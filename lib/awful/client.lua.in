@@ -8,6 +8,7 @@
 local hooks = require("awful.hooks")
 local util = require("awful.util")
 local layout = require("awful.layout")
+local tag = require("awful.tag")
 local pairs = pairs
 local ipairs = ipairs
 local table = table
@@ -45,7 +46,7 @@ hooks.user.create('unmarked')
 -- @return The first urgent client.
 function urgent.get()
     if #data.urgent > 0 then
-        return #data.urgent[1]
+        return data.urgent[1]
     else
         -- fallback behaviour: iterate through clients and get the first urgent
         local clients = capi.client.get()
