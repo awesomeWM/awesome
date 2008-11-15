@@ -541,9 +541,6 @@ client_resize(client_t *c, area_t geometry, bool hints)
     int new_screen;
     area_t area;
     layout_t *layout = layout_get_current(c->screen);
-    /* Values to configure a window is an array where values are
-     * stored according to 'value_mask' */
-    uint32_t values[5];
 
     if(c->titlebar && !c->ismoving && !client_isfloating(c) && layout != layout_floating)
         geometry = titlebar_geometry_remove(c->titlebar, c->border, geometry);
@@ -574,11 +571,14 @@ client_resize(client_t *c, area_t geometry, bool hints)
     {
         new_screen = screen_getbycoord(c->screen, geometry.x, geometry.y);
 
+        /* Values to configure a window is an array where values are
+         * stored according to 'value_mask' */
+        uint32_t values[4];
+
         c->geometry.x = values[0] = geometry.x;
-        c->geometry.width = values[2] = geometry.width;
         c->geometry.y = values[1] = geometry.y;
+        c->geometry.width = values[2] = geometry.width;
         c->geometry.height = values[3] = geometry.height;
-        values[4] = c->border;
 
         /* save the floating geometry if the window is floating but not
          * maximized */
@@ -590,9 +590,8 @@ client_resize(client_t *c, area_t geometry, bool hints)
         titlebar_update_geometry_floating(c);
 
         xcb_configure_window(globalconf.connection, c->win,
-                             XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y |
-                             XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT |
-                             XCB_CONFIG_WINDOW_BORDER_WIDTH,
+                             XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y
+                             | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
                              values);
         window_configure(c->win, geometry, c->border);
 
