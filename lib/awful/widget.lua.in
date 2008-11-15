@@ -105,6 +105,7 @@ function taglist.label.all(t, args)
     local bg_urgent = args.bg_urgent or theme.taglist_bg_urgent or theme.bg_urgent
     local taglist_squares_sel = args.squares_sel or theme.taglist_squares_sel
     local taglist_squares_unsel = args.squares_unsel or theme.taglist_squares_unsel
+    local taglist_squares_resize = theme.taglist_squares_resize or args.squares_resize or "true"
     local text
     local background = ""
     local sel = capi.client.focus
@@ -116,12 +117,12 @@ function taglist.label.all(t, args)
     end
     if sel and sel:tags()[t] then
         if taglist_squares_sel then
-            background = "resize=\"true\" image=\"" .. taglist_squares_sel .. "\""
+            background = "resize=\"" .. taglist_squares_resize .. "\" image=\"" .. taglist_squares_sel .. "\""
         end
     else
         local cls = t:clients()
         if #cls > 0 and taglist_squares_unsel then
-            background = "resize=\"true\" image=\"" .. taglist_squares_unsel .. "\""
+            background = "resize=\"" .. taglist_squares_resize .. "\" image=\"" .. taglist_squares_unsel .. "\""
         end
         for k, c in pairs(cls) do
             if c.urgent then
@@ -240,11 +241,12 @@ local function widget_tasklist_label_common(c, args)
     local fg_urgent = args.fg_urgent or theme.tasklist_fg_urgent or theme.fg_urgent
     local bg_urgent = args.bg_urgent or theme.tasklist_bg_urgent or theme.bg_urgent
     local floating_icon = args.floating_icon or theme.tasklist_floating_icon
+    local floating_icon_align = args.floating_icon_align or theme.tasklist_floating_icon_align or "right"
     local bg = nil
     local text = "<margin left=\"2\" right=\"2\"/>"
     local name
     if c.floating and floating_icon then
-        text = text.."<bg image=\"" .. floating_icon .. "\" align=\"right\"/>"
+        text = text.."<bg image=\"" .. floating_icon .. "\" align=\"" .. floating_icon_align .. "\"/>"
     end
     if c.minimized then
         name = util.escape(c.icon_name) or ""
