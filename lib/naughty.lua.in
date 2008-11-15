@@ -3,18 +3,6 @@
 -- @copyright 2008 koniu
 -- @release @AWESOME_VERSION@
 ----------------------------------------------------------------------------
---
--- Usage:
---
---  require("naughty")
---  naughty.notify({ text = "notification",
---                   title = "title",
---                   position = "top_left"|"top_right"|"bottom_left"|"bottom_right",
---                   timeout = 5,
---                   icon="/path/to/image",
---                   fg="#ffggcc",
---                   bg="#bbggcc",
---                   screen = 1 })
 
 -- Package environment
 local pairs = pairs
@@ -151,7 +139,7 @@ end
 function destroy(notification)
     if notification then
         notification.box.screen = nil
-        hooks.timer.unregister(notification.timer)
+        hooks.timer.unregister(notification.die)
         table.remove(notifications[notification.position], notification.idx)
         arrange()
         return true
