@@ -583,7 +583,8 @@ client_resize(client_t *c, area_t geometry, bool hints)
         /* save the floating geometry if the window is floating but not
          * maximized */
         if(c->ismoving || client_isfloating(c)
-           || layout_get_current(new_screen) == layout_floating)
+           || layout_get_current(new_screen) == layout_floating
+           || layout_get_current(c->screen) == layout_floating)
             if(!c->isfullscreen)
                 c->f_geometry = geometry;
 
