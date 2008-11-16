@@ -106,8 +106,6 @@ Navigation
     View next tag.
 *Mod4 \+ 1-9*::
     Switch to tag 1-9.
-*Mod4 \+ y*::
-    Go to next client in a tabbed display.
 *Mod4 \+ Control \+ j*::
     Focus next screen.
 *Mod4 \+ Control \+ k*::
@@ -132,10 +130,6 @@ Layout modification
     Increase number of columns for non-master windows by 1.
 *Mod4 \+ Control \+ l*::
     Decrease number of columns for non-master windows by 1.
-*Mod4 \+ Control \+ y*::
-    Move next client to a tabbed display in current client.
-*Mod4 \+ Shift \+ y*::
-    Move client out of a tabbed display.
 *Mod4 \+ space*::
     Switch to next layout.
 *Mod4 \+ Shift \+ space*::
