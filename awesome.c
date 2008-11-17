@@ -360,12 +360,12 @@ main(int argc, char **argv)
           case 'k':
             if(!luaA_parserc(confpath, false))
             {
-                fprintf(stderr, "✘ Configuration file error.\n");
+                fprintf(stderr, "✘ Configuration file syntax error.\n");
                 return EXIT_FAILURE;
             }
             else
             {
-                fprintf(stderr, "✔ Configuration file OK.\n");
+                fprintf(stderr, "✔ Configuration file syntax OK.\n");
                 return EXIT_SUCCESS;
             }
           case 'c':
