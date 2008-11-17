@@ -705,7 +705,6 @@ client_setfullscreen(client_t *c, bool s)
         {
             geometry = c->m_geometry;
             client_setborder(c, c->oldborder);
-            client_resize(c, c->m_geometry, false);
         }
         client_resize(c, geometry, false);
         client_need_arrange(c);
