@@ -336,6 +336,13 @@ client_stack()
     config_win_vals[0] = XCB_NONE;
     config_win_vals[1] = XCB_STACK_MODE_ABOVE;
 
+    /* stack desktop windows */
+    for(layer = LAYER_DESKTOP; layer < LAYER_BELOW; layer++)
+        for(node = last; node; node = node->prev)
+            if(client_layer_translator(node->client) == layer)
+                config_win_vals[0] = client_stack_above(node->client,
+                                                        config_win_vals[0]);
+
     /* first stack not ontop wibox window */
     for(screen = 0; screen < globalconf.nscreen; screen++)
         for(int i = 0; i < globalconf.screens[screen].wiboxes.len; i++)
@@ -352,7 +359,7 @@ client_stack()
         }
 
     /* stack bottom layers */
-    for(layer = LAYER_DESKTOP; layer < LAYER_FULLSCREEN; layer++)
+    for(layer = LAYER_BELOW; layer < LAYER_FULLSCREEN; layer++)
         for(node = last; node; node = node->prev)
             if(client_layer_translator(node->client) == layer)
                 config_win_vals[0] = client_stack_above(node->client,
