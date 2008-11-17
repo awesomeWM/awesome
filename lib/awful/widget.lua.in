@@ -93,8 +93,9 @@ end
 -- fg_focus The foreground color for selected tag.
 -- bg_urgent The background color for urgent tags.
 -- fg_urgent The foreground color for urgent tags.
--- taglist_squares_sel Optional: an user provided image for selected squares.
--- taglist_squares_unsel Optional: an user provided image for unselected squares.
+-- squares_sel Optional: a user provided image for selected squares.
+-- squares_unsel Optional: a user provided image for unselected squares.
+-- squares_resize Optional: true or false to resize squares.
 -- @return A string to print.
 function taglist.label.all(t, args)
     if not args then args = {} end
