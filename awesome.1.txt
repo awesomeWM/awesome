@@ -45,9 +45,8 @@ OPTIONS
 
 DEFAULT MOUSE BINDINGS
 -----------------------
-
-Navigation.
-~~~~~~~~~~~
+Navigation
+~~~~~~~~~~
 
 *Button1* on tag name::
     View tag.
@@ -58,9 +57,8 @@ Navigation.
 *Button1*, *Button3*, *Button4*, *Button5* on layout symbol::
     Switch to previous or next layout.
 
-Layout modification.
-~~~~~~~~~~~~~~~~~~~~
-
+Layout modification
+~~~~~~~~~~~~~~~~~~~
 *Mod4 \+ Button1* on tag name::
     Tag current client with this tag only.
 *Mod4 \+ Button3* on tag name::
@@ -73,27 +71,37 @@ Layout modification.
     Resize window.
 
 DEFAULT KEY BINDINGS
----------------------
-
-Birth and annihilation
+--------------------
+Window manager control
 ~~~~~~~~~~~~~~~~~~~~~~
-
-*Mod4 \+ Return*::
-    Spawn terminal emulator.
-*Mod4 \+ F1*::
-    Run prompt.
-*Mod4 \+ F4*::
-    Run lua code prompt.
-*Mod4 \+ Shift \+ c*::
-    Kill client.
 *Mod4 \+ Control \+ r*::
     Restart *awesome*.
 *Mod4 \+ Shift \+ q*::
     Quit *awesome*.
+*Mod4 \+ F1*::
+    Run prompt.
+*Mod4 \+ F4*::
+    Run Lua code prompt.
+*Mod4 \+ Return*::
+    Spawn terminal emulator.
+
+Clients
+~~~~~~~
+*Mod4 \+ Control \+ i*::
+    Print the client class and instance.
+*Mod4 \+ Shift \+ r*::
+    Redraw the focused window.
+*Mod4 \+ m*::
+    Maximize client.
+*Mod4 \+ f*::
+    Set client fullscreen.
+*Mod4 \+ Shift \+ c*::
+    Kill focused client.
+*Mod4 \+ t*::
+    Mark a client.
 
 Navigation
 ~~~~~~~~~~
-
 *Mod4 \+ j*::
     Focus next client.
 *Mod4 \+ k*::
@@ -110,10 +118,11 @@ Navigation
     Focus next screen.
 *Mod4 \+ Control \+ k*::
     Focus previous screen.
+*Mod4 \+ Escape*::
+    Focus previously selected tag set.
 
 Layout modification
 ~~~~~~~~~~~~~~~~~~~
-
 *Mod4 \+ Shift \+ j*::
     Switch client with next client.
 *Mod4 \+ Shift \+ k*::
@@ -144,14 +153,8 @@ Layout modification
     Tag client with tag.
 *Mod4 \+ Shift \+ Control \+ 1-9*::
     Toggle tag on client.
-
-Misc
-~~~~
-*Mod4 \+ Shift \+ i*::
-    Print the client class and instance.
-
-*Mod4 \+ Shift \+ r*::
-    Redraw the focused window.
+*Mod4 \+ Shift \+ F1-9*::
+    Tag marked clients with tag.
 
 CUSTOMIZATION
 -------------
