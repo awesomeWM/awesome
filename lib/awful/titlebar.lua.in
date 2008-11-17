@@ -19,6 +19,7 @@ local beautiful = require("beautiful")
 local hooks = require("awful.hooks")
 local util = require("awful.util")
 local widget = require("awful.widget")
+local mouse = require("awful.mouse")
 
 --- Titlebar module for awful
 module("awful.titlebar")
@@ -54,9 +55,9 @@ function add(c, args)
     -- Redirect relevant events to the client the titlebar belongs to
     local bts =
     {
-        capi.button({ }, 1, function (t) capi.client.focus = t.client t.client:raise() t.client:mouse_move() end),
-        capi.button({ args.modkey }, 1, function (t) t.client:mouse_move() end),
-        capi.button({ args.modkey }, 3, function (t) t.client:mouse_resize() end)
+        capi.button({ }, 1, function (t) capi.client.focus = t.client t.client:raise() mouse.client.move(t.client) end),
+        capi.button({ args.modkey }, 1, function (t) mouse.client.move(t.client) end),
+        capi.button({ args.modkey }, 3, function (t) mouse.client.resize(t.client) end)
     }
     title:buttons(bts)
     function title.mouse_enter(s) hooks.user.call('mouse_enter', c) end
@@ -85,8 +86,8 @@ function add(c, args)
         local bts =
         {
             capi.button({ }, 1, nil, function (t) t.client:kill() end),
-            capi.button({ args.modkey }, 1, function (t) t.client:mouse_move() end),
-            capi.button({ args.modkey }, 3, function (t) t.client:mouse_resize() end)
+            capi.button({ args.modkey }, 1, function (t) mouse.client.move(t.client) end),
+            capi.button({ args.modkey }, 3, function (t) mouse.client.resize(t.client) end)
         }
         if close then
             local rbts = close:buttons()

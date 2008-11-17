@@ -47,8 +47,6 @@ int luaA_mouse_pushstatus(lua_State *, int, int, uint16_t);
 DO_RCNT(button_t, button, button_delete)
 ARRAY_FUNCS(button_t *, button, button_unref)
 
-int luaA_client_mouse_resize(lua_State *);
-
 int luaA_button_array_get(lua_State *, button_array_t *);
 void luaA_button_array_set(lua_State *, int idx, button_array_t *);
 

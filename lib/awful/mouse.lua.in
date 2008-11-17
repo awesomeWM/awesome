@@ -6,6 +6,7 @@
 
 -- Grab environment we need
 local layout = require("awful.layout")
+local tag = require("awful.tag")
 local hooks = require("awful.hooks")
 local aclient = require("awful.client")
 local math = math
@@ -133,6 +134,214 @@ function client.move(c, snap)
                               end
                               return false
                           end, "fleur")
+end
+
+--- Get a client corner coordinates.
+-- @param c The client to get corner from, focused one by default.
+-- @param corner The corner to use: auto, top_left, top_right, bottom_left,
+-- bottom_right. Default is auto, and auto find the nearest corner.
+-- @return Actual used corner and x and y coordinates.
+function client.corner(c, corner)
+    local c = c or capi.client.focus
+    if not c then return end
+
+    local g = c:geometry()
+
+    if not corner or corner == "auto" then
+        local m_c = capi.mouse.coords()
+        if math.abs(g.y - m_c.y) < math.abs(g.y + g.height - m_c.y) then
+            if math.abs(g.x - m_c.x) < math.abs(g.x + g.width - m_c.x) then
+                corner = "top_left"
+            else
+                corner = "top_right"
+            end
+        else
+            if math.abs(g.x - m_c.x) < math.abs(g.x + g.width - m_c.x) then
+                corner = "bottom_left"
+            else
+                corner = "bottom_right"
+            end
+        end
+    end
+
+    local x, y
+    if corner == "top_right" then
+        x = g.x + g.width
+        y = g.y
+    elseif corner == "top_left" then
+        x = g.x
+        y = g.y
+    elseif corner == "bottom_left" then
+        x = g.x
+        y = g.y + g.height
+    else
+        x = g.x + g.width
+        y = g.y + g.height
+    end
+
+    return corner, x, y
+end
+
+local function client_resize_magnifier(c, corner)
+    local corner, x, y = client.corner(c, corner)
+    capi.mouse.coords({ x = x, y = y })
+
+    local wa = capi.screen[c.screen].workarea
+    local center_x = wa.x + wa.width / 2
+    local center_y = wa.y + wa.height / 2
+    local maxdist_pow = (wa.width^2 + wa.height^2) / 4
+
+    capi.mousegrabber.run(function (mouse)
+                              for k, v in ipairs(mouse.buttons) do
+                                  if v then
+                                      local dx = center_x - mouse.x
+                                      local dy = center_y - mouse.y
+                                      local dist = dx^2 + dy^2
+
+                                      -- New master width factor
+                                      local mwfact = dist / maxdist_pow
+                                      tag.setmwfact(math.min(math.max(0.01, mwfact), 0.99), c.screen)
+                                      return true
+                                  end
+                              end
+                              return false
+                          end, corner .. "_corner")
+end
+
+local function client_resize_tiled(c, lay)
+    local wa = capi.screen[c.screen].workarea
+    local mwfact = tag.selected(c.screen).mwfact
+    local cursor
+    if lay == "tile" then
+        capi.mouse.coords({ x = wa.x + wa.width * mwfact })
+        cursor = "sb_h_double_arrow"
+    elseif lay == "tileleft" then
+        capi.mouse.coords({ x = wa.x + wa.width * (1 - mwfact) })
+        cursor = "sb_h_double_arrow"
+    elseif lay == "tilebottom" then
+        capi.mouse.coords({ y = wa.y + wa.height * mwfact })
+        cursor = "sb_v_double_arrow"
+    else
+        capi.mouse.coords({ y = wa.y + wa.height * (1 - mwfact) })
+        cursor = "sb_v_double_arrow"
+    end
+
+    capi.mousegrabber.run(function (mouse)
+                              for k, v in ipairs(mouse.buttons) do
+                                  if v then
+                                      local fact_x = (mouse.x - wa.x) / wa.width
+                                      local fact_y = (mouse.y - wa.y) / wa.height
+                                      local mwfact
+
+                                      if lay == "tile" then
+                                          mwfact = fact_x
+                                      elseif lay == "tileleft" then
+                                          mwfact = 1 - fact_x
+                                      elseif lay == "tilebottom" then
+                                          mwfact = fact_y
+                                      else
+                                          mwfact = 1 - fact_y
+                                      end
+
+                                      tag.setmwfact(math.min(math.max(mwfact, 0.01), 0.99), c.screen)
+                                      return true
+                                  end
+                              end
+                              return false
+                          end, cursor)
+end
+
+local function client_resize_floating(c, corner)
+    local corner, x, y = client.corner(c, corner)
+    local fixed_x, fixed_y
+    local g = c:geometry()
+
+    -- Warp mouse pointer
+    capi.mouse.coords({ x = x, y = y })
+
+    local fixed_x, fixed_y
+
+    capi.mousegrabber.run(function (mouse)
+                              for k, v in ipairs(mouse.buttons) do
+                                  if v then
+                                      -- Ignore screen changes
+                                      if not c.floating
+                                          and capi.mouse.screen ~= c.screen then
+                                          return true
+                                      end
+
+                                      local ng
+                                      if corner == "bottom_right" then
+                                          ng = { width = mouse.x - g.x,
+                                                 height = mouse.y - g.y }
+                                      elseif corner == "bottom_left" then
+                                          ng = { x = mouse.x,
+                                                 width = (g.x + g.width) - mouse.x,
+                                                 height = mouse.y - g.y }
+                                      elseif corner == "top_left" then
+                                          ng = { x = mouse.x,
+                                                 width = (g.x + g.width) - mouse.x,
+                                                 y = mouse.y,
+                                                 height = (g.y + g.height) - mouse.y }
+                                      else
+                                          ng = { width = mouse.x - g.x,
+                                                 y = mouse.y,
+                                                 height = (g.y + g.height) - mouse.y }
+                                      end
+                                      if ng.width <= 0 then ng.width = nil end
+                                      if ng.height <= 0 then ng.height = nil end
+                                      c:geometry({ width = ng.width, height = ng.height })
+                                      -- Get real geometry that has been applied
+                                      -- in case we honor size hints
+                                      -- XXX: This should be rewritten when size
+                                      -- hints are available from Lua.
+                                      local rg = c:geometry()
+
+                                      if corner == "bottom_right" then
+                                          ng = {}
+                                      elseif corner == "bottom_left" then
+                                          ng = { x = (g.x + g.width) - rg.width  }
+                                      elseif corner == "top_left" then
+                                          ng = { x = (g.x + g.width) - rg.width,
+                                                 y = (g.y + g.height) - rg.height }
+                                      else
+                                          ng = { y = (g.y + g.height) - rg.height }
+                                      end
+                                      c:geometry({ x = ng.x, y = ng.y })
+                                      return true
+                                  end
+                              end
+                              return false
+                          end, corner .. "_corner")
+end
+
+--- Resize a client.
+-- @param c The client to resize, or the focused one by default.
+-- @param corner The corner to grab on resize. Auto detected by default.
+function client.resize(c, corner)
+    local c = c or capi.client.focus
+
+    if not c then return end
+
+    if c.fullscreen
+        or c.type == "desktop"
+        or c.type == "splash"
+        or c.type == "dock" then
+        return
+    end
+
+    local lay = layout.get(c.screen)
+
+    if lay == "floating" or c.floating then
+        return client_resize_floating(c, corner)
+    elseif lay == "tile"
+        or lay == "tileleft"
+        or lay == "tilebottom"
+        or lay == "tiletop" then
+        return client_resize_tiled(c, lay)
+    elseif lay == "magnifier" then
+        return client_resize_magnifier(c, corner)
+    end
 end
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

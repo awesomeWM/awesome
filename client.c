@@ -1601,6 +1601,17 @@ luaA_client_mouse_move(lua_State *L)
     return 0;
 }
 
+/** Resize a client with mouse (DEPRECATED).
+ * \param L The Lua VM state.
+ * \return The number of pushed elements.
+ */
+static int
+luaA_client_mouse_resize(lua_State *L)
+{
+    luaA_deprecate(L, "awful.mouse.client.resize()");
+    return 0;
+}
+
 const struct luaL_reg awesome_client_methods[] =
 {
     { "get", luaA_client_get },

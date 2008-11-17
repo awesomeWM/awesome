@@ -154,7 +154,6 @@ struct client_t
     /* Size hints */
     int basew, baseh, incw, inch, maxw, maxh, minw, minh;
     int minax, maxax, minay, maxay;
-    bool hassizehints;
     /** Strut */
     strut_t strut;
     /** Respect resize hints */

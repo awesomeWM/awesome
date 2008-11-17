@@ -140,10 +140,6 @@ property_update_wm_normal_hints(client_t *c, xcb_get_property_reply_t *reply)
     }
     else
         c->minax = c->maxax = c->minay = c->maxay = 0;
-
-    c->hassizehints = !(!c->basew && !c->baseh && !c->incw && !c->inch
-                        && !c->maxw && !c->maxh && !c->minw && !c->minh
-                        && !c->minax && !c->maxax && !c->minax && !c->minay);
 }
 
 static int
