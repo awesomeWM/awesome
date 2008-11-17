@@ -98,8 +98,9 @@ end
 
 --- Set master width factor.
 -- @param mwfact Master width factor.
-function setmwfact(mwfact)
-    local t = selected()
+-- @param screen Optional screen number.
+function setmwfact(mwfact, screen)
+    local t = selected(screen)
     if t then
         t.mwfact = mwfact
     end
