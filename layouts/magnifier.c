@@ -70,6 +70,8 @@ layout_magnifier(int screen)
     {
        /* No other clients. */
         geometry = area;
+        geometry.width -= 2 * focus->border;
+        geometry.height -= 2 * focus->border;
     }
     client_resize(focus, geometry, focus->honorsizehints);
     client_raise(focus);
