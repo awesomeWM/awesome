@@ -554,6 +554,7 @@ wibox_detach(wibox_t *wibox)
         /* save visible state */
         v = wibox->isvisible;
         wibox->isvisible = false;
+        wibox_systray_refresh(wibox);
         wibox_position_update(wibox);
         /* restore position */
         wibox->isvisible = v;
