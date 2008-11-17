@@ -1197,7 +1197,7 @@ luaA_client_handlegeom(lua_State *L, bool full)
                 geometry = titlebar_geometry_remove((*c)->titlebar,
                                                     (*c)->border,
                                                     geometry);
-            client_resize(*c, geometry, false);
+            client_resize(*c, geometry, (*c)->honorsizehints);
         }
 
     if(full)
