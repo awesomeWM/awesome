@@ -560,7 +560,7 @@ client_resize(client_t *c, area_t geometry, bool hints)
     area_t area;
     layout_t *layout = layout_get_current(c->screen);
 
-    if(c->titlebar && !c->ismoving && !client_isfloating(c) && layout != layout_floating)
+    if(c->titlebar && !c->ismoving && c->titlebar->isvisible && !client_isfloating(c) && layout != layout_floating)
         geometry = titlebar_geometry_remove(c->titlebar, c->border, geometry);
 
     if(hints)
