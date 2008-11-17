@@ -286,17 +286,23 @@ typedef enum
 static layer_t
 client_layer_translator(client_t *c)
 {
+    /* first deal with user set attributes */
     if(c->isontop)
         return LAYER_ONTOP;
     else if(c->isfullscreen)
         return LAYER_FULLSCREEN;
     else if(c->isabove)
         return LAYER_ABOVE;
-    else if(c->isfloating || client_isfixed(c))
+    else if(c->isbelow)
+        return LAYER_BELOW;
+    else if(c->isfloating)
         return LAYER_FLOAT;
-    else if(c->transient_for)
+
+    /* check for transient attr */
+    if(c->transient_for)
         return LAYER_IGNORE;
 
+    /* then deal with windows type */
     switch(c->type)
     {
       case WINDOW_TYPE_DOCK:
@@ -306,8 +312,13 @@ client_layer_translator(client_t *c)
       case WINDOW_TYPE_DIALOG:
         return LAYER_FLOAT;
       default:
-        return LAYER_TILE;
+        break;
     }
+
+    if(client_isfixed(c))
+        return LAYER_FLOAT;
+
+    return LAYER_TILE;
 }
 
 /** Restack clients.
