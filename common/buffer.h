@@ -172,7 +172,7 @@ buffer_add(buffer_t *buf, const void *data, int len)
  */
 static inline void buffer_adds(buffer_t *buf, const char *s)
 {
-    buffer_splice(buf, buf->len, 0, s, strlen(s));
+    buffer_splice(buf, buf->len, 0, s, a_strlen(s));
 }
 
 /** Add a char at the end of a buffer.
