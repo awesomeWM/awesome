@@ -36,7 +36,7 @@
 
 extern awesome_t globalconf;
 
-DO_LUA_NEW(extern, button_t, button, "button", button_ref)
+DO_LUA_NEW(static, button_t, button, "button", button_ref)
 DO_LUA_GC(button_t, button, "button", button_unref)
 DO_LUA_EQ(button_t, button, "button")
 
