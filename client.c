@@ -622,7 +622,7 @@ client_resize(client_t *c, area_t geometry, bool hints)
     }
 }
 
-/** Set a clinet floating.
+/** Set a client floating.
  * \param c The client.
  * \param floating Set floating, or not.
  * \param layer Layer to put the floating window onto.
