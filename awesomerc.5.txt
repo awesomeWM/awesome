@@ -16,15 +16,14 @@ SYNOPSIS
 
 DESCRIPTION
 -----------
-The *awesomerc* file contains configuration informations for *awesome*. It can
+The *rc.lua* file contains configuration informations for *awesome*. It can
 be used to configure the behaviour and look of awesome in a variety of ways.
-It can be assimilated as a Lua program/script run at startup by awesome.
+It can be assimilated as a Lua program/script run at startup by *awesome*.
 Therefore, it should use the awesome Lua API described in the API section.
 This file is read at startup.
 
 AWESOME LUA API
 ---------------
-
 Documentation for the Lua API can be found in the luadoc directory.
 
 COLORS FORMAT
@@ -43,11 +42,11 @@ This allows to format the text rendered in widgets.
 Pango markup documentation can be found in the Pango documentation at
 http://library.gnome.org/devel/pango/stable/PangoMarkupFormat.html.
 
-List of awesome markup elements and their attributes:
+List of *awesome* markup elements and their attributes:
 
 * bg
   - color: background color
-  - image: background image
+  - image: path to a background image
   - align: background image alignment
   - resize: resize background image to text size
 * border
@@ -65,7 +64,7 @@ List of awesome markup elements and their attributes:
 
 A Pango markup example: <span weight="bold" foreground="#336699">...</span>.
 
-An awesome markup example: <text align="right"/>.
+An *awesome* markup example: <text align="right"/>.
 
 SEE ALSO
 --------
