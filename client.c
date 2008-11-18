@@ -236,20 +236,22 @@ client_stack_above(client_t *c, xcb_window_t previous)
     config_win_vals[0] = previous;
     config_win_vals[1] = XCB_STACK_MODE_ABOVE;
 
+    xcb_configure_window(globalconf.connection, c->win,
+                         XCB_CONFIG_WINDOW_SIBLING | XCB_CONFIG_WINDOW_STACK_MODE,
+                         config_win_vals);
+
+    config_win_vals[0] = c->win;
+
     if(c->titlebar)
     {
         xcb_configure_window(globalconf.connection,
                              c->titlebar->sw.window,
                              XCB_CONFIG_WINDOW_SIBLING | XCB_CONFIG_WINDOW_STACK_MODE,
                              config_win_vals);
-        config_win_vals[0] = c->titlebar->sw.window;
+        previous = c->titlebar->sw.window;
     }
-
-    xcb_configure_window(globalconf.connection, c->win,
-                         XCB_CONFIG_WINDOW_SIBLING | XCB_CONFIG_WINDOW_STACK_MODE,
-                         config_win_vals);
-
-    previous = c->win;
+    else
+        previous = c->win;
 
     /* stack transient window on top of their parents */
     for(client_node_t *node = *client_node_list_last(&globalconf.stack);
