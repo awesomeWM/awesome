@@ -261,10 +261,31 @@ a_dbus_process_requests(EV_P_ ev_io *w, int revents)
         dbus_connection_flush(dbus_connection);
 }
 
+static bool
+a_dbus_request_name(const char *name)
+{
+    int ret = dbus_bus_request_name(dbus_connection, name, 0, &err);
+
+    if(dbus_error_is_set(&err))
+    {
+        warn("failed to request D-Bus name: %s", err.message);
+        return false;
+    }
+
+    switch(ret)
+    {
+      case DBUS_REQUEST_NAME_REPLY_PRIMARY_OWNER:
+        return true;
+      case DBUS_REQUEST_NAME_REPLY_ALREADY_OWNER:
+        warn("already primary D-Bus name owner for %s", name);
+        return true;
+    }
+    return false;
+}
+
 bool
 a_dbus_init(void)
 {
-    bool ret;
     int fd;
 
     dbus_error_init(&err);
@@ -280,21 +301,7 @@ a_dbus_init(void)
 
     dbus_connection_set_exit_on_disconnect(dbus_connection, FALSE);
 
-    ret = dbus_bus_request_name(dbus_connection, "org.awesome", 0, &err);
-
-    if(dbus_error_is_set(&err))
-    {
-        warn("failed to request D-Bus name: %s", err.message);
-        a_dbus_cleanup();
-        return false;
-    }
-
-    if(ret != DBUS_REQUEST_NAME_REPLY_PRIMARY_OWNER)
-    {
-        warn("not primary D-Bus name owner");
-        a_dbus_cleanup();
-        return false;
-    }
+    a_dbus_request_name("org.awesome");
 
     if(!dbus_connection_get_unix_fd(dbus_connection, &fd))
     {
@@ -332,6 +339,28 @@ a_dbus_cleanup(void)
     dbus_connection = NULL;
 }
 
+/** Register a D-Bus name to receive message from.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ * \luastack
+ * \lparam A string with the name of the D-Bus name to register. Note that
+ * org.awesome is registered by default.
+ * \lreturn True if everything worked fine, false otherwise.
+ */
+static int
+luaA_dbus_request_name(lua_State *L)
+{
+    const char *name = luaL_checkstring(L, 1);
+    lua_pushboolean(L, a_dbus_request_name(name));
+    return 1;
+}
+
+const struct luaL_reg awesome_dbus_lib[] =
+{
+    { "request_name", luaA_dbus_request_name },
+    { NULL, NULL }
+};
+
 #else /* HAVE_DBUS */
 
 bool
@@ -345,6 +374,18 @@ a_dbus_cleanup(void)
 {
     /* empty */
 }
+
+static int
+luaA_donothing(lua_State *L)
+{
+    return 0;
+}
+
+const struct luaL_reg awesome_dbus_lib[] =
+{
+    { "request_name", luaA_donothing },
+    { NULL, NULL }
+};
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

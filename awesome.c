@@ -397,6 +397,9 @@ main(int argc, char **argv)
     if(xcb_connection_has_error(globalconf.connection))
         fatal("cannot open display");
 
+    /* initiliaze dbus */
+    a_dbus_init();
+
     /* Grab server */
     xcb_grab_server(globalconf.connection);
     xcb_flush(globalconf.connection);
@@ -498,13 +501,10 @@ main(int argc, char **argv)
     a_xcb_set_event_handlers();
     a_xcb_set_property_handlers();
 
-    /* Grab server */
+    /* we will receive events, stop grabbing server */
     xcb_ungrab_server(globalconf.connection);
 
-    xcb_aux_sync(globalconf.connection);
-
     luaA_cs_init();
-    a_dbus_init();
 
     /* refresh everything before waiting events */
     awesome_refresh(globalconf.connection);
