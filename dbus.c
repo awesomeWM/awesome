@@ -134,7 +134,7 @@ a_dbus_init(void)
     dbus_connection = dbus_bus_get(DBUS_BUS_SESSION, &err);
     if(dbus_error_is_set(&err))
     {
-        warn("DBus system bus connection failed: %s", err.message);
+        warn("D-Bus system bus connection failed: %s", err.message);
         dbus_connection = NULL;
         dbus_error_free(&err);
         return false;
@@ -146,21 +146,21 @@ a_dbus_init(void)
 
     if(dbus_error_is_set(&err))
     {
-        warn("failed to request DBus name: %s", err.message);
+        warn("failed to request D-Bus name: %s", err.message);
         a_dbus_cleanup();
         return false;
     }
 
     if(ret != DBUS_REQUEST_NAME_REPLY_PRIMARY_OWNER)
     {
-        warn("not primary DBus name owner");
+        warn("not primary D-Bus name owner");
         a_dbus_cleanup();
         return false;
     }
 
     if(!dbus_connection_get_unix_fd(dbus_connection, &fd))
     {
-        warn("cannot get DBus connection file descriptor");
+        warn("cannot get D-Bus connection file descriptor");
         a_dbus_cleanup();
         return false;
     }
