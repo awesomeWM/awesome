@@ -283,6 +283,29 @@ a_dbus_request_name(const char *name)
     return false;
 }
 
+static bool
+a_dbus_release_name(const char *name)
+{
+    int ret = dbus_bus_release_name(dbus_connection, name, &err);
+
+    if(dbus_error_is_set(&err))
+    {
+        warn("failed to release D-Bus name: %s", err.message);
+        return false;
+    }
+
+    switch(ret)
+    {
+      case DBUS_RELEASE_NAME_REPLY_NOT_OWNER:
+        warn("not primary D-Bus name owner for %s", name);
+        return false;
+      case DBUS_RELEASE_NAME_REPLY_NON_EXISTENT:
+        warn("non existent D-Bus name: %s", name);
+        return false;
+    }
+    return true;
+}
+
 bool
 a_dbus_init(void)
 {
@@ -355,9 +378,25 @@ luaA_dbus_request_name(lua_State *L)
     return 1;
 }
 
+/** Release a D-Bus name.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ * \luastack
+ * \lparam A string with the name of the D-Bus name to unregister.
+ * \lreturn True if everything worked fine, false otherwise.
+ */
+static int
+luaA_dbus_release_name(lua_State *L)
+{
+    const char *name = luaL_checkstring(L, 1);
+    lua_pushboolean(L, a_dbus_release_name(name));
+    return 1;
+}
+
 const struct luaL_reg awesome_dbus_lib[] =
 {
     { "request_name", luaA_dbus_request_name },
+    { "release_name", luaA_dbus_release_name },
     { NULL, NULL }
 };
 
@@ -384,6 +423,7 @@ luaA_donothing(lua_State *L)
 const struct luaL_reg awesome_dbus_lib[] =
 {
     { "request_name", luaA_donothing },
+    { "release_name", luaA_donothing },
     { NULL, NULL }
 };
 
