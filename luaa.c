@@ -823,6 +823,9 @@ luaA_init(void)
     globalconf.hooks.tagged = LUA_REFNIL;
     globalconf.hooks.property = LUA_REFNIL;
     globalconf.hooks.timer = LUA_REFNIL;
+#ifdef WITH_DBUS
+    globalconf.hooks.dbus = LUA_REFNIL;
+#endif
 
     /* add Lua lib path (/usr/share/awesome/lib by default) */
     luaA_dostring(L, "package.path = package.path .. \";" AWESOME_LUA_LIB_PATH  "/?.lua\"");

@@ -25,6 +25,7 @@
 #include <xcb/xcb_icccm.h>
 #include <xcb/xcb_property.h>
 
+#include "config.h"
 #include "luaa.h"
 #include "layout.h"
 #include "swindow.h"
@@ -351,6 +352,10 @@ struct awesome_t
         luaA_ref property;
         /** Command to run on time */
         luaA_ref timer;
+#ifdef WITH_DBUS
+        /** Command to run on dbus events */
+        luaA_ref dbus;
+#endif
     } hooks;
     /** The event loop */
     struct ev_loop *loop;

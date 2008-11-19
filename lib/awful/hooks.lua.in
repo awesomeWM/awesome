@@ -7,6 +7,7 @@
 -- Grab environment we need
 local pairs = pairs
 local table = table
+local unpack = unpack
 local ipairs = ipairs
 local type = type
 local math = math
@@ -50,32 +51,8 @@ end
 -- Autodeclare awful.hooks.* functions
 -- mapped to awesome hooks.* functions
 for name, hook in pairs(capi.hooks) do
-    if name ~= 'timer' then
-        _M[name] = {}
-        _M[name].register = function (f)
-            if not _M[name].callbacks then
-                _M[name].callbacks = {}
-                hook(function (...)
-                    for i, callback in ipairs(_M[name].callbacks) do
-                       callback(...)
-                    end
-                end)
-            end
-
-            table.insert(_M[name].callbacks, f)
-        end
-        _M[name].unregister = function (f)
-            if _M[name].callbacks then
-                for k, h in ipairs(_M[name].callbacks) do
-                    if h == f then
-                        table.remove(_M[name].callbacks, k)
-                        break
-                    end
-                end
-            end
-        end
-    else
-        _M[name] = {}
+    _M[name] = {}
+    if name == 'timer' then
         _M[name].register = function (time, f, runnow)
             if type(time) ~= 'number' or type(f) ~= 'function' or time <= 0 then
                 return
@@ -113,6 +90,44 @@ for name, hook in pairs(capi.hooks) do
             if _M[name].callbacks then
                 for k, h in ipairs(_M[name].callbacks) do
                     if h.callback == f then
+                        table.remove(_M[name].callbacks, k)
+                        break
+                    end
+                end
+            end
+        end
+    elseif name == "dbus" then
+        _M[name].register = function (interface, f)
+            if not _M[name].callbacks then
+                _M[name].callbacks = {}
+                hook(function (msg, ...)
+                    if _M[name].callbacks[msg.interface] then
+                        return _M[name].callbacks[msg.interface](msg, unpack(arg))
+                    end
+                end)
+            end
+            _M[name].callbacks[interface] = f
+        end
+    else
+        _M[name].register = function (f)
+            if not _M[name].callbacks then
+                _M[name].callbacks = {}
+                hook(function (...)
+                    for i, callback in ipairs(_M[name].callbacks) do
+                       callback(...)
+                    end
+                end)
+            end
+
+            table.insert(_M[name].callbacks, f)
+        end
+    end
+
+    if name ~= "timer" then
+        _M[name].unregister = function (f)
+            if _M[name].callbacks then
+                for k, h in ipairs(_M[name].callbacks) do
+                    if h == f then
                         table.remove(_M[name].callbacks, k)
                         break
                     end

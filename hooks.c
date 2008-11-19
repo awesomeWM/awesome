@@ -174,6 +174,24 @@ luaA_hooks_timer(lua_State *L)
     return 0;
 }
 
+#ifdef WITH_DBUS
+/** Set the function to be called when a D-Bus event is received.
+ * The first argument passed to this function is the type of the message we
+ * receive: signal, method_call, method_return or error.
+ * The second argument is the path.
+ * The other arguments are a variable list of arguments.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ * \luastack
+ * \lparam A function to call on D-Bus events.
+ */
+static int
+luaA_hooks_dbus(lua_State *L)
+{
+    return luaA_registerfct(L, 1, &globalconf.hooks.dbus);
+}
+#endif
+
 const struct luaL_reg awesome_hooks_lib[] =
 {
     { "focus", luaA_hooks_focus },
@@ -187,5 +205,8 @@ const struct luaL_reg awesome_hooks_lib[] =
     { "tags", luaA_hooks_tags },
     { "tagged", luaA_hooks_tagged },
     { "timer", luaA_hooks_timer },
+#ifdef WITH_DBUS
+    { "dbus", luaA_hooks_dbus },
+#endif
     { NULL, NULL }
 };

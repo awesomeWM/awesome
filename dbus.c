@@ -18,7 +18,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  *
  */
+
 #include "config.h"
+#include "dbus.h"
+#include "client.h"
 
 #ifdef WITH_DBUS
 
@@ -27,9 +30,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-#include "dbus.h"
 #include "widget.h"
-#include "client.h"
 
 extern awesome_t globalconf;
 
@@ -37,56 +38,193 @@ static DBusError err;
 static DBusConnection *dbus_connection = NULL;
 ev_io dbusio = { .fd = -1 };
 
-/** Check a dbus object path format and its number of element.
- * \param path The path.
- * \param nelem The number of element it should have.
- * \return true if the path is ok, false otherwise.
- */
-static bool
-a_dbus_path_check(char **path, int nelem)
+static int
+a_dbus_message_iter(DBusMessageIter *iter)
 {
-    int i;
+    int nargs = 0;
 
-    for(i = 0; path[i]; i++);
-    if(i != nelem)
-        return false;
-    return (!a_strcmp(path[0], "org") && !a_strcmp(path[1], "awesome"));
+    do
+    {
+        switch(dbus_message_iter_get_arg_type(iter))
+        {
+          case DBUS_TYPE_INVALID:
+            break;
+          case DBUS_TYPE_VARIANT:
+            {
+                DBusMessageIter subiter;
+                dbus_message_iter_recurse(iter, &subiter);
+                a_dbus_message_iter(&subiter);
+            }
+            nargs++;
+            break;
+          case DBUS_TYPE_DICT_ENTRY:
+            {
+                DBusMessageIter subiter;
+
+                /* initialize a sub iterator */
+                dbus_message_iter_recurse(iter, &subiter);
+                /* create a new table to store the dict */
+                a_dbus_message_iter(&subiter);
+            }
+            nargs++;
+            break;
+          case DBUS_TYPE_ARRAY:
+            {
+                int array_type = dbus_message_iter_get_element_type(iter);
+
+                /* create a new table to store all the value */
+                lua_newtable(globalconf.L);
+
+                if(dbus_type_is_fixed(array_type))
+                    switch(array_type)
+                    {
+                      int datalen;
+#define DBUS_MSG_HANDLE_ARRAY_TYPE_NUMBER(type, dbustype) \
+                      case dbustype: \
+                        { \
+                            type *data; \
+                            dbus_message_iter_get_fixed_array(iter, &data, &datalen); \
+                            for(int i = 0; i < datalen; i++) \
+                            { \
+                                lua_pushnumber(globalconf.L, data[i]); \
+                                lua_rawseti(globalconf.L, -2, i + 1); \
+                            } \
+                        } \
+                        break;
+                      DBUS_MSG_HANDLE_ARRAY_TYPE_NUMBER(int16_t, DBUS_TYPE_INT16)
+                      DBUS_MSG_HANDLE_ARRAY_TYPE_NUMBER(uint16_t, DBUS_TYPE_UINT16)
+                      DBUS_MSG_HANDLE_ARRAY_TYPE_NUMBER(int32_t, DBUS_TYPE_INT32)
+                      DBUS_MSG_HANDLE_ARRAY_TYPE_NUMBER(uint32_t, DBUS_TYPE_UINT32)
+                      DBUS_MSG_HANDLE_ARRAY_TYPE_NUMBER(int64_t, DBUS_TYPE_INT64)
+                      DBUS_MSG_HANDLE_ARRAY_TYPE_NUMBER(uint64_t, DBUS_TYPE_UINT64)
+#undef DBUS_MSG_HANDLE_ARRAY_TYPE_NUMBER
+                    }
+                else if(array_type == DBUS_TYPE_DICT_ENTRY)
+                {
+                    DBusMessageIter subiter;
+
+                    /* initialize a sub iterator */
+                    dbus_message_iter_recurse(iter, &subiter);
+                    /* get the keys and the values
+                     * n is the number of entry in * dict */
+                    int n = a_dbus_message_iter(&subiter);
+
+                    for(int i = 0; i < n; i ++)
+                        lua_rawset(globalconf.L, - (n * 2) - 1 + i * 2);
+                }
+                else
+                {
+                    DBusMessageIter subiter;
+
+                    /* prepare to dig into the array*/
+                    dbus_message_iter_recurse(iter, &subiter);
+
+                    /* now iterate over every element of the array */
+                    int n = a_dbus_message_iter(&subiter);
+
+                    for(int i = n; i > 0; i--)
+                    {
+                        lua_rawseti(globalconf.L, - i - 1, i);
+                    }
+                }
+            }
+            nargs++;
+            break;
+          case DBUS_TYPE_BOOLEAN:
+            {
+                bool b;
+                dbus_message_iter_get_basic(iter, &b);
+                lua_pushboolean(globalconf.L, b);
+            }
+            nargs++;
+            break;
+          case DBUS_TYPE_BYTE:
+            {
+                char c;
+                dbus_message_iter_get_basic(iter, &c);
+                lua_pushlstring(globalconf.L, &c, 1);
+            }
+            nargs++;
+            break;
+#define DBUS_MSG_HANDLE_TYPE_NUMBER(type, dbustype) \
+          case dbustype: \
+            { \
+                type ui; \
+                dbus_message_iter_get_basic(iter, &ui); \
+                lua_pushnumber(globalconf.L, ui); \
+            } \
+            nargs++; \
+            break;
+          DBUS_MSG_HANDLE_TYPE_NUMBER(int16_t, DBUS_TYPE_INT16)
+          DBUS_MSG_HANDLE_TYPE_NUMBER(uint16_t, DBUS_TYPE_UINT16)
+          DBUS_MSG_HANDLE_TYPE_NUMBER(int32_t, DBUS_TYPE_INT32)
+          DBUS_MSG_HANDLE_TYPE_NUMBER(uint32_t, DBUS_TYPE_UINT32)
+          DBUS_MSG_HANDLE_TYPE_NUMBER(int64_t, DBUS_TYPE_INT64)
+          DBUS_MSG_HANDLE_TYPE_NUMBER(uint64_t, DBUS_TYPE_UINT64)
+#undef DBUS_MSG_HANDLE_TYPE_NUMBER
+          case DBUS_TYPE_STRING:
+            {
+                char *s;
+                dbus_message_iter_get_basic(iter, &s);
+                lua_pushstring(globalconf.L, s);
+            }
+            nargs++;
+            break;
+        }
+    } while(dbus_message_iter_next(iter));
+
+    return nargs;
 }
 
 static void
-a_dbus_process_request_do(DBusMessage *msg)
+a_dbus_process_request(DBusMessage *msg)
 {
-    int i;
-    DBusMessageIter iter;
-    char **path, *cmd;
-
-    if(!dbus_message_get_path_decomposed(msg, &path))
+    if(globalconf.hooks.dbus == LUA_REFNIL)
         return;
 
-    /* path is:
-     * /org/awesome */
-    if(!a_dbus_path_check(path, 2))
-        goto bailout;
+    lua_newtable(globalconf.L);
 
-    if(!dbus_message_iter_init(msg, &iter))
+    switch(dbus_message_get_type(msg))
     {
-        dbus_error_free(&err);
-        goto bailout;
+      case DBUS_MESSAGE_TYPE_SIGNAL:
+        lua_pushliteral(globalconf.L, "signal");
+        break;
+      case DBUS_MESSAGE_TYPE_METHOD_CALL:
+        lua_pushliteral(globalconf.L, "method_call");
+        break;
+      case DBUS_MESSAGE_TYPE_METHOD_RETURN:
+        lua_pushliteral(globalconf.L, "method_return");
+        break;
+      case DBUS_MESSAGE_TYPE_ERROR:
+        lua_pushliteral(globalconf.L, "error");
+        break;
+      default:
+        lua_pushliteral(globalconf.L, "unknown");
+        break;
     }
-    else if(DBUS_TYPE_STRING != dbus_message_iter_get_arg_type(&iter))
-    {
-        dbus_error_free(&err);
-        goto bailout;
-    }
-    else
-        dbus_message_iter_get_basic(&iter, &cmd);
 
-    luaA_dostring(globalconf.L, cmd);
+    lua_setfield(globalconf.L, -2, "type");
 
-bailout:
-    for(i = 0; path[i]; i++)
-        p_delete(&path[i]);
-    p_delete(&path);
+    const char *s = dbus_message_get_interface(msg);
+    lua_pushstring(globalconf.L, NONULL(s));
+    lua_setfield(globalconf.L, -2, "interface");
+
+    s = dbus_message_get_path(msg);
+    lua_pushstring(globalconf.L, NONULL(s));
+    lua_setfield(globalconf.L, -2, "path");
+
+    s = dbus_message_get_member(msg);
+    lua_pushstring(globalconf.L, NONULL(s));
+    lua_setfield(globalconf.L, -2, "member");
+
+    /* + 1 for the table above */
+    DBusMessageIter iter;
+    int nargs = 1;
+
+    if(dbus_message_iter_init(msg, &iter))
+        nargs += a_dbus_message_iter(&iter);
+
+    luaA_dofunction(globalconf.L, globalconf.hooks.dbus, nargs, 0);
 }
 
 static void
@@ -111,8 +249,8 @@ a_dbus_process_requests(EV_P_ ev_io *w, int revents)
             dbus_message_unref(msg);
             return;
         }
-        else if(dbus_message_is_method_call(msg, "org.awesome", "do"))
-            a_dbus_process_request_do(msg);
+        else
+            a_dbus_process_request(msg);
 
         dbus_message_unref(msg);
 
@@ -195,8 +333,6 @@ a_dbus_cleanup(void)
 }
 
 #else /* HAVE_DBUS */
-
-#include "dbus.h"
 
 bool
 a_dbus_init(void)
