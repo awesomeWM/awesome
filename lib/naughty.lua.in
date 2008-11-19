@@ -70,6 +70,7 @@ config.hover_timeout = nil
 -- Each element is a table consisting of:
 -- @field box Wibox object containing the popup
 -- @field height Popup height
+-- @field width Popup width
 -- @field die Function to be executed on timeout
 -- @name notifications[position]
 -- @class table
@@ -85,17 +86,19 @@ notifications = {
 -- @param idx Index of the notification
 -- @param position top_right | top_left | bottom_right | bottom_left
 -- @param height Popup height
+-- @param width Popup width (optional)
 -- @return Absolute position in {x, y} dictionary
 
-local function get_offset(idx, position, height)
+local function get_offset(idx, position, height, width)
     local ws = capi.screen[config.screen].workarea
     local v = {}
+    width = width or notifications[position][idx].width or config.width
 
     -- calculate x
     if position:match("left") then
         v.x = ws.x + config.padding
     else
-        v.x = ws.x + ws.width - (config.width + config.border_width*2 + config.padding)
+        v.x = ws.x + ws.width - (width + config.border_width*2 + config.padding)
     end
 
     -- calculate existing popups' height
@@ -127,7 +130,8 @@ local function arrange()
     for p,pos in pairs(notifications) do
         for i,notification in pairs(notifications[p]) do
             local offset = get_offset(i, p, notification.height)
-            notification.box:geometry({ x = offset.x, y = offset.y, width = config.width, height = notification.height })
+            local width = notification.width
+            notification.box:geometry({ x = offset.x, y = offset.y, width = width, height = notification.height })
             notification.idx = i
         end
     end
@@ -159,6 +163,7 @@ end
 -- @param screen Target screen for the notification
 -- @param ontop Target screen for the notification
 -- @param run Function to run on left click
+-- @param width The popup width
 -- @usage naughty.notify({ title = 'Achtung!', text = 'You\'re idling', timeout = 0 })
 function notify(args)
     -- gather variables together
@@ -168,6 +173,7 @@ function notify(args)
     local text = args.text or ""
     local screen = args.screen or config.screen
     local ontop = args.ontop or config.ontop
+    local width = args.width or config.width
 
     local notification = {}
     notification.position = args.position or config.position
@@ -225,8 +231,9 @@ function notify(args)
         notification.height = iconbox.image.height
     else
         notification.height = lines * config.height end
-    local offset = get_offset(notification.idx, notification.position, notification.height)
-    notification.box:geometry({ width = config.width,
+    notification.width = width
+    local offset = get_offset(notification.idx, notification.position, notification.height, notification.width)
+    notification.box:geometry({ width = width,
                                 height = notification.height,
                                 x = offset.x,
                                 y = offset.y })
