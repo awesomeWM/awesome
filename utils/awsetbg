@@ -66,8 +66,8 @@ command="`basename \"$0\"`"
 # Functions
 display_usage() {
     cat << EOF
-Usage: $command [-u/-U [wallpapersetter]] [-fFcCtTaA] /path/to/wallpaper
-       $command [-u/-U [wallpapersetter]] [-fFcCtTaA] -r/-R /path/to/wallpaperdirectory
+Usage: $command [-u/-U [wallpapersetter]] [-fFcCtTaA] [-m #] /path/to/wallpaper
+       $command [-u/-U [wallpapersetter]] [-fFcCtTaA] [-m #] -r/-R /path/to/wallpaperdirectory
        $command [-lhip]
 Use \`\`$command -h'' for a complete help message.
 
@@ -97,6 +97,9 @@ Options:
 
     -i  Information about selected wallpaper command.
 
+    -m  # Use montage to create a big image (image should
+          fit screen size). Requires montage(1).
+        # is the number of screen (columns in montage)
 Files:
 
     \$XDG_CACHE_HOME/awesome/lastwallpaper     In this file the wallpaper you set
@@ -210,6 +213,23 @@ while [ $# -gt 0 ]; do
         -T) option='$tile'
             remember=false
             shift ;;
+        -m)
+            montage=`which montage`
+            if test ! -z "$montage"; then
+                shift
+                cols="$1"; shift
+                fns=""
+                for i in `seq $cols`; do
+                    fns="$fns $1";
+                done;
+                shift
+                $montage $fns -geometry +0+0 -tile ${cols}x $CONFIG_DIR/montage.png
+                wallpaper=$CONFIG_DIR/montage.png
+            else
+                shift
+                echo "montage not found. Falling back to single image"
+            fi
+            ;;
         -r) option2=$option
             option=random
             wallpaper=$2 # in this case it's a dir
