@@ -30,8 +30,9 @@ extern awesome_t globalconf;
 static void
 layout_fair(int screen, const orientation_t orientation)
 {
-    int u_divisions=1, v_divisions = 1,
-        u = 0, v = 0, n = 0;
+    int strips=1, cells = 1,
+        strip = 0, cell = 0, n = 0,
+        full_strips;
     client_t *c;
     area_t geometry, area;
 
@@ -46,10 +47,11 @@ layout_fair(int screen, const orientation_t orientation)
 
     if(n > 0)
     {
-        while(u_divisions * u_divisions < n)
-            ++u_divisions;
+        while(cells * cells < n)
+            ++cells;
 
-        v_divisions = (u_divisions * (u_divisions - 1) >= n) ? u_divisions - 1 : u_divisions;
+        strips = (cells * (cells - 1) >= n) ? cells - 1 : cells;
+        full_strips = n - strips * (cells - 1);
 
         for(c = globalconf.clients; c; c = c->next)
             if(IS_TILED(c, screen))
@@ -57,28 +59,28 @@ layout_fair(int screen, const orientation_t orientation)
                 if (((orientation == East) && (n > 2))
                     || ((orientation == South) && (n <= 2)))
                 {
-                    geometry.width = area.width / u_divisions;
-                    geometry.height = area.height / v_divisions;
-                    geometry.x = area.x + u * geometry.width;
-                    geometry.y = area.y + v * geometry.height;
+                    geometry.width = area.width / cells;
+                    geometry.height = area.height / strips;
+                    geometry.x = area.x + cell * geometry.width;
+                    geometry.y = area.y + strip * geometry.height;
                 }
                 else
                 {
-                    geometry.width = area.width / v_divisions;
-                    geometry.height = area.height / u_divisions;
-                    geometry.x = area.x + v * geometry.width;
-                    geometry.y = area.y + u * geometry.height;
+                    geometry.width = area.width / strips;
+                    geometry.height = area.height / cells;
+                    geometry.x = area.x + strip * geometry.width;
+                    geometry.y = area.y + cell * geometry.height;
                 }
                 geometry.width -= 2 * c->border;
                 geometry.height -= 2 * c->border;
 
                 client_resize(c, geometry, c->honorsizehints);
 
-                if(++u == u_divisions)
+                if(++cell == cells)
                 {
-                    u = 0;
-                    if(++v == v_divisions - 1)
-                        u_divisions = u_divisions - u_divisions * v_divisions + n;
+                    cell = 0;
+                    if(++strip == full_strips)
+                        cells--;
                 }
             }
     }
