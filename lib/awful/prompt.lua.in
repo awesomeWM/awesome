@@ -107,17 +107,19 @@ end
 -- @param cursor_pos The cursor position.
 -- @param cursor_pos The cursor underline style.
 local function prompt_text_with_cursor(text, text_color, cursor_color, cursor_pos, cursor_ul)
-    local char
+    local char, spacer
     if not text then text = "" end
     if #text < cursor_pos then
         char = " "
+        spacer = ""
     else
         char = util.escape(text:sub(cursor_pos, cursor_pos))
+        spacer = " "
     end
     local underline = cursor_ul or "none"
     local text_start = util.escape(text:sub(1, cursor_pos - 1))
     local text_end = util.escape(text:sub(cursor_pos + 1))
-    return text_start .. "<span background=\"" .. util.color_strip_alpha(cursor_color) .. "\" foreground=\"" .. util.color_strip_alpha(text_color) .. "\" underline=\"" .. underline .. "\">" .. char .. "</span>" .. text_end
+    return text_start .. "<span background=\"" .. util.color_strip_alpha(cursor_color) .. "\" foreground=\"" .. util.color_strip_alpha(text_color) .. "\" underline=\"" .. underline .. "\">" .. char .. "</span>" .. text_end .. spacer
 end
 
 --- Run a prompt in a box.
