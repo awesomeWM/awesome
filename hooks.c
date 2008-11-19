@@ -180,6 +180,8 @@ luaA_hooks_timer(lua_State *L)
  * receive: signal, method_call, method_return or error.
  * The second argument is the path.
  * The other arguments are a variable list of arguments.
+ * The function can return values using pair of type, value.
+ * For example: return "s", "hello", "i", 32
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
  * \luastack

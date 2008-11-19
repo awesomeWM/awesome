@@ -224,7 +224,68 @@ a_dbus_process_request(DBusMessage *msg)
     if(dbus_message_iter_init(msg, &iter))
         nargs += a_dbus_message_iter(&iter);
 
-    luaA_dofunction(globalconf.L, globalconf.hooks.dbus, nargs, 0);
+    if(dbus_message_get_no_reply(msg))
+        luaA_dofunction(globalconf.L, globalconf.hooks.dbus, nargs, 0);
+    else
+    {
+        int n = lua_gettop(globalconf.L) - nargs;
+        luaA_dofunction(globalconf.L, globalconf.hooks.dbus, nargs, LUA_MULTRET);
+        n -= lua_gettop(globalconf.L);
+
+        DBusMessage *reply = dbus_message_new_method_return(msg);
+
+        dbus_message_iter_init_append(reply, &iter);
+
+        /* i is negative */
+        for(int i = n; i < 0; i += 2)
+        {
+            /* i is the type name, i+1 the value */
+            size_t len;
+            const char *type = lua_tolstring(globalconf.L, i, &len);
+
+            if(!type || len != 1)
+                break;
+
+            switch(*type)
+            {
+              case DBUS_TYPE_BOOLEAN:
+                {
+                    bool b = lua_toboolean(globalconf.L, i + 1);
+                    dbus_message_iter_append_basic(&iter, DBUS_TYPE_BOOLEAN, &b);
+                }
+                break;
+#define DBUS_MSG_RETURN_HANDLE_TYPE_STRING(dbustype) \
+              case dbustype: \
+                if((s = lua_tostring(globalconf.L, i + 1))) \
+                    dbus_message_iter_append_basic(&iter, dbustype, &s); \
+                break;
+              DBUS_MSG_RETURN_HANDLE_TYPE_STRING(DBUS_TYPE_STRING)
+              DBUS_MSG_RETURN_HANDLE_TYPE_STRING(DBUS_TYPE_BYTE)
+#undef DBUS_MSG_RETURN_HANDLE_TYPE_STRING
+#define DBUS_MSG_RETURN_HANDLE_TYPE_NUMBER(type, dbustype) \
+              case dbustype: \
+                { \
+                    type num = lua_tonumber(globalconf.L, i + 1); \
+                    dbus_message_iter_append_basic(&iter, dbustype, &num); \
+                } \
+                break;
+              DBUS_MSG_RETURN_HANDLE_TYPE_NUMBER(int16_t, DBUS_TYPE_INT16)
+              DBUS_MSG_RETURN_HANDLE_TYPE_NUMBER(uint16_t, DBUS_TYPE_UINT16)
+              DBUS_MSG_RETURN_HANDLE_TYPE_NUMBER(int32_t, DBUS_TYPE_INT32)
+              DBUS_MSG_RETURN_HANDLE_TYPE_NUMBER(uint32_t, DBUS_TYPE_UINT32)
+              DBUS_MSG_RETURN_HANDLE_TYPE_NUMBER(int64_t, DBUS_TYPE_INT64)
+              DBUS_MSG_RETURN_HANDLE_TYPE_NUMBER(uint64_t, DBUS_TYPE_UINT64)
+              DBUS_MSG_RETURN_HANDLE_TYPE_NUMBER(double, DBUS_TYPE_DOUBLE)
+#undef DBUS_MSG_RETURN_HANDLE_TYPE_NUMBER
+            }
+
+            lua_remove(globalconf.L, i);
+            lua_remove(globalconf.L, i + 1);
+        }
+
+        dbus_connection_send(dbus_connection, reply, NULL);
+        dbus_message_unref(reply);
+    }
 }
 
 static void
