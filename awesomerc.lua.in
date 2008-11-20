@@ -1,6 +1,9 @@
--- Include awesome libraries, with lots of useful function!
+-- Standard awesome library
 require("awful")
+-- Theme handling library
 require("beautiful")
+-- Notification library
+require("naughty")
 
 -- {{{ Variable definitions
 -- Themes define colours, icons, and wallpapers
