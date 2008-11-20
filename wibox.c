@@ -1004,8 +1004,7 @@ luaA_wibox_newindex(lua_State *L)
                 wibox_setvisible(*wibox, b);
                 break;
               case WIBOX_TYPE_TITLEBAR:
-                (*wibox)->isvisible = b;
-                globalconf.screens[(*wibox)->screen].need_arrange = true;
+                titlebar_set_visible(*wibox, b);
                 break;
             }
         break;

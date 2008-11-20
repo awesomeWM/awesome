@@ -181,6 +181,10 @@ struct client_t
     bool ismodal;
     /** True if the client is on top */
     bool isontop;
+    /** True if a client is banned to a position outside the viewport.
+     * Note that the geometry remains unchanged and that the window is still mapped.
+     */
+    bool isbanned;
     /** true if the client must be skipped from task bar client list */
     bool skiptb;
     /** True if the client cannot have focus */

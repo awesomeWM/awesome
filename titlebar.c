@@ -200,7 +200,6 @@ titlebar_client_attach(client_t *c, wibox_t *t)
             break;
         }
 
-
         titlebar_geometry_compute(c, c->geometry, &wingeom);
 
         simplewindow_init(&t->sw, c->phys_screen,
@@ -210,10 +209,36 @@ titlebar_client_attach(client_t *c, wibox_t *t)
 
         t->need_update = true;
 
+        /* This may seem useless, but it's the cleanest way to avoid seeing titlebars for banned clients. */
+        titlebar_update_geometry_floating(c);
+
         if(t->isvisible)
             xcb_map_window(globalconf.connection, t->sw.window);
 
         client_need_arrange(c);
+        client_stack();
+    }
+}
+
+/** Map or unmap a titlebar wibox.
+ * \param t The wibox/titlebar.
+ * \param visible The new state of the titlebar.
+ */
+void
+titlebar_set_visible(wibox_t *t, bool visible)
+{
+    if (visible != t->isvisible)
+    {
+        /* The price of (un)mapping something small like a titlebar is pretty cheap.
+         * It would complicate matters if this rare case was treated like clients.
+         * Clients are moved out of the viewport when banned.
+         */
+        if ((t->isvisible = visible))
+            xcb_map_window(globalconf.connection, t->sw.window);
+        else
+            xcb_unmap_window(globalconf.connection, t->sw.window);
+
+        globalconf.screens[t->screen].need_arrange = true;
         client_stack();
     }
 }

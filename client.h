@@ -127,9 +127,21 @@ client_isfloating(client_t *c)
  * \return true if the client is visible, false otherwise.
  */
 static inline bool
-client_isvisible(client_t *c, int screen)
+client_isvisible_exclude_banned(client_t *c, int screen)
 {
     return (!c->ishidden && !c->isminimized && client_maybevisible(c, screen));
+}
+
+/** Returns true if a client is tagged
+ * with one of the tags of the specified screen and is not hidden or banned.
+ * \param c The client to check.
+ * \param screen Virtual screen number.
+ * \return true if the client is visible, false otherwise.
+ */
+static inline bool
+client_isvisible(client_t *c, int screen)
+{
+    return (client_isvisible_exclude_banned(c, screen) && !c->isbanned);
 }
 
 /** Check if a client has strut information.

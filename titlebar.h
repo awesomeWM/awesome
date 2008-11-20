@@ -30,6 +30,7 @@ void titlebar_geometry_compute(client_t *, area_t, area_t *);
 void titlebar_init(client_t *);
 void titlebar_client_detach(client_t *);
 void titlebar_client_attach(client_t *, wibox_t *);
+void titlebar_set_visible(wibox_t *t, bool visible);
 
 int luaA_titlebar_newindex(lua_State *, wibox_t *, awesome_token_t);
 
@@ -130,7 +131,22 @@ titlebar_update_geometry_tiled(client_t *c, area_t geometry)
         return;
 
     titlebar_geometry_compute(c, geometry, &geom);
-    wibox_moveresize(c->titlebar, geom);
+    /* Can't actually move titlebar right now, but we will resize it. */
+    if(c->isbanned)
+    {
+        area_t moved_geom = geom;
+
+        /* Make sure it stays outside the viewport. */
+        moved_geom.x = - geom.width;
+        moved_geom.y = - geom.height;
+
+        wibox_moveresize(c->titlebar, moved_geom);
+
+        /* Store the real geometry. */
+        c->titlebar->sw.geometry = geom;
+    }
+    else
+        wibox_moveresize(c->titlebar, geom);
 }
 
 /** Update the titlebar geometry for a floating client.

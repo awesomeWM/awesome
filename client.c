@@ -158,7 +158,12 @@ client_getbywin(xcb_window_t w)
 static void
 client_unfocus(client_t *c)
 {
+    xcb_window_t root_win = xutil_screen_get(globalconf.connection, c->phys_screen)->root;
     globalconf.screens[c->phys_screen].client_focus = NULL;
+
+    /* Set focus on root window, so no events leak to the current window. */
+    xcb_set_input_focus(globalconf.connection, XCB_INPUT_FOCUS_POINTER_ROOT,
+        root_win, XCB_CURRENT_TIME);
 
     /* Call hook */
     if(globalconf.hooks.unfocus != LUA_REFNIL)
@@ -170,21 +175,45 @@ client_unfocus(client_t *c)
     ewmh_update_net_active_window(c->phys_screen);
 }
 
-/** Ban client and unmap it.
+/** Ban client and move it out of the viewport.
  * \param c The client.
  */
 void
 client_ban(client_t *c)
 {
-    if(globalconf.screen_focus->client_focus == c)
+    if(!c->isbanned)
+    {
+        /* Move all clients out of the physical viewport into negative coordinate space. */
+        /* They will all be put on top of each other. */
+        uint32_t request[2] = { - (c->geometry.width + 2 * c->border),
+                                - (c->geometry.height + 2 * c->border) };
+
+        xcb_configure_window(globalconf.connection, c->win,
+                             XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y,
+                             request);
+
+        /* Do it manually because client geometry remains unchanged. */
+        if (c->titlebar)
+        {
+            simple_window_t *sw = &c->titlebar->sw;
+
+            if (sw->window)
+            {
+                request[0] = - (sw->geometry.width);
+                request[1] = - (sw->geometry.height);
+                /* Move the titlebar to the same place as the window. */
+                xcb_configure_window(globalconf.connection, sw->window,
+                                     XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y,
+                                     request);
+            }
+        }
+
+        c->isbanned = true;
+    }
+
+    /* Wait until the last moment to take away the focus from the window. */
+    if (globalconf.screens[c->phys_screen].client_focus == c)
         client_unfocus(c);
-    xcb_unmap_window(globalconf.connection, c->win);
-    if(c->ishidden)
-        window_state_set(c->win, XCB_WM_STATE_ICONIC);
-    else
-        window_state_set(c->win, XCB_WM_STATE_WITHDRAWN);
-    if(c->titlebar)
-        xcb_unmap_window(globalconf.connection, c->titlebar->sw.window);
 }
 
 /** Give focus to client, or to first client if client is NULL.
@@ -496,6 +525,29 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
 
     ewmh_update_net_client_list(c->phys_screen);
 
+    /* Always stay in NORMAL_STATE. Even though iconified seems more
+     * appropriate sometimes. The only possible loss is that clients not using
+     * visibility events may continue to proces data (when banned).
+     * Without any exposes or other events the cost should be fairly limited though.
+     *
+     * Some clients may expect the window to be unmapped when STATE_ICONIFIED.
+     * Two conflicting parts of the ICCCM v2.0 (section 4.1.4):
+     *
+     * "Normal -> Iconic - The client should send a ClientMessage event as described later in this section."
+     * (note no explicit mention of unmapping, while Normal->Widthdrawn does mention that)
+     *
+     * "Once a client's window has left the Withdrawn state, the window will be mapped
+     * if it is in the Normal state and the window will be unmapped if it is in the Iconic state."
+     *
+     * At this stage it's just safer to keep it in normal state and avoid confusion.
+     */
+    window_state_set(c->win, XCB_WM_STATE_NORMAL);
+
+    /* Move window outside the viewport before mapping it. */
+    /* This also sets the state to iconified. */
+    client_ban(c);
+    xcb_map_window(globalconf.connection, c->win);
+
     /* Call hook to notify list change */
     if(globalconf.hooks.clients != LUA_REFNIL)
         luaA_dofunction(globalconf.L, globalconf.hooks.clients, 0, 0);
@@ -619,6 +671,15 @@ client_resize(client_t *c, area_t geometry, bool hints)
                 c->f_geometry = geometry;
 
         titlebar_update_geometry_floating(c);
+
+        /* The idea is to give a client a resize even when banned. */
+        /* We just have to move the (x,y) to keep it out of the viewport. */
+        /* This at least doesn't break expectations about events. */
+        if (c->isbanned)
+        {
+            geometry.x = values[0] = - (geometry.width + 2 * c->border);
+            geometry.y = values[1] = - (geometry.height + 2 * c->border);
+        }
 
         xcb_configure_window(globalconf.connection, c->win,
                              XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y
@@ -813,20 +874,38 @@ client_saveprops_tags(client_t *c)
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE, c->win, _AWESOME_TAGS, STRING, 8, i, prop);
 }
 
-/** Unban a client.
+/** Unban a client and move it back into the viewport.
  * \param c The client.
  */
 void
 client_unban(client_t *c)
 {
-    xcb_map_window(globalconf.connection, c->win);
-    window_state_set(c->win, XCB_WM_STATE_NORMAL);
-    if(c->titlebar)
+    if(c->isbanned)
     {
-        if(c->isfullscreen || !c->titlebar->isvisible)
-            xcb_unmap_window(globalconf.connection, c->titlebar->sw.window);
-        else
-            xcb_map_window(globalconf.connection, c->titlebar->sw.window);
+        /* Move the client back where it belongs. */
+        uint32_t request[2] = { c->geometry.x, c->geometry.y };
+
+        xcb_configure_window(globalconf.connection, c->win,
+                              XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y,
+                              request);
+        window_configure(c->win, c->geometry, c->border);
+
+        /* Do this manually because the system doesn't know we moved the toolbar.
+         * Note that !isvisible titlebars are unmapped and for fullscreen it'll
+         * end up offscreen anyway. */
+        if(c->titlebar)
+        {
+            simple_window_t *sw = &c->titlebar->sw;
+            /* All resizing is done, so only move now. */
+            request[0] = sw->geometry.x;
+            request[1] = sw->geometry.y;
+
+            xcb_configure_window(globalconf.connection, sw->window,
+                                XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y,
+                                request);
+        }
+
+        c->isbanned = false;
     }
 }
 

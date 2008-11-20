@@ -39,6 +39,7 @@
 #include "event.h"
 #include "property.h"
 #include "screen.h"
+#include "titlebar.h"
 #include "common/version.h"
 #include "common/atoms.h"
 #include "common/xcursor.h"
@@ -79,7 +80,10 @@ awesome_atexit(void)
 
     /* remap all clients since some WM won't handle them otherwise */
     for(c = globalconf.clients; c; c = c->next)
+    {
         client_unban(c);
+        titlebar_client_detach(c);
+    }
 
     xcb_flush(globalconf.connection);
 
