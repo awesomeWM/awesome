@@ -168,12 +168,12 @@ untag_client(client_t *c, tag_t *t)
         {
             client_need_arrange(c);
             client_array_take(&t->clients, i);
-            tag_unref(&t);
             client_saveprops_tags(c);
             /* call hook */
             luaA_client_userdata_new(globalconf.L, c);
             luaA_tag_userdata_new(globalconf.L, t);
             luaA_dofunction(globalconf.L, globalconf.hooks.tagged, 2, 0);
+            tag_unref(&t);
             return;
         }
 }
