@@ -53,7 +53,7 @@ else
 fi
 
 # The wallpapersetter is selected in this order
-wpsetters="${wpsetters:=Esetroot wmsetbg feh hsetroot chbg display qiv xv xsri xli xsetbg}" # broken icewmbg'
+wpsetters="${wpsetters:=Esetroot habak wmsetbg feh hsetroot chbg display qiv xv xsri xli xsetbg}" # broken icewmbg'
 lastwallpaper="${CONFIG_DIR}/lastwallpaper"
 
 
@@ -418,6 +418,13 @@ case $WPSETTER in
         tile='-tile'
         center='-center'
         aspect='-full'
+        debugstory=$standardok
+        ;;
+    habak)
+        full='-ms'
+        tile=''
+        center='-mC'
+        aspect='-mS'
         debugstory=$standardok
         ;;
     icewmbg)
