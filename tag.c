@@ -153,7 +153,8 @@ tag_client(client_t *c, tag_t *t)
     client_need_arrange(c);
     /* call hook */
     luaA_client_userdata_new(globalconf.L, c);
-    luaA_dofunction(globalconf.L, globalconf.hooks.tagged, 1, 0);
+    luaA_tag_userdata_new(globalconf.L, t);
+    luaA_dofunction(globalconf.L, globalconf.hooks.tagged, 2, 0);
 }
 
 /** Untag a client with specified tag.
