@@ -16,6 +16,7 @@ local button = button
 local capi = { screen = screen }
 local bt = require("beautiful")
 local beautiful = bt.get()
+local screen = screen
 
 --- Notification library
 module("naughty")
@@ -75,12 +76,15 @@ config.hover_timeout = nil
 -- @name notifications[position]
 -- @class table
 
-notifications = {
-    top_left = {},
-    top_right = {},
-    bottom_left = {},
-    bottom_right = {},
-}
+notifications = {}
+for s = 1, screen.count() do
+    notifications[s] = {
+        top_left = {},
+        top_right = {},
+        bottom_left = {},
+        bottom_right = {},
+    }
+end
 
 --- Evaluate desired position of the notification by index - internal
 -- @param idx Index of the notification
@@ -89,10 +93,10 @@ notifications = {
 -- @param width Popup width (optional)
 -- @return Absolute position in {x, y} dictionary
 
-local function get_offset(idx, position, height, width)
-    local ws = capi.screen[config.screen].workarea
+local function get_offset(screen, position, idx, width, height)
+    local ws = capi.screen[screen].workarea
     local v = {}
-    width = width or notifications[position][idx].width or config.width
+    width = width or notifications[screen][position][idx].width or config.width
 
     -- calculate x
     if position:match("left") then
@@ -104,7 +108,7 @@ local function get_offset(idx, position, height, width)
     -- calculate existing popups' height
     local existing = 0
     for i = 1, idx-1, 1 do
-         existing = existing + notifications[position][i].height + config.spacing + config.border_width*2
+        existing = existing + notifications[screen][position][i].height + config.spacing + config.border_width*2
     end
 
     -- calculate y
@@ -117,8 +121,8 @@ local function get_offset(idx, position, height, width)
     -- if positioned outside workarea, destroy oldest popup and recalculate
     if v.y + height > ws.y + ws.height or v.y < ws.y then
         idx = idx - 1
-        destroy(notifications[position][1])
-        v = get_offset(idx, position, height)
+        destroy(notifications[screen][position][1])
+        v = get_offset(screen, position, idx, width, height)
     end
 
     return v
@@ -126,12 +130,11 @@ end
 
 --- Re-arrange notifications according to their position and index - internal
 -- @return None
-local function arrange()
-    for p,pos in pairs(notifications) do
-        for i,notification in pairs(notifications[p]) do
-            local offset = get_offset(i, p, notification.height)
-            local width = notification.width
-            notification.box:geometry({ x = offset.x, y = offset.y, width = width, height = notification.height })
+local function arrange(screen)
+    for p,pos in pairs(notifications[screen]) do
+        for i,notification in pairs(notifications[screen][p]) do
+            local offset = get_offset(screen, p, i, notification.width, notification.height)
+            notification.box:geometry({ x = offset.x, y = offset.y, width = config.width, height = notification.height })
             notification.idx = i
         end
     end
@@ -143,10 +146,11 @@ end
 -- @return True if the popup was successfully destroyed, nil otherwise
 function destroy(notification)
     if notification then
-        notification.box.screen = nil
+        local scr = notification.box.screen
+        table.remove(notifications[notification.box.screen][notification.position], notification.idx)
         hooks.timer.unregister(notification.die)
-        table.remove(notifications[notification.position], notification.idx)
-        arrange()
+        notification.box.screen = nil
+        arrange(scr)
         return true
     end
 end
@@ -177,7 +181,7 @@ function notify(args)
 
     local notification = {}
     notification.position = args.position or config.position
-    notification.idx = #notifications[notification.position] + 1
+    notification.idx = #notifications[screen][notification.position] + 1
 
     local title = ""
     if args.title then title = args.title .. "\n"  end
@@ -232,8 +236,8 @@ function notify(args)
     else
         notification.height = lines * config.height end
     notification.width = width
-    local offset = get_offset(notification.idx, notification.position, notification.height, notification.width)
-    notification.box:geometry({ width = width,
+    local offset = get_offset(screen, notification.position, notification.idx, notification.width, notification.height)
+    notification.box:geometry({ width = notification.width,
                                 height = notification.height,
                                 x = offset.x,
                                 y = offset.y })
@@ -244,7 +248,7 @@ function notify(args)
     notification.box.widgets = { iconbox, textbox }
 
     -- insert the notification to the table
-    table.insert(notifications[notification.position],notification)
+    table.insert(notifications[screen][notification.position],notification)
 end
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
