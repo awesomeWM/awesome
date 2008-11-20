@@ -330,9 +330,7 @@ ewmh_process_state_atom(client_t *c, xcb_atom_t state, int set)
             c->isurgent = !c->isurgent;
 
         /* execute hook */
-        luaA_client_userdata_new(globalconf.L, c);
-        lua_pushliteral(globalconf.L, "urgent");
-        luaA_dofunction(globalconf.L, globalconf.hooks.property, 2, 0);
+        hooks_property(c, "urgent");
     }
 }
 

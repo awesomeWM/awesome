@@ -88,13 +88,23 @@ widget_common_button(widget_node_t *w,
     for(int i = 0; i < b->len; i++)
         if(ev->detail == b->tab[i]->button
            && XUTIL_MASK_CLEAN(ev->state) == b->tab[i]->mod)
-        {
-            luaA_wibox_userdata_new(globalconf.L, p);
-            luaA_dofunction(globalconf.L,
-                            ev->response_type == XCB_BUTTON_PRESS ?
-                            b->tab[i]->press : b->tab[i]->release,
-                            1, 0);
-        }
+            switch(ev->response_type)
+            {
+              case XCB_BUTTON_PRESS:
+                if(b->tab[i]->press != LUA_REFNIL)
+                {
+                    luaA_wibox_userdata_new(globalconf.L, p);
+                    luaA_dofunction(globalconf.L, b->tab[i]->press, 1, 0);
+                }
+                break;
+              case XCB_BUTTON_RELEASE:
+                if(b->tab[i]->release != LUA_REFNIL)
+                {
+                    luaA_wibox_userdata_new(globalconf.L, p);
+                    luaA_dofunction(globalconf.L, b->tab[i]->release, 1, 0);
+                }
+                break;
+            }
 }
 
 /** Convert a Lua table to a list of widget nodet.

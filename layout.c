@@ -72,8 +72,11 @@ arrange(int screen)
     globalconf.screens[screen].need_arrange = false;
 
     /* call hook */
-    lua_pushnumber(globalconf.L, screen + 1);
-    luaA_dofunction(globalconf.L, globalconf.hooks.arrange, 1, 0);
+    if(globalconf.hooks.arrange != LUA_REFNIL)
+    {
+        lua_pushnumber(globalconf.L, screen + 1);
+        luaA_dofunction(globalconf.L, globalconf.hooks.arrange, 1, 0);
+    }
 }
 
 /** Refresh the screen disposition

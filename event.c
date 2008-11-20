@@ -60,21 +60,33 @@ event_handle_mouse_button(client_t *c,
     for(int i = 0; i < buttons->len; i++)
         if(button == buttons->tab[i]->button
            && XUTIL_MASK_CLEAN(state) == buttons->tab[i]->mod)
-        {
-            if(c)
+            switch(type)
             {
-                luaA_client_userdata_new(globalconf.L, c);
-                luaA_dofunction(globalconf.L,
-                                type == XCB_BUTTON_PRESS ?
-                                buttons->tab[i]->press : buttons->tab[i]->release,
-                                1, 0);
+              case XCB_BUTTON_PRESS:
+                if(buttons->tab[i]->press != LUA_REFNIL)
+                {
+                    if(c)
+                    {
+                        luaA_client_userdata_new(globalconf.L, c);
+                        luaA_dofunction(globalconf.L, buttons->tab[i]->press, 1, 0);
+                    }
+                    else
+                        luaA_dofunction(globalconf.L, buttons->tab[i]->press, 0, 0);
+                }
+                break;
+              case XCB_BUTTON_RELEASE:
+                if(buttons->tab[i]->release != LUA_REFNIL)
+                {
+                    if(c)
+                    {
+                        luaA_client_userdata_new(globalconf.L, c);
+                        luaA_dofunction(globalconf.L, buttons->tab[i]->release, 1, 0);
+                    }
+                    else
+                        luaA_dofunction(globalconf.L, buttons->tab[i]->release, 0, 0);
+                }
+                break;
             }
-            else
-                luaA_dofunction(globalconf.L,
-                                type == XCB_BUTTON_PRESS ?
-                                buttons->tab[i]->press : buttons->tab[i]->release,
-                                0, 0);
-        }
 }
 
 /** Get a widget node from a wibox by coords.
@@ -340,16 +352,22 @@ event_handle_widget_motionnotify(void *object,
     {
         if(*mouse_over)
         {
-            /* call mouse leave function on old widget */
-            luaA_wibox_userdata_new(globalconf.L, object);
-            luaA_dofunction(globalconf.L, (*mouse_over)->mouse_leave, 1, 0);
+            if((*mouse_over)->mouse_leave != LUA_REFNIL)
+            {
+                /* call mouse leave function on old widget */
+                luaA_wibox_userdata_new(globalconf.L, object);
+                luaA_dofunction(globalconf.L, (*mouse_over)->mouse_leave, 1, 0);
+            }
         }
         if(w)
         {
             /* call mouse enter function on new widget and register it */
             *mouse_over = w->widget;
-            luaA_wibox_userdata_new(globalconf.L, object);
-            luaA_dofunction(globalconf.L, w->widget->mouse_enter, 1, 0);
+            if(w->widget->mouse_enter != LUA_REFNIL)
+            {
+                luaA_wibox_userdata_new(globalconf.L, object);
+                luaA_dofunction(globalconf.L, w->widget->mouse_enter, 1, 0);
+            }
         }
     }
 }
@@ -395,9 +413,12 @@ event_handle_leavenotify(void *data __attribute__ ((unused)),
 
     if(wibox && wibox->mouse_over)
     {
-        /* call mouse leave function on widget the mouse was over */
-        luaA_wibox_userdata_new(globalconf.L, wibox);
-        luaA_dofunction(globalconf.L, wibox->mouse_over->mouse_leave, 1, 0);
+        if(wibox->mouse_over->mouse_leave != LUA_REFNIL)
+        {
+            /* call mouse leave function on widget the mouse was over */
+            luaA_wibox_userdata_new(globalconf.L, wibox);
+            luaA_dofunction(globalconf.L, wibox->mouse_over->mouse_leave, 1, 0);
+        }
         wibox->mouse_over = NULL;
     }
 
@@ -445,8 +466,11 @@ event_handle_enternotify(void *data __attribute__ ((unused)),
         globalconf.pointer_x = ev->root_x;
         globalconf.pointer_y = ev->root_y;
 
-        luaA_client_userdata_new(globalconf.L, c);
-        luaA_dofunction(globalconf.L, globalconf.hooks.mouse_enter, 1, 0);
+        if(globalconf.hooks.mouse_enter != LUA_REFNIL)
+        {
+            luaA_client_userdata_new(globalconf.L, c);
+            luaA_dofunction(globalconf.L, globalconf.hooks.mouse_enter, 1, 0);
+        }
     }
     else if((emwin = xembed_getbywin(globalconf.embedded, ev->event)))
         xcb_ungrab_button(globalconf.connection, XCB_BUTTON_INDEX_ANY,

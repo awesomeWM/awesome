@@ -100,8 +100,11 @@ tag_append_to_screen(tag_t *tag, screen_t *s)
         client_saveprops_tags(c);
 
     /* call hook */
-    lua_pushnumber(globalconf.L, s->index + 1);
-    luaA_dofunction(globalconf.L, globalconf.hooks.tags, 1, 0);
+    if(globalconf.hooks.tags != LUA_REFNIL)
+    {
+        lua_pushnumber(globalconf.L, s->index + 1);
+        luaA_dofunction(globalconf.L, globalconf.hooks.tags, 1, 0);
+    }
 }
 
 /** Remove a tag from screen. Tag must be on a screen and have no clients.
@@ -132,8 +135,11 @@ tag_remove_from_screen(tag_t *tag)
         client_saveprops_tags(c);
 
     /* call hook */
-    lua_pushnumber(globalconf.L, screen + 1);
-    luaA_dofunction(globalconf.L, globalconf.hooks.tags, 1, 0);
+    if(globalconf.hooks.tags != LUA_REFNIL)
+    {
+        lua_pushnumber(globalconf.L, screen + 1);
+        luaA_dofunction(globalconf.L, globalconf.hooks.tags, 1, 0);
+    }
 }
 
 /** Tag a client with specified tag.
@@ -152,9 +158,12 @@ tag_client(client_t *c, tag_t *t)
     client_saveprops_tags(c);
     client_need_arrange(c);
     /* call hook */
-    luaA_client_userdata_new(globalconf.L, c);
-    luaA_tag_userdata_new(globalconf.L, t);
-    luaA_dofunction(globalconf.L, globalconf.hooks.tagged, 2, 0);
+    if(globalconf.hooks.tagged != LUA_REFNIL)
+    {
+        luaA_client_userdata_new(globalconf.L, c);
+        luaA_tag_userdata_new(globalconf.L, t);
+        luaA_dofunction(globalconf.L, globalconf.hooks.tagged, 2, 0);
+    }
 }
 
 /** Untag a client with specified tag.
@@ -171,9 +180,12 @@ untag_client(client_t *c, tag_t *t)
             client_array_take(&t->clients, i);
             client_saveprops_tags(c);
             /* call hook */
-            luaA_client_userdata_new(globalconf.L, c);
-            luaA_tag_userdata_new(globalconf.L, t);
-            luaA_dofunction(globalconf.L, globalconf.hooks.tagged, 2, 0);
+            if(globalconf.hooks.tagged != LUA_REFNIL)
+            {
+                luaA_client_userdata_new(globalconf.L, c);
+                luaA_tag_userdata_new(globalconf.L, t);
+                luaA_dofunction(globalconf.L, globalconf.hooks.tagged, 2, 0);
+            }
             tag_unref(&t);
             return;
         }

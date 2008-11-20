@@ -314,21 +314,17 @@ luaA_registerfct(lua_State *L, int idx, luaA_ref *fct)
 static inline bool
 luaA_dofunction(lua_State *L, luaA_ref f, int nargs, int nret)
 {
-    if(f != LUA_REFNIL)
+    lua_rawgeti(L, LUA_REGISTRYINDEX, f);
+    if(nargs)
+        lua_insert(L, - (nargs + 1));
+    if(lua_pcall(L, nargs, nret, 0))
     {
-        lua_rawgeti(L, LUA_REGISTRYINDEX, f);
-        if(nargs)
-            lua_insert(L, - (nargs + 1));
-        if(lua_pcall(L, nargs, nret, 0))
-        {
-            warn("error running function: %s",
-                 lua_tostring(L, -1));
-            lua_pop(L, 1);
-            return false;
-        }
-        return true;
+        warn("error running function: %s",
+             lua_tostring(L, -1));
+        lua_pop(L, 1);
+        return false;
     }
-    return false;
+    return true;
 }
 
 /** Print a warning about some Lua code.
@@ -378,9 +374,12 @@ bool luaA_isloop(lua_State *, int);
 
 #define hooks_property(c, prop) \
     do { \
-        luaA_client_userdata_new(globalconf.L, c); \
-        lua_pushliteral(globalconf.L, prop); \
-        luaA_dofunction(globalconf.L, globalconf.hooks.property, 2, 0); \
+        if(globalconf.hooks.property != LUA_REFNIL) \
+        { \
+            luaA_client_userdata_new(globalconf.L, c); \
+            lua_pushliteral(globalconf.L, prop); \
+            luaA_dofunction(globalconf.L, globalconf.hooks.property, 2, 0); \
+        } \
     } while(0);
 
 #endif

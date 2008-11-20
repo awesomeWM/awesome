@@ -161,8 +161,11 @@ client_unfocus(client_t *c)
     globalconf.screens[c->phys_screen].client_focus = NULL;
 
     /* Call hook */
-    luaA_client_userdata_new(globalconf.L, c);
-    luaA_dofunction(globalconf.L, globalconf.hooks.unfocus, 1, 0);
+    if(globalconf.hooks.unfocus != LUA_REFNIL)
+    {
+        luaA_client_userdata_new(globalconf.L, c);
+        luaA_dofunction(globalconf.L, globalconf.hooks.unfocus, 1, 0);
+    }
 
     ewmh_update_net_active_window(c->phys_screen);
 }
@@ -217,8 +220,11 @@ client_focus(client_t *c)
     client_need_arrange(c);
 
     /* execute hook */
-    luaA_client_userdata_new(globalconf.L, globalconf.screen_focus->client_focus);
-    luaA_dofunction(globalconf.L, globalconf.hooks.focus, 1, 0);
+    if(globalconf.hooks.focus != LUA_REFNIL)
+    {
+        luaA_client_userdata_new(globalconf.L, globalconf.screen_focus->client_focus);
+        luaA_dofunction(globalconf.L, globalconf.hooks.focus, 1, 0);
+    }
 
     ewmh_update_net_active_window(c->phys_screen);
 }
@@ -491,11 +497,15 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
     ewmh_update_net_client_list(c->phys_screen);
 
     /* Call hook to notify list change */
-    luaA_dofunction(globalconf.L, globalconf.hooks.clients, 0, 0);
+    if(globalconf.hooks.clients != LUA_REFNIL)
+        luaA_dofunction(globalconf.L, globalconf.hooks.clients, 0, 0);
 
     /* call hook */
-    luaA_client_userdata_new(globalconf.L, c);
-    luaA_dofunction(globalconf.L, globalconf.hooks.manage, 1, 0);
+    if(globalconf.hooks.manage != LUA_REFNIL)
+    {
+        luaA_client_userdata_new(globalconf.L, c);
+        luaA_dofunction(globalconf.L, globalconf.hooks.manage, 1, 0);
+    }
 }
 
 /** Compute client geometry with respect to its geometry hints.
@@ -838,11 +848,15 @@ client_unmanage(client_t *c)
         untag_client(c, tags->tab[i]);
 
     /* call hook */
-    luaA_client_userdata_new(globalconf.L, c);
-    luaA_dofunction(globalconf.L, globalconf.hooks.unmanage, 1, 0);
+    if(globalconf.hooks.unmanage != LUA_REFNIL)
+    {
+        luaA_client_userdata_new(globalconf.L, c);
+        luaA_dofunction(globalconf.L, globalconf.hooks.unmanage, 1, 0);
+    }
 
     /* Call hook to notify list change */
-    luaA_dofunction(globalconf.L, globalconf.hooks.clients, 0, 0);
+    if(globalconf.hooks.clients != LUA_REFNIL)
+        luaA_dofunction(globalconf.L, globalconf.hooks.clients, 0, 0);
 
     /* The server grab construct avoids race conditions. */
     xcb_grab_server(globalconf.connection);
@@ -1054,7 +1068,8 @@ luaA_client_swap(lua_State *L)
     client_need_arrange(*swap);
 
     /* Call hook to notify list change */
-    luaA_dofunction(L, globalconf.hooks.clients, 0, 0);
+    if(globalconf.hooks.clients != LUA_REFNIL)
+        luaA_dofunction(L, globalconf.hooks.clients, 0, 0);
 
     return 0;
 }
