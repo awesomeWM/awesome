@@ -342,7 +342,6 @@ awful.hooks.manage.register(function (c)
     -- if they're not focusable, so set border anyway.
     c.border_width = beautiful.border_width
     c.border_color = beautiful.border_normal
-    client.focus = c
 
     -- Check if the application should be floating.
     local cls = c.class
@@ -364,6 +363,9 @@ awful.hooks.manage.register(function (c)
         c.screen = target.screen
         awful.client.movetotag(tags[target.screen][target.tag], c)
     end
+
+    -- Do this after tag mapping, so you don't see it on the wrong tag for a split second.
+    client.focus = c
 
     -- Set the windows at the slave,
     -- i.e. put it at the end of others instead of setting it master.
