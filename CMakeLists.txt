@@ -90,6 +90,7 @@ set(AWE_CLIENT_SRCS
 
 set(AWE_MAN_SRCS
     ${SOURCE_DIR}/awesome.1.txt
+    ${SOURCE_DIR}/awsetbg.1.txt
     ${SOURCE_DIR}/awesome-client.1.txt
     ${SOURCE_DIR}/awesomerc.5.txt)
 
