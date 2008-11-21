@@ -41,9 +41,11 @@ layout_magnifier(int screen)
 
     focus = globalconf.screens[screen].client_focus;
 
-    /* When the client is not tiled and it has a parent, focus on that parent. */
+    /* Find parent of this window, if it has one. */
     if (!IS_TILED(focus, screen) && focus && focus->transient_for)
-	focus = focus->transient_for;
+        do {
+            focus = focus->transient_for;
+        } while (focus->transient_for != NULL);
 
     /* If focused window is not tiled, take the first one which is tiled. */
     if(!IS_TILED(focus, screen))
