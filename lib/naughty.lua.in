@@ -15,7 +15,6 @@ local widget = widget
 local button = button
 local capi = { screen = screen }
 local bt = require("beautiful")
-local beautiful = bt.get()
 local screen = screen
 
 --- Notification library
@@ -58,12 +57,8 @@ config.width = 300
 config.spacing = 1
 config.ontop = true
 config.margin = 10
-config.font = beautiful.font or "Verdana 8"
 config.icon = nil
 config.icon_size = 16
-config.fg = beautiful.fg_focus or '#ffffff'
-config.bg = beautiful.bg_focus or '#535d6c'
-config.border_color = beautiful.border_focus or '#535d6c'
 config.border_width = 1
 config.hover_timeout = nil
 
@@ -179,6 +174,12 @@ function notify(args)
     local ontop = args.ontop or config.ontop
     local width = args.width or config.width
 
+    -- beautiful
+    local beautiful = bt.get()
+    local font = args.font or config.font or beautiful.font or "Verdana 8"
+    local fg = args.fg or config.fg or beautiful.fg_normal or '#ffffff'
+    local bg = args.bg or config.bg or beautiful.bg_normal or '#535d6c'
+    local border_color = config.border_color or beautiful.bg_focus or '#535d6c'
     local notification = {}
     notification.position = args.position or config.position
     notification.idx = #notifications[screen][notification.position] + 1
@@ -224,8 +225,8 @@ function notify(args)
     -- create container wibox
     notification.box = wibox({ name = "not" .. notification.idx,
                                position = "floating",
-                               fg = args.fg or config.fg,
-                               bg = args.bg or config.bg,
+                               fg = fg,
+                               bg = bg,
                                border_color = config.border_color,
                                border_width = config.border_width })
 
