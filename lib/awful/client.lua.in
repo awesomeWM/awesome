@@ -174,7 +174,7 @@ function focus.history.previous()
 end
 
 --- Get visible clients from a screen.
--- @param The screen number, or nil for all screen.
+-- @param screen The screen number, or nil for all screens.
 -- @return A table with all visible clients.
 function visible(screen)
     local cls = capi.client.get(screen)
