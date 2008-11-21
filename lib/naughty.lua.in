@@ -39,7 +39,7 @@ module("naughty")
 -- @field margin Space between popup edge and content. Default: 10
 -- @field font Popup font. Default: beautiful.font or "Verdana 8"
 -- @field icon Popup icon. Default: nil
--- @field icon_size Size of the icon in pixels. Default: 16
+-- @field icon_size Size of the icon in pixels. Default: nil
 -- @field fg Foreground color. Default: beautiful.fg_focus or '#ffffff'
 -- @field bg Background color. Default: beautiful.bg_focus or '#535d6c'
 -- @field border_color Border color.
@@ -60,7 +60,7 @@ config.spacing = 1
 config.ontop = true
 config.margin = 10
 config.icon = nil
-config.icon_size = 16
+config.icon_size = nil
 config.border_width = 1
 config.hover_timeout = nil
 
@@ -259,8 +259,8 @@ function notify(args)
         local img = image(icon)
         if icon_size then
             img = img:crop_and_scale(0,0,img.height,img.width,icon_size,icon_size)
-            iconbox.resize = false
         end
+        iconbox.resize = false
         iconbox.image = img
         if config.hover_timeout then iconbox.mouse_enter = hover_destroy end
     end
