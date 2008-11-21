@@ -203,8 +203,7 @@ function notify(args)
     local textbox = widget({ type = "textbox", name = "text", align = "flex" })
     textbox:buttons({ button({ }, 1, run),
                       button({ }, 3, die) })
-    textbox.text = string.format('<margin right="'..config.margin..'" left="'..config.margin..'"/><span font_desc="%s"><b>%s</b>%s</span>',
-                                  config.font, title, text)
+    textbox.text = string.format('<margin right="'..config.margin..'" left="'..config.margin..'"/><span font_desc="%s"><b>%s</b>%s</span>', font, title, text)
     if config.hover_timeout then textbox.mouse_enter = hover_destroy end
 
     -- create iconbox
