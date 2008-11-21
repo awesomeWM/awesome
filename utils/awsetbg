@@ -89,7 +89,7 @@ Options:
     -u  Use specified wallpapersetter, use no argument to forget.
     -r  set random wallpaper from a directory
 
-    -F,-C,-T,-A,-U,-B,-R same as uncapsed but without remembering.
+    -F,-C,-T,-A,-U,-R same as uncapsed but without remembering.
 
     -h  Display this help.
 
