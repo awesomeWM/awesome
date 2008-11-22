@@ -26,25 +26,6 @@ module("beautiful")
 -- Local data
 local theme = {}
 
---- Split line in two if it  contains the '=' character.
--- @param line The line to split.
--- @return nil if  the '=' character is not in the string
-local function split_line(line)
-    local split_val = line:find('=')
-
-    if split_val and line:sub(1, 1) ~= '#' and line:sub(1, 2) ~= '--' then
-        -- Remove spaces and tabulations in key
-        local key = line:sub(1, split_val - 1):gsub(' ', ''):gsub('\t', '')
-        -- and extra spaces and tabulations before value
-        local value = line:sub(split_val + 1, -1)
-        while value:sub(1, 1) == ' ' or value:sub(1, 1) == '\t' do
-            value = value:sub(2, -1)
-        end
-
-        return key, value
-    end
-end
-
 --- Get a value directly.
 -- @param key The key.
 -- @return The value.
@@ -64,24 +45,20 @@ function init(path)
            return print("E: unable to load theme " .. path)
        end
 
-       for line in f:lines() do
-            local key, value
-            key, value = split_line(line)
-            if key then
-                if key == "wallpaper_cmd" then
-                    for s = 1, capi.screen.count() do
-                        util.spawn(value, s)
-                    end
-                elseif key == "font" then
-                    capi.awesome.font = value
-                elseif key == "fg_normal" then
-                    capi.awesome.fg = value
-                elseif key == "bg_normal" then
-                    capi.awesome.bg = value
+       for key, value in f:read("*all"):gsub("^","\n"):gmatch("\n[\t ]*([a-z_]+)[\t ]*=[\t ]*([^\n\t]+)") do
+            if key == "wallpaper_cmd" then
+                for s = 1, capi.screen.count() do
+                    util.spawn(value, s)
                 end
-                -- Store.
-                theme[key] = value
+            elseif key == "font" then
+                capi.awesome.font = value
+            elseif key == "fg_normal" then
+                capi.awesome.fg = value
+            elseif key == "bg_normal" then
+                capi.awesome.bg = value
             end
+            -- Store.
+            theme[key] = value
         end
         f:close()
     end
