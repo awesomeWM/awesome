@@ -156,4 +156,17 @@ function getdir(d)
         return os.getenv("HOME").."/.cache/awesome"
     end
 end
+
+--- Check if file exists and is readable.
+-- @param filename The file path
+-- @return True if file exists and readable.
+function file_readable(filename)
+    local file = io.open(filename)
+    if file then
+        io.close(file)
+        return true
+    end
+    return false
+end
+
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
