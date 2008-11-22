@@ -74,6 +74,7 @@ local counter = 1
 -- @field height Popup height
 -- @field width Popup width
 -- @field die Function to be executed on timeout
+-- @field id Unique notification id based on a counter
 -- @name notifications[position]
 -- @class table
 
