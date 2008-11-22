@@ -40,6 +40,10 @@ module("naughty")
 -- @field font Popup font. Default: beautiful.font or "Verdana 8"
 -- @field icon Popup icon. Default: nil
 -- @field icon_size Size of the icon in pixels. Default: nil
+-- @field icon_dirs List of directories that will be checked by getIcon()
+--   Default: { "/usr/share/pixmaps/", }
+-- @field icon_formats List of formats that will be checked by getIcon()
+--   Default: { "png", "gif" }
 -- @field fg Foreground color. Default: beautiful.fg_focus or '#ffffff'
 -- @field bg Background color. Default: beautiful.bg_focus or '#535d6c'
 -- @field border_color Border color.
@@ -61,6 +65,8 @@ config.ontop = true
 config.margin = 10
 config.icon = nil
 config.icon_size = nil
+config.icon_dirs = { "/usr/share/pixmaps/", }
+config.icon_formats = { "png", "gif" }
 config.border_width = 1
 config.hover_timeout = nil
 
@@ -172,6 +178,20 @@ local function getById(id)
     end
 end
 
+--- Search for an icon in specified directories with a specified format
+-- @param icon Name of the icon
+-- @return full path of the icon, or nil of no icon was found
+local function getIcon(name)
+    for d, dir in pairs(config.icon_dirs) do
+        for f, format in pairs(config.icon_formats) do
+            local icon = dir .. name .. "." .. format
+            if awful.util.file_readable(icon) then
+                return icon
+            end
+        end
+    end
+end
+
 --- Create notification. args is a dictionary of optional arguments. For more information and defaults see respective fields in config table.
 -- @param text Text of the notification
 -- @param timeout Time in seconds after which popup expires
@@ -254,16 +274,21 @@ function notify(args)
     -- create iconbox
     local iconbox = nil
     if icon then
-        iconbox = widget({ type = "imagebox", align = "left" })
-        iconbox:buttons({ button({ }, 1, run),
-                          button({ }, 3, die) })
-        local img = image(icon)
-        if icon_size then
-            img = img:crop_and_scale(0,0,img.height,img.width,icon_size,icon_size)
+        -- try to guess icon if the provided one is non-existent/readable
+        if not awful.util.file_readable(icon) then icon = getIcon(icon) end
+
+        -- if we have an icon, use it
+        if icon then
+            iconbox = widget({ type = "imagebox", align = "left" })
+            iconbox:buttons({ button({ }, 1, run), button({ }, 3, die) })
+            local img = image(icon)
+            if icon_size then
+                img = img:crop_and_scale(0,0,img.height,img.width,icon_size,icon_size)
+            end
+            iconbox.resize = false
+            iconbox.image = img
+            if config.hover_timeout then iconbox.mouse_enter = hover_destroy end
         end
-        iconbox.resize = false
-        iconbox.image = img
-        if config.hover_timeout then iconbox.mouse_enter = hover_destroy end
     end
 
     -- create container wibox
