@@ -123,7 +123,7 @@ local function get_offset(screen, position, idx, width, height)
     if position:match("top") then
         v.y = ws.y + config.padding + existing
     else
-        v.y = ws.y + ws.height - (config.padding + config.border_width + height + existing)
+        v.y = ws.y + ws.height - (config.padding + config.border_width*2 + height + existing)
     end
 
     -- if positioned outside workarea, destroy oldest popup and recalculate
