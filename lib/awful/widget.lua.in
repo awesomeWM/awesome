@@ -122,7 +122,8 @@ function taglist.label.all(t, args)
     local taglist_squares_sel = args.squares_sel or theme.taglist_squares_sel
     local taglist_squares_unsel = args.squares_unsel or theme.taglist_squares_unsel
     local taglist_squares_resize = theme.taglist_squares_resize or args.squares_resize or "true"
-    local text
+    local font = args.font or theme.taglist_font or theme.font or ""
+    local text = "<span font_desc='"..font.."'>"
     local background = ""
     local sel = capi.client.focus
     local bg_color = nil
@@ -149,10 +150,11 @@ function taglist.label.all(t, args)
         end
     end
     if bg_color and fg_color then
-        text = "<bg "..background.." color='"..bg_color.."'/> <span color='"..util.color_strip_alpha(fg_color).."'>"..util.escape(t.name).."</span> "
+        text = text .. "<bg "..background.." color='"..bg_color.."'/> <span color='"..util.color_strip_alpha(fg_color).."'>"..util.escape(t.name).."</span> "
     else
-        text = " <bg "..background.." />"..util.escape(t.name).." "
+        text = text .. " <bg "..background.." />"..util.escape(t.name).." "
     end
+    text = text .. "</span>"
     return text
 end
 
@@ -269,8 +271,9 @@ local function widget_tasklist_label_common(c, args)
     local bg_urgent = args.bg_urgent or theme.tasklist_bg_urgent or theme.bg_urgent
     local floating_icon = args.floating_icon or theme.tasklist_floating_icon
     local floating_icon_align = args.floating_icon_align or theme.tasklist_floating_icon_align or "right"
+    local font = args.font or theme.tasklist_font or theme.font or ""
     local bg = nil
-    local text = "<margin left=\"2\" right=\"2\"/>"
+    local text = "<margin left=\"2\" right=\"2\"/><span font_desc='"..font.."'>"
     local name
     if c.floating and floating_icon then
         text = text.."<bg image=\"" .. floating_icon .. "\" align=\"" .. floating_icon_align .. "\"/>"
@@ -293,6 +296,7 @@ local function widget_tasklist_label_common(c, args)
     else
         text = text .. name
     end
+    text = text .. "</span>"
     return text, bg
 end
 
