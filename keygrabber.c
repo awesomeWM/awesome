@@ -540,7 +540,6 @@ keysym_to_xkb(char *buf, int len, const xcb_keysym_t ksym)
         CASE(dead_stroke);
         CASE(dead_abovecomma);
         CASE(dead_abovereversedcomma);
-        CASE(dead_dasia);
         CASE(First_Virtual_Screen);
         CASE(Prev_Virtual_Screen);
         CASE(Next_Virtual_Screen);
