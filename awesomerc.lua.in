@@ -195,18 +195,14 @@ for i = 1, keynumber do
                    end):add()
     keybinding({ modkey, "Shift" }, i,
                    function ()
-                       if client.focus then
-                           if tags[client.focus.screen][i] then
-                               awful.client.movetotag(tags[client.focus.screen][i])
-                           end
+                       if client.focus and tags[client.focus.screen][i] then
+                           awful.client.movetotag(tags[client.focus.screen][i])
                        end
                    end):add()
     keybinding({ modkey, "Control", "Shift" }, i,
                    function ()
-                       if client.focus then
-                           if tags[client.focus.screen][i] then
-                               awful.client.toggletag(tags[client.focus.screen][i])
-                           end
+                       if client.focus and tags[client.focus.screen][i] then
+                           awful.client.toggletag(tags[client.focus.screen][i])
                        end
                    end):add()
 end
