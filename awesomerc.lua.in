@@ -262,7 +262,7 @@ keybinding({ modkey, "Ctrl" }, "i", function ()
                                         local s = mouse.screen
                                         if mypromptbox[s].text then
                                             mypromptbox[s].text = nil
-                                        elseif client.focus
+                                        elseif client.focus then
                                             mypromptbox[s].text = nil
                                             if client.focus.class then
                                                 mypromptbox[s].text = "Class: " .. client.focus.class .. " "
