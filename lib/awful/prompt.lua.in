@@ -167,7 +167,9 @@ function run(args, textbox, exe_callback, completion_callback, history_path, his
             capi.keygrabber.stop()
             exe_callback(command)
             if done_callback then done_callback() end
-            return false
+            -- We already unregistered ourselves so we don't want to return
+            -- true, otherwise we may unregister someone else.
+            return true
         end
 
         -- Control cases
