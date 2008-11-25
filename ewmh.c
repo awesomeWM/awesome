@@ -74,6 +74,8 @@ ewmh_init(int phys_screen)
         _NET_WM_STATE_STICKY,
         _NET_WM_STATE_SKIP_TASKBAR,
         _NET_WM_STATE_FULLSCREEN,
+        _NET_WM_STATE_MAXIMIZED_HORZ,
+        _NET_WM_STATE_MAXIMIZED_VERT,
         _NET_WM_STATE_ABOVE,
         _NET_WM_STATE_BELOW,
         _NET_WM_STATE_MODAL,
@@ -284,6 +286,24 @@ ewmh_process_state_atom(client_t *c, xcb_atom_t state, int set)
         else if(set == _NET_WM_STATE_TOGGLE)
             client_setfullscreen(c, !c->isfullscreen);
     }
+    else if(state == _NET_WM_STATE_MAXIMIZED_HORZ)
+    {
+        if(set == _NET_WM_STATE_REMOVE)
+            client_setmaxhoriz(c, false);
+        else if(set == _NET_WM_STATE_ADD)
+            client_setmaxhoriz(c, true);
+        else if(set == _NET_WM_STATE_TOGGLE)
+            client_setmaxhoriz(c, !c->ismaxhoriz);
+    }
+    else if(state == _NET_WM_STATE_MAXIMIZED_VERT)
+    {
+        if(set == _NET_WM_STATE_REMOVE)
+            client_setmaxvert(c, false);
+        else if(set == _NET_WM_STATE_ADD)
+            client_setmaxvert(c, true);
+        else if(set == _NET_WM_STATE_TOGGLE)
+            client_setmaxvert(c, !c->ismaxvert);
+    }
     else if(state == _NET_WM_STATE_ABOVE)
     {
         if(set == _NET_WM_STATE_REMOVE)
@@ -396,6 +416,10 @@ ewmh_client_update_hints(client_t *c)
         state[i++] = _NET_WM_STATE_MODAL;
     if(c->isfullscreen)
         state[i++] = _NET_WM_STATE_FULLSCREEN;
+    if(c->ismaxvert)
+        state[i++] = _NET_WM_STATE_MAXIMIZED_VERT;
+    if(c->ismaxhoriz)
+        state[i++] = _NET_WM_STATE_MAXIMIZED_HORZ;
     if(c->issticky)
         state[i++] = _NET_WM_STATE_STICKY;
     if(c->skiptb)

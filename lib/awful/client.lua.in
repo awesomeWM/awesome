@@ -27,7 +27,6 @@ module("awful.client")
 
 -- Private data
 local data = {}
-data.maximize = otable()
 data.focus = {}
 data.urgent = {}
 data.marked = {}
@@ -378,34 +377,8 @@ function moveresize(x, y, w, h, c)
     sel:geometry(geometry)
 end
 
---- Maximize a client to use the full workarea.
--- @param c A client, or the focused one if nil.
-function maximize(c)
-    local sel = c or capi.client.focus
-    if sel then
-        local curlay = layout.get()
-        local ws = capi.screen[sel.screen].workarea
-        ws.width = ws.width - 2 * sel.border_width
-        ws.height = ws.height - 2 * sel.border_width
-        if (sel.floating or curlay == "floating") and data.maximize[sel] then
-            sel:geometry(data.maximize[sel].geometry)
-            sel.floating = data.maximize[sel].floating
-            data.maximize[sel] = nil
-        else
-            data.maximize[sel] = { geometry = sel:geometry(), floating = sel.floating }
-            if curlay ~= "floating" then
-                sel.floating = true
-            end
-            sel:geometry(ws)
-        end
-    end
-end
-
-
---- Erase eventual client data in maximize.
--- @param c The client.
-local function maximize_clean(c)
-    data.maximize[c] = nil
+function maximize()
+    util.deprecate("maximized_horizontal and vertical client attributes")
 end
 
 --- Move a client to a tag.
@@ -541,7 +514,6 @@ end
 -- Register standards hooks
 hooks.focus.register(focus.history.add)
 hooks.unmanage.register(focus.history.delete)
-hooks.unmanage.register(maximize_clean)
 
 hooks.property.register(urgent.add)
 hooks.focus.register(urgent.delete)

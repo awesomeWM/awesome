@@ -47,6 +47,8 @@ len
 line
 Lock
 machine
+maximized_horizontal
+maximized_vertical
 middle
 minimize
 Mod1

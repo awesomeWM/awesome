@@ -62,6 +62,8 @@ void client_setbelow(client_t *, bool);
 void client_setmodal(client_t *, bool);
 void client_setontop(client_t *, bool);
 void client_setfullscreen(client_t *, bool);
+void client_setmaxhoriz(client_t *, bool);
+void client_setmaxvert(client_t *, bool);
 void client_setminimized(client_t *, bool);
 void client_setborder(client_t *, int);
 
@@ -117,6 +119,8 @@ client_isfloating(client_t *c)
     return (c->type != WINDOW_TYPE_NORMAL
             || c->isfloating
             || c->isfullscreen
+            || c->ismaxhoriz
+            || c->ismaxvert
             || client_isfixed(c));
 }
 

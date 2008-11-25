@@ -154,6 +154,8 @@ struct client_t
         area_t floating;
         /** Client geometry when (un)fullscreen */
         area_t fullscreen;
+        /** Client geometry when (un)-max */
+        area_t max;
     } geometries;
     /* Size hints */
     int basew, baseh, incw, inch, maxw, maxh, minw, minh;
@@ -176,6 +178,10 @@ struct client_t
     bool isminimized;
     /** True if the client is fullscreen */
     bool isfullscreen;
+    /** True if the client is maximized horizontally */
+    bool ismaxhoriz;
+    /** True if the client is maximized vertically */
+    bool ismaxvert;
     /** True if the client is above others */
     bool isabove;
     /** True if the client is below others */

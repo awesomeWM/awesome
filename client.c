@@ -332,7 +332,7 @@ client_layer_translator(client_t *c)
         return LAYER_ABOVE;
     else if(c->isbelow)
         return LAYER_BELOW;
-    else if(c->isfloating)
+    else if(c->isfloating || c->ismaxhoriz || c->ismaxvert)
         return LAYER_FLOAT;
 
     /* check for transient attr */
@@ -462,10 +462,10 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
 
     /* Initial values */
     c->win = w;
-    c->geometry.x = c->geometries.floating.x = c->geometries.fullscreen.x = wgeom->x;
-    c->geometry.y = c->geometries.floating.y = c->geometries.fullscreen.y = wgeom->y;
-    c->geometry.width = c->geometries.floating.width = c->geometries.fullscreen.width = wgeom->width;
-    c->geometry.height = c->geometries.floating.height = c->geometries.fullscreen.height = wgeom->height;
+    c->geometry.x = c->geometries.floating.x = wgeom->x;
+    c->geometry.y = c->geometries.floating.y = wgeom->y;
+    c->geometry.width = c->geometries.floating.width = wgeom->width;
+    c->geometry.height = c->geometries.floating.height = wgeom->height;
     client_setborder(c, wgeom->border_width);
     if((icon = ewmh_window_icon_get_reply(ewmh_icon_cookie)))
         c->icon = image_ref(&icon);
@@ -667,7 +667,7 @@ client_resize(client_t *c, area_t geometry, bool hints)
         if(client_isfloating(c)
            || layout_get_current(new_screen) == layout_floating
            || layout_get_current(c->screen) == layout_floating)
-            if(!c->isfullscreen)
+            if(!c->isfullscreen && !c->ismaxvert && !c->ismaxhoriz)
                 c->geometries.floating = geometry;
 
         titlebar_update_geometry_floating(c);
@@ -769,6 +769,10 @@ client_setfullscreen(client_t *c, bool s)
         /* become fullscreen! */
         if((c->isfullscreen = s))
         {
+            /* remove any max state */
+            client_setmaxhoriz(c, false);
+            client_setmaxvert(c, false);
+
             geometry = screen_area_get(c->screen, NULL, NULL, false);
             c->geometries.fullscreen = c->geometry;
             c->oldborder = c->border;
@@ -788,6 +792,94 @@ client_setfullscreen(client_t *c, bool s)
                             &c->isfullscreen);
         ewmh_client_update_hints(c);
         hooks_property(c, "fullscreen");
+    }
+}
+
+/** Set a client horizontally maximized.
+ * \param c The client.
+ * \param s The maximized status.
+ */
+void
+client_setmaxhoriz(client_t *c, bool s)
+{
+    if(c->ismaxhoriz != s)
+    {
+        area_t geometry;
+
+        if((c->ismaxhoriz = s))
+        {
+            /* remove fullscreen mode */
+            client_setfullscreen(c, false);
+
+            geometry = screen_area_get(c->screen,
+                                       &globalconf.screens[c->screen].wiboxes,
+                                       &globalconf.screens[c->screen].padding,
+                                       true);
+            /* Remove space needed for titlebar and border. */
+            geometry = titlebar_geometry_remove(c->titlebar,
+                                        c->border,
+                                        geometry);
+            geometry.y = c->geometry.y;
+            geometry.height = c->geometry.height;
+            c->geometries.max.x = c->geometry.x;
+            c->geometries.max.width = c->geometry.width;
+        }
+        else
+        {
+            geometry = c->geometry;
+            geometry.x = c->geometries.max.x;
+            geometry.width = c->geometries.max.width;
+        }
+
+        client_resize(c, geometry, c->honorsizehints);
+        client_need_arrange(c);
+        client_stack();
+        ewmh_client_update_hints(c);
+        hooks_property(c, "maximized_horizontal");
+    }
+}
+
+/** Set a client vertically maximized.
+ * \param c The client.
+ * \param s The maximized status.
+ */
+void
+client_setmaxvert(client_t *c, bool s)
+{
+    if(c->ismaxvert != s)
+    {
+        area_t geometry;
+
+        if((c->ismaxvert = s))
+        {
+            /* remove fullscreen mode */
+            client_setfullscreen(c, false);
+
+            geometry = screen_area_get(c->screen,
+                                       &globalconf.screens[c->screen].wiboxes,
+                                       &globalconf.screens[c->screen].padding,
+                                       true);
+            /* Remove space needed for titlebar and border. */
+            geometry = titlebar_geometry_remove(c->titlebar,
+                                        c->border,
+                                        geometry);
+            geometry.x = c->geometry.x;
+            geometry.width = c->geometry.width;
+            c->geometries.max.y = c->geometry.y;
+            c->geometries.max.height = c->geometry.height;
+        }
+        else
+        {
+            geometry = c->geometry;
+            geometry.y = c->geometries.max.y;
+            geometry.height = c->geometries.max.height;
+        }
+
+        client_resize(c, geometry, c->honorsizehints);
+        client_need_arrange(c);
+        client_stack();
+        ewmh_client_update_hints(c);
+        hooks_property(c, "maximized_vertical");
     }
 }
 
@@ -1348,6 +1440,12 @@ luaA_client_newindex(lua_State *L)
       case A_TK_FULLSCREEN:
         client_setfullscreen(*c, luaA_checkboolean(L, 3));
         break;
+      case A_TK_MAXIMIZED_HORIZONTAL:
+        client_setmaxhoriz(*c, luaA_checkboolean(L, 3));
+        break;
+      case A_TK_MAXIMIZED_VERTICAL:
+        client_setmaxvert(*c, luaA_checkboolean(L, 3));
+        break;
       case A_TK_ICON:
         image = luaA_checkudata(L, 3, "image");
         image_unref(&(*c)->icon);
@@ -1433,6 +1531,8 @@ luaA_client_newindex(lua_State *L)
  * \lfield opacity The client opacity between 0 and 1.
  * \lfield ontop The client is on top of every other windows.
  * \lfield fullscreen The client is fullscreen or not.
+ * \lfield maximized_horizontal The client is maximized horizontally or not.
+ * \lfield maximized_vertical The client is maximized vertically or not.
  * \lfield transient_for Return the client the window is transient for.
  * \lfield size_hints A table with size hints of the client: user_position,
  *         user_size, program_position and program_size.
@@ -1545,6 +1645,12 @@ luaA_client_index(lua_State *L)
         break;
       case A_TK_FULLSCREEN:
         lua_pushboolean(L, (*c)->isfullscreen);
+        break;
+      case A_TK_MAXIMIZED_HORIZONTAL:
+        lua_pushboolean(L, (*c)->ismaxhoriz);
+        break;
+      case A_TK_MAXIMIZED_VERTICAL:
+        lua_pushboolean(L, (*c)->ismaxvert);
         break;
       case A_TK_ICON:
         if((*c)->icon)

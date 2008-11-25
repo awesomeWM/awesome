@@ -250,6 +250,8 @@ function tasklist.new(label, buttons)
     hooks.property.register(function (c, prop)
         if prop == "urgent"
             or prop == "floating"
+            or prop == "maximized_horizontal"
+            or prop == "maximized_vertical"
             or prop == "icon"
             or prop == "name"
             or prop == "icon_name" then
