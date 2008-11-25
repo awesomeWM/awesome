@@ -136,8 +136,7 @@ local function arrange(screen)
 end
 
 --- Destroy notification by index
--- @param idx Index of the notification
--- @param position One of 4 keys in notification dictionary: top_right, top_left, bottom_right, bottom_left
+-- @param notification Notification object to be destroyed
 -- @return True if the popup was successfully destroyed, nil otherwise
 function destroy(notification)
     if notification then
@@ -164,6 +163,7 @@ end
 -- @param run Function to run on left click
 -- @param width The popup width
 -- @usage naughty.notify({ title = 'Achtung!', text = 'You\'re idling', timeout = 0 })
+-- @return The notification object
 function notify(args)
     -- gather variables together
     local timeout = args.timeout or config.timeout
@@ -248,7 +248,9 @@ function notify(args)
     notification.box.widgets = { iconbox, textbox }
 
     -- insert the notification to the table
-    table.insert(notifications[screen][notification.position],notification)
-end
+    table.insert(notifications[screen][notification.position], notification)
 
+    -- return the notification
+    return notification
+end
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
