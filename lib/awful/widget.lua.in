@@ -280,7 +280,7 @@ local function widget_tasklist_label_common(c, args)
     if c.floating and floating_icon then
         text = text.."<bg image=\"" .. floating_icon .. "\" align=\"" .. floating_icon_align .. "\"/>"
     end
-    if c.minimize then
+    if c.minimized then
         name = util.escape(c.icon_name) or ""
     else
         name = util.escape(c.name) or ""

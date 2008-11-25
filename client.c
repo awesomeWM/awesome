@@ -1435,6 +1435,8 @@ luaA_client_newindex(lua_State *L)
         }
         break;
       case A_TK_MINIMIZE:
+        luaA_deprecate(L, "client.minimized");
+      case A_TK_MINIMIZED:
         client_setminimized(*c, luaA_checkboolean(L, 3));
         break;
       case A_TK_FULLSCREEN:
@@ -1641,6 +1643,8 @@ luaA_client_index(lua_State *L)
         lua_pushboolean(L, (*c)->ishidden);
         break;
       case A_TK_MINIMIZE:
+        luaA_deprecate(L, "client.minimized");
+      case A_TK_MINIMIZED:
         lua_pushboolean(L, (*c)->isminimized);
         break;
       case A_TK_FULLSCREEN:
