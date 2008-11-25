@@ -259,7 +259,10 @@ function notify(args)
     hooks.timer.register(timeout, die)
     notification.die = die
 
-    local run = args.run or die
+    local run = function ()
+        if args.run then args.run() end
+        die()
+    end
 
     local hover_destroy = function ()
         if hover_timeout == 0 then die()
