@@ -462,10 +462,10 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
 
     /* Initial values */
     c->win = w;
-    c->geometry.x = c->f_geometry.x = c->m_geometry.x = wgeom->x;
-    c->geometry.y = c->f_geometry.y = c->m_geometry.y = wgeom->y;
-    c->geometry.width = c->f_geometry.width = c->m_geometry.width = wgeom->width;
-    c->geometry.height = c->f_geometry.height = c->m_geometry.height = wgeom->height;
+    c->geometry.x = c->geometries.floating.x = c->geometries.fullscreen.x = wgeom->x;
+    c->geometry.y = c->geometries.floating.y = c->geometries.fullscreen.y = wgeom->y;
+    c->geometry.width = c->geometries.floating.width = c->geometries.fullscreen.width = wgeom->width;
+    c->geometry.height = c->geometries.floating.height = c->geometries.fullscreen.height = wgeom->height;
     client_setborder(c, wgeom->border_width);
     if((icon = ewmh_window_icon_get_reply(ewmh_icon_cookie)))
         c->icon = image_ref(&icon);
@@ -668,7 +668,7 @@ client_resize(client_t *c, area_t geometry, bool hints)
            || layout_get_current(new_screen) == layout_floating
            || layout_get_current(c->screen) == layout_floating)
             if(!c->isfullscreen)
-                c->f_geometry = geometry;
+                c->geometries.floating = geometry;
 
         titlebar_update_geometry_floating(c);
 
@@ -708,7 +708,7 @@ client_setfloating(client_t *c, bool floating)
     {
         if((c->isfloating = floating))
             if(!c->isfullscreen)
-                client_resize(c, c->f_geometry, false);
+                client_resize(c, c->geometries.floating, false);
         client_need_arrange(c);
         client_stack();
         xcb_change_property(globalconf.connection,
@@ -770,13 +770,13 @@ client_setfullscreen(client_t *c, bool s)
         if((c->isfullscreen = s))
         {
             geometry = screen_area_get(c->screen, NULL, NULL, false);
-            c->m_geometry = c->geometry;
+            c->geometries.fullscreen = c->geometry;
             c->oldborder = c->border;
             client_setborder(c, 0);
         }
         else
         {
-            geometry = c->m_geometry;
+            geometry = c->geometries.fullscreen;
             client_setborder(c, c->oldborder);
         }
         client_resize(c, geometry, false);

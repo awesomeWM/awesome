@@ -148,10 +148,13 @@ struct client_t
     char *name, *icon_name;
     /** Window geometry */
     area_t geometry;
-    /** Floating window geometry */
-    area_t f_geometry;
-    /** Max window geometry */
-    area_t m_geometry;
+    struct
+    {
+        /** Client floating geometry. */
+        area_t floating;
+        /** Client geometry when (un)fullscreen */
+        area_t fullscreen;
+    } geometries;
     /* Size hints */
     int basew, baseh, incw, inch, maxw, maxh, minw, minh;
     int minax, maxax, minay, maxay;

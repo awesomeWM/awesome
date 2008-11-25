@@ -331,7 +331,7 @@ screen_client_moveto(client_t *c, int new_screen, bool dotag, bool doresize)
     if(doresize && old_screen != c->screen)
     {
         area_t new_geometry, new_f_geometry;
-        new_f_geometry = c->f_geometry;
+        new_f_geometry = c->geometries.floating;
 
         to = screen_area_get(c->screen,
                              NULL, NULL, false);
@@ -339,8 +339,8 @@ screen_client_moveto(client_t *c, int new_screen, bool dotag, bool doresize)
                                NULL, NULL, false);
 
         /* compute new coords in new screen */
-        new_f_geometry.x = (c->f_geometry.x - from.x) + to.x;
-        new_f_geometry.y = (c->f_geometry.y - from.y) + to.y;
+        new_f_geometry.x = (c->geometries.floating.x - from.x) + to.x;
+        new_f_geometry.y = (c->geometries.floating.y - from.y) + to.y;
 
         /* check that new coords are still in the screen */
         if(new_f_geometry.width > to.width)
@@ -371,18 +371,18 @@ screen_client_moveto(client_t *c, int new_screen, bool dotag, bool doresize)
                 new_geometry.y = to.y + to.height - new_geometry.height - 2 * c->border;
 
             /* compute new coords for max in new screen */
-            c->m_geometry.x = (c->m_geometry.x - from.x) + to.x;
-            c->m_geometry.y = (c->m_geometry.y - from.y) + to.y;
+            c->geometries.fullscreen.x = (c->geometries.fullscreen.x - from.x) + to.x;
+            c->geometries.fullscreen.y = (c->geometries.fullscreen.y - from.y) + to.y;
 
             /* check that new coords are still in the screen */
-            if(c->m_geometry.width > to.width)
-                c->m_geometry.width = to.width;
-            if(c->m_geometry.height > to.height)
-                c->m_geometry.height = to.height;
-            if(c->m_geometry.x + c->m_geometry.width >= to.x + to.width)
-                c->m_geometry.x = to.x + to.width - c->m_geometry.width - 2 * c->border;
-            if(c->m_geometry.y + c->m_geometry.height >= to.y + to.height)
-                c->m_geometry.y = to.y + to.height - c->m_geometry.height - 2 * c->border;
+            if(c->geometries.fullscreen.width > to.width)
+                c->geometries.fullscreen.width = to.width;
+            if(c->geometries.fullscreen.height > to.height)
+                c->geometries.fullscreen.height = to.height;
+            if(c->geometries.fullscreen.x + c->geometries.fullscreen.width >= to.x + to.width)
+                c->geometries.fullscreen.x = to.x + to.width - c->geometries.fullscreen.width - 2 * c->border;
+            if(c->geometries.fullscreen.y + c->geometries.fullscreen.height >= to.y + to.height)
+                c->geometries.fullscreen.y = to.y + to.height - c->geometries.fullscreen.height - 2 * c->border;
 
             client_resize(c, new_geometry, false);
         }
@@ -392,7 +392,7 @@ screen_client_moveto(client_t *c, int new_screen, bool dotag, bool doresize)
         /* otherwise just register them */
         else
         {
-            c->f_geometry = new_f_geometry;
+            c->geometries.floating = new_f_geometry;
             if(wasvisible)
                 globalconf.screens[old_screen].need_arrange = true;
             client_need_arrange(c);
