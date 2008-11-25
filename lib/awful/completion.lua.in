@@ -1,12 +1,14 @@
 ---------------------------------------------------------------------------
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
--- @copyright 2008 Julien Danjou
+-- @author Sébastien Gross &lt;seb-awesome@chezwam.org&gt;
+-- @copyright 2008 Julien Danjou, Sébastien Gross
 -- @release @AWESOME_VERSION@
 ---------------------------------------------------------------------------
 
 -- Grab environment we need
 local io = io
 local table = table
+local math = math
 
 --- Completion module for awful
 module("awful.completion")
@@ -14,6 +16,10 @@ module("awful.completion")
 -- mapping of command/completion function
 local bashcomp_funcs = {}
 local bashcomp_src = "/etc/bash_completion"
+
+--- keywords table use for the generic completion
+-- should not be local
+keywords = {}
 
 --- Enable programmable bash completion in awful.completion.bash at the price of
 -- a slight overhead
@@ -107,6 +113,44 @@ function bash(command, cur_pos, ncomp)
     cur_pos = cword_end + #output[ncomp] + 1
 
     return str, cur_pos
+end
+
+--- Run a generic completion.
+-- For this function to run properly the awful.completion.keyword table should
+-- be fed up with all keywords. The completion is run against these keywords.
+-- @param text The current text the user had typed yet.
+-- @param cur_pos The current cursor position.
+-- @param ncomp The number of yet requested completion using current text.
+-- @return The new match and the new cursor position.
+function generic(text, cur_pos, ncomp)
+    -- The keywords table may be empty
+    if #keywords == 0 then
+        return text, #text + 1
+    end
+
+    -- if no text had been typed yet, then we could start cycling around all
+    -- keywords with out filtering and move the cursor at the end of keyword
+    if text == nil or #text == 0 then
+        ncomp = math.mod(ncomp - 1, #keywords) + 1
+        return keywords[ncomp], #keywords[ncomp] + 2
+    end
+
+    -- Filter out only keywords starting with text
+    local matches = {}
+    table.foreach(keywords, function(_, x)
+        if x:sub(1 , #text) == text then
+            table.insert(matches, x)
+        end
+    end)
+
+    -- if there are no matches just leave out with the current text and position
+    if #matches == 0 then
+        return text, #text + 1
+    end
+
+    --  cycle around all matches
+    ncomp = math.mod(ncomp - 1, #matches) + 1
+    return matches[ncomp], #matches[ncomp] + 1
 end
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
