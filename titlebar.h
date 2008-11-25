@@ -118,19 +118,18 @@ titlebar_geometry_remove(wibox_t *t, int border, area_t geometry)
     return geometry;
 }
 
-/** Update the titlebar geometry for a tiled client.
+/** Update the titlebar geometry for a client.
  * \param c The client.
- * \param geometry The geometry the client will receive.
  */
 static inline void
-titlebar_update_geometry_tiled(client_t *c, area_t geometry)
+titlebar_update_geometry(client_t *c)
 {
     area_t geom;
 
     if(!c->titlebar)
         return;
 
-    titlebar_geometry_compute(c, geometry, &geom);
+    titlebar_geometry_compute(c, c->geometry, &geom);
     /* Can't actually move titlebar right now, but we will resize it. */
     if(c->isbanned)
     {
@@ -147,15 +146,6 @@ titlebar_update_geometry_tiled(client_t *c, area_t geometry)
     }
     else
         wibox_moveresize(c->titlebar, geom);
-}
-
-/** Update the titlebar geometry for a floating client.
- * \param c The client.
- */
-static inline void
-titlebar_update_geometry_floating(client_t *c)
-{
-    return titlebar_update_geometry_tiled(c, c->geometry);
 }
 
 #endif

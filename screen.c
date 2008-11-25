@@ -30,7 +30,6 @@
 #include "client.h"
 #include "widget.h"
 #include "wibox.h"
-#include "layouts/tile.h"
 
 extern awesome_t globalconf;
 
@@ -462,7 +461,7 @@ luaA_screen_tags(lua_State *L)
         {
             luaA_warn(L, "screen %d has no tag, taking last resort action and adding default tag\n",
                       s->index);
-            tag_append_to_screen(tag_new("default", sizeof("default") - 1, layout_tile, 0.5, 1, 0), s);
+            tag_append_to_screen(tag_new("default", sizeof("default") - 1), s);
             return 1;
         }
     }

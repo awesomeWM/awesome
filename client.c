@@ -29,7 +29,7 @@
 #include "titlebar.h"
 #include "systray.h"
 #include "property.h"
-#include "layouts/floating.h"
+#include "wibox.h"
 #include "common/markup.h"
 #include "common/atoms.h"
 
@@ -625,10 +625,6 @@ client_resize(client_t *c, area_t geometry, bool hints)
 {
     int new_screen;
     area_t area;
-    layout_t *layout = layout_get_current(c->screen);
-
-    if(c->titlebar && c->titlebar->isvisible && !client_isfloating(c) && layout != layout_floating)
-        geometry = titlebar_geometry_remove(c->titlebar, c->border, geometry);
 
     if(hints)
         geometry = client_geometry_hints(c, geometry);
@@ -668,12 +664,10 @@ client_resize(client_t *c, area_t geometry, bool hints)
         /* save the floating geometry if the window is floating but not
          * maximized */
         if(client_isfloating(c)
-           || layout_get_current(new_screen) == layout_floating
-           || layout_get_current(c->screen) == layout_floating)
-            if(!c->isfullscreen && !c->ismaxvert && !c->ismaxhoriz)
-                c->geometries.floating = geometry;
+           && !(c->isfullscreen || c->ismaxvert || c->ismaxhoriz))
+            c->geometries.floating = geometry;
 
-        titlebar_update_geometry_floating(c);
+        titlebar_update_geometry(c);
 
         /* The idea is to give a client a resize even when banned. */
         /* We just have to move the (x,y) to keep it out of the viewport. */
@@ -1171,13 +1165,7 @@ client_setborder(client_t *c, int width)
     xcb_configure_window(globalconf.connection, c->win,
                          XCB_CONFIG_WINDOW_BORDER_WIDTH, &w);
 
-    if(client_isvisible(c, c->screen))
-    {
-        if(client_isfloating(c) || layout_get_current(c->screen) == layout_floating)
-            titlebar_update_geometry_floating(c);
-        else
-            globalconf.screens[c->screen].need_arrange = true;
-    }
+    client_need_arrange(c);
 
     hooks_property(c, "border_width");
 }
@@ -1339,30 +1327,30 @@ luaA_client_handlegeom(lua_State *L, bool full)
     client_t **c = luaA_checkudata(L, 1, "client");
 
     if(lua_gettop(L) == 2)
-        if(client_isfloating(*c)
-           || layout_get_current((*c)->screen) == layout_floating)
-        {
-            area_t geometry;
+    {
+        area_t geometry;
 
-            luaA_checktable(L, 2);
-            geometry.x = luaA_getopt_number(L, 2, "x", (*c)->geometry.x);
-            geometry.y = luaA_getopt_number(L, 2, "y", (*c)->geometry.y);
-            if(client_isfixed(*c))
-            {
-                geometry.width = (*c)->geometry.width;
-                geometry.height = (*c)->geometry.height;
-            }
-            else
-            {
-                geometry.width = luaA_getopt_number(L, 2, "width", (*c)->geometry.width);
-                geometry.height = luaA_getopt_number(L, 2, "height", (*c)->geometry.height);
-            }
-            if(full)
-                geometry = titlebar_geometry_remove((*c)->titlebar,
-                                                    (*c)->border,
-                                                    geometry);
-            client_resize(*c, geometry, (*c)->honorsizehints);
+        luaA_checktable(L, 2);
+        geometry.x = luaA_getopt_number(L, 2, "x", (*c)->geometry.x);
+        geometry.y = luaA_getopt_number(L, 2, "y", (*c)->geometry.y);
+        if(client_isfixed(*c))
+        {
+            geometry.width = (*c)->geometry.width;
+            geometry.height = (*c)->geometry.height;
         }
+        else
+        {
+            geometry.width = luaA_getopt_number(L, 2, "width", (*c)->geometry.width);
+            geometry.height = luaA_getopt_number(L, 2, "height", (*c)->geometry.height);
+        }
+
+        if(full)
+            geometry = titlebar_geometry_remove((*c)->titlebar,
+                                                (*c)->border,
+                                                geometry);
+
+        client_resize(*c, geometry, (*c)->honorsizehints);
+    }
 
     if(full)
         return luaA_pusharea(L, titlebar_geometry_add((*c)->titlebar,

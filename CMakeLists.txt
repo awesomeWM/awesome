@@ -71,12 +71,6 @@ set(AWE_SRCS
     ${SOURCE_DIR}/common/xembed.c
     ${SOURCE_DIR}/common/xutil.c
     ${SOURCE_DIR}/common/xcursor.c
-    ${SOURCE_DIR}/layouts/fibonacci.c
-    ${SOURCE_DIR}/layouts/floating.c
-    ${SOURCE_DIR}/layouts/magnifier.c
-    ${SOURCE_DIR}/layouts/fair.c
-    ${SOURCE_DIR}/layouts/max.c
-    ${SOURCE_DIR}/layouts/tile.c
     ${SOURCE_DIR}/widgets/graph.c
     ${SOURCE_DIR}/widgets/progressbar.c
     ${SOURCE_DIR}/widgets/textbox.c
@@ -117,16 +111,6 @@ target_link_libraries(${PROJECT_AWECLIENT_NAME}
     ${AWESOMECLIENT_LIBRARIES})
 
 # {{{ Generated sources
-file(GLOB LAYOUTGEN_DEPS ${SOURCE_DIR}/layouts/*.h)
-add_custom_command(
-    COMMAND ${SOURCE_DIR}/build-utils/layoutgen.sh
-    ARGS    > ${BUILD_DIR}/layoutgen.h
-    OUTPUT  ${BUILD_DIR}/layoutgen.h
-    WORKING_DIRECTORY ${SOURCE_DIR}
-    DEPENDS ${LAYOUTGEN_DEPS}
-    COMMENT "Generating layoutgen.h"
-    VERBATIM)
-
 add_custom_command(
     COMMAND ${SOURCE_DIR}/build-utils/widgetgen.sh
     ARGS    > ${BUILD_DIR}/widgetgen.h
@@ -177,7 +161,6 @@ add_custom_command(
 
 add_custom_target(generated_sources
     DEPENDS ${BUILD_DIR}/widgetgen.h
-            ${BUILD_DIR}/layoutgen.h
             ${BUILD_DIR}/common/atoms-intern.h
             ${BUILD_DIR}/common/atoms-extern.h
             ${BUILD_DIR}/common/tokenize.c

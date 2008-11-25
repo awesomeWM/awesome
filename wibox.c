@@ -919,7 +919,7 @@ luaA_wibox_newindex(lua_State *L)
             wibox_position_update(*wibox);
             break;
           case WIBOX_TYPE_TITLEBAR:
-            titlebar_update_geometry_floating(client_getbytitlebar(*wibox));
+            titlebar_update_geometry(client_getbytitlebar(*wibox));
             break;
         }
         break;

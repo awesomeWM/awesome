@@ -5,15 +5,17 @@
 ---------------------------------------------------------------------------
 
 -- Grab environment we need
-local hooks = require("awful.hooks")
 local util = require("awful.util")
 local pairs = pairs
 local ipairs = ipairs
+local otable = otable
 local capi =
 {
+    hooks = hooks,
     screen = screen,
     mouse = mouse
 }
+local hooks = require("awful.hooks")
 
 --- Tag module for awful
 module("awful.tag")
@@ -23,6 +25,7 @@ local data = {}
 data.history = {}
 data.history.past = {}
 data.history.current = {}
+data.tags = otable()
 
 -- History functions
 history = {}
@@ -98,57 +101,66 @@ end
 
 --- Set master width factor.
 -- @param mwfact Master width factor.
--- @param screen Optional screen number.
-function setmwfact(mwfact, screen)
-    local t = selected(screen)
-    if t then
-        t.mwfact = mwfact
-    end
+function setmwfact(mwfact, t)
+    local t = t or selected()
+    setproperty(t, "mwfact", mwfact)
+    capi.hooks.arrange()(t.screen)
 end
 
 --- Increase master width factor.
 -- @param add Value to add to master width factor.
-function incmwfact(add)
-    local t = selected()
-    if t then
-        t.mwfact = t.mwfact + add
-    end
+function incmwfact(add, t)
+    setmwfact(getmwfact(t) + add)
+end
+
+--- Get master width factor.
+-- @param t Optional tag.
+function getmwfact(t)
+    local t = t or selected()
+    return getproperty(t, "mwfact") or 0.5
 end
 
 --- Set the number of master windows.
 -- @param nmaster The number of master windows.
-function setnmaster(nmaster)
-    local t = selected()
-    if t then
-        t.nmaster = nmaster
-    end
+-- @param t Optional tag.
+function setnmaster(nmaster, t)
+    local t = t or selected()
+    setproperty(t, "nmaster", nmaster)
+    capi.hooks.arrange()(t.screen)
+end
+
+--- Get the number of master windows.
+-- @param t Optional tag.
+function getnmaster(t)
+    local t = t or selected()
+    return getproperty(t, "nmaster") or 1
 end
 
 --- Increase the number of master windows.
 -- @param add Value to add to number of master windows.
-function incnmaster(add)
-    local t = selected()
-    if t then
-        t.nmaster = t.nmaster + add
-    end
+function incnmaster(add, t)
+    setnmaster(getnmaster(t) + add)
 end
 
 --- Set number of column windows.
 -- @param ncol The number of column.
-function setncol(ncol)
-    local t = selected()
-    if t then
-        t.ncol = ncol
-    end
+function setncol(ncol, t)
+    local t = t or selected()
+    setproperty(t, "ncol", ncol)
+    capi.hooks.arrange()(t.screen)
+end
+
+--- Get number of column windows.
+-- @param t Optional tag.
+function getncol(t)
+    local t = t or selected()
+    return getproperty(t, "ncol") or 1
 end
 
 --- Increase number of column windows.
 -- @param add Value to add to number of column windows.
-function incncol(add)
-    local t = selected()
-    if t then
-        t.ncol = t.ncol + add
-    end
+function incncol(add, t)
+    setncol(getncol(t) + add)
 end
 
 --- View no tag.
@@ -201,7 +213,41 @@ function viewmore(tags, screen)
     end
 end
 
+local function hook_tags(screen, tag, action)
+    if action == "remove" then
+        data.tags[tag] = nil
+    elseif action == "add" then
+        data.tags[tag] = {}
+    end
+end
+
+--- Get a tag property.
+-- @param tag The tag.
+-- @param prop The property name.
+-- @return The property.
+function getproperty(tag, prop)
+    if data.tags[tag] then
+        return data.tags[tag][prop]
+    end
+end
+
+--- Set a tag property.
+-- This properties are internal to awful. Some are used to draw taglist, or to
+-- handle layout, etc.
+-- @param tag The tag.
+-- @param prop The property name.
+-- @param value The value.
+-- @return True if the value has been set, false otherwise.
+function setproperty(tag, prop, value)
+    if data.tags[tag] then
+        data.tags[tag][prop] = value
+        return true
+    end
+    return false
+end
+
 -- Register standards hooks
 hooks.arrange.register(history.update)
+hooks.tags.register(hook_tags)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

@@ -48,7 +48,6 @@
 #include "screen.h"
 #include "event.h"
 #include "mouse.h"
-#include "layouts/tile.h"
 #include "common/socket.h"
 #include "common/buffer.h"
 
@@ -979,7 +978,7 @@ bailout:
     /* Assure there's at least one tag */
     for(screen = 0; screen < globalconf.nscreen; screen++)
         if(!globalconf.screens[screen].tags.len)
-            tag_append_to_screen(tag_new("default", sizeof("default") - 1, layout_tile, 0.5, 1, 0),
+            tag_append_to_screen(tag_new("default", sizeof("default") - 1),
                                  &globalconf.screens[screen]);
     return ret;
 }

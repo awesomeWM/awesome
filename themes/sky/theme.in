@@ -21,14 +21,12 @@ border_focus  = #729fcf
 border_marked = #eeeeec
 
 # IMAGES
-layout_dwindle = @AWESOME_THEMES_PATH@/sky/layouts/dwindle.png
 layout_fairh = @AWESOME_THEMES_PATH@/sky/layouts/fairh.png
 layout_fairv = @AWESOME_THEMES_PATH@/sky/layouts/fairv.png
 layout_floating = @AWESOME_THEMES_PATH@/sky/layouts/floating.png
 layout_magnifier = @AWESOME_THEMES_PATH@/sky/layouts/magnifier.png
 layout_max = @AWESOME_THEMES_PATH@/sky/layouts/max.png
 layout_fullscreen = @AWESOME_THEMES_PATH@/sky/layouts/fullscreen.png
-layout_spiral = @AWESOME_THEMES_PATH@/sky/layouts/spiral.png
 layout_tilebottom = @AWESOME_THEMES_PATH@/sky/layouts/tilebottom.png
 layout_tileleft = @AWESOME_THEMES_PATH@/sky/layouts/tileleft.png
 layout_tile = @AWESOME_THEMES_PATH@/sky/layouts/tile.png

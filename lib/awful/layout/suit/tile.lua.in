@@ -1,0 +1,168 @@
+---------------------------------------------------------------------------
+-- @author Julien Danjou &lt;julien@danjou.info&gt;
+-- @copyright 2008 Julien Danjou
+-- @release @AWESOME_VERSION@
+---------------------------------------------------------------------------
+
+-- Grab environment we need
+local setmetatable = setmetatable
+local ipairs = ipairs
+local math = math
+local client = require("awful.client")
+local tag = require("awful.tag")
+local capi =
+{
+    screen = screen
+}
+
+--- Tiled layouts module for awful
+module("awful.layout.suit.tile")
+
+local function tile(_, screen, position)
+    if not position then position = "right" end
+    local t = tag.selected()
+    local nmaster = tag.getnmaster(t)
+    local mwfact = tag.getmwfact(t)
+    local ncol = tag.getncol(t)
+
+    local wa = capi.screen[screen].workarea
+    local cls = client.tiled(screen)
+
+    local masterwin = math.min(#cls, nmaster)
+    local otherwin = math.max(#cls - masterwin, 0);
+
+    local mh, mw
+    if nmaster > 0 then
+        if position == "right" or position == "left" then
+            if masterwin > 0 then
+                mh = wa.height / masterwin
+            else
+                mh = wa.height
+            end
+            if otherwin > 0 then
+                mw = wa.width * mwfact
+            else
+                mw = wa.width
+            end
+        else
+            if otherwin > 0 then
+                mh = wa.height * mwfact
+            else
+                mh = wa.height
+            end
+            if masterwin > 0 then
+                mw = wa.width / masterwin
+            else
+                mw = wa.width
+            end
+        end
+    else
+        mh = 0
+        mw = 0
+    end
+
+    local real_ncol
+    if ncol > 0 then
+        real_ncol = math.min(otherwin, ncol)
+    else
+        real_ncol = math.min(otherwin, 1)
+    end
+
+    for i, c in ipairs(cls) do
+        local geometry = {}
+
+        -- Master windows
+        if i <= nmaster then
+            if position == "right" then
+                geometry.y = wa.y + (i - 1) * mh
+                geometry.x = wa.x
+            elseif position == "left" then
+                geometry.y = wa.y + (i - 1) * mh
+                geometry.x = wa.x + (wa.width - mw)
+            elseif position == "top" then
+                geometry.x = wa.x + (i - 1) * mw
+                geometry.y = wa.y + (wa.height - mh)
+            else
+                geometry.x = wa.x + (i - 1) * mw
+                geometry.y = wa.y
+            end
+
+            geometry.width = mw - 2 * c.border_width
+            geometry.height = mh - 2 * c.border_width
+
+        -- Slave windows
+        else
+            local win_by_col = math.ceil(otherwin / real_ncol)
+            real_ncol = math.ceil(otherwin / win_by_col)
+            local current_col = math.floor((i - 1 - nmaster) / win_by_col)
+
+            if position == "right" or position == "left" then
+                if otherwin <= real_ncol then
+                    geometry.height = wa.height - 2 * c.border_width
+                elseif (otherwin % win_by_col) ~= 0 and (current_col == real_ncol - 1) then
+                    geometry.height = math.floor(wa.height / (otherwin % win_by_col)) - 2 * c.border_width
+                else
+                    geometry.height = math.floor(wa.height / win_by_col) - 2 * c.border_width
+                end
+
+                geometry.width = math.floor((wa.width - mw) / real_ncol) - 2 * c.border_width
+
+                if otherwin <= real_ncol then
+                    geometry.y = wa.y
+                else
+                    geometry.y = wa.y + ((i - 1 - nmaster) % win_by_col) *
+                                        (geometry.height + 2 * c.border_width)
+                end
+                geometry.x = wa.x + current_col * (geometry.width + 2 * c.border_width)
+
+                if position == "right" then
+                    geometry.x = geometry.x + mw
+                end
+            else
+                if otherwin <= real_ncol then
+                    geometry.width = wa.width - 2 * c.border_width
+                elseif (otherwin % win_by_col) ~= 0 and (current_col == real_ncol - 1) then
+                    geometry.width = math.floor(wa.width / (otherwin % win_by_col)) - 2 * c.border_width
+                else
+                    geometry.width = math.floor(wa.width / win_by_col) - 2 * c.border_width
+                end
+
+                geometry.height = math.floor((wa.height - mh) /  real_ncol) - 2 * c.border_width
+
+                if otherwin <= real_ncol then
+                    geometry.x = wa.x
+                else
+                    geometry.x = wa.x + ((i - 1 - nmaster) % win_by_col) *
+                                        (geometry.width + 2 * c.border_width)
+                end
+
+                geometry.y = wa.y + current_col * (geometry.height + 2 * c.border_width)
+
+                if position == "bottom" then
+                    geometry.y = geometry.y + mh
+                end
+            end
+        end
+        c:fullgeometry(geometry)
+    end
+end
+
+--- The main tile algo, on left.
+-- @param screen The screen number to tile.
+function left(screen)
+    return tile(nil, screen, "left")
+end
+
+--- The main tile algo, on bottom.
+-- @param screen The screen number to tile.
+function bottom(screen)
+    return tile(nil, screen, "bottom")
+end
+
+--- The main tile algo, on top.
+-- @param screen The screen number to tile.
+function top(screen)
+    return tile(nil, screen, "top")
+end
+
+setmetatable(_M, { __call = tile })

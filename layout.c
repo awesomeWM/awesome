@@ -19,7 +19,7 @@
  *
  */
 
-#include "client.h"
+#include "layout.h"
 #include "tag.h"
 #include "window.h"
 #include "screen.h"
@@ -33,7 +33,6 @@ static void
 arrange(int screen)
 {
     client_t *c;
-    layout_t *curlay = layout_get_current(screen);
     int phys_screen = screen_virttophys(screen);
     xcb_query_pointer_cookie_t qp_c;
     xcb_query_pointer_reply_t *qp_r;
@@ -47,8 +46,12 @@ arrange(int screen)
             client_ban(c);
     }
 
-    if(curlay)
-        curlay(screen);
+    /* call hook */
+    if(globalconf.hooks.arrange != LUA_REFNIL)
+    {
+        lua_pushnumber(globalconf.L, screen + 1);
+        luaA_dofunction(globalconf.L, globalconf.hooks.arrange, 1, 0);
+    }
 
     qp_c = xcb_query_pointer_unchecked(globalconf.connection,
                                        xutil_screen_get(globalconf.connection,
@@ -70,13 +73,6 @@ arrange(int screen)
 
     /* reset status */
     globalconf.screens[screen].need_arrange = false;
-
-    /* call hook */
-    if(globalconf.hooks.arrange != LUA_REFNIL)
-    {
-        lua_pushnumber(globalconf.L, screen + 1);
-        luaA_dofunction(globalconf.L, globalconf.hooks.arrange, 1, 0);
-    }
 }
 
 /** Refresh the screen disposition
@@ -90,23 +86,6 @@ layout_refresh(void)
     for(screen = 0; screen < globalconf.nscreen; screen++)
         if(globalconf.screens[screen].need_arrange)
             arrange(screen);
-}
-
-/** Get current layout used on screen.
- * \param screen Virtual screen number.
- * \return layout used on that screen
- */
-layout_t *
-layout_get_current(int screen)
-{
-    layout_t *l = NULL;
-    tag_t **curtags = tags_get_current(screen);
-
-    if(curtags[0])
-        l = curtags[0]->layout;
-    p_delete(&curtags);
-
-    return l;
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

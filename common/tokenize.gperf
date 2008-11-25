@@ -7,8 +7,6 @@ border_color
 border_padding
 border_width
 bottom
-bottomleft
-bottomright
 button
 center
 char
@@ -16,7 +14,6 @@ class
 client
 color
 Control
-coords
 conffile
 Ctrl
 cursor
@@ -39,9 +36,6 @@ icon
 icon_name
 image
 instance
-invert
-label
-layout
 left
 len
 line
@@ -59,10 +53,7 @@ Mod4
 Mod5
 mouse_enter
 mouse_leave
-mwfact
 name
-ncol
-nmaster
 on
 ontop
 opacity
@@ -81,7 +72,6 @@ selected
 shadow
 shadow_offset
 Shift
-show_icons
 size_hints
 skip_taskbar
 south
@@ -92,8 +82,6 @@ ticks_count
 ticks_gap
 titlebar
 top
-topleft
-topright
 transient_for
 true
 type

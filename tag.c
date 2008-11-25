@@ -25,8 +25,6 @@
 #include "ewmh.h"
 #include "widget.h"
 
-#include "layoutgen.h"
-
 extern awesome_t globalconf;
 
 DO_LUA_NEW(extern, tag_t, tag, "tag", tag_ref)
@@ -48,33 +46,18 @@ tag_view(tag_t *tag, bool view)
 /** Create a new tag. Parameters values are checked.
  * \param name Tag name.
  * \param len Tag name length.
- * \param layout Layout to use.
- * \param mwfact Master width factor.
- * \param nmaster Number of master windows.
- * \param ncol Number of columns for slaves windows.
  * \return A new tag with all these parameters.
  */
 tag_t *
-tag_new(const char *name, ssize_t len, layout_t *layout, double mwfact, int nmaster, int ncol)
+tag_new(const char *name, ssize_t len)
 {
     tag_t *tag;
 
     tag = p_new(tag_t, 1);
     a_iso2utf8(&tag->name, name, len);
-    tag->layout = layout;
 
     /* to avoid error */
     tag->screen = SCREEN_UNDEF;
-
-    tag->mwfact = mwfact;
-    if(tag->mwfact <= 0 || tag->mwfact >= 1)
-        tag->mwfact = 0.5;
-
-    if((tag->nmaster = nmaster) < 0)
-        tag->nmaster = 1;
-
-    if((tag->ncol = ncol) < 1)
-        tag->ncol = 1;
 
     return tag;
 }
@@ -262,39 +245,16 @@ tag_view_only_byindex(int screen, int dindex)
 
 /** Create a new tag.
  * \param L The Lua VM state.
- *
  * \luastack
- * \lparam A table with at least a name attribute.
- * Optional attributes are: mwfact, ncol, nmaster and layout.
+ * \lparam A name.
  * \lreturn A new tag object.
  */
 static int
 luaA_tag_new(lua_State *L)
 {
-    size_t len, laylen;
-    tag_t *tag;
-    int ncol, nmaster;
-    const char *name, *lay;
-    double mwfact;
-    layout_t *layout;
-
-    luaA_checktable(L, 2);
-
-    if(!(name = luaA_getopt_lstring(L, 2, "name", NULL, &len)))
-        luaL_error(L, "object tag must have a name");
-
-    mwfact = luaA_getopt_number(L, 2, "mwfact", 0.5);
-    ncol = luaA_getopt_number(L, 2, "ncol", 1);
-    nmaster = luaA_getopt_number(L, 2, "nmaster", 1);
-    lay = luaA_getopt_lstring(L, 2, "layout", "tile", &laylen);
-
-    layout = name_func_lookup(lay, laylen, LayoutList);
-
-    tag = tag_new(name, len,
-                  layout,
-                  mwfact, nmaster, ncol);
-
-    return luaA_tag_userdata_new(L, tag);
+    size_t len;
+    const char *name = luaL_checklstring(L, 2, &len);
+    return luaA_tag_userdata_new(L, tag_new(name, len));
 }
 
 /** Get or set the clients attached to this tag.
@@ -345,9 +305,6 @@ luaA_tag_clients(lua_State *L)
  * \lfield screen Screen number of the tag.
  * \lfield layout Tag layout.
  * \lfield selected True if the client is selected to be viewed.
- * \lfield mwfact Master width factor.
- * \lfield nmaster Number of master windows.
- * \lfield ncol Number of column for slave windows.
  */
 static int
 luaA_tag_index(lua_State *L)
@@ -371,20 +328,8 @@ luaA_tag_index(lua_State *L)
             return 0;
         lua_pushnumber(L, (*tag)->screen + 1);
         break;
-      case A_TK_LAYOUT:
-        lua_pushstring(L, name_func_rlookup((*tag)->layout, LayoutList));
-        break;
       case A_TK_SELECTED:
         lua_pushboolean(L, (*tag)->selected);
-        break;
-      case A_TK_MWFACT:
-        lua_pushnumber(L, (*tag)->mwfact);
-        break;
-      case A_TK_NMASTER:
-        lua_pushnumber(L, (*tag)->nmaster);
-        break;
-      case A_TK_NCOL:
-        lua_pushnumber(L, (*tag)->ncol);
         break;
       default:
         return 0;
@@ -402,17 +347,18 @@ luaA_tag_newindex(lua_State *L)
 {
     size_t len;
     tag_t **tag = luaA_checkudata(L, 1, "tag");
-    const char *buf, *attr = luaL_checklstring(L, 2, &len);
-    double d;
-    int i, screen;
-    layout_t *l;
+    const char *attr = luaL_checklstring(L, 2, &len);
 
     switch(a_tokenize(attr, len))
     {
+        int screen;
+
       case A_TK_NAME:
-        buf = luaL_checklstring(L, 3, &len);
-        p_delete(&(*tag)->name);
-        a_iso2utf8(&(*tag)->name, buf, len);
+        {
+            const char *buf = luaL_checklstring(L, 3, &len);
+            p_delete(&(*tag)->name);
+            a_iso2utf8(&(*tag)->name, buf, len);
+        }
         break;
       case A_TK_SCREEN:
         if(!lua_isnil(L, 3))
@@ -429,51 +375,10 @@ luaA_tag_newindex(lua_State *L)
         if(screen != SCREEN_UNDEF)
             tag_append_to_screen(*tag, &globalconf.screens[screen]);
         break;
-      case A_TK_LAYOUT:
-        buf = luaL_checklstring(L, 3, &len);
-        l = name_func_lookup(buf, len, LayoutList);
-        if(l)
-            (*tag)->layout = l;
-        else
-        {
-            luaA_warn(L, "unknown layout: %s", buf);
-            return 0;
-        }
-        break;
       case A_TK_SELECTED:
         if((*tag)->screen != SCREEN_UNDEF)
             tag_view(*tag, luaA_checkboolean(L, 3));
         return 0;
-      case A_TK_MWFACT:
-        d = luaL_checknumber(L, 3);
-        if(d > 0 && d < 1)
-            (*tag)->mwfact = d;
-        else
-        {
-            luaA_warn(L, "bad value, must be between 0 and 1");
-            return 0;
-        }
-        break;
-      case A_TK_NMASTER:
-        i = luaL_checknumber(L, 3);
-        if(i >= 0)
-            (*tag)->nmaster = i;
-        else
-        {
-            luaA_warn(L, "bad value, must be greater than 0");
-            return 0;
-        }
-        break;
-      case A_TK_NCOL:
-        i = luaL_checknumber(L, 3);
-        if(i >= 1)
-            (*tag)->ncol = i;
-        else
-        {
-            luaA_warn(L, "bad value, must be greater than 1");
-            return 0;
-        }
-        break;
       default:
         return 0;
     }

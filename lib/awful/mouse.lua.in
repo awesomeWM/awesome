@@ -109,16 +109,16 @@ function client.move(c, snap)
                               for k, v in ipairs(mouse.buttons) do
                                   if v then
                                       local lay = layout.get(c.screen)
-                                      if lay == "floating" or c.floating then
+                                      if lay == layout.suit.floating or c.floating then
                                           local x = mouse.x - dist_x
                                           local y = mouse.y - dist_y
                                           c:fullgeometry(client.snap(c, snap, x, y))
-                                          if layout.get(c.screen) ~= "floating" and not c.floating then
+                                          if layout.get(c.screen) ~= layout.suit.floating and not c.floating then
                                               hooks.property.register(ug)
                                           end
-                                      elseif lay ~= "magnifier" then
+                                      elseif lay ~= layout.suit.magnifier then
                                           c.screen = capi.mouse.screen
-                                          if layout.get(c.screen) ~= "floating" then
+                                          if layout.get(c.screen) ~= layout.suit.floating then
                                               local c_u_m = capi.mouse.client_under_pointer()
                                               if c_u_m and not c_u_m.floating then
                                                   if c_u_m ~= c then
@@ -200,7 +200,7 @@ local function client_resize_magnifier(c, corner)
 
                                       -- New master width factor
                                       local mwfact = dist / maxdist_pow
-                                      tag.setmwfact(math.min(math.max(0.01, mwfact), 0.99), c.screen)
+                                      tag.setmwfact(math.min(math.max(0.01, mwfact), 0.99), tag.selected(c.screen))
                                       return true
                                   end
                               end
@@ -210,15 +210,15 @@ end
 
 local function client_resize_tiled(c, lay)
     local wa = capi.screen[c.screen].workarea
-    local mwfact = tag.selected(c.screen).mwfact
+    local mwfact = tag.getmwfact()
     local cursor
-    if lay == "tile" then
+    if lay == layout.suit.tile then
         capi.mouse.coords({ x = wa.x + wa.width * mwfact })
         cursor = "sb_h_double_arrow"
-    elseif lay == "tileleft" then
+    elseif lay == layout.suit.tile.left then
         capi.mouse.coords({ x = wa.x + wa.width * (1 - mwfact) })
         cursor = "sb_h_double_arrow"
-    elseif lay == "tilebottom" then
+    elseif lay == layout.suit.tile.bottom then
         capi.mouse.coords({ y = wa.y + wa.height * mwfact })
         cursor = "sb_v_double_arrow"
     else
@@ -233,17 +233,17 @@ local function client_resize_tiled(c, lay)
                                       local fact_y = (mouse.y - wa.y) / wa.height
                                       local mwfact
 
-                                      if lay == "tile" then
+                                      if lay == layout.suit.tile then
                                           mwfact = fact_x
-                                      elseif lay == "tileleft" then
+                                      elseif lay == layout.suit.tile.left then
                                           mwfact = 1 - fact_x
-                                      elseif lay == "tilebottom" then
+                                      elseif lay == layout.suit.tile.bottom then
                                           mwfact = fact_y
                                       else
                                           mwfact = 1 - fact_y
                                       end
 
-                                      tag.setmwfact(math.min(math.max(mwfact, 0.01), 0.99), c.screen)
+                                      tag.setmwfact(math.min(math.max(mwfact, 0.01), 0.99), tag.selected(c.screen))
                                       return true
                                   end
                               end
@@ -332,14 +332,14 @@ function client.resize(c, corner)
 
     local lay = layout.get(c.screen)
 
-    if lay == "floating" or c.floating then
+    if lay == layout.suit.floating or c.floating then
         return client_resize_floating(c, corner)
-    elseif lay == "tile"
-        or lay == "tileleft"
-        or lay == "tilebottom"
-        or lay == "tiletop" then
+    elseif lay == layout.suit.tile
+        or lay == layout.suit.tile.left
+        or lay == layout.suit.tile.top
+        or lay == layout.suit.tile.bottom then
         return client_resize_tiled(c, lay)
-    elseif lay == "magnifier" then
+    elseif lay == layout.suit.magnifier then
         return client_resize_magnifier(c, corner)
     end
 end

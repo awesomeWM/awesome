@@ -26,11 +26,8 @@
 #include "client.h"
 #include "common/refcount.h"
 
-/** Check if a client is tiled */
-#define IS_TILED(client, screen)            (client && !client_isfloating(client) && client_isvisible(client, screen))
-
 /* Contructor, destructor and referencors */
-tag_t *tag_new(const char *, ssize_t, layout_t *, double, int, int);
+tag_t *tag_new(const char *, ssize_t);
 
 static inline void
 tag_delete(tag_t **tag)

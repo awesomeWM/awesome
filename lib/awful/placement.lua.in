@@ -128,7 +128,7 @@ function no_overlap(c)
     local geometry = c:geometry()
     local fullgeometry = c:fullgeometry()
     for i, cl in pairs(cls) do
-        if cl ~= c and (cl.floating or layout == "floating") then
+        if cl ~= c and (cl.floating or layout == layout.suit.floating) then
             areas = area_remove(areas, cl:fullgeometry())
         end
     end

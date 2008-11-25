@@ -1,0 +1,83 @@
+---------------------------------------------------------------------------
+-- @author Julien Danjou &lt;julien@danjou.info&gt;
+-- @copyright 2008 Julien Danjou
+-- @release @AWESOME_VERSION@
+---------------------------------------------------------------------------
+
+-- Grab environment we need
+local setmetatable = setmetatable
+local ipairs = ipairs
+local math = math
+local tag = require("awful.tag")
+local capi =
+{
+    client = client,
+    screen = screen
+}
+local client = require("awful.client")
+
+--- Magnifier layout module for awful
+module("awful.layout.suit.magnifier")
+
+local function magnifier(_, screen)
+    -- Fullscreen?
+    local area = capi.screen[screen].workarea
+    local cls = client.tiled(screen)
+    local focus = capi.client.focus
+    local t = tag.selected()
+    local mwfact = tag.getmwfact(t)
+
+    if not focus and #cls > 0 then
+        focus = cls[1]
+    end
+
+    -- Abort if no clients are present
+    if not focus then
+        return
+    end
+
+    -- Find parent of this window, if it has one.
+    while focus.transient_for do
+        focus = focus.transient_for
+    end
+
+    -- If focused window is not tiled, take the first one which is tiled.
+    if client.floating.get(focus) then
+        focus = cls[1]
+    end
+
+    local geometry = {}
+    if #cls - 1 > 0 then
+        geometry.width = area.width * math.sqrt(mwfact)
+        geometry.height = area.height * math.sqrt(mwfact)
+        geometry.x = area.x + (area.width - geometry.width) / 2
+        geometry.y = area.y + (area.height - geometry.height) /2
+    else
+        geometry.x = area.x
+        geometry.y = area.y
+        geometry.width = area.width - 2 * focus.border_width
+        geometry.height = area.height - 2 * focus.border_width
+    end
+    focus:fullgeometry(geometry)
+    focus:raise()
+
+    if #cls - 1 > 0 then
+        geometry.x = area.x
+        geometry.y = area.y
+        geometry.height = area.height / (#cls - 1)
+        geometry.width = area.width
+
+        for k, c in ipairs(cls) do
+            if c ~= focus then
+                geometry.height = geometry.height - 2 * c.border_width
+                geometry.width = geometry.width - 2 * c.border_width
+                c:fullgeometry(geometry)
+                geometry.height = geometry.height + 2 * c.border_width
+                geometry.width = geometry.width + 2 * c.border_width
+                geometry.y = geometry.y + geometry.height
+            end
+        end
+    end
+end
+
+setmetatable(_M, { __call = magnifier })

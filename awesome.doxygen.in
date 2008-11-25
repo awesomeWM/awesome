@@ -95,8 +95,6 @@ FILE_PATTERNS          = *.c \
                          common/*.h \
                          widgets/*.c \
                          widgets/*.h \
-                         layouts/*.c \
-                         layouts/*.h
 RECURSIVE              = YES
 EXCLUDE                = 
 EXCLUDE_SYMLINKS       = NO

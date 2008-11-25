@@ -39,7 +39,6 @@
 #include "luaa.h"
 #include "systray.h"
 #include "screen.h"
-#include "layouts/floating.h"
 #include "common/atoms.h"
 
 extern awesome_t globalconf;
@@ -267,7 +266,7 @@ event_handle_configurerequest(void *data __attribute__ ((unused)),
         if(geometry.x != c->geometry.x || geometry.y != c->geometry.y
            || geometry.width != c->geometry.width || geometry.height != c->geometry.height)
         {
-            if(client_isfloating(c) || layout_get_current(c->screen) == layout_floating)
+            if(client_isfloating(c))
             {
                 client_resize(c, geometry, false);
                 if(client_hasstrut(c))

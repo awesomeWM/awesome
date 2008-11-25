@@ -24,10 +24,6 @@
 #include "common/tokenize.h"
 #include "screen.h"
 #include "tag.h"
-#include "titlebar.h"
-#include "layouts/floating.h"
-#include "layouts/tile.h"
-#include "layouts/magnifier.h"
 #include "common/xcursor.h"
 
 extern awesome_t globalconf;

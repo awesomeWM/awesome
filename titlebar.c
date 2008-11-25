@@ -210,7 +210,7 @@ titlebar_client_attach(client_t *c, wibox_t *t)
         t->need_update = true;
 
         /* This may seem useless, but it's the cleanest way to avoid seeing titlebars for banned clients. */
-        titlebar_update_geometry_floating(c);
+        titlebar_update_geometry(c);
 
         if(t->isvisible)
             xcb_map_window(globalconf.connection, t->sw.window);
@@ -342,7 +342,7 @@ luaA_titlebar_newindex(lua_State *L, wibox_t *titlebar, awesome_token_t tok)
             titlebar->position = position;
             if((c = client_getbytitlebar(titlebar)))
             {
-                titlebar_update_geometry_floating(c);
+                titlebar_update_geometry(c);
                 /* call geometry hook for client because some like to
                  * set titlebar width in that hook, which make sense */
                 hooks_property(c, "geometry");

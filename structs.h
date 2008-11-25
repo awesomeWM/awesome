@@ -27,7 +27,6 @@
 
 #include "config.h"
 #include "luaa.h"
-#include "layout.h"
 #include "swindow.h"
 #include "keybinding.h"
 #include "common/xutil.h"
@@ -240,14 +239,6 @@ struct tag
     int screen;
     /** true if selected */
     bool selected;
-    /** Current tag layout */
-    layout_t *layout;
-    /** Master width factor */
-    double mwfact;
-    /** Number of master windows */
-    int nmaster;
-    /** Number of columns in tile layout */
-    int ncol;
     /** clients in this tag */
     client_array_t clients;
 };
