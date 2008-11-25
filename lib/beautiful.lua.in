@@ -30,9 +30,7 @@ local theme = {}
 -- @param key The key.
 -- @return The value.
 function __index(self, key)
-    if theme[key] then
-        return theme[key]
-    end
+    return theme[key]
 end
 
 --- Init function, should be runned at the beginning of configuration file.
