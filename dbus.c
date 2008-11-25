@@ -454,10 +454,43 @@ luaA_dbus_release_name(lua_State *L)
     return 1;
 }
 
+/** Add a match rule to match messages going through the message bus.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ * \luastack
+ * \lparam A string with the name of the match rule.
+ */
+static int
+luaA_dbus_add_match(lua_State *L)
+{
+    const char *name = luaL_checkstring(L, 1);
+    dbus_bus_add_match(dbus_connection, name, NULL);
+    dbus_connection_flush(dbus_connection);
+    return 0;
+}
+
+/** Remove a previously added match rule "by value"
+ * (the most recently-added identical rule gets removed).
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ * \luastack
+ * \lparam A string with the name of the match rule.
+ */
+static int
+luaA_dbus_remove_match(lua_State *L)
+{
+    const char *name = luaL_checkstring(L, 1);
+    dbus_bus_remove_match(dbus_connection, name, NULL);
+    dbus_connection_flush(dbus_connection);
+    return 0;
+}
+
 const struct luaL_reg awesome_dbus_lib[] =
 {
     { "request_name", luaA_dbus_request_name },
     { "release_name", luaA_dbus_release_name },
+    { "add_match", luaA_dbus_add_match },
+    { "remove_match", luaA_dbus_remove_match },
     { NULL, NULL }
 };
 
@@ -485,6 +518,8 @@ const struct luaL_reg awesome_dbus_lib[] =
 {
     { "request_name", luaA_donothing },
     { "release_name", luaA_donothing },
+    { "add_match", luaA_donothing },
+    { "remove_match", luaA_donothing },
     { NULL, NULL }
 };
 
