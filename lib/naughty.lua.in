@@ -25,54 +25,89 @@ module("naughty")
 --- Naughty configuration - a table containing common/default popup settings.
 -- You can override some of these for individual popups using args to notify().
 -- @name config
--- @field timeout Number of seconds after which popups disappear.
---   Set to 0 for no timeout. Default: 5
 -- @field screen Screen on which the popups will appear number. Default: 1
 -- @field position Corner of the workarea the popups will appear.
 --   Valid values: 'top_right', 'top_left', 'bottom_right', 'bottom_left'.
 --   Default: 'top_right'
 -- @field padding Space between popups and edge of the workarea. Default: 4
--- @field height Height of a single line of text. Default: 16
 -- @field width Width of a popup. Default: 300
 -- @field spacing Spacing between popups. Default: 1
 -- @field ontop Boolean forcing popups to display on top. Default: true
 -- @field margin Space between popup edge and content. Default: 10
--- @field font Popup font. Default: beautiful.font or "Verdana 8"
--- @field icon Popup icon. Default: nil
--- @field icon_size Size of the icon in pixels. Default: nil
 -- @field icon_dirs List of directories that will be checked by getIcon()
 --   Default: { "/usr/share/pixmaps/", }
 -- @field icon_formats List of formats that will be checked by getIcon()
 --   Default: { "png", "gif" }
--- @field fg Foreground color. Default: beautiful.fg_focus or '#ffffff'
--- @field bg Background color. Default: beautiful.bg_focus or '#535d6c'
--- @field border_color Border color.
---   Default:  beautiful.border_focus or '#535d6c'
 -- @field border_width Border width. Default: 1
--- @field hover_timeout Delay in seconds after which hovered popup disappears.
---   Default: nil
 -- @class table
 
 config = {}
-config.timeout = 5
-config.screen = 1
-config.position = "top_right"
 config.padding = 4
-config.height = 16
-config.width = 300
 config.spacing = 1
-config.ontop = true
 config.margin = 10
-config.icon = nil
-config.icon_size = nil
+config.ontop = true
 config.icon_dirs = { "/usr/share/pixmaps/", }
 config.icon_formats = { "png", "gif" }
+
 config.border_width = 1
-config.hover_timeout = nil
+
+--- Notification Presets - a table containing presets for different purposes
+-- You have to pass a reference of a preset in your notify() call to use the preset
+-- At least the default preset named "normal" has to be defined
+-- The presets "low", "normal" and "critical" are used for notifications over DBUS
+-- @name config.presets
+-- @field low The preset for notifications with low urgency level
+-- @field normal The default preset for every notification without a preset that will also be used for normal urgency level
+-- @field critical The preset for notifications with a critical urgency level
+-- @class table
+
+--- Default preset for notifications
+-- @name config.presets.normal
+-- @field timeout Number of seconds after which popups disappear.
+--   Set to 0 for no timeout. Default: 5
+-- @field hover_timeout Delay in seconds after which hovered popup disappears.
+--   Default: nil
+-- @field border_color Border color.
+--   Default:  beautiful.border_focus or '#535d6c'
+-- @field fg Foreground color. Default: beautiful.fg_focus or '#ffffff'
+-- @field bg Background color. Default: beautiful.bg_focus or '#535d6c'
+-- @field font Popup font. Default: beautiful.font or "Verdana 8"
+-- @field height Height of a single line of text. Default: 16
+-- @field icon Popup icon. Default: nil
+-- @field icon_size Size of the icon in pixels. Default: nil
+
+config.presets = {
+    low = {
+        timeout = 5
+    },
+    normal = {
+        timeout = 8,
+        hover_timeout = nil,
+        position = "top_right",
+        screen = 1,
+        width = 300,
+        height = 16,
+        icon = nil,
+        icon_size = nil
+    },
+    critical = {
+        bg = "#ff0000",
+        fg = "#ffffff",
+        timeout = 0,
+        height = 25
+    }
+}
 
 -- Counter for the notifications
 -- Required for later access via DBUS
 local counter = 1
+
+-- DBUS Notification constants
+local urgency = {
+    low = "\0",
+    normal = "\1",
+    critical = "\2"
+}
 
 --- Index of notifications. See config table for valid 'position' values.
 -- Each element is a table consisting of:
@@ -211,21 +246,21 @@ end
 -- @return The notification object
 function notify(args)
     -- gather variables together
-    local timeout = args.timeout or config.timeout
-    local icon = args.icon or config.icon
-    local icon_size = args.icon_size or config.icon_size
+    local timeout = args.timeout or (args.preset and args.preset.timeout) or config.presets.normal.timeout
+    local icon = args.icon or (args.preset and args.preset.icon) or config.icon
+    local icon_size = args.icon_size or (args.preset and args.preset.icon_size) or config.icon_size
     local text = args.text or ""
-    local screen = args.screen or config.screen
+    local screen = args.screen or (args.preset and args.preset.screen) or config.presets.normal.screen
     local ontop = args.ontop or config.ontop
-    local width = args.width or config.width
-    local hover_timeout = args.hover_timeout or config.hover_timeout
+    local width = args.width or (args.preset and args.preset.width) or config.presets.normal.width
+    local hover_timeout = args.hover_timeout or (args.preset and args.preset.hover_timeout) or config.presets.normal.hover_timeout
 
     -- beautiful
     local beautiful = bt.get()
-    local font = args.font or config.font or beautiful.font or "Verdana 8"
-    local fg = args.fg or config.fg or beautiful.fg_normal or '#ffffff'
-    local bg = args.bg or config.bg or beautiful.bg_normal or '#535d6c'
-    local border_color = config.border_color or beautiful.bg_focus or '#535d6c'
+    local font = args.font or config.font or (args.preset and args.preset.font) or config.presets.normal.font or beautiful.font or "Verdana 8"
+    local fg = args.fg or config.fg or (args.preset and args.preset.fg) or config.presets.normal.fg or beautiful.fg_normal or '#ffffff'
+    local bg = args.bg or config.bg or (args.preset and args.preset.bg) or config.presets.normal.bg or beautiful.bg_normal or '#535d6c'
+    local border_color = (args.preset and args.preset.border_color) or config.presets.normal.border_color or beautiful.bg_focus or '#535d6c'
     local notification = {}
 
     -- replace notification if needed
@@ -248,7 +283,7 @@ function notify(args)
         notification.id = counter
     end
 
-    notification.position = args.position or config.position
+    notification.position = args.position or (args.preset and args.preset.position) or config.presets.normal.position
     notification.idx = #notifications[screen][notification.position] + 1
 
     local title = ""
@@ -300,15 +335,16 @@ function notify(args)
     notification.box = wibox({ position = "floating",
                                fg = fg,
                                bg = bg,
-                               border_color = config.border_color,
+                               border_color = args.preset and args.preset.border_color or config.presets.normal.border_color,
                                border_width = config.border_width })
 
     -- position the wibox
     local lines = 1; for i in string.gmatch(title..text, "\n") do lines = lines + 1 end
-    if iconbox and iconbox.image.height > lines * config.height then
+    local height = args.preset and args.preset.height or config.presets.normal.height
+    if iconbox and iconbox.image.height > lines * height then
         notification.height = iconbox.image.height
     else
-        notification.height = lines * config.height end
+        notification.height = lines * height end
     notification.width = width
     local offset = get_offset(screen, notification.position, notification.idx, notification.width, notification.height)
     notification.box:geometry({ width = notification.width,
@@ -331,7 +367,7 @@ end
 -- DBUS/Notification support
 
 -- Notify
-awful.hooks.dbus.register("org.freedesktop.Notifications", function (data, arg1, replaces_id, icon, title, text)
+awful.hooks.dbus.register("org.freedesktop.Notifications", function (data, arg1, replaces_id, icon, title, text, actions, hints, expire)
 args = {}
 if data.member == "Notify" then
     if text ~= "" then
@@ -346,11 +382,21 @@ if data.member == "Notify" then
             return nil
         end
     end
+    if hints.urgency == urgency.low then
+        args.preset = config.presets.low
+    elseif hints.urgency == urgency.normal then
+        args.preset = config.presets.normal
+    elseif hints.urgency == urgency.critical then
+        args.preset = config.presets.critical
+    end
     if icon ~= "" then
         args.icon = icon
     end
     if replaces_id and replaces_id ~= "" and replaces_id ~= 0 then
         args.replaces_id = replaces_id
+    end
+    if expire and expire > -1 then
+        args.timeout = expire / 1000
     end
     local id = notify(args).id
     return "i", id
