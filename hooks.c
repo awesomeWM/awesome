@@ -116,7 +116,8 @@ luaA_hooks_clients(lua_State *L)
 }
 
 /** Set the function called on each screen tag list change.
- * This function is called with a screen number as argument.
+ * This function is called with a screen number as first argument,
+ * the tag object as second and the action (add or remove) as third.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
  * \luastack

@@ -103,7 +103,9 @@ tag_append_to_screen(tag_t *tag, screen_t *s)
     if(globalconf.hooks.tags != LUA_REFNIL)
     {
         lua_pushnumber(globalconf.L, s->index + 1);
-        luaA_dofunction(globalconf.L, globalconf.hooks.tags, 1, 0);
+        luaA_tag_userdata_new(globalconf.L, tag);
+        lua_pushliteral(globalconf.L, "add");
+        luaA_dofunction(globalconf.L, globalconf.hooks.tags, 3, 0);
     }
 }
 
@@ -127,7 +129,6 @@ tag_remove_from_screen(tag_t *tag)
     ewmh_update_net_desktop_names(phys_screen);
     ewmh_update_workarea(phys_screen);
     tag->screen = SCREEN_UNDEF;
-    tag_unref(&tag);
 
     /* resave tag prop of all clients so the number of tag will be the
      * same */
@@ -138,8 +139,12 @@ tag_remove_from_screen(tag_t *tag)
     if(globalconf.hooks.tags != LUA_REFNIL)
     {
         lua_pushnumber(globalconf.L, screen + 1);
-        luaA_dofunction(globalconf.L, globalconf.hooks.tags, 1, 0);
+        luaA_tag_userdata_new(globalconf.L, tag);
+        lua_pushliteral(globalconf.L, "remove");
+        luaA_dofunction(globalconf.L, globalconf.hooks.tags, 3, 0);
     }
+
+    tag_unref(&tag);
 }
 
 /** Tag a client with specified tag.
