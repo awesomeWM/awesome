@@ -198,12 +198,14 @@ function next(i, c)
     if sel then
         -- Get all visible clients
         local cls = visible(sel.screen)
-        -- Remove all no-normal clients
+        local fcls = {}
+        -- Remove all non-normal clients
         for idx, c in ipairs(cls) do
-            if not focus.filter(c) then
-                table.remove(cls, idx)
+            if focus.filter(c) then
+                table.insert(fcls, c)
             end
         end
+        cls = fcls
         -- Loop upon each client
         for idx, c in ipairs(cls) do
             if c == sel then
