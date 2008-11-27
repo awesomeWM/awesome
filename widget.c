@@ -64,6 +64,7 @@ widget_calculate_offset(int barwidth, int widgetwidth, int offset, int alignment
     {
       case AlignLeft:
       case AlignFlex:
+      case AlignFixed:
         return offset;
     }
     return barwidth - offset - widgetwidth;
@@ -235,13 +236,14 @@ widget_render(widget_node_array_t *widgets, draw_context_t *ctx, xcb_gcontext_t 
     /* save left value */
     int fake_left = left;
 
-    /* compute width of flex aligned widgets that does not support it */
+    /* compute width of flex or fixed aligned widgets */
     int flex = 0;
     for(int i = 0; i < widgets->len; i++)
-        if(widgets->tab[i].widget->align == AlignFlex
+        if(widgets->tab[i].widget->align & (AlignFlex | AlignFixed)
           && widgets->tab[i].widget->isvisible)
         {
-            if(widgets->tab[i].widget->align_supported & AlignFlex)
+            if(widgets->tab[i].widget->align_supported & AlignFlex
+              && widgets->tab[i].widget->align == AlignFlex)
                 flex++;
             else
                 fake_left += widgets->tab[i].widget->geometry(widgets->tab[i].widget,
@@ -252,10 +254,11 @@ widget_render(widget_node_array_t *widgets, draw_context_t *ctx, xcb_gcontext_t 
     /* now compute everybody together! */
     int flex_rendered = 0;
     for(int i = 0; i < widgets->len; i++)
-        if(widgets->tab[i].widget->align == AlignFlex
+        if(widgets->tab[i].widget->align & (AlignFlex | AlignFixed)
           && widgets->tab[i].widget->isvisible)
         {
-            if(widgets->tab[i].widget->align_supported & AlignFlex)
+            if(widgets->tab[i].widget->align_supported & AlignFlex
+              && widgets->tab[i].widget->align == AlignFlex)
             {
                 int width = (ctx->width - (right + fake_left)) / flex;
                 /* give last pixels to last flex to be rendered */
@@ -269,7 +272,7 @@ widget_render(widget_node_array_t *widgets, draw_context_t *ctx, xcb_gcontext_t 
             else
                 widgets->tab[i].geometry = widgets->tab[i].widget->geometry(widgets->tab[i].widget,
                                                                             screen, ctx->height,
-                                                                            ctx->width - (left + right)); 
+                                                                            ctx->width - (left + right));
             widgets->tab[i].geometry.x = left;
             left += widgets->tab[i].geometry.width;
         }
@@ -389,7 +392,7 @@ luaA_widget_new(lua_State *L)
     w->type = wc;
 
     align = luaA_getopt_lstring(L, 2, "align", "left", &len);
-    w->align_supported |= AlignLeft | AlignRight;
+    w->align_supported |= AlignLeft | AlignRight | AlignFixed;
     w->align = draw_align_fromstr(align, len);
 
     /* Set visible by default. */

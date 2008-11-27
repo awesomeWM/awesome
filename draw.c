@@ -677,8 +677,8 @@ draw_text_extents(draw_text_context_t *data)
 }
 
 /** Transform a string to a alignment_t type.
- * Recognized string are flex, left, center or right. Everything else will be
- * recognized as AlignLeft.
+ * Recognized string are flex, fixed, left, center or right. Everything else
+ * will be recognized as AlignLeft.
  * \param align Atring with align text.
  * \param len The string length.
  * \return An alignment_t type.
@@ -691,6 +691,7 @@ draw_align_fromstr(const char *align, ssize_t len)
       case A_TK_CENTER: return AlignCenter;
       case A_TK_RIGHT:  return AlignRight;
       case A_TK_FLEX:   return AlignFlex;
+      case A_TK_FIXED:  return AlignFixed;
       case A_TK_TOP:    return AlignTop;
       case A_TK_BOTTOM: return AlignBottom;
       default:          return AlignLeft;
@@ -710,6 +711,7 @@ draw_align_tostr(alignment_t a)
       case AlignCenter: return "center";
       case AlignRight:  return "right";
       case AlignFlex:   return "flex";
+      case AlignFixed:  return "fixed";
       case AlignBottom: return "bottom";
       case AlignTop:    return "top";
       default:          return NULL;

@@ -61,6 +61,7 @@ typedef enum
     AlignTop    = (1 << 2),
     AlignBottom = (1 << 3),
     AlignFlex   = (1 << 4),
+    AlignFixed  = (1 << 5),
 } alignment_t;
 
 typedef struct vector_t vector_t;
