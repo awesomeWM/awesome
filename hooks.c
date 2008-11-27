@@ -23,6 +23,14 @@
 
 extern awesome_t globalconf;
 
+#define HANDLE_HOOK(L, h) \
+    do { \
+        if(lua_gettop(L) == 1) \
+            luaA_registerfct(L, 1, &h); \
+        lua_rawgeti(L, LUA_REGISTRYINDEX, h); \
+        return 1; \
+    } while(0)
+
 /** Set the function called each time a client gets focus. This function is
  * called with the client object as argument.
  * \param L The Lua VM state.
@@ -33,7 +41,7 @@ extern awesome_t globalconf;
 static int
 luaA_hooks_focus(lua_State *L)
 {
-    return luaA_registerfct(L, 1, &globalconf.hooks.focus);
+    HANDLE_HOOK(L, globalconf.hooks.focus);
 }
 
 /** Set the function called each time a client loses focus. This function is
@@ -46,7 +54,7 @@ luaA_hooks_focus(lua_State *L)
 static int
 luaA_hooks_unfocus(lua_State *L)
 {
-    return luaA_registerfct(L, 1, &globalconf.hooks.unfocus);
+    HANDLE_HOOK(L, globalconf.hooks.unfocus);
 }
 
 /** Set the function called each time a new client appears. This function is
@@ -59,7 +67,7 @@ luaA_hooks_unfocus(lua_State *L)
 static int
 luaA_hooks_manage(lua_State *L)
 {
-    return luaA_registerfct(L, 1, &globalconf.hooks.manage);
+    HANDLE_HOOK(L, globalconf.hooks.manage);
 }
 
 /** Set the function called each time a client goes away. This function is
@@ -72,7 +80,7 @@ luaA_hooks_manage(lua_State *L)
 static int
 luaA_hooks_unmanage(lua_State *L)
 {
-    return luaA_registerfct(L, 1, &globalconf.hooks.unmanage);
+    HANDLE_HOOK(L, globalconf.hooks.unmanage);
 }
 
 /** Set the function called each time the mouse enter a new window. This
@@ -85,7 +93,7 @@ luaA_hooks_unmanage(lua_State *L)
 static int
 luaA_hooks_mouse_enter(lua_State *L)
 {
-    return luaA_registerfct(L, 1, &globalconf.hooks.mouse_enter);
+    HANDLE_HOOK(L, globalconf.hooks.mouse_enter);
 }
 
 /** Set the function called on each client list change.
@@ -98,7 +106,7 @@ luaA_hooks_mouse_enter(lua_State *L)
 static int
 luaA_hooks_clients(lua_State *L)
 {
-    return luaA_registerfct(L, 1, &globalconf.hooks.clients);
+    HANDLE_HOOK(L, globalconf.hooks.clients);
 }
 
 /** Set the function called on each screen tag list change.
@@ -112,7 +120,7 @@ luaA_hooks_clients(lua_State *L)
 static int
 luaA_hooks_tags(lua_State *L)
 {
-    return luaA_registerfct(L, 1, &globalconf.hooks.tags);
+    HANDLE_HOOK(L, globalconf.hooks.tags);
 }
 
 /** Set the function called on each client's tags change.
@@ -125,7 +133,7 @@ luaA_hooks_tags(lua_State *L)
 static int
 luaA_hooks_tagged(lua_State *L)
 {
-    return luaA_registerfct(L, 1, &globalconf.hooks.tagged);
+    HANDLE_HOOK(L, globalconf.hooks.tagged);
 }
 
 /** Set the function called on each screen arrange. This function is called
@@ -138,7 +146,7 @@ luaA_hooks_tagged(lua_State *L)
 static int
 luaA_hooks_arrange(lua_State *L)
 {
-    return luaA_registerfct(L, 1, &globalconf.hooks.arrange);
+    HANDLE_HOOK(L, globalconf.hooks.arrange);
 }
 
 /** Set the function called on each client's property change.
@@ -152,7 +160,7 @@ luaA_hooks_arrange(lua_State *L)
 static int
 luaA_hooks_property(lua_State *L)
 {
-    return luaA_registerfct(L, 1, &globalconf.hooks.property);
+    HANDLE_HOOK(L, globalconf.hooks.property);
 }
 
 /** Set the function to be called every N seconds.
@@ -165,13 +173,19 @@ luaA_hooks_property(lua_State *L)
 static int
 luaA_hooks_timer(lua_State *L)
 {
-    globalconf.timer.repeat = luaL_checknumber(L, 1);
+    if(lua_gettop(L) >= 1)
+    {
+        globalconf.timer.repeat = luaL_checknumber(L, 1);
 
-    if(lua_gettop(L) == 2 && !lua_isnil(L, 2))
-        luaA_registerfct(L, 2, &globalconf.hooks.timer);
+        if(lua_gettop(L) == 2 && !lua_isnil(L, 2))
+            luaA_registerfct(L, 2, &globalconf.hooks.timer);
 
-    ev_timer_again(globalconf.loop, &globalconf.timer);
-    return 0;
+        ev_timer_again(globalconf.loop, &globalconf.timer);
+    }
+
+    lua_rawgeti(L, LUA_REGISTRYINDEX, globalconf.hooks.timer);
+
+    return 1;
 }
 
 #ifdef WITH_DBUS
@@ -190,7 +204,7 @@ luaA_hooks_timer(lua_State *L)
 static int
 luaA_hooks_dbus(lua_State *L)
 {
-    return luaA_registerfct(L, 1, &globalconf.hooks.dbus);
+    HANDLE_HOOK(L, globalconf.hooks.dbus);
 }
 #endif
 
