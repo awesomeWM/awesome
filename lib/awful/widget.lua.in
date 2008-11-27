@@ -164,12 +164,14 @@ function tasklist.new(label, buttons)
     local w = {}
     local function tasklist_update ()
         local clients = capi.client.get()
+        local shownclients = {}
         for k, c in ipairs(clients) do
-            if c.skip_taskbar or c.hide
-                or c.type == "splash" or c.type == "dock" or c.type == "desktop" then
-                table.remove(clients, k)
+            if not (c.skip_taskbar or c.hide
+                or c.type == "splash" or c.type == "dock" or c.type == "desktop") then
+                table.insert(shownclients, c)
             end
         end
+        clients = shownclients
         -- Hack: if it has been registered as a widget in a wibox,
         -- it's w.len since __len meta does not work on table until Lua 5.2.
         -- Otherwise it's standard #w.
