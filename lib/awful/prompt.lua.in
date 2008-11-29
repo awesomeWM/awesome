@@ -161,7 +161,8 @@ function run(args, textbox, exe_callback, completion_callback, history_path, his
             if done_callback then done_callback() end
             return false
         elseif (mod.Control and (key == "j" or key == "m"))
-            or (not mod.Control and key == "Return") then
+            or (not mod.Control and key == "Return")
+            or (not mod.Control and key == "KP_Enter") then
             textbox.text = ""
             history_add(history_path, command)
             capi.keygrabber.stop()
