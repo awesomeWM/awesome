@@ -63,11 +63,14 @@ ewmh_init(int phys_screen)
         _NET_WM_VISIBLE_ICON_NAME,
         _NET_WM_DESKTOP,
         _NET_WM_WINDOW_TYPE,
-        _NET_WM_WINDOW_TYPE_NORMAL,
         _NET_WM_WINDOW_TYPE_DESKTOP,
         _NET_WM_WINDOW_TYPE_DOCK,
+        _NET_WM_WINDOW_TYPE_TOOLBAR,
+        _NET_WM_WINDOW_TYPE_MENU,
+        _NET_WM_WINDOW_TYPE_UTILITY,
         _NET_WM_WINDOW_TYPE_SPLASH,
         _NET_WM_WINDOW_TYPE_DIALOG,
+        _NET_WM_WINDOW_TYPE_NORMAL,
         _NET_WM_ICON,
         _NET_WM_PID,
         _NET_WM_STATE,
@@ -497,6 +500,12 @@ ewmh_client_check_hints(client_t *c)
                 c->type = MAX(c->type, WINDOW_TYPE_SPLASH);
             else if(state[i] == _NET_WM_WINDOW_TYPE_DOCK)
                 c->type = MAX(c->type, WINDOW_TYPE_DOCK);
+            else if(state[i] == _NET_WM_WINDOW_TYPE_MENU)
+                c->type = MAX(c->type, WINDOW_TYPE_MENU);
+            else if(state[i] == _NET_WM_WINDOW_TYPE_TOOLBAR)
+                c->type = MAX(c->type, WINDOW_TYPE_TOOLBAR);
+            else if(state[i] == _NET_WM_WINDOW_TYPE_UTILITY)
+                c->type = MAX(c->type, WINDOW_TYPE_UTILITY);
     }
 
     p_delete(&reply);

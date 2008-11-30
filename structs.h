@@ -42,6 +42,12 @@ typedef enum
     WINDOW_TYPE_DOCK,
     WINDOW_TYPE_SPLASH,
     WINDOW_TYPE_DIALOG,
+    /* The ones below may have TRANSIENT_FOR, but are not plain dialogs.
+     * They were purposefully placed below DIALOG.
+     */
+    WINDOW_TYPE_MENU,
+    WINDOW_TYPE_TOOLBAR,
+    WINDOW_TYPE_UTILITY
 } window_type_t;
 
 /** Wibox types */

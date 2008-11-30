@@ -347,6 +347,9 @@ client_layer_translator(client_t *c)
       case WINDOW_TYPE_DESKTOP:
         return LAYER_DESKTOP;
       case WINDOW_TYPE_DIALOG:
+      case WINDOW_TYPE_MENU:
+      case WINDOW_TYPE_TOOLBAR:
+      case WINDOW_TYPE_UTILITY:
         return LAYER_FLOAT;
       default:
         break;
@@ -1585,6 +1588,15 @@ luaA_client_index(lua_State *L)
             break;
           case WINDOW_TYPE_DIALOG:
             lua_pushliteral(L, "dialog");
+            break;
+          case WINDOW_TYPE_MENU:
+            lua_pushliteral(L, "menu");
+            break;
+          case WINDOW_TYPE_TOOLBAR:
+            lua_pushliteral(L, "toolbar");
+            break;
+          case WINDOW_TYPE_UTILITY:
+            lua_pushliteral(L, "utility");
             break;
           default:
             lua_pushliteral(L, "normal");
