@@ -53,7 +53,7 @@ else
 fi
 
 # The wallpapersetter is selected in this order
-wpsetters="${wpsetters:=Esetroot habak wmsetbg feh hsetroot chbg display qiv xv xsri xli xsetbg}" # broken icewmbg'
+wpsetters="${wpsetters:=Esetroot habak wmsetbg feh hsetroot chbg display qiv xv xsri xli xsetbg xsetroot}" # broken icewmbg'
 lastwallpaper="${CONFIG_DIR}/lastwallpaper"
 
 
@@ -435,6 +435,15 @@ case $WPSETTER in
         debugstory="icewmbg does support transparency, but only tiling. And I noticed odd
 errormessages with aterm. Don't use it unless you have to."
         ;;
+    xsetroot)
+        tile='-solid'
+        full=$tile
+        center=$tile
+        aspect=$tile
+        debugstory="I can't find an app to set the wallpaper with. Using xsetroot to set
+a solid background. If you want to have a background image you should install Esetroot or feh."
+        wallpaper='#535d6c'
+        ;;
     '')
         message \
 "I can't find an app to set the wallpaper with. You can install one in
@@ -494,7 +503,7 @@ if [ "$option" = random ]; then
 fi
 
 
-if [ ! -r "$wallpaper" ]; then
+if [ ! -r "$wallpaper" ] && [ $WPSETTER != "xsetroot" ]; then
     message "Can't find wallpaper $wallpaper"
     exit 1
 fi
