@@ -326,11 +326,11 @@ screen_client_moveto(client_t *c, int new_screen, bool dotag, bool doresize)
                 tag_client(c, new_tags->tab[i]);
     }
 
-    /* resize the windows if it's floating */
+    /* move and resize the windows */
     if(doresize && old_screen != c->screen)
     {
         area_t new_geometry, new_f_geometry;
-        new_f_geometry = c->geometries.floating;
+        new_f_geometry = c->geometry;
 
         to = screen_area_get(c->screen,
                              NULL, NULL, false);
@@ -338,8 +338,8 @@ screen_client_moveto(client_t *c, int new_screen, bool dotag, bool doresize)
                                NULL, NULL, false);
 
         /* compute new coords in new screen */
-        new_f_geometry.x = (c->geometries.floating.x - from.x) + to.x;
-        new_f_geometry.y = (c->geometries.floating.y - from.y) + to.y;
+        new_f_geometry.x = (c->geometry.x - from.x) + to.x;
+        new_f_geometry.y = (c->geometry.y - from.y) + to.y;
 
         /* check that new coords are still in the screen */
         if(new_f_geometry.width > to.width)
@@ -385,13 +385,10 @@ screen_client_moveto(client_t *c, int new_screen, bool dotag, bool doresize)
 
             client_resize(c, new_geometry, false);
         }
-        /* if floating, move to this new coords */
-        else if(client_isfloating(c))
-            client_resize(c, new_f_geometry, false);
-        /* otherwise just register them */
+        /* move to this new coords */
         else
         {
-            c->geometries.floating = new_f_geometry;
+            client_resize(c, new_f_geometry, false);
             if(wasvisible)
                 globalconf.screens[old_screen].need_arrange = true;
             client_need_arrange(c);

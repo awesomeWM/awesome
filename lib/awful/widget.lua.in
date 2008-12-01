@@ -21,6 +21,7 @@ local util = require("awful.util")
 local hooks = require("awful.hooks")
 local beautiful = require("beautiful")
 local menu = require("awful.menu")
+local client = require("awful.client")
 
 --- Widget module for awful
 module("awful.widget")
@@ -277,7 +278,7 @@ local function widget_tasklist_label_common(c, args)
     local bg = nil
     local text = "<margin left=\"2\" right=\"2\"/><span font_desc='"..font.."'>"
     local name
-    if c.floating and floating_icon then
+    if client.floating.get(c) and floating_icon then
         text = text.."<bg image=\"" .. floating_icon .. "\" align=\"" .. floating_icon_align .. "\"/>"
     end
     if c.minimized then

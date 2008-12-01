@@ -26,7 +26,7 @@ local function fmax(screen, fs)
     end
 
     for k, c in pairs(client.visible(screen)) do
-        if not c.floating then
+        if not client.floating.get(c) then
             area.width = area.width - 2 * c.border_width
             area.height = area.height - 2 * c.border_width
             c:fullgeometry(area)

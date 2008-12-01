@@ -109,18 +109,18 @@ function client.move(c, snap)
                               for k, v in ipairs(mouse.buttons) do
                                   if v then
                                       local lay = layout.get(c.screen)
-                                      if lay == layout.suit.floating or c.floating then
+                                      if lay == layout.suit.floating or aclient.floating.get(c) then
                                           local x = mouse.x - dist_x
                                           local y = mouse.y - dist_y
                                           c:fullgeometry(client.snap(c, snap, x, y))
-                                          if layout.get(c.screen) ~= layout.suit.floating and not c.floating then
+                                          if layout.get(c.screen) ~= layout.suit.floating and not aclient.floating.get(c) then
                                               hooks.property.register(ug)
                                           end
                                       elseif lay ~= layout.suit.magnifier then
                                           c.screen = capi.mouse.screen
                                           if layout.get(c.screen) ~= layout.suit.floating then
                                               local c_u_m = capi.mouse.client_under_pointer()
-                                              if c_u_m and not c_u_m.floating then
+                                              if c_u_m and not aclient.floating.get(c_u_m) then
                                                   if c_u_m ~= c then
                                                       c:swap(c_u_m)
                                                   end
@@ -265,7 +265,7 @@ local function client_resize_floating(c, corner)
                               for k, v in ipairs(mouse.buttons) do
                                   if v then
                                       -- Ignore screen changes
-                                      if not c.floating
+                                      if not aclient.floating.get(c)
                                           and capi.mouse.screen ~= c.screen then
                                           return true
                                       end
@@ -332,7 +332,7 @@ function client.resize(c, corner)
 
     local lay = layout.get(c.screen)
 
-    if lay == layout.suit.floating or c.floating then
+    if lay == layout.suit.floating or aclient.floating.get(c) then
         return client_resize_floating(c, corner)
     elseif lay == layout.suit.tile
         or lay == layout.suit.tile.left

@@ -5,7 +5,6 @@
 ---------------------------------------------------------------------------
 
 -- Grab environment we need
-local hooks = require("awful.hooks")
 local util = require("awful.util")
 local tag = require("awful.tag")
 local pairs = pairs
@@ -19,7 +18,9 @@ local capi =
     client = client,
     mouse = mouse,
     screen = screen,
+    hooks = hooks
 }
+local hooks = require("awful.hooks")
 
 --- Client module for awful
 module("awful.client")
@@ -29,12 +30,14 @@ local data = {}
 data.focus = {}
 data.urgent = {}
 data.marked = {}
+data.floating = otable()
 
 -- Urgent functions
 urgent = {}
 focus = {}
 focus.history = {}
 swap = {}
+floating = {}
 
 -- User hooks
 hooks.user.create('marked')
@@ -193,7 +196,7 @@ function tiled(screen)
     local tclients = {}
     -- Remove floating clients
     for k, c in pairs(clients) do
-        if not c.floating then
+        if not floating.get(c) then
             table.insert(tclients, c)
         end
     end
@@ -426,15 +429,6 @@ function toggletag(target, c)
     end
 end
 
---- Toggle the floating status of a client.
--- @param c Optional client, the focused one if not set.
-function togglefloating(c)
-    local sel = c or capi.client.focus
-    if sel then
-        sel.floating = not sel.floating
-    end
-end
-
 --- Move a client to a screen. Default is next screen, cycling.
 -- @param c The client to move.
 -- @param s The screen number, default to current + 1.
@@ -525,6 +519,49 @@ function getmarked()
     return t
 end
 
+--- Set a client floating state.
+-- Floating client are not handled by tiling layouts.
+-- @param c A client.
+-- @param state True or false.
+function floating.set(c, s)
+    local c = c or capi.client.focus
+    if c and data.floating[c] ~= s then
+        data.floating[c] = s
+        capi.hooks.arrange()(c.screen)
+        capi.hooks.property()(c, "floating")
+    end
+end
+
+--- Get a client floating state.
+-- @param c A client.
+-- @return True or false. Note that some windows might be floating even if you
+-- did not set them manually. For example, windows with a type different than
+-- normal.
+function floating.get(c)
+    local c = c or capi.client.focus
+    if c then
+        if data.floating[c] ~= nil then
+            return data.floating[c]
+        end
+        return (c.type ~= "normal"
+            or c.fullscreen
+            or c.maximized_vertical
+            or c.maximized_horizontal)
+    end
+end
+
+--- Toggle the floating state of a client.
+-- @param c A client.
+function floating.toggle(c)
+    floating.set(c, not floating.get(c))
+end
+
+--- Remove the floating information on a client.
+-- @param c The client.
+function floating.delete(c)
+    data.floating[c] = nil
+end
+
 -- Register standards hooks
 hooks.focus.register(focus.history.add)
 hooks.unmanage.register(focus.history.delete)
@@ -532,5 +569,7 @@ hooks.unmanage.register(focus.history.delete)
 hooks.property.register(urgent.add)
 hooks.focus.register(urgent.delete)
 hooks.unmanage.register(urgent.delete)
+
+hooks.unmanage.register(floating.delete)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

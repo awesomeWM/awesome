@@ -266,26 +266,16 @@ event_handle_configurerequest(void *data __attribute__ ((unused)),
         if(geometry.x != c->geometry.x || geometry.y != c->geometry.y
            || geometry.width != c->geometry.width || geometry.height != c->geometry.height)
         {
-            if(client_isfloating(c))
-            {
-                client_resize(c, geometry, false);
-                if(client_hasstrut(c))
-                    /* All the wiboxes (may) need to be repositioned */
-                    for(int screen = 0; screen < globalconf.nscreen; screen++)
-                        for(int i = 0; i < globalconf.screens[screen].wiboxes.len; i++)
-                        {
-                            wibox_t *s = globalconf.screens[screen].wiboxes.tab[i];
-                            wibox_position_update(s);
-                        }
-            }
-            else
-            {
-                client_need_arrange(c);
-                /* If we do not resize the client, at least tell it that it
-                 * has its new configuration. That fixes at least
-                 * gnome-terminal */
-                window_configure(c->win, c->geometry, c->border);
-            }
+            client_resize(c, geometry, false);
+            if(client_hasstrut(c))
+                /* All the wiboxes (may) need to be repositioned */
+                for(int screen = 0; screen < globalconf.nscreen; screen++)
+                    for(int i = 0; i < globalconf.screens[screen].wiboxes.len; i++)
+                    {
+                        wibox_t *s = globalconf.screens[screen].wiboxes.tab[i];
+                        wibox_position_update(s);
+                    }
+            client_need_arrange(c);
         }
         else
             window_configure(c->win, geometry, c->border);

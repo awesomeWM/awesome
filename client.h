@@ -55,7 +55,6 @@ void client_resize(client_t *, area_t, bool);
 void client_unmanage(client_t *);
 void client_saveprops_tags(client_t *);
 void client_kill(client_t *);
-void client_setfloating(client_t *, bool);
 void client_setsticky(client_t *, bool);
 void client_setabove(client_t *, bool);
 void client_setbelow(client_t *, bool);
@@ -107,21 +106,6 @@ client_isfixed(client_t *c)
 {
     return (c->maxw && c->minw && c->maxh && c->minh
             && c->maxw == c->minw && c->maxh == c->minh);
-}
-
-/** Check if a client is floating.
- * \param c A client.
- * \return A boolean value, true if the client is floating.
- */
-static inline bool
-client_isfloating(client_t *c)
-{
-    return (c->type != WINDOW_TYPE_NORMAL
-            || c->isfloating
-            || c->isfullscreen
-            || c->ismaxhoriz
-            || c->ismaxvert
-            || client_isfixed(c));
 }
 
 /** Returns true if a client is tagged

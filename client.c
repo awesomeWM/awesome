@@ -51,7 +51,7 @@ client_loadprops(client_t * c, screen_t *screen)
     ssize_t len;
     tag_array_t *tags = &screen->tags;
     char *prop = NULL;
-    xcb_get_property_cookie_t floating_q, fullscreen_q;
+    xcb_get_property_cookie_t fullscreen_q;
     xcb_get_property_reply_t *reply;
     void *data;
 
@@ -60,9 +60,6 @@ client_loadprops(client_t * c, screen_t *screen)
         return false;
 
     /* Send the GetProperty requests which will be processed later */
-    floating_q = xcb_get_property_unchecked(globalconf.connection, false, c->win,
-                                            _AWESOME_FLOATING, CARDINAL, 0, 1);
-
     fullscreen_q = xcb_get_property_unchecked(globalconf.connection, false, c->win,
                                              _AWESOME_FULLSCREEN, CARDINAL, 0, 1);
 
@@ -75,13 +72,6 @@ client_loadprops(client_t * c, screen_t *screen)
                 untag_client(c, tags->tab[i]);
 
     p_delete(&prop);
-
-    /* check for floating */
-    reply = xcb_get_property_reply(globalconf.connection, floating_q, NULL);
-
-    if(reply && reply->value_len && (data = xcb_get_property_value(reply)))
-        client_setfloating(c, *(bool *) data);
-    p_delete(&reply);
 
     /* check for fullscreen */
     reply = xcb_get_property_reply(globalconf.connection, fullscreen_q, NULL);
@@ -308,8 +298,7 @@ typedef enum
     LAYER_IGNORE,
     LAYER_DESKTOP,
     LAYER_BELOW,
-    LAYER_TILE,
-    LAYER_FLOAT,
+    LAYER_NORMAL,
     LAYER_ABOVE,
     LAYER_FULLSCREEN,
     LAYER_ONTOP,
@@ -332,8 +321,6 @@ client_layer_translator(client_t *c)
         return LAYER_ABOVE;
     else if(c->isbelow)
         return LAYER_BELOW;
-    else if(c->isfloating || c->ismaxhoriz || c->ismaxvert)
-        return LAYER_FLOAT;
 
     /* check for transient attr */
     if(c->transient_for)
@@ -350,15 +337,12 @@ client_layer_translator(client_t *c)
       case WINDOW_TYPE_MENU:
       case WINDOW_TYPE_TOOLBAR:
       case WINDOW_TYPE_UTILITY:
-        return LAYER_FLOAT;
+        return LAYER_ABOVE;
       default:
         break;
     }
 
-    if(client_isfixed(c))
-        return LAYER_FLOAT;
-
-    return LAYER_TILE;
+    return LAYER_NORMAL;
 }
 
 /** Restack clients.
@@ -466,10 +450,10 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
 
     /* Initial values */
     c->win = w;
-    c->geometry.x = c->geometries.floating.x = wgeom->x;
-    c->geometry.y = c->geometries.floating.y = wgeom->y;
-    c->geometry.width = c->geometries.floating.width = wgeom->width;
-    c->geometry.height = c->geometries.floating.height = wgeom->height;
+    c->geometry.x = wgeom->x;
+    c->geometry.y = wgeom->y;
+    c->geometry.width = wgeom->width;
+    c->geometry.height = wgeom->height;
     client_setborder(c, wgeom->border_width);
     if((icon = ewmh_window_icon_get_reply(ewmh_icon_cookie)))
         c->icon = image_ref(&icon);
@@ -662,12 +646,6 @@ client_resize(client_t *c, area_t geometry, bool hints)
         c->geometry.width = values[2] = geometry.width;
         c->geometry.height = values[3] = geometry.height;
 
-        /* save the floating geometry if the window is floating but not
-         * maximized */
-        if(client_isfloating(c)
-           && !(c->isfullscreen || c->ismaxvert || c->ismaxhoriz))
-            c->geometries.floating = geometry;
-
         titlebar_update_geometry(c);
 
         /* The idea is to give a client a resize even when banned. */
@@ -690,31 +668,6 @@ client_resize(client_t *c, area_t geometry, bool hints)
 
         /* execute hook */
         hooks_property(c, "geometry");
-    }
-}
-
-/** Set a client floating.
- * \param c The client.
- * \param floating Set floating, or not.
- * \param layer Layer to put the floating window onto.
- */
-void
-client_setfloating(client_t *c, bool floating)
-{
-    if(c->isfloating != floating
-       && (c->type == WINDOW_TYPE_NORMAL))
-    {
-        if((c->isfloating = floating))
-            if(!c->isfullscreen)
-                client_resize(c, c->geometries.floating, false);
-        client_need_arrange(c);
-        client_stack();
-        xcb_change_property(globalconf.connection,
-                            XCB_PROP_MODE_REPLACE,
-                            c->win, _AWESOME_FLOATING, CARDINAL, 8, 1,
-                            &c->isfloating);
-        /* execute hook */
-        hooks_property(c, "floating");
     }
 }
 
@@ -1458,9 +1411,6 @@ luaA_client_newindex(lua_State *L)
                 window_opacity_set((*c)->win, d);
         }
         break;
-      case A_TK_FLOATING:
-        client_setfloating(*c, luaA_checkboolean(L, 3));
-        break;
       case A_TK_STICKY:
         client_setsticky(*c, luaA_checkboolean(L, 3));
         break;
@@ -1515,7 +1465,6 @@ luaA_client_newindex(lua_State *L)
  * \lfield minimize Define it the client must be iconify, i.e. only visible in
  * taskbar.
  * \lfield icon_path Path to the icon used to identify.
- * \lfield floating True always floating.
  * \lfield honorsizehints Honor size hints, i.e. respect size ratio.
  * \lfield border_width The client border width.
  * \lfield border_color The client border color.
@@ -1668,9 +1617,6 @@ luaA_client_index(lua_State *L)
             lua_pushnumber(L, d);
         else
             return 0;
-        break;
-      case A_TK_FLOATING:
-        lua_pushboolean(L, client_isfloating(*c));
         break;
       case A_TK_ONTOP:
         lua_pushboolean(L, (*c)->isontop);

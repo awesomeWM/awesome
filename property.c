@@ -63,7 +63,7 @@ property_handle_wm_transient_for(void *data,
 {
     client_t *c = client_getbywin(window);
 
-    if(c && !client_isfloating(c))
+    if(c)
         property_update_wm_transient_for(c, reply);
 
     return 0;

@@ -155,8 +155,6 @@ struct client_t
     area_t geometry;
     struct
     {
-        /** Client floating geometry. */
-        area_t floating;
         /** Client geometry when (un)fullscreen */
         area_t fullscreen;
         /** Client geometry when (un)-max */
@@ -175,8 +173,6 @@ struct client_t
     bool issticky;
     /** Has urgency hint */
     bool isurgent;
-    /** true if the window is floating */
-    bool isfloating;
     /** True if the client is hidden */
     bool ishidden;
     /** True if the client is minimized */
