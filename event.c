@@ -362,16 +362,17 @@ event_handle_destroynotify(void *data __attribute__ ((unused)),
                            xcb_destroy_notify_event_t *ev)
 {
     client_t *c;
-    xembed_window_t *emwin;
 
     if((c = client_getbywin(ev->window)))
         client_unmanage(c);
-    else if((emwin = xembed_getbywin(globalconf.embedded, ev->event)))
-    {
-        xembed_window_list_detach(&globalconf.embedded, emwin);
-        for(int i = 0; i < globalconf.nscreen; i++)
-            widget_invalidate_bytype(i, widget_systray);
-    }
+    else
+        for(int i = 0; i < globalconf.embedded.len; i++)
+            if(globalconf.embedded.tab[i].win == ev->window)
+            {
+                xembed_window_array_take(&globalconf.embedded, i);
+                for(int j = 0; j < globalconf.nscreen; j++)
+                    widget_invalidate_bytype(j, widget_systray);
+            }
 
     return 0;
 }
@@ -524,7 +525,7 @@ event_handle_enternotify(void *data __attribute__ ((unused)),
             luaA_dofunction(globalconf.L, globalconf.hooks.mouse_enter, 1, 0);
         }
     }
-    else if((emwin = xembed_getbywin(globalconf.embedded, ev->event)))
+    else if((emwin = xembed_getbywin(&globalconf.embedded, ev->event)))
         xcb_ungrab_button(globalconf.connection, XCB_BUTTON_INDEX_ANY,
                           xutil_screen_get(connection, emwin->phys_screen)->root,
                           XCB_BUTTON_MASK_ANY);
@@ -615,7 +616,7 @@ event_handle_maprequest(void *data __attribute__ ((unused)),
     if(wa_r->override_redirect)
         goto bailout;
 
-    if(xembed_getbywin(globalconf.embedded, ev->window))
+    if(xembed_getbywin(&globalconf.embedded, ev->window))
     {
         xcb_map_window(connection, ev->window);
         xembed_window_activate(connection, ev->window);
@@ -676,7 +677,6 @@ event_handle_unmapnotify(void *data __attribute__ ((unused)),
                          xcb_connection_t *connection, xcb_unmap_notify_event_t *ev)
 {
     client_t *c;
-    xembed_window_t *em;
 
     if((c = client_getbywin(ev->window)))
     {
@@ -685,12 +685,14 @@ event_handle_unmapnotify(void *data __attribute__ ((unused)),
            && window_state_get_reply(window_state_get_unchecked(c->win)) == XCB_WM_STATE_NORMAL)
             client_unmanage(c);
     }
-    else if((em = xembed_getbywin(globalconf.embedded, ev->window)))
-    {
-        xembed_window_list_detach(&globalconf.embedded, em);
-        for(int i = 0; i < globalconf.nscreen; i++)
-            widget_invalidate_bytype(i, widget_systray);
-    }
+    else
+        for(int i = 0; i < globalconf.embedded.len; i++)
+            if(globalconf.embedded.tab[i].win == ev->window)
+            {
+                xembed_window_array_take(&globalconf.embedded, i);
+                for(int j = 0; j < globalconf.nscreen; j++)
+                    widget_invalidate_bytype(j, widget_systray);
+            }
 
     return 0;
 }

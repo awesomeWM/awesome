@@ -100,14 +100,14 @@ xembed_info_get_reply(xcb_connection_t *connection,
 /** Get a XEMBED window from a xembed_window_t list.
  * \param list The xembed window list.
  * \param win The window to look for.
+ * \return The xembed window if found, NULL otherwise.
  */
 xembed_window_t *
-xembed_getbywin(xembed_window_t *list, xcb_window_t win)
+xembed_getbywin(xembed_window_array_t *list, xcb_window_t win)
 {
-    xembed_window_t *n;
-    for(n = list; n; n = n->next)
-        if(win == n->win)
-            return n;
+    for(int i = 0; i < list->len; i++)
+        if(list->tab[i].win == win)
+            return &list->tab[i];
     return NULL;
 }
 

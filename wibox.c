@@ -191,7 +191,9 @@ wibox_systray_refresh(wibox_t *wibox)
             {
               case Left:
                 config_win_vals[1] = systray->geometry.width - config_win_vals[3];
-                for(em = globalconf.embedded; em; em = em->next)
+                for(int j = 0; j < globalconf.embedded.len; j++)
+                {
+                    em = &globalconf.embedded.tab[j];
                     if(em->phys_screen == phys_screen)
                     {
                         if(config_win_vals[1] - config_win_vals[2] >= (uint32_t) wibox->sw.geometry.y)
@@ -211,10 +213,13 @@ wibox_systray_refresh(wibox_t *wibox)
                                                  | XCB_CONFIG_WINDOW_Y,
                                                  config_win_vals_off);
                     }
+                }
                 break;
               case Right:
                 config_win_vals[1] = 0;
-                for(em = globalconf.embedded; em; em = em->next)
+                for(int j = 0; j < globalconf.embedded.len; j++)
+                {
+                    em = &globalconf.embedded.tab[j];
                     if(em->phys_screen == phys_screen)
                     {
                         if(config_win_vals[1] + config_win_vals[3] <= (uint32_t) wibox->sw.geometry.y + wibox->sw.geometry.width)
@@ -234,12 +239,15 @@ wibox_systray_refresh(wibox_t *wibox)
                                                  | XCB_CONFIG_WINDOW_Y,
                                                  config_win_vals_off);
                     }
+                }
                 break;
               case Floating:
               case Top:
               case Bottom:
                 config_win_vals[1] = 0;
-                for(em = globalconf.embedded; em; em = em->next)
+                for(int j = 0; j < globalconf.embedded.len; j++)
+                {
+                    em = &globalconf.embedded.tab[j];
                     if(em->phys_screen == phys_screen)
                     {
                         /* if(x + width < systray.x + systray.width) */
@@ -260,6 +268,7 @@ wibox_systray_refresh(wibox_t *wibox)
                                                  | XCB_CONFIG_WINDOW_Y,
                                                  config_win_vals_off);
                     }
+                }
                 break;
             }
             break;

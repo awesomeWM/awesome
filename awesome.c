@@ -59,17 +59,17 @@ void
 awesome_atexit(void)
 {
     client_t *c;
-    xembed_window_t *em;
     int screen_nbr;
 
     a_dbus_cleanup();
     luaA_cs_cleanup();
 
     /* reparent systray windows, otherwise they may die with their master */
-    for(em = globalconf.embedded; em; em = em->next)
+    for(int i = 0; i < globalconf.embedded.len; i++)
     {
-        xcb_screen_t *s = xutil_screen_get(globalconf.connection, em->phys_screen);
-        xembed_window_unembed(globalconf.connection, em->win, s->root);
+        xcb_screen_t *s = xutil_screen_get(globalconf.connection,
+                                           globalconf.embedded.tab[i].phys_screen);
+        xembed_window_unembed(globalconf.connection, globalconf.embedded.tab[i].win, s->root);
     }
 
     /* do this only for real screen */

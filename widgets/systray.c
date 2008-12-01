@@ -36,16 +36,16 @@ static area_t
 systray_geometry(widget_t *widget, int screen, int height, int width)
 {
     area_t geometry;
-    int phys_screen = screen_virttophys(screen), i = 0;
+    int phys_screen = screen_virttophys(screen), n = 0;
 
     geometry.height = height;
 
-    for(xembed_window_t *em = globalconf.embedded; em; em = em->next)
-        if(em->phys_screen == phys_screen)
-            i++;
+    for(int i = 0; i < globalconf.embedded.len; i++)
+        if(globalconf.embedded.tab[i].phys_screen == phys_screen)
+            n++;
 
     /** \todo use class hints */
-    geometry.width = MIN(i * height, width);
+    geometry.width = MIN(n * height, width);
 
     return geometry;
 }

@@ -27,7 +27,7 @@
 
 #include <stdbool.h>
 
-#include "common/list.h"
+#include "common/array.h"
 #include "common/util.h"
 
 /** XEMBED information for a window.
@@ -38,16 +38,15 @@ typedef struct
     unsigned long flags;
 } xembed_info_t;
 
-typedef struct xembed_window_t xembed_window_t;
-struct xembed_window_t
+typedef struct xembed_window xembed_window_t;
+struct xembed_window
 {
     xcb_window_t win;
     int phys_screen;
     xembed_info_t info;
-    xembed_window_t *prev, *next;
 };
 
-DO_SLIST(xembed_window_t, xembed_window, p_delete)
+DO_ARRAY(xembed_window_t, xembed_window, DO_NOTHING)
 
 /** The version of the XEMBED protocol that this library supports.  */
 #define XEMBED_VERSION  0
@@ -91,7 +90,7 @@ DO_SLIST(xembed_window_t, xembed_window, p_delete)
 
 
 void xembed_message_send(xcb_connection_t *, xcb_window_t, long, long, long, long);
-xembed_window_t * xembed_getbywin(xembed_window_t *, xcb_window_t);
+xembed_window_t * xembed_getbywin(xembed_window_array_t *, xcb_window_t);
 void xembed_property_update(xcb_connection_t *, xembed_window_t *, xcb_get_property_reply_t *);
 xcb_get_property_cookie_t xembed_info_get_unchecked(xcb_connection_t *,
                                                     xcb_window_t);

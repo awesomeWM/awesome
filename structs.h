@@ -316,7 +316,7 @@ struct awesome_t
     /** Clients list */
     client_t *clients;
     /** Embedded windows */
-    xembed_window_t *embedded;
+    xembed_window_array_t embedded;
     /** Path to config file */
     char *conffile;
     /** Stack client history */

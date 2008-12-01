@@ -130,7 +130,7 @@ systray_cleanup(int phys_screen)
 int
 systray_request_handle(xcb_window_t embed_win, int phys_screen, xembed_info_t *info)
 {
-    xembed_window_t *em;
+    xembed_window_t em;
     xcb_get_property_cookie_t em_cookie;
     int i;
     const uint32_t select_input_val[] =
@@ -141,7 +141,7 @@ systray_request_handle(xcb_window_t embed_win, int phys_screen, xembed_info_t *i
     };
 
     /* check if not already trayed */
-    if((em = xembed_getbywin(globalconf.embedded, embed_win)))
+    if(xembed_getbywin(&globalconf.embedded, embed_win))
         return -1;
 
     p_clear(&em_cookie, 1);
@@ -157,20 +157,19 @@ systray_request_handle(xcb_window_t embed_win, int phys_screen, xembed_info_t *i
                         globalconf.screens[phys_screen].systray.window,
                         0, 0);
 
-    em = p_new(xembed_window_t, 1);
-    em->win = embed_win;
-    em->phys_screen = phys_screen;
-
-    xembed_window_list_append(&globalconf.embedded, em);
+    em.win = embed_win;
+    em.phys_screen = phys_screen;
 
     if(info)
-        em->info = *info;
+        em.info = *info;
     else
-        xembed_info_get_reply(globalconf.connection, em_cookie, &em->info);
+        xembed_info_get_reply(globalconf.connection, em_cookie, &em.info);
 
-    xembed_embedded_notify(globalconf.connection, em->win,
+    xembed_embedded_notify(globalconf.connection, em.win,
                            globalconf.screens[phys_screen].systray.window,
-                           MIN(XEMBED_VERSION, em->info.version));
+                           MIN(XEMBED_VERSION, em.info.version));
+
+    xembed_window_array_append(&globalconf.embedded, em);
 
     for(i = 0; i < globalconf.nscreen; i++)
         widget_invalidate_bytype(i, widget_systray);

@@ -345,7 +345,7 @@ property_handle_xembed_info(void *data __attribute__ ((unused)),
                             xcb_atom_t name,
                             xcb_get_property_reply_t *reply)
 {
-    xembed_window_t *emwin = xembed_getbywin(globalconf.embedded, window);
+    xembed_window_t *emwin = xembed_getbywin(&globalconf.embedded, window);
 
     if(emwin)
         xembed_property_update(connection, emwin, reply);
