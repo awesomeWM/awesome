@@ -412,6 +412,26 @@ client_stack()
                                                         config_win_vals[0]);
 }
 
+/** Copy tags from one client to another client on the same screen.
+ * Be careful: this does not untag!
+ * \param src_c The source client.
+ * \param dst_c The destination client.
+ */
+static void
+client_duplicate_tags(client_t *src_c, client_t *dst_c)
+{
+    int i;
+    tag_array_t *tags = &globalconf.screens[src_c->screen].tags;
+
+    /* Avoid doing dangerous things. */
+    if (src_c->screen != dst_c->screen)
+        return;
+
+    for(i = 0; i < tags->len; i++)
+        if(is_client_tagged(src_c, tags->tab[i]))
+            tag_client(dst_c, tags->tab[i]);
+}
+
 /** Manage a new client.
  * \param w The window.
  * \param wgeom Window geometry.
@@ -422,7 +442,7 @@ void
 client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, int screen)
 {
     xcb_get_property_cookie_t ewmh_icon_cookie;
-    client_t *c;
+    client_t *c, *group = NULL;
     image_t *icon;
     const uint32_t select_input_val[] =
     {
@@ -470,9 +490,20 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
     if(c->transient_for)
         screen = c->transient_for->screen;
 
-    /* Try to load props if any */
-    client_loadprops(c, &globalconf.screens[screen]);
+    /* Try to load props, if it fails check for group windows.
+     * transient_for windows are excluded, because they inherit the parent tags. */
+    if(!client_loadprops(c, &globalconf.screens[screen])
+       && c->group_win
+       && !c->transient_for)
+        /* Try to find a group of windows for better initial placement. */
+        for(group = globalconf.clients; group; group = group->next)
+            if(group->group_win == c->group_win)
+                break;
 
+    /* Move to the right screen.
+     * Assumption: Window groups do not span multiple logical screens. */
+    if(group)
+        screen = group->screen;
 
     /* Then check clients hints */
     ewmh_client_check_hints(c);
@@ -480,23 +511,29 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
     /* move client to screen, but do not tag it for now */
     screen_client_moveto(c, screen, false, true);
 
-    /* Check if client has been tagged by loading props, or maybe with its
-     * hints.
-     * If not, we tag it with current selected ones.
-     * This could be done on Lua side, but it's a sane behaviour. */
-    if(!c->issticky)
+    /* Duplicate the tags of either the parent or a group window.
+     * Otherwise check for existing tags, if that fails tag it with the current tag.
+     * This could be done lua side, but it's sane behaviour.  */
+    if (!c->issticky)
     {
-        int i;
-        tag_array_t *tags = &globalconf.screens[screen].tags;
-        for(i = 0; i < tags->len; i++)
-            if(is_client_tagged(c, tags->tab[i]))
-                break;
-
-        /* if no tag, set current selected */
-        if(i == tags->len)
+        if(c->transient_for)
+            client_duplicate_tags(c->transient_for, c);
+        else if (group)
+            client_duplicate_tags(group, c);
+        else
+        {
+            int i;
+            tag_array_t *tags = &globalconf.screens[screen].tags;
             for(i = 0; i < tags->len; i++)
-                if(tags->tab[i]->selected)
-                    tag_client(c, tags->tab[i]);
+                if(is_client_tagged(c, tags->tab[i]))
+                    break;
+
+            /* if no tag, set current selected */
+            if(i == tags->len)
+                for(i = 0; i < tags->len; i++)
+                    if(tags->tab[i]->selected)
+                        tag_client(c, tags->tab[i]);
+        }
     }
 
     /* Push client in client list */
