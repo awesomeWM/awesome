@@ -192,6 +192,9 @@ property_update_wm_hints(client_t *c, xcb_get_property_reply_t *reply)
 
     if(wmh.flags & XCB_WM_HINT_INPUT)
         c->nofocus = !wmh.input;
+
+    if(wmh.flags & XCB_WM_HINT_WINDOW_GROUP)
+        c->group_win = wmh.window_group;
 }
 
 static int

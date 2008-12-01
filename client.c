@@ -1477,6 +1477,7 @@ luaA_client_newindex(lua_State *L)
  * \lfield maximized_horizontal The client is maximized horizontally or not.
  * \lfield maximized_vertical The client is maximized vertically or not.
  * \lfield transient_for Return the client the window is transient for.
+ * \lfield group_id Identification unique to a group of windows.
  * \lfield size_hints A table with size hints of the client: user_position,
  *         user_size, program_position and program_size.
  */
@@ -1599,6 +1600,12 @@ luaA_client_index(lua_State *L)
         break;
       case A_TK_FULLSCREEN:
         lua_pushboolean(L, (*c)->isfullscreen);
+        break;
+      case A_TK_GROUP_ID:
+        if((*c)->group_win)
+            lua_pushnumber(L, (*c)->group_win);
+        else
+            return 0;
         break;
       case A_TK_MAXIMIZED_HORIZONTAL:
         lua_pushboolean(L, (*c)->ismaxhoriz);

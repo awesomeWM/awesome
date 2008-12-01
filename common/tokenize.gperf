@@ -28,6 +28,7 @@ font
 fullscreen
 gap
 geometry
+group_id
 grow
 height
 hide

@@ -203,6 +203,8 @@ struct client_t
     window_type_t type;
     /** Window of the client */
     xcb_window_t win;
+    /** Window of the group leader */
+    xcb_window_t group_win;
     /** Client logical screen */
     int screen;
     /** Client physical screen */
