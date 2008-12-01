@@ -25,6 +25,7 @@
 #include "structs.h"
 
 void property_update_wm_transient_for(client_t *, xcb_get_property_reply_t *);
+void property_update_wm_client_leader(client_t *c, xcb_get_property_reply_t *reply);
 void property_update_wm_normal_hints(client_t *, xcb_get_property_reply_t *);
 void property_update_wm_hints(client_t *, xcb_get_property_reply_t *);
 void property_update_wm_name(client_t *);

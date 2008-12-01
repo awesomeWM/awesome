@@ -465,6 +465,7 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
     property_update_wm_normal_hints(c, NULL);
     property_update_wm_hints(c, NULL);
     property_update_wm_transient_for(c, NULL);
+    property_update_wm_client_leader(c, NULL);
 
     if(c->transient_for)
         screen = c->transient_for->screen;
@@ -1478,6 +1479,7 @@ luaA_client_newindex(lua_State *L)
  * \lfield maximized_vertical The client is maximized vertically or not.
  * \lfield transient_for Return the client the window is transient for.
  * \lfield group_id Identification unique to a group of windows.
+ * \lfield leader_id Identification unique to windows spawned by the same command.
  * \lfield size_hints A table with size hints of the client: user_position,
  *         user_size, program_position and program_size.
  */
@@ -1576,6 +1578,9 @@ luaA_client_index(lua_State *L)
             p_delete(&prop_r);
             return 0;
         }
+        break;
+      case A_TK_LEADER_ID:
+        lua_pushnumber(L, (*c)->leader_win);
         break;
       case A_TK_MACHINE:
         if(!xutil_text_prop_get(globalconf.connection, (*c)->win,

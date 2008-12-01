@@ -69,6 +69,50 @@ property_handle_wm_transient_for(void *data,
     return 0;
 }
 
+
+/** Update leader hint of a client.
+ * \param c The client.
+ * \param reply (Optional) An existing reply.
+ */
+void
+property_update_wm_client_leader(client_t *c, xcb_get_property_reply_t *reply)
+{
+    xcb_get_property_cookie_t client_leader_q;
+    void *data;
+    bool no_reply = !reply;
+
+    if(no_reply)
+    {
+        client_leader_q = xcb_get_property_unchecked(globalconf.connection, false, c->win,
+                                                     WM_CLIENT_LEADER, WINDOW, 0, 32);
+
+        reply = xcb_get_property_reply(globalconf.connection, client_leader_q, NULL);
+    }
+
+    if(reply && reply->value_len && (data = xcb_get_property_value(reply)))
+        c->leader_win = *(xcb_window_t *) data;
+
+    /* Only free when we created a reply ourselves. */
+    if(no_reply)
+        p_delete(&reply);
+}
+
+static int
+property_handle_wm_client_leader(void *data,
+                                xcb_connection_t *connection,
+                                uint8_t state,
+                                xcb_window_t window,
+                                xcb_atom_t name,
+                                xcb_get_property_reply_t *reply)
+{
+    client_t *c = client_getbywin(window);
+
+    if(c)
+        property_update_wm_client_leader(c, reply);
+
+    return 0;
+}
+
 /** Update the size hints of a client.
  * \param c The client.
  */
@@ -394,6 +438,8 @@ void a_xcb_set_property_handlers(void)
     /* ICCCM stuff */
     xcb_property_set_handler(&globalconf.prophs, WM_TRANSIENT_FOR, UINT_MAX,
                              property_handle_wm_transient_for, NULL);
+    xcb_property_set_handler(&globalconf.prophs, WM_CLIENT_LEADER, UINT_MAX,
+                             property_handle_wm_client_leader, NULL);
     xcb_property_set_handler(&globalconf.prophs, WM_NORMAL_HINTS, UINT_MAX,
                              property_handle_wm_normal_hints, NULL);
     xcb_property_set_handler(&globalconf.prophs, WM_HINTS, UINT_MAX,

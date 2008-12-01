@@ -205,6 +205,8 @@ struct client_t
     xcb_window_t win;
     /** Window of the group leader */
     xcb_window_t group_win;
+    /** Window holding command needed to start it (session management related) */
+    xcb_window_t leader_win;
     /** Client logical screen */
     int screen;
     /** Client physical screen */
