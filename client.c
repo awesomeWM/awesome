@@ -533,7 +533,6 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
     window_state_set(c->win, XCB_WM_STATE_NORMAL);
 
     /* Move window outside the viewport before mapping it. */
-    /* This also sets the state to iconified. */
     client_ban(c);
     xcb_map_window(globalconf.connection, c->win);
 
