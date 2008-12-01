@@ -820,6 +820,7 @@ luaA_init(void)
     globalconf.hooks.focus = LUA_REFNIL;
     globalconf.hooks.unfocus = LUA_REFNIL;
     globalconf.hooks.mouse_enter = LUA_REFNIL;
+    globalconf.hooks.mouse_leave = LUA_REFNIL;
     globalconf.hooks.arrange = LUA_REFNIL;
     globalconf.hooks.clients = LUA_REFNIL;
     globalconf.hooks.tags = LUA_REFNIL;

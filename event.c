@@ -459,17 +459,29 @@ event_handle_leavenotify(void *data __attribute__ ((unused)),
                          xcb_connection_t *connection,
                          xcb_leave_notify_event_t *ev)
 {
-    wibox_t *wibox = wibox_getbywin(ev->event);
+    wibox_t *wibox;
+    client_t *c = client_getbywin(ev->event);
 
-    if(wibox && wibox->mouse_over)
+    if(c)
     {
-        if(wibox->mouse_over->mouse_leave != LUA_REFNIL)
+        if(globalconf.hooks.mouse_leave != LUA_REFNIL)
         {
-            /* call mouse leave function on widget the mouse was over */
-            luaA_wibox_userdata_new(globalconf.L, wibox);
-            luaA_dofunction(globalconf.L, wibox->mouse_over->mouse_leave, 1, 0);
+            luaA_client_userdata_new(globalconf.L, c);
+            luaA_dofunction(globalconf.L, globalconf.hooks.mouse_leave, 1, 0);
         }
-        wibox->mouse_over = NULL;
+    }
+    else if((wibox = wibox_getbywin(ev->event)))
+    {
+        if(wibox->mouse_over)
+        {
+            if(wibox->mouse_over->mouse_leave != LUA_REFNIL)
+            {
+                /* call mouse leave function on widget the mouse was over */
+                luaA_wibox_userdata_new(globalconf.L, wibox);
+                luaA_dofunction(globalconf.L, wibox->mouse_over->mouse_leave, 1, 0);
+            }
+            wibox->mouse_over = NULL;
+        }
     }
 
     return 0;

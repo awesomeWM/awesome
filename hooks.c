@@ -83,7 +83,7 @@ luaA_hooks_unmanage(lua_State *L)
     HANDLE_HOOK(L, globalconf.hooks.unmanage);
 }
 
-/** Set the function called each time the mouse enter a new window. This
+/** Set the function called each time the mouse enter a window. This
  * function is called with the client object as argument.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
@@ -94,6 +94,19 @@ static int
 luaA_hooks_mouse_enter(lua_State *L)
 {
     HANDLE_HOOK(L, globalconf.hooks.mouse_enter);
+}
+
+/** Set the function called each time the mouse leave a window. This
+ * function is called with the client object as argument.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ * \luastack
+ * \lparam A function to call each time a client gets mouse over it.
+ */
+static int
+luaA_hooks_mouse_leave(lua_State *L)
+{
+    HANDLE_HOOK(L, globalconf.hooks.mouse_leave);
 }
 
 /** Set the function called on each client list change.
@@ -215,6 +228,7 @@ const struct luaL_reg awesome_hooks_lib[] =
     { "manage", luaA_hooks_manage },
     { "unmanage", luaA_hooks_unmanage },
     { "mouse_enter", luaA_hooks_mouse_enter },
+    { "mouse_leave", luaA_hooks_mouse_leave },
     { "property", luaA_hooks_property },
     { "arrange", luaA_hooks_arrange },
     { "clients", luaA_hooks_clients },

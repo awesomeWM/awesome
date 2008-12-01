@@ -445,6 +445,7 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
         XCB_EVENT_MASK_STRUCTURE_NOTIFY
             | XCB_EVENT_MASK_PROPERTY_CHANGE
             | XCB_EVENT_MASK_ENTER_WINDOW
+            | XCB_EVENT_MASK_LEAVE_WINDOW
     };
 
 

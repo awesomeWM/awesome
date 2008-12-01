@@ -350,6 +350,8 @@ struct awesome_t
         luaA_ref unfocus;
         /** Command to run when mouse enter a client */
         luaA_ref mouse_enter;
+        /** Command to run when mouse leave a client */
+        luaA_ref mouse_leave;
         /** Command to run on arrange */
         luaA_ref arrange;
         /** Command to run when client list changes */
