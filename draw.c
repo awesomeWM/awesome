@@ -205,9 +205,6 @@ draw_markup_on_element(markup_parser_data_t *p, const char *elem,
         for(; *names; names++, values++)
             switch(a_tokenize(*names, -1))
             {
-              case A_TK_ALIGN:
-                data->align = draw_align_fromstr(*values, -1);
-                break;
               case A_TK_SHADOW:
                 reqs[++reqs_nbr] = xcolor_init_unchecked(&data->shadow.color,
                                                          *values,
@@ -314,6 +311,7 @@ draw_context_init(draw_context_t *d, int phys_screen,
  * \param font The font to use.
  * \param elip Ellipsize mode.
  * \param wrap Wrap mode.
+ * \param align Text alignment.
  * \param area Area to draw to.
  * \param text Text to draw.
  * \param len Text to draw length.
@@ -322,8 +320,8 @@ draw_context_init(draw_context_t *d, int phys_screen,
  */
 void
 draw_text(draw_context_t *ctx, font_t *font, PangoEllipsizeMode ellip, PangoWrapMode wrap,
-          area_t area, const char *text, ssize_t len, draw_parser_data_t *pdata,
-          area_t *ext)
+          alignment_t align, area_t area, const char *text, ssize_t len,
+          draw_parser_data_t *pdata, area_t *ext)
 {
     int x, y;
     draw_parser_data_t parser_data;
@@ -387,7 +385,7 @@ draw_text(draw_context_t *ctx, font_t *font, PangoEllipsizeMode ellip, PangoWrap
 
     /* only honors alignment if enough space */
     if(ext->width < area.width)
-        switch(pdata->align)
+        switch(align)
         {
           case AlignCenter:
             x += (area.width - ext->width) / 2;

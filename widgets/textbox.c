@@ -45,6 +45,8 @@ typedef struct
         int width;
         xcolor_t color;
     } border;
+    /** Text alignment */
+    alignment_t align;
 } textbox_data_t;
 
 static area_t
@@ -86,7 +88,8 @@ textbox_draw(widget_t *widget, draw_context_t *ctx, area_t geometry,
     if(d->border.width > 0)
         draw_rectangle(ctx, geometry, d->border.width, false, &d->border.color);
 
-    draw_text(ctx, globalconf.font, d->ellip, d->wrap, geometry, d->text, d->len, &d->pdata, &d->extents);
+    draw_text(ctx, globalconf.font, d->ellip, d->wrap, d->align,
+              geometry, d->text, d->len, &d->pdata, &d->extents);
 }
 
 /** Delete a textbox widget.
@@ -112,6 +115,7 @@ textbox_destructor(widget_t *w)
  * \lfield ellipsize The ellipsize mode: start, middle or end.
  * \lfield border_width The border width to draw around.
  * \lfield border_color The border color.
+ * \lfield align Text alignment, left, center or right.
  */
 static int
 luaA_textbox_index(lua_State *L, awesome_token_t token)
@@ -121,6 +125,9 @@ luaA_textbox_index(lua_State *L, awesome_token_t token)
 
     switch(token)
     {
+      case A_TK_ALIGN:
+        lua_pushstring(L, draw_align_tostr(d->align));
+        return 1;
       case A_TK_BORDER_WIDTH:
         lua_pushnumber(L, d->border.width);
         return 1;
@@ -181,6 +188,10 @@ luaA_textbox_newindex(lua_State *L, awesome_token_t token)
 
     switch(token)
     {
+      case A_TK_ALIGN:
+        if((buf = luaL_checklstring(L, 3, &len)))
+            d->align = draw_align_fromstr(buf, len);
+        break;
       case A_TK_BORDER_COLOR:
         if((buf = luaL_checklstring(L, 3, &len)))
             xcolor_init_reply(xcolor_init_unchecked(&d->border.color, buf, len));

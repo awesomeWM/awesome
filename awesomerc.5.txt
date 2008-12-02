@@ -54,7 +54,6 @@ List of *awesome* markup elements and their attributes:
   - right: right margin in pixel
   - top: top margin in pixel
 * text
-  - align: text alignment
   - shadow: shadow color
   - shadow_offset: shadow color offset in pixel
 
