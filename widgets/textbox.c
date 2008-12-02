@@ -47,6 +47,8 @@ typedef struct
     } border;
     /** Text alignment */
     alignment_t align;
+    /** Margin */
+    padding_t margin;
 } textbox_data_t;
 
 static area_t
@@ -88,7 +90,7 @@ textbox_draw(widget_t *widget, draw_context_t *ctx, area_t geometry,
     if(d->border.width > 0)
         draw_rectangle(ctx, geometry, d->border.width, false, &d->border.color);
 
-    draw_text(ctx, globalconf.font, d->ellip, d->wrap, d->align,
+    draw_text(ctx, globalconf.font, d->ellip, d->wrap, d->align, &d->margin,
               geometry, d->text, d->len, &d->pdata, &d->extents);
 }
 
@@ -104,6 +106,21 @@ textbox_destructor(widget_t *w)
     p_delete(&d);
 }
 
+static int
+luaA_textbox_margin(lua_State *L)
+{
+    widget_t **widget = luaA_checkudata(L, 1, "widget");
+    textbox_data_t *d = (*widget)->data;
+
+    if(lua_gettop(L) == 2)
+    {
+        d->margin = luaA_getopt_padding(L, 3, &d->margin);
+        widget_invalidate_bywidget(*widget);
+    }
+
+    return luaA_pushpadding(L, &d->margin);
+}
+
 /** Textbox widget.
  * \param L The Lua VM state.
  * \param token The key token.
@@ -116,6 +133,7 @@ textbox_destructor(widget_t *w)
  * \lfield border_width The border width to draw around.
  * \lfield border_color The border color.
  * \lfield align Text alignment, left, center or right.
+ * \lfield margin Method to pass text margin: a table with top, left, right and bottom keys.
  */
 static int
 luaA_textbox_index(lua_State *L, awesome_token_t token)
@@ -125,6 +143,9 @@ luaA_textbox_index(lua_State *L, awesome_token_t token)
 
     switch(token)
     {
+      case A_TK_MARGIN:
+        lua_pushcfunction(L, luaA_textbox_margin);
+        return 1;
       case A_TK_ALIGN:
         lua_pushstring(L, draw_align_tostr(d->align));
         return 1;

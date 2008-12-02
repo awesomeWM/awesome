@@ -194,6 +194,7 @@ local function tasklist_update(w, buttons, label, data)
         for i = len * 2 + 1, #clients * 2, 2 do
             w[i] = capi.widget({ type = "imagebox", align = "flex" })
             w[i + 1] = capi.widget({ type = "textbox", align = "flex" })
+            w[i + 1]:margin({ left = 2, right = 2 })
         end
     -- Remove widgets
     elseif len > #clients then
@@ -276,7 +277,7 @@ local function widget_tasklist_label_common(c, args)
     local floating_icon_align = args.floating_icon_align or theme.tasklist_floating_icon_align or "right"
     local font = args.font or theme.tasklist_font or theme.font or ""
     local bg = nil
-    local text = "<margin left=\"2\" right=\"2\"/><span font_desc='"..font.."'>"
+    local text = "<span font_desc='"..font.."'>"
     local name
     if client.floating.get(c) and floating_icon then
         text = text.."<bg image=\"" .. floating_icon .. "\" align=\"" .. floating_icon_align .. "\"/>"

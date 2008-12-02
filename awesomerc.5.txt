@@ -49,10 +49,6 @@ List of *awesome* markup elements and their attributes:
   - image: path to a background image
   - align: background image alignment
   - resize: resize background image to text size
-* margin
-  - left: left margin in pixel
-  - right: right margin in pixel
-  - top: top margin in pixel
 * text
   - shadow: shadow color
   - shadow_offset: shadow color offset in pixel

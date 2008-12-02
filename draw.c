@@ -217,22 +217,6 @@ draw_markup_on_element(markup_parser_data_t *p, const char *elem,
                 break;
             }
         break;
-      case 'm': /* margin */
-        for (; *names; names++, values++)
-            switch(a_tokenize(*names, -1))
-            {
-              case A_TK_LEFT:
-                data->margin.left = atoi(*values);
-                break;
-              case A_TK_RIGHT:
-                data->margin.right = atoi(*values);
-                break;
-              case A_TK_TOP:
-                data->margin.top = atoi(*values);
-              default:
-                break;
-            }
-        break;
     }
 
     for(i = 0; i <= reqs_nbr; i++)
@@ -246,7 +230,7 @@ static bool
 draw_text_markup_expand(draw_parser_data_t *data,
                         const char *str, ssize_t slen)
 {
-    static char const * const elements[] = { "bg", "bg_margin", "text", "margin", NULL };
+    static char const * const elements[] = { "bg", "bg_margin", "text", NULL };
     markup_parser_data_t p =
     {
         .elements   = elements,
@@ -312,6 +296,7 @@ draw_context_init(draw_context_t *d, int phys_screen,
  * \param elip Ellipsize mode.
  * \param wrap Wrap mode.
  * \param align Text alignment.
+ * \param margin Margin to respect when drawing text.
  * \param area Area to draw to.
  * \param text Text to draw.
  * \param len Text to draw length.
@@ -320,7 +305,7 @@ draw_context_init(draw_context_t *d, int phys_screen,
  */
 void
 draw_text(draw_context_t *ctx, font_t *font, PangoEllipsizeMode ellip, PangoWrapMode wrap,
-          alignment_t align, area_t area, const char *text, ssize_t len,
+          alignment_t align, padding_t *margin, area_t area, const char *text, ssize_t len,
           draw_parser_data_t *pdata, area_t *ext)
 {
     int x, y;
@@ -369,19 +354,19 @@ draw_text(draw_context_t *ctx, font_t *font, PangoEllipsizeMode ellip, PangoWrap
     pango_layout_set_text(ctx->layout, pdata->text, pdata->len);
     pango_layout_set_width(ctx->layout,
                            pango_units_from_double(area.width
-                                                   - (pdata->margin.left
-                                                      + pdata->margin.right)));
-    pango_layout_set_height(ctx->layout, pango_units_from_double(area.height) - pdata->margin.top);
+                                                   - (margin->left
+                                                      + margin->right)));
+    pango_layout_set_height(ctx->layout, pango_units_from_double(area.height) - margin->top);
     pango_layout_set_ellipsize(ctx->layout, ellip);
     pango_layout_set_wrap(ctx->layout, wrap);
     pango_layout_set_attributes(ctx->layout, pdata->attr_list);
     pango_layout_set_font_description(ctx->layout, font->desc);
 
-    x = area.x + pdata->margin.left;
+    x = area.x + margin->left;
     /* + 1 is added for rounding, so that in any case of doubt we rather draw
      * the text 1px lower than too high which usually results in a better type
      * face */
-    y = area.y + (ctx->height - ext->height + 1) / 2 + pdata->margin.top;
+    y = area.y + (ctx->height - ext->height + 1) / 2 + margin->top;
 
     /* only honors alignment if enough space */
     if(ext->width < area.width)

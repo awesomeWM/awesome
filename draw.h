@@ -161,7 +161,6 @@ typedef struct
     PangoAttrList *attr_list;
     char *text;
     ssize_t len;
-    padding_t margin;
     struct
     {
         int top, left;
@@ -178,7 +177,7 @@ typedef struct
     } shadow;
 } draw_parser_data_t;
 
-void draw_text(draw_context_t *, font_t *, PangoEllipsizeMode, PangoWrapMode, alignment_t, area_t, const char *, ssize_t len, draw_parser_data_t *, area_t *);
+void draw_text(draw_context_t *, font_t *, PangoEllipsizeMode, PangoWrapMode, alignment_t, padding_t *, area_t, const char *, ssize_t len, draw_parser_data_t *, area_t *);
 void draw_rectangle(draw_context_t *, area_t, float, bool, const xcolor_t *);
 void draw_rectangle_gradient(draw_context_t *, area_t, float, bool, vector_t,
                              const xcolor_t *, const xcolor_t *, const xcolor_t *);
