@@ -528,12 +528,7 @@ luaA_screen_padding(lua_State *L)
 
     if(lua_gettop(L) == 2)
     {
-        luaA_checktable(L, 2);
-
-        s->padding.right = luaA_getopt_number(L, 2, "right", 0);
-        s->padding.left = luaA_getopt_number(L, 2, "left", 0);
-        s->padding.top = luaA_getopt_number(L, 2, "top", 0);
-        s->padding.bottom = luaA_getopt_number(L, 2, "bottom", 0);
+        s->padding = luaA_getopt_padding(L, 2, &s->padding);
 
         s->need_arrange = true;
 
@@ -543,20 +538,7 @@ luaA_screen_padding(lua_State *L)
 
         ewmh_update_workarea(screen_virttophys(s->index));
     }
-    else
-    {
-        lua_newtable(L);
-        lua_pushnumber(L, s->padding.right);
-        lua_setfield(L, -2, "right");
-        lua_pushnumber(L, s->padding.left);
-        lua_setfield(L, -2, "left");
-        lua_pushnumber(L, s->padding.top);
-        lua_setfield(L, -2, "top");
-        lua_pushnumber(L, s->padding.bottom);
-        lua_setfield(L, -2, "bottom");
-    }
-
-    return 1;
+    return luaA_pushpadding(L, &s->padding);
 }
 
 /** Get the screen count.
