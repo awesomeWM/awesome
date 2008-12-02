@@ -33,6 +33,7 @@
 #include "cnode.h"
 #include "wibox.h"
 #include "common/atoms.h"
+#include "common/buffer.h"
 
 extern awesome_t globalconf;
 

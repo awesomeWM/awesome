@@ -29,7 +29,6 @@
 
 #include "image.h"
 #include "common/array.h"
-#include "common/buffer.h"
 #include "common/xutil.h"
 
 typedef struct
