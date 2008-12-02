@@ -24,6 +24,7 @@
 
 #include "mouse.h"
 #include "stack.h"
+#include "common/list.h"
 
 static void
 client_delete(client_t **c)
