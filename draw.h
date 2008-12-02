@@ -30,6 +30,19 @@
 #include "image.h"
 #include "common/array.h"
 
+/** Padding type */
+typedef struct
+{
+    /** Padding at top */
+    int top;
+    /** Padding at bottom */
+    int bottom;
+    /** Padding at left */
+    int left;
+    /** Padding at right */
+    int right;
+} padding_t;
+
 typedef struct
 {
     unsigned initialized : 1;
@@ -148,10 +161,7 @@ typedef struct
     PangoAttrList *attr_list;
     char *text;
     ssize_t len;
-    struct
-    {
-        int left, right, top;
-    } margin;
+    padding_t margin;
     struct
     {
         int top, left;

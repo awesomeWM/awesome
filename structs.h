@@ -244,19 +244,6 @@ struct tag
 };
 ARRAY_TYPE(tag_t *, tag)
 
-/** Padding type */
-typedef struct
-{
-    /** Padding at top */
-    int top;
-    /** Padding at bottom */
-    int bottom;
-    /** Padding at left */
-    int left;
-    /** Padding at right */
-    int right;
-} padding_t;
-
 typedef struct
 {
     /** Screen index */
