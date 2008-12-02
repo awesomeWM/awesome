@@ -126,9 +126,6 @@ xutil_lock_mask_get(xcb_connection_t *connection,
 /* Number of different errors */
 #define ERRORS_NBR 256
 
-/* Number of different events */
-#define EVENTS_NBR 126
-
 void
 xutil_error_handler_catch_all_set(xcb_event_handlers_t *evenths,
                                   xcb_generic_error_handler_t handler,
