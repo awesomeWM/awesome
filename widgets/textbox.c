@@ -34,7 +34,7 @@ typedef struct
     /** Textbox width */
     int width;
     /** Extents */
-    int extents;
+    area_t extents;
     PangoEllipsizeMode ellip;
     PangoWrapMode wrap;
     /** Draw parser data */
@@ -55,7 +55,7 @@ textbox_geometry(widget_t *widget, int screen, int height, int width)
         geometry.width = width;
     else
     {
-        geometry.width = MIN(d->extents, width);
+        geometry.width = MIN(d->extents.width, width);
 
         if(d->pdata.bg_image)
             geometry.width = MAX(geometry.width,
@@ -76,7 +76,7 @@ textbox_draw(widget_t *widget, draw_context_t *ctx, area_t geometry,
              int screen, wibox_t *p)
 {
     textbox_data_t *d = widget->data;
-    draw_text(ctx, globalconf.font, d->ellip, d->wrap, geometry, d->text, d->len, &d->pdata);
+    draw_text(ctx, globalconf.font, d->ellip, d->wrap, geometry, d->text, d->len, &d->pdata, &d->extents);
 }
 
 /** Delete a textbox widget.
@@ -178,10 +178,10 @@ luaA_textbox_newindex(lua_State *L, awesome_token_t token)
             if(buf)
             {
                 a_iso2utf8(&d->text, buf, len);
-                d->extents = draw_text_extents(globalconf.font, d->text, d->len, &d->pdata).width;
+                d->extents = draw_text_extents(globalconf.font, d->text, d->len, &d->pdata);
             }
             else
-                d->extents = 0;
+                p_clear(&d->extents, 1);
         }
         break;
       case A_TK_WIDTH:

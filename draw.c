@@ -337,13 +337,14 @@ draw_context_init(draw_context_t *d, int phys_screen,
  * \param text Text to draw.
  * \param len Text to draw length.
  * \param data Optional parser data.
+ * \param ext Text extents.
  */
 void
 draw_text(draw_context_t *ctx, font_t *font, PangoEllipsizeMode ellip, PangoWrapMode wrap,
-          area_t area, const char *text, ssize_t len, draw_parser_data_t *pdata)
+          area_t area, const char *text, ssize_t len, draw_parser_data_t *pdata,
+          area_t *ext)
 {
     int x, y;
-    PangoRectangle ext;
     draw_parser_data_t parser_data;
 
     if(!pdata)
@@ -399,23 +400,22 @@ draw_text(draw_context_t *ctx, font_t *font, PangoEllipsizeMode ellip, PangoWrap
     pango_layout_set_wrap(ctx->layout, wrap);
     pango_layout_set_attributes(ctx->layout, pdata->attr_list);
     pango_layout_set_font_description(ctx->layout, font->desc);
-    pango_layout_get_pixel_extents(ctx->layout, NULL, &ext);
 
     x = area.x + pdata->margin.left;
     /* + 1 is added for rounding, so that in any case of doubt we rather draw
      * the text 1px lower than too high which usually results in a better type
      * face */
-    y = area.y + (ctx->height - ext.height + 1) / 2 + pdata->margin.top;
+    y = area.y + (ctx->height - ext->height + 1) / 2 + pdata->margin.top;
 
     /* only honors alignment if enough space */
-    if(ext.width < area.width)
+    if(ext->width < area.width)
         switch(pdata->align)
         {
           case AlignCenter:
-            x += (area.width - ext.width) / 2;
+            x += (area.width - ext->width) / 2;
             break;
           case AlignRight:
-            x += area.width - ext.width;
+            x += area.width - ext->width;
             break;
           default:
             break;
@@ -860,7 +860,7 @@ draw_text_extents(font_t *font, const char *text, ssize_t len, draw_parser_data_
     cairo_surface_destroy(surface);
 
     geom.width = ext.width;
-    geom.height = ext.height * 1.5;
+    geom.height = ext.height;
 
     return geom;
 }
