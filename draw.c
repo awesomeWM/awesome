@@ -406,17 +406,19 @@ draw_text(draw_context_t *ctx, font_t *font, PangoEllipsizeMode ellip, PangoWrap
      * face */
     y = area.y + (ctx->height - ext.height + 1) / 2 + pdata->margin.top;
 
-    switch(pdata->align)
-    {
-      case AlignCenter:
-        x += (area.width - ext.width) / 2;
-        break;
-      case AlignRight:
-        x += area.width - ext.width;
-        break;
-      default:
-        break;
-    }
+    /* only honors alignment if enough space */
+    if(ext.width < area.width)
+        switch(pdata->align)
+        {
+          case AlignCenter:
+            x += (area.width - ext.width) / 2;
+            break;
+          case AlignRight:
+            x += area.width - ext.width;
+            break;
+          default:
+            break;
+        }
 
     if(pdata->shadow.offset)
     {
