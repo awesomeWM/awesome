@@ -49,9 +49,6 @@ List of *awesome* markup elements and their attributes:
   - image: path to a background image
   - align: background image alignment
   - resize: resize background image to text size
-* border
-  - color: border color
-  - width: border width
 * margin
   - left: left margin in pixel
   - right: right margin in pixel

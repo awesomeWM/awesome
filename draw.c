@@ -164,58 +164,39 @@ draw_markup_on_element(markup_parser_data_t *p, const char *elem,
     /* hack: markup.c validates tags so we can avoid strcmps here */
     switch (*elem) {
       case 'b':
-        if(elem[1] == 'g') /* bg? */
-        {
-            if(elem[2] == '_') /* bg_margin */
-                for(; *names; names++, values++)
-                    switch(a_tokenize(*names, -1))
-                    {
-                      case A_TK_LEFT:
-                        data->bg_margin.left = atoi(*values);
-                        break;
-                      case A_TK_TOP:
-                        data->bg_margin.top = atoi(*values);
-                      default:
-                        break;
-                    }
-            else /* bg */
-                for(; *names; names++, values++)
-                    switch(a_tokenize(*names, -1))
-                    {
-                      case A_TK_COLOR:
-                        reqs[++reqs_nbr] = xcolor_init_unchecked(&data->bg_color,
-                                                                 *values,
-                                                                 a_strlen(*values));
-
-                        bg_color_nbr = reqs_nbr;
-                        break;
-                      case A_TK_IMAGE:
-                        if(data->bg_image)
-                            image_delete(&data->bg_image);
-                        data->bg_image = image_new_from_file(*values);
-                        break;
-                      case A_TK_ALIGN:
-                        data->bg_align = draw_align_fromstr(*values, -1);
-                        break;
-                      case A_TK_RESIZE:
-                        data->bg_resize = a_strtobool(*values, -1);
-                      default:
-                        break;
-                    }
-
-        }
-        else /* border */
+        if(elem[2] == '_') /* bg_margin */
+            for(; *names; names++, values++)
+                switch(a_tokenize(*names, -1))
+                {
+                  case A_TK_LEFT:
+                    data->bg_margin.left = atoi(*values);
+                    break;
+                  case A_TK_TOP:
+                    data->bg_margin.top = atoi(*values);
+                  default:
+                    break;
+                }
+        else /* bg */
             for(; *names; names++, values++)
                 switch(a_tokenize(*names, -1))
                 {
                   case A_TK_COLOR:
-                    reqs[++reqs_nbr] = xcolor_init_unchecked(&data->border.color,
+                    reqs[++reqs_nbr] = xcolor_init_unchecked(&data->bg_color,
                                                              *values,
                                                              a_strlen(*values));
+
+                    bg_color_nbr = reqs_nbr;
                     break;
-                  case A_TK_WIDTH:
-                    data->border.width = atoi(*values);
+                  case A_TK_IMAGE:
+                    if(data->bg_image)
+                        image_delete(&data->bg_image);
+                    data->bg_image = image_new_from_file(*values);
                     break;
+                  case A_TK_ALIGN:
+                    data->bg_align = draw_align_fromstr(*values, -1);
+                    break;
+                  case A_TK_RESIZE:
+                    data->bg_resize = a_strtobool(*values, -1);
                   default:
                     break;
                 }
@@ -268,7 +249,7 @@ static bool
 draw_text_markup_expand(draw_parser_data_t *data,
                         const char *str, ssize_t slen)
 {
-    static char const * const elements[] = { "bg", "bg_margin", "text", "margin", "border", NULL };
+    static char const * const elements[] = { "bg", "bg_margin", "text", "margin", NULL };
     markup_parser_data_t p =
     {
         .elements   = elements,
@@ -365,9 +346,6 @@ draw_text(draw_context_t *ctx, font_t *font, PangoEllipsizeMode ellip, PangoWrap
 
     if(pdata->has_bg_color)
         draw_rectangle(ctx, area, 1.0, true, &pdata->bg_color);
-
-    if(pdata->border.width > 0)
-        draw_rectangle(ctx, area, pdata->border.width, false, &pdata->border.color);
 
     if(pdata->bg_image)
     {

@@ -39,6 +39,12 @@ typedef struct
     PangoWrapMode wrap;
     /** Draw parser data */
     draw_parser_data_t pdata;
+    /** Border */
+    struct
+    {
+        int width;
+        xcolor_t color;
+    } border;
 } textbox_data_t;
 
 static area_t
@@ -76,6 +82,10 @@ textbox_draw(widget_t *widget, draw_context_t *ctx, area_t geometry,
              int screen, wibox_t *p)
 {
     textbox_data_t *d = widget->data;
+
+    if(d->border.width > 0)
+        draw_rectangle(ctx, geometry, d->border.width, false, &d->border.color);
+
     draw_text(ctx, globalconf.font, d->ellip, d->wrap, geometry, d->text, d->len, &d->pdata, &d->extents);
 }
 
@@ -100,6 +110,8 @@ textbox_destructor(widget_t *w)
  * \lfield width The width of the textbox. Set to 0 for auto.
  * \lfield wrap The wrap mode: word, char, word_char.
  * \lfield ellipsize The ellipsize mode: start, middle or end.
+ * \lfield border_width The border width to draw around.
+ * \lfield border_color The border color.
  */
 static int
 luaA_textbox_index(lua_State *L, awesome_token_t token)
@@ -109,6 +121,12 @@ luaA_textbox_index(lua_State *L, awesome_token_t token)
 
     switch(token)
     {
+      case A_TK_BORDER_WIDTH:
+        lua_pushnumber(L, d->border.width);
+        return 1;
+      case A_TK_BORDER_COLOR:
+        luaA_pushcolor(L, &d->border.color);
+        return 1;
       case A_TK_TEXT:
         lua_pushstring(L, d->text);
         return 1;
@@ -163,6 +181,13 @@ luaA_textbox_newindex(lua_State *L, awesome_token_t token)
 
     switch(token)
     {
+      case A_TK_BORDER_COLOR:
+        if((buf = luaL_checklstring(L, 3, &len)))
+            xcolor_init_reply(xcolor_init_unchecked(&d->border.color, buf, len));
+        break;
+      case A_TK_BORDER_WIDTH:
+        d->border.width = luaL_checknumber(L, 3);
+        break;
       case A_TK_TEXT:
         if(lua_isnil(L, 3)
            || (buf = luaL_checklstring(L, 3, &len)))

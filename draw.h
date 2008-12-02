@@ -170,11 +170,6 @@ typedef struct
         int offset;
         xcolor_t color;
     } shadow;
-    struct
-    {
-        int width;
-        xcolor_t color;
-    } border;
 } draw_parser_data_t;
 
 void draw_text(draw_context_t *, font_t *, PangoEllipsizeMode, PangoWrapMode, area_t, const char *, ssize_t len, draw_parser_data_t *, area_t *);
