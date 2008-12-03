@@ -118,7 +118,7 @@ textbox_draw(widget_t *widget, draw_context_t *ctx, area_t geometry,
         }
     }
 
-    draw_text(ctx, &d->data, globalconf.font, d->ellip, d->wrap, d->align, &d->margin, geometry, &d->extents);
+    draw_text(ctx, &d->data, d->ellip, d->wrap, d->align, &d->margin, geometry, &d->extents);
 }
 
 /** Delete a textbox widget.
@@ -314,7 +314,7 @@ luaA_textbox_newindex(lua_State *L, awesome_token_t token)
                 else
                     draw_text_context_init(&d->data, buf, len);
 
-                d->extents = draw_text_extents(&d->data, globalconf.font);
+                d->extents = draw_text_extents(&d->data);
             }
             else
                 p_clear(&d->extents, 1);

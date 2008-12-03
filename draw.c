@@ -213,17 +213,16 @@ draw_context_init(draw_context_t *d, int phys_screen,
 
 /** Draw text into a draw context.
  * \param ctx Draw context  to draw to.
- * \param font The font to use.
+ * \param data Draw text context data.
  * \param elip Ellipsize mode.
  * \param wrap Wrap mode.
  * \param align Text alignment.
  * \param margin Margin to respect when drawing text.
  * \param area Area to draw to.
- * \param data Draw text context data.
  * \param ext Text extents.
  */
 void
-draw_text(draw_context_t *ctx, draw_text_context_t *data, font_t *font,
+draw_text(draw_context_t *ctx, draw_text_context_t *data,
           PangoEllipsizeMode ellip, PangoWrapMode wrap,
           alignment_t align, padding_t *margin, area_t area, area_t *ext)
 {
@@ -239,7 +238,7 @@ draw_text(draw_context_t *ctx, draw_text_context_t *data, font_t *font,
     pango_layout_set_ellipsize(ctx->layout, ellip);
     pango_layout_set_wrap(ctx->layout, wrap);
     pango_layout_set_attributes(ctx->layout, data->attr_list);
-    pango_layout_set_font_description(ctx->layout, font->desc);
+    pango_layout_set_font_description(ctx->layout, globalconf.font->desc);
 
     x = area.x + margin->left;
     /* + 1 is added for rounding, so that in any case of doubt we rather draw
@@ -640,11 +639,10 @@ draw_rotate(draw_context_t *ctx,
 
 /** Return the width and height of a text in pixel.
  * \param data The draw context text data.
- * \param font Font to use.
  * \return Text height and width.
  */
 area_t
-draw_text_extents(draw_text_context_t *data, font_t *font)
+draw_text_extents(draw_text_context_t *data)
 {
     cairo_surface_t *surface;
     cairo_t *cr;
@@ -666,7 +664,7 @@ draw_text_extents(draw_text_context_t *data, font_t *font)
     layout = pango_cairo_create_layout(cr);
     pango_layout_set_text(layout, data->text, data->len);
     pango_layout_set_attributes(layout, data->attr_list);
-    pango_layout_set_font_description(layout, font->desc);
+    pango_layout_set_font_description(layout, globalconf.font->desc);
     pango_layout_get_pixel_extents(layout, NULL, &ext);
     g_object_unref(layout);
     cairo_destroy(cr);
