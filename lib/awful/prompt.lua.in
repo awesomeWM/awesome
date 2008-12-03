@@ -106,8 +106,9 @@ end
 -- @param cursor_color The cursor color.
 -- @param cursor_pos The cursor position.
 -- @param cursor_pos The cursor underline style.
-local function prompt_text_with_cursor(text, text_color, cursor_color, cursor_pos, cursor_ul)
-    local char, spacer
+-- @param selectall If true cursor is rendered on the entire text.
+local function prompt_text_with_cursor(text, text_color, cursor_color, cursor_pos, cursor_ul, selectall)
+    local char, spacer, text_start, text_end
     if not text then text = "" end
     if #text < cursor_pos then
         char = " "
@@ -116,9 +117,14 @@ local function prompt_text_with_cursor(text, text_color, cursor_color, cursor_po
         char = util.escape(text:sub(cursor_pos, cursor_pos))
         spacer = " "
     end
+    text_start = util.escape(text:sub(1, cursor_pos - 1))
+    text_end = util.escape(text:sub(cursor_pos + 1))
+    if selectall then
+        char = text_start .. char .. text_end
+        text_start = ""
+        text_end = ""
+    end
     local underline = cursor_ul or "none"
-    local text_start = util.escape(text:sub(1, cursor_pos - 1))
-    local text_end = util.escape(text:sub(cursor_pos + 1))
     return text_start .. "<span background=\"" .. util.color_strip_alpha(cursor_color) .. "\" foreground=\"" .. util.color_strip_alpha(text_color) .. "\" underline=\"" .. underline .. "\">" .. char .. "</span>" .. text_end .. spacer
 end
 
@@ -151,7 +157,7 @@ function run(args, textbox, exe_callback, completion_callback, history_path, his
     if not textbox or not exe_callback then
         return
     end
-    textbox.text = prettyprompt .. prompt_text_with_cursor(text, inv_col, cur_col, cur_pos, cur_ul)
+    textbox.text = prettyprompt .. prompt_text_with_cursor(text, inv_col, cur_col, cur_pos, cur_ul, args.selectall)
     capi.keygrabber.run(
     function (mod, key)
         -- Get out cases
@@ -175,6 +181,7 @@ function run(args, textbox, exe_callback, completion_callback, history_path, his
 
         -- Control cases
         if mod.Control then
+            args.selectall = nil
             if key == "a" then
                 cur_pos = 1
             elseif key == "b" then
@@ -227,7 +234,7 @@ function run(args, textbox, exe_callback, completion_callback, history_path, his
                         if ncomp == 1 then return true end
                         if ncomp == 2 then
                             command = command_before_comp
-                            textbox.text = prettyprompt .. prompt_text_with_cursor(command_before_comp, inv_col, cur_col, cur_pos)
+                            textbox.text = prettyprompt .. prompt_text_with_cursor(command_before_comp, inv_col, cur_col, cur_pos, args.selectall)
                             return true
                         end
 
@@ -284,7 +291,7 @@ function run(args, textbox, exe_callback, completion_callback, history_path, his
                 -- len() is UTF-8 aware but #key is not,
                 -- so check that we have one UTF-8 char but advance the cursor of # position
                 if key:len() == 1 then
-                    if args.selectall and cur_pos == 1 then command = "" end
+                    if args.selectall then command = "" end
                     command = command:sub(1, cur_pos - 1) .. key .. command:sub(cur_pos)
                     cur_pos = cur_pos + #key
                 end
@@ -294,10 +301,11 @@ function run(args, textbox, exe_callback, completion_callback, history_path, his
             elseif cur_pos > #command + 1 then
                 cur_pos = #command + 1
             end
+            args.selectall = nil
         end
 
         -- Update textbox
-        textbox.text = prettyprompt .. prompt_text_with_cursor(command, inv_col, cur_col, cur_pos, cur_ul)
+        textbox.text = prettyprompt .. prompt_text_with_cursor(command, inv_col, cur_col, cur_pos, cur_ul, args.selectall)
 
         return true
     end)
