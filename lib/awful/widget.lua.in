@@ -51,7 +51,7 @@ local function taglist_update (screen, w, label, buttons, data)
     end
     -- Update widgets text
     for k, tag in ipairs(tags) do
-        w[k].text = label(tag)
+        w[k].text, w[k].bg = label(tag)
         if buttons then
             if not data[tag] then
                 -- Replace press function by a new one calling with tags as
@@ -112,7 +112,7 @@ end
 -- squares_sel Optional: a user provided image for selected squares.
 -- squares_unsel Optional: a user provided image for unselected squares.
 -- squares_resize Optional: true or false to resize squares.
--- @return A string to print.
+-- @return A string to print and a background color.
 function taglist.label.all(t, args)
     if not args then args = {} end
     local theme = beautiful.get()
@@ -150,13 +150,13 @@ function taglist.label.all(t, args)
             end
         end
     end
-    if bg_color and fg_color then
-        text = text .. "<bg "..background.." color='"..bg_color.."'/> <span color='"..util.color_strip_alpha(fg_color).."'>"..util.escape(t.name).."</span> "
+    if fg_color then
+        text = text .. "<bg "..background.." /> <span color='"..util.color_strip_alpha(fg_color).."'>"..util.escape(t.name).."</span> "
     else
         text = text .. " <bg "..background.." />"..util.escape(t.name).." "
     end
     text = text .. "</span>"
-    return text
+    return text, bg_color
 end
 
 --- Return labels for a taglist widget with all *non empty* tags from screen.
@@ -220,7 +220,8 @@ local function tasklist_update(w, buttons, label, data)
             w[k]:buttons(data[c])
             w[k + 1]:buttons(data[c])
         end
-        w[k + 1].text, w[k].bg = label(clients[(k + 1) / 2])
+        w[k + 1].text, w[k + 1].bg = label(clients[(k + 1) / 2])
+        w[k].bg = w[k + 1].bg
         if w[k + 1].text  then
             -- Set icon
             w[k].image = clients[(k + 1) / 2].icon
@@ -288,15 +289,15 @@ local function widget_tasklist_label_common(c, args)
         name = util.escape(c.name) or ""
     end
     if capi.client.focus == c then
-        if bg_focus and fg_focus then
-            bg = bg_focus
-            text = text .. "<bg color='"..bg_focus.."'/><span color='"..util.color_strip_alpha(fg_focus).."'>"..name.."</span>"
+        bg = bg_focus
+        if fg_focus then
+            text = text .. "<span color='"..util.color_strip_alpha(fg_focus).."'>"..name.."</span>"
         else
             text = text .. name
         end
-    elseif c.urgent and bg_urgent and fg_urgent then
+    elseif c.urgent and fg_urgent then
         bg = bg_urgent
-        text = text .. "<bg color='"..bg_urgent.."'/><span color='"..util.color_strip_alpha(fg_urgent).."'>"..name.."</span>"
+        text = text .. "<span color='"..util.color_strip_alpha(fg_urgent).."'>"..name.."</span>"
     else
         text = text .. name
     end
@@ -315,7 +316,7 @@ end
 -- fg_focus The foreground color for focused client.
 -- bg_urgent The background color for urgent clients.
 -- fg_urgent The foreground color for urgent clients.
--- @return A string to print.
+-- @return A string to print and a background color.
 function tasklist.label.allscreen(c, screen, args)
     return widget_tasklist_label_common(c, args)
 end
@@ -331,7 +332,7 @@ end
 -- fg_focus The foreground color for focused client.
 -- bg_urgent The background color for urgent clients.
 -- fg_urgent The foreground color for urgent clients.
--- @return A string to print.
+-- @return A string to print and a background color.
 function tasklist.label.alltags(c, screen, args)
     -- Only print client on the same screen as this widget
     if c.screen ~= screen then return end
@@ -349,7 +350,7 @@ end
 -- fg_focus The foreground color for focused client.
 -- bg_urgent The background color for urgent clients.
 -- fg_urgent The foreground color for urgent clients.
--- @return A string to print.
+-- @return A string to print and a background color.
 function tasklist.label.currenttags(c, screen, args)
     -- Only print client on the same screen as this widget
     if c.screen ~= screen then return end

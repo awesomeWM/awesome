@@ -158,9 +158,6 @@ draw_markup_on_element(markup_parser_data_t *p, const char *elem,
 {
     draw_parser_data_t *data = p->priv;
 
-    xcolor_init_request_t reqs[3];
-    int8_t i, bg_color_nbr = -1, reqs_nbr = -1;
-
     /* hack: markup.c validates tags so we can avoid strcmps here */
     switch (*elem) {
       case 'b':
@@ -180,13 +177,6 @@ draw_markup_on_element(markup_parser_data_t *p, const char *elem,
             for(; *names; names++, values++)
                 switch(a_tokenize(*names, -1))
                 {
-                  case A_TK_COLOR:
-                    reqs[++reqs_nbr] = xcolor_init_unchecked(&data->bg_color,
-                                                             *values,
-                                                             a_strlen(*values));
-
-                    bg_color_nbr = reqs_nbr;
-                    break;
                   case A_TK_IMAGE:
                     if(data->bg_image)
                         image_delete(&data->bg_image);
@@ -202,12 +192,6 @@ draw_markup_on_element(markup_parser_data_t *p, const char *elem,
                 }
         break;
     }
-
-    for(i = 0; i <= reqs_nbr; i++)
-        if(i == bg_color_nbr)
-            data->has_bg_color = xcolor_init_reply(reqs[i]);
-        else
-            xcolor_init_reply(reqs[i]);
 }
 
 static bool
@@ -310,9 +294,6 @@ draw_text(draw_context_t *ctx, font_t *font, PangoEllipsizeMode ellip, PangoWrap
         text = pdata->text;
         len = pdata->len;
     }
-
-    if(pdata->has_bg_color)
-        draw_rectangle(ctx, area, 1.0, true, &pdata->bg_color);
 
     if(pdata->bg_image)
     {

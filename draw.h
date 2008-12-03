@@ -165,8 +165,6 @@ typedef struct
     {
         int top, left;
     } bg_margin;
-    bool has_bg_color;
-    xcolor_t bg_color;
     image_t *bg_image;
     alignment_t bg_align;
     bool bg_resize;

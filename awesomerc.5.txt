@@ -45,7 +45,6 @@ http://library.gnome.org/devel/pango/stable/PangoMarkupFormat.html.
 List of *awesome* markup elements and their attributes:
 
 * bg
-  - color: background color
   - image: path to a background image
   - align: background image alignment
   - resize: resize background image to text size

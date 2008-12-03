@@ -49,6 +49,8 @@ typedef struct
     alignment_t align;
     /** Margin */
     padding_t margin;
+    /** Background color */
+    xcolor_t bg;
 } textbox_data_t;
 
 static area_t
@@ -86,6 +88,9 @@ textbox_draw(widget_t *widget, draw_context_t *ctx, area_t geometry,
              int screen, wibox_t *p)
 {
     textbox_data_t *d = widget->data;
+
+    if(d->bg.initialized)
+        draw_rectangle(ctx, geometry, 1.0, true, &d->bg);
 
     if(d->border.width > 0)
         draw_rectangle(ctx, geometry, d->border.width, false, &d->border.color);
@@ -134,6 +139,7 @@ luaA_textbox_margin(lua_State *L)
  * \lfield border_color The border color.
  * \lfield align Text alignment, left, center or right.
  * \lfield margin Method to pass text margin: a table with top, left, right and bottom keys.
+ * \lfield bg Background color.
  */
 static int
 luaA_textbox_index(lua_State *L, awesome_token_t token)
@@ -143,6 +149,8 @@ luaA_textbox_index(lua_State *L, awesome_token_t token)
 
     switch(token)
     {
+      case A_TK_BG:
+        return luaA_pushcolor(L, &d->bg);
       case A_TK_MARGIN:
         lua_pushcfunction(L, luaA_textbox_margin);
         return 1;
@@ -209,6 +217,12 @@ luaA_textbox_newindex(lua_State *L, awesome_token_t token)
 
     switch(token)
     {
+      case A_TK_BG:
+        if(lua_isnil(L, 3))
+            p_clear(&d->bg, 1);
+        else if((buf = luaL_checklstring(L, 3, &len)))
+            xcolor_init_reply(xcolor_init_unchecked(&d->bg, buf, len));
+        break;
       case A_TK_ALIGN:
         if((buf = luaL_checklstring(L, 3, &len)))
             d->align = draw_align_fromstr(buf, len);
