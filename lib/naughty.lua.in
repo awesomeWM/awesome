@@ -295,8 +295,11 @@ function notify(args)
     notification.die = die
 
     local run = function ()
-        if args.run then args.run() end
-        die()
+        if args.run then
+            args.run(notification)
+        else
+            die()
+        end
     end
 
     local hover_destroy = function ()
