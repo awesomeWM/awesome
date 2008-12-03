@@ -89,50 +89,6 @@ event_handle_mouse_button(client_t *c,
             }
 }
 
-/** Get a widget node from a wibox by coords.
- * \param Container position.
- * \param widgets The widget list.
- * \param width The container width.
- * \param height The container height.
- * \param x X coordinate of the widget.
- * \param y Y coordinate of the widget.
- * \return A widget.
- */
-static widget_t *
-widget_getbycoords(position_t position, widget_node_array_t *widgets,
-                   int width, int height, int16_t *x, int16_t *y)
-{
-    int tmp;
-
-    /* Need to transform coordinates like it was top/bottom */
-    switch(position)
-    {
-      case Right:
-        tmp = *y;
-        *y = width - *x;
-        *x = tmp;
-        break;
-      case Left:
-        tmp = *y;
-        *y = *x;
-        *x = height - tmp;
-        break;
-      default:
-        break;
-    }
-
-    for(int i = 0; i < widgets->len; i++)
-    {
-        widget_node_t *w = &widgets->tab[i];
-        if(w->widget->isvisible &&
-           *x >= w->geometry.x && *x < w->geometry.x + w->geometry.width
-           && *y >= w->geometry.y && *y < w->geometry.y + w->geometry.height)
-            return w->widget;
-    }
-
-    return NULL;
-}
-
 /** Handle an event with mouse grabber if needed
  * \param x The x coordinate.
  * \param y The y coordinate.

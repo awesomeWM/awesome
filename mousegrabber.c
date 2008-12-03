@@ -40,11 +40,11 @@ mousegrabber_grab(xcb_cursor_t cursor)
         screen < xcb_setup_roots_length(xcb_get_setup(globalconf.connection));
         screen++)
     {
-        int x, y;
+        int16_t x, y;
         uint16_t mask;
 
         root = xutil_screen_get(globalconf.connection, screen)->root;
-        if(mouse_query_pointer(root, &x, &y, &mask))
+        if(mouse_query_pointer(root, &x, &y, NULL, &mask))
             break;
     }
 

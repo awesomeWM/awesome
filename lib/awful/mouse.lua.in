@@ -9,6 +9,7 @@ local layout = require("awful.layout")
 local tag = require("awful.tag")
 local hooks = require("awful.hooks")
 local aclient = require("awful.client")
+local type = type
 local math = math
 local ipairs = ipairs
 local capi =
@@ -23,6 +24,27 @@ local capi =
 module("awful.mouse")
 
 client = {}
+
+function client_under_pointer()
+    local obj = capi.mouse.object_under_pointer()
+    if type(obj) == "client" then
+        return obj
+    end
+end
+
+function wibox_under_pointer()
+    local obj = capi.mouse.object_under_pointer()
+    if type(obj) == "wibox" then
+        return obj
+    end
+end
+
+function widget_under_pointer()
+    local obj, obj2 = capi.mouse.object_under_pointer()
+    if type(obj2) == "widget" then
+        return obj2
+    end
+end
 
 local function snap_outside(g, sg, snap)
     if g.x < snap + sg.x + sg.width and g.x > sg.x + sg.width then
@@ -119,7 +141,7 @@ function client.move(c, snap)
                                       elseif lay ~= layout.suit.magnifier then
                                           c.screen = capi.mouse.screen
                                           if layout.get(c.screen) ~= layout.suit.floating then
-                                              local c_u_m = capi.mouse.client_under_pointer()
+                                              local c_u_m = client_under_pointer()
                                               if c_u_m and not aclient.floating.get(c_u_m) then
                                                   if c_u_m ~= c then
                                                       c:swap(c_u_m)

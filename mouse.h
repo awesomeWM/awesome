@@ -41,7 +41,7 @@ struct button_t
 
 void button_delete(button_t **);
 
-bool mouse_query_pointer(xcb_window_t, int *, int *, uint16_t *);
+bool mouse_query_pointer(xcb_window_t, int16_t *, int16_t *, xcb_window_t *, uint16_t *);
 int luaA_mouse_pushstatus(lua_State *, int, int, uint16_t);
 
 DO_RCNT(button_t, button, button_delete)

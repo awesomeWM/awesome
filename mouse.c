@@ -24,6 +24,7 @@
 #include "common/tokenize.h"
 #include "screen.h"
 #include "tag.h"
+#include "wibox.h"
 #include "common/xcursor.h"
 
 extern awesome_t globalconf;
@@ -47,11 +48,12 @@ button_delete(button_t **button)
  * \param window The window to get position on.
  * \param x will be set to the Pointer-x-coordinate relative to window
  * \param y will be set to the Pointer-y-coordinate relative to window
+ * \param child Will be set to the window under the pointer.
  * \param mask will be set to the current buttons state
  * \return true on success, false if an error occured
  **/
 bool
-mouse_query_pointer(xcb_window_t window, int *x, int *y, uint16_t *mask)
+mouse_query_pointer(xcb_window_t window, int16_t *x, int16_t *y, xcb_window_t *child, uint16_t *mask)
 {
     xcb_query_pointer_cookie_t query_ptr_c;
     xcb_query_pointer_reply_t *query_ptr_r;
@@ -66,6 +68,8 @@ mouse_query_pointer(xcb_window_t window, int *x, int *y, uint16_t *mask)
     *y = query_ptr_r->win_y;
     if (mask)
         *mask = query_ptr_r->mask;
+    if(child)
+        *child = query_ptr_r->child;
 
     p_delete(&query_ptr_r);
 
@@ -76,11 +80,12 @@ mouse_query_pointer(xcb_window_t window, int *x, int *y, uint16_t *mask)
  * \param screen This will be set to the screen number the mouse is on.
  * \param x This will be set to the Pointer-x-coordinate relative to window.
  * \param y This will be set to the Pointer-y-coordinate relative to window.
+ * \param child This will be set to the window under the pointer.
  * \param mask This will be set to the current buttons state.
  * \return True on success, false if an error occured.
  */
 static bool
-mouse_query_pointer_root(int *s, int *x, int *y, uint16_t *mask)
+mouse_query_pointer_root(int *s, int16_t *x, int16_t *y, xcb_window_t *child, uint16_t *mask)
 {
     for(int screen = 0;
         screen < xcb_setup_roots_length(xcb_get_setup(globalconf.connection));
@@ -88,7 +93,7 @@ mouse_query_pointer_root(int *s, int *x, int *y, uint16_t *mask)
     {
         xcb_window_t root = xutil_screen_get(globalconf.connection, screen)->root;
 
-        if(mouse_query_pointer(root, x, y, mask))
+        if(mouse_query_pointer(root, x, y, child, mask))
         {
             *s = screen;
             return true;
@@ -324,13 +329,13 @@ luaA_mouse_index(lua_State *L)
 {
     size_t len;
     const char *attr = luaL_checklstring(L, 2, &len);
-    int mouse_x, mouse_y, i;
-    int screen;
+    int16_t mouse_x, mouse_y;
+    int screen, i;
 
     switch(a_tokenize(attr, len))
     {
       case A_TK_SCREEN:
-        if(!mouse_query_pointer_root(&screen, &mouse_x, &mouse_y, NULL))
+        if(!mouse_query_pointer_root(&screen, &mouse_x, &mouse_y, NULL, NULL))
             return 0;
 
         i = screen_getbycoord(screen, mouse_x, mouse_y);
@@ -421,7 +426,8 @@ static int
 luaA_mouse_coords(lua_State *L)
 {
     uint16_t mask;
-    int screen, x, y, mouse_x, mouse_y;
+    int screen, x, y;
+    int16_t mouse_x, mouse_y;
 
     if(lua_gettop(L) == 1)
     {
@@ -429,7 +435,7 @@ luaA_mouse_coords(lua_State *L)
 
         luaA_checktable(L, 1);
 
-        if(!mouse_query_pointer_root(&screen, &mouse_x, &mouse_y, &mask))
+        if(!mouse_query_pointer_root(&screen, &mouse_x, &mouse_y, NULL, &mask))
             return 0;
 
         x = luaA_getopt_number(L, 1, "x", mouse_x);
@@ -440,7 +446,7 @@ luaA_mouse_coords(lua_State *L)
         lua_pop(L, 1);
     }
 
-    if(!mouse_query_pointer_root(&screen, &mouse_x, &mouse_y, &mask))
+    if(!mouse_query_pointer_root(&screen, &mouse_x, &mouse_y, NULL, &mask))
         return 0;
 
     return luaA_mouse_pushstatus(L, mouse_x, mouse_y, mask);
@@ -453,30 +459,39 @@ luaA_mouse_coords(lua_State *L)
  * \lreturn A client or nil.
  */
 static int
-luaA_mouse_client_under_pointer(lua_State *L)
+luaA_mouse_object_under_pointer(lua_State *L)
 {
-    for(int screen = 0;
-        screen < xcb_setup_roots_length(xcb_get_setup(globalconf.connection));
-        screen++)
-    {
-        xcb_window_t root = xutil_screen_get(globalconf.connection, screen)->root;
-        xcb_query_pointer_reply_t *query_ptr_r;
-        xcb_query_pointer_cookie_t query_ptr_c = xcb_query_pointer_unchecked(globalconf.connection, root);
-        query_ptr_r = xcb_query_pointer_reply(globalconf.connection, query_ptr_c, NULL);
+    int screen;
+    int16_t mouse_x, mouse_y;
+    xcb_window_t child;
 
-        if(query_ptr_r)
+    if(!mouse_query_pointer_root(&screen, &mouse_x, &mouse_y, &child, NULL))
+        return 0;
+
+    wibox_t *wibox;
+    client_t *client;
+    if((wibox = wibox_getbywin(child)))
+    {
+        luaA_wibox_userdata_new(L, wibox);
+
+        int16_t x = mouse_x - wibox->sw.geometry.x;
+        int16_t y = mouse_y - wibox->sw.geometry.y;
+
+        widget_t *widget = widget_getbycoords(wibox->position, &wibox->widgets,
+                                              wibox->sw.geometry.width,
+                                              wibox->sw.geometry.height,
+                                              &x, &y);
+
+        if(widget)
         {
-            client_t *c = client_getbywin(query_ptr_r->child);
-            p_delete(&query_ptr_r);
-            if(c)
-               return luaA_client_userdata_new(L, c);
-            else
-            {
-                lua_pushnil(L);
-                return 1;
-            }
+            luaA_widget_userdata_new(L, widget);
+            return 2;
         }
+        return 1;
     }
+    else if((client = client_getbywin(child)))
+        return luaA_client_userdata_new(L, client);
+
     return 0;
 }
 
@@ -485,7 +500,7 @@ const struct luaL_reg awesome_mouse_methods[] =
     { "__index", luaA_mouse_index },
     { "__newindex", luaA_mouse_newindex },
     { "coords", luaA_mouse_coords },
-    { "client_under_pointer", luaA_mouse_client_under_pointer },
+    { "object_under_pointer", luaA_mouse_object_under_pointer },
     { NULL, NULL }
 };
 const struct luaL_reg awesome_mouse_meta[] =
