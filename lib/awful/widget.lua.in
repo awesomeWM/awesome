@@ -72,6 +72,8 @@ function taglist.new(scr, label, buttons)
             end
         end
     end
+    hooks.focus.register(function (c) return taglist_update(c.screen) end)
+    hooks.unfocus.register(function (c) return taglist_update(c.screen) end)
     hooks.arrange.register(taglist_update)
     hooks.tags.register(taglist_update)
     hooks.tagged.register(function (c, tag) taglist_update(c.screen) end)
