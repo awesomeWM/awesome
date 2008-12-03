@@ -356,7 +356,8 @@ draw_text(draw_context_t *ctx, font_t *font, PangoEllipsizeMode ellip, PangoWrap
                            pango_units_from_double(area.width
                                                    - (margin->left
                                                       + margin->right)));
-    pango_layout_set_height(ctx->layout, pango_units_from_double(area.height) - margin->top);
+    pango_layout_set_height(ctx->layout, pango_units_from_double(area.height)
+                                         - (margin->top + margin->bottom));
     pango_layout_set_ellipsize(ctx->layout, ellip);
     pango_layout_set_wrap(ctx->layout, wrap);
     pango_layout_set_attributes(ctx->layout, pdata->attr_list);
