@@ -64,7 +64,6 @@ set(AWE_SRCS
     ${SOURCE_DIR}/swindow.c
     ${SOURCE_DIR}/common/buffer.c
     ${SOURCE_DIR}/common/atoms.c
-    ${SOURCE_DIR}/common/markup.c
     ${SOURCE_DIR}/common/socket.c
     ${SOURCE_DIR}/common/util.c
     ${SOURCE_DIR}/common/version.c

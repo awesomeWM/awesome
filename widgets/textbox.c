@@ -27,18 +27,13 @@ extern awesome_t globalconf;
 /** The textbox private data structure */
 typedef struct
 {
-    /** Textbox text */
-    char *text;
-    /** Textbox text length */
-    ssize_t len;
+    draw_text_context_t data;
     /** Textbox width */
     int width;
     /** Extents */
     area_t extents;
     PangoEllipsizeMode ellip;
     PangoWrapMode wrap;
-    /** Draw parser data */
-    draw_parser_data_t pdata;
     /** Border */
     struct
     {
@@ -51,6 +46,12 @@ typedef struct
     padding_t margin;
     /** Background color */
     xcolor_t bg;
+    /** Background image */
+    image_t *bg_image;
+    /** Background resize to wibox height. */
+    bool bg_resize;
+    /** Background alignment */
+    alignment_t bg_align;
 } textbox_data_t;
 
 static area_t
@@ -65,14 +66,13 @@ textbox_geometry(widget_t *widget, int screen, int height, int width)
         geometry.width = d->width;
     else if(widget->align == AlignFlex)
         geometry.width = width;
-    else
+    else if(d->bg_image)
     {
-        geometry.width = MIN(d->extents.width, width);
-
-        if(d->pdata.bg_image)
-            geometry.width = MAX(geometry.width,
-                                 d->pdata.bg_resize ? ((double) d->pdata.bg_image->width / (double) d->pdata.bg_image->height) * geometry.height : d->pdata.bg_image->width);
+        double ratio = d->bg_resize ? (double) geometry.height / d->bg_image->height : 1;
+        geometry.width = MIN(width, MAX(d->extents.width, MAX(d->width, d->bg_image->width * ratio)));
     }
+    else
+        geometry.width = MIN(d->extents.width, width);
 
     return geometry;
 }
@@ -95,8 +95,30 @@ textbox_draw(widget_t *widget, draw_context_t *ctx, area_t geometry,
     if(d->border.width > 0)
         draw_rectangle(ctx, geometry, d->border.width, false, &d->border.color);
 
-    draw_text(ctx, globalconf.font, d->ellip, d->wrap, d->align, &d->margin,
-              geometry, d->text, d->len, &d->pdata, &d->extents);
+    if(d->bg_image)
+    {
+        double ratio = d->bg_resize ? (double) geometry.height / d->bg_image->height : 1;
+        /* check there is enough space to draw the image */
+        if(ratio * d->bg_image->width <= geometry.width)
+        {
+            int x = geometry.x;
+            int y = geometry.y;
+            switch(d->bg_align)
+            {
+              case AlignCenter:
+                x += (geometry.width - d->bg_image->width * ratio) / 2;
+                break;
+              case AlignRight:
+                x += geometry.width - d->bg_image->width * ratio;
+                break;
+              default:
+                break;
+            }
+            draw_image(ctx, x, y, ratio, d->bg_image);
+        }
+    }
+
+    draw_text(ctx, &d->data, globalconf.font, d->ellip, d->wrap, d->align, &d->margin, geometry, &d->extents);
 }
 
 /** Delete a textbox widget.
@@ -106,8 +128,7 @@ static void
 textbox_destructor(widget_t *w)
 {
     textbox_data_t *d = w->data;
-    draw_parser_data_wipe(&d->pdata);
-    p_delete(&d->text);
+    draw_text_context_wipe(&d->data);
     p_delete(&d);
 }
 
@@ -140,6 +161,9 @@ luaA_textbox_margin(lua_State *L)
  * \lfield align Text alignment, left, center or right.
  * \lfield margin Method to pass text margin: a table with top, left, right and bottom keys.
  * \lfield bg Background color.
+ * \lfield bg_image Background image.
+ * \lfield bg_align Background image alignment.
+ * \lfield bg_resize Background resize.
  */
 static int
 luaA_textbox_index(lua_State *L, awesome_token_t token)
@@ -149,6 +173,17 @@ luaA_textbox_index(lua_State *L, awesome_token_t token)
 
     switch(token)
     {
+      case A_TK_BG_RESIZE:
+        lua_pushboolean(L, d->bg_resize);
+        return 1;
+      case A_TK_BG_ALIGN:
+        lua_pushstring(L, draw_align_tostr(d->bg_align));
+        return 1;
+      case A_TK_BG_IMAGE:
+        if(d->bg_image)
+            return luaA_image_userdata_new(L, d->bg_image);
+        else
+            return 0;
       case A_TK_BG:
         return luaA_pushcolor(L, &d->bg);
       case A_TK_MARGIN:
@@ -164,8 +199,12 @@ luaA_textbox_index(lua_State *L, awesome_token_t token)
         luaA_pushcolor(L, &d->border.color);
         return 1;
       case A_TK_TEXT:
-        lua_pushstring(L, d->text);
-        return 1;
+        if(d->data.len > 0)
+        {
+            lua_pushlstring(L, d->data.text, d->data.len);
+            return 1;
+        }
+        return 0;
       case A_TK_WIDTH:
         lua_pushnumber(L, d->width);
         return 1;
@@ -214,9 +253,29 @@ luaA_textbox_newindex(lua_State *L, awesome_token_t token)
     widget_t **widget = luaA_checkudata(L, 1, "widget");
     const char *buf = NULL;
     textbox_data_t *d = (*widget)->data;
+    image_t **image = NULL;
 
     switch(token)
     {
+      case A_TK_BG_ALIGN:
+        buf = luaL_checklstring(L, 3, &len);
+        d->bg_align = draw_align_fromstr(buf, len);
+        break;
+      case A_TK_BG_RESIZE:
+        d->bg_resize = luaA_checkboolean(L, 3);
+        break;
+      case A_TK_BG_IMAGE:
+        if(lua_isnil(L, 3)
+           || (image = luaA_checkudata(L, 3, "image")))
+        {
+            /* unref image */
+            image_unref(&d->bg_image);
+            if(image)
+                d->bg_image = image_ref(image);
+            else
+                d->bg_image = NULL;
+        }
+        break;
       case A_TK_BG:
         if(lua_isnil(L, 3))
             p_clear(&d->bg, 1);
@@ -239,21 +298,26 @@ luaA_textbox_newindex(lua_State *L, awesome_token_t token)
            || (buf = luaL_checklstring(L, 3, &len)))
         {
             /* delete */
-            draw_parser_data_wipe(&d->pdata);
-            /* reinit since we are giving it as arg to draw_text unconditionally */
-            draw_parser_data_init(&d->pdata);
-            p_delete(&d->text);
+            draw_text_context_wipe(&d->data);
+            p_clear(&d->data, 1);
 
             if(buf)
             {
-                a_iso2utf8(buf, len, &d->text, &d->len);
-                d->extents = draw_text_extents(globalconf.font, d->text, d->len, &d->pdata);
+                char *text;
+                ssize_t tlen;
+                /* if text has been converted to UTF-8 */
+                if(draw_iso2utf8(buf, len, &text, &tlen))
+                {
+                    draw_text_context_init(&d->data, text, tlen);
+                    p_delete(&text);
+                }
+                else
+                    draw_text_context_init(&d->data, buf, len);
+
+                d->extents = draw_text_extents(&d->data, globalconf.font);
             }
             else
-            {
-                d->len = 0;
                 p_clear(&d->extents, 1);
-            }
         }
         break;
       case A_TK_WIDTH:

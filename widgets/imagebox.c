@@ -44,13 +44,15 @@ imagebox_geometry(widget_t *widget, int screen, int height, int width)
     {
         if(d->resize)
         {
-            geometry.width = ((double) height / (double) d->image->height) * d->image->width;
-            geometry.height = height;
+            double ratio = (double) height / d->image->height;
+            geometry.width = ratio * d->image->width;
             if(geometry.width > width)
             {
                 geometry.width = 0;
                 geometry.height = 0;
             }
+            else
+                geometry.height = height;
         }
         else if(d->image->width <= width)
         {
@@ -91,6 +93,7 @@ imagebox_draw(widget_t *widget, draw_context_t *ctx, area_t geometry,
             draw_rectangle(ctx, geometry, 1.0, true, &d->bg);
 
         int y = geometry.y;
+        double ratio = d->resize ? (double) geometry.height / d->image->height : 1;
         switch(d->valign)
         {
           case AlignBottom:
@@ -103,7 +106,7 @@ imagebox_draw(widget_t *widget, draw_context_t *ctx, area_t geometry,
             break;
         }
 
-        draw_image(ctx, geometry.x, y, d->resize ? ctx->height : 0, d->image);
+        draw_image(ctx, geometry.x, y, ratio, d->image);
     }
 }
 

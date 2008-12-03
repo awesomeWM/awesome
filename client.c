@@ -30,7 +30,6 @@
 #include "systray.h"
 #include "property.h"
 #include "wibox.h"
-#include "common/markup.h"
 #include "common/atoms.h"
 
 extern awesome_t globalconf;

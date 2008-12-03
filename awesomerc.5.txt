@@ -37,21 +37,12 @@ alpha channel to `aa' and will blend the green with the color under it.
 
 TEXT FORMAT
 -----------
-You can use and mix Pango markup and awesome markup in text string.
+You can use Pango markup in text string.
 This allows to format the text rendered in widgets.
 Pango markup documentation can be found in the Pango documentation at
 http://library.gnome.org/devel/pango/stable/PangoMarkupFormat.html.
 
-List of *awesome* markup elements and their attributes:
-
-* bg
-  - image: path to a background image
-  - align: background image alignment
-  - resize: resize background image to text size
-
 A Pango markup example: <span weight="bold" foreground="#336699">...</span>.
-
-An *awesome* markup example: <text align="right"/>.
 
 SEE ALSO
 --------

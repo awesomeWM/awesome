@@ -1,8 +1,10 @@
-1
 align
 bar_data_add
 bar_properties_set
 bg
+bg_align
+bg_image
+bg_resize
 border_color
 border_padding
 border_width
@@ -57,7 +59,6 @@ Mod5
 mouse_enter
 mouse_leave
 name
-on
 ontop
 opacity
 orientation
@@ -84,7 +85,6 @@ ticks_gap
 titlebar
 top
 transient_for
-true
 type
 urgent
 valign
@@ -96,4 +96,3 @@ word
 word_char
 workarea
 wrap
-yes

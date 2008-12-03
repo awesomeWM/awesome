@@ -14,7 +14,6 @@ In order to build awesome itself, you need header files and libs of:
   - cairo built with xcb support
   - pango and pangocairo
   - libev
-  - glib
   - Imlib2
   - dbus (optional, use -DWITH_DBUS=OFF with cmake to disable)
   - gperf

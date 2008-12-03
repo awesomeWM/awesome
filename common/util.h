@@ -37,8 +37,6 @@
 #include <alloca.h>
 #endif
 
-#include "tokenize.h"
-
 typedef enum
 {
     East,
@@ -311,29 +309,6 @@ a_strncat(char *dst, ssize_t n, const char *src, ssize_t l)
 {
     ssize_t dlen = a_strnlen(dst, n - 1);
     return dlen + a_strncpy(dst + dlen, n - dlen, src, l);
-}
-
-/** \brief convert a string to a boolean value.
- *
- * The a_strtobool() function converts a string \c s into a boolean.
- * It recognizes the strings "true", "on", "yes" and "1".
- *
- * \param[in]  s     the string to convert
- * \return true if the string is recognized as possibly true, false otherwise.
- */
-static inline bool
-a_strtobool(const char *s, ssize_t len)
-{
-    switch(a_tokenize(s, len))
-    {
-        case A_TK_TRUE:
-        case A_TK_YES:
-        case A_TK_ON:
-        case A_TK_1:
-          return true;
-        default:
-          return false;
-    }
 }
 
 #define fatal(string, ...) _fatal(__LINE__, \

@@ -32,7 +32,6 @@
 #include "structs.h"
 
 #include "common/tokenize.h"
-#include "common/markup.h"
 
 extern awesome_t globalconf;
 
@@ -159,81 +158,28 @@ draw_font_delete(font_t **font)
     }
 }
 
-static void
-draw_markup_on_element(markup_parser_data_t *p, const char *elem,
-                       const char **names, const char **values)
+/** Initialize a draw_text_context_t with text data.
+ * \param data The draw text context to init.
+ * \param str The text string to render.
+ * \param slen The text string length.
+ * \return True if everything is ok, false otherwise.
+ */
+bool
+draw_text_context_init(draw_text_context_t *data, const char *str, ssize_t slen)
 {
-    draw_parser_data_t *data = p->priv;
-
-    /* hack: markup.c validates tags so we can avoid strcmps here */
-    switch (*elem) {
-      case 'b':
-        if(elem[2] == '_') /* bg_margin */
-            for(; *names; names++, values++)
-                switch(a_tokenize(*names, -1))
-                {
-                  case A_TK_LEFT:
-                    data->bg_margin.left = atoi(*values);
-                    break;
-                  case A_TK_TOP:
-                    data->bg_margin.top = atoi(*values);
-                  default:
-                    break;
-                }
-        else /* bg */
-            for(; *names; names++, values++)
-                switch(a_tokenize(*names, -1))
-                {
-                  case A_TK_IMAGE:
-                    if(data->bg_image)
-                        image_delete(&data->bg_image);
-                    data->bg_image = image_new_from_file(*values);
-                    break;
-                  case A_TK_ALIGN:
-                    data->bg_align = draw_align_fromstr(*values, -1);
-                    break;
-                  case A_TK_RESIZE:
-                    data->bg_resize = a_strtobool(*values, -1);
-                  default:
-                    break;
-                }
-        break;
-    }
-}
-
-static bool
-draw_text_markup_expand(draw_parser_data_t *data,
-                        const char *str, ssize_t slen)
-{
-    static char const * const elements[] = { "bg", "bg_margin", NULL };
-    markup_parser_data_t p =
-    {
-        .elements   = elements,
-        .priv       = data,
-        .on_element = &draw_markup_on_element,
-    };
     GError *error = NULL;
-    bool ret = false;
 
-    markup_parser_data_init(&p);
-
-    if(!markup_parse(&p, str, slen))
-        goto bailout;
-
-    if(!pango_parse_markup(p.text.s, p.text.len, 0, &data->attr_list, &data->text, NULL, &error))
+    if(!pango_parse_markup(str, slen, 0, &data->attr_list, &data->text, NULL, &error))
     {
         warn("cannot parse pango markup: %s", error ? error->message : "unknown error");
         if(error)
             g_error_free(error);
-        goto bailout;
+        return false;
     }
 
     data->len = a_strlen(data->text);
-    ret = true;
 
-  bailout:
-    markup_parser_data_wipe(&p);
-    return ret;
+    return true;
 }
 
 /** Initialize a new draw context.
@@ -273,57 +219,17 @@ draw_context_init(draw_context_t *d, int phys_screen,
  * \param align Text alignment.
  * \param margin Margin to respect when drawing text.
  * \param area Area to draw to.
- * \param text Text to draw.
- * \param len Text to draw length.
- * \param data Optional parser data.
+ * \param data Draw text context data.
  * \param ext Text extents.
  */
 void
-draw_text(draw_context_t *ctx, font_t *font, PangoEllipsizeMode ellip, PangoWrapMode wrap,
-          alignment_t align, padding_t *margin, area_t area, const char *text, ssize_t len,
-          draw_parser_data_t *pdata, area_t *ext)
+draw_text(draw_context_t *ctx, draw_text_context_t *data, font_t *font,
+          PangoEllipsizeMode ellip, PangoWrapMode wrap,
+          alignment_t align, padding_t *margin, area_t area, area_t *ext)
 {
     int x, y;
-    draw_parser_data_t parser_data;
 
-    if(!pdata)
-    {
-        draw_parser_data_init(&parser_data);
-        if(draw_text_markup_expand(&parser_data, text, len))
-        {
-            text = parser_data.text;
-            len = parser_data.len;
-        }
-        pdata = &parser_data;
-    }
-    else
-    {
-        text = pdata->text;
-        len = pdata->len;
-    }
-
-    if(pdata->bg_image)
-    {
-        x = area.x;
-        y = area.y;
-        switch(pdata->bg_align)
-        {
-          case AlignCenter:
-            x += (area.width - pdata->bg_image->width) / 2;
-            break;
-          case AlignRight:
-            x += area.width- pdata->bg_image->width;
-            break;
-          default:
-            break;
-        }
-        draw_image(ctx,
-                   x + pdata->bg_margin.left,
-                   y + pdata->bg_margin.top,
-                   pdata->bg_resize ? area.height : 0, pdata->bg_image);
-    }
-
-    pango_layout_set_text(ctx->layout, pdata->text, pdata->len);
+    pango_layout_set_text(ctx->layout, data->text, data->len);
     pango_layout_set_width(ctx->layout,
                            pango_units_from_double(area.width
                                                    - (margin->left
@@ -332,7 +238,7 @@ draw_text(draw_context_t *ctx, font_t *font, PangoEllipsizeMode ellip, PangoWrap
                                          - (margin->top + margin->bottom));
     pango_layout_set_ellipsize(ctx->layout, ellip);
     pango_layout_set_wrap(ctx->layout, wrap);
-    pango_layout_set_attributes(ctx->layout, pdata->attr_list);
+    pango_layout_set_attributes(ctx->layout, data->attr_list);
     pango_layout_set_font_description(ctx->layout, font->desc);
 
     x = area.x + margin->left;
@@ -364,9 +270,6 @@ draw_text(draw_context_t *ctx, font_t *font, PangoEllipsizeMode ellip, PangoWrap
                           ctx->fg.alpha / 65535.0);
     pango_cairo_update_layout(ctx->cr, ctx->layout);
     pango_cairo_show_layout(ctx->cr, ctx->layout);
-
-    if (pdata == &parser_data)
-        draw_parser_data_wipe(&parser_data);
 }
 
 /** Setup color-source for cairo (gradient or mono).
@@ -657,14 +560,13 @@ draw_graph_line(draw_context_t *ctx, area_t rect, int *to, int cur_index,
  * \param y Y coordinate.
  * \param w Width.
  * \param h Height.
- * \param wanted_h Wanted height: if > 0, image will be resized.
+ * \param ratio The ratio to apply to the image.
  * \param data The image pixels array.
  */
 static void
 draw_image_from_argb_data(draw_context_t *ctx, int x, int y, int w, int h,
-                          int wanted_h, unsigned char *data)
+                          double ratio, unsigned char *data)
 {
-    double ratio;
     cairo_t *cr;
     cairo_surface_t *source;
 
@@ -675,14 +577,8 @@ draw_image_from_argb_data(draw_context_t *ctx, int x, int y, int w, int h,
                                                  cairo_format_stride_for_width(CAIRO_FORMAT_ARGB32, w));
 #endif
     cr = cairo_create(ctx->surface);
-    if(wanted_h > 0 && h > 0)
-    {
-        ratio = (double) wanted_h / (double) h;
-        cairo_scale(cr, ratio, ratio);
-        cairo_set_source_surface(cr, source, x / ratio, y / ratio);
-    }
-    else
-        cairo_set_source_surface(cr, source, x, y);
+    cairo_scale(cr, ratio, ratio);
+    cairo_set_source_surface(cr, source, x / ratio, y / ratio);
 
     cairo_paint(cr);
 
@@ -694,13 +590,13 @@ draw_image_from_argb_data(draw_context_t *ctx, int x, int y, int w, int h,
  * \param ctx Draw context to draw to.
  * \param x X coordinate.
  * \param y Y coordinate.
- * \param wanted_h Wanted height: if > 0, image will be resized.
+ * \param ratio The ratio to apply to the image.
  * \param image The image to draw.
  */
 void
-draw_image(draw_context_t *ctx, int x, int y, int wanted_h, image_t *image)
+draw_image(draw_context_t *ctx, int x, int y, double ratio, image_t *image)
 {
-    draw_image_from_argb_data(ctx, x, y, image->width, image->height, wanted_h, image->data);
+    draw_image_from_argb_data(ctx, x, y, image->width, image->height, ratio, image->data);
 }
 
 /** Rotate a pixmap.
@@ -743,14 +639,12 @@ draw_rotate(draw_context_t *ctx,
 }
 
 /** Return the width and height of a text in pixel.
+ * \param data The draw context text data.
  * \param font Font to use.
- * \param text The text.
- * \param len The text length.
- * \param pdata The parser data to fill.
  * \return Text height and width.
  */
 area_t
-draw_text_extents(font_t *font, const char *text, ssize_t len, draw_parser_data_t *parser_data)
+draw_text_extents(draw_text_context_t *data, font_t *font)
 {
     cairo_surface_t *surface;
     cairo_t *cr;
@@ -759,10 +653,7 @@ draw_text_extents(font_t *font, const char *text, ssize_t len, draw_parser_data_
     xcb_screen_t *s = xutil_screen_get(globalconf.connection, globalconf.default_screen);
     area_t geom = { 0, 0, 0, 0 };
 
-    if(!len)
-        return geom;
-
-    if(!draw_text_markup_expand(parser_data, text, len))
+    if(data->len <= 0)
         return geom;
 
     surface = cairo_xcb_surface_create(globalconf.connection,
@@ -773,8 +664,8 @@ draw_text_extents(font_t *font, const char *text, ssize_t len, draw_parser_data_
 
     cr = cairo_create(surface);
     layout = pango_cairo_create_layout(cr);
-    pango_layout_set_text(layout, parser_data->text, parser_data->len);
-    pango_layout_set_attributes(layout, parser_data->attr_list);
+    pango_layout_set_text(layout, data->text, data->len);
+    pango_layout_set_attributes(layout, data->attr_list);
     pango_layout_set_font_description(layout, font->desc);
     pango_layout_get_pixel_extents(layout, NULL, &ext);
     g_object_unref(layout);

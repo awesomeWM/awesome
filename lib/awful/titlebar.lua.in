@@ -6,6 +6,7 @@
 
 -- Grab environment we need
 local math = math
+local image = image
 local pairs = pairs
 local otable = otable
 local capi =
@@ -72,13 +73,13 @@ function add(c, args)
     local closef
     if theme.titlebar_close_button_focus then
         closef = widget.button({ align = "right",
-                                 image = theme.titlebar_close_button_focus })
+                                 image = image(theme.titlebar_close_button_focus) })
     end
 
     local close
     if theme.titlebar_close_button_normal then
         close = widget.button({ align = "right",
-                                image = theme.titlebar_close_button_normal })
+                                image = image(theme.titlebar_close_button_normal) })
     end
 
     if close or closef then
