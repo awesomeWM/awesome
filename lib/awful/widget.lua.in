@@ -221,6 +221,7 @@ function tasklist.new(label, buttons)
             end
         end
     end
+    hooks.arrange.register(tasklist_update)
     hooks.clients.register(tasklist_update)
     hooks.tagged.register(tasklist_update)
     hooks.focus.register(tasklist_update)
