@@ -170,11 +170,6 @@ typedef struct
     image_t *bg_image;
     alignment_t bg_align;
     bool bg_resize;
-    struct
-    {
-        int offset;
-        xcolor_t color;
-    } shadow;
 } draw_parser_data_t;
 
 void draw_text(draw_context_t *, font_t *, PangoEllipsizeMode, PangoWrapMode, alignment_t, padding_t *, area_t, const char *, ssize_t len, draw_parser_data_t *, area_t *);

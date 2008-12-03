@@ -201,22 +201,6 @@ draw_markup_on_element(markup_parser_data_t *p, const char *elem,
                     break;
                 }
         break;
-      case 't': /* text */
-        for(; *names; names++, values++)
-            switch(a_tokenize(*names, -1))
-            {
-              case A_TK_SHADOW:
-                reqs[++reqs_nbr] = xcolor_init_unchecked(&data->shadow.color,
-                                                         *values,
-                                                         a_strlen(*values));
-                break;
-              case A_TK_SHADOW_OFFSET:
-                data->shadow.offset = atoi(*values);
-                break;
-              default:
-                break;
-            }
-        break;
     }
 
     for(i = 0; i <= reqs_nbr; i++)
@@ -230,7 +214,7 @@ static bool
 draw_text_markup_expand(draw_parser_data_t *data,
                         const char *str, ssize_t slen)
 {
-    static char const * const elements[] = { "bg", "bg_margin", "text", NULL };
+    static char const * const elements[] = { "bg", "bg_margin", NULL };
     markup_parser_data_t p =
     {
         .elements   = elements,
@@ -382,18 +366,6 @@ draw_text(draw_context_t *ctx, font_t *font, PangoEllipsizeMode ellip, PangoWrap
           default:
             break;
         }
-
-    if(pdata->shadow.offset)
-    {
-        cairo_set_source_rgba(ctx->cr,
-                              pdata->shadow.color.red / 65535.0,
-                              pdata->shadow.color.green / 65535.0,
-                              pdata->shadow.color.blue / 65535.0,
-                              pdata->shadow.color.alpha / 65535.0);
-        cairo_move_to(ctx->cr, x + pdata->shadow.offset, y + pdata->shadow.offset);
-        pango_cairo_layout_path(ctx->cr, ctx->layout);
-        cairo_stroke(ctx->cr);
-    }
 
     cairo_move_to(ctx->cr, x, y);
 
