@@ -273,8 +273,9 @@ property_update_wm_name(client_t *c)
 
     p_delete(&c->name);
 
-    if((utf8 = draw_iso2utf8(name, len)))
-        c->name = utf8;
+    /* if no conversion needed, just point to name */
+    if(draw_iso2utf8(name, len, &utf8, NULL))
+        p_delete(&name);
     else
         c->name = name;
 
@@ -298,8 +299,8 @@ property_update_wm_icon_name(client_t *c)
 
     p_delete(&c->icon_name);
 
-    if((utf8 = draw_iso2utf8(name, len)))
-        c->icon_name = utf8;
+    if(draw_iso2utf8(name, len, &utf8, NULL))
+        p_delete(&name);
     else
         c->icon_name = name;
 

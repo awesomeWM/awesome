@@ -39,13 +39,14 @@ extern awesome_t globalconf;
 /** Convert text from any charset to UTF-8 using iconv.
  * \param iso The ISO string to convert.
  * \param len The string size.
- * \return NULL if error, otherwise pointer to the new converted string.
+ * \param dest The destination pointer. Memory will be allocated, up to you to
+ * free, like any char *.
+ * \param dlen The destination length, can be NULL.
+ * \return True if conversion was done.
  */
-char *
-draw_iso2utf8(const char *iso, size_t len)
+bool
+draw_iso2utf8(const char *iso, size_t len, char **dest, ssize_t *dlen)
 {
-    size_t utf8len;
-    char *utf8, *utf8p;
     static iconv_t iso2utf8 = (iconv_t) -1;
     static int8_t dont_need_convert = -1;
 
@@ -53,7 +54,7 @@ draw_iso2utf8(const char *iso, size_t len)
         dont_need_convert = !a_strcmp(nl_langinfo(CODESET), "UTF-8");
 
     if(!len || dont_need_convert)
-        return NULL;
+        return false;
 
     if(iso2utf8 == (iconv_t) -1)
     {
@@ -66,20 +67,26 @@ draw_iso2utf8(const char *iso, size_t len)
             else
                 warn("unable to convert text: %s", strerror(errno));
 
-            return NULL;
+            return false;
         }
     }
 
-    utf8len = 2 * len + 1;
-    utf8 = utf8p = p_new(char, utf8len);
+    size_t orig_utf8len, utf8len;
+    char *utf8;
+
+    orig_utf8len = utf8len = 2 * len + 1;
+    utf8 = *dest = p_new(char, utf8len);
 
     if(iconv(iso2utf8, (char **) &iso, &len, &utf8, &utf8len) == (size_t) -1)
     {
         warn("text conversion failed: %s", strerror(errno));
-        p_delete(&utf8p);
+        p_delete(dest);
     }
 
-    return utf8p;
+    if(dlen)
+        *dlen = orig_utf8len - utf8len;
+
+    return true;
 }
 
 static xcb_visualtype_t *

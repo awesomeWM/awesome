@@ -30,7 +30,7 @@ typedef struct
     /** Textbox text */
     char *text;
     /** Textbox text length */
-    size_t len;
+    ssize_t len;
     /** Textbox width */
     int width;
     /** Extents */
@@ -244,15 +244,16 @@ luaA_textbox_newindex(lua_State *L, awesome_token_t token)
             draw_parser_data_init(&d->pdata);
             p_delete(&d->text);
 
-            /* re-init */
-            d->len = len;
             if(buf)
             {
-                a_iso2utf8(&d->text, buf, len);
+                a_iso2utf8(buf, len, &d->text, &d->len);
                 d->extents = draw_text_extents(globalconf.font, d->text, d->len, &d->pdata);
             }
             else
+            {
+                d->len = 0;
                 p_clear(&d->extents, 1);
+            }
         }
         break;
       case A_TK_WIDTH:

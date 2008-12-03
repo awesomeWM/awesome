@@ -54,7 +54,7 @@ tag_new(const char *name, ssize_t len)
     tag_t *tag;
 
     tag = p_new(tag_t, 1);
-    a_iso2utf8(&tag->name, name, len);
+    a_iso2utf8(name, len, &tag->name, NULL);
 
     /* to avoid error */
     tag->screen = SCREEN_UNDEF;
@@ -357,7 +357,7 @@ luaA_tag_newindex(lua_State *L)
         {
             const char *buf = luaL_checklstring(L, 3, &len);
             p_delete(&(*tag)->name);
-            a_iso2utf8(&(*tag)->name, buf, len);
+            a_iso2utf8(buf, len, &(*tag)->name, NULL);
         }
         break;
       case A_TK_SCREEN:

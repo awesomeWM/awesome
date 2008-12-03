@@ -141,18 +141,26 @@ draw_context_wipe(draw_context_t *ctx)
 font_t *draw_font_new(const char *);
 void draw_font_delete(font_t **);
 
-char * draw_iso2utf8(const char *, size_t);
+bool draw_iso2utf8(const char *, size_t, char **, ssize_t *);
 
+/** Convert a string to UTF-8.
+ * \param str The string to convert.
+ * \param len The string length.
+ * \param dest The destination string that will be allocated.
+ * \param dlen The destination string length allocated, can be NULL.
+ * \return True if the conversion happened, false otherwise. In both case, dest
+ * and dlen will have value and dest have to be free().
+ */
 static inline bool
-a_iso2utf8(char **dest, const char *str, ssize_t len)
+a_iso2utf8(const char *str, ssize_t len, char **dest, ssize_t *dlen)
 {
-    char *utf8;
-    if((utf8 = draw_iso2utf8(str, len)))
-    {
-        *dest = utf8;
+    if(draw_iso2utf8(str, len, dest, dlen))
         return true;
-    }
+
     *dest = a_strdup(str);
+    if(dlen)
+        *dlen = len;
+
     return false;
 }
 
