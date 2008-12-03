@@ -285,6 +285,34 @@ luaAe_ipairs(lua_State *L)
     return 3;
 }
 
+/** Enhanced type() function which recognize awesome objects.
+ * \param L The Lua VM state.
+ * \return The number of arguments pushed on the stack.
+ */
+static int
+luaAe_type(lua_State *L)
+{
+    luaL_checkany(L, 1);
+#define CHECK_TYPE(type) \
+    do { \
+        if(luaA_toudata(L, 1, #type)) \
+        { \
+            lua_pushliteral(L, #type); \
+            return 1; \
+        } \
+    } while(0)
+CHECK_TYPE(wibox);
+CHECK_TYPE(client);
+CHECK_TYPE(image);
+CHECK_TYPE(keybinding);
+CHECK_TYPE(button);
+CHECK_TYPE(tag);
+CHECK_TYPE(widget);
+#undef CHECK_TYPE
+    lua_pushstring(L, luaL_typename(L, 1));
+    return 1;
+}
+
 /** Replace various standards Lua functions with our own.
  * \param L The Lua VM state.
  */
@@ -309,6 +337,10 @@ luaA_fixups(lua_State *L)
     lua_pushliteral(L, "ipairs");
     lua_pushcfunction(L, luaA_ipairs_aux);
     lua_pushcclosure(L, luaAe_ipairs, 1);
+    lua_settable(L, LUA_GLOBALSINDEX);
+    /* replace type */
+    lua_pushliteral(L, "type");
+    lua_pushcfunction(L, luaAe_type);
     lua_settable(L, LUA_GLOBALSINDEX);
 }
 
