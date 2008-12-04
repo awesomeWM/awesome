@@ -441,7 +441,7 @@ void
 client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, int screen)
 {
     xcb_get_property_cookie_t ewmh_icon_cookie;
-    client_t *c, *group = NULL;
+    client_t *c, *tc = NULL, *group = NULL;
     image_t *icon;
     const uint32_t select_input_val[] =
     {
@@ -486,8 +486,10 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
     property_update_wm_transient_for(c, NULL);
     property_update_wm_client_leader(c, NULL);
 
-    if(c->transient_for)
-        screen = c->transient_for->screen;
+    /* Recursively find the parent. */
+    for(tc = c; tc->transient_for; tc = tc->transient_for);
+    if(tc != c)
+        screen = tc->screen;
 
     /* Try to load props, if it fails check for group windows.
      * transient_for windows are excluded, because they inherit the parent tags. */
@@ -516,7 +518,7 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
     if (!c->issticky)
     {
         if(c->transient_for)
-            client_duplicate_tags(c->transient_for, c);
+            client_duplicate_tags(tc, c);
         else if (group)
             client_duplicate_tags(group, c);
         else

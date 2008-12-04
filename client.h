@@ -79,9 +79,23 @@ DO_SLIST(client_t, client, client_unref)
 static inline void
 client_raise(client_t *c)
 {
+    client_t *tc = c;
+    int counter = 0;
+
+    /* Find number of transient layers. */
+    for(counter = 0; tc->transient_for; counter++)
+        tc = tc->transient_for;
+
+    /* Push them in reverse order. */
+    for(; counter > 0; counter--)
+    {
+        tc = c;
+        for(int i = 0; i < counter; i++)
+            tc = tc->transient_for;
+        stack_client_push(tc);
+    }
+
     /* Push c on top of the stack. */
-    if(c->transient_for)
-        stack_client_push(c->transient_for);
     stack_client_push(c);
     client_stack();
 }
@@ -93,8 +107,11 @@ static inline void
 client_lower(client_t *c)
 {
     stack_client_append(c);
-    if(c->transient_for)
-        stack_client_append(c->transient_for);
+
+    /* Traverse all transient layers. */
+    for(client_t *tc = c->transient_for; tc; tc = tc->transient_for)
+        stack_client_append(tc);
+
     client_stack();
 }
 
