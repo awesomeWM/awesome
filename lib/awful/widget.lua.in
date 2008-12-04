@@ -31,59 +31,71 @@ taglist.label = {}
 tasklist = {}
 tasklist.label = {}
 
---- Create a new taglist widget.
--- @param screen The screen to draw tag list.
--- @param label Label function to use.
--- @param buttons A table with buttons binding to set.
-function taglist.new(scr, label, buttons)
-    local w = {}
-    local function taglist_update (screen)
-        -- Return right now if we do not care about this screen
-        if scr ~= screen then return end
-        local tags = capi.screen[screen]:tags()
-        -- Hack: if it has been registered as a widget in a wibox,
-        -- it's w.len since __len meta does not work on table until Lua 5.2.
-        -- Otherwise it's standard #w.
-        local len = w.len or #w
-        -- Add more widgets
-        if len < #tags then
-            for i = len + 1, #tags do
-                w[i] = capi.widget({ type = "textbox", name = "taglist" .. i })
-            end
-        -- Remove widgets
-        elseif len > #tags then
-            for i = #tags + 1, len do
-                w[i] = nil
-            end
+local function taglist_update (screen, w, label, buttons, data)
+    local tags = capi.screen[screen]:tags()
+    -- Hack: if it has been registered as a widget in a wibox,
+    -- it's w.len since __len meta does not work on table until Lua 5.2.
+    -- Otherwise it's standard #w.
+    local len = w.len or #w
+    -- Add more widgets
+    if len < #tags then
+        for i = len + 1, #tags do
+            w[i] = capi.widget({ type = "textbox", name = "taglist" .. i })
         end
-        -- Update widgets text
-        for k, tag in ipairs(tags) do
-            w[k].text = label(tag)
-            if buttons then
+    -- Remove widgets
+    elseif len > #tags then
+        for i = #tags + 1, len do
+            w[i] = nil
+        end
+    end
+    -- Update widgets text
+    for k, tag in ipairs(tags) do
+        w[k].text = label(tag)
+        if buttons then
+            if not data[tag] then
                 -- Replace press function by a new one calling with tags as
                 -- argument.
                 -- This is done here because order of tags can change
-                local mbuttons = {}
+                data[tag] = {}
                 for kb, b in ipairs(buttons) do
                     -- Copy object
-                    mbuttons[kb] = capi.button(b)
-                    mbuttons[kb].press = function () b.press(tag) end
+                    data[tag][kb] = capi.button(b)
+                    data[tag][kb].press = function () b.press(tag) end
                 end
-                w[k]:buttons(mbuttons)
             end
+            w[k]:buttons(data[tag])
         end
     end
-    hooks.focus.register(function (c) return taglist_update(c.screen) end)
-    hooks.unfocus.register(function (c) return taglist_update(c.screen) end)
-    hooks.arrange.register(taglist_update)
-    hooks.tags.register(taglist_update)
-    hooks.tagged.register(function (c, tag) taglist_update(c.screen) end)
+end
+
+--- Create a new taglist widget.
+-- @param screen The screen to draw tag list for.
+-- @param label Label function to use.
+-- @param buttons A table with buttons binding to set.
+function taglist.new(screen, label, buttons)
+    local w = {}
+    local data = otable()
+    local u = function (s)
+        if s == screen then
+            taglist_update(s, w, label, buttons, data)
+        end
+    end
+    local uc = function (c) return u(c.screen) end
+    hooks.focus.register(uc)
+    hooks.unfocus.register(uc)
+    hooks.arrange.register(u)
+    hooks.tags.register(u)
+    hooks.tagged.register(uc)
     hooks.property.register(function (c, prop)
-        if c.screen == scr and prop == "urgent" then
-            taglist_update(c.screen)
+        if prop == "urgent" then
+            u(c.screen)
         end
     end)
-    taglist_update(scr)
+    -- Free data on tag removal
+    hooks.tags.register(function (s, tag, action)
+        if action == "remove" then data[tag] = nil end
+    end)
+    u(screen)
     return w
 end
 
