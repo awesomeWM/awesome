@@ -1105,7 +1105,7 @@ luaA_client_tags(lua_State *L)
     }
 
     tags = &globalconf.screens[(*c)->screen].tags;
-    lua_newtable(L);
+    luaA_otable_new(L);
     for(int i = 0; i < tags->len; i++)
         if(is_client_tagged(*c, tags->tab[i]))
         {

@@ -322,7 +322,7 @@ luaA_tag_clients(lua_State *L)
         }
     }
 
-    lua_newtable(L);
+    luaA_otable_new(L);
     for(i = 0; i < clients->len; i++)
     {
         luaA_client_userdata_new(L, clients->tab[i]);
