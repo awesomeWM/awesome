@@ -41,7 +41,7 @@ DO_RCNT(client_t, client, client_delete)
 #define client_need_arrange(c) \
     do { \
         if(!globalconf.screens[(c)->screen].need_arrange \
-           && client_isvisible(c, (c)->screen)) \
+           && client_isvisible_exclude_banned(c, (c)->screen)) \
             globalconf.screens[(c)->screen].need_arrange = true; \
     } while(0)
 
