@@ -360,11 +360,13 @@ wibox_position_update(wibox_t *wibox)
             }
         }
 
+    /* The "length" of a wibox is always chosen to be the optimal size (non-floating).
+     * The "width" of a wibox is kept if it exists.
+     */
     switch(wibox->position)
     {
       case Right:
-        wingeom.height = wibox->sw.geometry.height > 0 ?
-            wibox->sw.geometry.height : area.height - 2 * wibox->sw.border.width;
+        wingeom.height = area.height - 2 * wibox->sw.border.width;
         wingeom.width = wibox->sw.geometry.width > 0 ? wibox->sw.geometry.width : 1.5 * globalconf.font->height;
         wingeom.x = area.x + area.width - wingeom.width - 2 * wibox->sw.border.width;
         switch(wibox->align)
@@ -381,8 +383,7 @@ wibox_position_update(wibox_t *wibox)
         }
         break;
       case Left:
-        wingeom.height = wibox->sw.geometry.height > 0 ?
-            wibox->sw.geometry.height : area.height - 2 * wibox->sw.border.width;
+        wingeom.height = area.height - 2 * wibox->sw.border.width;
         wingeom.width = wibox->sw.geometry.width > 0 ? wibox->sw.geometry.width : 1.5 * globalconf.font->height;
         wingeom.x = area.x;
         switch(wibox->align)
@@ -399,8 +400,7 @@ wibox_position_update(wibox_t *wibox)
         break;
       case Bottom:
         wingeom.height = wibox->sw.geometry.height > 0 ? wibox->sw.geometry.height : 1.5 * globalconf.font->height;
-        wingeom.width = wibox->sw.geometry.width > 0 ?
-            wibox->sw.geometry.width : area.width - 2 * wibox->sw.border.width;
+        wingeom.width = area.width - 2 * wibox->sw.border.width;
         wingeom.y = (area.y + area.height) - wingeom.height - 2 * wibox->sw.border.width;
         wingeom.x = area.x;
         switch(wibox->align)
@@ -417,8 +417,7 @@ wibox_position_update(wibox_t *wibox)
         break;
       case Top:
         wingeom.height = wibox->sw.geometry.height > 0 ? wibox->sw.geometry.height : 1.5 * globalconf.font->height;
-        wingeom.width = wibox->sw.geometry.width > 0 ?
-            wibox->sw.geometry.width : area.width - 2 * wibox->sw.border.width;
+        wingeom.width = area.width - 2 * wibox->sw.border.width;
         wingeom.x = area.x;
         wingeom.y = area.y;
         switch(wibox->align)
