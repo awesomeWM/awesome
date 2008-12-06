@@ -561,13 +561,8 @@ ewmh_client_strut_update(client_t *c, xcb_get_property_reply_t *strut_r)
             c->strut.bottom_end_x = strut[11];
 
             client_need_arrange(c);
-            /* All the wiboxes (may) need to be repositioned */
-            for(int screen = 0; screen < globalconf.nscreen; screen++)
-                for(int i = 0; i < globalconf.screens[screen].wiboxes.len; i++)
-                {
-                    wibox_t *s = globalconf.screens[screen].wiboxes.tab[i];
-                    wibox_position_update(s);
-                }
+            /* All the wiboxes (may) need to be repositioned. */
+            wibox_update_positions();
         }
     }
 

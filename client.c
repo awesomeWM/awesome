@@ -198,6 +198,10 @@ client_ban(client_t *c)
         }
 
         c->isbanned = true;
+
+        /* All the wiboxes (may) need to be repositioned. */
+        if(client_hasstrut(c))
+            wibox_update_positions();
     }
 
     /* Wait until the last moment to take away the focus from the window. */
@@ -987,6 +991,10 @@ client_unban(client_t *c)
         }
 
         c->isbanned = false;
+
+        /* All the wiboxes (may) need to be repositioned. */
+        if(client_hasstrut(c))
+            wibox_update_positions();
     }
 }
 
@@ -1040,14 +1048,9 @@ client_unmanage(client_t *c)
     xcb_delete_property(globalconf.connection, c->win, _AWESOME_TAGS);
     xcb_delete_property(globalconf.connection, c->win, _AWESOME_FLOATING);
 
+    /* All the wiboxes (may) need to be repositioned. */
     if(client_hasstrut(c))
-        /* All the wiboxes (may) need to be repositioned */
-        for(int screen = 0; screen < globalconf.nscreen; screen++)
-            for(int i = 0; i < globalconf.screens[screen].wiboxes.len; i++)
-            {
-                wibox_t *s = globalconf.screens[screen].wiboxes.tab[i];
-                wibox_position_update(s);
-            }
+        wibox_update_positions();
 
     /* set client as invalid */
     c->invalid = true;

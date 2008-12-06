@@ -223,14 +223,9 @@ event_handle_configurerequest(void *data __attribute__ ((unused)),
            || geometry.width != c->geometry.width || geometry.height != c->geometry.height)
         {
             client_resize(c, geometry, false);
+            /* All the wiboxes (may) need to be repositioned. */
             if(client_hasstrut(c))
-                /* All the wiboxes (may) need to be repositioned */
-                for(int screen = 0; screen < globalconf.nscreen; screen++)
-                    for(int i = 0; i < globalconf.screens[screen].wiboxes.len; i++)
-                    {
-                        wibox_t *s = globalconf.screens[screen].wiboxes.tab[i];
-                        wibox_position_update(s);
-                    }
+                wibox_update_positions();
             client_need_arrange(c);
         }
         else

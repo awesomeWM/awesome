@@ -522,6 +522,19 @@ wibox_refresh(void)
             wibox_draw(c->titlebar);
 }
 
+/** Reposition all wiboxes.
+ */
+void
+wibox_update_positions(void)
+{
+    for(int screen = 0; screen < globalconf.nscreen; screen++)
+            for(int i = 0; i < globalconf.screens[screen].wiboxes.len; i++)
+            {
+                wibox_t *s = globalconf.screens[screen].wiboxes.tab[i];
+                wibox_position_update(s);
+            }
+}
+
 /** Set a wibox visible or not.
  * \param wibox The wibox.
  * \param v The visible value.

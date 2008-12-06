@@ -26,6 +26,7 @@
 #include "swindow.h"
 
 void wibox_refresh(void);
+void wibox_update_positions(void);
 
 int luaA_wibox_new(lua_State *);
 int luaA_wibox_userdata_new(lua_State *, wibox_t *);
