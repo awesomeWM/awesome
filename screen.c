@@ -309,6 +309,9 @@ screen_client_moveto(client_t *c, int new_screen, bool dotag, bool doresize)
     area_t from, to;
     bool wasvisible = client_isvisible(c, c->screen);
 
+    if(new_screen == c->screen)
+        return;
+
     c->screen = new_screen;
 
     if(c->titlebar)
@@ -326,74 +329,58 @@ screen_client_moveto(client_t *c, int new_screen, bool dotag, bool doresize)
                 tag_client(c, new_tags->tab[i]);
     }
 
-    /* move and resize the windows */
-    if(doresize && old_screen != c->screen)
+    if (!doresize)
+        return;
+
+    from = screen_area_get(old_screen, NULL, NULL, false);
+    to = screen_area_get(c->screen, NULL, NULL, false);
+
+    area_t new_geometry = c->geometry;
+
+    if(c->isfullscreen)
     {
-        area_t new_geometry, new_f_geometry;
-        new_f_geometry = c->geometry;
+        new_geometry = to;
+        area_t new_f_geometry = c->geometries.fullscreen;
 
-        to = screen_area_get(c->screen,
-                             NULL, NULL, false);
-        from = screen_area_get(old_screen,
-                               NULL, NULL, false);
+        new_f_geometry.x = to.x + new_f_geometry.x - from.x;
+        new_f_geometry.y = to.y + new_f_geometry.y - from.x;
 
-        /* compute new coords in new screen */
-        new_f_geometry.x = (c->geometry.x - from.x) + to.x;
-        new_f_geometry.y = (c->geometry.y - from.y) + to.y;
+        /* resize the client's original geometry if it doesn't fit the screen */
+        if (new_f_geometry.width > to.width)
+            new_f_geometry.width = to.width - 2 * c->border;
+        if (new_f_geometry.height > to.height)
+            new_f_geometry.height = to.height - 2 * c->border;
 
-        /* check that new coords are still in the screen */
-        if(new_f_geometry.width > to.width)
-            new_f_geometry.width = to.width;
-        if(new_f_geometry.height > to.height)
-            new_f_geometry.height = to.height;
-        if(new_f_geometry.x + new_f_geometry.width >= to.x + to.width)
-            new_f_geometry.x = to.x + to.width - new_f_geometry.width - 2 * c->border;
-        if(new_f_geometry.y + new_f_geometry.height >= to.y + to.height)
-            new_f_geometry.y = to.y + to.height - new_f_geometry.height - 2 * c->border;
+        /* make sure the client is still on the screen */
+        if (new_f_geometry.x + new_f_geometry.width > to.x + to.width)
+            new_f_geometry.x = to.x + to.width - new_f_geometry.width;
+        if (new_f_geometry.y + new_f_geometry.height > to.y + to.height)
+            new_f_geometry.y = to.y + to.height - new_f_geometry.height;
 
-        if(c->isfullscreen)
-        {
-            new_geometry = c->geometry;
-
-            /* compute new coords in new screen */
-            new_geometry.x = (c->geometry.x - from.x) + to.x;
-            new_geometry.y = (c->geometry.y - from.y) + to.y;
-
-            /* check that new coords are still in the screen */
-            if(new_geometry.width > to.width)
-                new_geometry.width = to.width;
-            if(new_geometry.height > to.height)
-                new_geometry.height = to.height;
-            if(new_geometry.x + new_geometry.width >= to.x + to.width)
-                new_geometry.x = to.x + to.width - new_geometry.width - 2 * c->border;
-            if(new_geometry.y + new_geometry.height >= to.y + to.height)
-                new_geometry.y = to.y + to.height - new_geometry.height - 2 * c->border;
-
-            /* compute new coords for max in new screen */
-            c->geometries.fullscreen.x = (c->geometries.fullscreen.x - from.x) + to.x;
-            c->geometries.fullscreen.y = (c->geometries.fullscreen.y - from.y) + to.y;
-
-            /* check that new coords are still in the screen */
-            if(c->geometries.fullscreen.width > to.width)
-                c->geometries.fullscreen.width = to.width;
-            if(c->geometries.fullscreen.height > to.height)
-                c->geometries.fullscreen.height = to.height;
-            if(c->geometries.fullscreen.x + c->geometries.fullscreen.width >= to.x + to.width)
-                c->geometries.fullscreen.x = to.x + to.width - c->geometries.fullscreen.width - 2 * c->border;
-            if(c->geometries.fullscreen.y + c->geometries.fullscreen.height >= to.y + to.height)
-                c->geometries.fullscreen.y = to.y + to.height - c->geometries.fullscreen.height - 2 * c->border;
-
-            client_resize(c, new_geometry, false);
-        }
-        /* move to this new coords */
-        else
-        {
-            client_resize(c, new_f_geometry, false);
-            if(wasvisible)
-                globalconf.screens[old_screen].need_arrange = true;
-            client_need_arrange(c);
-        }
+        c->geometries.fullscreen = new_f_geometry;
     }
+    else
+    {
+        new_geometry.x = to.x + new_geometry.x - from.x;
+        new_geometry.y = to.y + new_geometry.y - from.y;
+
+        /* resize the client if it doesn't fit the new screen */
+        if(new_geometry.width > to.width)
+           new_geometry.width = to.width - 2 * c->border;
+        if(new_geometry.height > to.height)
+           new_geometry.height = to.height - 2 * c->border;
+
+        /* make sure the client is still on the screen */
+        if(new_geometry.x + new_geometry.width > to.x + to.width)
+           new_geometry.x = to.x + to.width - new_geometry.width;
+        if(new_geometry.y + new_geometry.height > to.y + to.height)
+           new_geometry.y = to.y + to.height - new_geometry.height;
+    }
+    /* move / resize the client */
+    client_resize(c, new_geometry, false);
+    if(wasvisible)
+        globalconf.screens[old_screen].need_arrange = true;
+    client_need_arrange(c);
 }
 
 /** Screen module.

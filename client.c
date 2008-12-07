@@ -705,8 +705,7 @@ client_resize(client_t *c, area_t geometry, bool hints)
                              values);
         window_configure(c->win, geometry, c->border);
 
-        if(c->screen != new_screen)
-            screen_client_moveto(c, new_screen, true, false);
+        screen_client_moveto(c, new_screen, true, false);
 
         /* execute hook */
         hooks_property(c, "geometry");
@@ -1407,8 +1406,7 @@ luaA_client_newindex(lua_State *L)
         {
             i = luaL_checknumber(L, 3) - 1;
             luaA_checkscreen(i);
-            if(i != (*c)->screen)
-                screen_client_moveto(*c, i, true, true);
+            screen_client_moveto(*c, i, true, true);
         }
         break;
       case A_TK_HIDE:
