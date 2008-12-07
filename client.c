@@ -415,9 +415,6 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
             | XCB_EVENT_MASK_ENTER_WINDOW
     };
 
-    /* Send request to get NET_WM_ICON property as soon as possible... */
-    ewmh_icon_cookie = ewmh_window_icon_get_unchecked(w);
-    xcb_change_window_attributes(globalconf.connection, w, XCB_CW_EVENT_MASK, select_input_val);
 
     if(systray_iskdedockapp(w))
     {
@@ -425,6 +422,9 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
         return;
     }
 
+    /* Send request to get NET_WM_ICON property as soon as possible... */
+    ewmh_icon_cookie = ewmh_window_icon_get_unchecked(w);
+    xcb_change_window_attributes(globalconf.connection, w, XCB_CW_EVENT_MASK, select_input_val);
     c = p_new(client_t, 1);
 
     c->screen = screen_getbycoord(screen, wgeom->x, wgeom->y);
