@@ -1426,6 +1426,7 @@ luaA_client_index(lua_State *L)
       case A_TK_TRANSIENT_FOR:
         if((*c)->transient_for)
             return luaA_client_userdata_new(L, (*c)->transient_for);
+        return 0;
       case A_TK_SKIP_TASKBAR:
         lua_pushboolean(L, (*c)->skiptb);
         break;
