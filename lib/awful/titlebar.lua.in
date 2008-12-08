@@ -84,15 +84,23 @@ function add(c, args)
         -- Bind kill button, also allow moving and resizing on this widget
         local bts =
         {
-                capi.button({ }, 1, nil, function (t) t.client:kill() end),
-                capi.button({ args.modkey }, 1, function (t) t.client:mouse_move() end),
-                capi.button({ args.modkey }, 3, function (t) t.client:mouse_resize() end)
+            capi.button({ }, 1, nil, function (t) t.client:kill() end),
+            capi.button({ args.modkey }, 1, function (t) t.client:mouse_move() end),
+            capi.button({ args.modkey }, 3, function (t) t.client:mouse_resize() end)
         }
         if close then
+            local rbts = close:buttons()
+            for k, v in pairs(rbts) do
+                bts[#bts + 1] = v
+            end
             close:buttons(bts)
             function close.mouse_enter(s) hooks.user.call('mouse_enter', c) end
         end
         if closef then
+            local rbts = closef:buttons()
+            for k, v in pairs(rbts) do
+                bts[#bts + 1] = v
+            end
             closef:buttons(bts)
             -- Needed for sloppy focus beheaviour
             function closef.mouse_enter(s) hooks.user.call('mouse_enter', c) end
