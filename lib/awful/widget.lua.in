@@ -33,6 +33,9 @@ taglist.label = {}
 tasklist = {}
 tasklist.label = {}
 
+-- Private structures
+local tagwidgets = otable()
+
 local function taglist_update (screen, w, label, buttons, data)
     local tags = capi.screen[screen]:tags()
     -- Hack: if it has been registered as a widget in a wibox,
@@ -42,11 +45,14 @@ local function taglist_update (screen, w, label, buttons, data)
     -- Add more widgets
     if len < #tags then
         for i = len + 1, #tags do
-            w[i] = capi.widget({ type = "textbox" })
+            local wi = capi.widget({ type = "textbox" })
+            w[i] = wi
+            tagwidgets[wi] = tags[i]
         end
     -- Remove widgets
     elseif len > #tags then
         for i = #tags + 1, len do
+            tagwidgets[w[i]] = nil
             w[i] = nil
         end
     end
@@ -72,6 +78,10 @@ local function taglist_update (screen, w, label, buttons, data)
             end
         end
     end
+end
+
+function taglist.gettag(widget)
+    return tagwidgets[widget]
 end
 
 --- Create a new taglist widget.

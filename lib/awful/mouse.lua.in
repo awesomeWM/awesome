@@ -9,6 +9,7 @@ local layout = require("awful.layout")
 local tag = require("awful.tag")
 local hooks = require("awful.hooks")
 local aclient = require("awful.client")
+local widget = require("awful.widget")
 local type = type
 local math = math
 local ipairs = ipairs
@@ -155,6 +156,31 @@ function client.move(c, snap)
                                   end
                               end
                               return false
+                          end, "fleur")
+end
+
+--- Move a client to a tag by drag'n'dropping it over a taglist widget
+-- @param c The client to move
+function client.dragtotag(c)
+    capi.mousegrabber.run(function (mouse)
+                              local button_down = false
+                              for k, v in ipairs(mouse.buttons) do
+                                  if v then
+                                      button_down = true
+                                  end
+                              end
+                              if not button_down then
+                                  local w = widget_under_pointer()
+                                  if w and widget.taglist.gettag(w) then
+                                      local t = widget.taglist.gettag(w)
+                                      if t.screen ~= c.screen then
+                                          aclient.movetoscreen(c, t.screen)
+                                      end
+                                      aclient.movetotag(t, c)
+                                  end
+                                  return false
+                              end
+                              return true
                           end, "fleur")
 end
 
