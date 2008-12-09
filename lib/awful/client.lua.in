@@ -532,6 +532,20 @@ function floating.set(c, s)
     end
 end
 
+--- Return if a client has a fixe size or not.
+-- @param c The client.
+function isfixed(c)
+    local c = c or client.focus
+    if not c then return end
+    local h = c.size_hints
+    return h.min_width and h.max_width
+        and h.max_height and h.min_height
+        and h.min_width > 0 and h.max_width > 0
+        and h.max_height > 0 and h.min_height > 0
+        and h.min_width == h.max_width
+        and h.min_height == h.max_height
+end
+
 --- Get a client floating state.
 -- @param c A client.
 -- @return True or false. Note that some windows might be floating even if you
@@ -546,7 +560,8 @@ function floating.get(c)
         return (c.type ~= "normal"
             or c.fullscreen
             or c.maximized_vertical
-            or c.maximized_horizontal)
+            or c.maximized_horizontal
+            or isfixed(c))
     end
 end
 
