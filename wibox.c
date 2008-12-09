@@ -521,23 +521,28 @@ wibox_setvisible(wibox_t *wibox, bool v)
 {
     if(v != wibox->isvisible)
     {
-        if((wibox->isvisible = v))
+        wibox->isvisible = v;
+
+        if(wibox->screen != SCREEN_UNDEF)
         {
-            xcb_map_window(globalconf.connection, wibox->sw.window);
-            simplewindow_refresh_pixmap(&wibox->sw);
-            /* stack correctly the wibox */
-            client_stack();
+            if(wibox->isvisible)
+            {
+                xcb_map_window(globalconf.connection, wibox->sw.window);
+                simplewindow_refresh_pixmap(&wibox->sw);
+                /* stack correctly the wibox */
+                client_stack();
+            }
+            else
+                xcb_unmap_window(globalconf.connection, wibox->sw.window);
+
+            /* kick out systray if needed */
+            wibox_systray_refresh(wibox);
+
+            /* All the other wibox and ourselves need to be repositioned */
+            wibox_array_t *w = &globalconf.screens[wibox->screen].wiboxes;
+            for(int i = 0; i < w->len; i++)
+                wibox_position_update(w->tab[i]);
         }
-        else
-            xcb_unmap_window(globalconf.connection, wibox->sw.window);
-
-        /* kick out systray if needed */
-        wibox_systray_refresh(wibox);
-
-        /* All the other wibox and ourselves need to be repositioned */
-        wibox_array_t *w = &globalconf.screens[wibox->screen].wiboxes;
-        for(int i = 0; i < w->len; i++)
-            wibox_position_update(w->tab[i]);
     }
 }
 
