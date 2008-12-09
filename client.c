@@ -767,13 +767,13 @@ client_setfullscreen(client_t *c, bool s)
 
             geometry = screen_area_get(c->screen, NULL, NULL, false);
             c->geometries.fullscreen = c->geometry;
-            c->oldborder = c->border;
+            c->border_fs = c->border;
             client_setborder(c, 0);
         }
         else
         {
             geometry = c->geometries.fullscreen;
-            client_setborder(c, c->oldborder);
+            client_setborder(c, c->border_fs);
         }
         client_resize(c, geometry, false);
         client_need_arrange(c);
@@ -1027,10 +1027,6 @@ client_unmanage(client_t *c)
 
     /* The server grab construct avoids race conditions. */
     xcb_grab_server(globalconf.connection);
-
-    xcb_configure_window(globalconf.connection, c->win,
-                         XCB_CONFIG_WINDOW_BORDER_WIDTH,
-                         (uint32_t *) &c->oldborder);
 
     xcb_ungrab_button(globalconf.connection, XCB_BUTTON_INDEX_ANY, c->win,
                       XCB_BUTTON_MASK_ANY);

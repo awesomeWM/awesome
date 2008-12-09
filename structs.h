@@ -168,7 +168,8 @@ struct client_t
     strut_t strut;
     /** Respect resize hints */
     bool honorsizehints;
-    int border, oldborder;
+    /** Border width and pre-fullscreen border width */
+    int border, border_fs;
     xcolor_t border_color;
     /** True if the client is sticky */
     bool issticky;
