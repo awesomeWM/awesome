@@ -51,7 +51,6 @@ function display(tabindex, cl)
         tabbed[tabindex][1] = cl
 
         cl.hide = false
-        cl:swap(p)
         p.hide = true
         capi.client.focus = cl
         awful.hooks.user.call('tabhide', p)
@@ -144,7 +143,7 @@ function prev(tabindex, cl)
         return nil
     end
 
-    if tabbed[tabindex][2][i-1] == nil then
+    if i == 1 then
         return tabbed[tabindex][2][table.maxn(tabbed[tabindex][2])]
     end
 
@@ -175,6 +174,7 @@ function untab(cl)
 
     c.hide = false
     awful.hooks.user.call('untabbed', c)
+    return true
 end
 
 --- Untab all clients in a tabbed display.
