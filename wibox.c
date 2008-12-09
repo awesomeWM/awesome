@@ -716,7 +716,6 @@ wibox_widgets_table_build(lua_State *L, wibox_t *wibox)
 static bool
 luaA_wibox_hasitem(lua_State *L, wibox_t *wibox, const void *item)
 {
-    fprintf(stderr, "look for %p\n", item);
     if(wibox->widgets_table != LUA_REFNIL)
     {
         lua_rawgeti(globalconf.L, LUA_REGISTRYINDEX, wibox->widgets_table);
