@@ -1554,7 +1554,7 @@ luaA_client_newindex(lua_State *L)
  * \lfield group_id Identification unique to a group of windows.
  * \lfield leader_id Identification unique to windows spawned by the same command.
  * \lfield size_hints A table with size hints of the client: user_position,
- *         user_size, program_position and program_size.
+ *         user_size, program_position, program_size, etc.
  */
 static int
 luaA_client_index(lua_State *L)
@@ -1728,15 +1728,124 @@ luaA_client_index(lua_State *L)
         lua_pushboolean(L, (*c)->isurgent);
         break;
       case A_TK_SIZE_HINTS:
-        lua_newtable(L);
-        lua_pushboolean(L, (*c)->size_hints.flags & XCB_SIZE_HINT_US_POSITION);
-        lua_setfield(L, -2, "user_position");
-        lua_pushboolean(L, (*c)->size_hints.flags & XCB_SIZE_HINT_US_SIZE);
-        lua_setfield(L, -2, "user_size");
-        lua_pushboolean(L, (*c)->size_hints.flags & XCB_SIZE_HINT_P_POSITION);
-        lua_setfield(L, -2, "program_position");
-        lua_pushboolean(L, (*c)->size_hints.flags & XCB_SIZE_HINT_P_SIZE);
-        lua_setfield(L, -2, "program_size");
+        {
+            const char *u_or_p = NULL;
+
+            lua_newtable(L);
+
+            if((*c)->size_hints.flags & XCB_SIZE_HINT_US_POSITION)
+                u_or_p = "user_position";
+            else if((*c)->size_hints.flags & XCB_SIZE_HINT_P_POSITION)
+                u_or_p = "program_position";
+
+            if(u_or_p)
+            {
+                lua_newtable(L);
+                lua_pushnumber(L, (*c)->size_hints.x);
+                lua_setfield(L, -2, "x");
+                lua_pushnumber(L, (*c)->size_hints.y);
+                lua_setfield(L, -2, "y");
+                lua_setfield(L, -2, u_or_p);
+                u_or_p = NULL;
+            }
+
+            if((*c)->size_hints.flags & XCB_SIZE_HINT_US_SIZE)
+                u_or_p = "user_size";
+            else if((*c)->size_hints.flags & XCB_SIZE_HINT_P_SIZE)
+                u_or_p = "program_size";
+
+            if(u_or_p)
+            {
+                lua_newtable(L);
+                lua_pushnumber(L, (*c)->size_hints.width);
+                lua_setfield(L, -2, "width");
+                lua_pushnumber(L, (*c)->size_hints.height);
+                lua_setfield(L, -2, "height");
+                lua_setfield(L, -2, u_or_p);
+            }
+
+            if((*c)->size_hints.flags & XCB_SIZE_HINT_P_MIN_SIZE)
+            {
+                lua_pushnumber(L, (*c)->size_hints.min_width);
+                lua_setfield(L, -2, "min_width");
+                lua_pushnumber(L, (*c)->size_hints.min_height);
+                lua_setfield(L, -2, "min_height");
+            }
+
+            if((*c)->size_hints.flags & XCB_SIZE_HINT_P_MAX_SIZE)
+            {
+                lua_pushnumber(L, (*c)->size_hints.max_width);
+                lua_setfield(L, -2, "max_width");
+                lua_pushnumber(L, (*c)->size_hints.max_height);
+                lua_setfield(L, -2, "max_height");
+            }
+
+            if((*c)->size_hints.flags & XCB_SIZE_HINT_P_RESIZE_INC)
+            {
+                lua_pushnumber(L, (*c)->size_hints.width_inc);
+                lua_setfield(L, -2, "width_inc");
+                lua_pushnumber(L, (*c)->size_hints.height_inc);
+                lua_setfield(L, -2, "height_inc");
+            }
+
+            if((*c)->size_hints.flags & XCB_SIZE_HINT_P_ASPECT)
+            {
+                lua_pushnumber(L, (*c)->size_hints.min_aspect_num);
+                lua_setfield(L, -2, "min_aspect_num");
+                lua_pushnumber(L, (*c)->size_hints.min_aspect_den);
+                lua_setfield(L, -2, "min_aspect_den");
+                lua_pushnumber(L, (*c)->size_hints.max_aspect_num);
+                lua_setfield(L, -2, "max_aspect_num");
+                lua_pushnumber(L, (*c)->size_hints.max_aspect_den);
+                lua_setfield(L, -2, "max_aspect_den");
+            }
+
+            if((*c)->size_hints.flags & XCB_SIZE_HINT_BASE_SIZE)
+            {
+                lua_pushnumber(L, (*c)->size_hints.base_width);
+                lua_setfield(L, -2, "base_width");
+                lua_pushnumber(L, (*c)->size_hints.base_height);
+                lua_setfield(L, -2, "base_height");
+            }
+
+            if((*c)->size_hints.flags & XCB_SIZE_HINT_P_WIN_GRAVITY)
+            {
+                switch((*c)->size_hints.win_gravity)
+                {
+                  default:
+                    lua_pushliteral(L, "north_west");
+                    break;
+                  case XCB_GRAVITY_NORTH:
+                    lua_pushliteral(L, "north");
+                    break;
+                  case XCB_GRAVITY_NORTH_EAST:
+                    lua_pushliteral(L, "north_east");
+                    break;
+                  case XCB_GRAVITY_WEST:
+                    lua_pushliteral(L, "west");
+                    break;
+                  case XCB_GRAVITY_CENTER:
+                    lua_pushliteral(L, "center");
+                    break;
+                  case XCB_GRAVITY_EAST:
+                    lua_pushliteral(L, "east");
+                    break;
+                  case XCB_GRAVITY_SOUTH_WEST:
+                    lua_pushliteral(L, "south_west");
+                    break;
+                  case XCB_GRAVITY_SOUTH:
+                    lua_pushliteral(L, "south");
+                    break;
+                  case XCB_GRAVITY_SOUTH_EAST:
+                    lua_pushliteral(L, "south_east");
+                    break;
+                  case XCB_GRAVITY_STATIC:
+                    lua_pushliteral(L, "static");
+                    break;
+                }
+                lua_setfield(L, -2, "win_gravity");
+            }
+        }
         break;
       default:
         return 0;
