@@ -716,14 +716,14 @@ wibox_widgets_table_build(lua_State *L, wibox_t *wibox)
 static bool
 luaA_wibox_hasitem(lua_State *L, wibox_t *wibox, const void *item)
 {
-    bool ret = false;
+    fprintf(stderr, "look for %p\n", item);
     if(wibox->widgets_table != LUA_REFNIL)
     {
         lua_rawgeti(globalconf.L, LUA_REGISTRYINDEX, wibox->widgets_table);
         if(lua_topointer(L, -1) == item || luaA_hasitem(L, item))
-            ret = true;
+            return true;
     }
-    return ret;
+    return false;
 }
 
 /** Invalidate a wibox by a Lua object (table, etc).
@@ -754,7 +754,6 @@ luaA_wibox_invalidate_byitem(lua_State *L, const void *item)
             lua_pop(L, 1); /* remove widgets table */
         }
 }
-
 
 /** Wibox object.
  * \param L The Lua VM state.

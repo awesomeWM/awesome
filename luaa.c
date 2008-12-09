@@ -295,8 +295,9 @@ luaA_next(lua_State *L, int idx)
         }
         return 1;
     }
-
-    return lua_next(L, idx);
+    else if(lua_istable(L, idx))
+        return lua_next(L, idx);
+    return 0;
 }
 
 /** Generic pairs function.
