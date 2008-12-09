@@ -482,7 +482,7 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
         c->icon = image_ref(&icon);
 
     /* we honor size hints by default */
-    c->honorsizehints = true;
+    c->size_hints_honor = true;
 
     /* update hints */
     property_update_wm_normal_hints(c, NULL);
@@ -598,46 +598,85 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
 area_t
 client_geometry_hints(client_t *c, area_t geometry)
 {
-    double dx, dy, max, min, ratio;
+    int32_t basew, baseh, minw, minh;
 
-    if(c->minay > 0 && c->maxay > 0 && (geometry.height - c->baseh) > 0
-       && (geometry.width - c->basew) > 0)
+    /* base size is substituted with min size if not specified */
+    if(c->size_hints.flags & XCB_SIZE_HINT_P_SIZE)
     {
-        dx = (double) (geometry.width - c->basew);
-        dy = (double) (geometry.height - c->baseh);
-        min = (double) (c->minax) / (double) (c->minay);
-        max = (double) (c->maxax) / (double) (c->maxay);
-        ratio = dx / dy;
+        basew = c->size_hints.base_width;
+        baseh = c->size_hints.base_height;
+    }
+    else if(c->size_hints.flags & XCB_SIZE_HINT_P_MIN_SIZE)
+    {
+        basew = c->size_hints.min_width;
+        baseh = c->size_hints.min_height;
+    }
+    else
+        basew = baseh = 0;
+
+    /* min size is substituted with base size if not specified */
+    if(c->size_hints.flags & XCB_SIZE_HINT_P_MIN_SIZE)
+    {
+        minw = c->size_hints.min_width;
+        minh = c->size_hints.min_height;
+    }
+    else if(c->size_hints.flags & XCB_SIZE_HINT_P_SIZE)
+    {
+        minw = c->size_hints.base_width;
+        minh = c->size_hints.base_height;
+    }
+    else
+        minw = minh = 0;
+
+    if(c->size_hints.flags & XCB_SIZE_HINT_P_ASPECT
+       && c->size_hints.min_aspect_num > 0
+       && c->size_hints.min_aspect_den > 0
+       && geometry.height - baseh > 0
+       && geometry.width - basew > 0)
+    {
+        double dx = (double) (geometry.width - basew);
+        double dy = (double) (geometry.height - baseh);
+        double min = (double) c->size_hints.min_aspect_num / (double) c->size_hints.min_aspect_den;
+        double max = (double) c->size_hints.max_aspect_num / (double) c->size_hints.min_aspect_den;
+        double ratio = dx / dy;
         if(max > 0 && min > 0 && ratio > 0)
         {
             if(ratio < min)
             {
                 dy = (dx * min + dy) / (min * min + 1);
                 dx = dy * min;
-                geometry.width = (int) dx + c->basew;
-                geometry.height = (int) dy + c->baseh;
+                geometry.width = (int) dx + basew;
+                geometry.height = (int) dy + baseh;
             }
             else if(ratio > max)
             {
                 dy = (dx * min + dy) / (max * max + 1);
                 dx = dy * min;
-                geometry.width = (int) dx + c->basew;
-                geometry.height = (int) dy + c->baseh;
+                geometry.width = (int) dx + basew;
+                geometry.height = (int) dy + baseh;
             }
         }
     }
-    if(c->minw && geometry.width < c->minw)
-        geometry.width = c->minw;
-    if(c->minh && geometry.height < c->minh)
-        geometry.height = c->minh;
-    if(c->maxw && geometry.width > c->maxw)
-        geometry.width = c->maxw;
-    if(c->maxh && geometry.height > c->maxh)
-        geometry.height = c->maxh;
-    if(c->incw)
-        geometry.width -= (geometry.width - c->basew) % c->incw;
-    if(c->inch)
-        geometry.height -= (geometry.height - c->baseh) % c->inch;
+
+    if(minw)
+        geometry.width = MAX(geometry.width, minw);
+    if(minh)
+        geometry.height = MAX(geometry.height, minh);
+
+    if(c->size_hints.flags & XCB_SIZE_HINT_P_MAX_SIZE)
+    {
+        if(c->size_hints.max_width)
+            geometry.width = MIN(geometry.width, c->size_hints.max_width);
+        if(c->size_hints.max_height)
+            geometry.height = MIN(geometry.height, c->size_hints.max_height);
+    }
+
+    if(c->size_hints.flags & (XCB_SIZE_HINT_P_RESIZE_INC | XCB_SIZE_HINT_BASE_SIZE)
+       && c->size_hints.width_inc && c->size_hints.height_inc)
+    {
+        geometry.width -= (geometry.width - basew) % c->size_hints.width_inc;
+        geometry.height -= (geometry.height - baseh) % c->size_hints.height_inc;
+    }
 
     return geometry;
 }
@@ -823,7 +862,7 @@ client_setmaxhoriz(client_t *c, bool s)
             geometry.width = c->geometries.max.width;
         }
 
-        client_resize(c, geometry, c->honorsizehints);
+        client_resize(c, geometry, c->size_hints_honor);
         client_need_arrange(c);
         client_stack();
         ewmh_client_update_hints(c);
@@ -867,7 +906,7 @@ client_setmaxvert(client_t *c, bool s)
             geometry.height = c->geometries.max.height;
         }
 
-        client_resize(c, geometry, c->honorsizehints);
+        client_resize(c, geometry, c->size_hints_honor);
         client_need_arrange(c);
         client_stack();
         ewmh_client_update_hints(c);
@@ -1339,7 +1378,7 @@ luaA_client_handlegeom(lua_State *L, bool full)
                                                 (*c)->border,
                                                 geometry);
 
-        client_resize(*c, geometry, (*c)->honorsizehints);
+        client_resize(*c, geometry, (*c)->size_hints_honor);
     }
 
     if(full)
@@ -1450,7 +1489,7 @@ luaA_client_newindex(lua_State *L)
         client_setsticky(*c, luaA_checkboolean(L, 3));
         break;
       case A_TK_HONORSIZEHINTS:
-        (*c)->honorsizehints = luaA_checkboolean(L, 3);
+        (*c)->size_hints_honor = luaA_checkboolean(L, 3);
         client_need_arrange(*c);
         break;
       case A_TK_BORDER_WIDTH:
@@ -1500,7 +1539,7 @@ luaA_client_newindex(lua_State *L)
  * \lfield minimize Define it the client must be iconify, i.e. only visible in
  * taskbar.
  * \lfield icon_path Path to the icon used to identify.
- * \lfield honorsizehints Honor size hints, i.e. respect size ratio.
+ * \lfield size_hints_honor Honor size hints, i.e. respect size ratio.
  * \lfield border_width The client border width.
  * \lfield border_color The client border color.
  * \lfield titlebar The client titlebar.
@@ -1671,7 +1710,9 @@ luaA_client_index(lua_State *L)
         lua_pushboolean(L, (*c)->issticky);
         break;
       case A_TK_HONORSIZEHINTS:
-        lua_pushboolean(L, (*c)->honorsizehints);
+        luaA_deprecate(L, "size_hints_honor");
+      case A_TK_SIZE_HINTS_HONOR:
+        lua_pushboolean(L, (*c)->size_hints_honor);
         break;
       case A_TK_BORDER_WIDTH:
         lua_pushnumber(L, (*c)->border);

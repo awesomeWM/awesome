@@ -161,13 +161,8 @@ struct client_t
         /** Client geometry when (un)-max */
         area_t max;
     } geometries;
-    /* Size hints */
-    int basew, baseh, incw, inch, maxw, maxh, minw, minh;
-    int minax, maxax, minay, maxay;
     /** Strut */
     strut_t strut;
-    /** Respect resize hints */
-    bool honorsizehints;
     /** Border width and pre-fullscreen border width */
     int border, border_fs;
     xcolor_t border_color;
@@ -223,6 +218,7 @@ struct client_t
     image_t *icon;
     /** Size hints */
     xcb_size_hints_t size_hints;
+    bool size_hints_honor;
     /** Window it is transient for */
     client_t *transient_for;
     /** Next and previous clients */

@@ -132,58 +132,6 @@ property_update_wm_normal_hints(client_t *c, xcb_get_property_reply_t *reply)
                                           &c->size_hints, NULL))
             return;
     }
-
-    if((c->size_hints.flags & XCB_SIZE_HINT_P_SIZE))
-    {
-        c->basew = c->size_hints.base_width;
-        c->baseh = c->size_hints.base_height;
-    }
-    else if((c->size_hints.flags & XCB_SIZE_HINT_P_MIN_SIZE))
-    {
-        c->basew = c->size_hints.min_width;
-        c->baseh = c->size_hints.min_height;
-    }
-    else
-        c->basew = c->baseh = 0;
-
-    if((c->size_hints.flags & XCB_SIZE_HINT_P_RESIZE_INC))
-    {
-        c->incw = c->size_hints.width_inc;
-        c->inch = c->size_hints.height_inc;
-    }
-    else
-        c->incw = c->inch = 0;
-
-    if((c->size_hints.flags & XCB_SIZE_HINT_P_MAX_SIZE))
-    {
-        c->maxw = c->size_hints.max_width;
-        c->maxh = c->size_hints.max_height;
-    }
-    else
-        c->maxw = c->maxh = 0;
-
-    if((c->size_hints.flags & XCB_SIZE_HINT_P_MIN_SIZE))
-    {
-        c->minw = c->size_hints.min_width;
-        c->minh = c->size_hints.min_height;
-    }
-    else if((c->size_hints.flags & XCB_SIZE_HINT_BASE_SIZE))
-    {
-        c->minw = c->size_hints.base_width;
-        c->minh = c->size_hints.base_height;
-    }
-    else
-        c->minw = c->minh = 0;
-
-    if((c->size_hints.flags & XCB_SIZE_HINT_P_ASPECT))
-    {
-        c->minax = c->size_hints.min_aspect_num;
-        c->minay = c->size_hints.min_aspect_den;
-        c->maxax = c->size_hints.max_aspect_num;
-        c->maxay = c->size_hints.max_aspect_den;
-    }
-    else
-        c->minax = c->maxax = c->minay = c->maxay = 0;
 }
 
 static int

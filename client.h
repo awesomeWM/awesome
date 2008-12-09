@@ -122,8 +122,10 @@ client_lower(client_t *c)
 static inline bool
 client_isfixed(client_t *c)
 {
-    return (c->maxw && c->minw && c->maxh && c->minh
-            && c->maxw == c->minw && c->maxh == c->minh);
+    return (c->size_hints.flags & XCB_SIZE_HINT_P_MAX_SIZE
+            && c->size_hints.flags & XCB_SIZE_HINT_P_MIN_SIZE
+            && c->size_hints.max_width == c->size_hints.min_width
+            && c->size_hints.max_height == c->size_hints.min_height);
 }
 
 /** Returns true if a client is tagged

@@ -76,6 +76,7 @@ screen
 selected
 Shift
 size_hints
+size_hints_honor
 skip_taskbar
 south
 start
