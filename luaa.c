@@ -297,6 +297,8 @@ luaA_next(lua_State *L, int idx)
     }
     else if(lua_istable(L, idx))
         return lua_next(L, idx);
+    /* remove the key */
+    lua_pop(L, 1);
     return 0;
 }
 
