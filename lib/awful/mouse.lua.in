@@ -81,9 +81,12 @@ end
 -- @param snap The pixel to snap clients.
 -- @param x The client x coordinate.
 -- @param y The client y coordinate.
-function client.snap(c, snap, x, y)
+-- @param fixed_x True if the client isn't allowed to move in the x direction.
+-- @param fixed_y True if the client isn't allowed to move in the y direction.
+function client.snap(c, snap, x, y, fixed_x, fixed_y)
     local snap = snap or 8
     local c = c or client.focus
+    local cur_geom = c:fullgeometry()
     local geom = c:fullgeometry()
     geom.x = x or geom.x
     geom.y = y or geom.y
@@ -96,6 +99,11 @@ function client.snap(c, snap, x, y)
             geom = snap_outside(geom, snapper:fullgeometry(), snap)
         end
     end
+
+    -- It's easiest to undo changes afterwards if they're not allowed
+    if fixed_x then geom.x = cur_geom.x end
+    if fixed_y then geom.y = cur_geom.y end
+
     return geom
 end
 
@@ -120,6 +128,9 @@ function client.move(c, snap)
     local m_c = capi.mouse.coords()
     local dist_x = m_c.x - orig.x
     local dist_y = m_c.y - orig.y
+    -- Only allow moving in the non-maximized directions
+    local fixed_x = c.maximized_horizontal
+    local fixed_y = c.maximized_vertical
 
     local function ug(c, prop)
         if prop == "geometry" then
@@ -136,7 +147,7 @@ function client.move(c, snap)
                                       if lay == layout.suit.floating or aclient.floating.get(c) then
                                           local x = mouse.x - dist_x
                                           local y = mouse.y - dist_y
-                                          c:fullgeometry(client.snap(c, snap, x, y))
+                                          c:fullgeometry(client.snap(c, snap, x, y, fixed_x, fixed_y))
                                           if layout.get(c.screen) ~= layout.suit.floating and not aclient.floating.get(c) then
                                               hooks.property.register(ug)
                                           end
@@ -342,15 +353,12 @@ local function client_resize_tiled(c, lay)
                           end, cursor)
 end
 
-local function client_resize_floating(c, corner)
+local function client_resize_floating(c, corner, fixed_x, fixed_y)
     local corner, x, y = client.corner(c, corner)
-    local fixed_x, fixed_y
     local g = c:geometry()
 
     -- Warp mouse pointer
     capi.mouse.coords({ x = x, y = y })
-
-    local fixed_x, fixed_y
 
     capi.mousegrabber.run(function (mouse)
                               for k, v in ipairs(mouse.buttons) do
@@ -381,6 +389,8 @@ local function client_resize_floating(c, corner)
                                       end
                                       if ng.width <= 0 then ng.width = nil end
                                       if ng.height <= 0 then ng.height = nil end
+                                      if fixed_x then ng.width = width end
+                                      if fixed_y then ng.height = height end
                                       c:geometry({ width = ng.width, height = ng.height })
                                       -- Get real geometry that has been applied
                                       -- in case we honor size hints
@@ -421,10 +431,14 @@ function client.resize(c, corner)
         return
     end
 
+    -- Do not allow maximized clients to be resized by mouse
+    local fixed_x = c.maximized_horizontal
+    local fixed_y = c.maximized_vertical
+
     local lay = layout.get(c.screen)
 
     if lay == layout.suit.floating or aclient.floating.get(c) then
-        return client_resize_floating(c, corner)
+        return client_resize_floating(c, corner, fixed_x, fixed_y)
     elseif lay == layout.suit.tile
         or lay == layout.suit.tile.left
         or lay == layout.suit.tile.top
