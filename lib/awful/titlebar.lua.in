@@ -112,7 +112,13 @@ function add(c, args)
     tb.widgets = { appicon = appicon, title = title,
                    closef = closef, close = close }
 
+    -- Store old geometry (including borders)
+    local old_geom = c:fullgeometry()
+
     c.titlebar = tb
+
+    -- Resize the client so the same amount of space is occupied as before.
+    c:fullgeometry(old_geom)
 
     update(c)
     update(c, "geometry")
@@ -161,8 +167,11 @@ end
 --- Remove a titlebar from a client.
 -- @param c The client.
 function remove(c)
+    local old_geom = c:fullgeometry()
     c.titlebar = nil
     data[c] = nil
+    -- Resize the client so the same amount of space is occupied as before.
+    c:fullgeometry(old_geom)
 end
 
 -- Register standards hooks
