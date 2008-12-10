@@ -43,35 +43,34 @@ int luaA_titlebar_newindex(lua_State *, wibox_t *, awesome_token_t);
 static inline area_t
 titlebar_geometry_add(wibox_t *t, int border, area_t geometry)
 {
+    /* We need to add titlebar border to the total width and height.
+     * This can then be substracted/added to the witdh/height/x/y.
+     * In this case the border is included, because it belongs to a different window.
+     */
     if(t)
         switch(t->position)
         {
           case Top:
-            geometry.y -= t->sw.geometry.height + 2 * t->sw.border.width - border;
-            geometry.height += t->sw.geometry.height + 2 * t->sw.border.width - border;
-            geometry.width += 2 * border;
+            geometry.y -= t->sw.geometry.height + 2 * t->sw.border.width;
+            geometry.height += t->sw.geometry.height + 2 * t->sw.border.width;
             break;
           case Bottom:
-            geometry.height += t->sw.geometry.height + 2 * t->sw.border.width - border;
-            geometry.width += 2 * border;
+            geometry.height += t->sw.geometry.height + 2 * t->sw.border.width;
             break;
           case Left:
-            geometry.x -= t->sw.geometry.width + 2 * t->sw.border.width - border;
-            geometry.width += t->sw.geometry.width + 2 * t->sw.border.width - border;
-            geometry.height += 2 * border;
+            geometry.x -= t->sw.geometry.width + 2 * t->sw.border.width;
+            geometry.width += t->sw.geometry.width + 2 * t->sw.border.width;
             break;
           case Right:
-            geometry.width += t->sw.geometry.width + 2 * t->sw.border.width - border;
-            geometry.height += 2 * border;
+            geometry.width += t->sw.geometry.width + 2 * t->sw.border.width;
             break;
           default:
             break;
         }
-    else
-    {
-        geometry.width += 2 * border;
-        geometry.height += 2 * border;
-    }
+
+    /* Adding a border to a client only changes width and height, x and y are including border. */
+    geometry.width += 2 * border;
+    geometry.height += 2 * border;
 
     return geometry;
 }
@@ -85,35 +84,34 @@ titlebar_geometry_add(wibox_t *t, int border, area_t geometry)
 static inline area_t
 titlebar_geometry_remove(wibox_t *t, int border, area_t geometry)
 {
+    /* We need to add titlebar border to the total width and height.
+     * This can then be substracted/added to the witdh/height/x/y.
+     * In this case the border is included, because it belongs to a different window.
+     */
     if(t)
         switch(t->position)
         {
           case Top:
-            geometry.y += t->sw.geometry.height + 2 * t->sw.border.width - border;
-            geometry.height -= t->sw.geometry.height + 2 * t->sw.border.width - border;
-            geometry.width -= 2 * border;
+            geometry.y += t->sw.geometry.height + 2 * t->sw.border.width;
+            geometry.height -= t->sw.geometry.height + 2 * t->sw.border.width;
             break;
           case Bottom:
-            geometry.height -= t->sw.geometry.height + 2 * t->sw.border.width - border;
-            geometry.width -= 2 * border;
+            geometry.height -= t->sw.geometry.height + 2 * t->sw.border.width;
             break;
           case Left:
-            geometry.x += t->sw.geometry.width + 2 * t->sw.border.width - border;
-            geometry.width -= t->sw.geometry.width + 2 * t->sw.border.width - border;
-            geometry.height -= 2 * border;
+            geometry.x += t->sw.geometry.width + 2 * t->sw.border.width;
+            geometry.width -= t->sw.geometry.width + 2 * t->sw.border.width;
             break;
           case Right:
-            geometry.width -= t->sw.geometry.width + 2 * t->sw.border.width - border;
-            geometry.height -= 2 * border;
+            geometry.width -= t->sw.geometry.width + 2 * t->sw.border.width;
             break;
           default:
             break;
         }
-    else
-    {
-        geometry.width -= 2 * border;
-        geometry.height -= 2 * border;
-    }
+
+    /* Adding a border to a client only changes width and height, x and y are including border. */
+    geometry.width -= 2 * border;
+    geometry.height -= 2 * border;
 
     return geometry;
 }
