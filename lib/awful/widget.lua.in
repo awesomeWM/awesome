@@ -288,7 +288,7 @@ local function widget_tasklist_label_common(c, args)
             text = text .. name
         end
     elseif c.urgent and bg_urgent and fg_urgent then
-        local bg = bg_urgent
+        bg = bg_urgent
         text = text .. "<bg color='"..bg_urgent.."'/><span color='"..util.color_strip_alpha(fg_urgent).."'>"..name.."</span>"
     else
         text = text .. name
