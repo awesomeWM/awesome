@@ -21,8 +21,6 @@
 #ifndef AWESOME_COMMON_REFCOUNT_H
 #define AWESOME_COMMON_REFCOUNT_H
 
-#include <assert.h>
-
 #define DO_RCNT(type, prefix, dtor)                                            \
     static inline void prefix##_unref(type **item)                             \
     {                                                                          \
