@@ -25,6 +25,7 @@ local capi =
 module("awful.mouse")
 
 client = {}
+wibox = {}
 
 function client_under_pointer()
     local obj = capi.mouse.object_under_pointer()
@@ -182,6 +183,48 @@ function client.dragtotag(c)
                               end
                               return true
                           end, "fleur")
+end
+
+--- Move the wibox under the cursor
+--@param w The wibox to move, or none to use that under the pointer
+function wibox.move(w)
+    if not w then w = wibox_under_pointer() end
+    if not w then return end
+
+    local offset = {
+        x = w:geometry()["x"] - capi.mouse.coords()["x"],
+        y = w:geometry()["y"] - capi.mouse.coords()["y"]
+    }
+
+    capi.mousegrabber.run(function (mouse)
+        local button_down = false
+        if w.position == "floating" then
+            w:geometry({
+                x = capi.mouse.coords()["x"] + offset["x"],
+                y = capi.mouse.coords()["y"] + offset["y"],
+            })
+        else
+            local wa = capi.screen[capi.mouse.screen].workarea
+
+            if capi.mouse.coords()["y"] > wa.y + wa.height - 10 then
+                w.position = "bottom"
+            elseif capi.mouse.coords()["y"] < wa.y + 10 then
+                w.position = "top"
+            elseif capi.mouse.coords()["x"] > wa.x + wa.width - 10 then
+                w.position = "right"
+            elseif capi.mouse.coords()["x"] < wa.x + 10 then
+                w.position = "left"
+            end
+            w.screen = capi.mouse.screen
+        end
+        for k, v in ipairs(mouse.buttons) do
+            if v then button_down = true end
+        end
+        if not button_down then
+            return false
+        end
+        return true
+    end, "fleur")
 end
 
 --- Get a client corner coordinates.
