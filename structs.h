@@ -99,6 +99,8 @@ typedef struct
     bool need_update;
     /** Cursor */
     char *cursor;
+    /** Button bindings */
+    button_array_t buttons;
 } wibox_t;
 ARRAY_TYPE(wibox_t *, wibox)
 

@@ -144,12 +144,38 @@ event_handle_button(void *data, xcb_connection_t *connection, xcb_button_press_e
             ev->event_x -= wibox->sw.geometry.x;
             ev->event_y -= wibox->sw.geometry.y;
         }
+
+        /* check if we match a binding on the wibox */
+        button_array_t *b = &wibox->buttons;
+
+        for(int i = 0; i < b->len; i++)
+            if(ev->detail == b->tab[i]->button
+               && XUTIL_MASK_CLEAN(ev->state) == b->tab[i]->mod)
+                switch(ev->response_type)
+                {
+                  case XCB_BUTTON_PRESS:
+                    if(b->tab[i]->press != LUA_REFNIL)
+                    {
+                        luaA_wibox_userdata_new(globalconf.L, wibox);
+                        luaA_dofunction(globalconf.L, b->tab[i]->press, 1, 0);
+                    }
+                    break;
+                  case XCB_BUTTON_RELEASE:
+                    if(b->tab[i]->release != LUA_REFNIL)
+                    {
+                        luaA_wibox_userdata_new(globalconf.L, wibox);
+                        luaA_dofunction(globalconf.L, b->tab[i]->release, 1, 0);
+                    }
+                    break;
+                }
+
+        /* then try to match a widget binding */
         if((w = widget_getbycoords(wibox->position, &wibox->widgets,
                                    wibox->sw.geometry.width,
                                    wibox->sw.geometry.height,
                                    &ev->event_x, &ev->event_y)))
         {
-            button_array_t *b = &w->buttons;
+            b = &w->buttons;
 
             for(int i = 0; i < b->len; i++)
                 if(ev->detail == b->tab[i]->button

@@ -455,6 +455,7 @@ void
 wibox_delete(wibox_t **wibox)
 {
     simplewindow_wipe(&(*wibox)->sw);
+    button_array_wipe(&(*wibox)->buttons);
     luaL_unref(globalconf.L, LUA_REGISTRYINDEX, (*wibox)->widgets_table);
     widget_node_array_wipe(&(*wibox)->widgets);
     p_delete(wibox);
@@ -1053,6 +1054,28 @@ luaA_wibox_newindex(lua_State *L)
     return 0;
 }
 
+/** Get or set mouse buttons bindings to a wibox.
+ * \param L The Lua VM state.
+ * \luastack
+ * \lvalue A wibox.
+ * \lparam An array of mouse button bindings objects, or nothing.
+ * \return The array of mouse button bindings objects of this wibox.
+ */
+static int
+luaA_wibox_buttons(lua_State *L)
+{
+    wibox_t **wibox = luaA_checkudata(L, 1, "wibox");
+    button_array_t *buttons = &(*wibox)->buttons;
+
+    if(lua_gettop(L) == 2)
+    {
+        luaA_button_array_set(L, 2, buttons);
+        return 1;
+    }
+
+    return luaA_button_array_get(L, buttons);
+}
+
 const struct luaL_reg awesome_wibox_methods[] =
 {
     { "__call", luaA_wibox_new },
@@ -1060,6 +1083,7 @@ const struct luaL_reg awesome_wibox_methods[] =
 };
 const struct luaL_reg awesome_wibox_meta[] =
 {
+    { "buttons", luaA_wibox_buttons },
     { "geometry", luaA_wibox_geometry },
     { "__index", luaA_wibox_index },
     { "__newindex", luaA_wibox_newindex },
