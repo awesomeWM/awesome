@@ -72,6 +72,14 @@ typedef struct
 #define MAX(a,b) ((a) < (b) ? (b) : (a))
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
 
+#define unsigned_subtract(a, b)  \
+    do {                         \
+        if (b > a)               \
+            a = 0;               \
+        else                     \
+            a -= b;              \
+    } while (0)
+
 #define ssizeof(foo)            (ssize_t)sizeof(foo)
 #define countof(foo)            (ssizeof(foo) / ssizeof(foo[0]))
 

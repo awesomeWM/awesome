@@ -113,12 +113,12 @@ function add(c, args)
                    closef = closef, close = close }
 
     -- Store old geometry (including borders)
-    local old_geom = c:fullgeometry()
+    local old_geom = c:geometry()
 
     c.titlebar = tb
 
     -- Resize the client so the same amount of space is occupied as before.
-    c:fullgeometry(old_geom)
+    c:geometry(old_geom)
 
     update(c)
     update(c, "geometry")
@@ -142,10 +142,10 @@ function update(c, prop)
             if data[c].width then
                 if c.titlebar.position == "top"
                     or c.titlebar.position == "bottom" then
-                    local w = math.min(data[c].width, c:geometry().width + 2 * c.border_width)
+                    local w = math.min(data[c].width, c:geometry().width)
                     c.titlebar:geometry({ width = w })
                 else
-                    local w = math.min(data[c].width, c:geometry().height + 2 * c.border_width)
+                    local w = math.min(data[c].width, c:geometry().height)
                     c.titlebar:geometry({ height = w })
                 end
             end
@@ -167,11 +167,11 @@ end
 --- Remove a titlebar from a client.
 -- @param c The client.
 function remove(c)
-    local old_geom = c:fullgeometry()
+    local old_geom = c:geometry()
     c.titlebar = nil
     data[c] = nil
     -- Resize the client so the same amount of space is occupied as before.
-    c:fullgeometry(old_geom)
+    c:geometry(old_geom)
 end
 
 -- Register standards hooks

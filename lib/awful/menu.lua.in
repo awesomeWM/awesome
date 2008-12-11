@@ -199,19 +199,19 @@ local function set_coords(menu, screen_idx)
         menu.w = menu.parent.w
         menu.h = menu.parent.h
 
-        local p_w = (menu.h + menu.theme.border_width) * (menu.num - 1)
-        local m_h = menu.theme.border_width + (menu.h + menu.theme.border_width) * #menu.items
-        local m_w = menu.w + menu.theme.border_width
+        local p_w = menu.h * (menu.num - 1)
+        local m_h = menu.h * #menu.items
+        local m_w = menu.w
         menu.y = menu.parent.y + p_w + m_h > screen_h and screen_h - m_h or menu.parent.y + p_w
-        menu.x = menu.parent.x + menu.w*2 + menu.theme.border_width > screen_w and menu.parent.x - m_w or menu.parent.x + m_w
+        menu.x = menu.parent.x + menu.w > screen_w and menu.parent.x - m_w or menu.parent.x + m_w
     else
         local m_coords = capi.mouse.coords()
 
         menu.y = m_coords.y < s_geometry.y and s_geometry.y or m_coords.y
         menu.x = m_coords.x < s_geometry.x and s_geometry.x or m_coords.x
 
-        local m_h = menu.theme.border_width + (menu.h + menu.theme.border_width) * #menu.items
-        local m_w = menu.w + menu.theme.border_width*2
+        local m_h = menu.h * #menu.items
+        local m_w = menu.w
         menu.y = menu.y + m_h > screen_h and screen_h - m_h or menu.y
         menu.x = menu.x + m_w > screen_w and screen_w - m_w or menu.x
     end
@@ -227,7 +227,7 @@ function show(menu)
             width = menu.w,
             height = menu.h,
             x = menu.x,
-            y = menu.y + (num - 1) * (menu.h + menu.theme.border_width)
+            y = menu.y + (num - 1) * menu.h
         })
         item.screen = screen_index
     end

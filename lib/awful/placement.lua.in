@@ -101,7 +101,7 @@ end
 --- Place the client without it being outside the screen.
 -- @param c The client.
 function no_offscreen(c)
-    local geometry = c:fullgeometry()
+    local geometry = c:geometry()
     local screen_geometry = capi.screen[c.screen].workarea
 
     if geometry.x + geometry.width > screen_geometry.x + screen_geometry.width then
@@ -116,7 +116,7 @@ function no_offscreen(c)
         geometry.y = screen_geometry.y
     end
 
-    c:fullgeometry(geometry)
+    c:geometry(geometry)
 end
 
 --- Place the client where there's place available with minimum overlap.
@@ -126,10 +126,9 @@ function no_overlap(c)
     local layout = layout.get()
     local areas = { capi.screen[c.screen].workarea }
     local geometry = c:geometry()
-    local fullgeometry = c:fullgeometry()
     for i, cl in pairs(cls) do
         if cl ~= c and (client.get.floating(cl) or layout == layout.suit.floating) then
-            areas = area_remove(areas, cl:fullgeometry())
+            areas = area_remove(areas, cl:geometry())
         end
     end
 
@@ -137,8 +136,8 @@ function no_overlap(c)
     local found = false
     local new = { x = geometry.x, y = geometry.y, width = 0, height = 0 }
     for i, r in ipairs(areas) do
-        if r.width >= fullgeometry.width
-           and r.height >= fullgeometry.height
+        if r.width >= geometry.width
+           and r.height >= geometry.height
            and r.width * r.height > new.width * new.height then
             found = true
             new = r

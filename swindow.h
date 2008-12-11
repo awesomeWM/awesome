@@ -36,6 +36,11 @@ typedef struct simple_window_t
     xcb_gcontext_t gc;
     /** The window geometry. */
     area_t geometry;
+    struct
+    {
+        /** Internal geometry (matching X11 protocol) */
+        area_t internal;
+    } geometries;
     /** The window border */
     struct
     {

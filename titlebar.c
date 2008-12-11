@@ -64,83 +64,83 @@ client_getbytitlebarwin(xcb_window_t win)
 void
 titlebar_geometry_compute(client_t *c, area_t geometry, area_t *res)
 {
-    int width, x_offset = 0, y_offset = 0;
+    int height, width, x_offset = 0, y_offset = 0;
 
     switch(c->titlebar->position)
     {
       default:
         return;
       case Top:
-        width = MAX(1, geometry.width + 2 * c->border - 2 * c->titlebar->sw.border.width);
+        width = MAX(1, geometry.width);
         switch(c->titlebar->align)
         {
           default:
             break;
           case AlignRight:
-            x_offset = 2 * c->border + geometry.width - width - 2 * c->titlebar->sw.border.width;
+            x_offset = geometry.width - width;
             break;
           case AlignCenter:
             x_offset = (geometry.width - width) / 2;
             break;
         }
         res->x = geometry.x + x_offset;
-        res->y = geometry.y - c->titlebar->sw.geometry.height - 2 * c->titlebar->sw.border.width + c->border;
+        res->y = geometry.y;
         res->width = width;
         res->height = c->titlebar->sw.geometry.height;
         break;
       case Bottom:
-        width = MAX(1, geometry.width + 2 * c->border - 2 * c->titlebar->sw.border.width);
+        width = MAX(1, geometry.width);
         switch(c->titlebar->align)
         {
           default:
             break;
           case AlignRight:
-            x_offset = 2 * c->border + geometry.width - width - 2 * c->titlebar->sw.border.width;
+            x_offset = geometry.width - width;
             break;
           case AlignCenter:
             x_offset = (geometry.width - width) / 2;
             break;
         }
         res->x = geometry.x + x_offset;
-        res->y = geometry.y + geometry.height + c->border;
+        res->y = geometry.y + geometry.height - c->titlebar->sw.geometry.height;
         res->width = width;
         res->height = c->titlebar->sw.geometry.height;
         break;
       case Left:
-        width = MAX(1, geometry.height + 2 * c->border - 2 * c->titlebar->sw.border.width);
+        height = MAX(1, geometry.height);
         switch(c->titlebar->align)
         {
           default:
             break;
           case AlignRight:
-            y_offset = 2 * c->border + geometry.height - width - 2 * c->titlebar->sw.border.width;
+            y_offset = geometry.height - height;
             break;
           case AlignCenter:
-            y_offset = (geometry.height - width) / 2;
+            y_offset = (geometry.height - height) / 2;
             break;
         }
-        res->x = geometry.x - c->titlebar->sw.geometry.width + c->border;
+        res->x = geometry.x;
         res->y = geometry.y + y_offset;
         res->width = c->titlebar->sw.geometry.width;
-        res->height = width;
+        res->height = height;
         break;
       case Right:
-        width = MAX(1, geometry.height + 2 * c->border - 2 * c->titlebar->sw.border.width);
+        height = MAX(1, geometry.height);
         switch(c->titlebar->align)
         {
           default:
             break;
           case AlignRight:
-            y_offset = 2 * c->border + geometry.height - width - 2 * c->titlebar->sw.border.width;
+            y_offset = geometry.height - height;
             break;
           case AlignCenter:
-            y_offset = (geometry.height - width) / 2;
+            y_offset = (geometry.height - height) / 2;
             break;
         }
-        res->x = geometry.x + geometry.width + c->border;
+        res->x = geometry.x + geometry.width - c->titlebar->sw.geometry.width;
         res->y = geometry.y + y_offset;
         res->width = c->titlebar->sw.geometry.width;
-        res->height = width;
+        res->height = height;
         break;
     }
 }

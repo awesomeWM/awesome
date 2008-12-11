@@ -87,8 +87,8 @@ local function tile(_, screen, position)
                 geometry.y = wa.y
             end
 
-            geometry.width = mw - 2 * c.border_width
-            geometry.height = mh - 2 * c.border_width
+            geometry.width = mw
+            geometry.height = mh
 
         -- Slave windows
         else
@@ -98,52 +98,52 @@ local function tile(_, screen, position)
 
             if position == "right" or position == "left" then
                 if otherwin <= real_ncol then
-                    geometry.height = wa.height - 2 * c.border_width
+                    geometry.height = wa.height
                 elseif (otherwin % win_by_col) ~= 0 and (current_col == real_ncol - 1) then
-                    geometry.height = math.floor(wa.height / (otherwin % win_by_col)) - 2 * c.border_width
+                    geometry.height = math.floor(wa.height / (otherwin % win_by_col))
                 else
-                    geometry.height = math.floor(wa.height / win_by_col) - 2 * c.border_width
+                    geometry.height = math.floor(wa.height / win_by_col)
                 end
 
-                geometry.width = math.floor((wa.width - mw) / real_ncol) - 2 * c.border_width
+                geometry.width = math.floor((wa.width - mw) / real_ncol)
 
                 if otherwin <= real_ncol then
                     geometry.y = wa.y
                 else
                     geometry.y = wa.y + ((i - 1 - nmaster) % win_by_col) *
-                                        (geometry.height + 2 * c.border_width)
+                                        geometry.height
                 end
-                geometry.x = wa.x + current_col * (geometry.width + 2 * c.border_width)
+                geometry.x = wa.x + current_col * geometry.width
 
                 if position == "right" then
                     geometry.x = geometry.x + mw
                 end
             else
                 if otherwin <= real_ncol then
-                    geometry.width = wa.width - 2 * c.border_width
+                    geometry.width = wa.width
                 elseif (otherwin % win_by_col) ~= 0 and (current_col == real_ncol - 1) then
-                    geometry.width = math.floor(wa.width / (otherwin % win_by_col)) - 2 * c.border_width
+                    geometry.width = math.floor(wa.width / (otherwin % win_by_col))
                 else
-                    geometry.width = math.floor(wa.width / win_by_col) - 2 * c.border_width
+                    geometry.width = math.floor(wa.width / win_by_col)
                 end
 
-                geometry.height = math.floor((wa.height - mh) /  real_ncol) - 2 * c.border_width
+                geometry.height = math.floor((wa.height - mh) /  real_ncol)
 
                 if otherwin <= real_ncol then
                     geometry.x = wa.x
                 else
                     geometry.x = wa.x + ((i - 1 - nmaster) % win_by_col) *
-                                        (geometry.width + 2 * c.border_width)
+                                        geometry.width
                 end
 
-                geometry.y = wa.y + current_col * (geometry.height + 2 * c.border_width)
+                geometry.y = wa.y + current_col * geometry.height
 
                 if position == "bottom" then
                     geometry.y = geometry.y + mh
                 end
             end
         end
-        c:fullgeometry(geometry)
+        c:geometry(geometry)
     end
 end
 

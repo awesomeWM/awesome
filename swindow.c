@@ -48,14 +48,14 @@ simplewindow_draw_context_update(simple_window_t *sw, xcb_screen_t *s)
         xcb_create_pixmap(globalconf.connection,
                           s->root_depth,
                           sw->ctx.pixmap, s->root,
-                          sw->geometry.height, sw->geometry.width);
+                          sw->geometry.height, sw->geometries.internal.width);
         draw_context_init(&sw->ctx, phys_screen,
-                          sw->geometry.height, sw->geometry.width,
+                          sw->geometry.height, sw->geometries.internal.width,
                           sw->ctx.pixmap, &fg, &bg);
         break;
       case East:
         draw_context_init(&sw->ctx, phys_screen,
-                          sw->geometry.width, sw->geometry.height,
+                          sw->geometries.internal.width, sw->geometries.internal.height,
                           sw->pixmap, &fg, &bg);
         break;
     }
@@ -88,6 +88,13 @@ simplewindow_init(simple_window_t *sw,
     sw->geometry.width = geometry.width;
     sw->geometry.height = geometry.height;
     sw->border.width = border_width;
+
+    /* The real protocol window. */
+    sw->geometries.internal.x = geometry.x;
+    sw->geometries.internal.y = geometry.y;
+    sw->geometries.internal.width = geometry.width - 2*border_width;
+    sw->geometries.internal.height = geometry.height - 2*border_width;
+
     sw->orientation = orientation;
     sw->ctx.fg = *fg;
     sw->ctx.bg = *bg;
@@ -102,14 +109,14 @@ simplewindow_init(simple_window_t *sw,
 
     sw->window = xcb_generate_id(globalconf.connection);
     xcb_create_window(globalconf.connection, s->root_depth, sw->window, s->root,
-                      geometry.x, geometry.y, geometry.width, geometry.height,
+                      sw->geometries.internal.x, sw->geometries.internal.y, sw->geometries.internal.width, sw->geometries.internal.height,
                       border_width, XCB_COPY_FROM_PARENT, s->root_visual,
                       XCB_CW_BACK_PIXMAP | XCB_CW_OVERRIDE_REDIRECT | XCB_CW_EVENT_MASK,
                       create_win_val);
 
     sw->pixmap = xcb_generate_id(globalconf.connection);
     xcb_create_pixmap(globalconf.connection, s->root_depth, sw->pixmap, s->root,
-                      geometry.width, geometry.height);
+                      sw->geometries.internal.width, sw->geometries.internal.height);
 
     sw->ctx.phys_screen = phys_screen;
     simplewindow_draw_context_update(sw, s);
@@ -153,10 +160,10 @@ simplewindow_move(simple_window_t *sw, int x, int y)
 {
     const uint32_t move_win_vals[] = { x, y };
 
-    if(x != sw->geometry.x || y != sw->geometry.y)
+    if(x != sw->geometries.internal.x || y != sw->geometries.internal.y)
     {
-        sw->geometry.x = x;
-        sw->geometry.y = y;
+        sw->geometry.x = sw->geometries.internal.x = x;
+        sw->geometry.y = sw->geometries.internal.y = y;
         xcb_configure_window(globalconf.connection, sw->window,
                              XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y,
                              move_win_vals);
@@ -171,19 +178,25 @@ simplewindow_move(simple_window_t *sw, int x, int y)
 void
 simplewindow_resize(simple_window_t *sw, int w, int h)
 {
-    if(w > 0 && h > 0 && (sw->geometry.width != w || sw->geometry.height != h))
+    int iw = w - 2 * sw->border.width;
+    int ih = h - 2 * sw->border.width;
+
+    if(iw > 0 && ih > 0 &&
+        (sw->geometries.internal.width != iw || sw->geometries.internal.height != ih))
     {
         xcb_screen_t *s = xutil_screen_get(globalconf.connection, sw->ctx.phys_screen);
         uint32_t resize_win_vals[2];
 
-        sw->geometry.width = resize_win_vals[0] = w;
-        sw->geometry.height = resize_win_vals[1] = h;
+        sw->geometries.internal.width = resize_win_vals[0] = iw;
+        sw->geometries.internal.height = resize_win_vals[1] = ih;
+        sw->geometry.width = w;
+        sw->geometry.height = h;
         xcb_free_pixmap(globalconf.connection, sw->pixmap);
         /* orientation != East */
         if(sw->pixmap != sw->ctx.pixmap)
             xcb_free_pixmap(globalconf.connection, sw->ctx.pixmap);
         sw->pixmap = xcb_generate_id(globalconf.connection);
-        xcb_create_pixmap(globalconf.connection, s->root_depth, sw->pixmap, s->root, w, h);
+        xcb_create_pixmap(globalconf.connection, s->root_depth, sw->pixmap, s->root, iw, ih);
         xcb_configure_window(globalconf.connection, sw->window,
                              XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
                              resize_win_vals);
@@ -193,7 +206,7 @@ simplewindow_resize(simple_window_t *sw, int w, int h)
 
 /** Move and resize a window in one call.
  * \param sw The simple window to move and resize.
- * \param geom The new gometry.
+ * \param geom The new geometry.
  */
 void
 simplewindow_moveresize(simple_window_t *sw, area_t geom)
@@ -201,10 +214,14 @@ simplewindow_moveresize(simple_window_t *sw, area_t geom)
     uint32_t moveresize_win_vals[4], mask_vals = 0;
     xcb_screen_t *s = xutil_screen_get(globalconf.connection, sw->ctx.phys_screen);
 
-    if(sw->geometry.x != geom.x || sw->geometry.y != geom.y)
+    area_t geom_internal = geom;
+    geom_internal.width -= 2 * sw->border.width;
+    geom_internal.height -= 2* sw->border.width;
+
+    if(sw->geometries.internal.x != geom_internal.x || sw->geometries.internal.y != geom_internal.y)
     {
-        sw->geometry.x = moveresize_win_vals[0] = geom.x;
-        sw->geometry.y = moveresize_win_vals[1] = geom.y;
+        sw->geometries.internal.x = moveresize_win_vals[0] = geom_internal.x;
+        sw->geometries.internal.y = moveresize_win_vals[1] = geom_internal.y;
         mask_vals |= XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y;
     }
 
@@ -212,13 +229,13 @@ simplewindow_moveresize(simple_window_t *sw, area_t geom)
     {
         if(mask_vals)
         {
-            sw->geometry.width = moveresize_win_vals[2] = geom.width;
-            sw->geometry.height = moveresize_win_vals[3] = geom.height;
+            sw->geometries.internal.width = moveresize_win_vals[2] = geom_internal.width;
+            sw->geometries.internal.height = moveresize_win_vals[3] = geom_internal.height;
         }
         else
         {
-            sw->geometry.width = moveresize_win_vals[0] = geom.width;
-            sw->geometry.height = moveresize_win_vals[1] = geom.height;
+            sw->geometries.internal.width = moveresize_win_vals[0] = geom_internal.width;
+            sw->geometries.internal.height = moveresize_win_vals[1] = geom_internal.height;
         }
         mask_vals |= XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT;
         xcb_free_pixmap(globalconf.connection, sw->pixmap);
@@ -226,9 +243,12 @@ simplewindow_moveresize(simple_window_t *sw, area_t geom)
         if(sw->pixmap != sw->ctx.pixmap)
             xcb_free_pixmap(globalconf.connection, sw->ctx.pixmap);
         sw->pixmap = xcb_generate_id(globalconf.connection);
-        xcb_create_pixmap(globalconf.connection, s->root_depth, sw->pixmap, s->root, geom.width, geom.height);
+        xcb_create_pixmap(globalconf.connection, s->root_depth, sw->pixmap, s->root, geom_internal.width, geom_internal.height);
         simplewindow_draw_context_update(sw, s);
     }
+
+    /* Also save geometry including border. */
+    sw->geometry = geom;
 
     xcb_configure_window(globalconf.connection, sw->window, mask_vals, moveresize_win_vals);
 }

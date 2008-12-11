@@ -51,18 +51,18 @@ titlebar_geometry_add(wibox_t *t, int border, area_t geometry)
         switch(t->position)
         {
           case Top:
-            geometry.y -= t->sw.geometry.height + 2 * t->sw.border.width;
-            geometry.height += t->sw.geometry.height + 2 * t->sw.border.width;
+            geometry.y -= t->sw.geometry.height;
+            geometry.height += t->sw.geometry.height;
             break;
           case Bottom:
-            geometry.height += t->sw.geometry.height + 2 * t->sw.border.width;
+            geometry.height += t->sw.geometry.height;
             break;
           case Left:
-            geometry.x -= t->sw.geometry.width + 2 * t->sw.border.width;
-            geometry.width += t->sw.geometry.width + 2 * t->sw.border.width;
+            geometry.x -= t->sw.geometry.width;
+            geometry.width += t->sw.geometry.width;
             break;
           case Right:
-            geometry.width += t->sw.geometry.width + 2 * t->sw.border.width;
+            geometry.width += t->sw.geometry.width;
             break;
           default:
             break;
@@ -92,26 +92,26 @@ titlebar_geometry_remove(wibox_t *t, int border, area_t geometry)
         switch(t->position)
         {
           case Top:
-            geometry.y += t->sw.geometry.height + 2 * t->sw.border.width;
-            geometry.height -= t->sw.geometry.height + 2 * t->sw.border.width;
+            geometry.y += t->sw.geometry.height;
+            unsigned_subtract(geometry.height, t->sw.geometry.height);
             break;
           case Bottom:
-            geometry.height -= t->sw.geometry.height + 2 * t->sw.border.width;
+            unsigned_subtract(geometry.height, t->sw.geometry.height);
             break;
           case Left:
-            geometry.x += t->sw.geometry.width + 2 * t->sw.border.width;
-            geometry.width -= t->sw.geometry.width + 2 * t->sw.border.width;
+            geometry.x += t->sw.geometry.width;
+            unsigned_subtract(geometry.width, t->sw.geometry.width);
             break;
           case Right:
-            geometry.width -= t->sw.geometry.width + 2 * t->sw.border.width;
+            unsigned_subtract(geometry.width, t->sw.geometry.width);
             break;
           default:
             break;
         }
 
     /* Adding a border to a client only changes width and height, x and y are including border. */
-    geometry.width -= 2 * border;
-    geometry.height -= 2 * border;
+    unsigned_subtract(geometry.width, 2*border);
+    unsigned_subtract(geometry.height, 2*border);
 
     return geometry;
 }

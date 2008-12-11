@@ -162,6 +162,8 @@ struct client_t
         area_t fullscreen;
         /** Client geometry when (un)-max */
         area_t max;
+        /** Internal geometry (matching X11 protocol) */
+        area_t internal;
     } geometries;
     /** Strut */
     strut_t strut;

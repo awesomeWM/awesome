@@ -174,8 +174,8 @@ client_ban(client_t *c)
     {
         /* Move all clients out of the physical viewport into negative coordinate space. */
         /* They will all be put on top of each other. */
-        uint32_t request[2] = { - (c->geometry.width + 2 * c->border),
-                                - (c->geometry.height + 2 * c->border) };
+        uint32_t request[2] = { - (c->geometries.internal.width + 2 * c->border),
+                                - (c->geometries.internal.height + 2 * c->border) };
 
         xcb_configure_window(globalconf.connection, c->win,
                              XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y,
@@ -475,8 +475,13 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
     c->win = w;
     c->geometry.x = wgeom->x;
     c->geometry.y = wgeom->y;
-    c->geometry.width = wgeom->width;
-    c->geometry.height = wgeom->height;
+    c->geometry.width = wgeom->width + 2 * wgeom->border_width;
+    c->geometry.height = wgeom->height + 2 * wgeom->border_width;
+    /* Also set internal geometry (client_ban() needs it). */
+    c->geometries.internal.x = wgeom->x;
+    c->geometries.internal.y = wgeom->y;
+    c->geometries.internal.width = wgeom->width;
+    c->geometries.internal.height = wgeom->height;
     client_setborder(c, wgeom->border_width);
     if((icon = ewmh_window_icon_get_reply(ewmh_icon_cookie)))
         c->icon = image_ref(&icon);
@@ -674,8 +679,11 @@ client_geometry_hints(client_t *c, area_t geometry)
     if(c->size_hints.flags & (XCB_SIZE_HINT_P_RESIZE_INC | XCB_SIZE_HINT_BASE_SIZE)
        && c->size_hints.width_inc && c->size_hints.height_inc)
     {
-        geometry.width -= (geometry.width - basew) % c->size_hints.width_inc;
-        geometry.height -= (geometry.height - baseh) % c->size_hints.height_inc;
+        uint16_t t1 = geometry.width, t2 = geometry.height;
+        unsigned_subtract(t1, basew);
+        unsigned_subtract(t2, baseh);
+        geometry.width -= t1 % c->size_hints.width_inc;
+        geometry.height -= t2 % c->size_hints.height_inc;
     }
 
     return geometry;
@@ -690,42 +698,52 @@ void
 client_resize(client_t *c, area_t geometry, bool hints)
 {
     int new_screen;
+    area_t geometry_internal;
     area_t area;
-
-    if(hints)
-        geometry = client_geometry_hints(c, geometry);
-
-    if(geometry.width <= 0 || geometry.height <= 0)
-        return;
 
     /* offscreen appearance fixes */
     area = display_area_get(c->phys_screen, NULL,
                             &globalconf.screens[c->screen].padding);
 
     if(geometry.x > area.width)
-        geometry.x = area.width - geometry.width - 2 * c->border;
+        geometry.x = area.width - geometry.width;
     if(geometry.y > area.height)
-        geometry.y = area.height - geometry.height - 2 * c->border;
-    if(geometry.x + geometry.width + 2 * c->border < 0)
+        geometry.y = area.height - geometry.height;
+    if(geometry.x + geometry.width < 0)
         geometry.x = 0;
-    if(geometry.y + geometry.height + 2 * c->border < 0)
+    if(geometry.y + geometry.height < 0)
         geometry.y = 0;
 
-    if(c->geometry.x != geometry.x
-       || c->geometry.y != geometry.y
-       || c->geometry.width != geometry.width
-       || c->geometry.height != geometry.height)
+    /* Real client geometry, please keep it contained to C code at the very least. */
+    geometry_internal = titlebar_geometry_remove(c->titlebar, c->border, geometry);
+
+    if(hints)
+        geometry_internal = client_geometry_hints(c, geometry_internal);
+
+    if(geometry_internal.width == 0 || geometry_internal.height == 0)
+        return;
+
+    /* Also let client hints propegate to the "official" geometry. */
+    geometry = titlebar_geometry_add(c->titlebar, c->border, geometry_internal);
+
+    if(c->geometries.internal.x != geometry_internal.x
+       || c->geometries.internal.y != geometry_internal.y
+       || c->geometries.internal.width != geometry_internal.width
+       || c->geometries.internal.height != geometry_internal.height)
     {
-        new_screen = screen_getbycoord(c->screen, geometry.x, geometry.y);
+        new_screen = screen_getbycoord(c->screen, geometry_internal.x, geometry_internal.y);
 
         /* Values to configure a window is an array where values are
          * stored according to 'value_mask' */
         uint32_t values[4];
 
-        c->geometry.x = values[0] = geometry.x;
-        c->geometry.y = values[1] = geometry.y;
-        c->geometry.width = values[2] = geometry.width;
-        c->geometry.height = values[3] = geometry.height;
+        c->geometries.internal.x = values[0] = geometry_internal.x;
+        c->geometries.internal.y = values[1] = geometry_internal.y;
+        c->geometries.internal.width = values[2] = geometry_internal.width;
+        c->geometries.internal.height = values[3] = geometry_internal.height;
+
+        /* Also store geometry including border and titlebar. */
+        c->geometry = geometry;
 
         titlebar_update_geometry(c);
 
@@ -734,15 +752,15 @@ client_resize(client_t *c, area_t geometry, bool hints)
         /* This at least doesn't break expectations about events. */
         if (c->isbanned)
         {
-            geometry.x = values[0] = - (geometry.width + 2 * c->border);
-            geometry.y = values[1] = - (geometry.height + 2 * c->border);
+            geometry.x = values[0] = - (geometry_internal.width + 2 * c->border);
+            geometry.y = values[1] = - (geometry_internal.height + 2 * c->border);
         }
 
         xcb_configure_window(globalconf.connection, c->win,
                              XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y
                              | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
                              values);
-        window_configure(c->win, geometry, c->border);
+        window_configure(c->win, geometry_internal, c->border);
 
         screen_client_moveto(c, new_screen, true, false);
 
@@ -846,10 +864,6 @@ client_setmaxhoriz(client_t *c, bool s)
                                        &globalconf.screens[c->screen].wiboxes,
                                        &globalconf.screens[c->screen].padding,
                                        true);
-            /* Remove space needed for titlebar and border. */
-            geometry = titlebar_geometry_remove(c->titlebar,
-                                        c->border,
-                                        geometry);
             geometry.y = c->geometry.y;
             geometry.height = c->geometry.height;
             c->geometries.max.x = c->geometry.x;
@@ -890,10 +904,6 @@ client_setmaxvert(client_t *c, bool s)
                                        &globalconf.screens[c->screen].wiboxes,
                                        &globalconf.screens[c->screen].padding,
                                        true);
-            /* Remove space needed for titlebar and border. */
-            geometry = titlebar_geometry_remove(c->titlebar,
-                                        c->border,
-                                        geometry);
             geometry.x = c->geometry.x;
             geometry.width = c->geometry.width;
             c->geometries.max.y = c->geometry.y;
@@ -1006,12 +1016,12 @@ client_unban(client_t *c)
     if(c->isbanned)
     {
         /* Move the client back where it belongs. */
-        uint32_t request[2] = { c->geometry.x, c->geometry.y };
+        uint32_t request[2] = { c->geometries.internal.x, c->geometries.internal.y };
 
         xcb_configure_window(globalconf.connection, c->win,
                               XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y,
                               request);
-        window_configure(c->win, c->geometry, c->border);
+        window_configure(c->win, c->geometries.internal, c->border);
 
         /* Do this manually because the system doesn't know we moved the toolbar.
          * Note that !isvisible titlebars are unmapped and for fullscreen it'll
@@ -1347,11 +1357,13 @@ luaA_client_unmanage(lua_State *L)
 
 /** Return client geometry.
  * \param L The Lua VM state.
- * \param full Use titlebar also.
  * \return The number of elements pushed on stack.
+ * \luastack
+ * \lparam A table with new coordinates, or none.
+ * \lreturn A table with client coordinates.
  */
 static int
-luaA_client_handlegeom(lua_State *L, bool full)
+luaA_client_geometry(lua_State *L)
 {
     client_t **c = luaA_checkudata(L, 1, "client");
 
@@ -1373,46 +1385,10 @@ luaA_client_handlegeom(lua_State *L, bool full)
             geometry.height = luaA_getopt_number(L, 2, "height", (*c)->geometry.height);
         }
 
-        if(full)
-            geometry = titlebar_geometry_remove((*c)->titlebar,
-                                                (*c)->border,
-                                                geometry);
-
         client_resize(*c, geometry, (*c)->size_hints_honor);
     }
 
-    if(full)
-        return luaA_pusharea(L, titlebar_geometry_add((*c)->titlebar,
-                                                      (*c)->border,
-                                                      (*c)->geometry));
-
     return luaA_pusharea(L, (*c)->geometry);
-}
-
-/** Return client geometry.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- * \luastack
- * \lparam A table with new coordinates, or none.
- * \lreturn A table with client coordinates.
- */
-static int
-luaA_client_geometry(lua_State *L)
-{
-    return luaA_client_handlegeom(L, false);
-}
-
-/** Return client geometry, using also titlebar and border width.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- * \luastack
- * \lparam A table with new coordinates, or none.
- * \lreturn A table with client coordinates.
- */
-static int
-luaA_client_fullgeometry(lua_State *L)
-{
-    return luaA_client_handlegeom(L, true);
 }
 
 /** Client newindex.
@@ -1955,7 +1931,6 @@ const struct luaL_reg awesome_client_meta[] =
 {
     { "isvisible", luaA_client_isvisible },
     { "geometry", luaA_client_geometry },
-    { "fullgeometry", luaA_client_fullgeometry },
     { "buttons", luaA_client_buttons },
     { "tags", luaA_client_tags },
     { "kill", luaA_client_kill },

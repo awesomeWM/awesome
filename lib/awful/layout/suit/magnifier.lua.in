@@ -55,10 +55,10 @@ local function magnifier(_, screen)
     else
         geometry.x = area.x
         geometry.y = area.y
-        geometry.width = area.width - 2 * focus.border_width
-        geometry.height = area.height - 2 * focus.border_width
+        geometry.width = area.width
+        geometry.height = area.height
     end
-    focus:fullgeometry(geometry)
+    focus:geometry(geometry)
     focus:raise()
 
     if #cls - 1 > 0 then
@@ -69,11 +69,7 @@ local function magnifier(_, screen)
 
         for k, c in ipairs(cls) do
             if c ~= focus then
-                geometry.height = geometry.height - 2 * c.border_width
-                geometry.width = geometry.width - 2 * c.border_width
-                c:fullgeometry(geometry)
-                geometry.height = geometry.height + 2 * c.border_width
-                geometry.width = geometry.width + 2 * c.border_width
+                c:geometry(geometry)
                 geometry.y = geometry.y + geometry.height
             end
         end

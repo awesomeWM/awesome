@@ -52,10 +52,7 @@ local function fair(screen, orientation)
                 g.y = wa.y + cell * g.height
             end
 
-            g.width = g.width - 2 * c.border_width
-            g.height = g.height - 2 * c.border_width
-
-            c:fullgeometry(g)
+            c:geometry(g)
 
             cell = cell + 1
             if cell == cells then

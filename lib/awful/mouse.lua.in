@@ -86,8 +86,8 @@ end
 function client.snap(c, snap, x, y, fixed_x, fixed_y)
     local snap = snap or 8
     local c = c or client.focus
-    local cur_geom = c:fullgeometry()
-    local geom = c:fullgeometry()
+    local cur_geom = c:geometry()
+    local geom = c:geometry()
     geom.x = x or geom.x
     geom.y = y or geom.y
 
@@ -96,7 +96,7 @@ function client.snap(c, snap, x, y, fixed_x, fixed_y)
 
     for k, snapper in ipairs(aclient.visible(c.screen)) do
         if snapper ~= c then
-            geom = snap_outside(geom, snapper:fullgeometry(), snap)
+            geom = snap_outside(geom, snapper:geometry(), snap)
         end
     end
 
@@ -124,7 +124,7 @@ function client.move(c, snap)
 
     c:raise()
 
-    local orig = c:fullgeometry()
+    local orig = c:geometry()
     local m_c = capi.mouse.coords()
     local dist_x = m_c.x - orig.x
     local dist_y = m_c.y - orig.y
@@ -134,7 +134,7 @@ function client.move(c, snap)
 
     local function ug(c, prop)
         if prop == "geometry" then
-            local g = c:fullgeometry()
+            local g = c:geometry()
             capi.mouse.coords({ x = g.x + dist_x, y = g.y + dist_y })
         end
     end
@@ -147,7 +147,7 @@ function client.move(c, snap)
                                       if lay == layout.suit.floating or aclient.floating.get(c) then
                                           local x = mouse.x - dist_x
                                           local y = mouse.y - dist_y
-                                          c:fullgeometry(client.snap(c, snap, x, y, fixed_x, fixed_y))
+                                          c:geometry(client.snap(c, snap, x, y, fixed_x, fixed_y))
                                           if layout.get(c.screen) ~= layout.suit.floating and not aclient.floating.get(c) then
                                               hooks.property.register(ug)
                                           end
@@ -389,9 +389,9 @@ local function client_resize_floating(c, corner, fixed_x, fixed_y)
                                       end
                                       if ng.width <= 0 then ng.width = nil end
                                       if ng.height <= 0 then ng.height = nil end
-                                      if fixed_x then ng.width = width end
-                                      if fixed_y then ng.height = height end
-                                      c:geometry({ width = ng.width, height = ng.height })
+                                      if fixed_x then ng.width = g.width ng.x = g.x end
+                                      if fixed_y then ng.height = g.height ng.y = g.y end
+                                      c:geometry(ng)
                                       -- Get real geometry that has been applied
                                       -- in case we honor size hints
                                       -- XXX: This should be rewritten when size
