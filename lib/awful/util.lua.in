@@ -73,10 +73,14 @@ end
 -- @return A string with the program output.
 function pread(cmd)
     if cmd and cmd ~= "" then
-        local f = io.popen(cmd, 'r')
-        local s = f:read("*all")
-        f:close()
-        return s
+        local f, err = io.popen(cmd, 'r')
+        if f then
+            local s = f:read("*all")
+            f:close()
+            return s
+        else
+            print(err)
+        end
     end
 end
 

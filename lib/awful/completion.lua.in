@@ -9,6 +9,7 @@
 local io = io
 local table = table
 local math = math
+local print = print
 
 --- Completion module for awful
 module("awful.completion")
@@ -26,16 +27,20 @@ keywords = {}
 -- @param src The bash completion source file, /etc/bash_completion by default.
 function bashcomp_load(src)
     if src then bashcomp_src = src end
-    local c = io.popen("/usr/bin/env bash -c 'source " .. bashcomp_src .. "; complete -p'")
-    while true do
-        local line = c:read("*line")
-        if not line then break end
-        -- if a bash function is used for completion, register it
-        if line:match(".* -F .*") then
-            bashcomp_funcs[line:gsub(".* (%S+)$","%1")] = line:gsub(".*-F +(%S+) .*$", "%1")
+    local c, err = io.popen("/usr/bin/env bash -c 'source " .. bashcomp_src .. "; complete -p'")
+    if c then
+        while true do
+            local line = c:read("*line")
+            if not line then break end
+            -- if a bash function is used for completion, register it
+            if line:match(".* -F .*") then
+                bashcomp_funcs[line:gsub(".* (%S+)$","%1")] = line:gsub(".*-F +(%S+) .*$", "%1")
+            end
         end
+        c:close()
+    else
+        print(err)
     end
-    c:close()
 end
 
 --- Use bash completion system to complete command and filename.
@@ -88,16 +93,20 @@ function bash(command, cur_pos, ncomp)
     else
         bash_cmd = "/usr/bin/env bash -c 'compgen -A " .. comptype .. " " .. words[cword_index] .. "'"
     end
-    local c = io.popen(bash_cmd)
+    local c, err = io.popen(bash_cmd)
     local output = {}
     i = 0
-    while true do
-        local line = c:read("*line")
-        if not line then break end
-        table.insert(output, line)
-    end
+    if c then
+        while true do
+            local line = c:read("*line")
+            if not line then break end
+            table.insert(output, line)
+        end
 
-    c:close()
+        c:close()
+    else
+        print(err)
+    end
 
     -- no completion, return
     if #output == 0 then
