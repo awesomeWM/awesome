@@ -9,6 +9,7 @@ local pairs = pairs
 local table = table
 local wibox = wibox
 local image = image
+local tostring = tostring
 local hooks = require("awful.hooks")
 local string = string
 local widget = widget
@@ -262,7 +263,7 @@ function notify(args)
     local timeout = args.timeout or (args.preset and args.preset.timeout) or config.presets.normal.timeout
     local icon = args.icon or (args.preset and args.preset.icon) or config.icon
     local icon_size = args.icon_size or (args.preset and args.preset.icon_size) or config.icon_size
-    local text = args.text or ""
+    local text = tostring(args.text) or ""
     local screen = args.screen or (args.preset and args.preset.screen) or config.presets.normal.screen
     local ontop = args.ontop or config.ontop
     local width = args.width or (args.preset and args.preset.width) or config.presets.normal.width
@@ -300,7 +301,7 @@ function notify(args)
     notification.idx = #notifications[screen][notification.position] + 1
 
     local title = ""
-    if args.title then title = args.title .. "\n"  end
+    if args.title then title = tostring(args.title) .. "\n"  end
 
     -- hook destroy
     local die = function () destroy(notification) end
