@@ -98,16 +98,29 @@ config.presets = {
     }
 }
 
--- Counter for the notifications
--- Required for later access via DBUS
-local counter = 1
-
 -- DBUS Notification constants
-local urgency = {
+urgency = {
     low = "\0",
     normal = "\1",
     critical = "\2"
 }
+
+--- DBUS notification to preset mapping
+-- @name config.mapping
+-- The first element is an object containing the filter
+-- If the rules in the filter matches the associated preset will be applied
+-- The rules object can contain: urgency, category, appname
+-- The second element is the preset
+
+config.mapping = {
+    {{urgency = urgency.low}, config.presets.low},
+    {{urgency = urgency.normal}, config.presets.normal},
+    {{urgency = urgency.critical}, config.presets.critical}
+}
+
+-- Counter for the notifications
+-- Required for later access via DBUS
+local counter = 1
 
 --- Index of notifications. See config table for valid 'position' values.
 -- Each element is a table consisting of:
@@ -371,7 +384,7 @@ end
 -- DBUS/Notification support
 
 -- Notify
-awful.hooks.dbus.register("org.freedesktop.Notifications", function (data, arg1, replaces_id, icon, title, text, actions, hints, expire)
+awful.hooks.dbus.register("org.freedesktop.Notifications", function (data, appname, replaces_id, icon, title, text, actions, hints, expire)
 args = {}
 if data.member == "Notify" then
     if text ~= "" then
@@ -386,12 +399,18 @@ if data.member == "Notify" then
             return nil
         end
     end
-    if hints.urgency == urgency.low then
-        args.preset = config.presets.low
-    elseif hints.urgency == urgency.normal then
-        args.preset = config.presets.normal
-    elseif hints.urgency == urgency.critical then
-        args.preset = config.presets.critical
+    local score = 0
+    for i, obj in pairs(config.mapping) do
+        local filter, preset, s = obj[1], obj[2], 0
+        if (not filter.urgency or filter.urgency == hints.urgency) and
+           (not filter.category or filter.category == hints.category) and
+           (not filter.appname or filter.appname == appname) then
+            for j, el in pairs(filter) do s = s + 1 end
+            if s > score then
+                score = s
+                args.preset = preset
+            end
+        end
     end
     if icon ~= "" then
         args.icon = icon
