@@ -51,8 +51,8 @@ end
 
 --- Set the layout function of the current tag.
 -- @param layout Layout name.
-function set(layout)
-    local t = tag.selected()
+function set(layout, t)
+    t = t or tag.selected()
     tag.setproperty(t, "layout", layout)
     capi.hooks.arrange()(t.screen)
 end
