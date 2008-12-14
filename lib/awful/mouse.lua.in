@@ -10,6 +10,7 @@ local tag = require("awful.tag")
 local hooks = require("awful.hooks")
 local aclient = require("awful.client")
 local widget = require("awful.widget")
+local util = require("awful.util")
 local type = type
 local math = math
 local ipairs = ipairs
@@ -171,15 +172,15 @@ function client.move(c, snap)
                           end, "fleur")
 end
 
+client.dragtotag = { }
+
 --- Move a client to a tag by drag'n'dropping it over a taglist widget
 -- @param c The client to move
-function client.dragtotag(c)
+function client.dragtotag.widget(c, side)
     capi.mousegrabber.run(function (mouse)
                               local button_down = false
-                              for k, v in ipairs(mouse.buttons) do
-                                  if v then
-                                      button_down = true
-                                  end
+                              for _, v in ipairs(mouse.buttons) do
+                                  if v then button_down = true end
                               end
                               if not button_down then
                                   local w = widget_under_pointer()
@@ -194,6 +195,44 @@ function client.dragtotag(c)
                               end
                               return true
                           end, "fleur")
+end
+
+--- Move a client to a tag by dragging it onto the left / right side of the screen
+-- @param c The client to move
+function client.dragtotag.border(c)
+    capi.mousegrabber.run(function (mouse)
+                                local button_down = false
+                                for _, v in ipairs(mouse.buttons) do
+                                    if v then button_down = true end
+                                end
+                                local wa = capi.screen[c.screen].workarea
+                                if mouse.x >= wa.x + wa.width then
+                                    capi.mouse.coords({ x = wa.x + wa.width - 1 })
+                                elseif mouse.x <= wa.x then
+                                    capi.mouse.coords({ x = wa.x + 1 })
+                                end
+                                if not button_down then
+                                    local tags = capi.screen[c.screen]:tags()
+                                    local t = tag.selected()
+                                    local idx
+                                    for i, v in ipairs(tags) do
+                                        if v == t then
+                                            idx = i
+                                        end
+                                    end
+                                    if mouse.x > wa.x + wa.width - 10 then
+                                        local newtag = tags[util.cycle(#tags, idx + 1)]
+                                        aclient.movetotag(newtag, c)
+                                        tag.viewnext()
+                                    elseif mouse.x < wa.x + 10 then
+                                        local newtag = tags[util.cycle(#tags, idx - 1)]
+                                        aclient.movetotag(newtag, c)
+                                        tag.viewprev()
+                                    end
+                                    return false
+                                end
+                                return true
+                            end, "fleur")
 end
 
 --- Move the wibox under the cursor
