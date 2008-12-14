@@ -6,6 +6,9 @@
 
 -- Grab environment
 local os = os
+local io = io
+local http = require("socket.http")
+local ltn12 = require("ltn12")
 local otable = otable
 local setmetatable = setmetatable
 local util = require("awful.util")
@@ -20,15 +23,13 @@ local capi =
 --- Root window image display library
 module("telak")
 
-command = "wget -q -O "
-
 local data = otable()
 
 -- Update a telak wibox.
 -- @param w The wibox to update.
 local function update(w)
     local tmp = os.tmpname()
-    os.execute(command .. tmp .. " '" .. data[w].image .. "'")
+    http.request{url = data[w].image, sink = ltn12.sink.file(io.open(tmp, "w"))}
     local img = capi.image(tmp)
     if img then
         w:geometry({ width = img.width, height = img.height })
