@@ -213,7 +213,7 @@ client_ban(client_t *c)
  * \param c The client or NULL.
  * \return True if a window (even root) has received focus, false otherwise.
  */
-static void
+void
 client_focus(client_t *c)
 {
     if(!client_maybevisible(c, c->screen) || c->nofocus)
