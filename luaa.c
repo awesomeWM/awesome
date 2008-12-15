@@ -319,10 +319,10 @@ CHECK_TYPE(widget);
 static void
 luaA_fixups(lua_State *L)
 {
-    /* replace string.len */
+    /* export string.wlen */
     lua_getglobal(L, "string");
     lua_pushcfunction(L, luaA_mbstrlen);
-    lua_setfield(L, -2, "len");
+    lua_setfield(L, -2, "wlen");
     lua_pop(L, 1);
     /* replace next */
     lua_pushliteral(L, "next");
