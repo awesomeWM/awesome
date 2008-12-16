@@ -36,8 +36,10 @@ typedef struct keybinding_t
     xcb_keysym_t keysym;
     /** Keycode */
     xcb_keycode_t keycode;
-    /** Lua function to execute. */
-    luaA_ref fct;
+    /** Lua function to execute on press */
+    luaA_ref press;
+    /** Lua function to execute on release */
+    luaA_ref release;
 } keybinding_t;
 
 ARRAY_TYPE(keybinding_t *, keybinding)

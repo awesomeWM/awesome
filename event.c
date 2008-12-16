@@ -538,9 +538,9 @@ event_handle_expose(void *data __attribute__ ((unused)),
  * \param ev The event.
  */
 static int
-event_handle_keypress(void *data __attribute__ ((unused)),
-                      xcb_connection_t *connection __attribute__ ((unused)),
-                      xcb_key_press_event_t *ev)
+event_handle_key(void *data __attribute__ ((unused)),
+                 xcb_connection_t *connection __attribute__ ((unused)),
+                 xcb_key_press_event_t *ev)
 {
     if(globalconf.keygrabber != LUA_REFNIL)
     {
@@ -560,8 +560,19 @@ event_handle_keypress(void *data __attribute__ ((unused)),
     else
     {
         keybinding_t *k = keybinding_find(ev);
-        if (k && k->fct != LUA_REFNIL)
-            luaA_dofunction(globalconf.L, k->fct, 0, 0);
+
+        if(k)
+            switch(ev->response_type)
+            {
+              case XCB_KEY_PRESS:
+                if(k->press != LUA_REFNIL)
+                    luaA_dofunction(globalconf.L, k->press, 0, 0);
+                break;
+              case XCB_KEY_RELEASE:
+                if(k->release != LUA_REFNIL)
+                    luaA_dofunction(globalconf.L, k->release, 0, 0);
+                break;
+            }
     }
 
     return 0;
@@ -814,7 +825,8 @@ void a_xcb_set_event_handlers(void)
     xcb_event_set_leave_notify_handler(&globalconf.evenths, event_handle_leavenotify, NULL);
     xcb_event_set_motion_notify_handler(&globalconf.evenths, event_handle_motionnotify, NULL);
     xcb_event_set_expose_handler(&globalconf.evenths, event_handle_expose, NULL);
-    xcb_event_set_key_press_handler(&globalconf.evenths, event_handle_keypress, NULL);
+    xcb_event_set_key_press_handler(&globalconf.evenths, event_handle_key, NULL);
+    xcb_event_set_key_release_handler(&globalconf.evenths, event_handle_key, NULL);
     xcb_event_set_map_request_handler(&globalconf.evenths, event_handle_maprequest, NULL);
     xcb_event_set_unmap_notify_handler(&globalconf.evenths, event_handle_unmapnotify, NULL);
     xcb_event_set_client_message_handler(&globalconf.evenths, event_handle_clientmessage, NULL);

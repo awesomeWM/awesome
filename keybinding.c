@@ -30,7 +30,8 @@ extern awesome_t globalconf;
 static void
 keybinding_delete(keybinding_t **kbp)
 {
-    luaL_unref(globalconf.L, LUA_REGISTRYINDEX, (*kbp)->fct);
+    luaL_unref(globalconf.L, LUA_REGISTRYINDEX, (*kbp)->press);
+    luaL_unref(globalconf.L, LUA_REGISTRYINDEX, (*kbp)->release);
     p_delete(kbp);
 }
 
@@ -313,7 +314,8 @@ luaA_keystore(keybinding_t *key, const char *str, ssize_t len)
  * \luastack
  * \lparam A table with modifier keys.
  * \lparam A key name.
- * \lparam A function to execute.
+ * \lparam A function to execute on key press.
+ * \lparam A function to execute on key release.
  * \lreturn The keybinding.
  */
 static int
@@ -322,18 +324,25 @@ luaA_keybinding_new(lua_State *L)
     size_t i, len;
     keybinding_t *k;
     const char *key;
+    luaA_ref press = LUA_REFNIL, release = LUA_REFNIL;
 
     /* arg 2 is key mod table */
     luaA_checktable(L, 2);
     /* arg 3 is key */
     key = luaL_checklstring(L, 3, &len);
-    /* arg 4 is cmd to run */
-    luaA_checkfunction(L, 4);
+
+    if(!lua_isnil(L, 4))
+        luaA_registerfct(L, 4, &press);
+
+    if(lua_gettop(L) == 5 && !lua_isnil(L, 5))
+        luaA_registerfct(L, 5, &release);
 
     /* get the last arg as function */
     k = p_new(keybinding_t, 1);
     luaA_keystore(k, key, len);
-    luaA_registerfct(L, 4, &k->fct);
+
+    k->press = press;
+    k->release = release;
 
     len = lua_objlen(L, 2);
     for(i = 1; i <= len; i++)
