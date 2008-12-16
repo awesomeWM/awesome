@@ -159,7 +159,8 @@ function run(args, textbox, exe_callback, completion_callback, history_path, his
     end
     textbox.text = prettyprompt .. prompt_text_with_cursor(text, inv_col, cur_col, cur_pos, cur_ul, args.selectall)
     capi.keygrabber.run(
-    function (mod, key)
+    function (mod, key, event)
+        if event ~= "press" then return true end
         -- Get out cases
         if (mod.Control and (key == "c" or key == "g"))
             or (not mod.Control and key == "Escape") then

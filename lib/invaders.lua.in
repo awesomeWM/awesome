@@ -285,7 +285,8 @@ function enemies.handle ()
     end
 end
 
-function keyhandler(mod, key)
+function keyhandler(mod, key, event)
+    if event ~= "press" then return true end
     if gamedata.highscore.getkeys then
         if key:len() == 1 and gamedata.name:len() < 20 then
             gamedata.name = gamedata.name .. key

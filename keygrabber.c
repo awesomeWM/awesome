@@ -680,14 +680,25 @@ keygrabber_handlekpress(lua_State *L, xcb_key_press_event_t *e)
 
     lua_pushstring(L, buf);
 
+    switch(e->response_type)
+    {
+      case XCB_KEY_PRESS:
+        lua_pushliteral(L, "press");
+        break;
+      case XCB_KEY_RELEASE:
+        lua_pushliteral(L, "release");
+        break;
+    }
+
     return true;
 }
 
 /** Grab keyboard and read pressed keys, calling callback function at each key
  * pressed. The callback function must return a boolean value: true to
  * continue grabbing, false to stop.
- * The function is called with 2 arguments:
- * a table containing modifiers keys and a string, the key pressed.
+ * The function is called with 3 arguments:
+ * a table containing modifiers keys, a string with the key pressed and a
+ * string with eithe "press" or "release" to indicate the event type.
  *
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.

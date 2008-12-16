@@ -76,7 +76,8 @@ end
 -- Arrow keys move focus, Return selects, Escape cancels.
 -- Ignores modifiers.
 function keyboardhandler (restore)
-    return function (mod, key)
+    return function (mod, key, event)
+                if event ~= "press" then return true end
                 if key == "Escape" then
                     restore()
                     awful.tag.history.restore()

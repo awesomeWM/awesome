@@ -547,7 +547,7 @@ event_handle_key(void *data __attribute__ ((unused)),
         lua_rawgeti(globalconf.L, LUA_REGISTRYINDEX, globalconf.keygrabber);
         if(keygrabber_handlekpress(globalconf.L, ev))
         {
-            if(lua_pcall(globalconf.L, 2, 1, 0))
+            if(lua_pcall(globalconf.L, 3, 1, 0))
             {
                 warn("error running function: %s", lua_tostring(globalconf.L, -1));
                 luaA_keygrabber_stop(globalconf.L);
