@@ -217,6 +217,29 @@ luaA_image_argb32_new(lua_State *L)
     return 0;
 }
 
+/** Performs 90 degree rotations on the current image. Passing 0 orientation
+ * does not rotate, 1 rotates clockwise by 90 degree, 2, rotates clockwise by
+ * 180 degrees, 3 rotates clockwise by 270 degrees.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ * \luastack
+ * \lvalue An image.
+ * \lparam The rotation to perform.
+ */
+static int
+luaA_image_orientate(lua_State *L)
+{
+    image_t **image = luaA_checkudata(L, 1, "image");
+    int orientation = luaL_checknumber(L, 2);
+
+    imlib_context_set_image((*image)->image);
+    imlib_image_orientate(orientation);
+
+    image_compute(*image);
+
+    return 0;
+}
+
 /** Rotate an image with specified angle radians and return a new image.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
@@ -352,6 +375,7 @@ const struct luaL_reg awesome_image_meta[] =
 {
     { "__index", luaA_image_index },
     { "rotate", luaA_image_rotate },
+    { "orientate", luaA_image_orientate },
     { "crop", luaA_image_crop },
     { "crop_and_scale", luaA_image_crop_and_scale },
     { "__gc", luaA_image_gc },
