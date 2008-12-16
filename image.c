@@ -114,7 +114,7 @@ image_new_from_argb32(int width, int height, uint32_t *data)
     Imlib_Image imimage;
     image_t *image = NULL;
 
-    if((imimage = imlib_create_image_using_data(width, height, data)))
+    if((imimage = imlib_create_image_using_copied_data(width, height, data)))
     {
         image = p_new(image_t, 1);
         image->image = imimage;
