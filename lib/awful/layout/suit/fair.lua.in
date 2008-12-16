@@ -22,14 +22,15 @@ local function fair(screen, orientation)
     local cls = client.tiled(screen)
 
     if #cls > 0 then
-        local cells = math.floor(math.sqrt(#cls))
+        local cells = math.ceil(math.sqrt(#cls))
         local strips = math.ceil(#cls / cells)
 
         local cell = 0
         local strip = 0
         for k, c in ipairs(cls) do
             local g = {}
-            if orientation == "east" then
+            if ( orientation == "east" and #cls > 2 )
+            or ( orientation == "south" and #cls <= 2 ) then
                 if #cls < (strips * cells) and strip == strips - 1 then
                     g.width = wa.width / (cells - ((strips * cells) - #cls))
                 else
