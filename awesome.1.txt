@@ -127,6 +127,8 @@ Layout modification
     Switch client with next client.
 *Mod4 \+ Shift \+ k*::
     Switch client with previous client.
+*Mod4 \+ o*::
+    Send client to next screen.
 *Mod4 \+ h*::
     Decrease master width factor by 5%.
 *Mod4 \+ l*::
