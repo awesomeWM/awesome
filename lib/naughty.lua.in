@@ -9,6 +9,7 @@ local pairs = pairs
 local table = table
 local wibox = wibox
 local image = image
+local type = type
 local tostring = tostring
 local hooks = require("awful.hooks")
 local string = string
@@ -76,6 +77,9 @@ config.border_width = 1
 -- @field height Height of a single line of text. Default: 16
 -- @field icon Popup icon. Default: nil
 -- @field icon_size Size of the icon in pixels. Default: nil
+-- @field callback function that will be called with all arguments
+--  the notification will only be displayed if the function returns true
+--  note: this function is only relevant to notifications sent via dbus
 
 config.presets = {
     low = {
@@ -413,17 +417,21 @@ if data.member == "Notify" then
             end
         end
     end
-    if icon ~= "" then
-        args.icon = icon
+    if not args.preset.callback or (type(args.preset.callback) == "function" and
+        args.preset.callback(data, appname, replaces_id, icon, title, text, actions, hints, expire)) then
+        if icon ~= "" then
+            args.icon = icon
+        end
+        if replaces_id and replaces_id ~= "" and replaces_id ~= 0 then
+            args.replaces_id = replaces_id
+        end
+        if expire and expire > -1 then
+            args.timeout = expire / 1000
+        end
+        local id = notify(args).id
+        return "i", id
     end
-    if replaces_id and replaces_id ~= "" and replaces_id ~= 0 then
-        args.replaces_id = replaces_id
-    end
-    if expire and expire > -1 then
-        args.timeout = expire / 1000
-    end
-    local id = notify(args).id
-    return "i", id
+    return "i", "0"
 elseif data.member == "CloseNotification" then
     local obj = getById(arg1)
     if obj then
