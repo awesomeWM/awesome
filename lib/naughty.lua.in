@@ -439,7 +439,7 @@ elseif data.member == "CloseNotification" then
     end
 elseif data.member == "GetServerInfo" or data.member == "GetServerInformation" then
     -- name of notification app, name of project, version of notification app, project version
-    return "s", "naughty", "s", "awesome", "s", "1337", "s", "1337"
+    return "s", "naughty", "s", "awesome", "s", AWESOME_VERSION, "s", "1337"
 end
 end)
 
