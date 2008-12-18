@@ -358,6 +358,10 @@ luaA_image_index(lua_State *L)
         imlib_context_set_image((*image)->image);
         lua_pushnumber(L, imlib_image_get_height());
         break;
+      case A_TK_ALPHA:
+        imlib_context_set_image((*image)->image);
+        lua_pushboolean(L, imlib_image_has_alpha());
+        break;
       default:
         return 0;
     }
