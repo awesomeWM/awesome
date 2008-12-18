@@ -18,10 +18,6 @@ module("awful.completion")
 local bashcomp_funcs = {}
 local bashcomp_src = "/etc/bash_completion"
 
---- keywords table use for the generic completion
--- should not be local
-keywords = {}
-
 --- Enable programmable bash completion in awful.completion.bash at the price of
 -- a slight overhead
 -- @param src The bash completion source file, /etc/bash_completion by default.
@@ -130,8 +126,9 @@ end
 -- @param text The current text the user had typed yet.
 -- @param cur_pos The current cursor position.
 -- @param ncomp The number of yet requested completion using current text.
+-- @param keywords The keywords table uised for completion.
 -- @return The new match and the new cursor position.
-function generic(text, cur_pos, ncomp)
+function generic(text, cur_pos, ncomp, keywords)
     -- The keywords table may be empty
     if #keywords == 0 then
         return text, #text + 1
