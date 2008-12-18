@@ -116,6 +116,8 @@ image_new_from_argb32(int width, int height, uint32_t *data)
 
     if((imimage = imlib_create_image_using_copied_data(width, height, data)))
     {
+        imlib_context_set_image(imimage);
+        imlib_image_set_has_alpha(true);
         image = p_new(image_t, 1);
         image->image = imimage;
         image_compute(image);
