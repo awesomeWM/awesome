@@ -17,6 +17,7 @@ local capi = { screen = screen, mouse = mouse, client = client }
 local util = require("awful.util")
 local tags = require("awful.tag")
 local awbeautiful = require("beautiful")
+local tonumber = tonumber
 
 --- Menu module for awful
 module("awful.menu")
@@ -113,31 +114,25 @@ local function add_item(data, num, item_info)
         button({}, 3, function () hide(data) end)
     }
 
-    -- Create the item icon widget
-    local icon
+    -- Create the item label widget
+    local label = widget({ type = "textbox", align = "left" })
+    label.text = item_info[1]
+    label:margin({ left = data.h + 2 })
+    -- Set icon if needed
     if item_info[3] then
-        icon = widget({ type = "imagebox",  align = "left" })
-        if type(item_info[3]) == "string" then
-            icon.image = image(item_info[3])
-        else
-            icon.image = item_info[3]
+        local icon = type(item_info[3]) == "string" and image(item_info[3]) or item_info[3]
+        if icon.width > tonumber(data.h) or icon.height > tonumber(data.h) then
+            local width, height
+            if ((data.h/icon.height) * icon.width) > tonumber(data.h) then
+                width, height = data.h, (tonumber(data.h) / icon.width) * icon.height
+            else
+                width, height = (tonumber(data.h) / icon.height) * icon.width, data.h
+            end
+            icon = icon:crop_and_scale(0, 0, icon.width, icon.height, width, height)
         end
-    else
-        icon = widget({type = "textbox", align = "left" })
-        icon.width = data.h
+        label.bg_image = icon
     end
 
-    icon:buttons(bindings)
-
-    function icon.mouse_enter() mouse_enter(item, data.theme) end
-    function icon.mouse_leave() mouse_leave(item, data.theme) end
-
-    -- Create the item label widget
-    local label = widget({
-        type = "textbox",
-        align = "flex"
-    })
-    label.text = " " .. item_info[1]
     label:buttons(bindings)
 
     function label.mouse_enter() mouse_enter(item, data.theme) end
@@ -155,7 +150,7 @@ local function add_item(data, num, item_info)
     end
 
     -- Add widgets to the wibox
-    item.widgets = { icon, label, submenu }
+    item.widgets = { label, submenu }
 
     item.ontop = true
 
