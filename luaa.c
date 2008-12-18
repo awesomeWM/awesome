@@ -73,8 +73,9 @@ extern const struct luaL_reg awesome_widget_methods[];
 extern const struct luaL_reg awesome_widget_meta[];
 extern const struct luaL_reg awesome_wibox_methods[];
 extern const struct luaL_reg awesome_wibox_meta[];
+extern const struct luaL_reg awesome_key_methods[];
+extern const struct luaL_reg awesome_key_meta[];
 extern const struct luaL_reg awesome_keybinding_methods[];
-extern const struct luaL_reg awesome_keybinding_meta[];
 
 static struct sockaddr_un *addr;
 static ev_io csio = { .fd = -1 };
@@ -304,7 +305,7 @@ luaAe_type(lua_State *L)
 CHECK_TYPE(wibox);
 CHECK_TYPE(client);
 CHECK_TYPE(image);
-CHECK_TYPE(keybinding);
+CHECK_TYPE(key);
 CHECK_TYPE(button);
 CHECK_TYPE(tag);
 CHECK_TYPE(widget);
@@ -836,7 +837,8 @@ luaA_init(void)
     luaA_openlib(L, "client", awesome_client_methods, awesome_client_meta);
 
     /* Export keys */
-    luaA_openlib(L, "keybinding", awesome_keybinding_methods, awesome_keybinding_meta);
+    luaA_openlib(L, "key", awesome_key_methods, awesome_key_meta);
+    luaA_openlib(L, "keybinding", awesome_keybinding_methods, awesome_key_meta);
 
     lua_pushliteral(L, "AWESOME_VERSION");
     lua_pushstring(L, AWESOME_VERSION);

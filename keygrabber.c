@@ -23,7 +23,7 @@
 
 #include "structs.h"
 #include "keygrabber.h"
-#include "keybinding.h"
+#include "key.h"
 
 extern awesome_t globalconf;
 

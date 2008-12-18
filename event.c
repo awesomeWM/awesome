@@ -33,7 +33,7 @@
 #include "client.h"
 #include "widget.h"
 #include "titlebar.h"
-#include "keybinding.h"
+#include "key.h"
 #include "keygrabber.h"
 #include "mousegrabber.h"
 #include "luaa.h"
@@ -559,7 +559,7 @@ event_handle_key(void *data __attribute__ ((unused)),
     }
     else
     {
-        keybinding_t *k = keybinding_find(ev);
+        keyb_t *k = key_find(ev);
 
         if(k)
             switch(ev->response_type)
@@ -787,7 +787,7 @@ event_handle_mappingnotify(void *data,
         } while(phys_screen < nscreen);
 
         /* regrab everything */
-        keybinding_array_t *arr = &globalconf.keys.by_sym;
+        key_array_t *arr = &globalconf.keys.by_sym;
         for(int i = 0; i < arr->len; i++)
             window_root_grabkey(arr->tab[i]);
 

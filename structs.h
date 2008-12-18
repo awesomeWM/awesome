@@ -28,7 +28,7 @@
 #include "config.h"
 #include "luaa.h"
 #include "swindow.h"
-#include "keybinding.h"
+#include "key.h"
 #include "common/xutil.h"
 #include "common/xembed.h"
 #include "common/refcount.h"
@@ -293,8 +293,8 @@ struct awesome_t
     /** Key bindings */
     struct
     {
-        keybinding_array_t by_code;
-        keybinding_array_t by_sym;
+        key_array_t by_code;
+        key_array_t by_sym;
     } keys;
     /** Mouse bindings list */
     button_array_t buttons;

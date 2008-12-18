@@ -1,5 +1,5 @@
 /*
- * keybinding.h - Keybinding helpers
+ * key.h - Keybinding helpers
  *
  * Copyright © 2008 Pierre Habouzit <madcoder@debian.org>
  *
@@ -26,7 +26,7 @@
 #include "luaa.h"
 #include "common/array.h"
 
-typedef struct keybinding_t
+typedef struct keyb_t
 {
     /** Ref count */
     int refcount;
@@ -40,12 +40,14 @@ typedef struct keybinding_t
     luaA_ref press;
     /** Lua function to execute on release */
     luaA_ref release;
-} keybinding_t;
+} keyb_t;
 
-ARRAY_TYPE(keybinding_t *, keybinding)
+ARRAY_TYPE(keyb_t *, key)
 
-keybinding_t *keybinding_find(const xcb_key_press_event_t *);
+keyb_t *key_find(const xcb_key_press_event_t *);
 xcb_keysym_t key_getkeysym(xcb_keycode_t, uint16_t);
-void window_root_grabkey(keybinding_t *);
+void window_root_grabkey(keyb_t *);
+
+int luaA_key_new(lua_State *);
 
 #endif
