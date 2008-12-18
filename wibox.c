@@ -522,6 +522,7 @@ wibox_setvisible(wibox_t *wibox, bool v)
     if(v != wibox->isvisible)
     {
         wibox->isvisible = v;
+        wibox->mouse_over = NULL;
 
         if(wibox->screen != SCREEN_UNDEF)
         {
@@ -563,6 +564,8 @@ wibox_detach(wibox_t *wibox)
         wibox_position_update(wibox);
         /* restore position */
         wibox->isvisible = v;
+
+        wibox->mouse_over = NULL;
 
         simplewindow_wipe(&wibox->sw);
 
