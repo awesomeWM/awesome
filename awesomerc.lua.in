@@ -232,7 +232,7 @@ key({ modkey, "Control" }, "k", function () awful.screen.focus(-1) end):add()
 key({ modkey, "Control" }, "space", awful.client.floating.toggle):add()
 key({ modkey, "Control" }, "Return", function () if client.focus then client.focus:swap(awful.client.getmaster()) end end):add()
 key({ modkey }, "o", awful.client.movetoscreen):add()
-key({ modkey }, "Tab", awful.client.focus.history.previous):add()
+key({ modkey }, "Tab", function () awful.client.focus.history.previous(); if client.focus then client.focus:raise() end end):add()
 key({ modkey }, "u", awful.client.urgent.jumpto):add()
 key({ modkey, "Shift" }, "r", function () if client.focus then client.focus:redraw() end end):add()
 
