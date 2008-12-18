@@ -34,7 +34,7 @@ local function load_theme(custom)
 
     theme.submenu_icon = custom.submenu_icon or beautiful.menu_submenu_icon
 
-    theme.menu_height = custom.height or beautiful.menu_height or 15
+    theme.menu_height = custom.height or beautiful.menu_height or 16
     theme.menu_width = custom.width or beautiful.menu_width or 100
 
     theme.border = custom.border_color or beautiful.menu_border_color or beautiful.border_normal
