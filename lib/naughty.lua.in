@@ -439,8 +439,8 @@ elseif data.member == "CloseNotification" then
        destroy(obj)
     end
 elseif data.member == "GetServerInfo" or data.member == "GetServerInformation" then
-    -- name of notification app, name of project, version of notification app, project version
-    return "s", "naughty", "s", "awesome", "s", "1337", "s", AWESOME_VERSION
+    -- name of notification app, name of vender, version
+    return "s", "naughty", "s", "awesome", "s", AWESOME_VERSION:match("%d.%d")
 end
 end)
 
@@ -472,17 +472,15 @@ Introspection 1.0//EN"
       <arg name="return_id" type="u" direction="out"/>
     </method>
     <method name="GetServerInformation">
-      <arg name="app_name" type="s" direction="out"/>
-      <arg name="project_name" type="s" direction="out"/>
-      <arg name="app_version" type="s" direction="out"/>
-      <arg name="project_version" type="s" direction="out"/>
+      <arg name="return_name" type="s" direction="out"/>
+      <arg name="return_vendor" type="s" direction="out"/>
+      <arg name="return_version" type="s" direction="out"/>
     </method>
     <method name="GetServerInfo">
-      <arg name="app_name" type="s" direction="out"/>
-      <arg name="project_name" type="s" direction="out"/>
-      <arg name="app_version" type="s" direction="out"/>
-      <arg name="project_version" type="s" direction="out"/>
-    </method>
+      <arg name="return_name" type="s" direction="out"/>
+      <arg name="return_vendor" type="s" direction="out"/>
+      <arg name="return_version" type="s" direction="out"/>
+   </method>
   </interface>
 </node>]=]
     return "s", xml
