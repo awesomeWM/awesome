@@ -69,10 +69,10 @@ textbox_geometry(widget_t *widget, int screen, int height, int width)
     else if(d->bg_image)
     {
         double ratio = d->bg_resize ? (double) geometry.height / d->bg_image->height : 1;
-        geometry.width = MIN(width, MAX(d->extents.width, MAX(d->width, d->bg_image->width * ratio)));
+        geometry.width = MIN(width, MAX(d->extents.width + d->margin.left + d->margin.right, MAX(d->width, d->bg_image->width * ratio)));
     }
     else
-        geometry.width = MIN(d->extents.width, width);
+        geometry.width = MIN(d->extents.width + d->margin.left + d->margin.right, width);
 
     return geometry;
 }
