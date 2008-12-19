@@ -471,6 +471,18 @@ Introspection 1.0//EN"
       <arg name="timeout" type="i" direction="in"/>
       <arg name="return_id" type="u" direction="out"/>
     </method>
+    <method name="GetServerInformation">
+      <arg name="app_name" type="s" direction="out"/>
+      <arg name="project_name" type="s" direction="out"/>
+      <arg name="app_version" type="s" direction="out"/>
+      <arg name="project_version" type="s" direction="out"/>
+    </method>
+    <method name="GetServerInfo">
+      <arg name="app_name" type="s" direction="out"/>
+      <arg name="project_name" type="s" direction="out"/>
+      <arg name="app_version" type="s" direction="out"/>
+      <arg name="project_version" type="s" direction="out"/>
+    </method>
   </interface>
 </node>]=]
     return "s", xml
