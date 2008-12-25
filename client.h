@@ -126,7 +126,9 @@ client_isfixed(client_t *c)
     return (c->size_hints.flags & XCB_SIZE_HINT_P_MAX_SIZE
             && c->size_hints.flags & XCB_SIZE_HINT_P_MIN_SIZE
             && c->size_hints.max_width == c->size_hints.min_width
-            && c->size_hints.max_height == c->size_hints.min_height);
+            && c->size_hints.max_height == c->size_hints.min_height
+            && c->size_hints.max_width
+            && c->size_hints.max_height);
 }
 
 /** Returns true if a client is tagged
