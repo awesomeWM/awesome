@@ -39,6 +39,11 @@ function bashcomp_load(src)
     end
 end
 
+local function bash_escape(str)
+    res = str:gsub(" ", "\\ ")
+    return res
+end
+
 --- Use bash completion system to complete command and filename.
 -- @param command The command line.
 -- @param cur_pos The cursor position.
@@ -96,7 +101,7 @@ function bash(command, cur_pos, ncomp)
         while true do
             local line = c:read("*line")
             if not line then break end
-            table.insert(output, line)
+            table.insert(output, bash_escape(line))
         end
 
         c:close()
