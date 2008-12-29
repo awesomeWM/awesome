@@ -95,7 +95,7 @@ awesome_atexit(void)
 static void
 scan(void)
 {
-    int i, screen, phys_screen, tree_c_len;
+    int i, phys_screen, tree_c_len;
     const int screen_max = xcb_setup_roots_length(xcb_get_setup(globalconf.connection));
     root_win_t root_wins[screen_max];
     xcb_query_tree_reply_t *tree_r;
@@ -176,9 +176,7 @@ scan(void)
                                                                   *(geom_wins[i]), NULL)))
                 continue;
 
-            screen = screen_getbycoord(phys_screen, geom_r->x, geom_r->y);
-
-            client_manage(wins[i], geom_r, phys_screen, screen, true);
+            client_manage(wins[i], geom_r, phys_screen, true);
 
             p_delete(&geom_r);
         }

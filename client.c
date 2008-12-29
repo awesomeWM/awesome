@@ -439,15 +439,15 @@ client_duplicate_tags(client_t *src_c, client_t *dst_c)
  * \param w The window.
  * \param wgeom Window geometry.
  * \param phys_screen Physical screen number.
- * \param screen Virtual screen number where to manage client.
  * \param startup True if we are managing at startup time.
  */
 void
-client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, int screen, bool startup)
+client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, bool startup)
 {
     xcb_get_property_cookie_t ewmh_icon_cookie;
     client_t *c, *tc = NULL, *group = NULL;
     image_t *icon;
+    int screen;
     const uint32_t select_input_val[] =
     {
         XCB_EVENT_MASK_STRUCTURE_NOTIFY
@@ -468,7 +468,7 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
     xcb_change_window_attributes(globalconf.connection, w, XCB_CW_EVENT_MASK, select_input_val);
     c = p_new(client_t, 1);
 
-    c->screen = screen_getbycoord(screen, wgeom->x, wgeom->y);
+    screen = c->screen = screen_getbycoord(phys_screen, wgeom->x, wgeom->y);
 
     c->phys_screen = phys_screen;
 

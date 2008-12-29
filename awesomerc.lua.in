@@ -364,6 +364,12 @@ awful.hooks.manage.register(function (c, startup)
         awful.client.movetotag(tags[target.screen][target.tag], c)
     end
 
+    -- If we are not managing this applicatin at startup,
+    -- move it to the screen where the mouse is
+    if not startup then
+        c.screen = mouse.screen
+    end
+
     -- Do this after tag mapping, so you don't see it on the wrong tag for a split second.
     client.focus = c
 

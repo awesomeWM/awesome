@@ -587,12 +587,10 @@ static int
 event_handle_maprequest(void *data __attribute__ ((unused)),
                         xcb_connection_t *connection, xcb_map_request_event_t *ev)
 {
-    int phys_screen, screen = 0, ret = 0;
+    int phys_screen, ret = 0;
     client_t *c;
     xcb_get_window_attributes_cookie_t wa_c;
     xcb_get_window_attributes_reply_t *wa_r;
-    xcb_query_pointer_cookie_t qp_c = { 0 };
-    xcb_query_pointer_reply_t *qp_r = NULL;
     xcb_get_geometry_cookie_t geom_c;
     xcb_get_geometry_reply_t *geom_r;
 
@@ -623,34 +621,20 @@ event_handle_maprequest(void *data __attribute__ ((unused)),
     {
         geom_c = xcb_get_geometry_unchecked(connection, ev->window);
 
-        if(globalconf.xinerama_is_active)
-            qp_c = xcb_query_pointer_unchecked(connection,
-                                               xutil_screen_get(globalconf.connection,
-                                                                globalconf.default_screen)->root);
-
         if(!(geom_r = xcb_get_geometry_reply(connection, geom_c, NULL)))
         {
-            if(globalconf.xinerama_is_active)
-                qp_r = xcb_query_pointer_reply(connection, qp_c, NULL);
             ret = -1;
             goto bailout;
         }
 
-
         phys_screen = xutil_root2screen(connection, geom_r->root);
 
-        if(globalconf.xinerama_is_active
-           && (qp_r = xcb_query_pointer_reply(connection, qp_c, NULL)))
-            screen = screen_getbycoord(screen, qp_r->root_x, qp_r->root_y);
-        else
-            screen = phys_screen;
+        client_manage(ev->window, geom_r, phys_screen, false);
 
-        client_manage(ev->window, geom_r, phys_screen, screen, false);
         p_delete(&geom_r);
     }
 
 bailout:
-    p_delete(&qp_r);
     p_delete(&wa_r);
     return ret;
 }
