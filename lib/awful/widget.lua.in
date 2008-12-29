@@ -393,7 +393,7 @@ function button(args)
     if not args or not args.image then return end
     local img_release
     if type(args.image) == "string" then
-        img_release = image(args.image)
+        img_release = capi.image(args.image)
     elseif type(args.image) == "image" then
         img_release = args.image
     else
