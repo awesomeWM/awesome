@@ -20,6 +20,7 @@
  */
 
 #include <xcb/xcb_atom.h>
+#include <xcb/xcb_image.h>
 
 #include "cnode.h"
 #include "tag.h"
@@ -127,6 +128,40 @@ client_maybevisible(client_t *c, int screen)
                 return true;
     }
     return false;
+}
+
+/** Return the content of a client as an image.
+ * That's just take a screenshot.
+ * \param c The client.
+ * \return An image.
+ */
+static image_t *
+client_getcontent(client_t *c)
+{
+    xcb_image_t *ximage = xcb_image_get(globalconf.connection,
+                                        c->win,
+                                        0, 0,
+                                        c->geometries.internal.width,
+                                        c->geometries.internal.height,
+                                        ~0, XCB_IMAGE_FORMAT_Z_PIXMAP);
+
+    if(!ximage || ximage->bpp < 24)
+        return NULL;
+
+    uint32_t *data = p_alloca(uint32_t, ximage->width * ximage->height);
+
+    for(int y = 0; y < ximage->height; y++)
+        for(int x = 0; x < ximage->width; x++)
+        {
+            data[y * ximage->width + x] = xcb_image_get_pixel(ximage, x, y);
+            data[y * ximage->width + x] |= 0xff000000; /* set alpha to 0xff */
+        }
+
+    image_t *image = image_new_from_argb32(ximage->width, ximage->height, data);
+
+    xcb_image_destroy(ximage);
+
+    return image;
 }
 
 /** Get a client by its window.
@@ -1556,6 +1591,8 @@ luaA_client_index(lua_State *L)
 
     switch(a_tokenize(buf, len))
     {
+        image_t *image;
+
       case A_TK_NAME:
         lua_pushstring(L, (*c)->name);
         break;
@@ -1566,6 +1603,10 @@ luaA_client_index(lua_State *L)
       case A_TK_SKIP_TASKBAR:
         lua_pushboolean(L, (*c)->skiptb);
         break;
+      case A_TK_CONTENT:
+        if((image = client_getcontent(*c)))
+            return luaA_image_userdata_new(L, image);
+        return 0;
       case A_TK_TYPE:
         switch((*c)->type)
         {

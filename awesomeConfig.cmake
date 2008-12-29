@@ -142,6 +142,7 @@ pkg_check_modules(AWESOME_REQUIRED REQUIRED
     xcb-atom>=0.3.0
     xcb-keysyms>=0.3.0
     xcb-icccm>=0.3.0
+    xcb-image>=0.3.0
     cairo-xcb
     xproto>=7.0.11
     imlib2)
