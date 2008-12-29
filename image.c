@@ -332,6 +332,30 @@ luaA_image_crop_and_scale(lua_State *L)
     return luaA_image_userdata_new(L, new);
 }
 
+/** Saves the image to the given path. The file extension (e.g. .png or .jpg)
+ * will affect the output format.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ * \luastack
+ * \lvalue An image.
+ * \lparam The image path.
+ */
+static int
+luaA_image_save(lua_State *L)
+{
+    image_t **image = luaA_checkudata(L, 1, "image");
+    const char *path = luaL_checkstring(L, 2);
+    Imlib_Load_Error err;
+
+    imlib_context_set_image((*image)->image);
+    imlib_save_image_with_error_return(path, &err);
+
+    if(err != IMLIB_LOAD_ERROR_NONE)
+        warn("cannot save image %s: %s", path, image_imlib_load_strerror(err));
+
+    return 0;
+}
+
 /** Image object.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
@@ -384,6 +408,7 @@ const struct luaL_reg awesome_image_meta[] =
     { "orientate", luaA_image_orientate },
     { "crop", luaA_image_crop },
     { "crop_and_scale", luaA_image_crop_and_scale },
+    { "save", luaA_image_save },
     { "__gc", luaA_image_gc },
     { "__eq", luaA_image_eq },
     { "__tostring", luaA_image_tostring },
