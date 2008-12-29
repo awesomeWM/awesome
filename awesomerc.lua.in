@@ -365,8 +365,9 @@ awful.hooks.manage.register(function (c, startup)
     end
 
     -- If we are not managing this applicatin at startup,
-    -- move it to the screen where the mouse is
-    if not startup then
+    -- move it to the screen where the mouse is.
+    -- We only do it for filtered windows (i.e. no dock, etc).
+    if not startup and awful.client.focus.filter(c) then
         c.screen = mouse.screen
     end
 
