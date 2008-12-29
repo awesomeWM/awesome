@@ -327,7 +327,7 @@ awful.hooks.mouse_enter.register(function (c)
 end)
 
 -- Hook function to execute when a new client appears.
-awful.hooks.manage.register(function (c)
+awful.hooks.manage.register(function (c, startup)
     if use_titlebar then
         -- Add a titlebar
         awful.titlebar.add(c, { modkey = modkey })

@@ -645,7 +645,7 @@ event_handle_maprequest(void *data __attribute__ ((unused)),
         else
             screen = phys_screen;
 
-        client_manage(ev->window, geom_r, phys_screen, screen);
+        client_manage(ev->window, geom_r, phys_screen, screen, false);
         p_delete(&geom_r);
     }
 

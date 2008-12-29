@@ -178,7 +178,7 @@ scan(void)
 
             screen = screen_getbycoord(phys_screen, geom_r->x, geom_r->y);
 
-            client_manage(wins[i], geom_r, phys_screen, screen);
+            client_manage(wins[i], geom_r, phys_screen, screen, true);
 
             p_delete(&geom_r);
         }

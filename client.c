@@ -440,9 +440,10 @@ client_duplicate_tags(client_t *src_c, client_t *dst_c)
  * \param wgeom Window geometry.
  * \param phys_screen Physical screen number.
  * \param screen Virtual screen number where to manage client.
+ * \param startup True if we are managing at startup time.
  */
 void
-client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, int screen)
+client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, int screen, bool startup)
 {
     xcb_get_property_cookie_t ewmh_icon_cookie;
     client_t *c, *tc = NULL, *group = NULL;
@@ -591,7 +592,8 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
     if(globalconf.hooks.manage != LUA_REFNIL)
     {
         luaA_client_userdata_new(globalconf.L, c);
-        luaA_dofunction(globalconf.L, globalconf.hooks.manage, 1, 0);
+        lua_pushboolean(globalconf.L, startup);
+        luaA_dofunction(globalconf.L, globalconf.hooks.manage, 2, 0);
     }
 }
 

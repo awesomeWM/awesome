@@ -58,7 +58,8 @@ luaA_hooks_unfocus(lua_State *L)
 }
 
 /** Set the function called each time a new client appears. This function is
- * called with the client object as argument.
+ * called with the client object as argument, plus a boolean argument which is
+ * true if the client is managed at startup.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
  * \luastack
