@@ -88,8 +88,8 @@ image_compute(image_t *image)
 
     size = image->width * image->height;
 
-    p_delete(&image->data);
-    image->data = dataimg = p_new(uint8_t, size * 4);
+    p_realloc(&image->data, size * 4);
+    dataimg = image->data;
 
     for(i = 0; i < size; i++, dataimg += 4)
     {
