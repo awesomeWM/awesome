@@ -306,6 +306,8 @@ struct awesome_t
     unsigned int capslockmask;
     /** Check for XRandR extension */
     bool have_randr;
+    /** Check for XTest extension */
+    bool have_xtest;
     /** Clients list */
     client_t *clients;
     /** Embedded windows */

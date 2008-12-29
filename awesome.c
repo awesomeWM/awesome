@@ -28,6 +28,7 @@
 
 #include <ev.h>
 
+#include <xcb/xtest.h>
 #include <xcb/xcb_event.h>
 
 #include "awesome.h"
@@ -398,6 +399,11 @@ main(int argc, char **argv)
     globalconf.connection = xcb_connect(NULL, &globalconf.default_screen);
     if(xcb_connection_has_error(globalconf.connection))
         fatal("cannot open display");
+
+    /* check for xtest extension */
+    const xcb_query_extension_reply_t *xtest_query;
+    xtest_query = xcb_get_extension_data(globalconf.connection, &xcb_test_id);
+    globalconf.have_xtest = xtest_query->present;
 
     /* initiliaze dbus */
     a_dbus_init();

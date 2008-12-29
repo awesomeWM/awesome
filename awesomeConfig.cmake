@@ -136,6 +136,7 @@ pkg_check_modules(AWESOME_REQUIRED REQUIRED
     pangocairo>=1.19.3
     x11-xcb
     xcb-randr
+    xcb-xtest
     xcb-xinerama
     xcb-event>=0.3.0
     xcb-aux>=0.3.0

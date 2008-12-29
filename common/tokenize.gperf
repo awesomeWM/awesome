@@ -11,6 +11,8 @@ border_padding
 border_width
 bottom
 button
+button_press
+button_release
 center
 char
 class
@@ -42,6 +44,8 @@ icon
 icon_name
 image
 instance
+key_press
+key_release
 leader_id
 left
 len
@@ -59,6 +63,7 @@ Mod2
 Mod3
 Mod4
 Mod5
+motion_notify
 mouse_enter
 mouse_leave
 name
