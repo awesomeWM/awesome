@@ -1557,6 +1557,7 @@ luaA_client_newindex(lua_State *L)
  * \lfield border_color The client border color.
  * \lfield titlebar The client titlebar.
  * \lfield urgent The client urgent state.
+ * \lfield content An image representing the client window content (screenshot).
  * \lfield focus The focused client.
  * \lfield opacity The client opacity between 0 and 1.
  * \lfield ontop The client is on top of every other windows.
