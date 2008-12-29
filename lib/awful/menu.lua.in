@@ -231,7 +231,7 @@ end
 --- Toggle menu visibility.
 -- @param menu The menu to show if it's hidden, or to hide if it's shown.
 function toggle(menu)
-    if menu.items[1].screen then
+    if menu.items[1] and menu.items[1].screen then
         hide(menu)
     else
         show(menu)
