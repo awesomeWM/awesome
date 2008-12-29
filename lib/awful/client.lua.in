@@ -156,8 +156,13 @@ function focus.history.get(screen, idx)
         end
     end
     -- Argh nobody found in history, give the first one visible if there is one
+    -- that passes the filter.
     if counter == 0 then
-        return vc[1]
+        for k, v in ipairs(vc) do
+            if focus.filter(v) then
+                return v
+            end
+        end
     end
 end
 
