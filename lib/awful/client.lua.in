@@ -222,7 +222,7 @@ function next(i, c)
         local fcls = {}
         -- Remove all non-normal clients
         for idx, c in ipairs(cls) do
-            if focus.filter(c) then
+            if focus.filter(c) or c == sel then
                 table.insert(fcls, c)
             end
         end
