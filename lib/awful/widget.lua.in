@@ -9,6 +9,7 @@ local ipairs = ipairs
 local pairs = pairs
 local table = table
 local otable = otable
+local type = type
 local capi =
 {
     screen = screen,
@@ -385,11 +386,19 @@ end
 
 --- Create a button widget. When clicked, the image is deplaced to make it like
 -- a real button.
--- @param args Standard widget table arguments, plus image for the image path.
+-- @param args Standard widget table arguments, plus image for the image path or
+-- the image object.
 -- @return A textbox widget configured as a button.
 function button(args)
     if not args or not args.image then return end
-    local img_release = args.image
+    local img_release
+    if type(args.image) == "string" then
+        img_release = image(args.image)
+    elseif type(args.image) == "image" then
+        img_release = args.image
+    else
+        return
+    end
     local img_press = img_release:crop(-2, -2, img_release.width, img_release.height)
     args.type = "imagebox"
     local w = capi.widget(args)
