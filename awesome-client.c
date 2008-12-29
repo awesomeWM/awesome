@@ -197,7 +197,7 @@ main(int argc, char **argv)
 
     if(isatty(STDIN_FILENO))
     {
-        asprintf(&prompt, "awesome@%s%% ", display ? display : "unknown");
+        a_asprintf(&prompt, "awesome@%s%% ", display ? display : "unknown");
         while((msg = readline(prompt)))
             if((msg_len = a_strlen(msg)))
             {
