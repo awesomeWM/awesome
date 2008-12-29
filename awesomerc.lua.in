@@ -328,6 +328,13 @@ end)
 
 -- Hook function to execute when a new client appears.
 awful.hooks.manage.register(function (c, startup)
+    -- If we are not managing this application at startup,
+    -- move it to the screen where the mouse is.
+    -- We only do it for filtered windows (i.e. no dock, etc).
+    if not startup and awful.client.focus.filter(c) then
+        c.screen = mouse.screen
+    end
+
     if use_titlebar then
         -- Add a titlebar
         awful.titlebar.add(c, { modkey = modkey })
@@ -362,13 +369,6 @@ awful.hooks.manage.register(function (c, startup)
     if target then
         c.screen = target.screen
         awful.client.movetotag(tags[target.screen][target.tag], c)
-    end
-
-    -- If we are not managing this applicatin at startup,
-    -- move it to the screen where the mouse is.
-    -- We only do it for filtered windows (i.e. no dock, etc).
-    if not startup and awful.client.focus.filter(c) then
-        c.screen = mouse.screen
     end
 
     -- Do this after tag mapping, so you don't see it on the wrong tag for a split second.
