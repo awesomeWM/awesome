@@ -107,7 +107,7 @@ function revelation(class, fn, s)
         return
     end
 
-    local tag = capi.tag({ name = "Revelation" })
+    local tag = capi.tag("Revelation")
     tag.screen = screen
 
     layout_fn(tag, #clients)
