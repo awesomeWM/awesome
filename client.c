@@ -187,8 +187,9 @@ client_unfocus(client_t *c)
     globalconf.screens[c->phys_screen].client_focus = NULL;
 
     /* Set focus on root window, so no events leak to the current window. */
-    xcb_set_input_focus(globalconf.connection, XCB_INPUT_FOCUS_POINTER_ROOT,
-        root_win, XCB_CURRENT_TIME);
+    if (!c->nofocus)
+        xcb_set_input_focus(globalconf.connection, XCB_INPUT_FOCUS_POINTER_ROOT,
+            root_win, XCB_CURRENT_TIME);
 
     /* Call hook */
     if(globalconf.hooks.unfocus != LUA_REFNIL)
@@ -252,7 +253,7 @@ client_ban(client_t *c)
 void
 client_focus(client_t *c)
 {
-    if(!client_maybevisible(c, c->screen) || c->nofocus)
+    if(!client_maybevisible(c, c->screen))
         return;
 
     /* unfocus current selected client */
@@ -270,8 +271,9 @@ client_focus(client_t *c)
     globalconf.screen_focus = &globalconf.screens[c->phys_screen];
     globalconf.screen_focus->client_focus = c;
 
-    xcb_set_input_focus(globalconf.connection, XCB_INPUT_FOCUS_POINTER_ROOT,
-                        c->win, XCB_CURRENT_TIME);
+    if (!c->nofocus)
+        xcb_set_input_focus(globalconf.connection, XCB_INPUT_FOCUS_POINTER_ROOT,
+                            c->win, XCB_CURRENT_TIME);
 
     /* Some layouts use focused client differently, so call them back.
      * And anyway, we have maybe unhidden */
