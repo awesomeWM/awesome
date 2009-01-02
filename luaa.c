@@ -76,6 +76,8 @@ extern const struct luaL_reg awesome_wibox_meta[];
 extern const struct luaL_reg awesome_key_methods[];
 extern const struct luaL_reg awesome_key_meta[];
 extern const struct luaL_reg awesome_keybinding_methods[];
+extern const struct luaL_reg awesome_selection_methods[];
+extern const struct luaL_reg awesome_selection_meta[];
 
 static struct sockaddr_un *addr;
 static ev_io csio = { .fd = -1 };
@@ -839,6 +841,9 @@ luaA_init(void)
     /* Export keys */
     luaA_openlib(L, "key", awesome_key_methods, awesome_key_meta);
     luaA_openlib(L, "keybinding", awesome_keybinding_methods, awesome_key_meta);
+
+    /* Export selection */
+    luaA_openlib(L, "selection", awesome_selection_methods, awesome_selection_meta);
 
     lua_pushliteral(L, "AWESOME_VERSION");
     lua_pushstring(L, AWESOME_VERSION);
