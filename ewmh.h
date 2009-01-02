@@ -34,6 +34,7 @@ int ewmh_process_client_message(xcb_client_message_event_t *);
 void ewmh_update_net_client_list_stacking(int);
 void ewmh_client_check_hints(client_t *);
 void ewmh_client_update_hints(client_t *);
+void ewmh_client_update_desktop(client_t *);
 void ewmh_update_workarea(int);
 void ewmh_client_strut_update(client_t *, xcb_get_property_reply_t *);
 xcb_get_property_cookie_t ewmh_window_icon_get_unchecked(xcb_window_t);

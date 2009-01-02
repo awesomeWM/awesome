@@ -144,6 +144,7 @@ tag_client(client_t *c, tag_t *t)
     tag_ref(&t);
     client_array_append(&t->clients, c);
     client_saveprops_tags(c);
+    ewmh_client_update_desktop(c);
     client_need_arrange(c);
     /* call hook */
     if(globalconf.hooks.tagged != LUA_REFNIL)
@@ -167,6 +168,7 @@ untag_client(client_t *c, tag_t *t)
             client_need_arrange(c);
             client_array_take(&t->clients, i);
             client_saveprops_tags(c);
+            ewmh_client_update_desktop(c);
             /* call hook */
             if(globalconf.hooks.tagged != LUA_REFNIL)
             {

@@ -446,6 +446,26 @@ ewmh_client_update_hints(client_t *c)
                         c->win, _NET_WM_STATE, ATOM, 32, i, state);
 }
 
+/** Update the client active desktop.
+ * This is "wrong" since it can be on several tags, but EWMH has a strict view
+ * of desktop system so just take the first tag.
+ * \param c The client.
+ */
+void
+ewmh_client_update_desktop(client_t *c)
+{
+    int i;
+    tag_array_t *tags = &globalconf.screens[c->screen].tags;
+
+    for(i = 0; i < tags->len; i++)
+        if(is_client_tagged(c, tags->tab[i]))
+        {
+            xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
+                                c->win, _NET_WM_DESKTOP, CARDINAL, 32, 1, &i);
+            return;
+        }
+}
+
 void
 ewmh_client_check_hints(client_t *c)
 {
