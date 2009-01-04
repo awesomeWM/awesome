@@ -11,7 +11,8 @@ local table = table
 local math = math
 local capi =
 {
-    keygrabber = keygrabber
+    keygrabber = keygrabber,
+    selection = selection
 }
 local util = require("awful.util")
 local beautiful = require("beautiful")
@@ -253,7 +254,18 @@ function run(args, textbox, exe_callback, completion_callback, history_path, his
             end
 
             -- Typin cases
-            if key == "Home" then
+            if mod.Shift and key == "Insert" then
+                local selection = capi.selection()
+                if selection then
+                    -- Remove \n
+                    local n = selection:find("\n")
+                    if n then
+                        selection = selection:sub(1, n - 1)
+                    end
+                    command = command .. selection
+                    cur_pos = cur_pos + #selection
+                end
+            elseif key == "Home" then
                 cur_pos = 1
             elseif key == "End" then
                 cur_pos = #command + 1
