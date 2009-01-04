@@ -418,25 +418,24 @@ keysym_to_utf8(char *buf, int len, const xcb_keysym_t ksym)
 }
 
 static bool
-keysym_to_str(char *buf, int len, const xcb_keysym_t ksym)
+keysym_to_str(char *buf, ssize_t len, const xcb_keysym_t ksym)
 {
-    /* Try to convert to Latin-1, handling ctrl */
-    if(!((ksym >= XK_BackSpace && ksym <= XK_Clear)
-         || (ksym >= XK_Home && ksym <= XK_Begin)
-         || ksym == XK_Return
-         || ksym == XK_Escape
-         || ksym == XK_KP_Space
-         || ksym == XK_KP_Tab
-         || ksym == XK_KP_Enter
-         || ksym == XK_KP_Equal
-         || (ksym >= XK_KP_Multiply && ksym <= XK_KP_9)
-         || (ksym >= XK_F1 && ksym <= XK_R15)
-         || ksym == XK_Delete))
+    if(ksym >= XK_Shift_L && ksym <= XK_Hyper_R)
         return false;
 
     switch(ksym)
     {
 #define CASE(k)  case XK_##k: a_strcpy(buf, len, #k); return true
+        CASE(BackSpace);
+        CASE(Tab);
+        CASE(Clear);
+        CASE(Return);
+        CASE(Pause);
+        CASE(Scroll_Lock);
+        CASE(Sys_Req);
+        CASE(Escape);
+        CASE(Delete);
+
         CASE(Home);
         CASE(Left);
         CASE(Up);
@@ -446,26 +445,52 @@ keysym_to_str(char *buf, int len, const xcb_keysym_t ksym)
         CASE(Page_Down);
         CASE(End);
         CASE(Begin);
-        CASE(BackSpace);
-        CASE(Return);
-        CASE(Escape);
+
+        CASE(Select);
+        CASE(Print);
+        CASE(Execute);
+        CASE(Insert);
+        CASE(Undo);
+        CASE(Redo);
+        CASE(Menu);
+        CASE(Find);
+        CASE(Cancel);
+        CASE(Help);
+        CASE(Break);
+        CASE(Mode_switch);
+        CASE(Num_Lock);
+
+      case XK_KP_Space:
+        /* Patch encoding botch */
+        buf[0] = XK_space & 0x7F;
+        break;
+        CASE(KP_Tab);
         CASE(KP_Enter);
+        CASE(KP_F1);
+        CASE(KP_F2);
+        CASE(KP_F3);
+        CASE(KP_F4);
+        CASE(KP_Home);
+        CASE(KP_Left);
+        CASE(KP_Up);
+        CASE(KP_Right);
+        CASE(KP_Down);
+        CASE(KP_Page_Up);
+        CASE(KP_Page_Down);
+        CASE(KP_End);
+        CASE(KP_Begin);
+        CASE(KP_Insert);
+        CASE(KP_Delete);
+        CASE(KP_Separator);
+
         CASE(F1);  CASE(F2);  CASE(F3);  CASE(F4);  CASE(F5);  CASE(F6);
         CASE(F7);  CASE(F8);  CASE(F9);  CASE(F10); CASE(F11); CASE(F12);
         CASE(F13); CASE(F14); CASE(F15); CASE(F16); CASE(F17); CASE(F18);
         CASE(F19); CASE(F20); CASE(F21); CASE(F22); CASE(F23); CASE(F24);
         CASE(F25); CASE(F26); CASE(F27); CASE(F28); CASE(F29); CASE(F30);
         CASE(F31); CASE(F32); CASE(F33); CASE(F34); CASE(F35);
-      case XK_KP_Space:
-        /* Patch encoding botch */
-        buf[0] = XK_space & 0x7F;
-        break;
-      case XK_hyphen:
-        /* Map to equivalent character */
-        buf[0] = (char)(XK_minus & 0xFF);
-        break;
       default:
-        buf[0] = (char)(ksym & 0x7F);
+        buf[0] = ksym & 0x7F;
         break;
     }
 
@@ -474,7 +499,7 @@ keysym_to_str(char *buf, int len, const xcb_keysym_t ksym)
 }
 
 static bool
-keysym_to_xkb(char *buf, int len, const xcb_keysym_t ksym)
+keysym_to_xkb(char *buf, ssize_t len, const xcb_keysym_t ksym)
 {
     switch(ksym)
     {    
@@ -596,7 +621,7 @@ keysym_to_xkb(char *buf, int len, const xcb_keysym_t ksym)
 
 static bool
 key_press_lookup_string(xcb_key_press_event_t *e,
-                        char *buf, int buf_len,
+                        char *buf, ssize_t buf_len,
                         xcb_keysym_t *ksym)
 {
     *ksym = key_getkeysym(e->detail, e->state);
