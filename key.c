@@ -205,6 +205,10 @@ key_getkeysym(xcb_keycode_t detail, uint16_t state)
         k1 = xcb_key_symbols_get_keysym(globalconf.keysyms, detail, 1);
     }
 
+    /* If the second column does not exists use the first one. */
+    if(k1 == XCB_NONE)
+        k1 = k0;
+
     /* The numlock modifier is on and the second KeySym is a keypad
      * KeySym */
     if((state & globalconf.numlockmask) && xcb_is_keypad_key(k1))
