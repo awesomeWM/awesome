@@ -230,8 +230,7 @@ function run(args, textbox, exe_callback, completion_callback, history_path, his
             end
         else
             if completion_callback then
-                -- That's tab
-                if key:byte() == 9 or key == "ISO_Left_Tab" then
+                if key == "Tab" or key == "ISO_Left_Tab" then
                     if key == "ISO_Left_Tab" then
                         if ncomp == 1 then return true end
                         if ncomp == 2 then
