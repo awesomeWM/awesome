@@ -218,6 +218,8 @@ struct client_t
     wibox_t *titlebar;
     /** Button bindings */
     button_array_t buttons;
+    /** Key bindings */
+    keybindings_t keys;
     /** Icon */
     image_t *icon;
     /** Size hints */
@@ -290,13 +292,9 @@ struct awesome_t
     int nscreen;
     /** True if xinerama is active */
     bool xinerama_is_active;
-    /** Key bindings */
-    struct
-    {
-        key_array_t by_code;
-        key_array_t by_sym;
-    } keys;
-    /** Mouse bindings list */
+    /** Root window key bindings */
+    keybindings_t keys;
+    /** Root window mouse bindings */
     button_array_t buttons;
     /** Numlock mask */
     unsigned int numlockmask;

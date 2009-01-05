@@ -542,6 +542,8 @@ event_handle_key(void *data __attribute__ ((unused)),
                  xcb_connection_t *connection __attribute__ ((unused)),
                  xcb_key_press_event_t *ev)
 {
+    client_t *c;
+
     if(globalconf.keygrabber != LUA_REFNIL)
     {
         lua_rawgeti(globalconf.L, LUA_REGISTRYINDEX, globalconf.keygrabber);
@@ -557,9 +559,32 @@ event_handle_key(void *data __attribute__ ((unused)),
         }
         lua_pop(globalconf.L, 1);  /* pop returned value or function if not called */
     }
+    else if((c = client_getbywin(ev->event)))
+    {
+        keyb_t *k = key_find(&c->keys, ev);
+
+        if(k)
+            switch(ev->response_type)
+            {
+              case XCB_KEY_PRESS:
+                if(k->press != LUA_REFNIL)
+                {
+                    luaA_client_userdata_new(globalconf.L, c);
+                    luaA_dofunction(globalconf.L, k->press, 1, 0);
+                }
+                break;
+              case XCB_KEY_RELEASE:
+                if(k->release != LUA_REFNIL)
+                {
+                    luaA_client_userdata_new(globalconf.L, c);
+                    luaA_dofunction(globalconf.L, k->release, 1, 0);
+                }
+                break;
+            }
+    }
     else
     {
-        keyb_t *k = key_find(ev);
+        keyb_t *k = key_find(&globalconf.keys, ev);
 
         if(k)
             switch(ev->response_type)
@@ -746,9 +771,6 @@ event_handle_mappingnotify(void *data,
     if(ev->request == XCB_MAPPING_MODIFIER
        || ev->request == XCB_MAPPING_KEYBOARD)
     {
-        int nscreen = xcb_setup_roots_length(xcb_get_setup(connection));
-        int phys_screen = 0;
-
         /* Send the request to get the NumLock, ShiftLock and CapsLock masks */
         xmapping_cookie = xcb_get_modifier_mapping_unchecked(globalconf.connection);
 
@@ -761,23 +783,22 @@ event_handle_mappingnotify(void *data,
                             globalconf.keysyms, &globalconf.numlockmask,
                             &globalconf.shiftlockmask, &globalconf.capslockmask);
 
-        do
-        {
-            xcb_screen_t *s = xutil_screen_get(globalconf.connection, phys_screen);
-            /* yes XCB_BUTTON_MASK_ANY is also for grab_key even if it's look
-             * weird */
-            xcb_ungrab_key(connection, XCB_GRAB_ANY, s->root, XCB_BUTTON_MASK_ANY);
-            phys_screen++;
-        } while(phys_screen < nscreen);
+        int nscreen = xcb_setup_roots_length(xcb_get_setup(connection));
 
         /* regrab everything */
-        key_array_t *arr = &globalconf.keys.by_sym;
-        for(int i = 0; i < arr->len; i++)
-            window_root_grabkey(arr->tab[i]);
+        for(int phys_screen = 0; phys_screen < nscreen; phys_screen++)
+        {
+            xcb_screen_t *s = xutil_screen_get(globalconf.connection, phys_screen);
+            /* yes XCB_BUTTON_MASK_ANY is also for grab_key even if it's look weird */
+            xcb_ungrab_key(connection, XCB_GRAB_ANY, s->root, XCB_BUTTON_MASK_ANY);
+            window_grabkeys(s->root, &globalconf.keys);
+        }
 
-        arr = &globalconf.keys.by_code;
-        for(int i = 0; i < arr->len; i++)
-            window_root_grabkey(arr->tab[i]);
+        for(client_t *c = globalconf.clients; c; c = c->next)
+        {
+            xcb_ungrab_key(connection, XCB_GRAB_ANY, c->win, XCB_BUTTON_MASK_ANY);
+            window_grabkeys(c->win, &c->keys);
+        }
     }
 
     return 0;

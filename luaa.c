@@ -84,24 +84,51 @@ static ev_io csio = { .fd = -1 };
 
 #define XDG_CONFIG_HOME_DEFAULT "/.config"
 
-/** Get or 
+/** Get or set global key bindings.
+ * This binding will be available when you'll press keys on root window.
+ * \param L The Lua VM state.
+ * \return The number of element pushed on stack.
+ * \luastack
+ * \lvalue A client.
+ * \lparam An array of key bindings objects, or nothing.
+ * \return The array of key bindings objects of this client.
+ */
+static int
+luaA_root_keys(lua_State *L)
+{
+    if(lua_gettop(L) == 1)
+    {
+        luaA_key_array_set(L, 1, &globalconf.keys);
+
+        int nscreen = xcb_setup_roots_length(xcb_get_setup(globalconf.connection));
+
+        for(int phys_screen = 0; phys_screen < nscreen; phys_screen++)
+        {
+            xcb_screen_t *s = xutil_screen_get(globalconf.connection, phys_screen);
+            xcb_ungrab_key(globalconf.connection, XCB_GRAB_ANY, s->root, XCB_BUTTON_MASK_ANY);
+            window_grabkeys(s->root, &globalconf.keys);
+        }
+    }
+
+    return luaA_key_array_get(L, &globalconf.keys);
+}
+
+/** Get or set global mouse bindings.
  * This binding will be available when you'll click on root window.
  * \param L The Lua VM state.
  * \return The number of element pushed on stack.
  * \luastack
  * \lvalue A client.
  * \lparam An array of mouse button bindings objects, or nothing.
- * \return The array of mouse button bindings objects of this client.
+ * \return The array of mouse button bindings objects.
  */
 static int
 luaA_root_buttons(lua_State *L)
 {
-    button_array_t *buttons = &globalconf.buttons;
-
     if(lua_gettop(L) == 1)
-        luaA_button_array_set(L, 1, buttons);
+        luaA_button_array_set(L, 1, &globalconf.buttons);
 
-    return luaA_button_array_get(L, buttons);
+    return luaA_button_array_get(L, &globalconf.buttons);
 }
 
 /** Get or set global mouse bindings (DEPRECATED).
@@ -111,7 +138,7 @@ luaA_root_buttons(lua_State *L)
  * \luastack
  * \lvalue A client.
  * \lparam An array of mouse button bindings objects, or nothing.
- * \return The array of mouse button bindings objects of this client.
+ * \return The array of mouse button bindings objects.
  */
 static int
 luaA_buttons(lua_State *L)
@@ -808,6 +835,7 @@ luaA_init(void)
     static const struct luaL_reg root_lib[] =
     {
         { "buttons", luaA_root_buttons },
+        { "keys", luaA_root_keys },
         { NULL, NULL }
     };
 

@@ -40,6 +40,20 @@ ARRAY_FUNCS(keyb_t *, key, key_unref)
 DO_LUA_NEW(static, keyb_t, key, "key", key_ref)
 DO_LUA_GC(keyb_t, key, "key", key_unref)
 
+static void
+keybindings_init(keybindings_t *kb)
+{
+    key_array_init(&kb->by_code);
+    key_array_init(&kb->by_sym);
+}
+
+static void
+keybindings_wipe(keybindings_t *kb)
+{
+    key_array_wipe(&kb->by_code);
+    key_array_wipe(&kb->by_sym);
+}
+
 static int
 key_ev_cmp(xcb_keysym_t keysym, xcb_keycode_t keycode,
                   unsigned long mod, const keyb_t *k)
@@ -68,68 +82,45 @@ key_cmp(const keyb_t *k1, const keyb_t *k2)
     return k1->mod == k2->mod ? 0 : (k2->mod > k1->mod ? 1 : -1);
 }
 
-/** Grab key on the root windows.
+/** Grab key on a window.
+ * \param win The window.
  * \param k The key.
  */
-void
-window_root_grabkey(keyb_t *k)
+static void
+window_grabkey(xcb_window_t win, keyb_t *k)
 {
-    int phys_screen = 0;
-    int nscreen = xcb_setup_roots_length(xcb_get_setup(globalconf.connection));
-    xcb_screen_t *s;
     xcb_keycode_t kc;
 
     if((kc = k->keycode)
        || (k->keysym
            && (kc = xcb_key_symbols_get_keycode(globalconf.keysyms, k->keysym))))
-        do
-        {
-            s = xutil_screen_get(globalconf.connection, phys_screen);
-            xcb_grab_key(globalconf.connection, true, s->root,
-                         k->mod, kc, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC);
-            xcb_grab_key(globalconf.connection, true, s->root,
-                         k->mod | XCB_MOD_MASK_LOCK, kc, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC);
-            xcb_grab_key(globalconf.connection, true, s->root,
-                         k->mod | globalconf.numlockmask, kc, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC);
-            xcb_grab_key(globalconf.connection, true, s->root,
-                         k->mod | globalconf.numlockmask | XCB_MOD_MASK_LOCK, kc, XCB_GRAB_MODE_ASYNC,
-                         XCB_GRAB_MODE_ASYNC);
-        phys_screen++;
-        } while(phys_screen < nscreen);
+    {
+        xcb_grab_key(globalconf.connection, true, win,
+                     k->mod, kc, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC);
+        xcb_grab_key(globalconf.connection, true, win,
+                     k->mod | XCB_MOD_MASK_LOCK, kc, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC);
+        xcb_grab_key(globalconf.connection, true, win,
+                     k->mod | globalconf.numlockmask, kc, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC);
+        xcb_grab_key(globalconf.connection, true, win,
+                     k->mod | globalconf.numlockmask | XCB_MOD_MASK_LOCK, kc, XCB_GRAB_MODE_ASYNC,
+                     XCB_GRAB_MODE_ASYNC);
+    }
 }
 
-/** Ungrab key on the root windows.
- * \param k The key.
- */
-static void
-window_root_ungrabkey(keyb_t *k)
+void
+window_grabkeys(xcb_window_t win, keybindings_t *keys)
 {
-    int phys_screen = 0;
-    int nscreen = xcb_setup_roots_length(xcb_get_setup(globalconf.connection));
-    xcb_screen_t *s;
-    xcb_keycode_t kc;
+    for(int i = 0; i < keys->by_code.len; i++)
+        window_grabkey(win, keys->by_code.tab[i]);
 
-    if((kc = k->keycode)
-       || (k->keysym && (kc = xcb_key_symbols_get_keycode(globalconf.keysyms, k->keysym))))
-        do
-        {
-            s = xutil_screen_get(globalconf.connection, phys_screen);
-            xcb_ungrab_key(globalconf.connection, kc, s->root,
-                           k->mod);
-            xcb_ungrab_key(globalconf.connection, kc, s->root,
-                           k->mod | XCB_MOD_MASK_LOCK);
-            xcb_ungrab_key(globalconf.connection, kc, s->root,
-                           k->mod | globalconf.numlockmask);
-            xcb_ungrab_key(globalconf.connection, kc, s->root,
-                           k->mod | globalconf.numlockmask | XCB_MOD_MASK_LOCK);
-        phys_screen++;
-        } while(phys_screen < nscreen);
+    for(int i = 0; i < keys->by_sym.len; i++)
+        window_grabkey(win, keys->by_sym.tab[i]);
 }
 
 static void
-key_register_root(keyb_t *k)
+key_register(keybindings_t *keys, keyb_t *k)
 {
-    key_array_t *arr = k->keysym ? &globalconf.keys.by_sym : &globalconf.keys.by_code;
+    key_array_t *arr = k->keysym ? &keys->by_sym : &keys->by_code;
     int l = 0, r = arr->len;
 
     key_ref(&k);
@@ -151,31 +142,6 @@ key_register_root(keyb_t *k)
     }
 
     key_array_splice(arr, r, 0, &k, 1);
-    window_root_grabkey(k);
-}
-
-static void
-key_unregister_root(keyb_t **k)
-{
-    key_array_t *arr = (*k)->keysym ? &globalconf.keys.by_sym : &globalconf.keys.by_code;
-    int l = 0, r = arr->len;
-
-    while (l < r) {
-        int i = (r + l) / 2;
-        switch (key_cmp(*k, arr->tab[i])) {
-          case -1: /* k < arr->tab[i] */
-            r = i;
-            break;
-          case 0: /* k == arr->tab[i] */
-            key_array_take(arr, i);
-            window_root_ungrabkey(*k);
-            key_unref(k);
-            return;
-          case 1: /* k > arr->tab[i] */
-            l = i + 1;
-            break;
-        }
-    }
 }
 
 /** Return the keysym from keycode.
@@ -256,9 +222,9 @@ key_getkeysym(xcb_keycode_t detail, uint16_t state)
 
 
 keyb_t *
-key_find(const xcb_key_press_event_t *ev)
+key_find(keybindings_t *keys, const xcb_key_press_event_t *ev)
 {
-    const key_array_t *arr = &globalconf.keys.by_sym;
+    const key_array_t *arr = &keys->by_sym;
     int l, r, mod = XUTIL_MASK_CLEAN(ev->state);
     xcb_keysym_t keysym;
 
@@ -283,9 +249,9 @@ key_find(const xcb_key_press_event_t *ev)
             break;
         }
     }
-    if (arr != &globalconf.keys.by_code)
+    if(arr != &keys->by_code)
     {
-        arr = &globalconf.keys.by_code;
+        arr = &keys->by_code;
         goto again;
     }
     return NULL;
@@ -360,6 +326,55 @@ luaA_key_new(lua_State *L)
     return luaA_key_userdata_new(L, k);
 }
 
+/** Set a key array with a Lua table.
+ * \param L The Lua VM state.
+ * \param idx The index of the Lua table.
+ * \param keys The array key to fill.
+ */
+void
+luaA_key_array_set(lua_State *L, int idx, keybindings_t *keys)
+{
+    luaA_checktable(L, idx);
+
+    for(int i = 0; i < keys->by_code.len; i++);
+
+    for(int i = 0; i < keys->by_sym.len; i++);
+
+    keybindings_wipe(keys);
+
+    keybindings_init(keys);
+
+    lua_pushnil(L);
+    while(lua_next(L, idx))
+    {
+        keyb_t **k = luaA_checkudata(L, -1, "key");
+        key_register(keys, *k);
+        lua_pop(L, 1);
+    }
+}
+
+/** Push an array of key as an Lua table onto the stack.
+ * \param L The Lua VM state.
+ * \param keys The key array to push.
+ * \return The number of elements pushed on stack.
+ */
+int
+luaA_key_array_get(lua_State *L, keybindings_t *keys)
+{
+    luaA_otable_new(L);
+    for(int i = 0; i < keys->by_code.len; i++)
+    {
+        luaA_key_userdata_new(L, keys->by_code.tab[i]);
+        lua_rawseti(L, -2, i + 1);
+    }
+    for(int i = 0; i < keys->by_sym.len; i++)
+    {
+        luaA_key_userdata_new(L, keys->by_sym.tab[i]);
+        lua_rawseti(L, -2, i + 1);
+    }
+    return 1;
+}
+
 /** Add a global key binding. This key binding will always be available.
  * \param L The Lua VM state.
  *
@@ -369,8 +384,19 @@ luaA_key_new(lua_State *L)
 static int
 luaA_key_add(lua_State *L)
 {
+    luaA_deprecate(L, "root.keys");
     keyb_t **k = luaA_checkudata(L, 1, "key");
-    key_register_root(*k);
+    int nscreen = xcb_setup_roots_length(xcb_get_setup(globalconf.connection));
+
+    key_register(&globalconf.keys, *k);
+
+    for(int phys_screen = 0; phys_screen < nscreen; phys_screen++)
+    {
+        xcb_screen_t *s = xutil_screen_get(globalconf.connection, phys_screen);
+        xcb_ungrab_key(globalconf.connection, XCB_GRAB_ANY, s->root, XCB_BUTTON_MASK_ANY);
+        window_grabkeys(s->root, &globalconf.keys);
+    }
+
     return 0;
 }
 
@@ -383,8 +409,7 @@ luaA_key_add(lua_State *L)
 static int
 luaA_key_remove(lua_State *L)
 {
-    keyb_t **k = luaA_checkudata(L, 1, "key");
-    key_unregister_root(k);
+    luaA_deprecate(L, "root.keys");
     return 0;
 }
 

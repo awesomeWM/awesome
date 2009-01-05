@@ -44,9 +44,20 @@ typedef struct keyb_t
 
 ARRAY_TYPE(keyb_t *, key)
 
-keyb_t *key_find(const xcb_key_press_event_t *);
+/** Key bindings */
+typedef struct
+{
+    key_array_t by_code;
+    key_array_t by_sym;
+} keybindings_t;
+
+keyb_t *key_find(keybindings_t *, const xcb_key_press_event_t *);
 xcb_keysym_t key_getkeysym(xcb_keycode_t, uint16_t);
-void window_root_grabkey(keyb_t *);
+
+void luaA_key_array_set(lua_State *, int, keybindings_t *);
+int luaA_key_array_get(lua_State *, keybindings_t *);
+
+void window_grabkeys(xcb_window_t, keybindings_t *);
 
 int luaA_key_new(lua_State *);
 

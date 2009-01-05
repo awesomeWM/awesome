@@ -1897,6 +1897,30 @@ luaA_client_buttons(lua_State *L)
     return luaA_button_array_get(L, buttons);
 }
 
+/** Get or set keys bindings for a client.
+ * \param L The Lua VM state.
+ * \return The number of element pushed on stack.
+ * \luastack
+ * \lvalue A client.
+ * \lparam An array of key bindings objects, or nothing.
+ * \return The array of key bindings objects of this client.
+ */
+static int
+luaA_client_keys(lua_State *L)
+{
+    client_t **c = luaA_checkudata(L, 1, "client");
+    keybindings_t *keys = &(*c)->keys;
+
+    if(lua_gettop(L) == 2)
+    {
+        luaA_key_array_set(L, 2, keys);
+        xcb_ungrab_key(globalconf.connection, XCB_GRAB_ANY, (*c)->win, XCB_BUTTON_MASK_ANY);
+        window_grabkeys((*c)->win, keys);
+    }
+
+    return luaA_key_array_get(L, keys);
+}
+
 /** Send fake events to a client.
  * \param L The Lua VM state.
  * \return The number of element pushed on stack.
@@ -2045,6 +2069,7 @@ const struct luaL_reg awesome_client_meta[] =
     { "isvisible", luaA_client_isvisible },
     { "geometry", luaA_client_geometry },
     { "buttons", luaA_client_buttons },
+    { "keys", luaA_client_keys },
     { "tags", luaA_client_tags },
     { "kill", luaA_client_kill },
     { "swap", luaA_client_swap },
