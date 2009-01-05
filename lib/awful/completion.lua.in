@@ -16,7 +16,7 @@ module("awful.completion")
 
 -- mapping of command/completion function
 local bashcomp_funcs = {}
-local bashcomp_src = "/etc/bash_completion"
+local bashcomp_src = "@SYSCONFDIR@/bash_completion"
 
 --- Enable programmable bash completion in awful.completion.bash at the price of
 -- a slight overhead
