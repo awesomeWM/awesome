@@ -420,9 +420,6 @@ keysym_to_utf8(char *buf, int len, const xcb_keysym_t ksym)
 static bool
 keysym_to_str(char *buf, ssize_t len, const xcb_keysym_t ksym)
 {
-    if(ksym >= XK_Shift_L && ksym <= XK_Hyper_R)
-        return false;
-
     switch(ksym)
     {
 #define CASE(k)  case XK_##k: a_strcpy(buf, len, #k); return true
@@ -489,6 +486,22 @@ keysym_to_str(char *buf, ssize_t len, const xcb_keysym_t ksym)
         CASE(F19); CASE(F20); CASE(F21); CASE(F22); CASE(F23); CASE(F24);
         CASE(F25); CASE(F26); CASE(F27); CASE(F28); CASE(F29); CASE(F30);
         CASE(F31); CASE(F32); CASE(F33); CASE(F34); CASE(F35);
+
+        CASE(Shift_L);
+        CASE(Shift_R);
+        CASE(Control_L);
+        CASE(Control_R);
+        CASE(Caps_Lock);
+        CASE(Shift_Lock);
+
+        CASE(Meta_L);
+        CASE(Meta_R);
+        CASE(Alt_L);
+        CASE(Alt_R);
+        CASE(Super_L);
+        CASE(Super_R);
+        CASE(Hyper_L);
+        CASE(Hyper_R);
       default:
         buf[0] = ksym & 0x7F;
         break;
