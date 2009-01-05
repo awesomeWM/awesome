@@ -84,7 +84,27 @@ static ev_io csio = { .fd = -1 };
 
 #define XDG_CONFIG_HOME_DEFAULT "/.config"
 
-/** Get or set global mouse bindings.
+/** Get or 
+ * This binding will be available when you'll click on root window.
+ * \param L The Lua VM state.
+ * \return The number of element pushed on stack.
+ * \luastack
+ * \lvalue A client.
+ * \lparam An array of mouse button bindings objects, or nothing.
+ * \return The array of mouse button bindings objects of this client.
+ */
+static int
+luaA_root_buttons(lua_State *L)
+{
+    button_array_t *buttons = &globalconf.buttons;
+
+    if(lua_gettop(L) == 1)
+        luaA_button_array_set(L, 1, buttons);
+
+    return luaA_button_array_get(L, buttons);
+}
+
+/** Get or set global mouse bindings (DEPRECATED).
  * This binding will be available when you'll click on root window.
  * \param L The Lua VM state.
  * \return The number of element pushed on stack.
@@ -96,12 +116,8 @@ static ev_io csio = { .fd = -1 };
 static int
 luaA_buttons(lua_State *L)
 {
-    button_array_t *buttons = &globalconf.buttons;
-
-    if(lua_gettop(L) == 1)
-        luaA_button_array_set(L, 1, buttons);
-
-    return luaA_button_array_get(L, buttons);
+    luaA_deprecate(L, "root.buttons");
+    return luaA_root_buttons(L);
 }
 
 /** Quit awesome.
@@ -789,6 +805,11 @@ luaA_init(void)
         { "__newindex", luaA_awesome_newindex },
         { NULL, NULL }
     };
+    static const struct luaL_reg root_lib[] =
+    {
+        { "buttons", luaA_root_buttons },
+        { NULL, NULL }
+    };
 
     L = globalconf.L = luaL_newstate();
 
@@ -798,6 +819,9 @@ luaA_init(void)
 
     /* Export awesome lib */
     luaA_openlib(L, "awesome", awesome_lib, awesome_lib);
+
+    /* Export root lib */
+    luaA_openlib(L, "root", root_lib, root_lib);
 
     /* Export hooks lib */
     luaL_register(L, "hooks", awesome_hooks_lib);
