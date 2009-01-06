@@ -540,15 +540,18 @@ end
 --- Return if a client has a fixe size or not.
 -- @param c The client.
 function isfixed(c)
-    local c = c or client.focus
+    local c = c or capi.client.focus
     if not c then return end
     local h = c.size_hints
-    return h.min_width and h.max_width
+    if h.min_width and h.max_width
         and h.max_height and h.min_height
         and h.min_width > 0 and h.max_width > 0
         and h.max_height > 0 and h.min_height > 0
         and h.min_width == h.max_width
-        and h.min_height == h.max_height
+        and h.min_height == h.max_height then
+        return true
+    end
+    return false
 end
 
 --- Get a client floating state.
@@ -562,11 +565,14 @@ function floating.get(c)
         if data.floating[c] ~= nil then
             return data.floating[c]
         end
-        return (c.type ~= "normal"
+        if c.type ~= "normal"
             or c.fullscreen
             or c.maximized_vertical
             or c.maximized_horizontal
-            or isfixed(c))
+            or isfixed(c) then
+            return true
+        end
+        return false
     end
 end
 
