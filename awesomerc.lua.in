@@ -368,9 +368,9 @@ awful.hooks.manage.register(function (c, startup)
     local cls = c.class
     local inst = c.instance
     if floatapps[cls] then
-        awful.client.floating.set(cls, floatapps[cls])
+        awful.client.floating.set(c, floatapps[cls])
     elseif floatapps[inst] then
-        awful.client.floating.set(cls, floatapps[inst])
+        awful.client.floating.set(c, floatapps[inst])
     end
 
     -- Check application->screen/tag mappings.
