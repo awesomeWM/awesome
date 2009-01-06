@@ -1,7 +1,7 @@
 /*
  * lua.c - Lua configuration management
  *
- * Copyright © 2008 Julien Danjou <julien@danjou.info>
+ * Copyright © 2008-2009 Julien Danjou <julien@danjou.info>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -48,6 +48,7 @@
 #include "screen.h"
 #include "event.h"
 #include "mouse.h"
+#include "selection.h"
 #include "common/socket.h"
 #include "common/buffer.h"
 
@@ -76,8 +77,6 @@ extern const struct luaL_reg awesome_wibox_meta[];
 extern const struct luaL_reg awesome_key_methods[];
 extern const struct luaL_reg awesome_key_meta[];
 extern const struct luaL_reg awesome_keybinding_methods[];
-extern const struct luaL_reg awesome_selection_methods[];
-extern const struct luaL_reg awesome_selection_meta[];
 
 static struct sockaddr_un *addr;
 static ev_io csio = { .fd = -1 };
@@ -387,6 +386,10 @@ luaA_fixups(lua_State *L)
     /* replace type */
     lua_pushliteral(L, "type");
     lua_pushcfunction(L, luaAe_type);
+    lua_settable(L, LUA_GLOBALSINDEX);
+    /* set selection */
+    lua_pushliteral(L, "selection");
+    lua_pushcfunction(L, luaA_selection_get);
     lua_settable(L, LUA_GLOBALSINDEX);
 }
 
@@ -893,9 +896,6 @@ luaA_init(void)
     /* Export keys */
     luaA_openlib(L, "key", awesome_key_methods, awesome_key_meta);
     luaA_openlib(L, "keybinding", awesome_keybinding_methods, awesome_key_meta);
-
-    /* Export selection */
-    luaA_openlib(L, "selection", awesome_selection_methods, awesome_selection_meta);
 
     lua_pushliteral(L, "AWESOME_VERSION");
     lua_pushstring(L, AWESOME_VERSION);

@@ -22,6 +22,7 @@
 
 #include <xcb/xcb_atom.h>
 
+#include "selection.h"
 #include "structs.h"
 #include "event.h"
 #include "common/atoms.h"
@@ -36,7 +37,7 @@ static xcb_window_t selection_window = XCB_NONE;
  * \luastack
  * \lreturn A string with the current X selection buffer.
  */
-static int
+int
 luaA_selection_get(lua_State *L)
 {
     if(selection_window == XCB_NONE)
@@ -116,14 +117,3 @@ luaA_selection_get(lua_State *L)
     p_delete(&event);
     return 0;
 }
-
-const struct luaL_reg awesome_selection_methods[] =
-{
-    { "__call", luaA_selection_get },
-    { NULL, NULL }
-};
-
-const struct luaL_reg awesome_selection_meta[] =
-{
-    { NULL, NULL }
-};
