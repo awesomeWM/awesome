@@ -165,8 +165,7 @@ a_find_library(LIB_READLINE readline)
 a_find_library(LIB_EV ev)
 
 # Error check
-set( LUA_FOUND LUA51_FOUND OR LUA50_FOUND )# This is a workaround to a cmake bug
-if(NOT LUA_FOUND)
+if(NOT LUA51_FOUND AND NOT LUA50_FOUND) # This is a workaround to a cmake bug
     message(FATAL_ERROR "lua library not found")
 endif()
 
