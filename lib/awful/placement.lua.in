@@ -20,7 +20,7 @@ local layout = require("awful.layout")
 --- Placement module for awful
 module("awful.placement")
 
---- Check if an area intersect another area.
+-- Check if an area intersect another area.
 -- @param a The area.
 -- @param b The other area.
 -- @return True if they intersect, false otherwise.
@@ -31,7 +31,7 @@ local function area_intersect_area(a, b)
             and b.y + b.height > a.y)
 end
 
---- Get the intersect area between a and b.
+-- Get the intersect area between a and b.
 -- @param a The area.
 -- @param b The other area.
 -- @return The intersect area.
@@ -44,7 +44,7 @@ local function area_intersect_area_get(a, b)
     return g
 end
 
---- Remove an area from a list, splitting the space between several area that
+-- Remove an area from a list, splitting the space between several area that
 -- can overlap.
 -- @param areas Table of areas.
 -- @param elem Area to remove.
