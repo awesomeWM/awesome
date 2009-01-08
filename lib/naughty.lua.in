@@ -148,13 +148,12 @@ for s = 1, screen.count() do
     }
 end
 
---- Evaluate desired position of the notification by index - internal
+-- Evaluate desired position of the notification by index - internal
 -- @param idx Index of the notification
 -- @param position top_right | top_left | bottom_right | bottom_left
 -- @param height Popup height
 -- @param width Popup width (optional)
 -- @return Absolute position in {x, y} dictionary
-
 local function get_offset(screen, position, idx, width, height)
     local ws = capi.screen[screen].workarea
     local v = {}
@@ -190,7 +189,7 @@ local function get_offset(screen, position, idx, width, height)
     return v
 end
 
---- Re-arrange notifications according to their position and index - internal
+-- Re-arrange notifications according to their position and index - internal
 -- @return None
 local function arrange(screen)
     for p,pos in pairs(notifications[screen]) do
@@ -216,7 +215,7 @@ function destroy(notification)
     end
 end
 
---- Get notification by ID
+-- Get notification by ID
 -- @param id ID of the notification
 -- @return notification object if it was found, nil otherwise
 local function getById(id)
@@ -232,7 +231,7 @@ local function getById(id)
     end
 end
 
---- Search for an icon in specified directories with a specified format
+-- Search for an icon in specified directories with a specified format
 -- @param icon Name of the icon
 -- @return full path of the icon, or nil of no icon was found
 local function getIcon(name)
