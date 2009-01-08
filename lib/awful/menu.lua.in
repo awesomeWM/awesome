@@ -71,7 +71,7 @@ function hide(menu)
     end
 end
 
---- Get the elder parent so for example when you kill
+-- Get the elder parent so for example when you kill
 -- it, it will destroy the whole family.
 local function get_parents(data)
     if data.parent then
