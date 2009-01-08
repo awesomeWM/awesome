@@ -24,6 +24,7 @@
 #include "titlebar.h"
 #include "client.h"
 #include "ewmh.h"
+#include "screen.h"
 #include "common/xcursor.h"
 
 extern awesome_t globalconf;
@@ -36,7 +37,10 @@ static void
 wibox_move(wibox_t *wibox, int16_t x, int16_t y)
 {
     if(wibox->sw.window)
+    {
         simplewindow_move(&wibox->sw, x, y);
+        wibox->screen = screen_getbycoord(wibox->screen, x, y);
+    }
     else
     {
         wibox->sw.geometry.x = x;
@@ -615,7 +619,15 @@ wibox_attach(wibox_t *wibox, screen_t *s)
 
     wibox_detach(wibox);
 
+    /* Set the wibox screen */
     wibox->screen = s->index;
+
+    /* Check that the wibox coordinates matches the screen. */
+    int cscreen = screen_getbycoord(wibox->screen, wibox->sw.geometry.x, wibox->sw.geometry.y);
+
+    /* If it does not match, move it to the screen coordinates */
+    if(cscreen != wibox->screen)
+        wibox_move(wibox, s->geometry.x, s->geometry.y);
 
     wibox_array_append(&s->wiboxes, wibox_ref(&wibox));
 
@@ -711,6 +723,8 @@ luaA_wibox_new(lua_State *L)
     /* recompute position */
     wibox_position_update(w);
 
+    w->sw.geometry.x = luaA_getopt_number(L, 2, "x", 0);
+    w->sw.geometry.y = luaA_getopt_number(L, 2, "y", 0);
     w->sw.geometry.width = luaA_getopt_number(L, 2, "width", 0);
     w->sw.geometry.height = luaA_getopt_number(L, 2, "height", 0);
 
