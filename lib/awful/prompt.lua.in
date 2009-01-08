@@ -24,7 +24,7 @@ module("awful.prompt")
 local data = {}
 data.history = {}
 
---- Load history file in history table
+-- Load history file in history table
 -- @param id The data.history identifier which is the path to the filename
 -- @param max Optional parameter, the maximum number of entries in file
 local function history_check_load(id, max)
@@ -50,7 +50,7 @@ local function history_check_load(id, max)
     end
 end
 
---- Save history table in history file
+-- Save history table in history file
 -- @param id The data.history identifier
 local function history_save(id)
     if data.history[id] then
@@ -70,7 +70,7 @@ local function history_save(id)
     end
 end
 
---- Return the number of items in history table regarding the id
+-- Return the number of items in history table regarding the id
 -- @param id The data.history identifier
 -- @return the number of items in history table, -1 if history is disabled
 local function history_items(id)
@@ -81,7 +81,7 @@ local function history_items(id)
     end
 end
 
---- Add an entry to the history file
+-- Add an entry to the history file
 -- @param id The data.history identifier
 -- @param command The command to add
 local function history_add(id, command)
@@ -101,7 +101,7 @@ local function history_add(id, command)
 end
 
 
---- Draw the prompt text with a cursor.
+-- Draw the prompt text with a cursor.
 -- @param text The text.
 -- @param text_color The text color.
 -- @param cursor_color The cursor color.
