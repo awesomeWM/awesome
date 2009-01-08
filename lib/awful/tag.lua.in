@@ -30,7 +30,7 @@ data.tags = otable()
 -- History functions
 history = {}
 
---- Compare 2 tables of tags.
+-- Compare 2 tables of tags.
 -- @param a The first table.
 -- @param b The second table of tags.
 -- @return True if the tables are identical, false otherwise.
