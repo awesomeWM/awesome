@@ -388,106 +388,107 @@ function notify(args)
 end
 
 -- DBUS/Notification support
-
 -- Notify
-awful.hooks.dbus.register("org.freedesktop.Notifications", function (data, appname, replaces_id, icon, title, text, actions, hints, expire)
-args = {}
-if data.member == "Notify" then
-    if text ~= "" then
-        args.text = text
-        if title ~= "" then
-            args.title = title
-        end
-    else
-        if title ~= "" then
-            args.text = title
+if awful.hooks.dbus then
+    awful.hooks.dbus.register("org.freedesktop.Notifications", function (data, appname, replaces_id, icon, title, text, actions, hints, expire)
+    args = {}
+    if data.member == "Notify" then
+        if text ~= "" then
+            args.text = text
+            if title ~= "" then
+                args.title = title
+            end
         else
-            return nil
-        end
-    end
-    local score = 0
-    for i, obj in pairs(config.mapping) do
-        local filter, preset, s = obj[1], obj[2], 0
-        if (not filter.urgency or filter.urgency == hints.urgency) and
-           (not filter.category or filter.category == hints.category) and
-           (not filter.appname or filter.appname == appname) then
-            for j, el in pairs(filter) do s = s + 1 end
-            if s > score then
-                score = s
-                args.preset = preset
+            if title ~= "" then
+                args.text = title
+            else
+                return nil
             end
         end
-    end
-    if not args.preset.callback or (type(args.preset.callback) == "function" and
-        args.preset.callback(data, appname, replaces_id, icon, title, text, actions, hints, expire)) then
-        if icon ~= "" then
-            args.icon = icon
+        local score = 0
+        for i, obj in pairs(config.mapping) do
+            local filter, preset, s = obj[1], obj[2], 0
+            if (not filter.urgency or filter.urgency == hints.urgency) and
+               (not filter.category or filter.category == hints.category) and
+               (not filter.appname or filter.appname == appname) then
+                for j, el in pairs(filter) do s = s + 1 end
+                if s > score then
+                    score = s
+                    args.preset = preset
+                end
+            end
         end
-        if replaces_id and replaces_id ~= "" and replaces_id ~= 0 then
-            args.replaces_id = replaces_id
+        if not args.preset.callback or (type(args.preset.callback) == "function" and
+            args.preset.callback(data, appname, replaces_id, icon, title, text, actions, hints, expire)) then
+            if icon ~= "" then
+                args.icon = icon
+            end
+            if replaces_id and replaces_id ~= "" and replaces_id ~= 0 then
+                args.replaces_id = replaces_id
+            end
+            if expire and expire > -1 then
+                args.timeout = expire / 1000
+            end
+            local id = notify(args).id
+            return "i", id
         end
-        if expire and expire > -1 then
-            args.timeout = expire / 1000
+        return "i", "0"
+    elseif data.member == "CloseNotification" then
+        local obj = getById(arg1)
+        if obj then
+           destroy(obj)
         end
-        local id = notify(args).id
-        return "i", id
+    elseif data.member == "GetServerInfo" or data.member == "GetServerInformation" then
+        -- name of notification app, name of vender, version
+        return "s", "naughty", "s", "awesome", "s", AWESOME_VERSION:match("%d.%d")
     end
-    return "i", "0"
-elseif data.member == "CloseNotification" then
-    local obj = getById(arg1)
-    if obj then
-       destroy(obj)
-    end
-elseif data.member == "GetServerInfo" or data.member == "GetServerInformation" then
-    -- name of notification app, name of vender, version
-    return "s", "naughty", "s", "awesome", "s", AWESOME_VERSION:match("%d.%d")
-end
-end)
+    end)
 
-awful.hooks.dbus.register("org.freedesktop.DBus.Introspectable",
-function (data, text)
-if data.member == "Introspect" then
-    local xml = [=[<!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object
-Introspection 1.0//EN"
-"http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
-<node>
-  <interface name="org.freedesktop.DBus.Introspectable">
-    <method name="Introspect">
-      <arg name="data" direction="out" type="s"/>
-    </method>
-  </interface>
-  <interface name="org.freedesktop.Notifications">
-    <method name="CloseNotification">
-      <arg name="id" type="u" direction="in"/>
-    </method>
-    <method name="Notify">
-      <arg name="app_name" type="s" direction="in"/>
-      <arg name="id" type="u" direction="in"/>
-      <arg name="icon" type="s" direction="in"/>
-      <arg name="summary" type="s" direction="in"/>
-      <arg name="body" type="s" direction="in"/>
-      <arg name="actions" type="as" direction="in"/>
-      <arg name="hints" type="a{sv}" direction="in"/>
-      <arg name="timeout" type="i" direction="in"/>
-      <arg name="return_id" type="u" direction="out"/>
-    </method>
-    <method name="GetServerInformation">
-      <arg name="return_name" type="s" direction="out"/>
-      <arg name="return_vendor" type="s" direction="out"/>
-      <arg name="return_version" type="s" direction="out"/>
-    </method>
-    <method name="GetServerInfo">
-      <arg name="return_name" type="s" direction="out"/>
-      <arg name="return_vendor" type="s" direction="out"/>
-      <arg name="return_version" type="s" direction="out"/>
-   </method>
-  </interface>
-</node>]=]
-    return "s", xml
-end
-end)
+    awful.hooks.dbus.register("org.freedesktop.DBus.Introspectable",
+    function (data, text)
+    if data.member == "Introspect" then
+        local xml = [=[<!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object
+    Introspection 1.0//EN"
+    "http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
+    <node>
+      <interface name="org.freedesktop.DBus.Introspectable">
+        <method name="Introspect">
+          <arg name="data" direction="out" type="s"/>
+        </method>
+      </interface>
+      <interface name="org.freedesktop.Notifications">
+        <method name="CloseNotification">
+          <arg name="id" type="u" direction="in"/>
+        </method>
+        <method name="Notify">
+          <arg name="app_name" type="s" direction="in"/>
+          <arg name="id" type="u" direction="in"/>
+          <arg name="icon" type="s" direction="in"/>
+          <arg name="summary" type="s" direction="in"/>
+          <arg name="body" type="s" direction="in"/>
+          <arg name="actions" type="as" direction="in"/>
+          <arg name="hints" type="a{sv}" direction="in"/>
+          <arg name="timeout" type="i" direction="in"/>
+          <arg name="return_id" type="u" direction="out"/>
+        </method>
+        <method name="GetServerInformation">
+          <arg name="return_name" type="s" direction="out"/>
+          <arg name="return_vendor" type="s" direction="out"/>
+          <arg name="return_version" type="s" direction="out"/>
+        </method>
+        <method name="GetServerInfo">
+          <arg name="return_name" type="s" direction="out"/>
+          <arg name="return_vendor" type="s" direction="out"/>
+          <arg name="return_version" type="s" direction="out"/>
+       </method>
+      </interface>
+    </node>]=]
+        return "s", xml
+    end
+    end)
 
--- listen for dbus notification requests
-dbus.request_name("org.freedesktop.Notifications")
+    -- listen for dbus notification requests
+    dbus.request_name("org.freedesktop.Notifications")
+end
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
