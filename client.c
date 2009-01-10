@@ -730,6 +730,7 @@ client_geometry_hints(client_t *c, area_t geometry)
 }
 
 /** Resize client window.
+ * The sizse given as parameters are with titlebar and borders!
  * \param c Client to resize.
  * \param geometry New window geometry.
  * \param hints Use size hints.

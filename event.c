@@ -245,6 +245,10 @@ event_handle_configurerequest(void *data __attribute__ ((unused)),
         if(ev->value_mask & XCB_CONFIG_WINDOW_HEIGHT)
             geometry.height = ev->height;
 
+        /** Configure request are sent with size relative to real (internal)
+         * window size, i.e. without titlebars and borders. */
+        geometry = titlebar_geometry_add(c->titlebar, c->border, geometry);
+
         if(geometry.x != c->geometry.x || geometry.y != c->geometry.y
            || geometry.width != c->geometry.width || geometry.height != c->geometry.height)
         {
