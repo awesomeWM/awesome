@@ -40,8 +40,12 @@ function bashcomp_load(src)
 end
 
 local function bash_escape(str)
-    res = str:gsub(" ", "\\ ")
-    return res
+    str = str:gsub(" ", "\\ ")
+    str = str:gsub("%[", "\\[")
+    str = str:gsub("%]", "\\]")
+    str = str:gsub("%(", "\\(")
+    str = str:gsub("%)", "\\)")
+    return str
 end
 
 --- Use bash completion system to complete command and filename.
