@@ -79,6 +79,7 @@ for s = 1, screen.count() do
         tags[s][tagnumber] = tag(tagnumber)
         -- Add tags to screen one by one
         tags[s][tagnumber].screen = s
+        awful.layout.set(layouts[1], tags[s][tagnumber])
     end
     -- I'm sure you want to see at least one tag.
     tags[s][1].selected = true
