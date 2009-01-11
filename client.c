@@ -1506,6 +1506,8 @@ luaA_client_newindex(lua_State *L)
         client_setsticky(*c, luaA_checkboolean(L, 3));
         break;
       case A_TK_HONORSIZEHINTS:
+        luaA_deprecate(L, "size_hints_honor");
+      case A_TK_SIZE_HINTS_HONOR:
         (*c)->size_hints_honor = luaA_checkboolean(L, 3);
         client_need_arrange(*c);
         break;
