@@ -593,6 +593,144 @@ function floating.delete(c)
     data.floating[c] = nil
 end
 
+-- Normalize a set of numbers to 1
+-- @param set the set of numbers to normalize
+-- @param num the number of numbers to normalize
+local function normalize(set, num)
+    local num = num or #set
+    local total = 0
+    if num then
+        for i = 1,num do
+            total = total + set[i]
+        end
+        for i = 1,num do
+            set[i] = set[i] / total
+        end
+    else
+        for i,v in ipairs(set) do
+            total = total + v
+        end
+
+        for i,v in ipairs(set) do
+            set[i] = v / total
+        end
+    end
+end
+
+--- Calculate a client's column number, index in that column, and
+-- number of visible clients in this column.
+-- @param c the client
+-- @return col the column number
+-- @return idx index of the client in the column
+-- @return num the number of visible clients in the column
+local function idx(c)
+    local c = c or capi.client.focus
+    if not c then return end
+
+    local clients = tiled(c.screen)
+    local idx = nil
+    for k, cl in ipairs(clients) do
+        if cl == c then
+            idx = k
+            break
+        end
+    end
+
+    local nmaster = tag.getnmaster(t)
+    if idx <= nmaster then
+        return {idx = idx, col=0, num=nmaster}
+    end
+    local nother = #clients - nmaster
+    idx = idx - nmaster
+
+    -- rather than regenerate the column number we can calculate it
+    -- based on the how the tiling algorithm places clients we calculate
+    -- the column, we could easily use the for loop in the program but we can
+    -- calculate it.
+    local ncol = tag.getncol(t)
+    -- minimum number of clients per column
+    local percol = math.floor(nother / ncol)
+    -- number of columns with an extra client
+    local overcol = math.mod(nother, ncol)
+    -- number of columns filled with [percol] clients
+    local regcol = ncol - overcol
+
+    local col = math.floor( (idx - 1) / percol) + 1
+    if  col > regcol then
+        -- col = math.floor( (idx - (percol*regcol) - 1) / (percol + 1) ) + regcol + 1
+        -- simplified
+        col = math.floor( (idx + regcol + percol) / (percol+1) )
+        -- calculate the index in the column
+        idx = idx - percol*regcol - (col - regcol - 1) * (percol+1)
+        percol = percol+1
+    else
+        idx = idx - percol*(col-1)
+    end
+
+    return {idx = idx, col=col, num=percol}
+end
+
+
+--- Set the window factor of a client
+-- @param wfact the window factor value
+-- @param c the client
+function setwfact(wfact, c)
+    -- get the currently selected window
+    local c =  c or capi.client.focus
+    if not c then return end
+
+    local t = tag.selected(c.screen)
+    local w = idx(c)
+
+    local cls = tiled(t.screen)
+    local nmaster = tag.getnmaster(t)
+
+    -- n is the number of windows currently visible for which we have to be concerned with the properties
+    local data = tag.getproperty(t, "windowfact") or {}
+    local colfact = data[w.col]
+
+    colfact[w.idx] = wfact
+    rest = 1-wfact
+
+    -- calculate the current denominator
+    local total = 0
+    for i = 1,w.num do
+        if i ~= w.idx then
+            total = total + colfact[i]
+        end
+    end
+
+    -- normalize the windows
+    for i = 1,w.num do
+        if i ~= w.idx then
+            colfact[i] = (colfact[i] * rest) / total
+        end
+    end
+end
+
+--- Increment a client's window factor
+-- @param add amount to increase the client's window
+-- @param c the client
+function incwfact(add, c)
+    local c = c or capi.client.focus
+    if not c then return end
+
+    local t = tag.selected(c.screen)
+
+    local w = idx(c)
+
+    local nmaster = tag.getnmaster(t)
+    local data = tag.getproperty(t, "windowfact") or {}
+    local colfact = data[w.col]
+    curr = colfact[w.idx] or 1
+    colfact[w.idx] = curr + add
+
+    -- keep our ratios normalized
+    normalize(colfact, w.num)
+    capi.hooks.arrange()(t.screen)
+end
+
+
 -- Register standards hooks
 hooks.focus.register(focus.history.add)
 hooks.unmanage.register(focus.history.delete)

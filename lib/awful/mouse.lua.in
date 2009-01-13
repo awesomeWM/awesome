@@ -392,6 +392,100 @@ local function client_resize_tiled(c, lay)
                           end, cursor)
 end
 
+local function client_resize_viled(c, lay)
+    local wa = capi.screen[c.screen].workarea
+    local mwfact = tag.getmwfact()
+    local cursor
+    local g = c:geometry()
+    local offset = 0
+    local x,y
+    if lay == layout.suit.vile then
+        cursor = "cross"
+        if g.height+15 > wa.height then
+            offset = g.height * .5
+            cursor = "sb_h_double_arrow"
+        elseif not (g.y+g.height+15 > wa.y+wa.height) then
+            offset = g.height
+        end
+        capi.mouse.coords({ x = wa.x + wa.width * mwfact, y = g.y + offset })
+    elseif lay == layout.suit.vile.left then
+        cursor = "cross"
+        if g.height+15 >= wa.height then
+            offset = g.height * .5
+            cursor = "sb_h_double_arrow"
+        elseif not (g.y+g.height+15 > wa.y+wa.height) then
+            offset = g.height
+        end
+        capi.mouse.coords({ x = wa.x + wa.width * (1 - mwfact), y = g.y + offset })
+    elseif lay == layout.suit.vile.bottom then
+        cursor = "cross"
+        if g.width+15 >= wa.width then
+            offset = g.width * .5
+            cursor = "sb_v_double_arrow"
+        elseif not (g.x+g.width+15 > wa.x+wa.width) then
+            offset = g.width
+        end
+        capi.mouse.coords({ y = wa.y + wa.height * mwfact, x = g.x + offset})
+    else
+        cursor = "cross"
+        if g.width+15 >= wa.width then
+            offset = g.width * .5
+            cursor = "sb_v_double_arrow"
+        elseif not (g.x+g.width+15 > wa.x+wa.width) then
+            offset = g.width
+        end
+        capi.mouse.coords({ y = wa.y + wa.height * (1 - mwfact), x= g.x + offset })
+    end
+
+    capi.mousegrabber.run(function (mouse)
+                              for k, v in ipairs(mouse.buttons) do
+                                  if v then
+                                      local fact_x = (mouse.x - wa.x) / wa.width
+                                      local fact_y = (mouse.y - wa.y) / wa.height
+                                      local mwfact
+
+                                      local g = c:geometry()
+
+
+                                      -- we have to make sure we're not on the last visible client where we have to use different settings.
+                                      local wfact
+                                      local wfact_x, wfact_y
+                                      if (g.y+g.height+15) > (wa.y+wa.height) then
+                                          wfact_y = (g.y + g.height - mouse.y) / wa.height
+                                      else
+                                          wfact_y = (mouse.y - g.y) / wa.height
+                                      end
+
+                                      if (g.x+g.width+15) > (wa.x+wa.width) then
+                                          wfact_x = (g.x + g.width - mouse.x) / wa.width
+                                      else
+                                          wfact_x = (mouse.x - g.x) / wa.width
+                                      end
+
+
+                                      if lay == layout.suit.vile then
+                                          mwfact = fact_x
+                                          wfact = wfact_y
+                                      elseif lay == layout.suit.vile.left then
+                                          mwfact = 1 - fact_x
+                                          wfact = wfact_y
+                                      elseif lay == layout.suit.vile.bottom then
+                                          mwfact = fact_y
+                                          wfact = wfact_x
+                                      else
+                                          mwfact = 1 - fact_y
+                                          wfact = wfact_x
+                                      end
+
+                                      tag.setmwfact(math.min(math.max(mwfact, 0.01), 0.99), tag.selected(c.screen))
+                                      aclient.setwfact(math.min(math.max(wfact,0.01), 0.99), c)
+                                      return true
+                                  end
+                              end
+                              return false
+                          end, cursor)
+end
+
 local function client_resize_floating(c, corner, fixed_x, fixed_y)
     local corner, x, y = client.corner(c, corner)
     local g = c:geometry()
@@ -483,6 +577,12 @@ function client.resize(c, corner)
         or lay == layout.suit.tile.top
         or lay == layout.suit.tile.bottom then
         return client_resize_tiled(c, lay)
+    elseif lay == layout.suit.vile
+        or lay == layout.suit.vile.left
+        or lay == layout.suit.vile.top
+        or lay == layout.suit.vile.bottom
+        then
+        return client_resize_viled(c, lay)
     elseif lay == layout.suit.magnifier then
         return client_resize_magnifier(c, corner)
     end

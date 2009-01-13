@@ -31,6 +31,10 @@ layout_tilebottom = @AWESOME_THEMES_PATH@/sky/layouts/tilebottom.png
 layout_tileleft = @AWESOME_THEMES_PATH@/sky/layouts/tileleft.png
 layout_tile = @AWESOME_THEMES_PATH@/sky/layouts/tile.png
 layout_tiletop = @AWESOME_THEMES_PATH@/sky/layouts/tiletop.png
+layout_vilebottom = @AWESOME_THEMES_PATH@/sky/layouts/vilebottom.png
+layout_vileleft = @AWESOME_THEMES_PATH@/sky/layouts/vileleft.png
+layout_vile = @AWESOME_THEMES_PATH@/sky/layouts/vile.png
+layout_viletop = @AWESOME_THEMES_PATH@/sky/layouts/viletop.png
 
 awesome_icon = @AWESOME_THEMES_PATH@/sky/awesome-icon.png
 tasklist_floating_icon = @AWESOME_THEMES_PATH@/sky/layouts/floating.png
