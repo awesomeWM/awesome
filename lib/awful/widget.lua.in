@@ -24,6 +24,7 @@ local hooks = require("awful.hooks")
 local beautiful = require("beautiful")
 local menu = require("awful.menu")
 local client = require("awful.client")
+local tag = require("awful.tag")
 
 --- Widget module for awful
 module("awful.widget")
@@ -37,48 +38,66 @@ tasklist.label = {}
 -- Private structures
 local tagwidgets = otable()
 
-local function taglist_update (screen, w, label, buttons, data)
-    local tags = capi.screen[screen]:tags()
+local function list_update(w, buttons, label, data, widgets, objects)
     -- Hack: if it has been registered as a widget in a wibox,
     -- it's w.len since __len meta does not work on table until Lua 5.2.
     -- Otherwise it's standard #w.
-    local len = w.len or #w
+    local len = (w.len or #w) / 2
     -- Add more widgets
-    if len < #tags then
-        for i = len + 1, #tags do
-            local wi = capi.widget({ type = "textbox" })
-            w[i] = wi
-            tagwidgets[wi] = tags[i]
+    if len < #objects then
+        for i = len * 2 + 1, #objects * 2, 2 do
+            w[i] = capi.widget({ type = "imagebox", align = widgets.imagebox.align })
+            w[i + 1] = capi.widget({ type = "textbox", align = widgets.textbox.align })
+            w[i + 1]:margin({ left = widgets.textbox.margin.left, right = widgets.textbox.margin.right })
+            w[i + 1].bg_resize = widgets.textbox.bg_resize or false
+            w[i + 1].bg_align = widgets.textbox.bg_align or ""
         end
     -- Remove widgets
-    elseif len > #tags then
-        for i = #tags + 1, len do
-            tagwidgets[w[i]] = nil
+    elseif len > #objects then
+        for i = #objects * 2 + 1, len * 2, 2 do
             w[i] = nil
+            w[i + 1] = nil
         end
     end
-    -- Update widgets text
-    for k, tag in ipairs(tags) do
-        local text, bg, bg_image, bg_resize = label(tag)
-        w[k].text = text
-        if text then
-            w[k].bg, w[k].bg_image, w[k].bg_resize = bg, bg_image, bg_resize
-            if buttons then
-                if not data[tag] then
-                    -- Replace press function by a new one calling with tags as
-                    -- argument.
-                    -- This is done here because order of tags can change
-                    data[tag] = {}
-                    for kb, b in ipairs(buttons) do
-                        -- Copy object
-                        data[tag][kb] = capi.button(b)
-                        data[tag][kb].press = function () b.press(tag) end
-                    end
+
+    -- update widgets text
+    for k = 1, #objects * 2, 2 do
+        local o = objects[(k + 1) / 2]
+        if buttons then
+            if not data[o] then
+                data[o] = { }
+                -- Replace press function by a new one calling with tags as
+                -- argument
+                for kb, b in ipairs(buttons) do
+                    -- Copy object
+                    data[o][kb] = capi.button(b)
+                    data[o][kb].press = function () b.press(c) end
                 end
-                w[k]:buttons(data[tag])
             end
+            w[k]:buttons(data[o])
+            w[k + 1]:buttons(data[o])
         end
-    end
+
+        local text, bg, bg_image, icon = label(o)
+        w[k + 1].text, w[k + 1].bg, w[k + 1].bg_image = text, bg, bg_image
+        w[k].bg, w[k].image = bg, icon
+        if not w[k + 1].text then
+            w[k+1].visible = false
+        else
+            w[k+1].visible = true
+        end
+        if not w[k].image then
+            w[k].visible = false
+        else
+            w[k].visible = true
+        end
+   end
+end
+
+local function taglist_update (screen, w, label, buttons, data, widgets)
+    local tags = capi.screen[screen]:tags()
+
+    list_update(w, buttons, label, data, widgets, tags)
 end
 
 function taglist.gettag(widget)
@@ -91,10 +110,16 @@ end
 -- @param buttons A table with buttons binding to set.
 function taglist.new(screen, label, buttons)
     local w = {}
+    local widgets = { }
+    widgets.imagebox = { }
+    widgets.textbox  = { ["margin"] = { ["left"]  = 0,
+                                        ["right"] = 0},
+                         ["bg_resize"] = true
+                       }
     local data = otable()
     local u = function (s)
         if s == screen then
-            taglist_update(s, w, label, buttons, data)
+            taglist_update(s, w, label, buttons, data, widgets)
         end
     end
     local uc = function (c) return u(c.screen) end
@@ -141,11 +166,12 @@ function taglist.label.all(t, args)
     local taglist_squares_unsel = args.squares_unsel or theme.taglist_squares_unsel
     local taglist_squares_resize = theme.taglist_squares_resize or args.squares_resize or "true"
     local font = args.font or theme.taglist_font or theme.font or ""
-    local text = "<span font_desc='"..font.."'> "
+    local text = "<span font_desc='"..font.."'>"
     local sel = capi.client.focus
     local bg_color = nil
     local fg_color = nil
     local bg_image
+    local icon
     local bg_resize = false
     if t.selected then
         bg_color = bg_focus
@@ -170,13 +196,34 @@ function taglist.label.all(t, args)
             end
         end
     end
-    if fg_color then
-        text = text .. "<span color='"..util.color_strip_alpha(fg_color).."'>"..util.escape(t.name).."</span>"
-    else
-        text = text .. util.escape(t.name)
+    local taglist_squares = false
+    if taglist_squares_sel or taglist_squares_unsel then
+        taglist_squares = true
     end
-    text = text .. " </span>"
-    return text, bg_color, bg_image, bg_resize
+    if t.name then
+        if fg_color then
+            text = text .. "<span color='"..util.color_strip_alpha(fg_color).."'>"
+            if taglist_squares then
+                text = text .. " "
+            end
+            text = text..util.escape(t.name).." </span>"
+        else
+            if taglist_squares then
+                text = text .. " "
+            end
+            text = text .. util.escape(t.name) .. " "
+        end
+    elseif taglist_squares then
+        text = text .. " "
+    end
+    text = text .. "</span>"
+    if tag.geticon(t) and type(tag.geticon(t)) == "image" then
+        icon = tag.geticon(t)
+    elseif tag.geticon(t) then
+        icon = capi.image(tag.geticon(t))
+    end
+
+    return text, bg_color, bg_image, icon
 end
 
 --- Return labels for a taglist widget with all *non empty* tags from screen.
@@ -196,7 +243,7 @@ function taglist.label.noempty(t, args)
     end
 end
 
-local function tasklist_update(w, buttons, label, data)
+local function tasklist_update(w, buttons, label, data, widgets)
     local clients = capi.client.get()
     local shownclients = {}
     for k, c in ipairs(clients) do
@@ -206,59 +253,8 @@ local function tasklist_update(w, buttons, label, data)
         end
     end
     clients = shownclients
-    -- Hack: if it has been registered as a widget in a wibox,
-    -- it's w.len since __len meta does not work on table until Lua 5.2.
-    -- Otherwise it's standard #w.
-    local len = (w.len or #w) / 2
-    -- Add more widgets
-    if len < #clients then
-        for i = len * 2 + 1, #clients * 2, 2 do
-            w[i] = capi.widget({ type = "imagebox", align = "flex" })
-            w[i + 1] = capi.widget({ type = "textbox", align = "flex" })
-            w[i + 1]:margin({ left = 2, right = 2 })
-            w[i + 1].bg_resize = true
-            w[i + 1].bg_align = "right"
-        end
-    -- Remove widgets
-    elseif len > #clients then
-        for i = #clients * 2 + 1, len * 2, 2 do
-            w[i] = nil
-            w[i + 1] = nil
-        end
-    end
-    -- Update widgets text
-    for k = 1, #clients * 2, 2 do
-        if buttons then
-            local c = clients[(k + 1) / 2]
-            if not data[c] then
-                data[c] = {}
-                -- Replace press function by a new one calling with tags as
-                -- argument
-                for kb, b in ipairs(buttons) do
-                    -- Copy object
-                    data[c][kb] = capi.button(b)
-                    data[c][kb].press = function () b.press(c) end
-                end
-            end
-            w[k]:buttons(data[c])
-            w[k + 1]:buttons(data[c])
-        end
-        w[k + 1].text, w[k + 1].bg, w[k + 1].bg_image= label(clients[(k + 1) / 2])
-        w[k].bg = w[k + 1].bg
-        if w[k + 1].text  then
-            -- Set icon
-            w[k].image = clients[(k + 1) / 2].icon
-            if w[k].image then
-                w[k].visible = true
-            else
-                w[k].visible = false
-            end
-            w[k + 1].visible = true
-        else
-            w[k].visible = false
-            w[k + 1].visible = false
-        end
-    end
+
+    list_update(w, buttons, label, data, widgets, clients)
 end
 
 --- Create a new tasklist widget.
@@ -266,8 +262,16 @@ end
 -- @param buttons A table with buttons binding to set.
 function tasklist.new(label, buttons)
     local w = {}
+    local widgets = { }
+    widgets.imagebox = { ["align"]      = "flex" }
+    widgets.textbox  = { ["align"]     = "flex",
+                         ["margin"]    = { ["left"]  = 2,
+                                           ["right"] = 2 },
+                         ["bg_resize"] = true,
+                         ["bg_align"]  = "right"
+                       }
     local data = otable()
-    local u = function () tasklist_update(w, buttons, label, data) end
+    local u = function () tasklist_update(w, buttons, label, data, widgets) end
     hooks.arrange.register(u)
     hooks.clients.register(u)
     hooks.tagged.register(u)
@@ -325,7 +329,7 @@ local function widget_tasklist_label_common(c, args)
         text = text .. name
     end
     text = text .. "</span>"
-    return text, bg, status_image
+    return text, bg, status_image, c.icon
 end
 
 --- Return labels for a tasklist widget with clients from all tags and screen.
