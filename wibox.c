@@ -669,7 +669,7 @@ wibox_attach(wibox_t *wibox, screen_t *s)
  *
  * \luastack
  * \lparam A table with optionaly defined values:
- * position, align, fg, bg, border_width, border_color, width and height.
+ * position, align, fg, bg, border_width, border_color, ontop, width and height.
  * \lreturn A brand new wibox.
  */
 int
@@ -697,6 +697,8 @@ luaA_wibox_new(lua_State *L)
     w->sw.border.color = globalconf.colors.bg;
     if((buf = luaA_getopt_lstring(L, 2, "border_color", NULL, &len)))
         reqs[++reqs_nbr] = xcolor_init_unchecked(&w->sw.border.color, buf, len);
+
+    w->ontop = luaA_getopt_boolean(L, 2, "ontop", false);
 
     buf = luaA_getopt_lstring(L, 2, "align", "left", &len);
     w->align = draw_align_fromstr(buf, len);
