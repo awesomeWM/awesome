@@ -51,7 +51,11 @@ function add(c, args)
     local tb = capi.wibox(args)
 
     local title = capi.widget({ type = "textbox", align = "flex" })
-    title.text = " " .. util.escape(c.name) .. " "
+    if c.name then
+        title.text = " " .. util.escape(c.name) .. " "
+    else
+        title.text = nil
+    end
 
     -- Redirect relevant events to the client the titlebar belongs to
     local bts =
