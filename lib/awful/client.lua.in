@@ -524,7 +524,7 @@ function getmarked()
     return t
 end
 
---- Set a client floating state.
+--- Set a client floating state, overriding auto-detection.
 -- Floating client are not handled by tiling layouts.
 -- @param c A client.
 -- @param state True or false.
@@ -576,10 +576,15 @@ function floating.get(c)
     end
 end
 
---- Toggle the floating state of a client.
+--- Toggle the floating state of a client between 'auto' and 'true'.
 -- @param c A client.
 function floating.toggle(c)
-    floating.set(c, not floating.get(c))
+    -- If it has been set to floating
+    if data.floating[c] then
+        floating.set(c, nil)
+    else
+        floating.set(c, true)
+    end
 end
 
 --- Remove the floating information on a client.
