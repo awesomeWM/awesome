@@ -87,8 +87,6 @@ Window manager control
 
 Clients
 ~~~~~~~
-*Mod4 \+ Control \+ i*::
-    Print the client class and instance.
 *Mod4 \+ Shift \+ r*::
     Redraw the focused window.
 *Mod4 \+ m*::

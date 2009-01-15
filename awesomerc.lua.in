@@ -246,23 +246,6 @@ table.insert(clientkeys, key({ modkey, "Control" }, "space", awful.client.floati
 table.insert(clientkeys, key({ modkey, "Control" }, "Return", function (c) c:swap(awful.client.getmaster()) end))
 table.insert(clientkeys, key({ modkey }, "o", awful.client.movetoscreen))
 table.insert(clientkeys, key({ modkey, "Shift" }, "r", function (c) c:redraw() end))
-table.insert(clientkeys, key({ modkey, "Ctrl" }, "i", function (c)
-                                                          local s = c.screen
-                                                          if mypromptbox[s].text then
-                                                              mypromptbox[s].text = nil
-                                                          else
-                                                              mypromptbox[s].text = nil
-                                                              if c.class then
-                                                                  mypromptbox[s].text = "Class: " .. c.class .. " "
-                                                              end
-                                                              if c.instance then
-                                                                  mypromptbox[s].text = mypromptbox[s].text .. "Instance: ".. c.instance .. " "
-                                                              end
-                                                              if c.role then
-                                                                  mypromptbox[s].text = mypromptbox[s].text .. "Role: ".. crole
-                                                              end
-                                                          end
-                                                      end))
 
 -- Layout manipulation
 table.insert(globalkeys, key({ modkey }, "l", function () awful.tag.incmwfact(0.05) end))
