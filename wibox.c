@@ -59,6 +59,7 @@ wibox_resize(wibox_t *wibox, uint16_t width, uint16_t height)
         wibox->sw.geometry.height = height;
     }
     wibox->need_update = true;
+    wibox->mouse_over = NULL;
 }
 
 static void
@@ -95,6 +96,7 @@ wibox_setposition(wibox_t *wibox, position_t p)
         ewmh_update_workarea(screen_virttophys(wibox->screen));
 
         wibox->need_update = true;
+        wibox->mouse_over = NULL;
     }
 }
 
@@ -1028,6 +1030,7 @@ luaA_wibox_newindex(lua_State *L)
         {
             simplewindow_orientation_set(&(*wibox)->sw, orientation_fromstr(buf, len));
             (*wibox)->need_update = true;
+            (*wibox)->mouse_over = NULL;
         }
         break;
       case A_TK_BORDER_COLOR:
