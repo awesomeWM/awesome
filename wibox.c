@@ -499,19 +499,6 @@ luaA_wibox_new(lua_State *L)
     return 1;
 }
 
-/** Rebuild wibox widgets list.
- * \param L The Lua VM state.
- * \param wibox The wibox.
- */
-static void
-wibox_widgets_table_build(lua_State *L, wibox_t *wibox)
-{
-    widget_node_array_wipe(&wibox->widgets);
-    widget_node_array_init(&wibox->widgets);
-    luaA_table2widgets(L, &wibox->widgets);
-    wibox_need_update(wibox);
-}
-
 /** Check if a wibox widget table has an item.
  * \param L The Lua VM state.
  * \param wibox The wibox.
@@ -541,8 +528,8 @@ luaA_wibox_invalidate_byitem(lua_State *L, const void *item)
         wibox_t *wibox = *w;
         if(luaA_wibox_hasitem(L, wibox, item))
         {
-            /* recompute widget node list */
-            wibox_widgets_table_build(L, wibox);
+            /* update wibox */
+            wibox_need_update(wibox);
             lua_pop(L, 1); /* remove widgets table */
         }
 
@@ -553,8 +540,8 @@ luaA_wibox_invalidate_byitem(lua_State *L, const void *item)
         client_t *c = *_c;
         if(c->titlebar && luaA_wibox_hasitem(L, c->titlebar, item))
         {
-            /* recompute widget node list */
-            wibox_widgets_table_build(L, c->titlebar);
+            /* update wibox */
+            wibox_need_update(c->titlebar);
             lua_pop(L, 1); /* remove widgets table */
         }
     }
@@ -848,12 +835,8 @@ luaA_wibox_newindex(lua_State *L)
             luaA_warn(L, "table is looping, cannot use this as widget table");
             return 0;
         }
-        /* register object */
-        luaA_register(L, 3, &wibox->widgets_table);
-        /* duplicate table because next function will eat it */
-        lua_pushvalue(L, -1);
-        /* recompute widget node list */
-        wibox_widgets_table_build(L, wibox);
+        luaA_register(L, 3, &(wibox->widgets_table));
+        wibox_need_update(wibox);
         luaA_table2wtable(L);
         break;
       case A_TK_OPACITY:

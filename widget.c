@@ -103,7 +103,7 @@ widget_getbycoords(orientation_t orientation, widget_node_array_t *widgets,
  * \param L The Lua VM state.
  * \param widgets The linked list of widget node.
  */
-void
+static void
 luaA_table2widgets(lua_State *L, widget_node_array_t *widgets)
 {
     if(lua_istable(L, -1))
@@ -192,6 +192,11 @@ widget_render(wibox_t *wibox)
     }
 
     widget_node_array_t *widgets = &wibox->widgets;
+
+    widget_node_array_wipe(widgets);
+    widget_node_array_init(widgets);
+    lua_rawgeti(globalconf.L, LUA_REGISTRYINDEX, wibox->widgets_table);
+    luaA_table2widgets(globalconf.L, widgets);
 
     /* compute geometry */
     for(int i = 0; i < widgets->len; i++)

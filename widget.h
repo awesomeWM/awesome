@@ -73,8 +73,6 @@ struct widget_node_t
 widget_t *widget_getbycoords(orientation_t, widget_node_array_t *, int, int, int16_t *, int16_t *);
 void widget_render(wibox_t *);
 
-void luaA_table2widgets(lua_State *, widget_node_array_t *);
-
 void widget_invalidate_bywidget(widget_t *);
 void widget_invalidate_bytype(widget_constructor_t *);
 
