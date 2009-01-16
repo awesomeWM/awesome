@@ -147,6 +147,7 @@ AC_FUNC_SELECT_ARGTYPES
 AC_TYPE_SIGNAL
 AC_FUNC_VPRINTF
 AC_CHECK_FUNCS([getline memchr regcomp select setenv socket strchr strrchr strstr])
+AC_SEARCH_LIBS(connect, socket)
 
 AC_CONFIG_FILES([Makefile])
 AC_CONFIG_FILES([awesome.doxygen])
