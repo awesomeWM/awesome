@@ -9,7 +9,7 @@ do
     echo "    /* $file */"
     grep '^Uicb uicb_' $file | cut -d' ' -f2 | cut -d\; -f1 | while read uicb
     do
-        shortname=$(echo $uicb | cut -d _ -f2-)
+        shortname=`echo $uicb | cut -d _ -f2-`
         echo "    {\"$shortname\", $uicb},"
     done
 done
