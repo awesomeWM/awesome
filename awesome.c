@@ -338,6 +338,11 @@ main(int argc, char *argv[])
     csfd = socket_getclient();
     addr = socket_getaddr(getenv("DISPLAY"));
 
+/* Needed for some Solaris */
+#ifndef SUN_LEN
+#define SUN_LEN(ptr) ((size_t) (((struct sockaddr_un *) 0)->sun_path) + strlen ((ptr)->sun_path))
+#endif
+
     if(bind(csfd, (const struct sockaddr *) addr, SUN_LEN(addr)))
     {
         if(errno == EADDRINUSE)
