@@ -497,11 +497,7 @@ wibox_draw(wibox_t *wibox)
 {
     if(wibox->isvisible)
     {
-        widget_render(&wibox->widgets, &wibox->sw.ctx, wibox->sw.gc,
-                      wibox->sw.pixmap,
-                      wibox->screen, wibox->sw.orientation,
-                      wibox->sw.geometry.x, wibox->sw.geometry.y,
-                      wibox);
+        widget_render(wibox);
         simplewindow_refresh_pixmap(&wibox->sw);
 
         wibox->need_update = false;

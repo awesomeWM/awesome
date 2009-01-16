@@ -144,22 +144,13 @@ luaA_table2widgets(lua_State *L, widget_node_array_t *widgets)
 }
 
 /** Render a list of widgets.
- * \param wnode The list of widgets.
- * \param ctx The draw context where to render.
- * \param rotate_px The rotate pixmap: where to rotate and render the final
- * pixmap when the object oritation is not east.
- * \param screen The logical screen used to render.
- * \param orientation The object orientation.
- * \param x The x coordinates of the object.
- * \param y The y coordinates of the object.
  * \param wibox The wibox.
  * \todo Remove GC.
  */
 void
-widget_render(widget_node_array_t *widgets, draw_context_t *ctx, xcb_gcontext_t gc, xcb_pixmap_t rotate_px,
-              int screen, orientation_t orientation,
-              int x, int y, wibox_t *wibox)
+widget_render(wibox_t *wibox)
 {
+    draw_context_t *ctx = &wibox->sw.ctx;
     int left = 0, right = 0;
     area_t rectangle = { 0, 0, 0, 0 };
 
@@ -168,6 +159,7 @@ widget_render(widget_node_array_t *widgets, draw_context_t *ctx, xcb_gcontext_t 
 
     if(ctx->bg.alpha != 0xffff)
     {
+        int x = wibox->sw.geometry.x, y = wibox->sw.geometry.y;
         xcb_get_property_reply_t *prop_r;
         char *data;
         xcb_pixmap_t rootpix;
@@ -180,7 +172,7 @@ widget_render(widget_node_array_t *widgets, draw_context_t *ctx, xcb_gcontext_t 
             if(prop_r->value_len
                && (data = xcb_get_property_value(prop_r))
                && (rootpix = *(xcb_pixmap_t *) data))
-               switch(orientation)
+               switch(wibox->sw.orientation)
                {
                  case North:
                    draw_rotate(ctx,
@@ -202,7 +194,7 @@ widget_render(widget_node_array_t *widgets, draw_context_t *ctx, xcb_gcontext_t 
                    break;
                  case East:
                    xcb_copy_area(globalconf.connection, rootpix,
-                                 rotate_px, gc,
+                                 wibox->sw.pixmap, wibox->sw.gc,
                                  x, y,
                                  0, 0,
                                  ctx->width, ctx->height);
@@ -212,12 +204,14 @@ widget_render(widget_node_array_t *widgets, draw_context_t *ctx, xcb_gcontext_t 
         }
     }
 
+    widget_node_array_t *widgets = &wibox->widgets;
+
     /* compute geometry */
     for(int i = 0; i < widgets->len; i++)
         if(widgets->tab[i].widget->align == AlignLeft && widgets->tab[i].widget->isvisible)
         {
             widgets->tab[i].geometry = widgets->tab[i].widget->geometry(widgets->tab[i].widget,
-                                                                        screen, ctx->height,
+                                                                        wibox->screen, ctx->height,
                                                                         ctx->width - (left + right));
             widgets->tab[i].geometry.x = left;
             left += widgets->tab[i].geometry.width;
@@ -227,7 +221,7 @@ widget_render(widget_node_array_t *widgets, draw_context_t *ctx, xcb_gcontext_t 
         if(widgets->tab[i].widget->align == AlignRight && widgets->tab[i].widget->isvisible)
         {
             widgets->tab[i].geometry = widgets->tab[i].widget->geometry(widgets->tab[i].widget,
-                                                                        screen, ctx->height,
+                                                                        wibox->screen, ctx->height,
                                                                         ctx->width - (left + right));
             right += widgets->tab[i].geometry.width;
             widgets->tab[i].geometry.x = ctx->width - right;
@@ -247,7 +241,7 @@ widget_render(widget_node_array_t *widgets, draw_context_t *ctx, xcb_gcontext_t 
                 flex++;
             else
                 fake_left += widgets->tab[i].widget->geometry(widgets->tab[i].widget,
-                                                              screen, ctx->height,
+                                                              wibox->screen, ctx->height,
                                                               ctx->width - (fake_left + right)).width;
         }
 
@@ -265,13 +259,13 @@ widget_render(widget_node_array_t *widgets, draw_context_t *ctx, xcb_gcontext_t 
                 if(flex_rendered == flex - 1)
                     width += (ctx->width - (right + fake_left)) % flex;
                 widgets->tab[i].geometry = widgets->tab[i].widget->geometry(widgets->tab[i].widget,
-                                                                            screen, ctx->height,
+                                                                            wibox->screen, ctx->height,
                                                                             width);
                 flex_rendered++;
             }
             else
                 widgets->tab[i].geometry = widgets->tab[i].widget->geometry(widgets->tab[i].widget,
-                                                                            screen, ctx->height,
+                                                                            wibox->screen, ctx->height,
                                                                             ctx->width - (left + right));
             widgets->tab[i].geometry.x = left;
             left += widgets->tab[i].geometry.width;
@@ -286,19 +280,19 @@ widget_render(widget_node_array_t *widgets, draw_context_t *ctx, xcb_gcontext_t 
             widgets->tab[i].geometry.y = 0;
             widgets->tab[i].widget->draw(widgets->tab[i].widget,
                                          ctx, widgets->tab[i].geometry,
-                                         screen, wibox);
+                                         wibox->screen, wibox);
         }
 
-    switch(orientation)
+    switch(wibox->sw.orientation)
     {
         case South:
-          draw_rotate(ctx, ctx->pixmap, rotate_px,
+          draw_rotate(ctx, ctx->pixmap, wibox->sw.pixmap,
                       ctx->width, ctx->height,
                       ctx->height, ctx->width,
                       M_PI_2, ctx->height, 0);
           break;
         case North:
-          draw_rotate(ctx, ctx->pixmap, rotate_px,
+          draw_rotate(ctx, ctx->pixmap, wibox->sw.pixmap,
                       ctx->width, ctx->height,
                       ctx->height, ctx->width,
                       - M_PI_2, 0, ctx->width);
