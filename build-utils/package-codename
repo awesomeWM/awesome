@@ -13,7 +13,7 @@ test -d "$top_srcdir" || { \
 codename_stamp="${2-codename-stamp}"
 
 if test -f "$top_srcdir/$codename_stamp"; then # dist source tree
-	echo \"$(cat "$top_srcdir/$codename_stamp" | ${TR-tr} -d '\012')\"
+	echo \"`cat "$top_srcdir/$codename_stamp" | ${TR-tr} -d '\012'`\"
 else
 	echo \""Productivity Breaker"\" | ${TR-tr} -d '\012'
 fi
