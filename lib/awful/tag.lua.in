@@ -177,8 +177,8 @@ end
 -- @param screen Optional screen number.
 function viewidx(i, screen)
     local tags = capi.screen[screen or capi.mouse.screen]:tags()
-    local sel = selected()
-    viewnone()
+    local sel = selected(screen)
+    viewnone(screen)
     for k, t in ipairs(tags) do
         if t == sel then
             tags[util.cycle(#tags, k + i)].selected = true
