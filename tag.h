@@ -46,7 +46,7 @@ void tag_append_to_screen(tag_t *, screen_t *);
 int luaA_tag_userdata_new(lua_State *, tag_t *);
 
 DO_RCNT(tag_t, tag, tag_delete)
-ARRAY_FUNCS(tag_t *, tag, tag_unref);
+ARRAY_FUNCS(tag_t *, tag, tag_unref)
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
