@@ -117,7 +117,7 @@ EOF
 }
 
 find_it() {
-    [ -n "$1" ] && hash $1 2> /dev/null
+    [ -n "$1" ] && which $1 1>/dev/null 2>&1
 }
 
 message() {
