@@ -66,12 +66,12 @@ local function list_update(w, buttons, label, data, widgets, objects)
         if buttons then
             if not data[o] then
                 data[o] = { }
-                -- Replace press function by a new one calling with tags as
+                -- Replace press function by a new one calling with object as
                 -- argument
                 for kb, b in ipairs(buttons) do
                     -- Copy object
                     data[o][kb] = capi.button(b)
-                    data[o][kb].press = function () b.press(c) end
+                    data[o][kb].press = function () b.press(o) end
                 end
             end
             w[k]:buttons(data[o])
