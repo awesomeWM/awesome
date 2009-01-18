@@ -441,7 +441,7 @@ luaA_progressbar_bar_properties_set(lua_State *L)
     bar_t *bar;
     progressbar_data_t *d = (*widget)->data;
     xcolor_init_request_t reqs[6];
-    int8_t i, reqs_nbr = -1;
+    int i, reqs_nbr = -1;
 
     luaA_checktable(L, 3);
 

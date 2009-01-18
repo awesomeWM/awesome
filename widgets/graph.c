@@ -307,7 +307,7 @@ luaA_graph_plot_properties_set(lua_State *L)
     size_t len;
     plot_t *plot = NULL;
     xcolor_init_request_t reqs[3];
-    int8_t i, reqs_nbr = -1;
+    int i, reqs_nbr = -1;
 
     title = luaL_checkstring(L, 2);
     luaA_checktable(L, 3);
