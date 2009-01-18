@@ -67,10 +67,12 @@ client_loadprops(client_t * c, screen_t *screen)
     /* ignore property if the tag count isn't matching */
     if(len == tags->len)
         for(int i = 0; i < tags->len; i++)
+        {
             if(prop[i] == '1')
                 tag_client(c, tags->tab[i]);
             else
                 untag_client(c, tags->tab[i]);
+        }
 
     p_delete(&prop);
 
