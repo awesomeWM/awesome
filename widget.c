@@ -482,10 +482,10 @@ luaA_widget_newindex(lua_State *L)
         break;
       case A_TK_MOUSE_ENTER:
         luaA_registerfct(L, 3, &(*widget)->mouse_enter);
-        break;
+        return 0;
       case A_TK_MOUSE_LEAVE:
         luaA_registerfct(L, 3, &(*widget)->mouse_leave);
-        break;
+        return 0;
       default:
         return (*widget)->newindex ? (*widget)->newindex(L, token) : 0;
     }
