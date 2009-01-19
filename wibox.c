@@ -677,7 +677,7 @@ luaA_wibox_new(lua_State *L)
     const char *buf;
     size_t len;
     xcolor_init_request_t reqs[3];
-    int8_t i, reqs_nbr = -1;
+    int i, reqs_nbr = -1;
 
     luaA_checktable(L, 2);
 
