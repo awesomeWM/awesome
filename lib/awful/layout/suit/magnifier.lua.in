@@ -24,7 +24,7 @@ local function magnifier(_, screen)
     local area = capi.screen[screen].workarea
     local cls = client.tiled(screen)
     local focus = capi.client.focus
-    local t = tag.selected()
+    local t = tag.selected(screen)
     local mwfact = tag.getmwfact(t)
 
     if not focus and #cls > 0 then
