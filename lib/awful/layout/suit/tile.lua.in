@@ -20,7 +20,7 @@ module("awful.layout.suit.tile")
 
 local function tile(_, screen, position)
     if not position then position = "right" end
-    local t = tag.selected()
+    local t = tag.selected(screen)
     local nmaster = tag.getnmaster(t)
     local mwfact = tag.getmwfact(t)
     local ncol = tag.getncol(t)
