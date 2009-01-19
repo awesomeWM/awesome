@@ -70,7 +70,6 @@ widget_calculate_offset(int barwidth, int widgetwidth, int offset, int alignment
     return barwidth - offset - widgetwidth;
 }
 
-
 /** Get a widget node from a wibox by coords.
  * \param Container position.
  * \param widgets The widget list.
@@ -424,6 +423,7 @@ luaA_widget_buttons(lua_State *L)
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
  * \luastack
+ * \lfield align The widget alignment.
  * \lfield visible The widget visibility.
  * \lfield mouse_enter A function to execute when the mouse enter the widget.
  * \lfield mouse_leave A function to execute when the mouse leave the widget.
@@ -441,6 +441,9 @@ luaA_widget_index(lua_State *L)
 
     switch((token = a_tokenize(buf, len)))
     {
+      case A_TK_ALIGN:
+        lua_pushstring(L, draw_align_tostr((*widget)->align));
+        return 1;
       case A_TK_VISIBLE:
         lua_pushboolean(L, (*widget)->isvisible);
         return 1;
@@ -477,6 +480,10 @@ luaA_widget_newindex(lua_State *L)
 
     switch((token = a_tokenize(buf, len)))
     {
+      case A_TK_ALIGN:
+        buf = luaL_checklstring(L, 3, &len);
+        (*widget)->align = draw_align_fromstr(buf, len);
+        break;
       case A_TK_VISIBLE:
         (*widget)->isvisible = luaA_checkboolean(L, 3);
         break;
