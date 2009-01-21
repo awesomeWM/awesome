@@ -67,11 +67,25 @@ local function magnifier(_, screen)
         geometry.height = area.height / (#cls - 1)
         geometry.width = area.width
 
+        local fidx
         for k, c in ipairs(cls) do
-            if c ~= focus then
-                c:geometry(geometry)
-                geometry.y = geometry.y + geometry.height
+            if k == focus then
+                fidx = k
+                break
             end
+        end
+
+        -- First move clients that are before focused client.
+        for k = fidx + 1, #cls do
+            cls[k]:geometry(geometry)
+            geometry.y = geometry.y + geometry.height
+        end
+
+        -- Then move clients that are after focused client.
+        -- So the next focused window will be the one at the top of the screen.
+        for k = 1, fidx - 1 do
+            cls[k]:geometry(geometry)
+            geometry.y = geometry.y + geometry.height
         end
     end
 end
