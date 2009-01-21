@@ -69,7 +69,7 @@ local function magnifier(_, screen)
 
         local fidx
         for k, c in ipairs(cls) do
-            if k == focus then
+            if c == focus then
                 fidx = k
                 break
             end
