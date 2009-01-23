@@ -554,7 +554,7 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
     /* Move to the right screen.
      * Assumption: Window groups do not span multiple logical screens. */
     if(group && group->phys_screen == c->phys_screen)
-        screen = group->screen;
+        screen_client_moveto(c, group->screen, false, true);
 
     /* Then check clients hints */
     ewmh_client_check_hints(c);
