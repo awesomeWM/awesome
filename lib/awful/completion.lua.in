@@ -7,6 +7,7 @@
 
 -- Grab environment we need
 local io = io
+local os = os
 local table = table
 local math = math
 local print = print
@@ -105,6 +106,9 @@ function bash(command, cur_pos, ncomp)
         while true do
             local line = c:read("*line")
             if not line then break end
+            if os.execute("test -d " .. line) == 0 then
+                line = line .. "/"
+            end
             table.insert(output, bash_escape(line))
         end
 
