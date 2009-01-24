@@ -26,6 +26,7 @@
 #include "ewmh.h"
 #include "screen.h"
 #include "common/xcursor.h"
+#include "window.h"
 
 extern awesome_t globalconf;
 
@@ -873,6 +874,15 @@ luaA_wibox_index(lua_State *L)
       case A_TK_CURSOR:
         lua_pushstring(L, (*wibox)->cursor);
         break;
+      case A_TK_OPACITY:
+        {
+            double d;
+            if ((d = window_opacity_get((*wibox)->sw.window)) >= 0)
+                lua_pushnumber(L, d);
+            else
+                return 0;
+        }
+        break;
       default:
         return 0;
     }
@@ -1058,6 +1068,16 @@ luaA_wibox_newindex(lua_State *L)
         /* recompute widget node list */
         wibox_widgets_table_build(L, *wibox);
         luaA_table2wtable(L);
+        break;
+      case A_TK_OPACITY:
+        if(lua_isnil(L, 3))
+            window_opacity_set((*wibox)->sw.window, -1);
+        else
+        {
+            double d = luaL_checknumber(L, 3);
+            if(d >= 0 && d <= 1)
+                window_opacity_set((*wibox)->sw.window, d);
+        }
         break;
       default:
         switch((*wibox)->type)
