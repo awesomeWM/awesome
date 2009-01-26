@@ -103,8 +103,10 @@ end
 -- @param mwfact Master width factor.
 function setmwfact(mwfact, t)
     local t = t or selected()
-    setproperty(t, "mwfact", mwfact)
-    capi.hooks.arrange()(t.screen)
+    if mwfact >= 0 and mwfact <= 1 then
+        setproperty(t, "mwfact", mwfact)
+        capi.hooks.arrange()(t.screen)
+    end
 end
 
 --- Increase master width factor.
@@ -125,8 +127,10 @@ end
 -- @param t Optional tag.
 function setnmaster(nmaster, t)
     local t = t or selected()
-    setproperty(t, "nmaster", nmaster)
-    capi.hooks.arrange()(t.screen)
+    if nmaster >= 0 then
+        setproperty(t, "nmaster", nmaster)
+        capi.hooks.arrange()(t.screen)
+    end
 end
 
 --- Get the number of master windows.
@@ -163,8 +167,10 @@ end
 -- @param ncol The number of column.
 function setncol(ncol, t)
     local t = t or selected()
-    setproperty(t, "ncol", ncol)
-    capi.hooks.arrange()(t.screen)
+    if ncol >= 1 then
+        setproperty(t, "ncol", ncol)
+        capi.hooks.arrange()(t.screen)
+    end
 end
 
 --- Get number of column windows.
