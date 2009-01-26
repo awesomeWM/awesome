@@ -61,7 +61,6 @@ awesome_atexit(void)
 {
     client_t *c;
     int screen_nbr, nscreens;
-    xcb_setup_t *s;
 
     a_dbus_cleanup();
     luaA_cs_cleanup();
@@ -75,7 +74,8 @@ awesome_atexit(void)
     }
 
     /* do this only for real screen */
-    nscreens = ((s = xcb_get_setup(globalconf.connection)) ? xcb_setup_roots_length(s) : -1);
+    const xcb_setup_t *setup = xcb_get_setup(globalconf.connection);
+    nscreens = setup ? xcb_setup_roots_length(setup) : -1;
     for(screen_nbr = 0;
         screen_nbr < nscreens;
         screen_nbr++)
