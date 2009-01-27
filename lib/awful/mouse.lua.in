@@ -176,7 +176,7 @@ client.dragtotag = { }
 
 --- Move a client to a tag by drag'n'dropping it over a taglist widget
 -- @param c The client to move
-function client.dragtotag.widget(c, side)
+function client.dragtotag.widget(c)
     capi.mousegrabber.run(function (mouse)
                               local button_down = false
                               for _, v in ipairs(mouse.buttons) do

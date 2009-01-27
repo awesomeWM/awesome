@@ -10,6 +10,7 @@ local pairs = pairs
 local table = table
 local otable = otable
 local type = type
+local math = math
 local capi =
 {
     screen = screen,
@@ -46,11 +47,19 @@ local function list_update(w, buttons, label, data, widgets, objects)
     -- Add more widgets
     if len < #objects then
         for i = len * 2 + 1, #objects * 2, 2 do
-            w[i] = capi.widget({ type = "imagebox", align = widgets.imagebox.align })
-            w[i + 1] = capi.widget({ type = "textbox", align = widgets.textbox.align })
+            local ib = capi.widget({ type = "imagebox", align = widgets.imagebox.align })
+            local tb = capi.widget({ type = "textbox", align = widgets.textbox.align })
+
+            w[i] = ib
+            w[i + 1] = tb
             w[i + 1]:margin({ left = widgets.textbox.margin.left, right = widgets.textbox.margin.right })
             w[i + 1].bg_resize = widgets.textbox.bg_resize or false
             w[i + 1].bg_align = widgets.textbox.bg_align or ""
+
+            if type(objects[math.floor(i / 2) + 1]) == "tag" then
+                tagwidgets[ib] = objects[math.floor(i / 2) + 1]
+                tagwidgets[tb] = objects[math.floor(i / 2) + 1]
+            end
         end
     -- Remove widgets
     elseif len > #objects then
