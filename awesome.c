@@ -191,7 +191,32 @@ scan(void)
 static void
 a_xcb_check_cb(EV_P_ ev_check *w, int revents)
 {
-    xcb_event_poll_for_event_loop(&globalconf.evenths);
+    xcb_generic_event_t *mouse = NULL, *event;
+
+    while((event = xcb_poll_for_event(globalconf.connection)))
+    {
+        /* We will treat mouse events later.
+         * We cannot afford to treat all mouse motion events,
+         * because that would be too much CPU intensive, so we just
+         * take the last we get after a bunch of events. */
+        if(XCB_EVENT_RESPONSE_TYPE(event) == XCB_MOTION_NOTIFY)
+        {
+            p_delete(&mouse);
+            mouse = event;
+        }
+        else
+        {
+            xcb_event_handle(&globalconf.evenths, event);
+            p_delete(&event);
+        }
+    }
+
+    if(mouse)
+    {
+        xcb_event_handle(&globalconf.evenths, mouse);
+        p_delete(&mouse);
+    }
+
     awesome_refresh(globalconf.connection);
 }
 
