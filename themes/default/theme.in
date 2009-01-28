@@ -56,9 +56,9 @@ layout_fairv = @AWESOME_THEMES_PATH@/default/layouts/fairvw.png
 layout_floating = @AWESOME_THEMES_PATH@/default/layouts/floatingw.png
 layout_magnifier = @AWESOME_THEMES_PATH@/default/layouts/magnifierw.png
 layout_max = @AWESOME_THEMES_PATH@/default/layouts/maxw.png
-layout_vilebottom = @AWESOME_THEMES_PATH@/default/layouts/vilebottomw.png
-layout_vileleft = @AWESOME_THEMES_PATH@/default/layouts/vileleftw.png
-layout_vile = @AWESOME_THEMES_PATH@/default/layouts/vilew.png
-layout_viletop = @AWESOME_THEMES_PATH@/default/layouts/viletopw.png
+layout_tilebottom = @AWESOME_THEMES_PATH@/default/layouts/tilebottomw.png
+layout_tileleft = @AWESOME_THEMES_PATH@/default/layouts/tileleftw.png
+layout_tile = @AWESOME_THEMES_PATH@/default/layouts/tilew.png
+layout_tiletop = @AWESOME_THEMES_PATH@/default/layouts/tiletopw.png
 
 awesome_icon = @AWESOME_ICON_PATH@/awesome16.png

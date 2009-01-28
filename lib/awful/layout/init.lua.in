@@ -64,10 +64,10 @@ end
 
 local layouts_name =
 {
-    [suit.vile]            = "vile",
-    [suit.vile.left]       = "vileleft",
-    [suit.vile.bottom]     = "vilebottom",
-    [suit.vile.top]        = "viletop",
+    [suit.tile]            = "tile",
+    [suit.tile.left]       = "tileleft",
+    [suit.tile.bottom]     = "tilebottom",
+    [suit.tile.top]        = "tiletop",
     [suit.fair]            = "fairv",
     [suit.fair.horizontal] = "fairh",
     [suit.max]             = "max",

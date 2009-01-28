@@ -349,14 +349,14 @@ local function client_resize_magnifier(c, corner)
                           end, corner .. "_corner")
 end
 
-local function client_resize_viled(c, lay)
+local function client_resize_tiled(c, lay)
     local wa = capi.screen[c.screen].workarea
     local mwfact = tag.getmwfact()
     local cursor
     local g = c:geometry()
     local offset = 0
     local x,y
-    if lay == layout.suit.vile then
+    if lay == layout.suit.tile then
         cursor = "cross"
         if g.height+15 > wa.height then
             offset = g.height * .5
@@ -365,7 +365,7 @@ local function client_resize_viled(c, lay)
             offset = g.height
         end
         capi.mouse.coords({ x = wa.x + wa.width * mwfact, y = g.y + offset })
-    elseif lay == layout.suit.vile.left then
+    elseif lay == layout.suit.tile.left then
         cursor = "cross"
         if g.height+15 >= wa.height then
             offset = g.height * .5
@@ -374,7 +374,7 @@ local function client_resize_viled(c, lay)
             offset = g.height
         end
         capi.mouse.coords({ x = wa.x + wa.width * (1 - mwfact), y = g.y + offset })
-    elseif lay == layout.suit.vile.bottom then
+    elseif lay == layout.suit.tile.bottom then
         cursor = "cross"
         if g.width+15 >= wa.width then
             offset = g.width * .5
@@ -420,13 +420,13 @@ local function client_resize_viled(c, lay)
                                       end
 
 
-                                      if lay == layout.suit.vile then
+                                      if lay == layout.suit.tile then
                                           mwfact = fact_x
                                           wfact = wfact_y
-                                      elseif lay == layout.suit.vile.left then
+                                      elseif lay == layout.suit.tile.left then
                                           mwfact = 1 - fact_x
                                           wfact = wfact_y
-                                      elseif lay == layout.suit.vile.bottom then
+                                      elseif lay == layout.suit.tile.bottom then
                                           mwfact = fact_y
                                           wfact = wfact_x
                                       else
@@ -529,12 +529,12 @@ function client.resize(c, corner)
 
     if lay == layout.suit.floating or aclient.floating.get(c) then
         return client_resize_floating(c, corner, fixed_x, fixed_y)
-    elseif lay == layout.suit.vile
-        or lay == layout.suit.vile.left
-        or lay == layout.suit.vile.top
-        or lay == layout.suit.vile.bottom
+    elseif lay == layout.suit.tile
+        or lay == layout.suit.tile.left
+        or lay == layout.suit.tile.top
+        or lay == layout.suit.tile.bottom
         then
-        return client_resize_viled(c, lay)
+        return client_resize_tiled(c, lay)
     elseif lay == layout.suit.magnifier then
         return client_resize_magnifier(c, corner)
     end
