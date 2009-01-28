@@ -94,29 +94,18 @@ end
 -- Useful to set raw text in textbox.
 -- @param text Text to escape.
 -- @return Escape text.
+local xml_entity_names = { ["'"] = "&apos;", ["\""] = "&quot;", ["<"] = "&lt;", [">"] = "&gt;", ["&"] = "&amp;" };
 function escape(text)
-    if text then
-        text = text:gsub("&", "&amp;")
-        text = text:gsub("<", "&lt;")
-        text = text:gsub(">", "&gt;")
-        text = text:gsub("'", "&apos;")
-        text = text:gsub("\"", "&quot;")
-    end
-    return text
+    return text and text:gsub("['&<>\"]", xml_entity_names) or nil
 end
 
 --- Unescape a string from entities.
 -- @param text Text to unescape.
 -- @return Unescaped text.
+
+local xml_entity_chars = { lt = "<", gt = ">", nbsp = " ", quot = "\"", apos = "'", ndash = "-", mdash = "-", amp = "&" };
 function unescape(text)
-    if text then
-        text = text:gsub("&amp;", "&")
-        text = text:gsub("&lt;", "<")
-        text = text:gsub("&gt;", ">")
-        text = text:gsub("&apos;", "'")
-        text = text:gsub("&quot;", "\"")
-    end
-    return text
+    return text and text:gsub("&(%a+);", xml_entity_chars) or nil
 end
 
 --- Check if a file is a Lua valid file.
