@@ -1,5 +1,4 @@
 require("awful.layout.suit.max")
-require("awful.layout.suit.tile")
 require("awful.layout.suit.vile")
 require("awful.layout.suit.fair")
 require("awful.layout.suit.floating")
