@@ -24,7 +24,7 @@ module("awful.layout")
 -- @return The layout function.
 function get(screen)
     local t = tag.selected(screen)
-    return tag.getproperty(t, "layout") or suit.tile
+    return tag.getproperty(t, "layout") or suit.floating
 end
 
 --- Change the layout of the current tag.
@@ -59,9 +59,7 @@ end
 
 -- Register an arrange hook.
 local function on_arrange (screen)
-    local t = tag.selected(screen)
-    local l = tag.getproperty(t, "layout") or suit.tile
-    l(screen)
+    get(screen)(screen)
 end
 
 local layouts_name =
