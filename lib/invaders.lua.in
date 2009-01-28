@@ -60,7 +60,7 @@ local game = { }
 local shots = { }
 local enemies = { }
 
-local function player.new ()
+function player.new ()
     p = wibox({ position = "floating",
                 bg = gamedata.solidbg or "#12345600" })
     p:geometry({ width = 24,
@@ -76,7 +76,7 @@ local function player.new ()
     return p
 end
 
-local function player.move(x)
+function player.move(x)
     if not gamedata.running then return false end
     local g = gamedata.player:geometry()
 
@@ -89,7 +89,7 @@ local function player.move(x)
     gamedata.player:geometry(g)
 end
 
-local function player.fire()
+function player.fire()
     if not gamedata.running then return false end
     if gamedata.ammo == 1 then
         gamedata.ammo = 0
@@ -98,7 +98,7 @@ local function player.fire()
     end
 end
 
-local function shots.fire (x, y, color)
+function shots.fire (x, y, color)
     local s = wibox({ position = "floating",
                       bg = color })
     s:geometry({ width = 4,
@@ -112,7 +112,7 @@ local function shots.fire (x, y, color)
     end
 end
 
-local function shots.fire_enemy (x, y, color)
+function shots.fire_enemy (x, y, color)
     if gamedata.enemies.shots.fired < gamedata.enemies.shots.max then
         gamedata.enemies.shots.fired = gamedata.enemies.shots.fired + 1
         local s = wibox({ position = "floating",
@@ -131,7 +131,7 @@ local function shots.fire_enemy (x, y, color)
     end
 end
 
-local function shots.handle()
+function shots.handle()
     if not gamedata.running then return false end
     if gamedata.ammo == 1 then return false end
 
@@ -150,7 +150,7 @@ local function shots.handle()
 end
 
 
-local function shots.handle_enemy ()
+function shots.handle_enemy ()
     if not gamedata.running then return false end
     if gamedata.enemies.shots.fired == 0 then return false end
 
@@ -172,7 +172,7 @@ local function shots.handle_enemy ()
     end
 end
 
-local function enemies.new (t)
+function enemies.new (t)
     e = wibox({ position = "floating",
                 bg = gamedata.solidbg or "#12345600" })
     e:geometry({ height = gamedata.enemies.h,
@@ -187,7 +187,7 @@ local function enemies.new (t)
     return e
 end
 
-local function enemies.setup()
+function enemies.setup()
     gamedata.enemies.data = { }
     gamedata.enemies.x = 10
     gamedata.enemies.y = 5
@@ -216,7 +216,7 @@ local function enemies.setup()
     end
 end
 
-local function enemies.handle ()
+function enemies.handle ()
     if not gamedata.running then return false end
 
     gamedata.enemies.number = 0
@@ -285,7 +285,7 @@ local function enemies.handle ()
     end
 end
 
-local function keyhandler(mod, key, event)
+function keyhandler(mod, key, event)
     if event ~= "press" then return true end
     if gamedata.highscore.getkeys then
         if key:len() == 1 and gamedata.name:len() < 20 then
@@ -318,7 +318,7 @@ local function keyhandler(mod, key, event)
     return true
 end
 
-local function game.collide(o1, o2)
+function game.collide(o1, o2)
     g1 = o1:geometry()
     g2 = o2:geometry()
 
@@ -331,12 +331,12 @@ local function game.collide(o1, o2)
     return false
 end
 
-local function game.over ()
+function game.over ()
     gamedata.running = false
     game.highscore(gamedata.score)
 end
 
-local function game.quit()
+function game.quit()
     gamedata.running = false
 
     if gamedata.highscore.window then
@@ -378,7 +378,7 @@ local function game.quit()
     end
 end
 
-local function game.highscore_show ()
+function game.highscore_show ()
     gamedata.highscore.window:geometry({ height = 140,
                                          width = 200,
                                          x = gamedata.field.x + math.floor(gamedata.field.w / 2) - 100,
@@ -409,7 +409,7 @@ local function game.highscore_show ()
     fh:close()
 end
 
-local function game.highscore_add (score, name)
+function game.highscore_add (score, name)
     local t = gamedata.highscore
 
     for i = 5, 1, -1 do
@@ -422,7 +422,7 @@ local function game.highscore_add (score, name)
     gamedata.highscore = t
 end
 
-local function game.highscore (score)
+function game.highscore (score)
     if gamedata.highscore.window and gamedata.highscore.window.screen then return false end
     local fh = io.open(gamedata.cachedir.."/highscore_invaders", "r")
 
