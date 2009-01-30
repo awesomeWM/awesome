@@ -343,8 +343,8 @@ typedef enum
     LAYER_BELOW,
     LAYER_NORMAL,
     LAYER_ABOVE,
-    LAYER_ONTOP,
     LAYER_FULLSCREEN,
+    LAYER_ONTOP,
     LAYER_OUTOFSPACE
 } layer_t;
 
@@ -425,8 +425,8 @@ client_stack()
             }
         }
 
-    /* stack bottom layers */
-    for(layer = LAYER_BELOW; layer < LAYER_FULLSCREEN; layer++)
+    /* then stack clients */
+    for(layer = LAYER_BELOW; layer < LAYER_OUTOFSPACE; layer++)
         for(node = last; node; node = node->prev)
             if(client_layer_translator(node->client) == layer)
                 config_win_vals[0] = client_stack_above(node->client,
@@ -446,13 +446,6 @@ client_stack()
                 config_win_vals[0] = sb->sw.window;
             }
         }
-
-    /* finally stack fullscreen windows */
-    for(layer = LAYER_FULLSCREEN; layer < LAYER_OUTOFSPACE; layer++)
-        for(node = last; node; node = node->prev)
-            if(client_layer_translator(node->client) == layer)
-                config_win_vals[0] = client_stack_above(node->client,
-                                                        config_win_vals[0]);
 }
 
 /** Copy tags from one client to another client on the same screen.
