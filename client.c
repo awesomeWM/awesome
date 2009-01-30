@@ -1052,10 +1052,16 @@ client_unban(client_t *c)
     if(c->isbanned)
     {
         /* Move the client back where it belongs. */
-        uint32_t request[2] = { c->geometries.internal.x, c->geometries.internal.y };
+        uint32_t request[] = { c->geometries.internal.x,
+                               c->geometries.internal.y,
+                               c->geometries.internal.width,
+                               c->geometries.internal.height };
 
         xcb_configure_window(globalconf.connection, c->win,
-                              XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y,
+                              XCB_CONFIG_WINDOW_X
+                              | XCB_CONFIG_WINDOW_Y
+                              | XCB_CONFIG_WINDOW_WIDTH
+                              | XCB_CONFIG_WINDOW_HEIGHT,
                               request);
         window_configure(c->win, c->geometries.internal, c->border);
 
