@@ -220,6 +220,52 @@ event_handle_button(void *data, xcb_connection_t *connection, xcb_button_press_e
     return 0;
 }
 
+static void
+event_handle_configurerequest_configure_window(xcb_configure_request_event_t *ev)
+{
+    uint16_t config_win_mask = 0;
+    uint32_t config_win_vals[7];
+    unsigned short i = 0;
+
+    if(ev->value_mask & XCB_CONFIG_WINDOW_X)
+    {
+        config_win_mask |= XCB_CONFIG_WINDOW_X;
+        config_win_vals[i++] = ev->x;
+    }
+    if(ev->value_mask & XCB_CONFIG_WINDOW_Y)
+    {
+        config_win_mask |= XCB_CONFIG_WINDOW_Y;
+        config_win_vals[i++] = ev->y;
+    }
+    if(ev->value_mask & XCB_CONFIG_WINDOW_WIDTH)
+    {
+        config_win_mask |= XCB_CONFIG_WINDOW_WIDTH;
+        config_win_vals[i++] = ev->width;
+    }
+    if(ev->value_mask & XCB_CONFIG_WINDOW_HEIGHT)
+    {
+        config_win_mask |= XCB_CONFIG_WINDOW_HEIGHT;
+        config_win_vals[i++] = ev->height;
+    }
+    if(ev->value_mask & XCB_CONFIG_WINDOW_BORDER_WIDTH)
+    {
+        config_win_mask |= XCB_CONFIG_WINDOW_BORDER_WIDTH;
+        config_win_vals[i++] = ev->border_width;
+    }
+    if(ev->value_mask & XCB_CONFIG_WINDOW_SIBLING)
+    {
+        config_win_mask |= XCB_CONFIG_WINDOW_SIBLING;
+        config_win_vals[i++] = ev->sibling;
+    }
+    if(ev->value_mask & XCB_CONFIG_WINDOW_STACK_MODE)
+    {
+        config_win_mask |= XCB_CONFIG_WINDOW_STACK_MODE;
+        config_win_vals[i++] = ev->stack_mode;
+    }
+
+    xcb_configure_window(globalconf.connection, ev->window, config_win_mask, config_win_vals);
+}
+
 /** The configure event handler.
  * \param data currently unused.
  * \param connection The connection to the X server.
@@ -249,62 +295,32 @@ event_handle_configurerequest(void *data __attribute__ ((unused)),
          * window size, i.e. without titlebars and borders. */
         geometry = titlebar_geometry_add(c->titlebar, c->border, geometry);
 
-        if(geometry.x != c->geometry.x || geometry.y != c->geometry.y
-           || geometry.width != c->geometry.width || geometry.height != c->geometry.height)
+        if(geometry.x != c->geometry.x
+           || geometry.y != c->geometry.y
+           || geometry.width != c->geometry.width
+           || geometry.height != c->geometry.height)
         {
-            client_resize(c, geometry, false);
-            /* All the wiboxes (may) need to be repositioned. */
-            if(client_hasstrut(c))
-                wibox_update_positions();
-            client_need_arrange(c);
+            if(c->isbanned)
+            {
+                window_configure(c->win, geometry, c->border);
+                event_handle_configurerequest_configure_window(ev);
+            }
+            else
+            {
+                client_resize(c, geometry, false);
+                /* All the wiboxes (may) need to be repositioned. */
+                if(client_hasstrut(c))
+                    wibox_update_positions();
+                client_need_arrange(c);
+
+                return 0;
+            }
         }
         else
             window_configure(c->win, geometry, c->border);
     }
     else
-    {
-        uint16_t config_win_mask = 0;
-        uint32_t config_win_vals[7];
-        unsigned short i = 0;
-
-        if(ev->value_mask & XCB_CONFIG_WINDOW_X)
-        {
-            config_win_mask |= XCB_CONFIG_WINDOW_X;
-            config_win_vals[i++] = ev->x;
-        }
-        if(ev->value_mask & XCB_CONFIG_WINDOW_Y)
-        {
-            config_win_mask |= XCB_CONFIG_WINDOW_Y;
-            config_win_vals[i++] = ev->y;
-        }
-        if(ev->value_mask & XCB_CONFIG_WINDOW_WIDTH)
-        {
-            config_win_mask |= XCB_CONFIG_WINDOW_WIDTH;
-            config_win_vals[i++] = ev->width;
-        }
-        if(ev->value_mask & XCB_CONFIG_WINDOW_HEIGHT)
-        {
-            config_win_mask |= XCB_CONFIG_WINDOW_HEIGHT;
-            config_win_vals[i++] = ev->height;
-        }
-        if(ev->value_mask & XCB_CONFIG_WINDOW_BORDER_WIDTH)
-        {
-            config_win_mask |= XCB_CONFIG_WINDOW_BORDER_WIDTH;
-            config_win_vals[i++] = ev->border_width;
-        }
-        if(ev->value_mask & XCB_CONFIG_WINDOW_SIBLING)
-        {
-            config_win_mask |= XCB_CONFIG_WINDOW_SIBLING;
-            config_win_vals[i++] = ev->sibling;
-        }
-        if(ev->value_mask & XCB_CONFIG_WINDOW_STACK_MODE)
-        {
-            config_win_mask |= XCB_CONFIG_WINDOW_STACK_MODE;
-            config_win_vals[i++] = ev->stack_mode;
-        }
-
-        xcb_configure_window(connection, ev->window, config_win_mask, config_win_vals);
-    }
+        event_handle_configurerequest_configure_window(ev);
 
     return 0;
 }
