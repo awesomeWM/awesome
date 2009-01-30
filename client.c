@@ -343,8 +343,8 @@ typedef enum
     LAYER_BELOW,
     LAYER_NORMAL,
     LAYER_ABOVE,
-    LAYER_FULLSCREEN,
     LAYER_ONTOP,
+    LAYER_FULLSCREEN,
     LAYER_OUTOFSPACE
 } layer_t;
 
@@ -447,7 +447,7 @@ client_stack()
             }
         }
 
-    /* finally stack ontop and fullscreen windows */
+    /* finally stack fullscreen windows */
     for(layer = LAYER_FULLSCREEN; layer < LAYER_OUTOFSPACE; layer++)
         for(node = last; node; node = node->prev)
             if(client_layer_translator(node->client) == layer)
