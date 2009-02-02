@@ -31,6 +31,7 @@ local data = otable()
 --- Create a standard titlebar.
 -- @param c The client.
 -- @param args Arguments.
+-- modkey: the modkey used for the bindings.
 -- fg: the foreground color.
 -- bg: the background color.
 -- fg_focus: the foreground color for focused window.
