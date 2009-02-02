@@ -61,6 +61,11 @@ client_getbytitlebarwin(xcb_window_t win)
     return NULL;
 }
 
+/** Get titlebar area.
+ * \param c The client
+ * \param geometry The client geometry including borders, excluding titlebars.
+ * \param res Pointer to area of titlebar, must be allocated already.
+ */
 void
 titlebar_geometry_compute(client_t *c, area_t geometry, area_t *res)
 {
@@ -84,7 +89,7 @@ titlebar_geometry_compute(client_t *c, area_t geometry, area_t *res)
             break;
         }
         res->x = geometry.x + x_offset;
-        res->y = geometry.y;
+        res->y = geometry.y - c->titlebar->sw.geometry.height;
         res->width = width;
         res->height = c->titlebar->sw.geometry.height;
         break;
@@ -102,7 +107,7 @@ titlebar_geometry_compute(client_t *c, area_t geometry, area_t *res)
             break;
         }
         res->x = geometry.x + x_offset;
-        res->y = geometry.y + geometry.height - c->titlebar->sw.geometry.height;
+        res->y = geometry.y + geometry.height;
         res->width = width;
         res->height = c->titlebar->sw.geometry.height;
         break;
@@ -119,7 +124,7 @@ titlebar_geometry_compute(client_t *c, area_t geometry, area_t *res)
             y_offset = (geometry.height - height) / 2;
             break;
         }
-        res->x = geometry.x;
+        res->x = geometry.x - c->titlebar->sw.geometry.width;
         res->y = geometry.y + y_offset;
         res->width = c->titlebar->sw.geometry.width;
         res->height = height;
@@ -137,11 +142,17 @@ titlebar_geometry_compute(client_t *c, area_t geometry, area_t *res)
             y_offset = (geometry.height - height) / 2;
             break;
         }
-        res->x = geometry.x + geometry.width - c->titlebar->sw.geometry.width;
+        res->x = geometry.x + geometry.width;
         res->y = geometry.y + y_offset;
         res->width = c->titlebar->sw.geometry.width;
         res->height = height;
         break;
+    }
+
+    /* Move out of visible screen if needed. */
+    if (c->isbanned) {
+        res->x = -res->width;
+        res->y = -res->height;
     }
 }
 
@@ -176,6 +187,8 @@ titlebar_client_attach(client_t *c, wibox_t *t)
     if(c && t)
     {
         area_t wingeom;
+        /* Get geometry prior to any titlebar changes. */
+        area_t curgeom = titlebar_geometry_remove(c->titlebar, 0, c->geometry);
 
         /* check if titlebar is already on a client */
         titlebar_client_detach(client_getbytitlebar(t));
@@ -200,7 +213,8 @@ titlebar_client_attach(client_t *c, wibox_t *t)
             break;
         }
 
-        titlebar_geometry_compute(c, c->geometry, &wingeom);
+        /* Client geometry without titlebar, but including borders, since that is always consistent. */
+        titlebar_geometry_compute(c, curgeom, &wingeom);
 
         simplewindow_init(&t->sw, c->phys_screen,
                           wingeom, 0, t->sw.orientation,
@@ -208,9 +222,6 @@ titlebar_client_attach(client_t *c, wibox_t *t)
         simplewindow_border_color_set(&t->sw, &t->sw.border.color);
 
         t->need_update = true;
-
-        /* This may seem useless, but it's the cleanest way to avoid seeing titlebars for banned clients. */
-        titlebar_update_geometry(c);
 
         if(t->isvisible)
             xcb_map_window(globalconf.connection, t->sw.window);

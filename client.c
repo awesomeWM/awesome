@@ -790,8 +790,8 @@ client_resize(client_t *c, area_t geometry, bool hints)
         /* This at least doesn't break expectations about events. */
         if (c->isbanned)
         {
-            geometry.x = values[0] = - (geometry_internal.width + 2 * c->border);
-            geometry.y = values[1] = - (geometry_internal.height + 2 * c->border);
+            geometry_internal.x = values[0] = - (geometry_internal.width + 2 * c->border);
+            geometry_internal.y = values[1] = - (geometry_internal.height + 2 * c->border);
         }
 
         xcb_configure_window(globalconf.connection, c->win,
@@ -1248,7 +1248,14 @@ client_setborder(client_t *c, int width)
     xcb_configure_window(globalconf.connection, c->win,
                          XCB_CONFIG_WINDOW_BORDER_WIDTH, &w);
 
+    /* Maintain original size of client and also allow titlebar to be properly sized. */
+    /* Don't forget that geometry is including border size. */
+    client_resize(c, c->geometry, false);
     client_need_arrange(c);
+
+    /* Changing border size also affects the size of the titlebar. */
+    if (c->titlebar)
+        titlebar_update_geometry(c);
 
     hooks_property(c, "border_width");
 }

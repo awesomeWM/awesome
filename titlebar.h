@@ -127,23 +127,9 @@ titlebar_update_geometry(client_t *c)
     if(!c->titlebar)
         return;
 
-    titlebar_geometry_compute(c, c->geometry, &geom);
-    /* Can't actually move titlebar right now, but we will resize it. */
-    if(c->isbanned)
-    {
-        area_t moved_geom = geom;
-
-        /* Make sure it stays outside the viewport. */
-        moved_geom.x = - geom.width;
-        moved_geom.y = - geom.height;
-
-        wibox_moveresize(c->titlebar, moved_geom);
-
-        /* Store the real geometry. */
-        c->titlebar->sw.geometry = geom;
-    }
-    else
-        wibox_moveresize(c->titlebar, geom);
+    /* Client geometry without titlebar, but including borders, since that is always consistent. */
+    titlebar_geometry_compute(c, titlebar_geometry_remove(c->titlebar, 0, c->geometry), &geom);
+    wibox_moveresize(c->titlebar, geom);
 }
 
 #endif
