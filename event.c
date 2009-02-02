@@ -280,7 +280,7 @@ event_handle_configurerequest(void *data __attribute__ ((unused)),
 
     if((c = client_getbywin(ev->window)))
     {
-        geometry = c->geometry;
+        geometry = titlebar_geometry_remove(c->titlebar, c->border, c->geometry);
 
         if(ev->value_mask & XCB_CONFIG_WINDOW_X)
             geometry.x = ev->x;
@@ -291,9 +291,19 @@ event_handle_configurerequest(void *data __attribute__ ((unused)),
         if(ev->value_mask & XCB_CONFIG_WINDOW_HEIGHT)
             geometry.height = ev->height;
 
-        /** Configure request are sent with size relative to real (internal)
-         * window size, i.e. without titlebars and borders. */
-        geometry = titlebar_geometry_add(c->titlebar, c->border, geometry);
+        if(c->isbanned)
+        {
+            /* We'll be sending protocol geometry, so don't readd borders and titlebar. */
+            /* We do have to ensure the windows don't end up in the visible screen. */
+            geometry.x = - (geometry.width + 2*c->border);
+            geometry.y = - (geometry.height + 2*c->border);
+        }
+        else
+        {
+            /** Configure request are sent with size relative to real (internal)
+             * window size, i.e. without titlebars and borders. */
+            geometry = titlebar_geometry_add(c->titlebar, c->border, geometry);
+        }
 
         if(geometry.x != c->geometry.x
            || geometry.y != c->geometry.y
