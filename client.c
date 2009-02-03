@@ -564,21 +564,23 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
             client_duplicate_tags(tc, c);
         else if (group)
             client_duplicate_tags(group, c);
-        else
-        {
-            int i;
-            tag_array_t *tags = &globalconf.screens[screen].tags;
-            for(i = 0; i < tags->len; i++)
-                if(is_client_tagged(c, tags->tab[i]))
-                    break;
 
-            /* if no tag, set current selected */
-            if(i == tags->len)
-                for(i = 0; i < tags->len; i++)
-                    if(tags->tab[i]->selected)
-                        tag_client(c, tags->tab[i]);
+        /* Now check that client is tagged.
+         * It can still has no tag, since the transient_for clients or the group
+         * client can be sticky. */
+
+        int i;
+        tag_array_t *tags = &globalconf.screens[screen].tags;
+        for(i = 0; i < tags->len; i++)
+            if(is_client_tagged(c, tags->tab[i]))
+                break;
+
+        /* if no tag, set current selected */
+        if(i == tags->len)
+            for(i = 0; i < tags->len; i++)
+                if(tags->tab[i]->selected)
+                    tag_client(c, tags->tab[i]);
         }
-    }
 
     /* Push client in client list */
     client_list_push(&globalconf.clients, client_ref(&c));
