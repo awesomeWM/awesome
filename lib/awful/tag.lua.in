@@ -269,8 +269,24 @@ function setproperty(tag, prop, value)
     return false
 end
 
+--- Tag a client with the set of current tags.
+-- @param c The client to tag.
+-- @param startup Optional: don't do anything if true.
+function withcurrent(c, startup)
+    if startup ~= true and c.sticky == false then
+        if c.transient_for then
+            c.screen = c.transient_for.screen
+            c:tags(c.transient_for:tags())
+        end
+        if #c:tags() == 0 then
+            c:tags(selectedlist(c.screen))
+        end
+    end
+end
+
 -- Register standards hooks
 hooks.arrange.register(history.update)
 hooks.tags.register(hook_tags)
+hooks.manage.register(withcurrent)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
