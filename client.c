@@ -220,21 +220,7 @@ client_ban(client_t *c)
                              XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y,
                              request);
 
-        /* Do it manually because client geometry remains unchanged. */
-        if (c->titlebar)
-        {
-            simple_window_t *sw = &c->titlebar->sw;
-
-            if (sw->window)
-            {
-                request[0] = - (sw->geometry.width);
-                request[1] = - (sw->geometry.height);
-                /* Move the titlebar to the same place as the window. */
-                xcb_configure_window(globalconf.connection, sw->window,
-                                     XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y,
-                                     request);
-            }
-        }
+        titlebar_ban(c->titlebar);
 
         c->isbanned = true;
 

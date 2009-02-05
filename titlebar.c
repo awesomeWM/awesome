@@ -61,6 +61,28 @@ client_getbytitlebarwin(xcb_window_t win)
     return NULL;
 }
 
+/** Move a titlebar out of the viewport.
+ * \param titlebar The titlebar.
+ */
+void
+titlebar_ban(wibox_t *titlebar)
+{
+    /* Do it manually because client geometry remains unchanged. */
+    if(titlebar)
+    {
+        simple_window_t *sw = &titlebar->sw;
+
+        if(sw->window)
+        {
+            uint32_t request[] = { - sw->geometry.width, - sw->geometry.height };
+            /* Move the titlebar to the same place as the window. */
+            xcb_configure_window(globalconf.connection, sw->window,
+                                 XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y,
+                                 request);
+        }
+    }
+}
+
 /** Get titlebar area.
  * \param c The client
  * \param geometry The client geometry including borders, excluding titlebars.
@@ -148,12 +170,6 @@ titlebar_geometry_compute(client_t *c, area_t geometry, area_t *res)
         res->height = height;
         break;
     }
-
-    /* Move out of visible screen if needed. */
-    if (c->isbanned) {
-        res->x = -res->width;
-        res->y = -res->height;
-    }
 }
 
 /** Detach a wibox titlebar from its client.
@@ -222,6 +238,11 @@ titlebar_client_attach(client_t *c, wibox_t *t)
         simplewindow_border_color_set(&t->sw, &t->sw.border.color);
 
         t->need_update = true;
+
+        /* Call update geometry. This will move the wibox to the right place,
+         * which might be the same as `wingeom', but then it will ban the
+         * titlebar if needed. */
+        titlebar_update_geometry(c);
 
         if(t->isvisible)
             xcb_map_window(globalconf.connection, t->sw.window);

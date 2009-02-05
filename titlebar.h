@@ -30,7 +30,8 @@ void titlebar_geometry_compute(client_t *, area_t, area_t *);
 void titlebar_init(client_t *);
 void titlebar_client_detach(client_t *);
 void titlebar_client_attach(client_t *, wibox_t *);
-void titlebar_set_visible(wibox_t *t, bool visible);
+void titlebar_set_visible(wibox_t *, bool);
+void titlebar_ban(wibox_t *);
 
 int luaA_titlebar_newindex(lua_State *, wibox_t *, awesome_token_t);
 
@@ -130,6 +131,10 @@ titlebar_update_geometry(client_t *c)
     /* Client geometry without titlebar, but including borders, since that is always consistent. */
     titlebar_geometry_compute(c, titlebar_geometry_remove(c->titlebar, 0, c->geometry), &geom);
     wibox_moveresize(c->titlebar, geom);
+
+    /* If the client is banned, move the titlebar out! */
+    if(c->isbanned)
+        titlebar_ban(c->titlebar);
 }
 
 #endif
