@@ -349,6 +349,7 @@ function notify(args)
             end
             iconbox.resize = false
             iconbox.image = img
+            iconbox.valign = "center"
             if hover_timeout then iconbox.mouse_enter = hover_destroy end
         end
     end
