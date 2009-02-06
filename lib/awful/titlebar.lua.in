@@ -117,17 +117,7 @@ function add(c, args)
     tb.widgets = { appicon = appicon, title = title,
                    closef = closef, close = close }
 
-    -- Store old geometry (including borders)
-    local old_geom = c:geometry()
-
     c.titlebar = tb
-
-    -- Resize the client so the same amount of space is occupied as before.
-    -- But not when it's a dialog, because applications remember this new size.
-    -- And everytime you open the dialog it shrinks further.
-    if c.type ~= "dialog" then
-        c:geometry(old_geom)
-    end
 
     update(c)
     update(c, "geometry")
