@@ -69,16 +69,16 @@ for name, hook in pairs(capi.hooks) do
             end
             if _M[name].timer ~= new_timer then
                 _M[name].timer = new_timer
-                hook(_M[name].timer, function (...)
-                    for i, callback in ipairs(_M[name].callbacks) do
-                        callback['counter'] = callback['counter'] + _M[name].timer
-                        if callback['counter'] >= callback['timer'] then
-                            callback['callback'](...)
-                            callback['counter'] = 0
-                        end
-                    end
-                end)
             end
+            hook(_M[name].timer, function (...)
+                for i, callback in ipairs(_M[name].callbacks) do
+                    callback['counter'] = callback['counter'] + _M[name].timer
+                    if callback['counter'] >= callback['timer'] then
+                        callback['callback'](...)
+                        callback['counter'] = 0
+                    end
+                 end
+            end)
 
             if runnow then
                 table.insert(_M[name].callbacks, { callback = f, timer = time, counter = time })
