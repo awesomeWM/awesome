@@ -99,7 +99,16 @@ for name, hook in pairs(capi.hooks) do
                     table.insert(delays, h.timer)
                 end
                 table.sort(delays)
-                hook(delays[1])
+                _M[name].timer = delays[1]
+                hook(delays[1], function (...)
+                    for i, callback in ipairs(_M[name].callbacks) do
+                        callback['counter'] = callback['counter'] + _M[name].timer
+                        if callback['counter'] >= callback['timer'] then
+                            callback['callback'](...)
+                            callback['counter'] = 0
+                        end
+                    end
+                end)
             end
         end
     elseif name == "dbus" then
