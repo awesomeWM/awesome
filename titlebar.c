@@ -181,6 +181,8 @@ titlebar_client_detach(client_t *c)
     /* If client has a titlebar, kick it out. */
     if(c && c->titlebar)
     {
+        /* Update client geometry to exclude the titlebar. */
+        c->geometry = titlebar_geometry_remove(c->titlebar, 0, c->geometry);
         simplewindow_wipe(&c->titlebar->sw);
         c->titlebar->type = WIBOX_TYPE_NORMAL;
         c->titlebar->screen = SCREEN_UNDEF;
@@ -203,11 +205,12 @@ titlebar_client_attach(client_t *c, wibox_t *t)
     if(c && t)
     {
         area_t wingeom;
-        /* Get geometry prior to any titlebar changes. */
-        area_t curgeom = titlebar_geometry_remove(c->titlebar, 0, c->geometry);
 
         /* check if titlebar is already on a client */
         titlebar_client_detach(client_getbytitlebar(t));
+
+        /* check if client already has a titlebar. */
+        titlebar_client_detach(c);
 
         c->titlebar = wibox_ref(&t);
         t->type = WIBOX_TYPE_TITLEBAR;
@@ -229,8 +232,11 @@ titlebar_client_attach(client_t *c, wibox_t *t)
             break;
         }
 
+        /* Update client geometry to include the titlebar. */
+        c->geometry = titlebar_geometry_add(c->titlebar, 0, c->geometry);
+
         /* Client geometry without titlebar, but including borders, since that is always consistent. */
-        titlebar_geometry_compute(c, curgeom, &wingeom);
+        titlebar_geometry_compute(c, titlebar_geometry_remove(c->titlebar, 0, c->geometry), &wingeom);
 
         simplewindow_init(&t->sw, c->phys_screen,
                           wingeom, 0, t->sw.orientation,
