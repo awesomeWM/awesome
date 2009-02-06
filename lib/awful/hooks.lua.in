@@ -54,7 +54,7 @@ for name, hook in pairs(capi.hooks) do
     _M[name] = {}
     if name == 'timer' then
         _M[name].register = function (time, f, runnow)
-            if type(time) ~= 'number' or type(f) ~= 'function' or time <= 0 then
+            if type(time) ~= 'number' or type(f) ~= 'function' or time < 0 then
                 return
             end
             local new_timer
@@ -94,6 +94,12 @@ for name, hook in pairs(capi.hooks) do
                         break
                     end
                 end
+                local delays = { }
+                for k, h in ipairs(_M[name].callbacks) do
+                    table.insert(delays, h.timer)
+                end
+                table.sort(delays)
+                hook(delays[1])
             end
         end
     elseif name == "dbus" then
