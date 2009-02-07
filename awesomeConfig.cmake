@@ -134,7 +134,6 @@ pkg_check_modules(AWESOME_REQUIRED REQUIRED
     cairo
     pango>=1.19.3
     pangocairo>=1.19.3
-    x11-xcb
     xcb-randr
     xcb-xtest
     xcb-xinerama
