@@ -64,17 +64,22 @@ local function snap_outside(g, sg, snap)
 end
 
 local function snap_inside(g, sg, snap)
+    local edge = "none"
     if math.abs(g.x) < snap + sg.x and g.x > sg.x then
+        edge = "left"
         g.x = sg.x
     elseif math.abs((sg.x + sg.width) - (g.x + g.width)) < snap then
+        edge = "right"
         g.x = sg.x + sg.width - g.width
     end
     if math.abs(g.y) < snap + sg.y and g.y > sg.y then
+        edge = "top"
         g.y = sg.y
     elseif math.abs((sg.y + sg.height) - (g.y + g.height)) < snap then
+        edge = "bottom"
         g.y = sg.y + sg.height - g.height
     end
-    return g
+    return g, edge
 end
 
 --- Snap a client to the closest client or screen edge.
@@ -89,11 +94,30 @@ function client.snap(c, snap, x, y, fixed_x, fixed_y)
     local c = c or client.focus
     local cur_geom = c:geometry()
     local geom = c:geometry()
+    local edge = "none"
+    local edge2 = "none"
     geom.x = x or geom.x
     geom.y = y or geom.y
 
-    geom = snap_inside(geom, capi.screen[c.screen].geometry, snap)
-    geom = snap_inside(geom, capi.screen[c.screen].workarea, snap)
+    geom, edge = snap_inside(geom, capi.screen[c.screen].geometry, snap)
+    geom, edge2 = snap_inside(geom, capi.screen[c.screen].workarea, snap)
+
+    -- Allow certain windows to snap to the edge of the screen.
+    if c.type == "utility" or c.type == "toolbar" or c.type == "dock" then
+        local struts = c:struts()
+        struts['left'] = 0
+        struts['right'] = 0
+        struts['top'] = 0
+        struts['bottom'] = 0
+        if edge ~= "none" and aclient.floating.get(c) then
+            if edge == "left" or edge == "right" then
+                struts[edge] = cur_geom.width
+            elseif edge == "top" or edge == "bottom" then
+                struts[edge] = cur_geom.height
+            end
+        end
+        c:struts(struts)
+    end
 
     for k, snapper in ipairs(aclient.visible(c.screen)) do
         if snapper ~= c then
@@ -535,5 +559,19 @@ function client.resize(c, corner)
         return client_resize_magnifier(c, corner)
     end
 end
+
+-- Disable struts when resizing
+local function update_struts(c, prop)
+    if prop == "geometry" then
+        local struts = c:struts()
+        struts['left'] = 0
+        struts['right'] = 0
+        struts['top'] = 0
+        struts['bottom'] = 0
+        c:struts(struts)
+    end
+end
+
+hooks.property.register(update_struts)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
