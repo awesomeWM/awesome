@@ -114,9 +114,8 @@ end
 function client.move(c, snap)
     local c = c or capi.client.focus
 
-    if not c then return end
-
-    if c.fullscreen
+    if not c
+        or c.fullscreen
         or c.type == "desktop"
         or c.type == "splash"
         or c.type == "dock" then
@@ -133,15 +132,7 @@ function client.move(c, snap)
     local fixed_x = c.maximized_horizontal
     local fixed_y = c.maximized_vertical
 
-    local function ug(c, prop)
-        if prop == "geometry" then
-            local g = c:geometry()
-            capi.mouse.coords({ x = g.x + dist_x, y = g.y + dist_y })
-        end
-    end
-
     capi.mousegrabber.run(function (mouse)
-                              hooks.property.unregister(ug)
                               for k, v in ipairs(mouse.buttons) do
                                   if v then
                                       local lay = layout.get(c.screen)
@@ -149,11 +140,18 @@ function client.move(c, snap)
                                           local x = mouse.x - dist_x
                                           local y = mouse.y - dist_y
                                           c:geometry(client.snap(c, snap, x, y, fixed_x, fixed_y))
-                                          if layout.get(c.screen) ~= layout.suit.floating and not aclient.floating.get(c) then
-                                              hooks.property.register(ug)
-                                          end
                                       elseif lay ~= layout.suit.magnifier then
-                                          c.screen = capi.mouse.screen
+                                          -- Only move the client to the mouse
+                                          -- screen if the target screen is not
+                                          -- floating.
+                                          -- Otherwise, we move if via geometry.
+                                          if layout.get(capi.mouse.screen) == layout.suit.floating then
+                                              local x = mouse.x - dist_x
+                                              local y = mouse.y - dist_y
+                                              c:geometry(client.snap(c, snap, x, y, fixed_x, fixed_y))
+                                          else
+                                              c.screen = capi.mouse.screen
+                                          end
                                           if layout.get(c.screen) ~= layout.suit.floating then
                                               local c_u_m = client_under_pointer()
                                               if c_u_m and not aclient.floating.get(c_u_m) then
@@ -161,8 +159,6 @@ function client.move(c, snap)
                                                       c:swap(c_u_m)
                                                   end
                                               end
-                                          else
-                                              hooks.property.register(ug)
                                           end
                                       end
                                       return true
