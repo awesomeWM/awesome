@@ -329,6 +329,10 @@ screen_client_moveto(client_t *c, int new_screen, bool dotag, bool doresize)
                 tag_client(c, new_tags->tab[i]);
     }
 
+    if(wasvisible)
+        globalconf.screens[old_screen].need_arrange = true;
+    client_need_arrange(c);
+
     if (!doresize)
         return;
 
@@ -378,9 +382,6 @@ screen_client_moveto(client_t *c, int new_screen, bool dotag, bool doresize)
     }
     /* move / resize the client */
     client_resize(c, new_geometry, false);
-    if(wasvisible)
-        globalconf.screens[old_screen].need_arrange = true;
-    client_need_arrange(c);
 }
 
 /** Screen module.
