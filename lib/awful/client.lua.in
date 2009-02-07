@@ -31,7 +31,6 @@ data.focus = {}
 data.urgent = {}
 data.marked = {}
 data.properties = otable()
-data.floating = otable()
 
 -- Functions
 urgent = {}
@@ -532,8 +531,8 @@ end
 -- @param state True or false.
 function floating.set(c, s)
     local c = c or capi.client.focus
-    if c and data.floating[c] ~= s then
-        data.floating[c] = s
+    if c and property.get(c, "floating") ~= s then
+        property.set(c, "floating", s)
         capi.hooks.arrange()(c.screen)
         capi.hooks.property()(c, "floating")
     end
@@ -564,8 +563,9 @@ end
 function floating.get(c)
     local c = c or capi.client.focus
     if c then
-        if data.floating[c] ~= nil then
-            return data.floating[c]
+        local value = property.get(c, "floating")
+        if value ~= nil then
+            return value
         end
         if c.type ~= "normal"
             or c.fullscreen
@@ -582,7 +582,7 @@ end
 -- @param c A client.
 function floating.toggle(c)
     -- If it has been set to floating
-    if data.floating[c] then
+    if property.get(c, "floating") then
         floating.set(c, nil)
     else
         floating.set(c, true)
