@@ -30,14 +30,16 @@ local data = {}
 data.focus = {}
 data.urgent = {}
 data.marked = {}
+data.properties = otable()
 data.floating = otable()
 
--- Urgent functions
+-- Functions
 urgent = {}
 focus = {}
 focus.history = {}
 swap = {}
 floating = {}
+property = {}
 
 -- User hooks
 hooks.user.create('marked')
@@ -730,6 +732,34 @@ function incwfact(add, c)
     capi.hooks.arrange()(t.screen)
 end
 
+--- Get a client property.
+-- @param c The client.
+-- @param prop The property name.
+-- @return The property.
+function property.get(c, prop)
+    if data.properties[c] then
+        return data.properties[c][prop]
+    end
+end
+
+--- Set a client property.
+-- This properties are internal to awful. Some are used to move clients, etc.
+-- @param c The client.
+-- @param prop The property name.
+-- @param value The value.
+function property.set(c, prop, value)
+    if not data.properties[c] then
+        data.properties[c] = {}
+    end
+    data.properties[c][prop] = value
+end
+
+-- Kill client property.
+-- This is garbage collection done on unmanage.
+-- @param c The client.
+local function killproperty(c)
+    data.property[c] = nil
+end
 
 -- Register standards hooks
 hooks.focus.register(focus.history.add)
@@ -740,5 +770,6 @@ hooks.focus.register(urgent.delete)
 hooks.unmanage.register(urgent.delete)
 
 hooks.unmanage.register(floating.delete)
+hooks.unmanage.register(killproperty)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
