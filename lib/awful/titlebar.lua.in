@@ -120,7 +120,6 @@ function add(c, args)
     c.titlebar = tb
 
     update(c)
-    update(c, "geometry")
 end
 
 --- Update a titlebar. This should be called in some hooks.
@@ -136,17 +135,6 @@ function update(c, prop)
         elseif prop == "icon" then
             if widgets.appicon then
                 widgets.appicon.image = c.icon
-            end
-        elseif prop == "geometry" then
-            if data[c].width then
-                if c.titlebar.position == "top"
-                    or c.titlebar.position == "bottom" then
-                    local w = math.min(data[c].width, c:geometry().width)
-                    c.titlebar:geometry({ width = w })
-                else
-                    local w = math.min(data[c].width, c:geometry().height)
-                    c.titlebar:geometry({ height = w })
-                end
             end
         end
         if capi.client.focus == c then
@@ -166,11 +154,8 @@ end
 --- Remove a titlebar from a client.
 -- @param c The client.
 function remove(c)
-    local old_geom = c:geometry()
     c.titlebar = nil
     data[c] = nil
-    -- Resize the client so the same amount of space is occupied as before.
-    c:geometry(old_geom)
 end
 
 -- Register standards hooks
