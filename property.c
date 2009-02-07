@@ -299,7 +299,7 @@ property_handle_net_wm_strut_partial(void *data,
     client_t *c = client_getbywin(window);
 
     if(c)
-        ewmh_client_strut_update(c, reply);
+        ewmh_process_client_strut(c, reply);
 
     return 0;
 }

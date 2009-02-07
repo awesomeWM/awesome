@@ -466,6 +466,32 @@ ewmh_client_update_desktop(client_t *c)
         }
 }
 
+/** Update the client struts.
+ * \param c The client.
+ */
+void
+ewmh_update_client_strut(client_t *c)
+{
+    uint32_t state[] =
+    {
+        c->strut.left,
+        c->strut.right,
+        c->strut.top,
+        c->strut.bottom,
+        c->strut.left_start_y,
+        c->strut.left_end_y,
+        c->strut.right_start_y,
+        c->strut.right_end_y,
+        c->strut.top_start_x,
+        c->strut.top_end_x,
+        c->strut.bottom_start_x,
+        c->strut.bottom_end_x
+    };
+
+    xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
+                        c->win, _NET_WM_STRUT_PARTIAL, CARDINAL, 32, countof(state), state);
+}
+
 void
 ewmh_client_check_hints(client_t *c)
 {
@@ -537,11 +563,11 @@ ewmh_client_check_hints(client_t *c)
     p_delete(&reply);
 }
 
-/** Update the WM strut of a client.
+/** Process the WM strut of a client.
  * \param c The client.
  */
 void
-ewmh_client_strut_update(client_t *c, xcb_get_property_reply_t *strut_r)
+ewmh_process_client_strut(client_t *c, xcb_get_property_reply_t *strut_r)
 {
     void *data;
     xcb_get_property_reply_t *mstrut_r = NULL;

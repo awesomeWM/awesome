@@ -520,7 +520,7 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
     property_update_wm_icon_name(c);
 
     /* update strut */
-    ewmh_client_strut_update(c, NULL);
+    ewmh_process_client_strut(c, NULL);
 
     ewmh_update_net_client_list(c->phys_screen);
 
@@ -1369,6 +1369,74 @@ luaA_client_geometry(lua_State *L)
     return luaA_pusharea(L, (*c)->geometry);
 }
 
+/** Push a strut type to a table on stack.
+ * \param L The Lua VM state.
+ * \param struts The struts to push.
+ * \return The number of elements pushed on stack.
+ */
+static inline int
+luaA_pushstruts(lua_State *L, strut_t struts)
+{
+    lua_newtable(L);
+    lua_pushnumber(L, struts.left);
+    lua_setfield(L, -2, "left");
+    lua_pushnumber(L, struts.right);
+    lua_setfield(L, -2, "right");
+    lua_pushnumber(L, struts.top);
+    lua_setfield(L, -2, "top");
+    lua_pushnumber(L, struts.bottom);
+    lua_setfield(L, -2, "bottom");
+    return 1;
+}
+
+/** Return client struts (reserved space at the edge of the screen).
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ * \luastack
+ * \lparam A table with new strut values, or none.
+ * \lreturn A table with strut values.
+ */
+static int
+luaA_client_struts(lua_State *L)
+{
+    client_t **c = luaA_checkudata(L, 1, "client");
+
+    if(lua_gettop(L) == 2)
+    {
+        strut_t struts;
+        area_t screen_area = display_area_get((*c)->phys_screen, NULL, NULL);
+
+        struts.left = luaA_getopt_number(L, 2, "left", (*c)->strut.left);
+        struts.right = luaA_getopt_number(L, 2, "right", (*c)->strut.right);
+        struts.top = luaA_getopt_number(L, 2, "top", (*c)->strut.top);
+        struts.bottom = luaA_getopt_number(L, 2, "bottom", (*c)->strut.bottom);
+
+        if (struts.left != (*c)->strut.left || struts.right != (*c)->strut.right ||
+                struts.top != (*c)->strut.top || struts.bottom != (*c)->strut.bottom) {
+            /* Struts are not so well defined in the context of xinerama. So we just
+             * give the entire root window and let the window manager decide. */
+            struts.left_start_y = 0;
+            struts.left_end_y = !struts.left ? 0 : screen_area.height;
+            struts.right_start_y = 0;
+            struts.right_end_y = !struts.right ? 0 : screen_area.height;
+            struts.top_start_x = 0;
+            struts.top_end_x = !struts.top ? 0 : screen_area.width;
+            struts.bottom_start_x = 0;
+            struts.bottom_end_x = !struts.bottom ? 0 : screen_area.width;
+
+            (*c)->strut = struts;
+
+            ewmh_update_client_strut((*c));
+
+            client_need_arrange((*c));
+            /* All the wiboxes (may) need to be repositioned. */
+            wibox_update_positions();
+        }
+    }
+
+    return luaA_pushstruts(L, (*c)->strut);
+}
+
 /** Client newindex.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
@@ -2008,6 +2076,7 @@ const struct luaL_reg awesome_client_meta[] =
 {
     { "isvisible", luaA_client_isvisible },
     { "geometry", luaA_client_geometry },
+    { "struts", luaA_client_struts },
     { "buttons", luaA_client_buttons },
     { "keys", luaA_client_keys },
     { "tags", luaA_client_tags },
