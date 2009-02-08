@@ -1025,6 +1025,11 @@ client_unmanage(client_t *c)
 {
     tag_array_t *tags = &globalconf.screens[c->screen].tags;
 
+    /* Reset transient_for attributes of widows that maybe refering to us */
+    for(client_t *tc = globalconf.clients; tc; tc = tc->next)
+        if(tc->transient_for == c)
+            tc->transient_for = NULL;
+
     if(globalconf.screens[c->phys_screen].client_focus == c)
         client_unfocus(c);
 
