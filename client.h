@@ -41,7 +41,7 @@ DO_RCNT(client_t, client, client_delete)
 #define client_need_arrange(c) \
     do { \
         if(!globalconf.screens[(c)->screen].need_arrange \
-           && client_isvisible_exclude_banned(c, (c)->screen)) \
+           && client_isvisible(c, (c)->screen)) \
             globalconf.screens[(c)->screen].need_arrange = true; \
     } while(0)
 
@@ -131,20 +131,8 @@ client_isfixed(client_t *c)
             && c->size_hints.max_height);
 }
 
-/** Returns true if a client is tagged
- * with one of the tags of the specified screen and is not hidden.
- * \param c The client to check.
- * \param screen Virtual screen number.
- * \return true if the client is visible, false otherwise.
- */
-static inline bool
-client_isvisible_exclude_banned(client_t *c, int screen)
-{
-    return (!c->ishidden && !c->isminimized && client_maybevisible(c, screen));
-}
-
-/** Returns true if a client is tagged
- * with one of the tags of the specified screen and is not hidden or banned.
+/** Returns true if a client is tagged with one of the tags of the 
+ * specified screen and is not hidden. Note that "banned" clients are included.
  * \param c The client to check.
  * \param screen Virtual screen number.
  * \return true if the client is visible, false otherwise.
@@ -152,7 +140,7 @@ client_isvisible_exclude_banned(client_t *c, int screen)
 static inline bool
 client_isvisible(client_t *c, int screen)
 {
-    return (client_isvisible_exclude_banned(c, screen) && !c->isbanned);
+    return (!c->ishidden && !c->isminimized && client_maybevisible(c, screen));
 }
 
 /** Check if a client has strut information.
