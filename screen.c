@@ -351,9 +351,9 @@ screen_client_moveto(client_t *c, int new_screen, bool dotag, bool doresize)
 
         /* resize the client's original geometry if it doesn't fit the screen */
         if (new_f_geometry.width > to.width)
-            new_f_geometry.width = to.width - 2 * c->border;
+            new_f_geometry.width = to.width;
         if (new_f_geometry.height > to.height)
-            new_f_geometry.height = to.height - 2 * c->border;
+            new_f_geometry.height = to.height;
 
         /* make sure the client is still on the screen */
         if (new_f_geometry.x + new_f_geometry.width > to.x + to.width)
@@ -370,9 +370,9 @@ screen_client_moveto(client_t *c, int new_screen, bool dotag, bool doresize)
 
         /* resize the client if it doesn't fit the new screen */
         if(new_geometry.width > to.width)
-           new_geometry.width = to.width - 2 * c->border;
+           new_geometry.width = to.width;
         if(new_geometry.height > to.height)
-           new_geometry.height = to.height - 2 * c->border;
+           new_geometry.height = to.height;
 
         /* make sure the client is still on the screen */
         if(new_geometry.x + new_geometry.width > to.x + to.width)

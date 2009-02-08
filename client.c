@@ -475,8 +475,9 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
     c->win = w;
     c->geometry.x = wgeom->x;
     c->geometry.y = wgeom->y;
-    c->geometry.width = wgeom->width + 2 * wgeom->border_width;
-    c->geometry.height = wgeom->height + 2 * wgeom->border_width;
+    /* Border will be added later. */
+    c->geometry.width = wgeom->width;
+    c->geometry.height = wgeom->height;
     /* Also set internal geometry (client_ban() needs it). */
     c->geometries.internal.x = wgeom->x;
     c->geometries.internal.y = wgeom->y;
@@ -1176,13 +1177,17 @@ client_setborder(client_t *c, int width)
     if(width == c->border || width < 0)
         return;
 
+    /* Update geometry with the new border. */
+    c->geometry.width -= c->border;
+    c->geometry.height -= c->border;
+
     c->border = width;
     xcb_configure_window(globalconf.connection, c->win,
                          XCB_CONFIG_WINDOW_BORDER_WIDTH, &w);
 
-    /* Maintain original size of client and also allow titlebar to be properly sized. */
-    /* Don't forget that geometry is including border size. */
-    client_resize(c, c->geometry, false);
+    c->geometry.width += c->border;
+    c->geometry.height += c->border;
+    /* Tiled clients will be resized by the layout functions. */
     client_need_arrange(c);
 
     /* Changing border size also affects the size of the titlebar. */
