@@ -592,7 +592,7 @@ end
 --- Remove the floating information on a client.
 -- @param c The client.
 function floating.delete(c)
-    data.floating[c] = nil
+    floating.set(c, nil)
 end
 
 -- Normalize a set of numbers to 1
@@ -758,7 +758,7 @@ end
 -- This is garbage collection done on unmanage.
 -- @param c The client.
 local function killproperty(c)
-    data.property[c] = nil
+    data.properties[c] = nil
 end
 
 -- Register standards hooks
