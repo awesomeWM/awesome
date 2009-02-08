@@ -297,37 +297,29 @@ event_handle_configurerequest(void *data __attribute__ ((unused)),
             /* We do have to ensure the windows don't end up in the visible screen. */
             geometry.x = - (geometry.width + 2*c->border);
             geometry.y = - (geometry.height + 2*c->border);
+            window_configure(c->win, geometry, c->border);
+            event_handle_configurerequest_configure_window(ev);
         }
         else
         {
             /** Configure request are sent with size relative to real (internal)
              * window size, i.e. without titlebars and borders. */
             geometry = titlebar_geometry_add(c->titlebar, c->border, geometry);
-        }
 
-        if(geometry.x != c->geometry.x
-           || geometry.y != c->geometry.y
-           || geometry.width != c->geometry.width
-           || geometry.height != c->geometry.height)
-        {
-            if(c->isbanned)
+            if(client_resize(c, geometry, false))
             {
-                window_configure(c->win, geometry, c->border);
-                event_handle_configurerequest_configure_window(ev);
-            }
-            else
-            {
-                client_resize(c, geometry, false);
                 /* All the wiboxes (may) need to be repositioned. */
                 if(client_hasstrut(c))
                     wibox_update_positions();
                 client_need_arrange(c);
-
-                return 0;
+            }
+            else
+            {
+                /* Resize wasn't officially needed, but we don't want to break expectations. */
+                geometry = titlebar_geometry_remove(c->titlebar, c->border, c->geometry);
+                window_configure(c->win, geometry, c->border);
             }
         }
-        else
-            window_configure(c->win, geometry, c->border);
     }
     else
         event_handle_configurerequest_configure_window(ev);

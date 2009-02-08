@@ -52,7 +52,7 @@ void client_ban(client_t *);
 void client_unban(client_t *);
 void client_manage(xcb_window_t, xcb_get_geometry_reply_t *, int, bool);
 area_t client_geometry_hints(client_t *, area_t);
-void client_resize(client_t *, area_t, bool);
+bool client_resize(client_t *, area_t, bool);
 void client_unmanage(client_t *);
 void client_saveprops_tags(client_t *);
 void client_kill(client_t *);

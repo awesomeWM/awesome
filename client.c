@@ -659,8 +659,9 @@ client_geometry_hints(client_t *c, area_t geometry)
  * \param c Client to resize.
  * \param geometry New window geometry.
  * \param hints Use size hints.
+ * \return true if an actual resize occurred.
  */
-void
+bool
 client_resize(client_t *c, area_t geometry, bool hints)
 {
     int new_screen;
@@ -687,7 +688,7 @@ client_resize(client_t *c, area_t geometry, bool hints)
         geometry_internal = client_geometry_hints(c, geometry_internal);
 
     if(geometry_internal.width == 0 || geometry_internal.height == 0)
-        return;
+        return false;
 
     /* Also let client hints propegate to the "official" geometry. */
     geometry = titlebar_geometry_add(c->titlebar, c->border, geometry_internal);
@@ -732,7 +733,11 @@ client_resize(client_t *c, area_t geometry, bool hints)
 
         /* execute hook */
         hooks_property(c, "geometry");
+
+        return true;
     }
+
+    return false;
 }
 
 /** Set a client minimized, or not.
