@@ -792,6 +792,10 @@ client_setfullscreen(client_t *c, bool s)
             /* remove any max state */
             client_setmaxhoriz(c, false);
             client_setmaxvert(c, false);
+            /* You can only be part of one of the special layers. */
+            client_setbelow(c, false);
+            client_setabove(c, false);
+            client_setontop(c, false);
 
             geometry = screen_area_get(c->screen, NULL, NULL, false);
             c->geometries.fullscreen = c->geometry;
@@ -904,6 +908,13 @@ client_setabove(client_t *c, bool s)
 {
     if(c->isabove != s)
     {
+        /* You can only be part of one of the special layers. */
+        if(s)
+        {
+            client_setbelow(c, false);
+            client_setontop(c, false);
+            client_setfullscreen(c, false);
+        }
         c->isabove = s;
         client_stack();
         ewmh_client_update_hints(c);
@@ -921,6 +932,13 @@ client_setbelow(client_t *c, bool s)
 {
     if(c->isbelow != s)
     {
+        /* You can only be part of one of the special layers. */
+        if(s)
+        {
+            client_setabove(c, false);
+            client_setontop(c, false);
+            client_setfullscreen(c, false);
+        }
         c->isbelow = s;
         client_stack();
         ewmh_client_update_hints(c);
@@ -955,6 +973,13 @@ client_setontop(client_t *c, bool s)
 {
     if(c->isontop != s)
     {
+        /* You can only be part of one of the special layers. */
+        if(s)
+        {
+            client_setabove(c, false);
+            client_setbelow(c, false);
+            client_setfullscreen(c, false);
+        }
         c->isontop = s;
         client_stack();
         /* execute hook */
@@ -1537,6 +1562,12 @@ luaA_client_newindex(lua_State *L)
       case A_TK_ONTOP:
         client_setontop(*c, luaA_checkboolean(L, 3));
         break;
+      case A_TK_ABOVE:
+        client_setabove(*c, luaA_checkboolean(L, 3));
+        break;
+      case A_TK_BELOW:
+        client_setbelow(*c, luaA_checkboolean(L, 3));
+        break;
       case A_TK_BORDER_COLOR:
         if((buf = luaL_checklstring(L, 3, &len))
            && xcolor_init_reply(xcolor_init_unchecked(&(*c)->border_color, buf, len)))
@@ -1587,6 +1618,8 @@ luaA_client_newindex(lua_State *L)
  * \lfield focus The focused client.
  * \lfield opacity The client opacity between 0 and 1.
  * \lfield ontop The client is on top of every other windows.
+ * \lfield above The client is above normal windows.
+ * \lfield below The client is below normal windows.
  * \lfield fullscreen The client is fullscreen or not.
  * \lfield maximized_horizontal The client is maximized horizontally or not.
  * \lfield maximized_vertical The client is maximized vertically or not.
@@ -1751,6 +1784,12 @@ luaA_client_index(lua_State *L)
         break;
       case A_TK_ONTOP:
         lua_pushboolean(L, (*c)->isontop);
+        break;
+      case A_TK_ABOVE:
+        lua_pushboolean(L, (*c)->isabove);
+        break;
+      case A_TK_BELOW:
+        lua_pushboolean(L, (*c)->isbelow);
         break;
       case A_TK_STICKY:
         lua_pushboolean(L, (*c)->issticky);
