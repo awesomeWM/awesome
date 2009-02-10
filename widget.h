@@ -37,7 +37,7 @@ struct widget_t
     /** Widget destructor */
     widget_destructor_t *destructor;
     /** Geometry function for drawing */
-    area_t (*geometry)(widget_t *, screen_t *, int, int);
+    area_t (*geometry)(widget_t *, int);
     /** Extents function */
     area_t (*extents)(lua_State *, widget_t *);
     /** Draw function */
@@ -72,6 +72,7 @@ struct widget_node_t
 
 widget_t *widget_getbycoords(orientation_t, widget_node_array_t *, int, int, int16_t *, int16_t *);
 void widget_render(wibox_t *);
+bool widget_geometries(wibox_t *);
 
 void widget_invalidate_bywidget(widget_t *);
 void widget_invalidate_bytype(widget_constructor_t *);

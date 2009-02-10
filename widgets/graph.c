@@ -148,13 +148,13 @@ graph_plot_get(graph_data_t *d, const char *title)
 }
 
 static area_t
-graph_geometry(widget_t *widget, screen_t *screen, int height, int width)
+graph_geometry(widget_t *widget, int screen)
 {
     area_t geometry;
     graph_data_t *d = widget->data;
 
     geometry.x = geometry.y = 0;
-    geometry.height = height;
+    geometry.height = d->width;
     geometry.width = d->width;
 
     return geometry;
@@ -163,11 +163,7 @@ graph_geometry(widget_t *widget, screen_t *screen, int height, int width)
 static area_t
 graph_extents(lua_State *L, widget_t *widget)
 {
-    area_t geometry;
-    graph_data_t *d = widget->data;
-    geometry.width = geometry.height = d->width;
-
-    return geometry;
+    return graph_geometry(widget, 0);
 }
 
 /** Draw a graph widget.

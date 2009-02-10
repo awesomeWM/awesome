@@ -133,12 +133,11 @@ progressbar_bar_get(bar_array_t *bars, const char *title)
 }
 
 static area_t
-progressbar_geometry(widget_t *widget, screen_t *screen, int height, int width)
+progressbar_geometry(widget_t *widget, int screen)
 {
     area_t geometry;
     progressbar_data_t *d = widget->data;
 
-    geometry.height = height;
 
     if(d->vertical)
     {
@@ -157,6 +156,7 @@ progressbar_geometry(widget_t *widget, screen_t *screen, int height, int width)
         }
         geometry.width = pb_width + 2 * (d->border_width + d->border_padding);
     }
+    geometry.height = geometry.width;
 
     geometry.x = geometry.y = 0;
 
@@ -166,29 +166,7 @@ progressbar_geometry(widget_t *widget, screen_t *screen, int height, int width)
 static area_t
 progressbar_extents(lua_State *L, widget_t *widget)
 {
-    area_t geometry;
-    progressbar_data_t *d = widget->data;
-
-    if (d->vertical)
-    {
-        int pb_width = (int) ((d->width - 2 * (d->border_width + d->border_padding) * d->bars.len
-                       - d->gap * (d->bars.len - 1)) / d->bars.len);
-        geometry.width = d->bars.len * (pb_width + 2 * (d->border_width + d->border_padding)
-                         + d->gap) - d->gap;
-    }else
-    {
-        int pb_width = d->width - 2 * (d->border_width + d->border_padding);
-        if(d->ticks_count && d->ticks_gap)
-        {
-            int unit = (pb_width + d->ticks_gap) / d->ticks_count;
-            pb_width = unit * d->ticks_count - d->ticks_gap; /* rounded to match ticks... */
-        }
-        geometry.width = pb_width + 2 * (d->border_width + d->border_padding);
-    }
-
-    geometry.height = geometry.width;
-
-    return geometry;
+    return progressbar_geometry(widget, 0);
 }
 
 /** Draw a progressbar.

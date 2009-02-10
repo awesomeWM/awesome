@@ -129,6 +129,93 @@ luaA_table2widgets(lua_State *L, widget_node_array_t *widgets)
     }
 }
 
+/** Retrieve a list of widget geometries using a Lua layout function.
+ *  a table which contains the geometries is then pushed onto the stack
+ * \param wibox The wibox.
+ * \return True is everything is ok, false otherwise.
+ * \todo What do we do if there's no layout defined?
+ */
+bool
+widget_geometries(wibox_t *wibox)
+{
+    /* get the layout field of the widget table */
+    if (wibox->widgets_table != LUA_REFNIL)
+    {
+        lua_rawgeti(globalconf.L, LUA_REGISTRYINDEX, wibox->widgets_table);
+        lua_getfield(globalconf.L, -1, "layout");
+    }
+    else
+        lua_pushnil(globalconf.L);
+
+    /* if the layout field is a function */
+    if(lua_isfunction(globalconf.L, -1))
+    {
+        /* Push 1st argument: wibox geometry */
+        area_t geometry = wibox->sw.geometry;
+        geometry.x = 0;
+        geometry.y = 0;
+        /* we need to exchange the width and height of the wibox window if it
+         * it is rotated, so the layout function doesn't need to care about that
+         */
+        if(wibox->sw.orientation != East)
+        {
+            int i = geometry.height;
+            geometry.height = geometry.width;
+            geometry.width = i;
+        }
+        geometry.height -= 2 * wibox->sw.border.width;
+        geometry.width -= 2 * wibox->sw.border.width;
+        luaA_pusharea(globalconf.L, geometry);
+        /* Re-push 2nd argument: widget table */
+        lua_pushvalue(globalconf.L, -3);
+        /* Push 3rd argument: wibox screen */
+        lua_pushnumber(globalconf.L, screen_array_indexof(&globalconf.screens, wibox->screen));
+        /* Re-push the layout function */
+        lua_pushvalue(globalconf.L, -4);
+        /* call the layout function with 3 arguments (wibox geometry, widget
+         * table, screen) and wait for one result */
+        if(!luaA_dofunction(globalconf.L, 3, 1))
+            return false;
+
+        lua_insert(globalconf.L, -3);
+        lua_pop(globalconf.L, 2);
+    }
+    else
+    {
+        /* If no layout function has been specified, we just push a table with
+         * geometries onto the stack. These geometries are nothing fancy, they
+         * have x = y = 0 and their height and width set to the widgets demands
+         * or the wibox size, depending on which is less.
+         */
+
+        widget_node_array_t *widgets = &wibox->widgets;
+        widget_node_array_wipe(widgets);
+        widget_node_array_init(widgets);
+
+        lua_rawgeti(globalconf.L, LUA_REGISTRYINDEX, wibox->widgets_table);
+        luaA_table2widgets(globalconf.L, widgets);
+        lua_pop(globalconf.L, 2);
+
+        lua_newtable(globalconf.L);
+        for(int i = 0; i < widgets->len; i++)
+        {
+            lua_pushnumber(globalconf.L, i + 1);
+            widget_t *widget = widgets->tab[i].widget;
+            lua_pushnumber(globalconf.L, screen_array_indexof(&globalconf.screens, wibox->screen));
+            area_t geometry = widget->extents(globalconf.L, widget);
+            lua_pop(globalconf.L, 1);
+            geometry.x = geometry.y = 0;
+            geometry.width = MIN(wibox->sw.geometry.width, geometry.width);
+            geometry.height = MIN(wibox->sw.geometry.height, geometry.height);
+
+            luaA_pusharea(globalconf.L, geometry);
+
+            lua_settable(globalconf.L, -3);
+        }
+    }
+    return true;
+}
+
 /** Render a list of widgets.
  * \param wibox The wibox.
  * \todo Remove GC.
@@ -136,13 +223,16 @@ luaA_table2widgets(lua_State *L, widget_node_array_t *widgets)
 void
 widget_render(wibox_t *wibox)
 {
+    lua_State *L = globalconf.L;
     draw_context_t *ctx = &wibox->sw.ctx;
-    int left = 0, right = 0;
     area_t rectangle = { 0, 0, 0, 0 };
     color_t col;
 
     rectangle.width = ctx->width;
     rectangle.height = ctx->height;
+
+    if (!widget_geometries(wibox))
+        return;
 
     if(ctx->bg.alpha != 0xffff)
     {
@@ -195,74 +285,23 @@ widget_render(wibox_t *wibox)
 
     widget_node_array_wipe(widgets);
     widget_node_array_init(widgets);
-    lua_rawgeti(globalconf.L, LUA_REGISTRYINDEX, wibox->widgets_table);
-    luaA_table2widgets(globalconf.L, widgets);
+    lua_rawgeti(L, LUA_REGISTRYINDEX, wibox->widgets_table);
+    luaA_table2widgets(L, widgets);
 
-    /* compute geometry */
-    for(int i = 0; i < widgets->len; i++)
-        if(widgets->tab[i].widget->align == AlignLeft
-           && widgets->tab[i].widget->isvisible)
-        {
-            widgets->tab[i].geometry = widgets->tab[i].widget->geometry(widgets->tab[i].widget,
-                                                                        wibox->screen, ctx->height,
-                                                                        ctx->width - (left + right));
-            widgets->tab[i].geometry.x = left;
-            left += widgets->tab[i].geometry.width;
-        }
+    /* get computed geometries */
+    for(unsigned int i = 0; i < lua_objlen(L, -1); i++)
+    {
+        lua_pushnumber(L, i + 1);
+        lua_gettable(L, -2);
 
-    for(int i = widgets->len - 1; i >= 0; i--)
-        if(widgets->tab[i].widget->align == AlignRight && widgets->tab[i].widget->isvisible)
-        {
-            widgets->tab[i].geometry = widgets->tab[i].widget->geometry(widgets->tab[i].widget,
-                                                                        wibox->screen, ctx->height,
-                                                                        ctx->width - (left + right));
-            right += widgets->tab[i].geometry.width;
-            widgets->tab[i].geometry.x = ctx->width - right;
-        }
+        widgets->tab[i].geometry.x = luaA_getopt_number(L, -1, "x", wibox->sw.geometry.x);
+        widgets->tab[i].geometry.y = luaA_getopt_number(L, -1, "y", wibox->sw.geometry.y);
+        widgets->tab[i].geometry.width = luaA_getopt_number(L, -1, "width", 1);
+        widgets->tab[i].geometry.height = luaA_getopt_number(L, -1, "height", 1);
 
-    /* save left value */
-    int fake_left = left;
-
-    /* compute width of flex or fixed aligned widgets */
-    int flex = 0;
-    for(int i = 0; i < widgets->len; i++)
-        if(widgets->tab[i].widget->align & (AlignFlex | AlignFixed)
-          && widgets->tab[i].widget->isvisible)
-        {
-            if(widgets->tab[i].widget->align_supported & AlignFlex
-              && widgets->tab[i].widget->align == AlignFlex)
-                flex++;
-            else
-                fake_left += widgets->tab[i].widget->geometry(widgets->tab[i].widget,
-                                                              wibox->screen, ctx->height,
-                                                              ctx->width - (fake_left + right)).width;
-        }
-
-    /* now compute everybody together! */
-    int flex_rendered = 0;
-    for(int i = 0; i < widgets->len; i++)
-        if(widgets->tab[i].widget->align & (AlignFlex | AlignFixed)
-          && widgets->tab[i].widget->isvisible)
-        {
-            if(widgets->tab[i].widget->align_supported & AlignFlex
-              && widgets->tab[i].widget->align == AlignFlex)
-            {
-                int width = (ctx->width - (right + fake_left)) / flex;
-                /* give last pixels to last flex to be rendered */
-                if(flex_rendered == flex - 1)
-                    width += (ctx->width - (right + fake_left)) % flex;
-                widgets->tab[i].geometry = widgets->tab[i].widget->geometry(widgets->tab[i].widget,
-                                                                            wibox->screen, ctx->height,
-                                                                            width);
-                flex_rendered++;
-            }
-            else
-                widgets->tab[i].geometry = widgets->tab[i].widget->geometry(widgets->tab[i].widget,
-                                                                            wibox->screen, ctx->height,
-                                                                            ctx->width - (left + right));
-            widgets->tab[i].geometry.x = left;
-            left += widgets->tab[i].geometry.width;
-        }
+        lua_pop(L, 1);
+    }
+    lua_pop(L, 1);
 
     /* draw background image, only if the background color is not opaque */
     if(wibox->bg_image && ctx->bg.alpha != 0xffff)
@@ -275,11 +314,8 @@ widget_render(wibox_t *wibox)
     /* draw everything! */
     for(int i = 0; i < widgets->len; i++)
         if(widgets->tab[i].widget->isvisible)
-        {
-            widgets->tab[i].geometry.y = 0;
             widgets->tab[i].widget->draw(widgets->tab[i].widget,
                                          ctx, widgets->tab[i].geometry, wibox);
-        }
 
     switch(wibox->sw.orientation)
     {

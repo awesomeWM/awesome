@@ -25,6 +25,7 @@
 #include "widget.h"
 #include "screen.h"
 #include "wibox.h"
+#include "structs.h"
 #include "common/xembed.h"
 #include "common/atoms.h"
 
@@ -32,36 +33,16 @@
 #define _NET_SYSTEM_TRAY_ORIENTATION_VERT 1
 
 static area_t
-systray_geometry(widget_t *widget, screen_t *screen, int height, int width)
+systray_geometry(widget_t *widget, int screen)
 {
     area_t geometry;
-    int phys_screen = screen_virttophys(screen_array_indexof(&globalconf.screens, screen)), n = 0;
-
-    geometry.height = height;
-
-    for(int i = 0; i < globalconf.embedded.len; i++)
-        if(globalconf.embedded.tab[i].phys_screen == phys_screen)
-            n++;
-
-    /** \todo use class hints */
-    geometry.width = MIN(n * height, width);
-
-    geometry.x = geometry.y = 0;
-
-    return geometry;
-}
-
-static area_t
-systray_extents(lua_State *L, widget_t *widget)
-{
-    area_t geometry;
-    int screen = screen_virttophys(luaL_optnumber(L, -1, 1)), n = 0;
+    int phys_screen = screen_virttophys(screen), n = 0;
 
     geometry.height = 0;
     int width = 0;
 
     for(int i = 0; i < globalconf.embedded.len; i++)
-        if(globalconf.embedded.tab[i].phys_screen == screen)
+        if(globalconf.embedded.tab[i].phys_screen == phys_screen)
         {
             xcb_get_geometry_cookie_t geo = xcb_get_geometry(globalconf.connection, globalconf.embedded.tab[i].win);
             xcb_get_geometry_reply_t *g = xcb_get_geometry_reply(globalconf.connection, geo, NULL);
@@ -73,9 +54,20 @@ systray_extents(lua_State *L, widget_t *widget)
                 width = g->width;
         }
 
+    /** \todo use class hints */
     geometry.width = width * n;
 
+    geometry.x = geometry.y = 0;
+
     return geometry;
+}
+
+static area_t
+systray_extents(lua_State *L, widget_t *widget)
+{
+    int screen = screen_virttophys(luaL_optnumber(L, -1, 1));
+
+    return systray_geometry(widget, screen);
 }
 
 static void

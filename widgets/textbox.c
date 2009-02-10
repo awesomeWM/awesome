@@ -20,6 +20,7 @@
  */
 
 #include "widget.h"
+#include "wibox.h"
 #include "common/tokenize.h"
 
 /** The textbox private data structure */
@@ -53,38 +54,10 @@ typedef struct
 } textbox_data_t;
 
 static area_t
-textbox_geometry(widget_t *widget, screen_t *screen, int height, int width)
-{
-    area_t geometry;
-    textbox_data_t *d = widget->data;
-
-    geometry.height = height;
-
-    if(d->width)
-        geometry.width = d->width;
-    else if(widget->align == AlignFlex)
-        geometry.width = width;
-    else if(d->bg_image)
-    {
-        int bgi_height = image_getheight(d->bg_image);
-        int bgi_width = image_getwidth(d->bg_image);
-        double ratio = d->bg_resize ? (double) geometry.height / bgi_height : 1;
-        geometry.width = MIN(width, MAX(d->extents.width + d->margin.left + d->margin.right, MAX(d->width, bgi_width * ratio)));
-    }
-    else
-        geometry.width = MIN(d->extents.width + d->margin.left + d->margin.right, width);
-
-    geometry.x = geometry.y = 0;
-
-    return geometry;
-}
-
-static area_t
-textbox_extents(lua_State *L, widget_t *widget)
+textbox_geometry(widget_t *widget, int screen)
 {
     textbox_data_t *d = widget->data;
     area_t geometry = d->extents;
-
     geometry.width += d->margin.left + d->margin.left;
     geometry.height += d->margin.bottom + d->margin.top;
 
@@ -96,13 +69,15 @@ textbox_extents(lua_State *L, widget_t *widget)
         geometry.width = MAX(d->extents.width + d->margin.left + d->margin.right, MAX(d->width, bgi_width * ratio));
     }
 
-    if (d->data.len == 0)
-    {
-        geometry.width = 0;
-        geometry.height = 0;
-    }
+    geometry.x = geometry.y = 0;
 
     return geometry;
+}
+
+static area_t
+textbox_extents(lua_State *L, widget_t *widget)
+{
+    return textbox_geometry(widget, 0);
 }
 
 /** Draw a textbox widget.
@@ -152,6 +127,7 @@ textbox_draw(widget_t *widget, draw_context_t *ctx, area_t geometry, wibox_t *p)
         }
     }
 
+    geometry.y += (geometry.height - textbox_geometry(widget, ctx->phys_screen).height - p->sw.border.width + 1) / 2;
     draw_text(ctx, &d->data, d->ellip, d->wrap, d->align, &d->margin, geometry, &d->extents);
 }
 

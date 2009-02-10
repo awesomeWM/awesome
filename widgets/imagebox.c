@@ -33,37 +33,15 @@ typedef struct
 } imagebox_data_t;
 
 static area_t
-imagebox_geometry(widget_t *widget, screen_t *screen, int height, int width)
+imagebox_geometry(widget_t *widget, int screen)
 {
     area_t geometry;
     imagebox_data_t *d = widget->data;
 
     if(d->image)
     {
-        int iwidth = image_getwidth(d->image);
-        int iheight = image_getheight(d->image);
-        if(d->resize)
-        {
-            double ratio = (double) height / iheight;
-            geometry.width = ratio * iwidth;
-            if(geometry.width > width)
-            {
-                geometry.width = 0;
-                geometry.height = 0;
-            }
-            else
-                geometry.height = height;
-        }
-        else if(iwidth <= width)
-        {
-            geometry.width = iwidth;
-            geometry.height = height;
-        }
-        else
-        {
-            geometry.width = 0;
-            geometry.height = 0;
-        }
+        geometry.width = image_getwidth(d->image);
+        geometry.height = image_getheight(d->image);
     }
     else
     {
@@ -79,21 +57,7 @@ imagebox_geometry(widget_t *widget, screen_t *screen, int height, int width)
 static area_t
 imagebox_extents(lua_State *L, widget_t *widget)
 {
-    area_t geometry = {
-        .x = 0,
-        .y = 0,
-        .width = 0,
-        .height = 0
-    };
-    imagebox_data_t *d = widget->data;
-
-    if(d->image)
-    {
-        geometry.width = image_getwidth(d->image);
-        geometry.height = image_getheight(d->image);
-    }
-
-    return geometry;
+    return imagebox_geometry(widget, 0);
 }
 
 /** Draw an image.
@@ -112,22 +76,8 @@ imagebox_draw(widget_t *widget, draw_context_t *ctx, area_t geometry, wibox_t *p
         if(d->bg.initialized)
             draw_rectangle(ctx, geometry, 1.0, true, &d->bg);
 
-        int y = geometry.y;
-        int iheight = image_getheight(d->image);
-        double ratio = d->resize ? (double) geometry.height / iheight : 1;
-        switch(d->valign)
-        {
-          case AlignBottom:
-            y += geometry.height - iheight;
-            break;
-          case AlignCenter:
-            y += (geometry.height - iheight) / 2;
-            break;
-          default:
-            break;
-        }
-
-        draw_image(ctx, geometry.x, y, ratio, d->image);
+        double ratio = d->resize ? (double) geometry.height / image_getheight(d->image) : 1;
+        draw_image(ctx, geometry.x, geometry.y, ratio, d->image);
     }
 }
 
