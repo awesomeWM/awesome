@@ -311,11 +311,7 @@ client_stack_above(client_t *c, xcb_window_t previous)
     for(client_node_t *node = *client_node_list_last(&globalconf.stack);
         node; node = node->prev)
         if(node->client->transient_for == c)
-        {
-            client_stack_above(node->client,
-                               previous);
-            previous = node->client->win;
-        }
+            previous = client_stack_above(node->client, previous);
 
     return previous;
 }
