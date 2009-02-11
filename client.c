@@ -179,6 +179,20 @@ client_getbywin(xcb_window_t w)
     return c;
 }
 
+/** Call unfocus hook.
+ * \param c Client being unfocused
+ */
+static void
+client_unfocus_hook(client_t *c)
+{
+    /* Call hook */
+    if(globalconf.hooks.unfocus != LUA_REFNIL)
+    {
+        luaA_client_userdata_new(globalconf.L, c);
+        luaA_dofunction(globalconf.L, globalconf.hooks.unfocus, 1, 0);
+    }
+}
+
 /** Unfocus a client.
  * \param c The client.
  */
@@ -189,16 +203,10 @@ client_unfocus(client_t *c)
     globalconf.screens[c->phys_screen].client_focus = NULL;
 
     /* Set focus on root window, so no events leak to the current window. */
-    if (!c->nofocus)
-        xcb_set_input_focus(globalconf.connection, XCB_INPUT_FOCUS_POINTER_ROOT,
+    xcb_set_input_focus(globalconf.connection, XCB_INPUT_FOCUS_POINTER_ROOT,
             root_win, XCB_CURRENT_TIME);
 
-    /* Call hook */
-    if(globalconf.hooks.unfocus != LUA_REFNIL)
-    {
-        luaA_client_userdata_new(globalconf.L, c);
-        luaA_dofunction(globalconf.L, globalconf.hooks.unfocus, 1, 0);
-    }
+    client_unfocus_hook(c);
 
     ewmh_update_net_active_window(c->phys_screen);
 }
@@ -244,10 +252,19 @@ client_focus(client_t *c)
     if(!client_maybevisible(c, c->screen))
         return;
 
-    /* unfocus current selected client */
+    /* Input Model: No Input */
+    if (!window_hasproto(c->win, WM_TAKE_FOCUS) && c->nofocus)
+        return;
+
+    /* unfocus current selected client
+     * We don't really need to unfocus here,
+     * because client already received FocusOut event.
+     * What we need to do is call unfocus hook, to
+     * inform lua script, about this event.
+     */
     if(globalconf.screen_focus->client_focus
        && c != globalconf.screen_focus->client_focus)
-        client_unfocus(globalconf.screen_focus->client_focus);
+        client_unfocus_hook(globalconf.screen_focus->client_focus);
 
     /* stop hiding c */
     c->ishidden = false;
@@ -259,9 +276,14 @@ client_focus(client_t *c)
     globalconf.screen_focus = &globalconf.screens[c->phys_screen];
     globalconf.screen_focus->client_focus = c;
 
-    if (!c->nofocus)
-        xcb_set_input_focus(globalconf.connection, XCB_INPUT_FOCUS_POINTER_ROOT,
-                            c->win, XCB_CURRENT_TIME);
+    /* Input Models: Passive, Locally Active */
+    xcb_set_input_focus(globalconf.connection, XCB_INPUT_FOCUS_POINTER_ROOT,
+                        c->win, XCB_CURRENT_TIME);
+
+    /* TODO: Currently we don't handle correctly globally active input model
+     * One fix I know of, is we should handle FocusIn and FocusOut events for windows,
+     * and use WM_TAKE_FOCUS client message.
+     */
 
     /* Some layouts use focused client differently, so call them back.
      * And anyway, we have maybe unhidden */
@@ -1349,8 +1371,7 @@ luaA_client_redraw(lua_State *L)
        performed on the window where the pointer is currently on
        because after the unmapping/mapping, the focus is lost */
     if(globalconf.screen_focus->client_focus == *c)
-        xcb_set_input_focus(globalconf.connection, XCB_INPUT_FOCUS_POINTER_ROOT,
-                            (*c)->win, XCB_CURRENT_TIME);
+        client_focus(*c);
 
     return 0;
 }
