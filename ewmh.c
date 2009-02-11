@@ -415,7 +415,7 @@ ewmh_process_client_message(xcb_client_message_event_t *ev)
 void
 ewmh_client_update_hints(client_t *c)
 {
-    xcb_atom_t state[8]; /* number of defined state atoms */
+    xcb_atom_t state[10]; /* number of defined state atoms */
     int i = 0;
 
     if(c->ismodal)
