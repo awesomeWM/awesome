@@ -172,12 +172,7 @@ property_update_wm_hints(client_t *c, xcb_get_property_reply_t *reply)
     }
 
     bool isurgent = xcb_wm_hints_get_urgency(&wmh);
-    if(isurgent != c->isurgent)
-    {
-        c->isurgent = isurgent;
-        /* execute hook */
-        hooks_property(c, "urgent");
-    }
+    client_seturgent(c, isurgent);
     if(wmh.flags & XCB_WM_HINT_STATE &&
        wmh.initial_state == XCB_WM_STATE_WITHDRAWN)
         client_setborder(c, 0);

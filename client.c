@@ -110,6 +110,36 @@ window_hasproto(xcb_window_t win, xcb_atom_t atom)
     return ret;
 }
 
+/** Change the clients urgency flag.
+ * \param c The client
+ * \param urgent The new flag state
+ */
+void
+client_seturgent(client_t *c, bool urgent)
+{
+    if(c->isurgent != urgent)
+    {
+        xcb_get_property_cookie_t hints =
+            xcb_get_wm_hints_unchecked(globalconf.connection, c->win);
+
+        c->isurgent = urgent;
+        ewmh_client_update_hints(c);
+
+        /* update ICCCM hints */
+        xcb_wm_hints_t wmh;
+        xcb_get_wm_hints_reply(globalconf.connection, hints, &wmh, NULL);
+
+        if(urgent)
+            wmh.flags |= XCB_WM_HINT_X_URGENCY;
+        else
+            wmh.flags &= ~XCB_WM_HINT_X_URGENCY;
+
+        xcb_set_wm_hints(globalconf.connection, c->win, &wmh);
+
+        hooks_property(c, "urgent");
+    }
+}
+
 /** Returns true if a client is tagged
  * with one of the tags of the specified screen.
  * \param c The client to check.
@@ -295,6 +325,9 @@ client_focus(client_t *c)
         luaA_client_userdata_new(globalconf.L, globalconf.screen_focus->client_focus);
         luaA_dofunction(globalconf.L, globalconf.hooks.focus, 1, 0);
     }
+
+    /* according to EWMH, we have to remove the urgent state from a client */
+    client_seturgent(c, false);
 
     ewmh_update_net_active_window(c->phys_screen);
 }

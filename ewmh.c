@@ -347,14 +347,11 @@ ewmh_process_state_atom(client_t *c, xcb_atom_t state, int set)
     else if(state == _NET_WM_STATE_DEMANDS_ATTENTION)
     {
         if(set == _NET_WM_STATE_REMOVE)
-            c->isurgent = false;
+            client_seturgent(c, false);
         else if(set == _NET_WM_STATE_ADD)
-            c->isurgent = true;
+            client_seturgent(c, true);
         else if(set == _NET_WM_STATE_TOGGLE)
-            c->isurgent = !c->isurgent;
-
-        /* execute hook */
-        hooks_property(c, "urgent");
+            client_seturgent(c, !c->isurgent);
     }
 }
 
