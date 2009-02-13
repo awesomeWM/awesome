@@ -170,4 +170,13 @@ function under_mouse(c)
                  y = m_coords.y - c_geometry.height / 2 })
 end
 
+--- Place the client centered in the screen.
+-- @param c The client.
+function centered(c)
+    local c_geometry = c:geometry()
+    local s_geometry = capi.screen[c.screen].geometry
+    c:geometry({ x = s_geometry.x + (s_geometry.width - c_geometry.width) / 2,
+                 y = s_geometry.y + (s_geometry.height - c_geometry.height) / 2 })
+end
+
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
