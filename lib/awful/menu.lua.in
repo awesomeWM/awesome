@@ -133,7 +133,6 @@ local function add_item(data, num, item_info)
         label.bg_image = icon
     end
 
-    label:buttons(bindings)
     item:buttons(bindings)
 
     function label.mouse_enter() mouse_enter(item, data.theme) end
