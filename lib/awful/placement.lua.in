@@ -13,6 +13,7 @@ local capi =
 {
     screen = screen,
     mouse = mouse,
+    client = client
 }
 local client = require("awful.client")
 local layout = require("awful.layout")
@@ -100,7 +101,9 @@ end
 
 --- Place the client without it being outside the screen.
 -- @param c The client.
+-- @return The new client geometry.
 function no_offscreen(c)
+    local c = c or capi.client.focus
     local geometry = c:geometry()
     local screen_geometry = capi.screen[c.screen].workarea
 
@@ -158,25 +161,29 @@ function no_overlap(c)
     new.width = geometry.width
     new.height = geometry.height
 
-    c:geometry(new)
+    return c:geometry(new)
 end
 
 --- Place the client under the mouse.
 -- @param c The client.
+-- @return The new client geometry.
 function under_mouse(c)
+    local c = c or capi.client.focus
     local c_geometry = c:geometry()
     local m_coords = capi.mouse.coords()
-    c:geometry({ x = m_coords.x - c_geometry.width / 2,
-                 y = m_coords.y - c_geometry.height / 2 })
+    return c:geometry({ x = m_coords.x - c_geometry.width / 2,
+                        y = m_coords.y - c_geometry.height / 2 })
 end
 
 --- Place the client centered in the screen.
 -- @param c The client.
+-- @return The new client geometry.
 function centered(c)
+    local c = c or capi.client.focus
     local c_geometry = c:geometry()
     local s_geometry = capi.screen[c.screen].geometry
-    c:geometry({ x = s_geometry.x + (s_geometry.width - c_geometry.width) / 2,
-                 y = s_geometry.y + (s_geometry.height - c_geometry.height) / 2 })
+    return c:geometry({ x = s_geometry.x + (s_geometry.width - c_geometry.width) / 2,
+                        y = s_geometry.y + (s_geometry.height - c_geometry.height) / 2 })
 end
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
