@@ -41,6 +41,23 @@ extern awesome_t globalconf;
 #define _NET_WM_STATE_ADD 1
 #define _NET_WM_STATE_TOGGLE 2
 
+/** Update the desktop geometry.
+ * \param phys_screen The physical screen id.
+ */
+static void
+ewmh_update_desktop_geometry(int phys_screen)
+{
+    area_t geom = screen_area_get(phys_screen,
+                                  NULL,
+                                  NULL,
+                                  false);
+    uint32_t sizes[] = { geom.width, geom.height };
+
+    xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
+                        xutil_screen_get(globalconf.connection, phys_screen)->root,
+                        _NET_DESKTOP_GEOMETRY, CARDINAL, 32, countof(sizes), sizes);
+}
+
 void
 ewmh_init(int phys_screen)
 {
@@ -57,6 +74,7 @@ ewmh_init(int phys_screen)
         _NET_DESKTOP_NAMES,
         _NET_ACTIVE_WINDOW,
         _NET_WORKAREA,
+        _NET_DESKTOP_GEOMETRY,
         _NET_CLOSE_WINDOW,
         _NET_WM_NAME,
         _NET_WM_STRUT_PARTIAL,
@@ -114,6 +132,8 @@ ewmh_init(int phys_screen)
     i = getpid();
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
                         father, _NET_WM_PID, CARDINAL, 32, 1, &i);
+
+    ewmh_update_desktop_geometry(phys_screen);
 }
 
 void
