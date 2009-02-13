@@ -134,9 +134,13 @@ local function add_item(data, num, item_info)
     end
 
     label:buttons(bindings)
+    item:buttons(bindings)
 
     function label.mouse_enter() mouse_enter(item, data.theme) end
     function label.mouse_leave() mouse_leave(item, data.theme) end
+
+    function item.mouse_enter() mouse_enter(item, data.theme) end
+    function item.mouse_leave() mouse_leave(item, data.theme) end
 
     -- Create the submenu icon widget
     local submenu
