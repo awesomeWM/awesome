@@ -310,6 +310,8 @@ local function widget_tasklist_label_common(c, args)
     local bg_focus = args.bg_focus or theme.tasklist_bg_focus or theme.bg_focus
     local fg_urgent = args.fg_urgent or theme.tasklist_fg_urgent or theme.fg_urgent
     local bg_urgent = args.bg_urgent or theme.tasklist_bg_urgent or theme.bg_urgent
+    local fg_minimize = args.fg_minimize or theme.tasklist_fg_minimize or theme.fg_minimize
+    local bg_minimize = args.bg_minimize or theme.tasklist_bg_minimize or theme.bg_minimize
     local floating_icon = args.floating_icon or theme.tasklist_floating_icon
     local font = args.font or theme.tasklist_font or theme.font or ""
     local bg = nil
@@ -334,6 +336,9 @@ local function widget_tasklist_label_common(c, args)
     elseif c.urgent and fg_urgent then
         bg = bg_urgent
         text = text .. "<span color='"..util.color_strip_alpha(fg_urgent).."'>"..name.."</span>"
+    elseif c.minimize and fg_minimize and bg_minimize then
+        bg = bg_minimize
+        text = text .. "<span color='"..util.color_strip_alpha(fg_minimize).."'>"..name.."</span>"
     else
         text = text .. name
     end

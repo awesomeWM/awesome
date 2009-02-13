@@ -7,10 +7,12 @@ font          = sans 8
 bg_normal     = #222222
 bg_focus      = #535d6c
 bg_urgent     = #ff0000
+bg_minimize   = #444444
 
 fg_normal     = #aaaaaa
 fg_focus      = #ffffff
 fg_urgent     = #ffffff
+fg_minimize  =  #ffffff
 
 border_width  = 1
 border_normal = #000000
