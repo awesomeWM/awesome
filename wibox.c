@@ -467,6 +467,8 @@ wibox_delete(wibox_t **wibox)
     simplewindow_wipe(&(*wibox)->sw);
     button_array_wipe(&(*wibox)->buttons);
     luaL_unref(globalconf.L, LUA_REGISTRYINDEX, (*wibox)->widgets_table);
+    luaL_unref(globalconf.L, LUA_REGISTRYINDEX, (*wibox)->mouse_enter);
+    luaL_unref(globalconf.L, LUA_REGISTRYINDEX, (*wibox)->mouse_leave);
     widget_node_array_wipe(&(*wibox)->widgets);
     p_delete(wibox);
 }
@@ -736,6 +738,8 @@ luaA_wibox_new(lua_State *L)
     w->isvisible = true;
     w->cursor = a_strdup("left_ptr");
 
+    w->mouse_enter = w->mouse_leave = LUA_REFNIL;
+
     for(i = 0; i <= reqs_nbr; i++)
         xcolor_init_reply(reqs[i]);
 
@@ -816,6 +820,8 @@ luaA_wibox_invalidate_byitem(lua_State *L, const void *item)
  * \lfield position The position.
  * \lfield ontop On top of other windows.
  * \lfield cursor The mouse cursor.
+ * \lfield mouse_enter A function to execute when the mouse enter the widget.
+ * \lfield mouse_leave A function to execute when the mouse leave the widget.
  */
 static int
 luaA_wibox_index(lua_State *L)
@@ -886,6 +892,18 @@ luaA_wibox_index(lua_State *L)
                 return 0;
         }
         break;
+      case A_TK_MOUSE_ENTER:
+        if((*wibox)->mouse_enter != LUA_REFNIL)
+            lua_rawgeti(L, LUA_REGISTRYINDEX, (*wibox)->mouse_enter);
+        else
+            return 0;
+        return 1;
+      case A_TK_MOUSE_LEAVE:
+        if((*wibox)->mouse_leave != LUA_REFNIL)
+            lua_rawgeti(L, LUA_REGISTRYINDEX, (*wibox)->mouse_leave);
+        else
+            return 0;
+        return 1;
       default:
         return 0;
     }
@@ -1082,6 +1100,12 @@ luaA_wibox_newindex(lua_State *L)
                 window_opacity_set((*wibox)->sw.window, d);
         }
         break;
+      case A_TK_MOUSE_ENTER:
+        luaA_registerfct(L, 3, &(*wibox)->mouse_enter);
+        return 0;
+      case A_TK_MOUSE_LEAVE:
+        luaA_registerfct(L, 3, &(*wibox)->mouse_leave);
+        return 0;
       default:
         switch((*wibox)->type)
         {

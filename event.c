@@ -472,6 +472,9 @@ event_handle_leavenotify(void *data __attribute__ ((unused)),
             }
             wibox->mouse_over = NULL;
         }
+
+        if(wibox->mouse_leave != LUA_REFNIL)
+            luaA_dofunction(globalconf.L, wibox->mouse_leave, 0, 0);
     }
 
     return 0;
@@ -489,7 +492,6 @@ event_handle_enternotify(void *data __attribute__ ((unused)),
 {
     client_t *c;
     xembed_window_t *emwin;
-    wibox_t *wibox;
     widget_t *w;
 
     if(ev->mode != XCB_NOTIFY_MODE_NORMAL
@@ -497,16 +499,22 @@ event_handle_enternotify(void *data __attribute__ ((unused)),
            && ev->root_y == globalconf.pointer_y))
         return 0;
 
+    wibox_t *wibox = wibox_getbywin(ev->event);
 
-    if((wibox = wibox_getbywin(ev->event))
-       && (w = widget_getbycoords(wibox->position, &wibox->widgets,
-                                  wibox->sw.geometry.width,
-                                  wibox->sw.geometry.height,
-                                  &ev->event_x, &ev->event_y)))
+    if(wibox)
     {
-        globalconf.pointer_x = ev->root_x;
-        globalconf.pointer_y = ev->root_y;
-        event_handle_widget_motionnotify(wibox, &wibox->mouse_over, w);
+        if((w = widget_getbycoords(wibox->position, &wibox->widgets,
+                                   wibox->sw.geometry.width,
+                                   wibox->sw.geometry.height,
+                                   &ev->event_x, &ev->event_y)))
+        {
+            globalconf.pointer_x = ev->root_x;
+            globalconf.pointer_y = ev->root_y;
+            event_handle_widget_motionnotify(wibox, &wibox->mouse_over, w);
+        }
+
+        if(wibox->mouse_enter != LUA_REFNIL)
+            luaA_dofunction(globalconf.L, wibox->mouse_enter, 0, 0);
     }
     else if((c = client_getbytitlebarwin(ev->event))
        || (c = client_getbywin(ev->event)))

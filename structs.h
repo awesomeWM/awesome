@@ -102,6 +102,8 @@ typedef struct
     luaA_ref widgets_table;
     /** Widget the mouse is over */
     widget_t *mouse_over;
+    /** Mouse over event handler */
+    luaA_ref mouse_enter, mouse_leave;
     /** Need update */
     bool need_update;
     /** Cursor */
