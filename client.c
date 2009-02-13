@@ -1741,7 +1741,25 @@ luaA_client_index(lua_State *L)
           case WINDOW_TYPE_UTILITY:
             lua_pushliteral(L, "utility");
             break;
-          default:
+          case WINDOW_TYPE_DROPDOWN_MENU:
+            lua_pushliteral(L, "dropdown_menu");
+            break;
+          case WINDOW_TYPE_POPUP_MENU:
+            lua_pushliteral(L, "popup_menu");
+            break;
+          case WINDOW_TYPE_TOOLTIP:
+            lua_pushliteral(L, "tooltip");
+            break;
+          case WINDOW_TYPE_NOTIFICATION:
+            lua_pushliteral(L, "notification");
+            break;
+          case WINDOW_TYPE_COMBO:
+            lua_pushliteral(L, "combo");
+            break;
+          case WINDOW_TYPE_DND:
+            lua_pushliteral(L, "dnd");
+            break;
+          case WINDOW_TYPE_NORMAL:
             lua_pushliteral(L, "normal");
             break;
         }

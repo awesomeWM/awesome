@@ -47,7 +47,14 @@ typedef enum
      */
     WINDOW_TYPE_MENU,
     WINDOW_TYPE_TOOLBAR,
-    WINDOW_TYPE_UTILITY
+    WINDOW_TYPE_UTILITY,
+    /* This ones are usually set on override-redirect windows. */
+    WINDOW_TYPE_DROPDOWN_MENU,
+    WINDOW_TYPE_POPUP_MENU,
+    WINDOW_TYPE_TOOLTIP,
+    WINDOW_TYPE_NOTIFICATION,
+    WINDOW_TYPE_COMBO,
+    WINDOW_TYPE_DND
 } window_type_t;
 
 /** Wibox types */
