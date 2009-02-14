@@ -427,12 +427,12 @@ event_handle_motionnotify(void *data __attribute__ ((unused)),
                           xcb_connection_t *connection,
                           xcb_motion_notify_event_t *ev)
 {
-    wibox_t *wibox = wibox_getbywin(ev->event);
+    wibox_t *wibox;
     widget_t *w;
 
     event_handle_mousegrabber(ev->root_x, ev->root_y, ev->state);
 
-    if(wibox
+    if((wibox = wibox_getbywin(ev->event))
        && (w = widget_getbycoords(wibox->position, &wibox->widgets,
                                   wibox->sw.geometry.width,
                                   wibox->sw.geometry.height,
@@ -457,9 +457,9 @@ event_handle_leavenotify(void *data __attribute__ ((unused)),
                          xcb_leave_notify_event_t *ev)
 {
     wibox_t *wibox;
-    client_t *c = client_getbywin(ev->event);
+    client_t *c;
 
-    if(c)
+    if((c = client_getbywin(ev->event)))
     {
         if(globalconf.hooks.mouse_leave != LUA_REFNIL)
         {
@@ -500,15 +500,14 @@ event_handle_enternotify(void *data __attribute__ ((unused)),
     client_t *c;
     xembed_window_t *emwin;
     widget_t *w;
+    wibox_t *wibox;
 
     if(ev->mode != XCB_NOTIFY_MODE_NORMAL
        || (ev->root_x == globalconf.pointer_x
            && ev->root_y == globalconf.pointer_y))
         return 0;
 
-    wibox_t *wibox = wibox_getbywin(ev->event);
-
-    if(wibox)
+    if((wibox = wibox_getbywin(ev->event)))
     {
         if((w = widget_getbycoords(wibox->position, &wibox->widgets,
                                    wibox->sw.geometry.width,
@@ -559,9 +558,9 @@ event_handle_expose(void *data __attribute__ ((unused)),
                     xcb_connection_t *connection __attribute__ ((unused)),
                     xcb_expose_event_t *ev)
 {
-    wibox_t *wibox = wibox_getbywin(ev->window);
+    wibox_t *wibox;
 
-    if(wibox)
+    if((wibox = wibox_getbywin(ev->window)))
         simplewindow_refresh_pixmap_partial(&wibox->sw,
                                             ev->x, ev->y,
                                             ev->width, ev->height);
