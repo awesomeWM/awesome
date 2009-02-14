@@ -538,6 +538,7 @@ main(int argc, char **argv)
 
     /* we will receive events, stop grabbing server */
     xcb_ungrab_server(globalconf.connection);
+    xcb_flush(globalconf.connection);
 
     luaA_cs_init();
 
