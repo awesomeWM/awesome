@@ -367,6 +367,28 @@ function swap.byidx(i, c)
     end
 end
 
+--- Cycle clients.
+-- @param clockwise True to cycle clients clockwise.
+-- @param screen Optional screen where to cycle clients.
+function cycle(clockwise, screen)
+    local screen = screen or capi.mouse.screen
+    local cls = visible(screen)
+    -- We can't rotate without at least 2 clients, buddy.
+    if #cls >= 2 then
+        local c = table.remove(cls, 1)
+        if clockwise then
+            for i = #cls, 1, -1 do
+                c:swap(cls[i])
+            end
+        else
+            for _, rc in pairs(cls) do
+                print(_)
+                c:swap(rc)
+            end
+        end
+    end
+end
+
 --- Get the master window.
 -- @param screen Optional screen number, otherwise screen mouse is used.
 -- @return The master window.
