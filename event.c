@@ -291,6 +291,9 @@ event_handle_configurerequest(void *data __attribute__ ((unused)),
         if(ev->value_mask & XCB_CONFIG_WINDOW_HEIGHT)
             geometry.height = ev->height;
 
+        if (ev->value_mask & XCB_CONFIG_WINDOW_BORDER_WIDTH)
+            client_setborder(c, ev->border_width);
+
         if(c->isbanned)
         {
             /* We'll be sending protocol geometry, so don't readd borders and titlebar. */
