@@ -295,8 +295,8 @@ event_handle_configurerequest(void *data __attribute__ ((unused)),
         {
             /* We'll be sending protocol geometry, so don't readd borders and titlebar. */
             /* We do have to ensure the windows don't end up in the visible screen. */
-            geometry.x = - (geometry.width + 2*c->border);
-            geometry.y = - (geometry.height + 2*c->border);
+            ev->x = geometry.x = - (geometry.width + 2*c->border);
+            ev->y = geometry.y = - (geometry.height + 2*c->border);
             window_configure(c->win, geometry, c->border);
             event_handle_configurerequest_configure_window(ev);
         }
