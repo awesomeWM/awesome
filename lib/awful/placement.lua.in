@@ -175,13 +175,19 @@ function under_mouse(c)
                         y = m_coords.y - c_geometry.height / 2 })
 end
 
---- Place the client centered in the screen.
+--- Place the client centered with respect to a parent or the clients screen.
 -- @param c The client.
+-- @param p The parent (optional, nil for screen centering).
 -- @return The new client geometry.
-function centered(c)
+function centered(c, p)
     local c = c or capi.client.focus
     local c_geometry = c:geometry()
-    local s_geometry = capi.screen[c.screen].geometry
+    local s_geometry
+    if p then
+        s_geometry = p:geometry()
+    else
+        s_geometry = capi.screen[c.screen].geometry
+    end
     return c:geometry({ x = s_geometry.x + (s_geometry.width - c_geometry.width) / 2,
                         y = s_geometry.y + (s_geometry.height - c_geometry.height) / 2 })
 end
