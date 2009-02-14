@@ -336,7 +336,7 @@ local function widget_tasklist_label_common(c, args)
     elseif c.urgent and fg_urgent then
         bg = bg_urgent
         text = text .. "<span color='"..util.color_strip_alpha(fg_urgent).."'>"..name.."</span>"
-    elseif c.minimize and fg_minimize and bg_minimize then
+    elseif c.minimized and fg_minimize and bg_minimize then
         bg = bg_minimize
         text = text .. "<span color='"..util.color_strip_alpha(fg_minimize).."'>"..name.."</span>"
     else
