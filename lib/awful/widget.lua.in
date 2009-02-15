@@ -109,6 +109,9 @@ local function taglist_update (screen, w, label, buttons, data, widgets)
     list_update(w, buttons, label, data, widgets, tags)
 end
 
+--- Get the tag object the given widget appears on.
+-- @param widget The widget the look for.
+-- @return The tag object.
 function taglist.gettag(widget)
     return tagwidgets[widget]
 end
