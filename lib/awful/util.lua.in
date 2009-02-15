@@ -90,20 +90,19 @@ function eval(s)
     return assert(loadstring("return " .. s))()
 end
 
+local xml_entity_names = { ["'"] = "&apos;", ["\""] = "&quot;", ["<"] = "&lt;", [">"] = "&gt;", ["&"] = "&amp;" };
 --- Escape a string from XML char.
 -- Useful to set raw text in textbox.
 -- @param text Text to escape.
 -- @return Escape text.
-local xml_entity_names = { ["'"] = "&apos;", ["\""] = "&quot;", ["<"] = "&lt;", [">"] = "&gt;", ["&"] = "&amp;" };
 function escape(text)
     return text and text:gsub("['&<>\"]", xml_entity_names) or nil
 end
 
+local xml_entity_chars = { lt = "<", gt = ">", nbsp = " ", quot = "\"", apos = "'", ndash = "-", mdash = "-", amp = "&" };
 --- Unescape a string from entities.
 -- @param text Text to unescape.
 -- @return Unescaped text.
-
-local xml_entity_chars = { lt = "<", gt = ">", nbsp = " ", quot = "\"", apos = "'", ndash = "-", mdash = "-", amp = "&" };
 function unescape(text)
     return text and text:gsub("&(%a+);", xml_entity_chars) or nil
 end
@@ -134,6 +133,11 @@ function restart()
     capi.awesome.restart()
 end
 
+--- Get the user's config or cache dir.
+-- It first checks XDG_CONFIG_HOME / XDG_CACHE_HOME, but then goes with the
+-- default paths.
+-- @param d The directory to get (either "config" or "cache").
+-- @return A string containing the requested path.
 function getdir(d)
     if d == "config" then
         local dir = os.getenv("XDG_CONFIG_HOME")
