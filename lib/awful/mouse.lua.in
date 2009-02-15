@@ -28,6 +28,8 @@ module("awful.mouse")
 client = {}
 wibox = {}
 
+--- Get the client object under the pointer.
+-- @return The client object under the pointer, if one can be found.
 function client_under_pointer()
     local obj = capi.mouse.object_under_pointer()
     if type(obj) == "client" then
@@ -35,6 +37,8 @@ function client_under_pointer()
     end
 end
 
+--- Get the wibox object under the pointer.
+-- @return The wibox object under the pointer, if one can be found.
 function wibox_under_pointer()
     local obj = capi.mouse.object_under_pointer()
     if type(obj) == "wibox" then
@@ -42,6 +46,8 @@ function wibox_under_pointer()
     end
 end
 
+--- Get the widget under the pointer.
+-- @return The widget object under the pointer, if it can be found.
 function widget_under_pointer()
     local obj, obj2 = capi.mouse.object_under_pointer()
     if type(obj2) == "widget" then
