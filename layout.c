@@ -46,6 +46,12 @@ arrange(int screen)
             client_ban(c);
     }
 
+    /* Reset status before calling arrange hook.
+     * This is needed if you call a function that relies
+     * on need_arrange while arrange is in progress.
+     */
+    globalconf.screens[screen].need_arrange = false;
+
     /* call hook */
     if(globalconf.hooks.arrange != LUA_REFNIL)
     {
@@ -70,9 +76,6 @@ arrange(int screen)
 
         p_delete(&qp_r);
     }
-
-    /* reset status */
-    globalconf.screens[screen].need_arrange = false;
 }
 
 /** Refresh the screen disposition
