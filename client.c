@@ -800,6 +800,7 @@ client_setminimized(client_t *c, bool s)
 {
     if(c->isminimized != s)
     {
+        client_need_arrange(c);
         c->isminimized = s;
         client_need_arrange(c);
         ewmh_client_update_hints(c);
@@ -817,6 +818,7 @@ client_setsticky(client_t *c, bool s)
 {
     if(c->issticky != s)
     {
+        client_need_arrange(c);
         c->issticky = s;
         client_need_arrange(c);
         ewmh_client_update_hints(c);
@@ -1558,6 +1560,7 @@ luaA_client_newindex(lua_State *L)
         b = luaA_checkboolean(L, 3);
         if(b != (*c)->ishidden)
         {
+            client_need_arrange(*c);
             (*c)->ishidden = b;
             client_need_arrange(*c);
         }
