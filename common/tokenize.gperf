@@ -44,6 +44,7 @@ hide
 honorsizehints
 icon
 icon_name
+id
 image
 instance
 key_press

@@ -1644,6 +1644,7 @@ luaA_client_newindex(lua_State *L)
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
  * \luastack
+ * \lfield id The window X id.
  * \lfield name The client title.
  * \lfield skip_taskbar True if the client does not want to be in taskbar.
  * \lfield type The window type (desktop, normal, dock, …).
@@ -1798,6 +1799,9 @@ luaA_client_index(lua_State *L)
             p_delete(&prop_r);
             return 0;
         }
+        break;
+      case A_TK_ID:
+        lua_pushnumber(L, (*c)->win);
         break;
       case A_TK_LEADER_ID:
         lua_pushnumber(L, (*c)->leader_win);
