@@ -40,6 +40,9 @@ OPTIONS
     random wallpaper from this same directory.
 *-i*::
     Display useful information about the best application to set the wallpaper found.
+*-m #*::
+    Use montage to create a big image (image should fit screen size). Requires montage(1).
+    # is the number of screen (columns in montage).
 *-p*::
     Display useful tips.
 *-h*::
