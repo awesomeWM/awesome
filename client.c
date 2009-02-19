@@ -286,15 +286,8 @@ client_focus(client_t *c)
     if (!window_hasproto(c->win, WM_TAKE_FOCUS) && c->nofocus)
         return;
 
-    /* unfocus current selected client
-     * We don't really need to unfocus here,
-     * because client already received FocusOut event.
-     * What we need to do is call unfocus hook, to
-     * inform lua script, about this event.
-     */
-    if(globalconf.screen_focus->client_focus
-       && c != globalconf.screen_focus->client_focus)
-        client_unfocus_hook(globalconf.screen_focus->client_focus);
+    /* Save current focused client */
+    client_t *focused_before = globalconf.screen_focus->client_focus;
 
     /* stop hiding c */
     c->ishidden = false;
@@ -318,6 +311,15 @@ client_focus(client_t *c)
     /* Some layouts use focused client differently, so call them back.
      * And anyway, we have maybe unhidden */
     client_need_arrange(c);
+
+    /* unfocus current selected client
+     * We don't really need to unfocus here,
+     * because client already received FocusOut event.
+     * What we need to do is call unfocus hook, to
+     * inform lua script, about this event.
+     */
+    if(focused_before && c != focused_before)
+        client_unfocus_hook(focused_before);
 
     /* execute hook */
     if(globalconf.hooks.focus != LUA_REFNIL)
