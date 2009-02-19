@@ -1261,15 +1261,15 @@ client_setborder(client_t *c, int width)
         return;
 
     /* Update geometry with the new border. */
-    c->geometry.width -= c->border;
-    c->geometry.height -= c->border;
+    c->geometry.width -= 2 * c->border;
+    c->geometry.height -= 2 * c->border;
 
     c->border = width;
     xcb_configure_window(globalconf.connection, c->win,
                          XCB_CONFIG_WINDOW_BORDER_WIDTH, &w);
 
-    c->geometry.width += c->border;
-    c->geometry.height += c->border;
+    c->geometry.width += 2 * c->border;
+    c->geometry.height += 2 * c->border;
     /* Tiled clients will be resized by the layout functions. */
     client_need_arrange(c);
 
