@@ -131,8 +131,14 @@ mytasklist.buttons = { button({ }, 1, function (c)
                                           c:raise()
                                       end),
                        button({ }, 3, function () if instance then instance:hide() end instance = awful.menu.clients({ width=250 }) end),
-                       button({ }, 4, function () awful.client.focus.byidx(1) end),
-                       button({ }, 5, function () awful.client.focus.byidx(-1) end) }
+                       button({ }, 4, function ()
+                                          awful.client.focus.byidx(1)
+                                          if client.focus then client.focus:raise() end
+                                      end),
+                       button({ }, 5, function ()
+                                          awful.client.focus.byidx(-1)
+                                          if client.focus then client.focus:raise() end
+                                      end) }
 
 for s = 1, screen.count() do
     -- Create a promptbox for each screen
