@@ -207,7 +207,7 @@ property_handle_wm_hints(void *data,
 void
 property_update_wm_name(client_t *c)
 {
-    char *name, *utf8;
+    char *name;
     ssize_t len;
 
     if(!xutil_text_prop_get(globalconf.connection, c->win, _NET_WM_NAME, &name, &len))
@@ -216,11 +216,7 @@ property_update_wm_name(client_t *c)
 
     p_delete(&c->name);
 
-    /* if no conversion needed, just point to name */
-    if(draw_iso2utf8(name, len, &utf8, NULL))
-        p_delete(&name);
-    else
-        c->name = name;
+    c->name = name;
 
     /* call hook */
     hooks_property(c, "name");
@@ -233,7 +229,7 @@ property_update_wm_name(client_t *c)
 void
 property_update_wm_icon_name(client_t *c)
 {
-    char *name, *utf8;
+    char *name;
     ssize_t len;
 
     if(!xutil_text_prop_get(globalconf.connection, c->win, _NET_WM_ICON_NAME, &name, &len))
@@ -242,10 +238,7 @@ property_update_wm_icon_name(client_t *c)
 
     p_delete(&c->icon_name);
 
-    if(draw_iso2utf8(name, len, &utf8, NULL))
-        p_delete(&name);
-    else
-        c->icon_name = name;
+    c->icon_name = name;
 
     /* call hook */
     hooks_property(c, "icon_name");
