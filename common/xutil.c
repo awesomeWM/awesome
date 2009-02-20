@@ -58,9 +58,11 @@ xutil_text_prop_get(xcb_connection_t *conn, xcb_window_t w, xcb_atom_t atom,
     if(text && len)
     {
         /* Check whether the returned property value is just an ascii
-         * string or utf8 string.  At the moment it doesn't handle
-         * COMPOUND_TEXT and multibyte but it's not needed...  */
-        if(reply.encoding == STRING || reply.encoding == UTF8_STRING)
+         * string, an UTF-8 string or just some random multibyte in any other
+         * encoding. */
+        if(reply.encoding == STRING
+           || reply.encoding == UTF8_STRING
+           || reply.encoding == COMPOUND_TEXT)
         {
             *text = p_new(char, reply.name_len + 1);
             /* Use memcpy() because the property name is not be \0
