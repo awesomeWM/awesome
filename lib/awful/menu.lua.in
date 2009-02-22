@@ -93,6 +93,16 @@ end
 local function item_enter(data, num)
     data.items[num].wibox.fg = data.theme.fg_focus
     data.items[num].wibox.bg = data.theme.bg_focus
+
+    if data.auto_expand == true then
+        if data.active_child then
+            data.active_child:hide()
+        end
+
+        if type(data.items[num].cmd) == "table" then
+            exec(data, num)
+        end
+    end
 end
 
 local function item_leave(data, num)
@@ -246,7 +256,7 @@ function toggle(menu)
 end
 
 --- Open a menu popup.
--- @param menu Table containing the menu informations. Key items: Table containing the displayed items, each element is a tab containing: item name, tiggered action, submenu table or function, item icon (optional). Keys [fg|bg]_[focus|normal], border, border_width, submenu_icon, height and width override the default display for your menu, each of them are optional.
+-- @param menu Table containing the menu informations. Key items: Table containing the displayed items, each element is a tab containing: item name, tiggered action, submenu table or function, item icon (optional). Keys [fg|bg]_[focus|normal], border, border_width, submenu_icon, height and width override the default display for your menu, each of them are optional. Key auto_expand controls the submenu auto expand behaviour by setting it to true (default) or false.
 -- @param parent Specify the parent menu if we want to open a submenu, this value should never be set by the user.
 -- @param num Specify the parent's clicked item number if we want to open a submenu, this value should never be set by the user.
 function new(menu, parent, num)
@@ -258,6 +268,7 @@ function new(menu, parent, num)
     data.theme = parent and parent.theme or load_theme(menu)
     data.parent = parent
     data.child = {}
+    data.auto_expand = parent and parent.auto_expand or menu.auto_expand or true
     data.h = parent and parent.h or data.theme.menu_height
     data.w = parent and parent.w or data.theme.menu_width
 
