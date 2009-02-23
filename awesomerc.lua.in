@@ -408,11 +408,8 @@ awful.hooks.arrange.register(function (screen)
     end
 end)
 
--- Hook called every second
-awful.hooks.timer.register(1, function ()
-    -- For unix time_t lovers
-    mytextbox.text = " " .. os.time() .. " time_t "
-    -- Otherwise use:
-    -- mytextbox.text = " " .. os.date() .. " "
+-- Hook called every minute
+awful.hooks.timer.register(60, function ()
+    mytextbox.text = os.date(" %a %b %d, %H:%M ")
 end)
 -- }}}
