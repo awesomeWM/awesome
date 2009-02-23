@@ -268,8 +268,8 @@ function new(menu, parent, num)
     data.theme = parent and parent.theme or load_theme(menu)
     data.parent = parent
     data.child = {}
-    if parent and parent.auto_expand then
-        data.auto_expand = true
+    if parent then
+        data.auto_expand = parent.auto_expand
     elseif menu.auto_expand ~= nil then
         data.auto_expand = menu.auto_expand
     else
