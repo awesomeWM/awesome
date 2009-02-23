@@ -391,7 +391,7 @@ end
 -- Notify
 if awful.hooks.dbus then
     awful.hooks.dbus.register("org.freedesktop.Notifications", function (data, appname, replaces_id, icon, title, text, actions, hints, expire)
-    args = {}
+    args = { preset = { } }
     if data.member == "Notify" then
         if text ~= "" then
             args.text = text
