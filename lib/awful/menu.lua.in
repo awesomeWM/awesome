@@ -44,26 +44,16 @@ local function load_theme(custom)
     return theme
 end
 
-local function mouse_enter(w, theme)
-    w.fg = theme.fg_focus
-    w.bg = theme.bg_focus
-end
-
-local function mouse_leave(w, theme)
-    w.fg = theme.fg_normal
-    w.bg = theme.bg_normal
-end
-
 --- Hide a menu popup.
 -- @param menu The menu to hide.
 function hide(menu)
     -- Remove items from screen
     for i = 1, #menu.items do
         -- Call mouse_leave to clear menu entry
-        for k, w in pairs(menu.items[i].widgets) do
+        for k, w in pairs(menu.items[i].wibox.widgets) do
             w.mouse_leave()
         end
-        menu.items[i].screen = nil
+        menu.items[i].wibox.screen = nil
     end
     if menu.active_child then
         menu.active_child:hide()
@@ -80,23 +70,34 @@ local function get_parents(data)
     return data
 end
 
-local function exec(data, action, num)
-    if type(action[2]) == "table" then
+local function exec(data, num)
+    cmd = data.items[num].cmd
+    if type(cmd) == "table" then
         if not data.child[num] then
-            data.child[num] = new({ items = action[2] }, data, num)
+            data.child[num] = new({ items = cmd }, data, num)
         end
         if data.active_child then
             data.active_child:hide()
         end
         data.active_child = data.child[num]
         data.active_child:show()
-    elseif type(action[2]) == "string" then
+    elseif type(cmd) == "string" then
         get_parents(data):hide()
-        util.spawn(action[2])
-    elseif type(action[2]) == "function" then
+        util.spawn(cmd)
+    elseif type(cmd) == "function" then
         get_parents(data):hide()
-        action[2]()
+        cmd()
     end
+end
+
+local function item_enter(data, num)
+    data.items[num].wibox.fg = data.theme.fg_focus
+    data.items[num].wibox.bg = data.theme.bg_focus
+end
+
+local function item_leave(data, num)
+    data.items[num].wibox.fg = data.theme.fg_normal
+    data.items[num].wibox.bg = data.theme.bg_normal
 end
 
 local function add_item(data, num, item_info)
@@ -110,7 +111,7 @@ local function add_item(data, num, item_info)
 
     -- Create bindings
     local bindings = {
-        button({}, 1, function () exec(data, item_info, num) end),
+        button({}, 1, function () exec(data, num) end),
         button({}, 3, function () hide(data) end)
     }
 
@@ -135,11 +136,11 @@ local function add_item(data, num, item_info)
 
     item:buttons(bindings)
 
-    function label.mouse_enter() mouse_enter(item, data.theme) end
-    function label.mouse_leave() mouse_leave(item, data.theme) end
+    function label.mouse_enter() item_enter(data, num) end
+    function label.mouse_leave() item_leave(data, num) end
 
-    function item.mouse_enter() mouse_enter(item, data.theme) end
-    function item.mouse_leave() mouse_leave(item, data.theme) end
+    function item.mouse_enter() item_enter(data, num) end
+    function item.mouse_leave() item_leave(data, num) end
 
     -- Create the submenu icon widget
     local submenu
@@ -148,8 +149,8 @@ local function add_item(data, num, item_info)
         submenu.image = data.theme.submenu_icon and image(data.theme.submenu_icon)
         submenu:buttons(bindings)
 
-        function submenu.mouse_enter() mouse_enter(item, data.theme) end
-        function submenu.mouse_leave() mouse_leave(item, data.theme) end
+        function submenu.mouse_enter() item_enter(data, num) end
+        function submenu.mouse_leave() item_leave(data, num) end
     end
 
     -- Add widgets to the wibox
@@ -157,7 +158,7 @@ local function add_item(data, num, item_info)
 
     item.ontop = true
 
-    return item
+    return { wibox = item, cmd = item_info[2] }
 end
 
 --- Build a popup menu with running clients and shows it.
@@ -223,20 +224,21 @@ function show(menu)
     local screen_index = capi.mouse.screen
     set_coords(menu, screen_index)
     for num, item in pairs(menu.items) do
-        item:geometry({
+        local wibox = item.wibox
+        wibox:geometry({
             width = menu.w,
             height = menu.h,
             x = menu.x,
             y = menu.y + (num - 1) * (menu.h - menu.theme.border_width)
         })
-        item.screen = screen_index
+        wibox.screen = screen_index
     end
 end
 
 --- Toggle menu visibility.
 -- @param menu The menu to show if it's hidden, or to hide if it's shown.
 function toggle(menu)
-    if menu.items[1] and menu.items[1].screen then
+    if menu.items[1] and menu.items[1].wibox.screen then
         hide(menu)
     else
         show(menu)
