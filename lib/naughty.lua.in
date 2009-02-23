@@ -430,9 +430,9 @@ if awful.hooks.dbus then
                 args.timeout = expire / 1000
             end
             local id = notify(args).id
-            return "i", id
+            return "u", id
         end
-        return "i", "0"
+        return "u", "0"
     elseif data.member == "CloseNotification" then
         local obj = getById(arg1)
         if obj then
