@@ -229,7 +229,8 @@ wibox_systray_refresh(wibox_t *wibox)
                     em = &globalconf.embedded.tab[j];
                     if(em->phys_screen == phys_screen)
                     {
-                        if(config_win_vals[1] + config_win_vals[3] <= (uint32_t) wibox->sw.geometry.y + wibox->sw.geometry.width)
+                        /* if(y + width <= wibox.y + systray.right) */
+                        if(config_win_vals[1] + config_win_vals[3] <= (uint32_t) wibox->sw.geometry.y + AREA_RIGHT(systray->geometry))
                         {
                             xcb_map_window(globalconf.connection, em->win);
                             xcb_configure_window(globalconf.connection, em->win,
