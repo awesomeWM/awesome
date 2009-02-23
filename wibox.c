@@ -137,15 +137,12 @@ wibox_systray_refresh(wibox_t *wibox)
             uint32_t config_win_vals[4];
             uint32_t config_win_vals_off[2] = { -512, -512 };
             xembed_window_t *em;
-            position_t pos;
             int phys_screen = wibox->sw.ctx.phys_screen;
 
             if(wibox->isvisible
                && systray->widget->isvisible
                && systray->geometry.width)
             {
-                pos = wibox->position;
-
                 /* Set background of the systray window. */
                 xcb_change_window_attributes(globalconf.connection,
                                              globalconf.screens[phys_screen].systray.window,
@@ -153,21 +150,21 @@ wibox_systray_refresh(wibox_t *wibox)
                 /* Map it. */
                 xcb_map_window(globalconf.connection, globalconf.screens[phys_screen].systray.window);
                 /* Move it. */
-                switch(wibox->position)
+                switch(wibox->sw.orientation)
                 {
-                  case Left:
+                  case North:
                     config_win_vals[0] = systray->geometry.y;
                     config_win_vals[1] = wibox->sw.geometry.height - systray->geometry.x - systray->geometry.width;
                     config_win_vals[2] = systray->geometry.height;
                     config_win_vals[3] = systray->geometry.width;
                     break;
-                  case Right:
+                  case South:
                     config_win_vals[0] = systray->geometry.y;
                     config_win_vals[1] = systray->geometry.x;
                     config_win_vals[2] = systray->geometry.height;
                     config_win_vals[3] = systray->geometry.width;
                     break;
-                  default:
+                  case East:
                     config_win_vals[0] = systray->geometry.x;
                     config_win_vals[1] = systray->geometry.y;
                     config_win_vals[2] = systray->geometry.width;
@@ -197,9 +194,9 @@ wibox_systray_refresh(wibox_t *wibox)
             else
                 return wibox_systray_kickout(phys_screen);
 
-            switch(pos)
+            switch(wibox->sw.orientation)
             {
-              case Left:
+              case North:
                 config_win_vals[1] = systray->geometry.width - config_win_vals[3];
                 for(int j = 0; j < globalconf.embedded.len; j++)
                 {
@@ -225,7 +222,7 @@ wibox_systray_refresh(wibox_t *wibox)
                     }
                 }
                 break;
-              case Right:
+              case South:
                 config_win_vals[1] = 0;
                 for(int j = 0; j < globalconf.embedded.len; j++)
                 {
@@ -251,9 +248,7 @@ wibox_systray_refresh(wibox_t *wibox)
                     }
                 }
                 break;
-              case Floating:
-              case Top:
-              case Bottom:
+              case East:
                 config_win_vals[1] = 0;
                 for(int j = 0; j < globalconf.embedded.len; j++)
                 {
