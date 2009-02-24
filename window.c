@@ -102,11 +102,10 @@ window_configure(xcb_window_t win, area_t geometry, int border)
 
 /** Grab or ungrab buttons on a window.
  * \param win The window.
- * \param root The root window.
  * \param buttons The buttons to grab.
  */
 void
-window_buttons_grab(xcb_window_t win, xcb_window_t root, button_array_t *buttons)
+window_buttons_grab(xcb_window_t win, button_array_t *buttons)
 {
     for(int i = 0; i < buttons->len; i++)
     {
@@ -122,33 +121,6 @@ window_buttons_grab(xcb_window_t win, xcb_window_t root, button_array_t *buttons
         xcb_grab_button(globalconf.connection, false, win, BUTTONMASK,
                         XCB_GRAB_MODE_SYNC, XCB_GRAB_MODE_ASYNC, XCB_NONE, XCB_NONE,
                         buttons->tab[i]->button, buttons->tab[i]->mod | globalconf.numlockmask | XCB_MOD_MASK_LOCK);
-    }
-
-    xcb_ungrab_button(globalconf.connection, XCB_BUTTON_INDEX_ANY, root, XCB_BUTTON_MASK_ANY);
-}
-
-/** Grab all buttons on the root window.
- * \param root The root window.
- */
-void
-window_root_buttons_grab(xcb_window_t root)
-{
-    button_array_t *barr = &globalconf.buttons;
-
-    for(int i = 0; i < barr->len; i++)
-    {
-        xcb_grab_button(globalconf.connection, false, root, BUTTONMASK,
-                        XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_SYNC, XCB_NONE, XCB_NONE,
-                        barr->tab[i]->button, barr->tab[i]->mod);
-        xcb_grab_button(globalconf.connection, false, root, BUTTONMASK,
-                        XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_SYNC, XCB_NONE, XCB_NONE,
-                        barr->tab[i]->button, barr->tab[i]->mod | XCB_MOD_MASK_LOCK);
-        xcb_grab_button(globalconf.connection, false, root, BUTTONMASK,
-                        XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_SYNC, XCB_NONE, XCB_NONE,
-                        barr->tab[i]->button, barr->tab[i]->mod | globalconf.numlockmask);
-        xcb_grab_button(globalconf.connection, false, root, BUTTONMASK,
-                        XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_SYNC, XCB_NONE, XCB_NONE,
-                        barr->tab[i]->button, barr->tab[i]->mod | globalconf.numlockmask | XCB_MOD_MASK_LOCK);
     }
 }
 

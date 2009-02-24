@@ -63,14 +63,8 @@ arrange(int screen)
                                        xutil_screen_get(globalconf.connection,
                                                           phys_screen)->root);
 
-    /* check that the mouse is on a window or not */
     if((qp_r = xcb_query_pointer_reply(globalconf.connection, qp_c, NULL)))
     {
-        if(qp_r->child == XCB_NONE || qp_r->root == qp_r->child)
-            window_root_buttons_grab(qp_r->root);
-        else if ((c = client_getbywin(qp_r->child)))
-            window_buttons_grab(c->win, qp_r->root, &c->buttons);
-
         globalconf.pointer_x = qp_r->root_x;
         globalconf.pointer_y = qp_r->root_y;
 

@@ -49,6 +49,7 @@
 #include "event.h"
 #include "mouse.h"
 #include "selection.h"
+#include "window.h"
 #include "common/socket.h"
 #include "common/buffer.h"
 

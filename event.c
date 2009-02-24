@@ -201,21 +201,22 @@ event_handle_button(void *data, xcb_connection_t *connection, xcb_button_press_e
         /* return even if no widget match */
         return 0;
     }
-
-    if((c = client_getbywin(ev->event)))
+    else if((c = client_getbywin(ev->event)))
     {
         event_handle_mouse_button(c, ev->response_type, ev->detail, ev->state, &c->buttons);
         xcb_allow_events(globalconf.connection,
                          XCB_ALLOW_REPLAY_POINTER,
                          XCB_CURRENT_TIME);
     }
-    else
+    else if(ev->child == XCB_NONE)
+    {
         for(screen = 0; screen < nb_screen; screen++)
             if(xutil_screen_get(connection, screen)->root == ev->event)
             {
                 event_handle_mouse_button(NULL, ev->response_type, ev->detail, ev->state, &globalconf.buttons);
                 return 0;
             }
+    }
 
     return 0;
 }
@@ -498,7 +499,6 @@ event_handle_enternotify(void *data __attribute__ ((unused)),
                          xcb_enter_notify_event_t *ev)
 {
     client_t *c;
-    xembed_window_t *emwin;
     widget_t *w;
     wibox_t *wibox;
 
@@ -525,7 +525,6 @@ event_handle_enternotify(void *data __attribute__ ((unused)),
     else if((c = client_getbytitlebarwin(ev->event))
        || (c = client_getbywin(ev->event)))
     {
-        window_buttons_grab(c->win, ev->root, &c->buttons);
         /* The idea behind saving pointer_x and pointer_y is Bob Marley powered.
          * this will allow us top drop some EnterNotify events and thus not giving
          * focus to windows appering under the cursor without a cursor move */
@@ -538,12 +537,6 @@ event_handle_enternotify(void *data __attribute__ ((unused)),
             luaA_dofunction(globalconf.L, globalconf.hooks.mouse_enter, 1, 0);
         }
     }
-    else if((emwin = xembed_getbywin(&globalconf.embedded, ev->event)))
-        xcb_ungrab_button(globalconf.connection, XCB_BUTTON_INDEX_ANY,
-                          xutil_screen_get(connection, emwin->phys_screen)->root,
-                          XCB_BUTTON_MASK_ANY);
-    else if(ev->event == ev->root)
-        window_root_buttons_grab(ev->root);
 
     return 0;
 }
