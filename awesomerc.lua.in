@@ -128,6 +128,7 @@ mytasklist.buttons = { button({ }, 1, function (c)
                                               awful.tag.viewonly(c:tags()[1])
                                           end
                                           client.focus = c
+                                          c:raise()
                                       end),
                        button({ }, 3, function () if instance then instance:hide() end instance = awful.menu.clients({ width=250 }) end),
                        button({ }, 4, function () awful.client.focus.byidx(1) end),
@@ -180,8 +181,16 @@ globalkeys =
     key({ modkey,           }, "Right",  awful.tag.viewnext       ),
     key({ modkey,           }, "Escape", awful.tag.history.restore),
 
-    key({ modkey,           }, "j", function () awful.client.focus.byidx( 1) end),
-    key({ modkey,           }, "k", function () awful.client.focus.byidx(-1) end),
+    key({ modkey,           }, "j",
+        function ()
+            awful.client.focus.byidx( 1)
+            if client.focus then client.focus:raise() end
+        end),
+    key({ modkey,           }, "k",
+        function ()
+            awful.client.focus.byidx(-1)
+            if client.focus then client.focus:raise() end
+        end),
 
     -- Layout manipulation
     key({ modkey, "Shift"   }, "j", function () awful.client.swap.byidx(  1) end),
@@ -189,7 +198,13 @@ globalkeys =
     key({ modkey, "Control" }, "j", function () awful.screen.focus( 1)       end),
     key({ modkey, "Control" }, "k", function () awful.screen.focus(-1)       end),
     key({ modkey,           }, "u", awful.client.urgent.jumpto),
-    key({ modkey,           }, "Tab", function () awful.client.focus.history.previous() end),
+    key({ modkey,           }, "Tab",
+        function ()
+            awful.client.focus.history.previous()
+            if client.focus then
+                client.focus:raise()
+            end
+        end),
 
     -- Standard program
     key({ modkey,           }, "Return", function () awful.util.spawn(terminal) end),
@@ -302,7 +317,6 @@ awful.hooks.focus.register(function (c)
     if not awful.client.ismarked(c) then
         c.border_color = beautiful.border_focus
     end
-    c:raise()
 end)
 
 -- Hook function to execute when unfocusing a client.
@@ -346,7 +360,7 @@ awful.hooks.manage.register(function (c, startup)
     end
     -- Add mouse bindings
     c:buttons({
-        button({ }, 1, function (c) client.focus = c end),
+        button({ }, 1, function (c) client.focus = c; c:raise() end),
         button({ modkey }, 1, awful.mouse.client.move),
         button({ modkey }, 3, awful.mouse.client.resize)
     })
