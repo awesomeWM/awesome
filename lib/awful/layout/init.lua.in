@@ -9,6 +9,7 @@ local ipairs = ipairs
 local tag = require("awful.tag")
 local util = require("awful.util")
 local suit = require("awful.layout.suit")
+local client = require("awful.client")
 local capi =
 {
     hooks = hooks,
@@ -59,7 +60,16 @@ end
 
 -- Register an arrange hook.
 local function on_arrange (screen)
-    get(screen).arrange(screen)
+    local t = tag.selected(screen)
+    local p = {}
+    p.workarea = capi.screen[screen].workarea
+    p.geometry = capi.screen[screen].geometry
+    p.clients = client.tiled(screen)
+    p.ncol = tag.getncol(t)
+    p.nmaster = tag.getnmaster(t)
+    p.mwfact = tag.getmwfact(t)
+    p.tagdata = tag.getdata(t)
+    get(screen).arrange(p)
 end
 
 --- Get the current layout name.

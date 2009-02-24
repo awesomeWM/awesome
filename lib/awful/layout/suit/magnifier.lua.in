@@ -18,14 +18,12 @@ local client = require("awful.client")
 --- Magnifier layout module for awful
 module("awful.layout.suit.magnifier")
 
-function arrange(screen)
+function arrange(p)
     -- Fullscreen?
-    local area = capi.screen[screen].workarea
-    local cls = client.tiled(screen)
+    local area = p.workarea
+    local cls = p.clients
     local focus = capi.client.focus
-    local t = tag.selected(screen)
-    local mwfact = tag.getmwfact(t)
-    local fidx -- Focus client index in cls table
+    local mwfact = p.mwfact
 
     -- Check that the focused window is on the right screen
     if focus and focus.screen ~= screen then focus = nil end

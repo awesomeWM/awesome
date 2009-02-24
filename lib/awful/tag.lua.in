@@ -244,6 +244,13 @@ local function hook_tags(screen, tag, action)
     end
 end
 
+--- Get tag data table.
+-- @param tag The Tag.
+-- @return The data table.
+function getdata(tag)
+    return data.tags[tag]
+end
+
 --- Get a tag property.
 -- @param tag The tag.
 -- @param prop The property name.

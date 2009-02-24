@@ -9,12 +9,6 @@
 -- Grab environment we need
 local ipairs = ipairs
 local math = math
-local client = require("awful.client")
-local tag = require("awful.tag")
-local capi =
-{
-    screen = screen
-}
 
 --- Tiled layouts module for awful
 module("awful.layout.suit.tile")
@@ -75,10 +69,9 @@ local function tile_group(cls, wa, orientation, fact, group)
     end
 
     return used_size
-
 end
 
-local function tile(screen, orientation)
+local function tile(param, orientation)
     orientation = orientation or "right"
 
     -- this handles are different orientations
@@ -93,23 +86,21 @@ local function tile(screen, orientation)
         y = "x"
     end
 
-    local t = tag.selected(screen)
-    local cls = client.tiled(screen)
-    local nmaster = math.min(tag.getnmaster(t), #cls)
+    local cls = param.clients
+    local nmaster = math.min(param.nmaster, #cls)
     local nother = math.max(#cls - nmaster,0)
 
-    local mwfact = tag.getmwfact(t)
-    local wa = capi.screen[screen].workarea
-    local ncol = tag.getncol(t)
+    local mwfact = param.mwfact
+    local wa = param.workarea
+    local ncol = param.ncol
 
-    local data = tag.getproperty(t,"windowfact")
+    local data = param.tagdata.windowfact
 
     if not data then
         data = {}
-        tag.setproperty(t,"windowfact", data)
+        param.tagdata.windowfact = data
     end
 
-    --
     local coord = wa[x]
     local place_master = true
     if orientation == "left" or orientation == "top" then
@@ -163,24 +154,24 @@ right.arrange = tile
 -- @param screen The screen number to tile.
 left = {}
 left.name = "tileleft"
-function left.arrange(screen)
-    return tile(screen, "left")
+function left.arrange(p)
+    return tile(p, "left")
 end
 
 --- The main tile algo, on bottom.
 -- @param screen The screen number to tile.
 bottom = {}
 bottom.name = "tilebottom"
-function bottom.arrange(screen)
-    return tile(screen, "bottom")
+function bottom.arrange(p)
+    return tile(p, "bottom")
 end
 
 --- The main tile algo, on top.
 -- @param screen The screen number to tile.
 top = {}
 top.name = "tiletop"
-function top.arrange(screen)
-    return tile(screen, "top")
+function top.arrange(p)
+    return tile(p, "top")
 end
 
 arrange = right.arrange

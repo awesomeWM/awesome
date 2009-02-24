@@ -7,7 +7,7 @@
 --- Dummy function for floating layout
 module("awful.layout.suit.floating")
 
-function arrange(screen)
+function arrange(p)
     return nil
 end
 
