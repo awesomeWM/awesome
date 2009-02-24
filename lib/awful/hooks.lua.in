@@ -112,6 +112,7 @@ for name, hook in pairs(capi.hooks) do
                 end
                 table.sort(delays)
                 _M[name].timer = delays[1]
+                if not delays[1] then delays[1] = 0 end
                 hook(delays[1], function (...)
                     for i, callback in ipairs(_M[name].callbacks) do
                         callback['counter'] = callback['counter'] + _M[name].timer
