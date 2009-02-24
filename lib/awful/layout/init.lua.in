@@ -59,28 +59,14 @@ end
 
 -- Register an arrange hook.
 local function on_arrange (screen)
-    get(screen)(screen)
+    get(screen).arrange(screen)
 end
-
-local layouts_name =
-{
-    [suit.tile]            = "tile",
-    [suit.tile.left]       = "tileleft",
-    [suit.tile.bottom]     = "tilebottom",
-    [suit.tile.top]        = "tiletop",
-    [suit.fair]            = "fairv",
-    [suit.fair.horizontal] = "fairh",
-    [suit.max]             = "max",
-    [suit.max.fullscreen]  = "fullscreen",
-    [suit.magnifier]       = "magnifier",
-    [suit.floating]        = "floating"
-}
 
 --- Get the current layout name.
 -- @param layout the layout name.
 -- @return The layout name.
 function getname(layout)
-    return layouts_name[layout]
+    return layout.name
 end
 
 hooks.arrange.register(on_arrange)

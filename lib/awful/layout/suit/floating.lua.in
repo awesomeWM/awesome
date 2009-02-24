@@ -4,14 +4,11 @@
 -- @release @AWESOME_VERSION@
 ---------------------------------------------------------------------------
 
--- Grab environment we need
-local setmetatable = setmetatable
-
 --- Dummy function for floating layout
 module("awful.layout.suit.floating")
 
-local function floating(_, screen)
+function arrange(screen)
     return nil
 end
 
-setmetatable(_M, { __call = floating })
+name = "floating"

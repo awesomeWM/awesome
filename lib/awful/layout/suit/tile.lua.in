@@ -7,7 +7,6 @@
 ---------------------------------------------------------------------------
 
 -- Grab environment we need
-local setmetatable = setmetatable
 local ipairs = ipairs
 local math = math
 local client = require("awful.client")
@@ -79,7 +78,7 @@ local function tile_group(cls, wa, orientation, fact, group)
 
 end
 
-local function tile(_, screen, orientation)
+local function tile(screen, orientation)
     orientation = orientation or "right"
 
     -- this handles are different orientations
@@ -156,22 +155,33 @@ local function tile(_, screen, orientation)
 
 end
 
+right = {}
+right.name = "tile"
+right.arrange = tile
+
 --- The main tile algo, on left.
 -- @param screen The screen number to tile.
-function left(screen)
-    return tile(nil, screen, "left")
+left = {}
+left.name = "tileleft"
+function left.arrange(screen)
+    return tile(screen, "left")
 end
 
 --- The main tile algo, on bottom.
 -- @param screen The screen number to tile.
-function bottom(screen)
-    return tile(nil, screen, "bottom")
+bottom = {}
+bottom.name = "tilebottom"
+function bottom.arrange(screen)
+    return tile(screen, "bottom")
 end
 
 --- The main tile algo, on top.
 -- @param screen The screen number to tile.
-function top(screen)
-    return tile(nil, screen, "top")
+top = {}
+top.name = "tiletop"
+function top.arrange(screen)
+    return tile(screen, "top")
 end
 
-setmetatable(_M, { __call = tile })
+arrange = right.arrange
+name = right.name

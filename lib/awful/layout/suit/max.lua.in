@@ -5,7 +5,6 @@
 ---------------------------------------------------------------------------
 
 -- Grab environment we need
-local setmetatable = setmetatable
 local pairs = pairs
 local client = require("awful.client")
 local capi =
@@ -34,14 +33,15 @@ end
 
 --- Maximized layout.
 -- @param screen The screen to arrange.
-local function max(_, screen)
+name = "max"
+function arrange(screen)
     return fmax(screen, false)
 end
 
 --- Fullscreen layout.
 -- @param screen The screen to arrange.
-function fullscreen(screen)
+fullscreen = {}
+fullscreen.name = "fullscreen"
+function fullscreen.arrange(screen)
     return fmax(screen, true)
 end
-
-setmetatable(_M, { __call = max })

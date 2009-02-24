@@ -5,7 +5,6 @@
 ---------------------------------------------------------------------------
 
 -- Grab environment we need
-local setmetatable = setmetatable
 local ipairs = ipairs
 local math = math
 local client = require("awful.client")
@@ -63,16 +62,18 @@ local function fair(screen, orientation)
         end
     end
 end
+
 --- Horizontal fair layout.
 -- @param screen The screen to arrange.
-function horizontal(screen)
-    return fair(screen, "east")
+horizontal = {}
+horizontal.name = "fairh"
+function horizontal.arrange(p)
+    return fair(p, "east")
 end
 
 -- Vertical fair layout.
 -- @param screen The screen to arrange.
-local function fairv(_, screen)
-    return fair(screen, "south")
+name = "fairv"
+function arrange(p)
+    return fair(p, "south")
 end
-
-setmetatable(_M, { __call = fairv })

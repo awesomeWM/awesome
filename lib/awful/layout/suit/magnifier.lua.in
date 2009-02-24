@@ -5,7 +5,6 @@
 ---------------------------------------------------------------------------
 
 -- Grab environment we need
-local setmetatable = setmetatable
 local ipairs = ipairs
 local math = math
 local tag = require("awful.tag")
@@ -19,7 +18,7 @@ local client = require("awful.client")
 --- Magnifier layout module for awful
 module("awful.layout.suit.magnifier")
 
-local function magnifier(_, screen)
+function arrange(screen)
     -- Fullscreen?
     local area = capi.screen[screen].workarea
     local cls = client.tiled(screen)
@@ -91,4 +90,4 @@ local function magnifier(_, screen)
     end
 end
 
-setmetatable(_M, { __call = magnifier })
+name = "magnifier"
