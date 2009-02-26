@@ -40,38 +40,6 @@ DO_LUA_NEW(extern, client_t, client, "client", client_ref)
 DO_LUA_EQ(client_t, client, "client")
 DO_LUA_GC(client_t, client, "client", client_unref)
 
-/** Load windows properties, restoring client's tag
- * and floating state before awesome was restarted if any.
- * \param c A client pointer.
- * \param screen A virtual screen.
- * \return True if client had property, false otherwise.
- */
-static bool
-client_loadprops(client_t * c, screen_t *screen)
-{
-    ssize_t len;
-    tag_array_t *tags = &screen->tags;
-    char *prop = NULL;
-
-    if(!xutil_text_prop_get(globalconf.connection, c->win, _AWESOME_TAGS,
-                            &prop, &len))
-        return false;
-
-    /* ignore property if the tag count isn't matching */
-    if(len == tags->len)
-        for(int i = 0; i < tags->len; i++)
-        {
-            if(prop[i] == '1')
-                tag_client(c, tags->tab[i]);
-            else
-                untag_client(c, tags->tab[i]);
-        }
-
-    p_delete(&prop);
-
-    return true;
-}
-
 /** Check if client supports protocol a protocole in WM_PROTOCOL.
  * \param win The window.
  * \return True if client has the atom in protocol, false otherwise.
@@ -592,9 +560,6 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
     if(tc != c && tc->phys_screen == c->phys_screen)
         screen = tc->screen;
 
-    /* Try to load props */
-    client_loadprops(c, &globalconf.screens[screen]);
-
     /* Then check clients hints */
     ewmh_client_check_hints(c);
 
@@ -1074,22 +1039,6 @@ client_setontop(client_t *c, bool s)
     }
 }
 
-/** Save client properties as an X property.
- * \param c The client.
- */
-void
-client_saveprops_tags(client_t *c)
-{
-    tag_array_t *tags = &globalconf.screens[c->screen].tags;
-    unsigned char *prop = p_alloca(unsigned char, tags->len + 1);
-    int i;
-
-    for(i = 0; i < tags->len; i++)
-        prop[i] = is_client_tagged(c, tags->tab[i]) ? '1' : '0';
-
-    xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE, c->win, _AWESOME_TAGS, STRING, 8, i, prop);
-}
-
 /** Unban a client and move it back into the viewport.
  * \param c The client.
  */
@@ -1181,9 +1130,6 @@ client_unmanage(client_t *c)
     titlebar_client_detach(c);
 
     ewmh_update_net_client_list(c->phys_screen);
-
-    /* delete properties */
-    xcb_delete_property(globalconf.connection, c->win, _AWESOME_TAGS);
 
     /* All the wiboxes (may) need to be repositioned. */
     if(client_hasstrut(c))

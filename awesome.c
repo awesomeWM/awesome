@@ -146,20 +146,15 @@ scan(void)
 
         for(i = 0; i < tree_c_len; i++)
         {
-            bool has_awesome_prop;
-
             attr_r = xcb_get_window_attributes_reply(globalconf.connection,
                                                      attr_wins[i],
                                                      NULL);
 
             state = window_state_get_reply(state_wins[i]);
 
-            has_awesome_prop = xutil_text_prop_get(globalconf.connection, wins[i],
-                                                   _AWESOME_TAGS, NULL, NULL);
-
             if(!attr_r || attr_r->override_redirect
-               || (attr_r->map_state != XCB_MAP_STATE_VIEWABLE && !has_awesome_prop)
-               || (state == XCB_WM_STATE_WITHDRAWN && !has_awesome_prop))
+               || attr_r->map_state != XCB_MAP_STATE_VIEWABLE
+               || state == XCB_WM_STATE_WITHDRAWN)
             {
                 geom_wins[i] = NULL;
                 p_delete(&attr_r);

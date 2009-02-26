@@ -77,11 +77,6 @@ tag_append_to_screen(tag_t *tag, screen_t *s)
     ewmh_update_net_desktop_names(phys_screen);
     ewmh_update_workarea(phys_screen);
 
-    /* resave tag prop of all clients so the number of tag will be the
-     * same */
-    for(client_t *c = globalconf.clients; c; c = c->next)
-        client_saveprops_tags(c);
-
     /* call hook */
     if(globalconf.hooks.tags != LUA_REFNIL)
     {
@@ -113,11 +108,6 @@ tag_remove_from_screen(tag_t *tag)
     ewmh_update_workarea(phys_screen);
     tag->screen = SCREEN_UNDEF;
 
-    /* resave tag prop of all clients so the number of tag will be the
-     * same */
-    for(client_t *c = globalconf.clients; c; c = c->next)
-        client_saveprops_tags(c);
-
     /* call hook */
     if(globalconf.hooks.tags != LUA_REFNIL)
     {
@@ -143,7 +133,6 @@ tag_client(client_t *c, tag_t *t)
 
     tag_ref(&t);
     client_array_append(&t->clients, c);
-    client_saveprops_tags(c);
     ewmh_client_update_desktop(c);
     client_need_arrange(c);
     /* call hook */
@@ -167,7 +156,6 @@ untag_client(client_t *c, tag_t *t)
         {
             client_need_arrange(c);
             client_array_take(&t->clients, i);
-            client_saveprops_tags(c);
             ewmh_client_update_desktop(c);
             /* call hook */
             if(globalconf.hooks.tagged != LUA_REFNIL)
