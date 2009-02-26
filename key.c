@@ -370,44 +370,6 @@ luaA_key_array_get(lua_State *L, keybindings_t *keys)
     return 1;
 }
 
-/** Add a global key binding. This key binding will always be available.
- * \param L The Lua VM state.
- *
- * \luastack
- * \lvalue A key.
- */
-static int
-luaA_key_add(lua_State *L)
-{
-    luaA_deprecate(L, "root.keys");
-    keyb_t **k = luaA_checkudata(L, 1, "key");
-    int nscreen = xcb_setup_roots_length(xcb_get_setup(globalconf.connection));
-
-    key_register(&globalconf.keys, *k);
-
-    for(int phys_screen = 0; phys_screen < nscreen; phys_screen++)
-    {
-        xcb_screen_t *s = xutil_screen_get(globalconf.connection, phys_screen);
-        xcb_ungrab_key(globalconf.connection, XCB_GRAB_ANY, s->root, XCB_BUTTON_MASK_ANY);
-        window_grabkeys(s->root, &globalconf.keys);
-    }
-
-    return 0;
-}
-
-/** Remove a global key binding.
- * \param L The Lua VM state.
- *
- * \luastack
- * \lvalue A key.
- */
-static int
-luaA_key_remove(lua_State *L)
-{
-    luaA_deprecate(L, "root.keys");
-    return 0;
-}
-
 const struct luaL_reg awesome_key_methods[] =
 {
     { "__call", luaA_key_new },
@@ -415,8 +377,6 @@ const struct luaL_reg awesome_key_methods[] =
 };
 const struct luaL_reg awesome_key_meta[] =
 {
-    { "add", luaA_key_add },
-    { "remove", luaA_key_remove },
     { "__tostring", luaA_key_tostring },
     { "__gc", luaA_key_gc },
     { NULL, NULL },

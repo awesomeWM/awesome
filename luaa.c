@@ -76,7 +76,6 @@ extern const struct luaL_reg awesome_wibox_methods[];
 extern const struct luaL_reg awesome_wibox_meta[];
 extern const struct luaL_reg awesome_key_methods[];
 extern const struct luaL_reg awesome_key_meta[];
-extern const struct luaL_reg awesome_keybinding_methods[];
 
 static struct sockaddr_un *addr;
 static ev_io csio = { .fd = -1 };
@@ -128,22 +127,6 @@ luaA_root_buttons(lua_State *L)
         luaA_button_array_set(L, 1, &globalconf.buttons);
 
     return luaA_button_array_get(L, &globalconf.buttons);
-}
-
-/** Get or set global mouse bindings (DEPRECATED).
- * This binding will be available when you'll click on root window.
- * \param L The Lua VM state.
- * \return The number of element pushed on stack.
- * \luastack
- * \lvalue A client.
- * \lparam An array of mouse button bindings objects, or nothing.
- * \return The array of mouse button bindings objects.
- */
-static int
-luaA_buttons(lua_State *L)
-{
-    luaA_deprecate(L, "root.buttons");
-    return luaA_root_buttons(L);
 }
 
 /** Quit awesome.
@@ -830,7 +813,6 @@ luaA_init(void)
         { "exec", luaA_exec },
         { "spawn", luaA_spawn },
         { "restart", luaA_restart },
-        { "buttons", luaA_buttons },
         { "__index", luaA_awesome_index },
         { "__newindex", luaA_awesome_newindex },
         { NULL, NULL }
@@ -895,7 +877,6 @@ luaA_init(void)
 
     /* Export keys */
     luaA_openlib(L, "key", awesome_key_methods, awesome_key_meta);
-    luaA_openlib(L, "keybinding", awesome_keybinding_methods, awesome_key_meta);
 
     lua_pushliteral(L, "AWESOME_VERSION");
     lua_pushstring(L, AWESOME_VERSION);

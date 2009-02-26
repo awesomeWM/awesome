@@ -255,19 +255,7 @@ static int
 luaA_tag_new(lua_State *L)
 {
     size_t len;
-    const char *name;
-
-    if(lua_istable(L, 2))
-    {
-        /* deprecation warning */
-        luaA_warn(L, "%s: This function prototype changed, see API documentation",
-                  __FUNCTION__);
-        lua_getfield(L, 2, "name");
-        name = luaL_checklstring(L, -1, &len);
-    }
-    else
-        name = luaL_checklstring(L, 2, &len);
-
+    const char *name = luaL_checklstring(L, 2, &len);
     return luaA_tag_userdata_new(L, tag_new(name, len));
 }
 

@@ -421,10 +421,6 @@ function moveresize(x, y, w, h, c)
     sel:geometry(geometry)
 end
 
-function maximize()
-    util.deprecate("maximized_horizontal and vertical client attributes")
-end
-
 --- Move a client to a tag.
 -- @param target The tag to move the client to.
 -- @param c Optional client to move, otherwise the focused one is used.

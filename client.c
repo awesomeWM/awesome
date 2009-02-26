@@ -1621,8 +1621,6 @@ luaA_client_newindex(lua_State *L)
             client_need_arrange(*c);
         }
         break;
-      case A_TK_MINIMIZE:
-        luaA_deprecate(L, "client.minimized");
       case A_TK_MINIMIZED:
         client_setminimized(*c, luaA_checkboolean(L, 3));
         break;
@@ -1656,8 +1654,6 @@ luaA_client_newindex(lua_State *L)
       case A_TK_STICKY:
         client_setsticky(*c, luaA_checkboolean(L, 3));
         break;
-      case A_TK_HONORSIZEHINTS:
-        luaA_deprecate(L, "size_hints_honor");
       case A_TK_SIZE_HINTS_HONOR:
         (*c)->size_hints_honor = luaA_checkboolean(L, 3);
         client_need_arrange(*c);
@@ -1878,8 +1874,6 @@ luaA_client_index(lua_State *L)
       case A_TK_HIDE:
         lua_pushboolean(L, (*c)->ishidden);
         break;
-      case A_TK_MINIMIZE:
-        luaA_deprecate(L, "client.minimized");
       case A_TK_MINIMIZED:
         lua_pushboolean(L, (*c)->isminimized);
         break;
@@ -1922,8 +1916,6 @@ luaA_client_index(lua_State *L)
       case A_TK_STICKY:
         lua_pushboolean(L, (*c)->issticky);
         break;
-      case A_TK_HONORSIZEHINTS:
-        luaA_deprecate(L, "size_hints_honor");
       case A_TK_SIZE_HINTS_HONOR:
         lua_pushboolean(L, (*c)->size_hints_honor);
         break;
@@ -2226,27 +2218,6 @@ luaA_client_module_newindex(lua_State *L)
     return 0;
 }
 
-/** Move a client with mouse (DEPRECATED).
- * \param L The Lua VM state.
- */
-static int
-luaA_client_mouse_move(lua_State *L)
-{
-    luaA_deprecate(L, "awful.mouse.client.move()");
-    return 0;
-}
-
-/** Resize a client with mouse (DEPRECATED).
- * \param L The Lua VM state.
- * \return The number of pushed elements.
- */
-static int
-luaA_client_mouse_resize(lua_State *L)
-{
-    luaA_deprecate(L, "awful.mouse.client.resize()");
-    return 0;
-}
-
 const struct luaL_reg awesome_client_methods[] =
 {
     { "get", luaA_client_get },
@@ -2267,8 +2238,6 @@ const struct luaL_reg awesome_client_meta[] =
     { "raise", luaA_client_raise },
     { "lower", luaA_client_lower },
     { "redraw", luaA_client_redraw },
-    { "mouse_resize", luaA_client_mouse_resize },
-    { "mouse_move", luaA_client_mouse_move },
     { "unmanage", luaA_client_unmanage },
     { "fake_input", luaA_client_fake_input },
     { "__index", luaA_client_index },
