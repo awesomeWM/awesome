@@ -336,12 +336,7 @@ luaA_key_array_set(lua_State *L, int idx, keybindings_t *keys)
 {
     luaA_checktable(L, idx);
 
-    for(int i = 0; i < keys->by_code.len; i++);
-
-    for(int i = 0; i < keys->by_sym.len; i++);
-
     keybindings_wipe(keys);
-
     keybindings_init(keys);
 
     lua_pushnil(L);
