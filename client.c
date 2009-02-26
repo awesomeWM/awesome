@@ -52,17 +52,10 @@ client_loadprops(client_t * c, screen_t *screen)
     ssize_t len;
     tag_array_t *tags = &screen->tags;
     char *prop = NULL;
-    xcb_get_property_cookie_t fullscreen_q;
-    xcb_get_property_reply_t *reply;
-    void *data;
 
     if(!xutil_text_prop_get(globalconf.connection, c->win, _AWESOME_TAGS,
                             &prop, &len))
         return false;
-
-    /* Send the GetProperty requests which will be processed later */
-    fullscreen_q = xcb_get_property_unchecked(globalconf.connection, false, c->win,
-                                             _AWESOME_FULLSCREEN, CARDINAL, 0, 1);
 
     /* ignore property if the tag count isn't matching */
     if(len == tags->len)
@@ -75,13 +68,6 @@ client_loadprops(client_t * c, screen_t *screen)
         }
 
     p_delete(&prop);
-
-    /* check for fullscreen */
-    reply = xcb_get_property_reply(globalconf.connection, fullscreen_q, NULL);
-
-    if(reply && reply->value_len && (data = xcb_get_property_value(reply)))
-        client_setfullscreen(c, *(bool *) data);
-    p_delete(&reply);
 
     return true;
 }
@@ -915,10 +901,6 @@ client_setfullscreen(client_t *c, bool s)
         client_resize(c, geometry, false);
         client_need_arrange(c);
         client_stack();
-        xcb_change_property(globalconf.connection,
-                            XCB_PROP_MODE_REPLACE,
-                            c->win, _AWESOME_FULLSCREEN, CARDINAL, 8, 1,
-                            &c->isfullscreen);
         ewmh_client_update_hints(c);
         hooks_property(c, "fullscreen");
     }
