@@ -231,7 +231,7 @@ globalkeys =
         function ()
             awful.prompt.run({ prompt = "Run: " },
             mypromptbox[mouse.screen],
-            awful.util.spawn, awful.completion.bash,
+            awful.util.spawn, awful.completion.shell,
             awful.util.getdir("cache") .. "/history")
         end),
 

@@ -11,6 +11,7 @@ local os = os
 local table = table
 local math = math
 local print = print
+local util = require("awful.util")
 
 --- Completion module for awful
 module("awful.completion")
@@ -49,12 +50,13 @@ local function bash_escape(str)
     return str
 end
 
---- Use bash completion system to complete command and filename.
+--- Use shell completion system to complete command and filename.
 -- @param command The command line.
 -- @param cur_pos The cursor position.
 -- @param ncomp The element number to complete.
+-- @param shell The shell to use for completion (bash (default) or zsh).
 -- @return The new command and the new cursor position.
-function bash(command, cur_pos, ncomp)
+function shell(command, cur_pos, ncomp, shell)
     local wstart = 1
     local wend = 1
     local words = {}
@@ -88,18 +90,31 @@ function bash(command, cur_pos, ncomp)
         comptype = "command"
     end
 
-    local bash_cmd
-    if bashcomp_funcs[words[1]] then
-        -- fairly complex command with inline bash script to get the possible completions
-        bash_cmd = "/usr/bin/env bash -c 'source " .. bashcomp_src .. "; " ..
-                   "__print_completions() { for ((i=0;i<${#COMPREPLY[*]};i++)); do echo ${COMPREPLY[i]}; done }; " ..
-                   "COMP_WORDS=(" ..  command .."); COMP_LINE=\"" .. command .. "\"; " ..
-                   "COMP_COUNT=" .. cur_pos ..  "; COMP_CWORD=" .. cword_index-1 .. "; " ..
-                   bashcomp_funcs[words[1]] .. "; __print_completions | sort -u'"
+    local shell_cmd
+    if shell == "zsh" or (not shell and os.getenv("SHELL"):match("zsh$")) then
+        if comptype == "file" then
+            shell_cmd = "/usr/bin/env zsh -c 'local -a res; res=( " .. words[cword_index] .. "* ); print -l -- ${res[@]}'"
+        else
+            -- check commands, aliases, builtins, functions and reswords
+            shell_cmd = "/usr/bin/env zsh -c 'local -a res; "..
+            "res=( "..
+            "\"${(k)commands[@]}\" \"${(k)aliases[@]}\" \"${(k)builtins[@]}\" \"${(k)functions[@]}\" \"${(k)reswords[@]}\" "..
+            "); "..
+            "print -l -- ${(M)res[@]:#"..words[cword_index].."*}'"
+        end
     else
-        bash_cmd = "/usr/bin/env bash -c 'compgen -A " .. comptype .. " " .. words[cword_index] .. "'"
+        if bashcomp_funcs[words[1]] then
+            -- fairly complex command with inline bash script to get the possible completions
+            shell_cmd = "/usr/bin/env bash -c 'source " .. bashcomp_src .. "; " ..
+            "__print_completions() { for ((i=0;i<${#COMPREPLY[*]};i++)); do echo ${COMPREPLY[i]}; done }; " ..
+            "COMP_WORDS=(" ..  command .."); COMP_LINE=\"" .. command .. "\"; " ..
+            "COMP_COUNT=" .. cur_pos ..  "; COMP_CWORD=" .. cword_index-1 .. "; " ..
+            bashcomp_funcs[words[1]] .. "; __print_completions | sort -u'"
+        else
+            shell_cmd = "/usr/bin/env bash -c 'compgen -A " .. comptype .. " " .. words[cword_index] .. "'"
+        end
     end
-    local c, err = io.popen(bash_cmd)
+    local c, err = io.popen(shell_cmd)
     local output = {}
     i = 0
     if c then
@@ -131,6 +146,11 @@ function bash(command, cur_pos, ncomp)
     cur_pos = cword_end + #output[ncomp] + 1
 
     return str, cur_pos
+end
+
+function bash(...)
+    util.deprecate("awful.completion.shell")
+    return shell(args)
 end
 
 --- Run a generic completion.
