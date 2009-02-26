@@ -1150,7 +1150,6 @@ client_unmanage(client_t *c)
 
     /* delete properties */
     xcb_delete_property(globalconf.connection, c->win, _AWESOME_TAGS);
-    xcb_delete_property(globalconf.connection, c->win, _AWESOME_FLOATING);
 
     /* All the wiboxes (may) need to be repositioned. */
     if(client_hasstrut(c))
