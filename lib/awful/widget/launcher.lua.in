@@ -1,0 +1,36 @@
+---------------------------------------------------------------------------
+-- @author Julien Danjou &lt;julien@danjou.info&gt;
+-- @copyright 2008-2009 Julien Danjou
+-- @release @AWESOME_VERSION@
+---------------------------------------------------------------------------
+
+local setmetatable = setmetatable
+local capi = { button = button }
+local util = require("awful.util")
+local button = require("awful.widget.button")
+
+module("awful.widget.launcher")
+
+--- Create a button widget which will launch a command.
+-- @param args Standard widget table arguments, plus image for the image path
+-- and command for the command to run on click, or either menu to create menu.
+-- @return A launcher widget.
+local function new(_, args)
+    if not args.command and not args.menu then return end
+    local w = button(args)
+    if not w then return end
+    local b = w:buttons()
+
+    if args.command then
+       b[#b + 1] = capi.button({}, 1, nil, function () util.spawn(args.command) end)
+    elseif args.menu then
+       b[#b + 1] = capi.button({}, 1, nil, function () args.menu:toggle() end)
+    end
+
+    w:buttons(b)
+    return w
+end
+
+setmetatable(_M, { __call = new })
+
+-- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
