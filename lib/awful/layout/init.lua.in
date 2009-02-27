@@ -73,9 +73,10 @@ local function on_arrange (screen)
 end
 
 --- Get the current layout name.
--- @param layout the layout name.
+-- @param layout The layout.
 -- @return The layout name.
 function getname(layout)
+    local layout = layout or get()
     return layout.name
 end
 
