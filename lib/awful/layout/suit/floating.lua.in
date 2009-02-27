@@ -7,8 +7,7 @@
 --- Dummy function for floating layout
 module("awful.layout.suit.floating")
 
-function arrange(p)
-    return nil
+function arrange()
 end
 
 name = "floating"
