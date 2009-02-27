@@ -91,18 +91,17 @@ draw_iso2utf8(const char *iso, size_t len, char **dest, ssize_t *dlen)
 static xcb_visualtype_t *
 draw_screen_default_visual(xcb_screen_t *s)
 {
-    xcb_depth_iterator_t depth_iter;
-    xcb_visualtype_iterator_t visual_iter;
-
     if(!s)
         return NULL;
 
-    for(depth_iter = xcb_screen_allowed_depths_iterator(s);
-        depth_iter.rem; xcb_depth_next (&depth_iter))
-        for(visual_iter = xcb_depth_visuals_iterator (depth_iter.data);
-             visual_iter.rem; xcb_visualtype_next (&visual_iter))
-            if (s->root_visual == visual_iter.data->visual_id)
-                return visual_iter.data;
+    xcb_depth_iterator_t depth_iter = xcb_screen_allowed_depths_iterator(s);
+
+    if(depth_iter.data)
+        for(; depth_iter.rem; xcb_depth_next (&depth_iter))
+            for(xcb_visualtype_iterator_t visual_iter = xcb_depth_visuals_iterator (depth_iter.data);
+                 visual_iter.rem; xcb_visualtype_next (&visual_iter))
+                if (s->root_visual == visual_iter.data->visual_id)
+                    return visual_iter.data;
 
     return NULL;
 }
@@ -120,11 +119,16 @@ draw_font_new(const char *fontname)
     PangoLayout *layout;
     font_t *font = p_new(font_t, 1);
 
+    xcb_visualtype_t *visual = draw_screen_default_visual(s);
+
+    if(!visual)
+        fatal("cannot get visual");
+
     /* Create a dummy cairo surface, cairo context and pango layout in
      * order to get font informations */
     surface = cairo_xcb_surface_create(globalconf.connection,
                                        globalconf.default_screen,
-                                       draw_screen_default_visual(s),
+                                       visual,
                                        s->width_in_pixels,
                                        s->height_in_pixels);
 
@@ -654,9 +658,14 @@ draw_text_extents(draw_text_context_t *data)
     if(data->len <= 0)
         return geom;
 
+    xcb_visualtype_t *visual = draw_screen_default_visual(s);
+
+    if(!visual)
+        fatal("no visual found");
+
     surface = cairo_xcb_surface_create(globalconf.connection,
                                        globalconf.default_screen,
-                                       draw_screen_default_visual(s),
+                                       visual,
                                        s->width_in_pixels,
                                        s->height_in_pixels);
 
