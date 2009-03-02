@@ -372,6 +372,9 @@ luaA_graph_plot_data_add(lua_State *L)
     float value;
     int i;
 
+    if(!d->size)
+        return 0;
+
     plot = graph_plot_get(d, title);
 
     /* assign incoming value */
