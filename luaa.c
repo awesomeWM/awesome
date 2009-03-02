@@ -977,27 +977,25 @@ luaA_init(void)
 static bool
 luaA_loadrc(const char *confpath, bool run)
 {
-    if(confpath)
+    if(!luaL_loadfile(globalconf.L, confpath))
     {
-        if(!luaL_loadfile(globalconf.L, confpath))
+        if(run)
         {
-            if(run)
-            {
-                if(lua_pcall(globalconf.L, 0, LUA_MULTRET, 0))
-                    fprintf(stderr, "%s\n", lua_tostring(globalconf.L, -1));
-                else
-                {
-                    globalconf.conffile = a_strdup(confpath);
-                    return true;
-                }
-            }
+            if(lua_pcall(globalconf.L, 0, LUA_MULTRET, 0))
+                fprintf(stderr, "%s\n", lua_tostring(globalconf.L, -1));
             else
-                lua_pop(globalconf.L, 1);
-            return true;
+            {
+                globalconf.conffile = a_strdup(confpath);
+                return true;
+            }
         }
         else
-            fprintf(stderr, "%s\n", lua_tostring(globalconf.L, -1));
+            lua_pop(globalconf.L, 1);
+        return true;
     }
+    else
+        fprintf(stderr, "%s\n", lua_tostring(globalconf.L, -1));
+
     return false;
 }
 
@@ -1015,10 +1013,15 @@ luaA_parserc(const char *confpatharg, bool run)
     bool ret = false;
 
     /* try to load, return if it's ok */
-    if(luaA_loadrc(confpatharg, run))
+    if(confpatharg)
     {
-        ret = true;
-        goto bailout;
+        if(luaA_loadrc(confpatharg, run))
+        {
+            ret = true;
+            goto bailout;
+        }
+        else if(!run)
+            goto bailout;
     }
 
     if((confdir = getenv("XDG_CONFIG_HOME")))
@@ -1032,6 +1035,8 @@ luaA_parserc(const char *confpatharg, bool run)
         ret = true;
         goto bailout;
     }
+    else if(!run)
+        goto bailout;
 
     p_delete(&confpath);
 
@@ -1053,6 +1058,8 @@ luaA_parserc(const char *confpatharg, bool run)
             ret = true;
             goto bailout;
         }
+        else if(!run)
+            goto bailout;
         p_delete(&confpath);
     }
 
