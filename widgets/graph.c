@@ -505,7 +505,7 @@ luaA_graph_newindex(lua_State *L, awesome_token_t token)
         break;
       case A_TK_WIDTH:
         width = luaL_checknumber(L, 3);
-        if(width != d->width)
+        if(width >= 2 && width != d->width)
         {
             d->width = width;
             d->size = d->width - 2;
