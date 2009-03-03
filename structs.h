@@ -108,6 +108,8 @@ typedef struct
     bool need_update;
     /** Cursor */
     char *cursor;
+    /** Background image */
+    image_t *bg_image;
     /** Button bindings */
     button_array_t buttons;
 } wibox_t;

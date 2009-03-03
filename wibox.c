@@ -861,6 +861,12 @@ luaA_wibox_index(lua_State *L)
       case A_TK_BG:
         luaA_pushcolor(L, &(*wibox)->sw.ctx.bg);
         break;
+      case A_TK_BG_IMAGE:
+        if((*wibox)->bg_image)
+            luaA_image_userdata_new(L, (*wibox)->bg_image);
+        else
+            return 0;
+        break;
       case A_TK_POSITION:
         lua_pushstring(L, position_tostr((*wibox)->position));
         break;
@@ -975,6 +981,23 @@ luaA_wibox_newindex(lua_State *L)
         if((buf = luaL_checklstring(L, 3, &len)))
             if(xcolor_init_reply(xcolor_init_unchecked(&(*wibox)->sw.ctx.bg, buf, len)))
                 (*wibox)->need_update = true;
+        break;
+      case A_TK_BG_IMAGE:
+        {
+            if(lua_isnil(L, 3))
+            {
+                image_unref(&(*wibox)->bg_image);
+                (*wibox)->bg_image = NULL;
+                (*wibox)->need_update = true;
+            }
+            else
+            {
+                image_t **img = luaA_checkudata(L, 3, "image");
+                image_unref(&(*wibox)->bg_image);
+                (*wibox)->bg_image = image_ref(img);
+                (*wibox)->need_update = true;
+            }
+        }
         break;
       case A_TK_ALIGN:
         buf = luaL_checklstring(L, 3, &len);

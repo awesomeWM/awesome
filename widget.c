@@ -270,9 +270,14 @@ widget_render(wibox_t *wibox)
             left += widgets->tab[i].geometry.width;
         }
 
-    /* draw everything! */
+    /* draw background image, only if the background color is not opaque */
+    if(wibox->bg_image && ctx->bg.alpha != 0xffff)
+        draw_image(ctx, 0, 0, 1.0, wibox->bg_image);
+
+    /* draw background color */
     draw_rectangle(ctx, rectangle, 1.0, true, &ctx->bg);
 
+    /* draw everything! */
     for(int i = 0; i < widgets->len; i++)
         if(widgets->tab[i].widget->isvisible)
         {
