@@ -110,6 +110,28 @@ window_hasproto(xcb_window_t win, xcb_atom_t atom)
     return ret;
 }
 
+/** Send WM_TAKE_FOCUS client message to window
+ * \param win destination window
+ */
+static void
+window_takefocus(xcb_window_t win)
+{
+    xcb_client_message_event_t ev;
+
+    /* Initialize all of event's fields first */
+    p_clear(&ev, 1);
+
+    ev.response_type = XCB_CLIENT_MESSAGE;
+    ev.window = win;
+    ev.format = 32;
+    ev.data.data32[1] = XCB_CURRENT_TIME;
+    ev.type = WM_PROTOCOLS;
+    ev.data.data32[0] = WM_TAKE_FOCUS;
+
+    xcb_send_event(globalconf.connection, false, win,
+                   XCB_EVENT_MASK_NO_EVENT, (char *) &ev);
+}
+
 /** Change the clients urgency flag.
  * \param c The client
  * \param urgent The new flag state
@@ -272,22 +294,52 @@ client_ban(client_t *c)
         client_unfocus(c);
 }
 
+/** Call focus hook.
+ * \param c Client being focused.
+ */
+static void
+client_focus_hook(client_t *c)
+{
+    /* execute hook */
+    if(globalconf.hooks.focus != LUA_REFNIL)
+    {
+        luaA_client_userdata_new(globalconf.L, c);
+        luaA_dofunction(globalconf.L, globalconf.hooks.focus, 1, 0);
+    }
+}
+
 /** Give focus to client, or to first client if client is NULL.
  * \param c The client or NULL.
- * \return True if a window (even root) has received focus, false otherwise.
+ * \param sendmessage true, if we should send message.
  */
 void
-client_focus(client_t *c)
+client_focus(client_t *c, bool sendmessage)
 {
+    /* Handle c == NULL case */
+    if(!c)
+    {
+        if(sendmessage)
+            c = globalconf.clients;
+
+        if(!c)
+            return;
+    }
+
     if(!client_maybevisible(c, c->screen))
         return;
 
-    /* Input Model: No Input */
-    if (!window_hasproto(c->win, WM_TAKE_FOCUS) && c->nofocus)
+    /* Does client window support WM_TAKE_FOCUS protocol ? */
+    bool takefocus = window_hasproto(c->win, WM_TAKE_FOCUS);
+
+    /* Disallow setting focus on client with No Input Model */
+    if(sendmessage && !takefocus && c->nofocus)
         return;
 
     /* Save current focused client */
     client_t *focused_before = globalconf.screen_focus->client_focus;
+
+    if(c == focused_before)
+        return;
 
     /* stop hiding c */
     c->ishidden = false;
@@ -299,14 +351,17 @@ client_focus(client_t *c)
     globalconf.screen_focus = &globalconf.screens[c->phys_screen];
     globalconf.screen_focus->client_focus = c;
 
-    /* Input Models: Passive, Locally Active */
-    xcb_set_input_focus(globalconf.connection, XCB_INPUT_FOCUS_POINTER_ROOT,
-                        c->win, XCB_CURRENT_TIME);
+    if(sendmessage)
+    {
+        if(!c->nofocus)
+            /* Input models: Passive, Locally Active */
+            xcb_set_input_focus(globalconf.connection, XCB_INPUT_FOCUS_POINTER_ROOT,
+                                c->win, XCB_CURRENT_TIME);
 
-    /* TODO: Currently we don't handle correctly globally active input model
-     * One fix I know of, is we should handle FocusIn and FocusOut events for windows,
-     * and use WM_TAKE_FOCUS client message.
-     */
+        if(takefocus)
+            /* Input models: No Input, Globally Active */
+            window_takefocus(c->win);
+    }
 
     /* Some layouts use focused client differently, so call them back.
      * And anyway, we have maybe unhidden */
@@ -318,20 +373,16 @@ client_focus(client_t *c)
      * What we need to do is call unfocus hook, to
      * inform lua script, about this event.
      */
-    if(focused_before && c != focused_before)
+    if(focused_before)
         client_unfocus_hook(focused_before);
 
-    /* execute hook */
-    if(globalconf.hooks.focus != LUA_REFNIL)
-    {
-        luaA_client_userdata_new(globalconf.L, globalconf.screen_focus->client_focus);
-        luaA_dofunction(globalconf.L, globalconf.hooks.focus, 1, 0);
-    }
+    client_focus_hook(c);
 
     /* according to EWMH, we have to remove the urgent state from a client */
     client_seturgent(c, false);
 
     ewmh_update_net_active_window(c->phys_screen);
+
 }
 
 /** Stack a window below.
@@ -506,6 +557,7 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
             | XCB_EVENT_MASK_PROPERTY_CHANGE
             | XCB_EVENT_MASK_ENTER_WINDOW
             | XCB_EVENT_MASK_LEAVE_WINDOW
+            | XCB_EVENT_MASK_FOCUS_CHANGE
     };
 
 
@@ -1405,7 +1457,10 @@ luaA_client_redraw(lua_State *L)
        performed on the window where the pointer is currently on
        because after the unmapping/mapping, the focus is lost */
     if(globalconf.screen_focus->client_focus == *c)
-        client_focus(*c);
+    {
+        client_unfocus(*c);
+        client_focus(*c, true);
+    }
 
     return 0;
 }
@@ -2162,7 +2217,7 @@ luaA_client_module_newindex(lua_State *L)
     {
       case A_TK_FOCUS:
         c = luaA_checkudata(L, 3, "client");
-        client_focus(*c);
+        client_focus(*c, true);
         break;
       default:
         break;
