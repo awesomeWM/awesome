@@ -13,7 +13,12 @@ local wibox = wibox
 local image = image
 local widget = widget
 local button = button
-local capi = { screen = screen, mouse = mouse, client = client }
+local capi =
+{
+    screen = screen,
+    mouse = mouse,
+    client = client
+}
 local util = require("awful.util")
 local tags = require("awful.tag")
 local awbeautiful = require("beautiful")
@@ -44,6 +49,13 @@ local function load_theme(custom)
     return theme
 end
 
+local function item_leave(menu, num)
+    if num > 0 then
+        menu.items[num].wibox.fg = menu.theme.fg_normal
+        menu.items[num].wibox.bg = menu.theme.bg_normal
+    end
+end
+
 --- Hide a menu popup.
 -- @param menu The menu to hide.
 function hide(menu)
@@ -51,63 +63,69 @@ function hide(menu)
     for i = 1, #menu.items do
         -- Call mouse_leave to clear menu entry
         for k, w in pairs(menu.items[i].wibox.widgets) do
-            w.mouse_leave()
+            item_leave(menu, i)
         end
         menu.items[i].wibox.screen = nil
     end
     if menu.active_child then
         menu.active_child:hide()
-        active_child = nil
+        menu.active_child = nil
     end
+    menu.sel = nil
 end
 
 -- Get the elder parent so for example when you kill
 -- it, it will destroy the whole family.
-local function get_parents(data)
-    if data.parent then
-        return get_parents(data.parent)
+local function get_parents(menu)
+    if menu.parent then
+        return get_parents(menu.parent)
     end
-    return data
+    return menu
 end
 
-local function exec(data, num)
-    cmd = data.items[num].cmd
+local function exec(menu, num, mouse_event)
+    cmd = menu.items[num].cmd
     if type(cmd) == "table" then
-        if not data.child[num] then
-            data.child[num] = new({ items = cmd }, data, num)
+        if not menu.child[num] then
+            menu.child[num] = new({ items = cmd }, menu, num)
         end
-        if data.active_child then
-            data.active_child:hide()
+
+        if menu.active_child then
+            menu.active_child:hide()
+            menu.active_child = nil
         end
-        data.active_child = data.child[num]
-        data.active_child:show()
+        menu.active_child = menu.child[num]
+        menu.active_child:show()
     elseif type(cmd) == "string" then
-        get_parents(data):hide()
+        get_parents(menu):hide()
         util.spawn(cmd)
     elseif type(cmd) == "function" then
-        get_parents(data):hide()
+        get_parents(menu):hide()
         cmd()
     end
 end
 
-local function item_enter(data, num)
-    data.items[num].wibox.fg = data.theme.fg_focus
-    data.items[num].wibox.bg = data.theme.bg_focus
+local function item_enter(menu, num, mouse_event)
+    if menu.sel == num then
+        return
+    elseif menu.sel then
+        item_leave(menu, menu.sel)
+    end
 
-    if data.auto_expand == true then
-        if data.active_child then
-            data.active_child:hide()
+    menu.items[num].wibox.fg = menu.theme.fg_focus
+    menu.items[num].wibox.bg = menu.theme.bg_focus
+    menu.sel = num
+
+    if menu.auto_expand and mouse_event then
+        if menu.active_child then
+            menu.active_child:hide()
+            menu.active_child = nil
         end
 
-        if type(data.items[num].cmd) == "table" then
-            exec(data, num)
+        if type(menu.items[num].cmd) == "table" then
+            exec(menu, num)
         end
     end
-end
-
-local function item_leave(data, num)
-    data.items[num].wibox.fg = data.theme.fg_normal
-    data.items[num].wibox.bg = data.theme.bg_normal
 end
 
 local function add_item(data, num, item_info)
@@ -121,7 +139,7 @@ local function add_item(data, num, item_info)
 
     -- Create bindings
     local bindings = {
-        button({}, 1, function () exec(data, num) end),
+        button({}, 1, function () item_enter(data, num); exec(data, num) end),
         button({}, 3, function () hide(data) end)
     }
 
@@ -146,11 +164,8 @@ local function add_item(data, num, item_info)
 
     item:buttons(bindings)
 
-    function label.mouse_enter() item_enter(data, num) end
-    function label.mouse_leave() item_leave(data, num) end
-
-    function item.mouse_enter() item_enter(data, num) end
-    function item.mouse_leave() item_leave(data, num) end
+    function label.mouse_enter() item_enter(data, num, true) end
+    function item.mouse_enter() item_enter(data, num, true) end
 
     -- Create the submenu icon widget
     local submenu
@@ -159,8 +174,7 @@ local function add_item(data, num, item_info)
         submenu.image = data.theme.submenu_icon and image(data.theme.submenu_icon)
         submenu:buttons(bindings)
 
-        function submenu.mouse_enter() item_enter(data, num) end
-        function submenu.mouse_leave() item_leave(data, num) end
+        function submenu.mouse_enter() item_enter(data, num, true) end
     end
 
     -- Add widgets to the wibox
