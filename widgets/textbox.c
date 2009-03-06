@@ -111,6 +111,12 @@ textbox_draw(widget_t *widget, draw_context_t *ctx, area_t geometry,
               case AlignRight:
                 x += geometry.width - d->bg_image->width * ratio;
                 break;
+              case AlignBottom:
+                y += geometry.height - d->bg_image->height * ratio;
+                break;
+              case AlignMiddle:
+                y += (geometry.height - d->bg_image->height * ratio) / 2;
+                break;
               default:
                 break;
             }
@@ -162,7 +168,7 @@ luaA_textbox_margin(lua_State *L)
  * \lfield margin Method to pass text margin: a table with top, left, right and bottom keys.
  * \lfield bg Background color.
  * \lfield bg_image Background image.
- * \lfield bg_align Background image alignment.
+ * \lfield bg_align Background image alignment, left, center, right, bottom, top or middle
  * \lfield bg_resize Background resize.
  */
 static int
