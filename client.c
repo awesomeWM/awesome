@@ -505,15 +505,7 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
     client_t *c, *tc = NULL;
     image_t *icon;
     int screen;
-    const uint32_t select_input_val[] =
-    {
-        XCB_EVENT_MASK_STRUCTURE_NOTIFY
-            | XCB_EVENT_MASK_PROPERTY_CHANGE
-            | XCB_EVENT_MASK_ENTER_WINDOW
-            | XCB_EVENT_MASK_LEAVE_WINDOW
-            | XCB_EVENT_MASK_FOCUS_CHANGE
-    };
-
+    const uint32_t select_input_val[] = { CLIENT_SELECT_INPUT_EVENT_MASK };
 
     if(systray_iskdedockapp(w))
     {

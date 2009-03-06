@@ -438,11 +438,7 @@ event_handle_motionnotify(void *data __attribute__ ((unused)),
                                   wibox->sw.geometry.width,
                                   wibox->sw.geometry.height,
                                   &ev->event_x, &ev->event_y)))
-    {
-        globalconf.pointer_x = ev->root_x;
-        globalconf.pointer_y = ev->root_y;
         event_handle_widget_motionnotify(wibox, &wibox->mouse_over, w);
-    }
 
     return 0;
 }
@@ -502,9 +498,7 @@ event_handle_enternotify(void *data __attribute__ ((unused)),
     widget_t *w;
     wibox_t *wibox;
 
-    if(ev->mode != XCB_NOTIFY_MODE_NORMAL
-       || (ev->root_x == globalconf.pointer_x
-           && ev->root_y == globalconf.pointer_y))
+    if(ev->mode != XCB_NOTIFY_MODE_NORMAL)
         return 0;
 
     if((wibox = wibox_getbywin(ev->event)))
@@ -513,11 +507,7 @@ event_handle_enternotify(void *data __attribute__ ((unused)),
                                    wibox->sw.geometry.width,
                                    wibox->sw.geometry.height,
                                    &ev->event_x, &ev->event_y)))
-        {
-            globalconf.pointer_x = ev->root_x;
-            globalconf.pointer_y = ev->root_y;
             event_handle_widget_motionnotify(wibox, &wibox->mouse_over, w);
-        }
 
         if(wibox->mouse_enter != LUA_REFNIL)
             luaA_dofunction(globalconf.L, wibox->mouse_enter, 0, 0);
@@ -525,12 +515,6 @@ event_handle_enternotify(void *data __attribute__ ((unused)),
     else if((c = client_getbytitlebarwin(ev->event))
        || (c = client_getbywin(ev->event)))
     {
-        /* The idea behind saving pointer_x and pointer_y is Bob Marley powered.
-         * this will allow us top drop some EnterNotify events and thus not giving
-         * focus to windows appering under the cursor without a cursor move */
-        globalconf.pointer_x = ev->root_x;
-        globalconf.pointer_y = ev->root_y;
-
         if(globalconf.hooks.mouse_enter != LUA_REFNIL)
         {
             luaA_client_userdata_new(globalconf.L, c);

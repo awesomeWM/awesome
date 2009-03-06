@@ -325,8 +325,6 @@ struct awesome_t
     client_node_t *stack;
     /** Command line passed to awesome */
     char *argv;
-    /** Last XMotionEvent coords */
-    int pointer_x, pointer_y;
     /** Lua VM state */
     lua_State *L;
     /** Default colors */
