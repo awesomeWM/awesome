@@ -17,7 +17,8 @@ local capi =
 {
     screen = screen,
     mouse = mouse,
-    client = client
+    client = client,
+    keygrabber = keygrabber
 }
 local util = require("awful.util")
 local tags = require("awful.tag")
@@ -26,6 +27,8 @@ local tonumber = tonumber
 
 --- Menu module for awful
 module("awful.menu")
+
+local cur_menu
 
 local function load_theme(custom)
     local theme = {}
@@ -72,6 +75,13 @@ function hide(menu)
         menu.active_child = nil
     end
     menu.sel = nil
+
+    if cur_menu == menu then
+        cur_menu = cur_menu.parent
+    end
+    if not cur_menu and menu.keygrabber then
+        capi.keygrabber.stop()
+    end
 end
 
 -- Get the elder parent so for example when you kill
@@ -115,6 +125,7 @@ local function item_enter(menu, num, mouse_event)
     menu.items[num].wibox.fg = menu.theme.fg_focus
     menu.items[num].wibox.bg = menu.theme.bg_focus
     menu.sel = num
+    cur_menu = menu
 
     if menu.auto_expand and mouse_event then
         if menu.active_child then
@@ -126,6 +137,29 @@ local function item_enter(menu, num, mouse_event)
             exec(menu, num)
         end
     end
+end
+
+local function grabber(mod, key, event)
+    if event == "release" then
+       return true
+    end
+
+    local sel = cur_menu.sel or 0
+    if key == "Up" then
+        local sel_new = sel-1 < 1 and #cur_menu.items or sel-1
+        item_enter(cur_menu, sel_new)
+    elseif key == "Down" then
+        local sel_new = sel+1 > #cur_menu.items and 1 or sel+1
+        item_enter(cur_menu, sel_new)
+     elseif sel > 0 and (key == "Return" or key == "Right") then
+        exec(cur_menu, sel)
+    elseif key == "Left" then
+        cur_menu:hide()
+     elseif key == "Escape" then
+        get_parents(cur_menu):hide()
+    end
+   
+    return true
 end
 
 local function add_item(data, num, item_info)
@@ -234,8 +268,8 @@ local function set_coords(menu, screen_idx)
         local m_coords = capi.mouse.coords()
         local m_w = menu.w
 
-        menu.y = m_coords.y < s_geometry.y and s_geometry.y or m_coords.y
-        menu.x = m_coords.x < s_geometry.x and s_geometry.x or m_coords.x
+        menu.y = m_coords.y+1 < s_geometry.y and s_geometry.y or m_coords.y+1
+        menu.x = m_coords.x+1 < s_geometry.x and s_geometry.x or m_coords.x+1
 
         menu.y = menu.y + m_h > screen_h and screen_h - m_h or menu.y
         menu.x = menu.x + m_w > screen_w and screen_w - m_w or menu.x
@@ -244,7 +278,8 @@ end
 
 --- Show a menu.
 -- @param menu The menu to show.
-function show(menu)
+-- @param keygrabber A boolean enabling or not the keyboard navigation.
+function show(menu, keygrabber)
     local screen_index = capi.mouse.screen
     set_coords(menu, screen_index)
     for num, item in pairs(menu.items) do
@@ -257,15 +292,29 @@ function show(menu)
         })
         wibox.screen = screen_index
     end
+
+    if menu.parent then
+        menu.keygrabber = menu.parent.keygrab
+    elseif keygrabber ~= nil then
+        menu.keygrabber = keygrabber
+    else
+        menu.keygrabber = false
+    end
+
+    if not cur_menu and menu.keygrabber then
+        capi.keygrabber.run(grabber) 
+    end
+    cur_menu = menu
 end
 
 --- Toggle menu visibility.
 -- @param menu The menu to show if it's hidden, or to hide if it's shown.
-function toggle(menu)
+-- @param keygrabber A boolean enabling or not the keyboard navigation.
+function toggle(menu, keygrabber)
     if menu.items[1] and menu.items[1].wibox.screen then
         hide(menu)
     else
-        show(menu)
+        show(menu, keygrabber)
     end
 end
 
