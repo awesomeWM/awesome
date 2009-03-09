@@ -29,6 +29,7 @@ local tonumber = tonumber
 module("awful.menu")
 
 local cur_menu
+local menu_keys = {}
 
 local function load_theme(custom)
     local theme = {}
@@ -145,17 +146,17 @@ local function grabber(mod, key, event)
     end
 
     local sel = cur_menu.sel or 0
-    if key == "Up" then
+    if key == menu_keys.up then
         local sel_new = sel-1 < 1 and #cur_menu.items or sel-1
         item_enter(cur_menu, sel_new)
-    elseif key == "Down" then
+    elseif key == menu_keys.down then
         local sel_new = sel+1 > #cur_menu.items and 1 or sel+1
         item_enter(cur_menu, sel_new)
-     elseif sel > 0 and (key == "Return" or key == "Right") then
+     elseif sel > 0 and key == menu_keys.exec then
         exec(cur_menu, sel)
-    elseif key == "Left" then
+    elseif key == menu_keys.back then
         cur_menu:hide()
-     elseif key == "Escape" then
+     elseif key == menu_keys.close then
         get_parents(cur_menu):hide()
     end
    
@@ -294,7 +295,7 @@ function show(menu, keygrabber)
     end
 
     if menu.parent then
-        menu.keygrabber = menu.parent.keygrab
+        menu.keygrabber = menu.parent.keygrabber
     elseif keygrabber ~= nil then
         menu.keygrabber = keygrabber
     else
@@ -318,6 +319,16 @@ function toggle(menu, keygrabber)
     end
 end
 
+--- Set key bindings for menu navigation.
+-- @param keys Table containing the following keys: up, down, exec, back, close. If a key is missing the default key binding will be used, defaults are respectively: "Up", "Down", "Return", "Left", "Escape".
+function setkeys(keys)
+    menu_keys.up = keys and keys.up or "Up"
+    menu_keys.down = keys and keys.down or "Down"
+    menu_keys.exec = keys and keys.exec or "Return"
+    menu_keys.back = keys and keys.back or "Left"
+    menu_keys.close = keys and keys.close or "Escape"
+end
+
 --- Open a menu popup.
 -- @param menu Table containing the menu informations. Key items: Table containing the displayed items, each element is a tab containing: item name, tiggered action, submenu table or function, item icon (optional). Keys [fg|bg]_[focus|normal], border, border_width, submenu_icon, height and width override the default display for your menu, each of them are optional. Key auto_expand controls the submenu auto expand behaviour by setting it to true (default) or false.
 -- @param parent Specify the parent menu if we want to open a submenu, this value should never be set by the user.
@@ -325,6 +336,10 @@ end
 function new(menu, parent, num)
     -- Create a table to store our menu informations
     local data = {}
+
+    if not menu_keys.up then
+        setkeys()
+    end
 
     data.items = {}
     data.num = num or 1
