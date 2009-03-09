@@ -84,6 +84,8 @@ Window manager control
     Run Lua code prompt.
 *Mod4 \+ Return*::
     Spawn terminal emulator.
+*Mod4 \+ w*::
+    Open main menu.
 
 Clients
 ~~~~~~~
