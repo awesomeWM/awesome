@@ -23,6 +23,7 @@ local capi =
 }
 local util = require("awful.util")
 local tags = require("awful.tag")
+local layout = require("awful.widget.layout")
 local awbeautiful = require("beautiful")
 local awibox = require("awful.wibox")
 local tonumber = tonumber
@@ -181,7 +182,7 @@ local function add_item(data, num, item_info)
     )
 
     -- Create the item label widget
-    local label = widget({ type = "textbox", align = "left" })
+    local label = widget({ type = "textbox" })
     label.text = item_info[1]
     label:margin({ left = data.h + 2 })
     -- Set icon if needed
@@ -207,7 +208,7 @@ local function add_item(data, num, item_info)
     -- Create the submenu icon widget
     local submenu
     if type(item_info[2]) == "table" then
-        submenu = widget({ type = "imagebox", align = "right" })
+        submenu = widget({ type = "imagebox" })
         submenu.image = data.theme.submenu_icon and image(data.theme.submenu_icon)
         submenu:buttons(bindings)
 
@@ -215,7 +216,11 @@ local function add_item(data, num, item_info)
     end
 
     -- Add widgets to the wibox
-    item.widgets = { label, submenu }
+    item.widgets = {
+        label,
+        submenu,
+        layout = layout.horizontal.flex
+    }
 
     item.ontop = true
 
@@ -255,7 +260,7 @@ local function set_coords(menu, screen_idx)
     local screen_w = s_geometry.x + s_geometry.width
     local screen_h = s_geometry.y + s_geometry.height
 
-    local i_h = menu.h - menu.theme.border_width
+    local i_h = menu.h + menu.theme.border_width
     local m_h = (i_h * #menu.items) + menu.theme.border_width
 
     if menu.parent then
@@ -291,7 +296,7 @@ function show(menu, keygrabber)
             width = menu.w,
             height = menu.h,
             x = menu.x,
-            y = menu.y + (num - 1) * (menu.h - menu.theme.border_width)
+            y = menu.y + (num - 1) * (menu.h + menu.theme.border_width)
         })
         wibox.screen = screen_index
     end
