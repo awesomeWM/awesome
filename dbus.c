@@ -47,6 +47,10 @@ a_dbus_message_iter(DBusMessageIter *iter)
     {
         switch(dbus_message_iter_get_arg_type(iter))
         {
+          default:
+            lua_pushnil(globalconf.L);
+            nargs++;
+            break;
           case DBUS_TYPE_INVALID:
             break;
           case DBUS_TYPE_VARIANT:
@@ -123,9 +127,7 @@ a_dbus_message_iter(DBusMessageIter *iter)
                     int n = a_dbus_message_iter(&subiter);
 
                     for(int i = n; i > 0; i--)
-                    {
                         lua_rawseti(globalconf.L, - i - 1, i);
-                    }
                 }
             }
             nargs++;
