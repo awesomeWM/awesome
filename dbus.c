@@ -128,6 +128,18 @@ a_dbus_message_iter(DBusMessageIter *iter)
                             lua_pushlstring(globalconf.L, c, datalen);
                         }
                         break;
+                      case DBUS_TYPE_BOOLEAN:
+                        {
+                            const bool *b;
+                            lua_newtable(globalconf.L);
+                            dbus_message_iter_get_fixed_array(&sub, &b, &datalen);
+                            for(int i = 0; i < datalen; i++)
+                            {
+                                lua_pushboolean(globalconf.L, b[i]);
+                                lua_rawseti(globalconf.L, -2, i + 1);
+                            }
+                        }
+                        break;
                     }
                 }
                 else if(array_type == DBUS_TYPE_DICT_ENTRY)
