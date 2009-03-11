@@ -80,14 +80,18 @@ a_dbus_message_iter(DBusMessageIter *iter)
                 lua_newtable(globalconf.L);
 
                 if(dbus_type_is_fixed(array_type))
+                {
+                    DBusMessageIter sub;
+                    dbus_message_iter_recurse(iter, &sub);
+
                     switch(array_type)
                     {
-                      int datalen;
+                      int datalen = 0;
 #define DBUS_MSG_HANDLE_ARRAY_TYPE_NUMBER(type, dbustype) \
                       case dbustype: \
                         { \
                             type *data; \
-                            dbus_message_iter_get_fixed_array(iter, &data, &datalen); \
+                            dbus_message_iter_get_fixed_array(&sub, &data, &datalen); \
                             for(int i = 0; i < datalen; i++) \
                             { \
                                 lua_pushnumber(globalconf.L, data[i]); \
@@ -103,6 +107,7 @@ a_dbus_message_iter(DBusMessageIter *iter)
                       DBUS_MSG_HANDLE_ARRAY_TYPE_NUMBER(uint64_t, DBUS_TYPE_UINT64)
 #undef DBUS_MSG_HANDLE_ARRAY_TYPE_NUMBER
                     }
+                }
                 else if(array_type == DBUS_TYPE_DICT_ENTRY)
                 {
                     DBusMessageIter subiter;
