@@ -72,6 +72,22 @@ a_dbus_message_iter(DBusMessageIter *iter)
             }
             nargs++;
             break;
+          case DBUS_TYPE_STRUCT:
+            {
+                /* create a new table to store all the value */
+                lua_newtable(globalconf.L);
+
+                DBusMessageIter subiter;
+                /* initialize a sub iterator */
+                dbus_message_iter_recurse(iter, &subiter);
+                /* create a new table to store the dict */
+                int n = a_dbus_message_iter(&subiter);
+
+                for(int i = n; i > 0; i--)
+                    lua_rawseti(globalconf.L, - i - 1, i);
+            }
+            nargs++;
+            break;
           case DBUS_TYPE_ARRAY:
             {
                 int array_type = dbus_message_iter_get_element_type(iter);
