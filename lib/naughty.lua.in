@@ -429,6 +429,26 @@ if awful.hooks.dbus then
             args.preset.callback(data, appname, replaces_id, icon, title, text, actions, hints, expire)) then
             if icon ~= "" then
                 args.icon = icon
+            elseif hints.icon_data then
+                -- icon_data is an array:
+                -- 1 -> width, 2 -> height, 3 -> rowstride, 4 -> has alpha
+                -- 5 -> bits per sample, 6 -> channels, 7 -> data
+
+                local imgdata
+                -- If has alpha (ARGB32)
+                if hints.icon_data[6] == 4 then
+                    imgdata = hints.icon_data[7]
+                -- If has not alpha (RGB24)
+                elseif hints.icon_data[6] == 3 then
+                    imgdata = ""
+                    for i = 1, #hints.icon_data[7], 3 do
+                        imgdata = imgdata .. hints.icon_data[7]:sub(i , i + 2):reverse()
+                        imgdata = imgdata .. string.format("%c", 255) -- alpha is 255
+                    end
+                end
+                if imgdata then
+                    args.icon = image.argb32(hints.icon_data[1], hints.icon_data[2], imgdata)
+                end
             end
             if replaces_id and replaces_id ~= "" and replaces_id ~= 0 then
                 args.replaces_id = replaces_id
