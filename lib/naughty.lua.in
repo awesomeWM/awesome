@@ -337,13 +337,20 @@ function notify(args)
     local iconbox = nil
     if icon then
         -- try to guess icon if the provided one is non-existent/readable
-        if not awful.util.file_readable(icon) then icon = getIcon(icon) end
+        if type(icon) == "string" and not awful.util.file_readable(icon) then
+            icon = getIcon(icon)
+        end
 
         -- if we have an icon, use it
         if icon then
             iconbox = widget({ type = "imagebox", align = "left" })
             iconbox:buttons({ button({ }, 1, run), button({ }, 3, die) })
-            local img = image(icon)
+            local img
+            if type(icon) == "string" then
+                img = image(icon)
+            else
+                img = icon
+            end
             if icon_size then
                 img = img:crop_and_scale(0,0,img.height,img.width,icon_size,icon_size)
             end
