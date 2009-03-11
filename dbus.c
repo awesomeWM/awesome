@@ -92,9 +92,6 @@ a_dbus_message_iter(DBusMessageIter *iter)
             {
                 int array_type = dbus_message_iter_get_element_type(iter);
 
-                /* create a new table to store all the value */
-                lua_newtable(globalconf.L);
-
                 if(dbus_type_is_fixed(array_type))
                 {
                     DBusMessageIter sub;
@@ -106,7 +103,8 @@ a_dbus_message_iter(DBusMessageIter *iter)
 #define DBUS_MSG_HANDLE_ARRAY_TYPE_NUMBER(type, dbustype) \
                       case dbustype: \
                         { \
-                            type *data; \
+                            const type *data; \
+                            lua_newtable(globalconf.L); \
                             dbus_message_iter_get_fixed_array(&sub, &data, &datalen); \
                             for(int i = 0; i < datalen; i++) \
                             { \
@@ -122,11 +120,20 @@ a_dbus_message_iter(DBusMessageIter *iter)
                       DBUS_MSG_HANDLE_ARRAY_TYPE_NUMBER(int64_t, DBUS_TYPE_INT64)
                       DBUS_MSG_HANDLE_ARRAY_TYPE_NUMBER(uint64_t, DBUS_TYPE_UINT64)
 #undef DBUS_MSG_HANDLE_ARRAY_TYPE_NUMBER
+                      case DBUS_TYPE_BYTE:
+                        {
+                            const char *c;
+                            dbus_message_iter_get_fixed_array(&sub, &c, &datalen);
+                            lua_pushlstring(globalconf.L, c, datalen);
+                        }
+                        break;
                     }
                 }
                 else if(array_type == DBUS_TYPE_DICT_ENTRY)
                 {
                     DBusMessageIter subiter;
+
+                    lua_newtable(globalconf.L);
 
                     /* initialize a sub iterator */
                     dbus_message_iter_recurse(iter, &subiter);
@@ -140,6 +147,8 @@ a_dbus_message_iter(DBusMessageIter *iter)
                 else
                 {
                     DBusMessageIter subiter;
+
+                    lua_newtable(globalconf.L);
 
                     /* prepare to dig into the array*/
                     dbus_message_iter_recurse(iter, &subiter);
