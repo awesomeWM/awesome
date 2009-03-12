@@ -382,7 +382,6 @@ function cycle(clockwise, screen)
             end
         else
             for _, rc in pairs(cls) do
-                print(_)
                 c:swap(rc)
             end
         end
