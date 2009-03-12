@@ -550,10 +550,25 @@ function floating.set(c, s)
     local c = c or capi.client.focus
     if c and property.get(c, "floating") ~= s then
         property.set(c, "floating", s)
+        local screen = c.screen
+        if s == true then
+            c:geometry(property.get(c, "floating_geometry"))
+        end
+        c.screen = screen
         capi.hooks.arrange()(c.screen)
         capi.hooks.property()(c, "floating")
     end
 end
+
+hooks.manage.register(function (c)
+    property.set(c, "floating_geometry", c:geometry())
+end)
+
+hooks.property.register(function (c, prop)
+    if prop == "geometry" and floating.get(c) then
+        property.set(c, "floating_geometry", c:geometry())
+    end
+end)
 
 --- Return if a client has a fixe size or not.
 -- @param c The client.
