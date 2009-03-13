@@ -24,9 +24,10 @@ function arrange(p)
     local cls = p.clients
     local focus = capi.client.focus
     local mwfact = p.mwfact
+    local fidx
 
     -- Check that the focused window is on the right screen
-    if focus and focus.screen ~= screen then focus = nil end
+    if focus and focus.screen ~= p.screen then focus = nil end
 
     if not focus and #cls > 0 then
         focus = cls[1]

@@ -69,6 +69,7 @@ local function on_arrange (screen)
     p.nmaster = tag.getnmaster(t)
     p.mwfact = tag.getmwfact(t)
     p.tagdata = tag.getdata(t)
+    p.screen = screen
     get(screen).arrange(p)
 end
 
