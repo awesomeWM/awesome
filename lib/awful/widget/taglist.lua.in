@@ -105,6 +105,7 @@ function label.all(t, args)
     local bg_image
     local icon
     local bg_resize = false
+    local is_selected = false
     if t.selected then
         bg_color = bg_focus
         fg_color = fg_focus
@@ -117,11 +118,13 @@ function label.all(t, args)
                 if v == t then
                     bg_image = capi.image(taglist_squares_sel)
                     bg_resize = taglist_squares_resize == "true"
+                    is_selected = true
                     break
                 end
             end
         end
-    else
+    end
+    if not is_selected then
         local cls = t:clients()
         if #cls > 0 and taglist_squares_unsel then
             bg_image = capi.image(taglist_squares_unsel)
