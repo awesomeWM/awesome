@@ -167,8 +167,13 @@ function label.currenttags(c, screen, args)
     -- Only print client on the same screen as this widget
     if c.screen ~= screen then return end
     for k, t in ipairs(capi.screen[screen]:tags()) do
-        if t.selected and c:tags()[t] then
-            return widget_tasklist_label_common(c, args)
+        if t.selected then
+            local ctags = c:tags()
+            for _, v in ipairs(ctags) do
+                if v == t then
+                    return widget_tasklist_label_common(c, args)
+                end
+            end
         end
     end
 end

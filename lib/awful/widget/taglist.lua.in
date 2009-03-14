@@ -12,6 +12,7 @@ local capi = { widget = widget,
 local otable = otable
 local type = type
 local pairs = pairs
+local ipairs = ipairs
 local hooks = require("awful.hooks")
 local common = require("awful.widget.common")
 local util = require("awful.util")
@@ -108,10 +109,17 @@ function label.all(t, args)
         bg_color = bg_focus
         fg_color = fg_focus
     end
-    if sel and sel:tags()[t] then
+    if sel then
         if taglist_squares_sel then
-            bg_image = capi.image(taglist_squares_sel)
-            bg_resize = taglist_squares_resize == "true"
+            -- Check that the selected clients is tagged with 't'.
+            local seltags = sel:tags()
+            for _, v in ipairs(seltags) do
+                if v == t then
+                    bg_image = capi.image(taglist_squares_sel)
+                    bg_resize = taglist_squares_resize == "true"
+                    break
+                end
+            end
         end
     else
         local cls = t:clients()
