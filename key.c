@@ -356,7 +356,7 @@ luaA_key_array_set(lua_State *L, int idx, keybindings_t *keys)
 int
 luaA_key_array_get(lua_State *L, keybindings_t *keys)
 {
-    luaA_otable_new(L);
+    lua_createtable(L, keys->by_code.len + keys->by_sym.len, 0);
     for(int i = 0; i < keys->by_code.len; i++)
     {
         luaA_key_userdata_new(L, keys->by_code.tab[i]);
