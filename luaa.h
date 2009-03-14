@@ -340,21 +340,6 @@ luaA_warn(lua_State *L, const char *fmt, ...)
     fprintf(stderr, "\n");
 }
 
-int luaA_otable_index(lua_State *);
-
-/** Create a new object table with a metatable.
- * This is useful to compare table with objects (udata) as keys.
- * \param L The Lua stack.
- * \return The number of elements pushed on stack.
- */
-static inline int
-luaA_otable_new(lua_State *L)
-{
-    /* Our object */
-    lua_newtable(L);
-    return luaA_settype(L, "otable");
-}
-
 /** Get an optional padding table from a Lua table.
  * \param L The Lua VM state.
  * \param idx The table index on the stack.

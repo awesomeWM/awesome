@@ -585,82 +585,6 @@ luaA_isloop(lua_State *L, int idx)
     return false;
 }
 
-/** Object table.
- * This table can use safely object as key.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- */
-int
-luaA_otable_index(lua_State *L)
-{
-    void **obj, **v;
-
-    if((obj = lua_touserdata(L, 2)))
-    {
-        /* begins at nil */
-        lua_pushnil(L);
-        while(lua_next(L, 1))
-        {
-            /* check the key against the key if the key is a userdata,
-             * otherwise check it again the value. */
-            if((v = lua_touserdata(L, -2))
-                && *v == *obj)
-                /* return value */
-                return 1;
-            else if((v = lua_touserdata(L, -1))
-                    && *v == *obj)
-            {
-                /* return key */
-                lua_pop(L, 1);
-                return 1;
-            }
-            /* removes 'value'; keeps 'key' for next iteration */
-            lua_pop(L, 1);
-        }
-        return 0;
-    }
-
-    lua_rawget(L, 1);
-    return 1;
-}
-
-/** Object table.
- * This table can use safely object as key.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- */
-static int
-luaA_otable_newindex(lua_State *L)
-{
-    void **obj, **v;
-
-    if((obj = lua_touserdata(L, 2)))
-    {
-        /* begins at nil */
-        lua_pushnil(L);
-        while(lua_next(L, 1))
-        {
-            if((v = lua_touserdata(L, -2))
-               && *v == *obj)
-            {
-                /* remove value */
-                lua_pop(L, 1);
-                /* push new value on top */
-                lua_pushvalue(L, 3);
-                /* set in table key = value */
-                lua_rawset(L, 1);
-                return 0;
-            }
-            /* removes 'value'; keeps 'key' for next iteration */
-            lua_pop(L, 1);
-        }
-    }
-
-    lua_rawset(L, 1);
-
-    return 0;
-}
-
 /** Spawn a program.
  * This function is multi-head (Zaphod) aware and will set display to
  * the right screen according to mouse position.
@@ -796,18 +720,6 @@ void
 luaA_init(void)
 {
     lua_State *L;
-
-    static const struct luaL_reg otable_methods[] =
-    {
-        { "__call", luaA_otable_new },
-        { NULL, NULL }
-    };
-    static const struct luaL_reg otable_meta[] =
-    {
-        { "__index", luaA_otable_index },
-        { "__newindex", luaA_otable_newindex },
-        { NULL, NULL }
-    };
     static const struct luaL_reg awesome_lib[] =
     {
         { "quit", luaA_quit },
@@ -848,9 +760,6 @@ luaA_init(void)
 
     /* Export mousegrabber lib */
     luaL_register(L, "mousegrabber", awesome_mousegrabber_lib);
-
-    /* Export otable lib */
-    luaA_openlib(L, "otable", otable_methods, otable_meta);
 
     /* Export screen */
     luaA_openlib(L, "screen", awesome_screen_methods, awesome_screen_meta);
