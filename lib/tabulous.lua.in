@@ -10,7 +10,7 @@ local capi = { client = client }
 local table = table
 local pairs = pairs
 local awful = require('awful')
-local otable = otable
+local otable = require("otable")
 
 --- Fabulous tabs
 module("tabulous")

@@ -8,7 +8,7 @@
 local util = require("awful.util")
 local pairs = pairs
 local ipairs = ipairs
-local otable = otable
+local otable = require("otable")
 local capi =
 {
     hooks = hooks,

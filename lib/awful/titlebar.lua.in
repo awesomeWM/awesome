@@ -8,7 +8,7 @@
 local math = math
 local image = image
 local pairs = pairs
-local otable = otable
+local otable = require("otable")
 local capi =
 {
     wibox = wibox,

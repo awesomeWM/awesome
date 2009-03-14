@@ -8,7 +8,7 @@
 local capi = { screen = screen,
                image = image,
                client = client }
-local otable = otable
+local otable = require("otable")
 local ipairs = ipairs
 local table = table
 local hooks = require("awful.hooks")

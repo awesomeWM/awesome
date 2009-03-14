@@ -7,7 +7,7 @@
 -- Grab environment we need
 local math = math
 local type = type
-local otable = otable
+local otable = require("otable")
 local ipairs = ipairs
 local capi = { widget = widget,
                button = button }

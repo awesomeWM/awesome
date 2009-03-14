@@ -9,7 +9,7 @@ local capi = { widget = widget,
                screen = screen,
                image = image,
                client = client }
-local otable = otable
+local otable = require("otable")
 local type = type
 local pairs = pairs
 local ipairs = ipairs

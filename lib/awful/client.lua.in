@@ -11,7 +11,7 @@ local pairs = pairs
 local ipairs = ipairs
 local table = table
 local math = math
-local otable = otable
+local otable = require("otable")
 local setmetatable = setmetatable
 local capi =
 {
