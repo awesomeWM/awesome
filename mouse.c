@@ -218,7 +218,7 @@ luaA_button_array_set(lua_State *L, int idx, button_array_t *buttons)
 int
 luaA_button_array_get(lua_State *L, button_array_t *buttons)
 {
-    luaA_otable_new(L);
+    lua_createtable(L, buttons->len, 0);
     for(int i = 0; i < buttons->len; i++)
     {
         luaA_button_userdata_new(L, buttons->tab[i]);
