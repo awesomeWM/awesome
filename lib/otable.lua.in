@@ -1,0 +1,38 @@
+----------------------------------------------------------------------------
+-- @author Julien Danjou &lt;julien@danjou.info&gt;
+-- @copyright 2009 Julien Danjou
+-- @release @AWESOME_VERSION@
+----------------------------------------------------------------------------
+
+local setmetatable = setmetatable
+local pairs = pairs
+local rawset = rawset
+
+--- Special object table
+module("otable")
+
+local function newindex(t, k, v)
+    for tk, tv in pairs(t) do
+        if tk == k then
+            rawset(t, tk, v)
+            return
+        end
+    end
+    rawset(t, k, v)
+end
+
+local function index(t, k)
+    for tk, tv in pairs(t) do
+        if tk == k then
+            return tv
+        end
+    end
+end
+
+local function new()
+    return setmetatable({}, { __newindex = newindex, __index = index })
+end
+
+setmetatable(_M, { __call = new })
+
+-- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
