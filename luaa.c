@@ -192,7 +192,7 @@ static int
 luaA_mbstrlen(lua_State *L)
 {
     const char *cmd = luaL_checkstring(L, 1);
-    lua_pushnumber(L, mbstowcs(NULL, NONULL(cmd), 0));
+    lua_pushnumber(L, (ssize_t) mbstowcs(NULL, NONULL(cmd), 0));
     return 1;
 }
 
