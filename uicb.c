@@ -110,10 +110,11 @@ uicb_spawn(int screen, char *arg)
     if(!globalconf.screens_info->xinerama_is_active && (tmp = getenv("DISPLAY")))
     {
         display = a_strdup(tmp);
-        if((tmp = strrchr(display, '.')))
+        if ((tmp = strrchr(display, '.')) && !strchr(tmp, ':'))
             *tmp = '\0';
         snprintf(newdisplay, sizeof(newdisplay), "%s.%d", display, screen);
         setenv("DISPLAY", newdisplay, 1);
+        p_delete(&display);
     }
 
 
