@@ -712,13 +712,13 @@ luaA_wibox_new(lua_State *L)
       case Bottom:
       case Top:
       case Floating:
-        simplewindow_orientation_set(&w->sw, East);
+        w->sw.orientation = East;
         break;
       case Left:
-        simplewindow_orientation_set(&w->sw, North);
+        w->sw.orientation = North;
         break;
       case Right:
-        simplewindow_orientation_set(&w->sw, South);
+        w->sw.orientation = South;
         break;
     }
 
