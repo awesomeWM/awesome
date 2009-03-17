@@ -84,34 +84,54 @@ sockets_reconnect(void)
     sockets_init();
 }
 
+/** Send a message to awesome without handling retries.
+ * \param msg The message.
+ * \param msg_len The message length.
+ * \return The errno of send().
+ */
+static int
+send_msg_raw(const char *msg, ssize_t msg_len)
+{
+    #ifndef __FreeBSD__
+    return send(csfd, msg, msg_len, MSG_NOSIGNAL | MSG_EOR);
+    #else
+    return send(csfd, msg, msg_len, MSG_NOSIGNAL | MSG_EOF);
+    #endif
+}
+
 /** Send a message to awesome.
  * \param msg The message.
  * \param msg_len The message length.
- * \return The errno of sendto().
+ * \return The errno of send().
  */
 static int
 send_msg(const char *msg, ssize_t msg_len)
 {
-    #ifndef __FreeBSD__
-    if(send(csfd, msg, msg_len, MSG_NOSIGNAL | MSG_EOR) == -1)
-    #else
-    if(send(csfd, msg, msg_len, MSG_NOSIGNAL | MSG_EOF) == -1)
-    #endif
+    int try = 10;
+
+    while (try && send_msg_raw(msg, msg_len) == -1)
     {
         switch (errno)
         {
-          case ENOENT:
-            warn("can't write to %s", addr->sun_path);
-            break;
           case EPIPE:
           case ENOTCONN:
           case ECONNRESET:
             sockets_reconnect();
-            return send_msg(msg, msg_len);
+            try--;
+            break;
+          case ENOENT:
+            warn("can't write to %s", addr->sun_path);
+            return errno;
           default:
             warn("error sending packet: %s", strerror(errno));
+            return errno;
         }
-        return errno;
+        usleep(100000);
+    }
+    if(!try)
+    {
+        warn("giving up.");
+        return EXIT_FAILURE;
     }
 
     return EXIT_SUCCESS;
@@ -201,12 +221,16 @@ main(int argc, char **argv)
         while((msg = readline(prompt)))
             if((msg_len = a_strlen(msg)))
             {
+                int result;
                 add_history (msg);
                 p_realloc(&msg, msg_len + 2);
                 msg[msg_len] = '\n';
                 msg[msg_len + 1] = '\0';
-                if(send_msg(msg, msg_len + 2) == EXIT_SUCCESS)
+                result = send_msg(msg, msg_len + 2);
+                if(result == EXIT_SUCCESS)
                     recv_msg();
+                else if(result == EXIT_FAILURE)
+                    break;
                 p_delete(&msg);
             }
     }
