@@ -92,8 +92,8 @@ simplewindow_init(simple_window_t *sw,
     /* The real protocol window. */
     sw->geometries.internal.x = geometry.x;
     sw->geometries.internal.y = geometry.y;
-    sw->geometries.internal.width = geometry.width - 2*border_width;
-    sw->geometries.internal.height = geometry.height - 2*border_width;
+    sw->geometries.internal.width = geometry.width;
+    sw->geometries.internal.height = geometry.height;
 
     sw->orientation = orientation;
     sw->ctx.fg = *fg;

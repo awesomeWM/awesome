@@ -372,7 +372,7 @@ wibox_position_update(wibox_t *wibox)
     switch(wibox->position)
     {
       case Right:
-        wingeom.height = area.height;
+        wingeom.height = area.height - 2 * wibox->sw.border.width;
         wingeom.width = wibox->sw.geometry.width > 0 ? wibox->sw.geometry.width : 1.5 * globalconf.font->height;
         wingeom.x = area.x + area.width - wingeom.width;
         switch(wibox->align)
@@ -389,7 +389,7 @@ wibox_position_update(wibox_t *wibox)
         }
         break;
       case Left:
-        wingeom.height = area.height;
+        wingeom.height = area.height - 2 * wibox->sw.border.width;
         wingeom.width = wibox->sw.geometry.width > 0 ? wibox->sw.geometry.width : 1.5 * globalconf.font->height;
         wingeom.x = area.x;
         switch(wibox->align)
@@ -406,7 +406,7 @@ wibox_position_update(wibox_t *wibox)
         break;
       case Bottom:
         wingeom.height = wibox->sw.geometry.height > 0 ? wibox->sw.geometry.height : 1.5 * globalconf.font->height;
-        wingeom.width = area.width;
+        wingeom.width = area.width - 2 * wibox->sw.border.width;
         wingeom.y = (area.y + area.height) - wingeom.height;
         wingeom.x = area.x;
         switch(wibox->align)
@@ -423,7 +423,7 @@ wibox_position_update(wibox_t *wibox)
         break;
       case Top:
         wingeom.height = wibox->sw.geometry.height > 0 ? wibox->sw.geometry.height : 1.5 * globalconf.font->height;
-        wingeom.width = area.width;
+        wingeom.width = area.width - 2 * wibox->sw.border.width;
         wingeom.x = area.x;
         wingeom.y = area.y;
         switch(wibox->align)
