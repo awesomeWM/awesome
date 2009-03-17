@@ -56,11 +56,16 @@ sockets_init(void)
     if((csfd = socket_getclient()) < 0)
         return false;
 
-    if(!(addr = socket_getaddr(display)))
+    if(!(addr = socket_getaddr(getenv("HOME"), display)))
         return false;
 
     if(connect(csfd, addr, sizeof(struct sockaddr_un)) == -1)
-        return false;
+    {
+        if(!(addr = socket_getaddr("/tmp", display)))
+            return false;
+        if(connect(csfd, addr, sizeof(struct sockaddr_un)) == -1)
+            return false;
+    }
 
     return true;
 }

@@ -34,20 +34,20 @@
 
 /** Get a sockaddr_un struct with information feeded for opening a
  * communication to the awesome socket for given display
+ * \param directory Where socket is created.
  * \param display the display number
  * \return sockaddr_un struct ready to be used or NULL if a problem occured
  */
 struct sockaddr_un *
-socket_getaddr(const char *display)
+socket_getaddr(const char *directory, const char *display)
 {
-    char *homedir, *host = NULL;
+    char *host = NULL;
     int screenp = 0, displayp = 0;
     ssize_t path_len, len;
     struct sockaddr_un *addr;
 
     addr = p_new(struct sockaddr_un, 1);
-    homedir = getenv("HOME");
-    
+
     xcb_parse_display(NULL, &host, &displayp, &screenp);
 
     len = a_strlen(host);
@@ -55,7 +55,7 @@ socket_getaddr(const char *display)
     /* + 2 for / and . and \0 */
     path_len = snprintf(addr->sun_path, sizeof(addr->sun_path),
                         "%s/" CONTROL_UNIX_SOCKET_PATH "%s%s%d",
-                        homedir, len ? host : "", len ? "." : "",
+                        directory, len ? host : "", len ? "." : "",
                         displayp);
 
     p_delete(&host);

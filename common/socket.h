@@ -22,7 +22,7 @@
 #ifndef AWESOME_COMMON_SOCKET_H
 #define AWESOME_COMMON_SOCKET_H
 
-struct sockaddr_un * socket_getaddr(const char *);
+struct sockaddr_un * socket_getaddr(const char *, const char *);
 int socket_getclient(void);
 
 #endif

@@ -1115,7 +1115,7 @@ luaA_cs_init(void)
     if (csfd < 0 || fcntl(csfd, F_SETFD, FD_CLOEXEC) == -1)
         return;
 
-    addr = socket_getaddr(getenv("DISPLAY"));
+    addr = socket_getaddr(getenv("HOME"), getenv("DISPLAY"));
 
 /* Needed for some OSes like Solaris */
 #ifndef SUN_LEN
@@ -1132,7 +1132,11 @@ luaA_cs_init(void)
                 return warn("error binding UNIX domain socket: %s", strerror(errno));
         }
         else
-            return warn("error binding UNIX domain socket: %s", strerror(errno));
+        {
+            addr = socket_getaddr("/tmp", getenv("DISPLAY"));
+            if (bind(csfd, (const struct sockaddr *) addr, SUN_LEN(addr)))
+                return warn("error binding UNIX domain socket: %s", strerror(errno));
+        }
     }
     listen(csfd, 10);
 
