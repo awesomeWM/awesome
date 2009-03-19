@@ -150,7 +150,7 @@ end
 
 function bash(...)
     util.deprecate("awful.completion.shell")
-    return shell(args)
+    return shell(...)
 end
 
 --- Run a generic completion.
