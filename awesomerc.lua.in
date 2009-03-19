@@ -240,7 +240,7 @@ globalkeys =
         function ()
             awful.prompt.run({ prompt = "Run Lua code: " },
             mypromptbox[mouse.screen],
-            awful.util.eval, awful.prompt.bash,
+            awful.util.eval, nil,
             awful.util.getdir("cache") .. "/history_eval")
         end),
 }
