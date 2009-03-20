@@ -48,10 +48,6 @@ struct widget_t
     int (*newindex)(lua_State *, awesome_token_t);
     /** Mouse over event handler */
     luaA_ref mouse_enter, mouse_leave;
-    /** Alignement */
-    alignment_t align;
-    /** Supported alignment */
-    alignment_t align_supported;
     /** Misc private data */
     void *data;
     /** Button bindings */

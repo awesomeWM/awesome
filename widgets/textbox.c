@@ -372,7 +372,6 @@ luaA_textbox_newindex(lua_State *L, awesome_token_t token)
 widget_t *
 widget_textbox(widget_t *w)
 {
-    w->align_supported |= AlignFlex;
     w->draw = textbox_draw;
     w->index = luaA_textbox_index;
     w->newindex = luaA_textbox_newindex;
