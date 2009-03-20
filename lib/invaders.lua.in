@@ -375,22 +375,22 @@ function game.quit()
 end
 
 function game.highscore_show ()
-    gamedata.highscore.window:geometry({ height = 140,
-                                         width = 200,
-                                         x = gamedata.field.x + math.floor(gamedata.field.w / 2) - 100,
-                                         y = gamedata.field.y + math.floor(gamedata.field.h / 2) - 55 })
-    gamedata.highscore.window.screen = gamedata.screen
-
     gamedata.highscore.table = widget({ type = "textbox" })
-    gamedata.highscore.window.widgets =  gamedata.highscore.table
 
-    gamedata.highscore.table.text = " Highscores:\n"
+    gamedata.highscore.table.text = "\tHighscores:\t\n"
 
     for i = 1, 5 do
         gamedata.highscore.table.text = gamedata.highscore.table.text .. "\n\t" .. gamedata.highscore[i]
     end
 
     gamedata.highscore.table.text = gamedata.highscore.table.text .. "\n\n Press Q to quit"
+
+    gamedata.highscore.window:geometry(gamedata.highscore.table:extents())
+    gamedata.highscore.window:geometry({ x = gamedata.field.x + math.floor(gamedata.field.w / 2) - 100,
+                                         y = gamedata.field.y + math.floor(gamedata.field.h / 2) - 55 })
+    gamedata.highscore.window.screen = gamedata.screen
+
+    gamedata.highscore.window.widgets =  gamedata.highscore.table
 
     local fh = io.open(gamedata.cachedir.."/highscore_invaders", "w")
 
@@ -494,23 +494,31 @@ function run(args)
        gamedata.field.background.screen = gamedata.screen
     end
 
+    gamedata.field.status = widget({ type = "textbox" })
+    gamedata.field.status.text = gamedata.score.." | "..gamedata.round .. "  "
+
+    gamedata.field.caption = widget({ type = "textbox" })
+    gamedata.field.caption.text = "  Awesome Invaders"
+
     gamedata.field.north = wibox({ bg = gamedata.btheme.bg_focus or "#333333",
                                    fg = gamedata.btheme.fg_focus or "#FFFFFF" })
     gamedata.field.north:geometry({ width = gamedata.field.w + 10,
-                                    height = 15,
+                                    height = gamedata.field.caption:extents()["height"],
                                     x = gamedata.field.x - 5,
-                                    y = gamedata.field.y - 15 })
+                                    y = gamedata.field.y - gamedata.field.caption:extents()["height"] })
     gamedata.field.north.screen = gamedata.screen
 
-    gamedata.field.status = widget({ type = "textbox",
-                                     align = "right" })
-    gamedata.field.status.text = gamedata.score.." | "..gamedata.round .. "  "
-
-    gamedata.field.caption = widget({ type = "textbox",
-                                      align = "left" })
-    gamedata.field.caption.text = "  Awesome Invaders"
-
-    gamedata.field.north.widgets = { gamedata.field.caption, gamedata.field.status }
+    gamedata.field.north.widgets = {
+        {
+            gamedata.field.caption,
+            ["layout"] = awful.widget.layout.horizontal.leftright
+        },
+        {
+            gamedata.field.status,
+            ["layout"] = awful.widget.layout.horizontal.rightleft
+        },
+        ["layout"] = awful.widget.layout.horizontal.rightleft
+    }
 
     gamedata.field.south = wibox({ bg = gamedata.btheme.bg_focus or "#333333",
                                    fg = gamedata.btheme.fg_focus or "#FFFFFF" })
