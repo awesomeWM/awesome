@@ -7,7 +7,6 @@
 -- Grab environment we need
 local pairs = pairs
 local table = table
-local unpack = unpack
 local ipairs = ipairs
 local type = type
 local math = math
@@ -130,7 +129,7 @@ for name, hook in pairs(capi.hooks) do
                 _M[name].callbacks = {}
                 hook(function (msg, ...)
                     if _M[name].callbacks[msg.interface] then
-                        return _M[name].callbacks[msg.interface](msg, unpack(arg))
+                        return _M[name].callbacks[msg.interface](msg, ...)
                     end
                 end)
             end
