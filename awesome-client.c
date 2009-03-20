@@ -56,16 +56,8 @@ sockets_init(void)
     if((csfd = socket_getclient()) < 0)
         return false;
 
-    if(!(addr = socket_getaddr(getenv("HOME"), display)))
+    if(!(addr = socket_open(csfd, display, SOCKET_MODE_CONNECT)))
         return false;
-
-    if(connect(csfd, addr, sizeof(struct sockaddr_un)) == -1)
-    {
-        if(!(addr = socket_getaddr("/tmp", display)))
-            return false;
-        if(connect(csfd, addr, sizeof(struct sockaddr_un)) == -1)
-            return false;
-    }
 
     return true;
 }

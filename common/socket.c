@@ -24,6 +24,7 @@
 #include <errno.h>
 #include <sys/socket.h>
 #include <sys/un.h>
+#include <unistd.h>
 
 #include <xcb/xcb.h>
 
@@ -32,41 +33,75 @@
 
 #define CONTROL_UNIX_SOCKET_PATH ".awesome_ctl."
 
-/** Get a sockaddr_un struct with information feeded for opening a
- * communication to the awesome socket for given display
- * \param directory Where socket is created.
+/** Open a communication socket with awesome for a given display.
+ * \param csfd The socket file descriptor.
  * \param display the display number
- * \return sockaddr_un struct ready to be used or NULL if a problem occured
+ * \param mode The open mode, either Bind or Connect.
+ * \return sockaddr_un Struct ready to be used or NULL if a problem ocurred.
  */
 struct sockaddr_un *
-socket_getaddr(const char *directory, const char *display)
+socket_open(int csfd, const char *display, const socket_mode_t mode)
 {
     char *host = NULL;
     int screenp = 0, displayp = 0;
+    bool is_socket_opened = false;
     ssize_t path_len, len;
     struct sockaddr_un *addr;
+    const char *fallback[] = { ":HOME", ":TMPDIR", "/tmp", NULL }, *directory;
 
     addr = p_new(struct sockaddr_un, 1);
+    addr->sun_family = AF_UNIX;
 
     xcb_parse_display(NULL, &host, &displayp, &screenp);
-
     len = a_strlen(host);
 
-    /* + 2 for / and . and \0 */
-    path_len = snprintf(addr->sun_path, sizeof(addr->sun_path),
-                        "%s/" CONTROL_UNIX_SOCKET_PATH "%s%s%d",
-                        directory, len ? host : "", len ? "." : "",
-                        displayp);
+    for(int i = 0; fallback[i] && !is_socket_opened; i++)
+    {
+        if(fallback[i][0] == ':')
+        {
+            if(!(directory = getenv(fallback[i] + 1)))
+                continue;
+        }
+        else
+            directory = fallback[i];
+
+        /* + 2 for / and . and \0 */
+        path_len = snprintf(addr->sun_path, sizeof(addr->sun_path),
+                            "%s/" CONTROL_UNIX_SOCKET_PATH "%s%s%d",
+                            directory, len ? host : "", len ? "." : "",
+                            displayp);
+
+        if(path_len < ssizeof(addr->sun_path))
+            switch(mode)
+            {
+              case SOCKET_MODE_BIND:
+/* Needed for some OSes like Solaris */
+#ifndef SUN_LEN
+#define SUN_LEN(ptr) ((size_t) (((struct sockaddr_un *) 0)->sun_path) + strlen ((ptr)->sun_path))
+#endif
+                if(!bind(csfd, (const struct sockaddr *) addr, SUN_LEN(addr)))
+                    is_socket_opened = true;
+                else if(errno == EADDRINUSE)
+                {
+                    if(unlink(addr->sun_path))
+                        warn("error unlinking existing file: %s", strerror(errno));
+                    if(!bind(csfd, (const struct sockaddr *)addr, SUN_LEN(addr)))
+                        is_socket_opened = true;
+                }
+                break;
+              case SOCKET_MODE_CONNECT:
+                if(!connect(csfd, (const struct sockaddr *)addr, sizeof(struct sockaddr_un)))
+                    is_socket_opened = true;
+                break;
+            }
+        else
+            warn("error: path (using %s) of control UNIX domain socket is too long", directory);
+    }
 
     p_delete(&host);
 
-    if(path_len >= ssizeof(addr->sun_path))
-    {
-        fprintf(stderr, "error: path of control UNIX domain socket is too long");
-        return NULL;
-    }
-
-    addr->sun_family = AF_UNIX;
+    if(!is_socket_opened)
+        p_delete(&addr);
 
     return addr;
 }

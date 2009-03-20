@@ -1115,31 +1115,13 @@ luaA_cs_init(void)
     if (csfd < 0 || fcntl(csfd, F_SETFD, FD_CLOEXEC) == -1)
         return;
 
-    addr = socket_getaddr(getenv("HOME"), getenv("DISPLAY"));
-
-/* Needed for some OSes like Solaris */
-#ifndef SUN_LEN
-#define SUN_LEN(ptr) ((size_t) (((struct sockaddr_un *) 0)->sun_path) + strlen ((ptr)->sun_path))
-#endif
-
-    if(bind(csfd, (const struct sockaddr *) addr, SUN_LEN(addr)))
+    if(!(addr = socket_open(csfd, getenv("DISPLAY"), SOCKET_MODE_BIND)))
     {
-        if(errno == EADDRINUSE)
-        {
-            if(unlink(addr->sun_path))
-                warn("error unlinking existing file: %s", strerror(errno));
-            if(bind(csfd, (const struct sockaddr *) addr, SUN_LEN(addr)))
-                return warn("error binding UNIX domain socket: %s", strerror(errno));
-        }
-        else
-        {
-            addr = socket_getaddr("/tmp", getenv("DISPLAY"));
-            if (bind(csfd, (const struct sockaddr *) addr, SUN_LEN(addr)))
-                return warn("error binding UNIX domain socket: %s", strerror(errno));
-        }
+        warn("error binding UNIX domain socket: %s", strerror(errno));
+        return;
     }
-    listen(csfd, 10);
 
+    listen(csfd, 10);
     ev_io_init(&csio, &luaA_conn_cb, csfd, EV_READ);
     ev_io_start(EV_DEFAULT_UC_ &csio);
     ev_unref(EV_DEFAULT_UC);

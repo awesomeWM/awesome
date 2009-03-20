@@ -22,7 +22,13 @@
 #ifndef AWESOME_COMMON_SOCKET_H
 #define AWESOME_COMMON_SOCKET_H
 
-struct sockaddr_un * socket_getaddr(const char *, const char *);
+typedef enum
+{
+    SOCKET_MODE_BIND,
+    SOCKET_MODE_CONNECT
+} socket_mode_t;
+
+struct sockaddr_un *socket_open(const int, const char *, const socket_mode_t);
 int socket_getclient(void);
 
 #endif
