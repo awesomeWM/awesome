@@ -1590,6 +1590,9 @@ luaA_client_newindex(lua_State *L)
       case A_TK_BELOW:
         client_setbelow(*c, luaA_checkboolean(L, 3));
         break;
+      case A_TK_URGENT:
+        client_seturgent(*c, luaA_checkboolean(L, 3));
+        break;
       case A_TK_BORDER_COLOR:
         if((buf = luaL_checklstring(L, 3, &len))
            && xcolor_init_reply(xcolor_init_unchecked(&(*c)->border_color, buf, len)))
