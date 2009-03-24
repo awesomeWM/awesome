@@ -48,3 +48,7 @@ taglist_squares = true
 titlebar_close_button = true
 menu_height   = 15
 menu_width    = 100
+
+# Define the image to load
+titlebar_close_button_normal = @AWESOME_THEMES_PATH@/default/titlebar/close.png
+titlebar_close_button_focus = @AWESOME_THEMES_PATH@/default/titlebar/closer.png
