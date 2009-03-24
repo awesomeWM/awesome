@@ -93,7 +93,7 @@ local function widget_tasklist_label_common(c, args)
         status_image = capi.image(floating_icon)
     end
     if c.minimized then
-        name = util.escape(c.icon_name) or util.escape("<untitled>")
+        name = util.escape(c.icon_name) or util.escape(c.name) or util.escape("<untitled>")
     else
         name = util.escape(c.name) or util.escape("<untitled>")
     end
