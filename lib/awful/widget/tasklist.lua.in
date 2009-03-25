@@ -166,6 +166,8 @@ end
 function label.currenttags(c, screen, args)
     -- Only print client on the same screen as this widget
     if c.screen ~= screen then return end
+    -- Include sticky client too
+    if c.sticky then return widget_tasklist_label_common(c, args) end
     for k, t in ipairs(capi.screen[screen]:tags()) do
         if t.selected then
             local ctags = c:tags()
