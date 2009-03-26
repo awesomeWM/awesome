@@ -44,7 +44,6 @@
 
 struct sockaddr_un *addr;
 int csfd;
-char *display;
 
 /** Initialize the client and server socket connections.
  * If something goes wrong, preserves errno.
@@ -56,7 +55,7 @@ sockets_init(void)
     if((csfd = socket_getclient()) < 0)
         return false;
 
-    if(!(addr = socket_open(csfd, display, SOCKET_MODE_CONNECT)))
+    if(!(addr = socket_open(csfd, SOCKET_MODE_CONNECT)))
         return false;
 
     return true;
@@ -190,7 +189,7 @@ exit_help(int exit_code)
 int
 main(int argc, char **argv)
 {
-    char buf[1024], *msg, *prompt;
+    char buf[1024], *msg, *prompt, *display;
     int ret_value = EXIT_SUCCESS;
     ssize_t len, msg_len = 1;
 

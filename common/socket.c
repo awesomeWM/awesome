@@ -33,14 +33,13 @@
 
 #define CONTROL_UNIX_SOCKET_PATH ".awesome_ctl."
 
-/** Open a communication socket with awesome for a given display.
+/** Open a communication socket with awesome.
  * \param csfd The socket file descriptor.
- * \param display the display number
  * \param mode The open mode, either Bind or Connect.
  * \return sockaddr_un Struct ready to be used or NULL if a problem ocurred.
  */
 struct sockaddr_un *
-socket_open(int csfd, const char *display, const socket_mode_t mode)
+socket_open(int csfd, const socket_mode_t mode)
 {
     char *host = NULL;
     int screenp = 0, displayp = 0;

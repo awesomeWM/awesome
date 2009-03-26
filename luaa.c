@@ -1115,7 +1115,7 @@ luaA_cs_init(void)
     if (csfd < 0 || fcntl(csfd, F_SETFD, FD_CLOEXEC) == -1)
         return;
 
-    if(!(addr = socket_open(csfd, getenv("DISPLAY"), SOCKET_MODE_BIND)))
+    if(!(addr = socket_open(csfd, SOCKET_MODE_BIND)))
     {
         warn("error binding UNIX domain socket: %s", strerror(errno));
         return;

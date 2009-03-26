@@ -28,7 +28,7 @@ typedef enum
     SOCKET_MODE_CONNECT
 } socket_mode_t;
 
-struct sockaddr_un *socket_open(const int, const char *, const socket_mode_t);
+struct sockaddr_un *socket_open(const int, const socket_mode_t);
 int socket_getclient(void);
 
 #endif
