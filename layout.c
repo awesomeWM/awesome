@@ -23,6 +23,7 @@
 #include "tag.h"
 #include "window.h"
 #include "screen.h"
+#include "titlebar.h"
 
 extern awesome_t globalconf;
 
@@ -44,6 +45,12 @@ arrange(int screen)
                                      c->win,
                                      XCB_CW_EVENT_MASK,
                                      select_input_val);
+
+        /* Restore titlebar before client, so geometry is ok again. */
+        if(titlebar_isvisible(c, screen))
+            titlebar_unban(c->titlebar);
+        else if(c->screen == screen)
+            titlebar_ban(c->titlebar);
 
         if(client_isvisible(c, screen))
             client_unban(c);

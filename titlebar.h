@@ -23,6 +23,8 @@
 #define AWESOME_TITLEBAR_H
 
 #include "wibox.h"
+#include "client.h"
+#include "window.h"
 
 client_t * client_getbytitlebar(wibox_t *);
 client_t * client_getbytitlebarwin(xcb_window_t);
@@ -32,8 +34,23 @@ void titlebar_client_detach(client_t *);
 void titlebar_client_attach(client_t *, wibox_t *);
 void titlebar_set_visible(wibox_t *, bool);
 void titlebar_ban(wibox_t *);
+void titlebar_unban(wibox_t *);
 
 int luaA_titlebar_newindex(lua_State *, wibox_t *, awesome_token_t);
+
+static inline bool
+titlebar_isvisible(client_t *c, int screen)
+{
+    if(client_isvisible(c, screen))
+    {
+        if(c->isfullscreen)
+            return false;
+        if(!c->titlebar || !c->titlebar->isvisible)
+            return false;
+        return true;
+    }
+    return false;
+}
 
 /** Add the titlebar geometry and border to a geometry.
  * \param t The titlebar
@@ -48,7 +65,7 @@ titlebar_geometry_add(wibox_t *t, int border, area_t geometry)
      * This can then be substracted/added to the witdh/height/x/y.
      * In this case the border is included, because it belongs to a different window.
      */
-    if(t)
+    if(t && !t->isbanned)
         switch(t->position)
         {
           case Top:
@@ -89,7 +106,7 @@ titlebar_geometry_remove(wibox_t *t, int border, area_t geometry)
      * This can then be substracted/added to the witdh/height/x/y.
      * In this case the border is included, because it belongs to a different window.
      */
-    if(t)
+    if(t && !t->isbanned)
         switch(t->position)
         {
           case Top:
@@ -131,10 +148,6 @@ titlebar_update_geometry(client_t *c)
     /* Client geometry without titlebar, but including borders, since that is always consistent. */
     titlebar_geometry_compute(c, titlebar_geometry_remove(c->titlebar, 0, c->geometry), &geom);
     wibox_moveresize(c->titlebar, geom);
-
-    /* If the client is banned, move the titlebar out! */
-    if(c->isbanned)
-        titlebar_ban(c->titlebar);
 }
 
 #endif

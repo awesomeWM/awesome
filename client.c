@@ -234,8 +234,6 @@ client_ban(client_t *c)
                              XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y,
                              request);
 
-        titlebar_ban(c->titlebar);
-
         c->isbanned = true;
 
         /* All the wiboxes (may) need to be repositioned. */
@@ -834,6 +832,10 @@ client_setfullscreen(client_t *c, bool s)
     {
         area_t geometry;
 
+        /* Make sure the current geometry is stored without titlebar. */
+        if (s)
+            titlebar_ban(c->titlebar);
+
         /* become fullscreen! */
         if((c->isfullscreen = s))
         {
@@ -1053,21 +1055,6 @@ client_unban(client_t *c)
                               request);
         window_configure(c->win, c->geometries.internal, c->border);
 
-        /* Do this manually because the system doesn't know we moved the toolbar.
-         * Note that !isvisible titlebars are unmapped and for fullscreen it'll
-         * end up offscreen anyway. */
-        if(c->titlebar)
-        {
-            simple_window_t *sw = &c->titlebar->sw;
-            /* All resizing is done, so only move now. */
-            request[0] = sw->geometry.x;
-            request[1] = sw->geometry.y;
-
-            xcb_configure_window(globalconf.connection, sw->window,
-                                XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y,
-                                request);
-        }
-
         c->isbanned = false;
 
         /* All the wiboxes (may) need to be repositioned. */
@@ -1245,8 +1232,7 @@ client_setborder(client_t *c, int width)
     client_need_arrange(c);
 
     /* Changing border size also affects the size of the titlebar. */
-    if (c->titlebar)
-        titlebar_update_geometry(c);
+    titlebar_update_geometry(c);
 
     hooks_property(c, "border_width");
 }

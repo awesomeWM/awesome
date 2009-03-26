@@ -41,8 +41,16 @@ void wibox_delete(wibox_t **);
 static inline void
 wibox_moveresize(wibox_t *wibox, area_t geometry)
 {
-    if(wibox->sw.window)
+    if(wibox->sw.window && !wibox->isbanned)
         simplewindow_moveresize(&wibox->sw, geometry);
+    else if(wibox->sw.window && wibox->isbanned)
+    {
+        area_t real_geom = geometry;
+        geometry.x = -geometry.width;
+        geometry.y = -geometry.height;
+        simplewindow_moveresize(&wibox->sw, geometry);
+        wibox->sw.geometry = real_geom;
+    }
     else
         wibox->sw.geometry = geometry;
     wibox->need_update = true;

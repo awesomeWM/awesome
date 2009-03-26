@@ -68,8 +68,9 @@ void
 titlebar_ban(wibox_t *titlebar)
 {
     /* Do it manually because client geometry remains unchanged. */
-    if(titlebar)
+    if(titlebar && !titlebar->isbanned)
     {
+        client_t *c;
         simple_window_t *sw = &titlebar->sw;
 
         if(sw->window)
@@ -80,6 +81,44 @@ titlebar_ban(wibox_t *titlebar)
                                  XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y,
                                  request);
         }
+
+        /* Remove titlebar geometry from client. */
+        if ((c = client_getbytitlebar(titlebar)))
+            c->geometry = titlebar_geometry_remove(titlebar, 0, c->geometry);
+
+        titlebar->isbanned = true;
+    }
+}
+
+/** Move a titlebar on top of its client.
+ * \param titlebar The titlebar.
+ */
+void
+titlebar_unban(wibox_t *titlebar)
+{
+    /* Do this manually because the system doesn't know we moved the toolbar.
+     * Note that !isvisible titlebars are unmapped and for fullscreen it'll
+     * end up offscreen anyway. */
+    if(titlebar && titlebar->isbanned)
+    {
+        client_t *c;
+        simple_window_t *sw = &titlebar->sw;
+
+        if (sw->window)
+        {
+            /* All resizing is done, so only move now. */
+            uint32_t request[] = { sw->geometry.x, sw->geometry.y };
+
+            xcb_configure_window(globalconf.connection, sw->window,
+                                XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y,
+                                request);
+        }
+
+        titlebar->isbanned = false;
+
+        /* Add titlebar geometry from client. */
+        if ((c = client_getbytitlebar(titlebar)))
+            c->geometry = titlebar_geometry_add(titlebar, 0, c->geometry);
     }
 }
 
@@ -250,8 +289,7 @@ titlebar_client_attach(client_t *c, wibox_t *t)
          * titlebar if needed. */
         titlebar_update_geometry(c);
 
-        if(t->isvisible)
-            xcb_map_window(globalconf.connection, t->sw.window);
+        xcb_map_window(globalconf.connection, t->sw.window);
 
         client_need_arrange(c);
         client_stack();
@@ -267,14 +305,10 @@ titlebar_set_visible(wibox_t *t, bool visible)
 {
     if (visible != t->isvisible)
     {
-        /* The price of (un)mapping something small like a titlebar is pretty cheap.
-         * It would complicate matters if this rare case was treated like clients.
-         * Clients are moved out of the viewport when banned.
-         */
         if ((t->isvisible = visible))
-            xcb_map_window(globalconf.connection, t->sw.window);
+            titlebar_unban(t);
         else
-            xcb_unmap_window(globalconf.connection, t->sw.window);
+            titlebar_ban(t);
 
         globalconf.screens[t->screen].need_arrange = true;
         client_stack();

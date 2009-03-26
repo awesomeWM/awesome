@@ -110,6 +110,8 @@ typedef struct
     char *cursor;
     /** Background image */
     image_t *bg_image;
+    /* Banned? used for titlebars */
+    bool isbanned;
     /** Button bindings */
     button_array_t buttons;
 } wibox_t;
