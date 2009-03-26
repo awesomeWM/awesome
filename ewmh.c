@@ -581,6 +581,11 @@ ewmh_client_check_hints(client_t *c)
                 c->type = MAX(c->type, WINDOW_TYPE_TOOLBAR);
             else if(state[i] == _NET_WM_WINDOW_TYPE_UTILITY)
                 c->type = MAX(c->type, WINDOW_TYPE_UTILITY);
+
+            if(c->type != WINDOW_TYPE_NORMAL
+               && c->type != WINDOW_TYPE_DESKTOP
+               && !c->transient_for)
+                client_setabove(c, true);
     }
 
     p_delete(&reply);

@@ -414,15 +414,8 @@ client_layer_translator(client_t *c)
     /* then deal with windows type */
     switch(c->type)
     {
-      case WINDOW_TYPE_DOCK:
-        return LAYER_ABOVE;
       case WINDOW_TYPE_DESKTOP:
         return LAYER_DESKTOP;
-      case WINDOW_TYPE_DIALOG:
-      case WINDOW_TYPE_MENU:
-      case WINDOW_TYPE_TOOLBAR:
-      case WINDOW_TYPE_UTILITY:
-        return LAYER_ABOVE;
       default:
         break;
     }

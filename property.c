@@ -51,6 +51,7 @@ property_update_wm_transient_for(client_t *c, xcb_get_property_reply_t *reply)
 
     c->type = WINDOW_TYPE_DIALOG;
     c->transient_for = client_getbywin(trans);
+    client_setabove(c, false);
 }
 
 static int
