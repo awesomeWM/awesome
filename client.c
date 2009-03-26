@@ -311,7 +311,7 @@ client_focus(client_t *c, bool sendmessage)
                                 c->win, XCB_CURRENT_TIME);
 
         if(takefocus)
-            /* Input models: No Input, Globally Active */
+            /* Input models: Local Active, Globally Active */
             window_takefocus(c->win);
     }
 
