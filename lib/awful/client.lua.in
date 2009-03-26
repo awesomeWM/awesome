@@ -38,6 +38,7 @@ focus = {}
 focus.history = {}
 swap = {}
 floating = {}
+dockable = {}
 property = {}
 
 -- User hooks
@@ -765,6 +766,35 @@ function incwfact(add, c)
     -- keep our ratios normalized
     normalize(colfact, w.num)
     capi.hooks.arrange()(t.screen)
+end
+
+--- Get a client dockable state.
+-- @param c A client.
+-- @return True or false. Note that some windows might be dockable even if you
+-- did not set them manually. For example, windows with a type "utility", "toolbar" 
+-- or "dock"
+function dockable.get(c)
+    local value = property.get(c, "dockable")
+
+    -- Some sane defaults
+    if value == nil then
+        if (c.type == "utility" or c.type == "toolbar" or c.type == "dock") then
+            value = true
+        else
+            value = false
+        end
+    end
+
+    return value
+end
+
+--- Set a client dockable state, overriding auto-detection.
+-- With this enabled you can dock windows by moving them from the center
+-- to the edge of the workarea.
+-- @param c A client.
+-- @param value True or false.
+function dockable.set(c, value)
+    property.set(c, "dockable", value)
 end
 
 --- Get a client property.
