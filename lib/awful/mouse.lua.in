@@ -72,14 +72,14 @@ end
 local function snap_inside(g, sg, snap)
     local edgev = 'none'
     local edgeh = 'none'
-    if math.abs(g.x) < snap + sg.x and g.x > sg.x then
+    if math.abs(g.x) < snap + sg.x and g.x >= sg.x then
         edgev = 'left'
         g.x = sg.x
     elseif math.abs((sg.x + sg.width) - (g.x + g.width)) < snap then
         edgev = 'right'
         g.x = sg.x + sg.width - g.width
     end
-    if math.abs(g.y) < snap + sg.y and g.y > sg.y then
+    if math.abs(g.y) < snap + sg.y and g.y >= sg.y then
         edgeh = 'top'
         g.y = sg.y
     elseif math.abs((sg.y + sg.height) - (g.y + g.height)) < snap then
@@ -115,18 +115,19 @@ function client.snap(c, snap, x, y, fixed_x, fixed_y)
     geom, edge = snap_inside(geom, capi.screen[c.screen].geometry, snap)
     geom, edge2 = snap_inside(geom, capi.screen[c.screen].workarea, snap)
 
-    -- Allow certain windows to snap to the edge of the screen.
+    -- Allow certain windows to snap to the edge of the workarea.
+    -- Only allow docking to workarea for consistency/to avoid problems.
     if c.type == "utility" or c.type == "toolbar" or c.type == "dock" then
         local struts = c:struts()
         struts['left'] = 0
         struts['right'] = 0
         struts['top'] = 0
         struts['bottom'] = 0
-        if edge ~= "none" and aclient.floating.get(c) then
-            if edge == "left" or edge == "right" then
-                struts[edge] = cur_geom.width
-            elseif edge == "top" or edge == "bottom" then
-                struts[edge] = cur_geom.height
+        if edge2 ~= "none" and aclient.floating.get(c) then
+            if edge2 == "left" or edge2 == "right" then
+                struts[edge2] = cur_geom.width
+            elseif edge2 == "top" or edge2 == "bottom" then
+                struts[edge2] = cur_geom.height
             end
         end
         c:struts(struts)

@@ -176,6 +176,7 @@ screen_area_get(int screen, wibox_array_t *wiboxes,
         area.height -= padding->top + padding->bottom;
     }
 
+    /* struts are additive, to allow for multiple clients at the screen edge. */
     if(strut)
     {
         client_t *c;
@@ -184,36 +185,36 @@ screen_area_get(int screen, wibox_array_t *wiboxes,
             {
                 if(c->strut.top_start_x || c->strut.top_end_x)
                 {
-                    if(c->strut.top)
-                        top = MAX(top, c->strut.top);
+                    if (c->strut.top)
+                        top += c->strut.top;
                     else
-                        top = MAX(top, (c->geometry.y - area.y) + c->geometry.height);
+                        top += c->geometry.height;
                 }
                 if(c->strut.bottom_start_x || c->strut.bottom_end_x)
                 {
-                    if(c->strut.bottom)
-                        bottom = MAX(bottom, c->strut.bottom);
+                    if (c->strut.bottom)
+                        bottom += c->strut.bottom;
                     else
-                        bottom = MAX(bottom, (area.y + area.height) - c->geometry.y);
+                        bottom += c->geometry.height;
                 }
                 if(c->strut.left_start_y || c->strut.left_end_y)
                 {
-                    if(c->strut.left)
-                        left = MAX(left, c->strut.left);
+                    if (c->strut.left)
+                        left += c->strut.left;
                     else
-                        left = MAX(left, (c->geometry.x - area.x) + c->geometry.width);
+                        left += c->geometry.width;
                 }
                 if(c->strut.right_start_y || c->strut.right_end_y)
                 {
-                    if(c->strut.right)
-                        right = MAX(right, c->strut.right);
+                    if (c->strut.right)
+                        right += c->strut.right;
                     else
-                        right = MAX(right, (area.x + area.width) - c->geometry.x);
+                        right += c->geometry.width;
                 }
             }
     }
 
-
+    /* swindow geometry includes borders. */
     if(wiboxes)
         for(int i = 0; i < wiboxes->len; i++)
         {
@@ -222,16 +223,16 @@ screen_area_get(int screen, wibox_array_t *wiboxes,
                 switch(w->position)
                 {
                   case Top:
-                    top = MAX(top, (uint16_t) (w->sw.geometry.y - area.y) + w->sw.geometry.height + 2 * w->sw.border.width);
+                    top += w->sw.geometry.height;
                     break;
                   case Bottom:
-                    bottom = MAX(bottom, (uint16_t) (area.y + area.height) - w->sw.geometry.y);
+                    bottom += w->sw.geometry.height;
                     break;
                   case Left:
-                    left = MAX(left, (uint16_t) (w->sw.geometry.x - area.x) + w->sw.geometry.width + 2 * w->sw.border.width);
+                    left += w->sw.geometry.width;
                     break;
                   case Right:
-                    right = MAX(right, (uint16_t) (area.x + area.width) - w->sw.geometry.x);
+                    right += w->sw.geometry.width;
                     break;
                   default:
                     break;
