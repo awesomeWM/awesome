@@ -642,6 +642,8 @@ ewmh_process_client_strut(client_t *c, xcb_get_property_reply_t *strut_r)
             client_need_arrange(c);
             /* All the wiboxes (may) need to be repositioned. */
             wibox_update_positions();
+
+            hooks_property(c, "struts");
         }
     }
 

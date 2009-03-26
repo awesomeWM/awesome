@@ -1476,6 +1476,8 @@ luaA_client_struts(lua_State *L)
             client_need_arrange((*c));
             /* All the wiboxes (may) need to be repositioned. */
             wibox_update_positions();
+
+            hooks_property(*c, "struts");
         }
     }
 
