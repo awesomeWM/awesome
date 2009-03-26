@@ -549,7 +549,7 @@ end
 --- Set a client floating state, overriding auto-detection.
 -- Floating client are not handled by tiling layouts.
 -- @param c A client.
--- @param state True or false.
+-- @param s True or false.
 function floating.set(c, s)
     local c = c or capi.client.focus
     if c and property.get(c, "floating") ~= s then
