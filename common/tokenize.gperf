@@ -19,7 +19,6 @@ center
 char
 class
 client
-color
 Control
 conffile
 content
@@ -41,7 +40,6 @@ group_id
 grow
 height
 hide
-honorsizehints
 icon
 icon_name
 id
@@ -59,7 +57,6 @@ margin
 maximized_horizontal
 maximized_vertical
 middle
-minimize
 minimized
 Mod1
 Mod2
