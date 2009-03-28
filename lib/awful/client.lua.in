@@ -69,8 +69,10 @@ function urgent.jumpto()
         if s ~= c.screen then
             capi.mouse.screen = c.screen
         end
-        -- focus the tag
-        tag.viewonly(c:tags()[1])
+        -- focus the tag only if the client is not sticky
+        if not c.sticky then
+           tag.viewonly(c:tags()[1])
+        end
         -- focus the client
         capi.client.focus = c
         c:raise()
