@@ -64,7 +64,7 @@ end
 -- @return The awesome.spawn return value.
 function spawn(cmd, screen)
     if cmd and cmd ~= "" then
-        return capi.awesome.spawn(cmd .. "&", screen or capi.mouse.screen)
+        return capi.awesome.spawn(cmd, screen or capi.mouse.screen)
     end
 end
 
