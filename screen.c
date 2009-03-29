@@ -185,28 +185,28 @@ screen_area_get(int screen, wibox_array_t *wiboxes,
             {
                 if(c->strut.top_start_x || c->strut.top_end_x)
                 {
-                    if (c->strut.top)
+                    if(c->strut.top)
                         top += c->strut.top;
                     else
                         top += c->geometry.height;
                 }
                 if(c->strut.bottom_start_x || c->strut.bottom_end_x)
                 {
-                    if (c->strut.bottom)
+                    if(c->strut.bottom)
                         bottom += c->strut.bottom;
                     else
                         bottom += c->geometry.height;
                 }
                 if(c->strut.left_start_y || c->strut.left_end_y)
                 {
-                    if (c->strut.left)
+                    if(c->strut.left)
                         left += c->strut.left;
                     else
                         left += c->geometry.width;
                 }
                 if(c->strut.right_start_y || c->strut.right_end_y)
                 {
-                    if (c->strut.right)
+                    if(c->strut.right)
                         right += c->strut.right;
                     else
                         right += c->geometry.width;
@@ -334,7 +334,7 @@ screen_client_moveto(client_t *c, int new_screen, bool dotag, bool doresize)
         globalconf.screens[old_screen].need_arrange = true;
     client_need_arrange(c);
 
-    if (!doresize)
+    if(!doresize)
         return;
 
     from = screen_area_get(old_screen, NULL, NULL, false);
@@ -351,15 +351,15 @@ screen_client_moveto(client_t *c, int new_screen, bool dotag, bool doresize)
         new_f_geometry.y = to.y + new_f_geometry.y - from.x;
 
         /* resize the client's original geometry if it doesn't fit the screen */
-        if (new_f_geometry.width > to.width)
+        if(new_f_geometry.width > to.width)
             new_f_geometry.width = to.width;
-        if (new_f_geometry.height > to.height)
+        if(new_f_geometry.height > to.height)
             new_f_geometry.height = to.height;
 
         /* make sure the client is still on the screen */
-        if (new_f_geometry.x + new_f_geometry.width > to.x + to.width)
+        if(new_f_geometry.x + new_f_geometry.width > to.x + to.width)
             new_f_geometry.x = to.x + to.width - new_f_geometry.width;
-        if (new_f_geometry.y + new_f_geometry.height > to.y + to.height)
+        if(new_f_geometry.y + new_f_geometry.height > to.y + to.height)
             new_f_geometry.y = to.y + to.height - new_f_geometry.height;
 
         c->geometries.fullscreen = new_f_geometry;

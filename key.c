@@ -58,12 +58,12 @@ static int
 key_ev_cmp(xcb_keysym_t keysym, xcb_keycode_t keycode,
                   unsigned long mod, const keyb_t *k)
 {
-    if (k->keysym) {
-        if (k->keysym != keysym)
+    if(k->keysym) {
+        if(k->keysym != keysym)
             return k->keysym > keysym ? 1 : -1;
     }
-    if (k->keycode) {
-        if (k->keycode != keycode)
+    if(k->keycode) {
+        if(k->keycode != keycode)
             return k->keycode > keycode ? 1 : -1;
     }
     return k->mod == mod ? 0 : (k->mod > mod ? 1 : -1);
@@ -75,9 +75,9 @@ key_cmp(const keyb_t *k1, const keyb_t *k2)
     assert ((k1->keysym && k2->keysym) || (k1->keycode && k2->keycode));
     assert ((!k1->keysym && !k2->keysym) || (!k1->keycode && !k2->keycode));
 
-    if (k1->keysym != k2->keysym)
+    if(k1->keysym != k2->keysym)
         return k2->keysym > k1->keysym ? 1 : -1;
-    if (k1->keycode != k2->keycode)
+    if(k1->keycode != k2->keycode)
         return k2->keycode > k1->keycode ? 1 : -1;
     return k1->mod == k2->mod ? 0 : (k2->mod > k1->mod ? 1 : -1);
 }
@@ -125,9 +125,10 @@ key_register(keybindings_t *keys, keyb_t *k)
 
     key_ref(&k);
 
-    while (l < r) {
+    while(l < r) {
         int i = (r + l) / 2;
-        switch (key_cmp(k, arr->tab[i])) {
+        switch(key_cmp(k, arr->tab[i]))
+        {
           case -1: /* k < arr->tab[i] */
             r = i;
             break;
@@ -234,10 +235,10 @@ key_find(keybindings_t *keys, const xcb_key_press_event_t *ev)
   again:
     l = 0;
     r = arr->len;
-    while (l < r)
+    while(l < r)
     {
         int i = (r + l) / 2;
-        switch (key_ev_cmp(keysym, ev->detail, mod, arr->tab[i]))
+        switch(key_ev_cmp(keysym, ev->detail, mod, arr->tab[i]))
         {
           case -1: /* ev < arr->tab[i] */
             r = i;
@@ -265,9 +266,9 @@ luaA_keystore(keyb_t *key, const char *str, ssize_t len)
         if(*str != '#')
         {
             key->keysym = XStringToKeysym(str);
-            if (!key->keysym)
+            if(!key->keysym)
             {
-                if (len == 1)
+                if(len == 1)
                     key->keysym = *str;
                 else
                     warn("there's no keysym named \"%s\"", str);

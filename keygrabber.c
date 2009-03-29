@@ -101,7 +101,7 @@ keysym_to_unicode_590_5fe[] =
     0x06f0, 0x06f1, 0x06f2, 0x06f3, 0x06f4, 0x06f5, 0x06f6, 0x06f7, /* 0x0590-0x0597 */
     0x06f8, 0x06f9, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, /* 0x0598-0x059f */
     0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x066a, 0x0670, 0x0679, /* 0x05a0-0x05a7 */
-	
+
     0x067e, 0x0686, 0x0688, 0x0691, 0x060c, 0x0000, 0x06d4, 0x0000, /* 0x05ac-0x05af */
     0x0660, 0x0661, 0x0662, 0x0663, 0x0664, 0x0665, 0x0666, 0x0667, /* 0x05b0-0x05b7 */
     0x0668, 0x0669, 0x0000, 0x061b, 0x0000, 0x0000, 0x0000, 0x061f, /* 0x05b8-0x05bf */
@@ -258,7 +258,7 @@ keysym_to_unicode_12a1_12fe[] =
     0x0175, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x1e6b, /* 0x12f0-0x12f7 */
     0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0177          /* 0x12f0-0x12ff */
 };
-		
+
 static unsigned short const
 keysym_to_unicode_13bc_13be[] =
 {
@@ -403,7 +403,7 @@ keysym_to_utf8(char *buf, int len, const xcb_keysym_t ksym)
         return false;
 
     count = utf8clen(ksym_conv);
-    switch (count)
+    switch(count)
     {
       case 7: return false;
       case 6: buf[5] = (ksym_conv | 0x80) & 0xbf; ksym_conv >>= 6;
@@ -515,7 +515,7 @@ static bool
 keysym_to_xkb(char *buf, ssize_t len, const xcb_keysym_t ksym)
 {
     switch(ksym)
-    {    
+    {
         CASE(ISO_Lock);
         CASE(ISO_Level2_Latch);
         CASE(ISO_Level3_Shift);
@@ -687,7 +687,7 @@ keygrabber_handlekpress(lua_State *L, xcb_key_press_event_t *e)
     xcb_keysym_t ksym = 0;
     char buf[MAX(MB_LEN_MAX, 32)];
 
-    if (!key_press_lookup_string(e, buf, countof(buf), &ksym))
+    if(!key_press_lookup_string(e, buf, countof(buf), &ksym))
         return false;
 
     lua_newtable(L);

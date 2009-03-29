@@ -242,7 +242,7 @@ client_ban(client_t *c)
     }
 
     /* Wait until the last moment to take away the focus from the window. */
-    if (globalconf.screens[c->phys_screen].client_focus == c)
+    if(globalconf.screens[c->phys_screen].client_focus == c)
         client_unfocus(c);
 }
 
@@ -756,7 +756,7 @@ client_resize(client_t *c, area_t geometry, bool hints)
         /* The idea is to give a client a resize even when banned. */
         /* We just have to move the (x,y) to keep it out of the viewport. */
         /* This at least doesn't break expectations about events. */
-        if (c->isbanned)
+        if(c->isbanned)
         {
             geometry_internal.x = values[0] = - (geometry_internal.width + 2 * c->border);
             geometry_internal.y = values[1] = - (geometry_internal.height + 2 * c->border);
@@ -826,7 +826,7 @@ client_setfullscreen(client_t *c, bool s)
         area_t geometry;
 
         /* Make sure the current geometry is stored without titlebar. */
-        if (s)
+        if(s)
             titlebar_ban(c->titlebar);
 
         /* become fullscreen! */
@@ -1456,7 +1456,7 @@ luaA_client_struts(lua_State *L)
         struts.top = luaA_getopt_number(L, 2, "top", (*c)->strut.top);
         struts.bottom = luaA_getopt_number(L, 2, "bottom", (*c)->strut.bottom);
 
-        if (struts.left != (*c)->strut.left || struts.right != (*c)->strut.right ||
+        if(struts.left != (*c)->strut.left || struts.right != (*c)->strut.right ||
                 struts.top != (*c)->strut.top || struts.bottom != (*c)->strut.bottom) {
             /* Struts are not so well defined in the context of xinerama. So we just
              * give the entire root window and let the window manager decide. */

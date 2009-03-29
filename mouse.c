@@ -66,7 +66,7 @@ mouse_query_pointer(xcb_window_t window, int16_t *x, int16_t *y, xcb_window_t *c
 
     *x = query_ptr_r->win_x;
     *y = query_ptr_r->win_y;
-    if (mask)
+    if(mask)
         *mask = query_ptr_r->mask;
     if(child)
         *child = query_ptr_r->child;

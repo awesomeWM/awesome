@@ -991,7 +991,7 @@ luaA_docmd(const char *cmd)
         oldtop = newtop;
 
         *p = '\0';
-        if (luaL_dostring(globalconf.L, cmd))
+        if(luaL_dostring(globalconf.L, cmd))
         {
             warn("error executing Lua code: %s", lua_tostring(globalconf.L, -1));
             return 1;
@@ -1040,7 +1040,7 @@ static void luaA_conn_cleanup(EV_P_ ev_io *w)
 {
     ev_ref(EV_DEFAULT_UC);
     ev_io_stop(EV_DEFAULT_UC_ w);
-    if (close(w->fd))
+    if(close(w->fd))
         warn("error closing UNIX domain socket: %s", strerror(errno));
     p_delete(&w);
 }
@@ -1079,7 +1079,7 @@ luaA_cb(EV_P_ ev_io *w, int revents)
         s = lua_tolstring(globalconf.L, -1, &len);
 
         /* ignore ENOENT because the client may not read */
-        if (send(w->fd, s, len, MSG_DONTWAIT) == -1)
+        if(send(w->fd, s, len, MSG_DONTWAIT) == -1)
            switch(errno)
            {
              case ENOENT:
@@ -1112,7 +1112,7 @@ luaA_cs_init(void)
 {
     int csfd = socket_getclient();
 
-    if (csfd < 0 || fcntl(csfd, F_SETFD, FD_CLOEXEC) == -1)
+    if(csfd < 0 || fcntl(csfd, F_SETFD, FD_CLOEXEC) == -1)
         return;
 
     if(!(addr = socket_open(csfd, SOCKET_MODE_BIND)))
@@ -1134,7 +1134,7 @@ luaA_cs_cleanup(void)
         return;
     ev_ref(EV_DEFAULT_UC);
     ev_io_stop(EV_DEFAULT_UC_ &csio);
-    if (close(csio.fd))
+    if(close(csio.fd))
         warn("error closing UNIX domain socket: %s", strerror(errno));
     if(unlink(addr->sun_path))
         warn("error unlinking UNIX domain socket: %s", strerror(errno));

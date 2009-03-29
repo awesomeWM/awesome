@@ -105,9 +105,9 @@ send_msg(const char *msg, ssize_t msg_len)
 {
     int try = 10;
 
-    while (try && send_msg_raw(msg, msg_len) == -1)
+    while(try && send_msg_raw(msg, msg_len) == -1)
     {
-        switch (errno)
+        switch(errno)
         {
           case EPIPE:
           case ENOTCONN:
@@ -146,7 +146,7 @@ recv_msg(void)
     while(try)
     {
         r = recv(csfd, buf, sizeof(buf) - 1, MSG_TRUNC | MSG_DONTWAIT);
-        if (r < 0)
+        if(r < 0)
         {
             if(errno != EAGAIN)
                 return warn("error recieving from UNIX domain socket: %s", strerror(errno));
@@ -205,7 +205,7 @@ main(int argc, char **argv)
 
     display = getenv("DISPLAY");
 
-    if (!sockets_init())
+    if(!sockets_init())
     {
         warn("can't connect to UNIX domain socket: %s", strerror(errno));
         return EXIT_FAILURE;
@@ -240,12 +240,12 @@ main(int argc, char **argv)
             {
                 ret_value = send_msg(msg, msg_len);
                 p_delete(&msg);
-                if (ret_value != EXIT_SUCCESS)
+                if(ret_value != EXIT_SUCCESS)
                     return ret_value;
                 msg = p_new(char, 1);
                 msg_len = 1;
             }
-            else if (len > 1)
+            else if(len > 1)
             {
                 msg_len += len;
                 p_realloc(&msg, msg_len);

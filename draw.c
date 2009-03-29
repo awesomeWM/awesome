@@ -100,7 +100,7 @@ draw_screen_default_visual(xcb_screen_t *s)
         for(; depth_iter.rem; xcb_depth_next (&depth_iter))
             for(xcb_visualtype_iterator_t visual_iter = xcb_depth_visuals_iterator (depth_iter.data);
                  visual_iter.rem; xcb_visualtype_next (&visual_iter))
-                if (s->root_visual == visual_iter.data->visual_id)
+                if(s->root_visual == visual_iter.data->visual_id)
                     return visual_iter.data;
 
     return NULL;
@@ -457,7 +457,7 @@ draw_graph(draw_context_t *ctx, area_t rect, int *from, int *to, int cur_index,
             cairo_line_to(ctx->cr, x, rect.y - to[cur_index]);
             x -= 1.0;
 
-            if (--cur_index < 0)
+            if(--cur_index < 0)
                 cur_index = rect.width - 1;
         }
     }
@@ -468,7 +468,7 @@ draw_graph(draw_context_t *ctx, area_t rect, int *from, int *to, int cur_index,
             cairo_line_to(ctx->cr, x, rect.y - to[cur_index]);
             x += 1.0;
 
-            if (--cur_index < 0)
+            if(--cur_index < 0)
                 cur_index = rect.width - 1;
         }
 
@@ -533,7 +533,7 @@ draw_graph_line(draw_context_t *ctx, area_t rect, int *to, int cur_index,
         /* cycles around the index */
         if(grow == Right)
         {
-            if (++cur_index > w - 1)
+            if(++cur_index > w - 1)
                 cur_index = 0;
         }
         else
@@ -695,7 +695,7 @@ draw_text_extents(draw_text_context_t *data)
 alignment_t
 draw_align_fromstr(const char *align, ssize_t len)
 {
-    switch (a_tokenize(align, len))
+    switch(a_tokenize(align, len))
     {
       case A_TK_CENTER: return AlignCenter;
       case A_TK_RIGHT:  return AlignRight;

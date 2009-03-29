@@ -83,7 +83,7 @@ titlebar_ban(wibox_t *titlebar)
         }
 
         /* Remove titlebar geometry from client. */
-        if ((c = client_getbytitlebar(titlebar)))
+        if((c = client_getbytitlebar(titlebar)))
             c->geometry = titlebar_geometry_remove(titlebar, 0, c->geometry);
 
         titlebar->isbanned = true;
@@ -104,7 +104,7 @@ titlebar_unban(wibox_t *titlebar)
         client_t *c;
         simple_window_t *sw = &titlebar->sw;
 
-        if (sw->window)
+        if(sw->window)
         {
             /* All resizing is done, so only move now. */
             uint32_t request[] = { sw->geometry.x, sw->geometry.y };
@@ -117,7 +117,7 @@ titlebar_unban(wibox_t *titlebar)
         titlebar->isbanned = false;
 
         /* Add titlebar geometry from client. */
-        if ((c = client_getbytitlebar(titlebar)))
+        if((c = client_getbytitlebar(titlebar)))
             c->geometry = titlebar_geometry_add(titlebar, 0, c->geometry);
     }
 }
@@ -303,9 +303,9 @@ titlebar_client_attach(client_t *c, wibox_t *t)
 void
 titlebar_set_visible(wibox_t *t, bool visible)
 {
-    if (visible != t->isvisible)
+    if(visible != t->isvisible)
     {
-        if ((t->isvisible = visible))
+        if((t->isvisible = visible))
             titlebar_unban(t);
         else
             titlebar_ban(t);

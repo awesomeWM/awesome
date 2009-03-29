@@ -178,7 +178,7 @@ bool
 is_client_tagged(client_t *c, tag_t *t)
 {
     for(int i = 0; i < t->clients.len; i++)
-        if (t->clients.tab[i] == c)
+        if(t->clients.tab[i] == c)
             return true;
 
     return false;
@@ -210,7 +210,7 @@ tags_get_current(int screen)
 static void
 tag_view_only(tag_t *target)
 {
-    if (target)
+    if(target)
     {
         tag_array_t *tags = &globalconf.screens[target->screen].tags;
 

@@ -455,7 +455,8 @@ a_dbus_cleanup(void)
 
     dbus_error_free(&err);
 
-    if (dbusio.fd >= 0) {
+    if(dbusio.fd >= 0)
+    {
         ev_ref(EV_DEFAULT_UC);
         ev_io_stop(EV_DEFAULT_UC_ &dbusio);
         dbusio.fd = -1;

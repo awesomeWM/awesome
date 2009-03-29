@@ -292,7 +292,7 @@ event_handle_configurerequest(void *data __attribute__ ((unused)),
         if(ev->value_mask & XCB_CONFIG_WINDOW_HEIGHT)
             geometry.height = ev->height;
 
-        if (ev->value_mask & XCB_CONFIG_WINDOW_BORDER_WIDTH)
+        if(ev->value_mask & XCB_CONFIG_WINDOW_BORDER_WIDTH)
             client_setborder(c, ev->border_width);
 
         /* Clients are not allowed to directly mess with stacking parameters. */
