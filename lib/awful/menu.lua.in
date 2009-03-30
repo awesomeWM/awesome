@@ -341,7 +341,7 @@ function new(menu, parent, num)
     local data = {}
 
     if not menu_keys.up then
-        setkeys()
+        setkeys(menu.keys)
     end
 
     data.items = {}
