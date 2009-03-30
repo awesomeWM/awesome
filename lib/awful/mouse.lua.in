@@ -574,18 +574,4 @@ function client.resize(c, corner)
     end
 end
 
--- Disable struts when resizing
-local function update_struts(c, prop)
-    if prop == "geometry" then
-        local struts = c:struts()
-        struts['left'] = 0
-        struts['right'] = 0
-        struts['top'] = 0
-        struts['bottom'] = 0
-        c:struts(struts)
-    end
-end
-
-hooks.property.register(update_struts)
-
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

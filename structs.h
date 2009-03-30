@@ -180,6 +180,8 @@ struct client_t
     } geometries;
     /** Strut */
     strut_t strut;
+    /** Ignore strut temporarily. */
+    bool ignore_strut;
     /** Border width and pre-fullscreen border width */
     int border, border_fs;
     xcolor_t border_color;

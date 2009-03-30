@@ -59,6 +59,8 @@ arrange(int screen)
             client_ban(c);
     }
 
+    client_update_strut_positions(screen);
+
     /* Reset status before calling arrange hook.
      * This is needed if you call a function that relies
      * on need_arrange while arrange is in progress.

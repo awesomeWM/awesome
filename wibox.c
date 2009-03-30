@@ -294,8 +294,9 @@ wibox_position_update(wibox_t *wibox)
 
     globalconf.screens[wibox->screen].need_arrange = true;
 
+    /* Place wibox'es at the edge of the screen, struts come later. */
     area = screen_area_get(wibox->screen, NULL,
-                           &globalconf.screens[wibox->screen].padding, true);
+                           &globalconf.screens[wibox->screen].padding, false);
 
     /* Top and Bottom wibox_t have prio */
     if(wibox->position != Floating)

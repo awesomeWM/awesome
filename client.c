@@ -779,6 +779,195 @@ client_resize(client_t *c, area_t geometry, bool hints)
     return false;
 }
 
+/** Update the position of all window with struts on a specific screen.
+ * \param screen The screen that should be processed.
+ */
+void
+client_update_strut_positions(int screen)
+{
+    client_t *c;
+    area_t allowed_area, geom;
+
+    /* Ignore all struts for starters. */
+    for(c = globalconf.clients; c; c = c->next)
+        if(c->screen == screen && client_hasstrut(c))
+            c->ignore_strut = true;
+
+    /* Rationale:
+     * Top and bottom panels are common, so they take precendence.
+     * WINDOW_TYPE_DOCK really wants to be at the side, so choose them first.
+     */
+
+    /* WINDOW_TYPE_DOCK: top + bottom. */
+    for(c = globalconf.clients; c; c = c->next)
+    {
+        if(c->screen != screen || !client_hasstrut(c) || c->type != WINDOW_TYPE_DOCK)
+            continue;
+
+        /* Screen area, minus padding, wibox'es and already processed struts. */
+        allowed_area = screen_area_get(c->screen,
+                        &globalconf.screens[c->screen].wiboxes,
+                        &globalconf.screens[c->screen].padding,
+                        true);
+
+        geom = c->geometry;
+
+        if(c->strut.top || c->strut.top_start_x || c->strut.top_end_x)
+        {
+            geom.y = allowed_area.y;
+            if(geom.x < allowed_area.x
+               || geom.x + geom.width > allowed_area.x + allowed_area.width)
+            {
+                geom.x = allowed_area.x;
+                if(geom.width > allowed_area.width)
+                    geom.width = allowed_area.width;
+            }
+            c->ignore_strut = false;
+            client_resize(c, geom, false);
+        }
+        else if(c->strut.bottom || c->strut.bottom_start_x || c->strut.bottom_end_x)
+        {
+            geom.y = allowed_area.y + allowed_area.height - geom.height;
+            if(geom.x < allowed_area.x
+               || geom.x + geom.width > allowed_area.x + allowed_area.width)
+            {
+                geom.x = allowed_area.x;
+                if(geom.width > allowed_area.width)
+                    geom.width = allowed_area.width;
+            }
+            c->ignore_strut = false;
+            client_resize(c, geom, false);
+        }
+    }
+
+    /* WINDOW_TYPE_DOCK: left + right. */
+    for(c = globalconf.clients; c; c = c->next)
+    {
+        if(c->screen != screen || !client_hasstrut(c) || c->type != WINDOW_TYPE_DOCK)
+            continue;
+
+        /* Screen area, minus padding, wibox'es and already processed struts. */
+        allowed_area = screen_area_get(c->screen,
+                        &globalconf.screens[c->screen].wiboxes,
+                        &globalconf.screens[c->screen].padding,
+                        true);
+
+        geom = c->geometry;
+
+        if(c->strut.left || c->strut.left_start_y || c->strut.left_end_y)
+        {
+            geom.x = allowed_area.x;
+            if(geom.y < allowed_area.y
+               || geom.y + geom.height > allowed_area.y + allowed_area.height)
+            {
+                geom.y = allowed_area.y;
+                if (geom.height > allowed_area.height)
+                    geom.height = allowed_area.height;
+            }
+            c->ignore_strut = false;
+            client_resize(c, geom, false);
+        }
+        else if(c->strut.right || c->strut.right_start_y || c->strut.right_end_y)
+        {
+            geom.x = allowed_area.x + allowed_area.width - geom.width;
+            if(geom.y < allowed_area.y
+               || geom.y + geom.height > allowed_area.y + allowed_area.height)
+            {
+                geom.y = allowed_area.y;
+                if (geom.height > allowed_area.height)
+                    geom.height = allowed_area.height;
+            }
+            c->ignore_strut = false;
+            client_resize(c, geom, false);
+        }
+    }
+
+    /* not WINDOW_TYPE_DOCK: top + bottom. */
+    for(c = globalconf.clients; c; c = c->next)
+    {
+        if(c->screen != screen || !client_hasstrut(c) || c->type == WINDOW_TYPE_DOCK)
+            continue;
+
+        /* Screen area, minus padding, wibox'es and already processed struts. */
+        allowed_area = screen_area_get(c->screen,
+                        &globalconf.screens[c->screen].wiboxes,
+                        &globalconf.screens[c->screen].padding,
+                        true);
+
+        geom = c->geometry;
+
+        if(c->strut.top || c->strut.top_start_x || c->strut.top_end_x)
+        {
+            geom.y = allowed_area.y;
+            if(geom.x < allowed_area.x
+               || geom.x + geom.width > allowed_area.x + allowed_area.width)
+            {
+                geom.x = allowed_area.x;
+                if(geom.width > allowed_area.width)
+                    geom.width = allowed_area.width;
+            }
+            c->ignore_strut = false;
+            client_resize(c, geom, false);
+        }
+        else if(c->strut.bottom || c->strut.bottom_start_x || c->strut.bottom_end_x)
+        {
+            geom.y = allowed_area.y + allowed_area.height - geom.height;
+            if(geom.x < allowed_area.x
+               || geom.x + geom.width > allowed_area.x + allowed_area.width)
+            {
+                geom.x = allowed_area.x;
+                if(geom.width > allowed_area.width)
+                    geom.width = allowed_area.width;
+            }
+            c->ignore_strut = false;
+            client_resize(c, geom, false);
+        }
+    }
+
+    /* not WINDOW_TYPE_DOCK: left + right. */
+    for(c = globalconf.clients; c; c = c->next)
+    {
+        if(c->screen != screen || !client_hasstrut(c) || c->type == WINDOW_TYPE_DOCK)
+            continue;
+
+        /* Screen area, minus padding, wibox'es and already processed struts. */
+        allowed_area = screen_area_get(c->screen,
+                        &globalconf.screens[c->screen].wiboxes,
+                        &globalconf.screens[c->screen].padding,
+                        true);
+
+        geom = c->geometry;
+
+        if(c->strut.left || c->strut.left_start_y || c->strut.left_end_y)
+        {
+            geom.x = allowed_area.x;
+            if(geom.y < allowed_area.y
+               || geom.y + geom.height > allowed_area.y + allowed_area.height)
+            {
+                geom.y = allowed_area.y;
+                if (geom.height > allowed_area.height)
+                    geom.height = allowed_area.height;
+            }
+            c->ignore_strut = false;
+            client_resize(c, geom, false);
+        }
+        else if(c->strut.right || c->strut.right_start_y || c->strut.right_end_y)
+        {
+            geom.x = allowed_area.x + allowed_area.width - geom.width;
+            if(geom.y < allowed_area.y
+               || geom.y + geom.height > allowed_area.y + allowed_area.height)
+            {
+                geom.y = allowed_area.y;
+                if (geom.height > allowed_area.height)
+                    geom.height = allowed_area.height;
+            }
+            c->ignore_strut = false;
+            client_resize(c, geom, false);
+        }
+    }
+}
+
+
 /** Set a client minimized, or not.
  * \param c The client.
  * \param s Set or not the client minimized.
