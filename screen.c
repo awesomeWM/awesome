@@ -176,7 +176,9 @@ screen_area_get(int screen, wibox_array_t *wiboxes,
         area.height -= padding->top + padding->bottom;
     }
 
-    /* struts are additive, to allow for multiple clients at the screen edge. */
+    /* Struts are additive, to allow for multiple clients at the screen edge. */
+    /* Some clients request more space than their size, because another window of the same app already has some space. */
+    /* So we clamp the strut size. */
     if(strut)
     {
         client_t *c;
@@ -186,28 +188,28 @@ screen_area_get(int screen, wibox_array_t *wiboxes,
                 if(c->strut.top_start_x || c->strut.top_end_x)
                 {
                     if(c->strut.top)
-                        top += c->strut.top;
+                        top += MIN(c->strut.top, c->geometry.height);
                     else
                         top += c->geometry.height;
                 }
                 if(c->strut.bottom_start_x || c->strut.bottom_end_x)
                 {
                     if(c->strut.bottom)
-                        bottom += c->strut.bottom;
+                        bottom += MIN(c->strut.bottom, c->geometry.height);
                     else
                         bottom += c->geometry.height;
                 }
                 if(c->strut.left_start_y || c->strut.left_end_y)
                 {
                     if(c->strut.left)
-                        left += c->strut.left;
+                        left += MIN(c->strut.left, c->geometry.width);
                     else
                         left += c->geometry.width;
                 }
                 if(c->strut.right_start_y || c->strut.right_end_y)
                 {
                     if(c->strut.right)
-                        right += c->strut.right;
+                        right += MIN(c->strut.right, c->geometry.width);
                     else
                         right += c->geometry.width;
                 }
