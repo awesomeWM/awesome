@@ -159,6 +159,8 @@ titlebar_draw(Client *c)
     switch(c->titlebar.position)
     {
       case Off:
+        if (c->titlebar.sw)
+            XUnmapWindow(globalconf.display, c->titlebar.sw->window);
         return;
       case Right:
       case Left:
