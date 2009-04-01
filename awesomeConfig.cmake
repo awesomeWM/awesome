@@ -220,13 +220,13 @@ endif()
 if(DEFINED SYSCONFDIR)
     set(SYSCONFDIR ${SYSCONFDIR} CACHE PATH "config directory")
 else()
-    set(SYSCONFDIR /etc CACHE PATH "config directory")
+    set(SYSCONFDIR ${PREFIX}/etc CACHE PATH "config directory")
 endif()
 
 #If an XDG Config Dir is specificed, use it instead
 #of the default XDG configuration dir.
 if(DEFINED XDG_CONFIG_DIR)
-    set(XDG_CONFIG_DIR ${XDG_CONFIG_SYS} CACHE PATH "xdg config directory")
+    set(XDG_CONFIG_DIR ${XDG_CONFIG_DIR} CACHE PATH "xdg config directory")
 else()
     set(XDG_CONFIG_DIR ${SYSCONFDIR}/xdg CACHE PATH "xdg config directory")
 endif()
