@@ -24,6 +24,7 @@
 #include <sys/wait.h>
 #include <unistd.h>
 #include <limits.h>
+#include <fcntl.h>
 
 #include "util.h"
 #include "tokenize.h"
@@ -271,6 +272,20 @@ a_strsplit(const char *str, ssize_t len, char delim)
     }
 
     return retval;
+}
+
+/** Mark a file descriptor as close-on-exec.
+ * \param fd The file descriptor.
+ * \return The fcntl() return value.
+ */
+int
+fd_set_close_on_exec(int fd)
+{
+    int flags = fcntl(fd, F_GETFD, 0);
+    /* ignore errors */
+    if(flags < 0)
+        return flags;
+    return fcntl(fd, F_SETFD, flags | FD_CLOEXEC);
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
