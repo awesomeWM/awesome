@@ -46,6 +46,7 @@ local function history_check_load(id, max)
                    break
 		end
             end
+            f:close()
 	end
     end
 end
