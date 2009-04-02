@@ -132,6 +132,7 @@ pkg_check_modules(AWESOME_COMMON_REQUIRED REQUIRED
 pkg_check_modules(AWESOME_REQUIRED REQUIRED
     glib-2.0
     cairo
+    x11
     pango>=1.19.3
     pangocairo>=1.19.3
     xcb-randr
