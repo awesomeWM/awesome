@@ -121,6 +121,8 @@ socket_getclient(void)
     if(csfd < 0)
         warn("error opening UNIX domain socket: %s", strerror(errno));
 
+    fd_set_close_on_exec(csfd);
+
     return csfd;
 }
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
