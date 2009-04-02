@@ -1102,6 +1102,11 @@ luaA_conn_cb(EV_P_ ev_io *w, int revents)
     ev_io *csio_conn = p_new(ev_io, 1);
     int csfd = accept(w->fd, NULL, NULL);
 
+    if(csfd < 0)
+        return;
+
+    fd_set_close_on_exec(csfd);
+
     ev_io_init(csio_conn, &luaA_cb, csfd, EV_READ);
     ev_io_start(EV_DEFAULT_UC_ csio_conn);
     ev_unref(EV_DEFAULT_UC);
