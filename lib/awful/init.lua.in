@@ -18,6 +18,7 @@ require("awful.widget")
 require("awful.menu")
 require("awful.mouse")
 require("awful.remote")
+require("awful.startup_notification")
 
 --- AWesome Functions very UsefuL
 module("awful")
