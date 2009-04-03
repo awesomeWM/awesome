@@ -552,7 +552,42 @@ luaA_hasitem(lua_State *L, const void *item)
     return false;
 }
 
-/** Check if a table is a loop. When using table as direct acyclic digram,
+/** Browse a table pushed on top of the index, and put all its table and
+ * sub-table into an array.
+ * \param L The Lua VM state.
+ * \param elems The elements array.
+ * \return False if we encounter an elements already in list.
+ */
+static bool
+luaA_isloop_check(lua_State *L, void_array_t *elems)
+{
+    const void *object = lua_topointer(L, -1);
+
+    /* Check that the object table is not already in the list */
+    for(int i = 0; i < elems->len; i++)
+        if(elems->tab[i] == object)
+            return false;
+
+    /* push the table in the elements list */
+    void_array_append(elems, object);
+
+    /* look every object in the "table" */
+    lua_pushnil(L);
+    while(luaA_next(L, -2))
+    {
+        if(!luaA_isloop_check(L, elems))
+        {
+            /* remove key and value */
+            lua_pop(L, 2);
+            return false;
+        }
+        /* remove value, keep key for next iteration */
+        lua_pop(L, 1);
+    }
+    return true;
+}
+
+/** Check if a table is a loop. When using tables as direct acyclic digram,
  * this is useful.
  * \param L The Lua VM state.
  * \param idx The index of the table in the stack
@@ -561,28 +596,21 @@ luaA_hasitem(lua_State *L, const void *item)
 bool
 luaA_isloop(lua_State *L, int idx)
 {
-    if(lua_istable(L, idx))
-    {
-        lua_pushvalue(L, idx); /* push table on top */
-        if(luaA_hasitem(L, lua_topointer(L, -1)))
-        {
-            lua_pop(L, 1); /* remove pushed table */
-            return true;
-        }
-        lua_pushnil(L);
-        while(luaA_next(L, -2))
-        {
-            /* check for recursivity */
-            if(luaA_isloop(L, -1))
-            {
-                lua_pop(L, 2); /* remove key and value */
-                return true;
-            }
-            lua_pop(L, 1); /* remove value */
-        }
-        lua_pop(L, 1); /* remove pushed table */
-    }
-    return false;
+    /* elems is an elements array that we will fill with all array we
+     * encounter while browsing the tables */
+    void_array_t elems;
+    bool ret = false;
+
+    void_array_init(&elems);
+
+    /* push table on top */
+    lua_pushvalue(L, idx);
+
+    ret = luaA_isloop_check(L, &elems);
+
+    void_array_wipe(&elems);
+
+    return !ret;
 }
 
 /** Spawn a program.
