@@ -823,10 +823,13 @@ event_handle_clientmessage(void *data __attribute__ ((unused)),
                            xcb_connection_t *connection,
                            xcb_client_message_event_t *ev)
 {
-    client_t *c;
+    /* check for startup notification messages */
+    if(sn_xcb_display_process_event(globalconf.sndisplay, (xcb_generic_event_t *) ev))
+        return 0;
 
     if(ev->type == WM_CHANGE_STATE)
     {
+        client_t *c;
         if((c = client_getbywin(ev->window))
            && ev->format == 32
            && ev->data.data32[0] == XCB_WM_STATE_ICONIC)

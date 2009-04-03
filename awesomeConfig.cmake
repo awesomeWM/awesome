@@ -145,6 +145,7 @@ pkg_check_modules(AWESOME_REQUIRED REQUIRED
     xcb-image>=0.3.0
     xcb-property>=0.3.0
     cairo-xcb
+    libstartup-notification-1.0>=0.10
     xproto>=7.0.11
     imlib2
     libxdg-basedir)

@@ -175,6 +175,20 @@ luaA_hooks_property(lua_State *L)
     HANDLE_HOOK(L, globalconf.hooks.property);
 }
 
+/** Set the function called on each startup-notification events
+ * This function is called with a table and various fields set to describe the
+ * vents.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ * \luastack
+ * \lparam A function to call on each startup-notification event.
+ */
+static int
+luaA_hooks_startup_notification(lua_State *L)
+{
+    HANDLE_HOOK(L, globalconf.hooks.startup_notification);
+}
+
 /** Set the function to be called every N seconds.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
@@ -233,6 +247,7 @@ const struct luaL_reg awesome_hooks_lib[] =
     { "clients", luaA_hooks_clients },
     { "tags", luaA_hooks_tags },
     { "tagged", luaA_hooks_tagged },
+    { "startup_notification", luaA_hooks_startup_notification },
     { "timer", luaA_hooks_timer },
 #ifdef WITH_DBUS
     { "dbus", luaA_hooks_dbus },

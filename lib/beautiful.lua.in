@@ -44,7 +44,7 @@ function init(path)
        for key, value in f:read("*all"):gsub("^","\n"):gmatch("\n[\t ]*([a-z_]+)[\t ]*=[\t ]*([^\n\t]+)") do
             if key == "wallpaper_cmd" then
                 for s = 1, capi.screen.count() do
-                    util.spawn(value, s)
+                    util.spawn(value, false, s)
                 end
             elseif key == "font" then
                 capi.awesome.font = value

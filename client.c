@@ -31,6 +31,7 @@
 #include "systray.h"
 #include "property.h"
 #include "wibox.h"
+#include "spawn.h"
 #include "common/atoms.h"
 
 DO_LUA_TOSTRING(client_t, client, "client")
@@ -544,6 +545,9 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
     /* Move window outside the viewport before mapping it. */
     client_ban(c);
     xcb_map_window(globalconf.connection, c->win);
+
+    if(!startup)
+        spawn_start_notify(c);
 
     /* Call hook to notify list change */
     if(globalconf.hooks.clients != LUA_REFNIL)

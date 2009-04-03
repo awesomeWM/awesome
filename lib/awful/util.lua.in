@@ -60,11 +60,13 @@ end
 
 --- Spawn a program.
 -- @param cmd The command.
+-- @paran sn Enable startup-notification.
 -- @param screen The screen where to spawn window.
 -- @return The awesome.spawn return value.
-function spawn(cmd, screen)
+function spawn(cmd, sn, screen)
     if cmd and cmd ~= "" then
-        return capi.awesome.spawn(cmd, screen or capi.mouse.screen)
+        if sn == nil then sn = true end
+        return capi.awesome.spawn(cmd, sn, screen or capi.mouse.screen)
     end
 end
 

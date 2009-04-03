@@ -32,6 +32,7 @@
 #include <xcb/xcb_event.h>
 
 #include "awesome.h"
+#include "spawn.h"
 #include "client.h"
 #include "window.h"
 #include "ewmh.h"
@@ -522,6 +523,9 @@ main(int argc, char **argv)
         ewmh_init(screen_nbr);
         systray_init(screen_nbr);
     }
+
+    /* init spawn (sn) */
+    spawn_init();
 
     /* Parse and run configuration file */
     luaA_parserc(xdg, confpath, true);

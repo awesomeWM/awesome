@@ -23,7 +23,10 @@
 #define AWESOME_SPAWN_H
 
 #include <lua.h>
+#include "structs.h"
 
+void spawn_init(void);
+void spawn_start_notify(client_t *);
 int luaA_spawn(lua_State *);
 
 #endif

@@ -22,6 +22,9 @@
 #ifndef AWESOME_STRUCTS_H
 #define AWESOME_STRUCTS_H
 
+#define SN_API_NOT_YET_FROZEN
+#include <libsn/sn.h>
+
 #include <xcb/xcb_icccm.h>
 #include <xcb/xcb_property.h>
 
@@ -285,6 +288,8 @@ typedef struct
     } systray;
     /** Focused client */
     client_t *client_focus;
+    /** The monitor of startup notifications */
+    SnMonitorContext *snmonitor;
 } screen_t;
 
 /** Main configuration structure */
@@ -365,6 +370,8 @@ struct awesome_t
         luaA_ref property;
         /** Command to run on time */
         luaA_ref timer;
+        /** Startup notification hooks */
+        luaA_ref startup_notification;
 #ifdef WITH_DBUS
         /** Command to run on dbus events */
         luaA_ref dbus;
@@ -382,6 +389,8 @@ struct awesome_t
     screen_t *screen_focus;
     /** Need to call client_stack_refresh() */
     bool client_need_stack_refresh;
+    /** The startup notification display struct */
+    SnDisplay *sndisplay;
 };
 
 DO_ARRAY(const void *, void, DO_NOTHING)
