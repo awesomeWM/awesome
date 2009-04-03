@@ -1,5 +1,5 @@
 /*
- * lua.c - Lua configuration management
+ * luaa.c - Lua configuration management
  *
  * Copyright © 2008-2009 Julien Danjou <julien@danjou.info>
  *
@@ -25,9 +25,6 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <unistd.h>
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <unistd.h>
 #include <fcntl.h>
 
 #include <ev.h>
@@ -43,6 +40,7 @@
 #include "ewmh.h"
 #include "config.h"
 #include "luaa.h"
+#include "spawn.h"
 #include "tag.h"
 #include "client.h"
 #include "screen.h"
@@ -618,57 +616,6 @@ luaA_isloop(lua_State *L, int idx)
     return !ret;
 }
 
-/** Spawn a program.
- * This function is multi-head (Zaphod) aware and will set display to
- * the right screen according to mouse position.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack
- * \luastack
- * \lparam The command to launch.
- * \lparam The optional screen number to spawn the command on.
- */
-static int
-luaA_spawn(lua_State *L)
-{
-    char *host, newdisplay[128];
-    const char *cmd;
-    int screen = 0, screenp, displayp;
-
-    if(lua_gettop(L) == 2)
-    {
-        screen = luaL_checknumber(L, 2) - 1;
-        luaA_checkscreen(screen);
-    }
-
-    cmd = luaL_checkstring(L, 1);
-
-    if(!globalconf.xinerama_is_active)
-    {
-        xcb_parse_display(NULL, &host, &displayp, &screenp);
-        snprintf(newdisplay, sizeof(newdisplay), "%s:%d.%d", host, displayp, screen);
-        setenv("DISPLAY", newdisplay, 1);
-        p_delete(&host);
-    }
-
-    /* The double-fork construct avoids zombie processes and keeps the code
-     * clean from stupid signal handlers. */
-    if(fork() == 0)
-    {
-        if(fork() == 0)
-        {
-            if(globalconf.connection)
-                xcb_disconnect(globalconf.connection);
-            setsid();
-            a_exec(cmd);
-            warn("execl '%s' failed: %s\n", cmd, strerror(errno));
-        }
-        exit(EXIT_SUCCESS);
-    }
-    wait(0);
-
-    return 0;
-}
-
 /** awesome global table.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
@@ -1210,3 +1157,5 @@ luaA_pushcolor(lua_State *L, const xcolor_t *c)
     lua_pushlstring(L, s, len);
     return 1;
 }
+
+// vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
