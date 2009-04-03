@@ -49,7 +49,7 @@
 #include "selection.h"
 #include "window.h"
 #include "common/socket.h"
-#include "common/buffer.h"
+#include "common/xcursor.h"
 
 extern awesome_t globalconf;
 
@@ -124,6 +124,36 @@ luaA_root_buttons(lua_State *L)
         luaA_button_array_set(L, 1, &globalconf.buttons);
 
     return luaA_button_array_get(L, &globalconf.buttons);
+}
+
+/** Set the root cursor.
+ * \param L The Lua VM state.
+ * \return The number of element pushed on stack.
+ * \luastack
+ * \lparam A X cursor name.
+ */
+static int
+luaA_root_cursor(lua_State *L)
+{
+    const char *cursor_name = luaL_checkstring(L, 1);
+    uint16_t cursor_font = xcursor_font_fromstr(cursor_name);
+
+    if(cursor_font)
+    {
+        uint32_t change_win_vals[] = { xcursor_new(globalconf.connection, cursor_font) };
+
+        for(int screen_nbr = 0;
+            screen_nbr < xcb_setup_roots_length(xcb_get_setup(globalconf.connection));
+            screen_nbr++)
+            xcb_change_window_attributes(globalconf.connection,
+                                         xutil_screen_get(globalconf.connection, screen_nbr)->root,
+                                         XCB_CW_CURSOR,
+                                         change_win_vals);
+    }
+    else
+        luaA_warn(L, "invalid cursor %s", cursor_name);
+
+    return 0;
 }
 
 /** Quit awesome.
@@ -712,6 +742,7 @@ luaA_init(void)
     {
         { "buttons", luaA_root_buttons },
         { "keys", luaA_root_keys },
+        { "cursor", luaA_root_cursor },
         { NULL, NULL }
     };
 
