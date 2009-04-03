@@ -559,11 +559,8 @@ event_handle_focusin(void *data __attribute__ ((unused)),
                      xcb_focus_in_event_t *ev)
 {
     /* filter focus-in events */
-    if(ev->mode != XCB_NOTIFY_MODE_NORMAL
-       && (ev->detail == XCB_NOTIFY_DETAIL_VIRTUAL
-           || ev->detail == XCB_NOTIFY_DETAIL_NONLINEAR_VIRTUAL
-           || ev->detail == XCB_NOTIFY_DETAIL_POINTER))
-            return 0;
+    if (ev->detail != XCB_NOTIFY_DETAIL_NONLINEAR)
+        return 0;
 
     client_t *c;
 
