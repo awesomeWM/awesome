@@ -383,5 +383,7 @@ struct awesome_t
     screen_t *screen_focus;
 };
 
+DO_ARRAY(const void *, void, DO_NOTHING)
+
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
