@@ -561,28 +561,31 @@ luaA_hasitem(lua_State *L, const void *item)
 static bool
 luaA_isloop_check(lua_State *L, void_array_t *elems)
 {
-    const void *object = lua_topointer(L, -1);
-
-    /* Check that the object table is not already in the list */
-    for(int i = 0; i < elems->len; i++)
-        if(elems->tab[i] == object)
-            return false;
-
-    /* push the table in the elements list */
-    void_array_append(elems, object);
-
-    /* look every object in the "table" */
-    lua_pushnil(L);
-    while(luaA_next(L, -2))
+    if(lua_istable(L, -1))
     {
-        if(!luaA_isloop_check(L, elems))
+        const void *object = lua_topointer(L, -1);
+
+        /* Check that the object table is not already in the list */
+        for(int i = 0; i < elems->len; i++)
+            if(elems->tab[i] == object)
+                return false;
+
+        /* push the table in the elements list */
+        void_array_append(elems, object);
+
+        /* look every object in the "table" */
+        lua_pushnil(L);
+        while(luaA_next(L, -2))
         {
-            /* remove key and value */
-            lua_pop(L, 2);
-            return false;
+            if(!luaA_isloop_check(L, elems))
+            {
+                /* remove key and value */
+                lua_pop(L, 2);
+                return false;
+            }
+            /* remove value, keep key for next iteration */
+            lua_pop(L, 1);
         }
-        /* remove value, keep key for next iteration */
-        lua_pop(L, 1);
     }
     return true;
 }
