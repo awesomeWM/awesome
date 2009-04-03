@@ -16,6 +16,7 @@ local math = math
 local ipairs = ipairs
 local capi =
 {
+    root = root,
     mouse = mouse,
     screen = screen,
     client = client,
@@ -573,5 +574,8 @@ function client.resize(c, corner)
         return client_resize_magnifier(c, corner)
     end
 end
+
+-- Set the cursor at startup
+capi.root.cursor("left_ptr")
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
