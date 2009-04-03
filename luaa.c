@@ -86,9 +86,8 @@ static ev_io csio = { .fd = -1 };
  * \param L The Lua VM state.
  * \return The number of element pushed on stack.
  * \luastack
- * \lvalue A client.
  * \lparam An array of key bindings objects, or nothing.
- * \return The array of key bindings objects of this client.
+ * \lreturn The array of key bindings objects of this client.
  */
 static int
 luaA_root_keys(lua_State *L)
@@ -115,9 +114,8 @@ luaA_root_keys(lua_State *L)
  * \param L The Lua VM state.
  * \return The number of element pushed on stack.
  * \luastack
- * \lvalue A client.
  * \lparam An array of mouse button bindings objects, or nothing.
- * \return The array of mouse button bindings objects.
+ * \lreturn The array of mouse button bindings objects.
  */
 static int
 luaA_root_buttons(lua_State *L)
