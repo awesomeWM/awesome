@@ -599,14 +599,16 @@ luaA_isloop(lua_State *L, int idx)
     /* elems is an elements array that we will fill with all array we
      * encounter while browsing the tables */
     void_array_t elems;
-    bool ret = false;
 
     void_array_init(&elems);
 
     /* push table on top */
     lua_pushvalue(L, idx);
 
-    ret = luaA_isloop_check(L, &elems);
+    bool ret = luaA_isloop_check(L, &elems);
+
+    /* remove pushed table */
+    lua_pop(L, 1);
 
     void_array_wipe(&elems);
 
