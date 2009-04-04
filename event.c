@@ -456,6 +456,9 @@ event_handle_leavenotify(void *data __attribute__ ((unused)),
     wibox_t *wibox;
     client_t *c;
 
+    if(ev->mode != XCB_NOTIFY_MODE_NORMAL)
+        return 0;
+
     if((c = client_getbywin(ev->event)))
     {
         if(globalconf.hooks.mouse_leave != LUA_REFNIL)
