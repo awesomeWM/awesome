@@ -558,6 +558,7 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
     /* update window title */
     property_update_wm_name(c);
     property_update_wm_icon_name(c);
+    property_update_wm_class(c);
 
     /* update strut */
     ewmh_process_client_strut(c, NULL);
@@ -1833,7 +1834,6 @@ luaA_client_index(lua_State *L)
     const char *buf = luaL_checklstring(L, 2, &len);
     char *value;
     void *data;
-    xcb_get_wm_class_reply_t hint;
     xcb_get_property_cookie_t prop_c;
     xcb_get_property_reply_t *prop_r = NULL;
     double d;
@@ -1910,20 +1910,10 @@ luaA_client_index(lua_State *L)
         }
         break;
       case A_TK_CLASS:
-        if(!xcb_get_wm_class_reply(globalconf.connection,
-                                   xcb_get_wm_class_unchecked(globalconf.connection, (*c)->win),
-                                   &hint, NULL))
-             return 0;
-        lua_pushstring(L, hint.class_name);
-        xcb_get_wm_class_reply_wipe(&hint);
+        lua_pushstring(L, (*c)->class);
         break;
       case A_TK_INSTANCE:
-        if(!xcb_get_wm_class_reply(globalconf.connection,
-                                   xcb_get_wm_class_unchecked(globalconf.connection, (*c)->win),
-                                   &hint, NULL))
-            return 0;
-        lua_pushstring(L, hint.instance_name);
-        xcb_get_wm_class_reply_wipe(&hint);
+        lua_pushstring(L, (*c)->instance);
         break;
       case A_TK_ROLE:
         if(!xutil_text_prop_get(globalconf.connection, (*c)->win,

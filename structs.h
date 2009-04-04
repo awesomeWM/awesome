@@ -167,6 +167,8 @@ struct client_t
     bool invalid;
     /** Client name */
     char *name, *icon_name;
+    /** WM_CLASS stuff */
+    char *class, *instance;
     /** Window geometry */
     area_t geometry;
     struct

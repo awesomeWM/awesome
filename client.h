@@ -36,6 +36,8 @@ static void
 client_delete(client_t **c)
 {
     button_array_wipe(&(*c)->buttons);
+    p_delete(&(*c)->class);
+    p_delete(&(*c)->instance);
     p_delete(&(*c)->icon_name);
     p_delete(&(*c)->name);
     p_delete(c);

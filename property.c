@@ -223,6 +223,24 @@ property_update_wm_name(client_t *c)
     hooks_property(c, "name");
 }
 
+void
+property_update_wm_class(client_t *c)
+{
+    xcb_get_wm_class_reply_t hint;
+
+    p_delete(&c->instance);
+    p_delete(&c->class);
+
+    if(xcb_get_wm_class_reply(globalconf.connection,
+                               xcb_get_wm_class_unchecked(globalconf.connection, c->win),
+                               &hint, NULL))
+    {
+        c->instance = a_strdup(hint.instance_name);
+        c->class = a_strdup(hint.class_name);
+        xcb_get_wm_class_reply_wipe(&hint);
+    }
+}
+
 /** Update client icon name attribute with its new title.
  * \param c The client.
  * \param Return true if it has been updated.
@@ -273,6 +291,22 @@ property_handle_wm_icon_name(void *data,
 
     if(c)
         property_update_wm_icon_name(c);
+
+    return 0;
+}
+
+static int
+property_handle_wm_class(void *data,
+                         xcb_connection_t *connection,
+                         uint8_t state,
+                         xcb_window_t window,
+                         xcb_atom_t name,
+                         xcb_get_property_reply_t *reply)
+{
+    client_t *c = client_getbywin(window);
+
+    if(c)
+        property_update_wm_class(c);
 
     return 0;
 }
@@ -386,6 +420,8 @@ void a_xcb_set_property_handlers(void)
                              property_handle_wm_name, NULL);
     xcb_property_set_handler(&globalconf.prophs, WM_ICON_NAME, UINT_MAX,
                              property_handle_wm_icon_name, NULL);
+    xcb_property_set_handler(&globalconf.prophs, WM_CLASS, UINT_MAX,
+                             property_handle_wm_class, NULL);
 
     /* EWMH stuff */
     xcb_property_set_handler(&globalconf.prophs, _NET_WM_NAME, UINT_MAX,
