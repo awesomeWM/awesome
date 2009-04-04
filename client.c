@@ -202,7 +202,7 @@ client_unfocus_hook(client_t *c)
 /** Unfocus a client.
  * \param c The client.
  */
-static void
+void
 client_unfocus(client_t *c)
 {
     xcb_window_t root_win = xutil_screen_get(globalconf.connection, c->phys_screen)->root;
@@ -293,6 +293,10 @@ client_focus(client_t *c, bool sendmessage)
     if(c == focused_before)
         return;
 
+    /* If we recieved a FocusOut event, this condition won't be hit. */
+    if(focused_before)
+        client_unfocus(focused_before);
+
     /* stop hiding c */
     c->ishidden = false;
     client_setminimized(c, false);
@@ -318,15 +322,6 @@ client_focus(client_t *c, bool sendmessage)
     /* Some layouts use focused client differently, so call them back.
      * And anyway, we have maybe unhidden */
     client_need_arrange(c);
-
-    /* unfocus current selected client
-     * We don't really need to unfocus here,
-     * because client already received FocusOut event.
-     * What we need to do is call unfocus hook, to
-     * inform lua script, about this event.
-     */
-    if(focused_before)
-        client_unfocus_hook(focused_before);
 
     client_focus_hook(c);
 
