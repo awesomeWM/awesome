@@ -227,8 +227,6 @@ struct client_t
     int screen;
     /** Client physical screen */
     int phys_screen;
-    /** Path to an icon */
-    char *icon_path;
     /** Titlebar */
     wibox_t *titlebar;
     /** Button bindings */

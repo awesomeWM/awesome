@@ -1804,7 +1804,6 @@ luaA_client_newindex(lua_State *L)
  * invisible in taskbar.
  * \lfield minimize Define it the client must be iconify, i.e. only visible in
  * taskbar.
- * \lfield icon_path Path to the icon used to identify.
  * \lfield size_hints_honor Honor size hints, i.e. respect size ratio.
  * \lfield border_width The client border width.
  * \lfield border_color The client border color.
