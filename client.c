@@ -55,6 +55,7 @@ luaA_client_gc(lua_State *L)
     button_array_wipe(&c->buttons);
     image_unref(L, c->icon);
     p_delete(&c->class);
+    p_delete(&c->startup_id);
     p_delete(&c->instance);
     p_delete(&c->icon_name);
     p_delete(&c->name);
@@ -514,6 +515,8 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
     property_update_wm_name(c);
     property_update_wm_icon_name(c);
     property_update_wm_class(c);
+
+    xutil_text_prop_get(globalconf.connection, c->win, _NET_STARTUP_ID, &c->startup_id, NULL);
 
     /* update strut */
     ewmh_process_client_strut(c, NULL);

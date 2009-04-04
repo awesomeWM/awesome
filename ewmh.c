@@ -65,6 +65,7 @@ ewmh_init(int phys_screen)
     {
         _NET_SUPPORTED,
         _NET_SUPPORTING_WM_CHECK,
+        _NET_STARTUP_ID,
         _NET_CLIENT_LIST,
         _NET_CLIENT_LIST_STACKING,
         _NET_NUMBER_OF_DESKTOPS,
