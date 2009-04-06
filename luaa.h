@@ -135,9 +135,10 @@ static inline lua_Number
 luaA_getopt_number(lua_State *L, int idx, const char *name, lua_Number def)
 {
     lua_getfield(L, idx, name);
-    lua_Number n = luaL_optnumber(L, -1, def);
+    if (lua_isnil(L, -1) || lua_isnumber(L, -1))
+        def = luaL_optnumber(L, -1, def);
     lua_pop(L, 1);
-    return n;
+    return def;
 }
 
 static inline const char *
