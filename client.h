@@ -76,7 +76,6 @@ void client_setminimized(client_t *, bool);
 void client_setborder(client_t *, int);
 void client_seturgent(client_t *, bool);
 void client_focus(client_t *, bool);
-void client_unfocus(client_t *);
 
 int luaA_client_newindex(lua_State *);
 
