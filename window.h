@@ -32,6 +32,9 @@ void window_buttons_grab(xcb_window_t, button_array_t *);
 double window_opacity_get(xcb_window_t);
 void window_opacity_set(xcb_window_t, double);
 void window_grabbuttons(xcb_window_t, xcb_window_t, button_array_t *);
+void window_takefocus(xcb_window_t);
+bool window_hasproto(xcb_window_t, xcb_atom_t);
+void window_setfocus(xcb_window_t, bool);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

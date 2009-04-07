@@ -172,4 +172,65 @@ window_opacity_set(xcb_window_t win, double opacity)
         xcb_delete_property(globalconf.connection, win, _NET_WM_WINDOW_OPACITY);
 }
 
+/** Check if client supports protocol a protocole in WM_PROTOCOL.
+ * \param win The window.
+ * \return True if client has the atom in protocol, false otherwise.
+ */
+bool
+window_hasproto(xcb_window_t win, xcb_atom_t atom)
+{
+    uint32_t i;
+    xcb_get_wm_protocols_reply_t protocols;
+    bool ret = false;
+
+    if(xcb_get_wm_protocols_reply(globalconf.connection,
+                                  xcb_get_wm_protocols_unchecked(globalconf.connection,
+                                                                 win, WM_PROTOCOLS),
+                                  &protocols, NULL))
+    {
+        for(i = 0; !ret && i < protocols.atoms_len; i++)
+            if(protocols.atoms[i] == atom)
+                ret = true;
+        xcb_get_wm_protocols_reply_wipe(&protocols);
+    }
+    return ret;
+}
+
+/** Send WM_TAKE_FOCUS client message to window
+ * \param win destination window
+ */
+void
+window_takefocus(xcb_window_t win)
+{
+    xcb_client_message_event_t ev;
+
+    /* Initialize all of event's fields first */
+    p_clear(&ev, 1);
+
+    ev.response_type = XCB_CLIENT_MESSAGE;
+    ev.window = win;
+    ev.format = 32;
+    ev.data.data32[1] = XCB_CURRENT_TIME;
+    ev.type = WM_PROTOCOLS;
+    ev.data.data32[0] = WM_TAKE_FOCUS;
+
+    xcb_send_event(globalconf.connection, false, win,
+                   XCB_EVENT_MASK_NO_EVENT, (char *) &ev);
+}
+
+/** Sets focus on window - using xcb_set_input_focus or WM_TAKE_FOCUS
+ * \param w Window that should get focus
+ * \param set_input_focus Should we call xcb_set_input_focus
+ */
+void
+window_setfocus(xcb_window_t w, bool set_input_focus)
+{
+    bool takefocus = window_hasproto(w, WM_TAKE_FOCUS);
+    if(set_input_focus)
+        xcb_set_input_focus(globalconf.connection, XCB_INPUT_FOCUS_PARENT,
+                            w, XCB_CURRENT_TIME);
+    if(takefocus)
+        window_takefocus(w);
+}
+
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

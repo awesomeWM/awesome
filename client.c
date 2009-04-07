@@ -40,52 +40,6 @@ DO_LUA_NEW(extern, client_t, client, "client", client_ref)
 DO_LUA_EQ(client_t, client, "client")
 DO_LUA_GC(client_t, client, "client", client_unref)
 
-/** Check if client supports protocol a protocole in WM_PROTOCOL.
- * \param win The window.
- * \return True if client has the atom in protocol, false otherwise.
- */
-static bool
-window_hasproto(xcb_window_t win, xcb_atom_t atom)
-{
-    uint32_t i;
-    xcb_get_wm_protocols_reply_t protocols;
-    bool ret = false;
-
-    if(xcb_get_wm_protocols_reply(globalconf.connection,
-                                  xcb_get_wm_protocols_unchecked(globalconf.connection,
-                                                                 win, WM_PROTOCOLS),
-                                  &protocols, NULL))
-    {
-        for(i = 0; !ret && i < protocols.atoms_len; i++)
-            if(protocols.atoms[i] == atom)
-                ret = true;
-        xcb_get_wm_protocols_reply_wipe(&protocols);
-    }
-    return ret;
-}
-
-/** Send WM_TAKE_FOCUS client message to window
- * \param win destination window
- */
-static void
-window_takefocus(xcb_window_t win)
-{
-    xcb_client_message_event_t ev;
-
-    /* Initialize all of event's fields first */
-    p_clear(&ev, 1);
-
-    ev.response_type = XCB_CLIENT_MESSAGE;
-    ev.window = win;
-    ev.format = 32;
-    ev.data.data32[1] = XCB_CURRENT_TIME;
-    ev.type = WM_PROTOCOLS;
-    ev.data.data32[0] = WM_TAKE_FOCUS;
-
-    xcb_send_event(globalconf.connection, false, win,
-                   XCB_EVENT_MASK_NO_EVENT, (char *) &ev);
-}
-
 /** Change the clients urgency flag.
  * \param c The client
  * \param urgent The new flag state
@@ -183,21 +137,6 @@ client_getbywin(xcb_window_t w)
     client_t *c;
     for(c = globalconf.clients; c && c->win != w; c = c->next);
     return c;
-}
-
-/** Sets focus on window - using xcb_set_input_focus or WM_TAKE_FOCUS
- * \param w Window that should get focus
- * \param set_input_focus Should we call xcb_set_input_focus
- */
-static void
-window_setfocus(xcb_window_t w, bool set_input_focus)
-{
-    bool takefocus = window_hasproto(w, WM_TAKE_FOCUS);
-    if(set_input_focus)
-        xcb_set_input_focus(globalconf.connection, XCB_INPUT_FOCUS_PARENT,
-                            w, XCB_CURRENT_TIME);
-    if(takefocus)
-        window_takefocus(w);
 }
 
 /** Record that a client lost focus.
