@@ -146,7 +146,8 @@ pkg_check_modules(AWESOME_REQUIRED REQUIRED
     xcb-property>=0.3.0
     cairo-xcb
     xproto>=7.0.11
-    imlib2)
+    imlib2
+    libxdg-basedir)
 
 if(NOT AWESOME_REQUIRED_FOUND OR NOT AWESOME_COMMON_REQUIRED_FOUND)
     message(FATAL_ERROR)

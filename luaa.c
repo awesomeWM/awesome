@@ -35,6 +35,8 @@
 
 #include <xcb/xcb.h>
 
+#include <basedir_fs.h>
+
 #include "awesome.h"
 #include "awesome-version-internal.h"
 #include "ewmh.h"
@@ -78,8 +80,6 @@ extern const struct luaL_reg awesome_key_meta[];
 
 static struct sockaddr_un *addr;
 static ev_io csio = { .fd = -1 };
-
-#define XDG_CONFIG_HOME_DEFAULT "/.config"
 
 /** Get or set global key bindings.
  * This binding will be available when you'll press keys on root window.
@@ -822,57 +822,25 @@ luaA_init(void)
     globalconf.hooks.dbus = LUA_REFNIL;
 #endif
 
+    xdgHandle xdg = xdgAllocHandle();
+
     /* add Lua lib path (/usr/share/awesome/lib by default) */
     luaA_dostring(L, "package.path = package.path .. \";" AWESOME_LUA_LIB_PATH  "/?.lua\"");
     luaA_dostring(L, "package.path = package.path .. \";" AWESOME_LUA_LIB_PATH  "/?/init.lua\"");
 
-    /* add XDG_CONFIG_DIR (/etc/xdg/awesome by default) as include path */
-    luaA_dostring(L, "package.path = package.path .. \";" XDG_CONFIG_DIR "/awesome/?.lua\"");
-    luaA_dostring(L, "package.path = package.path .. \";" XDG_CONFIG_DIR "/awesome/?/init.lua\"");
-
-    /* add either XDG_CONFIG_HOME/awesome or HOME/.config/awesome to path */
-    char *dir;
-    if((dir = getenv("XDG_CONFIG_HOME")))
+    /* add XDG_CONFIG_DIR as include path */
+    const char * const *xdgconfigdirs = xdgSearchableConfigDirectories(xdg);
+    for(; *xdgconfigdirs; xdgconfigdirs++)
     {
-        char *path;
-        a_asprintf(&path, "package.path = package.path .. \";%s/awesome/?.lua;%s/awesome/?/init.lua\"", dir, dir);
-        luaA_dostring(globalconf.L, path);
-        p_delete(&path);
-    }
-    else
-    {
-        char *path, *homedir = getenv("HOME");
-        a_asprintf(&path,
-                   "package.path = package.path .. \";%s" XDG_CONFIG_HOME_DEFAULT "/awesome/?.lua;%s" XDG_CONFIG_HOME_DEFAULT "/awesome/?/init.lua\"",
-                   homedir, homedir);
-        luaA_dostring(globalconf.L, path);
-        p_delete(&path);
+        char *buf;
+        a_asprintf(&buf, "package.path = package.path .. \";%s/awesome/?.lua;%s/awesome/?/init.lua\"",
+                   *xdgconfigdirs, *xdgconfigdirs);
+        luaA_dostring(L, buf);
+        p_delete(&buf);
     }
 
-    /* add XDG_CONFIG_DIRS to include paths */
-    char *xdg_config_dirs = getenv("XDG_CONFIG_DIRS");
-    ssize_t len;
-
-    if((len = a_strlen(xdg_config_dirs)))
-    {
-        char **buf, **xdg_files = a_strsplit(xdg_config_dirs, len, ':');
-
-        for(buf = xdg_files; *buf; buf++)
-        {
-            char *confpath;
-            a_asprintf(&confpath, "package.path = package.path .. \";%s/awesome/?.lua;%s/awesome/?/init.lua\"",
-                       *buf, *buf);
-            luaA_dostring(globalconf.L, confpath);
-            p_delete(&confpath);
-        }
-
-        for(buf = xdg_files; *buf; buf++)
-            p_delete(buf);
-        p_delete(&xdg_files);
-    }
+    xdgFreeHandle(xdg);
 }
-
-#define AWESOME_CONFIG_FILE "/awesome/rc.lua"
 
 static bool
 luaA_loadrc(const char *confpath, bool run)
@@ -907,10 +875,9 @@ bool
 luaA_parserc(const char *confpatharg, bool run)
 {
     int screen;
-    const char *confdir, *xdg_config_dirs;
-    char *confpath = NULL, **xdg_files = NULL, **buf;
-    ssize_t len;
+    char *confpath = NULL;
     bool ret = false;
+    xdgHandle xdg = NULL;
 
     /* try to load, return if it's ok */
     if(confpatharg)
@@ -924,55 +891,31 @@ luaA_parserc(const char *confpatharg, bool run)
             goto bailout;
     }
 
-    if((confdir = getenv("XDG_CONFIG_HOME")))
-        a_asprintf(&confpath, "%s" AWESOME_CONFIG_FILE, confdir);
-    else
-        a_asprintf(&confpath, "%s" XDG_CONFIG_HOME_DEFAULT AWESOME_CONFIG_FILE, getenv("HOME"));
+    xdg = xdgAllocHandle();
 
-    /* try to run XDG_CONFIG_HOME/awesome/rc.lua */
-    if(luaA_loadrc(confpath, run))
+    confpath = xdgConfigFind("awesome/rc.lua", xdg);
+
+    char *tmp = confpath;
+
+    /* confpath is "string1\0string2\0string3\0\0" */
+    do
     {
-        ret = true;
-        goto bailout;
-    }
-    else if(!run)
-        goto bailout;
-
-    p_delete(&confpath);
-
-    xdg_config_dirs = getenv("XDG_CONFIG_DIRS");
-
-    if(!(len = a_strlen(xdg_config_dirs)))
-    {
-        xdg_config_dirs = XDG_CONFIG_DIR;
-        len = sizeof(XDG_CONFIG_DIR) - 1;
-    }
-
-    xdg_files = a_strsplit(xdg_config_dirs, len, ':');
-
-    for(buf = xdg_files; *buf && !ret; buf++)
-    {
-        a_asprintf(&confpath, "%s" AWESOME_CONFIG_FILE, *buf);
-        if(luaA_loadrc(confpath, run))
+        if(luaA_loadrc(tmp, run))
         {
             ret = true;
             goto bailout;
         }
         else if(!run)
             goto bailout;
-        p_delete(&confpath);
-    }
+        tmp += a_strlen(tmp) + 1;
+    } while(*tmp != 0);
 
 bailout:
 
     p_delete(&confpath);
 
-    if(xdg_files)
-    {
-        for(buf = xdg_files; *buf; buf++)
-            p_delete(buf);
-        p_delete(&xdg_files);
-    }
+    if(xdg)
+        xdgFreeHandle(xdg);
 
     /* Assure there's at least one tag */
     for(screen = 0; screen < globalconf.nscreen; screen++)
