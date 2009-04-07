@@ -239,41 +239,6 @@ a_exec(const char *cmd)
     execl(shell, shell, "-c", cmd, NULL);
 }
 
-/** Split a string in substring.
- * \param str The string to split.
- * \param len The string length.
- * \param delim The string delimiter.
- * \return A list of string NULL terminted.
- */
-char **
-a_strsplit(const char *str, ssize_t len, char delim)
-{
-    char **retval;
-    int comp, i, j = 0, n = 1;
-
-    /* count components */
-    for(i = 0; i < len; i++)
-        if(str[i] == delim)
-            n++;
-
-    retval = p_new(char *, n + 1);
-
-    for(i = 0, comp = 0; comp < n; comp++)
-    {
-        if(str[i] == delim)
-            i++;
-
-        for(j = i; str[j] != delim && j < len; j++);
-
-        retval[comp] = p_dup(&str[i], j - i + 1);
-        retval[comp][j - i] = '\0';
-
-        i = j;
-    }
-
-    return retval;
-}
-
 /** Mark a file descriptor as close-on-exec.
  * \param fd The file descriptor.
  * \return The fcntl() return value.
