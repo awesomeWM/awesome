@@ -185,36 +185,50 @@ client_getbywin(xcb_window_t w)
     return c;
 }
 
-/** Call unfocus hook.
- * \param c Client being unfocused
+/** Sets focus on window - using xcb_set_input_focus or WM_TAKE_FOCUS
+ * \param w Window that should get focus
+ * \param set_input_focus Should we call xcb_set_input_focus
  */
 static void
-client_unfocus_hook(client_t *c)
+window_setfocus(xcb_window_t w, bool set_input_focus)
 {
+    bool takefocus = window_hasproto(w, WM_TAKE_FOCUS);
+    if(set_input_focus)
+        xcb_set_input_focus(globalconf.connection, XCB_INPUT_FOCUS_PARENT,
+                            w, XCB_CURRENT_TIME);
+    if(takefocus)
+        window_takefocus(w);
+}
+
+/** Record that a client lost focus.
+ * \param c Client being unfocused
+ */
+void
+client_unfocus_update(client_t *c)
+{
+    globalconf.screens[c->phys_screen].client_focus = NULL;
+    ewmh_update_net_active_window(c->phys_screen);
+
     /* Call hook */
     if(globalconf.hooks.unfocus != LUA_REFNIL)
     {
         luaA_client_userdata_new(globalconf.L, c);
         luaA_dofunction(globalconf.L, globalconf.hooks.unfocus, 1, 0);
     }
+
 }
 
 /** Unfocus a client.
  * \param c The client.
  */
-static void
+void
 client_unfocus(client_t *c)
 {
     xcb_window_t root_win = xutil_screen_get(globalconf.connection, c->phys_screen)->root;
     globalconf.screens[c->phys_screen].client_focus = NULL;
 
     /* Set focus on root window, so no events leak to the current window. */
-    xcb_set_input_focus(globalconf.connection, XCB_INPUT_FOCUS_POINTER_ROOT,
-            root_win, XCB_CURRENT_TIME);
-
-    client_unfocus_hook(c);
-
-    ewmh_update_net_active_window(c->phys_screen);
+    window_setfocus(root_win, true);
 }
 
 /** Ban client and move it out of the viewport.
@@ -239,19 +253,41 @@ client_ban(client_t *c)
         /* All the wiboxes (may) need to be repositioned. */
         if(client_hasstrut(c))
             wibox_update_positions();
-    }
 
-    /* Wait until the last moment to take away the focus from the window. */
-    if(globalconf.screens[c->phys_screen].client_focus == c)
-        client_unfocus(c);
+        /* Wait until the last moment to take away the focus from the window. */
+        if(globalconf.screens[c->phys_screen].client_focus == c)
+            client_unfocus(c);
+    }
 }
 
-/** Call focus hook.
+/** Record that a client got focus.
  * \param c Client being focused.
  */
-static void
-client_focus_hook(client_t *c)
+void
+client_focus_update(client_t *c)
 {
+    if(!client_maybevisible(c, c->screen))
+        return;
+
+    /* stop hiding client */
+    c->ishidden = false;
+    client_setminimized(c, false);
+
+    /* unban the client before focusing for consistency */
+    client_unban(c);
+
+    globalconf.screen_focus = &globalconf.screens[c->phys_screen];
+    globalconf.screen_focus->client_focus = c;
+
+    /* Some layouts use focused client differently, so call them back.
+     * And anyway, we have maybe unhidden */
+    client_need_arrange(c);
+
+    /* according to EWMH, we have to remove the urgent state from a client */
+    client_seturgent(c, false);
+
+    ewmh_update_net_active_window(c->phys_screen);
+
     /* execute hook */
     if(globalconf.hooks.focus != LUA_REFNIL)
     {
@@ -260,81 +296,24 @@ client_focus_hook(client_t *c)
     }
 }
 
+
 /** Give focus to client, or to first client if client is NULL.
  * \param c The client or NULL.
- * \param sendmessage true, if we should send message.
  */
 void
-client_focus(client_t *c, bool sendmessage)
+client_focus(client_t *c)
 {
-    /* Handle c == NULL case */
-    if(!c)
-    {
-        if(sendmessage)
-            c = globalconf.clients;
-
-        if(!c)
-            return;
-    }
+    /* We have to set focus on first client */
+    if(!c && !(c = globalconf.clients))
+        return;
 
     if(!client_maybevisible(c, c->screen))
         return;
 
-    /* Does client window support WM_TAKE_FOCUS protocol ? */
-    bool takefocus = window_hasproto(c->win, WM_TAKE_FOCUS);
-
-    /* Disallow setting focus on client with No Input Model */
-    if(sendmessage && !takefocus && c->nofocus)
-        return;
-
-    /* Save current focused client */
-    client_t *focused_before = globalconf.screen_focus->client_focus;
-
-    if(c == focused_before)
-        return;
-
-    /* stop hiding c */
-    c->ishidden = false;
-    client_setminimized(c, false);
-
-    /* unban the client before focusing or it will fail */
-    client_unban(c);
-
     globalconf.screen_focus = &globalconf.screens[c->phys_screen];
     globalconf.screen_focus->client_focus = c;
 
-    if(sendmessage)
-    {
-        if(!c->nofocus)
-            /* Input models: Passive, Locally Active */
-            xcb_set_input_focus(globalconf.connection, XCB_INPUT_FOCUS_POINTER_ROOT,
-                                c->win, XCB_CURRENT_TIME);
-
-        if(takefocus)
-            /* Input models: Local Active, Globally Active */
-            window_takefocus(c->win);
-    }
-
-    /* Some layouts use focused client differently, so call them back.
-     * And anyway, we have maybe unhidden */
-    client_need_arrange(c);
-
-    /* unfocus current selected client
-     * We don't really need to unfocus here,
-     * because client already received FocusOut event.
-     * What we need to do is call unfocus hook, to
-     * inform lua script, about this event.
-     */
-    if(focused_before)
-        client_unfocus_hook(focused_before);
-
-    client_focus_hook(c);
-
-    /* according to EWMH, we have to remove the urgent state from a client */
-    client_seturgent(c, false);
-
-    ewmh_update_net_active_window(c->phys_screen);
-
+    window_setfocus(c->win, !c->nofocus);
 }
 
 /** Stack a window below.
@@ -1548,7 +1527,7 @@ luaA_client_redraw(lua_State *L)
     if(globalconf.screen_focus->client_focus == *c)
     {
         client_unfocus(*c);
-        client_focus(*c, true);
+        client_focus(*c);
     }
 
     return 0;
@@ -2293,7 +2272,7 @@ luaA_client_module_newindex(lua_State *L)
     {
       case A_TK_FOCUS:
         c = luaA_checkudata(L, 3, "client");
-        client_focus(*c, true);
+        client_focus(*c);
         break;
       default:
         break;

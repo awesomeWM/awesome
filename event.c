@@ -538,17 +538,64 @@ event_handle_focusin(void *data __attribute__ ((unused)),
                      xcb_connection_t *connection,
                      xcb_focus_in_event_t *ev)
 {
-    /* filter focus-in events */
-    if (ev->detail != XCB_NOTIFY_DETAIL_NONLINEAR)
-        return 0;
-
     client_t *c;
 
-    if((c = client_getbytitlebarwin(ev->event))
-       || (c = client_getbywin(ev->event)))
-        client_focus(c, false);
+    /* Events that we are interested in: */
+    switch(ev->detail)
+    {
+        /* These are events that jump between windows of a toplevel client.
+         *
+         * NotifyVirtual event is handled in case where NotifyAncestor or
+         * NotifyInferior event is not generated on window that is managed by
+         * awesome ( client_* returns NULL )
+         *
+         * Can someone explain exactly why they are needed ?
+         */
+        case XCB_NOTIFY_DETAIL_VIRTUAL:
+        case XCB_NOTIFY_DETAIL_ANCESTOR:
+        case XCB_NOTIFY_DETAIL_INFERIOR:
 
-    return 0;
+        /* These are events that jump between clients.
+         * Virtual events ensure we always get an event on our top-level window.
+         */
+        case XCB_NOTIFY_DETAIL_NONLINEAR_VIRTUAL:
+        case XCB_NOTIFY_DETAIL_NONLINEAR:
+            if((c = client_getbytitlebarwin(ev->event))
+               || (c = client_getbywin(ev->event)))
+                client_focus_update(c);
+        /* all other events are ignored */
+        default:
+            return 0;
+    }
+}
+
+/** The focus out event handler.
+ * \param data currently unused.
+ * \param connection The connection to the X server.
+ * \param ev The event.
+ */
+static int
+event_handle_focusout(void *data __attribute__ ((unused)),
+                          xcb_connection_t *connection,
+                          xcb_focus_out_event_t *ev)
+{
+    client_t *c;
+
+    /* Events that we are interested in: */
+    switch(ev->detail)
+    {
+        /* These are events that jump between clients.
+         * Virtual events ensure we always get an event on our top-level window.
+         */
+        case XCB_NOTIFY_DETAIL_NONLINEAR_VIRTUAL:
+        case XCB_NOTIFY_DETAIL_NONLINEAR:
+            if((c = client_getbytitlebarwin(ev->event))
+               || (c = client_getbywin(ev->event)))
+                client_unfocus_update(c);
+        /* all other events are ignored */
+        default:
+            return 0;
+    }
 }
 
 /** The expose event handler.
@@ -868,6 +915,7 @@ void a_xcb_set_event_handlers(void)
     xcb_event_set_enter_notify_handler(&globalconf.evenths, event_handle_enternotify, NULL);
     xcb_event_set_leave_notify_handler(&globalconf.evenths, event_handle_leavenotify, NULL);
     xcb_event_set_focus_in_handler(&globalconf.evenths, event_handle_focusin, NULL);
+    xcb_event_set_focus_out_handler(&globalconf.evenths, event_handle_focusout, NULL);
     xcb_event_set_motion_notify_handler(&globalconf.evenths, event_handle_motionnotify, NULL);
     xcb_event_set_expose_handler(&globalconf.evenths, event_handle_expose, NULL);
     xcb_event_set_key_press_handler(&globalconf.evenths, event_handle_key, NULL);
