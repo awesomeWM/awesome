@@ -35,6 +35,13 @@ DO_LUA_GC(wibox_t, wibox, "wibox", wibox_unref)
 DO_LUA_EQ(wibox_t, wibox, "wibox")
 
 static void
+wibox_need_update(wibox_t *wibox)
+{
+    wibox->need_update = true;
+    wibox->mouse_over = NULL;
+}
+
+static void
 wibox_move(wibox_t *wibox, int16_t x, int16_t y)
 {
     if(wibox->sw.window)
@@ -59,8 +66,7 @@ wibox_resize(wibox_t *wibox, uint16_t width, uint16_t height)
         wibox->sw.geometry.width = width;
         wibox->sw.geometry.height = height;
     }
-    wibox->need_update = true;
-    wibox->mouse_over = NULL;
+    wibox_need_update(wibox);
 }
 
 static void
@@ -96,8 +102,7 @@ wibox_setposition(wibox_t *wibox, position_t p)
 
         ewmh_update_workarea(screen_virttophys(wibox->screen));
 
-        wibox->need_update = true;
-        wibox->mouse_over = NULL;
+        wibox_need_update(wibox);
     }
 }
 
@@ -662,7 +667,7 @@ wibox_attach(wibox_t *wibox, screen_t *s)
         client_stack();
     }
     else
-        wibox->need_update = true;
+        wibox_need_update(wibox);
 }
 
 /** Create a new wibox.
@@ -753,8 +758,7 @@ wibox_widgets_table_build(lua_State *L, wibox_t *wibox)
     widget_node_array_wipe(&wibox->widgets);
     widget_node_array_init(&wibox->widgets);
     luaA_table2widgets(L, &wibox->widgets);
-    wibox->mouse_over = NULL;
-    wibox->need_update = true;
+    wibox_need_update(wibox);
 }
 
 /** Check if a wibox widget table has an item.
@@ -1076,8 +1080,7 @@ luaA_wibox_newindex(lua_State *L)
         if((buf = luaL_checklstring(L, 3, &len)))
         {
             simplewindow_orientation_set(&(*wibox)->sw, orientation_fromstr(buf, len));
-            (*wibox)->need_update = true;
-            (*wibox)->mouse_over = NULL;
+            wibox_need_update(*wibox);
         }
         break;
       case A_TK_BORDER_COLOR:
