@@ -7,7 +7,7 @@ else
     ECHO=@:
 endif
 
-TARGETS=awesome awesome-client
+TARGETS=awesome
 BUILDLN=build
 
 all: $(TARGETS) $(BUILDLN) ;

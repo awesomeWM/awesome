@@ -385,8 +385,6 @@ luaA_pushpadding(lua_State *L, padding_t *padding)
 
 void luaA_init(xdgHandle);
 bool luaA_parserc(xdgHandle, const char *, bool);
-void luaA_cs_init(void);
-void luaA_cs_cleanup(void);
 void luaA_on_timer(EV_P_ ev_timer *, int);
 int luaA_pushcolor(lua_State *, const xcolor_t *);
 bool luaA_hasitem(lua_State *, const void *);

@@ -66,7 +66,6 @@ set(AWE_SRCS
     ${SOURCE_DIR}/swindow.c
     ${SOURCE_DIR}/common/buffer.c
     ${SOURCE_DIR}/common/atoms.c
-    ${SOURCE_DIR}/common/socket.c
     ${SOURCE_DIR}/common/util.c
     ${SOURCE_DIR}/common/version.c
     ${SOURCE_DIR}/common/xembed.c
@@ -78,12 +77,6 @@ set(AWE_SRCS
     ${SOURCE_DIR}/widgets/systray.c
     ${SOURCE_DIR}/widgets/imagebox.c)
 
-set(AWE_CLIENT_SRCS
-    ${SOURCE_DIR}/awesome-client.c
-    ${SOURCE_DIR}/common/socket.c
-    ${SOURCE_DIR}/common/util.c
-    ${SOURCE_DIR}/common/version.c)
-
 set(AWE_MAN_SRCS
     ${SOURCE_DIR}/awesome.1.txt
     ${SOURCE_DIR}/awsetbg.1.txt
@@ -94,10 +87,6 @@ add_executable(${PROJECT_AWE_NAME}
     ${AWE_SRCS}
     ${BUILD_DIR}/common/tokenize.c)
 
-add_executable(${PROJECT_AWECLIENT_NAME}
-    ${AWE_CLIENT_SRCS}
-    ${BUILD_DIR}/common/tokenize.c)
-
 set_target_properties(${PROJECT_AWE_NAME}
     PROPERTIES
     LINK_FLAGS -export-dynamic)
@@ -106,10 +95,6 @@ target_link_libraries(${PROJECT_AWE_NAME}
     ${AWESOME_COMMON_REQUIRED_LIBRARIES}
     ${AWESOME_REQUIRED_LIBRARIES}
     ${AWESOME_OPTIONAL_LIBRARIES})
-
-target_link_libraries(${PROJECT_AWECLIENT_NAME}
-    ${AWESOME_COMMON_REQUIRED_LIBRARIES}
-    ${AWESOMECLIENT_LIBRARIES})
 
 # {{{ Generated sources
 add_custom_command(
@@ -171,7 +156,6 @@ add_custom_target(generated_sources
 file(MAKE_DIRECTORY ${BUILD_DIR}/themes/default)
 file(MAKE_DIRECTORY ${BUILD_DIR}/themes/sky)
 add_dependencies(${PROJECT_AWE_NAME} generated_sources)
-add_dependencies(${PROJECT_AWECLIENT_NAME} generated_sources)
 # }}}
 
 # {{{ Version stamp
@@ -183,7 +167,6 @@ if(BUILD_FROM_GIT)
         WORKING_DIRECTORY ${SOURCE_DIR})
 
     add_dependencies(${PROJECT_AWE_NAME} version_stamp)
-    add_dependencies(${PROJECT_AWECLIENT_NAME} version_stamp)
 endif()
 # }}}
 
@@ -302,8 +285,9 @@ endif()
 # }}}
 
 # {{{ Installation
-install(TARGETS ${PROJECT_AWE_NAME} ${PROJECT_AWECLIENT_NAME} RUNTIME DESTINATION bin)
+install(TARGETS ${PROJECT_AWE_NAME} RUNTIME DESTINATION bin)
 install(FILES "utils/awsetbg" DESTINATION bin PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
+install(FILES "utils/awesome-client" DESTINATION bin PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
 install(DIRECTORY ${BUILD_DIR}/lib DESTINATION ${AWESOME_DATA_PATH})
 install(FILES ${AWE_CONF_FILE_DEFAULT} DESTINATION ${AWESOME_SYSCONFDIR}
         RENAME ${AWE_CONF_FILE})

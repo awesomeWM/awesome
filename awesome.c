@@ -63,7 +63,6 @@ awesome_atexit(void)
     int screen_nbr, nscreens;
 
     a_dbus_cleanup();
-    luaA_cs_cleanup();
 
     /* reparent systray windows, otherwise they may die with their master */
     for(int i = 0; i < globalconf.embedded.len; i++)
@@ -541,8 +540,6 @@ main(int argc, char **argv)
     /* we will receive events, stop grabbing server */
     xcb_ungrab_server(globalconf.connection);
     xcb_flush(globalconf.connection);
-
-    luaA_cs_init();
 
     /* refresh everything before waiting events */
     awesome_refresh(globalconf.connection);
