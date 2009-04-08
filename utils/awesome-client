@@ -1,0 +1,23 @@
+#!/bin/sh
+
+DBUS_SEND=dbus-send
+
+if ! which ${DBUS_SEND} >/dev/null 2>&1
+then
+    echo "E: Unable to find" ${DBUS_SEND}
+fi
+
+DBUS_METHOD=org.awesome.Remote.Eval
+DBUS_PATH=/
+DBUS_DEST=org.awesome
+
+a_dbus_send()
+{
+    $DBUS_SEND --dest=$DBUS_DEST --type=method_call --print-reply $DBUS_PATH \
+        $DBUS_METHOD string:"$1" | tail -n +2
+}
+
+while read -p "awesome# " line
+do
+    a_dbus_send "$line"
+done
