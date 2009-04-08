@@ -27,6 +27,8 @@
 #include <lua.h>
 #include <lauxlib.h>
 
+#include <basedir.h>
+
 #include <stdio.h>
 
 #include "draw.h"
@@ -381,8 +383,8 @@ luaA_pushpadding(lua_State *L, padding_t *padding)
     return 1;
 }
 
-void luaA_init(void);
-bool luaA_parserc(const char *, bool);
+void luaA_init(xdgHandle);
+bool luaA_parserc(xdgHandle, const char *, bool);
 void luaA_cs_init(void);
 void luaA_cs_cleanup(void);
 void luaA_on_timer(EV_P_ ev_timer *, int);

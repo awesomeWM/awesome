@@ -333,6 +333,7 @@ main(int argc, char **argv)
     xcolor_init_request_t colors_reqs[2];
     xcb_get_modifier_mapping_cookie_t xmapping_cookie;
     ssize_t cmdlen = 1;
+    xdgHandle xdg;
     static struct option long_options[] =
     {
         { "help",    0, NULL, 'h' },
@@ -370,8 +371,11 @@ main(int argc, char **argv)
     /* Text won't be printed correctly otherwise */
     setlocale(LC_CTYPE, "");
 
+    /* Get XDG basedir data */
+    xdg = xdgAllocHandle();
+
     /* init lua */
-    luaA_init();
+    luaA_init(xdg);
 
     /* check args */
     while((opt = getopt_long(argc, argv, "vhkc:",
@@ -385,7 +389,7 @@ main(int argc, char **argv)
             exit_help(EXIT_SUCCESS);
             break;
           case 'k':
-            if(!luaA_parserc(confpath, false))
+            if(!luaA_parserc(xdg, confpath, false))
             {
                 fprintf(stderr, "✘ Configuration file syntax error.\n");
                 return EXIT_FAILURE;
@@ -522,7 +526,9 @@ main(int argc, char **argv)
     }
 
     /* Parse and run configuration file */
-    luaA_parserc(confpath, true);
+    luaA_parserc(xdg, confpath, true);
+
+    xdgFreeHandle(xdg);
 
     /* scan existing windows */
     scan();

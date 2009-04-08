@@ -723,9 +723,10 @@ luaA_awesome_newindex(lua_State *L)
 }
 
 /** Initialize the Lua VM
+ * \param xdg An xdg handle to use to get XDG basedir.
  */
 void
-luaA_init(void)
+luaA_init(xdgHandle xdg)
 {
     lua_State *L;
     static const struct luaL_reg awesome_lib[] =
@@ -822,8 +823,6 @@ luaA_init(void)
     globalconf.hooks.dbus = LUA_REFNIL;
 #endif
 
-    xdgHandle xdg = xdgAllocHandle();
-
     /* add Lua lib path (/usr/share/awesome/lib by default) */
     luaA_dostring(L, "package.path = package.path .. \";" AWESOME_LUA_LIB_PATH  "/?.lua\"");
     luaA_dostring(L, "package.path = package.path .. \";" AWESOME_LUA_LIB_PATH  "/?/init.lua\"");
@@ -838,8 +837,6 @@ luaA_init(void)
         luaA_dostring(L, buf);
         p_delete(&buf);
     }
-
-    xdgFreeHandle(xdg);
 }
 
 static bool
@@ -868,16 +865,16 @@ luaA_loadrc(const char *confpath, bool run)
 }
 
 /** Load a configuration file.
+ * \param xdg An xdg handle to use to get XDG basedir.
  * \param confpatharg The configuration file to load.
  * \param run Run the configuration file.
  */
 bool
-luaA_parserc(const char *confpatharg, bool run)
+luaA_parserc(xdgHandle xdg, const char *confpatharg, bool run)
 {
     int screen;
     char *confpath = NULL;
     bool ret = false;
-    xdgHandle xdg = NULL;
 
     /* try to load, return if it's ok */
     if(confpatharg)
@@ -890,8 +887,6 @@ luaA_parserc(const char *confpatharg, bool run)
         else if(!run)
             goto bailout;
     }
-
-    xdg = xdgAllocHandle();
 
     confpath = xdgConfigFind("awesome/rc.lua", xdg);
 
@@ -913,9 +908,6 @@ luaA_parserc(const char *confpatharg, bool run)
 bailout:
 
     p_delete(&confpath);
-
-    if(xdg)
-        xdgFreeHandle(xdg);
 
     /* Assure there's at least one tag */
     for(screen = 0; screen < globalconf.nscreen; screen++)
