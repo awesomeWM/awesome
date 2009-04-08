@@ -382,7 +382,7 @@ main(int argc, char **argv)
         switch(opt)
         {
           case 'v':
-            eprint_version("awesome");
+            eprint_version();
             break;
           case 'h':
             exit_help(EXIT_SUCCESS);

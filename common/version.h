@@ -22,6 +22,6 @@
 #ifndef AWESOME_COMMON_VERSION_H
 #define AWESOME_COMMON_VERSION_H
 
-void eprint_version(const char *const executable) __attribute__ ((noreturn));
+void eprint_version(void) __attribute__ ((noreturn));
 
 #endif

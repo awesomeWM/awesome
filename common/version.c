@@ -30,12 +30,11 @@
  * \param executable program name
  */
 void
-eprint_version(const char *const executable)
+eprint_version(void)
 {
-    printf("%s (awesome) " AWESOME_VERSION
+    printf("awesome " AWESOME_VERSION
 	   " (" AWESOME_RELEASE ")\n"
-	   " • Build:",
-	   executable);
+	   " • Build:");
 #if defined(__DATE__) && defined(__TIME__)
     printf(" " __DATE__ " " __TIME__);
 #endif
