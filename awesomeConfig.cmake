@@ -160,8 +160,7 @@ macro(a_find_library variable library)
     endif()
 endmacro()
 
-# Check for readline, ncurse and libev
-a_find_library(LIB_READLINE readline)
+# Check for libev
 a_find_library(LIB_EV ev)
 
 # Error check
