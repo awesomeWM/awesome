@@ -1,0 +1,47 @@
+---------------------------------------------------------------------------
+-- @author Julien Danjou &lt;julien@danjou.info&gt;
+-- @copyright 2009 Julien Danjou
+-- @release @AWESOME_VERSION@
+---------------------------------------------------------------------------
+
+-- Grab environment we need
+local hooks = require("awful.hooks")
+local loadstring = loadstring
+local tostring = tostring
+local ipairs = ipairs
+local table = table
+local unpack = unpack
+local type = type
+
+--- Remote control module for awful
+module("awful.remote")
+
+if hooks.dbus then
+    hooks.dbus.register("org.awesome.Remote", function(data, code)
+        if data.member == "Eval" then
+            local f, e = loadstring(code)
+            if f then
+                results = { f() }
+                retvals = {}
+                for _, v in ipairs(results) do
+                    local t = type(v)
+                    if t == "boolean" then
+                        table.insert(retvals, "b")
+                        table.insert(retvals, v)
+                    elseif t == "number" then
+                        table.insert(retvals, "d")
+                        table.insert(retvals, v)
+                    else
+                        table.insert(retvals, "s")
+                        table.insert(retvals, tostring(v))
+                    end
+                end
+                return unpack(retvals)
+            elseif e then
+                return "s", e
+            end
+        end
+    end)
+end
+
+-- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
