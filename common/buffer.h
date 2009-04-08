@@ -192,7 +192,4 @@ void buffer_addvf(buffer_t *buf, const char *fmt, va_list)
 void buffer_addf(buffer_t *buf, const char *fmt, ...)
     __attribute__((format(printf, 2, 3)));
 
-
-void buffer_add_xmlescaped(buffer_t *buf, const char *s);
-
 #endif
