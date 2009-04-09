@@ -30,6 +30,11 @@
         int len, size;                                                      \
     } pfx##_array_t;
 
+#define foreach(var, array) \
+    for(typeof((array).tab) var = (array).tab; \
+        var < (array).tab + (array).len; \
+        var++)
+
 #define ARRAY_FUNCS(type_t, pfx, dtor)                                      \
     static inline pfx##_array_t * pfx##_array_new(void) {                   \
         return p_new(pfx##_array_t, 1);                                     \
