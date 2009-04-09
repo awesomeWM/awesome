@@ -39,6 +39,15 @@
     luaA_warn(L, "%s: This function is deprecated and will be removed, see %s", \
               __FUNCTION__, repl)
 
+#define DO_LUA_TOSTRING(type, prefix, lua_type) \
+    static int \
+    luaA_##prefix##_tostring(lua_State *L) \
+    { \
+        type *p = luaL_checkudata(L, 1, lua_type); \
+        lua_pushfstring(L, lua_type ": %p", p); \
+        return 1; \
+    }
+
 #define DO_LUA_NEW(decl, type, prefix, lua_type, type_ref) \
     decl int \
     luaA_##prefix##_userdata_new(lua_State *L, type *p) \
