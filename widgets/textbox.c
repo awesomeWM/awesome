@@ -184,10 +184,7 @@ luaA_textbox_index(lua_State *L, awesome_token_t token)
         lua_pushstring(L, draw_align_tostr(d->bg_align));
         return 1;
       case A_TK_BG_IMAGE:
-        if(d->bg_image)
-            return luaA_image_userdata_new(L, d->bg_image);
-        else
-            return 0;
+        return image_push(L, d->bg_image);
       case A_TK_BG:
         return luaA_pushcolor(L, &d->bg);
       case A_TK_MARGIN:
@@ -257,7 +254,6 @@ luaA_textbox_newindex(lua_State *L, awesome_token_t token)
     widget_t **widget = luaA_checkudata(L, 1, "widget");
     const char *buf = NULL;
     textbox_data_t *d = (*widget)->data;
-    image_t **image = NULL;
 
     switch(token)
     {
@@ -269,16 +265,8 @@ luaA_textbox_newindex(lua_State *L, awesome_token_t token)
         d->bg_resize = luaA_checkboolean(L, 3);
         break;
       case A_TK_BG_IMAGE:
-        if(lua_isnil(L, 3)
-           || (image = luaA_checkudata(L, 3, "image")))
-        {
-            /* unref image */
-            image_unref(&d->bg_image);
-            if(image)
-                d->bg_image = image_ref(image);
-            else
-                d->bg_image = NULL;
-        }
+        image_unref(L, d->bg_image);
+        d->bg_image = image_ref(L);
         break;
       case A_TK_BG:
         if(lua_isnil(L, 3))

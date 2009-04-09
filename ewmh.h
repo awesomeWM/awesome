@@ -39,8 +39,8 @@ void ewmh_update_workarea(int);
 void ewmh_process_client_strut(client_t *, xcb_get_property_reply_t *);
 void ewmh_update_client_strut(client_t *c);
 xcb_get_property_cookie_t ewmh_window_icon_get_unchecked(xcb_window_t);
-image_t *ewmh_window_icon_from_reply(xcb_get_property_reply_t *);
-image_t *ewmh_window_icon_get_reply(xcb_get_property_cookie_t);
+int ewmh_window_icon_from_reply(xcb_get_property_reply_t *);
+int ewmh_window_icon_get_reply(xcb_get_property_cookie_t);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

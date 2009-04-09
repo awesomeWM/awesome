@@ -22,16 +22,15 @@
 #ifndef AWESOME_IMAGE_H
 #define AWESOME_IMAGE_H
 
-#include <lua.h>
 #include <Imlib2.h>
 
 #include "common/util.h"
-#include "common/refcount.h"
+#include "common/luaobject.h"
 
 typedef struct
 {
-    /** Reference counter */
-    int refcount;
+    /** Lua references */
+    luaA_ref_array_t refs;
     /** Imlib2 image */
     Imlib_Image image;
     /** Image width */
@@ -42,23 +41,9 @@ typedef struct
     uint8_t *data;
 } image_t;
 
-static inline void
-image_delete(image_t **i)
-{
-    if(*i)
-    {
-        imlib_context_set_image((*i)->image);
-        imlib_free_image();
-        p_delete(&(*i)->data);
-        p_delete(i);
-    }
-}
+LUA_OBJECT_FUNCS(image_t, image, "image")
 
-DO_RCNT(image_t, image, image_delete)
-
-image_t * image_new_from_argb32(int, int, uint32_t *);
-
-int luaA_image_userdata_new(lua_State *, image_t *);
+int image_new_from_argb32(int, int, uint32_t *);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

@@ -93,9 +93,9 @@ client_maybevisible(client_t *c, int screen)
 /** Return the content of a client as an image.
  * That's just take a screenshot.
  * \param c The client.
- * \return An image.
+ * \return 1 if the image has been pushed on stack, false otherwise.
  */
-static image_t *
+static int
 client_getcontent(client_t *c)
 {
     xcb_image_t *ximage = xcb_image_get(globalconf.connection,
@@ -104,24 +104,27 @@ client_getcontent(client_t *c)
                                         c->geometries.internal.width,
                                         c->geometries.internal.height,
                                         ~0, XCB_IMAGE_FORMAT_Z_PIXMAP);
+    int retval = 0;
 
-    if(!ximage || ximage->bpp < 24)
-        return NULL;
-
-    uint32_t *data = p_alloca(uint32_t, ximage->width * ximage->height);
-
-    for(int y = 0; y < ximage->height; y++)
-        for(int x = 0; x < ximage->width; x++)
+    if(ximage)
+    {
+        if(ximage->bpp >= 24)
         {
-            data[y * ximage->width + x] = xcb_image_get_pixel(ximage, x, y);
-            data[y * ximage->width + x] |= 0xff000000; /* set alpha to 0xff */
+            uint32_t *data = p_alloca(uint32_t, ximage->width * ximage->height);
+
+            for(int y = 0; y < ximage->height; y++)
+                for(int x = 0; x < ximage->width; x++)
+                {
+                    data[y * ximage->width + x] = xcb_image_get_pixel(ximage, x, y);
+                    data[y * ximage->width + x] |= 0xff000000; /* set alpha to 0xff */
+                }
+
+            retval = image_new_from_argb32(ximage->width, ximage->height, data);
         }
+        xcb_image_destroy(ximage);
+    }
 
-    image_t *image = image_new_from_argb32(ximage->width, ximage->height, data);
-
-    xcb_image_destroy(ximage);
-
-    return image;
+    return retval;
 }
 
 /** Get a client by its window.
@@ -425,7 +428,6 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
 {
     xcb_get_property_cookie_t ewmh_icon_cookie;
     client_t *c, *tc = NULL;
-    image_t *icon;
     int screen;
     const uint32_t select_input_val[] = { CLIENT_SELECT_INPUT_EVENT_MASK };
 
@@ -457,8 +459,9 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
     c->geometries.internal.width = wgeom->width;
     c->geometries.internal.height = wgeom->height;
     client_setborder(c, wgeom->border_width);
-    if((icon = ewmh_window_icon_get_reply(ewmh_icon_cookie)))
-        c->icon = image_ref(&icon);
+
+    if(ewmh_window_icon_get_reply(ewmh_icon_cookie))
+        c->icon = image_ref(globalconf.L);
 
     /* we honor size hints by default */
     c->size_hints_honor = true;
@@ -1650,7 +1653,6 @@ luaA_client_newindex(lua_State *L)
     double d;
     int i;
     wibox_t **t = NULL;
-    image_t **image;
 
     if((*c)->invalid)
         luaL_error(L, "client is invalid\n");
@@ -1687,10 +1689,8 @@ luaA_client_newindex(lua_State *L)
         client_setmaxvert(*c, luaA_checkboolean(L, 3));
         break;
       case A_TK_ICON:
-        image = luaA_checkudata(L, 3, "image");
-        image_unref(&(*c)->icon);
-        image_ref(image);
-        (*c)->icon = *image;
+        image_unref(L, (*c)->icon);
+        (*c)->icon = image_ref(L);
         /* execute hook */
         hooks_property(*c, "icon");
         break;
@@ -1808,8 +1808,6 @@ luaA_client_index(lua_State *L)
 
     switch(a_tokenize(buf, len))
     {
-        image_t *image;
-
       case A_TK_NAME:
         lua_pushstring(L, (*c)->name);
         break;
@@ -1821,9 +1819,7 @@ luaA_client_index(lua_State *L)
         lua_pushboolean(L, (*c)->skiptb);
         break;
       case A_TK_CONTENT:
-        if((image = client_getcontent(*c)))
-            return luaA_image_userdata_new(L, image);
-        return 0;
+        return client_getcontent(*c);
       case A_TK_TYPE:
         switch((*c)->type)
         {
@@ -1937,10 +1933,7 @@ luaA_client_index(lua_State *L)
         lua_pushboolean(L, (*c)->ismaxvert);
         break;
       case A_TK_ICON:
-        if((*c)->icon)
-            luaA_image_userdata_new(L, (*c)->icon);
-        else
-            return 0;
+        image_push(L, (*c)->icon);
         break;
       case A_TK_OPACITY:
         if((d = window_opacity_get((*c)->win)) >= 0)

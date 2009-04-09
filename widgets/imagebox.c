@@ -115,7 +115,7 @@ static void
 imagebox_destructor(widget_t *w)
 {
     imagebox_data_t *d = w->data;
-    image_unref(&d->image);
+    image_unref(globalconf.L, d->image);
     p_delete(&d);
 }
 
@@ -138,10 +138,8 @@ luaA_imagebox_index(lua_State *L, awesome_token_t token)
     switch(token)
     {
       case A_TK_IMAGE:
-        if(d->image)
-            return luaA_image_userdata_new(L, d->image);
-        else
-            return 0;
+        image_push(L, d->image);
+        break;
       case A_TK_BG:
         luaA_pushcolor(L, &d->bg);
         break;
@@ -167,7 +165,6 @@ static int
 luaA_imagebox_newindex(lua_State *L, awesome_token_t token)
 {
     widget_t **widget = luaA_checkudata(L, 1, "widget");
-    image_t **image = NULL;
     imagebox_data_t *d = (*widget)->data;
 
     switch(token)
@@ -176,16 +173,8 @@ luaA_imagebox_newindex(lua_State *L, awesome_token_t token)
         size_t len;
 
       case A_TK_IMAGE:
-        if(lua_isnil(L, 3)
-           || (image = luaA_checkudata(L, 3, "image")))
-        {
-            /* unref image */
-            image_unref(&d->image);
-            if(image)
-                d->image = image_ref(image);
-            else
-                d->image = NULL;
-        }
+        image_unref(L, d->image);
+        d->image = image_ref(L);
         break;
       case A_TK_BG:
         if(lua_isnil(L, 3))

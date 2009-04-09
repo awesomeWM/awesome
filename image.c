@@ -1,7 +1,7 @@
 /*
  * image.c - image object
  *
- * Copyright © 2008 Julien Danjou <julien@danjou.info>
+ * Copyright © 2008-2009 Julien Danjou <julien@danjou.info>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,9 +21,17 @@
 
 #include "structs.h"
 
-DO_LUA_NEW(extern, image_t, image, "image", image_ref)
-DO_LUA_GC(image_t, image, "image", image_unref)
-DO_LUA_EQ(image_t, image, "image")
+DO_LUA_TOSTRING(image_t, image, "image");
+
+static int
+luaA_image_gc(lua_State *L)
+{
+    image_t *p = luaL_checkudata(L, 1, "image");
+    imlib_context_set_image(p->image);
+    imlib_free_image();
+    p_delete(&p->data);
+    return 0;
+}
 
 static const char *
 image_imlib_load_strerror(Imlib_Load_Error e)
@@ -104,31 +112,31 @@ image_compute(image_t *image)
  * \param width The image width.
  * \param height The image height.
  * \param data The image data.
- * \return A brand new image.
+ * \return 1 if an image has been pushed on stack, 0 otherwise.
  */
-image_t *
+int
 image_new_from_argb32(int width, int height, uint32_t *data)
 {
     Imlib_Image imimage;
-    image_t *image = NULL;
 
     if((imimage = imlib_create_image_using_copied_data(width, height, data)))
     {
         imlib_context_set_image(imimage);
         imlib_image_set_has_alpha(true);
-        image = p_new(image_t, 1);
+        image_t *image = image_new(globalconf.L);
         image->image = imimage;
         image_compute(image);
+        return 1;
     }
 
-    return image;
+    return 0;
 }
 
 /** Load an image from filename.
  * \param filename The image file to load.
- * \return A new image.
+ * \return 1 if image is loaded and on stack, 0 otherwise.
  */
-static image_t *
+static int
 image_new_from_file(const char *filename)
 {
     Imlib_Image imimage;
@@ -136,20 +144,20 @@ image_new_from_file(const char *filename)
     image_t *image;
 
     if(!filename)
-        return NULL;
+        return 0;
 
     if(!(imimage = imlib_load_image_with_error_return(filename, &e)))
     {
         warn("cannot load image %s: %s", filename, image_imlib_load_strerror(e));
-        return NULL;
+        return 0;
     }
 
-    image = p_new(image_t, 1);
+    image = image_new(globalconf.L);
     image->image = imimage;
 
     image_compute(image);
 
-    return image;
+    return 1;
 }
 
 /** Create a new image object.
@@ -167,11 +175,7 @@ luaA_image_new(lua_State *L)
     const char *filename;
 
     if((filename = lua_tostring(L, 2)))
-    {
-        image_t *image;
-        if((image = image_new_from_file(filename)))
-            return luaA_image_userdata_new(L, image);
-    }
+        return image_new_from_file(filename);
     else if(lua_isnil(L, 2))
     {
         int width = luaL_checknumber(L, 3);
@@ -181,10 +185,10 @@ luaA_image_new(lua_State *L)
             luaL_error(L, "request image has invalid size");
 
         Imlib_Image imimage = imlib_create_image(width, height);
-        image_t *image = p_new(image_t, 1);
+        image_t *image = image_new(L);
         image->image = imimage;
         image_compute(image);
-        return luaA_image_userdata_new(L, image);
+        return 1;
     }
 
     return 0;
@@ -203,7 +207,6 @@ static int
 luaA_image_argb32_new(lua_State *L)
 {
     size_t len;
-    image_t *image;
     unsigned int width = luaL_checknumber(L, 1);
     unsigned int height = luaL_checknumber(L, 2);
     const char *data = luaL_checklstring(L, 3, &len);
@@ -211,10 +214,7 @@ luaA_image_argb32_new(lua_State *L)
     if(width * height * 4 != len)
         luaL_error(L, "string size does not match image size");
 
-    if((image = image_new_from_argb32(width, height, (uint32_t *) data)))
-        return luaA_image_userdata_new(L, image);
-
-    return 0;
+    return image_new_from_argb32(width, height, (uint32_t *) data);
 }
 
 /** Performs 90 degree rotations on the current image. Passing 0 orientation
@@ -229,13 +229,13 @@ luaA_image_argb32_new(lua_State *L)
 static int
 luaA_image_orientate(lua_State *L)
 {
-    image_t **image = luaA_checkudata(L, 1, "image");
+    image_t *image = luaL_checkudata(L, 1, "image");
     int orientation = luaL_checknumber(L, 2);
 
-    imlib_context_set_image((*image)->image);
+    imlib_context_set_image(image->image);
     imlib_image_orientate(orientation);
 
-    image_compute(*image);
+    image_compute(image);
 
     return 0;
 }
@@ -251,17 +251,17 @@ luaA_image_orientate(lua_State *L)
 static int
 luaA_image_rotate(lua_State *L)
 {
-    image_t **image = luaA_checkudata(L, 1, "image"), *new;
+    image_t *image = luaL_checkudata(L, 1, "image"), *new;
     double angle = luaL_checknumber(L, 2);
 
-    new = p_new(image_t, 1);
+    new = image_new(L);
 
-    imlib_context_set_image((*image)->image);
+    imlib_context_set_image(image->image);
     new->image = imlib_create_rotated_image(angle);
 
     image_compute(new);
 
-    return luaA_image_userdata_new(L, new);
+    return 1;
 }
 
 /** Crop an image to the given rectangle.
@@ -277,20 +277,20 @@ luaA_image_rotate(lua_State *L)
 static int
 luaA_image_crop(lua_State *L)
 {
-    image_t **image = luaA_checkudata(L, 1, "image"), *new;
+    image_t *image = luaL_checkudata(L, 1, "image"), *new;
     int x = luaL_checkint(L, 2);
     int y = luaL_checkint(L, 3);
     int w = luaL_checkint(L, 4);
     int h = luaL_checkint(L, 5);
 
-    new = p_new(image_t, 1);
+    new = image_new(L);
 
-    imlib_context_set_image((*image)->image);
+    imlib_context_set_image(image->image);
     new->image = imlib_create_cropped_image(x, y, w, h);
 
     image_compute(new);
 
-    return luaA_image_userdata_new(L, new);
+    return 1;
 }
 
 /** Crop the image to the given rectangle and scales it.
@@ -309,7 +309,7 @@ luaA_image_crop(lua_State *L)
 static int
 luaA_image_crop_and_scale(lua_State *L)
 {
-    image_t **image = luaA_checkudata(L, 1, "image"), *new;
+    image_t *image = luaL_checkudata(L, 1, "image"), *new;
     int source_x = luaL_checkint(L, 2);
     int source_y = luaL_checkint(L, 3);
     int w = luaL_checkint(L, 4);
@@ -317,9 +317,9 @@ luaA_image_crop_and_scale(lua_State *L)
     int dest_w = luaL_checkint(L, 6);
     int dest_h = luaL_checkint(L, 7);
 
-    new = p_new(image_t, 1);
+    new = image_new(L);
 
-    imlib_context_set_image((*image)->image);
+    imlib_context_set_image(image->image);
     new->image = imlib_create_cropped_scaled_image(source_x,
                                                    source_y,
                                                    w, h,
@@ -327,7 +327,7 @@ luaA_image_crop_and_scale(lua_State *L)
 
     image_compute(new);
 
-    return luaA_image_userdata_new(L, new);
+    return 1;
 }
 
 /** Saves the image to the given path. The file extension (e.g. .png or .jpg)
@@ -341,11 +341,11 @@ luaA_image_crop_and_scale(lua_State *L)
 static int
 luaA_image_save(lua_State *L)
 {
-    image_t **image = luaA_checkudata(L, 1, "image");
+    image_t *image = luaL_checkudata(L, 1, "image");
     const char *path = luaL_checkstring(L, 2);
     Imlib_Load_Error err;
 
-    imlib_context_set_image((*image)->image);
+    imlib_context_set_image(image->image);
     imlib_save_image_with_error_return(path, &err);
 
     if(err != IMLIB_LOAD_ERROR_NONE)
@@ -368,22 +368,22 @@ luaA_image_index(lua_State *L)
     if(luaA_usemetatable(L, 1, 2))
         return 1;
 
-    image_t **image = luaA_checkudata(L, 1, "image");
+    image_t *image = luaL_checkudata(L, 1, "image");
     size_t len;
     const char *attr = luaL_checklstring(L, 2, &len);
 
     switch(a_tokenize(attr, len))
     {
       case A_TK_WIDTH:
-        imlib_context_set_image((*image)->image);
+        imlib_context_set_image(image->image);
         lua_pushnumber(L, imlib_image_get_width());
         break;
       case A_TK_HEIGHT:
-        imlib_context_set_image((*image)->image);
+        imlib_context_set_image(image->image);
         lua_pushnumber(L, imlib_image_get_height());
         break;
       case A_TK_ALPHA:
-        imlib_context_set_image((*image)->image);
+        imlib_context_set_image(image->image);
         lua_pushboolean(L, imlib_image_has_alpha());
         break;
       default:
@@ -408,7 +408,6 @@ const struct luaL_reg awesome_image_meta[] =
     { "crop_and_scale", luaA_image_crop_and_scale },
     { "save", luaA_image_save },
     { "__gc", luaA_image_gc },
-    { "__eq", luaA_image_eq },
     { "__tostring", luaA_image_tostring },
     { NULL, NULL }
 };

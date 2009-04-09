@@ -656,32 +656,29 @@ ewmh_window_icon_get_unchecked(xcb_window_t w)
                                     _NET_WM_ICON, CARDINAL, 0, UINT32_MAX);
 }
 
-image_t *
+int
 ewmh_window_icon_from_reply(xcb_get_property_reply_t *r)
 {
     uint32_t *data;
 
-    if(!r || r->type != CARDINAL || r->format != 32 || r->length < 2 ||
-       !(data = (uint32_t *) xcb_get_property_value(r)))
-        return NULL;
-
-    if(data[0] && data[1])
+    if(r && r->type == CARDINAL && r->format == 32 && r->length >= 2 &&
+       (data = (uint32_t *) xcb_get_property_value(r)) && data[0] && data[1])
         return image_new_from_argb32(data[0], data[1], data + 2);
 
-    return NULL;
+    return 0;
 }
 
 /** Get NET_WM_ICON.
  * \param cookie The cookie.
- * \return A draw_image_t structure which must be deleted after usage.
+ * \return The number of elements on stack.
  */
-image_t *
+int
 ewmh_window_icon_get_reply(xcb_get_property_cookie_t cookie)
 {
     xcb_get_property_reply_t *r = xcb_get_property_reply(globalconf.connection, cookie, NULL);
-    image_t *icon = ewmh_window_icon_from_reply(r);
+    int ret = ewmh_window_icon_from_reply(r);
     p_delete(&r);
-    return icon;
+    return ret;
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
