@@ -31,6 +31,7 @@
 #include <fcntl.h>
 
 #include "widget.h"
+#include "event.h"
 
 extern awesome_t globalconf;
 
@@ -365,6 +366,8 @@ a_dbus_process_requests(EV_P_ ev_io *w, int revents)
 
     if(nmsg)
         dbus_connection_flush(dbus_connection);
+
+    awesome_refresh(globalconf.connection);
 }
 
 static bool
