@@ -298,8 +298,8 @@ graph_draw(widget_t *widget, draw_context_t *ctx,
 static int
 luaA_graph_plot_properties_set(lua_State *L)
 {
-    widget_t **widget = luaA_checkudata(L, 1, "widget");
-    graph_data_t *d = (*widget)->data;
+    widget_t *widget = luaL_checkudata(L, 1, "widget");
+    graph_data_t *d = widget->data;
     float max_value;
     const char *title, *buf;
     size_t len;
@@ -347,7 +347,7 @@ luaA_graph_plot_properties_set(lua_State *L)
     for(i = 0; i <= reqs_nbr; i++)
         xcolor_init_reply(reqs[i]);
 
-    widget_invalidate_bywidget(*widget);
+    widget_invalidate_bywidget(widget);
 
     return 0;
 }
@@ -363,8 +363,8 @@ luaA_graph_plot_properties_set(lua_State *L)
 static int
 luaA_graph_plot_data_add(lua_State *L)
 {
-    widget_t **widget = luaA_checkudata(L, 1, "widget");
-    graph_data_t *d = (*widget)->data;
+    widget_t *widget = luaL_checkudata(L, 1, "widget");
+    graph_data_t *d = widget->data;
     plot_t *plot = NULL;
     const char *title = luaL_checkstring(L, 2);
     float value;
@@ -420,7 +420,7 @@ luaA_graph_plot_data_add(lua_State *L)
             plot->lines[plot->index] = d->box_height;
     }
 
-    widget_invalidate_bywidget(*widget);
+    widget_invalidate_bywidget(widget);
 
     return 0;
 }
@@ -440,8 +440,8 @@ luaA_graph_plot_data_add(lua_State *L)
 static int
 luaA_graph_index(lua_State *L, awesome_token_t token)
 {
-    widget_t **widget = luaA_checkudata(L, 1, "widget");
-    graph_data_t *d = (*widget)->data;
+    widget_t *widget = luaL_checkudata(L, 1, "widget");
+    graph_data_t *d = widget->data;
 
     switch(token)
     {
@@ -492,8 +492,8 @@ static int
 luaA_graph_newindex(lua_State *L, awesome_token_t token)
 {
     size_t len;
-    widget_t **widget = luaA_checkudata(L, 1, "widget");
-    graph_data_t *d = (*widget)->data;
+    widget_t *widget = luaL_checkudata(L, 1, "widget");
+    graph_data_t *d = widget->data;
     const char *buf;
     int width;
     position_t pos;
@@ -559,7 +559,7 @@ luaA_graph_newindex(lua_State *L, awesome_token_t token)
         return 0;
     }
 
-    widget_invalidate_bywidget(*widget);
+    widget_invalidate_bywidget(widget);
 
     return 0;
 }

@@ -482,7 +482,7 @@ luaA_mouse_object_under_pointer(lua_State *L)
 
         if(widget)
         {
-            luaA_widget_userdata_new(L, widget);
+            widget_push(L, widget);
             return 2;
         }
         return 1;

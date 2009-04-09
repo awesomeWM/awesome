@@ -24,22 +24,19 @@
 
 #include "mouse.h"
 
+LUA_OBJECT_FUNCS(widget_t, widget, "widget");
+
 struct widget_node_t
 {
-    /** The widget */
+    /** The widget object */
     widget_t *widget;
     /** The geometry where the widget was drawn */
     area_t geometry;
 };
 
-void widget_delete(widget_t **);
-
-DO_RCNT(widget_t, widget, widget_delete)
-
 widget_t *widget_getbycoords(position_t, widget_node_array_t *, int, int, int16_t *, int16_t *);
 void widget_render(wibox_t *);
 
-int luaA_widget_userdata_new(lua_State *, widget_t *);
 void luaA_table2widgets(lua_State *, widget_node_array_t *);
 
 void widget_invalidate_bywidget(widget_t *);
@@ -51,15 +48,7 @@ widget_constructor_t widget_graph;
 widget_constructor_t widget_systray;
 widget_constructor_t widget_imagebox;
 
-/** Delete a widget node structure.
- * \param node The node to destroy.
- */
-static inline void
-widget_node_delete(widget_node_t *node)
-{
-    widget_unref(&node->widget);
-}
-
+void widget_node_delete(widget_node_t *);
 ARRAY_FUNCS(widget_node_t, widget_node, widget_node_delete)
 
 #endif

@@ -132,8 +132,8 @@ imagebox_destructor(widget_t *w)
 static int
 luaA_imagebox_index(lua_State *L, awesome_token_t token)
 {
-    widget_t **widget = luaA_checkudata(L, 1, "widget");
-    imagebox_data_t *d = (*widget)->data;
+    widget_t *widget = luaL_checkudata(L, 1, "widget");
+    imagebox_data_t *d = widget->data;
 
     switch(token)
     {
@@ -164,8 +164,8 @@ luaA_imagebox_index(lua_State *L, awesome_token_t token)
 static int
 luaA_imagebox_newindex(lua_State *L, awesome_token_t token)
 {
-    widget_t **widget = luaA_checkudata(L, 1, "widget");
-    imagebox_data_t *d = (*widget)->data;
+    widget_t *widget = luaL_checkudata(L, 1, "widget");
+    imagebox_data_t *d = widget->data;
 
     switch(token)
     {
@@ -193,7 +193,7 @@ luaA_imagebox_newindex(lua_State *L, awesome_token_t token)
         return 0;
     }
 
-    widget_invalidate_bywidget(*widget);
+    widget_invalidate_bywidget(widget);
 
     return 0;
 }

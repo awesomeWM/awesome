@@ -29,24 +29,33 @@
 #include "wibox.h"
 #include "common/atoms.h"
 
-DO_LUA_NEW(extern, widget_t, widget, "widget", widget_ref)
-DO_LUA_GC(widget_t, widget, "widget", widget_unref)
-DO_LUA_EQ(widget_t, widget, "widget")
-
 #include "widgetgen.h"
 
-/** Delete a widget structure.
- * \param widget The widget to destroy.
+DO_LUA_TOSTRING(widget_t, widget, "widget")
+
+/** Collect a widget structure.
+ * \param L The Lua VM state.
+ * \return 0
+ */
+static int
+luaA_widget_gc(lua_State *L)
+{
+    widget_t *widget = luaL_checkudata(L, 1, "widget");
+    if(widget->destructor)
+        widget->destructor(widget);
+    button_array_wipe(&widget->buttons);
+    luaL_unref(globalconf.L, LUA_REGISTRYINDEX, widget->mouse_enter);
+    luaL_unref(globalconf.L, LUA_REGISTRYINDEX, widget->mouse_leave);
+    return 0;
+}
+
+/** Delete a widget node structure.
+ * \param node The node to destroy.
  */
 void
-widget_delete(widget_t **widget)
+widget_node_delete(widget_node_t *node)
 {
-    if((*widget)->destructor)
-        (*widget)->destructor(*widget);
-    button_array_wipe(&(*widget)->buttons);
-    luaL_unref(globalconf.L, LUA_REGISTRYINDEX, (*widget)->mouse_enter);
-    luaL_unref(globalconf.L, LUA_REGISTRYINDEX, (*widget)->mouse_leave);
-    p_delete(widget);
+    widget_unref(globalconf.L, node->widget);
 }
 
 /** Get a widget node from a wibox by coords.
@@ -80,14 +89,11 @@ widget_getbycoords(position_t position, widget_node_array_t *widgets,
       default:
         break;
     }
-    for(int i = 0; i < widgets->len; i++)
-    {
-        widget_node_t *w = &widgets->tab[i];
-        if(w->widget->isvisible &&
-           *x >= w->geometry.x && *x < w->geometry.x + w->geometry.width
+    foreach(w, *widgets)
+        if(w->widget->isvisible
+           && *x >= w->geometry.x && *x < w->geometry.x + w->geometry.width
            && *y >= w->geometry.y && *y < w->geometry.y + w->geometry.height)
             return w->widget;
-    }
 
     return NULL;
 }
@@ -103,21 +109,22 @@ luaA_table2widgets(lua_State *L, widget_node_array_t *widgets)
     {
         lua_pushnil(L);
         while(luaA_next(L, -2))
-        {
             luaA_table2widgets(L, widgets);
-            lua_pop(L, 1); /* remove value */
-        }
+        /* remove the table */
+        lua_pop(L, 1);
     }
     else
     {
-        widget_t **widget = luaA_toudata(L, -1, "widget");
+        widget_t *widget = luaA_toudata2(L, -1, "widget");
         if(widget)
         {
             widget_node_t w;
             p_clear(&w, 1);
-            w.widget = widget_ref(widget);
+            w.widget = widget_ref(L);
             widget_node_array_append(widgets, w);
         }
+        else
+            lua_pop(L, 1); /* remove value */
     }
 }
 
@@ -186,7 +193,8 @@ widget_render(wibox_t *wibox)
 
     /* compute geometry */
     for(int i = 0; i < widgets->len; i++)
-        if(widgets->tab[i].widget->align == AlignLeft && widgets->tab[i].widget->isvisible)
+        if(widgets->tab[i].widget->align == AlignLeft
+           && widgets->tab[i].widget->isvisible)
         {
             widgets->tab[i].geometry = widgets->tab[i].widget->geometry(widgets->tab[i].widget,
                                                                         wibox->screen, ctx->height,
@@ -360,7 +368,7 @@ luaA_widget_new(lua_State *L)
 
     if((wc = name_func_lookup(type, len, WidgetList)))
     {
-        w = p_new(widget_t, 1);
+        w = widget_new(L);
         wc(w);
     }
     else
@@ -380,7 +388,7 @@ luaA_widget_new(lua_State *L)
 
     w->mouse_enter = w->mouse_leave = LUA_REFNIL;
 
-    return luaA_widget_userdata_new(L, w);
+    return 1;
 }
 
 /** Get or set mouse buttons bindings to a widget.
@@ -394,8 +402,8 @@ luaA_widget_new(lua_State *L)
 static int
 luaA_widget_buttons(lua_State *L)
 {
-    widget_t **widget = luaA_checkudata(L, 1, "widget");
-    button_array_t *buttons = &(*widget)->buttons;
+    widget_t *widget = luaL_checkudata(L, 1, "widget");
+    button_array_t *buttons = &widget->buttons;
 
     if(lua_gettop(L) == 2)
     {
@@ -419,7 +427,7 @@ static int
 luaA_widget_index(lua_State *L)
 {
     size_t len;
-    widget_t **widget = luaA_checkudata(L, 1, "widget");
+    widget_t *widget = luaL_checkudata(L, 1, "widget");
     const char *buf = luaL_checklstring(L, 2, &len);
     awesome_token_t token;
 
@@ -429,20 +437,20 @@ luaA_widget_index(lua_State *L)
     switch((token = a_tokenize(buf, len)))
     {
       case A_TK_ALIGN:
-        lua_pushstring(L, draw_align_tostr((*widget)->align));
+        lua_pushstring(L, draw_align_tostr(widget->align));
         return 1;
       case A_TK_VISIBLE:
-        lua_pushboolean(L, (*widget)->isvisible);
+        lua_pushboolean(L, widget->isvisible);
         return 1;
       case A_TK_MOUSE_ENTER:
-        if((*widget)->mouse_enter != LUA_REFNIL)
-            lua_rawgeti(L, LUA_REGISTRYINDEX, (*widget)->mouse_enter);
+        if(widget->mouse_enter != LUA_REFNIL)
+            lua_rawgeti(L, LUA_REGISTRYINDEX, widget->mouse_enter);
         else
             return 0;
         return 1;
       case A_TK_MOUSE_LEAVE:
-        if((*widget)->mouse_leave != LUA_REFNIL)
-            lua_rawgeti(L, LUA_REGISTRYINDEX, (*widget)->mouse_leave);
+        if(widget->mouse_leave != LUA_REFNIL)
+            lua_rawgeti(L, LUA_REGISTRYINDEX, widget->mouse_leave);
         else
             return 0;
         return 1;
@@ -450,7 +458,7 @@ luaA_widget_index(lua_State *L)
         break;
     }
 
-    return (*widget)->index ? (*widget)->index(L, token) : 0;
+    return widget->index ? widget->index(L, token) : 0;
 }
 
 /** Generic widget newindex.
@@ -461,7 +469,7 @@ static int
 luaA_widget_newindex(lua_State *L)
 {
     size_t len;
-    widget_t **widget = luaA_checkudata(L, 1, "widget");
+    widget_t *widget = luaL_checkudata(L, 1, "widget");
     const char *buf = luaL_checklstring(L, 2, &len);
     awesome_token_t token;
 
@@ -469,22 +477,22 @@ luaA_widget_newindex(lua_State *L)
     {
       case A_TK_ALIGN:
         buf = luaL_checklstring(L, 3, &len);
-        (*widget)->align = draw_align_fromstr(buf, len);
+        widget->align = draw_align_fromstr(buf, len);
         break;
       case A_TK_VISIBLE:
-        (*widget)->isvisible = luaA_checkboolean(L, 3);
+        widget->isvisible = luaA_checkboolean(L, 3);
         break;
       case A_TK_MOUSE_ENTER:
-        luaA_registerfct(L, 3, &(*widget)->mouse_enter);
+        luaA_registerfct(L, 3, &widget->mouse_enter);
         return 0;
       case A_TK_MOUSE_LEAVE:
-        luaA_registerfct(L, 3, &(*widget)->mouse_leave);
+        luaA_registerfct(L, 3, &widget->mouse_leave);
         return 0;
       default:
-        return (*widget)->newindex ? (*widget)->newindex(L, token) : 0;
+        return widget->newindex ? widget->newindex(L, token) : 0;
     }
 
-    widget_invalidate_bywidget(*widget);
+    widget_invalidate_bywidget(widget);
 
     return 0;
 }
@@ -500,7 +508,6 @@ const struct luaL_reg awesome_widget_meta[] =
     { "__index", luaA_widget_index },
     { "__newindex", luaA_widget_newindex },
     { "__gc", luaA_widget_gc },
-    { "__eq", luaA_widget_eq },
     { "__tostring", luaA_widget_tostring },
     { NULL, NULL }
 };

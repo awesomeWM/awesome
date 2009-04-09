@@ -139,13 +139,13 @@ textbox_destructor(widget_t *w)
 static int
 luaA_textbox_margin(lua_State *L)
 {
-    widget_t **widget = luaA_checkudata(L, 1, "widget");
-    textbox_data_t *d = (*widget)->data;
+    widget_t *widget = luaL_checkudata(L, 1, "widget");
+    textbox_data_t *d = widget->data;
 
     if(lua_gettop(L) == 2)
     {
         d->margin = luaA_getopt_padding(L, 3, &d->margin);
-        widget_invalidate_bywidget(*widget);
+        widget_invalidate_bywidget(widget);
     }
 
     return luaA_pushpadding(L, &d->margin);
@@ -172,8 +172,8 @@ luaA_textbox_margin(lua_State *L)
 static int
 luaA_textbox_index(lua_State *L, awesome_token_t token)
 {
-    widget_t **widget = luaA_checkudata(L, 1, "widget");
-    textbox_data_t *d = (*widget)->data;
+    widget_t *widget = luaL_checkudata(L, 1, "widget");
+    textbox_data_t *d = widget->data;
 
     switch(token)
     {
@@ -251,9 +251,9 @@ static int
 luaA_textbox_newindex(lua_State *L, awesome_token_t token)
 {
     size_t len = 0;
-    widget_t **widget = luaA_checkudata(L, 1, "widget");
+    widget_t *widget = luaL_checkudata(L, 1, "widget");
     const char *buf = NULL;
-    textbox_data_t *d = (*widget)->data;
+    textbox_data_t *d = widget->data;
 
     switch(token)
     {
@@ -353,7 +353,7 @@ luaA_textbox_newindex(lua_State *L, awesome_token_t token)
         return 0;
     }
 
-    widget_invalidate_bywidget(*widget);
+    widget_invalidate_bywidget(widget);
 
     return 0;
 }

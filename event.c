@@ -121,7 +121,6 @@ event_handle_button(void *data, xcb_connection_t *connection, xcb_button_press_e
     int screen;
     const int nb_screen = xcb_setup_roots_length(xcb_get_setup(connection));
     client_t *c;
-    widget_t *w;
     wibox_t *wibox;
 
     /* ev->state is
@@ -168,10 +167,11 @@ event_handle_button(void *data, xcb_connection_t *connection, xcb_button_press_e
                 }
 
         /* then try to match a widget binding */
-        if((w = widget_getbycoords(wibox->position, &wibox->widgets,
-                                   wibox->sw.geometry.width,
-                                   wibox->sw.geometry.height,
-                                   &ev->event_x, &ev->event_y)))
+        widget_t *w = widget_getbycoords(wibox->position, &wibox->widgets,
+                                         wibox->sw.geometry.width,
+                                         wibox->sw.geometry.height,
+                                         &ev->event_x, &ev->event_y);
+        if(w)
         {
             b = &w->buttons;
 
@@ -427,16 +427,18 @@ event_handle_motionnotify(void *data __attribute__ ((unused)),
                           xcb_motion_notify_event_t *ev)
 {
     wibox_t *wibox;
-    widget_t *w;
 
     event_handle_mousegrabber(ev->root_x, ev->root_y, ev->state);
 
-    if((wibox = wibox_getbywin(ev->event))
-       && (w = widget_getbycoords(wibox->position, &wibox->widgets,
-                                  wibox->sw.geometry.width,
-                                  wibox->sw.geometry.height,
-                                  &ev->event_x, &ev->event_y)))
-        event_handle_widget_motionnotify(wibox, &wibox->mouse_over, w);
+    if((wibox = wibox_getbywin(ev->event)))
+    {
+        widget_t *w = widget_getbycoords(wibox->position, &wibox->widgets,
+                                         wibox->sw.geometry.width,
+                                         wibox->sw.geometry.height,
+                                         &ev->event_x, &ev->event_y);
+        if(w)
+            event_handle_widget_motionnotify(wibox, &wibox->mouse_over, w);
+    }
 
     return 0;
 }
@@ -495,7 +497,6 @@ event_handle_enternotify(void *data __attribute__ ((unused)),
                          xcb_enter_notify_event_t *ev)
 {
     client_t *c;
-    widget_t *w;
     wibox_t *wibox;
 
     if(ev->mode != XCB_NOTIFY_MODE_NORMAL)
@@ -503,10 +504,11 @@ event_handle_enternotify(void *data __attribute__ ((unused)),
 
     if((wibox = wibox_getbywin(ev->event)))
     {
-        if((w = widget_getbycoords(wibox->position, &wibox->widgets,
-                                   wibox->sw.geometry.width,
-                                   wibox->sw.geometry.height,
-                                   &ev->event_x, &ev->event_y)))
+        widget_t *w = widget_getbycoords(wibox->position, &wibox->widgets,
+                                         wibox->sw.geometry.width,
+                                         wibox->sw.geometry.height,
+                                         &ev->event_x, &ev->event_y);
+        if(w)
             event_handle_widget_motionnotify(wibox, &wibox->mouse_over, w);
 
         if(wibox->mouse_enter != LUA_REFNIL)
@@ -515,13 +517,11 @@ event_handle_enternotify(void *data __attribute__ ((unused)),
 
     if((c = client_getbytitlebarwin(ev->event))
        || (c = client_getbywin(ev->event)))
-    {
         if(globalconf.hooks.mouse_enter != LUA_REFNIL)
         {
             luaA_client_userdata_new(globalconf.L, c);
             luaA_dofunction(globalconf.L, globalconf.hooks.mouse_enter, 1, 0);
         }
-    }
 
     return 0;
 }

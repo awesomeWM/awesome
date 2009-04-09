@@ -1101,7 +1101,10 @@ luaA_wibox_newindex(lua_State *L)
             luaA_warn(L, "table is looping, cannot use this as widget table");
             return 0;
         }
+        /* register object */
         luaA_register(L, 3, &(*wibox)->widgets_table);
+        /* duplicate table because next function will eat it */
+        lua_pushvalue(L, -1);
         /* recompute widget node list */
         wibox_widgets_table_build(L, *wibox);
         luaA_table2wtable(L);

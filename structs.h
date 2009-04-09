@@ -120,8 +120,8 @@ ARRAY_TYPE(wibox_t *, wibox)
 /** Widget */
 struct widget_t
 {
-    /** Ref count */
-    int refcount;
+    /** Lua references */
+    luaA_ref_array_t refs;
     /** Widget type is constructor */
     widget_constructor_t *type;
     /** Widget destructor */

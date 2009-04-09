@@ -434,10 +434,10 @@ static int
 luaA_progressbar_bar_properties_set(lua_State *L)
 {
     size_t len;
-    widget_t **widget = luaA_checkudata(L, 1, "widget");
+    widget_t *widget = luaL_checkudata(L, 1, "widget");
     const char *buf, *title = luaL_checkstring(L, 2);
     bar_t *bar;
-    progressbar_data_t *d = (*widget)->data;
+    progressbar_data_t *d = widget->data;
     xcolor_init_request_t reqs[6];
     int i, reqs_nbr = -1;
 
@@ -483,7 +483,7 @@ luaA_progressbar_bar_properties_set(lua_State *L)
     for(i = 0; i <= reqs_nbr; i++)
         xcolor_init_reply(reqs[i]);
 
-    widget_invalidate_bywidget(*widget);
+    widget_invalidate_bywidget(widget);
 
     return 0;
 }
@@ -499,9 +499,9 @@ luaA_progressbar_bar_properties_set(lua_State *L)
 static int
 luaA_progressbar_bar_data_add(lua_State *L)
 {
-    widget_t **widget = luaA_checkudata(L, 1, "widget");
+    widget_t *widget = luaL_checkudata(L, 1, "widget");
     const char *title = luaL_checkstring(L, 2);
-    progressbar_data_t *d = (*widget)->data;
+    progressbar_data_t *d = widget->data;
     bar_t *bar;
 
     bar = progressbar_bar_get(&d->bars, title);
@@ -509,7 +509,7 @@ luaA_progressbar_bar_data_add(lua_State *L)
     bar->value = luaL_checknumber(L, 3);
     bar->value = MAX(bar->min_value, MIN(bar->max_value, bar->value));
 
-    widget_invalidate_bywidget(*widget);
+    widget_invalidate_bywidget(widget);
 
     return 0;
 }
@@ -533,8 +533,8 @@ luaA_progressbar_bar_data_add(lua_State *L)
 static int
 luaA_progressbar_index(lua_State *L, awesome_token_t token)
 {
-    widget_t **widget = luaA_checkudata(L, 1, "widget");
-    progressbar_data_t *d = (*widget)->data;
+    widget_t *widget = luaL_checkudata(L, 1, "widget");
+    progressbar_data_t *d = widget->data;
 
     switch(token)
     {
@@ -583,8 +583,8 @@ luaA_progressbar_index(lua_State *L, awesome_token_t token)
 static int
 luaA_progressbar_newindex(lua_State *L, awesome_token_t token)
 {
-    widget_t **widget = luaA_checkudata(L, 1, "widget");
-    progressbar_data_t *d = (*widget)->data;
+    widget_t *widget = luaL_checkudata(L, 1, "widget");
+    progressbar_data_t *d = widget->data;
 
     switch(token)
     {
@@ -616,7 +616,7 @@ luaA_progressbar_newindex(lua_State *L, awesome_token_t token)
         return 0;
     }
 
-    widget_invalidate_bywidget(*widget);
+    widget_invalidate_bywidget(widget);
 
     return 0;
 }
