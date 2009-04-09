@@ -862,7 +862,6 @@ luaA_loadrc(const char *confpath, bool run)
 bool
 luaA_parserc(xdgHandle xdg, const char *confpatharg, bool run)
 {
-    int screen;
     char *confpath = NULL;
     bool ret = false;
 
@@ -899,11 +898,6 @@ bailout:
 
     p_delete(&confpath);
 
-    /* Assure there's at least one tag */
-    for(screen = 0; screen < globalconf.nscreen; screen++)
-        if(!globalconf.screens[screen].tags.len)
-            tag_append_to_screen(tag_new("default", sizeof("default") - 1),
-                                 &globalconf.screens[screen]);
     return ret;
 }
 
