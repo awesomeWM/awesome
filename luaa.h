@@ -195,21 +195,27 @@ static inline lua_Number
 luaA_getopt_number(lua_State *L, int idx, const char *name, lua_Number def)
 {
     lua_getfield(L, idx, name);
-    return luaL_optnumber(L, -1, def);
+    lua_Number n = luaL_optnumber(L, -1, def);
+    lua_pop(L, 1);
+    return n;
 }
 
 static inline const char *
 luaA_getopt_lstring(lua_State *L, int idx, const char *name, const char *def, size_t *len)
 {
     lua_getfield(L, idx, name);
-    return luaL_optlstring(L, -1, def, len);
+    const char *s = luaL_optlstring(L, -1, def, len);
+    lua_pop(L, 1);
+    return s;
 }
 
 static inline bool
 luaA_getopt_boolean(lua_State *L, int idx, const char *name, bool def)
 {
     lua_getfield(L, idx, name);
-    return luaA_optboolean(L, -1, def);
+    bool b = luaA_optboolean(L, -1, def);
+    lua_pop(L, 1);
+    return b;
 }
 
 static inline int
