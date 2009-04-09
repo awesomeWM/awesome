@@ -325,7 +325,9 @@ widget_invalidate_bywidget(widget_t *widget)
                     }
          }
 
-    for(client_t *c = globalconf.clients; c; c = c->next)
+    foreach(_c, globalconf.clients)
+    {
+        client_t *c = *_c;
         if(c->titlebar && !c->titlebar->need_update)
             for(int j = 0; j < c->titlebar->widgets.len; j++)
                 if(c->titlebar->widgets.tab[j].widget == widget)
@@ -333,6 +335,7 @@ widget_invalidate_bywidget(widget_t *widget)
                     c->titlebar->need_update = true;
                     break;
                 }
+    }
 }
 
 /** Create a new widget.

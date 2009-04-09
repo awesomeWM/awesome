@@ -34,11 +34,9 @@
 client_t *
 client_getbytitlebar(wibox_t *titlebar)
 {
-    client_t *c;
-
-    for(c = globalconf.clients; c; c = c->next)
-        if(c->titlebar == titlebar)
-            return c;
+    foreach(c, globalconf.clients)
+        if((*c)->titlebar == titlebar)
+            return *c;
 
     return NULL;
 }
@@ -50,11 +48,9 @@ client_getbytitlebar(wibox_t *titlebar)
 client_t *
 client_getbytitlebarwin(xcb_window_t win)
 {
-    client_t *c;
-
-    for(c = globalconf.clients; c; c = c->next)
-        if(c->titlebar && c->titlebar->sw.window == win)
-            return c;
+    foreach(c, globalconf.clients)
+        if((*c)->titlebar && (*c)->titlebar->sw.window == win)
+            return *c;
 
     return NULL;
 }

@@ -84,8 +84,6 @@ int luaA_client_newindex(lua_State *);
 
 int luaA_client_userdata_new(lua_State *, client_t *);
 
-DO_SLIST(client_t, client, client_unref)
-
 static inline void
 client_stack(void)
 {

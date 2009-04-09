@@ -504,9 +504,12 @@ wibox_getbywin(xcb_window_t w)
                 return s;
         }
 
-    for(client_t *c = globalconf.clients; c; c = c->next)
+    foreach(_c, globalconf.clients)
+    {
+        client_t *c = *_c;
         if(c->titlebar && c->titlebar->sw.window == w)
             return c->titlebar;
+    }
 
     return NULL;
 }
@@ -541,9 +544,12 @@ wibox_refresh(void)
                 wibox_draw(s);
         }
 
-    for(client_t *c = globalconf.clients; c; c = c->next)
+    foreach(_c, globalconf.clients)
+    {
+        client_t *c = *_c;
         if(c->titlebar && c->titlebar->need_update)
             wibox_draw(c->titlebar);
+    }
 }
 
 /** Reposition all wiboxes.
@@ -797,13 +803,16 @@ luaA_wibox_invalidate_byitem(lua_State *L, const void *item)
 
         }
 
-    for(client_t *c = globalconf.clients; c; c = c->next)
+    foreach(_c, globalconf.clients)
+    {
+        client_t *c = *_c;
         if(c->titlebar && luaA_wibox_hasitem(L, c->titlebar, item))
         {
             /* recompute widget node list */
             wibox_widgets_table_build(L, c->titlebar);
             lua_pop(L, 1); /* remove widgets table */
         }
+    }
 }
 
 /** Wibox object.

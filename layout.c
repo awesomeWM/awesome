@@ -31,11 +31,11 @@
 static void
 arrange(int screen)
 {
-    client_t *c;
     uint32_t select_input_val[] = { CLIENT_SELECT_INPUT_EVENT_MASK & ~(XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW) };
 
-    for(c = globalconf.clients; c; c = c->next)
+    foreach(_c, globalconf.clients)
     {
+        client_t *c = *_c;
         /* Bob Marley v2:
          * While we arrange, we do not want to receive EnterNotify or LeaveNotify
          * events, or we would get spurious events. */
@@ -74,9 +74,9 @@ arrange(int screen)
 
     /* Now, we want to receive EnterNotify and LeaveNotify events back. */
     select_input_val[0] = CLIENT_SELECT_INPUT_EVENT_MASK;
-    for(c = globalconf.clients; c; c = c->next)
+    foreach(c, globalconf.clients)
         xcb_change_window_attributes(globalconf.connection,
-                                     c->win,
+                                     (*c)->win,
                                      XCB_CW_EVENT_MASK,
                                      select_input_val);
 }

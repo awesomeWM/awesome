@@ -59,7 +59,6 @@ typedef struct
 void
 awesome_atexit(void)
 {
-    client_t *c;
     int screen_nbr, nscreens;
 
     a_dbus_cleanup();
@@ -81,10 +80,10 @@ awesome_atexit(void)
         systray_cleanup(screen_nbr);
 
     /* remap all clients since some WM won't handle them otherwise */
-    for(c = globalconf.clients; c; c = c->next)
+    foreach(c, globalconf.clients)
     {
-        client_unban(c);
-        titlebar_client_detach(c);
+        client_unban(*c);
+        titlebar_client_detach(*c);
     }
 
     xcb_flush(globalconf.connection);

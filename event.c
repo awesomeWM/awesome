@@ -878,8 +878,9 @@ event_handle_mappingnotify(void *data,
             window_grabkeys(s->root, &globalconf.keys);
         }
 
-        for(client_t *c = globalconf.clients; c; c = c->next)
+        foreach(_c, globalconf.clients)
         {
+            client_t *c = *_c;
             xcb_ungrab_key(connection, XCB_GRAB_ANY, c->win, XCB_BUTTON_MASK_ANY);
             window_grabkeys(c->win, &c->keys);
         }

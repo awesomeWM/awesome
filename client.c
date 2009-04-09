@@ -131,9 +131,10 @@ client_getcontent(client_t *c)
 client_t *
 client_getbywin(xcb_window_t w)
 {
-    client_t *c;
-    for(c = globalconf.clients; c && c->win != w; c = c->next);
-    return c;
+    for(int i = 0; i < globalconf.clients.len; i++)
+        if(globalconf.clients.tab[i]->win == w)
+            return globalconf.clients.tab[i];
+    return NULL;
 }
 
 /** Record that a client lost focus.
@@ -240,8 +241,13 @@ void
 client_focus(client_t *c)
 {
     /* We have to set focus on first client */
-    if(!c && !(c = globalconf.clients))
-        return;
+    if(!c)
+    {
+        if(globalconf.clients.len)
+            c = globalconf.clients.tab[0];
+        else
+            return;
+    }
 
     if(!client_maybevisible(c, c->screen))
         return;
@@ -475,7 +481,7 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
     screen_client_moveto(c, screen, false, true);
 
     /* Push client in client list */
-    client_list_push(&globalconf.clients, client_ref(&c));
+    client_array_push(&globalconf.clients, client_ref(&c));
 
     /* Push client in stack */
     client_raise(c);
@@ -711,13 +717,15 @@ client_resize(client_t *c, area_t geometry, bool hints)
 void
 client_update_strut_positions(int screen)
 {
-    client_t *c;
     area_t allowed_area, geom;
 
     /* Ignore all struts for starters. */
-    for(c = globalconf.clients; c; c = c->next)
+    foreach(_c, globalconf.clients)
+    {
+        client_t *c = *_c;
         if(c->screen == screen && client_hasstrut(c))
             c->ignore_strut = true;
+    }
 
     /* Rationale:
      * Top and bottom panels are common, so they take precendence.
@@ -725,8 +733,9 @@ client_update_strut_positions(int screen)
      */
 
     /* WINDOW_TYPE_DOCK: top + bottom. */
-    for(c = globalconf.clients; c; c = c->next)
+    foreach(_c, globalconf.clients)
     {
+        client_t *c = *_c;
         if(c->screen != screen || !client_hasstrut(c) || c->type != WINDOW_TYPE_DOCK)
             continue;
 
@@ -767,8 +776,9 @@ client_update_strut_positions(int screen)
     }
 
     /* WINDOW_TYPE_DOCK: left + right. */
-    for(c = globalconf.clients; c; c = c->next)
+    foreach(_c, globalconf.clients)
     {
+        client_t *c = *_c;
         if(c->screen != screen || !client_hasstrut(c) || c->type != WINDOW_TYPE_DOCK)
             continue;
 
@@ -809,8 +819,9 @@ client_update_strut_positions(int screen)
     }
 
     /* not WINDOW_TYPE_DOCK: top + bottom. */
-    for(c = globalconf.clients; c; c = c->next)
+    foreach(_c, globalconf.clients)
     {
+        client_t *c = *_c;
         if(c->screen != screen || !client_hasstrut(c) || c->type == WINDOW_TYPE_DOCK)
             continue;
 
@@ -851,8 +862,9 @@ client_update_strut_positions(int screen)
     }
 
     /* not WINDOW_TYPE_DOCK: left + right. */
-    for(c = globalconf.clients; c; c = c->next)
+    foreach(_c, globalconf.clients)
     {
+        client_t *c = *_c;
         if(c->screen != screen || !client_hasstrut(c) || c->type == WINDOW_TYPE_DOCK)
             continue;
 
@@ -1180,15 +1192,25 @@ client_unmanage(client_t *c)
     tag_array_t *tags = &globalconf.screens[c->screen].tags;
 
     /* Reset transient_for attributes of widows that maybe refering to us */
-    for(client_t *tc = globalconf.clients; tc; tc = tc->next)
+    foreach(_tc, globalconf.clients)
+    {
+        client_t *tc = *_tc;
         if(tc->transient_for == c)
             tc->transient_for = NULL;
+    }
 
     if(globalconf.screens[c->phys_screen].client_focus == c)
         client_unfocus(c);
 
     /* remove client everywhere */
-    client_list_detach(&globalconf.clients, c);
+    client_t **_c = NULL;
+    foreach(iter, globalconf.clients)
+        if(c == *iter)
+        {
+            _c = iter;
+            break;
+        }
+    client_array_remove(&globalconf.clients, _c);
     stack_client_delete(c);
     for(int i = 0; i < tags->len; i++)
         untag_client(c, tags->tab[i]);
@@ -1267,27 +1289,30 @@ static int
 luaA_client_get(lua_State *L)
 {
     int i = 1, screen;
-    client_t *c;
 
     screen = luaL_optnumber(L, 1, 0) - 1;
 
     lua_newtable(L);
 
     if(screen == SCREEN_UNDEF)
-        for(c = globalconf.clients; c; c = c->next)
+        foreach(_c, globalconf.clients)
         {
+            client_t *c = *_c;
             luaA_client_userdata_new(globalconf.L, c);
             lua_rawseti(L, -2, i++);
         }
     else
     {
         luaA_checkscreen(screen);
-        for(c = globalconf.clients; c; c = c->next)
+        foreach(_c, globalconf.clients)
+        {
+            client_t *c = *_c;
             if(c->screen == screen)
             {
                 luaA_client_userdata_new(globalconf.L, c);
                 lua_rawseti(L, -2, i++);
             }
+        }
     }
 
     return 1;
@@ -1373,7 +1398,19 @@ luaA_client_swap(lua_State *L)
 
     if(*c != *swap)
     {
-        client_list_swap(&globalconf.clients, *swap, *c);
+        /* makes c and swap points on array address, not Lua */
+        foreach(iter, globalconf.clients)
+            if(*c == *iter)
+                c = iter;
+            else if(*swap == *iter)
+                swap = iter;
+
+        /* swap entry in the array */
+        client_t *tmp;
+        tmp = *c;
+        *c = *swap;
+        *swap = tmp;
+
         client_need_arrange(*c);
         client_need_arrange(*swap);
 

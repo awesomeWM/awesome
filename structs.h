@@ -242,8 +242,6 @@ struct client_t
     bool size_hints_honor;
     /** Window it is transient for */
     client_t *transient_for;
-    /** Next and previous clients */
-    client_t *prev, *next;
 };
 ARRAY_TYPE(client_t *, client)
 
@@ -322,7 +320,7 @@ struct awesome_t
     /** Check for XTest extension */
     bool have_xtest;
     /** Clients list */
-    client_t *clients;
+    client_array_t clients;
     /** Embedded windows */
     xembed_window_array_t embedded;
     /** Path to config file */

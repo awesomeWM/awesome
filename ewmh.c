@@ -143,18 +143,15 @@ ewmh_init(int phys_screen)
 void
 ewmh_update_net_client_list(int phys_screen)
 {
-    xcb_window_t *wins;
-    client_t *c;
+    xcb_window_t *wins = p_alloca(xcb_window_t, globalconf.clients.len);
+
     int n = 0;
-
-    for(c = globalconf.clients; c; c = c->next)
-        n++;
-
-    wins = p_alloca(xcb_window_t, n);
-
-    for(n = 0, c = globalconf.clients; c; c = c->next, n++)
+    foreach(_c, globalconf.clients)
+    {
+        client_t *c = *_c;
         if(c->phys_screen == phys_screen)
-            wins[n] = c->win;
+            wins[n++] = c->win;
+    }
 
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
 			xutil_screen_get(globalconf.connection, phys_screen)->root,

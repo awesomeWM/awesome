@@ -178,9 +178,9 @@ screen_area_get(int screen, wibox_array_t *wiboxes,
     /* Some clients request more space than their size, because another window of the same app already has some space. */
     /* So we clamp the strut size. */
     if(strut)
-    {
-        client_t *c;
-        for(c = globalconf.clients; c; c = c->next)
+        foreach(_c, globalconf.clients)
+        {
+            client_t *c = *_c;
             if(client_isvisible(c, screen) && !c->ignore_strut)
             {
                 if(c->strut.top_start_x || c->strut.top_end_x)
@@ -212,7 +212,7 @@ screen_area_get(int screen, wibox_array_t *wiboxes,
                         right += c->geometry.width;
                 }
             }
-    }
+        }
 
     /* swindow geometry includes borders. */
     if(wiboxes)
