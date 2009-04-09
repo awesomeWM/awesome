@@ -33,9 +33,7 @@
 
 #include "draw.h"
 #include "common/util.h"
-
-/** Type for Lua function */
-typedef int luaA_ref;
+#include "common/luaobject.h"
 
 #define luaA_deprecate(L, repl) \
     luaA_warn(L, "%s: This function is deprecated and will be removed, see %s", \
@@ -216,14 +214,6 @@ luaA_getopt_boolean(lua_State *L, int idx, const char *name, bool def)
     bool b = luaA_optboolean(L, -1, def);
     lua_pop(L, 1);
     return b;
-}
-
-static inline int
-luaA_settype(lua_State *L, const char *type)
-{
-    luaL_getmetatable(L, type);
-    lua_setmetatable(L, -2);
-    return 1;
 }
 
 /** Push a area type to a table on stack.
