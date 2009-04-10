@@ -295,6 +295,12 @@ wibox_position_update(wibox_t *wibox)
     area_t area, wingeom = wibox->sw.geometry;
     bool ignore = false;
 
+    /* Everything we do below needs the wibox' screen.
+     * No screen, nothing to do.
+     */
+    if (wibox->screen == SCREEN_UNDEF)
+        return;
+
     globalconf.screens[wibox->screen].need_arrange = true;
 
     /* Place wibox'es at the edge of the screen, struts come later. */
