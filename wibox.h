@@ -28,15 +28,13 @@
 void wibox_refresh(void);
 void wibox_update_positions(void);
 
-int luaA_wibox_new(lua_State *);
-int luaA_wibox_userdata_new(lua_State *, wibox_t *);
 void luaA_wibox_invalidate_byitem(lua_State *, const void *);
 
 void wibox_position_update(wibox_t *);
 wibox_t * wibox_getbywin(xcb_window_t);
 void wibox_detach(wibox_t *);
-void wibox_attach(wibox_t *, screen_t *);
-void wibox_delete(wibox_t **);
+
+void wibox_unref_simplified(wibox_t **);
 
 static inline void
 wibox_moveresize(wibox_t *wibox, area_t geometry)
@@ -56,8 +54,8 @@ wibox_moveresize(wibox_t *wibox, area_t geometry)
     wibox->need_update = true;
 }
 
-DO_RCNT(wibox_t, wibox, wibox_delete)
-ARRAY_FUNCS(wibox_t *, wibox, wibox_unref)
+LUA_OBJECT_FUNCS(wibox_t, wibox, "wibox")
+ARRAY_FUNCS(wibox_t *, wibox, wibox_unref_simplified)
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

@@ -470,7 +470,7 @@ luaA_mouse_object_under_pointer(lua_State *L)
     client_t *client;
     if((wibox = wibox_getbywin(child)))
     {
-        luaA_wibox_userdata_new(L, wibox);
+        wibox_push(L, wibox);
 
         int16_t x = mouse_x - wibox->sw.geometry.x;
         int16_t y = mouse_y - wibox->sw.geometry.y;

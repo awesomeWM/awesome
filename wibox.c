@@ -28,9 +28,30 @@
 #include "common/xcursor.h"
 #include "window.h"
 
-DO_LUA_NEW(extern, wibox_t, wibox, "wibox", wibox_ref)
-DO_LUA_GC(wibox_t, wibox, "wibox", wibox_unref)
-DO_LUA_EQ(wibox_t, wibox, "wibox")
+DO_LUA_TOSTRING(wibox_t, wibox, "wibox")
+
+/** Take care of garbage collecting a wibox.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack, 0!
+ */
+static int
+luaA_wibox_gc(lua_State *L)
+{
+    wibox_t *wibox = luaL_checkudata(L, 1, "wibox");
+    simplewindow_wipe(&wibox->sw);
+    button_array_wipe(&wibox->buttons);
+    luaL_unref(L, LUA_REGISTRYINDEX, wibox->widgets_table);
+    luaL_unref(L, LUA_REGISTRYINDEX, wibox->mouse_enter);
+    luaL_unref(L, LUA_REGISTRYINDEX, wibox->mouse_leave);
+    widget_node_array_wipe(&wibox->widgets);
+    return 0;
+}
+
+void
+wibox_unref_simplified(wibox_t **item)
+{
+    wibox_unref(globalconf.L, *item);
+}
 
 static void
 wibox_need_update(wibox_t *wibox)
@@ -104,9 +125,8 @@ wibox_setposition(wibox_t *wibox, position_t p)
         wibox_position_update(wibox);
 
         /* reset all wibox position */
-        wibox_array_t *w = &globalconf.screens[wibox->screen].wiboxes;
-        for(int i = 0; i < w->len; i++)
-            wibox_position_update(w->tab[i]);
+        foreach(w, globalconf.screens[wibox->screen].wiboxes)
+            wibox_position_update(*w);
 
         ewmh_update_workarea(screen_virttophys(wibox->screen));
 
@@ -319,9 +339,9 @@ wibox_position_update(wibox_t *wibox)
 
     /* Top and Bottom wibox_t have prio */
     if(wibox->position != Floating)
-        for(int i = 0; i < globalconf.screens[wibox->screen].wiboxes.len; i++)
+        foreach(_w, globalconf.screens[wibox->screen].wiboxes)
         {
-            wibox_t *w = globalconf.screens[wibox->screen].wiboxes.tab[i];
+            wibox_t *w = *_w;
             /* Ignore every wibox after me that is in the same position */
             if(wibox == w)
             {
@@ -474,40 +494,22 @@ wibox_position_update(wibox_t *wibox)
         wibox_move(wibox, wingeom.x, wingeom.y);
 }
 
-/** Delete a wibox.
- * \param wibox wibox to delete.
- */
-void
-wibox_delete(wibox_t **wibox)
-{
-    simplewindow_wipe(&(*wibox)->sw);
-    button_array_wipe(&(*wibox)->buttons);
-    luaL_unref(globalconf.L, LUA_REGISTRYINDEX, (*wibox)->widgets_table);
-    luaL_unref(globalconf.L, LUA_REGISTRYINDEX, (*wibox)->mouse_enter);
-    luaL_unref(globalconf.L, LUA_REGISTRYINDEX, (*wibox)->mouse_leave);
-    widget_node_array_wipe(&(*wibox)->widgets);
-    p_delete(wibox);
-}
-
 /** Get a wibox by its window.
  * \param w The window id.
  * \return A wibox if found, NULL otherwise.
  */
 wibox_t *
-wibox_getbywin(xcb_window_t w)
+wibox_getbywin(xcb_window_t win)
 {
     for(int screen = 0; screen < globalconf.nscreen; screen++)
-        for(int i = 0; i < globalconf.screens[screen].wiboxes.len; i++)
-        {
-            wibox_t *s = globalconf.screens[screen].wiboxes.tab[i];
-            if(s->sw.window == w)
-                return s;
-        }
+        foreach(w, globalconf.screens[screen].wiboxes)
+            if((*w)->sw.window == win)
+                return *w;
 
     foreach(_c, globalconf.clients)
     {
         client_t *c = *_c;
-        if(c->titlebar && c->titlebar->sw.window == w)
+        if(c->titlebar && c->titlebar->sw.window == win)
             return c->titlebar;
     }
 
@@ -537,12 +539,9 @@ void
 wibox_refresh(void)
 {
     for(int screen = 0; screen < globalconf.nscreen; screen++)
-        for(int i = 0; i < globalconf.screens[screen].wiboxes.len; i++)
-        {
-            wibox_t *s = globalconf.screens[screen].wiboxes.tab[i];
-            if(s->need_update)
-                wibox_draw(s);
-        }
+        foreach(w, globalconf.screens[screen].wiboxes)
+            if((*w)->need_update)
+                wibox_draw(*w);
 
     foreach(_c, globalconf.clients)
     {
@@ -558,11 +557,8 @@ void
 wibox_update_positions(void)
 {
     for(int screen = 0; screen < globalconf.nscreen; screen++)
-            for(int i = 0; i < globalconf.screens[screen].wiboxes.len; i++)
-            {
-                wibox_t *s = globalconf.screens[screen].wiboxes.tab[i];
-                wibox_position_update(s);
-            }
+        foreach(w, globalconf.screens[screen].wiboxes)
+            wibox_position_update(*w);
 }
 
 /** Set a wibox visible or not.
@@ -588,9 +584,8 @@ wibox_setvisible(wibox_t *wibox, bool v)
             wibox_systray_refresh(wibox);
 
             /* All the other wibox and ourselves need to be repositioned */
-            wibox_array_t *w = &globalconf.screens[wibox->screen].wiboxes;
-            for(int i = 0; i < w->len; i++)
-                wibox_position_update(w->tab[i]);
+            foreach(w, globalconf.screens[wibox->screen].wiboxes)
+                wibox_position_update(*w);
         }
     }
 }
@@ -617,26 +612,29 @@ wibox_detach(wibox_t *wibox)
 
         simplewindow_wipe(&wibox->sw);
 
-        for(int i = 0; i < globalconf.screens[wibox->screen].wiboxes.len; i++)
-            if(globalconf.screens[wibox->screen].wiboxes.tab[i] == wibox)
+        globalconf.screens[wibox->screen].need_arrange = true;
+
+        foreach(item, globalconf.screens[wibox->screen].wiboxes)
+            if(*item == wibox)
             {
-                wibox_array_take(&globalconf.screens[wibox->screen].wiboxes, i);
+                wibox_array_remove(&globalconf.screens[wibox->screen].wiboxes, item);
                 break;
             }
-        globalconf.screens[wibox->screen].need_arrange = true;
+
         wibox->screen = SCREEN_UNDEF;
-        wibox_unref(&wibox);
+        wibox_unref(globalconf.L, wibox);
     }
 }
 
-/** Attach a wibox.
- * \param wibox The wibox to attach.
+/** Attach a wibox that is on top of the stack.
  * \param s The screen to attach the wibox to.
  */
-void
-wibox_attach(wibox_t *wibox, screen_t *s)
+static void
+wibox_attach(screen_t *s)
 {
     int phys_screen = screen_virttophys(s->index);
+
+    wibox_t *wibox = wibox_ref(globalconf.L);
 
     wibox_detach(wibox);
 
@@ -650,7 +648,7 @@ wibox_attach(wibox_t *wibox, screen_t *s)
     if(cscreen != wibox->screen)
         wibox_move(wibox, s->geometry.x, s->geometry.y);
 
-    wibox_array_append(&s->wiboxes, wibox_ref(&wibox));
+    wibox_array_append(&s->wiboxes, wibox);
 
     /* compute x/y/width/height if not set */
     wibox_position_update(wibox);
@@ -667,8 +665,8 @@ wibox_attach(wibox_t *wibox, screen_t *s)
                             xcursor_new(globalconf.connection, xcursor_font_fromstr(wibox->cursor)));
 
     /* All the other wibox and ourselves need to be repositioned */
-    for(int i = 0; i < s->wiboxes.len; i++)
-        wibox_position_update(s->wiboxes.tab[i]);
+    foreach(w, s->wiboxes)
+        wibox_position_update(*w);
 
     ewmh_update_workarea(screen_virttophys(s->index));
 
@@ -686,7 +684,7 @@ wibox_attach(wibox_t *wibox, screen_t *s)
  * position, align, fg, bg, border_width, border_color, ontop, width and height.
  * \lreturn A brand new wibox.
  */
-int
+static int
 luaA_wibox_new(lua_State *L)
 {
     wibox_t *w;
@@ -697,7 +695,7 @@ luaA_wibox_new(lua_State *L)
 
     luaA_checktable(L, 2);
 
-    w = p_new(wibox_t, 1);
+    w = wibox_new(L);
     w->widgets_table = LUA_REFNIL;
 
     w->sw.ctx.fg = globalconf.colors.fg;
@@ -750,7 +748,7 @@ luaA_wibox_new(lua_State *L)
     for(i = 0; i <= reqs_nbr; i++)
         xcolor_init_reply(reqs[i]);
 
-    return luaA_wibox_userdata_new(L, w);
+    return 1;
 }
 
 /** Rebuild wibox widgets list.
@@ -791,9 +789,9 @@ void
 luaA_wibox_invalidate_byitem(lua_State *L, const void *item)
 {
     for(int screen = 0; screen < globalconf.nscreen; screen++)
-        for(int i = 0; i < globalconf.screens[screen].wiboxes.len; i++)
+        foreach(w, globalconf.screens[screen].wiboxes)
         {
-            wibox_t *wibox = globalconf.screens[screen].wiboxes.tab[i];
+            wibox_t *wibox = *w;
             if(luaA_wibox_hasitem(L, wibox, item))
             {
                 /* recompute widget node list */
@@ -836,7 +834,7 @@ static int
 luaA_wibox_index(lua_State *L)
 {
     size_t len;
-    wibox_t **wibox = luaA_checkudata(L, 1, "wibox");
+    wibox_t *wibox = luaL_checkudata(L, 1, "wibox");
     const char *attr = luaL_checklstring(L, 2, &len);
 
     if(luaA_usemetatable(L, 1, 2))
@@ -845,69 +843,69 @@ luaA_wibox_index(lua_State *L)
     switch(a_tokenize(attr, len))
     {
       case A_TK_VISIBLE:
-        lua_pushboolean(L, (*wibox)->isvisible);
+        lua_pushboolean(L, wibox->isvisible);
         break;
       case A_TK_CLIENT:
-        return client_push(L, client_getbytitlebar(*wibox));
+        return client_push(L, client_getbytitlebar(wibox));
       case A_TK_SCREEN:
-        if((*wibox)->screen == SCREEN_UNDEF)
+        if(wibox->screen == SCREEN_UNDEF)
             return 0;
-        lua_pushnumber(L, (*wibox)->screen + 1);
+        lua_pushnumber(L, wibox->screen + 1);
         break;
       case A_TK_BORDER_WIDTH:
-        lua_pushnumber(L, (*wibox)->sw.border.width);
+        lua_pushnumber(L, wibox->sw.border.width);
         break;
       case A_TK_BORDER_COLOR:
-        luaA_pushcolor(L, &(*wibox)->sw.border.color);
+        luaA_pushcolor(L, &wibox->sw.border.color);
         break;
       case A_TK_ALIGN:
-        lua_pushstring(L, draw_align_tostr((*wibox)->align));
+        lua_pushstring(L, draw_align_tostr(wibox->align));
         break;
       case A_TK_FG:
-        luaA_pushcolor(L, &(*wibox)->sw.ctx.fg);
+        luaA_pushcolor(L, &wibox->sw.ctx.fg);
         break;
       case A_TK_BG:
-        luaA_pushcolor(L, &(*wibox)->sw.ctx.bg);
+        luaA_pushcolor(L, &wibox->sw.ctx.bg);
         break;
       case A_TK_BG_IMAGE:
-        image_push(L, (*wibox)->bg_image);
+        image_push(L, wibox->bg_image);
         break;
       case A_TK_POSITION:
-        lua_pushstring(L, position_tostr((*wibox)->position));
+        lua_pushstring(L, position_tostr(wibox->position));
         break;
       case A_TK_ONTOP:
-        lua_pushboolean(L, (*wibox)->ontop);
+        lua_pushboolean(L, wibox->ontop);
         break;
       case A_TK_ORIENTATION:
-        lua_pushstring(L, orientation_tostr((*wibox)->sw.orientation));
+        lua_pushstring(L, orientation_tostr(wibox->sw.orientation));
         break;
       case A_TK_WIDGETS:
-        if((*wibox)->widgets_table != LUA_REFNIL)
-            lua_rawgeti(L, LUA_REGISTRYINDEX, (*wibox)->widgets_table);
+        if(wibox->widgets_table != LUA_REFNIL)
+            lua_rawgeti(L, LUA_REGISTRYINDEX, wibox->widgets_table);
         else
             lua_pushnil(L);
         break;
       case A_TK_CURSOR:
-        lua_pushstring(L, (*wibox)->cursor);
+        lua_pushstring(L, wibox->cursor);
         break;
       case A_TK_OPACITY:
         {
             double d;
-            if ((d = window_opacity_get((*wibox)->sw.window)) >= 0)
+            if ((d = window_opacity_get(wibox->sw.window)) >= 0)
                 lua_pushnumber(L, d);
             else
                 return 0;
         }
         break;
       case A_TK_MOUSE_ENTER:
-        if((*wibox)->mouse_enter != LUA_REFNIL)
-            lua_rawgeti(L, LUA_REGISTRYINDEX, (*wibox)->mouse_enter);
+        if(wibox->mouse_enter != LUA_REFNIL)
+            lua_rawgeti(L, LUA_REGISTRYINDEX, wibox->mouse_enter);
         else
             return 0;
         return 1;
       case A_TK_MOUSE_LEAVE:
-        if((*wibox)->mouse_leave != LUA_REFNIL)
-            lua_rawgeti(L, LUA_REGISTRYINDEX, (*wibox)->mouse_leave);
+        if(wibox->mouse_leave != LUA_REFNIL)
+            lua_rawgeti(L, LUA_REGISTRYINDEX, wibox->mouse_leave);
         else
             return 0;
         return 1;
@@ -928,37 +926,37 @@ luaA_wibox_index(lua_State *L)
 static int
 luaA_wibox_geometry(lua_State *L)
 {
-    wibox_t **wibox = luaA_checkudata(L, 1, "wibox");
+    wibox_t *wibox = luaL_checkudata(L, 1, "wibox");
 
     if(lua_gettop(L) == 2)
     {
         area_t wingeom;
 
         luaA_checktable(L, 2);
-        wingeom.x = luaA_getopt_number(L, 2, "x", (*wibox)->sw.geometry.x);
-        wingeom.y = luaA_getopt_number(L, 2, "y", (*wibox)->sw.geometry.y);
-        wingeom.width = luaA_getopt_number(L, 2, "width", (*wibox)->sw.geometry.width);
-        wingeom.height = luaA_getopt_number(L, 2, "height", (*wibox)->sw.geometry.height);
+        wingeom.x = luaA_getopt_number(L, 2, "x", wibox->sw.geometry.x);
+        wingeom.y = luaA_getopt_number(L, 2, "y", wibox->sw.geometry.y);
+        wingeom.width = luaA_getopt_number(L, 2, "width", wibox->sw.geometry.width);
+        wingeom.height = luaA_getopt_number(L, 2, "height", wibox->sw.geometry.height);
 
-        switch((*wibox)->type)
+        switch(wibox->type)
         {
           case WIBOX_TYPE_TITLEBAR:
-            wibox_resize(*wibox, wingeom.width, wingeom.height);
+            wibox_resize(wibox, wingeom.width, wingeom.height);
             break;
           case WIBOX_TYPE_NORMAL:
-            if((*wibox)->position == Floating)
-                wibox_moveresize(*wibox, wingeom);
-            else if(wingeom.width != (*wibox)->sw.geometry.width
-                    || wingeom.height != (*wibox)->sw.geometry.height)
+            if(wibox->position == Floating)
+                wibox_moveresize(wibox, wingeom);
+            else if(wingeom.width != wibox->sw.geometry.width
+                    || wingeom.height != wibox->sw.geometry.height)
             {
-                wibox_resize(*wibox, wingeom.width, wingeom.height);
-                globalconf.screens[(*wibox)->screen].need_arrange = true;
+                wibox_resize(wibox, wingeom.width, wingeom.height);
+                globalconf.screens[wibox->screen].need_arrange = true;
             }
             break;
         }
     }
 
-    return luaA_pusharea(L, (*wibox)->sw.geometry);
+    return luaA_pusharea(L, wibox->sw.geometry);
 }
 
 /** Wibox newindex.
@@ -969,7 +967,7 @@ static int
 luaA_wibox_newindex(lua_State *L)
 {
     size_t len;
-    wibox_t **wibox = luaA_checkudata(L, 1, "wibox");
+    wibox_t *wibox = luaL_checkudata(L, 1, "wibox");
     const char *buf, *attr = luaL_checklstring(L, 2, &len);
     awesome_token_t tok;
 
@@ -979,51 +977,52 @@ luaA_wibox_newindex(lua_State *L)
 
       case A_TK_FG:
         if((buf = luaL_checklstring(L, 3, &len)))
-            if(xcolor_init_reply(xcolor_init_unchecked(&(*wibox)->sw.ctx.fg, buf, len)))
-                (*wibox)->need_update = true;
+            if(xcolor_init_reply(xcolor_init_unchecked(&wibox->sw.ctx.fg, buf, len)))
+                wibox->need_update = true;
         break;
       case A_TK_BG:
         if((buf = luaL_checklstring(L, 3, &len)))
-            if(xcolor_init_reply(xcolor_init_unchecked(&(*wibox)->sw.ctx.bg, buf, len)))
-                (*wibox)->need_update = true;
+            if(xcolor_init_reply(xcolor_init_unchecked(&wibox->sw.ctx.bg, buf, len)))
+                wibox->need_update = true;
         break;
       case A_TK_BG_IMAGE:
-        image_unref(L, (*wibox)->bg_image);
-        (*wibox)->bg_image = image_ref(L);
-        (*wibox)->need_update = true;
+        image_unref(L, wibox->bg_image);
+        wibox->bg_image = image_ref(L);
+        wibox->need_update = true;
         break;
       case A_TK_ALIGN:
         buf = luaL_checklstring(L, 3, &len);
-        (*wibox)->align = draw_align_fromstr(buf, len);
-        switch((*wibox)->type)
+        wibox->align = draw_align_fromstr(buf, len);
+        switch(wibox->type)
         {
           case WIBOX_TYPE_NORMAL:
-            wibox_position_update(*wibox);
+            wibox_position_update(wibox);
             break;
           case WIBOX_TYPE_TITLEBAR:
-            titlebar_update_geometry(client_getbytitlebar(*wibox));
+            titlebar_update_geometry(client_getbytitlebar(wibox));
             break;
         }
         break;
       case A_TK_POSITION:
-        switch((*wibox)->type)
+        switch(wibox->type)
         {
           case WIBOX_TYPE_TITLEBAR:
-            return luaA_titlebar_newindex(L, *wibox, tok);
+            return luaA_titlebar_newindex(L, wibox, tok);
           case WIBOX_TYPE_NORMAL:
             if((buf = luaL_checklstring(L, 3, &len)))
-                wibox_setposition(*wibox, position_fromstr(buf, len));
+                wibox_setposition(wibox, position_fromstr(buf, len));
             break;
         }
         break;
       case A_TK_CLIENT:
         /* first detach */
         if(lua_isnil(L, 3))
-            titlebar_client_detach(client_getbytitlebar(*wibox));
+            titlebar_client_detach(client_getbytitlebar(wibox));
         else
         {
             client_t *c = luaA_client_checkudata(L, -1);
-            titlebar_client_attach(c, *wibox);
+            lua_pushvalue(L, 1);
+            titlebar_client_attach(c);
         }
         break;
       case A_TK_CURSOR:
@@ -1033,60 +1032,61 @@ luaA_wibox_newindex(lua_State *L)
             if(cursor_font)
             {
                 xcb_cursor_t cursor = xcursor_new(globalconf.connection, cursor_font);
-                p_delete(&(*wibox)->cursor);
-                (*wibox)->cursor = a_strdup(buf);
-                simplewindow_cursor_set(&(*wibox)->sw, cursor);
+                p_delete(&wibox->cursor);
+                wibox->cursor = a_strdup(buf);
+                simplewindow_cursor_set(&wibox->sw, cursor);
             }
         }
         break;
       case A_TK_SCREEN:
         if(lua_isnil(L, 3))
         {
-            wibox_detach(*wibox);
-            titlebar_client_detach(client_getbytitlebar(*wibox));
+            wibox_detach(wibox);
+            titlebar_client_detach(client_getbytitlebar(wibox));
         }
         else
         {
             int screen = luaL_checknumber(L, 3) - 1;
             luaA_checkscreen(screen);
-            if(screen != (*wibox)->screen)
+            if(screen != wibox->screen)
             {
-                titlebar_client_detach(client_getbytitlebar(*wibox));
-                wibox_attach(*wibox, &globalconf.screens[screen]);
+                titlebar_client_detach(client_getbytitlebar(wibox));
+                lua_pushvalue(L, 1);
+                wibox_attach(&globalconf.screens[screen]);
             }
         }
         break;
       case A_TK_ONTOP:
         b = luaA_checkboolean(L, 3);
-        if(b != (*wibox)->ontop)
+        if(b != wibox->ontop)
         {
-            (*wibox)->ontop = b;
+            wibox->ontop = b;
             client_stack();
         }
         break;
       case A_TK_ORIENTATION:
         if((buf = luaL_checklstring(L, 3, &len)))
         {
-            simplewindow_orientation_set(&(*wibox)->sw, orientation_fromstr(buf, len));
-            wibox_need_update(*wibox);
+            simplewindow_orientation_set(&wibox->sw, orientation_fromstr(buf, len));
+            wibox_need_update(wibox);
         }
         break;
       case A_TK_BORDER_COLOR:
         if((buf = luaL_checklstring(L, 3, &len)))
-            if(xcolor_init_reply(xcolor_init_unchecked(&(*wibox)->sw.border.color, buf, len)))
-                if((*wibox)->sw.window)
-                    simplewindow_border_color_set(&(*wibox)->sw, &(*wibox)->sw.border.color);
+            if(xcolor_init_reply(xcolor_init_unchecked(&wibox->sw.border.color, buf, len)))
+                if(wibox->sw.window)
+                    simplewindow_border_color_set(&wibox->sw, &wibox->sw.border.color);
         break;
       case A_TK_VISIBLE:
         b = luaA_checkboolean(L, 3);
-        if(b != (*wibox)->isvisible)
-            switch((*wibox)->type)
+        if(b != wibox->isvisible)
+            switch(wibox->type)
             {
               case WIBOX_TYPE_NORMAL:
-                wibox_setvisible(*wibox, b);
+                wibox_setvisible(wibox, b);
                 break;
               case WIBOX_TYPE_TITLEBAR:
-                titlebar_set_visible(*wibox, b);
+                titlebar_set_visible(wibox, b);
                 break;
             }
         break;
@@ -1097,34 +1097,34 @@ luaA_wibox_newindex(lua_State *L)
             return 0;
         }
         /* register object */
-        luaA_register(L, 3, &(*wibox)->widgets_table);
+        luaA_register(L, 3, &wibox->widgets_table);
         /* duplicate table because next function will eat it */
         lua_pushvalue(L, -1);
         /* recompute widget node list */
-        wibox_widgets_table_build(L, *wibox);
+        wibox_widgets_table_build(L, wibox);
         luaA_table2wtable(L);
         break;
       case A_TK_OPACITY:
         if(lua_isnil(L, 3))
-            window_opacity_set((*wibox)->sw.window, -1);
+            window_opacity_set(wibox->sw.window, -1);
         else
         {
             double d = luaL_checknumber(L, 3);
             if(d >= 0 && d <= 1)
-                window_opacity_set((*wibox)->sw.window, d);
+                window_opacity_set(wibox->sw.window, d);
         }
         break;
       case A_TK_MOUSE_ENTER:
-        luaA_registerfct(L, 3, &(*wibox)->mouse_enter);
+        luaA_registerfct(L, 3, &wibox->mouse_enter);
         return 0;
       case A_TK_MOUSE_LEAVE:
-        luaA_registerfct(L, 3, &(*wibox)->mouse_leave);
+        luaA_registerfct(L, 3, &wibox->mouse_leave);
         return 0;
       default:
-        switch((*wibox)->type)
+        switch(wibox->type)
         {
           case WIBOX_TYPE_TITLEBAR:
-            return luaA_titlebar_newindex(L, *wibox, tok);
+            return luaA_titlebar_newindex(L, wibox, tok);
           case WIBOX_TYPE_NORMAL:
             break;
         }
@@ -1143,8 +1143,8 @@ luaA_wibox_newindex(lua_State *L)
 static int
 luaA_wibox_buttons(lua_State *L)
 {
-    wibox_t **wibox = luaA_checkudata(L, 1, "wibox");
-    button_array_t *buttons = &(*wibox)->buttons;
+    wibox_t *wibox = luaL_checkudata(L, 1, "wibox");
+    button_array_t *buttons = &wibox->buttons;
 
     if(lua_gettop(L) == 2)
     {
@@ -1167,7 +1167,6 @@ const struct luaL_reg awesome_wibox_meta[] =
     { "__index", luaA_wibox_index },
     { "__newindex", luaA_wibox_newindex },
     { "__gc", luaA_wibox_gc },
-    { "__eq", luaA_wibox_eq },
     { "__tostring", luaA_wibox_tostring },
     { NULL, NULL },
 };

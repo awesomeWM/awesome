@@ -31,7 +31,7 @@ client_t * client_getbytitlebarwin(xcb_window_t);
 void titlebar_geometry_compute(client_t *, area_t, area_t *);
 void titlebar_init(client_t *);
 void titlebar_client_detach(client_t *);
-void titlebar_client_attach(client_t *, wibox_t *);
+void titlebar_client_attach(client_t *);
 void titlebar_set_visible(wibox_t *, bool);
 void titlebar_ban(wibox_t *);
 void titlebar_unban(wibox_t *);

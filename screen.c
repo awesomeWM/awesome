@@ -216,9 +216,9 @@ screen_area_get(int screen, wibox_array_t *wiboxes,
 
     /* swindow geometry includes borders. */
     if(wiboxes)
-        for(int i = 0; i < wiboxes->len; i++)
+        foreach(_w, *wiboxes)
         {
-            wibox_t *w = wiboxes->tab[i];
+            wibox_t *w = *_w;
             if(w->isvisible)
                 switch(w->position)
                 {
@@ -263,9 +263,9 @@ display_area_get(int phys_screen, wibox_array_t *wiboxes, padding_t *padding)
                     .height = s->height_in_pixels };
 
     if(wiboxes)
-        for(int i = 0; i < wiboxes->len; i++)
+        foreach(_w, *wiboxes)
         {
-            wibox_t *w = wiboxes->tab[i];
+            wibox_t *w = *_w;
             area.y += w->position == Top ? w->sw.geometry.height : 0;
             area.height -= (w->position == Top || w->position == Bottom) ? w->sw.geometry.height : 0;
         }
@@ -513,8 +513,8 @@ luaA_screen_padding(lua_State *L)
         s->need_arrange = true;
 
         /* All the wiboxes repositioned */
-        for(int i = 0; i < s->wiboxes.len; i++)
-            wibox_position_update(s->wiboxes.tab[i]);
+        foreach(w, s->wiboxes)
+            wibox_position_update(*w);
 
         ewmh_update_workarea(screen_virttophys(s->index));
     }

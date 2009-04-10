@@ -219,8 +219,10 @@ titlebar_client_detach(client_t *c)
         simplewindow_wipe(&c->titlebar->sw);
         c->titlebar->type = WIBOX_TYPE_NORMAL;
         c->titlebar->screen = SCREEN_UNDEF;
-        wibox_unref(&c->titlebar);
+
+        wibox_unref(globalconf.L, c->titlebar);
         c->titlebar = NULL;
+
         client_need_arrange(c);
         client_stack();
     }
@@ -228,66 +230,67 @@ titlebar_client_detach(client_t *c)
 
 /** Attach a wibox to a client as its titlebar.
  * \param c The client.
- * \param t The wibox/titlebar.
+ * \param ud The index of the wibox on the stack.
  */
 void
-titlebar_client_attach(client_t *c, wibox_t *t)
+titlebar_client_attach(client_t *c)
 {
+    /* check if we can register the object */
+    wibox_t *t = wibox_ref(globalconf.L);
+
     titlebar_client_detach(c);
 
-    if(c && t)
+    /* check if titlebar is already on a client */
+    titlebar_client_detach(client_getbytitlebar(t));
+
+    /* check if client already has a titlebar. */
+    titlebar_client_detach(c);
+
+    /* set the object as new client's titlebar */
+    c->titlebar = t;
+
+    t->type = WIBOX_TYPE_TITLEBAR;
+    t->screen = c->screen;
+
+    switch(t->position)
     {
-        area_t wingeom;
-
-        /* check if titlebar is already on a client */
-        titlebar_client_detach(client_getbytitlebar(t));
-
-        /* check if client already has a titlebar. */
-        titlebar_client_detach(c);
-
-        c->titlebar = wibox_ref(&t);
-        t->type = WIBOX_TYPE_TITLEBAR;
-        t->screen = c->screen;
-
-        switch(t->position)
-        {
-          case Floating:
-            t->position = Top;
-          case Top:
-          case Bottom:
-            if(!t->sw.geometry.height)
-                t->sw.geometry.height = 1.5 * globalconf.font->height;
-            break;
-          case Left:
-          case Right:
-            if(!t->sw.geometry.width)
-                t->sw.geometry.width = 1.5 * globalconf.font->height;
-            break;
-        }
-
-        /* Update client geometry to include the titlebar. */
-        c->geometry = titlebar_geometry_add(c->titlebar, 0, c->geometry);
-
-        /* Client geometry without titlebar, but including borders, since that is always consistent. */
-        titlebar_geometry_compute(c, titlebar_geometry_remove(c->titlebar, 0, c->geometry), &wingeom);
-
-        simplewindow_init(&t->sw, c->phys_screen,
-                          wingeom, 0, t->sw.orientation,
-                          &t->sw.ctx.fg, &t->sw.ctx.bg);
-        simplewindow_border_color_set(&t->sw, &t->sw.border.color);
-
-        t->need_update = true;
-
-        /* Call update geometry. This will move the wibox to the right place,
-         * which might be the same as `wingeom', but then it will ban the
-         * titlebar if needed. */
-        titlebar_update_geometry(c);
-
-        xcb_map_window(globalconf.connection, t->sw.window);
-
-        client_need_arrange(c);
-        client_stack();
+      case Floating:
+        t->position = Top;
+      case Top:
+      case Bottom:
+        if(!t->sw.geometry.height)
+            t->sw.geometry.height = 1.5 * globalconf.font->height;
+        break;
+      case Left:
+      case Right:
+        if(!t->sw.geometry.width)
+            t->sw.geometry.width = 1.5 * globalconf.font->height;
+        break;
     }
+
+    /* Update client geometry to include the titlebar. */
+    c->geometry = titlebar_geometry_add(c->titlebar, 0, c->geometry);
+
+    /* Client geometry without titlebar, but including borders, since that is always consistent. */
+    area_t wingeom;
+    titlebar_geometry_compute(c, titlebar_geometry_remove(c->titlebar, 0, c->geometry), &wingeom);
+
+    simplewindow_init(&t->sw, c->phys_screen,
+                      wingeom, 0, t->sw.orientation,
+                      &t->sw.ctx.fg, &t->sw.ctx.bg);
+    simplewindow_border_color_set(&t->sw, &t->sw.border.color);
+
+    t->need_update = true;
+
+    /* Call update geometry. This will move the wibox to the right place,
+     * which might be the same as `wingeom', but then it will ban the
+     * titlebar if needed. */
+    titlebar_update_geometry(c);
+
+    xcb_map_window(globalconf.connection, t->sw.window);
+
+    client_need_arrange(c);
+    client_stack();
 }
 
 /** Map or unmap a titlebar wibox.

@@ -1,7 +1,7 @@
 /*
  * client.c - client management
  *
- * Copyright © 2007-2008 Julien Danjou <julien@danjou.info>
+ * Copyright © 2007-2009 Julien Danjou <julien@danjou.info>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -391,9 +391,9 @@ client_real_stack(void)
 
     /* first stack not ontop wibox window */
     for(screen = 0; screen < globalconf.nscreen; screen++)
-        for(int i = 0; i < globalconf.screens[screen].wiboxes.len; i++)
+        foreach(_sb, globalconf.screens[screen].wiboxes)
         {
-            wibox_t *sb = globalconf.screens[screen].wiboxes.tab[i];
+            wibox_t *sb = *_sb;
             if(!sb->ontop)
             {
                 xcb_configure_window(globalconf.connection,
@@ -413,9 +413,9 @@ client_real_stack(void)
 
     /* then stack ontop wibox window */
     for(screen = 0; screen < globalconf.nscreen; screen++)
-        for(int i = 0; i < globalconf.screens[screen].wiboxes.len; i++)
+        foreach(_sb, globalconf.screens[screen].wiboxes)
         {
-            wibox_t *sb = globalconf.screens[screen].wiboxes.tab[i];
+            wibox_t *sb = *_sb;
             if(sb->ontop)
             {
                 xcb_configure_window(globalconf.connection,
@@ -1667,7 +1667,6 @@ luaA_client_newindex(lua_State *L)
     bool b;
     double d;
     int i;
-    wibox_t **t = NULL;
 
     switch(a_tokenize(buf, len))
     {
@@ -1748,10 +1747,7 @@ luaA_client_newindex(lua_State *L)
         if(lua_isnil(L, 3))
             titlebar_client_detach(c);
         else
-        {
-            t = luaA_checkudata(L, 3, "wibox");
-            titlebar_client_attach(c, *t);
-        }
+            titlebar_client_attach(c);
         break;
       default:
         return 0;
@@ -1970,9 +1966,7 @@ luaA_client_index(lua_State *L)
         luaA_pushcolor(L, &c->border_color);
         break;
       case A_TK_TITLEBAR:
-        if(c->titlebar)
-            return luaA_wibox_userdata_new(L, c->titlebar);
-        return 0;
+        return wibox_push(L, c->titlebar);
       case A_TK_URGENT:
         lua_pushboolean(L, c->isurgent);
         break;

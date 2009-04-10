@@ -153,14 +153,14 @@ event_handle_button(void *data, xcb_connection_t *connection, xcb_button_press_e
                   case XCB_BUTTON_PRESS:
                     if(b->tab[i]->press != LUA_REFNIL)
                     {
-                        luaA_wibox_userdata_new(globalconf.L, wibox);
+                        wibox_push(globalconf.L, wibox);
                         luaA_dofunction(globalconf.L, b->tab[i]->press, 1, 0);
                     }
                     break;
                   case XCB_BUTTON_RELEASE:
                     if(b->tab[i]->release != LUA_REFNIL)
                     {
-                        luaA_wibox_userdata_new(globalconf.L, wibox);
+                        wibox_push(globalconf.L, wibox);
                         luaA_dofunction(globalconf.L, b->tab[i]->release, 1, 0);
                     }
                     break;
@@ -183,14 +183,14 @@ event_handle_button(void *data, xcb_connection_t *connection, xcb_button_press_e
                       case XCB_BUTTON_PRESS:
                         if(b->tab[i]->press != LUA_REFNIL)
                         {
-                            luaA_wibox_userdata_new(globalconf.L, wibox);
+                            wibox_push(globalconf.L, wibox);
                             luaA_dofunction(globalconf.L, b->tab[i]->press, 1, 0);
                         }
                         break;
                       case XCB_BUTTON_RELEASE:
                         if(b->tab[i]->release != LUA_REFNIL)
                         {
-                            luaA_wibox_userdata_new(globalconf.L, wibox);
+                            wibox_push(globalconf.L, wibox);
                             luaA_dofunction(globalconf.L, b->tab[i]->release, 1, 0);
                         }
                         break;
@@ -399,7 +399,7 @@ event_handle_widget_motionnotify(void *object,
             if((*mouse_over)->mouse_leave != LUA_REFNIL)
             {
                 /* call mouse leave function on old widget */
-                luaA_wibox_userdata_new(globalconf.L, object);
+                widget_push(globalconf.L, *mouse_over);
                 luaA_dofunction(globalconf.L, (*mouse_over)->mouse_leave, 1, 0);
             }
         }
@@ -409,7 +409,7 @@ event_handle_widget_motionnotify(void *object,
             *mouse_over = widget;
             if(widget->mouse_enter != LUA_REFNIL)
             {
-                luaA_wibox_userdata_new(globalconf.L, object);
+                widget_push(globalconf.L, widget);
                 luaA_dofunction(globalconf.L, widget->mouse_enter, 1, 0);
             }
         }
@@ -473,7 +473,7 @@ event_handle_leavenotify(void *data __attribute__ ((unused)),
             if(wibox->mouse_over->mouse_leave != LUA_REFNIL)
             {
                 /* call mouse leave function on widget the mouse was over */
-                luaA_wibox_userdata_new(globalconf.L, wibox);
+                wibox_push(globalconf.L, wibox);
                 luaA_dofunction(globalconf.L, wibox->mouse_over->mouse_leave, 1, 0);
             }
             wibox->mouse_over = NULL;

@@ -81,8 +81,8 @@ ARRAY_TYPE(button_t *, button)
 /** Wibox type */
 typedef struct
 {
-    /** Ref count */
-    int refcount;
+    /** Lua references */
+    luaA_ref_array_t refs;
     /** Ontop */
     bool ontop;
     /** Visible */

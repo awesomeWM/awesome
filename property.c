@@ -377,17 +377,13 @@ property_handle_xrootpmap_id(void *data __attribute__ ((unused)),
 {
     if(globalconf.xinerama_is_active)
         for(int screen = 0; screen < globalconf.nscreen; screen++)
-        {
-            wibox_array_t *w = &globalconf.screens[screen].wiboxes;
-            for(int i = 0; i < w->len; i++)
-                w->tab[i]->need_update = true;
-        }
+            foreach(w, globalconf.screens[screen].wiboxes)
+                (*w)->need_update = true;
     else
     {
         int screen = xutil_root2screen(connection, window);
-        wibox_array_t *w = &globalconf.screens[screen].wiboxes;
-        for(int i = 0; i < w->len; i++)
-            w->tab[i]->need_update = true;
+        foreach(w, globalconf.screens[screen].wiboxes)
+            (*w)->need_update = true;
     }
 
     return 0;

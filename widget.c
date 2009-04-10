@@ -300,17 +300,13 @@ widget_render(wibox_t *wibox)
 void
 widget_invalidate_bytype(int screen, widget_constructor_t *type)
 {
-    for(int i = 0; i < globalconf.screens[screen].wiboxes.len; i++)
-    {
-        wibox_t *wibox = globalconf.screens[screen].wiboxes.tab[i];
-
-        for(int j = 0; j < wibox->widgets.len; j++)
-            if(wibox->widgets.tab[j].widget->type == type)
+    foreach(wibox, globalconf.screens[screen].wiboxes)
+        foreach(wnode, (*wibox)->widgets)
+            if(wnode->widget->type == type)
             {
-                wibox->need_update = true;
+                (*wibox)->need_update = true;
                 break;
             }
-    }
 }
 
 /** Set a wibox needs update because it has widget, or redraw a titlebar.
