@@ -488,7 +488,7 @@ luaA_mouse_object_under_pointer(lua_State *L)
         return 1;
     }
     else if((client = client_getbywin(child)))
-        return luaA_client_userdata_new(L, client);
+        return client_push(globalconf.L, client);
 
     return 0;
 }

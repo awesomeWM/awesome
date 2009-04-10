@@ -32,19 +32,10 @@
                                         | XCB_EVENT_MASK_LEAVE_WINDOW \
                                         | XCB_EVENT_MASK_FOCUS_CHANGE)
 
-static void
-client_delete(client_t **c)
-{
-    button_array_wipe(&(*c)->buttons);
-    p_delete(&(*c)->class);
-    p_delete(&(*c)->instance);
-    p_delete(&(*c)->icon_name);
-    p_delete(&(*c)->name);
-    p_delete(c);
-}
+client_t * luaA_client_checkudata(lua_State *, int);
 
 ARRAY_FUNCS(client_t *, client, DO_NOTHING)
-DO_RCNT(client_t, client, client_delete)
+LUA_OBJECT_FUNCS(client_t, client, "client")
 
 #define client_need_arrange(c) \
     do { \
@@ -79,10 +70,6 @@ void client_focus_update(client_t *);
 void client_unfocus(client_t *);
 void client_unfocus_update(client_t *);
 void client_stack_refresh(void);
-
-int luaA_client_newindex(lua_State *);
-
-int luaA_client_userdata_new(lua_State *, client_t *);
 
 static inline void
 client_stack(void)

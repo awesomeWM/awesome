@@ -161,8 +161,8 @@ typedef struct
 /** client_t type */
 struct client_t
 {
-    /** Ref counter */
-    int refcount;
+    /** Lua reference counter */
+    luaA_ref_array_t refs;
     /** Valid, or not ? */
     bool invalid;
     /** Client name */

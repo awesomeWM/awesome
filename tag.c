@@ -136,7 +136,7 @@ tag_client(client_t *c, tag_t *t)
     /* call hook */
     if(globalconf.hooks.tagged != LUA_REFNIL)
     {
-        luaA_client_userdata_new(globalconf.L, c);
+        client_push(globalconf.L, c);
         luaA_tag_userdata_new(globalconf.L, t);
         luaA_dofunction(globalconf.L, globalconf.hooks.tagged, 2, 0);
     }
@@ -158,7 +158,7 @@ untag_client(client_t *c, tag_t *t)
             /* call hook */
             if(globalconf.hooks.tagged != LUA_REFNIL)
             {
-                luaA_client_userdata_new(globalconf.L, c);
+                client_push(globalconf.L, c);
                 luaA_tag_userdata_new(globalconf.L, t);
                 luaA_dofunction(globalconf.L, globalconf.hooks.tagged, 2, 0);
             }
@@ -261,16 +261,14 @@ luaA_tag_clients(lua_State *L)
 
     if(lua_gettop(L) == 2)
     {
-        client_t **c;
-
         luaA_checktable(L, 2);
         for(i = 0; i < (*tag)->clients.len; i++)
             untag_client((*tag)->clients.tab[i], *tag);
         lua_pushnil(L);
         while(lua_next(L, 2))
         {
-            c = luaA_checkudata(L, -1, "client");
-            tag_client(*c, *tag);
+            client_t *c = luaA_client_checkudata(L, -1);
+            tag_client(c, *tag);
             lua_pop(L, 1);
         }
     }
@@ -278,7 +276,7 @@ luaA_tag_clients(lua_State *L)
     lua_createtable(L, clients->len, 0);
     for(i = 0; i < clients->len; i++)
     {
-        luaA_client_userdata_new(L, clients->tab[i]);
+        client_push(L, clients->tab[i]);
         lua_rawseti(L, -2, i + 1);
     }
 

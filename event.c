@@ -65,7 +65,7 @@ event_handle_mouse_button(client_t *c,
                 {
                     if(c)
                     {
-                        luaA_client_userdata_new(globalconf.L, c);
+                        client_push(globalconf.L, c);
                         luaA_dofunction(globalconf.L, buttons->tab[i]->press, 1, 0);
                     }
                     else
@@ -77,7 +77,7 @@ event_handle_mouse_button(client_t *c,
                 {
                     if(c)
                     {
-                        luaA_client_userdata_new(globalconf.L, c);
+                        client_push(globalconf.L, c);
                         luaA_dofunction(globalconf.L, buttons->tab[i]->release, 1, 0);
                     }
                     else
@@ -462,7 +462,7 @@ event_handle_leavenotify(void *data __attribute__ ((unused)),
     if((c = client_getbytitlebarwin(ev->event)) || (c = client_getbywin(ev->event)))
         if(globalconf.hooks.mouse_leave != LUA_REFNIL)
         {
-            luaA_client_userdata_new(globalconf.L, c);
+            client_push(globalconf.L, c);
             luaA_dofunction(globalconf.L, globalconf.hooks.mouse_leave, 1, 0);
         }
 
@@ -519,7 +519,7 @@ event_handle_enternotify(void *data __attribute__ ((unused)),
        || (c = client_getbywin(ev->event)))
         if(globalconf.hooks.mouse_enter != LUA_REFNIL)
         {
-            luaA_client_userdata_new(globalconf.L, c);
+            client_push(globalconf.L, c);
             luaA_dofunction(globalconf.L, globalconf.hooks.mouse_enter, 1, 0);
         }
 
@@ -653,14 +653,14 @@ event_handle_key(void *data __attribute__ ((unused)),
               case XCB_KEY_PRESS:
                 if(k->press != LUA_REFNIL)
                 {
-                    luaA_client_userdata_new(globalconf.L, c);
+                    client_push(globalconf.L, c);
                     luaA_dofunction(globalconf.L, k->press, 1, 0);
                 }
                 break;
               case XCB_KEY_RELEASE:
                 if(k->release != LUA_REFNIL)
                 {
-                    luaA_client_userdata_new(globalconf.L, c);
+                    client_push(globalconf.L, c);
                     luaA_dofunction(globalconf.L, k->release, 1, 0);
                 }
                 break;

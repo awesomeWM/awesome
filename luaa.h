@@ -422,7 +422,7 @@ bool luaA_isloop(lua_State *, int);
     do { \
         if(globalconf.hooks.property != LUA_REFNIL) \
         { \
-            luaA_client_userdata_new(globalconf.L, c); \
+            client_push(globalconf.L, c); \
             lua_pushliteral(globalconf.L, prop); \
             luaA_dofunction(globalconf.L, globalconf.hooks.property, 2, 0); \
         } \

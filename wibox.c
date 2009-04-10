@@ -844,16 +844,11 @@ luaA_wibox_index(lua_State *L)
 
     switch(a_tokenize(attr, len))
     {
-        client_t *c;
-
       case A_TK_VISIBLE:
         lua_pushboolean(L, (*wibox)->isvisible);
         break;
       case A_TK_CLIENT:
-        if((c = client_getbytitlebar(*wibox)))
-            return luaA_client_userdata_new(L, c);
-        else
-            return 0;
+        return client_push(L, client_getbytitlebar(*wibox));
       case A_TK_SCREEN:
         if((*wibox)->screen == SCREEN_UNDEF)
             return 0;
@@ -1027,8 +1022,8 @@ luaA_wibox_newindex(lua_State *L)
             titlebar_client_detach(client_getbytitlebar(*wibox));
         else
         {
-            client_t **c = luaA_checkudata(L, 3, "client");
-            titlebar_client_attach(*c, *wibox);
+            client_t *c = luaA_client_checkudata(L, -1);
+            titlebar_client_attach(c, *wibox);
         }
         break;
       case A_TK_CURSOR:
