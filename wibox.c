@@ -732,9 +732,6 @@ luaA_wibox_new(lua_State *L)
         break;
     }
 
-    /* recompute position */
-    wibox_position_update(w);
-
     w->sw.geometry.x = luaA_getopt_number(L, 2, "x", 0);
     w->sw.geometry.y = luaA_getopt_number(L, 2, "y", 0);
     w->sw.geometry.width = luaA_getopt_number(L, 2, "width", 0);
