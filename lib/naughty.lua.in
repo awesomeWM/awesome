@@ -272,6 +272,7 @@ function notify(args)
     local ontop = args.ontop or config.ontop
     local width = args.width or (args.preset and args.preset.width) or config.presets.normal.width
     local hover_timeout = args.hover_timeout or (args.preset and args.preset.hover_timeout) or config.presets.normal.hover_timeout
+    local opacity = args.opacity or (args.preset and args.preset.opacity) or config.presets.normal.opacity
 
     -- beautiful
     local beautiful = bt.get()
@@ -382,6 +383,7 @@ function notify(args)
                                 x = offset.x,
                                 y = offset.y })
     notification.box.ontop = ontop
+    notification.box.opacity = opacity
     notification.box.screen = screen
 
     -- populate widgets
