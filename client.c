@@ -305,7 +305,8 @@ typedef enum
     LAYER_ABOVE,
     LAYER_FULLSCREEN,
     LAYER_ONTOP,
-    LAYER_OUTOFSPACE
+    /** This one only used for counting and is not a real layer */
+    LAYER_COUNT
 } layer_t;
 
 /** Get the real layer of a client according to its attribute (fullscreen, …)
@@ -379,7 +380,7 @@ client_stack()
         }
 
     /* then stack clients */
-    for(layer = LAYER_BELOW; layer < LAYER_OUTOFSPACE; layer++)
+    for(layer = LAYER_BELOW; layer < LAYER_COUNT; layer++)
         for(node = last; node; node = node->prev)
             if(client_layer_translator(node->client) == layer)
                 config_win_vals[0] = client_stack_above(node->client,
