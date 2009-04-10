@@ -25,8 +25,6 @@
 #include "keygrabber.h"
 #include "key.h"
 
-extern awesome_t globalconf;
-
 /** XCB equivalent of XLookupString which translate the keycode given
  * by PressEvent to a KeySym and a string
  * \todo use XKB!

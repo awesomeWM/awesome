@@ -23,8 +23,6 @@
 #include "common/tokenize.h"
 #include "widget.h"
 
-extern awesome_t globalconf;
-
 /** Progressbar bar data structure */
 typedef struct
 {

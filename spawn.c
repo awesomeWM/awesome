@@ -28,8 +28,6 @@
 #include "spawn.h"
 #include "luaa.h"
 
-extern awesome_t globalconf;
-
 /** Spawn a program.
  * This function is multi-head (Zaphod) aware and will set display to
  * the right screen according to mouse position.

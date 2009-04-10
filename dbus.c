@@ -33,8 +33,6 @@
 #include "widget.h"
 #include "event.h"
 
-extern awesome_t globalconf;
-
 static DBusError err;
 static DBusConnection *dbus_connection = NULL;
 ev_io dbusio = { .fd = -1 };

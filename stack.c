@@ -23,8 +23,6 @@
 #include "cnode.h"
 #include "ewmh.h"
 
-extern awesome_t globalconf;
-
 /** Push the client at the beginning of the client stack.
  * \param c The client to push.
  */

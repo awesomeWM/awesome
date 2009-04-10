@@ -29,8 +29,6 @@
 #include "wibox.h"
 #include "common/atoms.h"
 
-extern awesome_t globalconf;
-
 DO_LUA_NEW(extern, widget_t, widget, "widget", widget_ref)
 DO_LUA_GC(widget_t, widget, "widget", widget_unref)
 DO_LUA_EQ(widget_t, widget, "widget")

@@ -21,8 +21,6 @@
 
 #include "structs.h"
 
-extern awesome_t globalconf;
-
 #define HANDLE_HOOK(L, h) \
     do { \
         if(lua_gettop(L) == 1) \

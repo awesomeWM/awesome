@@ -41,8 +41,6 @@
 #include "screen.h"
 #include "common/atoms.h"
 
-extern awesome_t globalconf;
-
 /** Handle mouse button events.
  * \param c The client on which the event happened or NULL.
  * \param type Event type, press or release.

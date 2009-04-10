@@ -385,5 +385,7 @@ struct awesome_t
 
 DO_ARRAY(const void *, void, DO_NOTHING)
 
+extern awesome_t globalconf;
+
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

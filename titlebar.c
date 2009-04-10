@@ -27,8 +27,6 @@
 #include "wibox.h"
 #include "screen.h"
 
-extern awesome_t globalconf;
-
 /** Get a client by its titlebar.
  * \param titlebar The titlebar.
  * \return A client.

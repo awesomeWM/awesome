@@ -25,8 +25,6 @@
 #include "mousegrabber.h"
 #include "common/xcursor.h"
 
-extern awesome_t globalconf;
-
 /** Grab the mouse.
  * \param cursor The cursor to use while grabbing.
  * \return True if mouse was grabbed.

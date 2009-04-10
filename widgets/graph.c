@@ -25,8 +25,6 @@
 #include "widget.h"
 #include "common/tokenize.h"
 
-extern awesome_t globalconf;
-
 typedef enum
 {
     Bottom_Style = 0,

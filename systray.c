@@ -30,8 +30,6 @@
 
 #define SYSTEM_TRAY_REQUEST_DOCK 0 /* Begin icon docking */
 
-extern awesome_t globalconf;
-
 /** Initialize systray information in X.
  * \param phys_screen Physical screen.
  */

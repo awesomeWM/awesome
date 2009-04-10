@@ -46,8 +46,6 @@
 #include "window.h"
 #include "common/xcursor.h"
 
-extern awesome_t globalconf;
-
 extern const struct luaL_reg awesome_hooks_lib[];
 extern const struct luaL_reg awesome_dbus_lib[];
 extern const struct luaL_reg awesome_keygrabber_lib[];

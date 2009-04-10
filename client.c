@@ -34,8 +34,6 @@
 #include "wibox.h"
 #include "common/atoms.h"
 
-extern awesome_t globalconf;
-
 DO_LUA_NEW(extern, client_t, client, "client", client_ref)
 DO_LUA_EQ(client_t, client, "client")
 DO_LUA_GC(client_t, client, "client", client_unref)

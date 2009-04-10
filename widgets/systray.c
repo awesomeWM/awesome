@@ -30,8 +30,6 @@
 #define _NET_SYSTEM_TRAY_ORIENTATION_HORZ 0
 #define _NET_SYSTEM_TRAY_ORIENTATION_VERT 1
 
-extern awesome_t globalconf;
-
 static area_t
 systray_geometry(widget_t *widget, int screen, int height, int width)
 {

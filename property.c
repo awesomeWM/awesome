@@ -27,9 +27,6 @@
 #include "ewmh.h"
 #include "common/atoms.h"
 
-extern awesome_t globalconf;
-
-
 void
 property_update_wm_transient_for(client_t *c, xcb_get_property_reply_t *reply)
 {

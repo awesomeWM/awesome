@@ -25,8 +25,6 @@
 #include "screen.h"
 #include "titlebar.h"
 
-extern awesome_t globalconf;
-
 /** Arrange windows following current selected layout
  * \param screen the screen to arrange
  */

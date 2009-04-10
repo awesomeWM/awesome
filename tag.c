@@ -25,8 +25,6 @@
 #include "ewmh.h"
 #include "widget.h"
 
-extern awesome_t globalconf;
-
 DO_LUA_NEW(extern, tag_t, tag, "tag", tag_ref)
 DO_LUA_GC(tag_t, tag, "tag", tag_unref)
 DO_LUA_EQ(tag_t, tag, "tag")

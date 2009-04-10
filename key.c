@@ -25,8 +25,6 @@
 
 #include "structs.h"
 
-extern awesome_t globalconf;
-
 static void
 key_delete(keyb_t **kbp)
 {

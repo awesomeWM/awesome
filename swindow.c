@@ -28,8 +28,6 @@
 #include "draw.h"
 #include "common/xutil.h"
 
-extern awesome_t globalconf;
-
 static void
 simplewindow_draw_context_update(simple_window_t *sw, xcb_screen_t *s)
 {

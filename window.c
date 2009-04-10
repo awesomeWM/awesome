@@ -26,8 +26,6 @@
 #include "mouse.h"
 #include "common/atoms.h"
 
-extern awesome_t globalconf;
-
 /** Mask shorthands */
 #define BUTTONMASK     (XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_BUTTON_RELEASE)
 

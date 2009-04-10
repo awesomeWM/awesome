@@ -27,8 +27,6 @@
 #include "event.h"
 #include "common/atoms.h"
 
-extern awesome_t globalconf;
-
 static xcb_window_t selection_window = XCB_NONE;
 
 /** Get the current X selection buffer.

@@ -33,8 +33,6 @@
 
 #include "common/tokenize.h"
 
-extern awesome_t globalconf;
-
 /** Convert text from any charset to UTF-8 using iconv.
  * \param iso The ISO string to convert.
  * \param len The string size.

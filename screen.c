@@ -31,8 +31,6 @@
 #include "widget.h"
 #include "wibox.h"
 
-extern awesome_t globalconf;
-
 static inline area_t
 screen_xsitoarea(xcb_xinerama_screen_info_t si)
 {

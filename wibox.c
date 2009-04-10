@@ -28,8 +28,6 @@
 #include "common/xcursor.h"
 #include "window.h"
 
-extern awesome_t globalconf;
-
 DO_LUA_NEW(extern, wibox_t, wibox, "wibox", wibox_ref)
 DO_LUA_GC(wibox_t, wibox, "wibox", wibox_unref)
 DO_LUA_EQ(wibox_t, wibox, "wibox")

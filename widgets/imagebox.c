@@ -22,8 +22,6 @@
 #include "widget.h"
 #include "titlebar.h"
 
-extern awesome_t globalconf;
-
 /** The imagebox private data structure */
 typedef struct
 {

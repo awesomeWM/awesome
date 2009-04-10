@@ -22,8 +22,6 @@
 #include "widget.h"
 #include "common/tokenize.h"
 
-extern awesome_t globalconf;
-
 /** The textbox private data structure */
 typedef struct
 {
