@@ -28,11 +28,11 @@
 #include "layout.h"
 
 static inline int
-awesome_refresh(xcb_connection_t *c)
+awesome_refresh(void)
 {
     layout_refresh();
     wibox_refresh();
-    return xcb_flush(c);
+    return xcb_flush(globalconf.connection);
 }
 
 void a_xcb_set_event_handlers(void);

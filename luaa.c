@@ -904,7 +904,7 @@ luaA_on_timer(EV_P_ ev_timer *w, int revents)
 {
     if(globalconf.hooks.timer != LUA_REFNIL)
         luaA_dofunction(globalconf.L, globalconf.hooks.timer, 0, 0);
-    awesome_refresh(globalconf.connection);
+    awesome_refresh();
 }
 
 /** Push a color as a string onto the stack

@@ -211,7 +211,7 @@ a_xcb_check_cb(EV_P_ ev_check *w, int revents)
         p_delete(&mouse);
     }
 
-    awesome_refresh(globalconf.connection);
+    awesome_refresh();
 }
 
 static void
@@ -542,7 +542,7 @@ main(int argc, char **argv)
     xcb_flush(globalconf.connection);
 
     /* refresh everything before waiting events */
-    awesome_refresh(globalconf.connection);
+    awesome_refresh();
 
     /* main event loop */
     ev_loop(globalconf.loop, 0);

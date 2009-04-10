@@ -76,7 +76,7 @@ luaA_selection_get(lua_State *L)
              */
             xcb_event_handle(&globalconf.evenths, event);
             p_delete(&event);
-            awesome_refresh(globalconf.connection);
+            awesome_refresh();
             continue;
         }
 
