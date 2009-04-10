@@ -26,12 +26,14 @@
 
 #include "wibox.h"
 #include "layout.h"
+#include "client.h"
 
 static inline int
 awesome_refresh(void)
 {
     layout_refresh();
     wibox_refresh();
+    client_stack_refresh();
     return xcb_flush(globalconf.connection);
 }
 

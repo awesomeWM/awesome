@@ -55,7 +55,6 @@ DO_RCNT(client_t, client, client_delete)
 
 bool client_maybevisible(client_t *, int);
 client_t * client_getbywin(xcb_window_t);
-void client_stack(void);
 void client_ban(client_t *);
 void client_unban(client_t *);
 void client_manage(xcb_window_t, xcb_get_geometry_reply_t *, int, bool);
@@ -79,12 +78,19 @@ void client_focus(client_t *);
 void client_focus_update(client_t *);
 void client_unfocus(client_t *);
 void client_unfocus_update(client_t *);
+void client_stack_refresh(void);
 
 int luaA_client_newindex(lua_State *);
 
 int luaA_client_userdata_new(lua_State *, client_t *);
 
 DO_SLIST(client_t, client, client_unref)
+
+static inline void
+client_stack(void)
+{
+    globalconf.client_need_stack_refresh = true;
+}
 
 /** Put client on top of the stack.
  * \param c The client to raise.

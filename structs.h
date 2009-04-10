@@ -381,6 +381,8 @@ struct awesome_t
     luaA_ref mousegrabber;
     /** Focused screen */
     screen_t *screen_focus;
+    /** Need to call client_stack_refresh() */
+    bool client_need_stack_refresh;
 };
 
 DO_ARRAY(const void *, void, DO_NOTHING)
