@@ -128,7 +128,7 @@ image_new_from_argb32(int width, int height, uint32_t *data)
  * \param filename The image file to load.
  * \return A new image.
  */
-image_t *
+static image_t *
 image_new_from_file(const char *filename)
 {
     Imlib_Image imimage;

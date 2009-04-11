@@ -56,9 +56,7 @@ image_delete(image_t **i)
 
 DO_RCNT(image_t, image, image_delete)
 
-image_t * image_new_from_file(const char *);
 image_t * image_new_from_argb32(int, int, uint32_t *);
-uint8_t * image_data_argb32_get(image_t *);
 
 int luaA_image_userdata_new(lua_State *, image_t *);
 
