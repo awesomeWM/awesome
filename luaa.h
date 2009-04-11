@@ -48,43 +48,6 @@
         return 1; \
     }
 
-#define DO_LUA_NEW(decl, type, prefix, lua_type, type_ref) \
-    decl int \
-    luaA_##prefix##_userdata_new(lua_State *L, type *p) \
-    { \
-        type **pp = lua_newuserdata(L, sizeof(type *)); \
-        *pp = p; \
-        type_ref(pp); \
-        return luaA_settype(L, lua_type); \
-    } \
-    static int \
-    luaA_##prefix##_tostring(lua_State *L) \
-    { \
-        type **p = luaA_checkudata(L, 1, lua_type); \
-        lua_pushfstring(L, lua_type ": %p", *p); \
-        return 1; \
-    }
-
-#define DO_LUA_GC(type, prefix, lua_type, type_unref) \
-    static int \
-    luaA_##prefix##_gc(lua_State *L) \
-    { \
-        type **p = luaA_checkudata(L, 1, lua_type); \
-        type_unref(p); \
-        *p = NULL; \
-        return 0; \
-    }
-
-#define DO_LUA_EQ(type, prefix, lua_type) \
-    static int \
-    luaA_##prefix##_eq(lua_State *L) \
-    { \
-        type **p1 = luaA_checkudata(L, 1, lua_type); \
-        type **p2 = luaA_checkudata(L, 2, lua_type); \
-        lua_pushboolean(L, (*p1 == *p2)); \
-        return 1; \
-    }
-
 #define luaA_dostring(L, cmd) \
     do { \
         if(luaL_dostring(L, cmd)) \
