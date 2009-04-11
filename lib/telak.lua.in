@@ -9,7 +9,6 @@ local os = os
 local io = io
 local http = require("socket.http")
 local ltn12 = require("ltn12")
-local otable = require("otable")
 local setmetatable = setmetatable
 local util = require("awful.util")
 local hooks = require("awful.hooks")
@@ -23,7 +22,7 @@ local capi =
 --- Root window image display library
 module("telak")
 
-local data = otable()
+local data = setmetatable({}, { __mode = 'k' })
 
 -- Update a telak wibox.
 -- @param w The wibox to update.
