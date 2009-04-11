@@ -11,7 +11,6 @@ local pairs = pairs
 local ipairs = ipairs
 local table = table
 local math = math
-local otable = require("otable")
 local setmetatable = setmetatable
 local capi =
 {
@@ -26,11 +25,11 @@ local hooks = require("awful.hooks")
 module("awful.client")
 
 -- Private data
-local data = {}
+data = {}
 data.focus = {}
 data.urgent = {}
 data.marked = {}
-data.properties = otable()
+data.properties = setmetatable({}, { __mode = 'k' })
 
 -- Functions
 urgent = {}
@@ -819,13 +818,6 @@ function property.set(c, prop, value)
     data.properties[c][prop] = value
 end
 
--- Kill client property.
--- This is garbage collection done on unmanage.
--- @param c The client.
-local function killproperty(c)
-    data.properties[c] = nil
-end
-
 -- Register standards hooks
 hooks.focus.register(focus.history.add)
 hooks.unmanage.register(focus.history.delete)
@@ -835,6 +827,5 @@ hooks.focus.register(urgent.delete)
 hooks.unmanage.register(urgent.delete)
 
 hooks.unmanage.register(floating.delete)
-hooks.unmanage.register(killproperty)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
