@@ -9,14 +9,16 @@
 local capi = { client = client }
 local table = table
 local pairs = pairs
+local setmetatable = setmetatable
 local awful = require('awful')
-local otable = require("otable")
 
 --- Fabulous tabs
 module("tabulous")
 
-local tabbed_tags = otable() -- all tab tables, indexed by tab
-local tabbed = {}            -- the current tag tab table
+-- all tab tables, indexed by tab
+local tabbed_tags = setmetatable({}, { __mode = 'k' })
+-- the current tag tab table
+local tabbed = {}
 
 local active_tag
 
