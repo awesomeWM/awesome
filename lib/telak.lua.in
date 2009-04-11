@@ -57,7 +57,7 @@ local function new(_, args)
     w.widgets = wimg
 
     data[w].cb = function () update(w) end
-    hooks.timer.register(args.timer or 3, data[w].cb)
+    hooks.timer.register(args.timer or 300, data[w].cb)
 
     update(w)
 
