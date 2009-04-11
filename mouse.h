@@ -27,8 +27,8 @@
 /** Mouse buttons bindings */
 struct button_t
 {
-    /** Ref count */
-    int refcount;
+    /** Lua references */
+    luaA_ref_array_t refs;
     /** Key modifiers */
     unsigned long mod;
     /** Mouse button number */
@@ -39,13 +39,11 @@ struct button_t
     luaA_ref release;
 };
 
-void button_delete(button_t **);
-
 bool mouse_query_pointer(xcb_window_t, int16_t *, int16_t *, xcb_window_t *, uint16_t *);
 int luaA_mouse_pushstatus(lua_State *, int, int, uint16_t);
 
-DO_RCNT(button_t, button, button_delete)
-ARRAY_FUNCS(button_t *, button, button_unref)
+void button_unref_simplified(button_t **);
+ARRAY_FUNCS(button_t *, button, button_unref_simplified)
 
 int luaA_button_array_get(lua_State *, button_array_t *);
 void luaA_button_array_set(lua_State *, int idx, button_array_t *);
