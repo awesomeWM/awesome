@@ -49,25 +49,6 @@ widget_delete(widget_t **widget)
     p_delete(widget);
 }
 
-/** Compute offset for drawing the first pixel of a widget.
- * \param barwidth The wibox width.
- * \param widgetwidth The widget width.
- * \param alignment The widget alignment on wibox.
- * \return The x coordinate to draw at.
- */
-int
-widget_calculate_offset(int barwidth, int widgetwidth, int offset, int alignment)
-{
-    switch(alignment)
-    {
-      case AlignLeft:
-      case AlignFlex:
-      case AlignFixed:
-        return offset;
-    }
-    return barwidth - offset - widgetwidth;
-}
-
 /** Get a widget node from a wibox by coords.
  * \param Container position.
  * \param widgets The widget list.

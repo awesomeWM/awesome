@@ -36,7 +36,6 @@ void widget_delete(widget_t **);
 
 DO_RCNT(widget_t, widget, widget_delete)
 
-int widget_calculate_offset(int, int, int, int);
 widget_t *widget_getbycoords(position_t, widget_node_array_t *, int, int, int16_t *, int16_t *);
 void widget_render(wibox_t *);
 
