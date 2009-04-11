@@ -325,9 +325,12 @@ screen_client_moveto(client_t *c, int new_screen, bool dotag, bool doresize)
             untag_client(c, old_tags->tab[i]);
 
         /* add new tags */
-        for(i = 0; i < new_tags->len; i++)
-            if(new_tags->tab[i]->selected)
-                tag_client(c, new_tags->tab[i]);
+        foreach(new_tag, *new_tags)
+            if((*new_tag)->selected)
+            {
+                tag_push(globalconf.L, *new_tag);
+                tag_client(c);
+            }
     }
 
     if(wasvisible)
@@ -420,8 +423,6 @@ luaA_screen_tags(lua_State *L)
 
     if(lua_gettop(L) == 2)
     {
-        tag_t **tag;
-
         luaA_checktable(L, 2);
 
         /* remove current tags */
@@ -436,18 +437,14 @@ luaA_screen_tags(lua_State *L)
         /* push new tags */
         lua_pushnil(L);
         while(lua_next(L, 2))
-        {
-            tag = luaA_checkudata(L, -1, "tag");
-            tag_append_to_screen(*tag, s);
-            lua_pop(L, 1);
-        }
+            tag_append_to_screen(s);
     }
     else
     {
         lua_newtable(L);
         for(i = 0; i < s->tags.len; i++)
         {
-            luaA_tag_userdata_new(L, s->tags.tab[i]);
+            tag_push(L, s->tags.tab[i]);
             lua_rawseti(L, -2, i + 1);
         }
     }

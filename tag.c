@@ -25,9 +25,26 @@
 #include "ewmh.h"
 #include "widget.h"
 
-DO_LUA_NEW(extern, tag_t, tag, "tag", tag_ref)
-DO_LUA_GC(tag_t, tag, "tag", tag_unref)
-DO_LUA_EQ(tag_t, tag, "tag")
+DO_LUA_TOSTRING(tag_t, tag, "tag")
+
+void
+tag_unref_simplified(tag_t **tag)
+{
+    tag_unref(globalconf.L, *tag);
+}
+
+/** Garbage collect a tag.
+ * \param L The Lua VM state.
+ * \return 0.
+ */
+static int
+luaA_tag_gc(lua_State *L)
+{
+    tag_t *tag = luaL_checkudata(L, 1, "tag");
+    client_array_wipe(&tag->clients);
+    p_delete(&tag->name);
+    return 0;
+}
 
 /** View or unview a tag.
  * \param tag the tag
@@ -41,36 +58,17 @@ tag_view(tag_t *tag, bool view)
     globalconf.screens[tag->screen].need_arrange = true;
 }
 
-/** Create a new tag. Parameters values are checked.
- * \param name Tag name.
- * \param len Tag name length.
- * \return A new tag with all these parameters.
- */
-tag_t *
-tag_new(const char *name, ssize_t len)
-{
-    tag_t *tag;
-
-    tag = p_new(tag_t, 1);
-    a_iso2utf8(name, len, &tag->name, NULL);
-
-    /* to avoid error */
-    tag->screen = SCREEN_UNDEF;
-
-    return tag;
-}
-
-/** Append a tag to a screen.
- * \param tag the tag to append
+/** Append a tag which on top of the stack to a screen.
  * \param screen the screen id
  */
 void
-tag_append_to_screen(tag_t *tag, screen_t *s)
+tag_append_to_screen(screen_t *s)
 {
     int phys_screen = screen_virttophys(s->index);
+    tag_t *tag = tag_ref(globalconf.L);
 
     tag->screen = s->index;
-    tag_array_append(&s->tags, tag_ref(&tag));
+    tag_array_append(&s->tags, tag);
     ewmh_update_net_numbers_of_desktop(phys_screen);
     ewmh_update_net_desktop_names(phys_screen);
     ewmh_update_workarea(phys_screen);
@@ -79,7 +77,7 @@ tag_append_to_screen(tag_t *tag, screen_t *s)
     if(globalconf.hooks.tags != LUA_REFNIL)
     {
         lua_pushnumber(globalconf.L, s->index + 1);
-        luaA_tag_userdata_new(globalconf.L, tag);
+        tag_push(globalconf.L, tag);
         lua_pushliteral(globalconf.L, "add");
         luaA_dofunction(globalconf.L, globalconf.hooks.tags, 3, 0);
     }
@@ -110,26 +108,26 @@ tag_remove_from_screen(tag_t *tag)
     if(globalconf.hooks.tags != LUA_REFNIL)
     {
         lua_pushnumber(globalconf.L, screen + 1);
-        luaA_tag_userdata_new(globalconf.L, tag);
+        tag_push(globalconf.L, tag);
         lua_pushliteral(globalconf.L, "remove");
         luaA_dofunction(globalconf.L, globalconf.hooks.tags, 3, 0);
     }
 
-    tag_unref(&tag);
+    tag_unref(globalconf.L, tag);
 }
 
-/** Tag a client with specified tag.
+/** Tag a client with the tag on top of the stack.
  * \param c the client to tag
- * \param t the tag to tag the client with
  */
 void
-tag_client(client_t *c, tag_t *t)
+tag_client(client_t *c)
 {
+    tag_t *t = tag_ref(globalconf.L);
+
     /* don't tag twice */
     if(is_client_tagged(c, t))
         return;
 
-    tag_ref(&t);
     client_array_append(&t->clients, c);
     ewmh_client_update_desktop(c);
     client_need_arrange(c);
@@ -137,7 +135,7 @@ tag_client(client_t *c, tag_t *t)
     if(globalconf.hooks.tagged != LUA_REFNIL)
     {
         client_push(globalconf.L, c);
-        luaA_tag_userdata_new(globalconf.L, t);
+        tag_push(globalconf.L, t);
         luaA_dofunction(globalconf.L, globalconf.hooks.tagged, 2, 0);
     }
 }
@@ -159,10 +157,10 @@ untag_client(client_t *c, tag_t *t)
             if(globalconf.hooks.tagged != LUA_REFNIL)
             {
                 client_push(globalconf.L, c);
-                luaA_tag_userdata_new(globalconf.L, t);
+                tag_push(globalconf.L, t);
                 luaA_dofunction(globalconf.L, globalconf.hooks.tagged, 2, 0);
             }
-            tag_unref(&t);
+            tag_unref(globalconf.L, t);
             return;
         }
 }
@@ -242,7 +240,14 @@ luaA_tag_new(lua_State *L)
 {
     size_t len;
     const char *name = luaL_checklstring(L, 2, &len);
-    return luaA_tag_userdata_new(L, tag_new(name, len));
+    tag_t *tag = tag_new(globalconf.L);
+
+    a_iso2utf8(name, len, &tag->name, NULL);
+
+    /* to avoid error */
+    tag->screen = SCREEN_UNDEF;
+
+    return 1;
 }
 
 /** Get or set the clients attached to this tag.
@@ -255,20 +260,22 @@ luaA_tag_new(lua_State *L)
 static int
 luaA_tag_clients(lua_State *L)
 {
-    tag_t **tag = luaA_checkudata(L, 1, "tag");
-    client_array_t *clients = &(*tag)->clients;
+    tag_t *tag = luaL_checkudata(L, 1, "tag");
+    client_array_t *clients = &tag->clients;
     int i;
 
     if(lua_gettop(L) == 2)
     {
         luaA_checktable(L, 2);
-        for(i = 0; i < (*tag)->clients.len; i++)
-            untag_client((*tag)->clients.tab[i], *tag);
+        foreach(c, tag->clients)
+            untag_client(*c, tag);
         lua_pushnil(L);
         while(lua_next(L, 2))
         {
             client_t *c = luaA_client_checkudata(L, -1);
-            tag_client(c, *tag);
+            /* push tag on top of the stack */
+            lua_pushvalue(L, 1);
+            tag_client(c);
             lua_pop(L, 1);
         }
     }
@@ -296,7 +303,7 @@ static int
 luaA_tag_index(lua_State *L)
 {
     size_t len;
-    tag_t **tag = luaA_checkudata(L, 1, "tag");
+    tag_t *tag = luaL_checkudata(L, 1, "tag");
     const char *attr;
 
     if(luaA_usemetatable(L, 1, 2))
@@ -307,15 +314,15 @@ luaA_tag_index(lua_State *L)
     switch(a_tokenize(attr, len))
     {
       case A_TK_NAME:
-        lua_pushstring(L, (*tag)->name);
+        lua_pushstring(L, tag->name);
         break;
       case A_TK_SCREEN:
-        if((*tag)->screen == SCREEN_UNDEF)
+        if(tag->screen == SCREEN_UNDEF)
             return 0;
-        lua_pushnumber(L, (*tag)->screen + 1);
+        lua_pushnumber(L, tag->screen + 1);
         break;
       case A_TK_SELECTED:
-        lua_pushboolean(L, (*tag)->selected);
+        lua_pushboolean(L, tag->selected);
         break;
       default:
         return 0;
@@ -332,7 +339,7 @@ static int
 luaA_tag_newindex(lua_State *L)
 {
     size_t len;
-    tag_t **tag = luaA_checkudata(L, 1, "tag");
+    tag_t *tag = luaL_checkudata(L, 1, "tag");
     const char *attr = luaL_checklstring(L, 2, &len);
 
     switch(a_tokenize(attr, len))
@@ -342,8 +349,8 @@ luaA_tag_newindex(lua_State *L)
       case A_TK_NAME:
         {
             const char *buf = luaL_checklstring(L, 3, &len);
-            p_delete(&(*tag)->name);
-            a_iso2utf8(buf, len, &(*tag)->name, NULL);
+            p_delete(&tag->name);
+            a_iso2utf8(buf, len, &tag->name, NULL);
         }
         break;
       case A_TK_SCREEN:
@@ -355,22 +362,26 @@ luaA_tag_newindex(lua_State *L)
         else
             screen = SCREEN_UNDEF;
 
-        if((*tag)->screen != SCREEN_UNDEF)
-            tag_remove_from_screen(*tag);
+        if(tag->screen != SCREEN_UNDEF)
+            tag_remove_from_screen(tag);
 
         if(screen != SCREEN_UNDEF)
-            tag_append_to_screen(*tag, &globalconf.screens[screen]);
+        {
+            /* push tag on top of the stack */
+            lua_pushvalue(L, 1);
+            tag_append_to_screen(&globalconf.screens[screen]);
+        }
         break;
       case A_TK_SELECTED:
-        if((*tag)->screen != SCREEN_UNDEF)
-            tag_view(*tag, luaA_checkboolean(L, 3));
+        if(tag->screen != SCREEN_UNDEF)
+            tag_view(tag, luaA_checkboolean(L, 3));
         return 0;
       default:
         return 0;
     }
 
-    if((*tag)->screen != SCREEN_UNDEF && (*tag)->selected)
-        globalconf.screens[(*tag)->screen].need_arrange = true;
+    if(tag->screen != SCREEN_UNDEF && tag->selected)
+        globalconf.screens[tag->screen].need_arrange = true;
 
     return 0;
 }
@@ -385,7 +396,6 @@ const struct luaL_reg awesome_tag_meta[] =
     { "clients", luaA_tag_clients },
     { "__index", luaA_tag_index },
     { "__newindex", luaA_tag_newindex },
-    { "__eq", luaA_tag_eq },
     { "__gc", luaA_tag_gc },
     { "__tostring", luaA_tag_tostring },
     { NULL, NULL },

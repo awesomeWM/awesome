@@ -406,7 +406,10 @@ ewmh_process_client_message(xcb_client_message_event_t *ev)
             else
                 for(int i = 0; i < tags->len; i++)
                     if((int)ev->data.data32[0] == i)
-                        tag_client(c, tags->tab[i]);
+                    {
+                        tag_push(globalconf.L, tags->tab[i]);
+                        tag_client(c);
+                    }
                     else
                         untag_client(c, tags->tab[i]);
         }
@@ -540,7 +543,10 @@ ewmh_client_check_hints(client_t *c)
         else
             for(int i = 0; i < tags->len; i++)
                 if(desktop == i)
-                    tag_client(c, tags->tab[i]);
+                {
+                    tag_push(globalconf.L, tags->tab[i]);
+                    tag_client(c);
+                }
                 else
                     untag_client(c, tags->tab[i]);
     }

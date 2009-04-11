@@ -248,8 +248,8 @@ ARRAY_TYPE(client_t *, client)
 /** Tag type */
 struct tag
 {
-    /** Ref count */
-    int refcount;
+    /** Lua references count */
+    luaA_ref_array_t refs;
     /** Tag name */
     char *name;
     /** Screen */

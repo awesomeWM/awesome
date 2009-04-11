@@ -1449,33 +1449,26 @@ luaA_client_swap(lua_State *L)
 static int
 luaA_client_tags(lua_State *L)
 {
-    tag_array_t *tags;
-    tag_t **tag;
     client_t *c = luaA_client_checkudata(L, 1);
+    tag_array_t *tags = &globalconf.screens[c->screen].tags;
     int j = 0;
 
     if(lua_gettop(L) == 2)
     {
         luaA_checktable(L, 2);
-        tags = &globalconf.screens[c->screen].tags;
         for(int i = 0; i < tags->len; i++)
             untag_client(c, tags->tab[i]);
         lua_pushnil(L);
         while(lua_next(L, 2))
-        {
-            tag = luaA_checkudata(L, -1, "tag");
-            tag_client(c, *tag);
-            lua_pop(L, 1);
-        }
+            tag_client(c);
         lua_pop(L, 1);
     }
 
-    tags = &globalconf.screens[c->screen].tags;
     lua_newtable(L);
-    for(int i = 0; i < tags->len; i++)
-        if(is_client_tagged(c, tags->tab[i]))
+    foreach(tag, *tags)
+        if(is_client_tagged(c, *tag))
         {
-            luaA_tag_userdata_new(L, tags->tab[i]);
+            tag_push(L, *tag);
             lua_rawseti(L, -2, ++j);
         }
 

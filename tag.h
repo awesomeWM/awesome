@@ -24,29 +24,17 @@
 
 #include "structs.h"
 #include "client.h"
-#include "common/refcount.h"
-
-/* Contructor, destructor and referencors */
-tag_t *tag_new(const char *, ssize_t);
-
-static inline void
-tag_delete(tag_t **tag)
-{
-    client_array_wipe(&(*tag)->clients);
-    p_delete(&(*tag)->name);
-    p_delete(tag);
-}
 
 tag_t **tags_get_current(int);
-void tag_client(client_t *, tag_t *);
+void tag_client(client_t *);
 void untag_client(client_t *, tag_t *);
 bool is_client_tagged(client_t *, tag_t *);
 void tag_view_only_byindex(int, int);
-void tag_append_to_screen(tag_t *, screen_t *);
-int luaA_tag_userdata_new(lua_State *, tag_t *);
+void tag_append_to_screen(screen_t *);
+void tag_unref_simplified(tag_t **);
 
-DO_RCNT(tag_t, tag, tag_delete)
-ARRAY_FUNCS(tag_t *, tag, tag_unref)
+ARRAY_FUNCS(tag_t *, tag, tag_unref_simplified)
+LUA_OBJECT_FUNCS(tag_t, tag, "tag")
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
