@@ -8,7 +8,7 @@
 local util = require("awful.util")
 local pairs = pairs
 local ipairs = ipairs
-local otable = require("otable")
+local setmetatable = setmetatable
 local capi =
 {
     hooks = hooks,
@@ -25,7 +25,7 @@ local data = {}
 data.history = {}
 data.history.past = {}
 data.history.current = {}
-data.tags = otable()
+data.tags = setmetatable({}, { __mode = 'k' })
 
 -- History functions
 history = {}
@@ -236,14 +236,6 @@ function viewmore(tags, screen)
     end
 end
 
-local function hook_tags(screen, tag, action)
-    if action == "remove" then
-        data.tags[tag] = nil
-    elseif action == "add" then
-        data.tags[tag] = {}
-    end
-end
-
 --- Get tag data table.
 -- @param tag The Tag.
 -- @return The data table.
@@ -267,13 +259,11 @@ end
 -- @param tag The tag.
 -- @param prop The property name.
 -- @param value The value.
--- @return True if the value has been set, false otherwise.
 function setproperty(tag, prop, value)
-    if data.tags[tag] then
-        data.tags[tag][prop] = value
-        return true
+    if not data.tags[tag] then
+        data.tags[tag] = {}
     end
-    return false
+    data.tags[tag][prop] = value
 end
 
 --- Tag a client with the set of current tags.
@@ -293,7 +283,6 @@ end
 
 -- Register standards hooks
 hooks.arrange.register(history.update)
-hooks.tags.register(hook_tags)
 hooks.manage.register(withcurrent)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
