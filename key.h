@@ -24,12 +24,12 @@
 
 #include <xcb/xcb.h>
 #include "luaa.h"
-#include "common/array.h"
+#include "common/luaobject.h"
 
 typedef struct keyb_t
 {
-    /** Ref count */
-    int refcount;
+    /** Lua references */
+    luaA_ref_array_t refs;
     /** Key modifier */
     unsigned long mod;
     /** Keysym */

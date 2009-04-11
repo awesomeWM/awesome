@@ -25,18 +25,29 @@
 
 #include "structs.h"
 
+LUA_OBJECT_FUNCS(keyb_t, key, "key")
+
 static void
-key_delete(keyb_t **kbp)
+key_unref_simplified(keyb_t **b)
 {
-    luaL_unref(globalconf.L, LUA_REGISTRYINDEX, (*kbp)->press);
-    luaL_unref(globalconf.L, LUA_REGISTRYINDEX, (*kbp)->release);
-    p_delete(kbp);
+    key_unref(globalconf.L, *b);
 }
 
-DO_RCNT(keyb_t, key, key_delete)
-ARRAY_FUNCS(keyb_t *, key, key_unref)
-DO_LUA_NEW(static, keyb_t, key, "key", key_ref)
-DO_LUA_GC(keyb_t, key, "key", key_unref)
+ARRAY_FUNCS(keyb_t *, key, key_unref_simplified)
+DO_LUA_TOSTRING(keyb_t, key, "key")
+
+/** Garbage collect a key.
+ * \param L The Lua VM state.
+ * \return 0.
+ */
+static int
+luaA_key_gc(lua_State *L)
+{
+    keyb_t *kbp = luaL_checkudata(L, 1, "key");
+    luaL_unref(globalconf.L, LUA_REGISTRYINDEX, kbp->press);
+    luaL_unref(globalconf.L, LUA_REGISTRYINDEX, kbp->release);
+    return 0;
+}
 
 static void
 keybindings_init(keybindings_t *kb)
@@ -115,13 +126,15 @@ window_grabkeys(xcb_window_t win, keybindings_t *keys)
         window_grabkey(win, keys->by_sym.tab[i]);
 }
 
+/** Register a key which on top of the stack.
+ * \param keys The keybinding array where to put the key.
+ */
 static void
-key_register(keybindings_t *keys, keyb_t *k)
+key_register(keybindings_t *keys)
 {
+    keyb_t *k = key_ref(globalconf.L);
     key_array_t *arr = k->keysym ? &keys->by_sym : &keys->by_code;
     int l = 0, r = arr->len;
-
-    key_ref(&k);
 
     while(l < r) {
         int i = (r + l) / 2;
@@ -131,7 +144,7 @@ key_register(keybindings_t *keys, keyb_t *k)
             r = i;
             break;
           case 0: /* k == arr->tab[i] */
-            key_unref(&arr->tab[i]);
+            key_unref(globalconf.L, arr->tab[i]);
             arr->tab[i] = k;
             return;
           case 1: /* k > arr->tab[i] */
@@ -306,8 +319,7 @@ luaA_key_new(lua_State *L)
     if(lua_gettop(L) == 5 && !lua_isnil(L, 5))
         luaA_registerfct(L, 5, &release);
 
-    /* get the last arg as function */
-    k = p_new(keyb_t, 1);
+    k = key_new(L);
     luaA_keystore(k, key, len);
 
     k->press = press;
@@ -319,10 +331,11 @@ luaA_key_new(lua_State *L)
         size_t blen;
         lua_rawgeti(L, 2, i);
         key = luaL_checklstring(L, -1, &blen);
+        lua_pop(L, 1);
         k->mod |= xutil_key_mask_fromstr(key, blen);
     }
 
-    return luaA_key_userdata_new(L, k);
+    return 1;
 }
 
 /** Set a key array with a Lua table.
@@ -340,11 +353,7 @@ luaA_key_array_set(lua_State *L, int idx, keybindings_t *keys)
 
     lua_pushnil(L);
     while(lua_next(L, idx))
-    {
-        keyb_t **k = luaA_checkudata(L, -1, "key");
-        key_register(keys, *k);
-        lua_pop(L, 1);
-    }
+        key_register(keys);
 }
 
 /** Push an array of key as an Lua table onto the stack.
@@ -358,12 +367,12 @@ luaA_key_array_get(lua_State *L, keybindings_t *keys)
     lua_createtable(L, keys->by_code.len + keys->by_sym.len, 0);
     for(int i = 0; i < keys->by_code.len; i++)
     {
-        luaA_key_userdata_new(L, keys->by_code.tab[i]);
+        key_push(L, keys->by_code.tab[i]);
         lua_rawseti(L, -2, i + 1);
     }
     for(int i = 0; i < keys->by_sym.len; i++)
     {
-        luaA_key_userdata_new(L, keys->by_sym.tab[i]);
+        key_push(L, keys->by_sym.tab[i]);
         lua_rawseti(L, -2, i + 1);
     }
     return 1;
