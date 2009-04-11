@@ -7,8 +7,8 @@
 -- Grab environment we need
 local math = math
 local type = type
-local otable = require("otable")
 local ipairs = ipairs
+local setmetatable = setmetatable
 local capi = { widget = widget,
                button = button }
 
@@ -16,7 +16,7 @@ local capi = { widget = widget,
 module("awful.widget.common")
 
 -- Private structures
-tagwidgets = otable()
+tagwidgets = setmetatable({}, { __mode = 'k' })
 
 function list_update(w, buttons, label, data, widgets, objects)
     -- Hack: if it has been registered as a widget in a wibox,
