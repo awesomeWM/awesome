@@ -1729,7 +1729,7 @@ luaA_client_newindex(lua_State *L)
  * \lfield screen Client screen number.
  * \lfield hide Define if the client must be hidden, i.e. never mapped,
  * invisible in taskbar.
- * \lfield minimize Define it the client must be iconify, i.e. only visible in
+ * \lfield minimized Define it the client must be iconify, i.e. only visible in
  * taskbar.
  * \lfield size_hints_honor Honor size hints, i.e. respect size ratio.
  * \lfield border_width The client border width.
