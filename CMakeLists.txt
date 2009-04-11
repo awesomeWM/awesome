@@ -78,10 +78,10 @@ set(AWE_SRCS
     ${SOURCE_DIR}/widgets/imagebox.c)
 
 set(AWE_MAN_SRCS
-    ${SOURCE_DIR}/awesome.1.txt
-    ${SOURCE_DIR}/awsetbg.1.txt
-    ${SOURCE_DIR}/awesome-client.1.txt
-    ${SOURCE_DIR}/awesomerc.5.txt)
+    ${SOURCE_DIR}/manpages/awesome.1.txt
+    ${SOURCE_DIR}/manpages/awsetbg.1.txt
+    ${SOURCE_DIR}/manpages/awesome-client.1.txt
+    ${SOURCE_DIR}/manpages/awesomerc.5.txt)
 
 add_executable(${PROJECT_AWE_NAME}
     ${AWE_SRCS}
@@ -172,6 +172,9 @@ endif()
 
 # {{{ Manpages
 if(GENERATE_MANPAGES)
+    if(NOT BUILD_DIR STREQUAL SOURCE_DIR)
+        file(MAKE_DIRECTORY ${BUILD_DIR}/manpages)
+    endif()
     foreach(txtfile ${AWE_MAN_SRCS})
         string(REGEX REPLACE ".txt\$" ".xml" xmlfile ${txtfile})
         string(REPLACE ${SOURCE_DIR}
@@ -180,21 +183,20 @@ if(GENERATE_MANPAGES)
         string(REGEX REPLACE ".gz\$" "" manfile ${gzfile})
 
         add_custom_command(
-            COMMAND ${CAT_EXECUTABLE} ${txtfile}
-                    | ${ASCIIDOC_EXECUTABLE} -d manpage -b docbook -o ${xmlfile} -
-            WORKING_DIRECTORY ${BUILD_DIR}
+            COMMAND ${ASCIIDOC_EXECUTABLE} -d manpage -b docbook -o ${xmlfile} - < ${txtfile}
+            WORKING_DIRECTORY ${BUILD_DIR}/manpages
             OUTPUT  ${xmlfile}
             DEPENDS ${txtfile}
             VERBATIM)
         add_custom_command(
             COMMAND ${XMLTO_EXECUTABLE} man ${xmlfile}
             OUTPUT  ${manfile}
+            WORKING_DIRECTORY ${BUILD_DIR}/manpages
             DEPENDS ${xmlfile})
         add_custom_command(
-            COMMAND ${CAT_EXECUTABLE} ${manfile}
-                    | ${GZIP_EXECUTABLE}
-                    > ${gzfile}
+            COMMAND ${GZIP_EXECUTABLE} < ${manfile} > ${gzfile}
             OUTPUT  ${gzfile}
+            WORKING_DIRECTORY ${BUILD_DIR}/manpages
             DEPENDS ${manfile}
             VERBATIM)
 
