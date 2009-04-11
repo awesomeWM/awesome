@@ -31,7 +31,7 @@ typedef struct keyb_t
     /** Lua references */
     luaA_ref_array_t refs;
     /** Key modifier */
-    unsigned long mod;
+    uint16_t mod;
     /** Keysym */
     xcb_keysym_t keysym;
     /** Keycode */

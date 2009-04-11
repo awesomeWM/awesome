@@ -115,10 +115,10 @@ window_buttons_grab(xcb_window_t win, button_array_t *buttons)
                         buttons->tab[i]->button, buttons->tab[i]->mod | XCB_MOD_MASK_LOCK);
         xcb_grab_button(globalconf.connection, false, win, BUTTONMASK,
                         XCB_GRAB_MODE_SYNC, XCB_GRAB_MODE_ASYNC, XCB_NONE, XCB_NONE,
-                        buttons->tab[i]->button, buttons->tab[i]->mod | globalconf.numlockmask);
+                        buttons->tab[i]->button, buttons->tab[i]->mod | XCB_MOD_MASK_2);
         xcb_grab_button(globalconf.connection, false, win, BUTTONMASK,
                         XCB_GRAB_MODE_SYNC, XCB_GRAB_MODE_ASYNC, XCB_NONE, XCB_NONE,
-                        buttons->tab[i]->button, buttons->tab[i]->mod | globalconf.numlockmask | XCB_MOD_MASK_LOCK);
+                        buttons->tab[i]->button, buttons->tab[i]->mod | XCB_MOD_MASK_2 | XCB_MOD_MASK_LOCK);
     }
 }
 

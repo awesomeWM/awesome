@@ -91,6 +91,20 @@ key_cmp(const keyb_t *k1, const keyb_t *k2)
     return k1->mod == k2->mod ? 0 : (k2->mod > k1->mod ? 1 : -1);
 }
 
+static void
+window_grabkey_keycode(xcb_window_t win, uint16_t mod, xcb_keycode_t kc)
+{
+    xcb_grab_key(globalconf.connection, true, win,
+                 mod, kc, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC);
+    xcb_grab_key(globalconf.connection, true, win,
+                 mod | XCB_MOD_MASK_LOCK, kc, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC);
+    xcb_grab_key(globalconf.connection, true, win,
+                 mod | XCB_MOD_MASK_2, kc, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC);
+    xcb_grab_key(globalconf.connection, true, win,
+                 mod | XCB_MOD_MASK_2 | XCB_MOD_MASK_LOCK, kc, XCB_GRAB_MODE_ASYNC,
+                 XCB_GRAB_MODE_ASYNC);
+}
+
 /** Grab key on a window.
  * \param win The window.
  * \param k The key.
@@ -98,21 +112,17 @@ key_cmp(const keyb_t *k1, const keyb_t *k2)
 static void
 window_grabkey(xcb_window_t win, keyb_t *k)
 {
-    xcb_keycode_t kc;
-
-    if((kc = k->keycode)
-       || (k->keysym
-           && (kc = xcb_key_symbols_get_keycode(globalconf.keysyms, k->keysym))))
+    if(k->keycode)
+       window_grabkey_keycode(win, k->mod, k->keycode);
+    else if(k->keysym)
     {
-        xcb_grab_key(globalconf.connection, true, win,
-                     k->mod, kc, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC);
-        xcb_grab_key(globalconf.connection, true, win,
-                     k->mod | XCB_MOD_MASK_LOCK, kc, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC);
-        xcb_grab_key(globalconf.connection, true, win,
-                     k->mod | globalconf.numlockmask, kc, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC);
-        xcb_grab_key(globalconf.connection, true, win,
-                     k->mod | globalconf.numlockmask | XCB_MOD_MASK_LOCK, kc, XCB_GRAB_MODE_ASYNC,
-                     XCB_GRAB_MODE_ASYNC);
+        xcb_keycode_t *keycodes = xcb_key_symbols_get_keycode(globalconf.keysyms, k->keysym);
+        if(keycodes)
+        {
+            for(xcb_keycode_t *kc = keycodes; *kc; kc++)
+               window_grabkey_keycode(win, k->mod, *kc);
+            p_delete(&keycodes);
+        }
     }
 }
 
@@ -189,12 +199,11 @@ key_getkeysym(xcb_keycode_t detail, uint16_t state)
 
     /* The numlock modifier is on and the second KeySym is a keypad
      * KeySym */
-    if((state & globalconf.numlockmask) && xcb_is_keypad_key(k1))
+    if((state & XCB_MOD_MASK_2) && xcb_is_keypad_key(k1))
     {
         /* The Shift modifier is on, or if the Lock modifier is on and
          * is interpreted as ShiftLock, use the first KeySym */
-        if((state & XCB_MOD_MASK_SHIFT) ||
-           (state & XCB_MOD_MASK_LOCK && (state & globalconf.shiftlockmask)))
+        if((state & XCB_MOD_MASK_SHIFT) || (state & XCB_MOD_MASK_LOCK))
             return k0;
         else
             return k1;
@@ -207,8 +216,7 @@ key_getkeysym(xcb_keycode_t detail, uint16_t state)
 
     /* The Shift modifier is off and the Lock modifier is on and is
      * interpreted as CapsLock */
-    else if(!(state & XCB_MOD_MASK_SHIFT) &&
-            (state & XCB_MOD_MASK_LOCK && (state & globalconf.capslockmask)))
+    else if(!(state & XCB_MOD_MASK_SHIFT) && (state & XCB_MOD_MASK_LOCK))
         /* The first Keysym is used but if that KeySym is lowercase
          * alphabetic, then the corresponding uppercase KeySym is used
          * instead */
@@ -216,8 +224,7 @@ key_getkeysym(xcb_keycode_t detail, uint16_t state)
 
     /* The Shift modifier is on, and the Lock modifier is on and is
      * interpreted as CapsLock */
-    else if((state & XCB_MOD_MASK_SHIFT) &&
-            (state & XCB_MOD_MASK_LOCK && (state & globalconf.capslockmask)))
+    else if((state & XCB_MOD_MASK_SHIFT) && (state & XCB_MOD_MASK_LOCK))
         /* The second Keysym is used but if that KeySym is lowercase
          * alphabetic, then the corresponding uppercase KeySym is used
          * instead */
@@ -225,8 +232,7 @@ key_getkeysym(xcb_keycode_t detail, uint16_t state)
 
     /* The Shift modifer is on, or the Lock modifier is on and is
      * interpreted as ShiftLock, or both */
-    else if((state & XCB_MOD_MASK_SHIFT) ||
-            (state & XCB_MOD_MASK_LOCK && (state & globalconf.shiftlockmask)))
+    else if((state & XCB_MOD_MASK_SHIFT) || (state & XCB_MOD_MASK_LOCK))
         return k1;
 
     return XCB_NO_SYMBOL;

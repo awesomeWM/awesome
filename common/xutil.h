@@ -32,7 +32,7 @@
 
 #include "array.h"
 
-#define XUTIL_MASK_CLEAN(mask) (mask & ~(globalconf.numlockmask | XCB_MOD_MASK_LOCK))
+#define XUTIL_MASK_CLEAN(mask) (mask & ~(XCB_MOD_MASK_LOCK | XCB_MOD_MASK_2))
 
 /* X error codes */
 
@@ -82,10 +82,6 @@
 #define XUTIL_BAD_IMPLEMENTATION 17
 
 bool xutil_text_prop_get(xcb_connection_t *, xcb_window_t, xcb_atom_t, char **, ssize_t *);
-
-void xutil_lock_mask_get(xcb_connection_t *, xcb_get_modifier_mapping_cookie_t,
-                         xcb_key_symbols_t *, unsigned int *, unsigned int *,
-                         unsigned int *);
 
 /** Set the same handler for all errors */
 void xutil_error_handler_catch_all_set(xcb_event_handlers_t *,

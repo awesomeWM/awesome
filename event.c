@@ -853,22 +853,12 @@ event_handle_mappingnotify(void *data,
                            xcb_connection_t *connection,
                            xcb_mapping_notify_event_t *ev)
 {
-    xcb_get_modifier_mapping_cookie_t xmapping_cookie;
-
     if(ev->request == XCB_MAPPING_MODIFIER
        || ev->request == XCB_MAPPING_KEYBOARD)
     {
-        /* Send the request to get the NumLock, ShiftLock and CapsLock masks */
-        xmapping_cookie = xcb_get_modifier_mapping_unchecked(globalconf.connection);
-
         /* Free and then allocate the key symbols */
         xcb_key_symbols_free(globalconf.keysyms);
         globalconf.keysyms = xcb_key_symbols_alloc(globalconf.connection);
-
-        /* Process the reply of previously sent mapping request */
-        xutil_lock_mask_get(globalconf.connection, xmapping_cookie,
-                            globalconf.keysyms, &globalconf.numlockmask,
-                            &globalconf.shiftlockmask, &globalconf.capslockmask);
 
         int nscreen = xcb_setup_roots_length(xcb_get_setup(connection));
 

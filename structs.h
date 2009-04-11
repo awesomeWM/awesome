@@ -315,12 +315,6 @@ struct awesome_t
     keybindings_t keys;
     /** Root window mouse bindings */
     button_array_t buttons;
-    /** Numlock mask */
-    unsigned int numlockmask;
-    /** Numlock mask */
-    unsigned int shiftlockmask;
-    /** Numlock mask */
-    unsigned int capslockmask;
     /** Check for XRandR extension */
     bool have_randr;
     /** Check for XTest extension */

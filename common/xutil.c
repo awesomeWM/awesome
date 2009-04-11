@@ -82,50 +82,6 @@ xutil_text_prop_get(xcb_connection_t *conn, xcb_window_t w, xcb_atom_t atom,
     return true;
 }
 
-/** Get the lock masks (shiftlock, numlock, capslock).
- * \param connection The X connection.
- * \param cookie The cookie of the request.
- * \param keysyms Key symbols.
- * \param numlockmask Numlock mask.
- * \param shiftlockmask Shiftlock mask.
- * \param capslockmask Capslock mask.
- */
-void
-xutil_lock_mask_get(xcb_connection_t *connection,
-                    xcb_get_modifier_mapping_cookie_t cookie,
-                    xcb_key_symbols_t *keysyms,
-                    unsigned int *numlockmask,
-                    unsigned int *shiftlockmask,
-                    unsigned int *capslockmask)
-{
-    xcb_get_modifier_mapping_reply_t *modmap_r;
-    xcb_keycode_t *modmap, kc;
-    unsigned int mask;
-    int i, j;
-
-    modmap_r = xcb_get_modifier_mapping_reply(connection, cookie, NULL);
-    modmap = xcb_get_modifier_mapping_keycodes(modmap_r);
-
-    for(i = 0; i < 8; i++)
-        for(j = 0; j < modmap_r->keycodes_per_modifier; j++)
-        {
-            kc = modmap[i * modmap_r->keycodes_per_modifier + j];
-            mask = (1 << i);
-
-            if(numlockmask != NULL
-               && kc == xcb_key_symbols_get_keycode(keysyms, XK_Num_Lock))
-                *numlockmask = mask;
-            else if(shiftlockmask != NULL
-                    && kc == xcb_key_symbols_get_keycode(keysyms, XK_Shift_Lock))
-                *shiftlockmask = mask;
-            else if(capslockmask != NULL
-                    && kc == xcb_key_symbols_get_keycode(keysyms, XK_Caps_Lock))
-                *capslockmask = mask;
-        }
-
-    p_delete(&modmap_r);
-}
-
 /* Number of different errors */
 #define ERRORS_NBR 256
 
