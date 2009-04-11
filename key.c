@@ -287,7 +287,7 @@ luaA_keystore(keyb_t *key, const char *str, ssize_t len)
  * \lparam A function to execute on key release.
  * \lreturn The key.
  */
-int
+static int
 luaA_key_new(lua_State *L)
 {
     size_t i, len;
