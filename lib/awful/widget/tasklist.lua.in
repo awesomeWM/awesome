@@ -8,8 +8,8 @@
 local capi = { screen = screen,
                image = image,
                client = client }
-local otable = require("otable")
 local ipairs = ipairs
+local setmetatable = setmetatable
 local table = table
 local hooks = require("awful.hooks")
 local common = require("awful.widget.common")
@@ -50,7 +50,7 @@ function new(label, buttons)
                          bg_resize = true,
                          bg_align  = "right"
                        }
-    local data = otable()
+    local data = setmetatable({}, { __mode = 'k' })
     local u = function () tasklist_update(w, buttons, label, data, widgets) end
     hooks.arrange.register(u)
     hooks.clients.register(u)
@@ -69,8 +69,6 @@ function new(label, buttons)
         end
     end)
     u()
-    -- Free data on unmanage
-    hooks.unmanage.register(function (c) data[c] = nil end)
     return w
 end
 
