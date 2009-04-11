@@ -40,6 +40,15 @@ wibox_need_update(wibox_t *wibox)
 }
 
 static void
+wibox_map(wibox_t *wibox)
+{
+    xcb_map_window(globalconf.connection, wibox->sw.window);
+    simplewindow_refresh_pixmap(&wibox->sw);
+    /* Stack this wibox correctly */
+    client_stack();
+}
+
+static void
 wibox_move(wibox_t *wibox, int16_t x, int16_t y)
 {
     if(wibox->sw.window)
@@ -564,12 +573,7 @@ wibox_setvisible(wibox_t *wibox, bool v)
         if(wibox->screen != SCREEN_UNDEF)
         {
             if(wibox->isvisible)
-            {
-                xcb_map_window(globalconf.connection, wibox->sw.window);
-                simplewindow_refresh_pixmap(&wibox->sw);
-                /* stack correctly the wibox */
-                client_stack();
-            }
+                wibox_map(wibox);
             else
                 xcb_unmap_window(globalconf.connection, wibox->sw.window);
 
@@ -665,10 +669,7 @@ wibox_attach(wibox_t *wibox, screen_t *s)
     {
         /* draw it right now once to avoid garbage shown */
         wibox_draw(wibox);
-        xcb_map_window(globalconf.connection, wibox->sw.window);
-        simplewindow_refresh_pixmap(&wibox->sw);
-        /* stack correctly the wibox */
-        client_stack();
+        wibox_map(wibox);
     }
     else
         wibox_need_update(wibox);
