@@ -43,7 +43,8 @@ static void
 wibox_map(wibox_t *wibox)
 {
     xcb_map_window(globalconf.connection, wibox->sw.window);
-    simplewindow_refresh_pixmap(&wibox->sw);
+    /* We must make sure the wibox does not display garbage */
+    wibox_need_update(wibox);
     /* Stack this wibox correctly */
     client_stack();
 }
@@ -666,11 +667,7 @@ wibox_attach(wibox_t *wibox, screen_t *s)
     ewmh_update_workarea(screen_virttophys(s->index));
 
     if(wibox->isvisible)
-    {
-        /* draw it right now once to avoid garbage shown */
-        wibox_draw(wibox);
         wibox_map(wibox);
-    }
     else
         wibox_need_update(wibox);
 }
