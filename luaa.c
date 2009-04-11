@@ -413,7 +413,7 @@ luaAe_type(lua_State *L)
     luaL_checkany(L, 1);
 #define CHECK_TYPE(type) \
     do { \
-        if(luaA_toudata2(L, 1, #type) || luaA_toudata(L, 1, #type)) \
+        if(luaA_toudata2(L, 1, #type)) \
         { \
             lua_pushliteral(L, #type); \
             return 1; \
