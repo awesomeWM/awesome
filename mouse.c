@@ -136,7 +136,7 @@ luaA_button_new(lua_State *L)
     button_t *button, *orig;
     luaA_ref press = LUA_REFNIL, release = LUA_REFNIL;
 
-    if((orig = luaA_toudata2(L, 2, "button")))
+    if((orig = luaA_toudata(L, 2, "button")))
     {
         button_t *copy = button_new(L);
         copy->mod = orig->mod;

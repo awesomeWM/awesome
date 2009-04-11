@@ -114,7 +114,7 @@ luaA_dumpstack(lua_State *L)
  * \return A pointer to the object, NULL otherwise.
  */
 static inline void *
-luaA_toudata2(lua_State *L, int ud, const char *tname)
+luaA_toudata(lua_State *L, int ud, const char *tname)
 {
     void *p = lua_touserdata(L, ud);
     if(p) /* value is a userdata? */

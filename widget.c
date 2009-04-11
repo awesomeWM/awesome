@@ -115,7 +115,7 @@ luaA_table2widgets(lua_State *L, widget_node_array_t *widgets)
     }
     else
     {
-        widget_t *widget = luaA_toudata2(L, -1, "widget");
+        widget_t *widget = luaA_toudata(L, -1, "widget");
         if(widget)
         {
             widget_node_t w;
