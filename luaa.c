@@ -28,6 +28,7 @@
 #include <lualib.h>
 
 #include <xcb/xcb.h>
+#include <xcb/xtest.h>
 
 #include <basedir_fs.h>
 
@@ -68,6 +69,80 @@ extern const struct luaL_reg awesome_wibox_methods[];
 extern const struct luaL_reg awesome_wibox_meta[];
 extern const struct luaL_reg awesome_key_methods[];
 extern const struct luaL_reg awesome_key_meta[];
+
+/** Send fake events. Usually the current focused client will get it.
+ * \param L The Lua VM state.
+ * \return The number of element pushed on stack.
+ * \luastack
+ * \lvalue A client.
+ * \lparam The event type: key_press, key_release, button_press, button_release
+ * or motion_notify.
+ * \lparam The detail: in case of a key event, this is the keycode to send, in
+ * case of a button event this is the number of the button. In case of a motion
+ * event, this is a boolean value which if true make the coordinates relatives.
+ * \lparam In case of a motion event, this is the X coordinate.
+ * \lparam In case of a motion event, this is the Y coordinate.
+ * \lparam In case of a motion event, this is the screen number to move on.
+ * If not specified, the current one is used.
+ */
+static int
+luaA_root_fake_input(lua_State *L)
+{
+    if(!globalconf.have_xtest)
+    {
+        luaA_warn(L, "XTest extension is not available, cannot fake input.");
+        return 0;
+    }
+
+    size_t tlen;
+    const char *stype = luaL_checklstring(L, 2, &tlen);
+    uint8_t type, detail;
+    int x = 0, y = 0;
+    xcb_window_t root = XCB_NONE;
+
+    switch(a_tokenize(stype, tlen))
+    {
+      case A_TK_KEY_PRESS:
+        type = XCB_KEY_PRESS;
+        detail = luaL_checknumber(L, 3); /* keycode */
+        break;
+      case A_TK_KEY_RELEASE:
+        type = XCB_KEY_RELEASE;
+        detail = luaL_checknumber(L, 3); /* keycode */
+        break;
+      case A_TK_BUTTON_PRESS:
+        type = XCB_BUTTON_PRESS;
+        detail = luaL_checknumber(L, 3); /* button number */
+        break;
+      case A_TK_BUTTON_RELEASE:
+        type = XCB_BUTTON_RELEASE;
+        detail = luaL_checknumber(L, 3); /* button number */
+        break;
+      case A_TK_MOTION_NOTIFY:
+        type = XCB_MOTION_NOTIFY;
+        detail = luaA_checkboolean(L, 3); /* relative to the current position or not */
+        x = luaL_checknumber(L, 4);
+        y = luaL_checknumber(L, 5);
+        if(lua_gettop(L) == 6 && !globalconf.xinerama_is_active)
+        {
+            int screen = luaL_checknumber(L, 6);
+            luaA_checkscreen(screen);
+            root = xutil_screen_get(globalconf.connection, screen)->root;
+        }
+        break;
+      default:
+        return 0;
+    }
+
+    xcb_test_fake_input(globalconf.connection,
+                        type,
+                        detail,
+                        XCB_CURRENT_TIME,
+                        root,
+                        x, y,
+                        0);
+    return 0;
+}
 
 /** Get or set global key bindings.
  * This binding will be available when you'll press keys on root window.
@@ -732,6 +807,7 @@ luaA_init(xdgHandle xdg)
         { "buttons", luaA_root_buttons },
         { "keys", luaA_root_keys },
         { "cursor", luaA_root_cursor },
+        { "fake_input", luaA_root_fake_input },
         { NULL, NULL }
     };
 
