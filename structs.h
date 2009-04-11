@@ -31,7 +31,6 @@
 #include "key.h"
 #include "common/xutil.h"
 #include "common/xembed.h"
-#include "common/refcount.h"
 #include "common/tokenize.h"
 
 /** Windows type */
