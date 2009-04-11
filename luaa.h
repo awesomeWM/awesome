@@ -107,22 +107,6 @@ luaA_dumpstack(lua_State *L)
     fprintf(stderr, "------- Lua stack dump end ------\n");
 }
 
-/** Check that an object is not a NULL reference.
- * \param L The Lua state.
- * \param ud The index of the object in the stack.
- * \param tname The type name.
- * \return A pointer to the object.
- */
-static inline void *
-luaA_checkudata(lua_State *L, int ud, const char *tname)
-{
-    void **p = luaL_checkudata(L, ud, tname);
-    if(*p)
-        return p;
-    luaL_error(L, "invalid object");
-    return NULL;
-}
-
 /** Convert a object to a udata if possible.
  * \param L The Lua VM state.
  * \param ud The index.
