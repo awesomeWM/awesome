@@ -9,8 +9,8 @@ local capi = { widget = widget,
                screen = screen,
                image = image,
                client = client }
-local otable = require("otable")
 local type = type
+local setmetatable = setmetatable
 local pairs = pairs
 local ipairs = ipairs
 local hooks = require("awful.hooks")
@@ -48,7 +48,7 @@ function new(screen, label, buttons)
                                         ["right"] = 0},
                          ["bg_resize"] = true
                        }
-    local data = otable()
+    local data = setmetatable({}, { __mode = 'k' })
     local u = function (s)
         if s == screen then
             taglist_update(s, w, label, buttons, data, widgets)
@@ -64,10 +64,6 @@ function new(screen, label, buttons)
         if prop == "urgent" then
             u(c.screen)
         end
-    end)
-    -- Free data on tag removal
-    hooks.tags.register(function (s, tag, action)
-        if action == "remove" then data[tag] = nil end
     end)
     u(screen)
     return w
