@@ -331,7 +331,11 @@ wibox_position_update(wibox_t *wibox)
     if (wibox->screen == SCREEN_UNDEF)
         return;
 
-    globalconf.screens[wibox->screen].need_arrange = true;
+    /* If this is a non-floating wibox, it limits the space available to clients
+     * and thus clients need to be repositioned.
+     */
+    if (wibox->position != Floating)
+        globalconf.screens[wibox->screen].need_arrange = true;
 
     /* Place wibox'es at the edge of the screen, struts come later. */
     area = screen_area_get(wibox->screen, NULL,
