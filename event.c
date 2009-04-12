@@ -513,7 +513,8 @@ event_handle_enternotify(void *data __attribute__ ((unused)),
         if(wibox->mouse_enter != LUA_REFNIL)
             luaA_dofunction(globalconf.L, wibox->mouse_enter, 0, 0);
     }
-    else if((c = client_getbytitlebarwin(ev->event))
+
+    if((c = client_getbytitlebarwin(ev->event))
        || (c = client_getbywin(ev->event)))
     {
         if(globalconf.hooks.mouse_enter != LUA_REFNIL)

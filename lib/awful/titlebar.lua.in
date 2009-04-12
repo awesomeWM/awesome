@@ -69,7 +69,6 @@ function add(c, args)
         capi.button({ args.modkey }, 3, function (t) mouse.client.resize(t.client) end)
     }
     title:buttons(bts)
-    function title.mouse_enter(s) hooks.user.call('mouse_enter', c) end
 
     local appicon = capi.widget({ type = "imagebox", align = "left" })
     appicon.image = c.icon
@@ -172,7 +171,6 @@ local function button_new(c, name, modkey, theme, state)
     end
 
     button:buttons(bts)
-    function button.mouse_enter(s) hooks.user.call('mouse_enter', c) end
     button.visible = false
     return button
 end
