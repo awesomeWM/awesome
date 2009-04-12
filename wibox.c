@@ -315,12 +315,24 @@ wibox_systray_refresh(wibox_t *wibox)
     }
 }
 
-/** Update the wibox position. It deletes every wibox resources and
- * create them back.
- * \param wibox The wibox.
- */
-void
-wibox_position_update(wibox_t *wibox)
+/* Only called by wibox_position_update() */
+static void
+wibox_position_update_floating(wibox_t *wibox)
+{
+    area_t wingeom = wibox->sw.geometry;
+
+    /* We only make sure the wibox is at least 1x1 pixel big. */
+    wingeom.width = MAX(1, wibox->sw.geometry.width);
+    wingeom.height = MAX(1, wibox->sw.geometry.height);
+
+    if(wingeom.width != wibox->sw.geometry.width
+       || wingeom.height != wibox->sw.geometry.height)
+        wibox_resize(wibox, wingeom.width, wingeom.height);
+}
+
+/* Only called by wibox_position_update() */
+static void
+wibox_position_update_non_floating(wibox_t *wibox)
 {
     area_t area, wingeom = wibox->sw.geometry;
     bool ignore = false;
@@ -484,6 +496,19 @@ wibox_position_update(wibox_t *wibox)
     if(wingeom.x != wibox->sw.geometry.x
         || wingeom.y != wibox->sw.geometry.y)
         wibox_move(wibox, wingeom.x, wingeom.y);
+}
+
+/** Update the wibox position. It deletes every wibox resources and
+ * create them back.
+ * \param wibox The wibox.
+ */
+void
+wibox_position_update(wibox_t *wibox)
+{
+    if(wibox->position == Floating)
+        wibox_position_update_floating(wibox);
+    else
+        wibox_position_update_non_floating(wibox);
 }
 
 /** Get a wibox by its window.
