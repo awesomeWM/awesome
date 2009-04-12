@@ -343,72 +343,70 @@ wibox_position_update_non_floating(wibox_t *wibox)
     if (wibox->screen == SCREEN_UNDEF)
         return;
 
-    /* If this is a non-floating wibox, it limits the space available to clients
-     * and thus clients need to be repositioned.
+    /* This wibox limits the space available to clients and thus clients
+     * need to be repositioned.
      */
-    if (wibox->position != Floating)
-        globalconf.screens[wibox->screen].need_arrange = true;
+    globalconf.screens[wibox->screen].need_arrange = true;
 
     /* Place wibox'es at the edge of the screen, struts come later. */
     area = screen_area_get(wibox->screen, NULL,
                            &globalconf.screens[wibox->screen].padding, false);
 
     /* Top and Bottom wibox_t have prio */
-    if(wibox->position != Floating)
-        foreach(_w, globalconf.screens[wibox->screen].wiboxes)
+    foreach(_w, globalconf.screens[wibox->screen].wiboxes)
+    {
+        wibox_t *w = *_w;
+        /* Ignore every wibox after me that is in the same position */
+        if(wibox == w)
         {
-            wibox_t *w = *_w;
-            /* Ignore every wibox after me that is in the same position */
-            if(wibox == w)
+            ignore = true;
+            continue;
+        }
+        else if((ignore && wibox->position == w->position) || !w->isvisible)
+            continue;
+        switch(w->position)
+        {
+          case Floating:
+            break;
+          case Left:
+            if(wibox->position == Left)
+                area.x += wibox->sw.geometry.height;
+            break;
+          case Right:
+            if(wibox->position == Right)
+                area.x -= wibox->sw.geometry.height;
+            break;
+          case Top:
+            switch(wibox->position)
             {
-                ignore = true;
-                continue;
-            }
-            else if((ignore && wibox->position == w->position) || !w->isvisible)
-                continue;
-            switch(w->position)
-            {
-              case Floating:
+              case Top:
+                area.y += w->sw.geometry.height;
                 break;
               case Left:
-                if(wibox->position == Left)
-                    area.x += wibox->sw.geometry.height;
-                break;
               case Right:
-                if(wibox->position == Right)
-                    area.x -= wibox->sw.geometry.height;
+                area.height -= w->sw.geometry.height;
+                area.y += w->sw.geometry.height;
                 break;
-              case Top:
-                switch(wibox->position)
-                {
-                  case Top:
-                    area.y += w->sw.geometry.height;
-                    break;
-                  case Left:
-                  case Right:
-                    area.height -= w->sw.geometry.height;
-                    area.y += w->sw.geometry.height;
-                    break;
-                  default:
-                    break;
-                }
-                break;
-              case Bottom:
-                switch(wibox->position)
-                {
-                  case Bottom:
-                    area.y -= w->sw.geometry.height;
-                    break;
-                  case Left:
-                  case Right:
-                    area.height -= w->sw.geometry.height;
-                    break;
-                  default:
-                    break;
-                }
+              default:
                 break;
             }
+            break;
+          case Bottom:
+            switch(wibox->position)
+            {
+              case Bottom:
+                area.y -= w->sw.geometry.height;
+                break;
+              case Left:
+              case Right:
+                area.height -= w->sw.geometry.height;
+                break;
+              default:
+                break;
+            }
+            break;
         }
+    }
 
     /* The "length" of a wibox is always chosen to be the optimal size (non-floating).
      * The "width" of a wibox is kept if it exists.
@@ -483,8 +481,9 @@ wibox_position_update_non_floating(wibox_t *wibox)
         }
         break;
       case Floating:
-        wingeom.width = MAX(1, wibox->sw.geometry.width);
-        wingeom.height = MAX(1, wibox->sw.geometry.height);
+        /* Floating wiboxes are not handled here, but in
+         * wibox_position_update_floating(), but the compiler insists...
+         */
         break;
     }
 
