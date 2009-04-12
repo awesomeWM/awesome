@@ -21,6 +21,7 @@ local hooks = require("awful.hooks")
 local util = require("awful.util")
 local widget = require("awful.widget")
 local mouse = require("awful.mouse")
+local client = require("awful.client")
 
 --- Titlebar module for awful
 module("awful.titlebar")
@@ -251,6 +252,23 @@ local function select_state(c,p,a)
     end
 end
 
+-- Select a state for a client based on whether it's floating or not
+-- @param c      The client of the titlebar
+-- @param p      The property that has changed
+local function select_state_floating(c,p)
+    if not c then return end
+    if capi.client.focus == c then
+        if client.floating.get(c) then
+            return "f/a"
+        end
+        return "f/i"
+    end
+    if client.floating.get(c) then
+        return "n/a"
+    end
+    return "n/i"
+end
+
 -- Select a state for a client based on whether it's maximized or not
 -- @param c      The client of the titlebar
 -- @param p      The property that has changed
@@ -333,8 +351,23 @@ local maximized_buttons = button_group("maximized",
                                      { idx = "n/a", img = "normal_active", action = function(t) t.client.maximized_horizontal = false ; t.client.maximized_vertical = false ; update(t.client) end},
                                      { idx = "f/a", img = "focus_active", action = function(t) t.client.maximized_horizontal = false ; t.client.maximized_vertical = false ; update(t.client) end}
                                   )
+local function floating_update(t)
+    client.floating.toggle(t.client)
+end
 
-button_groups = {  ontop_buttons, sticky_buttons, maximized_buttons, close_buttons}
+local floating_buttons = button_group("floating",
+                                     { align = "right"},
+                                     select_state_floating,
+                                     { idx = "n/i", img = "normal_inactive", action = floating_update },
+                                     { idx = "f/i", img = "focus_inactive", action = floating_update },
+                                     { idx = "n/a", img = "normal_active", action = floating_update },
+                                     { idx = "f/a", img = "focus_active", action = floating_update })
+
+button_groups = { ontop_buttons,
+                  sticky_buttons,
+                  maximized_buttons,
+                  floating_buttons,
+                  close_buttons }
 
 -- Register standards hooks
 hooks.focus.register(update)
