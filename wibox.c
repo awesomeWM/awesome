@@ -359,24 +359,12 @@ wibox_position_update(wibox_t *wibox)
               case Floating:
                 break;
               case Left:
-                switch(wibox->position)
-                {
-                  case Left:
+                if(wibox->position == Left)
                     area.x += wibox->sw.geometry.height;
-                    break;
-                  default:
-                    break;
-                }
                 break;
               case Right:
-                switch(wibox->position)
-                {
-                  case Right:
+                if(wibox->position == Right)
                     area.x -= wibox->sw.geometry.height;
-                    break;
-                  default:
-                    break;
-                }
                 break;
               case Top:
                 switch(wibox->position)
