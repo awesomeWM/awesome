@@ -457,15 +457,14 @@ event_handle_leavenotify(void *data __attribute__ ((unused)),
     if(ev->mode != XCB_NOTIFY_MODE_NORMAL)
         return 0;
 
-    if((c = client_getbywin(ev->event)))
-    {
+    if((c = client_getbytitlebarwin(ev->event)) || (c = client_getbywin(ev->event)))
         if(globalconf.hooks.mouse_leave != LUA_REFNIL)
         {
             luaA_client_userdata_new(globalconf.L, c);
             luaA_dofunction(globalconf.L, globalconf.hooks.mouse_leave, 1, 0);
         }
-    }
-    else if((wibox = wibox_getbywin(ev->event)))
+
+    if((wibox = wibox_getbywin(ev->event)))
     {
         if(wibox->mouse_over)
         {
