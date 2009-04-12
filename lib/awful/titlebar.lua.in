@@ -319,38 +319,52 @@ end
 --                    button 1
 
 local close_buttons = button_group("close",
-                                   { align = "left"},
+                                   { align = "left" },
                                    select_state_focus,
-                                   { idx = "n", img = "normal", action = function (t) t.client:kill() end},
-                                   { idx = "f", img = "focus",  action = function (t) t.client:kill() end}
-                                )
+                                   { idx = "n", img = "normal",
+                                     action = function (t) t.client:kill() end },
+                                   { idx = "f", img = "focus",
+                                     action = function (t) t.client:kill() end })
 
 local ontop_buttons = button_group("ontop",
-                                   { align = "right"},
+                                   { align = "right" },
                                    function(c,p) return select_state(c, p, "ontop") end,
-                                   { idx = "n/i", img = "normal_inactive", action = function(t) t.client.ontop = true ; update(t.client) end},
-                                   { idx = "f/i", img = "focus_inactive", action = function(t) t.client.ontop = true ; update(t.client) end},
-                                   { idx = "n/a", img = "normal_active", action = function(t) t.client.ontop = false ; update(t.client) end},
-                                   { idx = "f/a", img = "focus_active", action = function(t) t.client.ontop = false ; update(t.client) end}
-                                )
+                                   { idx = "n/i", img = "normal_inactive",
+                                     action = function(t) t.client.ontop = true end },
+                                   { idx = "f/i", img = "focus_inactive",
+                                     action = function(t) t.client.ontop = true end },
+                                   { idx = "n/a", img = "normal_active",
+                                     action = function(t) t.client.ontop = false end },
+                                   { idx = "f/a", img = "focus_active",
+                                     action = function(t) t.client.ontop = false end })
 
 local sticky_buttons = button_group("sticky",
-                                    { align = "right"},
+                                    { align = "right" },
                                     function(c,p) return select_state(c,p,"sticky") end,
-                                    { idx = "n/i", img = "normal_inactive", action = function(t) t.client.sticky = true ; update(t.client) end},
-                                    { idx = "f/i", img = "focus_inactive", action = function(t) t.client.sticky = true ; update(t.client) end},
-                                    { idx = "n/a", img = "normal_active", action = function(t) t.client.sticky = false ; update(t.client) end},
-                                    { idx = "f/a", img = "focus_active", action = function(t) t.client.sticky = false ; update(t.client) end}
-                                 )
+                                    { idx = "n/i", img = "normal_inactive",
+                                      action = function(t) t.client.sticky = true end },
+                                    { idx = "f/i", img = "focus_inactive",
+                                      action = function(t) t.client.sticky = true end },
+                                    { idx = "n/a", img = "normal_active",
+                                      action = function(t) t.client.sticky = false end },
+                                    { idx = "f/a", img = "focus_active",
+                                      action = function(t) t.client.sticky = false end })
 
 local maximized_buttons = button_group("maximized",
-                                     { align = "right"},
+                                     { align = "right" },
                                      select_state_maximized,
-                                     { idx = "n/i", img = "normal_inactive", action = function(t) t.client.maximized_horizontal = true ; t.client.maximized_vertical = true ; update(t.client) end},
-                                     { idx = "f/i", img = "focus_inactive", action = function(t) t.client.maximized_horizontal = true ; t.client.maximized_vertical = true ; update(t.client) end},
-                                     { idx = "n/a", img = "normal_active", action = function(t) t.client.maximized_horizontal = false ; t.client.maximized_vertical = false ; update(t.client) end},
-                                     { idx = "f/a", img = "focus_active", action = function(t) t.client.maximized_horizontal = false ; t.client.maximized_vertical = false ; update(t.client) end}
-                                  )
+                                     { idx = "n/i", img = "normal_inactive",
+                                       action = function(t) t.client.maximized_horizontal = true
+                                                            t.client.maximized_vertical = true end },
+                                     { idx = "f/i", img = "focus_inactive",
+                                       action = function(t) t.client.maximized_horizontal = true
+                                                            t.client.maximized_vertical = true end },
+                                     { idx = "n/a", img = "normal_active",
+                                       action = function(t) t.client.maximized_horizontal = false
+                                                            t.client.maximized_vertical = false end },
+                                     { idx = "f/a", img = "focus_active",
+                                       action = function(t) t.client.maximized_horizontal = false
+                                                            t.client.maximized_vertical = false end })
 local function floating_update(t)
     client.floating.toggle(t.client)
 end
