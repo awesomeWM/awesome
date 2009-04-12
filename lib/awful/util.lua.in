@@ -87,7 +87,7 @@ end
 --- Eval Lua code.
 -- @return The return value of Lua code.
 function eval(s)
-    return assert(loadstring("return " .. s))()
+    return assert(loadstring(s))()
 end
 
 local xml_entity_names = { ["'"] = "&apos;", ["\""] = "&quot;", ["<"] = "&lt;", [">"] = "&gt;", ["&"] = "&amp;" };
