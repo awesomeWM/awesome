@@ -28,6 +28,9 @@ module("awful.titlebar")
 -- Privata data
 local data = otable()
 
+-- Predeclaration for buttons
+local button_groups
+
 --- Create a standard titlebar.
 -- @param c The client.
 -- @param args Arguments.
@@ -71,52 +74,28 @@ function add(c, args)
     local appicon = capi.widget({ type = "imagebox", align = "left" })
     appicon.image = c.icon
 
-    -- Also redirect events for appicon (So the entire titlebar behaves consistently)
-    appicon:buttons(bts)
-    function appicon.mouse_enter(s) hooks.user.call('mouse_enter', c) end
-
-    local closef
-    if theme.titlebar_close_button_focus then
-        closef = widget.button({ align = "right",
-                                 image = image(theme.titlebar_close_button_focus) })
-    end
-
-    local close
-    if theme.titlebar_close_button_normal then
-        close = widget.button({ align = "right",
-                                image = image(theme.titlebar_close_button_normal) })
-    end
-
-    if close or closef then
-        -- Bind kill button, also allow moving and resizing on this widget
-        local bts =
-        {
-            capi.button({ }, 1, nil, function (t) t.client:kill() end),
-            capi.button({ args.modkey }, 1, function (t) mouse.client.move(t.client) end),
-            capi.button({ args.modkey }, 3, function (t) mouse.client.resize(t.client) end)
-        }
-        if close then
-            local rbts = close:buttons()
-            for k, v in pairs(rbts) do
-                bts[#bts + 1] = v
+    -- for each button group, call create for the client.
+    -- if a button set is created add the set to the
+    -- data[c].button_sets for late updates and add the
+    -- individual buttons to the array part of the widget
+    -- list
+    local widget_list = { appicon = appicon, title = title }
+    local iw = #widget_list
+    local is = 1
+    data[c].button_sets = {}
+    for i = 1, #button_groups do
+        local set = button_groups[i].create(c, modkey, theme)
+        if (set) then
+            data[c].button_sets[is] = set
+            is = is + 1
+            for n,b in pairs(set) do
+                widget_list[iw] = b
+                iw = iw + 1
             end
-            close:buttons(bts)
-            function close.mouse_enter(s) hooks.user.call('mouse_enter', c) end
-        end
-        if closef then
-            local rbts = closef:buttons()
-            for k, v in pairs(rbts) do
-                bts[#bts + 1] = v
-            end
-            closef:buttons(bts)
-            -- Needed for sloppy focus beheaviour
-            function closef.mouse_enter(s) hooks.user.call('mouse_enter', c) end
         end
     end
 
-    tb.widgets = { appicon = appicon, title = title,
-                   closef = closef, close = close }
-
+    tb.widgets = widget_list
     c.titlebar = tb
 
     update(c)
@@ -126,7 +105,7 @@ end
 -- @param c The client to update.
 -- @param prop The property name which has changed.
 function update(c, prop)
-    if c.titlebar and data[c] then
+     if c.titlebar and data[c] then
         local widgets = c.titlebar.widgets
         if prop == "name" then
             if widgets.title then
@@ -140,13 +119,15 @@ function update(c, prop)
         if capi.client.focus == c then
             c.titlebar.fg = data[c].fg_focus
             c.titlebar.bg = data[c].bg_focus
-            if widgets.closef then widgets.closef.visible = true end
-            if widgets.close then widgets.close.visible = false end
         else
             c.titlebar.fg = data[c].fg
             c.titlebar.bg = data[c].bg
-            if widgets.closef then widgets.closef.visible = false end
-            if widgets.close then widgets.close.visible = true end
+        end
+
+        -- iterated of all registered button_sets and update
+        local sets = data[c].button_sets
+        for i = 1, #sets do
+            sets[i].update(c,prop)
         end
     end
 end
@@ -157,6 +138,205 @@ function remove(c)
     c.titlebar = nil
     data[c] = nil
 end
+
+-- Create a new button for the toolbar
+-- @param c      The client of the titlebar
+-- @param name   The base name of the button (i.e. close)
+-- @param modkey ... you know that one, don't you?
+-- @param theme  The theme from beautifull. Used to get the image paths
+-- @param state  The state the button is associated to. Containse path the action and info about the image
+local function button_new(c, name, modkey, theme, state)
+    local bts =
+    {
+        capi.button({ }, 1, nil,  state.action),
+        capi.button({ modkey }, 1, function (t) mouse.client.move(t.client) end),
+        capi.button({ modkey }, 3, function (t) mouse.client.resize(t.client) end)
+    }
+
+    -- get the image path from the theme. Only return a button if we find an image
+    local img
+    img = "titlebar_" .. name .. "_button_" .. state.img
+    img = theme[img]
+    if not img then return end
+    img = image(img)
+    if not img then return end
+
+    -- now create the button
+    local bname = name .. "_" .. state.idx
+    local button = widget.button({ image = img })
+    if not button then return end
+    local rbts = button:buttons()
+
+    for k, v in pairs(rbts) do
+        bts[#bts + 1] = v
+    end
+
+    button:buttons(bts)
+    function button.mouse_enter(s) hooks.user.call('mouse_enter', c) end
+    button.visible = false
+    return button
+end
+
+-- Update the buttons in a button group
+-- @param s      The button group to update
+-- @param c      The client of the titlebar
+-- @param p      The property that has changed
+local function button_group_update(s,c,p)
+    -- hide the currently active button, get the new state and show the new button
+    local n = s.select_state(c,p)
+    if n == nil then return end
+    if (s.active ~= nil) then  s.active.visible = false end
+    s.active = s.buttons[n]
+    s.active.visible = true
+end
+
+-- Create all buttons in a group
+-- @param c      The client of the titlebar
+-- @param group  The button group to create the buttons for
+-- @param modkey ...
+-- @param theme  Theme for the image paths
+local function button_group_create(c, group, modkey, theme )
+    local s = {}
+    s.name = group.name
+    s.select_state = group.select_state
+    s.buttons = {}
+    for n,state in pairs(group.states) do
+        s.buttons[n] = button_new(c, s.name, modkey, theme, state)
+        if (s.buttons[n] == nil) then return end
+        for a,v in pairs(group.attributes) do
+            s.buttons[n][a] = v
+        end
+    end
+    function s.update(c,p) button_group_update(s,c,p) end
+    return s
+end
+
+-- Builds a new button group
+-- @param name   The base name for the buttons in the group (i.e. "close")
+-- @param attrs  Common attributes for the buttons (i.e. {align = "right")
+-- @param sfn    State select function.
+-- @param args   The states of the button
+local function button_group(name, attrs, sfn, ...)
+    local s = {}
+    s.name = name
+    s.select_state = sfn
+    s.attributes = attrs
+    s.states = {}
+
+    for i = 1, #arg do
+        local state = arg[i]
+        s.states[state.idx] = state
+    end
+
+    function s.create(c,modkey, theme) return button_group_create(c,s,modkey, theme) end
+    return s
+end
+
+-- Select a state for a client based on an attribute of the client and whether it has focus
+-- @param c      The client of the titlebar
+-- @param p      The property that has changed
+-- @param a      The property to check
+local function select_state(c,p,a)
+    if (c == nil) then return "n/i" end
+    if capi.client.focus == c then
+        if c[a] then
+            return "f/a"
+        else
+            return "f/i"
+        end
+    else
+        if c[a] then
+            return "n/a"
+        else
+            return "n/i"
+        end
+    end
+end
+
+-- Select a state for a client based on whether it's maximized or not
+-- @param c      The client of the titlebar
+-- @param p      The property that has changed
+local function select_state_maximized(c,p)
+    if (c == nil) then return "n/i" end
+    if capi.client.focus == c then
+        if c.maximized_horizontal or c.maximized_vertical then
+            return "f/a"
+        else
+            return "f/i"
+        end
+    else
+        if c.maximized_horizontal or c.maximized_vertical then
+            return "n/a"
+        else
+            return "n/i"
+        end
+    end
+end
+
+-- Select a state for a client based on whether it has focus or not
+-- @param c      The client of the titlebar
+-- @param p      The property that has changed
+local function select_state_focus(c,p)
+    if c and capi.client.focus == c then
+        return "f"
+    end
+    return "n"
+end
+
+-- These are the predefined button groups
+-- A short explanation using 'close_buttons' as an example:
+-- "close" : name of the button, the images for this button are taken from the
+--           theme variables titlebar_close_button_...
+-- { align ... :  attributes of all the buttons
+-- select_state_focus : This function returns a short string used to describe
+--                      the state. In this case either "n" or "f" depending on
+--                      the focus state of the client. These strings can be
+--                      choosen freely but the< must match one of the idx fuekds
+--                      of the states below
+--  { idx = "n" ... : This is the state of the button for the 'unfocussed'
+--                    (normal) state. The idx = "n" parameter connects this
+--                    button to the return value of the 'select_state_focus'
+--                    function. The img = "normal" parameter is used to
+--                    determine its image. In this case the iamge is taken from
+--                    the theme variable "titlebar_close_button_normal".
+--                    Finally the last parameter is the action for mouse
+--                    button 1
+
+local close_buttons = button_group("close",
+                                   { align = "left"},
+                                   select_state_focus,
+                                   { idx = "n", img = "normal", action = function (t) t.client:kill() end},
+                                   { idx = "f", img = "focus",  action = function (t) t.client:kill() end}
+                                )
+
+local ontop_buttons = button_group("ontop",
+                                   { align = "right"},
+                                   function(c,p) return select_state(c, p, "ontop") end,
+                                   { idx = "n/i", img = "normal_inactive", action = function(t) t.client.ontop = true ; update(t.client) end},
+                                   { idx = "f/i", img = "focus_inactive", action = function(t) t.client.ontop = true ; update(t.client) end},
+                                   { idx = "n/a", img = "normal_active", action = function(t) t.client.ontop = false ; update(t.client) end},
+                                   { idx = "f/a", img = "focus_active", action = function(t) t.client.ontop = false ; update(t.client) end}
+                                )
+
+local sticky_buttons = button_group("sticky",
+                                    { align = "right"},
+                                    function(c,p) return select_state(c,p,"sticky") end,
+                                    { idx = "n/i", img = "normal_inactive", action = function(t) t.client.sticky = true ; update(t.client) end},
+                                    { idx = "f/i", img = "focus_inactive", action = function(t) t.client.sticky = true ; update(t.client) end},
+                                    { idx = "n/a", img = "normal_active", action = function(t) t.client.sticky = false ; update(t.client) end},
+                                    { idx = "f/a", img = "focus_active", action = function(t) t.client.sticky = false ; update(t.client) end}
+                                 )
+
+local maximized_buttons = button_group("maximized",
+                                     { align = "right"},
+                                     select_state_maximized,
+                                     { idx = "n/i", img = "normal_inactive", action = function(t) t.client.maximized_horizontal = true ; t.client.maximized_vertical = true ; update(t.client) end},
+                                     { idx = "f/i", img = "focus_inactive", action = function(t) t.client.maximized_horizontal = true ; t.client.maximized_vertical = true ; update(t.client) end},
+                                     { idx = "n/a", img = "normal_active", action = function(t) t.client.maximized_horizontal = false ; t.client.maximized_vertical = false ; update(t.client) end},
+                                     { idx = "f/a", img = "focus_active", action = function(t) t.client.maximized_horizontal = false ; t.client.maximized_vertical = false ; update(t.client) end}
+                                  )
+
+button_groups = {  ontop_buttons, sticky_buttons, maximized_buttons, close_buttons}
 
 -- Register standards hooks
 hooks.focus.register(update)
