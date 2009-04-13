@@ -132,6 +132,7 @@ static void
 textbox_destructor(widget_t *w)
 {
     textbox_data_t *d = w->data;
+    image_unref(globalconf.L, d->bg_image);
     draw_text_context_wipe(&d->data);
     p_delete(&d);
 }
