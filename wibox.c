@@ -40,6 +40,7 @@ luaA_wibox_gc(lua_State *L)
     wibox_t *wibox = luaL_checkudata(L, 1, "wibox");
     simplewindow_wipe(&wibox->sw);
     button_array_wipe(&wibox->buttons);
+    image_unref(L, wibox->bg_image);
     luaL_unref(L, LUA_REGISTRYINDEX, wibox->widgets_table);
     luaL_unref(L, LUA_REGISTRYINDEX, wibox->mouse_enter);
     luaL_unref(L, LUA_REGISTRYINDEX, wibox->mouse_leave);
