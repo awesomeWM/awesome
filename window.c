@@ -137,10 +137,7 @@ window_opacity_get(xcb_window_t win)
 
     prop_r = xcb_get_property_reply(globalconf.connection, prop_c, NULL);
 
-    if(!prop_r || !prop_r->value_len || prop_r->format != 32)
-        goto bailout;
-
-    if(prop_r->value_len)
+    if(prop_r && prop_r->value_len && prop_r->format == 32)
     {
         unsigned int *data = xcb_get_property_value(prop_r);
         unsigned int value = *data;
@@ -148,7 +145,6 @@ window_opacity_get(xcb_window_t win)
         return (double) value / (double) 0xffffffff;
     }
 
-  bailout:
     p_delete(&prop_r);
     return -1;
 }
