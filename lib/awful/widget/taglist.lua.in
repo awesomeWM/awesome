@@ -134,25 +134,13 @@ function label.all(t, args)
             end
         end
     end
-    local taglist_squares = false
-    if taglist_squares_sel or taglist_squares_unsel then
-        taglist_squares = true
-    end
-    if t.name and not tag.getproperty(t, "icon_only") then
+    if not tag.getproperty(t, "icon_only") then
         if fg_color then
             text = text .. "<span color='"..util.color_strip_alpha(fg_color).."'>"
-            if taglist_squares then
-                text = text .. " "
-            end
-            text = text..util.escape(t.name).." </span>"
+            text = " " .. text..util.escape(t.name).." </span>"
         else
-            if taglist_squares then
-                text = text .. " "
-            end
-            text = text .. util.escape(t.name) .. " "
+            text = text .. " " .. util.escape(t.name) .. " "
         end
-    elseif taglist_squares then
-        text = text .. " "
     end
     text = text .. "</span>"
     if tag.geticon(t) and type(tag.geticon(t)) == "image" then
