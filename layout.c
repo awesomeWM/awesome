@@ -47,13 +47,22 @@ arrange(int screen)
         /* Restore titlebar before client, so geometry is ok again. */
         if(titlebar_isvisible(c, screen))
             titlebar_unban(c->titlebar);
-        else if(c->screen == screen)
-            titlebar_ban(c->titlebar);
 
         if(client_isvisible(c, screen))
             client_unban(c);
+    }
+
+    /* Some people disliked the short flicker of background, so we first unban everything.
+     * Afterwards we ban everything we don't want. This should avoid that. */
+    foreach(_c, globalconf.clients)
+    {
+        client_t *c = *_c;
+
+        if(!titlebar_isvisible(c, screen) && c->screen == screen)
+            titlebar_ban(c->titlebar);
+
         /* we don't touch other screens windows */
-        else if(c->screen == screen)
+        if(!client_isvisible(c, screen) && c->screen == screen)
             client_ban(c);
     }
 
