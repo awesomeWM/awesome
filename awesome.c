@@ -273,33 +273,20 @@ xerror(void *data __attribute__ ((unused)),
        xcb_connection_t *c __attribute__ ((unused)),
        xcb_generic_error_t *e)
 {
-    xutil_error_t err;
-
-    if(!xutil_error_init(e, &err))
+    /* ignore this */
+    if(e->error_code == XCB_EVENT_ERROR_BAD_WINDOW
+       || (e->error_code == XCB_EVENT_ERROR_BAD_MATCH
+           && XCB_EVENT_REQUEST_TYPE(e) == XCB_SET_INPUT_FOCUS)
+       || (e->error_code == XCB_EVENT_ERROR_BAD_VALUE
+           && XCB_EVENT_REQUEST_TYPE(e) == XCB_KILL_CLIENT)
+       || (XCB_EVENT_REQUEST_TYPE(e) == XCB_CONFIGURE_WINDOW
+           && e->error_code == XCB_EVENT_ERROR_BAD_MATCH))
         return 0;
 
-    /* ignore this */
-    if(e->error_code == XUTIL_BAD_WINDOW
-       || (e->error_code == XUTIL_BAD_MATCH && err.request_code == XCB_SET_INPUT_FOCUS)
-       || (e->error_code == XUTIL_BAD_VALUE && err.request_code == XCB_KILL_CLIENT)
-       || (err.request_code == XCB_CONFIGURE_WINDOW && e->error_code == XUTIL_BAD_MATCH))
-        goto bailout;
+    warn("X error: request=%s, error=%s",
+         xcb_event_get_request_label(XCB_EVENT_REQUEST_TYPE(e)),
+         xcb_event_get_error_label(e->error_code));
 
-    warn("X error: request=%s, error=%s", err.request_label, err.error_label);
-
-    /*
-     * Xlib code was using default X error handler, namely
-     * '_XDefaultError()', which displays more informations about the
-     * error and also exit if 'error_code'' equals to
-     * 'BadImplementation'
-     *
-     * \todo display more informations about the error (like the Xlib default error handler)
-     */
-    if(e->error_code == XUTIL_BAD_IMPLEMENTATION)
-       fatal("X error: request=%s, error=%s", err.request_label, err.error_label);
-
-  bailout:
-    xutil_error_wipe(&err);
     return 0;
 }
 
