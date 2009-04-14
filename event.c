@@ -57,7 +57,7 @@ event_handle_mouse_button(client_t *c,
 {
     for(int i = 0; i < buttons->len; i++)
         if(button == buttons->tab[i]->button
-           && XUTIL_MASK_CLEAN(state) == buttons->tab[i]->mod)
+           && state == buttons->tab[i]->mod)
             switch(type)
             {
               case XCB_BUTTON_PRESS:
@@ -147,7 +147,7 @@ event_handle_button(void *data, xcb_connection_t *connection, xcb_button_press_e
 
         for(int i = 0; i < b->len; i++)
             if(ev->detail == b->tab[i]->button
-               && XUTIL_MASK_CLEAN(ev->state) == b->tab[i]->mod)
+               && ev->state == b->tab[i]->mod)
                 switch(ev->response_type)
                 {
                   case XCB_BUTTON_PRESS:
@@ -177,7 +177,7 @@ event_handle_button(void *data, xcb_connection_t *connection, xcb_button_press_e
 
             for(int i = 0; i < b->len; i++)
                 if(ev->detail == b->tab[i]->button
-                   && XUTIL_MASK_CLEAN(ev->state) == b->tab[i]->mod)
+                   && ev->state == b->tab[i]->mod)
                     switch(ev->response_type)
                     {
                       case XCB_BUTTON_PRESS:

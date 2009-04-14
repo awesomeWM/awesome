@@ -105,21 +105,10 @@ window_configure(xcb_window_t win, area_t geometry, int border)
 void
 window_buttons_grab(xcb_window_t win, button_array_t *buttons)
 {
-    for(int i = 0; i < buttons->len; i++)
-    {
+    foreach(b, *buttons)
         xcb_grab_button(globalconf.connection, false, win, BUTTONMASK,
                         XCB_GRAB_MODE_SYNC, XCB_GRAB_MODE_ASYNC, XCB_NONE, XCB_NONE,
-                        buttons->tab[i]->button, buttons->tab[i]->mod);
-        xcb_grab_button(globalconf.connection, false, win, BUTTONMASK,
-                        XCB_GRAB_MODE_SYNC, XCB_GRAB_MODE_ASYNC, XCB_NONE, XCB_NONE,
-                        buttons->tab[i]->button, buttons->tab[i]->mod | XCB_MOD_MASK_LOCK);
-        xcb_grab_button(globalconf.connection, false, win, BUTTONMASK,
-                        XCB_GRAB_MODE_SYNC, XCB_GRAB_MODE_ASYNC, XCB_NONE, XCB_NONE,
-                        buttons->tab[i]->button, buttons->tab[i]->mod | XCB_MOD_MASK_2);
-        xcb_grab_button(globalconf.connection, false, win, BUTTONMASK,
-                        XCB_GRAB_MODE_SYNC, XCB_GRAB_MODE_ASYNC, XCB_NONE, XCB_NONE,
-                        buttons->tab[i]->button, buttons->tab[i]->mod | XCB_MOD_MASK_2 | XCB_MOD_MASK_LOCK);
-    }
+                        (*b)->button, (*b)->mod);
 }
 
 /** Get the opacity of a window.

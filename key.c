@@ -91,20 +91,6 @@ key_cmp(const keyb_t *k1, const keyb_t *k2)
     return k1->mod == k2->mod ? 0 : (k2->mod > k1->mod ? 1 : -1);
 }
 
-static void
-window_grabkey_keycode(xcb_window_t win, uint16_t mod, xcb_keycode_t kc)
-{
-    xcb_grab_key(globalconf.connection, true, win,
-                 mod, kc, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC);
-    xcb_grab_key(globalconf.connection, true, win,
-                 mod | XCB_MOD_MASK_LOCK, kc, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC);
-    xcb_grab_key(globalconf.connection, true, win,
-                 mod | XCB_MOD_MASK_2, kc, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC);
-    xcb_grab_key(globalconf.connection, true, win,
-                 mod | XCB_MOD_MASK_2 | XCB_MOD_MASK_LOCK, kc, XCB_GRAB_MODE_ASYNC,
-                 XCB_GRAB_MODE_ASYNC);
-}
-
 /** Grab key on a window.
  * \param win The window.
  * \param k The key.
@@ -113,14 +99,16 @@ static void
 window_grabkey(xcb_window_t win, keyb_t *k)
 {
     if(k->keycode)
-       window_grabkey_keycode(win, k->mod, k->keycode);
+        xcb_grab_key(globalconf.connection, true, win,
+                     k->mod, k->keycode, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC);
     else if(k->keysym)
     {
         xcb_keycode_t *keycodes = xcb_key_symbols_get_keycode(globalconf.keysyms, k->keysym);
         if(keycodes)
         {
             for(xcb_keycode_t *kc = keycodes; *kc; kc++)
-               window_grabkey_keycode(win, k->mod, *kc);
+                xcb_grab_key(globalconf.connection, true, win,
+                             k->mod, *kc, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC);
             p_delete(&keycodes);
         }
     }
@@ -243,7 +231,7 @@ keyb_t *
 key_find(keybindings_t *keys, const xcb_key_press_event_t *ev)
 {
     const key_array_t *arr = &keys->by_sym;
-    int l, r, mod = XUTIL_MASK_CLEAN(ev->state);
+    int l, r;
     xcb_keysym_t keysym;
 
     /* get keysym ignoring shift and mod5 */
@@ -255,7 +243,7 @@ key_find(keybindings_t *keys, const xcb_key_press_event_t *ev)
     while(l < r)
     {
         int i = (r + l) / 2;
-        switch(key_ev_cmp(keysym, ev->detail, mod, arr->tab[i]))
+        switch(key_ev_cmp(keysym, ev->detail, ev->state, arr->tab[i]))
         {
           case -1: /* ev < arr->tab[i] */
             r = i;

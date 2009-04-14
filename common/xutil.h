@@ -32,8 +32,6 @@
 
 #include "array.h"
 
-#define XUTIL_MASK_CLEAN(mask) (mask & ~(XCB_MOD_MASK_LOCK | XCB_MOD_MASK_2))
-
 bool xutil_text_prop_get(xcb_connection_t *, xcb_window_t, xcb_atom_t, char **, ssize_t *);
 
 /** Set the same handler for all errors */

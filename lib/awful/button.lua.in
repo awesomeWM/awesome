@@ -1,0 +1,41 @@
+---------------------------------------------------------------------------
+-- @author Julien Danjou &lt;julien@danjou.info&gt;
+-- @copyright 2009 Julien Danjou
+-- @release @AWESOME_VERSION@
+---------------------------------------------------------------------------
+
+-- Grab environment we need
+local setmetatable = setmetatable
+local ipairs = ipairs
+local unpack = unpack
+local capi = { button = button }
+local util = require("awful.util")
+
+--- Button helper for awful
+module("awful.button")
+
+--- Modifiers to ignore
+ignore_modifiers = { "Lock", "Mod2" }
+
+--- Create a new button to use as binding.
+-- This function is useful to create several buttons from one, because it will use
+-- the ignore_modifier variable to create more button with or without the ignored
+-- modifiers activated.
+-- For example if you want to ignore CapsLock in your buttonbinding (which is
+-- ignored by default by this function), creatina button binding with this function
+-- will return 2 button objects: one with CapsLock on, and the other one with
+-- CapsLock off.
+-- @see C api button() function for parameters.
+-- @return One or several button objects.
+local function new(_, mod, ...)
+    local ret = {}
+    local subsets = util.subsets(ignore_modifiers)
+    for _, set in ipairs(subsets) do
+        ret[#ret + 1] = capi.button(util.table.concat(mod, set), unpack(arg))
+    end
+    return unpack(ret)
+end
+
+setmetatable(_M, { __call = new })
+
+-- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
