@@ -34,76 +34,14 @@
 
 #define XUTIL_MASK_CLEAN(mask) (mask & ~(XCB_MOD_MASK_LOCK | XCB_MOD_MASK_2))
 
-/* X error codes */
-
-/* Everything's okay */
-#define XUTIL_SUCCESS 0
-/* Bad request code */
-#define XUTIL_BAD_REQUEST 1
-/* Int parameter out of range */
-#define XUTIL_BAD_VALUE 2
-/* Parameter not a Window */
-#define XUTIL_BAD_WINDOW 3
-/* Parameter not a Pixmap */
-#define XUTIL_BAD_PIXMAP 4
-/* Parameter not an Atom */
-#define XUTIL_BAD_ATOM 5
-/* Parameter not a Cursor */
-#define XUTIL_BAD_CURSOR 6
-/* Parameter not a Font */
-#define XUTIL_BAD_FONT 7
-/* Parameter mismatch */
-#define XUTIL_BAD_MATCH 8
-/* Parameter not a Pixmap or Window */
-#define XUTIL_BAD_DRAWABLE 9
-/* Depending on context:
-   - key/button already grabbed
-   - attempt to free an illegal
-     cmap entry
-   - attempt to store into a read-only
-     color map entry.
-   - attempt to modify the access control
-     list from other than the local host.
-*/
-#define XUTIL_BAD_ACCESS 10
-/* Insufficient resources */
-#define XUTIL_BAD_ALLOC 11
-/* No such colormap */
-#define XUTIL_BAD_COLOR 12
-/* Parameter not a GC */
-#define XUTIL_BAD_GC 13
-/* Choice not in range or already used */
-#define XUTIL_BAD_ID_CHOICE 14
-/* Font or color name doesn't exist */
-#define XUTIL_BAD_NAME 15
-/* Request length incorrect */
-#define XUTIL_BAD_LENGTH 16
-/* Server is defective */
-#define XUTIL_BAD_IMPLEMENTATION 17
-
 bool xutil_text_prop_get(xcb_connection_t *, xcb_window_t, xcb_atom_t, char **, ssize_t *);
 
 /** Set the same handler for all errors */
 void xutil_error_handler_catch_all_set(xcb_event_handlers_t *,
                                        xcb_generic_error_handler_t, void *);
 
-typedef struct
-{
-    uint8_t request_code;
-    char *request_label;
-    char *error_label;
-} xutil_error_t;
-
-bool xutil_error_init(const xcb_generic_error_t *, xutil_error_t *);
 xcb_keysym_t xutil_key_mask_fromstr(const char *, size_t);
 unsigned int xutil_button_fromint(int);
-
-static inline void
-xutil_error_wipe(xutil_error_t *err)
-{
-    p_delete(&err->error_label);
-    p_delete(&err->request_label);
-}
 
 /* Get the informations about the screen.
  * \param c X connection.
