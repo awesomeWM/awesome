@@ -510,6 +510,8 @@ luaA_graph_newindex(lua_State *L, awesome_token_t token)
         {
             d->width = width;
             d->size = d->width - 2;
+            p_realloc(&d->draw_from, d->size);
+            p_realloc(&d->draw_to, d->size);
             for(int i = 0; i < d->plots.len; i++)
             {
                 plot_t *plot = &d->plots.tab[i];
