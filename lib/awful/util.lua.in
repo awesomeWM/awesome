@@ -14,6 +14,7 @@ local debug = debug
 local print = print
 local type = type
 local rtable = table
+local ipairs = ipairs
 local capi =
 {
     awesome = awesome,
@@ -22,6 +23,8 @@ local capi =
 
 --- Utility module for awful
 module("awful.util")
+
+table = {}
 
 function deprecate(see)
     io.stderr:write("W: awful: function is deprecated")
@@ -210,6 +213,23 @@ function subsets(set)
 
     while subset_next(mask) do
         rtable.insert(ret, subset_mask_apply(mask, set))
+    end
+    return ret
+end
+
+--- Concat all tables given as parameters.
+-- This will iterate both tables and insert value from 1 to N.
+-- Non integer keys are ignored.
+-- @param t1 First table.
+-- @param t2 Second table.
+-- @return A new table with t1 and t2 concatened.
+function table.concat(t1, t2)
+    local ret = {}
+    for k, v in ipairs(t1) do
+        ret[#ret + 1] = v
+    end
+    for k, v in ipairs(t2) do
+        ret[#ret + 1] = v
     end
     return ret
 end
