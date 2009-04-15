@@ -225,7 +225,7 @@ end
 function table.join(...)
     local ret = {}
     for i = 1, arg.n do
-        for k, v in ipairs(arg[i]) do table.insert(ret, v) end
+        for k, v in ipairs(arg[i]) do rtable.insert(ret, v) end
     end
     return ret
 end
