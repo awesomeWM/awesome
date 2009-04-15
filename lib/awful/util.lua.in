@@ -13,6 +13,7 @@ local loadfile = loadfile
 local debug = debug
 local print = print
 local type = type
+local rtable = table
 local capi =
 {
     awesome = awesome,
@@ -166,6 +167,51 @@ function file_readable(filename)
         return true
     end
     return false
+end
+
+local function subset_mask_apply(mask, set)
+    local ret = {}
+    for i = 1, #set do
+        if mask[i] then
+            rtable.insert(ret, set[i])
+        end
+    end
+    return ret
+end
+
+local function subset_next(mask)
+    local i = 1
+    while i <= #mask and mask[i] do
+        mask[i] = false
+        i = i + 1
+    end
+
+    if i <= #mask then
+        mask[i] = 1
+        return true
+    end
+    return false
+end
+
+--- Return all subsets of a specific set.
+-- This function, giving a set, will return all subset it.
+-- For example, if we consider a set with value { 10, 15, 34 },
+-- it will return a table containing 2^n set:
+-- { }, { 10 }, { 15 }, { 34 }, { 10, 15 }, { 10, 34 }, etc.
+-- @param set A set.
+-- @return A table with all subset.
+function subsets(set)
+    local mask = {}
+    local ret = {}
+    for i = 1, #set do mask[i] = false end
+
+    -- Insert the empty one
+    rtable.insert(ret, {})
+
+    while subset_next(mask) do
+        rtable.insert(ret, subset_mask_apply(mask, set))
+    end
+    return ret
 end
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
