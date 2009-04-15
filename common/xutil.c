@@ -95,7 +95,7 @@ xutil_error_handler_catch_all_set(xcb_event_handlers_t *evenths,
 	xcb_event_set_error_handler(evenths, err_num, handler, data);
 }
 
-xcb_keysym_t
+uint16_t
 xutil_key_mask_fromstr(const char *keyname, size_t len)
 {
     switch(a_tokenize(keyname, len))

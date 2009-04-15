@@ -38,7 +38,7 @@ bool xutil_text_prop_get(xcb_connection_t *, xcb_window_t, xcb_atom_t, char **, 
 void xutil_error_handler_catch_all_set(xcb_event_handlers_t *,
                                        xcb_generic_error_handler_t, void *);
 
-xcb_keysym_t xutil_key_mask_fromstr(const char *, size_t);
+uint16_t xutil_key_mask_fromstr(const char *, size_t);
 unsigned int xutil_button_fromint(int);
 
 /* Get the informations about the screen.
