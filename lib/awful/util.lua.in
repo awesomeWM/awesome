@@ -217,12 +217,12 @@ function subsets(set)
     return ret
 end
 
---- Concat all tables given as parameters.
+--- Join all tables given as parameters.
 -- This will iterate all tables and insert value from 1 to N.
 -- Non integer keys are ignored.
--- @param args A list of tables to concatenate
--- @return A new table with arguments concatened.
-function table.concat(...)
+-- @param args A list of tables to join
+-- @return A new table containing all interger keys from the arguments.
+function table.join(...)
     local ret = {}
     for i = 1, arg.n do
         for k, v in ipairs(arg[i]) do table.insert(ret, v) end

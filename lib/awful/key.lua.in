@@ -31,7 +31,7 @@ local function new(_, mod, ...)
     local ret = {}
     local subsets = util.subsets(ignore_modifiers)
     for _, set in ipairs(subsets) do
-        ret[#ret + 1] = capi.key(util.table.concat(mod, set), unpack(arg))
+        ret[#ret + 1] = capi.key(util.table.join(mod, set), unpack(arg))
     end
     return unpack(ret)
 end
