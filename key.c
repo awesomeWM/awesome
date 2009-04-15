@@ -75,7 +75,8 @@ key_ev_cmp(xcb_keysym_t keysym, xcb_keycode_t keycode,
         if(k->keycode != keycode)
             return k->keycode > keycode ? 1 : -1;
     }
-    return k->mod == mod ? 0 : (k->mod > mod ? 1 : -1);
+    return ((k->mod == mod || k->mod == XCB_BUTTON_MASK_ANY) ?
+            0 : (k->mod > mod ? 1 : -1));
 }
 
 static int
@@ -288,7 +289,8 @@ luaA_keystore(keyb_t *key, const char *str, ssize_t len)
  * \param L The Lua VM state.
  *
  * \luastack
- * \lparam A table with modifier keys.
+ * \lparam A table with modifier keys: can be Control or Ctrl, Shift, Lock,
+ * Mod1, Mod2, Mod3, Mod4, Mod5 or Any.
  * \lparam A key name.
  * \lparam A function to execute on key press.
  * \lparam A function to execute on key release.

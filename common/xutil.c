@@ -109,6 +109,8 @@ xutil_key_mask_fromstr(const char *keyname, size_t len)
       case A_TK_MOD3:    return XCB_MOD_MASK_3;
       case A_TK_MOD4:    return XCB_MOD_MASK_4;
       case A_TK_MOD5:    return XCB_MOD_MASK_5;
+      /* this is misnamed but correct */
+      case A_TK_ANY:     return XCB_BUTTON_MASK_ANY;
       default:           return XCB_NO_SYMBOL;
     }
 }
