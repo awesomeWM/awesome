@@ -39,7 +39,7 @@ void xutil_error_handler_catch_all_set(xcb_event_handlers_t *,
                                        xcb_generic_error_handler_t, void *);
 
 uint16_t xutil_key_mask_fromstr(const char *, size_t);
-unsigned int xutil_button_fromint(int);
+uint8_t xutil_button_fromint(int);
 
 /* Get the informations about the screen.
  * \param c X connection.

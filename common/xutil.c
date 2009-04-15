@@ -140,7 +140,7 @@ typedef struct
  * \param button Mouse button index.
  * \return Mouse button or 0 if not found.
  */
-unsigned int
+uint8_t
 xutil_button_fromint(int button)
 {
     /** List of button name and corresponding X11 mask codes */
