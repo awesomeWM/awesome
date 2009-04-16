@@ -184,11 +184,8 @@ luaA_image_new(lua_State *L)
         if(width <= 0 || height <= 0)
             luaL_error(L, "request image has invalid size");
 
-        Imlib_Image imimage = imlib_create_image(width, height);
-        image_t *image = image_new(L);
-        image->image = imimage;
-        image_compute(image);
-        return 1;
+        uint32_t *data = p_new(uint32_t, width * height);
+        return image_new_from_argb32(width, height, data);
     }
 
     return 0;
