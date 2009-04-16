@@ -327,6 +327,180 @@ luaA_image_crop_and_scale(lua_State *L)
     return 1;
 }
 
+/** Draw a pixel in an image
+ * \param L The Lua VM state
+ * \luastack
+ * \lvalua An image.
+ * \lparam The x coordinate of the pixel to draw
+ * \lparam The y coordinate of the pixel to draw
+ * \lparam The color to draw the pixel in
+ */
+static int
+luaA_image_draw_pixel(lua_State *L)
+{
+    size_t len;
+    xcolor_t color;
+    xcolor_init_request_t cookie;
+    image_t *image = luaL_checkudata(L, 1, "image");
+    int x = luaL_checkint(L, 2);
+    int y = luaL_checkint(L, 3);
+    const char *buf = luaL_checklstring(L, 4, &len);
+
+    cookie = xcolor_init_unchecked(&color, buf, len);
+    imlib_context_set_image(image->image);
+    xcolor_init_reply(cookie);
+
+    if((x > imlib_image_get_width()) || (y > imlib_image_get_height()))
+        return 0;
+
+    color.red /= 256;
+    color.green /= 256;
+    color.blue /= 256;
+    color.alpha /= 256;
+
+    imlib_context_set_color(color.red, color.green, color.blue, color.alpha);
+    imlib_image_draw_pixel(x, y, 1);
+    image_compute(image);
+    return 0;
+}
+
+/** Draw a line in an image
+ * \param L The Lua VM state
+ * \luastack
+ * \lvalua An image.
+ * \lparam The x1 coordinate of the line to draw
+ * \lparam The y1 coordinate of the line to draw
+ * \lparam The x2 coordinate of the line to draw
+ * \lparam The y2 coordinate of the line to draw
+ * \lparam The color to draw the line in
+ */
+static int
+luaA_image_draw_line(lua_State *L)
+{
+    size_t len;
+    xcolor_t color;
+    xcolor_init_request_t cookie;
+    image_t *image = luaL_checkudata(L, 1, "image");
+    int x1 = luaL_checkint(L, 2);
+    int y1 = luaL_checkint(L, 3);
+    int x2 = luaL_checkint(L, 4);
+    int y2 = luaL_checkint(L, 5);
+    const char *buf = luaL_checklstring(L, 6, &len);
+
+    cookie = xcolor_init_unchecked(&color, buf, len);
+    imlib_context_set_image(image->image);
+    xcolor_init_reply(cookie);
+
+    if((MAX(x1,x2) > imlib_image_get_width()) || (MAX(y1,y2) > imlib_image_get_height()))
+        return 0;
+
+    color.red /= 256;
+    color.green /= 256;
+    color.blue /= 256;
+    color.alpha /= 256;
+
+    imlib_context_set_color(color.red, color.green, color.blue, color.alpha);
+    imlib_image_draw_line(x1, y1, x2, y2, 1);
+    image_compute(image);
+    return 0;
+}
+
+/** Draw a rectangle in an image
+ * \param L The Lua VM state
+ * \luastack
+ * \lvalua An image.
+ * \lparam The x coordinate of the rectangles top left corner
+ * \lparam The y coordinate of the rectangles top left corner
+ * \lparam The width of the rectangle
+ * \lparam The height of the rectangle
+ * \lparam True if the rectangle should be filled, False otherwise
+ * \lparam The color to draw the rectangle in
+ */
+static int
+luaA_image_draw_rectangle(lua_State *L)
+{
+    size_t len;
+    xcolor_t color;
+    xcolor_init_request_t cookie;
+    image_t *image = luaL_checkudata(L, 1, "image");
+    int x = luaL_checkint(L, 2);
+    int y = luaL_checkint(L, 3);
+    int width  = luaL_checkint(L, 4);
+    int height = luaL_checkint(L, 5);
+    int fill = luaA_checkboolean(L, 6);
+    const char *buf = luaL_checklstring(L, 7, &len);
+
+    cookie = xcolor_init_unchecked(&color, buf, len);
+    imlib_context_set_image(image->image);
+    xcolor_init_reply(cookie);
+
+    if((x > imlib_image_get_width()) || (x + width > imlib_image_get_width()))
+        return 0;
+    if((y > imlib_image_get_height()) || (y + height > imlib_image_get_height()))
+        return 0;
+
+    color.red /= 256;
+    color.green /= 256;
+    color.blue /= 256;
+    color.alpha /= 256;
+
+    imlib_context_set_color(color.red, color.green, color.blue, color.alpha);
+    if(!fill)
+        imlib_image_draw_rectangle(x, y, width, height);
+    else
+        imlib_image_fill_rectangle(x, y, width, height);
+    image_compute(image);
+    return 0;
+}
+
+/** Draw a circle in an image
+ * \param L The Lua VM state
+ * \luastack
+ * \lvalua An image.
+ * \lparam The x coordinate of the center of the circle
+ * \lparam The y coordinate of the center of the circle
+ * \lparam The horizontal amplitude (width)
+ * \lparam The vertical amplitude (height)
+ * \lparam True if the circle should be filled, False otherwise
+ * \lparam The color to draw the circle in
+ */
+static int
+luaA_image_draw_circle(lua_State *L)
+{
+    size_t len;
+    xcolor_t color;
+    xcolor_init_request_t cookie;
+    image_t *image = luaL_checkudata(L, 1, "image");
+    int x = luaL_checkint(L, 2);
+    int y = luaL_checkint(L, 3);
+    int ah = luaL_checkint(L, 4);
+    int av = luaL_checkint(L, 5);
+    int fill = luaA_checkboolean(L, 6);
+    const char *buf = luaL_checklstring(L, 7, &len);
+
+    cookie = xcolor_init_unchecked(&color, buf, len);
+    imlib_context_set_image(image->image);
+    xcolor_init_reply(cookie);
+
+    if((x > imlib_image_get_width()) || (x + ah > imlib_image_get_width()) || (x - ah < 0))
+        return 0;
+    if((y > imlib_image_get_height()) || (y + av > imlib_image_get_height()) || (y - av < 0))
+        return 0;
+
+    color.red /= 256;
+    color.green /= 256;
+    color.blue /= 256;
+    color.alpha /= 256;
+
+    imlib_context_set_color(color.red, color.green, color.blue, color.alpha);
+    if(!fill)
+        imlib_image_draw_ellipse(x, y, ah, av);
+    else
+        imlib_image_fill_ellipse(x, y, ah, av);
+    image_compute(image);
+    return 0;
+}
+
 /** Saves the image to the given path. The file extension (e.g. .png or .jpg)
  * will affect the output format.
  * \param L The Lua VM state.
@@ -404,6 +578,12 @@ const struct luaL_reg awesome_image_meta[] =
     { "crop", luaA_image_crop },
     { "crop_and_scale", luaA_image_crop_and_scale },
     { "save", luaA_image_save },
+    /* draw on images, whee! */
+    { "draw_pixel", luaA_image_draw_pixel },
+    { "draw_line",  luaA_image_draw_line  },
+    { "draw_rectangle", luaA_image_draw_rectangle },
+    { "draw_circle", luaA_image_draw_circle },
+    /* */
     { "__gc", luaA_image_gc },
     { "__tostring", luaA_image_tostring },
     { NULL, NULL }
