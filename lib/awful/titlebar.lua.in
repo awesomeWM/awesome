@@ -63,7 +63,7 @@ function add(c, args)
     end
 
     -- Redirect relevant events to the client the titlebar belongs to
-    local bts = util.tablejoin(
+    local bts = util.table.join(
         button({ }, 1, function (t) capi.client.focus = t.client t.client:raise() mouse.client.move(t.client) end),
         button({ args.modkey }, 1, function (t) mouse.client.move(t.client) end),
         button({ args.modkey }, 3, function (t) mouse.client.resize(t.client) end)
