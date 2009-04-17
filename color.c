@@ -72,6 +72,84 @@ color_parse(const char *colstr, ssize_t len,
     return true;
 }
 
+/** Send a request to initialize a color.
+ * \param color color_t struct to store color into.
+ * \param colstr Color specification.
+ * \return request informations.
+ */
+color_init_cookie_t
+color_init_unchecked(color_t *color, const char *colstr, ssize_t len)
+{
+    xcb_screen_t *s = xutil_screen_get(globalconf.connection, globalconf.default_screen);
+    color_init_cookie_t req;
+
+    p_clear(&req, 1);
+
+    if(!len)
+    {
+        req.has_error = true;
+        return req;
+    }
+
+    /* The color is given in RGB value */
+    if(colstr[0] == '#')
+    {
+        if(!color_parse(colstr, len, &color->red, &color->green, &color->blue, &color->alpha))
+        {
+            req.has_error = true;
+            return req;
+        }
+
+        color->initialized = true;
+
+        /* This means everything is done and _reply() will just return true */
+        req.color = NULL;
+    }
+    else
+    {
+        req.color = color;
+        req.colstr = colstr;
+        req.cookie = xcb_alloc_named_color_unchecked(globalconf.connection,
+                                                     s->default_colormap, len,
+                                                     colstr);
+    }
+
+    req.has_error = false;
+
+    return req;
+}
+
+/** Initialize a color.
+ * \param req color_init request.
+ * \return True if color allocation was successfull.
+ */
+bool
+color_init_reply(color_init_cookie_t req)
+{
+    if(req.has_error)
+        return false;
+
+    if(req.color == NULL)
+        return true;
+
+    xcb_alloc_named_color_reply_t *named_color;
+
+    if((named_color = xcb_alloc_named_color_reply(globalconf.connection,
+                                                  req.cookie, NULL)))
+    {
+        req.color->red   = named_color->visual_red;
+        req.color->green = named_color->visual_green;
+        req.color->blue  = named_color->visual_blue;
+        req.color->alpha = 0xff;
+        req.color->initialized = true;
+        p_delete(&named_color);
+        return true;
+    }
+
+    warn("awesome: error, cannot allocate color '%s'", req.colstr);
+    return false;
+}
+
 /** Send a request to initialize a X color.
  * \param color xcolor_t struct to store color into.
  * \param colstr Color specification.

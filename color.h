@@ -27,6 +27,23 @@
 
 typedef struct
 {
+    uint8_t red;
+    uint8_t green;
+    uint8_t blue;
+    uint8_t alpha;
+    bool initialized;
+} color_t;
+
+typedef struct
+{
+    color_t *color;
+    const char *colstr;
+    xcb_alloc_named_color_cookie_t cookie;
+    bool has_error;
+} color_init_cookie_t;
+
+typedef struct
+{
     uint32_t pixel;
     uint16_t red;
     uint16_t green;
@@ -48,6 +65,9 @@ typedef struct
     bool is_hexa, has_error;
     const char *colstr;
 } xcolor_init_request_t;
+
+color_init_cookie_t color_init_unchecked(color_t *, const char *, ssize_t);
+bool color_init_reply(color_init_cookie_t);
 
 xcolor_init_request_t xcolor_init_unchecked(xcolor_t *, const char *, ssize_t);
 bool xcolor_init_reply(xcolor_init_request_t);
