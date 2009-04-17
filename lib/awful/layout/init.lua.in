@@ -94,12 +94,13 @@ end
 
 hooks.arrange.register(on_arrange)
 hooks.property.register(function (c, prop)
-    if type(c) == "client" and c:isvisible()
-        and (prop == "size_hints_honor"
-             or prop == "struts"
-             or prop == "minimized"
-             or prop == "sticky"
-             or prop == "fullscreen") then
+    if type(c) == "client" and prop == "size_hints_honor"
+        or prop == "struts"
+        or prop == "minimized"
+        or prop == "sticky"
+        or prop == "fullscreen"
+        or prop == "maximized_horizontal"
+        or prop == "maximized_vertical" then
         on_arrange(c.screen)
     end
 end)

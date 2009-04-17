@@ -855,7 +855,6 @@ client_setmaxhoriz(client_t *c, bool s)
         }
 
         client_resize(c, geometry, c->size_hints_honor);
-        client_need_arrange(c);
         client_stack();
         ewmh_client_update_hints(c);
         hook_property(client, c, "maximized_horizontal");
@@ -892,7 +891,6 @@ client_setmaxvert(client_t *c, bool s)
         }
 
         client_resize(c, geometry, c->size_hints_honor);
-        client_need_arrange(c);
         client_stack();
         ewmh_client_update_hints(c);
         hook_property(client, c, "maximized_vertical");
