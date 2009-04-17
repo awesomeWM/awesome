@@ -53,21 +53,6 @@ ARRAY_TYPE(tag_t *, tag)
 ARRAY_TYPE(screen_t, screen)
 ARRAY_TYPE(client_t *, client)
 
-/** Tag type */
-struct tag
-{
-    /** Lua references count */
-    luaA_ref_array_t refs;
-    /** Tag name */
-    char *name;
-    /** Screen */
-    screen_t *screen;
-    /** true if selected */
-    bool selected;
-    /** clients in this tag */
-    client_array_t clients;
-};
-
 /** Main configuration structure */
 struct awesome_t
 {

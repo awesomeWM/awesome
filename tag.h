@@ -25,6 +25,21 @@
 #include "structs.h"
 #include "client.h"
 
+/** Tag type */
+struct tag
+{
+    /** Lua references count */
+    luaA_ref_array_t refs;
+    /** Tag name */
+    char *name;
+    /** Screen */
+    screen_t *screen;
+    /** true if selected */
+    bool selected;
+    /** clients in this tag */
+    client_array_t clients;
+};
+
 tag_t **tags_get_current(screen_t *);
 void tag_client(client_t *);
 void untag_client(client_t *, tag_t *);
