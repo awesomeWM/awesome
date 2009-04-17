@@ -23,6 +23,7 @@
 #define AWESOME_SCREEN_H
 
 #include "structs.h"
+#include "wibox.h"
 
 struct a_screen
 {

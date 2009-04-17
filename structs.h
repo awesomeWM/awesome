@@ -59,13 +59,7 @@ typedef enum
     WINDOW_TYPE_DND
 } window_type_t;
 
-/** Wibox types */
-typedef enum
-{
-    WIBOX_TYPE_NORMAL = 0,
-    WIBOX_TYPE_TITLEBAR
-} wibox_type_t;
-
+typedef struct wibox_t wibox_t;
 typedef struct a_screen screen_t;
 typedef struct button_t button_t;
 typedef struct widget_t widget_t;
@@ -80,45 +74,6 @@ ARRAY_TYPE(widget_node_t, widget_node)
 ARRAY_TYPE(button_t *, button)
 ARRAY_TYPE(tag_t *, tag)
 ARRAY_TYPE(screen_t, screen)
-
-/** Wibox type */
-typedef struct
-{
-    /** Lua references */
-    luaA_ref_array_t refs;
-    /** Ontop */
-    bool ontop;
-    /** Visible */
-    bool isvisible;
-    /** Position */
-    position_t position;
-    /** Wibox type */
-    wibox_type_t type;
-    /** Window */
-    simple_window_t sw;
-    /** Alignment */
-    alignment_t align;
-    /** Screen */
-    screen_t *screen;
-    /** Widget list */
-    widget_node_array_t widgets;
-    luaA_ref widgets_table;
-    /** Widget the mouse is over */
-    widget_t *mouse_over;
-    /** Mouse over event handler */
-    luaA_ref mouse_enter, mouse_leave;
-    /** Need update */
-    bool need_update;
-    /** Cursor */
-    char *cursor;
-    /** Background image */
-    image_t *bg_image;
-    /* Banned? used for titlebars */
-    bool isbanned;
-    /** Button bindings */
-    button_array_t buttons;
-} wibox_t;
-ARRAY_TYPE(wibox_t *, wibox)
 
 /* Strut */
 typedef struct
