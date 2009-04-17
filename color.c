@@ -24,7 +24,7 @@
 #include "structs.h"
 #include <ctype.h>
 
-#define RGB_8TO16(i)   (65536 * ((i) & 0xff) / 255)
+#define RGB_8TO16(i)   (0xffff * ((i) & 0xff) / 0xff)
 
 /** Parse an hexadecimal color string to its component.
  * \param colstr The color string.
