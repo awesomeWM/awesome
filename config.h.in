@@ -5,6 +5,5 @@
 #define XDG_CONFIG_DIR       "@XDG_CONFIG_DIR@"
 
 #cmakedefine WITH_DBUS
-#cmakedefine WITH_IMLIB2
 
 #endif //_CONFIG_H_
