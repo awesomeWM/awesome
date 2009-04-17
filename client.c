@@ -1230,9 +1230,6 @@ luaA_client_swap(lua_State *L)
         *ref_c = swap;
         *ref_swap = c;
 
-        client_need_arrange(c);
-        client_need_arrange(swap);
-
         /* Call hook to notify list change */
         if(globalconf.hooks.clients != LUA_REFNIL)
             luaA_dofunction(L, globalconf.hooks.clients, 0, 0);

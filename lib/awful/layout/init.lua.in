@@ -111,5 +111,10 @@ end)
 
 hooks.padding.register(function(screen) on_arrange(screen) end)
 hooks.focus.register(function(c) on_arrange(c.screen) end)
+hooks.clients.register(function()
+                           for screen = 1, capi.screen.count() do
+                               on_arrange(screen)
+                           end
+                       end)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
