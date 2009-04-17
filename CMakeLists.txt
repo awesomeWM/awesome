@@ -41,6 +41,7 @@ set(AWE_SRCS
     ${SOURCE_DIR}/client.c
     ${SOURCE_DIR}/cnode.c
     ${SOURCE_DIR}/dbus.c
+    ${SOURCE_DIR}/root.c
     ${SOURCE_DIR}/event.c
     ${SOURCE_DIR}/property.c
     ${SOURCE_DIR}/ewmh.c
