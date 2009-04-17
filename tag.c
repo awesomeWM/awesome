@@ -101,7 +101,6 @@ tag_remove_from_screen(tag_t *tag)
     ewmh_update_net_numbers_of_desktop(phys_screen);
     ewmh_update_net_desktop_names(phys_screen);
     ewmh_update_workarea(phys_screen);
-    tag->screen = NULL;
 
     /* call hook */
     if(globalconf.hooks.tags != LUA_REFNIL)
@@ -111,6 +110,8 @@ tag_remove_from_screen(tag_t *tag)
         lua_pushliteral(globalconf.L, "remove");
         luaA_dofunction(globalconf.L, globalconf.hooks.tags, 3, 0);
     }
+
+    tag->screen = NULL;
 
     tag_unref(globalconf.L, tag);
 }
