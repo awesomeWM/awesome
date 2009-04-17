@@ -32,6 +32,127 @@
                                         | XCB_EVENT_MASK_LEAVE_WINDOW \
                                         | XCB_EVENT_MASK_FOCUS_CHANGE)
 
+/** Windows type */
+typedef enum
+{
+    WINDOW_TYPE_NORMAL = 0,
+    WINDOW_TYPE_DESKTOP,
+    WINDOW_TYPE_DOCK,
+    WINDOW_TYPE_SPLASH,
+    WINDOW_TYPE_DIALOG,
+    /* The ones below may have TRANSIENT_FOR, but are not plain dialogs.
+     * They were purposefully placed below DIALOG.
+     */
+    WINDOW_TYPE_MENU,
+    WINDOW_TYPE_TOOLBAR,
+    WINDOW_TYPE_UTILITY,
+    /* This ones are usually set on override-redirect windows. */
+    WINDOW_TYPE_DROPDOWN_MENU,
+    WINDOW_TYPE_POPUP_MENU,
+    WINDOW_TYPE_TOOLTIP,
+    WINDOW_TYPE_NOTIFICATION,
+    WINDOW_TYPE_COMBO,
+    WINDOW_TYPE_DND
+} window_type_t;
+
+/* Strut */
+typedef struct
+{
+    uint16_t left, right, top, bottom;
+    uint16_t left_start_y, left_end_y;
+    uint16_t right_start_y, right_end_y;
+    uint16_t top_start_x, top_end_x;
+    uint16_t bottom_start_x, bottom_end_x;
+} strut_t;
+
+/** client_t type */
+struct client_t
+{
+    /** Lua reference counter */
+    luaA_ref_array_t refs;
+    /** Valid, or not ? */
+    bool invalid;
+    /** Client name */
+    char *name, *icon_name;
+    /** WM_CLASS stuff */
+    char *class, *instance;
+    /** Startup ID */
+    char *startup_id;
+    /** Window geometry */
+    area_t geometry;
+    struct
+    {
+        /** Client geometry when (un)fullscreen */
+        area_t fullscreen;
+        /** Client geometry when (un)-max */
+        area_t max;
+        /** Internal geometry (matching X11 protocol) */
+        area_t internal;
+    } geometries;
+    /** Strut */
+    strut_t strut;
+    /** Ignore strut temporarily. */
+    bool ignore_strut;
+    /** Border width and pre-fullscreen border width */
+    int border, border_fs;
+    xcolor_t border_color;
+    /** True if the client is sticky */
+    bool issticky;
+    /** Has urgency hint */
+    bool isurgent;
+    /** True if the client is hidden */
+    bool ishidden;
+    /** True if the client is minimized */
+    bool isminimized;
+    /** True if the client is fullscreen */
+    bool isfullscreen;
+    /** True if the client is maximized horizontally */
+    bool ismaxhoriz;
+    /** True if the client is maximized vertically */
+    bool ismaxvert;
+    /** True if the client is above others */
+    bool isabove;
+    /** True if the client is below others */
+    bool isbelow;
+    /** True if the client is modal */
+    bool ismodal;
+    /** True if the client is on top */
+    bool isontop;
+    /** True if a client is banned to a position outside the viewport.
+     * Note that the geometry remains unchanged and that the window is still mapped.
+     */
+    bool isbanned;
+    /** true if the client must be skipped from task bar client list */
+    bool skiptb;
+    /** True if the client cannot have focus */
+    bool nofocus;
+    /** The window type */
+    window_type_t type;
+    /** Window of the client */
+    xcb_window_t win;
+    /** Window of the group leader */
+    xcb_window_t group_win;
+    /** Window holding command needed to start it (session management related) */
+    xcb_window_t leader_win;
+    /** Client logical screen */
+    screen_t *screen;
+    /** Client physical screen */
+    int phys_screen;
+    /** Titlebar */
+    wibox_t *titlebar;
+    /** Button bindings */
+    button_array_t buttons;
+    /** Key bindings */
+    keybindings_t keys;
+    /** Icon */
+    image_t *icon;
+    /** Size hints */
+    xcb_size_hints_t size_hints;
+    bool size_hints_honor;
+    /** Window it is transient for */
+    client_t *transient_for;
+};
+
 client_t * luaA_client_checkudata(lua_State *, int);
 
 ARRAY_FUNCS(client_t *, client, DO_NOTHING)
