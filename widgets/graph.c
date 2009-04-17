@@ -174,6 +174,8 @@ graph_draw(widget_t *widget, draw_context_t *ctx,
     graph_data_t *d = widget->data;
     area_t rectangle;
     vector_t color_gradient;
+    color_t col;
+    color_t color_start, color_center, color_end;
 
     if(!d->plots.len)
         return;
@@ -189,7 +191,8 @@ graph_draw(widget_t *widget, draw_context_t *ctx,
     rectangle.y = margin_top + 1;
     rectangle.width = d->size;
     rectangle.height = d->box_height;
-    draw_rectangle(ctx, rectangle, 1.0, true, &d->bg);
+    xcolor_to_color(&d->bg, &col);
+    draw_rectangle(ctx, rectangle, 1.0, true, &col);
 
     /* for plot drawing */
     rectangle.y = margin_top + d->box_height + 1; /* bottom left corner as starting point */
@@ -206,6 +209,11 @@ graph_draw(widget_t *widget, draw_context_t *ctx,
     for(int i = 0; i < d->plots.len; i++)
     {
         plot_t *plot = &d->plots.tab[i];
+
+        /* Prepare colors */
+        xcolor_to_color(&plot->color_start, &color_start);
+        xcolor_to_color(&plot->pcolor_center, &color_center);
+        xcolor_to_color(&plot->pcolor_end, &color_end);
 
         switch(plot->draw_style)
         {
@@ -233,7 +241,7 @@ graph_draw(widget_t *widget, draw_context_t *ctx,
                   d->draw_to[y] = d->box_height - plot->lines[y]; /* i.e. on full plot -> 0 = bottom */
               }
               draw_graph(ctx, rectangle , d->draw_from, d->draw_to, plot->index, d->grow, color_gradient,
-                         &plot->color_start, &plot->pcolor_center, &plot->pcolor_end);
+                         &color_start, &color_center, &color_end);
               break;
             case Bottom_Style:
               color_gradient.y = rectangle.y;
@@ -254,7 +262,7 @@ graph_draw(widget_t *widget, draw_context_t *ctx,
 
               p_clear(d->draw_from, d->size);
               draw_graph(ctx, rectangle, d->draw_from, plot->lines, plot->index, d->grow, color_gradient,
-                         &plot->color_start, &plot->pcolor_center, &plot->pcolor_end);
+                         &color_start, &color_center, &color_end);
               break;
             case Line_Style:
               color_gradient.y = rectangle.y;
@@ -273,7 +281,7 @@ graph_draw(widget_t *widget, draw_context_t *ctx,
               }
 
               draw_graph_line(ctx, rectangle, plot->lines, plot->index, d->grow, color_gradient,
-                              &plot->color_start, &plot->pcolor_center, &plot->pcolor_end);
+                              &color_start, &color_center, &color_end);
               break;
         }
     }
@@ -283,7 +291,8 @@ graph_draw(widget_t *widget, draw_context_t *ctx,
     rectangle.y = margin_top;
     rectangle.width = d->size + 2;
     rectangle.height = d->box_height + 2;
-    draw_rectangle(ctx, rectangle, 1.0, false, &d->border_color);
+    xcolor_to_color(&d->border_color, &col);
+    draw_rectangle(ctx, rectangle, 1.0, false, &col);
 }
 
 /** Set various plot graph properties.

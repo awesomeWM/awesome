@@ -85,8 +85,12 @@ imagebox_draw(widget_t *widget, draw_context_t *ctx, area_t geometry, wibox_t *p
 
     if(d->image && geometry.width && geometry.height)
     {
-        if(d->bg.initialized)
-            draw_rectangle(ctx, geometry, 1.0, true, &d->bg);
+        color_t bg;
+
+        xcolor_to_color(&d->bg, &bg);
+
+        if(bg.initialized)
+            draw_rectangle(ctx, geometry, 1.0, true, &bg);
 
         int y = geometry.y;
         double ratio = d->resize ? (double) geometry.height / d->image->height : 1;

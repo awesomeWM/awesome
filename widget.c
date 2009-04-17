@@ -141,6 +141,7 @@ widget_render(wibox_t *wibox)
     draw_context_t *ctx = &wibox->sw.ctx;
     int left = 0, right = 0;
     area_t rectangle = { 0, 0, 0, 0 };
+    color_t col;
 
     rectangle.width = ctx->width;
     rectangle.height = ctx->height;
@@ -265,7 +266,8 @@ widget_render(wibox_t *wibox)
         draw_image(ctx, 0, 0, 1.0, wibox->bg_image);
 
     /* draw background color */
-    draw_rectangle(ctx, rectangle, 1.0, true, &ctx->bg);
+    xcolor_to_color(&ctx->bg, &col);
+    draw_rectangle(ctx, rectangle, 1.0, true, &col);
 
     /* draw everything! */
     for(int i = 0; i < widgets->len; i++)

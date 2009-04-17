@@ -284,8 +284,8 @@ draw_text(draw_context_t *ctx, draw_text_context_t *data,
  */
 static cairo_pattern_t *
 draw_setup_cairo_color_source(draw_context_t *ctx, vector_t gradient_vector,
-                              const xcolor_t *pcolor, const xcolor_t *pcolor_center,
-                              const xcolor_t *pcolor_end)
+                              const color_t *pcolor, const color_t *pcolor_center,
+                              const color_t *pcolor_end)
 {
     cairo_pattern_t *pat = NULL;
     bool has_center = pcolor_center->initialized;
@@ -294,10 +294,10 @@ draw_setup_cairo_color_source(draw_context_t *ctx, vector_t gradient_vector,
     /* no need for a real pattern: */
     if(!has_end && !has_center)
         cairo_set_source_rgba(ctx->cr,
-                              pcolor->red / 65535.0,
-                              pcolor->green / 65535.0,
-                              pcolor->blue / 65535.0,
-                              pcolor->alpha / 65535.0);
+                              pcolor->red / 255.0,
+                              pcolor->green / 255.0,
+                              pcolor->blue / 255.0,
+                              pcolor->alpha / 255.0);
     else
     {
         pat = cairo_pattern_create_linear(gradient_vector.x,
@@ -307,30 +307,30 @@ draw_setup_cairo_color_source(draw_context_t *ctx, vector_t gradient_vector,
 
         /* pcolor is always set (so far in awesome) */
         cairo_pattern_add_color_stop_rgba(pat, 0.0,
-                                          pcolor->red / 65535.0,
-                                          pcolor->green / 65535.0,
-                                          pcolor->blue / 65535.0,
-                                          pcolor->alpha / 65535.0);
+                                          pcolor->red / 255.0,
+                                          pcolor->green / 255.0,
+                                          pcolor->blue / 255.0,
+                                          pcolor->alpha / 255.0);
 
         if(has_center)
             cairo_pattern_add_color_stop_rgba(pat, 0.5,
-                                              pcolor_center->red / 65535.0,
-                                              pcolor_center->green / 65535.0,
-                                              pcolor_center->blue / 65535.0,
-                                              pcolor_center->alpha / 65535.0);
+                                              pcolor_center->red / 255.0,
+                                              pcolor_center->green / 255.0,
+                                              pcolor_center->blue / 255.0,
+                                              pcolor_center->alpha / 255.0);
 
         if(has_end)
             cairo_pattern_add_color_stop_rgba(pat, 1.0,
-                                              pcolor_end->red / 65535.0,
-                                              pcolor_end->green / 65535.0,
-                                              pcolor_end->blue / 65535.0,
-                                              pcolor_end->alpha / 65535.0);
+                                              pcolor_end->red / 255.0,
+                                              pcolor_end->green / 255.0,
+                                              pcolor_end->blue / 255.0,
+                                              pcolor_end->alpha / 255.0);
         else
             cairo_pattern_add_color_stop_rgba(pat, 1.0,
-                                              pcolor->red / 65535.0,
-                                              pcolor->green / 65535.0,
-                                              pcolor->blue / 65535.0,
-                                              pcolor->alpha / 65535.0);
+                                              pcolor->red / 255.0,
+                                              pcolor->green / 255.0,
+                                              pcolor->blue / 255.0,
+                                              pcolor->alpha / 255.0);
         cairo_set_source(ctx->cr, pat);
     }
     return pat;
@@ -345,17 +345,17 @@ draw_setup_cairo_color_source(draw_context_t *ctx, vector_t gradient_vector,
  */
 void
 draw_rectangle(draw_context_t *ctx, area_t geometry,
-               float line_width, bool filled, const xcolor_t *color)
+               float line_width, bool filled, const color_t *color)
 {
     cairo_set_antialias(ctx->cr, CAIRO_ANTIALIAS_NONE);
     cairo_set_line_width(ctx->cr, line_width);
     cairo_set_miter_limit(ctx->cr, 10.0);
     cairo_set_line_join(ctx->cr, CAIRO_LINE_JOIN_MITER);
     cairo_set_source_rgba(ctx->cr,
-                          color->red / 65535.0,
-                          color->green / 65535.0,
-                          color->blue / 65535.0,
-                          color->alpha / 65535.0);
+                          color->red / 255.0,
+                          color->green / 255.0,
+                          color->blue / 255.0,
+                          color->alpha / 255.0);
     if(filled)
     {
         cairo_rectangle(ctx->cr, geometry.x, geometry.y,
@@ -382,8 +382,8 @@ draw_rectangle(draw_context_t *ctx, area_t geometry,
  */
 void
 draw_rectangle_gradient(draw_context_t *ctx, area_t geometry, float line_width, bool filled,
-                        vector_t gradient_vector, const xcolor_t *pcolor,
-                        const xcolor_t *pcolor_center, const xcolor_t *pcolor_end)
+                        vector_t gradient_vector, const color_t *pcolor,
+                        const color_t *pcolor_center, const color_t *pcolor_end)
 {
     cairo_pattern_t *pat;
 
@@ -437,8 +437,8 @@ draw_graph_setup(draw_context_t *ctx)
  */
 void
 draw_graph(draw_context_t *ctx, area_t rect, int *from, int *to, int cur_index,
-           position_t grow, vector_t gradient_vector, const xcolor_t *pcolor,
-           const xcolor_t *pcolor_center, const xcolor_t *pcolor_end)
+           position_t grow, vector_t gradient_vector, const color_t *pcolor,
+           const color_t *pcolor_center, const color_t *pcolor_end)
 {
     int i = -1;
     float x = rect.x + 0.5; /* middle of a pixel */
@@ -490,8 +490,8 @@ draw_graph(draw_context_t *ctx, area_t rect, int *from, int *to, int cur_index,
  */
 void
 draw_graph_line(draw_context_t *ctx, area_t rect, int *to, int cur_index,
-                position_t grow, vector_t gradient_vector, const xcolor_t *pcolor,
-                const xcolor_t *pcolor_center, const xcolor_t *pcolor_end)
+                position_t grow, vector_t gradient_vector, const color_t *pcolor,
+                const color_t *pcolor_center, const color_t *pcolor_end)
 {
     int i, w;
     float x, y;

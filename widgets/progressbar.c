@@ -217,6 +217,20 @@ progressbar_draw(widget_t *widget, draw_context_t *ctx, area_t geometry, wibox_t
         for(int i = 0; i < d->bars.len; i++)
         {
             bar_t *bar = &d->bars.tab[i];
+            color_t bg;
+            color_t border_color;
+            color_t fg;
+            color_t fg_center;
+            color_t fg_end;
+            color_t fg_off;
+
+            xcolor_to_color(&bar->bg, &bg);
+            xcolor_to_color(&bar->border_color, &border_color);
+            xcolor_to_color(&bar->fg_off, &fg_off);
+            xcolor_to_color(&bar->fg, &fg);
+            xcolor_to_color(&bar->fg_center, &fg_center);
+            xcolor_to_color(&bar->fg_end, &fg_end);
+
             if(d->ticks_count && d->ticks_gap)
             {
                 values_ticks = (int)(d->ticks_count * (bar->value - bar->min_value)
@@ -243,8 +257,8 @@ progressbar_draw(widget_t *widget, draw_context_t *ctx, area_t geometry, wibox_t
                 rectangle.height = pb_height + 2 * (d->border_padding + d->border_width);
 
                 if(d->border_padding)
-                    draw_rectangle(ctx, rectangle, 1.0, true, &bar->bg);
-                draw_rectangle(ctx, rectangle, d->border_width, false, &bar->border_color);
+                    draw_rectangle(ctx, rectangle, 1.0, true, &bg);
+                draw_rectangle(ctx, rectangle, d->border_width, false, &border_color);
             }
 
             color_gradient.x = pb_x;
@@ -275,10 +289,10 @@ progressbar_draw(widget_t *widget, draw_context_t *ctx, area_t geometry, wibox_t
 
                 /* fg color */
                 if(bar->reverse)
-                    draw_rectangle(ctx, rectangle, 1.0, true, &bar->fg_off);
+                    draw_rectangle(ctx, rectangle, 1.0, true, &fg_off);
                 else
                     draw_rectangle_gradient(ctx, rectangle, 1.0, true, color_gradient,
-                                            &bar->fg, &bar->fg_center, &bar->fg_end);
+                                            &fg, &fg_center, &fg_end);
             }
 
             /* top part */
@@ -292,9 +306,9 @@ progressbar_draw(widget_t *widget, draw_context_t *ctx, area_t geometry, wibox_t
                 /* bg color */
                 if(bar->reverse)
                     draw_rectangle_gradient(ctx, rectangle, 1.0, true, color_gradient,
-                                            &bar->fg, &bar->fg_center, &bar->fg_end);
+                                            &fg, &fg_center, &fg_end);
                 else
-                    draw_rectangle(ctx, rectangle, 1.0, true, &bar->fg_off);
+                    draw_rectangle(ctx, rectangle, 1.0, true, &fg_off);
             }
             /* draw gaps TODO: improve e.g all in one */
             if(d->ticks_count && d->ticks_gap)
@@ -305,7 +319,7 @@ progressbar_draw(widget_t *widget, draw_context_t *ctx, area_t geometry, wibox_t
                 for(rectangle.y = pb_y + (unit - d->ticks_gap);
                         pb_y + pb_height - d->ticks_gap >= rectangle.y;
                         rectangle.y += unit)
-                    draw_rectangle(ctx, rectangle, 1.0, true, &bar->bg);
+                    draw_rectangle(ctx, rectangle, 1.0, true, &bg);
             }
             pb_offset += pb_width + d->gap + 2 * (d->border_width + d->border_padding);
         }
@@ -329,6 +343,21 @@ progressbar_draw(widget_t *widget, draw_context_t *ctx, area_t geometry, wibox_t
         for(int i = 0; i < d->bars.len; i++)
         {
             bar_t *bar = &d->bars.tab[i];
+
+            color_t bg;
+            color_t fg;
+            color_t fg_off;
+            color_t fg_center;
+            color_t fg_end;
+            color_t border_color;
+
+            xcolor_to_color(&bar->bg, &bg);
+            xcolor_to_color(&bar->fg, &fg);
+            xcolor_to_color(&bar->fg_off, &fg_off);
+            xcolor_to_color(&bar->fg_center, &fg_center);
+            xcolor_to_color(&bar->fg_end, &fg_end);
+            xcolor_to_color(&bar->border_color, &border_color);
+
             if(d->ticks_count && d->ticks_gap)
             {
                 /* +0.5 rounds up ticks -> turn on a tick when half of it is reached */
@@ -352,8 +381,8 @@ progressbar_draw(widget_t *widget, draw_context_t *ctx, area_t geometry, wibox_t
                 rectangle.height = pb_height + 2 * (d->border_padding + d->border_width);
 
                 if(d->border_padding)
-                    draw_rectangle(ctx, rectangle, 1.0, true, &bar->bg);
-                draw_rectangle(ctx, rectangle, d->border_width, false, &bar->border_color);
+                    draw_rectangle(ctx, rectangle, 1.0, true, &bg);
+                draw_rectangle(ctx, rectangle, d->border_width, false, &border_color);
             }
 
             color_gradient.y = pb_y;
@@ -382,10 +411,10 @@ progressbar_draw(widget_t *widget, draw_context_t *ctx, area_t geometry, wibox_t
 
                 /* fg color */
                 if(bar->reverse)
-                    draw_rectangle(ctx, rectangle, 1.0, true, &bar->fg_off);
+                    draw_rectangle(ctx, rectangle, 1.0, true, &fg_off);
                 else
                     draw_rectangle_gradient(ctx, rectangle, 1.0, true, color_gradient,
-                                            &bar->fg, &bar->fg_center, &bar->fg_end);
+                                            &fg, &fg_center, &fg_end);
             }
 
             /* right part */
@@ -399,9 +428,9 @@ progressbar_draw(widget_t *widget, draw_context_t *ctx, area_t geometry, wibox_t
                 /* bg color */
                 if(bar->reverse)
                     draw_rectangle_gradient(ctx, rectangle, 1.0, true, color_gradient,
-                                            &bar->fg, &bar->fg_center, &bar->fg_end);
+                                            &fg, &fg_center, &fg_end);
                 else
-                    draw_rectangle(ctx, rectangle, 1.0, true, &bar->fg_off);
+                    draw_rectangle(ctx, rectangle, 1.0, true, &fg_off);
             }
             /* draw gaps TODO: improve e.g all in one */
             if(d->ticks_count && d->ticks_gap)
@@ -412,7 +441,7 @@ progressbar_draw(widget_t *widget, draw_context_t *ctx, area_t geometry, wibox_t
                 for(rectangle.x = pb_x + (unit - d->ticks_gap);
                         pb_x + pb_width - d->ticks_gap >= rectangle.x;
                         rectangle.x += unit)
-                    draw_rectangle(ctx, rectangle, 1.0, true, &bar->bg);
+                    draw_rectangle(ctx, rectangle, 1.0, true, &bg);
             }
 
             pb_offset += pb_height + d->gap + 2 * (d->border_width + d->border_padding);

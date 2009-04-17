@@ -84,12 +84,17 @@ static void
 textbox_draw(widget_t *widget, draw_context_t *ctx, area_t geometry, wibox_t *p)
 {
     textbox_data_t *d = widget->data;
+    color_t bg;
+    color_t border_color;
 
-    if(d->bg.initialized)
-        draw_rectangle(ctx, geometry, 1.0, true, &d->bg);
+    xcolor_to_color(&d->bg, &bg);
+    xcolor_to_color(&d->border.color, &border_color);
+
+    if(bg.initialized)
+        draw_rectangle(ctx, geometry, 1.0, true, &bg);
 
     if(d->border.width > 0)
-        draw_rectangle(ctx, geometry, d->border.width, false, &d->border.color);
+        draw_rectangle(ctx, geometry, d->border.width, false, &border_color);
 
     if(d->bg_image)
     {
