@@ -1446,8 +1446,6 @@ luaA_client_struts(lua_State *L)
 
             ewmh_update_client_strut(c);
 
-            client_need_arrange(c);
-
             hook_property(client, c, "struts");
         }
     }

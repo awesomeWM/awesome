@@ -94,7 +94,9 @@ end
 
 hooks.arrange.register(on_arrange)
 hooks.property.register(function (c, prop)
-    if type(c) == "client" and c:isvisible() and prop == "size_hints_honor" then
+    if type(c) == "client" and c:isvisible()
+        and (prop == "size_hints_honor"
+             or prop == "struts") then
         on_arrange(c.screen)
     end
 end)
