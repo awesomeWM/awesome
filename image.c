@@ -340,24 +340,19 @@ static int
 luaA_image_draw_pixel(lua_State *L)
 {
     size_t len;
-    xcolor_t color;
-    xcolor_init_request_t cookie;
+    color_t color;
+    color_init_cookie_t cookie;
     image_t *image = luaL_checkudata(L, 1, "image");
     int x = luaL_checkint(L, 2);
     int y = luaL_checkint(L, 3);
     const char *buf = luaL_checklstring(L, 4, &len);
 
-    cookie = xcolor_init_unchecked(&color, buf, len);
+    cookie = color_init_unchecked(&color, buf, len);
     imlib_context_set_image(image->image);
-    xcolor_init_reply(cookie);
+    color_init_reply(cookie);
 
     if((x > imlib_image_get_width()) || (y > imlib_image_get_height()))
         return 0;
-
-    color.red /= 256;
-    color.green /= 256;
-    color.blue /= 256;
-    color.alpha /= 256;
 
     imlib_context_set_color(color.red, color.green, color.blue, color.alpha);
     imlib_image_draw_pixel(x, y, 1);
@@ -379,8 +374,8 @@ static int
 luaA_image_draw_line(lua_State *L)
 {
     size_t len;
-    xcolor_t color;
-    xcolor_init_request_t cookie;
+    color_t color;
+    color_init_cookie_t cookie;
     image_t *image = luaL_checkudata(L, 1, "image");
     int x1 = luaL_checkint(L, 2);
     int y1 = luaL_checkint(L, 3);
@@ -388,17 +383,12 @@ luaA_image_draw_line(lua_State *L)
     int y2 = luaL_checkint(L, 5);
     const char *buf = luaL_checklstring(L, 6, &len);
 
-    cookie = xcolor_init_unchecked(&color, buf, len);
+    cookie = color_init_unchecked(&color, buf, len);
     imlib_context_set_image(image->image);
-    xcolor_init_reply(cookie);
+    color_init_reply(cookie);
 
     if((MAX(x1,x2) > imlib_image_get_width()) || (MAX(y1,y2) > imlib_image_get_height()))
         return 0;
-
-    color.red /= 256;
-    color.green /= 256;
-    color.blue /= 256;
-    color.alpha /= 256;
 
     imlib_context_set_color(color.red, color.green, color.blue, color.alpha);
     imlib_image_draw_line(x1, y1, x2, y2, 1);
@@ -421,8 +411,8 @@ static int
 luaA_image_draw_rectangle(lua_State *L)
 {
     size_t len;
-    xcolor_t color;
-    xcolor_init_request_t cookie;
+    color_t color;
+    color_init_cookie_t cookie;
     image_t *image = luaL_checkudata(L, 1, "image");
     int x = luaL_checkint(L, 2);
     int y = luaL_checkint(L, 3);
@@ -431,19 +421,14 @@ luaA_image_draw_rectangle(lua_State *L)
     int fill = luaA_checkboolean(L, 6);
     const char *buf = luaL_checklstring(L, 7, &len);
 
-    cookie = xcolor_init_unchecked(&color, buf, len);
+    cookie = color_init_unchecked(&color, buf, len);
     imlib_context_set_image(image->image);
-    xcolor_init_reply(cookie);
+    color_init_reply(cookie);
 
     if((x > imlib_image_get_width()) || (x + width > imlib_image_get_width()))
         return 0;
     if((y > imlib_image_get_height()) || (y + height > imlib_image_get_height()))
         return 0;
-
-    color.red /= 256;
-    color.green /= 256;
-    color.blue /= 256;
-    color.alpha /= 256;
 
     imlib_context_set_color(color.red, color.green, color.blue, color.alpha);
     if(!fill)
@@ -469,8 +454,8 @@ static int
 luaA_image_draw_circle(lua_State *L)
 {
     size_t len;
-    xcolor_t color;
-    xcolor_init_request_t cookie;
+    color_t color;
+    color_init_cookie_t cookie;
     image_t *image = luaL_checkudata(L, 1, "image");
     int x = luaL_checkint(L, 2);
     int y = luaL_checkint(L, 3);
@@ -479,19 +464,14 @@ luaA_image_draw_circle(lua_State *L)
     int fill = luaA_checkboolean(L, 6);
     const char *buf = luaL_checklstring(L, 7, &len);
 
-    cookie = xcolor_init_unchecked(&color, buf, len);
+    cookie = color_init_unchecked(&color, buf, len);
     imlib_context_set_image(image->image);
-    xcolor_init_reply(cookie);
+    color_init_reply(cookie);
 
     if((x > imlib_image_get_width()) || (x + ah > imlib_image_get_width()) || (x - ah < 0))
         return 0;
     if((y > imlib_image_get_height()) || (y + av > imlib_image_get_height()) || (y - av < 0))
         return 0;
-
-    color.red /= 256;
-    color.green /= 256;
-    color.blue /= 256;
-    color.alpha /= 256;
 
     imlib_context_set_color(color.red, color.green, color.blue, color.alpha);
     if(!fill)
