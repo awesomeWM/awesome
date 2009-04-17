@@ -25,6 +25,7 @@
 #include <ctype.h>
 
 #define RGB_8TO16(i)   (0xffff * ((i) & 0xff) / 0xff)
+#define RGB_16TO8(i)   (0xff * ((i) & 0xffff) / 0xffff)
 
 /** Parse an hexadecimal color string to its component.
  * \param colstr The color string.
@@ -253,6 +254,29 @@ xcolor_init_reply(xcolor_init_request_t req)
 
     warn("awesome: error, cannot allocate color '%s'", req.colstr);
     return false;
+}
+
+/** Convert a xcolor struct to a color one.
+ * \param xcol The X color.
+ * \param col The color.
+ * \return True if everything has been converted.
+ */
+bool
+xcolor_to_color(const xcolor_t *xcol, color_t *col)
+{
+    if (!xcol->initialized)
+    {
+        col->initialized = false;
+        return false;
+    }
+
+    col->initialized = true;
+    col->red   = RGB_16TO8(xcol->red);
+    col->green = RGB_16TO8(xcol->green);
+    col->blue  = RGB_16TO8(xcol->blue);
+    col->alpha = RGB_16TO8(xcol->alpha);
+
+    return true;
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

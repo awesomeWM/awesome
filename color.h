@@ -72,6 +72,8 @@ bool color_init_reply(color_init_cookie_t);
 xcolor_init_request_t xcolor_init_unchecked(xcolor_t *, const char *, ssize_t);
 bool xcolor_init_reply(xcolor_init_request_t);
 
+bool xcolor_to_color(const xcolor_t *, color_t *);
+
 #endif
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
