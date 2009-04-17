@@ -124,5 +124,6 @@ hooks.clients.register(function()
                                on_arrange(screen)
                            end
                        end)
+hooks.tags.register(function(screen, tag, action) on_arrange(screen) end)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
