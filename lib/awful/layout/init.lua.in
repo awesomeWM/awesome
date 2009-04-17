@@ -82,5 +82,10 @@ function getname(layout)
 end
 
 hooks.arrange.register(on_arrange)
+hooks.property.register(function (c, prop)
+    if c:isvisible() and prop == "size_hints_honor" then
+        on_arrange(c.screen)
+    end
+end)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

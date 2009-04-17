@@ -1721,7 +1721,7 @@ luaA_client_newindex(lua_State *L)
         break;
       case A_TK_SIZE_HINTS_HONOR:
         c->size_hints_honor = luaA_checkboolean(L, 3);
-        client_need_arrange(c);
+        hooks_property(c, "size_hints_honor");
         break;
       case A_TK_BORDER_WIDTH:
         client_setborder(c, luaL_checknumber(L, 3));
