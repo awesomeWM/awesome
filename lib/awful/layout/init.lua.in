@@ -101,7 +101,8 @@ hooks.property.register(function (c, prop)
         or prop == "fullscreen"
         or prop == "maximized_horizontal"
         or prop == "maximized_vertical"
-        or prop == "border_width" then
+        or prop == "border_width"
+        or prop == "hide" then
         on_arrange(c.screen)
     end
 end)

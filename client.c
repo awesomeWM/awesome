@@ -1472,6 +1472,7 @@ luaA_client_newindex(lua_State *L)
             client_need_arrange(c);
             c->ishidden = b;
             client_need_arrange(c);
+            hook_property(client, c, "hide");
         }
         break;
       case A_TK_MINIMIZED:
