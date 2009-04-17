@@ -24,9 +24,9 @@
 #include "screen.h"
 #include "property.h"
 #include "client.h"
-#include "widget.h"
 #include "ewmh.h"
 #include "common/atoms.h"
+#include "common/xutil.h"
 
 void
 property_update_wm_transient_for(client_t *c, xcb_get_property_reply_t *reply)

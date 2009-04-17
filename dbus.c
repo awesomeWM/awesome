@@ -19,7 +19,6 @@
  *
  */
 
-#include "config.h"
 #include "dbus.h"
 #include "client.h"
 
@@ -30,7 +29,6 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-#include "widget.h"
 #include "event.h"
 
 static DBusError err;

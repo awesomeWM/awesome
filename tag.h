@@ -22,7 +22,6 @@
 #ifndef AWESOME_TAG_H
 #define AWESOME_TAG_H
 
-#include "structs.h"
 #include "client.h"
 
 /** Tag type */

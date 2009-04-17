@@ -19,7 +19,6 @@
  *
  */
 
-#include "stack.h"
 #include "cnode.h"
 #include "ewmh.h"
 

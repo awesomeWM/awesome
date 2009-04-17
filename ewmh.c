@@ -34,6 +34,7 @@
 #include "wibox.h"
 #include "common/atoms.h"
 #include "common/buffer.h"
+#include "common/xutil.h"
 
 #define _NET_WM_STATE_REMOVE 0
 #define _NET_WM_STATE_ADD 1

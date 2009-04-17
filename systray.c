@@ -28,6 +28,7 @@
 #include "window.h"
 #include "widget.h"
 #include "common/atoms.h"
+#include "common/xutil.h"
 
 #define SYSTEM_TRAY_REQUEST_DOCK 0 /* Begin icon docking */
 

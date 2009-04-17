@@ -23,7 +23,6 @@
 #define AWESOME_SWINDOW_H
 
 #include "draw.h"
-#include "common/util.h"
 
 /** A simple window. */
 typedef struct simple_window_t

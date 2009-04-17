@@ -20,6 +20,7 @@
  */
 
 #include "structs.h"
+#include "common/tokenize.h"
 
 DO_LUA_TOSTRING(image_t, image, "image");
 

@@ -29,11 +29,7 @@
 
 #include <basedir.h>
 
-#include <stdio.h>
-
 #include "draw.h"
-#include "common/util.h"
-#include "common/luaobject.h"
 
 #define luaA_deprecate(L, repl) \
     luaA_warn(L, "%s: This function is deprecated and will be removed, see %s", \

@@ -24,6 +24,7 @@
 #include "mouse.h"
 #include "mousegrabber.h"
 #include "common/xcursor.h"
+#include "common/xutil.h"
 
 /** Grab the mouse.
  * \param cursor The cursor to use while grabbing.

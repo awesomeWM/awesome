@@ -24,6 +24,7 @@
 #include <X11/Xlib.h>
 
 #include "structs.h"
+#include "common/xutil.h"
 
 LUA_OBJECT_FUNCS(keyb_t, key, "key")
 

@@ -24,7 +24,6 @@
 
 #include "mouse.h"
 #include "stack.h"
-#include "common/list.h"
 
 #define CLIENT_SELECT_INPUT_EVENT_MASK (XCB_EVENT_MASK_STRUCTURE_NOTIFY \
                                         | XCB_EVENT_MASK_PROPERTY_CHANGE \

@@ -27,9 +27,6 @@
 #include <xcb/xcb_aux.h>
 #include <xcb/xcb_event.h>
 
-/* XCB doesn't provide keysyms definition */
-#include <X11/keysym.h>
-
 #include "array.h"
 
 bool xutil_text_prop_get(xcb_connection_t *, xcb_window_t, xcb_atom_t, char **, ssize_t *);

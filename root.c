@@ -23,6 +23,8 @@
 
 #include "mouse.h"
 #include "common/xcursor.h"
+#include "common/tokenize.h"
+#include "common/xutil.h"
 
 /** Send fake events. Usually the current focused client will get it.
  * \param L The Lua VM state.

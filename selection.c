@@ -23,9 +23,9 @@
 #include <xcb/xcb_atom.h>
 
 #include "selection.h"
-#include "structs.h"
 #include "event.h"
 #include "common/atoms.h"
+#include "common/xutil.h"
 
 static xcb_window_t selection_window = XCB_NONE;
 

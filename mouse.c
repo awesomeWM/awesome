@@ -21,11 +21,10 @@
 
 #include <math.h>
 
-#include "common/tokenize.h"
 #include "screen.h"
 #include "tag.h"
-#include "wibox.h"
 #include "common/xcursor.h"
+#include "common/xutil.h"
 
 DO_LUA_TOSTRING(button_t, button, "button")
 LUA_OBJECT_FUNCS(button_t, button, "button")

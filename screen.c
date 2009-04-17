@@ -30,6 +30,7 @@
 #include "client.h"
 #include "widget.h"
 #include "wibox.h"
+#include "common/xutil.h"
 
 static inline area_t
 screen_xsitoarea(xcb_xinerama_screen_info_t si)

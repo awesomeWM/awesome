@@ -30,6 +30,7 @@
 #include "wibox.h"
 #include "client.h"
 #include "common/atoms.h"
+#include "common/xutil.h"
 
 #include "widgetgen.h"
 

@@ -26,15 +26,11 @@
 #include <libsn/sn.h>
 
 #include <xcb/xcb_icccm.h>
-#include <xcb/xcb_property.h>
+#include <xcb/xcb_keysyms.h>
 
 #include "config.h"
-#include "luaa.h"
-#include "swindow.h"
 #include "key.h"
-#include "common/xutil.h"
 #include "common/xembed.h"
-#include "common/tokenize.h"
 
 typedef struct wibox_t wibox_t;
 typedef struct a_screen screen_t;

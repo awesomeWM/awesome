@@ -40,6 +40,7 @@
 #include "systray.h"
 #include "screen.h"
 #include "common/atoms.h"
+#include "common/xutil.h"
 
 /** Handle mouse button events.
  * \param c The client on which the event happened or NULL.

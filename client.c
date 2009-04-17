@@ -24,15 +24,14 @@
 
 #include "cnode.h"
 #include "tag.h"
-#include "window.h"
 #include "ewmh.h"
 #include "screen.h"
 #include "titlebar.h"
 #include "systray.h"
 #include "property.h"
-#include "wibox.h"
 #include "spawn.h"
 #include "common/atoms.h"
+#include "common/xutil.h"
 
 DO_LUA_TOSTRING(client_t, client, "client")
 

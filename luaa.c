@@ -19,7 +19,7 @@
  *
  */
 
-#include "common/util.h"
+#define _GNU_SOURCE
 
 #include <ev.h>
 
@@ -27,21 +27,17 @@
 #include <lauxlib.h>
 #include <lualib.h>
 
-#include <xcb/xcb.h>
-
 #include <basedir_fs.h>
 
 #include "awesome.h"
 #include "awesome-version-internal.h"
 #include "ewmh.h"
-#include "config.h"
 #include "luaa.h"
 #include "spawn.h"
 #include "tag.h"
 #include "client.h"
 #include "screen.h"
 #include "event.h"
-#include "mouse.h"
 #include "selection.h"
 #include "window.h"
 #include "common/xcursor.h"

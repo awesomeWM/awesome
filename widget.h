@@ -23,6 +23,7 @@
 #define AWESOME_WIDGET_H
 
 #include "mouse.h"
+#include "common/tokenize.h"
 
 typedef widget_t *(widget_constructor_t)(widget_t *);
 typedef void (widget_destructor_t)(widget_t *);

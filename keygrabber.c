@@ -19,11 +19,15 @@
  *
  */
 
+/* XCB doesn't provide keysyms definition */
+#include <X11/keysym.h>
+
 #include <unistd.h>
 
 #include "structs.h"
 #include "keygrabber.h"
 #include "key.h"
+#include "common/xutil.h"
 
 /** XCB equivalent of XLookupString which translate the keycode given
  * by PressEvent to a KeySym and a string

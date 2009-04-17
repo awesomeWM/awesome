@@ -25,8 +25,9 @@
 #include "client.h"
 #include "ewmh.h"
 #include "screen.h"
-#include "common/xcursor.h"
 #include "window.h"
+#include "common/xcursor.h"
+#include "common/xutil.h"
 
 DO_LUA_TOSTRING(wibox_t, wibox, "wibox")
 

@@ -22,9 +22,7 @@
 #ifndef AWESOME_KEYBINDING_H
 #define AWESOME_KEYBINDING_H
 
-#include <xcb/xcb.h>
 #include "luaa.h"
-#include "common/luaobject.h"
 
 typedef struct keyb_t
 {

@@ -22,8 +22,6 @@
 #ifndef AWESOME_EVENT_H
 #define AWESOME_EVENT_H
 
-#include <xcb/xcb.h>
-
 #include "wibox.h"
 #include "layout.h"
 #include "client.h"

@@ -23,6 +23,7 @@
 #define AWESOME_CNODE_H
 
 #include "client.h"
+#include "common/list.h"
 
 struct client_node
 {

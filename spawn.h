@@ -22,7 +22,6 @@
 #ifndef AWESOME_SPAWN_H
 #define AWESOME_SPAWN_H
 
-#include <lua.h>
 #include "structs.h"
 
 void spawn_init(void);

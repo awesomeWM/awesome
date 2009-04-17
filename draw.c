@@ -32,6 +32,7 @@
 #include "structs.h"
 
 #include "common/tokenize.h"
+#include "common/xutil.h"
 
 /** Convert text from any charset to UTF-8 using iconv.
  * \param iso The ISO string to convert.

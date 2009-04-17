@@ -45,7 +45,7 @@
 #include "common/version.h"
 #include "common/atoms.h"
 #include "common/xcursor.h"
-#include "config.h"
+#include "common/xutil.h"
 
 awesome_t globalconf;
 
