@@ -819,7 +819,6 @@ client_setfullscreen(client_t *c, bool s)
             client_setborder(c, c->border_fs);
         }
         client_resize(c, geometry, false);
-        client_need_arrange(c);
         client_stack();
         ewmh_client_update_hints(c);
         hook_property(client, c, "fullscreen");

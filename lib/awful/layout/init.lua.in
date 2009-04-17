@@ -98,7 +98,8 @@ hooks.property.register(function (c, prop)
         and (prop == "size_hints_honor"
              or prop == "struts"
              or prop == "minimized"
-             or prop == "sticky") then
+             or prop == "sticky"
+             or prop == "fullscreen") then
         on_arrange(c.screen)
     end
 end)
