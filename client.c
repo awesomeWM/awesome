@@ -1181,8 +1181,6 @@ client_setborder(client_t *c, int width)
 
     c->geometry.width += 2 * c->border;
     c->geometry.height += 2 * c->border;
-    /* Tiled clients will be resized by the layout functions. */
-    client_need_arrange(c);
 
     /* Changing border size also affects the size of the titlebar. */
     titlebar_update_geometry(c);

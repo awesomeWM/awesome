@@ -100,7 +100,8 @@ hooks.property.register(function (c, prop)
         or prop == "sticky"
         or prop == "fullscreen"
         or prop == "maximized_horizontal"
-        or prop == "maximized_vertical" then
+        or prop == "maximized_vertical"
+        or prop == "border_width" then
         on_arrange(c.screen)
     end
 end)
