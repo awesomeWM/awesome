@@ -14,7 +14,8 @@ local tostring = tostring
 local hooks = require("awful.hooks")
 local string = string
 local widget = widget
-local button = button
+local button = require("awful.button")
+local util = require("awful.util")
 local capi = { screen = screen }
 local bt = require("beautiful")
 local screen = screen
@@ -328,8 +329,7 @@ function notify(args)
 
     -- create textbox
     local textbox = widget({ type = "textbox", align = "flex" })
-    textbox:buttons({ button({ }, 1, run),
-                      button({ }, 3, die) })
+    textbox:buttons(util.table.join(button({ }, 1, run), button({ }, 3, die)))
     textbox:margin({ right = config.margin, left = config.margin })
     textbox.text = string.format('<span font_desc="%s"><b>%s</b>%s</span>', font, title, text)
     if hover_timeout then textbox.mouse_enter = hover_destroy end
@@ -345,7 +345,7 @@ function notify(args)
         -- if we have an icon, use it
         if icon then
             iconbox = widget({ type = "imagebox", align = "left" })
-            iconbox:buttons({ button({ }, 1, run), button({ }, 3, die) })
+            iconbox:buttons(util.join(button({ }, 1, run), button({ }, 3, die)))
             local img
             if type(icon) == "string" then
                 img = image(icon)

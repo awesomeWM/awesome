@@ -13,9 +13,9 @@ local capi =
 {
     wibox = wibox,
     widget = widget,
-    button = button,
     client = client,
 }
+local button = require("awful.button")
 local beautiful = require("beautiful")
 local hooks = require("awful.hooks")
 local util = require("awful.util")
@@ -63,12 +63,11 @@ function add(c, args)
     end
 
     -- Redirect relevant events to the client the titlebar belongs to
-    local bts =
-    {
-        capi.button({ }, 1, function (t) capi.client.focus = t.client t.client:raise() mouse.client.move(t.client) end),
-        capi.button({ args.modkey }, 1, function (t) mouse.client.move(t.client) end),
-        capi.button({ args.modkey }, 3, function (t) mouse.client.resize(t.client) end)
-    }
+    local bts = util.tablejoin(
+        button({ }, 1, function (t) capi.client.focus = t.client t.client:raise() mouse.client.move(t.client) end),
+        button({ args.modkey }, 1, function (t) mouse.client.move(t.client) end),
+        button({ args.modkey }, 3, function (t) mouse.client.resize(t.client) end)
+    )
     title:buttons(bts)
 
     local appicon = capi.widget({ type = "imagebox", align = "left" })
@@ -146,12 +145,11 @@ end
 -- @param theme  The theme from beautifull. Used to get the image paths
 -- @param state  The state the button is associated to. Containse path the action and info about the image
 local function button_new(c, name, modkey, theme, state)
-    local bts =
-    {
-        capi.button({ }, 1, nil,  state.action),
-        capi.button({ modkey }, 1, function (t) mouse.client.move(t.client) end),
-        capi.button({ modkey }, 3, function (t) mouse.client.resize(t.client) end)
-    }
+    local bts = util.table.join(
+        button({ }, 1, nil,  state.action),
+        button({ modkey }, 1, function (t) mouse.client.move(t.client) end),
+        button({ modkey }, 3, function (t) mouse.client.resize(t.client) end)
+    )
 
     -- get the image path from the theme. Only return a button if we find an image
     local img

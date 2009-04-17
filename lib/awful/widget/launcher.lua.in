@@ -5,9 +5,9 @@
 ---------------------------------------------------------------------------
 
 local setmetatable = setmetatable
-local capi = { button = button }
 local util = require("awful.util")
-local button = require("awful.widget.button")
+local wbutton = require("awful.widget.button")
+local button = require("awful.button")
 
 module("awful.widget.launcher")
 
@@ -17,14 +17,13 @@ module("awful.widget.launcher")
 -- @return A launcher widget.
 local function new(_, args)
     if not args.command and not args.menu then return end
-    local w = button(args)
+    local w = wbutton(args)
     if not w then return end
-    local b = w:buttons()
 
     if args.command then
-       b[#b + 1] = capi.button({}, 1, nil, function () util.spawn(args.command) end)
+       b = util.table.join(w:buttons(), button({}, 1, nil, function () util.spawn(args.command) end))
     elseif args.menu then
-       b[#b + 1] = capi.button({}, 1, nil, function () args.menu:toggle() end)
+       b = util.table.join(w:buttons(), button({}, 1, nil, function () args.menu:toggle() end))
     end
 
     w:buttons(b)
