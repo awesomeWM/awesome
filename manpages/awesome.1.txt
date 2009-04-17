@@ -80,7 +80,7 @@ Window manager control
     Quit *awesome*.
 *Mod4 \+ F1*::
     Run prompt.
-*Mod4 \+ F4*::
+*Mod4 \+ x*::
     Run Lua code prompt.
 *Mod4 \+ Return*::
     Spawn terminal emulator.
