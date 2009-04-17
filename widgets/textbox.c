@@ -36,14 +36,14 @@ typedef struct
     struct
     {
         int width;
-        xcolor_t color;
+        color_t color;
     } border;
     /** Text alignment */
     alignment_t align;
     /** Margin */
     padding_t margin;
     /** Background color */
-    xcolor_t bg;
+    color_t bg;
     /** Background image */
     image_t *bg_image;
     /** Background resize to wibox height. */
@@ -84,17 +84,12 @@ static void
 textbox_draw(widget_t *widget, draw_context_t *ctx, area_t geometry, wibox_t *p)
 {
     textbox_data_t *d = widget->data;
-    color_t bg;
-    color_t border_color;
 
-    xcolor_to_color(&d->bg, &bg);
-    xcolor_to_color(&d->border.color, &border_color);
-
-    if(bg.initialized)
-        draw_rectangle(ctx, geometry, 1.0, true, &bg);
+    if(d->bg.initialized)
+        draw_rectangle(ctx, geometry, 1.0, true, &d->bg);
 
     if(d->border.width > 0)
-        draw_rectangle(ctx, geometry, d->border.width, false, &border_color);
+        draw_rectangle(ctx, geometry, d->border.width, false, &d->border.color);
 
     if(d->bg_image)
     {
@@ -190,7 +185,7 @@ luaA_textbox_index(lua_State *L, awesome_token_t token)
       case A_TK_BG_IMAGE:
         return image_push(L, d->bg_image);
       case A_TK_BG:
-        return luaA_pushxcolor(L, &d->bg);
+        return luaA_pushcolor(L, &d->bg);
       case A_TK_MARGIN:
         lua_pushcfunction(L, luaA_textbox_margin);
         return 1;
@@ -201,7 +196,7 @@ luaA_textbox_index(lua_State *L, awesome_token_t token)
         lua_pushnumber(L, d->border.width);
         return 1;
       case A_TK_BORDER_COLOR:
-        luaA_pushxcolor(L, &d->border.color);
+        luaA_pushcolor(L, &d->border.color);
         return 1;
       case A_TK_TEXT:
         if(d->data.len > 0)
@@ -276,7 +271,7 @@ luaA_textbox_newindex(lua_State *L, awesome_token_t token)
         if(lua_isnil(L, 3))
             p_clear(&d->bg, 1);
         else if((buf = luaL_checklstring(L, 3, &len)))
-            xcolor_init_reply(xcolor_init_unchecked(&d->bg, buf, len));
+            color_init_reply(color_init_unchecked(&d->bg, buf, len));
         break;
       case A_TK_ALIGN:
         if((buf = luaL_checklstring(L, 3, &len)))
@@ -284,7 +279,7 @@ luaA_textbox_newindex(lua_State *L, awesome_token_t token)
         break;
       case A_TK_BORDER_COLOR:
         if((buf = luaL_checklstring(L, 3, &len)))
-            xcolor_init_reply(xcolor_init_unchecked(&d->border.color, buf, len));
+            color_init_reply(color_init_unchecked(&d->border.color, buf, len));
         break;
       case A_TK_BORDER_WIDTH:
         d->border.width = luaL_checknumber(L, 3);
