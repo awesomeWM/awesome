@@ -27,7 +27,7 @@ typedef struct
 {
     /** Imagebox image */
     image_t *image;
-    xcolor_t bg;
+    color_t bg;
     alignment_t valign;
     bool resize;
 } imagebox_data_t;
@@ -85,12 +85,8 @@ imagebox_draw(widget_t *widget, draw_context_t *ctx, area_t geometry, wibox_t *p
 
     if(d->image && geometry.width && geometry.height)
     {
-        color_t bg;
-
-        xcolor_to_color(&d->bg, &bg);
-
-        if(bg.initialized)
-            draw_rectangle(ctx, geometry, 1.0, true, &bg);
+        if(d->bg.initialized)
+            draw_rectangle(ctx, geometry, 1.0, true, &d->bg);
 
         int y = geometry.y;
         double ratio = d->resize ? (double) geometry.height / d->image->height : 1;
@@ -143,7 +139,7 @@ luaA_imagebox_index(lua_State *L, awesome_token_t token)
         image_push(L, d->image);
         break;
       case A_TK_BG:
-        luaA_pushxcolor(L, &d->bg);
+        luaA_pushcolor(L, &d->bg);
         break;
       case A_TK_RESIZE:
         lua_pushboolean(L, d->resize);
@@ -182,7 +178,7 @@ luaA_imagebox_newindex(lua_State *L, awesome_token_t token)
         if(lua_isnil(L, 3))
             p_clear(&d->bg, 1);
         else if((buf = luaL_checklstring(L, 3, &len)))
-            xcolor_init_reply(xcolor_init_unchecked(&d->bg, buf, len));
+            color_init_reply(color_init_unchecked(&d->bg, buf, len));
         break;
       case A_TK_RESIZE:
         d->resize = luaA_checkboolean(L, 3);
