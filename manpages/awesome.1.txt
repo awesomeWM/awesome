@@ -78,7 +78,7 @@ Window manager control
     Restart *awesome*.
 *Mod4 \+ Shift \+ q*::
     Quit *awesome*.
-*Mod4 \+ F1*::
+*Mod4 \+ r*::
     Run prompt.
 *Mod4 \+ x*::
     Run Lua code prompt.
