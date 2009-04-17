@@ -848,4 +848,27 @@ luaA_pushxcolor(lua_State *L, const xcolor_t *c)
     return 1;
 }
 
+/** Push a color as a string onto the stack
+ * \param L The Lua VM state.
+ * \param c The color to push.
+ * \return The number of elements pushed on stack.
+ */
+int
+luaA_pushcolor(lua_State *L, const color_t *c)
+{
+    uint8_t r = c->red;
+    uint8_t g = c->green;
+    uint8_t b = c->blue;
+    uint8_t a = c->alpha;
+    char s[10];
+    int len;
+    /* do not print alpha if it's full */
+    if(a == 0xff)
+        len = snprintf(s, sizeof(s), "#%02x%02x%02x", r, g, b);
+    else
+        len = snprintf(s, sizeof(s), "#%02x%02x%02x%02x", r, g, b, a);
+    lua_pushlstring(L, s, len);
+    return 1;
+}
+
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
