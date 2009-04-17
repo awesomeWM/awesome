@@ -94,7 +94,8 @@ end
 
 hooks.arrange.register(on_arrange)
 hooks.property.register(function (c, prop)
-    if type(c) == "client" and prop == "size_hints_honor"
+    if type(c) ~= "client" then return end
+    if prop == "size_hints_honor"
         or prop == "struts"
         or prop == "minimized"
         or prop == "sticky"
@@ -104,6 +105,12 @@ hooks.property.register(function (c, prop)
         or prop == "border_width"
         or prop == "hide" then
         on_arrange(c.screen)
+    elseif prop == "screen" then
+        -- If prop is screen, we do not know what was the previous screen, so
+        -- let's arrange all screens :-(
+        for screen = 1, capi.screen.count() do
+            on_arrange(screen)
+        end
     end
 end)
 hooks.wibox_position.register(function(wibox)

@@ -240,7 +240,6 @@ screen_client_moveto(client_t *c, screen_t *new_screen, bool dotag, bool doresiz
     tag_array_t *old_tags = &old_screen->tags,
                 *new_tags = &new_screen->tags;
     area_t from, to;
-    bool wasvisible = client_isvisible(c, c->screen);
 
     if(new_screen == c->screen)
         return;
@@ -265,12 +264,11 @@ screen_client_moveto(client_t *c, screen_t *new_screen, bool dotag, bool doresiz
             }
     }
 
-    if(wasvisible)
-        old_screen->need_arrange = true;
-    client_need_arrange(c);
-
     if(!doresize)
+    {
+        hook_property(client, c, "screen");
         return;
+    }
 
     from = screen_area_get(old_screen, false);
     to = screen_area_get(c->screen, false);
@@ -318,6 +316,7 @@ screen_client_moveto(client_t *c, screen_t *new_screen, bool dotag, bool doresiz
     }
     /* move / resize the client */
     client_resize(c, new_geometry, false);
+    hook_property(client, c, "screen");
 }
 
 /** Screen module.
