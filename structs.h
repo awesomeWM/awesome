@@ -146,8 +146,6 @@ struct awesome_t
     SnDisplay *sndisplay;
 };
 
-DO_ARRAY(const void *, void, DO_NOTHING)
-
 extern awesome_t globalconf;
 
 #endif

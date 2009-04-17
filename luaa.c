@@ -70,6 +70,8 @@ extern const struct luaL_reg awesome_wibox_meta[];
 extern const struct luaL_reg awesome_key_methods[];
 extern const struct luaL_reg awesome_key_meta[];
 
+DO_ARRAY(const void *, void, DO_NOTHING)
+
 /** Quit awesome.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
