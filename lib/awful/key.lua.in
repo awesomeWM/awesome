@@ -26,14 +26,14 @@ ignore_modifiers = { "Lock", "Mod2" }
 -- will return 2 key objects: one with CapsLock on, and the other one with
 -- CapsLock off.
 -- @see C api key() function for parameters.
--- @return One or several key objects.
+-- @return A table with one or several key objects.
 local function new(_, mod, ...)
     local ret = {}
     local subsets = util.subsets(ignore_modifiers)
     for _, set in ipairs(subsets) do
         ret[#ret + 1] = capi.key(util.table.join(mod, set), unpack(arg))
     end
-    return unpack(ret)
+    return ret
 end
 
 setmetatable(_M, { __call = new })
