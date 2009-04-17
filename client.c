@@ -257,10 +257,6 @@ client_focus_update(client_t *c)
     globalconf.screen_focus->prev_client_focus = c;
     globalconf.screen_focus->client_focus = c;
 
-    /* Some layouts use focused client differently, so call them back.
-     * And anyway, we have maybe unhidden */
-    client_need_arrange(c);
-
     /* according to EWMH, we have to remove the urgent state from a client */
     client_seturgent(c, false);
 
