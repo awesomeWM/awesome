@@ -216,11 +216,11 @@ client_raise(client_t *c)
         tc = c;
         for(int i = 0; i < counter; i++)
             tc = tc->transient_for;
-        stack_client_push(tc);
+        stack_client_append(tc);
     }
 
     /* Push c on top of the stack. */
-    stack_client_push(c);
+    stack_client_append(c);
     client_stack();
 }
 
@@ -230,11 +230,11 @@ client_raise(client_t *c)
 static inline void
 client_lower(client_t *c)
 {
-    stack_client_append(c);
+    stack_client_push(c);
 
     /* Traverse all transient layers. */
     for(client_t *tc = c->transient_for; tc; tc = tc->transient_for)
-        stack_client_append(tc);
+        stack_client_push(tc);
 
     client_stack();
 }

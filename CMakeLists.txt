@@ -39,7 +39,6 @@ set(AWE_DOC_FILES
 set(AWE_SRCS
     ${SOURCE_DIR}/awesome.c
     ${SOURCE_DIR}/client.c
-    ${SOURCE_DIR}/cnode.c
     ${SOURCE_DIR}/dbus.c
     ${SOURCE_DIR}/root.c
     ${SOURCE_DIR}/event.c

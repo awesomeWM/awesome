@@ -81,7 +81,7 @@ struct awesome_t
     /** Path to config file */
     char *conffile;
     /** Stack client history */
-    client_node_t *stack;
+    client_array_t stack;
     /** Command line passed to awesome */
     char *argv;
     /** Lua VM state */

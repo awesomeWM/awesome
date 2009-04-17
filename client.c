@@ -22,7 +22,6 @@
 #include <xcb/xcb_atom.h>
 #include <xcb/xcb_image.h>
 
-#include "cnode.h"
 #include "tag.h"
 #include "ewmh.h"
 #include "screen.h"
@@ -311,10 +310,9 @@ client_stack_above(client_t *c, xcb_window_t previous)
         previous = c->win;
 
     /* stack transient window on top of their parents */
-    for(client_node_t *node = *client_node_list_last(&globalconf.stack);
-        node; node = node->prev)
-        if(node->client->transient_for == c)
-            previous = client_stack_above(node->client, previous);
+    foreach(node, globalconf.stack)
+        if((*node)->transient_for == c)
+            previous = client_stack_above(*node, previous);
 
     return previous;
 }
@@ -375,7 +373,6 @@ static void
 client_real_stack(void)
 {
     uint32_t config_win_vals[2];
-    client_node_t *node, *last = *client_node_list_last(&globalconf.stack);
     layer_t layer;
 
     config_win_vals[0] = XCB_NONE;
@@ -383,9 +380,9 @@ client_real_stack(void)
 
     /* stack desktop windows */
     for(layer = LAYER_DESKTOP; layer < LAYER_BELOW; layer++)
-        for(node = last; node; node = node->prev)
-            if(client_layer_translator(node->client) == layer)
-                config_win_vals[0] = client_stack_above(node->client,
+        foreach(node, globalconf.stack)
+            if(client_layer_translator(*node) == layer)
+                config_win_vals[0] = client_stack_above(*node,
                                                         config_win_vals[0]);
 
     /* first stack not ontop wibox window */
@@ -405,9 +402,9 @@ client_real_stack(void)
 
     /* then stack clients */
     for(layer = LAYER_BELOW; layer < LAYER_COUNT; layer++)
-        for(node = last; node; node = node->prev)
-            if(client_layer_translator(node->client) == layer)
-                config_win_vals[0] = client_stack_above(node->client,
+        foreach(node, globalconf.stack)
+            if(client_layer_translator(*node) == layer)
+                config_win_vals[0] = client_stack_above(*node,
                                                         config_win_vals[0]);
 
     /* then stack ontop wibox window */
@@ -1237,7 +1234,7 @@ client_unmanage(client_t *c)
             client_array_remove(&globalconf.clients, elem);
             break;
         }
-    stack_client_delete(c);
+    stack_client_remove(c);
     for(int i = 0; i < tags->len; i++)
         untag_client(c, tags->tab[i]);
 

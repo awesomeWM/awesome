@@ -1,7 +1,7 @@
 /*
  * stack.c - client stack management
  *
- * Copyright © 2008 Julien Danjou <julien@danjou.info>
+ * Copyright © 2008-2009 Julien Danjou <julien@danjou.info>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,8 +19,21 @@
  *
  */
 
-#include "cnode.h"
 #include "ewmh.h"
+#include "stack.h"
+#include "client.h"
+
+void
+stack_client_remove(client_t *c)
+{
+    foreach(client, globalconf.stack)
+        if(*client == c)
+        {
+            client_array_remove(&globalconf.stack, client);
+            break;
+        }
+    ewmh_update_net_client_list_stacking(c->phys_screen);
+}
 
 /** Push the client at the beginning of the client stack.
  * \param c The client to push.
@@ -28,8 +41,8 @@
 void
 stack_client_push(client_t *c)
 {
-    client_node_t *node = client_node_client_add(&globalconf.stack, c);
-    client_node_list_push(&globalconf.stack, node);
+    stack_client_remove(c);
+    client_array_push(&globalconf.stack, c);
     ewmh_update_net_client_list_stacking(c->phys_screen);
 }
 
@@ -39,25 +52,9 @@ stack_client_push(client_t *c)
 void
 stack_client_append(client_t *c)
 {
-    client_node_t *node = client_node_client_add(&globalconf.stack, c);
-    client_node_list_append(&globalconf.stack, node);
+    stack_client_remove(c);
+    client_array_append(&globalconf.stack, c);
     ewmh_update_net_client_list_stacking(c->phys_screen);
-}
-
-/** Remove a client from stack history.
- * \param c The client.
- */
-void
-stack_client_delete(client_t *c)
-{
-    client_node_t *node = client_node_client_getby(globalconf.stack, c);
-
-    if(node)
-    {
-        client_node_list_detach(&globalconf.stack, node);
-        p_delete(&node);
-        ewmh_update_net_client_list_stacking(c->phys_screen);
-    }
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

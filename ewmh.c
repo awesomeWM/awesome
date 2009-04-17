@@ -30,7 +30,6 @@
 #include "screen.h"
 #include "client.h"
 #include "widget.h"
-#include "cnode.h"
 #include "wibox.h"
 #include "common/atoms.h"
 #include "common/buffer.h"
@@ -166,18 +165,12 @@ ewmh_update_net_client_list(int phys_screen)
 void
 ewmh_update_net_client_list_stacking(int phys_screen)
 {
-    xcb_window_t *wins;
-    client_node_t *c;
     int n = 0;
+    xcb_window_t *wins = p_alloca(xcb_window_t, globalconf.stack.len);
 
-    for(c = globalconf.stack; c; c = c->next)
-        n++;
-
-    wins = p_alloca(xcb_window_t, n);
-
-    for(n = 0, c = *client_node_list_last(&globalconf.stack); c; c = c->prev, n++)
-        if(c->client->phys_screen == phys_screen)
-            wins[n] = c->client->win;
+    foreach(client, globalconf.stack)
+        if((*client)->phys_screen == phys_screen)
+            wins[n++] = (*client)->win;
 
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
 			xutil_screen_get(globalconf.connection, phys_screen)->root,
