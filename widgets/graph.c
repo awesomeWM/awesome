@@ -56,11 +56,11 @@ typedef struct
     /** Actual values */
     float *values;
     /** Color of them */
-    xcolor_t color_start;
+    color_t color_start;
     /** Color at middle of graph */
-    xcolor_t pcolor_center;
+    color_t pcolor_center;
     /** Color at end of graph */
-    xcolor_t pcolor_end;
+    color_t pcolor_end;
     /** Create a vertical color gradient */
     bool vertical_gradient;
 } plot_t;
@@ -87,9 +87,9 @@ typedef struct
     /** Size of lines-array (also innerbox-length) */
     int size;
     /** Background color */
-    xcolor_t bg;
+    color_t bg;
     /** Border color */
-    xcolor_t border_color;
+    color_t border_color;
     /** Grow: Left or Right */
     position_t grow;
     /** Preparation/tmp array for draw_graph(); */
@@ -116,8 +116,9 @@ graph_plot_add(graph_data_t *d, const char *title)
     plot.values = p_new(float, d->size);
     plot.lines = p_new(int, d->size);
     plot.max_value = 100.0;
-    plot.color_start = globalconf.colors.fg;
     plot.vertical_gradient = true;
+
+    xcolor_to_color(&globalconf.colors.fg, &plot.color_start);
 
     plot_array_append(&d->plots, plot);
 
@@ -174,8 +175,6 @@ graph_draw(widget_t *widget, draw_context_t *ctx,
     graph_data_t *d = widget->data;
     area_t rectangle;
     vector_t color_gradient;
-    color_t col;
-    color_t color_start, color_center, color_end;
 
     if(!d->plots.len)
         return;
@@ -191,8 +190,7 @@ graph_draw(widget_t *widget, draw_context_t *ctx,
     rectangle.y = margin_top + 1;
     rectangle.width = d->size;
     rectangle.height = d->box_height;
-    xcolor_to_color(&d->bg, &col);
-    draw_rectangle(ctx, rectangle, 1.0, true, &col);
+    draw_rectangle(ctx, rectangle, 1.0, true, &d->bg);
 
     /* for plot drawing */
     rectangle.y = margin_top + d->box_height + 1; /* bottom left corner as starting point */
@@ -209,11 +207,6 @@ graph_draw(widget_t *widget, draw_context_t *ctx,
     for(int i = 0; i < d->plots.len; i++)
     {
         plot_t *plot = &d->plots.tab[i];
-
-        /* Prepare colors */
-        xcolor_to_color(&plot->color_start, &color_start);
-        xcolor_to_color(&plot->pcolor_center, &color_center);
-        xcolor_to_color(&plot->pcolor_end, &color_end);
 
         switch(plot->draw_style)
         {
@@ -241,7 +234,7 @@ graph_draw(widget_t *widget, draw_context_t *ctx,
                   d->draw_to[y] = d->box_height - plot->lines[y]; /* i.e. on full plot -> 0 = bottom */
               }
               draw_graph(ctx, rectangle , d->draw_from, d->draw_to, plot->index, d->grow, color_gradient,
-                         &color_start, &color_center, &color_end);
+                         &plot->color_start, &plot->pcolor_center, &plot->pcolor_end);
               break;
             case Bottom_Style:
               color_gradient.y = rectangle.y;
@@ -262,7 +255,7 @@ graph_draw(widget_t *widget, draw_context_t *ctx,
 
               p_clear(d->draw_from, d->size);
               draw_graph(ctx, rectangle, d->draw_from, plot->lines, plot->index, d->grow, color_gradient,
-                         &color_start, &color_center, &color_end);
+                         &plot->color_start, &plot->pcolor_center, &plot->pcolor_end);
               break;
             case Line_Style:
               color_gradient.y = rectangle.y;
@@ -281,7 +274,7 @@ graph_draw(widget_t *widget, draw_context_t *ctx,
               }
 
               draw_graph_line(ctx, rectangle, plot->lines, plot->index, d->grow, color_gradient,
-                              &color_start, &color_center, &color_end);
+                              &plot->color_start, &plot->pcolor_center, &plot->pcolor_end);
               break;
         }
     }
@@ -291,8 +284,7 @@ graph_draw(widget_t *widget, draw_context_t *ctx,
     rectangle.y = margin_top;
     rectangle.width = d->size + 2;
     rectangle.height = d->box_height + 2;
-    xcolor_to_color(&d->border_color, &col);
-    draw_rectangle(ctx, rectangle, 1.0, false, &col);
+    draw_rectangle(ctx, rectangle, 1.0, false, &d->border_color);
 }
 
 /** Set various plot graph properties.
@@ -312,7 +304,7 @@ luaA_graph_plot_properties_set(lua_State *L)
     const char *title, *buf;
     size_t len;
     plot_t *plot = NULL;
-    xcolor_init_request_t reqs[3];
+    color_init_cookie_t reqs[3];
     int i, reqs_nbr = -1;
 
     title = luaL_checkstring(L, 2);
@@ -321,13 +313,13 @@ luaA_graph_plot_properties_set(lua_State *L)
     plot = graph_plot_get(d, title);
 
     if((buf = luaA_getopt_lstring(L, 3, "fg", NULL, &len)))
-        reqs[++reqs_nbr] = xcolor_init_unchecked(&plot->color_start, buf, len);
+        reqs[++reqs_nbr] = color_init_unchecked(&plot->color_start, buf, len);
 
     if((buf = luaA_getopt_lstring(L, 3, "fg_center", NULL, &len)))
-        reqs[++reqs_nbr] = xcolor_init_unchecked(&plot->pcolor_center, buf, len);
+        reqs[++reqs_nbr] = color_init_unchecked(&plot->pcolor_center, buf, len);
 
     if((buf = luaA_getopt_lstring(L, 3, "fg_end", NULL, &len)))
-        reqs[++reqs_nbr] = xcolor_init_unchecked(&plot->pcolor_end, buf, len);
+        reqs[++reqs_nbr] = color_init_unchecked(&plot->pcolor_end, buf, len);
 
     plot->vertical_gradient = luaA_getopt_boolean(L, 3, "vertical_gradient", plot->vertical_gradient);
     plot->scale = luaA_getopt_boolean(L, 3, "scale", plot->scale);
@@ -353,7 +345,7 @@ luaA_graph_plot_properties_set(lua_State *L)
         }
 
     for(i = 0; i <= reqs_nbr; i++)
-        xcolor_init_reply(reqs[i]);
+        color_init_reply(reqs[i]);
 
     widget_invalidate_bywidget(widget);
 
@@ -466,10 +458,10 @@ luaA_graph_index(lua_State *L, awesome_token_t token)
         lua_pushnumber(L, d->width);
         break;
       case A_TK_BORDER_COLOR:
-        luaA_pushxcolor(L, &d->border_color);
+        luaA_pushcolor(L, &d->border_color);
         break;
       case A_TK_BG:
-        luaA_pushxcolor(L, &d->bg);
+        luaA_pushcolor(L, &d->bg);
         break;
       case A_TK_GROW:
         switch(d->grow)
@@ -505,7 +497,7 @@ luaA_graph_newindex(lua_State *L, awesome_token_t token)
     const char *buf;
     int width;
     position_t pos;
-    xcolor_t color;
+    color_t color;
 
     switch(token)
     {
@@ -538,7 +530,7 @@ luaA_graph_newindex(lua_State *L, awesome_token_t token)
       case A_TK_BG:
         if((buf = luaL_checklstring(L, 3, &len)))
         {
-            if(xcolor_init_reply(xcolor_init_unchecked(&color, buf, len)))
+            if(color_init_reply(color_init_unchecked(&color, buf, len)))
                 d->bg = color;
             else
                 return 0;
@@ -547,7 +539,7 @@ luaA_graph_newindex(lua_State *L, awesome_token_t token)
       case A_TK_BORDER_COLOR:
         if((buf = luaL_checklstring(L, 3, &len)))
         {
-            if(xcolor_init_reply(xcolor_init_unchecked(&color, buf, len)))
+            if(color_init_reply(color_init_unchecked(&color, buf, len)))
                 d->border_color = color;
             else
                 return 0;
@@ -610,8 +602,8 @@ widget_graph(widget_t *w)
     d->draw_from = p_new(int, d->size);
     d->draw_to = p_new(int, d->size);
 
-    d->bg = globalconf.colors.bg;
-    d->border_color = globalconf.colors.fg;
+    xcolor_to_color(&globalconf.colors.bg, &d->bg);
+    xcolor_to_color(&globalconf.colors.fg, &d->border_color);
 
     return w;
 }
