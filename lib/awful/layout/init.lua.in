@@ -97,7 +97,8 @@ hooks.property.register(function (c, prop)
     if type(c) == "client" and c:isvisible()
         and (prop == "size_hints_honor"
              or prop == "struts"
-             or prop == "minimized") then
+             or prop == "minimized"
+             or prop == "sticky") then
         on_arrange(c.screen)
     end
 end)
