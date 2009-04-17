@@ -22,8 +22,55 @@
 
 #include "color.h"
 #include "structs.h"
+#include <ctype.h>
 
-#define RGB_COLOR_8_TO_16(i) (65535 * ((i) & 0xff) / 255)
+#define RGB_8TO16(i)   (65536 * ((i) & 0xff) / 255)
+
+/** Parse an hexadecimal color string to its component.
+ * \param colstr The color string.
+ * \param len The color string length.
+ * \param red A pointer to the red color to fill.
+ * \param green A pointer to the green color to fill.
+ * \param blue A pointer to the blue color to fill.
+ * \param alpha A pointer to the alpha color to fill.
+ * \return True if everything alright.
+ */
+static bool
+color_parse(const char *colstr, ssize_t len,
+            uint8_t *red, uint8_t *green, uint8_t *blue, uint8_t *alpha)
+{
+    unsigned long colnum;
+    char *p;
+
+    if(len == 7)
+    {
+        colnum = strtoul(colstr + 1, &p, 16);
+        if(p - colstr != 7)
+            goto invalid;
+        *alpha = 0xff;
+    }
+    /* we have alpha */
+    else if(len == 9)
+    {
+        colnum = strtoul(colstr + 1, &p, 16);
+        if(p - colstr != 9)
+            goto invalid;
+        *alpha = colnum & 0xff;
+        colnum >>= 8;
+    }
+    else
+    {
+      invalid:
+        warn("awesome: error, invalid color '%s'", colstr);
+        return false;
+    }
+
+    *red   = (colnum >> 16) & 0xff;
+    *green = (colnum >> 8) & 0xff;
+    *blue  = colnum & 0xff;
+
+    return true;
+}
 
 /** Send a request to initialize a X color.
  * \param color xcolor_t struct to store color into.
@@ -35,8 +82,7 @@ xcolor_init_unchecked(xcolor_t *color, const char *colstr, ssize_t len)
 {
     xcb_screen_t *s = xutil_screen_get(globalconf.connection, globalconf.default_screen);
     xcolor_init_request_t req;
-    unsigned long colnum;
-    uint16_t red, green, blue;
+    uint8_t red, green, blue, alpha;
 
     p_clear(&req, 1);
 
@@ -52,39 +98,21 @@ xcolor_init_unchecked(xcolor_t *color, const char *colstr, ssize_t len)
     /* The color is given in RGB value */
     if(colstr[0] == '#')
     {
-        char *p;
-
-        if(len == 7)
+        if(!color_parse(colstr, len, &red, &green, &blue, &alpha))
         {
-            colnum = strtoul(colstr + 1, &p, 16);
-            if(p - colstr != 7)
-                goto invalid;
-        }
-        /* we have alpha */
-        else if(len == 9)
-        {
-            colnum = strtoul(colstr + 1, &p, 16);
-            if(p - colstr != 9)
-                goto invalid;
-            req.alpha = RGB_COLOR_8_TO_16(colnum);
-            colnum >>= 8;
-        }
-        else
-        {
-          invalid:
             warn("awesome: error, invalid color '%s'", colstr);
             req.has_error = true;
             return req;
         }
 
-        red   = RGB_COLOR_8_TO_16(colnum >> 16);
-        green = RGB_COLOR_8_TO_16(colnum >> 8);
-        blue  = RGB_COLOR_8_TO_16(colnum);
+        req.alpha = RGB_8TO16(alpha);
 
         req.is_hexa = true;
         req.cookie_hexa = xcb_alloc_color_unchecked(globalconf.connection,
                                                     s->default_colormap,
-                                                    red, green, blue);
+                                                    RGB_8TO16(red),
+                                                    RGB_8TO16(green),
+                                                    RGB_8TO16(blue));
     }
     else
     {
