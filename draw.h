@@ -28,6 +28,7 @@
 #include <xcb/xcb.h>
 
 #include "image.h"
+#include "color.h"
 #include "common/array.h"
 
 /** Padding type */
@@ -42,16 +43,6 @@ typedef struct
     /** Padding at right */
     int right;
 } padding_t;
-
-typedef struct
-{
-    uint32_t pixel;
-    uint16_t red;
-    uint16_t green;
-    uint16_t blue;
-    uint16_t alpha;
-    bool initialized;
-} xcolor_t;
 
 typedef enum
 {
@@ -189,23 +180,6 @@ void draw_rotate(draw_context_t *, xcb_drawable_t, xcb_drawable_t, int, int, int
 area_t draw_text_extents(draw_text_context_t *);
 alignment_t draw_align_fromstr(const char *, ssize_t);
 const char *draw_align_tostr(alignment_t);
-
-typedef struct
-{
-    union
-    {
-        xcb_alloc_color_cookie_t cookie_hexa;
-        xcb_alloc_named_color_cookie_t cookie_named;
-    };
-
-    uint16_t alpha;
-    xcolor_t *color;
-    bool is_hexa, has_error;
-    const char *colstr;
-} xcolor_init_request_t;
-
-xcolor_init_request_t xcolor_init_unchecked(xcolor_t *, const char *, ssize_t);
-bool xcolor_init_reply(xcolor_init_request_t);
 
 static inline void
 draw_text_context_wipe(draw_text_context_t *pdata)
