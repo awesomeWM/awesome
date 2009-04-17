@@ -25,11 +25,11 @@
 #include "screen.h"
 #include "titlebar.h"
 
-/** Arrange windows following current selected layout
- * \param screen the screen to arrange
+/** Arrange windows following current selected layout.
+ * \param screen The screen to arrange.
  */
 static void
-arrange(int screen)
+arrange(screen_t *screen)
 {
     uint32_t select_input_val[] = { CLIENT_SELECT_INPUT_EVENT_MASK & ~(XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW) };
 
@@ -72,12 +72,12 @@ arrange(int screen)
      * This is needed if you call a function that relies
      * on need_arrange while arrange is in progress.
      */
-    globalconf.screens[screen].need_arrange = false;
+    screen->need_arrange = false;
 
     /* call hook */
     if(globalconf.hooks.arrange != LUA_REFNIL)
     {
-        lua_pushnumber(globalconf.L, screen + 1);
+        lua_pushnumber(globalconf.L, screen->index + 1);
         luaA_dofunction(globalconf.L, globalconf.hooks.arrange, 1, 0);
     }
 
@@ -96,10 +96,8 @@ arrange(int screen)
 void
 layout_refresh(void)
 {
-    int screen;
-
-    for(screen = 0; screen < globalconf.nscreen; screen++)
-        if(globalconf.screens[screen].need_arrange)
+    foreach(screen, globalconf.screens)
+        if(screen->need_arrange)
             arrange(screen);
 }
 

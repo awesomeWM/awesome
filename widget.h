@@ -40,7 +40,7 @@ void widget_render(wibox_t *);
 void luaA_table2widgets(lua_State *, widget_node_array_t *);
 
 void widget_invalidate_bywidget(widget_t *);
-void widget_invalidate_bytype(int, widget_constructor_t *);
+void widget_invalidate_bytype(screen_t *, widget_constructor_t *);
 
 widget_constructor_t widget_textbox;
 widget_constructor_t widget_progressbar;

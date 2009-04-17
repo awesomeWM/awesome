@@ -147,7 +147,7 @@ graph_plot_get(graph_data_t *d, const char *title)
 }
 
 static area_t
-graph_geometry(widget_t *widget, int screen, int height, int width)
+graph_geometry(widget_t *widget, screen_t *screen, int height, int width)
 {
     area_t geometry;
     graph_data_t *d = widget->data;
@@ -160,7 +160,6 @@ graph_geometry(widget_t *widget, int screen, int height, int width)
 
 /** Draw a graph widget.
  * \param ctx The draw context.
- * \param screen The screen number.
  * \param w The widget node we are called from.
  * \param offset The offset to draw at.
  * \param used The already used width.
@@ -169,7 +168,7 @@ graph_geometry(widget_t *widget, int screen, int height, int width)
  */
 static void
 graph_draw(widget_t *widget, draw_context_t *ctx,
-           area_t geometry, int screen, wibox_t *p)
+           area_t geometry, wibox_t *p)
 {
     int margin_top, y;
     graph_data_t *d = widget->data;

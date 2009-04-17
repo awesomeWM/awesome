@@ -25,11 +25,11 @@
 #include "structs.h"
 #include "client.h"
 
-tag_t **tags_get_current(int);
+tag_t **tags_get_current(screen_t *);
 void tag_client(client_t *);
 void untag_client(client_t *, tag_t *);
 bool is_client_tagged(client_t *, tag_t *);
-void tag_view_only_byindex(int, int);
+void tag_view_only_byindex(screen_t *, int);
 void tag_append_to_screen(screen_t *);
 void tag_unref_simplified(tag_t **);
 

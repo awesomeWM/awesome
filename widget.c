@@ -24,6 +24,7 @@
 #include <xcb/xcb.h>
 #include <xcb/xcb_atom.h>
 
+#include "screen.h"
 #include "mouse.h"
 #include "widget.h"
 #include "wibox.h"
@@ -270,8 +271,7 @@ widget_render(wibox_t *wibox)
         {
             widgets->tab[i].geometry.y = 0;
             widgets->tab[i].widget->draw(widgets->tab[i].widget,
-                                         ctx, widgets->tab[i].geometry,
-                                         wibox->screen, wibox);
+                                         ctx, widgets->tab[i].geometry, wibox);
         }
 
     switch(wibox->sw.orientation)
@@ -294,13 +294,13 @@ widget_render(wibox_t *wibox)
 }
 
 /** Invalidate widgets which should be refresh depending on their types.
- * \param screen Virtual screen number.
+ * \param screen Virtual screen.
  * \param type Widget type to invalidate.
  */
 void
-widget_invalidate_bytype(int screen, widget_constructor_t *type)
+widget_invalidate_bytype(screen_t *screen, widget_constructor_t *type)
 {
-    foreach(wibox, globalconf.screens[screen].wiboxes)
+    foreach(wibox, screen->wiboxes)
         foreach(wnode, (*wibox)->widgets)
             if(wnode->widget->type == type)
             {
@@ -316,18 +316,15 @@ widget_invalidate_bytype(int screen, widget_constructor_t *type)
 void
 widget_invalidate_bywidget(widget_t *widget)
 {
-    for(int screen = 0; screen < globalconf.nscreen; screen++)
-        for(int i = 0; i < globalconf.screens[screen].wiboxes.len; i++)
-        {
-            wibox_t *wibox = globalconf.screens[screen].wiboxes.tab[i];
-            if(!wibox->need_update)
-                for(int j = 0; j < wibox->widgets.len; j++)
-                    if(wibox->widgets.tab[j].widget == widget)
+    foreach(screen, globalconf.screens)
+        foreach(wibox, screen->wiboxes)
+            if(!(*wibox)->need_update)
+                foreach(wnode, (*wibox)->widgets)
+                    if(wnode->widget == widget)
                     {
-                        wibox->need_update = true;
+                        (*wibox)->need_update = true;
                         break;
                     }
-         }
 
     foreach(_c, globalconf.clients)
     {

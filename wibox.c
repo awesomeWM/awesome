@@ -127,10 +127,10 @@ wibox_setposition(wibox_t *wibox, position_t p)
         wibox_position_update(wibox);
 
         /* reset all wibox position */
-        foreach(w, globalconf.screens[wibox->screen].wiboxes)
+        foreach(w, wibox->screen->wiboxes)
             wibox_position_update(*w);
 
-        ewmh_update_workarea(screen_virttophys(wibox->screen));
+        ewmh_update_workarea(screen_virttophys(wibox->screen->index));
 
         wibox_need_update(wibox);
     }
@@ -144,23 +144,23 @@ wibox_systray_kickout(int phys_screen)
 {
     xcb_screen_t *s = xutil_screen_get(globalconf.connection, phys_screen);
 
-    if(globalconf.screens[phys_screen].systray.parent != s->root)
+    if(globalconf.screens.tab[phys_screen].systray.parent != s->root)
     {
         /* Who! Check that we're not deleting a wibox with a systray, because it
          * may be its parent. If so, we reparent to root before, otherwise it will
          * hurt very much. */
         xcb_reparent_window(globalconf.connection,
-                            globalconf.screens[phys_screen].systray.window,
+                            globalconf.screens.tab[phys_screen].systray.window,
                             s->root, -512, -512);
 
-        globalconf.screens[phys_screen].systray.parent = s->root;
+        globalconf.screens.tab[phys_screen].systray.parent = s->root;
     }
 }
 
 static void
 wibox_systray_refresh(wibox_t *wibox)
 {
-    if(wibox->screen == SCREEN_UNDEF)
+    if(!wibox->screen)
         return;
 
     for(int i = 0; i < wibox->widgets.len; i++)
@@ -180,10 +180,10 @@ wibox_systray_refresh(wibox_t *wibox)
             {
                 /* Set background of the systray window. */
                 xcb_change_window_attributes(globalconf.connection,
-                                             globalconf.screens[phys_screen].systray.window,
+                                             globalconf.screens.tab[phys_screen].systray.window,
                                              XCB_CW_BACK_PIXEL, config_back);
                 /* Map it. */
-                xcb_map_window(globalconf.connection, globalconf.screens[phys_screen].systray.window);
+                xcb_map_window(globalconf.connection, globalconf.screens.tab[phys_screen].systray.window);
                 /* Move it. */
                 switch(wibox->sw.orientation)
                 {
@@ -207,16 +207,16 @@ wibox_systray_refresh(wibox_t *wibox)
                     break;
                 }
                 /* reparent */
-                if(globalconf.screens[phys_screen].systray.parent != wibox->sw.window)
+                if(globalconf.screens.tab[phys_screen].systray.parent != wibox->sw.window)
                 {
                     xcb_reparent_window(globalconf.connection,
-                                        globalconf.screens[phys_screen].systray.window,
+                                        globalconf.screens.tab[phys_screen].systray.window,
                                         wibox->sw.window,
                                         config_win_vals[0], config_win_vals[1]);
-                    globalconf.screens[phys_screen].systray.parent = wibox->sw.window;
+                    globalconf.screens.tab[phys_screen].systray.parent = wibox->sw.window;
                 }
                 xcb_configure_window(globalconf.connection,
-                                     globalconf.screens[phys_screen].systray.window,
+                                     globalconf.screens.tab[phys_screen].systray.window,
                                      XCB_CONFIG_WINDOW_X
                                      | XCB_CONFIG_WINDOW_Y
                                      | XCB_CONFIG_WINDOW_WIDTH
@@ -342,20 +342,20 @@ wibox_position_update_non_floating(wibox_t *wibox)
     /* Everything we do below needs the wibox' screen.
      * No screen, nothing to do.
      */
-    if (wibox->screen == SCREEN_UNDEF)
+    if (!wibox->screen)
         return;
 
     /* This wibox limits the space available to clients and thus clients
      * need to be repositioned.
      */
-    globalconf.screens[wibox->screen].need_arrange = true;
+    wibox->screen->need_arrange = true;
 
     /* Place wibox'es at the edge of the screen, struts come later. */
     area = screen_area_get(wibox->screen, NULL,
-                           &globalconf.screens[wibox->screen].padding, false);
+                           &wibox->screen->padding, false);
 
     /* Top and Bottom wibox_t have prio */
-    foreach(_w, globalconf.screens[wibox->screen].wiboxes)
+    foreach(_w, wibox->screen->wiboxes)
     {
         wibox_t *w = *_w;
         /* Ignore every wibox after me that is in the same position */
@@ -519,8 +519,8 @@ wibox_position_update(wibox_t *wibox)
 wibox_t *
 wibox_getbywin(xcb_window_t win)
 {
-    for(int screen = 0; screen < globalconf.nscreen; screen++)
-        foreach(w, globalconf.screens[screen].wiboxes)
+    foreach(screen, globalconf.screens)
+        foreach(w, screen->wiboxes)
             if((*w)->sw.window == win)
                 return *w;
 
@@ -556,8 +556,8 @@ wibox_draw(wibox_t *wibox)
 void
 wibox_refresh(void)
 {
-    for(int screen = 0; screen < globalconf.nscreen; screen++)
-        foreach(w, globalconf.screens[screen].wiboxes)
+    foreach(screen, globalconf.screens)
+        foreach(w, screen->wiboxes)
             if((*w)->need_update)
                 wibox_draw(*w);
 
@@ -574,8 +574,8 @@ wibox_refresh(void)
 void
 wibox_update_positions(void)
 {
-    for(int screen = 0; screen < globalconf.nscreen; screen++)
-        foreach(w, globalconf.screens[screen].wiboxes)
+    foreach(screen, globalconf.screens)
+        foreach(w, screen->wiboxes)
             wibox_position_update(*w);
 }
 
@@ -591,7 +591,7 @@ wibox_setvisible(wibox_t *wibox, bool v)
         wibox->isvisible = v;
         wibox->mouse_over = NULL;
 
-        if(wibox->screen != SCREEN_UNDEF)
+        if(wibox->screen != NULL)
         {
             if(wibox->isvisible)
                 wibox_map(wibox);
@@ -602,7 +602,7 @@ wibox_setvisible(wibox_t *wibox, bool v)
             wibox_systray_refresh(wibox);
 
             /* All the other wibox and ourselves need to be repositioned */
-            foreach(w, globalconf.screens[wibox->screen].wiboxes)
+            foreach(w, wibox->screen->wiboxes)
                 wibox_position_update(*w);
         }
     }
@@ -614,7 +614,7 @@ wibox_setvisible(wibox_t *wibox, bool v)
 void
 wibox_detach(wibox_t *wibox)
 {
-    if(wibox->screen != SCREEN_UNDEF)
+    if(wibox->screen != NULL)
     {
         bool v;
 
@@ -630,16 +630,16 @@ wibox_detach(wibox_t *wibox)
 
         simplewindow_wipe(&wibox->sw);
 
-        globalconf.screens[wibox->screen].need_arrange = true;
+        wibox->screen->need_arrange = true;
 
-        foreach(item, globalconf.screens[wibox->screen].wiboxes)
+        foreach(item, wibox->screen->wiboxes)
             if(*item == wibox)
             {
-                wibox_array_remove(&globalconf.screens[wibox->screen].wiboxes, item);
+                wibox_array_remove(&wibox->screen->wiboxes, item);
                 break;
             }
 
-        wibox->screen = SCREEN_UNDEF;
+        wibox->screen = NULL;
         wibox_unref(globalconf.L, wibox);
     }
 }
@@ -657,10 +657,11 @@ wibox_attach(screen_t *s)
     wibox_detach(wibox);
 
     /* Set the wibox screen */
-    wibox->screen = s->index;
+    wibox->screen = s;
 
     /* Check that the wibox coordinates matches the screen. */
-    int cscreen = screen_getbycoord(wibox->screen, wibox->sw.geometry.x, wibox->sw.geometry.y);
+    screen_t *cscreen =
+        screen_getbycoord(wibox->screen, wibox->sw.geometry.x, wibox->sw.geometry.y);
 
     /* If it does not match, move it to the screen coordinates */
     if(cscreen != wibox->screen)
@@ -757,7 +758,6 @@ luaA_wibox_new(lua_State *L)
     w->sw.geometry.width = luaA_getopt_number(L, 2, "width", 0);
     w->sw.geometry.height = luaA_getopt_number(L, 2, "height", 0);
 
-    w->screen = SCREEN_UNDEF;
     w->isvisible = true;
     w->cursor = a_strdup("left_ptr");
 
@@ -806,8 +806,8 @@ luaA_wibox_hasitem(lua_State *L, wibox_t *wibox, const void *item)
 void
 luaA_wibox_invalidate_byitem(lua_State *L, const void *item)
 {
-    for(int screen = 0; screen < globalconf.nscreen; screen++)
-        foreach(w, globalconf.screens[screen].wiboxes)
+    foreach(screen, globalconf.screens)
+        foreach(w, screen->wiboxes)
         {
             wibox_t *wibox = *w;
             if(luaA_wibox_hasitem(L, wibox, item))
@@ -866,9 +866,9 @@ luaA_wibox_index(lua_State *L)
       case A_TK_CLIENT:
         return client_push(L, client_getbytitlebar(wibox));
       case A_TK_SCREEN:
-        if(wibox->screen == SCREEN_UNDEF)
+        if(!wibox->screen)
             return 0;
-        lua_pushnumber(L, wibox->screen + 1);
+        lua_pushnumber(L, wibox->screen->index + 1);
         break;
       case A_TK_BORDER_WIDTH:
         lua_pushnumber(L, wibox->sw.border.width);
@@ -968,7 +968,7 @@ luaA_wibox_geometry(lua_State *L)
                     || wingeom.height != wibox->sw.geometry.height)
             {
                 wibox_resize(wibox, wingeom.width, wingeom.height);
-                globalconf.screens[wibox->screen].need_arrange = true;
+                wibox->screen->need_arrange = true;
             }
             break;
         }
@@ -1066,11 +1066,11 @@ luaA_wibox_newindex(lua_State *L)
         {
             int screen = luaL_checknumber(L, 3) - 1;
             luaA_checkscreen(screen);
-            if(screen != wibox->screen)
+            if(!wibox->screen || screen != wibox->screen->index)
             {
                 titlebar_client_detach(client_getbytitlebar(wibox));
                 lua_pushvalue(L, 1);
-                wibox_attach(&globalconf.screens[screen]);
+                wibox_attach(&globalconf.screens.tab[screen]);
             }
         }
         break;

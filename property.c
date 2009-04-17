@@ -21,6 +21,7 @@
 
 #include <xcb/xcb_atom.h>
 
+#include "screen.h"
 #include "property.h"
 #include "client.h"
 #include "widget.h"
@@ -376,13 +377,13 @@ property_handle_xrootpmap_id(void *data __attribute__ ((unused)),
                              xcb_get_property_reply_t *reply)
 {
     if(globalconf.xinerama_is_active)
-        for(int screen = 0; screen < globalconf.nscreen; screen++)
-            foreach(w, globalconf.screens[screen].wiboxes)
+        foreach(screen, globalconf.screens)
+            foreach(w, screen->wiboxes)
                 (*w)->need_update = true;
     else
     {
         int screen = xutil_root2screen(connection, window);
-        foreach(w, globalconf.screens[screen].wiboxes)
+        foreach(w, globalconf.screens.tab[screen].wiboxes)
             (*w)->need_update = true;
     }
 

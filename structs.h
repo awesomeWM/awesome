@@ -66,6 +66,7 @@ typedef enum
     WIBOX_TYPE_TITLEBAR
 } wibox_type_t;
 
+typedef struct a_screen screen_t;
 typedef struct button_t button_t;
 typedef struct widget_t widget_t;
 typedef struct widget_node_t widget_node_t;
@@ -79,6 +80,8 @@ typedef struct awesome_t awesome_t;
 
 ARRAY_TYPE(widget_node_t, widget_node)
 ARRAY_TYPE(button_t *, button)
+ARRAY_TYPE(tag_t *, tag)
+ARRAY_TYPE(screen_t, screen)
 
 /** Wibox type */
 typedef struct
@@ -98,7 +101,7 @@ typedef struct
     /** Alignment */
     alignment_t align;
     /** Screen */
-    int screen;
+    screen_t *screen;
     /** Widget list */
     widget_node_array_t widgets;
     luaA_ref widgets_table;
@@ -129,9 +132,9 @@ struct widget_t
     /** Widget destructor */
     widget_destructor_t *destructor;
     /** Geometry function */
-    area_t (*geometry)(widget_t *, int, int, int);
+    area_t (*geometry)(widget_t *, screen_t *, int, int);
     /** Draw function */
-    void (*draw)(widget_t *, draw_context_t *, area_t, int, wibox_t *);
+    void (*draw)(widget_t *, draw_context_t *, area_t, wibox_t *);
     /** Index function */
     int (*index)(lua_State *, awesome_token_t);
     /** Newindex function */
@@ -230,7 +233,7 @@ struct client_t
     /** Window holding command needed to start it (session management related) */
     xcb_window_t leader_win;
     /** Client logical screen */
-    int screen;
+    screen_t *screen;
     /** Client physical screen */
     int phys_screen;
     /** Titlebar */
@@ -257,40 +260,12 @@ struct tag
     /** Tag name */
     char *name;
     /** Screen */
-    int screen;
+    screen_t *screen;
     /** true if selected */
     bool selected;
     /** clients in this tag */
     client_array_t clients;
 };
-ARRAY_TYPE(tag_t *, tag)
-
-typedef struct
-{
-    /** Screen index */
-    int index;
-    /** Screen geometry */
-    area_t geometry;
-    /** true if we need to arrange() */
-    bool need_arrange;
-    /** Tag list */
-    tag_array_t tags;
-    /** Wiboxes */
-    wibox_array_t wiboxes;
-    /** Padding */
-    padding_t padding;
-    /** Window that contains the systray */
-    struct
-    {
-        xcb_window_t window;
-        /** Systray window parent */
-        xcb_window_t parent;
-    } systray;
-    /** Focused client */
-    client_t *client_focus;
-    /** The monitor of startup notifications */
-    SnMonitorContext *snmonitor;
-} screen_t;
 
 /** Main configuration structure */
 struct awesome_t
@@ -306,9 +281,7 @@ struct awesome_t
     /** Keys symbol table */
     xcb_key_symbols_t *keysyms;
     /** Logical screens */
-    screen_t *screens;
-    /** Number of screens */
-    int nscreen;
+    screen_array_t screens;
     /** True if xinerama is active */
     bool xinerama_is_active;
     /** Root window key bindings */

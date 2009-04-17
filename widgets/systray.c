@@ -31,10 +31,10 @@
 #define _NET_SYSTEM_TRAY_ORIENTATION_VERT 1
 
 static area_t
-systray_geometry(widget_t *widget, int screen, int height, int width)
+systray_geometry(widget_t *widget, screen_t *screen, int height, int width)
 {
     area_t geometry;
-    int phys_screen = screen_virttophys(screen), n = 0;
+    int phys_screen = screen_virttophys(screen->index), n = 0;
 
     geometry.height = height;
 
@@ -50,7 +50,7 @@ systray_geometry(widget_t *widget, int screen, int height, int width)
 
 static void
 systray_draw(widget_t *widget, draw_context_t *ctx,
-             area_t geometry, int screen, wibox_t *p)
+             area_t geometry, wibox_t *p)
 {
     uint32_t orient;
 
@@ -68,7 +68,7 @@ systray_draw(widget_t *widget, draw_context_t *ctx,
     /* set wibox orientation */
     /** \todo stop setting that property on each redraw */
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
-                        globalconf.screens[p->sw.ctx.phys_screen].systray.window,
+                        globalconf.screens.tab[p->sw.ctx.phys_screen].systray.window,
                         _NET_SYSTEM_TRAY_ORIENTATION, CARDINAL, 32, 1, &orient);
 }
 

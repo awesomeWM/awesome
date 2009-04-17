@@ -45,7 +45,7 @@
 static void
 ewmh_update_desktop_geometry(int phys_screen)
 {
-    area_t geom = screen_area_get(phys_screen,
+    area_t geom = screen_area_get(&globalconf.screens.tab[phys_screen],
                                   NULL,
                                   NULL,
                                   false);
@@ -186,7 +186,7 @@ ewmh_update_net_client_list_stacking(int phys_screen)
 void
 ewmh_update_net_numbers_of_desktop(int phys_screen)
 {
-    uint32_t count = globalconf.screens[phys_screen].tags.len;
+    uint32_t count = globalconf.screens.tab[phys_screen].tags.len;
 
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
 			xutil_screen_get(globalconf.connection, phys_screen)->root,
@@ -196,9 +196,9 @@ ewmh_update_net_numbers_of_desktop(int phys_screen)
 void
 ewmh_update_net_current_desktop(int phys_screen)
 {
-    tag_array_t *tags = &globalconf.screens[phys_screen].tags;
+    tag_array_t *tags = &globalconf.screens.tab[phys_screen].tags;
     uint32_t count = 0;
-    tag_t **curtags = tags_get_current(phys_screen);
+    tag_t **curtags = tags_get_current( &globalconf.screens.tab[phys_screen]);
 
     while(count < (uint32_t) tags->len && tags->tab[count] != curtags[0])
         count++;
@@ -213,7 +213,7 @@ ewmh_update_net_current_desktop(int phys_screen)
 void
 ewmh_update_net_desktop_names(int phys_screen)
 {
-    tag_array_t *tags = &globalconf.screens[phys_screen].tags;
+    tag_array_t *tags = &globalconf.screens.tab[phys_screen].tags;
     buffer_t buf;
 
     buffer_inita(&buf, BUFSIZ);
@@ -236,11 +236,11 @@ ewmh_update_net_desktop_names(int phys_screen)
 void
 ewmh_update_workarea(int phys_screen)
 {
-    tag_array_t *tags = &globalconf.screens[phys_screen].tags;
+    tag_array_t *tags = &globalconf.screens.tab[phys_screen].tags;
     uint32_t *area = p_alloca(uint32_t, tags->len * 4);
-    area_t geom = screen_area_get(phys_screen,
-                                  &globalconf.screens[phys_screen].wiboxes,
-                                  &globalconf.screens[phys_screen].padding,
+    area_t geom = screen_area_get(&globalconf.screens.tab[phys_screen],
+                                  &globalconf.screens.tab[phys_screen].wiboxes,
+                                  &globalconf.screens.tab[phys_screen].padding,
                                   true);
 
 
@@ -389,7 +389,7 @@ ewmh_process_client_message(xcb_client_message_event_t *ev)
             screen++)
         {
             if(ev->window == xutil_screen_get(globalconf.connection, screen)->root)
-                tag_view_only_byindex(screen, ev->data.data32[0]);
+                tag_view_only_byindex(&globalconf.screens.tab[screen], ev->data.data32[0]);
         }
     else if(ev->type == _NET_CLOSE_WINDOW)
     {
@@ -400,7 +400,7 @@ ewmh_process_client_message(xcb_client_message_event_t *ev)
     {
         if((c = client_getbywin(ev->window)))
         {
-            tag_array_t *tags = &globalconf.screens[c->screen].tags;
+            tag_array_t *tags = &c->screen->tags;
 
             if(ev->data.data32[0] == 0xffffffff)
                 c->issticky = true;
@@ -477,7 +477,7 @@ void
 ewmh_client_update_desktop(client_t *c)
 {
     int i;
-    tag_array_t *tags = &globalconf.screens[c->screen].tags;
+    tag_array_t *tags = &c->screen->tags;
 
     for(i = 0; i < tags->len; i++)
         if(is_client_tagged(c, tags->tab[i]))
@@ -536,7 +536,7 @@ ewmh_client_check_hints(client_t *c)
     reply = xcb_get_property_reply(globalconf.connection, c0, NULL);
     if(reply && reply->value_len && (data = xcb_get_property_value(reply)))
     {
-        tag_array_t *tags = &globalconf.screens[c->screen].tags;
+        tag_array_t *tags = &c->screen->tags;
 
         desktop = *(uint32_t *) data;
         if(desktop == -1)

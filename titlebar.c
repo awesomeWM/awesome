@@ -218,7 +218,7 @@ titlebar_client_detach(client_t *c)
         c->geometry = titlebar_geometry_remove(c->titlebar, 0, c->geometry);
         simplewindow_wipe(&c->titlebar->sw);
         c->titlebar->type = WIBOX_TYPE_NORMAL;
-        c->titlebar->screen = SCREEN_UNDEF;
+        c->titlebar->screen = NULL;
 
         wibox_unref(globalconf.L, c->titlebar);
         c->titlebar = NULL;
@@ -307,7 +307,7 @@ titlebar_set_visible(wibox_t *t, bool visible)
         else
             titlebar_ban(t);
 
-        globalconf.screens[t->screen].need_arrange = true;
+        t->screen->need_arrange = true;
         client_stack();
     }
 }

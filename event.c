@@ -375,8 +375,8 @@ event_handle_destroynotify(void *data __attribute__ ((unused)),
             if(globalconf.embedded.tab[i].win == ev->window)
             {
                 xembed_window_array_take(&globalconf.embedded, i);
-                for(int j = 0; j < globalconf.nscreen; j++)
-                    widget_invalidate_bytype(j, widget_systray);
+                foreach(screen, globalconf.screens)
+                    widget_invalidate_bytype(screen, widget_systray);
             }
 
     return 0;
@@ -771,8 +771,8 @@ event_handle_unmapnotify(void *data __attribute__ ((unused)),
             if(globalconf.embedded.tab[i].win == ev->window)
             {
                 xembed_window_array_take(&globalconf.embedded, i);
-                for(int j = 0; j < globalconf.nscreen; j++)
-                    widget_invalidate_bytype(j, widget_systray);
+                foreach(screen, globalconf.screens)
+                    widget_invalidate_bytype(screen, widget_systray);
             }
 
     return 0;

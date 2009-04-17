@@ -71,98 +71,87 @@ screen_scan(void)
         xsi = xcb_xinerama_query_screens_screen_info(xsq);
         xinerama_screen_number = xcb_xinerama_query_screens_screen_info_length(xsq);
 
-        globalconf.screens = p_new(screen_t, xinerama_screen_number);
-
         /* now check if screens overlaps (same x,y): if so, we take only the biggest one */
         for(int screen = 0; screen < xinerama_screen_number; screen++)
         {
             bool drop = false;
-            for(int screen_to_test = 0; screen_to_test < globalconf.nscreen; screen_to_test++)
-                if(xsi[screen].x_org == globalconf.screens[screen_to_test].geometry.x
-                   && xsi[screen].y_org == globalconf.screens[screen_to_test].geometry.y)
+            foreach(screen_to_test, globalconf.screens)
+                if(xsi[screen].x_org == screen_to_test->geometry.x
+                   && xsi[screen].y_org == screen_to_test->geometry.y)
                     {
                         /* we already have a screen for this area, just check if
                          * it's not bigger and drop it */
                         drop = true;
-                        globalconf.screens[screen_to_test].geometry.width =
-                            MAX(xsi[screen].width, xsi[screen_to_test].width);
-                        globalconf.screens[screen_to_test].geometry.height =
-                            MAX(xsi[screen].height, xsi[screen_to_test].height);
+                        screen_to_test->geometry.width =
+                            MAX(xsi[screen].width, xsi[screen_to_test->index].width);
+                        screen_to_test->geometry.height =
+                            MAX(xsi[screen].height, xsi[screen_to_test->index].height);
                     }
             if(!drop)
             {
-                globalconf.screens[globalconf.nscreen].index = screen;
-                globalconf.screens[globalconf.nscreen++].geometry = screen_xsitoarea(xsi[screen]);
+                screen_t s;
+                p_clear(&s, 1);
+                s.index = screen;
+                s.geometry = screen_xsitoarea(xsi[screen]);
+                screen_array_append(&globalconf.screens, s);
             }
-        }
-
-        /* realloc smaller if xinerama_screen_number != screen registered */
-        if(xinerama_screen_number != globalconf.nscreen)
-        {
-            screen_t *new = p_new(screen_t, globalconf.nscreen);
-            memcpy(new, globalconf.screens, globalconf.nscreen * sizeof(screen_t));
-            p_delete(&globalconf.screens);
-            globalconf.screens = new;
         }
 
         p_delete(&xsq);
     }
     else
-    {
-        globalconf.nscreen = xcb_setup_roots_length(xcb_get_setup(globalconf.connection));
-        globalconf.screens = p_new(screen_t, globalconf.nscreen);
-        for(int screen = 0; screen < globalconf.nscreen; screen++)
+        /* One screen only / Zaphod mode */
+        for(int screen = 0;
+            screen < xcb_setup_roots_length(xcb_get_setup(globalconf.connection));
+            screen++)
         {
-            xcb_screen_t *s = xutil_screen_get(globalconf.connection, screen);
-            globalconf.screens[screen].index = screen;
-            globalconf.screens[screen].geometry.x = 0;
-            globalconf.screens[screen].geometry.y = 0;
-            globalconf.screens[screen].geometry.width = s->width_in_pixels;
-            globalconf.screens[screen].geometry.height = s->height_in_pixels;
+            xcb_screen_t *xcb_screen = xutil_screen_get(globalconf.connection, screen);
+            screen_t s;
+            p_clear(&s, 1);
+            s.index = screen;
+            s.geometry.x = 0;
+            s.geometry.y = 0;
+            s.geometry.width = xcb_screen->width_in_pixels;
+            s.geometry.height = xcb_screen->height_in_pixels;
+            screen_array_append(&globalconf.screens, s);
         }
-    }
 
-    globalconf.screen_focus = globalconf.screens;
+    globalconf.screen_focus = globalconf.screens.tab;
 }
 
 /** Return the Xinerama screen number where the coordinates belongs to.
  * \param screen The logical screen number.
  * \param x X coordinate
  * \param y Y coordinate
- * \return Screen number or screen param if no match or no multi-head.
+ * \return Screen pointer or screen param if no match or no multi-head.
  */
-int
-screen_getbycoord(int screen, int x, int y)
+screen_t *
+screen_getbycoord(screen_t *screen, int x, int y)
 {
-    int i;
-
     /* don't waste our time */
     if(!globalconf.xinerama_is_active)
         return screen;
 
-    for(i = 0; i < globalconf.nscreen; i++)
-    {
-        screen_t *s = &globalconf.screens[i];
+    foreach(s, globalconf.screens)
         if((x < 0 || (x >= s->geometry.x && x < s->geometry.x + s->geometry.width))
            && (y < 0 || (y >= s->geometry.y && y < s->geometry.y + s->geometry.height)))
-            return i;
-    }
+            return s;
 
     return screen;
 }
 
 /** Get screens info.
- * \param screen Screen number.
+ * \param screen Screen.
  * \param wiboxes Wiboxes list to remove.
  * \param padding Padding.
  * \param strut Honor windows strut.
  * \return The screen area.
  */
 area_t
-screen_area_get(int screen, wibox_array_t *wiboxes,
+screen_area_get(screen_t *screen, wibox_array_t *wiboxes,
                 padding_t *padding, bool strut)
 {
-    area_t area = globalconf.screens[screen].geometry;
+    area_t area = screen->geometry;
     uint16_t top = 0, bottom = 0, left = 0, right = 0;
 
     /* make padding corrections */
@@ -296,17 +285,18 @@ screen_virttophys(int screen)
 
 /** Move a client to a virtual screen.
  * \param c The client to move.
- * \param new_screen The destinatiuon screen number.
+ * \param new_screen The destinatiuon screen.
  * \param dotag Set to true if we also change tags.
  * \param doresize Set to true if we also move the client to the new x and
  *        y of the new screen.
  */
 void
-screen_client_moveto(client_t *c, int new_screen, bool dotag, bool doresize)
+screen_client_moveto(client_t *c, screen_t *new_screen, bool dotag, bool doresize)
 {
-    int i, old_screen = c->screen;
-    tag_array_t *old_tags = &globalconf.screens[old_screen].tags,
-                *new_tags = &globalconf.screens[new_screen].tags;
+    int i;
+    screen_t *old_screen = c->screen;
+    tag_array_t *old_tags = &old_screen->tags,
+                *new_tags = &new_screen->tags;
     area_t from, to;
     bool wasvisible = client_isvisible(c, c->screen);
 
@@ -334,7 +324,7 @@ screen_client_moveto(client_t *c, int new_screen, bool dotag, bool doresize)
     }
 
     if(wasvisible)
-        globalconf.screens[old_screen].need_arrange = true;
+        old_screen->need_arrange = true;
     client_need_arrange(c);
 
     if(!doresize)
@@ -400,7 +390,7 @@ luaA_screen_module_index(lua_State *L)
     int screen = luaL_checknumber(L, 2) - 1;
 
     luaA_checkscreen(screen);
-    lua_pushlightuserdata(L, &globalconf.screens[screen]);
+    lua_pushlightuserdata(L, &globalconf.screens.tab[screen]);
     return luaA_settype(L, "screen");
 }
 
@@ -427,7 +417,7 @@ luaA_screen_tags(lua_State *L)
 
         /* remove current tags */
         for(i = 0; i < s->tags.len; i++)
-            s->tags.tab[i]->screen = SCREEN_UNDEF;
+            s->tags.tab[i]->screen = NULL;
 
         tag_array_wipe(&s->tags);
         tag_array_init(&s->tags);
@@ -478,7 +468,7 @@ luaA_screen_index(lua_State *L)
         luaA_pusharea(L, s->geometry);
         break;
       case A_TK_WORKAREA:
-        luaA_pusharea(L, screen_area_get(s->index, &s->wiboxes, &s->padding, true));
+        luaA_pusharea(L, screen_area_get(s, &s->wiboxes, &s->padding, true));
         break;
       default:
         return 0;
@@ -528,7 +518,7 @@ luaA_screen_padding(lua_State *L)
 static int
 luaA_screen_count(lua_State *L)
 {
-    lua_pushnumber(L, globalconf.nscreen);
+    lua_pushnumber(L, globalconf.screens.len);
     return 1;
 }
 

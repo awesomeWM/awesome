@@ -205,10 +205,10 @@ spawn_init(void)
     const int screen_max = xcb_setup_roots_length(xcb_get_setup(globalconf.connection));
 
     for(int screen = 0; screen < screen_max; screen++)
-        globalconf.screens[screen].snmonitor = sn_monitor_context_new(globalconf.sndisplay,
-                                                                      screen,
-                                                                      spawn_monitor_event,
-                                                                      NULL, NULL);
+        globalconf.screens.tab[screen].snmonitor = sn_monitor_context_new(globalconf.sndisplay,
+                                                                          screen,
+                                                                          spawn_monitor_event,
+                                                                          NULL, NULL);
 }
 
 static void

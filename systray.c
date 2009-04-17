@@ -23,6 +23,7 @@
 #include <xcb/xcb_icccm.h>
 #include <xcb/xcb_atom.h>
 
+#include "screen.h"
 #include "systray.h"
 #include "window.h"
 #include "widget.h"
@@ -55,9 +56,9 @@ systray_init(int phys_screen)
 
     p_delete(&atom_name);
 
-    globalconf.screens[phys_screen].systray.window = xcb_generate_id(globalconf.connection);
+    globalconf.screens.tab[phys_screen].systray.window = xcb_generate_id(globalconf.connection);
     xcb_create_window(globalconf.connection, xscreen->root_depth,
-                      globalconf.screens[phys_screen].systray.window,
+                      globalconf.screens.tab[phys_screen].systray.window,
                       xscreen->root,
                       -1, -1, 1, 1, 0,
                       XCB_COPY_FROM_PARENT, xscreen->root_visual, 0, NULL);
@@ -69,7 +70,7 @@ systray_init(int phys_screen)
     ev.format = 32;
     ev.type = MANAGER;
     ev.data.data32[0] = XCB_CURRENT_TIME;
-    ev.data.data32[2] = globalconf.screens[phys_screen].systray.window;
+    ev.data.data32[2] = globalconf.screens.tab[phys_screen].systray.window;
     ev.data.data32[3] = ev.data.data32[4] = 0;
 
     if(!(atom_systray_r = xcb_intern_atom_reply(globalconf.connection, atom_systray_q, NULL)))
@@ -83,7 +84,7 @@ systray_init(int phys_screen)
     p_delete(&atom_systray_r);
 
     xcb_set_selection_owner(globalconf.connection,
-                            globalconf.screens[phys_screen].systray.window,
+                            globalconf.screens.tab[phys_screen].systray.window,
                             atom_systray,
                             XCB_CURRENT_TIME);
 
@@ -130,7 +131,6 @@ systray_request_handle(xcb_window_t embed_win, int phys_screen, xembed_info_t *i
 {
     xembed_window_t em;
     xcb_get_property_cookie_t em_cookie;
-    int i;
     const uint32_t select_input_val[] =
     {
         XCB_EVENT_MASK_STRUCTURE_NOTIFY
@@ -152,7 +152,7 @@ systray_request_handle(xcb_window_t embed_win, int phys_screen, xembed_info_t *i
     window_state_set(embed_win, XCB_WM_STATE_WITHDRAWN);
 
     xcb_reparent_window(globalconf.connection, embed_win,
-                        globalconf.screens[phys_screen].systray.window,
+                        globalconf.screens.tab[phys_screen].systray.window,
                         0, 0);
 
     em.win = embed_win;
@@ -164,13 +164,13 @@ systray_request_handle(xcb_window_t embed_win, int phys_screen, xembed_info_t *i
         xembed_info_get_reply(globalconf.connection, em_cookie, &em.info);
 
     xembed_embedded_notify(globalconf.connection, em.win,
-                           globalconf.screens[phys_screen].systray.window,
+                           globalconf.screens.tab[phys_screen].systray.window,
                            MIN(XEMBED_VERSION, em.info.version));
 
     xembed_window_array_append(&globalconf.embedded, em);
 
-    for(i = 0; i < globalconf.nscreen; i++)
-        widget_invalidate_bytype(i, widget_systray);
+    foreach(screen, globalconf.screens)
+        widget_invalidate_bytype(screen, widget_systray);
 
     return 0;
 }

@@ -96,21 +96,19 @@ client_seturgent(client_t *c, bool urgent)
 /** Returns true if a client is tagged
  * with one of the tags of the specified screen.
  * \param c The client to check.
- * \param screen Virtual screen number.
+ * \param screen Virtual screen.
  * \return true if the client is visible, false otherwise.
  */
 bool
-client_maybevisible(client_t *c, int screen)
+client_maybevisible(client_t *c, screen_t *screen)
 {
     if(c->screen == screen)
     {
         if(c->issticky || c->type == WINDOW_TYPE_DESKTOP)
             return true;
 
-        tag_array_t *tags = &globalconf.screens[screen].tags;
-
-        for(int i = 0; i < tags->len; i++)
-            if(tags->tab[i]->selected && is_client_tagged(c, tags->tab[i]))
+        foreach(tag, screen->tags)
+            if((*tag)->selected && is_client_tagged(c, *tag))
                 return true;
     }
     return false;
@@ -173,7 +171,7 @@ client_getbywin(xcb_window_t w)
 void
 client_unfocus_update(client_t *c)
 {
-    globalconf.screens[c->phys_screen].client_focus = NULL;
+    globalconf.screens.tab[c->phys_screen].client_focus = NULL;
     ewmh_update_net_active_window(c->phys_screen);
 
     /* Call hook */
@@ -192,7 +190,7 @@ void
 client_unfocus(client_t *c)
 {
     xcb_window_t root_win = xutil_screen_get(globalconf.connection, c->phys_screen)->root;
-    globalconf.screens[c->phys_screen].client_focus = NULL;
+    globalconf.screens.tab[c->phys_screen].client_focus = NULL;
 
     /* Set focus on root window, so no events leak to the current window. */
     window_setfocus(root_win, true);
@@ -222,7 +220,7 @@ client_ban(client_t *c)
             wibox_update_positions();
 
         /* Wait until the last moment to take away the focus from the window. */
-        if(globalconf.screens[c->phys_screen].client_focus == c)
+        if(globalconf.screens.tab[c->phys_screen].client_focus == c)
             client_unfocus(c);
     }
 }
@@ -243,7 +241,7 @@ client_focus_update(client_t *c)
     /* unban the client before focusing for consistency */
     client_unban(c);
 
-    globalconf.screen_focus = &globalconf.screens[c->phys_screen];
+    globalconf.screen_focus = &globalconf.screens.tab[c->phys_screen];
     globalconf.screen_focus->client_focus = c;
 
     /* Some layouts use focused client differently, so call them back.
@@ -277,7 +275,7 @@ client_focus(client_t *c)
     if(!client_maybevisible(c, c->screen))
         return;
 
-    globalconf.screen_focus = &globalconf.screens[c->phys_screen];
+    globalconf.screen_focus = &globalconf.screens.tab[c->phys_screen];
     globalconf.screen_focus->client_focus = c;
 
     window_setfocus(c->win, !c->nofocus);
@@ -380,7 +378,6 @@ client_real_stack(void)
     uint32_t config_win_vals[2];
     client_node_t *node, *last = *client_node_list_last(&globalconf.stack);
     layer_t layer;
-    int screen;
 
     config_win_vals[0] = XCB_NONE;
     config_win_vals[1] = XCB_STACK_MODE_ABOVE;
@@ -393,8 +390,8 @@ client_real_stack(void)
                                                         config_win_vals[0]);
 
     /* first stack not ontop wibox window */
-    for(screen = 0; screen < globalconf.nscreen; screen++)
-        foreach(_sb, globalconf.screens[screen].wiboxes)
+    foreach(s, globalconf.screens)
+        foreach(_sb, s->wiboxes)
         {
             wibox_t *sb = *_sb;
             if(!sb->ontop)
@@ -415,8 +412,8 @@ client_real_stack(void)
                                                         config_win_vals[0]);
 
     /* then stack ontop wibox window */
-    for(screen = 0; screen < globalconf.nscreen; screen++)
-        foreach(_sb, globalconf.screens[screen].wiboxes)
+    foreach(s, globalconf.screens)
+        foreach(_sb, s->wiboxes)
         {
             wibox_t *sb = *_sb;
             if(sb->ontop)
@@ -450,7 +447,7 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
 {
     xcb_get_property_cookie_t ewmh_icon_cookie;
     client_t *c, *tc = NULL;
-    int screen;
+    screen_t *screen;
     const uint32_t select_input_val[] = { CLIENT_SELECT_INPUT_EVENT_MASK };
 
     if(systray_iskdedockapp(w))
@@ -468,7 +465,8 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
     client_array_push(&globalconf.clients, client_ref(globalconf.L));
 
 
-    screen = c->screen = screen_getbycoord(phys_screen, wgeom->x, wgeom->y);
+    screen = c->screen = screen_getbycoord(&globalconf.screens.tab[phys_screen],
+                                           wgeom->x, wgeom->y);
 
     c->phys_screen = phys_screen;
 
@@ -666,13 +664,12 @@ client_geometry_hints(client_t *c, area_t geometry)
 bool
 client_resize(client_t *c, area_t geometry, bool hints)
 {
-    int new_screen;
     area_t geometry_internal;
     area_t area;
 
     /* offscreen appearance fixes */
     area = display_area_get(c->phys_screen, NULL,
-                            &globalconf.screens[c->screen].padding);
+                            &c->screen->padding);
 
     if(geometry.x > area.width)
         geometry.x = area.width - geometry.width;
@@ -700,7 +697,8 @@ client_resize(client_t *c, area_t geometry, bool hints)
        || c->geometries.internal.width != geometry_internal.width
        || c->geometries.internal.height != geometry_internal.height)
     {
-        new_screen = screen_getbycoord(c->screen, geometry_internal.x, geometry_internal.y);
+        screen_t *new_screen = screen_getbycoord(c->screen,
+                                                 geometry_internal.x, geometry_internal.y);
 
         /* Values to configure a window is an array where values are
          * stored according to 'value_mask' */
@@ -746,7 +744,7 @@ client_resize(client_t *c, area_t geometry, bool hints)
  * \param screen The screen that should be processed.
  */
 void
-client_update_strut_positions(int screen)
+client_update_strut_positions(screen_t *screen)
 {
     area_t allowed_area, geom;
 
@@ -772,8 +770,8 @@ client_update_strut_positions(int screen)
 
         /* Screen area, minus padding, wibox'es and already processed struts. */
         allowed_area = screen_area_get(c->screen,
-                        &globalconf.screens[c->screen].wiboxes,
-                        &globalconf.screens[c->screen].padding,
+                        &c->screen->wiboxes,
+                        &c->screen->padding,
                         true);
 
         geom = c->geometry;
@@ -815,8 +813,8 @@ client_update_strut_positions(int screen)
 
         /* Screen area, minus padding, wibox'es and already processed struts. */
         allowed_area = screen_area_get(c->screen,
-                        &globalconf.screens[c->screen].wiboxes,
-                        &globalconf.screens[c->screen].padding,
+                        &c->screen->wiboxes,
+                        &c->screen->padding,
                         true);
 
         geom = c->geometry;
@@ -858,8 +856,8 @@ client_update_strut_positions(int screen)
 
         /* Screen area, minus padding, wibox'es and already processed struts. */
         allowed_area = screen_area_get(c->screen,
-                        &globalconf.screens[c->screen].wiboxes,
-                        &globalconf.screens[c->screen].padding,
+                        &c->screen->wiboxes,
+                        &c->screen->padding,
                         true);
 
         geom = c->geometry;
@@ -901,8 +899,8 @@ client_update_strut_positions(int screen)
 
         /* Screen area, minus padding, wibox'es and already processed struts. */
         allowed_area = screen_area_get(c->screen,
-                        &globalconf.screens[c->screen].wiboxes,
-                        &globalconf.screens[c->screen].padding,
+                        &c->screen->wiboxes,
+                        &c->screen->padding,
                         true);
 
         geom = c->geometry;
@@ -1033,8 +1031,8 @@ client_setmaxhoriz(client_t *c, bool s)
             client_setfullscreen(c, false);
 
             geometry = screen_area_get(c->screen,
-                                       &globalconf.screens[c->screen].wiboxes,
-                                       &globalconf.screens[c->screen].padding,
+                                       &c->screen->wiboxes,
+                                       &c->screen->padding,
                                        true);
             geometry.y = c->geometry.y;
             geometry.height = c->geometry.height;
@@ -1073,8 +1071,8 @@ client_setmaxvert(client_t *c, bool s)
             client_setfullscreen(c, false);
 
             geometry = screen_area_get(c->screen,
-                                       &globalconf.screens[c->screen].wiboxes,
-                                       &globalconf.screens[c->screen].padding,
+                                       &c->screen->wiboxes,
+                                       &c->screen->padding,
                                        true);
             geometry.x = c->geometry.x;
             geometry.width = c->geometry.width;
@@ -1220,7 +1218,7 @@ client_unban(client_t *c)
 void
 client_unmanage(client_t *c)
 {
-    tag_array_t *tags = &globalconf.screens[c->screen].tags;
+    tag_array_t *tags = &c->screen->tags;
 
     /* Reset transient_for attributes of widows that maybe refering to us */
     foreach(_tc, globalconf.clients)
@@ -1230,7 +1228,7 @@ client_unmanage(client_t *c)
             tc->transient_for = NULL;
     }
 
-    if(globalconf.screens[c->phys_screen].client_focus == c)
+    if(globalconf.screens.tab[c->phys_screen].client_focus == c)
         client_unfocus(c);
 
     /* remove client from global list and everywhere else */
@@ -1323,7 +1321,7 @@ luaA_client_get(lua_State *L)
 
     lua_newtable(L);
 
-    if(screen == SCREEN_UNDEF)
+    if(screen == -1)
         foreach(c, globalconf.clients)
         {
             client_push(L, *c);
@@ -1333,7 +1331,7 @@ luaA_client_get(lua_State *L)
     {
         luaA_checkscreen(screen);
         foreach(c, globalconf.clients)
-            if((*c)->screen == screen)
+            if((*c)->screen == &globalconf.screens.tab[screen])
             {
                 client_push(L, *c);
                 lua_rawseti(L, -2, i++);
@@ -1458,7 +1456,7 @@ static int
 luaA_client_tags(lua_State *L)
 {
     client_t *c = luaA_client_checkudata(L, 1);
-    tag_array_t *tags = &globalconf.screens[c->screen].tags;
+    tag_array_t *tags = &c->screen->tags;
     int j = 0;
 
     if(lua_gettop(L) == 2)
@@ -1676,7 +1674,7 @@ luaA_client_newindex(lua_State *L)
         {
             i = luaL_checknumber(L, 3) - 1;
             luaA_checkscreen(i);
-            screen_client_moveto(c, i, true, true);
+            screen_client_moveto(c, &globalconf.screens.tab[i], true, true);
         }
         break;
       case A_TK_HIDE:
@@ -1913,7 +1911,7 @@ luaA_client_index(lua_State *L)
         lua_pushstring(L, c->icon_name);
         break;
       case A_TK_SCREEN:
-        lua_pushnumber(L, 1 + c->screen);
+        lua_pushnumber(L, 1 + c->screen->index);
         break;
       case A_TK_HIDE:
         lua_pushboolean(L, c->ishidden);

@@ -82,7 +82,7 @@ mouse_query_pointer(xcb_window_t window, int16_t *x, int16_t *y, xcb_window_t *c
 }
 
 /** Get the pointer position on the screen.
- * \param screen This will be set to the screen number the mouse is on.
+ * \param screen This will be set to the screen the mouse is on.
  * \param x This will be set to the Pointer-x-coordinate relative to window.
  * \param y This will be set to the Pointer-y-coordinate relative to window.
  * \param child This will be set to the window under the pointer.
@@ -90,7 +90,7 @@ mouse_query_pointer(xcb_window_t window, int16_t *x, int16_t *y, xcb_window_t *c
  * \return True on success, false if an error occured.
  */
 static bool
-mouse_query_pointer_root(int *s, int16_t *x, int16_t *y, xcb_window_t *child, uint16_t *mask)
+mouse_query_pointer_root(screen_t **s, int16_t *x, int16_t *y, xcb_window_t *child, uint16_t *mask)
 {
     for(int screen = 0;
         screen < xcb_setup_roots_length(xcb_get_setup(globalconf.connection));
@@ -100,7 +100,7 @@ mouse_query_pointer_root(int *s, int16_t *x, int16_t *y, xcb_window_t *child, ui
 
         if(mouse_query_pointer(root, x, y, child, mask))
         {
-            *s = screen;
+            *s = &globalconf.screens.tab[screen];
             return true;
         }
     }
@@ -331,7 +331,7 @@ luaA_mouse_index(lua_State *L)
     size_t len;
     const char *attr = luaL_checklstring(L, 2, &len);
     int16_t mouse_x, mouse_y;
-    int screen, i;
+    screen_t *screen;
 
     switch(a_tokenize(attr, len))
     {
@@ -339,9 +339,9 @@ luaA_mouse_index(lua_State *L)
         if(!mouse_query_pointer_root(&screen, &mouse_x, &mouse_y, NULL, NULL))
             return 0;
 
-        i = screen_getbycoord(screen, mouse_x, mouse_y);
+        screen  = screen_getbycoord(screen, mouse_x, mouse_y);
 
-        lua_pushnumber(L, i + 1);
+        lua_pushnumber(L, screen->index + 1);
         break;
       default:
         return 0;
@@ -373,8 +373,8 @@ luaA_mouse_newindex(lua_State *L)
         phys_screen = screen_virttophys(screen);
         root = xutil_screen_get(globalconf.connection, phys_screen)->root;
 
-        x = globalconf.screens[screen].geometry.x;
-        y = globalconf.screens[screen].geometry.y;
+        x = globalconf.screens.tab[screen].geometry.x;
+        y = globalconf.screens.tab[screen].geometry.y;
 
         mouse_warp_pointer(root, x, y);
         break;
@@ -427,8 +427,9 @@ static int
 luaA_mouse_coords(lua_State *L)
 {
     uint16_t mask;
-    int screen, x, y;
+    int x, y;
     int16_t mouse_x, mouse_y;
+    screen_t *screen;
 
     if(lua_gettop(L) == 1)
     {
@@ -442,7 +443,7 @@ luaA_mouse_coords(lua_State *L)
         x = luaA_getopt_number(L, 1, "x", mouse_x);
         y = luaA_getopt_number(L, 1, "y", mouse_y);
 
-        root = xutil_screen_get(globalconf.connection, screen)->root;
+        root = xutil_screen_get(globalconf.connection, screen->index)->root;
         mouse_warp_pointer(root, x, y);
         lua_pop(L, 1);
     }
@@ -462,7 +463,7 @@ luaA_mouse_coords(lua_State *L)
 static int
 luaA_mouse_object_under_pointer(lua_State *L)
 {
-    int screen;
+    screen_t *screen;
     int16_t mouse_x, mouse_y;
     xcb_window_t child;
 

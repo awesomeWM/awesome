@@ -39,7 +39,7 @@ void titlebar_unban(wibox_t *);
 int luaA_titlebar_newindex(lua_State *, wibox_t *, awesome_token_t);
 
 static inline bool
-titlebar_isvisible(client_t *c, int screen)
+titlebar_isvisible(client_t *c, screen_t *screen)
 {
     if(client_isvisible(c, screen))
     {

@@ -132,7 +132,7 @@ progressbar_bar_get(bar_array_t *bars, const char *title)
 }
 
 static area_t
-progressbar_geometry(widget_t *widget, int screen, int height, int width)
+progressbar_geometry(widget_t *widget, screen_t *screen, int height, int width)
 {
     area_t geometry;
     progressbar_data_t *d = widget->data;
@@ -162,7 +162,6 @@ progressbar_geometry(widget_t *widget, int screen, int height, int width)
 
 /** Draw a progressbar.
  * \param ctx The draw context.
- * \param screen The screen we're drawing for.
  * \param w The widget node we're drawing for.
  * \param offset Offset to draw at.
  * \param used Space already used.
@@ -170,8 +169,7 @@ progressbar_geometry(widget_t *widget, int screen, int height, int width)
  * \return The width used.
  */
 static void
-progressbar_draw(widget_t *widget, draw_context_t *ctx, area_t geometry,
-                 int screen, wibox_t *p)
+progressbar_draw(widget_t *widget, draw_context_t *ctx, area_t geometry, wibox_t *p)
 {
     /* pb_.. values points to the widget inside a potential border */
     int values_ticks, pb_x, pb_y, pb_height, pb_width, pb_progress, pb_offset;

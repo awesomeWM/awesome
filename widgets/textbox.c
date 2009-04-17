@@ -53,7 +53,7 @@ typedef struct
 } textbox_data_t;
 
 static area_t
-textbox_geometry(widget_t *widget, int screen, int height, int width)
+textbox_geometry(widget_t *widget, screen_t *screen, int height, int width)
 {
     area_t geometry;
     textbox_data_t *d = widget->data;
@@ -78,12 +78,10 @@ textbox_geometry(widget_t *widget, int screen, int height, int width)
 /** Draw a textbox widget.
  * \param widget The widget.
  * \param ctx The draw context.
- * \param screen The screen.
  * \param p A pointer to the object we're draw onto.
  */
 static void
-textbox_draw(widget_t *widget, draw_context_t *ctx, area_t geometry,
-             int screen, wibox_t *p)
+textbox_draw(widget_t *widget, draw_context_t *ctx, area_t geometry, wibox_t *p)
 {
     textbox_data_t *d = widget->data;
 

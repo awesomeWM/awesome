@@ -39,19 +39,19 @@ LUA_OBJECT_FUNCS(client_t, client, "client")
 
 #define client_need_arrange(c) \
     do { \
-        if(!globalconf.screens[(c)->screen].need_arrange \
+        if(!c->screen->need_arrange \
            && client_isvisible(c, (c)->screen)) \
-            globalconf.screens[(c)->screen].need_arrange = true; \
+            c->screen->need_arrange = true; \
     } while(0)
 
-bool client_maybevisible(client_t *, int);
+bool client_maybevisible(client_t *, screen_t *);
 client_t * client_getbywin(xcb_window_t);
 void client_ban(client_t *);
 void client_unban(client_t *);
 void client_manage(xcb_window_t, xcb_get_geometry_reply_t *, int, bool);
 area_t client_geometry_hints(client_t *, area_t);
 bool client_resize(client_t *, area_t, bool);
-void client_update_strut_positions(int);
+void client_update_strut_positions(screen_t *);
 void client_unmanage(client_t *);
 void client_kill(client_t *);
 void client_setsticky(client_t *, bool);
@@ -141,7 +141,7 @@ client_isfixed(client_t *c)
  * \return true if the client is visible, false otherwise.
  */
 static inline bool
-client_isvisible(client_t *c, int screen)
+client_isvisible(client_t *c, screen_t *screen)
 {
     return (!c->ishidden && !c->isminimized && client_maybevisible(c, screen));
 }

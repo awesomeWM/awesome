@@ -24,14 +24,40 @@
 
 #include "structs.h"
 
-#define SCREEN_UNDEF    (-1)
+struct a_screen
+{
+    /** Screen index */
+    int index;
+    /** Screen geometry */
+    area_t geometry;
+    /** true if we need to arrange() */
+    bool need_arrange;
+    /** Tag list */
+    tag_array_t tags;
+    /** Wiboxes */
+    wibox_array_t wiboxes;
+    /** Padding */
+    padding_t padding;
+    /** Window that contains the systray */
+    struct
+    {
+        xcb_window_t window;
+        /** Systray window parent */
+        xcb_window_t parent;
+    } systray;
+    /** Focused client */
+    client_t *client_focus;
+    /** The monitor of startup notifications */
+    SnMonitorContext *snmonitor;
+};
+ARRAY_FUNCS(screen_t, screen, DO_NOTHING)
 
 void screen_scan(void);
-int screen_getbycoord(int, int, int);
-area_t screen_area_get(int, wibox_array_t *, padding_t *, bool);
+screen_t *screen_getbycoord(screen_t *, int, int);
+area_t screen_area_get(screen_t *, wibox_array_t *, padding_t *, bool);
 area_t display_area_get(int, wibox_array_t *, padding_t *);
 int screen_virttophys(int);
-void screen_client_moveto(client_t *, int, bool, bool);
+void screen_client_moveto(client_t *, screen_t *, bool, bool);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

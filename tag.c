@@ -54,8 +54,8 @@ static void
 tag_view(tag_t *tag, bool view)
 {
     tag->selected = view;
-    ewmh_update_net_current_desktop(screen_virttophys(tag->screen));
-    globalconf.screens[tag->screen].need_arrange = true;
+    ewmh_update_net_current_desktop(screen_virttophys(tag->screen->index));
+    tag->screen->need_arrange = true;
 }
 
 /** Append a tag which on top of the stack to a screen.
@@ -67,7 +67,7 @@ tag_append_to_screen(screen_t *s)
     int phys_screen = screen_virttophys(s->index);
     tag_t *tag = tag_ref(globalconf.L);
 
-    tag->screen = s->index;
+    tag->screen = s;
     tag_array_append(&s->tags, tag);
     ewmh_update_net_numbers_of_desktop(phys_screen);
     ewmh_update_net_desktop_names(phys_screen);
@@ -89,9 +89,8 @@ tag_append_to_screen(screen_t *s)
 static void
 tag_remove_from_screen(tag_t *tag)
 {
-    int screen = tag->screen;
-    int phys_screen = screen_virttophys(tag->screen);
-    tag_array_t *tags = &globalconf.screens[tag->screen].tags;
+    int phys_screen = screen_virttophys(tag->screen->index);
+    tag_array_t *tags = &tag->screen->tags;
 
     for(int i = 0; i < tags->len; i++)
         if(tags->tab[i] == tag)
@@ -102,12 +101,12 @@ tag_remove_from_screen(tag_t *tag)
     ewmh_update_net_numbers_of_desktop(phys_screen);
     ewmh_update_net_desktop_names(phys_screen);
     ewmh_update_workarea(phys_screen);
-    tag->screen = SCREEN_UNDEF;
+    tag->screen = NULL;
 
     /* call hook */
     if(globalconf.hooks.tags != LUA_REFNIL)
     {
-        lua_pushnumber(globalconf.L, screen + 1);
+        lua_pushnumber(globalconf.L, tag->screen->index + 1);
         tag_push(globalconf.L, tag);
         lua_pushliteral(globalconf.L, "remove");
         luaA_dofunction(globalconf.L, globalconf.hooks.tags, 3, 0);
@@ -182,19 +181,18 @@ is_client_tagged(client_t *c, tag_t *t)
 
 /** Get the current tags for the specified screen.
  * Returned pointer must be p_delete'd after.
- * \param screen screen id
- * \return a double pointer of tag list finished with a NULL element
+ * \param screen Screen.
+ * \return A double pointer of tag list finished with a NULL element.
  */
 tag_t **
-tags_get_current(int screen)
+tags_get_current(screen_t *screen)
 {
-    tag_array_t *tags = &globalconf.screens[screen].tags;
-    tag_t **out = p_new(tag_t *, tags->len + 1);
+    tag_t **out = p_new(tag_t *, screen->tags.len + 1);
     int n = 0;
 
-    for(int i = 0; i < tags->len; i++)
-        if(tags->tab[i]->selected)
-            out[n++] = tags->tab[i];
+    foreach(tag, screen->tags)
+        if((*tag)->selected)
+            out[n++] = *tag;
 
     return out;
 }
@@ -207,22 +205,18 @@ static void
 tag_view_only(tag_t *target)
 {
     if(target)
-    {
-        tag_array_t *tags = &globalconf.screens[target->screen].tags;
-
-        for(int i = 0; i < tags->len; i++)
-            tag_view(tags->tab[i], tags->tab[i] == target);
-    }
+        foreach(tag, target->screen->tags)
+            tag_view(*tag, *tag == target);
 }
 
 /** View only a tag, selected by its index.
- * \param screen screen id
- * \param dindex the index
+ * \param screen Screen.
+ * \param dindex The index.
  */
 void
-tag_view_only_byindex(int screen, int dindex)
+tag_view_only_byindex(screen_t *screen, int dindex)
 {
-    tag_array_t *tags = &globalconf.screens[screen].tags;
+    tag_array_t *tags = &screen->tags;
 
     if(dindex < 0 || dindex >= tags->len)
         return;
@@ -243,9 +237,6 @@ luaA_tag_new(lua_State *L)
     tag_t *tag = tag_new(globalconf.L);
 
     a_iso2utf8(name, len, &tag->name, NULL);
-
-    /* to avoid error */
-    tag->screen = SCREEN_UNDEF;
 
     return 1;
 }
@@ -317,9 +308,9 @@ luaA_tag_index(lua_State *L)
         lua_pushstring(L, tag->name);
         break;
       case A_TK_SCREEN:
-        if(tag->screen == SCREEN_UNDEF)
+        if(!tag->screen)
             return 0;
-        lua_pushnumber(L, tag->screen + 1);
+        lua_pushnumber(L, tag->screen->index + 1);
         break;
       case A_TK_SELECTED:
         lua_pushboolean(L, tag->selected);
@@ -360,28 +351,28 @@ luaA_tag_newindex(lua_State *L)
             luaA_checkscreen(screen);
         }
         else
-            screen = SCREEN_UNDEF;
+            screen = -1;
 
-        if(tag->screen != SCREEN_UNDEF)
+        if(tag->screen)
             tag_remove_from_screen(tag);
 
-        if(screen != SCREEN_UNDEF)
+        if(screen != -1)
         {
             /* push tag on top of the stack */
             lua_pushvalue(L, 1);
-            tag_append_to_screen(&globalconf.screens[screen]);
+            tag_append_to_screen(&globalconf.screens.tab[screen]);
         }
         break;
       case A_TK_SELECTED:
-        if(tag->screen != SCREEN_UNDEF)
+        if(tag->screen)
             tag_view(tag, luaA_checkboolean(L, 3));
         return 0;
       default:
         return 0;
     }
 
-    if(tag->screen != SCREEN_UNDEF && tag->selected)
-        globalconf.screens[tag->screen].need_arrange = true;
+    if(tag->screen && tag->selected)
+        tag->screen->need_arrange = true;
 
     return 0;
 }
