@@ -74,8 +74,6 @@ typedef struct client_t client_t;
 typedef struct client_node client_node_t;
 typedef struct tag tag_t;
 typedef struct tag_client_node_t tag_client_node_t;
-typedef widget_t *(widget_constructor_t)(widget_t *);
-typedef void (widget_destructor_t)(widget_t *);
 typedef struct awesome_t awesome_t;
 
 ARRAY_TYPE(widget_node_t, widget_node)
@@ -121,37 +119,6 @@ typedef struct
     button_array_t buttons;
 } wibox_t;
 ARRAY_TYPE(wibox_t *, wibox)
-
-/** Widget */
-struct widget_t
-{
-    /** Lua references */
-    luaA_ref_array_t refs;
-    /** Widget type is constructor */
-    widget_constructor_t *type;
-    /** Widget destructor */
-    widget_destructor_t *destructor;
-    /** Geometry function */
-    area_t (*geometry)(widget_t *, screen_t *, int, int);
-    /** Draw function */
-    void (*draw)(widget_t *, draw_context_t *, area_t, wibox_t *);
-    /** Index function */
-    int (*index)(lua_State *, awesome_token_t);
-    /** Newindex function */
-    int (*newindex)(lua_State *, awesome_token_t);
-    /** Mouse over event handler */
-    luaA_ref mouse_enter, mouse_leave;
-    /** Alignement */
-    alignment_t align;
-    /** Supported alignment */
-    alignment_t align_supported;
-    /** Misc private data */
-    void *data;
-    /** Button bindings */
-    button_array_t buttons;
-    /** True if the widget is visible */
-    bool isvisible;
-};
 
 /* Strut */
 typedef struct
