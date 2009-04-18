@@ -345,7 +345,7 @@ function notify(args)
         -- if we have an icon, use it
         if icon then
             iconbox = widget({ type = "imagebox", align = "left" })
-            iconbox:buttons(util.join(button({ }, 1, run), button({ }, 3, die)))
+            iconbox:buttons(util.table.join(button({ }, 1, run), button({ }, 3, die)))
             local img
             if type(icon) == "string" then
                 img = image(icon)
