@@ -1,5 +1,13 @@
 #!/bin/sh
 
+# rlwrap provides readline to stuff which doesn't know readline by itself
+RLWRAP=`which rlwrap 2>/dev/null`
+
+if [ "$RLWRAP" != "" ] && [ "$A_RERUN" = "" ]
+then
+	A_RERUN="no" exec $RLWRAP $0
+fi
+
 DBUS_SEND=dbus-send
 
 if ! which ${DBUS_SEND} >/dev/null 2>&1
