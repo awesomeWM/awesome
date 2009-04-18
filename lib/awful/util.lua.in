@@ -14,7 +14,7 @@ local debug = debug
 local print = print
 local type = type
 local rtable = table
-local ipairs = ipairs
+local pairs = pairs
 local capi =
 {
     awesome = awesome,
@@ -218,14 +218,19 @@ function subsets(set)
 end
 
 --- Join all tables given as parameters.
--- This will iterate all tables and insert value from 1 to N.
--- Non integer keys are ignored.
+-- This will iterate all tables and insert all their keys into a new table.
 -- @param args A list of tables to join
--- @return A new table containing all interger keys from the arguments.
+-- @return A new table containing all keys from the arguments.
 function table.join(...)
     local ret = {}
     for i = 1, arg.n do
-        for k, v in ipairs(arg[i]) do rtable.insert(ret, v) end
+        for k, v in pairs(arg[i]) do
+            if type(k) == "number" then
+                rtable.insert(ret, v)
+            else
+                ret[k] = v
+            end
+        end
     end
     return ret
 end
