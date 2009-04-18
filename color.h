@@ -23,7 +23,8 @@
 #ifndef AWESOME_COLOR_H
 #define AWESOME_COLOR_H
 
-#include "common/xutil.h"
+#include <xcb/xcb.h>
+#include <stdbool.h>
 
 typedef struct
 {

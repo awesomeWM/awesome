@@ -20,9 +20,11 @@
  *
  */
 
+#include <ctype.h>
+
 #include "color.h"
 #include "structs.h"
-#include <ctype.h>
+#include "common/xutil.h"
 
 #define RGB_8TO16(i)   (0xffff * ((i) & 0xff) / 0xff)
 #define RGB_16TO8(i)   (0xff * ((i) & 0xffff) / 0xffff)
