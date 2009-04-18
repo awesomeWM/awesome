@@ -25,6 +25,7 @@
 typedef struct
 {
     const char *name;
+    size_t len;
     xcb_atom_t *atom;
 } atom_item_t;
 
@@ -42,7 +43,7 @@ atoms_init(xcb_connection_t *conn)
     for(i = 0; i < countof(ATOM_LIST); i++)
 	cs[i] = xcb_intern_atom_unchecked(conn,
 					  false,
-					  a_strlen(ATOM_LIST[i].name),
+					  ATOM_LIST[i].len,
 					  ATOM_LIST[i].name);
 
     for(i = 0; i < countof(ATOM_LIST); i++)

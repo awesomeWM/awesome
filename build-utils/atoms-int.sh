@@ -14,7 +14,7 @@ echo '{'
 
 while read atom
 do
-    echo '    { "'$atom'", &'$atom' },'
+    echo '    { "'$atom'", sizeof("'$atom'") - 1, &'$atom' },'
 done < $1
 
 echo '};'
