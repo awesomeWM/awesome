@@ -148,7 +148,7 @@ pkg_check_modules(AWESOME_REQUIRED REQUIRED
     libstartup-notification-1.0>=0.10
     xproto>=7.0.11
     imlib2
-    libxdg-basedir)
+    libxdg-basedir>=1.0.0)
 
 if(NOT AWESOME_REQUIRED_FOUND OR NOT AWESOME_COMMON_REQUIRED_FOUND)
     message(FATAL_ERROR)

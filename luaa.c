@@ -640,7 +640,7 @@ luaA_awesome_newindex(lua_State *L)
  * \param xdg An xdg handle to use to get XDG basedir.
  */
 void
-luaA_init(xdgHandle xdg)
+luaA_init(xdgHandle* xdg)
 {
     lua_State *L;
     static const struct luaL_reg awesome_lib[] =
@@ -780,7 +780,7 @@ luaA_loadrc(const char *confpath, bool run)
  * \param run Run the configuration file.
  */
 bool
-luaA_parserc(xdgHandle xdg, const char *confpatharg, bool run)
+luaA_parserc(xdgHandle* xdg, const char *confpatharg, bool run)
 {
     char *confpath = NULL;
     bool ret = false;

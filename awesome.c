@@ -357,10 +357,10 @@ main(int argc, char **argv)
     setlocale(LC_CTYPE, "");
 
     /* Get XDG basedir data */
-    xdg = xdgAllocHandle();
+    xdgInitHandle(&xdg);
 
     /* init lua */
-    luaA_init(xdg);
+    luaA_init(&xdg);
 
     /* check args */
     while((opt = getopt_long(argc, argv, "vhkc:",
@@ -374,7 +374,7 @@ main(int argc, char **argv)
             exit_help(EXIT_SUCCESS);
             break;
           case 'k':
-            if(!luaA_parserc(xdg, confpath, false))
+            if(!luaA_parserc(&xdg, confpath, false))
             {
                 fprintf(stderr, "✘ Configuration file syntax error.\n");
                 return EXIT_FAILURE;
@@ -505,9 +505,9 @@ main(int argc, char **argv)
     spawn_init();
 
     /* Parse and run configuration file */
-    luaA_parserc(xdg, confpath, true);
+    luaA_parserc(&xdg, confpath, true);
 
-    xdgFreeHandle(xdg);
+    xdgWipeHandle(&xdg);
 
     /* scan existing windows */
     scan();
