@@ -221,22 +221,34 @@ property_update_wm_name(client_t *c)
     hooks_property(c, "name");
 }
 
+/** Update WM_CLASS of a client.
+ * \param c The client.
+ * \param reply The reply to get property request, or NULL if none.
+ */
 void
-property_update_wm_class(client_t *c)
+property_update_wm_class(client_t *c, xcb_get_property_reply_t *reply)
 {
     xcb_get_wm_class_reply_t hint;
+
+    if(reply)
+    {
+        if(!xcb_get_wm_class_from_reply(&hint, reply))
+            return;
+    }
+    else
+    {
+        if(!xcb_get_wm_class_reply(globalconf.connection,
+                                   xcb_get_wm_class_unchecked(globalconf.connection, c->win),
+                                   &hint, NULL))
+            return;
+    }
 
     p_delete(&c->instance);
     p_delete(&c->class);
 
-    if(xcb_get_wm_class_reply(globalconf.connection,
-                               xcb_get_wm_class_unchecked(globalconf.connection, c->win),
-                               &hint, NULL))
-    {
-        c->instance = a_strdup(hint.instance_name);
-        c->class = a_strdup(hint.class_name);
-        xcb_get_wm_class_reply_wipe(&hint);
-    }
+    c->instance = a_strdup(hint.instance_name);
+    c->class = a_strdup(hint.class_name);
+    xcb_get_wm_class_reply_wipe(&hint);
 }
 
 /** Update client icon name attribute with its new title.
@@ -304,7 +316,7 @@ property_handle_wm_class(void *data,
     client_t *c = client_getbywin(window);
 
     if(c)
-        property_update_wm_class(c);
+        property_update_wm_class(c, reply);
 
     return 0;
 }

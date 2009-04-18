@@ -509,7 +509,7 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
     /* update window title */
     property_update_wm_name(c);
     property_update_wm_icon_name(c);
-    property_update_wm_class(c);
+    property_update_wm_class(c, NULL);
 
     xutil_text_prop_get(globalconf.connection, c->win, _NET_STARTUP_ID, &c->startup_id, NULL);
 
