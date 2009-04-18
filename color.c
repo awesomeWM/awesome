@@ -74,8 +74,12 @@ color_parse(const char *colstr, ssize_t len,
 }
 
 /** Send a request to initialize a color.
+ * If you are only interested in the color's pixel value or need both, the pixel
+ * value and the rgba components, use xcolor_init_unchecked() and/or
+ * xcolor_to_color() instead.
  * \param color color_t struct to store color into.
  * \param colstr Color specification.
+ * \param len The length of colstr (which still MUST be NULL terminated).
  * \return request informations.
  */
 color_init_cookie_t
@@ -152,8 +156,11 @@ color_init_reply(color_init_cookie_t req)
 }
 
 /** Send a request to initialize a X color.
+ * If you are only interested in the rgba values and don't need the color's
+ * pixel value, you should use color_init_unchecked() instead.
  * \param color xcolor_t struct to store color into.
  * \param colstr Color specification.
+ * \param len The length of colstr (which still MUST be NULL terminated).
  * \return request informations.
  */
 xcolor_init_request_t
