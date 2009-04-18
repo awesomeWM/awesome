@@ -224,11 +224,13 @@ end
 function table.join(...)
     local ret = {}
     for i = 1, arg.n do
-        for k, v in pairs(arg[i]) do
-            if type(k) == "number" then
-                rtable.insert(ret, v)
-            else
-                ret[k] = v
+        if arg[i] then
+            for k, v in pairs(arg[i]) do
+                if type(k) == "number" then
+                    rtable.insert(ret, v)
+                else
+                    ret[k] = v
+                end
             end
         end
     end
