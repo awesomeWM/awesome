@@ -190,7 +190,7 @@ luaA_textbox_index(lua_State *L, awesome_token_t token)
       case A_TK_BG_IMAGE:
         return image_push(L, d->bg_image);
       case A_TK_BG:
-        return luaA_pushcolor(L, &d->bg);
+        return luaA_pushxcolor(L, &d->bg);
       case A_TK_MARGIN:
         lua_pushcfunction(L, luaA_textbox_margin);
         return 1;
@@ -201,7 +201,7 @@ luaA_textbox_index(lua_State *L, awesome_token_t token)
         lua_pushnumber(L, d->border.width);
         return 1;
       case A_TK_BORDER_COLOR:
-        luaA_pushcolor(L, &d->border.color);
+        luaA_pushxcolor(L, &d->border.color);
         return 1;
       case A_TK_TEXT:
         if(d->data.len > 0)

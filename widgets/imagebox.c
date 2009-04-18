@@ -143,7 +143,7 @@ luaA_imagebox_index(lua_State *L, awesome_token_t token)
         image_push(L, d->image);
         break;
       case A_TK_BG:
-        luaA_pushcolor(L, &d->bg);
+        luaA_pushxcolor(L, &d->bg);
         break;
       case A_TK_RESIZE:
         lua_pushboolean(L, d->resize);

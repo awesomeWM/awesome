@@ -1958,7 +1958,7 @@ luaA_client_index(lua_State *L)
         lua_pushnumber(L, c->border);
         break;
       case A_TK_BORDER_COLOR:
-        luaA_pushcolor(L, &c->border_color);
+        luaA_pushxcolor(L, &c->border_color);
         break;
       case A_TK_TITLEBAR:
         return wibox_push(L, c->titlebar);

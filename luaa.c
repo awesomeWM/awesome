@@ -585,10 +585,10 @@ luaA_awesome_index(lua_State *L)
         lua_pushstring(L, globalconf.conffile);
         break;
       case A_TK_FG:
-        luaA_pushcolor(L, &globalconf.colors.fg);
+        luaA_pushxcolor(L, &globalconf.colors.fg);
         break;
       case A_TK_BG:
-        luaA_pushcolor(L, &globalconf.colors.bg);
+        luaA_pushxcolor(L, &globalconf.colors.bg);
         break;
       default:
         return 0;
@@ -831,7 +831,7 @@ luaA_on_timer(EV_P_ ev_timer *w, int revents)
  * \return The number of elements pushed on stack.
  */
 int
-luaA_pushcolor(lua_State *L, const xcolor_t *c)
+luaA_pushxcolor(lua_State *L, const xcolor_t *c)
 {
     uint8_t r = (unsigned)c->red   * 0xff / 0xffff;
     uint8_t g = (unsigned)c->green * 0xff / 0xffff;

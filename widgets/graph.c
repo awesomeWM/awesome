@@ -466,10 +466,10 @@ luaA_graph_index(lua_State *L, awesome_token_t token)
         lua_pushnumber(L, d->width);
         break;
       case A_TK_BORDER_COLOR:
-        luaA_pushcolor(L, &d->border_color);
+        luaA_pushxcolor(L, &d->border_color);
         break;
       case A_TK_BG:
-        luaA_pushcolor(L, &d->bg);
+        luaA_pushxcolor(L, &d->bg);
         break;
       case A_TK_GROW:
         switch(d->grow)
