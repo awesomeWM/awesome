@@ -54,7 +54,8 @@ static void
 tag_view(tag_t *tag, bool view)
 {
     tag->selected = view;
-    ewmh_update_net_current_desktop(screen_virttophys(tag->screen->index));
+    ewmh_update_net_current_desktop(screen_virttophys(screen_array_indexof(&globalconf.screens,
+                                                                           tag->screen)));
     tag->screen->need_arrange = true;
 }
 
@@ -64,7 +65,8 @@ tag_view(tag_t *tag, bool view)
 void
 tag_append_to_screen(screen_t *s)
 {
-    int phys_screen = screen_virttophys(s->index);
+    int screen_index = screen_array_indexof(&globalconf.screens, s);
+    int phys_screen = screen_virttophys(screen_index);
     tag_t *tag = tag_ref(globalconf.L);
 
     tag->screen = s;
@@ -76,7 +78,7 @@ tag_append_to_screen(screen_t *s)
     /* call hook */
     if(globalconf.hooks.tags != LUA_REFNIL)
     {
-        lua_pushnumber(globalconf.L, s->index + 1);
+        lua_pushnumber(globalconf.L, screen_index + 1);
         tag_push(globalconf.L, tag);
         lua_pushliteral(globalconf.L, "add");
         luaA_dofunction(globalconf.L, globalconf.hooks.tags, 3, 0);
@@ -89,7 +91,8 @@ tag_append_to_screen(screen_t *s)
 static void
 tag_remove_from_screen(tag_t *tag)
 {
-    int phys_screen = screen_virttophys(tag->screen->index);
+    int screen_index = screen_array_indexof(&globalconf.screens, tag->screen);
+    int phys_screen = screen_virttophys(screen_index);
     tag_array_t *tags = &tag->screen->tags;
 
     for(int i = 0; i < tags->len; i++)
@@ -105,7 +108,7 @@ tag_remove_from_screen(tag_t *tag)
     /* call hook */
     if(globalconf.hooks.tags != LUA_REFNIL)
     {
-        lua_pushnumber(globalconf.L, tag->screen->index + 1);
+        lua_pushnumber(globalconf.L, screen_index + 1);
         tag_push(globalconf.L, tag);
         lua_pushliteral(globalconf.L, "remove");
         luaA_dofunction(globalconf.L, globalconf.hooks.tags, 3, 0);
@@ -311,7 +314,7 @@ luaA_tag_index(lua_State *L)
       case A_TK_SCREEN:
         if(!tag->screen)
             return 0;
-        lua_pushnumber(L, tag->screen->index + 1);
+        lua_pushnumber(L, screen_array_indexof(&globalconf.screens, tag->screen) + 1);
         break;
       case A_TK_SELECTED:
         lua_pushboolean(L, tag->selected);

@@ -1907,7 +1907,7 @@ luaA_client_index(lua_State *L)
         lua_pushstring(L, c->icon_name);
         break;
       case A_TK_SCREEN:
-        lua_pushnumber(L, 1 + c->screen->index);
+        lua_pushnumber(L, 1 + screen_array_indexof(&globalconf.screens, c->screen));
         break;
       case A_TK_HIDE:
         lua_pushboolean(L, c->ishidden);

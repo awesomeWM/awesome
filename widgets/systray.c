@@ -34,7 +34,7 @@ static area_t
 systray_geometry(widget_t *widget, screen_t *screen, int height, int width)
 {
     area_t geometry;
-    int phys_screen = screen_virttophys(screen->index), n = 0;
+    int phys_screen = screen_virttophys(screen_array_indexof(&globalconf.screens, screen)), n = 0;
 
     geometry.height = height;
 

@@ -131,7 +131,7 @@ wibox_setposition(wibox_t *wibox, position_t p)
         foreach(w, wibox->screen->wiboxes)
             wibox_position_update(*w);
 
-        ewmh_update_workarea(screen_virttophys(wibox->screen->index));
+        ewmh_update_workarea(screen_virttophys(screen_array_indexof(&globalconf.screens, wibox->screen)));
 
         wibox_need_update(wibox);
     }
@@ -651,7 +651,7 @@ wibox_detach(wibox_t *wibox)
 static void
 wibox_attach(screen_t *s)
 {
-    int phys_screen = screen_virttophys(s->index);
+    int phys_screen = screen_virttophys(screen_array_indexof(&globalconf.screens, s));
 
     wibox_t *wibox = wibox_ref(globalconf.L);
 
@@ -688,7 +688,7 @@ wibox_attach(screen_t *s)
     foreach(w, s->wiboxes)
         wibox_position_update(*w);
 
-    ewmh_update_workarea(screen_virttophys(s->index));
+    ewmh_update_workarea(phys_screen);
 
     if(wibox->isvisible)
         wibox_map(wibox);
@@ -869,7 +869,7 @@ luaA_wibox_index(lua_State *L)
       case A_TK_SCREEN:
         if(!wibox->screen)
             return 0;
-        lua_pushnumber(L, wibox->screen->index + 1);
+        lua_pushnumber(L, screen_array_indexof(&globalconf.screens, wibox->screen) + 1);
         break;
       case A_TK_BORDER_WIDTH:
         lua_pushnumber(L, wibox->sw.border.width);
@@ -1067,7 +1067,7 @@ luaA_wibox_newindex(lua_State *L)
         {
             int screen = luaL_checknumber(L, 3) - 1;
             luaA_checkscreen(screen);
-            if(!wibox->screen || screen != wibox->screen->index)
+            if(!wibox->screen || screen != screen_array_indexof(&globalconf.screens, wibox->screen))
             {
                 titlebar_client_detach(client_getbytitlebar(wibox));
                 lua_pushvalue(L, 1);

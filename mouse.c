@@ -340,7 +340,7 @@ luaA_mouse_index(lua_State *L)
 
         screen  = screen_getbycoord(screen, mouse_x, mouse_y);
 
-        lua_pushnumber(L, screen->index + 1);
+        lua_pushnumber(L, screen_array_indexof(&globalconf.screens, screen) + 1);
         break;
       default:
         return 0;
@@ -442,7 +442,8 @@ luaA_mouse_coords(lua_State *L)
         x = luaA_getopt_number(L, 1, "x", mouse_x);
         y = luaA_getopt_number(L, 1, "y", mouse_y);
 
-        root = xutil_screen_get(globalconf.connection, screen->index)->root;
+        root = xutil_screen_get(globalconf.connection,
+                                screen_array_indexof(&globalconf.screens, screen))->root;
         mouse_warp_pointer(root, x, y);
         lua_pop(L, 1);
     }

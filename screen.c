@@ -83,16 +83,16 @@ screen_scan(void)
                         /* we already have a screen for this area, just check if
                          * it's not bigger and drop it */
                         drop = true;
+                        int i = screen_array_indexof(&globalconf.screens, screen_to_test);
                         screen_to_test->geometry.width =
-                            MAX(xsi[screen].width, xsi[screen_to_test->index].width);
+                            MAX(xsi[screen].width, xsi[i].width);
                         screen_to_test->geometry.height =
-                            MAX(xsi[screen].height, xsi[screen_to_test->index].height);
+                            MAX(xsi[screen].height, xsi[i].height);
                     }
             if(!drop)
             {
                 screen_t s;
                 p_clear(&s, 1);
-                s.index = screen;
                 s.geometry = screen_xsitoarea(xsi[screen]);
                 screen_array_append(&globalconf.screens, s);
             }
@@ -109,7 +109,6 @@ screen_scan(void)
             xcb_screen_t *xcb_screen = xutil_screen_get(globalconf.connection, screen);
             screen_t s;
             p_clear(&s, 1);
-            s.index = screen;
             s.geometry.x = 0;
             s.geometry.y = 0;
             s.geometry.width = xcb_screen->width_in_pixels;
@@ -504,7 +503,7 @@ luaA_screen_padding(lua_State *L)
         foreach(w, s->wiboxes)
             wibox_position_update(*w);
 
-        ewmh_update_workarea(screen_virttophys(s->index));
+        ewmh_update_workarea(screen_virttophys(screen_array_indexof(&globalconf.screens, s)));
     }
     return luaA_pushpadding(L, &s->padding);
 }

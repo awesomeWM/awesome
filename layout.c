@@ -77,7 +77,7 @@ arrange(screen_t *screen)
     /* call hook */
     if(globalconf.hooks.arrange != LUA_REFNIL)
     {
-        lua_pushnumber(globalconf.L, screen->index + 1);
+        lua_pushnumber(globalconf.L, screen_array_indexof(&globalconf.screens, screen) + 1);
         luaA_dofunction(globalconf.L, globalconf.hooks.arrange, 1, 0);
     }
 

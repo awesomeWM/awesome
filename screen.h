@@ -26,8 +26,6 @@
 
 struct a_screen
 {
-    /** Screen index */
-    int index;
     /** Screen geometry */
     area_t geometry;
     /** true if we need to arrange() */
