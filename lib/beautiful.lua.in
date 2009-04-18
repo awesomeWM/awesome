@@ -1,12 +1,13 @@
 ----------------------------------------------------------------------------
 -- @author Damien Leone &lt;damien.leone@gmail.com&gt;
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
--- @copyright 2008 Damien Leone, Julien Danjou
+-- @copyright 2008-2009 Damien Leone, Julien Danjou
 -- @release @AWESOME_VERSION@
 ----------------------------------------------------------------------------
 
 -- Grab environment
 local io = io
+local os = os
 local print = print
 local setmetatable = setmetatable
 local util = require("awful.util")
@@ -41,7 +42,8 @@ function init(path)
            return print("E: unable to load theme " .. path)
        end
 
-       for key, value in f:read("*all"):gsub("^","\n"):gmatch("\n[\t ]*([a-z_]+)[\t ]*=[\t ]*([^\n\t]+)") do
+       for key, value in f:read("*all"):gsub("^", "\n"):gmatch("\n[\t ]*([a-z_]+)[\t ]*=[\t ]*([^\n\t]+)") do
+            value = value:gsub("~", os.getenv("HOME"))
             if key == "wallpaper_cmd" then
                 for s = 1, capi.screen.count() do
                     util.spawn(value, false, s)
