@@ -421,7 +421,7 @@ a_dbus_init(void)
     dbus_connection = dbus_bus_get(DBUS_BUS_SESSION, &err);
     if(dbus_error_is_set(&err))
     {
-        warn("D-Bus system bus connection failed: %s", err.message);
+        warn("D-Bus session bus connection failed: %s", err.message);
         dbus_connection = NULL;
         dbus_error_free(&err);
         return false;
