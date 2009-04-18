@@ -338,7 +338,6 @@ const char * orientation_tostr(orientation_t);
 void *name_func_lookup(const char *, size_t, const name_func_link_t *);
 const char * name_func_rlookup(void *, const name_func_link_t *);
 void a_exec(const char *);
-int fd_set_close_on_exec(int);
 
 #define a_asprintf(strp, fmt, ...) \
     do { \
