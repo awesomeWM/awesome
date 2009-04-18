@@ -82,6 +82,7 @@ right
 role
 screen
 selected
+session
 Shift
 size_hints
 size_hints_honor
@@ -89,6 +90,7 @@ skip_taskbar
 south
 start
 sticky
+system
 text
 ticks_count
 ticks_gap

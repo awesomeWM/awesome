@@ -42,8 +42,10 @@
 #include "window.h"
 #include "common/xcursor.h"
 
-extern const struct luaL_reg awesome_hooks_lib[];
+#ifdef WITH_DBUS
 extern const struct luaL_reg awesome_dbus_lib[];
+#endif
+extern const struct luaL_reg awesome_hooks_lib[];
 extern const struct luaL_reg awesome_keygrabber_lib[];
 extern const struct luaL_reg awesome_mousegrabber_lib[];
 extern const struct luaL_reg awesome_root_lib[];
@@ -667,8 +669,10 @@ luaA_init(xdgHandle xdg)
     /* Export hooks lib */
     luaL_register(L, "hooks", awesome_hooks_lib);
 
+#ifdef WITH_DBUS
     /* Export D-Bus lib */
     luaL_register(L, "dbus", awesome_dbus_lib);
+#endif
 
     /* Export keygrabber lib */
     luaL_register(L, "keygrabber", awesome_keygrabber_lib);

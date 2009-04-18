@@ -517,7 +517,7 @@ if awful.hooks.dbus then
     end)
 
     -- listen for dbus notification requests
-    dbus.request_name("org.freedesktop.Notifications")
+    dbus.request_name("session", "org.freedesktop.Notifications")
 end
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

@@ -10,6 +10,7 @@ local loadstring = loadstring
 local tostring = tostring
 local ipairs = ipairs
 local table = table
+local dbus = dbus
 local unpack = unpack
 local type = type
 
@@ -17,6 +18,7 @@ local type = type
 module("awful.remote")
 
 if hooks.dbus then
+    dbus.request_name("session", "org.awesome")
     hooks.dbus.register("org.awesome.Remote", function(data, code)
         if data.member == "Eval" then
             local f, e = loadstring(code)

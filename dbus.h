@@ -22,9 +22,7 @@
 #ifndef AWESOME_DBUS_H
 #define AWESOME_DBUS_H
 
-#include <stdbool.h>
-
-bool a_dbus_init(void);
+void a_dbus_init(void);
 void a_dbus_cleanup(void);
 
 #endif

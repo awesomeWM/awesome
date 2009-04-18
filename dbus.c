@@ -31,9 +31,10 @@
 
 #include "event.h"
 
-static DBusError err;
-static DBusConnection *dbus_connection = NULL;
-ev_io dbusio = { .fd = -1 };
+static DBusConnection *dbus_connection_session = NULL;
+static DBusConnection *dbus_connection_system = NULL;
+ev_io dbusio_ses = { .fd = -1 };
+ev_io dbusio_sys = { .fd = -1 };
 
 static int
 a_dbus_message_iter(DBusMessageIter *iter)
@@ -219,7 +220,7 @@ a_dbus_message_iter(DBusMessageIter *iter)
 }
 
 static void
-a_dbus_process_request(DBusMessage *msg)
+a_dbus_process_request(DBusConnection *dbus_connection, DBusMessage *msg)
 {
     if(globalconf.hooks.dbus == LUA_REFNIL)
         return;
@@ -258,6 +259,12 @@ a_dbus_process_request(DBusMessage *msg)
     s = dbus_message_get_member(msg);
     lua_pushstring(globalconf.L, NONULL(s));
     lua_setfield(globalconf.L, -2, "member");
+
+    if(dbus_connection == dbus_connection_system)
+        lua_pushliteral(globalconf.L, "system");
+    else
+        lua_pushliteral(globalconf.L, "session");
+    lua_setfield(globalconf.L, -2, "bus");
 
     /* + 1 for the table above */
     DBusMessageIter iter;
@@ -331,13 +338,10 @@ a_dbus_process_request(DBusMessage *msg)
 }
 
 static void
-a_dbus_process_requests(EV_P_ ev_io *w, int revents)
+a_dbus_process_requests_on_bus(DBusConnection *dbus_connection)
 {
     DBusMessage *msg;
     int nmsg = 0;
-
-    if(!dbus_connection && !a_dbus_init())
-        return;
 
     while(true)
     {
@@ -353,7 +357,7 @@ a_dbus_process_requests(EV_P_ ev_io *w, int revents)
             return;
         }
         else
-            a_dbus_process_request(msg);
+            a_dbus_process_request(dbus_connection, msg);
 
         dbus_message_unref(msg);
 
@@ -366,14 +370,34 @@ a_dbus_process_requests(EV_P_ ev_io *w, int revents)
     awesome_refresh();
 }
 
-static bool
-a_dbus_request_name(const char *name)
+static void
+a_dbus_process_requests_session(EV_P_ ev_io *w, int revents)
 {
+    a_dbus_process_requests_on_bus(dbus_connection_session);
+}
+
+static void
+a_dbus_process_requests_system(EV_P_ ev_io *w, int revents)
+{
+    a_dbus_process_requests_on_bus(dbus_connection_system);
+}
+
+static bool
+a_dbus_request_name(DBusConnection *dbus_connection, const char *name)
+{
+    DBusError err;
+
+    if(!dbus_connection)
+        return false;
+
+    dbus_error_init(&err);
+
     int ret = dbus_bus_request_name(dbus_connection, name, 0, &err);
 
     if(dbus_error_is_set(&err))
     {
         warn("failed to request D-Bus name: %s", err.message);
+        dbus_error_free(&err);
         return false;
     }
 
@@ -389,13 +413,21 @@ a_dbus_request_name(const char *name)
 }
 
 static bool
-a_dbus_release_name(const char *name)
+a_dbus_release_name(DBusConnection *dbus_connection, const char *name)
 {
+    DBusError err;
+
+    if(!dbus_connection)
+        return false;
+
+    dbus_error_init(&err);
+
     int ret = dbus_bus_release_name(dbus_connection, name, &err);
 
     if(dbus_error_is_set(&err))
     {
         warn("failed to release D-Bus name: %s", err.message);
+        dbus_error_free(&err);
         return false;
     }
 
@@ -411,67 +443,99 @@ a_dbus_release_name(const char *name)
     return true;
 }
 
-bool
-a_dbus_init(void)
+static DBusConnection *
+a_dbus_connect(DBusBusType type, const char *type_name,
+               ev_io *dbusio, void *cb)
 {
     int fd;
+    DBusConnection *dbus_connection;
+    DBusError err;
 
     dbus_error_init(&err);
 
-    dbus_connection = dbus_bus_get(DBUS_BUS_SESSION, &err);
+    dbus_connection = dbus_bus_get(type, &err);
     if(dbus_error_is_set(&err))
     {
-        warn("D-Bus session bus connection failed: %s", err.message);
+        warn("D-Bus session bus %s failed: %s", type_name, err.message);
         dbus_connection = NULL;
         dbus_error_free(&err);
-        return false;
     }
-
-    dbus_connection_set_exit_on_disconnect(dbus_connection, FALSE);
-
-    a_dbus_request_name("org.awesome");
-
-    if(!dbus_connection_get_unix_fd(dbus_connection, &fd))
+    else
     {
-        warn("cannot get D-Bus connection file descriptor");
-        a_dbus_cleanup();
-        return false;
+        dbus_connection_set_exit_on_disconnect(dbus_connection, FALSE);
+
+        if(dbus_connection_get_unix_fd(dbus_connection, &fd))
+        {
+            fcntl(fd, F_SETFD, FD_CLOEXEC);
+
+            ev_io_init(dbusio, cb, fd, EV_READ);
+            ev_io_start(EV_DEFAULT_UC_ dbusio);
+            ev_unref(EV_DEFAULT_UC);
+        }
+        else
+        {
+            warn("cannot get D-Bus connection file descriptor");
+            a_dbus_cleanup();
+        }
     }
 
-    fcntl(fd, F_SETFD, FD_CLOEXEC);
-
-    ev_io_init(&dbusio, a_dbus_process_requests, fd, EV_READ);
-    ev_io_start(EV_DEFAULT_UC_ &dbusio);
-    ev_unref(EV_DEFAULT_UC);
-    return true;
+    return dbus_connection;
 }
 
 void
-a_dbus_cleanup(void)
+a_dbus_init(void)
+{
+    dbus_connection_session = a_dbus_connect(DBUS_BUS_SESSION, "session",
+                                             &dbusio_ses, a_dbus_process_requests_session);
+    dbus_connection_system = a_dbus_connect(DBUS_BUS_SYSTEM, "system",
+                                            &dbusio_sys, a_dbus_process_requests_system);
+}
+
+static void
+a_dbus_cleanup_bus(DBusConnection *dbus_connection, ev_io *dbusio)
 {
     if(!dbus_connection)
         return;
 
-    dbus_error_free(&err);
-
-    if(dbusio.fd >= 0)
+    if(dbusio->fd >= 0)
     {
         ev_ref(EV_DEFAULT_UC);
-        ev_io_stop(EV_DEFAULT_UC_ &dbusio);
-        dbusio.fd = -1;
+        ev_io_stop(EV_DEFAULT_UC_ dbusio);
+        dbusio->fd = -1;
     }
 
     /* This is a shared connection owned by libdbus
      * Do not close it, only unref
      */
     dbus_connection_unref(dbus_connection);
-    dbus_connection = NULL;
+}
+
+void
+a_dbus_cleanup(void)
+{
+    a_dbus_cleanup_bus(dbus_connection_session, &dbusio_ses);
+    a_dbus_cleanup_bus(dbus_connection_system, &dbusio_sys);
+}
+
+static DBusConnection *
+a_dbus_bus_getbyname(const char *name, size_t len)
+{
+    switch(a_tokenize(name, len))
+    {
+      case A_TK_SYSTEM:
+        return dbus_connection_system;
+      case A_TK_SESSION:
+        return dbus_connection_session;
+      default:
+        return NULL;
+    }
 }
 
 /** Register a D-Bus name to receive message from.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
  * \luastack
+ * \lparam A string indicating if we are using system or session bus.
  * \lparam A string with the name of the D-Bus name to register. Note that
  * org.awesome is registered by default.
  * \lreturn True if everything worked fine, false otherwise.
@@ -479,8 +543,11 @@ a_dbus_cleanup(void)
 static int
 luaA_dbus_request_name(lua_State *L)
 {
-    const char *name = luaL_checkstring(L, 1);
-    lua_pushboolean(L, a_dbus_request_name(name));
+    size_t len;
+    const char *bus = luaL_checklstring(L, 1, &len);
+    const char *name = luaL_checkstring(L, 2);
+    DBusConnection *dbus_connection = a_dbus_bus_getbyname(bus, len);
+    lua_pushboolean(L, a_dbus_request_name(dbus_connection, name));
     return 1;
 }
 
@@ -488,14 +555,18 @@ luaA_dbus_request_name(lua_State *L)
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
  * \luastack
+ * \lparam A string indicating if we are using system or session bus.
  * \lparam A string with the name of the D-Bus name to unregister.
  * \lreturn True if everything worked fine, false otherwise.
  */
 static int
 luaA_dbus_release_name(lua_State *L)
 {
-    const char *name = luaL_checkstring(L, 1);
-    lua_pushboolean(L, a_dbus_release_name(name));
+    size_t len;
+    const char *bus = luaL_checklstring(L, 1, &len);
+    const char *name = luaL_checkstring(L, 2);
+    DBusConnection *dbus_connection = a_dbus_bus_getbyname(bus, len);
+    lua_pushboolean(L, a_dbus_release_name(dbus_connection, name));
     return 1;
 }
 
@@ -503,14 +574,23 @@ luaA_dbus_release_name(lua_State *L)
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
  * \luastack
+ * \lparam A string indicating if we are using system or session bus.
  * \lparam A string with the name of the match rule.
  */
 static int
 luaA_dbus_add_match(lua_State *L)
 {
-    const char *name = luaL_checkstring(L, 1);
-    dbus_bus_add_match(dbus_connection, name, NULL);
-    dbus_connection_flush(dbus_connection);
+    size_t len;
+    const char *bus = luaL_checklstring(L, 1, &len);
+    const char *name = luaL_checkstring(L, 2);
+    DBusConnection *dbus_connection = a_dbus_bus_getbyname(bus, len);
+
+    if(dbus_connection)
+    {
+        dbus_bus_add_match(dbus_connection, name, NULL);
+        dbus_connection_flush(dbus_connection);
+    }
+
     return 0;
 }
 
@@ -519,14 +599,23 @@ luaA_dbus_add_match(lua_State *L)
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
  * \luastack
+ * \lparam A string indicating if we are using system or session bus.
  * \lparam A string with the name of the match rule.
  */
 static int
 luaA_dbus_remove_match(lua_State *L)
 {
-    const char *name = luaL_checkstring(L, 1);
-    dbus_bus_remove_match(dbus_connection, name, NULL);
-    dbus_connection_flush(dbus_connection);
+    size_t len;
+    const char *bus = luaL_checklstring(L, 1, &len);
+    const char *name = luaL_checkstring(L, 2);
+    DBusConnection *dbus_connection = a_dbus_bus_getbyname(bus, len);
+
+    if(dbus_connection)
+    {
+        dbus_bus_remove_match(dbus_connection, name, NULL);
+        dbus_connection_flush(dbus_connection);
+    }
+
     return 0;
 }
 
@@ -541,32 +630,15 @@ const struct luaL_reg awesome_dbus_lib[] =
 
 #else /* HAVE_DBUS */
 
-bool
+void
 a_dbus_init(void)
 {
-    return false;
 }
 
 void
 a_dbus_cleanup(void)
 {
-    /* empty */
 }
-
-static int
-luaA_donothing(lua_State *L)
-{
-    return 0;
-}
-
-const struct luaL_reg awesome_dbus_lib[] =
-{
-    { "request_name", luaA_donothing },
-    { "release_name", luaA_donothing },
-    { "add_match", luaA_donothing },
-    { "remove_match", luaA_donothing },
-    { NULL, NULL }
-};
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
