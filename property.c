@@ -248,7 +248,9 @@ property_update_wm_class(client_t *c, xcb_get_property_reply_t *reply)
 
     c->instance = a_strdup(hint.instance_name);
     c->class = a_strdup(hint.class_name);
-    xcb_get_wm_class_reply_wipe(&hint);
+    /* only delete reply if we get it ourselves */
+    if(!reply)
+        xcb_get_wm_class_reply_wipe(&hint);
 }
 
 /** Update client icon name attribute with its new title.
