@@ -443,12 +443,19 @@ function toggletag(target, c)
     -- Check that tag and client screen are identical
     if sel and sel.screen == target.screen then
         local tags = sel:tags()
-        if tags[target] then
+        local index = nil;
+        for i, v in ipairs(tags) do
+            if v == target then
+                index = i
+                break
+            end
+        end
+        if index then
             -- If it's the only tag for the window, stop.
             if #tags == 1 then return end
-            tags[tags[target]] = nil
+            tags[index] = nil
         else
-            tags[target] = target
+            tags[#tags + 1] = target
         end
         sel:tags(tags)
     end
