@@ -43,6 +43,8 @@ struct a_screen
         /** Systray window parent */
         xcb_window_t parent;
     } systray;
+    /** Previously focused client */
+    client_t *prev_client_focus;
     /** Focused client */
     client_t *client_focus;
     /** The monitor of startup notifications */
