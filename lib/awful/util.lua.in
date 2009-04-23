@@ -74,7 +74,7 @@ function spawn(cmd, sn, screen)
     end
 end
 
--- Read a program output and returns its output as a string.
+--- Read a program output and returns its output as a string.
 -- @param cmd The command to run.
 -- @return A string with the program output.
 function pread(cmd)
