@@ -115,6 +115,29 @@ xutil_key_mask_fromstr(const char *keyname, size_t len)
     }
 }
 
+void
+xutil_key_mask_tostr(uint16_t mask, const char **name, size_t *len)
+{
+    switch(mask)
+    {
+#define SET_RESULT(res) \
+        *name = #res; \
+        *len = sizeof(#res) - 1; \
+        return;
+      case XCB_MOD_MASK_SHIFT:   SET_RESULT(Shift)
+      case XCB_MOD_MASK_LOCK:    SET_RESULT(Lock)
+      case XCB_MOD_MASK_CONTROL: SET_RESULT(Control)
+      case XCB_MOD_MASK_1:       SET_RESULT(Mod1)
+      case XCB_MOD_MASK_2:       SET_RESULT(Mod2)
+      case XCB_MOD_MASK_3:       SET_RESULT(Mod3)
+      case XCB_MOD_MASK_4:       SET_RESULT(Mod4)
+      case XCB_MOD_MASK_5:       SET_RESULT(Mod5)
+      case XCB_BUTTON_MASK_ANY:  SET_RESULT(Any)
+      default:                   SET_RESULT(Unknown)
+#undef SET_RESULT
+    }
+}
+
 /** Permit to use mouse with many more buttons */
 #ifndef XCB_BUTTON_INDEX_6
 #define XCB_BUTTON_INDEX_6 6
