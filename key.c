@@ -20,11 +20,12 @@
  *
  */
 
-/* XStringToKeysym() */
+/* XStringToKeysym() and XKeysymToString()*/
 #include <X11/Xlib.h>
 
 #include "structs.h"
 #include "common/xutil.h"
+#include "common/tokenize.h"
 
 LUA_OBJECT_FUNCS(keyb_t, key, "key")
 
@@ -375,6 +376,66 @@ luaA_key_array_get(lua_State *L, keybindings_t *keys)
     return 1;
 }
 
+/** Key object.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ * \luastack
+ * \lfield key The key to press to triggers an event.
+ * \lfield modifiers The modifier key that should be pressed while the key is
+ * pressed. An array with all the modifiers. Valid modifiers are: Any, Mod1,
+ * Mod2, Mod3, Mod4, Mod5, Shift, Lock and Control.
+ * \lfield press The function which is called when the key combination is pressed.
+ * \lfield release The function which is called when the key combination is released.
+ */
+static int
+luaA_key_index(lua_State *L)
+{
+    size_t len;
+    keyb_t *k = luaL_checkudata(L, 1, "key");
+    const char *attr = luaL_checklstring(L, 2, &len);
+
+    if(luaA_usemetatable(L, 1, 2))
+        return 1;
+
+    switch(a_tokenize(attr, len))
+    {
+      case A_TK_KEY:
+        if(k->keycode)
+        {
+            char buf[12];
+            int slen = snprintf(buf, sizeof(buf), "#%u", k->keycode);
+            lua_pushlstring(L, buf, slen);
+        }
+        else
+            lua_pushstring(L, XKeysymToString(k->keysym));
+        break;
+      case A_TK_MODIFIERS:
+        lua_newtable(L);
+        {
+            int i = 1;
+            for(uint32_t maski = XCB_MOD_MASK_SHIFT; maski <= XCB_BUTTON_MASK_ANY; maski <<= 1)
+                if(maski & k->mod)
+                {
+                    const char *mod;
+                    size_t slen;
+                    xutil_key_mask_tostr(maski, &mod, &slen);
+                    lua_pushlstring(L, mod, slen);
+                    lua_rawseti(L, -2, i++);
+                }
+        }
+        break;
+      case A_TK_PRESS:
+        lua_rawgeti(L, LUA_REGISTRYINDEX, k->press);
+        break;
+      case A_TK_RELEASE:
+        lua_rawgeti(L, LUA_REGISTRYINDEX, k->release);
+        break;
+      default:
+        break;
+    }
+    return 1;
+}
+
 const struct luaL_reg awesome_key_methods[] =
 {
     { "__call", luaA_key_new },
@@ -383,6 +444,7 @@ const struct luaL_reg awesome_key_methods[] =
 const struct luaL_reg awesome_key_meta[] =
 {
     { "__tostring", luaA_key_tostring },
+    { "__index", luaA_key_index },
     { "__gc", luaA_key_gc },
     { NULL, NULL },
 };

@@ -46,6 +46,7 @@ icon_name
 id
 image
 instance
+key
 key_press
 key_release
 leader_id
@@ -64,6 +65,7 @@ Mod2
 Mod3
 Mod4
 Mod5
+modifiers
 motion_notify
 mouse_enter
 mouse_leave
