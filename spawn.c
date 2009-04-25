@@ -77,7 +77,7 @@ spawn_monitor_event(SnMonitorEvent *event, void *data)
     SnStartupSequence *sequence = sn_monitor_event_get_startup_sequence(event);
     SnMonitorEventType event_type = sn_monitor_event_get_type(event);
 
-    lua_newtable(globalconf.L);
+    lua_createtable(globalconf.L, 0, 2);
     lua_pushstring(globalconf.L, sn_startup_sequence_get_id(sequence));
     lua_setfield(globalconf.L, -2, "id");
 

@@ -72,14 +72,16 @@ a_dbus_message_iter(DBusMessageIter *iter)
             break;
           case DBUS_TYPE_STRUCT:
             {
-                /* create a new table to store all the value */
-                lua_newtable(globalconf.L);
-
                 DBusMessageIter subiter;
                 /* initialize a sub iterator */
                 dbus_message_iter_recurse(iter, &subiter);
-                /* create a new table to store the dict */
+
                 int n = a_dbus_message_iter(&subiter);
+
+                /* create a new table to store all the value */
+                lua_createtable(globalconf.L, n, 0);
+                /* move the table before array elements */
+                lua_insert(globalconf.L, - n - 1);
 
                 for(int i = n; i > 0; i--)
                     lua_rawseti(globalconf.L, - i - 1, i);
@@ -102,8 +104,8 @@ a_dbus_message_iter(DBusMessageIter *iter)
                       case dbustype: \
                         { \
                             const type *data; \
-                            lua_newtable(globalconf.L); \
                             dbus_message_iter_get_fixed_array(&sub, &data, &datalen); \
+                            lua_createtable(globalconf.L, datalen, 0); \
                             for(int i = 0; i < datalen; i++) \
                             { \
                                 lua_pushnumber(globalconf.L, data[i]); \
@@ -129,8 +131,8 @@ a_dbus_message_iter(DBusMessageIter *iter)
                       case DBUS_TYPE_BOOLEAN:
                         {
                             const bool *b;
-                            lua_newtable(globalconf.L);
                             dbus_message_iter_get_fixed_array(&sub, &b, &datalen);
+                            lua_createtable(globalconf.L, datalen, 0);
                             for(int i = 0; i < datalen; i++)
                             {
                                 lua_pushboolean(globalconf.L, b[i]);
@@ -143,14 +145,17 @@ a_dbus_message_iter(DBusMessageIter *iter)
                 else if(array_type == DBUS_TYPE_DICT_ENTRY)
                 {
                     DBusMessageIter subiter;
-
-                    lua_newtable(globalconf.L);
-
                     /* initialize a sub iterator */
                     dbus_message_iter_recurse(iter, &subiter);
+
                     /* get the keys and the values
-                     * n is the number of entry in * dict */
+                     * n is the number of entry in dict */
                     int n = a_dbus_message_iter(&subiter);
+
+                    /* create a new table to store all the value */
+                    lua_createtable(globalconf.L, n, 0);
+                    /* move the table before array elements */
+                    lua_insert(globalconf.L, - (n * 2) - 1);
 
                     for(int i = 0; i < n; i ++)
                         lua_rawset(globalconf.L, - (n * 2) - 1 + i * 2);
@@ -158,14 +163,16 @@ a_dbus_message_iter(DBusMessageIter *iter)
                 else
                 {
                     DBusMessageIter subiter;
-
-                    lua_newtable(globalconf.L);
-
                     /* prepare to dig into the array*/
                     dbus_message_iter_recurse(iter, &subiter);
 
                     /* now iterate over every element of the array */
                     int n = a_dbus_message_iter(&subiter);
+
+                    /* create a new table to store all the value */
+                    lua_createtable(globalconf.L, n, 0);
+                    /* move the table before array elements */
+                    lua_insert(globalconf.L, - n - 1);
 
                     for(int i = n; i > 0; i--)
                         lua_rawseti(globalconf.L, - i - 1, i);
@@ -225,7 +232,7 @@ a_dbus_process_request(DBusConnection *dbus_connection, DBusMessage *msg)
     if(globalconf.hooks.dbus == LUA_REFNIL)
         return;
 
-    lua_newtable(globalconf.L);
+    lua_createtable(globalconf.L, 0, 5);
 
     switch(dbus_message_get_type(msg))
     {

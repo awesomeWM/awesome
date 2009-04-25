@@ -173,7 +173,7 @@ luaA_getopt_boolean(lua_State *L, int idx, const char *name, bool def)
 static inline int
 luaA_pusharea(lua_State *L, area_t geometry)
 {
-    lua_newtable(L);
+    lua_createtable(L, 0, 4);
     lua_pushnumber(L, geometry.x);
     lua_setfield(L, -2, "x");
     lua_pushnumber(L, geometry.y);
@@ -316,7 +316,7 @@ luaA_getopt_padding(lua_State *L, int idx, padding_t *dpadding)
 static inline int
 luaA_pushpadding(lua_State *L, padding_t *padding)
 {
-    lua_newtable(L);
+    lua_createtable(L, 0, 4);
     lua_pushnumber(L, padding->right);
     lua_setfield(L, -2, "right");
     lua_pushnumber(L, padding->left);

@@ -1598,7 +1598,7 @@ luaA_client_geometry(lua_State *L)
 static inline int
 luaA_pushstruts(lua_State *L, strut_t struts)
 {
-    lua_newtable(L);
+    lua_createtable(L, 4, 0);
     lua_pushnumber(L, struts.left);
     lua_setfield(L, -2, "left");
     lua_pushnumber(L, struts.right);
@@ -1980,7 +1980,7 @@ luaA_client_index(lua_State *L)
         {
             const char *u_or_p = NULL;
 
-            lua_newtable(L);
+            lua_createtable(L, 0, 1);
 
             if(c->size_hints.flags & XCB_SIZE_HINT_US_POSITION)
                 u_or_p = "user_position";
@@ -1989,7 +1989,7 @@ luaA_client_index(lua_State *L)
 
             if(u_or_p)
             {
-                lua_newtable(L);
+                lua_createtable(L, 0, 2);
                 lua_pushnumber(L, c->size_hints.x);
                 lua_setfield(L, -2, "x");
                 lua_pushnumber(L, c->size_hints.y);
@@ -2005,7 +2005,7 @@ luaA_client_index(lua_State *L)
 
             if(u_or_p)
             {
-                lua_newtable(L);
+                lua_createtable(L, 0, 2);
                 lua_pushnumber(L, c->size_hints.width);
                 lua_setfield(L, -2, "width");
                 lua_pushnumber(L, c->size_hints.height);

@@ -393,13 +393,13 @@ luaA_mouse_newindex(lua_State *L)
 int
 luaA_mouse_pushstatus(lua_State *L, int x, int y, uint16_t mask)
 {
-    lua_newtable(L);
+    lua_createtable(L, 0, 2);
     lua_pushnumber(L, x);
     lua_setfield(L, -2, "x");
     lua_pushnumber(L, y);
     lua_setfield(L, -2, "y");
 
-    lua_newtable(L);
+    lua_createtable(L, 5, 0);
 
     int i = 1;
 

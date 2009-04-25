@@ -418,7 +418,7 @@ luaA_table2wtable(lua_State *L)
         return;
 
     lua_newtable(L); /* create *real* content table */
-    lua_newtable(L); /* metatable */
+    lua_createtable(L, 0, 5); /* metatable */
     lua_pushvalue(L, -2); /* copy content table */
     lua_pushcfunction(L, luaA_ipairs_aux); /* push ipairs aux */
     lua_pushcclosure(L, luaA_wtable_ipairs, 2);

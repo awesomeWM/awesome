@@ -431,7 +431,7 @@ luaA_screen_tags(lua_State *L)
     }
     else
     {
-        lua_newtable(L);
+        lua_createtable(L, s->tags.len, 0);
         for(i = 0; i < s->tags.len; i++)
         {
             tag_push(L, s->tags.tab[i]);
