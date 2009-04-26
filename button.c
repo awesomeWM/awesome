@@ -163,6 +163,7 @@ luaA_button_array_get(lua_State *L, button_array_t *buttons)
  * \luastack
  * \lfield press The function called when button press event is received.
  * \lfield release The function called when button release event is received.
+ * \lfield button The mouse button number, or 0 for any button.
  */
 static int
 luaA_button_index(lua_State *L)
