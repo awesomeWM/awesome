@@ -54,23 +54,21 @@ window_state_get_unchecked(xcb_window_t w)
 
 /** Get a window state (WM_STATE).
  * \param cookie The cookie.
- * \return The current state of the window, or -1 on error.
+ * \return The current state of the window, or 0 on error.
  */
-long
+uint32_t
 window_state_get_reply(xcb_get_property_cookie_t cookie)
 {
-    long result = -1;
-    unsigned char *p = NULL;
+    uint32_t result = 0;
     xcb_get_property_reply_t *prop_r;
 
-    if(!(prop_r = xcb_get_property_reply(globalconf.connection, cookie, NULL)))
-        return -1;
+    if((prop_r = xcb_get_property_reply(globalconf.connection, cookie, NULL)))
+    {
+        if(xcb_get_property_value_length(prop_r))
+            result = *(uint32_t *) xcb_get_property_value(prop_r);
 
-    p = xcb_get_property_value(prop_r);
-    if(xcb_get_property_value_length(prop_r) != 0)
-        result = *p;
-
-    p_delete(&prop_r);
+        p_delete(&prop_r);
+    }
 
     return result;
 }
@@ -118,23 +116,22 @@ window_buttons_grab(xcb_window_t win, button_array_t *buttons)
 double
 window_opacity_get(xcb_window_t win)
 {
-    xcb_get_property_cookie_t prop_c;
-    xcb_get_property_reply_t *prop_r;
+    xcb_get_property_cookie_t prop_c =
+        xcb_get_property_unchecked(globalconf.connection, false, win,
+                                   _NET_WM_WINDOW_OPACITY, CARDINAL, 0L, 1L);
 
-    prop_c = xcb_get_property_unchecked(globalconf.connection, false, win,
-                                        _NET_WM_WINDOW_OPACITY, CARDINAL, 0L, 1L);
-
-    prop_r = xcb_get_property_reply(globalconf.connection, prop_c, NULL);
+    xcb_get_property_reply_t *prop_r =
+        xcb_get_property_reply(globalconf.connection, prop_c, NULL);
 
     if(prop_r && prop_r->value_len && prop_r->format == 32)
     {
-        unsigned int *data = xcb_get_property_value(prop_r);
-        unsigned int value = *data;
+        uint32_t value = *(uint32_t *) xcb_get_property_value(prop_r);
         p_delete(&prop_r);
         return (double) value / (double) 0xffffffff;
     }
 
     p_delete(&prop_r);
+
     return -1;
 }
 
@@ -145,11 +142,9 @@ window_opacity_get(xcb_window_t win)
 void
 window_opacity_set(xcb_window_t win, double opacity)
 {
-    unsigned int real_opacity = 0xffffffff;
-
     if(opacity >= 0 && opacity <= 1)
     {
-        real_opacity = opacity * 0xffffffff;
+        uint32_t real_opacity = opacity * 0xffffffff;
         xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE, win,
                             _NET_WM_WINDOW_OPACITY, CARDINAL, 32, 1L, &real_opacity);
     }

@@ -30,7 +30,7 @@ struct button_t
     /** Lua references */
     luaA_ref_array_t refs;
     /** Key modifiers */
-    unsigned long mod;
+    uint16_t mod;
     /** Mouse button number */
     xcb_button_t button;
     /** Lua function to execute on press. */
