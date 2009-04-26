@@ -56,33 +56,32 @@ event_handle_mouse_button(client_t *c,
                           uint16_t state,
                           button_array_t *buttons)
 {
-    for(int i = 0; i < buttons->len; i++)
-        if(button == buttons->tab[i]->button
-           && state == buttons->tab[i]->mod)
+    foreach(b, *buttons)
+        if((!(*b)->button || button == (*b)->button) && state == (*b)->mod)
             switch(type)
             {
               case XCB_BUTTON_PRESS:
-                if(buttons->tab[i]->press != LUA_REFNIL)
+                if((*b)->press != LUA_REFNIL)
                 {
                     if(c)
                     {
                         client_push(globalconf.L, c);
-                        luaA_dofunction(globalconf.L, buttons->tab[i]->press, 1, 0);
+                        luaA_dofunction(globalconf.L, (*b)->press, 1, 0);
                     }
                     else
-                        luaA_dofunction(globalconf.L, buttons->tab[i]->press, 0, 0);
+                        luaA_dofunction(globalconf.L, (*b)->press, 0, 0);
                 }
                 break;
               case XCB_BUTTON_RELEASE:
-                if(buttons->tab[i]->release != LUA_REFNIL)
+                if((*b)->release != LUA_REFNIL)
                 {
                     if(c)
                     {
                         client_push(globalconf.L, c);
-                        luaA_dofunction(globalconf.L, buttons->tab[i]->release, 1, 0);
+                        luaA_dofunction(globalconf.L, (*b)->release, 1, 0);
                     }
                     else
-                        luaA_dofunction(globalconf.L, buttons->tab[i]->release, 0, 0);
+                        luaA_dofunction(globalconf.L, (*b)->release, 0, 0);
                 }
                 break;
             }
@@ -144,25 +143,22 @@ event_handle_button(void *data, xcb_connection_t *connection, xcb_button_press_e
         }
 
         /* check if we match a binding on the wibox */
-        button_array_t *b = &wibox->buttons;
-
-        for(int i = 0; i < b->len; i++)
-            if(ev->detail == b->tab[i]->button
-               && ev->state == b->tab[i]->mod)
+        foreach(b, wibox->buttons)
+            if((!(*b)->button || ev->detail == (*b)->button) && ev->state == (*b)->mod)
                 switch(ev->response_type)
                 {
                   case XCB_BUTTON_PRESS:
-                    if(b->tab[i]->press != LUA_REFNIL)
+                    if((*b)->press != LUA_REFNIL)
                     {
                         wibox_push(globalconf.L, wibox);
-                        luaA_dofunction(globalconf.L, b->tab[i]->press, 1, 0);
+                        luaA_dofunction(globalconf.L, (*b)->press, 1, 0);
                     }
                     break;
                   case XCB_BUTTON_RELEASE:
-                    if(b->tab[i]->release != LUA_REFNIL)
+                    if((*b)->release != LUA_REFNIL)
                     {
                         wibox_push(globalconf.L, wibox);
-                        luaA_dofunction(globalconf.L, b->tab[i]->release, 1, 0);
+                        luaA_dofunction(globalconf.L, (*b)->release, 1, 0);
                     }
                     break;
                 }
@@ -173,30 +169,26 @@ event_handle_button(void *data, xcb_connection_t *connection, xcb_button_press_e
                                          wibox->sw.geometry.height,
                                          &ev->event_x, &ev->event_y);
         if(w)
-        {
-            b = &w->buttons;
-
-            for(int i = 0; i < b->len; i++)
-                if(ev->detail == b->tab[i]->button
-                   && ev->state == b->tab[i]->mod)
+            foreach(b, w->buttons)
+                if((!(*b)->button || ev->detail == (*b)->button) && ev->state == (*b)->mod)
                     switch(ev->response_type)
                     {
                       case XCB_BUTTON_PRESS:
-                        if(b->tab[i]->press != LUA_REFNIL)
+                        if((*b)->press != LUA_REFNIL)
                         {
                             wibox_push(globalconf.L, wibox);
-                            luaA_dofunction(globalconf.L, b->tab[i]->press, 1, 0);
+                            luaA_dofunction(globalconf.L, (*b)->press, 1, 0);
                         }
                         break;
                       case XCB_BUTTON_RELEASE:
-                        if(b->tab[i]->release != LUA_REFNIL)
+                        if((*b)->release != LUA_REFNIL)
                         {
                             wibox_push(globalconf.L, wibox);
-                            luaA_dofunction(globalconf.L, b->tab[i]->release, 1, 0);
+                            luaA_dofunction(globalconf.L, (*b)->release, 1, 0);
                         }
                         break;
                     }
-        }
+
         /* return even if no widget match */
         return 0;
     }

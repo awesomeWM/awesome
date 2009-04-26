@@ -51,7 +51,7 @@ luaA_button_gc(lua_State *L)
  * \return The number of elements pushed on stack.
  * \luastack
  * \lparam A table with modifiers keys, or a button to clone.
- * \lparam A mouse button number.
+ * \lparam A mouse button number, or 0 to match any button.
  * \lparam A function to execute on click events.
  * \lparam A function to execute on release events.
  * \lreturn A mouse button binding.
