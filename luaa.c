@@ -41,6 +41,7 @@
 #include "selection.h"
 #include "window.h"
 #include "common/xcursor.h"
+#include "common/buffer.h"
 
 #ifdef WITH_DBUS
 extern const struct luaL_reg awesome_dbus_lib[];
@@ -739,14 +740,20 @@ luaA_init(xdgHandle* xdg)
 
     /* add XDG_CONFIG_DIR as include path */
     const char * const *xdgconfigdirs = xdgSearchableConfigDirectories(xdg);
+    buffer_t buf;
+    buffer_init(&buf);
     for(; *xdgconfigdirs; xdgconfigdirs++)
     {
-        char *buf;
-        a_asprintf(&buf, "package.path = package.path .. \";%s/awesome/?.lua;%s/awesome/?/init.lua\"",
-                   *xdgconfigdirs, *xdgconfigdirs);
-        luaA_dostring(L, buf);
-        p_delete(&buf);
+        size_t len = a_strlen(*xdgconfigdirs);
+        buffer_addsl(&buf, "package.path = package.path .. \";");
+        buffer_add(&buf, *xdgconfigdirs, len);
+        buffer_addsl(&buf, "/awesome/?.lua;");
+        buffer_add(&buf, *xdgconfigdirs, len);
+        buffer_addsl(&buf, "/awesome/?/init.lua\"");
+        luaA_dostring(L, buf.s);
+        buf.len = 0;
     }
+    buffer_wipe(&buf);
 }
 
 static bool
