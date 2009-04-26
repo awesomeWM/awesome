@@ -65,12 +65,17 @@ tag_view(tag_t *tag, bool view)
 void
 tag_append_to_screen(screen_t *s)
 {
+    tag_t *tag = luaL_checkudata(globalconf.L, -1, "tag");
+
+    /* can't attach a tag twice */
+    if(tag->screen)
+        return;
+
     int screen_index = screen_array_indexof(&globalconf.screens, s);
     int phys_screen = screen_virttophys(screen_index);
-    tag_t *tag = tag_ref(globalconf.L);
 
     tag->screen = s;
-    tag_array_append(&s->tags, tag);
+    tag_array_append(&s->tags, tag_ref(globalconf.L));
     ewmh_update_net_numbers_of_desktop(phys_screen);
     ewmh_update_net_desktop_names(phys_screen);
     ewmh_update_workarea(phys_screen);
