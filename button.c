@@ -164,6 +164,8 @@ luaA_button_array_get(lua_State *L, button_array_t *buttons)
  * \lfield press The function called when button press event is received.
  * \lfield release The function called when button release event is received.
  * \lfield button The mouse button number, or 0 for any button.
+ * \lfield modifiers The modifier key table that should be pressed while the
+ * button is pressed.
  */
 static int
 luaA_button_index(lua_State *L)
@@ -190,8 +192,10 @@ luaA_button_index(lua_State *L)
             lua_pushnil(L);
         break;
       case A_TK_BUTTON:
-        /* works fine, but not *really* neat */
         lua_pushnumber(L, button->button);
+        break;
+      case A_TK_MODIFIERS:
+        luaA_pushmodifiers(L, button->mod);
         break;
       default:
         return 0;
