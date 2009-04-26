@@ -1,7 +1,7 @@
 /*
  * common/xutil.c - X-related useful functions
  *
- * Copyright © 2007-2008 Julien Danjou <julien@danjou.info>
+ * Copyright © 2007-2009 Julien Danjou <julien@danjou.info>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -136,54 +136,6 @@ xutil_key_mask_tostr(uint16_t mask, const char **name, size_t *len)
       default:                   SET_RESULT(Unknown)
 #undef SET_RESULT
     }
-}
-
-/** Permit to use mouse with many more buttons */
-#ifndef XCB_BUTTON_INDEX_6
-#define XCB_BUTTON_INDEX_6 6
-#endif
-#ifndef XCB_BUTTON_INDEX_7
-#define XCB_BUTTON_INDEX_7 7
-#endif
-#ifndef XCB_BUTTON_INDEX_8
-#define XCB_BUTTON_INDEX_8 8
-#endif
-#ifndef XCB_BUTTON_INDEX_9
-#define XCB_BUTTON_INDEX_9 9
-#endif
-
-/** Link a name to a mouse button symbol */
-typedef struct
-{
-    int id;
-    unsigned int button;
-} mouse_button_t;
-
-/** Lookup for a mouse button from its index.
- * \param button Mouse button index.
- * \return Mouse button or 0 if not found.
- */
-uint8_t
-xutil_button_fromint(int button)
-{
-    /** List of button name and corresponding X11 mask codes */
-    static const mouse_button_t mouse_button_list[] =
-    {
-        { 1, XCB_BUTTON_INDEX_1 },
-        { 2, XCB_BUTTON_INDEX_2 },
-        { 3, XCB_BUTTON_INDEX_3 },
-        { 4, XCB_BUTTON_INDEX_4 },
-        { 5, XCB_BUTTON_INDEX_5 },
-        { 6, XCB_BUTTON_INDEX_6 },
-        { 7, XCB_BUTTON_INDEX_7 },
-        { 8, XCB_BUTTON_INDEX_8 },
-        { 9, XCB_BUTTON_INDEX_9 }
-    };
-
-    if(button >= 1 && button <= countof(mouse_button_list))
-        return mouse_button_list[button - 1].button;
-
-    return 0;
 }
 
 /** Convert a root window a physical screen ID.

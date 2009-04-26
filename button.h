@@ -32,7 +32,7 @@ struct button_t
     /** Key modifiers */
     unsigned long mod;
     /** Mouse button number */
-    unsigned int button;
+    xcb_button_t button;
     /** Lua function to execute on press. */
     luaA_ref press;
     /** Lua function to execute on release. */

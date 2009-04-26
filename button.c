@@ -59,7 +59,8 @@ luaA_button_gc(lua_State *L)
 static int
 luaA_button_new(lua_State *L)
 {
-    int i, len;
+    int len;
+    xcb_button_t xbutton;
     button_t *button, *orig;
     luaA_ref press = LUA_REFNIL, release = LUA_REFNIL;
 
@@ -89,7 +90,7 @@ luaA_button_new(lua_State *L)
 
     luaA_checktable(L, 2);
     /* arg 3 is mouse button */
-    i = luaL_checknumber(L, 3);
+    xbutton = luaL_checknumber(L, 3);
 
     /* arg 4 and 5 are callback functions, check they are functions... */
     if(!lua_isnil(L, 4))
@@ -107,10 +108,10 @@ luaA_button_new(lua_State *L)
     button = button_new(L);
     button->press = press;
     button->release = release;
-    button->button = xutil_button_fromint(i);
+    button->button = xbutton;
 
     len = lua_objlen(L, 2);
-    for(i = 1; i <= len; i++)
+    for(int i = 1; i <= len; i++)
     {
         size_t blen;
         const char *buf;
@@ -222,7 +223,7 @@ luaA_button_newindex(lua_State *L)
         luaA_registerfct(L, 3, &button->release);
         break;
       case A_TK_BUTTON:
-        button->button = xutil_button_fromint(luaL_checknumber(L, 3));
+        button->button = luaL_checknumber(L, 3);
         break;
       default:
         break;

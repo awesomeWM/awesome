@@ -1,7 +1,7 @@
 /*
  * common/xutil.h - X-related useful functions header
  *
- * Copyright © 2007-2008 Julien Danjou <julien@danjou.info>
+ * Copyright © 2007-2009 Julien Danjou <julien@danjou.info>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,7 +37,6 @@ void xutil_error_handler_catch_all_set(xcb_event_handlers_t *,
 
 uint16_t xutil_key_mask_fromstr(const char *, size_t);
 void xutil_key_mask_tostr(uint16_t, const char **, size_t *);
-uint8_t xutil_button_fromint(int);
 
 /* Get the informations about the screen.
  * \param c X connection.
