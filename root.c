@@ -21,7 +21,8 @@
 
 #include <xcb/xtest.h>
 
-#include "mouse.h"
+#include "structs.h"
+#include "button.h"
 #include "common/xcursor.h"
 #include "common/tokenize.h"
 #include "common/xutil.h"

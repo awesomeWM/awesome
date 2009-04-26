@@ -21,6 +21,7 @@
 
 #include <unistd.h>
 
+#include "structs.h"
 #include "mouse.h"
 #include "mousegrabber.h"
 #include "common/xcursor.h"

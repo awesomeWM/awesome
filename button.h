@@ -1,7 +1,7 @@
 /*
- * mouse.h - mouse managing header
+ * button.h - button header
  *
- * Copyright © 2007-2008 Julien Danjou <julien@danjou.info>
+ * Copyright © 2007-2009 Julien Danjou <julien@danjou.info>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,15 +19,31 @@
  *
  */
 
-#ifndef AWESOME_MOUSE_H
-#define AWESOME_MOUSE_H
+#ifndef AWESOME_BUTTON_H
+#define AWESOME_BUTTON_H
 
-#include <stdbool.h>
-#include <xcb/xcb.h>
-#include <lua.h>
+#include "structs.h"
 
-bool mouse_query_pointer(xcb_window_t, int16_t *, int16_t *, xcb_window_t *, uint16_t *);
-int luaA_mouse_pushstatus(lua_State *, int, int, uint16_t);
+/** Mouse buttons bindings */
+struct button_t
+{
+    /** Lua references */
+    luaA_ref_array_t refs;
+    /** Key modifiers */
+    unsigned long mod;
+    /** Mouse button number */
+    unsigned int button;
+    /** Lua function to execute on press. */
+    luaA_ref press;
+    /** Lua function to execute on release. */
+    luaA_ref release;
+};
+
+void button_unref_simplified(button_t **);
+ARRAY_FUNCS(button_t *, button, button_unref_simplified)
+
+int luaA_button_array_get(lua_State *, button_array_t *);
+void luaA_button_array_set(lua_State *, int idx, button_array_t *);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

@@ -1,7 +1,7 @@
 /*
  * widget.h - widget managing header
  *
- * Copyright © 2007-2008 Julien Danjou <julien@danjou.info>
+ * Copyright © 2007-2009 Julien Danjou <julien@danjou.info>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@
 #ifndef AWESOME_WIDGET_H
 #define AWESOME_WIDGET_H
 
-#include "mouse.h"
+#include "button.h"
 #include "common/tokenize.h"
 
 typedef widget_t *(widget_constructor_t)(widget_t *);

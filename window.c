@@ -23,7 +23,7 @@
 #include <xcb/xcb_atom.h>
 
 #include "window.h"
-#include "mouse.h"
+#include "button.h"
 #include "common/atoms.h"
 
 /** Mask shorthands */
