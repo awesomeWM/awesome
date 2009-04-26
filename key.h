@@ -56,5 +56,6 @@ void luaA_key_array_set(lua_State *, int, keybindings_t *);
 int luaA_key_array_get(lua_State *, keybindings_t *);
 
 void window_grabkeys(xcb_window_t, keybindings_t *);
+int luaA_pushmodifiers(lua_State *, uint16_t);
 
 #endif

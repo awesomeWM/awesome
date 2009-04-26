@@ -376,6 +376,30 @@ luaA_key_array_get(lua_State *L, keybindings_t *keys)
     return 1;
 }
 
+/** Push a modifier set to a Lua table.
+ * \param L The Lua VM state.
+ * \param mod The modifier.
+ * \return The number of elements pushed on stack.
+ */
+int
+luaA_pushmodifiers(lua_State *L, uint16_t modifiers)
+{
+    lua_newtable(L);
+    {
+        int i = 1;
+        for(uint32_t maski = XCB_MOD_MASK_SHIFT; maski <= XCB_BUTTON_MASK_ANY; maski <<= 1)
+            if(maski & modifiers)
+            {
+                const char *mod;
+                size_t slen;
+                xutil_key_mask_tostr(maski, &mod, &slen);
+                lua_pushlstring(L, mod, slen);
+                lua_rawseti(L, -2, i++);
+            }
+    }
+    return 1;
+}
+
 /** Key object.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
@@ -410,19 +434,7 @@ luaA_key_index(lua_State *L)
             lua_pushstring(L, XKeysymToString(k->keysym));
         break;
       case A_TK_MODIFIERS:
-        lua_newtable(L);
-        {
-            int i = 1;
-            for(uint32_t maski = XCB_MOD_MASK_SHIFT; maski <= XCB_BUTTON_MASK_ANY; maski <<= 1)
-                if(maski & k->mod)
-                {
-                    const char *mod;
-                    size_t slen;
-                    xutil_key_mask_tostr(maski, &mod, &slen);
-                    lua_pushlstring(L, mod, slen);
-                    lua_rawseti(L, -2, i++);
-                }
-        }
+        luaA_pushmodifiers(L, k->mod);
         break;
       case A_TK_PRESS:
         lua_rawgeti(L, LUA_REGISTRYINDEX, k->press);
