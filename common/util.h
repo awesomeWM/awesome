@@ -23,7 +23,6 @@
 #ifndef AWESOME_COMMON_UTIL_H
 #define AWESOME_COMMON_UTIL_H
 
-/* asprintf */
 #define _GNU_SOURCE
 
 #include <string.h>
@@ -338,12 +337,6 @@ const char * orientation_tostr(orientation_t);
 void *name_func_lookup(const char *, size_t, const name_func_link_t *);
 const char * name_func_rlookup(void *, const name_func_link_t *);
 void a_exec(const char *);
-
-#define a_asprintf(strp, fmt, ...) \
-    do { \
-        if(asprintf(strp, fmt, ## __VA_ARGS__) < 0) \
-            abort(); \
-    } while(0)
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
