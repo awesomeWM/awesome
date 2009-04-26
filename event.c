@@ -42,6 +42,10 @@
 #include "common/atoms.h"
 #include "common/xutil.h"
 
+#define EVENT_BUTTON_MATCH(b, state, xbutton) \
+    ((!(b)->button || (xbutton) == (b)->button) \
+     && ((b)->mod == XCB_BUTTON_MASK_ANY || (b)->mod == (state)))
+
 /** Handle mouse button events.
  * \param c The client on which the event happened or NULL.
  * \param type Event type, press or release.
@@ -57,7 +61,7 @@ event_handle_mouse_button(client_t *c,
                           button_array_t *buttons)
 {
     foreach(b, *buttons)
-        if((!(*b)->button || button == (*b)->button) && state == (*b)->mod)
+        if(EVENT_BUTTON_MATCH(*b, state, button))
             switch(type)
             {
               case XCB_BUTTON_PRESS:
@@ -144,7 +148,7 @@ event_handle_button(void *data, xcb_connection_t *connection, xcb_button_press_e
 
         /* check if we match a binding on the wibox */
         foreach(b, wibox->buttons)
-            if((!(*b)->button || ev->detail == (*b)->button) && ev->state == (*b)->mod)
+            if(EVENT_BUTTON_MATCH(*b, ev->state, ev->detail))
                 switch(ev->response_type)
                 {
                   case XCB_BUTTON_PRESS:
@@ -170,7 +174,7 @@ event_handle_button(void *data, xcb_connection_t *connection, xcb_button_press_e
                                          &ev->event_x, &ev->event_y);
         if(w)
             foreach(b, w->buttons)
-                if((!(*b)->button || ev->detail == (*b)->button) && ev->state == (*b)->mod)
+                if(EVENT_BUTTON_MATCH(*b, ev->state, ev->detail))
                     switch(ev->response_type)
                     {
                       case XCB_BUTTON_PRESS:
@@ -200,14 +204,12 @@ event_handle_button(void *data, xcb_connection_t *connection, xcb_button_press_e
                          XCB_CURRENT_TIME);
     }
     else if(ev->child == XCB_NONE)
-    {
         for(screen = 0; screen < nb_screen; screen++)
             if(xutil_screen_get(connection, screen)->root == ev->event)
             {
                 event_handle_mouse_button(NULL, ev->response_type, ev->detail, ev->state, &globalconf.buttons);
                 return 0;
             }
-    }
 
     return 0;
 }
