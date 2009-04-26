@@ -194,7 +194,7 @@ luaA_button_index(lua_State *L)
         lua_pushnumber(L, button->button);
         break;
       default:
-        break;
+        return 0;
     }
 
     return 1;
