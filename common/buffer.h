@@ -166,6 +166,9 @@ buffer_add(buffer_t *buf, const void *data, int len)
     buffer_splice(buf, buf->len, 0, data, len);
 }
 
+#define buffer_addsl(buf, data) \
+    buffer_add(buf, data, sizeof(data) - 1);
+
 /** Add a string to the and of a buffer.
  * \param buf The buffer where to add.
  * \param s The string to add.
