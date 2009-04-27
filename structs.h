@@ -67,7 +67,7 @@ struct awesome_t
     /** True if xinerama is active */
     bool xinerama_is_active;
     /** Root window key bindings */
-    keybindings_t keys;
+    key_array_t keys;
     /** Root window mouse bindings */
     button_array_t buttons;
     /** Check for XRandR extension */

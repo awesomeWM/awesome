@@ -142,7 +142,7 @@ struct client_t
     /** Button bindings */
     button_array_t buttons;
     /** Key bindings */
-    keybindings_t keys;
+    key_array_t keys;
     /** Icon */
     image_t *icon;
     /** Size hints */

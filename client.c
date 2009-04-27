@@ -2135,7 +2135,7 @@ static int
 luaA_client_keys(lua_State *L)
 {
     client_t *c = luaA_client_checkudata(L, 1);
-    keybindings_t *keys = &c->keys;
+    key_array_t *keys = &c->keys;
 
     if(lua_gettop(L) == 2)
     {

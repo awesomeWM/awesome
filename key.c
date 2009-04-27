@@ -51,49 +51,6 @@ luaA_key_gc(lua_State *L)
     return 0;
 }
 
-static void
-keybindings_init(keybindings_t *kb)
-{
-    key_array_init(&kb->by_code);
-    key_array_init(&kb->by_sym);
-}
-
-static void
-keybindings_wipe(keybindings_t *kb)
-{
-    key_array_wipe(&kb->by_code);
-    key_array_wipe(&kb->by_sym);
-}
-
-static int
-key_ev_cmp(xcb_keysym_t keysym, xcb_keycode_t keycode,
-                  unsigned long mod, const keyb_t *k)
-{
-    if(k->keysym) {
-        if(k->keysym != keysym)
-            return k->keysym > keysym ? 1 : -1;
-    }
-    if(k->keycode) {
-        if(k->keycode != keycode)
-            return k->keycode > keycode ? 1 : -1;
-    }
-    return ((k->mod == mod || k->mod == XCB_BUTTON_MASK_ANY) ?
-            0 : (k->mod > mod ? 1 : -1));
-}
-
-static int
-key_cmp(const keyb_t *k1, const keyb_t *k2)
-{
-    assert ((k1->keysym && k2->keysym) || (k1->keycode && k2->keycode));
-    assert ((!k1->keysym && !k2->keysym) || (!k1->keycode && !k2->keycode));
-
-    if(k1->keysym != k2->keysym)
-        return k2->keysym > k1->keysym ? 1 : -1;
-    if(k1->keycode != k2->keycode)
-        return k2->keycode > k1->keycode ? 1 : -1;
-    return k1->mod == k2->mod ? 0 : (k2->mod > k1->mod ? 1 : -1);
-}
-
 /** Grab key on a window.
  * \param win The window.
  * \param k The key.
@@ -118,43 +75,10 @@ window_grabkey(xcb_window_t win, keyb_t *k)
 }
 
 void
-window_grabkeys(xcb_window_t win, keybindings_t *keys)
+window_grabkeys(xcb_window_t win, key_array_t *keys)
 {
-    for(int i = 0; i < keys->by_code.len; i++)
-        window_grabkey(win, keys->by_code.tab[i]);
-
-    for(int i = 0; i < keys->by_sym.len; i++)
-        window_grabkey(win, keys->by_sym.tab[i]);
-}
-
-/** Register a key which on top of the stack.
- * \param keys The keybinding array where to put the key.
- */
-static void
-key_register(keybindings_t *keys)
-{
-    keyb_t *k = key_ref(globalconf.L);
-    key_array_t *arr = k->keysym ? &keys->by_sym : &keys->by_code;
-    int l = 0, r = arr->len;
-
-    while(l < r) {
-        int i = (r + l) / 2;
-        switch(key_cmp(k, arr->tab[i]))
-        {
-          case -1: /* k < arr->tab[i] */
-            r = i;
-            break;
-          case 0: /* k == arr->tab[i] */
-            key_unref(globalconf.L, arr->tab[i]);
-            arr->tab[i] = k;
-            return;
-          case 1: /* k > arr->tab[i] */
-            l = i + 1;
-            break;
-        }
-    }
-
-    key_array_splice(arr, r, 0, &k, 1);
+    foreach(k, *keys)
+        window_grabkey(win, *k);
 }
 
 /** Return the keysym from keycode.
@@ -229,40 +153,20 @@ key_getkeysym(xcb_keycode_t detail, uint16_t state)
     return XCB_NO_SYMBOL;
 }
 
-
 keyb_t *
-key_find(keybindings_t *keys, const xcb_key_press_event_t *ev)
+key_find(key_array_t *keys, const xcb_key_press_event_t *ev)
 {
-    const key_array_t *arr = &keys->by_sym;
-    int l, r;
-    xcb_keysym_t keysym;
-
     /* get keysym ignoring shift and mod5 */
-    keysym = key_getkeysym(ev->detail, ev->state & ~(XCB_MOD_MASK_SHIFT | XCB_MOD_MASK_5 | XCB_MOD_MASK_LOCK));
+    xcb_keysym_t keysym =
+        key_getkeysym(ev->detail,
+                      ev->state & ~(XCB_MOD_MASK_SHIFT | XCB_MOD_MASK_5 | XCB_MOD_MASK_LOCK));
 
-  again:
-    l = 0;
-    r = arr->len;
-    while(l < r)
-    {
-        int i = (r + l) / 2;
-        switch(key_ev_cmp(keysym, ev->detail, ev->state, arr->tab[i]))
-        {
-          case -1: /* ev < arr->tab[i] */
-            r = i;
-            break;
-          case 0: /* ev == arr->tab[i] */
-            return arr->tab[i];
-          case 1: /* ev > arr->tab[i] */
-            l = i + 1;
-            break;
-        }
-    }
-    if(arr != &keys->by_code)
-    {
-        arr = &keys->by_code;
-        goto again;
-    }
+    foreach(k, *keys)
+        if((((*k)->keycode && ev->detail == (*k)->keycode)
+            || ((*k)->keysym && keysym == (*k)->keysym))
+           && ((*k)->mod == XCB_BUTTON_MASK_ANY || (*k)->mod == ev->state))
+            return *k;
+
     return NULL;
 }
 
@@ -334,16 +238,16 @@ luaA_key_new(lua_State *L)
  * \param keys The array key to fill.
  */
 void
-luaA_key_array_set(lua_State *L, int idx, keybindings_t *keys)
+luaA_key_array_set(lua_State *L, int idx, key_array_t *keys)
 {
     luaA_checktable(L, idx);
 
-    keybindings_wipe(keys);
-    keybindings_init(keys);
+    key_array_wipe(keys);
+    key_array_init(keys);
 
     lua_pushnil(L);
     while(lua_next(L, idx))
-        key_register(keys);
+        key_array_append(keys, key_ref(L));
 }
 
 /** Push an array of key as an Lua table onto the stack.
@@ -352,17 +256,12 @@ luaA_key_array_set(lua_State *L, int idx, keybindings_t *keys)
  * \return The number of elements pushed on stack.
  */
 int
-luaA_key_array_get(lua_State *L, keybindings_t *keys)
+luaA_key_array_get(lua_State *L, key_array_t *keys)
 {
-    lua_createtable(L, keys->by_code.len + keys->by_sym.len, 0);
-    for(int i = 0; i < keys->by_code.len; i++)
+    lua_createtable(L, keys->len, 0);
+    for(int i = 0; i < keys->len; i++)
     {
-        key_push(L, keys->by_code.tab[i]);
-        lua_rawseti(L, -2, i + 1);
-    }
-    for(int i = 0; i < keys->by_sym.len; i++)
-    {
-        key_push(L, keys->by_sym.tab[i]);
+        key_push(L, keys->tab[i]);
         lua_rawseti(L, -2, i + 1);
     }
     return 1;
