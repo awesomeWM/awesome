@@ -460,6 +460,41 @@ luaA_key_index(lua_State *L)
     return 1;
 }
 
+/** Key object newindex.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ */
+static int
+luaA_key_newindex(lua_State *L)
+{
+    size_t len;
+    keyb_t *k = luaL_checkudata(L, 1, "key");
+    const char *attr = luaL_checklstring(L, 2, &len);
+
+    switch(a_tokenize(attr, len))
+    {
+      case A_TK_KEY:
+        {
+            size_t klen;
+            const char *key = luaL_checklstring(L, 3, &klen);
+            luaA_keystore(k, key, klen);
+        }
+        break;
+      case A_TK_MODIFIERS:
+        luaA_setmodifiers(L, 3, &k->mod);
+        break;
+      case A_TK_PRESS:
+        luaA_registerfct(L, 3, &k->press);
+        break;
+      case A_TK_RELEASE:
+        luaA_registerfct(L, 3, &k->release);
+        break;
+      default:
+        break;
+    }
+    return 0;
+}
+
 const struct luaL_reg awesome_key_methods[] =
 {
     { "__call", luaA_key_new },
@@ -469,6 +504,7 @@ const struct luaL_reg awesome_key_meta[] =
 {
     { "__tostring", luaA_key_tostring },
     { "__index", luaA_key_index },
+    { "__newindex", luaA_key_newindex },
     { "__gc", luaA_key_gc },
     { NULL, NULL },
 };
