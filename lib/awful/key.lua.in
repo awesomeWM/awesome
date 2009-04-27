@@ -27,7 +27,7 @@ ignore_modifiers = { "Lock", "Mod2" }
 -- CapsLock off.
 -- @see C api key() function for parameters.
 -- @return A table with one or several key objects.
-local function new(_, mod, ...)
+function new(mod, ...)
     local ret = {}
     local subsets = util.subsets(ignore_modifiers)
     for _, set in ipairs(subsets) do
@@ -57,6 +57,6 @@ function match(key, pressed_mod, pressed_key)
     return true
 end
 
-setmetatable(_M, { __call = new })
+setmetatable(_M, { __call = function(_, ...) return new(unpack(arg)) end })
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
