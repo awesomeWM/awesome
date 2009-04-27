@@ -620,6 +620,13 @@ luaA_awesome_newindex(lua_State *L)
             const char *newfont = luaL_checkstring(L, 3);
             draw_font_delete(&globalconf.font);
             globalconf.font = draw_font_new(newfont);
+            /* refresh all wiboxes */
+            foreach(screen, globalconf.screens)
+                foreach(wibox, screen->wiboxes)
+                    (*wibox)->need_update = true;
+            foreach(c, globalconf.clients)
+                if((*c)->titlebar)
+                    (*c)->titlebar->need_update = true;
         }
         break;
       case A_TK_FG:
