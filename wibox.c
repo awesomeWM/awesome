@@ -373,11 +373,11 @@ wibox_position_update_non_floating(wibox_t *wibox)
             break;
           case Left:
             if(wibox->position == Left)
-                area.x += wibox->sw.geometry.height;
+                area.x += wibox->sw.geometry.width;
             break;
           case Right:
             if(wibox->position == Right)
-                area.x -= wibox->sw.geometry.height;
+                area.x -= wibox->sw.geometry.width;
             break;
           case Top:
             switch(wibox->position)
