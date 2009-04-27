@@ -36,6 +36,27 @@ local function new(_, mod, ...)
     return ret
 end
 
+--- Compare a key object with modifiers and key.
+-- @param key The key object.
+-- @param pressed_mod The modifiers to compare with.
+-- @param pressed_key The key to compare with.
+function match(key, pressed_mod, pressed_key)
+    -- First, compare key.
+    if pressed_key ~= key.key then return false end
+    -- Then, compare mod
+    local mod = key.modifiers
+    local nbmod = 0
+    for _, m in ipairs(pressed_mod) do
+        if awful.util.table.hasitem(mod, m) then
+            nbmod = nbmod + 1
+        end
+    end
+    if nbmod ~= #pressed_mod then
+        return false
+    end
+    return true
+end
+
 setmetatable(_M, { __call = new })
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
