@@ -21,7 +21,6 @@
 
 #include "button.h"
 
-#include "common/xutil.h"
 #include "common/tokenize.h"
 
 DO_LUA_TOSTRING(button_t, button, "button")
@@ -59,7 +58,6 @@ luaA_button_gc(lua_State *L)
 static int
 luaA_button_new(lua_State *L)
 {
-    int len;
     xcb_button_t xbutton;
     button_t *button, *orig;
     luaA_ref press = LUA_REFNIL, release = LUA_REFNIL;
@@ -110,16 +108,7 @@ luaA_button_new(lua_State *L)
     button->release = release;
     button->button = xbutton;
 
-    len = lua_objlen(L, 2);
-    for(int i = 1; i <= len; i++)
-    {
-        size_t blen;
-        const char *buf;
-        lua_rawgeti(L, 2, i);
-        buf = luaL_checklstring(L, -1, &blen);
-        button->mod |= xutil_key_mask_fromstr(buf, blen);
-        lua_pop(L, 1);
-    }
+    luaA_setmodifiers(L, 2, &button->mod);
 
     return 1;
 }

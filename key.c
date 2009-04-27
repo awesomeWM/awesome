@@ -301,7 +301,7 @@ luaA_keystore(keyb_t *key, const char *str, ssize_t len)
 static int
 luaA_key_new(lua_State *L)
 {
-    size_t i, len;
+    size_t len;
     keyb_t *k;
     const char *key;
     luaA_ref press = LUA_REFNIL, release = LUA_REFNIL;
@@ -323,15 +323,7 @@ luaA_key_new(lua_State *L)
     k->press = press;
     k->release = release;
 
-    len = lua_objlen(L, 2);
-    for(i = 1; i <= len; i++)
-    {
-        size_t blen;
-        lua_rawgeti(L, 2, i);
-        key = luaL_checklstring(L, -1, &blen);
-        lua_pop(L, 1);
-        k->mod |= xutil_key_mask_fromstr(key, blen);
-    }
+    luaA_setmodifiers(L, 2, &k->mod);
 
     return 1;
 }
@@ -398,6 +390,25 @@ luaA_pushmodifiers(lua_State *L, uint16_t modifiers)
             }
     }
     return 1;
+}
+
+/** Take a modifier table from the stack and set modifiers in mod.
+ * \param L The Lua VM state.
+ * \param ud The index of the table.
+ * \param mod Where to set the modifiers.
+ */
+void
+luaA_setmodifiers(lua_State *L, int ud, uint16_t *mod)
+{
+    ssize_t len = lua_objlen(L, ud);
+    for(int i = 1; i <= len; i++)
+    {
+        lua_rawgeti(L, ud, i);
+        size_t blen;
+        const char *key = luaL_checklstring(L, -1, &blen);
+        *mod |= xutil_key_mask_fromstr(key, blen);
+        lua_pop(L, 1);
+    }
 }
 
 /** Key object.
