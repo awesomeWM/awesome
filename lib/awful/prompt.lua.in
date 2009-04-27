@@ -9,6 +9,7 @@ local assert = assert
 local io = io
 local table = table
 local math = math
+local ipairs = ipairs
 local capi =
 {
     keygrabber = keygrabber,
@@ -161,8 +162,11 @@ function run(args, textbox, exe_callback, completion_callback, history_path, his
     end
     textbox.text = prettyprompt .. prompt_text_with_cursor(text, inv_col, cur_col, cur_pos, cur_ul, args.selectall)
     capi.keygrabber.run(
-    function (mod, key, event)
+    function (modifiers, key, event)
         if event ~= "press" then return true end
+        -- Convert index array to hash table
+        local mod = {}
+        for k, v in ipairs(modifiers) do mod[v] = true end
         -- Get out cases
         if (mod.Control and (key == "c" or key == "g"))
             or (not mod.Control and key == "Escape") then

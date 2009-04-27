@@ -692,31 +692,7 @@ keygrabber_handlekpress(lua_State *L, xcb_key_press_event_t *e)
     if(!key_press_lookup_string(e, buf, countof(buf), &ksym))
         return false;
 
-    lua_createtable(L, 0, 8);
-
-    lua_pushboolean(L, e->state & XCB_MOD_MASK_CONTROL);
-    lua_setfield(L, -2, "Control");
-
-    lua_pushboolean(L, e->state & XCB_MOD_MASK_LOCK);
-    lua_setfield(L, -2, "Lock");
-
-    lua_pushboolean(L, e->state & XCB_MOD_MASK_SHIFT);
-    lua_setfield(L, -2, "Shift");
-
-    lua_pushboolean(L, e->state & XCB_MOD_MASK_1);
-    lua_setfield(L, -2, "Mod1");
-
-    lua_pushboolean(L, e->state & XCB_MOD_MASK_2);
-    lua_setfield(L, -2, "Mod2");
-
-    lua_pushboolean(L, e->state & XCB_MOD_MASK_3);
-    lua_setfield(L, -2, "Mod3");
-
-    lua_pushboolean(L, e->state & XCB_MOD_MASK_4);
-    lua_setfield(L, -2, "Mod4");
-
-    lua_pushboolean(L, e->state & XCB_MOD_MASK_5);
-    lua_setfield(L, -2, "Mod5");
+    luaA_pushmodifiers(L, e->state);
 
     lua_pushstring(L, buf);
 
