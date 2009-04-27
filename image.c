@@ -100,12 +100,21 @@ image_compute(image_t *image)
 
     for(i = 0; i < size; i++, dataimg += 4)
     {
+#if AWESOME_IS_BIG_ENDIAN
+        dataimg[0] = (data[i] >> 24) & 0xff;           /* A */
+        /* cairo wants pre-multiplied alpha */
+        alpha = dataimg[0] / 255.0;
+        dataimg[1] = ((data[i] >> 16) & 0xff) * alpha; /* R */
+        dataimg[2] = ((data[i] >>  8) & 0xff) * alpha; /* G */
+        dataimg[3] = (data[i]         & 0xff) * alpha; /* B */
+#else
         dataimg[3] = (data[i] >> 24) & 0xff;           /* A */
         /* cairo wants pre-multiplied alpha */
         alpha = dataimg[3] / 255.0;
         dataimg[2] = ((data[i] >> 16) & 0xff) * alpha; /* R */
         dataimg[1] = ((data[i] >>  8) & 0xff) * alpha; /* G */
         dataimg[0] = (data[i]         & 0xff) * alpha; /* B */
+#endif
     }
 }
 
