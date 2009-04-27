@@ -242,7 +242,8 @@ globalkeys = awful.util.table.join(
               function ()
                   awful.prompt.run({ prompt = "Run: " },
                   mypromptbox[mouse.screen],
-                  awful.util.spawn, awful.completion.shell,
+                  function (...) mypromptbox[mouse.screen].text = awful.util.spawn(unpack(arg)) end,
+                  awful.completion.shell,
                   awful.util.getdir("cache") .. "/history")
               end),
 

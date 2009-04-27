@@ -24,6 +24,8 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
+#include <glib/gspawn.h>
+
 #include "spawn.h"
 #include "screen.h"
 #include "luaa.h"
@@ -228,6 +230,7 @@ spawn_launchee_timeout(struct ev_loop *loop, ev_timer *w, int revents)
  * \lparam The command to launch.
  * \lparam Use startup-notification, true or false, default to true.
  * \lparam The optional screen number to spawn the command on.
+ * \lreturn Nothing if launch was successful, an error string otherwise.
  */
 int
 luaA_spawn(lua_State *L)
@@ -256,6 +259,7 @@ luaA_spawn(lua_State *L)
         p_delete(&host);
     }
 
+    SnLauncherContext *context = NULL;
     if(use_sn)
     {
         char *cmdname, *space;
@@ -264,7 +268,7 @@ luaA_spawn(lua_State *L)
         else
             cmdname = a_strdup(cmd);
 
-        SnLauncherContext *context = sn_launcher_context_new(globalconf.sndisplay, screen_virttophys(screen));
+        context = sn_launcher_context_new(globalconf.sndisplay, screen_virttophys(screen));
         sn_launcher_context_set_name(context, "awesome");
         sn_launcher_context_set_description(context, "awesome spawn");
         sn_launcher_context_set_binary_name(context, cmdname);
@@ -280,21 +284,16 @@ luaA_spawn(lua_State *L)
         sn_launcher_context_setup_child_process(context);
     }
 
-    /* The double-fork construct avoids zombie processes and keeps the code
-     * clean from stupid signal handlers. */
-    if(fork() == 0)
+    GError *error = NULL;
+    if(!g_spawn_command_line_async(cmd, &error))
     {
-        if(fork() == 0)
-        {
-            if(globalconf.connection)
-                xcb_disconnect(globalconf.connection);
-            setsid();
-            a_exec(cmd);
-            warn("execl '%s' failed: %s\n", cmd, strerror(errno));
-        }
-        exit(EXIT_SUCCESS);
+        /* push error on stack */
+        lua_pushstring(L, error->message);
+        g_error_free(error);
+        if(context)
+            sn_launcher_context_complete(context);
+        return 1;
     }
-    wait(0);
 
     return 0;
 }
