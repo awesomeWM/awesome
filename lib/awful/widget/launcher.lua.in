@@ -16,7 +16,7 @@ module("awful.widget.launcher")
 -- @param args Standard widget table arguments, plus image for the image path
 -- and command for the command to run on click, or either menu to create menu.
 -- @return A launcher widget.
-local function new(args)
+function new(args)
     if not args.command and not args.menu then return end
     local w = wbutton(args)
     if not w then return end
