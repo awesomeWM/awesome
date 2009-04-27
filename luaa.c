@@ -752,9 +752,8 @@ luaA_init(xdgHandle* xdg)
     buffer_init(&buf);
 #define A_LUAA_FIRST_STRING "package.path = package.path .. \";"
 #define A_LUAA_SECOND_STRING "/awesome/?.lua;"
-    buffer_addsl(&buf, A_LUAA_FIRST_STRING);
-    buffer_addsl(&buf, A_LUAA_SECOND_STRING);
-    buffer_addsl(&buf, "/awesome/?/init.lua\"");
+#define A_LUAA_FULL_STRING A_LUAA_FIRST_STRING A_LUAA_SECOND_STRING "/awesome/?/init.lua\""
+    buffer_addsl(&buf, A_LUAA_FULL_STRING);
     for(; *xdgconfigdirs; xdgconfigdirs++)
     {
         size_t len = a_strlen(*xdgconfigdirs);
@@ -769,6 +768,7 @@ luaA_init(xdgHandle* xdg)
     }
 #undef A_LUAA_FIRST_STRING
 #undef A_LUAA_SECOND_STRING
+#undef A_LUAA_FULL_STRING
     buffer_wipe(&buf);
 }
 
