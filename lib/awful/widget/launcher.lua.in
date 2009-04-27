@@ -5,6 +5,7 @@
 ---------------------------------------------------------------------------
 
 local setmetatable = setmetatable
+local unpack = unpack
 local util = require("awful.util")
 local wbutton = require("awful.widget.button")
 local button = require("awful.button")
@@ -15,7 +16,7 @@ module("awful.widget.launcher")
 -- @param args Standard widget table arguments, plus image for the image path
 -- and command for the command to run on click, or either menu to create menu.
 -- @return A launcher widget.
-local function new(_, args)
+local function new(args)
     if not args.command and not args.menu then return end
     local w = wbutton(args)
     if not w then return end
@@ -30,6 +31,6 @@ local function new(_, args)
     return w
 end
 
-setmetatable(_M, { __call = new })
+setmetatable(_M, { __call = function (_, ...) return new(unpack(arg)) end })
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
