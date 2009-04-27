@@ -400,6 +400,7 @@ luaA_pushmodifiers(lua_State *L, uint16_t modifiers)
 void
 luaA_setmodifiers(lua_State *L, int ud, uint16_t *mod)
 {
+    luaA_checktable(L, ud);
     ssize_t len = lua_objlen(L, ud);
     for(int i = 1; i <= len; i++)
     {
