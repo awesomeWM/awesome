@@ -5,6 +5,7 @@
 ---------------------------------------------------------------------------
 
 local setmetatable = setmetatable
+local unpack = unpack
 local type = type
 local button = require("awful.button")
 local capi = { image = image,
@@ -18,7 +19,7 @@ module("awful.widget.button")
 -- @param args Standard widget table arguments, plus image for the image path or
 -- the image object.
 -- @return A textbox widget configured as a button.
-function new(_, args)
+function new(args)
     if not args or not args.image then return end
     local img_release
     if type(args.image) == "string" then
@@ -38,6 +39,6 @@ function new(_, args)
     return w
 end
 
-setmetatable(_M, { __call = new })
+setmetatable(_M, { __call = function(_, ...) return new(unpack(arg)) end })
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
