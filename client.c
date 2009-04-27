@@ -731,7 +731,6 @@ client_resize(client_t *c, area_t geometry, bool hints)
                              XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y
                              | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
                              values);
-        window_configure(c->win, geometry_internal, c->border);
 
         screen_client_moveto(c, new_screen, true, false);
 
@@ -1206,7 +1205,6 @@ client_unban(client_t *c)
                               | XCB_CONFIG_WINDOW_WIDTH
                               | XCB_CONFIG_WINDOW_HEIGHT,
                               request);
-        window_configure(c->win, c->geometries.internal, c->border);
 
         c->isbanned = false;
 
