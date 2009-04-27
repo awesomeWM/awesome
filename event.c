@@ -46,10 +46,11 @@
     static void \
     event_##xcbtype##_callback(xcb_##xcbtype##_press_event_t *ev, \
                                arraytype *arr, \
-                               int nargs) \
+                               int nargs, \
+                               void *data) \
     { \
         foreach(item, *arr) \
-            if(match(ev, *item)) \
+            if(match(ev, *item, data)) \
                 switch(ev->response_type) \
                 { \
                   case xcbeventprefix##_PRESS: \
@@ -73,20 +74,17 @@
     }
 
 static bool
-event_button_match(xcb_button_press_event_t *ev, button_t *b)
+event_button_match(xcb_button_press_event_t *ev, button_t *b, void *data)
 {
     return ((!b->button || ev->detail == b->button)
             && (b->mod == XCB_BUTTON_MASK_ANY || b->mod == ev->state));
 }
 
 static bool
-event_key_match(xcb_key_press_event_t *ev, keyb_t *k)
+event_key_match(xcb_key_press_event_t *ev, keyb_t *k, void *data)
 {
-    /* get keysym ignoring shift and mod5 */
-    xcb_keysym_t keysym =
-        key_getkeysym(ev->detail,
-                      ev->state & ~(XCB_MOD_MASK_SHIFT | XCB_MOD_MASK_5 | XCB_MOD_MASK_LOCK));
-
+    assert(data);
+    xcb_keysym_t keysym = *(xcb_keysym_t *) data;
     return (((k->keycode && ev->detail == k->keycode)
              || (k->keysym && keysym == k->keysym))
             && (k->mod == XCB_BUTTON_MASK_ANY || k->mod == ev->state));
@@ -151,7 +149,7 @@ event_handle_button(void *data, xcb_connection_t *connection, xcb_button_press_e
         }
 
         wibox_push(globalconf.L, wibox);
-        event_button_callback(ev, &wibox->buttons, 1);
+        event_button_callback(ev, &wibox->buttons, 1, NULL);
 
         /* then try to match a widget binding */
         widget_t *w = widget_getbycoords(wibox->position, &wibox->widgets,
@@ -161,7 +159,7 @@ event_handle_button(void *data, xcb_connection_t *connection, xcb_button_press_e
         if(w)
         {
             widget_push(globalconf.L, w);
-            event_button_callback(ev, &w->buttons, 1);
+            event_button_callback(ev, &w->buttons, 1, NULL);
         }
 
         /* return even if no widget match */
@@ -170,7 +168,7 @@ event_handle_button(void *data, xcb_connection_t *connection, xcb_button_press_e
     else if((c = client_getbywin(ev->event)))
     {
         client_push(globalconf.L, c);
-        event_button_callback(ev, &c->buttons, 1);
+        event_button_callback(ev, &c->buttons, 1, NULL);
         xcb_allow_events(globalconf.connection,
                          XCB_ALLOW_REPLAY_POINTER,
                          XCB_CURRENT_TIME);
@@ -179,7 +177,7 @@ event_handle_button(void *data, xcb_connection_t *connection, xcb_button_press_e
         for(screen = 0; screen < nb_screen; screen++)
             if(xutil_screen_get(connection, screen)->root == ev->event)
             {
-                event_button_callback(ev, &globalconf.buttons, 0);
+                event_button_callback(ev, &globalconf.buttons, 0, NULL);
                 return 0;
             }
 
@@ -593,8 +591,6 @@ event_handle_key(void *data __attribute__ ((unused)),
                  xcb_connection_t *connection __attribute__ ((unused)),
                  xcb_key_press_event_t *ev)
 {
-    client_t *c;
-
     if(globalconf.keygrabber != LUA_REFNIL)
     {
         lua_rawgeti(globalconf.L, LUA_REGISTRYINDEX, globalconf.keygrabber);
@@ -610,13 +606,21 @@ event_handle_key(void *data __attribute__ ((unused)),
         }
         lua_pop(globalconf.L, 1);  /* pop returned value or function if not called */
     }
-    else if((c = client_getbywin(ev->event)))
-    {
-        client_push(globalconf.L, c);
-        event_key_callback(ev, &c->keys, 1);
-    }
     else
-        event_key_callback(ev, &globalconf.keys, 0);
+    {
+        /* get keysym ignoring shift and mod5 */
+        xcb_keysym_t keysym =
+            key_getkeysym(ev->detail,
+                          ev->state & ~(XCB_MOD_MASK_SHIFT | XCB_MOD_MASK_5 | XCB_MOD_MASK_LOCK));
+        client_t *c;
+        if((c = client_getbywin(ev->event)))
+        {
+            client_push(globalconf.L, c);
+            event_key_callback(ev, &c->keys, 1, &keysym);
+        }
+        else
+            event_key_callback(ev, &globalconf.keys, 0, &keysym);
+    }
 
     return 0;
 }
