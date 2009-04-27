@@ -42,54 +42,44 @@
 #include "common/atoms.h"
 #include "common/xutil.h"
 
-#define EVENT_BUTTON_MATCH(b, state, xbutton) \
-    ((!(b)->button || (xbutton) == (b)->button) \
-     && ((b)->mod == XCB_BUTTON_MASK_ANY || (b)->mod == (state)))
+#define DO_EVENT_HOOK_CALLBACK(xcbtype, xcbeventprefix, type, arraytype, match) \
+    static void \
+    event_##xcbtype##_callback(xcb_##xcbtype##_press_event_t *ev, \
+                               arraytype *arr, \
+                               int nargs) \
+    { \
+        foreach(item, *arr) \
+            if(match(ev, *item)) \
+                switch(ev->response_type) \
+                { \
+                  case xcbeventprefix##_PRESS: \
+                    if((*item)->press != LUA_REFNIL) \
+                    { \
+                        for(int i = 0; i < nargs; i++) \
+                            lua_pushvalue(globalconf.L, - nargs); \
+                        luaA_dofunction(globalconf.L, (*item)->press, nargs, 0); \
+                    } \
+                    break; \
+                  case xcbeventprefix##_RELEASE: \
+                    if((*item)->release != LUA_REFNIL) \
+                    { \
+                        for(int i = 0; i < nargs; i++) \
+                            lua_pushvalue(globalconf.L, - nargs); \
+                        luaA_dofunction(globalconf.L, (*item)->release, nargs, 0); \
+                    } \
+                    break; \
+                } \
+        lua_pop(globalconf.L, nargs); \
+    }
 
-/** Handle mouse button events.
- * \param c The client on which the event happened or NULL.
- * \param type Event type, press or release.
- * \param button Button number.
- * \param state Modkeys state.
- * \param buttons Buttons array to check for.
- */
-static void
-event_handle_mouse_button(client_t *c,
-                          uint8_t type,
-                          xcb_button_t button,
-                          uint16_t state,
-                          button_array_t *buttons)
+static bool
+event_button_match(xcb_button_press_event_t *ev, button_t *b)
 {
-    foreach(b, *buttons)
-        if(EVENT_BUTTON_MATCH(*b, state, button))
-            switch(type)
-            {
-              case XCB_BUTTON_PRESS:
-                if((*b)->press != LUA_REFNIL)
-                {
-                    if(c)
-                    {
-                        client_push(globalconf.L, c);
-                        luaA_dofunction(globalconf.L, (*b)->press, 1, 0);
-                    }
-                    else
-                        luaA_dofunction(globalconf.L, (*b)->press, 0, 0);
-                }
-                break;
-              case XCB_BUTTON_RELEASE:
-                if((*b)->release != LUA_REFNIL)
-                {
-                    if(c)
-                    {
-                        client_push(globalconf.L, c);
-                        luaA_dofunction(globalconf.L, (*b)->release, 1, 0);
-                    }
-                    else
-                        luaA_dofunction(globalconf.L, (*b)->release, 0, 0);
-                }
-                break;
-            }
+    return ((!b->button || ev->detail == b->button)
+            && (b->mod == XCB_BUTTON_MASK_ANY || b->mod == ev->state));
 }
+
+DO_EVENT_HOOK_CALLBACK(button, XCB_BUTTON, button_t, button_array_t, event_button_match)
 
 /** Handle an event with mouse grabber if needed
  * \param x The x coordinate.
@@ -146,26 +136,8 @@ event_handle_button(void *data, xcb_connection_t *connection, xcb_button_press_e
             ev->event_y -= wibox->sw.geometry.y;
         }
 
-        /* check if we match a binding on the wibox */
-        foreach(b, wibox->buttons)
-            if(EVENT_BUTTON_MATCH(*b, ev->state, ev->detail))
-                switch(ev->response_type)
-                {
-                  case XCB_BUTTON_PRESS:
-                    if((*b)->press != LUA_REFNIL)
-                    {
-                        wibox_push(globalconf.L, wibox);
-                        luaA_dofunction(globalconf.L, (*b)->press, 1, 0);
-                    }
-                    break;
-                  case XCB_BUTTON_RELEASE:
-                    if((*b)->release != LUA_REFNIL)
-                    {
-                        wibox_push(globalconf.L, wibox);
-                        luaA_dofunction(globalconf.L, (*b)->release, 1, 0);
-                    }
-                    break;
-                }
+        wibox_push(globalconf.L, wibox);
+        event_button_callback(ev, &wibox->buttons, 1);
 
         /* then try to match a widget binding */
         widget_t *w = widget_getbycoords(wibox->position, &wibox->widgets,
@@ -173,32 +145,18 @@ event_handle_button(void *data, xcb_connection_t *connection, xcb_button_press_e
                                          wibox->sw.geometry.height,
                                          &ev->event_x, &ev->event_y);
         if(w)
-            foreach(b, w->buttons)
-                if(EVENT_BUTTON_MATCH(*b, ev->state, ev->detail))
-                    switch(ev->response_type)
-                    {
-                      case XCB_BUTTON_PRESS:
-                        if((*b)->press != LUA_REFNIL)
-                        {
-                            wibox_push(globalconf.L, wibox);
-                            luaA_dofunction(globalconf.L, (*b)->press, 1, 0);
-                        }
-                        break;
-                      case XCB_BUTTON_RELEASE:
-                        if((*b)->release != LUA_REFNIL)
-                        {
-                            wibox_push(globalconf.L, wibox);
-                            luaA_dofunction(globalconf.L, (*b)->release, 1, 0);
-                        }
-                        break;
-                    }
+        {
+            widget_push(globalconf.L, w);
+            event_button_callback(ev, &w->buttons, 1);
+        }
 
         /* return even if no widget match */
         return 0;
     }
     else if((c = client_getbywin(ev->event)))
     {
-        event_handle_mouse_button(c, ev->response_type, ev->detail, ev->state, &c->buttons);
+        client_push(globalconf.L, c);
+        event_button_callback(ev, &c->buttons, 1);
         xcb_allow_events(globalconf.connection,
                          XCB_ALLOW_REPLAY_POINTER,
                          XCB_CURRENT_TIME);
@@ -207,7 +165,7 @@ event_handle_button(void *data, xcb_connection_t *connection, xcb_button_press_e
         for(screen = 0; screen < nb_screen; screen++)
             if(xutil_screen_get(connection, screen)->root == ev->event)
             {
-                event_handle_mouse_button(NULL, ev->response_type, ev->detail, ev->state, &globalconf.buttons);
+                event_button_callback(ev, &globalconf.buttons, 0);
                 return 0;
             }
 
