@@ -153,23 +153,6 @@ key_getkeysym(xcb_keycode_t detail, uint16_t state)
     return XCB_NO_SYMBOL;
 }
 
-keyb_t *
-key_find(key_array_t *keys, const xcb_key_press_event_t *ev)
-{
-    /* get keysym ignoring shift and mod5 */
-    xcb_keysym_t keysym =
-        key_getkeysym(ev->detail,
-                      ev->state & ~(XCB_MOD_MASK_SHIFT | XCB_MOD_MASK_5 | XCB_MOD_MASK_LOCK));
-
-    foreach(k, *keys)
-        if((((*k)->keycode && ev->detail == (*k)->keycode)
-            || ((*k)->keysym && keysym == (*k)->keysym))
-           && ((*k)->mod == XCB_BUTTON_MASK_ANY || (*k)->mod == ev->state))
-            return *k;
-
-    return NULL;
-}
-
 static void
 luaA_keystore(keyb_t *key, const char *str, ssize_t len)
 {

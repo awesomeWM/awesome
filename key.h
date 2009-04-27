@@ -42,7 +42,6 @@ typedef struct keyb_t
 
 ARRAY_TYPE(keyb_t *, key)
 
-keyb_t *key_find(key_array_t *, const xcb_key_press_event_t *);
 xcb_keysym_t key_getkeysym(xcb_keycode_t, uint16_t);
 
 void luaA_key_array_set(lua_State *, int, key_array_t *);

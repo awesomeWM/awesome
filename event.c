@@ -79,7 +79,21 @@ event_button_match(xcb_button_press_event_t *ev, button_t *b)
             && (b->mod == XCB_BUTTON_MASK_ANY || b->mod == ev->state));
 }
 
+static bool
+event_key_match(xcb_key_press_event_t *ev, keyb_t *k)
+{
+    /* get keysym ignoring shift and mod5 */
+    xcb_keysym_t keysym =
+        key_getkeysym(ev->detail,
+                      ev->state & ~(XCB_MOD_MASK_SHIFT | XCB_MOD_MASK_5 | XCB_MOD_MASK_LOCK));
+
+    return (((k->keycode && ev->detail == k->keycode)
+             || (k->keysym && keysym == k->keysym))
+            && (k->mod == XCB_BUTTON_MASK_ANY || k->mod == ev->state));
+}
+
 DO_EVENT_HOOK_CALLBACK(button, XCB_BUTTON, button_t, button_array_t, event_button_match)
+DO_EVENT_HOOK_CALLBACK(key, XCB_KEY, keyb_t, key_array_t, event_key_match)
 
 /** Handle an event with mouse grabber if needed
  * \param x The x coordinate.
@@ -598,44 +612,11 @@ event_handle_key(void *data __attribute__ ((unused)),
     }
     else if((c = client_getbywin(ev->event)))
     {
-        keyb_t *k = key_find(&c->keys, ev);
-
-        if(k)
-            switch(ev->response_type)
-            {
-              case XCB_KEY_PRESS:
-                if(k->press != LUA_REFNIL)
-                {
-                    client_push(globalconf.L, c);
-                    luaA_dofunction(globalconf.L, k->press, 1, 0);
-                }
-                break;
-              case XCB_KEY_RELEASE:
-                if(k->release != LUA_REFNIL)
-                {
-                    client_push(globalconf.L, c);
-                    luaA_dofunction(globalconf.L, k->release, 1, 0);
-                }
-                break;
-            }
+        client_push(globalconf.L, c);
+        event_key_callback(ev, &c->keys, 1);
     }
     else
-    {
-        keyb_t *k = key_find(&globalconf.keys, ev);
-
-        if(k)
-            switch(ev->response_type)
-            {
-              case XCB_KEY_PRESS:
-                if(k->press != LUA_REFNIL)
-                    luaA_dofunction(globalconf.L, k->press, 0, 0);
-                break;
-              case XCB_KEY_RELEASE:
-                if(k->release != LUA_REFNIL)
-                    luaA_dofunction(globalconf.L, k->release, 0, 0);
-                break;
-            }
-    }
+        event_key_callback(ev, &globalconf.keys, 0);
 
     return 0;
 }
