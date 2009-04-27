@@ -36,6 +36,25 @@ static DBusConnection *dbus_connection_system = NULL;
 ev_io dbusio_ses = { .fd = -1 };
 ev_io dbusio_sys = { .fd = -1 };
 
+static void
+a_dbus_cleanup_bus(DBusConnection *dbus_connection, ev_io *dbusio)
+{
+    if(!dbus_connection)
+        return;
+
+    if(dbusio->fd >= 0)
+    {
+        ev_ref(EV_DEFAULT_UC);
+        ev_io_stop(EV_DEFAULT_UC_ dbusio);
+        dbusio->fd = -1;
+    }
+
+    /* This is a shared connection owned by libdbus
+     * Do not close it, only unref
+     */
+    dbus_connection_unref(dbus_connection);
+}
+
 static int
 a_dbus_message_iter(DBusMessageIter *iter)
 {
@@ -345,7 +364,7 @@ a_dbus_process_request(DBusConnection *dbus_connection, DBusMessage *msg)
 }
 
 static void
-a_dbus_process_requests_on_bus(DBusConnection *dbus_connection)
+a_dbus_process_requests_on_bus(DBusConnection *dbus_connection, ev_io *dbusio)
 {
     DBusMessage *msg;
     int nmsg = 0;
@@ -359,7 +378,7 @@ a_dbus_process_requests_on_bus(DBusConnection *dbus_connection)
 
         if(dbus_message_is_signal(msg, DBUS_INTERFACE_LOCAL, "Disconnected"))
         {
-            a_dbus_cleanup();
+            a_dbus_cleanup_bus(dbus_connection, dbusio);
             dbus_message_unref(msg);
             return;
         }
@@ -380,13 +399,13 @@ a_dbus_process_requests_on_bus(DBusConnection *dbus_connection)
 static void
 a_dbus_process_requests_session(EV_P_ ev_io *w, int revents)
 {
-    a_dbus_process_requests_on_bus(dbus_connection_session);
+    a_dbus_process_requests_on_bus(dbus_connection_session, w);
 }
 
 static void
 a_dbus_process_requests_system(EV_P_ ev_io *w, int revents)
 {
-    a_dbus_process_requests_on_bus(dbus_connection_system);
+    a_dbus_process_requests_on_bus(dbus_connection_system, w);
 }
 
 static bool
@@ -480,7 +499,7 @@ a_dbus_connect(DBusBusType type, const char *type_name,
         else
         {
             warn("cannot get D-Bus connection file descriptor");
-            a_dbus_cleanup();
+            a_dbus_cleanup_bus(dbus_connection, dbusio);
         }
     }
 
@@ -494,25 +513,6 @@ a_dbus_init(void)
                                              &dbusio_ses, a_dbus_process_requests_session);
     dbus_connection_system = a_dbus_connect(DBUS_BUS_SYSTEM, "system",
                                             &dbusio_sys, a_dbus_process_requests_system);
-}
-
-static void
-a_dbus_cleanup_bus(DBusConnection *dbus_connection, ev_io *dbusio)
-{
-    if(!dbus_connection)
-        return;
-
-    if(dbusio->fd >= 0)
-    {
-        ev_ref(EV_DEFAULT_UC);
-        ev_io_stop(EV_DEFAULT_UC_ dbusio);
-        dbusio->fd = -1;
-    }
-
-    /* This is a shared connection owned by libdbus
-     * Do not close it, only unref
-     */
-    dbus_connection_unref(dbus_connection);
 }
 
 void
