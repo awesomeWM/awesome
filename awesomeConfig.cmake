@@ -28,6 +28,11 @@ add_definitions(-std=gnu99 -ggdb3 -fno-strict-aliasing -Wall -Wextra
     -Wstrict-prototypes)
 # }}}
 
+# {{{ Endianness
+include(TestBigEndian)
+TEST_BIG_ENDIAN(AWESOME_IS_BIG_ENDIAN)
+# }}}
+
 # {{{ Find external utilities
 macro(a_find_program var prg req)
     set(required ${req})
