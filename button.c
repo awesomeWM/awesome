@@ -219,6 +219,8 @@ luaA_button_newindex(lua_State *L)
       case A_TK_BUTTON:
         button->button = luaL_checknumber(L, 3);
         break;
+      case A_TK_MODIFIERS:
+        luaA_setmodifiers(L, 3, &button->mod);
       default:
         break;
     }
