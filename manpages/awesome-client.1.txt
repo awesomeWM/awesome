@@ -4,7 +4,7 @@ awesome-client(1)
 NAME
 ----
 
-awesome-client - awesome window manager command line interface
+awesome-client - awesome window manager remote execution
 
 SYNOPSIS
 --------
@@ -14,18 +14,15 @@ awesome-client
 DESCRIPTION
 -----------
 
-awesome-client is the command line interface to awesome. It communicates with awesome
-via a socket located in the users's HOME directory.
-It permits to execute Lua code remotely.
+awesome-client is a remote command line interface to awesome.
+It communicates with awesome via D-Bus. It permits to execute Lua code remotely.
 
 USAGE
 -----
-To determine which socket is to be used, it reads the DISPLAY environment variable.
-awesome-client reads commands from standard input.
+awesome-client reads commands from standard input and send via D-Bus to awesome.
+If 'rlwrap' is installed, it will be used to provide a readline command line interface.
 
-When you pipe multiple lines into awesome-client, an empty line will flush already
-collected lines into awesome with an according immediate execution.
-
+The 'awful.remote' module has to be loaded if you want this command to work.
 
 SEE ALSO
 --------
