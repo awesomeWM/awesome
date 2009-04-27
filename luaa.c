@@ -748,18 +748,27 @@ luaA_init(xdgHandle* xdg)
     /* add XDG_CONFIG_DIR as include path */
     const char * const *xdgconfigdirs = xdgSearchableConfigDirectories(xdg);
     buffer_t buf;
+    int prev_len = 0;
     buffer_init(&buf);
+#define A_LUAA_FIRST_STRING "package.path = package.path .. \";"
+#define A_LUAA_SECOND_STRING "/awesome/?.lua;"
+    buffer_addsl(&buf, A_LUAA_FIRST_STRING);
+    buffer_addsl(&buf, A_LUAA_SECOND_STRING);
+    buffer_addsl(&buf, "/awesome/?/init.lua\"");
     for(; *xdgconfigdirs; xdgconfigdirs++)
     {
         size_t len = a_strlen(*xdgconfigdirs);
-        buffer_addsl(&buf, "package.path = package.path .. \";");
-        buffer_add(&buf, *xdgconfigdirs, len);
-        buffer_addsl(&buf, "/awesome/?.lua;");
-        buffer_add(&buf, *xdgconfigdirs, len);
-        buffer_addsl(&buf, "/awesome/?/init.lua\"");
+        buffer_splice(&buf, sizeof(A_LUAA_FIRST_STRING) - 1, prev_len, *xdgconfigdirs, len);
+        buffer_splice(&buf,
+                      sizeof(A_LUAA_FIRST_STRING) - 1
+                      + len
+                      + sizeof(A_LUAA_SECOND_STRING) - 1,
+                      prev_len, *xdgconfigdirs, len);
         luaA_dostring(L, buf.s);
-        buf.len = 0;
+        prev_len = len;
     }
+#undef A_LUAA_FIRST_STRING
+#undef A_LUAA_SECOND_STRING
     buffer_wipe(&buf);
 }
 
