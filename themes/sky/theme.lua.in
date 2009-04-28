@@ -1,0 +1,59 @@
+-------------------------------
+--    "Sky" awesome theme    --
+--  By Andrei "Garoth" Thorp --
+-------------------------------
+-- If you want SVGs and extras, get them from garoth.com/awesome/sky-theme
+
+-- BASICS
+theme = {}
+theme.font          = "sans 8"
+
+theme.bg_focus      = "#e2eeea"
+theme.bg_normal     = "#729fcf"
+theme.bg_urgent     = "#fce94f"
+theme.bg_minimize   = "#0067ce"
+
+theme.fg_normal     = "#2e3436"
+theme.fg_focus      = "#2e3436"
+theme.fg_urgent     = "#2e3436"
+theme.fg_minimize   = "#2e3436"
+
+theme.border_width  = "2"
+theme.border_normal = "#dae3e0"
+theme.border_focus  = "#729fcf"
+theme.border_marked = "#eeeeec"
+
+-- IMAGES
+theme.layout_fairh           = "@AWESOME_THEMES_PATH@/sky/layouts/fairh.png"
+theme.layout_fairv           = "@AWESOME_THEMES_PATH@/sky/layouts/fairv.png"
+theme.layout_floating        = "@AWESOME_THEMES_PATH@/sky/layouts/floating.png"
+theme.layout_magnifier       = "@AWESOME_THEMES_PATH@/sky/layouts/magnifier.png"
+theme.layout_max             = "@AWESOME_THEMES_PATH@/sky/layouts/max.png"
+theme.layout_fullscreen      = "@AWESOME_THEMES_PATH@/sky/layouts/fullscreen.png"
+theme.layout_tilebottom      = "@AWESOME_THEMES_PATH@/sky/layouts/tilebottom.png"
+theme.layout_tileleft        = "@AWESOME_THEMES_PATH@/sky/layouts/tileleft.png"
+theme.layout_tile            = "@AWESOME_THEMES_PATH@/sky/layouts/tile.png"
+theme.layout_tiletop         = "@AWESOME_THEMES_PATH@/sky/layouts/tiletop.png"
+
+theme.awesome_icon           = "@AWESOME_THEMES_PATH@/sky/awesome-icon.png"
+theme.tasklist_floating_icon = "@AWESOME_THEMES_PATH@/sky/layouts/floating.png"
+
+-- from default for now...
+theme.menu_submenu_icon     = "@AWESOME_THEMES_PATH@/default/submenu.png"
+theme.taglist_squares_sel   = "@AWESOME_THEMES_PATH@/default/taglist/squarefw.png"
+theme.taglist_squares_unsel = "@AWESOME_THEMES_PATH@/default/taglist/squarew.png"
+
+-- MISC
+theme.wallpaper_cmd         = { [1] = "awsetbg @AWESOME_THEMES_PATH@/sky/sky-background.png",
+                                [2] = "awsetbg @AWESOME_THEMES_PATH@/sky/sky-background.png" }
+theme.taglist_squares       = "true"
+theme.titlebar_close_button = "true"
+theme.menu_height           = "15"
+theme.menu_width            = "100"
+
+-- Define the image to load
+theme.titlebar_close_button_normal = "@AWESOME_THEMES_PATH@/default/titlebar/close.png"
+theme.titlebar_close_button_focus  = "@AWESOME_THEMES_PATH@/default/titlebar/closer.png"
+
+return theme
+-- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
