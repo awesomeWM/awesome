@@ -1,6 +1,7 @@
 /*
  * array.h - useful array handling header
  *
+ * Copyright © 2009 Julien Danjou <julien@danjou.info>
  * Copyright © 2008 Pierre Habouzit <madcoder@debian.org>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -32,7 +33,7 @@
 
 #define foreach(var, array) \
     for(typeof((array).tab) var = (array).tab; \
-        var < (array).tab + (array).len; \
+        var >= (array).tab && var < (array).tab + (array).len; \
         var++)
 
 #define ARRAY_FUNCS(type_t, pfx, dtor)                                      \
