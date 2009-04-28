@@ -325,7 +325,7 @@ a_dbus_process_request(DBusConnection *dbus_connection, DBusMessage *msg)
             {
               case DBUS_TYPE_BOOLEAN:
                 {
-                    bool b = lua_toboolean(globalconf.L, i + 1);
+                    dbus_bool_t  b = lua_toboolean(globalconf.L, i + 1);
                     dbus_message_iter_append_basic(&iter, DBUS_TYPE_BOOLEAN, &b);
                 }
                 break;
