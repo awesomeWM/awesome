@@ -45,22 +45,18 @@ function match(key, pressed_mod, pressed_key)
     if pressed_key ~= key.key then return false end
     -- Then, compare mod
     local mod = key.modifiers
-    local nbmod = 0
     -- For each modifier of the key object, check that the modifier has been
     -- pressed.
     for _, m in ipairs(mod) do
         -- Has it been pressed?
-        if util.table.hasitem(pressed_mod, m) then
-            -- Yes, the number of modifier correctly pressed++
-            nbmod = nbmod + 1
-        else
+        if not util.table.hasitem(pressed_mod, m) then
             -- No, so this is failure!
             return false
         end
     end
     -- If the number of pressed modifier is ~=, it is probably >, so this is not
     -- the same, return false.
-    if nbmod ~= #mod then
+    if #pressed_mod ~= #mod then
         return false
     end
     return true
