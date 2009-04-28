@@ -149,7 +149,7 @@ a_dbus_message_iter(DBusMessageIter *iter)
                         break;
                       case DBUS_TYPE_BOOLEAN:
                         {
-                            const bool *b;
+                            const dbus_bool_t *b;
                             dbus_message_iter_get_fixed_array(&sub, &b, &datalen);
                             lua_createtable(globalconf.L, datalen, 0);
                             for(int i = 0; i < datalen; i++)
@@ -201,7 +201,7 @@ a_dbus_message_iter(DBusMessageIter *iter)
             break;
           case DBUS_TYPE_BOOLEAN:
             {
-                bool b;
+                dbus_bool_t b;
                 dbus_message_iter_get_basic(iter, &b);
                 lua_pushboolean(globalconf.L, b);
             }
