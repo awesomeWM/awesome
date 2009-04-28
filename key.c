@@ -109,7 +109,7 @@ key_getkeysym(xcb_keycode_t detail, uint16_t state)
     }
 
     /* If the second column does not exists use the first one. */
-    if(k1 == XCB_NONE)
+    if(k1 == XCB_NO_SYMBOL)
         k1 = k0;
 
     /* The numlock modifier is on and the second KeySym is a keypad
