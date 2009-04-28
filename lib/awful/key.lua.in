@@ -47,7 +47,7 @@ function match(key, pressed_mod, pressed_key)
     local mod = key.modifiers
     local nbmod = 0
     for _, m in ipairs(pressed_mod) do
-        if awful.util.table.hasitem(mod, m) then
+        if util.table.hasitem(mod, m) then
             nbmod = nbmod + 1
         end
     end
