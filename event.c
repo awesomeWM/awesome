@@ -608,10 +608,8 @@ event_handle_key(void *data __attribute__ ((unused)),
     }
     else
     {
-        /* get keysym ignoring shift and mod5 */
-        xcb_keysym_t keysym =
-            key_getkeysym(ev->detail,
-                          ev->state & ~(XCB_MOD_MASK_SHIFT | XCB_MOD_MASK_5 | XCB_MOD_MASK_LOCK));
+        /* get keysym ignoring all modifiers */
+        xcb_keysym_t keysym = key_getkeysym(ev->detail, 0);
         client_t *c;
         if((c = client_getbywin(ev->event)))
         {
