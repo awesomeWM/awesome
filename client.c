@@ -187,11 +187,12 @@ client_unfocus_update(client_t *c)
 void
 client_unfocus(client_t *c)
 {
-    xcb_window_t root_win = xutil_screen_get(globalconf.connection, c->phys_screen)->root;
-    globalconf.screens.tab[c->phys_screen].client_focus = NULL;
 
+    xcb_window_t root_win = xutil_screen_get(globalconf.connection, c->phys_screen)->root;
     /* Set focus on root window, so no events leak to the current window. */
     window_setfocus(root_win, true);
+
+    client_unfocus_update(c);
 }
 
 /** Ban client and move it out of the viewport.
@@ -239,6 +240,15 @@ client_focus_update(client_t *c)
         return;
     }
 
+    if(globalconf.screen_focus
+        && globalconf.screen_focus->client_focus)
+    {
+        if (globalconf.screen_focus->client_focus != c)
+            client_unfocus_update(globalconf.screen_focus->client_focus);
+        else
+            /* Already focused */
+            return;
+    }
     /* stop hiding client */
     c->ishidden = false;
     client_setminimized(c, false);
@@ -281,8 +291,8 @@ client_focus(client_t *c)
     if(!client_maybevisible(c, c->screen))
         return;
 
-    globalconf.screen_focus = &globalconf.screens.tab[c->phys_screen];
-    globalconf.screen_focus->client_focus = c;
+    if (!c->nofocus)
+        client_focus_update(c);
 
     window_setfocus(c->win, !c->nofocus);
 }
