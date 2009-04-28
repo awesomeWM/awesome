@@ -103,6 +103,7 @@ type
 urgent
 valign
 visible
+version
 vertical
 widgets
 width

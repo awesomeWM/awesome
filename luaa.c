@@ -593,6 +593,12 @@ luaA_awesome_index(lua_State *L)
       case A_TK_BG:
         luaA_pushxcolor(L, &globalconf.colors.bg);
         break;
+      case A_TK_VERSION:
+        lua_pushliteral(L, AWESOME_VERSION);
+        break;
+      case A_TK_RELEASE:
+        lua_pushliteral(L, AWESOME_RELEASE);
+        break;
       default:
         return 0;
     }
@@ -714,14 +720,6 @@ luaA_init(xdgHandle* xdg)
 
     /* Export keys */
     luaA_openlib(L, "key", awesome_key_methods, awesome_key_meta);
-
-    lua_pushliteral(L, "AWESOME_VERSION");
-    lua_pushstring(L, AWESOME_VERSION);
-    lua_settable(L, LUA_GLOBALSINDEX);
-
-    lua_pushliteral(L, "AWESOME_RELEASE");
-    lua_pushstring(L, AWESOME_RELEASE);
-    lua_settable(L, LUA_GLOBALSINDEX);
 
     /* init hooks */
     globalconf.hooks.manage = LUA_REFNIL;

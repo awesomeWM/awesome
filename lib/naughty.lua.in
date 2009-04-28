@@ -16,12 +16,11 @@ local string = string
 local widget = widget
 local button = require("awful.button")
 local util = require("awful.util")
-local capi = { screen = screen }
+local capi = { screen = screen, awesome = awesome }
 local bt = require("beautiful")
 local screen = screen
 local awful = awful
 local dbus = dbus
-local AWESOME_VERSION = AWESOME_VERSION
 
 --- Notification library
 module("naughty")
@@ -469,7 +468,7 @@ if awful.hooks.dbus then
         end
     elseif data.member == "GetServerInfo" or data.member == "GetServerInformation" then
         -- name of notification app, name of vender, version
-        return "s", "naughty", "s", "awesome", "s", AWESOME_VERSION:match("%d.%d")
+        return "s", "naughty", "s", "awesome", "s", capi.awesome.version:match("%d.%d")
     end
     end)
 
