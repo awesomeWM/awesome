@@ -1,0 +1,93 @@
+---------------------------
+-- Default awesome theme --
+---------------------------
+
+theme = {}
+
+theme.font          = "sans 8"
+
+theme.bg_normal     = "#222222"
+theme.bg_focus      = "#535d6c"
+theme.bg_urgent     = "#ff0000"
+theme.bg_minimize   = "#444444"
+
+theme.fg_normal     = "#aaaaaa"
+theme.fg_focus      = "#ffffff"
+theme.fg_urgent     = "#ffffff"
+theme.fg_minimize  = " #ffffff"
+
+theme.border_width  = "1"
+theme.border_normal = "#000000"
+theme.border_focus  = "#535d6c"
+theme.border_marked = "#91231c"
+
+-- There are another variables sets
+-- overriding the default one when
+-- defined, the sets are:
+-- [taglist|tasklist]_[bg|fg]_[focus|urgent]
+-- titlebar_[bg|fg]_[normal|focus]
+-- Example:
+--taglist_bg_focus = #ff0000
+
+-- Display the taglist squares
+theme.taglist_squares_sel = "@AWESOME_THEMES_PATH@/default/taglist/squarefw.png"
+theme.taglist_squares_unsel = "@AWESOME_THEMES_PATH@/default/taglist/squarew.png"
+
+theme.tasklist_floating_icon = "@AWESOME_THEMES_PATH@/default/tasklist/floatingw.png"
+
+-- Variables set for theming menu
+-- menu_[bg|fg]_[normal|focus]
+-- menu_[border_color|border_width]
+theme.menu_submenu_icon = "@AWESOME_THEMES_PATH@/default/submenu.png"
+theme.menu_height   = "15"
+theme.menu_width    = "100"
+
+-- You can add as many variables as
+-- you wish and access them by using
+-- beautiful.variable in your rc.lua
+--bg_widget    = #cc0000
+
+-- Define the image to load
+theme.titlebar_close_button_normal = "@AWESOME_THEMES_PATH@/default/titlebar/close_normal.png"
+theme.titlebar_close_button_focus = "@AWESOME_THEMES_PATH@/default/titlebar/close_focus.png"
+
+theme.titlebar_ontop_button_normal_inactive = "@AWESOME_THEMES_PATH@/default/titlebar/ontop_normal_inactive.png"
+theme.titlebar_ontop_button_focus_inactive = "@AWESOME_THEMES_PATH@/default/titlebar/ontop_focus_inactive.png"
+theme.titlebar_ontop_button_normal_active = "@AWESOME_THEMES_PATH@/default/titlebar/ontop_normal_active.png"
+theme.titlebar_ontop_button_focus_active = "@AWESOME_THEMES_PATH@/default/titlebar/ontop_focus_active.png"
+
+theme.titlebar_sticky_button_normal_inactive = "@AWESOME_THEMES_PATH@/default/titlebar/sticky_normal_inactive.png"
+theme.titlebar_sticky_button_focus_inactive = "@AWESOME_THEMES_PATH@/default/titlebar/sticky_focus_inactive.png"
+theme.titlebar_sticky_button_normal_active = "@AWESOME_THEMES_PATH@/default/titlebar/sticky_normal_active.png"
+theme.titlebar_sticky_button_focus_active = "@AWESOME_THEMES_PATH@/default/titlebar/sticky_focus_active.png"
+
+theme.titlebar_floating_button_normal_inactive = "@AWESOME_THEMES_PATH@/default/titlebar/floating_normal_inactive.png"
+theme.titlebar_floating_button_focus_inactive = "@AWESOME_THEMES_PATH@/default/titlebar/floating_focus_inactive.png"
+theme.titlebar_floating_button_normal_active = "@AWESOME_THEMES_PATH@/default/titlebar/floating_normal_active.png"
+theme.titlebar_floating_button_focus_active = "@AWESOME_THEMES_PATH@/default/titlebar/floating_focus_active.png"
+
+theme.titlebar_maximized_button_normal_inactive = "@AWESOME_THEMES_PATH@/default/titlebar/maximized_normal_inactive.png"
+theme.titlebar_maximized_button_focus_inactive = "@AWESOME_THEMES_PATH@/default/titlebar/maximized_focus_inactive.png"
+theme.titlebar_maximized_button_normal_active = "@AWESOME_THEMES_PATH@/default/titlebar/maximized_normal_active.png"
+theme.titlebar_maximized_button_focus_active = "@AWESOME_THEMES_PATH@/default/titlebar/maximized_focus_active.png"
+
+-- You can use your own command to set your wallpaper
+theme.wallpaper_cmd = { [1] = "awsetbg @AWESOME_THEMES_PATH@/default/background.png",
+                        [2] = "awsetbg @AWESOME_THEMES_PATH@/default/background.png" }
+
+-- You can use your own layout icons like this:
+theme.layout_fairh = "@AWESOME_THEMES_PATH@/default/layouts/fairhw.png"
+theme.layout_fairv = "@AWESOME_THEMES_PATH@/default/layouts/fairvw.png"
+theme.layout_floating = "@AWESOME_THEMES_PATH@/default/layouts/floatingw.png"
+theme.layout_magnifier = "@AWESOME_THEMES_PATH@/default/layouts/magnifierw.png"
+theme.layout_max = "@AWESOME_THEMES_PATH@/default/layouts/maxw.png"
+theme.layout_fullscreen = "@AWESOME_THEMES_PATH@/default/layouts/fullscreenw.png"
+theme.layout_tilebottom = "@AWESOME_THEMES_PATH@/default/layouts/tilebottomw.png"
+theme.layout_tileleft = "@AWESOME_THEMES_PATH@/default/layouts/tileleftw.png"
+theme.layout_tile = "@AWESOME_THEMES_PATH@/default/layouts/tilew.png"
+theme.layout_tiletop = "@AWESOME_THEMES_PATH@/default/layouts/tiletopw.png"
+
+theme.awesome_icon = "@AWESOME_ICON_PATH@/awesome16.png"
+
+return theme
+-- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
