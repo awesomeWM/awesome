@@ -22,18 +22,11 @@ local capi =
     image = image
 }
 
---- Theme library
+--- Theme library.
 module("beautiful")
 
 -- Local data
 local theme = {}
-
---- Get a value directly.
--- @param key The key.
--- @return The value.
-function __index(self, key)
-    return theme[key]
-end
 
 --- Init function, should be runned at the beginning of configuration file.
 -- @param path The theme file path.
@@ -71,9 +64,9 @@ end
 --- Get the current theme.
 -- @return The current theme table.
 function get()
-    return _M
+    return theme
 end
 
-setmetatable(_M, _M)
+setmetatable(_M, { __index = function(t, k) return theme[k] end })
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
