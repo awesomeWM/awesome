@@ -9,6 +9,9 @@
 local io = io
 local os = os
 local print = print
+local pairs = pairs
+local type = type
+local dofile = dofile
 local setmetatable = setmetatable
 local util = require("awful.util")
 local package = package
@@ -36,29 +39,32 @@ end
 -- @param path The theme file path.
 function init(path)
     if path then
-       local f = io.open(path)
+        theme = dofile(path)
 
-       if not f then
-           return print("E: unable to load theme " .. path)
-       end
-
-       for key, value in f:read("*all"):gsub("^", "\n"):gmatch("\n[\t ]*([a-z_]+)[\t ]*=[\t ]*([^\n\t]+)") do
-            value = value:gsub("~", os.getenv("HOME"))
-            if key == "wallpaper_cmd" then
-                for s = 1, capi.screen.count() do
-                    util.spawn(value, false, s)
+        if theme then
+            -- try and grab user's $HOME directory
+            local homedir = os.getenv("HOME")
+            -- expand '~'
+            if homedir then
+                for k, v in pairs(theme) do
+                    if type(v) == "string" then theme[k] = v:gsub("~", homedir) end
                 end
-            elseif key == "font" then
-                capi.awesome.font = value
-            elseif key == "fg_normal" then
-                capi.awesome.fg = value
-            elseif key == "bg_normal" then
-                capi.awesome.bg = value
             end
-            -- Store.
-            theme[key] = value
+
+            -- setup wallpaper
+            if theme.wallpaper_cmd then
+                for s = 1, capi.screen.count() do
+                    util.spawn(theme.wallpaper_cmd[util.cycle(#theme.wallpaper_cmd, s)], false, s)
+                end
+            end
+            if theme.font then capi.awesome.font = theme.font end
+            if theme.fg_normal then capi.awesome.fg = theme.fg_normal end
+            if theme.bg_normal then capi.awesome.bg = theme.bg_normal end
+        else
+            return print("E: error loading theme file " .. path)
         end
-        f:close()
+    else
+        return print("E: error loading theme: no path specified " )
     end
 end
 

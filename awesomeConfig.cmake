@@ -275,13 +275,11 @@ set(AWESOME_THEMES_PATH      ${AWESOME_DATA_PATH}/themes)
 # }}}
 
 # {{{ Configure files
-file(GLOB_RECURSE awesome_lua_configure_files RELATIVE ${SOURCE_DIR} ${SOURCE_DIR}/lib/*.lua.in)
+file(GLOB_RECURSE awesome_lua_configure_files RELATIVE ${SOURCE_DIR} ${SOURCE_DIR}/lib/*.lua.in ${SOURCE_DIR}/themes/*/*.lua.in)
 set(AWESOME_CONFIGURE_FILES 
     ${awesome_lua_configure_files}
     config.h.in
     awesomerc.lua.in
-    themes/default/theme.in
-    themes/sky/theme.in
     awesome-version-internal.h.in
     awesome.doxygen.in)
 

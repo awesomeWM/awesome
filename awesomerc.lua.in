@@ -8,9 +8,9 @@ require("naughty")
 -- {{{ Variable definitions
 -- Themes define colours, icons, and wallpapers
 -- The default is a dark theme
-theme_path = "@AWESOME_THEMES_PATH@/default/theme"
+theme_path = "@AWESOME_THEMES_PATH@/default/theme.lua"
 -- Uncommment this for a lighter theme
--- theme_path = "@AWESOME_THEMES_PATH@/sky/theme"
+-- theme_path = "@AWESOME_THEMES_PATH@/sky/theme.lua"
 
 -- Actually load theme
 beautiful.init(theme_path)
