@@ -31,6 +31,10 @@
 
 bool xutil_text_prop_get(xcb_connection_t *, xcb_window_t, xcb_atom_t, char **, ssize_t *);
 
+void xutil_lock_mask_get(xcb_connection_t *, xcb_get_modifier_mapping_cookie_t,
+                         xcb_key_symbols_t *,
+                         uint16_t *, uint16_t *, uint16_t *, uint16_t *);
+
 /** Set the same handler for all errors */
 void xutil_error_handler_catch_all_set(xcb_event_handlers_t *,
                                        xcb_generic_error_handler_t, void *);

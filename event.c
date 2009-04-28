@@ -792,9 +792,17 @@ event_handle_mappingnotify(void *data,
     if(ev->request == XCB_MAPPING_MODIFIER
        || ev->request == XCB_MAPPING_KEYBOARD)
     {
+        xcb_get_modifier_mapping_cookie_t xmapping_cookie =
+            xcb_get_modifier_mapping_unchecked(globalconf.connection);
+
         /* Free and then allocate the key symbols */
         xcb_key_symbols_free(globalconf.keysyms);
         globalconf.keysyms = xcb_key_symbols_alloc(globalconf.connection);
+
+        xutil_lock_mask_get(globalconf.connection, xmapping_cookie,
+                            globalconf.keysyms, &globalconf.numlockmask,
+                            &globalconf.shiftlockmask, &globalconf.capslockmask,
+                            &globalconf.modeswitchmask);
 
         int nscreen = xcb_setup_roots_length(xcb_get_setup(connection));
 

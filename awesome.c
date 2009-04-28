@@ -458,6 +458,8 @@ main(int argc, char **argv)
 
     /* Allocate the key symbols */
     globalconf.keysyms = xcb_key_symbols_alloc(globalconf.connection);
+    xcb_get_modifier_mapping_cookie_t xmapping_cookie =
+        xcb_get_modifier_mapping_unchecked(globalconf.connection);
 
     /* init atom cache */
     atoms_init(globalconf.connection);
@@ -476,6 +478,11 @@ main(int argc, char **argv)
 
     for(colors_nbr = 0; colors_nbr < 2; colors_nbr++)
         xcolor_init_reply(colors_reqs[colors_nbr]);
+
+    xutil_lock_mask_get(globalconf.connection, xmapping_cookie,
+                        globalconf.keysyms, &globalconf.numlockmask,
+                        &globalconf.shiftlockmask, &globalconf.capslockmask,
+                        &globalconf.modeswitchmask);
 
     /* do this only for real screen */
     for(screen_nbr = 0;

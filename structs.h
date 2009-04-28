@@ -70,6 +70,8 @@ struct awesome_t
     key_array_t keys;
     /** Root window mouse bindings */
     button_array_t buttons;
+    /** Modifiers masks */
+    uint16_t numlockmask, shiftlockmask, capslockmask, modeswitchmask;
     /** Check for XRandR extension */
     bool have_randr;
     /** Check for XTest extension */
