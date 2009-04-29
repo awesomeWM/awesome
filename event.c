@@ -132,14 +132,14 @@ event_handle_button(void *data, xcb_connection_t *connection, xcb_button_press_e
     client_t *c;
     wibox_t *wibox;
 
+    if(event_handle_mousegrabber(ev->root_x, ev->root_y, 1 << (ev->detail - 1 + 8)))
+        return 0;
+
     /* ev->state is
      * button status (8 bits) + modifiers status (8 bits)
      * we don't care for button status that we get, especially on release, so
      * drop them */
     ev->state &= 0x00ff;
-
-    if(event_handle_mousegrabber(ev->root_x, ev->root_y, ev->state))
-        return 0;
 
     if((wibox = wibox_getbywin(ev->event))
        || (wibox = wibox_getbywin(ev->child)))
