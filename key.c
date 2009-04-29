@@ -717,7 +717,7 @@ keysym_to_xf86(char *buf, ssize_t len, const xcb_keysym_t ksym)
 {
     switch(ksym)
     {
-#define CASE(k)  case XF86XK_##k: a_strcpy(buf, len, #k); return true
+#define CASE(k)  case XF86XK_##k: a_strcpy(buf, len, "XF86"); a_strcat(buf, len, #k); return true
         CASE(ModeLock);
         CASE(MonBrightnessUp);
         CASE(MonBrightnessDown);
