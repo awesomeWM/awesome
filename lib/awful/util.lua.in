@@ -74,6 +74,20 @@ function spawn(cmd, sn, screen)
     end
 end
 
+--- Spawn a program using the shell.
+-- @param cmd The command.
+-- @param screen The screen where to run the command.
+function spawn_with_shell(cmd, screen)
+    if cmd and cmd ~= "" then
+        -- Get the shell once for all
+        if not shell then
+            shell = os.getenv("SHELL") or "/bin/sh"
+        end
+        cmd = shell .. " -c \"" .. cmd .. "\""
+        return capi.awesome.spawn(cmd, false, screen or capi.mouse.screen)
+    end
+end
+
 --- Read a program output and returns its output as a string.
 -- @param cmd The command to run.
 -- @return A string with the program output.
