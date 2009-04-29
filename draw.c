@@ -544,7 +544,7 @@ draw_graph_line(draw_context_t *ctx, area_t rect, int *to, int cur_index,
 
     /* onto the right border: fills a pixel also when there's only one value */
     if(grow == Right)
-        cairo_line_to(ctx->cr, x, y - to[cur_index]);
+        cairo_line_to(ctx->cr, x, y - to[(cur_index + (w - 1)) % w]);
 
     cairo_stroke(ctx->cr);
 
