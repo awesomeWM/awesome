@@ -510,7 +510,8 @@ fi
 
 
 $WPSETTER `eval echo $option` "$wallpaper"
-if [ $? -ne 0 ]; then
+if [ $? -ne 0 -a "$WPSETTER" != "display" ] ||
+   [ $? -ne 1 -a "$WPSETTER"  = "display" ]; then
     message "Something went wrong while setting the wallpaper.
 Run '$WPSETTER "`eval echo $option` $wallpaper"' from an xterm to find out what."
     exit 1
