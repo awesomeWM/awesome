@@ -49,6 +49,7 @@ instance
 key
 key_press
 key_release
+keysym
 leader_id
 left
 len

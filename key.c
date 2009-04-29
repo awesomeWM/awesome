@@ -20,7 +20,7 @@
  *
  */
 
-/* XStringToKeysym() */
+/* XStringToKeysym() and XKeysymToString */
 #include <X11/Xlib.h>
 
 /* XCB doesn't provide keysyms definition */
@@ -1135,6 +1135,8 @@ luaA_setmodifiers(lua_State *L, int ud, uint16_t *mod)
  * \return The number of elements pushed on stack.
  * \luastack
  * \lfield key The key to press to triggers an event.
+ * \lfield keysym Same as key, but return the name of the key symbol. It can
+ * be identical to key, but for characters like '.' it will return 'period'.
  * \lfield modifiers The modifier key that should be pressed while the key is
  * pressed. An array with all the modifiers. Valid modifiers are: Any, Mod1,
  * Mod2, Mod3, Mod4, Mod5, Shift, Lock and Control.
@@ -1168,6 +1170,12 @@ luaA_key_index(lua_State *L)
 
             lua_pushstring(L, buf);
         }
+        break;
+      case A_TK_KEYSYM:
+        if(k->keysym)
+            lua_pushstring(L, XKeysymToString(k->keysym));
+        else
+            return 0;
         break;
       case A_TK_MODIFIERS:
         luaA_pushmodifiers(L, k->mod);
