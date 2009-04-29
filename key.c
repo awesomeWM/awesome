@@ -690,21 +690,17 @@ keysym_to_xkb(char *buf, ssize_t len, const xcb_keysym_t ksym)
 #undef CASE
 
 bool
-key_press_lookup_string(uint16_t state,
-                        xcb_keycode_t detail,
-                        char *buf, ssize_t buf_len,
-                        xcb_keysym_t *ksym)
+key_press_lookup_string(xcb_keysym_t ksym,
+                        char *buf, ssize_t buf_len)
 {
-    *ksym = key_getkeysym(detail, state);
-
     /* Handle special KeySym (Tab, Newline...) */
-    if((*ksym & 0xffffff00) == 0xff00)
-        return keysym_to_str(buf, buf_len, *ksym);
-    else if((*ksym & 0xfffffe00) == 0xfe00)
-        return keysym_to_xkb(buf, buf_len, *ksym);
+    if((ksym & 0xffffff00) == 0xff00)
+        return keysym_to_str(buf, buf_len, ksym);
+    else if((ksym & 0xfffffe00) == 0xfe00)
+        return keysym_to_xkb(buf, buf_len, ksym);
 
     /* Handle other KeySym (like unicode...) */
-    return keysym_to_utf8(buf, buf_len, *ksym);
+    return keysym_to_utf8(buf, buf_len, ksym);
 }
 
 /** Return the keysym from keycode.

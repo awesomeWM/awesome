@@ -61,10 +61,12 @@ keygrabber_grab(void)
 bool
 keygrabber_handlekpress(lua_State *L, xcb_key_press_event_t *e)
 {
-    xcb_keysym_t ksym = 0;
-    char buf[MAX(MB_LEN_MAX, 32)];
+    /* transfer event (keycode + modifiers) to keysym */
+    xcb_keysym_t ksym = key_getkeysym(e->detail, e->state);
 
-    if(!key_press_lookup_string(e->state, e->detail, buf, countof(buf), &ksym))
+    /* convert keysym to string */
+    char buf[MAX(MB_LEN_MAX, 32)];
+    if(!key_press_lookup_string(ksym, buf, countof(buf)))
         return false;
 
     luaA_pushmodifiers(L, e->state);
