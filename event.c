@@ -163,7 +163,8 @@ event_handle_button(void *data, xcb_connection_t *connection, xcb_button_press_e
         if(w)
         {
             widget_push(globalconf.L, w);
-            event_button_callback(ev, &w->buttons, 1, NULL);
+            wibox_push(globalconf.L, wibox);
+            event_button_callback(ev, &w->buttons, 2, NULL);
         }
     }
     else if((c = client_getbywin(ev->event)))
