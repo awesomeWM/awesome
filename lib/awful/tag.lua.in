@@ -68,7 +68,7 @@ function history.update(screen)
     end
 end
 
--- Revert tag history.
+--- Revert tag history.
 -- @param screen The screen number.
 function history.restore(screen)
     local s = screen or capi.mouse.screen
