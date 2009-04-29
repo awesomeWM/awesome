@@ -32,6 +32,20 @@ local data = setmetatable({}, { __mode = 'k' })
 -- Predeclaration for buttons
 local button_groups
 
+local function button_callback_focus_raise_move(w, t)
+    capi.client.focus = t.client
+    t.client:raise()
+    mouse.client.move(t.client)
+end
+
+local function button_callback_move(w, t)
+    return mouse.client.move(t.client)
+end
+
+local function button_callback_resize(w, t)
+    return mouse.client.resize(t.client)
+end
+
 --- Create a standard titlebar.
 -- @param c The client.
 -- @param args Arguments.
@@ -58,16 +72,13 @@ function add(c, args)
     local title = capi.widget({ type = "textbox", align = "flex" })
     if c.name then
         title.text = " " .. util.escape(c.name) .. " "
-    else
-        title.text = nil
     end
 
     -- Redirect relevant events to the client the titlebar belongs to
     local bts = util.table.join(
-        button({ }, 1, function (t) capi.client.focus = t.client t.client:raise() mouse.client.move(t.client) end),
-        button({ args.modkey }, 1, function (t) mouse.client.move(t.client) end),
-        button({ args.modkey }, 3, function (t) mouse.client.resize(t.client) end)
-    )
+        button({ }, 1, button_callback_focus_raise_move),
+        button({ args.modkey }, 1, button_callback_move),
+        button({ args.modkey }, 3, button_callback_resize))
     title:buttons(bts)
 
     local appicon = capi.widget({ type = "imagebox", align = "left" })
@@ -145,11 +156,7 @@ end
 -- @param theme  The theme from beautifull. Used to get the image paths
 -- @param state  The state the button is associated to. Containse path the action and info about the image
 local function button_new(c, name, modkey, theme, state)
-    local bts = util.table.join(
-        button({ }, 1, nil,  state.action),
-        button({ modkey }, 1, function (t) mouse.client.move(t.client) end),
-        button({ modkey }, 3, function (t) mouse.client.resize(t.client) end)
-    )
+    local bts = button({ }, 1, nil,  state.action)
 
     -- get the image path from the theme. Only return a button if we find an image
     local img
@@ -320,50 +327,50 @@ local close_buttons = button_group("close",
                                    { align = "left" },
                                    select_state_focus,
                                    { idx = "n", img = "normal",
-                                     action = function (t) t.client:kill() end },
+                                     action = function (w, t) t.client:kill() end },
                                    { idx = "f", img = "focus",
-                                     action = function (t) t.client:kill() end })
+                                     action = function (w, t) t.client:kill() end })
 
 local ontop_buttons = button_group("ontop",
                                    { align = "right" },
                                    function(c,p) return select_state(c, p, "ontop") end,
                                    { idx = "n/i", img = "normal_inactive",
-                                     action = function(t) t.client.ontop = true end },
+                                     action = function(w, t) t.client.ontop = true end },
                                    { idx = "f/i", img = "focus_inactive",
-                                     action = function(t) t.client.ontop = true end },
+                                     action = function(w, t) t.client.ontop = true end },
                                    { idx = "n/a", img = "normal_active",
-                                     action = function(t) t.client.ontop = false end },
+                                     action = function(w, t) t.client.ontop = false end },
                                    { idx = "f/a", img = "focus_active",
-                                     action = function(t) t.client.ontop = false end })
+                                     action = function(w, t) t.client.ontop = false end })
 
 local sticky_buttons = button_group("sticky",
                                     { align = "right" },
                                     function(c,p) return select_state(c,p,"sticky") end,
                                     { idx = "n/i", img = "normal_inactive",
-                                      action = function(t) t.client.sticky = true end },
+                                      action = function(w, t) t.client.sticky = true end },
                                     { idx = "f/i", img = "focus_inactive",
-                                      action = function(t) t.client.sticky = true end },
+                                      action = function(w, t) t.client.sticky = true end },
                                     { idx = "n/a", img = "normal_active",
-                                      action = function(t) t.client.sticky = false end },
+                                      action = function(w, t) t.client.sticky = false end },
                                     { idx = "f/a", img = "focus_active",
-                                      action = function(t) t.client.sticky = false end })
+                                      action = function(w, t) t.client.sticky = false end })
 
 local maximized_buttons = button_group("maximized",
                                      { align = "right" },
                                      select_state_maximized,
                                      { idx = "n/i", img = "normal_inactive",
-                                       action = function(t) t.client.maximized_horizontal = true
-                                                            t.client.maximized_vertical = true end },
+                                       action = function(w, t) t.client.maximized_horizontal = true
+                                                               t.client.maximized_vertical = true end },
                                      { idx = "f/i", img = "focus_inactive",
-                                       action = function(t) t.client.maximized_horizontal = true
-                                                            t.client.maximized_vertical = true end },
+                                       action = function(w, t) t.client.maximized_horizontal = true
+                                                               t.client.maximized_vertical = true end },
                                      { idx = "n/a", img = "normal_active",
-                                       action = function(t) t.client.maximized_horizontal = false
-                                                            t.client.maximized_vertical = false end },
+                                       action = function(w, t) t.client.maximized_horizontal = false
+                                                               t.client.maximized_vertical = false end },
                                      { idx = "f/a", img = "focus_active",
-                                       action = function(t) t.client.maximized_horizontal = false
-                                                            t.client.maximized_vertical = false end })
-local function floating_update(t)
+                                       action = function(w, t) t.client.maximized_horizontal = false
+                                                               t.client.maximized_vertical = false end })
+local function floating_update(w, t)
     client.floating.toggle(t.client)
 end
 
