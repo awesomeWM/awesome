@@ -25,6 +25,7 @@
 
 /* XCB doesn't provide keysyms definition */
 #include <X11/keysym.h>
+#include <X11/XF86keysym.h>
 
 #include "structs.h"
 #include "common/xutil.h"
@@ -711,6 +712,191 @@ keysym_to_xkb(char *buf, ssize_t len, const xcb_keysym_t ksym)
 }
 #undef CASE
 
+static bool
+keysym_to_xf86(char *buf, ssize_t len, const xcb_keysym_t ksym)
+{
+    switch(ksym)
+    {
+#define CASE(k)  case XF86XK_##k: a_strcpy(buf, len, #k); return true
+        CASE(ModeLock);
+        CASE(MonBrightnessUp);
+        CASE(MonBrightnessDown);
+        CASE(KbdLightOnOff);
+        CASE(KbdBrightnessUp);
+        CASE(KbdBrightnessDown);
+        CASE(Standby);
+        CASE(AudioLowerVolume);
+        CASE(AudioMute);
+        CASE(AudioRaiseVolume);
+        CASE(AudioPlay);
+        CASE(AudioStop);
+        CASE(AudioPrev);
+        CASE(AudioNext);
+        CASE(HomePage);
+        CASE(Mail);
+        CASE(Start);
+        CASE(Search);
+        CASE(AudioRecord);
+        CASE(Calculator);
+        CASE(Memo);
+        CASE(ToDoList);
+        CASE(Calendar);
+        CASE(PowerDown);
+        CASE(ContrastAdjust);
+        CASE(RockerUp);
+        CASE(RockerDown);
+        CASE(RockerEnter);
+        CASE(Back);
+        CASE(Forward);
+        CASE(Stop);
+        CASE(Refresh);
+        CASE(PowerOff);
+        CASE(WakeUp);
+        CASE(Eject);
+        CASE(ScreenSaver);
+        CASE(WWW);
+        CASE(Sleep);
+        CASE(Favorites);
+        CASE(AudioPause);
+        CASE(AudioMedia);
+        CASE(MyComputer);
+        CASE(VendorHome);
+        CASE(LightBulb);
+        CASE(Shop);
+        CASE(History);
+        CASE(OpenURL);
+        CASE(AddFavorite);
+        CASE(HotLinks);
+        CASE(BrightnessAdjust);
+        CASE(Finance);
+        CASE(Community);
+        CASE(AudioRewind);
+        CASE(BackForward);
+        CASE(Launch0);
+        CASE(Launch1);
+        CASE(Launch2);
+        CASE(Launch3);
+        CASE(Launch4);
+        CASE(Launch5);
+        CASE(Launch6);
+        CASE(Launch7);
+        CASE(Launch8);
+        CASE(Launch9);
+        CASE(LaunchA);
+        CASE(LaunchB);
+        CASE(LaunchC);
+        CASE(LaunchD);
+        CASE(LaunchE);
+        CASE(LaunchF);
+        CASE(ApplicationLeft);
+        CASE(ApplicationRight);
+        CASE(Book);
+        CASE(CD);
+        CASE(Calculater);
+        CASE(Clear);
+        CASE(Close);
+        CASE(Copy);
+        CASE(Cut);
+        CASE(Display);
+        CASE(DOS);
+        CASE(Documents);
+        CASE(Excel);
+        CASE(Explorer);
+        CASE(Game);
+        CASE(Go);
+        CASE(iTouch);
+        CASE(LogOff);
+        CASE(Market);
+        CASE(Meeting);
+        CASE(MenuKB);
+        CASE(MenuPB);
+        CASE(MySites);
+        CASE(New);
+        CASE(News);
+        CASE(OfficeHome);
+        CASE(Open);
+        CASE(Option);
+        CASE(Paste);
+        CASE(Phone);
+        CASE(Q);
+        CASE(Reply);
+        CASE(Reload);
+        CASE(RotateWindows);
+        CASE(RotationPB);
+        CASE(RotationKB);
+        CASE(Save);
+        CASE(ScrollUp);
+        CASE(ScrollDown);
+        CASE(ScrollClick);
+        CASE(Send);
+        CASE(Spell);
+        CASE(SplitScreen);
+        CASE(Support);
+        CASE(TaskPane);
+        CASE(Terminal);
+        CASE(Tools);
+        CASE(Travel);
+        CASE(UserPB);
+        CASE(User1KB);
+        CASE(User2KB);
+        CASE(Video);
+        CASE(WheelButton);
+        CASE(Word);
+        CASE(Xfer);
+        CASE(ZoomIn);
+        CASE(ZoomOut);
+        CASE(Away);
+        CASE(Messenger);
+        CASE(WebCam);
+        CASE(MailForward);
+        CASE(Pictures);
+        CASE(Music);
+        CASE(Battery);
+        CASE(Bluetooth);
+        CASE(WLAN);
+        CASE(UWB);
+        CASE(AudioForward);
+        CASE(AudioRepeat);
+        CASE(AudioRandomPlay);
+        CASE(Subtitle);
+        CASE(AudioCycleTrack);
+        CASE(CycleAngle);
+        CASE(FrameBack);
+        CASE(FrameForward);
+        CASE(Time);
+        CASE(Select);
+        CASE(View);
+        CASE(TopMenu);
+        CASE(Red);
+        CASE(Green);
+        CASE(Yellow);
+        CASE(Blue);
+        CASE(Suspend);
+        CASE(Hibernate);
+        CASE(Switch_VT_1);
+        CASE(Switch_VT_2);
+        CASE(Switch_VT_3);
+        CASE(Switch_VT_4);
+        CASE(Switch_VT_5);
+        CASE(Switch_VT_6);
+        CASE(Switch_VT_7);
+        CASE(Switch_VT_8);
+        CASE(Switch_VT_9);
+        CASE(Switch_VT_10);
+        CASE(Switch_VT_11);
+        CASE(Switch_VT_12);
+        CASE(Ungrab);
+        CASE(ClearGrab);
+        CASE(Next_VMode);
+        CASE(Prev_VMode);
+      default:
+        return false;
+    }
+
+    return true;
+}
+#undef CASE
+
 bool
 key_press_lookup_string(xcb_keysym_t ksym,
                         char *buf, ssize_t buf_len)
@@ -720,6 +906,8 @@ key_press_lookup_string(xcb_keysym_t ksym,
         return keysym_to_str(buf, buf_len, ksym);
     else if((ksym & 0xfffffe00) == 0xfe00)
         return keysym_to_xkb(buf, buf_len, ksym);
+    else if((ksym & 0x1008F000) == 0x1008F000)
+        return keysym_to_xf86(buf, buf_len, ksym);
 
     /* Handle other KeySym (like unicode...) */
     return keysym_to_utf8(buf, buf_len, ksym);
