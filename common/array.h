@@ -32,9 +32,11 @@
     } pfx##_array_t;
 
 #define foreach(var, array) \
-    for(typeof((array).tab) var = (array).tab; \
-        var >= (array).tab && var < (array).tab + (array).len; \
-        var++)
+    for(int __foreach_index_##var = 0; \
+        __foreach_index_##var < (array).len; \
+        __foreach_index_##var++) \
+        for(typeof((array).tab) var = &(array).tab[__foreach_index_##var]; \
+            var; var = NULL)
 
 #define ARRAY_FUNCS(type_t, pfx, dtor)                                      \
     static inline pfx##_array_t * pfx##_array_new(void) {                   \
