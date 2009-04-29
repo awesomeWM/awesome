@@ -97,8 +97,9 @@ DO_EVENT_HOOK_CALLBACK(key, XCB_KEY, keyb_t, key_array_t, event_key_match)
  * \param x The x coordinate.
  * \param y The y coordinate.
  * \param mask The mask buttons.
+ * \return True if the event was handled.
  */
-static void
+static bool
 event_handle_mousegrabber(int x, int y, uint16_t mask)
 {
     if(globalconf.mousegrabber != LUA_REFNIL)
@@ -113,7 +114,9 @@ event_handle_mousegrabber(int x, int y, uint16_t mask)
         else if(!lua_isboolean(globalconf.L, -1) || !lua_toboolean(globalconf.L, -1))
             luaA_mousegrabber_stop(globalconf.L);
         lua_pop(globalconf.L, 1);  /* pop returned value */
+        return true;
     }
+    return false;
 }
 
 /** The button press event handler.
@@ -135,7 +138,8 @@ event_handle_button(void *data, xcb_connection_t *connection, xcb_button_press_e
      * drop them */
     ev->state &= 0x00ff;
 
-    event_handle_mousegrabber(ev->root_x, ev->root_y, ev->state);
+    if(event_handle_mousegrabber(ev->root_x, ev->root_y, ev->state))
+        return 0;
 
     if((wibox = wibox_getbywin(ev->event))
        || (wibox = wibox_getbywin(ev->child)))
@@ -161,9 +165,6 @@ event_handle_button(void *data, xcb_connection_t *connection, xcb_button_press_e
             widget_push(globalconf.L, w);
             event_button_callback(ev, &w->buttons, 1, NULL);
         }
-
-        /* return even if no widget match */
-        return 0;
     }
     else if((c = client_getbywin(ev->event)))
     {
@@ -393,7 +394,8 @@ event_handle_motionnotify(void *data __attribute__ ((unused)),
 {
     wibox_t *wibox;
 
-    event_handle_mousegrabber(ev->root_x, ev->root_y, ev->state);
+    if(event_handle_mousegrabber(ev->root_x, ev->root_y, ev->state))
+        return 0;
 
     if((wibox = wibox_getbywin(ev->event)))
     {
