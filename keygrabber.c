@@ -635,11 +635,12 @@ keysym_to_xkb(char *buf, ssize_t len, const xcb_keysym_t ksym)
 #undef CASE
 
 static bool
-key_press_lookup_string(xcb_key_press_event_t *e,
+key_press_lookup_string(uint16_t state,
+                        xcb_keycode_t detail,
                         char *buf, ssize_t buf_len,
                         xcb_keysym_t *ksym)
 {
-    *ksym = key_getkeysym(e->detail, e->state);
+    *ksym = key_getkeysym(detail, state);
 
     /* Handle special KeySym (Tab, Newline...) */
     if((*ksym & 0xffffff00) == 0xff00)
@@ -689,7 +690,7 @@ keygrabber_handlekpress(lua_State *L, xcb_key_press_event_t *e)
     xcb_keysym_t ksym = 0;
     char buf[MAX(MB_LEN_MAX, 32)];
 
-    if(!key_press_lookup_string(e, buf, countof(buf), &ksym))
+    if(!key_press_lookup_string(e->state, e->detail, buf, countof(buf), &ksym))
         return false;
 
     luaA_pushmodifiers(L, e->state);
