@@ -3,9 +3,14 @@
 # rlwrap provides readline to stuff which doesn't know readline by itself
 RLWRAP=`which rlwrap 2>/dev/null`
 
-if [ "$RLWRAP" != "" ] && [ "$A_RERUN" = "" ]
+if [ "$RLWRAP" != "" ]
 then
-	A_RERUN="no" exec $RLWRAP $0
+    if [ "$A_RERUN" = "" ]
+    then
+        A_RERUN="no" exec $RLWRAP $0
+    fi
+else
+    USE_READLINE="-e"
 fi
 
 DBUS_SEND=dbus-send
@@ -25,7 +30,7 @@ a_dbus_send()
         $DBUS_METHOD string:"$1" | tail -n +2
 }
 
-while read -p "awesome# " line
+while read ${USE_READLINE} -r -p "awesome# " line
 do
     a_dbus_send "$line"
 done
