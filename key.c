@@ -1,7 +1,7 @@
 /*
  * key.c - Key bindings configuration management
  *
- * Copyright © 2008 Julien Danjou <julien@danjou.info>
+ * Copyright © 2008-2009 Julien Danjou <julien@danjou.info>
  * Copyright © 2008 Pierre Habouzit <madcoder@debian.org>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -20,7 +20,7 @@
  *
  */
 
-/* XStringToKeysym() and XKeysymToString()*/
+/* XStringToKeysym() */
 #include <X11/Xlib.h>
 
 /* XCB doesn't provide keysyms definition */
@@ -951,7 +951,13 @@ luaA_key_index(lua_State *L)
             lua_pushlstring(L, buf, slen);
         }
         else
-            lua_pushstring(L, XKeysymToString(k->keysym));
+        {
+            char buf[MAX(MB_LEN_MAX, 32)];
+            if(!key_press_lookup_string(k->keysym, buf, countof(buf)))
+                return 0;
+
+            lua_pushstring(L, buf);
+        }
         break;
       case A_TK_MODIFIERS:
         luaA_pushmodifiers(L, k->mod);
