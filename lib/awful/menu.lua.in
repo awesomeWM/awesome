@@ -95,7 +95,7 @@ local function get_parents(menu)
 end
 
 local function exec(menu, num, mouse_event)
-    cmd = menu.items[num].cmd
+    local cmd = menu.items[num].cmd
     if type(cmd) == "table" then
         if #cmd == 0 then
             return
@@ -246,7 +246,7 @@ function clients(menu)
 
     menu.items = cls_t
 
-    m = new(menu)
+    local m = new(menu)
     m:show()
     return m
 end
