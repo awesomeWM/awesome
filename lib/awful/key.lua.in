@@ -25,7 +25,7 @@ ignore_modifiers = { "Lock", "Mod2" }
 -- ignored by default by this function), creatina key binding with this function
 -- will return 2 key objects: one with CapsLock on, and the other one with
 -- CapsLock off.
--- @see C api key() function for parameters.
+-- @see capi.key
 -- @return A table with one or several key objects.
 function new(mod, ...)
     local ret = {}

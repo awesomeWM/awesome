@@ -25,7 +25,7 @@ ignore_modifiers = { "Lock", "Mod2" }
 -- ignored by default by this function), creatina button binding with this function
 -- will return 2 button objects: one with CapsLock on, and the other one with
 -- CapsLock off.
--- @see C api button() function for parameters.
+-- @see capi.button
 -- @return A table with one or several button objects.
 function new(mod, ...)
     local ret = {}
