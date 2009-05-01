@@ -66,12 +66,14 @@ function add(c, args)
     data[c].fg_focus = args.fg_focus or theme.titlebar_fg_focus or theme.fg_focus
     data[c].bg_focus = args.bg_focus or theme.titlebar_bg_focus or theme.bg_focus
     data[c].width = args.width
+    data[c].font = args.font or theme.titlebar_font or theme.font
 
     local tb = capi.wibox(args)
 
     local title = capi.widget({ type = "textbox", align = "flex" })
     if c.name then
-        title.text = " " .. util.escape(c.name) .. " "
+        title.text = "<span font_desc='" .. data[c].font .. "'> " ..
+                     util.escape(c.name) .. " </span>"
     end
 
     -- Redirect relevant events to the client the titlebar belongs to
@@ -119,7 +121,8 @@ function update(c, prop)
         local widgets = c.titlebar.widgets
         if prop == "name" then
             if widgets.title then
-                widgets.title.text = " " .. util.escape(c.name) .. " "
+                widgets.title.text = "<span font_desc='" .. data[c].font ..
+                                     "'> ".. util.escape(c.name) .. " </span>"
             end
         elseif prop == "icon" then
             if widgets.appicon then
