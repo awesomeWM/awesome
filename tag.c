@@ -393,9 +393,6 @@ luaA_tag_newindex(lua_State *L)
         return 0;
     }
 
-    if(tag->screen && tag->selected)
-        tag->screen->need_arrange = true;
-
     return 0;
 }
 
