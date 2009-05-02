@@ -406,9 +406,8 @@ awful.hooks.manage.register(function (c, startup)
     -- c.size_hints_honor = false
 end)
 
--- Hook function to execute when arranging the screen.
--- (tag switch, new client, etc)
-awful.hooks.arrange.register(function (screen)
+-- Hook function to execute when switching tag selection.
+awful.hooks.tags.register(function (screen, tag, view)
     local layout = awful.layout.getname(awful.layout.get(screen))
     if layout and beautiful["layout_" ..layout] then
         mylayoutbox[screen].image = image(beautiful["layout_" .. layout])
@@ -418,7 +417,7 @@ awful.hooks.arrange.register(function (screen)
 
     -- Give focus to the latest client in history if no window has focus
     -- or if the current window is a desktop or a dock one.
-    if not client.focus then
+    if not client.focus or not client.focus:isvisible() then
         local c = awful.client.focus.history.get(screen, 0)
         if c then client.focus = c end
     end

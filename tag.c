@@ -54,10 +54,22 @@ luaA_tag_gc(lua_State *L)
 static void
 tag_view(tag_t *tag, bool view)
 {
+    int screen_index = screen_array_indexof(&globalconf.screens, tag->screen);
+
     tag->selected = view;
-    ewmh_update_net_current_desktop(screen_virttophys(screen_array_indexof(&globalconf.screens,
-                                                                           tag->screen)));
     tag->screen->need_arrange = true;
+    ewmh_update_net_current_desktop(screen_virttophys(screen_index));
+
+    if(globalconf.hooks.tags != LUA_REFNIL)
+    {
+        lua_pushnumber(globalconf.L, screen_index + 1);
+        tag_push(globalconf.L, tag);
+        if(view)
+            lua_pushliteral(globalconf.L, "select");
+        else
+            lua_pushliteral(globalconf.L, "unselect");
+        luaA_dofunction(globalconf.L, globalconf.hooks.tags, 3, 0);
+    }
 }
 
 /** Append a tag which on top of the stack to a screen.
