@@ -76,7 +76,7 @@ DO_ARRAY(luaA_ref, luaA_ref, DO_NOTHING)
     {                                                                          \
         if(item)                                                               \
         {                                                                      \
-            assert(items->refs.len);                                           \
+            assert(item->refs.len);                                            \
             luaL_unref(L, LUA_REGISTRYINDEX, item->refs.tab[0]);               \
             luaA_ref_array_take(&item->refs, 0);                               \
         }                                                                      \
