@@ -143,25 +143,14 @@ screen_getbycoord(screen_t *screen, int x, int y)
 /** Get screens info.
  * \param screen Screen.
  * \param wiboxes Wiboxes list to remove.
- * \param padding Padding.
  * \param strut Honor windows strut.
  * \return The screen area.
  */
 area_t
-screen_area_get(screen_t *screen, wibox_array_t *wiboxes,
-                padding_t *padding, bool strut)
+screen_area_get(screen_t *screen, wibox_array_t *wiboxes, bool strut)
 {
     area_t area = screen->geometry;
     uint16_t top = 0, bottom = 0, left = 0, right = 0;
-
-    /* make padding corrections */
-    if(padding)
-    {
-        area.x += padding->left;
-        area.y += padding->top;
-        area.width -= padding->left + padding->right;
-        area.height -= padding->top + padding->bottom;
-    }
 
     if(strut)
         foreach(_c, globalconf.clients)
@@ -236,11 +225,10 @@ screen_area_get(screen_t *screen, wibox_array_t *wiboxes,
 /** Get display info.
  * \param phys_screen Physical screen number.
  * \param wiboxes The wiboxes.
- * \param padding Padding.
  * \return The display area.
  */
 area_t
-display_area_get(int phys_screen, wibox_array_t *wiboxes, padding_t *padding)
+display_area_get(int phys_screen, wibox_array_t *wiboxes)
 {
     xcb_screen_t *s = xutil_screen_get(globalconf.connection, phys_screen);
     area_t area = { .x = 0,
@@ -256,14 +244,6 @@ display_area_get(int phys_screen, wibox_array_t *wiboxes, padding_t *padding)
             area.height -= (w->position == Top || w->position == Bottom) ? w->sw.geometry.height : 0;
         }
 
-    /* make padding corrections */
-    if(padding)
-    {
-            area.x += padding->left;
-            area.y += padding->top;
-            area.width -= padding->left + padding->right;
-            area.height -= padding->top + padding->bottom;
-    }
     return area;
 }
 
@@ -327,8 +307,8 @@ screen_client_moveto(client_t *c, screen_t *new_screen, bool dotag, bool doresiz
     if(!doresize)
         return;
 
-    from = screen_area_get(old_screen, NULL, NULL, false);
-    to = screen_area_get(c->screen, NULL, NULL, false);
+    from = screen_area_get(old_screen, NULL, false);
+    to = screen_area_get(c->screen, NULL, false);
 
     area_t new_geometry = c->geometry;
 
@@ -465,44 +445,13 @@ luaA_screen_index(lua_State *L)
         luaA_pusharea(L, s->geometry);
         break;
       case A_TK_WORKAREA:
-        luaA_pusharea(L, screen_area_get(s, &s->wiboxes, &s->padding, true));
+        luaA_pusharea(L, screen_area_get(s, &s->wiboxes, true));
         break;
       default:
         return 0;
     }
 
     return 1;
-}
-
-/** Set or get the screen padding.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- * \luastack
- * \lparam None or a table with new padding values.
- * \lreturn The screen padding. A table with top, right, left and bottom
- * keys and values in pixel.
- */
-static int
-luaA_screen_padding(lua_State *L)
-{
-    screen_t *s = lua_touserdata(L, 1);
-
-    if(!s)
-        luaL_typerror(L, 1, "screen");
-
-    if(lua_gettop(L) == 2)
-    {
-        s->padding = luaA_getopt_padding(L, 2, &s->padding);
-
-        s->need_arrange = true;
-
-        /* All the wiboxes repositioned */
-        foreach(w, s->wiboxes)
-            wibox_position_update(*w);
-
-        ewmh_update_workarea(screen_virttophys(screen_array_indexof(&globalconf.screens, s)));
-    }
-    return luaA_pushpadding(L, &s->padding);
 }
 
 /** Get the screen count.
@@ -529,7 +478,6 @@ const struct luaL_reg awesome_screen_methods[] =
 const struct luaL_reg awesome_screen_meta[] =
 {
     { "tags", luaA_screen_tags },
-    { "padding", luaA_screen_padding },
     { "__index", luaA_screen_index },
     { NULL, NULL }
 };

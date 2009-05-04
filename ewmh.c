@@ -47,7 +47,6 @@ ewmh_update_desktop_geometry(int phys_screen)
 {
     area_t geom = screen_area_get(&globalconf.screens.tab[phys_screen],
                                   NULL,
-                                  NULL,
                                   false);
     uint32_t sizes[] = { geom.width, geom.height };
 
@@ -234,7 +233,6 @@ ewmh_update_workarea(int phys_screen)
     uint32_t *area = p_alloca(uint32_t, tags->len * 4);
     area_t geom = screen_area_get(&globalconf.screens.tab[phys_screen],
                                   &globalconf.screens.tab[phys_screen].wiboxes,
-                                  &globalconf.screens.tab[phys_screen].padding,
                                   true);
 
 

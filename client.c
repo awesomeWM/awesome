@@ -683,8 +683,7 @@ client_resize(client_t *c, area_t geometry, bool hints)
     area_t area;
 
     /* offscreen appearance fixes */
-    area = display_area_get(c->phys_screen, NULL,
-                            &c->screen->padding);
+    area = display_area_get(c->phys_screen, NULL);
 
     if(geometry.x > area.width)
         geometry.x = area.width - geometry.width;
@@ -815,7 +814,7 @@ client_setfullscreen(client_t *c, bool s)
             client_setabove(c, false);
             client_setontop(c, false);
 
-            geometry = screen_area_get(c->screen, NULL, NULL, false);
+            geometry = screen_area_get(c->screen, NULL, false);
             c->geometries.fullscreen = c->geometry;
             c->border_fs = c->border;
             client_setborder(c, 0);
@@ -851,7 +850,6 @@ client_setmaxhoriz(client_t *c, bool s)
 
             geometry = screen_area_get(c->screen,
                                        &c->screen->wiboxes,
-                                       &c->screen->padding,
                                        true);
             geometry.y = c->geometry.y;
             geometry.height = c->geometry.height;
@@ -891,7 +889,6 @@ client_setmaxvert(client_t *c, bool s)
 
             geometry = screen_area_get(c->screen,
                                        &c->screen->wiboxes,
-                                       &c->screen->padding,
                                        true);
             geometry.x = c->geometry.x;
             geometry.width = c->geometry.width;
@@ -1439,7 +1436,7 @@ luaA_client_struts(lua_State *L)
     if(lua_gettop(L) == 2)
     {
         strut_t struts;
-        area_t screen_area = display_area_get(c->phys_screen, NULL, NULL);
+        area_t screen_area = display_area_get(c->phys_screen, NULL);
 
         struts.left = luaA_getopt_number(L, 2, "left", c->strut.left);
         struts.right = luaA_getopt_number(L, 2, "right", c->strut.right);
