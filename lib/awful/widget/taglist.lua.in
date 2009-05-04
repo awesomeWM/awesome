@@ -137,9 +137,9 @@ function label.all(t, args)
     if not tag.getproperty(t, "icon_only") then
         if fg_color then
             text = text .. "<span color='"..util.color_strip_alpha(fg_color).."'>"
-            text = " " .. text..util.escape(t.name).." </span>"
+            text = " " .. text.. (util.escape(t.name) or "") .." </span>"
         else
-            text = text .. " " .. util.escape(t.name) .. " "
+            text = text .. " " .. (util.escape(t.name) or "") .. " "
         end
     end
     text = text .. "</span>"
