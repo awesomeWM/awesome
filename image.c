@@ -396,7 +396,7 @@ luaA_image_draw_line(lua_State *L)
         return 0;
 
     imlib_context_set_color(color.red, color.green, color.blue, color.alpha);
-    imlib_image_draw_line(x1, y1, x2, y2, 1);
+    imlib_image_draw_line(x1, y1, x2, y2, 0);
     image_compute(image);
     return 0;
 }
