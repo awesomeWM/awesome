@@ -40,10 +40,12 @@ imagebox_geometry(widget_t *widget, screen_t *screen, int height, int width)
 
     if(d->image)
     {
+        int iwidth = image_getwidth(d->image);
+        int iheight = image_getheight(d->image);
         if(d->resize)
         {
-            double ratio = (double) height / d->image->height;
-            geometry.width = ratio * d->image->width;
+            double ratio = (double) height / iheight;
+            geometry.width = ratio * iwidth;
             if(geometry.width > width)
             {
                 geometry.width = 0;
@@ -52,9 +54,9 @@ imagebox_geometry(widget_t *widget, screen_t *screen, int height, int width)
             else
                 geometry.height = height;
         }
-        else if(d->image->width <= width)
+        else if(iwidth <= width)
         {
-            geometry.width = d->image->width;
+            geometry.width = iwidth;
             geometry.height = height;
         }
         else
@@ -91,14 +93,15 @@ imagebox_draw(widget_t *widget, draw_context_t *ctx, area_t geometry, wibox_t *p
             draw_rectangle(ctx, geometry, 1.0, true, &d->bg);
 
         int y = geometry.y;
-        double ratio = d->resize ? (double) geometry.height / d->image->height : 1;
+        int iheight = image_getheight(d->image);
+        double ratio = d->resize ? (double) geometry.height / iheight : 1;
         switch(d->valign)
         {
           case AlignBottom:
-            y += geometry.height - d->image->height;
+            y += geometry.height - iheight;
             break;
           case AlignCenter:
-            y += (geometry.height - d->image->height) / 2;
+            y += (geometry.height - iheight) / 2;
             break;
           default:
             break;

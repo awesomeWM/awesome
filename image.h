@@ -33,17 +33,19 @@ typedef struct
     luaA_ref_array_t refs;
     /** Imlib2 image */
     Imlib_Image image;
-    /** Image width */
-    int width;
-    /** Image height */
-    int height;
     /** Image data */
     uint8_t *data;
+    /** Flag telling if the image is up to date or needs computing before
+     * drawing */
+    bool isupdated;
 } image_t;
 
 LUA_OBJECT_FUNCS(image_t, image, "image")
 
 int image_new_from_argb32(int, int, uint32_t *);
+uint8_t * image_getdata(image_t *);
+int image_getwidth(image_t *);
+int image_getheight(image_t *);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

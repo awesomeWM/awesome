@@ -66,8 +66,10 @@ textbox_geometry(widget_t *widget, screen_t *screen, int height, int width)
         geometry.width = width;
     else if(d->bg_image)
     {
-        double ratio = d->bg_resize ? (double) geometry.height / d->bg_image->height : 1;
-        geometry.width = MIN(width, MAX(d->extents.width + d->margin.left + d->margin.right, MAX(d->width, d->bg_image->width * ratio)));
+        int bgi_height = image_getheight(d->bg_image);
+        int bgi_width = image_getwidth(d->bg_image);
+        double ratio = d->bg_resize ? (double) geometry.height / bgi_height : 1;
+        geometry.width = MIN(width, MAX(d->extents.width + d->margin.left + d->margin.right, MAX(d->width, bgi_width * ratio)));
     }
     else
         geometry.width = MIN(d->extents.width + d->margin.left + d->margin.right, width);
@@ -95,25 +97,27 @@ textbox_draw(widget_t *widget, draw_context_t *ctx, area_t geometry, wibox_t *p)
 
     if(d->bg_image)
     {
-        double ratio = d->bg_resize ? (double) geometry.height / d->bg_image->height : 1;
+        int bgi_height = image_getheight(d->bg_image);
+        int bgi_width = image_getwidth(d->bg_image);
+        double ratio = d->bg_resize ? (double) geometry.height / bgi_height : 1;
         /* check there is enough space to draw the image */
-        if(ratio * d->bg_image->width <= geometry.width)
+        if(ratio * bgi_width <= geometry.width)
         {
             int x = geometry.x;
             int y = geometry.y;
             switch(d->bg_align)
             {
               case AlignCenter:
-                x += (geometry.width - d->bg_image->width * ratio) / 2;
+                x += (geometry.width - bgi_width * ratio) / 2;
                 break;
               case AlignRight:
-                x += geometry.width - d->bg_image->width * ratio;
+                x += geometry.width - bgi_width * ratio;
                 break;
               case AlignBottom:
-                y += geometry.height - d->bg_image->height * ratio;
+                y += geometry.height - bgi_height * ratio;
                 break;
               case AlignMiddle:
-                y += (geometry.height - d->bg_image->height * ratio) / 2;
+                y += (geometry.height - bgi_height * ratio) / 2;
                 break;
               default:
                 break;

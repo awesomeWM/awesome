@@ -598,7 +598,7 @@ draw_image_from_argb_data(draw_context_t *ctx, int x, int y, int w, int h,
 void
 draw_image(draw_context_t *ctx, int x, int y, double ratio, image_t *image)
 {
-    draw_image_from_argb_data(ctx, x, y, image->width, image->height, ratio, image->data);
+    draw_image_from_argb_data(ctx, x, y, image_getwidth(image), image_getheight(image), ratio, image_getdata(image));
 }
 
 /** Rotate a pixmap.

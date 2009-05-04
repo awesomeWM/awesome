@@ -75,26 +75,48 @@ image_imlib_load_strerror(Imlib_Load_Error e)
     return "unknown error";
 }
 
-/** Recompute the ARGB32 data from an image.
+/** Get image width.
+ * \param image The image.
+ * \return The image width in pixel.
+ */
+int
+image_getwidth(image_t *image)
+{
+    imlib_context_set_image(image->image);
+    return imlib_image_get_width();
+}
+
+/** Get image height.
+ * \param image The image.
+ * \return The image height in pixel.
+ */
+int
+image_getheight(image_t *image)
+{
+    imlib_context_set_image(image->image);
+    return imlib_image_get_height();
+}
+
+/** Get the ARGB32 data from an image.
  * \param image The image.
  * \return Data.
  */
-static void
-image_compute(image_t *image)
+uint8_t *
+image_getdata(image_t *image)
 {
     int size, i;
     uint32_t *data;
     double alpha;
     uint8_t *dataimg;
 
+    if(image->isupdated)
+        return image->data;
+
     imlib_context_set_image(image->image);
 
     data = imlib_image_get_data_for_reading_only();
 
-    image->width = imlib_image_get_width();
-    image->height = imlib_image_get_height();
-
-    size = image->width * image->height;
+    size = imlib_image_get_width() * imlib_image_get_height();
 
     p_realloc(&image->data, size * 4);
     dataimg = image->data;
@@ -117,6 +139,10 @@ image_compute(image_t *image)
         dataimg[0] = (data[i]         & 0xff) * alpha; /* B */
 #endif
     }
+
+    image->isupdated = true;
+
+    return image->data;
 }
 
 /** Create a new image from ARGB32 data.
@@ -136,7 +162,6 @@ image_new_from_argb32(int width, int height, uint32_t *data)
         imlib_image_set_has_alpha(true);
         image_t *image = image_new(globalconf.L);
         image->image = imimage;
-        image_compute(image);
         return 1;
     }
 
@@ -165,8 +190,6 @@ image_new_from_file(const char *filename)
 
     image = image_new(globalconf.L);
     image->image = imimage;
-
-    image_compute(image);
 
     return 1;
 }
@@ -237,7 +260,7 @@ luaA_image_orientate(lua_State *L)
     imlib_context_set_image(image->image);
     imlib_image_orientate(orientation);
 
-    image_compute(image);
+    image->isupdated = false;
 
     return 0;
 }
@@ -260,8 +283,6 @@ luaA_image_rotate(lua_State *L)
 
     imlib_context_set_image(image->image);
     new->image = imlib_create_rotated_image(angle);
-
-    image_compute(new);
 
     return 1;
 }
@@ -289,8 +310,6 @@ luaA_image_crop(lua_State *L)
 
     imlib_context_set_image(image->image);
     new->image = imlib_create_cropped_image(x, y, w, h);
-
-    image_compute(new);
 
     return 1;
 }
@@ -327,8 +346,6 @@ luaA_image_crop_and_scale(lua_State *L)
                                                    w, h,
                                                    dest_w, dest_h);
 
-    image_compute(new);
-
     return 1;
 }
 
@@ -360,7 +377,7 @@ luaA_image_draw_pixel(lua_State *L)
 
     imlib_context_set_color(color.red, color.green, color.blue, color.alpha);
     imlib_image_draw_pixel(x, y, 1);
-    image_compute(image);
+    image->isupdated = false;
     return 0;
 }
 
@@ -396,7 +413,7 @@ luaA_image_draw_line(lua_State *L)
 
     imlib_context_set_color(color.red, color.green, color.blue, color.alpha);
     imlib_image_draw_line(x1, y1, x2, y2, 0);
-    image_compute(image);
+    image->isupdated = false;
     return 0;
 }
 
@@ -439,7 +456,7 @@ luaA_image_draw_rectangle(lua_State *L)
         imlib_image_draw_rectangle(x, y, width, height);
     else
         imlib_image_fill_rectangle(x, y, width, height);
-    image_compute(image);
+    image->isupdated = false;
     return 0;
 }
 
@@ -530,7 +547,7 @@ luaA_image_draw_rectangle_gradient(lua_State *L)
 
     imlib_free_color_range();
 
-    image_compute(image);
+    image->isupdated = false;
 
     return 0;
 }
@@ -574,7 +591,7 @@ luaA_image_draw_circle(lua_State *L)
         imlib_image_draw_ellipse(x, y, ah, av);
     else
         imlib_image_fill_ellipse(x, y, ah, av);
-    image_compute(image);
+    image->isupdated = false;
     return 0;
 }
 
@@ -629,14 +646,14 @@ luaA_image_insert(lua_State *L)
 
     int xsrc = luaL_optnumber(L, 5, 0);
     int ysrc = luaL_optnumber(L, 6, 0);
-    int wsrc = luaL_optnumber(L, 7, image_source->width);
-    int hsrc = luaL_optnumber(L, 8, image_source->height);
+    int wsrc = luaL_optnumber(L, 7, image_getwidth(image_source));
+    int hsrc = luaL_optnumber(L, 8, image_getheight(image_source));
 
-    int hxoff = luaL_optnumber(L, 9, image_source->width);
+    int hxoff = luaL_optnumber(L, 9, image_getwidth(image_source));
     int hyoff = luaL_optnumber(L, 10, 0);
 
     int vxoff = luaL_optnumber(L, 11, 0);
-    int vyoff = luaL_optnumber(L, 12, image_source->height);
+    int vyoff = luaL_optnumber(L, 12, image_getheight(image_source));
 
     imlib_context_set_image(image_target->image);
 
@@ -649,7 +666,7 @@ luaA_image_insert(lua_State *L)
                                          * is the default */
                                         hxoff, hyoff, vxoff, vyoff);
 
-    image_compute(image_target);
+    image_target->isupdated = false;
 
     return 0;
 }
@@ -675,12 +692,10 @@ luaA_image_index(lua_State *L)
     switch(a_tokenize(attr, len))
     {
       case A_TK_WIDTH:
-        imlib_context_set_image(image->image);
-        lua_pushnumber(L, imlib_image_get_width());
+        lua_pushnumber(L, image_getwidth(image));
         break;
       case A_TK_HEIGHT:
-        imlib_context_set_image(image->image);
-        lua_pushnumber(L, imlib_image_get_height());
+        lua_pushnumber(L, image_getheight(image));
         break;
       case A_TK_ALPHA:
         imlib_context_set_image(image->image);
