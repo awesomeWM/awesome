@@ -518,6 +518,7 @@ luaA_progressbar_bar_data_add(lua_State *L)
 }
 
 /** Progressbar widget.
+ * DEPRECATED, see awful.widget.progressbar.
  * \param L The Lua VM state.
  * \param token The key token.
  * \return The number of elements pushed on the stack.
@@ -643,6 +644,7 @@ progressbar_destructor(widget_t *widget)
 widget_t *
 widget_progressbar(widget_t *w)
 {
+    luaA_deprecate(globalconf.L, "awful.widget.progressbar");
     w->draw = progressbar_draw;
     w->index = luaA_progressbar_index;
     w->newindex = luaA_progressbar_newindex;
