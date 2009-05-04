@@ -443,6 +443,98 @@ luaA_image_draw_rectangle(lua_State *L)
     return 0;
 }
 
+/** Convert a table to a color range and set it as current color range.
+ * \param L The Lua VM state.
+ * \param ud The index of the table.
+ * \return A color range that you are responsible to free.
+ */
+static Imlib_Color_Range
+luaA_table_to_color_range(lua_State *L, int ud)
+{
+    Imlib_Color_Range range = imlib_create_color_range();
+
+    imlib_context_set_color_range(range);
+
+    for(size_t i = 1; i <= lua_objlen(L, ud); i++)
+    {
+        /* get t[i] */
+        lua_pushnumber(L, i);
+        lua_gettable(L, ud);
+
+        size_t len;
+        const char *colstr = lua_tolstring(L, -1, &len);
+
+        if(colstr)
+        {
+            color_t color;
+
+            color_init_cookie_t cookie = color_init_unchecked(&color, colstr, len);
+
+            /* get value with colstr as key in table */
+            lua_pushvalue(L, -1);
+            lua_gettable(L, ud);
+
+            /* convert the distance, if any, to number, or set 1 */
+            int distance = lua_tonumber(L, -1);
+            /* remove distance */
+            lua_pop(L, 1);
+
+            color_init_reply(cookie);
+
+            imlib_context_set_color(color.red, color.green, color.blue, color.alpha);
+
+            imlib_add_color_to_color_range(distance);
+        }
+
+        /* remove color string (value) */
+        lua_pop(L, 1);
+    }
+
+    return range;
+}
+
+/** Draw a rectangle in an image with gradient color.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ * \luastack
+ * \lvalua An image.
+ * \lparam The x coordinate of the rectangles top left corner.
+ * \lparam The y coordinate of the rectangles top left corner.
+ * \lparam The width of the rectangle.
+ * \lparam The height of the rectangle.
+ * \lparam A table with the color to draw the rectangle. You can specified the
+ * color distance from the previous one by setting t[color] = distance.
+ * \lparam The angle of gradient.
+ */
+static int
+luaA_image_draw_rectangle_gradient(lua_State *L)
+{
+    image_t *image = luaL_checkudata(L, 1, "image");
+    int x = luaL_checkint(L, 2);
+    int y = luaL_checkint(L, 3);
+    int width  = luaL_checkint(L, 4);
+    int height = luaL_checkint(L, 5);
+    luaA_checktable(L, 6);
+    double angle = luaL_checknumber(L, 7);
+
+    if((x > imlib_image_get_width()) || (x + width > imlib_image_get_width()))
+        return 0;
+    if((y > imlib_image_get_height()) || (y + height > imlib_image_get_height()))
+        return 0;
+
+    imlib_context_set_image(image->image);
+
+    luaA_table_to_color_range(L, 6);
+
+    imlib_image_fill_color_range_rectangle(x, y, width, height, angle);
+
+    imlib_free_color_range();
+
+    image_compute(image);
+
+    return 0;
+}
+
 /** Draw a circle in an image
  * \param L The Lua VM state
  * \luastack
@@ -620,8 +712,8 @@ const struct luaL_reg awesome_image_meta[] =
     { "draw_pixel", luaA_image_draw_pixel },
     { "draw_line",  luaA_image_draw_line  },
     { "draw_rectangle", luaA_image_draw_rectangle },
+    { "draw_rectangle_gradient", luaA_image_draw_rectangle_gradient },
     { "draw_circle", luaA_image_draw_circle },
-    /* */
     { "__gc", luaA_image_gc },
     { "__tostring", luaA_image_tostring },
     { NULL, NULL }
