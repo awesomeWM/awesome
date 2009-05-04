@@ -10,6 +10,7 @@ require("awful.widget.button")
 require("awful.widget.launcher")
 require("awful.widget.prompt")
 require("awful.widget.progressbar")
+require("awful.widget.graph")
 
 --- Widget module for awful
 module("awful.widget")
