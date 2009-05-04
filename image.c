@@ -186,18 +186,6 @@ luaA_image_new(lua_State *L)
 
     if((filename = lua_tostring(L, 2)))
         return image_new_from_file(filename);
-    else if(lua_isnil(L, 2))
-    {
-        int width = luaL_checknumber(L, 3);
-        int height = luaL_checknumber(L, 4);
-
-        if(width <= 0 || height <= 0)
-            luaL_error(L, "request image has invalid size");
-
-        uint32_t *data = p_new(uint32_t, width * height);
-        return image_new_from_argb32(width, height, data);
-    }
-
     return 0;
 }
 
@@ -207,7 +195,8 @@ luaA_image_new(lua_State *L)
  * \luastack
  * \lparam The image width.
  * \lparam The image height.
- * \lparam The image data as a string in ARGB32 format.
+ * \lparam The image data as a string in ARGB32 format, or nil to create an
+ * empty image.
  * \lreturn An image object.
  */
 static int
@@ -216,6 +205,13 @@ luaA_image_argb32_new(lua_State *L)
     size_t len;
     unsigned int width = luaL_checknumber(L, 1);
     unsigned int height = luaL_checknumber(L, 2);
+
+    if(lua_isnil(L, 3))
+    {
+        uint32_t *data = p_new(uint32_t, width * height);
+        return image_new_from_argb32(width, height, data);
+    }
+
     const char *data = luaL_checklstring(L, 3, &len);
 
     if(width * height * 4 != len)
