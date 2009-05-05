@@ -427,6 +427,7 @@ luaA_graph_plot_data_add(lua_State *L)
 }
 
 /** Graph widget.
+ * DEPRECATED, see awful.widget.graph.
  * \param L The Lua VM state.
  * \param token The key token.
  * \return The number of elements pushed on stack.
@@ -588,6 +589,7 @@ graph_destructor(widget_t *widget)
 widget_t *
 widget_graph(widget_t *w)
 {
+    luaA_deprecate(globalconf.L, "awful.widget.graph");
     w->draw = graph_draw;
     w->index = luaA_graph_index;
     w->newindex = luaA_graph_newindex;
