@@ -38,7 +38,7 @@
 
 typedef enum
 {
-    East,
+    East = 0,
     South,
     North,
 } orientation_t;
@@ -46,11 +46,10 @@ typedef enum
 /** A list of possible position, not sex related */
 typedef enum
 {
-    Top,
+    Top = 0,
     Bottom,
     Right,
-    Left,
-    Floating
+    Left
 } position_t;
 
 /** Link a name to a function */

@@ -147,7 +147,7 @@ screen_getbycoord(screen_t *screen, int x, int y)
  * \return The screen area.
  */
 area_t
-screen_area_get(screen_t *screen, wibox_array_t *wiboxes, bool strut)
+screen_area_get(screen_t *screen, bool strut)
 {
     area_t area = screen->geometry;
     uint16_t top = 0, bottom = 0, left = 0, right = 0;
@@ -189,31 +189,6 @@ screen_area_get(screen_t *screen, wibox_array_t *wiboxes, bool strut)
             }
         }
 
-
-    if(wiboxes)
-        foreach(_w, *wiboxes)
-        {
-            wibox_t *w = *_w;
-            if(w->isvisible)
-                switch(w->position)
-                {
-                  case Top:
-                    top = MAX(top, (uint16_t) (w->sw.geometry.y - area.y) + w->sw.geometry.height + 2 * w->sw.border.width);
-                    break;
-                  case Bottom:
-                    bottom = MAX(bottom, (uint16_t) (area.y + area.height) - w->sw.geometry.y);
-                    break;
-                  case Left:
-                    left = MAX(left, (uint16_t) (w->sw.geometry.x - area.x) + w->sw.geometry.width + 2 * w->sw.border.width);
-                    break;
-                  case Right:
-                    right = MAX(right, (uint16_t) (area.x + area.width) - w->sw.geometry.x);
-                    break;
-                  default:
-                    break;
-                }
-        }
-
     area.x += left;
     area.y += top;
     area.width -= left + right;
@@ -224,26 +199,16 @@ screen_area_get(screen_t *screen, wibox_array_t *wiboxes, bool strut)
 
 /** Get display info.
  * \param phys_screen Physical screen number.
- * \param wiboxes The wiboxes.
  * \return The display area.
  */
 area_t
-display_area_get(int phys_screen, wibox_array_t *wiboxes)
+display_area_get(int phys_screen)
 {
     xcb_screen_t *s = xutil_screen_get(globalconf.connection, phys_screen);
     area_t area = { .x = 0,
                     .y = 0,
                     .width = s->width_in_pixels,
                     .height = s->height_in_pixels };
-
-    if(wiboxes)
-        foreach(_w, *wiboxes)
-        {
-            wibox_t *w = *_w;
-            area.y += w->position == Top ? w->sw.geometry.height : 0;
-            area.height -= (w->position == Top || w->position == Bottom) ? w->sw.geometry.height : 0;
-        }
-
     return area;
 }
 
@@ -307,8 +272,8 @@ screen_client_moveto(client_t *c, screen_t *new_screen, bool dotag, bool doresiz
     if(!doresize)
         return;
 
-    from = screen_area_get(old_screen, NULL, false);
-    to = screen_area_get(c->screen, NULL, false);
+    from = screen_area_get(old_screen, false);
+    to = screen_area_get(c->screen, false);
 
     area_t new_geometry = c->geometry;
 
@@ -424,7 +389,7 @@ luaA_screen_tags(lua_State *L)
  * \return The number of elements pushed on stack.
  * \luastack
  * \lfield coords The screen coordinates. Immutable.
- * \lfield workarea The screen workarea, i.e. without wiboxes.
+ * \lfield workarea The screen workarea.
  */
 static int
 luaA_screen_index(lua_State *L)
@@ -445,7 +410,7 @@ luaA_screen_index(lua_State *L)
         luaA_pusharea(L, s->geometry);
         break;
       case A_TK_WORKAREA:
-        luaA_pusharea(L, screen_area_get(s, &s->wiboxes, true));
+        luaA_pusharea(L, screen_area_get(s, true));
         break;
       default:
         return 0;

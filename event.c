@@ -280,12 +280,7 @@ event_handle_configurerequest(void *data __attribute__ ((unused)),
             geometry = titlebar_geometry_add(c->titlebar, c->border, geometry);
 
             if(client_resize(c, geometry, false))
-            {
-                /* All the wiboxes (may) need to be repositioned. */
-                if(client_hasstrut(c))
-                    wibox_update_positions();
                 client_need_arrange(c);
-            }
             else
             {
                 /* Resize wasn't officially needed, but we don't want to break expectations. */

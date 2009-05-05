@@ -215,10 +215,6 @@ client_ban(client_t *c)
 
         c->isbanned = true;
 
-        /* All the wiboxes (may) need to be repositioned. */
-        if(client_hasstrut(c))
-            wibox_update_positions();
-
         if(globalconf.screens.tab[c->phys_screen].prev_client_focus == c)
             globalconf.screens.tab[c->phys_screen].prev_client_focus = NULL;
 
@@ -683,7 +679,7 @@ client_resize(client_t *c, area_t geometry, bool hints)
     area_t area;
 
     /* offscreen appearance fixes */
-    area = display_area_get(c->phys_screen, NULL);
+    area = display_area_get(c->phys_screen);
 
     if(geometry.x > area.width)
         geometry.x = area.width - geometry.width;
@@ -814,7 +810,7 @@ client_setfullscreen(client_t *c, bool s)
             client_setabove(c, false);
             client_setontop(c, false);
 
-            geometry = screen_area_get(c->screen, NULL, false);
+            geometry = screen_area_get(c->screen, false);
             c->geometries.fullscreen = c->geometry;
             c->border_fs = c->border;
             client_setborder(c, 0);
@@ -848,9 +844,7 @@ client_setmaxhoriz(client_t *c, bool s)
             /* remove fullscreen mode */
             client_setfullscreen(c, false);
 
-            geometry = screen_area_get(c->screen,
-                                       &c->screen->wiboxes,
-                                       true);
+            geometry = screen_area_get(c->screen, true);
             geometry.y = c->geometry.y;
             geometry.height = c->geometry.height;
             c->geometries.max.x = c->geometry.x;
@@ -887,9 +881,7 @@ client_setmaxvert(client_t *c, bool s)
             /* remove fullscreen mode */
             client_setfullscreen(c, false);
 
-            geometry = screen_area_get(c->screen,
-                                       &c->screen->wiboxes,
-                                       true);
+            geometry = screen_area_get(c->screen, true);
             geometry.x = c->geometry.x;
             geometry.width = c->geometry.width;
             c->geometries.max.y = c->geometry.y;
@@ -1020,10 +1012,6 @@ client_unban(client_t *c)
                               request);
 
         c->isbanned = false;
-
-        /* All the wiboxes (may) need to be repositioned. */
-        if(client_hasstrut(c))
-            wibox_update_positions();
     }
 }
 
@@ -1084,10 +1072,6 @@ client_unmanage(client_t *c)
     titlebar_client_detach(c);
 
     ewmh_update_net_client_list(c->phys_screen);
-
-    /* All the wiboxes (may) need to be repositioned. */
-    if(client_hasstrut(c))
-        wibox_update_positions();
 
     /* set client as invalid */
     c->invalid = true;
@@ -1436,7 +1420,7 @@ luaA_client_struts(lua_State *L)
     if(lua_gettop(L) == 2)
     {
         strut_t struts;
-        area_t screen_area = display_area_get(c->phys_screen, NULL);
+        area_t screen_area = display_area_get(c->phys_screen);
 
         struts.left = luaA_getopt_number(L, 2, "left", c->strut.left);
         struts.right = luaA_getopt_number(L, 2, "right", c->strut.right);
@@ -1461,8 +1445,6 @@ luaA_client_struts(lua_State *L)
             ewmh_update_client_strut(c);
 
             client_need_arrange(c);
-            /* All the wiboxes (may) need to be repositioned. */
-            wibox_update_positions();
 
             hook_property(client, c, "struts");
         }

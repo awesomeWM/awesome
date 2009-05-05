@@ -52,8 +52,8 @@ ARRAY_FUNCS(screen_t, screen, DO_NOTHING)
 
 void screen_scan(void);
 screen_t *screen_getbycoord(screen_t *, int, int);
-area_t screen_area_get(screen_t *, wibox_array_t *, bool);
-area_t display_area_get(int, wibox_array_t *);
+area_t screen_area_get(screen_t *, bool);
+area_t display_area_get(int);
 int screen_virttophys(int);
 void screen_client_moveto(client_t *, screen_t *, bool, bool);
 

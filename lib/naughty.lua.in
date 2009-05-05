@@ -18,6 +18,7 @@ local capi = { screen = screen,
 local hooks = require("awful.hooks")
 local button = require("awful.button")
 local util = require("awful.util")
+local wibox = require("awful.wibox")
 local bt = require("beautiful")
 
 --- Notification library
@@ -118,7 +119,7 @@ end
 -- @param width Popup width (optional)
 -- @return Absolute position and index in { x = X, y = Y, idx = I } table
 local function get_offset(screen, position, idx, width, height)
-    local ws = capi.screen[screen].workarea
+    local ws = wibox.get_workarea(screen)
     local v = {}
     local idx = idx or #notifications[screen][position] + 1
     local width = width or notifications[screen][position][idx].width
@@ -344,8 +345,7 @@ function notify(args)
     end
 
     -- create container wibox
-    notification.box = capi.wibox({ position = "floating",
-                                    fg = fg,
+    notification.box = capi.wibox({ fg = fg,
                                     bg = bg,
                                     border_color = border_color,
                                     border_width = border_width })
@@ -365,11 +365,12 @@ function notify(args)
     end
 
     -- crop to workarea size if too big
-    if width > capi.screen[screen].workarea.width - 2 * (border_width or 0) - 2 * (config.padding or 0) then
-        width = capi.screen[screen].workarea.width - 2 * (border_width or 0) - 2 * (config.padding or 0)
+    local workarea = wibox.get_workarea(screen)
+    if width > workarea.width - 2 * (border_width or 0) - 2 * (config.padding or 0) then
+        width = workarea.width - 2 * (border_width or 0) - 2 * (config.padding or 0)
     end
-    if height > capi.screen[screen].workarea.height - 2 * (border_width or 0) - 2 * (config.padding or 0) then
-        height = capi.screen[screen].workarea.height - 2 * (border_width or 0) - 2 * (config.padding or 0)
+    if height > workarea.height - 2 * (border_width or 0) - 2 * (config.padding or 0) then
+        height = workarea.height - 2 * (border_width or 0) - 2 * (config.padding or 0)
     end
 
     -- set size in notification object

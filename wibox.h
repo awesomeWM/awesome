@@ -75,13 +75,10 @@ void wibox_unref_simplified(wibox_t **);
 DO_ARRAY(wibox_t *, wibox, wibox_unref_simplified)
 
 void wibox_refresh(void);
-void wibox_update_positions(void);
 
 void luaA_wibox_invalidate_byitem(lua_State *, const void *);
 
-void wibox_position_update(wibox_t *);
 wibox_t * wibox_getbywin(xcb_window_t);
-void wibox_detach(wibox_t *);
 
 static inline void
 wibox_moveresize(wibox_t *wibox, area_t geometry)

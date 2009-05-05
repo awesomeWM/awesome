@@ -23,6 +23,7 @@ local capi =
 local util = require("awful.util")
 local tags = require("awful.tag")
 local awbeautiful = require("beautiful")
+local awibox = require("awful.wibox")
 local tonumber = tonumber
 
 --- Menu module for awful
@@ -249,7 +250,7 @@ function clients(menu)
 end
 
 local function set_coords(menu, screen_idx)
-    local s_geometry = capi.screen[screen_idx].workarea
+    local s_geometry = awibox.get_workarea(screen_idx)
     local screen_w = s_geometry.x + s_geometry.width
     local screen_h = s_geometry.y + s_geometry.height
 

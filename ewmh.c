@@ -45,9 +45,7 @@
 static void
 ewmh_update_desktop_geometry(int phys_screen)
 {
-    area_t geom = screen_area_get(&globalconf.screens.tab[phys_screen],
-                                  NULL,
-                                  false);
+    area_t geom = screen_area_get(&globalconf.screens.tab[phys_screen], false);
     uint32_t sizes[] = { geom.width, geom.height };
 
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
@@ -231,10 +229,7 @@ ewmh_update_workarea(int phys_screen)
 {
     tag_array_t *tags = &globalconf.screens.tab[phys_screen].tags;
     uint32_t *area = p_alloca(uint32_t, tags->len * 4);
-    area_t geom = screen_area_get(&globalconf.screens.tab[phys_screen],
-                                  &globalconf.screens.tab[phys_screen].wiboxes,
-                                  true);
-
+    area_t geom = screen_area_get(&globalconf.screens.tab[phys_screen], true);
 
     for(int i = 0; i < tags->len; i++)
     {
@@ -634,8 +629,6 @@ ewmh_process_client_strut(client_t *c, xcb_get_property_reply_t *strut_r)
             c->strut.bottom_end_x = strut[11];
 
             client_need_arrange(c);
-            /* All the wiboxes (may) need to be repositioned. */
-            wibox_update_positions();
 
             hook_property(client, c, "struts");
         }

@@ -50,7 +50,7 @@ local function new(_, args)
     if not args or not args.image then return end
 
     -- Create wibox
-    local w = capi.wibox({ position = "floating" })
+    local w = capi.wibox{}
     data[w] = { image = args.image }
     local wimg = capi.widget({ type = "imagebox" })
     w.widgets = wimg

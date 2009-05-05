@@ -11,6 +11,7 @@ local tag = require("awful.tag")
 local util = require("awful.util")
 local suit = require("awful.layout.suit")
 local client = require("awful.client")
+local wibox = require("awful.wibox")
 local ascreen = require("awful.screen")
 local capi =
 {
@@ -64,7 +65,7 @@ end
 local function on_arrange (screen)
     local t = tag.selected(screen)
     local p = {}
-    p.workarea = capi.screen[screen].workarea
+    p.workarea = wibox.get_workarea(screen)
     -- Handle padding
     local padding = ascreen.padding(screen)
     if padding then
@@ -96,6 +97,9 @@ hooks.property.register(function (c, prop)
     if type(c) == "client" and c:isvisible() and prop == "size_hints_honor" then
         on_arrange(c.screen)
     end
+end)
+hooks.wibox_position.register(function(wibox)
+    on_arrange(wibox.screen)
 end)
 
 hooks.padding.register(function(screen) on_arrange(screen) end)

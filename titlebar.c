@@ -254,8 +254,6 @@ titlebar_client_attach(client_t *c)
 
     switch(t->position)
     {
-      case Floating:
-        t->position = Top;
       case Top:
       case Bottom:
         if(!t->sw.geometry.height)
@@ -363,7 +361,6 @@ luaA_titlebar_newindex(lua_State *L, wibox_t *titlebar, awesome_token_t tok)
                     break;
                   case Top:
                   case Bottom:
-                  case Floating:
                     tmp = titlebar->sw.geometry.width;
                     titlebar->sw.geometry.width = titlebar->sw.geometry.height;
                     titlebar->sw.geometry.height = tmp;
@@ -380,7 +377,6 @@ luaA_titlebar_newindex(lua_State *L, wibox_t *titlebar, awesome_token_t tok)
                     break;
                   case Top:
                   case Bottom:
-                  case Floating:
                     tmp = titlebar->sw.geometry.width;
                     titlebar->sw.geometry.width = titlebar->sw.geometry.height;
                     titlebar->sw.geometry.height = tmp;
@@ -390,7 +386,6 @@ luaA_titlebar_newindex(lua_State *L, wibox_t *titlebar, awesome_token_t tok)
                 break;
               case Top:
               case Bottom:
-              case Floating:
                 switch(titlebar->position)
                 {
                     int tmp;
@@ -402,7 +397,6 @@ luaA_titlebar_newindex(lua_State *L, wibox_t *titlebar, awesome_token_t tok)
                     break;
                   case Top:
                   case Bottom:
-                  case Floating:
                     break;
                 }
                 simplewindow_orientation_set(&titlebar->sw, East);

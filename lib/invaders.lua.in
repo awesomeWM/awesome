@@ -61,8 +61,7 @@ local shots = { }
 local enemies = { }
 
 function player.new ()
-    p = wibox({ position = "floating",
-                bg = gamedata.solidbg or "#12345600" })
+    p = wibox({ bg = gamedata.solidbg or "#12345600" })
     p:geometry({ width = 24,
                  height = 16,
                  x = gamedata.field.x + (gamedata.field.w / 2),
@@ -99,8 +98,7 @@ function player.fire()
 end
 
 function shots.fire (x, y, color)
-    local s = wibox({ position = "floating",
-                      bg = color })
+    local s = wibox({ bg = color })
     s:geometry({ width = 4,
                  height = 10,
                  x = x,
@@ -115,8 +113,7 @@ end
 function shots.fire_enemy (x, y, color)
     if gamedata.enemies.shots.fired < gamedata.enemies.shots.max then
         gamedata.enemies.shots.fired = gamedata.enemies.shots.fired + 1
-        local s = wibox({ position = "floating",
-                          bg = color })
+        local s = wibox({ bg = color })
         s:geometry({ width = 4,
                      height = 10,
                      x = x,
@@ -173,8 +170,7 @@ function shots.handle_enemy ()
 end
 
 function enemies.new (t)
-    e = wibox({ position = "floating",
-                bg = gamedata.solidbg or "#12345600" })
+    e = wibox({ bg = gamedata.solidbg or "#12345600" })
     e:geometry({ height = gamedata.enemies.h,
                  width = gamedata.enemies.w,
                  x = gamedata.field.x,
@@ -443,8 +439,7 @@ function game.highscore (score)
         if s <= score then newentry = true end
     end
 
-    gamedata.highscore.window = wibox({ position = "floating",
-                                        bg = gamedata.btheme.bg_focus or "#333333",
+    gamedata.highscore.window = wibox({ bg = gamedata.btheme.bg_focus or "#333333",
                                         fg = gamedata.btheme.fg_focus or "#FFFFFF" })
     gamedata.highscore.window:geometry({ height = 20,
                                          width = 300,
@@ -491,8 +486,7 @@ function run(args)
     gamedata.cachedir = awful.util.getdir("cache")
 
     if gamedata.solidbg then
-       gamedata.field.background = wibox({ position = "floating",
-                                           bg = gamedata.solidbg })
+       gamedata.field.background = wibox({ bg = gamedata.solidbg })
        gamedata.field.background:geometry({ x = gamedata.field.x,
                                             y = gamedata.field.y,
                                             height = gamedata.field.h,
@@ -500,8 +494,7 @@ function run(args)
        gamedata.field.background.screen = gamedata.screen
     end
 
-    gamedata.field.north = wibox({ position = "floating",
-                                   bg = gamedata.btheme.bg_focus or "#333333",
+    gamedata.field.north = wibox({ bg = gamedata.btheme.bg_focus or "#333333",
                                    fg = gamedata.btheme.fg_focus or "#FFFFFF" })
     gamedata.field.north:geometry({ width = gamedata.field.w + 10,
                                     height = 15,
@@ -519,8 +512,7 @@ function run(args)
 
     gamedata.field.north.widgets = { gamedata.field.caption, gamedata.field.status }
 
-    gamedata.field.south = wibox({ position = "floating",
-                                   bg = gamedata.btheme.bg_focus or "#333333",
+    gamedata.field.south = wibox({ bg = gamedata.btheme.bg_focus or "#333333",
                                    fg = gamedata.btheme.fg_focus or "#FFFFFF" })
     gamedata.field.south:geometry({ width = gamedata.field.w,
                                     height = 5,
@@ -528,8 +520,7 @@ function run(args)
                                     y = gamedata.field.y + gamedata.field.h - 5 })
     gamedata.field.south.screen = gamedata.screen
 
-    gamedata.field.west = wibox({ position = "floating",
-                                  bg = gamedata.btheme.bg_focus or "#333333",
+    gamedata.field.west = wibox({ bg = gamedata.btheme.bg_focus or "#333333",
                                   fg = gamedata.btheme.fg_focus or "#FFFFFF" })
     gamedata.field.west:geometry({ width = 5,
                                    height = gamedata.field.h,
@@ -537,8 +528,7 @@ function run(args)
                                    y = gamedata.field.y })
     gamedata.field.west.screen = gamedata.screen
 
-    gamedata.field.east = wibox({ position = "floating",
-                                  bg = gamedata.btheme.bg_focus or "#333333",
+    gamedata.field.east = wibox({ bg = gamedata.btheme.bg_focus or "#333333",
                                   fg = gamedata.btheme.fg_focus or "#FFFFFF" })
     gamedata.field.east:geometry({ width = 5,
                                    height = gamedata.field.h,

@@ -23,7 +23,6 @@
 #include "wibox.h"
 #include "titlebar.h"
 #include "client.h"
-#include "ewmh.h"
 #include "screen.h"
 #include "window.h"
 #include "common/xcursor.h"
@@ -102,41 +101,6 @@ wibox_resize(wibox_t *wibox, uint16_t width, uint16_t height)
     wibox_need_update(wibox);
 }
 
-static void
-wibox_setposition(wibox_t *wibox, position_t p)
-{
-    if(p != wibox->position)
-    {
-        switch((wibox->position = p))
-        {
-          case Bottom:
-          case Top:
-          case Floating:
-            simplewindow_orientation_set(&wibox->sw, East);
-            break;
-          case Left:
-            simplewindow_orientation_set(&wibox->sw, North);
-            break;
-          case Right:
-            simplewindow_orientation_set(&wibox->sw, South);
-            break;
-        }
-        /* reset width/height to 0 */
-        if(wibox->position != Floating)
-            wibox->sw.geometry.width = wibox->sw.geometry.height = 0;
-
-        /* recompute position */
-        wibox_position_update(wibox);
-
-        /* reset all wibox position */
-        foreach(w, wibox->screen->wiboxes)
-            wibox_position_update(*w);
-
-        ewmh_update_workarea(screen_virttophys(screen_array_indexof(&globalconf.screens, wibox->screen)));
-
-        wibox_need_update(wibox);
-    }
-}
 
 /** Kick out systray windows.
  * \param phys_screen Physical screen number.
@@ -319,200 +283,6 @@ wibox_systray_refresh(wibox_t *wibox)
     }
 }
 
-/* Only called by wibox_position_update() */
-static void
-wibox_position_update_floating(wibox_t *wibox)
-{
-    area_t wingeom = wibox->sw.geometry;
-
-    /* We only make sure the wibox is at least 1x1 pixel big. */
-    wingeom.width = MAX(1, wibox->sw.geometry.width);
-    wingeom.height = MAX(1, wibox->sw.geometry.height);
-
-    if(wingeom.width != wibox->sw.geometry.width
-       || wingeom.height != wibox->sw.geometry.height)
-        wibox_resize(wibox, wingeom.width, wingeom.height);
-}
-
-/* Only called by wibox_position_update() */
-static void
-wibox_position_update_non_floating(wibox_t *wibox)
-{
-    area_t area, wingeom = wibox->sw.geometry;
-    bool ignore = false;
-
-    /* Everything we do below needs the wibox' screen.
-     * No screen, nothing to do.
-     */
-    if (!wibox->screen)
-        return;
-
-    /* This wibox limits the space available to clients and thus clients
-     * need to be repositioned.
-     */
-    wibox->screen->need_arrange = true;
-
-    area = screen_area_get(wibox->screen, NULL,
-                           &wibox->screen->padding, true);
-
-    /* Top and Bottom wibox_t have prio */
-    foreach(_w, wibox->screen->wiboxes)
-    {
-        wibox_t *w = *_w;
-        /* Ignore every wibox after me that is in the same position */
-        if(wibox == w)
-        {
-            ignore = true;
-            continue;
-        }
-        else if((ignore && wibox->position == w->position) || !w->isvisible)
-            continue;
-        switch(w->position)
-        {
-          case Floating:
-            break;
-          case Left:
-            if(wibox->position == Left)
-                area.x += wibox->sw.geometry.width;
-            break;
-          case Right:
-            if(wibox->position == Right)
-                area.x -= wibox->sw.geometry.width;
-            break;
-          case Top:
-            switch(wibox->position)
-            {
-              case Top:
-                area.y += w->sw.geometry.height;
-                break;
-              case Left:
-              case Right:
-                area.height -= w->sw.geometry.height;
-                area.y += w->sw.geometry.height;
-                break;
-              default:
-                break;
-            }
-            break;
-          case Bottom:
-            switch(wibox->position)
-            {
-              case Bottom:
-                area.y -= w->sw.geometry.height;
-                break;
-              case Left:
-              case Right:
-                area.height -= w->sw.geometry.height;
-                break;
-              default:
-                break;
-            }
-            break;
-        }
-    }
-
-    /* The "length" of a wibox is always chosen to be the optimal size (non-floating).
-     * The "width" of a wibox is kept if it exists.
-     */
-    switch(wibox->position)
-    {
-      case Right:
-        wingeom.height = area.height - 2 * wibox->sw.border.width;
-        wingeom.width = wibox->sw.geometry.width > 0 ? wibox->sw.geometry.width : 1.5 * globalconf.font->height;
-        wingeom.x = area.x + area.width - wingeom.width;
-        switch(wibox->align)
-        {
-          default:
-            wingeom.y = area.y;
-            break;
-          case AlignRight:
-            wingeom.y = area.y + area.height - wingeom.height;
-            break;
-          case AlignCenter:
-            wingeom.y = (area.y + area.height - wingeom.height) / 2;
-            break;
-        }
-        break;
-      case Left:
-        wingeom.height = area.height - 2 * wibox->sw.border.width;
-        wingeom.width = wibox->sw.geometry.width > 0 ? wibox->sw.geometry.width : 1.5 * globalconf.font->height;
-        wingeom.x = area.x;
-        switch(wibox->align)
-        {
-          default:
-            wingeom.y = (area.y + area.height) - wingeom.height;
-            break;
-          case AlignRight:
-            wingeom.y = area.y;
-            break;
-          case AlignCenter:
-            wingeom.y = (area.y + area.height - wingeom.height) / 2;
-        }
-        break;
-      case Bottom:
-        wingeom.height = wibox->sw.geometry.height > 0 ? wibox->sw.geometry.height : 1.5 * globalconf.font->height;
-        wingeom.width = area.width - 2 * wibox->sw.border.width;
-        wingeom.y = (area.y + area.height) - wingeom.height;
-        wingeom.x = area.x;
-        switch(wibox->align)
-        {
-          default:
-            break;
-          case AlignRight:
-            wingeom.x += area.width - wingeom.width;
-            break;
-          case AlignCenter:
-            wingeom.x += (area.width - wingeom.width) / 2;
-            break;
-        }
-        break;
-      case Top:
-        wingeom.height = wibox->sw.geometry.height > 0 ? wibox->sw.geometry.height : 1.5 * globalconf.font->height;
-        wingeom.width = area.width - 2 * wibox->sw.border.width;
-        wingeom.x = area.x;
-        wingeom.y = area.y;
-        switch(wibox->align)
-        {
-          default:
-            break;
-          case AlignRight:
-            wingeom.x += area.width - wingeom.width;
-            break;
-          case AlignCenter:
-            wingeom.x += (area.width - wingeom.width) / 2;
-            break;
-        }
-        break;
-      case Floating:
-        /* Floating wiboxes are not handled here, but in
-         * wibox_position_update_floating(), but the compiler insists...
-         */
-        break;
-    }
-
-    /* same window size and position ? */
-    if(wingeom.width != wibox->sw.geometry.width
-       || wingeom.height != wibox->sw.geometry.height)
-        wibox_resize(wibox, wingeom.width, wingeom.height);
-
-    if(wingeom.x != wibox->sw.geometry.x
-        || wingeom.y != wibox->sw.geometry.y)
-        wibox_move(wibox, wingeom.x, wingeom.y);
-}
-
-/** Update the wibox position. It deletes every wibox resources and
- * create them back.
- * \param wibox The wibox.
- */
-void
-wibox_position_update(wibox_t *wibox)
-{
-    if(wibox->position == Floating)
-        wibox_position_update_floating(wibox);
-    else
-        wibox_position_update_non_floating(wibox);
-}
-
 /** Get a wibox by its window.
  * \param w The window id.
  * \return A wibox if found, NULL otherwise.
@@ -570,16 +340,6 @@ wibox_refresh(void)
     }
 }
 
-/** Reposition all wiboxes.
- */
-void
-wibox_update_positions(void)
-{
-    foreach(screen, globalconf.screens)
-        foreach(w, screen->wiboxes)
-            wibox_position_update(*w);
-}
-
 /** Set a wibox visible or not.
  * \param wibox The wibox.
  * \param v The visible value.
@@ -592,7 +352,7 @@ wibox_setvisible(wibox_t *wibox, bool v)
         wibox->isvisible = v;
         wibox->mouse_over = NULL;
 
-        if(wibox->screen != NULL)
+        if(wibox->screen)
         {
             if(wibox->isvisible)
                 wibox_map(wibox);
@@ -601,11 +361,6 @@ wibox_setvisible(wibox_t *wibox, bool v)
 
             /* kick out systray if needed */
             wibox_systray_refresh(wibox);
-
-            /* All the other wibox and ourselves need to be repositioned */
-            foreach(w, wibox->screen->wiboxes)
-                wibox_position_update(*w);
-
         }
 
         hook_property(wibox, wibox, "visible");
@@ -615,10 +370,10 @@ wibox_setvisible(wibox_t *wibox, bool v)
 /** Remove a wibox from a screen.
  * \param wibox Wibox to detach from screen.
  */
-void
+static void
 wibox_detach(wibox_t *wibox)
 {
-    if(wibox->screen != NULL)
+    if(wibox->screen)
     {
         bool v;
 
@@ -626,8 +381,7 @@ wibox_detach(wibox_t *wibox)
         v = wibox->isvisible;
         wibox->isvisible = false;
         wibox_systray_refresh(wibox);
-        wibox_position_update(wibox);
-        /* restore position */
+        /* restore visibility */
         wibox->isvisible = v;
 
         wibox->mouse_over = NULL;
@@ -676,9 +430,6 @@ wibox_attach(screen_t *s)
 
     wibox_array_append(&s->wiboxes, wibox);
 
-    /* compute x/y/width/height if not set */
-    wibox_position_update(wibox);
-
     simplewindow_init(&wibox->sw, phys_screen,
                       wibox->sw.geometry,
                       wibox->sw.border.width,
@@ -689,13 +440,6 @@ wibox_attach(screen_t *s)
 
     simplewindow_cursor_set(&wibox->sw,
                             xcursor_new(globalconf.connection, xcursor_font_fromstr(wibox->cursor)));
-
-    /* All the other wibox and ourselves need to be repositioned */
-    foreach(w, s->wiboxes)
-        wibox_position_update(*w);
-
-    ewmh_update_workarea(phys_screen);
-
     if(wibox->isvisible)
         wibox_map(wibox);
     else
@@ -709,7 +453,7 @@ wibox_attach(screen_t *s)
  *
  * \luastack
  * \lparam A table with optionaly defined values:
- * position, align, fg, bg, border_width, border_color, ontop, width and height.
+ * fg, bg, border_width, border_color, ontop, width and height.
  * \lreturn A brand new wibox.
  */
 static int
@@ -740,32 +484,11 @@ luaA_wibox_new(lua_State *L)
 
     w->ontop = luaA_getopt_boolean(L, 2, "ontop", false);
 
-    buf = luaA_getopt_lstring(L, 2, "align", "left", &len);
-    w->align = draw_align_fromstr(buf, len);
-
     w->sw.border.width = luaA_getopt_number(L, 2, "border_width", 0);
-
-    buf = luaA_getopt_lstring(L, 2, "position", "top", &len);
-
-    switch((w->position = position_fromstr(buf, len)))
-    {
-      case Bottom:
-      case Top:
-      case Floating:
-        w->sw.orientation = East;
-        break;
-      case Left:
-        w->sw.orientation = North;
-        break;
-      case Right:
-        w->sw.orientation = South;
-        break;
-    }
-
     w->sw.geometry.x = luaA_getopt_number(L, 2, "x", 0);
     w->sw.geometry.y = luaA_getopt_number(L, 2, "y", 0);
-    w->sw.geometry.width = luaA_getopt_number(L, 2, "width", 0);
-    w->sw.geometry.height = luaA_getopt_number(L, 2, "height", 0);
+    w->sw.geometry.width = luaA_getopt_number(L, 2, "width", 100);
+    w->sw.geometry.height = luaA_getopt_number(L, 2, "height", globalconf.font->height * 1.5);
 
     w->isvisible = true;
     w->cursor = a_strdup("left_ptr");
@@ -848,11 +571,11 @@ luaA_wibox_invalidate_byitem(lua_State *L, const void *item)
  * \lfield client The client attached to (titlebar).
  * \lfield border_width Border width.
  * \lfield border_color Border color.
- * \lfield align The alignment.
+ * \lfield align The alignment (titlebar).
  * \lfield fg Foreground color.
  * \lfield bg Background color.
  * \lfield bg_image Background image.
- * \lfield position The position.
+ * \lfield position The position (titlebar).
  * \lfield ontop On top of other windows.
  * \lfield cursor The mouse cursor.
  * \lfield visible Visibility.
@@ -891,6 +614,8 @@ luaA_wibox_index(lua_State *L)
         luaA_pushxcolor(L, &wibox->sw.border.color);
         break;
       case A_TK_ALIGN:
+        if(wibox->type == WIBOX_TYPE_NORMAL)
+            luaA_deprecate(L, "awful.wibox.align");
         lua_pushstring(L, draw_align_tostr(wibox->align));
         break;
       case A_TK_FG:
@@ -903,6 +628,8 @@ luaA_wibox_index(lua_State *L)
         image_push(L, wibox->bg_image);
         break;
       case A_TK_POSITION:
+        if(wibox->type == WIBOX_TYPE_NORMAL)
+            luaA_deprecate(L, "awful.wibox.attach");
         lua_pushstring(L, position_tostr(wibox->position));
         break;
       case A_TK_ONTOP:
@@ -976,14 +703,7 @@ luaA_wibox_geometry(lua_State *L)
             wibox_resize(wibox, wingeom.width, wingeom.height);
             break;
           case WIBOX_TYPE_NORMAL:
-            if(wibox->position == Floating)
-                wibox_moveresize(wibox, wingeom);
-            else if(wingeom.width != wibox->sw.geometry.width
-                    || wingeom.height != wibox->sw.geometry.height)
-            {
-                wibox_resize(wibox, wingeom.width, wingeom.height);
-                wibox->screen->need_arrange = true;
-            }
+            wibox_moveresize(wibox, wingeom);
             break;
         }
     }
@@ -1028,7 +748,7 @@ luaA_wibox_newindex(lua_State *L)
         switch(wibox->type)
         {
           case WIBOX_TYPE_NORMAL:
-            wibox_position_update(wibox);
+            luaA_deprecate(L, "awful.wibox.align");
             break;
           case WIBOX_TYPE_TITLEBAR:
             titlebar_update_geometry(client_getbytitlebar(wibox));
@@ -1038,12 +758,15 @@ luaA_wibox_newindex(lua_State *L)
       case A_TK_POSITION:
         switch(wibox->type)
         {
-          case WIBOX_TYPE_TITLEBAR:
-            return luaA_titlebar_newindex(L, wibox, tok);
           case WIBOX_TYPE_NORMAL:
             if((buf = luaL_checklstring(L, 3, &len)))
-                wibox_setposition(wibox, position_fromstr(buf, len));
+            {
+                luaA_deprecate(L, "awful.wibox.attach");
+                wibox->position = position_fromstr(buf, len);
+            }
             break;
+          case WIBOX_TYPE_TITLEBAR:
+            return luaA_titlebar_newindex(L, wibox, tok);
         }
         break;
       case A_TK_CLIENT:
