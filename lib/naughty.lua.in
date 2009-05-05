@@ -91,8 +91,8 @@ config.presets = {
         hover_timeout = nil,
         position = "top_right",
         screen = 1,
-        width = 300,
-        height = 16,
+        width = nil,
+        height = nil,
         icon = nil,
         icon_size = nil
     },
@@ -273,6 +273,7 @@ function notify(args)
     local screen = args.screen or (args.preset and args.preset.screen) or config.presets.normal.screen
     local ontop = args.ontop or config.ontop
     local width = args.width or (args.preset and args.preset.width) or config.presets.normal.width
+    local height = args.preset and args.preset.height or config.presets.normal.height
     local hover_timeout = args.hover_timeout or (args.preset and args.preset.hover_timeout) or config.presets.normal.hover_timeout
     local opacity = args.opacity or (args.preset and args.preset.opacity) or config.presets.normal.opacity
 
@@ -370,13 +371,31 @@ function notify(args)
                                border_width = config.border_width })
 
     -- position the wibox
-    local lines = 1; for i in string.gmatch(title..text, "\n") do lines = lines + 1 end
-    local height = args.preset and args.preset.height or config.presets.normal.height
-    if iconbox and iconbox.image.height > lines * height then
-        notification.height = iconbox.image.height
+    if height then
+        if iconbox and iconbox.image.height > height then
+            notification.height = iconbox.image.height
+        else
+            notification.height = height
+        end
     else
-        notification.height = lines * height end
-    notification.width = width
+        if iconbox and iconbox:extents().height > textbox:extents().height then
+            notification.height = iconbox:extents().height
+        else
+            notification.height = textbox:extents().height
+        end
+    end
+    if width then
+        notification.width = width
+    else
+        notification.width = textbox:extents().width + (iconbox and iconbox:extents().width or 0) + (2 * (config.border_width or 0))
+    end
+    if notification.width > capi.screen[screen].workarea.width - 2 * (config.border_width or 0) then
+        notification.width = capi.screen[screen].workarea.width - 2 * (config.border_width or 0)
+    end
+    if notification.height > capi.screen[screen].workarea.height - 2 * (config.border_width or 0) - 2 * (config.padding or 0) then
+        notification.height = capi.screen[screen].workarea.height - 2 * (config.border_width or 0) - 2 * (config.padding or 0)
+    end
+
     local offset = get_offset(screen, notification.position, nil, notification.width, notification.height)
     notification.box:geometry({ width = notification.width,
                                 height = notification.height,
