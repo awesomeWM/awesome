@@ -564,6 +564,7 @@ luaA_isloop(lua_State *L, int idx)
  * \return The number of elements pushed on stack.
  * \luastack
  * \lfield font The default font.
+ * \lfield font_height The default font height.
  * \lfield conffile The configuration file which has been loaded.
  */
 static int
@@ -583,6 +584,9 @@ luaA_awesome_index(lua_State *L)
             lua_pushstring(L, font);
             g_free(font);
         }
+        break;
+      case A_TK_FONT_HEIGHT:
+        lua_pushnumber(L, globalconf.font->height);
         break;
       case A_TK_CONFFILE:
         lua_pushstring(L, globalconf.conffile);
