@@ -76,6 +76,26 @@ imagebox_geometry(widget_t *widget, screen_t *screen, int height, int width)
     return geometry;
 }
 
+static area_t
+imagebox_extents(lua_State *L, widget_t *widget)
+{
+    area_t geometry = {
+        .x = 0,
+        .y = 0,
+        .width = 0,
+        .height = 0
+    };
+    imagebox_data_t *d = widget->data;
+
+    if(d->image)
+    {
+        geometry.width = image_getwidth(d->image);
+        geometry.height = image_getheight(d->image);
+    }
+
+    return geometry;
+}
+
 /** Draw an image.
  * \param widget The widget.
  * \param ctx The draw context.
@@ -215,6 +235,7 @@ widget_imagebox(widget_t *w)
     w->newindex = luaA_imagebox_newindex;
     w->destructor = imagebox_destructor;
     w->geometry = imagebox_geometry;
+    w->extents = imagebox_extents;
     w->data = d = p_new(imagebox_data_t, 1);
     d->resize = true;
     d->valign = AlignTop;

@@ -495,6 +495,29 @@ luaA_widget_newindex(lua_State *L)
     return 0;
 }
 
+static int
+luaA_widget_extents(lua_State *L)
+{
+    widget_t *widget = luaL_checkudata(L, 1, "widget");
+    area_t g = {
+        .x = 0,
+        .y = 0,
+        .width = 0,
+        .height = 0
+    };
+
+    if(widget->extents)
+        g = widget->extents(L, widget);
+
+    lua_newtable(L);
+    lua_pushnumber(L, g.width);
+    lua_setfield(L, -2, "width");
+    lua_pushnumber(L, g.height);
+    lua_setfield(L, -2, "height");
+
+    return 1;
+}
+
 const struct luaL_reg awesome_widget_methods[] =
 {
     { "__call", luaA_widget_new },
@@ -503,6 +526,7 @@ const struct luaL_reg awesome_widget_methods[] =
 const struct luaL_reg awesome_widget_meta[] =
 {
     { "buttons", luaA_widget_buttons },
+    { "extents", luaA_widget_extents },
     { "__index", luaA_widget_index },
     { "__newindex", luaA_widget_newindex },
     { "__gc", luaA_widget_gc },

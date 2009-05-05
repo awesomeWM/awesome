@@ -163,6 +163,34 @@ progressbar_geometry(widget_t *widget, screen_t *screen, int height, int width)
     return geometry;
 }
 
+static area_t
+progressbar_extents(lua_State *L, widget_t *widget)
+{
+    area_t geometry;
+    progressbar_data_t *d = widget->data;
+
+    if (d->vertical)
+    {
+        int pb_width = (int) ((d->width - 2 * (d->border_width + d->border_padding) * d->bars.len
+                       - d->gap * (d->bars.len - 1)) / d->bars.len);
+        geometry.width = d->bars.len * (pb_width + 2 * (d->border_width + d->border_padding)
+                         + d->gap) - d->gap;
+    }else
+    {
+        int pb_width = d->width - 2 * (d->border_width + d->border_padding);
+        if(d->ticks_count && d->ticks_gap)
+        {
+            int unit = (pb_width + d->ticks_gap) / d->ticks_count;
+            pb_width = unit * d->ticks_count - d->ticks_gap; /* rounded to match ticks... */
+        }
+        geometry.width = pb_width + 2 * (d->border_width + d->border_padding);
+    }
+
+    geometry.height = geometry.width;
+
+    return geometry;
+}
+
 /** Draw a progressbar.
  * \param ctx The draw context.
  * \param w The widget node we're drawing for.
@@ -650,6 +678,7 @@ widget_progressbar(widget_t *w)
     w->newindex = luaA_progressbar_newindex;
     w->destructor = progressbar_destructor;
     w->geometry = progressbar_geometry;
+    w->extents = progressbar_extents;
 
     progressbar_data_t *d = w->data = p_new(progressbar_data_t, 1);
 

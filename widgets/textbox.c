@@ -79,6 +79,32 @@ textbox_geometry(widget_t *widget, screen_t *screen, int height, int width)
     return geometry;
 }
 
+static area_t
+textbox_extents(lua_State *L, widget_t *widget)
+{
+    textbox_data_t *d = widget->data;
+    area_t geometry = d->extents;
+
+    geometry.width += d->margin.left + d->margin.left;
+    geometry.height += d->margin.bottom + d->margin.top;
+
+    if(d->bg_image)
+    {
+        int bgi_height = image_getheight(d->bg_image);
+        int bgi_width = image_getwidth(d->bg_image);
+        double ratio = d->bg_resize ? (double) geometry.height / bgi_height : 1;
+        geometry.width = MAX(d->extents.width + d->margin.left + d->margin.right, MAX(d->width, bgi_width * ratio));
+    }
+
+    if (d->data.len == 0)
+    {
+        geometry.width = 0;
+        geometry.height = 0;
+    }
+
+    return geometry;
+}
+
 /** Draw a textbox widget.
  * \param widget The widget.
  * \param ctx The draw context.
@@ -376,6 +402,7 @@ widget_textbox(widget_t *w)
     w->newindex = luaA_textbox_newindex;
     w->destructor = textbox_destructor;
     w->geometry = textbox_geometry;
+    w->extents = textbox_extents;
 
     textbox_data_t *d = w->data = p_new(textbox_data_t, 1);
     d->ellip = PANGO_ELLIPSIZE_END;

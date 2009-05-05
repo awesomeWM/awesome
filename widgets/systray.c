@@ -50,6 +50,33 @@ systray_geometry(widget_t *widget, screen_t *screen, int height, int width)
     return geometry;
 }
 
+static area_t
+systray_extents(lua_State *L, widget_t *widget)
+{
+    area_t geometry;
+    int screen = screen_virttophys(luaL_optnumber(L, -1, 1)), n = 0;
+
+    geometry.height = 0;
+    int width = 0;
+
+    for(int i = 0; i < globalconf.embedded.len; i++)
+        if(globalconf.embedded.tab[i].phys_screen == screen)
+        {
+            xcb_get_geometry_cookie_t geo = xcb_get_geometry(globalconf.connection, globalconf.embedded.tab[i].win);
+            xcb_get_geometry_reply_t *g = xcb_get_geometry_reply(globalconf.connection, geo, NULL);
+
+            n++;
+            if(g->height > geometry.height)
+                geometry.height = g->height;
+            if(g->width > width)
+                width = g->width;
+        }
+
+    geometry.width = width * n;
+
+    return geometry;
+}
+
 static void
 systray_draw(widget_t *widget, draw_context_t *ctx,
              area_t geometry, wibox_t *p)
@@ -83,6 +110,7 @@ widget_systray(widget_t *w)
 {
     w->draw = systray_draw;
     w->geometry = systray_geometry;
+    w->extents = systray_extents;
 
     return w;
 }

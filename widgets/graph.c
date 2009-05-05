@@ -160,6 +160,16 @@ graph_geometry(widget_t *widget, screen_t *screen, int height, int width)
     return geometry;
 }
 
+static area_t
+graph_extents(lua_State *L, widget_t *widget)
+{
+    area_t geometry;
+    graph_data_t *d = widget->data;
+    geometry.width = geometry.height = d->width;
+
+    return geometry;
+}
+
 /** Draw a graph widget.
  * \param ctx The draw context.
  * \param w The widget node we are called from.
@@ -595,6 +605,7 @@ widget_graph(widget_t *w)
     w->newindex = luaA_graph_newindex;
     w->destructor = graph_destructor;
     w->geometry = graph_geometry;
+    w->extents = graph_extents;
 
     graph_data_t *d = w->data = p_new(graph_data_t, 1);
 
