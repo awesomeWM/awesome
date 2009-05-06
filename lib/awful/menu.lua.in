@@ -65,10 +65,7 @@ end
 function hide(menu)
     -- Remove items from screen
     for i = 1, #menu.items do
-        -- Call mouse_leave to clear menu entry
-        for k, w in pairs(menu.items[i].wibox.widgets) do
-            item_leave(menu, i)
-        end
+        item_leave(menu, i)
         menu.items[i].wibox.screen = nil
     end
     if menu.active_child then
