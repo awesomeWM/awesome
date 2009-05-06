@@ -121,8 +121,8 @@ end
 local function get_offset(screen, position, idx, width, height)
     local ws = capi.screen[screen].workarea
     local v = {}
-    width = width or notifications[screen][position][idx].width or config.width
     local idx = idx or #notifications[screen][position] + 1
+    local width = width or notifications[screen][position][idx].width
 
     -- calculate x
     if position:match("left") then
@@ -351,35 +351,36 @@ function notify(args)
                                border_color = border_color,
                                border_width = border_width })
 
-    -- position the wibox
-    if height then
-        if iconbox and iconbox.image.height > height then
-            notification.height = iconbox.image.height
-        else
-            notification.height = height
-        end
-    else
+    -- calculate the height
+    if not height then
         if iconbox and iconbox:extents().height > textbox:extents().height then
-            notification.height = iconbox:extents().height
+            height = iconbox:extents().height
         else
-            notification.height = textbox:extents().height
+            height = textbox:extents().height
         end
-    end
-    if width then
-        notification.width = width
-    else
-        notification.width = textbox:extents().width + (iconbox and iconbox:extents().width or 0) + (2 * (border_width or 0))
-    end
-    if notification.width > capi.screen[screen].workarea.width - 2 * (border_width or 0) then
-        notification.width = capi.screen[screen].workarea.width - 2 * (border_width or 0)
-    end
-    if notification.height > capi.screen[screen].workarea.height - 2 * (border_width or 0) - 2 * (config.padding or 0) then
-        notification.height = capi.screen[screen].workarea.height - 2 * (border_width or 0) - 2 * (config.padding or 0)
     end
 
+    -- calculate the width
+    if not width then
+        width = textbox:extents().width + (iconbox and iconbox:extents().width or 0)
+    end
+
+    -- crop to workarea size if too big
+    if width > capi.screen[screen].workarea.width - 2 * (border_width or 0) - 2 * (config.padding or 0) then
+        width = capi.screen[screen].workarea.width - 2 * (border_width or 0) - 2 * (config.padding or 0)
+    end
+    if height > capi.screen[screen].workarea.height - 2 * (border_width or 0) - 2 * (config.padding or 0) then
+        height = capi.screen[screen].workarea.height - 2 * (border_width or 0) - 2 * (config.padding or 0)
+    end
+
+    -- set size in notification object
+    notification.height = height + 2 * (border_width or 0)
+    notification.width = width + 2 * (border_width or 0)
+
+    -- position the wibox
     local offset = get_offset(screen, notification.position, nil, notification.width, notification.height)
-    notification.box:geometry({ width = notification.width,
-                                height = notification.height,
+    notification.box:geometry({ width = width,
+                                height = height,
                                 x = offset.x,
                                 y = offset.y })
     notification.box.ontop = ontop
