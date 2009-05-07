@@ -174,9 +174,7 @@ image_new_from_file(const char *filename)
  * \param L The Lua stack.
  * \return The number of elements pushed on stack.
  * \luastack
- * \lparam The image path, or nil to create an empty image.
- * \lparam The image width if nil was set as first arg.
- * \lparam The image height if nil was set as first arg.
+ * \lparam The image path.
  * \lreturn An image object.
  */
 static int
