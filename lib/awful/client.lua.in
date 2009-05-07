@@ -13,6 +13,7 @@ local ipairs = ipairs
 local table = table
 local math = math
 local setmetatable = setmetatable
+local type = type
 local capi =
 {
     client = client,
@@ -575,7 +576,7 @@ hooks.manage.register(function (c)
 end)
 
 hooks.property.register(function (c, prop)
-    if prop == "geometry" and floating.get(c) then
+    if type(c) == "client" and prop == "geometry" and floating.get(c) then
         property.set(c, "floating_geometry", c:geometry())
     end
 end)

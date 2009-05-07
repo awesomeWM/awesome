@@ -605,7 +605,10 @@ wibox_setvisible(wibox_t *wibox, bool v)
             /* All the other wibox and ourselves need to be repositioned */
             foreach(w, wibox->screen->wiboxes)
                 wibox_position_update(*w);
+
         }
+
+        hook_property(wibox, wibox, "visible");
     }
 }
 
@@ -640,7 +643,10 @@ wibox_detach(wibox_t *wibox)
                 break;
             }
 
+        hook_property(wibox, wibox, "screen");
+
         wibox->screen = NULL;
+
         wibox_unref(globalconf.L, wibox);
     }
 }
@@ -694,6 +700,8 @@ wibox_attach(screen_t *s)
         wibox_map(wibox);
     else
         wibox_need_update(wibox);
+
+    hook_property(wibox, wibox, "screen");
 }
 
 /** Create a new wibox.

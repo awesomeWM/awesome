@@ -10,6 +10,7 @@ local image = image
 local pairs = pairs
 local type = type
 local setmetatable = setmetatable
+local type = type
 local capi =
 {
     wibox = wibox,
