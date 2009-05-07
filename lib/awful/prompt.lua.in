@@ -278,8 +278,7 @@ function run(args, textbox, exe_callback, completion_callback, history_path, his
                     command = command:sub(1, cur_pos - 2) .. command:sub(cur_pos)
                     cur_pos = cur_pos - 1
                 end
-            -- That's DEL
-            elseif key:byte() == 127 then
+            elseif key == "Delete" then
                 command = command:sub(1, cur_pos - 1) .. command:sub(cur_pos + 1)
             elseif key == "Left" then
                 cur_pos = cur_pos - 1
