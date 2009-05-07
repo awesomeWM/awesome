@@ -639,7 +639,7 @@ ewmh_process_client_strut(client_t *c, xcb_get_property_reply_t *strut_r)
             /* All the wiboxes (may) need to be repositioned. */
             wibox_update_positions();
 
-            hooks_property(c, "struts");
+            hook_property(client, c, "struts");
         }
     }
 

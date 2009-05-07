@@ -218,7 +218,7 @@ property_update_wm_name(client_t *c)
     c->name = name;
 
     /* call hook */
-    hooks_property(c, "name");
+    hook_property(client, c, "name");
 }
 
 /** Update WM_CLASS of a client.
@@ -272,7 +272,7 @@ property_update_wm_icon_name(client_t *c)
     c->icon_name = name;
 
     /* call hook */
-    hooks_property(c, "icon_name");
+    hook_property(client, c, "icon_name");
 }
 
 static int
@@ -355,7 +355,7 @@ property_handle_net_wm_icon(void *data,
         if(ewmh_window_icon_from_reply(reply))
             c->icon = image_ref(globalconf.L);
         /* execute hook */
-        hooks_property(c, "icon");
+        hook_property(client, c, "icon");
     }
 
     return 0;

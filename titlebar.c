@@ -414,7 +414,7 @@ luaA_titlebar_newindex(lua_State *L, wibox_t *titlebar, awesome_token_t tok)
                 titlebar_update_geometry(c);
                 /* call geometry hook for client because some like to
                  * set titlebar width in that hook, which make sense */
-                hooks_property(c, "geometry");
+                hook_property(client, c, "geometry");
             }
         }
         break;

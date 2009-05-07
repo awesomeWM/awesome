@@ -88,7 +88,7 @@ client_seturgent(client_t *c, bool urgent)
 
         xcb_set_wm_hints(globalconf.connection, c->win, &wmh);
 
-        hooks_property(c, "urgent");
+        hook_property(client, c, "urgent");
     }
 }
 
@@ -746,7 +746,7 @@ client_resize(client_t *c, area_t geometry, bool hints)
         screen_client_moveto(c, new_screen, true, false);
 
         /* execute hook */
-        hooks_property(c, "geometry");
+        hook_property(client, c, "geometry");
 
         return true;
     }
@@ -768,7 +768,7 @@ client_setminimized(client_t *c, bool s)
         client_need_arrange(c);
         ewmh_client_update_hints(c);
         /* execute hook */
-        hooks_property(c, "minimized");
+        hook_property(client, c, "minimized");
     }
 }
 
@@ -785,7 +785,7 @@ client_setsticky(client_t *c, bool s)
         c->issticky = s;
         client_need_arrange(c);
         ewmh_client_update_hints(c);
-        hooks_property(c, "sticky");
+        hook_property(client, c, "sticky");
     }
 }
 
@@ -829,7 +829,7 @@ client_setfullscreen(client_t *c, bool s)
         client_need_arrange(c);
         client_stack();
         ewmh_client_update_hints(c);
-        hooks_property(c, "fullscreen");
+        hook_property(client, c, "fullscreen");
     }
 }
 
@@ -869,7 +869,7 @@ client_setmaxhoriz(client_t *c, bool s)
         client_need_arrange(c);
         client_stack();
         ewmh_client_update_hints(c);
-        hooks_property(c, "maximized_horizontal");
+        hook_property(client, c, "maximized_horizontal");
     }
 }
 
@@ -909,7 +909,7 @@ client_setmaxvert(client_t *c, bool s)
         client_need_arrange(c);
         client_stack();
         ewmh_client_update_hints(c);
-        hooks_property(c, "maximized_vertical");
+        hook_property(client, c, "maximized_vertical");
     }
 }
 
@@ -933,7 +933,7 @@ client_setabove(client_t *c, bool s)
         client_stack();
         ewmh_client_update_hints(c);
         /* execute hook */
-        hooks_property(c, "above");
+        hook_property(client, c, "above");
     }
 }
 
@@ -957,7 +957,7 @@ client_setbelow(client_t *c, bool s)
         client_stack();
         ewmh_client_update_hints(c);
         /* execute hook */
-        hooks_property(c, "below");
+        hook_property(client, c, "below");
     }
 }
 
@@ -974,7 +974,7 @@ client_setmodal(client_t *c, bool s)
         client_stack();
         ewmh_client_update_hints(c);
         /* execute hook */
-        hooks_property(c, "modal");
+        hook_property(client, c, "modal");
     }
 }
 
@@ -997,7 +997,7 @@ client_setontop(client_t *c, bool s)
         c->isontop = s;
         client_stack();
         /* execute hook */
-        hooks_property(c, "ontop");
+        hook_property(client, c, "ontop");
     }
 }
 
@@ -1211,7 +1211,7 @@ client_setborder(client_t *c, int width)
     /* Changing border size also affects the size of the titlebar. */
     titlebar_update_geometry(c);
 
-    hooks_property(c, "border_width");
+    hook_property(client, c, "border_width");
 }
 
 /** Kill a client.
@@ -1467,7 +1467,7 @@ luaA_client_struts(lua_State *L)
             /* All the wiboxes (may) need to be repositioned. */
             wibox_update_positions();
 
-            hooks_property(c, "struts");
+            hook_property(client, c, "struts");
         }
     }
 
@@ -1523,7 +1523,7 @@ luaA_client_newindex(lua_State *L)
         image_unref(L, c->icon);
         c->icon = image_ref(L);
         /* execute hook */
-        hooks_property(c, "icon");
+        hook_property(client, c, "icon");
         break;
       case A_TK_OPACITY:
         if(lua_isnil(L, 3))
@@ -1540,7 +1540,7 @@ luaA_client_newindex(lua_State *L)
         break;
       case A_TK_SIZE_HINTS_HONOR:
         c->size_hints_honor = luaA_checkboolean(L, 3);
-        hooks_property(c, "size_hints_honor");
+        hook_property(client, c, "size_hints_honor");
         break;
       case A_TK_BORDER_WIDTH:
         client_setborder(c, luaL_checknumber(L, 3));
