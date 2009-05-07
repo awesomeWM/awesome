@@ -837,15 +837,20 @@ luaA_wibox_invalidate_byitem(lua_State *L, const void *item)
  * \return The number of elements pushed on stack.
  * \luastack
  * \lfield screen Screen number.
- * \lfield client The client attached to this titlebar.
+ * \lfield client The client attached to (titlebar).
  * \lfield border_width Border width.
  * \lfield border_color Border color.
  * \lfield align The alignment.
  * \lfield fg Foreground color.
  * \lfield bg Background color.
+ * \lfield bg_image Background image.
  * \lfield position The position.
  * \lfield ontop On top of other windows.
  * \lfield cursor The mouse cursor.
+ * \lfield visible Visibility.
+ * \lfield orientation The drawing orientation: east, north or south.
+ * \lfield widgets An array with all widgets drawn on this wibox.
+ * \lfield opacity The opacity of the wibox, between 0 and 1.
  * \lfield mouse_enter A function to execute when the mouse enter the widget.
  * \lfield mouse_leave A function to execute when the mouse leave the widget.
  */
