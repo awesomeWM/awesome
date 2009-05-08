@@ -11,6 +11,7 @@ local capi = { widget = widget,
                client = client }
 local type = type
 local setmetatable = setmetatable
+local unpack = unpack
 local pairs = pairs
 local ipairs = ipairs
 local hooks = require("awful.hooks")
@@ -168,5 +169,7 @@ function label.noempty(t, args)
         return label.all(t, args)
     end
 end
+
+setmetatable(_M, { __call = function(_, ...) return new(unpack(arg)) end })
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
