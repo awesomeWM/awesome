@@ -39,6 +39,7 @@ static int
 luaA_wibox_gc(lua_State *L)
 {
     wibox_t *wibox = luaL_checkudata(L, 1, "wibox");
+    luaA_ref_array_wipe(&wibox->refs);
     p_delete(&wibox->cursor);
     simplewindow_wipe(&wibox->sw);
     button_array_wipe(&wibox->buttons);

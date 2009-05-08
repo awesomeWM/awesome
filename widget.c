@@ -44,6 +44,7 @@ static int
 luaA_widget_gc(lua_State *L)
 {
     widget_t *widget = luaL_checkudata(L, 1, "widget");
+    luaA_ref_array_wipe(&widget->refs);
     if(widget->destructor)
         widget->destructor(widget);
     button_array_wipe(&widget->buttons);

@@ -50,6 +50,7 @@ static int
 luaA_key_gc(lua_State *L)
 {
     keyb_t *kbp = luaL_checkudata(L, 1, "key");
+    luaA_ref_array_wipe(&kbp->refs);
     luaL_unref(globalconf.L, LUA_REGISTRYINDEX, kbp->press);
     luaL_unref(globalconf.L, LUA_REGISTRYINDEX, kbp->release);
     return 0;
