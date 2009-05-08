@@ -21,7 +21,7 @@ $(BUILDLN):
 cmake ${builddir}/CMakeCache.txt:
 	mkdir -p ${builddir}
 	$(ECHO) "Running cmake…"
-	cd ${builddir} && cmake "$(@D)" ..
+	cd ${builddir} && cmake $(CMAKE_ARGS) "$(@D)" ..
 
 cmake-build: ${builddir}/CMakeCache.txt
 	$(ECHO) "Building…"
