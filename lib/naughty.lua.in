@@ -7,19 +7,18 @@
 -- Package environment
 local pairs = pairs
 local table = table
-local wibox = wibox
-local image = image
 local type = type
-local hooks = require("awful.hooks")
 local string = string
-local widget = widget
+local capi = { screen = screen,
+               awesome = awesome,
+               dbus = dbus,
+               widget = widget,
+               wibox = wibox,
+               image = image }
+local hooks = require("awful.hooks")
 local button = require("awful.button")
 local util = require("awful.util")
-local capi = { screen = screen, awesome = awesome }
 local bt = require("beautiful")
-local screen = screen
-local awful = awful
-local dbus = dbus
 
 --- Notification library
 module("naughty")
@@ -103,7 +102,7 @@ local counter = 1
 -- @class table
 
 notifications = {}
-for s = 1, screen.count() do
+for s = 1, capi.screen.count() do
     notifications[s] = {
         top_left = {},
         top_right = {},
@@ -186,7 +185,7 @@ end
 -- @return notification object if it was found, nil otherwise
 local function getById(id)
     -- iterate the notifications to get the notfications with the correct ID
-    for s = 1, screen.count() do
+    for s = 1, capi.screen.count() do
         for p,pos in pairs(notifications[s]) do
             for i,notification in pairs(notifications[s][p]) do
                 if notification.id == id then
@@ -204,7 +203,7 @@ local function getIcon(name)
     for d, dir in pairs(config.icon_dirs) do
         for f, format in pairs(config.icon_formats) do
             local icon = dir .. name .. "." .. format
-            if awful.util.file_readable(icon) then
+            if util.file_readable(icon) then
                 return icon
             end
         end
@@ -310,7 +309,7 @@ function notify(args)
     end
 
     -- create textbox
-    local textbox = widget({ type = "textbox", align = "flex" })
+    local textbox = capi.widget({ type = "textbox", align = "flex" })
     textbox:buttons(util.table.join(button({ }, 1, run), button({ }, 3, die)))
     textbox:margin({ right = margin, left = margin, bottom = 2 * margin })
     textbox.text = string.format('<span font_desc="%s"><b>%s</b>%s</span>', font, title, text)
@@ -320,17 +319,17 @@ function notify(args)
     local iconbox = nil
     if icon then
         -- try to guess icon if the provided one is non-existent/readable
-        if type(icon) == "string" and not awful.util.file_readable(icon) then
+        if type(icon) == "string" and not util.file_readable(icon) then
             icon = getIcon(icon)
         end
 
         -- if we have an icon, use it
         if icon then
-            iconbox = widget({ type = "imagebox", align = "left" })
+            iconbox = capi.widget({ type = "imagebox", align = "left" })
             iconbox:buttons(util.table.join(button({ }, 1, run), button({ }, 3, die)))
             local img
             if type(icon) == "string" then
-                img = image(icon)
+                img = capi.image(icon)
             else
                 img = icon
             end
@@ -345,11 +344,11 @@ function notify(args)
     end
 
     -- create container wibox
-    notification.box = wibox({ position = "floating",
-                               fg = fg,
-                               bg = bg,
-                               border_color = border_color,
-                               border_width = border_width })
+    notification.box = capi.wibox({ position = "floating",
+                                    fg = fg,
+                                    bg = bg,
+                                    border_color = border_color,
+                                    border_width = border_width })
 
     -- calculate the height
     if not height then
@@ -400,8 +399,8 @@ end
 
 -- DBUS/Notification support
 -- Notify
-if awful.hooks.dbus then
-    awful.hooks.dbus.register("org.freedesktop.Notifications", function (data, appname, replaces_id, icon, title, text, actions, hints, expire)
+if hooks.dbus then
+    hooks.dbus.register("org.freedesktop.Notifications", function (data, appname, replaces_id, icon, title, text, actions, hints, expire)
     args = { preset = { } }
     if data.member == "Notify" then
         if text ~= "" then
@@ -451,7 +450,7 @@ if awful.hooks.dbus then
                     end
                 end
                 if imgdata then
-                    args.icon = image.argb32(hints.icon_data[1], hints.icon_data[2], imgdata)
+                    args.icon = capi.image.argb32(hints.icon_data[1], hints.icon_data[2], imgdata)
                 end
             end
             if replaces_id and replaces_id ~= "" and replaces_id ~= 0 then
@@ -475,7 +474,7 @@ if awful.hooks.dbus then
     end
     end)
 
-    awful.hooks.dbus.register("org.freedesktop.DBus.Introspectable",
+    hooks.dbus.register("org.freedesktop.DBus.Introspectable",
     function (data, text)
     if data.member == "Introspect" then
         local xml = [=[<!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object
@@ -519,7 +518,7 @@ if awful.hooks.dbus then
     end)
 
     -- listen for dbus notification requests
-    dbus.request_name("session", "org.freedesktop.Notifications")
+    capi.dbus.request_name("session", "org.freedesktop.Notifications")
 end
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
