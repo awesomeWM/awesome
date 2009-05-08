@@ -60,32 +60,8 @@ static int
 luaA_button_new(lua_State *L)
 {
     xcb_button_t xbutton;
-    button_t *button, *orig;
+    button_t *button;
     luaA_ref press = LUA_REFNIL, release = LUA_REFNIL;
-
-    if((orig = luaA_toudata(L, 2, "button")))
-    {
-        button_t *copy = button_new(L);
-        copy->mod = orig->mod;
-        copy->button = orig->button;
-        if(orig->press != LUA_REFNIL)
-        {
-            lua_rawgeti(L, LUA_REGISTRYINDEX, orig->press);
-            luaA_registerfct(L, -1, &copy->press);
-            lua_pop(L, 1);
-        }
-        else
-            copy->press = LUA_REFNIL;
-        if(orig->release != LUA_REFNIL)
-        {
-            lua_rawgeti(L, LUA_REGISTRYINDEX, orig->release);
-            luaA_registerfct(L, -1, &copy->release);
-            lua_pop(L, 1);
-        }
-        else
-            copy->release = LUA_REFNIL;
-        return 1;
-    }
 
     luaA_checktable(L, 2);
     /* arg 3 is mouse button */
