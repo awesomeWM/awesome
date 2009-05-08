@@ -67,6 +67,11 @@ function new(screen, label, buttons)
         end
     end)
     u(screen)
+    -- Free data on tag removal.
+    -- See tasklist to get why this is needed.
+    hooks.tags.register(function (s, tag, action)
+        if action == "remove" then data[tag] = nil end
+    end)
     return w
 end
 

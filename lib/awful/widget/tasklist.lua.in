@@ -70,6 +70,13 @@ function new(label, buttons)
         end
     end)
     u()
+    -- Free data on unmanage.
+    -- You may thing we do not need to clear data[] on unmanage because it's a
+    -- weak-keyed table. But in fact we need, because it's a loop reference
+    -- between data[client] and data[client][i] = button(reference a client in
+    -- the Lua registry) and since the registry and the button() are totally
+    -- unconnected, Lua does not free anything.
+    hooks.unmanage.register(function (c) data[c] = nil end)
     return w
 end
 
