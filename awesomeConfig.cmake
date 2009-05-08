@@ -5,7 +5,7 @@ set(PROJECT_AWECLIENT_NAME awesome-client)
 # `git describe` later.
 set(VERSION devel)
 
-set(CODENAME "The Lightning Strike")
+set(CODENAME "Bad Boyfriend")
 
 project(${PROJECT_AWE_NAME} C)
 
