@@ -67,6 +67,16 @@ static void
 spawn_monitor_timeout(struct ev_loop *loop, ev_timer *w, int revents)
 {
     spawn_sequence_remove(w->data);
+    /* send a timeout event to hook function */
+    if(globalconf.hooks.startup_notification != LUA_REFNIL)
+    {
+        lua_createtable(globalconf.L, 0, 2);
+        lua_pushstring(globalconf.L, sn_startup_sequence_get_id(w->data));
+        lua_setfield(globalconf.L, -2, "id");
+        lua_pushliteral(globalconf.L, "timedout");
+        lua_setfield(globalconf.L, -2, "type");
+        luaA_dofunction(globalconf.L, globalconf.hooks.startup_notification, 1, 0);
+    }
     sn_startup_sequence_unref(w->data);
     p_delete(&w);
 }
