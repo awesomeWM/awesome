@@ -70,7 +70,8 @@ do_tokens() {
 }
 
 do_c() {
-    if ! which gperf > /dev/null; then
+    which gperf > /dev/null
+    if test $? = 1 ; then
         echo "gperf not found. You need to install gperf." > /dev/stderr;
         exit 1;
     fi;
