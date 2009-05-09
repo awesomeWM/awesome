@@ -1,4 +1,4 @@
-#!/bin/sh -e
+#!/bin/sh
 #
 # Copyright © 2008 Pierre Habouzit <madcoder@debian.org>
 #
