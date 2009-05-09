@@ -50,7 +50,7 @@ do_h() {
 
 typedef enum awesome_token_t {
     A_TK_UNKNOWN,
-`tr 'a-z-./ ' 'A-Z____' | sed -e "s/^[^/].*/    A_TK_&,/"`
+`tr '[:lower:]' '[:upper:]' | sed -e "s/^[^/].*/    A_TK_&,/"`
 } awesome_token_t;
 
 __attribute__((pure)) enum awesome_token_t a_tokenize(const char *s, int len);
@@ -63,7 +63,7 @@ do_tokens() {
         case "$tok" in
             "") continue;;
             *)
-                echo "$tok, A_TK_`echo $tok | tr 'a-z-./ ' 'A-Z____'`"
+                echo "$tok, A_TK_`echo $tok | tr '[:lower:]' '[:upper:]'`"
                 ;;
         esac
     done
