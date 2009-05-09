@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # rlwrap provides readline to stuff which doesn't know readline by itself
 RLWRAP=`which rlwrap 2>/dev/null`
