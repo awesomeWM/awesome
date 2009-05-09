@@ -679,20 +679,25 @@ luaA_init(xdgHandle* xdg)
 
     /* Export root lib */
     luaL_register(L, "root", awesome_root_lib);
+    lua_pop(L, 1); /* luaL_register() leaves the table on stack */
 
     /* Export hooks lib */
     luaL_register(L, "hooks", awesome_hooks_lib);
+    lua_pop(L, 1); /* luaL_register() leaves the table on stack */
 
 #ifdef WITH_DBUS
     /* Export D-Bus lib */
     luaL_register(L, "dbus", awesome_dbus_lib);
+    lua_pop(L, 1); /* luaL_register() leaves the table on stack */
 #endif
 
     /* Export keygrabber lib */
     luaL_register(L, "keygrabber", awesome_keygrabber_lib);
+    lua_pop(L, 1); /* luaL_register() leaves the table on stack */
 
     /* Export mousegrabber lib */
     luaL_register(L, "mousegrabber", awesome_mousegrabber_lib);
+    lua_pop(L, 1); /* luaL_register() leaves the table on stack */
 
     /* Export screen */
     luaA_openlib(L, "screen", awesome_screen_methods, awesome_screen_meta);
@@ -740,34 +745,41 @@ luaA_init(xdgHandle* xdg)
 #endif
 
     /* add Lua lib path (/usr/share/awesome/lib by default) */
-    luaA_dostring(L, "package.path = package.path .. \";" AWESOME_LUA_LIB_PATH  "/?.lua\"");
-    luaA_dostring(L, "package.path = package.path .. \";" AWESOME_LUA_LIB_PATH  "/?/init.lua\"");
+    lua_getglobal(L, "package");
+    if (LUA_TTABLE != lua_type(L, 1))
+    {
+        warn("package is not a table");
+        return;
+    }
+    lua_getfield(L, 1, "path");
+    if (LUA_TSTRING != lua_type(L, 2))
+    {
+        warn("package.path is not a string");
+        lua_pop(L, 1);
+        return;
+    }
+    lua_pushliteral(L, ";" AWESOME_LUA_LIB_PATH "/?.lua");
+    lua_pushliteral(L, ";" AWESOME_LUA_LIB_PATH "/?/init.lua");
+    lua_concat(L, 3); /* concatenate with package.path */
 
     /* add XDG_CONFIG_DIR as include path */
     const char * const *xdgconfigdirs = xdgSearchableConfigDirectories(xdg);
-    buffer_t buf;
-    int prev_len = 0;
-    buffer_init(&buf);
-#define A_LUAA_FIRST_STRING "package.path = package.path .. \";"
-#define A_LUAA_SECOND_STRING "/awesome/?.lua;"
-#define A_LUAA_FULL_STRING A_LUAA_FIRST_STRING A_LUAA_SECOND_STRING "/awesome/?/init.lua\""
-    buffer_addsl(&buf, A_LUAA_FULL_STRING);
     for(; *xdgconfigdirs; xdgconfigdirs++)
     {
         size_t len = a_strlen(*xdgconfigdirs);
-        buffer_splice(&buf, sizeof(A_LUAA_FIRST_STRING) - 1, prev_len, *xdgconfigdirs, len);
-        buffer_splice(&buf,
-                      sizeof(A_LUAA_FIRST_STRING) - 1
-                      + len
-                      + sizeof(A_LUAA_SECOND_STRING) - 1,
-                      prev_len, *xdgconfigdirs, len);
-        luaA_dostring(L, buf.s);
-        prev_len = len;
+        lua_pushliteral(L, ";");
+        lua_pushlstring(L, *xdgconfigdirs, len);
+        lua_pushliteral(L, "/awesome/?.lua");
+        lua_concat(L, 3);
+
+        lua_pushliteral(L, ";");
+        lua_pushlstring(L, *xdgconfigdirs, len);
+        lua_pushliteral(L, "/awesome/?/init.lua");
+        lua_concat(L, 3);
+
+        lua_concat(L, 3); /* concatenate with package.path */
     }
-#undef A_LUAA_FIRST_STRING
-#undef A_LUAA_SECOND_STRING
-#undef A_LUAA_FULL_STRING
-    buffer_wipe(&buf);
+    lua_setfield(L, 1, "path"); /* package.path = "concatenated string" */
 }
 
 static bool
