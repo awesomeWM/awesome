@@ -47,7 +47,8 @@ local function startup_hook(event)
     if event.type == "initiated" then
         register_event(event.id)
     elseif event.type == "canceled"
-        or event.type == "completed" then
+        or event.type == "completed"
+        or event.type == "timedout" then
         unregister_event(event.id)
     end
 end
