@@ -18,6 +18,7 @@ DBUS_SEND=dbus-send
 if ! which ${DBUS_SEND} >/dev/null 2>&1
 then
     echo "E: Unable to find" ${DBUS_SEND}
+    exit 1
 fi
 
 DBUS_METHOD=org.awesome.Remote.Eval
