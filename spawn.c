@@ -67,6 +67,7 @@ static void
 spawn_monitor_timeout(struct ev_loop *loop, ev_timer *w, int revents)
 {
     spawn_sequence_remove(w->data);
+    sn_startup_sequence_unref(w->data);
     p_delete(&w);
 }
 
@@ -86,6 +87,7 @@ spawn_monitor_event(SnMonitorEvent *event, void *data)
     switch(event_type)
     {
       case SN_MONITOR_EVENT_INITIATED:
+        /* ref the sequence for the array */
         sn_startup_sequence_ref(sequence);
         SnStartupSequence_array_append(&sn_waits, sequence);
         lua_pushliteral(globalconf.L, "initiated");
@@ -95,6 +97,8 @@ spawn_monitor_event(SnMonitorEvent *event, void *data)
          * for ever */
         struct ev_timer *ev_timeout = p_new(struct ev_timer, 1);
         ev_timer_init(ev_timeout, spawn_monitor_timeout, AWESOME_SPAWN_TIMEOUT, 0.);
+        /* ref the sequence for the callback event */
+        sn_startup_sequence_ref(sequence);
         ev_timeout->data = sequence;
         ev_timer_start(globalconf.loop, ev_timeout);
         break;
