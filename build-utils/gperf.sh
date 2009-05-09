@@ -75,8 +75,8 @@ do_c() {
         exit 1;
     fi;
 
-    cat <<EOF | gperf -l -t -C -F",0" \
-        --language=ANSI-C -Na_tokenize_aux \
+    gperf -l -t -C -F",0" \
+        --language=ANSI-C -Na_tokenize_aux <<EOF \
         | sed -e '/__gnu_inline__/d;s/\<\(__\|\)inline\>//g'
 %{
 `do_hdr`
@@ -119,8 +119,8 @@ trap "rm -f ${TARGET}" 0
 
 rm -f "${TARGET}"
 case "${TARGET}" in
-    *.h) cat "${TOKENS_FILE}" | do_h > "${TARGET}";;
-    *.c) cat "${TOKENS_FILE}" | do_c > "${TARGET}";;
+    *.h) do_h > "${TARGET}" < "${TOKENS_FILE}" ;;
+    *.c) do_c > "${TARGET}" < "${TOKENS_FILE}" ;;
     *)  die "you must ask for the 'h' or 'c' generation";;
 esac
 chmod -w "${TARGET}"
