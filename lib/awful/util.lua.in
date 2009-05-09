@@ -26,6 +26,8 @@ module("awful.util")
 
 table = {}
 
+shell = os.getenv("SHELL") or "/bin/sh"
+
 function deprecate(see)
     io.stderr:write("W: awful: function is deprecated")
     if see then
@@ -79,10 +81,6 @@ end
 -- @param screen The screen where to run the command.
 function spawn_with_shell(cmd, screen)
     if cmd and cmd ~= "" then
-        -- Get the shell once for all
-        if not shell then
-            shell = os.getenv("SHELL") or "/bin/sh"
-        end
         cmd = shell .. " -c \"" .. cmd .. "\""
         return capi.awesome.spawn(cmd, false, screen or capi.mouse.screen)
     end
