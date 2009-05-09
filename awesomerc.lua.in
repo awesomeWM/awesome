@@ -272,33 +272,34 @@ for s = 1, screen.count() do
 end
 
 for i = 1, keynumber do
-    table.foreach(awful.key({ modkey }, i,
+    globalkeys = awful.util.table.join(globalkeys,
+        awful.key({ modkey }, i,
                   function ()
                         local screen = mouse.screen
                         if tags[screen][i] then
                             awful.tag.viewonly(tags[screen][i])
                         end
-                  end), function(_, k) table.insert(globalkeys, k) end)
-    table.foreach(awful.key({ modkey, "Control" }, i,
+                  end),
+        awful.key({ modkey, "Control" }, i,
                   function ()
                       local screen = mouse.screen
                       if tags[screen][i] then
                           tags[screen][i].selected = not tags[screen][i].selected
                       end
-                  end), function(_, k) table.insert(globalkeys, k) end)
-    table.foreach(awful.key({ modkey, "Shift" }, i,
+                  end),
+        awful.key({ modkey, "Shift" }, i,
                   function ()
                       if client.focus and tags[client.focus.screen][i] then
                           awful.client.movetotag(tags[client.focus.screen][i])
                       end
-                  end), function(_, k) table.insert(globalkeys, k) end)
-    table.foreach(awful.key({ modkey, "Control", "Shift" }, i,
+                  end),
+        awful.key({ modkey, "Control", "Shift" }, i,
                   function ()
                       if client.focus and tags[client.focus.screen][i] then
                           awful.client.toggletag(tags[client.focus.screen][i])
                       end
-                  end), function(_, k) table.insert(globalkeys, k) end)
-    table.foreach(awful.key({ modkey, "Shift" }, "F" .. i,
+                  end),
+        awful.key({ modkey, "Shift" }, "F" .. i,
                   function ()
                       local screen = mouse.screen
                       if tags[screen][i] then
@@ -306,7 +307,7 @@ for i = 1, keynumber do
                               awful.client.movetotag(tags[screen][i], c)
                           end
                       end
-                   end), function(_, k) table.insert(globalkeys, k) end)
+                   end))
 end
 
 -- Set keys
