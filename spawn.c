@@ -50,26 +50,27 @@ SnStartupSequence_array_t sn_waits;
 /** Remove a SnStartupSequence pointer from an array and forget about it.
  * \param array The startup sequence array.
  * \param s The startup sequence to found, remove and unref.
+ * \return True if found and removed.
  */
-static inline void
+static inline bool
 spawn_sequence_remove(SnStartupSequence *s)
 {
     for(int i = 0; i < sn_waits.len; i++)
         if(sn_waits.tab[i] == s)
         {
             SnStartupSequence_array_take(&sn_waits, i);
-            sn_startup_sequence_unref(s);
-            break;
+            return true;
         }
+    return false;
 }
 
 static void
 spawn_monitor_timeout(struct ev_loop *loop, ev_timer *w, int revents)
 {
-    spawn_sequence_remove(w->data);
-    /* send a timeout event to hook function */
-    if(globalconf.hooks.startup_notification != LUA_REFNIL)
+    if(spawn_sequence_remove(w->data)
+       && globalconf.hooks.startup_notification != LUA_REFNIL)
     {
+        /* send a timeout event to hook function */
         lua_createtable(globalconf.L, 0, 2);
         lua_pushstring(globalconf.L, sn_startup_sequence_get_id(w->data));
         lua_setfield(globalconf.L, -2, "id");
@@ -170,6 +171,7 @@ spawn_monitor_event(SnMonitorEvent *event, void *data)
       case SN_MONITOR_EVENT_COMPLETED:
       case SN_MONITOR_EVENT_CANCELED:
         spawn_sequence_remove(sequence);
+        sn_startup_sequence_unref(sequence);
         break;
     }
 
