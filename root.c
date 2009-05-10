@@ -23,6 +23,7 @@
 
 #include "structs.h"
 #include "button.h"
+#include "wibox.h"
 #include "common/xcursor.h"
 #include "common/tokenize.h"
 #include "common/xutil.h"
@@ -175,12 +176,33 @@ luaA_root_cursor(lua_State *L)
     return 0;
 }
 
+/** Get the wiboxes attached to a screen.
+ * \param L The Lua VM state.
+ * \return The number of element pushed on stack.
+ * \luastack
+ * \lreturn A table with all wiboxes.
+ */
+static int
+luaA_root_wiboxes(lua_State *L)
+{
+    lua_createtable(L, globalconf.wiboxes.len, 0);
+
+    for(int i = 0; i < globalconf.wiboxes.len; i++)
+    {
+        wibox_push(L, globalconf.wiboxes.tab[i]);
+        lua_rawseti(L, -2, i + 1);
+    }
+
+    return 1;
+}
+
 const struct luaL_reg awesome_root_lib[] =
 {
     { "buttons", luaA_root_buttons },
     { "keys", luaA_root_keys },
     { "cursor", luaA_root_cursor },
     { "fake_input", luaA_root_fake_input },
+    { "wiboxes", luaA_root_wiboxes },
     { NULL, NULL }
 };
 
