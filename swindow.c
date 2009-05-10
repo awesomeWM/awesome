@@ -46,9 +46,9 @@ simplewindow_draw_context_update(simple_window_t *sw, xcb_screen_t *s)
         xcb_create_pixmap(globalconf.connection,
                           s->root_depth,
                           sw->ctx.pixmap, s->root,
-                          sw->geometry.height, sw->geometries.internal.width);
+                          sw->geometries.internal.height, sw->geometries.internal.width);
         draw_context_init(&sw->ctx, phys_screen,
-                          sw->geometry.height, sw->geometries.internal.width,
+                          sw->geometries.internal.height, sw->geometries.internal.width,
                           sw->ctx.pixmap, &fg, &bg);
         break;
       case East:
