@@ -72,7 +72,7 @@ struct wibox_t
 
 void wibox_unref_simplified(wibox_t **);
 
-DO_ARRAY(wibox_t *, wibox, wibox_unref_simplified)
+ARRAY_FUNCS(wibox_t *, wibox, wibox_unref_simplified)
 
 void wibox_refresh(void);
 

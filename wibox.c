@@ -290,10 +290,9 @@ wibox_systray_refresh(wibox_t *wibox)
 wibox_t *
 wibox_getbywin(xcb_window_t win)
 {
-    foreach(screen, globalconf.screens)
-        foreach(w, screen->wiboxes)
-            if((*w)->sw.window == win)
-                return *w;
+    foreach(w, globalconf.wiboxes)
+        if((*w)->sw.window == win)
+            return *w;
 
     foreach(_c, globalconf.clients)
     {
@@ -327,10 +326,9 @@ wibox_draw(wibox_t *wibox)
 void
 wibox_refresh(void)
 {
-    foreach(screen, globalconf.screens)
-        foreach(w, screen->wiboxes)
-            if((*w)->need_update)
-                wibox_draw(*w);
+    foreach(w, globalconf.wiboxes)
+        if((*w)->need_update)
+            wibox_draw(*w);
 
     foreach(_c, globalconf.clients)
     {
@@ -390,10 +388,10 @@ wibox_detach(wibox_t *wibox)
 
         wibox->screen->need_arrange = true;
 
-        foreach(item, wibox->screen->wiboxes)
+        foreach(item, globalconf.wiboxes)
             if(*item == wibox)
             {
-                wibox_array_remove(&wibox->screen->wiboxes, item);
+                wibox_array_remove(&globalconf.wiboxes, item);
                 break;
             }
 
@@ -428,7 +426,7 @@ wibox_attach(screen_t *s)
     if(cscreen != wibox->screen)
         wibox_move(wibox, s->geometry.x, s->geometry.y);
 
-    wibox_array_append(&s->wiboxes, wibox);
+    wibox_array_append(&globalconf.wiboxes, wibox);
 
     simplewindow_init(&wibox->sw, phys_screen,
                       wibox->sw.geometry,
@@ -538,18 +536,17 @@ luaA_wibox_hasitem(lua_State *L, wibox_t *wibox, const void *item)
 void
 luaA_wibox_invalidate_byitem(lua_State *L, const void *item)
 {
-    foreach(screen, globalconf.screens)
-        foreach(w, screen->wiboxes)
+    foreach(w, globalconf.wiboxes)
+    {
+        wibox_t *wibox = *w;
+        if(luaA_wibox_hasitem(L, wibox, item))
         {
-            wibox_t *wibox = *w;
-            if(luaA_wibox_hasitem(L, wibox, item))
-            {
-                /* recompute widget node list */
-                wibox_widgets_table_build(L, wibox);
-                lua_pop(L, 1); /* remove widgets table */
-            }
-
+            /* recompute widget node list */
+            wibox_widgets_table_build(L, wibox);
+            lua_pop(L, 1); /* remove widgets table */
         }
+
+    }
 
     foreach(_c, globalconf.clients)
     {

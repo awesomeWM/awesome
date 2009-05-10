@@ -401,19 +401,18 @@ client_real_stack(void)
                                                         config_win_vals[0]);
 
     /* first stack not ontop wibox window */
-    foreach(s, globalconf.screens)
-        foreach(_sb, s->wiboxes)
+    foreach(_sb, globalconf.wiboxes)
+    {
+        wibox_t *sb = *_sb;
+        if(!sb->ontop)
         {
-            wibox_t *sb = *_sb;
-            if(!sb->ontop)
-            {
-                xcb_configure_window(globalconf.connection,
-                                     sb->sw.window,
-                                     XCB_CONFIG_WINDOW_SIBLING | XCB_CONFIG_WINDOW_STACK_MODE,
-                                     config_win_vals);
-                config_win_vals[0] = sb->sw.window;
-            }
+            xcb_configure_window(globalconf.connection,
+                                 sb->sw.window,
+                                 XCB_CONFIG_WINDOW_SIBLING | XCB_CONFIG_WINDOW_STACK_MODE,
+                                 config_win_vals);
+            config_win_vals[0] = sb->sw.window;
         }
+    }
 
     /* then stack clients */
     for(layer = LAYER_BELOW; layer < LAYER_COUNT; layer++)
@@ -423,19 +422,18 @@ client_real_stack(void)
                                                         config_win_vals[0]);
 
     /* then stack ontop wibox window */
-    foreach(s, globalconf.screens)
-        foreach(_sb, s->wiboxes)
+    foreach(_sb, globalconf.wiboxes)
+    {
+        wibox_t *sb = *_sb;
+        if(sb->ontop)
         {
-            wibox_t *sb = *_sb;
-            if(sb->ontop)
-            {
-                xcb_configure_window(globalconf.connection,
-                                     sb->sw.window,
-                                     XCB_CONFIG_WINDOW_SIBLING | XCB_CONFIG_WINDOW_STACK_MODE,
-                                     config_win_vals);
-                config_win_vals[0] = sb->sw.window;
-            }
+            xcb_configure_window(globalconf.connection,
+                                 sb->sw.window,
+                                 XCB_CONFIG_WINDOW_SIBLING | XCB_CONFIG_WINDOW_STACK_MODE,
+                                 config_win_vals);
+            config_win_vals[0] = sb->sw.window;
         }
+    }
 }
 
 void

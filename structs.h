@@ -48,6 +48,7 @@ ARRAY_TYPE(button_t *, button)
 ARRAY_TYPE(tag_t *, tag)
 ARRAY_TYPE(screen_t, screen)
 ARRAY_TYPE(client_t *, client)
+ARRAY_TYPE(wibox_t *, wibox)
 
 /** Main configuration structure */
 struct awesome_t
@@ -140,6 +141,8 @@ struct awesome_t
     screen_t *screen_focus;
     /** Need to call client_stack_refresh() */
     bool client_need_stack_refresh;
+    /** Wiboxes */
+    wibox_array_t wiboxes;
     /** The startup notification display struct */
     SnDisplay *sndisplay;
 };

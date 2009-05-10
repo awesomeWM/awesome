@@ -23,6 +23,8 @@
 #include "screen.h"
 #include "client.h"
 #include "structs.h"
+#include "wibox.h"
+#include "common/tokenize.h"
 #include "common/xutil.h"
 
 /** Get the pointer position.

@@ -25,6 +25,7 @@
 #include "property.h"
 #include "client.h"
 #include "ewmh.h"
+#include "wibox.h"
 #include "common/atoms.h"
 #include "common/xutil.h"
 
@@ -391,14 +392,14 @@ property_handle_xrootpmap_id(void *data __attribute__ ((unused)),
                              xcb_get_property_reply_t *reply)
 {
     if(globalconf.xinerama_is_active)
-        foreach(screen, globalconf.screens)
-            foreach(w, screen->wiboxes)
-                (*w)->need_update = true;
+        foreach(w, globalconf.wiboxes)
+            (*w)->need_update = true;
     else
     {
         int screen = xutil_root2screen(connection, window);
-        foreach(w, globalconf.screens.tab[screen].wiboxes)
-            (*w)->need_update = true;
+        foreach(w, globalconf.wiboxes)
+            if(screen == screen_array_indexof(&globalconf.screens, (*w)->screen))
+               (*w)->need_update = true;
     }
 
     return 0;

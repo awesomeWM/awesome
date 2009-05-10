@@ -299,13 +299,12 @@ widget_render(wibox_t *wibox)
 }
 
 /** Invalidate widgets which should be refresh depending on their types.
- * \param screen Virtual screen.
  * \param type Widget type to invalidate.
  */
 void
-widget_invalidate_bytype(screen_t *screen, widget_constructor_t *type)
+widget_invalidate_bytype(widget_constructor_t *type)
 {
-    foreach(wibox, screen->wiboxes)
+    foreach(wibox, globalconf.wiboxes)
         foreach(wnode, (*wibox)->widgets)
             if(wnode->widget->type == type)
             {
@@ -315,21 +314,19 @@ widget_invalidate_bytype(screen_t *screen, widget_constructor_t *type)
 }
 
 /** Set a wibox needs update because it has widget, or redraw a titlebar.
- * \todo Probably needs more optimization.
  * \param widget The widget to look for.
  */
 void
 widget_invalidate_bywidget(widget_t *widget)
 {
-    foreach(screen, globalconf.screens)
-        foreach(wibox, screen->wiboxes)
-            if(!(*wibox)->need_update)
-                foreach(wnode, (*wibox)->widgets)
-                    if(wnode->widget == widget)
-                    {
-                        (*wibox)->need_update = true;
-                        break;
-                    }
+    foreach(wibox, globalconf.wiboxes)
+        if(!(*wibox)->need_update)
+            foreach(wnode, (*wibox)->widgets)
+                if(wnode->widget == widget)
+                {
+                    (*wibox)->need_update = true;
+                    break;
+                }
 
     foreach(_c, globalconf.clients)
     {

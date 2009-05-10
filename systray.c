@@ -170,8 +170,7 @@ systray_request_handle(xcb_window_t embed_win, int phys_screen, xembed_info_t *i
 
     xembed_window_array_append(&globalconf.embedded, em);
 
-    foreach(screen, globalconf.screens)
-        widget_invalidate_bytype(screen, widget_systray);
+    widget_invalidate_bytype(widget_systray);
 
     return 0;
 }

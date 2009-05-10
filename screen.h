@@ -22,7 +22,7 @@
 #ifndef AWESOME_SCREEN_H
 #define AWESOME_SCREEN_H
 
-#include "wibox.h"
+#include "structs.h"
 
 struct a_screen
 {
@@ -32,8 +32,6 @@ struct a_screen
     bool need_arrange;
     /** Tag list */
     tag_array_t tags;
-    /** Wiboxes */
-    wibox_array_t wiboxes;
     /** Window that contains the systray */
     struct
     {
