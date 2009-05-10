@@ -223,7 +223,7 @@ titlebar_client_detach(client_t *c)
         wibox_unref(globalconf.L, c->titlebar);
         c->titlebar = NULL;
 
-        client_need_arrange(c);
+        hook_property(client, c, "titlebar");
         client_stack();
     }
 }
@@ -286,7 +286,7 @@ titlebar_client_attach(client_t *c)
 
     xcb_map_window(globalconf.connection, t->sw.window);
 
-    client_need_arrange(c);
+    hook_property(client, c, "titlebar");
     client_stack();
 }
 

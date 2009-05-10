@@ -104,7 +104,8 @@ hooks.property.register(function (obj, prop)
             or prop == "maximized_horizontal"
             or prop == "maximized_vertical"
             or prop == "border_width"
-            or prop == "hide" then
+            or prop == "hide"
+            or prop == "titlebar" then
             on_arrange(obj.screen)
         elseif prop == "screen" then
             -- If prop is screen, we do not know what was the previous screen, so
