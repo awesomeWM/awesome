@@ -156,7 +156,7 @@ event_handle_button(void *data, xcb_connection_t *connection, xcb_button_press_e
         event_button_callback(ev, &wibox->buttons, 1, NULL);
 
         /* then try to match a widget binding */
-        widget_t *w = widget_getbycoords(wibox->position, &wibox->widgets,
+        widget_t *w = widget_getbycoords(wibox->sw.orientation, &wibox->widgets,
                                          wibox->sw.geometry.width,
                                          wibox->sw.geometry.height,
                                          &ev->event_x, &ev->event_y);
@@ -400,7 +400,7 @@ event_handle_motionnotify(void *data __attribute__ ((unused)),
 
     if((wibox = wibox_getbywin(ev->event)))
     {
-        widget_t *w = widget_getbycoords(wibox->position, &wibox->widgets,
+        widget_t *w = widget_getbycoords(wibox->sw.orientation, &wibox->widgets,
                                          wibox->sw.geometry.width,
                                          wibox->sw.geometry.height,
                                          &ev->event_x, &ev->event_y);
@@ -472,7 +472,7 @@ event_handle_enternotify(void *data __attribute__ ((unused)),
 
     if((wibox = wibox_getbywin(ev->event)))
     {
-        widget_t *w = widget_getbycoords(wibox->position, &wibox->widgets,
+        widget_t *w = widget_getbycoords(wibox->sw.orientation, &wibox->widgets,
                                          wibox->sw.geometry.width,
                                          wibox->sw.geometry.height,
                                          &ev->event_x, &ev->event_y);

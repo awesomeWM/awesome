@@ -257,7 +257,7 @@ luaA_mouse_object_under_pointer(lua_State *L)
         int16_t x = mouse_x - wibox->sw.geometry.x;
         int16_t y = mouse_y - wibox->sw.geometry.y;
 
-        widget_t *widget = widget_getbycoords(wibox->position, &wibox->widgets,
+        widget_t *widget = widget_getbycoords(wibox->sw.orientation, &wibox->widgets,
                                               wibox->sw.geometry.width,
                                               wibox->sw.geometry.height,
                                               &x, &y);

@@ -69,7 +69,7 @@ struct widget_node_t
     area_t geometry;
 };
 
-widget_t *widget_getbycoords(position_t, widget_node_array_t *, int, int, int16_t *, int16_t *);
+widget_t *widget_getbycoords(orientation_t, widget_node_array_t *, int, int, int16_t *, int16_t *);
 void widget_render(wibox_t *);
 
 void luaA_table2widgets(lua_State *, widget_node_array_t *);

@@ -63,7 +63,7 @@ widget_node_delete(widget_node_t *node)
 }
 
 /** Get a widget node from a wibox by coords.
- * \param Container position.
+ * \param orientation Wibox orientation.
  * \param widgets The widget list.
  * \param width The container width.
  * \param height The container height.
@@ -72,20 +72,20 @@ widget_node_delete(widget_node_t *node)
  * \return A widget.
  */
 widget_t *
-widget_getbycoords(position_t position, widget_node_array_t *widgets,
+widget_getbycoords(orientation_t orientation, widget_node_array_t *widgets,
                    int width, int height, int16_t *x, int16_t *y)
 {
     int tmp;
 
     /* Need to transform coordinates like it was top/bottom */
-    switch(position)
+    switch(orientation)
     {
-      case Right:
+      case South:
         tmp = *y;
         *y = width - *x;
         *x = tmp;
         break;
-      case Left:
+      case North:
         tmp = *y;
         *y = *x;
         *x = height - tmp;
