@@ -415,9 +415,6 @@ luaA_titlebar_newindex(lua_State *L, wibox_t *titlebar, awesome_token_t tok)
         return 0;
     }
 
-    if((c || (c = client_getbytitlebar(titlebar))))
-        client_need_arrange(c);
-
     return 0;
 }
 
