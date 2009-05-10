@@ -279,9 +279,7 @@ event_handle_configurerequest(void *data __attribute__ ((unused)),
              * window size, i.e. without titlebars and borders. */
             geometry = titlebar_geometry_add(c->titlebar, c->border, geometry);
 
-            if(client_resize(c, geometry, false))
-                client_need_arrange(c);
-            else
+            if(!client_resize(c, geometry, false))
             {
                 /* Resize wasn't officially needed, but we don't want to break expectations. */
                 geometry = titlebar_geometry_remove(c->titlebar, c->border, c->geometry);
