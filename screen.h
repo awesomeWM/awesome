@@ -1,7 +1,7 @@
 /*
  * screen.h - screen management header
  *
- * Copyright © 2007-2008 Julien Danjou <julien@danjou.info>
+ * Copyright © 2007-2009 Julien Danjou <julien@danjou.info>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,8 +28,8 @@ struct a_screen
 {
     /** Screen geometry */
     area_t geometry;
-    /** true if we need to arrange() */
-    bool need_arrange;
+    /** True if we need to reban() */
+    bool need_reban;
     /** Tag list */
     tag_array_t tags;
     /** Window that contains the systray */

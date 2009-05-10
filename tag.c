@@ -54,21 +54,24 @@ luaA_tag_gc(lua_State *L)
 static void
 tag_view(tag_t *tag, bool view)
 {
-    int screen_index = screen_array_indexof(&globalconf.screens, tag->screen);
-
-    tag->selected = view;
-    tag->screen->need_arrange = true;
-    ewmh_update_net_current_desktop(screen_virttophys(screen_index));
-
-    if(globalconf.hooks.tags != LUA_REFNIL)
+    if(tag->selected != view)
     {
-        lua_pushnumber(globalconf.L, screen_index + 1);
-        tag_push(globalconf.L, tag);
-        if(view)
-            lua_pushliteral(globalconf.L, "select");
-        else
-            lua_pushliteral(globalconf.L, "unselect");
-        luaA_dofunction(globalconf.L, globalconf.hooks.tags, 3, 0);
+        int screen_index = screen_array_indexof(&globalconf.screens, tag->screen);
+
+        tag->selected = view;
+        tag->screen->need_reban = true;
+        ewmh_update_net_current_desktop(screen_virttophys(screen_index));
+
+        if(globalconf.hooks.tags != LUA_REFNIL)
+        {
+            lua_pushnumber(globalconf.L, screen_index + 1);
+            tag_push(globalconf.L, tag);
+            if(view)
+                lua_pushliteral(globalconf.L, "select");
+            else
+                lua_pushliteral(globalconf.L, "unselect");
+            luaA_dofunction(globalconf.L, globalconf.hooks.tags, 3, 0);
+        }
     }
 }
 
@@ -151,7 +154,8 @@ tag_client(client_t *c)
 
     client_array_append(&t->clients, c);
     ewmh_client_update_desktop(c);
-    client_need_arrange(c);
+    client_need_reban(c);
+
     /* call hook */
     if(globalconf.hooks.tagged != LUA_REFNIL)
     {
@@ -171,8 +175,9 @@ untag_client(client_t *c, tag_t *t)
     for(int i = 0; i < t->clients.len; i++)
         if(t->clients.tab[i] == c)
         {
-            client_need_arrange(c);
+            client_need_reban(c);
             client_array_take(&t->clients, i);
+            client_need_reban(c);
             ewmh_client_update_desktop(c);
             /* call hook */
             if(globalconf.hooks.tagged != LUA_REFNIL)

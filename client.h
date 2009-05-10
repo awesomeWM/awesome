@@ -155,11 +155,11 @@ client_t * luaA_client_checkudata(lua_State *, int);
 ARRAY_FUNCS(client_t *, client, DO_NOTHING)
 LUA_OBJECT_FUNCS(client_t, client, "client")
 
-#define client_need_arrange(c) \
+#define client_need_reban(c) \
     do { \
-        if(!c->screen->need_arrange \
+        if(!c->screen->need_reban \
            && client_isvisible(c, (c)->screen)) \
-            c->screen->need_arrange = true; \
+            c->screen->need_reban = true; \
     } while(0)
 
 bool client_maybevisible(client_t *, screen_t *);

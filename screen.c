@@ -363,7 +363,7 @@ luaA_screen_tags(lua_State *L)
         tag_array_wipe(&s->tags);
         tag_array_init(&s->tags);
 
-        s->need_arrange = true;
+        s->need_reban = true;
 
         /* push new tags */
         lua_pushnil(L);

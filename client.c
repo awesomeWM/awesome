@@ -752,9 +752,9 @@ client_setminimized(client_t *c, bool s)
 {
     if(c->isminimized != s)
     {
-        client_need_arrange(c);
+        client_need_reban(c);
         c->isminimized = s;
-        client_need_arrange(c);
+        client_need_reban(c);
         if(s)
             window_state_set(c->win, XCB_WM_STATE_ICONIC);
         else
@@ -774,9 +774,9 @@ client_setsticky(client_t *c, bool s)
 {
     if(c->issticky != s)
     {
-        client_need_arrange(c);
+        client_need_reban(c);
         c->issticky = s;
-        client_need_arrange(c);
+        client_need_reban(c);
         ewmh_client_update_hints(c);
         hook_property(client, c, "sticky");
     }
@@ -1469,9 +1469,9 @@ luaA_client_newindex(lua_State *L)
         b = luaA_checkboolean(L, 3);
         if(b != c->ishidden)
         {
-            client_need_arrange(c);
+            client_need_reban(c);
             c->ishidden = b;
-            client_need_arrange(c);
+            client_need_reban(c);
             hook_property(client, c, "hide");
         }
         break;

@@ -1,7 +1,7 @@
 /*
- * layout.c - layout management
+ * banning.c - client banning management
  *
- * Copyright © 2007-2008 Julien Danjou <julien@danjou.info>
+ * Copyright © 2007-2009 Julien Danjou <julien@danjou.info>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,17 +19,17 @@
  *
  */
 
-#include "layout.h"
+#include "banning.h"
 #include "tag.h"
 #include "window.h"
 #include "screen.h"
 #include "titlebar.h"
 
-/** Arrange windows following current selected layout.
+/** Reban windows following current selected tags.
  * \param screen The screen to arrange.
  */
 static void
-arrange(screen_t *screen)
+reban(screen_t *screen)
 {
     uint32_t select_input_val[] = { CLIENT_SELECT_INPUT_EVENT_MASK & ~(XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW) };
 
@@ -66,18 +66,7 @@ arrange(screen_t *screen)
             client_ban(c);
     }
 
-    /* Reset status before calling arrange hook.
-     * This is needed if you call a function that relies
-     * on need_arrange while arrange is in progress.
-     */
-    screen->need_arrange = false;
-
-    /* call hook */
-    if(globalconf.hooks.arrange != LUA_REFNIL)
-    {
-        lua_pushnumber(globalconf.L, screen_array_indexof(&globalconf.screens, screen) + 1);
-        luaA_dofunction(globalconf.L, globalconf.hooks.arrange, 1, 0);
-    }
+    screen->need_reban = false;
 
     /* Now, we want to receive EnterNotify and LeaveNotify events back. */
     select_input_val[0] = CLIENT_SELECT_INPUT_EVENT_MASK;
@@ -88,15 +77,15 @@ arrange(screen_t *screen)
                                      select_input_val);
 }
 
-/** Refresh the screen disposition
+/** Refresh the client disposition.
  * \return true if the screen was arranged, false otherwise
  */
 void
-layout_refresh(void)
+banning_refresh(void)
 {
     foreach(screen, globalconf.screens)
-        if(screen->need_arrange)
-            arrange(screen);
+        if(screen->need_reban)
+            reban(screen);
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
