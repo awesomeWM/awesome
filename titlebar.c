@@ -304,7 +304,7 @@ titlebar_set_visible(wibox_t *t, bool visible)
         else
             titlebar_ban(t);
 
-        t->screen->need_arrange = true;
+        hook_property(wibox, t, "visible");
         client_stack();
     }
 }

@@ -115,7 +115,8 @@ hooks.property.register(function (obj, prop)
             end
         end
     elseif objtype == "wibox" then
-        if prop == "screen" then
+        if prop == "screen"
+            or prop == "visible" then
             on_arrange(obj.screen)
         end
     end
