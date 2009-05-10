@@ -386,8 +386,6 @@ wibox_detach(wibox_t *wibox)
 
         simplewindow_wipe(&wibox->sw);
 
-        wibox->screen->need_arrange = true;
-
         foreach(item, globalconf.wiboxes)
             if(*item == wibox)
             {

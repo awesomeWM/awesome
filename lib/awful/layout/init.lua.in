@@ -93,23 +93,29 @@ function getname(layout)
 end
 
 hooks.arrange.register(on_arrange)
-hooks.property.register(function (c, prop)
-    if type(c) ~= "client" then return end
-    if prop == "size_hints_honor"
-        or prop == "struts"
-        or prop == "minimized"
-        or prop == "sticky"
-        or prop == "fullscreen"
-        or prop == "maximized_horizontal"
-        or prop == "maximized_vertical"
-        or prop == "border_width"
-        or prop == "hide" then
-        on_arrange(c.screen)
-    elseif prop == "screen" then
-        -- If prop is screen, we do not know what was the previous screen, so
-        -- let's arrange all screens :-(
-        for screen = 1, capi.screen.count() do
-            on_arrange(screen)
+hooks.property.register(function (obj, prop)
+    local objtype = type(obj)
+    if objtype == "client" then
+        if prop == "size_hints_honor"
+            or prop == "struts"
+            or prop == "minimized"
+            or prop == "sticky"
+            or prop == "fullscreen"
+            or prop == "maximized_horizontal"
+            or prop == "maximized_vertical"
+            or prop == "border_width"
+            or prop == "hide" then
+            on_arrange(obj.screen)
+        elseif prop == "screen" then
+            -- If prop is screen, we do not know what was the previous screen, so
+            -- let's arrange all screens :-(
+            for screen = 1, capi.screen.count() do
+                on_arrange(screen)
+            end
+        end
+    elseif objtype == "wibox" then
+        if prop == "screen" then
+            on_arrange(obj.screen)
         end
     end
 end)
