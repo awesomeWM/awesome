@@ -237,7 +237,7 @@ function run(args, textbox, exe_callback, completion_callback, history_path, his
                 local cword_start = 1
                 local cword_end = 1
                 while wend < cur_pos do
-                    wend = command:find(" ", wstart)
+                    wend = command:find("[{[(,.:;_-+=@/ ]", wstart)
                     if not wend then wend = #command + 1 end
                     if cur_pos >= wstart and cur_pos <= wend + 1 then
                         cword_start = wstart
