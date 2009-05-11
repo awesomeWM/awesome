@@ -82,7 +82,7 @@ luaA_root_fake_input(lua_State *L)
         y = luaL_checknumber(L, 5);
         if(lua_gettop(L) == 6 && !globalconf.xinerama_is_active)
         {
-            int screen = luaL_checknumber(L, 6);
+            int screen = luaL_checknumber(L, 6) - 1;
             luaA_checkscreen(screen);
             root = xutil_screen_get(globalconf.connection, screen)->root;
         }
