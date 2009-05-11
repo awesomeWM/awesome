@@ -31,7 +31,6 @@
  * \param L The Lua VM state.
  * \return The number of element pushed on stack.
  * \luastack
- * \lvalue A client.
  * \lparam The event type: key_press, key_release, button_press, button_release
  * or motion_notify.
  * \lparam The detail: in case of a key event, this is the keycode to send, in
@@ -52,7 +51,7 @@ luaA_root_fake_input(lua_State *L)
     }
 
     size_t tlen;
-    const char *stype = luaL_checklstring(L, 2, &tlen);
+    const char *stype = luaL_checklstring(L, 1, &tlen);
     uint8_t type, detail;
     int x = 0, y = 0;
     xcb_window_t root = XCB_NONE;
@@ -61,28 +60,28 @@ luaA_root_fake_input(lua_State *L)
     {
       case A_TK_KEY_PRESS:
         type = XCB_KEY_PRESS;
-        detail = luaL_checknumber(L, 3); /* keycode */
+        detail = luaL_checknumber(L, 2); /* keycode */
         break;
       case A_TK_KEY_RELEASE:
         type = XCB_KEY_RELEASE;
-        detail = luaL_checknumber(L, 3); /* keycode */
+        detail = luaL_checknumber(L, 2); /* keycode */
         break;
       case A_TK_BUTTON_PRESS:
         type = XCB_BUTTON_PRESS;
-        detail = luaL_checknumber(L, 3); /* button number */
+        detail = luaL_checknumber(L, 2); /* button number */
         break;
       case A_TK_BUTTON_RELEASE:
         type = XCB_BUTTON_RELEASE;
-        detail = luaL_checknumber(L, 3); /* button number */
+        detail = luaL_checknumber(L, 2); /* button number */
         break;
       case A_TK_MOTION_NOTIFY:
         type = XCB_MOTION_NOTIFY;
-        detail = luaA_checkboolean(L, 3); /* relative to the current position or not */
-        x = luaL_checknumber(L, 4);
-        y = luaL_checknumber(L, 5);
-        if(lua_gettop(L) == 6 && !globalconf.xinerama_is_active)
+        detail = luaA_checkboolean(L, 2); /* relative to the current position or not */
+        x = luaL_checknumber(L, 3);
+        y = luaL_checknumber(L, 4);
+        if(lua_gettop(L) == 5 && !globalconf.xinerama_is_active)
         {
-            int screen = luaL_checknumber(L, 6) - 1;
+            int screen = luaL_checknumber(L, 5) - 1;
             luaA_checkscreen(screen);
             root = xutil_screen_get(globalconf.connection, screen)->root;
         }
