@@ -59,6 +59,7 @@ spawn_sequence_remove(SnStartupSequence *s)
         if(sn_waits.tab[i] == s)
         {
             SnStartupSequence_array_take(&sn_waits, i);
+            sn_startup_sequence_unref(s);
             return true;
         }
     return false;
@@ -171,7 +172,6 @@ spawn_monitor_event(SnMonitorEvent *event, void *data)
       case SN_MONITOR_EVENT_COMPLETED:
       case SN_MONITOR_EVENT_CANCELED:
         spawn_sequence_remove(sequence);
-        sn_startup_sequence_unref(sequence);
         break;
     }
 
