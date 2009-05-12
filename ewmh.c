@@ -661,12 +661,21 @@ int
 ewmh_window_icon_from_reply(xcb_get_property_reply_t *r)
 {
     uint32_t *data;
+    uint64_t len;
 
     if(!r || r->type != CARDINAL || r->format != 32 || r->length < 2)
         return 0;
 
     data = (uint32_t *) xcb_get_property_value(r);
-    if (!data || !data[0] || !data[1])
+    if (!data)
+        return 0;
+
+    /* Check that the property is as long as it should be, handling integer
+     * overflow. <uint32_t> times <another uint32_t casted to uint64_t> always
+     * fits into an uint64_t and thus this multiplication cannot overflow.
+     */
+    len = data[0] * (uint64_t) data[1];
+    if (!data[0] || !data[1] || len > r->length - 2)
         return 0;
 
     return image_new_from_argb32(data[0], data[1], data + 2);
