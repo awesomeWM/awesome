@@ -662,11 +662,14 @@ ewmh_window_icon_from_reply(xcb_get_property_reply_t *r)
 {
     uint32_t *data;
 
-    if(r && r->type == CARDINAL && r->format == 32 && r->length >= 2 &&
-       (data = (uint32_t *) xcb_get_property_value(r)) && data[0] && data[1])
-        return image_new_from_argb32(data[0], data[1], data + 2);
+    if(!r || r->type != CARDINAL || r->format != 32 || r->length < 2)
+        return 0;
 
-    return 0;
+    data = (uint32_t *) xcb_get_property_value(r);
+    if (!data || !data[0] || !data[1])
+        return 0;
+
+    return image_new_from_argb32(data[0], data[1], data + 2);
 }
 
 /** Get NET_WM_ICON.
