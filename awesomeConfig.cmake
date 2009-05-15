@@ -11,8 +11,6 @@ project(${PROJECT_AWE_NAME} C)
 
 set(CMAKE_BUILD_TYPE RELEASE)
 
-set(CURSES_NEED_NCURSES true)
-
 option(WITH_DBUS "build with D-BUS" ON)
 option(GENERATE_MANPAGES "generate manpages" ON)
 option(GENERATE_LUADOC "generate luadoc" ON)
@@ -64,8 +62,6 @@ a_find_program(LUADOC_EXECUTABLE luadoc FALSE)
 include(FindDoxygen)
 # pkg-config
 include(FindPkgConfig)
-# ncurses
-include(FindCurses)
 # lua 5.1
 include(FindLua51) #Due to a cmake bug, you will see Lua50 on screen
 # }}}
