@@ -58,6 +58,8 @@ a_find_program(GZIP_EXECUTABLE gzip FALSE)
 # lua documentation
 a_find_program(LUA_EXECUTABLE lua FALSE)
 a_find_program(LUADOC_EXECUTABLE luadoc FALSE)
+# theme graphics
+a_find_program(CONVERT_EXECUTABLE convert TRUE)
 # doxygen
 include(FindDoxygen)
 # pkg-config

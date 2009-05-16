@@ -18,6 +18,9 @@ In order to build awesome itself, you need header files and libs of:
   - dbus (optional, use -DWITH_DBUS=OFF with cmake to disable)
   - gperf
 
+As well as the following tools to build theme icons:
+  - ImageMagick
+
 In order to build the awesome man pages and documentation,
 you need these tools:
   - asciidoc

@@ -280,6 +280,46 @@ if(GENERATE_LUADOC)
 endif()
 # }}}
 
+# {{{ Theme icons
+file(GLOB icon_sources ${SOURCE_DIR}/themes/*/titlebar/*.png)
+set(ALL_ICONS ${icon_sources})
+
+macro(a_icon_convert match replacement input)
+    string(REPLACE ${match} ${replacement} output ${input})
+
+    if(NOT ${input} STREQUAL ${output})
+        if(NOT ${output} MATCHES ${BUILD_DIR})
+            string(REPLACE ${SOURCE_DIR} ${BUILD_DIR} output ${output})
+        endif()
+
+        set(ALL_ICONS ${ALL_ICONS} ${output})
+
+        get_filename_component(output_path ${output} PATH)
+        file(MAKE_DIRECTORY ${output_path})
+
+        add_custom_command(
+            COMMAND ${CONVERT_EXECUTABLE} ${input} ${ARGN} ${output}
+            OUTPUT  ${output}
+            DEPENDS ${input}
+            VERBATIM)
+    endif()
+endmacro()
+
+foreach(icon ${ALL_ICONS})
+    # Make unfocused icons translucent
+    a_icon_convert("_focus" "_normal" ${icon}
+        -evaluate Pow 2 -channel A -evaluate Multiply 0.4)
+endforeach()
+
+foreach(icon ${ALL_ICONS})
+    # Make inactive icons grayscale
+    a_icon_convert("_active" "_inactive" ${icon}
+        -colorspace Gray)
+endforeach()
+
+add_custom_target(generated_icons ALL DEPENDS ${ALL_ICONS})
+# }}}
+
 # {{{ Dist tarball
 if(BUILD_FROM_GIT)
     add_custom_target(dist
