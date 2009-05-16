@@ -541,8 +541,7 @@ a_dbus_bus_getbyname(const char *name, size_t len)
  * \return The number of elements pushed on stack.
  * \luastack
  * \lparam A string indicating if we are using system or session bus.
- * \lparam A string with the name of the D-Bus name to register. Note that
- * org.awesome is registered by default.
+ * \lparam A string with the name of the D-Bus name to register.
  * \lreturn True if everything worked fine, false otherwise.
  */
 static int

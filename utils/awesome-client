@@ -31,9 +31,9 @@ then
     exit 1
 fi
 
-DBUS_METHOD=org.awesome.Remote.Eval
+DBUS_METHOD=org.naquadah.awesome.Remote.Eval
 DBUS_PATH=/
-DBUS_DEST=org.awesome
+DBUS_DEST=org.naquadah.awesome
 
 a_dbus_send()
 {

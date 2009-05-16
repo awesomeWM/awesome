@@ -18,8 +18,8 @@ local type = type
 module("awful.remote")
 
 if hooks.dbus then
-    dbus.request_name("session", "org.awesome")
-    hooks.dbus.register("org.awesome.Remote", function(data, code)
+    dbus.request_name("session", "org.naquadah.awesome")
+    hooks.dbus.register("org.naquadah.awesome.Remote", function(data, code)
         if data.member == "Eval" then
             local f, e = loadstring(code)
             if f then
