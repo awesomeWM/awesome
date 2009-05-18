@@ -566,7 +566,6 @@ function floating.set(c, s)
             c:geometry(property.get(c, "floating_geometry"))
         end
         c.screen = screen
-        capi.hooks.arrange()(c.screen)
     end
 end
 
@@ -772,7 +771,6 @@ function incwfact(add, c)
 
     -- keep our ratios normalized
     normalize(colfact, w.num)
-    capi.hooks.arrange()(t.screen)
 end
 
 --- Get a client dockable state.
