@@ -1,0 +1,49 @@
+---------------------------------------------------------------------------
+-- @author Julien Danjou &lt;julien@danjou.info&gt;
+-- @copyright 2009 Julien Danjou
+-- @release @AWESOME_VERSION@
+---------------------------------------------------------------------------
+
+local setmetatable = setmetatable
+local button = require("awful.button")
+local layout = require("awful.layout")
+local beautiful = require("beautiful")
+local hooks = require("awful.hooks")
+local capi = { image = image,
+               widget = widget }
+
+--- Layoutbox widget.
+module("awful.widget.layoutbox")
+
+local function update(w, screen)
+    local layout = layout.getname(layout.get(screen))
+    if layout and beautiful["layout_" ..layout] then
+        w.image = capi.image(beautiful["layout_" ..layout])
+    else
+        w.image = nil
+    end
+end
+
+--- Create a layoutbox widget. It draws a picture with the current layout
+-- symbol of the current tag.
+-- @param screen The screen number that the layout will be represented for.
+-- @param args Standard arguments for an imagebox widget.
+-- @return An imagebox widget configured as a layoutbox.
+function new(screen, args)
+    local screen = screen or 1
+    local args = args or {}
+    args.type = "imagebox"
+    local w = capi.widget(args)
+    update(w, screen)
+    hooks.tags.register(function (s, t, view)
+        if s == screen then return update(w, s) end
+    end)
+    hooks.layout.register(function (t, layout)
+        if t.screen == screen then return update(w, t.screen) end
+    end)
+    return w
+end
+
+setmetatable(_M, { __call = function(_, ...) return new(...) end })
+
+-- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

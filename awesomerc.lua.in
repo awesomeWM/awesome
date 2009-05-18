@@ -155,7 +155,7 @@ for s = 1, screen.count() do
     mypromptbox[s] = awful.widget.prompt({ align = "left" })
     -- Create an imagebox widget which will contains an icon indicating which layout we're using.
     -- We need one layoutbox per screen.
-    mylayoutbox[s] = widget({ type = "imagebox", align = "right" })
+    mylayoutbox[s] = awful.widget.layoutbox(s, { align = "right" })
     mylayoutbox[s]:buttons(awful.util.table.join(
                            awful.button({ }, 1, function () awful.layout.inc(layouts, 1) end),
                            awful.button({ }, 3, function () awful.layout.inc(layouts, -1) end),
@@ -408,13 +408,6 @@ end)
 
 -- Hook function to execute when switching tag selection.
 awful.hooks.tags.register(function (screen, tag, view)
-    local layout = awful.layout.getname(awful.layout.get(screen))
-    if layout and beautiful["layout_" ..layout] then
-        mylayoutbox[screen].image = image(beautiful["layout_" .. layout])
-    else
-        mylayoutbox[screen].image = nil
-    end
-
     -- Give focus to the latest client in history if no window has focus
     -- or if the current window is a desktop or a dock one.
     if not client.focus or not client.focus:isvisible() then
