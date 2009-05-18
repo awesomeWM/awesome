@@ -308,7 +308,7 @@ endmacro()
 foreach(icon ${ALL_ICONS})
     # Make unfocused icons translucent
     a_icon_convert("_focus" "_normal" ${icon}
-        -evaluate Pow 2 -channel A -evaluate Multiply 0.4)
+        -gamma 0.6 -channel A -evaluate Multiply 0.4)
 endforeach()
 
 foreach(icon ${ALL_ICONS})
