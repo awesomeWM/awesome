@@ -12,7 +12,6 @@ local table = table
 local setmetatable = setmetatable
 local capi =
 {
-    hooks = hooks,
     screen = screen,
     mouse = mouse
 }
@@ -106,7 +105,6 @@ function setmwfact(mwfact, t)
     local t = t or selected()
     if mwfact >= 0 and mwfact <= 1 then
         setproperty(t, "mwfact", mwfact)
-        capi.hooks.arrange()(t.screen)
     end
 end
 
@@ -130,7 +128,6 @@ function setnmaster(nmaster, t)
     local t = t or selected()
     if nmaster >= 0 then
         setproperty(t, "nmaster", nmaster)
-        capi.hooks.arrange()(t.screen)
     end
 end
 
@@ -169,7 +166,6 @@ function setncol(ncol, t)
     local t = t or selected()
     if ncol >= 1 then
         setproperty(t, "ncol", ncol)
-        capi.hooks.arrange()(t.screen)
     end
 end
 

@@ -123,6 +123,12 @@ hooks.property.register(function (obj, prop)
             or prop == "visible" then
             on_arrange(obj.screen)
         end
+    elseif objtype == "tag" then
+        if prop == "mwfact"
+            or prop == "nmaster"
+            or prop == "ncol" then
+            on_arrange(obj.screen)
+        end
     end
 end)
 hooks.wibox_position.register(function(wibox)
