@@ -6,6 +6,7 @@
 
 -- Grab environment we need
 local ipairs = ipairs
+local type = type
 local tag = require("awful.tag")
 local util = require("awful.util")
 local suit = require("awful.layout.suit")
@@ -83,7 +84,7 @@ end
 
 hooks.arrange.register(on_arrange)
 hooks.property.register(function (c, prop)
-    if c:isvisible() and prop == "size_hints_honor" then
+    if type(c) == "client" and c:isvisible() and prop == "size_hints_honor" then
         on_arrange(c.screen)
     end
 end)

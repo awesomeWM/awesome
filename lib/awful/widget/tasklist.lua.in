@@ -9,6 +9,7 @@ local capi = { screen = screen,
                image = image,
                client = client }
 local ipairs = ipairs
+local type = type
 local setmetatable = setmetatable
 local unpack = unpack
 local table = table
@@ -59,6 +60,7 @@ function new(label, buttons)
     hooks.focus.register(u)
     hooks.unfocus.register(u)
     hooks.property.register(function (c, prop)
+        if type(c) ~= "client" then return end
         if prop == "urgent"
             or prop == "floating"
             or prop == "maximized_horizontal"

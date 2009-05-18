@@ -153,7 +153,6 @@ end
 function seticon(icon, tag)
     local tag = tag or selected()
     setproperty(tag, "icon", icon)
-    capi.hooks.tags()(tag.screen, tag, "modify")
 end
 
 --- Get the tag icon
@@ -264,6 +263,7 @@ function setproperty(tag, prop, value)
         data.tags[tag] = {}
     end
     data.tags[tag][prop] = value
+    hooks.user.call("property", tag, prop)
 end
 
 --- Tag a client with the set of current tags.

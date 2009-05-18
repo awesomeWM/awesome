@@ -62,7 +62,8 @@ function new(screen, label, buttons)
     hooks.tags.register(u)
     hooks.tagged.register(uc)
     hooks.property.register(function (c, prop)
-        if prop == "urgent" then
+        if (type(c) == "client" and prop == "urgent")
+            or (type(c) == "tag" and prop == "icon") then
             u(c.screen)
         end
     end)

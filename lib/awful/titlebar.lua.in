@@ -8,6 +8,7 @@
 local math = math
 local image = image
 local pairs = pairs
+local type = type
 local setmetatable = setmetatable
 local capi =
 {
@@ -117,7 +118,7 @@ end
 -- @param c The client to update.
 -- @param prop The property name which has changed.
 function update(c, prop)
-     if c.titlebar and data[c] then
+     if type(c) == "client" and c.titlebar and data[c] then
         local widgets = c.titlebar.widgets
         if prop == "name" then
             if widgets.title then
