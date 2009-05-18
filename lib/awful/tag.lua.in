@@ -285,7 +285,7 @@ function withcurrent(c, startup)
 end
 
 -- Register standards hooks
-hooks.arrange.register(history.update)
+hooks.tags.register(history.update)
 hooks.manage.register(withcurrent)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
