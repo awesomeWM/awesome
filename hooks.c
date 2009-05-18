@@ -149,19 +149,6 @@ luaA_hooks_tagged(lua_State *L)
     HANDLE_HOOK(L, globalconf.hooks.tagged);
 }
 
-/** Set the function called on each screen arrange. This function is called
- * with the screen number as argument.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- * \luastack
- * \lparam A function to call on each screen arrange.
- */
-static int
-luaA_hooks_arrange(lua_State *L)
-{
-    HANDLE_HOOK(L, globalconf.hooks.arrange);
-}
-
 /** Set the function called on each client's property change.
  * This function is called with the client object as argument and the
  * property name.
@@ -256,7 +243,6 @@ const struct luaL_reg awesome_hooks_lib[] =
     { "mouse_enter", luaA_hooks_mouse_enter },
     { "mouse_leave", luaA_hooks_mouse_leave },
     { "property", luaA_hooks_property },
-    { "arrange", luaA_hooks_arrange },
     { "clients", luaA_hooks_clients },
     { "tags", luaA_hooks_tags },
     { "tagged", luaA_hooks_tagged },

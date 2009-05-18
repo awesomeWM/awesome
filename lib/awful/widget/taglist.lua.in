@@ -64,7 +64,6 @@ function new(screen, label, buttons)
     local uc = function (c) return u(c.screen) end
     hooks.focus.register(uc)
     hooks.unfocus.register(uc)
-    hooks.arrange.register(u)
     hooks.tags.register(u)
     hooks.tagged.register(uc)
     hooks.property.register(function (c, prop)

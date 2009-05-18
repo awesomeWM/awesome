@@ -736,7 +736,6 @@ luaA_init(xdgHandle* xdg)
     globalconf.hooks.unfocus = LUA_REFNIL;
     globalconf.hooks.mouse_enter = LUA_REFNIL;
     globalconf.hooks.mouse_leave = LUA_REFNIL;
-    globalconf.hooks.arrange = LUA_REFNIL;
     globalconf.hooks.clients = LUA_REFNIL;
     globalconf.hooks.tags = LUA_REFNIL;
     globalconf.hooks.tagged = LUA_REFNIL;

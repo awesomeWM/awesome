@@ -91,7 +91,6 @@ function getname(layout)
     return layout.name
 end
 
-hooks.arrange.register(on_arrange)
 hooks.property.register(function (obj, prop)
     local objtype = type(obj)
     if objtype == "client" then

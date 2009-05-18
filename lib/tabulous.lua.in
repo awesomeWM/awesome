@@ -304,7 +304,7 @@ end
 -- Keep tabulous in sync when focus change
 awful.hooks.focus.register(hook_focus)
 -- update the tabbing when the tags changes
-awful.hooks.arrange.register(update_tabbing)
+awful.hooks.tags.register(update_tabbing)
 
 -- Set up hook so we don't leave lost hidden clients
 awful.hooks.unmanage.register(untab)
