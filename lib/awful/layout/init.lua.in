@@ -13,11 +13,7 @@ local suit = require("awful.layout.suit")
 local client = require("awful.client")
 local wibox = require("awful.wibox")
 local ascreen = require("awful.screen")
-local capi =
-{
-    hooks = hooks,
-    screen = screen
-}
+local capi = { screen = screen }
 local hooks = require("awful.hooks")
 
 --- Layout module for awful
@@ -62,7 +58,6 @@ function set(layout, t)
     t = t or tag.selected()
     tag.setproperty(t, "layout", layout)
     hooks.user.call("layout", t, layout)
-    capi.hooks.arrange()(t.screen)
 end
 
 -- Register an arrange hook.
@@ -127,7 +122,9 @@ hooks.property.register(function (obj, prop)
     elseif objtype == "tag" then
         if prop == "mwfact"
             or prop == "nmaster"
-            or prop == "ncol" then
+            or prop == "ncol"
+            or prop == "layout"
+            or prop == "windowfact" then
             on_arrange(obj.screen)
         end
     end
