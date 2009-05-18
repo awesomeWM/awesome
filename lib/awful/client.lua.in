@@ -567,7 +567,6 @@ function floating.set(c, s)
         end
         c.screen = screen
         capi.hooks.arrange()(c.screen)
-        capi.hooks.property()(c, "floating")
     end
 end
 
@@ -825,6 +824,7 @@ function property.set(c, prop, value)
         data.properties[c] = {}
     end
     data.properties[c][prop] = value
+    hooks.user.call("property", c, prop)
 end
 
 -- Register standards hooks
