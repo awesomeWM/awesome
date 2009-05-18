@@ -23,6 +23,9 @@ local hooks = require("awful.hooks")
 --- Layout module for awful
 module("awful.layout")
 
+-- Create a hook to call when changing layout
+hooks.user.create("layout")
+
 --- Get the current layout.
 -- @param screen The screen number.
 -- @return The layout function.
@@ -58,6 +61,7 @@ end
 function set(layout, t)
     t = t or tag.selected()
     tag.setproperty(t, "layout", layout)
+    hooks.user.call("layout", t, layout)
     capi.hooks.arrange()(t.screen)
 end
 
