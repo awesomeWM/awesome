@@ -68,13 +68,7 @@ titlebar_ban(wibox_t *titlebar)
         simple_window_t *sw = &titlebar->sw;
 
         if(sw->window)
-        {
-            uint32_t request[] = { - sw->geometry.width, - sw->geometry.height };
-            /* Move the titlebar to the same place as the window. */
-            xcb_configure_window(globalconf.connection, sw->window,
-                                 XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y,
-                                 request);
-        }
+            xcb_unmap_window(globalconf.connection, sw->window);
 
         /* Remove titlebar geometry from client. */
         if((c = client_getbytitlebar(titlebar)))
@@ -99,14 +93,7 @@ titlebar_unban(wibox_t *titlebar)
         simple_window_t *sw = &titlebar->sw;
 
         if(sw->window)
-        {
-            /* All resizing is done, so only move now. */
-            uint32_t request[] = { sw->geometry.x, sw->geometry.y };
-
-            xcb_configure_window(globalconf.connection, sw->window,
-                                XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y,
-                                request);
-        }
+            xcb_map_window(globalconf.connection, sw->window);
 
         titlebar->isbanned = false;
 

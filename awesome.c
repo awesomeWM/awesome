@@ -156,7 +156,7 @@ scan(void)
             state = window_state_get_reply(state_wins[i]);
 
             if(!attr_r || attr_r->override_redirect
-               || attr_r->map_state != XCB_MAP_STATE_VIEWABLE
+               || attr_r->map_state == XCB_MAP_STATE_UNVIEWABLE
                || state == XCB_WM_STATE_WITHDRAWN)
             {
                 geom_wins[i] = NULL;
@@ -176,6 +176,9 @@ scan(void)
             if(!geom_wins[i] || !(geom_r = xcb_get_geometry_reply(globalconf.connection,
                                                                   *(geom_wins[i]), NULL)))
                 continue;
+
+            /* The window can be mapped, so force it to be undrawn for startup */
+            xcb_unmap_window(globalconf.connection, wins[i]);
 
             client_manage(wins[i], geom_r, phys_screen, true);
 

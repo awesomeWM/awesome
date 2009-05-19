@@ -204,14 +204,7 @@ client_ban(client_t *c)
 {
     if(!c->isbanned)
     {
-        /* Move all clients out of the physical viewport into negative coordinate space. */
-        /* They will all be put on top of each other. */
-        uint32_t request[2] = { - (c->geometries.internal.width + 2 * c->border),
-                                - (c->geometries.internal.height + 2 * c->border) };
-
-        xcb_configure_window(globalconf.connection, c->win,
-                             XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y,
-                             request);
+        xcb_unmap_window(globalconf.connection, c->win);
 
         c->isbanned = true;
 
@@ -475,6 +468,9 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
 
     c->phys_screen = phys_screen;
 
+    /* consider the window banned */
+    c->isbanned = true;
+
     /* Initial values */
     c->win = w;
     c->geometry.x = wgeom->x;
@@ -544,10 +540,6 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
      * At this stage it's just safer to keep it in normal state and avoid confusion.
      */
     window_state_set(c->win, XCB_WM_STATE_NORMAL);
-
-    /* Move window outside the viewport before mapping it. */
-    client_ban(c);
-    xcb_map_window(globalconf.connection, c->win);
 
     if(!startup)
         spawn_start_notify(c);
@@ -717,15 +709,6 @@ client_resize(client_t *c, area_t geometry, bool hints)
         c->geometry = geometry;
 
         titlebar_update_geometry(c);
-
-        /* The idea is to give a client a resize even when banned. */
-        /* We just have to move the (x,y) to keep it out of the viewport. */
-        /* This at least doesn't break expectations about events. */
-        if(c->isbanned)
-        {
-            geometry_internal.x = values[0] = - (geometry_internal.width + 2 * c->border);
-            geometry_internal.y = values[1] = - (geometry_internal.height + 2 * c->border);
-        }
 
         xcb_configure_window(globalconf.connection, c->win,
                              XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y
@@ -993,18 +976,7 @@ client_unban(client_t *c)
 {
     if(c->isbanned)
     {
-        /* Move the client back where it belongs. */
-        uint32_t request[] = { c->geometries.internal.x,
-                               c->geometries.internal.y,
-                               c->geometries.internal.width,
-                               c->geometries.internal.height };
-
-        xcb_configure_window(globalconf.connection, c->win,
-                              XCB_CONFIG_WINDOW_X
-                              | XCB_CONFIG_WINDOW_Y
-                              | XCB_CONFIG_WINDOW_WIDTH
-                              | XCB_CONFIG_WINDOW_HEIGHT,
-                              request);
+        xcb_map_window(globalconf.connection, c->win);
 
         c->isbanned = false;
     }

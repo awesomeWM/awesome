@@ -264,27 +264,15 @@ event_handle_configurerequest(void *data __attribute__ ((unused)),
         ev->value_mask &= ~(XCB_CONFIG_WINDOW_SIBLING |
                                             XCB_CONFIG_WINDOW_STACK_MODE);
 
-        if(c->isbanned)
-        {
-            /* We'll be sending protocol geometry, so don't readd borders and titlebar. */
-            /* We do have to ensure the windows don't end up in the visible screen. */
-            ev->x = geometry.x = - (geometry.width + 2*c->border);
-            ev->y = geometry.y = - (geometry.height + 2*c->border);
-            window_configure(c->win, geometry, c->border);
-            event_handle_configurerequest_configure_window(ev);
-        }
-        else
-        {
-            /** Configure request are sent with size relative to real (internal)
-             * window size, i.e. without titlebars and borders. */
-            geometry = titlebar_geometry_add(c->titlebar, c->border, geometry);
+        /** Configure request are sent with size relative to real (internal)
+         * window size, i.e. without titlebars and borders. */
+        geometry = titlebar_geometry_add(c->titlebar, c->border, geometry);
 
-            if(!client_resize(c, geometry, false))
-            {
-                /* Resize wasn't officially needed, but we don't want to break expectations. */
-                geometry = titlebar_geometry_remove(c->titlebar, c->border, c->geometry);
-                window_configure(c->win, geometry, c->border);
-            }
+        if(!client_resize(c, geometry, false))
+        {
+            /* Resize wasn't officially needed, but we don't want to break expectations. */
+            geometry = titlebar_geometry_remove(c->titlebar, c->border, c->geometry);
+            window_configure(c->win, geometry, c->border);
         }
     }
     else

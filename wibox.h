@@ -83,16 +83,8 @@ wibox_t * wibox_getbywin(xcb_window_t);
 static inline void
 wibox_moveresize(wibox_t *wibox, area_t geometry)
 {
-    if(wibox->sw.window && !wibox->isbanned)
+    if(wibox->sw.window)
         simplewindow_moveresize(&wibox->sw, geometry);
-    else if(wibox->sw.window && wibox->isbanned)
-    {
-        area_t real_geom = geometry;
-        geometry.x = -geometry.width;
-        geometry.y = -geometry.height;
-        simplewindow_moveresize(&wibox->sw, geometry);
-        wibox->sw.geometry = real_geom;
-    }
     else
         wibox->sw.geometry = geometry;
     wibox->need_update = true;

@@ -65,7 +65,7 @@ titlebar_geometry_add(wibox_t *t, int border, area_t geometry)
      * This can then be substracted/added to the witdh/height/x/y.
      * In this case the border is included, because it belongs to a different window.
      */
-    if(t && !t->isbanned)
+    if(t && t->isvisible)
         switch(t->position)
         {
           case Top:
@@ -106,7 +106,7 @@ titlebar_geometry_remove(wibox_t *t, int border, area_t geometry)
      * This can then be substracted/added to the witdh/height/x/y.
      * In this case the border is included, because it belongs to a different window.
      */
-    if(t && !t->isbanned)
+    if(t && t->isvisible)
         switch(t->position)
         {
           case Top:
