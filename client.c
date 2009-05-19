@@ -177,7 +177,7 @@ client_unfocus_update(client_t *c)
     if(globalconf.hooks.unfocus != LUA_REFNIL)
     {
         client_push(globalconf.L, c);
-        luaA_dofunction(globalconf.L, globalconf.hooks.unfocus, 1, 0);
+        luaA_dofunction_from_registry(globalconf.L, globalconf.hooks.unfocus, 1, 0);
     }
 
 }
@@ -259,7 +259,7 @@ client_focus_update(client_t *c)
     if(globalconf.hooks.focus != LUA_REFNIL)
     {
         client_push(globalconf.L, c);
-        luaA_dofunction(globalconf.L, globalconf.hooks.focus, 1, 0);
+        luaA_dofunction_from_registry(globalconf.L, globalconf.hooks.focus, 1, 0);
     }
 }
 
@@ -546,14 +546,14 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
 
     /* Call hook to notify list change */
     if(globalconf.hooks.clients != LUA_REFNIL)
-        luaA_dofunction(globalconf.L, globalconf.hooks.clients, 0, 0);
+        luaA_dofunction_from_registry(globalconf.L, globalconf.hooks.clients, 0, 0);
 
     /* call hook */
     if(globalconf.hooks.manage != LUA_REFNIL)
     {
         client_push(globalconf.L, c);
         lua_pushboolean(globalconf.L, startup);
-        luaA_dofunction(globalconf.L, globalconf.hooks.manage, 2, 0);
+        luaA_dofunction_from_registry(globalconf.L, globalconf.hooks.manage, 2, 0);
     }
 }
 
@@ -1019,12 +1019,12 @@ client_unmanage(client_t *c)
     if(globalconf.hooks.unmanage != LUA_REFNIL)
     {
         client_push(globalconf.L, c);
-        luaA_dofunction(globalconf.L, globalconf.hooks.unmanage, 1, 0);
+        luaA_dofunction_from_registry(globalconf.L, globalconf.hooks.unmanage, 1, 0);
     }
 
     /* Call hook to notify list change */
     if(globalconf.hooks.clients != LUA_REFNIL)
-        luaA_dofunction(globalconf.L, globalconf.hooks.clients, 0, 0);
+        luaA_dofunction_from_registry(globalconf.L, globalconf.hooks.clients, 0, 0);
 
     /* The server grab construct avoids race conditions. */
     xcb_grab_server(globalconf.connection);
@@ -1204,7 +1204,7 @@ luaA_client_swap(lua_State *L)
 
         /* Call hook to notify list change */
         if(globalconf.hooks.clients != LUA_REFNIL)
-            luaA_dofunction(L, globalconf.hooks.clients, 0, 0);
+            luaA_dofunction_from_registry(L, globalconf.hooks.clients, 0, 0);
     }
 
     return 0;

@@ -300,11 +300,11 @@ a_dbus_process_request(DBusConnection *dbus_connection, DBusMessage *msg)
         nargs += a_dbus_message_iter(&iter);
 
     if(dbus_message_get_no_reply(msg))
-        luaA_dofunction(globalconf.L, globalconf.hooks.dbus, nargs, 0);
+        luaA_dofunction_from_registry(globalconf.L, globalconf.hooks.dbus, nargs, 0);
     else
     {
         int n = lua_gettop(globalconf.L) - nargs;
-        luaA_dofunction(globalconf.L, globalconf.hooks.dbus, nargs, LUA_MULTRET);
+        luaA_dofunction_from_registry(globalconf.L, globalconf.hooks.dbus, nargs, LUA_MULTRET);
         n -= lua_gettop(globalconf.L);
 
         DBusMessage *reply = dbus_message_new_method_return(msg);

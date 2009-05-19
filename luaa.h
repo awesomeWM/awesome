@@ -238,17 +238,15 @@ luaA_registerfct(lua_State *L, int idx, luaA_ref *fct)
     return luaA_register(L, idx, fct);
 }
 
-/** Execute an Lua function.
+/** Execute an Lua function on top of the stack.
  * \param L The Lua stack.
- * \param f The Lua function to execute.
  * \param nargs The number of arguments for the Lua function.
  * \param nret The number of returned value from the Lua function.
  * \return True on no error, false otherwise.
  */
 static inline bool
-luaA_dofunction(lua_State *L, luaA_ref f, int nargs, int nret)
+luaA_dofunction(lua_State *L, int nargs, int nret)
 {
-    lua_rawgeti(L, LUA_REGISTRYINDEX, f);
     if(nargs)
         lua_insert(L, - (nargs + 1));
     if(lua_pcall(L, nargs, nret, 0))
@@ -259,6 +257,20 @@ luaA_dofunction(lua_State *L, luaA_ref f, int nargs, int nret)
         return false;
     }
     return true;
+}
+
+/** Grab a function from the registry and execute it.
+ * \param L The Lua stack.
+ * \param ref The function reference.
+ * \param nargs The number of arguments for the Lua function.
+ * \param nret The number of returned value from the Lua function.
+ * \return True on no error, false otherwise.
+ */
+static inline bool
+luaA_dofunction_from_registry(lua_State *L, luaA_ref ref, int nargs, int nret)
+{
+    lua_rawgeti(L, LUA_REGISTRYINDEX, ref);
+    return luaA_dofunction(L, nargs, nret);
 }
 
 /** Print a warning about some Lua code.
@@ -337,7 +349,7 @@ bool luaA_isloop(lua_State *, int);
         { \
             type##_push(globalconf.L, obj); \
             lua_pushliteral(globalconf.L, prop); \
-            luaA_dofunction(globalconf.L, globalconf.hooks.property, 2, 0); \
+            luaA_dofunction_from_registry(globalconf.L, globalconf.hooks.property, 2, 0); \
         } \
     } while(0);
 

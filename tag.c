@@ -70,7 +70,7 @@ tag_view(tag_t *tag, bool view)
                 lua_pushliteral(globalconf.L, "select");
             else
                 lua_pushliteral(globalconf.L, "unselect");
-            luaA_dofunction(globalconf.L, globalconf.hooks.tags, 3, 0);
+            luaA_dofunction_from_registry(globalconf.L, globalconf.hooks.tags, 3, 0);
         }
     }
 }
@@ -102,7 +102,7 @@ tag_append_to_screen(screen_t *s)
         lua_pushnumber(globalconf.L, screen_index + 1);
         tag_push(globalconf.L, tag);
         lua_pushliteral(globalconf.L, "add");
-        luaA_dofunction(globalconf.L, globalconf.hooks.tags, 3, 0);
+        luaA_dofunction_from_registry(globalconf.L, globalconf.hooks.tags, 3, 0);
     }
 }
 
@@ -132,7 +132,7 @@ tag_remove_from_screen(tag_t *tag)
         lua_pushnumber(globalconf.L, screen_index + 1);
         tag_push(globalconf.L, tag);
         lua_pushliteral(globalconf.L, "remove");
-        luaA_dofunction(globalconf.L, globalconf.hooks.tags, 3, 0);
+        luaA_dofunction_from_registry(globalconf.L, globalconf.hooks.tags, 3, 0);
     }
 
     tag->screen = NULL;
@@ -161,7 +161,7 @@ tag_client(client_t *c)
     {
         client_push(globalconf.L, c);
         tag_push(globalconf.L, t);
-        luaA_dofunction(globalconf.L, globalconf.hooks.tagged, 2, 0);
+        luaA_dofunction_from_registry(globalconf.L, globalconf.hooks.tagged, 2, 0);
     }
 }
 
@@ -184,7 +184,7 @@ untag_client(client_t *c, tag_t *t)
             {
                 client_push(globalconf.L, c);
                 tag_push(globalconf.L, t);
-                luaA_dofunction(globalconf.L, globalconf.hooks.tagged, 2, 0);
+                luaA_dofunction_from_registry(globalconf.L, globalconf.hooks.tagged, 2, 0);
             }
             tag_unref(globalconf.L, t);
             return;
