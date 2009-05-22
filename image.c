@@ -108,6 +108,11 @@ image_getdata(image_t *image)
     uint32_t *data;
     double alpha;
     uint8_t *dataimg;
+#if AWESOME_IS_BIG_ENDIAN
+    const int index_a = 0, index_r = 1, index_g = 2, index_b = 3;
+#else
+    const int index_a = 3, index_r = 2, index_g = 1, index_b = 0;
+#endif
 
     if(image->isupdated)
         return image->data;
@@ -123,21 +128,12 @@ image_getdata(image_t *image)
 
     for(i = 0; i < size; i++, dataimg += 4)
     {
-#if AWESOME_IS_BIG_ENDIAN
-        dataimg[0] = (data[i] >> 24) & 0xff;           /* A */
+        dataimg[index_a] = (data[i] >> 24) & 0xff;           /* A */
         /* cairo wants pre-multiplied alpha */
-        alpha = dataimg[0] / 255.0;
-        dataimg[1] = ((data[i] >> 16) & 0xff) * alpha; /* R */
-        dataimg[2] = ((data[i] >>  8) & 0xff) * alpha; /* G */
-        dataimg[3] = (data[i]         & 0xff) * alpha; /* B */
-#else
-        dataimg[3] = (data[i] >> 24) & 0xff;           /* A */
-        /* cairo wants pre-multiplied alpha */
-        alpha = dataimg[3] / 255.0;
-        dataimg[2] = ((data[i] >> 16) & 0xff) * alpha; /* R */
-        dataimg[1] = ((data[i] >>  8) & 0xff) * alpha; /* G */
-        dataimg[0] = (data[i]         & 0xff) * alpha; /* B */
-#endif
+        alpha = dataimg[index_a] / 255.0;
+        dataimg[index_r] = ((data[i] >> 16) & 0xff) * alpha; /* R */
+        dataimg[index_g] = ((data[i] >>  8) & 0xff) * alpha; /* G */
+        dataimg[index_b] = (data[i]         & 0xff) * alpha; /* B */
     }
 
     image->isupdated = true;
