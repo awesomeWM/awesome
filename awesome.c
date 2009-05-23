@@ -63,6 +63,9 @@ awesome_atexit(void)
 {
     int screen_nbr, nscreens;
 
+    if(globalconf.hooks.exit != LUA_REFNIL)
+        luaA_dofunction_from_registry(globalconf.L, globalconf.hooks.exit, 0, 0);
+
     a_dbus_cleanup();
 
     /* reparent systray windows, otherwise they may die with their master */

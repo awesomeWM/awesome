@@ -214,6 +214,18 @@ luaA_hooks_timer(lua_State *L)
     return 1;
 }
 
+/** Set the function called on awesome exit
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ * \luastack
+ * \lparam A function to call on awesome exit.
+ */
+static int
+luaA_hooks_exit(lua_State *L)
+{
+    HANDLE_HOOK(L, globalconf.hooks.exit);
+}
+
 #ifdef WITH_DBUS
 /** Set the function to be called when a D-Bus event is received.
  * The first argument passed to this function is the type of the message we
@@ -249,6 +261,7 @@ const struct luaL_reg awesome_hooks_lib[] =
     { "tagged", luaA_hooks_tagged },
     { "startup_notification", luaA_hooks_startup_notification },
     { "timer", luaA_hooks_timer },
+    { "exit", luaA_hooks_exit },
 #ifdef WITH_DBUS
     { "dbus", luaA_hooks_dbus },
 #endif

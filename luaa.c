@@ -743,6 +743,7 @@ luaA_init(xdgHandle* xdg)
     globalconf.hooks.property = LUA_REFNIL;
     globalconf.hooks.startup_notification = LUA_REFNIL;
     globalconf.hooks.timer = LUA_REFNIL;
+    globalconf.hooks.exit = LUA_REFNIL;
 #ifdef WITH_DBUS
     globalconf.hooks.dbus = LUA_REFNIL;
 #endif

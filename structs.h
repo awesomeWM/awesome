@@ -122,6 +122,8 @@ struct awesome_t
         luaA_ref property;
         /** Command to run on time */
         luaA_ref timer;
+        /** Command to run on awesome exit */
+        luaA_ref exit;
         /** Startup notification hooks */
         luaA_ref startup_notification;
 #ifdef WITH_DBUS
