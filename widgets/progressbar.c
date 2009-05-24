@@ -158,6 +158,8 @@ progressbar_geometry(widget_t *widget, screen_t *screen, int height, int width)
         geometry.width = pb_width + 2 * (d->border_width + d->border_padding);
     }
 
+    geometry.x = geometry.y = 0;
+
     return geometry;
 }
 

@@ -153,6 +153,7 @@ graph_geometry(widget_t *widget, screen_t *screen, int height, int width)
     area_t geometry;
     graph_data_t *d = widget->data;
 
+    geometry.x = geometry.y = 0;
     geometry.height = height;
     geometry.width = d->width;
 

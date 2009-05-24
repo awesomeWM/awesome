@@ -45,6 +45,8 @@ systray_geometry(widget_t *widget, screen_t *screen, int height, int width)
     /** \todo use class hints */
     geometry.width = MIN(n * height, width);
 
+    geometry.x = geometry.y = 0;
+
     return geometry;
 }
 

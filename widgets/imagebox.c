@@ -69,6 +69,8 @@ imagebox_geometry(widget_t *widget, screen_t *screen, int height, int width)
         geometry.height = 0;
     }
 
+    geometry.x = geometry.y = 0;
+
     return geometry;
 }
 

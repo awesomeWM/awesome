@@ -72,6 +72,8 @@ textbox_geometry(widget_t *widget, screen_t *screen, int height, int width)
     else
         geometry.width = MIN(d->extents.width + d->margin.left + d->margin.right, width);
 
+    geometry.x = geometry.y = 0;
+
     return geometry;
 }
 
