@@ -437,6 +437,9 @@ wibox_attach(screen_t *s)
 
     simplewindow_cursor_set(&wibox->sw,
                             xcursor_new(globalconf.connection, xcursor_font_fromstr(wibox->cursor)));
+
+    simplewindow_opacity_set(&wibox->sw, wibox->sw.opacity);
+
     if(wibox->isvisible)
         wibox_map(wibox);
     else
@@ -481,6 +484,7 @@ luaA_wibox_new(lua_State *L)
 
     w->ontop = luaA_getopt_boolean(L, 2, "ontop", false);
 
+    w->sw.opacity = -1;
     w->sw.border.width = luaA_getopt_number(L, 2, "border_width", 0);
     w->sw.geometry.x = luaA_getopt_number(L, 2, "x", 0);
     w->sw.geometry.y = luaA_getopt_number(L, 2, "y", 0);
