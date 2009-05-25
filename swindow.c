@@ -106,7 +106,8 @@ simplewindow_init(simple_window_t *sw,
         | XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY | XCB_EVENT_MASK_ENTER_WINDOW
         | XCB_EVENT_MASK_LEAVE_WINDOW | XCB_EVENT_MASK_STRUCTURE_NOTIFY
         | XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_BUTTON_RELEASE
-        | XCB_EVENT_MASK_POINTER_MOTION | XCB_EVENT_MASK_EXPOSURE;
+        | XCB_EVENT_MASK_POINTER_MOTION | XCB_EVENT_MASK_EXPOSURE
+        | XCB_EVENT_MASK_PROPERTY_CHANGE;
 
     sw->window = xcb_generate_id(globalconf.connection);
     xcb_create_window(globalconf.connection, s->root_depth, sw->window, s->root,

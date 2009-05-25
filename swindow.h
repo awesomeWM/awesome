@@ -53,6 +53,8 @@ typedef struct simple_window_t
     draw_context_t ctx;
     /** Orientation */
     orientation_t orientation;
+    /** Opacity */
+    double opacity;
 } simple_window_t;
 
 void simplewindow_init(simple_window_t *s,
@@ -85,6 +87,7 @@ simplewindow_refresh_pixmap(simple_window_t *sw)
 static inline void
 simplewindow_opacity_set(simple_window_t *sw, double opacity)
 {
+    sw->opacity = opacity;
     window_opacity_set(sw->window, opacity);
 }
 
@@ -94,7 +97,7 @@ simplewindow_opacity_set(simple_window_t *sw, double opacity)
 static inline double
 simplewindow_opacity_get(simple_window_t *sw)
 {
-    return window_opacity_get(sw->window);
+    return sw->opacity;
 }
 
 #endif
