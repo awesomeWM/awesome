@@ -88,7 +88,8 @@ static inline void
 simplewindow_opacity_set(simple_window_t *sw, double opacity)
 {
     sw->opacity = opacity;
-    window_opacity_set(sw->window, opacity);
+    if(sw->window != XCB_NONE)
+        window_opacity_set(sw->window, opacity);
 }
 
 /** Get a simplewindow's opacity.
