@@ -42,53 +42,65 @@
 #include "common/atoms.h"
 #include "common/xutil.h"
 
-#define DO_EVENT_HOOK_CALLBACK(type, xcbeventprefix, arraytype, match) \
+#define DO_EVENT_HOOK_CALLBACK(type, prefix, xcbtype, xcbeventprefix, arraytype, match) \
     static void \
-    event_##type##_callback(xcb_##type##_press_event_t *ev, \
-                            arraytype *arr, \
-                            int oud, \
-                            int nargs, \
-                            void *data) \
+    event_##xcbtype##_callback(xcb_##xcbtype##_press_event_t *ev, \
+                               arraytype *arr, \
+                               int oud, \
+                               int nargs, \
+                               void *data) \
     { \
+        int abs_oud = oud < 0 ? ((lua_gettop(globalconf.L) + 1) + oud) : oud; \
+        int item_matching = 0; \
         foreach(item, *arr) \
             if(match(ev, *item, data)) \
-                switch(ev->response_type) \
+            { \
+                if(oud) \
+                    luaA_object_push_item(globalconf.L, abs_oud, *item); \
+                else \
+                    prefix##_push(globalconf.L, *item); \
+                item_matching++; \
+            } \
+        for(; item_matching > 0; item_matching--) \
+        { \
+            type *item = luaL_checkudata(globalconf.L, -1, #prefix); \
+            switch(ev->response_type) \
+            { \
+              case xcbeventprefix##_PRESS: \
+                if(item->press) \
                 { \
-                  case xcbeventprefix##_PRESS: \
-                    if((*item)->press) \
+                    for(int i = 0; i < nargs; i++) \
+                        lua_pushvalue(globalconf.L, - nargs - item_matching); \
+                    if(oud) \
                     { \
-                        for(int i = 0; i < nargs; i++) \
-                            lua_pushvalue(globalconf.L, - nargs); \
-                        if(oud) \
-                        { \
-                            luaA_object_push_item(globalconf.L, oud < 0 ? oud - nargs : oud, \
-                                                  (*item)); \
-                            luaA_object_push_item(globalconf.L,  -1, (*item)->press); \
-                            lua_remove(globalconf.L, -2); \
-                        } \
-                        else \
-                            type##_push_item(globalconf.L, *item, (*item)->press); \
-                        luaA_dofunction(globalconf.L, nargs, 0); \
+                        luaA_object_push_item(globalconf.L, abs_oud, item); \
+                        luaA_object_push_item(globalconf.L,  -1, item->press); \
+                        lua_remove(globalconf.L, -2); \
                     } \
-                    break; \
-                  case xcbeventprefix##_RELEASE: \
-                    if((*item)->release) \
-                    { \
-                        for(int i = 0; i < nargs; i++) \
-                            lua_pushvalue(globalconf.L, - nargs); \
-                        if(oud) \
-                        { \
-                            luaA_object_push_item(globalconf.L, oud < 0 ? oud - nargs : oud, \
-                                                  (*item)); \
-                            luaA_object_push_item(globalconf.L,  -1, (*item)->release); \
-                            lua_remove(globalconf.L, -2); \
-                        } \
-                        else \
-                            type##_push_item(globalconf.L, *item, (*item)->release); \
-                        luaA_dofunction(globalconf.L, nargs, 0); \
-                    } \
-                    break; \
+                    else \
+                        prefix##_push_item(globalconf.L, item, item->press); \
+                    luaA_dofunction(globalconf.L, nargs, 0); \
                 } \
+                break; \
+              case xcbeventprefix##_RELEASE: \
+                if(item->release) \
+                { \
+                    for(int i = 0; i < nargs; i++) \
+                        lua_pushvalue(globalconf.L, - nargs - item_matching); \
+                    if(oud) \
+                    { \
+                        luaA_object_push_item(globalconf.L, abs_oud, item); \
+                        luaA_object_push_item(globalconf.L,  -1, item->release); \
+                        lua_remove(globalconf.L, -2); \
+                    } \
+                    else \
+                        prefix##_push_item(globalconf.L, item, item->release); \
+                    luaA_dofunction(globalconf.L, nargs, 0); \
+                } \
+                break; \
+            } \
+            lua_pop(globalconf.L, 1); \
+        } \
         lua_pop(globalconf.L, nargs); \
     }
 
@@ -109,8 +121,8 @@ event_key_match(xcb_key_press_event_t *ev, keyb_t *k, void *data)
             && (k->mod == XCB_BUTTON_MASK_ANY || k->mod == ev->state));
 }
 
-DO_EVENT_HOOK_CALLBACK(button, XCB_BUTTON, button_array_t, event_button_match)
-DO_EVENT_HOOK_CALLBACK(key, XCB_KEY, key_array_t, event_key_match)
+DO_EVENT_HOOK_CALLBACK(button_t, button, button, XCB_BUTTON, button_array_t, event_button_match)
+DO_EVENT_HOOK_CALLBACK(keyb_t, key, key, XCB_KEY, key_array_t, event_key_match)
 
 /** Handle an event with mouse grabber if needed
  * \param x The x coordinate.
