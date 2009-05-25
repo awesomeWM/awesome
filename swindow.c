@@ -73,11 +73,12 @@ simplewindow_init(simple_window_t *sw,
                   int phys_screen,
                   area_t geometry,
                   uint16_t border_width,
+                  const xcolor_t *border_color,
                   orientation_t orientation,
                   const xcolor_t *fg, const xcolor_t *bg)
 {
     xcb_screen_t *s = xutil_screen_get(globalconf.connection, phys_screen);
-    uint32_t create_win_val[3];
+    uint32_t create_win_val[4];
     const uint32_t gc_mask = XCB_GC_FOREGROUND | XCB_GC_BACKGROUND;
     const uint32_t gc_values[2] = { s->black_pixel, s->white_pixel };
 
@@ -96,10 +97,12 @@ simplewindow_init(simple_window_t *sw,
     sw->orientation = orientation;
     sw->ctx.fg = *fg;
     sw->ctx.bg = *bg;
+    sw->border.color = *border_color;
 
     create_win_val[0] = XCB_BACK_PIXMAP_PARENT_RELATIVE;
-    create_win_val[1] = 1;
-    create_win_val[2] = XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT
+    create_win_val[1] = border_color->pixel;
+    create_win_val[2] = 1;
+    create_win_val[3] = XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT
         | XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY | XCB_EVENT_MASK_ENTER_WINDOW
         | XCB_EVENT_MASK_LEAVE_WINDOW | XCB_EVENT_MASK_STRUCTURE_NOTIFY
         | XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_BUTTON_RELEASE
@@ -109,7 +112,7 @@ simplewindow_init(simple_window_t *sw,
     xcb_create_window(globalconf.connection, s->root_depth, sw->window, s->root,
                       sw->geometries.internal.x, sw->geometries.internal.y, sw->geometries.internal.width, sw->geometries.internal.height,
                       border_width, XCB_COPY_FROM_PARENT, s->root_visual,
-                      XCB_CW_BACK_PIXMAP | XCB_CW_OVERRIDE_REDIRECT | XCB_CW_EVENT_MASK,
+                      XCB_CW_BACK_PIXMAP | XCB_CW_BORDER_PIXEL | XCB_CW_OVERRIDE_REDIRECT | XCB_CW_EVENT_MASK,
                       create_win_val);
 
     sw->pixmap = xcb_generate_id(globalconf.connection);

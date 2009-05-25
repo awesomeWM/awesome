@@ -55,7 +55,7 @@ typedef struct simple_window_t
 } simple_window_t;
 
 void simplewindow_init(simple_window_t *s,
-                       int, area_t, uint16_t,
+                       int, area_t, uint16_t, const xcolor_t *,
                        orientation_t, const xcolor_t *, const xcolor_t *);
 
 void simplewindow_wipe(simple_window_t *);

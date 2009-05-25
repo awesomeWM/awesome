@@ -431,10 +431,9 @@ wibox_attach(screen_t *s)
     simplewindow_init(&wibox->sw, phys_screen,
                       wibox->sw.geometry,
                       wibox->sw.border.width,
+                      &wibox->sw.border.color,
                       wibox->sw.orientation,
                       &wibox->sw.ctx.fg, &wibox->sw.ctx.bg);
-
-    simplewindow_border_color_set(&wibox->sw, &wibox->sw.border.color);
 
     simplewindow_cursor_set(&wibox->sw,
                             xcursor_new(globalconf.connection, xcursor_font_fromstr(wibox->cursor)));

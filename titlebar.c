@@ -274,9 +274,8 @@ titlebar_client_attach(client_t *c)
     titlebar_geometry_compute(c, titlebar_geometry_remove(c->titlebar, 0, c->geometry), &wingeom);
 
     simplewindow_init(&t->sw, c->phys_screen,
-                      wingeom, 0, t->sw.orientation,
-                      &t->sw.ctx.fg, &t->sw.ctx.bg);
-    simplewindow_border_color_set(&t->sw, &t->sw.border.color);
+                      wingeom, 0, &t->sw.border.color,
+                      t->sw.orientation, &t->sw.ctx.fg, &t->sw.ctx.bg);
 
     t->need_update = true;
 
