@@ -116,6 +116,8 @@ window_buttons_grab(xcb_window_t win, button_array_t *buttons)
 double
 window_opacity_get(xcb_window_t win)
 {
+    double ret;
+
     xcb_get_property_cookie_t prop_c =
         xcb_get_property_unchecked(globalconf.connection, false, win,
                                    _NET_WM_WINDOW_OPACITY, CARDINAL, 0L, 1L);
@@ -123,14 +125,22 @@ window_opacity_get(xcb_window_t win)
     xcb_get_property_reply_t *prop_r =
         xcb_get_property_reply(globalconf.connection, prop_c, NULL);
 
+    ret = window_opacity_get_from_reply(prop_r);
+    p_delete(&prop_r);
+    return ret;
+}
+
+/** Get the opacity of a window.
+ * \param A reply to a get property request for _NET_WM_WINDOW_OPACITY.
+ * \return The opacity, between 0 and 1.
+ */
+double window_opacity_get_from_reply(xcb_get_property_reply_t *prop_r)
+{
     if(prop_r && prop_r->value_len && prop_r->format == 32)
     {
         uint32_t value = *(uint32_t *) xcb_get_property_value(prop_r);
-        p_delete(&prop_r);
         return (double) value / (double) 0xffffffff;
     }
-
-    p_delete(&prop_r);
 
     return -1;
 }
