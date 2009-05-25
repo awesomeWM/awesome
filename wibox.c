@@ -352,9 +352,8 @@ wibox_position_update_non_floating(wibox_t *wibox)
      */
     wibox->screen->need_arrange = true;
 
-    /* Place wibox'es at the edge of the screen, struts come later. */
     area = screen_area_get(wibox->screen, NULL,
-                           &wibox->screen->padding, false);
+                           &wibox->screen->padding, true);
 
     /* Top and Bottom wibox_t have prio */
     foreach(_w, wibox->screen->wiboxes)

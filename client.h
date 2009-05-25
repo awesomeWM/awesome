@@ -90,8 +90,6 @@ struct client_t
     } geometries;
     /** Strut */
     strut_t strut;
-    /** Ignore strut temporarily. */
-    bool ignore_strut;
     /** Border width and pre-fullscreen border width */
     int border, border_fs;
     xcolor_t border_color;
@@ -171,7 +169,6 @@ void client_unban(client_t *);
 void client_manage(xcb_window_t, xcb_get_geometry_reply_t *, int, bool);
 area_t client_geometry_hints(client_t *, area_t);
 bool client_resize(client_t *, area_t, bool);
-void client_update_strut_positions(screen_t *);
 void client_unmanage(client_t *);
 void client_kill(client_t *);
 void client_setsticky(client_t *, bool);

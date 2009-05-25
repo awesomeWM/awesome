@@ -170,7 +170,7 @@ screen_area_get(screen_t *screen, wibox_array_t *wiboxes,
         foreach(_c, globalconf.clients)
         {
             client_t *c = *_c;
-            if(client_isvisible(c, screen) && !c->ignore_strut)
+            if(client_isvisible(c, screen))
             {
                 if(c->strut.top_start_x || c->strut.top_end_x)
                 {

@@ -114,7 +114,7 @@ function client.snap(c, snap, x, y, fixed_x, fixed_y)
     geom.y = y or geom.y
 
     geom, edge = snap_inside(geom, capi.screen[c.screen].geometry, snap)
-    geom, edge2 = snap_inside(geom, capi.screen[c.screen].workarea, snap)
+    geom = snap_inside(geom, capi.screen[c.screen].workarea, snap)
 
     -- Allow certain windows to snap to the edge of the workarea.
     -- Only allow docking to workarea for consistency/to avoid problems.
@@ -124,11 +124,11 @@ function client.snap(c, snap, x, y, fixed_x, fixed_y)
         struts['right'] = 0
         struts['top'] = 0
         struts['bottom'] = 0
-        if edge2 ~= "none" and aclient.floating.get(c) then
-            if edge2 == "left" or edge2 == "right" then
-                struts[edge2] = cur_geom.width
-            elseif edge2 == "top" or edge2 == "bottom" then
-                struts[edge2] = cur_geom.height
+        if edge ~= "none" and aclient.floating.get(c) then
+            if edge == "left" or edge == "right" then
+                struts[edge] = cur_geom.width
+            elseif edge == "top" or edge == "bottom" then
+                struts[edge] = cur_geom.height
             end
         end
         c:struts(struts)
