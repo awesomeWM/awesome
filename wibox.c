@@ -645,8 +645,8 @@ luaA_wibox_index(lua_State *L)
         break;
       case A_TK_OPACITY:
         {
-            double d;
-            if ((d = window_opacity_get(wibox->sw.window)) >= 0)
+            double d = simplewindow_opacity_get(&wibox->sw);
+            if (d >= 0)
                 lua_pushnumber(L, d);
             else
                 return 0;
@@ -857,12 +857,12 @@ luaA_wibox_newindex(lua_State *L)
         break;
       case A_TK_OPACITY:
         if(lua_isnil(L, 3))
-            window_opacity_set(wibox->sw.window, -1);
+            simplewindow_opacity_set(&wibox->sw, -1);
         else
         {
             double d = luaL_checknumber(L, 3);
             if(d >= 0 && d <= 1)
-                window_opacity_set(wibox->sw.window, d);
+                simplewindow_opacity_set(&wibox->sw, d);
         }
         break;
       case A_TK_MOUSE_ENTER:
