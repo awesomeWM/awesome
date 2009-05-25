@@ -73,14 +73,14 @@ end
 local function snap_inside(g, sg, snap)
     local edgev = 'none'
     local edgeh = 'none'
-    if math.abs(g.x) < snap + sg.x and g.x >= sg.x then
+    if math.abs(g.x) < snap + sg.x and g.x > sg.x then
         edgev = 'left'
         g.x = sg.x
     elseif math.abs((sg.x + sg.width) - (g.x + g.width)) < snap then
         edgev = 'right'
         g.x = sg.x + sg.width - g.width
     end
-    if math.abs(g.y) < snap + sg.y and g.y >= sg.y then
+    if math.abs(g.y) < snap + sg.y and g.y > sg.y then
         edgeh = 'top'
         g.y = sg.y
     elseif math.abs((sg.y + sg.height) - (g.y + g.height)) < snap then
