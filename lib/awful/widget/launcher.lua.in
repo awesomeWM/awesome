@@ -5,7 +5,6 @@
 ---------------------------------------------------------------------------
 
 local setmetatable = setmetatable
-local unpack = unpack
 local util = require("awful.util")
 local wbutton = require("awful.widget.button")
 local button = require("awful.button")
@@ -31,6 +30,6 @@ function new(args)
     return w
 end
 
-setmetatable(_M, { __call = function (_, ...) return new(unpack(arg)) end })
+setmetatable(_M, { __call = function (_, ...) return new(...) end })
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

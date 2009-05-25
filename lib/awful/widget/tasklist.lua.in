@@ -11,7 +11,6 @@ local capi = { screen = screen,
 local ipairs = ipairs
 local type = type
 local setmetatable = setmetatable
-local unpack = unpack
 local table = table
 local hooks = require("awful.hooks")
 local common = require("awful.widget.common")
@@ -188,6 +187,6 @@ function label.currenttags(c, screen, args)
     end
 end
 
-setmetatable(_M, { __call = function(_, ...) return new(unpack(arg)) end })
+setmetatable(_M, { __call = function(_, ...) return new(...) end })
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
