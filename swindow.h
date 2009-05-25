@@ -23,6 +23,7 @@
 #define AWESOME_SWINDOW_H
 
 #include "draw.h"
+#include "window.h"
 
 /** A simple window. */
 typedef struct simple_window_t
@@ -76,6 +77,24 @@ static inline void
 simplewindow_refresh_pixmap(simple_window_t *sw)
 {
     simplewindow_refresh_pixmap_partial(sw, 0, 0, sw->geometry.width, sw->geometry.height);
+}
+
+/** Set a simplewindow's opacity.
+ * \param opacity A value between 0 and 1 which describes the opacity.
+ */
+static inline void
+simplewindow_opacity_set(simple_window_t *sw, double opacity)
+{
+    window_opacity_set(sw->window, opacity);
+}
+
+/** Get a simplewindow's opacity.
+ * \return The opacity as a value between 0 and 1, or -1 if unset.
+ */
+static inline double
+simplewindow_opacity_get(simple_window_t *sw)
+{
+    return window_opacity_get(sw->window);
 }
 
 #endif
