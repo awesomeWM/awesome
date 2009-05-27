@@ -510,6 +510,58 @@ luaA_image_save(lua_State *L)
     return 0;
 }
 
+/** Insert one image into another.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ * \luastack
+ * \lvalue An image.
+ * \lparam The image to insert.
+ * \lparam The X offset of the image to insert (optional).
+ * \lparam The Y offset of the image to insert (optional).
+ * \lparam The horizontal offset of the upper right image corner (optional).
+ * \lparam The vertical offset of the upper right image corner (optional).
+ * \lparam The horizontal offset of the lower left image corner (optional).
+ * \lparam The vertical offset of the lower left image corner (optional).
+ * \lparam The X coordinate of the source rectangle (optional).
+ * \lparam The Y coordinate of the source rectangle (optional).
+ * \lparam The width of the source rectangle (optional).
+ * \lparam The height of the source rectangle (optional).
+ */
+static int
+luaA_image_insert(lua_State *L)
+{
+    image_t *image_target = luaL_checkudata(L, 1, "image");
+    image_t *image_source = luaL_checkudata(L, 2, "image");
+    int xoff = luaL_optnumber(L, 3, 0);
+    int yoff = luaL_optnumber(L, 4, 0);
+
+    int xsrc = luaL_optnumber(L, 5, 0);
+    int ysrc = luaL_optnumber(L, 6, 0);
+    int wsrc = luaL_optnumber(L, 7, image_source->width);
+    int hsrc = luaL_optnumber(L, 8, image_source->height);
+
+    int hxoff = luaL_optnumber(L, 9, image_source->width);
+    int hyoff = luaL_optnumber(L, 10, 0);
+
+    int vxoff = luaL_optnumber(L, 11, 0);
+    int vyoff = luaL_optnumber(L, 12, image_source->height);
+
+    imlib_context_set_image(image_target->image);
+
+    imlib_blend_image_onto_image_skewed(image_source->image, 0,
+                                        /* source rectangle */
+                                        xsrc, ysrc, wsrc, hsrc,
+                                        /* position of the source image in the target image */
+                                        xoff, yoff,
+                                        /* axis offsets for the source image, (w|0|0|h)
+                                         * is the default */
+                                        hxoff, hyoff, vxoff, vyoff);
+
+    image_compute(image_target);
+
+    return 0;
+}
+
 /** Image object.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
@@ -563,6 +615,7 @@ const struct luaL_reg awesome_image_meta[] =
     { "crop", luaA_image_crop },
     { "crop_and_scale", luaA_image_crop_and_scale },
     { "save", luaA_image_save },
+    { "insert", luaA_image_insert },
     /* draw on images, whee! */
     { "draw_pixel", luaA_image_draw_pixel },
     { "draw_line",  luaA_image_draw_line  },
