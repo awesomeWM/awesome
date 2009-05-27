@@ -15,6 +15,7 @@ local print = print
 local type = type
 local rtable = table
 local pairs = pairs
+local string = string
 local capi =
 {
     awesome = awesome,
@@ -259,6 +260,26 @@ function table.hasitem(t, item)
             return k
         end
     end
+end
+
+--- Split a string into multiple lines
+-- @param text String to wrap.
+-- @param width Maximum length of each line. Default: 72.
+-- @param indent Number of spaces added before each wrapped line. Default: 0.
+-- @return The string with lines wrapped to width.
+function linewrap(text, width, indent)
+    local text = text or ""
+    local width = width or 72
+    local indent = indent or 0
+
+    local pos = 1
+    return text:gsub("(%s+)()(%S+)()",
+        function(sp, st, word, fi)
+            if fi - pos > width then
+                pos = st
+                return "\n" .. string.rep(" ", indent) .. word
+            end
+        end)
 end
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
