@@ -32,32 +32,27 @@
 #define _NET_SYSTEM_TRAY_ORIENTATION_HORZ 0
 #define _NET_SYSTEM_TRAY_ORIENTATION_VERT 1
 
+typedef struct
+{
+    /* systray height */
+    int height;
+} systray_data_t;
+
 static area_t
 systray_geometry(widget_t *widget, int screen)
 {
     area_t geometry;
-    int phys_screen = screen_virttophys(screen), n = 0;
-
-    geometry.height = 0;
-    int width = 0;
+    int phys_screen   = screen_virttophys(screen), n = 0;
+    systray_data_t *d = widget->data;
 
     for(int i = 0; i < globalconf.embedded.len; i++)
         if(globalconf.embedded.tab[i].phys_screen == phys_screen)
-        {
-            xcb_get_geometry_cookie_t geo = xcb_get_geometry(globalconf.connection, globalconf.embedded.tab[i].win);
-            xcb_get_geometry_reply_t *g = xcb_get_geometry_reply(globalconf.connection, geo, NULL);
-
             n++;
-            if(g->height > geometry.height)
-                geometry.height = g->height;
-            if(g->width > width)
-                width = g->width;
-        }
 
     /** \todo use class hints */
-    geometry.width = width * n;
-
-    geometry.x = geometry.y = 0;
+    geometry.width  = d->height * n;
+    geometry.height = d->height;
+    geometry.x      = geometry.y = 0;
 
     return geometry;
 }
@@ -87,6 +82,9 @@ systray_draw(widget_t *widget, draw_context_t *ctx,
         break;
     }
 
+    systray_data_t *d = widget->data;
+    d->height = p->sw.geometry.height;
+
     /* set wibox orientation */
     /** \todo stop setting that property on each redraw */
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
@@ -104,6 +102,9 @@ widget_systray(widget_t *w)
     w->draw = systray_draw;
     w->geometry = systray_geometry;
     w->extents = systray_extents;
+
+    systray_data_t *d = w->data = p_new(systray_data_t, 1);
+    d->height = 0;
 
     return w;
 }
