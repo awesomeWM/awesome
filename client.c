@@ -1546,6 +1546,10 @@ luaA_client_newindex(lua_State *L)
         else
             titlebar_client_attach(c);
         break;
+      case A_TK_SKIP_TASKBAR:
+        c->skiptb = luaA_checkboolean(L, 3);
+        hook_property(client, c, "skip_taskbar");
+        break;
       default:
         return 0;
     }
@@ -1559,7 +1563,7 @@ luaA_client_newindex(lua_State *L)
  * \luastack
  * \lfield id The window X id.
  * \lfield name The client title.
- * \lfield skip_taskbar True if the client does not want to be in taskbar.
+ * \lfield skip_taskbar If true the client won't be shown in the tasklist.
  * \lfield type The window type (desktop, normal, dock, …).
  * \lfield class The client class.
  * \lfield instance The client instance.

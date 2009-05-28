@@ -66,7 +66,8 @@ function new(label, buttons)
             or prop == "maximized_vertical"
             or prop == "icon"
             or prop == "name"
-            or prop == "icon_name" then
+            or prop == "icon_name"
+            or prop == "skip_taskbar" then
             u()
         end
     end)
