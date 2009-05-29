@@ -317,6 +317,21 @@ a_strncat(char *dst, ssize_t n, const char *src, ssize_t l)
     return dlen + a_strncpy(dst + dlen, n - dlen, src, l);
 }
 
+/** Compute a hash for a string.
+ * This is based on 'djb2' algorithm.
+ */
+static inline unsigned long
+a_strhash(const unsigned char *str)
+{
+    unsigned long hash = 5381;
+    int c;
+
+    while((c = *str++))
+        hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
+
+    return hash;
+}
+
 #define fatal(string, ...) _fatal(__LINE__, \
                                   __FUNCTION__, \
                                   string, ## __VA_ARGS__)
