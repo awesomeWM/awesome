@@ -13,6 +13,7 @@ local type = type
 local setmetatable = setmetatable
 local pairs = pairs
 local ipairs = ipairs
+local table = table
 local hooks = require("awful.hooks")
 local common = require("awful.widget.common")
 local util = require("awful.util")
@@ -26,7 +27,13 @@ label = {}
 
 local function taglist_update (screen, w, label, buttons, data, widgets)
     local tags = capi.screen[screen]:tags()
-    common.list_update(w, buttons, label, data, widgets, tags)
+    local showntags = {}
+    for k, t in ipairs(tags) do
+        if not tag.getproperty(t, "hide") then
+            table.insert(showntags, t)
+        end
+    end
+    common.list_update(w, buttons, label, data, widgets, showntags)
 end
 
 --- Get the tag object the given widget appears on.
@@ -62,7 +69,8 @@ function new(screen, label, buttons)
     hooks.tagged.register(uc)
     hooks.property.register(function (c, prop)
         if (type(c) == "client" and prop == "urgent")
-            or (type(c) == "tag" and prop == "icon") then
+            or (type(c) == "tag" and
+               (prop == "icon" or prop == "hide")) then
             u(c.screen)
         end
     end)
