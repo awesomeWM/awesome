@@ -8,6 +8,7 @@
 local util = require("awful.util")
 local pairs = pairs
 local ipairs = ipairs
+local table = table
 local setmetatable = setmetatable
 local capi =
 {
@@ -194,16 +195,22 @@ function viewnone(screen)
     end
 end
 
---- View a tag by its index.
+--- View a tag by its taglist index.
 -- @param i The relative index to see.
 -- @param screen Optional screen number.
 function viewidx(i, screen)
     local tags = capi.screen[screen or capi.mouse.screen]:tags()
+    local showntags = {}
+    for k, t in ipairs(tags) do
+        if not getproperty(t, "hide") then
+            table.insert(showntags, t)
+        end
+    end
     local sel = selected(screen)
     viewnone(screen)
-    for k, t in ipairs(tags) do
+    for k, t in ipairs(showntags) do
         if t == sel then
-            tags[util.cycle(#tags, k + i)].selected = true
+            showntags[util.cycle(#showntags, k + i)].selected = true
         end
     end
 end
