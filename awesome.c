@@ -513,7 +513,8 @@ main(int argc, char **argv)
     spawn_init();
 
     /* Parse and run configuration file */
-    luaA_parserc(&xdg, confpath, true);
+    if (!luaA_parserc(&xdg, confpath, true))
+        fatal("couldn't find any rc file");
 
     xdgWipeHandle(&xdg);
 

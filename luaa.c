@@ -835,7 +835,7 @@ luaA_parserc(xdgHandle* xdg, const char *confpatharg, bool run)
     char *tmp = confpath;
 
     /* confpath is "string1\0string2\0string3\0\0" */
-    do
+    while(*tmp)
     {
         if(luaA_loadrc(tmp, run))
         {
@@ -845,7 +845,7 @@ luaA_parserc(xdgHandle* xdg, const char *confpatharg, bool run)
         else if(!run)
             goto bailout;
         tmp += a_strlen(tmp) + 1;
-    } while(*tmp != 0);
+    }
 
 bailout:
 
