@@ -23,8 +23,11 @@
 #ifndef AWESOME_COMMON_ARRAY_H
 #define AWESOME_COMMON_ARRAY_H
 
+#include <stdlib.h>
+
 #include "common/util.h"
 
+/** Common array type */
 #define ARRAY_TYPE(type_t, pfx)                                             \
     typedef struct pfx##_array_t {                                          \
         type_t *tab;                                                        \
@@ -40,7 +43,8 @@
             (var = &(array).tab[__foreach_index_##var]);                    \
             ++__foreach_index_##var)
 
-#define ARRAY_FUNCS(type_t, pfx, dtor)                                      \
+/** Common array functions */
+#define ARRAY_COMMON_FUNCS(type_t, pfx, dtor)                               \
     static inline pfx##_array_t * pfx##_array_new(void) {                   \
         return p_new(pfx##_array_t, 1);                                     \
     }                                                                       \
@@ -89,7 +93,11 @@
     static inline type_t pfx##_array_remove(pfx##_array_t *arr, type_t *e)  \
     {                                                                       \
         return pfx##_array_take(arr, pfx##_array_indexof(arr, e));          \
-    }                                                                       \
+    }
+
+/** Non-ordered array functions */
+#define ARRAY_FUNCS(type_t, pfx, dtor)                                      \
+    ARRAY_COMMON_FUNCS(type_t, pfx, dtor)                                   \
     static inline void                                                      \
     pfx##_array_push(pfx##_array_t *arr, type_t e)                          \
     {                                                                       \
@@ -97,11 +105,45 @@
     }                                                                       \
     static inline void pfx##_array_append(pfx##_array_t *arr, type_t e) {   \
         pfx##_array_splice(arr, arr->len, 0, &e, 1);                        \
+    }                                                                       \
+
+/** Binary ordered array functions */
+#define BARRAY_FUNCS(type_t, pfx, dtor, cmp)                                \
+    ARRAY_COMMON_FUNCS(type_t, pfx, dtor)                                   \
+    static inline void                                                      \
+    pfx##_array_insert(pfx##_array_t *arr, type_t e)                        \
+    {                                                                       \
+        int l = 0, r = arr->len;                                            \
+        while(l < r)                                                        \
+        {                                                                   \
+            int i = (r + l) / 2;                                            \
+            switch(cmp(&e, &arr->tab[i]))                                   \
+            {                                                               \
+              case -1:                                                      \
+                r = i;                                                      \
+                break;                                                      \
+              case 0:                                                       \
+                return;                                                     \
+              case 1:                                                       \
+                l = i + 1;                                                  \
+                break;                                                      \
+            }                                                               \
+        }                                                                   \
+        pfx##_array_splice(arr, r, 0, &e, 1);                               \
+    }                                                                       \
+    static inline type_t *                                                  \
+    pfx##_array_lookup(pfx##_array_t *arr, type_t *e)                       \
+    {                                                                       \
+        return bsearch(e, arr->tab, arr->len, sizeof(type_t), cmp);         \
     }
 
 #define DO_ARRAY(type_t, pfx, dtor)                                         \
     ARRAY_TYPE(type_t, pfx) \
     ARRAY_FUNCS(type_t, pfx, dtor)
+
+#define DO_BARRAY(type_t, pfx, dtor, cmp)                                   \
+    ARRAY_TYPE(type_t, pfx) \
+    BARRAY_FUNCS(type_t, pfx, dtor, cmp)
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
