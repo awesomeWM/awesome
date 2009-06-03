@@ -95,7 +95,6 @@ typedef struct
     uint16_t width;
     uint16_t height;
     int phys_screen;
-    uint8_t depth;
     cairo_t *cr;
     cairo_surface_t *surface;
     PangoLayout *layout;

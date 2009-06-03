@@ -204,7 +204,6 @@ draw_context_init(draw_context_t *d, int phys_screen,
     d->phys_screen = phys_screen;
     d->width = width;
     d->height = height;
-    d->depth = s->root_depth;
     d->visual = draw_screen_default_visual(s);
     d->pixmap = px;
     d->surface = cairo_xcb_surface_create(globalconf.connection, px, d->visual, width, height);
