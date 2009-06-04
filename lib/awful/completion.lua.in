@@ -148,11 +148,6 @@ function shell(command, cur_pos, ncomp, shell)
     return str, cur_pos
 end
 
-function bash(...)
-    util.deprecate("awful.completion.shell")
-    return shell(...)
-end
-
 --- Run a generic completion.
 -- For this function to run properly the awful.completion.keyword table should
 -- be fed up with all keywords. The completion is run against these keywords.
