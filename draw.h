@@ -77,8 +77,6 @@ struct area_t
     uint16_t height;
 };
 
-DO_ARRAY(area_t, area, DO_NOTHING)
-
 #define AREA_LEFT(a)    ((a).x)
 #define AREA_TOP(a)     ((a).y)
 #define AREA_RIGHT(a)   ((a).x + (a).width)
