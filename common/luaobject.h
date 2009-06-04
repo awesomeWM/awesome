@@ -145,6 +145,10 @@ void luaA_object_add_signal(lua_State *, int, const char *, int);
 void luaA_object_remove_signal(lua_State *, int, const char *, int);
 void luaA_object_emit_signal(lua_State *, int, const char *, int);
 
+int luaA_object_add_signal_simple(lua_State *);
+int luaA_object_remove_signal_simple(lua_State *);
+int luaA_object_emit_signal_simple(lua_State *);
+
 #define LUA_OBJECT_HEADER \
         signal_array_t signals;
 

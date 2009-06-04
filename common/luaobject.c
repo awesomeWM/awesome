@@ -198,4 +198,25 @@ luaA_object_emit_signal(lua_State *L, int oud,
     lua_pop(L, nargs);
 }
 
+int
+luaA_object_add_signal_simple(lua_State *L)
+{
+    luaA_object_add_signal(L, 1, luaL_checkstring(L, 2), 3);
+    return 0;
+}
+
+int
+luaA_object_remove_signal_simple(lua_State *L)
+{
+    luaA_object_remove_signal(L, 1, luaL_checkstring(L, 2), 3);
+    return 0;
+}
+
+int
+luaA_object_emit_signal_simple(lua_State *L)
+{
+    luaA_object_emit_signal(L, 1, luaL_checkstring(L, 2), lua_gettop(L) - 2);
+    return 0;
+}
+
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
