@@ -247,14 +247,21 @@ function new(arg)
     -- Empty position and align in arg so we are passing deprecation warning
     arg.position = nil
 
+    -- Set default size
+    if position == "left" or position == "right" then
+        arg.width = arg.width or capi.awesome.font_height * 1.5
+        arg.height = arg.height or 100
+    else
+        arg.width = arg.width or 100
+        arg.height = arg.height or capi.awesome.font_height * 1.5
+    end
+
     local w = capi.wibox(arg)
 
     if position == "left" then
         w.orientation = "north"
-        w:geometry({ width = capi.awesome.font_height * 1.5 })
     elseif position == "right" then
         w.orientation = "south"
-        w:geometry({ width = capi.awesome.font_height * 1.5 })
     end
 
     w.screen = arg.screen or 1
