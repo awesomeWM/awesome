@@ -759,6 +759,10 @@ client_setminimized(client_t *c, bool s)
         client_need_arrange(c);
         c->isminimized = s;
         client_need_arrange(c);
+        if(s)
+            window_state_set(c->win, XCB_WM_STATE_ICONIC);
+        else
+            window_state_set(c->win, XCB_WM_STATE_NORMAL);
         ewmh_client_update_hints(c);
         /* execute hook */
         hook_property(client, c, "minimized");
