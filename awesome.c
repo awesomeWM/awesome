@@ -236,7 +236,7 @@ xerrorstart(void * data __attribute__ ((unused)),
 }
 
 static void
-signal_fatal(EV_P_ ev_signal *w, int revents)
+signal_fatal(int signum)
 {
     buffer_t buf;
     backtrace_get(&buf);
@@ -408,13 +408,16 @@ main(int argc, char **argv)
     ev_signal_init(&sigint, exit_on_signal, SIGINT);
     ev_signal_init(&sigterm, exit_on_signal, SIGTERM);
     ev_signal_init(&sighup, restart_on_signal, SIGHUP);
-    ev_signal_init(&sighup, signal_fatal, SIGSEGV);
     ev_signal_start(globalconf.loop, &sigint);
     ev_signal_start(globalconf.loop, &sigterm);
     ev_signal_start(globalconf.loop, &sighup);
     ev_unref(globalconf.loop);
     ev_unref(globalconf.loop);
     ev_unref(globalconf.loop);
+
+    struct sigaction sa = { .sa_handler = signal_fatal, .sa_flags = 0 };
+    sigemptyset(&sa.sa_mask);
+    sigaction(SIGSEGV, &sa, 0);
 
     /* X stuff */
     globalconf.connection = xcb_connect(NULL, &globalconf.default_screen);
