@@ -115,6 +115,13 @@ function set_position(wibox, position, screen)
         wingeom.y = area.y
     end
 
+    for _, wprop in ipairs(wiboxes) do
+        if wprop.wibox == wibox then
+            wprop.position = position
+            break
+        end
+    end
+
     wibox:geometry(wingeom)
 end
 
@@ -145,6 +152,10 @@ function attach(wibox, position)
             -- We could break here, but well, let's check if there is no other
             -- table with their wiboxes been garbage collected.
         end
+    end
+
+    if position ~= "top" and position ~= "bottom" and position ~= "right" and position ~= "left" then
+        position = "floating"
     end
 
     if not wibox_prop_table then
