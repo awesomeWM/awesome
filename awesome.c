@@ -46,6 +46,7 @@
 #include "common/atoms.h"
 #include "common/xcursor.h"
 #include "common/xutil.h"
+#include "common/backtrace.h"
 
 awesome_t globalconf;
 
@@ -234,6 +235,14 @@ xerrorstart(void * data __attribute__ ((unused)),
     fatal("another window manager is already running");
 }
 
+static void
+signal_fatal(EV_P_ ev_signal *w, int revents)
+{
+    buffer_t buf;
+    backtrace_get(&buf);
+    fatal("dumping backtrace\n%s", buf.s);
+}
+
 /** Function to exit on some signals.
  * \param sig the signal received, unused
  */
@@ -399,6 +408,7 @@ main(int argc, char **argv)
     ev_signal_init(&sigint, exit_on_signal, SIGINT);
     ev_signal_init(&sigterm, exit_on_signal, SIGTERM);
     ev_signal_init(&sighup, restart_on_signal, SIGHUP);
+    ev_signal_init(&sighup, signal_fatal, SIGSEGV);
     ev_signal_start(globalconf.loop, &sigint);
     ev_signal_start(globalconf.loop, &sigterm);
     ev_signal_start(globalconf.loop, &sighup);
