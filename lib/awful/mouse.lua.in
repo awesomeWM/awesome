@@ -284,7 +284,7 @@ function wibox.move(w)
 
     capi.mousegrabber.run(function (mouse)
         local button_down = false
-        if w.position == "floating" then
+        if awibox.get_position(w) == "floating" then
             w:geometry({
                 x = capi.mouse.coords()["x"] + offset["x"],
                 y = capi.mouse.coords()["y"] + offset["y"],
@@ -293,13 +293,13 @@ function wibox.move(w)
             local wa = awibox.get_workarea(capi.mouse.screen)
 
             if capi.mouse.coords()["y"] > wa.y + wa.height - 10 then
-                w.position = "bottom"
+                awibox.set_position(w, "bottom", w.screen)
             elseif capi.mouse.coords()["y"] < wa.y + 10 then
-                w.position = "top"
+                awibox.set_position(w, "top", w.screen)
             elseif capi.mouse.coords()["x"] > wa.x + wa.width - 10 then
-                w.position = "right"
+                awibox.set_position(w, "right", w.screen)
             elseif capi.mouse.coords()["x"] < wa.x + 10 then
-                w.position = "left"
+                awibox.set_position(w, "left", w.screen)
             end
             w.screen = capi.mouse.screen
         end
