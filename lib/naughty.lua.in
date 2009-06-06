@@ -261,7 +261,7 @@ function notify(args)
 
     -- beautiful
     local beautiful = bt.get()
-    local font = args.font or preset.font or beautiful.font or awesome.font
+    local font = args.font or preset.font or beautiful.font or capi.awesome.font
     local fg = args.fg or preset.fg or beautiful.fg_normal or '#ffffff'
     local bg = args.bg or preset.bg or beautiful.bg_normal or '#535d6c'
     local border_color = args.border_color or preset.border_color or beautiful.bg_focus or '#535d6c'

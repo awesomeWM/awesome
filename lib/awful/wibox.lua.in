@@ -242,7 +242,6 @@ end
 -- If not specified, 1 is assumed.
 -- @return The wibox created.
 function new(arg)
-    local screen = screen or 1
     local arg = arg or {}
     local position = arg.position or "top"
     -- Empty position and align in arg so we are passing deprecation warning
