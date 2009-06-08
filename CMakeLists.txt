@@ -74,6 +74,7 @@ set(AWE_SRCS
     ${SOURCE_DIR}/common/xcursor.c
     ${SOURCE_DIR}/common/backtrace.c
     ${SOURCE_DIR}/common/luaobject.c
+    ${SOURCE_DIR}/common/luaclass.c
     ${SOURCE_DIR}/widgets/graph.c
     ${SOURCE_DIR}/widgets/progressbar.c
     ${SOURCE_DIR}/widgets/textbox.c
