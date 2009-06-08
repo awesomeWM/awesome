@@ -50,9 +50,15 @@ local data = setmetatable({}, { __mode = "k" })
 -- @param graph The graph.
 -- @param color The graph background color.
 
+--- Set the maximum value the graph should handle.
+-- @name set_max_value
+-- @class function
+-- @param graph The graph.
+-- @param value The value.
+
 local properties = { "width", "height", "border_color",
                      "gradient_colors", "gradient_angle", "color",
-                     "background_color" }
+                     "background_color", "max_value" }
 
 local function update(graph)
     -- Create new empty image
@@ -67,6 +73,7 @@ local function update(graph)
     end
 
     local values = data[graph].values
+    local max_value = data[graph].max_value
 
     -- Draw background
     -- Draw full gradient
@@ -87,15 +94,14 @@ local function update(graph)
     if #values ~= 0 then
         -- Draw reverse
         for i = 0, #values - 1 do
-            if values[#values - i] > 0 then
-                -- Do not draw a pixel if the value is 1
-                if values[#values - i] ~= 1 then
-                    img:draw_line(data[graph].width - border_width - i - 1,
-                                  border_width + ((data[graph].height - 2 * border_width) * (1 - values[#values - i])),
-                                  data[graph].width - border_width - i - 1,
-                                  border_width,
-                                  data[graph].background_color or "#000000aa")
-                end
+            local value = values[#values - i]
+            if value > 0 then
+                value = value / max_value
+                img:draw_line(data[graph].width - border_width - i - 1,
+                              border_width + ((data[graph].height - 2 * border_width) * (1 - value)),
+                              data[graph].width - border_width - i - 1,
+                              border_width,
+                              data[graph].background_color or "#000000aa")
             end
         end
     end
@@ -121,7 +127,8 @@ local function add_value(graph, value)
     if not graph then return end
 
     local value = value or 0
-    value = math.min(1, math.max(0, value))
+    local max_value = data[graph].max_value
+    value = math.min(max_value, math.max(0, value))
 
     table.insert(data[graph].values, value)
 
@@ -183,7 +190,7 @@ function new(args)
     local graph = {}
     graph.widget = capi.widget(args)
 
-    data[graph] = { width = width, height = height, values = {} }
+    data[graph] = { width = width, height = height, values = {}, max_value = 1 }
 
     -- Set methods
     graph.add_value = add_value
