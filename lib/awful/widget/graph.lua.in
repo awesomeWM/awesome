@@ -51,14 +51,22 @@ local data = setmetatable({}, { __mode = "k" })
 -- @param color The graph background color.
 
 --- Set the maximum value the graph should handle.
+-- If "scale" is also set, the graph never scales up below this value, but it
+-- automatically scales down to make all data fit.
 -- @name set_max_value
 -- @class function
 -- @param graph The graph.
 -- @param value The value.
 
+--- Set the graph to automatically scale its values. Default is false.
+-- @name set_scale
+-- @class function
+-- @param graph The graph.
+-- @param scale A boolean value
+
 local properties = { "width", "height", "border_color",
                      "gradient_colors", "gradient_angle", "color",
-                     "background_color", "max_value" }
+                     "background_color", "max_value", "scale" }
 
 local function update(graph)
     -- Create new empty image
@@ -74,6 +82,14 @@ local function update(graph)
 
     local values = data[graph].values
     local max_value = data[graph].max_value
+
+    if data[graph].scale then
+        for _, v in ipairs(values) do
+            if v > max_value then
+                max_value = v
+            end
+        end
+    end
 
     -- Draw background
     -- Draw full gradient
@@ -128,7 +144,10 @@ local function add_value(graph, value)
 
     local value = value or 0
     local max_value = data[graph].max_value
-    value = math.min(max_value, math.max(0, value))
+    value = math.max(0, value)
+    if not data[graph].scale then
+        value = math.min(max_value, value)
+    end
 
     table.insert(data[graph].values, value)
 
