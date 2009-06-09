@@ -144,6 +144,7 @@ luaA_button_newindex(lua_State *L)
 
 const struct luaL_reg awesome_button_methods[] =
 {
+    LUA_CLASS_METHODS(button)
     { "__call", luaA_button_new },
     { NULL, NULL }
 };

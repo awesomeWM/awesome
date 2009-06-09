@@ -1146,6 +1146,7 @@ luaA_key_newindex(lua_State *L)
 
 const struct luaL_reg awesome_key_methods[] =
 {
+    LUA_CLASS_METHODS(key)
     { "__call", luaA_key_new },
     { NULL, NULL }
 };

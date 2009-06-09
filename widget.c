@@ -552,6 +552,7 @@ luaA_widget_extents(lua_State *L)
 
 const struct luaL_reg awesome_widget_methods[] =
 {
+    LUA_CLASS_METHODS(widget)
     { "__call", luaA_widget_new },
     { NULL, NULL }
 };

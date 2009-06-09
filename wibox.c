@@ -1201,6 +1201,7 @@ luaA_wibox_newindex(lua_State *L)
 
 const struct luaL_reg awesome_wibox_methods[] =
 {
+    LUA_CLASS_METHODS(wibox)
     { "__call", luaA_wibox_new },
     { NULL, NULL }
 };

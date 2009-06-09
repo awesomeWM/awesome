@@ -770,6 +770,7 @@ luaA_image_index(lua_State *L)
 
 const struct luaL_reg awesome_image_methods[] =
 {
+    LUA_CLASS_METHODS(image)
     { "__call", luaA_image_new },
     { "argb32", luaA_image_argb32_new },
     { NULL, NULL }

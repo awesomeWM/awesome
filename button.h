@@ -38,7 +38,8 @@ struct button_t
     void *release;
 };
 
-LUA_OBJECT_FUNCS(button_t, button, "button")
+lua_class_t button_class;
+LUA_OBJECT_FUNCS(button_class, button_t, button, "button")
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

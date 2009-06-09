@@ -47,7 +47,8 @@ void tag_append_to_screen(screen_t *);
 void tag_unref_simplified(tag_t **);
 
 ARRAY_FUNCS(tag_t *, tag, tag_unref_simplified)
-LUA_OBJECT_FUNCS(tag_t, tag, "tag")
+lua_class_t tag_class;
+LUA_OBJECT_FUNCS(tag_class, tag_t, tag, "tag")
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

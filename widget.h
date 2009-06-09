@@ -56,7 +56,8 @@ struct widget_t
     bool isvisible;
 };
 
-LUA_OBJECT_FUNCS(widget_t, widget, "widget");
+lua_class_t widget_class;
+LUA_OBJECT_FUNCS(widget_class, widget_t, widget, "widget");
 
 struct widget_node_t
 {

@@ -1956,6 +1956,7 @@ luaA_client_module_newindex(lua_State *L)
 
 const struct luaL_reg awesome_client_methods[] =
 {
+    LUA_CLASS_METHODS(client)
     { "get", luaA_client_get },
     { "__index", luaA_client_module_index },
     { "__newindex", luaA_client_module_newindex },

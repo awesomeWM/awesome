@@ -405,6 +405,7 @@ luaA_tag_newindex(lua_State *L)
 
 const struct luaL_reg awesome_tag_methods[] =
 {
+    LUA_CLASS_METHODS(tag)
     { "__call", luaA_tag_new },
     { NULL, NULL }
 };

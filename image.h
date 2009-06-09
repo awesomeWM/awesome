@@ -26,6 +26,7 @@
 
 #include "common/util.h"
 #include "common/luaobject.h"
+#include "common/luaclass.h"
 
 typedef struct
 {
@@ -39,7 +40,8 @@ typedef struct
     bool isupdated;
 } image_t;
 
-LUA_OBJECT_FUNCS(image_t, image, "image")
+lua_class_t image_class;
+LUA_OBJECT_FUNCS(image_class, image_t, image, "image")
 
 int image_new_from_argb32(int, int, uint32_t *);
 uint8_t * image_getdata(image_t *);

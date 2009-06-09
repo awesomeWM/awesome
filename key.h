@@ -39,7 +39,8 @@ typedef struct keyb_t
     void *release;
 } keyb_t;
 
-LUA_OBJECT_FUNCS(keyb_t, key, "key")
+lua_class_t key_class;
+LUA_OBJECT_FUNCS(key_class, keyb_t, key, "key")
 
 bool key_press_lookup_string(xcb_keysym_t, char *, ssize_t);
 xcb_keysym_t key_getkeysym(xcb_keycode_t, uint16_t);

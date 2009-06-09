@@ -22,7 +22,7 @@
 #ifndef AWESOME_COMMON_LUAOBJECT
 #define AWESOME_COMMON_LUAOBJECT
 
-#include "common/signal.h"
+#include "common/luaclass.h"
 
 static inline int
 luaA_settype(lua_State *L, const char *type)
@@ -160,7 +160,8 @@ typedef struct
     LUA_OBJECT_HEADER
 } lua_object_t;
 
-#define LUA_OBJECT_FUNCS(type, prefix, lua_type)                               \
+#define LUA_OBJECT_FUNCS(lua_class, type, prefix, lua_type)                    \
+    LUA_CLASS_FUNCS(prefix, lua_class)                                         \
     static inline type *                                                       \
     prefix##_new(lua_State *L)                                                 \
     {                                                                          \
@@ -171,6 +172,8 @@ typedef struct
         lua_newtable(L);                                                       \
         lua_setmetatable(L, -2);                                               \
         lua_setfenv(L, -2);                                                    \
+        lua_pushvalue(L, -1);                                                  \
+        luaA_class_emit_signal(L, &(lua_class), "new", 1);                     \
         return p;                                                              \
     }                                                                          \
                                                                                \

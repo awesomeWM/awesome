@@ -24,6 +24,7 @@
 
 #include "mouse.h"
 #include "stack.h"
+#include "common/luaclass.h"
 
 #define CLIENT_SELECT_INPUT_EVENT_MASK (XCB_EVENT_MASK_STRUCTURE_NOTIFY \
                                         | XCB_EVENT_MASK_PROPERTY_CHANGE \
@@ -154,7 +155,11 @@ struct client_t
 client_t * luaA_client_checkudata(lua_State *, int);
 
 ARRAY_FUNCS(client_t *, client, DO_NOTHING)
-LUA_OBJECT_FUNCS(client_t, client, "client")
+
+/** Client class */
+lua_class_t client_class;
+
+LUA_OBJECT_FUNCS(client_class, client_t, client, "client")
 
 #define client_need_reban(c) \
     do { \
