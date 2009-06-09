@@ -279,7 +279,12 @@ luaA_spawn(lua_State *L)
     if(use_sn)
     {
         char *cmdname, *space;
-        if((space = strchr(cmd, ' ')))
+        const char *first_no_space_char = cmd;
+        /* Look for the first char which is not space */
+        while(*first_no_space_char && *first_no_space_char == ' ')
+            first_no_space_char++;
+        /* Look for space in the string to get the command name. */
+        if((space = strchr(first_no_space_char, ' ')))
             cmdname = a_strndup(cmd, space - cmd);
         else
             cmdname = a_strdup(cmd);
