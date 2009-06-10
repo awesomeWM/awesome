@@ -149,7 +149,10 @@ tag_client(client_t *c)
 
     /* don't tag twice */
     if(is_client_tagged(c, t))
+    {
+        tag_unref(globalconf.L, t);
         return;
+    }
 
     client_array_append(&t->clients, c);
     ewmh_client_update_desktop(c);
