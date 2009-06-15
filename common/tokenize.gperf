@@ -1,7 +1,7 @@
-Any
 above
 align
 alpha
+Any
 bar_data_add
 bar_properties_set
 below
@@ -20,9 +20,9 @@ center
 char
 class
 client
-Control
 conffile
 content
+Control
 Ctrl
 cursor
 east
@@ -104,9 +104,9 @@ transient_for
 type
 urgent
 valign
-visible
 version
 vertical
+visible
 widgets
 width
 word
