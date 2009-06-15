@@ -5,6 +5,7 @@
 ---------------------------------------------------------------------------
 
 -- Grab environment we need
+require("awful.dbus")
 local hooks = require("awful.hooks")
 local loadstring = loadstring
 local tostring = tostring
@@ -17,9 +18,8 @@ local type = type
 --- Remote control module for awful
 module("awful.remote")
 
-if hooks.dbus then
-    dbus.request_name("session", "org.naquadah.awesome")
-    hooks.dbus.register("org.naquadah.awesome.Remote", function(data, code)
+if dbus then
+    hooks.dbus.register("org.naquadah.awesome.awful.Remote", function(data, code)
         if data.member == "Eval" then
             local f, e = loadstring(code)
             if f then
