@@ -79,6 +79,7 @@ draw_iso2utf8(const char *iso, size_t len, char **dest, ssize_t *dlen)
     {
         warn("text conversion failed: %s", strerror(errno));
         p_delete(dest);
+        return false;
     }
 
     if(dlen)
@@ -171,6 +172,9 @@ bool
 draw_text_context_init(draw_text_context_t *data, const char *str, ssize_t slen)
 {
     GError *error = NULL;
+
+    if(!str)
+        return false;
 
     if(!pango_parse_markup(str, slen, 0, &data->attr_list, &data->text, NULL, &error))
     {
