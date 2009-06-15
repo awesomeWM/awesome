@@ -246,23 +246,7 @@ static int
 luaAe_type(lua_State *L)
 {
     luaL_checkany(L, 1);
-#define CHECK_TYPE(type) \
-    do { \
-        if(luaA_toudata(L, 1, #type)) \
-        { \
-            lua_pushliteral(L, #type); \
-            return 1; \
-        } \
-    } while(0)
-CHECK_TYPE(wibox);
-CHECK_TYPE(client);
-CHECK_TYPE(image);
-CHECK_TYPE(key);
-CHECK_TYPE(button);
-CHECK_TYPE(tag);
-CHECK_TYPE(widget);
-#undef CHECK_TYPE
-    lua_pushstring(L, luaL_typename(L, 1));
+    lua_pushstring(L, luaA_typename(L, 1));
     return 1;
 }
 

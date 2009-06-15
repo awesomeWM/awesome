@@ -90,27 +90,6 @@ luaA_dumpstack(lua_State *L)
     fprintf(stderr, "------- Lua stack dump end ------\n");
 }
 
-/** Convert a object to a udata if possible.
- * \param L The Lua VM state.
- * \param ud The index.
- * \param tname The type name.
- * \return A pointer to the object, NULL otherwise.
- */
-static inline void *
-luaA_toudata(lua_State *L, int ud, const char *tname)
-{
-    void *p = lua_touserdata(L, ud);
-    if(p) /* value is a userdata? */
-        if(lua_getmetatable(L, ud)) /* does it have a metatable? */
-        {
-            lua_getfield(L, LUA_REGISTRYINDEX, tname); /* get correct metatable */
-            if(!lua_rawequal(L, -1, -2)) /* does it have the correct mt? */
-                p = NULL;
-            lua_pop(L, 2); /* remove both metatables */
-        }
-    return p;
-}
-
 static inline bool
 luaA_checkboolean(lua_State *L, int n)
 {

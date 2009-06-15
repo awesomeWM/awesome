@@ -32,6 +32,43 @@ DO_ARRAY(lua_class_id_t, lua_class_id, DO_NOTHING)
 
 static lua_class_id_array_t luaA_classes;
 
+/* This has to be initialized to the highest natural type of Lua */
+#define LUA_HIGHEST_TYPE LUA_TTHREAD
+
+/** Enhanced version of lua_type that recognizes setup Lua classes.
+ * \param L The Lua VM state.
+ * \param idx The index of the object on the stack.
+ */
+int
+luaA_type(lua_State *L, int idx)
+{
+    int type = lua_type(L, idx);
+
+    if(type == LUA_TUSERDATA)
+        foreach(class, luaA_classes)
+            if(luaA_toudata(L, idx, class->class->name))
+                return class->id;
+
+    return type;
+}
+
+/** Enhanced version of lua_typename that recognizes setup Lua classes.
+ * \param L The Lua VM state.
+ * \param idx The index of the object on the stack.
+ */
+const char *
+luaA_typename(lua_State *L, int idx)
+{
+    int type = luaA_type(L, idx);
+
+    if(type > LUA_HIGHEST_TYPE)
+        foreach(class, luaA_classes)
+            if(class->id == type)
+                return class->class->name;
+
+    return lua_typename(L, type);
+}
+
 void
 luaA_openlib(lua_State *L, const char *name,
              const struct luaL_reg methods[],
@@ -55,7 +92,7 @@ luaA_class_setup(lua_State *L, lua_class_t *class,
                  const struct luaL_reg methods[],
                  const struct luaL_reg meta[])
 {
-    static int class_type_counter = LUA_TTHREAD + 1;
+    static int class_type_counter = LUA_HIGHEST_TYPE;
 
     luaA_openlib(L, name, methods, meta);
 

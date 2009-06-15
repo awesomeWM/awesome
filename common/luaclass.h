@@ -46,6 +46,9 @@ typedef struct
     lua_class_allocator_t allocator;
 } lua_class_t;
 
+int luaA_type(lua_State *, int);
+const char * luaA_typename(lua_State *, int);
+
 void luaA_class_add_signal(lua_State *, lua_class_t *, const char *, int);
 void luaA_class_remove_signal(lua_State *, lua_class_t *, const char *, int);
 void luaA_class_emit_signal(lua_State *, lua_class_t *, const char *, int);
