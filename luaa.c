@@ -108,22 +108,6 @@ luaA_restart(lua_State *L __attribute__ ((unused)))
     return 0;
 }
 
-static void
-luaA_openlib(lua_State *L, const char *name,
-             const struct luaL_reg methods[],
-             const struct luaL_reg meta[])
-{
-    luaL_newmetatable(L, name);                                        /* 1 */
-    lua_pushvalue(L, -1);           /* dup metatable                      2 */
-    lua_setfield(L, -2, "__index"); /* metatable.__index = metatable      1 */
-
-    luaL_register(L, NULL, meta);                                      /* 1 */
-    luaL_register(L, name, methods);                                   /* 2 */
-    lua_pushvalue(L, -1);           /* dup self as metatable              3 */
-    lua_setmetatable(L, -2);        /* set self as metatable              2 */
-    lua_pop(L, 2);
-}
-
 /** UTF-8 aware string length computing.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
@@ -709,25 +693,32 @@ luaA_init(xdgHandle* xdg)
     luaA_openlib(L, "mouse", awesome_mouse_methods, awesome_mouse_meta);
 
     /* Export button */
-    luaA_openlib(L, "button", awesome_button_methods, awesome_button_meta);
+    luaA_class_setup(L, &button_class, "button", (lua_class_allocator_t) button_new,
+                     awesome_button_methods, awesome_button_meta);
 
     /* Export image */
-    luaA_openlib(L, "image", awesome_image_methods, awesome_image_meta);
+    luaA_class_setup(L, &image_class, "image", (lua_class_allocator_t) image_new,
+                     awesome_image_methods, awesome_image_meta);
 
     /* Export tag */
-    luaA_openlib(L, "tag", awesome_tag_methods, awesome_tag_meta);
+    luaA_class_setup(L, &tag_class, "tag", (lua_class_allocator_t) tag_new,
+                     awesome_tag_methods, awesome_tag_meta);
 
     /* Export wibox */
-    luaA_openlib(L, "wibox", awesome_wibox_methods, awesome_wibox_meta);
+    luaA_class_setup(L, &wibox_class, "wibox", (lua_class_allocator_t) wibox_new,
+                     awesome_wibox_methods, awesome_wibox_meta);
 
     /* Export widget */
-    luaA_openlib(L, "widget", awesome_widget_methods, awesome_widget_meta);
+    luaA_class_setup(L, &widget_class, "widget", (lua_class_allocator_t) widget_new,
+                     awesome_widget_methods, awesome_widget_meta);
 
     /* Export client */
-    luaA_openlib(L, "client", awesome_client_methods, awesome_client_meta);
+    luaA_class_setup(L, &client_class, "client", (lua_class_allocator_t) client_new,
+                     awesome_client_methods, awesome_client_meta);
 
     /* Export keys */
-    luaA_openlib(L, "key", awesome_key_methods, awesome_key_meta);
+    luaA_class_setup(L, &key_class, "key", (lua_class_allocator_t) key_new,
+                     awesome_key_methods, awesome_key_meta);
 
     /* init hooks */
     globalconf.hooks.manage = LUA_REFNIL;

@@ -149,17 +149,6 @@ int luaA_object_add_signal_simple(lua_State *);
 int luaA_object_remove_signal_simple(lua_State *);
 int luaA_object_emit_signal_simple(lua_State *);
 
-#define LUA_OBJECT_HEADER \
-        signal_array_t signals;
-
-/** Generic type for all objects.
- * All Lua objects can be casted to this type.
- */
-typedef struct
-{
-    LUA_OBJECT_HEADER
-} lua_object_t;
-
 #define LUA_OBJECT_FUNCS(lua_class, type, prefix, lua_type)                    \
     LUA_CLASS_FUNCS(prefix, lua_class)                                         \
     static inline type *                                                       \

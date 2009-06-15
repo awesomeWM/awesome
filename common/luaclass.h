@@ -24,14 +24,35 @@
 
 #include "common/signal.h"
 
+#define LUA_OBJECT_HEADER \
+        signal_array_t signals;
+
+/** Generic type for all objects.
+ * All Lua objects can be casted to this type.
+ */
 typedef struct
 {
+    LUA_OBJECT_HEADER
+} lua_object_t;
+
+typedef lua_object_t *(*lua_class_allocator_t)(lua_State *);
+
+typedef struct
+{
+    /** Class name */
+    const char *name;
     signal_array_t signals;
+    /** Allocator for creating new objects of that class */
+    lua_class_allocator_t allocator;
 } lua_class_t;
 
 void luaA_class_add_signal(lua_State *, lua_class_t *, const char *, int);
 void luaA_class_remove_signal(lua_State *, lua_class_t *, const char *, int);
 void luaA_class_emit_signal(lua_State *, lua_class_t *, const char *, int);
+
+void luaA_openlib(lua_State *, const char *, const struct luaL_reg[], const struct luaL_reg[]);
+void luaA_class_setup(lua_State *, lua_class_t *, const char *, lua_class_allocator_t,
+                      const struct luaL_reg[], const struct luaL_reg[]);
 
 #define LUA_CLASS_FUNCS(prefix, lua_class) \
     static inline int                                                          \

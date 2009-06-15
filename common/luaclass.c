@@ -22,6 +22,53 @@
 #include "common/luaclass.h"
 #include "common/luaobject.h"
 
+typedef struct
+{
+    int id;
+    lua_class_t *class;
+} lua_class_id_t;
+
+DO_ARRAY(lua_class_id_t, lua_class_id, DO_NOTHING)
+
+static lua_class_id_array_t luaA_classes;
+
+void
+luaA_openlib(lua_State *L, const char *name,
+             const struct luaL_reg methods[],
+             const struct luaL_reg meta[])
+{
+    luaL_newmetatable(L, name);                                        /* 1 */
+    lua_pushvalue(L, -1);           /* dup metatable                      2 */
+    lua_setfield(L, -2, "__index"); /* metatable.__index = metatable      1 */
+
+    luaL_register(L, NULL, meta);                                      /* 1 */
+    luaL_register(L, name, methods);                                   /* 2 */
+    lua_pushvalue(L, -1);           /* dup self as metatable              3 */
+    lua_setmetatable(L, -2);        /* set self as metatable              2 */
+    lua_pop(L, 2);
+}
+
+void
+luaA_class_setup(lua_State *L, lua_class_t *class,
+                 const char *name,
+                 lua_class_allocator_t allocator,
+                 const struct luaL_reg methods[],
+                 const struct luaL_reg meta[])
+{
+    static int class_type_counter = LUA_TTHREAD + 1;
+
+    luaA_openlib(L, name, methods, meta);
+
+    class->allocator = allocator;
+    class->name = name;
+
+    lua_class_id_array_append(&luaA_classes, (lua_class_id_t)
+                              {
+                                  .id = ++class_type_counter,
+                                  .class = class,
+                              });
+}
+
 void
 luaA_class_add_signal(lua_State *L, lua_class_t *lua_class,
                       const char *name, int ud)
