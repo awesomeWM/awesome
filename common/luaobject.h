@@ -38,6 +38,17 @@ luaA_settype(lua_State *L, const char *type)
 
 DO_ARRAY(luaA_ref, luaA_ref, DO_NOTHING)
 
+#define LUA_OBJECT_HEADER \
+        luaA_ref_array_t refs;
+
+/** Generic type for all objects.
+ * All Lua objects can be casted to this type.
+ */
+typedef struct
+{
+    LUA_OBJECT_HEADER
+} lua_object_t;
+
 #define LUA_OBJECT_FUNCS(type, prefix, lua_type)                               \
     static inline type *                                                       \
     prefix##_new(lua_State *L)                                                 \
@@ -81,6 +92,18 @@ DO_ARRAY(luaA_ref, luaA_ref, DO_NOTHING)
             luaA_ref_array_take(&item->refs, 0);                               \
         }                                                                      \
     }
+
+/** Garbage collect a Lua object.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ */
+static inline int
+luaA_object_gc(lua_State *L)
+{
+    lua_object_t *item = lua_touserdata(L, 1);
+    luaA_ref_array_wipe(&item->refs);
+    return 0;
+}
 
 #endif
 
