@@ -31,8 +31,7 @@ typedef void (widget_destructor_t)(widget_t *);
 /** Widget */
 struct widget_t
 {
-    /** Lua references */
-    luaA_ref_array_t refs;
+    LUA_OBJECT_HEADER
     /** Widget type is constructor */
     widget_constructor_t *type;
     /** Widget destructor */

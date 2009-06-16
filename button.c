@@ -40,10 +40,9 @@ static int
 luaA_button_gc(lua_State *L)
 {
     button_t *button = luaL_checkudata(L, 1, "button");
-    luaA_ref_array_wipe(&button->refs);
     luaL_unref(globalconf.L, LUA_REGISTRYINDEX, button->press);
     luaL_unref(globalconf.L, LUA_REGISTRYINDEX, button->release);
-    return 0;
+    return luaA_object_gc(L);
 }
 
 /** Create a new mouse button bindings.

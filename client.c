@@ -51,7 +51,6 @@ static int
 luaA_client_gc(lua_State *L)
 {
     client_t *c = luaL_checkudata(L, 1, "client");
-    luaA_ref_array_wipe(&c->refs);
     button_array_wipe(&c->buttons);
     image_unref(L, c->icon);
     p_delete(&c->class);
@@ -59,7 +58,7 @@ luaA_client_gc(lua_State *L)
     p_delete(&c->instance);
     p_delete(&c->icon_name);
     p_delete(&c->name);
-    return 0;
+    return luaA_object_gc(L);
 }
 
 /** Change the clients urgency flag.

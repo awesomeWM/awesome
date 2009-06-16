@@ -44,13 +44,12 @@ static int
 luaA_widget_gc(lua_State *L)
 {
     widget_t *widget = luaL_checkudata(L, 1, "widget");
-    luaA_ref_array_wipe(&widget->refs);
     if(widget->destructor)
         widget->destructor(widget);
     button_array_wipe(&widget->buttons);
     luaL_unref(globalconf.L, LUA_REGISTRYINDEX, widget->mouse_enter);
     luaL_unref(globalconf.L, LUA_REGISTRYINDEX, widget->mouse_leave);
-    return 0;
+    return luaA_object_gc(L);
 }
 
 /** Delete a widget node structure.

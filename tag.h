@@ -27,8 +27,7 @@
 /** Tag type */
 struct tag
 {
-    /** Lua references count */
-    luaA_ref_array_t refs;
+    LUA_OBJECT_HEADER
     /** Tag name */
     char *name;
     /** Screen */

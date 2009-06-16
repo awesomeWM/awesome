@@ -41,10 +41,9 @@ static int
 luaA_tag_gc(lua_State *L)
 {
     tag_t *tag = luaL_checkudata(L, 1, "tag");
-    luaA_ref_array_wipe(&tag->refs);
     client_array_wipe(&tag->clients);
     p_delete(&tag->name);
-    return 0;
+    return luaA_object_gc(L);
 }
 
 /** View or unview a tag.

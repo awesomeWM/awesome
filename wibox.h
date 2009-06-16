@@ -35,8 +35,7 @@ typedef enum
 /** Wibox type */
 struct wibox_t
 {
-    /** Lua references */
-    luaA_ref_array_t refs;
+    LUA_OBJECT_HEADER
     /** Ontop */
     bool ontop;
     /** Visible */

@@ -27,8 +27,7 @@
 /** Mouse buttons bindings */
 struct button_t
 {
-    /** Lua references */
-    luaA_ref_array_t refs;
+    LUA_OBJECT_HEADER
     /** Key modifiers */
     uint16_t mod;
     /** Mouse button number */

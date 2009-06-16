@@ -29,8 +29,7 @@
 
 typedef struct
 {
-    /** Lua references */
-    luaA_ref_array_t refs;
+    LUA_OBJECT_HEADER
     /** Imlib2 image */
     Imlib_Image image;
     /** Image data */

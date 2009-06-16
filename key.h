@@ -26,8 +26,7 @@
 
 typedef struct keyb_t
 {
-    /** Lua references */
-    luaA_ref_array_t refs;
+    LUA_OBJECT_HEADER
     /** Key modifier */
     uint16_t mod;
     /** Keysym */

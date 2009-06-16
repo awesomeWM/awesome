@@ -28,11 +28,10 @@ static int
 luaA_image_gc(lua_State *L)
 {
     image_t *p = luaL_checkudata(L, 1, "image");
-    luaA_ref_array_wipe(&p->refs);
     imlib_context_set_image(p->image);
     imlib_free_image();
     p_delete(&p->data);
-    return 0;
+    return luaA_object_gc(L);
 }
 
 static const char *
