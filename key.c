@@ -1066,7 +1066,7 @@ luaA_key_array_set(lua_State *L, int idx, key_array_t *keys)
 
     lua_pushnil(L);
     while(lua_next(L, idx))
-        key_array_append(keys, key_ref(L));
+        key_array_append(keys, key_ref(L, -1));
 }
 
 /** Push an array of key as an Lua table onto the stack.

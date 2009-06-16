@@ -355,7 +355,7 @@ property_handle_net_wm_icon(void *data,
     {
         image_unref(globalconf.L, c->icon);
         if(ewmh_window_icon_from_reply(reply))
-            c->icon = image_ref(globalconf.L);
+            c->icon = image_ref(globalconf.L, -1);
         /* execute hook */
         hook_property(client, c, "icon");
     }

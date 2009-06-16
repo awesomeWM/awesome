@@ -223,7 +223,7 @@ void
 titlebar_client_attach(client_t *c)
 {
     /* check if we can register the object */
-    wibox_t *t = wibox_ref(globalconf.L);
+    wibox_t *t = wibox_ref(globalconf.L, -1);
 
     titlebar_client_detach(c);
 

@@ -123,7 +123,7 @@ luaA_table2widgets(lua_State *L, widget_node_array_t *widgets)
         {
             widget_node_t w;
             p_clear(&w, 1);
-            w.widget = widget_ref(L);
+            w.widget = widget_ref(L, -1);
             widget_node_array_append(widgets, w);
         }
         else

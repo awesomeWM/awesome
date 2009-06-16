@@ -90,7 +90,7 @@ tag_append_to_screen(screen_t *s)
     int phys_screen = screen_virttophys(screen_index);
 
     tag->screen = s;
-    tag_array_append(&s->tags, tag_ref(globalconf.L));
+    tag_array_append(&s->tags, tag_ref(globalconf.L, -1));
     ewmh_update_net_numbers_of_desktop(phys_screen);
     ewmh_update_net_desktop_names(phys_screen);
     ewmh_update_workarea(phys_screen);
@@ -145,7 +145,7 @@ tag_remove_from_screen(tag_t *tag)
 void
 tag_client(client_t *c)
 {
-    tag_t *t = tag_ref(globalconf.L);
+    tag_t *t = tag_ref(globalconf.L, -1);
 
     /* don't tag twice */
     if(is_client_tagged(c, t))

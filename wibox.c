@@ -408,7 +408,7 @@ wibox_attach(screen_t *s)
 {
     int phys_screen = screen_virttophys(screen_array_indexof(&globalconf.screens, s));
 
-    wibox_t *wibox = wibox_ref(globalconf.L);
+    wibox_t *wibox = wibox_ref(globalconf.L, -1);
 
     wibox_detach(wibox);
 
@@ -736,7 +736,7 @@ luaA_wibox_newindex(lua_State *L)
         break;
       case A_TK_BG_IMAGE:
         image_unref(L, wibox->bg_image);
-        wibox->bg_image = image_ref(L);
+        wibox->bg_image = image_ref(L, 3);
         wibox->need_update = true;
         break;
       case A_TK_ALIGN:

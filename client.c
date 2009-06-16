@@ -459,7 +459,7 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
 
     c = client_new(globalconf.L);
     /* Push client in client list */
-    client_array_push(&globalconf.clients, client_ref(globalconf.L));
+    client_array_push(&globalconf.clients, client_ref(globalconf.L, -1));
 
 
     screen = c->screen = screen_getbycoord(&globalconf.screens.tab[phys_screen],
@@ -485,7 +485,7 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
     client_setborder(c, wgeom->border_width);
 
     if(ewmh_window_icon_get_reply(ewmh_icon_cookie))
-        c->icon = image_ref(globalconf.L);
+        c->icon = image_ref(globalconf.L, -1);
 
     /* we honor size hints by default */
     c->size_hints_honor = true;
@@ -1460,7 +1460,7 @@ luaA_client_newindex(lua_State *L)
         break;
       case A_TK_ICON:
         image_unref(L, c->icon);
-        c->icon = image_ref(L);
+        c->icon = image_ref(L, 3);
         /* execute hook */
         hook_property(client, c, "icon");
         break;

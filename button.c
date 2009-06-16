@@ -102,7 +102,7 @@ luaA_button_array_set(lua_State *L, int idx, button_array_t *buttons)
     button_array_init(buttons);
     lua_pushnil(L);
     while(lua_next(L, idx))
-        button_array_append(buttons, button_ref(L));
+        button_array_append(buttons, button_ref(L, -1));
 }
 
 /** Push an array of button as an Lua table onto the stack.

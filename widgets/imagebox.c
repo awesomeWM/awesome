@@ -197,7 +197,7 @@ luaA_imagebox_newindex(lua_State *L, awesome_token_t token)
 
       case A_TK_IMAGE:
         image_unref(L, d->image);
-        d->image = image_ref(L);
+        d->image = image_ref(L, 3);
         break;
       case A_TK_BG:
         if(lua_isnil(L, 3))

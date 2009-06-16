@@ -297,7 +297,7 @@ luaA_textbox_newindex(lua_State *L, awesome_token_t token)
         break;
       case A_TK_BG_IMAGE:
         image_unref(L, d->bg_image);
-        d->bg_image = image_ref(L);
+        d->bg_image = image_ref(L, 3);
         break;
       case A_TK_BG:
         if(lua_isnil(L, 3))

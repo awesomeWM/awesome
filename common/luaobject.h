@@ -73,12 +73,14 @@ typedef struct
     }                                                                          \
                                                                                \
     static inline type *                                                       \
-    prefix##_ref(lua_State *L)                                                 \
+    prefix##_ref(lua_State *L, int ud)                                         \
     {                                                                          \
-        if(lua_isnil(L, -1))                                                   \
+        if(lua_isnil(L, ud))                                                   \
             return NULL;                                                       \
-        type *item = luaL_checkudata(L, -1, lua_type);                         \
+        type *item = luaL_checkudata(L, ud, lua_type);                         \
+        lua_pushvalue(L, ud);                                                  \
         luaA_ref_array_append(&item->refs, luaL_ref(L, LUA_REGISTRYINDEX));    \
+        lua_remove(L, ud);                                                     \
         return item;                                                           \
     }                                                                          \
                                                                                \
