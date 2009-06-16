@@ -118,22 +118,6 @@ luaA_pusharea(lua_State *L, area_t geometry)
     return 1;
 }
 
-static inline int
-luaA_usemetatable(lua_State *L, int idxobj, int idxfield)
-{
-    lua_getmetatable(L, idxobj);
-    lua_pushvalue(L, idxfield);
-    lua_rawget(L, -2);
-    if(!lua_isnil(L, -1))
-    {
-        lua_remove(L, -2);
-        return 1;
-    }
-    lua_pop(L, 2);
-
-    return 0;
-}
-
 /** Register an Lua object.
  * \param L The Lua stack.
  * \param idx Index of the object in the stack.

@@ -69,6 +69,10 @@ void luaA_class_setup(lua_State *, lua_class_t *, const char *, lua_class_alloca
 void luaA_class_add_property(lua_class_t *, awesome_token_t, const char *,
                              lua_class_propfunc_t, lua_class_propfunc_t, lua_class_propfunc_t);
 
+int luaA_usemetatable(lua_State *, int, int);
+int luaA_class_index(lua_State *);
+int luaA_class_newindex(lua_State *);
+
 #define LUA_CLASS_FUNCS(prefix, lua_class) \
     static inline int                                                          \
     luaA_##prefix##_class_add_signal(lua_State *L)                             \
@@ -97,6 +101,10 @@ void luaA_class_add_property(lua_class_t *, awesome_token_t, const char *,
     { "add_signal", luaA_##class##_class_add_signal }, \
     { "remove_signal", luaA_##class##_class_remove_signal }, \
     { "emit_signal", luaA_##class##_class_emit_signal },
+
+#define LUA_CLASS_META \
+    { "__index", luaA_class_index }, \
+    { "__newindex", luaA_class_newindex },
 
 #endif
 

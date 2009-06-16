@@ -183,4 +183,123 @@ luaA_class_emit_signal(lua_State *L, lua_class_t *lua_class,
     lua_pop(L, nargs);
 }
 
+/** Try to use the metatable of an object.
+ * \param L The Lua VM state.
+ * \param idxobj The index of the object.
+ * \param idxfield The index of the field (attribute) to get.
+ * \return The number of element pushed on stack.
+ */
+int
+luaA_usemetatable(lua_State *L, int idxobj, int idxfield)
+{
+    /* Get metatable of the object. */
+    lua_getmetatable(L, idxobj);
+    /* Get the field */
+    lua_pushvalue(L, idxfield);
+    lua_rawget(L, -2);
+    /* Do we have a field like that? */
+    if(!lua_isnil(L, -1))
+    {
+        /* Yes, so return it! */
+        lua_remove(L, -2);
+        return 1;
+    }
+    /* No, so remove everything. */
+    lua_pop(L, 2);
+
+    return 0;
+}
+
+static lua_class_property_t *
+lua_class_property_array_getbyid(lua_class_property_array_t *arr,
+                                 awesome_token_t id)
+{
+    lua_class_property_t lookup_prop = { .id = id };
+    return lua_class_property_array_lookup(arr, &lookup_prop);
+}
+
+/** Get the class of an object.
+ * \param L The Lua VM state.
+ * \param idx The index of the object on the stack.
+ * \return The class if found, NULL otherwise.
+ */
+static lua_class_t *
+luaA_class_get(lua_State *L, int idx)
+{
+    int type = luaA_type(L, 1);
+
+    /* Find the class. */
+    lua_class_t *class = NULL;
+
+    foreach(classid, luaA_classes)
+        if(classid->id == type)
+        {
+            class = classid->class;
+            break;
+        }
+
+    return class;
+}
+
+/** Get a property of a object.
+ * \param L The Lua VM state.
+ * \param lua_class The Lua class.
+ * \param fieldidx The index of the field name.
+ * \return The object property if found, NULL otherwise.
+ */
+static lua_class_property_t *
+luaA_class_property_get(lua_State *L, lua_class_t *lua_class, int fieldidx)
+{
+    /* Lookup the property using token */
+    size_t len;
+    const char *attr = luaL_checklstring(L, fieldidx, &len);
+    awesome_token_t token = a_tokenize(attr, len);
+
+    return lua_class_property_array_getbyid(&lua_class->properties, token);
+}
+
+/** Generic index meta function for objects.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ */
+int
+luaA_class_index(lua_State *L)
+{
+    /* Try to use metatable first. */
+    if(luaA_usemetatable(L, 1, 2))
+        return 1;
+
+    lua_class_t *class = luaA_class_get(L, 1);
+
+    lua_class_property_t *prop = luaA_class_property_get(L, class, 2);
+
+    /* Property does exist and has an index callback */
+    if(prop && prop->index)
+        return prop->index(L, luaL_checkudata(L, 1, class->name));
+
+    return 0;
+}
+
+/** Generic newindex meta function for objects.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ */
+int
+luaA_class_newindex(lua_State *L)
+{
+    /* Try to use metatable first. */
+    if(luaA_usemetatable(L, 1, 2))
+        return 1;
+
+    lua_class_t *class = luaA_class_get(L, 1);
+
+    lua_class_property_t *prop = luaA_class_property_get(L, class, 2);
+
+    /* Property does exist and has a newindex callback */
+    if(prop && prop->newindex)
+        return prop->newindex(L, luaL_checkudata(L, 1, class->name));
+
+    return 0;
+}
+
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
