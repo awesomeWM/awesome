@@ -1046,7 +1046,7 @@ luaA_key_new(lua_State *L)
     k->press = press;
     k->release = release;
 
-    luaA_setmodifiers(L, 2, &k->mod);
+    k->mod = luaA_tomodifiers(L, 2);
 
     return 1;
 }
@@ -1110,24 +1110,26 @@ luaA_pushmodifiers(lua_State *L, uint16_t modifiers)
     return 1;
 }
 
-/** Take a modifier table from the stack and set modifiers in mod.
+/** Take a modifier table from the stack and return modifiers mask.
  * \param L The Lua VM state.
  * \param ud The index of the table.
- * \param mod Where to set the modifiers.
+ * \return The mask value.
  */
-void
-luaA_setmodifiers(lua_State *L, int ud, uint16_t *mod)
+uint16_t
+luaA_tomodifiers(lua_State *L, int ud)
 {
     luaA_checktable(L, ud);
     ssize_t len = lua_objlen(L, ud);
+    uint16_t mod = XCB_NONE;
     for(int i = 1; i <= len; i++)
     {
         lua_rawgeti(L, ud, i);
         size_t blen;
         const char *key = luaL_checklstring(L, -1, &blen);
-        *mod |= xutil_key_mask_fromstr(key, blen);
+        mod |= xutil_key_mask_fromstr(key, blen);
         lua_pop(L, 1);
     }
+    return mod;
 }
 
 /** Key object.
@@ -1213,7 +1215,7 @@ luaA_key_newindex(lua_State *L)
         }
         break;
       case A_TK_MODIFIERS:
-        luaA_setmodifiers(L, 3, &k->mod);
+        k->mod = luaA_tomodifiers(L, 3);
         break;
       case A_TK_PRESS:
         luaA_registerfct(L, 3, &k->press);

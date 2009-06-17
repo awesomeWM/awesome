@@ -83,8 +83,7 @@ luaA_button_new(lua_State *L)
     button->press = press;
     button->release = release;
     button->button = xbutton;
-
-    luaA_setmodifiers(L, 2, &button->mod);
+    button->mod = luaA_tomodifiers(L, 2);
 
     return 1;
 }
@@ -196,7 +195,8 @@ luaA_button_newindex(lua_State *L)
         button->button = luaL_checknumber(L, 3);
         break;
       case A_TK_MODIFIERS:
-        luaA_setmodifiers(L, 3, &button->mod);
+        button->mod = luaA_tomodifiers(L, 3);
+        break;
       default:
         break;
     }

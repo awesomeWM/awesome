@@ -1,7 +1,7 @@
 /*
  * key.h - Keybinding helpers
  *
- * Copyright © 2008 Pierre Habouzit <madcoder@debian.org>
+ * Copyright © 2009 Julien Danjou <julien@danjou.info>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,6 +49,6 @@ int luaA_key_array_get(lua_State *, key_array_t *);
 
 void window_grabkeys(xcb_window_t, key_array_t *);
 int luaA_pushmodifiers(lua_State *, uint16_t);
-void luaA_setmodifiers(lua_State *, int, uint16_t *);
+uint16_t luaA_tomodifiers(lua_State *L, int ud);
 
 #endif
