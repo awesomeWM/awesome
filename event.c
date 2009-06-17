@@ -671,9 +671,6 @@ event_handle_randr_screen_change_notify(void *data __attribute__ ((unused)),
                                         xcb_connection_t *connection __attribute__ ((unused)),
                                         xcb_randr_screen_change_notify_event_t *ev)
 {
-    if(!globalconf.have_randr)
-        return -1;
-
     /* Code  of  XRRUpdateConfiguration Xlib  function  ported to  XCB
      * (only the code relevant  to RRScreenChangeNotify) as the latter
      * doesn't provide this kind of function */
@@ -810,7 +807,7 @@ void a_xcb_set_event_handlers(void)
 
     /* check for randr extension */
     randr_query = xcb_get_extension_data(globalconf.connection, &xcb_randr_id);
-    if((globalconf.have_randr = randr_query->present))
+    if(randr_query->present)
         xcb_event_set_handler(&globalconf.evenths,
                               randr_query->first_event + XCB_RANDR_SCREEN_CHANGE_NOTIFY,
                               (xcb_generic_event_handler_t) event_handle_randr_screen_change_notify,

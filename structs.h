@@ -73,8 +73,6 @@ struct awesome_t
     button_array_t buttons;
     /** Modifiers masks */
     uint16_t numlockmask, shiftlockmask, capslockmask, modeswitchmask;
-    /** Check for XRandR extension */
-    bool have_randr;
     /** Check for XTest extension */
     bool have_xtest;
     /** Clients list */
