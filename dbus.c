@@ -488,6 +488,7 @@ a_dbus_connect(DBusBusType type, const char *type_name,
     }
     else
     {
+        dbus_connection_set_exit_on_disconnect(dbus_connection, false);
         if(dbus_connection_get_unix_fd(dbus_connection, &fd))
         {
             fcntl(fd, F_SETFD, FD_CLOEXEC);
