@@ -80,6 +80,8 @@ typedef struct
 
 #define ssizeof(foo)            (ssize_t)sizeof(foo)
 #define countof(foo)            (ssizeof(foo) / ssizeof(foo[0]))
+#define fieldsizeof(type_t, m)  sizeof(((type_t *)0)->m)
+#define fieldtypeof(type_t, m)  typeof(((type_t *)0)->m)
 
 #define p_alloca(type, count)                                \
         ((type *)memset(alloca(sizeof(type) * (count)),      \
