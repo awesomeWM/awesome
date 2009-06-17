@@ -52,14 +52,6 @@ typedef enum
     Left
 } position_t;
 
-/** Link a name to a function */
-typedef struct
-{
-    const char *name;
-    size_t len;
-    void *func;
-} name_func_link_t;
-
 /** \brief replace \c NULL strings with emtpy strings */
 #define NONULL(x)       (x ? x : "")
 
@@ -350,8 +342,6 @@ position_t position_fromstr(const char *, ssize_t);
 const char * position_tostr(position_t);
 orientation_t orientation_fromstr(const char *, ssize_t);
 const char * orientation_tostr(orientation_t);
-void *name_func_lookup(const char *, size_t, const name_func_link_t *);
-const char * name_func_rlookup(void *, const name_func_link_t *);
 void a_exec(const char *);
 
 #endif

@@ -99,16 +99,6 @@ target_link_libraries(${PROJECT_AWE_NAME}
     ${AWESOME_REQUIRED_LIBRARIES}
     ${AWESOME_OPTIONAL_LIBRARIES})
 
-# {{{ Generated sources
-add_custom_command(
-    COMMAND ${SOURCE_DIR}/build-utils/widgetgen.sh
-    ARGS    > ${BUILD_DIR}/widgetgen.h
-    OUTPUT  ${BUILD_DIR}/widgetgen.h
-    WORKING_DIRECTORY ${SOURCE_DIR}
-    DEPENDS ${SOURCE_DIR}/widget.h
-    COMMENT "Generating widgetgen.h"
-    VERBATIM)
-
 # atoms
 file(MAKE_DIRECTORY ${BUILD_DIR}/common)
 add_custom_command(
@@ -149,8 +139,7 @@ add_custom_command(
     COMMENT "Generating common/tokenize.c")
 
 add_custom_target(generated_sources
-    DEPENDS ${BUILD_DIR}/widgetgen.h
-            ${BUILD_DIR}/common/atoms-intern.h
+    DEPENDS ${BUILD_DIR}/common/atoms-intern.h
             ${BUILD_DIR}/common/atoms-extern.h
             ${BUILD_DIR}/common/tokenize.c
             ${BUILD_DIR}/common/tokenize.h)

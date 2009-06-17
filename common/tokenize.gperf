@@ -37,6 +37,7 @@ font_height
 fullscreen
 gap
 geometry
+graph
 group_id
 grow
 height
@@ -45,6 +46,7 @@ icon
 icon_name
 id
 image
+imagebox
 instance
 key
 key_press
@@ -79,6 +81,7 @@ plot_data_add
 plot_properties_set
 position
 press
+progressbar
 release
 resize
 right
@@ -94,7 +97,9 @@ south
 start
 sticky
 system
+systray
 text
+textbox
 ticks_count
 ticks_gap
 titlebar

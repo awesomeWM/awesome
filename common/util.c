@@ -57,45 +57,6 @@ _warn(int line, const char *fct, const char *fmt, ...)
     fprintf(stderr, "\n");
 }
 
-/** Lookup for a function pointer from its name
- * in the given name_func_link_t list.
- * \param funcname Function name.
- * \param len The function name length.
- * \param list Function and name link list.
- * \return Function pointer.
- */
-void *
-name_func_lookup(const char *funcname, size_t len, const name_func_link_t *list)
-{
-    int i;
-
-    if(funcname && list)
-        for(i = 0; list[i].name; i++)
-            if(len == list[i].len && !a_strcmp(funcname, list[i].name))
-                return list[i].func;
-
-    return NULL;
-}
-
-/** Lookup for a function name from its pointer
- * in the given name_func_link_t list.
- * \param funcp Function pointer.
- * \param list Function and name link list.
- * \return Name of the function.
- */
-const char *
-name_func_rlookup(void * funcp, const name_func_link_t *list)
-{
-    int i;
-    
-    if(funcp && list)
-        for(i = 0; list[i].name; i++)
-            if(funcp == list[i].func)
-                return list[i].name;
-
-    return NULL;
-}
-
 /** Get a position type from a string.
  * \param pos The position.
  * \param len The string length, -1 if unknown.
