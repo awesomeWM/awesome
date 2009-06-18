@@ -190,6 +190,12 @@ scan(void)
 }
 
 static void
+a_refresh_cb(EV_P_ ev_prepare *w, int revents)
+{
+    awesome_refresh();
+}
+
+static void
 a_xcb_check_cb(EV_P_ ev_check *w, int revents)
 {
     xcb_generic_event_t *mouse = NULL, *event;
@@ -217,8 +223,6 @@ a_xcb_check_cb(EV_P_ ev_check *w, int revents)
         xcb_event_handle(&globalconf.evenths, mouse);
         p_delete(&mouse);
     }
-
-    awesome_refresh();
 }
 
 static void
@@ -346,6 +350,7 @@ main(int argc, char **argv)
     /* event loop watchers */
     ev_io xio    = { .fd = -1 };
     ev_check xcheck;
+    ev_prepare a_refresh;
     ev_signal sigint;
     ev_signal sigterm;
     ev_signal sighup;
@@ -449,6 +454,9 @@ main(int argc, char **argv)
     ev_check_init(&xcheck, &a_xcb_check_cb);
     ev_check_start(globalconf.loop, &xcheck);
     ev_unref(globalconf.loop);
+    ev_prepare_init(&a_refresh, &a_refresh_cb);
+    ev_prepare_start(globalconf.loop, &a_refresh);
+    ev_unref(globalconf.loop);
 
     /* Allocate a handler which will holds all errors and events */
     xcb_event_handlers_init(globalconf.connection, &globalconf.evenths);
@@ -549,15 +557,14 @@ main(int argc, char **argv)
     xcb_ungrab_server(globalconf.connection);
     xcb_flush(globalconf.connection);
 
-    /* refresh everything before waiting events */
-    awesome_refresh();
-
     /* main event loop */
     ev_loop(globalconf.loop, 0);
 
     /* cleanup event loop */
     ev_ref(globalconf.loop);
     ev_check_stop(globalconf.loop, &xcheck);
+    ev_ref(globalconf.loop);
+    ev_prepare_stop(globalconf.loop, &a_refresh);
     ev_ref(globalconf.loop);
     ev_io_stop(globalconf.loop, &xio);
 

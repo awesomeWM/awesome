@@ -392,8 +392,6 @@ a_dbus_process_requests_on_bus(DBusConnection *dbus_connection, ev_io *dbusio)
 
     if(nmsg)
         dbus_connection_flush(dbus_connection);
-
-    awesome_refresh();
 }
 
 static void
