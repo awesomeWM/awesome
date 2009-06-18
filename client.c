@@ -372,11 +372,15 @@ client_layer_translator(client_t *c)
  * \todo It might be worth stopping to restack everyone and only stack `c'
  * relatively to the first matching in the list.
  */
-static void
-client_real_stack(void)
+void
+client_stack_refresh()
 {
     uint32_t config_win_vals[2];
     layer_t layer;
+
+    if (!globalconf.client_need_stack_refresh)
+        return;
+    globalconf.client_need_stack_refresh = false;
 
     config_win_vals[0] = XCB_NONE;
     config_win_vals[1] = XCB_STACK_MODE_ABOVE;
@@ -422,15 +426,6 @@ client_real_stack(void)
             config_win_vals[0] = sb->sw.window;
         }
     }
-}
-
-void
-client_stack_refresh()
-{
-    if (!globalconf.client_need_stack_refresh)
-        return;
-    globalconf.client_need_stack_refresh = false;
-    client_real_stack();
 }
 
 /** Manage a new client.
