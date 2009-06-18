@@ -46,5 +46,7 @@ uint8_t * image_getdata(image_t *);
 int image_getwidth(image_t *);
 int image_getheight(image_t *);
 
+xcb_pixmap_t image_to_1bit_pixmap(image_t *, xcb_drawable_t);
+
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

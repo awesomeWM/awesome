@@ -21,6 +21,8 @@
 
 #include "structs.h"
 #include "common/tokenize.h"
+#include "common/xutil.h"
+#include <xcb/xcb_image.h>
 
 DO_LUA_TOSTRING(image_t, image, "image");
 
@@ -138,6 +140,69 @@ image_getdata(image_t *image)
     image->isupdated = true;
 
     return image->data;
+
+}
+
+static void
+image_draw_to_1bit_ximage(image_t *image, xcb_image_t *img)
+{
+    imlib_context_set_image(image->image);
+
+    uint32_t *data = imlib_image_get_data_for_reading_only();
+
+    int width = imlib_image_get_width();
+    int height = imlib_image_get_height();
+
+    for(int y = 0; y < height; y++)
+        for(int x = 0; x < width; x++)
+        {
+            int i, pixel, tmp;
+
+            i = y * width + x;
+
+            // Sum up all color components ignoring alpha
+            tmp  = (data[i] >> 16) & 0xff;
+            tmp += (data[i] >>  8) & 0xff;
+            tmp +=  data[i]        & 0xff;
+
+            pixel = (tmp / 3 < 127) ? 0 : 1;
+
+            xcb_image_put_pixel(img, x, y, pixel);
+        }
+}
+
+// Convert an image to a 1bit pixmap
+xcb_pixmap_t
+image_to_1bit_pixmap(image_t *image, xcb_drawable_t d)
+{
+    xcb_pixmap_t pixmap;
+    xcb_gcontext_t gc;
+    xcb_image_t *img;
+    uint16_t width, height;
+
+    width = image_getwidth(image);
+    height = image_getheight(image);
+
+    /* Prepare the pixmap and gc */
+    pixmap = xcb_generate_id(globalconf.connection);
+    xcb_create_pixmap(globalconf.connection, 1, pixmap, d, width, height);
+
+    gc = xcb_generate_id(globalconf.connection);
+    xcb_create_gc(globalconf.connection, gc, pixmap, 0, NULL);
+
+    /* Prepare the image */
+    img = xcb_image_create_native(globalconf.connection, width, height,
+            XCB_IMAGE_FORMAT_XY_BITMAP, 1, NULL, 0, NULL);
+    image_draw_to_1bit_ximage(image, img);
+
+    /* Paint the image to the pixmap */
+    xcb_image_put(globalconf.connection, pixmap, gc, img, 0, 0, 0);
+
+    xcb_free_gc(globalconf.connection, gc);
+
+    xcb_image_destroy(img);
+
+    return pixmap;
 }
 
 /** Create a new image from ARGB32 data.
