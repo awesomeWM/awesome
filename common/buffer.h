@@ -143,7 +143,6 @@ buffer_splice(buffer_t *buf, int pos, int len, const void *data, int dlen)
         buf->s    += len - dlen;
         buf->size -= len - dlen;
         buf->len  -= len - dlen;
-        len = dlen;
     }
     else if (len != dlen)
     {
