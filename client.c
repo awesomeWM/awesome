@@ -1521,6 +1521,7 @@ luaA_client_newindex(lua_State *L)
         break;
       case A_TK_ICON:
         image_unref(L, c->icon);
+        c->icon = NULL;
         c->icon = image_ref(L);
         /* execute hook */
         hooks_property(c, "icon");
