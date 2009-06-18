@@ -352,14 +352,13 @@ luaA_widget_new(lua_State *L)
     const char *align, *type;
     widget_t *w;
     widget_constructor_t *wc = NULL;
-    awesome_token_t token;
     size_t len;
 
     luaA_checktable(L, 2);
 
     type = luaA_getopt_lstring(L, 2, "type", NULL, &len);
 
-    switch((token = a_tokenize(type, len)))
+    switch(a_tokenize(type, len))
     {
       case A_TK_TEXTBOX:
         wc = widget_textbox;
