@@ -22,8 +22,7 @@
 #ifndef AWESOME_COMMON_LUAOBJECT
 #define AWESOME_COMMON_LUAOBJECT
 
-#include <lauxlib.h>
-#include "common/array.h"
+#include "common/signal.h"
 
 static inline int
 luaA_settype(lua_State *L, const char *type)
@@ -142,7 +141,12 @@ luaA_object_push(lua_State *L, void *pointer)
     return 1;
 }
 
-#define LUA_OBJECT_HEADER
+void luaA_object_add_signal(lua_State *, int, const char *, int);
+void luaA_object_remove_signal(lua_State *, int, const char *, int);
+void luaA_object_emit_signal(lua_State *, int, const char *, int);
+
+#define LUA_OBJECT_HEADER \
+        signal_array_t signals;
 
 /** Generic type for all objects.
  * All Lua objects can be casted to this type.
@@ -201,6 +205,8 @@ typedef struct
 static inline int
 luaA_object_gc(lua_State *L)
 {
+    lua_object_t *item = lua_touserdata(L, 1);
+    signal_array_wipe(&item->signals);
     return 0;
 }
 

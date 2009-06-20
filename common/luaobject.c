@@ -139,4 +139,63 @@ luaA_object_decref(lua_State *L, int tud, void *pointer)
     }
 }
 
+/** Add a signal to an object.
+ * \param L The Lua VM state.
+ * \param oud The object index on the stack.
+ * \param name The name of the signal.
+ * \param ud The index of function to call when signal is emited.
+ */
+void
+luaA_object_add_signal(lua_State *L, int oud,
+                       const char *name, int ud)
+{
+    luaA_checkfunction(L, ud);
+    lua_object_t *obj = lua_touserdata(L, oud);
+    signal_add(&obj->signals, name, luaA_object_ref_item(L, oud, ud));
+}
+
+/** Remove a signal to an object.
+ * \param L The Lua VM state.
+ * \param oud The object index on the stack.
+ * \param name The name of the signal.
+ * \param ud The index of function to call when signal is emited.
+ */
+void
+luaA_object_remove_signal(lua_State *L, int oud,
+                          const char *name, int ud)
+{
+    luaA_checkfunction(L, ud);
+    lua_object_t *obj = lua_touserdata(L, oud);
+    void *ref = (void *) lua_topointer(L, ud);
+    signal_remove(&obj->signals, name, ref);
+    luaA_object_unref_item(L, oud, ref);
+    lua_remove(L, ud);
+}
+
+/** Emit a signal to an object.
+ * \param L The Lua VM state.
+ * \param oud The object index on the stack.
+ * \param name The name of the signal.
+ * \param nargs The number of arguments to pass to the called functions.
+ */
+void
+luaA_object_emit_signal(lua_State *L, int oud,
+                        const char *name, int nargs)
+{
+    int oud_abs = luaA_absindex(L, oud);
+    lua_object_t *obj = lua_touserdata(L, oud);
+    signal_t *sigfound = signal_array_getbyid(&obj->signals,
+                                              a_strhash((const unsigned char *) name));
+    if(sigfound)
+        foreach(ref, sigfound->sigfuncs)
+        {
+            lua_pushvalue(L, oud_abs);
+            for(int i = 0; i < nargs; i++)
+                lua_pushvalue(L, - nargs - 1);
+            luaA_object_push_item(L, oud_abs, (void *) *ref);
+            luaA_dofunction(L, nargs + 1, 0);
+        }
+    lua_pop(L, nargs);
+}
+
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

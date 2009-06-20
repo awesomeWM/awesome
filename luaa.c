@@ -70,8 +70,6 @@ extern const struct luaL_reg awesome_wibox_meta[];
 extern const struct luaL_reg awesome_key_methods[];
 extern const struct luaL_reg awesome_key_meta[];
 
-DO_ARRAY(const void *, void, DO_NOTHING)
-
 /** Quit awesome.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
@@ -501,7 +499,7 @@ luaA_hasitem(lua_State *L, const void *item)
  * \return False if we encounter an elements already in list.
  */
 static bool
-luaA_isloop_check(lua_State *L, void_array_t *elems)
+luaA_isloop_check(lua_State *L, cptr_array_t *elems)
 {
     if(lua_istable(L, -1))
     {
@@ -513,7 +511,7 @@ luaA_isloop_check(lua_State *L, void_array_t *elems)
                 return false;
 
         /* push the table in the elements list */
-        void_array_append(elems, object);
+        cptr_array_append(elems, object);
 
         /* look every object in the "table" */
         lua_pushnil(L);
@@ -543,9 +541,9 @@ luaA_isloop(lua_State *L, int idx)
 {
     /* elems is an elements array that we will fill with all array we
      * encounter while browsing the tables */
-    void_array_t elems;
+    cptr_array_t elems;
 
-    void_array_init(&elems);
+    cptr_array_init(&elems);
 
     /* push table on top */
     lua_pushvalue(L, idx);
@@ -555,7 +553,7 @@ luaA_isloop(lua_State *L, int idx)
     /* remove pushed table */
     lua_pop(L, 1);
 
-    void_array_wipe(&elems);
+    cptr_array_wipe(&elems);
 
     return !ret;
 }

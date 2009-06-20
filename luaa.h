@@ -50,12 +50,6 @@
             luaL_typerror(L, n, "table"); \
     } while(0)
 
-#define luaA_checkfunction(L, n) \
-    do { \
-        if(!lua_isfunction(L, n)) \
-            luaL_typerror(L, n, "function"); \
-    } while(0)
-
 #define luaA_checkscreen(screen) \
     do { \
         if(screen < 0 || screen >= globalconf.screens.len) \
@@ -237,27 +231,6 @@ luaA_registerfct(lua_State *L, int idx, int *fct)
 {
     luaA_checkfunction(L, idx);
     return luaA_register(L, idx, fct);
-}
-
-/** Execute an Lua function on top of the stack.
- * \param L The Lua stack.
- * \param nargs The number of arguments for the Lua function.
- * \param nret The number of returned value from the Lua function.
- * \return True on no error, false otherwise.
- */
-static inline bool
-luaA_dofunction(lua_State *L, int nargs, int nret)
-{
-    if(nargs)
-        lua_insert(L, - (nargs + 1));
-    if(lua_pcall(L, nargs, nret, 0))
-    {
-        warn("error running function: %s",
-             lua_tostring(L, -1));
-        lua_pop(L, 1);
-        return false;
-    }
-    return true;
 }
 
 /** Grab a function from the registry and execute it.
