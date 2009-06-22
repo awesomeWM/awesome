@@ -570,6 +570,9 @@ main(int argc, char **argv)
     ev_ref(globalconf.loop);
     ev_io_stop(globalconf.loop, &xio);
 
+    /* Close Lua */
+    lua_close(globalconf.L);
+
     awesome_atexit();
 
     return EXIT_SUCCESS;
