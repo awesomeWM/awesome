@@ -52,6 +52,7 @@ luaA_client_gc(lua_State *L)
 {
     client_t *c = luaL_checkudata(L, 1, "client");
     button_array_wipe(&c->buttons);
+    key_array_wipe(&c->keys);
     image_unref(L, c->icon);
     p_delete(&c->class);
     p_delete(&c->startup_id);

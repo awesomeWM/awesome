@@ -33,13 +33,12 @@
 
 LUA_OBJECT_FUNCS(keyb_t, key, "key")
 
-static void
+void
 key_unref_simplified(keyb_t **b)
 {
     key_unref(globalconf.L, *b);
 }
 
-ARRAY_FUNCS(keyb_t *, key, key_unref_simplified)
 DO_LUA_TOSTRING(keyb_t, key, "key")
 
 /** Garbage collect a key.

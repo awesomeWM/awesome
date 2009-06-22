@@ -39,7 +39,9 @@ typedef struct keyb_t
     luaA_ref release;
 } keyb_t;
 
-ARRAY_TYPE(keyb_t *, key)
+void key_unref_simplified(keyb_t **);
+
+DO_ARRAY(keyb_t *, key, key_unref_simplified)
 
 bool key_press_lookup_string(xcb_keysym_t, char *, ssize_t);
 xcb_keysym_t key_getkeysym(xcb_keycode_t, uint16_t);
