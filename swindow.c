@@ -22,11 +22,66 @@
 #include <math.h>
 
 #include <xcb/xcb.h>
+#include <xcb/shape.h>
 
 #include "structs.h"
 #include "swindow.h"
 #include "draw.h"
 #include "common/xutil.h"
+
+static int
+have_shape(void)
+{
+    const xcb_query_extension_reply_t *reply;
+
+    reply = xcb_get_extension_data(globalconf.connection, &xcb_shape_id);
+    if (!reply || !reply->present)
+        return 0;
+
+    /* We don't need a specific version of SHAPE, no version check required */
+    return 1;
+}
+
+static void
+do_update_shape(xcb_window_t win, xcb_shape_kind_t kind, image_t *image, int offset)
+{
+    xcb_pixmap_t shape;
+
+    if(image)
+        shape = image_to_1bit_pixmap(image, win);
+    else
+        /* Reset the shape */
+        shape = XCB_NONE;
+
+    xcb_shape_mask(globalconf.connection, XCB_SHAPE_SO_SET, kind,
+                   win, offset, offset, shape);
+
+    if (shape != XCB_NONE)
+        xcb_free_pixmap(globalconf.connection, shape);
+}
+
+/** Update the window's shape.
+ * \param sw The simplw window whose shape should be updated.
+ */
+void
+simplewindow_update_shape(simple_window_t *sw)
+{
+    if(sw->window == XCB_NONE)
+        return;
+
+    if(!have_shape())
+    {
+        static bool warned = false;
+        if (!warned)
+            warn("The X server doesn't have the SHAPE extension; "
+                    "can't change window's shape");
+        warned = true;
+        return;
+    }
+
+    do_update_shape(sw->window, XCB_SHAPE_SK_CLIP, sw->shape.clip, 0);
+    do_update_shape(sw->window, XCB_SHAPE_SK_BOUNDING, sw->shape.bounding, -sw->border.width);
+}
 
 static void
 simplewindow_draw_context_update(simple_window_t *sw, xcb_screen_t *s)
@@ -127,6 +182,8 @@ simplewindow_init(simple_window_t *sw,
     /* The default GC is just a newly created associated to the root window */
     sw->gc = xcb_generate_id(globalconf.connection);
     xcb_create_gc(globalconf.connection, sw->gc, s->root, gc_mask, gc_values);
+
+    simplewindow_update_shape(sw);
 }
 
 /** Destroy all resources of a simple window.

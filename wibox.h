@@ -59,6 +59,8 @@ struct wibox_t
     luaA_ref mouse_enter, mouse_leave;
     /** Need update */
     bool need_update;
+    /** Need shape update */
+    bool need_shape_update;
     /** Cursor */
     char *cursor;
     /** Background image */

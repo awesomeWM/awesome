@@ -139,6 +139,7 @@ pkg_check_modules(AWESOME_REQUIRED REQUIRED
     xcb-randr
     xcb-xtest
     xcb-xinerama
+    xcb-shape
     xcb-event>=0.3.4
     xcb-aux>=0.3.0
     xcb-atom>=0.3.0

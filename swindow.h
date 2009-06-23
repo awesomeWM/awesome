@@ -55,6 +55,14 @@ typedef struct simple_window_t
     orientation_t orientation;
     /** Opacity */
     double opacity;
+    /** The window's shape */
+    struct
+    {
+        /** The window's content */
+        image_t *clip;
+        /** The window's content and border */
+        image_t *bounding;
+    } shape;
 } simple_window_t;
 
 void simplewindow_init(simple_window_t *s,
@@ -71,6 +79,7 @@ void simplewindow_border_width_set(simple_window_t *, uint32_t);
 void simplewindow_border_color_set(simple_window_t *, const xcolor_t *);
 void simplewindow_orientation_set(simple_window_t *, orientation_t);
 void simplewindow_cursor_set(simple_window_t *, xcb_cursor_t);
+void simplewindow_update_shape(simple_window_t *);
 
 /** Refresh the window content by copying its pixmap data to its window.
  * \param sw The simple window to refresh.

@@ -326,8 +326,15 @@ void
 wibox_refresh(void)
 {
     foreach(w, globalconf.wiboxes)
+    {
+        if((*w)->need_shape_update)
+        {
+            simplewindow_update_shape(&(*w)->sw);
+            (*w)->need_shape_update = false;
+        }
         if((*w)->need_update)
             wibox_draw(*w);
+    }
 
     foreach(_c, globalconf.clients)
     {
@@ -568,6 +575,8 @@ luaA_wibox_invalidate_byitem(lua_State *L, const void *item)
  * \lfield opacity The opacity of the wibox, between 0 and 1.
  * \lfield mouse_enter A function to execute when the mouse enter the widget.
  * \lfield mouse_leave A function to execute when the mouse leave the widget.
+ * \lfield shape_clip Image describing the window's content shape.
+ * \lfield shape_bounding Image describing the window's border shape.
  */
 static int
 luaA_wibox_index(lua_State *L)
@@ -652,6 +661,12 @@ luaA_wibox_index(lua_State *L)
         else
             return 0;
         return 1;
+      case A_TK_SHAPE_BOUNDING:
+        image_push(L, wibox->sw.shape.bounding);
+        break;
+      case A_TK_SHAPE_CLIP:
+        image_push(L, wibox->sw.shape.clip);
+        break;
       default:
         return 0;
     }
@@ -855,6 +870,16 @@ luaA_wibox_newindex(lua_State *L)
       case A_TK_MOUSE_LEAVE:
         luaA_registerfct(L, 3, &wibox->mouse_leave);
         return 0;
+      case A_TK_SHAPE_BOUNDING:
+        image_unref(L, wibox->sw.shape.bounding);
+        wibox->sw.shape.bounding = image_ref(L, 3);
+        wibox->need_shape_update = true;
+        break;
+      case A_TK_SHAPE_CLIP:
+        image_unref(L, wibox->sw.shape.clip);
+        wibox->sw.shape.clip = image_ref(L, 3);
+        wibox->need_shape_update = true;
+        break;
       default:
         switch(wibox->type)
         {
