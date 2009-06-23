@@ -74,7 +74,7 @@ local function update(pbar)
 
     local angle = 270
     if data[pbar].vertical then
-        angle = 0
+        angle = 180
     end
 
     -- Draw full gradient
