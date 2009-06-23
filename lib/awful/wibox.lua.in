@@ -15,6 +15,7 @@ local setmetatable = setmetatable
 local ipairs = ipairs
 local table = table
 local type = type
+local image = image
 local hooks = require("awful.hooks")
 
 --- Wibox module for awful.
@@ -270,6 +271,61 @@ function new(arg)
     stretch(w)
 
     return w
+end
+
+local function do_rounded_corners(width, height, corner)
+    local img = image.argb32(width, height, nil)
+
+    -- The image starts completely black which is fully opaque for our use
+
+    local function transp_rect(x, y)
+        img:draw_rectangle(x, y, corner, corner, true, "#ffffff")
+    end
+    local function opaque_circle(x, y)
+        -- x, y are the center of the circle
+        img:draw_circle(x, y, corner, corner, true, "#000000")
+    end
+
+    -- Upper left corner
+    -- First make a 'corner times corner' rectangle transparent
+    transp_rect(0, 0)
+    -- Then add the rounded corner
+    opaque_circle(corner, corner)
+
+    -- Upper right corner
+    transp_rect(width - corner, 0)
+    opaque_circle(width - corner - 1, corner)
+
+    -- Bottom left corner
+    transp_rect(0, height - corner)
+    opaque_circle(corner, height - corner - 1)
+
+    -- Bottom right corner
+    transp_rect(width - corner, height - corner)
+    opaque_circle(width - corner - 1, height - corner - 1)
+
+    return img
+end
+
+--- Add rounded corners to a wibox
+-- @param wibox The wibox.
+-- @param corner_size The size in pixel of the rounded corners.
+function rounded_corners(wibox, corner_size)
+    local border = wibox.border_width
+    local geometry = wibox:geometry()
+    local width = geometry.width
+    local height = geometry.height
+
+    -- Corners can't be larger than half the wibox' space
+    if width / 2 < corner_size then
+        corner_size = width / 2
+    end
+    if height / 2 < corner_size then
+        corner_size = height / 2
+    end
+
+    wibox.shape_clip = do_rounded_corners(width, height, corner_size)
+    wibox.shape_bounding = do_rounded_corners(width + border * 2, height + border * 2, corner_size + border)
 end
 
 local function update_wiboxes_position(obj, prop)
