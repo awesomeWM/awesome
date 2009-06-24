@@ -334,4 +334,15 @@ function table.reverse(t)
     return tr
 end
 
+--- Clone a table
+-- @param t the table to clone
+-- @return a clone of t
+function table.clone(t)
+    local c = { }
+    for k, v in pairs(t) do
+        c[k] = v
+    end
+    return c
+end
+
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
