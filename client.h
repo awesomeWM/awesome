@@ -188,6 +188,8 @@ void client_focus_update(client_t *);
 void client_unfocus(client_t *);
 void client_unfocus_update(client_t *);
 void client_stack_refresh(void);
+bool client_hasproto(client_t *, xcb_atom_t);
+void client_setfocus(client_t *, bool);
 
 static inline void
 client_stack(void)

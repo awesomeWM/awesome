@@ -191,10 +191,53 @@ client_unfocus(client_t *c)
 {
 
     xcb_window_t root_win = xutil_screen_get(globalconf.connection, c->phys_screen)->root;
-    /* Set focus on root window, so no events leak to the current window. */
-    window_setfocus(root_win, true);
+    /* Set focus on root window, so no events leak to the current window.
+     * This kind of inlines client_setfocus(), but a root window will never have
+     * the WM_TAKE_FOCUS protocol.
+     */
+    xcb_set_input_focus(globalconf.connection, XCB_INPUT_FOCUS_PARENT,
+                        root_win, XCB_CURRENT_TIME);
 
     client_unfocus_update(c);
+}
+
+/** Check if client supports protocol a protocole in WM_PROTOCOL.
+ * \param c The client.
+ * \return True if client has the atom in protocol, false otherwise.
+ */
+bool
+client_hasproto(client_t *c, xcb_atom_t atom)
+{
+    uint32_t i;
+    xcb_get_wm_protocols_reply_t protocols;
+    bool ret = false;
+
+    if(xcb_get_wm_protocols_reply(globalconf.connection,
+                                  xcb_get_wm_protocols_unchecked(globalconf.connection,
+                                                                 c->win, WM_PROTOCOLS),
+                                  &protocols, NULL))
+    {
+        for(i = 0; !ret && i < protocols.atoms_len; i++)
+            if(protocols.atoms[i] == atom)
+                ret = true;
+        xcb_get_wm_protocols_reply_wipe(&protocols);
+    }
+    return ret;
+}
+
+/** Sets focus on window - using xcb_set_input_focus or WM_TAKE_FOCUS
+ * \param c Client that should get focus
+ * \param set_input_focus Should we call xcb_set_input_focus
+ */
+void
+client_setfocus(client_t *c, bool set_input_focus)
+{
+    bool takefocus = client_hasproto(c, WM_TAKE_FOCUS);
+    if(set_input_focus)
+        xcb_set_input_focus(globalconf.connection, XCB_INPUT_FOCUS_PARENT,
+                            c->win, XCB_CURRENT_TIME);
+    if(takefocus)
+        window_takefocus(c->win);
 }
 
 /** Ban client and move it out of the viewport.
@@ -281,7 +324,7 @@ client_focus(client_t *c)
     if (!c->nofocus)
         client_focus_update(c);
 
-    window_setfocus(c->win, !c->nofocus);
+    client_setfocus(c, !c->nofocus);
 }
 
 /** Stack a window below.
@@ -1050,7 +1093,7 @@ client_unmanage(client_t *c)
 void
 client_kill(client_t *c)
 {
-    if(window_hasproto(c->win, WM_DELETE_WINDOW))
+    if(client_hasproto(c, WM_DELETE_WINDOW))
     {
         xcb_client_message_event_t ev;
 
