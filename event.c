@@ -118,7 +118,7 @@ event_key_match(xcb_key_press_event_t *ev, keyb_t *k, void *data)
     xcb_keysym_t keysym = *(xcb_keysym_t *) data;
     return (((k->keycode && ev->detail == k->keycode)
              || (k->keysym && keysym == k->keysym))
-            && (k->mod == XCB_BUTTON_MASK_ANY || k->mod == ev->state));
+            && (k->modifiers == XCB_BUTTON_MASK_ANY || k->modifiers == ev->state));
 }
 
 DO_EVENT_HOOK_CALLBACK(button_t, button, button, XCB_BUTTON, button_array_t, event_button_match)

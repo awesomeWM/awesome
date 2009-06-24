@@ -28,7 +28,7 @@ typedef struct keyb_t
 {
     LUA_OBJECT_HEADER
     /** Key modifier */
-    uint16_t mod;
+    uint16_t modifiers;
     /** Keysym */
     xcb_keysym_t keysym;
     /** Keycode */
@@ -42,6 +42,8 @@ typedef struct keyb_t
 lua_class_t key_class;
 LUA_OBJECT_FUNCS(key_class, keyb_t, key, "key")
 DO_ARRAY(keyb_t *, key, DO_NOTHING)
+
+void key_class_setup(lua_State *);
 
 bool key_press_lookup_string(xcb_keysym_t, char *, ssize_t);
 xcb_keysym_t key_getkeysym(xcb_keycode_t, uint16_t);

@@ -67,8 +67,6 @@ extern const struct luaL_reg awesome_widget_methods[];
 extern const struct luaL_reg awesome_widget_meta[];
 extern const struct luaL_reg awesome_wibox_methods[];
 extern const struct luaL_reg awesome_wibox_meta[];
-extern const struct luaL_reg awesome_key_methods[];
-extern const struct luaL_reg awesome_key_meta[];
 
 /** Quit awesome.
  * \param L The Lua VM state.
@@ -766,8 +764,7 @@ luaA_init(xdgHandle* xdg)
                      awesome_client_methods, awesome_client_meta);
 
     /* Export keys */
-    luaA_class_setup(L, &key_class, "key", (lua_class_allocator_t) key_new,
-                     awesome_key_methods, awesome_key_meta);
+    key_class_setup(L);
 
     /* Export timer */
     timer_class_setup(L);

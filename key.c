@@ -40,7 +40,7 @@ window_grabkey(xcb_window_t win, keyb_t *k)
 {
     if(k->keycode)
         xcb_grab_key(globalconf.connection, true, win,
-                     k->mod, k->keycode, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC);
+                     k->modifiers, k->keycode, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC);
     else if(k->keysym)
     {
         xcb_keycode_t *keycodes = xcb_key_symbols_get_keycode(globalconf.keysyms, k->keysym);
@@ -48,7 +48,7 @@ window_grabkey(xcb_window_t win, keyb_t *k)
         {
             for(xcb_keycode_t *kc = keycodes; *kc; kc++)
                 xcb_grab_key(globalconf.connection, true, win,
-                             k->mod, *kc, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC);
+                             k->modifiers, *kc, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC);
             p_delete(&keycodes);
         }
     }
@@ -966,8 +966,9 @@ key_getkeysym(xcb_keycode_t detail, uint16_t state)
 }
 
 static void
-luaA_keystore(keyb_t *key, const char *str, ssize_t len)
+luaA_keystore(lua_State *L, int ud, const char *str, ssize_t len)
 {
+    keyb_t *key = luaL_checkudata(L, ud, "key");
     if(len)
     {
         if(*str != '#')
@@ -980,22 +981,20 @@ luaA_keystore(keyb_t *key, const char *str, ssize_t len)
                 else
                     warn("there's no keysym named \"%s\"", str);
             }
+            key->keycode = 0;
         }
         else
+        {
             key->keycode = atoi(str + 1);
+            key->keysym = 0;
+        }
+        luaA_object_emit_signal(L, ud, "property::key", 0);
     }
 }
 
-/** Define a global key binding. This key binding will always be available.
+/** Create a new key object.
  * \param L The Lua VM state.
- *
- * \luastack
- * \lparam A table with modifier keys: can be Control or Ctrl, Shift, Lock,
- * Mod1, Mod2, Mod3, Mod4, Mod5 or Any.
- * \lparam A key name.
- * \lparam A function to execute on key press.
- * \lparam A function to execute on key release.
- * \lreturn The key.
+ * \return The number of elements pushed on stack.
  */
 static int
 luaA_key_new(lua_State *L)
@@ -1004,27 +1003,47 @@ luaA_key_new(lua_State *L)
     keyb_t *k;
     const char *key;
 
-    /* be sure there's 5 arguments */
-    lua_settop(L, 5);
+    /* compat code */
+    if(lua_istable(L, 2) && lua_isstring(L, 3))
+    {
+        luaA_deprecate(L, "new syntax");
 
-    /* arg 2 is key mod table */
-    luaA_checktable(L, 2);
-    /* arg 3 is key */
-    key = luaL_checklstring(L, 3, &len);
+        /* be sure there's 5 arguments */
+        lua_settop(L, 5);
 
-    if(!lua_isnil(L, 4))
-        luaA_checkfunction(L, 4);
+        /* arg 2 is key mod table */
+        luaA_checktable(L, 2);
+        /* arg 3 is key */
+        key = luaL_checklstring(L, 3, &len);
 
-    if(!lua_isnil(L, 5))
-        luaA_checkfunction(L, 5);
+        if(!lua_isnil(L, 4))
+            luaA_checkfunction(L, 4);
 
-    k = key_new(L);
-    k->press = luaA_object_ref_item(L, -1, 4);
-    k->release = luaA_object_ref_item(L, -1, 4);
-    luaA_keystore(k, key, len);
-    k->mod = luaA_tomodifiers(L, 2);
+        if(!lua_isnil(L, 5))
+            luaA_checkfunction(L, 5);
 
-    return 1;
+        k = key_new(L);
+        k->press = luaA_object_ref_item(L, -1, 4);
+        k->release = luaA_object_ref_item(L, -1, 4);
+        luaA_keystore(L, -1, key, len);
+        k->modifiers = luaA_tomodifiers(L, 2);
+
+        if(!lua_isnil(L, 4))
+        {
+            lua_pushvalue(L, 4);
+            luaA_object_add_signal(L, -2, "press", -1);
+        }
+
+        if(!lua_isnil(L, 5))
+        {
+            lua_pushvalue(L, 5);
+            luaA_object_add_signal(L, -2, "release", -1);
+        }
+
+        return 1;
+    }
+
+    return luaA_class_new(L, &key_class);
 }
 
 /** Set a key array with a Lua table.
@@ -1116,117 +1135,82 @@ luaA_tomodifiers(lua_State *L, int ud)
     return mod;
 }
 
-/** Key object.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- * \luastack
- * \lfield key The key to press to triggers an event.
- * \lfield keysym Same as key, but return the name of the key symbol. It can
- * be identical to key, but for characters like '.' it will return 'period'.
- * \lfield modifiers The modifier key that should be pressed while the key is
- * pressed. An array with all the modifiers. Valid modifiers are: Any, Mod1,
- * Mod2, Mod3, Mod4, Mod5, Shift, Lock and Control.
- * \lfield press The function which is called when the key combination is pressed.
- * \lfield release The function which is called when the key combination is released.
- */
 static int
-luaA_key_index(lua_State *L)
+luaA_key_set_modifiers(lua_State *L, keyb_t *k)
 {
-    size_t len;
-    keyb_t *k = luaL_checkudata(L, 1, "key");
-    const char *attr = luaL_checklstring(L, 2, &len);
+    k->modifiers = luaA_tomodifiers(L, -1);
+    luaA_object_emit_signal(L, -3, "property::modifiers", 0);
+    return 0;
+}
 
-    if(luaA_usemetatable(L, 1, 2))
-        return 1;
+LUA_OBJECT_EXPORT_PROPERTY(key, keyb_t, modifiers, luaA_pushmodifiers)
 
-    switch(a_tokenize(attr, len))
+static int
+luaA_key_get_key(lua_State *L, keyb_t *k)
+{
+    if(k->keycode)
     {
-      case A_TK_KEY:
-        if(k->keycode)
-        {
-            char buf[12];
-            int slen = snprintf(buf, sizeof(buf), "#%u", k->keycode);
-            lua_pushlstring(L, buf, slen);
-        }
-        else
-        {
-            char buf[MAX(MB_LEN_MAX, 32)];
-            if(!key_press_lookup_string(k->keysym, buf, countof(buf)))
-                return 0;
-
-            lua_pushstring(L, buf);
-        }
-        break;
-      case A_TK_KEYSYM:
-        if(k->keysym)
-            lua_pushstring(L, XKeysymToString(k->keysym));
-        else
+        char buf[12];
+        int slen = snprintf(buf, sizeof(buf), "#%u", k->keycode);
+        lua_pushlstring(L, buf, slen);
+    }
+    else
+    {
+        char buf[MAX(MB_LEN_MAX, 32)];
+        if(!key_press_lookup_string(k->keysym, buf, countof(buf)))
             return 0;
-        break;
-      case A_TK_MODIFIERS:
-        luaA_pushmodifiers(L, k->mod);
-        break;
-      case A_TK_PRESS:
-        return luaA_object_push_item(L, 1, k->press);
-      case A_TK_RELEASE:
-        return luaA_object_push_item(L, 1, k->release);
-      default:
-        break;
+
+        lua_pushstring(L, buf);
     }
     return 1;
 }
 
-/** Key object newindex.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- */
 static int
-luaA_key_newindex(lua_State *L)
+luaA_key_get_keysym(lua_State *L, keyb_t *k)
 {
-    size_t len;
-    keyb_t *k = luaL_checkudata(L, 1, "key");
-    const char *attr = luaL_checklstring(L, 2, &len);
+    lua_pushstring(L, XKeysymToString(k->keysym));
+    return 1;
+}
 
-    switch(a_tokenize(attr, len))
-    {
-      case A_TK_KEY:
-        {
-            size_t klen;
-            const char *key = luaL_checklstring(L, 3, &klen);
-            luaA_keystore(k, key, klen);
-        }
-        break;
-      case A_TK_MODIFIERS:
-        k->mod = luaA_tomodifiers(L, 3);
-        break;
-      case A_TK_PRESS:
-        luaA_checkfunction(L, 3);
-        luaA_object_unref_item(L, 1, k->press);
-        k->press = luaA_object_ref_item(L, 1, 3);
-        break;
-      case A_TK_RELEASE:
-        luaA_checkfunction(L, 3);
-        luaA_object_unref_item(L, 1, k->release);
-        k->release = luaA_object_ref_item(L, 1, 3);
-        break;
-      default:
-        break;
-    }
+static int
+luaA_key_set_key(lua_State *L, keyb_t *k)
+{
+    size_t klen;
+    const char *key = luaL_checklstring(L, -1, &klen);
+    luaA_keystore(L, -3, key, klen);
     return 0;
 }
 
-const struct luaL_reg awesome_key_methods[] =
+void
+key_class_setup(lua_State *L)
 {
-    LUA_CLASS_METHODS(key)
-    { "__call", luaA_key_new },
-    { NULL, NULL }
-};
-const struct luaL_reg awesome_key_meta[] =
-{
-    LUA_OBJECT_META(key)
-    { "__index", luaA_key_index },
-    { "__newindex", luaA_key_newindex },
-    { "__gc", luaA_object_gc },
-    { NULL, NULL },
-};
+    static const struct luaL_reg key_methods[] =
+    {
+        LUA_CLASS_METHODS(key)
+        { "__call", luaA_key_new },
+        { NULL, NULL }
+    };
 
+    static const struct luaL_reg key_meta[] =
+    {
+        LUA_OBJECT_META(key)
+        LUA_CLASS_META
+        { "__gc", luaA_object_gc },
+        { NULL, NULL },
+    };
+
+    luaA_class_setup(L, &key_class, "key", (lua_class_allocator_t) key_new,
+                     key_methods, key_meta);
+    luaA_class_add_property(&key_class, A_TK_KEY,
+                            (lua_class_propfunc_t) luaA_key_set_key,
+                            (lua_class_propfunc_t) luaA_key_get_key,
+                            (lua_class_propfunc_t) luaA_key_set_key);
+    luaA_class_add_property(&key_class, A_TK_KEY,
+                            NULL,
+                            (lua_class_propfunc_t) luaA_key_get_keysym,
+                            NULL);
+    luaA_class_add_property(&key_class, A_TK_MODIFIERS,
+                            (lua_class_propfunc_t) luaA_key_set_modifiers,
+                            (lua_class_propfunc_t) luaA_key_get_modifiers,
+                            (lua_class_propfunc_t) luaA_key_set_modifiers);
+}
