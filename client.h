@@ -130,6 +130,8 @@ struct client_t
     xcb_window_t group_win;
     /** Window holding command needed to start it (session management related) */
     xcb_window_t leader_win;
+    /** Client's WM_PROTOCOLS property */
+    xcb_get_wm_protocols_reply_t protocols;
     /** Client logical screen */
     screen_t *screen;
     /** Client physical screen */

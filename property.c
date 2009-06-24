@@ -365,6 +365,41 @@ property_handle_net_wm_icon(void *data,
     return 0;
 }
 
+/** Update the list of supported protocols for a client.
+ * \param c The client.
+ */
+void
+property_update_wm_protocols(client_t *c)
+{
+    xcb_get_wm_protocols_reply_t protocols;
+
+    /* If this fails for any reason, we still got the old value */
+    if(xcb_get_wm_protocols_reply(globalconf.connection,
+                                  xcb_get_wm_protocols_unchecked(globalconf.connection,
+                                                                 c->win, WM_PROTOCOLS),
+                                  &protocols, NULL))
+    {
+        xcb_get_wm_protocols_reply_wipe(&c->protocols);
+        memcpy(&c->protocols, &protocols, sizeof(protocols));
+    }
+}
+
+static int
+property_handle_wm_protocols(void *data,
+                             xcb_connection_t *connection,
+                             uint8_t state,
+                             xcb_window_t window,
+                             xcb_atom_t name,
+                             xcb_get_property_reply_t *reply)
+{
+    client_t *c = client_getbywin(window);
+
+    if(c)
+        property_update_wm_protocols(c);
+
+    return 0;
+}
+
 /** The property notify event handler.
  * \param data currently unused.
  * \param connection The connection to the X server.
@@ -447,6 +482,8 @@ void a_xcb_set_property_handlers(void)
                              property_handle_wm_icon_name, NULL);
     xcb_property_set_handler(&globalconf.prophs, WM_CLASS, UINT_MAX,
                              property_handle_wm_class, NULL);
+    xcb_property_set_handler(&globalconf.prophs, WM_PROTOCOLS, UINT_MAX,
+                             property_handle_wm_protocols, NULL);
 
     /* EWMH stuff */
     xcb_property_set_handler(&globalconf.prophs, _NET_WM_NAME, UINT_MAX,
