@@ -209,20 +209,11 @@ bool
 client_hasproto(client_t *c, xcb_atom_t atom)
 {
     uint32_t i;
-    xcb_get_wm_protocols_reply_t protocols;
-    bool ret = false;
 
-    if(xcb_get_wm_protocols_reply(globalconf.connection,
-                                  xcb_get_wm_protocols_unchecked(globalconf.connection,
-                                                                 c->win, WM_PROTOCOLS),
-                                  &protocols, NULL))
-    {
-        for(i = 0; !ret && i < protocols.atoms_len; i++)
-            if(protocols.atoms[i] == atom)
-                ret = true;
-        xcb_get_wm_protocols_reply_wipe(&protocols);
-    }
-    return ret;
+    for(i = 0; i < c->protocols.atoms_len; i++)
+        if(c->protocols.atoms[i] == atom)
+            return true;
+    return false;
 }
 
 /** Sets focus on window - using xcb_set_input_focus or WM_TAKE_FOCUS
