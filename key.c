@@ -1023,8 +1023,6 @@ luaA_key_new(lua_State *L)
             luaA_checkfunction(L, 5);
 
         k = key_new(L);
-        k->press = luaA_object_ref_item(L, -1, 4);
-        k->release = luaA_object_ref_item(L, -1, 4);
         luaA_keystore(L, -1, key, len);
         k->modifiers = luaA_tomodifiers(L, 2);
 

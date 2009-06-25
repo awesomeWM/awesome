@@ -63,40 +63,17 @@
             } \
         for(; item_matching > 0; item_matching--) \
         { \
-            type *item = luaL_checkudata(globalconf.L, -1, #prefix); \
             switch(ev->response_type) \
             { \
               case xcbeventprefix##_PRESS: \
-                if(item->press) \
-                { \
-                    for(int i = 0; i < nargs; i++) \
-                        lua_pushvalue(globalconf.L, - nargs - item_matching); \
-                    if(oud) \
-                    { \
-                        luaA_object_push_item(globalconf.L, abs_oud, item); \
-                        luaA_object_push_item(globalconf.L,  -1, item->press); \
-                        lua_remove(globalconf.L, -2); \
-                    } \
-                    else \
-                        prefix##_push_item(globalconf.L, item, item->press); \
-                    luaA_dofunction(globalconf.L, nargs, 0); \
-                } \
+                for(int i = 0; i < nargs; i++) \
+                    lua_pushvalue(globalconf.L, - nargs - item_matching); \
+                luaA_object_emit_signal(globalconf.L, - nargs - 1, "press", nargs); \
                 break; \
               case xcbeventprefix##_RELEASE: \
-                if(item->release) \
-                { \
-                    for(int i = 0; i < nargs; i++) \
-                        lua_pushvalue(globalconf.L, - nargs - item_matching); \
-                    if(oud) \
-                    { \
-                        luaA_object_push_item(globalconf.L, abs_oud, item); \
-                        luaA_object_push_item(globalconf.L,  -1, item->release); \
-                        lua_remove(globalconf.L, -2); \
-                    } \
-                    else \
-                        prefix##_push_item(globalconf.L, item, item->release); \
-                    luaA_dofunction(globalconf.L, nargs, 0); \
-                } \
+                for(int i = 0; i < nargs; i++) \
+                    lua_pushvalue(globalconf.L, - nargs - item_matching); \
+                luaA_object_emit_signal(globalconf.L, - nargs - 1, "release", nargs); \
                 break; \
             } \
             lua_pop(globalconf.L, 1); \

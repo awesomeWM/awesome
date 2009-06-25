@@ -33,10 +33,6 @@ typedef struct keyb_t
     xcb_keysym_t keysym;
     /** Keycode */
     xcb_keycode_t keycode;
-    /** Lua function to execute on press */
-    void *press;
-    /** Lua function to execute on release */
-    void *release;
 } keyb_t;
 
 lua_class_t key_class;
