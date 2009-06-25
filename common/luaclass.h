@@ -72,6 +72,7 @@ void luaA_class_add_property(lua_class_t *, awesome_token_t, const char *,
 int luaA_usemetatable(lua_State *, int, int);
 int luaA_class_index(lua_State *);
 int luaA_class_newindex(lua_State *);
+int luaA_class_new(lua_State *, lua_class_t *);
 
 #define LUA_CLASS_FUNCS(prefix, lua_class) \
     static inline int                                                          \

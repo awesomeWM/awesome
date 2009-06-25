@@ -141,6 +141,12 @@ luaA_toudata(lua_State *L, int ud, const char *tname)
     return p;
 }
 
+#define luaA_checktable(L, n) \
+    do { \
+        if(!lua_istable(L, n)) \
+            luaL_typerror(L, n, "table"); \
+    } while(0)
+
 #endif
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

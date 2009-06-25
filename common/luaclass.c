@@ -302,4 +302,44 @@ luaA_class_newindex(lua_State *L)
     return 0;
 }
 
+/** Generic constructor function for objects.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ */
+int
+luaA_class_new(lua_State *L, lua_class_t *lua_class)
+{
+    /* Check we have a table that should contains some properties */
+    luaA_checktable(L, 2);
+
+    /* Create a new object */
+    void *object = lua_class->allocator(L);
+
+    /* Push the first key before iterating */
+    lua_pushnil(L);
+    /* Iterate over the property keys */
+    while(lua_next(L, 2))
+    {
+        /* Check that the key is a string.
+         * We cannot call tostring blindly or Lua will convert a key that is a
+         * number TO A STRING, confusing lua_next() */
+        if(lua_isstring(L, -2))
+        {
+            /* Lookup the property using token */
+            size_t len;
+            const char *attr = lua_tolstring(L, -2, &len);
+            lua_class_property_t *prop =
+                lua_class_property_array_getbyid(&lua_class->properties,
+                                                 a_tokenize(attr, len));
+
+            if(prop && prop->new)
+                prop->new(L, object);
+        }
+        /* Remove value */
+        lua_pop(L, 1);
+    }
+
+    return 1;
+}
+
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

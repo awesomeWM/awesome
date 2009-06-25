@@ -35,21 +35,6 @@
     luaA_warn(L, "%s: This function is deprecated and will be removed, see %s", \
               __FUNCTION__, repl)
 
-#define DO_LUA_TOSTRING(type, prefix, lua_type) \
-    static int \
-    luaA_##prefix##_tostring(lua_State *L) \
-    { \
-        type *p = luaL_checkudata(L, 1, lua_type); \
-        lua_pushfstring(L, lua_type ": %p", p); \
-        return 1; \
-    }
-
-#define luaA_checktable(L, n) \
-    do { \
-        if(!lua_istable(L, n)) \
-            luaL_typerror(L, n, "table"); \
-    } while(0)
-
 #define luaA_checkscreen(screen) \
     do { \
         if(screen < 0 || screen >= globalconf.screens.len) \
