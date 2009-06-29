@@ -167,15 +167,6 @@ int luaA_object_emit_signal_simple(lua_State *);
     }                                                                          \
                                                                                \
     static inline int                                                          \
-    prefix##_push_item(lua_State *L, type *item, void *ref)                    \
-    {                                                                          \
-        luaA_object_push(L, item);                                             \
-        luaA_object_push_item(L, -1, ref);                                     \
-        lua_remove(L, -2);                                                     \
-        return 1;                                                              \
-    }                                                                          \
-                                                                               \
-    static inline int                                                          \
     luaA_##prefix##_tostring(lua_State *L)                                     \
     {                                                                          \
         lua_pushfstring(L, lua_type ": %p", luaL_checkudata(L, 1, lua_type));  \
