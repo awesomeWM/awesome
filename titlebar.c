@@ -205,10 +205,10 @@ titlebar_client_detach(client_t *c)
         c->titlebar->type = WIBOX_TYPE_NORMAL;
         c->titlebar->screen = NULL;
 
-        wibox_unref(globalconf.L, c->titlebar);
+        luaA_object_unref(globalconf.L, c->titlebar);
         c->titlebar = NULL;
 
-        hook_property(client, c, "titlebar");
+        hook_property(c, "titlebar");
         client_stack();
     }
 }
@@ -220,7 +220,7 @@ void
 titlebar_client_attach(client_t *c)
 {
     /* check if we can register the object */
-    wibox_t *t = wibox_ref(globalconf.L, -1);
+    wibox_t *t = luaA_object_ref(globalconf.L, -1);
 
     titlebar_client_detach(c);
 
@@ -267,7 +267,7 @@ titlebar_client_attach(client_t *c)
 
     xcb_map_window(globalconf.connection, t->window);
 
-    hook_property(client, c, "titlebar");
+    hook_property(c, "titlebar");
     client_stack();
 }
 
@@ -285,7 +285,7 @@ titlebar_set_visible(wibox_t *t, bool visible)
         else
             titlebar_ban(t);
 
-        hook_property(wibox, t, "visible");
+        hook_property(t, "visible");
         client_stack();
     }
 }
@@ -388,7 +388,7 @@ luaA_titlebar_newindex(lua_State *L, wibox_t *titlebar, awesome_token_t tok)
                 titlebar_update_geometry(c);
                 /* call geometry hook for client because some like to
                  * set titlebar width in that hook, which make sense */
-                hook_property(client, c, "geometry");
+                hook_property(c, "geometry");
             }
         }
         break;

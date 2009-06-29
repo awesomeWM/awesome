@@ -39,7 +39,7 @@ stack_client_remove(client_t *c)
  * \param c The client to push.
  */
 void
-stack_client_push(client_t *c)
+stack_luaA_object_push(client_t *c)
 {
     stack_client_remove(c);
     client_array_push(&globalconf.stack, c);

@@ -48,7 +48,7 @@ luaA_wibox_gc(lua_State *L)
 void
 wibox_unref_simplified(wibox_t **item)
 {
-    wibox_unref(globalconf.L, *item);
+    luaA_object_unref(globalconf.L, *item);
 }
 
 static void
@@ -603,7 +603,7 @@ wibox_setvisible(wibox_t *wibox, bool v)
             wibox_systray_refresh(wibox);
         }
 
-        hook_property(wibox, wibox, "visible");
+        hook_property(wibox, "visible");
     }
 }
 
@@ -659,11 +659,11 @@ wibox_detach(wibox_t *wibox)
                 break;
             }
 
-        hook_property(wibox, wibox, "screen");
+        hook_property(wibox, "screen");
 
         wibox->screen = NULL;
 
-        wibox_unref(globalconf.L, wibox);
+        luaA_object_unref(globalconf.L, wibox);
     }
 }
 
@@ -675,7 +675,7 @@ wibox_attach(screen_t *s)
 {
     int phys_screen = screen_virttophys(screen_array_indexof(&globalconf.screens, s));
 
-    wibox_t *wibox = wibox_ref(globalconf.L, -1);
+    wibox_t *wibox = luaA_object_ref(globalconf.L, -1);
 
     wibox_detach(wibox);
 
@@ -707,7 +707,7 @@ wibox_attach(screen_t *s)
     else
         wibox_need_update(wibox);
 
-    hook_property(wibox, wibox, "screen");
+    hook_property(wibox, "screen");
 }
 
 /** Create a new wibox.
@@ -771,7 +771,7 @@ luaA_wibox_hasitem(lua_State *L, wibox_t *wibox, const void *item)
 {
     if(wibox->widgets_table)
     {
-        wibox_push(L, wibox);
+        luaA_object_push(L, wibox);
         luaA_object_push_item(L, -1, wibox->widgets_table);
         lua_remove(L, -2);
         if(lua_topointer(L, -1) == item || luaA_hasitem(L, item))
@@ -851,7 +851,7 @@ luaA_wibox_index(lua_State *L)
         lua_pushboolean(L, wibox->isvisible);
         break;
       case A_TK_CLIENT:
-        return client_push(L, client_getbytitlebar(wibox));
+        return luaA_object_push(L, client_getbytitlebar(wibox));
       case A_TK_SCREEN:
         if(!wibox->screen)
             return 0;

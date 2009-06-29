@@ -254,7 +254,7 @@ luaA_mouse_object_under_pointer(lua_State *L)
     client_t *client;
     if((wibox = wibox_getbywin(child)))
     {
-        wibox_push(L, wibox);
+        luaA_object_push(L, wibox);
 
         int16_t x = mouse_x - wibox->geometry.x;
         int16_t y = mouse_y - wibox->geometry.y;
@@ -266,13 +266,13 @@ luaA_mouse_object_under_pointer(lua_State *L)
 
         if(widget)
         {
-            widget_push(L, widget);
+            luaA_object_push(L, widget);
             return 2;
         }
         return 1;
     }
     else if((client = client_getbywin(child)))
-        return client_push(globalconf.L, client);
+        return luaA_object_push(globalconf.L, client);
 
     return 0;
 }

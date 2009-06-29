@@ -167,27 +167,9 @@ int luaA_object_emit_signal_simple(lua_State *);
     }                                                                          \
                                                                                \
     static inline int                                                          \
-    prefix##_push(lua_State *L, type *item)                                    \
-    {                                                                          \
-        return luaA_object_push(L, item);                                      \
-    }                                                                          \
-                                                                               \
-    static inline type *                                                       \
-    prefix##_ref(lua_State *L, int ud)                                         \
-    {                                                                          \
-        return luaA_object_ref(L, ud);                                         \
-    }                                                                          \
-                                                                               \
-    static inline void                                                         \
-    prefix##_unref(lua_State *L, type *item)                                   \
-    {                                                                          \
-        luaA_object_unref(L, item);                                            \
-    }                                                                          \
-                                                                               \
-    static inline int                                                          \
     prefix##_push_item(lua_State *L, type *item, void *ref)                    \
     {                                                                          \
-        prefix##_push(L, item);                                                \
+        luaA_object_push(L, item);                                             \
         luaA_object_push_item(L, -1, ref);                                     \
         lua_remove(L, -2);                                                     \
         return 1;                                                              \

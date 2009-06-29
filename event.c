@@ -42,7 +42,7 @@
 #include "common/atoms.h"
 #include "common/xutil.h"
 
-#define DO_EVENT_HOOK_CALLBACK(type, prefix, xcbtype, xcbeventprefix, arraytype, match) \
+#define DO_EVENT_HOOK_CALLBACK(type, xcbtype, xcbeventprefix, arraytype, match) \
     static void \
     event_##xcbtype##_callback(xcb_##xcbtype##_press_event_t *ev, \
                                arraytype *arr, \
@@ -58,7 +58,7 @@
                 if(oud) \
                     luaA_object_push_item(globalconf.L, abs_oud, *item); \
                 else \
-                    prefix##_push(globalconf.L, *item); \
+                    luaA_object_push(globalconf.L, *item); \
                 item_matching++; \
             } \
         for(; item_matching > 0; item_matching--) \
@@ -98,8 +98,8 @@ event_button_match(xcb_button_press_event_t *ev, button_t *b, void *data)
             && (b->modifiers == XCB_BUTTON_MASK_ANY || b->modifiers == ev->state));
 }
 
-DO_EVENT_HOOK_CALLBACK(button_t, button, button, XCB_BUTTON, button_array_t, event_button_match)
-DO_EVENT_HOOK_CALLBACK(keyb_t, key, key, XCB_KEY, key_array_t, event_key_match)
+DO_EVENT_HOOK_CALLBACK(button_t, button, XCB_BUTTON, button_array_t, event_button_match)
+DO_EVENT_HOOK_CALLBACK(keyb_t, key, XCB_KEY, key_array_t, event_key_match)
 
 /** Handle an event with mouse grabber if needed
  * \param x The x coordinate.
@@ -160,7 +160,7 @@ event_handle_button(void *data, xcb_connection_t *connection, xcb_button_press_e
             ev->event_y -= wibox->geometry.y;
         }
 
-        wibox_push(globalconf.L, wibox);
+        luaA_object_push(globalconf.L, wibox);
         event_button_callback(ev, &wibox->buttons, -1, 1, NULL);
 
         /* then try to match a widget binding */
@@ -170,14 +170,14 @@ event_handle_button(void *data, xcb_connection_t *connection, xcb_button_press_e
                                          &ev->event_x, &ev->event_y);
         if(w)
         {
-            widget_push(globalconf.L, w);
-            wibox_push(globalconf.L, wibox);
+            luaA_object_push(globalconf.L, w);
+            luaA_object_push(globalconf.L, wibox);
             event_button_callback(ev, &w->buttons, -2, 2, NULL);
         }
     }
     else if((c = client_getbywin(ev->event)))
     {
-        client_push(globalconf.L, c);
+        luaA_object_push(globalconf.L, c);
         event_button_callback(ev, &c->buttons, -1, 1, NULL);
         xcb_allow_events(globalconf.connection,
                          XCB_ALLOW_REPLAY_POINTER,
@@ -354,8 +354,8 @@ event_handle_widget_motionnotify(void *object,
             if((*mouse_over)->mouse_leave)
             {
                 /* call mouse leave function on old widget */
-                widget_push(globalconf.L, *mouse_over);
-                widget_push_item(globalconf.L, *mouse_over, (*mouse_over)->mouse_leave);
+                luaA_object_push(globalconf.L, *mouse_over);
+                luaA_object_push_item(globalconf.L, -1, (*mouse_over)->mouse_leave);
                 luaA_dofunction(globalconf.L, 1, 0);
             }
         }
@@ -365,8 +365,8 @@ event_handle_widget_motionnotify(void *object,
             *mouse_over = widget;
             if(widget->mouse_enter)
             {
-                widget_push(globalconf.L, widget);
-                widget_push_item(globalconf.L, widget, widget->mouse_enter);
+                luaA_object_push(globalconf.L, widget);
+                luaA_object_push_item(globalconf.L, -1, widget->mouse_enter);
                 luaA_dofunction(globalconf.L, 1, 0);
             }
         }
@@ -420,7 +420,7 @@ event_handle_leavenotify(void *data __attribute__ ((unused)),
     if((c = client_getbytitlebarwin(ev->event)) || (c = client_getbywin(ev->event)))
         if(globalconf.hooks.mouse_leave != LUA_REFNIL)
         {
-            client_push(globalconf.L, c);
+            luaA_object_push(globalconf.L, c);
             luaA_dofunction_from_registry(globalconf.L, globalconf.hooks.mouse_leave, 1, 0);
         }
 
@@ -431,8 +431,8 @@ event_handle_leavenotify(void *data __attribute__ ((unused)),
             if(wibox->mouse_over->mouse_leave)
             {
                 /* call mouse leave function on widget the mouse was over */
-                wibox_push(globalconf.L, wibox);
-                widget_push_item(globalconf.L, wibox->mouse_over, wibox->mouse_over->mouse_leave);
+                luaA_object_push(globalconf.L, wibox->mouse_over);
+                luaA_object_push_item(globalconf.L, -1, wibox->mouse_over->mouse_leave);
                 luaA_dofunction(globalconf.L, 1, 0);
             }
             wibox->mouse_over = NULL;
@@ -484,7 +484,7 @@ event_handle_enternotify(void *data __attribute__ ((unused)),
        || (c = client_getbywin(ev->event)))
         if(globalconf.hooks.mouse_enter != LUA_REFNIL)
         {
-            client_push(globalconf.L, c);
+            luaA_object_push(globalconf.L, c);
             luaA_dofunction_from_registry(globalconf.L, globalconf.hooks.mouse_enter, 1, 0);
         }
 
@@ -578,7 +578,7 @@ event_handle_key(void *data __attribute__ ((unused)),
         client_t *c;
         if((c = client_getbywin(ev->event)))
         {
-            client_push(globalconf.L, c);
+            luaA_object_push(globalconf.L, c);
             event_key_callback(ev, &c->keys, -1, 1, &keysym);
         }
         else

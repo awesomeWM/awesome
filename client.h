@@ -245,11 +245,11 @@ client_raise(client_t *c)
 static inline void
 client_lower(client_t *c)
 {
-    stack_client_push(c);
+    stack_luaA_object_push(c);
 
     /* Traverse all transient layers. */
     for(client_t *tc = c->transient_for; tc; tc = tc->transient_for)
-        stack_client_push(tc);
+        stack_luaA_object_push(tc);
 
     client_stack();
 }

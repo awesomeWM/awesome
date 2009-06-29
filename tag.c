@@ -28,7 +28,7 @@
 void
 tag_unref_simplified(tag_t **tag)
 {
-    tag_unref(globalconf.L, *tag);
+    luaA_object_unref(globalconf.L, *tag);
 }
 
 /** Garbage collect a tag.
@@ -62,7 +62,7 @@ tag_view(tag_t *tag, bool view)
         if(globalconf.hooks.tags != LUA_REFNIL)
         {
             lua_pushnumber(globalconf.L, screen_index + 1);
-            tag_push(globalconf.L, tag);
+            luaA_object_push(globalconf.L, tag);
             if(view)
                 lua_pushliteral(globalconf.L, "select");
             else
@@ -88,7 +88,7 @@ tag_append_to_screen(screen_t *s)
     int phys_screen = screen_virttophys(screen_index);
 
     tag->screen = s;
-    tag_array_append(&s->tags, tag_ref(globalconf.L, -1));
+    tag_array_append(&s->tags, luaA_object_ref(globalconf.L, -1));
     ewmh_update_net_numbers_of_desktop(phys_screen);
     ewmh_update_net_desktop_names(phys_screen);
     ewmh_update_workarea(phys_screen);
@@ -97,7 +97,7 @@ tag_append_to_screen(screen_t *s)
     if(globalconf.hooks.tags != LUA_REFNIL)
     {
         lua_pushnumber(globalconf.L, screen_index + 1);
-        tag_push(globalconf.L, tag);
+        luaA_object_push(globalconf.L, tag);
         lua_pushliteral(globalconf.L, "add");
         luaA_dofunction_from_registry(globalconf.L, globalconf.hooks.tags, 3, 0);
     }
@@ -127,14 +127,14 @@ tag_remove_from_screen(tag_t *tag)
     if(globalconf.hooks.tags != LUA_REFNIL)
     {
         lua_pushnumber(globalconf.L, screen_index + 1);
-        tag_push(globalconf.L, tag);
+        luaA_object_push(globalconf.L, tag);
         lua_pushliteral(globalconf.L, "remove");
         luaA_dofunction_from_registry(globalconf.L, globalconf.hooks.tags, 3, 0);
     }
 
     tag->screen = NULL;
 
-    tag_unref(globalconf.L, tag);
+    luaA_object_unref(globalconf.L, tag);
 }
 
 /** Tag a client with the tag on top of the stack.
@@ -143,12 +143,12 @@ tag_remove_from_screen(tag_t *tag)
 void
 tag_client(client_t *c)
 {
-    tag_t *t = tag_ref(globalconf.L, -1);
+    tag_t *t = luaA_object_ref(globalconf.L, -1);
 
     /* don't tag twice */
     if(is_client_tagged(c, t))
     {
-        tag_unref(globalconf.L, t);
+        luaA_object_unref(globalconf.L, t);
         return;
     }
 
@@ -159,8 +159,8 @@ tag_client(client_t *c)
     /* call hook */
     if(globalconf.hooks.tagged != LUA_REFNIL)
     {
-        client_push(globalconf.L, c);
-        tag_push(globalconf.L, t);
+        luaA_object_push(globalconf.L, c);
+        luaA_object_push(globalconf.L, t);
         luaA_dofunction_from_registry(globalconf.L, globalconf.hooks.tagged, 2, 0);
     }
 }
@@ -182,11 +182,11 @@ untag_client(client_t *c, tag_t *t)
             /* call hook */
             if(globalconf.hooks.tagged != LUA_REFNIL)
             {
-                client_push(globalconf.L, c);
-                tag_push(globalconf.L, t);
+                luaA_object_push(globalconf.L, c);
+                luaA_object_push(globalconf.L, t);
                 luaA_dofunction_from_registry(globalconf.L, globalconf.hooks.tagged, 2, 0);
             }
-            tag_unref(globalconf.L, t);
+            luaA_object_unref(globalconf.L, t);
             return;
         }
 }
@@ -295,7 +295,7 @@ luaA_tag_clients(lua_State *L)
     lua_createtable(L, clients->len, 0);
     for(i = 0; i < clients->len; i++)
     {
-        client_push(L, clients->tab[i]);
+        luaA_object_push(L, clients->tab[i]);
         lua_rawseti(L, -2, i + 1);
     }
 

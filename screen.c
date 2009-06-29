@@ -276,14 +276,14 @@ screen_client_moveto(client_t *c, screen_t *new_screen, bool dotag, bool doresiz
             foreach(new_tag, new_screen->tags)
                 if((*new_tag)->selected)
                 {
-                    tag_push(globalconf.L, *new_tag);
+                    luaA_object_push(globalconf.L, *new_tag);
                     tag_client(c);
                 }
     }
 
     if(!doresize)
     {
-        hook_property(client, c, "screen");
+        hook_property(c, "screen");
         return;
     }
 
@@ -333,7 +333,7 @@ screen_client_moveto(client_t *c, screen_t *new_screen, bool dotag, bool doresiz
     }
     /* move / resize the client */
     client_resize(c, new_geometry, false);
-    hook_property(client, c, "screen");
+    hook_property(c, "screen");
 }
 
 /** Push a screen onto the stack.
@@ -401,7 +401,7 @@ luaA_screen_tags(lua_State *L)
         lua_createtable(L, s->tags.len, 0);
         for(i = 0; i < s->tags.len; i++)
         {
-            tag_push(L, s->tags.tab[i]);
+            luaA_object_push(L, s->tags.tab[i]);
             lua_rawseti(L, -2, i + 1);
         }
     }

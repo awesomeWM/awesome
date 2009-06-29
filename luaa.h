@@ -229,11 +229,11 @@ void luaA_table2wtable(lua_State *);
 int luaA_next(lua_State *, int);
 bool luaA_isloop(lua_State *, int);
 
-#define hook_property(type, obj, prop) \
+#define hook_property(obj, prop) \
     do { \
         if(globalconf.hooks.property != LUA_REFNIL) \
         { \
-            type##_push(globalconf.L, obj); \
+            luaA_object_push(globalconf.L, obj); \
             lua_pushliteral(globalconf.L, prop); \
             luaA_dofunction_from_registry(globalconf.L, globalconf.hooks.property, 2, 0); \
         } \

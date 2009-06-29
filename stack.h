@@ -25,7 +25,7 @@
 #include "structs.h"
 
 void stack_client_remove(client_t *);
-void stack_client_push(client_t *);
+void stack_luaA_object_push(client_t *);
 void stack_client_append(client_t *);
 
 #endif

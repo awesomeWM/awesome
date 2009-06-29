@@ -52,7 +52,7 @@ luaA_widget_gc(lua_State *L)
 void
 widget_node_delete(widget_node_t *node)
 {
-    widget_unref(globalconf.L, node->widget);
+    luaA_object_unref(globalconf.L, node->widget);
 }
 
 /** Get a widget node from a wibox by coords.
@@ -117,7 +117,7 @@ luaA_table2widgets(lua_State *L, widget_node_array_t *widgets)
         {
             widget_node_t w;
             p_clear(&w, 1);
-            w.widget = widget_ref(L, -1);
+            w.widget = luaA_object_ref(L, -1);
             widget_node_array_append(widgets, w);
         }
         else
@@ -138,7 +138,7 @@ widget_geometries(wibox_t *wibox)
     if(wibox->widgets_table)
     {
         /* push wibox */
-        wibox_push(globalconf.L, wibox);
+        luaA_object_push(globalconf.L, wibox);
         /* push widgets table */
         luaA_object_push_item(globalconf.L, -1, wibox->widgets_table);
         /* remove wibox */
@@ -195,7 +195,7 @@ widget_geometries(wibox_t *wibox)
         widget_node_array_init(widgets);
 
         /* push wibox */
-        wibox_push(globalconf.L, wibox);
+        luaA_object_push(globalconf.L, wibox);
         /* push widgets table */
         luaA_object_push_item(globalconf.L, -1, wibox->widgets_table);
         /* remove wibox */
@@ -292,7 +292,7 @@ widget_render(wibox_t *wibox)
     widget_node_array_wipe(widgets);
     widget_node_array_init(widgets);
     /* push wibox */
-    wibox_push(globalconf.L, wibox);
+    luaA_object_push(globalconf.L, wibox);
     /* push widgets table */
     luaA_object_push_item(globalconf.L, -1, wibox->widgets_table);
     /* remove wibox */

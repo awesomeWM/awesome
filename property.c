@@ -280,7 +280,7 @@ property_update_wm_name(client_t *c)
     c->name = name;
 
     /* call hook */
-    hook_property(client, c, "name");
+    hook_property(c, "name");
 }
 
 /** Update WM_CLASS of a client.
@@ -333,7 +333,7 @@ property_update_wm_icon_name(client_t *c)
     c->icon_name = name;
 
     /* call hook */
-    hook_property(client, c, "icon_name");
+    hook_property(c, "icon_name");
 }
 
 static int
@@ -412,7 +412,7 @@ property_handle_net_wm_icon(void *data,
 
     if(c)
     {
-        client_push(globalconf.L, c);
+        luaA_object_push(globalconf.L, c);
         luaA_object_unref_item(globalconf.L, -1, c->icon);
         if(ewmh_window_icon_from_reply(reply))
             c->icon = luaA_object_ref_item(globalconf.L, -2, -1);
@@ -421,7 +421,7 @@ property_handle_net_wm_icon(void *data,
         /* remove client */
         lua_pop(globalconf.L, 1);
         /* execute hook */
-        hook_property(client, c, "icon");
+        hook_property(c, "icon");
     }
 
     return 0;

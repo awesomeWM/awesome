@@ -86,7 +86,7 @@ client_seturgent(client_t *c, bool urgent)
 
         xcb_set_wm_hints(globalconf.connection, c->win, &wmh);
 
-        hook_property(client, c, "urgent");
+        hook_property(c, "urgent");
     }
 }
 
@@ -174,7 +174,7 @@ client_unfocus_update(client_t *c)
     /* Call hook */
     if(globalconf.hooks.unfocus != LUA_REFNIL)
     {
-        client_push(globalconf.L, c);
+        luaA_object_push(globalconf.L, c);
         luaA_dofunction_from_registry(globalconf.L, globalconf.hooks.unfocus, 1, 0);
     }
 
@@ -316,7 +316,7 @@ client_focus_update(client_t *c)
     /* execute hook */
     if(globalconf.hooks.focus != LUA_REFNIL)
     {
-        client_push(globalconf.L, c);
+        luaA_object_push(globalconf.L, c);
         luaA_dofunction_from_registry(globalconf.L, globalconf.hooks.focus, 1, 0);
     }
 
@@ -515,7 +515,7 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
 
     client_t *c = client_new(globalconf.L);
     /* Push client in client list */
-    client_array_push(&globalconf.clients, client_ref(globalconf.L, -1));
+    client_array_push(&globalconf.clients, luaA_object_ref(globalconf.L, -1));
 
 
     screen = c->screen = screen_getbycoord(&globalconf.screens.tab[phys_screen],
@@ -542,7 +542,7 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
 
     if(ewmh_window_icon_get_reply(ewmh_icon_cookie))
     {
-        client_push(globalconf.L, c);
+        luaA_object_push(globalconf.L, c);
         c->icon = luaA_object_ref_item(globalconf.L, -1, -2);
         lua_pop(globalconf.L, 1);
     }
@@ -612,7 +612,7 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
     /* call hook */
     if(globalconf.hooks.manage != LUA_REFNIL)
     {
-        client_push(globalconf.L, c);
+        luaA_object_push(globalconf.L, c);
         lua_pushboolean(globalconf.L, startup);
         luaA_dofunction_from_registry(globalconf.L, globalconf.hooks.manage, 2, 0);
     }
@@ -784,7 +784,7 @@ client_resize(client_t *c, area_t geometry, bool hints)
         screen_client_moveto(c, new_screen, true, false);
 
         /* execute hook */
-        hook_property(client, c, "geometry");
+        hook_property(c, "geometry");
 
         return true;
     }
@@ -810,7 +810,7 @@ client_setminimized(client_t *c, bool s)
             window_state_set(c->win, XCB_WM_STATE_NORMAL);
         ewmh_client_update_hints(c);
         /* execute hook */
-        hook_property(client, c, "minimized");
+        hook_property(c, "minimized");
     }
 }
 
@@ -827,7 +827,7 @@ client_setsticky(client_t *c, bool s)
         c->issticky = s;
         client_need_reban(c);
         ewmh_client_update_hints(c);
-        hook_property(client, c, "sticky");
+        hook_property(c, "sticky");
     }
 }
 
@@ -870,7 +870,7 @@ client_setfullscreen(client_t *c, bool s)
         client_resize(c, geometry, false);
         client_stack();
         ewmh_client_update_hints(c);
-        hook_property(client, c, "fullscreen");
+        hook_property(c, "fullscreen");
     }
 }
 
@@ -906,7 +906,7 @@ client_setmaxhoriz(client_t *c, bool s)
         client_resize(c, geometry, c->size_hints_honor);
         client_stack();
         ewmh_client_update_hints(c);
-        hook_property(client, c, "maximized_horizontal");
+        hook_property(c, "maximized_horizontal");
     }
 }
 
@@ -942,7 +942,7 @@ client_setmaxvert(client_t *c, bool s)
         client_resize(c, geometry, c->size_hints_honor);
         client_stack();
         ewmh_client_update_hints(c);
-        hook_property(client, c, "maximized_vertical");
+        hook_property(c, "maximized_vertical");
     }
 }
 
@@ -966,7 +966,7 @@ client_setabove(client_t *c, bool s)
         client_stack();
         ewmh_client_update_hints(c);
         /* execute hook */
-        hook_property(client, c, "above");
+        hook_property(c, "above");
     }
 }
 
@@ -990,7 +990,7 @@ client_setbelow(client_t *c, bool s)
         client_stack();
         ewmh_client_update_hints(c);
         /* execute hook */
-        hook_property(client, c, "below");
+        hook_property(c, "below");
     }
 }
 
@@ -1007,7 +1007,7 @@ client_setmodal(client_t *c, bool s)
         client_stack();
         ewmh_client_update_hints(c);
         /* execute hook */
-        hook_property(client, c, "modal");
+        hook_property(c, "modal");
     }
 }
 
@@ -1030,7 +1030,7 @@ client_setontop(client_t *c, bool s)
         c->isontop = s;
         client_stack();
         /* execute hook */
-        hook_property(client, c, "ontop");
+        hook_property(c, "ontop");
     }
 }
 
@@ -1084,7 +1084,7 @@ client_unmanage(client_t *c)
     /* call hook */
     if(globalconf.hooks.unmanage != LUA_REFNIL)
     {
-        client_push(globalconf.L, c);
+        luaA_object_push(globalconf.L, c);
         luaA_dofunction_from_registry(globalconf.L, globalconf.hooks.unmanage, 1, 0);
     }
 
@@ -1101,7 +1101,7 @@ client_unmanage(client_t *c)
     /* set client as invalid */
     c->invalid = true;
 
-    client_unref(globalconf.L, c);
+    luaA_object_unref(globalconf.L, c);
 }
 
 /** Kill a client via a WM_DELETE_WINDOW request or KillClient if not
@@ -1151,7 +1151,7 @@ luaA_client_get(lua_State *L)
     if(screen == -1)
         foreach(c, globalconf.clients)
         {
-            client_push(L, *c);
+            luaA_object_push(L, *c);
             lua_rawseti(L, -2, i++);
         }
     else
@@ -1160,7 +1160,7 @@ luaA_client_get(lua_State *L)
         foreach(c, globalconf.clients)
             if((*c)->screen == &globalconf.screens.tab[screen])
             {
-                client_push(L, *c);
+                luaA_object_push(L, *c);
                 lua_rawseti(L, -2, i++);
             }
     }
@@ -1215,7 +1215,7 @@ client_setborder(client_t *c, int width)
     /* Changing border size also affects the size of the titlebar. */
     titlebar_update_geometry(c);
 
-    hook_property(client, c, "border_width");
+    hook_property(c, "border_width");
 }
 
 /** Kill a client.
@@ -1296,7 +1296,7 @@ luaA_client_tags(lua_State *L)
     foreach(tag, *tags)
         if(is_client_tagged(c, *tag))
         {
-            tag_push(L, *tag);
+            luaA_object_push(L, *tag);
             lua_rawseti(L, -2, ++j);
         }
 
@@ -1464,7 +1464,7 @@ luaA_client_struts(lua_State *L)
 
             ewmh_update_client_strut(c);
 
-            hook_property(client, c, "struts");
+            hook_property(c, "struts");
         }
     }
 
@@ -1502,7 +1502,7 @@ luaA_client_newindex(lua_State *L)
             client_need_reban(c);
             c->ishidden = b;
             client_need_reban(c);
-            hook_property(client, c, "hide");
+            hook_property(c, "hide");
         }
         break;
       case A_TK_MINIMIZED:
@@ -1522,7 +1522,7 @@ luaA_client_newindex(lua_State *L)
         c->icon = NULL;
         c->icon = luaA_object_ref_item(L, 1, 3);
         /* execute hook */
-        hook_property(client, c, "icon");
+        hook_property(c, "icon");
         break;
       case A_TK_OPACITY:
         if(lua_isnil(L, 3))
@@ -1545,7 +1545,7 @@ luaA_client_newindex(lua_State *L)
         break;
       case A_TK_SIZE_HINTS_HONOR:
         c->size_hints_honor = luaA_checkboolean(L, 3);
-        hook_property(client, c, "size_hints_honor");
+        hook_property(c, "size_hints_honor");
         break;
       case A_TK_BORDER_WIDTH:
         client_setborder(c, luaL_checknumber(L, 3));
@@ -1576,7 +1576,7 @@ luaA_client_newindex(lua_State *L)
         break;
       case A_TK_SKIP_TASKBAR:
         c->skiptb = luaA_checkboolean(L, 3);
-        hook_property(client, c, "skip_taskbar");
+        hook_property(c, "skip_taskbar");
         break;
       default:
         return 0;
@@ -1640,7 +1640,7 @@ luaA_client_index(lua_State *L)
         lua_pushstring(L, c->name);
         break;
       case A_TK_TRANSIENT_FOR:
-        return client_push(globalconf.L, c->transient_for);
+        return luaA_object_push(globalconf.L, c->transient_for);
       case A_TK_SKIP_TASKBAR:
         lua_pushboolean(L, c->skiptb);
         break;
@@ -1769,7 +1769,7 @@ luaA_client_index(lua_State *L)
         luaA_pushxcolor(L, c->border_color);
         break;
       case A_TK_TITLEBAR:
-        return wibox_push(L, c->titlebar);
+        return luaA_object_push(L, c->titlebar);
       case A_TK_URGENT:
         lua_pushboolean(L, c->isurgent);
         break;
@@ -1959,7 +1959,7 @@ luaA_client_module_index(lua_State *L)
     switch(a_tokenize(buf, len))
     {
       case A_TK_FOCUS:
-        return client_push(globalconf.L, globalconf.screen_focus->client_focus);
+        return luaA_object_push(globalconf.L, globalconf.screen_focus->client_focus);
         break;
       default:
         return 0;

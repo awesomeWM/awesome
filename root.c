@@ -117,14 +117,14 @@ luaA_root_keys(lua_State *L)
         luaA_checktable(L, 1);
 
         foreach(key, globalconf.keys)
-            key_unref(globalconf.L, *key);
+            luaA_object_unref(globalconf.L, *key);
 
         key_array_wipe(&globalconf.keys);
         key_array_init(&globalconf.keys);
 
         lua_pushnil(L);
         while(lua_next(L, 1))
-            key_array_append(&globalconf.keys, key_ref(L, -1));
+            key_array_append(&globalconf.keys, luaA_object_ref(L, -1));
 
         int nscreen = xcb_setup_roots_length(xcb_get_setup(globalconf.connection));
 
@@ -141,7 +141,7 @@ luaA_root_keys(lua_State *L)
     lua_createtable(L, globalconf.keys.len, 0);
     for(int i = 0; i < globalconf.keys.len; i++)
     {
-        key_push(L, globalconf.keys.tab[i]);
+        luaA_object_push(L, globalconf.keys.tab[i]);
         lua_rawseti(L, -2, i + 1);
     }
 
@@ -164,14 +164,14 @@ luaA_root_buttons(lua_State *L)
         luaA_checktable(L, 1);
 
         foreach(button, globalconf.buttons)
-            button_unref(globalconf.L, *button);
+            luaA_object_unref(globalconf.L, *button);
 
         button_array_wipe(&globalconf.buttons);
         button_array_init(&globalconf.buttons);
 
         lua_pushnil(L);
         while(lua_next(L, 1))
-            button_array_append(&globalconf.buttons, button_ref(L, -1));
+            button_array_append(&globalconf.buttons, luaA_object_ref(L, -1));
 
         return 1;
     }
@@ -179,7 +179,7 @@ luaA_root_buttons(lua_State *L)
     lua_createtable(L, globalconf.buttons.len, 0);
     for(int i = 0; i < globalconf.buttons.len; i++)
     {
-        button_push(L, globalconf.buttons.tab[i]);
+        luaA_object_push(L, globalconf.buttons.tab[i]);
         lua_rawseti(L, -2, i + 1);
     }
 
@@ -229,7 +229,7 @@ luaA_root_wiboxes(lua_State *L)
 
     for(int i = 0; i < globalconf.wiboxes.len; i++)
     {
-        wibox_push(L, globalconf.wiboxes.tab[i]);
+        luaA_object_push(L, globalconf.wiboxes.tab[i]);
         lua_rawseti(L, -2, i + 1);
     }
 

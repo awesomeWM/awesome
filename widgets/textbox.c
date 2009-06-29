@@ -190,7 +190,7 @@ luaA_textbox_index(lua_State *L, awesome_token_t token)
         lua_pushstring(L, draw_align_tostr(d->bg_align));
         return 1;
       case A_TK_BG_IMAGE:
-        return image_push(L, d->bg_image);
+        return luaA_object_push(L, d->bg_image);
       case A_TK_BG:
         return luaA_pushcolor(L, &d->bg);
       case A_TK_MARGIN:

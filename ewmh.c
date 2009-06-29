@@ -388,7 +388,7 @@ ewmh_process_client_message(xcb_client_message_event_t *ev)
                 for(int i = 0; i < tags->len; i++)
                     if((int)ev->data.data32[0] == i)
                     {
-                        tag_push(globalconf.L, tags->tab[i]);
+                        luaA_object_push(globalconf.L, tags->tab[i]);
                         tag_client(c);
                     }
                     else
@@ -525,7 +525,7 @@ ewmh_client_check_hints(client_t *c)
             for(int i = 0; i < tags->len; i++)
                 if(desktop == i)
                 {
-                    tag_push(globalconf.L, tags->tab[i]);
+                    luaA_object_push(globalconf.L, tags->tab[i]);
                     tag_client(c);
                 }
                 else
@@ -617,7 +617,7 @@ ewmh_process_client_strut(client_t *c, xcb_get_property_reply_t *strut_r)
             c->strut.bottom_start_x = strut[10];
             c->strut.bottom_end_x = strut[11];
 
-            hook_property(client, c, "struts");
+            hook_property(c, "struts");
         }
     }
 
