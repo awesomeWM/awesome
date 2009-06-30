@@ -14,6 +14,7 @@ local capi =
 {
     hooks = hooks
 }
+local util = require("awful.util")
 
 --- Hooks module for awful
 module("awful.hooks")
@@ -53,6 +54,7 @@ for name, hook in pairs(capi.hooks) do
     _M[name] = {}
     if name == 'timer' then
         _M[name].register = function (time, f, runnow)
+            util.deprecate("timer object")
             if type(time) ~= 'number' or type(f) ~= 'function' or time <= 0 then
                 return
             end
