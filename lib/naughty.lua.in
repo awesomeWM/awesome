@@ -14,7 +14,8 @@ local capi = { screen = screen,
                dbus = dbus,
                widget = widget,
                wibox = wibox,
-               image = image }
+               image = image,
+               timer = timer }
 local hooks = require("awful.hooks")
 local button = require("awful.button")
 local util = require("awful.util")
@@ -175,7 +176,7 @@ function destroy(notification)
     if notification and notification.box.screen then
         local scr = notification.box.screen
         table.remove(notifications[notification.box.screen][notification.position], notification.idx)
-        hooks.timer.unregister(notification.die)
+        notification.timer:stop()
         notification.box.screen = nil
         arrange(scr)
         return true
@@ -293,9 +294,12 @@ function notify(args)
     if title then title = title .. "\n" else title = "" end
 
     -- hook destroy
+    local timer_die = capi.timer { timeout = timeout }
     local die = function () destroy(notification) end
-    hooks.timer.register(timeout, die)
+    timer_die:add_signal("timeout", die)
+    timer_die:start()
     notification.die = die
+    notification.timer = timer_die
 
     local run = function ()
         if args.run then
@@ -307,7 +311,7 @@ function notify(args)
 
     local hover_destroy = function ()
         if hover_timeout == 0 then die()
-          else hooks.timer.register(hover_timeout, die) end
+          else timer_die:stop() end
     end
 
     -- create textbox
