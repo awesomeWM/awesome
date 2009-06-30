@@ -23,6 +23,7 @@
 --}}}
 
 local wibox = wibox
+local timer = timer
 local widget = widget
 local awful = require("awful")
 local beautiful = require("beautiful")
@@ -552,6 +553,13 @@ function run(args)
     gamedata.running = true
 end
 
-awful.hooks.timer.register(0.02, shots.handle)
-awful.hooks.timer.register(0.03, shots.handle_enemy)
-awful.hooks.timer.register(0.01, enemies.handle)
+-- Start timers
+local t = timer { timeout = 0.02 }
+t:add_signal("timeout", shots.handle)
+t:start()
+local t = timer { timeout = 0.03 }
+t:add_signal("timeout", shots.handle_enemy)
+t:start()
+local t = timer { timeout = 0.01 }
+t:add_signal("timeout", enemies.handle)
+t:start()
