@@ -89,10 +89,8 @@ end
 -- }}}
 
 -- {{{ Wibox
--- Create a textbox widget
-mytextbox = widget({ type = "textbox", align = "right" })
--- Set the default text in textbox
-mytextbox.text = "<b><small> " .. awesome.release .. " </small></b>"
+-- Create a textclock widget
+mytextclock = awful.widget.textclock({ align = "right" })
 
 -- Create a laucher widget and a main menu
 myawesomemenu = {
@@ -182,7 +180,7 @@ for s = 1, screen.count() do
             layout = awful.widget.layout.horizontal.leftright
         },
         mylayoutbox[s],
-        mytextbox,
+        mytextclock,
         s == 1 and mysystray or nil,
         mytasklist[s],
         layout = awful.widget.layout.horizontal.rightleft
@@ -404,8 +402,4 @@ awful.hooks.tags.register(function (screen, tag, view)
     end
 end)
 
--- Hook called every minute
-awful.hooks.timer.register(60, function ()
-    mytextbox.text = os.date(" %a %b %d, %H:%M ")
-end)
 -- }}}
