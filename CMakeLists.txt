@@ -64,6 +64,7 @@ set(AWE_SRCS
     ${SOURCE_DIR}/image.c
     ${SOURCE_DIR}/draw.c
     ${SOURCE_DIR}/color.c
+    ${SOURCE_DIR}/timer.c
     ${SOURCE_DIR}/common/buffer.c
     ${SOURCE_DIR}/common/atoms.c
     ${SOURCE_DIR}/common/util.c

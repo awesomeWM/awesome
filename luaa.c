@@ -30,6 +30,7 @@
 #include <basedir_fs.h>
 
 #include "awesome.h"
+#include "timer.h"
 #include "awesome-version-internal.h"
 #include "ewmh.h"
 #include "luaa.h"
@@ -767,6 +768,9 @@ luaA_init(xdgHandle* xdg)
     /* Export keys */
     luaA_class_setup(L, &key_class, "key", (lua_class_allocator_t) key_new,
                      awesome_key_methods, awesome_key_meta);
+
+    /* Export timer */
+    timer_class_setup(L);
 
     /* init hooks */
     globalconf.hooks.manage = LUA_REFNIL;

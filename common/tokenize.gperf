@@ -103,6 +103,7 @@ text
 textbox
 ticks_count
 ticks_gap
+timeout
 titlebar
 top
 transient_for
