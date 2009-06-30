@@ -12,6 +12,7 @@ require("awful.widget.prompt")
 require("awful.widget.progressbar")
 require("awful.widget.graph")
 require("awful.widget.layoutbox")
+require("awful.widget.textclock")
 require("awful.widget.layout")
 
 --- Widget module for awful
