@@ -25,6 +25,9 @@
 #include "ewmh.h"
 #include "widget.h"
 
+static lua_class_t tag_class;
+LUA_OBJECT_FUNCS(tag_class, tag_t, tag, "tag")
+
 void
 tag_unref_simplified(tag_t **tag)
 {
@@ -45,40 +48,51 @@ luaA_tag_gc(lua_State *L)
 }
 
 /** View or unview a tag.
- * \param tag the tag
- * \param view set visible or not
+ * \param L The Lua VM state.
+ * \param udx The index of the tag on the stack.
+ * \param view Set visible or not.
  */
 static void
-tag_view(tag_t *tag, bool view)
+tag_view(lua_State *L, int udx, bool view)
 {
+    tag_t *tag = luaL_checkudata(L, udx, "tag");
     if(tag->selected != view)
     {
-        int screen_index = screen_array_indexof(&globalconf.screens, tag->screen);
-
         tag->selected = view;
-        tag->screen->need_reban = true;
-        ewmh_update_net_current_desktop(screen_virttophys(screen_index));
 
-        if(globalconf.hooks.tags != LUA_REFNIL)
+        luaA_object_emit_signal(L, udx, "property::selected", 0);
+
+        if(tag->screen)
         {
-            lua_pushnumber(globalconf.L, screen_index + 1);
-            luaA_object_push(globalconf.L, tag);
-            if(view)
-                lua_pushliteral(globalconf.L, "select");
-            else
-                lua_pushliteral(globalconf.L, "unselect");
-            luaA_dofunction_from_registry(globalconf.L, globalconf.hooks.tags, 3, 0);
+            int screen_index = screen_array_indexof(&globalconf.screens, tag->screen);
+
+            tag->screen->need_reban = true;
+
+            ewmh_update_net_current_desktop(screen_virttophys(screen_index));
+
+            if(globalconf.hooks.tags != LUA_REFNIL)
+            {
+                lua_pushnumber(globalconf.L, screen_index + 1);
+                luaA_object_push(globalconf.L, tag);
+                if(view)
+                    lua_pushliteral(globalconf.L, "select");
+                else
+                    lua_pushliteral(globalconf.L, "unselect");
+                luaA_dofunction_from_registry(globalconf.L, globalconf.hooks.tags, 3, 0);
+            }
         }
     }
 }
 
-/** Append a tag which on top of the stack to a screen.
- * \param s screen the screen id
+/** Append a tag to a screen.
+ * \param L The Lua VM state.
+ * \param udx The tag index on the stack.
+ * \param s The screen.
  */
 void
-tag_append_to_screen(screen_t *s)
+tag_append_to_screen(lua_State *L, int udx, screen_t *s)
 {
-    tag_t *tag = luaL_checkudata(globalconf.L, -1, "tag");
+    tag_t *tag = luaL_checkudata(globalconf.L, udx, "tag");
 
     /* can't attach a tag twice */
     if(tag->screen)
@@ -88,10 +102,14 @@ tag_append_to_screen(screen_t *s)
     int phys_screen = screen_virttophys(screen_index);
 
     tag->screen = s;
-    tag_array_append(&s->tags, luaA_object_ref(globalconf.L, -1));
+    tag_array_append(&s->tags, luaA_object_ref(globalconf.L, udx));
     ewmh_update_net_numbers_of_desktop(phys_screen);
     ewmh_update_net_desktop_names(phys_screen);
     ewmh_update_workarea(phys_screen);
+
+    luaA_object_push(globalconf.L, tag);
+    luaA_object_emit_signal(L, -1, "property::screen", 0);
+    lua_pop(L, 1);
 
     /* call hook */
     if(globalconf.hooks.tags != LUA_REFNIL)
@@ -133,6 +151,10 @@ tag_remove_from_screen(tag_t *tag)
     }
 
     tag->screen = NULL;
+
+    luaA_object_push(globalconf.L, tag);
+    luaA_object_emit_signal(globalconf.L, -1, "property::screen", 0);
+    lua_pop(globalconf.L, 1);
 
     luaA_object_unref(globalconf.L, tag);
 }
@@ -227,7 +249,11 @@ tag_view_only(tag_t *target)
 {
     if(target)
         foreach(tag, target->screen->tags)
-            tag_view(*tag, *tag == target);
+        {
+            luaA_object_push(globalconf.L, *tag);
+            tag_view(globalconf.L, -1, *tag == target);
+            lua_pop(globalconf.L, 1);
+        }
 }
 
 /** View only a tag, selected by its index.
@@ -253,13 +279,21 @@ tag_view_only_byindex(screen_t *screen, int dindex)
 static int
 luaA_tag_new(lua_State *L)
 {
-    size_t len;
-    const char *name = luaL_checklstring(L, 2, &len);
-    tag_t *tag = tag_new(globalconf.L);
+    if(lua_isstring(L, 2))
+    {
+        /* compat code */
+        luaA_deprecate(L, "new syntax");
 
-    a_iso2utf8(name, len, &tag->name, NULL);
+        size_t len;
+        const char *name = luaL_checklstring(L, 2, &len);
+        tag_t *tag = tag_new(globalconf.L);
 
-    return 1;
+        a_iso2utf8(name, len, &tag->name, NULL);
+
+        return 1;
+    }
+
+    return luaA_class_new(L, &tag_class);
 }
 
 /** Get or set the clients attached to this tag.
@@ -302,113 +336,106 @@ luaA_tag_clients(lua_State *L)
     return 1;
 }
 
-/** Tag object.
+LUA_OBJECT_EXPORT_PROPERTY(tag, tag_t, name, lua_pushstring)
+LUA_OBJECT_EXPORT_PROPERTY(tag, tag_t, selected, lua_pushboolean)
+
+/** Set the tag name.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
- * \luastack
- * \lfield name Tag name.
- * \lfield screen Screen number of the tag.
- * \lfield layout Tag layout.
- * \lfield selected True if the client is selected to be viewed.
  */
 static int
-luaA_tag_index(lua_State *L)
+luaA_tag_set_name(lua_State *L, tag_t *tag)
 {
     size_t len;
-    tag_t *tag = luaL_checkudata(L, 1, "tag");
-    const char *attr;
-
-    if(luaA_usemetatable(L, 1, 2))
-        return 1;
-
-    attr = luaL_checklstring(L, 2, &len);
-
-    switch(a_tokenize(attr, len))
-    {
-      case A_TK_NAME:
-        lua_pushstring(L, tag->name);
-        break;
-      case A_TK_SCREEN:
-        if(!tag->screen)
-            return 0;
-        lua_pushnumber(L, screen_array_indexof(&globalconf.screens, tag->screen) + 1);
-        break;
-      case A_TK_SELECTED:
-        lua_pushboolean(L, tag->selected);
-        break;
-      default:
-        return 0;
-    }
-
-    return 1;
+    const char *buf = luaL_checklstring(L, -1, &len);
+    p_delete(&tag->name);
+    a_iso2utf8(buf, len, &tag->name, NULL);
+    luaA_object_emit_signal(L, -3, "property::name", 0);
+    return 0;
 }
 
-/** Tag newindex.
+/** Set the tag selection status.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
  */
 static int
-luaA_tag_newindex(lua_State *L)
+luaA_tag_set_selected(lua_State *L, tag_t *tag)
 {
-    size_t len;
-    tag_t *tag = luaL_checkudata(L, 1, "tag");
-    const char *attr = luaL_checklstring(L, 2, &len);
+    tag_view(L, -3, luaA_checkboolean(L, -1));
+    return 0;
+}
 
-    switch(a_tokenize(attr, len))
+/** Set the tag screen.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ */
+static int
+luaA_tag_set_screen(lua_State *L, tag_t *tag)
+{
+    int screen;
+    if(lua_isnil(L, -1))
+        screen = -1;
+    else
     {
-        int screen;
-
-      case A_TK_NAME:
-        {
-            const char *buf = luaL_checklstring(L, 3, &len);
-            p_delete(&tag->name);
-            a_iso2utf8(buf, len, &tag->name, NULL);
-        }
-        break;
-      case A_TK_SCREEN:
-        if(!lua_isnil(L, 3))
-        {
-            screen = luaL_checknumber(L, 3) - 1;
-            luaA_checkscreen(screen);
-        }
-        else
-            screen = -1;
-
-        if(tag->screen)
-            tag_remove_from_screen(tag);
-
-        if(screen != -1)
-        {
-            /* push tag on top of the stack */
-            lua_pushvalue(L, 1);
-            tag_append_to_screen(&globalconf.screens.tab[screen]);
-        }
-        break;
-      case A_TK_SELECTED:
-        if(tag->screen)
-            tag_view(tag, luaA_checkboolean(L, 3));
-        return 0;
-      default:
-        return 0;
+        screen = luaL_checknumber(L, -1) - 1;
+        luaA_checkscreen(screen);
     }
+
+    if(tag->screen)
+        tag_remove_from_screen(tag);
+
+    if(screen != -1)
+        tag_append_to_screen(L, -3, &globalconf.screens.tab[screen]);
 
     return 0;
 }
 
-const struct luaL_reg awesome_tag_methods[] =
+/** Get the tag screen.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ */
+static int
+luaA_tag_get_screen(lua_State *L, tag_t *tag)
 {
-    LUA_CLASS_METHODS(tag)
-    { "__call", luaA_tag_new },
-    { NULL, NULL }
-};
-const struct luaL_reg awesome_tag_meta[] =
+    if(!tag->screen)
+        return 0;
+    lua_pushnumber(L, screen_array_indexof(&globalconf.screens, tag->screen) + 1);
+    return 1;
+}
+
+void
+tag_class_setup(lua_State *L)
 {
-    LUA_OBJECT_META(tag)
-    { "clients", luaA_tag_clients },
-    { "__index", luaA_tag_index },
-    { "__newindex", luaA_tag_newindex },
-    { "__gc", luaA_tag_gc },
-    { NULL, NULL },
-};
+    static const struct luaL_reg tag_methods[] =
+    {
+        LUA_CLASS_METHODS(tag)
+        { "__call", luaA_tag_new },
+        { NULL, NULL }
+    };
+
+    static const struct luaL_reg tag_meta[] =
+    {
+        LUA_OBJECT_META(tag)
+        LUA_CLASS_META
+        { "clients", luaA_tag_clients },
+        { "__gc", luaA_tag_gc },
+        { NULL, NULL },
+    };
+
+    luaA_class_setup(L, &tag_class, "tag", (lua_class_allocator_t) tag_new,
+                     tag_methods, tag_meta);
+    luaA_class_add_property(&tag_class, A_TK_NAME,
+                            (lua_class_propfunc_t) luaA_tag_set_name,
+                            (lua_class_propfunc_t) luaA_tag_get_name,
+                            (lua_class_propfunc_t) luaA_tag_set_name);
+    luaA_class_add_property(&tag_class, A_TK_SCREEN,
+                            (lua_class_propfunc_t) NULL,
+                            (lua_class_propfunc_t) luaA_tag_get_screen,
+                            (lua_class_propfunc_t) luaA_tag_set_screen);
+    luaA_class_add_property(&tag_class, A_TK_SELECTED,
+                            (lua_class_propfunc_t) luaA_tag_set_selected,
+                            (lua_class_propfunc_t) luaA_tag_get_selected,
+                            (lua_class_propfunc_t) luaA_tag_set_selected);
+}
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

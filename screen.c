@@ -394,7 +394,7 @@ luaA_screen_tags(lua_State *L)
         /* push new tags */
         lua_pushnil(L);
         while(lua_next(L, 2))
-            tag_append_to_screen(s);
+            tag_append_to_screen(L, -1, s);
     }
     else
     {

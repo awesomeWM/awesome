@@ -43,12 +43,12 @@ void tag_client(client_t *);
 void untag_client(client_t *, tag_t *);
 bool is_client_tagged(client_t *, tag_t *);
 void tag_view_only_byindex(screen_t *, int);
-void tag_append_to_screen(screen_t *);
+void tag_append_to_screen(lua_State *, int, screen_t *);
 void tag_unref_simplified(tag_t **);
 
 ARRAY_FUNCS(tag_t *, tag, tag_unref_simplified)
-lua_class_t tag_class;
-LUA_OBJECT_FUNCS(tag_class, tag_t, tag, "tag")
+
+void tag_class_setup(lua_State *);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

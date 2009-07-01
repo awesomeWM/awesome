@@ -59,8 +59,6 @@ extern const struct luaL_reg awesome_screen_methods[];
 extern const struct luaL_reg awesome_screen_meta[];
 extern const struct luaL_reg awesome_client_methods[];
 extern const struct luaL_reg awesome_client_meta[];
-extern const struct luaL_reg awesome_tag_methods[];
-extern const struct luaL_reg awesome_tag_meta[];
 extern const struct luaL_reg awesome_wibox_methods[];
 extern const struct luaL_reg awesome_wibox_meta[];
 
@@ -743,8 +741,7 @@ luaA_init(xdgHandle* xdg)
                      awesome_image_methods, awesome_image_meta);
 
     /* Export tag */
-    luaA_class_setup(L, &tag_class, "tag", (lua_class_allocator_t) tag_new,
-                     awesome_tag_methods, awesome_tag_meta);
+    tag_class_setup(L);
 
     /* Export wibox */
     luaA_class_setup(L, &wibox_class, "wibox", (lua_class_allocator_t) wibox_new,

@@ -78,7 +78,7 @@ for s = 1, screen.count() do
     tags[s] = {}
     -- Create 9 tags per screen.
     for tagnumber = 1, 9 do
-        tags[s][tagnumber] = tag(tagnumber)
+        tags[s][tagnumber] = tag { name = tagnumber }
         -- Add tags to screen one by one
         tags[s][tagnumber].screen = s
         awful.layout.set(layouts[1], tags[s][tagnumber])
