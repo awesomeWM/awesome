@@ -24,6 +24,7 @@ local util = require("awful.util")
 local widget = require("awful.widget")
 local mouse = require("awful.mouse")
 local client = require("awful.client")
+local layout = require("awful.widget.layout")
 
 --- Titlebar module for awful
 module("awful.titlebar")
@@ -72,7 +73,7 @@ function add(c, args)
 
     local tb = capi.wibox(args)
 
-    local title = capi.widget({ type = "textbox", align = "flex" })
+    local title = capi.widget({ type = "textbox" })
     if c.name then
         title.text = "<span font_desc='" .. data[c].font .. "'> " ..
                      util.escape(c.name) .. " </span>"
@@ -85,7 +86,7 @@ function add(c, args)
         button({ args.modkey }, 3, button_callback_resize))
     title:buttons(bts)
 
-    local appicon = capi.widget({ type = "imagebox", align = "left" })
+    local appicon = capi.widget({ type = "imagebox" })
     appicon.image = c.icon
 
     -- for each button group, call create for the client.
@@ -93,8 +94,10 @@ function add(c, args)
     -- data[c].button_sets for late updates and add the
     -- individual buttons to the array part of the widget
     -- list
-    local widget_list = { appicon = appicon, title = title }
-    local iw = #widget_list
+    local widget_list = {
+        layout = layout.horizontal.rightleft
+    }
+    local iw = 1
     local is = 1
     data[c].button_sets = {}
     for i = 1, #button_groups do
@@ -109,7 +112,16 @@ function add(c, args)
         end
     end
 
-    tb.widgets = widget_list
+    tb.widgets = {
+        widget_list,
+        {
+            appicon = appicon,
+            title = title,
+            layout = layout.horizontal.flex
+        },
+        layout = layout.horizontal.rightleft
+    }
+
     c.titlebar = tb
 
     update(c)
@@ -122,13 +134,13 @@ function update(c, prop)
      if type(c) == "client" and c.titlebar and data[c] then
         local widgets = c.titlebar.widgets
         if prop == "name" then
-            if widgets.title then
-                widgets.title.text = "<span font_desc='" .. data[c].font ..
+            if widgets[2].title then
+                widgets[2].title.text = "<span font_desc='" .. data[c].font ..
                                      "'> ".. util.escape(c.name) .. " </span>"
             end
         elseif prop == "icon" then
-            if widgets.appicon then
-                widgets.appicon.image = c.icon
+            if widgets[2].appicon then
+                widgets[2].appicon.image = c.icon
             end
         end
         if capi.client.focus == c then
@@ -208,7 +220,9 @@ local function button_group_create(c, group, modkey, theme )
     local s = {}
     s.name = group.name
     s.select_state = group.select_state
-    s.buttons = {}
+    s.buttons = {
+        layout = layout.horizontal.rightleft
+    }
     for n,state in pairs(group.states) do
         s.buttons[n] = button_new(c, s.name, modkey, theme, state)
         if (s.buttons[n] == nil) then return end
@@ -328,14 +342,6 @@ end
 --                    Finally the last parameter is the action for mouse
 --                    button 1
 
-local close_buttons = button_group("close",
-                                   { align = "left" },
-                                   select_state_focus,
-                                   { idx = "n", img = "normal",
-                                     action = function (w, t) t.client:kill() end },
-                                   { idx = "f", img = "focus",
-                                     action = function (w, t) t.client:kill() end })
-
 local ontop_buttons = button_group("ontop",
                                    { align = "right" },
                                    function(c,p) return select_state(c, p, "ontop") end,
@@ -375,6 +381,15 @@ local maximized_buttons = button_group("maximized",
                                      { idx = "f/a", img = "focus_active",
                                        action = function(w, t) t.client.maximized_horizontal = false
                                                                t.client.maximized_vertical = false end })
+
+local close_buttons = button_group("close",
+                                   { align = "left" },
+                                   select_state_focus,
+                                   { idx = "n", img = "normal",
+                                     action = function (w, t) t.client:kill() end },
+                                   { idx = "f", img = "focus",
+                                     action = function (w, t) t.client:kill() end })
+
 local function floating_update(w, t)
     client.floating.toggle(t.client)
 end
@@ -387,11 +402,11 @@ local floating_buttons = button_group("floating",
                                      { idx = "n/a", img = "normal_active", action = floating_update },
                                      { idx = "f/a", img = "focus_active", action = floating_update })
 
-button_groups = { ontop_buttons,
+button_groups = { close_buttons,
+                  ontop_buttons,
                   sticky_buttons,
                   maximized_buttons,
-                  floating_buttons,
-                  close_buttons }
+                  floating_buttons }
 
 -- Register standards hooks
 hooks.focus.register(update)
