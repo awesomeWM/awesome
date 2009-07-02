@@ -1,0 +1,158 @@
+-------------------------------------------------
+-- @author Gregor Best <farhaven@googlemail.com>
+-- @copyright 2009 Gregor Best
+-- @release @AWESOME_VERSION@
+-------------------------------------------------
+
+-- Grab environment
+local ipairs = ipairs
+local type = type
+local table = table
+local math = math
+local util = require("awful.util")
+local default = require("awful.widget.layout.default")
+
+--- Horizontal widget layout
+module("awful.widget.layout.horizontal")
+
+local function horizontal(direction, bounds, widgets, screen)
+    local geometries = { }
+    local x = 0
+
+    -- we are only interested in tables and widgets
+    local keys = util.table.keys_filter(widgets, "table", "widget")
+
+    for _, k in ipairs(keys) do
+        local v = widgets[k]
+        if type(v) == "table" then
+            local layout = v.layout or default
+            local g = layout(bounds, v, screen)
+            for _, v in ipairs(g) do
+                v.x = v.x + x
+                table.insert(geometries, v)
+            end
+            bounds = g.free
+            x = x + g.free.x
+        elseif type(v) == "widget" then
+            local g
+            if v.visible then
+                g = v:extents(screen)
+            else
+                g = {
+                    width  = 0,
+                    height = 0,
+                }
+            end
+            g.ratio = 1
+            if g.height > 0 then
+                g.ratio = g.width / g.height
+            end
+            if g.width > bounds.width then
+                g.width = bounds.width
+            end
+            g.height = bounds.height
+            g.y = 0
+
+            if v.resize and g.width > 0 then
+                g.width = math.floor(g.height * g.ratio)
+            end
+
+            if direction == "leftright" then
+                g.x = x
+                x = x + g.width
+            else
+                g.x = x + bounds.width - g.width
+            end
+            bounds.width = bounds.width - g.width
+
+            table.insert(geometries, g)
+        end
+    end
+
+    geometries.free = util.table.clone(bounds)
+    geometries.free.x = x
+    geometries.free.y = 0
+
+    return geometries
+end
+
+function flex(bounds, widgets, screen)
+    local geometries = {
+        free = util.table.clone(bounds)
+    }
+    -- the flex layout always uses the complete available place, thus we return
+    -- no usable free area
+    geometries.free.width = 0
+
+    -- we are only interested in tables and widgets
+    local keys = util.table.keys_filter(widgets, "table", "widget")
+    local nelements = 0
+
+    for _, k in ipairs(keys) do
+        local v = widgets[k]
+        if type(v) == "table" then
+            nelements = nelements + 1
+        elseif type(v) == "widget" then
+            local g = v:extents()
+            if v.resize and g.width > 0 and g.height > 0 then
+                bounds.width = bounds.width - bounds.height
+            elseif g.width > 0 and g.height > 0 then
+                nelements = nelements + 1
+            end
+        end
+    end
+
+    nelements = (nelements == 0) and 1 or nelements
+
+    local x = 0
+    local width = bounds.width / nelements
+
+    for _, k in ipairs(util.table.keys(widgets)) do
+        local v = widgets[k]
+        if type(v) == "table" then
+            local layout = v.layout or default
+            local g = layout(bounds, v, screen)
+            for _, v in ipairs(g) do
+                v.x = v.x + x
+                table.insert(geometries, v)
+            end
+            bounds = g.free
+        elseif type(v) == "widget" then
+            local g = v:extents(screen)
+            g.resize = v.resize
+
+            if v.resize and g.width > 0 and g.height > 0 then
+                g.width = bounds.height
+                g.height = bounds.height
+                g.x = x
+                g.y = bounds.y
+                x = x + g.width
+            elseif g.width > 0 and g.height > 0 then
+                g.x = x
+                g.y = bounds.y
+                g.width = math.floor(width + 0.5)
+                g.height = bounds.height
+                x = x + width
+            else
+                g.x = 0
+                g.y = 0
+                g.width = 0
+                g.height = 0
+            end
+
+            table.insert(geometries, g)
+        end
+    end
+
+    return geometries
+end
+
+function leftright(...)
+    return horizontal("leftright", ...)
+end
+
+function rightleft(...)
+    return horizontal("rightleft", ...)
+end
+
+-- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

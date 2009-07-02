@@ -19,6 +19,7 @@ local common = require("awful.widget.common")
 local util = require("awful.util")
 local tag = require("awful.tag")
 local beautiful = require("beautiful")
+local layout = require("awful.widget.layout")
 
 --- Taglist widget module for awful
 module("awful.widget.taglist")
@@ -48,7 +49,9 @@ end
 -- @param label Label function to use.
 -- @param buttons A table with buttons binding to set.
 function new(screen, label, buttons)
-    local w = {}
+    local w = {
+        layout = layout.horizontal.leftright
+    }
     local widgets = { }
     widgets.imagebox = { }
     widgets.textbox  = { ["margin"] = { ["left"]  = 0,
