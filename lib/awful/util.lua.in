@@ -12,6 +12,8 @@ local loadstring = loadstring
 local loadfile = loadfile
 local debug = debug
 local print = print
+local pairs = pairs
+local ipairs = ipairs
 local type = type
 local rtable = table
 local pairs = pairs
@@ -280,6 +282,20 @@ function linewrap(text, width, indent)
                 return "\n" .. string.rep(" ", indent) .. word
             end
         end)
+end
+
+--- Get a sorted table with all integer keys from a table
+-- @param t the table for which the keys to get
+-- @return A table with keys
+function table.keys(t)
+    local keys = { }
+    for k, _ in pairs(t) do
+        rtable.insert(keys, k)
+    end
+    rtable.sort(keys, function (a, b)
+        return type(a) == type(b) and a < b or false
+    end)
+    return keys
 end
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
