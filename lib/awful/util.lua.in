@@ -298,4 +298,22 @@ function table.keys(t)
     return keys
 end
 
+--- Filter a tables keys for certain content types
+-- @param t The table to retrieve the keys for
+-- @param ... the types to look for
+-- @return A filtered table with keys
+function table.keys_filter(t, ...)
+    local keys = table.keys(t)
+    local keys_filtered = { }
+    for _, k in pairs(keys) do
+        for _, et in pairs(arg) do
+            if type(t[k]) == et then
+                rtable.insert(keys_filtered, k)
+                break
+            end
+        end
+    end
+    return keys_filtered
+end
+
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
