@@ -316,4 +316,22 @@ function table.keys_filter(t, ...)
     return keys_filtered
 end
 
+--- Reverse a table
+-- @param t the table to reverse
+-- @return the reversed table
+function table.reverse(t)
+    local tr = { }
+    -- reverse all elements with integer keys
+    for _, v in ipairs(t) do
+        rtable.insert(tr, 1, v)
+    end
+    -- add the remaining elements
+    for k, v in pairs(t) do
+        if type(v) ~= "number" then
+            tr[k] = v
+        end
+    end
+    return tr
+end
+
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
