@@ -74,9 +74,6 @@ local function update(graph)
 
     local border_width = 0
     if data[graph].border_color then
-        -- Draw border
-        img:draw_rectangle(0, 0, data[graph].width, data[graph].height,
-                           false, data[graph].border_color or "white")
         border_width = 1
     end
 
@@ -111,7 +108,7 @@ local function update(graph)
         -- Draw reverse
         for i = 0, #values - 1 do
             local value = values[#values - i]
-            if value > 0 then
+            if value >= 0 then
                 value = value / max_value
                 img:draw_line(data[graph].width - border_width - i - 1,
                               border_width + ((data[graph].height - 2 * border_width) * (1 - value)),
@@ -131,6 +128,12 @@ local function update(graph)
                            true, data[graph].background_color or "#000000aa")
     end
 
+    -- Draw the border last so that it overlaps other stuff
+    if data[graph].border_color then
+        -- Draw border
+        img:draw_rectangle(0, 0, data[graph].width, data[graph].height,
+                           false, data[graph].border_color or "white")
+    end
 
     -- Update the image
     graph.widget.image = img
