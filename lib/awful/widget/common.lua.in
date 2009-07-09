@@ -9,8 +9,7 @@ local math = math
 local type = type
 local ipairs = ipairs
 local setmetatable = setmetatable
-local capi = { widget = widget }
-local abutton = require("awful.button")
+local capi = { widget = widget, button = button }
 
 --- Common widget code
 module("awful.widget.common")
@@ -54,15 +53,15 @@ function list_update(w, buttons, label, data, widgets, objects)
         if buttons then
             if not data[o] then
                 data[o] = { }
-                -- Replace press function by a new one calling with object as
-                -- argument
                 for kb, b in ipairs(buttons) do
-                    -- Copy object
-                    local bpress, brelease = b.press, b.release
-                    local press, release
-                    if bpress then press = function() bpress(o) end end
-                    if brelease then release = function () brelease(o) end end
-                    data[o][kb] = abutton(b.modifiers, b.button, press, release)
+                    -- Create a proxy button object: it will receive the real
+                    -- press and release events, and will propagate them the the
+                    -- button object the user provided, but with the object as
+                    -- argument.
+                    local btn = capi.button { modifiers = b.modifiers, button = b.button }
+                    btn:add_signal("press", function () b:emit_signal("press", o) end)
+                    btn:add_signal("release", function () b:emit_signal("release", o) end)
+                    data[o][#data[o] + 1] = btn
                 end
             end
             w[k]:buttons(data[o])
