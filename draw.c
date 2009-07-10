@@ -1,7 +1,7 @@
 /*
  * draw.c - draw functions
  *
- * Copyright © 2007-2008 Julien Danjou <julien@danjou.info>
+ * Copyright © 2007-2009 Julien Danjou <julien@danjou.info>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,6 +30,7 @@
 #include <math.h>
 
 #include "structs.h"
+#include "screen.h"
 
 #include "common/tokenize.h"
 #include "common/xutil.h"
@@ -88,24 +89,6 @@ draw_iso2utf8(const char *iso, size_t len, char **dest, ssize_t *dlen)
     return true;
 }
 
-static xcb_visualtype_t *
-draw_screen_default_visual(xcb_screen_t *s)
-{
-    if(!s)
-        return NULL;
-
-    xcb_depth_iterator_t depth_iter = xcb_screen_allowed_depths_iterator(s);
-
-    if(depth_iter.data)
-        for(; depth_iter.rem; xcb_depth_next (&depth_iter))
-            for(xcb_visualtype_iterator_t visual_iter = xcb_depth_visuals_iterator (depth_iter.data);
-                 visual_iter.rem; xcb_visualtype_next (&visual_iter))
-                if(s->root_visual == visual_iter.data->visual_id)
-                    return visual_iter.data;
-
-    return NULL;
-}
-
 /** Create a new Pango font.
  * \param fontname Pango fontname (e.g. [FAMILY-LIST] [STYLE-OPTIONS] [SIZE]).
  * \return A new font.
@@ -119,16 +102,11 @@ draw_font_new(const char *fontname)
     PangoLayout *layout;
     font_t *font = p_new(font_t, 1);
 
-    xcb_visualtype_t *visual = draw_screen_default_visual(s);
-
-    if(!visual)
-        fatal("cannot get visual");
-
     /* Create a dummy cairo surface, cairo context and pango layout in
      * order to get font informations */
     surface = cairo_xcb_surface_create(globalconf.connection,
                                        globalconf.default_screen,
-                                       visual,
+                                       globalconf.screens.tab[0].visual,
                                        s->width_in_pixels,
                                        s->height_in_pixels);
 
@@ -203,14 +181,13 @@ draw_context_init(draw_context_t *d, int phys_screen,
                   int width, int height, xcb_pixmap_t px,
                   const xcolor_t *fg, const xcolor_t *bg)
 {
-    xcb_screen_t *s = xutil_screen_get(globalconf.connection, phys_screen);
-
     d->phys_screen = phys_screen;
     d->width = width;
     d->height = height;
-    d->visual = draw_screen_default_visual(s);
     d->pixmap = px;
-    d->surface = cairo_xcb_surface_create(globalconf.connection, px, d->visual, width, height);
+    d->surface = cairo_xcb_surface_create(globalconf.connection,
+                                          px, globalconf.screens.tab[phys_screen].visual,
+                                          width, height);
     d->cr = cairo_create(d->surface);
     d->layout = pango_cairo_create_layout(d->cr);
     d->fg = *fg;
@@ -627,9 +604,11 @@ draw_rotate(draw_context_t *ctx,
     cairo_t *cr;
 
     surface = cairo_xcb_surface_create(globalconf.connection, dest,
-                                       ctx->visual, dest_w, dest_h);
+                                       globalconf.screens.tab[ctx->phys_screen].visual,
+                                       dest_w, dest_h);
     source = cairo_xcb_surface_create(globalconf.connection, src,
-                                      ctx->visual, src_w, src_h);
+                                      globalconf.screens.tab[ctx->phys_screen].visual,
+                                      src_w, src_h);
     cr = cairo_create (surface);
 
     cairo_translate(cr, tx, ty);
@@ -660,14 +639,9 @@ draw_text_extents(draw_text_context_t *data)
     if(data->len <= 0)
         return geom;
 
-    xcb_visualtype_t *visual = draw_screen_default_visual(s);
-
-    if(!visual)
-        fatal("no visual found");
-
     surface = cairo_xcb_surface_create(globalconf.connection,
                                        globalconf.default_screen,
-                                       visual,
+                                       globalconf.screens.tab[0].visual,
                                        s->width_in_pixels,
                                        s->height_in_pixels);
 

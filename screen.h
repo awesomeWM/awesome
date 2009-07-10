@@ -45,6 +45,8 @@ struct a_screen
     client_t *client_focus;
     /** The monitor of startup notifications */
     SnMonitorContext *snmonitor;
+    /** The default visual, used to draw */
+    xcb_visualtype_t *visual;
 };
 ARRAY_FUNCS(screen_t, screen, DO_NOTHING)
 

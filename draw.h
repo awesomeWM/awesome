@@ -91,7 +91,6 @@ typedef struct
 typedef struct
 {
     xcb_pixmap_t pixmap;
-    xcb_visualtype_t *visual;
     uint16_t width;
     uint16_t height;
     int phys_screen;

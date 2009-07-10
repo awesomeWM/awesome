@@ -1,7 +1,7 @@
 /*
  * screen.c - screen management
  *
- * Copyright © 2007-2008 Julien Danjou <julien@danjou.info>
+ * Copyright © 2007-2009 Julien Danjou <julien@danjou.info>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,6 +43,21 @@ screen_xsitoarea(xcb_xinerama_screen_info_t si)
         .height = si.height
     };
     return a;
+}
+
+static xcb_visualtype_t *
+screen_default_visual(xcb_screen_t *s)
+{
+    xcb_depth_iterator_t depth_iter = xcb_screen_allowed_depths_iterator(s);
+
+    if(depth_iter.data)
+        for(; depth_iter.rem; xcb_depth_next (&depth_iter))
+            for(xcb_visualtype_iterator_t visual_iter = xcb_depth_visuals_iterator(depth_iter.data);
+                visual_iter.rem; xcb_visualtype_next (&visual_iter))
+                if(s->root_visual == visual_iter.data->visual_id)
+                    return visual_iter.data;
+
+    return NULL;
 }
 
 /** Get screens informations and fill global configuration.
@@ -99,6 +114,9 @@ screen_scan(void)
         }
 
         p_delete(&xsq);
+
+        xcb_screen_t *s = xutil_screen_get(globalconf.connection, globalconf.default_screen);
+        globalconf.screens.tab[0].visual = screen_default_visual(s);
     }
     else
         /* One screen only / Zaphod mode */
@@ -113,6 +131,7 @@ screen_scan(void)
             s.geometry.y = 0;
             s.geometry.width = xcb_screen->width_in_pixels;
             s.geometry.height = xcb_screen->height_in_pixels;
+            s.visual = screen_default_visual(xcb_screen);
             screen_array_append(&globalconf.screens, s);
         }
 
