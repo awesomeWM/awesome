@@ -13,7 +13,8 @@ local setmetatable = setmetatable
 local capi =
 {
     screen = screen,
-    mouse = mouse
+    mouse = mouse,
+    client = client
 }
 local hooks = require("awful.hooks")
 
@@ -286,6 +287,6 @@ end
 
 -- Register standards hooks
 hooks.tags.register(history.update)
-hooks.manage.register(withcurrent)
+capi.client.add_signal("manage", withcurrent)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

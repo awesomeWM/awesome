@@ -9,7 +9,8 @@ local capi =
 {
     awesome = awesome,
     screen = screen,
-    wibox = wibox
+    wibox = wibox,
+    client = client
 }
 local setmetatable = setmetatable
 local ipairs = ipairs
@@ -377,7 +378,7 @@ end
 
 -- Hook registered to reset all wiboxes position.
 hooks.property.register(update_wiboxes_position)
-hooks.manage.register(update_wiboxes_on_struts)
+capi.client.add_signal("manage", update_wiboxes_on_struts)
 hooks.unmanage.register(update_wiboxes_on_struts)
 
 setmetatable(_M, { __call = function(_, ...) return new(...) end })

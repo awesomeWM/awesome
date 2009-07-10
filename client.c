@@ -616,6 +616,10 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
         lua_pushboolean(globalconf.L, startup);
         luaA_dofunction_from_registry(globalconf.L, globalconf.hooks.manage, 2, 0);
     }
+
+    luaA_object_push(globalconf.L, c);
+    lua_pushboolean(globalconf.L, startup);
+    luaA_class_emit_signal(globalconf.L, &client_class, "manage", 2);
 }
 
 /** Compute client geometry with respect to its geometry hints.

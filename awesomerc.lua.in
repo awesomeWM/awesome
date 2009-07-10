@@ -320,7 +320,7 @@ awful.hooks.mouse_enter.register(function (c)
 end)
 
 -- Hook function to execute when a new client appears.
-awful.hooks.manage.register(function (c, startup)
+client.add_signal("manage", function (c, startup)
     -- If we are not managing this application at startup,
     -- move it to the screen where the mouse is.
     -- We only do it for filtered windows (i.e. no dock, etc).

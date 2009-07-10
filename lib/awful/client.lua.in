@@ -569,7 +569,7 @@ function floating.set(c, s)
     end
 end
 
-hooks.manage.register(function (c)
+capi.client.add_signal("manage", function (c)
     property.set(c, "floating_geometry", c:geometry())
 end)
 
