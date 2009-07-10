@@ -831,12 +831,12 @@ end
 
 -- Register standards hooks
 capi.client.add_signal("focus", focus.history.add)
-hooks.unmanage.register(focus.history.delete)
+capi.client.add_signal("unmanage", focus.history.delete)
 
 hooks.property.register(urgent.add)
 capi.client.add_signal("focus", urgent.delete)
-hooks.unmanage.register(urgent.delete)
+capi.client.add_signal("unmanage", urgent.delete)
 
-hooks.unmanage.register(floating.delete)
+capi.client.add_signal("unmanage", floating.delete)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

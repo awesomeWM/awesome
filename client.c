@@ -1092,6 +1092,9 @@ client_unmanage(client_t *c)
         luaA_dofunction_from_registry(globalconf.L, globalconf.hooks.unmanage, 1, 0);
     }
 
+    luaA_object_push(globalconf.L, c);
+    luaA_class_emit_signal(globalconf.L, &client_class, "unmanage", 1);
+
     /* Call hook to notify list change */
     if(globalconf.hooks.clients != LUA_REFNIL)
         luaA_dofunction_from_registry(globalconf.L, globalconf.hooks.clients, 0, 0);
