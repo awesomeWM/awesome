@@ -66,7 +66,7 @@ function new(screen, label, buttons)
     end
     local uc = function (c) return u(c.screen) end
     capi.client.add_signal("focus", uc)
-    hooks.unfocus.register(uc)
+    capi.client.add_signal("unfocus", uc)
     hooks.tags.register(u)
     hooks.tagged.register(uc)
     hooks.property.register(function (c, prop)

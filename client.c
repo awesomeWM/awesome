@@ -178,6 +178,8 @@ client_unfocus_update(client_t *c)
         luaA_dofunction_from_registry(globalconf.L, globalconf.hooks.unfocus, 1, 0);
     }
 
+    luaA_object_push(globalconf.L, c);
+    luaA_class_emit_signal(globalconf.L, &client_class, "unfocus", 1);
 }
 
 /** Unfocus a client.

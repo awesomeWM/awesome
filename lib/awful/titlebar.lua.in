@@ -410,7 +410,7 @@ button_groups = { close_buttons,
 
 -- Register standards hooks
 capi.client.add_signal("focus", update)
-hooks.unfocus.register(update)
+capi.client.add_signal("unfocus", update)
 hooks.property.register(update)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
