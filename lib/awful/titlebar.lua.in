@@ -409,7 +409,7 @@ button_groups = { close_buttons,
                   floating_buttons }
 
 -- Register standards hooks
-hooks.focus.register(update)
+capi.client.add_signal("focus", update)
 hooks.unfocus.register(update)
 hooks.property.register(update)
 

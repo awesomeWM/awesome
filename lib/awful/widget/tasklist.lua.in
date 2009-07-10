@@ -58,7 +58,7 @@ function new(label, buttons)
     hooks.tags.register(u)
     hooks.clients.register(u)
     hooks.tagged.register(u)
-    hooks.focus.register(u)
+    capi.client.add_signal("focus", u)
     hooks.unfocus.register(u)
     hooks.property.register(function (c, prop)
         if type(c) ~= "client" then return end

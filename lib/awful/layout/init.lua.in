@@ -7,6 +7,7 @@
 -- Grab environment we need
 local ipairs = ipairs
 local type = type
+local capi = { screen = screen, client = client }
 local tag = require("awful.tag")
 local util = require("awful.util")
 local suit = require("awful.layout.suit")
@@ -131,7 +132,7 @@ hooks.wibox_position.register(function(wibox)
 end)
 
 hooks.padding.register(function(screen) on_arrange(screen) end)
-hooks.focus.register(function(c) on_arrange(c.screen) end)
+capi.client.add_signal("focus", function(c) on_arrange(c.screen) end)
 hooks.clients.register(function()
                            for screen = 1, capi.screen.count() do
                                on_arrange(screen)
