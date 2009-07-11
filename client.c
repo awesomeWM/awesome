@@ -609,6 +609,8 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
     if(globalconf.hooks.clients != LUA_REFNIL)
         luaA_dofunction_from_registry(globalconf.L, globalconf.hooks.clients, 0, 0);
 
+    luaA_class_emit_signal(globalconf.L, &client_class, "list", 0);
+
     /* call hook */
     if(globalconf.hooks.manage != LUA_REFNIL)
     {
@@ -1099,6 +1101,8 @@ client_unmanage(client_t *c)
     if(globalconf.hooks.clients != LUA_REFNIL)
         luaA_dofunction_from_registry(globalconf.L, globalconf.hooks.clients, 0, 0);
 
+    luaA_class_emit_signal(globalconf.L, &client_class, "list", 0);
+
     window_state_set(c->win, XCB_WM_STATE_WITHDRAWN);
 
     titlebar_client_detach(c);
@@ -1270,6 +1274,8 @@ luaA_client_swap(lua_State *L)
         /* Call hook to notify list change */
         if(globalconf.hooks.clients != LUA_REFNIL)
             luaA_dofunction_from_registry(L, globalconf.hooks.clients, 0, 0);
+
+        luaA_class_emit_signal(globalconf.L, &client_class, "list", 0);
     }
 
     return 0;
