@@ -1,0 +1,79 @@
+---------------------------------------------------------------------------
+-- @author Uli Schlachter &lt;psychon@znc.in&gt;
+-- @copyright 2009 Uli Schlachter
+-- @copyright 2008 Julien Danjou
+-- @release @AWESOME_VERSION@
+---------------------------------------------------------------------------
+
+-- Grab environment we need
+local ipairs = ipairs
+
+module("awful.layout.suit.spiral")
+
+local function spiral(p, dwindle)
+    local wa = p.workarea
+    local cls = p.clients
+
+    local i = 0
+    local n = #cls
+    local nx = wa.x
+    local ny = wa.y
+    local nw = wa.width
+    local nh = wa.height
+
+    for k, c in ipairs(cls) do
+        if (i % 2 == 1 and nh / 2 > 2 * c.border_width)
+              or (i % 2 == 0 and nw / 2 > 2 * c.border_width) then
+            if i < n - 1 then
+                if i % 2 == 1 then
+                    nh = nh / 2
+                else
+                    nw = nw / 2
+                end
+                if i % 4 == 2 and not dwindle then
+                    nx = nx + nw
+                elseif i % 4 == 3 and not dwindle then
+                    ny = ny + nh
+                end
+            end
+            if i % 4 == 0 then
+                if dwindle then
+                    ny = ny + nh
+                else
+                    ny = ny - nh
+                end
+            elseif i % 4 == 1 then
+                nx = nx + nw
+            elseif i % 4 == 2 then
+                ny = ny + nh
+            elseif i % 4 == 3 then
+                if dwindle then
+                    nx = nx + nw
+                else
+                    nx = nx - nw
+                end
+            end
+            if i == 0 then
+                ny = wa.y
+            end
+            i = i + 1
+        end
+        local geom = { x = nx, y = ny, width = nw, height = nh }
+        c:geometry(geom)
+    end
+end
+
+--- Dwindle layout
+dwindle = {}
+dwindle.name = "dwindle"
+function dwindle.arrange(p)
+    return spiral(p, true)
+end
+
+--- Spiral layout
+name = "spiral"
+function arrange(p)
+    return spiral(p, false)
+end
+
+-- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
