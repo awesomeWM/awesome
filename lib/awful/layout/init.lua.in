@@ -10,11 +10,14 @@ local type = type
 local tag = require("awful.tag")
 local util = require("awful.util")
 local suit = require("awful.layout.suit")
-local client = require("awful.client")
 local wibox = require("awful.wibox")
 local ascreen = require("awful.screen")
-local capi = { screen = screen }
 local hooks = require("awful.hooks")
+local capi = {
+    screen = screen,
+    client = client
+}
+local client = require("awful.client")
 
 --- Layout module for awful
 module("awful.layout")
@@ -140,5 +143,13 @@ hooks.clients.register(function()
                            end
                        end)
 hooks.tags.register(function(screen, tag, action) on_arrange(screen) end)
+hooks.tagged.register(function(c, tag)
+    if not tag.screen then return end
+    on_arrange(tag.screen)
+    if not capi.client.focus or not client.focus:isvisible() then
+        local c = client.focus.history.get(tag.screen, 0)
+        if c then capi.client.focus = c end
+    end
+end)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
