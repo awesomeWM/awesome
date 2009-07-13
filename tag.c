@@ -119,6 +119,9 @@ tag_append_to_screen(lua_State *L, int udx, screen_t *s)
         lua_pushliteral(globalconf.L, "add");
         luaA_dofunction_from_registry(globalconf.L, globalconf.hooks.tags, 3, 0);
     }
+
+    luaA_object_push(globalconf.L, tag);
+    screen_emit_signal(globalconf.L, s, "tag::attach", 1);
 }
 
 /** Remove a tag from screen. Tag must be on a screen and have no clients.
@@ -150,11 +153,12 @@ tag_remove_from_screen(tag_t *tag)
         luaA_dofunction_from_registry(globalconf.L, globalconf.hooks.tags, 3, 0);
     }
 
+    screen_t *s = tag->screen;
     tag->screen = NULL;
 
     luaA_object_push(globalconf.L, tag);
     luaA_object_emit_signal(globalconf.L, -1, "property::screen", 0);
-    lua_pop(globalconf.L, 1);
+    screen_emit_signal(globalconf.L, s, "tag::detach", 1);
 
     luaA_object_unref(globalconf.L, tag);
 }
