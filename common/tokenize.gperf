@@ -46,6 +46,7 @@ icon_name
 id
 image
 imagebox
+index
 instance
 key
 key_press

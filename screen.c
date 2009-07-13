@@ -431,6 +431,9 @@ luaA_screen_index(lua_State *L)
 
     switch(a_tokenize(buf, len))
     {
+      case A_TK_INDEX:
+        lua_pushinteger(L, screen_array_indexof(&globalconf.screens, s) + 1);
+        break;
       case A_TK_GEOMETRY:
         luaA_pusharea(L, s->geometry);
         break;
