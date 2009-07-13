@@ -366,10 +366,7 @@ static int
 luaA_screen_tags(lua_State *L)
 {
     int i;
-    screen_t *s = lua_touserdata(L, 1);
-
-    if(!s)
-        luaL_typerror(L, 1, "screen");
+    screen_t *s = luaL_checkudata(L, 1, "screen");
 
     if(lua_gettop(L) == 2)
     {
