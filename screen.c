@@ -338,6 +338,20 @@ screen_client_moveto(client_t *c, screen_t *new_screen, bool dotag, bool doresiz
     hook_property(client, c, "screen");
 }
 
+/** Push a screen onto the stack.
+ * \param L The Lua VM state.
+ * \param s The scren to push.
+ * \return The number of elements pushed on stack.
+ */
+int
+luaA_pushscreen(lua_State *L, screen_t *s)
+{
+    lua_pushlightuserdata(L, s);
+    luaL_getmetatable(L, "screen");
+    lua_setmetatable(L, -2);
+    return 1;
+}
+
 /** Screen module.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
@@ -348,10 +362,8 @@ static int
 luaA_screen_module_index(lua_State *L)
 {
     int screen = luaL_checknumber(L, 2) - 1;
-
     luaA_checkscreen(screen);
-    lua_pushlightuserdata(L, &globalconf.screens.tab[screen]);
-    return luaA_settype(L, "screen");
+    return luaA_pushscreen(L, &globalconf.screens.tab[screen]);
 }
 
 /** Get or set screen tags.

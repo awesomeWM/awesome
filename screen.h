@@ -56,6 +56,7 @@ area_t screen_area_get(screen_t *, bool);
 area_t display_area_get(int);
 int screen_virttophys(int);
 void screen_client_moveto(client_t *, screen_t *, bool, bool);
+int luaA_pushscreen(lua_State *, screen_t *);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
