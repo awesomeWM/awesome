@@ -444,6 +444,82 @@ luaA_screen_index(lua_State *L)
     return 1;
 }
 
+/** Add a signal to a screen.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ * \luastack
+ * \lvalue A screen.
+ * \lparam A signal name.
+ * \lparam A function to call when the signal is emited.
+ */
+static int
+luaA_screen_add_signal(lua_State *L)
+{
+    screen_t *s = lua_touserdata(L, 1);
+    const char *name = luaL_checkstring(L, 2);
+    luaA_checkfunction(L, 3);
+    signal_add(&s->signals, name, luaA_object_ref(L, 3));
+    return 0;
+}
+
+/** Remove a signal to a screen.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ * \luastack
+ * \lvalue A screen.
+ * \lparam A signal name.
+ * \lparam A function to remove
+ */
+static int
+luaA_screen_remove_signal(lua_State *L)
+{
+    screen_t *s = lua_touserdata(L, 1);
+    const char *name = luaL_checkstring(L, 2);
+    luaA_checkfunction(L, 3);
+    const void *ref = lua_topointer(L, 3);
+    signal_remove(&s->signals, name, ref);
+    luaA_object_unref(L, (void *) ref);
+    return 0;
+}
+
+/** Emit a signal to a screen.
+ * \param L The Lua VM state.
+ * \param screen The screen.
+ * \param name The signal name.
+ * \param nargs The number of arguments to the signal function.
+ */
+void
+screen_emit_signal(lua_State *L, screen_t *screen, const char *name, int nargs)
+{
+    signal_t *sigfound = signal_array_getbyid(&screen->signals,
+                                              a_strhash((const unsigned char *) name));
+    if(sigfound)
+        foreach(func, sigfound->sigfuncs)
+        {
+            luaA_pushscreen(L, screen);
+            for(int i = 0; i < nargs; i++)
+                lua_pushvalue(L, - nargs - 1);
+            luaA_object_push(L, (void *) *func);
+            luaA_dofunction(L, nargs + 1, 0);
+        }
+    lua_pop(L, nargs);
+}
+
+/** Emit a signal to a screen.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ * \luastack
+ * \lvalue A screen.
+ * \lparam A signal name.
+ * \lparam Various arguments, optional.
+ */
+static int
+luaA_screen_emit_signal(lua_State *L)
+{
+    screen_emit_signal(L, lua_touserdata(L, 1), luaL_checkstring(L, 2), lua_gettop(L) - 2);
+    return 0;
+}
+
 /** Get the screen count.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
@@ -467,6 +543,9 @@ const struct luaL_reg awesome_screen_methods[] =
 
 const struct luaL_reg awesome_screen_meta[] =
 {
+    { "add_signal", luaA_screen_add_signal },
+    { "remove_signal", luaA_screen_remove_signal },
+    { "emit_signal", luaA_screen_emit_signal },
     { "tags", luaA_screen_tags },
     { "__index", luaA_screen_index },
     { NULL, NULL }
