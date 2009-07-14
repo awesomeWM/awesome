@@ -750,6 +750,8 @@ function setwfact(wfact, c)
             colfact[i] = (colfact[i] * rest) / total
         end
     end
+
+    hooks.user.call("property", t, "windowfact")
 end
 
 --- Increment a client's window factor
@@ -771,6 +773,8 @@ function incwfact(add, c)
 
     -- keep our ratios normalized
     normalize(colfact, w.num)
+
+    hooks.user.call("property", t, "windowfact")
 end
 
 --- Get a client dockable state.
