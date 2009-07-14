@@ -146,7 +146,7 @@ hooks.tags.register(function(screen, tag, action) on_arrange(screen) end)
 hooks.tagged.register(function(c, tag)
     if not tag.screen then return end
     on_arrange(tag.screen)
-    if not capi.client.focus or not client.focus:isvisible() then
+    if not capi.client.focus or not capi.client.focus:isvisible() then
         local c = client.focus.history.get(tag.screen, 0)
         if c then capi.client.focus = c end
     end
