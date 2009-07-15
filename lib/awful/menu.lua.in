@@ -9,6 +9,7 @@
 local pairs = pairs
 local table = table
 local type = type
+local setmetatable = setmetatable
 local wibox = wibox
 local image = image
 local widget = widget
@@ -369,3 +370,7 @@ function new(menu, parent, num)
 
     return data
 end
+
+setmetatable(_M, { __call = function(_, ...) return new(...) end })
+
+-- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
