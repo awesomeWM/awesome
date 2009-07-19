@@ -9,6 +9,7 @@ local ipairs = ipairs
 local math = math
 local capi = { image = image,
                widget = widget }
+local layout = require("awful.widget.layout")
 
 --- A progressbar widget.
 module("awful.widget.progressbar")
@@ -170,6 +171,8 @@ function new(args)
     for _, prop in ipairs(properties) do
         pbar["set_" .. prop] = _M["set_" .. prop]
     end
+
+    pbar.layout = args.layout or layout.horizontal.leftright
 
     return pbar
 end

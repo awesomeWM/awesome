@@ -10,6 +10,7 @@ local math = math
 local table = table
 local capi = { image = image,
                widget = widget }
+local layout = require("awful.widget.layout")
 
 --- A graph widget.
 module("awful.widget.graph")
@@ -220,6 +221,8 @@ function new(args)
     for _, prop in ipairs(properties) do
         graph["set_" .. prop] = _M["set_" .. prop]
     end
+
+    graph.layout = args.layout or layout.horizontal.leftright
 
     return graph
 end
