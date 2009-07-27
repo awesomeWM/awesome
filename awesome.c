@@ -254,7 +254,8 @@ signal_fatal(int signum)
 }
 
 /** Function to exit on some signals.
- * \param sig the signal received, unused
+ * \param w the signal received, unused
+ * \param revents currently unused
  */
 static void
 exit_on_signal(EV_P_ ev_signal *w, int revents)
@@ -270,7 +271,8 @@ awesome_restart(void)
 }
 
 /** Function to restart aweome on some signals.
- * \param sig the signam received, unused
+ * \param w the signam received, unused
+ * \param revents Currently unused
  */
 static void
 restart_on_signal(EV_P_ ev_signal *w, int revents)

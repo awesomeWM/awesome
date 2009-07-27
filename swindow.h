@@ -82,6 +82,7 @@ simplewindow_refresh_pixmap(simple_window_t *sw)
 }
 
 /** Set a simplewindow's opacity.
+ * \param sw The window the adjust the opacity of.
  * \param opacity A value between 0 and 1 which describes the opacity.
  */
 static inline void

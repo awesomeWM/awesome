@@ -283,7 +283,7 @@ wibox_systray_refresh(wibox_t *wibox)
 }
 
 /** Get a wibox by its window.
- * \param w The window id.
+ * \param win The window id.
  * \return A wibox if found, NULL otherwise.
  */
 wibox_t *

@@ -161,7 +161,6 @@ screen_getbycoord(screen_t *screen, int x, int y)
 
 /** Get screens info.
  * \param screen Screen.
- * \param wiboxes Wiboxes list to remove.
  * \param strut Honor windows strut.
  * \return The screen area.
  */

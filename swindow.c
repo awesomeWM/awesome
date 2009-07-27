@@ -64,8 +64,9 @@ simplewindow_draw_context_update(simple_window_t *sw, xcb_screen_t *s)
  * \param phys_screen Physical screen number.
  * \param geometry Window geometry.
  * \param border_width Window border width.
+ * \param border_color Window border color.
  * \param orientation The rendering orientation.
- * \param bg Default foreground color.
+ * \param fg Default foreground color.
  * \param bg Default background color.
  */
 void
@@ -257,6 +258,10 @@ simplewindow_moveresize(simple_window_t *sw, area_t geom)
 
 /** Refresh the window content by copying its pixmap data to its window.
  * \param sw The simple window to refresh.
+ * \param x The copy starting point x component.
+ * \param y The copy starting point y component.
+ * \param w The copy width from the x component.
+ * \param h The copy height from the y component.
  */
 void
 simplewindow_refresh_pixmap_partial(simple_window_t *sw,

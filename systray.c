@@ -126,6 +126,9 @@ systray_cleanup(int phys_screen)
 
 /** Handle a systray request.
  * \param embed_win The window to embed.
+ * \param phys_screen The physical monitor to display on.
+ * \param info The embeding info
+ * \return 0 on no error.
  */
 int
 systray_request_handle(xcb_window_t embed_win, int phys_screen, xembed_info_t *info)

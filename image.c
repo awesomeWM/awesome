@@ -347,7 +347,7 @@ luaA_image_crop_and_scale(lua_State *L)
 /** Draw a pixel in an image
  * \param L The Lua VM state
  * \luastack
- * \lvalua An image.
+ * \lvalue An image.
  * \lparam The x coordinate of the pixel to draw
  * \lparam The y coordinate of the pixel to draw
  * \lparam The color to draw the pixel in
@@ -379,7 +379,7 @@ luaA_image_draw_pixel(lua_State *L)
 /** Draw a line in an image
  * \param L The Lua VM state
  * \luastack
- * \lvalua An image.
+ * \lvalue An image.
  * \lparam The x1 coordinate of the line to draw
  * \lparam The y1 coordinate of the line to draw
  * \lparam The x2 coordinate of the line to draw
@@ -415,7 +415,7 @@ luaA_image_draw_line(lua_State *L)
 /** Draw a rectangle in an image
  * \param L The Lua VM state
  * \luastack
- * \lvalua An image.
+ * \lvalue An image.
  * \lparam The x coordinate of the rectangles top left corner
  * \lparam The y coordinate of the rectangles top left corner
  * \lparam The width of the rectangle
@@ -509,7 +509,7 @@ luaA_table_to_color_range(lua_State *L, int ud)
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
  * \luastack
- * \lvalua An image.
+ * \lvalue An image.
  * \lparam The x coordinate of the rectangles top left corner.
  * \lparam The y coordinate of the rectangles top left corner.
  * \lparam The width of the rectangle.
@@ -550,7 +550,7 @@ luaA_image_draw_rectangle_gradient(lua_State *L)
 /** Draw a circle in an image
  * \param L The Lua VM state
  * \luastack
- * \lvalua An image.
+ * \lvalue An image.
  * \lparam The x coordinate of the center of the circle
  * \lparam The y coordinate of the center of the circle
  * \lparam The horizontal amplitude (width)

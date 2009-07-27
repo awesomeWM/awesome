@@ -72,7 +72,9 @@ mousegrabber_grab(xcb_cursor_t cursor)
 
 /** Handle mouse motion events.
  * \param L Lua stack to push the pointer motion.
- * \param ev Received mouse motion event.
+ * \param x The received mouse event x component.
+ * \param y The received mouse event y component.
+ * \param mask The received mouse event bit mask.
  */
 void
 mousegrabber_handleevent(lua_State *L, int x, int y, uint16_t mask)

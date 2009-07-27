@@ -197,7 +197,7 @@ draw_context_init(draw_context_t *d, int phys_screen,
 /** Draw text into a draw context.
  * \param ctx Draw context  to draw to.
  * \param data Draw text context data.
- * \param elip Ellipsize mode.
+ * \param ellip Ellipsize mode.
  * \param wrap Wrap mode.
  * \param align Text alignment.
  * \param margin Margin to respect when drawing text.

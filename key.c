@@ -1087,7 +1087,7 @@ luaA_key_array_get(lua_State *L, key_array_t *keys)
 
 /** Push a modifier set to a Lua table.
  * \param L The Lua VM state.
- * \param mod The modifier.
+ * \param modifiers The modifier.
  * \return The number of elements pushed on stack.
  */
 int

@@ -75,7 +75,7 @@ tag_view(tag_t *tag, bool view)
 }
 
 /** Append a tag which on top of the stack to a screen.
- * \param screen the screen id
+ * \param s screen the screen id
  */
 void
 tag_append_to_screen(screen_t *s)

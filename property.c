@@ -116,6 +116,7 @@ property_handle_wm_client_leader(void *data,
 
 /** Update the size hints of a client.
  * \param c The client.
+ * \param reply (Optional) An existing reply.
  */
 void
 property_update_wm_normal_hints(client_t *c, xcb_get_property_reply_t *reply)
@@ -153,6 +154,7 @@ property_handle_wm_normal_hints(void *data,
 
 /** Update the WM hints of a client.
  * \param c The client.
+ * \param reply (Optional) An existing reply.
  */
 void
 property_update_wm_hints(client_t *c, xcb_get_property_reply_t *reply)
@@ -203,7 +205,6 @@ property_handle_wm_hints(void *data,
 
 /** Update client name attribute with its new title.
  * \param c The client.
- * \param Return true if it has been updated.
  */
 void
 property_update_wm_name(client_t *c)
@@ -257,7 +258,6 @@ property_update_wm_class(client_t *c, xcb_get_property_reply_t *reply)
 
 /** Update client icon name attribute with its new title.
  * \param c The client.
- * \param Return true if it has been updated.
  */
 void
 property_update_wm_icon_name(client_t *c)
@@ -384,6 +384,14 @@ property_update_wm_protocols(client_t *c)
     }
 }
 
+/** The property notify event handler.
+ * \param data currently unused.
+ * \param connection currently unusued.
+ * \param state currently unused.
+ * \param window The window to obtain update protocols from.
+ * \param name currently unused.
+ * \param reply currently unused.
+ */
 static int
 property_handle_wm_protocols(void *data,
                              xcb_connection_t *connection,
@@ -403,7 +411,10 @@ property_handle_wm_protocols(void *data,
 /** The property notify event handler.
  * \param data currently unused.
  * \param connection The connection to the X server.
- * \param ev The event.
+ * \param state currently unused
+ * \param window The window to obtain update the property with.
+ * \param name The protocol atom, currently unused.
+ * \param reply (Optional) An existing reply.
  */
 static int
 property_handle_xembed_info(void *data __attribute__ ((unused)),

@@ -203,6 +203,7 @@ client_unfocus(client_t *c)
 
 /** Check if client supports protocol a protocole in WM_PROTOCOL.
  * \param c The client.
+ * \param atom The protocol atom to check for.
  * \return True if client has the atom in protocol, false otherwise.
  */
 bool
@@ -321,7 +322,7 @@ client_focus(client_t *c)
 /** Stack a window below.
  * \param c The client.
  * \param previous The previous window on the stack.
- * \param return The next-previous!
+ * \return The next-previous!
  */
 static xcb_window_t
 client_stack_above(client_t *c, xcb_window_t previous)

@@ -139,7 +139,7 @@ luaA_mbstrlen(lua_State *L)
 
 /** Overload standard Lua next function to use __next key on metatable.
  * \param L The Lua VM state.
- * \param The number of elements pushed on stack.
+ * \return The number of elements pushed on stack.
  */
 static int
 luaAe_next(lua_State *L)

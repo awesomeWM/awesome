@@ -110,7 +110,7 @@ window_buttons_grab(xcb_window_t win, button_array_t *buttons)
 }
 
 /** Get the opacity of a window.
- * \param The window.
+ * \param win The window.
  * \return The opacity, between 0 and 1 or -1 or no opacity set.
  */
 double
@@ -131,7 +131,7 @@ window_opacity_get(xcb_window_t win)
 }
 
 /** Get the opacity of a window.
- * \param A reply to a get property request for _NET_WM_WINDOW_OPACITY.
+ * \param prop_r A reply to a get property request for _NET_WM_WINDOW_OPACITY.
  * \return The opacity, between 0 and 1.
  */
 double window_opacity_get_from_reply(xcb_get_property_reply_t *prop_r)

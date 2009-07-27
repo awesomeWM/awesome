@@ -217,7 +217,6 @@ titlebar_client_detach(client_t *c)
 
 /** Attach a wibox to a client as its titlebar.
  * \param c The client.
- * \param ud The index of the wibox on the stack.
  */
 void
 titlebar_client_attach(client_t *c)

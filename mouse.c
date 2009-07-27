@@ -60,7 +60,7 @@ mouse_query_pointer(xcb_window_t window, int16_t *x, int16_t *y, xcb_window_t *c
 }
 
 /** Get the pointer position on the screen.
- * \param screen This will be set to the screen the mouse is on.
+ * \param s This will be set to the screen the mouse is on.
  * \param x This will be set to the Pointer-x-coordinate relative to window.
  * \param y This will be set to the Pointer-y-coordinate relative to window.
  * \param child This will be set to the window under the pointer.

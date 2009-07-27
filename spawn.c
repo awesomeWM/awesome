@@ -48,7 +48,6 @@ DO_ARRAY(SnStartupSequence *, SnStartupSequence, a_sn_startup_sequence_unref)
 SnStartupSequence_array_t sn_waits;
 
 /** Remove a SnStartupSequence pointer from an array and forget about it.
- * \param array The startup sequence array.
  * \param s The startup sequence to found, remove and unref.
  * \return True if found and removed.
  */

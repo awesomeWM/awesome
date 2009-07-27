@@ -577,6 +577,7 @@ ewmh_client_check_hints(client_t *c)
 
 /** Process the WM strut of a client.
  * \param c The client.
+ * \param strut_r (Optional) An existing reply.
  */
 void
 ewmh_process_client_strut(client_t *c, xcb_get_property_reply_t *strut_r)
