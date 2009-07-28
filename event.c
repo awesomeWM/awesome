@@ -42,25 +42,34 @@
 #include "common/atoms.h"
 #include "common/xutil.h"
 
-#define DO_EVENT_HOOK_CALLBACK(type, prefix, xcbtype, xcbeventprefix, arraytype, match) \
+#define DO_EVENT_HOOK_CALLBACK(type, prefix, xcbtype, xcbeventprefix, match) \
     static int \
     event_##xcbtype##_callback(xcb_##xcbtype##_press_event_t *ev, \
-                               arraytype *arr, \
+                               void *arr, \
                                int oud, \
                                int nargs, \
                                void *data) \
     { \
         int abs_oud = oud < 0 ? ((lua_gettop(globalconf.L) + 1) + oud) : oud; \
         int item_matching = 0, item_matched = 0; \
-        foreach(item, *arr) \
-            if(match(ev, *item, data)) \
+        if(oud) \
+            luaA_object_push_item(globalconf.L, abs_oud, arr); \
+        else \
+            luaA_object_push(globalconf.L, arr); \
+        lua_pushnil(globalconf.L); \
+        while(luaA_next(globalconf.L, -2)) \
+        { \
+            type *item = luaA_toudata(globalconf.L, -1, #prefix); \
+            if(item && match(ev, item, data)) \
             { \
-                if(oud) \
-                    luaA_object_push_item(globalconf.L, abs_oud, *item); \
-                else \
-                    prefix##_push(globalconf.L, *item); \
+                lua_insert(globalconf.L, -3); \
                 item_matching++; \
             } \
+            else \
+                lua_pop(globalconf.L, 1); \
+        } \
+        /* remove the table */ \
+        lua_pop(globalconf.L, 1); \
         for(item_matched = item_matching; item_matching > 0; item_matching--) \
         { \
             type *item = luaL_checkudata(globalconf.L, -1, #prefix); \
@@ -71,14 +80,7 @@
                 { \
                     for(int i = 0; i < nargs; i++) \
                         lua_pushvalue(globalconf.L, - nargs - item_matching); \
-                    if(oud) \
-                    { \
-                        luaA_object_push_item(globalconf.L, abs_oud, item); \
-                        luaA_object_push_item(globalconf.L,  -1, item->press); \
-                        lua_remove(globalconf.L, -2); \
-                    } \
-                    else \
-                        prefix##_push_item(globalconf.L, item, item->press); \
+                    luaA_object_push_item(globalconf.L,  - nargs - 1, item->press); \
                     luaA_dofunction(globalconf.L, nargs, 0); \
                 } \
                 break; \
@@ -87,14 +89,7 @@
                 { \
                     for(int i = 0; i < nargs; i++) \
                         lua_pushvalue(globalconf.L, - nargs - item_matching); \
-                    if(oud) \
-                    { \
-                        luaA_object_push_item(globalconf.L, abs_oud, item); \
-                        luaA_object_push_item(globalconf.L,  -1, item->release); \
-                        lua_remove(globalconf.L, -2); \
-                    } \
-                    else \
-                        prefix##_push_item(globalconf.L, item, item->release); \
+                    luaA_object_push_item(globalconf.L,  - nargs - 1, item->release); \
                     luaA_dofunction(globalconf.L, nargs, 0); \
                 } \
                 break; \
@@ -122,8 +117,8 @@ event_key_match(xcb_key_press_event_t *ev, keyb_t *k, void *data)
             && (k->mod == XCB_BUTTON_MASK_ANY || k->mod == ev->state));
 }
 
-DO_EVENT_HOOK_CALLBACK(button_t, button, button, XCB_BUTTON, button_array_t, event_button_match)
-DO_EVENT_HOOK_CALLBACK(keyb_t, key, key, XCB_KEY, key_array_t, event_key_match)
+DO_EVENT_HOOK_CALLBACK(button_t, button, button, XCB_BUTTON, event_button_match)
+DO_EVENT_HOOK_CALLBACK(keyb_t, key, key, XCB_KEY, event_key_match)
 
 /** Handle an event with mouse grabber if needed
  * \param x The x coordinate.
@@ -185,7 +180,7 @@ event_handle_button(void *data, xcb_connection_t *connection, xcb_button_press_e
         }
 
         wibox_push(globalconf.L, wibox);
-        event_button_callback(ev, &wibox->buttons, -1, 1, NULL);
+        event_button_callback(ev, wibox->buttons, -1, 1, NULL);
 
         /* then try to match a widget binding */
         widget_t *w = widget_getbycoords(wibox->sw.orientation, &wibox->widgets,
@@ -196,13 +191,13 @@ event_handle_button(void *data, xcb_connection_t *connection, xcb_button_press_e
         {
             widget_push(globalconf.L, w);
             wibox_push(globalconf.L, wibox);
-            event_button_callback(ev, &w->buttons, -2, 2, NULL);
+            event_button_callback(ev, w->buttons, -2, 2, NULL);
         }
     }
     else if((c = client_getbywin(ev->event)))
     {
         client_push(globalconf.L, c);
-        event_button_callback(ev, &c->buttons, -1, 1, NULL);
+        event_button_callback(ev, c->buttons, -1, 1, NULL);
         xcb_allow_events(globalconf.connection,
                          XCB_ALLOW_REPLAY_POINTER,
                          XCB_CURRENT_TIME);
@@ -211,7 +206,7 @@ event_handle_button(void *data, xcb_connection_t *connection, xcb_button_press_e
         for(screen = 0; screen < nb_screen; screen++)
             if(xutil_screen_get(connection, screen)->root == ev->event)
             {
-                event_button_callback(ev, &globalconf.buttons, 0, 0, NULL);
+                event_button_callback(ev, globalconf.buttons, 0, 0, NULL);
                 return 0;
             }
 
@@ -603,15 +598,15 @@ event_handle_key(void *data __attribute__ ((unused)),
         if((c = client_getbywin(ev->event)))
         {
             client_push(globalconf.L, c);
-            if(!event_key_callback(ev, &c->keys, -1, 1, &keysym))
-                if(!event_key_callback(ev, &globalconf.keys, 0, 0, &keysym))
+            if(!event_key_callback(ev, c->keys, -1, 1, &keysym))
+                if(!event_key_callback(ev, globalconf.keys, 0, 0, &keysym))
                     xcb_allow_events(globalconf.connection,
                                      XCB_ALLOW_REPLAY_KEYBOARD,
                                      XCB_CURRENT_TIME);
 
         }
         else
-            event_key_callback(ev, &globalconf.keys, 0, 0, &keysym);
+            event_key_callback(ev, globalconf.keys, 0, 0, &keysym);
 
         xcb_allow_events(globalconf.connection,
                          XCB_ALLOW_SYNC_KEYBOARD,

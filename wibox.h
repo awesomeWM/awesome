@@ -68,7 +68,7 @@ struct wibox_t
     /* Banned? used for titlebars */
     bool isbanned;
     /** Button bindings */
-    button_array_t buttons;
+    void *buttons;
 };
 
 void wibox_unref_simplified(wibox_t **);

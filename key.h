@@ -39,14 +39,10 @@ typedef struct keyb_t
     void *release;
 } keyb_t;
 
-DO_ARRAY(keyb_t *, key, DO_NOTHING)
 LUA_OBJECT_FUNCS(keyb_t, key, "key")
 
 bool key_press_lookup_string(xcb_keysym_t, char *, ssize_t);
 xcb_keysym_t key_getkeysym(xcb_keycode_t, uint16_t);
-
-void luaA_key_array_set(lua_State *, int, int, key_array_t *);
-int luaA_key_array_get(lua_State *, int, key_array_t *);
 
 int luaA_pushmodifiers(lua_State *, uint16_t);
 uint16_t luaA_tomodifiers(lua_State *L, int ud);

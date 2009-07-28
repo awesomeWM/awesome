@@ -999,49 +999,6 @@ luaA_key_new(lua_State *L)
     return 1;
 }
 
-/** Set a key array with a Lua table.
- * \param L The Lua VM state.
- * \param oidx The index of the object to store items into.
- * \param idx The index of the Lua table.
- * \param keys The array key to fill.
- */
-void
-luaA_key_array_set(lua_State *L, int oidx, int idx, key_array_t *keys)
-{
-    luaA_checktable(L, idx);
-
-    foreach(key, *keys)
-        luaA_object_unref_item(L, oidx, *key);
-
-    key_array_wipe(keys);
-    key_array_init(keys);
-
-    lua_pushnil(L);
-    while(lua_next(L, idx))
-        if(luaA_toudata(L, -1, "key"))
-            key_array_append(keys, luaA_object_ref_item(L, oidx, -1));
-        else
-            lua_pop(L, 1);
-}
-
-/** Push an array of key as an Lua table onto the stack.
- * \param L The Lua VM state.
- * \param oidx The index of the object to get items from.
- * \param keys The key array to push.
- * \return The number of elements pushed on stack.
- */
-int
-luaA_key_array_get(lua_State *L, int oidx, key_array_t *keys)
-{
-    lua_createtable(L, keys->len, 0);
-    for(int i = 0; i < keys->len; i++)
-    {
-        luaA_object_push_item(L, oidx, keys->tab[i]);
-        lua_rawseti(L, -2, i + 1);
-    }
-    return 1;
-}
-
 /** Push a modifier set to a Lua table.
  * \param L The Lua VM state.
  * \param modifiers The modifier.

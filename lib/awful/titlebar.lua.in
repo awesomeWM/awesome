@@ -80,11 +80,10 @@ function add(c, args)
     end
 
     -- Redirect relevant events to the client the titlebar belongs to
-    local bts = util.table.join(
+    title.buttons = util.table.join(
         button({ }, 1, button_callback_focus_raise_move),
         button({ args.modkey }, 1, button_callback_move),
         button({ args.modkey }, 3, button_callback_resize))
-    title:buttons(bts)
 
     local appicon = capi.widget({ type = "imagebox" })
     appicon.image = c.icon
@@ -173,8 +172,6 @@ end
 -- @param theme  The theme from beautifull. Used to get the image paths
 -- @param state  The state the button is associated to. Containse path the action and info about the image
 local function button_new(c, name, modkey, theme, state)
-    local bts = button({ }, 1, nil,  state.action)
-
     -- get the image path from the theme. Only return a button if we find an image
     local img
     img = "titlebar_" .. name .. "_button_" .. state.img
@@ -187,13 +184,9 @@ local function button_new(c, name, modkey, theme, state)
     local bname = name .. "_" .. state.idx
     local button = widget.button({ image = img })
     if not button then return end
-    local rbts = button:buttons()
 
-    for k, v in pairs(rbts) do
-        bts[#bts + 1] = v
-    end
+    button.buttons = util.table.join(button.buttons,  button({ }, 1, nil,  state.action))
 
-    button:buttons(bts)
     button.visible = false
     return button
 end

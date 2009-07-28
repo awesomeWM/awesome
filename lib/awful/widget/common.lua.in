@@ -65,8 +65,8 @@ function list_update(w, buttons, label, data, widgets, objects)
                     data[o][kb] = capi.button(b.modifiers, b.button, press, release)
                 end
             end
-            w[k]:buttons(data[o])
-            w[k + 1]:buttons(data[o])
+            w[k].buttons = data[o]
+            w[k + 1].buttons = data[o]
         end
 
         local text, bg, bg_image, icon = label(o)

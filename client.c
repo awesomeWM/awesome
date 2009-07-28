@@ -51,8 +51,6 @@ static int
 luaA_client_gc(lua_State *L)
 {
     client_t *c = luaL_checkudata(L, 1, "client");
-    button_array_wipe(&c->buttons);
-    key_array_wipe(&c->keys);
     xcb_get_wm_protocols_reply_wipe(&c->protocols);
     p_delete(&c->class);
     p_delete(&c->startup_id);
@@ -1552,6 +1550,14 @@ luaA_client_newindex(lua_State *L)
         c->skiptb = luaA_checkboolean(L, 3);
         hook_property(client, c, "skip_taskbar");
         break;
+      case A_TK_KEYS:
+        luaA_object_unref_item(L, 1, c->keys);
+        c->keys = luaA_object_ref_item(L, 1, 3);
+        break;
+      case A_TK_BUTTONS:
+        luaA_object_unref_item(L, 1, c->buttons);
+        c->buttons = luaA_object_ref_item(L, 1, 3);
+        break;
       default:
         return 0;
     }
@@ -1893,51 +1899,15 @@ luaA_client_index(lua_State *L)
             }
         }
         break;
+      case A_TK_KEYS:
+        return luaA_object_push_item(L, 1, c->keys);
+      case A_TK_BUTTONS:
+        return luaA_object_push_item(L, 1, c->buttons);
       default:
         return 0;
     }
 
     return 1;
-}
-
-/** Get or set mouse buttons bindings for a client.
- * \param L The Lua VM state.
- * \return The number of element pushed on stack.
- * \luastack
- * \lvalue A client.
- * \lparam An array of mouse button bindings objects, or nothing.
- * \return The array of mouse button bindings objects of this client.
- */
-static int
-luaA_client_buttons(lua_State *L)
-{
-    client_t *client = luaA_client_checkudata(L, 1);
-    button_array_t *buttons = &client->buttons;
-
-    if(lua_gettop(L) == 2)
-        luaA_button_array_set(L, 1, 2, buttons);
-
-    return luaA_button_array_get(L, 1, buttons);
-}
-
-/** Get or set keys bindings for a client.
- * \param L The Lua VM state.
- * \return The number of element pushed on stack.
- * \luastack
- * \lvalue A client.
- * \lparam An array of key bindings objects, or nothing.
- * \return The array of key bindings objects of this client.
- */
-static int
-luaA_client_keys(lua_State *L)
-{
-    client_t *c = luaA_client_checkudata(L, 1);
-    key_array_t *keys = &c->keys;
-
-    if(lua_gettop(L) == 2)
-        luaA_key_array_set(L, 1, 2, keys);
-
-    return luaA_key_array_get(L, 1, keys);
 }
 
 /* Client module.
@@ -1996,8 +1966,6 @@ const struct luaL_reg awesome_client_meta[] =
     { "isvisible", luaA_client_isvisible },
     { "geometry", luaA_client_geometry },
     { "struts", luaA_client_struts },
-    { "buttons", luaA_client_buttons },
-    { "keys", luaA_client_keys },
     { "tags", luaA_client_tags },
     { "kill", luaA_client_kill },
     { "swap", luaA_client_swap },

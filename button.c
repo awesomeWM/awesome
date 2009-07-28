@@ -63,49 +63,6 @@ luaA_button_new(lua_State *L)
     return 1;
 }
 
-/** Set a button array with a Lua table.
- * \param L The Lua VM state.
- * \param oidx The index of the object to store items into.
- * \param idx The index of the Lua table.
- * \param buttons The array button to fill.
- */
-void
-luaA_button_array_set(lua_State *L, int oidx, int idx, button_array_t *buttons)
-{
-    luaA_checktable(L, idx);
-
-    foreach(button, *buttons)
-        luaA_object_unref_item(L, oidx, *button);
-
-    button_array_wipe(buttons);
-    button_array_init(buttons);
-
-    lua_pushnil(L);
-    while(lua_next(L, idx))
-        if(luaA_toudata(L, -1, "button"))
-            button_array_append(buttons, luaA_object_ref_item(L, oidx, -1));
-        else
-            lua_pop(L, 1);
-}
-
-/** Push an array of button as an Lua table onto the stack.
- * \param L The Lua VM state.
- * \param oidx The index of the object to get items from.
- * \param buttons The button array to push.
- * \return The number of elements pushed on stack.
- */
-int
-luaA_button_array_get(lua_State *L, int oidx, button_array_t *buttons)
-{
-    lua_createtable(L, buttons->len, 0);
-    for(int i = 0; i < buttons->len; i++)
-    {
-        luaA_object_push_item(L, oidx, buttons->tab[i]);
-        lua_rawseti(L, -2, i + 1);
-    }
-    return 1;
-}
-
 /** Button object.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.

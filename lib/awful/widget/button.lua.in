@@ -32,7 +32,7 @@ function new(args)
     args.type = "imagebox"
     local w = capi.widget(args)
     w.image = img_release
-    w:buttons(button({}, 1, function () w.image = img_press end, function () w.image = img_release end))
+    w.buttons = button({}, 1, function () w.image = img_press end, function () w.image = img_release end)
     function w.mouse_leave(s) w.image = img_release end
     function w.mouse_enter(s) if capi.mouse.coords().buttons[1] then w.image = img_press end end
     return w

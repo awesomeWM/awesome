@@ -312,7 +312,7 @@ function notify(args)
 
     -- create textbox
     local textbox = capi.widget({ type = "textbox", align = "flex" })
-    textbox:buttons(util.table.join(button({ }, 1, run), button({ }, 3, die)))
+    textbox.buttons = util.table.join(button({ }, 1, run), button({ }, 3, die))
     textbox:margin({ right = margin, left = margin, bottom = 2 * margin })
     textbox.text = string.format('<span font_desc="%s"><b>%s</b>%s</span>', font, title, text)
     if hover_timeout then textbox.mouse_enter = hover_destroy end
@@ -328,7 +328,7 @@ function notify(args)
         -- if we have an icon, use it
         if icon then
             iconbox = capi.widget({ type = "imagebox", align = "left" })
-            iconbox:buttons(util.table.join(button({ }, 1, run), button({ }, 3, die)))
+            iconbox.buttons = util.table.join(button({ }, 1, run), button({ }, 3, die))
             local img
             if type(icon) == "string" then
                 img = capi.image(icon)

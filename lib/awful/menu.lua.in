@@ -200,7 +200,7 @@ local function add_item(data, num, item_info)
         label.bg_image = icon
     end
 
-    item:buttons(bindings)
+    item.buttons = bindings
 
     function label.mouse_enter() item_enter(data, num, true) end
     function item.mouse_enter() item_enter(data, num, true) end
@@ -210,7 +210,7 @@ local function add_item(data, num, item_info)
     if type(item_info[2]) == "table" then
         submenu = widget({ type = "imagebox" })
         submenu.image = data.theme.submenu_icon and image(data.theme.submenu_icon)
-        submenu:buttons(bindings)
+        submenu.buttons = bindings
 
         function submenu.mouse_enter() item_enter(data, num, true) end
     end

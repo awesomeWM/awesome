@@ -51,7 +51,7 @@ struct widget_t
     /** Misc private data */
     void *data;
     /** Button bindings */
-    button_array_t buttons;
+    void *buttons;
     /** True if the widget is visible */
     bool isvisible;
 };

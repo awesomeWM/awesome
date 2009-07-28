@@ -44,7 +44,6 @@ luaA_widget_gc(lua_State *L)
     widget_t *widget = luaL_checkudata(L, 1, "widget");
     if(widget->destructor)
         widget->destructor(widget);
-    button_array_wipe(&widget->buttons);
     return luaA_object_gc(L);
 }
 
@@ -451,28 +450,6 @@ luaA_widget_new(lua_State *L)
     return 1;
 }
 
-/** Get or set mouse buttons bindings to a widget.
- * \param L The Lua VM state.
- *
- * \luastack
- * \lvalue A widget.
- * \lparam An array of mouse button bindings objects, or nothing.
- * \return The array of mouse button bindings objects of this widget.
- */
-static int
-luaA_widget_buttons(lua_State *L)
-{
-    widget_t *widget = luaL_checkudata(L, 1, "widget");
-
-    if(lua_gettop(L) == 2)
-    {
-        luaA_button_array_set(L, 1, 2, &widget->buttons);
-        return 1;
-    }
-
-    return luaA_button_array_get(L, 1, &widget->buttons);
-}
-
 /** Generic widget.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
@@ -501,6 +478,8 @@ luaA_widget_index(lua_State *L)
         return luaA_object_push_item(L, 1, widget->mouse_enter);
       case A_TK_MOUSE_LEAVE:
         return luaA_object_push_item(L, 1, widget->mouse_leave);
+      case A_TK_BUTTONS:
+        return luaA_object_push_item(L, 1, widget->buttons);
       default:
         break;
     }
@@ -535,6 +514,10 @@ luaA_widget_newindex(lua_State *L)
         luaA_object_unref_item(L, 1, widget->mouse_leave);
         widget->mouse_leave = luaA_object_ref_item(L, 1, 3);
         return 0;
+      case A_TK_BUTTONS:
+        luaA_object_unref_item(L, 1, widget->buttons);
+        widget->buttons = luaA_object_ref_item(L, 1, 3);
+        break;
       default:
         return widget->newindex ? widget->newindex(L, token) : 0;
     }
@@ -574,7 +557,6 @@ const struct luaL_reg awesome_widget_methods[] =
 };
 const struct luaL_reg awesome_widget_meta[] =
 {
-    { "buttons", luaA_widget_buttons },
     { "extents", luaA_widget_extents },
     { "__index", luaA_widget_index },
     { "__newindex", luaA_widget_newindex },
