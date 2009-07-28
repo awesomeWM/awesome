@@ -83,12 +83,12 @@ systray_draw(widget_t *widget, draw_context_t *ctx,
     }
 
     systray_data_t *d = widget->data;
-    d->height = p->sw.geometry.height;
+    d->height = p->geometry.height;
 
     /* set wibox orientation */
     /** \todo stop setting that property on each redraw */
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
-                        globalconf.screens.tab[p->sw.ctx.phys_screen].systray.window,
+                        globalconf.screens.tab[p->ctx.phys_screen].systray.window,
                         _NET_SYSTEM_TRAY_ORIENTATION, CARDINAL, 32, 1, &orient);
 }
 

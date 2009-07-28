@@ -256,12 +256,12 @@ luaA_mouse_object_under_pointer(lua_State *L)
     {
         wibox_push(L, wibox);
 
-        int16_t x = mouse_x - wibox->sw.geometry.x;
-        int16_t y = mouse_y - wibox->sw.geometry.y;
+        int16_t x = mouse_x - wibox->geometry.x;
+        int16_t y = mouse_y - wibox->geometry.y;
 
-        widget_t *widget = widget_getbycoords(wibox->sw.orientation, &wibox->widgets,
-                                              wibox->sw.geometry.width,
-                                              wibox->sw.geometry.height,
+        widget_t *widget = widget_getbycoords(wibox->orientation, &wibox->widgets,
+                                              wibox->geometry.width,
+                                              wibox->geometry.height,
                                               &x, &y);
 
         if(widget)

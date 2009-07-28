@@ -49,7 +49,7 @@ client_t *
 client_getbytitlebarwin(xcb_window_t win)
 {
     foreach(c, globalconf.clients)
-        if((*c)->titlebar && (*c)->titlebar->sw.window == win)
+        if((*c)->titlebar && (*c)->titlebar->window == win)
             return *c;
 
     return NULL;
@@ -65,10 +65,9 @@ titlebar_ban(wibox_t *titlebar)
     if(titlebar && !titlebar->isbanned)
     {
         client_t *c;
-        simple_window_t *sw = &titlebar->sw;
 
-        if(sw->window)
-            xcb_unmap_window(globalconf.connection, sw->window);
+        if(titlebar->window)
+            xcb_unmap_window(globalconf.connection, titlebar->window);
 
         /* Remove titlebar geometry from client. */
         if((c = client_getbytitlebar(titlebar)))
@@ -90,10 +89,9 @@ titlebar_unban(wibox_t *titlebar)
     if(titlebar && titlebar->isbanned)
     {
         client_t *c;
-        simple_window_t *sw = &titlebar->sw;
 
-        if(sw->window)
-            xcb_map_window(globalconf.connection, sw->window);
+        if(titlebar->window)
+            xcb_map_window(globalconf.connection, titlebar->window);
 
         titlebar->isbanned = false;
 
@@ -131,9 +129,9 @@ titlebar_geometry_compute(client_t *c, area_t geometry, area_t *res)
             break;
         }
         res->x = geometry.x + x_offset;
-        res->y = geometry.y - c->titlebar->sw.geometry.height;
+        res->y = geometry.y - c->titlebar->geometry.height;
         res->width = width;
-        res->height = c->titlebar->sw.geometry.height;
+        res->height = c->titlebar->geometry.height;
         break;
       case Bottom:
         width = MAX(1, geometry.width);
@@ -151,7 +149,7 @@ titlebar_geometry_compute(client_t *c, area_t geometry, area_t *res)
         res->x = geometry.x + x_offset;
         res->y = geometry.y + geometry.height;
         res->width = width;
-        res->height = c->titlebar->sw.geometry.height;
+        res->height = c->titlebar->geometry.height;
         break;
       case Left:
         height = MAX(1, geometry.height);
@@ -166,9 +164,9 @@ titlebar_geometry_compute(client_t *c, area_t geometry, area_t *res)
             y_offset = (geometry.height - height) / 2;
             break;
         }
-        res->x = geometry.x - c->titlebar->sw.geometry.width;
+        res->x = geometry.x - c->titlebar->geometry.width;
         res->y = geometry.y + y_offset;
-        res->width = c->titlebar->sw.geometry.width;
+        res->width = c->titlebar->geometry.width;
         res->height = height;
         break;
       case Right:
@@ -186,7 +184,7 @@ titlebar_geometry_compute(client_t *c, area_t geometry, area_t *res)
         }
         res->x = geometry.x + geometry.width;
         res->y = geometry.y + y_offset;
-        res->width = c->titlebar->sw.geometry.width;
+        res->width = c->titlebar->geometry.width;
         res->height = height;
         break;
     }
@@ -203,7 +201,7 @@ titlebar_client_detach(client_t *c)
     {
         /* Update client geometry to exclude the titlebar. */
         c->geometry = titlebar_geometry_remove(c->titlebar, 0, c->geometry);
-        simplewindow_wipe(&c->titlebar->sw);
+        wibox_wipe(c->titlebar);
         c->titlebar->type = WIBOX_TYPE_NORMAL;
         c->titlebar->screen = NULL;
 
@@ -242,13 +240,13 @@ titlebar_client_attach(client_t *c)
     {
       case Top:
       case Bottom:
-        if(!t->sw.geometry.height)
-            t->sw.geometry.height = 1.5 * globalconf.font->height;
+        if(!t->geometry.height)
+            t->geometry.height = 1.5 * globalconf.font->height;
         break;
       case Left:
       case Right:
-        if(!t->sw.geometry.width)
-            t->sw.geometry.width = 1.5 * globalconf.font->height;
+        if(!t->geometry.width)
+            t->geometry.width = 1.5 * globalconf.font->height;
         break;
     }
 
@@ -256,12 +254,9 @@ titlebar_client_attach(client_t *c)
     c->geometry = titlebar_geometry_add(c->titlebar, 0, c->geometry);
 
     /* Client geometry without titlebar, but including borders, since that is always consistent. */
-    area_t wingeom;
-    titlebar_geometry_compute(c, titlebar_geometry_remove(c->titlebar, 0, c->geometry), &wingeom);
+    titlebar_geometry_compute(c, titlebar_geometry_remove(c->titlebar, 0, c->geometry), &t->geometry);
 
-    simplewindow_init(&t->sw, c->phys_screen,
-                      wingeom, 0, &t->sw.border.color,
-                      t->sw.orientation, &t->sw.ctx.fg, &t->sw.ctx.bg);
+    wibox_init(t, c->phys_screen);
 
     t->need_update = true;
 
@@ -270,7 +265,7 @@ titlebar_client_attach(client_t *c)
      * titlebar if needed. */
     titlebar_update_geometry(c);
 
-    xcb_map_window(globalconf.connection, t->sw.window);
+    xcb_map_window(globalconf.connection, t->window);
 
     hook_property(client, c, "titlebar");
     client_stack();
@@ -321,14 +316,14 @@ luaA_titlebar_newindex(lua_State *L, wibox_t *titlebar, awesome_token_t tok)
         break;
       case A_TK_BORDER_WIDTH:
         if((i = luaL_checknumber(L, 3)) >= 0)
-            simplewindow_border_width_set(&titlebar->sw, i);
+            wibox_border_width_set(titlebar, i);
         else
             return 0;
         break;
       case A_TK_BORDER_COLOR:
         if((buf = luaL_checklstring(L, 3, &len)))
-            if(xcolor_init_reply(xcolor_init_unchecked(&titlebar->sw.border.color, buf, len)))
-                simplewindow_border_color_set(&titlebar->sw, &titlebar->sw.border.color);
+            if(xcolor_init_reply(xcolor_init_unchecked(&titlebar->border.color, buf, len)))
+                wibox_border_color_set(titlebar, &titlebar->border.color);
         return 0;
       case A_TK_POSITION:
         buf = luaL_checklstring(L, 3, &len);
@@ -346,12 +341,12 @@ luaA_titlebar_newindex(lua_State *L, wibox_t *titlebar, awesome_token_t tok)
                     break;
                   case Top:
                   case Bottom:
-                    tmp = titlebar->sw.geometry.width;
-                    titlebar->sw.geometry.width = titlebar->sw.geometry.height;
-                    titlebar->sw.geometry.height = tmp;
+                    tmp = titlebar->geometry.width;
+                    titlebar->geometry.width = titlebar->geometry.height;
+                    titlebar->geometry.height = tmp;
                     break;
                 }
-                simplewindow_orientation_set(&titlebar->sw, North);
+                wibox_orientation_set(titlebar, North);
                 break;
               case Right:
                 switch(titlebar->position)
@@ -362,12 +357,12 @@ luaA_titlebar_newindex(lua_State *L, wibox_t *titlebar, awesome_token_t tok)
                     break;
                   case Top:
                   case Bottom:
-                    tmp = titlebar->sw.geometry.width;
-                    titlebar->sw.geometry.width = titlebar->sw.geometry.height;
-                    titlebar->sw.geometry.height = tmp;
+                    tmp = titlebar->geometry.width;
+                    titlebar->geometry.width = titlebar->geometry.height;
+                    titlebar->geometry.height = tmp;
                     break;
                 }
-                simplewindow_orientation_set(&titlebar->sw, South);
+                wibox_orientation_set(titlebar, South);
                 break;
               case Top:
               case Bottom:
@@ -376,15 +371,15 @@ luaA_titlebar_newindex(lua_State *L, wibox_t *titlebar, awesome_token_t tok)
                     int tmp;
                   case Left:
                   case Right:
-                    tmp = titlebar->sw.geometry.width;
-                    titlebar->sw.geometry.width = titlebar->sw.geometry.height;
-                    titlebar->sw.geometry.height = tmp;
+                    tmp = titlebar->geometry.width;
+                    titlebar->geometry.width = titlebar->geometry.height;
+                    titlebar->geometry.height = tmp;
                     break;
                   case Top:
                   case Bottom:
                     break;
                 }
-                simplewindow_orientation_set(&titlebar->sw, East);
+                wibox_orientation_set(titlebar, East);
                 break;
             }
             titlebar->position = position;

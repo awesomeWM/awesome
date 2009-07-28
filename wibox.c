@@ -1,7 +1,7 @@
 /*
  * wibox.c - wibox functions
  *
- * Copyright © 2008 Julien Danjou <julien@danjou.info>
+ * Copyright © 2008-2009 Julien Danjou <julien@danjou.info>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  *
  */
+
+#include <xcb/shape.h>
 
 #include "screen.h"
 #include "wibox.h"
@@ -39,7 +41,7 @@ luaA_wibox_gc(lua_State *L)
 {
     wibox_t *wibox = luaL_checkudata(L, 1, "wibox");
     p_delete(&wibox->cursor);
-    simplewindow_wipe(&wibox->sw);
+    wibox_wipe(wibox);
     widget_node_array_wipe(&wibox->widgets);
     return luaA_object_gc(L);
 }
@@ -48,6 +50,289 @@ void
 wibox_unref_simplified(wibox_t **item)
 {
     wibox_unref(globalconf.L, *item);
+}
+
+static int
+have_shape(void)
+{
+    const xcb_query_extension_reply_t *reply;
+
+    reply = xcb_get_extension_data(globalconf.connection, &xcb_shape_id);
+    if (!reply || !reply->present)
+        return 0;
+
+    /* We don't need a specific version of SHAPE, no version check required */
+    return 1;
+}
+
+static void
+shape_update(xcb_window_t win, xcb_shape_kind_t kind, image_t *image, int offset)
+{
+    xcb_pixmap_t shape;
+
+    if(image)
+        shape = image_to_1bit_pixmap(image, win);
+    else
+        /* Reset the shape */
+        shape = XCB_NONE;
+
+    xcb_shape_mask(globalconf.connection, XCB_SHAPE_SO_SET, kind,
+                   win, offset, offset, shape);
+
+    if (shape != XCB_NONE)
+        xcb_free_pixmap(globalconf.connection, shape);
+}
+
+/** Update the window's shape.
+ * \param wibox The simplw window whose shape should be updated.
+ */
+static void
+wibox_shape_update(wibox_t *wibox)
+{
+    if(wibox->window == XCB_NONE)
+        return;
+
+    if(!have_shape())
+    {
+        static bool warned = false;
+        if(!warned)
+            warn("The X server doesn't have the SHAPE extension; "
+                    "can't change window's shape");
+        warned = true;
+        return;
+    }
+
+    shape_update(wibox->window, XCB_SHAPE_SK_CLIP, wibox->shape.clip, 0);
+    shape_update(wibox->window, XCB_SHAPE_SK_BOUNDING, wibox->shape.bounding, - wibox->border.width);
+
+    wibox->need_shape_update = false;
+}
+
+static void
+wibox_draw_context_update(wibox_t *w, xcb_screen_t *s)
+{
+    xcolor_t fg = w->ctx.fg, bg = w->ctx.bg;
+    int phys_screen = w->ctx.phys_screen;
+
+    draw_context_wipe(&w->ctx);
+
+    /* update draw context */
+    switch(w->orientation)
+    {
+      case South:
+      case North:
+        /* we need a new pixmap this way [     ] to render */
+        w->ctx.pixmap = xcb_generate_id(globalconf.connection);
+        xcb_create_pixmap(globalconf.connection,
+                          s->root_depth,
+                          w->ctx.pixmap, s->root,
+                          w->geometries.internal.height, w->geometries.internal.width);
+        draw_context_init(&w->ctx, phys_screen,
+                          w->geometries.internal.height, w->geometries.internal.width,
+                          w->ctx.pixmap, &fg, &bg);
+        break;
+      case East:
+        draw_context_init(&w->ctx, phys_screen,
+                          w->geometries.internal.width, w->geometries.internal.height,
+                          w->pixmap, &fg, &bg);
+        break;
+    }
+}
+
+/** Initialize a wibox.
+ * \param w The wibox to initialize.
+ * \param phys_screen Physical screen number.
+ */
+void
+wibox_init(wibox_t *w, int phys_screen)
+{
+    xcb_screen_t *s = xutil_screen_get(globalconf.connection, phys_screen);
+
+    /* Copy the real protocol window geometry. */
+    w->geometries.internal.x = w->geometry.x;
+    w->geometries.internal.y = w->geometry.y;
+    w->geometries.internal.width = w->geometry.width;
+    w->geometries.internal.height = w->geometry.height;
+
+    w->window = xcb_generate_id(globalconf.connection);
+    xcb_create_window(globalconf.connection, s->root_depth, w->window, s->root,
+                      w->geometries.internal.x, w->geometries.internal.y,
+                      w->geometries.internal.width, w->geometries.internal.height,
+                      w->border.width, XCB_COPY_FROM_PARENT, s->root_visual,
+                      XCB_CW_BACK_PIXMAP | XCB_CW_BORDER_PIXEL
+                      | XCB_CW_OVERRIDE_REDIRECT | XCB_CW_EVENT_MASK,
+                      (const uint32_t [])
+                      {
+                          XCB_BACK_PIXMAP_PARENT_RELATIVE,
+                          w->border.color.pixel,
+                          1,
+                          XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT
+                          | XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY | XCB_EVENT_MASK_ENTER_WINDOW
+                          | XCB_EVENT_MASK_LEAVE_WINDOW | XCB_EVENT_MASK_STRUCTURE_NOTIFY
+                          | XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_BUTTON_RELEASE
+                          | XCB_EVENT_MASK_POINTER_MOTION | XCB_EVENT_MASK_EXPOSURE
+                          | XCB_EVENT_MASK_PROPERTY_CHANGE
+                      });
+
+    /* Create a pixmap. */
+    w->pixmap = xcb_generate_id(globalconf.connection);
+    xcb_create_pixmap(globalconf.connection, s->root_depth, w->pixmap, s->root,
+                      w->geometries.internal.width, w->geometries.internal.height);
+
+    /* Update draw context physical screen, important for Zaphod. */
+    w->ctx.phys_screen = phys_screen;
+    wibox_draw_context_update(w, s);
+
+    /* The default GC is just a newly created associated to the root window */
+    w->gc = xcb_generate_id(globalconf.connection);
+    xcb_create_gc(globalconf.connection, w->gc, s->root, XCB_GC_FOREGROUND | XCB_GC_BACKGROUND,
+                  (const uint32_t[]) { s->black_pixel, s->white_pixel });
+
+    wibox_shape_update(w);
+}
+
+/** Refresh the window content by copying its pixmap data to its window.
+ * \param w The wibox to refresh.
+ */
+static inline void
+wibox_refresh_pixmap(wibox_t *w)
+{
+    wibox_refresh_pixmap_partial(w, 0, 0, w->geometry.width, w->geometry.height);
+}
+
+/** Set a wibox opacity.
+ * \param w The wibox the adjust the opacity of.
+ * \param opacity A value between 0 and 1 which describes the opacity.
+ */
+static inline void
+wibox_opacity_set(wibox_t *w, double opacity)
+{
+    w->opacity = opacity;
+    if(w->window != XCB_NONE)
+        window_opacity_set(w->window, opacity);
+}
+
+void
+wibox_moveresize(wibox_t *w, area_t geometry)
+{
+    if(w->window)
+    {
+        uint32_t moveresize_win_vals[4], mask_vals = 0;
+        xcb_screen_t *s = xutil_screen_get(globalconf.connection, w->ctx.phys_screen);
+
+        area_t geom_internal = geometry;
+        geom_internal.width -= 2 * w->border.width;
+        geom_internal.height -= 2* w->border.width;
+
+        if(w->geometries.internal.x != geom_internal.x || w->geometries.internal.y != geom_internal.y)
+        {
+            w->geometries.internal.x = moveresize_win_vals[0] = geom_internal.x;
+            w->geometries.internal.y = moveresize_win_vals[1] = geom_internal.y;
+            mask_vals |= XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y;
+        }
+
+        if(w->geometry.width != geometry.width || w->geometry.height != geometry.height)
+        {
+            if(mask_vals)
+            {
+                w->geometries.internal.width = moveresize_win_vals[2] = geom_internal.width;
+                w->geometries.internal.height = moveresize_win_vals[3] = geom_internal.height;
+            }
+            else
+            {
+                w->geometries.internal.width = moveresize_win_vals[0] = geom_internal.width;
+                w->geometries.internal.height = moveresize_win_vals[1] = geom_internal.height;
+            }
+            mask_vals |= XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT;
+            xcb_free_pixmap(globalconf.connection, w->pixmap);
+            /* orientation != East */
+            if(w->pixmap != w->ctx.pixmap)
+                xcb_free_pixmap(globalconf.connection, w->ctx.pixmap);
+            w->pixmap = xcb_generate_id(globalconf.connection);
+            xcb_create_pixmap(globalconf.connection, s->root_depth, w->pixmap, s->root, geom_internal.width, geom_internal.height);
+            wibox_draw_context_update(w, s);
+        }
+
+        /* Also save geometry including border. */
+        w->geometry = geometry;
+
+        xcb_configure_window(globalconf.connection, w->window, mask_vals, moveresize_win_vals);
+    }
+    else
+        w->geometry = geometry;
+
+    w->need_update = true;
+}
+
+/** Refresh the window content by copying its pixmap data to its window.
+ * \param wibox The wibox to refresh.
+ * \param x The copy starting point x component.
+ * \param y The copy starting point y component.
+ * \param w The copy width from the x component.
+ * \param h The copy height from the y component.
+ */
+void
+wibox_refresh_pixmap_partial(wibox_t *wibox,
+                             int16_t x, int16_t y,
+                             uint16_t w, uint16_t h)
+{
+    xcb_copy_area(globalconf.connection, wibox->pixmap,
+                  wibox->window, wibox->gc, x, y, x, y,
+                  w, h);
+}
+
+/** Set a wibox border width.
+ * \param w The wibox to change border width.
+ * \param border_width The border width in pixel.
+ */
+void
+wibox_border_width_set(wibox_t *w, uint32_t border_width)
+{
+    xcb_configure_window(globalconf.connection, w->window, XCB_CONFIG_WINDOW_BORDER_WIDTH,
+                         &border_width);
+    w->border.width = border_width;
+}
+
+/** Set a wibox border color.
+ * \param w The wibox to change border width.
+ * \param color The border color.
+ */
+void
+wibox_border_color_set(wibox_t *w, const xcolor_t *color)
+{
+    xcb_change_window_attributes(globalconf.connection, w->window,
+                                 XCB_CW_BORDER_PIXEL, &color->pixel);
+    w->border.color = *color;
+}
+
+/** Set wibox orientation.
+ * \param w The wibox.
+ * \param o The new orientation.
+ */
+void
+wibox_orientation_set(wibox_t *w, orientation_t o)
+{
+    if(o != w->orientation)
+    {
+        xcb_screen_t *s = xutil_screen_get(globalconf.connection, w->ctx.phys_screen);
+        w->orientation = o;
+        /* orientation != East */
+        if(w->pixmap != w->ctx.pixmap)
+            xcb_free_pixmap(globalconf.connection, w->ctx.pixmap);
+        wibox_draw_context_update(w, s);
+    }
+}
+
+/** Set wibox cursor.
+ * \param w The wibox.
+ * \param c The cursor.
+ */
+static void
+wibox_cursor_set(wibox_t *w, xcb_cursor_t c)
+{
+    if(w->window)
+        xcb_change_window_attributes(globalconf.connection, w->window, XCB_CW_CURSOR,
+                                     (const uint32_t[]) { c });
 }
 
 static void
@@ -60,7 +345,7 @@ wibox_need_update(wibox_t *wibox)
 static void
 wibox_map(wibox_t *wibox)
 {
-    xcb_map_window(globalconf.connection, wibox->sw.window);
+    xcb_map_window(globalconf.connection, wibox->window);
     /* We must make sure the wibox does not display garbage */
     wibox_need_update(wibox);
     /* Stack this wibox correctly */
@@ -70,31 +355,60 @@ wibox_map(wibox_t *wibox)
 static void
 wibox_move(wibox_t *wibox, int16_t x, int16_t y)
 {
-    if(wibox->sw.window)
+    wibox->geometry.x = x;
+    wibox->geometry.y = y;
+
+    if(wibox->window
+       && (x != wibox->geometries.internal.x || y != wibox->geometries.internal.y))
     {
-        simplewindow_move(&wibox->sw, x, y);
+        wibox->geometry.x = wibox->geometries.internal.x = x;
+        wibox->geometry.y = wibox->geometries.internal.y = y;
+
+        xcb_configure_window(globalconf.connection, wibox->window,
+                             XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y,
+                             (const uint32_t[]) { x, y });
+
         wibox->screen = screen_getbycoord(wibox->screen, x, y);
-    }
-    else
-    {
-        wibox->sw.geometry.x = x;
-        wibox->sw.geometry.y = y;
     }
 }
 
 static void
-wibox_resize(wibox_t *wibox, uint16_t width, uint16_t height)
+wibox_resize(wibox_t *w, uint16_t width, uint16_t height)
 {
-    if(wibox->sw.window)
-        simplewindow_resize(&wibox->sw, width, height);
+    if(w->window)
+    {
+        int iw = width - 2 * w->border.width;
+        int ih = height - 2 * w->border.width;
+
+        if(iw > 0 && ih > 0 &&
+           (w->geometries.internal.width != iw || w->geometries.internal.height != ih))
+        {
+            xcb_screen_t *s = xutil_screen_get(globalconf.connection, w->ctx.phys_screen);
+            uint32_t resize_win_vals[2];
+
+            w->geometries.internal.width = resize_win_vals[0] = iw;
+            w->geometries.internal.height = resize_win_vals[1] = ih;
+            w->geometry.width = width;
+            w->geometry.height = height;
+            xcb_free_pixmap(globalconf.connection, w->pixmap);
+            /* orientation != East */
+            if(w->pixmap != w->ctx.pixmap)
+                xcb_free_pixmap(globalconf.connection, w->ctx.pixmap);
+            w->pixmap = xcb_generate_id(globalconf.connection);
+            xcb_create_pixmap(globalconf.connection, s->root_depth, w->pixmap, s->root, iw, ih);
+            xcb_configure_window(globalconf.connection, w->window,
+                                 XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
+                                 resize_win_vals);
+            wibox_draw_context_update(w, s);
+        }
+    }
     else
     {
-        wibox->sw.geometry.width = width;
-        wibox->sw.geometry.height = height;
+        w->geometry.width = width;
+        w->geometry.height = height;
     }
-    wibox_need_update(wibox);
+    wibox_need_update(w);
 }
-
 
 /** Kick out systray windows.
  * \param phys_screen Physical screen number.
@@ -128,11 +442,11 @@ wibox_systray_refresh(wibox_t *wibox)
         widget_node_t *systray = &wibox->widgets.tab[i];
         if(systray->widget->type == widget_systray)
         {
-            uint32_t config_back[] = { wibox->sw.ctx.bg.pixel };
+            uint32_t config_back[] = { wibox->ctx.bg.pixel };
             uint32_t config_win_vals[4];
             uint32_t config_win_vals_off[2] = { -512, -512 };
             xembed_window_t *em;
-            int phys_screen = wibox->sw.ctx.phys_screen;
+            int phys_screen = wibox->ctx.phys_screen;
 
             if(wibox->isvisible
                && systray->widget->isvisible
@@ -145,11 +459,11 @@ wibox_systray_refresh(wibox_t *wibox)
                 /* Map it. */
                 xcb_map_window(globalconf.connection, globalconf.screens.tab[phys_screen].systray.window);
                 /* Move it. */
-                switch(wibox->sw.orientation)
+                switch(wibox->orientation)
                 {
                   case North:
                     config_win_vals[0] = systray->geometry.y;
-                    config_win_vals[1] = wibox->sw.geometry.height - systray->geometry.x - systray->geometry.width;
+                    config_win_vals[1] = wibox->geometry.height - systray->geometry.x - systray->geometry.width;
                     config_win_vals[2] = systray->geometry.height;
                     config_win_vals[3] = systray->geometry.width;
                     break;
@@ -167,13 +481,13 @@ wibox_systray_refresh(wibox_t *wibox)
                     break;
                 }
                 /* reparent */
-                if(globalconf.screens.tab[phys_screen].systray.parent != wibox->sw.window)
+                if(globalconf.screens.tab[phys_screen].systray.parent != wibox->window)
                 {
                     xcb_reparent_window(globalconf.connection,
                                         globalconf.screens.tab[phys_screen].systray.window,
-                                        wibox->sw.window,
+                                        wibox->window,
                                         config_win_vals[0], config_win_vals[1]);
-                    globalconf.screens.tab[phys_screen].systray.parent = wibox->sw.window;
+                    globalconf.screens.tab[phys_screen].systray.parent = wibox->window;
                 }
                 xcb_configure_window(globalconf.connection,
                                      globalconf.screens.tab[phys_screen].systray.window,
@@ -189,7 +503,7 @@ wibox_systray_refresh(wibox_t *wibox)
             else
                 return wibox_systray_kickout(phys_screen);
 
-            switch(wibox->sw.orientation)
+            switch(wibox->orientation)
             {
               case North:
                 config_win_vals[1] = systray->geometry.width - config_win_vals[3];
@@ -198,7 +512,7 @@ wibox_systray_refresh(wibox_t *wibox)
                     em = &globalconf.embedded.tab[j];
                     if(em->phys_screen == phys_screen)
                     {
-                        if(config_win_vals[1] - config_win_vals[2] >= (uint32_t) wibox->sw.geometry.y)
+                        if(config_win_vals[1] - config_win_vals[2] >= (uint32_t) wibox->geometry.y)
                         {
                             xcb_map_window(globalconf.connection, em->win);
                             xcb_configure_window(globalconf.connection, em->win,
@@ -225,7 +539,7 @@ wibox_systray_refresh(wibox_t *wibox)
                     if(em->phys_screen == phys_screen)
                     {
                         /* if(y + width <= wibox.y + systray.right) */
-                        if(config_win_vals[1] + config_win_vals[3] <= (uint32_t) wibox->sw.geometry.y + AREA_RIGHT(systray->geometry))
+                        if(config_win_vals[1] + config_win_vals[3] <= (uint32_t) wibox->geometry.y + AREA_RIGHT(systray->geometry))
                         {
                             xcb_map_window(globalconf.connection, em->win);
                             xcb_configure_window(globalconf.connection, em->win,
@@ -252,7 +566,7 @@ wibox_systray_refresh(wibox_t *wibox)
                     if(em->phys_screen == phys_screen)
                     {
                         /* if(x + width < systray.x + systray.width) */
-                        if(config_win_vals[0] + config_win_vals[2] <= (uint32_t) AREA_RIGHT(systray->geometry) + wibox->sw.geometry.x)
+                        if(config_win_vals[0] + config_win_vals[2] <= (uint32_t) AREA_RIGHT(systray->geometry) + wibox->geometry.x)
                         {
                             xcb_map_window(globalconf.connection, em->win);
                             xcb_configure_window(globalconf.connection, em->win,
@@ -285,13 +599,13 @@ wibox_t *
 wibox_getbywin(xcb_window_t win)
 {
     foreach(w, globalconf.wiboxes)
-        if((*w)->sw.window == win)
+        if((*w)->window == win)
             return *w;
 
     foreach(_c, globalconf.clients)
     {
         client_t *c = *_c;
-        if(c->titlebar && c->titlebar->sw.window == win)
+        if(c->titlebar && c->titlebar->window == win)
             return c->titlebar;
     }
 
@@ -307,7 +621,7 @@ wibox_draw(wibox_t *wibox)
     if(wibox->isvisible)
     {
         widget_render(wibox);
-        simplewindow_refresh_pixmap(&wibox->sw);
+        wibox_refresh_pixmap(wibox);
 
         wibox->need_update = false;
     }
@@ -323,10 +637,7 @@ wibox_refresh(void)
     foreach(w, globalconf.wiboxes)
     {
         if((*w)->need_shape_update)
-        {
-            simplewindow_update_shape(&(*w)->sw);
-            (*w)->need_shape_update = false;
-        }
+            wibox_shape_update(*w);
         if((*w)->need_update)
             wibox_draw(*w);
     }
@@ -356,7 +667,7 @@ wibox_setvisible(wibox_t *wibox, bool v)
             if(wibox->isvisible)
                 wibox_map(wibox);
             else
-                xcb_unmap_window(globalconf.connection, wibox->sw.window);
+                xcb_unmap_window(globalconf.connection, wibox->window);
 
             /* kick out systray if needed */
             wibox_systray_refresh(wibox);
@@ -364,6 +675,30 @@ wibox_setvisible(wibox_t *wibox, bool v)
 
         hook_property(wibox, wibox, "visible");
     }
+}
+
+/** Destroy all X resources of a wibox.
+ * \param w The wibox to wipe.
+ */
+void
+wibox_wipe(wibox_t *w)
+{
+    if(w->window)
+    {
+        xcb_destroy_window(globalconf.connection, w->window);
+        w->window = XCB_NONE;
+    }
+    if(w->pixmap)
+    {
+        xcb_free_pixmap(globalconf.connection, w->pixmap);
+        w->pixmap = XCB_NONE;
+    }
+    if(w->gc)
+    {
+        xcb_free_gc(globalconf.connection, w->gc);
+        w->gc = XCB_NONE;
+    }
+    draw_context_wipe(&w->ctx);
 }
 
 /** Remove a wibox from a screen.
@@ -385,7 +720,7 @@ wibox_detach(wibox_t *wibox)
 
         wibox->mouse_over = NULL;
 
-        simplewindow_wipe(&wibox->sw);
+        wibox_wipe(wibox);
 
         foreach(item, globalconf.wiboxes)
             if(*item == wibox)
@@ -419,7 +754,7 @@ wibox_attach(screen_t *s)
 
     /* Check that the wibox coordinates matches the screen. */
     screen_t *cscreen =
-        screen_getbycoord(wibox->screen, wibox->sw.geometry.x, wibox->sw.geometry.y);
+        screen_getbycoord(wibox->screen, wibox->geometry.x, wibox->geometry.y);
 
     /* If it does not match, move it to the screen coordinates */
     if(cscreen != wibox->screen)
@@ -427,17 +762,12 @@ wibox_attach(screen_t *s)
 
     wibox_array_append(&globalconf.wiboxes, wibox);
 
-    simplewindow_init(&wibox->sw, phys_screen,
-                      wibox->sw.geometry,
-                      wibox->sw.border.width,
-                      &wibox->sw.border.color,
-                      wibox->sw.orientation,
-                      &wibox->sw.ctx.fg, &wibox->sw.ctx.bg);
+    wibox_init(wibox, phys_screen);
 
-    simplewindow_cursor_set(&wibox->sw,
-                            xcursor_new(globalconf.connection, xcursor_font_fromstr(wibox->cursor)));
+    wibox_cursor_set(wibox,
+                     xcursor_new(globalconf.connection, xcursor_font_fromstr(wibox->cursor)));
 
-    simplewindow_opacity_set(&wibox->sw, wibox->sw.opacity);
+    wibox_opacity_set(wibox, wibox->opacity);
 
     if(wibox->isvisible)
         wibox_map(wibox);
@@ -468,26 +798,26 @@ luaA_wibox_new(lua_State *L)
 
     w = wibox_new(L);
 
-    w->sw.ctx.fg = globalconf.colors.fg;
+    w->ctx.fg = globalconf.colors.fg;
     if((buf = luaA_getopt_lstring(L, 2, "fg", NULL, &len)))
-        reqs[++reqs_nbr] = xcolor_init_unchecked(&w->sw.ctx.fg, buf, len);
+        reqs[++reqs_nbr] = xcolor_init_unchecked(&w->ctx.fg, buf, len);
 
-    w->sw.ctx.bg = globalconf.colors.bg;
+    w->ctx.bg = globalconf.colors.bg;
     if((buf = luaA_getopt_lstring(L, 2, "bg", NULL, &len)))
-        reqs[++reqs_nbr] = xcolor_init_unchecked(&w->sw.ctx.bg, buf, len);
+        reqs[++reqs_nbr] = xcolor_init_unchecked(&w->ctx.bg, buf, len);
 
-    w->sw.border.color = globalconf.colors.bg;
+    w->border.color = globalconf.colors.bg;
     if((buf = luaA_getopt_lstring(L, 2, "border_color", NULL, &len)))
-        reqs[++reqs_nbr] = xcolor_init_unchecked(&w->sw.border.color, buf, len);
+        reqs[++reqs_nbr] = xcolor_init_unchecked(&w->border.color, buf, len);
 
     w->ontop = luaA_getopt_boolean(L, 2, "ontop", false);
 
-    w->sw.opacity = -1;
-    w->sw.border.width = luaA_getopt_number(L, 2, "border_width", 0);
-    w->sw.geometry.x = luaA_getopt_number(L, 2, "x", 0);
-    w->sw.geometry.y = luaA_getopt_number(L, 2, "y", 0);
-    w->sw.geometry.width = luaA_getopt_number(L, 2, "width", 100);
-    w->sw.geometry.height = luaA_getopt_number(L, 2, "height", globalconf.font->height * 1.5);
+    w->opacity = -1;
+    w->border.width = luaA_getopt_number(L, 2, "border_width", 0);
+    w->geometry.x = luaA_getopt_number(L, 2, "x", 0);
+    w->geometry.y = luaA_getopt_number(L, 2, "y", 0);
+    w->geometry.width = luaA_getopt_number(L, 2, "width", 100);
+    w->geometry.height = luaA_getopt_number(L, 2, "height", globalconf.font->height * 1.5);
 
     w->isvisible = true;
     w->cursor = a_strdup("left_ptr");
@@ -595,10 +925,10 @@ luaA_wibox_index(lua_State *L)
         lua_pushnumber(L, screen_array_indexof(&globalconf.screens, wibox->screen) + 1);
         break;
       case A_TK_BORDER_WIDTH:
-        lua_pushnumber(L, wibox->sw.border.width);
+        lua_pushnumber(L, wibox->border.width);
         break;
       case A_TK_BORDER_COLOR:
-        luaA_pushxcolor(L, &wibox->sw.border.color);
+        luaA_pushxcolor(L, &wibox->border.color);
         break;
       case A_TK_ALIGN:
         if(wibox->type == WIBOX_TYPE_NORMAL)
@@ -606,10 +936,10 @@ luaA_wibox_index(lua_State *L)
         lua_pushstring(L, draw_align_tostr(wibox->align));
         break;
       case A_TK_FG:
-        luaA_pushxcolor(L, &wibox->sw.ctx.fg);
+        luaA_pushxcolor(L, &wibox->ctx.fg);
         break;
       case A_TK_BG:
-        luaA_pushxcolor(L, &wibox->sw.ctx.bg);
+        luaA_pushxcolor(L, &wibox->ctx.bg);
         break;
       case A_TK_BG_IMAGE:
         luaA_object_push_item(L, 1, wibox->bg_image);
@@ -623,7 +953,7 @@ luaA_wibox_index(lua_State *L)
         lua_pushboolean(L, wibox->ontop);
         break;
       case A_TK_ORIENTATION:
-        lua_pushstring(L, orientation_tostr(wibox->sw.orientation));
+        lua_pushstring(L, orientation_tostr(wibox->orientation));
         break;
       case A_TK_WIDGETS:
         return luaA_object_push_item(L, 1, wibox->widgets_table);
@@ -631,22 +961,19 @@ luaA_wibox_index(lua_State *L)
         lua_pushstring(L, wibox->cursor);
         break;
       case A_TK_OPACITY:
-        {
-            double d = simplewindow_opacity_get(&wibox->sw);
-            if (d >= 0)
-                lua_pushnumber(L, d);
-            else
-                return 0;
-        }
+        if (wibox->opacity >= 0)
+            lua_pushnumber(L, wibox->opacity);
+        else
+            return 0;
         break;
       case A_TK_MOUSE_ENTER:
         return luaA_object_push_item(L, 1, wibox->mouse_enter);
       case A_TK_MOUSE_LEAVE:
         return luaA_object_push_item(L, 1, wibox->mouse_leave);
       case A_TK_SHAPE_BOUNDING:
-        return luaA_object_push_item(L, 1, wibox->sw.shape.bounding);
+        return luaA_object_push_item(L, 1, wibox->shape.bounding);
       case A_TK_SHAPE_CLIP:
-        return luaA_object_push_item(L, 1, wibox->sw.shape.clip);
+        return luaA_object_push_item(L, 1, wibox->shape.clip);
       case A_TK_BUTTONS:
         return luaA_object_push_item(L, 1, wibox->buttons);
       default:
@@ -673,10 +1000,10 @@ luaA_wibox_geometry(lua_State *L)
         area_t wingeom;
 
         luaA_checktable(L, 2);
-        wingeom.x = luaA_getopt_number(L, 2, "x", wibox->sw.geometry.x);
-        wingeom.y = luaA_getopt_number(L, 2, "y", wibox->sw.geometry.y);
-        wingeom.width = luaA_getopt_number(L, 2, "width", wibox->sw.geometry.width);
-        wingeom.height = luaA_getopt_number(L, 2, "height", wibox->sw.geometry.height);
+        wingeom.x = luaA_getopt_number(L, 2, "x", wibox->geometry.x);
+        wingeom.y = luaA_getopt_number(L, 2, "y", wibox->geometry.y);
+        wingeom.width = luaA_getopt_number(L, 2, "width", wibox->geometry.width);
+        wingeom.height = luaA_getopt_number(L, 2, "height", wibox->geometry.height);
 
         switch(wibox->type)
         {
@@ -689,7 +1016,7 @@ luaA_wibox_geometry(lua_State *L)
         }
     }
 
-    return luaA_pusharea(L, wibox->sw.geometry);
+    return luaA_pusharea(L, wibox->geometry);
 }
 
 /** Wibox newindex.
@@ -710,12 +1037,12 @@ luaA_wibox_newindex(lua_State *L)
 
       case A_TK_FG:
         if((buf = luaL_checklstring(L, 3, &len)))
-            if(xcolor_init_reply(xcolor_init_unchecked(&wibox->sw.ctx.fg, buf, len)))
+            if(xcolor_init_reply(xcolor_init_unchecked(&wibox->ctx.fg, buf, len)))
                 wibox->need_update = true;
         break;
       case A_TK_BG:
         if((buf = luaL_checklstring(L, 3, &len)))
-            if(xcolor_init_reply(xcolor_init_unchecked(&wibox->sw.ctx.bg, buf, len)))
+            if(xcolor_init_reply(xcolor_init_unchecked(&wibox->ctx.bg, buf, len)))
                 wibox->need_update = true;
         break;
       case A_TK_BG_IMAGE:
@@ -770,7 +1097,7 @@ luaA_wibox_newindex(lua_State *L)
                 xcb_cursor_t cursor = xcursor_new(globalconf.connection, cursor_font);
                 p_delete(&wibox->cursor);
                 wibox->cursor = a_strdup(buf);
-                simplewindow_cursor_set(&wibox->sw, cursor);
+                wibox_cursor_set(wibox, cursor);
             }
         }
         break;
@@ -803,15 +1130,15 @@ luaA_wibox_newindex(lua_State *L)
       case A_TK_ORIENTATION:
         if((buf = luaL_checklstring(L, 3, &len)))
         {
-            simplewindow_orientation_set(&wibox->sw, orientation_fromstr(buf, len));
+            wibox_orientation_set(wibox, orientation_fromstr(buf, len));
             wibox_need_update(wibox);
         }
         break;
       case A_TK_BORDER_COLOR:
         if((buf = luaL_checklstring(L, 3, &len)))
-            if(xcolor_init_reply(xcolor_init_unchecked(&wibox->sw.border.color, buf, len)))
-                if(wibox->sw.window)
-                    simplewindow_border_color_set(&wibox->sw, &wibox->sw.border.color);
+            if(xcolor_init_reply(xcolor_init_unchecked(&wibox->border.color, buf, len)))
+                if(wibox->window)
+                    wibox_border_color_set(wibox, &wibox->border.color);
         break;
       case A_TK_VISIBLE:
         b = luaA_checkboolean(L, 3);
@@ -841,12 +1168,12 @@ luaA_wibox_newindex(lua_State *L)
         break;
       case A_TK_OPACITY:
         if(lua_isnil(L, 3))
-            simplewindow_opacity_set(&wibox->sw, -1);
+            wibox_opacity_set(wibox, -1);
         else
         {
             double d = luaL_checknumber(L, 3);
             if(d >= 0 && d <= 1)
-                simplewindow_opacity_set(&wibox->sw, d);
+                wibox_opacity_set(wibox, d);
         }
         break;
       case A_TK_MOUSE_ENTER:
@@ -860,13 +1187,13 @@ luaA_wibox_newindex(lua_State *L)
         wibox->mouse_leave = luaA_object_ref_item(L, 1, 3);
         return 0;
       case A_TK_SHAPE_BOUNDING:
-        luaA_object_unref_item(L, 1, wibox->sw.shape.bounding);
-        wibox->sw.shape.bounding = luaA_object_ref_item(L, 1, 3);
+        luaA_object_unref_item(L, 1, wibox->shape.bounding);
+        wibox->shape.bounding = luaA_object_ref_item(L, 1, 3);
         wibox->need_shape_update = true;
         break;
       case A_TK_SHAPE_CLIP:
-        luaA_object_unref_item(L, 1, wibox->sw.shape.clip);
-        wibox->sw.shape.clip = luaA_object_ref_item(L, 1, 3);
+        luaA_object_unref_item(L, 1, wibox->shape.clip);
+        wibox->shape.clip = luaA_object_ref_item(L, 1, 3);
         wibox->need_shape_update = true;
       case A_TK_BUTTONS:
         luaA_object_unref_item(L, 1, wibox->buttons);

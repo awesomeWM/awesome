@@ -338,10 +338,10 @@ client_stack_above(client_t *c, xcb_window_t previous)
     if(c->titlebar)
     {
         xcb_configure_window(globalconf.connection,
-                             c->titlebar->sw.window,
+                             c->titlebar->window,
                              XCB_CONFIG_WINDOW_SIBLING | XCB_CONFIG_WINDOW_STACK_MODE,
                              config_win_vals);
-        previous = c->titlebar->sw.window;
+        previous = c->titlebar->window;
     }
     else
         previous = c->win;
@@ -433,10 +433,10 @@ client_stack_refresh()
         if(!sb->ontop)
         {
             xcb_configure_window(globalconf.connection,
-                                 sb->sw.window,
+                                 sb->window,
                                  XCB_CONFIG_WINDOW_SIBLING | XCB_CONFIG_WINDOW_STACK_MODE,
                                  config_win_vals);
-            config_win_vals[0] = sb->sw.window;
+            config_win_vals[0] = sb->window;
         }
     }
 
@@ -454,10 +454,10 @@ client_stack_refresh()
         if(sb->ontop)
         {
             xcb_configure_window(globalconf.connection,
-                                 sb->sw.window,
+                                 sb->window,
                                  XCB_CONFIG_WINDOW_SIBLING | XCB_CONFIG_WINDOW_STACK_MODE,
                                  config_win_vals);
-            config_win_vals[0] = sb->sw.window;
+            config_win_vals[0] = sb->window;
         }
     }
 }

@@ -69,18 +69,18 @@ titlebar_geometry_add(wibox_t *t, int border, area_t geometry)
         switch(t->position)
         {
           case Top:
-            geometry.y -= t->sw.geometry.height;
-            geometry.height += t->sw.geometry.height;
+            geometry.y -= t->geometry.height;
+            geometry.height += t->geometry.height;
             break;
           case Bottom:
-            geometry.height += t->sw.geometry.height;
+            geometry.height += t->geometry.height;
             break;
           case Left:
-            geometry.x -= t->sw.geometry.width;
-            geometry.width += t->sw.geometry.width;
+            geometry.x -= t->geometry.width;
+            geometry.width += t->geometry.width;
             break;
           case Right:
-            geometry.width += t->sw.geometry.width;
+            geometry.width += t->geometry.width;
             break;
           default:
             break;
@@ -110,18 +110,18 @@ titlebar_geometry_remove(wibox_t *t, int border, area_t geometry)
         switch(t->position)
         {
           case Top:
-            geometry.y += t->sw.geometry.height;
-            unsigned_subtract(geometry.height, t->sw.geometry.height);
+            geometry.y += t->geometry.height;
+            unsigned_subtract(geometry.height, t->geometry.height);
             break;
           case Bottom:
-            unsigned_subtract(geometry.height, t->sw.geometry.height);
+            unsigned_subtract(geometry.height, t->geometry.height);
             break;
           case Left:
-            geometry.x += t->sw.geometry.width;
-            unsigned_subtract(geometry.width, t->sw.geometry.width);
+            geometry.x += t->geometry.width;
+            unsigned_subtract(geometry.width, t->geometry.width);
             break;
           case Right:
-            unsigned_subtract(geometry.width, t->sw.geometry.width);
+            unsigned_subtract(geometry.width, t->geometry.width);
             break;
           default:
             break;

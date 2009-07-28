@@ -173,19 +173,19 @@ event_handle_button(void *data, xcb_connection_t *connection, xcb_button_press_e
     {
         /* If the wibox is child, then x,y are
          * relative to root window */
-        if(wibox->sw.window == ev->child)
+        if(wibox->window == ev->child)
         {
-            ev->event_x -= wibox->sw.geometry.x;
-            ev->event_y -= wibox->sw.geometry.y;
+            ev->event_x -= wibox->geometry.x;
+            ev->event_y -= wibox->geometry.y;
         }
 
         wibox_push(globalconf.L, wibox);
         event_button_callback(ev, wibox->buttons, -1, 1, NULL);
 
         /* then try to match a widget binding */
-        widget_t *w = widget_getbycoords(wibox->sw.orientation, &wibox->widgets,
-                                         wibox->sw.geometry.width,
-                                         wibox->sw.geometry.height,
+        widget_t *w = widget_getbycoords(wibox->orientation, &wibox->widgets,
+                                         wibox->geometry.width,
+                                         wibox->geometry.height,
                                          &ev->event_x, &ev->event_y);
         if(w)
         {
@@ -409,9 +409,9 @@ event_handle_motionnotify(void *data __attribute__ ((unused)),
 
     if((wibox = wibox_getbywin(ev->event)))
     {
-        widget_t *w = widget_getbycoords(wibox->sw.orientation, &wibox->widgets,
-                                         wibox->sw.geometry.width,
-                                         wibox->sw.geometry.height,
+        widget_t *w = widget_getbycoords(wibox->orientation, &wibox->widgets,
+                                         wibox->geometry.width,
+                                         wibox->geometry.height,
                                          &ev->event_x, &ev->event_y);
         if(w)
             event_handle_widget_motionnotify(wibox, &wibox->mouse_over, w);
@@ -485,9 +485,9 @@ event_handle_enternotify(void *data __attribute__ ((unused)),
 
     if((wibox = wibox_getbywin(ev->event)))
     {
-        widget_t *w = widget_getbycoords(wibox->sw.orientation, &wibox->widgets,
-                                         wibox->sw.geometry.width,
-                                         wibox->sw.geometry.height,
+        widget_t *w = widget_getbycoords(wibox->orientation, &wibox->widgets,
+                                         wibox->geometry.width,
+                                         wibox->geometry.height,
                                          &ev->event_x, &ev->event_y);
         if(w)
             event_handle_widget_motionnotify(wibox, &wibox->mouse_over, w);
@@ -558,9 +558,9 @@ event_handle_expose(void *data __attribute__ ((unused)),
     wibox_t *wibox;
 
     if((wibox = wibox_getbywin(ev->window)))
-        simplewindow_refresh_pixmap_partial(&wibox->sw,
-                                            ev->x, ev->y,
-                                            ev->width, ev->height);
+        wibox_refresh_pixmap_partial(wibox,
+                                     ev->x, ev->y,
+                                     ev->width, ev->height);
 
     return 0;
 }

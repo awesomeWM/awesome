@@ -1,7 +1,7 @@
 /*
  * wibox.h - wibox functions header
  *
- * Copyright © 2007-2008 Julien Danjou <julien@danjou.info>
+ * Copyright © 2007-2009 Julien Danjou <julien@danjou.info>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,11 +19,10 @@
  *
  */
 
-#ifndef AWESOME_STATUSBAR_H
-#define AWESOME_STATUSBAR_H
+#ifndef AWESOME_WIBOX_H
+#define AWESOME_WIBOX_H
 
 #include "widget.h"
-#include "swindow.h"
 
 /** Wibox types */
 typedef enum
@@ -44,8 +43,6 @@ struct wibox_t
     position_t position;
     /** Wibox type */
     wibox_type_t type;
-    /** Window */
-    simple_window_t sw;
     /** Alignment */
     alignment_t align;
     /** Screen */
@@ -69,6 +66,41 @@ struct wibox_t
     bool isbanned;
     /** Button bindings */
     void *buttons;
+    /** The window object. */
+    xcb_window_t window;
+    /** The pixmap copied to the window object. */
+    xcb_pixmap_t pixmap;
+    /** The graphic context. */
+    xcb_gcontext_t gc;
+    /** The window geometry. */
+    area_t geometry;
+    struct
+    {
+        /** Internal geometry (matching X11 protocol) */
+        area_t internal;
+    } geometries;
+    /** The window border */
+    struct
+    {
+        /** The window border width */
+        uint16_t width;
+        /** The window border color */
+        xcolor_t color;
+    } border;
+    /** Draw context */
+    draw_context_t ctx;
+    /** Orientation */
+    orientation_t orientation;
+    /** Opacity */
+    double opacity;
+    /** The window's shape */
+    struct
+    {
+        /** The window's content */
+        image_t *clip;
+        /** The window's content and border */
+        image_t *bounding;
+    } shape;
 };
 
 void wibox_unref_simplified(wibox_t **);
@@ -81,15 +113,13 @@ void luaA_wibox_invalidate_byitem(lua_State *, const void *);
 
 wibox_t * wibox_getbywin(xcb_window_t);
 
-static inline void
-wibox_moveresize(wibox_t *wibox, area_t geometry)
-{
-    if(wibox->sw.window)
-        simplewindow_moveresize(&wibox->sw, geometry);
-    else
-        wibox->sw.geometry = geometry;
-    wibox->need_update = true;
-}
+void wibox_moveresize(wibox_t *, area_t);
+void wibox_refresh_pixmap_partial(wibox_t *, int16_t, int16_t, uint16_t, uint16_t);
+void wibox_init(wibox_t *, int);
+void wibox_wipe(wibox_t *);
+void wibox_border_width_set(wibox_t *, uint32_t);
+void wibox_border_color_set(wibox_t *, const xcolor_t *);
+void wibox_orientation_set(wibox_t *, orientation_t);
 
 LUA_OBJECT_FUNCS(wibox_t, wibox, "wibox")
 

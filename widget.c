@@ -153,20 +153,20 @@ widget_geometries(wibox_t *wibox)
     if(lua_isfunction(globalconf.L, -1))
     {
         /* Push 1st argument: wibox geometry */
-        area_t geometry = wibox->sw.geometry;
+        area_t geometry = wibox->geometry;
         geometry.x = 0;
         geometry.y = 0;
         /* we need to exchange the width and height of the wibox window if it
          * it is rotated, so the layout function doesn't need to care about that
          */
-        if(wibox->sw.orientation != East)
+        if(wibox->orientation != East)
         {
             int i = geometry.height;
             geometry.height = geometry.width;
             geometry.width = i;
         }
-        geometry.height -= 2 * wibox->sw.border.width;
-        geometry.width -= 2 * wibox->sw.border.width;
+        geometry.height -= 2 * wibox->border.width;
+        geometry.width -= 2 * wibox->border.width;
         luaA_pusharea(globalconf.L, geometry);
         /* Re-push 2nd argument: widget table */
         lua_pushvalue(globalconf.L, -3);
@@ -212,8 +212,8 @@ widget_geometries(wibox_t *wibox)
             area_t geometry = widget->extents(globalconf.L, widget);
             lua_pop(globalconf.L, 1);
             geometry.x = geometry.y = 0;
-            geometry.width = MIN(wibox->sw.geometry.width, geometry.width);
-            geometry.height = MIN(wibox->sw.geometry.height, geometry.height);
+            geometry.width = MIN(wibox->geometry.width, geometry.width);
+            geometry.height = MIN(wibox->geometry.height, geometry.height);
 
             luaA_pusharea(globalconf.L, geometry);
 
@@ -231,7 +231,7 @@ void
 widget_render(wibox_t *wibox)
 {
     lua_State *L = globalconf.L;
-    draw_context_t *ctx = &wibox->sw.ctx;
+    draw_context_t *ctx = &wibox->ctx;
     area_t rectangle = { 0, 0, 0, 0 };
     color_t col;
 
@@ -243,7 +243,7 @@ widget_render(wibox_t *wibox)
 
     if(ctx->bg.alpha != 0xffff)
     {
-        int x = wibox->sw.geometry.x, y = wibox->sw.geometry.y;
+        int x = wibox->geometry.x, y = wibox->geometry.y;
         xcb_get_property_reply_t *prop_r;
         char *data;
         xcb_pixmap_t rootpix;
@@ -256,7 +256,7 @@ widget_render(wibox_t *wibox)
             if(prop_r->value_len
                && (data = xcb_get_property_value(prop_r))
                && (rootpix = *(xcb_pixmap_t *) data))
-               switch(wibox->sw.orientation)
+               switch(wibox->orientation)
                {
                  case North:
                    draw_rotate(ctx,
@@ -278,7 +278,7 @@ widget_render(wibox_t *wibox)
                    break;
                  case East:
                    xcb_copy_area(globalconf.connection, rootpix,
-                                 wibox->sw.pixmap, wibox->sw.gc,
+                                 wibox->pixmap, wibox->gc,
                                  x, y,
                                  0, 0,
                                  ctx->width, ctx->height);
@@ -306,8 +306,8 @@ widget_render(wibox_t *wibox)
         lua_pushnumber(L, i + 1);
         lua_gettable(L, -2);
 
-        widgets->tab[i].geometry.x = luaA_getopt_number(L, -1, "x", wibox->sw.geometry.x);
-        widgets->tab[i].geometry.y = luaA_getopt_number(L, -1, "y", wibox->sw.geometry.y);
+        widgets->tab[i].geometry.x = luaA_getopt_number(L, -1, "x", wibox->geometry.x);
+        widgets->tab[i].geometry.y = luaA_getopt_number(L, -1, "y", wibox->geometry.y);
         widgets->tab[i].geometry.width = luaA_getopt_number(L, -1, "width", 1);
         widgets->tab[i].geometry.height = luaA_getopt_number(L, -1, "height", 1);
 
@@ -329,16 +329,16 @@ widget_render(wibox_t *wibox)
             widgets->tab[i].widget->draw(widgets->tab[i].widget,
                                          ctx, widgets->tab[i].geometry, wibox);
 
-    switch(wibox->sw.orientation)
+    switch(wibox->orientation)
     {
         case South:
-          draw_rotate(ctx, ctx->pixmap, wibox->sw.pixmap,
+          draw_rotate(ctx, ctx->pixmap, wibox->pixmap,
                       ctx->width, ctx->height,
                       ctx->height, ctx->width,
                       M_PI_2, ctx->height, 0);
           break;
         case North:
-          draw_rotate(ctx, ctx->pixmap, wibox->sw.pixmap,
+          draw_rotate(ctx, ctx->pixmap, wibox->pixmap,
                       ctx->width, ctx->height,
                       ctx->height, ctx->width,
                       - M_PI_2, 0, ctx->width);

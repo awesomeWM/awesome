@@ -468,7 +468,7 @@ property_handle_opacity(void *data __attribute__ ((unused)),
     wibox_t *wibox = wibox_getbywin(window);
 
     if (wibox)
-        wibox->sw.opacity = window_opacity_get_from_reply(reply);
+        wibox->opacity = window_opacity_get_from_reply(reply);
     return 0;
 }
 
