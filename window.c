@@ -23,11 +23,7 @@
 #include <xcb/xcb_atom.h>
 
 #include "window.h"
-#include "button.h"
 #include "common/atoms.h"
-
-/** Mask shorthands */
-#define BUTTONMASK     (XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_BUTTON_RELEASE)
 
 /** Set client state (WM_STATE) property.
  * \param win The window to set state.
@@ -94,19 +90,6 @@ window_configure(xcb_window_t win, area_t geometry, int border)
     ce.above_sibling = XCB_NONE;
     ce.override_redirect = false;
     xcb_send_event(globalconf.connection, false, win, XCB_EVENT_MASK_STRUCTURE_NOTIFY, (char *) &ce);
-}
-
-/** Grab or ungrab buttons on a window.
- * \param win The window.
- * \param buttons The buttons to grab.
- */
-void
-window_buttons_grab(xcb_window_t win, button_array_t *buttons)
-{
-    foreach(b, *buttons)
-        xcb_grab_button(globalconf.connection, false, win, BUTTONMASK,
-                        XCB_GRAB_MODE_SYNC, XCB_GRAB_MODE_ASYNC, XCB_NONE, XCB_NONE,
-                        (*b)->button, (*b)->mod);
 }
 
 /** Get the opacity of a window.

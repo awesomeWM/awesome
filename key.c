@@ -33,36 +33,6 @@
 
 DO_LUA_TOSTRING(keyb_t, key, "key")
 
-/** Grab key on a window.
- * \param win The window.
- * \param k The key.
- */
-static void
-window_grabkey(xcb_window_t win, keyb_t *k)
-{
-    if(k->keycode)
-        xcb_grab_key(globalconf.connection, true, win,
-                     k->mod, k->keycode, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC);
-    else if(k->keysym)
-    {
-        xcb_keycode_t *keycodes = xcb_key_symbols_get_keycode(globalconf.keysyms, k->keysym);
-        if(keycodes)
-        {
-            for(xcb_keycode_t *kc = keycodes; *kc; kc++)
-                xcb_grab_key(globalconf.connection, true, win,
-                             k->mod, *kc, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC);
-            p_delete(&keycodes);
-        }
-    }
-}
-
-void
-window_grabkeys(xcb_window_t win, key_array_t *keys)
-{
-    foreach(k, *keys)
-        window_grabkey(win, *k);
-}
-
 /** XCB equivalent of XLookupString which translate the keycode given
  * by PressEvent to a KeySym and a string
  * \todo use XKB!

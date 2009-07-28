@@ -527,6 +527,8 @@ main(int argc, char **argv)
                 | XCB_EVENT_MASK_PROPERTY_CHANGE
                 | XCB_EVENT_MASK_BUTTON_PRESS
                 | XCB_EVENT_MASK_BUTTON_RELEASE
+                | XCB_EVENT_MASK_KEY_PRESS
+                | XCB_EVENT_MASK_KEY_RELEASE
                 | XCB_EVENT_MASK_FOCUS_CHANGE
         };
 
