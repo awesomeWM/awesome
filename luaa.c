@@ -677,6 +677,8 @@ luaA_init(xdgHandle* xdg)
 
     luaA_fixups(L);
 
+    luaA_object_setup(L);
+
     /* Export awesome lib */
     luaA_openlib(L, "awesome", awesome_lib, awesome_lib);
 

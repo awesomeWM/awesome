@@ -21,6 +21,25 @@
 
 #include "common/luaobject.h"
 
+/** Setup the object system at startup.
+ * \param L The Lua VM state.
+ */
+void
+luaA_object_setup(lua_State *L)
+{
+    /* Push identification string */
+    lua_pushliteral(L, LUAA_OBJECT_REGISTRY_KEY);
+    /* Create an empty table */
+    lua_newtable(L);
+    /* Create an empty metatable */
+    lua_newtable(L);
+    /* Set this empty table as the registry metatable.
+     * It's used to store the number of reference on stored objects. */
+    lua_setmetatable(L, -2);
+    /* Register table inside registry */
+    lua_rawset(L, LUA_REGISTRYINDEX);
+}
+
 /** Increment a object reference in its store table.
  * \param L The Lua VM state.
  * \param tud The table index on the stack.
