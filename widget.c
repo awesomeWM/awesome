@@ -45,8 +45,6 @@ luaA_widget_gc(lua_State *L)
     if(widget->destructor)
         widget->destructor(widget);
     button_array_wipe(&widget->buttons);
-    luaL_unref(globalconf.L, LUA_REGISTRYINDEX, widget->mouse_enter);
-    luaL_unref(globalconf.L, LUA_REGISTRYINDEX, widget->mouse_leave);
     return luaA_object_gc(L);
 }
 
@@ -139,9 +137,14 @@ bool
 widget_geometries(wibox_t *wibox)
 {
     /* get the layout field of the widget table */
-    if (wibox->widgets_table != LUA_REFNIL)
+    if(wibox->widgets_table)
     {
-        lua_rawgeti(globalconf.L, LUA_REGISTRYINDEX, wibox->widgets_table);
+        /* push wibox */
+        wibox_push(globalconf.L, wibox);
+        /* push widgets table */
+        luaA_object_push_item(globalconf.L, -1, wibox->widgets_table);
+        /* remove wibox */
+        lua_remove(globalconf.L, -2);
         lua_getfield(globalconf.L, -1, "layout");
     }
     else
@@ -192,7 +195,12 @@ widget_geometries(wibox_t *wibox)
         widget_node_array_wipe(widgets);
         widget_node_array_init(widgets);
 
-        lua_rawgeti(globalconf.L, LUA_REGISTRYINDEX, wibox->widgets_table);
+        /* push wibox */
+        wibox_push(globalconf.L, wibox);
+        /* push widgets table */
+        luaA_object_push_item(globalconf.L, -1, wibox->widgets_table);
+        /* remove wibox */
+        lua_remove(globalconf.L, -2);
         luaA_table2widgets(globalconf.L, widgets);
         lua_pop(globalconf.L, 2);
 
@@ -285,7 +293,12 @@ widget_render(wibox_t *wibox)
 
     widget_node_array_wipe(widgets);
     widget_node_array_init(widgets);
-    lua_rawgeti(L, LUA_REGISTRYINDEX, wibox->widgets_table);
+    /* push wibox */
+    wibox_push(globalconf.L, wibox);
+    /* push widgets table */
+    luaA_object_push_item(globalconf.L, -1, wibox->widgets_table);
+    /* remove wibox */
+    lua_remove(globalconf.L, -2);
     luaA_table2widgets(L, widgets);
 
     /* get computed geometries */
@@ -435,8 +448,6 @@ luaA_widget_new(lua_State *L)
     /* Set visible by default. */
     w->isvisible = true;
 
-    w->mouse_enter = w->mouse_leave = LUA_REFNIL;
-
     return 1;
 }
 
@@ -452,15 +463,14 @@ static int
 luaA_widget_buttons(lua_State *L)
 {
     widget_t *widget = luaL_checkudata(L, 1, "widget");
-    button_array_t *buttons = &widget->buttons;
 
     if(lua_gettop(L) == 2)
     {
-        luaA_button_array_set(L, 2, buttons);
+        luaA_button_array_set(L, 1, 2, &widget->buttons);
         return 1;
     }
 
-    return luaA_button_array_get(L, buttons);
+    return luaA_button_array_get(L, 1, &widget->buttons);
 }
 
 /** Generic widget.
@@ -488,17 +498,9 @@ luaA_widget_index(lua_State *L)
         lua_pushboolean(L, widget->isvisible);
         return 1;
       case A_TK_MOUSE_ENTER:
-        if(widget->mouse_enter != LUA_REFNIL)
-            lua_rawgeti(L, LUA_REGISTRYINDEX, widget->mouse_enter);
-        else
-            return 0;
-        return 1;
+        return luaA_object_push_item(L, 1, widget->mouse_enter);
       case A_TK_MOUSE_LEAVE:
-        if(widget->mouse_leave != LUA_REFNIL)
-            lua_rawgeti(L, LUA_REGISTRYINDEX, widget->mouse_leave);
-        else
-            return 0;
-        return 1;
+        return luaA_object_push_item(L, 1, widget->mouse_leave);
       default:
         break;
     }
@@ -524,10 +526,14 @@ luaA_widget_newindex(lua_State *L)
         widget->isvisible = luaA_checkboolean(L, 3);
         break;
       case A_TK_MOUSE_ENTER:
-        luaA_registerfct(L, 3, &widget->mouse_enter);
+        luaA_checkfunction(L, 3);
+        luaA_object_unref_item(L, 1, widget->mouse_enter);
+        widget->mouse_enter = luaA_object_ref_item(L, 1, 3);
         return 0;
       case A_TK_MOUSE_LEAVE:
-        luaA_registerfct(L, 3, &widget->mouse_leave);
+        luaA_checkfunction(L, 3);
+        luaA_object_unref_item(L, 1, widget->mouse_leave);
+        widget->mouse_leave = luaA_object_ref_item(L, 1, 3);
         return 0;
       default:
         return widget->newindex ? widget->newindex(L, token) : 0;

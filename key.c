@@ -31,28 +31,7 @@
 #include "common/xutil.h"
 #include "common/tokenize.h"
 
-LUA_OBJECT_FUNCS(keyb_t, key, "key")
-
-void
-key_unref_simplified(keyb_t **b)
-{
-    key_unref(globalconf.L, *b);
-}
-
 DO_LUA_TOSTRING(keyb_t, key, "key")
-
-/** Garbage collect a key.
- * \param L The Lua VM state.
- * \return 0.
- */
-static int
-luaA_key_gc(lua_State *L)
-{
-    keyb_t *kbp = luaL_checkudata(L, 1, "key");
-    luaL_unref(globalconf.L, LUA_REGISTRYINDEX, kbp->press);
-    luaL_unref(globalconf.L, LUA_REGISTRYINDEX, kbp->release);
-    return luaA_object_gc(L);
-}
 
 /** Grab key on a window.
  * \param win The window.
@@ -1026,7 +1005,9 @@ luaA_key_new(lua_State *L)
     size_t len;
     keyb_t *k;
     const char *key;
-    luaA_ref press = LUA_REFNIL, release = LUA_REFNIL;
+
+    /* be sure there's 5 arguments */
+    lua_settop(L, 5);
 
     /* arg 2 is key mod table */
     luaA_checktable(L, 2);
@@ -1034,17 +1015,15 @@ luaA_key_new(lua_State *L)
     key = luaL_checklstring(L, 3, &len);
 
     if(!lua_isnil(L, 4))
-        luaA_registerfct(L, 4, &press);
+        luaA_checkfunction(L, 4);
 
-    if(lua_gettop(L) == 5 && !lua_isnil(L, 5))
-        luaA_registerfct(L, 5, &release);
+    if(!lua_isnil(L, 5))
+        luaA_checkfunction(L, 5);
 
     k = key_new(L);
+    k->press = luaA_object_ref_item(L, -1, 4);
+    k->release = luaA_object_ref_item(L, -1, 4);
     luaA_keystore(k, key, len);
-
-    k->press = press;
-    k->release = release;
-
     k->mod = luaA_tomodifiers(L, 2);
 
     return 1;
@@ -1052,34 +1031,42 @@ luaA_key_new(lua_State *L)
 
 /** Set a key array with a Lua table.
  * \param L The Lua VM state.
+ * \param oidx The index of the object to store items into.
  * \param idx The index of the Lua table.
  * \param keys The array key to fill.
  */
 void
-luaA_key_array_set(lua_State *L, int idx, key_array_t *keys)
+luaA_key_array_set(lua_State *L, int oidx, int idx, key_array_t *keys)
 {
     luaA_checktable(L, idx);
+
+    foreach(key, *keys)
+        luaA_object_unref_item(L, oidx, *key);
 
     key_array_wipe(keys);
     key_array_init(keys);
 
     lua_pushnil(L);
     while(lua_next(L, idx))
-        key_array_append(keys, key_ref(L, -1));
+        if(luaA_toudata(L, -1, "key"))
+            key_array_append(keys, luaA_object_ref_item(L, oidx, -1));
+        else
+            lua_pop(L, 1);
 }
 
 /** Push an array of key as an Lua table onto the stack.
  * \param L The Lua VM state.
+ * \param oidx The index of the object to get items from.
  * \param keys The key array to push.
  * \return The number of elements pushed on stack.
  */
 int
-luaA_key_array_get(lua_State *L, key_array_t *keys)
+luaA_key_array_get(lua_State *L, int oidx, key_array_t *keys)
 {
     lua_createtable(L, keys->len, 0);
     for(int i = 0; i < keys->len; i++)
     {
-        key_push(L, keys->tab[i]);
+        luaA_object_push_item(L, oidx, keys->tab[i]);
         lua_rawseti(L, -2, i + 1);
     }
     return 1;
@@ -1182,11 +1169,9 @@ luaA_key_index(lua_State *L)
         luaA_pushmodifiers(L, k->mod);
         break;
       case A_TK_PRESS:
-        lua_rawgeti(L, LUA_REGISTRYINDEX, k->press);
-        break;
+        return luaA_object_push_item(L, 1, k->press);
       case A_TK_RELEASE:
-        lua_rawgeti(L, LUA_REGISTRYINDEX, k->release);
-        break;
+        return luaA_object_push_item(L, 1, k->release);
       default:
         break;
     }
@@ -1217,10 +1202,14 @@ luaA_key_newindex(lua_State *L)
         k->mod = luaA_tomodifiers(L, 3);
         break;
       case A_TK_PRESS:
-        luaA_registerfct(L, 3, &k->press);
+        luaA_checkfunction(L, 3);
+        luaA_object_unref_item(L, 1, k->press);
+        k->press = luaA_object_ref_item(L, 1, 3);
         break;
       case A_TK_RELEASE:
-        luaA_registerfct(L, 3, &k->release);
+        luaA_checkfunction(L, 3);
+        luaA_object_unref_item(L, 1, k->release);
+        k->release = luaA_object_ref_item(L, 1, 3);
         break;
       default:
         break;
@@ -1238,7 +1227,7 @@ const struct luaL_reg awesome_key_meta[] =
     { "__tostring", luaA_key_tostring },
     { "__index", luaA_key_index },
     { "__newindex", luaA_key_newindex },
-    { "__gc", luaA_key_gc },
+    { "__gc", luaA_object_gc },
     { NULL, NULL },
 };
 

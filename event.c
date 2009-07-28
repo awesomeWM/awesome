@@ -42,31 +42,50 @@
 #include "common/atoms.h"
 #include "common/xutil.h"
 
-#define DO_EVENT_HOOK_CALLBACK(xcbtype, xcbeventprefix, type, arraytype, match) \
+#define DO_EVENT_HOOK_CALLBACK(type, xcbeventprefix, arraytype, match) \
     static void \
-    event_##xcbtype##_callback(xcb_##xcbtype##_press_event_t *ev, \
-                               arraytype *arr, \
-                               int nargs, \
-                               void *data) \
+    event_##type##_callback(xcb_##type##_press_event_t *ev, \
+                            arraytype *arr, \
+                            int oud, \
+                            int nargs, \
+                            void *data) \
     { \
         foreach(item, *arr) \
             if(match(ev, *item, data)) \
                 switch(ev->response_type) \
                 { \
                   case xcbeventprefix##_PRESS: \
-                    if((*item)->press != LUA_REFNIL) \
+                    if((*item)->press) \
                     { \
                         for(int i = 0; i < nargs; i++) \
                             lua_pushvalue(globalconf.L, - nargs); \
-                        luaA_dofunction_from_registry(globalconf.L, (*item)->press, nargs, 0); \
+                        if(oud) \
+                        { \
+                            luaA_object_push_item(globalconf.L, oud < 0 ? oud - nargs : oud, \
+                                                  (*item)); \
+                            luaA_object_push_item(globalconf.L,  -1, (*item)->press); \
+                            lua_remove(globalconf.L, -2); \
+                        } \
+                        else \
+                            type##_push_item(globalconf.L, *item, (*item)->press); \
+                        luaA_dofunction(globalconf.L, nargs, 0); \
                     } \
                     break; \
                   case xcbeventprefix##_RELEASE: \
-                    if((*item)->release != LUA_REFNIL) \
+                    if((*item)->release) \
                     { \
                         for(int i = 0; i < nargs; i++) \
                             lua_pushvalue(globalconf.L, - nargs); \
-                        luaA_dofunction_from_registry(globalconf.L, (*item)->release, nargs, 0); \
+                        if(oud) \
+                        { \
+                            luaA_object_push_item(globalconf.L, oud < 0 ? oud - nargs : oud, \
+                                                  (*item)); \
+                            luaA_object_push_item(globalconf.L,  -1, (*item)->release); \
+                            lua_remove(globalconf.L, -2); \
+                        } \
+                        else \
+                            type##_push_item(globalconf.L, *item, (*item)->release); \
+                        luaA_dofunction(globalconf.L, nargs, 0); \
                     } \
                     break; \
                 } \
@@ -90,8 +109,8 @@ event_key_match(xcb_key_press_event_t *ev, keyb_t *k, void *data)
             && (k->mod == XCB_BUTTON_MASK_ANY || k->mod == ev->state));
 }
 
-DO_EVENT_HOOK_CALLBACK(button, XCB_BUTTON, button_t, button_array_t, event_button_match)
-DO_EVENT_HOOK_CALLBACK(key, XCB_KEY, keyb_t, key_array_t, event_key_match)
+DO_EVENT_HOOK_CALLBACK(button, XCB_BUTTON, button_array_t, event_button_match)
+DO_EVENT_HOOK_CALLBACK(key, XCB_KEY, key_array_t, event_key_match)
 
 /** Handle an event with mouse grabber if needed
  * \param x The x coordinate.
@@ -153,7 +172,7 @@ event_handle_button(void *data, xcb_connection_t *connection, xcb_button_press_e
         }
 
         wibox_push(globalconf.L, wibox);
-        event_button_callback(ev, &wibox->buttons, 1, NULL);
+        event_button_callback(ev, &wibox->buttons, -1, 1, NULL);
 
         /* then try to match a widget binding */
         widget_t *w = widget_getbycoords(wibox->sw.orientation, &wibox->widgets,
@@ -164,13 +183,13 @@ event_handle_button(void *data, xcb_connection_t *connection, xcb_button_press_e
         {
             widget_push(globalconf.L, w);
             wibox_push(globalconf.L, wibox);
-            event_button_callback(ev, &w->buttons, 2, NULL);
+            event_button_callback(ev, &w->buttons, -2, 2, NULL);
         }
     }
     else if((c = client_getbywin(ev->event)))
     {
         client_push(globalconf.L, c);
-        event_button_callback(ev, &c->buttons, 1, NULL);
+        event_button_callback(ev, &c->buttons, -1, 1, NULL);
         xcb_allow_events(globalconf.connection,
                          XCB_ALLOW_REPLAY_POINTER,
                          XCB_CURRENT_TIME);
@@ -179,7 +198,7 @@ event_handle_button(void *data, xcb_connection_t *connection, xcb_button_press_e
         for(screen = 0; screen < nb_screen; screen++)
             if(xutil_screen_get(connection, screen)->root == ev->event)
             {
-                event_button_callback(ev, &globalconf.buttons, 0, NULL);
+                event_button_callback(ev, &globalconf.buttons, 0, 0, NULL);
                 return 0;
             }
 
@@ -343,21 +362,23 @@ event_handle_widget_motionnotify(void *object,
     {
         if(*mouse_over)
         {
-            if((*mouse_over)->mouse_leave != LUA_REFNIL)
+            if((*mouse_over)->mouse_leave)
             {
                 /* call mouse leave function on old widget */
                 widget_push(globalconf.L, *mouse_over);
-                luaA_dofunction_from_registry(globalconf.L, (*mouse_over)->mouse_leave, 1, 0);
+                widget_push_item(globalconf.L, *mouse_over, (*mouse_over)->mouse_leave);
+                luaA_dofunction(globalconf.L, 1, 0);
             }
         }
         if(widget)
         {
             /* call mouse enter function on new widget and register it */
             *mouse_over = widget;
-            if(widget->mouse_enter != LUA_REFNIL)
+            if(widget->mouse_enter)
             {
                 widget_push(globalconf.L, widget);
-                luaA_dofunction_from_registry(globalconf.L, widget->mouse_enter, 1, 0);
+                widget_push_item(globalconf.L, widget, widget->mouse_enter);
+                luaA_dofunction(globalconf.L, 1, 0);
             }
         }
     }
@@ -418,17 +439,21 @@ event_handle_leavenotify(void *data __attribute__ ((unused)),
     {
         if(wibox->mouse_over)
         {
-            if(wibox->mouse_over->mouse_leave != LUA_REFNIL)
+            if(wibox->mouse_over->mouse_leave)
             {
                 /* call mouse leave function on widget the mouse was over */
                 wibox_push(globalconf.L, wibox);
-                luaA_dofunction_from_registry(globalconf.L, wibox->mouse_over->mouse_leave, 1, 0);
+                widget_push_item(globalconf.L, wibox->mouse_over, wibox->mouse_over->mouse_leave);
+                luaA_dofunction(globalconf.L, 1, 0);
             }
             wibox->mouse_over = NULL;
         }
 
-        if(wibox->mouse_leave != LUA_REFNIL)
-            luaA_dofunction_from_registry(globalconf.L, wibox->mouse_leave, 0, 0);
+        if(wibox->mouse_leave)
+        {
+            wibox_push_item(globalconf.L, wibox, wibox->mouse_leave);
+            luaA_dofunction(globalconf.L, 0, 0);
+        }
     }
 
     return 0;
@@ -459,8 +484,11 @@ event_handle_enternotify(void *data __attribute__ ((unused)),
         if(w)
             event_handle_widget_motionnotify(wibox, &wibox->mouse_over, w);
 
-        if(wibox->mouse_enter != LUA_REFNIL)
-            luaA_dofunction_from_registry(globalconf.L, wibox->mouse_enter, 0, 0);
+        if(wibox->mouse_enter)
+        {
+            wibox_push_item(globalconf.L, wibox, wibox->mouse_enter);
+            luaA_dofunction(globalconf.L, 0, 0);
+        }
     }
 
     if((c = client_getbytitlebarwin(ev->event))
@@ -562,10 +590,10 @@ event_handle_key(void *data __attribute__ ((unused)),
         if((c = client_getbywin(ev->event)))
         {
             client_push(globalconf.L, c);
-            event_key_callback(ev, &c->keys, 1, &keysym);
+            event_key_callback(ev, &c->keys, -1, 1, &keysym);
         }
         else
-            event_key_callback(ev, &globalconf.keys, 0, &keysym);
+            event_key_callback(ev, &globalconf.keys, 0, 0, &keysym);
     }
 
     return 0;

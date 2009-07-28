@@ -97,34 +97,34 @@ struct awesome_t
     struct
     {
         /** Command to execute when spawning a new client */
-        luaA_ref manage;
+        int manage;
         /** Command to execute when unmanaging client */
-        luaA_ref unmanage;
+        int unmanage;
         /** Command to execute when giving focus to a client */
-        luaA_ref focus;
+        int focus;
         /** Command to execute when removing focus to a client */
-        luaA_ref unfocus;
+        int unfocus;
         /** Command to run when mouse enter a client */
-        luaA_ref mouse_enter;
+        int mouse_enter;
         /** Command to run when mouse leave a client */
-        luaA_ref mouse_leave;
+        int mouse_leave;
         /** Command to run when client list changes */
-        luaA_ref clients;
+        int clients;
         /** Command to run on numbers of tag changes */
-        luaA_ref tags;
+        int tags;
         /** Command to run when client gets (un)tagged */
-        luaA_ref tagged;
+        int tagged;
         /** Command to run on property change */
-        luaA_ref property;
+        int property;
         /** Command to run on time */
-        luaA_ref timer;
+        int timer;
         /** Command to run on awesome exit */
-        luaA_ref exit;
+        int exit;
         /** Startup notification hooks */
-        luaA_ref startup_notification;
+        int startup_notification;
 #ifdef WITH_DBUS
         /** Command to run on dbus events */
-        luaA_ref dbus;
+        int dbus;
 #endif
     } hooks;
     /** The event loop */
@@ -132,9 +132,9 @@ struct awesome_t
     /** The timeout after which we need to stop select() */
     struct ev_timer timer;
     /** The key grabber function */
-    luaA_ref keygrabber;
+    int keygrabber;
     /** The mouse pointer grabber function */
-    luaA_ref mousegrabber;
+    int mousegrabber;
     /** Focused screen */
     screen_t *screen_focus;
     /** Need to call client_stack_refresh() */

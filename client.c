@@ -53,7 +53,6 @@ luaA_client_gc(lua_State *L)
     client_t *c = luaL_checkudata(L, 1, "client");
     button_array_wipe(&c->buttons);
     key_array_wipe(&c->keys);
-    image_unref(L, c->icon);
     xcb_get_wm_protocols_reply_wipe(&c->protocols);
     p_delete(&c->class);
     p_delete(&c->startup_id);
@@ -517,7 +516,11 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
     client_setborder(c, wgeom->border_width);
 
     if(ewmh_window_icon_get_reply(ewmh_icon_cookie))
-        c->icon = image_ref(globalconf.L, -1);
+    {
+        client_push(globalconf.L, c);
+        c->icon = luaA_object_ref_item(globalconf.L, -1, -2);
+        lua_pop(globalconf.L, 1);
+    }
 
     /* we honor size hints by default */
     c->size_hints_honor = true;
@@ -1492,9 +1495,9 @@ luaA_client_newindex(lua_State *L)
         client_setmaxvert(c, luaA_checkboolean(L, 3));
         break;
       case A_TK_ICON:
-        image_unref(L, c->icon);
+        luaA_object_unref_item(L, 1, c->icon);
         c->icon = NULL;
-        c->icon = image_ref(L, 3);
+        c->icon = luaA_object_ref_item(L, 1, 3);
         /* execute hook */
         hook_property(client, c, "icon");
         break;
@@ -1733,7 +1736,7 @@ luaA_client_index(lua_State *L)
         lua_pushboolean(L, c->ismaxvert);
         break;
       case A_TK_ICON:
-        image_push(L, c->icon);
+        luaA_object_push_item(L, 1, c->icon);
         break;
       case A_TK_OPACITY:
         if((d = window_opacity_get(c->win)) >= 0)
@@ -1909,11 +1912,11 @@ luaA_client_buttons(lua_State *L)
     button_array_t *buttons = &client->buttons;
 
     if(lua_gettop(L) == 2)
-        luaA_button_array_set(L, 2, buttons);
+        luaA_button_array_set(L, 1, 2, buttons);
 
     window_buttons_grab(client->win, &client->buttons);
 
-    return luaA_button_array_get(L, buttons);
+    return luaA_button_array_get(L, 1, buttons);
 }
 
 /** Get or set keys bindings for a client.
@@ -1932,12 +1935,12 @@ luaA_client_keys(lua_State *L)
 
     if(lua_gettop(L) == 2)
     {
-        luaA_key_array_set(L, 2, keys);
+        luaA_key_array_set(L, 1, 2, keys);
         xcb_ungrab_key(globalconf.connection, XCB_GRAB_ANY, c->win, XCB_BUTTON_MASK_ANY);
         window_grabkeys(c->win, keys);
     }
 
-    return luaA_key_array_get(L, keys);
+    return luaA_key_array_get(L, 1, keys);
 }
 
 /* Client module.

@@ -114,7 +114,17 @@ luaA_root_keys(lua_State *L)
 {
     if(lua_gettop(L) == 1)
     {
-        luaA_key_array_set(L, 1, &globalconf.keys);
+        luaA_checktable(L, 1);
+
+        foreach(key, globalconf.keys)
+            key_unref(globalconf.L, *key);
+
+        key_array_wipe(&globalconf.keys);
+        key_array_init(&globalconf.keys);
+
+        lua_pushnil(L);
+        while(lua_next(L, 1))
+            key_array_append(&globalconf.keys, key_ref(L, -1));
 
         int nscreen = xcb_setup_roots_length(xcb_get_setup(globalconf.connection));
 
@@ -124,9 +134,18 @@ luaA_root_keys(lua_State *L)
             xcb_ungrab_key(globalconf.connection, XCB_GRAB_ANY, s->root, XCB_BUTTON_MASK_ANY);
             window_grabkeys(s->root, &globalconf.keys);
         }
+
+        return 1;
     }
 
-    return luaA_key_array_get(L, &globalconf.keys);
+    lua_createtable(L, globalconf.keys.len, 0);
+    for(int i = 0; i < globalconf.keys.len; i++)
+    {
+        key_push(L, globalconf.keys.tab[i]);
+        lua_rawseti(L, -2, i + 1);
+    }
+
+    return 1;
 }
 
 /** Get or set global mouse bindings.
@@ -141,9 +160,30 @@ static int
 luaA_root_buttons(lua_State *L)
 {
     if(lua_gettop(L) == 1)
-        luaA_button_array_set(L, 1, &globalconf.buttons);
+    {
+        luaA_checktable(L, 1);
 
-    return luaA_button_array_get(L, &globalconf.buttons);
+        foreach(button, globalconf.buttons)
+            button_unref(globalconf.L, *button);
+
+        button_array_wipe(&globalconf.buttons);
+        button_array_init(&globalconf.buttons);
+
+        lua_pushnil(L);
+        while(lua_next(L, 1))
+            button_array_append(&globalconf.buttons, button_ref(L, -1));
+
+        return 1;
+    }
+
+    lua_createtable(L, globalconf.buttons.len, 0);
+    for(int i = 0; i < globalconf.buttons.len; i++)
+    {
+        button_push(L, globalconf.buttons.tab[i]);
+        lua_rawseti(L, -2, i + 1);
+    }
+
+    return 1;
 }
 
 /** Set the root cursor.

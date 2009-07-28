@@ -198,13 +198,13 @@ luaA_usemetatable(lua_State *L, int idxobj, int idxfield)
 /** Register an Lua object.
  * \param L The Lua stack.
  * \param idx Index of the object in the stack.
- * \param ref A luaA_ref address: it will be filled with the luaA_ref
+ * \param ref A int address: it will be filled with the int
  * registered. If the adresse point to an already registered object, it will
  * be unregistered.
  * \return Always 0.
  */
 static inline int
-luaA_register(lua_State *L, int idx, luaA_ref *ref)
+luaA_register(lua_State *L, int idx, int *ref)
 {
     lua_pushvalue(L, idx);
     if(*ref != LUA_REFNIL)
@@ -218,7 +218,7 @@ luaA_register(lua_State *L, int idx, luaA_ref *ref)
  * \param ref A reference to an Lua object.
  */
 static inline void
-luaA_unregister(lua_State *L, luaA_ref *ref)
+luaA_unregister(lua_State *L, int *ref)
 {
     luaL_unref(L, LUA_REGISTRYINDEX, *ref);
     *ref = LUA_REFNIL;
@@ -227,13 +227,13 @@ luaA_unregister(lua_State *L, luaA_ref *ref)
 /** Register a function.
  * \param L The Lua stack.
  * \param idx Index of the function in the stack.
- * \param fct A luaA_ref address: it will be filled with the luaA_ref
+ * \param fct A int address: it will be filled with the int
  * registered. If the adresse point to an already registered function, it will
  * be unregistered.
  * \return luaA_register value.
  */
 static inline int
-luaA_registerfct(lua_State *L, int idx, luaA_ref *fct)
+luaA_registerfct(lua_State *L, int idx, int *fct)
 {
     luaA_checkfunction(L, idx);
     return luaA_register(L, idx, fct);
@@ -268,7 +268,7 @@ luaA_dofunction(lua_State *L, int nargs, int nret)
  * \return True on no error, false otherwise.
  */
 static inline bool
-luaA_dofunction_from_registry(lua_State *L, luaA_ref ref, int nargs, int nret)
+luaA_dofunction_from_registry(lua_State *L, int ref, int nargs, int nret)
 {
     lua_rawgeti(L, LUA_REGISTRYINDEX, ref);
     return luaA_dofunction(L, nargs, nret);

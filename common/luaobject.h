@@ -25,9 +25,6 @@
 #include <lauxlib.h>
 #include "common/array.h"
 
-/** Type for Lua references */
-typedef int luaA_ref;
-
 static inline int
 luaA_settype(lua_State *L, const char *type)
 {
@@ -36,10 +33,66 @@ luaA_settype(lua_State *L, const char *type)
     return 1;
 }
 
-DO_ARRAY(luaA_ref, luaA_ref, DO_NOTHING)
+void * luaA_object_incref(lua_State *, int, int);
+void luaA_object_decref(lua_State *, int, void *);
+
+/** Store an item in the environment table of an object.
+ * \param L The Lua VM state.
+ * \param ud The index of the object on the stack.
+ * \param iud The index of the item on the stack.
+ * \return The item reference.
+ */
+static inline void *
+luaA_object_ref_item(lua_State *L, int ud, int iud)
+{
+    /* Get the env table from the object */
+    lua_getfenv(L, ud);
+    void *pointer = luaA_object_incref(L, -1, iud < 0 ? iud - 1 : iud);
+    /* Remove env table */
+    lua_pop(L, 1);
+    return pointer;
+}
+
+/** Unref an item from the environment table of an object.
+ * \param L The Lua VM state.
+ * \param ud The index of the object on the stack.
+ * \param ref item.
+ */
+static inline void
+luaA_object_unref_item(lua_State *L, int ud, void *pointer)
+{
+    /* Get the env table from the object */
+    lua_getfenv(L, ud);
+    /* Decrement */
+    luaA_object_decref(L, -1, pointer);
+    /* Remove env table */
+    lua_pop(L, 1);
+}
+
+/** Push an object item on the stack.
+ * \param L The Lua VM state.
+ * \param ud The object index on the stack.
+ * \param pointer The item pointer.
+ * \return The number of element pushed on stack.
+ */
+static inline int
+luaA_object_push_item(lua_State *L, int ud, void *pointer)
+{
+    /* Get env table of the object */
+    lua_getfenv(L, ud);
+    /* Push key */
+    lua_pushlightuserdata(L, pointer);
+    /* Get env.pointer */
+    lua_rawget(L, -2);
+    /* Remove env table */
+    lua_remove(L, -2);
+    return 1;
+}
+
+DO_ARRAY(int, int, DO_NOTHING)
 
 #define LUA_OBJECT_HEADER \
-        luaA_ref_array_t refs;
+        int_array_t refs;
 
 /** Generic type for all objects.
  * All Lua objects can be casted to this type.
@@ -56,6 +109,10 @@ typedef struct
         type *p = lua_newuserdata(L, sizeof(type));                            \
         p_clear(p, 1);                                                         \
         luaA_settype(L, lua_type);                                             \
+        lua_newtable(L);                                                       \
+        lua_newtable(L);                                                       \
+        lua_setmetatable(L, -2);                                               \
+        lua_setfenv(L, -2);                                                    \
         return p;                                                              \
     }                                                                          \
                                                                                \
@@ -79,7 +136,7 @@ typedef struct
             return NULL;                                                       \
         type *item = luaL_checkudata(L, ud, lua_type);                         \
         lua_pushvalue(L, ud);                                                  \
-        luaA_ref_array_append(&item->refs, luaL_ref(L, LUA_REGISTRYINDEX));    \
+        int_array_append(&item->refs, luaL_ref(L, LUA_REGISTRYINDEX));         \
         lua_remove(L, ud);                                                     \
         return item;                                                           \
     }                                                                          \
@@ -91,9 +148,19 @@ typedef struct
         {                                                                      \
             assert(item->refs.len);                                            \
             luaL_unref(L, LUA_REGISTRYINDEX, item->refs.tab[0]);               \
-            luaA_ref_array_take(&item->refs, 0);                               \
+            int_array_take(&item->refs, 0);                                    \
         }                                                                      \
+    }                                                                          \
+                                                                               \
+    static inline int                                                          \
+    prefix##_push_item(lua_State *L, type *item, void *ref)                    \
+    {                                                                          \
+        prefix##_push(L, item);                                                \
+        luaA_object_push_item(L, -1, ref);                                     \
+        lua_remove(L, -2);                                                     \
+        return 1;                                                              \
     }
+
 
 /** Garbage collect a Lua object.
  * \param L The Lua VM state.
@@ -103,7 +170,7 @@ static inline int
 luaA_object_gc(lua_State *L)
 {
     lua_object_t *item = lua_touserdata(L, 1);
-    luaA_ref_array_wipe(&item->refs);
+    int_array_wipe(&item->refs);
     return 0;
 }
 

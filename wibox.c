@@ -41,10 +41,6 @@ luaA_wibox_gc(lua_State *L)
     p_delete(&wibox->cursor);
     simplewindow_wipe(&wibox->sw);
     button_array_wipe(&wibox->buttons);
-    image_unref(L, wibox->bg_image);
-    luaL_unref(L, LUA_REGISTRYINDEX, wibox->widgets_table);
-    luaL_unref(L, LUA_REGISTRYINDEX, wibox->mouse_enter);
-    luaL_unref(L, LUA_REGISTRYINDEX, wibox->mouse_leave);
     widget_node_array_wipe(&wibox->widgets);
     return luaA_object_gc(L);
 }
@@ -472,7 +468,6 @@ luaA_wibox_new(lua_State *L)
     luaA_checktable(L, 2);
 
     w = wibox_new(L);
-    w->widgets_table = LUA_REFNIL;
 
     w->sw.ctx.fg = globalconf.colors.fg;
     if((buf = luaA_getopt_lstring(L, 2, "fg", NULL, &len)))
@@ -498,8 +493,6 @@ luaA_wibox_new(lua_State *L)
     w->isvisible = true;
     w->cursor = a_strdup("left_ptr");
 
-    w->mouse_enter = w->mouse_leave = LUA_REFNIL;
-
     for(i = 0; i <= reqs_nbr; i++)
         xcolor_init_reply(reqs[i]);
 
@@ -514,9 +507,11 @@ luaA_wibox_new(lua_State *L)
 static bool
 luaA_wibox_hasitem(lua_State *L, wibox_t *wibox, const void *item)
 {
-    if(wibox->widgets_table != LUA_REFNIL)
+    if(wibox->widgets_table)
     {
-        lua_rawgeti(globalconf.L, LUA_REGISTRYINDEX, wibox->widgets_table);
+        wibox_push(L, wibox);
+        luaA_object_push_item(L, -1, wibox->widgets_table);
+        lua_remove(L, -2);
         if(lua_topointer(L, -1) == item || luaA_hasitem(L, item))
             return true;
     }
@@ -618,7 +613,7 @@ luaA_wibox_index(lua_State *L)
         luaA_pushxcolor(L, &wibox->sw.ctx.bg);
         break;
       case A_TK_BG_IMAGE:
-        image_push(L, wibox->bg_image);
+        luaA_object_push_item(L, 1, wibox->bg_image);
         break;
       case A_TK_POSITION:
         if(wibox->type == WIBOX_TYPE_NORMAL)
@@ -632,11 +627,7 @@ luaA_wibox_index(lua_State *L)
         lua_pushstring(L, orientation_tostr(wibox->sw.orientation));
         break;
       case A_TK_WIDGETS:
-        if(wibox->widgets_table != LUA_REFNIL)
-            lua_rawgeti(L, LUA_REGISTRYINDEX, wibox->widgets_table);
-        else
-            lua_pushnil(L);
-        break;
+        return luaA_object_push_item(L, 1, wibox->widgets_table);
       case A_TK_CURSOR:
         lua_pushstring(L, wibox->cursor);
         break;
@@ -650,23 +641,13 @@ luaA_wibox_index(lua_State *L)
         }
         break;
       case A_TK_MOUSE_ENTER:
-        if(wibox->mouse_enter != LUA_REFNIL)
-            lua_rawgeti(L, LUA_REGISTRYINDEX, wibox->mouse_enter);
-        else
-            return 0;
-        return 1;
+        return luaA_object_push_item(L, 1, wibox->mouse_enter);
       case A_TK_MOUSE_LEAVE:
-        if(wibox->mouse_leave != LUA_REFNIL)
-            lua_rawgeti(L, LUA_REGISTRYINDEX, wibox->mouse_leave);
-        else
-            return 0;
-        return 1;
+        return luaA_object_push_item(L, 1, wibox->mouse_leave);
       case A_TK_SHAPE_BOUNDING:
-        image_push(L, wibox->sw.shape.bounding);
-        break;
+        return luaA_object_push_item(L, 1, wibox->sw.shape.bounding);
       case A_TK_SHAPE_CLIP:
-        image_push(L, wibox->sw.shape.clip);
-        break;
+        return luaA_object_push_item(L, 1, wibox->sw.shape.clip);
       default:
         return 0;
     }
@@ -737,8 +718,8 @@ luaA_wibox_newindex(lua_State *L)
                 wibox->need_update = true;
         break;
       case A_TK_BG_IMAGE:
-        image_unref(L, wibox->bg_image);
-        wibox->bg_image = image_ref(L, 3);
+        luaA_object_unref_item(L, 1, wibox->bg_image);
+        wibox->bg_image = luaA_object_ref_item(L, 1, 3);
         wibox->need_update = true;
         break;
       case A_TK_ALIGN:
@@ -850,7 +831,10 @@ luaA_wibox_newindex(lua_State *L)
             luaA_warn(L, "table is looping, cannot use this as widget table");
             return 0;
         }
-        luaA_register(L, 3, &(wibox->widgets_table));
+        /* duplicate table because next function will eat it */
+        lua_pushvalue(L, 3);
+        /* register object */
+        wibox->widgets_table = luaA_object_ref_item(L, 1, -1);
         wibox_need_update(wibox);
         luaA_table2wtable(L);
         break;
@@ -865,19 +849,23 @@ luaA_wibox_newindex(lua_State *L)
         }
         break;
       case A_TK_MOUSE_ENTER:
-        luaA_registerfct(L, 3, &wibox->mouse_enter);
+        luaA_checkfunction(L, 3);
+        luaA_object_unref_item(L, 1, wibox->mouse_enter);
+        wibox->mouse_enter = luaA_object_ref_item(L, 1, 3);
         return 0;
       case A_TK_MOUSE_LEAVE:
-        luaA_registerfct(L, 3, &wibox->mouse_leave);
+        luaA_checkfunction(L, 3);
+        luaA_object_unref_item(L, 1, wibox->mouse_leave);
+        wibox->mouse_leave = luaA_object_ref_item(L, 1, 3);
         return 0;
       case A_TK_SHAPE_BOUNDING:
-        image_unref(L, wibox->sw.shape.bounding);
-        wibox->sw.shape.bounding = image_ref(L, 3);
+        luaA_object_unref_item(L, 1, wibox->sw.shape.bounding);
+        wibox->sw.shape.bounding = luaA_object_ref_item(L, 1, 3);
         wibox->need_shape_update = true;
         break;
       case A_TK_SHAPE_CLIP:
-        image_unref(L, wibox->sw.shape.clip);
-        wibox->sw.shape.clip = image_ref(L, 3);
+        luaA_object_unref_item(L, 1, wibox->sw.shape.clip);
+        wibox->sw.shape.clip = luaA_object_ref_item(L, 1, 3);
         wibox->need_shape_update = true;
         break;
       default:
@@ -904,15 +892,14 @@ static int
 luaA_wibox_buttons(lua_State *L)
 {
     wibox_t *wibox = luaL_checkudata(L, 1, "wibox");
-    button_array_t *buttons = &wibox->buttons;
 
     if(lua_gettop(L) == 2)
     {
-        luaA_button_array_set(L, 2, buttons);
+        luaA_button_array_set(L, 1, 2, &wibox->buttons);
         return 1;
     }
 
-    return luaA_button_array_get(L, buttons);
+    return luaA_button_array_get(L, 1, &wibox->buttons);
 }
 
 const struct luaL_reg awesome_wibox_methods[] =

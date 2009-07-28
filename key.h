@@ -34,20 +34,19 @@ typedef struct keyb_t
     /** Keycode */
     xcb_keycode_t keycode;
     /** Lua function to execute on press */
-    luaA_ref press;
+    void *press;
     /** Lua function to execute on release */
-    luaA_ref release;
+    void *release;
 } keyb_t;
 
-void key_unref_simplified(keyb_t **);
-
-DO_ARRAY(keyb_t *, key, key_unref_simplified)
+DO_ARRAY(keyb_t *, key, DO_NOTHING)
+LUA_OBJECT_FUNCS(keyb_t, key, "key")
 
 bool key_press_lookup_string(xcb_keysym_t, char *, ssize_t);
 xcb_keysym_t key_getkeysym(xcb_keycode_t, uint16_t);
 
-void luaA_key_array_set(lua_State *, int, key_array_t *);
-int luaA_key_array_get(lua_State *, key_array_t *);
+void luaA_key_array_set(lua_State *, int, int, key_array_t *);
+int luaA_key_array_get(lua_State *, int, key_array_t *);
 
 void window_grabkeys(xcb_window_t, key_array_t *);
 int luaA_pushmodifiers(lua_State *, uint16_t);

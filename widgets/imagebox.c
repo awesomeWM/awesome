@@ -88,7 +88,6 @@ static void
 imagebox_destructor(widget_t *w)
 {
     imagebox_data_t *d = w->data;
-    image_unref(globalconf.L, d->image);
     p_delete(&d);
 }
 
@@ -111,7 +110,7 @@ luaA_imagebox_index(lua_State *L, awesome_token_t token)
     switch(token)
     {
       case A_TK_IMAGE:
-        image_push(L, d->image);
+        luaA_object_push_item(L, 1, d->image);
         break;
       case A_TK_BG:
         luaA_pushcolor(L, &d->bg);
@@ -146,8 +145,8 @@ luaA_imagebox_newindex(lua_State *L, awesome_token_t token)
         size_t len;
 
       case A_TK_IMAGE:
-        image_unref(L, d->image);
-        d->image = image_ref(L, 3);
+        luaA_object_unref_item(L, 1, d->image);
+        d->image = luaA_object_ref_item(L, 1, 3);
         break;
       case A_TK_BG:
         if(lua_isnil(L, 3))

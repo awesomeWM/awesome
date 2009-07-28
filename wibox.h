@@ -52,11 +52,11 @@ struct wibox_t
     screen_t *screen;
     /** Widget list */
     widget_node_array_t widgets;
-    luaA_ref widgets_table;
+    void *widgets_table;
     /** Widget the mouse is over */
     widget_t *mouse_over;
     /** Mouse over event handler */
-    luaA_ref mouse_enter, mouse_leave;
+    void *mouse_enter, *mouse_leave;
     /** Need update */
     bool need_update;
     /** Need shape update */

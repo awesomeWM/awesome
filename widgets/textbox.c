@@ -138,7 +138,6 @@ static void
 textbox_destructor(widget_t *w)
 {
     textbox_data_t *d = w->data;
-    image_unref(globalconf.L, d->bg_image);
     draw_text_context_wipe(&d->data);
     p_delete(&d);
 }
@@ -272,8 +271,8 @@ luaA_textbox_newindex(lua_State *L, awesome_token_t token)
         d->bg_resize = luaA_checkboolean(L, 3);
         break;
       case A_TK_BG_IMAGE:
-        image_unref(L, d->bg_image);
-        d->bg_image = image_ref(L, 3);
+        luaA_object_unref_item(L, 1, d->bg_image);
+        d->bg_image = luaA_object_ref_item(L, 1, 3);
         break;
       case A_TK_BG:
         if(lua_isnil(L, 3))

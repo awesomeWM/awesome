@@ -33,16 +33,16 @@ struct button_t
     /** Mouse button number */
     xcb_button_t button;
     /** Lua function to execute on press. */
-    luaA_ref press;
+    void *press;
     /** Lua function to execute on release. */
-    luaA_ref release;
+    void *release;
 };
 
-void button_unref_simplified(button_t **);
-ARRAY_FUNCS(button_t *, button, button_unref_simplified)
+ARRAY_FUNCS(button_t *, button, DO_NOTHING)
+LUA_OBJECT_FUNCS(button_t, button, "button")
 
-int luaA_button_array_get(lua_State *, button_array_t *);
-void luaA_button_array_set(lua_State *, int idx, button_array_t *);
+int luaA_button_array_get(lua_State *, int, button_array_t *);
+void luaA_button_array_set(lua_State *, int, int, button_array_t *);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

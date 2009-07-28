@@ -353,11 +353,14 @@ property_handle_net_wm_icon(void *data,
 
     if(c)
     {
-        image_unref(globalconf.L, c->icon);
+        client_push(globalconf.L, c);
+        luaA_object_unref_item(globalconf.L, 1, c->icon);
         if(ewmh_window_icon_from_reply(reply))
-            c->icon = image_ref(globalconf.L, -1);
+            c->icon = luaA_object_ref_item(globalconf.L, -2, -1);
         else
             c->icon = NULL;
+        /* remove client */
+        lua_pop(globalconf.L, 1);
         /* execute hook */
         hook_property(client, c, "icon");
     }
