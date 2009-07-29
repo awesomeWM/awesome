@@ -133,17 +133,17 @@ wibox_draw_context_update(wibox_t *w, xcb_screen_t *s)
         xcb_create_pixmap(globalconf.connection,
                           s->root_depth,
                           w->ctx.pixmap, s->root,
-                          w->geometry.height - (2 * w->border.width),
-                          w->geometry.width - (2 * w->border.width));
+                          w->geometry.height,
+                          w->geometry.width);
         draw_context_init(&w->ctx, phys_screen,
-                          w->geometry.height - (2 * w->border.width),
-                          w->geometry.width - (2 * w->border.width),
+                          w->geometry.height,
+                          w->geometry.width,
                           w->ctx.pixmap, &fg, &bg);
         break;
       case East:
         draw_context_init(&w->ctx, phys_screen,
-                          w->geometry.width - (2 * w->border.width),
-                          w->geometry.height - (2 * w->border.width),
+                          w->geometry.width,
+                          w->geometry.height,
                           w->pixmap, &fg, &bg);
         break;
     }
@@ -161,8 +161,7 @@ wibox_init(wibox_t *w, int phys_screen)
     w->window = xcb_generate_id(globalconf.connection);
     xcb_create_window(globalconf.connection, s->root_depth, w->window, s->root,
                       w->geometry.x, w->geometry.y,
-                      w->geometry.width - (2 * w->border.width),
-                      w->geometry.height - (2 * w->border.width),
+                      w->geometry.width, w->geometry.height,
                       w->border.width, XCB_COPY_FROM_PARENT, s->root_visual,
                       XCB_CW_BACK_PIXMAP | XCB_CW_BORDER_PIXEL
                       | XCB_CW_OVERRIDE_REDIRECT | XCB_CW_EVENT_MASK,
@@ -182,8 +181,7 @@ wibox_init(wibox_t *w, int phys_screen)
     /* Create a pixmap. */
     w->pixmap = xcb_generate_id(globalconf.connection);
     xcb_create_pixmap(globalconf.connection, s->root_depth, w->pixmap, s->root,
-                      w->geometry.width - (2 * w->border.width),
-                      w->geometry.height - (2 * w->border.width));
+                      w->geometry.width, w->geometry.height);
 
     /* Update draw context physical screen, important for Zaphod. */
     w->ctx.phys_screen = phys_screen;
@@ -238,25 +236,19 @@ wibox_moveresize(wibox_t *w, area_t geometry)
             mask_vals |= XCB_CONFIG_WINDOW_Y;
         }
 
-        uint16_t iw = geometry.width - (2 * w->border.width),
-                 ih = geometry.height - (2 * w->border.width);
-
-        if(iw > 0 && w->geometry.width != geometry.width)
+        if(geometry.width > 0 && w->geometry.width != geometry.width)
         {
-            w->geometry.width = geometry.width;
-            moveresize_win_vals[number_of_vals++] = iw;
+            w->geometry.width = moveresize_win_vals[number_of_vals++] = geometry.width;
             mask_vals |= XCB_CONFIG_WINDOW_WIDTH;
         }
 
-        if(ih > 0 && w->geometry.height != geometry.height)
+        if(geometry.height > 0 && w->geometry.height != geometry.height)
         {
-            w->geometry.height = geometry.height;
-            moveresize_win_vals[number_of_vals++] = ih;
+            w->geometry.height = moveresize_win_vals[number_of_vals++] = geometry.height;
             mask_vals |= XCB_CONFIG_WINDOW_HEIGHT;
         }
 
-        if(iw > 0 && ih > 0
-           && (mask_vals & (XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT)))
+        if(mask_vals & (XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT))
         {
             xcb_free_pixmap(globalconf.connection, w->pixmap);
             /* orientation != East */
@@ -264,7 +256,8 @@ wibox_moveresize(wibox_t *w, area_t geometry)
                 xcb_free_pixmap(globalconf.connection, w->ctx.pixmap);
             w->pixmap = xcb_generate_id(globalconf.connection);
             xcb_screen_t *s = xutil_screen_get(globalconf.connection, w->ctx.phys_screen);
-            xcb_create_pixmap(globalconf.connection, s->root_depth, w->pixmap, s->root, iw, ih);
+            xcb_create_pixmap(globalconf.connection, s->root_depth, w->pixmap, s->root,
+                              w->geometry.width, w->geometry.height);
             wibox_draw_context_update(w, s);
         }
 
@@ -378,11 +371,11 @@ wibox_move(wibox_t *wibox, int16_t x, int16_t y)
 static void
 wibox_resize(wibox_t *w, uint16_t width, uint16_t height)
 {
-    int iw = width - 2 * w->border.width;
-    int ih = height - 2 * w->border.width;
-
-    if(iw <= 0 || ih <= 0 || (w->geometry.width == width && w->geometry.height == height))
+    if(width <= 0 || height <= 0 || (w->geometry.width == width && w->geometry.height == height))
         return;
+
+    w->geometry.width = width;
+    w->geometry.height = height;
 
     if(w->window)
     {
@@ -393,15 +386,13 @@ wibox_resize(wibox_t *w, uint16_t width, uint16_t height)
         if(w->pixmap != w->ctx.pixmap)
             xcb_free_pixmap(globalconf.connection, w->ctx.pixmap);
         w->pixmap = xcb_generate_id(globalconf.connection);
-        xcb_create_pixmap(globalconf.connection, s->root_depth, w->pixmap, s->root, iw, ih);
+        xcb_create_pixmap(globalconf.connection, s->root_depth, w->pixmap, s->root,
+                          w->geometry.width, w->geometry.height);
         xcb_configure_window(globalconf.connection, w->window,
                              XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
-                             (const uint32_t[]) { iw, ih });
+                             (const uint32_t[]) { w->geometry.width, w->geometry.height });
         wibox_draw_context_update(w, s);
     }
-
-    w->geometry.width = width;
-    w->geometry.height = height;
 
     wibox_need_update(w);
 }
