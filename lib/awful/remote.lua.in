@@ -6,7 +6,6 @@
 
 -- Grab environment we need
 require("awful.dbus")
-local hooks = require("awful.hooks")
 local loadstring = loadstring
 local tostring = tostring
 local ipairs = ipairs
