@@ -221,12 +221,12 @@ luaA_getopt_padding(lua_State *L, int idx, padding_t *dpadding)
 {
     padding_t padding;
 
-    luaA_checktable(L, 2);
+    luaA_checktable(L, idx);
 
-    padding.right = luaA_getopt_number(L, 2, "right", dpadding->right);
-    padding.left = luaA_getopt_number(L, 2, "left", dpadding->left);
-    padding.top = luaA_getopt_number(L, 2, "top", dpadding->top);
-    padding.bottom = luaA_getopt_number(L, 2, "bottom", dpadding->bottom);
+    padding.right = luaA_getopt_number(L, idx, "right", dpadding->right);
+    padding.left = luaA_getopt_number(L, idx, "left", dpadding->left);
+    padding.top = luaA_getopt_number(L, idx, "top", dpadding->top);
+    padding.bottom = luaA_getopt_number(L, idx, "bottom", dpadding->bottom);
 
     return padding;
 }
