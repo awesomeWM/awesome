@@ -35,15 +35,15 @@ function get_workarea(s)
     for _, wprop in ipairs(wiboxes) do
         if wprop.wibox.visible and wprop.wibox.screen == s then
             if wprop.position == "top" then
-                area.y = area.y + wprop.wibox:geometry().height
-                area.height = area.height - wprop.wibox:geometry().height
+                area.y = area.y + wprop.wibox:geometry().height + (2 * wprop.wibox.border_width)
+                area.height = area.height - (wprop.wibox:geometry().height + (2 * wprop.wibox.border_width))
             elseif wprop.position == "bottom" then
-                area.height = area.height - wprop.wibox:geometry().height
+                area.height = area.height - (wprop.wibox:geometry().height + (2 * wprop.wibox.border_width))
             elseif wprop.position == "left" then
-                area.x = area.x + wprop.wibox:geometry().width
-                area.width = area.width - wprop.wibox:geometry().width
+                area.x = area.x + (wprop.wibox:geometry().width + (2 * wprop.wibox.border_width))
+                area.width = area.width - (wprop.wibox:geometry().width + (2 * wprop.wibox.border_width))
             elseif wprop.position == "right" then
-                area.width = area.width - wprop.wibox:geometry().width
+                area.width = area.width - (wprop.wibox:geometry().width + (2 * wprop.wibox.border_width))
             end
         end
     end
@@ -61,19 +61,19 @@ local function compute_area(wibox, position, s)
            and not (ignore and wprop.position == position) then
             if (wprop.position == "right" or wprop.position == "left")
                 and wprop.position == position then
-                area.x = area.x + wibox:geometry().width
+                area.x = area.x + (wibox:geometry().width + (2 * wibox.border_width))
             elseif wprop.position == "top" then
                 if position == "top" then
-                    area.y = area.y + wprop.wibox:geometry().height
+                    area.y = area.y + (wprop.wibox:geometry().height + (2 * wprop.wibox.border_width))
                 elseif position == "left" or position == "right" then
-                    area.height = area.height - wprop.wibox:geometry().height
-                    area.y = area.y + wprop.wibox:geometry().height
+                    area.height = area.height - (wprop.wibox:geometry().height + (2 * wprop.wibox.border_width))
+                    area.y = area.y + (wprop.wibox:geometry().height + (2 * wprop.wibox.border_width))
                 end
             elseif wprop.position == "bottom" then
                 if position == "bottom" then
-                    area.y = area.y - wprop.wibox:geometry().height
+                    area.y = area.y - (wprop.wibox:geometry().height + (2 * wprop.wibox.border_width))
                 elseif position == "left" or position == "right" then
-                    area.height = area.height - wprop.wibox:geometry().height
+                    area.height = area.height - (wprop.wibox:geometry().height + (2 * wprop.wibox.border_width))
                 end
             end
         end
@@ -107,11 +107,11 @@ function set_position(wibox, position, screen)
     -- (non-floating).
     -- The "width" of a wibox is kept if it exists.
     if position == "right" then
-        wingeom.x = area.x + area.width - wingeom.width
+        wingeom.x = area.x + area.width - (wingeom.width + 2 * wibox.border_width)
     elseif position == "left" then
         wingeom.x = area.x
     elseif position == "bottom" then
-        wingeom.y = (area.y + area.height) - wingeom.height
+        wingeom.y = (area.y + area.height) - (wingeom.height + 2 * wibox.border_width)
     elseif position == "top" then
         wingeom.y = area.y
     end
@@ -180,6 +180,8 @@ function align(wibox, align, screen)
     local position = get_position(wibox)
     local area = compute_area(wibox, position, screen)
     local wingeom = wibox:geometry()
+    wingeom.height = wingeom.height + 2 * wibox.border_width
+    wingeom.width = wingeom.width + 2 * wibox.border_width
 
     if position == "right" then
         if align == "right" then
@@ -215,6 +217,10 @@ function align(wibox, align, screen)
         end
     end
 
+    -- Reset height and width
+    wingeom.height = wingeom.height - 2 * wibox.border_width
+    wingeom.width = wingeom.width - 2 * wibox.border_width
+
     wibox:geometry(wingeom)
 end
 
@@ -225,11 +231,11 @@ function stretch(wibox)
     local area = compute_area(wibox, position)
     local wingeom = {}
     if position == "right" or position == "left" then
-        wingeom.height = area.height
+        wingeom.height = area.height - (2 * wibox.border_width)
         wibox:geometry(wingeom)
         align(wibox, "center")
     else
-        wingeom.width = area.width
+        wingeom.width = area.width - (2 * wibox.border_width)
         wibox:geometry(wingeom)
         align(wibox, "left")
     end
