@@ -165,8 +165,6 @@ widget_geometries(wibox_t *wibox)
             geometry.height = geometry.width;
             geometry.width = i;
         }
-        geometry.height -= 2 * wibox->border.width;
-        geometry.width -= 2 * wibox->border.width;
         luaA_pusharea(globalconf.L, geometry);
         /* Re-push 2nd argument: widget table */
         lua_pushvalue(globalconf.L, -3);
