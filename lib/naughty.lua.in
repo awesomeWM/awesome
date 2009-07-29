@@ -379,24 +379,10 @@ function notify(args)
     notification.width = width + 2 * (border_width or 0)
 
     -- position the wibox
-    if iconbox and iconbox.image.height > textbox:extents()["height"] then
-        notification.height = iconbox.image.height + (2 * config.border_width)
-    else
-        notification.height = textbox:extents()["height"] + (2 * config.border_width)
-    end
-    notification.width = (iconbox and iconbox:extents()["width"] or 0) + textbox:extents()["width"] + (2 * config.border_width)
-
-    if capi.screen[screen].workarea.width < notification.width then
-        notification.width = capi.screen[screen].workarea.width - (2 * config.border_width) - (2 * config.padding)
-    end
-    if capi.screen[screen].workarea.height < notification.height then
-        notification.height = capi.screen[screen].workarea.height - (2 * config.border_width) - (2 * config.padding)
-    end
-
-    local offset = get_offset(screen, notification.position, notification.idx, notification.width, notification.height)
+    local offset = get_offset(screen, notification.position, nil, notification.width, notification.height)
     notification.box.ontop = ontop
-    notification.box:geometry({ width = notification.width,
-                                height = notification.height,
+    notification.box:geometry({ width = width,
+                                height = height,
                                 x = offset.x,
                                 y = offset.y })
     notification.box.opacity = opacity
