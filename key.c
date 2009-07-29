@@ -353,7 +353,7 @@ static int8_t const __utf32_clz_to_len[32] = {
 #define utf8clen(c) __utf32_clz_to_len[__builtin_clz((uint32_t)(c) | 1)]
 
 static bool
-keysym_to_utf8(char *buf, int len, const xcb_keysym_t ksym)
+keysym_to_utf8(char *buf, const xcb_keysym_t ksym)
 {
     unsigned int ksym_conv;
     int count;
@@ -856,7 +856,7 @@ key_press_lookup_string(xcb_keysym_t ksym,
         return keysym_to_xf86(buf, buf_len, ksym);
 
     /* Handle other KeySym (like unicode...) */
-    return keysym_to_utf8(buf, buf_len, ksym);
+    return keysym_to_utf8(buf, ksym);
 }
 
 /** Return the keysym from keycode.
