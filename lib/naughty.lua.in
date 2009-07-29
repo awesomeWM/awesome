@@ -401,8 +401,8 @@ end
 
 -- DBUS/Notification support
 -- Notify
-if hooks.dbus then
-    hooks.dbus.register("org.freedesktop.Notifications", function (data, appname, replaces_id, icon, title, text, actions, hints, expire)
+if capi.dbus then
+    capi.dbus.add_signal("org.freedesktop.Notifications", function (data, appname, replaces_id, icon, title, text, actions, hints, expire)
     args = { preset = { } }
     if data.member == "Notify" then
         if text ~= "" then
@@ -476,7 +476,7 @@ if hooks.dbus then
     end
     end)
 
-    hooks.dbus.register("org.freedesktop.DBus.Introspectable",
+    capi.dbus.add_signal("org.freedesktop.DBus.Introspectable",
     function (data, text)
     if data.member == "Introspect" then
         local xml = [=[<!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object

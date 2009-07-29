@@ -123,18 +123,6 @@ for name, hook in pairs(capi.hooks) do
                 end)
             end
         end
-    elseif name == "dbus" then
-        _M[name].register = function (interface, f)
-            if not _M[name].callbacks then
-                _M[name].callbacks = {}
-                hook(function (msg, ...)
-                    if _M[name].callbacks[msg.interface] then
-                        return _M[name].callbacks[msg.interface](msg, ...)
-                    end
-                end)
-            end
-            _M[name].callbacks[interface] = f
-        end
     else
         _M[name].register = function (f)
             if not _M[name].callbacks then

@@ -19,7 +19,7 @@ local type = type
 module("awful.remote")
 
 if dbus then
-    hooks.dbus.register("org.naquadah.awesome.awful.Remote", function(data, code)
+    dbus.add_signal("org.naquadah.awesome.awful.Remote", function(data, code)
         if data.member == "Eval" then
             local f, e = loadstring(code)
             if f then

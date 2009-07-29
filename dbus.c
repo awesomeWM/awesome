@@ -30,11 +30,14 @@
 #include <fcntl.h>
 
 #include "event.h"
+#include "luaa.h"
 
 static DBusConnection *dbus_connection_session = NULL;
 static DBusConnection *dbus_connection_system = NULL;
 ev_io dbusio_ses = { .fd = -1 };
 ev_io dbusio_sys = { .fd = -1 };
+
+static signal_array_t dbus_signals;
 
 static void
 a_dbus_cleanup_bus(DBusConnection *dbus_connection, ev_io *dbusio)
@@ -248,7 +251,11 @@ a_dbus_message_iter(DBusMessageIter *iter)
 static void
 a_dbus_process_request(DBusConnection *dbus_connection, DBusMessage *msg)
 {
-    if(globalconf.hooks.dbus == LUA_REFNIL)
+    const char *interface = dbus_message_get_interface(msg);
+    signal_t *sig = signal_array_getbyid(&dbus_signals,
+                                         a_strhash((const unsigned char *) interface));
+
+    if(!sig)
         return;
 
     lua_createtable(globalconf.L, 0, 5);
@@ -274,11 +281,10 @@ a_dbus_process_request(DBusConnection *dbus_connection, DBusMessage *msg)
 
     lua_setfield(globalconf.L, -2, "type");
 
-    const char *s = dbus_message_get_interface(msg);
-    lua_pushstring(globalconf.L, NONULL(s));
+    lua_pushstring(globalconf.L, NONULL(interface));
     lua_setfield(globalconf.L, -2, "interface");
 
-    s = dbus_message_get_path(msg);
+    const char *s = dbus_message_get_path(msg);
     lua_pushstring(globalconf.L, NONULL(s));
     lua_setfield(globalconf.L, -2, "path");
 
@@ -300,67 +306,85 @@ a_dbus_process_request(DBusConnection *dbus_connection, DBusMessage *msg)
         nargs += a_dbus_message_iter(&iter);
 
     if(dbus_message_get_no_reply(msg))
-        luaA_dofunction_from_registry(globalconf.L, globalconf.hooks.dbus, nargs, 0);
-    else
-    {
-        int n = lua_gettop(globalconf.L) - nargs;
-        luaA_dofunction_from_registry(globalconf.L, globalconf.hooks.dbus, nargs, LUA_MULTRET);
-        n -= lua_gettop(globalconf.L);
-
-        DBusMessage *reply = dbus_message_new_method_return(msg);
-
-        dbus_message_iter_init_append(reply, &iter);
-
-        /* i is negative */
-        for(int i = n; i < 0; i += 2)
+        /* emit signals */
+        foreach(func, sig->sigfuncs)
         {
-            /* i is the type name, i+1 the value */
-            size_t len;
-            const char *type = lua_tolstring(globalconf.L, i, &len);
+            for(int i = 0; i < nargs; i++)
+                lua_pushvalue(globalconf.L, - nargs);
+            luaA_object_push(globalconf.L, (void *) *func);
+            luaA_dofunction(globalconf.L, nargs, 0);
+        }
+    else
+        foreach(func, sig->sigfuncs)
+        {
+            int n = lua_gettop(globalconf.L);
 
-            if(!type || len != 1)
-                break;
+            for(int i = 0; i < nargs; i++)
+                lua_pushvalue(globalconf.L, - nargs);
+            luaA_object_push(globalconf.L, (void *) *func);
+            luaA_dofunction(globalconf.L, nargs, LUA_MULTRET);
 
-            switch(*type)
+            n -= lua_gettop(globalconf.L);
+
+            DBusMessage *reply = dbus_message_new_method_return(msg);
+
+            dbus_message_iter_init_append(reply, &iter);
+
+            /* i is negative */
+            for(int i = n; i < 0; i += 2)
             {
-              case DBUS_TYPE_BOOLEAN:
+                /* i is the type name, i+1 the value */
+                size_t len;
+                const char *type = lua_tolstring(globalconf.L, i, &len);
+
+                if(!type || len != 1)
                 {
-                    dbus_bool_t  b = lua_toboolean(globalconf.L, i + 1);
-                    dbus_message_iter_append_basic(&iter, DBUS_TYPE_BOOLEAN, &b);
+                    luaA_warn(globalconf.L,
+                              "your D-Bus signal handling method returned bad data");
+                    return;
                 }
-                break;
+
+                switch(*type)
+                {
+                  case DBUS_TYPE_BOOLEAN:
+                    {
+                        dbus_bool_t  b = lua_toboolean(globalconf.L, i + 1);
+                        dbus_message_iter_append_basic(&iter, DBUS_TYPE_BOOLEAN, &b);
+                    }
+                    break;
 #define DBUS_MSG_RETURN_HANDLE_TYPE_STRING(dbustype) \
-              case dbustype: \
-                if((s = lua_tostring(globalconf.L, i + 1))) \
+                  case dbustype: \
+                                 if((s = lua_tostring(globalconf.L, i + 1))) \
                     dbus_message_iter_append_basic(&iter, dbustype, &s); \
-                break;
-              DBUS_MSG_RETURN_HANDLE_TYPE_STRING(DBUS_TYPE_STRING)
-              DBUS_MSG_RETURN_HANDLE_TYPE_STRING(DBUS_TYPE_BYTE)
+                    break;
+                    DBUS_MSG_RETURN_HANDLE_TYPE_STRING(DBUS_TYPE_STRING)
+                        DBUS_MSG_RETURN_HANDLE_TYPE_STRING(DBUS_TYPE_BYTE)
 #undef DBUS_MSG_RETURN_HANDLE_TYPE_STRING
 #define DBUS_MSG_RETURN_HANDLE_TYPE_NUMBER(type, dbustype) \
-              case dbustype: \
-                { \
-                    type num = lua_tonumber(globalconf.L, i + 1); \
-                    dbus_message_iter_append_basic(&iter, dbustype, &num); \
-                } \
-                break;
-              DBUS_MSG_RETURN_HANDLE_TYPE_NUMBER(int16_t, DBUS_TYPE_INT16)
-              DBUS_MSG_RETURN_HANDLE_TYPE_NUMBER(uint16_t, DBUS_TYPE_UINT16)
-              DBUS_MSG_RETURN_HANDLE_TYPE_NUMBER(int32_t, DBUS_TYPE_INT32)
-              DBUS_MSG_RETURN_HANDLE_TYPE_NUMBER(uint32_t, DBUS_TYPE_UINT32)
-              DBUS_MSG_RETURN_HANDLE_TYPE_NUMBER(int64_t, DBUS_TYPE_INT64)
-              DBUS_MSG_RETURN_HANDLE_TYPE_NUMBER(uint64_t, DBUS_TYPE_UINT64)
-              DBUS_MSG_RETURN_HANDLE_TYPE_NUMBER(double, DBUS_TYPE_DOUBLE)
+                  case dbustype: \
+                                 { \
+                                     type num = lua_tonumber(globalconf.L, i + 1); \
+                                     dbus_message_iter_append_basic(&iter, dbustype, &num); \
+                                 } \
+                        break;
+                        DBUS_MSG_RETURN_HANDLE_TYPE_NUMBER(int16_t, DBUS_TYPE_INT16)
+                        DBUS_MSG_RETURN_HANDLE_TYPE_NUMBER(uint16_t, DBUS_TYPE_UINT16)
+                        DBUS_MSG_RETURN_HANDLE_TYPE_NUMBER(int32_t, DBUS_TYPE_INT32)
+                        DBUS_MSG_RETURN_HANDLE_TYPE_NUMBER(uint32_t, DBUS_TYPE_UINT32)
+                        DBUS_MSG_RETURN_HANDLE_TYPE_NUMBER(int64_t, DBUS_TYPE_INT64)
+                        DBUS_MSG_RETURN_HANDLE_TYPE_NUMBER(uint64_t, DBUS_TYPE_UINT64)
+                        DBUS_MSG_RETURN_HANDLE_TYPE_NUMBER(double, DBUS_TYPE_DOUBLE)
 #undef DBUS_MSG_RETURN_HANDLE_TYPE_NUMBER
+                }
+
+                lua_remove(globalconf.L, i);
+                lua_remove(globalconf.L, i + 1);
             }
 
-            lua_remove(globalconf.L, i);
-            lua_remove(globalconf.L, i + 1);
+            dbus_connection_send(dbus_connection, reply, NULL);
+            dbus_message_unref(reply);
         }
-
-        dbus_connection_send(dbus_connection, reply, NULL);
-        dbus_message_unref(reply);
-    }
+    lua_pop(globalconf.L, nargs);
 }
 
 static void
@@ -622,12 +646,48 @@ luaA_dbus_remove_match(lua_State *L)
     return 0;
 }
 
+/** Add a signal receiver on the D-Bus.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ * \luastack
+ * \lparam A string with the interface name.
+ * \lparam The function to call.
+ */
+static int
+luaA_dbus_add_signal(lua_State *L)
+{
+    const char *name = luaL_checkstring(L, 1);
+    luaA_checkfunction(L, 2);
+    signal_add(&dbus_signals, name, luaA_object_ref(L, 2));
+    return 0;
+}
+
+/** Add a signal receiver on the D-Bus.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ * \luastack
+ * \lparam A string with the interface name.
+ * \lparam The function to call.
+ */
+static int
+luaA_dbus_remove_signal(lua_State *L)
+{
+    const char *name = luaL_checkstring(L, 1);
+    luaA_checkfunction(L, 2);
+    const void *func = lua_topointer(L, 2);
+    signal_remove(&dbus_signals, name, func);
+    luaA_object_unref(L, (void *) func);
+    return 0;
+}
+
 const struct luaL_reg awesome_dbus_lib[] =
 {
     { "request_name", luaA_dbus_request_name },
     { "release_name", luaA_dbus_release_name },
     { "add_match", luaA_dbus_add_match },
     { "remove_match", luaA_dbus_remove_match },
+    { "add_signal", luaA_dbus_add_signal },
+    { "remove_signal", luaA_dbus_remove_signal },
     { NULL, NULL }
 };
 

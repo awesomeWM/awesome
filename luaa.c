@@ -718,9 +718,6 @@ luaA_init(xdgHandle* xdg)
     globalconf.hooks.startup_notification = LUA_REFNIL;
     globalconf.hooks.timer = LUA_REFNIL;
     globalconf.hooks.exit = LUA_REFNIL;
-#ifdef WITH_DBUS
-    globalconf.hooks.dbus = LUA_REFNIL;
-#endif
 
     /* add Lua lib path (/usr/share/awesome/lib by default) */
     lua_getglobal(L, "package");

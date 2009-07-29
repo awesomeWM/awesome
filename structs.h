@@ -122,10 +122,6 @@ struct awesome_t
         int exit;
         /** Startup notification hooks */
         int startup_notification;
-#ifdef WITH_DBUS
-        /** Command to run on dbus events */
-        int dbus;
-#endif
     } hooks;
     /** The event loop */
     struct ev_loop *loop;
