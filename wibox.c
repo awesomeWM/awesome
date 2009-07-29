@@ -30,8 +30,6 @@
 #include "common/xcursor.h"
 #include "common/xutil.h"
 
-DO_LUA_TOSTRING(wibox_t, wibox, "wibox")
-
 /** Take care of garbage collecting a wibox.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack, 0!
@@ -1207,12 +1205,11 @@ const struct luaL_reg awesome_wibox_methods[] =
 };
 const struct luaL_reg awesome_wibox_meta[] =
 {
-    LUA_OBJECT_META
+    LUA_OBJECT_META(wibox)
     { "geometry", luaA_wibox_geometry },
     { "__index", luaA_wibox_index },
     { "__newindex", luaA_wibox_newindex },
     { "__gc", luaA_wibox_gc },
-    { "__tostring", luaA_wibox_tostring },
     { NULL, NULL },
 };
 

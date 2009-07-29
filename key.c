@@ -31,8 +31,6 @@
 #include "common/xutil.h"
 #include "common/tokenize.h"
 
-DO_LUA_TOSTRING(keyb_t, key, "key")
-
 /** XCB equivalent of XLookupString which translate the keycode given
  * by PressEvent to a KeySym and a string
  * \todo use XKB!
@@ -1152,8 +1150,7 @@ const struct luaL_reg awesome_key_methods[] =
 };
 const struct luaL_reg awesome_key_meta[] =
 {
-    LUA_OBJECT_META
-    { "__tostring", luaA_key_tostring },
+    LUA_OBJECT_META(key)
     { "__index", luaA_key_index },
     { "__newindex", luaA_key_newindex },
     { "__gc", luaA_object_gc },

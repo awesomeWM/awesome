@@ -32,8 +32,6 @@
 #include "common/atoms.h"
 #include "common/xutil.h"
 
-DO_LUA_TOSTRING(widget_t, widget, "widget")
-
 /** Collect a widget structure.
  * \param L The Lua VM state.
  * \return 0
@@ -558,12 +556,11 @@ const struct luaL_reg awesome_widget_methods[] =
 };
 const struct luaL_reg awesome_widget_meta[] =
 {
-    LUA_OBJECT_META
+    LUA_OBJECT_META(widget)
     { "extents", luaA_widget_extents },
     { "__index", luaA_widget_index },
     { "__newindex", luaA_widget_newindex },
     { "__gc", luaA_widget_gc },
-    { "__tostring", luaA_widget_tostring },
     { NULL, NULL }
 };
 

@@ -24,8 +24,6 @@
 #include "common/xutil.h"
 #include <xcb/xcb_image.h>
 
-DO_LUA_TOSTRING(image_t, image, "image");
-
 static int
 luaA_image_gc(lua_State *L)
 {
@@ -777,7 +775,7 @@ const struct luaL_reg awesome_image_methods[] =
 };
 const struct luaL_reg awesome_image_meta[] =
 {
-    LUA_OBJECT_META
+    LUA_OBJECT_META(image)
     { "__index", luaA_image_index },
     { "rotate", luaA_image_rotate },
     { "orientate", luaA_image_orientate },
@@ -792,7 +790,6 @@ const struct luaL_reg awesome_image_meta[] =
     { "draw_rectangle_gradient", luaA_image_draw_rectangle_gradient },
     { "draw_circle", luaA_image_draw_circle },
     { "__gc", luaA_image_gc },
-    { "__tostring", luaA_image_tostring },
     { NULL, NULL }
 };
 

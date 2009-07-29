@@ -25,8 +25,6 @@
 #include "ewmh.h"
 #include "widget.h"
 
-DO_LUA_TOSTRING(tag_t, tag, "tag")
-
 void
 tag_unref_simplified(tag_t **tag)
 {
@@ -411,12 +409,11 @@ const struct luaL_reg awesome_tag_methods[] =
 };
 const struct luaL_reg awesome_tag_meta[] =
 {
-    LUA_OBJECT_META
+    LUA_OBJECT_META(tag)
     { "clients", luaA_tag_clients },
     { "__index", luaA_tag_index },
     { "__newindex", luaA_tag_newindex },
     { "__gc", luaA_tag_gc },
-    { "__tostring", luaA_tag_tostring },
     { NULL, NULL },
 };
 

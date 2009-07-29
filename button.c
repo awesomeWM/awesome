@@ -23,8 +23,6 @@
 
 #include "common/tokenize.h"
 
-DO_LUA_TOSTRING(button_t, button, "button")
-
 /** Create a new mouse button bindings.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
@@ -150,11 +148,10 @@ const struct luaL_reg awesome_button_methods[] =
 };
 const struct luaL_reg awesome_button_meta[] =
 {
-    LUA_OBJECT_META
+    LUA_OBJECT_META(button)
     { "__index", luaA_button_index },
     { "__newindex", luaA_button_newindex },
     { "__gc", luaA_object_gc },
-    { "__tostring", luaA_button_tostring },
     { NULL, NULL }
 };
 

@@ -191,6 +191,13 @@ int luaA_object_emit_signal_simple(lua_State *);
         luaA_object_push_item(L, -1, ref);                                     \
         lua_remove(L, -2);                                                     \
         return 1;                                                              \
+    }                                                                          \
+                                                                               \
+    static inline int                                                          \
+    luaA_##prefix##_tostring(lua_State *L)                                     \
+    {                                                                          \
+        lua_pushfstring(L, lua_type ": %p", luaL_checkudata(L, 1, lua_type));  \
+        return 1;                                                              \
     }
 
 
@@ -206,7 +213,8 @@ luaA_object_gc(lua_State *L)
     return 0;
 }
 
-#define LUA_OBJECT_META \
+#define LUA_OBJECT_META(prefix) \
+    { "__tostring", luaA_##prefix##_tostring }, \
     { "add_signal", luaA_object_add_signal_simple }, \
     { "remove_signal", luaA_object_remove_signal_simple }, \
     { "emit_signal", luaA_object_emit_signal_simple },

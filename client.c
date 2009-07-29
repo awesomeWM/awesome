@@ -32,8 +32,6 @@
 #include "common/atoms.h"
 #include "common/xutil.h"
 
-DO_LUA_TOSTRING(client_t, client, "client")
-
 client_t *
 luaA_client_checkudata(lua_State *L, int ud)
 {
@@ -1964,7 +1962,7 @@ const struct luaL_reg awesome_client_methods[] =
 };
 const struct luaL_reg awesome_client_meta[] =
 {
-    LUA_OBJECT_META
+    LUA_OBJECT_META(client)
     { "isvisible", luaA_client_isvisible },
     { "geometry", luaA_client_geometry },
     { "struts", luaA_client_struts },
@@ -1978,7 +1976,6 @@ const struct luaL_reg awesome_client_meta[] =
     { "__index", luaA_client_index },
     { "__newindex", luaA_client_newindex },
     { "__gc", luaA_client_gc },
-    { "__tostring", luaA_client_tostring },
     { NULL, NULL }
 };
 
