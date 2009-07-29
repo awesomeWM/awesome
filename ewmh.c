@@ -197,14 +197,13 @@ ewmh_update_net_current_desktop(int phys_screen)
 void
 ewmh_update_net_desktop_names(int phys_screen)
 {
-    tag_array_t *tags = &globalconf.screens.tab[phys_screen].tags;
     buffer_t buf;
 
     buffer_inita(&buf, BUFSIZ);
 
-    for(int i = 0; i < tags->len; i++)
+    foreach(tag, globalconf.screens.tab[phys_screen].tags)
     {
-        buffer_adds(&buf, tags->tab[i]->name);
+        buffer_adds(&buf, tag_get_name(*tag));
         buffer_addc(&buf, '\0');
     }
 

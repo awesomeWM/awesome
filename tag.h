@@ -24,20 +24,6 @@
 
 #include "client.h"
 
-/** Tag type */
-struct tag
-{
-    LUA_OBJECT_HEADER
-    /** Tag name */
-    char *name;
-    /** Screen */
-    screen_t *screen;
-    /** true if selected */
-    bool selected;
-    /** clients in this tag */
-    client_array_t clients;
-};
-
 int tags_get_first_selected_index(screen_t *);
 void tag_client(client_t *);
 void untag_client(client_t *, tag_t *);
@@ -49,6 +35,10 @@ void tag_unref_simplified(tag_t **);
 ARRAY_FUNCS(tag_t *, tag, tag_unref_simplified)
 
 void tag_class_setup(lua_State *);
+
+bool tag_get_selected(tag_t *);
+char *tag_get_name(tag_t *);
+void tag_set_screen(tag_t *, screen_t *);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

@@ -274,7 +274,7 @@ screen_client_moveto(client_t *c, screen_t *new_screen, bool dotag, bool doresiz
         if(!c->issticky)
             /* add new tags */
             foreach(new_tag, new_screen->tags)
-                if((*new_tag)->selected)
+                if(tag_get_selected(*new_tag))
                 {
                     luaA_object_push(globalconf.L, *new_tag);
                     tag_client(c);
@@ -383,8 +383,8 @@ luaA_screen_tags(lua_State *L)
         luaA_checktable(L, 2);
 
         /* remove current tags */
-        for(i = 0; i < s->tags.len; i++)
-            s->tags.tab[i]->screen = NULL;
+        foreach(tag, s->tags)
+            tag_set_screen(*tag, NULL);
 
         tag_array_wipe(&s->tags);
         tag_array_init(&s->tags);

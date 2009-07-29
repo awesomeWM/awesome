@@ -105,7 +105,7 @@ client_maybevisible(client_t *c, screen_t *screen)
             return true;
 
         foreach(tag, screen->tags)
-            if((*tag)->selected && is_client_tagged(c, *tag))
+            if(tag_get_selected(*tag) && is_client_tagged(c, *tag))
                 return true;
     }
     return false;

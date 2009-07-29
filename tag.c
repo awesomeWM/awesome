@@ -25,8 +25,23 @@
 #include "ewmh.h"
 #include "widget.h"
 
+/** Tag type */
+struct tag
+{
+    LUA_OBJECT_HEADER
+    /** Tag name */
+    char *name;
+    /** Screen */
+    screen_t *screen;
+    /** true if selected */
+    bool selected;
+    /** clients in this tag */
+    client_array_t clients;
+};
+
 static lua_class_t tag_class;
 LUA_OBJECT_FUNCS(tag_class, tag_t, tag)
+
 
 void
 tag_unref_simplified(tag_t **tag)
@@ -45,6 +60,15 @@ luaA_tag_gc(lua_State *L)
     client_array_wipe(&tag->clients);
     p_delete(&tag->name);
     return luaA_object_gc(L);
+}
+
+OBJECT_EXPORT_PROPERTY(tag, tag_t, selected)
+OBJECT_EXPORT_PROPERTY(tag, tag_t, name)
+
+void
+tag_set_screen(tag_t *tag, screen_t *s)
+{
+    tag->screen = s;
 }
 
 /** View or unview a tag.
