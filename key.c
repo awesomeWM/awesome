@@ -1151,6 +1151,7 @@ const struct luaL_reg awesome_key_methods[] =
 };
 const struct luaL_reg awesome_key_meta[] =
 {
+    LUA_OBJECT_META
     { "__tostring", luaA_key_tostring },
     { "__index", luaA_key_index },
     { "__newindex", luaA_key_newindex },

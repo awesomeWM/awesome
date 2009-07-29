@@ -1963,6 +1963,7 @@ const struct luaL_reg awesome_client_methods[] =
 };
 const struct luaL_reg awesome_client_meta[] =
 {
+    LUA_OBJECT_META
     { "isvisible", luaA_client_isvisible },
     { "geometry", luaA_client_geometry },
     { "struts", luaA_client_struts },

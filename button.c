@@ -149,6 +149,7 @@ const struct luaL_reg awesome_button_methods[] =
 };
 const struct luaL_reg awesome_button_meta[] =
 {
+    LUA_OBJECT_META
     { "__index", luaA_button_index },
     { "__newindex", luaA_button_newindex },
     { "__gc", luaA_object_gc },

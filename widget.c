@@ -557,6 +557,7 @@ const struct luaL_reg awesome_widget_methods[] =
 };
 const struct luaL_reg awesome_widget_meta[] =
 {
+    LUA_OBJECT_META
     { "extents", luaA_widget_extents },
     { "__index", luaA_widget_index },
     { "__newindex", luaA_widget_newindex },

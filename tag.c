@@ -410,6 +410,7 @@ const struct luaL_reg awesome_tag_methods[] =
 };
 const struct luaL_reg awesome_tag_meta[] =
 {
+    LUA_OBJECT_META
     { "clients", luaA_tag_clients },
     { "__index", luaA_tag_index },
     { "__newindex", luaA_tag_newindex },

@@ -776,6 +776,7 @@ const struct luaL_reg awesome_image_methods[] =
 };
 const struct luaL_reg awesome_image_meta[] =
 {
+    LUA_OBJECT_META
     { "__index", luaA_image_index },
     { "rotate", luaA_image_rotate },
     { "orientate", luaA_image_orientate },

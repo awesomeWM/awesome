@@ -1206,6 +1206,7 @@ const struct luaL_reg awesome_wibox_methods[] =
 };
 const struct luaL_reg awesome_wibox_meta[] =
 {
+    LUA_OBJECT_META
     { "geometry", luaA_wibox_geometry },
     { "__index", luaA_wibox_index },
     { "__newindex", luaA_wibox_newindex },

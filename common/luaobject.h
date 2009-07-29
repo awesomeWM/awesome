@@ -214,6 +214,11 @@ luaA_object_gc(lua_State *L)
     return 0;
 }
 
+#define LUA_OBJECT_META \
+    { "add_signal", luaA_object_add_signal_simple }, \
+    { "remove_signal", luaA_object_remove_signal_simple }, \
+    { "emit_signal", luaA_object_emit_signal_simple },
+
 #endif
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
