@@ -184,6 +184,9 @@ widget_geometries(wibox_t *wibox)
     }
     else
     {
+        /* Remove the "nil function" */
+        lua_pop(globalconf.L, 1);
+
         /* If no layout function has been specified, we just push a table with
          * geometries onto the stack. These geometries are nothing fancy, they
          * have x = y = 0 and their height and width set to the widgets demands
@@ -201,7 +204,6 @@ widget_geometries(wibox_t *wibox)
         /* remove wibox */
         lua_remove(globalconf.L, -2);
         luaA_table2widgets(globalconf.L, widgets);
-        lua_pop(globalconf.L, 2);
 
         lua_newtable(globalconf.L);
         for(int i = 0; i < widgets->len; i++)
