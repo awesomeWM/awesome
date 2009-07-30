@@ -187,18 +187,11 @@ ewmh_update_net_numbers_of_desktop(int phys_screen)
 void
 ewmh_update_net_current_desktop(int phys_screen)
 {
-    tag_array_t *tags = &globalconf.screens.tab[phys_screen].tags;
-    uint32_t count = 0;
-    tag_t **curtags = tags_get_current( &globalconf.screens.tab[phys_screen]);
-
-    while(count < (uint32_t) tags->len && tags->tab[count] != curtags[0])
-        count++;
+    uint32_t idx = tags_get_first_selected_index(&globalconf.screens.tab[phys_screen]);
 
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
                         xutil_screen_get(globalconf.connection, phys_screen)->root,
-                        _NET_CURRENT_DESKTOP, CARDINAL, 32, 1, &count);
-
-    p_delete(&curtags);
+                        _NET_CURRENT_DESKTOP, CARDINAL, 32, 1, &idx);
 }
 
 void

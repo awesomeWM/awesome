@@ -206,24 +206,18 @@ is_client_tagged(client_t *c, tag_t *t)
     return false;
 }
 
-/** Get the current tags for the specified screen.
- * Returned pointer must be p_delete'd after.
+/** Get the index of the first selected tag.
  * \param screen Screen.
- * \return A double pointer of tag list finished with a NULL element.
+ * \return Its index.
  */
-tag_t **
-tags_get_current(screen_t *screen)
+int
+tags_get_first_selected_index(screen_t *screen)
 {
-    tag_t **out = p_new(tag_t *, screen->tags.len + 1);
-    int n = 0;
-
     foreach(tag, screen->tags)
         if((*tag)->selected)
-            out[n++] = *tag;
-
-    return out;
+            return tag_array_indexof(&screen->tags, tag);
+    return 0;
 }
-
 
 /** Set a tag to be the only one viewed.
  * \param target the tag to see
