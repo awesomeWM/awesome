@@ -150,7 +150,7 @@ luaA_textbox_margin(lua_State *L)
 
     if(lua_gettop(L) == 2)
     {
-        d->margin = luaA_getopt_padding(L, 3, &d->margin);
+        d->margin = luaA_getopt_padding(L, 2, &d->margin);
         widget_invalidate_bywidget(widget);
     }
 
