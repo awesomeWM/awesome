@@ -5,11 +5,11 @@
 ---------------------------------------------------------------------------
 
 -- Grab environment we need
-local hooks = require("awful.hooks")
 local ipairs = ipairs
 local table = table
 local capi =
 {
+    awesome = awesome,
     root = root
 }
 
@@ -43,16 +43,12 @@ local function register_event(event_id)
     update_cursor()
 end
 
-local function startup_hook(event)
-    if event.type == "initiated" then
-        register_event(event.id)
-    elseif event.type == "canceled"
-        or event.type == "completed"
-        or event.type == "timedout" then
-        unregister_event(event.id)
-    end
-end
+local function unregister_hook(event) unregister_event(event.id) end
+local function register_hook(event) register_event(event.id) end
 
-hooks.startup_notification.register(startup_hook)
+capi.awesome.add_signal("spawn::initiated", register_hook)
+capi.awesome.add_signal("spawn::canceled", unregister_hook)
+capi.awesome.add_signal("spawn::completed", unregister_hook)
+capi.awesome.add_signal("spawn::timeout", unregister_hook)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

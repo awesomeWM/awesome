@@ -619,6 +619,67 @@ luaA_awesome_newindex(lua_State *L)
     return 0;
 }
 
+/** Add a global signal.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ * \luastack
+ * \lparam A string with the event name.
+ * \lparam The function to call.
+ */
+static int
+luaA_awesome_add_signal(lua_State *L)
+{
+    const char *name = luaL_checkstring(L, 1);
+    luaA_checkfunction(L, 2);
+    signal_add(&global_signals, name, luaA_object_ref(L, 2));
+    return 0;
+}
+
+/** Remove a global signal.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ * \luastack
+ * \lparam A string with the event name.
+ * \lparam The function to call.
+ */
+static int
+luaA_awesome_remove_signal(lua_State *L)
+{
+    const char *name = luaL_checkstring(L, 1);
+    luaA_checkfunction(L, 2);
+    const void *func = lua_topointer(L, 2);
+    signal_remove(&global_signals, name, func);
+    luaA_object_unref(L, (void *) func);
+    return 0;
+}
+
+/** Emit a global signal.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ * \luastack
+ * \lparam A string with the event name.
+ * \lparam The function to call.
+ */
+static int
+luaA_awesome_emit_signal(lua_State *L)
+{
+    const char *name = luaL_checkstring(L, 1);
+    signal_t *sigfound = signal_array_getbyid(&global_signals,
+                                              a_strhash((const unsigned char *) name));
+    if(sigfound)
+    {
+        int nargs = lua_gettop(L) - 1;
+        foreach(ref, sigfound->sigfuncs)
+        {
+            for(int i = 0; i < nargs; i++)
+                lua_pushvalue(L, - nargs);
+            luaA_object_push(L, (void *) *ref);
+            luaA_dofunction(L, nargs, 0);
+        }
+    }
+    return 0;
+}
+
 /** Initialize the Lua VM
  * \param xdg An xdg handle to use to get XDG basedir.
  */
@@ -632,6 +693,9 @@ luaA_init(xdgHandle* xdg)
         { "exec", luaA_exec },
         { "spawn", luaA_spawn },
         { "restart", luaA_restart },
+        { "add_signal", luaA_awesome_add_signal },
+        { "remove_signal", luaA_awesome_remove_signal },
+        { "emit_signal", luaA_awesome_emit_signal },
         { "__index", luaA_awesome_index },
         { "__newindex", luaA_awesome_newindex },
         { NULL, NULL }
@@ -715,7 +779,6 @@ luaA_init(xdgHandle* xdg)
     globalconf.hooks.tags = LUA_REFNIL;
     globalconf.hooks.tagged = LUA_REFNIL;
     globalconf.hooks.property = LUA_REFNIL;
-    globalconf.hooks.startup_notification = LUA_REFNIL;
     globalconf.hooks.timer = LUA_REFNIL;
     globalconf.hooks.exit = LUA_REFNIL;
 

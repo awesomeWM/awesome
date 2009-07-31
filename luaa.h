@@ -239,5 +239,8 @@ bool luaA_isloop(lua_State *, int);
         } \
     } while(0);
 
+/** Global signals */
+signal_array_t global_signals;
+
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

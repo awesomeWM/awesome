@@ -120,8 +120,6 @@ struct awesome_t
         int timer;
         /** Command to run on awesome exit */
         int exit;
-        /** Startup notification hooks */
-        int startup_notification;
     } hooks;
     /** The event loop */
     struct ev_loop *loop;
