@@ -245,22 +245,40 @@ end
 -- @see capi.wibox
 -- @param args A table with standard arguments to wibox() creator.
 -- You can add also position key with value top, bottom, left or right.
+-- You can also use width or height in % and set align to center, right or left.
 -- You can also set the screen key with a screen number to attach the wibox.
 -- If not specified, 1 is assumed.
 -- @return The wibox created.
 function new(arg)
     local arg = arg or {}
     local position = arg.position or "top"
+    local has_to_stretch = true
     -- Empty position and align in arg so we are passing deprecation warning
     arg.position = nil
 
     -- Set default size
     if position == "left" or position == "right" then
         arg.width = arg.width or capi.awesome.font_height * 1.5
-        arg.height = arg.height or 100
+        if arg.height then
+            has_to_stretch = false
+            if arg.screen then
+                local hp = arg.height:match("(%d+)%%")
+                if hp then
+                    arg.height = capi.screen[arg.screen].workarea.height * hp / 100
+                end
+            end
+        end
     else
-        arg.width = arg.width or 100
         arg.height = arg.height or capi.awesome.font_height * 1.5
+        if arg.width then
+            has_to_stretch = false
+            if arg.screen then
+                local wp = arg.width:match("(%d+)%%")
+                if wp then
+                    arg.width = capi.screen[arg.screen].workarea.width * wp / 100
+                end
+            end
+        end
     end
 
     local w = capi.wibox(arg)
@@ -274,7 +292,11 @@ function new(arg)
     w.screen = arg.screen or 1
 
     attach(w, position)
-    stretch(w)
+    if has_to_stretch then
+        stretch(w)
+    else
+        align(w, arg.align)
+    end
 
     return w
 end
