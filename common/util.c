@@ -26,8 +26,8 @@
 #include <limits.h>
 #include <fcntl.h>
 
-#include "util.h"
-#include "tokenize.h"
+#include "common/util.h"
+#include "common/tokenize.h"
 
 /** Print error and exit with EXIT_FAILURE code.
  */
