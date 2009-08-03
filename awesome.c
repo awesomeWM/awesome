@@ -276,15 +276,15 @@ xerror(void *data __attribute__ ((unused)),
     /* ignore this */
     if(e->error_code == XCB_EVENT_ERROR_BAD_WINDOW
        || (e->error_code == XCB_EVENT_ERROR_BAD_MATCH
-           && XCB_EVENT_REQUEST_TYPE(e) == XCB_SET_INPUT_FOCUS)
+           && e->major_code == XCB_SET_INPUT_FOCUS)
        || (e->error_code == XCB_EVENT_ERROR_BAD_VALUE
-           && XCB_EVENT_REQUEST_TYPE(e) == XCB_KILL_CLIENT)
-       || (XCB_EVENT_REQUEST_TYPE(e) == XCB_CONFIGURE_WINDOW
+           && e->major_code == XCB_KILL_CLIENT)
+       || (e->major_code == XCB_CONFIGURE_WINDOW
            && e->error_code == XCB_EVENT_ERROR_BAD_MATCH))
         return 0;
 
     warn("X error: request=%s, error=%s",
-         xcb_event_get_request_label(XCB_EVENT_REQUEST_TYPE(e)),
+         xcb_event_get_request_label(e->major_code),
          xcb_event_get_error_label(e->error_code));
 
     return 0;
