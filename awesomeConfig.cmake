@@ -128,7 +128,7 @@ execute_process(
 
 # Use pkgconfig to get most of the libraries
 pkg_check_modules(AWESOME_COMMON_REQUIRED REQUIRED
-    xcb>=1.1)
+    xcb>=1.4)
 
 pkg_check_modules(AWESOME_REQUIRED REQUIRED
     glib-2.0
@@ -140,7 +140,7 @@ pkg_check_modules(AWESOME_REQUIRED REQUIRED
     xcb-xtest
     xcb-xinerama
     xcb-shape
-    xcb-event>=0.3.4
+    xcb-event>=0.3.6
     xcb-aux>=0.3.0
     xcb-atom>=0.3.0
     xcb-keysyms>=0.3.4
