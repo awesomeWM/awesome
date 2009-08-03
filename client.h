@@ -195,6 +195,8 @@ void client_unfocus_update(client_t *);
 void client_stack_refresh(void);
 bool client_hasproto(client_t *, xcb_atom_t);
 void client_setfocus(client_t *, bool);
+void client_ignore_enterleave_events(void);
+void client_restore_enterleave_events(void);
 
 static inline void
 client_stack(void)

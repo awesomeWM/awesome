@@ -248,6 +248,29 @@ client_ban(client_t *c)
     }
 }
 
+/** This is part of The Bob Marley Algorithmm: we ignore enter and leave window
+ * in certain cases, like map/unmap or move, so we don't get spurious events.
+ */
+void
+client_ignore_enterleave_events(void)
+{
+    foreach(c, globalconf.clients)
+        xcb_change_window_attributes(globalconf.connection,
+                                     (*c)->win,
+                                     XCB_CW_EVENT_MASK,
+                                     (const uint32_t []) { CLIENT_SELECT_INPUT_EVENT_MASK & ~(XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW) });
+}
+
+void
+client_restore_enterleave_events(void)
+{
+    foreach(c, globalconf.clients)
+        xcb_change_window_attributes(globalconf.connection,
+                                     (*c)->win,
+                                     XCB_CW_EVENT_MASK,
+                                     (const uint32_t []) { CLIENT_SELECT_INPUT_EVENT_MASK });
+}
+
 /** Record that a client got focus.
  * \param c Client being focused.
  */
@@ -752,10 +775,15 @@ client_resize(client_t *c, area_t geometry, bool hints)
 
         titlebar_update_geometry(c);
 
+        /* Ignore all spurious enter/leave notify events */
+        client_ignore_enterleave_events();
+
         xcb_configure_window(globalconf.connection, c->win,
                              XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y
                              | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
                              values);
+
+        client_restore_enterleave_events();
 
         screen_client_moveto(c, new_screen, true, false);
 

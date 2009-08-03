@@ -31,18 +31,11 @@
 static void
 reban(screen_t *screen)
 {
-    uint32_t select_input_val[] = { CLIENT_SELECT_INPUT_EVENT_MASK & ~(XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW) };
+    client_ignore_enterleave_events();
 
     foreach(_c, globalconf.clients)
     {
         client_t *c = *_c;
-        /* Bob Marley v2:
-         * While we arrange, we do not want to receive EnterNotify or LeaveNotify
-         * events, or we would get spurious events. */
-        xcb_change_window_attributes(globalconf.connection,
-                                     c->win,
-                                     XCB_CW_EVENT_MASK,
-                                     select_input_val);
 
         /* Restore titlebar before client, so geometry is ok again. */
         if(titlebar_isvisible(c, screen))
@@ -66,15 +59,9 @@ reban(screen_t *screen)
             client_ban(c);
     }
 
-    screen->need_reban = false;
+    client_restore_enterleave_events();
 
-    /* Now, we want to receive EnterNotify and LeaveNotify events back. */
-    select_input_val[0] = CLIENT_SELECT_INPUT_EVENT_MASK;
-    foreach(c, globalconf.clients)
-        xcb_change_window_attributes(globalconf.connection,
-                                     (*c)->win,
-                                     XCB_CW_EVENT_MASK,
-                                     select_input_val);
+    screen->need_reban = false;
 }
 
 /** Refresh the client disposition.
