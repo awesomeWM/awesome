@@ -17,7 +17,7 @@ local capi =
     widget = widget,
     client = client,
 }
-local button = require("awful.button")
+local abutton = require("awful.button")
 local beautiful = require("beautiful")
 local hooks = require("awful.hooks")
 local util = require("awful.util")
@@ -81,9 +81,9 @@ function add(c, args)
 
     -- Redirect relevant events to the client the titlebar belongs to
     title.buttons = util.table.join(
-        button({ }, 1, button_callback_focus_raise_move),
-        button({ args.modkey }, 1, button_callback_move),
-        button({ args.modkey }, 3, button_callback_resize))
+        abutton({ }, 1, button_callback_focus_raise_move),
+        abutton({ args.modkey }, 1, button_callback_move),
+        abutton({ args.modkey }, 3, button_callback_resize))
 
     local appicon = capi.widget({ type = "imagebox" })
     appicon.image = c.icon
@@ -185,7 +185,7 @@ local function button_new(c, name, modkey, theme, state)
     local button = widget.button({ image = img })
     if not button then return end
 
-    button.buttons = util.table.join(button.buttons,  button({ }, 1, nil,  state.action))
+    button.buttons = util.table.join(button.buttons,  abutton({ }, 1, nil,  state.action))
 
     button.visible = false
     return button
