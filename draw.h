@@ -51,7 +51,6 @@ typedef enum
     AlignCenter = (1 << 1),
     AlignTop    = (1 << 2),
     AlignBottom = (1 << 3),
-    AlignFixed  = (1 << 4),
     AlignMiddle = (1 << 5)
 } alignment_t;
 
