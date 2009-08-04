@@ -100,7 +100,7 @@ function add(c, args)
     local is = 1
     data[c].button_sets = {}
     for i = 1, #button_groups do
-        local set = button_groups[i].create(c, modkey, theme)
+        local set = button_groups[i].create(c, args.modkey, theme)
         if (set) then
             data[c].button_sets[is] = set
             is = is + 1
