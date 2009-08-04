@@ -261,6 +261,8 @@ wibox_moveresize(wibox_t *w, area_t geometry)
 
         if(mask_vals)
             xcb_configure_window(globalconf.connection, w->window, mask_vals, moveresize_win_vals);
+
+        w->screen = screen_getbycoord(w->screen, w->geometry.x, w->geometry.y);
     }
     else
         w->geometry = geometry;
@@ -347,52 +349,6 @@ wibox_map(wibox_t *wibox)
     wibox_need_update(wibox);
     /* Stack this wibox correctly */
     client_stack();
-}
-
-static void
-wibox_move(wibox_t *wibox, int16_t x, int16_t y)
-{
-    if(wibox->window
-       && (x != wibox->geometry.x || y != wibox->geometry.y))
-    {
-        xcb_configure_window(globalconf.connection, wibox->window,
-                             XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y,
-                             (const uint32_t[]) { x, y });
-
-        wibox->screen = screen_getbycoord(wibox->screen, x, y);
-    }
-
-    wibox->geometry.x = x;
-    wibox->geometry.y = y;
-}
-
-static void
-wibox_resize(wibox_t *w, uint16_t width, uint16_t height)
-{
-    if(width <= 0 || height <= 0 || (w->geometry.width == width && w->geometry.height == height))
-        return;
-
-    w->geometry.width = width;
-    w->geometry.height = height;
-
-    if(w->window)
-    {
-        xcb_screen_t *s = xutil_screen_get(globalconf.connection, w->ctx.phys_screen);
-
-        xcb_free_pixmap(globalconf.connection, w->pixmap);
-        /* orientation != East */
-        if(w->pixmap != w->ctx.pixmap)
-            xcb_free_pixmap(globalconf.connection, w->ctx.pixmap);
-        w->pixmap = xcb_generate_id(globalconf.connection);
-        xcb_create_pixmap(globalconf.connection, s->root_depth, w->pixmap, s->root,
-                          w->geometry.width, w->geometry.height);
-        xcb_configure_window(globalconf.connection, w->window,
-                             XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
-                             (const uint32_t[]) { w->geometry.width, w->geometry.height });
-        wibox_draw_context_update(w, s);
-    }
-
-    wibox_need_update(w);
 }
 
 /** Kick out systray windows.
@@ -743,7 +699,10 @@ wibox_attach(screen_t *s)
 
     /* If it does not match, move it to the screen coordinates */
     if(cscreen != wibox->screen)
-        wibox_move(wibox, s->geometry.x, s->geometry.y);
+        wibox_moveresize(wibox, (area_t) { .x = s->geometry.x,
+                                           .y = s->geometry.y,
+                                           .width = wibox->geometry.width,
+                                           .height = wibox->geometry.height });
 
     wibox_array_append(&globalconf.wiboxes, wibox);
 
@@ -993,7 +952,10 @@ luaA_wibox_geometry(lua_State *L)
         switch(wibox->type)
         {
           case WIBOX_TYPE_TITLEBAR:
-            wibox_resize(wibox, wingeom.width, wingeom.height);
+            wibox_moveresize(wibox, (area_t) { .x = wibox->geometry.x,
+                                               .y = wibox->geometry.y,
+                                               .width = wingeom.width,
+                                               .height = wingeom.height });
             break;
           case WIBOX_TYPE_NORMAL:
             wibox_moveresize(wibox, wingeom);
