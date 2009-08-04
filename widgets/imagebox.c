@@ -28,7 +28,6 @@ typedef struct
     /** Imagebox image */
     image_t *image;
     color_t bg;
-    alignment_t valign;
     bool resize;
 } imagebox_data_t;
 
@@ -95,7 +94,6 @@ imagebox_destructor(widget_t *w)
  * \param L The Lua VM state.
  * \param token The key token.
  * \param resize Resize image.
- * \param valign Vertical alignment, top, bottom or center.
  * \return The number of elements pushed on stack.
  * \luastack
  * \lfield image The image to display.
@@ -117,9 +115,6 @@ luaA_imagebox_index(lua_State *L, awesome_token_t token)
         break;
       case A_TK_RESIZE:
         lua_pushboolean(L, d->resize);
-        break;
-      case A_TK_VALIGN:
-        lua_pushstring(L, draw_align_tostr(d->valign));
         break;
       default:
         return 0;
@@ -157,10 +152,6 @@ luaA_imagebox_newindex(lua_State *L, awesome_token_t token)
       case A_TK_RESIZE:
         d->resize = luaA_checkboolean(L, 3);
         break;
-      case A_TK_VALIGN:
-        if((buf = luaL_checklstring(L, 3, &len)))
-            d->valign = draw_align_fromstr(buf, len);
-        break;
       default:
         return 0;
     }
@@ -187,7 +178,6 @@ widget_imagebox(widget_t *w)
     w->extents = imagebox_extents;
     w->data = d = p_new(imagebox_data_t, 1);
     d->resize = true;
-    d->valign = AlignTop;
 
     return w;
 }
