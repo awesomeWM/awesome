@@ -329,18 +329,6 @@ wibox_orientation_set(wibox_t *w, orientation_t o)
     }
 }
 
-/** Set wibox cursor.
- * \param w The wibox.
- * \param c The cursor.
- */
-static void
-wibox_cursor_set(wibox_t *w, xcb_cursor_t c)
-{
-    if(w->window)
-        xcb_change_window_attributes(globalconf.connection, w->window, XCB_CW_CURSOR,
-                                     (const uint32_t[]) { c });
-}
-
 static void
 wibox_map(wibox_t *wibox)
 {
@@ -708,8 +696,8 @@ wibox_attach(screen_t *s)
 
     wibox_init(wibox, phys_screen);
 
-    wibox_cursor_set(wibox,
-                     xcursor_new(globalconf.connection, xcursor_font_fromstr(wibox->cursor)));
+    window_set_cursor(wibox->window,
+                      xcursor_new(globalconf.connection, xcursor_font_fromstr(wibox->cursor)));
 
     wibox_opacity_set(wibox, wibox->opacity);
 
@@ -1044,7 +1032,7 @@ luaA_wibox_newindex(lua_State *L)
                 xcb_cursor_t cursor = xcursor_new(globalconf.connection, cursor_font);
                 p_delete(&wibox->cursor);
                 wibox->cursor = a_strdup(buf);
-                wibox_cursor_set(wibox, cursor);
+                window_set_cursor(wibox->window, cursor);
             }
         }
         break;
