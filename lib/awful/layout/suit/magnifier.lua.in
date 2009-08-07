@@ -23,7 +23,7 @@ function arrange(p)
     local area = p.workarea
     local cls = p.clients
     local focus = capi.client.focus
-    local mwfact = p.mwfact
+    local mwfact = tag.getmwfact(tag.selected(p.screen))
     local fidx
 
     -- Check that the focused window is on the right screen

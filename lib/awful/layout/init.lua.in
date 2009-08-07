@@ -65,7 +65,6 @@ end
 
 -- Register an arrange hook.
 local function on_arrange (screen)
-    local t = tag.selected(screen)
     local p = {}
     p.workarea = wibox.get_workarea(screen)
     -- Handle padding
@@ -78,10 +77,6 @@ local function on_arrange (screen)
     end
     p.geometry = capi.screen[screen].geometry
     p.clients = client.tiled(screen)
-    p.ncol = tag.getncol(t)
-    p.nmaster = tag.getnmaster(t)
-    p.mwfact = tag.getmwfact(t)
-    p.tagdata = tag.getdata(t)
     p.screen = screen
     get(screen).arrange(p)
 end
