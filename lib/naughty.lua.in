@@ -162,7 +162,7 @@ local function arrange(screen)
     for p,pos in pairs(notifications[screen]) do
         for i,notification in pairs(notifications[screen][p]) do
             local offset = get_offset(screen, p, i, notification.width, notification.height)
-            notification.box:geometry({ x = offset.x, y = offset.y, width = notification.width, height = notification.height })
+            notification.box:geometry({ x = offset.x, y = offset.y })
             notification.idx = offset.idx
         end
     end
