@@ -493,7 +493,6 @@ void
 client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, bool startup)
 {
     xcb_get_property_cookie_t ewmh_icon_cookie;
-    client_t *c, *tc = NULL;
     screen_t *screen;
     const uint32_t select_input_val[] = { CLIENT_SELECT_INPUT_EVENT_MASK };
 
@@ -507,7 +506,7 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
     ewmh_icon_cookie = ewmh_window_icon_get_unchecked(w);
     xcb_change_window_attributes(globalconf.connection, w, XCB_CW_EVENT_MASK, select_input_val);
 
-    c = client_new(globalconf.L);
+    client_t *c = client_new(globalconf.L);
     /* Push client in client list */
     client_array_push(&globalconf.clients, client_ref(globalconf.L, -1));
 
@@ -549,11 +548,6 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
     property_update_wm_hints(c, NULL);
     property_update_wm_transient_for(c, NULL);
     property_update_wm_client_leader(c, NULL);
-
-    /* Recursively find the parent. */
-    for(tc = c; tc->transient_for; tc = tc->transient_for);
-    if(tc != c && tc->phys_screen == c->phys_screen)
-        screen = tc->screen;
 
     /* Then check clients hints */
     ewmh_client_check_hints(c);
