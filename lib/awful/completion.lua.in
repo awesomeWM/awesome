@@ -137,7 +137,8 @@ function shell(command, cur_pos, ncomp, shell)
         return command, cur_pos
     end
 
-    -- cycle
+    -- sort and cycle
+    table.sort(output)
     while ncomp > #output do
         ncomp = ncomp - #output
     end
