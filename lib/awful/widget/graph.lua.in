@@ -164,6 +164,7 @@ local function add_value(graph, value)
     end
 
     update(graph)
+    return graph
 end
 
 
@@ -175,6 +176,7 @@ local function set_height(graph, height)
         data[graph].height = height
         update(graph)
     end
+    return graph
 end
 
 --- Set the graph width.
@@ -185,6 +187,7 @@ local function set_width(graph, width)
         data[graph].width = width
         update(graph)
     end
+    return graph
 end
 
 -- Build properties function
@@ -193,6 +196,7 @@ for _, prop in ipairs(properties) do
         _M["set_" .. prop] = function(graph, value)
             data[graph][prop] = value
             update(graph)
+            return graph
         end
     end
 end

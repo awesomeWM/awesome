@@ -116,6 +116,7 @@ end
 local function set_value(pbar, value)
     local value = value or 0
     data[pbar].value = math.min(1, math.max(0, value))
+    return pbar
 end
 
 --- Set the progressbar height.
@@ -126,6 +127,7 @@ local function set_height(progressbar, height)
         data[progressbar].height = height
         update(progressbar)
     end
+    return progressbar
 end
 
 --- Set the progressbar width.
@@ -136,6 +138,7 @@ local function set_width(progressbar, width)
         data[progressbar].width = width
         update(progressbar)
     end
+    return progressbar
 end
 
 -- Build properties function
@@ -144,6 +147,7 @@ for _, prop in ipairs(properties) do
         _M["set_" .. prop] = function(pbar, value)
             data[pbar][prop] = value
             update(pbar)
+            return pbar
         end
     end
 end
