@@ -513,9 +513,6 @@ luaA_image_draw_line(lua_State *L)
     imlib_context_set_image(image->image);
     color_init_reply(cookie);
 
-    if((MAX(x1,x2) > imlib_image_get_width()) || (MAX(y1,y2) > imlib_image_get_height()))
-        return 0;
-
     imlib_context_set_color(color.red, color.green, color.blue, color.alpha);
     imlib_image_draw_line(x1, y1, x2, y2, 0);
     image->isupdated = false;
@@ -550,11 +547,6 @@ luaA_image_draw_rectangle(lua_State *L)
     cookie = color_init_unchecked(&color, buf, len);
     imlib_context_set_image(image->image);
     color_init_reply(cookie);
-
-    if((x > imlib_image_get_width()) || (x + width > imlib_image_get_width()))
-        return 0;
-    if((y > imlib_image_get_height()) || (y + height > imlib_image_get_height()))
-        return 0;
 
     imlib_context_set_color(color.red, color.green, color.blue, color.alpha);
     if(!fill)
@@ -639,11 +631,6 @@ luaA_image_draw_rectangle_gradient(lua_State *L)
     luaA_checktable(L, 6);
     double angle = luaL_checknumber(L, 7);
 
-    if((x > imlib_image_get_width()) || (x + width > imlib_image_get_width()))
-        return 0;
-    if((y > imlib_image_get_height()) || (y + height > imlib_image_get_height()))
-        return 0;
-
     imlib_context_set_image(image->image);
 
     luaA_table_to_color_range(L, 6);
@@ -685,11 +672,6 @@ luaA_image_draw_circle(lua_State *L)
     cookie = color_init_unchecked(&color, buf, len);
     imlib_context_set_image(image->image);
     color_init_reply(cookie);
-
-    if((x > imlib_image_get_width()) || (x + ah > imlib_image_get_width()) || (x - ah < 0))
-        return 0;
-    if((y > imlib_image_get_height()) || (y + av > imlib_image_get_height()) || (y - av < 0))
-        return 0;
 
     imlib_context_set_color(color.red, color.green, color.blue, color.alpha);
     if(!fill)
