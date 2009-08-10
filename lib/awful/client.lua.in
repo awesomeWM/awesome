@@ -83,9 +83,8 @@ end
 
 --- Adds client to urgent stack.
 -- @param c The client object.
--- @param prop The property which is updated.
-function urgent.add(c, prop)
-    if type(c) == "client" and prop == "urgent" and c.urgent then
+function urgent.add(c)
+    if c.urgent then
         table.insert(data.urgent, c)
     end
 end
@@ -295,7 +294,7 @@ end
 local function get_client_in_direction(dir, c)
     local sel = c or capi.client.focus
     if sel then
-        local geometry = sel:geometry()
+        local geometry = { x = c.x, y = c.y, width = c.width, height = c.height }
         local dist, dist_min
         local target = nil
         local cls = visible(sel.screen)
@@ -303,10 +302,11 @@ local function get_client_in_direction(dir, c)
         -- We check each client.
         for i, c in ipairs(cls) do
             -- Check geometry to see if client is located in the right direction.
-            if is_in_direction(dir, geometry, c:geometry()) then
+            local g = { x = c.x, y = c.y, width = c.width, height = c.height }
+            if is_in_direction(dir, geometry, g) then
 
                 -- Calculate distance between focused client and checked client.
-                dist = calculate_distance(dir, geometry, c:geometry())
+                dist = calculate_distance(dir, geometry, g)
 
                 -- If distance is shorter then keep the client.
                 if not target or dist < dist_min then
@@ -416,13 +416,11 @@ end
 -- @param h The relative height.
 -- @param c The optional client, otherwise focused one is used.
 function moveresize(x, y, w, h, c)
-    local sel = c or capi.client.focus
-    local geometry = sel:geometry()
-    geometry['x'] = geometry['x'] + x
-    geometry['y'] = geometry['y'] + y
-    geometry['width'] = geometry['width'] + w
-    geometry['height'] = geometry['height'] + h
-    sel:geometry(geometry)
+    local c = c or capi.client.focus
+    c.x = c.x + x
+    c.y = c.y + y
+    c.width = c.width + width
+    c.height = c.height + height
 end
 
 --- Move a client to a tag.
@@ -563,20 +561,32 @@ function floating.set(c, s)
         property.set(c, "floating", s)
         local screen = c.screen
         if s == true then
-            c:geometry(property.get(c, "floating_geometry"))
+            local g = property.get(c, "floating_geometry")
+            c.x = g.x
+            c.y = g.y
+            c.width = g.width
+            c.height = g.height
         end
         c.screen = screen
     end
 end
 
 capi.client.add_signal("manage", function (c)
-    property.set(c, "floating_geometry", c:geometry())
+    property.set(c, "floating_geometry", { x = c.x, y = c.y, width = c.width, height = c.height })
 end)
 
-hooks.property.register(function (c, prop)
-    if type(c) == "client" and prop == "geometry" and floating.get(c) then
-        property.set(c, "floating_geometry", c:geometry())
+local function store_floating_geometry(c)
+    if floating.get(c) then
+        property.set(c, "floating_geometry",
+                     { x = c.x, y = c.y, width = c.width, height = c.height })
     end
+end
+
+capi.client.add_signal("manage", function(c)
+    c:add_signal("property::x", store_floating_geometry)
+    c:add_signal("property::y", store_floating_geometry)
+    c:add_signal("property::width", store_floating_geometry)
+    c:add_signal("property::height", store_floating_geometry)
 end)
 
 --- Return if a client has a fixe size or not.
@@ -829,11 +839,11 @@ function property.set(c, prop, value)
     hooks.user.call("property", c, prop)
 end
 
--- Register standards hooks
+-- Register standards signals
 capi.client.add_signal("focus", focus.history.add)
 capi.client.add_signal("unmanage", focus.history.delete)
 
-hooks.property.register(urgent.add)
+capi.client.add_signal("manage", function(c) c:add_signal("property::urgent", urgent.add) end)
 capi.client.add_signal("focus", urgent.delete)
 capi.client.add_signal("unmanage", urgent.delete)
 
