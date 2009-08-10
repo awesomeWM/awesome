@@ -552,6 +552,9 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
     property_update_wm_window_role(c);
     property_update_net_wm_pid(c, NULL);
 
+    /* get opacity */
+    c->opacity = window_opacity_get(c->win);
+
     /* Then check clients hints */
     ewmh_client_check_hints(c);
 
@@ -1527,12 +1530,18 @@ luaA_client_newindex(lua_State *L)
         break;
       case A_TK_OPACITY:
         if(lua_isnil(L, 3))
+        {
             window_opacity_set(c->win, -1);
+            c->opacity = -1;
+        }
         else
         {
             d = luaL_checknumber(L, 3);
             if(d >= 0 && d <= 1)
+            {
                 window_opacity_set(c->win, d);
+                c->opacity = d;
+            }
         }
         break;
       case A_TK_STICKY:
@@ -1633,7 +1642,6 @@ luaA_client_index(lua_State *L)
     size_t len;
     client_t *c = luaA_client_checkudata(L, 1);
     const char *buf = luaL_checklstring(L, 2, &len);
-    double d;
 
     if(luaA_usemetatable(L, 1, 2))
         return 1;
@@ -1749,10 +1757,7 @@ luaA_client_index(lua_State *L)
         luaA_object_push_item(L, 1, c->icon);
         break;
       case A_TK_OPACITY:
-        if((d = window_opacity_get(c->win)) >= 0)
-            lua_pushnumber(L, d);
-        else
-            return 0;
+        lua_pushnumber(L, c->opacity);
         break;
       case A_TK_ONTOP:
         lua_pushboolean(L, c->isontop);

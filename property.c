@@ -557,17 +557,24 @@ property_handle_xrootpmap_id(void *data __attribute__ ((unused)),
 }
 
 static int
-property_handle_opacity(void *data __attribute__ ((unused)),
-                             xcb_connection_t *connection,
-                             uint8_t state,
-                             xcb_window_t window,
-                             xcb_atom_t name,
-                             xcb_get_property_reply_t *reply)
+property_handle_net_wm_opacity(void *data __attribute__ ((unused)),
+                               xcb_connection_t *connection,
+                               uint8_t state,
+                               xcb_window_t window,
+                               xcb_atom_t name,
+                               xcb_get_property_reply_t *reply)
 {
     wibox_t *wibox = wibox_getbywin(window);
 
-    if (wibox)
+    if(wibox)
         wibox->opacity = window_opacity_get_from_reply(reply);
+    else
+    {
+        client_t *c = client_getbywin(window);
+        if(c)
+            c->opacity = window_opacity_get_from_reply(reply);
+    }
+
     return 0;
 }
 
@@ -613,14 +620,12 @@ void a_xcb_set_property_handlers(void)
                              property_handle_net_wm_icon, NULL);
     xcb_property_set_handler(&globalconf.prophs, _NET_WM_PID, UINT_MAX,
                              property_handle_net_wm_pid, NULL);
+    xcb_property_set_handler(&globalconf.prophs, _NET_WM_WINDOW_OPACITY, 1,
+                             property_handle_net_wm_opacity, NULL);
 
     /* background change */
     xcb_property_set_handler(&globalconf.prophs, _XROOTPMAP_ID, 1,
                              property_handle_xrootpmap_id, NULL);
-
-    /* Opacity */
-    xcb_property_set_handler(&globalconf.prophs, _NET_WM_WINDOW_OPACITY, 1,
-                             property_handle_opacity, NULL);
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

@@ -156,6 +156,8 @@ struct client_t
     uint32_t pid;
     /** Window it is transient for */
     client_t *transient_for;
+    /** Window opacity */
+    double opacity;
 };
 
 client_t * luaA_client_checkudata(lua_State *, int);
