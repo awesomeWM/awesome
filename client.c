@@ -549,6 +549,7 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
     property_update_wm_transient_for(c, NULL);
     property_update_wm_client_leader(c, NULL);
     property_update_wm_client_machine(c);
+    property_update_wm_window_role(c);
     property_update_net_wm_pid(c, NULL);
 
     /* Then check clients hints */
@@ -1630,10 +1631,8 @@ static int
 luaA_client_index(lua_State *L)
 {
     size_t len;
-    ssize_t slen;
     client_t *c = luaA_client_checkudata(L, 1);
     const char *buf = luaL_checklstring(L, 2, &len);
-    char *value;
     double d;
 
     if(luaA_usemetatable(L, 1, 2))
@@ -1705,11 +1704,7 @@ luaA_client_index(lua_State *L)
         lua_pushstring(L, c->instance);
         break;
       case A_TK_ROLE:
-        if(!xutil_text_prop_get(globalconf.connection, c->win,
-                                WM_WINDOW_ROLE, &value, &slen))
-            return 0;
-        lua_pushlstring(L, value, slen);
-        p_delete(&value);
+        lua_pushstring(L, c->role);
         break;
       case A_TK_PID:
         lua_pushnumber(L, c->pid);

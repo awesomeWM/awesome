@@ -100,6 +100,36 @@ property_handle_wm_client_machine(void *data,
     return 0;
 }
 
+void
+property_update_wm_window_role(client_t *c)
+{
+    ssize_t slen;
+    char *value;
+
+    if(!xutil_text_prop_get(globalconf.connection, c->win,
+                            WM_WINDOW_ROLE, &value, &slen))
+        return;
+
+    p_delete(&c->role);
+    c->role = a_strdup(value);
+}
+
+static int
+property_handle_wm_window_role(void *data,
+                        xcb_connection_t *connection,
+                        uint8_t state,
+                        xcb_window_t window,
+                        xcb_atom_t name,
+                        xcb_get_property_reply_t *reply)
+{
+    client_t *c = client_getbywin(window);
+
+    if(c)
+        property_update_wm_window_role(c);
+
+    return 0;
+}
+
 /** Update leader hint of a client.
  * \param c The client.
  * \param reply (Optional) An existing reply.
@@ -569,6 +599,8 @@ void a_xcb_set_property_handlers(void)
                              property_handle_wm_protocols, NULL);
     xcb_property_set_handler(&globalconf.prophs, WM_CLIENT_MACHINE, UINT_MAX,
                              property_handle_wm_client_machine, NULL);
+    xcb_property_set_handler(&globalconf.prophs, WM_WINDOW_ROLE, UINT_MAX,
+                             property_handle_wm_window_role, NULL);
 
     /* EWMH stuff */
     xcb_property_set_handler(&globalconf.prophs, _NET_WM_NAME, UINT_MAX,
