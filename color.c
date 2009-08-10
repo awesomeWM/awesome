@@ -294,12 +294,12 @@ xcolor_to_color(const xcolor_t *xcol, color_t *col)
  * \return The number of elements pushed on stack.
  */
 int
-luaA_pushxcolor(lua_State *L, const xcolor_t *c)
+luaA_pushxcolor(lua_State *L, const xcolor_t c)
 {
-    uint8_t r = (unsigned)c->red   * 0xff / 0xffff;
-    uint8_t g = (unsigned)c->green * 0xff / 0xffff;
-    uint8_t b = (unsigned)c->blue  * 0xff / 0xffff;
-    uint8_t a = (unsigned)c->alpha * 0xff / 0xffff;
+    uint8_t r = (unsigned) c.red   * 0xff / 0xffff;
+    uint8_t g = (unsigned) c.green * 0xff / 0xffff;
+    uint8_t b = (unsigned) c.blue  * 0xff / 0xffff;
+    uint8_t a = (unsigned) c.alpha * 0xff / 0xffff;
     char s[10];
     int len;
     /* do not print alpha if it's full */

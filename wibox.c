@@ -861,7 +861,7 @@ luaA_wibox_index(lua_State *L)
         lua_pushnumber(L, wibox->border.width);
         break;
       case A_TK_BORDER_COLOR:
-        luaA_pushxcolor(L, &wibox->border.color);
+        luaA_pushxcolor(L, wibox->border.color);
         break;
       case A_TK_ALIGN:
         if(wibox->type == WIBOX_TYPE_NORMAL)
@@ -869,10 +869,10 @@ luaA_wibox_index(lua_State *L)
         lua_pushstring(L, draw_align_tostr(wibox->align));
         break;
       case A_TK_FG:
-        luaA_pushxcolor(L, &wibox->ctx.fg);
+        luaA_pushxcolor(L, wibox->ctx.fg);
         break;
       case A_TK_BG:
-        luaA_pushxcolor(L, &wibox->ctx.bg);
+        luaA_pushxcolor(L, wibox->ctx.bg);
         break;
       case A_TK_BG_IMAGE:
         luaA_object_push_item(L, 1, wibox->bg_image);

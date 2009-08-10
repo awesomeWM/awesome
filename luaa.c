@@ -558,10 +558,10 @@ luaA_awesome_index(lua_State *L)
         lua_pushstring(L, globalconf.conffile);
         break;
       case A_TK_FG:
-        luaA_pushxcolor(L, &globalconf.colors.fg);
+        luaA_pushxcolor(L, globalconf.colors.fg);
         break;
       case A_TK_BG:
-        luaA_pushxcolor(L, &globalconf.colors.bg);
+        luaA_pushxcolor(L, globalconf.colors.bg);
         break;
       case A_TK_VERSION:
         lua_pushliteral(L, AWESOME_VERSION);

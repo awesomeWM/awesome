@@ -76,7 +76,7 @@ bool xcolor_init_reply(xcolor_init_request_t);
 
 bool xcolor_to_color(const xcolor_t *, color_t *);
 
-int luaA_pushxcolor(lua_State *, const xcolor_t *);
+int luaA_pushxcolor(lua_State *, const xcolor_t);
 int luaA_pushcolor(lua_State *, const color_t *);
 
 #endif
