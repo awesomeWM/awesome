@@ -549,6 +549,7 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
     property_update_wm_transient_for(c, NULL);
     property_update_wm_client_leader(c, NULL);
     property_update_wm_client_machine(c);
+    property_update_net_wm_pid(c, NULL);
 
     /* Then check clients hints */
     ewmh_client_check_hints(c);
@@ -1633,9 +1634,6 @@ luaA_client_index(lua_State *L)
     client_t *c = luaA_client_checkudata(L, 1);
     const char *buf = luaL_checklstring(L, 2, &len);
     char *value;
-    void *data;
-    xcb_get_property_cookie_t prop_c;
-    xcb_get_property_reply_t *prop_r = NULL;
     double d;
 
     if(luaA_usemetatable(L, 1, 2))
@@ -1714,16 +1712,7 @@ luaA_client_index(lua_State *L)
         p_delete(&value);
         break;
       case A_TK_PID:
-        prop_c = xcb_get_property_unchecked(globalconf.connection, false, c->win, _NET_WM_PID, CARDINAL, 0L, 1L);
-        prop_r = xcb_get_property_reply(globalconf.connection, prop_c, NULL);
-
-        if(prop_r && prop_r->value_len && (data = xcb_get_property_value(prop_r)))
-            lua_pushnumber(L, *(uint32_t *)data);
-        else
-        {
-            p_delete(&prop_r);
-            return 0;
-        }
+        lua_pushnumber(L, c->pid);
         break;
       case A_TK_ID:
         lua_pushnumber(L, c->win);

@@ -397,6 +397,46 @@ property_handle_net_wm_icon(void *data,
     return 0;
 }
 
+void
+property_update_net_wm_pid(client_t *c,
+                           xcb_get_property_reply_t *reply)
+{
+    bool no_reply = !reply;
+
+    if(no_reply)
+    {
+        xcb_get_property_cookie_t prop_c =
+            xcb_get_property_unchecked(globalconf.connection, false, c->win, _NET_WM_PID, CARDINAL, 0L, 1L);
+        reply = xcb_get_property_reply(globalconf.connection, prop_c, NULL);
+    }
+
+    if(reply && reply->value_len)
+    {
+        uint32_t *rdata = xcb_get_property_value(reply);
+        if(rdata)
+            c->pid = *rdata;
+    }
+
+    if(no_reply)
+        p_delete(&reply);
+}
+
+static int
+property_handle_net_wm_pid(void *data,
+                           xcb_connection_t *connection,
+                           uint8_t state,
+                           xcb_window_t window,
+                           xcb_atom_t name,
+                           xcb_get_property_reply_t *reply)
+{
+    client_t *c = client_getbywin(window);
+
+    if(c)
+        property_update_net_wm_pid(c, reply);
+
+    return 0;
+}
+
 /** Update the list of supported protocols for a client.
  * \param c The client.
  */
@@ -539,6 +579,8 @@ void a_xcb_set_property_handlers(void)
                              property_handle_net_wm_strut_partial, NULL);
     xcb_property_set_handler(&globalconf.prophs, _NET_WM_ICON, UINT_MAX,
                              property_handle_net_wm_icon, NULL);
+    xcb_property_set_handler(&globalconf.prophs, _NET_WM_PID, UINT_MAX,
+                             property_handle_net_wm_pid, NULL);
 
     /* background change */
     xcb_property_set_handler(&globalconf.prophs, _XROOTPMAP_ID, 1,

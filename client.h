@@ -150,6 +150,8 @@ struct client_t
     bool size_hints_honor;
     /** Machine the client is running on. */
     char *machine;
+    /** Client pid */
+    uint32_t pid;
     /** Window it is transient for */
     client_t *transient_for;
 };

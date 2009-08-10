@@ -33,6 +33,7 @@ void property_update_wm_name(client_t *);
 void property_update_wm_icon_name(client_t *);
 void property_update_wm_protocols(client_t *);
 void property_update_wm_client_machine(client_t *);
+void property_update_net_wm_pid(client_t *, xcb_get_property_reply_t *);
 void a_xcb_set_property_handlers(void);
 
 #endif
