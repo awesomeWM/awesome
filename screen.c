@@ -285,6 +285,9 @@ screen_client_moveto(client_t *c, screen_t *new_screen, bool dotag, bool doresiz
     if(!doresize)
     {
         hook_property(c, "screen");
+        luaA_object_push(globalconf.L, c);
+        luaA_object_emit_signal(globalconf.L, -1, "property::screen", 0);
+        lua_pop(globalconf.L, 1);
         return;
     }
 
@@ -335,6 +338,9 @@ screen_client_moveto(client_t *c, screen_t *new_screen, bool dotag, bool doresiz
     /* move / resize the client */
     client_resize(c, new_geometry, false);
     hook_property(c, "screen");
+    luaA_object_push(globalconf.L, c);
+    luaA_object_emit_signal(globalconf.L, -1, "property::screen", 0);
+    lua_pop(globalconf.L, 1);
 }
 
 /** Push a screen onto the stack.
