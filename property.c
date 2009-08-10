@@ -1,7 +1,7 @@
 /*
  * property.c - property handlers
  *
- * Copyright © 2008 Julien Danjou <julien@danjou.info>
+ * Copyright © 2008-2009 Julien Danjou <julien@danjou.info>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -70,6 +70,35 @@ property_handle_wm_transient_for(void *data,
     return 0;
 }
 
+void
+property_update_wm_client_machine(client_t *c)
+{
+    ssize_t slen;
+    char *value;
+
+    if(!xutil_text_prop_get(globalconf.connection, c->win,
+                            WM_CLIENT_MACHINE, &value, &slen))
+        return;
+
+    p_delete(&c->machine);
+    c->machine = a_strdup(value);
+}
+
+static int
+property_handle_wm_client_machine(void *data,
+                                  xcb_connection_t *connection,
+                                  uint8_t state,
+                                  xcb_window_t window,
+                                  xcb_atom_t name,
+                                  xcb_get_property_reply_t *reply)
+{
+    client_t *c = client_getbywin(window);
+
+    if(c)
+        property_update_wm_client_machine(c);
+
+    return 0;
+}
 
 /** Update leader hint of a client.
  * \param c The client.
@@ -498,6 +527,8 @@ void a_xcb_set_property_handlers(void)
                              property_handle_wm_class, NULL);
     xcb_property_set_handler(&globalconf.prophs, WM_PROTOCOLS, UINT_MAX,
                              property_handle_wm_protocols, NULL);
+    xcb_property_set_handler(&globalconf.prophs, WM_CLIENT_MACHINE, UINT_MAX,
+                             property_handle_wm_client_machine, NULL);
 
     /* EWMH stuff */
     xcb_property_set_handler(&globalconf.prophs, _NET_WM_NAME, UINT_MAX,

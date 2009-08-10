@@ -1,7 +1,7 @@
 /*
  * property.h - property handlers header
  *
- * Copyright © 2008 Julien Danjou <julien@danjou.info>
+ * Copyright © 2008-2009 Julien Danjou <julien@danjou.info>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,6 +32,7 @@ void property_update_wm_class(client_t *, xcb_get_property_reply_t *);
 void property_update_wm_name(client_t *);
 void property_update_wm_icon_name(client_t *);
 void property_update_wm_protocols(client_t *);
+void property_update_wm_client_machine(client_t *);
 void a_xcb_set_property_handlers(void);
 
 #endif

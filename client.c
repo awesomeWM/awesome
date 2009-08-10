@@ -548,6 +548,7 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
     property_update_wm_hints(c, NULL);
     property_update_wm_transient_for(c, NULL);
     property_update_wm_client_leader(c, NULL);
+    property_update_wm_client_machine(c);
 
     /* Then check clients hints */
     ewmh_client_check_hints(c);
@@ -1731,11 +1732,7 @@ luaA_client_index(lua_State *L)
         lua_pushnumber(L, c->leader_win);
         break;
       case A_TK_MACHINE:
-        if(!xutil_text_prop_get(globalconf.connection, c->win,
-                                WM_CLIENT_MACHINE, &value, &slen))
-            return 0;
-        lua_pushlstring(L, value, slen);
-        p_delete(&value);
+        lua_pushstring(L, c->machine);
         break;
       case A_TK_ICON_NAME:
         lua_pushstring(L, c->icon_name);

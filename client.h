@@ -148,6 +148,8 @@ struct client_t
     /** Size hints */
     xcb_size_hints_t size_hints;
     bool size_hints_honor;
+    /** Machine the client is running on. */
+    char *machine;
     /** Window it is transient for */
     client_t *transient_for;
 };
