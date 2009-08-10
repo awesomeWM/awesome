@@ -253,10 +253,7 @@ screen_virttophys(int screen)
 void
 screen_client_moveto(client_t *c, screen_t *new_screen, bool dotag, bool doresize)
 {
-    int i;
     screen_t *old_screen = c->screen;
-    tag_array_t *old_tags = &old_screen->tags,
-                *new_tags = &new_screen->tags;
     area_t from, to;
 
     if(new_screen == c->screen)
@@ -267,19 +264,21 @@ screen_client_moveto(client_t *c, screen_t *new_screen, bool dotag, bool doresiz
     if(c->titlebar)
         c->titlebar->screen = new_screen;
 
-    if(dotag && !c->issticky)
+    if(dotag)
     {
         /* remove old tags */
-        for(i = 0; i < old_tags->len; i++)
-            untag_client(c, old_tags->tab[i]);
+        foreach(old_tag, old_screen->tags)
+            untag_client(c, *old_tag);
 
-        /* add new tags */
-        foreach(new_tag, *new_tags)
-            if((*new_tag)->selected)
-            {
-                tag_push(globalconf.L, *new_tag);
-                tag_client(c);
-            }
+        /* \todo move this to Lua */
+        if(!c->issticky)
+            /* add new tags */
+            foreach(new_tag, new_screen->tags)
+                if((*new_tag)->selected)
+                {
+                    tag_push(globalconf.L, *new_tag);
+                    tag_client(c);
+                }
     }
 
     if(!doresize)
