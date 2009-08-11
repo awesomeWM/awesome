@@ -8,8 +8,8 @@ local setmetatable = setmetatable
 local button = require("awful.button")
 local layout = require("awful.layout")
 local beautiful = require("beautiful")
-local hooks = require("awful.hooks")
 local capi = { image = image,
+               screen = screen,
                widget = widget }
 
 --- Layoutbox widget.
@@ -35,11 +35,18 @@ function new(screen, args)
     args.type = "imagebox"
     local w = capi.widget(args)
     update(w, screen)
-    hooks.tags.register(function (s, t, view)
-        if s == screen then return update(w, s) end
+
+    local function update_on_tag_selection(tag)
+        return update(w, tag)
+    end
+
+    capi.screen[screen]:add_signal("tag::attach", function(s, tag)
+        tag:add_signal("property::selected", update_on_tag_selection)
+        tag:add_signal("property::layout", update_on_tag_selection)
     end)
-    hooks.layout.register(function (t, layout)
-        if t.screen == screen then return update(w, t.screen) end
+    capi.screen[screen]:add_signal("tag::detach", function(s, tag)
+        tag:remove_signal("property::selected", update_on_tag_selection)
+        tag:remove_signal("property::layout", update_on_tag_selection)
     end)
     return w
 end
