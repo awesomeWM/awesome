@@ -19,7 +19,6 @@ local capi =
 }
 local abutton = require("awful.button")
 local beautiful = require("beautiful")
-local hooks = require("awful.hooks")
 local util = require("awful.util")
 local widget = require("awful.widget")
 local mouse = require("awful.mouse")
@@ -124,24 +123,23 @@ function add(c, args)
 
     c.titlebar = tb
 
+    c:add_signal("property::icon", update)
+    c:add_signal("property::name", update)
     update(c)
 end
 
 --- Update a titlebar. This should be called in some hooks.
 -- @param c The client to update.
 -- @param prop The property name which has changed.
-function update(c, prop)
-     if type(c) == "client" and c.titlebar and data[c] then
+function update(c)
+     if c.titlebar and data[c] then
         local widgets = c.titlebar.widgets
-        if prop == "name" then
-            if widgets[2].title then
-                widgets[2].title.text = "<span font_desc='" .. data[c].font ..
-                                     "'> ".. util.escape(c.name) .. " </span>"
-            end
-        elseif prop == "icon" then
-            if widgets[2].appicon then
-                widgets[2].appicon.image = c.icon
-            end
+        if widgets[2].title then
+            widgets[2].title.text = "<span font_desc='" .. data[c].font ..
+            "'> ".. util.escape(c.name) .. " </span>"
+        end
+        if widgets[2].appicon then
+            widgets[2].appicon.image = c.icon
         end
         if capi.client.focus == c then
             c.titlebar.fg = data[c].fg_focus
@@ -411,6 +409,5 @@ button_groups = { close_buttons,
 -- Register standards hooks
 capi.client.add_signal("focus", update)
 capi.client.add_signal("unfocus", update)
-hooks.property.register(update)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
