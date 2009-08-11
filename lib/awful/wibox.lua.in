@@ -17,7 +17,6 @@ local ipairs = ipairs
 local table = table
 local type = type
 local image = image
-local hooks = require("awful.hooks")
 
 --- Wibox module for awful.
 module("awful.wibox")
@@ -25,8 +24,6 @@ module("awful.wibox")
 -- Array of table with wiboxes inside.
 -- It's an array so it is ordered.
 local wiboxes = {}
-
-hooks.user.create("wibox_position")
 
 --- Get the workarea space without wiboxes geometry.
 -- @param s The screen number.
@@ -127,8 +124,13 @@ end
 local function update_all_wiboxes_position()
     for _, wprop in ipairs(wiboxes) do
         set_position(wprop.wibox, wprop.position)
-        hooks.user.call("wibox_position", wprop.wibox)
+        capi.awesome.emit_signal("arrange", wprop.wibox.screen)
     end
+end
+
+local function call_wibox_position_hook_on_prop_update(w)
+    capi.awesome.emit_signal("arrange", w.screen)
+    update_all_wiboxes_position()
 end
 
 --- Attach a wibox to a screen.
@@ -166,6 +168,9 @@ function attach(wibox, position)
     if wibox.screen and wibox.visible then
         update_all_wiboxes_position()
     end
+
+    wibox:add_signal("property::screen", call_wibox_position_hook_on_prop_update)
+    wibox:add_signal("property::visible", call_wibox_position_hook_on_prop_update)
 end
 
 --- Align a wibox.
@@ -338,17 +343,6 @@ function rounded_corners(wibox, corner_size)
     wibox.shape_bounding = do_rounded_corners(wibox.width + border * 2, wibox.height + border * 2, corner_size + border)
 end
 
-local function update_wiboxes_position(obj, prop)
-    if (type(obj) == "wibox"
-        and (prop == nil
-             or prop == "visible"
-             or prop == "screen"))
-        or (type(obj) == "client"
-            and prop == "struts") then
-            update_all_wiboxes_position()
-    end
-end
-
 local function update_wiboxes_on_struts(c)
     local struts = c:struts()
     if struts.left ~= 0 or struts.right ~= 0
@@ -358,8 +352,10 @@ local function update_wiboxes_on_struts(c)
 end
 
 -- Hook registered to reset all wiboxes position.
-hooks.property.register(update_wiboxes_position)
-capi.client.add_signal("manage", update_wiboxes_on_struts)
+capi.client.add_signal("manage", function(c)
+    update_wiboxes_on_struts(c)
+    c:add_signal("property::struts", update_wiboxes_on_struts)
+end)
 capi.client.add_signal("unmanage", update_wiboxes_on_struts)
 
 setmetatable(_M, { __call = function(_, ...) return new(...) end })

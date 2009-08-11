@@ -14,7 +14,6 @@ local setmetatable = setmetatable
 local pairs = pairs
 local ipairs = ipairs
 local table = table
-local hooks = require("awful.hooks")
 local common = require("awful.widget.common")
 local util = require("awful.util")
 local tag = require("awful.tag")
@@ -67,15 +66,34 @@ function new(screen, label, buttons)
     local uc = function (c) return u(c.screen) end
     capi.client.add_signal("focus", uc)
     capi.client.add_signal("unfocus", uc)
-    hooks.tags.register(u)
-    hooks.tagged.register(uc)
-    hooks.property.register(function (c, prop)
-        if (type(c) == "client" and prop == "urgent")
-            or (type(c) == "tag" and
-               (prop == "icon" or prop == "hide")) then
-            u(c.screen)
-        end
+    capi.screen[screen]:add_signal("tag::attach", function(screen, tag)
+            taglist_update(s, w, label, buttons, data, widgets)
+            tag:add_signal("property::selected", uc)
+            tag:add_signal("property::icon", uc)
+            tag:add_signal("property::hide", uc)
+        end)
+    capi.screen[screen]:add_signal("tag::detach", function(screen, tag)
+            taglist_update(s, w, label, buttons, data, widgets)
+            tag:remove_signal("property::selected", uc)
+            tag:remove_signal("property::icon", uc)
+            tag:remove_signal("property::hide", uc)
+        end)
+    for _, tag in ipairs(capi.screen[screen]:tags()) do
+            tag:add_signal("property::selected", uc)
+            tag:add_signal("property::icon", uc)
+            tag:add_signal("property::hide", uc)
+    end
+    capi.client.add_signal("new", function(c)
+        c:add_signal("property::urgent", uc)
+        c:add_signal("property::screen", function(c)
+            -- If client change screen, refresh it anyway since we don't from
+            -- which screen it was coming :-)
+            u(screen)
+        end)
+        c:add_signal("tagged", uc)
+        c:add_signal("untagged", uc)
     end)
+    capi.client.add_signal("unmanage", uc)
     u(screen)
     return w
 end

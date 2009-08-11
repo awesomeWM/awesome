@@ -13,18 +13,15 @@ local util = require("awful.util")
 local suit = require("awful.layout.suit")
 local wibox = require("awful.wibox")
 local ascreen = require("awful.screen")
-local hooks = require("awful.hooks")
 local capi = {
     screen = screen,
+    awesome = awesome,
     client = client
 }
 local client = require("awful.client")
 
 --- Layout module for awful
 module("awful.layout")
-
--- Create a hook to call when changing layout
-hooks.user.create("layout")
 
 --- Get the current layout.
 -- @param screen The screen number.
@@ -61,11 +58,11 @@ end
 function set(layout, t)
     t = t or tag.selected()
     tag.setproperty(t, "layout", layout)
-    hooks.user.call("layout", t, layout)
 end
 
--- Register an arrange hook.
-local function on_arrange (screen)
+--- Arrange a screen using its current layout.
+-- @param screen The screen to arrange.
+function arrange(screen)
     local p = {}
     p.workarea = wibox.get_workarea(screen)
     -- Handle padding
@@ -90,62 +87,68 @@ function getname(layout)
     return layout.name
 end
 
-hooks.property.register(function (obj, prop)
-    local objtype = type(obj)
-    if objtype == "client" then
-        if prop == "size_hints_honor"
-            or prop == "struts"
-            or prop == "minimized"
-            or prop == "sticky"
-            or prop == "fullscreen"
-            or prop == "maximized_horizontal"
-            or prop == "maximized_vertical"
-            or prop == "border_width"
-            or prop == "hide"
-            or prop == "titlebar"
-            or prop == "floating" then
-            on_arrange(obj.screen)
-        elseif prop == "screen" then
-            -- If prop is screen, we do not know what was the previous screen, so
-            -- let's arrange all screens :-(
-            for screen = 1, capi.screen.count() do
-                on_arrange(screen)
-            end
-        end
-    elseif objtype == "wibox" then
-        if prop == "screen"
-            or prop == "visible" then
-            on_arrange(obj.screen)
-        end
-    elseif objtype == "tag" then
-        if prop == "mwfact"
-            or prop == "nmaster"
-            or prop == "ncol"
-            or prop == "layout"
-            or prop == "windowfact" then
-            on_arrange(obj.screen)
-        end
-    end
-end)
-hooks.wibox_position.register(function(wibox)
-    on_arrange(wibox.screen)
+local function arrange_prop(obj) arrange(obj.screen) end
+
+capi.client.add_signal("new", function(c)
+    c:add_signal("property::size_hints_honor", arrange_prop)
+    c:add_signal("property::struts", arrange_prop)
+    c:add_signal("property::minimized", arrange_prop)
+    c:add_signal("property::sticky", arrange_prop)
+    c:add_signal("property::fullscreen", arrange_prop)
+    c:add_signal("property::maximized_horizontal", arrange_prop)
+    c:add_signal("property::maximized_vertical", arrange_prop)
+    c:add_signal("property::border_width", arrange_prop)
+    c:add_signal("property::hidden", arrange_prop)
+    c:add_signal("property::titlebar", arrange_prop)
+    c:add_signal("property::floating", arrange_prop)
+    -- If prop is screen, we do not know what was the previous screen, so
+    -- let's arrange all screens :-(
+    c:add_signal("property::screen", function(c)
+        for screen = 1, capi.screen.count() do arrange(screen) end end)
 end)
 
-hooks.padding.register(function(screen) on_arrange(screen) end)
-capi.client.add_signal("focus", function(c) on_arrange(c.screen) end)
-capi.client.add_signal("list", function()
-                                   for screen = 1, capi.screen.count() do
-                                       on_arrange(screen)
-                                   end
-                               end)
-hooks.tags.register(function(screen, tag, action) on_arrange(screen) end)
-hooks.tagged.register(function(c, tag)
+local function arrange_on_tagged(c, tag)
     if not tag.screen then return end
-    on_arrange(tag.screen)
+    arrange(tag.screen)
     if not capi.client.focus or not capi.client.focus:isvisible() then
         local c = client.focus.history.get(tag.screen, 0)
         if c then capi.client.focus = c end
     end
+end
+
+for s = 1, capi.screen.count() do
+    capi.screen[s]:add_signal("tag::attach", function (screen, tag)
+        arrange(screen.index)
+        tag:add_signal("property::mwfact", arrange_prop)
+        tag:add_signal("property::nmaster", arrange_prop)
+        tag:add_signal("property::ncol", arrange_prop)
+        tag:add_signal("property::layout", arrange_prop)
+        tag:add_signal("property::windowfact", arrange_prop)
+        tag:add_signal("property::selected", arrange_prop)
+        tag:add_signal("tagged", arrange_on_tagged)
+    end)
+    capi.screen[s]:add_signal("tag::detach", function (screen, tag)
+        arrange(screen.index)
+        tag:remove_signal("property::mwfact", arrange_prop)
+        tag:remove_signal("property::nmaster", arrange_prop)
+        tag:remove_signal("property::ncol", arrange_prop)
+        tag:remove_signal("property::layout", arrange_prop)
+        tag:remove_signal("property::windowfact", arrange_prop)
+        tag:remove_signal("property::selected", arrange_prop)
+        tag:remove_signal("tagged", arrange_on_tagged)
+    end)
+    capi.screen[s]:add_signal("padding", arrange)
+end
+
+capi.awesome.add_signal("arrange", function(screen)
+    arrange(screen)
 end)
+
+capi.client.add_signal("focus", function(c) arrange(c.screen) end)
+capi.client.add_signal("list", function()
+                                   for screen = 1, capi.screen.count() do
+                                       arrange(screen)
+                                   end
+                               end)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

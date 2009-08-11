@@ -13,16 +13,12 @@ local capi =
 }
 local util = require("awful.util")
 local client = require("awful.client")
-local hooks = require("awful.hooks")
 
 --- Screen module for awful
 module("awful.screen")
 
 local data = {}
 data.padding = {}
-
--- Create a hook for padding event
-hooks.user.create("padding")
 
 --- Give the focus to a screen, and move pointer.
 -- @param i Relative screen number.
@@ -41,7 +37,7 @@ end
 function padding(i, padding)
     if padding then
         data.padding[i] = padding
-        hooks.user.call("padding", i)
+        capi.screen[i]:emit_signal("padding")
     end
     return data.padding[i]
 end

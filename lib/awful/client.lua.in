@@ -19,9 +19,7 @@ local capi =
     client = client,
     mouse = mouse,
     screen = screen,
-    hooks = hooks
 }
-local hooks = require("awful.hooks")
 
 --- Client module for awful
 module("awful.client")
@@ -41,10 +39,6 @@ swap = {}
 floating = {}
 dockable = {}
 property = {}
-
--- User hooks
-hooks.user.create('marked')
-hooks.user.create('unmarked')
 
 --- Get the first client that got the urgent hint.
 -- @return The first urgent client.
@@ -493,7 +487,7 @@ function mark(c)
         table.insert(data.marked, cl)
 
         -- Call callback
-        hooks.user.call('marked', cl)
+        cl:emit_signal("marked")
         return true
     end
 end
@@ -507,7 +501,7 @@ function unmark(c)
     for k, v in pairs(data.marked) do
         if cl == v then
             table.remove(data.marked, k)
-            hooks.user.call('unmarked', cl)
+            cl:emit_signal("unmarked")
             return true
         end
     end
@@ -543,7 +537,7 @@ end
 -- @return A table with all marked clients.
 function getmarked()
     for k, v in pairs(data.marked) do
-        hooks.user.call('unmarked', v)
+        v:emit_signal("unmarked")
     end
 
     t = data.marked
@@ -761,7 +755,7 @@ function setwfact(wfact, c)
         end
     end
 
-    hooks.user.call("property", t, "windowfact")
+    t:emit_signal("property::windowfact")
 end
 
 --- Increment a client's window factor
@@ -784,7 +778,7 @@ function incwfact(add, c)
     -- keep our ratios normalized
     normalize(colfact, w.num)
 
-    hooks.user.call("property", t, "windowfact")
+    t:emit_signal("property::windowfact")
 end
 
 --- Get a client dockable state.
@@ -836,7 +830,7 @@ function property.set(c, prop, value)
         data.properties[c] = {}
     end
     data.properties[c][prop] = value
-    hooks.user.call("property", c, prop)
+    c:emit_signal("property::floating")
 end
 
 -- Register standards signals

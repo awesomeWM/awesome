@@ -5,6 +5,7 @@
 ---------------------------------------------------------------------------
 
 local setmetatable = setmetatable
+local ipairs = ipairs
 local button = require("awful.button")
 local layout = require("awful.layout")
 local beautiful = require("beautiful")
@@ -37,7 +38,7 @@ function new(screen, args)
     update(w, screen)
 
     local function update_on_tag_selection(tag)
-        return update(w, tag)
+        return update(w, tag.screen)
     end
 
     capi.screen[screen]:add_signal("tag::attach", function(s, tag)
@@ -48,6 +49,11 @@ function new(screen, args)
         tag:remove_signal("property::selected", update_on_tag_selection)
         tag:remove_signal("property::layout", update_on_tag_selection)
     end)
+
+    for _, tag in ipairs(capi.screen[screen]:tags()) do
+        tag:add_signal("property::selected", update_on_tag_selection)
+        tag:add_signal("property::layout", update_on_tag_selection)
+    end
     return w
 end
 

@@ -16,7 +16,6 @@ local capi =
     mouse = mouse,
     client = client
 }
-local hooks = require("awful.hooks")
 
 --- Tag module for awful
 module("awful.tag")
@@ -267,7 +266,7 @@ function setproperty(tag, prop, value)
         data.tags[tag] = {}
     end
     data.tags[tag][prop] = value
-    hooks.user.call("property", tag, prop)
+    tag:emit_signal("property::" .. prop)
 end
 
 --- Tag a client with the set of current tags.
@@ -285,8 +284,7 @@ function withcurrent(c, startup)
     end
 end
 
--- Register standards hooks
-hooks.tags.register(history.update)
+-- Register standards signals
 capi.client.add_signal("manage", withcurrent)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
