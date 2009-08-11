@@ -16,7 +16,6 @@ local capi = { screen = screen,
                wibox = wibox,
                image = image,
                timer = timer }
-local hooks = require("awful.hooks")
 local button = require("awful.button")
 local util = require("awful.util")
 local wibox = require("awful.wibox")
