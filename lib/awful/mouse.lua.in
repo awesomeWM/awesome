@@ -7,7 +7,6 @@
 -- Grab environment we need
 local layout = require("awful.layout")
 local tag = require("awful.tag")
-local hooks = require("awful.hooks")
 local aclient = require("awful.client")
 local widget = require("awful.widget")
 local awibox = require("awful.wibox")
