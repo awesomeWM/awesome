@@ -188,6 +188,22 @@ tag_remove_from_screen(tag_t *tag)
     luaA_object_unref(globalconf.L, tag);
 }
 
+static void
+tag_client_emit_signal(lua_State *L, tag_t *t, client_t *c, const char *signame)
+{
+    luaA_object_push(L, c);
+    luaA_object_push(L, t);
+    /* emit signal on client, with new tag as argument */
+    luaA_object_emit_signal(L, -2, signame, 1);
+    /* re push tag */
+    luaA_object_push(L, t);
+    /* move tag before client */
+    lua_insert(L, -2);
+    luaA_object_emit_signal(L, -2, signame, 1);
+    /* Remove tag */
+    lua_pop(L, 1);
+}
+
 /** Tag a client with the tag on top of the stack.
  * \param c the client to tag
  */
@@ -214,6 +230,7 @@ tag_client(client_t *c)
         luaA_object_push(globalconf.L, t);
         luaA_dofunction_from_registry(globalconf.L, globalconf.hooks.tagged, 2, 0);
     }
+    tag_client_emit_signal(globalconf.L, t, c, "tagged");
 }
 
 /** Untag a client with specified tag.
@@ -237,6 +254,7 @@ untag_client(client_t *c, tag_t *t)
                 luaA_object_push(globalconf.L, t);
                 luaA_dofunction_from_registry(globalconf.L, globalconf.hooks.tagged, 2, 0);
             }
+            tag_client_emit_signal(globalconf.L, t, c, "untagged");
             luaA_object_unref(globalconf.L, t);
             return;
         }
