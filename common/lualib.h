@@ -76,6 +76,22 @@ luaA_absindex(lua_State *L, int ud)
     return (ud > 0 || ud <= LUA_REGISTRYINDEX) ? ud : lua_gettop(L) + ud + 1;
 }
 
+static inline int
+luaA_dofunction_error(lua_State *L)
+{
+    if(!luaL_dostring(L, "return debug.traceback(\"error while running function\", 3)"))
+    {
+        /* Move traceback before error */
+        lua_insert(L, -2);
+        /* Insert sentence */
+        lua_pushliteral(L, "\nerror: ");
+        /* Move it before error */
+        lua_insert(L, -2);
+        lua_concat(L, 3);
+    }
+    return 1;
+}
+
 /** Execute an Lua function on top of the stack.
  * \param L The Lua stack.
  * \param nargs The number of arguments for the Lua function.
@@ -85,15 +101,21 @@ luaA_absindex(lua_State *L, int ud)
 static inline bool
 luaA_dofunction(lua_State *L, int nargs, int nret)
 {
-    if(nargs)
-        lua_insert(L, - (nargs + 1));
-    if(lua_pcall(L, nargs, nret, 0))
+    /* Move function before arguments */
+    lua_insert(L, - nargs - 1);
+    /* Push error handling function */
+    lua_pushcfunction(L, luaA_dofunction_error);
+    /* Move error handling function before args and function */
+    lua_insert(L, - nargs - 2);
+    if(lua_pcall(L, nargs, nret, - nargs - 2))
     {
-        warn("error running function: %s",
-             lua_tostring(L, -1));
-        lua_pop(L, 1);
+        warn("%s", lua_tostring(L, -1));
+        /* Remove error function and error string */
+        lua_pop(L, 2);
         return false;
     }
+    /* Remove error function */
+    lua_remove(L, - nret - 1);
     return true;
 }
 
