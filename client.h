@@ -140,9 +140,9 @@ struct client_t
     /** Titlebar */
     wibox_t *titlebar;
     /** Button bindings */
-    void *buttons;
+    button_array_t buttons;
     /** Key bindings */
-    void *keys;
+    key_array_t keys;
     /** Icon */
     image_t *icon;
     /** Size hints */

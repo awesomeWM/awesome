@@ -40,6 +40,10 @@ struct button_t
 
 lua_class_t button_class;
 LUA_OBJECT_FUNCS(button_class, button_t, button, "button")
+ARRAY_FUNCS(button_t *, button, DO_NOTHING)
+
+int luaA_button_array_get(lua_State *, int, button_array_t *);
+void luaA_button_array_set(lua_State *, int, int, button_array_t *);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

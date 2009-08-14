@@ -22,6 +22,7 @@
 #include <xcb/xtest.h>
 
 #include "structs.h"
+#include "button.h"
 #include "wibox.h"
 #include "common/xcursor.h"
 #include "common/tokenize.h"
@@ -100,6 +101,82 @@ luaA_root_fake_input(lua_State *L)
     return 0;
 }
 
+/** Get or set global key bindings.
+ * This binding will be available when you'll press keys on root window.
+ * \param L The Lua VM state.
+ * \return The number of element pushed on stack.
+ * \luastack
+ * \lparam An array of key bindings objects, or nothing.
+ * \lreturn The array of key bindings objects of this client.
+ */
+static int
+luaA_root_keys(lua_State *L)
+{
+    if(lua_gettop(L) == 1)
+    {
+        luaA_checktable(L, 1);
+
+        foreach(key, globalconf.keys)
+            key_unref(globalconf.L, *key);
+
+        key_array_wipe(&globalconf.keys);
+        key_array_init(&globalconf.keys);
+
+        lua_pushnil(L);
+        while(lua_next(L, 1))
+            key_array_append(&globalconf.keys, key_ref(L, -1));
+
+        return 1;
+    }
+
+    lua_createtable(L, globalconf.keys.len, 0);
+    for(int i = 0; i < globalconf.keys.len; i++)
+    {
+        key_push(L, globalconf.keys.tab[i]);
+        lua_rawseti(L, -2, i + 1);
+    }
+
+    return 1;
+}
+
+/** Get or set global mouse bindings.
+ * This binding will be available when you'll click on root window.
+ * \param L The Lua VM state.
+ * \return The number of element pushed on stack.
+ * \luastack
+ * \lparam An array of mouse button bindings objects, or nothing.
+ * \lreturn The array of mouse button bindings objects.
+ */
+static int
+luaA_root_buttons(lua_State *L)
+{
+    if(lua_gettop(L) == 1)
+    {
+        luaA_checktable(L, 1);
+
+        foreach(button, globalconf.buttons)
+            button_unref(globalconf.L, *button);
+
+        button_array_wipe(&globalconf.buttons);
+        button_array_init(&globalconf.buttons);
+
+        lua_pushnil(L);
+        while(lua_next(L, 1))
+            button_array_append(&globalconf.buttons, button_ref(L, -1));
+
+        return 1;
+    }
+
+    lua_createtable(L, globalconf.buttons.len, 0);
+    for(int i = 0; i < globalconf.buttons.len; i++)
+    {
+        button_push(L, globalconf.buttons.tab[i]);
+        lua_rawseti(L, -2, i + 1);
+    }
+
+    return 1;
+}
+
 /** Set the root cursor.
  * \param L The Lua VM state.
  * \return The number of element pushed on stack.
@@ -150,58 +227,13 @@ luaA_root_wiboxes(lua_State *L)
     return 1;
 }
 
-static int
-luaA_root_index(lua_State *L)
+const struct luaL_reg awesome_root_lib[] =
 {
-    size_t len;
-    const char *attr = luaL_checklstring(L, 2, &len);
-
-    switch(a_tokenize(attr, len))
-    {
-      case A_TK_KEYS:
-        return luaA_object_push(L, globalconf.keys);
-      case A_TK_BUTTONS:
-        return luaA_object_push(L, globalconf.buttons);
-      default:
-        return 0;
-    }
-}
-
-static int
-luaA_root_newindex(lua_State *L)
-{
-    size_t len;
-    const char *attr = luaL_checklstring(L, 2, &len);
-
-    switch(a_tokenize(attr, len))
-    {
-      case A_TK_KEYS:
-        luaA_object_unref(L, globalconf.keys);
-        globalconf.keys = luaA_object_ref(L, 3);
-        break;
-      case A_TK_BUTTONS:
-        luaA_object_unref(L, globalconf.buttons);
-        globalconf.buttons = luaA_object_ref(L, 3);
-        break;
-      default:
-        break;
-    }
-
-    return 0;
-}
-
-const struct luaL_reg awesome_root_methods[] =
-{
+    { "buttons", luaA_root_buttons },
+    { "keys", luaA_root_keys },
     { "cursor", luaA_root_cursor },
     { "fake_input", luaA_root_fake_input },
     { "wiboxes", luaA_root_wiboxes },
-    { "__index", luaA_root_index },
-    { "__newindex", luaA_root_newindex },
-    { NULL, NULL }
-};
-
-const struct luaL_reg awesome_root_meta[] =
-{
     { NULL, NULL }
 };
 

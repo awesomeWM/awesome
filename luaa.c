@@ -49,8 +49,7 @@ extern const struct luaL_reg awesome_dbus_lib[];
 extern const struct luaL_reg awesome_hooks_lib[];
 extern const struct luaL_reg awesome_keygrabber_lib[];
 extern const struct luaL_reg awesome_mousegrabber_lib[];
-extern const struct luaL_reg awesome_root_methods[];
-extern const struct luaL_reg awesome_root_meta[];
+extern const struct luaL_reg awesome_root_lib[];
 extern const struct luaL_reg awesome_button_methods[];
 extern const struct luaL_reg awesome_button_meta[];
 extern const struct luaL_reg awesome_image_methods[];
@@ -649,8 +648,9 @@ luaA_init(xdgHandle* xdg)
     /* Export awesome lib */
     luaA_openlib(L, "awesome", awesome_lib, awesome_lib);
 
-    /* Export root */
-    luaA_openlib(L, "root", awesome_root_methods, awesome_root_meta);
+    /* Export root lib */
+    luaL_register(L, "root", awesome_root_lib);
+    lua_pop(L, 1); /* luaL_register() leaves the table on stack */
 
     /* Export hooks lib */
     luaL_register(L, "hooks", awesome_hooks_lib);

@@ -21,11 +21,12 @@ function new(args)
     if not w then return end
 
     if args.command then
-       w.buttons = util.table.join(w.buttons, button({}, 1, nil, function () util.spawn(args.command) end))
+       b = util.table.join(w:buttons(), button({}, 1, nil, function () util.spawn(args.command) end))
     elseif args.menu then
-       w.buttons = util.table.join(w.buttons, button({}, 1, nil, function () args.menu:toggle() end))
+       b = util.table.join(w:buttons(), button({}, 1, nil, function () args.menu:toggle() end))
     end
 
+    w:buttons(b)
     return w
 end
 

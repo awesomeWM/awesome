@@ -14,7 +14,6 @@ border_padding
 border_width
 bottom
 button
-buttons
 button_press
 button_release
 center
@@ -49,7 +48,6 @@ image
 imagebox
 instance
 key
-keys
 key_press
 key_release
 keysym

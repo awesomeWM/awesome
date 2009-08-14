@@ -158,11 +158,11 @@ for s = 1, screen.count() do
     -- Create an imagebox widget which will contains an icon indicating which layout we're using.
     -- We need one layoutbox per screen.
     mylayoutbox[s] = awful.widget.layoutbox(s)
-    mylayoutbox[s].buttons = awful.util.table.join(
+    mylayoutbox[s]:buttons(awful.util.table.join(
                            awful.button({ }, 1, function () awful.layout.inc(layouts, 1) end),
                            awful.button({ }, 3, function () awful.layout.inc(layouts, -1) end),
                            awful.button({ }, 4, function () awful.layout.inc(layouts, 1) end),
-                           awful.button({ }, 5, function () awful.layout.inc(layouts, -1) end))
+                           awful.button({ }, 5, function () awful.layout.inc(layouts, -1) end)))
     -- Create a taglist widget
     mytaglist[s] = awful.widget.taglist(s, awful.widget.taglist.label.all, mytaglist.buttons)
 
@@ -191,10 +191,11 @@ end
 -- }}}
 
 -- {{{ Mouse bindings
-root.buttons = awful.util.table.join(
+root.buttons(awful.util.table.join(
     awful.button({ }, 3, function () mymainmenu:toggle() end),
     awful.button({ }, 4, awful.tag.viewnext),
-    awful.button({ }, 5, awful.tag.viewprev))
+    awful.button({ }, 5, awful.tag.viewprev)
+))
 -- }}}
 
 -- {{{ Key bindings
@@ -317,7 +318,7 @@ for i = 1, keynumber do
 end
 
 -- Set keys
-root.keys = globalkeys
+root.keys(globalkeys)
 -- }}}
 
 -- {{{ Hooks
@@ -368,10 +369,11 @@ awful.hooks.manage.register(function (c, startup)
         awful.titlebar.add(c, { modkey = modkey })
     end
     -- Add mouse bindings
-    c.buttons = awful.util.table.join(
+    c:buttons(awful.util.table.join(
         awful.button({ }, 1, function (c) client.focus = c; c:raise() end),
         awful.button({ modkey }, 1, awful.mouse.client.move),
-        awful.button({ modkey }, 3, awful.mouse.client.resize))
+        awful.button({ modkey }, 3, awful.mouse.client.resize)
+    ))
     -- New client may not receive focus
     -- if they're not focusable, so set border anyway.
     c.border_width = beautiful.border_width
@@ -402,7 +404,7 @@ awful.hooks.manage.register(function (c, startup)
     client.focus = c
 
     -- Set key bindings
-    c.keys = clientkeys
+    c:keys(clientkeys)
 
     -- Set the windows at the slave,
     -- i.e. put it at the end of others instead of setting it master.

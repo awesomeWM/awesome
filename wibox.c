@@ -40,6 +40,7 @@ luaA_wibox_gc(lua_State *L)
     wibox_t *wibox = luaL_checkudata(L, 1, "wibox");
     p_delete(&wibox->cursor);
     wibox_wipe(wibox);
+    button_array_wipe(&wibox->buttons);
     widget_node_array_wipe(&wibox->widgets);
     return luaA_object_gc(L);
 }
@@ -906,8 +907,6 @@ luaA_wibox_index(lua_State *L)
         return luaA_object_push_item(L, 1, wibox->shape.bounding);
       case A_TK_SHAPE_CLIP:
         return luaA_object_push_item(L, 1, wibox->shape.clip);
-      case A_TK_BUTTONS:
-        return luaA_object_push_item(L, 1, wibox->buttons);
       default:
         return 0;
     }
@@ -1130,9 +1129,6 @@ luaA_wibox_newindex(lua_State *L)
         luaA_object_unref_item(L, 1, wibox->shape.clip);
         wibox->shape.clip = luaA_object_ref_item(L, 1, 3);
         wibox->need_shape_update = true;
-      case A_TK_BUTTONS:
-        luaA_object_unref_item(L, 1, wibox->buttons);
-        wibox->buttons = luaA_object_ref_item(L, 1, 3);
         break;
       default:
         switch(wibox->type)
@@ -1147,6 +1143,27 @@ luaA_wibox_newindex(lua_State *L)
     return 0;
 }
 
+/** Get or set mouse buttons bindings to a wibox.
+ * \param L The Lua VM state.
+ * \luastack
+ * \lvalue A wibox.
+ * \lparam An array of mouse button bindings objects, or nothing.
+ * \return The array of mouse button bindings objects of this wibox.
+ */
+static int
+luaA_wibox_buttons(lua_State *L)
+{
+    wibox_t *wibox = luaL_checkudata(L, 1, "wibox");
+
+    if(lua_gettop(L) == 2)
+    {
+        luaA_button_array_set(L, 1, 2, &wibox->buttons);
+        return 1;
+    }
+
+    return luaA_button_array_get(L, 1, &wibox->buttons);
+}
+
 const struct luaL_reg awesome_wibox_methods[] =
 {
     LUA_CLASS_METHODS(wibox)
@@ -1156,6 +1173,7 @@ const struct luaL_reg awesome_wibox_methods[] =
 const struct luaL_reg awesome_wibox_meta[] =
 {
     LUA_OBJECT_META(wibox)
+    { "buttons", luaA_wibox_buttons },
     { "geometry", luaA_wibox_geometry },
     { "__index", luaA_wibox_index },
     { "__newindex", luaA_wibox_newindex },

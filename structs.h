@@ -68,9 +68,9 @@ struct awesome_t
     /** True if xinerama is active */
     bool xinerama_is_active;
     /** Root window key bindings */
-    void *keys;
+    key_array_t keys;
     /** Root window mouse bindings */
-    void *buttons;
+    button_array_t buttons;
     /** Modifiers masks */
     uint16_t numlockmask, shiftlockmask, capslockmask, modeswitchmask;
     /** Check for XTest extension */

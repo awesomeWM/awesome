@@ -65,7 +65,7 @@ struct wibox_t
     /* Banned? used for titlebars */
     bool isbanned;
     /** Button bindings */
-    void *buttons;
+    button_array_t buttons;
     /** The window object. */
     xcb_window_t window;
     /** The pixmap copied to the window object. */
