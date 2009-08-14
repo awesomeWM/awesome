@@ -43,7 +43,7 @@
 #include "common/xutil.h"
 
 #define DO_EVENT_HOOK_CALLBACK(type, prefix, xcbtype, xcbeventprefix, arraytype, match) \
-    static int \
+    static void \
     event_##xcbtype##_callback(xcb_##xcbtype##_press_event_t *ev, \
                                arraytype *arr, \
                                int oud, \
@@ -51,7 +51,7 @@
                                void *data) \
     { \
         int abs_oud = oud < 0 ? ((lua_gettop(globalconf.L) + 1) + oud) : oud; \
-        int item_matching = 0, item_matched = 0; \
+        int item_matching = 0; \
         foreach(item, *arr) \
             if(match(ev, *item, data)) \
             { \
@@ -61,7 +61,7 @@
                     prefix##_push(globalconf.L, *item); \
                 item_matching++; \
             } \
-        for(item_matched = item_matching; item_matching > 0; item_matching--) \
+        for(; item_matching > 0; item_matching--) \
         { \
             type *item = luaL_checkudata(globalconf.L, -1, #prefix); \
             switch(ev->response_type) \
@@ -102,7 +102,6 @@
             lua_pop(globalconf.L, 1); \
         } \
         lua_pop(globalconf.L, nargs); \
-        return item_matched; \
     }
 
 static bool
@@ -603,19 +602,10 @@ event_handle_key(void *data __attribute__ ((unused)),
         if((c = client_getbywin(ev->event)))
         {
             client_push(globalconf.L, c);
-            if(!event_key_callback(ev, &c->keys, -1, 1, &keysym))
-                if(!event_key_callback(ev, &globalconf.keys, 0, 0, &keysym))
-                    xcb_allow_events(globalconf.connection,
-                                     XCB_ALLOW_REPLAY_KEYBOARD,
-                                     XCB_CURRENT_TIME);
-
+            event_key_callback(ev, &c->keys, -1, 1, &keysym);
         }
         else
             event_key_callback(ev, &globalconf.keys, 0, 0, &keysym);
-
-        xcb_allow_events(globalconf.connection,
-                         XCB_ALLOW_SYNC_KEYBOARD,
-                         XCB_CURRENT_TIME);
     }
 
     return 0;
@@ -797,6 +787,24 @@ event_handle_mappingnotify(void *data,
                             globalconf.keysyms, &globalconf.numlockmask,
                             &globalconf.shiftlockmask, &globalconf.capslockmask,
                             &globalconf.modeswitchmask);
+
+        int nscreen = xcb_setup_roots_length(xcb_get_setup(connection));
+
+        /* regrab everything */
+        for(int phys_screen = 0; phys_screen < nscreen; phys_screen++)
+        {
+            xcb_screen_t *s = xutil_screen_get(globalconf.connection, phys_screen);
+            /* yes XCB_BUTTON_MASK_ANY is also for grab_key even if it's look weird */
+            xcb_ungrab_key(connection, XCB_GRAB_ANY, s->root, XCB_BUTTON_MASK_ANY);
+            window_grabkeys(s->root, &globalconf.keys);
+        }
+
+        foreach(_c, globalconf.clients)
+        {
+            client_t *c = *_c;
+            xcb_ungrab_key(connection, XCB_GRAB_ANY, c->win, XCB_BUTTON_MASK_ANY);
+            window_grabkeys(c->win, &c->keys);
+        }
     }
 
     return 0;

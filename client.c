@@ -597,17 +597,6 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
      */
     window_state_set(c->win, XCB_WM_STATE_NORMAL);
 
-    /* Grab everything */
-    xcb_grab_key(globalconf.connection, true, w,
-                 XCB_MOD_MASK_ANY, XCB_GRAB_ANY,
-                 XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_SYNC);
-
-    xcb_grab_button(globalconf.connection, false, w,
-                    XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_BUTTON_RELEASE,
-                    XCB_GRAB_MODE_SYNC, XCB_GRAB_MODE_ASYNC, XCB_NONE, XCB_NONE,
-                    XCB_GRAB_ANY, XCB_MOD_MASK_ANY);
-
-
     if(!startup)
         spawn_start_notify(c);
 
@@ -1923,6 +1912,8 @@ luaA_client_buttons(lua_State *L)
     if(lua_gettop(L) == 2)
         luaA_button_array_set(L, 1, 2, buttons);
 
+    window_buttons_grab(client->win, &client->buttons);
+
     return luaA_button_array_get(L, 1, buttons);
 }
 
@@ -1941,7 +1932,11 @@ luaA_client_keys(lua_State *L)
     key_array_t *keys = &c->keys;
 
     if(lua_gettop(L) == 2)
+    {
         luaA_key_array_set(L, 1, 2, keys);
+        xcb_ungrab_key(globalconf.connection, XCB_GRAB_ANY, c->win, XCB_BUTTON_MASK_ANY);
+        window_grabkeys(c->win, keys);
+    }
 
     return luaA_key_array_get(L, 1, keys);
 }

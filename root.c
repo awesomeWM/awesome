@@ -126,6 +126,15 @@ luaA_root_keys(lua_State *L)
         while(lua_next(L, 1))
             key_array_append(&globalconf.keys, key_ref(L, -1));
 
+        int nscreen = xcb_setup_roots_length(xcb_get_setup(globalconf.connection));
+
+        for(int phys_screen = 0; phys_screen < nscreen; phys_screen++)
+        {
+            xcb_screen_t *s = xutil_screen_get(globalconf.connection, phys_screen);
+            xcb_ungrab_key(globalconf.connection, XCB_GRAB_ANY, s->root, XCB_BUTTON_MASK_ANY);
+            window_grabkeys(s->root, &globalconf.keys);
+        }
+
         return 1;
     }
 
