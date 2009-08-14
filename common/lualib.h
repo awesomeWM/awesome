@@ -107,7 +107,7 @@ luaA_dofunction(lua_State *L, int nargs, int nret)
     lua_pushcfunction(L, luaA_dofunction_error);
     /* Move error handling function before args and function */
     lua_insert(L, - nargs - 2);
-    int error_func_pos = lua_gettop(L) - nargs - 2;
+    int error_func_pos = lua_gettop(L) - nargs - 1;
     if(lua_pcall(L, nargs, nret, - nargs - 2))
     {
         warn("%s", lua_tostring(L, -1));
