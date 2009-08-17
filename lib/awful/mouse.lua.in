@@ -273,21 +273,19 @@ end
 --- Move the wibox under the cursor
 --@param w The wibox to move, or none to use that under the pointer
 function wibox.move(w)
-    if not w then w = wibox_under_pointer() end
+    local w = w or wibox_under_pointer()
     if not w then return end
 
     local offset = {
-        x = w:geometry()["x"] - capi.mouse.coords()["x"],
-        y = w:geometry()["y"] - capi.mouse.coords()["y"]
+        x = w.x - capi.mouse.coords().x,
+        y = w.y - capi.mouse.coords().y
     }
 
     capi.mousegrabber.run(function (mouse)
         local button_down = false
         if awibox.get_position(w) == "floating" then
-            w:geometry({
-                x = capi.mouse.coords()["x"] + offset["x"],
-                y = capi.mouse.coords()["y"] + offset["y"],
-            })
+            w.x = capi.mouse.coords().x + offset.x
+            w.y = capi.mouse.coords().y + offset.y
         else
             local wa = awibox.get_workarea(capi.mouse.screen)
 

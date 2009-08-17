@@ -168,7 +168,6 @@ end
 
 local function add_item(data, num, item_info)
     local item = wibox({
-        position = "floating",
         fg = data.theme.fg_normal,
         bg = data.theme.bg_normal,
         border_color = data.theme.border,
@@ -205,7 +204,7 @@ local function add_item(data, num, item_info)
     local mouse_enter_func = function () item_enter(data, num, true) end
 
     label:add_signal("mouse::enter", mouse_enter_func)
-    item.mouse_enter = mouse_enter_func
+    item:add_signal("mouse::enter", mouse_enter_func)
 
     -- Create the submenu icon widget
     local submenu
@@ -294,12 +293,10 @@ function show(menu, keygrabber)
     set_coords(menu, screen_index)
     for num, item in pairs(menu.items) do
         local wibox = item.wibox
-        wibox:geometry({
-            width = menu.w,
-            height = menu.h,
-            x = menu.x,
-            y = menu.y + (num - 1) * (menu.h + menu.theme.border_width)
-        })
+        wibox.width = menu.w
+        wibox.height = menu.h
+        wibox.x = menu.x
+        wibox.y = menu.y + (num - 1) * (menu.h - menu.theme.border_width)
         wibox.screen = screen_index
     end
 

@@ -62,11 +62,11 @@ local shots = { }
 local enemies = { }
 
 function player.new ()
-    p = wibox({ bg = gamedata.solidbg or "#12345600" })
-    p:geometry({ width = 24,
-                 height = 16,
-                 x = gamedata.field.x + (gamedata.field.w / 2),
-                 y = gamedata.field.y + gamedata.field.h - (16 + 5) })
+    p = wibox({ bg = gamedata.solidbg or "#12345600",
+                width = 24,
+                height = 16,
+                x = gamedata.field.x + (gamedata.field.w / 2),
+                y = gamedata.field.y + gamedata.field.h - (16 + 5) })
     p.screen = gamedata.screen
 
     w = widget({ type = "imagebox" })
@@ -78,32 +78,28 @@ end
 
 function player.move(x)
     if not gamedata.running then return false end
-    local g = gamedata.player:geometry()
 
-    if x < 0 and g.x > gamedata.field.x then
-        g.x = g.x + x
-    elseif x > 0 and g.x < gamedata.field.x + gamedata.field.w - 30 then
-        g.x = g.x + x
+    if x < 0 and gamedata.player.x > gamedata.field.x then
+        gamedata.player.x = gamedata.player.x + x
+    elseif x > 0 and gamedata.player.x < gamedata.field.x + gamedata.field.w - 30 then
+        gamedata.player.x = gamedata.player.x + x
     end
-
-    gamedata.player:geometry(g)
 end
 
 function player.fire()
     if not gamedata.running then return false end
     if gamedata.ammo == 1 then
         gamedata.ammo = 0
-        local gb = gamedata.player:geometry()
-        shots.fire(gb.x + 9, gb.y - 10, "#00FF00")
+        shots.fire(gamedata.player.x + 9, gamedata.player.y - 10, "#00FF00")
     end
 end
 
 function shots.fire (x, y, color)
-    local s = wibox({ bg = color })
-    s:geometry({ width = 4,
-                 height = 10,
-                 x = x,
-                 y = y })
+    local s = wibox({ bg = color,
+                      width = 4,
+                      height = 10,
+                      x = x,
+                      y = y })
     s.screen = gamedata.screen
 
     if not gamedata.shot or gamedata.shot.screen == nil then
@@ -114,11 +110,11 @@ end
 function shots.fire_enemy (x, y, color)
     if gamedata.enemies.shots.fired < gamedata.enemies.shots.max then
         gamedata.enemies.shots.fired = gamedata.enemies.shots.fired + 1
-        local s = wibox({ bg = color })
-        s:geometry({ width = 4,
-                     height = 10,
-                     x = x,
-                     y = y })
+        local s = wibox({ bg = color,
+                          width = 4,
+                          height = 10,
+                          x = x,
+                          y = y })
         s.screen = gamedata.screen
         for i = 1, gamedata.enemies.shots.max do
             if not gamedata.enemies.shots[i] or gamedata.enemies.shots[i].screen == nil then
@@ -136,13 +132,11 @@ function shots.handle()
     local s = gamedata.shot
     if s and s.screen then
         gamedata.ammo = 0
-        local g = s:geometry()
-        if g.y < gamedata.field.y + 15 then
+        if s.y < gamedata.field.y + 15 then
             s.screen = nil
             gamedata.ammo = 1
         else
-            g.y = g.y - 6
-            s:geometry(g)
+            s.y = s.y - 6
         end
     end
 end
@@ -155,13 +149,11 @@ function shots.handle_enemy ()
     for i = 1, gamedata.enemies.shots.max do
         local s = gamedata.enemies.shots[i]
         if s and s.screen then
-            local g = s:geometry()
-            if g.y > gamedata.field.y + gamedata.field.h - 15 then
+            if s.y > gamedata.field.y + gamedata.field.h - 15 then
                 s.screen = nil
                 gamedata.enemies.shots.fired = gamedata.enemies.shots.fired - 1
             else
-                g.y = g.y + 3
-                s:geometry(g)
+                s.y = s.y + 3
             end
             if game.collide(gamedata.player, s) then
                 game.over()
@@ -171,11 +163,11 @@ function shots.handle_enemy ()
 end
 
 function enemies.new (t)
-    e = wibox({ bg = gamedata.solidbg or "#12345600" })
-    e:geometry({ height = gamedata.enemies.h,
-                 width = gamedata.enemies.w,
-                 x = gamedata.field.x,
-                 y = gamedata.field.y })
+    e = wibox({ bg = gamedata.solidbg or "#12345600",
+                height = gamedata.enemies.h,
+                width = gamedata.enemies.w,
+                x = gamedata.field.x,
+                y = gamedata.field.y })
     e.screen = gamedata.screen
     w = widget({ type = "imagebox" })
     w.image = gamedata.enemies[t]
@@ -222,13 +214,11 @@ function enemies.handle ()
         for x = 1, #gamedata.enemies.data[y] do
             local e = gamedata.enemies.data[y][x]
             if e.screen then
-                local g = e:geometry()
                 gamedata.enemies.number = gamedata.enemies.number + 1
                 if gamedata.enemies.speed_count == (gamedata.enemies.speed - 1) then
-                    g.y = math.floor(gamedata.field.y + gamedata.enemies.y + ((y - 1) * gamedata.enemies.h * 2))
-                    g.x = math.floor(gamedata.field.x + gamedata.enemies.x + ((x - 1) * gamedata.enemies.w * 2))
-                    e:geometry(g)
-                    if game.collide(gamedata.player, e) or g.y > gamedata.field.y + gamedata.field.h - 20 then
+                    e.y = math.floor(gamedata.field.y + gamedata.enemies.y + ((y - 1) * gamedata.enemies.h * 2))
+                    e.x = math.floor(gamedata.field.x + gamedata.enemies.x + ((x - 1) * gamedata.enemies.w * 2))
+                    if game.collide(gamedata.player, e) or e.y > gamedata.field.y + gamedata.field.h - 20 then
                         game.over()
                     end
                 end
@@ -316,12 +306,9 @@ function keyhandler(mod, key, event)
 end
 
 function game.collide(o1, o2)
-    g1 = o1:geometry()
-    g2 = o2:geometry()
-
     --check if o2 is inside o1
-    if g2.x >= g1.x and g2.x <= g1.x + g1.width
-        and g2.y >= g1.y and g2.y <= g1.y + g1.height then
+    if o2.x >= o1.x and o2.x <= o1.x + o1.width
+        and o2.y >= o1.y and o2.y <= o1.y + o1.height then
         return true
     end
 
@@ -441,11 +428,11 @@ function game.highscore (score)
     end
 
     gamedata.highscore.window = wibox({ bg = gamedata.btheme.bg_focus or "#333333",
-                                        fg = gamedata.btheme.fg_focus or "#FFFFFF" })
-    gamedata.highscore.window:geometry({ height = 20,
-                                         width = 300,
-                                         x = gamedata.field.x + math.floor(gamedata.field.w / 2) - 150,
-                                         y = gamedata.field.y + math.floor(gamedata.field.h / 2) })
+                                        fg = gamedata.btheme.fg_focus or "#FFFFFF",
+                                        height = 20,
+                                        width = 300,
+                                        x = gamedata.field.x + math.floor(gamedata.field.w / 2) - 150,
+                                        y = gamedata.field.y + math.floor(gamedata.field.h / 2) })
     gamedata.highscore.window.screen = gamedata.screen
 
     gamedata.namebox = widget({ type = "textbox" })
@@ -487,11 +474,11 @@ function run(args)
     gamedata.cachedir = awful.util.getdir("cache")
 
     if gamedata.solidbg then
-       gamedata.field.background = wibox({ bg = gamedata.solidbg })
-       gamedata.field.background:geometry({ x = gamedata.field.x,
-                                            y = gamedata.field.y,
-                                            height = gamedata.field.h,
-                                            width = gamedata.field.w })
+       gamedata.field.background = wibox({ bg = gamedata.solidbg,
+                                           x = gamedata.field.x,
+                                           y = gamedata.field.y,
+                                           height = gamedata.field.h,
+                                           width = gamedata.field.w })
        gamedata.field.background.screen = gamedata.screen
     end
 
@@ -502,11 +489,11 @@ function run(args)
     gamedata.field.caption.text = "  Awesome Invaders"
 
     gamedata.field.north = wibox({ bg = gamedata.btheme.bg_focus or "#333333",
-                                   fg = gamedata.btheme.fg_focus or "#FFFFFF" })
-    gamedata.field.north:geometry({ width = gamedata.field.w + 10,
-                                    height = gamedata.field.caption:extents()["height"],
-                                    x = gamedata.field.x - 5,
-                                    y = gamedata.field.y - gamedata.field.caption:extents()["height"] })
+                                   fg = gamedata.btheme.fg_focus or "#FFFFFF",
+                                   width = gamedata.field.w + 10,
+                                   height = gamedata.field.caption:extents()["height"],
+                                   x = gamedata.field.x - 5,
+                                   y = gamedata.field.y - gamedata.field.caption:extents()["height"] })
     gamedata.field.north.screen = gamedata.screen
 
     gamedata.field.north.widgets = {
@@ -522,27 +509,27 @@ function run(args)
     }
 
     gamedata.field.south = wibox({ bg = gamedata.btheme.bg_focus or "#333333",
-                                   fg = gamedata.btheme.fg_focus or "#FFFFFF" })
-    gamedata.field.south:geometry({ width = gamedata.field.w,
-                                    height = 5,
-                                    x = gamedata.field.x,
-                                    y = gamedata.field.y + gamedata.field.h - 5 })
+                                   fg = gamedata.btheme.fg_focus or "#FFFFFF",
+                                   width = gamedata.field.w,
+                                   height = 5,
+                                   x = gamedata.field.x,
+                                   y = gamedata.field.y + gamedata.field.h - 5 })
     gamedata.field.south.screen = gamedata.screen
 
     gamedata.field.west = wibox({ bg = gamedata.btheme.bg_focus or "#333333",
-                                  fg = gamedata.btheme.fg_focus or "#FFFFFF" })
-    gamedata.field.west:geometry({ width = 5,
-                                   height = gamedata.field.h,
-                                   x = gamedata.field.x - 5,
-                                   y = gamedata.field.y })
+                                  fg = gamedata.btheme.fg_focus or "#FFFFFF",
+                                  width = 5,
+                                  height = gamedata.field.h,
+                                  x = gamedata.field.x - 5,
+                                  y = gamedata.field.y })
     gamedata.field.west.screen = gamedata.screen
 
     gamedata.field.east = wibox({ bg = gamedata.btheme.bg_focus or "#333333",
-                                  fg = gamedata.btheme.fg_focus or "#FFFFFF" })
-    gamedata.field.east:geometry({ width = 5,
-                                   height = gamedata.field.h,
-                                   x = gamedata.field.x + gamedata.field.w,
-                                   y = gamedata.field.y })
+                                  fg = gamedata.btheme.fg_focus or "#FFFFFF",
+                                  width = 5,
+                                  height = gamedata.field.h,
+                                  x = gamedata.field.x + gamedata.field.w,
+                                  y = gamedata.field.y })
     gamedata.field.east.screen = gamedata.screen
 
     gamedata.enemies.speed = 5

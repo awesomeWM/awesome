@@ -568,7 +568,11 @@ property_handle_net_wm_opacity(void *data __attribute__ ((unused)),
     wibox_t *wibox = wibox_getbywin(window);
 
     if(wibox)
-        wibox->opacity = window_opacity_get_from_reply(reply);
+    {
+        luaA_object_push(globalconf.L, wibox);
+        wibox_set_opacity(globalconf.L, -1, window_opacity_get_from_reply(reply));
+        lua_pop(globalconf.L, -1);
+    }
     else
     {
         client_t *c = client_getbywin(window);

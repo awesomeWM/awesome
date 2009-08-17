@@ -85,7 +85,7 @@ void
 titlebar_unban(wibox_t *titlebar)
 {
     /* Do this manually because the system doesn't know we moved the toolbar.
-     * Note that !isvisible titlebars are unmapped and for fullscreen it'll
+     * Note that !visible titlebars are unmapped and for fullscreen it'll
      * end up offscreen anyway. */
     if(titlebar && titlebar->isbanned)
     {
@@ -279,9 +279,9 @@ titlebar_client_attach(client_t *c)
 void
 titlebar_set_visible(wibox_t *t, bool visible)
 {
-    if(visible != t->isvisible)
+    if(visible != t->visible)
     {
-        if((t->isvisible = visible))
+        if((t->visible = visible))
             titlebar_unban(t);
         else
             titlebar_ban(t);
@@ -291,112 +291,77 @@ titlebar_set_visible(wibox_t *t, bool visible)
     }
 }
 
-/** Titlebar newindex.
- * \param L The Lua VM state.
- * \param titlebar The wibox titlebar.
- * \param tok The attribute token.
- * \return The number of elements pushed on stack.
- */
 int
-luaA_titlebar_newindex(lua_State *L, wibox_t *titlebar, awesome_token_t tok)
+luaA_titlebar_set_position(lua_State *L, int udx)
 {
-    client_t *c = NULL;
-
-    switch(tok)
+    wibox_t *titlebar = luaA_checkudata(L, udx, &wibox_class);
+    size_t len;
+    const char *buf = luaL_checklstring(L, -1, &len);
+    position_t position = position_fromstr(buf, len);
+    if(position != titlebar->position)
     {
-        position_t position;
-        int i;
-        size_t len;
-        const char *buf;
-
-      case A_TK_ALIGN:
-        if((buf = luaL_checklstring(L, 3, &len)))
-            titlebar->align = draw_align_fromstr(buf, len);
-        else
-            return 0;
-        break;
-      case A_TK_BORDER_WIDTH:
-        if((i = luaL_checknumber(L, 3)) >= 0)
-            wibox_border_width_set(titlebar, i);
-        else
-            return 0;
-        break;
-      case A_TK_BORDER_COLOR:
-        if((buf = luaL_checklstring(L, 3, &len)))
-            if(xcolor_init_reply(xcolor_init_unchecked(&titlebar->border.color, buf, len)))
-                wibox_border_color_set(titlebar, &titlebar->border.color);
-        return 0;
-      case A_TK_POSITION:
-        buf = luaL_checklstring(L, 3, &len);
-        position = position_fromstr(buf, len);
-        if(position != titlebar->position)
+        switch(position)
         {
-            switch(position)
+          case Left:
+            switch(titlebar->position)
             {
+                int tmp;
               case Left:
-                switch(titlebar->position)
-                {
-                    int tmp;
-                  case Left:
-                  case Right:
-                    break;
-                  case Top:
-                  case Bottom:
-                    tmp = titlebar->geometry.width;
-                    titlebar->geometry.width = titlebar->geometry.height;
-                    titlebar->geometry.height = tmp;
-                    break;
-                }
-                wibox_orientation_set(titlebar, North);
-                break;
               case Right:
-                switch(titlebar->position)
-                {
-                    int tmp;
-                  case Left:
-                  case Right:
-                    break;
-                  case Top:
-                  case Bottom:
-                    tmp = titlebar->geometry.width;
-                    titlebar->geometry.width = titlebar->geometry.height;
-                    titlebar->geometry.height = tmp;
-                    break;
-                }
-                wibox_orientation_set(titlebar, South);
                 break;
               case Top:
               case Bottom:
-                switch(titlebar->position)
-                {
-                    int tmp;
-                  case Left:
-                  case Right:
-                    tmp = titlebar->geometry.width;
-                    titlebar->geometry.width = titlebar->geometry.height;
-                    titlebar->geometry.height = tmp;
-                    break;
-                  case Top:
-                  case Bottom:
-                    break;
-                }
-                wibox_orientation_set(titlebar, East);
+                tmp = titlebar->geometry.width;
+                titlebar->geometry.width = titlebar->geometry.height;
+                titlebar->geometry.height = tmp;
                 break;
             }
-            titlebar->position = position;
-            if((c = client_getbytitlebar(titlebar)))
+            wibox_set_orientation(L, udx, North);
+            break;
+          case Right:
+            switch(titlebar->position)
             {
-                titlebar_update_geometry(c);
-                /* call geometry hook for client because some like to
-                 * set titlebar width in that hook, which make sense */
-                hook_property(c, "geometry");
+                int tmp;
+              case Left:
+              case Right:
+                break;
+              case Top:
+              case Bottom:
+                tmp = titlebar->geometry.width;
+                titlebar->geometry.width = titlebar->geometry.height;
+                titlebar->geometry.height = tmp;
+                break;
             }
+            wibox_set_orientation(L, udx, South);
+            break;
+          case Top:
+          case Bottom:
+            switch(titlebar->position)
+            {
+                int tmp;
+              case Left:
+              case Right:
+                tmp = titlebar->geometry.width;
+                titlebar->geometry.width = titlebar->geometry.height;
+                titlebar->geometry.height = tmp;
+                break;
+              case Top:
+              case Bottom:
+                break;
+            }
+            wibox_set_orientation(L, udx, East);
+            break;
         }
-        break;
-      default:
-        return 0;
+        titlebar->position = position;
+        client_t *c;
+        if((c = client_getbytitlebar(titlebar)))
+        {
+            titlebar_update_geometry(c);
+            /* call geometry hook for client because some like to
+             * set titlebar width in that hook, which make sense */
+            hook_property(c, "geometry");
+        }
     }
-
     return 0;
 }
 

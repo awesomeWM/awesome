@@ -429,13 +429,9 @@ event_handle_leavenotify(void *data __attribute__ ((unused)),
             wibox->mouse_over = NULL;
         }
 
-        if(wibox->mouse_leave)
-        {
-            luaA_object_push(globalconf.L, wibox);
-            luaA_object_push_item(globalconf.L, -1, wibox->mouse_leave);
-            lua_remove(globalconf.L, -2);
-            luaA_dofunction(globalconf.L, 0, 0);
-        }
+        luaA_object_push(globalconf.L, wibox);
+        luaA_object_emit_signal(globalconf.L, -1, "mouse::leave", 0);
+        lua_pop(globalconf.L, 1);
     }
 
     return 0;
@@ -466,13 +462,9 @@ event_handle_enternotify(void *data __attribute__ ((unused)),
         if(w)
             event_handle_widget_motionnotify(wibox, &wibox->mouse_over, w);
 
-        if(wibox->mouse_enter)
-        {
-            luaA_object_push(globalconf.L, wibox);
-            luaA_object_push_item(globalconf.L, -1, wibox->mouse_enter);
-            lua_remove(globalconf.L, -2);
-            luaA_dofunction(globalconf.L, 0, 0);
-        }
+        luaA_object_push(globalconf.L, wibox);
+        luaA_object_emit_signal(globalconf.L, -1, "mouse::enter", 0);
+        lua_pop(globalconf.L, 1);
     }
 
     if((c = client_getbytitlebarwin(ev->event))

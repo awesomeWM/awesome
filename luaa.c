@@ -57,8 +57,6 @@ extern const struct luaL_reg awesome_screen_methods[];
 extern const struct luaL_reg awesome_screen_meta[];
 extern const struct luaL_reg awesome_client_methods[];
 extern const struct luaL_reg awesome_client_meta[];
-extern const struct luaL_reg awesome_wibox_methods[];
-extern const struct luaL_reg awesome_wibox_meta[];
 
 /** Quit awesome.
  * \param L The Lua VM state.
@@ -741,8 +739,7 @@ luaA_init(xdgHandle* xdg)
     tag_class_setup(L);
 
     /* Export wibox */
-    luaA_class_setup(L, &wibox_class, "wibox", (lua_class_allocator_t) wibox_new,
-                     awesome_wibox_methods, awesome_wibox_meta);
+    wibox_class_setup(L);
 
     /* Export widget */
     widget_class_setup(L);

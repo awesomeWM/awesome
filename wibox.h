@@ -39,7 +39,7 @@ struct wibox_t
     /** Ontop */
     bool ontop;
     /** Visible */
-    bool isvisible;
+    bool visible;
     /** Position */
     position_t position;
     /** Wibox type */
@@ -53,8 +53,6 @@ struct wibox_t
     void *widgets_table;
     /** Widget the mouse is over */
     widget_t *mouse_over;
-    /** Mouse over event handler */
-    void *mouse_enter, *mouse_leave;
     /** Need update */
     bool need_update;
     /** Need shape update */
@@ -75,14 +73,10 @@ struct wibox_t
     xcb_gcontext_t gc;
     /** The window geometry. */
     area_t geometry;
-    /** The window border */
-    struct
-    {
-        /** The window border width */
-        uint16_t width;
-        /** The window border color */
-        xcolor_t color;
-    } border;
+    /** The window border width */
+    uint16_t border_width;
+    /** The window border color */
+    xcolor_t border_color;
     /** Draw context */
     draw_context_t ctx;
     /** Orientation */
@@ -109,16 +103,16 @@ void luaA_wibox_invalidate_byitem(lua_State *, const void *);
 
 wibox_t * wibox_getbywin(xcb_window_t);
 
-void wibox_moveresize(wibox_t *, area_t);
+void wibox_moveresize(lua_State *, int, area_t);
 void wibox_refresh_pixmap_partial(wibox_t *, int16_t, int16_t, uint16_t, uint16_t);
 void wibox_init(wibox_t *, int);
 void wibox_wipe(wibox_t *);
-void wibox_border_width_set(wibox_t *, uint32_t);
-void wibox_border_color_set(wibox_t *, const xcolor_t *);
-void wibox_orientation_set(wibox_t *, orientation_t);
+void wibox_set_opacity(lua_State *, int, double);
+void wibox_set_orientation(lua_State *, int, orientation_t);
+
+void wibox_class_setup(lua_State *);
 
 lua_class_t wibox_class;
-LUA_OBJECT_FUNCS(wibox_class, wibox_t, wibox)
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

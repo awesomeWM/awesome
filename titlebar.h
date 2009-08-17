@@ -36,7 +36,7 @@ void titlebar_set_visible(wibox_t *, bool);
 void titlebar_ban(wibox_t *);
 void titlebar_unban(wibox_t *);
 
-int luaA_titlebar_newindex(lua_State *, wibox_t *, awesome_token_t);
+int luaA_titlebar_set_position(lua_State *, int);
 
 static inline bool
 titlebar_isvisible(client_t *c, screen_t *screen)
@@ -45,7 +45,7 @@ titlebar_isvisible(client_t *c, screen_t *screen)
     {
         if(c->isfullscreen)
             return false;
-        if(!c->titlebar || !c->titlebar->isvisible)
+        if(!c->titlebar || !c->titlebar->visible)
             return false;
         return true;
     }
@@ -65,7 +65,7 @@ titlebar_geometry_add(wibox_t *t, int border, area_t geometry)
      * This can then be substracted/added to the witdh/height/x/y.
      * In this case the border is included, because it belongs to a different window.
      */
-    if(t && t->isvisible)
+    if(t && t->visible)
         switch(t->position)
         {
           case Top:
@@ -106,7 +106,7 @@ titlebar_geometry_remove(wibox_t *t, int border, area_t geometry)
      * This can then be substracted/added to the witdh/height/x/y.
      * In this case the border is included, because it belongs to a different window.
      */
-    if(t && t->isvisible)
+    if(t && t->visible)
         switch(t->position)
         {
           case Top:
@@ -147,7 +147,10 @@ titlebar_update_geometry(client_t *c)
 
     /* Client geometry without titlebar, but including borders, since that is always consistent. */
     titlebar_geometry_compute(c, titlebar_geometry_remove(c->titlebar, 0, c->geometry), &geom);
-    wibox_moveresize(c->titlebar, geom);
+    luaA_object_push(globalconf.L, c);
+    luaA_object_push_item(globalconf.L, -1, c->titlebar);
+    wibox_moveresize(globalconf.L, -1, geom);
+    lua_pop(globalconf.L, 2);
 }
 
 #endif
