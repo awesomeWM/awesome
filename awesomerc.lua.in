@@ -264,7 +264,6 @@ clientkeys = awful.util.table.join(
     awful.key({ modkey, "Control" }, "Return", function (c) c:swap(awful.client.getmaster()) end),
     awful.key({ modkey,           }, "o",      awful.client.movetoscreen                        ),
     awful.key({ modkey, "Shift"   }, "r",      function (c) c:redraw()                       end),
-    awful.key({ modkey }, "t", awful.client.togglemarked),
     awful.key({ modkey,}, "m",
         function (c)
             c.maximized_horizontal = not c.maximized_horizontal
@@ -305,16 +304,7 @@ for i = 1, keynumber do
                       if client.focus and tags[client.focus.screen][i] then
                           awful.client.toggletag(tags[client.focus.screen][i])
                       end
-                  end),
-        awful.key({ modkey, "Shift" }, "F" .. i,
-                  function ()
-                      local screen = mouse.screen
-                      if tags[screen][i] then
-                          for k, c in pairs(awful.client.getmarked()) do
-                              awful.client.movetotag(tags[screen][i], c)
-                          end
-                      end
-                   end))
+                  end))
 end
 
 -- Set keys
@@ -334,16 +324,6 @@ awful.hooks.unfocus.register(function (c)
     if not awful.client.ismarked(c) then
         c.border_color = beautiful.border_normal
     end
-end)
-
--- Hook function to execute when marking a client
-awful.hooks.marked.register(function (c)
-    c.border_color = beautiful.border_marked
-end)
-
--- Hook function to execute when unmarking a client.
-awful.hooks.unmarked.register(function (c)
-    c.border_color = beautiful.border_focus
 end)
 
 -- Hook function to execute when the mouse enters a client.
