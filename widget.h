@@ -46,8 +46,6 @@ struct widget_t
     int (*index)(lua_State *, awesome_token_t);
     /** Newindex function */
     int (*newindex)(lua_State *, awesome_token_t);
-    /** Mouse over event handler */
-    void *mouse_enter, *mouse_leave;
     /** Misc private data */
     void *data;
     /** Button bindings */

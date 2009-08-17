@@ -351,24 +351,18 @@ event_handle_widget_motionnotify(void *object,
     {
         if(*mouse_over)
         {
-            if((*mouse_over)->mouse_leave)
-            {
-                /* call mouse leave function on old widget */
-                luaA_object_push(globalconf.L, *mouse_over);
-                luaA_object_push_item(globalconf.L, -1, (*mouse_over)->mouse_leave);
-                luaA_dofunction(globalconf.L, 1, 0);
-            }
+            /* call mouse leave function on old widget */
+            luaA_object_push(globalconf.L, *mouse_over);
+            luaA_object_emit_signal(globalconf.L, -1, "mouse::leave", 0);
+            lua_pop(globalconf.L, 1);
         }
         if(widget)
         {
-            /* call mouse enter function on new widget and register it */
+            /* emit mouse::enter signal on new widget and register it */
             *mouse_over = widget;
-            if(widget->mouse_enter)
-            {
-                luaA_object_push(globalconf.L, widget);
-                luaA_object_push_item(globalconf.L, -1, widget->mouse_enter);
-                luaA_dofunction(globalconf.L, 1, 0);
-            }
+            luaA_object_push(globalconf.L, widget);
+            luaA_object_emit_signal(globalconf.L, -1, "mouse::enter", 0);
+            lua_pop(globalconf.L, 1);
         }
     }
 }
@@ -428,13 +422,10 @@ event_handle_leavenotify(void *data __attribute__ ((unused)),
     {
         if(wibox->mouse_over)
         {
-            if(wibox->mouse_over->mouse_leave)
-            {
-                /* call mouse leave function on widget the mouse was over */
-                luaA_object_push(globalconf.L, wibox->mouse_over);
-                luaA_object_push_item(globalconf.L, -1, wibox->mouse_over->mouse_leave);
-                luaA_dofunction(globalconf.L, 1, 0);
-            }
+            luaA_object_push(globalconf.L, wibox->mouse_over);
+            /* emit mouse::leave signal on widget the mouse was over */
+            luaA_object_emit_signal(globalconf.L, -1, "mouse::leave", 0);
+            lua_pop(globalconf.L, 1);
             wibox->mouse_over = NULL;
         }
 
