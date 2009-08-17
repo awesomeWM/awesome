@@ -9,8 +9,8 @@ local math = math
 local type = type
 local ipairs = ipairs
 local setmetatable = setmetatable
-local capi = { widget = widget,
-               button = button }
+local capi = { widget = widget }
+local abutton = require("awful.button")
 
 --- Common widget code
 module("awful.widget.common")
@@ -62,7 +62,7 @@ function list_update(w, buttons, label, data, widgets, objects)
                     local press, release
                     if bpress then press = function() bpress(o) end end
                     if brelease then release = function () brelease(o) end end
-                    data[o][kb] = capi.button(b.modifiers, b.button, press, release)
+                    data[o][kb] = abutton(b.modifiers, b.button, press, release)
                 end
             end
             w[k]:buttons(data[o])

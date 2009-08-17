@@ -20,18 +20,12 @@
  */
 
 #include "button.h"
-
-#include "common/tokenize.h"
+#include "luaa.h"
+#include "key.h"
 
 /** Create a new mouse button bindings.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
- * \luastack
- * \lparam A table with modifiers keys, or a button to clone.
- * \lparam A mouse button number, or 0 to match any button.
- * \lparam A function to execute on click events.
- * \lparam A function to execute on release events.
- * \lreturn A mouse button binding.
  */
 static int
 luaA_button_new(lua_State *L)
@@ -39,26 +33,43 @@ luaA_button_new(lua_State *L)
     xcb_button_t xbutton;
     button_t *button;
 
-    lua_settop(L, 5);
+    /* compat code */
+    if(lua_istable(L, 2) && lua_isnumber(L, 3))
+    {
+        luaA_deprecate(L, "new syntax");
 
-    luaA_checktable(L, 2);
-    /* arg 3 is mouse button */
-    xbutton = luaL_checknumber(L, 3);
+        lua_settop(L, 5);
 
-    /* arg 4 and 5 are callback functions, check they are functions... */
-    if(!lua_isnil(L, 4))
-        luaA_checkfunction(L, 4);
-    if(!lua_isnil(L, 5))
-        luaA_checkfunction(L, 5);
+        luaA_checktable(L, 2);
+        /* arg 3 is mouse button */
+        xbutton = luaL_checknumber(L, 3);
 
-    button = button_new(L);
+        /* arg 4 and 5 are callback functions, check they are functions... */
+        if(!lua_isnil(L, 4))
+            luaA_checkfunction(L, 4);
+        if(!lua_isnil(L, 5))
+            luaA_checkfunction(L, 5);
 
-    button->press = luaA_object_ref_item(L, -1, 4);
-    button->release = luaA_object_ref_item(L, -1, 4);
-    button->button = xbutton;
-    button->mod = luaA_tomodifiers(L, 2);
+        button = button_new(L);
+        button->button = xbutton;
+        button->modifiers = luaA_tomodifiers(L, 2);
 
-    return 1;
+        if(!lua_isnil(L, 4))
+        {
+            lua_pushvalue(L, 4);
+            luaA_object_add_signal(L, -2, "press", -1);
+        }
+
+        if(!lua_isnil(L, 5))
+        {
+            lua_pushvalue(L, 5);
+            luaA_object_add_signal(L, -2, "release", -1);
+        }
+
+        return 1;
+    }
+
+    return luaA_class_new(L, &button_class);
 }
 
 /** Set a button array with a Lua table.
@@ -104,98 +115,53 @@ luaA_button_array_get(lua_State *L, int oidx, button_array_t *buttons)
     return 1;
 }
 
-/** Button object.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- * \luastack
- * \lfield press The function called when button press event is received.
- * \lfield release The function called when button release event is received.
- * \lfield button The mouse button number, or 0 for any button.
- * \lfield modifiers The modifier key table that should be pressed while the
- * button is pressed.
- */
+LUA_OBJECT_EXPORT_PROPERTY(button, button_t, button, lua_pushnumber);
+LUA_OBJECT_EXPORT_PROPERTY(button, button_t, modifiers, luaA_pushmodifiers);
+
 static int
-luaA_button_index(lua_State *L)
+luaA_button_set_modifiers(lua_State *L, button_t *b)
 {
-    if(luaA_usemetatable(L, 1, 2))
-        return 1;
-
-    size_t len;
-    button_t *button = luaL_checkudata(L, 1, "button");
-    const char *attr = luaL_checklstring(L, 2, &len);
-
-    switch(a_tokenize(attr, len))
-    {
-      case A_TK_PRESS:
-        return luaA_object_push_item(L, 1, button->press);
-      case A_TK_RELEASE:
-        return luaA_object_push_item(L, 1, button->release);
-      case A_TK_BUTTON:
-        lua_pushnumber(L, button->button);
-        break;
-      case A_TK_MODIFIERS:
-        luaA_pushmodifiers(L, button->mod);
-        break;
-      default:
-        return 0;
-    }
-
-    return 1;
-}
-
-/** Button object.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- * \luastack
- */
-static int
-luaA_button_newindex(lua_State *L)
-{
-    if(luaA_usemetatable(L, 1, 2))
-        return 1;
-
-    size_t len;
-    button_t *button = luaL_checkudata(L, 1, "button");
-    const char *attr = luaL_checklstring(L, 2, &len);
-
-    switch(a_tokenize(attr, len))
-    {
-      case A_TK_PRESS:
-        luaA_checkfunction(L, 3);
-        luaA_object_unref_item(L, 1, button->press);
-        button->press = luaA_object_ref_item(L, 1, 3);
-        break;
-      case A_TK_RELEASE:
-        luaA_checkfunction(L, 3);
-        luaA_object_unref_item(L, 1, button->release);
-        button->release = luaA_object_ref_item(L, 1, 3);
-        break;
-      case A_TK_BUTTON:
-        button->button = luaL_checknumber(L, 3);
-        break;
-      case A_TK_MODIFIERS:
-        button->mod = luaA_tomodifiers(L, 3);
-        break;
-      default:
-        break;
-    }
-
+    b->modifiers = luaA_tomodifiers(L, -1);
+    luaA_object_emit_signal(L, -3, "property::modifiers", 0);
     return 0;
 }
 
-const struct luaL_reg awesome_button_methods[] =
+static int
+luaA_button_set_button(lua_State *L, button_t *b)
 {
-    LUA_CLASS_METHODS(button)
-    { "__call", luaA_button_new },
-    { NULL, NULL }
-};
-const struct luaL_reg awesome_button_meta[] =
+    b->button = luaL_checknumber(L, -1);
+    luaA_object_emit_signal(L, -3, "property::button", 0);
+    return 0;
+}
+
+void
+button_class_setup(lua_State *L)
 {
-    LUA_OBJECT_META(button)
-    { "__index", luaA_button_index },
-    { "__newindex", luaA_button_newindex },
-    { "__gc", luaA_object_gc },
-    { NULL, NULL }
-};
+    static const struct luaL_reg button_methods[] =
+    {
+        LUA_CLASS_METHODS(button)
+        { "__call", luaA_button_new },
+        { NULL, NULL }
+    };
+
+    static const struct luaL_reg button_meta[] =
+    {
+        LUA_OBJECT_META(button)
+        LUA_CLASS_META
+        { "__gc", luaA_object_gc },
+        { NULL, NULL }
+    };
+
+    luaA_class_setup(L, &button_class, "button", (lua_class_allocator_t) button_new,
+                     button_methods, button_meta);
+    luaA_class_add_property(&button_class, A_TK_BUTTON,
+                            (lua_class_propfunc_t) luaA_button_set_button,
+                            (lua_class_propfunc_t) luaA_button_get_button,
+                            (lua_class_propfunc_t) luaA_button_set_button);
+    luaA_class_add_property(&button_class, A_TK_MODIFIERS,
+                            (lua_class_propfunc_t) luaA_button_set_modifiers,
+                            (lua_class_propfunc_t) luaA_button_get_modifiers,
+                            (lua_class_propfunc_t) luaA_button_set_modifiers);
+}
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

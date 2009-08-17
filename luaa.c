@@ -51,8 +51,6 @@ extern const struct luaL_reg awesome_hooks_lib[];
 extern const struct luaL_reg awesome_keygrabber_lib[];
 extern const struct luaL_reg awesome_mousegrabber_lib[];
 extern const struct luaL_reg awesome_root_lib[];
-extern const struct luaL_reg awesome_button_methods[];
-extern const struct luaL_reg awesome_button_meta[];
 extern const struct luaL_reg awesome_image_methods[];
 extern const struct luaL_reg awesome_image_meta[];
 extern const struct luaL_reg awesome_mouse_methods[];
@@ -740,8 +738,7 @@ luaA_init(xdgHandle* xdg)
     luaA_openlib(L, "mouse", awesome_mouse_methods, awesome_mouse_meta);
 
     /* Export button */
-    luaA_class_setup(L, &button_class, "button", (lua_class_allocator_t) button_new,
-                     awesome_button_methods, awesome_button_meta);
+    button_class_setup(L);
 
     /* Export image */
     luaA_class_setup(L, &image_class, "image", (lua_class_allocator_t) image_new,

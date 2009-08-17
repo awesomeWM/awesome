@@ -82,13 +82,6 @@
     }
 
 static bool
-event_button_match(xcb_button_press_event_t *ev, button_t *b, void *data)
-{
-    return ((!b->button || ev->detail == b->button)
-            && (b->mod == XCB_BUTTON_MASK_ANY || b->mod == ev->state));
-}
-
-static bool
 event_key_match(xcb_key_press_event_t *ev, keyb_t *k, void *data)
 {
     assert(data);
@@ -96,6 +89,13 @@ event_key_match(xcb_key_press_event_t *ev, keyb_t *k, void *data)
     return (((k->keycode && ev->detail == k->keycode)
              || (k->keysym && keysym == k->keysym))
             && (k->modifiers == XCB_BUTTON_MASK_ANY || k->modifiers == ev->state));
+}
+
+static bool
+event_button_match(xcb_button_press_event_t *ev, button_t *b, void *data)
+{
+    return ((!b->button || ev->detail == b->button)
+            && (b->modifiers == XCB_BUTTON_MASK_ANY || b->modifiers == ev->state));
 }
 
 DO_EVENT_HOOK_CALLBACK(button_t, button, button, XCB_BUTTON, button_array_t, event_button_match)

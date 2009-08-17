@@ -29,13 +29,9 @@ struct button_t
 {
     LUA_OBJECT_HEADER
     /** Key modifiers */
-    uint16_t mod;
+    uint16_t modifiers;
     /** Mouse button number */
     xcb_button_t button;
-    /** Lua function to execute on press. */
-    void *press;
-    /** Lua function to execute on release. */
-    void *release;
 };
 
 lua_class_t button_class;
@@ -44,6 +40,8 @@ ARRAY_FUNCS(button_t *, button, DO_NOTHING)
 
 int luaA_button_array_get(lua_State *, int, button_array_t *);
 void luaA_button_array_set(lua_State *, int, int, button_array_t *);
+void button_class_setup(lua_State *);
 
 #endif
+
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
