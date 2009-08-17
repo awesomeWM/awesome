@@ -20,8 +20,9 @@
  *
  */
 
-#include "common/tokenize.h"
 #include "widget.h"
+#include "luaa.h"
+#include "common/tokenize.h"
 
 /** Progressbar bar data structure */
 typedef struct

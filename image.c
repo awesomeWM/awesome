@@ -19,10 +19,27 @@
  *
  */
 
-#include "structs.h"
-#include "common/tokenize.h"
-#include "common/xutil.h"
 #include <xcb/xcb_image.h>
+
+#include <Imlib2.h>
+
+#include "structs.h"
+#include "luaa.h"
+#include "common/luaobject.h"
+
+struct image
+{
+    LUA_OBJECT_HEADER
+    /** Imlib2 image */
+    Imlib_Image image;
+    /** Image data */
+    uint8_t *data;
+    /** Flag telling if the image is up to date or needs computing before
+     * drawing */
+    bool isupdated;
+};
+
+LUA_OBJECT_FUNCS(image_class, image_t, image)
 
 static int
 luaA_image_gc(lua_State *L)
@@ -729,68 +746,73 @@ luaA_image_insert(lua_State *L)
     return 0;
 }
 
-/** Image object.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- * \luastack
- * \lvalue An image
- * \lfield width The image width.
- * \lfield height The image height.
- */
 static int
-luaA_image_index(lua_State *L)
+luaA_image_get_width(lua_State *L, image_t *image)
 {
-    if(luaA_usemetatable(L, 1, 2))
-        return 1;
-
-    image_t *image = luaA_checkudata(L, 1, &image_class);
-    size_t len;
-    const char *attr = luaL_checklstring(L, 2, &len);
-
-    switch(a_tokenize(attr, len))
-    {
-      case A_TK_WIDTH:
-        lua_pushnumber(L, image_getwidth(image));
-        break;
-      case A_TK_HEIGHT:
-        lua_pushnumber(L, image_getheight(image));
-        break;
-      case A_TK_ALPHA:
-        imlib_context_set_image(image->image);
-        lua_pushboolean(L, imlib_image_has_alpha());
-        break;
-      default:
-        return 0;
-    }
-
+    lua_pushnumber(L, image_getwidth(image));
     return 1;
 }
 
-const struct luaL_reg awesome_image_methods[] =
+static int
+luaA_image_get_height(lua_State *L, image_t *image)
 {
-    LUA_CLASS_METHODS(image)
-    { "__call", luaA_image_new },
-    { "argb32", luaA_image_argb32_new },
-    { NULL, NULL }
-};
-const struct luaL_reg awesome_image_meta[] =
+    lua_pushnumber(L, image_getheight(image));
+    return 1;
+}
+
+static int
+luaA_image_get_alpha(lua_State *L, image_t *image)
 {
-    LUA_OBJECT_META(image)
-    { "__index", luaA_image_index },
-    { "rotate", luaA_image_rotate },
-    { "orientate", luaA_image_orientate },
-    { "crop", luaA_image_crop },
-    { "crop_and_scale", luaA_image_crop_and_scale },
-    { "save", luaA_image_save },
-    { "insert", luaA_image_insert },
-    /* draw on images, whee! */
-    { "draw_pixel", luaA_image_draw_pixel },
-    { "draw_line",  luaA_image_draw_line  },
-    { "draw_rectangle", luaA_image_draw_rectangle },
-    { "draw_rectangle_gradient", luaA_image_draw_rectangle_gradient },
-    { "draw_circle", luaA_image_draw_circle },
-    { "__gc", luaA_image_gc },
-    { NULL, NULL }
-};
+    imlib_context_set_image(image->image);
+    lua_pushboolean(L, imlib_image_has_alpha());
+    return 1;
+}
+
+void
+image_class_setup(lua_State *L)
+{
+    static const struct luaL_reg image_methods[] =
+    {
+        LUA_CLASS_METHODS(image)
+        { "__call", luaA_image_new },
+        { "argb32", luaA_image_argb32_new },
+        { NULL, NULL }
+    };
+
+    static const struct luaL_reg image_meta[] =
+    {
+        LUA_OBJECT_META(image)
+        LUA_CLASS_META
+        { "rotate", luaA_image_rotate },
+        { "orientate", luaA_image_orientate },
+        { "crop", luaA_image_crop },
+        { "crop_and_scale", luaA_image_crop_and_scale },
+        { "save", luaA_image_save },
+        { "insert", luaA_image_insert },
+        /* draw on images, whee! */
+        { "draw_pixel", luaA_image_draw_pixel },
+        { "draw_line",  luaA_image_draw_line  },
+        { "draw_rectangle", luaA_image_draw_rectangle },
+        { "draw_rectangle_gradient", luaA_image_draw_rectangle_gradient },
+        { "draw_circle", luaA_image_draw_circle },
+        { "__gc", luaA_image_gc },
+        { NULL, NULL }
+    };
+
+    luaA_class_setup(L, &image_class, "image", (lua_class_allocator_t) image_new,
+                     image_methods, image_meta);
+    luaA_class_add_property(&image_class, A_TK_WIDTH,
+                            NULL,
+                            (lua_class_propfunc_t) luaA_image_get_width,
+                            NULL);
+    luaA_class_add_property(&image_class, A_TK_HEIGHT,
+                            NULL,
+                            (lua_class_propfunc_t) luaA_image_get_height,
+                            NULL);
+    luaA_class_add_property(&image_class, A_TK_ALPHA,
+                            NULL,
+                            (lua_class_propfunc_t) luaA_image_get_alpha,
+                            NULL);
+}
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

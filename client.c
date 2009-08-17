@@ -29,6 +29,7 @@
 #include "systray.h"
 #include "property.h"
 #include "spawn.h"
+#include "luaa.h"
 #include "common/atoms.h"
 #include "common/xutil.h"
 

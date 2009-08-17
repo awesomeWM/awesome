@@ -24,6 +24,7 @@
 #include "client.h"
 #include "structs.h"
 #include "wibox.h"
+#include "luaa.h"
 #include "common/tokenize.h"
 #include "common/xutil.h"
 

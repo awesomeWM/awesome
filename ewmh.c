@@ -31,6 +31,7 @@
 #include "client.h"
 #include "widget.h"
 #include "wibox.h"
+#include "luaa.h"
 #include "common/atoms.h"
 #include "common/buffer.h"
 #include "common/xutil.h"

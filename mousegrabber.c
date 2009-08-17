@@ -1,7 +1,7 @@
 /*
  * mousegrabber.c - mouse pointer grabbing
  *
- * Copyright © 2008 Julien Danjou <julien@danjou.info>
+ * Copyright © 2008-2009 Julien Danjou <julien@danjou.info>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@
 #include "structs.h"
 #include "mouse.h"
 #include "mousegrabber.h"
+#include "luaa.h"
 #include "common/xcursor.h"
 #include "common/xutil.h"
 

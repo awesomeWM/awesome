@@ -23,6 +23,7 @@
 #define AWESOME_WIBOX_H
 
 #include "widget.h"
+#include "common/luaobject.h"
 
 /** Wibox types */
 typedef enum

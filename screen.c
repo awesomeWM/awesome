@@ -30,6 +30,7 @@
 #include "client.h"
 #include "widget.h"
 #include "wibox.h"
+#include "luaa.h"
 #include "common/xutil.h"
 
 static inline area_t

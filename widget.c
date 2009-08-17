@@ -29,6 +29,7 @@
 #include "widget.h"
 #include "wibox.h"
 #include "client.h"
+#include "luaa.h"
 #include "common/atoms.h"
 #include "common/xutil.h"
 

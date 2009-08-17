@@ -24,6 +24,7 @@
 #include "structs.h"
 #include "keygrabber.h"
 #include "key.h"
+#include "luaa.h"
 #include "common/xutil.h"
 
 /** Grab the keyboard.

@@ -30,6 +30,7 @@
 #include <basedir.h>
 
 #include "draw.h"
+#include "common/lualib.h"
 
 #define luaA_deprecate(L, repl) \
     luaA_warn(L, "%s: This function is deprecated and will be removed, see %s", \

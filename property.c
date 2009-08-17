@@ -26,9 +26,10 @@
 #include "client.h"
 #include "ewmh.h"
 #include "wibox.h"
+#include "window.h"
+#include "luaa.h"
 #include "common/atoms.h"
 #include "common/xutil.h"
-#include "window.h"
 
 void
 property_update_wm_transient_for(client_t *c, xcb_get_property_reply_t *reply)

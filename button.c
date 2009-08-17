@@ -22,6 +22,7 @@
 #include "button.h"
 #include "luaa.h"
 #include "key.h"
+#include "common/luaobject.h"
 
 /** Create a new mouse button bindings.
  * \param L The Lua VM state.

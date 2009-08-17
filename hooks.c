@@ -20,6 +20,7 @@
  */
 
 #include "structs.h"
+#include "luaa.h"
 
 #define HANDLE_HOOK(L, h) \
     do { \

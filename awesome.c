@@ -26,8 +26,6 @@
 #include <unistd.h>
 #include <signal.h>
 
-#include <ev.h>
-
 #include <xcb/xtest.h>
 #include <xcb/xcb_event.h>
 
@@ -42,6 +40,7 @@
 #include "property.h"
 #include "screen.h"
 #include "titlebar.h"
+#include "luaa.h"
 #include "common/version.h"
 #include "common/atoms.h"
 #include "common/xcursor.h"

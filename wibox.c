@@ -27,6 +27,7 @@
 #include "client.h"
 #include "screen.h"
 #include "window.h"
+#include "luaa.h"
 #include "common/xcursor.h"
 #include "common/xutil.h"
 

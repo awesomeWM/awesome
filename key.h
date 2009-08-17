@@ -22,7 +22,7 @@
 #ifndef AWESOME_KEY_H
 #define AWESOME_KEY_H
 
-#include "luaa.h"
+#include "common/luaobject.h"
 
 typedef struct keyb_t
 {

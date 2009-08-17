@@ -25,11 +25,14 @@
 #define SN_API_NOT_YET_FROZEN
 #include <libsn/sn.h>
 
+#include <ev.h>
+
 #include <xcb/xcb_icccm.h>
 #include <xcb/xcb_keysyms.h>
 
 #include "config.h"
 #include "key.h"
+#include "draw.h"
 #include "common/xembed.h"
 
 typedef struct wibox_t wibox_t;

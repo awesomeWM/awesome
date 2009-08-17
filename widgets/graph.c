@@ -23,6 +23,7 @@
 #include <math.h>
 
 #include "widget.h"
+#include "luaa.h"
 #include "common/tokenize.h"
 
 typedef enum

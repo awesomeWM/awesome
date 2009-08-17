@@ -1,7 +1,7 @@
 /*
  * titlebar.c - titlebar management
  *
- * Copyright © 2008 Julien Danjou <julien@danjou.info>
+ * Copyright © 2008-2009 Julien Danjou <julien@danjou.info>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@
 #include "widget.h"
 #include "wibox.h"
 #include "screen.h"
+#include "luaa.h"
 
 /** Get a client by its titlebar.
  * \param titlebar The titlebar.

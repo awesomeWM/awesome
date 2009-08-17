@@ -28,8 +28,9 @@
 #include <X11/XF86keysym.h>
 
 #include "structs.h"
+#include "luaa.h"
 #include "common/xutil.h"
-#include "common/tokenize.h"
+#include "common/luaobject.h"
 
 /** Grab key on a window.
  * \param win The window.

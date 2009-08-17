@@ -21,6 +21,7 @@
 
 #include "widget.h"
 #include "wibox.h"
+#include "luaa.h"
 #include "common/tokenize.h"
 
 /** The textbox private data structure */

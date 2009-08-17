@@ -24,6 +24,7 @@
 #include "structs.h"
 #include "luaa.h"
 #include "timer.h"
+#include "common/luaobject.h"
 
 typedef struct
 {
