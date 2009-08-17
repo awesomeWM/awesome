@@ -43,7 +43,7 @@ titlebar_isvisible(client_t *c, screen_t *screen)
 {
     if(client_isvisible(c, screen))
     {
-        if(c->isfullscreen)
+        if(c->fullscreen)
             return false;
         if(!c->titlebar || !c->titlebar->visible)
             return false;

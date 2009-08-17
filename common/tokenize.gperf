@@ -37,13 +37,12 @@ fullscreen
 gap
 geometry
 graph
-group_id
+group_window
 grow
 height
-hide
+hidden
 icon
 icon_name
-id
 image
 imagebox
 index
@@ -52,7 +51,7 @@ key
 key_press
 key_release
 keysym
-leader_id
+leader_window
 left
 len
 line
@@ -68,6 +67,7 @@ Mod2
 Mod3
 Mod4
 Mod5
+modal
 modifiers
 motion_notify
 mouse_enter
@@ -116,6 +116,7 @@ vertical
 visible
 widgets
 width
+window
 word
 word_char
 workarea

@@ -149,7 +149,7 @@ ewmh_update_net_client_list(int phys_screen)
     {
         client_t *c = *_c;
         if(c->phys_screen == phys_screen)
-            wins[n++] = c->win;
+            wins[n++] = c->window;
     }
 
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
@@ -168,7 +168,7 @@ ewmh_update_net_client_list_stacking(int phys_screen)
 
     foreach(client, globalconf.stack)
         if((*client)->phys_screen == phys_screen)
-            wins[n++] = (*client)->win;
+            wins[n++] = (*client)->window;
 
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
 			xutil_screen_get(globalconf.connection, phys_screen)->root,
@@ -244,7 +244,7 @@ ewmh_update_net_active_window(int phys_screen)
 
     if(globalconf.screen_focus->client_focus
        && globalconf.screen_focus->client_focus->phys_screen == phys_screen)
-        win = globalconf.screen_focus->client_focus->win;
+        win = globalconf.screen_focus->client_focus->window;
     else
         win = XCB_NONE;
 
@@ -256,104 +256,106 @@ ewmh_update_net_active_window(int phys_screen)
 static void
 ewmh_process_state_atom(client_t *c, xcb_atom_t state, int set)
 {
+    luaA_object_push(globalconf.L, c);
+
     if(state == _NET_WM_STATE_STICKY)
     {
         if(set == _NET_WM_STATE_REMOVE)
-            client_setsticky(c, false);
+            client_set_sticky(globalconf.L, -1, false);
         else if(set == _NET_WM_STATE_ADD)
-            client_setsticky(c, true);
+            client_set_sticky(globalconf.L, -1, true);
         else if(set == _NET_WM_STATE_TOGGLE)
-            client_setsticky(c, !c->issticky);
+            client_set_sticky(globalconf.L, -1, !c->sticky);
     }
     else if(state == _NET_WM_STATE_SKIP_TASKBAR)
     {
         if(set == _NET_WM_STATE_REMOVE)
         {
-            c->skiptb = false;
+            client_set_skip_taskbar(globalconf.L, -1, false);
             ewmh_client_update_hints(c);
         }
         else if(set == _NET_WM_STATE_ADD)
         {
-            c->skiptb = true;
+            client_set_skip_taskbar(globalconf.L, -1, true);
             ewmh_client_update_hints(c);
         }
         else if(set == _NET_WM_STATE_TOGGLE)
         {
-            c->skiptb = !c->skiptb;
+            client_set_skip_taskbar(globalconf.L, -1, !c->skip_taskbar);
             ewmh_client_update_hints(c);
         }
     }
     else if(state == _NET_WM_STATE_FULLSCREEN)
     {
         if(set == _NET_WM_STATE_REMOVE)
-            client_setfullscreen(c, false);
+            client_set_fullscreen(globalconf.L, -1, false);
         else if(set == _NET_WM_STATE_ADD)
-            client_setfullscreen(c, true);
+            client_set_fullscreen(globalconf.L, -1, true);
         else if(set == _NET_WM_STATE_TOGGLE)
-            client_setfullscreen(c, !c->isfullscreen);
+            client_set_fullscreen(globalconf.L, -1, !c->fullscreen);
     }
     else if(state == _NET_WM_STATE_MAXIMIZED_HORZ)
     {
         if(set == _NET_WM_STATE_REMOVE)
-            client_setmaxhoriz(c, false);
+            client_set_maximized_horizontal(globalconf.L, -1, false);
         else if(set == _NET_WM_STATE_ADD)
-            client_setmaxhoriz(c, true);
+            client_set_maximized_horizontal(globalconf.L, -1, true);
         else if(set == _NET_WM_STATE_TOGGLE)
-            client_setmaxhoriz(c, !c->ismaxhoriz);
+            client_set_maximized_horizontal(globalconf.L, -1, c->maximized_horizontal);
     }
     else if(state == _NET_WM_STATE_MAXIMIZED_VERT)
     {
         if(set == _NET_WM_STATE_REMOVE)
-            client_setmaxvert(c, false);
+            client_set_maximized_vertical(globalconf.L, -1, false);
         else if(set == _NET_WM_STATE_ADD)
-            client_setmaxvert(c, true);
+            client_set_maximized_vertical(globalconf.L, -1, true);
         else if(set == _NET_WM_STATE_TOGGLE)
-            client_setmaxvert(c, !c->ismaxvert);
+            client_set_maximized_vertical(globalconf.L, -1, !c->maximized_vertical);
     }
     else if(state == _NET_WM_STATE_ABOVE)
     {
         if(set == _NET_WM_STATE_REMOVE)
-            client_setabove(c, false);
+            client_set_above(globalconf.L, -1, false);
         else if(set == _NET_WM_STATE_ADD)
-            client_setabove(c, true);
+            client_set_above(globalconf.L, -1, true);
         else if(set == _NET_WM_STATE_TOGGLE)
-            client_setabove(c, !c->isabove);
+            client_set_above(globalconf.L, -1, !c->above);
     }
     else if(state == _NET_WM_STATE_BELOW)
     {
         if(set == _NET_WM_STATE_REMOVE)
-            client_setbelow(c, false);
+            client_set_below(globalconf.L, -1, false);
         else if(set == _NET_WM_STATE_ADD)
-            client_setbelow(c, true);
+            client_set_below(globalconf.L, -1, true);
         else if(set == _NET_WM_STATE_TOGGLE)
-            client_setbelow(c, !c->isbelow);
+            client_set_below(globalconf.L, -1, !c->below);
     }
     else if(state == _NET_WM_STATE_MODAL)
     {
         if(set == _NET_WM_STATE_REMOVE)
-            client_setmodal(c, false);
+            client_set_modal(globalconf.L, -1, false);
         else if(set == _NET_WM_STATE_ADD)
-            client_setmodal(c, true);
+            client_set_modal(globalconf.L, -1, true);
         else if(set == _NET_WM_STATE_TOGGLE)
-            client_setmodal(c, !c->ismodal);
+            client_set_modal(globalconf.L, -1, !c->modal);
     }
     else if(state == _NET_WM_STATE_HIDDEN)
     {
         if(set == _NET_WM_STATE_REMOVE)
-            client_setminimized(c, false);
+            client_set_minimized(globalconf.L, -1, false);
         else if(set == _NET_WM_STATE_ADD)
-            client_setminimized(c, true);
+            client_set_minimized(globalconf.L, -1, true);
         else if(set == _NET_WM_STATE_TOGGLE)
-            client_setminimized(c, !c->isminimized);
+            client_set_minimized(globalconf.L, -1, !c->minimized);
     }
     else if(state == _NET_WM_STATE_DEMANDS_ATTENTION)
     {
         if(set == _NET_WM_STATE_REMOVE)
-            client_seturgent(c, false);
+            client_set_urgent(globalconf.L, -1, false);
         else if(set == _NET_WM_STATE_ADD)
-            client_seturgent(c, true);
+            client_set_urgent(globalconf.L, -1, true);
         else if(set == _NET_WM_STATE_TOGGLE)
-            client_seturgent(c, !c->isurgent);
+            client_set_urgent(globalconf.L, -1, !c->urgent);
     }
 }
 
@@ -383,7 +385,7 @@ ewmh_process_client_message(xcb_client_message_event_t *ev)
             tag_array_t *tags = &c->screen->tags;
 
             if(ev->data.data32[0] == 0xffffffff)
-                c->issticky = true;
+                c->sticky = true;
             else
                 for(int i = 0; i < tags->len; i++)
                     if((int)ev->data.data32[0] == i)
@@ -423,29 +425,29 @@ ewmh_client_update_hints(client_t *c)
     xcb_atom_t state[10]; /* number of defined state atoms */
     int i = 0;
 
-    if(c->ismodal)
+    if(c->modal)
         state[i++] = _NET_WM_STATE_MODAL;
-    if(c->isfullscreen)
+    if(c->fullscreen)
         state[i++] = _NET_WM_STATE_FULLSCREEN;
-    if(c->ismaxvert)
+    if(c->maximized_vertical)
         state[i++] = _NET_WM_STATE_MAXIMIZED_VERT;
-    if(c->ismaxhoriz)
+    if(c->maximized_horizontal)
         state[i++] = _NET_WM_STATE_MAXIMIZED_HORZ;
-    if(c->issticky)
+    if(c->sticky)
         state[i++] = _NET_WM_STATE_STICKY;
-    if(c->skiptb)
+    if(c->skip_taskbar)
         state[i++] = _NET_WM_STATE_SKIP_TASKBAR;
-    if(c->isabove)
+    if(c->above)
         state[i++] = _NET_WM_STATE_ABOVE;
-    if(c->isbelow)
+    if(c->below)
         state[i++] = _NET_WM_STATE_BELOW;
-    if(c->isminimized)
+    if(c->minimized)
         state[i++] = _NET_WM_STATE_HIDDEN;
-    if(c->isurgent)
+    if(c->urgent)
         state[i++] = _NET_WM_STATE_DEMANDS_ATTENTION;
 
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
-                        c->win, _NET_WM_STATE, ATOM, 32, i, state);
+                        c->window, _NET_WM_STATE, ATOM, 32, i, state);
 }
 
 /** Update the client active desktop.
@@ -463,7 +465,7 @@ ewmh_client_update_desktop(client_t *c)
         if(is_client_tagged(c, tags->tab[i]))
         {
             xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
-                                c->win, _NET_WM_DESKTOP, CARDINAL, 32, 1, &i);
+                                c->window, _NET_WM_DESKTOP, CARDINAL, 32, 1, &i);
             return;
         }
 }
@@ -491,7 +493,7 @@ ewmh_update_client_strut(client_t *c)
     };
 
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
-                        c->win, _NET_WM_STRUT_PARTIAL, CARDINAL, 32, countof(state), state);
+                        c->window, _NET_WM_STRUT_PARTIAL, CARDINAL, 32, countof(state), state);
 }
 
 void
@@ -504,13 +506,13 @@ ewmh_client_check_hints(client_t *c)
     xcb_get_property_reply_t *reply;
 
     /* Send the GetProperty requests which will be processed later */
-    c0 = xcb_get_property_unchecked(globalconf.connection, false, c->win,
+    c0 = xcb_get_property_unchecked(globalconf.connection, false, c->window,
                                     _NET_WM_DESKTOP, XCB_GET_PROPERTY_TYPE_ANY, 0, 1);
 
-    c1 = xcb_get_property_unchecked(globalconf.connection, false, c->win,
+    c1 = xcb_get_property_unchecked(globalconf.connection, false, c->window,
                                     _NET_WM_STATE, ATOM, 0, UINT32_MAX);
 
-    c2 = xcb_get_property_unchecked(globalconf.connection, false, c->win,
+    c2 = xcb_get_property_unchecked(globalconf.connection, false, c->window,
                                     _NET_WM_WINDOW_TYPE, ATOM, 0, UINT32_MAX);
 
     reply = xcb_get_property_reply(globalconf.connection, c0, NULL);
@@ -520,7 +522,7 @@ ewmh_client_check_hints(client_t *c)
 
         desktop = *(uint32_t *) data;
         if(desktop == -1)
-            c->issticky = true;
+            c->sticky = true;
         else
             for(int i = 0; i < tags->len; i++)
                 if(desktop == i)
@@ -580,7 +582,7 @@ ewmh_process_client_strut(client_t *c, xcb_get_property_reply_t *strut_r)
 
     if(!strut_r)
     {
-        xcb_get_property_cookie_t strut_q = xcb_get_property_unchecked(globalconf.connection, false, c->win,
+        xcb_get_property_cookie_t strut_q = xcb_get_property_unchecked(globalconf.connection, false, c->window,
                                                                        _NET_WM_STRUT_PARTIAL, CARDINAL, 0, 12);
         strut_r = mstrut_r = xcb_get_property_reply(globalconf.connection, strut_q, NULL);
     }

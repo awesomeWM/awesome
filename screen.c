@@ -272,7 +272,7 @@ screen_client_moveto(client_t *c, screen_t *new_screen, bool dotag, bool doresiz
             untag_client(c, *old_tag);
 
         /* \todo move this to Lua */
-        if(!c->issticky)
+        if(!c->sticky)
             /* add new tags */
             foreach(new_tag, new_screen->tags)
                 if(tag_get_selected(*new_tag))
@@ -293,7 +293,7 @@ screen_client_moveto(client_t *c, screen_t *new_screen, bool dotag, bool doresiz
 
     area_t new_geometry = c->geometry;
 
-    if(c->isfullscreen)
+    if(c->fullscreen)
     {
         new_geometry = to;
         area_t new_f_geometry = c->geometries.fullscreen;

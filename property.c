@@ -45,14 +45,16 @@ property_update_wm_transient_for(client_t *c, xcb_get_property_reply_t *reply)
     {
         if(!xcb_get_wm_transient_for_reply(globalconf.connection,
                                             xcb_get_wm_transient_for_unchecked(globalconf.connection,
-                                                                               c->win),
+                                                                               c->window),
                                             &trans, NULL))
             return;
     }
 
-    c->type = WINDOW_TYPE_DIALOG;
-    c->transient_for = client_getbywin(trans);
-    client_setabove(c, false);
+    luaA_object_push(globalconf.L, c);
+    client_set_type(globalconf.L, -1, WINDOW_TYPE_DIALOG);
+    client_set_above(globalconf.L, -1, false);
+    client_set_transient_for(globalconf.L, -1, client_getbywin(trans));
+    lua_pop(globalconf.L, 1);
 }
 
 static int
@@ -77,12 +79,13 @@ property_update_wm_client_machine(client_t *c)
     ssize_t slen;
     char *value;
 
-    if(!xutil_text_prop_get(globalconf.connection, c->win,
+    if(!xutil_text_prop_get(globalconf.connection, c->window,
                             WM_CLIENT_MACHINE, &value, &slen))
         return;
 
-    p_delete(&c->machine);
-    c->machine = a_strdup(value);
+    luaA_object_push(globalconf.L, c);
+    client_set_machine(globalconf.L, -1, value);
+    lua_pop(globalconf.L, 1);
 }
 
 static int
@@ -107,12 +110,13 @@ property_update_wm_window_role(client_t *c)
     ssize_t slen;
     char *value;
 
-    if(!xutil_text_prop_get(globalconf.connection, c->win,
+    if(!xutil_text_prop_get(globalconf.connection, c->window,
                             WM_WINDOW_ROLE, &value, &slen))
         return;
 
-    p_delete(&c->role);
-    c->role = a_strdup(value);
+    luaA_object_push(globalconf.L, c);
+    client_set_role(globalconf.L, -1, value);
+    lua_pop(globalconf.L, 1);
 }
 
 static int
@@ -144,14 +148,14 @@ property_update_wm_client_leader(client_t *c, xcb_get_property_reply_t *reply)
 
     if(no_reply)
     {
-        client_leader_q = xcb_get_property_unchecked(globalconf.connection, false, c->win,
+        client_leader_q = xcb_get_property_unchecked(globalconf.connection, false, c->window,
                                                      WM_CLIENT_LEADER, WINDOW, 0, 32);
 
         reply = xcb_get_property_reply(globalconf.connection, client_leader_q, NULL);
     }
 
     if(reply && reply->value_len && (data = xcb_get_property_value(reply)))
-        c->leader_win = *(xcb_window_t *) data;
+        c->leader_window = *(xcb_window_t *) data;
 
     /* Only free when we created a reply ourselves. */
     if(no_reply)
@@ -190,7 +194,7 @@ property_update_wm_normal_hints(client_t *c, xcb_get_property_reply_t *reply)
     {
         if(!xcb_get_wm_normal_hints_reply(globalconf.connection,
                                           xcb_get_wm_normal_hints_unchecked(globalconf.connection,
-                                                                            c->win),
+                                                                            c->window),
                                           &c->size_hints, NULL))
             return;
     }
@@ -229,22 +233,22 @@ property_update_wm_hints(client_t *c, xcb_get_property_reply_t *reply)
     else
     {
         if(!xcb_get_wm_hints_reply(globalconf.connection,
-                                  xcb_get_wm_hints_unchecked(globalconf.connection, c->win),
+                                  xcb_get_wm_hints_unchecked(globalconf.connection, c->window),
                                   &wmh, NULL))
             return;
     }
 
-    bool isurgent = xcb_wm_hints_get_urgency(&wmh);
-    client_seturgent(c, isurgent);
+    luaA_object_push(globalconf.L, c);
+    client_set_urgent(globalconf.L, -1, xcb_wm_hints_get_urgency(&wmh));
     if(wmh.flags & XCB_WM_HINT_STATE &&
        wmh.initial_state == XCB_WM_STATE_WITHDRAWN)
-        client_setborder(c, 0);
+        client_set_border_width(globalconf.L, -1, 0);
 
     if(wmh.flags & XCB_WM_HINT_INPUT)
         c->nofocus = !wmh.input;
 
     if(wmh.flags & XCB_WM_HINT_WINDOW_GROUP)
-        c->group_win = wmh.window_group;
+        client_set_group_window(globalconf.L, -1, wmh.window_group);
 }
 
 static int
@@ -272,16 +276,13 @@ property_update_wm_name(client_t *c)
     char *name;
     ssize_t len;
 
-    if(!xutil_text_prop_get(globalconf.connection, c->win, _NET_WM_NAME, &name, &len))
-        if(!xutil_text_prop_get(globalconf.connection, c->win, WM_NAME, &name, &len))
+    if(!xutil_text_prop_get(globalconf.connection, c->window, _NET_WM_NAME, &name, &len))
+        if(!xutil_text_prop_get(globalconf.connection, c->window, WM_NAME, &name, &len))
             return;
 
-    p_delete(&c->name);
-
-    c->name = name;
-
-    /* call hook */
-    hook_property(c, "name");
+    luaA_object_push(globalconf.L, c);
+    client_set_name(globalconf.L, -1, name);
+    lua_pop(globalconf.L, 1);
 }
 
 /** Update WM_CLASS of a client.
@@ -301,16 +302,15 @@ property_update_wm_class(client_t *c, xcb_get_property_reply_t *reply)
     else
     {
         if(!xcb_get_wm_class_reply(globalconf.connection,
-                                   xcb_get_wm_class_unchecked(globalconf.connection, c->win),
+                                   xcb_get_wm_class_unchecked(globalconf.connection, c->window),
                                    &hint, NULL))
             return;
     }
 
-    p_delete(&c->instance);
-    p_delete(&c->class);
+    luaA_object_push(globalconf.L, c);
+    client_set_class_instance(globalconf.L, -1, hint.instance_name, hint.class_name);
+    lua_pop(globalconf.L, 1);
 
-    c->instance = a_strdup(hint.instance_name);
-    c->class = a_strdup(hint.class_name);
     /* only delete reply if we get it ourselves */
     if(!reply)
         xcb_get_wm_class_reply_wipe(&hint);
@@ -325,16 +325,13 @@ property_update_wm_icon_name(client_t *c)
     char *name;
     ssize_t len;
 
-    if(!xutil_text_prop_get(globalconf.connection, c->win, _NET_WM_ICON_NAME, &name, &len))
-        if(!xutil_text_prop_get(globalconf.connection, c->win, WM_ICON_NAME, &name, &len))
+    if(!xutil_text_prop_get(globalconf.connection, c->window, _NET_WM_ICON_NAME, &name, &len))
+        if(!xutil_text_prop_get(globalconf.connection, c->window, WM_ICON_NAME, &name, &len))
             return;
 
-    p_delete(&c->icon_name);
-
-    c->icon_name = name;
-
-    /* call hook */
-    hook_property(c, "icon_name");
+    luaA_object_push(globalconf.L, c);
+    client_set_icon_name(globalconf.L, -1, name);
+    lua_pop(globalconf.L, 1);
 }
 
 static int
@@ -401,6 +398,31 @@ property_handle_net_wm_strut_partial(void *data,
     return 0;
 }
 
+void
+property_update_net_wm_icon(client_t *c,
+                            xcb_get_property_reply_t *reply)
+{
+    luaA_object_push(globalconf.L, c);
+
+    if(reply)
+    {
+        if(ewmh_window_icon_from_reply(reply))
+        {
+            client_set_icon(globalconf.L, -2, -1);
+            /* remove icon */
+            lua_pop(globalconf.L, 1);
+        }
+    }
+    else if(ewmh_window_icon_get_reply(ewmh_window_icon_get_unchecked(c->window)))
+    {
+        client_set_icon(globalconf.L, -2, -1);
+        /* remove icon */
+        lua_pop(globalconf.L, 1);
+    }
+
+    lua_pop(globalconf.L, 1);
+}
+
 static int
 property_handle_net_wm_icon(void *data,
                             xcb_connection_t *connection,
@@ -412,18 +434,7 @@ property_handle_net_wm_icon(void *data,
     client_t *c = client_getbywin(window);
 
     if(c)
-    {
-        luaA_object_push(globalconf.L, c);
-        luaA_object_unref_item(globalconf.L, -1, c->icon);
-        if(ewmh_window_icon_from_reply(reply))
-            c->icon = luaA_object_ref_item(globalconf.L, -2, -1);
-        else
-            c->icon = NULL;
-        /* remove client */
-        lua_pop(globalconf.L, 1);
-        /* execute hook */
-        hook_property(c, "icon");
-    }
+        property_update_net_wm_icon(c, reply);
 
     return 0;
 }
@@ -437,7 +448,7 @@ property_update_net_wm_pid(client_t *c,
     if(no_reply)
     {
         xcb_get_property_cookie_t prop_c =
-            xcb_get_property_unchecked(globalconf.connection, false, c->win, _NET_WM_PID, CARDINAL, 0L, 1L);
+            xcb_get_property_unchecked(globalconf.connection, false, c->window, _NET_WM_PID, CARDINAL, 0L, 1L);
         reply = xcb_get_property_reply(globalconf.connection, prop_c, NULL);
     }
 
@@ -445,7 +456,11 @@ property_update_net_wm_pid(client_t *c,
     {
         uint32_t *rdata = xcb_get_property_value(reply);
         if(rdata)
-            c->pid = *rdata;
+        {
+            luaA_object_push(globalconf.L, c);
+            client_set_pid(globalconf.L, -1, *rdata);
+            lua_pop(globalconf.L, 1);
+        }
     }
 
     if(no_reply)
@@ -479,7 +494,7 @@ property_update_wm_protocols(client_t *c)
     /* If this fails for any reason, we still got the old value */
     if(xcb_get_wm_protocols_reply(globalconf.connection,
                                   xcb_get_wm_protocols_unchecked(globalconf.connection,
-                                                                 c->win, WM_PROTOCOLS),
+                                                                 c->window, WM_PROTOCOLS),
                                   &protocols, NULL))
     {
         xcb_get_wm_protocols_reply_wipe(&c->protocols);
@@ -577,7 +592,11 @@ property_handle_net_wm_opacity(void *data __attribute__ ((unused)),
     {
         client_t *c = client_getbywin(window);
         if(c)
-            c->opacity = window_opacity_get_from_reply(reply);
+        {
+            luaA_object_push(globalconf.L, c);
+            client_set_opacity(globalconf.L, -1, window_opacity_get_from_reply(reply));
+            lua_pop(globalconf.L, 1);
+        }
     }
 
     return 0;

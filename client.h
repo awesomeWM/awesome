@@ -91,46 +91,46 @@ struct client_t
     /** Strut */
     strut_t strut;
     /** Border width and pre-fullscreen border width */
-    int border, border_fs;
+    int border_width, border_width_fs;
     xcolor_t border_color;
     /** True if the client is sticky */
-    bool issticky;
+    bool sticky;
     /** Has urgency hint */
-    bool isurgent;
+    bool urgent;
     /** True if the client is hidden */
-    bool ishidden;
+    bool hidden;
     /** True if the client is minimized */
-    bool isminimized;
+    bool minimized;
     /** True if the client is fullscreen */
-    bool isfullscreen;
+    bool fullscreen;
     /** True if the client is maximized horizontally */
-    bool ismaxhoriz;
+    bool maximized_horizontal;
     /** True if the client is maximized vertically */
-    bool ismaxvert;
+    bool maximized_vertical;
     /** True if the client is above others */
-    bool isabove;
+    bool above;
     /** True if the client is below others */
-    bool isbelow;
+    bool below;
     /** True if the client is modal */
-    bool ismodal;
+    bool modal;
     /** True if the client is on top */
-    bool isontop;
+    bool ontop;
     /** True if a client is banned to a position outside the viewport.
      * Note that the geometry remains unchanged and that the window is still mapped.
      */
     bool isbanned;
     /** true if the client must be skipped from task bar client list */
-    bool skiptb;
+    bool skip_taskbar;
     /** True if the client cannot have focus */
     bool nofocus;
     /** The window type */
     window_type_t type;
     /** Window of the client */
-    xcb_window_t win;
+    xcb_window_t window;
     /** Window of the group leader */
-    xcb_window_t group_win;
+    xcb_window_t group_window;
     /** Window holding command needed to start it (session management related) */
-    xcb_window_t leader_win;
+    xcb_window_t leader_window;
     /** Client's WM_PROTOCOLS property */
     xcb_get_wm_protocols_reply_t protocols;
     /** Client logical screen */
@@ -185,26 +185,39 @@ area_t client_geometry_hints(client_t *, area_t);
 bool client_resize(client_t *, area_t, bool);
 void client_unmanage(client_t *);
 void client_kill(client_t *);
-void client_setsticky(client_t *, bool);
-void client_setabove(client_t *, bool);
-void client_setbelow(client_t *, bool);
-void client_setmodal(client_t *, bool);
-void client_setontop(client_t *, bool);
-void client_setfullscreen(client_t *, bool);
-void client_setmaxhoriz(client_t *, bool);
-void client_setmaxvert(client_t *, bool);
-void client_setminimized(client_t *, bool);
-void client_setborder(client_t *, int);
-void client_seturgent(client_t *, bool);
+void client_set_sticky(lua_State *, int, bool);
+void client_set_above(lua_State *, int, bool);
+void client_set_below(lua_State *, int, bool);
+void client_set_modal(lua_State *, int, bool);
+void client_set_ontop(lua_State *, int, bool);
+void client_set_fullscreen(lua_State *, int, bool);
+void client_set_maximized_horizontal(lua_State *, int, bool);
+void client_set_maximized_vertical(lua_State *, int, bool);
+void client_set_minimized(lua_State *, int, bool);
+void client_set_border_width(lua_State *, int, int);
+void client_set_urgent(lua_State *, int, bool);
+void client_set_pid(lua_State *, int, uint32_t);
+void client_set_role(lua_State *, int, const char *);
+void client_set_machine(lua_State *, int, const char *);
+void client_set_icon_name(lua_State *, int, const char *);
+void client_set_class_instance(lua_State *, int, const char *, const char *);
+void client_set_type(lua_State *L, int, window_type_t);
+void client_set_transient_for(lua_State *L, int, client_t *);
+void client_set_name(lua_State *L, int, const char *);
+void client_set_group_window(lua_State *, int, xcb_window_t);
+void client_set_icon(lua_State *, int, int);
+void client_set_skip_taskbar(lua_State *, int, bool);
+void client_set_opacity(lua_State *, int, double);
 void client_focus(client_t *);
 void client_focus_update(client_t *);
 void client_unfocus(client_t *);
 void client_unfocus_update(client_t *);
 void client_stack_refresh(void);
 bool client_hasproto(client_t *, xcb_atom_t);
-void client_setfocus(client_t *, bool);
+void client_set_focus(client_t *, bool);
 void client_ignore_enterleave_events(void);
 void client_restore_enterleave_events(void);
+void client_class_setup(lua_State *);
 
 static inline void
 client_stack(void)
@@ -278,7 +291,7 @@ client_isfixed(client_t *c)
 static inline bool
 client_isvisible(client_t *c, screen_t *screen)
 {
-    return (!c->ishidden && !c->isminimized && client_maybevisible(c, screen));
+    return (!c->hidden && !c->minimized && client_maybevisible(c, screen));
 }
 
 /** Check if a client has strut information.

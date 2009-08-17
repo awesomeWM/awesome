@@ -254,7 +254,7 @@ event_handle_configurerequest(void *data __attribute__ ((unused)),
 
     if((c = client_getbywin(ev->window)))
     {
-        geometry = titlebar_geometry_remove(c->titlebar, c->border, c->geometry);
+        geometry = titlebar_geometry_remove(c->titlebar, c->border_width, c->geometry);
 
         if(ev->value_mask & XCB_CONFIG_WINDOW_X)
             geometry.x = ev->x;
@@ -266,7 +266,11 @@ event_handle_configurerequest(void *data __attribute__ ((unused)),
             geometry.height = ev->height;
 
         if(ev->value_mask & XCB_CONFIG_WINDOW_BORDER_WIDTH)
-            client_setborder(c, ev->border_width);
+        {
+            luaA_object_push(globalconf.L, c);
+            client_set_border_width(globalconf.L, -1, ev->border_width);
+            lua_pop(globalconf.L, 1);
+        }
 
         /* Clients are not allowed to directly mess with stacking parameters. */
         ev->value_mask &= ~(XCB_CONFIG_WINDOW_SIBLING |
@@ -274,13 +278,13 @@ event_handle_configurerequest(void *data __attribute__ ((unused)),
 
         /** Configure request are sent with size relative to real (internal)
          * window size, i.e. without titlebars and borders. */
-        geometry = titlebar_geometry_add(c->titlebar, c->border, geometry);
+        geometry = titlebar_geometry_add(c->titlebar, c->border_width, geometry);
 
         if(!client_resize(c, geometry, false))
         {
             /* Resize wasn't officially needed, but we don't want to break expectations. */
-            geometry = titlebar_geometry_remove(c->titlebar, c->border, c->geometry);
-            window_configure(c->win, geometry, c->border);
+            geometry = titlebar_geometry_remove(c->titlebar, c->border_width, c->geometry);
+            window_configure(c->window, geometry, c->border_width);
         }
     }
     else
@@ -607,9 +611,11 @@ event_handle_maprequest(void *data __attribute__ ((unused)),
     else if((c = client_getbywin(ev->window)))
     {
         /* Check that it may be visible, but not asked to be hidden */
-        if(client_maybevisible(c, c->screen) && !c->ishidden)
+        if(client_maybevisible(c, c->screen) && !c->hidden)
         {
-            client_setminimized(c, false);
+            luaA_object_push(globalconf.L, c);
+            client_set_minimized(globalconf.L, -1, false);
+            lua_pop(globalconf.L, 1);
             /* it will be raised, so just update ourself */
             client_raise(c);
         }
@@ -651,7 +657,7 @@ event_handle_unmapnotify(void *data __attribute__ ((unused)),
     {
         if(ev->event == xutil_screen_get(connection, c->phys_screen)->root
            && XCB_EVENT_SENT(ev)
-           && window_state_get_reply(window_state_get_unchecked(c->win)) == XCB_WM_STATE_NORMAL)
+           && window_state_get_reply(window_state_get_unchecked(c->window)) == XCB_WM_STATE_NORMAL)
             client_unmanage(c);
     }
     else
@@ -717,7 +723,11 @@ event_handle_clientmessage(void *data __attribute__ ((unused)),
         if((c = client_getbywin(ev->window))
            && ev->format == 32
            && ev->data.data32[0] == XCB_WM_STATE_ICONIC)
-            client_setminimized(c, true);
+        {
+            luaA_object_push(globalconf.L, c);
+            client_set_minimized(globalconf.L, -1, true);
+            lua_pop(globalconf.L, 1);
+        }
     }
     else if(ev->type == _XEMBED)
         return xembed_process_client_message(ev);
@@ -766,8 +776,8 @@ event_handle_mappingnotify(void *data,
         foreach(_c, globalconf.clients)
         {
             client_t *c = *_c;
-            xcb_ungrab_key(connection, XCB_GRAB_ANY, c->win, XCB_BUTTON_MASK_ANY);
-            window_grabkeys(c->win, &c->keys);
+            xcb_ungrab_key(connection, XCB_GRAB_ANY, c->window, XCB_BUTTON_MASK_ANY);
+            window_grabkeys(c->window, &c->keys);
         }
     }
 

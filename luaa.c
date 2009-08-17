@@ -55,8 +55,6 @@ extern const struct luaL_reg awesome_mouse_methods[];
 extern const struct luaL_reg awesome_mouse_meta[];
 extern const struct luaL_reg awesome_screen_methods[];
 extern const struct luaL_reg awesome_screen_meta[];
-extern const struct luaL_reg awesome_client_methods[];
-extern const struct luaL_reg awesome_client_meta[];
 
 /** Quit awesome.
  * \param L The Lua VM state.
@@ -745,8 +743,7 @@ luaA_init(xdgHandle* xdg)
     widget_class_setup(L);
 
     /* Export client */
-    luaA_class_setup(L, &client_class, "client", (lua_class_allocator_t) client_new,
-                     awesome_client_methods, awesome_client_meta);
+    client_class_setup(L);
 
     /* Export keys */
     key_class_setup(L);
