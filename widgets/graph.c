@@ -305,7 +305,7 @@ graph_draw(widget_t *widget, draw_context_t *ctx,
 static int
 luaA_graph_plot_properties_set(lua_State *L)
 {
-    widget_t *widget = luaL_checkudata(L, 1, "widget");
+    widget_t *widget = luaA_checkudata(L, 1, &widget_class);
     graph_data_t *d = widget->data;
     float max_value;
     const char *title, *buf;
@@ -370,7 +370,7 @@ luaA_graph_plot_properties_set(lua_State *L)
 static int
 luaA_graph_plot_data_add(lua_State *L)
 {
-    widget_t *widget = luaL_checkudata(L, 1, "widget");
+    widget_t *widget = luaA_checkudata(L, 1, &widget_class);
     graph_data_t *d = widget->data;
     plot_t *plot = NULL;
     const char *title = luaL_checkstring(L, 2);
@@ -448,7 +448,7 @@ luaA_graph_plot_data_add(lua_State *L)
 static int
 luaA_graph_index(lua_State *L, awesome_token_t token)
 {
-    widget_t *widget = luaL_checkudata(L, 1, "widget");
+    widget_t *widget = luaA_checkudata(L, 1, &widget_class);
     graph_data_t *d = widget->data;
 
     switch(token)
@@ -500,7 +500,7 @@ static int
 luaA_graph_newindex(lua_State *L, awesome_token_t token)
 {
     size_t len;
-    widget_t *widget = luaL_checkudata(L, 1, "widget");
+    widget_t *widget = luaA_checkudata(L, 1, &widget_class);
     graph_data_t *d = widget->data;
     const char *buf;
     int width;

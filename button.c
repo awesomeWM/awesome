@@ -91,7 +91,7 @@ luaA_button_array_set(lua_State *L, int oidx, int idx, button_array_t *buttons)
 
     lua_pushnil(L);
     while(lua_next(L, idx))
-        if(luaA_toudata(L, -1, "button"))
+        if(luaA_toudata(L, -1, &button_class))
             button_array_append(buttons, luaA_object_ref_item(L, oidx, -1));
         else
             lua_pop(L, 1);

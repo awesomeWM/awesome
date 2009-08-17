@@ -55,8 +55,8 @@ typedef struct
 
 typedef int (*lua_class_propfunc_t)(lua_State *, lua_object_t *);
 
-int luaA_type(lua_State *, int);
 const char * luaA_typename(lua_State *, int);
+lua_class_t * luaA_class_get(lua_State *, int);
 
 void luaA_class_add_signal(lua_State *, lua_class_t *, const char *, int);
 void luaA_class_remove_signal(lua_State *, lua_class_t *, const char *, int);
@@ -73,6 +73,9 @@ int luaA_usemetatable(lua_State *, int, int);
 int luaA_class_index(lua_State *);
 int luaA_class_newindex(lua_State *);
 int luaA_class_new(lua_State *, lua_class_t *);
+
+void * luaA_checkudata(lua_State *, int, lua_class_t *);
+void * luaA_toudata(lua_State *L, int ud, lua_class_t *);
 
 #define LUA_CLASS_FUNCS(prefix, lua_class) \
     static inline int                                                          \

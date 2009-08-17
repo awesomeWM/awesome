@@ -34,34 +34,61 @@ struct lua_class_property
     lua_class_propfunc_t newindex;
 };
 
-typedef struct
+DO_ARRAY(lua_class_t *, lua_class, DO_NOTHING)
+
+static lua_class_array_t luaA_classes;
+
+/** Convert a object to a udata if possible.
+ * \param L The Lua VM state.
+ * \param ud The index.
+ * \param class The wanted class.
+ * \return A pointer to the object, NULL otherwise.
+ */
+void *
+luaA_toudata(lua_State *L, int ud, lua_class_t *class)
 {
-    int id;
-    lua_class_t *class;
-} lua_class_id_t;
+    void *p = lua_touserdata(L, ud);
+    if(p) /* value is a userdata? */
+        if(lua_getmetatable(L, ud)) /* does it have a metatable? */
+        {
+            lua_pushlightuserdata(L, class);
+            lua_rawget(L, LUA_REGISTRYINDEX);
+            if(!lua_rawequal(L, -1, -2)) /* does it have the correct mt? */
+                p = NULL;
+            lua_pop(L, 2); /* remove both metatables */
+        }
+    return p;
+}
 
-DO_ARRAY(lua_class_id_t, lua_class_id, DO_NOTHING)
+/** Check for a udata class.
+ * \param L The Lua VM state.
+ * \param ud The object index on the stack.
+ * \param class The wanted class.
+ */
+void *
+luaA_checkudata(lua_State *L, int ud, lua_class_t *class)
+{
+    void *p = luaA_toudata(L, ud, class);
+    if(!p)
+        luaL_typerror(L, ud, class->name);
+    return p;
+}
 
-static lua_class_id_array_t luaA_classes;
-
-/* This has to be initialized to the highest natural type of Lua */
-#define LUA_HIGHEST_TYPE LUA_TTHREAD
-
-/** Enhanced version of lua_type that recognizes setup Lua classes.
+/** Get an object lua_class.
  * \param L The Lua VM state.
  * \param idx The index of the object on the stack.
  */
-int
-luaA_type(lua_State *L, int idx)
+lua_class_t *
+luaA_class_get(lua_State *L, int idx)
 {
     int type = lua_type(L, idx);
 
     if(type == LUA_TUSERDATA)
         foreach(class, luaA_classes)
-            if(luaA_toudata(L, idx, class->class->name))
-                return class->id;
+            if(luaA_toudata(L, idx, *class))
+                return *class;
 
-    return type;
+    return NULL;
 }
 
 /** Enhanced version of lua_typename that recognizes setup Lua classes.
@@ -71,12 +98,14 @@ luaA_type(lua_State *L, int idx)
 const char *
 luaA_typename(lua_State *L, int idx)
 {
-    int type = luaA_type(L, idx);
+    int type = lua_type(L, idx);
 
-    if(type > LUA_HIGHEST_TYPE)
-        foreach(class, luaA_classes)
-            if(class->id == type)
-                return class->class->name;
+    if(type == LUA_TUSERDATA)
+    {
+        lua_class_t *lua_class = luaA_class_get(L, idx);
+        if(lua_class)
+            return lua_class->name;
+    }
 
     return lua_typename(L, type);
 }
@@ -129,18 +158,27 @@ luaA_class_setup(lua_State *L, lua_class_t *class,
                  const struct luaL_reg methods[],
                  const struct luaL_reg meta[])
 {
-    static int class_type_counter = LUA_HIGHEST_TYPE;
+    /* Create the metatable */
+    lua_newtable(L);
+    /* Register it with class pointer as key in the registry */
+    lua_pushlightuserdata(L, class);
+    /* Duplicate the metatable */
+    lua_pushvalue(L, -2);
+    lua_rawset(L, LUA_REGISTRYINDEX);
 
-    luaA_openlib(L, name, methods, meta);
+    lua_pushvalue(L, -1);           /* dup metatable                      2 */
+    lua_setfield(L, -2, "__index"); /* metatable.__index = metatable      1 */
+
+    luaL_register(L, NULL, meta);                                      /* 1 */
+    luaL_register(L, name, methods);                                   /* 2 */
+    lua_pushvalue(L, -1);           /* dup self as metatable              3 */
+    lua_setmetatable(L, -2);        /* set self as metatable              2 */
+    lua_pop(L, 2);
 
     class->allocator = allocator;
     class->name = name;
 
-    lua_class_id_array_append(&luaA_classes, (lua_class_id_t)
-                              {
-                                  .id = ++class_type_counter,
-                                  .class = class,
-                              });
+    lua_class_array_append(&luaA_classes, class);
 }
 
 void
@@ -214,29 +252,6 @@ lua_class_property_array_getbyid(lua_class_property_array_t *arr,
     return lua_class_property_array_lookup(arr, &lookup_prop);
 }
 
-/** Get the class of an object.
- * \param L The Lua VM state.
- * \param idx The index of the object on the stack.
- * \return The class if found, NULL otherwise.
- */
-static lua_class_t *
-luaA_class_get(lua_State *L, int idx)
-{
-    int type = luaA_type(L, 1);
-
-    /* Find the class. */
-    lua_class_t *class = NULL;
-
-    foreach(classid, luaA_classes)
-        if(classid->id == type)
-        {
-            class = classid->class;
-            break;
-        }
-
-    return class;
-}
-
 /** Get a property of a object.
  * \param L The Lua VM state.
  * \param lua_class The Lua class.
@@ -271,7 +286,7 @@ luaA_class_index(lua_State *L)
 
     /* Property does exist and has an index callback */
     if(prop && prop->index)
-        return prop->index(L, luaL_checkudata(L, 1, class->name));
+        return prop->index(L, luaA_checkudata(L, 1, class));
 
     return 0;
 }
@@ -293,7 +308,7 @@ luaA_class_newindex(lua_State *L)
 
     /* Property does exist and has a newindex callback */
     if(prop && prop->newindex)
-        return prop->newindex(L, luaL_checkudata(L, 1, class->name));
+        return prop->newindex(L, luaA_checkudata(L, 1, class));
 
     return 0;
 }

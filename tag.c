@@ -26,7 +26,7 @@
 #include "widget.h"
 
 static lua_class_t tag_class;
-LUA_OBJECT_FUNCS(tag_class, tag_t, tag, "tag")
+LUA_OBJECT_FUNCS(tag_class, tag_t, tag)
 
 void
 tag_unref_simplified(tag_t **tag)
@@ -41,7 +41,7 @@ tag_unref_simplified(tag_t **tag)
 static int
 luaA_tag_gc(lua_State *L)
 {
-    tag_t *tag = luaL_checkudata(L, 1, "tag");
+    tag_t *tag = luaA_checkudata(L, 1, &tag_class);
     client_array_wipe(&tag->clients);
     p_delete(&tag->name);
     return luaA_object_gc(L);
@@ -55,7 +55,7 @@ luaA_tag_gc(lua_State *L)
 static void
 tag_view(lua_State *L, int udx, bool view)
 {
-    tag_t *tag = luaL_checkudata(L, udx, "tag");
+    tag_t *tag = luaA_checkudata(L, udx, &tag_class);
     if(tag->selected != view)
     {
         tag->selected = view;
@@ -92,7 +92,7 @@ tag_view(lua_State *L, int udx, bool view)
 void
 tag_append_to_screen(lua_State *L, int udx, screen_t *s)
 {
-    tag_t *tag = luaL_checkudata(globalconf.L, udx, "tag");
+    tag_t *tag = luaA_checkudata(globalconf.L, udx, &tag_class);
 
     /* can't attach a tag twice */
     if(tag->screen)
@@ -306,7 +306,7 @@ luaA_tag_new(lua_State *L)
 static int
 luaA_tag_clients(lua_State *L)
 {
-    tag_t *tag = luaL_checkudata(L, 1, "tag");
+    tag_t *tag = luaA_checkudata(L, 1, &tag_class);
     client_array_t *clients = &tag->clients;
     int i;
 

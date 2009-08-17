@@ -139,6 +139,15 @@ luaA_object_decref(lua_State *L, int tud, void *pointer)
     }
 }
 
+int
+luaA_settype(lua_State *L, lua_class_t *lua_class)
+{
+    lua_pushlightuserdata(L, lua_class);
+    lua_rawget(L, LUA_REGISTRYINDEX);
+    lua_setmetatable(L, -2);
+    return 1;
+}
+
 /** Add a signal to an object.
  * \param L The Lua VM state.
  * \param oud The object index on the stack.
@@ -216,6 +225,26 @@ int
 luaA_object_emit_signal_simple(lua_State *L)
 {
     luaA_object_emit_signal(L, 1, luaL_checkstring(L, 2), lua_gettop(L) - 2);
+    return 0;
+}
+
+int
+luaA_object_tostring(lua_State *L)
+{
+    lua_class_t *lua_class = luaA_class_get(L, 1);
+    lua_pushfstring(L, "%s: %p", lua_class->name, luaA_checkudata(L, 1, lua_class));
+    return 1;
+}
+
+/** Garbage collect a Lua object.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ */
+int
+luaA_object_gc(lua_State *L)
+{
+    lua_object_t *item = lua_touserdata(L, 1);
+    signal_array_wipe(&item->signals);
     return 0;
 }
 

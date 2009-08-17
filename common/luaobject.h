@@ -24,16 +24,9 @@
 
 #include "common/luaclass.h"
 
-static inline int
-luaA_settype(lua_State *L, const char *type)
-{
-    luaL_getmetatable(L, type);
-    lua_setmetatable(L, -2);
-    return 1;
-}
-
 #define LUAA_OBJECT_REGISTRY_KEY "awesome.object.registry"
 
+int luaA_settype(lua_State *, lua_class_t *);
 void luaA_object_setup(lua_State *);
 void * luaA_object_incref(lua_State *, int, int);
 void luaA_object_decref(lua_State *, int, void *);
@@ -149,14 +142,14 @@ int luaA_object_add_signal_simple(lua_State *);
 int luaA_object_remove_signal_simple(lua_State *);
 int luaA_object_emit_signal_simple(lua_State *);
 
-#define LUA_OBJECT_FUNCS(lua_class, type, prefix, lua_type)                    \
+#define LUA_OBJECT_FUNCS(lua_class, type, prefix)                              \
     LUA_CLASS_FUNCS(prefix, lua_class)                                         \
     static inline type *                                                       \
     prefix##_new(lua_State *L)                                                 \
     {                                                                          \
         type *p = lua_newuserdata(L, sizeof(type));                            \
         p_clear(p, 1);                                                         \
-        luaA_settype(L, lua_type);                                             \
+        luaA_settype(L, &(lua_class));                                         \
         lua_newtable(L);                                                       \
         lua_newtable(L);                                                       \
         lua_setmetatable(L, -2);                                               \
@@ -164,13 +157,6 @@ int luaA_object_emit_signal_simple(lua_State *);
         lua_pushvalue(L, -1);                                                  \
         luaA_class_emit_signal(L, &(lua_class), "new", 1);                     \
         return p;                                                              \
-    }                                                                          \
-                                                                               \
-    static inline int                                                          \
-    luaA_##prefix##_tostring(lua_State *L)                                     \
-    {                                                                          \
-        lua_pushfstring(L, lua_type ": %p", luaL_checkudata(L, 1, lua_type));  \
-        return 1;                                                              \
     }
 
 #define LUA_OBJECT_EXPORT_PROPERTY(pfx, type, field, pusher) \
@@ -181,20 +167,11 @@ int luaA_object_emit_signal_simple(lua_State *);
         return 1; \
     }
 
-/** Garbage collect a Lua object.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- */
-static inline int
-luaA_object_gc(lua_State *L)
-{
-    lua_object_t *item = lua_touserdata(L, 1);
-    signal_array_wipe(&item->signals);
-    return 0;
-}
+int luaA_object_tostring(lua_State *);
+int luaA_object_gc(lua_State *);
 
 #define LUA_OBJECT_META(prefix) \
-    { "__tostring", luaA_##prefix##_tostring }, \
+    { "__tostring", luaA_object_tostring }, \
     { "add_signal", luaA_object_add_signal_simple }, \
     { "remove_signal", luaA_object_remove_signal_simple }, \
     { "emit_signal", luaA_object_emit_signal_simple },

@@ -33,7 +33,7 @@ typedef struct
 } atimer_t;
 
 static lua_class_t timer_class;
-LUA_OBJECT_FUNCS(timer_class, atimer_t, timer, "timer")
+LUA_OBJECT_FUNCS(timer_class, atimer_t, timer)
 
 static void
 ev_timer_emit_signal(struct ev_loop *loop, struct ev_timer *w, int revents)
@@ -47,7 +47,7 @@ static int
 luaA_timer_new(lua_State *L)
 {
     luaA_class_new(L, &timer_class);
-    atimer_t *timer = luaL_checkudata(L, -1, "timer");
+    atimer_t *timer = luaA_checkudata(L, -1, &timer_class);
     timer->timer.data = timer;
     ev_set_cb(&timer->timer, ev_timer_emit_signal);
     return 1;
@@ -72,7 +72,7 @@ luaA_timer_get_timeout(lua_State *L, atimer_t *timer)
 static int
 luaA_timer_start(lua_State *L)
 {
-    atimer_t *timer = luaL_checkudata(L, 1, "timer");
+    atimer_t *timer = luaA_checkudata(L, 1, &timer_class);
     if(timer->started)
         luaA_warn(L, "timer already started");
     else
@@ -87,7 +87,7 @@ luaA_timer_start(lua_State *L)
 static int
 luaA_timer_stop(lua_State *L)
 {
-    atimer_t *timer = luaL_checkudata(L, 1, "timer");
+    atimer_t *timer = luaA_checkudata(L, 1, &timer_class);
     if(timer->started)
     {
         ev_timer_stop(globalconf.loop, &timer->timer);

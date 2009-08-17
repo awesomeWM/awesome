@@ -32,8 +32,7 @@
 #include "common/atoms.h"
 #include "common/xutil.h"
 
-static lua_class_t widget_class;
-LUA_OBJECT_FUNCS(widget_class, widget_t, widget, "widget");
+LUA_OBJECT_FUNCS(widget_class, widget_t, widget);
 
 /** Collect a widget structure.
  * \param L The Lua VM state.
@@ -42,7 +41,7 @@ LUA_OBJECT_FUNCS(widget_class, widget_t, widget, "widget");
 static int
 luaA_widget_gc(lua_State *L)
 {
-    widget_t *widget = luaL_checkudata(L, 1, "widget");
+    widget_t *widget = luaA_checkudata(L, 1, &widget_class);
     if(widget->destructor)
         widget->destructor(widget);
     button_array_wipe(&widget->buttons);
@@ -115,7 +114,7 @@ luaA_table2widgets(lua_State *L, widget_node_array_t *widgets)
     }
     else
     {
-        widget_t *widget = luaA_toudata(L, -1, "widget");
+        widget_t *widget = luaA_toudata(L, -1, &widget_class);
         if(widget)
         {
             widget_node_t w;
@@ -405,7 +404,7 @@ luaA_widget_new(lua_State *L)
 {
     luaA_class_new(L, &widget_class);
 
-    widget_t *w = luaL_checkudata(L, -1, "widget");
+    widget_t *w = luaA_checkudata(L, -1, &widget_class);
     /* Set visible by default. */
     w->isvisible = true;
 
@@ -423,7 +422,7 @@ luaA_widget_new(lua_State *L)
 static int
 luaA_widget_buttons(lua_State *L)
 {
-    widget_t *widget = luaL_checkudata(L, 1, "widget");
+    widget_t *widget = luaA_checkudata(L, 1, &widget_class);
 
     if(lua_gettop(L) == 2)
     {
@@ -455,7 +454,7 @@ luaA_widget_index(lua_State *L)
         return 1;
 
     /* Then call special widget index */
-    widget_t *widget = luaL_checkudata(L, 1, "widget");
+    widget_t *widget = luaA_checkudata(L, 1, &widget_class);
     return widget->index ? widget->index(L, token) : 0;
 }
 
@@ -474,14 +473,14 @@ luaA_widget_newindex(lua_State *L)
     luaA_class_newindex(L);
 
     /* Then call special widget newindex */
-    widget_t *widget = luaL_checkudata(L, 1, "widget");
+    widget_t *widget = luaA_checkudata(L, 1, &widget_class);
     return widget->newindex ? widget->newindex(L, token) : 0;
 }
 
 static int
 luaA_widget_extents(lua_State *L)
 {
-    widget_t *widget = luaL_checkudata(L, 1, "widget");
+    widget_t *widget = luaA_checkudata(L, 1, &widget_class);
     area_t g = {
         .x = 0,
         .y = 0,

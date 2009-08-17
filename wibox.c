@@ -37,7 +37,7 @@
 static int
 luaA_wibox_gc(lua_State *L)
 {
-    wibox_t *wibox = luaL_checkudata(L, 1, "wibox");
+    wibox_t *wibox = luaA_checkudata(L, 1, &wibox_class);
     p_delete(&wibox->cursor);
     wibox_wipe(wibox);
     button_array_wipe(&wibox->buttons);
@@ -839,7 +839,7 @@ static int
 luaA_wibox_index(lua_State *L)
 {
     size_t len;
-    wibox_t *wibox = luaL_checkudata(L, 1, "wibox");
+    wibox_t *wibox = luaA_checkudata(L, 1, &wibox_class);
     const char *attr = luaL_checklstring(L, 2, &len);
 
     if(luaA_usemetatable(L, 1, 2))
@@ -924,7 +924,7 @@ luaA_wibox_index(lua_State *L)
 static int
 luaA_wibox_geometry(lua_State *L)
 {
-    wibox_t *wibox = luaL_checkudata(L, 1, "wibox");
+    wibox_t *wibox = luaA_checkudata(L, 1, &wibox_class);
 
     if(lua_gettop(L) == 2)
     {
@@ -961,7 +961,7 @@ static int
 luaA_wibox_newindex(lua_State *L)
 {
     size_t len;
-    wibox_t *wibox = luaL_checkudata(L, 1, "wibox");
+    wibox_t *wibox = luaA_checkudata(L, 1, &wibox_class);
     const char *buf, *attr = luaL_checklstring(L, 2, &len);
     awesome_token_t tok;
 
@@ -1153,7 +1153,7 @@ luaA_wibox_newindex(lua_State *L)
 static int
 luaA_wibox_buttons(lua_State *L)
 {
-    wibox_t *wibox = luaL_checkudata(L, 1, "wibox");
+    wibox_t *wibox = luaA_checkudata(L, 1, &wibox_class);
 
     if(lua_gettop(L) == 2)
     {

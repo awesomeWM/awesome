@@ -35,7 +35,7 @@
 client_t *
 luaA_client_checkudata(lua_State *L, int ud)
 {
-    client_t *c = luaL_checkudata(L, ud, "client");
+    client_t *c = luaA_checkudata(L, ud, &client_class);
     if(c->invalid)
         luaL_error(L, "client is invalid\n");
     return c;
@@ -48,7 +48,7 @@ luaA_client_checkudata(lua_State *L, int ud)
 static int
 luaA_client_gc(lua_State *L)
 {
-    client_t *c = luaL_checkudata(L, 1, "client");
+    client_t *c = luaA_checkudata(L, 1, &client_class);
     button_array_wipe(&c->buttons);
     key_array_wipe(&c->keys);
     xcb_get_wm_protocols_reply_wipe(&c->protocols);

@@ -167,7 +167,7 @@ ARRAY_FUNCS(client_t *, client, DO_NOTHING)
 /** Client class */
 lua_class_t client_class;
 
-LUA_OBJECT_FUNCS(client_class, client_t, client, "client")
+LUA_OBJECT_FUNCS(client_class, client_t, client)
 
 #define client_need_reban(c) \
     do { \

@@ -345,7 +345,7 @@ luaA_wtable_newindex(lua_State *L)
     /* get current key value in content table */
     lua_rawget(L, lua_upvalueindex(1));
     /* if value is a widget, notify change */
-    if(lua_istable(L, -1) || luaA_toudata(L, -1, "widget"))
+    if(lua_istable(L, -1) || luaA_toudata(L, -1, &widget_class))
         invalid = true;
 
     lua_pop(L, 1); /* remove value */
@@ -356,7 +356,7 @@ luaA_wtable_newindex(lua_State *L)
         luaA_table2wtable(L);
         invalid = true;
     }
-    else if(!invalid && luaA_toudata(L, 3, "widget"))
+    else if(!invalid && luaA_toudata(L, 3, &widget_class))
         invalid = true;
 
     /* upvalue 1 is content table */

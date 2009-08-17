@@ -443,7 +443,7 @@ static int
 luaA_progressbar_bar_properties_set(lua_State *L)
 {
     size_t len;
-    widget_t *widget = luaL_checkudata(L, 1, "widget");
+    widget_t *widget = luaA_checkudata(L, 1, &widget_class);
     const char *buf, *title = luaL_checkstring(L, 2);
     bar_t *bar;
     progressbar_data_t *d = widget->data;
@@ -508,7 +508,7 @@ luaA_progressbar_bar_properties_set(lua_State *L)
 static int
 luaA_progressbar_bar_data_add(lua_State *L)
 {
-    widget_t *widget = luaL_checkudata(L, 1, "widget");
+    widget_t *widget = luaA_checkudata(L, 1, &widget_class);
     const char *title = luaL_checkstring(L, 2);
     progressbar_data_t *d = widget->data;
     bar_t *bar;
@@ -543,7 +543,7 @@ luaA_progressbar_bar_data_add(lua_State *L)
 static int
 luaA_progressbar_index(lua_State *L, awesome_token_t token)
 {
-    widget_t *widget = luaL_checkudata(L, 1, "widget");
+    widget_t *widget = luaA_checkudata(L, 1, &widget_class);
     progressbar_data_t *d = widget->data;
 
     switch(token)
@@ -593,7 +593,7 @@ luaA_progressbar_index(lua_State *L, awesome_token_t token)
 static int
 luaA_progressbar_newindex(lua_State *L, awesome_token_t token)
 {
-    widget_t *widget = luaL_checkudata(L, 1, "widget");
+    widget_t *widget = luaA_checkudata(L, 1, &widget_class);
     progressbar_data_t *d = widget->data;
 
     switch(token)

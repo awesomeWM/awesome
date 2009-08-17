@@ -35,7 +35,7 @@ struct button_t
 };
 
 lua_class_t button_class;
-LUA_OBJECT_FUNCS(button_class, button_t, button, "button")
+LUA_OBJECT_FUNCS(button_class, button_t, button)
 ARRAY_FUNCS(button_t *, button, DO_NOTHING)
 
 int luaA_button_array_get(lua_State *, int, button_array_t *);

@@ -69,6 +69,7 @@ bool widget_geometries(wibox_t *);
 void widget_invalidate_bywidget(widget_t *);
 void widget_invalidate_bytype(widget_constructor_t *);
 
+lua_class_t widget_class;
 void widget_class_setup(lua_State *);
 
 widget_constructor_t widget_textbox;

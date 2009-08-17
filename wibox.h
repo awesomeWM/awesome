@@ -117,7 +117,7 @@ void wibox_border_color_set(wibox_t *, const xcolor_t *);
 void wibox_orientation_set(wibox_t *, orientation_t);
 
 lua_class_t wibox_class;
-LUA_OBJECT_FUNCS(wibox_class, wibox_t, wibox, "wibox")
+LUA_OBJECT_FUNCS(wibox_class, wibox_t, wibox)
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

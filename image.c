@@ -27,7 +27,7 @@
 static int
 luaA_image_gc(lua_State *L)
 {
-    image_t *p = luaL_checkudata(L, 1, "image");
+    image_t *p = luaA_checkudata(L, 1, &image_class);
     imlib_context_set_image(p->image);
     imlib_free_image();
     p_delete(&p->data);
@@ -312,7 +312,7 @@ luaA_image_argb32_new(lua_State *L)
 static int
 luaA_image_orientate(lua_State *L)
 {
-    image_t *image = luaL_checkudata(L, 1, "image");
+    image_t *image = luaA_checkudata(L, 1, &image_class);
     int orientation = luaL_checknumber(L, 2);
 
     imlib_context_set_image(image->image);
@@ -334,7 +334,7 @@ luaA_image_orientate(lua_State *L)
 static int
 luaA_image_rotate(lua_State *L)
 {
-    image_t *image = luaL_checkudata(L, 1, "image"), *new;
+    image_t *image = luaA_checkudata(L, 1, &image_class), *new;
     double angle = luaL_checknumber(L, 2);
 
     new = image_new(L);
@@ -358,7 +358,7 @@ luaA_image_rotate(lua_State *L)
 static int
 luaA_image_crop(lua_State *L)
 {
-    image_t *image = luaL_checkudata(L, 1, "image"), *new;
+    image_t *image = luaA_checkudata(L, 1, &image_class), *new;
     int x = luaL_checkint(L, 2);
     int y = luaL_checkint(L, 3);
     int w = luaL_checkint(L, 4);
@@ -388,7 +388,7 @@ luaA_image_crop(lua_State *L)
 static int
 luaA_image_crop_and_scale(lua_State *L)
 {
-    image_t *image = luaL_checkudata(L, 1, "image"), *new;
+    image_t *image = luaA_checkudata(L, 1, &image_class), *new;
     int source_x = luaL_checkint(L, 2);
     int source_y = luaL_checkint(L, 3);
     int w = luaL_checkint(L, 4);
@@ -421,7 +421,7 @@ luaA_image_draw_pixel(lua_State *L)
     size_t len;
     color_t color;
     color_init_cookie_t cookie;
-    image_t *image = luaL_checkudata(L, 1, "image");
+    image_t *image = luaA_checkudata(L, 1, &image_class);
     int x = luaL_checkint(L, 2);
     int y = luaL_checkint(L, 3);
     const char *buf = luaL_checklstring(L, 4, &len);
@@ -455,7 +455,7 @@ luaA_image_draw_line(lua_State *L)
     size_t len;
     color_t color;
     color_init_cookie_t cookie;
-    image_t *image = luaL_checkudata(L, 1, "image");
+    image_t *image = luaA_checkudata(L, 1, &image_class);
     int x1 = luaL_checkint(L, 2);
     int y1 = luaL_checkint(L, 3);
     int x2 = luaL_checkint(L, 4);
@@ -492,7 +492,7 @@ luaA_image_draw_rectangle(lua_State *L)
     size_t len;
     color_t color;
     color_init_cookie_t cookie;
-    image_t *image = luaL_checkudata(L, 1, "image");
+    image_t *image = luaA_checkudata(L, 1, &image_class);
     int x = luaL_checkint(L, 2);
     int y = luaL_checkint(L, 3);
     int width  = luaL_checkint(L, 4);
@@ -584,7 +584,7 @@ luaA_table_to_color_range(lua_State *L, int ud)
 static int
 luaA_image_draw_rectangle_gradient(lua_State *L)
 {
-    image_t *image = luaL_checkudata(L, 1, "image");
+    image_t *image = luaA_checkudata(L, 1, &image_class);
     int x = luaL_checkint(L, 2);
     int y = luaL_checkint(L, 3);
     int width  = luaL_checkint(L, 4);
@@ -627,7 +627,7 @@ luaA_image_draw_circle(lua_State *L)
     size_t len;
     color_t color;
     color_init_cookie_t cookie;
-    image_t *image = luaL_checkudata(L, 1, "image");
+    image_t *image = luaA_checkudata(L, 1, &image_class);
     int x = luaL_checkint(L, 2);
     int y = luaL_checkint(L, 3);
     int ah = luaL_checkint(L, 4);
@@ -664,7 +664,7 @@ luaA_image_draw_circle(lua_State *L)
 static int
 luaA_image_save(lua_State *L)
 {
-    image_t *image = luaL_checkudata(L, 1, "image");
+    image_t *image = luaA_checkudata(L, 1, &image_class);
     const char *path = luaL_checkstring(L, 2);
     Imlib_Load_Error err;
 
@@ -697,8 +697,8 @@ luaA_image_save(lua_State *L)
 static int
 luaA_image_insert(lua_State *L)
 {
-    image_t *image_target = luaL_checkudata(L, 1, "image");
-    image_t *image_source = luaL_checkudata(L, 2, "image");
+    image_t *image_target = luaA_checkudata(L, 1, &image_class);
+    image_t *image_source = luaA_checkudata(L, 2, &image_class);
     int xoff = luaL_optnumber(L, 3, 0);
     int yoff = luaL_optnumber(L, 4, 0);
 
@@ -743,7 +743,7 @@ luaA_image_index(lua_State *L)
     if(luaA_usemetatable(L, 1, 2))
         return 1;
 
-    image_t *image = luaL_checkudata(L, 1, "image");
+    image_t *image = luaA_checkudata(L, 1, &image_class);
     size_t len;
     const char *attr = luaL_checklstring(L, 2, &len);
 

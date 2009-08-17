@@ -968,7 +968,7 @@ key_getkeysym(xcb_keycode_t detail, uint16_t state)
 static void
 luaA_keystore(lua_State *L, int ud, const char *str, ssize_t len)
 {
-    keyb_t *key = luaL_checkudata(L, ud, "key");
+    keyb_t *key = luaA_checkudata(L, ud, &key_class);
     if(len)
     {
         if(*str != '#')
@@ -1063,7 +1063,7 @@ luaA_key_array_set(lua_State *L, int oidx, int idx, key_array_t *keys)
 
     lua_pushnil(L);
     while(lua_next(L, idx))
-        if(luaA_toudata(L, -1, "key"))
+        if(luaA_toudata(L, -1, &key_class))
             key_array_append(keys, luaA_object_ref_item(L, oidx, -1));
         else
             lua_pop(L, 1);
