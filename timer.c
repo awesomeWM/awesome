@@ -99,6 +99,8 @@ luaA_timer_stop(lua_State *L)
     return 0;
 }
 
+LUA_OBJECT_EXPORT_PROPERTY(timer, atimer_t, started, lua_pushboolean)
+
 void
 timer_class_setup(lua_State *L)
 {
@@ -125,6 +127,10 @@ timer_class_setup(lua_State *L)
                             (lua_class_propfunc_t) luaA_timer_set_timeout,
                             (lua_class_propfunc_t) luaA_timer_get_timeout,
                             (lua_class_propfunc_t) luaA_timer_set_timeout);
+    luaA_class_add_property(&timer_class, A_TK_STARTED, "started",
+                            NULL,
+                            (lua_class_propfunc_t) luaA_timer_get_started,
+                            NULL);
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
