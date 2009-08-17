@@ -32,6 +32,9 @@
 #include "common/atoms.h"
 #include "common/xutil.h"
 
+static lua_class_t widget_class;
+LUA_OBJECT_FUNCS(widget_class, widget_t, widget, "widget");
+
 /** Collect a widget structure.
  * \param L The Lua VM state.
  * \return 0
@@ -400,49 +403,9 @@ widget_invalidate_bywidget(widget_t *widget)
 static int
 luaA_widget_new(lua_State *L)
 {
-    const char *type;
-    widget_t *w;
-    widget_constructor_t *wc = NULL;
-    size_t len;
+    luaA_class_new(L, &widget_class);
 
-    luaA_checktable(L, 2);
-
-    type = luaA_getopt_lstring(L, 2, "type", NULL, &len);
-
-    switch(a_tokenize(type, len))
-    {
-      case A_TK_TEXTBOX:
-        wc = widget_textbox;
-        break;
-      case A_TK_PROGRESSBAR:
-        wc = widget_progressbar;
-        break;
-      case A_TK_GRAPH:
-        wc = widget_graph;
-        break;
-      case A_TK_SYSTRAY:
-        wc = widget_systray;
-        break;
-      case A_TK_IMAGEBOX:
-        wc = widget_imagebox;
-        break;
-      default:
-        break;
-    }
-
-    if(wc)
-    {
-        w = widget_new(L);
-        wc(w);
-    }
-    else
-    {
-        luaA_warn(L, "unkown widget type: %s", type);
-        return 0;
-    }
-
-    w->type = wc;
-
+    widget_t *w = luaL_checkudata(L, -1, "widget");
     /* Set visible by default. */
     w->isvisible = true;
 
@@ -465,6 +428,7 @@ luaA_widget_buttons(lua_State *L)
     if(lua_gettop(L) == 2)
     {
         luaA_button_array_set(L, 1, 2, &widget->buttons);
+        luaA_object_emit_signal(L, 1, "property::buttons", 0);
         return 1;
     }
 
@@ -483,26 +447,15 @@ static int
 luaA_widget_index(lua_State *L)
 {
     size_t len;
+    const char *prop = luaL_checklstring(L, 2, &len);
+    awesome_token_t token = a_tokenize(prop, len);
+
+    /* Try standard method */
+    if(luaA_class_index(L))
+        return 1;
+
+    /* Then call special widget index */
     widget_t *widget = luaL_checkudata(L, 1, "widget");
-    const char *buf = luaL_checklstring(L, 2, &len);
-    awesome_token_t token;
-
-    if(luaA_usemetatable(L, 1, 2))
-        return 1;
-
-    switch((token = a_tokenize(buf, len)))
-    {
-      case A_TK_VISIBLE:
-        lua_pushboolean(L, widget->isvisible);
-        return 1;
-      case A_TK_MOUSE_ENTER:
-        return luaA_object_push_item(L, 1, widget->mouse_enter);
-      case A_TK_MOUSE_LEAVE:
-        return luaA_object_push_item(L, 1, widget->mouse_leave);
-      default:
-        break;
-    }
-
     return widget->index ? widget->index(L, token) : 0;
 }
 
@@ -514,32 +467,15 @@ static int
 luaA_widget_newindex(lua_State *L)
 {
     size_t len;
+    const char *prop = luaL_checklstring(L, 2, &len);
+    awesome_token_t token = a_tokenize(prop, len);
+
+    /* Try standard method */
+    luaA_class_newindex(L);
+
+    /* Then call special widget newindex */
     widget_t *widget = luaL_checkudata(L, 1, "widget");
-    const char *buf = luaL_checklstring(L, 2, &len);
-    awesome_token_t token;
-
-    switch((token = a_tokenize(buf, len)))
-    {
-      case A_TK_VISIBLE:
-        widget->isvisible = luaA_checkboolean(L, 3);
-        break;
-      case A_TK_MOUSE_ENTER:
-        luaA_checkfunction(L, 3);
-        luaA_object_unref_item(L, 1, widget->mouse_enter);
-        widget->mouse_enter = luaA_object_ref_item(L, 1, 3);
-        return 0;
-      case A_TK_MOUSE_LEAVE:
-        luaA_checkfunction(L, 3);
-        luaA_object_unref_item(L, 1, widget->mouse_leave);
-        widget->mouse_leave = luaA_object_ref_item(L, 1, 3);
-        return 0;
-      default:
-        return widget->newindex ? widget->newindex(L, token) : 0;
-    }
-
-    widget_invalidate_bywidget(widget);
-
-    return 0;
+    return widget->newindex ? widget->newindex(L, token) : 0;
 }
 
 static int
@@ -565,21 +501,91 @@ luaA_widget_extents(lua_State *L)
     return 1;
 }
 
-const struct luaL_reg awesome_widget_methods[] =
+static int
+luaA_widget_set_type(lua_State *L, widget_t *w)
 {
-    LUA_CLASS_METHODS(widget)
-    { "__call", luaA_widget_new },
-    { NULL, NULL }
-};
-const struct luaL_reg awesome_widget_meta[] =
+    size_t len;
+    const char *type = luaL_checklstring(L, -1, &len);
+    widget_constructor_t *wc = NULL;
+
+    switch(a_tokenize(type, len))
+    {
+      case A_TK_TEXTBOX:
+        wc = widget_textbox;
+        break;
+      case A_TK_PROGRESSBAR:
+        wc = widget_progressbar;
+        break;
+      case A_TK_GRAPH:
+        wc = widget_graph;
+        break;
+      case A_TK_SYSTRAY:
+        wc = widget_systray;
+        break;
+      case A_TK_IMAGEBOX:
+        wc = widget_imagebox;
+        break;
+      default:
+        break;
+    }
+
+    if(!wc)
+        luaL_error(L, "unkown widget type: %s", type);
+
+    wc(w);
+    w->type = wc;
+    luaA_object_emit_signal(L, -3, "property::type", 0);
+
+    return 0;
+}
+
+static int
+luaA_widget_get_visible(lua_State *L, widget_t *w)
 {
-    LUA_OBJECT_META(widget)
-    { "buttons", luaA_widget_buttons },
-    { "extents", luaA_widget_extents },
-    { "__index", luaA_widget_index },
-    { "__newindex", luaA_widget_newindex },
-    { "__gc", luaA_widget_gc },
-    { NULL, NULL }
-};
+    lua_pushboolean(L, w->isvisible);
+    return 1;
+}
+
+static int
+luaA_widget_set_visible(lua_State *L, widget_t *w)
+{
+    w->isvisible = luaA_checkboolean(L, -1);
+    widget_invalidate_bywidget(w);
+    luaA_object_emit_signal(L, -3, "property::visible", 0);
+    return 0;
+}
+
+void
+widget_class_setup(lua_State *L)
+{
+    static const struct luaL_reg widget_methods[] =
+    {
+        LUA_CLASS_METHODS(widget)
+        { "__call", luaA_widget_new },
+        { NULL, NULL }
+    };
+
+    static const struct luaL_reg widget_meta[] =
+    {
+        LUA_OBJECT_META(widget)
+        { "buttons", luaA_widget_buttons },
+        { "extents", luaA_widget_extents },
+        { "__index", luaA_widget_index },
+        { "__newindex", luaA_widget_newindex },
+        { "__gc", luaA_widget_gc },
+        { NULL, NULL }
+    };
+
+    luaA_class_setup(L, &widget_class, "widget", (lua_class_allocator_t) widget_new,
+                     widget_methods, widget_meta);
+    luaA_class_add_property(&widget_class, A_TK_VISIBLE,
+                            (lua_class_propfunc_t) luaA_widget_set_visible,
+                            (lua_class_propfunc_t) luaA_widget_get_visible,
+                            (lua_class_propfunc_t) luaA_widget_set_visible);
+    luaA_class_add_property(&widget_class, A_TK_TYPE,
+                            (lua_class_propfunc_t) luaA_widget_set_type,
+                            NULL,
+                            NULL);
+}
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

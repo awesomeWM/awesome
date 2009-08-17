@@ -56,9 +56,6 @@ struct widget_t
     bool isvisible;
 };
 
-lua_class_t widget_class;
-LUA_OBJECT_FUNCS(widget_class, widget_t, widget, "widget");
-
 struct widget_node_t
 {
     /** The widget object */
@@ -73,6 +70,8 @@ bool widget_geometries(wibox_t *);
 
 void widget_invalidate_bywidget(widget_t *);
 void widget_invalidate_bytype(widget_constructor_t *);
+
+void widget_class_setup(lua_State *);
 
 widget_constructor_t widget_textbox;
 widget_constructor_t widget_progressbar;
