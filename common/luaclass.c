@@ -204,17 +204,7 @@ void
 luaA_class_emit_signal(lua_State *L, lua_class_t *lua_class,
                        const char *name, int nargs)
 {
-    signal_t *sigfound = signal_array_getbyid(&lua_class->signals,
-                                              a_strhash((const unsigned char *) name));
-    if(sigfound)
-        foreach(ref, sigfound->sigfuncs)
-        {
-            for(int i = 0; i < nargs; i++)
-                lua_pushvalue(L, - nargs);
-            luaA_object_push(L, (void *) *ref);
-            luaA_dofunction(L, nargs, 0);
-        }
-    lua_pop(L, nargs);
+    signal_object_emit(L, &lua_class->signals, name, nargs);
 }
 
 /** Try to use the metatable of an object.
