@@ -1503,7 +1503,7 @@ wibox_class_setup(lua_State *L)
     luaA_class_add_property(&wibox_class, A_TK_BORDER_WIDTH,
                             (lua_class_propfunc_t) luaA_wibox_set_border_width,
                             (lua_class_propfunc_t) luaA_wibox_get_border_width,
-                            (lua_class_propfunc_t) NULL);
+                            (lua_class_propfunc_t) luaA_wibox_set_border_width);
     luaA_class_add_property(&wibox_class, A_TK_ORIENTATION,
                             (lua_class_propfunc_t) luaA_wibox_set_orientation,
                             (lua_class_propfunc_t) luaA_wibox_get_orientation,
