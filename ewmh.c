@@ -620,6 +620,9 @@ ewmh_process_client_strut(client_t *c, xcb_get_property_reply_t *strut_r)
             c->strut.bottom_end_x = strut[11];
 
             hook_property(c, "struts");
+            luaA_object_push(globalconf.L, c);
+            luaA_object_emit_signal(globalconf.L, -1, "property::struts", 0);
+            lua_pop(globalconf.L, 1);
         }
     }
 

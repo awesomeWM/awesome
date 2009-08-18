@@ -1628,6 +1628,9 @@ luaA_client_struts(lua_State *L)
             ewmh_update_client_strut(c);
 
             hook_property(c, "struts");
+            luaA_object_push(globalconf.L, c);
+            luaA_object_emit_signal(L, -1, "property::struts", 0);
+            lua_pop(globalconf.L, 1);
         }
     }
 
