@@ -474,26 +474,26 @@ ewmh_client_update_desktop(client_t *c)
  * \param c The client.
  */
 void
-ewmh_update_client_strut(client_t *c)
+ewmh_update_strut(xcb_window_t window, strut_t *strut)
 {
-    uint32_t state[] =
+    const uint32_t state[] =
     {
-        c->strut.left,
-        c->strut.right,
-        c->strut.top,
-        c->strut.bottom,
-        c->strut.left_start_y,
-        c->strut.left_end_y,
-        c->strut.right_start_y,
-        c->strut.right_end_y,
-        c->strut.top_start_x,
-        c->strut.top_end_x,
-        c->strut.bottom_start_x,
-        c->strut.bottom_end_x
+        strut->left,
+        strut->right,
+        strut->top,
+        strut->bottom,
+        strut->left_start_y,
+        strut->left_end_y,
+        strut->right_start_y,
+        strut->right_end_y,
+        strut->top_start_x,
+        strut->top_end_x,
+        strut->bottom_start_x,
+        strut->bottom_end_x
     };
 
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
-                        c->window, _NET_WM_STRUT_PARTIAL, CARDINAL, 32, countof(state), state);
+                        window, _NET_WM_STRUT_PARTIAL, CARDINAL, 32, countof(state), state);
 }
 
 void

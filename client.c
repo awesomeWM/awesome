@@ -1605,7 +1605,7 @@ luaA_client_struts(lua_State *L)
 
             c->strut = struts;
 
-            ewmh_update_client_strut(c);
+            ewmh_update_strut(c->window, &c->strut);
 
             hook_property(c, "struts");
             luaA_object_emit_signal(L, 1, "property::struts", 0);

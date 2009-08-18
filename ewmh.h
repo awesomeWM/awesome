@@ -23,6 +23,7 @@
 #define AWESOME_EWMH_H
 
 #include "structs.h"
+#include "strut.h"
 
 void ewmh_init(int);
 void ewmh_update_net_client_list(int);
@@ -37,7 +38,7 @@ void ewmh_client_update_hints(client_t *);
 void ewmh_client_update_desktop(client_t *);
 void ewmh_update_workarea(int);
 void ewmh_process_client_strut(client_t *, xcb_get_property_reply_t *);
-void ewmh_update_client_strut(client_t *c);
+void ewmh_update_strut(xcb_window_t, strut_t *);
 xcb_get_property_cookie_t ewmh_window_icon_get_unchecked(xcb_window_t);
 int ewmh_window_icon_from_reply(xcb_get_property_reply_t *);
 int ewmh_window_icon_get_reply(xcb_get_property_cookie_t);
