@@ -284,6 +284,31 @@ function withcurrent(c, startup)
     end
 end
 
+local function attached_add_signal_screen(screen, sig, func)
+    capi.screen[screen]:add_signal("tag::attach", function (s, tag)
+        tag:add_signal(sig, func)
+    end)
+    capi.screen[screen]:add_signal("tag::detach", function (s, tag)
+        tag:remove_signal(sig, func)
+    end)
+    for _, tag in ipairs(capi.screen[screen]:tags()) do
+        tag:add_signal(sig, func)
+    end
+end
+
+--- Add a signal to all attached tag and all tag that will be attached in the
+-- future. When a tag is detach from the screen, its signal is removed.
+-- @param screen The screen concerned, or all if nil.
+function attached_add_signal(screen, ...)
+    if screen then
+        attached_add_signal_screen(screen, ...)
+    else
+        for screen = 1, capi.screen.count() do
+            attached_add_signal_screen(screen, ...)
+        end
+    end
+end
+
 -- Register standards signals
 capi.client.add_signal("manage", withcurrent)
 
