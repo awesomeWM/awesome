@@ -171,6 +171,7 @@ function attach(wibox, position)
 
     wibox:add_signal("property::screen", call_wibox_position_hook_on_prop_update)
     wibox:add_signal("property::visible", call_wibox_position_hook_on_prop_update)
+    wibox:add_signal("property::border_width", call_wibox_position_hook_on_prop_update)
 end
 
 --- Align a wibox.
