@@ -1568,26 +1568,6 @@ luaA_client_geometry(lua_State *L)
     return luaA_pusharea(L, c->geometry);
 }
 
-/** Push a strut type to a table on stack.
- * \param L The Lua VM state.
- * \param struts The struts to push.
- * \return The number of elements pushed on stack.
- */
-static inline int
-luaA_pushstruts(lua_State *L, strut_t struts)
-{
-    lua_createtable(L, 4, 0);
-    lua_pushnumber(L, struts.left);
-    lua_setfield(L, -2, "left");
-    lua_pushnumber(L, struts.right);
-    lua_setfield(L, -2, "right");
-    lua_pushnumber(L, struts.top);
-    lua_setfield(L, -2, "top");
-    lua_pushnumber(L, struts.bottom);
-    lua_setfield(L, -2, "bottom");
-    return 1;
-}
-
 /** Return client struts (reserved space at the edge of the screen).
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
@@ -1628,13 +1608,11 @@ luaA_client_struts(lua_State *L)
             ewmh_update_client_strut(c);
 
             hook_property(c, "struts");
-            luaA_object_push(globalconf.L, c);
-            luaA_object_emit_signal(L, -1, "property::struts", 0);
-            lua_pop(globalconf.L, 1);
+            luaA_object_emit_signal(L, 1, "property::struts", 0);
         }
     }
 
-    return luaA_pushstruts(L, c->strut);
+    return luaA_pushstrut(L, c->strut);
 }
 
 static int

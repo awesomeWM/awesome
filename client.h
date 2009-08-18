@@ -1,7 +1,7 @@
 /*
  * client.h - client management header
  *
- * Copyright © 2007-2008 Julien Danjou <julien@danjou.info>
+ * Copyright © 2007-2009 Julien Danjou <julien@danjou.info>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@
 
 #include "mouse.h"
 #include "stack.h"
+#include "strut.h"
 #include "common/luaobject.h"
 
 #define CLIENT_SELECT_INPUT_EVENT_MASK (XCB_EVENT_MASK_STRUCTURE_NOTIFY \
@@ -54,16 +55,6 @@ typedef enum
     WINDOW_TYPE_COMBO,
     WINDOW_TYPE_DND
 } window_type_t;
-
-/* Strut */
-typedef struct
-{
-    uint16_t left, right, top, bottom;
-    uint16_t left_start_y, left_end_y;
-    uint16_t right_start_y, right_end_y;
-    uint16_t top_start_x, top_end_x;
-    uint16_t bottom_start_x, bottom_end_x;
-} strut_t;
 
 /** client_t type */
 struct client_t
