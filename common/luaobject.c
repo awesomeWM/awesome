@@ -181,6 +181,37 @@ luaA_object_remove_signal(lua_State *L, int oud,
     lua_remove(L, ud);
 }
 
+void
+signal_object_emit(lua_State *L, signal_array_t *arr, const char *name, int nargs)
+{
+    signal_t *sigfound = signal_array_getbyid(arr,
+                                              a_strhash((const unsigned char *) name));
+
+    if(sigfound)
+    {
+        int nbfunc = sigfound->sigfuncs.len;
+        luaL_checkstack(L, lua_gettop(L) + nbfunc + nargs + 1, "too much signal");
+        /* Push all functions and then execute, because this list can change
+         * while executing funcs. */
+        foreach(func, sigfound->sigfuncs)
+            luaA_object_push(L, (void *) *func);
+
+        for(int i = 0; i < nbfunc; i++)
+        {
+            /* push all args */
+            for(int j = 0; j < nargs; j++)
+                lua_pushvalue(L, - nargs - nbfunc + i);
+            /* push first function */
+            lua_pushvalue(L, - nargs - nbfunc + i);
+            /* remove this first function */
+            lua_remove(L, - nargs - nbfunc - 1 + i);
+            luaA_dofunction(L, nargs, 0);
+        }
+    }
+    /* remove args */
+    lua_pop(L, nargs);
+}
+
 /** Emit a signal to an object.
  * \param L The Lua VM state.
  * \param oud The object index on the stack.

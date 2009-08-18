@@ -134,6 +134,8 @@ luaA_object_push(lua_State *L, void *pointer)
     return 1;
 }
 
+void signal_object_emit(lua_State *, signal_array_t *, const char *, int);
+
 void luaA_object_add_signal(lua_State *, int, const char *, int);
 void luaA_object_remove_signal(lua_State *, int, const char *, int);
 void luaA_object_emit_signal(lua_State *, int, const char *, int);
