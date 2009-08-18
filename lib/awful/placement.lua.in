@@ -17,7 +17,6 @@ local capi =
 }
 local client = require("awful.client")
 local layout = require("awful.layout")
-local wibox = require("awful.wibox")
 
 --- Placement module for awful
 module("awful.placement")
@@ -106,7 +105,7 @@ end
 function no_offscreen(c)
     local c = c or capi.client.focus
     local geometry = c:geometry()
-    local screen_geometry = wibox.get_workarea(c.screen)
+    local screen_geometry = capi.screen[c.screen].workarea
 
     if geometry.x + geometry.width > screen_geometry.x + screen_geometry.width then
         geometry.x = screen_geometry.x + screen_geometry.width - geometry.width
@@ -128,7 +127,7 @@ end
 function no_overlap(c)
     local cls = client.visible(c.screen)
     local curlay = layout.get()
-    local areas = { wibox.get_workarea(c.screen) }
+    local areas = { capi.screen[c.screen].workarea }
     local geometry = c:geometry()
     for i, cl in pairs(cls) do
         if cl ~= c and (client.floating.get(cl) or curlay == layout.suit.floating) then

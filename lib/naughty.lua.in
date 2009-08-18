@@ -18,7 +18,6 @@ local capi = { screen = screen,
                timer = timer }
 local button = require("awful.button")
 local util = require("awful.util")
-local wibox = require("awful.wibox")
 local bt = require("beautiful")
 local layout = require("awful.widget.layout")
 
@@ -120,7 +119,7 @@ end
 -- @param width Popup width (optional)
 -- @return Absolute position and index in { x = X, y = Y, idx = I } table
 local function get_offset(screen, position, idx, width, height)
-    local ws = wibox.get_workarea(screen)
+    local ws = capi.screen[screen].workarea
     local v = {}
     local idx = idx or #notifications[screen][position] + 1
     local width = width or notifications[screen][position][idx].width
@@ -368,7 +367,7 @@ function notify(args)
     end
 
     -- crop to workarea size if too big
-    local workarea = wibox.get_workarea(screen)
+    local workarea = capi.screen[screen].workarea
     if width > workarea.width - 2 * (border_width or 0) - 2 * (config.padding or 0) then
         width = workarea.width - 2 * (border_width or 0) - 2 * (config.padding or 0)
     end

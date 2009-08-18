@@ -11,7 +11,6 @@ local capi = { screen = screen, client = client }
 local tag = require("awful.tag")
 local util = require("awful.util")
 local suit = require("awful.layout.suit")
-local wibox = require("awful.wibox")
 local ascreen = require("awful.screen")
 local capi = {
     screen = screen,
@@ -64,7 +63,7 @@ end
 -- @param screen The screen to arrange.
 function arrange(screen)
     local p = {}
-    p.workarea = wibox.get_workarea(screen)
+    p.workarea = capi.screen[screen].workarea
     -- Handle padding
     local padding = ascreen.padding(screen)
     if padding then

@@ -25,60 +25,6 @@ module("awful.wibox")
 -- It's an array so it is ordered.
 local wiboxes = {}
 
---- Get the workarea space without wiboxes geometry.
--- @param s The screen number.
--- @return The screen workarea.
-function get_workarea(s)
-    local area = capi.screen[s].workarea
-    for _, wprop in ipairs(wiboxes) do
-        if wprop.wibox.visible and wprop.wibox.screen == s then
-            if wprop.position == "top" then
-                area.y = area.y + wprop.wibox.height + (2 * wprop.wibox.border_width)
-                area.height = area.height - (wprop.wibox.height + (2 * wprop.wibox.border_width))
-            elseif wprop.position == "bottom" then
-                area.height = area.height - (wprop.wibox.height + (2 * wprop.wibox.border_width))
-            elseif wprop.position == "left" then
-                area.x = area.x + wprop.wibox.width + (2 * wprop.wibox.border_width)
-                area.width = area.width - (wprop.wibox.width + (2 * wprop.wibox.border_width))
-            elseif wprop.position == "right" then
-                area.width = area.width - (wprop.wibox.width + (2 * wprop.wibox.border_width))
-            end
-        end
-    end
-    return area
-end
-
-local function compute_area(wibox, position, s)
-    local s = wibox.screen or s or 1
-    local area = capi.screen[s].workarea
-    local ignore = false
-    for _, wprop in ipairs(wiboxes) do
-        if wprop.wibox == wibox then
-            ignore = true
-        elseif wprop.wibox.visible and wprop.wibox.screen == s
-           and not (ignore and wprop.position == position) then
-            if (wprop.position == "right" or wprop.position == "left")
-                and wprop.position == position then
-                area.x = area.x + (wibox.width + (2 * wibox.border_width))
-            elseif wprop.position == "top" then
-                if position == "top" then
-                    area.y = area.y + (wprop.wibox.height + (2 * wprop.wibox.border_width))
-                elseif position == "left" or position == "right" then
-                    area.height = area.height - (wprop.wibox.height + (2 * wprop.wibox.border_width))
-                    area.y = area.y + (wprop.wibox.height + (2 * wprop.wibox.border_width))
-                end
-            elseif wprop.position == "bottom" then
-                if position == "bottom" then
-                    area.y = area.y - (wprop.wibox.height + (2 * wprop.wibox.border_width))
-                elseif position == "left" or position == "right" then
-                    area.height = area.height - (wprop.wibox.height + (2 * wprop.wibox.border_width))
-                end
-            end
-        end
-    end
-    return area
-end
-
 --- Get a wibox position if it has been set, or return top.
 -- @param wibox The wibox
 -- @return The wibox position.
@@ -91,13 +37,14 @@ function get_position(wibox)
     return "top"
 end
 
---- Attach a wibox to a screen at the position.
+--- Put a wibox on a screen at this position.
 -- @param wibox The wibox to attach.
 -- @param position The position: top, bottom left or right.
 -- @param screen If the wibox it not attached to a screen, specified on which
 -- screen the position should be set.
 function set_position(wibox, position, screen)
-    local area = compute_area(wibox, position, screen)
+    local screen = screen or wibox.screen or 1
+    local area = capi.screen[screen].geometry
 
     -- The "length" of a wibox is always chosen to be the optimal size
     -- (non-floating).
@@ -170,23 +117,14 @@ function attach(wibox, position)
         end
     end
 
-    if position ~= "top" and position ~= "bottom" and position ~= "right" and position ~= "left" then
-        position = "floating"
-    end
-
     if not wibox_prop_table then
-        table.insert(wiboxes,
-        setmetatable({ wibox = wibox, position = position }, { __mode = 'v' }))
+        table.insert(wiboxes, setmetatable({ wibox = wibox, position = position }, { __mode = 'v' }))
     else
         wibox_prop_table.position = position
     end
 
     wibox:add_signal("property::width", wibox_update_strut)
     wibox:add_signal("property::height", wibox_update_strut)
-
-    if wibox.screen and wibox.visible then
-        update_all_wiboxes_position()
-    end
 
     wibox:add_signal("property::screen", call_wibox_position_hook_on_prop_update)
     wibox:add_signal("property::visible", call_wibox_position_hook_on_prop_update)
@@ -200,7 +138,8 @@ end
 -- screen where to align. Otherwise 1 is assumed.
 function align(wibox, align, screen)
     local position = get_position(wibox)
-    local area = compute_area(wibox, position, screen)
+    local screen = screen or wibox.screen or 1
+    local area = capi.screen[screen].geometry
 
     if position == "right" then
         if align == "right" then
@@ -239,15 +178,19 @@ end
 
 --- Stretch a wibox so it takes all screen width or height.
 -- @param wibox The wibox.
-function stretch(wibox)
-    local position = get_position(wibox)
-    local area = compute_area(wibox, position)
-    if position == "right" or position == "left" then
-        wibox.height = area.height - (2 * wibox.border_width)
-        align(wibox, "center")
-    else
-        wibox.width = area.width - (2 * wibox.border_width)
-        align(wibox, "left")
+-- @param screen The screen to stretch on, or the wibox screen.
+function stretch(wibox, screen)
+    local screen = screen or wibox.screen
+    if screen then
+        local position = get_position(wibox)
+        local area = capi.screen[screen].workarea
+        if position == "right" or position == "left" then
+            wibox.height = area.height - (2 * wibox.border_width)
+            align(wibox, "center")
+        else
+            wibox.width = area.width - (2 * wibox.border_width)
+            align(wibox, "left")
+        end
     end
 end
 
@@ -274,7 +217,7 @@ function new(arg)
             if arg.screen then
                 local hp = arg.height:match("(%d+)%%")
                 if hp then
-                    arg.height = capi.screen[arg.screen].workarea.height * hp / 100
+                    arg.height = capi.screen[arg.screen].geometry.height * hp / 100
                 end
             end
         end
@@ -285,7 +228,7 @@ function new(arg)
             if arg.screen then
                 local wp = arg.width:match("(%d+)%%")
                 if wp then
-                    arg.width = capi.screen[arg.screen].workarea.width * wp / 100
+                    arg.width = capi.screen[arg.screen].geometry.width * wp / 100
                 end
             end
         end
