@@ -36,6 +36,7 @@ typedef struct
 } strut_t;
 
 int luaA_pushstrut(lua_State *, strut_t);
+void luaA_tostrut(lua_State *, int, strut_t *);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

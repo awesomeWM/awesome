@@ -1582,34 +1582,10 @@ luaA_client_struts(lua_State *L)
 
     if(lua_gettop(L) == 2)
     {
-        strut_t struts;
-        area_t screen_area = display_area_get(c->phys_screen);
-
-        struts.left = luaA_getopt_number(L, 2, "left", c->strut.left);
-        struts.right = luaA_getopt_number(L, 2, "right", c->strut.right);
-        struts.top = luaA_getopt_number(L, 2, "top", c->strut.top);
-        struts.bottom = luaA_getopt_number(L, 2, "bottom", c->strut.bottom);
-
-        if(struts.left != c->strut.left || struts.right != c->strut.right ||
-                struts.top != c->strut.top || struts.bottom != c->strut.bottom) {
-            /* Struts are not so well defined in the context of xinerama. So we just
-             * give the entire root window and let the window manager decide. */
-            struts.left_start_y = 0;
-            struts.left_end_y = !struts.left ? 0 : screen_area.height;
-            struts.right_start_y = 0;
-            struts.right_end_y = !struts.right ? 0 : screen_area.height;
-            struts.top_start_x = 0;
-            struts.top_end_x = !struts.top ? 0 : screen_area.width;
-            struts.bottom_start_x = 0;
-            struts.bottom_end_x = !struts.bottom ? 0 : screen_area.width;
-
-            c->strut = struts;
-
-            ewmh_update_strut(c->window, &c->strut);
-
-            hook_property(c, "struts");
-            luaA_object_emit_signal(L, 1, "property::struts", 0);
-        }
+        luaA_tostrut(L, 2, &c->strut);
+        ewmh_update_strut(c->window, &c->strut);
+        hook_property(c, "struts");
+        luaA_object_emit_signal(L, 1, "property::struts", 0);
     }
 
     return luaA_pushstrut(L, c->strut);

@@ -20,6 +20,7 @@
  */
 
 #include "strut.h"
+#include "luaa.h"
 
 /** Push a strut type to a table on stack.
  * \param L The Lua VM state.
@@ -39,6 +40,21 @@ luaA_pushstrut(lua_State *L, strut_t strut)
     lua_pushnumber(L, strut.bottom);
     lua_setfield(L, -2, "bottom");
     return 1;
+}
+
+/** Convert a table to a strut_t structure.
+ * \param L The Lua VM state.
+ * \param idx The index of the table on the stack.
+ * \param struts The strut to fill. Current values will be used as default.
+ */
+void
+luaA_tostrut(lua_State *L, int idx, strut_t *strut)
+{
+    luaA_checktable(L, idx);
+    strut->left = luaA_getopt_number(L, idx, "left", strut->left);
+    strut->right = luaA_getopt_number(L, idx, "right", strut->right);
+    strut->top = luaA_getopt_number(L, idx, "top", strut->top);
+    strut->bottom = luaA_getopt_number(L, idx, "bottom", strut->bottom);
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
