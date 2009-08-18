@@ -23,6 +23,7 @@
 #define AWESOME_WIBOX_H
 
 #include "widget.h"
+#include "strut.h"
 #include "common/luaobject.h"
 
 /** Wibox types */
@@ -83,6 +84,8 @@ struct wibox_t
     orientation_t orientation;
     /** Opacity */
     double opacity;
+    /** Strut */
+    strut_t strut;
     /** The window's shape */
     struct
     {

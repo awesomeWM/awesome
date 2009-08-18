@@ -28,6 +28,7 @@
 #include "screen.h"
 #include "window.h"
 #include "luaa.h"
+#include "ewmh.h"
 #include "common/xcursor.h"
 #include "common/xutil.h"
 
@@ -767,6 +768,8 @@ wibox_attach(lua_State *L, int udx, screen_t *s)
     if(wibox->opacity != -1)
         window_opacity_set(wibox->window, wibox->opacity);
 
+    ewmh_update_strut(wibox->window, &wibox->strut);
+
     if(wibox->visible)
         wibox_map(wibox);
     else
@@ -905,6 +908,22 @@ luaA_wibox_geometry(lua_State *L)
     }
 
     return luaA_pusharea(L, wibox->geometry);
+}
+
+static int
+luaA_wibox_struts(lua_State *L)
+{
+    wibox_t *w = luaA_checkudata(L, 1, &wibox_class);
+
+    if(lua_gettop(L) == 2)
+    {
+        luaA_tostrut(L, 2, &w->strut);
+        if(w->window)
+            ewmh_update_strut(w->window, &w->strut);
+        luaA_object_emit_signal(L, 1, "property::struts", 0);
+    }
+
+    return luaA_pushstrut(L, w->strut);
 }
 
 LUA_OBJECT_EXPORT_PROPERTY(wibox, wibox_t, ontop, lua_pushboolean)
@@ -1476,6 +1495,7 @@ wibox_class_setup(lua_State *L)
     {
         LUA_OBJECT_META(wibox)
         LUA_CLASS_META
+        { "struts", luaA_wibox_struts },
         { "buttons", luaA_wibox_buttons },
         { "geometry", luaA_wibox_geometry },
         { "__gc", luaA_wibox_gc },
