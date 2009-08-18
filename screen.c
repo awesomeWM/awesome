@@ -510,18 +510,9 @@ luaA_screen_remove_signal(lua_State *L)
 void
 screen_emit_signal(lua_State *L, screen_t *screen, const char *name, int nargs)
 {
-    signal_t *sigfound = signal_array_getbyid(&screen->signals,
-                                              a_strhash((const unsigned char *) name));
-    if(sigfound)
-        foreach(func, sigfound->sigfuncs)
-        {
-            luaA_pushscreen(L, screen);
-            for(int i = 0; i < nargs; i++)
-                lua_pushvalue(L, - nargs - 1);
-            luaA_object_push(L, (void *) *func);
-            luaA_dofunction(L, nargs + 1, 0);
-        }
-    lua_pop(L, nargs);
+    luaA_pushscreen(L, screen);
+    lua_insert(L, - nargs - 1);
+    signal_object_emit(L, &screen->signals, name, nargs + 1);
 }
 
 /** Emit a signal to a screen.
