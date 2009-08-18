@@ -71,12 +71,10 @@ end
 local function update_all_wiboxes_position()
     for _, wprop in ipairs(wiboxes) do
         set_position(wprop.wibox, wprop.position)
-        capi.awesome.emit_signal("arrange", wprop.wibox.screen)
     end
 end
 
 local function call_wibox_position_hook_on_prop_update(w)
-    capi.awesome.emit_signal("arrange", w.screen)
     update_all_wiboxes_position()
 end
 
