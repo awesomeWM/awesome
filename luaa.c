@@ -650,20 +650,7 @@ luaA_awesome_remove_signal(lua_State *L)
 static int
 luaA_awesome_emit_signal(lua_State *L)
 {
-    const char *name = luaL_checkstring(L, 1);
-    signal_t *sigfound = signal_array_getbyid(&global_signals,
-                                              a_strhash((const unsigned char *) name));
-    if(sigfound)
-    {
-        int nargs = lua_gettop(L) - 1;
-        foreach(ref, sigfound->sigfuncs)
-        {
-            for(int i = 0; i < nargs; i++)
-                lua_pushvalue(L, - nargs);
-            luaA_object_push(L, (void *) *ref);
-            luaA_dofunction(L, nargs, 0);
-        }
-    }
+    signal_object_emit(L, &global_signals, luaL_checkstring(L, 1), lua_gettop(L) - 1);
     return 0;
 }
 
