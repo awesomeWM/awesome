@@ -921,6 +921,8 @@ luaA_wibox_struts(lua_State *L)
         if(w->window)
             ewmh_update_strut(w->window, &w->strut);
         luaA_object_emit_signal(L, 1, "property::struts", 0);
+        if(w->screen)
+            screen_emit_signal(L, w->screen, "property::workarea", 0);
     }
 
     return luaA_pushstrut(L, w->strut);

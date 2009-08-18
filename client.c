@@ -1586,6 +1586,7 @@ luaA_client_struts(lua_State *L)
         ewmh_update_strut(c->window, &c->strut);
         hook_property(c, "struts");
         luaA_object_emit_signal(L, 1, "property::struts", 0);
+        screen_emit_signal(L, c->screen, "property::workarea", 0);
     }
 
     return luaA_pushstrut(L, c->strut);
