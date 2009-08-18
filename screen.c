@@ -168,45 +168,54 @@ screen_getbycoord(screen_t *screen, int x, int y)
 area_t
 screen_area_get(screen_t *screen, bool strut)
 {
+    if(!strut)
+        return screen->geometry;
+
     area_t area = screen->geometry;
     uint16_t top = 0, bottom = 0, left = 0, right = 0;
 
-    if(strut)
-        foreach(_c, globalconf.clients)
-        {
-            client_t *c = *_c;
-            if(client_isvisible(c, screen))
-            {
-                if(c->strut.top_start_x || c->strut.top_end_x)
-                {
-                    if(c->strut.top)
-                        top = MAX(top, c->strut.top);
-                    else
-                        top = MAX(top, (c->geometry.y - area.y) + c->geometry.height);
-                }
-                if(c->strut.bottom_start_x || c->strut.bottom_end_x)
-                {
-                    if(c->strut.bottom)
-                        bottom = MAX(bottom, c->strut.bottom);
-                    else
-                        bottom = MAX(bottom, (area.y + area.height) - c->geometry.y);
-                }
-                if(c->strut.left_start_y || c->strut.left_end_y)
-                {
-                    if(c->strut.left)
-                        left = MAX(left, c->strut.left);
-                    else
-                        left = MAX(left, (c->geometry.x - area.x) + c->geometry.width);
-                }
-                if(c->strut.right_start_y || c->strut.right_end_y)
-                {
-                    if(c->strut.right)
-                        right = MAX(right, c->strut.right);
-                    else
-                        right = MAX(right, (area.x + area.width) - c->geometry.x);
-                }
-            }
-        }
+#define COMPUTE_STRUT(o) \
+    { \
+        if((o)->strut.top_start_x || (o)->strut.top_end_x || (o)->strut.top) \
+        { \
+            if((o)->strut.top) \
+                top = MAX(top, (o)->strut.top); \
+            else \
+                top = MAX(top, ((o)->geometry.y - area.y) + (o)->geometry.height); \
+        } \
+        if((o)->strut.bottom_start_x || (o)->strut.bottom_end_x || (o)->strut.bottom) \
+        { \
+            if((o)->strut.bottom) \
+                bottom = MAX(bottom, (o)->strut.bottom); \
+            else \
+                bottom = MAX(bottom, (area.y + area.height) - (o)->geometry.y); \
+        } \
+        if((o)->strut.left_start_y || (o)->strut.left_end_y || (o)->strut.left) \
+        { \
+            if((o)->strut.left) \
+                left = MAX(left, (o)->strut.left); \
+            else \
+                left = MAX(left, ((o)->geometry.x - area.x) + (o)->geometry.width); \
+        } \
+        if((o)->strut.right_start_y || (o)->strut.right_end_y || (o)->strut.right) \
+        { \
+            if((o)->strut.right) \
+                right = MAX(right, (o)->strut.right); \
+            else \
+                right = MAX(right, (area.x + area.width) - (o)->geometry.x); \
+        } \
+    }
+
+    foreach(c, globalconf.clients)
+        if(client_isvisible(*c, screen))
+            COMPUTE_STRUT(*c)
+
+    foreach(wibox, globalconf.wiboxes)
+        if((*wibox)->visible
+           && (*wibox)->screen == screen)
+            COMPUTE_STRUT(*wibox)
+
+#undef COMPUTE_STRUT
 
     area.x += left;
     area.y += top;
