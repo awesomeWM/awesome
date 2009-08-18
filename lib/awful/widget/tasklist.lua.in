@@ -16,6 +16,7 @@ local common = require("awful.widget.common")
 local beautiful = require("beautiful")
 local client = require("awful.client")
 local util = require("awful.util")
+local tag = require("awful.tag")
 local layout = require("awful.widget.layout")
 
 --- Tasklist widget module for awful
@@ -55,17 +56,9 @@ function new(label, buttons)
     local data = setmetatable({}, { __mode = 'k' })
     local u = function () tasklist_update(w, buttons, label, data, widgets) end
     for s = 1, capi.screen.count() do
-        capi.screen[s]:add_signal("tag::attach", function (s, t)
-            u()
-            t:add_signal("property::selected", u)
-        end)
-        capi.screen[s]:add_signal("tag::detach", function (s, t)
-            u()
-            t:remove_signal("property::selected", u)
-        end)
-        for _, tag in ipairs(capi.screen[s]:tags()) do
-            tag:add_signal("property::selected", u)
-        end
+        tag.attached_add_signal(s, "property::selected", u)
+        capi.screen[s]:add_signal("tag::attach", u)
+        capi.screen[s]:add_signal("tag::detach", u)
     end
     capi.client.add_signal("new", function (c)
         c:add_signal("property::urgent", u)
