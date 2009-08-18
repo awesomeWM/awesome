@@ -133,6 +133,22 @@ local function call_wibox_position_hook_on_prop_update(w)
     update_all_wiboxes_position()
 end
 
+local function wibox_update_strut(wibox)
+    for _, wprop in ipairs(wiboxes) do
+        if wprop.wibox == wibox then
+            if wprop.position == "top" then
+                wibox:struts { left = 0, right = 0, bottom = 0, top = wibox.height }
+            elseif wprop.position == "bottom" then
+                wibox:struts { left = 0, right = 0, bottom = wibox.height, top = 0 }
+            elseif wprop.position == "left" then
+                wibox:struts { left = wibox.width, right = 0, bottom = 0, top = 0 }
+            elseif wprop.position == "right" then
+                wibox:struts { left = 0, right = wibox.width, bottom = 0, top = 0 }
+            end
+        end
+    end
+end
+
 --- Attach a wibox to a screen.
 -- If a wibox is attached, it will be automatically be moved when other wiboxes
 -- will be attached.
@@ -164,6 +180,9 @@ function attach(wibox, position)
     else
         wibox_prop_table.position = position
     end
+
+    wibox:add_signal("property::width", wibox_update_strut)
+    wibox:add_signal("property::height", wibox_update_strut)
 
     if wibox.screen and wibox.visible then
         update_all_wiboxes_position()
