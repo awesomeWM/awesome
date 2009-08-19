@@ -538,7 +538,7 @@ ewmh_client_check_hints(client_t *c)
     if(reply && (data = xcb_get_property_value(reply)))
     {
         state = (xcb_atom_t *) data;
-        for(int i = 0; i < xcb_get_property_value_length(reply); i++)
+        for(int i = 0; i < xcb_get_property_value_length(reply) / ssizeof(xcb_atom_t); i++)
             ewmh_process_state_atom(c, state[i], _NET_WM_STATE_ADD);
     }
 
@@ -548,7 +548,7 @@ ewmh_client_check_hints(client_t *c)
     if(reply && (data = xcb_get_property_value(reply)))
     {
         state = (xcb_atom_t *) data;
-        for(int i = 0; i < xcb_get_property_value_length(reply); i++)
+        for(int i = 0; i < xcb_get_property_value_length(reply) / ssizeof(xcb_atom_t); i++)
             if(state[i] == _NET_WM_WINDOW_TYPE_DESKTOP)
                 c->type = MAX(c->type, WINDOW_TYPE_DESKTOP);
             else if(state[i] == _NET_WM_WINDOW_TYPE_DIALOG)
