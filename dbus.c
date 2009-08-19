@@ -252,11 +252,6 @@ static void
 a_dbus_process_request(DBusConnection *dbus_connection, DBusMessage *msg)
 {
     const char *interface = dbus_message_get_interface(msg);
-    signal_t *sig = signal_array_getbyid(&dbus_signals,
-                                         a_strhash((const unsigned char *) interface));
-
-    if(!sig)
-        return;
 
     lua_createtable(globalconf.L, 0, 5);
 
@@ -307,21 +302,19 @@ a_dbus_process_request(DBusConnection *dbus_connection, DBusMessage *msg)
 
     if(dbus_message_get_no_reply(msg))
         /* emit signals */
-        foreach(func, sig->sigfuncs)
-        {
-            for(int i = 0; i < nargs; i++)
-                lua_pushvalue(globalconf.L, - nargs);
-            luaA_object_push(globalconf.L, (void *) *func);
-            luaA_dofunction(globalconf.L, nargs, 0);
-        }
+        signal_object_emit(globalconf.L, &dbus_signals, interface, nargs);
     else
-        foreach(func, sig->sigfuncs)
+    {
+        signal_t *sig = signal_array_getbyid(&dbus_signals,
+                                             a_strhash((const unsigned char *) interface));
+        if(sig)
         {
-            int n = lua_gettop(globalconf.L);
+            /* there can be only ONE handler to send reply */
+            void *func = (void *) sig->sigfuncs.tab[0];
 
-            for(int i = 0; i < nargs; i++)
-                lua_pushvalue(globalconf.L, - nargs);
-            luaA_object_push(globalconf.L, (void *) *func);
+            int n = lua_gettop(globalconf.L) - nargs;
+
+            luaA_object_push(globalconf.L, (void *) func);
             luaA_dofunction(globalconf.L, nargs, LUA_MULTRET);
 
             n -= lua_gettop(globalconf.L);
@@ -341,7 +334,7 @@ a_dbus_process_request(DBusConnection *dbus_connection, DBusMessage *msg)
                 {
                     luaA_warn(globalconf.L,
                               "your D-Bus signal handling method returned bad data");
-                    return;
+                    break;
                 }
 
                 switch(*type)
@@ -384,7 +377,7 @@ a_dbus_process_request(DBusConnection *dbus_connection, DBusMessage *msg)
             dbus_connection_send(dbus_connection, reply, NULL);
             dbus_message_unref(reply);
         }
-    lua_pop(globalconf.L, nargs);
+    }
 }
 
 static void
