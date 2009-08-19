@@ -416,11 +416,16 @@ event_handle_leavenotify(void *data __attribute__ ((unused)),
         return 0;
 
     if((c = client_getbytitlebarwin(ev->event)) || (c = client_getbywin(ev->event)))
+    {
         if(globalconf.hooks.mouse_leave != LUA_REFNIL)
         {
             luaA_object_push(globalconf.L, c);
             luaA_dofunction_from_registry(globalconf.L, globalconf.hooks.mouse_leave, 1, 0);
         }
+        luaA_object_push(globalconf.L, c);
+        luaA_object_emit_signal(globalconf.L, -1, "mouse::leave", 0);
+        lua_pop(globalconf.L, 1);
+    }
 
     if((wibox = wibox_getbywin(ev->event)))
     {
@@ -473,11 +478,16 @@ event_handle_enternotify(void *data __attribute__ ((unused)),
 
     if((c = client_getbytitlebarwin(ev->event))
        || (c = client_getbywin(ev->event)))
+    {
         if(globalconf.hooks.mouse_enter != LUA_REFNIL)
         {
             luaA_object_push(globalconf.L, c);
             luaA_dofunction_from_registry(globalconf.L, globalconf.hooks.mouse_enter, 1, 0);
         }
+        luaA_object_push(globalconf.L, c);
+        luaA_object_emit_signal(globalconf.L, -1, "mouse::enter", 0);
+        lua_pop(globalconf.L, 1);
+    }
 
     return 0;
 }
