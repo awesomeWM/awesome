@@ -310,17 +310,8 @@ end
 root.keys(globalkeys)
 -- }}}
 
--- {{{ Hooks
--- Hook function to execute when the mouse enters a client.
-awful.hooks.mouse_enter.register(function (c)
-    -- Sloppy focus, but disabled for magnifier layout
-    if awful.layout.get(c.screen) ~= awful.layout.suit.magnifier
-        and awful.client.focus.filter(c) then
-        client.focus = c
-    end
-end)
-
--- Hook function to execute when a new client appears.
+-- {{{ Signals
+-- Signal function to execute when a new client appears.
 client.add_signal("manage", function (c, startup)
     -- If we are not managing this application at startup,
     -- move it to the screen where the mouse is.
@@ -370,6 +361,14 @@ client.add_signal("manage", function (c, startup)
 
     -- Set key bindings
     c:keys(clientkeys)
+
+    -- Enable sloppy focus
+    c:add_signal("mouse::enter", function(c)
+        if awful.layout.get(c.screen) ~= awful.layout.suit.magnifier
+            and awful.client.focus.filter(c) then
+            client.focus = c
+        end
+    end)
 
     -- Set the windows at the slave,
     -- i.e. put it at the end of others instead of setting it master.
