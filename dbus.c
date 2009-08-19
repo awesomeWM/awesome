@@ -651,7 +651,12 @@ luaA_dbus_add_signal(lua_State *L)
 {
     const char *name = luaL_checkstring(L, 1);
     luaA_checkfunction(L, 2);
-    signal_add(&dbus_signals, name, luaA_object_ref(L, 2));
+    signal_t *sig = signal_array_getbyid(&dbus_signals,
+                                         a_strhash((const unsigned char *) name));
+    if(sig)
+        luaA_warn(L, "cannot add signal %s on D-Bus, already existing", name);
+    else
+        signal_add(&dbus_signals, name, luaA_object_ref(L, 2));
     return 0;
 }
 
