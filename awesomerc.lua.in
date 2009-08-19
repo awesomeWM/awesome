@@ -1,5 +1,6 @@
 -- Standard awesome library
 require("awful")
+require("awful.autofocus")
 -- Theme handling library
 require("beautiful")
 -- Notification library
@@ -377,15 +378,4 @@ client.add_signal("manage", function (c, startup)
     -- Honor size hints: if you want to drop the gaps between windows, set this to false.
     -- c.size_hints_honor = false
 end)
-
--- Hook function to execute when switching tag selection.
-awful.hooks.tags.register(function (screen, tag, view)
-    -- Give focus to the latest client in history if no window has focus
-    -- or if the current window is a desktop or a dock one.
-    if not client.focus or not client.focus:isvisible() then
-        local c = awful.client.focus.history.get(screen, 0)
-        if c then client.focus = c end
-    end
-end)
-
 -- }}}
