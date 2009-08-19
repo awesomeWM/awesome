@@ -14,7 +14,6 @@ local function spiral(p, dwindle)
     local wa = p.workarea
     local cls = p.clients
 
-    local i = 0
     local n = #cls
     local nx = wa.x
     local ny = wa.y
@@ -22,41 +21,40 @@ local function spiral(p, dwindle)
     local nh = wa.height
 
     for k, c in ipairs(cls) do
-        if (i % 2 == 1 and nh / 2 > 2 * c.border_width)
-              or (i % 2 == 0 and nw / 2 > 2 * c.border_width) then
-            if i < n - 1 then
-                if i % 2 == 1 then
+        if (k % 2 == 0 and nh / 2 > 2 * c.border_width)
+              or (k % 2 == 1 and nw / 2 > 2 * c.border_width) then
+            if k < n then
+                if k % 2 == 0 then
                     nh = nh / 2
                 else
                     nw = nw / 2
                 end
-                if i % 4 == 2 and not dwindle then
+                if k % 4 == 3 and not dwindle then
                     nx = nx + nw
-                elseif i % 4 == 3 and not dwindle then
+                elseif k % 4 == 0 and not dwindle then
                     ny = ny + nh
                 end
             end
-            if i % 4 == 0 then
+            if k % 4 == 1 then
                 if dwindle then
                     ny = ny + nh
                 else
                     ny = ny - nh
                 end
-            elseif i % 4 == 1 then
+            elseif k % 4 == 2 then
                 nx = nx + nw
-            elseif i % 4 == 2 then
+            elseif k % 4 == 3 then
                 ny = ny + nh
-            elseif i % 4 == 3 then
+            elseif k % 4 == 0 then
                 if dwindle then
                     nx = nx + nw
                 else
                     nx = nx - nw
                 end
             end
-            if i == 0 then
+            if k == 1 then
                 ny = wa.y
             end
-            i = i + 1
         end
         local geom = { x = nx, y = ny, width = nw, height = nh }
         c:geometry(geom)
