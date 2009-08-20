@@ -155,6 +155,8 @@ void
 luaA_class_setup(lua_State *L, lua_class_t *class,
                  const char *name,
                  lua_class_allocator_t allocator,
+                 lua_class_propfunc_t index_miss_property,
+                 lua_class_propfunc_t newindex_miss_property,
                  const struct luaL_reg methods[],
                  const struct luaL_reg meta[])
 {
@@ -177,6 +179,8 @@ luaA_class_setup(lua_State *L, lua_class_t *class,
 
     class->allocator = allocator;
     class->name = name;
+    class->index_miss_property = index_miss_property;
+    class->newindex_miss_property = newindex_miss_property;
 
     lua_class_array_append(&luaA_classes, class);
 }
@@ -275,8 +279,16 @@ luaA_class_index(lua_State *L)
     lua_class_property_t *prop = luaA_class_property_get(L, class, 2);
 
     /* Property does exist and has an index callback */
-    if(prop && prop->index)
-        return prop->index(L, luaA_checkudata(L, 1, class));
+    if(prop)
+    {
+        if(prop->index)
+            return prop->index(L, luaA_checkudata(L, 1, class));
+    }
+    else
+    {
+        if(class->index_miss_property)
+            return class->index_miss_property(L, luaA_checkudata(L, 1, class));
+    }
 
     return 0;
 }
@@ -297,8 +309,16 @@ luaA_class_newindex(lua_State *L)
     lua_class_property_t *prop = luaA_class_property_get(L, class, 2);
 
     /* Property does exist and has a newindex callback */
-    if(prop && prop->newindex)
-        return prop->newindex(L, luaA_checkudata(L, 1, class));
+    if(prop)
+    {
+        if(prop->newindex)
+            return prop->newindex(L, luaA_checkudata(L, 1, class));
+    }
+    else
+    {
+        if(class->newindex_miss_property)
+            return class->newindex_miss_property(L, luaA_checkudata(L, 1, class));
+    }
 
     return 0;
 }

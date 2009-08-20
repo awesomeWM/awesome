@@ -42,18 +42,23 @@ typedef struct
 
 typedef lua_object_t *(*lua_class_allocator_t)(lua_State *);
 
+typedef int (*lua_class_propfunc_t)(lua_State *, lua_object_t *);
+
 typedef struct
 {
     /** Class name */
     const char *name;
+    /** Class signals */
     signal_array_t signals;
     /** Allocator for creating new objects of that class */
     lua_class_allocator_t allocator;
     /** Class properties */
     lua_class_property_array_t properties;
+    /** Function to call when a indexing an unknown property */
+    lua_class_propfunc_t index_miss_property;
+    /** Function to call when a indexing an unknown property */
+    lua_class_propfunc_t newindex_miss_property;
 } lua_class_t;
-
-typedef int (*lua_class_propfunc_t)(lua_State *, lua_object_t *);
 
 const char * luaA_typename(lua_State *, int);
 lua_class_t * luaA_class_get(lua_State *, int);
@@ -64,6 +69,7 @@ void luaA_class_emit_signal(lua_State *, lua_class_t *, const char *, int);
 
 void luaA_openlib(lua_State *, const char *, const struct luaL_reg[], const struct luaL_reg[]);
 void luaA_class_setup(lua_State *, lua_class_t *, const char *, lua_class_allocator_t,
+                      lua_class_propfunc_t, lua_class_propfunc_t,
                       const struct luaL_reg[], const struct luaL_reg[]);
 
 void luaA_class_add_property(lua_class_t *, awesome_token_t,

@@ -800,6 +800,7 @@ image_class_setup(lua_State *L)
     };
 
     luaA_class_setup(L, &image_class, "image", (lua_class_allocator_t) image_new,
+                     luaA_class_index_miss_property, luaA_class_newindex_miss_property,
                      image_methods, image_meta);
     luaA_class_add_property(&image_class, A_TK_WIDTH,
                             NULL,

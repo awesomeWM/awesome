@@ -243,5 +243,8 @@ bool luaA_isloop(lua_State *, int);
 /** Global signals */
 signal_array_t global_signals;
 
+int luaA_class_index_miss_property(lua_State *, lua_object_t *);
+int luaA_class_newindex_miss_property(lua_State *, lua_object_t *);
+
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

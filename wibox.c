@@ -1505,6 +1505,7 @@ wibox_class_setup(lua_State *L)
     };
 
     luaA_class_setup(L, &wibox_class, "wibox", (lua_class_allocator_t) wibox_new,
+                     luaA_class_index_miss_property, luaA_class_newindex_miss_property,
                      wibox_methods, wibox_meta);
     luaA_class_add_property(&wibox_class, A_TK_WIDGETS,
                             (lua_class_propfunc_t) luaA_wibox_set_widgets,
