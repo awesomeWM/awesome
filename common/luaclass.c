@@ -26,8 +26,6 @@ struct lua_class_property
 {
     /** ID matching the property */
     awesome_token_t id;
-    /** Name of the property */
-    const char *name;
     /** Callback function called when the property is found in object creation. */
     lua_class_propfunc_t new;
     /** Callback function called when the property is found in object __index. */
@@ -111,7 +109,6 @@ BARRAY_FUNCS(lua_class_property_t, lua_class_property, DO_NOTHING, lua_class_pro
 void
 luaA_class_add_property(lua_class_t *lua_class,
                         awesome_token_t token,
-                        const char *name,
                         lua_class_propfunc_t cb_new,
                         lua_class_propfunc_t cb_index,
                         lua_class_propfunc_t cb_newindex)
@@ -119,7 +116,6 @@ luaA_class_add_property(lua_class_t *lua_class,
     lua_class_property_array_insert(&lua_class->properties, (lua_class_property_t)
                                     {
                                         .id = token,
-                                        .name = name,
                                         .new = cb_new,
                                         .index = cb_index,
                                         .newindex = cb_newindex

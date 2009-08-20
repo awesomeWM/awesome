@@ -123,11 +123,11 @@ timer_class_setup(lua_State *L)
 
     luaA_class_setup(L, &timer_class, "timer", (lua_class_allocator_t) timer_new,
                      timer_methods, timer_meta);
-    luaA_class_add_property(&timer_class, A_TK_TIMEOUT, "timeout",
+    luaA_class_add_property(&timer_class, A_TK_TIMEOUT,
                             (lua_class_propfunc_t) luaA_timer_set_timeout,
                             (lua_class_propfunc_t) luaA_timer_get_timeout,
                             (lua_class_propfunc_t) luaA_timer_set_timeout);
-    luaA_class_add_property(&timer_class, A_TK_STARTED, "started",
+    luaA_class_add_property(&timer_class, A_TK_STARTED,
                             NULL,
                             (lua_class_propfunc_t) luaA_timer_get_started,
                             NULL);

@@ -66,7 +66,7 @@ void luaA_openlib(lua_State *, const char *, const struct luaL_reg[], const stru
 void luaA_class_setup(lua_State *, lua_class_t *, const char *, lua_class_allocator_t,
                       const struct luaL_reg[], const struct luaL_reg[]);
 
-void luaA_class_add_property(lua_class_t *, awesome_token_t, const char *,
+void luaA_class_add_property(lua_class_t *, awesome_token_t,
                              lua_class_propfunc_t, lua_class_propfunc_t, lua_class_propfunc_t);
 
 int luaA_usemetatable(lua_State *, int, int);
