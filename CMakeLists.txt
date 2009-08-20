@@ -21,7 +21,7 @@ include_directories(
     ${AWESOME_REQUIRED_INCLUDE_DIRS}
     ${AWESOME_OPTIONAL_INCLUDE_DIRS})
 
-file(GLOB_RECURSE AWE_LUA_FILES ${BUILD_DIR}/lib/*.lua)
+file(GLOB_RECURSE AWE_LUA_FILES ${BUILD_DIR}/lib/*.lua ${BUILD_DIR}/luadoc/*.lua)
 
 set(AWE_CONF_FILE_DEFAULT ${BUILD_DIR}/awesomerc.lua)
 set(AWE_CONF_FILE rc.lua)
@@ -216,59 +216,24 @@ endif()
 # {{{ Lua API Documentation
 if(GENERATE_LUADOC)
 
-    set(capi_lua ${BUILD_DIR}/lib/capi.lua)
-
     if(NOT BUILD_DIR STREQUAL SOURCE_DIR)
         file(MAKE_DIRECTORY ${BUILD_DIR}/lib)
     endif()
 
-    # {{{ setup a command for ${capi_lua}
-    macro(a_file_match infile regex result_var)
-        file(STRINGS ${infile} match REGEX ${regex} LIMIT_COUNT 1)
-        if(match)
-            set(${result_var} TRUE)
-        else()
-            set(${result_var} FALSE)
-        endif()
-    endmacro()
-
     set(luadoc_c_srcs "")
 
-    # find .c files exporting lua functions
-    foreach(cfile ${AWE_SRCS})
-        a_file_match(${cfile} "const struct luaL_reg" result)
-        if(result)
-            set(luadoc_c_srcs ${luadoc_c_srcs} ${cfile})
-        else()
-            a_file_match(${cfile} "luaA_.*_index" result)
-            if(result)
-                set(luadoc_c_srcs ${luadoc_c_srcs} ${cfile})
-        endif()
-        endif()
-    endforeach()
-
-    # create fake lua source file to process by luadoc
-    add_custom_command(
-        COMMAND ${CAT_EXECUTABLE} ${luadoc_c_srcs}
-                | ${LUA_EXECUTABLE} ${SOURCE_DIR}/build-utils/fake-lua-src.lua
-                > ${capi_lua}
-        OUTPUT  ${capi_lua}
-        DEPENDS ${luadoc_c_srcs}
-        COMMENT "Generating fake lua source."
-        VERBATIM)
-    # }}}
-
     # Generate documentation of lib//0lua
-    file(GLOB_RECURSE lua_lib_files ${BUILD_DIR}/lib/*.lua)
+    file(GLOB_RECURSE lua_lib_files ${BUILD_DIR}/lib/*.lua
+        ${SOURCE_DIR}/luadoc/*.lua)
     foreach(filename ${lua_lib_files})
-        file(RELATIVE_PATH filename ${BUILD_DIR}/lib ${filename})
+        file(RELATIVE_PATH filename ${BUILD_DIR} ${filename})
         set(luadoc_srcs ${luadoc_srcs} ${filename})
     endforeach()
 
     add_custom_target(luadoc ALL
-        COMMAND ${LUADOC_EXECUTABLE} ${luadoc_srcs} -d ${BUILD_DIR}/luadoc
-        WORKING_DIRECTORY ${BUILD_DIR}/lib
-        DEPENDS ${AWE_LUA_FILES} ${capi_lua})
+        COMMAND ${LUADOC_EXECUTABLE} ${luadoc_srcs} -d ${BUILD_DIR}/luadoc --nofiles
+        WORKING_DIRECTORY ${BUILD_DIR}
+        DEPENDS ${AWE_LUA_FILES})
 endif()
 # }}}
 
