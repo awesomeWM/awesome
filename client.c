@@ -936,13 +936,11 @@ client_set_fullscreen(lua_State *L, int cidx, bool s)
     {
         area_t geometry;
 
-        /* Make sure the current geometry is stored without titlebar. */
-        if(s)
-            titlebar_ban(c->titlebar);
-
         /* become fullscreen! */
-        if((c->fullscreen = s))
+        if(s)
         {
+            /* Make sure the current geometry is stored without titlebar. */
+            titlebar_ban(c->titlebar);
             /* remove any max state */
             client_set_maximized_horizontal(L, cidx, false);
             client_set_maximized_vertical(L, cidx, false);
@@ -955,10 +953,12 @@ client_set_fullscreen(lua_State *L, int cidx, bool s)
             c->geometries.fullscreen = c->geometry;
             c->border_width_fs = c->border_width;
             client_set_border_width(L, cidx, 0);
+            c->fullscreen = true;
         }
         else
         {
             geometry = c->geometries.fullscreen;
+            c->fullscreen = false;
             client_set_border_width(L, cidx, c->border_width_fs);
         }
         client_resize(c, geometry, false);
@@ -1342,6 +1342,10 @@ client_set_border_width(lua_State *L, int cidx, int width)
         return;
 
     if(width == c->border_width || width < 0)
+        return;
+
+    /* disallow change of border width if the client is fullscreen */
+    if(c->fullscreen)
         return;
 
     /* Update geometry with the new border. */
