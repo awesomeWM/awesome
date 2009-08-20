@@ -174,7 +174,9 @@ function destroy(notification)
     if notification and notification.box.screen then
         local scr = notification.box.screen
         table.remove(notifications[notification.box.screen][notification.position], notification.idx)
-        notification.timer:stop()
+        if notification.timer then
+            notification.timer:stop()
+        end
         notification.box.screen = nil
         arrange(scr)
         return true
@@ -292,12 +294,14 @@ function notify(args)
     if title then title = title .. "\n" else title = "" end
 
     -- hook destroy
-    local timer_die = capi.timer { timeout = timeout }
     local die = function () destroy(notification) end
-    timer_die:add_signal("timeout", die)
-    timer_die:start()
+    if timeout > 0 then
+        local timer_die = capi.timer { timeout = timeout }
+        timer_die:add_signal("timeout", die)
+        timer_die:start()
+        notification.timer = timer_die
+    end
     notification.die = die
-    notification.timer = timer_die
 
     local run = function ()
         if args.run then
@@ -308,8 +312,11 @@ function notify(args)
     end
 
     local hover_destroy = function ()
-        if hover_timeout == 0 then die()
-          else timer_die:stop() end
+        if hover_timeout == 0 then
+            die()
+        elseif timer_die then
+            timer_die:stop()
+        end
     end
 
     -- create textbox
