@@ -127,7 +127,7 @@ textbox_draw(widget_t *widget, draw_context_t *ctx, area_t geometry, wibox_t *p)
         }
     }
 
-    geometry.y += (geometry.height - textbox_geometry(widget, ctx->phys_screen).height - p->border.width + 1) / 2;
+    geometry.y += (geometry.height - textbox_geometry(widget, ctx->phys_screen).height) / 2;
     draw_text(ctx, &d->data, d->ellip, d->wrap, d->align, &d->margin, geometry, &d->extents);
 }
 
