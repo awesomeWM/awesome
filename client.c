@@ -220,7 +220,7 @@ client_set_name(lua_State *L, int cidx, const char *name)
 bool
 client_maybevisible(client_t *c, screen_t *screen)
 {
-    if(c->screen == screen)
+    if(screen && c->screen == screen)
     {
         if(c->sticky || c->type == WINDOW_TYPE_DESKTOP)
             return true;
