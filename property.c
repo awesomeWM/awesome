@@ -85,6 +85,7 @@ property_update_wm_client_machine(client_t *c)
 
     luaA_object_push(globalconf.L, c);
     client_set_machine(globalconf.L, -1, value);
+    p_delete(&value);
     lua_pop(globalconf.L, 1);
 }
 
@@ -116,6 +117,7 @@ property_update_wm_window_role(client_t *c)
 
     luaA_object_push(globalconf.L, c);
     client_set_role(globalconf.L, -1, value);
+    p_delete(&value);
     lua_pop(globalconf.L, 1);
 }
 
@@ -282,6 +284,7 @@ property_update_wm_name(client_t *c)
 
     luaA_object_push(globalconf.L, c);
     client_set_name(globalconf.L, -1, name);
+    p_delete(&name);
     lua_pop(globalconf.L, 1);
 }
 
@@ -331,6 +334,7 @@ property_update_wm_icon_name(client_t *c)
 
     luaA_object_push(globalconf.L, c);
     client_set_icon_name(globalconf.L, -1, name);
+    p_delete(&name);
     lua_pop(globalconf.L, 1);
 }
 
