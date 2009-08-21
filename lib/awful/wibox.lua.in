@@ -81,7 +81,9 @@ end
 local function wibox_update_strut(wibox)
     for _, wprop in ipairs(wiboxes) do
         if wprop.wibox == wibox then
-            if wprop.position == "top" then
+            if not wibox.visible then
+                wibox:struts { left = 0, right = 0, bottom = 0, top = 0 }
+            elseif wprop.position == "top" then
                 wibox:struts { left = 0, right = 0, bottom = 0, top = wibox.height }
             elseif wprop.position == "bottom" then
                 wibox:struts { left = 0, right = 0, bottom = wibox.height, top = 0 }
@@ -90,6 +92,7 @@ local function wibox_update_strut(wibox)
             elseif wprop.position == "right" then
                 wibox:struts { left = 0, right = wibox.width, bottom = 0, top = 0 }
             end
+            break
         end
     end
 end
@@ -123,6 +126,7 @@ function attach(wibox, position)
 
     wibox:add_signal("property::width", wibox_update_strut)
     wibox:add_signal("property::height", wibox_update_strut)
+    wibox:add_signal("property::visible", wibox_update_strut)
 
     wibox:add_signal("property::screen", call_wibox_position_hook_on_prop_update)
     wibox:add_signal("property::visible", call_wibox_position_hook_on_prop_update)
