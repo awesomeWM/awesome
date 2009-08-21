@@ -29,7 +29,7 @@ local function tasklist_update(w, buttons, label, data, widgets)
     local clients = capi.client.get()
     local shownclients = {}
     for k, c in ipairs(clients) do
-        if not (c.skip_taskbar or c.hide
+        if not (c.skip_taskbar or c.hidden
             or c.type == "splash" or c.type == "dock" or c.type == "desktop") then
             table.insert(shownclients, c)
         end
