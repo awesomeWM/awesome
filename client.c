@@ -1375,10 +1375,13 @@ void
 client_set_icon(lua_State *L, int cidx, int iidx)
 {
     client_t *c = luaA_client_checkudata(L, cidx);
+    /* convert index to absolute */
+    cidx = luaA_absindex(L, cidx);
+    iidx = luaA_absindex(L, iidx);
     luaA_checkudata(L, iidx, &image_class);
     luaA_object_unref_item(L, cidx, c->icon);
     c->icon = luaA_object_ref_item(L, cidx, iidx);
-    luaA_object_emit_signal(L, cidx, "property::icon", 0);
+    luaA_object_emit_signal(L, cidx < iidx ? cidx : cidx - 1, "property::icon", 0);
     /* execute hook */
     hook_property(c, "icon");
 }
