@@ -359,4 +359,7 @@ client.add_signal("manage", function (c, startup)
     -- Honor size hints: if you want to drop the gaps between windows, set this to false.
     -- c.size_hints_honor = false
 end)
+
+client.add_signal("focus", function(c) c.border_color = beautiful.border_focus end)
+client.add_signal("unfocus", function(c) c.border_color = beautiful.border_normal end)
 -- }}}
