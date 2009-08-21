@@ -31,7 +31,18 @@ local tonumber = tonumber
 module("awful.menu")
 
 local cur_menu
-local menu_keys = {}
+
+--- Key bindings for menu navigation.
+-- Keys are: up, down, exec, back, close. Value are table with a list of valid
+-- keys for the action, i.e. menu_keys.up =  { "j", "k" } will bind 'j' and 'k'
+-- key to up action. This is common to all created menu.
+-- @class table
+-- @name menu_keys
+menu_keys = { up = { "Up" },
+              down = { "Down" },
+              exec = { "Return", "Right" },
+              back = { "Left" },
+              close = { "Escape" } }
 
 local function load_theme(custom)
     local theme = {}
@@ -320,16 +331,6 @@ function toggle(menu, keygrabber)
     end
 end
 
---- Set key bindings for menu navigation.
--- @param keys Table containing the following keys: up, down, exec, back, close. If a key is missing the default key binding will be used, defaults are respectively: "Up", "Down", "Return", "Left", "Escape".
-function setkeys(keys)
-    menu_keys.up = keys and keys.up or { "Up" }
-    menu_keys.down = keys and keys.down or { "Down" }
-    menu_keys.exec = keys and keys.exec or { "Return", "Right" }
-    menu_keys.back = keys and keys.back or { "Left" }
-    menu_keys.close = keys and keys.close or { "Escape" }
-end
-
 --- Open a menu popup.
 -- @param menu Table containing the menu informations. Key items: Table containing the displayed items, each element is a tab containing: item name, tiggered action, submenu table or function, item icon (optional). Keys [fg|bg]_[focus|normal], border, border_width, submenu_icon, height and width override the default display for your menu, each of them are optional. Key auto_expand controls the submenu auto expand behaviour by setting it to true (default) or false.
 -- @param parent Specify the parent menu if we want to open a submenu, this value should never be set by the user.
@@ -337,10 +338,6 @@ end
 function new(menu, parent, num)
     -- Create a table to store our menu informations
     local data = {}
-
-    if not menu_keys.up then
-        setkeys(menu.keys)
-    end
 
     data.items = {}
     data.num = num or 1
