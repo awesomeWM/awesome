@@ -292,9 +292,7 @@ client_unfocus(client_t *c)
 bool
 client_hasproto(client_t *c, xcb_atom_t atom)
 {
-    uint32_t i;
-
-    for(i = 0; i < c->protocols.atoms_len; i++)
+    for(uint32_t i = 0; i < c->protocols.atoms_len / sizeof(xcb_atom_t) ; i++)
         if(c->protocols.atoms[i] == atom)
             return true;
     return false;
