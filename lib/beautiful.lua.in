@@ -9,6 +9,7 @@
 local io = io
 local os = os
 local print = print
+local pcall = pcall
 local pairs = pairs
 local type = type
 local dofile = dofile
@@ -26,15 +27,18 @@ local capi =
 module("beautiful")
 
 -- Local data
-local theme = {}
+local theme
 
 --- Init function, should be runned at the beginning of configuration file.
 -- @param path The theme file path.
 function init(path)
     if path then
-        theme = dofile(path)
+        local success
+        success, theme = pcall(function() return dofile(path) end)
 
-        if theme then
+        if not success then
+            return print("E: beautiful: error loading theme file " .. theme)
+        elseif theme then
             -- try and grab user's $HOME directory
             local homedir = os.getenv("HOME")
             -- expand '~'
@@ -54,10 +58,10 @@ function init(path)
             if theme.fg_normal then capi.awesome.fg = theme.fg_normal end
             if theme.bg_normal then capi.awesome.bg = theme.bg_normal end
         else
-            return print("E: error loading theme file " .. path)
+            return print("E: beautiful: error loading theme file " .. path)
         end
     else
-        return print("E: error loading theme: no path specified " )
+        return print("E: beautiful: error loading theme: no path specified")
     end
 end
 
