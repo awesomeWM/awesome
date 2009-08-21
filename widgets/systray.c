@@ -92,6 +92,16 @@ systray_draw(widget_t *widget, draw_context_t *ctx,
                         _NET_SYSTEM_TRAY_ORIENTATION, CARDINAL, 32, 1, &orient);
 }
 
+/** Delete a systray widget.
+ * \param w The widget to destroy.
+ */
+static void
+systray_destructor(widget_t *w)
+{
+    systray_data_t *d = w->data;
+    p_delete(&d);
+}
+
 /** Initialize a systray widget.
  * \param w The widget to initialize.
  * \return The same widget.
@@ -102,6 +112,7 @@ widget_systray(widget_t *w)
     w->draw = systray_draw;
     w->geometry = systray_geometry;
     w->extents = systray_extents;
+    w->destructor = systray_destructor;
 
     systray_data_t *d = w->data = p_new(systray_data_t, 1);
     d->height = 0;
