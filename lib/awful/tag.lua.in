@@ -12,6 +12,7 @@ local table = table
 local setmetatable = setmetatable
 local capi =
 {
+    tag = tag,
     screen = screen,
     mouse = mouse,
     client = client
@@ -53,6 +54,26 @@ local function compare_select(a, b)
         end
     end
     return true
+end
+
+--- Create a set of tags and attach it to a screen.
+-- @param names The tag name, in a table
+-- @param screen The tag screen, or 1 if not set.
+-- @param layout The layout to set for this tags by default.
+-- @return A table with all created tags.
+function new(names, screen, layout)
+    local screen = screen or 1
+    local tags = {}
+    for id, name in ipairs(names) do
+        tags[#tags + 1] = capi.tag { name = name }
+        tags[#tags].screen = screen
+        -- Select the first tag.
+        if id == 1 then
+            tags[#tags].selected = true
+        end
+        setproperty(tags[#tags], "layout", layout)
+    end
+    return tags
 end
 
 --- Update the tag history.
@@ -311,5 +332,7 @@ end
 
 -- Register standards signals
 capi.client.add_signal("manage", withcurrent)
+
+setmetatable(_M, { __call = function (_, ...) return new(...) end })
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
