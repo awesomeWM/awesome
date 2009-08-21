@@ -7,15 +7,6 @@ require("beautiful")
 require("naughty")
 
 -- {{{ Variable definitions
--- Themes define colours, icons, and wallpapers
--- The default is a dark theme
-theme_path = "@AWESOME_THEMES_PATH@/default/theme.lua"
--- Uncommment this for a lighter theme
--- theme_path = "@AWESOME_THEMES_PATH@/sky/theme.lua"
-
--- Actually load theme
-beautiful.init(theme_path)
-
 -- This is used later as the default terminal and editor to run.
 terminal = "xterm"
 editor = os.getenv("EDITOR") or "nano"
