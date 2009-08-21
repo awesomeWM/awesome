@@ -23,6 +23,9 @@ Imitate the existing code style. For concrete rules:
 
  - Be clear in what you do;
 
+ - Prefix your function name with the module they are enhancing,
+   i.e. if you add a function to manipulate a tag prefix it with tag_.
+
  - Write documentation for any new functions, options, whatever.
 
 A vim modeline is set in each file to respect this.
