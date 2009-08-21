@@ -1205,7 +1205,7 @@ key_class_setup(lua_State *L)
                             (lua_class_propfunc_t) luaA_key_set_key,
                             (lua_class_propfunc_t) luaA_key_get_key,
                             (lua_class_propfunc_t) luaA_key_set_key);
-    luaA_class_add_property(&key_class, A_TK_KEY,
+    luaA_class_add_property(&key_class, A_TK_KEYSYM,
                             NULL,
                             (lua_class_propfunc_t) luaA_key_get_keysym,
                             NULL);
