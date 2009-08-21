@@ -164,8 +164,8 @@ client_set_role(lua_State *L, int cidx, const char *role)
 {
     client_t *c = luaA_client_checkudata(L, cidx);
     p_delete(&c->role);
-    luaA_object_emit_signal(L, cidx, "property::role", 0);
     c->role = a_strdup(role);
+    luaA_object_emit_signal(L, cidx, "property::role", 0);
 }
 
 void
