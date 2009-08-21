@@ -2,36 +2,6 @@ awesome
 =======
 awesome is a highly configurable, next generation framework window manager for X.
 
-Requirements
-------------
-In order to build awesome itself, you need header files and libs of:
-  - cmake (>= 2.6)
-  - Xlib
-  - xproto
-  - xcb (>= 1.1)
-  - xcb-util (>= 0.3)
-  - Lua (>= 5.1)
-  - cairo built with xcb support
-  - pango and pangocairo (>= 1.19.3)
-  - libev
-  - Imlib2
-  - dbus (optional, use -DWITH_DBUS=OFF with cmake to disable)
-  - gperf
-
-As well as the following tools to build theme icons:
-  - ImageMagick
-
-In order to build the awesome man pages and documentation,
-you need these tools:
-  - asciidoc
-  - xmlto
-  - docbook XSL stylesheets
-  - luadoc
-
-In order to build the source code reference, you need these tools:
-  - doxygen
-  - graphviz
-
 Building and installation
 -------------------------
 After extracting the dist tarball, run:
