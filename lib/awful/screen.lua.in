@@ -21,13 +21,20 @@ local data = {}
 data.padding = {}
 
 --- Give the focus to a screen, and move pointer.
--- @param i Relative screen number.
-function focus(i)
-    local s = util.cycle(capi.screen.count(), capi.mouse.screen + i)
-    local c = client.focus.history.get(s, 0)
+-- @param screen Screen number.
+function focus(screen)
+    local c = client.focus.history.get(screen, 0)
     if c then capi.client.focus = c end
     -- Move the mouse on the screen
-    capi.mouse.screen = s
+    capi.mouse.screen = screen
+end
+
+--- Give the focus to a screen, and move pointer, but relative to the current
+-- focused screen.
+-- @param i Value to add to the current focused screen index. 1 will focus next
+-- screen, -1 would focus the previous one.
+function focus_relative(i)
+    return focus(util.cycle(capi.screen.count(), capi.mouse.screen + i))
 end
 
 --- Get or set the screen padding.
