@@ -148,17 +148,17 @@ local function grabber(mod, key, event)
     end
 
     local sel = cur_menu.sel or 0
-    if key == menu_keys.up then
+    if util.table.hasitem(menu_keys.up, key) then
         local sel_new = sel-1 < 1 and #cur_menu.items or sel-1
         item_enter(cur_menu, sel_new)
-    elseif key == menu_keys.down then
+    elseif util.table.hasitem(menu_keys.down, key) then
         local sel_new = sel+1 > #cur_menu.items and 1 or sel+1
         item_enter(cur_menu, sel_new)
-     elseif sel > 0 and key == menu_keys.exec then
+    elseif sel > 0 and util.table.hasitem(menu_keys.exec, key) then
         exec(cur_menu, sel)
-    elseif key == menu_keys.back then
+    elseif util.table.hasitem(menu_keys.back, key) then
         cur_menu:hide()
-     elseif key == menu_keys.close then
+    elseif util.table.hasitem(menu_keys.close, key) then
         get_parents(cur_menu):hide()
     end
    
@@ -323,11 +323,11 @@ end
 --- Set key bindings for menu navigation.
 -- @param keys Table containing the following keys: up, down, exec, back, close. If a key is missing the default key binding will be used, defaults are respectively: "Up", "Down", "Return", "Left", "Escape".
 function setkeys(keys)
-    menu_keys.up = keys and keys.up or "Up"
-    menu_keys.down = keys and keys.down or "Down"
-    menu_keys.exec = keys and keys.exec or "Return"
-    menu_keys.back = keys and keys.back or "Left"
-    menu_keys.close = keys and keys.close or "Escape"
+    menu_keys.up = keys and keys.up or { "Up" }
+    menu_keys.down = keys and keys.down or { "Down" }
+    menu_keys.exec = keys and keys.exec or { "Return", "Right" }
+    menu_keys.back = keys and keys.back or { "Left" }
+    menu_keys.close = keys and keys.close or { "Escape" }
 end
 
 --- Open a menu popup.
