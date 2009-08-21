@@ -40,7 +40,13 @@ signal_cmp(const void *a, const void *b)
     return x->id > y->id ? 1 : (x->id < y->id ? -1 : 0);
 }
 
-DO_BARRAY(signal_t, signal, DO_NOTHING, signal_cmp)
+static inline void
+signal_wipe(signal_t *sig)
+{
+    cptr_array_wipe(&sig->sigfuncs);
+}
+
+DO_BARRAY(signal_t, signal, signal_wipe, signal_cmp)
 
 static inline signal_t *
 signal_array_getbyid(signal_array_t *arr, unsigned long id)
