@@ -52,3 +52,5 @@ int luaA_pushmodifiers(lua_State *, uint16_t);
 uint16_t luaA_tomodifiers(lua_State *L, int ud);
 
 #endif
+
+// vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

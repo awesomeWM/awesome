@@ -115,3 +115,5 @@ luaA_selection_get(lua_State *L)
     p_delete(&event);
     return 0;
 }
+
+// vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

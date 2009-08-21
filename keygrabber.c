@@ -136,3 +136,5 @@ const struct luaL_reg awesome_keygrabber_lib[] =
     { "stop", luaA_keygrabber_stop },
     { NULL, NULL }
 };
+
+// vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

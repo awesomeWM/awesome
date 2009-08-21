@@ -1214,3 +1214,5 @@ key_class_setup(lua_State *L)
                             (lua_class_propfunc_t) luaA_key_get_modifiers,
                             (lua_class_propfunc_t) luaA_key_set_modifiers);
 }
+
+// vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
