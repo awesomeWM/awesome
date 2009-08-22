@@ -32,7 +32,7 @@ void property_update_wm_class(client_t *, xcb_get_property_reply_t *);
 void property_update_wm_name(client_t *);
 void property_update_wm_icon_name(client_t *);
 void property_update_wm_protocols(client_t *);
-void property_update_wm_client_machine(client_t *);
+void property_update_wm_client_machine(client_t *, xcb_get_property_reply_t *);
 void property_update_wm_window_role(client_t *);
 void property_update_net_wm_pid(client_t *, xcb_get_property_reply_t *);
 void property_update_net_wm_icon(client_t *, xcb_get_property_reply_t *);

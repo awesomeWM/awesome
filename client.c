@@ -629,7 +629,7 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
     property_update_wm_hints(c, NULL);
     property_update_wm_transient_for(c, NULL);
     property_update_wm_client_leader(c, NULL);
-    property_update_wm_client_machine(c);
+    property_update_wm_client_machine(c, NULL);
     property_update_wm_window_role(c);
     property_update_net_wm_pid(c, NULL);
     property_update_net_wm_icon(c, NULL);

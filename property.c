@@ -74,19 +74,26 @@ property_handle_wm_transient_for(void *data,
 }
 
 void
-property_update_wm_client_machine(client_t *c)
+property_update_wm_client_machine(client_t *c, xcb_get_property_reply_t *reply)
 {
-    ssize_t slen;
-    char *value;
+    bool no_reply = !reply;
 
-    if(!xutil_text_prop_get(globalconf.connection, c->window,
-                            WM_CLIENT_MACHINE, &value, &slen))
-        return;
+    if(no_reply)
+        reply = xcb_get_property_reply(globalconf.connection,
+                                       xcb_get_any_property(globalconf.connection,
+                                                            false,
+                                                            c->window,
+                                                            WM_CLIENT_MACHINE,
+                                                            UINT_MAX), NULL);
+
+    const char *value = xutil_get_text_property_from_reply(reply);
 
     luaA_object_push(globalconf.L, c);
     client_set_machine(globalconf.L, -1, value);
-    p_delete(&value);
     lua_pop(globalconf.L, 1);
+
+    if(no_reply)
+        p_delete(&reply);
 }
 
 static int
@@ -100,7 +107,7 @@ property_handle_wm_client_machine(void *data,
     client_t *c = client_getbywin(window);
 
     if(c)
-        property_update_wm_client_machine(c);
+        property_update_wm_client_machine(c, reply);
 
     return 0;
 }
