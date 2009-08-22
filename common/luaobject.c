@@ -224,6 +224,8 @@ luaA_object_emit_signal(lua_State *L, int oud,
 {
     int oud_abs = luaA_absindex(L, oud);
     lua_object_t *obj = lua_touserdata(L, oud);
+    if(!obj)
+        luaL_error(L, "trying to emit signal on non-object");
     signal_t *sigfound = signal_array_getbyid(&obj->signals,
                                               a_strhash((const unsigned char *) name));
     if(sigfound)
