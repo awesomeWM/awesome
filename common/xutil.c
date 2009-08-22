@@ -29,7 +29,6 @@
 #include <xcb/xcb_icccm.h>
 
 #include "common/xutil.h"
-#include "common/atoms.h"
 #include "common/tokenize.h"
 
 /** Get the string value of an atom.

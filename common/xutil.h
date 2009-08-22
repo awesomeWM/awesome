@@ -26,8 +26,23 @@
 #include <xcb/xcb_keysyms.h>
 #include <xcb/xcb_aux.h>
 #include <xcb/xcb_event.h>
+#include <xcb/xcb_atom.h>
 
-#include "array.h"
+#include "common/array.h"
+#include "common/atoms.h"
+
+static inline const char *
+xutil_get_text_property_from_reply(xcb_get_property_reply_t *reply)
+{
+    if(reply
+       && (reply->type == STRING
+           || reply->type == UTF8_STRING
+           || reply->type == COMPOUND_TEXT)
+       && reply->format == 8
+       && xcb_get_property_value_length(reply))
+        return xcb_get_property_value(reply);
+    return NULL;
+}
 
 bool xutil_text_prop_get(xcb_connection_t *, xcb_window_t, xcb_atom_t, char **, ssize_t *);
 
