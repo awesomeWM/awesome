@@ -418,19 +418,12 @@ property_update_net_wm_icon(client_t *c,
     if(reply)
     {
         if(ewmh_window_icon_from_reply(reply))
-        {
             client_set_icon(globalconf.L, -2, -1);
-            /* remove icon */
-            lua_pop(globalconf.L, 1);
-        }
     }
     else if(ewmh_window_icon_get_reply(ewmh_window_icon_get_unchecked(c->window)))
-    {
         client_set_icon(globalconf.L, -2, -1);
-        /* remove icon */
-        lua_pop(globalconf.L, 1);
-    }
 
+    /* remove client */
     lua_pop(globalconf.L, 1);
 }
 
