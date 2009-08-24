@@ -391,19 +391,27 @@ property_handle_net_wm_pid(void *data,
  * \param c The client.
  */
 void
-property_update_wm_protocols(client_t *c)
+property_update_wm_protocols(client_t *c, xcb_get_property_reply_t *reply)
 {
     xcb_get_wm_protocols_reply_t protocols;
 
-    /* If this fails for any reason, we still got the old value */
-    if(xcb_get_wm_protocols_reply(globalconf.connection,
-                                  xcb_get_wm_protocols_unchecked(globalconf.connection,
-                                                                 c->window, WM_PROTOCOLS),
-                                  &protocols, NULL))
+    if(reply)
     {
-        xcb_get_wm_protocols_reply_wipe(&c->protocols);
-        memcpy(&c->protocols, &protocols, sizeof(protocols));
+        if(!xcb_get_wm_protocols_from_reply(reply, &protocols))
+            return;
     }
+    else
+    {
+        /* If this fails for any reason, we still got the old value */
+        if(!xcb_get_wm_protocols_reply(globalconf.connection,
+                                      xcb_get_wm_protocols_unchecked(globalconf.connection,
+                                                                     c->window, WM_PROTOCOLS),
+                                      &protocols, NULL))
+            return;
+    }
+
+    xcb_get_wm_protocols_reply_wipe(&c->protocols);
+    memcpy(&c->protocols, &protocols, sizeof(protocols));
 }
 
 /** The property notify event handler.
@@ -425,7 +433,7 @@ property_handle_wm_protocols(void *data,
     client_t *c = client_getbywin(window);
 
     if(c)
-        property_update_wm_protocols(c);
+        property_update_wm_protocols(c, reply);
 
     return 0;
 }

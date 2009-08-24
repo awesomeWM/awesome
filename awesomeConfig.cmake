@@ -144,7 +144,7 @@ pkg_check_modules(AWESOME_REQUIRED REQUIRED
     xcb-aux>=0.3.0
     xcb-atom>=0.3.0
     xcb-keysyms>=0.3.4
-    xcb-icccm>=0.3.3
+    xcb-icccm>=0.3.6
     xcb-image>=0.3.0
     xcb-property>=0.3.0
     cairo-xcb

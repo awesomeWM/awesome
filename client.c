@@ -656,7 +656,7 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
     property_update_wm_name(c, NULL);
     property_update_wm_icon_name(c, NULL);
     property_update_wm_class(c, NULL);
-    property_update_wm_protocols(c);
+    property_update_wm_protocols(c, NULL);
 
     /* update strut */
     ewmh_process_client_strut(c, NULL);
