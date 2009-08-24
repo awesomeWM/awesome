@@ -38,7 +38,8 @@ module("awful.rules")
 -- <p>Note that all "rule" entries need to match. If any of the entry does not
 -- match, the rule won't be applied.</p>
 -- <p>If a client matches multiple rules, their applied in the order they are
--- put in this global rules table.
+-- put in this global rules table. If the value of a rule is a string, then the
+-- match function is used to determine if the client matches the rule.</p>
 --
 -- @class table
 -- @name rules
@@ -50,8 +51,12 @@ rules = {}
 -- @return True if it matches, false otherwise.
 function match(c, rule)
     for field, value in pairs(rule) do
-        if c[field] and not c[field]:match(value) then
-            return false
+        if c[field] then
+            if type(c[field]) == "string" and not c[field]:match(value) then
+                return false
+            elseif c[field] ~= value then
+                return false
+            end
         end
     end
     return true
