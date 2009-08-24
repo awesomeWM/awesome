@@ -42,7 +42,7 @@
                                            xcb_get_any_property(globalconf.connection, \
                                                                 false, \
                                                                 c->window, \
-                                                                WM_NAME, \
+                                                                atom, \
                                                                 UINT_MAX), NULL); \
         luaA_object_push(globalconf.L, c); \
         setfunc(globalconf.L, -1, xutil_get_text_property_from_reply(reply)); \
