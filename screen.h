@@ -58,7 +58,7 @@ screen_t *screen_getbycoord(screen_t *, int, int);
 area_t screen_area_get(screen_t *, bool);
 area_t display_area_get(int);
 int screen_virttophys(int);
-void screen_client_moveto(client_t *, screen_t *, bool, bool);
+void screen_client_moveto(client_t *, screen_t *, bool);
 int luaA_pushscreen(lua_State *, screen_t *);
 
 #endif

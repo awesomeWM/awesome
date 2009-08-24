@@ -334,7 +334,10 @@ function attached_add_signal(screen, ...)
 end
 
 -- Register standards signals
-capi.client.add_signal("manage", withcurrent)
+capi.client.add_signal("manage", function(c)
+    withcurrent(c)
+    c:add_signal("property::screen", withcurrent)
+end)
 
 setmetatable(_M, { __call = function (_, ...) return new(...) end })
 

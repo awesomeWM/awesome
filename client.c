@@ -646,8 +646,7 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
     /* Then check clients hints */
     ewmh_client_check_hints(c);
 
-    /* move client to screen, but do not tag it */
-    screen_client_moveto(c, screen, false, true);
+    screen_client_moveto(c, screen, true);
 
     /* Push client in stack */
     client_raise(c);
@@ -875,7 +874,7 @@ client_resize(client_t *c, area_t geometry, bool hints)
 
         client_restore_enterleave_events();
 
-        screen_client_moveto(c, new_screen, true, false);
+        screen_client_moveto(c, new_screen, false);
 
         /* execute hook */
         hook_property(c, "geometry");
@@ -1617,7 +1616,7 @@ luaA_client_set_screen(lua_State *L, client_t *c)
     {
         int screen = luaL_checknumber(L, -1) - 1;
         luaA_checkscreen(screen);
-        screen_client_moveto(c, &globalconf.screens.tab[screen], true, true);
+        screen_client_moveto(c, &globalconf.screens.tab[screen], true);
     }
     return 0;
 }

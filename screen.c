@@ -256,12 +256,11 @@ screen_virttophys(int screen)
 /** Move a client to a virtual screen.
  * \param c The client to move.
  * \param new_screen The destinatiuon screen.
- * \param dotag Set to true if we also change tags.
  * \param doresize Set to true if we also move the client to the new x and
  *        y of the new screen.
  */
 void
-screen_client_moveto(client_t *c, screen_t *new_screen, bool dotag, bool doresize)
+screen_client_moveto(client_t *c, screen_t *new_screen, bool doresize)
 {
     screen_t *old_screen = c->screen;
     area_t from, to;
@@ -274,22 +273,9 @@ screen_client_moveto(client_t *c, screen_t *new_screen, bool dotag, bool doresiz
     if(c->titlebar)
         c->titlebar->screen = new_screen;
 
-    if(dotag)
-    {
-        /* remove old tags */
-        foreach(old_tag, old_screen->tags)
-            untag_client(c, *old_tag);
-
-        /* \todo move this to Lua */
-        if(!c->sticky)
-            /* add new tags */
-            foreach(new_tag, new_screen->tags)
-                if(tag_get_selected(*new_tag))
-                {
-                    luaA_object_push(globalconf.L, *new_tag);
-                    tag_client(c);
-                }
-    }
+    /* remove old tags */
+    foreach(old_tag, old_screen->tags)
+        untag_client(c, *old_tag);
 
     if(!doresize)
     {
