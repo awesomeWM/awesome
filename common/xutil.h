@@ -40,7 +40,15 @@ xutil_get_text_property_from_reply(xcb_get_property_reply_t *reply)
            || reply->type == COMPOUND_TEXT)
        && reply->format == 8
        && xcb_get_property_value_length(reply))
-        return a_strndup(xcb_get_property_value(reply), xcb_get_property_value_length(reply));
+    {
+        /* We need to copy it that way since the string may not be
+         * NULL-terminated */
+        int len = xcb_get_property_value_length(reply);
+        char *value = p_new(char, len + 1);
+        memcpy(value, xcb_get_property_value(reply), len);
+        value[len] = '\0';
+        return value;
+    }
     return NULL;
 }
 
