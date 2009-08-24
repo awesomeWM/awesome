@@ -72,6 +72,32 @@ HANDLE_TEXT_PROPERTY(wm_window_role, WM_WINDOW_ROLE, client_set_role)
 
 #undef HANDLE_TEXT_PROPERTY
 
+#define HANDLE_PROPERTY(name) \
+    static int \
+    property_handle_##name(void *data, \
+                           xcb_connection_t *connection, \
+                           uint8_t state, \
+                           xcb_window_t window, \
+                           xcb_atom_t name, \
+                           xcb_get_property_reply_t *reply) \
+    { \
+        client_t *c = client_getbywin(window); \
+        if(c) \
+            property_update_##name(c, reply); \
+        return 0; \
+    }
+
+HANDLE_PROPERTY(wm_protocols)
+HANDLE_PROPERTY(wm_transient_for)
+HANDLE_PROPERTY(wm_client_leader)
+HANDLE_PROPERTY(wm_normal_hints)
+HANDLE_PROPERTY(wm_hints)
+HANDLE_PROPERTY(wm_class)
+HANDLE_PROPERTY(net_wm_icon)
+HANDLE_PROPERTY(net_wm_pid)
+
+#undef HANDLE_PROPERTY
+
 void
 property_update_wm_transient_for(client_t *c, xcb_get_property_reply_t *reply)
 {
@@ -96,22 +122,6 @@ property_update_wm_transient_for(client_t *c, xcb_get_property_reply_t *reply)
     client_set_above(globalconf.L, -1, false);
     client_set_transient_for(globalconf.L, -1, client_getbywin(trans));
     lua_pop(globalconf.L, 1);
-}
-
-static int
-property_handle_wm_transient_for(void *data,
-                                 xcb_connection_t *connection,
-                                 uint8_t state,
-                                 xcb_window_t window,
-                                 xcb_atom_t name,
-                                 xcb_get_property_reply_t *reply)
-{
-    client_t *c = client_getbywin(window);
-
-    if(c)
-        property_update_wm_transient_for(c, reply);
-
-    return 0;
 }
 
 /** Update leader hint of a client.
@@ -141,22 +151,6 @@ property_update_wm_client_leader(client_t *c, xcb_get_property_reply_t *reply)
         p_delete(&reply);
 }
 
-static int
-property_handle_wm_client_leader(void *data,
-                                xcb_connection_t *connection,
-                                uint8_t state,
-                                xcb_window_t window,
-                                xcb_atom_t name,
-                                xcb_get_property_reply_t *reply)
-{
-    client_t *c = client_getbywin(window);
-
-    if(c)
-        property_update_wm_client_leader(c, reply);
-
-    return 0;
-}
-
 /** Update the size hints of a client.
  * \param c The client.
  * \param reply (Optional) An existing reply.
@@ -177,22 +171,6 @@ property_update_wm_normal_hints(client_t *c, xcb_get_property_reply_t *reply)
                                           &c->size_hints, NULL))
             return;
     }
-}
-
-static int
-property_handle_wm_normal_hints(void *data,
-                                xcb_connection_t *connection,
-                                uint8_t state,
-                                xcb_window_t window,
-                                xcb_atom_t name,
-                                xcb_get_property_reply_t *reply)
-{
-    client_t *c = client_getbywin(window);
-
-    if(c)
-        property_update_wm_normal_hints(c, reply);
-
-    return 0;
 }
 
 /** Update the WM hints of a client.
@@ -230,22 +208,6 @@ property_update_wm_hints(client_t *c, xcb_get_property_reply_t *reply)
         client_set_group_window(globalconf.L, -1, wmh.window_group);
 }
 
-static int
-property_handle_wm_hints(void *data,
-                         xcb_connection_t *connection,
-                         uint8_t state,
-                         xcb_window_t window,
-                         xcb_atom_t name,
-                         xcb_get_property_reply_t *reply)
-{
-    client_t *c = client_getbywin(window);
-
-    if(c)
-        property_update_wm_hints(c, reply);
-
-    return 0;
-}
-
 /** Update WM_CLASS of a client.
  * \param c The client.
  * \param reply The reply to get property request, or NULL if none.
@@ -275,22 +237,6 @@ property_update_wm_class(client_t *c, xcb_get_property_reply_t *reply)
     /* only delete reply if we get it ourselves */
     if(!reply)
         xcb_get_wm_class_reply_wipe(&hint);
-}
-
-static int
-property_handle_wm_class(void *data,
-                         xcb_connection_t *connection,
-                         uint8_t state,
-                         xcb_window_t window,
-                         xcb_atom_t name,
-                         xcb_get_property_reply_t *reply)
-{
-    client_t *c = client_getbywin(window);
-
-    if(c)
-        property_update_wm_class(c, reply);
-
-    return 0;
 }
 
 static int
@@ -327,22 +273,6 @@ property_update_net_wm_icon(client_t *c,
     lua_pop(globalconf.L, 1);
 }
 
-static int
-property_handle_net_wm_icon(void *data,
-                            xcb_connection_t *connection,
-                            uint8_t state,
-                            xcb_window_t window,
-                            xcb_atom_t name,
-                            xcb_get_property_reply_t *reply)
-{
-    client_t *c = client_getbywin(window);
-
-    if(c)
-        property_update_net_wm_icon(c, reply);
-
-    return 0;
-}
-
 void
 property_update_net_wm_pid(client_t *c,
                            xcb_get_property_reply_t *reply)
@@ -371,22 +301,6 @@ property_update_net_wm_pid(client_t *c,
         p_delete(&reply);
 }
 
-static int
-property_handle_net_wm_pid(void *data,
-                           xcb_connection_t *connection,
-                           uint8_t state,
-                           xcb_window_t window,
-                           xcb_atom_t name,
-                           xcb_get_property_reply_t *reply)
-{
-    client_t *c = client_getbywin(window);
-
-    if(c)
-        property_update_net_wm_pid(c, reply);
-
-    return 0;
-}
-
 /** Update the list of supported protocols for a client.
  * \param c The client.
  */
@@ -412,30 +326,6 @@ property_update_wm_protocols(client_t *c, xcb_get_property_reply_t *reply)
 
     xcb_get_wm_protocols_reply_wipe(&c->protocols);
     memcpy(&c->protocols, &protocols, sizeof(protocols));
-}
-
-/** The property notify event handler.
- * \param data currently unused.
- * \param connection currently unusued.
- * \param state currently unused.
- * \param window The window to obtain update protocols from.
- * \param name currently unused.
- * \param reply currently unused.
- */
-static int
-property_handle_wm_protocols(void *data,
-                             xcb_connection_t *connection,
-                             uint8_t state,
-                             xcb_window_t window,
-                             xcb_atom_t name,
-                             xcb_get_property_reply_t *reply)
-{
-    client_t *c = client_getbywin(window);
-
-    if(c)
-        property_update_wm_protocols(c, reply);
-
-    return 0;
 }
 
 /** The property notify event handler.
