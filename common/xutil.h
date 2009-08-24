@@ -31,7 +31,7 @@
 #include "common/array.h"
 #include "common/atoms.h"
 
-static inline const char *
+static inline char *
 xutil_get_text_property_from_reply(xcb_get_property_reply_t *reply)
 {
     if(reply
@@ -40,7 +40,7 @@ xutil_get_text_property_from_reply(xcb_get_property_reply_t *reply)
            || reply->type == COMPOUND_TEXT)
        && reply->format == 8
        && xcb_get_property_value_length(reply))
-        return xcb_get_property_value(reply);
+        return a_strndup(xcb_get_property_value(reply), xcb_get_property_value_length(reply));
     return NULL;
 }
 
