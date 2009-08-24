@@ -25,7 +25,7 @@
 #include "structs.h"
 
 void spawn_init(void);
-void spawn_start_notify(client_t *);
+void spawn_start_notify(client_t *, const char *);
 int luaA_spawn(lua_State *);
 
 #endif

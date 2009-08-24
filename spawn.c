@@ -195,9 +195,10 @@ spawn_monitor_event(SnMonitorEvent *event, void *data)
 
 /** Tell the spawn module that an app has been started.
  * \param c The client that just started.
+ * \param startup_id The startup id of the started application.
  */
 void
-spawn_start_notify(client_t *c)
+spawn_start_notify(client_t *c, const char * startup_id)
 {
     foreach(_seq, sn_waits)
     {
@@ -205,7 +206,7 @@ spawn_start_notify(client_t *c)
         bool found = false;
         const char *seqid = sn_startup_sequence_get_id(seq);
 
-        if(!a_strcmp(seqid, c->startup_id))
+        if(!a_strcmp(seqid, startup_id))
             found = true;
         else
         {

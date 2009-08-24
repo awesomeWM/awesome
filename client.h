@@ -66,8 +66,6 @@ struct client_t
     char *name, *icon_name;
     /** WM_CLASS stuff */
     char *class, *instance;
-    /** Startup ID */
-    char *startup_id;
     /** Window geometry */
     area_t geometry;
     struct

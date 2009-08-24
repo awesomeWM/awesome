@@ -54,7 +54,6 @@ luaA_client_gc(lua_State *L)
     key_array_wipe(&c->keys);
     xcb_get_wm_protocols_reply_wipe(&c->protocols);
     p_delete(&c->class);
-    p_delete(&c->startup_id);
     p_delete(&c->instance);
     p_delete(&c->icon_name);
     p_delete(&c->name);
@@ -588,6 +587,13 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
         return;
     }
 
+    /* If this is a new client that just has been launched, then request its
+     * startup id. */
+    xcb_get_property_cookie_t startup_id_q = { 0 };
+    if(!startup)
+        startup_id_q = xcb_get_any_property(globalconf.connection,
+                                            false, w, _NET_STARTUP_ID, UINT_MAX);
+
     xcb_change_window_attributes(globalconf.connection, w, XCB_CW_EVENT_MASK, select_input_val);
 
     client_t *c = client_new(globalconf.L);
@@ -652,8 +658,6 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
     property_update_wm_class(c, NULL);
     property_update_wm_protocols(c);
 
-    xutil_text_prop_get(globalconf.connection, c->window, _NET_STARTUP_ID, &c->startup_id, NULL);
-
     /* update strut */
     ewmh_process_client_strut(c, NULL);
 
@@ -678,7 +682,16 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
     window_state_set(c->window, XCB_WM_STATE_NORMAL);
 
     if(!startup)
-        spawn_start_notify(c);
+    {
+        /* Request our response */
+        xcb_get_property_reply_t *reply =
+            xcb_get_property_reply(globalconf.connection, startup_id_q, NULL);
+        /* Say spawn that a client has been started, with startup id as argument */
+        char *startup_id = xutil_get_text_property_from_reply(reply);
+        p_delete(&reply);
+        spawn_start_notify(c, startup_id);
+        p_delete(&startup_id);
+    }
 
     /* Call hook to notify list change */
     if(globalconf.hooks.clients != LUA_REFNIL)
