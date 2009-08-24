@@ -1,6 +1,7 @@
 -- Standard awesome library
 require("awful")
 require("awful.autofocus")
+require("awful.rules")
 -- Theme handling library
 require("beautiful")
 -- Notification library
@@ -35,31 +36,6 @@ layouts =
     awful.layout.suit.magnifier,
     awful.layout.suit.floating
 }
-
--- Table of clients that should be set floating. The index may be either
--- the application class or instance. The instance is useful when running
--- a console app in a terminal like (Music on Console)
---    xterm -name mocp -e mocp
-floatapps =
-{
-    -- by class
-    ["MPlayer"] = true,
-    ["pinentry"] = true,
-    ["gimp"] = true,
-    -- by instance
-    ["mocp"] = true
-}
-
--- Applications to be moved to a pre-defined tag by class or instance.
--- Use the screen and tags indices.
-apptags =
-{
-    -- ["Firefox"] = { screen = 1, tag = 2 },
-    -- ["mocp"] = { screen = 2, tag = 4 },
-}
-
--- Define if we want to use titlebar on all applications.
-use_titlebar = false
 -- }}}
 
 -- {{{ Tags
@@ -288,8 +264,34 @@ for i = 1, keynumber do
                   end))
 end
 
+clientbuttons = awful.util.table.join(
+    awful.button({ }, 1, function (c) client.focus = c; c:raise() end),
+    awful.button({ modkey }, 1, awful.mouse.client.move),
+    awful.button({ modkey }, 3, awful.mouse.client.resize))
+
 -- Set keys
 root.keys(globalkeys)
+-- }}}
+
+-- {{{ Rules
+awful.rules.rules = {
+    -- All clients will match this rule.
+    { rule = { },
+      properties = { border_width = beautiful.border_width,
+                     border_color = beautiful.border_normal,
+                     focus = true,
+                     keys = clientkeys,
+                     buttons = clientbuttons } },
+    { rule = { class = "MPlayer" },
+      properties = { floating = true } },
+    { rule = { class = "pinentry" },
+      properties = { floating = true } },
+    { rule = { class = "gimp" },
+      properties = { floating = true } },
+    -- Set Firefox to always map on tags number 2 of screen 1.
+    -- { rule = { instance = "Firefox" },
+    --   properties = { tag = tags[1][2] } },
+}
 -- }}}
 
 -- {{{ Signals
@@ -302,47 +304,8 @@ client.add_signal("manage", function (c, startup)
         c.screen = mouse.screen
     end
 
-    if use_titlebar then
-        -- Add a titlebar
-        awful.titlebar.add(c, { modkey = modkey })
-    end
-    -- Add mouse bindings
-    c:buttons(awful.util.table.join(
-        awful.button({ }, 1, function (c) client.focus = c; c:raise() end),
-        awful.button({ modkey }, 1, awful.mouse.client.move),
-        awful.button({ modkey }, 3, awful.mouse.client.resize)
-    ))
-    -- New client may not receive focus
-    -- if they're not focusable, so set border anyway.
-    c.border_width = beautiful.border_width
-    c.border_color = beautiful.border_normal
-
-    -- Check if the application should be floating.
-    local cls = c.class
-    local inst = c.instance
-    if floatapps[cls] ~= nil then
-        awful.client.floating.set(c, floatapps[cls])
-    elseif floatapps[inst] ~= nil then
-        awful.client.floating.set(c, floatapps[inst])
-    end
-
-    -- Check application->screen/tag mappings.
-    local target
-    if apptags[cls] then
-        target = apptags[cls]
-    elseif apptags[inst] then
-        target = apptags[inst]
-    end
-    if target then
-        c.screen = target.screen
-        awful.client.movetotag(tags[target.screen][target.tag], c)
-    end
-
-    -- Do this after tag mapping, so you don't see it on the wrong tag for a split second.
-    client.focus = c
-
-    -- Set key bindings
-    c:keys(clientkeys)
+    -- Add a titlebar
+    -- awful.titlebar.add(c, { modkey = modkey })
 
     -- Enable sloppy focus
     c:add_signal("mouse::enter", function(c)
@@ -355,9 +318,6 @@ client.add_signal("manage", function (c, startup)
     -- Set the windows at the slave,
     -- i.e. put it at the end of others instead of setting it master.
     -- awful.client.setslave(c)
-
-    -- Honor size hints: if you want to drop the gaps between windows, set this to false.
-    -- c.size_hints_honor = false
 end)
 
 client.add_signal("focus", function(c) c.border_color = beautiful.border_focus end)
