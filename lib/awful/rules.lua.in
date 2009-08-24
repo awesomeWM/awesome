@@ -1,0 +1,84 @@
+---------------------------------------------------------------------------
+-- @author Julien Danjou &lt;julien@danjou.info&gt;
+-- @copyright 2009 Julien Danjou
+-- @release @AWESOME_VERSION@
+---------------------------------------------------------------------------
+
+-- Grab environment we need
+local client = client
+local type = type
+local ipairs = ipairs
+local pairs = pairs
+local aclient = require("awful.client")
+
+--- Apply rules to clients at startup.
+module("awful.rules")
+
+--- This is the global rules table.
+-- <p>You should fill this table with your rule and properties to apply.
+-- For example, if you want to set xterm maximized at startup, you can add:
+-- <br/>
+-- <code>
+-- { rule = { class = "xterm" },
+--   properties = { maximized_vertical = true, maximized_horizontal = true } }
+-- </code>
+-- </p>
+-- <p>If you want to set mplayer floating at startup, you can add:
+-- <code>
+-- <br/>
+-- { rule = { name = "MPlayer" },
+--   properties = { floating = true } }
+-- </code>
+-- </p>
+-- <p>If you want to put Firefox on a specific tag at startup, you
+-- can add:
+-- <code
+-- { rule = { instance = "Firefox" }
+--   properties = { tag = mytagobject } }
+-- <p>Note that all "rule" entries need to match. If any of the entry does not
+-- match, the rule won't be applied.</p>
+-- <p>If a client matches multiple rules, their applied in the order they are
+-- put in this global rules table.
+--
+-- @class table
+-- @name rules
+rules = {}
+
+--- Check if a client match a rule.
+-- @param c The client.
+-- @param rule The rule to check.
+-- @return True if it matches, false otherwise.
+function match(c, rule)
+    for field, value in pairs(rule) do
+        if c[field] and not c[field]:match(value) then
+            return false
+        end
+    end
+    return true
+end
+
+--- Apply rules to a client.
+-- @param c The client.
+function apply(c)
+    for _, entry in ipairs(rules) do
+        if match(c, entry.rule) then
+            for property, value in pairs(entry.properties) do
+                if property == "floating" then
+                    aclient.floating.set(c, value)
+                elseif property == "focus" then
+                    client.focus = c
+                elseif property == "tag" then
+                    aclient.movetotag(value, c)
+                elseif type(c[property]) == "function" then
+                    c[property](c, value)
+                else
+                    c[property] = value
+                end
+            end
+        end
+    end
+end
+
+client.add_signal("manage", apply)
+
+-- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
