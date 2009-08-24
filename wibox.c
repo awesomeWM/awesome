@@ -207,21 +207,6 @@ wibox_refresh_pixmap(wibox_t *w)
     wibox_refresh_pixmap_partial(w, 0, 0, w->geometry.width, w->geometry.height);
 }
 
-/** Set a wibox opacity.
- * \param L The Lua VM state.
- * \param w The index wibox the adjust the opacity of.
- * \param opacity A value between 0 and 1 which describes the opacity.
- */
-static inline void
-wibox_opacity_set(lua_State *L, int udx, double opacity)
-{
-    wibox_t *w = luaA_checkudata(L, udx, &wibox_class);
-    w->opacity = opacity;
-    if(w->window != XCB_NONE)
-        window_opacity_set(w->window, opacity);
-    luaA_object_emit_signal(globalconf.L, udx, "property::opacity", 0);
-}
-
 /** Move and/or resize a wibox
  * \param L The Lua VM state.
  * \param udx The index of the wibox.
@@ -1116,12 +1101,12 @@ static int
 luaA_wibox_set_opacity(lua_State *L, wibox_t *wibox)
 {
     if(lua_isnil(L, -1))
-        wibox_opacity_set(L, -3, -1);
+        wibox_set_opacity(L, -3, -1);
     else
     {
         double d = luaL_checknumber(L, -1);
         if(d >= 0 && d <= 1)
-            wibox_opacity_set(L, -3, d);
+            wibox_set_opacity(L, -3, d);
     }
     return 0;
 }
