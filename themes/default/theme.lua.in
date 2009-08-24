@@ -85,6 +85,8 @@ theme.layout_tilebottom = "@AWESOME_THEMES_PATH@/default/layouts/tilebottomw.png
 theme.layout_tileleft = "@AWESOME_THEMES_PATH@/default/layouts/tileleftw.png"
 theme.layout_tile = "@AWESOME_THEMES_PATH@/default/layouts/tilew.png"
 theme.layout_tiletop = "@AWESOME_THEMES_PATH@/default/layouts/tiletopw.png"
+theme.layout_spiral = "@AWESOME_THEMES_PATH@/default/layouts/spiralw.png"
+theme.layout_dwindle = "@AWESOME_THEMES_PATH@/default/layouts/dwindlew.png"
 
 theme.awesome_icon = "@AWESOME_ICON_PATH@/awesome16.png"
 
