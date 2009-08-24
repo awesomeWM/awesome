@@ -518,12 +518,6 @@ luaA_widget_set_type(lua_State *L, widget_t *w)
       case A_TK_TEXTBOX:
         wc = widget_textbox;
         break;
-      case A_TK_PROGRESSBAR:
-        wc = widget_progressbar;
-        break;
-      case A_TK_GRAPH:
-        wc = widget_graph;
-        break;
       case A_TK_SYSTRAY:
         wc = widget_systray;
         break;

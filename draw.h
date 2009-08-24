@@ -41,17 +41,6 @@ typedef enum
     AlignMiddle = (1 << 5)
 } alignment_t;
 
-typedef struct vector_t vector_t;
-struct vector_t
-{
-    /** Co-ords of starting point */
-    int16_t x;
-    int16_t y;
-    /** Offset to starting point */
-    int16_t x_offset;
-    int16_t y_offset;
-};
-
 typedef struct area_t area_t;
 struct area_t
 {
@@ -139,14 +128,6 @@ typedef struct
 bool draw_text_context_init(draw_text_context_t *, const char *, ssize_t);
 void draw_text(draw_context_t *, draw_text_context_t *, PangoEllipsizeMode, PangoWrapMode, alignment_t, alignment_t, area_t);
 void draw_rectangle(draw_context_t *, area_t, float, bool, const color_t *);
-void draw_rectangle_gradient(draw_context_t *, area_t, float, bool, vector_t,
-                             const color_t *, const color_t *, const color_t *);
-
-void draw_graph_setup(draw_context_t *);
-void draw_graph(draw_context_t *, area_t, int *, int *, int, position_t, vector_t,
-                const color_t *, const color_t *, const color_t *);
-void draw_graph_line(draw_context_t *, area_t, int *, int, position_t, vector_t,
-                     const color_t *, const color_t *, const color_t *);
 void draw_image(draw_context_t *, int, int, double, image_t *);
 void draw_rotate(draw_context_t *, xcb_drawable_t, xcb_drawable_t, int, int, int, int, double, int, int);
 area_t draw_text_extents(draw_text_context_t *);

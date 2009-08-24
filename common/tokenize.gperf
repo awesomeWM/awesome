@@ -35,7 +35,6 @@ font_height
 fullscreen
 gap
 geometry
-graph
 group_window
 grow
 height
@@ -77,7 +76,6 @@ pid
 plot_data_add
 plot_properties_set
 position
-progressbar
 release
 resize
 right

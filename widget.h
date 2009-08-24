@@ -75,8 +75,6 @@ lua_class_t widget_class;
 void widget_class_setup(lua_State *);
 
 widget_constructor_t widget_textbox;
-widget_constructor_t widget_progressbar;
-widget_constructor_t widget_graph;
 widget_constructor_t widget_systray;
 widget_constructor_t widget_imagebox;
 
