@@ -150,30 +150,30 @@ client_set_pid(lua_State *L, int cidx, uint32_t pid)
 }
 
 void
-client_set_icon_name(lua_State *L, int cidx, const char *icon_name)
+client_set_icon_name(lua_State *L, int cidx, char *icon_name)
 {
     client_t *c = luaA_client_checkudata(L, cidx);
     p_delete(&c->icon_name);
-    c->icon_name = a_strdup(icon_name);
+    c->icon_name = icon_name;
     luaA_object_emit_signal(L, cidx, "property::icon_name", 0);
     hook_property(c, "icon_name");
 }
 
 void
-client_set_role(lua_State *L, int cidx, const char *role)
+client_set_role(lua_State *L, int cidx, char *role)
 {
     client_t *c = luaA_client_checkudata(L, cidx);
     p_delete(&c->role);
-    c->role = a_strdup(role);
+    c->role = role;
     luaA_object_emit_signal(L, cidx, "property::role", 0);
 }
 
 void
-client_set_machine(lua_State *L, int cidx, const char *machine)
+client_set_machine(lua_State *L, int cidx, char *machine)
 {
     client_t *c = luaA_client_checkudata(L, cidx);
     p_delete(&c->machine);
-    c->machine = a_strdup(machine);
+    c->machine = machine;
     luaA_object_emit_signal(L, cidx, "property::machine", 0);
 }
 
@@ -202,11 +202,11 @@ client_set_transient_for(lua_State *L, int cidx, client_t *transient_for)
 }
 
 void
-client_set_name(lua_State *L, int cidx, const char *name)
+client_set_name(lua_State *L, int cidx, char *name)
 {
     client_t *c = luaA_client_checkudata(L, cidx);
     p_delete(&c->name);
-    c->name = a_strdup(name);
+    c->name = name;
     hook_property(c, "name");
     luaA_object_emit_signal(L, cidx, "property::name", 0);
 }
@@ -630,7 +630,7 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
     property_update_wm_transient_for(c, NULL);
     property_update_wm_client_leader(c, NULL);
     property_update_wm_client_machine(c, NULL);
-    property_update_wm_window_role(c);
+    property_update_wm_window_role(c, NULL);
     property_update_net_wm_pid(c, NULL);
     property_update_net_wm_icon(c, NULL);
 
@@ -647,8 +647,8 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
     client_raise(c);
 
     /* update window title */
-    property_update_wm_name(c);
-    property_update_wm_icon_name(c);
+    property_update_wm_name(c, NULL);
+    property_update_wm_icon_name(c, NULL);
     property_update_wm_class(c, NULL);
     property_update_wm_protocols(c);
 

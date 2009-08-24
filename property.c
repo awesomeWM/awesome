@@ -31,6 +31,47 @@
 #include "common/atoms.h"
 #include "common/xutil.h"
 
+
+#define HANDLE_TEXT_PROPERTY(funcname, atom, setfunc) \
+    void \
+    property_update_##funcname(client_t *c, xcb_get_property_reply_t *reply) \
+    { \
+        bool no_reply = !reply; \
+        if(no_reply) \
+            reply = xcb_get_property_reply(globalconf.connection, \
+                                           xcb_get_any_property(globalconf.connection, \
+                                                                false, \
+                                                                c->window, \
+                                                                WM_NAME, \
+                                                                UINT_MAX), NULL); \
+        luaA_object_push(globalconf.L, c); \
+        setfunc(globalconf.L, -1, xutil_get_text_property_from_reply(reply)); \
+        lua_pop(globalconf.L, 1); \
+        if(no_reply) \
+            p_delete(&reply); \
+    } \
+    static int \
+    property_handle_##funcname(void *data, \
+                               xcb_connection_t *connection, \
+                               uint8_t state, \
+                               xcb_window_t window, \
+                               xcb_atom_t name, \
+                               xcb_get_property_reply_t *reply) \
+    { \
+        client_t *c = client_getbywin(window); \
+        if(c) \
+            property_update_##funcname(c, reply); \
+        return 0; \
+    }
+
+
+HANDLE_TEXT_PROPERTY(wm_name, WM_NAME, client_set_name)
+HANDLE_TEXT_PROPERTY(wm_icon_name, WM_ICON_NAME, client_set_icon_name)
+HANDLE_TEXT_PROPERTY(wm_client_machine, WM_CLIENT_MACHINE, client_set_machine)
+HANDLE_TEXT_PROPERTY(wm_window_role, WM_WINDOW_ROLE, client_set_role)
+
+#undef HANDLE_TEXT_PROPERTY
+
 void
 property_update_wm_transient_for(client_t *c, xcb_get_property_reply_t *reply)
 {
@@ -69,77 +110,6 @@ property_handle_wm_transient_for(void *data,
 
     if(c)
         property_update_wm_transient_for(c, reply);
-
-    return 0;
-}
-
-void
-property_update_wm_client_machine(client_t *c, xcb_get_property_reply_t *reply)
-{
-    bool no_reply = !reply;
-
-    if(no_reply)
-        reply = xcb_get_property_reply(globalconf.connection,
-                                       xcb_get_any_property(globalconf.connection,
-                                                            false,
-                                                            c->window,
-                                                            WM_CLIENT_MACHINE,
-                                                            UINT_MAX), NULL);
-
-    const char *value = xutil_get_text_property_from_reply(reply);
-
-    luaA_object_push(globalconf.L, c);
-    client_set_machine(globalconf.L, -1, value);
-    lua_pop(globalconf.L, 1);
-
-    if(no_reply)
-        p_delete(&reply);
-}
-
-static int
-property_handle_wm_client_machine(void *data,
-                                  xcb_connection_t *connection,
-                                  uint8_t state,
-                                  xcb_window_t window,
-                                  xcb_atom_t name,
-                                  xcb_get_property_reply_t *reply)
-{
-    client_t *c = client_getbywin(window);
-
-    if(c)
-        property_update_wm_client_machine(c, reply);
-
-    return 0;
-}
-
-void
-property_update_wm_window_role(client_t *c)
-{
-    ssize_t slen;
-    char *value;
-
-    if(!xutil_text_prop_get(globalconf.connection, c->window,
-                            WM_WINDOW_ROLE, &value, &slen))
-        return;
-
-    luaA_object_push(globalconf.L, c);
-    client_set_role(globalconf.L, -1, value);
-    p_delete(&value);
-    lua_pop(globalconf.L, 1);
-}
-
-static int
-property_handle_wm_window_role(void *data,
-                        xcb_connection_t *connection,
-                        uint8_t state,
-                        xcb_window_t window,
-                        xcb_atom_t name,
-                        xcb_get_property_reply_t *reply)
-{
-    client_t *c = client_getbywin(window);
-
-    if(c)
-        property_update_wm_window_role(c);
 
     return 0;
 }
@@ -276,25 +246,6 @@ property_handle_wm_hints(void *data,
     return 0;
 }
 
-/** Update client name attribute with its new title.
- * \param c The client.
- */
-void
-property_update_wm_name(client_t *c)
-{
-    char *name;
-    ssize_t len;
-
-    if(!xutil_text_prop_get(globalconf.connection, c->window, _NET_WM_NAME, &name, &len))
-        if(!xutil_text_prop_get(globalconf.connection, c->window, WM_NAME, &name, &len))
-            return;
-
-    luaA_object_push(globalconf.L, c);
-    client_set_name(globalconf.L, -1, name);
-    p_delete(&name);
-    lua_pop(globalconf.L, 1);
-}
-
 /** Update WM_CLASS of a client.
  * \param c The client.
  * \param reply The reply to get property request, or NULL if none.
@@ -324,57 +275,6 @@ property_update_wm_class(client_t *c, xcb_get_property_reply_t *reply)
     /* only delete reply if we get it ourselves */
     if(!reply)
         xcb_get_wm_class_reply_wipe(&hint);
-}
-
-/** Update client icon name attribute with its new title.
- * \param c The client.
- */
-void
-property_update_wm_icon_name(client_t *c)
-{
-    char *name;
-    ssize_t len;
-
-    if(!xutil_text_prop_get(globalconf.connection, c->window, _NET_WM_ICON_NAME, &name, &len))
-        if(!xutil_text_prop_get(globalconf.connection, c->window, WM_ICON_NAME, &name, &len))
-            return;
-
-    luaA_object_push(globalconf.L, c);
-    client_set_icon_name(globalconf.L, -1, name);
-    p_delete(&name);
-    lua_pop(globalconf.L, 1);
-}
-
-static int
-property_handle_wm_name(void *data,
-                        xcb_connection_t *connection,
-                        uint8_t state,
-                        xcb_window_t window,
-                        xcb_atom_t name,
-                        xcb_get_property_reply_t *reply)
-{
-    client_t *c = client_getbywin(window);
-
-    if(c)
-        property_update_wm_name(c);
-
-    return 0;
-}
-
-static int
-property_handle_wm_icon_name(void *data,
-                             xcb_connection_t *connection,
-                             uint8_t state,
-                             xcb_window_t window,
-                             xcb_atom_t name,
-                             xcb_get_property_reply_t *reply)
-{
-    client_t *c = client_getbywin(window);
-
-    if(c)
-        property_update_wm_icon_name(c);
-
-    return 0;
 }
 
 static int
