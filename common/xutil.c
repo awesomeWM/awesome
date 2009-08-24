@@ -31,59 +31,6 @@
 #include "common/xutil.h"
 #include "common/tokenize.h"
 
-/** Get the string value of an atom.
- * \param conn X connection.
- * \param w Window.
- * \param atom The atom.
- * \param text Buffer to fill.
- * \param len Length of the filled buffer.
- * \return True on sucess, false on failure.
- */
-bool
-xutil_text_prop_get(xcb_connection_t *conn, xcb_window_t w, xcb_atom_t atom,
-                    char **text, ssize_t *len)
-{
-    xcb_get_text_property_reply_t reply;
-
-    p_clear(&reply, 1);
-
-    if(!xcb_get_text_property_reply(conn,
-                                    xcb_get_text_property_unchecked(conn, w,
-                                                                    atom),
-                                    &reply, NULL) ||
-       !reply.name_len || reply.format != 8)
-    {
-        xcb_get_text_property_reply_wipe(&reply);
-        return false;
-    }
-
-    if(text && len)
-    {
-        /* Check whether the returned property value is just an ascii
-         * string, an UTF-8 string or just some random multibyte in any other
-         * encoding. */
-        if(reply.encoding == STRING
-           || reply.encoding == UTF8_STRING
-           || reply.encoding == COMPOUND_TEXT)
-        {
-            *text = p_new(char, reply.name_len + 1);
-            /* Use memcpy() because the property name is not be \0
-             * terminated */
-            memcpy(*text, reply.name, reply.name_len);
-            (*text)[reply.name_len] = '\0';
-            *len = reply.name_len;
-        }
-        else
-        {
-            *text = NULL;
-            *len = 0;
-        }
-    }
-
-    xcb_get_text_property_reply_wipe(&reply);
-    return true;
-}
-
 /** Get the lock masks (shiftlock, numlock, capslock, modeswitch).
  * \param connection The X connection.
  * \param cookie The cookie of the request.
