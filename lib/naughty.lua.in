@@ -314,8 +314,11 @@ function notify(args)
     local hover_destroy = function ()
         if hover_timeout == 0 then
             die()
-        elseif timer_die then
-            timer_die:stop()
+        else
+            if notification.timer then notification.timer:stop() end
+            notification.timer = capi.timer { timeout = hover_timeout }
+            notification.timer:add_signal("timeout", die)
+            notification.timer:start()
         end
     end
 
