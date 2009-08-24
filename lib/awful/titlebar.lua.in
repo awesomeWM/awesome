@@ -13,6 +13,7 @@ local setmetatable = setmetatable
 local type = type
 local capi =
 {
+    awesome = awesome,
     wibox = wibox,
     widget = widget,
     client = client,
@@ -60,6 +61,7 @@ end
 function add(c, args)
     if not c or (c.type ~= "normal" and c.type ~= "dialog") then return end
     if not args then args = {} end
+    if not args.height then args.height = capi.awesome.font_height * 1.5 end
     local theme = beautiful.get()
     -- Store colors
     data[c] = {}
