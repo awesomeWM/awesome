@@ -11,6 +11,7 @@ local table = table
 local math = math
 local util = require("awful.util")
 local default = require("awful.widget.layout.default")
+local margins = awful.widget.layout.margins
 
 --- Horizontal widget layout
 module("awful.widget.layout.horizontal")
@@ -26,17 +27,34 @@ local function horizontal(direction, bounds, widgets, screen)
         local v = widgets[k]
         if type(v) == "table" then
             local layout = v.layout or default
+            if margins[v] then
+                bounds.width = bounds.width - (margins[v].left or 0) - (margins[v].right or 0)
+                bounds.height = bounds.height - (margins[v].top or 0) - (margins[v].bottom or 0)
+            end
             local g = layout(bounds, v, screen)
+            if margins[v] then
+                x = x + (margins[v].left or 0)
+            end
             for _, v in ipairs(g) do
                 v.x = v.x + x
                 table.insert(geometries, v)
             end
             bounds = g.free
-            x = x + g.free.x
+            if margins[v] then
+                x = x + g.free.x + (margins[v].right or 0)
+                y = y + (margins[v].top or 0)
+                bounds.width = bounds.width - (margins[v].right or 0) - (margins[v].left or 0)
+            else
+                x = x + g.free.x
+            end
         elseif type(v) == "widget" then
             local g
             if v.visible then
                 g = v:extents(screen)
+                if margins[v] then
+                    g.width = g.width + (margins[v].left or 0) + (margins[v].right or 0)
+                    g.height = g.height + (margins[v].top or 0) + (margins[v].bottom or 0)
+                end
             else
                 g = {
                     width  = 0,
@@ -51,17 +69,30 @@ local function horizontal(direction, bounds, widgets, screen)
                 g.width = bounds.width
             end
             g.height = bounds.height
-            g.y = 0
+
+            if margins[v] then
+                g.y = (margins[v].top or 0)
+            else
+                g.y = 0
+            end
 
             if v.resize and g.width > 0 then
                 g.width = math.floor(g.height * g.ratio)
             end
 
             if direction == "leftright" then
-                g.x = x
+                if margins[v] then
+                    g.x = x + (margins[v].left or 0)
+                else
+                    g.x = x
+                end
                 x = x + g.width
             else
-                g.x = x + bounds.width - g.width
+                if margins[v] then
+                    g.x = x + bounds.width - g.width + (margins[v].left or 0)
+                else
+                    g.x = x + bounds.width - g.width
+                end
             end
             bounds.width = bounds.width - g.width
 
