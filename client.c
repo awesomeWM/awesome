@@ -1899,7 +1899,7 @@ luaA_client_get_icon(lua_State *L, client_t *c)
 static int
 luaA_client_get_titlebar(lua_State *L, client_t *c)
 {
-    return luaA_object_push_item(L, -2, c->titlebar);
+    return luaA_object_push(L, c->titlebar);
 }
 
 static int

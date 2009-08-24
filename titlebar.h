@@ -147,8 +147,7 @@ titlebar_update_geometry(client_t *c)
 
     /* Client geometry without titlebar, but including borders, since that is always consistent. */
     titlebar_geometry_compute(c, titlebar_geometry_remove(c->titlebar, 0, c->geometry), &geom);
-    luaA_object_push(globalconf.L, c);
-    luaA_object_push_item(globalconf.L, -1, c->titlebar);
+    luaA_object_push(globalconf.L, c->titlebar);
     wibox_moveresize(globalconf.L, -1, geom);
     lua_pop(globalconf.L, 2);
 }
