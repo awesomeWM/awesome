@@ -231,7 +231,7 @@ property_update_wm_class(client_t *c, xcb_get_property_reply_t *reply)
     }
 
     luaA_object_push(globalconf.L, c);
-    client_set_class_instance(globalconf.L, -1, hint.instance_name, hint.class_name);
+    client_set_class_instance(globalconf.L, -1, hint.class_name, hint.instance_name);
     lua_pop(globalconf.L, 1);
 
     /* only delete reply if we get it ourselves */
