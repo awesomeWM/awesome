@@ -216,7 +216,8 @@ end
 -- @param i The relative index to see.
 -- @param screen Optional screen number.
 function viewidx(i, screen)
-    local tags = capi.screen[screen or capi.mouse.screen]:tags()
+    local screen = scree or capi.mouse.screen
+    local tags = capi.screen[screen]:tags()
     local showntags = {}
     for k, t in ipairs(tags) do
         if not getproperty(t, "hide") then
@@ -233,13 +234,15 @@ function viewidx(i, screen)
 end
 
 --- View next tag. This is the same as tag.viewidx(1).
-function viewnext()
-    return viewidx(1)
+-- @param screen The screen number.
+function viewnext(screen)
+    return viewidx(1, screen)
 end
 
 --- View previous tag. This is the same a tag.viewidx(-1).
-function viewprev()
-    return viewidx(-1)
+-- @param screen The screen number.
+function viewprev(screen)
+    return viewidx(-1, screen)
 end
 
 --- View only a tag.
