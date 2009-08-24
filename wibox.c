@@ -320,21 +320,6 @@ wibox_set_opacity(lua_State *L, int udx, double opacity)
     }
 }
 
-/** Set a wibox border width.
- * \param L The Lua VM state.
- * \param idx The wibox to change border width.
- * \param border_width The border width in pixel.
- */
-static void
-wibox_set_border_width(lua_State *L, int udx, uint32_t border_width)
-{
-    wibox_t *w = luaA_checkudata(L, udx, &wibox_class);
-    xcb_configure_window(globalconf.connection, w->window, XCB_CONFIG_WINDOW_BORDER_WIDTH,
-                         &border_width);
-    w->border_width = border_width;
-    luaA_object_emit_signal(L, udx, "property::border_width", 0);
-}
-
 /** Set a wibox border color.
  * \param L The Lua VM state.
  * \param idx The wibox to change border width.
@@ -1432,7 +1417,15 @@ luaA_wibox_buttons(lua_State *L)
 static int
 luaA_wibox_set_border_width(lua_State *L, wibox_t *wibox)
 {
-    wibox_set_border_width(L, -3, luaL_checknumber(L, -1));
+    wibox_t *w = luaA_checkudata(L, -3, &wibox_class);
+    uint32_t border_width = luaL_checknumber(L, -1);
+    if(border_width != w->border_width)
+    {
+        xcb_configure_window(globalconf.connection, w->window, XCB_CONFIG_WINDOW_BORDER_WIDTH,
+                             &border_width);
+        w->border_width = border_width;
+        luaA_object_emit_signal(L, -3, "property::border_width", 0);
+    }
     return 0;
 }
 
