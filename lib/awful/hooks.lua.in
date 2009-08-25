@@ -127,6 +127,7 @@ for name, hook in pairs(capi.hooks) do
         end
     else
         _M[name].register = function (f)
+            util.deprecate("signals")
             if not _M[name].callbacks then
                 _M[name].callbacks = {}
                 hook(function (...)
