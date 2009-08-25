@@ -65,6 +65,8 @@ awesome_atexit(void)
     if(globalconf.hooks.exit != LUA_REFNIL)
         luaA_dofunction_from_registry(globalconf.L, globalconf.hooks.exit, 0, 0);
 
+    signal_object_emit(globalconf.L, &global_signals, "exit", 0);
+
     a_dbus_cleanup();
 
     /* reparent systray windows, otherwise they may die with their master */
