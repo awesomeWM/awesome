@@ -375,7 +375,7 @@ function notify(args)
 
     -- calculate the width
     if not width then
-        width = textbox:extents().width + (iconbox and iconbox:extents().width or 0) + 2 * margin
+        width = textbox:extents().width + (iconbox and iconbox:extents().width + 2 * margin or 0) + 2 * margin
     end
 
     -- crop to workarea size if too big
