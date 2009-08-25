@@ -93,6 +93,8 @@ Clients
     Redraw the focused window.
 *Mod4 \+ m*::
     Maximize client.
+*Mod4 + n*::
+    Minimize client.
 *Mod4 \+ f*::
     Set client fullscreen.
 *Mod4 \+ Shift \+ c*::
