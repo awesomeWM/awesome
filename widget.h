@@ -36,8 +36,6 @@ struct widget_t
     widget_constructor_t *type;
     /** Widget destructor */
     widget_destructor_t *destructor;
-    /** Geometry function for drawing */
-    area_t (*geometry)(widget_t *, int);
     /** Extents function */
     area_t (*extents)(lua_State *, widget_t *);
     /** Draw function */

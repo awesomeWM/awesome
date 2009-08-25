@@ -382,7 +382,6 @@ widget_textbox(widget_t *w)
     w->index = luaA_textbox_index;
     w->newindex = luaA_textbox_newindex;
     w->destructor = textbox_destructor;
-    w->geometry = textbox_geometry;
     w->extents = textbox_extents;
 
     textbox_data_t *d = w->data = p_new(textbox_data_t, 1);

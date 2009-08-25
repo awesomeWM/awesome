@@ -110,7 +110,6 @@ widget_t *
 widget_systray(widget_t *w)
 {
     w->draw = systray_draw;
-    w->geometry = systray_geometry;
     w->extents = systray_extents;
     w->destructor = systray_destructor;
 

@@ -175,7 +175,6 @@ widget_imagebox(widget_t *w)
     w->index = luaA_imagebox_index;
     w->newindex = luaA_imagebox_newindex;
     w->destructor = imagebox_destructor;
-    w->geometry = imagebox_geometry;
     w->extents = imagebox_extents;
     w->data = d = p_new(imagebox_data_t, 1);
     d->resize = true;

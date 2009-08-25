@@ -656,7 +656,6 @@ widget_progressbar(widget_t *w)
     w->index = luaA_progressbar_index;
     w->newindex = luaA_progressbar_newindex;
     w->destructor = progressbar_destructor;
-    w->geometry = progressbar_geometry;
     w->extents = progressbar_extents;
 
     progressbar_data_t *d = w->data = p_new(progressbar_data_t, 1);

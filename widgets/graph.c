@@ -601,7 +601,6 @@ widget_graph(widget_t *w)
     w->index = luaA_graph_index;
     w->newindex = luaA_graph_newindex;
     w->destructor = graph_destructor;
-    w->geometry = graph_geometry;
     w->extents = graph_extents;
 
     graph_data_t *d = w->data = p_new(graph_data_t, 1);
