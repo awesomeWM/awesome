@@ -374,4 +374,29 @@ luaA_spawn(lua_State *L)
     return 0;
 }
 
+/** Spawn a program. This works exactly as system() does, but clears the signal mask.
+ * \param arg The shell command to execute.
+ * \return The return status of the program.
+ */
+int
+spawn_system(const char *arg)
+{
+    GError *error;
+    gboolean retval;
+    gint status;
+    static const char *shell = NULL;
+    if(!shell && !(shell = getenv("SHELL")))
+        shell = "/bin/sh";
+    char *argv[] = { (char *) shell, (char *) "-c", (char *) arg, NULL };
+
+    retval = g_spawn_sync(NULL, argv, NULL, 0, spawn_child_callback,
+                          NULL, NULL, NULL, &status, &error);
+
+    if (retval)
+        return status;
+
+    g_error_free(error);
+    return -1;
+}
+
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
