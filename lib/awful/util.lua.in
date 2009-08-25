@@ -11,7 +11,6 @@ local assert = assert
 local loadstring = loadstring
 local loadfile = loadfile
 local debug = debug
-local print = print
 local pairs = pairs
 local ipairs = ipairs
 local type = type
@@ -91,7 +90,7 @@ end
 
 --- Read a program output and returns its output as a string.
 -- @param cmd The command to run.
--- @return A string with the program output.
+-- @return A string with the program output, or the error if one occured.
 function pread(cmd)
     if cmd and cmd ~= "" then
         local f, err = io.popen(cmd, 'r')
@@ -100,7 +99,7 @@ function pread(cmd)
             f:close()
             return s
         else
-            print(err)
+            return err
         end
     end
 end
