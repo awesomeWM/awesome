@@ -55,7 +55,7 @@ typedef struct
 } textbox_data_t;
 
 static area_t
-textbox_geometry(widget_t *widget, int screen)
+textbox_extents(lua_State *L, widget_t *widget)
 {
     textbox_data_t *d = widget->data;
     area_t geometry = d->extents;
@@ -73,12 +73,6 @@ textbox_geometry(widget_t *widget, int screen)
     geometry.x = geometry.y = 0;
 
     return geometry;
-}
-
-static area_t
-textbox_extents(lua_State *L, widget_t *widget)
-{
-    return textbox_geometry(widget, 0);
 }
 
 /** Draw a textbox widget.
