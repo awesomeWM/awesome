@@ -33,9 +33,9 @@ typedef struct
 } imagebox_data_t;
 
 static area_t
-imagebox_geometry(widget_t *widget, int screen)
+imagebox_extents(lua_State *L, widget_t *widget)
 {
-    area_t geometry;
+    area_t geometry = { .x = 0, .y = 0 };
     imagebox_data_t *d = widget->data;
 
     if(d->image)
@@ -49,15 +49,7 @@ imagebox_geometry(widget_t *widget, int screen)
         geometry.height = 0;
     }
 
-    geometry.x = geometry.y = 0;
-
     return geometry;
-}
-
-static area_t
-imagebox_extents(lua_State *L, widget_t *widget)
-{
-    return imagebox_geometry(widget, 0);
 }
 
 /** Draw an image.
