@@ -66,7 +66,9 @@
 
 
 HANDLE_TEXT_PROPERTY(wm_name, WM_NAME, client_set_name)
+HANDLE_TEXT_PROPERTY(net_wm_name, _NET_WM_NAME, client_set_name)
 HANDLE_TEXT_PROPERTY(wm_icon_name, WM_ICON_NAME, client_set_icon_name)
+HANDLE_TEXT_PROPERTY(net_wm_icon_name, _NET_WM_ICON_NAME, client_set_icon_name)
 HANDLE_TEXT_PROPERTY(wm_client_machine, WM_CLIENT_MACHINE, client_set_machine)
 HANDLE_TEXT_PROPERTY(wm_window_role, WM_WINDOW_ROLE, client_set_role)
 
@@ -437,9 +439,9 @@ void a_xcb_set_property_handlers(void)
 
     /* EWMH stuff */
     xcb_property_set_handler(&globalconf.prophs, _NET_WM_NAME, UINT_MAX,
-                             property_handle_wm_name, NULL);
+                             property_handle_net_wm_name, NULL);
     xcb_property_set_handler(&globalconf.prophs, _NET_WM_ICON_NAME, UINT_MAX,
-                             property_handle_wm_icon_name, NULL);
+                             property_handle_net_wm_icon_name, NULL);
     xcb_property_set_handler(&globalconf.prophs, _NET_WM_STRUT_PARTIAL, UINT_MAX,
                              property_handle_net_wm_strut_partial, NULL);
     xcb_property_set_handler(&globalconf.prophs, _NET_WM_ICON, UINT_MAX,

@@ -56,7 +56,9 @@ luaA_client_gc(lua_State *L)
     p_delete(&c->class);
     p_delete(&c->instance);
     p_delete(&c->icon_name);
+    p_delete(&c->alt_icon_name);
     p_delete(&c->name);
+    p_delete(&c->alt_name);
     return luaA_object_gc(L);
 }
 
@@ -159,6 +161,16 @@ client_set_icon_name(lua_State *L, int cidx, char *icon_name)
 }
 
 void
+client_set_alt_icon_name(lua_State *L, int cidx, char *icon_name)
+{
+    client_t *c = luaA_client_checkudata(L, cidx);
+    p_delete(&c->alt_icon_name);
+    c->alt_icon_name = icon_name;
+    luaA_object_emit_signal(L, cidx, "property::icon_name", 0);
+    hook_property(c, "icon_name");
+}
+
+void
 client_set_role(lua_State *L, int cidx, char *role)
 {
     client_t *c = luaA_client_checkudata(L, cidx);
@@ -206,6 +218,16 @@ client_set_name(lua_State *L, int cidx, char *name)
     client_t *c = luaA_client_checkudata(L, cidx);
     p_delete(&c->name);
     c->name = name;
+    hook_property(c, "name");
+    luaA_object_emit_signal(L, cidx, "property::name", 0);
+}
+
+void
+client_set_alt_name(lua_State *L, int cidx, char *name)
+{
+    client_t *c = luaA_client_checkudata(L, cidx);
+    p_delete(&c->alt_name);
+    c->alt_name = name;
     hook_property(c, "name");
     luaA_object_emit_signal(L, cidx, "property::name", 0);
 }
@@ -653,7 +675,9 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
 
     /* update window title */
     property_update_wm_name(c, NULL);
+    property_update_net_wm_name(c, NULL);
     property_update_wm_icon_name(c, NULL);
+    property_update_net_wm_icon_name(c, NULL);
     property_update_wm_class(c, NULL);
     property_update_wm_protocols(c, NULL);
 
@@ -1772,8 +1796,20 @@ luaA_client_set_skip_taskbar(lua_State *L, client_t *c)
     return 0;
 }
 
-LUA_OBJECT_EXPORT_PROPERTY(client, client_t, name, lua_pushstring)
-LUA_OBJECT_EXPORT_PROPERTY(client, client_t, icon_name, lua_pushstring)
+static int
+luaA_client_get_name(lua_State *L, client_t *c)
+{
+    lua_pushstring(L, c->name ? c->name : c->alt_name);
+    return 1;
+}
+
+static int
+luaA_client_get_icon_name(lua_State *L, client_t *c)
+{
+    lua_pushstring(L, c->icon_name ? c->icon_name : c->alt_icon_name);
+    return 1;
+}
+
 LUA_OBJECT_EXPORT_PROPERTY(client, client_t, class, lua_pushstring)
 LUA_OBJECT_EXPORT_PROPERTY(client, client_t, instance, lua_pushstring)
 LUA_OBJECT_EXPORT_PROPERTY(client, client_t, machine, lua_pushstring)

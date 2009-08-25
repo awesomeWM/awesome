@@ -63,7 +63,7 @@ struct client_t
     /** Valid, or not ? */
     bool invalid;
     /** Client name */
-    char *name, *icon_name;
+    char *name, *alt_name, *icon_name, *alt_icon_name;
     /** WM_CLASS stuff */
     char *class, *instance;
     /** Window geometry */
@@ -189,10 +189,12 @@ void client_set_pid(lua_State *, int, uint32_t);
 void client_set_role(lua_State *, int, char *);
 void client_set_machine(lua_State *, int, char *);
 void client_set_icon_name(lua_State *, int, char *);
+void client_set_alt_icon_name(lua_State *, int, char *);
 void client_set_class_instance(lua_State *, int, const char *, const char *);
 void client_set_type(lua_State *L, int, window_type_t);
 void client_set_transient_for(lua_State *L, int, client_t *);
 void client_set_name(lua_State *L, int, char *);
+void client_set_alt_name(lua_State *L, int, char *);
 void client_set_group_window(lua_State *, int, xcb_window_t);
 void client_set_icon(lua_State *, int, int);
 void client_set_skip_taskbar(lua_State *, int, bool);
