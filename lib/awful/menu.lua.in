@@ -193,8 +193,8 @@ local function add_item(data, num, item_info)
     -- Create the item label widget
     local label = widget({ type = "textbox" })
     label.text = item_info[1]
-    label:margin({ left = data.h + 2 })
     -- Set icon if needed
+    local iconbox
     if item_info[3] then
         local icon = type(item_info[3]) == "string" and image(item_info[3]) or item_info[3]
         if icon.width > tonumber(data.h) or icon.height > tonumber(data.h) then
@@ -206,7 +206,11 @@ local function add_item(data, num, item_info)
             end
             icon = icon:crop_and_scale(0, 0, icon.width, icon.height, width, height)
         end
-        label.bg_image = icon
+        iconbox = widget { type = "imagebox" }
+        iconbox.image = icon
+        layout.margins[label] = { left = 2 }
+    else
+        layout.margins[label] = { left = data.h + 2 }
     end
 
     item:buttons(bindings)
@@ -223,11 +227,21 @@ local function add_item(data, num, item_info)
     end
 
     -- Add widgets to the wibox
-    item.widgets = {
-        label,
-        submenu,
-        layout = layout.horizontal.flex
-    }
+    if iconbox then
+        item.widgets = {
+            iconbox,
+            label,
+            { submenu, layout = layout.horizontal.rightleft },
+            layout = layout.horizontal.leftright
+        }
+    else
+        item.widgets = {
+            label,
+            { submenu, layout = layout.horizontal.rightleft },
+            layout = layout.horizontal.leftright
+        }
+    end
+
 
     item.ontop = true
 
