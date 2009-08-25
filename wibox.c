@@ -258,8 +258,14 @@ wibox_moveresize(lua_State *L, int udx, area_t geometry)
             wibox_draw_context_update(w, s);
         }
 
+        /* Activatate BMA */
+        client_ignore_enterleave_events();
+
         if(mask_vals)
             xcb_configure_window(globalconf.connection, w->window, mask_vals, moveresize_win_vals);
+
+        /* Deactivatate BMA */
+        client_restore_enterleave_events();
 
         w->screen = screen_getbycoord(w->screen, w->geometry.x, w->geometry.y);
 
@@ -359,7 +365,12 @@ wibox_set_orientation(lua_State *L, int udx, orientation_t o)
 static void
 wibox_map(wibox_t *wibox)
 {
+    /* Activate BMA */
+    client_ignore_enterleave_events();
+    /* Map the wibox */
     xcb_map_window(globalconf.connection, wibox->window);
+    /* Deactivatate BMA */
+    client_restore_enterleave_events();
     /* We must make sure the wibox does not display garbage */
     wibox_need_update(wibox);
     /* Stack this wibox correctly */
@@ -624,7 +635,14 @@ wibox_set_visible(lua_State *L, int udx, bool v)
             if(wibox->visible)
                 wibox_map(wibox);
             else
+            {
+                /* Active BMA */
+                client_ignore_enterleave_events();
+                /* Unmap window */
                 xcb_unmap_window(globalconf.connection, wibox->window);
+                /* Active BMA */
+                client_restore_enterleave_events();
+            }
 
             /* kick out systray if needed */
             wibox_systray_refresh(wibox);
@@ -644,7 +662,11 @@ wibox_wipe(wibox_t *w)
 {
     if(w->window)
     {
+        /* Activate BMA */
+        client_ignore_enterleave_events();
         xcb_destroy_window(globalconf.connection, w->window);
+        /* Deactivate BMA */
+        client_restore_enterleave_events();
         w->window = XCB_NONE;
     }
     if(w->pixmap)
