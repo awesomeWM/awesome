@@ -471,7 +471,8 @@ ewmh_client_update_desktop(client_t *c)
 }
 
 /** Update the client struts.
- * \param c The client.
+ * \param window The window to update the struts for.
+ * \param strut The strut type to update the window with.
  */
 void
 ewmh_update_strut(xcb_window_t window, strut_t *strut)

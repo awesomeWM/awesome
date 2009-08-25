@@ -328,7 +328,7 @@ wibox_set_opacity(lua_State *L, int udx, double opacity)
 
 /** Set a wibox border color.
  * \param L The Lua VM state.
- * \param idx The wibox to change border width.
+ * \param udx The wibox to change border width.
  * \param color The border color.
  */
 static void
@@ -343,7 +343,7 @@ wibox_set_border_color(lua_State *L, int udx, const xcolor_t *color)
 
 /** Set wibox orientation.
  * \param L The Lua VM state.
- * \param w The wibox.
+ * \param udx The wibox to change orientation.
  * \param o The new orientation.
  */
 void
@@ -618,7 +618,8 @@ wibox_refresh(void)
 }
 
 /** Set a wibox visible or not.
- * \param wibox The wibox.
+ * \param L The Lua VM state.
+ * \param udx The wibox.
  * \param v The visible value.
  */
 static void
@@ -722,6 +723,8 @@ wibox_detach(lua_State *L, int udx)
 }
 
 /** Attach a wibox that is on top of the stack.
+ * \param L The Lua VM state.
+ * \param udx The wibox to attach.
  * \param s The screen to attach the wibox to.
  */
 static void

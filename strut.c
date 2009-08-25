@@ -45,7 +45,7 @@ luaA_pushstrut(lua_State *L, strut_t strut)
 /** Convert a table to a strut_t structure.
  * \param L The Lua VM state.
  * \param idx The index of the table on the stack.
- * \param struts The strut to fill. Current values will be used as default.
+ * \param strut The strut to fill. Current values will be used as default.
  */
 void
 luaA_tostrut(lua_State *L, int idx, strut_t *strut)

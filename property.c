@@ -305,6 +305,7 @@ property_update_net_wm_pid(client_t *c,
 
 /** Update the list of supported protocols for a client.
  * \param c The client.
+ * \param reply The xcb property reply.
  */
 void
 property_update_wm_protocols(client_t *c, xcb_get_property_reply_t *reply)

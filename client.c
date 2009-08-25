@@ -1404,7 +1404,7 @@ client_set_border_width(lua_State *L, int cidx, int width)
 /** Set a client icon.
  * \param L The Lua VM state.
  * \param cidx The client index on the stack.
- * \para iidx The image index on the stack.
+ * \param iidx The image index on the stack.
  */
 void
 client_set_icon(lua_State *L, int cidx, int iidx)

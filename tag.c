@@ -388,6 +388,7 @@ LUA_OBJECT_EXPORT_PROPERTY(tag, tag_t, selected, lua_pushboolean)
 
 /** Set the tag name.
  * \param L The Lua VM state.
+ * \param tag The tag to name.
  * \return The number of elements pushed on stack.
  */
 static int
@@ -403,6 +404,7 @@ luaA_tag_set_name(lua_State *L, tag_t *tag)
 
 /** Set the tag selection status.
  * \param L The Lua VM state.
+ * \param tag The tag to set the selection status for.
  * \return The number of elements pushed on stack.
  */
 static int
@@ -414,6 +416,7 @@ luaA_tag_set_selected(lua_State *L, tag_t *tag)
 
 /** Set the tag screen.
  * \param L The Lua VM state.
+ * \param tag The tag to set the screen for.
  * \return The number of elements pushed on stack.
  */
 static int
@@ -439,6 +442,7 @@ luaA_tag_set_screen(lua_State *L, tag_t *tag)
 
 /** Get the tag screen.
  * \param L The Lua VM state.
+ * \param tag The tag to get the screen for.
  * \return The number of elements pushed on stack.
  */
 static int
