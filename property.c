@@ -65,9 +65,9 @@
     }
 
 
-HANDLE_TEXT_PROPERTY(wm_name, WM_NAME, client_set_name)
+HANDLE_TEXT_PROPERTY(wm_name, WM_NAME, client_set_alt_name)
 HANDLE_TEXT_PROPERTY(net_wm_name, _NET_WM_NAME, client_set_name)
-HANDLE_TEXT_PROPERTY(wm_icon_name, WM_ICON_NAME, client_set_icon_name)
+HANDLE_TEXT_PROPERTY(wm_icon_name, WM_ICON_NAME, client_set_alt_icon_name)
 HANDLE_TEXT_PROPERTY(net_wm_icon_name, _NET_WM_ICON_NAME, client_set_icon_name)
 HANDLE_TEXT_PROPERTY(wm_client_machine, WM_CLIENT_MACHINE, client_set_machine)
 HANDLE_TEXT_PROPERTY(wm_window_role, WM_WINDOW_ROLE, client_set_role)
