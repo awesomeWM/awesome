@@ -181,47 +181,6 @@ luaA_warn(lua_State *L, const char *fmt, ...)
     fprintf(stderr, "\n");
 }
 
-/** Get an optional padding table from a Lua table.
- * \param L The Lua VM state.
- * \param idx The table index on the stack.
- * \param dpadding The default padding value to use.
- */
-static inline padding_t
-luaA_getopt_padding(lua_State *L, int idx, padding_t *dpadding)
-{
-    padding_t padding;
-
-    luaA_checktable(L, idx);
-
-    padding.right = luaA_getopt_number(L, idx, "right", dpadding->right);
-    padding.left = luaA_getopt_number(L, idx, "left", dpadding->left);
-    padding.top = luaA_getopt_number(L, idx, "top", dpadding->top);
-    padding.bottom = luaA_getopt_number(L, idx, "bottom", dpadding->bottom);
-
-    return padding;
-}
-
-
-/** Push a padding structure into a table on the Lua stack.
- * \param L The Lua VM state.
- * \param padding The padding struct pointer.
- * \return The number of elements pushed on stack.
- */
-static inline int
-luaA_pushpadding(lua_State *L, padding_t *padding)
-{
-    lua_createtable(L, 0, 4);
-    lua_pushnumber(L, padding->right);
-    lua_setfield(L, -2, "right");
-    lua_pushnumber(L, padding->left);
-    lua_setfield(L, -2, "left");
-    lua_pushnumber(L, padding->top);
-    lua_setfield(L, -2, "top");
-    lua_pushnumber(L, padding->bottom);
-    lua_setfield(L, -2, "bottom");
-    return 1;
-}
-
 void luaA_init(xdgHandle *);
 bool luaA_parserc(xdgHandle *, const char *, bool);
 void luaA_on_timer(EV_P_ ev_timer *, int);

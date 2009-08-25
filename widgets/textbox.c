@@ -1,7 +1,7 @@
 /*
  * textbox.c - text box widget
  *
- * Copyright © 2007-2008 Julien Danjou <julien@danjou.info>
+ * Copyright © 2007-2009 Julien Danjou <julien@danjou.info>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,6 +23,19 @@
 #include "wibox.h"
 #include "luaa.h"
 #include "common/tokenize.h"
+
+/** Padding type */
+typedef struct
+{
+    /** Padding at top */
+    int top;
+    /** Padding at bottom */
+    int bottom;
+    /** Padding at left */
+    int left;
+    /** Padding at right */
+    int right;
+} padding_t;
 
 /** The textbox private data structure */
 typedef struct
@@ -53,6 +66,47 @@ typedef struct
     /** Background alignment */
     alignment_t bg_align;
 } textbox_data_t;
+
+/** Get an optional padding table from a Lua table.
+ * \param L The Lua VM state.
+ * \param idx The table index on the stack.
+ * \param dpadding The default padding value to use.
+ */
+static inline padding_t
+luaA_getopt_padding(lua_State *L, int idx, padding_t *dpadding)
+{
+    padding_t padding;
+
+    luaA_checktable(L, idx);
+
+    padding.right = luaA_getopt_number(L, idx, "right", dpadding->right);
+    padding.left = luaA_getopt_number(L, idx, "left", dpadding->left);
+    padding.top = luaA_getopt_number(L, idx, "top", dpadding->top);
+    padding.bottom = luaA_getopt_number(L, idx, "bottom", dpadding->bottom);
+
+    return padding;
+}
+
+
+/** Push a padding structure into a table on the Lua stack.
+ * \param L The Lua VM state.
+ * \param padding The padding struct pointer.
+ * \return The number of elements pushed on stack.
+ */
+static inline int
+luaA_pushpadding(lua_State *L, padding_t *padding)
+{
+    lua_createtable(L, 0, 4);
+    lua_pushnumber(L, padding->right);
+    lua_setfield(L, -2, "right");
+    lua_pushnumber(L, padding->left);
+    lua_setfield(L, -2, "left");
+    lua_pushnumber(L, padding->top);
+    lua_setfield(L, -2, "top");
+    lua_pushnumber(L, padding->bottom);
+    lua_setfield(L, -2, "bottom");
+    return 1;
+}
 
 static area_t
 textbox_extents(lua_State *L, widget_t *widget)
@@ -122,7 +176,12 @@ textbox_draw(widget_t *widget, draw_context_t *ctx, area_t geometry, wibox_t *p)
         }
     }
 
-    draw_text(ctx, &d->data, d->ellip, d->wrap, d->align, d->valign, &d->margin, geometry, &d->extents);
+    geometry.x += d->margin.left;
+    geometry.y += d->margin.top;
+    geometry.width -= d->margin.left + d->margin.right;
+    geometry.height -= d->margin.top + d->margin.bottom;
+
+    draw_text(ctx, &d->data, d->ellip, d->wrap, d->align, d->valign, geometry, &d->extents);
 }
 
 /** Delete a textbox widget.

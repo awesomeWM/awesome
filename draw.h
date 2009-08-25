@@ -1,7 +1,7 @@
 /*
  * draw.h - draw functions header
  *
- * Copyright © 2007-2008 Julien Danjou <julien@danjou.info>
+ * Copyright © 2007-2009 Julien Danjou <julien@danjou.info>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,19 +30,6 @@
 #include "image.h"
 #include "color.h"
 #include "common/array.h"
-
-/** Padding type */
-typedef struct
-{
-    /** Padding at top */
-    int top;
-    /** Padding at bottom */
-    int bottom;
-    /** Padding at left */
-    int left;
-    /** Padding at right */
-    int right;
-} padding_t;
 
 typedef enum
 {
@@ -159,7 +146,7 @@ typedef struct
 } draw_text_context_t;
 
 bool draw_text_context_init(draw_text_context_t *, const char *, ssize_t);
-void draw_text(draw_context_t *, draw_text_context_t *, PangoEllipsizeMode, PangoWrapMode, alignment_t, alignment_t, padding_t *, area_t, area_t *);
+void draw_text(draw_context_t *, draw_text_context_t *, PangoEllipsizeMode, PangoWrapMode, alignment_t, alignment_t, area_t, area_t *);
 void draw_rectangle(draw_context_t *, area_t, float, bool, const color_t *);
 void draw_rectangle_gradient(draw_context_t *, area_t, float, bool, vector_t,
                              const color_t *, const color_t *, const color_t *);

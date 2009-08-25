@@ -201,41 +201,32 @@ draw_context_init(draw_context_t *d, int phys_screen,
  * \param wrap Wrap mode.
  * \param align Text alignment.
  * \param valign Vertical text alignment.
- * \param margin Margin to respect when drawing text.
  * \param area Area to draw to.
  * \param ext Text extents.
  */
 void
 draw_text(draw_context_t *ctx, draw_text_context_t *data,
           PangoEllipsizeMode ellip, PangoWrapMode wrap,
-          alignment_t align, alignment_t valign, padding_t *margin, area_t area, area_t *ext)
+          alignment_t align, alignment_t valign, area_t area, area_t *ext)
 {
-    int x, y;
-
     pango_layout_set_text(ctx->layout, data->text, data->len);
     pango_layout_set_width(ctx->layout,
-                           pango_units_from_double(area.width
-                                                   - (margin->left
-                                                      + margin->right)));
-    pango_layout_set_height(ctx->layout, pango_units_from_double(area.height)
-                                         - (margin->top + margin->bottom));
+                           pango_units_from_double(area.width));
+    pango_layout_set_height(ctx->layout, pango_units_from_double(area.height));
     pango_layout_set_ellipsize(ctx->layout, ellip);
     pango_layout_set_wrap(ctx->layout, wrap);
     pango_layout_set_attributes(ctx->layout, data->attr_list);
     pango_layout_set_font_description(ctx->layout, globalconf.font->desc);
-
-    x = area.x + margin->left;
-    y = area.y + margin->top;
 
     /* only honors alignment if enough space */
     if(ext->width < area.width)
         switch(align)
         {
           case AlignCenter:
-            x += (area.width - ext->width) / 2;
+            area.x += (area.width - ext->width) / 2;
             break;
           case AlignRight:
-            x += area.width - ext->width;
+            area.x += area.width - ext->width;
             break;
           default:
             break;
@@ -244,16 +235,16 @@ draw_text(draw_context_t *ctx, draw_text_context_t *data,
     switch(valign)
     {
       case AlignCenter:
-        y += (area.height - ext->height) / 2;
+        area.y += (area.height - ext->height) / 2;
         break;
       case AlignBottom:
-        y += area.height - ext->height;
+        area.y += area.height - ext->height;
         break;
       default:
         break;
     }
 
-    cairo_move_to(ctx->cr, x, y);
+    cairo_move_to(ctx->cr, area.x, area.y);
 
     cairo_set_source_rgba(ctx->cr,
                           ctx->fg.red / 65535.0,
