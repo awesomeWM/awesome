@@ -1176,6 +1176,7 @@ client_set_skip_taskbar(lua_State *L, int cidx, bool s)
     if(c->skip_taskbar != s)
     {
         c->skip_taskbar = s;
+        ewmh_client_update_hints(c);
         luaA_object_emit_signal(L, cidx, "property::skip_taskbar", 0);
     }
 }
