@@ -39,8 +39,9 @@ typedef struct
 } systray_data_t;
 
 static area_t
-systray_geometry(widget_t *widget, int screen)
+systray_extents(lua_State *L, widget_t *widget)
 {
+    int screen = screen_virttophys(luaL_optnumber(L, -1, 1));
     area_t geometry;
     int phys_screen   = screen_virttophys(screen), n = 0;
     systray_data_t *d = widget->data;
@@ -55,14 +56,6 @@ systray_geometry(widget_t *widget, int screen)
     geometry.x      = geometry.y = 0;
 
     return geometry;
-}
-
-static area_t
-systray_extents(lua_State *L, widget_t *widget)
-{
-    int screen = screen_virttophys(luaL_optnumber(L, -1, 1));
-
-    return systray_geometry(widget, screen);
 }
 
 static void
