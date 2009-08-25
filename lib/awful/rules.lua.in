@@ -70,8 +70,6 @@ function apply(c)
             for property, value in pairs(entry.properties) do
                 if property == "floating" then
                     aclient.floating.set(c, value)
-                elseif property == "focus" then
-                    client.focus = c
                 elseif property == "tag" then
                     aclient.movetotag(value, c)
                 elseif type(c[property]) == "function" then
@@ -79,6 +77,11 @@ function apply(c)
                 else
                     c[property] = value
                 end
+            end
+            -- Do this at last so we do not erase things done by the focus
+            -- signal.
+            if entry.properties.focus then
+                client.focus = c
             end
         end
     end
