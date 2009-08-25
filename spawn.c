@@ -237,6 +237,28 @@ spawn_launchee_timeout(struct ev_loop *loop, ev_timer *w, int revents)
     p_delete(&w);
 }
 
+/** Spawn a command.
+ * \param command_line The command line to launch.
+ * \param error A error pointer to fill with the possible error from
+ * g_spawn_async.
+ * \return g_spawn_async value.
+ */
+static gboolean
+spawn_command(const gchar *command_line, GError **error)
+{
+    gboolean retval;
+    gchar **argv = 0;
+
+    if(!g_shell_parse_argv(command_line, NULL, &argv, error))
+        return FALSE;
+
+    retval = g_spawn_async(NULL, argv, NULL, G_SPAWN_SEARCH_PATH,
+                           NULL, NULL, NULL, error);
+    g_strfreev (argv);
+
+    return retval;
+}
+
 /** Spawn a program.
  * This function is multi-head (Zaphod) aware and will set display to
  * the right screen according to mouse position.
@@ -306,7 +328,7 @@ luaA_spawn(lua_State *L)
     }
 
     GError *error = NULL;
-    if(!g_spawn_command_line_async(cmd, &error))
+    if(!spawn_command(cmd, &error))
     {
         /* push error on stack */
         lua_pushstring(L, error->message);
