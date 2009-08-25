@@ -325,8 +325,9 @@ function notify(args)
     -- create textbox
     local textbox = capi.widget({ type = "textbox", align = "flex" })
     textbox:buttons(util.table.join(button({ }, 1, run), button({ }, 3, die)))
-    textbox:margin({ right = margin, left = margin, bottom = margin, top = margin })
+    layout.margins[textbox] = { right = margin, left = margin, bottom = margin, top = margin }
     textbox.text = string.format('<span font_desc="%s"><b>%s</b>%s</span>', font, title, text)
+    textbox.valign = "middle"
 
     -- create iconbox
     local iconbox = nil
@@ -339,6 +340,7 @@ function notify(args)
         -- if we have an icon, use it
         if icon then
             iconbox = capi.widget({ type = "imagebox", align = "left" })
+            layout.margins[iconbox] = { right = margin, left = margin, bottom = margin, top = margin }
             iconbox:buttons(util.table.join(button({ }, 1, run), button({ }, 3, die)))
             local img
             if type(icon) == "string" then
@@ -364,16 +366,16 @@ function notify(args)
 
     -- calculate the height
     if not height then
-        if iconbox and iconbox:extents().height > textbox:extents().height then
-            height = iconbox:extents().height
+        if iconbox and iconbox:extents().height + 2 * margin > textbox:extents().height + 2 * margin then
+            height = iconbox:extents().height + 2 * margin
         else
-            height = textbox:extents().height
+            height = textbox:extents().height + 2 * margin
         end
     end
 
     -- calculate the width
     if not width then
-        width = textbox:extents().width + (iconbox and iconbox:extents().width or 0)
+        width = textbox:extents().width + (iconbox and iconbox:extents().width or 0) + 2 * margin
     end
 
     -- crop to workarea size if too big
