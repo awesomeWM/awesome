@@ -41,7 +41,7 @@ typedef struct
         color_t color;
     } border;
     /** Text alignment */
-    alignment_t align;
+    alignment_t align, valign;
     /** Margin */
     padding_t margin;
     /** Background color */
@@ -128,8 +128,7 @@ textbox_draw(widget_t *widget, draw_context_t *ctx, area_t geometry, wibox_t *p)
         }
     }
 
-    geometry.y += (geometry.height - textbox_geometry(widget, ctx->phys_screen).height) / 2;
-    draw_text(ctx, &d->data, d->ellip, d->wrap, d->align, &d->margin, geometry, &d->extents);
+    draw_text(ctx, &d->data, d->ellip, d->wrap, d->align, d->valign, &d->margin, geometry, &d->extents);
 }
 
 /** Delete a textbox widget.
@@ -199,6 +198,9 @@ luaA_textbox_index(lua_State *L, awesome_token_t token)
         return 1;
       case A_TK_ALIGN:
         lua_pushstring(L, draw_align_tostr(d->align));
+        return 1;
+      case A_TK_VALIGN:
+        lua_pushstring(L, draw_align_tostr(d->valign));
         return 1;
       case A_TK_BORDER_WIDTH:
         lua_pushnumber(L, d->border.width);
@@ -284,6 +286,10 @@ luaA_textbox_newindex(lua_State *L, awesome_token_t token)
       case A_TK_ALIGN:
         if((buf = luaL_checklstring(L, 3, &len)))
             d->align = draw_align_fromstr(buf, len);
+        break;
+      case A_TK_VALIGN:
+        if((buf = luaL_checklstring(L, 3, &len)))
+            d->valign = draw_align_fromstr(buf, len);
         break;
       case A_TK_BORDER_COLOR:
         if((buf = luaL_checklstring(L, 3, &len)))
@@ -381,6 +387,7 @@ widget_textbox(widget_t *w)
 
     textbox_data_t *d = w->data = p_new(textbox_data_t, 1);
     d->ellip = PANGO_ELLIPSIZE_END;
+    d->valign = AlignCenter;
 
     return w;
 }

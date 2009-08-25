@@ -200,6 +200,7 @@ draw_context_init(draw_context_t *d, int phys_screen,
  * \param ellip Ellipsize mode.
  * \param wrap Wrap mode.
  * \param align Text alignment.
+ * \param valign Vertical text alignment.
  * \param margin Margin to respect when drawing text.
  * \param area Area to draw to.
  * \param ext Text extents.
@@ -207,7 +208,7 @@ draw_context_init(draw_context_t *d, int phys_screen,
 void
 draw_text(draw_context_t *ctx, draw_text_context_t *data,
           PangoEllipsizeMode ellip, PangoWrapMode wrap,
-          alignment_t align, padding_t *margin, area_t area, area_t *ext)
+          alignment_t align, alignment_t valign, padding_t *margin, area_t area, area_t *ext)
 {
     int x, y;
 
@@ -239,6 +240,18 @@ draw_text(draw_context_t *ctx, draw_text_context_t *data,
           default:
             break;
         }
+
+    switch(valign)
+    {
+      case AlignCenter:
+        y += (area.height - ext->height) / 2;
+        break;
+      case AlignBottom:
+        y += area.height - ext->height;
+        break;
+      default:
+        break;
+    }
 
     cairo_move_to(ctx->cr, x, y);
 
