@@ -253,6 +253,23 @@ spawn_launchee_timeout(struct ev_loop *loop, ev_timer *w, int revents)
     p_delete(&w);
 }
 
+/** This callback is executed in the child process after fork(). It clears the
+ * signal mask. Without this, child processes would be started with e.g.
+ * SIGINT blocked if we are compiled against libev 3.8 or newer.
+ * BEWARE: Pending signals are inherited by child processes. This might mean
+ * that we receive a signal that was meant for awesome after clearing the signal
+ * mask! Sadly, we can't do anything about this.
+ * \param user_data Not used.
+ */
+static void
+spawn_child_callback(gpointer user_data)
+{
+    sigset_t empty;
+
+    sigemptyset(&empty);
+    sigprocmask(SIG_SETMASK, &empty, NULL);
+}
+
 /** Spawn a command.
  * \param command_line The command line to launch.
  * \param error A error pointer to fill with the possible error from
@@ -269,7 +286,7 @@ spawn_command(const gchar *command_line, GError **error)
         return FALSE;
 
     retval = g_spawn_async(NULL, argv, NULL, G_SPAWN_SEARCH_PATH,
-                           NULL, NULL, NULL, error);
+                           spawn_child_callback, NULL, NULL, error);
     g_strfreev (argv);
 
     return retval;
