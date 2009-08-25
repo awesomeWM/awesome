@@ -1631,7 +1631,7 @@ luaA_client_set_hidden(lua_State *L, client_t *c)
         c->hidden = b;
         client_need_reban(c);
         hook_property(c, "hidden");
-        luaA_object_emit_signal(L, -3, "property::screen", 0);
+        luaA_object_emit_signal(L, -3, "property::hidden", 0);
     }
     return 0;
 }
