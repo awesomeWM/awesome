@@ -171,7 +171,7 @@ end
 --- Set the graph height.
 -- @param graph The graph.
 -- @param height The height to set.
-local function set_height(graph, height)
+function set_height(graph, height)
     if height >= 5 then
         data[graph].height = height
         update(graph)
@@ -182,7 +182,7 @@ end
 --- Set the graph width.
 -- @param graph The graph.
 -- @param width The width to set.
-local function set_width(graph, width)
+function set_width(graph, width)
     if width >= 5 then
         data[graph].width = width
         update(graph)
