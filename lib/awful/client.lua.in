@@ -678,6 +678,7 @@ local function idx(c)
         end
     end
 
+    local t = tag.selected(c.screen)
     local nmaster = tag.getnmaster(t)
     if idx <= nmaster then
         return {idx = idx, col=0, num=nmaster}
