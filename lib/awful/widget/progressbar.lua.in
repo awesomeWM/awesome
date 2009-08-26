@@ -169,6 +169,7 @@ function new(args)
     local pbar = {}
 
     pbar.widget = capi.widget(args)
+    pbar.widget.resize = false
 
     data[pbar] = { width = width, height = height, value = 0 }
 

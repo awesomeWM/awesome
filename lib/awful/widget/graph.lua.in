@@ -216,6 +216,7 @@ function new(args)
 
     local graph = {}
     graph.widget = capi.widget(args)
+    graph.widget.resize = false
 
     data[graph] = { width = width, height = height, values = {}, max_value = 1 }
 
