@@ -303,6 +303,11 @@ luaA_image_argb32_new(lua_State *L)
     unsigned int width = luaL_checknumber(L, 1);
     unsigned int height = luaL_checknumber(L, 2);
 
+    if (width == 0)
+        luaL_error(L, "image.argb32() called with zero width");
+    if (height == 0)
+        luaL_error(L, "image.argb32() called with zero height");
+
     if(lua_isnil(L, 3))
     {
         uint32_t *data = p_new(uint32_t, width * height);
