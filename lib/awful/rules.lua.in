@@ -52,8 +52,10 @@ rules = {}
 function match(c, rule)
     for field, value in pairs(rule) do
         if c[field] then
-            if type(c[field]) == "string" and not c[field]:match(value) then
-                return false
+            if type(c[field]) == "string" then
+                if not c[field]:match(value) and c[field] ~= value then
+                    return false
+                end
             elseif c[field] ~= value then
                 return false
             end
