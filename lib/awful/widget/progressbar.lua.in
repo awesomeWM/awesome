@@ -116,6 +116,7 @@ end
 function set_value(pbar, value)
     local value = value or 0
     data[pbar].value = math.min(1, math.max(0, value))
+    update(pbar)
     return pbar
 end
 
