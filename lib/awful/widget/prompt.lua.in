@@ -33,6 +33,7 @@ function new(args)
     local promptbox = {}
     args.type = "textbox"
     promptbox.widget = capi.widget(args)
+    promptbox.widget.ellipsize = "start"
     promptbox.run = run
     promptbox.prompt = args.prompt or "Run: "
     promptbox.layout = args.layout or layout.horizontal.leftright
