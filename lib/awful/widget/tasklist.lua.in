@@ -186,6 +186,25 @@ function label.currenttags(c, screen, args)
     end
 end
 
+--- Return label for only the currently focused client.
+-- It returns the client name and set a special
+-- foreground and background color for focused client.
+-- It also puts a special icon for floating windows.
+-- @param c The client.
+-- @param screen The screen we are drawing on.
+-- @param args The arguments table.
+-- bg_focus The background color for focused client.
+-- fg_focus The foreground color for focused client.
+-- bg_urgent The background color for urgent clients.
+-- fg_urgent The foreground color for urgent clients.
+-- @return A string to print, a background color and a status image.
+function label.focused(c, screen, args)
+    -- Only print client on the same screen as this widget
+    if c.screen == screen and capi.client.focus == c then
+        return widget_tasklist_label_common(c, args)
+    end
+end
+
 setmetatable(_M, { __call = function(_, ...) return new(...) end })
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
