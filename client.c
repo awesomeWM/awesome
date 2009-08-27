@@ -1922,6 +1922,8 @@ luaA_client_get_type(lua_State *L, client_t *c)
 static int
 luaA_client_get_screen(lua_State *L, client_t *c)
 {
+    if(!c->screen)
+        return 0;
     lua_pushnumber(L, 1 + screen_array_indexof(&globalconf.screens, c->screen));
     return 1;
 }
