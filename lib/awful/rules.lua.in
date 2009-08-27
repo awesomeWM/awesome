@@ -10,6 +10,7 @@ local type = type
 local ipairs = ipairs
 local pairs = pairs
 local aclient = require("awful.client")
+local atag = require("awful.tag")
 
 --- Apply rules to clients at startup.
 module("awful.rules")
@@ -24,17 +25,28 @@ module("awful.rules")
 -- </code>
 -- </p>
 -- <p>If you want to set mplayer floating at startup, you can add:
--- <code>
 -- <br/>
+-- <code>
 -- { rule = { name = "MPlayer" },
 --   properties = { floating = true } }
 -- </code>
 -- </p>
 -- <p>If you want to put Firefox on a specific tag at startup, you
 -- can add:
--- <code
--- { rule = { instance = "Firefox" }
+-- <br/>
+-- <code>
+-- { rule = { instance = "firefox" }
 --   properties = { tag = mytagobject } }
+-- </code>
+-- </p>
+-- <p>If you want to put Emacs on a specific tag at startup, and
+-- immediately switch to that tag you can add:
+-- <br/>
+-- <code>
+-- { rule = { class = "Emacs" }
+--   properties = { tag = mytagobject, switchtotag = true } }
+-- </code>
+-- </p>
 -- <p>Note that all "rule" entries need to match. If any of the entry does not
 -- match, the rule won't be applied.</p>
 -- <p>If a client matches multiple rules, their applied in the order they are
@@ -74,6 +86,9 @@ function apply(c)
                     aclient.floating.set(c, value)
                 elseif property == "tag" then
                     aclient.movetotag(value, c)
+                elseif property == "switchtotag" and value
+                    and entry.properties["tag"] then
+                    atag.viewonly(entry.properties["tag"])
                 elseif type(c[property]) == "function" then
                     c[property](c, value)
                 else
