@@ -178,8 +178,18 @@ textbox_draw(widget_t *widget, draw_context_t *ctx, area_t geometry, wibox_t *p)
 
     geometry.x += d->margin.left;
     geometry.y += d->margin.top;
-    geometry.width -= d->margin.left + d->margin.right;
-    geometry.height -= d->margin.top + d->margin.bottom;
+
+    int margin_width = d->margin.left + d->margin.right;
+    if(margin_width <= geometry.width)
+        geometry.width -= d->margin.left + d->margin.right;
+    else
+        geometry.width = 0;
+
+    int margin_height = d->margin.top + d->margin.bottom;
+    if(margin_height <= geometry.height)
+        geometry.height -= d->margin.top + d->margin.bottom;
+    else
+        geometry.height = 0;
 
     draw_text(ctx, &d->data, d->ellip, d->wrap, d->align, d->valign, geometry, &d->extents);
 }
