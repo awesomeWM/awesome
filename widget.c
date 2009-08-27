@@ -145,7 +145,10 @@ widget_geometries(wibox_t *wibox)
         luaA_object_push_item(globalconf.L, -1, wibox->widgets_table);
         /* remove wibox */
         lua_remove(globalconf.L, -2);
+        /* get layout field from the table */
         lua_getfield(globalconf.L, -1, "layout");
+        /* remove the widget table */
+        lua_remove(globalconf.L, -2);
     }
     else
         lua_pushnil(globalconf.L);
@@ -167,8 +170,10 @@ widget_geometries(wibox_t *wibox)
             geometry.width = i;
         }
         luaA_pusharea(globalconf.L, geometry);
-        /* Re-push 2nd argument: widget table */
-        lua_pushvalue(globalconf.L, -3);
+        /* Push 2nd argument: widget table */
+        luaA_object_push(globalconf.L, wibox);
+        luaA_object_push_item(globalconf.L, -1, wibox->widgets_table);
+        lua_remove(globalconf.L, -2);
         /* Push 3rd argument: wibox screen */
         lua_pushnumber(globalconf.L, screen_array_indexof(&globalconf.screens, wibox->screen));
         /* Re-push the layout function */
@@ -178,8 +183,8 @@ widget_geometries(wibox_t *wibox)
         if(!luaA_dofunction(globalconf.L, 3, 1))
             return false;
 
-        lua_insert(globalconf.L, -3);
-        lua_pop(globalconf.L, 2);
+        /* Remove the left over layout function */
+        lua_remove(globalconf.L, -2);
     }
     else
     {
