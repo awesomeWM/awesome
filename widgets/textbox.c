@@ -191,7 +191,7 @@ textbox_draw(widget_t *widget, draw_context_t *ctx, area_t geometry, wibox_t *p)
     else
         geometry.height = 0;
 
-    draw_text(ctx, &d->data, d->ellip, d->wrap, d->align, d->valign, geometry, &d->extents);
+    draw_text(ctx, &d->data, d->ellip, d->wrap, d->align, d->valign, geometry);
 }
 
 /** Delete a textbox widget.

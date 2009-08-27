@@ -202,12 +202,11 @@ draw_context_init(draw_context_t *d, int phys_screen,
  * \param align Text alignment.
  * \param valign Vertical text alignment.
  * \param area Area to draw to.
- * \param ext Text extents.
  */
 void
 draw_text(draw_context_t *ctx, draw_text_context_t *data,
           PangoEllipsizeMode ellip, PangoWrapMode wrap,
-          alignment_t align, alignment_t valign, area_t area, area_t *ext)
+          alignment_t align, alignment_t valign, area_t area)
 {
     pango_layout_set_text(ctx->layout, data->text, data->len);
     pango_layout_set_width(ctx->layout,
@@ -218,27 +217,32 @@ draw_text(draw_context_t *ctx, draw_text_context_t *data,
     pango_layout_set_attributes(ctx->layout, data->attr_list);
     pango_layout_set_font_description(ctx->layout, globalconf.font->desc);
 
-    /* only honors alignment if enough space */
-    if(ext->width < area.width)
-        switch(align)
-        {
-          case AlignCenter:
-            area.x += (area.width - ext->width) / 2;
-            break;
-          case AlignRight:
-            area.x += area.width - ext->width;
-            break;
-          default:
-            break;
-        }
+    PangoRectangle ext;
+    pango_layout_get_pixel_extents(ctx->layout, NULL, &ext);
+
+    /* Not enough space, draw nothing */
+    if(ext.width > area.width || ext.height > area.height)
+        return;
+
+    switch(align)
+    {
+      case AlignCenter:
+        area.x += (area.width - ext.width) / 2;
+        break;
+      case AlignRight:
+        area.x += area.width - ext.width;
+        break;
+      default:
+        break;
+    }
 
     switch(valign)
     {
       case AlignCenter:
-        area.y += (area.height - ext->height) / 2;
+        area.y += (area.height - ext.height) / 2;
         break;
       case AlignBottom:
-        area.y += area.height - ext->height;
+        area.y += area.height - ext.height;
         break;
       default:
         break;
