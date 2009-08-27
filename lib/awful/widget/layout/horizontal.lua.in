@@ -37,12 +37,12 @@ local function horizontal(direction, bounds, widgets, screen)
             end
             for _, v in ipairs(g) do
                 v.x = v.x + x
+                v.y = v.y + (margins[v] and (margins[v].top and margins[v].top or 0) or 0)
                 table.insert(geometries, v)
             end
             bounds = g.free
             if margins[v] then
                 x = x + g.free.x + (margins[v].right or 0)
-                y = y + (margins[v].top or 0)
                 bounds.width = bounds.width - (margins[v].right or 0) - (margins[v].left or 0)
             else
                 x = x + g.free.x
