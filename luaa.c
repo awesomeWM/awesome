@@ -671,6 +671,15 @@ luaA_awesome_emit_signal(lua_State *L)
     return 0;
 }
 
+static int
+luaA_panic(lua_State *L)
+{
+    warn("unprotected error in call to Lua API (%s), restarting awesome",
+         lua_tostring(L, -1));
+    awesome_restart();
+    return 0;
+}
+
 /** Initialize the Lua VM
  * \param xdg An xdg handle to use to get XDG basedir.
  */
@@ -693,6 +702,9 @@ luaA_init(xdgHandle* xdg)
     };
 
     L = globalconf.L = luaL_newstate();
+
+    /* Set panic function */
+    lua_atpanic(L, luaA_panic);
 
     luaL_openlibs(L);
 
