@@ -129,12 +129,11 @@ luaA_table2widgets(lua_State *L, widget_node_array_t *widgets)
 }
 
 /** Retrieve a list of widget geometries using a Lua layout function.
- *  a table which contains the geometries is then pushed onto the stack
+ * a table which contains the geometries is then pushed onto the stack
  * \param wibox The wibox.
  * \return True is everything is ok, false otherwise.
- * \todo What do we do if there's no layout defined?
  */
-bool
+static bool
 widget_geometries(wibox_t *wibox)
 {
     /* get the layout field of the widget table */
