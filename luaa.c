@@ -683,6 +683,11 @@ luaA_panic(lua_State *L)
 static int
 luaA_dofunction_on_error(lua_State *L)
 {
+    /* duplicate string error */
+    lua_pushvalue(L, -1);
+    /* emit error signal */
+    signal_object_emit(L, &global_signals, "debug::error", 1);
+
     if(!luaL_dostring(L, "return debug.traceback(\"error while running function\", 3)"))
     {
         /* Move traceback before error */
