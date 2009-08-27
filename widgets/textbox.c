@@ -41,8 +41,8 @@ typedef struct
 typedef struct
 {
     draw_text_context_t data;
-    /** Textbox width */
-    int width;
+    /** Textbox width and height */
+    int width, height;
     /** Extents */
     area_t extents;
     PangoEllipsizeMode ellip;
@@ -118,6 +118,9 @@ textbox_extents(lua_State *L, widget_t *widget)
 
     if(d->width)
         geometry.width = d->width;
+
+    if(d->height)
+        geometry.width = d->height;
 
     if(d->bg_image)
     {
@@ -284,6 +287,9 @@ luaA_textbox_index(lua_State *L, awesome_token_t token)
       case A_TK_WIDTH:
         lua_pushnumber(L, d->width);
         return 1;
+      case A_TK_HEIGHT:
+        lua_pushnumber(L, d->height);
+        return 1;
       case A_TK_WRAP:
         switch(d->wrap)
         {
@@ -393,6 +399,9 @@ luaA_textbox_newindex(lua_State *L, awesome_token_t token)
         break;
       case A_TK_WIDTH:
         d->width = luaL_checknumber(L, 3);
+        break;
+      case A_TK_HEIGHT:
+        d->height = luaL_checknumber(L, 3);
         break;
       case A_TK_WRAP:
         if((buf = luaL_checklstring(L, 3, &len)))
