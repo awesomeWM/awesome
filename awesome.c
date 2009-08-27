@@ -95,6 +95,9 @@ awesome_atexit(void)
     xcb_flush(globalconf.connection);
 
     xcb_disconnect(globalconf.connection);
+
+    /* Close Lua */
+    lua_close(globalconf.L);
 }
 
 /** Scan X to find windows to manage.
@@ -570,9 +573,6 @@ main(int argc, char **argv)
     ev_prepare_stop(globalconf.loop, &a_refresh);
     ev_ref(globalconf.loop);
     ev_io_stop(globalconf.loop, &xio);
-
-    /* Close Lua */
-    lua_close(globalconf.L);
 
     awesome_atexit();
 
