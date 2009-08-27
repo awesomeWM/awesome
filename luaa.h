@@ -33,8 +33,12 @@
 #include "common/lualib.h"
 
 #define luaA_deprecate(L, repl) \
-    luaA_warn(L, "%s: This function is deprecated and will be removed, see %s", \
-              __FUNCTION__, repl)
+    do { \
+        luaA_warn(L, "%s: This function is deprecated and will be removed, see %s", \
+                  __FUNCTION__, repl); \
+        lua_pushlstring(L, __FUNCTION__, sizeof(__FUNCTION__)); \
+        signal_object_emit(L, &global_signals, "debug::deprecation", 1); \
+    } while(0)
 
 #define luaA_checkscreen(screen) \
     do { \
