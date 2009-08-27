@@ -61,10 +61,13 @@ local function horizontal(direction, bounds, widgets, screen)
                     height = 0,
                 }
             end
-            g.ratio = 1
-            if g.height > 0 then
-                g.ratio = g.width / g.height
+
+            if v.resize and g.width > 0 and g.height > 0 then
+                local ratio = g.width / g.height
+                g.width = math.floor(bounds.height * ratio)
+                g.height = bounds.height
             end
+
             if g.width > bounds.width then
                 g.width = bounds.width
             end
@@ -74,10 +77,6 @@ local function horizontal(direction, bounds, widgets, screen)
                 g.y = (margins[v].top or 0)
             else
                 g.y = 0
-            end
-
-            if v.resize and g.width > 0 then
-                g.width = math.floor(g.height * g.ratio)
             end
 
             if direction == "leftright" then
