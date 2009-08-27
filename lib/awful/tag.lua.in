@@ -24,37 +24,11 @@ module("awful.tag")
 -- Private data
 local data = {}
 data.history = {}
-data.history.past = {}
-data.history.current = {}
 data.tags = setmetatable({}, { __mode = 'k' })
 
 -- History functions
 history = {}
-
--- Compare 2 tables of tags.
--- @param a The first table.
--- @param b The second table of tags.
--- @return True if the tables are identical, false otherwise.
-local function compare_select(a, b)
-    if not a or not b then
-        return false
-    end
-    -- Quick size comparison
-    if #a ~= #b then
-        return false
-    end
-    for ka, va in pairs(a) do
-        if b[ka] ~= va.selected then
-            return false
-        end
-    end
-    for kb, vb in pairs(b) do
-        if a[kb].selected ~= vb then
-            return false
-        end
-    end
-    return true
-end
+history.limit = 20
 
 --- Create a set of tags and attach it to a screen.
 -- @param names The tag name, in a table
@@ -77,26 +51,55 @@ function new(names, screen, layout)
 end
 
 --- Update the tag history.
--- @param screen The screen number.
-function history.update(screen)
-    local curtags = capi.screen[screen]:tags()
-    if not compare_select(curtags, data.history.current[screen]) then
-        data.history.past[screen] = data.history.current[screen]
-        data.history.current[screen] = {}
-        for k, v in ipairs(curtags) do
-            data.history.current[screen][k] = v.selected
+-- @param obj Screen object.
+function history.update(obj)
+    local s = obj.index
+    local curtags = capi.screen[s]:tags()
+    -- create history table
+    if not data.history[s] then
+        data.history[s] = {}
+    -- limit history
+    elseif #data.history[s] >= history.limit then
+        for i = history.limit, #data.history[s] do
+            data.history[s][i] = nil
         end
     end
+    -- store previously selected tags in the history table
+    table.insert(data.history[s], 1, data.history[s].current)
+    data.history[s].previous = data.history[s][1]
+    -- store currently selected tags
+    data.history[s].current = setmetatable(selectedlist(s), { __mode = 'v' })
 end
 
 --- Revert tag history.
 -- @param screen The screen number.
-function history.restore(screen)
+-- @param idx Index in history. Defaults to "previous" which is a special index
+-- toggling between last two selected sets of tags. Number (eg 1) will go back
+-- to the given index in history.
+function history.restore(screen, idx)
     local s = screen or capi.mouse.screen
-    local tags = capi.screen[s]:tags()
-    for k, t in pairs(tags) do
-        t.selected = data.history.past[s][k]
+    local i = idx or "previous"
+    local sel = selectedlist(s)
+    -- do nothing if history empty
+    if not data.history[s] or not data.history[s][i] then return end
+    -- if all tags been deleted, try next entry
+    if #data.history[s][i] == 0 then
+        if i == "previous" then i = 0 end
+        history.restore(s, i + 1)
+        return
     end
+    -- deselect all tags
+    viewnone(s)
+    -- select tags from the history entry
+    for _, t in ipairs(data.history[s][i]) do
+        t.selected = true
+    end
+    -- update currently selected tags table
+    data.history[s].current = data.history[s][i]
+    -- store previously selected tags
+    data.history[s].previous = setmetatable(sel, { __mode = 'v' })
+    -- remove the reverted history entry
+    if i ~= "previous" then table.remove(data.history[s], i) end
 end
 
 --- Return a table with all visible tags
@@ -231,6 +234,7 @@ function viewidx(i, screen)
             showntags[util.cycle(#showntags, k + i)].selected = true
         end
     end
+    capi.screen[screen]:emit_signal("tag::history::update")
 end
 
 --- View next tag. This is the same as tag.viewidx(1).
@@ -250,6 +254,7 @@ end
 function viewonly(t)
     viewnone(t.screen)
     t.selected = true
+    capi.screen[t.screen]:emit_signal("tag::history::update")
 end
 
 --- View only a set of tags.
@@ -260,6 +265,7 @@ function viewmore(tags, screen)
     for i, t in pairs(tags) do
         t.selected = true
     end
+    capi.screen[screen]:emit_signal("tag::history::update")
 end
 
 --- Get tag data table.
@@ -338,6 +344,10 @@ capi.client.add_signal("manage", function(c)
     withcurrent(c)
     c:add_signal("property::screen", withcurrent)
 end)
+
+for s = 1, capi.screen.count() do
+    capi.screen[s]:add_signal("tag::history::update", history.update)
+end
 
 setmetatable(_M, { __call = function (_, ...) return new(...) end })
 
