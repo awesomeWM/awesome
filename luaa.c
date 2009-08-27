@@ -680,6 +680,22 @@ luaA_panic(lua_State *L)
     return 0;
 }
 
+static int
+luaA_dofunction_on_error(lua_State *L)
+{
+    if(!luaL_dostring(L, "return debug.traceback(\"error while running function\", 3)"))
+    {
+        /* Move traceback before error */
+        lua_insert(L, -2);
+        /* Insert sentence */
+        lua_pushliteral(L, "\nerror: ");
+        /* Move it before error */
+        lua_insert(L, -2);
+        lua_concat(L, 3);
+    }
+    return 1;
+}
+
 /** Initialize the Lua VM
  * \param xdg An xdg handle to use to get XDG basedir.
  */
@@ -705,6 +721,9 @@ luaA_init(xdgHandle* xdg)
 
     /* Set panic function */
     lua_atpanic(L, luaA_panic);
+
+    /* Set error handling function */
+    lualib_dofunction_on_error = luaA_dofunction_on_error;
 
     luaL_openlibs(L);
 

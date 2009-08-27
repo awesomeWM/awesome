@@ -25,6 +25,9 @@
 #include <lauxlib.h>
 #include "common/util.h"
 
+/** Lua function to call on dofuction() error */
+lua_CFunction lualib_dofunction_on_error;
+
 #define luaA_checkfunction(L, n) \
     do { \
         if(!lua_isfunction(L, n)) \
@@ -79,17 +82,9 @@ luaA_absindex(lua_State *L, int ud)
 static inline int
 luaA_dofunction_error(lua_State *L)
 {
-    if(!luaL_dostring(L, "return debug.traceback(\"error while running function\", 3)"))
-    {
-        /* Move traceback before error */
-        lua_insert(L, -2);
-        /* Insert sentence */
-        lua_pushliteral(L, "\nerror: ");
-        /* Move it before error */
-        lua_insert(L, -2);
-        lua_concat(L, 3);
-    }
-    return 1;
+    if(lualib_dofunction_on_error)
+        return lualib_dofunction_on_error(L);
+    return 0;
 }
 
 /** Execute an Lua function on top of the stack.
