@@ -210,6 +210,9 @@ titlebar_client_detach(client_t *c)
         c->titlebar = NULL;
 
         hook_property(c, "titlebar");
+        luaA_object_push(globalconf.L, c);
+        luaA_object_emit_signal(globalconf.L, -1, "property::titlebar", 0);
+        lua_pop(globalconf.L, 1);
         client_stack();
     }
 }
