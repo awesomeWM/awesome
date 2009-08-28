@@ -929,6 +929,8 @@ client_set_minimized(lua_State *L, int cidx, bool s)
         else
             window_state_set(c->window, XCB_WM_STATE_NORMAL);
         ewmh_client_update_hints(c);
+        if(strut_has_value(&c->strut))
+            screen_emit_signal(globalconf.L, c->screen, "property::workarea", 0);
         /* execute hook */
         hook_property(c, "minimized");
         luaA_object_emit_signal(L, cidx, "property::minimized", 0);
@@ -1267,6 +1269,9 @@ client_unmanage(client_t *c)
         luaA_dofunction_from_registry(globalconf.L, globalconf.hooks.clients, 0, 0);
 
     luaA_class_emit_signal(globalconf.L, &client_class, "list", 0);
+
+    if(strut_has_value(&c->strut))
+        screen_emit_signal(globalconf.L, c->screen, "property::workarea", 0);
 
     window_state_set(c->window, XCB_WM_STATE_WITHDRAWN);
 
@@ -1656,6 +1661,8 @@ luaA_client_set_hidden(lua_State *L, client_t *c)
         c->hidden = b;
         client_need_reban(c);
         hook_property(c, "hidden");
+        if(strut_has_value(&c->strut))
+            screen_emit_signal(globalconf.L, c->screen, "property::workarea", 0);
         luaA_object_emit_signal(L, -3, "property::hidden", 0);
     }
     return 0;
