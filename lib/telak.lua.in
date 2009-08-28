@@ -19,7 +19,7 @@ local capi =
     image = image
 }
 
---- Root window image display library
+--- Display a remote image on your root window, and update it once in a while.
 module("telak")
 
 local data = setmetatable({}, { __mode = 'k' })
@@ -46,7 +46,7 @@ end
 -- Default is 300 seconds.
 -- @return The wibox. You need to attach it to a screen and to set its
 -- coordinates as you want.
-local function new(_, args)
+local function new(args)
     if not args or not args.image then return end
 
     -- Create wibox
@@ -73,6 +73,6 @@ function delete(w)
     end
 end
 
-setmetatable(_M, { __call = new })
+setmetatable(_M, { __call = function(_, ...) return new(...) end })
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
