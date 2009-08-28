@@ -27,7 +27,7 @@ local layout = require("awful.widget.layout")
 local awbeautiful = require("beautiful")
 local tonumber = tonumber
 
---- Menu module for awful
+--- Creation of menus.
 module("awful.menu")
 
 local cur_menu
