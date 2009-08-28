@@ -14,7 +14,7 @@ local dbus = dbus
 local unpack = unpack
 local type = type
 
---- Remote control module for awful
+--- Remote control module allowing usage of awesome-client.
 module("awful.remote")
 
 if dbus then
