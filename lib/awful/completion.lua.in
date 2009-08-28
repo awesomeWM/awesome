@@ -13,7 +13,8 @@ local math = math
 local print = print
 local util = require("awful.util")
 
---- Completion module for awful
+--- Completion module.
+-- This module store a set of function using shell to complete commands name.
 module("awful.completion")
 
 -- mapping of command/completion function
@@ -21,7 +22,7 @@ local bashcomp_funcs = {}
 local bashcomp_src = "@SYSCONFDIR@/bash_completion"
 
 --- Enable programmable bash completion in awful.completion.bash at the price of
--- a slight overhead
+-- a slight overhead.
 -- @param src The bash completion source file, /etc/bash_completion by default.
 function bashcomp_load(src)
     if src then bashcomp_src = src end
