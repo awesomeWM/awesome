@@ -7,7 +7,9 @@
 -- Grab environment we need
 local dbus = dbus
 
---- D-Bus module for awful
+--- D-Bus module for awful.
+-- This module simply request the org.naquadah.awesome.awful name on the D-Bus
+-- for futur usage by other awful modules.
 module("awful.dbus")
 
 if dbus then
