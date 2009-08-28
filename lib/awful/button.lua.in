@@ -10,10 +10,15 @@ local ipairs = ipairs
 local capi = { button = button }
 local util = require("awful.util")
 
---- Button helper for awful
+--- Create easily new buttons objects ignoring certain modifiers.
 module("awful.button")
 
---- Modifiers to ignore
+--- Modifiers to ignore.
+-- By default this is initialized as { "Lock", "Mod2" }
+-- so the Caps Lock or Num Lock modifier are not taking into account by awesome
+-- when pressing keys.
+-- @name ignore_modifiers
+-- @class table
 ignore_modifiers = { "Lock", "Mod2" }
 
 --- Create a new button to use as binding.
@@ -21,10 +26,10 @@ ignore_modifiers = { "Lock", "Mod2" }
 -- the ignore_modifier variable to create more button with or without the ignored
 -- modifiers activated.
 -- For example if you want to ignore CapsLock in your buttonbinding (which is
--- ignored by default by this function), creatina button binding with this function
+-- ignored by default by this function), creating button binding with this function
 -- will return 2 button objects: one with CapsLock on, and the other one with
 -- CapsLock off.
--- @see capi.button
+-- @see button
 -- @return A table with one or several button objects.
 function new(mod, button, press, release)
     local ret = {}

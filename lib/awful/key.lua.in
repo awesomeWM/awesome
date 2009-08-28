@@ -10,10 +10,15 @@ local ipairs = ipairs
 local capi = { key = key }
 local util = require("awful.util")
 
---- Key helper for awful
+--- Create easily new key objects ignoring certain modifiers.
 module("awful.key")
 
---- Modifiers to ignore
+--- Modifiers to ignore.
+-- By default this is initialized as { "Lock", "Mod2" }
+-- so the Caps Lock or Num Lock modifier are not taking into account by awesome
+-- when pressing keys.
+-- @name ignore_modifiers
+-- @class table
 ignore_modifiers = { "Lock", "Mod2" }
 
 --- Create a new key to use as binding.
@@ -21,7 +26,7 @@ ignore_modifiers = { "Lock", "Mod2" }
 -- the ignore_modifier variable to create more key with or without the ignored
 -- modifiers activated.
 -- For example if you want to ignore CapsLock in your keybinding (which is
--- ignored by default by this function), creatina key binding with this function
+-- ignored by default by this function), creating key binding with this function
 -- will return 2 key objects: one with CapsLock on, and the other one with
 -- CapsLock off.
 -- @see capi.key
