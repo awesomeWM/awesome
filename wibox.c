@@ -715,6 +715,9 @@ wibox_detach(lua_State *L, int udx)
 
         hook_property(wibox, "screen");
 
+        if(strut_has_value(&wibox->strut))
+            screen_emit_signal(L, wibox->screen, "property::workarea", 0);
+
         wibox->screen = NULL;
         luaA_object_emit_signal(L, udx, "property::screen", 0);
 
@@ -772,6 +775,9 @@ wibox_attach(lua_State *L, int udx, screen_t *s)
 
     hook_property(wibox, "screen");
     luaA_object_emit_signal(L, udx, "property::screen", 0);
+
+    if(strut_has_value(&wibox->strut))
+        screen_emit_signal(L, wibox->screen, "property::workarea", 0);
 }
 
 /** Create a new wibox.
