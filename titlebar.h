@@ -149,7 +149,7 @@ titlebar_update_geometry(client_t *c)
     titlebar_geometry_compute(c, titlebar_geometry_remove(c->titlebar, 0, c->geometry), &geom);
     luaA_object_push(globalconf.L, c->titlebar);
     wibox_moveresize(globalconf.L, -1, geom);
-    lua_pop(globalconf.L, 2);
+    lua_pop(globalconf.L, 1);
 }
 
 #endif
