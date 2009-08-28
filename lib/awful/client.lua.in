@@ -21,7 +21,7 @@ local capi =
     screen = screen,
 }
 
---- Client module for awful
+--- Useful client manipulation functions.
 module("awful.client")
 
 -- Private data
@@ -243,14 +243,16 @@ end
 -- @param cB The second client.
 -- @return True if B is in the direction of A.
 local function is_in_direction(dir, cA, cB)
+    local gA = cA:geometry()
+    local gB = cB:geometry()
     if dir == "up" then
-        return cA['y'] > cB['y']
+        return gA.y > gB.y
     elseif dir == "down" then
-        return cA['y'] < cB['y']
+        return gA.y < gB.y
     elseif dir == "left" then
-        return cA['x'] > cB['x']
+        return gA.x > gB.x
     elseif dir == "right" then
-        return cA['x'] < cB['x']
+        return gA.x < gB.x
     end
     return false
 end
@@ -265,25 +267,23 @@ end
 -- @param cB The second client.
 -- @return The distance between the clients.
 local function calculate_distance(dir, cA, cB)
-    local xA = cA['x']
-    local xB = cB['x']
-    local yA = cA['y']
-    local yB = cB['y']
+    local gA = cA:geometry()
+    local gB = cB:geometry()
 
     if dir == "up" then
-        yB = yB + cB['height']
+        gB.y = gB.y + gB.height
     elseif dir == "down" then
-        yA = yA + cA['height']
+        gA.y = gA.y + gA.height
     elseif dir == "left" then
-        xB = xB + cB['width']
+        gB.x = gB.x + gB.width
     elseif dir == "right" then
-        xA = xA + cA['width']
+        gA.x = gA.x + gA.width
     end
 
-    return math.sqrt(math.pow(xB - xA, 2) + math.pow(yB - yA, 2))
+    return math.sqrt(math.pow(gB.x - gA.x, 2) + math.pow(gB.y - gA.y, 2))
 end
 
--- Get the nearest client in the given direction
+-- Get the nearest client in the given direction.
 -- @param dir The direction, can be either "up", "down", "left" or "right".
 -- @param c Optional client to get a client relative to. Else focussed is used.
 local function get_client_in_direction(dir, c)
