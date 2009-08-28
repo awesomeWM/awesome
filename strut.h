@@ -19,11 +19,12 @@
  *
  */
 
-#ifndef AWESOME_STRUTS_H
-#define AWESOME_STRUTS_H
+#ifndef AWESOME_STRUT_H
+#define AWESOME_STRUT_H
 
 #include <lua.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 /* Strut */
 typedef struct
@@ -34,6 +35,27 @@ typedef struct
     uint16_t top_start_x, top_end_x;
     uint16_t bottom_start_x, bottom_end_x;
 } strut_t;
+
+/** Check if a strut has information.
+ * \param strut A strut structure.
+ * \return A boolean value, true if the strut has strut information.
+ */
+static inline bool
+strut_has_value(strut_t *strut)
+{
+    return (strut->left
+            || strut->right
+            || strut->top
+            || strut->bottom
+            || strut->left_start_y
+            || strut->left_end_y
+            || strut->right_start_y
+            || strut->right_end_y
+            || strut->top_start_x
+            || strut->top_end_x
+            || strut->bottom_start_x
+            || strut->bottom_end_x);
+}
 
 int luaA_pushstrut(lua_State *, strut_t);
 void luaA_tostrut(lua_State *, int, strut_t *);

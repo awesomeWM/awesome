@@ -287,26 +287,5 @@ client_isvisible(client_t *c, screen_t *screen)
     return (!c->hidden && !c->minimized && client_maybevisible(c, screen));
 }
 
-/** Check if a client has strut information.
- * \param c A client.
- * \return A boolean value, true if the client has strut information.
- */
-static inline bool
-client_hasstrut(client_t *c)
-{
-    return (c->strut.left
-            || c->strut.right
-            || c->strut.top
-            || c->strut.bottom
-            || c->strut.left_start_y
-            || c->strut.left_end_y
-            || c->strut.right_start_y
-            || c->strut.right_end_y
-            || c->strut.top_start_x
-            || c->strut.top_end_x
-            || c->strut.bottom_start_x
-            || c->strut.bottom_end_x);
-}
-
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
