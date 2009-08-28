@@ -18,7 +18,7 @@ local capi =
 local client = require("awful.client")
 local layout = require("awful.layout")
 
---- Placement module for awful
+--- Places client according to special criteria.
 module("awful.placement")
 
 -- Check if an area intersect another area.
@@ -99,7 +99,7 @@ local function area_remove(areas, elem)
     return areas
 end
 
---- Place the client without it being outside the screen.
+--- Place the client so no part of it will be outside the screen.
 -- @param c The client.
 -- @return The new client geometry.
 function no_offscreen(c)
