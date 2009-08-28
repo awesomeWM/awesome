@@ -1535,7 +1535,15 @@ static int
 luaA_client_lower(lua_State *L)
 {
     client_t *c = luaA_client_checkudata(L, 1);
-    client_lower(c);
+
+    stack_client_push(c);
+
+    /* Traverse all transient layers. */
+    for(client_t *tc = c->transient_for; tc; tc = tc->transient_for)
+        stack_client_push(tc);
+
+    client_stack();
+
     return 0;
 }
 

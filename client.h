@@ -245,21 +245,6 @@ client_raise(client_t *c)
     client_stack();
 }
 
-/** Put client on the end of the stack.
- * \param c The client to lower.
- */
-static inline void
-client_lower(client_t *c)
-{
-    stack_client_push(c);
-
-    /* Traverse all transient layers. */
-    for(client_t *tc = c->transient_for; tc; tc = tc->transient_for)
-        stack_client_push(tc);
-
-    client_stack();
-}
-
 /** Check if a client has fixed size.
  * \param c A client.
  * \return A boolean value, true if the client has a fixed size.
