@@ -18,7 +18,7 @@ local capi =
     client = client
 }
 
---- Tag module for awful
+--- Useful functions for tag manipulation.
 module("awful.tag")
 
 -- Private data
