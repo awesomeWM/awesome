@@ -16,7 +16,9 @@ local capi =
 }
 local util = require("awful.util")
 
---- Hooks module for awful
+--- Hooks module for awful.
+-- This module is deprecated and should not be used anymore. You are encouraged
+-- to use signals.
 module("awful.hooks")
 
 -- User hook functions
