@@ -8,7 +8,7 @@ module("keygrabber")
 -- continue grabbing, false to stop.
 -- The function is called with 3 arguments:
 -- a table containing modifiers keys, a string with the key pressed and a
--- string with eithe "press" or "release" to indicate the event type.
+-- string with either "press" or "release" to indicate the event type.
 -- @param func A callback function as described above.
 -- @name run
 -- @class function

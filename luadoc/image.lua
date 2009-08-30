@@ -6,7 +6,7 @@ module("image")
 --- Image objects.
 -- @field width The image width. Immutable.
 -- @field height The image height. Immutable.
--- @field alpha Boolean indiacating if the image alpha channel is present.
+-- @field alpha Boolean indicating if the image alpha channel is present.
 -- @class table
 -- @name image
 
@@ -113,7 +113,7 @@ module("image")
 
 --- Add a signal.
 -- @param name A signal name.
--- @param func A function to call when the signal is emited.
+-- @param func A function to call when the signal is emitted.
 -- @name add_signal
 -- @class function
 

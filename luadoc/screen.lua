@@ -3,8 +3,8 @@
 -- @copyright 2008-2009 Julien Danjou
 module("screen")
 
---- Scree is a table where indexes are screen number. You can use screen[1] to get acces to the
--- first screen, etc. Each screen has a set of properties.
+--- Screen is a table where indexes are screen number. You can use screen[1]
+-- to get access to the first screen, etc. Each screen has a set of properties.
 -- @field geometry The screen coordinates. Immutable.
 -- @field workarea The screen workarea.
 -- @field index The screen number.
@@ -19,7 +19,7 @@ module("screen")
 
 --- Add a signal to a screen.
 -- @param name A signal name.
--- @param func A function to call when the signal is emited.
+-- @param func A function to call when the signal is emitted.
 -- @name add_signal
 -- @class function
 

@@ -18,7 +18,7 @@ module("tag")
 
 --- Add a signal.
 -- @param name A signal name.
--- @param func A function to call when the signal is emited.
+-- @param func A function to call when the signal is emitted.
 -- @name add_signal
 -- @class function
 

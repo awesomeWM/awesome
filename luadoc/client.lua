@@ -45,7 +45,7 @@ module("client")
 -- @name client
 
 --- Get all clients into a table.
--- @param screen An optional screen nunmber.
+-- @param screen An optional screen number.
 -- @return A table with all clients.
 -- @name client.get
 -- @class function
@@ -118,7 +118,7 @@ module("client")
 
 --- Add a signal.
 -- @param name A signal name.
--- @param func A function to call when the signal is emited.
+-- @param func A function to call when the signal is emitted.
 -- @name client.add_signal
 -- @class function
 

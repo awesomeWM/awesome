@@ -3,7 +3,7 @@
 -- @copyright 2009 Julien Danjou
 module("timer")
 
---- Timer object. This type of objects is useful to trigger events in a repeated manner.
+--- Timer object. This type of object is useful when triggering events in a repeatedly.
 -- The timer will emit the "timeout" signal every N seconds, N being the timeout value.
 -- @field timeout Interval in seconds to emit the timeout signal.
 -- Can be any value, including floating ones (i.e. 1.5 second).
@@ -23,7 +23,7 @@ module("timer")
 
 --- Add a signal.
 -- @param name A signal name.
--- @param func A function to call when the signal is emited.
+-- @param func A function to call when the signal is emitted.
 -- @name add_signal
 -- @class function
 
