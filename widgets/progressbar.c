@@ -195,7 +195,7 @@ progressbar_draw(widget_t *widget, draw_context_t *ctx, area_t geometry, wibox_t
      * basic progressbar:
      * 1. the full space gets the size of the formerly empty one
      * 2. the pattern must be mirrored
-     * 3. the formerly 'empty' side gets drawed with fg colors, the 'full' with bg-color
+     * 3. the formerly 'empty' side is drawn with fg colors, the 'full' with bg-color
      *
      * ticks:
      * 1. round the values to a full tick accordingly
@@ -307,7 +307,7 @@ progressbar_draw(widget_t *widget, draw_context_t *ctx, area_t geometry, wibox_t
                 else
                     draw_rectangle(ctx, rectangle, 1.0, true, &bar->fg_off);
             }
-            /* draw gaps TODO: improve e.g all in one */
+            /* draw gaps \todo improve e.g all in one */
             if(d->ticks_count && d->ticks_gap)
             {
                 rectangle.width = pb_width;
@@ -415,7 +415,7 @@ progressbar_draw(widget_t *widget, draw_context_t *ctx, area_t geometry, wibox_t
                 else
                     draw_rectangle(ctx, rectangle, 1.0, true, &bar->fg_off);
             }
-            /* draw gaps TODO: improve e.g all in one */
+            /* draw gaps \todo improve e.g all in one */
             if(d->ticks_count && d->ticks_gap)
             {
                 rectangle.width = d->ticks_gap;

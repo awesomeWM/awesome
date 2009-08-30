@@ -47,7 +47,7 @@ struct a_screen
     SnMonitorContext *snmonitor;
     /** The default visual, used to draw */
     xcb_visualtype_t *visual;
-    /** The signals emited by screen objects */
+    /** The signals emitted by screen objects */
     signal_array_t signals;
 };
 ARRAY_FUNCS(screen_t, screen, DO_NOTHING)

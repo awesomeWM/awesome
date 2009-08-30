@@ -62,7 +62,7 @@ static inline area_t
 titlebar_geometry_add(wibox_t *t, int border, area_t geometry)
 {
     /* We need to add titlebar border to the total width and height.
-     * This can then be substracted/added to the witdh/height/x/y.
+     * This can then be subtracted/added to the width/height/x/y.
      * In this case the border is included, because it belongs to a different window.
      */
     if(t && t->visible)
@@ -103,7 +103,7 @@ static inline area_t
 titlebar_geometry_remove(wibox_t *t, int border, area_t geometry)
 {
     /* We need to add titlebar border to the total width and height.
-     * This can then be substracted/added to the witdh/height/x/y.
+     * This can then be subtracted/added to the width/height/x/y.
      * In this case the border is included, because it belongs to a different window.
      */
     if(t && t->visible)

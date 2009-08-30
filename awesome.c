@@ -274,8 +274,8 @@ awesome_restart(void)
     a_exec(globalconf.argv);
 }
 
-/** Function to restart aweome on some signals.
- * \param w the signam received, unused
+/** Function to restart awesome on some signals.
+ * \param w the signal received, unused
  * \param revents Currently unused
  */
 static void
@@ -289,7 +289,7 @@ restart_on_signal(EV_P_ ev_signal *w, int revents)
  * ignored (especially on UnmapNotify's).  Other types of errors call Xlibs
  * default error handler, which may call exit.
  * \param data Currently unused.
- * \param c The connectiont to the X server.
+ * \param c The connection to the X server.
  * \param e The error event.
  * \return 0 if no error, or xerror's xlib return status.
  */
@@ -446,7 +446,7 @@ main(int argc, char **argv)
     xtest_query = xcb_get_extension_data(globalconf.connection, &xcb_test_id);
     globalconf.have_xtest = xtest_query->present;
 
-    /* initiliaze dbus */
+    /* initialize dbus */
     a_dbus_init();
 
     /* Grab server */

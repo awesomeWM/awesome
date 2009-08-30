@@ -305,7 +305,7 @@ client_unfocus(client_t *c)
     client_unfocus_update(c);
 }
 
-/** Check if client supports protocol a protocole in WM_PROTOCOL.
+/** Check if client supports atom a protocol in WM_PROTOCOL.
  * \param c The client.
  * \param atom The protocol atom to check for.
  * \return True if client has the atom in protocol, false otherwise.
@@ -355,7 +355,7 @@ client_ban(client_t *c)
     }
 }
 
-/** This is part of The Bob Marley Algorithmm: we ignore enter and leave window
+/** This is part of The Bob Marley Algorithm: we ignore enter and leave window
  * in certain cases, like map/unmap or move, so we don't get spurious events.
  */
 void
@@ -688,7 +688,7 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
 
     /* Always stay in NORMAL_STATE. Even though iconified seems more
      * appropriate sometimes. The only possible loss is that clients not using
-     * visibility events may continue to proces data (when banned).
+     * visibility events may continue to process data (when banned).
      * Without any exposes or other events the cost should be fairly limited though.
      *
      * Some clients may expect the window to be unmapped when STATE_ICONIFIED.
@@ -830,7 +830,7 @@ client_geometry_hints(client_t *c, area_t geometry)
 }
 
 /** Resize client window.
- * The sizse given as parameters are with titlebar and borders!
+ * The sizes given as parameters are with titlebar and borders!
  * \param c Client to resize.
  * \param geometry New window geometry.
  * \param hints Use size hints.
@@ -863,7 +863,7 @@ client_resize(client_t *c, area_t geometry, bool hints)
     if(geometry_internal.width == 0 || geometry_internal.height == 0)
         return false;
 
-    /* Also let client hints propegate to the "official" geometry. */
+    /* Also let client hints propagate to the "official" geometry. */
     geometry = titlebar_geometry_add(c->titlebar, c->border_width, geometry_internal);
 
     if(c->geometries.internal.x != geometry_internal.x
@@ -1229,7 +1229,7 @@ client_unmanage(client_t *c)
 {
     tag_array_t *tags = &c->screen->tags;
 
-    /* Reset transient_for attributes of widows that maybe refering to us */
+    /* Reset transient_for attributes of widows that maybe referring to us */
     foreach(_tc, globalconf.clients)
     {
         client_t *tc = *_tc;
@@ -1317,7 +1317,7 @@ client_kill(client_t *c)
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
  * \luastack
- * \lparam An optional screen nunmber.
+ * \lparam An optional screen number.
  * \lreturn A table with all clients.
  */
 static int

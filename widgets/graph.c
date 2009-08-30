@@ -36,7 +36,7 @@ typedef enum
 /** The plot data structure. */
 typedef struct
 {
-    /** Grapht title of the plot sections */
+    /** Graph title of the plot sections */
     char *title;
     /** Represents a full graph */
     float max_value;

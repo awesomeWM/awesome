@@ -95,7 +95,7 @@ luaA_object_registry_push(lua_State *L)
  * That only works with userdata, table, thread or function.
  * \param L The Lua VM state.
  * \param oud The object index on the stack.
- * \return The object reference, or NULL if not referencable.
+ * \return The object reference, or NULL if not referenceable.
  */
 static inline void *
 luaA_object_ref(lua_State *L, int oud)

@@ -98,7 +98,7 @@ widget_getbycoords(orientation_t orientation, widget_node_array_t *widgets,
     return NULL;
 }
 
-/** Convert a Lua table to a list of widget nodet.
+/** Convert a Lua table to a list of widget nodes.
  * \param L The Lua VM state.
  * \param widgets The linked list of widget node.
  */
@@ -534,7 +534,7 @@ luaA_widget_set_type(lua_State *L, widget_t *w)
     }
 
     if(!wc)
-        luaL_error(L, "unkown widget type: %s", type);
+        luaL_error(L, "unknown widget type: %s", type);
 
     wc(w);
     w->type = wc;

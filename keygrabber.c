@@ -57,7 +57,7 @@ keygrabber_grab(void)
 /** Handle keypress event.
  * \param L Lua stack to push the key pressed.
  * \param e Received XKeyEvent.
- * \return True if a key was succesfully get, false otherwise.
+ * \return True if a key was successfully get, false otherwise.
  */
 bool
 keygrabber_handlekpress(lua_State *L, xcb_key_press_event_t *e)
@@ -92,7 +92,7 @@ keygrabber_handlekpress(lua_State *L, xcb_key_press_event_t *e)
  * continue grabbing, false to stop.
  * The function is called with 3 arguments:
  * a table containing modifiers keys, a string with the key pressed and a
- * string with eithe "press" or "release" to indicate the event type.
+ * string with either "press" or "release" to indicate the event type.
  *
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.

@@ -10,9 +10,9 @@ After extracting the dist tarball, run:
 
 This will create a build directory, run cmake in it and build awesome.
 
-After the building done, you can type this to install:
+After building is finished, you can install:
 
-  make install # might need root permissions
+  make install # you might need root permissions
 
 Running awesome
 ---------------
@@ -32,7 +32,7 @@ the DISPLAY environment variable is set correctly, e.g.:
 Configuration
 -------------
 The configuration of awesome is done by creating a $XDG_CONFIG_HOME/awesome/rc.lua file.
-An example is provided in the sources.
+An example configuration named "awesomerc.lua.in" is provided in the source.
 
 Troubleshooting
 ---------------

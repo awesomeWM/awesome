@@ -71,7 +71,7 @@ luaA_selection_get(lua_State *L)
              * xcb_event_poll_for_event_loop() and awesome_refresh(),
              * then check if some static buffer has been filled with data.
              * If yes, that'd be the xsel data, otherwise, re-loop.
-             * Anyway that's still brokes the socket or D-Bus, so maybe using
+             * Anyway that's still brakes the socket or D-Bus, so maybe using
              * ev_loop() would be even better.
              */
             xcb_event_handle(&globalconf.evenths, event);

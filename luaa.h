@@ -112,7 +112,7 @@ luaA_pusharea(lua_State *L, area_t geometry)
  * \param L The Lua stack.
  * \param idx Index of the object in the stack.
  * \param ref A int address: it will be filled with the int
- * registered. If the adresse point to an already registered object, it will
+ * registered. If the address points to an already registered object, it will
  * be unregistered.
  * \return Always 0.
  */
@@ -141,7 +141,7 @@ luaA_unregister(lua_State *L, int *ref)
  * \param L The Lua stack.
  * \param idx Index of the function in the stack.
  * \param fct A int address: it will be filled with the int
- * registered. If the adresse point to an already registered function, it will
+ * registered. If the address points to an already registered function, it will
  * be unregistered.
  * \return luaA_register value.
  */

@@ -83,7 +83,7 @@ buffer_wipe(buffer_t *buf)
 }
 
 /** Get a new buffer.
- * \return A new allocatedbuffer.
+ * \return A new allocated buffer.
  */
 static inline buffer_t *
 buffer_new(void)

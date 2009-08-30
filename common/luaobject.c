@@ -52,7 +52,7 @@ luaA_object_incref(lua_State *L, int tud, int oud)
     /* Get pointer value of the item */
     void *pointer = (void *) lua_topointer(L, oud);
 
-    /* Not referencable. */
+    /* Not reference able. */
     if(!pointer)
     {
         lua_remove(L, oud);
@@ -152,7 +152,7 @@ luaA_settype(lua_State *L, lua_class_t *lua_class)
  * \param L The Lua VM state.
  * \param oud The object index on the stack.
  * \param name The name of the signal.
- * \param ud The index of function to call when signal is emited.
+ * \param ud The index of function to call when signal is emitted.
  */
 void
 luaA_object_add_signal(lua_State *L, int oud,
@@ -167,7 +167,7 @@ luaA_object_add_signal(lua_State *L, int oud,
  * \param L The Lua VM state.
  * \param oud The object index on the stack.
  * \param name The name of the signal.
- * \param ud The index of function to call when signal is emited.
+ * \param ud The index of function to call when signal is emitted.
  */
 void
 luaA_object_remove_signal(lua_State *L, int oud,

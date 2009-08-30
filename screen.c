@@ -255,7 +255,7 @@ screen_virttophys(int screen)
 
 /** Move a client to a virtual screen.
  * \param c The client to move.
- * \param new_screen The destinatiuon screen.
+ * \param new_screen The destination screen.
  * \param doresize Set to true if we also move the client to the new x and
  *        y of the new screen.
  */
@@ -340,7 +340,7 @@ screen_client_moveto(client_t *c, screen_t *new_screen, bool doresize)
 
 /** Push a screen onto the stack.
  * \param L The Lua VM state.
- * \param s The scren to push.
+ * \param s The screen to push.
  * \return The number of elements pushed on stack.
  */
 int
@@ -455,7 +455,7 @@ luaA_screen_index(lua_State *L)
  * \luastack
  * \lvalue A screen.
  * \lparam A signal name.
- * \lparam A function to call when the signal is emited.
+ * \lparam A function to call when the signal is emitted.
  */
 static int
 luaA_screen_add_signal(lua_State *L)

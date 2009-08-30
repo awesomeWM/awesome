@@ -94,7 +94,7 @@ shape_update(xcb_window_t win, xcb_shape_kind_t kind, image_t *image, int offset
 }
 
 /** Update the window's shape.
- * \param wibox The simplw window whose shape should be updated.
+ * \param wibox The simple window whose shape should be updated.
  */
 static void
 wibox_shape_update(wibox_t *wibox)
@@ -258,13 +258,13 @@ wibox_moveresize(lua_State *L, int udx, area_t geometry)
             wibox_draw_context_update(w, s);
         }
 
-        /* Activatate BMA */
+        /* Activate BMA */
         client_ignore_enterleave_events();
 
         if(mask_vals)
             xcb_configure_window(globalconf.connection, w->window, mask_vals, moveresize_win_vals);
 
-        /* Deactivatate BMA */
+        /* Deactivate BMA */
         client_restore_enterleave_events();
 
         w->screen = screen_getbycoord(w->screen, w->geometry.x, w->geometry.y);
@@ -369,7 +369,7 @@ wibox_map(wibox_t *wibox)
     client_ignore_enterleave_events();
     /* Map the wibox */
     xcb_map_window(globalconf.connection, wibox->window);
-    /* Deactivatate BMA */
+    /* Deactivate BMA */
     client_restore_enterleave_events();
     /* We must make sure the wibox does not display garbage */
     wibox_need_update(wibox);
@@ -784,7 +784,7 @@ wibox_attach(lua_State *L, int udx, screen_t *s)
  * \param L The Lua VM state.
  *
  * \luastack
- * \lparam A table with optionaly defined values:
+ * \lparam A table with optionally defined values:
  * fg, bg, border_width, border_color, ontop, width and height.
  * \lreturn A brand new wibox.
  */

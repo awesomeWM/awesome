@@ -49,7 +49,7 @@ atoms_init(xcb_connection_t *conn)
     for(i = 0; i < countof(ATOM_LIST); i++)
     {
 	if(!(r = xcb_intern_atom_reply(conn, cs[i], NULL)))
-	    /* An error occured, get reply for next atom */
+	    /* An error occurred, get reply for next atom */
 	    continue;
 
 	*ATOM_LIST[i].atom = r->atom;

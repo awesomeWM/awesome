@@ -127,7 +127,7 @@ systray_cleanup(int phys_screen)
 /** Handle a systray request.
  * \param embed_win The window to embed.
  * \param phys_screen The physical monitor to display on.
- * \param info The embeding info
+ * \param info The embedding info
  * \return 0 on no error.
  */
 int
@@ -221,7 +221,7 @@ systray_iskdedockapp(xcb_window_t w)
     xcb_get_property_reply_t *kde_check;
     bool ret;
 
-    /* Check if that is a KDE tray because it does not repect fdo standards,
+    /* Check if that is a KDE tray because it does not respect fdo standards,
      * thanks KDE. */
     kde_check_q = xcb_get_property_unchecked(globalconf.connection, false, w,
                                              _KDE_NET_WM_SYSTEM_TRAY_WINDOW_FOR,

@@ -52,7 +52,7 @@ typedef enum
     Left
 } position_t;
 
-/** \brief replace \c NULL strings with emtpy strings */
+/** \brief replace \c NULL strings with empty strings */
 #define NONULL(x)       (x ? x : "")
 
 #define DO_NOTHING(...)
@@ -200,7 +200,7 @@ static inline ssize_t a_strnlen(const char *s, ssize_t n)
 
 /** \brief \c NULL resistant strdup.
  *
- * the a_strdup() function returns a pointer to a new string, which is a
+ * The a_strdup() function returns a pointer to a new string, which is a
  * duplicate of \c s. Memory should be freed using p_delete().
  *
  * \warning when s is \c "", it returns NULL !

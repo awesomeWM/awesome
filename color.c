@@ -128,7 +128,7 @@ color_init_unchecked(color_t *color, const char *colstr, ssize_t len)
 
 /** Initialize a color.
  * \param req color_init request.
- * \return True if color allocation was successfull.
+ * \return True if color allocation was successful.
  */
 bool
 color_init_reply(color_init_cookie_t req)
@@ -218,7 +218,7 @@ xcolor_init_unchecked(xcolor_t *color, const char *colstr, ssize_t len)
 
 /** Initialize a X color.
  * \param req xcolor_init request.
- * \return True if color allocation was successfull.
+ * \return True if color allocation was successful.
  */
 bool
 xcolor_init_reply(xcolor_init_request_t req)

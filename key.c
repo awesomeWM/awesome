@@ -957,7 +957,7 @@ key_getkeysym(xcb_keycode_t detail, uint16_t state)
          * instead */
         return k1;
 
-    /* The Shift modifer is on, or the Lock modifier is on and is
+    /* The Shift modifier is on, or the Lock modifier is on and is
      * interpreted as ShiftLock, or both */
     else if((state & XCB_MOD_MASK_SHIFT)
             || (state & XCB_MOD_MASK_LOCK && (state & globalconf.shiftlockmask)))

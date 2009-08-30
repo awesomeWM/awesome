@@ -668,7 +668,7 @@ draw_text_extents(draw_text_context_t *data)
 
 /** Transform a string to a alignment_t type.
  * Recognized string are flex, fixed, left, center, middle or right.
- * \param align Atring with align text.
+ * \param align A string with align text.
  * \param len The string length.
  * \return An alignment_t type.
  */

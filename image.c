@@ -67,11 +67,11 @@ image_imlib_load_strerror(Imlib_Load_Error e)
       case IMLIB_LOAD_ERROR_PATH_TOO_LONG:
         return "path too long";
       case IMLIB_LOAD_ERROR_PATH_COMPONENT_NON_EXISTANT:
-        return "path component non existant";
+        return "path component non existent";
       case IMLIB_LOAD_ERROR_PATH_COMPONENT_NOT_DIRECTORY:
-        return "path compoment not a directory";
+        return "path component not a directory";
       case IMLIB_LOAD_ERROR_PATH_POINTS_OUTSIDE_ADDRESS_SPACE:
-        return "path points oustide address space";
+        return "path points outside address space";
       case IMLIB_LOAD_ERROR_TOO_MANY_SYMBOLIC_LINKS:
         return "too many symbolic links";
       case IMLIB_LOAD_ERROR_OUT_OF_MEMORY:

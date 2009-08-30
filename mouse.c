@@ -34,7 +34,7 @@
  * \param y will be set to the Pointer-y-coordinate relative to window
  * \param child Will be set to the window under the pointer.
  * \param mask will be set to the current buttons state
- * \return true on success, false if an error occured
+ * \return true on success, false if an error occurred
  **/
 bool
 mouse_query_pointer(xcb_window_t window, int16_t *x, int16_t *y, xcb_window_t *child, uint16_t *mask)
@@ -66,7 +66,7 @@ mouse_query_pointer(xcb_window_t window, int16_t *x, int16_t *y, xcb_window_t *c
  * \param y This will be set to the Pointer-y-coordinate relative to window.
  * \param child This will be set to the window under the pointer.
  * \param mask This will be set to the current buttons state.
- * \return True on success, false if an error occured.
+ * \return True on success, false if an error occurred.
  */
 static bool
 mouse_query_pointer_root(screen_t **s, int16_t *x, int16_t *y, xcb_window_t *child, uint16_t *mask)

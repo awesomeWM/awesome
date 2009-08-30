@@ -237,7 +237,7 @@ luaAe_type(lua_State *L)
 }
 
 /** Modified version of os.execute() which use spawn code to reset signal
- * handlers correctly before exec()ing the new program.
+ * handlers correctly before exec()'ing the new program.
  * \param L The Lua VM state.
  * \return The number of arguments pushed on stack.
  */
@@ -342,7 +342,7 @@ luaA_wtable_index(lua_State *L)
     return 1;
 }
 
-/** Newndex function of wtable objects.
+/** Newindex function of wtable objects.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
  */
