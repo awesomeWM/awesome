@@ -15,11 +15,11 @@ DESCRIPTION
 -----------
 
 awesome-client is a remote command line interface to awesome.
-It communicates with awesome via D-Bus. It permits to execute Lua code remotely.
+It communicates with awesome via D-Bus, allowing remote execution of Lua code.
 
 USAGE
 -----
-awesome-client reads commands from standard input and send via D-Bus to awesome.
+awesome-client reads commands from standard input and sends them via D-Bus to awesome.
 If 'rlwrap' is installed, it will be used to provide a readline command line interface.
 
 The 'awful.remote' module has to be loaded if you want this command to work.

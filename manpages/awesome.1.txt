@@ -15,22 +15,22 @@ DESCRIPTION
 -----------
 
 *awesome* is a window manager for X. It manages windows in different layouts, like
-floating or tiled. Either layout can be applied dynamically, optimizing the
-environment for the application in use and the task performed.
+floating or tiled. Any layout can be applied dynamically, optimizing the
+environment for the application in use and the task currently being performed.
 
-In tiled layout, windows are managed in a master and stacking area. The master
-area contains the windows which currently need most attention, whereas the
-stacking area contains all other windows. In floating layout windows can be
-resized and moved freely. Dialog windows are always managed floating,
-regardless of the layout applied. The spiral and dwindle layout are special cases
-of the tiled layout where the stacking area is arranged in a spiral for the
-former or as a rectangular fractal for the later.
+In a tiled layout, windows are managed in a master and stacking area. The master
+area contains the windows which currently need the most attention, whereas the
+stacking area contains all other windows. In a floating layout windows can be
+resized and moved freely. Dialog windows are always managed as floating,
+regardless of the layout currently applied. The spiral and dwindle layouts are
+special cases of the tiled layout where the stacking area is arranged in a
+spiral for the former or as a rectangular fractal for the later.
 
-Windows are grouped by tags. Each window can be tagged with one or multiple
-tags. Selecting certain tags displays all windows with these tags.
+Windows are grouped by tags in awesome. Each window can be tagged with one or
+more tags. Selecting certain tags displays all windows with these tags.
 
 *awesome* can contain small wiboxes which can display anything you want:
-all available tags, the layout, the title of the visible windows, a text, etc.
+all available tags, the current layout, the title of the visible windows, text, etc.
 
 OPTIONS
 -------

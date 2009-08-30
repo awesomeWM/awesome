@@ -8,7 +8,7 @@ awesomerc - Configuration file for the awesome window manager
 
 SYNOPSIS
 --------
-*awesome* looks for this configuration file in this order:
+*awesome* looks for a configuration file in this order:
 
 * $XDG_CONFIG_HOME/awesome/rc.lua
 * $HOME/.config/awesome/rc.lua
@@ -16,8 +16,8 @@ SYNOPSIS
 
 DESCRIPTION
 -----------
-The *rc.lua* file contains configuration informations for *awesome*. It can
-be used to configure the behaviour and look of awesome in a variety of ways.
+The *rc.lua* file contains configuration information for *awesome*. It can
+be used to configure the behavior and look of awesome in a variety of ways.
 It can be assimilated as a Lua program/script run at startup by *awesome*.
 Therefore, it should use the awesome Lua API described in the API section.
 This file is read at startup.
@@ -28,17 +28,17 @@ Documentation for the Lua API can be found in the luadoc directory.
 
 COLORS FORMAT
 -------------
-Colors format in *awesome* are either standard X color names
-(blue, darkblue, lightred, etc) or hexadecimal formatted colors (#rrggbb
+The color format in *awesome* is either a standard X color name
+(blue, darkblue, lightred, etc) or a hexadecimal formatted color (#rrggbb
 or #rrggbbaa).
-By using hexadecimal format, you can also specifies an alpha channel:
+By using the hexadecimal format, you can also specify an alpha channel:
 that means that #00ff00 will draw pure green, but #00ff00aa will set the
 alpha channel to `aa' and will blend the green with the color under it.
 
 TEXT FORMAT
 -----------
-You can use Pango markup in text string.
-This allows to format the text rendered in widgets.
+You can use Pango markup in a text string.
+This allows formating the text rendered inside widgets.
 Pango markup documentation can be found in the Pango documentation at
 http://library.gnome.org/devel/pango/stable/PangoMarkupFormat.html.
 
