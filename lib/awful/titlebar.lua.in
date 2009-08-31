@@ -127,6 +127,11 @@ function add(c, args)
 
     c:add_signal("property::icon", update)
     c:add_signal("property::name", update)
+    c:add_signal("property::sticky", update)
+    c:add_signal("property::floating", update)
+    c:add_signal("property::ontop", update)
+    c:add_signal("property::maximized_vertical", update)
+    c:add_signal("property::maximized_horizontal", update)
     update(c)
 end
 
