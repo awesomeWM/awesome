@@ -878,8 +878,8 @@ key_getkeysym(xcb_keycode_t detail, uint16_t state)
      */
     if(state & globalconf.modeswitchmask)
     {
-        k0 = xcb_key_symbols_get_keysym(globalconf.keysyms, detail, 2);
-        k1 = xcb_key_symbols_get_keysym(globalconf.keysyms, detail, 3);
+        k0 = xcb_key_symbols_get_keysym(globalconf.keysyms, detail, 4);
+        k1 = xcb_key_symbols_get_keysym(globalconf.keysyms, detail, 5);
     }
     else
     {
