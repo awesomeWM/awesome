@@ -161,11 +161,12 @@ function run(args, textbox, exe_callback, completion_callback, history_path, his
     local cur_ul = args.ul_cursor
     local text = args.text or ""
     local font = args.font or theme.font
+    local selectall = args.selectall
 
     history_check_load(history_path, history_max)
     local history_index = history_items(history_path) + 1
     -- The cursor position
-    local cur_pos = (args.selectall and 1) or text:wlen() + 1
+    local cur_pos = (selectall and 1) or text:wlen() + 1
     -- The completion element to use on completion request.
     local ncomp = 1
     if not textbox or not exe_callback then
@@ -173,7 +174,7 @@ function run(args, textbox, exe_callback, completion_callback, history_path, his
     end
     textbox.text = prompt_text_with_cursor{
         text = text, text_color = inv_col, cursor_color = cur_col,
-        cursor_pos = cur_pos, cursor_ul = cur_ul, selectall = args.selectall,
+        cursor_pos = cur_pos, cursor_ul = cur_ul, selectall = selectall,
         font = font, prompt = prettyprompt }
 
     capi.keygrabber.run(
@@ -203,7 +204,7 @@ function run(args, textbox, exe_callback, completion_callback, history_path, his
 
         -- Control cases
         if mod.Control then
-            args.selectall = nil
+            selectall = nil
             if key == "a" then
                 cur_pos = 1
             elseif key == "b" then
@@ -257,7 +258,7 @@ function run(args, textbox, exe_callback, completion_callback, history_path, his
                             command = command_before_comp
                             textbox.text = prompt_text_with_cursor{
                                 text = command_before_comp, text_color = inv_col, cursor_color = cur_col,
-                                cursor_pos = cur_pos, cursor_ul = cur_ul, selectall = args.selectall,
+                                cursor_pos = cur_pos, cursor_ul = cur_ul, selectall = selectall,
                                 font = font, prompt = prettyprompt }
                             return true
                         end
@@ -325,7 +326,7 @@ function run(args, textbox, exe_callback, completion_callback, history_path, his
                 -- wlen() is UTF-8 aware but #key is not,
                 -- so check that we have one UTF-8 char but advance the cursor of # position
                 if key:wlen() == 1 then
-                    if args.selectall then command = "" end
+                    if selectall then command = "" end
                     command = command:sub(1, cur_pos - 1) .. key .. command:sub(cur_pos)
                     cur_pos = cur_pos + #key
                 end
@@ -335,13 +336,13 @@ function run(args, textbox, exe_callback, completion_callback, history_path, his
             elseif cur_pos > #command + 1 then
                 cur_pos = #command + 1
             end
-            args.selectall = nil
+            selectall = nil
         end
 
         -- Update textbox
         textbox.text = prompt_text_with_cursor{
             text = command, text_color = inv_col, cursor_color = cur_col,
-            cursor_pos = cur_pos, cursor_ul = cur_ul, selectall = args.selectall,
+            cursor_pos = cur_pos, cursor_ul = cur_ul, selectall = selectall,
             font = font, prompt = prettyprompt }
 
         return true
