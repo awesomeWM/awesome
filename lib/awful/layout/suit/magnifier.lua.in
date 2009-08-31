@@ -34,14 +34,14 @@ function arrange(p)
         fidx = 1
     end
 
-    -- Abort if no clients are present
-    if not focus then return end
-
     -- If focused window is not tiled, take the first one which is tiled.
     if client.floating.get(focus) then
         focus = cls[1]
         fidx = 1
     end
+
+    -- Abort if no clients are present
+    if not focus then return end
 
     local geometry = {}
     if #cls > 1 then
