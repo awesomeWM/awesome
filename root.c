@@ -25,6 +25,7 @@
 #include "button.h"
 #include "wibox.h"
 #include "luaa.h"
+#include "window.h"
 #include "common/xcursor.h"
 #include "common/tokenize.h"
 #include "common/xutil.h"

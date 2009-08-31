@@ -109,6 +109,36 @@ window_buttons_grab(xcb_window_t win, button_array_t *buttons)
                         (*b)->button, (*b)->modifiers);
 }
 
+/** Grab key on a window.
+ * \param win The window.
+ * \param k The key.
+ */
+static void
+window_grabkey(xcb_window_t win, keyb_t *k)
+{
+    if(k->keycode)
+        xcb_grab_key(globalconf.connection, true, win,
+                     k->modifiers, k->keycode, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC);
+    else if(k->keysym)
+    {
+        xcb_keycode_t *keycodes = xcb_key_symbols_get_keycode(globalconf.keysyms, k->keysym);
+        if(keycodes)
+        {
+            for(xcb_keycode_t *kc = keycodes; *kc; kc++)
+                xcb_grab_key(globalconf.connection, true, win,
+                             k->modifiers, *kc, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC);
+            p_delete(&keycodes);
+        }
+    }
+}
+
+void
+window_grabkeys(xcb_window_t win, key_array_t *keys)
+{
+    foreach(k, *keys)
+        window_grabkey(win, *k);
+}
+
 /** Get the opacity of a window.
  * \param win The window.
  * \return The opacity, between 0 and 1 or -1 or no opacity set.

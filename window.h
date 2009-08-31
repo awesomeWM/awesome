@@ -33,6 +33,7 @@ double window_opacity_get(xcb_window_t);
 double window_opacity_get_from_reply(xcb_get_property_reply_t *);
 void window_opacity_set(xcb_window_t, double);
 void window_grabbuttons(xcb_window_t, xcb_window_t, button_array_t *);
+void window_grabkeys(xcb_window_t, key_array_t *);
 void window_takefocus(xcb_window_t);
 void window_set_cursor(xcb_window_t, xcb_cursor_t);
 
