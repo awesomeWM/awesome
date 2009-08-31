@@ -24,9 +24,9 @@ theme.bg_urgent = "#3F3F3F"
 -- }}}
 
 -- {{{ Borders
-theme.border_width  = "1"
+theme.border_width  = "2"
 theme.border_normal = "#3F3F3F"
-theme.border_focus  = "#1E2320"
+theme.border_focus  = "#6F6F6F"
 theme.border_marked = "#CC9393"
 -- }}}
 
@@ -65,9 +65,9 @@ theme.menu_width  = "100"
 
 -- {{{ Icons
 -- {{{ Taglist
-theme.taglist_squares       = "true"
 theme.taglist_squares_sel   = "@AWESOME_THEMES_PATH@/zenburn/taglist/squarefz.png"
 theme.taglist_squares_unsel = "@AWESOME_THEMES_PATH@/zenburn/taglist/squarez.png"
+--theme.taglist_squares_resize = "false"
 -- }}}
 
 -- {{{ Misc
