@@ -104,35 +104,45 @@ end
 
 
 -- Draw the prompt text with a cursor.
+-- @param args The table of arguments.
 -- @param text The text.
+-- @param font The font.
+-- @param prompt The text prefix.
 -- @param text_color The text color.
 -- @param cursor_color The cursor color.
 -- @param cursor_pos The cursor position.
--- @param cursor_pos The cursor underline style.
+-- @param cursor_ul The cursor underline style.
 -- @param selectall If true cursor is rendered on the entire text.
-local function prompt_text_with_cursor(text, text_color, cursor_color, cursor_pos, cursor_ul, selectall)
-    local char, spacer, text_start, text_end
-    if not text then text = "" end
-    if #text < cursor_pos then
-        char = " "
-        spacer = ""
-    else
-        char = util.escape(text:sub(cursor_pos, cursor_pos))
+local function prompt_text_with_cursor(args)
+    local char, spacer, text_start, text_end, ret
+    local text = args.text or ""
+    local prompt = args.prompt or ""
+    local underline = args.cursor_ul or "none"
+
+    if args.selectall then
+        if #text == 0 then char = " " else char = util.escape(text) end
         spacer = " "
-    end
-    text_start = util.escape(text:sub(1, cursor_pos - 1))
-    text_end = util.escape(text:sub(cursor_pos + 1))
-    if selectall then
-        char = text_start .. char .. text_end
         text_start = ""
         text_end = ""
+    elseif #text < args.cursor_pos then
+        char = " "
+        spacer = ""
+        text_start = util.escape(text)
+        text_end = ""
+    else
+        char = util.escape(text:sub(args.cursor_pos, args.cursor_pos))
+        spacer = " "
+        text_start = util.escape(text:sub(1, args.cursor_pos - 1))
+        text_end = util.escape(text:sub(args.cursor_pos + 1))
     end
-    local underline = cursor_ul or "none"
-    return text_start .. "<span background=\"" .. util.color_strip_alpha(cursor_color) .. "\" foreground=\"" .. util.color_strip_alpha(text_color) .. "\" underline=\"" .. underline .. "\">" .. char .. "</span>" .. text_end .. spacer
+
+    ret = prompt .. text_start .. "<span background=\"" .. util.color_strip_alpha(args.cursor_color) .. "\" foreground=\"" .. util.color_strip_alpha(args.text_color) .. "\" underline=\"" .. underline .. "\">" .. char .. "</span>" .. text_end .. spacer
+    if args.font then ret = "<span font_desc='" .. args.font .. "'>" .. ret .. "</span>" end
+    return ret
 end
 
 --- Run a prompt in a box.
--- @param args A table with optional arguments: fg_cursor, bg_cursor, ul_cursor, prompt, text, selectall .
+-- @param args A table with optional arguments: fg_cursor, bg_cursor, ul_cursor, prompt, text, selectall, font.
 -- @param textbox The textbox to use for the prompt.
 -- @param exe_callback The callback function to call with command as argument when finished.
 -- @param completion_callback The callback function to call to get completion.
@@ -150,6 +160,7 @@ function run(args, textbox, exe_callback, completion_callback, history_path, his
     local cur_col = args.bg_cursor or theme.bg_focus or "white"
     local cur_ul = args.ul_cursor
     local text = args.text or ""
+    local font = args.font or theme.font
 
     history_check_load(history_path, history_max)
     local history_index = history_items(history_path) + 1
@@ -160,7 +171,11 @@ function run(args, textbox, exe_callback, completion_callback, history_path, his
     if not textbox or not exe_callback then
         return
     end
-    textbox.text = prettyprompt .. prompt_text_with_cursor(text, inv_col, cur_col, cur_pos, cur_ul, args.selectall)
+    textbox.text = prompt_text_with_cursor{
+        text = text, text_color = inv_col, cursor_color = cur_col,
+        cursor_pos = cur_pos, cursor_ul = cur_ul, selectall = args.selectall,
+        font = font, prompt = prettyprompt }
+
     capi.keygrabber.run(
     function (modifiers, key, event)
         if event ~= "press" then return true end
@@ -240,7 +255,10 @@ function run(args, textbox, exe_callback, completion_callback, history_path, his
                         if ncomp == 1 then return true end
                         if ncomp == 2 then
                             command = command_before_comp
-                            textbox.text = prettyprompt .. prompt_text_with_cursor(command_before_comp, inv_col, cur_col, cur_pos, args.selectall)
+                            textbox.text = prompt_text_with_cursor{
+                                text = command_before_comp, text_color = inv_col, cursor_color = cur_col,
+                                cursor_pos = cur_pos, cursor_ul = cur_ul, selectall = args.selectall,
+                                font = font, prompt = prettyprompt }
                             return true
                         end
 
@@ -321,7 +339,10 @@ function run(args, textbox, exe_callback, completion_callback, history_path, his
         end
 
         -- Update textbox
-        textbox.text = prettyprompt .. prompt_text_with_cursor(command, inv_col, cur_col, cur_pos, cur_ul, args.selectall)
+        textbox.text = prompt_text_with_cursor{
+            text = command, text_color = inv_col, cursor_color = cur_col,
+            cursor_pos = cur_pos, cursor_ul = cur_ul, selectall = args.selectall,
+            font = font, prompt = prettyprompt }
 
         return true
     end)
