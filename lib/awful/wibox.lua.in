@@ -253,6 +253,8 @@ function new(arg)
         align(w, arg.align)
     end
 
+    set_position(w, position)
+
     return w
 end
 
