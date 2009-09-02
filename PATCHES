@@ -3,6 +3,9 @@ If you plan to submit patches, here's a checklist:
  Commits:
 
 - make commits of logical units;
+- do not modify piece of code not related to your commit;
+- do not try to fix style of code you are not writing,
+  it's just adding noise for no gain;
 - check for unnecessary whitespace with "git diff --check" before commiting;
 - do not check in commented out code or unneeded files;
 - provide a meaningful commit message;
