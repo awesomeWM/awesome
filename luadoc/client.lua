@@ -47,89 +47,89 @@ module("client")
 --- Get all clients into a table.
 -- @param screen An optional screen number.
 -- @return A table with all clients.
--- @name client.get
+-- @name get
 -- @class function
 
 --- Check if a client is visible on its screen.
 -- @param -
 -- @return A boolean value, true if the client is visible, false otherwise.
--- @name client.isvisible
+-- @name isvisible
 -- @class function
 
 --- Return client geometry.
 -- @param arg1 A table with new coordinates, or none.
 -- @return A table with client coordinates.
--- @name client.geometry
+-- @name geometry
 -- @class function
 
 --- Return client struts (reserved space at the edge of the screen).
 -- @param struts A table with new strut values, or none.
 -- @return A table with strut values.
--- @name client.struts
+-- @name struts
 -- @class function
 
 --- Get or set mouse buttons bindings for a client.
 -- @param buttons_table An array of mouse button bindings objects, or nothing.
 -- @return A table with all buttons.
--- @name client.buttons
+-- @name buttons
 -- @class function
 
 --- Get or set keys bindings for a client.
 -- @param keys_table An array of key bindings objects, or nothing.
 -- @return A table with all keys.
--- @name client.keys
+-- @name keys
 -- @class function
 
 --- Access or set the client tags.
 -- @param tags_table A table with tags to set, or none to get the current tags table.
 -- @return A table with all tags.
--- @name client.tags
+-- @name tags
 -- @class function
 
 --- Kill a client.
 -- @param -
--- @name client.kill
+-- @name kill
 -- @class function
 
 --- Swap a client with another one in global client list.
 -- @param c A client to swap with.
--- @name client.swap
+-- @name swap
 -- @class function
 
 --- Raise a client on top of others which are on the same layer.
 -- @param -
--- @name client.raise
+-- @name raise
 -- @class function
 
 --- Lower a client on bottom of others which are on the same layer.
 -- @param -
--- @name client.lower
+-- @name lower
 -- @class function
 
 --- Redraw a client by unmapping and mapping it quickly.
 -- @param -
--- @name client.redraw
+-- @name redraw
 -- @class function
 
 --- Stop managing a client.
 -- @param -
--- @name client.unmanage
+-- @name unmanage
 -- @class function
 
 --- Add a signal.
 -- @param name A signal name.
 -- @param func A function to call when the signal is emitted.
--- @name client.add_signal
+-- @name add_signal
 -- @class function
 
 --- Remove a signal.
 -- @param name A signal name.
 -- @param func A function to remove.
--- @name client.remove_signal
+-- @name remove_signal
 -- @class function
 
 --- Emit a signal.
 -- @param name A signal name.
 -- @param ... Various arguments, optional.
--- @name client.emit_signal
+-- @name emit_signal
 -- @class function
