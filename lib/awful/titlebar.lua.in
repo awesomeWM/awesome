@@ -63,6 +63,7 @@ function add(c, args)
     if not args then args = {} end
     if not args.height then args.height = capi.awesome.font_height * 1.5 end
     local theme = beautiful.get()
+    if not args.widget then customwidget = {} else customwidget = args.widget end
     -- Store colors
     data[c] = {}
     data[c].fg = args.fg or theme.titlebar_fg_normal or theme.fg_normal
@@ -115,6 +116,7 @@ function add(c, args)
 
     tb.widgets = {
         widget_list,
+        customwidget,
         {
             appicon = appicon,
             title = title,
