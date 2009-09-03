@@ -297,10 +297,10 @@ local function get_client_in_direction(dir, c)
         -- We check each client.
         for i, c in ipairs(cls) do
             -- Check geometry to see if client is located in the right direction.
-            if is_in_direction(dir, geometry, c:geometry()) then
+            if is_in_direction(dir, sel, c) then
 
                 -- Calculate distance between focused client and checked client.
-                dist = calculate_distance(dir, geometry, c:geometry())
+                dist = calculate_distance(dir, sel, c)
 
                 -- If distance is shorter then keep the client.
                 if not target or dist < dist_min then
