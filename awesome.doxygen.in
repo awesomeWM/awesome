@@ -203,7 +203,8 @@ EXPAND_ONLY_PREDEF     = YES
 SEARCH_INCLUDES        = YES
 INCLUDE_PATH           = 
 INCLUDE_FILE_PATTERNS  = 
-PREDEFINED             = "__attribute__(x)="
+PREDEFINED             = WITH_DBUS = \
+			 "__attribute__(x)="
 EXPAND_AS_DEFINED      = 
 SKIP_FUNCTION_MACROS   = YES
 #---------------------------------------------------------------------------
@@ -225,7 +226,7 @@ CLASS_GRAPH            = YES
 COLLABORATION_GRAPH    = YES
 GROUP_GRAPHS           = YES
 UML_LOOK               = YES
-TEMPLATE_RELATIONS     = YeS
+TEMPLATE_RELATIONS     = YES
 INCLUDE_GRAPH          = YES
 INCLUDED_BY_GRAPH      = YES
 CALL_GRAPH             = YES
@@ -237,7 +238,7 @@ DOT_PATH               =
 DOTFILE_DIRS           = 
 DOT_GRAPH_MAX_NODES    = 50
 MAX_DOT_GRAPH_DEPTH    = 1000
-DOT_TRANSPARENT        = NO
+DOT_TRANSPARENT        = YES
 DOT_MULTI_TARGETS      = NO
 GENERATE_LEGEND        = YES
 DOT_CLEANUP            = YES
