@@ -92,12 +92,13 @@ awesome_atexit(void)
         titlebar_client_detach(*c);
     }
 
-    xcb_flush(globalconf.connection);
-
-    xcb_disconnect(globalconf.connection);
-
     /* Close Lua */
     lua_close(globalconf.L);
+
+    xcb_flush(globalconf.connection);
+
+    /* Disconnect *after* closing lua */
+    xcb_disconnect(globalconf.connection);
 }
 
 /** Scan X to find windows to manage.
