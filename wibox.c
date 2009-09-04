@@ -1463,6 +1463,7 @@ luaA_wibox_set_border_width(lua_State *L, wibox_t *wibox)
 static int
 luaA_wibox_set_shape_bounding(lua_State *L, wibox_t *wibox)
 {
+    luaA_checkudata(L, -1, &image_class);
     luaA_object_unref_item(L, -3, wibox->shape.bounding);
     wibox->shape.bounding = luaA_object_ref_item(L, -3, -1);
     wibox->need_shape_update = true;
@@ -1479,6 +1480,7 @@ luaA_wibox_get_shape_bounding(lua_State *L, wibox_t *wibox)
 static int
 luaA_wibox_set_shape_clip(lua_State *L, wibox_t *wibox)
 {
+    luaA_checkudata(L, -1, &image_class);
     luaA_object_unref_item(L, -3, wibox->shape.clip);
     wibox->shape.clip = luaA_object_ref_item(L, -3, -1);
     wibox->need_shape_update = true;

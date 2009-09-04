@@ -133,6 +133,7 @@ luaA_imagebox_newindex(lua_State *L, awesome_token_t token)
         size_t len;
 
       case A_TK_IMAGE:
+        luaA_checkudata(L, 1, &image_class);
         luaA_object_unref_item(L, 1, d->image);
         d->image = luaA_object_ref_item(L, 1, 3);
         break;

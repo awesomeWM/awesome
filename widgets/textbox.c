@@ -346,6 +346,7 @@ luaA_textbox_newindex(lua_State *L, awesome_token_t token)
         d->bg_resize = luaA_checkboolean(L, 3);
         break;
       case A_TK_BG_IMAGE:
+        luaA_checkudata(L, 1, &image_class);
         luaA_object_unref_item(L, 1, d->bg_image);
         d->bg_image = luaA_object_ref_item(L, 1, 3);
         break;
