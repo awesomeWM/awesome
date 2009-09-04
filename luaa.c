@@ -805,7 +805,7 @@ luaA_init(xdgHandle* xdg)
     globalconf.hooks.timer = LUA_REFNIL;
     globalconf.hooks.exit = LUA_REFNIL;
 
-    /* add Lua lib path (/usr/share/awesome/lib by default) */
+    /* add Lua search paths */
     lua_getglobal(L, "package");
     if (LUA_TTABLE != lua_type(L, 1))
     {
@@ -819,9 +819,6 @@ luaA_init(xdgHandle* xdg)
         lua_pop(L, 1);
         return;
     }
-    lua_pushliteral(L, ";" AWESOME_LUA_LIB_PATH "/?.lua");
-    lua_pushliteral(L, ";" AWESOME_LUA_LIB_PATH "/?/init.lua");
-    lua_concat(L, 3); /* concatenate with package.path */
 
     /* add XDG_CONFIG_DIR as include path */
     const char * const *xdgconfigdirs = xdgSearchableConfigDirectories(xdg);
@@ -840,6 +837,11 @@ luaA_init(xdgHandle* xdg)
 
         lua_concat(L, 3); /* concatenate with package.path */
     }
+
+    /* add Lua lib path (/usr/share/awesome/lib by default) */
+    lua_pushliteral(L, ";" AWESOME_LUA_LIB_PATH "/?.lua");
+    lua_pushliteral(L, ";" AWESOME_LUA_LIB_PATH "/?/init.lua");
+    lua_concat(L, 3); /* concatenate with package.path */
     lua_setfield(L, 1, "path"); /* package.path = "concatenated string" */
 }
 
