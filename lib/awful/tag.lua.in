@@ -316,7 +316,7 @@ function withcurrent(c, startup)
             c:tags(c.transient_for:tags())
         end
         if #c:tags() == 0 then
-            c:tags(selectedlist(c.screen))
+            c:tags(selectedlist(capi.mouse.screen))
         end
     end
 end
