@@ -39,6 +39,10 @@ ev_io dbusio_sys = { .fd = -1 };
 
 static signal_array_t dbus_signals;
 
+/** Clean up the D-Bus connection data members
+ * \param dbus_connection The D-Bus connection to clean up
+ * \param dbusio The D-Bus event watcher
+ */
 static void
 a_dbus_cleanup_bus(DBusConnection *dbus_connection, ev_io *dbusio)
 {
@@ -58,6 +62,10 @@ a_dbus_cleanup_bus(DBusConnection *dbus_connection, ev_io *dbusio)
     dbus_connection_unref(dbus_connection);
 }
 
+/** Iterate through the D-Bus messages counting each or traverse each sub message.
+ * \param iter The D-Bus message iterator pointer
+ * \return The number of arguments in the iterator
+ */
 static int
 a_dbus_message_iter(DBusMessageIter *iter)
 {
@@ -248,6 +256,10 @@ a_dbus_message_iter(DBusMessageIter *iter)
     return nargs;
 }
 
+/** Process a single request from D-Bus
+ * \param dbus_connection  The connection to the D-Bus server.
+ * \param msg  The D-Bus message request being sent to the D-Bus connection.
+ */
 static void
 a_dbus_process_request(DBusConnection *dbus_connection, DBusMessage *msg)
 {
@@ -380,6 +392,10 @@ a_dbus_process_request(DBusConnection *dbus_connection, DBusMessage *msg)
     }
 }
 
+/** Attempt to process all the requests in the D-Bus connection.
+ * \param dbus_connection The D-Bus connection to process from
+ * \param dbusio The D-Bus event watcher
+ */
 static void
 a_dbus_process_requests_on_bus(DBusConnection *dbus_connection, ev_io *dbusio)
 {
@@ -411,18 +427,32 @@ a_dbus_process_requests_on_bus(DBusConnection *dbus_connection, ev_io *dbusio)
         dbus_connection_flush(dbus_connection);
 }
 
+/** Foreword D-Bus process session requests on too the correct function.
+ * \param w The D-Bus event watcher
+ * \param revents (not used)
+ */
 static void
 a_dbus_process_requests_session(EV_P_ ev_io *w, int revents)
 {
     a_dbus_process_requests_on_bus(dbus_connection_session, w);
 }
 
+/** Foreword D-Bus process system requests on too the correct function.
+ * \param w The D-Bus event watcher
+ * \param revents (not used)
+ */
 static void
 a_dbus_process_requests_system(EV_P_ ev_io *w, int revents)
 {
     a_dbus_process_requests_on_bus(dbus_connection_system, w);
 }
 
+/** Attempt to request a D-Bus name
+ * \param dbus_connection The application's connection to D-Bus
+ * \param name The D-Bus connection name to be requested
+ * \return true if the name is primary owner or the name is already
+ * the owner, otherwise false.
+ */
 static bool
 a_dbus_request_name(DBusConnection *dbus_connection, const char *name)
 {
@@ -453,6 +483,12 @@ a_dbus_request_name(DBusConnection *dbus_connection, const char *name)
     return false;
 }
 
+/** Attempt to release the D-Bus name owner
+ * \param dbus_connection The application's connection to the D-Bus
+ * \param name The name to be released
+ * \return True on success. False if the name is not
+ * the owner, or does not exist.
+ */
 static bool
 a_dbus_release_name(DBusConnection *dbus_connection, const char *name)
 {
@@ -484,6 +520,13 @@ a_dbus_release_name(DBusConnection *dbus_connection, const char *name)
     return true;
 }
 
+/** Attempt to create a new connection to D-Bus
+ * \param type The bus type to use when connecting to D-Bus
+ * \param type_name The bus type name eg: "session" or "system"
+ * \param dbusio The D-Bus event watcher
+ * \param cb Function callback to use when processing requests
+ * \return The requested D-Bus connection on success, NULL on failure.
+ */
 static DBusConnection *
 a_dbus_connect(DBusBusType type, const char *type_name,
                ev_io *dbusio, void *cb)
@@ -522,6 +565,8 @@ a_dbus_connect(DBusBusType type, const char *type_name,
     return dbus_connection;
 }
 
+/** Initialize the D-Bus session and system
+ */
 void
 a_dbus_init(void)
 {
@@ -531,6 +576,8 @@ a_dbus_init(void)
                                             &dbusio_sys, a_dbus_process_requests_system);
 }
 
+/** Cleanup the D-Bus session and system
+ */
 void
 a_dbus_cleanup(void)
 {
@@ -538,6 +585,11 @@ a_dbus_cleanup(void)
     a_dbus_cleanup_bus(dbus_connection_system, &dbusio_sys);
 }
 
+/** Retrieve the D-Bus bus by it's name
+ * \param name The name of the bus
+ * \param len The length of the name variable
+ * \return The corresponding D-Bus connection
+ */
 static DBusConnection *
 a_dbus_bus_getbyname(const char *name, size_t len)
 {
@@ -689,13 +741,15 @@ const struct luaL_reg awesome_dbus_lib[] =
     { NULL, NULL }
 };
 
-#else /* HAVE_DBUS */
+#else /* WITH_DBUS */
 
+/** Empty stub if dbus is not enabled */
 void
 a_dbus_init(void)
 {
 }
 
+/** Empty stub if dbus is not enabled */
 void
 a_dbus_cleanup(void)
 {
