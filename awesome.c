@@ -99,6 +99,8 @@ awesome_atexit(void)
 
     /* Disconnect *after* closing lua */
     xcb_disconnect(globalconf.connection);
+
+    ev_default_destroy();
 }
 
 /** Scan X to find windows to manage.
