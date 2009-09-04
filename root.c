@@ -126,7 +126,7 @@ luaA_root_keys(lua_State *L)
 
         lua_pushnil(L);
         while(lua_next(L, 1))
-            key_array_append(&globalconf.keys, luaA_object_ref(L, -1));
+            key_array_append(&globalconf.keys, luaA_object_ref_class(L, -1, &key_class));
 
         int nscreen = xcb_setup_roots_length(xcb_get_setup(globalconf.connection));
 

@@ -224,7 +224,7 @@ void
 titlebar_client_attach(client_t *c)
 {
     /* check if we can register the object */
-    wibox_t *t = luaA_object_ref(globalconf.L, -1);
+    wibox_t *t = luaA_object_ref_class(globalconf.L, -1, &wibox_class);
 
     titlebar_client_detach(c);
 

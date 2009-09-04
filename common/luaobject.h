@@ -106,6 +106,20 @@ luaA_object_ref(lua_State *L, int oud)
     return p;
 }
 
+/** Reference an object and return a pointer to it checking its type.
+ * That only works with userdata.
+ * \param L The Lua VM state.
+ * \param oud The object index on the stack.
+ * \param class The class of object expected
+ * \return The object reference, or NULL if not referenceable.
+ */
+static inline void *
+luaA_object_ref_class(lua_State *L, int oud, lua_class_t *class)
+{
+    luaA_checkudata(L, oud, class);
+    return luaA_object_ref(L, oud);
+}
+
 /** Unreference an object and return a pointer to it.
  * That only works with userdata, table, thread or function.
  * \param L The Lua VM state.

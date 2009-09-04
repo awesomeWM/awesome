@@ -127,7 +127,7 @@ tag_append_to_screen(lua_State *L, int udx, screen_t *s)
     int phys_screen = screen_virttophys(screen_index);
 
     tag->screen = s;
-    tag_array_append(&s->tags, luaA_object_ref(globalconf.L, udx));
+    tag_array_append(&s->tags, luaA_object_ref_class(globalconf.L, udx, &tag_class));
     ewmh_update_net_numbers_of_desktop(phys_screen);
     ewmh_update_net_desktop_names(phys_screen);
     ewmh_update_workarea(phys_screen);
@@ -210,7 +210,7 @@ tag_client_emit_signal(lua_State *L, tag_t *t, client_t *c, const char *signame)
 void
 tag_client(client_t *c)
 {
-    tag_t *t = luaA_object_ref(globalconf.L, -1);
+    tag_t *t = luaA_object_ref_class(globalconf.L, -1, &tag_class);
 
     /* don't tag twice */
     if(is_client_tagged(c, t))

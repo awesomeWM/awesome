@@ -738,7 +738,7 @@ wibox_attach(lua_State *L, int udx, screen_t *s)
     /* duplicate wibox */
     lua_pushvalue(L, udx);
     /* ref it */
-    wibox_t *wibox = luaA_object_ref(globalconf.L, -1);
+    wibox_t *wibox = luaA_object_ref_class(globalconf.L, -1, &wibox_class);
 
     wibox_detach(L, udx);
 
