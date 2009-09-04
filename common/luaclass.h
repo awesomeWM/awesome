@@ -83,6 +83,14 @@ int luaA_class_new(lua_State *, lua_class_t *);
 void * luaA_checkudata(lua_State *, int, lua_class_t *);
 void * luaA_toudata(lua_State *L, int ud, lua_class_t *);
 
+static inline void *
+luaA_checkudataornil(lua_State *L, int udx, lua_class_t *class)
+{
+    if(lua_isnil(L, udx))
+        return NULL;
+    return luaA_checkudata(L, udx, class);
+}
+
 #define LUA_CLASS_FUNCS(prefix, lua_class) \
     static inline int                                                          \
     luaA_##prefix##_class_add_signal(lua_State *L)                             \
