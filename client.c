@@ -1599,7 +1599,7 @@ luaA_client_geometry(lua_State *L)
 {
     client_t *c = luaA_client_checkudata(L, 1);
 
-    if(lua_gettop(L) == 2)
+    if(lua_gettop(L) == 2 && !lua_isnil(L, 2))
     {
         area_t geometry;
 
