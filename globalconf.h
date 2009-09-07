@@ -40,10 +40,7 @@ typedef struct a_screen screen_t;
 typedef struct button_t button_t;
 typedef struct widget_t widget_t;
 typedef struct client_t client_t;
-typedef struct client_node client_node_t;
 typedef struct tag tag_t;
-typedef struct tag_client_node_t tag_client_node_t;
-typedef struct awesome_t awesome_t;
 
 ARRAY_TYPE(button_t *, button)
 ARRAY_TYPE(tag_t *, tag)
@@ -52,7 +49,7 @@ ARRAY_TYPE(client_t *, client)
 ARRAY_TYPE(wibox_t *, wibox)
 
 /** Main configuration structure */
-struct awesome_t
+typedef struct
 {
     /** Connection ref */
     xcb_connection_t *connection;
@@ -138,7 +135,7 @@ struct awesome_t
     wibox_array_t wiboxes;
     /** The startup notification display struct */
     SnDisplay *sndisplay;
-};
+} awesome_t;
 
 extern awesome_t globalconf;
 
