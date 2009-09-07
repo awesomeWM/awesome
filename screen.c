@@ -343,7 +343,7 @@ screen_client_moveto(client_t *c, screen_t *new_screen, bool doresize)
  * \param s The screen to push.
  * \return The number of elements pushed on stack.
  */
-int
+static int
 luaA_pushscreen(lua_State *L, screen_t *s)
 {
     lua_pushlightuserdata(L, s);
