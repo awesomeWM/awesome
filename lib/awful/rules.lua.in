@@ -91,6 +91,11 @@ function apply(c)
                 elseif property == "switchtotag" and value
                     and entry.properties["tag"] then
                     atag.viewonly(entry.properties["tag"])
+                elseif property == "height" or property == "width" or
+                       property == "x" or property == "y" then
+                    local geo = c:geometry();
+                    geo[property] = value
+                    c:geometry(geo);
                 elseif type(c[property]) == "function" then
                     c[property](c, value)
                 else
