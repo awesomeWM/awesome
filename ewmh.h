@@ -22,7 +22,7 @@
 #ifndef AWESOME_EWMH_H
 #define AWESOME_EWMH_H
 
-#include "structs.h"
+#include "globalconf.h"
 #include "strut.h"
 
 void ewmh_init(int);

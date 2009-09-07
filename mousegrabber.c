@@ -21,7 +21,7 @@
 
 #include <unistd.h>
 
-#include "structs.h"
+#include "globalconf.h"
 #include "mouse.h"
 #include "mousegrabber.h"
 #include "luaa.h"

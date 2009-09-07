@@ -22,7 +22,7 @@
 #ifndef AWESOME_WINDOW_H
 #define AWESOME_WINDOW_H
 
-#include "structs.h"
+#include "globalconf.h"
 
 void window_state_set(xcb_window_t, long);
 xcb_get_property_cookie_t window_state_get_unchecked(xcb_window_t);

@@ -23,7 +23,7 @@
 
 #include <Imlib2.h>
 
-#include "structs.h"
+#include "globalconf.h"
 #include "luaa.h"
 #include "common/luaobject.h"
 

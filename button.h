@@ -22,7 +22,7 @@
 #ifndef AWESOME_BUTTON_H
 #define AWESOME_BUTTON_H
 
-#include "structs.h"
+#include "globalconf.h"
 
 /** Mouse buttons bindings */
 struct button_t

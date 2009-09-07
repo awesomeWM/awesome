@@ -23,7 +23,7 @@
 #include <ctype.h>
 
 #include "color.h"
-#include "structs.h"
+#include "globalconf.h"
 #include "common/xutil.h"
 
 #define RGB_8TO16(i)   (0xffff * ((i) & 0xff) / 0xff)

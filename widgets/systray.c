@@ -1,7 +1,7 @@
 /*
  * systray.c - systray widget
  *
- * Copyright © 2008 Julien Danjou <julien@danjou.info>
+ * Copyright © 2008-2009 Julien Danjou <julien@danjou.info>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@
 #include "widget.h"
 #include "screen.h"
 #include "wibox.h"
-#include "structs.h"
+#include "globalconf.h"
 #include "common/xembed.h"
 #include "common/atoms.h"
 

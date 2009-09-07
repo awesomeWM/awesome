@@ -1,7 +1,7 @@
 /*
- * structs.h - basic structs header
+ * globalconf.h - basic globalconf.header
  *
- * Copyright © 2007-2008 Julien Danjou <julien@danjou.info>
+ * Copyright © 2007-2009 Julien Danjou <julien@danjou.info>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,8 +19,8 @@
  *
  */
 
-#ifndef AWESOME_STRUCTS_H
-#define AWESOME_STRUCTS_H
+#ifndef AWESOME_GLOBALCONF_H
+#define AWESOME_GLOBALCONF_H
 
 #define SN_API_NOT_YET_FROZEN
 #include <libsn/sn.h>

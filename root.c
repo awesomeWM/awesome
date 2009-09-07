@@ -21,7 +21,7 @@
 
 #include <xcb/xtest.h>
 
-#include "structs.h"
+#include "globalconf.h"
 #include "button.h"
 #include "wibox.h"
 #include "luaa.h"

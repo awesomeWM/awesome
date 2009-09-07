@@ -19,7 +19,7 @@
  *
  */
 
-#include "structs.h"
+#include "globalconf.h"
 #include "luaa.h"
 
 #define HANDLE_HOOK(L, h) \

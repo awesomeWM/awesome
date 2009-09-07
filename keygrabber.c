@@ -21,7 +21,7 @@
 
 #include <unistd.h>
 
-#include "structs.h"
+#include "globalconf.h"
 #include "keygrabber.h"
 #include "key.h"
 #include "luaa.h"

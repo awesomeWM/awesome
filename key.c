@@ -27,7 +27,7 @@
 #include <X11/keysym.h>
 #include <X11/XF86keysym.h>
 
-#include "structs.h"
+#include "globalconf.h"
 #include "luaa.h"
 #include "common/xutil.h"
 #include "common/luaobject.h"

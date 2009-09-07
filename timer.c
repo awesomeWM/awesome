@@ -21,7 +21,7 @@
 
 #include <ev.h>
 
-#include "structs.h"
+#include "globalconf.h"
 #include "luaa.h"
 #include "timer.h"
 #include "common/luaobject.h"

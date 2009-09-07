@@ -29,7 +29,7 @@
 #include <ctype.h>
 #include <math.h>
 
-#include "structs.h"
+#include "globalconf.h"
 #include "screen.h"
 
 #include "common/tokenize.h"
