@@ -27,6 +27,7 @@
 
 typedef widget_t *(widget_constructor_t)(widget_t *);
 typedef void (widget_destructor_t)(widget_t *);
+typedef struct widget_node widget_node_t;
 
 /** Widget */
 struct widget_t
@@ -52,13 +53,16 @@ struct widget_t
     bool isvisible;
 };
 
-struct widget_node_t
+void widget_node_delete(widget_node_t *);
+
+struct widget_node
 {
     /** The widget object */
     widget_t *widget;
     /** The geometry where the widget was drawn */
     area_t geometry;
 };
+DO_ARRAY(widget_node_t, widget_node, widget_node_delete)
 
 widget_t *widget_getbycoords(orientation_t, widget_node_array_t *, int, int, int16_t *, int16_t *);
 void widget_render(wibox_t *);
@@ -74,9 +78,6 @@ widget_constructor_t widget_progressbar;
 widget_constructor_t widget_graph;
 widget_constructor_t widget_systray;
 widget_constructor_t widget_imagebox;
-
-void widget_node_delete(widget_node_t *);
-ARRAY_FUNCS(widget_node_t, widget_node, widget_node_delete)
 
 #endif
 

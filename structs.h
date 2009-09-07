@@ -39,14 +39,12 @@ typedef struct wibox_t wibox_t;
 typedef struct a_screen screen_t;
 typedef struct button_t button_t;
 typedef struct widget_t widget_t;
-typedef struct widget_node_t widget_node_t;
 typedef struct client_t client_t;
 typedef struct client_node client_node_t;
 typedef struct tag tag_t;
 typedef struct tag_client_node_t tag_client_node_t;
 typedef struct awesome_t awesome_t;
 
-ARRAY_TYPE(widget_node_t, widget_node)
 ARRAY_TYPE(button_t *, button)
 ARRAY_TYPE(tag_t *, tag)
 ARRAY_TYPE(screen_t, screen)
