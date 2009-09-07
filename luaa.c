@@ -30,6 +30,7 @@
 #include <basedir_fs.h>
 
 #include "awesome.h"
+#include "config.h"
 #include "timer.h"
 #include "awesome-version-internal.h"
 #include "ewmh.h"

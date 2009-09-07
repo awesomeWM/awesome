@@ -24,6 +24,7 @@
 #include <Imlib2.h>
 
 #include "globalconf.h"
+#include "config.h"
 #include "luaa.h"
 #include "common/luaobject.h"
 

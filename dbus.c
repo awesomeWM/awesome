@@ -1,7 +1,7 @@
 /*
  * dbus.c - awesome dbus support
  *
- * Copyright © 2008 Julien Danjou <julien@danjou.info>
+ * Copyright © 2008-2009 Julien Danjou <julien@danjou.info>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,8 +19,9 @@
  *
  */
 
+#include "config.h"
+
 #include "dbus.h"
-#include "client.h"
 
 #ifdef WITH_DBUS
 
