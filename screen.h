@@ -23,6 +23,7 @@
 #define AWESOME_SCREEN_H
 
 #include "globalconf.h"
+#include "draw.h"
 
 struct a_screen
 {

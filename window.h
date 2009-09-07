@@ -1,7 +1,7 @@
 /*
  * window.h - window handling functions header
  *
- * Copyright © 2007-2008 Julien Danjou <julien@danjou.info>
+ * Copyright © 2007-2009 Julien Danjou <julien@danjou.info>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 #define AWESOME_WINDOW_H
 
 #include "globalconf.h"
+#include "draw.h"
 
 void window_state_set(xcb_window_t, long);
 xcb_get_property_cookie_t window_state_get_unchecked(xcb_window_t);

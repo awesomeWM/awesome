@@ -23,6 +23,7 @@
 #define AWESOME_WIDGET_H
 
 #include "button.h"
+#include "draw.h"
 #include "common/tokenize.h"
 
 typedef widget_t *(widget_constructor_t)(widget_t *);

@@ -25,6 +25,7 @@
 #include "mouse.h"
 #include "stack.h"
 #include "strut.h"
+#include "draw.h"
 #include "common/luaobject.h"
 
 #define CLIENT_SELECT_INPUT_EVENT_MASK (XCB_EVENT_MASK_STRUCTURE_NOTIFY \

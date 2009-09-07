@@ -69,12 +69,6 @@ struct area_t
 
 typedef struct
 {
-    PangoFontDescription *desc;
-    int height;
-} font_t;
-
-typedef struct
-{
     xcb_pixmap_t pixmap;
     uint16_t width;
     uint16_t height;
@@ -111,9 +105,6 @@ draw_context_wipe(draw_context_t *ctx)
         ctx->cr = NULL;
     }
 }
-
-font_t *draw_font_new(const char *);
-void draw_font_delete(font_t **);
 
 bool draw_iso2utf8(const char *, size_t, char **, ssize_t *);
 

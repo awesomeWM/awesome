@@ -89,57 +89,6 @@ draw_iso2utf8(const char *iso, size_t len, char **dest, ssize_t *dlen)
     return true;
 }
 
-/** Create a new Pango font.
- * \param fontname Pango fontname (e.g. [FAMILY-LIST] [STYLE-OPTIONS] [SIZE]).
- * \return A new font.
- */
-font_t *
-draw_font_new(const char *fontname)
-{
-    cairo_surface_t *surface;
-    xcb_screen_t *s = xutil_screen_get(globalconf.connection, globalconf.default_screen);
-    cairo_t *cr;
-    PangoLayout *layout;
-    font_t *font = p_new(font_t, 1);
-
-    /* Create a dummy cairo surface, cairo context and pango layout in
-     * order to get font informations */
-    surface = cairo_xcb_surface_create(globalconf.connection,
-                                       globalconf.default_screen,
-                                       globalconf.screens.tab[0].visual,
-                                       s->width_in_pixels,
-                                       s->height_in_pixels);
-
-    cr = cairo_create(surface);
-    layout = pango_cairo_create_layout(cr);
-
-    /* Get the font description used to set text on a PangoLayout */
-    font->desc = pango_font_description_from_string(fontname);
-    pango_layout_set_font_description(layout, font->desc);
-
-    /* Get height */
-    pango_layout_get_pixel_size(layout, NULL, &font->height);
-
-    g_object_unref(layout);
-    cairo_destroy(cr);
-    cairo_surface_destroy(surface);
-
-    return font;
-}
-
-/** Delete a font.
- * \param font Font to delete.
- */
-void
-draw_font_delete(font_t **font)
-{
-    if(*font)
-    {
-        pango_font_description_free((*font)->desc);
-        p_delete(font);
-    }
-}
-
 /** Initialize a draw_text_context_t with text data.
  * \param data The draw text context to init.
  * \param str The text string to render.

@@ -31,7 +31,8 @@
 #include <xcb/xcb_keysyms.h>
 
 #include "key.h"
-#include "draw.h"
+#include "color.h"
+#include "font.h"
 #include "common/xembed.h"
 
 typedef struct wibox_t wibox_t;
