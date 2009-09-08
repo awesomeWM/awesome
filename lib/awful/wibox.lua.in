@@ -19,6 +19,8 @@ local type = type
 local image = image
 
 --- Wibox module for awful.
+-- This module allows you to easily create wibox and attach them to the edge of
+-- a screen.
 module("awful.wibox")
 
 -- Array of table with wiboxes inside.
