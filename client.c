@@ -53,6 +53,7 @@ luaA_client_gc(lua_State *L)
     button_array_wipe(&c->buttons);
     key_array_wipe(&c->keys);
     xcb_get_wm_protocols_reply_wipe(&c->protocols);
+    p_delete(&c->machine);
     p_delete(&c->class);
     p_delete(&c->instance);
     p_delete(&c->icon_name);
