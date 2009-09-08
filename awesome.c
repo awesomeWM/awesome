@@ -342,7 +342,7 @@ exit_help(int exit_code)
 int
 main(int argc, char **argv)
 {
-    const char *confpath = NULL;
+    char *confpath = NULL;
     int xfd, i, screen_nbr, opt, colors_nbr;
     xcolor_init_request_t colors_reqs[2];
     ssize_t cmdlen = 1;
@@ -551,6 +551,8 @@ main(int argc, char **argv)
     /* Parse and run configuration file */
     if (!luaA_parserc(&xdg, confpath, true))
         fatal("couldn't find any rc file");
+
+    p_delete(&confpath);
 
     xdgWipeHandle(&xdg);
 
