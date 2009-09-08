@@ -197,12 +197,12 @@ local function add_item(data, num, item_info)
     local iconbox
     if item_info[3] then
         local icon = type(item_info[3]) == "string" and image(item_info[3]) or item_info[3]
-        if icon.width > tonumber(data.h) or icon.height > tonumber(data.h) then
+        if icon.width > data.h or icon.height > data.h then
             local width, height
-            if ((data.h/icon.height) * icon.width) > tonumber(data.h) then
-                width, height = data.h, (tonumber(data.h) / icon.width) * icon.height
+            if ((data.h/icon.height) * icon.width) > data.h then
+                width, height = data.h, (data.h / icon.width) * icon.height
             else
-                width, height = (tonumber(data.h) / icon.height) * icon.width, data.h
+                width, height = (data.h / icon.height) * icon.width, data.h
             end
             icon = icon:crop_and_scale(0, 0, icon.width, icon.height, width, height)
         end
@@ -242,7 +242,7 @@ local function add_item(data, num, item_info)
         }
     end
 
-
+    item.height = label:extents().height + 2
     item.ontop = true
 
     return { wibox = item, cmd = item_info[2] }
@@ -366,11 +366,17 @@ function new(menu, parent, num)
         data.auto_expand = true
     end
     data.h = parent and parent.h or data.theme.menu_height
+    if type(data.h) ~= 'number' then data.h = tonumber(data.h) end
     data.w = parent and parent.w or data.theme.menu_width
+    if type(data.w) ~= 'number' then data.w = tonumber(data.w) end
 
     -- Create items
     for k, v in pairs(menu.items) do
         table.insert(data.items, add_item(data, k, v))
+    end
+
+    if #data.items > 0 and data.h < data.items[1].wibox.height then
+        data.h = data.items[1].wibox.height
     end
 
     -- Set methods
