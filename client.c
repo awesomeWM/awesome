@@ -904,6 +904,13 @@ client_resize(client_t *c, area_t geometry, bool hints)
         /* execute hook */
         hook_property(c, "geometry");
 
+        luaA_object_push(globalconf.L, c);
+        luaA_object_emit_signal(globalconf.L, -1, "property::x", 0);
+        luaA_object_emit_signal(globalconf.L, -1, "property::y", 0);
+        luaA_object_emit_signal(globalconf.L, -1, "property::width", 0);
+        luaA_object_emit_signal(globalconf.L, -1, "property::height", 0);
+        lua_pop(globalconf.L, 1);
+
         return true;
     }
 
