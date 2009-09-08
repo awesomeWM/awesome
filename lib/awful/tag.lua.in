@@ -315,8 +315,9 @@ function withcurrent(c, startup)
             c.screen = c.transient_for.screen
             c:tags(c.transient_for:tags())
         end
+        c.screen = capi.mouse.screen
         if #c:tags() == 0 then
-            c:tags(selectedlist(capi.mouse.screen))
+            c:tags(selectedlist(c.screen))
         end
     end
 end
@@ -347,8 +348,8 @@ function attached_add_signal(screen, ...)
 end
 
 -- Register standards signals
-capi.client.add_signal("manage", function(c)
-    withcurrent(c)
+capi.client.add_signal("manage", function(c, startup)
+    withcurrent(c, startup)
     c:add_signal("property::screen", withcurrent)
 end)
 
