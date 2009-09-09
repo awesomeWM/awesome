@@ -22,6 +22,7 @@ require("awful.key")
 require("awful.button")
 require("awful.wibox")
 require("awful.startup_notification")
+require("awful.tooltip")
 
 --- AWesome Functions very UsefuL
 module("awful")
