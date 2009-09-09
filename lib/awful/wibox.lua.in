@@ -17,6 +17,7 @@ local ipairs = ipairs
 local table = table
 local type = type
 local image = image
+local error = error
 
 --- Wibox module for awful.
 -- This module allows you to easily create wibox and attach them to the edge of
@@ -212,6 +213,12 @@ function new(arg)
     local has_to_stretch = true
     -- Empty position and align in arg so we are passing deprecation warning
     arg.position = nil
+
+    if position ~= "top" and position ~="bottom"
+            and position ~= "left" and position ~= "right" then
+        error("Invalid position in awful.wibox(), you may only use"
+            .. " 'top', 'bottom', 'left' and 'right'")
+    end
 
     -- Set default size
     if position == "left" or position == "right" then
