@@ -1,9 +1,0 @@
-diff a/lib/awful/wibox.lua.in b/lib/awful/wibox.lua.in	(rejected hunks)
-@@ -17,6 +17,7 @@ local ipairs = ipairs
- local table = table
- local type = type
- local image = image
-+local error = error
- 
- --- Wibox module for awful.
- -- This module allows you to easily create wibox and attach them to the edge of
