@@ -13,7 +13,6 @@ local ipairs = ipairs
 local table = table
 local math = math
 local setmetatable = setmetatable
-local type = type
 local capi =
 {
     client = client,
