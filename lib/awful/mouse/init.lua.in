@@ -23,6 +23,8 @@ local capi =
     mousegrabber = mousegrabber,
 }
 
+require("awful.mouse.finder")
+
 --- Mouse module for awful
 module("awful.mouse")
 
