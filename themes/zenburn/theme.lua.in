@@ -40,6 +40,7 @@ theme.titlebar_bg_normal = "#3F3F3F"
 -- defined, the sets are:
 -- [taglist|tasklist]_[bg|fg]_[focus|urgent]
 -- titlebar_[normal|focus]
+-- tooltip_[font|opacity|fg_color|bg_color|border_width|border_color]
 -- Example:
 --theme.taglist_bg_focus = "#CC9393"
 -- }}}
@@ -53,6 +54,11 @@ theme.titlebar_bg_normal = "#3F3F3F"
 --theme.fg_end_widget    = "#FF5656"
 --theme.bg_widget        = "#494B4F"
 --theme.border_widget    = "#3F3F3F"
+-- }}}
+
+-- {{{ Mouse finder
+theme.mouse_finder_color = "#CC9393"
+-- mouse_finder_[timeout|animate_timeout|radius|factor]
 -- }}}
 
 -- {{{ Menu
