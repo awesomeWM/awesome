@@ -192,4 +192,37 @@ function centered(c, p)
                         y = s_geometry.y + (s_geometry.height - c_geometry.height) / 2 })
 end
 
+--- Place the client centered on the horizontal axis with respect to a parent or the clients screen.
+-- @param c The client.
+-- @param p The parent (optional, nil for screen centering).
+-- @return The new client geometry.
+function center_horizontal(c, p)
+    local c = c or capi.client.focus
+    local c_geometry = c:geometry()
+    local s_geometry
+    if p then
+        s_geometry = p:geometry()
+    else
+        s_geometry = capi.screen[c.screen].geometry
+    end
+    return c:geometry({ x = s_geometry.x + (s_geometry.width - c_geometry.width) / 2 })
+end
+
+--- Place the client centered on the vertical axis with respect to a parent or the clients screen.
+-- @param c The client.
+-- @param p The parent (optional, nil for screen centering).
+-- @return The new client geometry.
+function center_vertical(c, p)
+    local c = c or capi.client.focus
+    local c_geometry = c:geometry()
+    local s_geometry
+    if p then
+        s_geometry = p:geometry()
+    else
+        s_geometry = capi.screen[c.screen].geometry
+    end
+    return c:geometry({ y = s_geometry.y + (s_geometry.height - c_geometry.height) / 2 })
+end
+
+
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
