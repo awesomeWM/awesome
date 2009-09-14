@@ -81,8 +81,6 @@ typedef struct
     char *conffile;
     /** Stack client history */
     client_array_t stack;
-    /** Command line passed to awesome */
-    char *argv;
     /** Lua VM state */
     lua_State *L;
     /** Default colors */

@@ -49,6 +49,9 @@
 
 awesome_t globalconf;
 
+/** argv used to run awesome */
+static char *awesome_argv;
+
 typedef struct
 {
     xcb_window_t id;
@@ -271,7 +274,7 @@ void
 awesome_restart(void)
 {
     awesome_atexit();
-    a_exec(globalconf.argv);
+    a_exec(awesome_argv);
 }
 
 /** Function to restart awesome on some signals.
@@ -370,13 +373,13 @@ main(int argc, char **argv)
     for(i = 0; i < argc; i++)
         cmdlen += a_strlen(argv[i]) + 1;
 
-    globalconf.argv = p_new(char, cmdlen);
-    a_strcpy(globalconf.argv, cmdlen, argv[0]);
+    awesome_argv = p_new(char, cmdlen);
+    a_strcpy(awesome_argv, cmdlen, argv[0]);
 
     for(i = 1; i < argc; i++)
     {
-        a_strcat(globalconf.argv, cmdlen, " ");
-        a_strcat(globalconf.argv, cmdlen, argv[i]);
+        a_strcat(awesome_argv, cmdlen, " ");
+        a_strcat(awesome_argv, cmdlen, argv[i]);
     }
 
     /* Text won't be printed correctly otherwise */
