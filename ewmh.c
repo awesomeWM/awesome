@@ -30,7 +30,7 @@
 #include "screen.h"
 #include "objects/client.h"
 #include "objects/widget.h"
-#include "wibox.h"
+#include "objects/wibox.h"
 #include "luaa.h"
 #include "common/atoms.h"
 #include "common/buffer.h"

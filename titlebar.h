@@ -1,7 +1,7 @@
 /*
  * titlebar.h - titlebar management header
  *
- * Copyright © 2008 Julien Danjou <julien@danjou.info>
+ * Copyright © 2008-2009 Julien Danjou <julien@danjou.info>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@
 #ifndef AWESOME_TITLEBAR_H
 #define AWESOME_TITLEBAR_H
 
-#include "wibox.h"
+#include "objects/wibox.h"
 #include "objects/client.h"
 #include "window.h"
 

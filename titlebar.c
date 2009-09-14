@@ -24,7 +24,7 @@
 #include "titlebar.h"
 #include "objects/client.h"
 #include "objects/widget.h"
-#include "wibox.h"
+#include "objects/wibox.h"
 #include "screen.h"
 #include "luaa.h"
 

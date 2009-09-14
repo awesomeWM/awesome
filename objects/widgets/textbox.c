@@ -20,7 +20,6 @@
  */
 
 #include "objects/widget.h"
-#include "wibox.h"
 #include "luaa.h"
 #include "common/tokenize.h"
 

@@ -23,7 +23,7 @@
 
 #include "globalconf.h"
 #include "objects/button.h"
-#include "wibox.h"
+#include "objects/wibox.h"
 #include "luaa.h"
 #include "window.h"
 #include "common/xcursor.h"

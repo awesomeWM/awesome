@@ -25,7 +25,7 @@
 #include "property.h"
 #include "objects/client.h"
 #include "ewmh.h"
-#include "wibox.h"
+#include "objects/wibox.h"
 #include "window.h"
 #include "luaa.h"
 #include "common/atoms.h"

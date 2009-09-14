@@ -24,7 +24,7 @@
 
 #include "objects/widget.h"
 #include "screen.h"
-#include "wibox.h"
+#include "objects/wibox.h"
 #include "globalconf.h"
 #include "common/xembed.h"
 #include "common/atoms.h"

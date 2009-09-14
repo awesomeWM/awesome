@@ -29,7 +29,7 @@
 #include "objects/tag.h"
 #include "objects/client.h"
 #include "objects/widget.h"
-#include "wibox.h"
+#include "objects/wibox.h"
 #include "luaa.h"
 #include "common/xutil.h"
 

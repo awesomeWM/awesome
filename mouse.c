@@ -23,7 +23,7 @@
 #include "screen.h"
 #include "objects/client.h"
 #include "globalconf.h"
-#include "wibox.h"
+#include "objects/wibox.h"
 #include "luaa.h"
 #include "common/tokenize.h"
 #include "common/xutil.h"

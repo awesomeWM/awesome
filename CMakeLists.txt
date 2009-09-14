@@ -55,7 +55,7 @@ set(AWE_SRCS
     ${SOURCE_DIR}/screen.c
     ${SOURCE_DIR}/stack.c
     ${SOURCE_DIR}/selection.c
-    ${SOURCE_DIR}/wibox.c
+    ${SOURCE_DIR}/objects/wibox.c
     ${SOURCE_DIR}/systray.c
     ${SOURCE_DIR}/objects/tag.c
     ${SOURCE_DIR}/titlebar.c
