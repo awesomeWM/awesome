@@ -1158,7 +1158,6 @@ luaA_wibox_set_align(lua_State *L, wibox_t *wibox)
     switch(wibox->type)
     {
       case WIBOX_TYPE_NORMAL:
-        luaA_deprecate(L, "awful.wibox.align");
         break;
       case WIBOX_TYPE_TITLEBAR:
         titlebar_update_geometry(client_getbytitlebar(wibox));
@@ -1175,8 +1174,6 @@ luaA_wibox_set_align(lua_State *L, wibox_t *wibox)
 static int
 luaA_wibox_get_align(lua_State *L, wibox_t *wibox)
 {
-    if(wibox->type == WIBOX_TYPE_NORMAL)
-        luaA_deprecate(L, "awful.wibox.align");
     lua_pushstring(L, draw_align_tostr(wibox->align));
     return 1;
 }
@@ -1192,16 +1189,7 @@ luaA_wibox_set_position(lua_State *L, wibox_t *wibox)
     switch(wibox->type)
     {
       case WIBOX_TYPE_NORMAL:
-      {
-        size_t len;
-        const char *buf;
-        if((buf = luaL_checklstring(L, -1, &len)))
-        {
-            luaA_deprecate(L, "awful.wibox.attach");
-            wibox->position = position_fromstr(buf, len);
-        }
-      }
-      break;
+        break;
       case WIBOX_TYPE_TITLEBAR:
         return luaA_titlebar_set_position(L, -3);
     }
@@ -1216,8 +1204,6 @@ luaA_wibox_set_position(lua_State *L, wibox_t *wibox)
 static int
 luaA_wibox_get_position(lua_State *L, wibox_t *wibox)
 {
-    if(wibox->type == WIBOX_TYPE_NORMAL)
-        luaA_deprecate(L, "awful.wibox.attach");
     lua_pushstring(L, position_tostr(wibox->position));
     return 1;
 }
