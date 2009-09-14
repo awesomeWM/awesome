@@ -22,7 +22,7 @@
 #include <xcb/xtest.h>
 
 #include "globalconf.h"
-#include "button.h"
+#include "objects/button.h"
 #include "wibox.h"
 #include "luaa.h"
 #include "window.h"

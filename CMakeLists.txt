@@ -51,7 +51,7 @@ set(AWE_SRCS
     ${SOURCE_DIR}/luaa.c
     ${SOURCE_DIR}/spawn.c
     ${SOURCE_DIR}/mouse.c
-    ${SOURCE_DIR}/button.c
+    ${SOURCE_DIR}/objects/button.c
     ${SOURCE_DIR}/screen.c
     ${SOURCE_DIR}/stack.c
     ${SOURCE_DIR}/selection.c
