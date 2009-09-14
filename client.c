@@ -110,7 +110,6 @@ client_set_urgent(lua_State *L, int cidx, bool urgent)
 
         xcb_set_wm_hints(globalconf.connection, c->window, &wmh);
 
-        hook_property(c, "urgent");
         luaA_object_emit_signal(L, cidx, "property::urgent", 0);
     }
 }
@@ -158,7 +157,6 @@ client_set_icon_name(lua_State *L, int cidx, char *icon_name)
     p_delete(&c->icon_name);
     c->icon_name = icon_name;
     luaA_object_emit_signal(L, cidx, "property::icon_name", 0);
-    hook_property(c, "icon_name");
 }
 
 void
@@ -168,7 +166,6 @@ client_set_alt_icon_name(lua_State *L, int cidx, char *icon_name)
     p_delete(&c->alt_icon_name);
     c->alt_icon_name = icon_name;
     luaA_object_emit_signal(L, cidx, "property::icon_name", 0);
-    hook_property(c, "icon_name");
 }
 
 void
@@ -219,7 +216,6 @@ client_set_name(lua_State *L, int cidx, char *name)
     client_t *c = luaA_client_checkudata(L, cidx);
     p_delete(&c->name);
     c->name = name;
-    hook_property(c, "name");
     luaA_object_emit_signal(L, cidx, "property::name", 0);
 }
 
@@ -229,7 +225,6 @@ client_set_alt_name(lua_State *L, int cidx, char *name)
     client_t *c = luaA_client_checkudata(L, cidx);
     p_delete(&c->alt_name);
     c->alt_name = name;
-    hook_property(c, "name");
     luaA_object_emit_signal(L, cidx, "property::name", 0);
 }
 
@@ -276,13 +271,6 @@ client_unfocus_update(client_t *c)
 {
     globalconf.screens.tab[c->phys_screen].client_focus = NULL;
     ewmh_update_net_active_window(c->phys_screen);
-
-    /* Call hook */
-    if(globalconf.hooks.unfocus != LUA_REFNIL)
-    {
-        luaA_object_push(globalconf.L, c);
-        luaA_dofunction_from_registry(globalconf.L, globalconf.hooks.unfocus, 1, 0);
-    }
 
     luaA_object_push(globalconf.L, c);
     luaA_class_emit_signal(globalconf.L, &client_class, "unfocus", 1);
@@ -423,13 +411,6 @@ client_focus_update(client_t *c)
     client_set_urgent(globalconf.L, -1, false);
 
     ewmh_update_net_active_window(c->phys_screen);
-
-    /* execute hook */
-    if(globalconf.hooks.focus != LUA_REFNIL)
-    {
-        luaA_object_push(globalconf.L, c);
-        luaA_dofunction_from_registry(globalconf.L, globalconf.hooks.focus, 1, 0);
-    }
 
     luaA_object_push(globalconf.L, c);
     luaA_class_emit_signal(globalconf.L, &client_class, "focus", 1);
@@ -726,19 +707,7 @@ HANDLE_GEOM(height)
         p_delete(&startup_id);
     }
 
-    /* Call hook to notify list change */
-    if(globalconf.hooks.clients != LUA_REFNIL)
-        luaA_dofunction_from_registry(globalconf.L, globalconf.hooks.clients, 0, 0);
-
     luaA_class_emit_signal(globalconf.L, &client_class, "list", 0);
-
-    /* call hook */
-    if(globalconf.hooks.manage != LUA_REFNIL)
-    {
-        luaA_object_push(globalconf.L, c);
-        lua_pushboolean(globalconf.L, startup);
-        luaA_dofunction_from_registry(globalconf.L, globalconf.hooks.manage, 2, 0);
-    }
 
     /* client is still on top of the stack; push startup value,
      * and emit signals with 2 args */
@@ -911,9 +880,6 @@ client_resize(client_t *c, area_t geometry, bool hints)
 
         screen_client_moveto(c, new_screen, false);
 
-        /* execute hook */
-        hook_property(c, "geometry");
-
         luaA_object_push(globalconf.L, c);
         luaA_object_emit_signal(globalconf.L, -1, "property::geometry", 0);
         /** \todo This need to be VERIFIED before it is emitted! */
@@ -950,8 +916,6 @@ client_set_minimized(lua_State *L, int cidx, bool s)
         ewmh_client_update_hints(c);
         if(strut_has_value(&c->strut))
             screen_emit_signal(globalconf.L, c->screen, "property::workarea", 0);
-        /* execute hook */
-        hook_property(c, "minimized");
         luaA_object_emit_signal(L, cidx, "property::minimized", 0);
     }
 }
@@ -971,7 +935,6 @@ client_set_sticky(lua_State *L, int cidx, bool s)
         c->sticky = s;
         banning_need_update((c)->screen);
         ewmh_client_update_hints(c);
-        hook_property(c, "sticky");
         luaA_object_emit_signal(L, cidx, "property::sticky", 0);
     }
 }
@@ -1018,7 +981,6 @@ client_set_fullscreen(lua_State *L, int cidx, bool s)
         client_resize(c, geometry, false);
         client_stack();
         ewmh_client_update_hints(c);
-        hook_property(c, "fullscreen");
         luaA_object_emit_signal(L, cidx, "property::fullscreen", 0);
     }
 }
@@ -1058,7 +1020,6 @@ client_set_maximized_horizontal(lua_State *L, int cidx, bool s)
         client_resize(c, geometry, c->size_hints_honor);
         client_stack();
         ewmh_client_update_hints(c);
-        hook_property(c, "maximized_horizontal");
         luaA_object_emit_signal(L, cidx, "property::maximized_horizontal", 0);
     }
 }
@@ -1098,7 +1059,6 @@ client_set_maximized_vertical(lua_State *L, int cidx, bool s)
         client_resize(c, geometry, c->size_hints_honor);
         client_stack();
         ewmh_client_update_hints(c);
-        hook_property(c, "maximized_vertical");
         luaA_object_emit_signal(L, cidx, "property::maximized_vertical", 0);
     }
 }
@@ -1125,8 +1085,6 @@ client_set_above(lua_State *L, int cidx, bool s)
         c->above = s;
         client_stack();
         ewmh_client_update_hints(c);
-        /* execute hook */
-        hook_property(c, "above");
         luaA_object_emit_signal(L, cidx, "property::above", 0);
     }
 }
@@ -1153,8 +1111,6 @@ client_set_below(lua_State *L, int cidx, bool s)
         c->below = s;
         client_stack();
         ewmh_client_update_hints(c);
-        /* execute hook */
-        hook_property(c, "below");
         luaA_object_emit_signal(L, cidx, "property::below", 0);
     }
 }
@@ -1174,8 +1130,6 @@ client_set_modal(lua_State *L, int cidx, bool s)
         c->modal = s;
         client_stack();
         ewmh_client_update_hints(c);
-        /* execute hook */
-        hook_property(c, "modal");
         luaA_object_emit_signal(L, cidx, "property::modal", 0);
     }
 }
@@ -1201,8 +1155,6 @@ client_set_ontop(lua_State *L, int cidx, bool s)
         }
         c->ontop = s;
         client_stack();
-        /* execute hook */
-        hook_property(c, "ontop");
         luaA_object_emit_signal(L, cidx, "property::ontop", 0);
     }
 }
@@ -1272,19 +1224,8 @@ client_unmanage(client_t *c)
     for(int i = 0; i < tags->len; i++)
         untag_client(c, tags->tab[i]);
 
-    /* call hook */
-    if(globalconf.hooks.unmanage != LUA_REFNIL)
-    {
-        luaA_object_push(globalconf.L, c);
-        luaA_dofunction_from_registry(globalconf.L, globalconf.hooks.unmanage, 1, 0);
-    }
-
     luaA_object_push(globalconf.L, c);
     luaA_class_emit_signal(globalconf.L, &client_class, "unmanage", 1);
-
-    /* Call hook to notify list change */
-    if(globalconf.hooks.clients != LUA_REFNIL)
-        luaA_dofunction_from_registry(globalconf.L, globalconf.hooks.clients, 0, 0);
 
     luaA_class_emit_signal(globalconf.L, &client_class, "list", 0);
 
@@ -1420,7 +1361,6 @@ client_set_border_width(lua_State *L, int cidx, int width)
     /* Changing border size also affects the size of the titlebar. */
     titlebar_update_geometry(c);
 
-    hook_property(c, "border_width");
     luaA_object_emit_signal(L, cidx, "property::border_width", 0);
 }
 
@@ -1440,8 +1380,6 @@ client_set_icon(lua_State *L, int cidx, int iidx)
     luaA_object_unref_item(L, cidx, c->icon);
     c->icon = luaA_object_ref_item(L, cidx, iidx);
     luaA_object_emit_signal(L, cidx < iidx ? cidx : cidx - 1, "property::icon", 0);
-    /* execute hook */
-    hook_property(c, "icon");
 }
 
 /** Kill a client.
@@ -1485,10 +1423,6 @@ luaA_client_swap(lua_State *L)
         /* swap ! */
         *ref_c = swap;
         *ref_swap = c;
-
-        /* Call hook to notify list change */
-        if(globalconf.hooks.clients != LUA_REFNIL)
-            luaA_dofunction_from_registry(L, globalconf.hooks.clients, 0, 0);
 
         luaA_class_emit_signal(globalconf.L, &client_class, "list", 0);
     }
@@ -1657,7 +1591,6 @@ luaA_client_struts(lua_State *L)
     {
         luaA_tostrut(L, 2, &c->strut);
         ewmh_update_strut(c->window, &c->strut);
-        hook_property(c, "struts");
         luaA_object_emit_signal(L, 1, "property::struts", 0);
         screen_emit_signal(L, c->screen, "property::workarea", 0);
     }
@@ -1685,7 +1618,6 @@ luaA_client_set_hidden(lua_State *L, client_t *c)
     {
         c->hidden = b;
         banning_need_update((c)->screen);
-        hook_property(c, "hidden");
         if(strut_has_value(&c->strut))
             screen_emit_signal(globalconf.L, c->screen, "property::workarea", 0);
         luaA_object_emit_signal(L, -3, "property::hidden", 0);
@@ -1756,7 +1688,6 @@ static int
 luaA_client_set_size_hints_honor(lua_State *L, client_t *c)
 {
     c->size_hints_honor = luaA_checkboolean(L, -1);
-    hook_property(c, "size_hints_honor");
     luaA_object_emit_signal(L, -3, "property::size_hints_honor", 0);
     return 0;
 }

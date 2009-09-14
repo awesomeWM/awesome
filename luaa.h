@@ -187,21 +187,10 @@ luaA_warn(lua_State *L, const char *fmt, ...)
 
 void luaA_init(xdgHandle *);
 bool luaA_parserc(xdgHandle *, const char *, bool);
-void luaA_on_timer(EV_P_ ev_timer *, int);
 bool luaA_hasitem(lua_State *, const void *);
 void luaA_table2wtable(lua_State *);
 int luaA_next(lua_State *, int);
 bool luaA_isloop(lua_State *, int);
-
-#define hook_property(obj, prop) \
-    do { \
-        if(globalconf.hooks.property != LUA_REFNIL) \
-        { \
-            luaA_object_push(globalconf.L, obj); \
-            lua_pushliteral(globalconf.L, prop); \
-            luaA_dofunction_from_registry(globalconf.L, globalconf.hooks.property, 2, 0); \
-        } \
-    } while(0);
 
 /** Global signals */
 signal_array_t global_signals;

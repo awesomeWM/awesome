@@ -86,17 +86,6 @@ tag_view(lua_State *L, int udx, bool view)
             banning_need_update(tag->screen);
 
             ewmh_update_net_current_desktop(screen_virttophys(screen_index));
-
-            if(globalconf.hooks.tags != LUA_REFNIL)
-            {
-                lua_pushnumber(globalconf.L, screen_index + 1);
-                luaA_object_push(globalconf.L, tag);
-                if(view)
-                    lua_pushliteral(globalconf.L, "select");
-                else
-                    lua_pushliteral(globalconf.L, "unselect");
-                luaA_dofunction_from_registry(globalconf.L, globalconf.hooks.tags, 3, 0);
-            }
         }
 
         luaA_object_emit_signal(L, udx, "property::selected", 0);
@@ -133,15 +122,6 @@ tag_append_to_screen(lua_State *L, int udx, screen_t *s)
     luaA_object_emit_signal(L, -1, "property::screen", 0);
     lua_pop(L, 1);
 
-    /* call hook */
-    if(globalconf.hooks.tags != LUA_REFNIL)
-    {
-        lua_pushnumber(globalconf.L, screen_index + 1);
-        luaA_object_push(globalconf.L, tag);
-        lua_pushliteral(globalconf.L, "add");
-        luaA_dofunction_from_registry(globalconf.L, globalconf.hooks.tags, 3, 0);
-    }
-
     luaA_object_push(globalconf.L, tag);
     screen_emit_signal(globalconf.L, s, "tag::attach", 1);
 }
@@ -173,15 +153,6 @@ tag_remove_from_screen(tag_t *tag)
     ewmh_update_net_numbers_of_desktop(phys_screen);
     ewmh_update_net_desktop_names(phys_screen);
     ewmh_update_workarea(phys_screen);
-
-    /* call hook */
-    if(globalconf.hooks.tags != LUA_REFNIL)
-    {
-        lua_pushnumber(globalconf.L, screen_index + 1);
-        luaA_object_push(globalconf.L, tag);
-        lua_pushliteral(globalconf.L, "remove");
-        luaA_dofunction_from_registry(globalconf.L, globalconf.hooks.tags, 3, 0);
-    }
 
     screen_t *s = tag->screen;
     tag->screen = NULL;
@@ -228,13 +199,6 @@ tag_client(client_t *c)
     ewmh_client_update_desktop(c);
     banning_need_update((c)->screen);
 
-    /* call hook */
-    if(globalconf.hooks.tagged != LUA_REFNIL)
-    {
-        luaA_object_push(globalconf.L, c);
-        luaA_object_push(globalconf.L, t);
-        luaA_dofunction_from_registry(globalconf.L, globalconf.hooks.tagged, 2, 0);
-    }
     tag_client_emit_signal(globalconf.L, t, c, "tagged");
 }
 
@@ -251,13 +215,6 @@ untag_client(client_t *c, tag_t *t)
             client_array_take(&t->clients, i);
             banning_need_update((c)->screen);
             ewmh_client_update_desktop(c);
-            /* call hook */
-            if(globalconf.hooks.tagged != LUA_REFNIL)
-            {
-                luaA_object_push(globalconf.L, c);
-                luaA_object_push(globalconf.L, t);
-                luaA_dofunction_from_registry(globalconf.L, globalconf.hooks.tagged, 2, 0);
-            }
             tag_client_emit_signal(globalconf.L, t, c, "untagged");
             luaA_object_unref(globalconf.L, t);
             return;

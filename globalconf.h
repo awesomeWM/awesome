@@ -92,37 +92,8 @@ typedef struct
     } colors;
     /** Default font */
     font_t *font;
-    struct
-    {
-        /** Command to execute when spawning a new client */
-        int manage;
-        /** Command to execute when unmanaging client */
-        int unmanage;
-        /** Command to execute when giving focus to a client */
-        int focus;
-        /** Command to execute when removing focus to a client */
-        int unfocus;
-        /** Command to run when mouse enter a client */
-        int mouse_enter;
-        /** Command to run when mouse leave a client */
-        int mouse_leave;
-        /** Command to run when client list changes */
-        int clients;
-        /** Command to run on numbers of tag changes */
-        int tags;
-        /** Command to run when client gets (un)tagged */
-        int tagged;
-        /** Command to run on property change */
-        int property;
-        /** Command to run on time */
-        int timer;
-        /** Command to run on awesome exit */
-        int exit;
-    } hooks;
     /** The event loop */
     struct ev_loop *loop;
-    /** The timeout after which we need to stop select() */
-    struct ev_timer timer;
     /** The key grabber function */
     int keygrabber;
     /** The mouse pointer grabber function */

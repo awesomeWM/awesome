@@ -50,7 +50,6 @@ set(AWE_SRCS
     ${SOURCE_DIR}/banning.c
     ${SOURCE_DIR}/luaa.c
     ${SOURCE_DIR}/spawn.c
-    ${SOURCE_DIR}/hooks.c
     ${SOURCE_DIR}/mouse.c
     ${SOURCE_DIR}/button.c
     ${SOURCE_DIR}/screen.c

@@ -6,7 +6,6 @@
 
 require("awful.client")
 require("awful.completion")
-require("awful.hooks")
 require("awful.layout")
 require("awful.placement")
 require("awful.prompt")

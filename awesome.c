@@ -62,9 +62,6 @@ awesome_atexit(void)
 {
     int screen_nbr, nscreens;
 
-    if(globalconf.hooks.exit != LUA_REFNIL)
-        luaA_dofunction_from_registry(globalconf.L, globalconf.hooks.exit, 0, 0);
-
     signal_object_emit(globalconf.L, &global_signals, "exit", 0);
 
     a_dbus_cleanup();
@@ -422,7 +419,6 @@ main(int argc, char **argv)
         }
 
     globalconf.loop = ev_default_loop(0);
-    ev_timer_init(&globalconf.timer, &luaA_on_timer, 0., 0.);
 
     /* register function for signals */
     ev_signal_init(&sigint, exit_on_signal, SIGINT);

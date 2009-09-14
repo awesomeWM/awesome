@@ -48,7 +48,6 @@
 #ifdef WITH_DBUS
 extern const struct luaL_reg awesome_dbus_lib[];
 #endif
-extern const struct luaL_reg awesome_hooks_lib[];
 extern const struct luaL_reg awesome_keygrabber_lib[];
 extern const struct luaL_reg awesome_mousegrabber_lib[];
 extern const struct luaL_reg awesome_root_lib[];
@@ -744,10 +743,6 @@ luaA_init(xdgHandle* xdg)
     luaL_register(L, "root", awesome_root_lib);
     lua_pop(L, 1); /* luaL_register() leaves the table on stack */
 
-    /* Export hooks lib */
-    luaL_register(L, "hooks", awesome_hooks_lib);
-    lua_pop(L, 1); /* luaL_register() leaves the table on stack */
-
 #ifdef WITH_DBUS
     /* Export D-Bus lib */
     luaL_register(L, "dbus", awesome_dbus_lib);
@@ -791,20 +786,6 @@ luaA_init(xdgHandle* xdg)
 
     /* Export timer */
     timer_class_setup(L);
-
-    /* init hooks */
-    globalconf.hooks.manage = LUA_REFNIL;
-    globalconf.hooks.unmanage = LUA_REFNIL;
-    globalconf.hooks.focus = LUA_REFNIL;
-    globalconf.hooks.unfocus = LUA_REFNIL;
-    globalconf.hooks.mouse_enter = LUA_REFNIL;
-    globalconf.hooks.mouse_leave = LUA_REFNIL;
-    globalconf.hooks.clients = LUA_REFNIL;
-    globalconf.hooks.tags = LUA_REFNIL;
-    globalconf.hooks.tagged = LUA_REFNIL;
-    globalconf.hooks.property = LUA_REFNIL;
-    globalconf.hooks.timer = LUA_REFNIL;
-    globalconf.hooks.exit = LUA_REFNIL;
 
     /* add Lua search paths */
     lua_getglobal(L, "package");
@@ -916,13 +897,6 @@ bailout:
     p_delete(&confpath);
 
     return ret;
-}
-
-void
-luaA_on_timer(EV_P_ ev_timer *w, int revents)
-{
-    if(globalconf.hooks.timer != LUA_REFNIL)
-        luaA_dofunction_from_registry(globalconf.L, globalconf.hooks.timer, 0, 0);
 }
 
 int

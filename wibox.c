@@ -650,8 +650,6 @@ wibox_set_visible(lua_State *L, int udx, bool v)
         }
 
         luaA_object_emit_signal(L, udx, "property::visible", 0);
-
-        hook_property(wibox, "visible");
     }
 }
 
@@ -713,8 +711,6 @@ wibox_detach(lua_State *L, int udx)
                 break;
             }
 
-        hook_property(wibox, "screen");
-
         if(strut_has_value(&wibox->strut))
             screen_emit_signal(L, wibox->screen, "property::workarea", 0);
 
@@ -773,7 +769,6 @@ wibox_attach(lua_State *L, int udx, screen_t *s)
     else
         wibox_need_update(wibox);
 
-    hook_property(wibox, "screen");
     luaA_object_emit_signal(L, udx, "property::screen", 0);
 
     if(strut_has_value(&wibox->strut))

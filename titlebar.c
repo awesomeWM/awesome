@@ -209,7 +209,6 @@ titlebar_client_detach(client_t *c)
         luaA_object_unref(globalconf.L, c->titlebar);
         c->titlebar = NULL;
 
-        hook_property(c, "titlebar");
         luaA_object_push(globalconf.L, c);
         luaA_object_emit_signal(globalconf.L, -1, "property::titlebar", 0);
         lua_pop(globalconf.L, 1);
@@ -271,8 +270,6 @@ titlebar_client_attach(client_t *c)
 
     xcb_map_window(globalconf.connection, t->window);
 
-    hook_property(c, "titlebar");
-
     luaA_object_push(globalconf.L, c);
     luaA_object_emit_signal(globalconf.L, -1, "property::titlebar", 0);
     lua_pop(globalconf.L, 1);
@@ -293,7 +290,6 @@ titlebar_set_visible(wibox_t *t, bool visible)
         else
             titlebar_ban(t);
 
-        hook_property(t, "visible");
         client_stack();
     }
 }
@@ -362,12 +358,7 @@ luaA_titlebar_set_position(lua_State *L, int udx)
         titlebar->position = position;
         client_t *c;
         if((c = client_getbytitlebar(titlebar)))
-        {
             titlebar_update_geometry(c);
-            /* call geometry hook for client because some like to
-             * set titlebar width in that hook, which make sense */
-            hook_property(c, "geometry");
-        }
     }
     return 0;
 }
