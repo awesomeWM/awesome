@@ -287,20 +287,6 @@ tag_view_only_byindex(screen_t *screen, int dindex)
 static int
 luaA_tag_new(lua_State *L)
 {
-    if(lua_isstring(L, 2))
-    {
-        /* compat code */
-        luaA_deprecate(L, "new syntax");
-
-        size_t len;
-        const char *name = luaL_checklstring(L, 2, &len);
-        tag_t *tag = tag_new(globalconf.L);
-
-        a_iso2utf8(name, len, &tag->name, NULL);
-
-        return 1;
-    }
-
     return luaA_class_new(L, &tag_class);
 }
 
