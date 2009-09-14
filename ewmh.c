@@ -29,7 +29,7 @@
 #include "objects/tag.h"
 #include "screen.h"
 #include "objects/client.h"
-#include "widget.h"
+#include "objects/widget.h"
 #include "wibox.h"
 #include "luaa.h"
 #include "common/atoms.h"

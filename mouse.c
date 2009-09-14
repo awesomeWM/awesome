@@ -21,7 +21,7 @@
 
 #include "mouse.h"
 #include "screen.h"
-#include "client.h"
+#include "objects/client.h"
 #include "globalconf.h"
 #include "wibox.h"
 #include "luaa.h"

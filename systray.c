@@ -1,7 +1,7 @@
 /*
  * systray.c - systray handling
  *
- * Copyright © 2008 Julien Danjou <julien@danjou.info>
+ * Copyright © 2008-2009 Julien Danjou <julien@danjou.info>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@
 #include "screen.h"
 #include "systray.h"
 #include "window.h"
-#include "widget.h"
+#include "objects/widget.h"
 #include "common/atoms.h"
 #include "common/xutil.h"
 

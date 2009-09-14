@@ -59,7 +59,7 @@ set(AWE_SRCS
     ${SOURCE_DIR}/systray.c
     ${SOURCE_DIR}/objects/tag.c
     ${SOURCE_DIR}/titlebar.c
-    ${SOURCE_DIR}/widget.c
+    ${SOURCE_DIR}/objects/widget.c
     ${SOURCE_DIR}/window.c
     ${SOURCE_DIR}/image.c
     ${SOURCE_DIR}/draw.c
@@ -76,9 +76,9 @@ set(AWE_SRCS
     ${SOURCE_DIR}/common/backtrace.c
     ${SOURCE_DIR}/common/luaobject.c
     ${SOURCE_DIR}/common/luaclass.c
-    ${SOURCE_DIR}/widgets/textbox.c
-    ${SOURCE_DIR}/widgets/systray.c
-    ${SOURCE_DIR}/widgets/imagebox.c)
+    ${SOURCE_DIR}/objects/widgets/textbox.c
+    ${SOURCE_DIR}/objects/widgets/systray.c
+    ${SOURCE_DIR}/objects/widgets/imagebox.c)
 
 set(AWE_MAN_SRCS
     ${SOURCE_DIR}/manpages/awesome.1.txt

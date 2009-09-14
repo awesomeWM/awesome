@@ -19,7 +19,7 @@
  *
  */
 
-#include "widget.h"
+#include "objects/widget.h"
 #include "luaa.h"
 #include "titlebar.h"
 

@@ -23,7 +23,7 @@
 
 #include "screen.h"
 #include "property.h"
-#include "client.h"
+#include "objects/client.h"
 #include "ewmh.h"
 #include "wibox.h"
 #include "window.h"

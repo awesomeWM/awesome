@@ -22,7 +22,7 @@
 #ifndef AWESOME_WIBOX_H
 #define AWESOME_WIBOX_H
 
-#include "widget.h"
+#include "objects/widget.h"
 #include "strut.h"
 #include "common/luaobject.h"
 

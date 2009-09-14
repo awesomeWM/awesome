@@ -28,7 +28,7 @@
 #include "ewmh.h"
 #include "objects/tag.h"
 #include "objects/client.h"
-#include "widget.h"
+#include "objects/widget.h"
 #include "wibox.h"
 #include "luaa.h"
 #include "common/xutil.h"

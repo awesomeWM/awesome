@@ -31,7 +31,7 @@
 #include "window.h"
 #include "ewmh.h"
 #include "objects/client.h"
-#include "widget.h"
+#include "objects/widget.h"
 #include "titlebar.h"
 #include "key.h"
 #include "keygrabber.h"

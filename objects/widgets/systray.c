@@ -22,7 +22,7 @@
 #include <xcb/xcb.h>
 #include <xcb/xcb_atom.h>
 
-#include "widget.h"
+#include "objects/widget.h"
 #include "screen.h"
 #include "wibox.h"
 #include "globalconf.h"
