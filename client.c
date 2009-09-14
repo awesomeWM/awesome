@@ -22,7 +22,7 @@
 #include <xcb/xcb_atom.h>
 #include <xcb/xcb_image.h>
 
-#include "tag.h"
+#include "objects/tag.h"
 #include "ewmh.h"
 #include "screen.h"
 #include "titlebar.h"

@@ -26,7 +26,7 @@
 #include <xcb/xcb_atom.h>
 
 #include "ewmh.h"
-#include "tag.h"
+#include "objects/tag.h"
 #include "screen.h"
 #include "client.h"
 #include "widget.h"

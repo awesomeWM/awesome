@@ -20,7 +20,8 @@
  */
 
 #include "banning.h"
-#include "client.h"
+#include "objects/tag.h"
+#include "window.h"
 #include "titlebar.h"
 #include "screen.h"
 

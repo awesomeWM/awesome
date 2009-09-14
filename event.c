@@ -27,7 +27,7 @@
 
 #include "awesome.h"
 #include "event.h"
-#include "tag.h"
+#include "objects/tag.h"
 #include "window.h"
 #include "ewmh.h"
 #include "client.h"

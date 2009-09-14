@@ -36,7 +36,7 @@
 #include "ewmh.h"
 #include "luaa.h"
 #include "spawn.h"
-#include "tag.h"
+#include "objects/tag.h"
 #include "client.h"
 #include "screen.h"
 #include "event.h"
