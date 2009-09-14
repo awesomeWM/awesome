@@ -21,7 +21,7 @@
 
 #include "button.h"
 #include "luaa.h"
-#include "key.h"
+#include "objects/key.h"
 #include "common/luaobject.h"
 
 /** Create a new mouse button bindings.

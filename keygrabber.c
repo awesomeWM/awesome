@@ -23,7 +23,7 @@
 
 #include "globalconf.h"
 #include "keygrabber.h"
-#include "key.h"
+#include "objects/key.h"
 #include "luaa.h"
 #include "common/xutil.h"
 

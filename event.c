@@ -33,7 +33,7 @@
 #include "objects/client.h"
 #include "objects/widget.h"
 #include "titlebar.h"
-#include "key.h"
+#include "objects/key.h"
 #include "keygrabber.h"
 #include "mousegrabber.h"
 #include "luaa.h"

@@ -30,7 +30,7 @@
 #include <xcb/xcb_icccm.h>
 #include <xcb/xcb_keysyms.h>
 
-#include "key.h"
+#include "objects/key.h"
 #include "color.h"
 #include "font.h"
 #include "common/xembed.h"

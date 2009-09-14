@@ -44,7 +44,7 @@ set(AWE_SRCS
     ${SOURCE_DIR}/event.c
     ${SOURCE_DIR}/property.c
     ${SOURCE_DIR}/ewmh.c
-    ${SOURCE_DIR}/key.c
+    ${SOURCE_DIR}/objects/key.c
     ${SOURCE_DIR}/keygrabber.c
     ${SOURCE_DIR}/mousegrabber.c
     ${SOURCE_DIR}/banning.c
