@@ -970,48 +970,6 @@ luaA_keystore(lua_State *L, int ud, const char *str, ssize_t len)
 static int
 luaA_key_new(lua_State *L)
 {
-    size_t len;
-    keyb_t *k;
-    const char *key;
-
-    /* compat code */
-    if(lua_istable(L, 2) && lua_isstring(L, 3))
-    {
-        luaA_deprecate(L, "new syntax");
-
-        /* be sure there's 5 arguments */
-        lua_settop(L, 5);
-
-        /* arg 2 is key mod table */
-        luaA_checktable(L, 2);
-        /* arg 3 is key */
-        key = luaL_checklstring(L, 3, &len);
-
-        if(!lua_isnil(L, 4))
-            luaA_checkfunction(L, 4);
-
-        if(!lua_isnil(L, 5))
-            luaA_checkfunction(L, 5);
-
-        k = key_new(L);
-        luaA_keystore(L, -1, key, len);
-        k->modifiers = luaA_tomodifiers(L, 2);
-
-        if(!lua_isnil(L, 4))
-        {
-            lua_pushvalue(L, 4);
-            luaA_object_add_signal(L, -2, "press", -1);
-        }
-
-        if(!lua_isnil(L, 5))
-        {
-            lua_pushvalue(L, 5);
-            luaA_object_add_signal(L, -2, "release", -1);
-        }
-
-        return 1;
-    }
-
     return luaA_class_new(L, &key_class);
 }
 
