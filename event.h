@@ -23,7 +23,7 @@
 #define AWESOME_EVENT_H
 
 #include "wibox.h"
-#include "client.h"
+#include "objects/client.h"
 
 static inline int
 awesome_refresh(void)

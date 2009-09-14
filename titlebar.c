@@ -22,7 +22,7 @@
 #include <xcb/xcb.h>
 
 #include "titlebar.h"
-#include "client.h"
+#include "objects/client.h"
 #include "widget.h"
 #include "wibox.h"
 #include "screen.h"

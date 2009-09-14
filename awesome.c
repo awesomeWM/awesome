@@ -31,7 +31,7 @@
 
 #include "awesome.h"
 #include "spawn.h"
-#include "client.h"
+#include "objects/client.h"
 #include "window.h"
 #include "ewmh.h"
 #include "dbus.h"

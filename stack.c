@@ -21,7 +21,7 @@
 
 #include "ewmh.h"
 #include "stack.h"
-#include "client.h"
+#include "objects/client.h"
 
 void
 stack_client_remove(client_t *c)

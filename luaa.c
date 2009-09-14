@@ -37,7 +37,7 @@
 #include "luaa.h"
 #include "spawn.h"
 #include "objects/tag.h"
-#include "client.h"
+#include "objects/client.h"
 #include "screen.h"
 #include "event.h"
 #include "selection.h"

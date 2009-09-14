@@ -23,7 +23,7 @@
 #define AWESOME_TITLEBAR_H
 
 #include "wibox.h"
-#include "client.h"
+#include "objects/client.h"
 #include "window.h"
 
 client_t * client_getbytitlebar(wibox_t *);

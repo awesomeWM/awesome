@@ -30,7 +30,7 @@
 #include "objects/tag.h"
 #include "window.h"
 #include "ewmh.h"
-#include "client.h"
+#include "objects/client.h"
 #include "widget.h"
 #include "titlebar.h"
 #include "key.h"

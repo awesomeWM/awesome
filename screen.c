@@ -27,7 +27,7 @@
 #include "screen.h"
 #include "ewmh.h"
 #include "objects/tag.h"
-#include "client.h"
+#include "objects/client.h"
 #include "widget.h"
 #include "wibox.h"
 #include "luaa.h"
