@@ -31,7 +31,7 @@
 
 #include "awesome.h"
 #include "config.h"
-#include "timer.h"
+#include "objects/timer.h"
 #include "awesome-version-internal.h"
 #include "ewmh.h"
 #include "luaa.h"
