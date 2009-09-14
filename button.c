@@ -31,45 +31,6 @@
 static int
 luaA_button_new(lua_State *L)
 {
-    xcb_button_t xbutton;
-    button_t *button;
-
-    /* compat code */
-    if(lua_istable(L, 2) && lua_isnumber(L, 3))
-    {
-        luaA_deprecate(L, "new syntax");
-
-        lua_settop(L, 5);
-
-        luaA_checktable(L, 2);
-        /* arg 3 is mouse button */
-        xbutton = luaL_checknumber(L, 3);
-
-        /* arg 4 and 5 are callback functions, check they are functions... */
-        if(!lua_isnil(L, 4))
-            luaA_checkfunction(L, 4);
-        if(!lua_isnil(L, 5))
-            luaA_checkfunction(L, 5);
-
-        button = button_new(L);
-        button->button = xbutton;
-        button->modifiers = luaA_tomodifiers(L, 2);
-
-        if(!lua_isnil(L, 4))
-        {
-            lua_pushvalue(L, 4);
-            luaA_object_add_signal(L, -2, "press", -1);
-        }
-
-        if(!lua_isnil(L, 5))
-        {
-            lua_pushvalue(L, 5);
-            luaA_object_add_signal(L, -2, "release", -1);
-        }
-
-        return 1;
-    }
-
     return luaA_class_new(L, &button_class);
 }
 
