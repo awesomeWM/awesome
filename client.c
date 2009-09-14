@@ -531,9 +531,10 @@ client_stack_refresh()
     uint32_t config_win_vals[2];
     layer_t layer;
 
-    if (!globalconf.client_need_stack_refresh)
+    if (!client_need_stack_refresh)
         return;
-    globalconf.client_need_stack_refresh = false;
+
+    client_need_stack_refresh = false;
 
     config_win_vals[0] = XCB_NONE;
     config_win_vals[1] = XCB_STACK_MODE_ABOVE;

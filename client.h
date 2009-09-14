@@ -206,10 +206,11 @@ void client_ignore_enterleave_events(void);
 void client_restore_enterleave_events(void);
 void client_class_setup(lua_State *);
 
+bool client_need_stack_refresh;
 static inline void
 client_stack(void)
 {
-    globalconf.client_need_stack_refresh = true;
+    client_need_stack_refresh = true;
 }
 
 /** Put client on top of the stack.

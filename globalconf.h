@@ -98,8 +98,6 @@ typedef struct
     int mousegrabber;
     /** Focused screen */
     screen_t *screen_focus;
-    /** Need to call client_stack_refresh() */
-    bool client_need_stack_refresh;
     /** Wiboxes */
     wibox_array_t wiboxes;
     /** The startup notification display struct */
