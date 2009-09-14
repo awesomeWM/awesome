@@ -211,8 +211,6 @@ function new(arg)
     local arg = arg or {}
     local position = arg.position or "top"
     local has_to_stretch = true
-    -- Empty position and align in arg so we are passing deprecation warning
-    arg.position = nil
 
     if position ~= "top" and position ~="bottom"
             and position ~= "left" and position ~= "right" then
