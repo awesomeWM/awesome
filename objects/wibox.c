@@ -25,7 +25,7 @@
 #include "wibox.h"
 #include "objects/client.h"
 #include "screen.h"
-#include "window.h"
+#include "xwindow.h"
 #include "luaa.h"
 #include "ewmh.h"
 #include "common/xcursor.h"
@@ -348,7 +348,7 @@ wibox_set_opacity(lua_State *L, int udx, double opacity)
     {
         w->opacity = opacity;
         if(w->window)
-            window_opacity_set(w->window, opacity);
+            xwindow_set_opacity(w->window, opacity);
         luaA_object_emit_signal(L, udx, "property::opacity", 0);
     }
 }
@@ -740,11 +740,11 @@ wibox_attach(lua_State *L, int udx, screen_t *s)
 
     wibox_init(wibox, phys_screen);
 
-    window_set_cursor(wibox->window,
+    xwindow_set_cursor(wibox->window,
                       xcursor_new(globalconf.connection, xcursor_font_fromstr(wibox->cursor)));
 
     if(wibox->opacity != -1)
-        window_opacity_set(wibox->window, wibox->opacity);
+        xwindow_set_opacity(wibox->window, wibox->opacity);
 
     ewmh_update_strut(wibox->window, &wibox->strut);
 
@@ -1117,7 +1117,7 @@ luaA_wibox_set_cursor(lua_State *L, wibox_t *wibox)
             xcb_cursor_t cursor = xcursor_new(globalconf.connection, cursor_font);
             p_delete(&wibox->cursor);
             wibox->cursor = a_strdup(buf);
-            window_set_cursor(wibox->window, cursor);
+            xwindow_set_cursor(wibox->window, cursor);
             luaA_object_emit_signal(L, -3, "property::cursor", 0);
         }
     }

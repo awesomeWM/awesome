@@ -41,7 +41,6 @@
 #include "screen.h"
 #include "event.h"
 #include "selection.h"
-#include "window.h"
 #include "common/xcursor.h"
 #include "common/buffer.h"
 

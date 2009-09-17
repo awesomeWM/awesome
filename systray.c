@@ -25,7 +25,7 @@
 
 #include "screen.h"
 #include "systray.h"
-#include "window.h"
+#include "xwindow.h"
 #include "objects/widget.h"
 #include "common/atoms.h"
 #include "common/xutil.h"
@@ -153,7 +153,7 @@ systray_request_handle(xcb_window_t embed_win, int phys_screen, xembed_info_t *i
 
     xcb_change_window_attributes(globalconf.connection, embed_win, XCB_CW_EVENT_MASK,
                                  select_input_val);
-    window_state_set(embed_win, XCB_WM_STATE_WITHDRAWN);
+    xwindow_set_state(embed_win, XCB_WM_STATE_WITHDRAWN);
 
     xcb_reparent_window(globalconf.connection, embed_win,
                         globalconf.screens.tab[phys_screen].systray.window,

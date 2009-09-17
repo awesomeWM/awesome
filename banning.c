@@ -21,7 +21,6 @@
 
 #include "banning.h"
 #include "objects/tag.h"
-#include "window.h"
 #include "screen.h"
 
 /** Reban windows following current selected tags.

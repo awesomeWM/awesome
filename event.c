@@ -28,7 +28,7 @@
 #include "awesome.h"
 #include "event.h"
 #include "objects/tag.h"
-#include "window.h"
+#include "xwindow.h"
 #include "ewmh.h"
 #include "objects/client.h"
 #include "objects/widget.h"
@@ -283,7 +283,7 @@ event_handle_configurerequest(void *data __attribute__ ((unused)),
         {
             geometry.width -= 2 * c->border_width;
             geometry.height -= 2 * c->border_width;
-            window_configure(c->window, geometry, c->border_width);
+            xwindow_configure(c->window, geometry, c->border_width);
         }
     }
     else
@@ -656,7 +656,7 @@ event_handle_unmapnotify(void *data __attribute__ ((unused)),
     {
         if(ev->event == xutil_screen_get(connection, c->phys_screen)->root
            && XCB_EVENT_SENT(ev)
-           && window_state_get_reply(window_state_get_unchecked(c->window)) == XCB_WM_STATE_NORMAL)
+           && xwindow_get_state_reply(xwindow_get_state_unchecked(c->window)) == XCB_WM_STATE_NORMAL)
             client_unmanage(c);
     }
     else
@@ -769,14 +769,14 @@ event_handle_mappingnotify(void *data,
             xcb_screen_t *s = xutil_screen_get(globalconf.connection, phys_screen);
             /* yes XCB_BUTTON_MASK_ANY is also for grab_key even if it's look weird */
             xcb_ungrab_key(connection, XCB_GRAB_ANY, s->root, XCB_BUTTON_MASK_ANY);
-            window_grabkeys(s->root, &globalconf.keys);
+            xwindow_grabkeys(s->root, &globalconf.keys);
         }
 
         foreach(_c, globalconf.clients)
         {
             client_t *c = *_c;
             xcb_ungrab_key(connection, XCB_GRAB_ANY, c->window, XCB_BUTTON_MASK_ANY);
-            window_grabkeys(c->window, &c->keys);
+            xwindow_grabkeys(c->window, &c->keys);
         }
     }
 

@@ -26,7 +26,7 @@
 #include "objects/client.h"
 #include "ewmh.h"
 #include "objects/wibox.h"
-#include "window.h"
+#include "xwindow.h"
 #include "luaa.h"
 #include "common/atoms.h"
 #include "common/xutil.h"
@@ -390,7 +390,7 @@ property_handle_net_wm_opacity(void *data __attribute__ ((unused)),
     if(wibox)
     {
         luaA_object_push(globalconf.L, wibox);
-        wibox_set_opacity(globalconf.L, -1, window_opacity_get_from_reply(reply));
+        wibox_set_opacity(globalconf.L, -1, xwindow_get_opacity_from_reply(reply));
         lua_pop(globalconf.L, -1);
     }
     else
@@ -399,7 +399,7 @@ property_handle_net_wm_opacity(void *data __attribute__ ((unused)),
         if(c)
         {
             luaA_object_push(globalconf.L, c);
-            client_set_opacity(globalconf.L, -1, window_opacity_get_from_reply(reply));
+            client_set_opacity(globalconf.L, -1, xwindow_get_opacity_from_reply(reply));
             lua_pop(globalconf.L, 1);
         }
     }

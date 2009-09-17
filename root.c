@@ -25,7 +25,7 @@
 #include "objects/button.h"
 #include "objects/wibox.h"
 #include "luaa.h"
-#include "window.h"
+#include "xwindow.h"
 #include "common/xcursor.h"
 #include "common/tokenize.h"
 #include "common/xutil.h"
@@ -134,7 +134,7 @@ luaA_root_keys(lua_State *L)
         {
             xcb_screen_t *s = xutil_screen_get(globalconf.connection, phys_screen);
             xcb_ungrab_key(globalconf.connection, XCB_GRAB_ANY, s->root, XCB_BUTTON_MASK_ANY);
-            window_grabkeys(s->root, &globalconf.keys);
+            xwindow_grabkeys(s->root, &globalconf.keys);
         }
 
         return 1;

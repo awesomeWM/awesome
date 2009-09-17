@@ -32,7 +32,7 @@
 #include "awesome.h"
 #include "spawn.h"
 #include "objects/client.h"
-#include "window.h"
+#include "xwindow.h"
 #include "ewmh.h"
 #include "dbus.h"
 #include "systray.h"
@@ -145,7 +145,7 @@ scan(void)
             attr_wins[i] = xcb_get_window_attributes_unchecked(globalconf.connection,
                                                                wins[i]);
 
-            state_wins[i] = window_state_get_unchecked(wins[i]);
+            state_wins[i] = xwindow_get_state_unchecked(wins[i]);
         }
 
         xcb_get_geometry_cookie_t *geom_wins[tree_c_len];
@@ -156,7 +156,7 @@ scan(void)
                                                      attr_wins[i],
                                                      NULL);
 
-            state = window_state_get_reply(state_wins[i]);
+            state = xwindow_get_state_reply(state_wins[i]);
 
             if(!attr_r || attr_r->override_redirect
                || attr_r->map_state == XCB_MAP_STATE_UNVIEWABLE

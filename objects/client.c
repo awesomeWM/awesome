@@ -30,7 +30,7 @@
 #include "property.h"
 #include "spawn.h"
 #include "luaa.h"
-#include "window.h"
+#include "xwindow.h"
 #include "common/atoms.h"
 #include "common/xutil.h"
 
@@ -77,7 +77,7 @@ client_set_opacity(lua_State *L, int cidx, double opacity)
     if(c->opacity != opacity)
     {
         c->opacity = opacity;
-        window_opacity_set(c->window, opacity);
+        xwindow_set_opacity(c->window, opacity);
         luaA_object_emit_signal(L, cidx, "property::opacity", 0);
     }
 }
@@ -321,7 +321,7 @@ client_set_focus(client_t *c, bool set_input_focus)
         xcb_set_input_focus(globalconf.connection, XCB_INPUT_FOCUS_PARENT,
                             c->window, XCB_CURRENT_TIME);
     if(takefocus)
-        window_takefocus(c->window);
+        xwindow_takefocus(c->window);
 }
 
 /** Prepare banning a client by running all needed lua events.
@@ -646,8 +646,7 @@ HANDLE_GEOM(height)
     property_update_net_wm_pid(c, NULL);
     property_update_net_wm_icon(c, NULL);
 
-    /* get opacity */
-    client_set_opacity(globalconf.L, -1, window_opacity_get(c->window));
+    client_set_opacity(globalconf.L, -1, xwindow_get_opacity(c->window));
 
     /* Then check clients hints */
     ewmh_client_check_hints(c);
@@ -684,7 +683,7 @@ HANDLE_GEOM(height)
      *
      * At this stage it's just safer to keep it in normal state and avoid confusion.
      */
-    window_state_set(c->window, XCB_WM_STATE_NORMAL);
+    xwindow_set_state(c->window, XCB_WM_STATE_NORMAL);
 
     if(!startup)
     {
@@ -903,9 +902,9 @@ client_set_minimized(lua_State *L, int cidx, bool s)
         c->minimized = s;
         banning_need_update((c)->screen);
         if(s)
-            window_state_set(c->window, XCB_WM_STATE_ICONIC);
+            xwindow_set_state(c->window, XCB_WM_STATE_ICONIC);
         else
-            window_state_set(c->window, XCB_WM_STATE_NORMAL);
+            xwindow_set_state(c->window, XCB_WM_STATE_NORMAL);
         ewmh_client_update_hints(c);
         if(strut_has_value(&c->strut))
             screen_emit_signal(globalconf.L, c->screen, "property::workarea", 0);
@@ -1223,7 +1222,7 @@ client_unmanage(client_t *c)
     if(strut_has_value(&c->strut))
         screen_emit_signal(globalconf.L, c->screen, "property::workarea", 0);
 
-    window_state_set(c->window, XCB_WM_STATE_WITHDRAWN);
+    xwindow_set_state(c->window, XCB_WM_STATE_WITHDRAWN);
 
     ewmh_update_net_client_list(c->phys_screen);
 
@@ -2014,7 +2013,7 @@ luaA_client_buttons(lua_State *L)
     {
         luaA_button_array_set(L, 1, 2, buttons);
         luaA_object_emit_signal(L, 1, "property::buttons", 0);
-        window_buttons_grab(client->window, &client->buttons);
+        xwindow_buttons_grab(client->window, &client->buttons);
     }
 
     return luaA_button_array_get(L, 1, buttons);
@@ -2039,7 +2038,7 @@ luaA_client_keys(lua_State *L)
         luaA_key_array_set(L, 1, 2, keys);
         luaA_object_emit_signal(L, 1, "property::keys", 0);
         xcb_ungrab_key(globalconf.connection, XCB_GRAB_ANY, c->window, XCB_BUTTON_MASK_ANY);
-        window_grabkeys(c->window, keys);
+        xwindow_grabkeys(c->window, keys);
     }
 
     return luaA_key_array_get(L, 1, keys);

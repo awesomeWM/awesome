@@ -1,5 +1,5 @@
 /*
- * window.c - window handling functions
+ * xwindow.c - X window handling functions
  *
  * Copyright © 2007-2009 Julien Danjou <julien@danjou.info>
  *
@@ -22,7 +22,7 @@
 #include <xcb/xcb.h>
 #include <xcb/xcb_atom.h>
 
-#include "window.h"
+#include "xwindow.h"
 #include "objects/button.h"
 #include "common/atoms.h"
 
@@ -34,7 +34,7 @@
  * \param state The state to set.
  */
 void
-window_state_set(xcb_window_t win, long state)
+xwindow_set_state(xcb_window_t win, long state)
 {
     long data[] = { state, XCB_NONE };
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE, win,
@@ -46,7 +46,7 @@ window_state_set(xcb_window_t win, long state)
  * \return The cookie associated with the request.
  */
 xcb_get_property_cookie_t
-window_state_get_unchecked(xcb_window_t w)
+xwindow_get_state_unchecked(xcb_window_t w)
 {
     return xcb_get_property_unchecked(globalconf.connection, false, w, WM_STATE,
                                       WM_STATE, 0L, 2L);
@@ -57,7 +57,7 @@ window_state_get_unchecked(xcb_window_t w)
  * \return The current state of the window, or 0 on error.
  */
 uint32_t
-window_state_get_reply(xcb_get_property_cookie_t cookie)
+xwindow_get_state_reply(xcb_get_property_cookie_t cookie)
 {
     uint32_t result = 0;
     xcb_get_property_reply_t *prop_r;
@@ -79,7 +79,7 @@ window_state_get_reply(xcb_get_property_cookie_t cookie)
  * \param border The new border size.
  */
 void
-window_configure(xcb_window_t win, area_t geometry, int border)
+xwindow_configure(xcb_window_t win, area_t geometry, int border)
 {
     xcb_configure_notify_event_t ce;
 
@@ -101,7 +101,7 @@ window_configure(xcb_window_t win, area_t geometry, int border)
  * \param buttons The buttons to grab.
  */
 void
-window_buttons_grab(xcb_window_t win, button_array_t *buttons)
+xwindow_buttons_grab(xcb_window_t win, button_array_t *buttons)
 {
     foreach(b, *buttons)
         xcb_grab_button(globalconf.connection, false, win, BUTTONMASK,
@@ -114,7 +114,7 @@ window_buttons_grab(xcb_window_t win, button_array_t *buttons)
  * \param k The key.
  */
 static void
-window_grabkey(xcb_window_t win, keyb_t *k)
+xwindow_grabkey(xcb_window_t win, keyb_t *k)
 {
     if(k->keycode)
         xcb_grab_key(globalconf.connection, true, win,
@@ -133,10 +133,10 @@ window_grabkey(xcb_window_t win, keyb_t *k)
 }
 
 void
-window_grabkeys(xcb_window_t win, key_array_t *keys)
+xwindow_grabkeys(xcb_window_t win, key_array_t *keys)
 {
     foreach(k, *keys)
-        window_grabkey(win, *k);
+        xwindow_grabkey(win, *k);
 }
 
 /** Get the opacity of a window.
@@ -144,7 +144,7 @@ window_grabkeys(xcb_window_t win, key_array_t *keys)
  * \return The opacity, between 0 and 1 or -1 or no opacity set.
  */
 double
-window_opacity_get(xcb_window_t win)
+xwindow_get_opacity(xcb_window_t win)
 {
     double ret;
 
@@ -155,7 +155,7 @@ window_opacity_get(xcb_window_t win)
     xcb_get_property_reply_t *prop_r =
         xcb_get_property_reply(globalconf.connection, prop_c, NULL);
 
-    ret = window_opacity_get_from_reply(prop_r);
+    ret = xwindow_get_opacity_from_reply(prop_r);
     p_delete(&prop_r);
     return ret;
 }
@@ -164,7 +164,8 @@ window_opacity_get(xcb_window_t win)
  * \param prop_r A reply to a get property request for _NET_WM_WINDOW_OPACITY.
  * \return The opacity, between 0 and 1.
  */
-double window_opacity_get_from_reply(xcb_get_property_reply_t *prop_r)
+double
+xwindow_get_opacity_from_reply(xcb_get_property_reply_t *prop_r)
 {
     if(prop_r && prop_r->value_len && prop_r->format == 32)
     {
@@ -180,7 +181,7 @@ double window_opacity_get_from_reply(xcb_get_property_reply_t *prop_r)
  * \param opacity Opacity of the window, between 0 and 1.
  */
 void
-window_opacity_set(xcb_window_t win, double opacity)
+xwindow_set_opacity(xcb_window_t win, double opacity)
 {
     if(opacity >= 0 && opacity <= 1)
     {
@@ -196,7 +197,7 @@ window_opacity_set(xcb_window_t win, double opacity)
  * \param win destination window
  */
 void
-window_takefocus(xcb_window_t win)
+xwindow_takefocus(xcb_window_t win)
 {
     xcb_client_message_event_t ev;
 
@@ -219,7 +220,7 @@ window_takefocus(xcb_window_t win)
  * \param c The cursor.
  */
 void
-window_set_cursor(xcb_window_t w, xcb_cursor_t c)
+xwindow_set_cursor(xcb_window_t w, xcb_cursor_t c)
 {
     xcb_change_window_attributes(globalconf.connection, w, XCB_CW_CURSOR,
                                  (const uint32_t[]) { c });
