@@ -22,7 +22,6 @@
 #include "banning.h"
 #include "objects/tag.h"
 #include "window.h"
-#include "titlebar.h"
 #include "screen.h"
 
 /** Reban windows following current selected tags.
@@ -56,31 +55,16 @@ reban(screen_t *screen)
 
     client_ignore_enterleave_events();
 
-    foreach(_c, globalconf.clients)
-    {
-        client_t *c = *_c;
-
-        /* Restore titlebar before client, so geometry is ok again. */
-        if(titlebar_isvisible(c, screen))
-            titlebar_unban(c->titlebar);
-
-        if(client_isvisible(c, screen))
-            client_unban(c);
-    }
+    foreach(c, globalconf.clients)
+        if(client_isvisible(*c, screen))
+            client_unban(*c);
 
     /* Some people disliked the short flicker of background, so we first unban everything.
      * Afterwards we ban everything we don't want. This should avoid that. */
-    foreach(_c, globalconf.clients)
-    {
-        client_t *c = *_c;
-
-        if(!titlebar_isvisible(c, screen) && c->screen == screen)
-            titlebar_ban(c->titlebar);
-
+    foreach(c, globalconf.clients)
         /* we don't touch other screens windows */
-        if(!client_isvisible(c, screen) && c->screen == screen)
-            client_ban(c);
-    }
+        if(!client_isvisible(*c, screen) && (*c)->screen == screen)
+            client_ban(*c);
 
     client_restore_enterleave_events();
 }

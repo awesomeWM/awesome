@@ -58,7 +58,6 @@ set(AWE_SRCS
     ${SOURCE_DIR}/objects/wibox.c
     ${SOURCE_DIR}/systray.c
     ${SOURCE_DIR}/objects/tag.c
-    ${SOURCE_DIR}/titlebar.c
     ${SOURCE_DIR}/objects/widget.c
     ${SOURCE_DIR}/window.c
     ${SOURCE_DIR}/image.c

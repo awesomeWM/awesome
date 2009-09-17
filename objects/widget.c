@@ -370,7 +370,7 @@ widget_invalidate_bytype(widget_constructor_t *type)
             }
 }
 
-/** Set a wibox needs update because it has widget, or redraw a titlebar.
+/** Set a wibox needs update because it has widget.
  * \param widget The widget to look for.
  */
 void
@@ -384,18 +384,6 @@ widget_invalidate_bywidget(widget_t *widget)
                     (*wibox)->need_update = true;
                     break;
                 }
-
-    foreach(_c, globalconf.clients)
-    {
-        client_t *c = *_c;
-        if(c->titlebar && !c->titlebar->need_update)
-            for(int j = 0; j < c->titlebar->widgets.len; j++)
-                if(c->titlebar->widgets.tab[j].widget == widget)
-                {
-                    c->titlebar->need_update = true;
-                    break;
-                }
-    }
 }
 
 /** Create a new widget.

@@ -62,18 +62,7 @@ static void
 systray_draw(widget_t *widget, draw_context_t *ctx,
              area_t geometry, wibox_t *p)
 {
-    uint32_t orient;
-
-    switch(p->position)
-    {
-      case Right:
-      case Left:
-        orient = _NET_SYSTEM_TRAY_ORIENTATION_VERT;
-        break;
-      default:
-        orient = _NET_SYSTEM_TRAY_ORIENTATION_HORZ;
-        break;
-    }
+    uint32_t orient = _NET_SYSTEM_TRAY_ORIENTATION_HORZ;
 
     systray_data_t *d = widget->data;
     d->height = p->geometry.height;

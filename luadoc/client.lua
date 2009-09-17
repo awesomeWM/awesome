@@ -23,7 +23,6 @@ module("client")
 -- @field size_hints_honor Honor size hints, i.e. respect size ratio.
 -- @field border_width The client border width.
 -- @field border_color The client border color.
--- @field titlebar The client titlebar.
 -- @field urgent The client urgent state.
 -- @field content An image representing the client window content (screenshot).
 -- @field focus The focused client.

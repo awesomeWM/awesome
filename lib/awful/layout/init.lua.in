@@ -105,7 +105,6 @@ capi.client.add_signal("new", function(c)
     c:add_signal("property::maximized_vertical", arrange_prop)
     c:add_signal("property::border_width", arrange_prop)
     c:add_signal("property::hidden", arrange_prop)
-    c:add_signal("property::titlebar", arrange_prop)
     c:add_signal("property::floating", arrange_prop)
     c:add_signal("property::geometry", arrange_prop)
     -- If prop is screen, we do not know what was the previous screen, so

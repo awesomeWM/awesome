@@ -5,14 +5,11 @@ module("wibox")
 
 --- Wibox object.
 -- @field screen Screen number.
--- @field client The client attached to (titlebar only).
 -- @field border_width Border width.
 -- @field border_color Border color.
--- @field align The alignment (titlebar only).
 -- @field fg Foreground color.
 -- @field bg Background color.
 -- @field bg_image Background image.
--- @field position The position (titlebar only).
 -- @field ontop On top of other windows.
 -- @field cursor The mouse cursor.
 -- @field visible Visibility.

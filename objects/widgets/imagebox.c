@@ -21,7 +21,6 @@
 
 #include "objects/widget.h"
 #include "luaa.h"
-#include "titlebar.h"
 
 /** The imagebox private data structure */
 typedef struct

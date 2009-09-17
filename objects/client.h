@@ -128,8 +128,6 @@ struct client_t
     screen_t *screen;
     /** Client physical screen */
     int phys_screen;
-    /** Titlebar */
-    wibox_t *titlebar;
     /** Button bindings */
     button_array_t buttons;
     /** Key bindings */

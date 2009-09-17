@@ -603,9 +603,6 @@ luaA_awesome_newindex(lua_State *L)
             /* refresh all wiboxes */
             foreach(wibox, globalconf.wiboxes)
                 (*wibox)->need_update = true;
-            foreach(c, globalconf.clients)
-                if((*c)->titlebar)
-                    (*c)->titlebar->need_update = true;
         }
         break;
       case A_TK_FG:

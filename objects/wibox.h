@@ -26,13 +26,6 @@
 #include "strut.h"
 #include "common/luaobject.h"
 
-/** Wibox types */
-typedef enum
-{
-    WIBOX_TYPE_NORMAL = 0,
-    WIBOX_TYPE_TITLEBAR
-} wibox_type_t;
-
 /** Wibox type */
 struct wibox_t
 {
@@ -41,12 +34,6 @@ struct wibox_t
     bool ontop;
     /** Visible */
     bool visible;
-    /** Position */
-    position_t position;
-    /** Wibox type */
-    wibox_type_t type;
-    /** Alignment */
-    alignment_t align;
     /** Screen */
     screen_t *screen;
     /** Widget list */
@@ -62,8 +49,6 @@ struct wibox_t
     char *cursor;
     /** Background image */
     image_t *bg_image;
-    /* Banned? used for titlebars */
-    bool isbanned;
     /** Button bindings */
     button_array_t buttons;
     /** The window object. */
@@ -106,12 +91,9 @@ void luaA_wibox_invalidate_byitem(lua_State *, const void *);
 
 wibox_t * wibox_getbywin(xcb_window_t);
 
-void wibox_moveresize(lua_State *, int, area_t);
-void wibox_refresh_pixmap_partial(wibox_t *, int16_t, int16_t, uint16_t, uint16_t);
-void wibox_init(wibox_t *, int);
-void wibox_wipe(wibox_t *);
 void wibox_set_opacity(lua_State *, int, double);
-void wibox_set_orientation(lua_State *, int, orientation_t);
+
+void wibox_refresh_pixmap_partial(wibox_t *, int16_t, int16_t, uint16_t, uint16_t);
 
 void wibox_class_setup(lua_State *);
 

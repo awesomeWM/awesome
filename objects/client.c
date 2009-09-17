@@ -25,11 +25,12 @@
 #include "objects/tag.h"
 #include "ewmh.h"
 #include "screen.h"
-#include "titlebar.h"
+#include "wibox.h"
 #include "systray.h"
 #include "property.h"
 #include "spawn.h"
 #include "luaa.h"
+#include "window.h"
 #include "common/atoms.h"
 #include "common/xutil.h"
 
@@ -452,18 +453,7 @@ client_stack_above(client_t *c, xcb_window_t previous)
                          XCB_CONFIG_WINDOW_SIBLING | XCB_CONFIG_WINDOW_STACK_MODE,
                          config_win_vals);
 
-    config_win_vals[0] = c->window;
-
-    if(c->titlebar)
-    {
-        xcb_configure_window(globalconf.connection,
-                             c->titlebar->window,
-                             XCB_CONFIG_WINDOW_SIBLING | XCB_CONFIG_WINDOW_STACK_MODE,
-                             config_win_vals);
-        previous = c->titlebar->window;
-    }
-    else
-        previous = c->window;
+    previous = config_win_vals[0] = c->window;
 
     /* stack transient window on top of their parents */
     foreach(node, globalconf.stack)
@@ -811,7 +801,7 @@ client_geometry_hints(client_t *c, area_t geometry)
 }
 
 /** Resize client window.
- * The sizes given as parameters are with titlebar and borders!
+ * The sizes given as parameters are with borders!
  * \param c Client to resize.
  * \param geometry New window geometry.
  * \param hints Use size hints.
@@ -820,7 +810,6 @@ client_geometry_hints(client_t *c, area_t geometry)
 bool
 client_resize(client_t *c, area_t geometry, bool hints)
 {
-    area_t geometry_internal;
     area_t area;
 
     /* offscreen appearance fixes */
@@ -835,8 +824,10 @@ client_resize(client_t *c, area_t geometry, bool hints)
     if(geometry.y + geometry.height < 0)
         geometry.y = 0;
 
-    /* Real client geometry, please keep it contained to C code at the very least. */
-    geometry_internal = titlebar_geometry_remove(c->titlebar, c->border_width, geometry);
+    area_t geometry_internal = { .x = geometry.x,
+                                 .y = geometry.y,
+                                 .width = geometry.width - 2 * c->border_width,
+                                 .height = geometry.height - 2 * c->border_width };
 
     if(hints)
         geometry_internal = client_geometry_hints(c, geometry_internal);
@@ -845,7 +836,10 @@ client_resize(client_t *c, area_t geometry, bool hints)
         return false;
 
     /* Also let client hints propagate to the "official" geometry. */
-    geometry = titlebar_geometry_add(c->titlebar, c->border_width, geometry_internal);
+    geometry.x = geometry_internal.x;
+    geometry.y = geometry_internal.y;
+    geometry.width = geometry_internal.width + 2 * c->border_width;
+    geometry.height = geometry_internal.height + 2 * c->border_width;
 
     if(c->geometries.internal.x != geometry_internal.x
        || c->geometries.internal.y != geometry_internal.y
@@ -864,10 +858,8 @@ client_resize(client_t *c, area_t geometry, bool hints)
         c->geometries.internal.width = values[2] = geometry_internal.width;
         c->geometries.internal.height = values[3] = geometry_internal.height;
 
-        /* Also store geometry including border and titlebar. */
+        /* Also store geometry including border */
         c->geometry = geometry;
-
-        titlebar_update_geometry(c);
 
         /* Ignore all spurious enter/leave notify events */
         client_ignore_enterleave_events();
@@ -957,8 +949,6 @@ client_set_fullscreen(lua_State *L, int cidx, bool s)
         /* become fullscreen! */
         if(s)
         {
-            /* Make sure the current geometry is stored without titlebar. */
-            titlebar_ban(c->titlebar);
             /* remove any max state */
             client_set_maximized_horizontal(L, cidx, false);
             client_set_maximized_vertical(L, cidx, false);
@@ -1235,8 +1225,6 @@ client_unmanage(client_t *c)
 
     window_state_set(c->window, XCB_WM_STATE_WITHDRAWN);
 
-    titlebar_client_detach(c);
-
     ewmh_update_net_client_list(c->phys_screen);
 
     /* set client as invalid */
@@ -1358,9 +1346,6 @@ client_set_border_width(lua_State *L, int cidx, int width)
 
     c->geometry.width += 2 * c->border_width;
     c->geometry.height += 2 * c->border_width;
-
-    /* Changing border size also affects the size of the titlebar. */
-    titlebar_update_geometry(c);
 
     luaA_object_emit_signal(L, cidx, "property::border_width", 0);
 }
@@ -1744,16 +1729,6 @@ luaA_client_set_border_color(lua_State *L, client_t *c)
 }
 
 static int
-luaA_client_set_titlebar(lua_State *L, client_t *c)
-{
-    if(lua_isnil(L, -1))
-        titlebar_client_detach(c);
-    else
-        titlebar_client_attach(c);
-    return 0;
-}
-
-static int
 luaA_client_set_skip_taskbar(lua_State *L, client_t *c)
 {
     client_set_skip_taskbar(L, -3, luaA_checkboolean(L, -1));
@@ -1896,12 +1871,6 @@ static int
 luaA_client_get_icon(lua_State *L, client_t *c)
 {
     return luaA_object_push_item(L, -2, c->icon);
-}
-
-static int
-luaA_client_get_titlebar(lua_State *L, client_t *c)
-{
-    return luaA_object_push(L, c->titlebar);
 }
 
 static int
@@ -2275,10 +2244,6 @@ client_class_setup(lua_State *L)
                             (lua_class_propfunc_t) luaA_client_set_border_color,
                             (lua_class_propfunc_t) luaA_client_get_border_color,
                             (lua_class_propfunc_t) luaA_client_set_border_color);
-    luaA_class_add_property(&client_class, A_TK_TITLEBAR,
-                            (lua_class_propfunc_t) luaA_client_set_titlebar,
-                            (lua_class_propfunc_t) luaA_client_get_titlebar,
-                            (lua_class_propfunc_t) luaA_client_set_titlebar);
     luaA_class_add_property(&client_class, A_TK_URGENT,
                             (lua_class_propfunc_t) luaA_client_set_urgent,
                             (lua_class_propfunc_t) luaA_client_get_urgent,

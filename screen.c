@@ -270,9 +270,6 @@ screen_client_moveto(client_t *c, screen_t *new_screen, bool doresize)
 
     c->screen = new_screen;
 
-    if(c->titlebar)
-        c->titlebar->screen = new_screen;
-
     /* If client was on a screen, remove old tags */
     if(old_screen)
         foreach(old_tag, old_screen->tags)

@@ -39,7 +39,6 @@
 #include "event.h"
 #include "property.h"
 #include "screen.h"
-#include "titlebar.h"
 #include "luaa.h"
 #include "common/version.h"
 #include "common/atoms.h"
@@ -87,10 +86,7 @@ awesome_atexit(void)
 
     /* remap all clients since some WM won't handle them otherwise */
     foreach(c, globalconf.clients)
-    {
         client_unban(*c);
-        titlebar_client_detach(*c);
-    }
 
     /* Close Lua */
     lua_close(globalconf.L);

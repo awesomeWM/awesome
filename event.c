@@ -32,7 +32,6 @@
 #include "ewmh.h"
 #include "objects/client.h"
 #include "objects/widget.h"
-#include "titlebar.h"
 #include "objects/key.h"
 #include "keygrabber.h"
 #include "mousegrabber.h"
@@ -250,11 +249,10 @@ event_handle_configurerequest(void *data __attribute__ ((unused)),
                               xcb_connection_t *connection, xcb_configure_request_event_t *ev)
 {
     client_t *c;
-    area_t geometry;
 
     if((c = client_getbywin(ev->window)))
     {
-        geometry = titlebar_geometry_remove(c->titlebar, c->border_width, c->geometry);
+        area_t geometry = c->geometries.internal;
 
         if(ev->value_mask & XCB_CONFIG_WINDOW_X)
             geometry.x = ev->x;
@@ -277,13 +275,14 @@ event_handle_configurerequest(void *data __attribute__ ((unused)),
                                             XCB_CONFIG_WINDOW_STACK_MODE);
 
         /** Configure request are sent with size relative to real (internal)
-         * window size, i.e. without titlebars and borders. */
-        geometry = titlebar_geometry_add(c->titlebar, c->border_width, geometry);
+         * window size, i.e. without borders. */
+        geometry.width += 2 * c->border_width;
+        geometry.height += 2 * c->border_width;
 
         if(!client_resize(c, geometry, false))
         {
-            /* Resize wasn't officially needed, but we don't want to break expectations. */
-            geometry = titlebar_geometry_remove(c->titlebar, c->border_width, c->geometry);
+            geometry.width -= 2 * c->border_width;
+            geometry.height -= 2 * c->border_width;
             window_configure(c->window, geometry, c->border_width);
         }
     }
@@ -415,7 +414,7 @@ event_handle_leavenotify(void *data __attribute__ ((unused)),
     if(ev->mode != XCB_NOTIFY_MODE_NORMAL)
         return 0;
 
-    if((c = client_getbytitlebarwin(ev->event)) || (c = client_getbywin(ev->event)))
+    if((c = client_getbywin(ev->event)))
     {
         luaA_object_push(globalconf.L, c);
         luaA_object_emit_signal(globalconf.L, -1, "mouse::leave", 0);
@@ -471,8 +470,7 @@ event_handle_enternotify(void *data __attribute__ ((unused)),
         lua_pop(globalconf.L, 1);
     }
 
-    if((c = client_getbytitlebarwin(ev->event))
-       || (c = client_getbywin(ev->event)))
+    if((c = client_getbywin(ev->event)))
     {
         luaA_object_push(globalconf.L, c);
         luaA_object_emit_signal(globalconf.L, -1, "mouse::enter", 0);
@@ -492,8 +490,6 @@ event_handle_focusin(void *data __attribute__ ((unused)),
                      xcb_connection_t *connection,
                      xcb_focus_in_event_t *ev)
 {
-    client_t *c;
-
     /* Events that we are interested in: */
     switch(ev->detail)
     {
@@ -507,9 +503,12 @@ event_handle_focusin(void *data __attribute__ ((unused)),
          */
         case XCB_NOTIFY_DETAIL_NONLINEAR_VIRTUAL:
         case XCB_NOTIFY_DETAIL_NONLINEAR:
-            if((c = client_getbytitlebarwin(ev->event))
-               || (c = client_getbywin(ev->event)))
+          {
+            client_t *c;
+
+            if((c = client_getbywin(ev->event)))
                 client_focus_update(c);
+          }
         /* all other events are ignored */
         default:
             break;

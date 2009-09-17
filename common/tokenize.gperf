@@ -19,7 +19,6 @@ button_release
 center
 char
 class
-client
 conffile
 content
 Control
@@ -75,7 +74,6 @@ orientation
 pid
 plot_data_add
 plot_properties_set
-position
 release
 resize
 right
@@ -100,7 +98,6 @@ textbox
 ticks_count
 ticks_gap
 timeout
-titlebar
 top
 transient_for
 type
