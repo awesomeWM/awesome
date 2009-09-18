@@ -22,6 +22,10 @@ local client = require("awful.client")
 --- Layout module for awful
 module("awful.layout")
 
+-- This is a special lock used by the arrange function.
+-- This avoids recurring call by emitted signals.
+local arrange_lock = false
+
 --- Get the current layout.
 -- @param screen The screen number.
 -- @return The layout function.
@@ -62,6 +66,8 @@ end
 --- Arrange a screen using its current layout.
 -- @param screen The screen to arrange.
 function arrange(screen)
+    if arrange_lock then return end
+    arrange_lock = true
     local p = {}
     p.workarea = capi.screen[screen].workarea
     -- Handle padding
@@ -76,6 +82,7 @@ function arrange(screen)
     p.clients = client.tiled(screen)
     p.screen = screen
     get(screen).arrange(p)
+    arrange_lock = false
 end
 
 --- Get the current layout name.
@@ -100,6 +107,7 @@ capi.client.add_signal("new", function(c)
     c:add_signal("property::hidden", arrange_prop)
     c:add_signal("property::titlebar", arrange_prop)
     c:add_signal("property::floating", arrange_prop)
+    c:add_signal("property::geometry", arrange_prop)
     -- If prop is screen, we do not know what was the previous screen, so
     -- let's arrange all screens :-(
     c:add_signal("property::screen", function(c)
