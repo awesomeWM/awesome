@@ -442,6 +442,14 @@ luaA_pushscreen(lua_State *L, screen_t *s)
 static int
 luaA_screen_module_index(lua_State *L)
 {
+    const char *name;
+
+    if((name = lua_tostring(L, 2)))
+        foreach(screen, globalconf.screens)
+            foreach(output, screen->outputs)
+                if(!a_strcmp(output->name, name))
+                    return luaA_pushscreen(L, screen);
+
     int screen = luaL_checknumber(L, 2) - 1;
     luaA_checkscreen(screen);
     return luaA_pushscreen(L, &globalconf.screens.tab[screen]);
