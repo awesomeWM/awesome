@@ -931,9 +931,8 @@ client_set_minimized(lua_State *L, int cidx, bool s)
 
     if(c->minimized != s)
     {
-        client_need_reban(c);
         c->minimized = s;
-        client_need_reban(c);
+        banning_refresh((c)->screen);
         if(s)
             window_state_set(c->window, XCB_WM_STATE_ICONIC);
         else
@@ -959,9 +958,8 @@ client_set_sticky(lua_State *L, int cidx, bool s)
 
     if(c->sticky != s)
     {
-        client_need_reban(c);
         c->sticky = s;
-        client_need_reban(c);
+        banning_refresh((c)->screen);
         ewmh_client_update_hints(c);
         hook_property(c, "sticky");
         luaA_object_emit_signal(L, cidx, "property::sticky", 0);
@@ -1675,9 +1673,8 @@ luaA_client_set_hidden(lua_State *L, client_t *c)
     bool b = luaA_checkboolean(L, -1);
     if(b != c->hidden)
     {
-        client_need_reban(c);
         c->hidden = b;
-        client_need_reban(c);
+        banning_refresh((c)->screen);
         hook_property(c, "hidden");
         if(strut_has_value(&c->strut))
             screen_emit_signal(globalconf.L, c->screen, "property::workarea", 0);

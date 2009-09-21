@@ -160,12 +160,6 @@ lua_class_t client_class;
 
 LUA_OBJECT_FUNCS(client_class, client_t, client)
 
-#define client_need_reban(c) \
-    do { \
-        if(client_isvisible(c, (c)->screen)) \
-            banning_refresh((c)->screen); \
-    } while(0)
-
 bool client_maybevisible(client_t *, screen_t *);
 client_t * client_getbywin(xcb_window_t);
 void client_ban(client_t *);

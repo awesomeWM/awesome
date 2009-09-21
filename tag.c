@@ -226,7 +226,7 @@ tag_client(client_t *c)
 
     client_array_append(&t->clients, c);
     ewmh_client_update_desktop(c);
-    client_need_reban(c);
+    banning_refresh((c)->screen);
 
     /* call hook */
     if(globalconf.hooks.tagged != LUA_REFNIL)
@@ -248,9 +248,8 @@ untag_client(client_t *c, tag_t *t)
     for(int i = 0; i < t->clients.len; i++)
         if(t->clients.tab[i] == c)
         {
-            client_need_reban(c);
             client_array_take(&t->clients, i);
-            client_need_reban(c);
+            banning_refresh((c)->screen);
             ewmh_client_update_desktop(c);
             /* call hook */
             if(globalconf.hooks.tagged != LUA_REFNIL)
