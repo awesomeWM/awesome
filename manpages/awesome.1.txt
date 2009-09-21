@@ -176,13 +176,6 @@ BUGS
 ----
 Of course there's no bug in *awesome*. But there may be unexpected behaviors.
 
-Java applications which use the XToolkit/XAWT backend may draw gray windows
-only. The XToolkit/XAWT backend breaks ICCCM-compliance in recent JDK 1.5 and early
-JDK 1.6 versions because it assumes a reparenting window manager. As a workaround
-you can use JDK 1.4 (which doesn't contain the XToolkit/XAWT backend), or you
-can set the following environment variable (to use the older Motif
-backend instead): AWT_TOOLKIT=MToolkit
-
 AUTHORS
 -------
 Julien Danjou <julien@danjou.info> and others.
