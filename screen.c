@@ -516,6 +516,20 @@ luaA_screen_index(lua_State *L)
       case A_TK_WORKAREA:
         luaA_pusharea(L, screen_area_get(s, true));
         break;
+      case A_TK_OUTPUTS:
+        {
+            lua_createtable(L, 0, s->outputs.len);
+            foreach(output, s->outputs)
+            {
+                lua_createtable(L, 2, 0);
+                lua_pushinteger(L, output->mm_width);
+                lua_setfield(L, -2, "mm_width");
+                lua_pushinteger(L, output->mm_height);
+                lua_setfield(L, -2, "mm_height");
+                lua_setfield(L, -2, output->name);
+            }
+        }
+        break;
       default:
         return 0;
     }

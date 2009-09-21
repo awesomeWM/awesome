@@ -65,6 +65,7 @@ name
 ontop
 opacity
 orientation
+outputs
 pid
 release
 resize
