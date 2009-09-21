@@ -25,6 +25,9 @@
 #include "globalconf.h"
 #include "draw.h"
 
+typedef struct screen_output_t screen_output_t;
+ARRAY_TYPE(screen_output_t, screen_output)
+
 struct a_screen
 {
     /** Screen geometry */
@@ -50,6 +53,8 @@ struct a_screen
     signal_array_t signals;
     /** True if the banning on this screen needs to be updated */
     bool need_lazy_banning;
+    /** The screen outputs informations */
+    screen_output_array_t outputs;
 };
 ARRAY_FUNCS(screen_t, screen, DO_NOTHING)
 
