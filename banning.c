@@ -22,14 +22,13 @@
 #include "banning.h"
 #include "tag.h"
 #include "window.h"
-#include "screen.h"
 #include "titlebar.h"
 
 /** Reban windows following current selected tags.
  * \param screen The screen to arrange.
  */
-static void
-reban(screen_t *screen)
+void
+banning_refresh(screen_t *screen)
 {
     client_ignore_enterleave_events();
 
@@ -60,19 +59,6 @@ reban(screen_t *screen)
     }
 
     client_restore_enterleave_events();
-
-    screen->need_reban = false;
-}
-
-/** Refresh the client disposition.
- * \return true if the screen was arranged, false otherwise
- */
-void
-banning_refresh(void)
-{
-    foreach(screen, globalconf.screens)
-        if(screen->need_reban)
-            reban(screen);
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

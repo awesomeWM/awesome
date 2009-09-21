@@ -23,13 +23,11 @@
 #define AWESOME_EVENT_H
 
 #include "wibox.h"
-#include "banning.h"
 #include "client.h"
 
 static inline int
 awesome_refresh(void)
 {
-    banning_refresh();
     wibox_refresh();
     client_stack_refresh();
     return xcb_flush(globalconf.connection);

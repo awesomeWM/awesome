@@ -29,8 +29,6 @@ struct a_screen
 {
     /** Screen geometry */
     area_t geometry;
-    /** True if we need to reban() */
-    bool need_reban;
     /** Tag list */
     tag_array_t tags;
     /** Window that contains the systray */

@@ -26,6 +26,7 @@
 #include "stack.h"
 #include "strut.h"
 #include "draw.h"
+#include "banning.h"
 #include "common/luaobject.h"
 
 #define CLIENT_SELECT_INPUT_EVENT_MASK (XCB_EVENT_MASK_STRUCTURE_NOTIFY \
@@ -161,9 +162,8 @@ LUA_OBJECT_FUNCS(client_class, client_t, client)
 
 #define client_need_reban(c) \
     do { \
-        if(!c->screen->need_reban \
-           && client_isvisible(c, (c)->screen)) \
-            c->screen->need_reban = true; \
+        if(client_isvisible(c, (c)->screen)) \
+            banning_refresh((c)->screen); \
     } while(0)
 
 bool client_maybevisible(client_t *, screen_t *);

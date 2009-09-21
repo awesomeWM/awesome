@@ -66,12 +66,6 @@ luaA_tag_gc(lua_State *L)
 OBJECT_EXPORT_PROPERTY(tag, tag_t, selected)
 OBJECT_EXPORT_PROPERTY(tag, tag_t, name)
 
-void
-tag_set_screen(tag_t *tag, screen_t *s)
-{
-    tag->screen = s;
-}
-
 /** View or unview a tag.
  * \param L The Lua VM state.
  * \param udx The index of the tag on the stack.
@@ -91,7 +85,7 @@ tag_view(lua_State *L, int udx, bool view)
         {
             int screen_index = screen_array_indexof(&globalconf.screens, tag->screen);
 
-            tag->screen->need_reban = true;
+            banning_refresh(tag->screen);
 
             ewmh_update_net_current_desktop(screen_virttophys(screen_index));
 
@@ -171,6 +165,11 @@ tag_remove_from_screen(tag_t *tag)
             tag_array_take(tags, i);
             break;
         }
+
+    /* tag was selected? If so, reban */
+    if(tag->selected)
+        banning_refresh(tag->screen);
+
     ewmh_update_net_numbers_of_desktop(phys_screen);
     ewmh_update_net_desktop_names(phys_screen);
     ewmh_update_workarea(phys_screen);
