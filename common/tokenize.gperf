@@ -29,7 +29,6 @@ east
 ellipsize
 end
 fg
-flex
 focus
 font
 font_height
@@ -70,8 +69,6 @@ Mod5
 modal
 modifiers
 motion_notify
-mouse_enter
-mouse_leave
 name
 ontop
 opacity
@@ -80,7 +77,6 @@ pid
 plot_data_add
 plot_properties_set
 position
-press
 progressbar
 release
 resize
