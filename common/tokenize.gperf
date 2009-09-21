@@ -2,15 +2,12 @@ above
 align
 alpha
 Any
-bar_data_add
-bar_properties_set
 below
 bg
 bg_align
 bg_image
 bg_resize
 border_color
-border_padding
 border_width
 bottom
 button
@@ -32,10 +29,8 @@ focus
 font
 font_height
 fullscreen
-gap
 geometry
 group_window
-grow
 height
 hidden
 icon
@@ -51,7 +46,6 @@ keysym
 leader_window
 left
 len
-line
 Lock
 machine
 margin
@@ -72,8 +66,6 @@ ontop
 opacity
 orientation
 pid
-plot_data_add
-plot_properties_set
 release
 resize
 right
@@ -95,8 +87,6 @@ system
 systray
 text
 textbox
-ticks_count
-ticks_gap
 timeout
 top
 transient_for
@@ -104,7 +94,6 @@ type
 urgent
 valign
 version
-vertical
 visible
 widgets
 width
