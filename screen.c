@@ -366,7 +366,7 @@ luaA_screen_module_index(lua_State *L)
     return luaA_pushscreen(L, &globalconf.screens.tab[screen]);
 }
 
-/** Get or set screen tags.
+/** Get screen tags.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
  * \luastack
@@ -377,23 +377,16 @@ luaA_screen_module_index(lua_State *L)
 static int
 luaA_screen_tags(lua_State *L)
 {
-    int i;
     screen_t *s = luaL_checkudata(L, 1, "screen");
 
     if(lua_gettop(L) == 2)
     {
         luaA_checktable(L, 2);
 
-        /* remove current tags */
-        foreach(tag, s->tags)
-            tag_set_screen(*tag, NULL);
+        /* Detach all tags, but go backward since the array len will change */
+        for(int i = s->tags.len - 1; i >= 0; i--)
+            tag_remove_from_screen(s->tags.tab[i]);
 
-        tag_array_wipe(&s->tags);
-        tag_array_init(&s->tags);
-
-        s->need_reban = true;
-
-        /* push new tags */
         lua_pushnil(L);
         while(lua_next(L, 2))
             tag_append_to_screen(L, -1, s);
@@ -401,7 +394,7 @@ luaA_screen_tags(lua_State *L)
     else
     {
         lua_createtable(L, s->tags.len, 0);
-        for(i = 0; i < s->tags.len; i++)
+        for(int i = 0; i < s->tags.len; i++)
         {
             luaA_object_push(L, s->tags.tab[i]);
             lua_rawseti(L, -2, i + 1);

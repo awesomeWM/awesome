@@ -121,7 +121,10 @@ tag_append_to_screen(lua_State *L, int udx, screen_t *s)
 
     /* can't attach a tag twice */
     if(tag->screen)
+    {
+        lua_remove(L, udx);
         return;
+    }
 
     int screen_index = screen_array_indexof(&globalconf.screens, s);
     int phys_screen = screen_virttophys(screen_index);
@@ -152,9 +155,12 @@ tag_append_to_screen(lua_State *L, int udx, screen_t *s)
 /** Remove a tag from screen. Tag must be on a screen and have no clients.
  * \param tag The tag to remove.
  */
-static void
+void
 tag_remove_from_screen(tag_t *tag)
 {
+    if(!tag->screen)
+        return;
+
     int screen_index = screen_array_indexof(&globalconf.screens, tag->screen);
     int phys_screen = screen_virttophys(screen_index);
     tag_array_t *tags = &tag->screen->tags;
@@ -431,8 +437,7 @@ luaA_tag_set_screen(lua_State *L, tag_t *tag)
         luaA_checkscreen(screen);
     }
 
-    if(tag->screen)
-        tag_remove_from_screen(tag);
+    tag_remove_from_screen(tag);
 
     if(screen != -1)
         tag_append_to_screen(L, -3, &globalconf.screens.tab[screen]);
