@@ -263,9 +263,9 @@ end
 -- @param tags A table with tags to view only.
 -- @param screen Optional screen number of the tags.
 function viewmore(tags, screen)
-    viewnone(screen)
-    for i, t in pairs(tags) do
-        t.selected = true
+    local screen_tags = capi.screen[screen or capi.mouse.screen]:tags()
+    for _, tag in pairs(screen_tags) do
+        tag.selected = (table.hasitem(tags, tag) ~= nil)
     end
     capi.screen[screen]:emit_signal("tag::history::update")
 end
