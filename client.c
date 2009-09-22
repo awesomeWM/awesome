@@ -601,7 +601,6 @@ client_stack_refresh()
 void
 client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, bool startup)
 {
-    screen_t *screen;
     const uint32_t select_input_val[] = { CLIENT_SELECT_INPUT_EVENT_MASK };
 
     if(systray_iskdedockapp(w))
@@ -620,38 +619,42 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
     xcb_change_window_attributes(globalconf.connection, w, XCB_CW_EVENT_MASK, select_input_val);
 
     client_t *c = client_new(globalconf.L);
-    /* Push client in client list */
-    client_array_push(&globalconf.clients, luaA_object_ref(globalconf.L, -1));
 
-
-    screen = c->screen = screen_getbycoord(&globalconf.screens.tab[phys_screen],
-                                           wgeom->x, wgeom->y);
-
+    /* This cannot change, ever. */
     c->phys_screen = phys_screen;
-
     /* consider the window banned */
     c->isbanned = true;
-
-    /* Initial values */
+    /* Store window */
     c->window = w;
-    c->geometry.x = wgeom->x;
-    c->geometry.y = wgeom->y;
-    /* Border will be added later. */
-    c->geometry.width = wgeom->width;
-    c->geometry.height = wgeom->height;
-    /* Also set internal geometry (client_ban() needs it). */
-    c->geometries.internal.x = wgeom->x;
-    c->geometries.internal.y = wgeom->y;
-    c->geometries.internal.width = wgeom->width;
-    c->geometries.internal.height = wgeom->height;
+    luaA_object_emit_signal(globalconf.L, -1, "property::window", 0);
+
+    /* Duplicate client and push it in client list */
+    lua_pushvalue(globalconf.L, -1);
+    client_array_push(&globalconf.clients, luaA_object_ref(globalconf.L, -1));
+
+    /* Set the right screen */
+    screen_client_moveto(c, screen_getbycoord(&globalconf.screens.tab[phys_screen], wgeom->x, wgeom->y), false);
+
+    /* Store initial geometry and emits signals so we inform that geometry have
+     * been set. */
+#define HANDLE_GEOM(attr) \
+    c->geometry.attr = wgeom->attr; \
+    c->geometries.internal.attr = wgeom->attr; \
+    luaA_object_emit_signal(globalconf.L, -1, "property::" #attr, 0);
+HANDLE_GEOM(x)
+HANDLE_GEOM(y)
+HANDLE_GEOM(width)
+HANDLE_GEOM(height)
+#undef HANDLE_GEOM
+
+    luaA_object_emit_signal(globalconf.L, -1, "property::geometry", 0);
 
     /* Push client */
-    luaA_object_push(globalconf.L, c);
     client_set_border_width(globalconf.L, -1, wgeom->border_width);
-    lua_pop(globalconf.L, 1);
 
     /* we honor size hints by default */
     c->size_hints_honor = true;
+    luaA_object_emit_signal(globalconf.L, -1, "property::size_hints_honor", 0);
 
     /* update hints */
     property_update_wm_normal_hints(c, NULL);
@@ -664,12 +667,10 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
     property_update_net_wm_icon(c, NULL);
 
     /* get opacity */
-    c->opacity = window_opacity_get(c->window);
+    client_set_opacity(globalconf.L, -1, window_opacity_get(c->window));
 
     /* Then check clients hints */
     ewmh_client_check_hints(c);
-
-    screen_client_moveto(c, screen, true);
 
     /* Push client in stack */
     client_raise(c);
@@ -731,7 +732,8 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
         luaA_dofunction_from_registry(globalconf.L, globalconf.hooks.manage, 2, 0);
     }
 
-    luaA_object_push(globalconf.L, c);
+    /* client is still on top of the stack; push startup value,
+     * and emit signals with 2 args */
     lua_pushboolean(globalconf.L, startup);
     luaA_class_emit_signal(globalconf.L, &client_class, "manage", 2);
 }
