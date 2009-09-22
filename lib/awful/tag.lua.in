@@ -252,7 +252,7 @@ end
 --- View only a tag.
 -- @param t The tag object.
 function viewonly(t)
-    local tags = capi.screen[screen or capi.mouse.screen]:tags()
+    local tags = capi.screen[t.screen or capi.mouse.screen]:tags()
     for _, tag in pairs(tags) do
         tag.selected = (t == tag)
     end
