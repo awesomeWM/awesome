@@ -568,12 +568,17 @@ local function store_floating_geometry(c)
     end
 end
 
+-- Store the initial client geometry.
+capi.client.add_signal("new", function(c)
+    local function store_init_geometry(c)
+        property.set(c, "floating_geometry", c:geometry())
+        c:remove_signal("property::geometry", store_init_geometry)
+    end
+    c:add_signal("property::geometry", store_init_geometry)
+end)
+
 capi.client.add_signal("manage", function(c)
-    property.set(c, "floating_geometry", c:geometry())
-    c:add_signal("property::x", store_floating_geometry)
-    c:add_signal("property::y", store_floating_geometry)
-    c:add_signal("property::width", store_floating_geometry)
-    c:add_signal("property::height", store_floating_geometry)
+    c:add_signal("property::geometry", store_floating_geometry)
 end)
 
 --- Return if a client has a fixe size or not.
