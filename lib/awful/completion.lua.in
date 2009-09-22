@@ -110,12 +110,12 @@ function shell(command, cur_pos, ncomp, shell)
             "__print_completions() { for ((i=0;i<${#COMPREPLY[*]};i++)); do echo ${COMPREPLY[i]}; done }; " ..
             "COMP_WORDS=(" ..  command .."); COMP_LINE=\"" .. command .. "\"; " ..
             "COMP_COUNT=" .. cur_pos ..  "; COMP_CWORD=" .. cword_index-1 .. "; " ..
-            bashcomp_funcs[words[1]] .. "; __print_completions | sort -u'"
+            bashcomp_funcs[words[1]] .. "; __print_completions'"
         else
             shell_cmd = "/usr/bin/env bash -c 'compgen -A " .. comptype .. " " .. words[cword_index] .. "'"
         end
     end
-    local c, err = io.popen(shell_cmd)
+    local c, err = io.popen(shell_cmd .. " | sort -u")
     local output = {}
     i = 0
     if c then
@@ -138,8 +138,7 @@ function shell(command, cur_pos, ncomp, shell)
         return command, cur_pos
     end
 
-    -- sort and cycle
-    table.sort(output)
+    -- cycle
     while ncomp > #output do
         ncomp = ncomp - #output
     end
