@@ -311,11 +311,6 @@ end
 -- @param startup Optional: don't do anything if true.
 function withcurrent(c, startup)
     if startup ~= true and c.sticky == false then
-        if c.transient_for then
-            c.screen = c.transient_for.screen
-            c:tags(c.transient_for:tags())
-        end
-        c.screen = capi.mouse.screen
         if #c:tags() == 0 then
             c:tags(selectedlist(c.screen))
         end
@@ -349,6 +344,16 @@ end
 
 -- Register standards signals
 capi.client.add_signal("manage", function(c, startup)
+    if not startup then
+        if c.transient_for then
+            c.screen = c.transient_for.screen
+            if not c.sticky then
+                c:tags(c.transient_for:tags())
+            end
+        else
+            c.screen = capi.mouse.screen
+        end
+    end
     withcurrent(c, startup)
     c:add_signal("property::screen", withcurrent)
 end)
