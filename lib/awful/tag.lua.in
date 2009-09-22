@@ -252,8 +252,10 @@ end
 --- View only a tag.
 -- @param t The tag object.
 function viewonly(t)
-    viewnone(t.screen)
-    t.selected = true
+    local tags = capi.screen[screen or capi.mouse.screen]:tags()
+    for _, tag in pairs(tags) do
+        tag.selected = (t == tag)
+    end
     capi.screen[t.screen]:emit_signal("tag::history::update")
 end
 
