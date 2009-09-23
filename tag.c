@@ -79,8 +79,6 @@ tag_view(lua_State *L, int udx, bool view)
     {
         tag->selected = view;
 
-        luaA_object_emit_signal(L, udx, "property::selected", 0);
-
         if(tag->screen)
         {
             int screen_index = screen_array_indexof(&globalconf.screens, tag->screen);
@@ -100,6 +98,8 @@ tag_view(lua_State *L, int udx, bool view)
                 luaA_dofunction_from_registry(globalconf.L, globalconf.hooks.tags, 3, 0);
             }
         }
+
+        luaA_object_emit_signal(L, udx, "property::selected", 0);
     }
 }
 
