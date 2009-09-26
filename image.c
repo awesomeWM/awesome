@@ -244,6 +244,31 @@ image_new_from_argb32(int width, int height, uint32_t *data)
     return 0;
 }
 
+/** Create a new, completely black image.
+ * \param width The image width.
+ * \param height The image height.
+ * \return 1 if an image has been pushed on stack, 0 otherwise.
+ */
+static int
+image_new_blank(int width, int height)
+{
+    Imlib_Image imimage;
+
+    if((imimage = imlib_create_image(width, height)))
+    {
+        imlib_context_set_image(imimage);
+        imlib_image_set_has_alpha(true);
+        /* After creation, an image has undefined content. Fix that up. */
+        imlib_context_set_color(0, 0, 0, 0xff);
+        imlib_image_fill_rectangle(0, 0, width, height);
+        image_t *image = image_new(globalconf.L);
+        image->image = imimage;
+        return 1;
+    }
+
+    return 0;
+}
+
 /** Load an image from filename.
  * \param filename The image file to load.
  * \return 1 if image is loaded and on stack, 0 otherwise.
@@ -311,8 +336,7 @@ luaA_image_argb32_new(lua_State *L)
 
     if(lua_isnil(L, 3))
     {
-        uint32_t *data = p_new(uint32_t, width * height);
-        return image_new_from_argb32(width, height, data);
+        return image_new_blank(width, height);
     }
 
     const char *data = luaL_checklstring(L, 3, &len);
