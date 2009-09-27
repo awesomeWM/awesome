@@ -28,6 +28,7 @@
 static inline int
 awesome_refresh(void)
 {
+    banning_refresh();
     wibox_refresh();
     client_stack_refresh();
     return xcb_flush(globalconf.connection);

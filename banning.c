@@ -20,16 +20,39 @@
  */
 
 #include "banning.h"
-#include "tag.h"
-#include "window.h"
+#include "client.h"
 #include "titlebar.h"
+#include "screen.h"
 
 /** Reban windows following current selected tags.
  * \param screen The screen to arrange.
  */
 void
-banning_refresh(screen_t *screen)
+banning_need_update(screen_t *screen)
 {
+    /* We update the complete banning only once per main loop to avoid
+     * excessive updates...  */
+    screen->need_lazy_banning = true;
+
+    /* But if a client will be banned in our next update we unfocus it now. */
+    foreach(_c, globalconf.clients)
+    {
+        client_t *c = *_c;
+
+        /* we don't touch other screens windows */
+        if(!client_isvisible(c, screen) && c->screen == screen)
+            client_ban_unfocus(c);
+    }
+}
+
+static void
+reban(screen_t *screen)
+{
+    if (!screen->need_lazy_banning)
+        return;
+
+    screen->need_lazy_banning = false;
+
     client_ignore_enterleave_events();
 
     foreach(_c, globalconf.clients)
@@ -59,6 +82,15 @@ banning_refresh(screen_t *screen)
     }
 
     client_restore_enterleave_events();
+}
+
+/** Check all screens if they need to rebanned
+ */
+void
+banning_refresh(void)
+{
+    foreach(screen, globalconf.screens)
+        reban(screen);
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

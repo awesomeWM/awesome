@@ -48,6 +48,8 @@ struct a_screen
     xcb_visualtype_t *visual;
     /** The signals emitted by screen objects */
     signal_array_t signals;
+    /** True if the banning on this screen needs to be updated */
+    bool need_lazy_banning;
 };
 ARRAY_FUNCS(screen_t, screen, DO_NOTHING)
 
