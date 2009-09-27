@@ -163,6 +163,7 @@ LUA_OBJECT_FUNCS(client_class, client_t, client)
 bool client_maybevisible(client_t *, screen_t *);
 client_t * client_getbywin(xcb_window_t);
 void client_ban(client_t *);
+void client_ban_unfocus(client_t *);
 void client_unban(client_t *);
 void client_manage(xcb_window_t, xcb_get_geometry_reply_t *, int, bool);
 area_t client_geometry_hints(client_t *, area_t);

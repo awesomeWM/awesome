@@ -335,6 +335,19 @@ client_set_focus(client_t *c, bool set_input_focus)
         window_takefocus(c->window);
 }
 
+/** Prepare banning a client by running all needed lua events.
+ * \param c The client.
+ */
+void client_ban_unfocus(client_t *c)
+{
+    if(globalconf.screens.tab[c->phys_screen].prev_client_focus == c)
+        globalconf.screens.tab[c->phys_screen].prev_client_focus = NULL;
+
+    /* Wait until the last moment to take away the focus from the window. */
+    if(globalconf.screens.tab[c->phys_screen].client_focus == c)
+        client_unfocus(c);
+}
+
 /** Ban client and move it out of the viewport.
  * \param c The client.
  */
@@ -347,12 +360,7 @@ client_ban(client_t *c)
 
         c->isbanned = true;
 
-        if(globalconf.screens.tab[c->phys_screen].prev_client_focus == c)
-            globalconf.screens.tab[c->phys_screen].prev_client_focus = NULL;
-
-        /* Wait until the last moment to take away the focus from the window. */
-        if(globalconf.screens.tab[c->phys_screen].client_focus == c)
-            client_unfocus(c);
+        client_ban_unfocus(c);
     }
 }
 
