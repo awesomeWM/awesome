@@ -252,10 +252,17 @@ end
 --- View only a tag.
 -- @param t The tag object.
 function viewonly(t)
-    local tags = capi.screen[t.screen or capi.mouse.screen]:tags()
+    local tags = capi.screen[t.screen]:tags()
+    -- First, untag everyone except the viewed tag.
     for _, tag in pairs(tags) do
-        tag.selected = (t == tag)
+        if tag ~= t then
+            tag.selected = false
+        end
     end
+    -- Then, set this one to selected.
+    -- We need to do that in 2 operations so we avoid flickering and several tag
+    -- selected at the same time.
+    t.selected = true
     capi.screen[t.screen]:emit_signal("tag::history::update")
 end
 
@@ -264,8 +271,13 @@ end
 -- @param screen Optional screen number of the tags.
 function viewmore(tags, screen)
     local screen_tags = capi.screen[screen or capi.mouse.screen]:tags()
-    for _, tag in pairs(screen_tags) do
-        tag.selected = (util.table.hasitem(tags, tag) ~= nil)
+    for _, tag in ipairs(screen_tags) do
+        if not util.table.hasitem(tags, tag) then
+            tag.selected = false
+        end
+    end
+    for _, tag in ipairs(tags) do
+        tag.selected = true
     end
     capi.screen[screen]:emit_signal("tag::history::update")
 end
