@@ -265,7 +265,7 @@ end
 function viewmore(tags, screen)
     local screen_tags = capi.screen[screen or capi.mouse.screen]:tags()
     for _, tag in pairs(screen_tags) do
-        tag.selected = (table.hasitem(tags, tag) ~= nil)
+        tag.selected = (util.table.hasitem(tags, tag) ~= nil)
     end
     capi.screen[screen]:emit_signal("tag::history::update")
 end
