@@ -19,6 +19,7 @@ local client = require("awful.client")
 module("awful.layout.suit.magnifier")
 
 function arrange(p)
+    -- Fullscreen?
     local area = p.workarea
     local cls = p.clients
     local focus = capi.client.focus
@@ -28,14 +29,18 @@ function arrange(p)
     -- Check that the focused window is on the right screen
     if focus and focus.screen ~= p.screen then focus = nil end
 
-    -- If we don't have a focused window on our screen,
-    -- and we have at least one client, take the first one.
     if not focus and #cls > 0 then
         focus = cls[1]
         fidx = 1
     end
 
-    -- Abort if clients to arrange are present.
+    -- If focused window is not tiled, take the first one which is tiled.
+    if client.floating.get(focus) then
+        focus = cls[1]
+        fidx = 1
+    end
+
+    -- Abort if no clients are present
     if not focus then return end
 
     local geometry = {}
