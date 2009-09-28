@@ -30,6 +30,12 @@ module("awesome")
 -- @name restart
 -- @class function
 
+--- Spawn a program.
+-- @param cmd The command to launch.
+-- @param use_sn Use startup-notification, true or false, default to true.
+-- @param screen Optional screen number to spawn the command on.
+-- @return Nothing is everything is OK, or an error string if an error occured.
+
 --- Add a global signal.
 -- @param name A string with the event name.
 -- @param func The function to call.
