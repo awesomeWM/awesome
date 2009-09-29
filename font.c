@@ -35,7 +35,6 @@ font_t *
 draw_font_new(const char *fontname)
 {
     cairo_surface_t *surface;
-    xcb_screen_t *s = xutil_screen_get(globalconf.connection, globalconf.default_screen);
     cairo_t *cr;
     PangoLayout *layout;
     font_t *font = p_new(font_t, 1);
@@ -44,9 +43,7 @@ draw_font_new(const char *fontname)
      * order to get font informations */
     surface = cairo_xcb_surface_create(globalconf.connection,
                                        globalconf.default_screen,
-                                       globalconf.screens.tab[0].visual,
-                                       s->width_in_pixels,
-                                       s->height_in_pixels);
+                                       globalconf.screens.tab[0].visual, 1, 1);
 
     cr = cairo_create(surface);
     layout = pango_cairo_create_layout(cr);
