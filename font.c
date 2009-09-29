@@ -32,7 +32,7 @@
  * \return A new font.
  */
 font_t *
-draw_font_new(const char *fontname)
+font_new(const char *fontname)
 {
     cairo_surface_t *surface;
     cairo_t *cr;
@@ -66,7 +66,7 @@ draw_font_new(const char *fontname)
  * \param font Font to delete.
  */
 void
-draw_font_delete(font_t **font)
+font_delete(font_t **font)
 {
     if(*font)
     {

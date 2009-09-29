@@ -597,8 +597,8 @@ luaA_awesome_newindex(lua_State *L)
       case A_TK_FONT:
         {
             const char *newfont = luaL_checkstring(L, 3);
-            draw_font_delete(&globalconf.font);
-            globalconf.font = draw_font_new(newfont);
+            font_delete(&globalconf.font);
+            globalconf.font = font_new(newfont);
             /* refresh all wiboxes */
             foreach(wibox, globalconf.wiboxes)
                 (*wibox)->need_update = true;

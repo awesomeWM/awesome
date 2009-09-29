@@ -30,8 +30,8 @@ typedef struct
     int height;
 } font_t;
 
-font_t *draw_font_new(const char *);
-void draw_font_delete(font_t **);
+font_t *font_new(const char *);
+void font_delete(font_t **);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
