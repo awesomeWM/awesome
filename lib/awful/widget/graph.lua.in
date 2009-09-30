@@ -32,7 +32,7 @@ local data = setmetatable({}, { __mode = "k" })
 -- can also be specified. Example: { "red", "blue" } or { "red", "green",
 -- "blue", blue = 10 } to specify blue distance from other colors.
 
---- Set the graph foreground colors gradient angle. Default is 240 degrees
+--- Set the graph foreground colors gradient angle. Default is 270 degrees
 -- (horizontal).
 -- @name set_gradient_angle
 -- @class function
