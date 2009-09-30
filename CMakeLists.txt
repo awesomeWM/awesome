@@ -60,7 +60,7 @@ set(AWE_SRCS
     ${SOURCE_DIR}/objects/tag.c
     ${SOURCE_DIR}/objects/widget.c
     ${SOURCE_DIR}/xwindow.c
-    ${SOURCE_DIR}/image.c
+    ${SOURCE_DIR}/objects/image.c
     ${SOURCE_DIR}/draw.c
     ${SOURCE_DIR}/font.c
     ${SOURCE_DIR}/color.c

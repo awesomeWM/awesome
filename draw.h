@@ -27,7 +27,7 @@
 
 #include <xcb/xcb.h>
 
-#include "image.h"
+#include "objects/image.h"
 #include "color.h"
 #include "common/array.h"
 
