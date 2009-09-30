@@ -48,16 +48,22 @@ void *
 luaA_toudata(lua_State *L, int ud, lua_class_t *class)
 {
     void *p = lua_touserdata(L, ud);
-    if(p) /* value is a userdata? */
-        if(lua_getmetatable(L, ud)) /* does it have a metatable? */
-        {
-            lua_pushlightuserdata(L, class);
-            lua_rawget(L, LUA_REGISTRYINDEX);
-            if(!lua_rawequal(L, -1, -2)) /* does it have the correct mt? */
-                p = NULL;
-            lua_pop(L, 2); /* remove both metatables */
-        }
-    return p;
+    if(p && lua_getmetatable(L, ud)) /* does it have a metatable? */
+    {
+        /* Get the lua_class_t that matches this metatable */
+        lua_rawget(L, LUA_REGISTRYINDEX);
+        lua_class_t *metatable_class = lua_touserdata(L, -1);
+
+        /* remove lightuserdata (lua_class pointer) */
+        lua_pop(L, 1);
+
+        /* Now, check that the class given in argument is the same as the
+         * metatable's object, or one of its parent (inheritance) */
+        for(; metatable_class; metatable_class = metatable_class->parent)
+            if(metatable_class == class)
+                return p;
+    }
+    return NULL;
 }
 
 /** Check for a udata class.
@@ -85,10 +91,14 @@ luaA_class_get(lua_State *L, int idx)
 {
     int type = lua_type(L, idx);
 
-    if(type == LUA_TUSERDATA)
-        foreach(class, luaA_classes)
-            if(luaA_toudata(L, idx, *class))
-                return *class;
+    if(type == LUA_TUSERDATA && lua_getmetatable(L, idx))
+    {
+        /* Use the metatable has key to get the class from registry */
+        lua_rawget(L, LUA_REGISTRYINDEX);
+        lua_class_t *class = lua_touserdata(L, -1);
+        lua_pop(L, 1);
+        return class;
+    }
 
     return NULL;
 }
@@ -153,9 +163,23 @@ luaA_class_add_property(lua_class_t *lua_class,
                                     });
 }
 
+/** Setup a new Lua class.
+ * \param L The Lua VM state.
+ * \param name The class name.
+ * \param parent The parent class (inheritance).
+ * \param allocator The allocator function used when creating a new object.
+ * \param checker The check function to call when using luaA_checkudata().
+ * \param index_miss_property Function to call when an object of this class
+ * receive a __index request on an unknown property.
+ * \param newindex_miss_property Function to call when an object of this class
+ * receive a __newindex request on an unknown property.
+ * \param methods The methods to set on the class table.
+ * \param meta The meta-methods to set on the class objects.
+ */
 void
 luaA_class_setup(lua_State *L, lua_class_t *class,
                  const char *name,
+                 lua_class_t *parent,
                  lua_class_allocator_t allocator,
                  lua_class_checker_t checker,
                  lua_class_propfunc_t index_miss_property,
@@ -165,10 +189,16 @@ luaA_class_setup(lua_State *L, lua_class_t *class,
 {
     /* Create the metatable */
     lua_newtable(L);
-    /* Register it with class pointer as key in the registry */
+    /* Register it with class pointer as key in the registry
+     * class-pointer -> metatable */
     lua_pushlightuserdata(L, class);
     /* Duplicate the metatable */
     lua_pushvalue(L, -2);
+    lua_rawset(L, LUA_REGISTRYINDEX);
+    /* Now register class pointer with metatable as key in the registry
+     * metatable -> class-pointer */
+    lua_pushvalue(L, -1);
+    lua_pushlightuserdata(L, class);
     lua_rawset(L, LUA_REGISTRYINDEX);
 
     lua_pushvalue(L, -1);           /* dup metatable                      2 */
@@ -185,6 +215,7 @@ luaA_class_setup(lua_State *L, lua_class_t *class,
     class->index_miss_property = index_miss_property;
     class->newindex_miss_property = newindex_miss_property;
     class->checker = checker;
+    class->parent = parent;
 
     lua_class_array_append(&luaA_classes, class);
 }
@@ -224,20 +255,28 @@ luaA_class_emit_signal(lua_State *L, lua_class_t *lua_class,
 int
 luaA_usemetatable(lua_State *L, int idxobj, int idxfield)
 {
-    /* Get metatable of the object. */
-    lua_getmetatable(L, idxobj);
-    /* Get the field */
-    lua_pushvalue(L, idxfield);
-    lua_rawget(L, -2);
-    /* Do we have a field like that? */
-    if(!lua_isnil(L, -1))
+    lua_class_t *class = luaA_class_get(L, idxobj);
+
+    for(; class; class = class->parent)
     {
-        /* Yes, so return it! */
-        lua_remove(L, -2);
-        return 1;
+        /* Push the class */
+        lua_pushlightuserdata(L, class);
+        /* Get its metatable from registry */
+        lua_rawget(L, LUA_REGISTRYINDEX);
+        /* Push the field */
+        lua_pushvalue(L, idxfield);
+        /* Get the field in the metatable */
+        lua_rawget(L, -2);
+        /* Do we have a field like that? */
+        if(!lua_isnil(L, -1))
+        {
+            /* Yes, so remove the metatable and return it! */
+            lua_remove(L, -2);
+            return 1;
+        }
+        /* No, so remove the metatable and its value */
+        lua_pop(L, 2);
     }
-    /* No, so remove everything. */
-    lua_pop(L, 2);
 
     return 0;
 }
@@ -264,7 +303,17 @@ luaA_class_property_get(lua_State *L, lua_class_t *lua_class, int fieldidx)
     const char *attr = luaL_checklstring(L, fieldidx, &len);
     awesome_token_t token = a_tokenize(attr, len);
 
-    return lua_class_property_array_getbyid(&lua_class->properties, token);
+    /* Look for the property in the class; if not found, go in the parent class. */
+    for(; lua_class; lua_class = lua_class->parent)
+    {
+        lua_class_property_t *prop =
+            lua_class_property_array_getbyid(&lua_class->properties, token);
+
+        if(prop)
+            return prop;
+    }
+
+    return NULL;
 }
 
 /** Generic index meta function for objects.
@@ -350,12 +399,7 @@ luaA_class_new(lua_State *L, lua_class_t *lua_class)
          * number TO A STRING, confusing lua_next() */
         if(lua_isstring(L, -2))
         {
-            /* Lookup the property using token */
-            size_t len;
-            const char *attr = lua_tolstring(L, -2, &len);
-            lua_class_property_t *prop =
-                lua_class_property_array_getbyid(&lua_class->properties,
-                                                 a_tokenize(attr, len));
+            lua_class_property_t *prop = luaA_class_property_get(L, lua_class, -2);
 
             if(prop && prop->new)
                 prop->new(L, object);

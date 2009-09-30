@@ -114,7 +114,8 @@ button_class_setup(lua_State *L)
         { NULL, NULL }
     };
 
-    luaA_class_setup(L, &button_class, "button", (lua_class_allocator_t) button_new, NULL,
+    luaA_class_setup(L, &button_class, "button", NULL,
+                     (lua_class_allocator_t) button_new, NULL,
                      luaA_class_index_miss_property, luaA_class_newindex_miss_property,
                      button_methods, button_meta);
     luaA_class_add_property(&button_class, A_TK_BUTTON,

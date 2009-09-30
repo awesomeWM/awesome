@@ -507,8 +507,20 @@ luaA_screen_index(lua_State *L)
     const char *buf;
     screen_t *s;
 
-    if(luaA_usemetatable(L, 1, 2))
+    /* Get metatable of the screen. */
+    lua_getmetatable(L, 1);
+    /* Get the field */
+    lua_pushvalue(L, 2);
+    lua_rawget(L, -2);
+    /* Do we have a field like that? */
+    if(!lua_isnil(L, -1))
+    {
+        /* Yes, so return it! */
+        lua_remove(L, -2);
         return 1;
+    }
+    /* No, so remove everything. */
+    lua_pop(L, 2);
 
     buf = luaL_checklstring(L, 2, &len);
     s = lua_touserdata(L, 1);

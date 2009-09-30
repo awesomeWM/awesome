@@ -2089,7 +2089,8 @@ client_class_setup(lua_State *L)
         { NULL, NULL }
     };
 
-    luaA_class_setup(L, &client_class, "client", (lua_class_allocator_t) client_new,
+    luaA_class_setup(L, &client_class, "client", NULL,
+                     (lua_class_allocator_t) client_new,
                      (lua_class_checker_t) client_checker,
                      luaA_class_index_miss_property, luaA_class_newindex_miss_property,
                      client_methods, client_meta);

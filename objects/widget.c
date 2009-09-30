@@ -578,7 +578,8 @@ widget_class_setup(lua_State *L)
         { NULL, NULL }
     };
 
-    luaA_class_setup(L, &widget_class, "widget", (lua_class_allocator_t) widget_new, NULL,
+    luaA_class_setup(L, &widget_class, "widget", NULL,
+                     (lua_class_allocator_t) widget_new, NULL,
                      NULL, NULL,
                      widget_methods, widget_meta);
     luaA_class_add_property(&widget_class, A_TK_VISIBLE,
