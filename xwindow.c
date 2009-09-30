@@ -183,14 +183,17 @@ xwindow_get_opacity_from_reply(xcb_get_property_reply_t *prop_r)
 void
 xwindow_set_opacity(xcb_window_t win, double opacity)
 {
-    if(opacity >= 0 && opacity <= 1)
+    if(win)
     {
-        uint32_t real_opacity = opacity * 0xffffffff;
-        xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE, win,
-                            _NET_WM_WINDOW_OPACITY, CARDINAL, 32, 1L, &real_opacity);
+        if(opacity >= 0 && opacity <= 1)
+        {
+            uint32_t real_opacity = opacity * 0xffffffff;
+            xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE, win,
+                                _NET_WM_WINDOW_OPACITY, CARDINAL, 32, 1L, &real_opacity);
+        }
+        else
+            xcb_delete_property(globalconf.connection, win, _NET_WM_WINDOW_OPACITY);
     }
-    else
-        xcb_delete_property(globalconf.connection, win, _NET_WM_WINDOW_OPACITY);
 }
 
 /** Send WM_TAKE_FOCUS client message to window
