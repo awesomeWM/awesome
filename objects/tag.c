@@ -312,7 +312,7 @@ luaA_tag_clients(lua_State *L)
         lua_pushnil(L);
         while(lua_next(L, 2))
         {
-            client_t *c = luaA_client_checkudata(L, -1);
+            client_t *c = luaA_checkudata(L, -1, &client_class);
             /* push tag on top of the stack */
             lua_pushvalue(L, 1);
             tag_client(c);
@@ -419,7 +419,7 @@ tag_class_setup(lua_State *L)
         { NULL, NULL },
     };
 
-    luaA_class_setup(L, &tag_class, "tag", (lua_class_allocator_t) tag_new,
+    luaA_class_setup(L, &tag_class, "tag", (lua_class_allocator_t) tag_new, NULL,
                      luaA_class_index_miss_property, luaA_class_newindex_miss_property,
                      tag_methods, tag_meta);
     luaA_class_add_property(&tag_class, A_TK_NAME,

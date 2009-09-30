@@ -149,8 +149,6 @@ struct client_t
     double opacity;
 };
 
-client_t * luaA_client_checkudata(lua_State *, int);
-
 ARRAY_FUNCS(client_t *, client, DO_NOTHING)
 
 /** Client class */

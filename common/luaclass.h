@@ -44,6 +44,8 @@ typedef lua_object_t *(*lua_class_allocator_t)(lua_State *);
 
 typedef int (*lua_class_propfunc_t)(lua_State *, lua_object_t *);
 
+typedef bool (*lua_class_checker_t)(lua_object_t *);
+
 typedef struct
 {
     /** Class name */
@@ -58,6 +60,8 @@ typedef struct
     lua_class_propfunc_t index_miss_property;
     /** Function to call when a indexing an unknown property */
     lua_class_propfunc_t newindex_miss_property;
+    /** Function to call to check if an object is valid */
+    lua_class_checker_t checker;
 } lua_class_t;
 
 const char * luaA_typename(lua_State *, int);
@@ -68,7 +72,7 @@ void luaA_class_remove_signal(lua_State *, lua_class_t *, const char *, int);
 void luaA_class_emit_signal(lua_State *, lua_class_t *, const char *, int);
 
 void luaA_openlib(lua_State *, const char *, const struct luaL_reg[], const struct luaL_reg[]);
-void luaA_class_setup(lua_State *, lua_class_t *, const char *, lua_class_allocator_t,
+void luaA_class_setup(lua_State *, lua_class_t *, const char *, lua_class_allocator_t, lua_class_checker_t,
                       lua_class_propfunc_t, lua_class_propfunc_t,
                       const struct luaL_reg[], const struct luaL_reg[]);
 

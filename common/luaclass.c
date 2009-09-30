@@ -71,6 +71,8 @@ luaA_checkudata(lua_State *L, int ud, lua_class_t *class)
     void *p = luaA_toudata(L, ud, class);
     if(!p)
         luaL_typerror(L, ud, class->name);
+    else if(class->checker && !class->checker(p))
+        luaL_error(L, "invalid object");
     return p;
 }
 
@@ -155,6 +157,7 @@ void
 luaA_class_setup(lua_State *L, lua_class_t *class,
                  const char *name,
                  lua_class_allocator_t allocator,
+                 lua_class_checker_t checker,
                  lua_class_propfunc_t index_miss_property,
                  lua_class_propfunc_t newindex_miss_property,
                  const struct luaL_reg methods[],
@@ -181,6 +184,7 @@ luaA_class_setup(lua_State *L, lua_class_t *class,
     class->name = name;
     class->index_miss_property = index_miss_property;
     class->newindex_miss_property = newindex_miss_property;
+    class->checker = checker;
 
     lua_class_array_append(&luaA_classes, class);
 }
