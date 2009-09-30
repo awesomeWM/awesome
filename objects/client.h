@@ -27,6 +27,7 @@
 #include "strut.h"
 #include "draw.h"
 #include "banning.h"
+#include "objects/window.h"
 #include "common/luaobject.h"
 
 #define CLIENT_SELECT_INPUT_EVENT_MASK (XCB_EVENT_MASK_STRUCTURE_NOTIFY \
@@ -61,7 +62,7 @@ typedef enum
 /** client_t type */
 struct client_t
 {
-    LUA_OBJECT_HEADER
+    WINDOW_OBJECT_HEADER
     /** Valid, or not ? */
     bool invalid;
     /** Client name */
@@ -116,8 +117,6 @@ struct client_t
     bool nofocus;
     /** The window type */
     window_type_t type;
-    /** Window of the client */
-    xcb_window_t window;
     /** Window of the group leader */
     xcb_window_t group_window;
     /** Window holding command needed to start it (session management related) */
@@ -145,8 +144,6 @@ struct client_t
     uint32_t pid;
     /** Window it is transient for */
     client_t *transient_for;
-    /** Window opacity */
-    double opacity;
 };
 
 ARRAY_FUNCS(client_t *, client, DO_NOTHING)
@@ -190,7 +187,6 @@ void client_set_alt_name(lua_State *L, int, char *);
 void client_set_group_window(lua_State *, int, xcb_window_t);
 void client_set_icon(lua_State *, int, int);
 void client_set_skip_taskbar(lua_State *, int, bool);
-void client_set_opacity(lua_State *, int, double);
 void client_focus(client_t *);
 void client_focus_update(client_t *);
 void client_unfocus(client_t *);

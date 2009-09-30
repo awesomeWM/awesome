@@ -24,12 +24,13 @@
 
 #include "objects/widget.h"
 #include "strut.h"
+#include "objects/window.h"
 #include "common/luaobject.h"
 
 /** Wibox type */
 struct wibox_t
 {
-    LUA_OBJECT_HEADER
+    WINDOW_OBJECT_HEADER
     /** Ontop */
     bool ontop;
     /** Visible */
@@ -51,8 +52,6 @@ struct wibox_t
     image_t *bg_image;
     /** Button bindings */
     button_array_t buttons;
-    /** The window object. */
-    xcb_window_t window;
     /** The pixmap copied to the window object. */
     xcb_pixmap_t pixmap;
     /** The graphic context. */
@@ -67,8 +66,6 @@ struct wibox_t
     draw_context_t ctx;
     /** Orientation */
     orientation_t orientation;
-    /** Opacity */
-    double opacity;
     /** Strut */
     strut_t strut;
     /** The window's shape */
@@ -91,8 +88,6 @@ void wibox_refresh(void);
 void luaA_wibox_invalidate_byitem(lua_State *, const void *);
 
 wibox_t * wibox_getbywin(xcb_window_t);
-
-void wibox_set_opacity(lua_State *, int, double);
 
 void wibox_refresh_pixmap_partial(wibox_t *, int16_t, int16_t, uint16_t, uint16_t);
 

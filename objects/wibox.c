@@ -355,19 +355,6 @@ wibox_refresh_pixmap_partial(wibox_t *wibox,
                   w, h);
 }
 
-void
-wibox_set_opacity(lua_State *L, int udx, double opacity)
-{
-    wibox_t *w = luaA_checkudata(L, udx, &wibox_class);
-    if(w->opacity != opacity)
-    {
-        w->opacity = opacity;
-        if(w->window)
-            xwindow_set_opacity(w->window, opacity);
-        luaA_object_emit_signal(L, udx, "property::opacity", 0);
-    }
-}
-
 /** Set a wibox border color.
  * \param L The Lua VM state.
  * \param udx The wibox to change border width.
@@ -1105,41 +1092,6 @@ luaA_wibox_set_ontop(lua_State *L, wibox_t *wibox)
     return 0;
 }
 
-/** Set the wibox opacity.
- * \param L The Lua VM state.
- * \param wibox The wibox object.
- * \return The number of elements pushed on stack.
- */
-static int
-luaA_wibox_set_opacity(lua_State *L, wibox_t *wibox)
-{
-    if(lua_isnil(L, -1))
-        wibox_set_opacity(L, -3, -1);
-    else
-    {
-        double d = luaL_checknumber(L, -1);
-        if(d >= 0 && d <= 1)
-            wibox_set_opacity(L, -3, d);
-    }
-    return 0;
-}
-
-/** Get the wibox opacity.
- * \param L The Lua VM state.
- * \param wibox The wibox object.
- * \return The number of elements pushed on stack.
- */
-static int
-luaA_wibox_get_opacity(lua_State *L, wibox_t *wibox)
-{
-    if (wibox->opacity >= 0)
-    {
-        lua_pushnumber(L, wibox->opacity);
-        return 1;
-    }
-    return 0;
-}
-
 /** Set the wibox cursor.
  * \param L The Lua VM state.
  * \param wibox The wibox object.
@@ -1389,7 +1341,7 @@ wibox_class_setup(lua_State *L)
         { NULL, NULL },
     };
 
-    luaA_class_setup(L, &wibox_class, "wibox", NULL,
+    luaA_class_setup(L, &wibox_class, "wibox", &window_class,
                      (lua_class_allocator_t) wibox_new, NULL,
                      luaA_class_index_miss_property, luaA_class_newindex_miss_property,
                      wibox_methods, wibox_meta);
@@ -1397,10 +1349,6 @@ wibox_class_setup(lua_State *L)
                             (lua_class_propfunc_t) luaA_wibox_set_widgets,
                             (lua_class_propfunc_t) luaA_wibox_get_widgets,
                             (lua_class_propfunc_t) luaA_wibox_set_widgets);
-    luaA_class_add_property(&wibox_class, A_TK_OPACITY,
-                            (lua_class_propfunc_t) luaA_wibox_set_opacity,
-                            (lua_class_propfunc_t) luaA_wibox_get_opacity,
-                            (lua_class_propfunc_t) luaA_wibox_set_opacity);
     luaA_class_add_property(&wibox_class, A_TK_VISIBLE,
                             (lua_class_propfunc_t) luaA_wibox_set_visible,
                             (lua_class_propfunc_t) luaA_wibox_get_visible,

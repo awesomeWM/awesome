@@ -759,6 +759,9 @@ luaA_init(xdgHandle* xdg)
     /* Export tag */
     tag_class_setup(L);
 
+    /* Export window */
+    window_class_setup(L);
+
     /* Export wibox */
     wibox_class_setup(L);
 

@@ -55,24 +55,6 @@ luaA_client_gc(lua_State *L)
     return luaA_object_gc(L);
 }
 
-/** Change the client opacity.
- * \param L The Lua VM state.
- * \param cidx The client index.
- * \param opacity The opacity.
- */
-void
-client_set_opacity(lua_State *L, int cidx, double opacity)
-{
-    client_t *c = luaA_checkudata(L, cidx, &client_class);
-
-    if(c->opacity != opacity)
-    {
-        c->opacity = opacity;
-        xwindow_set_opacity(c->window, opacity);
-        luaA_object_emit_signal(L, cidx, "property::opacity", 0);
-    }
-}
-
 /** Change the clients urgency flag.
  * \param L The Lua VM state.
  * \param cidx The client index on the stack.
@@ -636,7 +618,7 @@ HANDLE_GEOM(height)
     property_update_net_wm_pid(c, NULL);
     property_update_net_wm_icon(c, NULL);
 
-    client_set_opacity(globalconf.L, -1, xwindow_get_opacity(c->window));
+    window_set_opacity(globalconf.L, -1, xwindow_get_opacity(c->window));
 
     /* Then check clients hints */
     ewmh_client_check_hints(c);
@@ -1617,16 +1599,6 @@ luaA_client_set_icon(lua_State *L, client_t *c)
 }
 
 static int
-luaA_client_set_opacity(lua_State *L, client_t *c)
-{
-    if(lua_isnil(L, -1))
-        client_set_opacity(L, -3, -1);
-    else
-        client_set_opacity(L, -3, luaL_checknumber(L, -1));
-    return 0;
-}
-
-static int
 luaA_client_set_sticky(lua_State *L, client_t *c)
 {
     client_set_sticky(L, -3, luaA_checkboolean(L, -1));
@@ -1718,7 +1690,6 @@ LUA_OBJECT_EXPORT_PROPERTY(client, client_t, machine, lua_pushstring)
 LUA_OBJECT_EXPORT_PROPERTY(client, client_t, role, lua_pushstring)
 LUA_OBJECT_EXPORT_PROPERTY(client, client_t, transient_for, luaA_object_push)
 LUA_OBJECT_EXPORT_PROPERTY(client, client_t, skip_taskbar, lua_pushboolean)
-LUA_OBJECT_EXPORT_PROPERTY(client, client_t, window, lua_pushnumber)
 LUA_OBJECT_EXPORT_PROPERTY(client, client_t, leader_window, lua_pushnumber)
 LUA_OBJECT_EXPORT_PROPERTY(client, client_t, group_window, lua_pushnumber)
 LUA_OBJECT_EXPORT_PROPERTY(client, client_t, pid, lua_pushnumber)
@@ -1734,7 +1705,6 @@ LUA_OBJECT_EXPORT_PROPERTY(client, client_t, sticky, lua_pushboolean)
 LUA_OBJECT_EXPORT_PROPERTY(client, client_t, size_hints_honor, lua_pushboolean)
 LUA_OBJECT_EXPORT_PROPERTY(client, client_t, maximized_horizontal, lua_pushboolean)
 LUA_OBJECT_EXPORT_PROPERTY(client, client_t, maximized_vertical, lua_pushboolean)
-LUA_OBJECT_EXPORT_PROPERTY(client, client_t, opacity, lua_pushnumber)
 LUA_OBJECT_EXPORT_PROPERTY(client, client_t, border_width, lua_pushnumber)
 LUA_OBJECT_EXPORT_PROPERTY(client, client_t, border_color, luaA_pushxcolor)
 
@@ -2089,7 +2059,7 @@ client_class_setup(lua_State *L)
         { NULL, NULL }
     };
 
-    luaA_class_setup(L, &client_class, "client", NULL,
+    luaA_class_setup(L, &client_class, "client", &window_class,
                      (lua_class_allocator_t) client_new,
                      (lua_class_checker_t) client_checker,
                      luaA_class_index_miss_property, luaA_class_newindex_miss_property,
@@ -2129,10 +2099,6 @@ client_class_setup(lua_State *L)
     luaA_class_add_property(&client_class, A_TK_PID,
                             NULL,
                             (lua_class_propfunc_t) luaA_client_get_pid,
-                            NULL);
-    luaA_class_add_property(&client_class, A_TK_WINDOW,
-                            NULL,
-                            (lua_class_propfunc_t) luaA_client_get_window,
                             NULL);
     luaA_class_add_property(&client_class, A_TK_LEADER_WINDOW,
                             NULL,
@@ -2182,10 +2148,6 @@ client_class_setup(lua_State *L)
                             (lua_class_propfunc_t) luaA_client_set_icon,
                             (lua_class_propfunc_t) luaA_client_get_icon,
                             (lua_class_propfunc_t) luaA_client_set_icon);
-    luaA_class_add_property(&client_class, A_TK_OPACITY,
-                            (lua_class_propfunc_t) luaA_client_set_opacity,
-                            (lua_class_propfunc_t) luaA_client_get_opacity,
-                            (lua_class_propfunc_t) luaA_client_set_opacity);
     luaA_class_add_property(&client_class, A_TK_ONTOP,
                             (lua_class_propfunc_t) luaA_client_set_ontop,
                             (lua_class_propfunc_t) luaA_client_get_ontop,
