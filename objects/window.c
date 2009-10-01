@@ -21,10 +21,33 @@
 
 #include "luaa.h"
 #include "xwindow.h"
+#include "ewmh.h"
+#include "screen.h"
 #include "objects/window.h"
 #include "common/luaobject.h"
 
 LUA_CLASS_FUNCS(window, window_class)
+
+/** Return window struts (reserved space at the edge of the screen).
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ */
+static int
+luaA_window_struts(lua_State *L)
+{
+    window_t *window = luaA_checkudata(L, 1, &window_class);
+
+    if(lua_gettop(L) == 2)
+    {
+        luaA_tostrut(L, 2, &window->strut);
+        ewmh_update_strut(window->window, &window->strut);
+        luaA_object_emit_signal(L, 1, "property::struts", 0);
+        if(window->screen)
+            screen_emit_signal(L, window->screen, "property::workarea", 0);
+    }
+
+    return luaA_pushstrut(L, window->strut);
+}
 
 /** Set a window opacity.
  * \param L The Lua VM state.
@@ -91,6 +114,7 @@ window_class_setup(lua_State *L)
 
     static const struct luaL_reg window_meta[] =
     {
+        { "struts", luaA_window_struts },
         { NULL, NULL }
     };
 

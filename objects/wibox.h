@@ -23,7 +23,6 @@
 #define AWESOME_WIBOX_H
 
 #include "objects/widget.h"
-#include "strut.h"
 #include "objects/window.h"
 #include "common/luaobject.h"
 
@@ -35,8 +34,6 @@ struct wibox_t
     bool ontop;
     /** Visible */
     bool visible;
-    /** Screen */
-    screen_t *screen;
     /** Widget list */
     widget_node_array_t widgets;
     void *widgets_table;
@@ -66,8 +63,6 @@ struct wibox_t
     draw_context_t ctx;
     /** Orientation */
     orientation_t orientation;
-    /** Strut */
-    strut_t strut;
     /** The window's shape */
     struct
     {

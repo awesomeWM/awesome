@@ -1506,29 +1506,6 @@ luaA_client_geometry(lua_State *L)
     return luaA_pusharea(L, c->geometry);
 }
 
-/** Return client struts (reserved space at the edge of the screen).
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- * \luastack
- * \lparam A table with new strut values, or none.
- * \lreturn A table with strut values.
- */
-static int
-luaA_client_struts(lua_State *L)
-{
-    client_t *c = luaA_checkudata(L, 1, &client_class);
-
-    if(lua_gettop(L) == 2)
-    {
-        luaA_tostrut(L, 2, &c->strut);
-        ewmh_update_strut(c->window, &c->strut);
-        luaA_object_emit_signal(L, 1, "property::struts", 0);
-        screen_emit_signal(L, c->screen, "property::workarea", 0);
-    }
-
-    return luaA_pushstrut(L, c->strut);
-}
-
 static int
 luaA_client_set_screen(lua_State *L, client_t *c)
 {
@@ -2048,7 +2025,6 @@ client_class_setup(lua_State *L)
         { "keys", luaA_client_keys },
         { "isvisible", luaA_client_isvisible },
         { "geometry", luaA_client_geometry },
-        { "struts", luaA_client_struts },
         { "tags", luaA_client_tags },
         { "kill", luaA_client_kill },
         { "swap", luaA_client_swap },

@@ -22,6 +22,7 @@
 #ifndef AWESOME_OBJECTS_WINDOW_H
 #define AWESOME_OBJECTS_WINDOW_H
 
+#include "strut.h"
 #include "common/luaclass.h"
 
 #define WINDOW_OBJECT_HEADER \
@@ -29,7 +30,11 @@
     /** The X window number */ \
     xcb_window_t window; \
     /** Opacity */ \
-    double opacity;
+    double opacity; \
+    /** Strut */ \
+    strut_t strut; \
+    /** Client logical screen */ \
+    screen_t *screen;
 
 /** Window structure */
 typedef struct

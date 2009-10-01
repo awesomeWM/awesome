@@ -453,24 +453,27 @@ ewmh_client_update_desktop(client_t *c)
 void
 ewmh_update_strut(xcb_window_t window, strut_t *strut)
 {
-    const uint32_t state[] =
+    if(window)
     {
-        strut->left,
-        strut->right,
-        strut->top,
-        strut->bottom,
-        strut->left_start_y,
-        strut->left_end_y,
-        strut->right_start_y,
-        strut->right_end_y,
-        strut->top_start_x,
-        strut->top_end_x,
-        strut->bottom_start_x,
-        strut->bottom_end_x
-    };
+        const uint32_t state[] =
+        {
+            strut->left,
+            strut->right,
+            strut->top,
+            strut->bottom,
+            strut->left_start_y,
+            strut->left_end_y,
+            strut->right_start_y,
+            strut->right_end_y,
+            strut->top_start_x,
+            strut->top_end_x,
+            strut->bottom_start_x,
+            strut->bottom_end_x
+        };
 
-    xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
-                        window, _NET_WM_STRUT_PARTIAL, CARDINAL, 32, countof(state), state);
+        xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
+                            window, _NET_WM_STRUT_PARTIAL, CARDINAL, 32, countof(state), state);
+    }
 }
 
 void

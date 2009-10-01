@@ -24,7 +24,6 @@
 
 #include "mouse.h"
 #include "stack.h"
-#include "strut.h"
 #include "draw.h"
 #include "banning.h"
 #include "objects/window.h"
@@ -80,8 +79,6 @@ struct client_t
         /** Internal geometry (matching X11 protocol) */
         area_t internal;
     } geometries;
-    /** Strut */
-    strut_t strut;
     /** Border width and pre-fullscreen border width */
     int border_width, border_width_fs;
     xcolor_t border_color;
@@ -123,8 +120,6 @@ struct client_t
     xcb_window_t leader_window;
     /** Client's WM_PROTOCOLS property */
     xcb_get_wm_protocols_reply_t protocols;
-    /** Client logical screen */
-    screen_t *screen;
     /** Client physical screen */
     int phys_screen;
     /** Button bindings */
