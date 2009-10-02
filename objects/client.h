@@ -122,8 +122,6 @@ struct client_t
     xcb_get_wm_protocols_reply_t protocols;
     /** Client physical screen */
     int phys_screen;
-    /** Button bindings */
-    button_array_t buttons;
     /** Key bindings */
     key_array_t keys;
     /** Icon */

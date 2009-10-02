@@ -66,7 +66,6 @@ wibox_wipe(wibox_t *wibox)
 {
     p_delete(&wibox->cursor);
     wibox_wipe_resources(wibox);
-    button_array_wipe(&wibox->buttons);
     widget_node_array_wipe(&wibox->widgets);
 }
 
@@ -1217,28 +1216,6 @@ luaA_wibox_get_widgets(lua_State *L, wibox_t *wibox)
     return luaA_object_push_item(L, 1, wibox->widgets_table);
 }
 
-/** Get or set mouse buttons bindings to a wibox.
- * \param L The Lua VM state.
- * \luastack
- * \lvalue A wibox.
- * \lparam An array of mouse button bindings objects, or nothing.
- * \return The array of mouse button bindings objects of this wibox.
- */
-static int
-luaA_wibox_buttons(lua_State *L)
-{
-    wibox_t *wibox = luaA_checkudata(L, 1, &wibox_class);
-
-    if(lua_gettop(L) == 2)
-    {
-        luaA_button_array_set(L, 1, 2, &wibox->buttons);
-        luaA_object_emit_signal(L, 1, "property::buttons", 0);
-        xwindow_buttons_grab(wibox->window, &wibox->buttons);
-    }
-
-    return luaA_button_array_get(L, 1, &wibox->buttons);
-}
-
 /** Set the wibox border width.
  * \param L The Lua VM state.
  * \param wibox The wibox object.
@@ -1310,7 +1287,6 @@ wibox_class_setup(lua_State *L)
     {
         LUA_OBJECT_META(wibox)
         LUA_CLASS_META
-        { "buttons", luaA_wibox_buttons },
         { "geometry", luaA_wibox_geometry },
         { NULL, NULL },
     };

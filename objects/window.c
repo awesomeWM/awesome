@@ -28,6 +28,31 @@
 
 LUA_CLASS_FUNCS(window, window_class)
 
+static void
+window_wipe(window_t *window)
+{
+    button_array_wipe(&window->buttons);
+}
+
+/** Get or set mouse buttons bindings on a window.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on the stack.
+ */
+static int
+luaA_window_buttons(lua_State *L)
+{
+    window_t *window = luaA_checkudata(L, 1, &window_class);
+
+    if(lua_gettop(L) == 2)
+    {
+        luaA_button_array_set(L, 1, 2, &window->buttons);
+        luaA_object_emit_signal(L, 1, "property::buttons", 0);
+        xwindow_buttons_grab(window->window, &window->buttons);
+    }
+
+    return luaA_button_array_get(L, 1, &window->buttons);
+}
+
 /** Return window struts (reserved space at the edge of the screen).
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
@@ -115,11 +140,12 @@ window_class_setup(lua_State *L)
     static const struct luaL_reg window_meta[] =
     {
         { "struts", luaA_window_struts },
+        { "buttons", luaA_window_buttons },
         { NULL, NULL }
     };
 
     luaA_class_setup(L, &window_class, "window", NULL,
-                     NULL, NULL, NULL,
+                     NULL, (lua_class_collector_t) window_wipe, NULL,
                      luaA_class_index_miss_property, luaA_class_newindex_miss_property,
                      window_methods, window_meta);
 

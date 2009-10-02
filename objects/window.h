@@ -23,6 +23,7 @@
 #define AWESOME_OBJECTS_WINDOW_H
 
 #include "strut.h"
+#include "objects/button.h"
 #include "common/luaclass.h"
 
 #define WINDOW_OBJECT_HEADER \
@@ -34,7 +35,9 @@
     /** Strut */ \
     strut_t strut; \
     /** Client logical screen */ \
-    screen_t *screen;
+    screen_t *screen; \
+    /** Button bindings */ \
+    button_array_t buttons;
 
 /** Window structure */
 typedef struct

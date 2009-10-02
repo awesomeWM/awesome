@@ -41,7 +41,6 @@
 static void
 client_wipe(client_t *c)
 {
-    button_array_wipe(&c->buttons);
     key_array_wipe(&c->keys);
     xcb_get_wm_protocols_reply_wipe(&c->protocols);
     p_delete(&c->machine);
@@ -1904,30 +1903,6 @@ luaA_client_get_size_hints(lua_State *L, client_t *c)
     return 1;
 }
 
-/** Get or set mouse buttons bindings for a client.
- * \param L The Lua VM state.
- * \return The number of element pushed on stack.
- * \luastack
- * \lvalue A client.
- * \lparam An array of mouse button bindings objects, or nothing.
- * \return The array of mouse button bindings objects of this client.
- */
-static int
-luaA_client_buttons(lua_State *L)
-{
-    client_t *client = luaA_checkudata(L, 1, &client_class);
-    button_array_t *buttons = &client->buttons;
-
-    if(lua_gettop(L) == 2)
-    {
-        luaA_button_array_set(L, 1, 2, buttons);
-        luaA_object_emit_signal(L, 1, "property::buttons", 0);
-        xwindow_buttons_grab(client->window, &client->buttons);
-    }
-
-    return luaA_button_array_get(L, 1, buttons);
-}
-
 /** Get or set keys bindings for a client.
  * \param L The Lua VM state.
  * \return The number of element pushed on stack.
@@ -2019,7 +1994,6 @@ client_class_setup(lua_State *L)
     {
         LUA_OBJECT_META(client)
         LUA_CLASS_META
-        { "buttons", luaA_client_buttons },
         { "keys", luaA_client_keys },
         { "isvisible", luaA_client_isvisible },
         { "geometry", luaA_client_geometry },

@@ -47,8 +47,6 @@ struct wibox_t
     char *cursor;
     /** Background image */
     image_t *bg_image;
-    /** Button bindings */
-    button_array_t buttons;
     /** The pixmap copied to the window object. */
     xcb_pixmap_t pixmap;
     /** The graphic context. */
