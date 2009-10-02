@@ -1,7 +1,7 @@
 /*
  * keygrabber.c - key grabbing
  *
- * Copyright © 2008 Julien Danjou <julien@danjou.info>
+ * Copyright © 2008-2009 Julien Danjou <julien@danjou.info>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@
 #include "keygrabber.h"
 #include "objects/key.h"
 #include "luaa.h"
+#include "keyresolv.h"
 #include "common/xutil.h"
 
 /** Grab the keyboard.
@@ -63,11 +64,11 @@ bool
 keygrabber_handlekpress(lua_State *L, xcb_key_press_event_t *e)
 {
     /* transfer event (keycode + modifiers) to keysym */
-    xcb_keysym_t ksym = key_getkeysym(e->detail, e->state);
+    xcb_keysym_t ksym = keyresolv_get_keysym(e->detail, e->state);
 
     /* convert keysym to string */
     char buf[MAX(MB_LEN_MAX, 32)];
-    if(!key_press_lookup_string(ksym, buf, countof(buf)))
+    if(!keyresolv_keysym_to_string(ksym, buf, countof(buf)))
         return false;
 
     luaA_pushmodifiers(L, e->state);

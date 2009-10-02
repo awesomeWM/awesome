@@ -1,5 +1,5 @@
 /*
- * key.h - Keybinding helpers
+ * keyresolv.h - Key resolv
  *
  * Copyright © 2009 Julien Danjou <julien@danjou.info>
  *
@@ -19,33 +19,13 @@
  *
  */
 
-#ifndef AWESOME_KEY_H
-#define AWESOME_KEY_H
+#ifndef AWESOME_KEYRESOLV_H
+#define AWESOME_KEYRESOLV_H
 
-#include "common/luaobject.h"
+#include <xcb/xcb.h>
 
-typedef struct keyb_t
-{
-    LUA_OBJECT_HEADER
-    /** Key modifier */
-    uint16_t modifiers;
-    /** Keysym */
-    xcb_keysym_t keysym;
-    /** Keycode */
-    xcb_keycode_t keycode;
-} keyb_t;
-
-lua_class_t key_class;
-LUA_OBJECT_FUNCS(key_class, keyb_t, key)
-DO_ARRAY(keyb_t *, key, DO_NOTHING)
-
-void key_class_setup(lua_State *);
-
-void luaA_key_array_set(lua_State *, int, int, key_array_t *);
-int luaA_key_array_get(lua_State *, int, key_array_t *);
-
-int luaA_pushmodifiers(lua_State *, uint16_t);
-uint16_t luaA_tomodifiers(lua_State *L, int ud);
+xcb_keysym_t keyresolv_get_keysym(xcb_keycode_t, uint16_t);
+bool keyresolv_keysym_to_string(xcb_keysym_t, char *, ssize_t);
 
 #endif
 

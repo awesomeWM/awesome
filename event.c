@@ -32,7 +32,7 @@
 #include "ewmh.h"
 #include "objects/client.h"
 #include "objects/widget.h"
-#include "objects/key.h"
+#include "keyresolv.h"
 #include "keygrabber.h"
 #include "mousegrabber.h"
 #include "luaa.h"
@@ -611,7 +611,7 @@ event_handle_key(void *data __attribute__ ((unused)),
     else
     {
         /* get keysym ignoring all modifiers */
-        xcb_keysym_t keysym = key_getkeysym(ev->detail, 0);
+        xcb_keysym_t keysym = keyresolv_get_keysym(ev->detail, 0);
         client_t *c;
         if((c = client_getbywin(ev->event)))
         {
