@@ -50,17 +50,11 @@ tag_unref_simplified(tag_t **tag)
     luaA_object_unref(globalconf.L, *tag);
 }
 
-/** Garbage collect a tag.
- * \param L The Lua VM state.
- * \return 0.
- */
-static int
-luaA_tag_gc(lua_State *L)
+static void
+tag_wipe(tag_t *tag)
 {
-    tag_t *tag = luaA_checkudata(L, 1, &tag_class);
     client_array_wipe(&tag->clients);
     p_delete(&tag->name);
-    return luaA_object_gc(L);
 }
 
 OBJECT_EXPORT_PROPERTY(tag, tag_t, selected)
@@ -413,12 +407,13 @@ tag_class_setup(lua_State *L)
         LUA_OBJECT_META(tag)
         LUA_CLASS_META
         { "clients", luaA_tag_clients },
-        { "__gc", luaA_tag_gc },
         { NULL, NULL },
     };
 
     luaA_class_setup(L, &tag_class, "tag", NULL,
-                     (lua_class_allocator_t) tag_new, NULL,
+                     (lua_class_allocator_t) tag_new,
+                     (lua_class_collector_t) tag_wipe,
+                     NULL,
                      luaA_class_index_miss_property, luaA_class_newindex_miss_property,
                      tag_methods, tag_meta);
     luaA_class_add_property(&tag_class, A_TK_NAME,

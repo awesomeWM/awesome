@@ -37,7 +37,7 @@ LUA_OBJECT_FUNCS(wibox_class, wibox_t, wibox)
  * \param w The wibox to wipe.
  */
 static void
-wibox_wipe(wibox_t *w)
+wibox_wipe_resources(wibox_t *w)
 {
     if(w->window)
     {
@@ -61,19 +61,13 @@ wibox_wipe(wibox_t *w)
     draw_context_wipe(&w->ctx);
 }
 
-/** Take care of garbage collecting a wibox.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack, 0!
- */
-static int
-luaA_wibox_gc(lua_State *L)
+static void
+wibox_wipe(wibox_t *wibox)
 {
-    wibox_t *wibox = luaA_checkudata(L, 1, &wibox_class);
     p_delete(&wibox->cursor);
-    wibox_wipe(wibox);
+    wibox_wipe_resources(wibox);
     button_array_wipe(&wibox->buttons);
     widget_node_array_wipe(&wibox->widgets);
-    return luaA_object_gc(L);
 }
 
 /** Wipe an array of widget_node. Release references to widgets.
@@ -702,7 +696,7 @@ wibox_detach(lua_State *L, int udx)
 
         wibox_clear_mouse_over(wibox);
 
-        wibox_wipe(wibox);
+        wibox_wipe_resources(wibox);
 
         foreach(item, globalconf.wiboxes)
             if(*item == wibox)
@@ -1318,12 +1312,13 @@ wibox_class_setup(lua_State *L)
         LUA_CLASS_META
         { "buttons", luaA_wibox_buttons },
         { "geometry", luaA_wibox_geometry },
-        { "__gc", luaA_wibox_gc },
         { NULL, NULL },
     };
 
     luaA_class_setup(L, &wibox_class, "wibox", &window_class,
-                     (lua_class_allocator_t) wibox_new, NULL,
+                     (lua_class_allocator_t) wibox_new,
+                     (lua_class_collector_t) wibox_wipe,
+                     NULL,
                      luaA_class_index_miss_property, luaA_class_newindex_miss_property,
                      wibox_methods, wibox_meta);
     luaA_class_add_property(&wibox_class, A_TK_WIDGETS,

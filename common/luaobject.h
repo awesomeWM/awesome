@@ -191,7 +191,6 @@ int luaA_object_emit_signal_simple(lua_State *);
     }
 
 int luaA_object_tostring(lua_State *);
-int luaA_object_gc(lua_State *);
 
 #define LUA_OBJECT_META(prefix) \
     { "__tostring", luaA_object_tostring }, \

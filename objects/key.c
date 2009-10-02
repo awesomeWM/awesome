@@ -1122,12 +1122,11 @@ key_class_setup(lua_State *L)
     {
         LUA_OBJECT_META(key)
         LUA_CLASS_META
-        { "__gc", luaA_object_gc },
         { NULL, NULL },
     };
 
     luaA_class_setup(L, &key_class, "key", NULL,
-                     (lua_class_allocator_t) key_new, NULL,
+                     (lua_class_allocator_t) key_new, NULL, NULL,
                      luaA_class_index_miss_property, luaA_class_newindex_miss_property,
                      key_methods, key_meta);
     luaA_class_add_property(&key_class, A_TK_KEY,

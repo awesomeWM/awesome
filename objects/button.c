@@ -110,12 +110,11 @@ button_class_setup(lua_State *L)
     {
         LUA_OBJECT_META(button)
         LUA_CLASS_META
-        { "__gc", luaA_object_gc },
         { NULL, NULL }
     };
 
     luaA_class_setup(L, &button_class, "button", NULL,
-                     (lua_class_allocator_t) button_new, NULL,
+                     (lua_class_allocator_t) button_new, NULL, NULL,
                      luaA_class_index_miss_property, luaA_class_newindex_miss_property,
                      button_methods, button_meta);
     luaA_class_add_property(&button_class, A_TK_BUTTON,

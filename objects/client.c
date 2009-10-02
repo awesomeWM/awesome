@@ -38,10 +38,9 @@
  * \param L The Lua VM state.
  * \return The number of element pushed on stack.
  */
-static int
-luaA_client_gc(lua_State *L)
+static void
+client_wipe(client_t *c)
 {
-    client_t *c = luaA_checkudata(L, 1, &client_class);
     button_array_wipe(&c->buttons);
     key_array_wipe(&c->keys);
     xcb_get_wm_protocols_reply_wipe(&c->protocols);
@@ -52,7 +51,6 @@ luaA_client_gc(lua_State *L)
     p_delete(&c->alt_icon_name);
     p_delete(&c->name);
     p_delete(&c->alt_name);
-    return luaA_object_gc(L);
 }
 
 /** Change the clients urgency flag.
@@ -2031,12 +2029,12 @@ client_class_setup(lua_State *L)
         { "raise", luaA_client_raise },
         { "lower", luaA_client_lower },
         { "unmanage", luaA_client_unmanage },
-        { "__gc", luaA_client_gc },
         { NULL, NULL }
     };
 
     luaA_class_setup(L, &client_class, "client", &window_class,
                      (lua_class_allocator_t) client_new,
+                     (lua_class_collector_t) client_wipe,
                      (lua_class_checker_t) client_checker,
                      luaA_class_index_miss_property, luaA_class_newindex_miss_property,
                      client_methods, client_meta);

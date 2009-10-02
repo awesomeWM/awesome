@@ -163,11 +163,31 @@ luaA_class_add_property(lua_class_t *lua_class,
                                     });
 }
 
+/** Garbage collect a Lua object.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ */
+static int
+luaA_class_gc(lua_State *L)
+{
+    lua_object_t *item = lua_touserdata(L, 1);
+    signal_array_wipe(&item->signals);
+    /* Get the object class */
+    lua_class_t *class = luaA_class_get(L, 1);
+    /* Call the collector function of the class, and all its parent classes */
+    for(; class; class = class->parent)
+        if(class->collector)
+            class->collector(item);
+    return 0;
+}
+
 /** Setup a new Lua class.
  * \param L The Lua VM state.
  * \param name The class name.
  * \param parent The parent class (inheritance).
  * \param allocator The allocator function used when creating a new object.
+ * \param Collector The collector function used when garbage collecting an
+ * object.
  * \param checker The check function to call when using luaA_checkudata().
  * \param index_miss_property Function to call when an object of this class
  * receive a __index request on an unknown property.
@@ -181,18 +201,19 @@ luaA_class_setup(lua_State *L, lua_class_t *class,
                  const char *name,
                  lua_class_t *parent,
                  lua_class_allocator_t allocator,
+                 lua_class_collector_t collector,
                  lua_class_checker_t checker,
                  lua_class_propfunc_t index_miss_property,
                  lua_class_propfunc_t newindex_miss_property,
                  const struct luaL_reg methods[],
                  const struct luaL_reg meta[])
 {
-    /* Create the metatable */
+    /* Create the object metatable */
     lua_newtable(L);
     /* Register it with class pointer as key in the registry
      * class-pointer -> metatable */
     lua_pushlightuserdata(L, class);
-    /* Duplicate the metatable */
+    /* Duplicate the object metatable */
     lua_pushvalue(L, -2);
     lua_rawset(L, LUA_REGISTRYINDEX);
     /* Now register class pointer with metatable as key in the registry
@@ -201,7 +222,12 @@ luaA_class_setup(lua_State *L, lua_class_t *class,
     lua_pushlightuserdata(L, class);
     lua_rawset(L, LUA_REGISTRYINDEX);
 
-    lua_pushvalue(L, -1);           /* dup metatable                      2 */
+    /* Duplicate objects metatable */
+    lua_pushvalue(L, -1);
+    /* Set garbage collector in the metatable */
+    lua_pushcfunction(L, luaA_class_gc);
+    lua_setfield(L, -2, "__gc");
+
     lua_setfield(L, -2, "__index"); /* metatable.__index = metatable      1 */
 
     luaL_register(L, NULL, meta);                                      /* 1 */
@@ -210,6 +236,7 @@ luaA_class_setup(lua_State *L, lua_class_t *class,
     lua_setmetatable(L, -2);        /* set self as metatable              2 */
     lua_pop(L, 2);
 
+    class->collector = collector;
     class->allocator = allocator;
     class->name = name;
     class->index_miss_property = index_miss_property;

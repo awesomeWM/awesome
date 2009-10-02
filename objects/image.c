@@ -42,14 +42,12 @@ struct image
 
 LUA_OBJECT_FUNCS(image_class, image_t, image)
 
-static int
-luaA_image_gc(lua_State *L)
+static void
+image_wipe(image_t *image)
 {
-    image_t *p = luaA_checkudata(L, 1, &image_class);
-    imlib_context_set_image(p->image);
+    imlib_context_set_image(image->image);
     imlib_free_image();
-    p_delete(&p->data);
-    return luaA_object_gc(L);
+    p_delete(&image->data);
 }
 
 static const char *
@@ -816,12 +814,13 @@ image_class_setup(lua_State *L)
         { "draw_rectangle", luaA_image_draw_rectangle },
         { "draw_rectangle_gradient", luaA_image_draw_rectangle_gradient },
         { "draw_circle", luaA_image_draw_circle },
-        { "__gc", luaA_image_gc },
         { NULL, NULL }
     };
 
     luaA_class_setup(L, &image_class, "image", NULL,
-                     (lua_class_allocator_t) image_new, NULL,
+                     (lua_class_allocator_t) image_new,
+                     (lua_class_collector_t) image_wipe,
+                     NULL,
                      luaA_class_index_miss_property, luaA_class_newindex_miss_property,
                      image_methods, image_meta);
     luaA_class_add_property(&image_class, A_TK_WIDTH,

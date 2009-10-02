@@ -35,18 +35,12 @@
 
 LUA_OBJECT_FUNCS(widget_class, widget_t, widget);
 
-/** Collect a widget structure.
- * \param L The Lua VM state.
- * \return 0
- */
-static int
-luaA_widget_gc(lua_State *L)
+static void
+widget_wipe(widget_t *widget)
 {
-    widget_t *widget = luaA_checkudata(L, 1, &widget_class);
     if(widget->destructor)
         widget->destructor(widget);
     button_array_wipe(&widget->buttons);
-    return luaA_object_gc(L);
 }
 
 /** Get a widget node from a wibox by coords.
@@ -574,13 +568,13 @@ widget_class_setup(lua_State *L)
         { "extents", luaA_widget_extents },
         { "__index", luaA_widget_index },
         { "__newindex", luaA_widget_newindex },
-        { "__gc", luaA_widget_gc },
         { NULL, NULL }
     };
 
     luaA_class_setup(L, &widget_class, "widget", NULL,
-                     (lua_class_allocator_t) widget_new, NULL,
-                     NULL, NULL,
+                     (lua_class_allocator_t) widget_new,
+                     (lua_class_collector_t) widget_wipe,
+                     NULL, NULL, NULL,
                      widget_methods, widget_meta);
     luaA_class_add_property(&widget_class, A_TK_VISIBLE,
                             (lua_class_propfunc_t) luaA_widget_set_visible,

@@ -41,6 +41,7 @@ typedef struct
 } lua_object_t;
 
 typedef lua_object_t *(*lua_class_allocator_t)(lua_State *);
+typedef void (*lua_class_collector_t)(lua_object_t *);
 
 typedef int (*lua_class_propfunc_t)(lua_State *, lua_object_t *);
 
@@ -57,6 +58,8 @@ struct lua_class_t
     lua_class_t *parent;
     /** Allocator for creating new objects of that class */
     lua_class_allocator_t allocator;
+    /** Garbage collection function */
+    lua_class_collector_t collector;
     /** Class properties */
     lua_class_property_array_t properties;
     /** Function to call when a indexing an unknown property */
@@ -76,7 +79,8 @@ void luaA_class_emit_signal(lua_State *, lua_class_t *, const char *, int);
 
 void luaA_openlib(lua_State *, const char *, const struct luaL_reg[], const struct luaL_reg[]);
 void luaA_class_setup(lua_State *, lua_class_t *, const char *, lua_class_t *,
-                      lua_class_allocator_t, lua_class_checker_t,
+                      lua_class_allocator_t, lua_class_collector_t,
+                      lua_class_checker_t,
                       lua_class_propfunc_t, lua_class_propfunc_t,
                       const struct luaL_reg[], const struct luaL_reg[]);
 

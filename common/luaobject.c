@@ -300,16 +300,4 @@ luaA_object_tostring(lua_State *L)
     return 1;
 }
 
-/** Garbage collect a Lua object.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- */
-int
-luaA_object_gc(lua_State *L)
-{
-    lua_object_t *item = lua_touserdata(L, 1);
-    signal_array_wipe(&item->signals);
-    return 0;
-}
-
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
