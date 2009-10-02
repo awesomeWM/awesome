@@ -37,49 +37,49 @@ set(AWE_DOC_FILES
 
 set(AWE_SRCS
     ${SOURCE_DIR}/awesome.c
-    ${SOURCE_DIR}/objects/client.c
-    ${SOURCE_DIR}/strut.c
-    ${SOURCE_DIR}/dbus.c
-    ${SOURCE_DIR}/root.c
-    ${SOURCE_DIR}/event.c
-    ${SOURCE_DIR}/property.c
-    ${SOURCE_DIR}/ewmh.c
-    ${SOURCE_DIR}/objects/key.c
-    ${SOURCE_DIR}/keygrabber.c
-    ${SOURCE_DIR}/mousegrabber.c
     ${SOURCE_DIR}/banning.c
-    ${SOURCE_DIR}/luaa.c
-    ${SOURCE_DIR}/spawn.c
-    ${SOURCE_DIR}/mouse.c
-    ${SOURCE_DIR}/objects/button.c
-    ${SOURCE_DIR}/screen.c
-    ${SOURCE_DIR}/stack.c
-    ${SOURCE_DIR}/selection.c
-    ${SOURCE_DIR}/objects/wibox.c
-    ${SOURCE_DIR}/systray.c
-    ${SOURCE_DIR}/objects/tag.c
-    ${SOURCE_DIR}/objects/widget.c
-    ${SOURCE_DIR}/xwindow.c
-    ${SOURCE_DIR}/objects/image.c
-    ${SOURCE_DIR}/draw.c
-    ${SOURCE_DIR}/font.c
     ${SOURCE_DIR}/color.c
+    ${SOURCE_DIR}/dbus.c
+    ${SOURCE_DIR}/draw.c
+    ${SOURCE_DIR}/event.c
+    ${SOURCE_DIR}/ewmh.c
+    ${SOURCE_DIR}/font.c
+    ${SOURCE_DIR}/keygrabber.c
     ${SOURCE_DIR}/keyresolv.c
-    ${SOURCE_DIR}/objects/timer.c
-    ${SOURCE_DIR}/objects/window.c
-    ${SOURCE_DIR}/common/buffer.c
+    ${SOURCE_DIR}/luaa.c
+    ${SOURCE_DIR}/mouse.c
+    ${SOURCE_DIR}/mousegrabber.c
+    ${SOURCE_DIR}/property.c
+    ${SOURCE_DIR}/root.c
+    ${SOURCE_DIR}/screen.c
+    ${SOURCE_DIR}/selection.c
+    ${SOURCE_DIR}/spawn.c
+    ${SOURCE_DIR}/stack.c
+    ${SOURCE_DIR}/strut.c
+    ${SOURCE_DIR}/systray.c
+    ${SOURCE_DIR}/xwindow.c
     ${SOURCE_DIR}/common/atoms.c
+    ${SOURCE_DIR}/common/backtrace.c
+    ${SOURCE_DIR}/common/buffer.c
+    ${SOURCE_DIR}/common/luaclass.c
+    ${SOURCE_DIR}/common/luaobject.c
     ${SOURCE_DIR}/common/util.c
     ${SOURCE_DIR}/common/version.c
+    ${SOURCE_DIR}/common/xcursor.c
     ${SOURCE_DIR}/common/xembed.c
     ${SOURCE_DIR}/common/xutil.c
-    ${SOURCE_DIR}/common/xcursor.c
-    ${SOURCE_DIR}/common/backtrace.c
-    ${SOURCE_DIR}/common/luaobject.c
-    ${SOURCE_DIR}/common/luaclass.c
-    ${SOURCE_DIR}/objects/widgets/textbox.c
+    ${SOURCE_DIR}/objects/button.c
+    ${SOURCE_DIR}/objects/client.c
+    ${SOURCE_DIR}/objects/image.c
+    ${SOURCE_DIR}/objects/key.c
+    ${SOURCE_DIR}/objects/tag.c
+    ${SOURCE_DIR}/objects/timer.c
+    ${SOURCE_DIR}/objects/wibox.c
+    ${SOURCE_DIR}/objects/window.c
+    ${SOURCE_DIR}/objects/widget.c
+    ${SOURCE_DIR}/objects/widgets/imagebox.c
     ${SOURCE_DIR}/objects/widgets/systray.c
-    ${SOURCE_DIR}/objects/widgets/imagebox.c)
+    ${SOURCE_DIR}/objects/widgets/textbox.c)
 
 set(AWE_MAN_SRCS
     ${SOURCE_DIR}/manpages/awesome.1.txt

@@ -19,8 +19,8 @@
  *
  */
 
-#ifndef AWESOME_TAG_H
-#define AWESOME_TAG_H
+#ifndef AWESOME_OBJECTS_TAG_H
+#define AWESOME_OBJECTS_TAG_H
 
 #include "client.h"
 

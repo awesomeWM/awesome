@@ -19,8 +19,8 @@
  *
  */
 
-#ifndef AWESOME_CLIENT_H
-#define AWESOME_CLIENT_H
+#ifndef AWESOME_OBJECTS_CLIENT_H
+#define AWESOME_OBJECTS_CLIENT_H
 
 #include "mouse.h"
 #include "stack.h"

@@ -19,8 +19,8 @@
  *
  */
 
-#ifndef AWESOME_BUTTON_H
-#define AWESOME_BUTTON_H
+#ifndef AWESOME_OBJECTS_BUTTON_H
+#define AWESOME_OBJECTS_BUTTON_H
 
 #include "globalconf.h"
 

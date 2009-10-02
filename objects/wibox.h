@@ -19,8 +19,8 @@
  *
  */
 
-#ifndef AWESOME_WIBOX_H
-#define AWESOME_WIBOX_H
+#ifndef AWESOME_OBJECTS_WIBOX_H
+#define AWESOME_OBJECTS_WIBOX_H
 
 #include "objects/widget.h"
 #include "objects/window.h"

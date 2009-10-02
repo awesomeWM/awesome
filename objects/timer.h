@@ -19,8 +19,8 @@
  *
  */
 
-#ifndef AWESOME_TIMER
-#define AWESOME_TIMER
+#ifndef AWESOME_OBJECTS_TIMER_H
+#define AWESOME_OBJECTS_TIMER_H
 
 #include <lua.h>
 

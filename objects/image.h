@@ -19,8 +19,8 @@
  *
  */
 
-#ifndef AWESOME_IMAGE_H
-#define AWESOME_IMAGE_H
+#ifndef AWESOME_OBJECTS_IMAGE_H
+#define AWESOME_OBJECTS_IMAGE_H
 
 #include <xcb/xcb.h>
 #include "common/luaclass.h"

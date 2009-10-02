@@ -19,8 +19,8 @@
  *
  */
 
-#ifndef AWESOME_WIDGET_H
-#define AWESOME_WIDGET_H
+#ifndef AWESOME_OBJECTS_WIDGET_H
+#define AWESOME_OBJECTS_WIDGET_H
 
 #include "button.h"
 #include "draw.h"

@@ -19,8 +19,8 @@
  *
  */
 
-#ifndef AWESOME_KEY_H
-#define AWESOME_KEY_H
+#ifndef AWESOME_OBJECTS_KEY_H
+#define AWESOME_OBJECTS_KEY_H
 
 #include "common/luaobject.h"
 
