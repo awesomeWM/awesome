@@ -37,7 +37,9 @@
     /** Client logical screen */ \
     screen_t *screen; \
     /** Button bindings */ \
-    button_array_t buttons;
+    button_array_t buttons; \
+    /** Border color */ \
+    xcolor_t border_color;
 
 /** Window structure */
 typedef struct

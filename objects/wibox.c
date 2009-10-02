@@ -347,20 +347,6 @@ wibox_refresh_pixmap_partial(wibox_t *wibox,
                   w, h);
 }
 
-/** Set a wibox border color.
- * \param L The Lua VM state.
- * \param udx The wibox to change border width.
- * \param color The border color.
- */
-static void
-wibox_set_border_color(lua_State *L, int udx, const xcolor_t *color)
-{
-    wibox_t *w = luaA_checkudata(L, udx, &wibox_class);
-    xwindow_set_border_color(w->window, &w->border_color);
-    w->border_color = *color;
-    luaA_object_emit_signal(L, udx, "property::border_color", 0);
-}
-
 /** Set wibox orientation.
  * \param L The Lua VM state.
  * \param udx The wibox to change orientation.
@@ -767,11 +753,7 @@ wibox_attach(lua_State *L, int udx, screen_t *s)
 
 /** Create a new wibox.
  * \param L The Lua VM state.
- *
- * \luastack
- * \lparam A table with optionally defined values:
- * fg, bg, border_width, border_color, ontop, width and height.
- * \lreturn A brand new wibox.
+ * \return The number of elements pushed on stack.
  */
 static int
 luaA_wibox_new(lua_State *L)
@@ -785,9 +767,6 @@ luaA_wibox_new(lua_State *L)
 
     if(!w->ctx.bg.initialized)
         w->ctx.bg = globalconf.colors.bg;
-
-    if(!w->border_color.initialized)
-        w->border_color = globalconf.colors.bg;
 
     w->visible = true;
 
@@ -878,7 +857,6 @@ LUA_OBJECT_EXPORT_PROPERTY(wibox, wibox_t, ontop, lua_pushboolean)
 LUA_OBJECT_EXPORT_PROPERTY(wibox, wibox_t, cursor, lua_pushstring)
 LUA_OBJECT_EXPORT_PROPERTY(wibox, wibox_t, visible, lua_pushboolean)
 LUA_OBJECT_EXPORT_PROPERTY(wibox, wibox_t, border_width, lua_pushnumber)
-LUA_OBJECT_EXPORT_PROPERTY(wibox, wibox_t, border_color, luaA_pushxcolor)
 
 static int
 luaA_wibox_set_x(lua_State *L, wibox_t *wibox)
@@ -1152,23 +1130,6 @@ luaA_wibox_get_orientation(lua_State *L, wibox_t *wibox)
     return 1;
 }
 
-/** Set the wibox border color.
- * \param L The Lua VM state.
- * \param wibox The wibox object.
- * \return The number of elements pushed on stack.
- */
-static int
-luaA_wibox_set_border_color(lua_State *L, wibox_t *wibox)
-{
-    size_t len;
-    const char *buf = luaL_checklstring(L, -1, &len);
-    if(buf)
-        if(xcolor_init_reply(xcolor_init_unchecked(&wibox->border_color, buf, len)))
-            if(wibox->window)
-                wibox_set_border_color(L, -3, &wibox->border_color);
-    return 0;
-}
-
 /** Set the wibox visibility.
  * \param L The Lua VM state.
  * \param wibox The wibox object.
@@ -1303,10 +1264,6 @@ wibox_class_setup(lua_State *L)
                             (lua_class_propfunc_t) luaA_wibox_set_visible,
                             (lua_class_propfunc_t) luaA_wibox_get_visible,
                             (lua_class_propfunc_t) luaA_wibox_set_visible);
-    luaA_class_add_property(&wibox_class, A_TK_BORDER_COLOR,
-                            (lua_class_propfunc_t) luaA_wibox_set_border_color,
-                            (lua_class_propfunc_t) luaA_wibox_get_border_color,
-                            (lua_class_propfunc_t) luaA_wibox_set_border_color);
     luaA_class_add_property(&wibox_class, A_TK_BORDER_WIDTH,
                             (lua_class_propfunc_t) luaA_wibox_set_border_width,
                             (lua_class_propfunc_t) luaA_wibox_get_border_width,

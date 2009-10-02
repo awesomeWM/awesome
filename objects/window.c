@@ -127,7 +127,29 @@ luaA_window_get_opacity(lua_State *L, window_t *window)
     return 0;
 }
 
+/** Set the window border color.
+ * \param L The Lua VM state.
+ * \param window The window object.
+ * \return The number of elements pushed on stack.
+ */
+static int
+luaA_window_set_border_color(lua_State *L, window_t *window)
+{
+    size_t len;
+    const char *color_name = luaL_checklstring(L, -1, &len);
+
+    if(color_name &&
+       xcolor_init_reply(xcolor_init_unchecked(&window->border_color, color_name, len)))
+    {
+        xwindow_set_border_color(window->window, &window->border_color);
+        luaA_object_emit_signal(L, -3, "property::border_color", 0);
+    }
+
+    return 0;
+}
+
 LUA_OBJECT_EXPORT_PROPERTY(window, window_t, window, lua_pushnumber)
+LUA_OBJECT_EXPORT_PROPERTY(window, window_t, border_color, luaA_pushxcolor)
 
 void
 window_class_setup(lua_State *L)
@@ -157,6 +179,10 @@ window_class_setup(lua_State *L)
                             (lua_class_propfunc_t) luaA_window_set_opacity,
                             (lua_class_propfunc_t) luaA_window_get_opacity,
                             (lua_class_propfunc_t) luaA_window_set_opacity);
+    luaA_class_add_property(&window_class, A_TK_BORDER_COLOR,
+                            (lua_class_propfunc_t) luaA_window_set_border_color,
+                            (lua_class_propfunc_t) luaA_window_get_border_color,
+                            (lua_class_propfunc_t) luaA_window_set_border_color);
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

@@ -81,7 +81,6 @@ struct client_t
     } geometries;
     /** Border width and pre-fullscreen border width */
     int border_width, border_width_fs;
-    xcolor_t border_color;
     /** True if the client is sticky */
     bool sticky;
     /** Has urgency hint */

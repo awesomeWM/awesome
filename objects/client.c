@@ -1623,20 +1623,6 @@ luaA_client_set_urgent(lua_State *L, client_t *c)
 }
 
 static int
-luaA_client_set_border_color(lua_State *L, client_t *c)
-{
-    size_t len;
-    const char *buf;
-    if((buf = luaL_checklstring(L, -1, &len))
-       && xcolor_init_reply(xcolor_init_unchecked(&c->border_color, buf, len)))
-    {
-        xwindow_set_border_color(c->window, &c->border_color);
-        luaA_object_emit_signal(L, -3, "property::border_color", 0);
-    }
-    return 0;
-}
-
-static int
 luaA_client_set_skip_taskbar(lua_State *L, client_t *c)
 {
     client_set_skip_taskbar(L, -3, luaA_checkboolean(L, -1));
@@ -1679,7 +1665,6 @@ LUA_OBJECT_EXPORT_PROPERTY(client, client_t, size_hints_honor, lua_pushboolean)
 LUA_OBJECT_EXPORT_PROPERTY(client, client_t, maximized_horizontal, lua_pushboolean)
 LUA_OBJECT_EXPORT_PROPERTY(client, client_t, maximized_vertical, lua_pushboolean)
 LUA_OBJECT_EXPORT_PROPERTY(client, client_t, border_width, lua_pushnumber)
-LUA_OBJECT_EXPORT_PROPERTY(client, client_t, border_color, luaA_pushxcolor)
 
 static int
 luaA_client_get_content(lua_State *L, client_t *c)
@@ -2119,10 +2104,6 @@ client_class_setup(lua_State *L)
                             (lua_class_propfunc_t) luaA_client_set_border_width,
                             (lua_class_propfunc_t) luaA_client_get_border_width,
                             (lua_class_propfunc_t) luaA_client_set_border_width);
-    luaA_class_add_property(&client_class, A_TK_BORDER_COLOR,
-                            (lua_class_propfunc_t) luaA_client_set_border_color,
-                            (lua_class_propfunc_t) luaA_client_get_border_color,
-                            (lua_class_propfunc_t) luaA_client_set_border_color);
     luaA_class_add_property(&client_class, A_TK_URGENT,
                             (lua_class_propfunc_t) luaA_client_set_urgent,
                             (lua_class_propfunc_t) luaA_client_get_urgent,

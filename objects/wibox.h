@@ -55,8 +55,6 @@ struct wibox_t
     area_t geometry;
     /** The window border width */
     uint16_t border_width;
-    /** The window border color */
-    xcolor_t border_color;
     /** Draw context */
     draw_context_t ctx;
     /** Orientation */
