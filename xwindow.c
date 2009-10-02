@@ -104,6 +104,9 @@ xwindow_configure(xcb_window_t win, area_t geometry, int border)
 void
 xwindow_buttons_grab(xcb_window_t win, button_array_t *buttons)
 {
+    /* Ungrab everything first */
+    xcb_ungrab_button(globalconf.connection, XCB_BUTTON_INDEX_ANY, win, XCB_BUTTON_MASK_ANY);
+
     foreach(b, *buttons)
         xcb_grab_button(globalconf.connection, false, win, BUTTONMASK,
                         XCB_GRAB_MODE_SYNC, XCB_GRAB_MODE_ASYNC, XCB_NONE, XCB_NONE,
@@ -136,6 +139,9 @@ xwindow_grabkey(xcb_window_t win, keyb_t *k)
 void
 xwindow_grabkeys(xcb_window_t win, key_array_t *keys)
 {
+    /* Ungrab everything first */
+    xcb_ungrab_key(globalconf.connection, XCB_GRAB_ANY, win, XCB_BUTTON_MASK_ANY);
+
     foreach(k, *keys)
         xwindow_grabkey(win, *k);
 }
