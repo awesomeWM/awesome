@@ -212,7 +212,6 @@ wibox_init(wibox_t *w, int phys_screen)
                           XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT
                           | XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY | XCB_EVENT_MASK_ENTER_WINDOW
                           | XCB_EVENT_MASK_LEAVE_WINDOW | XCB_EVENT_MASK_STRUCTURE_NOTIFY
-                          | XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_BUTTON_RELEASE
                           | XCB_EVENT_MASK_POINTER_MOTION | XCB_EVENT_MASK_EXPOSURE
                           | XCB_EVENT_MASK_PROPERTY_CHANGE
                       });
@@ -1234,6 +1233,7 @@ luaA_wibox_buttons(lua_State *L)
     {
         luaA_button_array_set(L, 1, 2, &wibox->buttons);
         luaA_object_emit_signal(L, 1, "property::buttons", 0);
+        xwindow_buttons_grab(wibox->window, &wibox->buttons);
     }
 
     return luaA_button_array_get(L, 1, &wibox->buttons);
