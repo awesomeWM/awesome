@@ -225,8 +225,8 @@ xwindow_takefocus(xcb_window_t win)
                    XCB_EVENT_MASK_NO_EVENT, (char *) &ev);
 }
 
-/** Set wibox cursor.
- * \param w The wibox.
+/** Set window cursor.
+ * \param w The window.
  * \param c The cursor.
  */
 void
@@ -234,6 +234,17 @@ xwindow_set_cursor(xcb_window_t w, xcb_cursor_t c)
 {
     xcb_change_window_attributes(globalconf.connection, w, XCB_CW_CURSOR,
                                  (const uint32_t[]) { c });
+}
+
+/** Set a window border color.
+ * \param w The window.
+ * \param color The color.
+ */
+void
+xwindow_set_border_color(xcb_window_t w, xcolor_t *color)
+{
+    if(w)
+        xcb_change_window_attributes(globalconf.connection, w, XCB_CW_BORDER_PIXEL, &color->pixel);
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

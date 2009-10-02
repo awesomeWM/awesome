@@ -1630,8 +1630,7 @@ luaA_client_set_border_color(lua_State *L, client_t *c)
     if((buf = luaL_checklstring(L, -1, &len))
        && xcolor_init_reply(xcolor_init_unchecked(&c->border_color, buf, len)))
     {
-        xcb_change_window_attributes(globalconf.connection, c->window,
-                                     XCB_CW_BORDER_PIXEL, &c->border_color.pixel);
+        xwindow_set_border_color(c->window, &c->border_color);
         luaA_object_emit_signal(L, -3, "property::border_color", 0);
     }
     return 0;
