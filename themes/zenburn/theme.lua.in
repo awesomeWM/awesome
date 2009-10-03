@@ -79,7 +79,6 @@ theme.taglist_squares_unsel = "@AWESOME_THEMES_PATH@/zenburn/taglist/squarez.png
 -- {{{ Misc
 theme.awesome_icon           = "@AWESOME_THEMES_PATH@/zenburn/awesome-icon.png"
 theme.menu_submenu_icon      = "@AWESOME_THEMES_PATH@/default/submenu.png"
-theme.tasklist_floating_icon = "@AWESOME_THEMES_PATH@/default/tasklist/floatingw.png"
 -- }}}
 
 -- {{{ Layout

@@ -35,8 +35,6 @@ theme.border_marked = "#91231c"
 theme.taglist_squares_sel   = "@AWESOME_THEMES_PATH@/default/taglist/squarefw.png"
 theme.taglist_squares_unsel = "@AWESOME_THEMES_PATH@/default/taglist/squarew.png"
 
-theme.tasklist_floating_icon = "@AWESOME_THEMES_PATH@/default/tasklist/floatingw.png"
-
 -- Variables set for theming the menu:
 -- menu_[bg|fg]_[normal|focus]
 -- menu_[border_color|border_width]

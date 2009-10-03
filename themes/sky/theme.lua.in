@@ -36,7 +36,6 @@ theme.layout_tile            = "@AWESOME_THEMES_PATH@/sky/layouts/tile.png"
 theme.layout_tiletop         = "@AWESOME_THEMES_PATH@/sky/layouts/tiletop.png"
 
 theme.awesome_icon           = "@AWESOME_THEMES_PATH@/sky/awesome-icon.png"
-theme.tasklist_floating_icon = "@AWESOME_THEMES_PATH@/sky/layouts/floating.png"
 
 -- from default for now...
 theme.menu_submenu_icon     = "@AWESOME_THEMES_PATH@/default/submenu.png"

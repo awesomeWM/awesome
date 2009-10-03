@@ -34,19 +34,17 @@ local function tasklist_label(c, args)
     local bg_urgent = args.bg_urgent or theme.tasklist_bg_urgent or theme.bg_urgent
     local fg_minimize = args.fg_minimize or theme.tasklist_fg_minimize or theme.fg_minimize
     local bg_minimize = args.bg_minimize or theme.tasklist_bg_minimize or theme.bg_minimize
-    local floating_icon = args.floating_icon or theme.tasklist_floating_icon
     local font = args.font or theme.tasklist_font or theme.font or ""
     local bg = nil
     local text = "<span font_desc='"..font.."'>"
-    local name
-    local status_image
-    if client.floating.get(c) and floating_icon then
-        status_image = capi.image(floating_icon)
-    end
+    local name = ""
+    if client.floating.get(c) then name = name .. "✈" end
+    if c.maximized_horizontal then name = name .. '⬌' end
+    if c.maximized_vertical then name = name .. "⬍" end
     if c.minimized then
-        name = util.escape(c.icon_name) or util.escape(c.name) or util.escape("<untitled>")
+        name = name .. util.escape(c.icon_name) or util.escape(c.name) or util.escape("<untitled>")
     else
-        name = util.escape(c.name) or util.escape("<untitled>")
+        name = name .. util.escape(c.name) or util.escape("<untitled>")
     end
     if capi.client.focus == c then
         bg = bg_focus
@@ -65,7 +63,7 @@ local function tasklist_label(c, args)
         text = text .. name
     end
     text = text .. "</span>"
-    return text, bg, status_image, c.icon
+    return text, bg, nil, c.icon
 end
 
 local function tasklist_update(s, w, buttons, filter, data, style, template)
