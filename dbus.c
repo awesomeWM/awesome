@@ -315,7 +315,7 @@ a_dbus_process_request(DBusConnection *dbus_connection, DBusMessage *msg)
 
     if(dbus_message_get_no_reply(msg))
         /* emit signals */
-        signal_object_emit(globalconf.L, &dbus_signals, interface, nargs);
+        signal_object_emit(globalconf.L, &dbus_signals, NONULL(interface), nargs);
     else
     {
         signal_t *sig = signal_array_getbyid(&dbus_signals,
