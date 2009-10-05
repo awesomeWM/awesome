@@ -183,19 +183,11 @@ void client_focus(client_t *);
 void client_focus_update(client_t *);
 void client_unfocus(client_t *);
 void client_unfocus_update(client_t *);
-void client_stack_refresh(void);
 bool client_hasproto(client_t *, xcb_atom_t);
 void client_set_focus(client_t *, bool);
 void client_ignore_enterleave_events(void);
 void client_restore_enterleave_events(void);
 void client_class_setup(lua_State *);
-
-bool client_need_stack_refresh;
-static inline void
-client_stack(void)
-{
-    client_need_stack_refresh = true;
-}
 
 /** Put client on top of the stack.
  * \param c The client to raise.
@@ -223,7 +215,7 @@ client_raise(client_t *c)
 
     /* Push c on top of the stack. */
     stack_client_append(c);
-    client_stack();
+    stack_windows();
 }
 
 /** Check if a client has fixed size.

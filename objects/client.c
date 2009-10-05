@@ -405,142 +405,6 @@ client_focus(client_t *c)
     client_set_focus(c, !c->nofocus);
 }
 
-/** Stack a window below.
- * \param c The client.
- * \param previous The previous window on the stack.
- * \return The next-previous!
- */
-static xcb_window_t
-client_stack_above(client_t *c, xcb_window_t previous)
-{
-    uint32_t config_win_vals[2];
-
-    config_win_vals[0] = previous;
-    config_win_vals[1] = XCB_STACK_MODE_ABOVE;
-
-    xcb_configure_window(globalconf.connection, c->window,
-                         XCB_CONFIG_WINDOW_SIBLING | XCB_CONFIG_WINDOW_STACK_MODE,
-                         config_win_vals);
-
-    previous = config_win_vals[0] = c->window;
-
-    /* stack transient window on top of their parents */
-    foreach(node, globalconf.stack)
-        if((*node)->transient_for == c)
-            previous = client_stack_above(*node, previous);
-
-    return previous;
-}
-
-/** Stacking layout layers */
-typedef enum
-{
-    /** This one is a special layer */
-    LAYER_IGNORE,
-    LAYER_DESKTOP,
-    LAYER_BELOW,
-    LAYER_NORMAL,
-    LAYER_ABOVE,
-    LAYER_FULLSCREEN,
-    LAYER_ONTOP,
-    /** This one only used for counting and is not a real layer */
-    LAYER_COUNT
-} layer_t;
-
-/** Get the real layer of a client according to its attribute (fullscreen, …)
- * \param c The client.
- * \return The real layer.
- */
-static layer_t
-client_layer_translator(client_t *c)
-{
-    /* first deal with user set attributes */
-    if(c->ontop)
-        return LAYER_ONTOP;
-    else if(c->fullscreen)
-        return LAYER_FULLSCREEN;
-    else if(c->above)
-        return LAYER_ABOVE;
-    else if(c->below)
-        return LAYER_BELOW;
-
-    /* check for transient attr */
-    if(c->transient_for)
-        return LAYER_IGNORE;
-
-    /* then deal with windows type */
-    switch(c->type)
-    {
-      case WINDOW_TYPE_DESKTOP:
-        return LAYER_DESKTOP;
-      default:
-        break;
-    }
-
-    return LAYER_NORMAL;
-}
-
-/** Restack clients.
- * \todo It might be worth stopping to restack everyone and only stack `c'
- * relatively to the first matching in the list.
- */
-void
-client_stack_refresh()
-{
-    uint32_t config_win_vals[2];
-    layer_t layer;
-
-    if (!client_need_stack_refresh)
-        return;
-
-    client_need_stack_refresh = false;
-
-    config_win_vals[0] = XCB_NONE;
-    config_win_vals[1] = XCB_STACK_MODE_ABOVE;
-
-    /* stack desktop windows */
-    for(layer = LAYER_DESKTOP; layer < LAYER_BELOW; layer++)
-        foreach(node, globalconf.stack)
-            if(client_layer_translator(*node) == layer)
-                config_win_vals[0] = client_stack_above(*node,
-                                                        config_win_vals[0]);
-
-    /* first stack not ontop wibox window */
-    foreach(_sb, globalconf.wiboxes)
-    {
-        wibox_t *sb = *_sb;
-        if(!sb->ontop)
-        {
-            xcb_configure_window(globalconf.connection,
-                                 sb->window,
-                                 XCB_CONFIG_WINDOW_SIBLING | XCB_CONFIG_WINDOW_STACK_MODE,
-                                 config_win_vals);
-            config_win_vals[0] = sb->window;
-        }
-    }
-
-    /* then stack clients */
-    for(layer = LAYER_BELOW; layer < LAYER_COUNT; layer++)
-        foreach(node, globalconf.stack)
-            if(client_layer_translator(*node) == layer)
-                config_win_vals[0] = client_stack_above(*node,
-                                                        config_win_vals[0]);
-
-    /* then stack ontop wibox window */
-    foreach(_sb, globalconf.wiboxes)
-    {
-        wibox_t *sb = *_sb;
-        if(sb->ontop)
-        {
-            xcb_configure_window(globalconf.connection,
-                                 sb->window,
-                                 XCB_CONFIG_WINDOW_SIBLING | XCB_CONFIG_WINDOW_STACK_MODE,
-                                 config_win_vals);
-            config_win_vals[0] = sb->window;
-        }
-    }
-}
-
 /** Manage a new client.
  * \param w The window.
  * \param wgeom Window geometry.
@@ -938,7 +802,7 @@ client_set_fullscreen(lua_State *L, int cidx, bool s)
             client_set_border_width(L, cidx, c->border_width_fs);
         }
         client_resize(c, geometry, false);
-        client_stack();
+        stack_windows();
         ewmh_client_update_hints(c);
         luaA_object_emit_signal(L, cidx, "property::fullscreen", 0);
     }
@@ -977,7 +841,7 @@ client_set_maximized_horizontal(lua_State *L, int cidx, bool s)
         }
 
         client_resize(c, geometry, c->size_hints_honor);
-        client_stack();
+        stack_windows();
         ewmh_client_update_hints(c);
         luaA_object_emit_signal(L, cidx, "property::maximized_horizontal", 0);
     }
@@ -1016,7 +880,7 @@ client_set_maximized_vertical(lua_State *L, int cidx, bool s)
         }
 
         client_resize(c, geometry, c->size_hints_honor);
-        client_stack();
+        stack_windows();
         ewmh_client_update_hints(c);
         luaA_object_emit_signal(L, cidx, "property::maximized_vertical", 0);
     }
@@ -1042,7 +906,7 @@ client_set_above(lua_State *L, int cidx, bool s)
             client_set_fullscreen(L, cidx, false);
         }
         c->above = s;
-        client_stack();
+        stack_windows();
         ewmh_client_update_hints(c);
         luaA_object_emit_signal(L, cidx, "property::above", 0);
     }
@@ -1068,7 +932,7 @@ client_set_below(lua_State *L, int cidx, bool s)
             client_set_fullscreen(L, cidx, false);
         }
         c->below = s;
-        client_stack();
+        stack_windows();
         ewmh_client_update_hints(c);
         luaA_object_emit_signal(L, cidx, "property::below", 0);
     }
@@ -1087,7 +951,7 @@ client_set_modal(lua_State *L, int cidx, bool s)
     if(c->modal != s)
     {
         c->modal = s;
-        client_stack();
+        stack_windows();
         ewmh_client_update_hints(c);
         luaA_object_emit_signal(L, cidx, "property::modal", 0);
     }
@@ -1113,7 +977,7 @@ client_set_ontop(lua_State *L, int cidx, bool s)
             client_set_fullscreen(L, cidx, false);
         }
         c->ontop = s;
-        client_stack();
+        stack_windows();
         luaA_object_emit_signal(L, cidx, "property::ontop", 0);
     }
 }
@@ -1448,7 +1312,7 @@ luaA_client_lower(lua_State *L)
     for(client_t *tc = c->transient_for; tc; tc = tc->transient_for)
         stack_client_push(tc);
 
-    client_stack();
+    stack_windows();
 
     return 0;
 }
