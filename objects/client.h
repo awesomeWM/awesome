@@ -70,15 +70,6 @@ struct client_t
     char *class, *instance;
     /** Window geometry */
     area_t geometry;
-    struct
-    {
-        /** Client geometry when (un)fullscreen */
-        area_t fullscreen;
-        /** Client geometry when (un)-max */
-        area_t max;
-    } geometries;
-    /** Pre-fullscreen border width */
-    int border_width_fs;
     /** True if the client is sticky */
     bool sticky;
     /** Has urgency hint */

@@ -755,8 +755,6 @@ client_set_fullscreen(lua_State *L, int cidx, bool s)
 
     if(c->fullscreen != s)
     {
-        area_t geometry;
-
         /* become fullscreen! */
         if(s)
         {
@@ -767,103 +765,43 @@ client_set_fullscreen(lua_State *L, int cidx, bool s)
             client_set_below(L, cidx, false);
             client_set_above(L, cidx, false);
             client_set_ontop(L, cidx, false);
-
-            geometry = screen_area_get(c->screen, false);
-            c->geometries.fullscreen = c->geometry;
-            c->border_width_fs = c->border_width;
-            window_set_border_width(L, cidx, 0);
-            c->fullscreen = true;
         }
-        else
-        {
-            geometry = c->geometries.fullscreen;
-            c->fullscreen = false;
-            window_set_border_width(L, cidx, c->border_width_fs);
-        }
-        client_resize(c, geometry, false);
+        int abs_cidx = luaA_absindex(L, cidx); \
+        lua_pushboolean(L, s);
+        luaA_object_emit_signal(L, abs_cidx, "request::fullscreen", 1);
+        c->fullscreen = s;
         stack_windows();
         ewmh_client_update_hints(c);
-        luaA_object_emit_signal(L, cidx, "property::fullscreen", 0);
+        luaA_object_emit_signal(L, abs_cidx, "property::fullscreen", 0);
     }
 }
 
-/** Set a client horizontally maximized.
+/** Set a client horizontally|vertically maximized.
  * \param L The Lua VM state.
  * \param cidx The client index.
  * \param s The maximized status.
  */
-void
-client_set_maximized_horizontal(lua_State *L, int cidx, bool s)
-{
-    client_t *c = luaA_checkudata(L, cidx, &client_class);
-
-    if(c->maximized_horizontal != s)
-    {
-        area_t geometry;
-
-        if((c->maximized_horizontal = s))
-        {
-            /* remove fullscreen mode */
-            client_set_fullscreen(L, cidx, false);
-
-            geometry = screen_area_get(c->screen, true);
-            geometry.y = c->geometry.y;
-            geometry.height = c->geometry.height;
-            c->geometries.max.x = c->geometry.x;
-            c->geometries.max.width = c->geometry.width;
-        }
-        else
-        {
-            geometry = c->geometry;
-            geometry.x = c->geometries.max.x;
-            geometry.width = c->geometries.max.width;
-        }
-
-        client_resize(c, geometry, c->size_hints_honor);
-        stack_windows();
-        ewmh_client_update_hints(c);
-        luaA_object_emit_signal(L, cidx, "property::maximized_horizontal", 0);
+#define DO_FUNCTION_CLIENT_MAXIMIZED(type) \
+    void \
+    client_set_maximized_##type(lua_State *L, int cidx, bool s) \
+    { \
+        client_t *c = luaA_checkudata(L, cidx, &client_class); \
+        if(c->maximized_##type != s) \
+        { \
+            int abs_cidx = luaA_absindex(L, cidx); \
+            if(s) \
+                client_set_fullscreen(L, abs_cidx, false); \
+            lua_pushboolean(L, s); \
+            luaA_object_emit_signal(L, abs_cidx, "request::maximized_" #type, 1); \
+            c->maximized_##type = s; \
+            stack_windows(); \
+            ewmh_client_update_hints(c); \
+            luaA_object_emit_signal(L, abs_cidx, "property::maximized_" #type, 0); \
+        } \
     }
-}
-
-/** Set a client vertically maximized.
- * \param L The Lua VM state.
- * \param cidx The client index.
- * \param s The maximized status.
- */
-void
-client_set_maximized_vertical(lua_State *L, int cidx, bool s)
-{
-    client_t *c = luaA_checkudata(L, cidx, &client_class);
-
-    if(c->maximized_vertical != s)
-    {
-        area_t geometry;
-
-        if((c->maximized_vertical = s))
-        {
-            /* remove fullscreen mode */
-            client_set_fullscreen(L, cidx, false);
-
-            geometry = screen_area_get(c->screen, true);
-            geometry.x = c->geometry.x;
-            geometry.width = c->geometry.width;
-            c->geometries.max.y = c->geometry.y;
-            c->geometries.max.height = c->geometry.height;
-        }
-        else
-        {
-            geometry = c->geometry;
-            geometry.y = c->geometries.max.y;
-            geometry.height = c->geometries.max.height;
-        }
-
-        client_resize(c, geometry, c->size_hints_honor);
-        stack_windows();
-        ewmh_client_update_hints(c);
-        luaA_object_emit_signal(L, cidx, "property::maximized_vertical", 0);
-    }
-}
+DO_FUNCTION_CLIENT_MAXIMIZED(vertical)
+DO_FUNCTION_CLIENT_MAXIMIZED(horizontal)
+#undef DO_FUNCTION_CLIENT_MAXIMIZED
 
 /** Set a client above, or not.
  * \param L The Lua VM state.

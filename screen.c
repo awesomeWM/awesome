@@ -373,45 +373,21 @@ screen_client_moveto(client_t *c, screen_t *new_screen, bool doresize)
 
     area_t new_geometry = c->geometry;
 
-    if(c->fullscreen)
-    {
-        new_geometry = to;
-        area_t new_f_geometry = c->geometries.fullscreen;
+    new_geometry.x = to.x + new_geometry.x - from.x;
+    new_geometry.y = to.y + new_geometry.y - from.y;
 
-        new_f_geometry.x = to.x + new_f_geometry.x - from.x;
-        new_f_geometry.y = to.y + new_f_geometry.y - from.x;
+    /* resize the client if it doesn't fit the new screen */
+    if(new_geometry.width > to.width)
+        new_geometry.width = to.width;
+    if(new_geometry.height > to.height)
+        new_geometry.height = to.height;
 
-        /* resize the client's original geometry if it doesn't fit the screen */
-        if(new_f_geometry.width > to.width)
-            new_f_geometry.width = to.width;
-        if(new_f_geometry.height > to.height)
-            new_f_geometry.height = to.height;
+    /* make sure the client is still on the screen */
+    if(new_geometry.x + new_geometry.width > to.x + to.width)
+        new_geometry.x = to.x + to.width - new_geometry.width;
+    if(new_geometry.y + new_geometry.height > to.y + to.height)
+        new_geometry.y = to.y + to.height - new_geometry.height;
 
-        /* make sure the client is still on the screen */
-        if(new_f_geometry.x + new_f_geometry.width > to.x + to.width)
-            new_f_geometry.x = to.x + to.width - new_f_geometry.width;
-        if(new_f_geometry.y + new_f_geometry.height > to.y + to.height)
-            new_f_geometry.y = to.y + to.height - new_f_geometry.height;
-
-        c->geometries.fullscreen = new_f_geometry;
-    }
-    else
-    {
-        new_geometry.x = to.x + new_geometry.x - from.x;
-        new_geometry.y = to.y + new_geometry.y - from.y;
-
-        /* resize the client if it doesn't fit the new screen */
-        if(new_geometry.width > to.width)
-           new_geometry.width = to.width;
-        if(new_geometry.height > to.height)
-           new_geometry.height = to.height;
-
-        /* make sure the client is still on the screen */
-        if(new_geometry.x + new_geometry.width > to.x + to.width)
-           new_geometry.x = to.x + to.width - new_geometry.width;
-        if(new_geometry.y + new_geometry.height > to.y + to.height)
-           new_geometry.y = to.y + to.height - new_geometry.height;
-    }
     /* move / resize the client */
     client_resize(c, new_geometry, false);
     luaA_object_push(globalconf.L, c);
