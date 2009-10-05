@@ -1475,32 +1475,6 @@ luaA_client_lower(lua_State *L)
     return 0;
 }
 
-/** Redraw a client by unmapping and mapping it quickly.
- * \param L The Lua VM state.
- *
- * \luastack
- * \lvalue A client.
- */
-static int
-luaA_client_redraw(lua_State *L)
-{
-    client_t *c = luaA_checkudata(L, 1, &client_class);
-
-    xcb_unmap_window(globalconf.connection, c->window);
-    xcb_map_window(globalconf.connection, c->window);
-
-    /* Set the focus on the current window if the redraw has been
-       performed on the window where the pointer is currently on
-       because after the unmapping/mapping, the focus is lost */
-    if(globalconf.screen_focus->client_focus == c)
-    {
-        client_unfocus(c);
-        client_focus(c);
-    }
-
-    return 0;
-}
-
 /** Stop managing a client.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
@@ -2111,7 +2085,6 @@ client_class_setup(lua_State *L)
         { "swap", luaA_client_swap },
         { "raise", luaA_client_raise },
         { "lower", luaA_client_lower },
-        { "redraw", luaA_client_redraw },
         { "unmanage", luaA_client_unmanage },
         { "__gc", luaA_client_gc },
         { NULL, NULL }

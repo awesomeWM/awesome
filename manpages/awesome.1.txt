@@ -89,8 +89,6 @@ Window manager control
 
 Clients
 ~~~~~~~
-*Mod4 + Shift + r*::
-    Redraw the focused window.
 *Mod4 + m*::
     Maximize client.
 *Mod4 + n*::

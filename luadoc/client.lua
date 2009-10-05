@@ -105,11 +105,6 @@ module("client")
 -- @name lower
 -- @class function
 
---- Redraw a client by unmapping and mapping it quickly.
--- @param -
--- @name redraw
--- @class function
-
 --- Stop managing a client.
 -- @param -
 -- @name unmanage
