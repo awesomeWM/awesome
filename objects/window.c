@@ -148,8 +148,39 @@ luaA_window_set_border_color(lua_State *L, window_t *window)
     return 0;
 }
 
+/** Set a window border width.
+ * \param L The Lua VM state.
+ * \param idx The window index.
+ * \param width The border width.
+ */
+void
+window_set_border_width(lua_State *L, int idx, int width)
+{
+    window_t *window = luaA_checkudata(L, idx, &window_class);
+
+    if(width == window->border_width || width < 0)
+        return;
+
+    if(window->window)
+        xcb_configure_window(globalconf.connection, window->window,
+                             XCB_CONFIG_WINDOW_BORDER_WIDTH,
+                             (uint32_t[]) { width });
+
+    window->border_width = width;
+
+    luaA_object_emit_signal(L, idx, "property::border_width", 0);
+}
+
+static int
+luaA_window_set_border_width(lua_State *L, window_t *c)
+{
+    window_set_border_width(L, -3, luaL_checknumber(L, -1));
+    return 0;
+}
+
 LUA_OBJECT_EXPORT_PROPERTY(window, window_t, window, lua_pushnumber)
 LUA_OBJECT_EXPORT_PROPERTY(window, window_t, border_color, luaA_pushxcolor)
+LUA_OBJECT_EXPORT_PROPERTY(window, window_t, border_width, lua_pushnumber)
 
 void
 window_class_setup(lua_State *L)
@@ -183,6 +214,10 @@ window_class_setup(lua_State *L)
                             (lua_class_propfunc_t) luaA_window_set_border_color,
                             (lua_class_propfunc_t) luaA_window_get_border_color,
                             (lua_class_propfunc_t) luaA_window_set_border_color);
+    luaA_class_add_property(&window_class, A_TK_BORDER_WIDTH,
+                            (lua_class_propfunc_t) luaA_window_set_border_width,
+                            (lua_class_propfunc_t) luaA_window_get_border_width,
+                            (lua_class_propfunc_t) luaA_window_set_border_width);
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

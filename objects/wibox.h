@@ -53,8 +53,6 @@ struct wibox_t
     xcb_gcontext_t gc;
     /** The window geometry. */
     area_t geometry;
-    /** The window border width */
-    uint16_t border_width;
     /** Draw context */
     draw_context_t ctx;
     /** Orientation */

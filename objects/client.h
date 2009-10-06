@@ -79,8 +79,8 @@ struct client_t
         /** Internal geometry (matching X11 protocol) */
         area_t internal;
     } geometries;
-    /** Border width and pre-fullscreen border width */
-    int border_width, border_width_fs;
+    /** Pre-fullscreen border width */
+    int border_width_fs;
     /** True if the client is sticky */
     bool sticky;
     /** Has urgency hint */
@@ -164,7 +164,6 @@ void client_set_fullscreen(lua_State *, int, bool);
 void client_set_maximized_horizontal(lua_State *, int, bool);
 void client_set_maximized_vertical(lua_State *, int, bool);
 void client_set_minimized(lua_State *, int, bool);
-void client_set_border_width(lua_State *, int, int);
 void client_set_urgent(lua_State *, int, bool);
 void client_set_pid(lua_State *, int, uint32_t);
 void client_set_role(lua_State *, int, char *);

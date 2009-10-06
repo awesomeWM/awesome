@@ -462,8 +462,8 @@ HANDLE_GEOM(height)
 
     luaA_object_emit_signal(globalconf.L, -1, "property::geometry", 0);
 
-    /* Push client */
-    client_set_border_width(globalconf.L, -1, wgeom->border_width);
+    /* Set border width */
+    window_set_border_width(globalconf.L, -1, wgeom->border_width);
 
     /* we honor size hints by default */
     c->size_hints_honor = true;
@@ -792,14 +792,14 @@ client_set_fullscreen(lua_State *L, int cidx, bool s)
             geometry = screen_area_get(c->screen, false);
             c->geometries.fullscreen = c->geometry;
             c->border_width_fs = c->border_width;
-            client_set_border_width(L, cidx, 0);
+            window_set_border_width(L, cidx, 0);
             c->fullscreen = true;
         }
         else
         {
             geometry = c->geometries.fullscreen;
             c->fullscreen = false;
-            client_set_border_width(L, cidx, c->border_width_fs);
+            window_set_border_width(L, cidx, c->border_width_fs);
         }
         client_resize(c, geometry, false);
         stack_windows();
@@ -1144,44 +1144,6 @@ luaA_client_isvisible(lua_State *L)
     return 1;
 }
 
-/** Set client border width.
- * \param L The Lua VM state.
- * \param cidx The client index.
- * \param width The border width.
- */
-void
-client_set_border_width(lua_State *L, int cidx, int width)
-{
-    client_t *c = luaA_checkudata(L, cidx, &client_class);
-    uint32_t w = width;
-
-    if(width > 0 && (c->type == WINDOW_TYPE_DOCK
-                     || c->type == WINDOW_TYPE_SPLASH
-                     || c->type == WINDOW_TYPE_DESKTOP
-                     || c->fullscreen))
-        return;
-
-    if(width == c->border_width || width < 0)
-        return;
-
-    /* disallow change of border width if the client is fullscreen */
-    if(c->fullscreen)
-        return;
-
-    /* Update geometry with the new border. */
-    c->geometry.width -= 2 * c->border_width;
-    c->geometry.height -= 2 * c->border_width;
-
-    c->border_width = width;
-    xcb_configure_window(globalconf.connection, c->window,
-                         XCB_CONFIG_WINDOW_BORDER_WIDTH, &w);
-
-    c->geometry.width += 2 * c->border_width;
-    c->geometry.height += 2 * c->border_width;
-
-    luaA_object_emit_signal(L, cidx, "property::border_width", 0);
-}
-
 /** Set a client icon.
  * \param L The Lua VM state.
  * \param cidx The client index on the stack.
@@ -1452,13 +1414,6 @@ luaA_client_set_size_hints_honor(lua_State *L, client_t *c)
 }
 
 static int
-luaA_client_set_border_width(lua_State *L, client_t *c)
-{
-    client_set_border_width(L, -3, luaL_checknumber(L, -1));
-    return 0;
-}
-
-static int
 luaA_client_set_ontop(lua_State *L, client_t *c)
 {
     client_set_ontop(L, -3, luaA_checkboolean(L, -1));
@@ -1528,7 +1483,6 @@ LUA_OBJECT_EXPORT_PROPERTY(client, client_t, sticky, lua_pushboolean)
 LUA_OBJECT_EXPORT_PROPERTY(client, client_t, size_hints_honor, lua_pushboolean)
 LUA_OBJECT_EXPORT_PROPERTY(client, client_t, maximized_horizontal, lua_pushboolean)
 LUA_OBJECT_EXPORT_PROPERTY(client, client_t, maximized_vertical, lua_pushboolean)
-LUA_OBJECT_EXPORT_PROPERTY(client, client_t, border_width, lua_pushnumber)
 
 static int
 luaA_client_get_content(lua_State *L, client_t *c)
@@ -1964,10 +1918,6 @@ client_class_setup(lua_State *L)
                             (lua_class_propfunc_t) luaA_client_set_size_hints_honor,
                             (lua_class_propfunc_t) luaA_client_get_size_hints_honor,
                             (lua_class_propfunc_t) luaA_client_set_size_hints_honor);
-    luaA_class_add_property(&client_class, A_TK_BORDER_WIDTH,
-                            (lua_class_propfunc_t) luaA_client_set_border_width,
-                            (lua_class_propfunc_t) luaA_client_get_border_width,
-                            (lua_class_propfunc_t) luaA_client_set_border_width);
     luaA_class_add_property(&client_class, A_TK_URGENT,
                             (lua_class_propfunc_t) luaA_client_set_urgent,
                             (lua_class_propfunc_t) luaA_client_get_urgent,

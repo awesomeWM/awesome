@@ -276,7 +276,7 @@ event_handle_configurerequest(void *data __attribute__ ((unused)),
         if(ev->value_mask & XCB_CONFIG_WINDOW_BORDER_WIDTH)
         {
             luaA_object_push(globalconf.L, c);
-            client_set_border_width(globalconf.L, -1, ev->border_width);
+            window_set_border_width(globalconf.L, -1, ev->border_width);
             lua_pop(globalconf.L, 1);
         }
 

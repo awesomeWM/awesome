@@ -751,6 +751,13 @@ wibox_attach(lua_State *L, int udx, screen_t *s)
         screen_emit_signal(L, wibox->screen, "property::workarea", 0);
 }
 
+static int
+luaA_wibox_need_update(lua_State *L)
+{
+    wibox_need_update(luaA_checkudata(L, 1, &wibox_class));
+    return 0;
+}
+
 /** Create a new wibox.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
@@ -781,6 +788,9 @@ luaA_wibox_new(lua_State *L)
 
     if(!w->geometry.height)
         w->geometry.height = 1;
+
+    lua_pushcfunction(L, luaA_wibox_need_update);
+    luaA_object_add_signal(L, -2, "property::border_width", -1);
 
     return 1;
 }
@@ -856,7 +866,6 @@ luaA_wibox_geometry(lua_State *L)
 LUA_OBJECT_EXPORT_PROPERTY(wibox, wibox_t, ontop, lua_pushboolean)
 LUA_OBJECT_EXPORT_PROPERTY(wibox, wibox_t, cursor, lua_pushstring)
 LUA_OBJECT_EXPORT_PROPERTY(wibox, wibox_t, visible, lua_pushboolean)
-LUA_OBJECT_EXPORT_PROPERTY(wibox, wibox_t, border_width, lua_pushnumber)
 
 static int
 luaA_wibox_set_x(lua_State *L, wibox_t *wibox)
@@ -1175,29 +1184,6 @@ luaA_wibox_get_widgets(lua_State *L, wibox_t *wibox)
     return luaA_object_push_item(L, 1, wibox->widgets_table);
 }
 
-/** Set the wibox border width.
- * \param L The Lua VM state.
- * \param wibox The wibox object.
- * \return The number of elements pushed on stack.
- */
-static int
-luaA_wibox_set_border_width(lua_State *L, wibox_t *wibox)
-{
-    wibox_t *w = luaA_checkudata(L, -3, &wibox_class);
-    int32_t border_width = luaL_checknumber(L, -1);
-    if(border_width != w->border_width && border_width >= 0)
-    {
-        if (w->window != XCB_NONE)
-            xcb_configure_window(globalconf.connection, w->window, XCB_CONFIG_WINDOW_BORDER_WIDTH,
-                                 (uint32_t[]) { border_width });
-        w->border_width = border_width;
-        /* Need update if transparent background */
-        wibox_need_update(w);
-        luaA_object_emit_signal(L, -3, "property::border_width", 0);
-    }
-    return 0;
-}
-
 static int
 luaA_wibox_set_shape_bounding(lua_State *L, wibox_t *wibox)
 {
@@ -1264,10 +1250,6 @@ wibox_class_setup(lua_State *L)
                             (lua_class_propfunc_t) luaA_wibox_set_visible,
                             (lua_class_propfunc_t) luaA_wibox_get_visible,
                             (lua_class_propfunc_t) luaA_wibox_set_visible);
-    luaA_class_add_property(&wibox_class, A_TK_BORDER_WIDTH,
-                            (lua_class_propfunc_t) luaA_wibox_set_border_width,
-                            (lua_class_propfunc_t) luaA_wibox_get_border_width,
-                            (lua_class_propfunc_t) luaA_wibox_set_border_width);
     luaA_class_add_property(&wibox_class, A_TK_ORIENTATION,
                             (lua_class_propfunc_t) luaA_wibox_set_orientation,
                             (lua_class_propfunc_t) luaA_wibox_get_orientation,

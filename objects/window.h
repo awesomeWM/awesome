@@ -39,7 +39,9 @@
     /** Button bindings */ \
     button_array_t buttons; \
     /** Border color */ \
-    xcolor_t border_color;
+    xcolor_t border_color; \
+    /** Border width */ \
+    uint16_t border_width;
 
 /** Window structure */
 typedef struct
@@ -52,6 +54,7 @@ lua_class_t window_class;
 void window_class_setup(lua_State *);
 
 void window_set_opacity(lua_State *, int, double);
+void window_set_border_width(lua_State *, int, int);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
