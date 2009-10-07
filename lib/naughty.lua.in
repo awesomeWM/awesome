@@ -485,7 +485,7 @@ if capi.dbus then
         end
     elseif data.member == "GetServerInfo" or data.member == "GetServerInformation" then
         -- name of notification app, name of vender, version
-        return "s", "naughty", "s", "awesome", "s", capi.awesome.version:match("%d.%d")
+        return "s", "naughty", "s", "awesome", "s", capi.awesome.version:match("%d.%d"), "s", "1.0"
     end
     end)
 
@@ -520,6 +520,7 @@ if capi.dbus then
           <arg name="return_name" type="s" direction="out"/>
           <arg name="return_vendor" type="s" direction="out"/>
           <arg name="return_version" type="s" direction="out"/>
+          <arg name="return_spec_version" type="s" direction="out"/>
         </method>
         <method name="GetServerInfo">
           <arg name="return_name" type="s" direction="out"/>
