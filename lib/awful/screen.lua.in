@@ -39,15 +39,15 @@ function focus_relative(i)
 end
 
 --- Get or set the screen padding.
--- @param i The screen number.
+-- @param screen The screen object to change the padding on
 -- @param padding The padding, an table with 'top', 'left', 'right' and/or
 -- 'bottom'. Can be nil if you only want to retrieve padding
-function padding(i, padding)
+function padding(screen, padding)
     if padding then
-        data.padding[i] = padding
-        capi.screen[i]:emit_signal("padding")
+        data.padding[screen] = padding
+        screen:emit_signal("padding")
     end
-    return data.padding[i]
+    return data.padding[screen]
 end
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
