@@ -452,7 +452,6 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
      * been set. */
 #define HANDLE_GEOM(attr) \
     c->geometry.attr = wgeom->attr; \
-    c->geometries.internal.attr = wgeom->attr; \
     luaA_object_emit_signal(globalconf.L, -1, "property::" #attr, 0);
 HANDLE_GEOM(x)
 HANDLE_GEOM(y)
@@ -656,39 +655,19 @@ client_resize(client_t *c, area_t geometry, bool hints)
     if(geometry.y + geometry.height < 0)
         geometry.y = 0;
 
-    area_t geometry_internal = { .x = geometry.x,
-                                 .y = geometry.y,
-                                 .width = geometry.width - 2 * c->border_width,
-                                 .height = geometry.height - 2 * c->border_width };
-
     if(hints)
-        geometry_internal = client_geometry_hints(c, geometry_internal);
+        geometry = client_geometry_hints(c, geometry);
 
-    if(geometry_internal.width == 0 || geometry_internal.height == 0)
+    if(geometry.width == 0 || geometry.height == 0)
         return false;
 
-    /* Also let client hints propagate to the "official" geometry. */
-    geometry.x = geometry_internal.x;
-    geometry.y = geometry_internal.y;
-    geometry.width = geometry_internal.width + 2 * c->border_width;
-    geometry.height = geometry_internal.height + 2 * c->border_width;
-
-    if(c->geometries.internal.x != geometry_internal.x
-       || c->geometries.internal.y != geometry_internal.y
-       || c->geometries.internal.width != geometry_internal.width
-       || c->geometries.internal.height != geometry_internal.height)
+    if(c->geometry.x != geometry.x
+       || c->geometry.y != geometry.y
+       || c->geometry.width != geometry.width
+       || c->geometry.height != geometry.height)
     {
         screen_t *new_screen = screen_getbycoord(c->screen,
-                                                 geometry_internal.x, geometry_internal.y);
-
-        /* Values to configure a window is an array where values are
-         * stored according to 'value_mask' */
-        uint32_t values[4];
-
-        c->geometries.internal.x = values[0] = geometry_internal.x;
-        c->geometries.internal.y = values[1] = geometry_internal.y;
-        c->geometries.internal.width = values[2] = geometry_internal.width;
-        c->geometries.internal.height = values[3] = geometry_internal.height;
+                                                 geometry.x, geometry.y);
 
         /* Also store geometry including border */
         c->geometry = geometry;
@@ -699,7 +678,7 @@ client_resize(client_t *c, area_t geometry, bool hints)
         xcb_configure_window(globalconf.connection, c->window,
                              XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y
                              | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
-                             values);
+                             (uint32_t[]) { geometry.x, geometry.y, geometry.width, geometry.height });
 
         client_restore_enterleave_events();
 
@@ -1490,8 +1469,8 @@ luaA_client_get_content(lua_State *L, client_t *c)
     xcb_image_t *ximage = xcb_image_get(globalconf.connection,
                                         c->window,
                                         0, 0,
-                                        c->geometries.internal.width,
-                                        c->geometries.internal.height,
+                                        c->geometry.width,
+                                        c->geometry.height,
                                         ~0, XCB_IMAGE_FORMAT_Z_PIXMAP);
     int retval = 0;
 

@@ -262,7 +262,7 @@ event_handle_configurerequest(void *data __attribute__ ((unused)),
 
     if((c = client_getbywin(ev->window)))
     {
-        area_t geometry = c->geometries.internal;
+        area_t geometry = c->geometry;
 
         if(ev->value_mask & XCB_CONFIG_WINDOW_X)
             geometry.x = ev->x;
@@ -280,21 +280,8 @@ event_handle_configurerequest(void *data __attribute__ ((unused)),
             lua_pop(globalconf.L, 1);
         }
 
-        /* Clients are not allowed to directly mess with stacking parameters. */
-        ev->value_mask &= ~(XCB_CONFIG_WINDOW_SIBLING |
-                                            XCB_CONFIG_WINDOW_STACK_MODE);
-
-        /** Configure request are sent with size relative to real (internal)
-         * window size, i.e. without borders. */
-        geometry.width += 2 * c->border_width;
-        geometry.height += 2 * c->border_width;
-
         if(!client_resize(c, geometry, false))
-        {
-            geometry.width -= 2 * c->border_width;
-            geometry.height -= 2 * c->border_width;
             xwindow_configure(c->window, geometry, c->border_width);
-        }
     }
     else
         event_handle_configurerequest_configure_window(ev);
