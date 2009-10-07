@@ -34,6 +34,7 @@ stack_client_remove(client_t *c)
             break;
         }
     ewmh_update_net_client_list_stacking(c->phys_screen);
+    stack_windows();
 }
 
 /** Push the client at the beginning of the client stack.
@@ -45,6 +46,7 @@ stack_client_push(client_t *c)
     stack_client_remove(c);
     client_array_push(&globalconf.stack, c);
     ewmh_update_net_client_list_stacking(c->phys_screen);
+    stack_windows();
 }
 
 /** Push the client at the end of the client stack.
@@ -56,6 +58,7 @@ stack_client_append(client_t *c)
     stack_client_remove(c);
     client_array_append(&globalconf.stack, c);
     ewmh_update_net_client_list_stacking(c->phys_screen);
+    stack_windows();
 }
 
 static bool need_stack_refresh = false;

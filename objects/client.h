@@ -212,7 +212,6 @@ client_raise(client_t *c)
 
     /* Push c on top of the stack. */
     stack_client_append(c);
-    stack_windows();
 }
 
 /** Check if a client has fixed size.
