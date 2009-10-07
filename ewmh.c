@@ -246,20 +246,11 @@ ewmh_process_state_atom(client_t *c, xcb_atom_t state, int set)
     else if(state == _NET_WM_STATE_SKIP_TASKBAR)
     {
         if(set == _NET_WM_STATE_REMOVE)
-        {
             client_set_skip_taskbar(globalconf.L, -1, false);
-            ewmh_client_update_hints(c);
-        }
         else if(set == _NET_WM_STATE_ADD)
-        {
             client_set_skip_taskbar(globalconf.L, -1, true);
-            ewmh_client_update_hints(c);
-        }
         else if(set == _NET_WM_STATE_TOGGLE)
-        {
             client_set_skip_taskbar(globalconf.L, -1, !c->skip_taskbar);
-            ewmh_client_update_hints(c);
-        }
     }
     else if(state == _NET_WM_STATE_FULLSCREEN)
     {
