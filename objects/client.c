@@ -84,77 +84,40 @@ client_set_urgent(lua_State *L, int cidx, bool urgent)
     }
 }
 
-void
-client_set_group_window(lua_State *L, int cidx, xcb_window_t window)
-{
-    client_t *c = luaA_checkudata(L, cidx, &client_class);
-
-    if(c->group_window != window)
-    {
-        c->group_window = window;
-        luaA_object_emit_signal(L, cidx, "property::group_window", 0);
+#define DO_CLIENT_SET_PROPERTY(prop) \
+    void \
+    client_set_##prop(lua_State *L, int cidx, fieldtypeof(client_t, prop) value) \
+    { \
+        client_t *c = luaA_checkudata(L, cidx, &client_class); \
+        if(c->prop != value) \
+        { \
+            c->prop = value; \
+            luaA_object_emit_signal(L, cidx, "property::" #prop, 0); \
+        } \
     }
-}
+DO_CLIENT_SET_PROPERTY(group_window)
+DO_CLIENT_SET_PROPERTY(type)
+DO_CLIENT_SET_PROPERTY(transient_for)
+DO_CLIENT_SET_PROPERTY(pid)
+DO_CLIENT_SET_PROPERTY(skip_taskbar)
+#undef DO_CLIENT_SET_PROPERTY
 
-void
-client_set_type(lua_State *L, int cidx, window_type_t type)
-{
-    client_t *c = luaA_checkudata(L, cidx, &client_class);
-
-    if(c->type != type)
-    {
-        c->type = type;
-        luaA_object_emit_signal(L, cidx, "property::type", 0);
+#define DO_CLIENT_SET_STRING_PROPERTY(prop) \
+    void \
+    client_set_##prop(lua_State *L, int cidx, char *value) \
+    { \
+        client_t *c = luaA_checkudata(L, cidx, &client_class); \
+        p_delete(&c->prop); \
+        c->prop = value; \
+        luaA_object_emit_signal(L, cidx, "property::" #prop, 0); \
     }
-}
-
-void
-client_set_pid(lua_State *L, int cidx, uint32_t pid)
-{
-    client_t *c = luaA_checkudata(L, cidx, &client_class);
-
-    if(c->pid != pid)
-    {
-        c->pid = pid;
-        luaA_object_emit_signal(L, cidx, "property::pid", 0);
-    }
-}
-
-void
-client_set_icon_name(lua_State *L, int cidx, char *icon_name)
-{
-    client_t *c = luaA_checkudata(L, cidx, &client_class);
-    p_delete(&c->icon_name);
-    c->icon_name = icon_name;
-    luaA_object_emit_signal(L, cidx, "property::icon_name", 0);
-}
-
-void
-client_set_alt_icon_name(lua_State *L, int cidx, char *icon_name)
-{
-    client_t *c = luaA_checkudata(L, cidx, &client_class);
-    p_delete(&c->alt_icon_name);
-    c->alt_icon_name = icon_name;
-    luaA_object_emit_signal(L, cidx, "property::icon_name", 0);
-}
-
-void
-client_set_role(lua_State *L, int cidx, char *role)
-{
-    client_t *c = luaA_checkudata(L, cidx, &client_class);
-    p_delete(&c->role);
-    c->role = role;
-    luaA_object_emit_signal(L, cidx, "property::role", 0);
-}
-
-void
-client_set_machine(lua_State *L, int cidx, char *machine)
-{
-    client_t *c = luaA_checkudata(L, cidx, &client_class);
-    p_delete(&c->machine);
-    c->machine = machine;
-    luaA_object_emit_signal(L, cidx, "property::machine", 0);
-}
+DO_CLIENT_SET_STRING_PROPERTY(name)
+DO_CLIENT_SET_STRING_PROPERTY(alt_name)
+DO_CLIENT_SET_STRING_PROPERTY(icon_name)
+DO_CLIENT_SET_STRING_PROPERTY(alt_icon_name)
+DO_CLIENT_SET_STRING_PROPERTY(role)
+DO_CLIENT_SET_STRING_PROPERTY(machine)
+#undef DO_CLIENT_SET_STRING_PROPERTY
 
 void
 client_set_class_instance(lua_State *L, int cidx, const char *class, const char *instance)
@@ -163,39 +126,9 @@ client_set_class_instance(lua_State *L, int cidx, const char *class, const char 
     p_delete(&c->class);
     p_delete(&c->instance);
     c->class = a_strdup(class);
-    c->instance = a_strdup(instance);
     luaA_object_emit_signal(L, cidx, "property::class", 0);
+    c->instance = a_strdup(instance);
     luaA_object_emit_signal(L, cidx, "property::instance", 0);
-}
-
-void
-client_set_transient_for(lua_State *L, int cidx, client_t *transient_for)
-{
-    client_t *c = luaA_checkudata(L, cidx, &client_class);
-
-    if(c->transient_for != transient_for)
-    {
-        c->transient_for = transient_for;
-        luaA_object_emit_signal(L, cidx, "property::transient_for", 0);
-    }
-}
-
-void
-client_set_name(lua_State *L, int cidx, char *name)
-{
-    client_t *c = luaA_checkudata(L, cidx, &client_class);
-    p_delete(&c->name);
-    c->name = name;
-    luaA_object_emit_signal(L, cidx, "property::name", 0);
-}
-
-void
-client_set_alt_name(lua_State *L, int cidx, char *name)
-{
-    client_t *c = luaA_checkudata(L, cidx, &client_class);
-    p_delete(&c->alt_name);
-    c->alt_name = name;
-    luaA_object_emit_signal(L, cidx, "property::name", 0);
 }
 
 /** Returns true if a client is tagged
@@ -981,23 +914,6 @@ client_set_ontop(lua_State *L, int cidx, bool s)
         c->ontop = s;
         stack_windows();
         luaA_object_emit_signal(L, cidx, "property::ontop", 0);
-    }
-}
-
-/** Set a client skip taskbar attribute.
- * \param L Tha Lua VM state.
- * \param cidx The client index.
- * \param s Set or not the client skip taskbar attribute.
- */
-void
-client_set_skip_taskbar(lua_State *L, int cidx, bool s)
-{
-    client_t *c = luaA_checkudata(L, cidx, &client_class);
-
-    if(c->skip_taskbar != s)
-    {
-        c->skip_taskbar = s;
-        luaA_object_emit_signal(L, cidx, "property::skip_taskbar", 0);
     }
 }
 
