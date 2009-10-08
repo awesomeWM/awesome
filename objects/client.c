@@ -240,7 +240,6 @@ void
 client_unfocus_update(client_t *c)
 {
     globalconf.screens.tab[c->phys_screen].client_focus = NULL;
-    ewmh_update_net_active_window(c->phys_screen);
 
     luaA_object_push(globalconf.L, c);
     luaA_class_emit_signal(globalconf.L, &client_class, "unfocus", 1);
@@ -379,8 +378,6 @@ client_focus_update(client_t *c)
 
     /* according to EWMH, we have to remove the urgent state from a client */
     client_set_urgent(globalconf.L, -1, false);
-
-    ewmh_update_net_active_window(c->phys_screen);
 
     luaA_class_emit_signal(globalconf.L, &client_class, "focus", 1);
 }

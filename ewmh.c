@@ -111,6 +111,25 @@ ewmh_update_desktop_geometry(int phys_screen)
                         _NET_DESKTOP_GEOMETRY, CARDINAL, 32, countof(sizes), sizes);
 }
 
+static int
+ewmh_update_net_active_window(lua_State *L)
+{
+    client_t *c = luaA_checkudata(L, 1, &client_class);
+    xcb_window_t win;
+
+    if(globalconf.screen_focus->client_focus
+       && globalconf.screen_focus->client_focus->phys_screen == c->phys_screen)
+        win = globalconf.screen_focus->client_focus->window;
+    else
+        win = XCB_NONE;
+
+    xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
+			xutil_screen_get(globalconf.connection, c->phys_screen)->root,
+			_NET_ACTIVE_WINDOW, WINDOW, 32, 1, &win);
+
+    return 0;
+}
+
 void
 ewmh_init(int phys_screen)
 {
@@ -196,6 +215,10 @@ ewmh_init(int phys_screen)
 
     lua_pushcfunction(globalconf.L, ewmh_signal_on_client_new);
     luaA_class_add_signal(globalconf.L, &client_class, "new", -1);
+    lua_pushcfunction(globalconf.L, ewmh_update_net_active_window);
+    luaA_class_add_signal(globalconf.L, &client_class, "focus", -1);
+    lua_pushcfunction(globalconf.L, ewmh_update_net_active_window);
+    luaA_class_add_signal(globalconf.L, &client_class, "unfocus", -1);
 }
 
 void
@@ -271,22 +294,6 @@ ewmh_update_net_desktop_names(int phys_screen)
 			xutil_screen_get(globalconf.connection, phys_screen)->root,
 			_NET_DESKTOP_NAMES, UTF8_STRING, 8, buf.len, buf.s);
     buffer_wipe(&buf);
-}
-
-void
-ewmh_update_net_active_window(int phys_screen)
-{
-    xcb_window_t win;
-
-    if(globalconf.screen_focus->client_focus
-       && globalconf.screen_focus->client_focus->phys_screen == phys_screen)
-        win = globalconf.screen_focus->client_focus->window;
-    else
-        win = XCB_NONE;
-
-    xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
-			xutil_screen_get(globalconf.connection, phys_screen)->root,
-			_NET_ACTIVE_WINDOW, WINDOW, 32, 1, &win);
 }
 
 static void
