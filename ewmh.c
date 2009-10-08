@@ -40,6 +40,63 @@
 #define _NET_WM_STATE_ADD 1
 #define _NET_WM_STATE_TOGGLE 2
 
+/** Update client EWMH hints.
+ * \param c The client.
+ */
+static int
+ewmh_client_update_hints(lua_State *L)
+{
+    client_t *c = luaA_checkudata(L, 1, &client_class);
+    xcb_atom_t state[10]; /* number of defined state atoms */
+    int i = 0;
+
+    if(c->modal)
+        state[i++] = _NET_WM_STATE_MODAL;
+    if(c->fullscreen)
+        state[i++] = _NET_WM_STATE_FULLSCREEN;
+    if(c->maximized_vertical)
+        state[i++] = _NET_WM_STATE_MAXIMIZED_VERT;
+    if(c->maximized_horizontal)
+        state[i++] = _NET_WM_STATE_MAXIMIZED_HORZ;
+    if(c->sticky)
+        state[i++] = _NET_WM_STATE_STICKY;
+    if(c->skip_taskbar)
+        state[i++] = _NET_WM_STATE_SKIP_TASKBAR;
+    if(c->above)
+        state[i++] = _NET_WM_STATE_ABOVE;
+    if(c->below)
+        state[i++] = _NET_WM_STATE_BELOW;
+    if(c->minimized)
+        state[i++] = _NET_WM_STATE_HIDDEN;
+    if(c->urgent)
+        state[i++] = _NET_WM_STATE_DEMANDS_ATTENTION;
+
+    xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
+                        c->window, _NET_WM_STATE, ATOM, 32, i, state);
+
+    return 0;
+}
+
+static int
+ewmh_signal_on_client_new(lua_State *L)
+{
+#define DO_ADD_SIGNAL_FOR_PROPERTY(prop) \
+    lua_pushcfunction(L, ewmh_client_update_hints); \
+    luaA_object_add_signal(L, 1, "property::" #prop , -1);
+    DO_ADD_SIGNAL_FOR_PROPERTY(modal)
+    DO_ADD_SIGNAL_FOR_PROPERTY(fullscreen)
+    DO_ADD_SIGNAL_FOR_PROPERTY(maximized_horizontal)
+    DO_ADD_SIGNAL_FOR_PROPERTY(maximized_vertical)
+    DO_ADD_SIGNAL_FOR_PROPERTY(sticky)
+    DO_ADD_SIGNAL_FOR_PROPERTY(skip_taskbar)
+    DO_ADD_SIGNAL_FOR_PROPERTY(above)
+    DO_ADD_SIGNAL_FOR_PROPERTY(below)
+    DO_ADD_SIGNAL_FOR_PROPERTY(minimized)
+    DO_ADD_SIGNAL_FOR_PROPERTY(urgent)
+#undef DO_ADD_SIGNAL_FOR_PROPERTY
+    return 0;
+}
+
 /** Update the desktop geometry.
  * \param phys_screen The physical screen id.
  */
@@ -136,6 +193,9 @@ ewmh_init(int phys_screen)
                         father, _NET_WM_PID, CARDINAL, 32, 1, &i);
 
     ewmh_update_desktop_geometry(phys_screen);
+
+    lua_pushcfunction(globalconf.L, ewmh_signal_on_client_new);
+    luaA_class_add_signal(globalconf.L, &client_class, "new", -1);
 }
 
 void
@@ -381,40 +441,6 @@ ewmh_process_client_message(xcb_client_message_event_t *ev)
     }
 
     return 0;
-}
-
-/** Update client EWMH hints.
- * \param c The client.
- */
-void
-ewmh_client_update_hints(client_t *c)
-{
-    xcb_atom_t state[10]; /* number of defined state atoms */
-    int i = 0;
-
-    if(c->modal)
-        state[i++] = _NET_WM_STATE_MODAL;
-    if(c->fullscreen)
-        state[i++] = _NET_WM_STATE_FULLSCREEN;
-    if(c->maximized_vertical)
-        state[i++] = _NET_WM_STATE_MAXIMIZED_VERT;
-    if(c->maximized_horizontal)
-        state[i++] = _NET_WM_STATE_MAXIMIZED_HORZ;
-    if(c->sticky)
-        state[i++] = _NET_WM_STATE_STICKY;
-    if(c->skip_taskbar)
-        state[i++] = _NET_WM_STATE_SKIP_TASKBAR;
-    if(c->above)
-        state[i++] = _NET_WM_STATE_ABOVE;
-    if(c->below)
-        state[i++] = _NET_WM_STATE_BELOW;
-    if(c->minimized)
-        state[i++] = _NET_WM_STATE_HIDDEN;
-    if(c->urgent)
-        state[i++] = _NET_WM_STATE_DEMANDS_ATTENTION;
-
-    xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
-                        c->window, _NET_WM_STATE, ATOM, 32, i, state);
 }
 
 /** Update the client active desktop.
