@@ -571,8 +571,6 @@ HANDLE_GEOM(height)
     /* Push client in stack */
     client_raise(c);
 
-    ewmh_update_net_client_list();
-
     /* Always stay in NORMAL_STATE. Even though iconified seems more
      * appropriate sometimes. The only possible loss is that clients not using
      * visibility events may continue to process data (when banned).
@@ -1062,8 +1060,6 @@ client_unmanage(client_t *c)
 
     if(strut_has_value(&c->strut))
         screen_emit_signal(globalconf.L, c->screen, "property::workarea", 0);
-
-    ewmh_update_net_client_list();
 
     /* Clear our event mask so that we don't receive any events from now on,
      * especially not for the following requests. */

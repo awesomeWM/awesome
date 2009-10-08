@@ -127,6 +127,22 @@ ewmh_update_net_active_window(lua_State *L)
     return 0;
 }
 
+static int
+ewmh_update_net_client_list(lua_State *L)
+{
+    xcb_window_t *wins = p_alloca(xcb_window_t, globalconf.clients.len);
+
+    int n = 0;
+    foreach(client, globalconf.clients)
+        wins[n++] = (*client)->window;
+
+    xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
+                        globalconf.screen->root,
+			_NET_CLIENT_LIST, WINDOW, 32, n, wins);
+
+    return 0;
+}
+
 void
 ewmh_init(void)
 {
@@ -216,23 +232,10 @@ ewmh_init(void)
     luaA_class_add_signal(globalconf.L, &client_class, "focus", -1);
     lua_pushcfunction(globalconf.L, ewmh_update_net_active_window);
     luaA_class_add_signal(globalconf.L, &client_class, "unfocus", -1);
-}
-
-void
-ewmh_update_net_client_list(void)
-{
-    xcb_window_t *wins = p_alloca(xcb_window_t, globalconf.clients.len);
-
-    int n = 0;
-    foreach(_c, globalconf.clients)
-    {
-        client_t *c = *_c;
-        wins[n++] = c->window;
-    }
-
-    xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
-			globalconf.screen->root,
-			_NET_CLIENT_LIST, XCB_ATOM_WINDOW, 32, n, wins);
+    lua_pushcfunction(globalconf.L, ewmh_update_net_client_list);
+    luaA_class_add_signal(globalconf.L, &client_class, "manage", -1);
+    lua_pushcfunction(globalconf.L, ewmh_update_net_client_list);
+    luaA_class_add_signal(globalconf.L, &client_class, "unmanage", -1);
 }
 
 /** Set the client list in stacking order, bottom to top.

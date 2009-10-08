@@ -26,7 +26,6 @@
 #include "strut.h"
 
 void ewmh_init(void);
-void ewmh_update_net_client_list(void);
 void ewmh_update_net_numbers_of_desktop(void);
 void ewmh_update_net_current_desktop(void);
 void ewmh_update_net_desktop_names(void);
