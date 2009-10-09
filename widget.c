@@ -249,7 +249,8 @@ widget_render(wibox_t *wibox)
 
     if(ctx->bg.alpha != 0xffff)
     {
-        int x = wibox->geometry.x, y = wibox->geometry.y;
+        int x = wibox->geometry.x + wibox->border_width,
+            y = wibox->geometry.y + wibox->border_width;
         xcb_get_property_reply_t *prop_r;
         char *data;
         xcb_pixmap_t rootpix;
