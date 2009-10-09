@@ -145,7 +145,7 @@ function update(c)
         local widgets = c.titlebar.widgets
         if widgets[3].title then
             widgets[3].title.text = "<span font_desc='" .. data[c].font ..
-            "'> ".. util.escape(c.name) .. " </span>"
+            "'> ".. util.escape(c.name or "<unknown>") .. " </span>"
         end
         if widgets[3].appicon then
             widgets[3].appicon.image = c.icon
