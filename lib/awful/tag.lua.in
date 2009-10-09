@@ -459,33 +459,33 @@ function withcurrent(c, startup)
     end
 end
 
-local function attached_add_signal_screen(screen, sig, func)
-    capi.screen[screen]:add_signal("tag::attach", function (s, tag)
-        tag:add_signal(sig, func)
+local function attached_connect_signal_screen(screen, sig, func)
+    capi.screen[screen]:connect_signal("tag::attach", function (s, tag)
+        tag:connect_signal(sig, func)
     end)
-    capi.screen[screen]:add_signal("tag::detach", function (s, tag)
-        tag:remove_signal(sig, func)
+    capi.screen[screen]:connect_signal("tag::detach", function (s, tag)
+        tag:disconnect_signal(sig, func)
     end)
     for _, tag in ipairs(capi.screen[screen]:tags()) do
-        tag:add_signal(sig, func)
+        tag:connect_signal(sig, func)
     end
 end
 
 --- Add a signal to all attached tag and all tag that will be attached in the
 -- future. When a tag is detach from the screen, its signal is removed.
 -- @param screen The screen concerned, or all if nil.
-function attached_add_signal(screen, ...)
+function attached_connect_signal(screen, ...)
     if screen then
-        attached_add_signal_screen(screen, ...)
+        attached_connect_signal_screen(screen, ...)
     else
         for screen = 1, capi.screen.count() do
-            attached_add_signal_screen(screen, ...)
+            attached_connect_signal_screen(screen, ...)
         end
     end
 end
 
 -- Register standards signals
-capi.client.add_signal("manage", function(c, startup)
+capi.client.connect_signal("manage", function(c, startup)
     -- If we are not managing this application at startup,
     -- move it to the screen where the mouse is.
     -- We only do it for "normal" windows (i.e. no dock, etc).
@@ -502,13 +502,13 @@ capi.client.add_signal("manage", function(c, startup)
             c.screen = capi.mouse.screen
         end
     end
-    c:add_signal("property::screen", withcurrent)
+    c:connect_signal("property::screen", withcurrent)
 end)
 
-capi.client.add_signal("manage", withcurrent)
+capi.client.connect_signal("manage", withcurrent)
 
 for s = 1, capi.screen.count() do
-    capi.screen[s]:add_signal("tag::history::update", history.update)
+    capi.screen[s]:connect_signal("tag::history::update", history.update)
 end
 
 setmetatable(_M, { __call = function (_, ...) return new(...) end })

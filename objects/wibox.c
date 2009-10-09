@@ -770,7 +770,7 @@ luaA_wibox_new(lua_State *L)
     if(!w->geometry.height)
         w->geometry.height = 1;
 
-    luaA_object_add_signal(L, -2, "property::border_width", luaA_wibox_need_update);
+    luaA_object_connect_signal(L, -2, "property::border_width", luaA_wibox_need_update);
 
     return 1;
 }

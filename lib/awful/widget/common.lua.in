@@ -81,8 +81,8 @@ function common.list_update(w, buttons, label, data, template, objects)
                     -- button object the user provided, but with the object as
                     -- argument.
                     local btn = capi.button { modifiers = b.modifiers, button = b.button }
-                    btn:add_signal("press", function () b:emit_signal("press", o) end)
-                    btn:add_signal("release", function () b:emit_signal("release", o) end)
+                    btn:connect_signal("press", function () b:emit_signal("press", o) end)
+                    btn:connect_signal("release", function () b:emit_signal("release", o) end)
                     data[o][#data[o] + 1] = btn
                 end
             end

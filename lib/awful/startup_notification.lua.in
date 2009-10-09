@@ -46,9 +46,9 @@ end
 local function unregister_hook(event) unregister_event(event.id) end
 local function register_hook(event) register_event(event.id) end
 
-capi.awesome.add_signal("spawn::initiated", register_hook)
-capi.awesome.add_signal("spawn::canceled", unregister_hook)
-capi.awesome.add_signal("spawn::completed", unregister_hook)
-capi.awesome.add_signal("spawn::timeout", unregister_hook)
+capi.awesome.connect_signal("spawn::initiated", register_hook)
+capi.awesome.connect_signal("spawn::canceled", unregister_hook)
+capi.awesome.connect_signal("spawn::completed", unregister_hook)
+capi.awesome.connect_signal("spawn::timeout", unregister_hook)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

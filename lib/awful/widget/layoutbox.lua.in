@@ -42,8 +42,8 @@ function new(screen, args)
         return update(w, tag.screen)
     end
 
-    tag.attached_add_signal(screen, "property::selected", update_on_tag_selection)
-    tag.attached_add_signal(screen, "property::layout", update_on_tag_selection)
+    tag.attached_connect_signal(screen, "property::selected", update_on_tag_selection)
+    tag.attached_connect_signal(screen, "property::layout", update_on_tag_selection)
 
     return w
 end

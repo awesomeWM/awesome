@@ -102,11 +102,11 @@ local function screen_change(window)
     end
 end
 
-client.add_signal("manage", function (c)
-    c:add_signal("request::maximized_horizontal", maximized_horizontal)
-    c:add_signal("request::maximized_vertical", maximized_vertical)
-    c:add_signal("request::fullscreen", fullscreen)
-    c:add_signal("property::screen", screen_change)
+client.connect_signal("manage", function (c)
+    c:connect_signal("request::maximized_horizontal", maximized_horizontal)
+    c:connect_signal("request::maximized_vertical", maximized_vertical)
+    c:connect_signal("request::fullscreen", fullscreen)
+    c:connect_signal("property::screen", screen_change)
 end)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

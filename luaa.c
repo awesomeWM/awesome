@@ -614,7 +614,7 @@ luaA_awesome_newindex(lua_State *L)
  * \lparam The function to call.
  */
 static int
-luaA_awesome_add_signal(lua_State *L)
+luaA_awesome_connect_signal(lua_State *L)
 {
     const char *name = luaL_checkstring(L, 1);
     luaA_checkfunction(L, 2);
@@ -630,7 +630,7 @@ luaA_awesome_add_signal(lua_State *L)
  * \lparam The function to call.
  */
 static int
-luaA_awesome_remove_signal(lua_State *L)
+luaA_awesome_disconnect_signal(lua_State *L)
 {
     const char *name = luaL_checkstring(L, 1);
     luaA_checkfunction(L, 2);
@@ -701,8 +701,8 @@ luaA_init(xdgHandle* xdg)
         { "exec", luaA_exec },
         { "spawn", luaA_spawn },
         { "restart", luaA_restart },
-        { "add_signal", luaA_awesome_add_signal },
-        { "remove_signal", luaA_awesome_remove_signal },
+        { "connect_signal", luaA_awesome_connect_signal },
+        { "disconnect_signal", luaA_awesome_disconnect_signal },
         { "emit_signal", luaA_awesome_emit_signal },
         { "__index", luaA_awesome_index },
         { "__newindex", luaA_awesome_newindex },

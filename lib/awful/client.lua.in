@@ -570,16 +570,16 @@ local function store_floating_geometry(c)
 end
 
 -- Store the initial client geometry.
-capi.client.add_signal("new", function(c)
+capi.client.connect_signal("new", function(c)
     local function store_init_geometry(c)
         property.set(c, "floating_geometry", c:geometry())
-        c:remove_signal("property::geometry", store_init_geometry)
+        c:disconnect_signal("property::geometry", store_init_geometry)
     end
-    c:add_signal("property::geometry", store_init_geometry)
+    c:connect_signal("property::geometry", store_init_geometry)
 end)
 
-capi.client.add_signal("manage", function(c)
-    c:add_signal("property::geometry", store_floating_geometry)
+capi.client.connect_signal("manage", function(c)
+    c:connect_signal("property::geometry", store_floating_geometry)
 end)
 
 --- Return if a client has a fixe size or not.
@@ -834,13 +834,13 @@ function property.set(c, prop, value)
 end
 
 -- Register standards signals
-capi.client.add_signal("focus", focus.history.add)
-capi.client.add_signal("unmanage", focus.history.delete)
+capi.client.connect_signal("focus", focus.history.add)
+capi.client.connect_signal("unmanage", focus.history.delete)
 
-capi.client.add_signal("manage", function(c) c:add_signal("property::urgent", urgent.add) end)
-capi.client.add_signal("focus", urgent.delete)
-capi.client.add_signal("unmanage", urgent.delete)
+capi.client.connect_signal("manage", function(c) c:connect_signal("property::urgent", urgent.add) end)
+capi.client.connect_signal("focus", urgent.delete)
+capi.client.connect_signal("unmanage", urgent.delete)
 
-capi.client.add_signal("unmanage", floating.delete)
+capi.client.connect_signal("unmanage", floating.delete)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

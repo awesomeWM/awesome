@@ -25,7 +25,7 @@ function new(args, format, timeout)
     local w = capi.widget(args)
     local timer = capi.timer { timeout = timeout }
     w.text = os.date(format)
-    timer:add_signal("timeout", function() w.text = os.date(format) end)
+    timer:connect_signal("timeout", function() w.text = os.date(format) end)
     timer:start()
     return w
 end

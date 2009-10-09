@@ -149,19 +149,19 @@ luaA_settype(lua_State *L, lua_class_t *lua_class)
 }
 
 void
-luaA_object_add_signal(lua_State *L, int oud,
-                       const char *name, lua_CFunction fn)
+luaA_object_connect_signal(lua_State *L, int oud,
+                           const char *name, lua_CFunction fn)
 {
     lua_pushcfunction(L, fn);
-    luaA_object_add_signal_from_stack(L, oud, name, -1);
+    luaA_object_connect_signal_from_stack(L, oud, name, -1);
 }
 
 void
-luaA_object_remove_signal(lua_State *L, int oud,
-                       const char *name, lua_CFunction fn)
+luaA_object_disconnect_signal(lua_State *L, int oud,
+                              const char *name, lua_CFunction fn)
 {
     lua_pushcfunction(L, fn);
-    luaA_object_remove_signal_from_stack(L, oud, name, -1);
+    luaA_object_disconnect_signal_from_stack(L, oud, name, -1);
 }
 
 /** Add a signal to an object.
@@ -171,8 +171,8 @@ luaA_object_remove_signal(lua_State *L, int oud,
  * \param ud The index of function to call when signal is emitted.
  */
 void
-luaA_object_add_signal_from_stack(lua_State *L, int oud,
-                                  const char *name, int ud)
+luaA_object_connect_signal_from_stack(lua_State *L, int oud,
+                                      const char *name, int ud)
 {
     luaA_checkfunction(L, ud);
     lua_object_t *obj = lua_touserdata(L, oud);
@@ -186,8 +186,8 @@ luaA_object_add_signal_from_stack(lua_State *L, int oud,
  * \param ud The index of function to call when signal is emitted.
  */
 void
-luaA_object_remove_signal_from_stack(lua_State *L, int oud,
-                                     const char *name, int ud)
+luaA_object_disconnect_signal_from_stack(lua_State *L, int oud,
+                                         const char *name, int ud)
 {
     luaA_checkfunction(L, ud);
     lua_object_t *obj = lua_touserdata(L, oud);
@@ -274,16 +274,16 @@ luaA_object_emit_signal(lua_State *L, int oud,
 }
 
 int
-luaA_object_add_signal_simple(lua_State *L)
+luaA_object_connect_signal_simple(lua_State *L)
 {
-    luaA_object_add_signal_from_stack(L, 1, luaL_checkstring(L, 2), 3);
+    luaA_object_connect_signal_from_stack(L, 1, luaL_checkstring(L, 2), 3);
     return 0;
 }
 
 int
-luaA_object_remove_signal_simple(lua_State *L)
+luaA_object_disconnect_signal_simple(lua_State *L)
 {
-    luaA_object_remove_signal_from_stack(L, 1, luaL_checkstring(L, 2), 3);
+    luaA_object_disconnect_signal_from_stack(L, 1, luaL_checkstring(L, 2), 3);
     return 0;
 }
 

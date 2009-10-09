@@ -25,12 +25,12 @@ local function check_focus(obj)
     end
 end
 
-atag.attached_add_signal(nil, "property::selected", check_focus)
-client.add_signal("unmanage", check_focus)
-client.add_signal("new", function(c)
-    c:add_signal("untagged", check_focus)
-    c:add_signal("property::hidden", check_focus)
-    c:add_signal("property::minimized", check_focus)
+atag.attached_connect_signal(nil, "property::selected", check_focus)
+client.connect_signal("unmanage", check_focus)
+client.connect_signal("new", function(c)
+    c:connect_signal("untagged", check_focus)
+    c:connect_signal("property::hidden", check_focus)
+    c:connect_signal("property::minimized", check_focus)
 end)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

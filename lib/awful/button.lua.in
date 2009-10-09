@@ -38,10 +38,10 @@ function new(mod, button, press, release)
         ret[#ret + 1] = capi.button({ modifiers = util.table.join(mod, set),
                                       button = button })
         if press then
-            ret[#ret]:add_signal("press", function(bobj, ...) press(...) end)
+            ret[#ret]:connect_signal("press", function(bobj, ...) press(...) end)
         end
         if release then
-            ret[#ret]:add_signal("release", function (bobj, ...) release(...) end)
+            ret[#ret]:connect_signal("release", function (bobj, ...) release(...) end)
         end
     end
     return ret

@@ -18,7 +18,7 @@ local ipairs = ipairs
 -- A tooltip is a small hint displayed when the mouse cursor
 -- hovers a specific item.
 -- In awesome, a tooltip can be linked with almost any
--- object having a <code>add_signal()</code> method and receiving
+-- object having a <code>connect_signal()</code> method and receiving
 -- <code>mouse::enter</code> and <code>mouse::leave</code> signals.
 -- <p>How to create a tooltip?<br/>
 --  <code>
@@ -151,16 +151,16 @@ end
 -- @param self The tooltip.
 -- @param object An object.
 local function add_to_object(self, object)
-    object:add_signal("mouse::enter", data[self].show)
-    object:add_signal("mouse::leave", data[self].hide)
+    object:connect_signal("mouse::enter", data[self].show)
+    object:connect_signal("mouse::leave", data[self].hide)
 end
 
 --- Remove tooltip from an object.
 -- @param self The tooltip.
 -- @param object An object.
 local function remove_from_object(self, object)
-    object:remove_signal("mouse::enter", data[self].show)
-    object:remove_signal("mouse::leave", data[self].hide)
+    object:disconnect_signal("mouse::enter", data[self].show)
+    object:disconnect_signal("mouse::leave", data[self].hide)
 end
 
 
@@ -206,7 +206,7 @@ local function new(args)
                 self:set_text(args.timer_function())
                 set_geometry(self)
             end
-        data[self].timer:add_signal("timeout", data[self].timer_function)
+        data[self].timer:connect_signal("timeout", data[self].timer_function)
     end
 
     -- set tooltip properties
@@ -216,7 +216,7 @@ local function new(args)
     self.wibox.widgets = { my_textbox }
 
     -- add some signals on both the tooltip and widget
-    self.wibox:add_signal("mouse::enter", data[self].hide)
+    self.wibox:connect_signal("mouse::enter", data[self].hide)
 
     -- Add tooltip to objects
     if args.objects then

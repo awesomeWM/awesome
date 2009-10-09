@@ -538,7 +538,7 @@ luaA_screen_index(lua_State *L)
  * \lparam A function to call when the signal is emitted.
  */
 static int
-luaA_screen_add_signal(lua_State *L)
+luaA_screen_connect_signal(lua_State *L)
 {
     screen_t *s = lua_touserdata(L, 1);
     const char *name = luaL_checkstring(L, 2);
@@ -556,7 +556,7 @@ luaA_screen_add_signal(lua_State *L)
  * \lparam A function to remove
  */
 static int
-luaA_screen_remove_signal(lua_State *L)
+luaA_screen_disconnect_signal(lua_State *L)
 {
     screen_t *s = lua_touserdata(L, 1);
     const char *name = luaL_checkstring(L, 2);
@@ -619,8 +619,8 @@ const struct luaL_reg awesome_screen_methods[] =
 
 const struct luaL_reg awesome_screen_meta[] =
 {
-    { "add_signal", luaA_screen_add_signal },
-    { "remove_signal", luaA_screen_remove_signal },
+    { "connect_signal", luaA_screen_connect_signal },
+    { "disconnect_signal", luaA_screen_disconnect_signal },
     { "emit_signal", luaA_screen_emit_signal },
     { "tags", luaA_screen_tags },
     { "__index", luaA_screen_index },

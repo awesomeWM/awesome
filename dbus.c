@@ -754,7 +754,7 @@ luaA_dbus_remove_match(lua_State *L)
  * \lparam The function to call.
  */
 static int
-luaA_dbus_add_signal(lua_State *L)
+luaA_dbus_connect_signal(lua_State *L)
 {
     const char *name = luaL_checkstring(L, 1);
     luaA_checkfunction(L, 2);
@@ -775,7 +775,7 @@ luaA_dbus_add_signal(lua_State *L)
  * \lparam The function to call.
  */
 static int
-luaA_dbus_remove_signal(lua_State *L)
+luaA_dbus_disconnect_signal(lua_State *L)
 {
     const char *name = luaL_checkstring(L, 1);
     luaA_checkfunction(L, 2);
@@ -791,8 +791,8 @@ const struct luaL_reg awesome_dbus_lib[] =
     { "release_name", luaA_dbus_release_name },
     { "add_match", luaA_dbus_add_match },
     { "remove_match", luaA_dbus_remove_match },
-    { "add_signal", luaA_dbus_add_signal },
-    { "remove_signal", luaA_dbus_remove_signal },
+    { "connect_signal", luaA_dbus_connect_signal },
+    { "disconnect_signal", luaA_dbus_disconnect_signal },
     { NULL, NULL }
 };
 

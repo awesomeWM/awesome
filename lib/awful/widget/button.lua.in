@@ -33,8 +33,8 @@ function new(args)
     local w = capi.widget(args)
     w.image = img_release
     w:buttons(button({}, 1, function () w.image = img_press end, function () w.image = img_release end))
-    w:add_signal("mouse::leave", function () w.image = img_release end)
-    w:add_signal("mouse::enter", function ()
+    w:connect_signal("mouse::leave", function () w.image = img_release end)
+    w:connect_signal("mouse::enter", function ()
                                      if capi.mouse.coords().buttons[1] then w.image = img_press end
                                  end)
     return w

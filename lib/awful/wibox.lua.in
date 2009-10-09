@@ -128,15 +128,15 @@ function attach(wibox, position)
         wibox_prop_table.position = position
     end
 
-    wibox:add_signal("property::width", wibox_update_strut)
-    wibox:add_signal("property::height", wibox_update_strut)
-    wibox:add_signal("property::visible", wibox_update_strut)
+    wibox:connect_signal("property::width", wibox_update_strut)
+    wibox:connect_signal("property::height", wibox_update_strut)
+    wibox:connect_signal("property::visible", wibox_update_strut)
 
-    wibox:add_signal("property::screen", call_wibox_position_hook_on_prop_update)
-    wibox:add_signal("property::width", call_wibox_position_hook_on_prop_update)
-    wibox:add_signal("property::height", call_wibox_position_hook_on_prop_update)
-    wibox:add_signal("property::visible", call_wibox_position_hook_on_prop_update)
-    wibox:add_signal("property::border_width", call_wibox_position_hook_on_prop_update)
+    wibox:connect_signal("property::screen", call_wibox_position_hook_on_prop_update)
+    wibox:connect_signal("property::width", call_wibox_position_hook_on_prop_update)
+    wibox:connect_signal("property::height", call_wibox_position_hook_on_prop_update)
+    wibox:connect_signal("property::visible", call_wibox_position_hook_on_prop_update)
+    wibox:connect_signal("property::border_width", call_wibox_position_hook_on_prop_update)
 end
 
 --- Align a wibox.
@@ -326,11 +326,11 @@ local function update_wiboxes_on_struts(c)
 end
 
 -- Hook registered to reset all wiboxes position.
-capi.client.add_signal("manage", function(c)
+capi.client.connect_signal("manage", function(c)
     update_wiboxes_on_struts(c)
-    c:add_signal("property::struts", update_wiboxes_on_struts)
+    c:connect_signal("property::struts", update_wiboxes_on_struts)
 end)
-capi.client.add_signal("unmanage", update_wiboxes_on_struts)
+capi.client.connect_signal("unmanage", update_wiboxes_on_struts)
 
 setmetatable(_M, { __call = function(_, ...) return new(...) end })
 

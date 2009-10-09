@@ -137,8 +137,8 @@ local function new()
     -- setup the timer action only if needed
     data[self].timer = timer { timeout = data[self].timeout }
     data[self].animate_timer = timer { timeout = data[self].animate_timeout }
-    data[self].timer:add_signal("timeout", data[self].hide)
-    data[self].animate_timer:add_signal("timeout", data[self].animate)
+    data[self].timer:connect_signal("timeout", data[self].hide)
+    data[self].animate_timer:connect_signal("timeout", data[self].animate)
     data[self].wibox.ontop = true
     data[self].wibox.visible = false
 

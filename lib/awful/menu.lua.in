@@ -237,7 +237,7 @@ local function add_item(data, num, item_info)
     item:buttons(bindings)
 
     local mouse_enter_func = function () item_enter(data, num, true) end
-    item:add_signal("mouse::enter", mouse_enter_func)
+    item:connect_signal("mouse::enter", mouse_enter_func)
 
     -- Create the submenu icon widget
     local submenu
