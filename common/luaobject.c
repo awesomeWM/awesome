@@ -251,7 +251,10 @@ luaA_object_emit_signal(lua_State *L, int oud,
             luaA_dofunction(L, nargs + 1, 0);
         }
     }
-    lua_pop(L, nargs);
+    /* Then emit signal on the class */
+    lua_pushvalue(L, oud);
+    lua_insert(L, - nargs - 1);
+    luaA_class_emit_signal(L, luaA_class_get(L, - nargs - 1), name, nargs + 1);
 }
 
 int
