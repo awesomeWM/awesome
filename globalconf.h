@@ -80,8 +80,6 @@ typedef struct
     int keygrabber;
     /** The mouse pointer grabber function */
     int mousegrabber;
-    /** Previously focused client */
-    client_t *prev_client_focus;
     /** Focused client */
     client_t *client_focus;
     /** Drawins */

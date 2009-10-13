@@ -231,9 +231,6 @@ client_hasproto(client_t *c, xcb_atom_t atom)
  */
 void client_ban_unfocus(client_t *c)
 {
-    if(globalconf.prev_client_focus == c)
-        globalconf.prev_client_focus = NULL;
-
     /* Wait until the last moment to take away the focus from the window. */
     if(globalconf.client_focus == c)
         client_unfocus(c);
@@ -297,11 +294,7 @@ void
 client_focus_update(client_t *c)
 {
     if(!client_maybevisible(c, c->screen))
-    {
-        /* Focus previously focused client */
-        client_focus(globalconf.prev_client_focus);
         return;
-    }
 
     if(globalconf.client_focus)
     {
@@ -312,7 +305,6 @@ client_focus_update(client_t *c)
             return;
     }
 
-    globalconf.prev_client_focus = c;
     globalconf.client_focus = c;
 
     /* according to EWMH, we have to remove the urgent state from a client */
@@ -951,9 +943,6 @@ client_unmanage(client_t *c, bool window_valid)
         if(tc->transient_for == c)
             tc->transient_for = NULL;
     }
-
-    if(globalconf.prev_client_focus == c)
-        globalconf.prev_client_focus = NULL;
 
     if(globalconf.client_focus == c)
         client_unfocus(c);
