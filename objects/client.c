@@ -189,7 +189,8 @@ client_unfocus_update(client_t *c)
     globalconf.client_focus = NULL;
 
     luaA_object_push(globalconf.L, c);
-    luaA_class_emit_signal(globalconf.L, &client_class, "unfocus", 1);
+    luaA_object_emit_signal(globalconf.L, -1, "unfocus", 0);
+    lua_pop(globalconf.L, 1);
 }
 
 /** Unfocus a client.
@@ -317,7 +318,9 @@ client_focus_update(client_t *c)
     luaA_object_push(globalconf.L, c);
     client_set_urgent(globalconf.L, -1, false);
 
-    luaA_class_emit_signal(globalconf.L, &client_class, "focus", 1);
+    luaA_object_push(globalconf.L, c);
+    luaA_object_emit_signal(globalconf.L, -1, "focus", 0);
+    lua_pop(globalconf.L, 1);
 }
 
 /** Give focus to client, or to first client if client is NULL.
@@ -528,9 +531,11 @@ HANDLE_GEOM(height)
     luaA_class_emit_signal(globalconf.L, &client_class, "list", 0);
 
     /* client is still on top of the stack; push startup value,
-     * and emit signals with 2 args */
+     * and emit signals with one arg */
     lua_pushboolean(globalconf.L, startup);
-    luaA_class_emit_signal(globalconf.L, &client_class, "manage", 2);
+    luaA_object_emit_signal(globalconf.L, -2, "manage", 1);
+    /* pop client */
+    lua_pop(globalconf.L, 1);
 }
 
 /** Compute client geometry with respect to its geometry hints.
@@ -961,7 +966,8 @@ client_unmanage(client_t *c)
         untag_client(c, tags->tab[i]);
 
     luaA_object_push(globalconf.L, c);
-    luaA_class_emit_signal(globalconf.L, &client_class, "unmanage", 1);
+    luaA_object_emit_signal(globalconf.L, -1, "unmanage", 0);
+    lua_pop(globalconf.L, 1);
 
     luaA_class_emit_signal(globalconf.L, &client_class, "list", 0);
 
