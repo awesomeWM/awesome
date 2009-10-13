@@ -1002,7 +1002,7 @@ client_unmanage(client_t *c)
     xwindow_set_state(c->window, XCB_WM_STATE_WITHDRAWN);
 
     /* set client as invalid */
-    c->invalid = true;
+    c->window = XCB_NONE;
 
     luaA_object_unref(globalconf.L, c);
 }
@@ -1731,7 +1731,7 @@ luaA_client_module_newindex(lua_State *L)
 static bool
 client_checker(client_t *c)
 {
-    return !c->invalid;
+    return c->window != XCB_NONE;
 }
 
 void

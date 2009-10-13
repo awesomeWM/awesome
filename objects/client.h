@@ -65,8 +65,6 @@ typedef enum
 struct client_t
 {
     WINDOW_OBJECT_HEADER
-    /** Valid, or not ? */
-    bool invalid;
     /** Client name */
     char *name, *alt_name, *icon_name, *alt_icon_name;
     /** WM_CLASS stuff */
