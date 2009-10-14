@@ -170,7 +170,6 @@ void client_set_icon(lua_State *, int, int);
 void client_set_skip_taskbar(lua_State *, int, bool);
 void client_focus(client_t *);
 void client_focus_update(client_t *);
-void client_unfocus(client_t *);
 bool client_hasproto(client_t *, xcb_atom_t);
 void client_set_focus(client_t *, bool);
 void client_ignore_enterleave_events(void);

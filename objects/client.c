@@ -195,7 +195,7 @@ client_unfocus_update(client_t *c)
 /** Unfocus a client.
  * \param c The client.
  */
-void
+static void
 client_unfocus(client_t *c)
 {
 
