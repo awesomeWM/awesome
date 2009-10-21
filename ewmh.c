@@ -301,7 +301,7 @@ ewmh_process_state_atom(client_t *c, xcb_atom_t state, int set)
         else if(set == _NET_WM_STATE_ADD)
             client_set_maximized_horizontal(globalconf.L, -1, true);
         else if(set == _NET_WM_STATE_TOGGLE)
-            client_set_maximized_horizontal(globalconf.L, -1, c->maximized_horizontal);
+            client_set_maximized_horizontal(globalconf.L, -1, !c->maximized_horizontal);
     }
     else if(state == _NET_WM_STATE_MAXIMIZED_VERT)
     {
