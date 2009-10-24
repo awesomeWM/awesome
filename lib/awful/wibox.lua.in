@@ -245,12 +245,6 @@ function new(arg)
 
     local w = capi.wibox(arg)
 
-    if position == "left" then
-        w.orientation = "north"
-    elseif position == "right" then
-        w.orientation = "south"
-    end
-
     w.screen = arg.screen or 1
 
     attach(w, position)
