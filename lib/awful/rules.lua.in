@@ -81,33 +81,37 @@ end
 --- Apply rules to a client.
 -- @param c The client.
 function apply(c)
+    local props = {}
     for _, entry in ipairs(rules) do
         if match(c, entry.rule) then
             for property, value in pairs(entry.properties) do
-                if property == "floating" then
-                    aclient.floating.set(c, value)
-                elseif property == "tag" then
-                    aclient.movetotag(value, c)
-                elseif property == "switchtotag" and value
-                    and entry.properties["tag"] then
-                    atag.viewonly(entry.properties["tag"])
-                elseif property == "height" or property == "width" or
-                       property == "x" or property == "y" then
-                    local geo = c:geometry();
-                    geo[property] = value
-                    c:geometry(geo);
-                elseif type(c[property]) == "function" then
-                    c[property](c, value)
-                else
-                    c[property] = value
-                end
-            end
-            -- Do this at last so we do not erase things done by the focus
-            -- signal.
-            if entry.properties.focus then
-                client.focus = c
+                props[property] = value
             end
         end
+    end
+
+    for property, value in pairs(props) do
+        if property == "floating" then
+            aclient.floating.set(c, value)
+        elseif property == "tag" then
+            aclient.movetotag(value, c)
+        elseif property == "switchtotag" and value and props.tag then
+            atag.viewonly(props.tag)
+        elseif property == "height" or property == "width" or
+                property == "x" or property == "y" then
+            local geo = c:geometry();
+            geo[property] = value
+            c:geometry(geo);
+        elseif type(c[property]) == "function" then
+            c[property](c, value)
+        else
+            c[property] = value
+        end
+    end
+    -- Do this at last so we do not erase things done by the focus
+    -- signal.
+    if props.focus then
+        client.focus = c
     end
 end
 
