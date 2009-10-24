@@ -107,11 +107,18 @@ luaA_table2widgets(lua_State *L, widget_node_array_t *widgets)
 {
     if(lua_istable(L, -1))
     {
-        lua_pushnil(L);
-        while(luaA_next(L, -2))
+        int i = 1;
+        lua_pushnumber(L, i++);
+        lua_gettable(L, -2);
+        while(!lua_isnil(L, -1))
+        {
             luaA_table2widgets(L, widgets);
-        /* remove the table */
-        lua_pop(L, 1);
+            lua_pushnumber(L, i++);
+            lua_gettable(L, -2);
+        }
+
+        /* remove the nil and the table */
+        lua_pop(L, 2);
     }
     else
     {
