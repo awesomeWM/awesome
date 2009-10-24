@@ -23,89 +23,9 @@ local layout = require("awful.widget.layout")
 --- Taglist widget module for awful
 module("awful.widget.taglist")
 
-label = {}
+filter = {}
 
-local function taglist_update (screen, w, label, buttons, data, widgets)
-    local tags = capi.screen[screen]:tags()
-    local showntags = {}
-    for k, t in ipairs(tags) do
-        if not tag.getproperty(t, "hide") then
-            table.insert(showntags, t)
-        end
-    end
-    common.list_update(w, buttons, label, data, widgets, showntags)
-end
-
---- Get the tag object the given widget appears on.
--- @param widget The widget the look for.
--- @return The tag object.
-function gettag(widget)
-    return common.tagwidgets[widget]
-end
-
---- Create a new taglist widget.
--- @param screen The screen to draw tag list for.
--- @param label Label function to use.
--- @param buttons A table with buttons binding to set.
-function new(screen, label, buttons)
-    local w = {
-        layout = layout.horizontal.leftright
-    }
-    local widgets = { }
-    widgets.imagebox = { }
-    widgets.textbox  = { ["margin"] = { ["left"]  = 0,
-                                        ["right"] = 0},
-                         ["bg_resize"] = true
-                       }
-    local data = setmetatable({}, { __mode = 'k' })
-    local u = function (s)
-        if s == screen then
-            taglist_update(s, w, label, buttons, data, widgets)
-        end
-    end
-    local uc = function (c) return u(c.screen) end
-    capi.client.add_signal("focus", uc)
-    capi.client.add_signal("unfocus", uc)
-    tag.attached_add_signal(screen, "property::selected", uc)
-    tag.attached_add_signal(screen, "property::icon", uc)
-    tag.attached_add_signal(screen, "property::hide", uc)
-    tag.attached_add_signal(screen, "property::name", uc)
-    capi.screen[screen]:add_signal("tag::attach", function(screen, tag)
-            u(screen.index)
-        end)
-    capi.screen[screen]:add_signal("tag::detach", function(screen, tag)
-            u(screen.index)
-        end)
-    capi.client.add_signal("new", function(c)
-        c:add_signal("property::urgent", uc)
-        c:add_signal("property::screen", function(c)
-            -- If client change screen, refresh it anyway since we don't from
-            -- which screen it was coming :-)
-            u(screen)
-        end)
-        c:add_signal("tagged", uc)
-        c:add_signal("untagged", uc)
-    end)
-    capi.client.add_signal("unmanage", uc)
-    u(screen)
-    return w
-end
-
---- Return labels for a taglist widget with all tag from screen.
--- It returns the tag name and set a special
--- foreground and background color for selected tags.
--- @param t The tag.
--- @param args The arguments table.
--- bg_focus The background color for selected tag.
--- fg_focus The foreground color for selected tag.
--- bg_urgent The background color for urgent tags.
--- fg_urgent The foreground color for urgent tags.
--- squares_sel Optional: a user provided image for selected squares.
--- squares_unsel Optional: a user provided image for unselected squares.
--- squares_resize Optional: true or false to resize squares.
--- @return A string to print, a background color, a background image and a
--- background resize value.
-function label.all(t, args)
+function taglist_label(t, args)
     if not args then args = {} end
     local theme = beautiful.get()
     local fg_focus = args.fg_focus or theme.taglist_fg_focus or theme.fg_focus
@@ -174,21 +94,122 @@ function label.all(t, args)
     return text, bg_color, bg_image, icon
 end
 
---- Return labels for a taglist widget with all *non empty* tags from screen.
--- It returns the tag name and set a special
--- foreground and background color for selected tags.
--- @param t The tag.
--- @param args The arguments table.
--- bg_focus The background color for selected tag.
--- fg_focus The foreground color for selected tag.
--- bg_urgent The background color for urgent tags.
--- fg_urgent The foreground color for urgent tags.
--- @return A string to print, a background color, a background image and a
--- background resize value.
-function label.noempty(t, args)
-    if #t:clients() > 0 or t.selected then
-        return label.all(t, args)
+local function taglist_update(s, w, buttons, filter, data, style, template)
+    local tags = {}
+    for k, t in ipairs(capi.screen[s]:tags()) do
+        if not tag.getproperty(t, "hide") and filter(t) then
+            table.insert(tags, t)
+        end
     end
+
+    local function label(c) return taglist_label(c, style) end
+
+    common.list_update(w, buttons, label, data, template, tags)
+end
+
+--- Get the tag object the given widget appears on.
+-- @param widget The widget the look for.
+-- @return The tag object.
+function gettag(widget)
+    return common.tagwidgets[widget]
+end
+
+--- Create a new taglist widget.
+-- @param screen The screen to draw taglist for.
+-- @param filter Filter function to define what clients will be listed.
+-- @param buttons A table with buttons binding to set.
+-- @param style The style overrides default theme.
+-- bg_focus The background color for focused client.
+-- fg_focus The foreground color for focused client.
+-- bg_urgent The background color for urgent clients.
+-- fg_urgent The foreground color for urgent clients.
+-- squares_sel Optional: a user provided image for selected squares.
+-- squares_unsel Optional: a user provided image for unselected squares.
+-- squares_resize Optional: true or false to resize squares.
+-- font The font.
+-- @param template The template to use for each item.
+-- The default template:<br/>
+-- <code>
+--{<br/>
+--&nbsp; {<br/>
+--&nbsp; &nbsp; item = "icon"<br/>
+--&nbsp; },<br/>
+--&nbsp; {<br/>
+--&nbsp; &nbsp; item = "title",<br/>
+--&nbsp; &nbsp; bg_resize = true,<br/>
+--&nbsp; },<br/>
+--&nbsp; layout = layout.horizontal.leftright<br/>
+--}<br/>
+-- </code>
+function new(screen, filter, buttons, style, template)
+    local w = {
+        layout = layout.horizontal.leftright
+    }
+
+    template = template or {
+        {
+            item = "icon"
+        },
+        {
+            item = "title",
+            --margin = { left  = 2, right = 2 },
+            bg_resize = true,
+        },
+        layout = layout.horizontal.leftright
+    }
+
+    local data = setmetatable({}, { __mode = 'k' })
+    local u = function (s)
+        if s == screen then
+            taglist_update(s, w, buttons, filter, data, style, template)
+        end
+    end
+    local uc = function (c) return u(c.screen) end
+    capi.client.add_signal("focus", uc)
+    capi.client.add_signal("unfocus", uc)
+    tag.attached_add_signal(screen, "property::selected", uc)
+    tag.attached_add_signal(screen, "property::icon", uc)
+    tag.attached_add_signal(screen, "property::hide", uc)
+    tag.attached_add_signal(screen, "property::name", uc)
+    capi.screen[screen]:add_signal("tag::attach", function(screen, tag)
+            u(screen.index)
+        end)
+    capi.screen[screen]:add_signal("tag::detach", function(screen, tag)
+            u(screen.index)
+        end)
+    capi.client.add_signal("new", function(c)
+        c:add_signal("property::urgent", uc)
+        c:add_signal("property::screen", function(c)
+            -- If client change screen, refresh it anyway since we don't from
+            -- which screen it was coming :-)
+            u(screen)
+        end)
+        c:add_signal("tagged", uc)
+        c:add_signal("untagged", uc)
+    end)
+    capi.client.add_signal("unmanage", uc)
+    u(screen)
+    return w
+end
+
+--- Filtering function to include all nonempty tags on the screen.
+-- @param t The tag.
+-- @param screen The screen we are drawing on.
+-- @return true if t is not empty, else false
+function filter.noempty(t, args)
+    if #t:clients() > 0 or t.selected then
+        return true
+    end
+
+    return false
+end
+
+--- Filtering function to include all tags on the screen.
+-- @param t The tag.
+-- @param screen The screen we are drawing on.
+-- @return true
+function filter.all(t, args)
+    return true
 end
 
 setmetatable(_M, { __call = function(_, ...) return new(...) end })

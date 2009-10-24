@@ -8,48 +8,70 @@
 local math = math
 local type = type
 local ipairs = ipairs
+local pairs = pairs
 local setmetatable = setmetatable
 local capi = { widget = widget, button = button }
+local layout = require("awful.widget.layout")
+local util = require("awful.util")
 
---- Common widget code
-module("awful.widget.common")
+local common = {}
 
 -- Private structures
 tagwidgets = setmetatable({}, { __mode = 'k' })
 
-function list_update(w, buttons, label, data, widgets, objects)
+-- Recursively processes a template, replacing the tables representing the icon and
+-- the title with the widgets ib and tb
+local function replace_in_template(t, ib, tb)
+    for i, v in ipairs(t) do
+        if type(t[i]) == "table" then
+            if v.item == "icon" then
+                t[i] = ib
+            elseif v.item == "title" then
+                tb.align = v.align or "left"
+                tb:margin(v.margin or {})
+                tb.bg_resize = v.bg_resize or false
+                tb.bg_align = v.bg_align or ""
+                t[i] = tb
+            else
+                replace_in_template(v, ib, tb)
+            end
+        end
+    end
+end
+
+function common.list_update(w, buttons, label, data, template, objects)
     -- Hack: if it has been registered as a widget in a wibox,
     -- it's w.len since __len meta does not work on table until Lua 5.2.
     -- Otherwise it's standard #w.
-    local len = (w.len or #w) / 2
-    -- Add more widgets
-    if len < #objects then
-        for i = len * 2 + 1, #objects * 2, 2 do
-            local ib = capi.widget({ type = "imagebox", align = widgets.imagebox.align })
-            local tb = capi.widget({ type = "textbox", align = widgets.textbox.align })
+    local len = (w.len or #w)
 
-            w[i] = ib
-            w[i + 1] = tb
-            w[i + 1]:margin({ left = widgets.textbox.margin.left, right = widgets.textbox.margin.right })
-            w[i + 1].bg_resize = widgets.textbox.bg_resize or false
-            w[i + 1].bg_align = widgets.textbox.bg_align or ""
-
-            if type(objects[math.floor(i / 2) + 1]) == "tag" then
-                tagwidgets[ib] = objects[math.floor(i / 2) + 1]
-                tagwidgets[tb] = objects[math.floor(i / 2) + 1]
-            end
-        end
-    -- Remove widgets
-    elseif len > #objects then
-        for i = #objects * 2 + 1, len * 2, 2 do
+    -- Remove excessive widgets
+    if len > #objects then
+        for i = #objects, len do
             w[i] = nil
-            w[i + 1] = nil
         end
     end
 
-    -- update widgets text
-    for k = 1, #objects * 2, 2 do
-        local o = objects[(k + 1) / 2]
+    -- update the widgets, creating them if needed
+    for i, o in ipairs(objects) do
+        local ib, tb
+        if w[i] then
+            ib = w[i].icon
+            tb = w[i].title
+        else
+            ib = capi.widget({ type = "imagebox" })
+            tb = capi.widget({ type = "textbox" })
+            w[i] = util.table.clone(template)
+            replace_in_template(w[i], ib, tb)
+            w[i].icon = ib
+            w[i].title = tb
+
+            if type(o) == "tag" then
+                tagwidgets[ib] = o
+                tagwidgets[tb] = o
+            end
+        end
+
         if buttons then
             if not data[o] then
                 data[o] = { }
@@ -64,24 +86,26 @@ function list_update(w, buttons, label, data, widgets, objects)
                     data[o][#data[o] + 1] = btn
                 end
             end
-            w[k]:buttons(data[o])
-            w[k + 1]:buttons(data[o])
+            ib:buttons(data[o])
+            tb:buttons(data[o])
         end
 
         local text, bg, bg_image, icon = label(o)
-        w[k + 1].text, w[k + 1].bg, w[k + 1].bg_image = text, bg, bg_image
-        w[k].bg, w[k].image = bg, icon
-        if not w[k + 1].text then
-            w[k+1].visible = false
+        tb.text, tb.bg, tb.bg_image = text, bg, bg_image
+        ib.bg, ib.image = bg, icon
+        if not tb.text then
+            tb.visible = false
         else
-            w[k+1].visible = true
+            tb.visible = true
         end
-        if not w[k].image then
-            w[k].visible = false
+        if not ib.image then
+            ib.visible = false
         else
-            w[k].visible = true
+            ib.visible = true
         end
    end
 end
+
+return common
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
