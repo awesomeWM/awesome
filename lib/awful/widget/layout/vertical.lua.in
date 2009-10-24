@@ -1,101 +1,98 @@
 -------------------------------------------------
--- @author Gregor Best <farhaven@googlemail.com>
--- @copyright 2009 Gregor Best
+-- @author Gregor Best <farhaven@googlemail.com>, Lukas Hrazky <lukkash@email.cz>
+-- @copyright 2009 Gregor Best, Lukas Hrazky
 -- @release @AWESOME_VERSION@
 -------------------------------------------------
 
--- Grab environment
+local require = require
 local ipairs = ipairs
-local type = type
-local table = table
-local math = math
+local pairs = pairs
 local util = require("awful.util")
-local default = require("awful.widget.layout.default")
+local layout = require("awful.widget.layout")
+local linear = require("awful.widget.layout.linear_common")
 
---- Vertical widget layout
+--- Vertical widget layouts
 module("awful.widget.layout.vertical")
 
-function flex(bounds, widgets, screen)
-    local geometries = {
-        free = util.table.clone(bounds)
-    }
+-- index used for vertical layouts
+local idx = layout.switched_index
 
-    local y = 0
-
-    -- we are only interested in tables and widgets
-    local keys = util.table.keys_filter(widgets, "table", "widget")
-    local nelements = 0
-    for _, k in ipairs(keys) do
-        local v = widgets[k]
-        if type(v) == "table" then
-            nelements = nelements + 1
-        else
-            local e = v:extents()
-            if v.visible and e.width > 0 and e.height > 0 then
-                nelements = nelements + 1
-            end
-        end
-    end
-    if nelements == 0 then return geometries end
-    local height = math.floor(bounds.height / nelements)
-
-    for _, k in ipairs(keys) do
-        local v = widgets[k]
-        if type(v) == "table" then
-            local layout = v.layout or default
-            -- we need to modify the height a bit because vertical layouts always span the
-            -- whole height
-            nbounds = util.table.clone(bounds)
-            nbounds.height = height
-            local g = layout(nbounds, v, screen)
-            for _, w in ipairs(g) do
-                w.y = w.y + y
-                table.insert(geometries, w)
-            end
-            y = y + height
-        elseif type(v) == "widget" then
-            local g
-            if v.visible then
-                g = v:extents(screen)
-            else
-                g = {
-                    ["width"] = 0,
-                    ["height"] = 0
-                }
-            end
-
-            g.ratio = 1
-            if g.height > 0 and g.width > 0 then
-                g.ratio = g.width / g.height
-            end
-            g.height = height
-            if v.resize then
-                g.width = g.height * g.ratio
-            end
-            g.width = math.min(g.width, bounds.width)
-            geometries.free.x = math.max(geometries.free.x, g.width)
-
-            g.x = 0
-            g.y = y
-            y = y + g.height
-            bounds.height = bounds.height - g.height
-
-            table.insert(geometries, g)
-        end
-    end
-
-    local maxw = 0
-    local maxx = 0
-    for _, v in ipairs(geometries) do
-        if v.width > maxw then maxw = v.width end
-        if v.x > maxx then maxx = v.x end
-    end
-
-    geometries.free.width = geometries.free.width - maxw
-    geometries.free.x = geometries.free.x + maxw
-
-    geometries.free.height = nelements * height
-    geometries.free.y = 0
-
-    return geometries
+--- Places the widgets in a column, aligned to the top.
+-- It recognizes the following attributes in the encompassing table:
+-- <p><code>width</code>: Maximum width of the layout. If set, all widgets are resized to this width.
+-- (optional)<br/>
+-- <code>height</code>: Height of the layout. (optional)</p>
+-- @param bounds The geometry of the bounds for the layout.
+-- @param widgets The table of the widgets to layout. When layout function is placed in
+-- a table, it is the table that is passed as this argument.
+-- @param screen The screen of the wibox.
+-- @return A table of geometries of all the widgets.
+function topdown(bounds, widgets, screen)
+    return linear.fixed(idx, bounds, widgets, screen)
 end
+
+--- Places the widgets in a column, aligned to the bottom.
+-- It recognizes the following attributes in the encompassing table:
+-- <p><code>width</code>: Maximum width of the layout. If set, all widgets are resized to this width.
+-- (optional)<br/>
+-- <code>height</code>: Height of the layout. (optional)</p>
+-- @param bounds The geometry of the bounds for the layout.
+-- @param widgets The table of the widgets to layout. When layout function is placed in
+-- a table, it is the table that is passed as this argument.
+-- @param screen The screen of the wibox.
+-- @return A table of geometries of all the widgets.
+function bottomup(bounds, widgets, screen)
+    local g = linear.fixed(idx, util.table.clone(bounds), widgets, screen)
+    for _, w in pairs(g) do
+        w.y = w.y + bounds.height - g.total.height
+    end
+    return g
+end
+
+--- Places the widgets in a column, aligned to the center.
+-- It recognizes the following attributes in the encompassing table:
+-- <p><code>width</code>: Maximum width of the layout. If set, all widgets are resized to this width.
+-- (optional)<br/>
+-- <code>height</code>: Height of the layout. (optional)</p>
+-- The widgets will be placed in the center of the free space that is left after all widgets
+-- preceding the table with this layout were placed. The area covered by widgets with this layout
+-- is not subtracted from the total free area (so the widgets "cover no space"). Therefore, if you
+-- put anything after a table with center layout, the widgets may overlap.
+-- @param bounds The geometry of the bounds for the layout.
+-- @param widgets The table of the widgets to layout. When layout function is placed in
+-- a table, it is the table that is passed as this argument.
+-- @param screen The screen of the wibox.
+-- @return A table of geometries of all the widgets.
+function center(bounds, widgets, screen)
+    local g = linear.fixed(idx, util.table.clone(bounds), widgets, screen)
+    for _, w in ipairs(g) do
+        w.y = w.y + (bounds.height - g.total.height) / 2
+    end
+    -- if height is set for widgets table, make total this wide,
+    -- otherwise move total.y to reflect new position
+    if widgets.height then
+        g.total.height = widgets.height
+    else
+        g.total.y = g.total.y  + (bounds.height - g.total.height) / 2
+    end
+    return g
+end
+
+--- Places the widgets in a column, making them equally high.
+-- It recognizes the following attributes in the encompassing table:
+-- <p><code>width</code>: Maximum width of the layout. If set, all widgets are resized to this width.
+-- (optional)<br/>
+-- <code>height</code>: Height of the layout. (optional)<br/>
+-- <code>max_size</code>: Maximum height of one item. If not set, widgets' heights are set so that they always
+-- cover all available space. (optional)<br/>
+-- <code>gap</code>: Gap between the widgets. (optional)</p>
+-- @param bounds The geometry of the bounds for the layout.
+-- @param widgets The table of the widgets to layout. When layout function is placed in
+-- a table, it is the table that is passed as this argument.
+-- @param screen The screen of the wibox.
+-- @return A table of geometries of all the widgets.
+function flex(bounds, widgets, screen)
+    return linear.flex(idx, bounds, widgets, screen)
+end
+
+-- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
