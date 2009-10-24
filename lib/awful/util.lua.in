@@ -339,7 +339,11 @@ end
 function table.clone(t)
     local c = { }
     for k, v in pairs(t) do
-        c[k] = v
+        if type(v) == "table" then
+            c[k] = table.clone(v)
+        else
+            c[k] = v
+        end
     end
     return c
 end
