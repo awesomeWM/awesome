@@ -495,6 +495,17 @@ luaA_widget_extents(lua_State *L)
 }
 
 static int
+luaA_widget_get_type(lua_State *L, widget_t *w)
+{
+    if (w->type == widget_textbox) lua_pushstring(L, "textbox");
+    else if (w->type == widget_systray) lua_pushstring(L, "systray");
+    else if (w->type == widget_imagebox) lua_pushstring(L, "imagebox");
+    else lua_pushstring(L, "unknown");
+
+    return 1;
+}
+
+static int
 luaA_widget_set_type(lua_State *L, widget_t *w)
 {
     size_t len;
@@ -572,7 +583,7 @@ widget_class_setup(lua_State *L)
                             (lua_class_propfunc_t) luaA_widget_set_visible);
     luaA_class_add_property(&widget_class, A_TK_TYPE,
                             (lua_class_propfunc_t) luaA_widget_set_type,
-                            NULL,
+                            (lua_class_propfunc_t) luaA_widget_get_type,
                             NULL);
 }
 
