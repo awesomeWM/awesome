@@ -34,6 +34,7 @@ function new(args)
     args.type = "textbox"
     promptbox.widget = capi.widget(args)
     promptbox.widget.ellipsize = "start"
+    promptbox[1] = promptbox.widget
     promptbox.run = run
     promptbox.prompt = args.prompt or "Run: "
     promptbox.layout = args.layout or layout.horizontal.leftright

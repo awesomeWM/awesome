@@ -170,6 +170,7 @@ function new(args)
 
     pbar.widget = capi.widget(args)
     pbar.widget.resize = false
+    pbar[1] = pbar.widget
 
     data[pbar] = { width = width, height = height, value = 0 }
 
