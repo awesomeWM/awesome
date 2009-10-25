@@ -112,9 +112,10 @@ local function update(graph)
             if value >= 0 then
                 value = value / max_value
                 img:draw_line(data[graph].width - border_width - i - 1,
-                              border_width + ((data[graph].height - 2 * border_width) * (1 - value)),
+                              border_width - 1 +
+                                  math.floor(((data[graph].height - 2 * border_width) * (1 - value)) + 0.5),
                               data[graph].width - border_width - i - 1,
-                              border_width,
+                              border_width - 1,
                               data[graph].background_color or "#000000aa")
             end
         end
