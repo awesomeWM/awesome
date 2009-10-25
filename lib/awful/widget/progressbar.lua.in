@@ -57,8 +57,6 @@ local function update(pbar)
     local width = data[pbar].width or 100
     local height  = data[pbar].height or 20
 
-    if data[pbar].width < 5 or data[pbar].height < 2 then return end
-
     -- Create new empty image
     local img = capi.image.argb32(width, height, nil)
 
@@ -124,10 +122,8 @@ end
 -- @param progressbar The progressbar.
 -- @param height The height to set.
 function set_height(progressbar, height)
-    if height >= 5 then
-        data[progressbar].height = height
-        update(progressbar)
-    end
+    data[progressbar].height = height
+    update(progressbar)
     return progressbar
 end
 
@@ -135,10 +131,8 @@ end
 -- @param progressbar The progressbar.
 -- @param width The width to set.
 function set_width(progressbar, width)
-    if width >= 5 then
-        data[progressbar].width = width
-        update(progressbar)
-    end
+    data[progressbar].width = width
+    update(progressbar)
     return progressbar
 end
 
@@ -161,8 +155,6 @@ function new(args)
     local args = args or {}
     local width = args.width or 100
     local height = args.height or 20
-
-    if width < 5 or height < 5 then return end
 
     args.type = "imagebox"
 
