@@ -98,7 +98,7 @@ local function update(pbar)
                            rel_height,
                            true, data[pbar].background_color or "#000000aa")
     else
-        local rel_x = math.floor(over_drawn_width * data[pbar].value)
+        local rel_x = math.floor((over_drawn_width * data[pbar].value) + 0.5)
         img:draw_rectangle(border_width + rel_x,
                            border_width,
                            over_drawn_width - rel_x,
