@@ -33,7 +33,7 @@ history.limit = 20
 --- Create a set of tags and attach it to a screen.
 -- @param names The tag name, in a table
 -- @param screen The tag screen, or 1 if not set.
--- @param layout The layout to set for this tags by default.
+-- @param layout The layout or layout table to set for this tags by default.
 -- @return A table with all created tags.
 function new(names, screen, layout)
     local screen = screen or 1
@@ -45,7 +45,7 @@ function new(names, screen, layout)
         if id == 1 then
             tags[#tags].selected = true
         end
-        setproperty(tags[#tags], "layout", layout)
+        setproperty(tags[#tags], "layout", layout[#tags] or layout[1] or layout)
     end
     return tags
 end
