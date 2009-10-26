@@ -165,6 +165,17 @@ endmacro()
 
 # Check for libev
 a_find_library(LIB_EV ev)
+# GNU libc has <execinfo.h> and backtrace() stuff. If this is not available, we
+# need libexecinfo.
+try_compile(HAS_EXECINFO
+    ${CMAKE_BINARY_DIR}
+    ${CMAKE_SOURCE_DIR}/build-tests/execinfo.c)
+if(NOT HAS_EXECINFO)
+    a_find_library(LIB_EXECINFO execinfo)
+    set(AWESOME_REQUIRED_LIBRARIES
+        ${AWESOME_REQUIRED_LIBRARIES}
+        ${LIB_EXECINFO})
+endif()
 
 # Error check
 if(NOT LUA51_FOUND AND NOT LUA50_FOUND) # This is a workaround to a cmake bug
