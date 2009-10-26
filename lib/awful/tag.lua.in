@@ -45,7 +45,7 @@ function new(names, screen, layout)
         if id == 1 then
             tags[#tags].selected = true
         end
-        setproperty(tags[#tags], "layout", layout[#tags] or layout[1] or layout)
+        setproperty(tags[#tags], "layout", layout and (layout[#tags] or layout[1]) or layout)
     end
     return tags
 end
