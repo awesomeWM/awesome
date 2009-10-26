@@ -403,7 +403,11 @@ function notify(args)
     notification.idx = offset.idx
 
     -- populate widgets
-    notification.box.widgets = { iconbox, textbox, ["layout"] = layout.horizontal.leftright }
+    if iconbox then
+        notification.box.widgets = { iconbox, textbox, ["layout"] = layout.horizontal.leftright }
+    else
+        notification.box.widgets = { textbox, ["layout"] = layout.horizontal.leftright }
+    end
 
     -- insert the notification to the table
     table.insert(notifications[screen][notification.position], notification)
