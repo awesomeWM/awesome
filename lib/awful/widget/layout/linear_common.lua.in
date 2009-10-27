@@ -245,7 +245,7 @@ function linear_common.flex(idx, bounds, widgets, screen)
                     insert(geometries, v)
                 end
             elseif type(v) == "widget" then
-                g = v:extents(screen)
+                local g = v:extents(screen)
 
                 -- resize to fit the width available if requested
                 if v.resize and g.width > 0 and g.height > 0 then
