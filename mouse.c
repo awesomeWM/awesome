@@ -199,9 +199,6 @@ luaA_mouse_pushstatus(lua_State *L, int x, int y, uint16_t mask)
 /** Get or set the mouse coords.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
- * \luastack
- * \lparam None or a table with x and y keys as mouse coordinates.
- * \lreturn A table with mouse coordinates.
  */
 static int
 luaA_mouse_coords(lua_State *L)
@@ -211,11 +208,12 @@ luaA_mouse_coords(lua_State *L)
     int16_t mouse_x, mouse_y;
     screen_t *screen;
 
-    if(lua_gettop(L) == 1)
+    if(lua_gettop(L) >= 1)
     {
         xcb_window_t root;
 
         luaA_checktable(L, 1);
+        bool ignore_enter_notify = (lua_gettop(L) == 2 && luaA_checkboolean(L, 2));
 
         if(!mouse_query_pointer_root(&screen, &mouse_x, &mouse_y, NULL, &mask))
             return 0;
@@ -225,7 +223,15 @@ luaA_mouse_coords(lua_State *L)
 
         root = xutil_screen_get(globalconf.connection,
                                 screen_array_indexof(&globalconf.screens, screen))->root;
+
+        if(ignore_enter_notify)
+            client_ignore_enterleave_events();
+
         mouse_warp_pointer(root, x, y);
+
+        if(ignore_enter_notify)
+            client_restore_enterleave_events();
+
         lua_pop(L, 1);
     }
 
