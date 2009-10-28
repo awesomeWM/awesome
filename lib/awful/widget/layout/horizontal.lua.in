@@ -66,13 +66,8 @@ function center(bounds, widgets, screen)
     for _, w in ipairs(g) do
         w.x = w.x + (bounds.width - g.total.width) / 2
     end
-    -- if width is set for widgets table, make total this wide,
-    -- otherwise move total.x to reflect new position
-    if widgets.width then
-        g.total.width = widgets.width
-    else
-        g.total.x = g.total.x  + (bounds.width - g.total.width) / 2
-    end
+    g.total.x = 0
+    g.total.width = 0
     return g
 end
 

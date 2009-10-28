@@ -78,12 +78,8 @@ function linear_common.fixed(idx, bounds, widgets, screen)
                 v.width = t_width
                 v.height = t_height
 
-                -- subtract the space taken by the table from our bounds - only if the taken space
-                -- is either on the left or on the right of our bounds (not in the middle)
-                if g.total[idx.x] == bounds[idx.x] or
-                    g.total[idx.x] + g.total[idx.width] == bounds[idx.x] + bounds[idx.width] then
-                    bounds[idx.width] = bounds[idx.width] - g.total[idx.width]
-                end
+                -- subtract the space taken by the table from our bounds
+                bounds[idx.width] = bounds[idx.width] - g.total[idx.width]
                 -- we only move the 'x' coord if the taken space is on the left side of our bounds
                 if g.total[idx.x] == bounds[idx.x] then
                     bounds[idx.x] = bounds[idx.x] + g.total[idx.width] + m[idx.right]
@@ -141,7 +137,7 @@ function linear_common.fixed(idx, bounds, widgets, screen)
 
     -- calculate the total space taken by the widgets
     geometries.total[idx.width] = geometries.total[idx.width] - bounds[idx.width]
-    geometries.total[idx.height] = maxh
+    geometries.total[idx.height] = widgets[idx.height] or maxh
     -- if the bounds are on the left of what was empty in the beginning of this function,
     -- we move the total to the right. this, however, most probably happened cos of rightleft layout
     -- inside 'widgets', and only if there was nothing aligned to the left
@@ -280,7 +276,7 @@ function linear_common.flex(idx, bounds, widgets, screen)
 
     -- we have total already from the cloned bounds, just set the height to what we got
     geometries.total[idx.width] = geometries.total[idx.width] - bounds[idx.width]
-    geometries.total[idx.height] = maxh
+    geometries.total[idx.height] = widgets[idx.height] or maxh
 
     return geometries
 end
