@@ -78,10 +78,10 @@ function taglist_label(t, args)
     end
     if not tag.getproperty(t, "icon_only") then
         if fg_color then
-            text = text .. "<span color='"..util.color_strip_alpha(fg_color).."'>"
-            text = " " .. text.. (util.escape(t.name) or "") .." </span>"
+            text = text .. "<span color='"..util.color_strip_alpha(fg_color).."'>" ..
+                (util.escape(t.name) or "") .. "</span>"
         else
-            text = text .. " " .. (util.escape(t.name) or "") .. " "
+            text = text .. (util.escape(t.name) or "")
         end
     end
     text = text .. "</span>"
@@ -152,7 +152,7 @@ function new(screen, filter, buttons, style, template)
         },
         {
             item = "title",
-            --margin = { left  = 2, right = 2 },
+            margin = { left  = 4, right = 4 },
             bg_resize = true,
         },
         layout = layout.horizontal.leftright
