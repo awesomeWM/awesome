@@ -82,6 +82,7 @@ function arrange(screen)
     p.clients = client.tiled(screen)
     p.screen = screen
     get(screen).arrange(p)
+    capi.screen[screen]:emit_signal("arrange")
     arrange_lock = false
 end
 
