@@ -166,11 +166,11 @@ wibox_init(wibox_t *w, int phys_screen)
                       w->geometry.x, w->geometry.y,
                       w->geometry.width, w->geometry.height,
                       w->border_width, XCB_COPY_FROM_PARENT, s->root_visual,
-                      XCB_CW_BACK_PIXMAP | XCB_CW_BORDER_PIXEL
+                      XCB_CW_BACK_PIXEL | XCB_CW_BORDER_PIXEL
                       | XCB_CW_OVERRIDE_REDIRECT | XCB_CW_EVENT_MASK,
                       (const uint32_t [])
                       {
-                          XCB_BACK_PIXMAP_PARENT_RELATIVE,
+                          w->ctx.bg.pixel,
                           w->border_color.pixel,
                           1,
                           XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT
@@ -1047,7 +1047,16 @@ luaA_wibox_set_bg(lua_State *L, wibox_t *wibox)
     size_t len;
     const char *buf = luaL_checklstring(L, -1, &len);
     if(xcolor_init_reply(xcolor_init_unchecked(&wibox->ctx.bg, buf, len)))
+    {
+        uint32_t mask = XCB_CW_BACK_PIXEL;
+        uint32_t values[] = { wibox->ctx.bg.pixel };
+
         wibox->need_update = true;
+        xcb_change_window_attributes(globalconf.connection,
+                                     wibox->window,
+                                     mask,
+                                     values);
+    }
     luaA_object_emit_signal(L, -3, "property::bg", 0);
     return 0;
 }
