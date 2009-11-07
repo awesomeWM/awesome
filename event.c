@@ -528,7 +528,10 @@ event_handle_expose(void *data __attribute__ ((unused)),
 {
     wibox_t *wibox;
 
-    if((wibox = wibox_getbywin(ev->window)))
+    /* If the wibox got need_update set, skip this because it will be repainted
+     * soon anyway. Without this we could be painting garbage to the screen!
+     */
+    if((wibox = wibox_getbywin(ev->window)) && !wibox->need_update)
         wibox_refresh_pixmap_partial(wibox,
                                      ev->x, ev->y,
                                      ev->width, ev->height);
