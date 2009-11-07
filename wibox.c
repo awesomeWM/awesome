@@ -166,12 +166,13 @@ wibox_init(wibox_t *w, int phys_screen)
                       w->geometry.x, w->geometry.y,
                       w->geometry.width, w->geometry.height,
                       w->border_width, XCB_COPY_FROM_PARENT, s->root_visual,
-                      XCB_CW_BACK_PIXEL | XCB_CW_BORDER_PIXEL
+                      XCB_CW_BACK_PIXEL | XCB_CW_BORDER_PIXEL | XCB_CW_BIT_GRAVITY
                       | XCB_CW_OVERRIDE_REDIRECT | XCB_CW_EVENT_MASK,
                       (const uint32_t [])
                       {
                           w->ctx.bg.pixel,
                           w->border_color.pixel,
+                          XCB_GRAVITY_NORTH_WEST,
                           1,
                           XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT
                           | XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY | XCB_EVENT_MASK_ENTER_WINDOW
