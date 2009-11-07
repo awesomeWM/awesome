@@ -97,7 +97,7 @@ local function show(self)
             data[self].timer:start()
         end
     end
-    place(self)
+    set_geometry(self)
     self.wibox.visible = true
     self.visible = true
 end
