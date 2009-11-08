@@ -1010,10 +1010,12 @@ luaA_wibox_set_bg(lua_State *L, wibox_t *wibox)
         uint32_t values[] = { wibox->ctx.bg.pixel };
 
         wibox->need_update = true;
-        xcb_change_window_attributes(globalconf.connection,
-                                     wibox->window,
-                                     mask,
-                                     values);
+
+        if (wibox->window != XCB_NONE)
+            xcb_change_window_attributes(globalconf.connection,
+                                         wibox->window,
+                                         mask,
+                                         values);
     }
     luaA_object_emit_signal(L, -3, "property::bg", 0);
     return 0;
