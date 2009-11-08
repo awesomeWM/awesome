@@ -6,6 +6,7 @@
 
 -- Grab environment we need
 local client = client
+local table = table
 local type = type
 local ipairs = ipairs
 local pairs = pairs
@@ -47,6 +48,14 @@ module("awful.rules")
 --   properties = { tag = mytagobject, switchtotag = true } }
 -- </code>
 -- </p>
+-- <p>If you want to apply a custom callback to execute when a rule matched, you
+-- can add:
+-- <br/>
+-- <code>
+-- { rule = { class = "dosbox" },
+--   callback = awful.placement.centered }
+-- </code>
+-- </p>
 -- <p>Note that all "rule" entries need to match. If any of the entry does not
 -- match, the rule won't be applied.</p>
 -- <p>If a client matches multiple rules, their applied in the order they are
@@ -82,10 +91,14 @@ end
 -- @param c The client.
 function apply(c)
     local props = {}
+    local callbacks = {}
     for _, entry in ipairs(rules) do
         if match(c, entry.rule) then
             for property, value in pairs(entry.properties) do
                 props[property] = value
+            end
+            if entry.callback then
+                table.insert(callbacks, entry.callback)
             end
         end
     end
@@ -108,6 +121,12 @@ function apply(c)
             c[property] = value
         end
     end
+
+    -- Apply all callbacks from matched rules.
+    for i, callback in pairs(callbacks) do
+        callback(c)
+    end
+
     -- Do this at last so we do not erase things done by the focus
     -- signal.
     if props.focus then
