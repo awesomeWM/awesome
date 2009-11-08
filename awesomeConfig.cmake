@@ -17,7 +17,7 @@ option(GENERATE_LUADOC "generate luadoc" ON)
 link_directories(/usr/local/lib)
 
 # {{{ CFLAGS
-add_definitions(-std=gnu99 -ggdb3 -fno-strict-aliasing -Wall -Wextra
+add_definitions(-std=gnu99 -ggdb3 -rdynamic -fno-strict-aliasing -Wall -Wextra
     -Wchar-subscripts -Wundef -Wshadow -Wcast-align -Wwrite-strings
     -Wsign-compare -Wunused -Wno-unused-parameter -Wuninitialized -Winit-self
     -Wpointer-arith -Wredundant-decls -Wformat-nonliteral
