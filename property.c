@@ -409,51 +409,53 @@ property_handle_net_wm_opacity(void *data __attribute__ ((unused)),
 
 void a_xcb_set_property_handlers(void)
 {
+    static xcb_property_handlers_t prophs;
+
     /* init */
-    xcb_property_handlers_init(&globalconf.prophs, &globalconf.evenths);
+    xcb_property_handlers_init(&prophs, &globalconf.evenths);
 
     /* Xembed stuff */
-    xcb_property_set_handler(&globalconf.prophs, _XEMBED_INFO, UINT_MAX,
+    xcb_property_set_handler(&prophs, _XEMBED_INFO, UINT_MAX,
                              property_handle_xembed_info, NULL);
 
     /* ICCCM stuff */
-    xcb_property_set_handler(&globalconf.prophs, WM_TRANSIENT_FOR, UINT_MAX,
+    xcb_property_set_handler(&prophs, WM_TRANSIENT_FOR, UINT_MAX,
                              property_handle_wm_transient_for, NULL);
-    xcb_property_set_handler(&globalconf.prophs, WM_CLIENT_LEADER, UINT_MAX,
+    xcb_property_set_handler(&prophs, WM_CLIENT_LEADER, UINT_MAX,
                              property_handle_wm_client_leader, NULL);
-    xcb_property_set_handler(&globalconf.prophs, WM_NORMAL_HINTS, UINT_MAX,
+    xcb_property_set_handler(&prophs, WM_NORMAL_HINTS, UINT_MAX,
                              property_handle_wm_normal_hints, NULL);
-    xcb_property_set_handler(&globalconf.prophs, WM_HINTS, UINT_MAX,
+    xcb_property_set_handler(&prophs, WM_HINTS, UINT_MAX,
                              property_handle_wm_hints, NULL);
-    xcb_property_set_handler(&globalconf.prophs, WM_NAME, UINT_MAX,
+    xcb_property_set_handler(&prophs, WM_NAME, UINT_MAX,
                              property_handle_wm_name, NULL);
-    xcb_property_set_handler(&globalconf.prophs, WM_ICON_NAME, UINT_MAX,
+    xcb_property_set_handler(&prophs, WM_ICON_NAME, UINT_MAX,
                              property_handle_wm_icon_name, NULL);
-    xcb_property_set_handler(&globalconf.prophs, WM_CLASS, UINT_MAX,
+    xcb_property_set_handler(&prophs, WM_CLASS, UINT_MAX,
                              property_handle_wm_class, NULL);
-    xcb_property_set_handler(&globalconf.prophs, WM_PROTOCOLS, UINT_MAX,
+    xcb_property_set_handler(&prophs, WM_PROTOCOLS, UINT_MAX,
                              property_handle_wm_protocols, NULL);
-    xcb_property_set_handler(&globalconf.prophs, WM_CLIENT_MACHINE, UINT_MAX,
+    xcb_property_set_handler(&prophs, WM_CLIENT_MACHINE, UINT_MAX,
                              property_handle_wm_client_machine, NULL);
-    xcb_property_set_handler(&globalconf.prophs, WM_WINDOW_ROLE, UINT_MAX,
+    xcb_property_set_handler(&prophs, WM_WINDOW_ROLE, UINT_MAX,
                              property_handle_wm_window_role, NULL);
 
     /* EWMH stuff */
-    xcb_property_set_handler(&globalconf.prophs, _NET_WM_NAME, UINT_MAX,
+    xcb_property_set_handler(&prophs, _NET_WM_NAME, UINT_MAX,
                              property_handle_net_wm_name, NULL);
-    xcb_property_set_handler(&globalconf.prophs, _NET_WM_ICON_NAME, UINT_MAX,
+    xcb_property_set_handler(&prophs, _NET_WM_ICON_NAME, UINT_MAX,
                              property_handle_net_wm_icon_name, NULL);
-    xcb_property_set_handler(&globalconf.prophs, _NET_WM_STRUT_PARTIAL, UINT_MAX,
+    xcb_property_set_handler(&prophs, _NET_WM_STRUT_PARTIAL, UINT_MAX,
                              property_handle_net_wm_strut_partial, NULL);
-    xcb_property_set_handler(&globalconf.prophs, _NET_WM_ICON, UINT_MAX,
+    xcb_property_set_handler(&prophs, _NET_WM_ICON, UINT_MAX,
                              property_handle_net_wm_icon, NULL);
-    xcb_property_set_handler(&globalconf.prophs, _NET_WM_PID, UINT_MAX,
+    xcb_property_set_handler(&prophs, _NET_WM_PID, UINT_MAX,
                              property_handle_net_wm_pid, NULL);
-    xcb_property_set_handler(&globalconf.prophs, _NET_WM_WINDOW_OPACITY, 1,
+    xcb_property_set_handler(&prophs, _NET_WM_WINDOW_OPACITY, 1,
                              property_handle_net_wm_opacity, NULL);
 
     /* background change */
-    xcb_property_set_handler(&globalconf.prophs, _XROOTPMAP_ID, 1,
+    xcb_property_set_handler(&prophs, _XROOTPMAP_ID, 1,
                              property_handle_xrootpmap_id, NULL);
 }
 
