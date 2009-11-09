@@ -314,7 +314,7 @@ a_strncat(char *dst, ssize_t n, const char *src, ssize_t l)
 /** Compute a hash for a string.
  * This is based on 'djb2' algorithm.
  */
-static inline unsigned long
+static inline unsigned long __attribute__ ((nonnull(1)))
 a_strhash(const unsigned char *str)
 {
     unsigned long hash = 5381;
