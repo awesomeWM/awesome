@@ -94,8 +94,10 @@ function apply(c)
     local callbacks = {}
     for _, entry in ipairs(rules) do
         if match(c, entry.rule) then
-            for property, value in pairs(entry.properties) do
-                props[property] = value
+            if entry.properties then
+                for property, value in pairs(entry.properties) do
+                    props[property] = value
+                end
             end
             if entry.callback then
                 table.insert(callbacks, entry.callback)
