@@ -289,15 +289,15 @@ a_dbus_process_request(DBusConnection *dbus_connection, DBusMessage *msg)
 
     lua_setfield(globalconf.L, -2, "type");
 
-    lua_pushstring(globalconf.L, NONULL(interface));
+    lua_pushstring(globalconf.L, interface);
     lua_setfield(globalconf.L, -2, "interface");
 
     const char *s = dbus_message_get_path(msg);
-    lua_pushstring(globalconf.L, NONULL(s));
+    lua_pushstring(globalconf.L, s);
     lua_setfield(globalconf.L, -2, "path");
 
     s = dbus_message_get_member(msg);
-    lua_pushstring(globalconf.L, NONULL(s));
+    lua_pushstring(globalconf.L, s);
     lua_setfield(globalconf.L, -2, "member");
 
     if(dbus_connection == dbus_connection_system)
