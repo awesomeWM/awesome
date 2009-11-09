@@ -48,12 +48,15 @@ module("awful.rules")
 --   properties = { tag = mytagobject, switchtotag = true } }
 -- </code>
 -- </p>
--- <p>If you want to apply a custom callback to execute when a rule matched, you
+-- <p>If you want to apply a custom callback to execute when a rule matched,
+-- for example to pause playing music from mpd when you start dosbox, you
 -- can add:
 -- <br/>
 -- <code>
 -- { rule = { class = "dosbox" },
---   callback = awful.placement.centered }
+--   callback = function(c)
+--      awful.util.spawn('mpc pause')
+--   end }
 -- </code>
 -- </p>
 -- <p>Note that all "rule" entries need to match. If any of the entry does not
