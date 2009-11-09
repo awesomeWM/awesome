@@ -43,6 +43,7 @@
 #include "selection.h"
 #include "common/xcursor.h"
 #include "common/buffer.h"
+#include "common/backtrace.h"
 
 #ifdef WITH_DBUS
 extern const struct luaL_reg awesome_dbus_lib[];
@@ -656,8 +657,12 @@ luaA_awesome_emit_signal(lua_State *L)
 static int
 luaA_panic(lua_State *L)
 {
-    warn("unprotected error in call to Lua API (%s), restarting awesome",
+    warn("unprotected error in call to Lua API (%s)",
          lua_tostring(L, -1));
+    buffer_t buf;
+    backtrace_get(&buf);
+    warn("dumping backtrace\n%s", buf.s);
+    warn("restarting awesome");
     awesome_restart();
     return 0;
 }
