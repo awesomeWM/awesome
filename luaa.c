@@ -133,7 +133,7 @@ luaAe_next(lua_State *L)
  * \param idx The index number of elements in stack.
  * \return 1 if more elements to come, 0 otherwise.
  */
-int
+static int
 luaA_next(lua_State *L, int idx)
 {
     if(luaL_getmetafield(L, idx, "__next"))
