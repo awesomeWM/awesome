@@ -175,7 +175,7 @@ widget_geometries(wibox_t *wibox)
         luaA_object_push_item(globalconf.L, -1, wibox->widgets_table);
         lua_remove(globalconf.L, -2);
         /* Push 3rd argument: wibox screen */
-        lua_pushnumber(globalconf.L, screen_array_indexof(&globalconf.screens, wibox->screen));
+        lua_pushnumber(globalconf.L, screen_array_indexof(&globalconf.screens, wibox->screen) + 1);
         /* Re-push the layout function */
         lua_pushvalue(globalconf.L, -4);
         /* call the layout function with 3 arguments (wibox geometry, widget
@@ -214,7 +214,7 @@ widget_geometries(wibox_t *wibox)
         {
             lua_pushnumber(globalconf.L, i + 1);
             widget_t *widget = widgets->tab[i].widget;
-            lua_pushnumber(globalconf.L, screen_array_indexof(&globalconf.screens, wibox->screen));
+            lua_pushnumber(globalconf.L, screen_array_indexof(&globalconf.screens, wibox->screen) + 1);
             area_t geometry = widget->extents(globalconf.L, widget);
             lua_pop(globalconf.L, 1);
             geometry.x = geometry.y = 0;
