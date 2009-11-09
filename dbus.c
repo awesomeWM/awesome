@@ -319,7 +319,7 @@ a_dbus_process_request(DBusConnection *dbus_connection, DBusMessage *msg)
     else
     {
         signal_t *sig = signal_array_getbyid(&dbus_signals,
-                                             a_strhash((const unsigned char *) interface));
+                                             a_strhash((const unsigned char *) NONULL(interface)));
         if(sig)
         {
             /* there can be only ONE handler to send reply */
