@@ -33,7 +33,6 @@ void xwindow_buttons_grab(xcb_window_t, button_array_t *);
 double xwindow_get_opacity(xcb_window_t);
 double xwindow_get_opacity_from_reply(xcb_get_property_reply_t *);
 void xwindow_set_opacity(xcb_window_t, double);
-void xwindow_grabbuttons(xcb_window_t, xcb_window_t, button_array_t *);
 void xwindow_grabkeys(xcb_window_t, key_array_t *);
 void xwindow_takefocus(xcb_window_t);
 void xwindow_set_cursor(xcb_window_t, xcb_cursor_t);
