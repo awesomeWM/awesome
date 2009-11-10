@@ -222,13 +222,14 @@ image_to_1bit_pixmap(image_t *image, xcb_drawable_t d)
 }
 
 /** Create a new image from ARGB32 data.
+ * \param L The Lua VM state.
  * \param width The image width.
  * \param height The image height.
  * \param data The image data.
  * \return 1 if an image has been pushed on stack, 0 otherwise.
  */
 int
-image_new_from_argb32(int width, int height, uint32_t *data)
+image_new_from_argb32(lua_State *L, int width, int height, uint32_t *data)
 {
     Imlib_Image imimage;
 
@@ -236,7 +237,7 @@ image_new_from_argb32(int width, int height, uint32_t *data)
     {
         imlib_context_set_image(imimage);
         imlib_image_set_has_alpha(true);
-        image_t *image = image_new(globalconf.L);
+        image_t *image = image_new(L);
         image->image = imimage;
         return 1;
     }
@@ -245,12 +246,13 @@ image_new_from_argb32(int width, int height, uint32_t *data)
 }
 
 /** Create a new, completely black image.
+ * \param L The Lua VM state.
  * \param width The image width.
  * \param height The image height.
  * \return 1 if an image has been pushed on stack, 0 otherwise.
  */
 static int
-image_new_blank(int width, int height)
+image_new_blank(lua_State *L, int width, int height)
 {
     Imlib_Image imimage;
 
@@ -261,7 +263,7 @@ image_new_blank(int width, int height)
         /* After creation, an image has undefined content. Fix that up. */
         imlib_context_set_color(0, 0, 0, 0xff);
         imlib_image_fill_rectangle(0, 0, width, height);
-        image_t *image = image_new(globalconf.L);
+        image_t *image = image_new(L);
         image->image = imimage;
         return 1;
     }
@@ -270,11 +272,12 @@ image_new_blank(int width, int height)
 }
 
 /** Load an image from filename.
+ * \param L The Lua VM state.
  * \param filename The image file to load.
  * \return 1 if image is loaded and on stack, 0 otherwise.
  */
 static int
-image_new_from_file(const char *filename)
+image_new_from_file(lua_State *L, const char *filename)
 {
     Imlib_Image imimage;
     image_t *image;
@@ -288,7 +291,7 @@ image_new_from_file(const char *filename)
         return 0;
     }
 
-    image = image_new(globalconf.L);
+    image = image_new(L);
     image->image = imimage;
 
     return 1;
@@ -307,7 +310,7 @@ luaA_image_new(lua_State *L)
     const char *filename;
 
     if((filename = lua_tostring(L, 2)))
-        return image_new_from_file(filename);
+        return image_new_from_file(L, filename);
     return 0;
 }
 
@@ -335,7 +338,7 @@ luaA_image_argb32_new(lua_State *L)
 
     if(lua_isnil(L, 3))
     {
-        return image_new_blank(width, height);
+        return image_new_blank(L, width, height);
     }
 
     const char *data = luaL_checklstring(L, 3, &len);
@@ -343,7 +346,7 @@ luaA_image_argb32_new(lua_State *L)
     if(width * height * 4 != len)
         luaL_error(L, "string size does not match image size");
 
-    return image_new_from_argb32(width, height, (uint32_t *) data);
+    return image_new_from_argb32(L, width, height, (uint32_t *) data);
 }
 
 /** Performs 90 degree rotations on the current image. Passing 0 orientation
