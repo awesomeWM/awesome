@@ -75,8 +75,6 @@ typedef struct
     client_array_t clients;
     /** Embedded windows */
     xembed_window_array_t embedded;
-    /** Path to config file */
-    char *conffile;
     /** Stack client history */
     client_array_t stack;
     /** Lua VM state */

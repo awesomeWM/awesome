@@ -55,6 +55,9 @@ extern const struct luaL_reg awesome_mouse_meta[];
 extern const struct luaL_reg awesome_screen_methods[];
 extern const struct luaL_reg awesome_screen_meta[];
 
+/** Path to config file */
+static char *conffile;
+
 /** Quit awesome.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
@@ -558,7 +561,7 @@ luaA_awesome_index(lua_State *L)
         lua_pushnumber(L, globalconf.font->height);
         break;
       case A_TK_CONFFILE:
-        lua_pushstring(L, globalconf.conffile);
+        lua_pushstring(L, conffile);
         break;
       case A_TK_FG:
         luaA_pushxcolor(L, globalconf.colors.fg);
@@ -834,7 +837,7 @@ luaA_loadrc(const char *confpath, bool run)
                 fprintf(stderr, "%s\n", lua_tostring(globalconf.L, -1));
             else
             {
-                globalconf.conffile = a_strdup(confpath);
+                conffile = a_strdup(confpath);
                 return true;
             }
         }
