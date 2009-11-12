@@ -20,6 +20,13 @@ local function check_focus(obj)
         local c = aclient.focus.history.get(obj.screen, 0)
         if c then client.focus = c end
     end
+    -- If we didn't find a client, try other screens.
+    if not client.focus or not client.focus:isvisible() then
+        for i = 1, screen.count() do
+            local c = aclient.focus.history.get(i, 0)
+            if c and c:isvisible() then client.focus = c; return end
+        end
+    end
 end
 
 atag.attached_add_signal(nil, "property::selected", check_focus)
