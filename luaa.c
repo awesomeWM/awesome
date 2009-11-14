@@ -238,18 +238,6 @@ luaAe_type(lua_State *L)
     return 1;
 }
 
-/** Modified version of os.execute() which use spawn code to reset signal
- * handlers correctly before exec()'ing the new program.
- * \param L The Lua VM state.
- * \return The number of arguments pushed on stack.
- */
-static int
-luaAe_os_execute(lua_State *L)
-{
-    lua_pushinteger(L, spawn_system(luaL_optstring(L, 1, NULL)));
-    return 1;
-}
-
 /** Replace various standards Lua functions with our own.
  * \param L The Lua VM state.
  */
@@ -260,11 +248,6 @@ luaA_fixups(lua_State *L)
     lua_getglobal(L, "string");
     lua_pushcfunction(L, luaA_mbstrlen);
     lua_setfield(L, -2, "wlen");
-    lua_pop(L, 1);
-    /* replace os.execute */
-    lua_getglobal(L, "os");
-    lua_pushcfunction(L, luaAe_os_execute);
-    lua_setfield(L, -2, "execute");
     lua_pop(L, 1);
     /* replace next */
     lua_pushliteral(L, "next");

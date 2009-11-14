@@ -417,7 +417,7 @@ main(int argc, char **argv)
             break;
         }
 
-    globalconf.loop = ev_default_loop(0);
+    globalconf.loop = ev_default_loop(EVFLAG_NOSIGFD);
 
     /* register function for signals */
     ev_signal_init(&sigint, exit_on_signal, SIGINT);

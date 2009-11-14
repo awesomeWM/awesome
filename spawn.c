@@ -253,23 +253,6 @@ spawn_launchee_timeout(struct ev_loop *loop, ev_timer *w, int revents)
     p_delete(&w);
 }
 
-/** This callback is executed in the child process after fork(). It clears the
- * signal mask. Without this, child processes would be started with e.g.
- * SIGINT blocked if we are compiled against libev 3.8 or newer.
- * BEWARE: Pending signals are inherited by child processes. This might mean
- * that we receive a signal that was meant for awesome after clearing the signal
- * mask! Sadly, we can't do anything about this.
- * \param user_data Not used.
- */
-static void
-spawn_child_callback(gpointer user_data)
-{
-    sigset_t empty;
-
-    sigemptyset(&empty);
-    sigprocmask(SIG_SETMASK, &empty, NULL);
-}
-
 /** Spawn a command.
  * \param command_line The command line to launch.
  * \param error A error pointer to fill with the possible error from
@@ -286,7 +269,7 @@ spawn_command(const gchar *command_line, GError **error)
         return FALSE;
 
     retval = g_spawn_async(NULL, argv, NULL, G_SPAWN_SEARCH_PATH,
-                           spawn_child_callback, NULL, NULL, error);
+                           NULL, NULL, NULL, error);
     g_strfreev (argv);
 
     return retval;
@@ -372,31 +355,6 @@ luaA_spawn(lua_State *L)
     }
 
     return 0;
-}
-
-/** Spawn a program. This works exactly as system() does, but clears the signal mask.
- * \param arg The shell command to execute.
- * \return The return status of the program.
- */
-int
-spawn_system(const char *arg)
-{
-    GError *error;
-    gboolean retval;
-    gint status;
-    static const char *shell = NULL;
-    if(!shell && !(shell = getenv("SHELL")))
-        shell = "/bin/sh";
-    char *argv[] = { (char *) shell, (char *) "-c", (char *) arg, NULL };
-
-    retval = g_spawn_sync(NULL, argv, NULL, 0, spawn_child_callback,
-                          NULL, NULL, NULL, &status, &error);
-
-    if (retval)
-        return status;
-
-    g_error_free(error);
-    return -1;
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
