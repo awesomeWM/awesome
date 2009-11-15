@@ -336,8 +336,9 @@ static void
 wibox_set_border_color(lua_State *L, int udx, const xcolor_t *color)
 {
     wibox_t *w = luaA_checkudata(L, udx, &wibox_class);
-    xcb_change_window_attributes(globalconf.connection, w->window,
-                                 XCB_CW_BORDER_PIXEL, &color->pixel);
+    if (w->window != XCB_NONE)
+        xcb_change_window_attributes(globalconf.connection, w->window,
+                                     XCB_CW_BORDER_PIXEL, &color->pixel);
     w->border_color = *color;
     luaA_object_emit_signal(L, udx, "property::border_color", 0);
 }
@@ -1464,8 +1465,9 @@ luaA_wibox_set_border_width(lua_State *L, wibox_t *wibox)
     uint32_t border_width = luaL_checknumber(L, -1);
     if(border_width != w->border_width)
     {
-        xcb_configure_window(globalconf.connection, w->window, XCB_CONFIG_WINDOW_BORDER_WIDTH,
-                             &border_width);
+        if (w->window != XCB_NONE)
+            xcb_configure_window(globalconf.connection, w->window, XCB_CONFIG_WINDOW_BORDER_WIDTH,
+                                 &border_width);
         w->border_width = border_width;
         /* Need update if transparent background */
         wibox_need_update(w);
