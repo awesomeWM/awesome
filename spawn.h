@@ -28,7 +28,5 @@ void spawn_init(void);
 void spawn_start_notify(client_t *, const char *);
 int luaA_spawn(lua_State *);
 
-int spawn_system(const char *);
-
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
