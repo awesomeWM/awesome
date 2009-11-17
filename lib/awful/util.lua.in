@@ -326,7 +326,7 @@ function table.reverse(t)
     end
     -- add the remaining elements
     for k, v in pairs(t) do
-        if type(v) ~= "number" then
+        if type(k) ~= "number" then
             tr[k] = v
         end
     end
