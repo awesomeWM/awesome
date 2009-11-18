@@ -316,7 +316,7 @@ function show(menu, keygrabber)
         wibox.width = menu.w
         wibox.height = menu.h
         wibox.x = menu.x
-        wibox.y = menu.y + (num - 1) * (menu.h + menu.theme.border_width)
+        wibox.y = menu.y + (num - 1) * (menu.h + wibox.border_width)
         wibox.screen = screen_index
     end
 
