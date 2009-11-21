@@ -359,11 +359,19 @@ event_handle_widget_motionnotify(void *object,
             luaA_object_push(globalconf.L, *mouse_over);
             luaA_object_emit_signal(globalconf.L, -1, "mouse::leave", 0);
             lua_pop(globalconf.L, 1);
+
+            luaA_object_unref(globalconf.L, *mouse_over);
+            *mouse_over = NULL;
         }
         if(widget)
         {
-            /* emit mouse::enter signal on new widget and register it */
+            /* Get a ref on this widget so that it can't be unref'd from
+             * underneath us (-> invalid pointer dereference). */
+            luaA_object_push(globalconf.L, widget);
+            luaA_object_ref(globalconf.L, -1);
             *mouse_over = widget;
+
+            /* emit mouse::enter signal on new widget */
             luaA_object_push(globalconf.L, widget);
             luaA_object_emit_signal(globalconf.L, -1, "mouse::enter", 0);
             lua_pop(globalconf.L, 1);
@@ -435,7 +443,7 @@ event_handle_leavenotify(void *data __attribute__ ((unused)),
             /* emit mouse::leave signal on widget the mouse was over */
             luaA_object_emit_signal(globalconf.L, -1, "mouse::leave", 0);
             lua_pop(globalconf.L, 1);
-            wibox->mouse_over = NULL;
+            wibox_clear_mouse_over(wibox);
         }
 
         luaA_object_push(globalconf.L, wibox);
