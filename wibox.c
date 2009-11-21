@@ -1462,12 +1462,12 @@ static int
 luaA_wibox_set_border_width(lua_State *L, wibox_t *wibox)
 {
     wibox_t *w = luaA_checkudata(L, -3, &wibox_class);
-    uint32_t border_width = luaL_checknumber(L, -1);
-    if(border_width != w->border_width)
+    int32_t border_width = luaL_checknumber(L, -1);
+    if(border_width != w->border_width && border_width >= 0)
     {
         if (w->window != XCB_NONE)
             xcb_configure_window(globalconf.connection, w->window, XCB_CONFIG_WINDOW_BORDER_WIDTH,
-                                 &border_width);
+                                 (uint32_t[]) { border_width });
         w->border_width = border_width;
         /* Need update if transparent background */
         wibox_need_update(w);
