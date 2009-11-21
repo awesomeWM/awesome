@@ -86,7 +86,7 @@ static void
 wibox_need_update(wibox_t *wibox)
 {
     wibox->need_update = true;
-    wibox->mouse_over = NULL;
+    wibox_clear_mouse_over(wibox);
 }
 
 static int
@@ -631,6 +631,19 @@ wibox_refresh(void)
     }
 }
 
+/** Clear the wibox' mouse_over pointer.
+ * \param wibox The wibox.
+ */
+void
+wibox_clear_mouse_over(wibox_t *wibox)
+{
+    if (wibox->mouse_over)
+    {
+        luaA_object_unref(globalconf.L, wibox->mouse_over);
+        wibox->mouse_over = NULL;
+    }
+}
+
 /** Set a wibox visible or not.
  * \param L The Lua VM state.
  * \param udx The wibox.
@@ -643,7 +656,7 @@ wibox_set_visible(lua_State *L, int udx, bool v)
     if(v != wibox->visible)
     {
         wibox->visible = v;
-        wibox->mouse_over = NULL;
+        wibox_clear_mouse_over(wibox);
 
         if(wibox->screen)
         {
@@ -686,7 +699,7 @@ wibox_detach(lua_State *L, int udx)
         /* restore visibility */
         wibox->visible = v;
 
-        wibox->mouse_over = NULL;
+        wibox_clear_mouse_over(wibox);
 
         wibox_wipe(wibox);
 
