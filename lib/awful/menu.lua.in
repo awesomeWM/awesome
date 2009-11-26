@@ -8,6 +8,7 @@
 -- Grab environment we need
 local pairs = pairs
 local table = table
+local string = string
 local type = type
 local setmetatable = setmetatable
 local wibox = wibox
@@ -153,6 +154,18 @@ local function item_enter(menu, num, mouse_event)
     end
 end
 
+local function check_access_key(menu, key)
+   for i, item in pairs(menu.items) do
+      if item.akey == key then
+	 exec(menu, i)
+	 return
+      end
+   end
+   if menu.parent then
+      check_access_key(menu.parent, key)
+   end
+end
+
 local function grabber(mod, key, event)
     if event == "release" then
        return true
@@ -171,6 +184,8 @@ local function grabber(mod, key, event)
         cur_menu:hide()
     elseif util.table.hasitem(menu_keys.close, key) then
         get_parents(cur_menu):hide()
+    else
+        check_access_key(cur_menu, key)
     end
    
     return true
@@ -192,7 +207,11 @@ local function add_item(data, num, item_info)
 
     -- Create the item label widget
     local label = widget({ type = "textbox" })
-    label.text = item_info[1]
+    local key = ''
+    label.text = string.gsub(item_info[1], "&(%w)", function (l)
+						        key= string.lower(l)
+						        return "<u>"..l.."</u>"
+						    end, 1)
     -- Set icon if needed
     local iconbox
     if item_info[3] then
@@ -245,7 +264,7 @@ local function add_item(data, num, item_info)
     item.height = label:extents().height + 2
     item.ontop = true
 
-    return { wibox = item, cmd = item_info[2] }
+    return { wibox = item, akey= key, cmd = item_info[2] }
 end
 
 --- Build a popup menu with running clients and shows it.
