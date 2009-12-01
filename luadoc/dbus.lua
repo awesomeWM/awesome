@@ -36,7 +36,7 @@ module("dbus")
 -- @name add_signal
 -- @class function
 
---- Add a signal receiver on the D-Bus.
+--- Remove a signal receiver on the D-Bus.
 -- @param interface A string with the interface name.
 -- @param func The function to call.
 -- @name remove_signal
