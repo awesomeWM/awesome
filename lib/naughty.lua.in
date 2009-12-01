@@ -483,7 +483,7 @@ if capi.dbus then
         end
         return "u", "0"
     elseif data.member == "CloseNotification" then
-        local obj = getById(arg1)
+        local obj = getById(appname)
         if obj then
            destroy(obj)
         end
