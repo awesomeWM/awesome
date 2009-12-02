@@ -250,8 +250,9 @@ end
 
 --- Build a popup menu with running clients and shows it.
 -- @param menu Menu table, see new() function for more informations
+-- @param keygrabber A boolean enabling or not the keyboard navigation.
 -- @return The menu.
-function clients(menu)
+function clients(menu, keygrabber)
     local cls = capi.client.get()
     local cls_t = {}
     for k, c in pairs(cls) do
@@ -272,7 +273,7 @@ function clients(menu)
     menu.items = cls_t
 
     local m = new(menu)
-    m:show()
+    m:show(keygrabber)
     return m
 end
 
