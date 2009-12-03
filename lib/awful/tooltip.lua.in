@@ -82,6 +82,9 @@ local function set_geometry(self)
         self.wibox:geometry(n_s)
         place(self)
     end
+    if not self.wibox.visible then
+       place(self)
+    end
 end
 
 -- Show a tooltip.
