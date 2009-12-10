@@ -25,6 +25,7 @@
 #include "objects/widget.h"
 #include "screen.h"
 #include "objects/wibox.h"
+#include "luaa.h"
 #include "globalconf.h"
 #include "common/xembed.h"
 #include "common/atoms.h"
@@ -41,9 +42,11 @@ typedef struct
 static area_t
 systray_extents(lua_State *L, widget_t *widget)
 {
-    int screen = screen_virttophys(luaL_optnumber(L, -1, 1));
+    int screen = luaL_optnumber(L, -1, 1) - 1;
+    luaA_checkscreen(screen);
+
     area_t geometry;
-    int phys_screen   = screen_virttophys(screen), n = 0;
+    int phys_screen = screen_virttophys(screen), n = 0;
     systray_data_t *d = widget->data;
 
     for(int i = 0; i < globalconf.embedded.len; i++)
