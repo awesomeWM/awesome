@@ -277,14 +277,15 @@ static int
 image_new_from_file(const char *filename)
 {
     Imlib_Image imimage;
+    Imlib_Load_Error e = IMLIB_LOAD_ERROR_NONE;
     image_t *image;
 
     if(!filename)
         return 0;
 
-    if(!(imimage = imlib_load_image(filename)))
+    if(!(imimage = imlib_load_image_with_error_return(filename, &e)))
     {
-        warn("cannot load image %s", filename);
+        warn("cannot load image %s: %s", filename, image_imlib_load_strerror(e));
         return 0;
     }
 
