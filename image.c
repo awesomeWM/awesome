@@ -282,11 +282,17 @@ image_new_from_file(const char *filename)
     if(!filename)
         return 0;
 
-    if(!(imimage = imlib_load_image_without_cache(filename)))
+    if(!(imimage = imlib_load_image(filename)))
     {
         warn("cannot load image %s", filename);
         return 0;
     }
+
+    /* Make imlib check if the file changed on disk if it's later opened by the
+     * same file name again before using its cache.
+     */
+    imlib_context_set_image(imimage);
+    imlib_image_set_changes_on_disk();
 
     image = image_new(globalconf.L);
     image->image = imimage;
