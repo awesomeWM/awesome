@@ -257,6 +257,55 @@ a_dbus_message_iter(DBusMessageIter *iter)
     return nargs;
 }
 
+static bool
+a_dbus_convert_value(lua_State *L, int idx, DBusMessageIter *iter)
+{
+    /* i is the type name, i+1 the value */
+    size_t len;
+    const char *type = lua_tolstring(globalconf.L, idx, &len);
+
+    if(!type || len != 1)
+        return false;
+
+    switch(*type)
+    {
+      case DBUS_TYPE_BOOLEAN:
+        {
+            dbus_bool_t b = lua_toboolean(globalconf.L, idx + 1);
+            dbus_message_iter_append_basic(iter, DBUS_TYPE_BOOLEAN, &b);
+        }
+        break;
+#define DBUS_MSG_RETURN_HANDLE_TYPE_STRING(dbustype) \
+      case dbustype: \
+        { \
+            const char *s = lua_tostring(globalconf.L, idx + 1); \
+            if(s) \
+                dbus_message_iter_append_basic(iter, dbustype, &s); \
+        } \
+        break;
+    DBUS_MSG_RETURN_HANDLE_TYPE_STRING(DBUS_TYPE_STRING)
+    DBUS_MSG_RETURN_HANDLE_TYPE_STRING(DBUS_TYPE_BYTE)
+#undef DBUS_MSG_RETURN_HANDLE_TYPE_STRING
+#define DBUS_MSG_RETURN_HANDLE_TYPE_NUMBER(type, dbustype) \
+      case dbustype: \
+        { \
+           type num = lua_tonumber(globalconf.L, idx + 1); \
+           dbus_message_iter_append_basic(iter, dbustype, &num); \
+        } \
+        break;
+    DBUS_MSG_RETURN_HANDLE_TYPE_NUMBER(int16_t, DBUS_TYPE_INT16)
+    DBUS_MSG_RETURN_HANDLE_TYPE_NUMBER(uint16_t, DBUS_TYPE_UINT16)
+    DBUS_MSG_RETURN_HANDLE_TYPE_NUMBER(int32_t, DBUS_TYPE_INT32)
+    DBUS_MSG_RETURN_HANDLE_TYPE_NUMBER(uint32_t, DBUS_TYPE_UINT32)
+    DBUS_MSG_RETURN_HANDLE_TYPE_NUMBER(int64_t, DBUS_TYPE_INT64)
+    DBUS_MSG_RETURN_HANDLE_TYPE_NUMBER(uint64_t, DBUS_TYPE_UINT64)
+    DBUS_MSG_RETURN_HANDLE_TYPE_NUMBER(double, DBUS_TYPE_DOUBLE)
+#undef DBUS_MSG_RETURN_HANDLE_TYPE_NUMBER
+    }
+
+    return true;
+}
+
 /** Process a single request from D-Bus
  * \param dbus_connection  The connection to the D-Bus server.
  * \param msg  The D-Bus message request being sent to the D-Bus connection.
@@ -339,49 +388,8 @@ a_dbus_process_request(DBusConnection *dbus_connection, DBusMessage *msg)
             /* i is negative */
             for(int i = n; i < 0; i += 2)
             {
-                /* i is the type name, i+1 the value */
-                size_t len;
-                const char *type = lua_tolstring(globalconf.L, i, &len);
-
-                if(!type || len != 1)
-                {
-                    luaA_warn(globalconf.L,
-                              "your D-Bus signal handling method returned bad data");
-                    break;
-                }
-
-                switch(*type)
-                {
-                  case DBUS_TYPE_BOOLEAN:
-                    {
-                        dbus_bool_t  b = lua_toboolean(globalconf.L, i + 1);
-                        dbus_message_iter_append_basic(&iter, DBUS_TYPE_BOOLEAN, &b);
-                    }
-                    break;
-#define DBUS_MSG_RETURN_HANDLE_TYPE_STRING(dbustype) \
-                  case dbustype: \
-                                 if((s = lua_tostring(globalconf.L, i + 1))) \
-                    dbus_message_iter_append_basic(&iter, dbustype, &s); \
-                    break;
-                    DBUS_MSG_RETURN_HANDLE_TYPE_STRING(DBUS_TYPE_STRING)
-                        DBUS_MSG_RETURN_HANDLE_TYPE_STRING(DBUS_TYPE_BYTE)
-#undef DBUS_MSG_RETURN_HANDLE_TYPE_STRING
-#define DBUS_MSG_RETURN_HANDLE_TYPE_NUMBER(type, dbustype) \
-                  case dbustype: \
-                                 { \
-                                     type num = lua_tonumber(globalconf.L, i + 1); \
-                                     dbus_message_iter_append_basic(&iter, dbustype, &num); \
-                                 } \
-                        break;
-                        DBUS_MSG_RETURN_HANDLE_TYPE_NUMBER(int16_t, DBUS_TYPE_INT16)
-                        DBUS_MSG_RETURN_HANDLE_TYPE_NUMBER(uint16_t, DBUS_TYPE_UINT16)
-                        DBUS_MSG_RETURN_HANDLE_TYPE_NUMBER(int32_t, DBUS_TYPE_INT32)
-                        DBUS_MSG_RETURN_HANDLE_TYPE_NUMBER(uint32_t, DBUS_TYPE_UINT32)
-                        DBUS_MSG_RETURN_HANDLE_TYPE_NUMBER(int64_t, DBUS_TYPE_INT64)
-                        DBUS_MSG_RETURN_HANDLE_TYPE_NUMBER(uint64_t, DBUS_TYPE_UINT64)
-                        DBUS_MSG_RETURN_HANDLE_TYPE_NUMBER(double, DBUS_TYPE_DOUBLE)
-#undef DBUS_MSG_RETURN_HANDLE_TYPE_NUMBER
-                }
+                if(!a_dbus_convert_value(globalconf.L, i, &iter))
+                    luaL_error(globalconf.L, "your D-Bus signal handling method returned bad data");
 
                 lua_remove(globalconf.L, i);
                 lua_remove(globalconf.L, i + 1);
