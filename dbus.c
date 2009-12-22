@@ -264,11 +264,42 @@ a_dbus_convert_value(lua_State *L, int idx, DBusMessageIter *iter)
     size_t len;
     const char *type = lua_tolstring(globalconf.L, idx, &len);
 
-    if(!type || len != 1)
+    if(!type || len < 1)
         return false;
 
     switch(*type)
     {
+      case DBUS_TYPE_ARRAY:
+        {
+            DBusMessageIter subiter;
+            dbus_message_iter_open_container(iter, DBUS_TYPE_ARRAY,
+                                             type + 1,
+                                             &subiter);
+
+            int arraylen = lua_objlen(L, idx + 1);
+
+            if(arraylen % 2 != 0)
+                luaL_error(globalconf.L,
+                           "your D-Bus signal handling method returned wrong number of arguments");
+
+            /* Push the array */
+            lua_pushvalue(L, idx + 1);
+
+            for(int i = 1; i < arraylen; i += 2)
+            {
+                lua_rawgeti(L, -1, i);
+                lua_rawgeti(L, -2, i + 1);
+                if(!a_dbus_convert_value(L, -2, &subiter))
+                    return false;
+                lua_pop(L, 2);
+            }
+
+            /* Remove the array */
+            lua_pop(L, 1);
+
+            dbus_message_iter_close_container(iter, &subiter);
+        }
+        break;
       case DBUS_TYPE_BOOLEAN:
         {
             dbus_bool_t b = lua_toboolean(globalconf.L, idx + 1);
@@ -384,6 +415,10 @@ a_dbus_process_request(DBusConnection *dbus_connection, DBusMessage *msg)
             DBusMessage *reply = dbus_message_new_method_return(msg);
 
             dbus_message_iter_init_append(reply, &iter);
+
+            if(n % 2 != 0)
+                luaL_error(globalconf.L,
+                           "your D-Bus signal handling method returned wrong number of arguments");
 
             /* i is negative */
             for(int i = n; i < 0; i += 2)
