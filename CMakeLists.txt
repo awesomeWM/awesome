@@ -189,18 +189,27 @@ if(GENERATE_MANPAGES)
             OUTPUT  ${manfile}
             WORKING_DIRECTORY ${BUILD_DIR}/manpages
             DEPENDS ${xmlfile})
-        add_custom_command(
-            COMMAND ${GZIP_EXECUTABLE} < ${manfile} > ${gzfile}
-            OUTPUT  ${gzfile}
-            WORKING_DIRECTORY ${BUILD_DIR}/manpages
-            DEPENDS ${manfile}
-            VERBATIM)
 
-        set(MAN_FILES ${MAN_FILES} ${gzfile})
+        if(COMPRESS_MANPAGES)
+            add_custom_command(
+                COMMAND ${GZIP_EXECUTABLE} < ${manfile} > ${gzfile}
+                OUTPUT  ${gzfile}
+                WORKING_DIRECTORY ${BUILD_DIR}/manpages
+                DEPENDS ${manfile}
+                VERBATIM)
+
+            set(MAN_FILES ${MAN_FILES} ${gzfile})
+        else()
+            set(MAN_FILES ${MAN_FILES} ${manfile})
+        endif()
 
         # figure out in what section to install to from filename
         string(REGEX REPLACE "^.*\\.([0-9])\\.gz\$" "\\1" section ${gzfile})
-        set(AWE_MAN${section}_FILES ${AWE_MAN${section}_FILES} ${gzfile})
+        if(COMPRESS_MANPAGES)
+            set(AWE_MAN${section}_FILES ${AWE_MAN${section}_FILES} ${gzfile})
+        else()
+            set(AWE_MAN${section}_FILES ${AWE_MAN${section}_FILES} ${manfile})
+        endif()
     endforeach()
 
     add_custom_target(man ALL DEPENDS ${MAN_FILES})
