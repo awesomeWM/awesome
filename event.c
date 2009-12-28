@@ -666,9 +666,11 @@ event_handle_unmapnotify(void *data __attribute__ ((unused)),
     if((c = client_getbywin(ev->window)))
     {
         if(ev->event == xutil_screen_get(connection, c->phys_screen)->root
-           && XCB_EVENT_SENT(ev)
-           && xwindow_get_state_reply(xwindow_get_state_unchecked(c->window)) == XCB_WM_STATE_NORMAL)
+           && XCB_EVENT_SENT(ev))
+        {
             client_unmanage(c);
+            xcb_unmap_window(connection, ev->window);
+        }
     }
     else
         for(int i = 0; i < globalconf.embedded.len; i++)
