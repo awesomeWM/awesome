@@ -665,23 +665,10 @@ event_handle_unmapnotify(void *data __attribute__ ((unused)),
 
     if((c = client_getbywin(ev->window)))
     {
-        if(ev->event == xutil_screen_get(connection, c->phys_screen)->root)
-        {
-            if(!XCB_EVENT_SENT(ev))
-            {
-                /* A regular UnmapNotify, remove that client from our lists */
-                client_unmanage(c);
-            }
-            else
-            {
-                /* According to ICCCM 4.1.4 a client sends a synthetic
-                 * UnmapNotify when it wants to switch to Widthdrawn state.
-                 * We handle these by unmapping the client and waiting for the
-                 * "real" UnmapNotify.
-                 */
-                xcb_unmap_window(connection, ev->window);
-            }
-        }
+        if(ev->event == xutil_screen_get(connection, c->phys_screen)->root
+           && XCB_EVENT_SENT(ev)
+           && xwindow_get_state_reply(xwindow_get_state_unchecked(c->window)) == XCB_WM_STATE_NORMAL)
+            client_unmanage(c);
     }
     else
         for(int i = 0; i < globalconf.embedded.len; i++)
