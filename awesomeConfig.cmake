@@ -12,6 +12,7 @@ set(CMAKE_BUILD_TYPE RELEASE)
 
 option(WITH_DBUS "build with D-BUS" ON)
 option(GENERATE_MANPAGES "generate manpages" ON)
+option(COMPRESS_MANPAGES "generate manpages" ON)
 option(GENERATE_LUADOC "generate luadoc" ON)
 
 link_directories(/usr/local/lib)
@@ -69,14 +70,14 @@ include(FindLua51) #Due to a cmake bug, you will see Lua50 on screen
 
 # {{{ Check if documentation can be build
 if(GENERATE_MANPAGES)
-    if(NOT ASCIIDOC_EXECUTABLE OR NOT XMLTO_EXECUTABLE OR NOT GZIP_EXECUTABLE)
+    if(NOT ASCIIDOC_EXECUTABLE OR NOT XMLTO_EXECUTABLE OR (COMPRESS_MANPAGES AND NOT GZIP_EXECUTABLE))
         if(NOT ASCIIDOC_EXECUTABLE)
             SET(missing "asciidoc")
         endif()
         if(NOT XMLTO_EXECUTABLE)
             SET(missing ${missing} " xmlto")
         endif()
-        if(NOT GZIP_EXECUTABLE)
+        if(COMPRESS_MANPAGES AND NOT GZIP_EXECUTABLE)
             SET(missing ${missing} " gzip")
         endif()
 
