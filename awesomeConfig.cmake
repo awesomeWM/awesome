@@ -12,7 +12,7 @@ set(CMAKE_BUILD_TYPE RELEASE)
 
 option(WITH_DBUS "build with D-BUS" ON)
 option(GENERATE_MANPAGES "generate manpages" ON)
-option(COMPRESS_MANPAGES "generate manpages" ON)
+option(COMPRESS_MANPAGES "compress manpages" ON)
 option(GENERATE_LUADOC "generate luadoc" ON)
 
 link_directories(/usr/local/lib)
