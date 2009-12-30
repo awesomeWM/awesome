@@ -87,13 +87,13 @@ local function wibox_update_strut(wibox)
             if not wibox.visible then
                 wibox:struts { left = 0, right = 0, bottom = 0, top = 0 }
             elseif wprop.position == "top" then
-                wibox:struts { left = 0, right = 0, bottom = 0, top = wibox.height }
+                wibox:struts { left = 0, right = 0, bottom = 0, top = wibox.height + wibox.border_width }
             elseif wprop.position == "bottom" then
-                wibox:struts { left = 0, right = 0, bottom = wibox.height, top = 0 }
+                wibox:struts { left = 0, right = 0, bottom = wibox.height + wibox.border_width, top = 0 }
             elseif wprop.position == "left" then
-                wibox:struts { left = wibox.width, right = 0, bottom = 0, top = 0 }
+                wibox:struts { left = wibox.width + wibox.border_width, right = 0, bottom = 0, top = 0 }
             elseif wprop.position == "right" then
-                wibox:struts { left = 0, right = wibox.width, bottom = 0, top = 0 }
+                wibox:struts { left = 0, right = wibox.width + wibox.border_width, bottom = 0, top = 0 }
             end
             break
         end
