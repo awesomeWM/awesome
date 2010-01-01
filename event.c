@@ -678,7 +678,7 @@ event_handle_unmapnotify(void *data __attribute__ ((unused)),
     {
         if(ev->event == xutil_screen_get(connection, c->phys_screen)->root
            && XCB_EVENT_SENT(ev)
-           && xwindow_get_state_reply(xwindow_get_state_unchecked(c->window)) == XCB_WM_STATE_NORMAL)
+           && window_state_get_reply(window_state_get_unchecked(c->window)) == XCB_WM_STATE_NORMAL)
             client_unmanage(c);
     }
     else
