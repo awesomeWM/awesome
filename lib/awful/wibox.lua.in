@@ -13,6 +13,7 @@ local capi =
     client = client
 }
 local setmetatable = setmetatable
+local tostring = tostring
 local ipairs = ipairs
 local table = table
 local type = type
@@ -224,7 +225,7 @@ function new(arg)
         if arg.height then
             has_to_stretch = false
             if arg.screen then
-                local hp = arg.height:match("(%d+)%%")
+                local hp = tostring(arg.height):match("(%d+)%%")
                 if hp then
                     arg.height = capi.screen[arg.screen].geometry.height * hp / 100
                 end
@@ -235,7 +236,7 @@ function new(arg)
         if arg.width then
             has_to_stretch = false
             if arg.screen then
-                local wp = arg.width:match("(%d+)%%")
+                local wp = tostring(arg.width):match("(%d+)%%")
                 if wp then
                     arg.width = capi.screen[arg.screen].geometry.width * wp / 100
                 end
