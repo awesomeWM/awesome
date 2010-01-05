@@ -144,7 +144,7 @@ end
 function align(wibox, align, screen)
     local position = get_position(wibox)
     local screen = screen or wibox.screen or 1
-    local area = capi.screen[screen].geometry
+    local area = capi.screen[screen].workarea
 
     if position == "right" then
         if align == "right" then
