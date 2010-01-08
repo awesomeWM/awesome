@@ -112,7 +112,7 @@ function apply(c)
         if property == "floating" then
             aclient.floating.set(c, value)
         elseif property == "tag" then
-            aclient.movetotag(value, c)
+            c:tags({ value })
         elseif property == "switchtotag" and value and props.tag then
             atag.viewonly(props.tag)
         elseif property == "height" or property == "width" or
@@ -125,6 +125,11 @@ function apply(c)
         else
             c[property] = value
         end
+    end
+
+    -- If untagged, stick the client on the current one.
+    if #c:tags() == 0 then
+        atag.withcurrent(c, startup)
     end
 
     -- Apply all callbacks from matched rules.
@@ -140,5 +145,6 @@ function apply(c)
 end
 
 client.add_signal("manage", apply)
+client.remove_signal("manage", atag.withcurrent)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
