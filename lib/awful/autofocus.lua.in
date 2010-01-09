@@ -19,6 +19,9 @@ local function check_focus(obj)
     if not client.focus or not client.focus:isvisible() then
         local c = aclient.focus.history.get(obj.screen, 0)
         if c then client.focus = c end
+    elseif client.focus and client.focus.screen ~= obj.screen then
+        local c = aclient.focus.history.get(obj.screen, 0)
+        if c then client.focus = c end
     end
 end
 
