@@ -208,6 +208,8 @@ property_update_wm_hints(client_t *c, xcb_get_property_reply_t *reply)
 
     if(wmh.flags & XCB_WM_HINT_WINDOW_GROUP)
         client_set_group_window(globalconf.L, -1, wmh.window_group);
+
+    lua_pop(globalconf.L, 1);
 }
 
 /** Update WM_CLASS of a client.
