@@ -404,7 +404,6 @@ client_focus_update(client_t *c)
 
     ewmh_update_net_active_window(c->phys_screen);
 
-    luaA_object_push(globalconf.L, c);
     luaA_class_emit_signal(globalconf.L, &client_class, "focus", 1);
 }
 
