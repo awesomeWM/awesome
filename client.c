@@ -431,7 +431,6 @@ client_focus_update(client_t *c)
         luaA_dofunction_from_registry(globalconf.L, globalconf.hooks.focus, 1, 0);
     }
 
-    luaA_object_push(globalconf.L, c);
     luaA_class_emit_signal(globalconf.L, &client_class, "focus", 1);
 }
 
