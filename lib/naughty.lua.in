@@ -167,7 +167,7 @@ local function arrange(screen)
     end
 end
 
---- Destroy notification by index
+--- Destroy notification by notification object
 -- @param notification Notification object to be destroyed
 -- @return True if the popup was successfully destroyed, nil otherwise
 function destroy(notification)
