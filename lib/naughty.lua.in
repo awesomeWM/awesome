@@ -92,6 +92,9 @@ config.mapping = {
 -- Required for later access via DBUS
 local counter = 1
 
+-- True if notifying is suspended
+local suspended = false
+
 --- Index of notifications. See config table for valid 'position' values.
 -- Each element is a table consisting of:
 -- @field box Wibox object containing the popup
@@ -102,7 +105,7 @@ local counter = 1
 -- @name notifications[screen][position]
 -- @class table
 
-notifications = {}
+notifications = { suspended = { } }
 for s = 1, capi.screen.count() do
     notifications[s] = {
         top_left = {},
@@ -110,6 +113,21 @@ for s = 1, capi.screen.count() do
         bottom_left = {},
         bottom_right = {},
     }
+end
+
+--- Suspend notifications
+function suspend()
+    suspended = true
+end
+
+--- Resume notifications
+function resume()
+    suspended = false
+    for i, v in pairs(notifications.suspended) do
+        v.box.visible = true
+        if v.timer then v.timer:start() end
+    end
+    notifications.suspended = { }
 end
 
 -- Evaluate desired position of the notification by index - internal
@@ -172,6 +190,14 @@ end
 -- @return True if the popup was successfully destroyed, nil otherwise
 function destroy(notification)
     if notification and notification.box.screen then
+        if suspended then
+            for k, v in pairs(notifications.suspended) do
+                if v.box == notification.box then
+                    table.remove(notifications.suspended, k)
+                    break
+                end
+            end
+        end
         local scr = notification.box.screen
         table.remove(notifications[notification.box.screen][notification.position], notification.idx)
         if notification.timer then
@@ -298,7 +324,9 @@ function notify(args)
     if timeout > 0 then
         local timer_die = capi.timer { timeout = timeout }
         timer_die:add_signal("timeout", die)
-        timer_die:start()
+        if not suspended then
+            timer_die:start()
+        end
         notification.timer = timer_die
     end
     notification.die = die
@@ -407,6 +435,11 @@ function notify(args)
 
     -- insert the notification to the table
     table.insert(notifications[screen][notification.position], notification)
+
+    if suspended then
+        notification.box.visible = false
+        table.insert(notifications.suspended, notification)
+    end
 
     -- return the notification
     return notification
