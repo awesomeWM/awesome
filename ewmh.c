@@ -70,7 +70,6 @@ ewmh_init(int phys_screen)
         _NET_CURRENT_DESKTOP,
         _NET_DESKTOP_NAMES,
         _NET_ACTIVE_WINDOW,
-        _NET_WORKAREA,
         _NET_DESKTOP_GEOMETRY,
         _NET_CLOSE_WINDOW,
         _NET_WM_NAME,
@@ -212,29 +211,6 @@ ewmh_update_net_desktop_names(int phys_screen)
 			xutil_screen_get(globalconf.connection, phys_screen)->root,
 			_NET_DESKTOP_NAMES, UTF8_STRING, 8, buf.len, buf.s);
     buffer_wipe(&buf);
-}
-
-/** Update the work area space for each physical screen and each desktop.
- * \param phys_screen The physical screen id.
- */
-void
-ewmh_update_workarea(int phys_screen)
-{
-    tag_array_t *tags = &globalconf.screens.tab[phys_screen].tags;
-    uint32_t *area = p_alloca(uint32_t, tags->len * 4);
-    area_t geom = screen_area_get(&globalconf.screens.tab[phys_screen], true);
-
-    for(int i = 0; i < tags->len; i++)
-    {
-        area[4 * i + 0] = geom.x;
-        area[4 * i + 1] = geom.y;
-        area[4 * i + 2] = geom.width;
-        area[4 * i + 3] = geom.height;
-    }
-
-    xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
-                        xutil_screen_get(globalconf.connection, phys_screen)->root,
-                        _NET_WORKAREA, CARDINAL, 32, tags->len * 4, area);
 }
 
 void
