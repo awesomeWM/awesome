@@ -208,10 +208,11 @@ local function add_item(data, num, item_info)
     -- Create the item label widget
     local label = widget({ type = "textbox" })
     local key = ''
-    label.text = string.gsub(item_info[1], "&(%w)", function (l)
-						        key= string.lower(l)
-						        return "<u>"..l.."</u>"
-						    end, 1)
+    label.text = string.gsub(util.escape(item_info[1]), "&amp;(%w)",
+                             function (l)
+                                 key = string.lower(l)
+                                 return "<u>"..l.."</u>"
+                             end, 1)
     -- Set icon if needed
     local iconbox
     if item_info[3] then
