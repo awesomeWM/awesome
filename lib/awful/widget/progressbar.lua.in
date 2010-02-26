@@ -49,9 +49,15 @@ local data = setmetatable({}, { __mode = "k" })
 -- @param progressbar The progressbar.
 -- @param vertical A boolean value.
 
+--- Set the maximum value the progressbar should handle.
+-- @name set_max_value
+-- @class function
+-- @param progressbar The progressbar.
+-- @param value The value.
+
 local properties = { "width", "height", "border_color",
                      "gradient_colors", "color", "background_color",
-                     "vertical", "value" }
+                     "vertical", "value", "max_value" }
 
 local function update(pbar)
     local width = data[pbar].width or 100
@@ -59,6 +65,12 @@ local function update(pbar)
 
     -- Create new empty image
     local img = capi.image.argb32(width, height, nil)
+
+    local value = data[pbar].value
+    local max_value = data[pbar].max_value
+    if value >= 0 then
+        value = value / max_value
+    end
 
     local over_drawn_width = width
     local over_drawn_height = height
@@ -89,14 +101,14 @@ local function update(pbar)
 
     -- Cover the part that is not set with a rectangle
     if data[pbar].vertical then
-        local rel_height = math.floor(over_drawn_height * (1 - data[pbar].value))
+        local rel_height = math.floor(over_drawn_height * (1 - value))
         img:draw_rectangle(border_width,
                            border_width,
                            over_drawn_width,
                            rel_height,
                            true, data[pbar].background_color or "#000000aa")
     else
-        local rel_x = math.floor((over_drawn_width * data[pbar].value) + 0.5)
+        local rel_x = math.floor((over_drawn_width * value) + 0.5)
         img:draw_rectangle(border_width + rel_x,
                            border_width,
                            over_drawn_width - rel_x,
@@ -113,7 +125,8 @@ end
 -- @param value The progress bar value between 0 and 1.
 function set_value(pbar, value)
     local value = value or 0
-    data[pbar].value = math.min(1, math.max(0, value))
+    local max_value = data[pbar].max_value
+    data[pbar].value = math.min(max_value, math.max(0, value))
     update(pbar)
     return pbar
 end
@@ -164,7 +177,7 @@ function new(args)
     pbar.widget.resize = false
     pbar[1] = pbar.widget
 
-    data[pbar] = { width = width, height = height, value = 0 }
+    data[pbar] = { width = width, height = height, value = 0, max_value = 1 }
 
     -- Set methods
     for _, prop in ipairs(properties) do
