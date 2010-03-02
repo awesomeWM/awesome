@@ -253,7 +253,8 @@ client_isfixed(client_t *c)
             && c->size_hints.max_width == c->size_hints.min_width
             && c->size_hints.max_height == c->size_hints.min_height
             && c->size_hints.max_width
-            && c->size_hints.max_height);
+            && c->size_hints.max_height
+            && c->size_hints_honor);
 }
 
 /** Returns true if a client is tagged with one of the tags of the 
