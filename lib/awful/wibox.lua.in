@@ -133,6 +133,8 @@ function attach(wibox, position)
     wibox:add_signal("property::visible", wibox_update_strut)
 
     wibox:add_signal("property::screen", call_wibox_position_hook_on_prop_update)
+    wibox:add_signal("property::width", call_wibox_position_hook_on_prop_update)
+    wibox:add_signal("property::height", call_wibox_position_hook_on_prop_update)
     wibox:add_signal("property::visible", call_wibox_position_hook_on_prop_update)
     wibox:add_signal("property::border_width", call_wibox_position_hook_on_prop_update)
 end
