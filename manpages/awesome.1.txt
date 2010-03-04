@@ -100,7 +100,7 @@ Clients
 *Mod4 + Shift + c*::
     Kill focused client.
 *Mod4 + t*::
-    Mark a client.
+    Set client on-top.
 
 Navigation
 ~~~~~~~~~~
