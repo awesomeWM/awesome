@@ -126,7 +126,7 @@ local function exec(menu, num, mouse_event)
         util.spawn(cmd)
     elseif type(cmd) == "function" then
         get_parents(menu):hide()
-        cmd()
+        cmd(menu.items[num].returned_value)
     end
 end
 
@@ -265,7 +265,7 @@ local function add_item(data, num, item_info)
     item.height = label:extents().height + 2
     item.ontop = true
 
-    return { wibox = item, akey= key, cmd = item_info[2] }
+    return { wibox = item, akey= key, cmd = item_info[2], returned_value=item_info[1] }
 end
 
 --- Build a popup menu with running clients and shows it.
@@ -367,7 +367,7 @@ function toggle(menu, keygrabber)
 end
 
 --- Open a menu popup.
--- @param menu Table containing the menu informations. Key items: Table containing the displayed items, each element is a tab containing: item name, tiggered action, submenu table or function, item icon (optional). Keys [fg|bg]_[focus|normal], border, border_width, submenu_icon, height and width override the default display for your menu, each of them are optional. Key auto_expand controls the submenu auto expand behaviour by setting it to true (default) or false.
+-- @param menu Table containing the menu informations. Key items: Table containing the displayed items, each element is a tab containing: item name, triggered action, submenu table or function, item icon (optional). Keys [fg|bg]_[focus|normal], border, border_width, submenu_icon, height and width override the default display for your menu, each of them are optional. Key auto_expand controls the submenu auto expand behaviour by setting it to true (default) or false.
 -- @param parent Specify the parent menu if we want to open a submenu, this value should never be set by the user.
 -- @param num Specify the parent's clicked item number if we want to open a submenu, this value should never be set by the user.
 function new(menu, parent, num)
