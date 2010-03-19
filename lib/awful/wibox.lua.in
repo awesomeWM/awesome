@@ -194,10 +194,10 @@ function stretch(wibox, screen)
         local area = capi.screen[screen].workarea
         if position == "right" or position == "left" then
             wibox.height = area.height - (2 * wibox.border_width)
-            align(wibox, "center")
+            wibox.y = area.y
         else
             wibox.width = area.width - (2 * wibox.border_width)
-            align(wibox, "left")
+            wibox.x = area.x
         end
     end
 end
