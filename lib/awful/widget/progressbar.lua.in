@@ -49,6 +49,24 @@ local data = setmetatable({}, { __mode = "k" })
 -- @param progressbar The progressbar.
 -- @param vertical A boolean value.
 
+--- Set the progressbar to draw ticks. Default is false.
+-- @name set_ticks
+-- @class function
+-- @param progressbar The progressbar.
+-- @param ticks A boolean value.
+
+--- Set the progressbar ticks gap.
+-- @name set_ticks_gap
+-- @class function
+-- @param progressbar The progressbar.
+-- @param value The value.
+
+--- Set the progressbar ticks size.
+-- @name set_ticks_size
+-- @class function
+-- @param progressbar The progressbar.
+-- @param value The value.
+
 --- Set the maximum value the progressbar should handle.
 -- @name set_max_value
 -- @class function
@@ -57,11 +75,14 @@ local data = setmetatable({}, { __mode = "k" })
 
 local properties = { "width", "height", "border_color",
                      "gradient_colors", "color", "background_color",
-                     "vertical", "value", "max_value" }
+                     "vertical", "value", "max_value",
+                     "ticks", "ticks_gap", "ticks_size" }
 
 local function update(pbar)
     local width = data[pbar].width or 100
-    local height  = data[pbar].height or 20
+    local height = data[pbar].height or 20
+    local ticks_gap = data[pbar].ticks_gap or 1
+    local ticks_size = data[pbar].ticks_size or 4
 
     -- Create new empty image
     local img = capi.image.argb32(width, height, nil)
@@ -107,13 +128,42 @@ local function update(pbar)
                            over_drawn_width,
                            rel_height,
                            true, data[pbar].background_color or "#000000aa")
+
+        -- Place smaller pieces over the gradient if ticks are enabled
+        if data[pbar].ticks then
+            for i=0, height / (ticks_size+ticks_gap)-border_width do
+                local rel_offset = over_drawn_height / 1 - (ticks_size+ticks_gap) * i
+
+                if rel_offset >= rel_height then
+                    img:draw_rectangle(border_width,
+                                       rel_offset,
+                                       over_drawn_width,
+                                       ticks_gap,
+                                       true, data[pbar].background_color or "#000000aa")
+                end
+            end
+        end
     else
-        local rel_x = math.floor((over_drawn_width * value) + 0.5)
+        local rel_x = math.ceil(over_drawn_width * value)
         img:draw_rectangle(border_width + rel_x,
                            border_width,
                            over_drawn_width - rel_x,
                            over_drawn_height,
                            true, data[pbar].background_color or "#000000aa")
+
+        if data[pbar].ticks then
+            for i=0, width / (ticks_size+ticks_gap)-border_width do
+                local rel_offset = over_drawn_width / 1 - (ticks_size+ticks_gap) * i
+
+                if rel_offset <= rel_x then
+                    img:draw_rectangle(rel_offset,
+                                       border_width,
+                                       ticks_gap,
+                                       over_drawn_height,
+                                       true, data[pbar].background_color or "#000000aa")
+                end
+            end
+        end
     end
 
     -- Update the image
