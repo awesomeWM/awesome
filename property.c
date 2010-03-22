@@ -313,11 +313,17 @@ void
 property_update_wm_protocols(client_t *c, xcb_get_property_reply_t *reply)
 {
     xcb_get_wm_protocols_reply_t protocols;
+    xcb_get_property_reply_t *reply_copy;
 
     if(reply)
     {
-        if(!xcb_get_wm_protocols_from_reply(reply, &protocols))
+        reply_copy = p_dup(reply, 1);
+
+        if(!xcb_get_wm_protocols_from_reply(reply_copy, &protocols))
+	{
+            p_delete(&reply_copy);
             return;
+	}
     }
     else
     {
