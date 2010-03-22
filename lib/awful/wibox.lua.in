@@ -182,6 +182,9 @@ function align(wibox, align, screen)
             wibox.x = area.x + (area.width - wibox.width) / 2
         end
     end
+
+    -- Update struts regardless of changes
+    wibox_update_strut(wibox)
 end
 
 --- Stretch a wibox so it takes all screen width or height.
