@@ -8,6 +8,7 @@ local setmetatable = setmetatable
 local ipairs = ipairs
 local math = math
 local table = table
+local type = type
 local capi = { image = image,
                widget = widget }
 local layout = require("awful.widget.layout")
@@ -65,9 +66,21 @@ local data = setmetatable({}, { __mode = "k" })
 -- @param graph The graph.
 -- @param scale A boolean value
 
-local properties = { "width", "height", "border_color",
-                     "gradient_colors", "gradient_angle", "color",
-                     "background_color", "max_value", "scale" }
+--- Set the graph to draw stacks. Default is false.
+-- @name set_stack
+-- @class function
+-- @param progressbar The graph.
+-- @param stack A boolean value.
+
+--- Set the graph stacking colors. Order matters.
+-- @name set_stack_colors
+-- @class function
+-- @param graph The graph.
+-- @param stack_colors A table with stacking colors.
+
+local properties = { "width", "height", "border_color", "stack",
+                     "stack_colors", "gradient_colors", "gradient_angle",
+                     "color", "background_color", "max_value", "scale" }
 
 local function update(graph)
     -- Create new empty image
@@ -78,61 +91,90 @@ local function update(graph)
         border_width = 1
     end
 
-    local values = data[graph].values
-    local max_value = data[graph].max_value
-
-    if data[graph].scale then
-        for _, v in ipairs(values) do
-            if v > max_value then
-                max_value = v
-            end
-        end
-    end
-
-    -- Draw background
-    -- Draw full gradient
-    if data[graph].gradient_colors then
-        img:draw_rectangle_gradient(border_width, border_width,
-                                    data[graph].width - (2 * border_width),
-                                    data[graph].height - (2 * border_width),
-                                    data[graph].gradient_colors,
-                                    data[graph].gradient_angle or 270)
-    else
+    -- Draw a stacked graph
+    if data[graph].stack then
+        -- Draw the background first
         img:draw_rectangle(border_width, border_width,
                            data[graph].width - (2 * border_width),
-                           data[graph].height - (2 * border_width),
-                           true, data[graph].color or "red")
-    end
+                           data[graph].height,
+                           true, data[graph].background_color or "#000000aa")
 
-    -- No value? Draw nothing.
-    if #values ~= 0 then
-        -- Draw reverse
-        for i = 0, #values - 1 do
-            local value = values[#values - i]
-            if value >= 0 then
-                value = value / max_value
-                img:draw_line(data[graph].width - border_width - i - 1,
-                              border_width - 1 +
-                                  math.floor(((data[graph].height - 2 * border_width) * (1 - value)) + 0.5),
-                              data[graph].width - border_width - i - 1,
-                              border_width - 1,
-                              data[graph].background_color or "#000000aa")
+        for i = 0, data[graph].width - (2 * border_width) do
+            local rel_i = 0
+            local rel_x = data[graph].width - border_width - i - 1
+
+            if data[graph].stack_colors then
+                for idx, color in ipairs(data[graph].stack_colors) do
+                    local values = data[graph].values[idx]
+                    if values and i < #values then
+                        local value = values[#values - i] + rel_i
+
+                        img:draw_line(rel_x, border_width - 1 +
+                                          math.ceil((data[graph].height - 2 * border_width) * (1 - rel_i)),
+                                      rel_x, border_width - 1 +
+                                          math.ceil((data[graph].height - 2 * border_width) * (1 - value)),
+                                      color or "red")
+                        rel_i = value
+                    end
+                end
             end
+        end
+    else
+        local values = data[graph].values
+        local max_value = data[graph].max_value
+
+        if data[graph].scale then
+            for _, v in ipairs(values) do
+                if v > max_value then
+                    max_value = v
+                end
+            end
+        end
+
+        -- Draw full gradient
+        if data[graph].gradient_colors then
+            img:draw_rectangle_gradient(border_width, border_width,
+                                        data[graph].width - (2 * border_width),
+                                        data[graph].height - (2 * border_width),
+                                        data[graph].gradient_colors,
+                                        data[graph].gradient_angle or 270)
+        else
+            img:draw_rectangle(border_width, border_width,
+                               data[graph].width - (2 * border_width),
+                               data[graph].height - (2 * border_width),
+                               true, data[graph].color or "red")
+        end
+
+        -- Draw the background on no value
+        if #values ~= 0 then
+            -- Draw reverse
+            for i = 0, #values - 1 do
+                local value = values[#values - i]
+                if value >= 0 then
+                    value = value / max_value
+                    img:draw_line(data[graph].width - border_width - i - 1,
+                                  border_width - 1 +
+                                      math.ceil((data[graph].height - 2 * border_width) * (1 - value)),
+                                  data[graph].width - border_width - i - 1,
+                                  border_width - 1,
+                                  data[graph].background_color or "#000000aa")
+                end
+            end
+        end
+
+        -- If we didn't draw values in full length, draw a square
+        -- over the last, left, part to reset everything to 0
+        if #values < data[graph].width - (2 * border_width) then
+            img:draw_rectangle(border_width, border_width,
+                               data[graph].width - (2 * border_width) - #values,
+                               data[graph].height - (2 * border_width),
+                               true, data[graph].background_color or "#000000aa")
         end
     end
 
-    -- If we did not draw values everywhere, draw a square over the last left
-    -- part to set everything to 0 :-)
-    if #values < data[graph].width - (2 * border_width) then
-        img:draw_rectangle(border_width, border_width,
-                           data[graph].width - (2 * border_width) - #values,
-                           data[graph].height - (2 * border_width),
-                           true, data[graph].background_color or "#000000aa")
-    end
-
-    -- Draw the border last so that it overlaps other stuff
+    -- Draw the border last so that it overlaps already drawn values
     if data[graph].border_color then
-        -- Draw border
+        -- Draw the border
         img:draw_rectangle(0, 0, data[graph].width, data[graph].height,
                            false, data[graph].border_color or "white")
     end
@@ -144,24 +186,34 @@ end
 --- Add a value to the graph
 -- @param graph The graph.
 -- @param value The value between 0 and 1.
-local function add_value(graph, value)
+-- @param group The stack color group index.
+local function add_value(graph, value, group)
     if not graph then return end
 
     local value = value or 0
+    local values = data[graph].values
     local max_value = data[graph].max_value
     value = math.max(0, value)
     if not data[graph].scale then
         value = math.min(max_value, value)
     end
 
-    table.insert(data[graph].values, value)
+    if data[graph].stack and group then
+        if not  data[graph].values[group]
+        or type(data[graph].values[group]) ~= "table"
+        then
+            data[graph].values[group] = {}
+        end
+        values = data[graph].values[group]
+    end
+    table.insert(values, value)
 
     local border_width = 0
     if data[graph].border then border_width = 2 end
 
     -- Ensure we never have more data than we can draw
-    while #data[graph].values > data[graph].width - border_width do
-        table.remove(data[graph].values, 1)
+    while #values > data[graph].width - border_width do
+        table.remove(values, 1)
     end
 
     update(graph)
