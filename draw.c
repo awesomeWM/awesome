@@ -169,10 +169,6 @@ draw_text(draw_context_t *ctx, draw_text_context_t *data,
     PangoRectangle ext;
     pango_layout_get_pixel_extents(ctx->layout, NULL, &ext);
 
-    /* Not enough space, draw nothing */
-    if(ext.width > area.width || ext.height > area.height)
-        return;
-
     switch(align)
     {
       case AlignCenter:
