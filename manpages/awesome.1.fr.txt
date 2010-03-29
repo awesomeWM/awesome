@@ -1,0 +1,208 @@
+awesome(1)
+==========
+
+NOM
+----
+
+awesome - gestionnaire de fenêtres awesome
+
+SYNOPSIS
+--------
+
+*awesome* [*-v* | *--version*] [*-h* | *--help*] [*-c* | *--config* 'FILE'] [*-k* | *--check*]
+
+DESCRIPTION
+-----------
+
+*awesome* est un gestionnaire de fenêtres pour X.
+Il gère les fenêtres avec diverses mises en page, par exemple flottante ou
+juxtaposée.
+Toutes les mises en page peuvent être appliquées dynamiquement, pour
+optimiser l'environnement pour l'application utilisée et la tâche en cours
+d'exécution.
+
+Avec la mise en page juxtaposée, les fenêtres sont gérées avec une zone
+maître et une zone d'empilage.
+La zone maître contient les fenêtres qui nécessitent le plus d'attention,
+tandis que la zone d'empilage contient toutes les autres fenêtres.
+Avec la mise en page flottante, les fenêtres peuvent être redimensionnées
+et déplacées à la demande. Les fenêtres de dialogue sont toujours gérées
+d'une manière flottante, quelle que soit la mise en page en cours.
+Les mises en forme spirale ou décroissante sont des modes spéciaux de mise
+en forme juxtaposée, où la zone d'empilage est présentée en spirale pour la
+première, ou comme une fractale rectangulaire pour la seconde.
+
+Dans awesome les fenêtres sont groupées en onglets.
+Chaque fenêtre peut être affectée à  un ou plusieurs onglets.
+En sélectionnant plusieurs onglets on peut afficher toutes les fenêtres
+affectées à ces onglets.
+
+*awesome* peut contenir des petites boîtes graphiques qui peuvent afficher
+tout ce que vous désirez : tous les onglets disponibles, la mise en page
+courante, le titre des fenêtres visibles, du texte, etc.
+
+OPTIONS
+-------
+*-v*, *--version*::
+    Affiche la version de awesome sur la sortie standard.
+*-h*, *--help*::
+    Affiche l'aide.
+*-c*, *--config* 'FILE'::
+    Définit un autre fichier de configuration à la place de
+'$XDG_CONFIG_HOME/awesome/rc.lua'.
+*-k*, *--check*::
+    Vérifie la syntaxe du fichier de configuration.
+
+ASSOCIATIONS AVEC LA SOURIS (PAR DÉFAUT)
+----------------------------------------
+Navigation
+~~~~~~~~~~
+*Bouton1* sur le nom de l'onglet::
+    Affiche le contenu de l'onglet.
+*Bouton4*, *Bouton5* sur le nom de l'onglet::
+    Affiche le contenu de l'onglet précédent ou suivant.
+*Bouton4*, *Bouton5* sur un onglet vide::
+    Affiche le contenu de l'onglet précédent ou suivant.
+*Bouton1*, *Bouton3*, *Bouton4*, *Bouton5* sur le symbole de mise en page::
+    Affiche la mise en page précédente ou suivante.
+
+Changement dans la mise en page
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*Mod4 + Bouton1* sur le nom de l'onglet::
+    Déplace la fenêtre courante vers cet onglet.
+*Mod4 + Bouton3* sur le nom de l'onglet::
+    Ajoute ou retire la fenêtre courante à cet onglet.
+*Bouton3* sur le nom de l'onglet::
+    Ajoute ou retire le contenu de cet onglet à la vue courante.
+*Mod4 + Bouton1* sur la fenêtre courante avec déplacement de la souris::
+    Déplace la fenêtre courante sur l'écran.
+*Mod4 + Bouton3* sur la fenêtre courante avec déplacement de la souris::
+    Redimensionne la fenêtre courante sur l'écran.
+
+ASSOCIATIONS AVEC LES TOUCHES DU CLAVIER (PAR DÉFAUT)
+-----------------------------------------------------
+Contrôle du gestionnaire de fenêtres
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*Mod4 + Contrôle + r*::
+    Redémarre le gestionnaire de fenêtres *awesome*.
+*Mod4 + Majuscule + q*::
+    Quitte le gestionnaire de fenêtres *awesome*.
+*Mod4 + r*::
+    Affiche une invite de ligne de commande dans la barre de statut.
+*Mod4 + x*::
+    Affiche une invite de code lua dans la barre de statut.
+*Mod4 + Retour*::
+    Lance un émulateur de terminal.
+*Mod4 + w*::
+    Ouvre le menu principal.
+
+Clients
+~~~~~~~
+*Mod4 + Majuscule + r*::
+    Réaffiche la fenêtre focalisée.
+*Mod4 + m*::
+    Maximise la fenêtre de l'application.
+*Mod4 + n*::
+    Minimise la fenêtre de l'application.
+*Mod4 + f*::
+    Affiche la fenêtre de l'application en plein écran.
+*Mod4 + Majuscule + c*::
+    Ferme la fenêtre focalisée.
+*Mod4 + t*::
+    Marque la fenêtre de l'application.
+
+Navigation
+~~~~~~~~~~
+*Mod4 + j*::
+    Focalise sur la fenêtre suivante.
+*Mod4 + k*::
+    Focalise sur la fenêtre précédente.
+*Mod4 + u*::
+    Focalise sur la première fenêtre urgente.
+*Mod4 + Flèche Gauche*::
+    Affiche l'onglet précédent.
+*Mod4 + Flèche Droite*::
+    Affiche l'onglet suivant.
+*Mod4 + 1-9*::
+    Affiche le contenu de l'onglet 1 à 9.
+*Mod4 + Contrôle + j*::
+    Focalise sur l'écran d'affichage suivant et y déplace la souris.
+*Mod4 + Contrôle + k*::
+    Focalise sur l'écran d'affichage précédent et y déplace la souris.
+*Mod4 + Échappement*::
+    Affiche l'onglet sélectionné précédemment.
+
+Layout modification
+~~~~~~~~~~~~~~~~~~~
+*Mod4 + Majuscule + j*::
+    Intervertit la fenêtre courante avec la suivante.
+*Mod4 + Majuscule + k*::
+    Intervertit la fenêtre courante avec la précédente.
+*Mod4 + o*::
+    Déplace le client vers l'écran suivant.
+*Mod4 + h*::
+    Diminue la largeur de la fenêtre-maître de 5%.
+*Mod4 + l*::
+    Augmente la largeur de la fenêtre-maître de 5%.
+*Mod4 + Majuscule + h*::
+    Augmente de 1 le nombre de fenêtres-maître.
+*Mod4 + Majuscule + l*::
+    Diminue de 1 le nombre de fenêtres-maître.
+*Mod4 + Contrôle + h*::
+    Augmente de 1 le nombre de colonnes pour les fenêtres non-maître.
+*Mod4 + Contrôle + l*::
+    Diminue de 1 le nombre de colonnes pour les fenêtres non-maître.
+*Mod4 + Espace*::
+    Affiche la mise en page suivante.
+*Mod4 + Majuscule + Espace*::
+    Affiche la mise en page précédente.
+*Mod4 + Contrôle + Espace*::
+    Rend la fenêtre flottante, ou fixe si elle est déjà flottante.
+*Mod4 + Contrôle + Retour*::
+    Intervertit la fenêtre focalisée avec la fenêtre-maître.
+*Mod4 + Contrôle + 1-9*::
+    Ajoute ou supprime le contenu de l'onglet 1 à 9 à l'onglet courant.
+*Mod4 + Majuscule + 1-9*::
+    Déplace la fenêtre courante dans l'onglet 1 à 9.
+*Mod4 + Majuscule + Contrôle + 1-9*::
+    Ajoute ou retire la fenêtre courante à l'onglet 1 à 9.
+*Mod4 + Majuscule + F1-9*::
+    Déplace les applications marquées vers l'onglet 1 à 9.
+
+PERSONNALISATION
+-----------------
+*awesome* peut être personnalisé en créant un fichier spécifique
+'$XDG_CONFIG_HOME/awesome/rc.lua'.
+
+SIGNAUX
+-------
+*awesome* peut être redémarré en lui envoyant un signal SIGHUP.
+
+VOIR AUSSI
+----------
+*awesomerc*(5) *awesome-client*(1)
+
+BOGUES
+------
+Bien sûr il n'y a aucun bogue dans *awesome* ! Il peut seulement y avoir
+des comportements inattendus...
+
+AUTEURS
+-------
+Julien Danjou <julien@danjou.info> and others.
+
+WWW
+---
+http://awesome.naquadah.org
+
+TRADUCTION
+----------
+Ce document est une traduction, réalisée par Jean-Luc Duflot
+<jl POING duflot CHEZ laposte POING net> le 25 mars 2010.
+
+L'équipe de traduction a fait le maximum pour réaliser une adaptation
+française de qualité.
+La version anglaise la plus à jour de ce document est toujours consultable
+via la commande : LANGUAGE=en man awesome.
+N'hésitez pas à signaler à l'auteur ou au traducteur, selon le cas, toute
+erreur dans cette page de manuel.
