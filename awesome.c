@@ -163,7 +163,7 @@ scan(void)
             state = window_state_get_reply(state_wins[i]);
 
             if(!attr_r || attr_r->override_redirect
-               || attr_r->map_state == XCB_MAP_STATE_UNVIEWABLE
+               || attr_r->map_state == XCB_MAP_STATE_UNMAPPED
                || state == XCB_WM_STATE_WITHDRAWN)
             {
                 geom_wins[i] = NULL;
