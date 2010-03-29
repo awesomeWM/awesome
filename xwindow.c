@@ -59,7 +59,8 @@ xwindow_get_state_unchecked(xcb_window_t w)
 uint32_t
 xwindow_get_state_reply(xcb_get_property_cookie_t cookie)
 {
-    uint32_t result = 0;
+    /* If no property is set, we just assume a sane default. */
+    uint32_t result = XCB_WM_STATE_NORMAL;
     xcb_get_property_reply_t *prop_r;
 
     if((prop_r = xcb_get_property_reply(globalconf.connection, cookie, NULL)))
