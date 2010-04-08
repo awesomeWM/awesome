@@ -84,6 +84,7 @@ set(AWE_MAN_SRCS
     ${SOURCE_DIR}/manpages/awsetbg.1.txt
     ${SOURCE_DIR}/manpages/awesome-client.1.txt
     ${SOURCE_DIR}/manpages/awesomerc.5.txt)
+set(AWE_MAN_LANGS fr)
 
 add_executable(${PROJECT_AWE_NAME}
     ${AWE_SRCS}
@@ -167,45 +168,68 @@ if(GENERATE_MANPAGES)
     if(NOT BUILD_DIR STREQUAL SOURCE_DIR)
         file(MAKE_DIRECTORY ${BUILD_DIR}/manpages)
     endif()
-    foreach(txtfile ${AWE_MAN_SRCS})
-        string(REGEX REPLACE ".txt\$" ".xml" xmlfile ${txtfile})
-        string(REPLACE ${SOURCE_DIR}
-                       ${BUILD_DIR} xmlfile ${xmlfile})
-        string(REGEX REPLACE ".xml\$" ".gz" gzfile ${xmlfile})
-        string(REGEX REPLACE ".gz\$" "" manfile ${gzfile})
 
-        add_custom_command(
-            COMMAND ${ASCIIDOC_EXECUTABLE} -d manpage -b docbook -o ${xmlfile} - < ${txtfile}
-            WORKING_DIRECTORY ${BUILD_DIR}/manpages
-            OUTPUT  ${xmlfile}
-            DEPENDS ${txtfile}
-            VERBATIM)
-        add_custom_command(
-            COMMAND ${XMLTO_EXECUTABLE} man ${xmlfile}
-            OUTPUT  ${manfile}
-            WORKING_DIRECTORY ${BUILD_DIR}/manpages
-            DEPENDS ${xmlfile})
+    # add the default translation to the list of languages
+    set(AWE_MAN_LANGS default ${AWE_MAN_LANGS})
 
-        if(COMPRESS_MANPAGES)
+    foreach(lang ${AWE_MAN_LANGS})
+
+        foreach(txtfile ${AWE_MAN_SRCS})
+            # figure the base name of the file (ie "awesome.1")
+            GET_FILENAME_COMPONENT(tmpname ${txtfile} NAME)
+            string(REGEX REPLACE ".txt\$" "" basename ${tmpname})
+
+            # figure the relative path of the file
+            GET_FILENAME_COMPONENT(tmppath ${txtfile} PATH)
+            string(REPLACE ${SOURCE_DIR}/ "" relpath ${tmppath})
+
+            # figure the manpage section to install to from filename
+            string(REGEX REPLACE "^.*\\.([0-9])$" "\\1" section ${basename})
+
+            # construct the language specific versions of the basename and path
+            if (lang STREQUAL default)
+                set(basename2 ${basename})
+                set(relpath2 ${relpath}/man${section})
+            else()
+                set(basename2 ${basename}.${lang})
+                set(relpath2 ${relpath}/${lang}/man${section})
+            endif()
+
+            # create the build directory (if it does not exist)
+            file(MAKE_DIRECTORY ${BUILD_DIR}/${relpath2})
+
+            # set the final filenames
+            set(txtfile ${SOURCE_DIR}/${relpath}/${basename2}.txt)
+            set(xmlfile ${BUILD_DIR}/${relpath2}/${basename}.xml)
+            set(gzfile  ${BUILD_DIR}/${relpath2}/${basename}.gz)
+            set(manfile ${BUILD_DIR}/${relpath2}/${basename})
+
             add_custom_command(
-                COMMAND ${GZIP_EXECUTABLE} < ${manfile} > ${gzfile}
-                OUTPUT  ${gzfile}
-                WORKING_DIRECTORY ${BUILD_DIR}/manpages
-                DEPENDS ${manfile}
+                COMMAND ${ASCIIDOC_EXECUTABLE} -d manpage -b docbook -o ${xmlfile} - < ${txtfile}
+                WORKING_DIRECTORY ${BUILD_DIR}/${relpath2}
+                OUTPUT  ${xmlfile}
+                DEPENDS ${txtfile}
                 VERBATIM)
+            add_custom_command(
+                COMMAND ${XMLTO_EXECUTABLE} man ${xmlfile}
+                OUTPUT  ${manfile}
+                WORKING_DIRECTORY ${BUILD_DIR}/${relpath2}
+                DEPENDS ${xmlfile})
 
-            set(MAN_FILES ${MAN_FILES} ${gzfile})
-        else()
-            set(MAN_FILES ${MAN_FILES} ${manfile})
-        endif()
+            if(COMPRESS_MANPAGES)
+                add_custom_command(
+                    COMMAND ${GZIP_EXECUTABLE} < ${manfile} > ${gzfile}
+                    OUTPUT  ${gzfile}
+                    WORKING_DIRECTORY ${BUILD_DIR}/${relpath2}
+                    DEPENDS ${manfile}
+                    VERBATIM)
 
-        # figure out in what section to install to from filename
-        string(REGEX REPLACE "^.*\\.([0-9])\\.gz\$" "\\1" section ${gzfile})
-        if(COMPRESS_MANPAGES)
-            set(AWE_MAN${section}_FILES ${AWE_MAN${section}_FILES} ${gzfile})
-        else()
-            set(AWE_MAN${section}_FILES ${AWE_MAN${section}_FILES} ${manfile})
-        endif()
+                set(MAN_FILES ${MAN_FILES} ${gzfile})
+            else()
+                set(MAN_FILES ${MAN_FILES} ${manfile})
+            endif()
+        endforeach()
+
     endforeach()
 
     add_custom_target(man ALL DEPENDS ${MAN_FILES})
@@ -301,8 +325,14 @@ install(DIRECTORY ${BUILD_DIR}/lib DESTINATION ${AWESOME_DATA_PATH}
 install(FILES ${AWE_CONF_FILE_DEFAULT} DESTINATION ${AWESOME_SYSCONFDIR}
         RENAME ${AWE_CONF_FILE})
 if(GENERATE_MANPAGES)
-    install(FILES ${AWE_MAN1_FILES} DESTINATION ${AWESOME_MAN_PATH}/man1)
-    install(FILES ${AWE_MAN5_FILES} DESTINATION ${AWESOME_MAN_PATH}/man5)
+    if(COMPRESS_MANPAGES)
+        set(regex "\\.(xml|[0-9])$")
+    else()
+        set(regex "\\.(xml|gz)$")
+    endif()
+MESSAGE( ${relpath} )
+    install(DIRECTORY ${BUILD_DIR}/${relpath}/ DESTINATION ${AWESOME_MAN_PATH}
+            REGEX ${regex} EXCLUDE )
 endif()
 install(DIRECTORY ${AWE_ICON_DIR} DESTINATION ${AWESOME_DATA_PATH})
 install(DIRECTORY ${BUILD_DIR}/themes DESTINATION ${AWESOME_DATA_PATH}
