@@ -1,0 +1,45 @@
+awesome-client(1)
+=================
+
+NOMBRE
+------
+
+awesome-client - ejecución remota en el gestor de ventanas awesome
+
+SINOPSIS
+--------
+
+awesome-client
+
+DESCRIPCIÓN
+-----------
+
+awesome-client es una interfaz de línea de comandos remota para awesome.
+Se comunica con awesome utilizando D-Bus, y permite la ejecución remota
+de código en lenguaje Lua.
+
+USO
+---
+awesome-client recibe los comandos desde la entrada estándar y los envía
+a awesome utilizando D-Bus. Si 'rlwrap' está instalado en el sistema, la
+interfaz de línea de comandos utilizará las facilidades proporcionadas por
+readline.
+
+El módulo 'awful.remote' tiene que estar cargado para que este comando
+funcione.
+
+VÉASE TAMBIÉN
+-------------
+awesome(1) awesomerc(5)
+
+AUTOR
+-----
+Julien Danjou <julien@danjou.info>
+
+WWW
+---
+http://awesome.naquadah.org
+
+TRADUCCIÓN
+----------
+Esta página de manual ha sido traducida por Diego Moreda.

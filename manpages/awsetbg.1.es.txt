@@ -1,0 +1,87 @@
+awsetbg(1)
+=========
+
+NOMBRE
+------
+awsetbg - herramienta para establecer el fondo de pantalla en awesome
+
+SINOPSIS
+--------
+*awsetbg* [-fctaFCTA fondodepantalla] [-uU programa] [-m #] [-bB opcionesfbsetroot ...] [-rR directorio] [-l]
+
+DESCRIPCIÓN
+-----------
+*awsetbg* es un programa que intenta encontrar una aplicación adecuada para
+establecer el fondo de pantalla, y posteriormente establece el fondo de
+pantalla utilizando esa aplicación. No es necesario configurar *awsetbg*,
+puesto que simplemente utiliza la primera aplicación que encuentra.
+
+Además, almacena automáticamente el último fondo de pantalla utilizado,
+por lo que no es necesario editar ningún archivo para cambiar el fondo
+de pantalla.
+
+OPCIONES
+-------
+*-f* fichero::
+    Establece un fondo de pantalla a pantalla completa.
+*-c* fichero::
+    Establece un fondo de pantalla centrado.
+*-t* fichero::
+    Establece un fondo de pantalla en mosaico.
+*-a* fichero::
+    Establece un fondo de pantalla con el máximo tamaño posible pero
+    conservando la relación de aspecto. Si la aplicación utilizada no
+    soporta este modo, se muestra a pantalla completa.
+*-u* programa::
+    Indica el programa a utilizar para establecer el fondo de pantalla.
+*-r* directorio::
+    Establece como fondo de pantalla un archivo al azar de ese directorio.
+*-F, -C, -T, -A, -U, -R*::
+    Tienen la misma función que la opción correspondiente en minúscula,
+    pero sin guardar la nueva configuración automáticamente.
+*-l*::
+    Vuelve al fondo de pantalla utilizado anteriormente. Si el fondo de
+    pantalla anterior fue escogido al azar en un directorio, se utilizará
+    otro fondo al azar de ese mismo directorio.
+*-i*::
+    Muestra información acerca de la mejor aplicación para establecer el
+    fondo de pantalla que fue encontrada.
+*-m #*::
+    Utiliza montage para crear una imagen de gran tamaño (la imagen debe
+    corresponder al tamaño de la pantalla). Requiere el programa montage(1).
+    # es el número de pantallas (columnas en montage).
+*-p*::
+    Muestra consejos útiles para el uso del programa.
+*-h*::
+    Muestra información de ayuda.
+
+FICHEROS
+--------
+Los ficheros $XDG_CACHE_HOME/awesome/lastwallpaper o
+$HOME/.cache/awesome/lastwallpaper contienen información sobre el último
+fondo de pantalla utilizado. La opción -l hace uso de esta información.
+
+VARIABLES DE ENTORNO
+--------------------
+*wpsetters*::
+    Indica los programas para establecer el fondo de pantalla a utilizar.
+*DISPLAY*::
+    Indica el DISPLAY en el que se quiere establecer el fondo de pantalla.
+
+VÉASE TAMBIÉN
+-------------
+awesome(1)
+
+
+AUTORES
+-------
+Julien Danjou <julien@danjou.info> y otros.
+awsetbg está derivado de fbsetbg, que ha sido escrito por Han Boetes <han@fluxbox.org>.
+
+WWW
+---
+http://awesome.naquadah.org
+
+TRADUCCIÓN
+----------
+Esta página de manual ha sido traducida por Diego Moreda.
