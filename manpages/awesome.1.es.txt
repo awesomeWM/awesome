@@ -1,0 +1,198 @@
+awesome(1)
+==========
+
+NOMBRE
+------
+
+awesome - gestor de ventanas awesome
+
+SINOPSIS
+--------
+
+*awesome* [*-v* | *--version*] [*-h* | *--help*] [*-c* | *--config* 'FICHERO'] [*-k* | *--check*]
+
+DESCRIPCIÓN
+-----------
+
+*awesome* es un gestor de ventanas para el sistema de ventanas X. Organiza las
+ventanas utilizando diferentes disposiciones o esquemas (layouts), como por
+ejemplo superpuestas o en mosaico. Cualquiera de los esquemas puede ser
+aplicado dinámicamente, optimizando el entorno para la aplicación que se
+esté ejecutando o la tarea que se esté llevando a cabo.
+
+En los esquemas en mosaico la pantalla se divide en un área principal y un
+área de apilamiento. El área principal contiene las ventanas que necesitan
+mayor cantidad de atención, mientras que el área de apilamiento contiene el
+resto de ventanas. En los esquemas flotantes las ventanas pueden ser
+desplazadas y redimensionadas por el usuario sin restricciones. Las ventanas
+de diálogo siempre se consideran flotantes, independientemente del esquema
+que esté aplicado en ese momento. El esquema en espiral y el menguante son
+casos particulares de los esquemas en mosaico, en los que el área de
+apilamiento se organiza, respectivamente, en forma de espiral o dividiéndose
+en rectángulos siguiendo un patrón fractal.
+
+Las ventanas se agrupan por etiquetas en awesome. Cada ventana puede tener una
+o más etiquetas. Al seleccionar una etiqueta se muestran todas las ventanas
+que tienen esa etiqueta.
+
+En *awesome* se pueden añadir wiboxes que pueden mostrar cualquier valor:
+todas las etiquetas existentes, el esquema que está seleccionado, el título
+de las ventanas visibles, texto, etc.
+
+OPCIONES
+-------
+*-v*, *--version*::
+    Muestra la información de la versión en la salida estándar, y sale del programa.
+*-h*, *--help*::
+    Muestra información de ayuda, y sale del programa.
+*-c*, *--config* 'FICHERO'::
+    Utiliza un fichero de configuración alternativo en lugar de
+'$XDG_CONFIG_HOME/awesome/rc.lua'.
+*-k*, *--check*::
+    Verifica la sintaxis del archivo de configuración.
+
+ATAJOS DE RAtÓN POR OMISIÓN
+---------------------------
+Navegación
+~~~~~~~~~~
+
+*Botón1* en el nombre de una etiqueta::
+    Muestra las ventanas con esa etiqueta.
+*Botón4*, *Botón5* en el nombre de una etiqueta::
+    Cambia a la etiqueta anterior o siguiente.
+*Botón4*, *Botón5* en la ventana de fondo::
+    Cambia a la etiqueta anterior o siguiente.
+*Button1*, *Button3*, *Button4*, *Button5* en el símbolo de esquema::
+    Cambia al esquema anterior o siguiente.
+
+Modificación del esquema
+~~~~~~~~~~~~~~~~~~~~~~~~
+*Mod4 + Botón1* en el nombre de una etiqueta::
+    Etiqueta al cliente actual únicamente con esa etiqueta.
+*Mod4 + Botón* en el nombre de una etiqueta::
+    Activa o desactiva esa etiqueta para el cliente actual.
+*Botón3* en el nombre de una etiqueta::
+    Añade el contenido de esa etiqueta a la vista actual.
+*Mod4 + Botón1* en una ventana cliente::
+    Mueve la ventana.
+*Mod4 + Botón3* en una ventana cliente::
+    Redimensiona la ventana.
+
+ATAJOS DE TECLADO POR OMISIÓN
+-----------------------------
+Control del gestor de ventanas
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*Mod4 + Control + r*::
+    Reinicia *awesome*.
+*Mod4 + Mayús + q*::
+    Sale de *awesome*.
+*Mod4 + r*::
+    Ejecuta una línea de comandos en la barra de estado.
+*Mod4 + x*::
+    Ejecuta una línea de comandos de Lua en la barra de estado.
+*Mod4 + Intro*::
+    Lanza una instancia del emulador de terminal.
+*Mod4 + w*::
+    Despliega el menú principal.
+
+Clientes
+~~~~~~~~
+*Mod4 + m*::
+    Maximiza el cliente actual.
+*Mod4 + n*::
+    Minimiza el cliente actual.
+*Mod4 + f*::
+    Activa o desactiva el modo de pantalla completa para el cliente actual.
+*Mod4 + Mayús + c*::
+    Termina (kill) el cliente actual.
+*Mod4 + t*::
+    Activa o desactiva el modo "siempre visible" para el cliente actual.
+
+Navegación
+~~~~~~~~~~
+*Mod4 + j*::
+    Establece el foco sobre el cliente siguiente.
+*Mod4 + k*::
+    Establece el foco sobre el cliente anterior.
+*Mod4 + u*::
+    Establece el foco sobre el primer cliente urgente.
+*Mod4 + Left*::
+    Muestra la etiqueta anterior.
+*Mod4 + Right*::
+    Muestra la etiqueta siguiente.
+*Mod4 + 1-9*::
+    Muestra los contenidos de la etiqueta 1-9.
+*Mod4 + Control + j*::
+    Establece el foco en la pantalla siguiente.
+*Mod4 + Control + k*::
+    Establece el foco en la pantalla anterior.
+*Mod4 + Escape*::
+    Establece el foco en el conjunto de etiquetas seleccionado anteriormente.
+
+Modificación del esquema
+~~~~~~~~~~~~~~~~~~~~~~~~
+*Mod4 + Mayús + j*::
+    Intercambia el cliente actual con el cliente siguiente.
+*Mod4 + Mayús + k*::
+    Intercambia el cliente actual con el cliente anterior.
+*Mod4 + o*::
+    Envía el cliente a la pantalla siguiente.
+*Mod4 + h*::
+    Decrementa la anchura del área principal en un 5%.
+*Mod4 + l*::
+    Incrementa la anchura del área principal en un 5%.
+*Mod4 + Mayús + h*::
+    Incrementa el número de ventanas en el área principal en 1.
+*Mod4 + Mayús + l*::
+    Decrementa el número de ventanas en el área principal en 1.
+*Mod4 + Control + h*::
+    Incrementa el número de columnas en el área de apilamiento en 1.
+*Mod4 + Control + l*::
+    Decrementa el número de columnas en el área de apilamiento en 1.
+*Mod4 + space*::
+    Cambia al esquema siguiente.
+*Mod4 + Mayús + espacio*::
+    Cambia al esquema anterior.
+*Mod4 + Control + espacio*::
+    Activa o desactiva el estado flotante del cliente actual
+*Mod4 + Control + Intro*::
+    Intercambia el cliente actual con el cliente en el área principal
+*Mod4 + Control + 1-9*::
+    Activa o desactiva la vista de la etiqueta 1-9.
+*Mod4 + Mayús + 1-9*::
+    Etiqueta al cliente actual con la etiqueta 1-9.
+*Mod4 + Mayús + Control + 1-9*::
+    Activa o desactiva la etiqueta 1-9 para el cliente actual.
+*Mod4 + Mayús + F1-9*::
+    Etiqueta a los clientes marcados con la etiqueta 1-9.
+
+PERSONALIZACIÓN
+---------------
+*awesome* se configura creando un fichero '$XDG_CONFIG_HOME/awesome/rc.lua'
+personalizado.
+
+SEÑALES
+-------
+La señal SIGHUP provoca que *awesome* se reinicie.
+
+VÉASE TAMBIÉN
+------------
+*awesomerc*(5) *awesome-client*(1)
+
+FALLOS
+------
+Por supuesto, *awesome* no tiene fallos. Pero es posible que tenga
+comportamientos inesperados.
+
+AUTORES
+-------
+Julien Danjou <julien@danjou.info> y otros.
+
+
+WWW
+---
+http://awesome.naquadah.org
+
+TRADUCCIÓN
+----------
+Esta página de manual ha sido traducida por Diego Moreda.

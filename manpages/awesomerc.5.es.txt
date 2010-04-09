@@ -1,0 +1,66 @@
+awesomerc(5)
+===========
+
+NOMBRE
+------
+
+awesomerc - Fichero de configuración para el gestor de ventanas awesome
+
+SINOPSIS
+--------
+*awesome* busca un fichero de configuración siguiendo este orden:
+
+* $XDG_CONFIG_HOME/awesome/rc.lua
+* $HOME/.config/awesome/rc.lua
+* XDG_CONFIG_DIRS/awesome/rc.lua
+
+DESCRIPCIÓN
+-----------
+El fichero *rc.lua* contiene la información de configuración de *awesome*.
+Se utiliza para configurar de diferentes maneras el comportamiento y el
+aspecto del gestor de ventanas. Puede ser entendido como un programa o script
+en Lua que es ejecutado por *awesome* al iniciarse. Por lo tanto, debe utilizar
+el API Lua de awesome que se describe en la sección API. Este fichero es
+leído al iniciarse el gestor de ventanas.
+
+API LUA DE AWESOME
+------------------
+La documentación de la API Lua se encuentra en el directorio luadoc.
+
+FORMATO DE COLOR
+----------------
+Para especificar un color en *awesome* se puede utilizar un nombre de color
+estándar de X, o utilizar un color en formato hexadecimal (#rrggbb o
+#rrggbbaa).
+Al utilizar el formato hexadecimal es posible especificar también un canal
+alpha que representa la opacidad: el color #00ff00 se dibujará como verde,
+pero el color #00ff00aa, con un valor de opacidad `aa' se dibujará
+combinando el verde con el color del fondo sobre el que es dibujado.
+
+FORMATO DE TEXTO
+----------------
+Las cadenas de texto permiten utilizar elementos del lenguaje de marcado
+Pango. Esto permite añadir formato a los textos que se visualizan dentro de
+los widgets.
+La documentación relacionada con el lenguaje de marcado Pango se encuentra
+dentro de la documentación de Pango en
+http://library.gnome.org/devel/pango/stable/PangoMarkupFormat.html.
+
+Un ejemplo de lenguaje de marcado Pango:
+<span weight="bold" foreground="#336699">...</span>.
+
+VÉASE TAMBIÉN
+-------------
+awesome(1) awesome-client(1)
+
+AUTORES
+-------
+Escrito por Julien Danjou <julien@danjou.info>.
+
+WWW
+---
+http://awesome.naquadah.org
+
+TRADUCCIÓN
+----------
+Esta página de manual ha sido traducida por Diego Moreda.
