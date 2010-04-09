@@ -334,7 +334,6 @@ if(GENERATE_MANPAGES)
     else()
         set(regex "\\.(xml|gz)$")
     endif()
-MESSAGE( ${relpath} )
     install(DIRECTORY ${BUILD_DIR}/${relpath}/ DESTINATION ${AWESOME_MAN_PATH}
             REGEX ${regex} EXCLUDE )
 endif()
