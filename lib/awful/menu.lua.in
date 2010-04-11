@@ -157,8 +157,9 @@ end
 local function check_access_key(menu, key)
    for i, item in pairs(menu.items) do
       if item.akey == key then
-	 exec(menu, i)
-	 return
+          item_enter(menu, i)
+          exec(menu, i)
+          return
       end
    end
    if menu.parent then
