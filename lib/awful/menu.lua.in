@@ -202,7 +202,7 @@ local function add_item(data, num, item_info)
     -- Create bindings
     local bindings = util.table.join(
         button({}, 1, function () item_enter(data, num); exec(data, num) end),
-        button({}, 3, function () hide(data) end)
+        button({}, 3, function () data:hide() end)
     )
 
     -- Create the item label widget
@@ -360,9 +360,9 @@ end
 -- @param keygrabber A boolean enabling or not the keyboard navigation.
 function toggle(menu, keygrabber)
     if menu.items[1] and menu.items[1].wibox.screen then
-        hide(menu)
+        menu:hide()
     else
-        show(menu, keygrabber)
+        menu:show(keygrabber)
     end
 end
 
