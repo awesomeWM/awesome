@@ -271,9 +271,9 @@ end
 
 --- Build a popup menu with running clients and shows it.
 -- @param menu Menu table, see new() function for more informations
--- @param keygrabber A boolean enabling or not the keyboard navigation.
+-- @param args.keygrabber A boolean enabling or not the keyboard navigation.
 -- @return The menu.
-function clients(menu, keygrabber)
+function clients(menu, args)
     local cls = capi.client.get()
     local cls_t = {}
     for k, c in pairs(cls) do
@@ -294,11 +294,11 @@ function clients(menu, keygrabber)
     menu.items = cls_t
 
     local m = new(menu)
-    m:show(keygrabber)
+    m:show(args)
     return m
 end
 
-local function set_coords(menu, screen_idx)
+local function set_coords(menu, screen_idx, m_coords)
     local s_geometry = capi.screen[screen_idx].workarea
     local screen_w = s_geometry.x + s_geometry.width
     local screen_h = s_geometry.y + s_geometry.height
@@ -316,11 +316,15 @@ local function set_coords(menu, screen_idx)
         menu.y = menu.parent.y + p_w + m_h > screen_h and screen_h - m_h or menu.parent.y + p_w
         menu.x = menu.parent.x + m_w*2 > screen_w and menu.parent.x - m_w or menu.parent.x + m_w
     else
-        local m_coords = capi.mouse.coords()
         local m_w = menu.w
+        if m_coords == nil then
+            m_coords = capi.mouse.coords()
+            m_coords.x = m_coords.x + 1
+            m_coords.y = m_coords.y + 1
+        end
 
-        menu.y = m_coords.y+1 < s_geometry.y and s_geometry.y or m_coords.y+1
-        menu.x = m_coords.x+1 < s_geometry.x and s_geometry.x or m_coords.x+1
+        menu.y = m_coords.y < s_geometry.y and s_geometry.y or m_coords.y
+        menu.x = m_coords.x < s_geometry.x and s_geometry.x or m_coords.x
 
         menu.y = menu.y + m_h > screen_h and screen_h - m_h or menu.y
         menu.x = menu.x + m_w > screen_w and screen_w - m_w or menu.x
@@ -329,10 +333,14 @@ end
 
 --- Show a menu.
 -- @param menu The menu to show.
--- @param keygrabber A boolean enabling or not the keyboard navigation.
-function show(menu, keygrabber)
+-- @param args.keygrabber A boolean enabling or not the keyboard navigation.
+-- @param args.coords Menu position defaulting to mouse.coords()
+function show(menu, args)
+    args = args or {}
     local screen_index = capi.mouse.screen
-    set_coords(menu, screen_index)
+    local keygrabber = args.keygrabber or false
+    local coords = args.coords or nil
+    set_coords(menu, screen_index, coords)
     for num, item in pairs(menu.items) do
         local wibox = item.wibox
         wibox.width = menu.w
@@ -358,12 +366,13 @@ end
 
 --- Toggle menu visibility.
 -- @param menu The menu to show if it's hidden, or to hide if it's shown.
--- @param keygrabber A boolean enabling or not the keyboard navigation.
-function toggle(menu, keygrabber)
+-- @param args.keygrabber A boolean enabling or not the keyboard navigation.
+-- @param args.coords Menu position {x,y}
+function toggle(menu, args)
     if menu.items[1] and menu.items[1].wibox.screen then
         menu:hide()
     else
-        menu:show(keygrabber)
+        menu:show(args)
     end
 end
 
