@@ -287,7 +287,7 @@ spawn_command(const gchar *command_line, GError **error)
  * \lparam The command to launch.
  * \lparam Use startup-notification, true or false, default to true.
  * \lparam The optional screen number to spawn the command on.
- * \lreturn Nothing if launch was successful, an error string otherwise.
+ * \lreturn Process ID if everything is OK, or an error string if an error occured.
  */
 int
 luaA_spawn(lua_State *L)
