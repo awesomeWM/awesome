@@ -259,20 +259,23 @@ spawn_launchee_timeout(struct ev_loop *loop, ev_timer *w, int revents)
  * g_spawn_async.
  * \return g_spawn_async value.
  */
-static gboolean
+static GPid
 spawn_command(const gchar *command_line, GError **error)
 {
     gboolean retval;
+    GPid pid;
     gchar **argv = 0;
 
     if(!g_shell_parse_argv(command_line, NULL, &argv, error))
-        return FALSE;
+        return 0;
 
     retval = g_spawn_async(NULL, argv, NULL, G_SPAWN_SEARCH_PATH,
-                           NULL, NULL, NULL, error);
+                           NULL, NULL, &pid, error);
     g_strfreev (argv);
 
-    return retval;
+    if (!retval)
+        return 0;
+    return pid;
 }
 
 /** Spawn a program.
@@ -344,7 +347,8 @@ luaA_spawn(lua_State *L)
     }
 
     GError *error = NULL;
-    if(!spawn_command(cmd, &error))
+    GPid pid = spawn_command(cmd, &error);
+    if(!pid)
     {
         /* push error on stack */
         lua_pushstring(L, error->message);
@@ -354,7 +358,10 @@ luaA_spawn(lua_State *L)
         return 1;
     }
 
-    return 0;
+    /* push pid on stack */
+    lua_pushnumber(L, pid);
+
+    return 1;
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
