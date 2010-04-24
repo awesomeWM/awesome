@@ -276,20 +276,23 @@ spawn_child_callback(gpointer user_data)
  * g_spawn_async.
  * \return g_spawn_async value.
  */
-static gboolean
+static GPid
 spawn_command(const gchar *command_line, GError **error)
 {
     gboolean retval;
+    GPid pid;
     gchar **argv = 0;
 
     if(!g_shell_parse_argv(command_line, NULL, &argv, error))
-        return FALSE;
+        return 0;
 
     retval = g_spawn_async(NULL, argv, NULL, G_SPAWN_SEARCH_PATH,
-                           spawn_child_callback, NULL, NULL, error);
+                           spawn_child_callback, NULL, &pid, error);
     g_strfreev (argv);
 
-    return retval;
+    if (!retval)
+        return 0;
+    return pid;
 }
 
 /** Spawn a program.
@@ -361,7 +364,8 @@ luaA_spawn(lua_State *L)
     }
 
     GError *error = NULL;
-    if(!spawn_command(cmd, &error))
+    GPid pid = spawn_command(cmd, &error);
+    if(!pid)
     {
         /* push error on stack */
         lua_pushstring(L, error->message);
@@ -371,7 +375,10 @@ luaA_spawn(lua_State *L)
         return 1;
     }
 
-    return 0;
+    /* push pid on stack */
+    lua_pushnumber(L, pid);
+
+    return 1;
 }
 
 /** Spawn a program. This works exactly as system() does, but clears the signal mask.
