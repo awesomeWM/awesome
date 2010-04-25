@@ -144,6 +144,7 @@ debugawsetbg() {
     echo
     echo $debugstory
     echo $sad_esetroot_story
+    echo $sad_display_story
     exit 0
 }
 
@@ -320,15 +321,26 @@ if [ "$setterfromcommandline" != true ]; then
     fi
     for wpsetter in $wpsetters; do
         if find_it $wpsetter; then
-            if [ ! "$wpsetter" = Esetroot ]; then
-                WPSETTER=$wpsetter
-                break
-            elif ldd `which Esetroot`|grep libImlib 2>&1 > /dev/null; then
-                WPSETTER=$wpsetter
-                break
-            else
-                sad_esetroot_story="I also found Esetroot, but it doesn't have support for setting wallpapers. You need to install libimlib2 and rebuild Eterm to get it working."
-            fi
+            case $wpsetter in
+                Esetroot)
+                    if ldd `which Esetroot`|grep libImlib 2>&1 > /dev/null; then
+                        WPSETTER=$wpsetter
+                        break
+                    else
+                        sad_esetroot_story="I also found Esetroot, but it doesn't have support for setting wallpapers. You need to install libimlib2 and rebuild Eterm to get it working."
+                    fi
+                    ;;
+                display)
+                    if find_it xwininfo; then
+                        WPSETTER=$wpsetter
+                        break
+                    else
+                        sad_display_story="I also found display, but I need xwininfo for querying the root window geometry."
+                    fi
+                    ;;
+                *)
+                    WPSETTER=$wpsetter
+            esac
         fi
     done
 fi
