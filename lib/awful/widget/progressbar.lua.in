@@ -170,7 +170,7 @@ local function update(pbar)
     pbar.widget.image = img
 end
 
--- Set the progressbar value.
+--- Set the progressbar value.
 -- @param pbar The progress bar.
 -- @param value The progress bar value between 0 and 1.
 function set_value(pbar, value)
