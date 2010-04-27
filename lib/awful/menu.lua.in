@@ -283,6 +283,7 @@ function clients(menu, args)
                                       tags.viewmore(c:tags(), c.screen)
                                   end
                                   capi.client.focus = c
+                                  c:raise()
                               end,
                               c.icon }
     end
