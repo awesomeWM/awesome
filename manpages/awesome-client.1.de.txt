@@ -1,0 +1,37 @@
+awesome-client(1)
+=================
+
+NAME
+----
+
+awesome-client - awesome Fenstermanager externe Befehlsschnittstelle
+
+SYNTAX
+-------
+
+awesome-client
+
+BESCHREIBUNG
+------------
+
+awesome-client ist eine externe Befehlsschnittstelle für awesome.
+Es kommuniziert über D-Bus mit awesome um die Möglichkeit zu bieten, Lua-Anweisungen von extern auszuführen.
+
+BENUTZUNG
+---------
+awesome-client liest Befehle von der Standard-Eingabe und sendet diese über D-BUS an awesome.
+Wenn 'rlwrap' installiert ist wird es benutzt, um eine readline-Kommandozeileneingabe zu ermöglichen.
+
+Das Modul 'awful.remote' muss geladen sein, um diesen Befehl zu benutzen.
+
+SIEHE AUCH
+----------
+awesome(1) awesomerc(5)
+
+AUTOREN
+-------
+Julien Danjou <julien@danjou.info>
+
+WWW
+---
+http://awesome.naquadah.org

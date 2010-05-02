@@ -1,0 +1,72 @@
+awsetbg(1)
+=========
+
+NAME
+----
+awsetbg - awesome Wrapper Werkzeug zum Setzen des Hintergrundbildes
+
+SYNTAX
+------
+*awsetbg* [-fctaFCTA Hintergrundbild] [-uU Hintergrundbildsetzer] [-m #] [-bB fbsetrootoptionen ...] [-rR Pfad] [-l]
+
+BESCHREIBUNG
+------------
+*awsetbg* ist ein Wrapper, welches versucht eine passende Anwendung zum Setzen des Hintergrundbildes zu finden und setzt über diese Anwendung das Hintergrundbild. Sie müssen *awsetbg* dabei nicht konfigurieren, da es lediglich die erst beste Anwendung nutzt um das Hintergrundbild zu setzen.
+
+Des Weiteren merkt es sich das zuletzt gesetzte Hintergrundbild. Auf
+diese Weise muss nichts geändert werden um das Hintergrundbild zu
+ändern.
+
+OPTIONEN
+--------
+*-f* Datei::
+    Das Vollbild Hintergrundbild.
+*-c* Datei::
+    Das zentrierte Hintergrundbild.
+*-t* Datei::
+    Das geteilte Hintergrundbild.
+*-a* Datei::
+    Setzt das vergrößerte Hintergrundbild unter Berücksichtigung der Seitenverhältnisse. Wenn die gewählte Anwendung diese Option nicht unterstützt, wird auf Vollbild zurückgegriffen.
+*-u* Hintergrundbildsetzer::
+    Benutzt die angegebene Anwendung um das Hintergrundbild zu setzen.
+*-r* Verzeichnis::
+    Setze ein beliebiges Hintergrundbild aus diesem Verzeichnis.
+*-F, -C, -T, -A, -U, -R*::
+    Identisch mit den klein geschriebenen Optionen, allerdings ohne zukünftige Speicherung.
+*-l*::
+    Setzt das zuletzt verwendete Hintergrundbild. Wenn zuletzt ein beliebiges Hintergrundbild verwendet wurde, wird wieder ein beliebiges Hintergrundbild aus dem gleichen Verzeichnis verwendet.
+*-i*::
+    Zeigt nützliche Informationen über die passendste Anwendung zum Setzen des Hintergrundbildes an.
+*-m #*::
+    Benutzt montage um ein großes Bild zu erstellen (das Bild sollte in die Bildschirmgröße passen). Benötigt montage(1).
+    # ist die Anzahl der Bildschirmen (Spalten in montage).
+*-p*::
+    Zeige nützliche Tipps.
+*-h*::
+    Zeige die Hilfe.
+
+DATEIEN
+-------
+$XDG_CACHE_HOME/awesome/lastwallpaper oder $HOME/.cache/awesome/lastwallpaper
+Dateien beinhalten das letzte Hintrgrundbild, welches mit der Option -l genutzt wird.
+
+UMGEBUNGSVARIABLEN
+------------------
+*wpsetters*::
+    Programm zum setzen des Hintergrundes.
+*DISPLAY*::
+    Anzeige auf der das Hintergrundbild gezeigt werden soll.
+
+SIEHE AUCH
+----------
+awesome(1)
+
+
+AUTOREN
+-------
+Julien Danjou <julien@danjou.info> und andere.
+awsetbg stammt von fbsetbg ab, welches von Han Boetes <han@fluxbox.org> geschrieben wurde.
+
+WWW
+---
+http://awesome.naquadah.org
