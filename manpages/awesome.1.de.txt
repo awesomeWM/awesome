@@ -1,0 +1,174 @@
+awesome(1)
+==========
+
+NAME
+----
+
+awesome - awesome Fenstermanager
+
+SYNTAX
+--------
+
+*awesome* [*-v* | *--version*] [*-h* | *--help*] [*-c* | *--config* 'Datei'] [*-k* | *--check*]
+
+BESCHREIBUNG
+-----------
+
+*awesome* ist ein Fenstermanager für X. Er verwaltet Fenster in verschiedenen Anordnungen, wie etwa überlappend oder geteilt. Jede Anordnung kann dynamisch angewendet werden, wodurch eine optimale Anpassung an die aktuelle Anwendung und die entsprechende Tätigkeit vorgenommen werden kann.
+
+In einer geteilten Anordnung werden Fenster in einer Haupt- und einer Stackanordnung abgebildet. Das Hauptfenster ist das Fenster, welches die meiste Aufmerksamkeit benötigt, hingegen beinhaltet der Stack alle weiteren Fenster. In einer überlappenden Anordnung können Fenster beliebig vergrößert und verschoben werden. Dialog-Fenster werden immer als überlappend behandelt, unabhängig von der aktuellen Anordnung. Die spiralförmige und die vermindernde Anordnung sind Spezialfälle der geteilten Anordnung, wobei die Stack-Fläche als Spirale für die obersten oder als rechteckiges Fraktal für die untersten dient.
+
+Fenster sind durch Bezeichner (Tags) in awesome gruppiert. Jedes Fenster kann mit einem oder mehreren Bezeichnern versehen werden. Bei der Auswahl eines Bezeichners werden dabei alle Fenster angezeigt, die mit diesem Bezeichner markiert wurden.
+
+*awesome* kann kleine Wiboxes beinhalten, welche zur Anzeige von beliebigen Inhalt dienen können, wie etwa:
+Alle verfügbaren Bezeichner, die aktuelle Anordnung, der Titel eines sichtbaren Fenster, Text, etc.
+
+OPTIONEN
+-------
+*-v*, *--version*::
+    Gibt die Versionsinformationen auf der Standard-Ausgabe aus.
+*-h*, *--help*::
+    Gibt die Hilfe aus.
+*-c*, *--config* 'Datei'::
+    Nutzung einer alternativen Konfigurationsdatei, statt '$XDG_CONFIG_HOME/awesome/rc.lua'.
+*-k*, *--check*::
+    Überprüft die Syntax der Konfigurationsdatei.
+
+TASTENBELEGUNG FÜR MAUSZEIGER
+-----------------------------
+Navigation
+~~~~~~~~~~
+
+*Button1* auf Bezeichner::
+    Bezeichner anzeigen.
+*Button4*, *Button5* auf Bezeichner::
+    Wechsel zum vorhergehenden oder nächsten Bezeichner.
+*Button4*, *Button5* auf Root-Fenster::
+    Wechsel zum vorhergehenden oder nächsten Bezeichner.
+*Button1*, *Button3*, *Button4*, *Button5* auf Anordnungssymbol::
+    Wechsel zur vorhergehenden oder nächsten Anordnung.
+
+Veränderung der Anordnung
+~~~~~~~~~~~~~~~~~~~~~~~~~
+*Mod4 + Button1* auf Bezeichner::
+    Aktuelles Fenster nur mit diesem Bezeichner markieren.
+*Mod4 + Button3* auf Bezeichner::
+    Wechsel des Bezeichners für das aktuelle Fenster.
+*Button3* auf Bezeichner::
+    Bezeichner in die aktuelle Ansicht mit aufnehmen.
+*Mod4 + Button1* auf Fenster::
+    Fenster bewegen.
+*Mod4 + Button3* auf Fenster::
+    Fenster vergrößern.
+
+TASTENKÜRZEL
+------------
+Fenstermanager kontrollieren
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*Mod4 + Control + r*::
+    *awesome* neu starten.
+*Mod4 + Shift + q*::
+    *awesome* beenden.
+*Mod4 + r*::
+    Eingabeaufforderung.
+*Mod4 + x*::
+    Lua-Code Eingabeaufforderung.
+*Mod4 + Return*::
+    Konsolenemulator starten.
+*Mod4 + w*::
+    Hauptmenü öffnen.
+
+Fenster
+~~~~~~~
+*Mod4 + m*::
+    Fenster maximieren.
+*Mod4 + n*::
+    Fenster minimieren.
+*Mod4 + f*::
+    Fenster auf Vollbild setzen.
+*Mod4 + Shift + c*::
+    Aktuelles Fenster beenden.
+*Mod4 + t*::
+    Fenster auf oberste Ebene setzen.
+
+Navigation
+~~~~~~~~~~
+*Mod4 + j*::
+    Fokus auf das nächste Fenster legen.
+*Mod4 + k*::
+    Fokus auf das vorhergehende Fenster legen.
+*Mod4 + u*::
+    Fokus auf das erste dringliche Fenster legen.
+*Mod4 + Left*::
+    Anzeige des vorhergehenden Bezeichners.
+*Mod4 + Right*::
+    Anzeige des nächsten Bezeichners.
+*Mod4 + 1-9*::
+    Wechsel zwischen den Bezeichnern 1-9.
+*Mod4 + Control + j*::
+    Fokus auf den nächsten Bildschirm legen.
+*Mod4 + Control + k*::
+    Fokus auf den vorhergehenden Bildschirm legen.
+*Mod4 + Escape*::
+    Fokus auf den zuvor gewählten Bezeichner legen.
+
+Anordnungsänderung
+~~~~~~~~~~~~~~~~~~
+*Mod4 + Shift + j*::
+    Wechsel zwischen aktuellem und nächstem Fenster
+*Mod4 + Shift + k*::
+    Wechsel zwischen aktuellem und vorhergehenden Fenster.
+*Mod4 + o*::
+    Verschiebe Fenster auf den nächsten Bildschirm.
+*Mod4 + h*::
+    Erniedrige Breite des Hauptfensters um 5%.
+*Mod4 + l*::
+    Erhöhe die Breite des Hauptfensters um 5%.
+*Mod4 + Shift + h*::
+    Erhöhe die Anzahl der Hauptfenster um 1.
+*Mod4 + Shift + l*::
+    Erniedrige die Anzahl der Hauptfenster um 1.
+*Mod4 + Control + h*::
+    Erhöhe die Anzahl der Spalten für Nicht-Hauptfenster um 1.
+*Mod4 + Control + l*::
+    Erniedrige die Anzahl der Spalten für Nicht-Hauptfenster um 1.
+*Mod4 + space*::
+    Wechsel zur nächsten Anordnung.
+*Mod4 + Shift + space*::
+    Wechsel zur vorhergehenden Anordnung.
+*Mod4 + Control + space*::
+    Überlappen aktivieren/deaktivieren.
+*Mod4 + Control + Return*::
+    Wechsel des Haupt mit dem Stack-Fenster.
+*Mod4 + Control + 1-9*::
+    Wechsel der Bezeichneransicht.
+*Mod4 + Shift + 1-9*::
+    Markiere Fenster mit Bezeichner.
+*Mod4 + Shift + Control + 1-9*::
+    Wechsel des Bezeichners des Fensters.
+*Mod4 + Shift + F1-9*::
+    Markiere aktives Fenster mit Bezeichner.
+
+ANPASSUNG
+---------
+*awesome* kann durch die Erstellung einer '$XDG_CONFIG_HOME/awesome/rc.lua' Konfigurationsdatei angepasst werden.
+
+SIGNALE
+-------
+*awesome* kann durch das senden eines SIGHUP neu gestartet werden.
+
+SIEHE AUCH
+----------
+*awesomerc*(5) *awesome-client*(1)
+
+FEHLER
+------
+Natürlich gibt es keine Fehler in *awesome*. Dennoch können unerwartete Ereignisse auftreten.
+
+AUTOREN
+-------
+Julien Danjou <julien@danjou.info> und andere.
+
+WWW
+---
+http://awesome.naquadah.org
