@@ -13,7 +13,7 @@ then
 else
     if [ "$BASH" ]
     then
-        READ_PARAMETERS=" -e"
+        READ_OPTIONS=" -e"
     fi
 fi
 
@@ -41,7 +41,7 @@ a_dbus_send()
         $DBUS_METHOD string:"$1" | tail -n +2
 }
 
-while read ${USE_READLINE} ${READ_OPTIONS} line
+while read ${READ_OPTIONS} line
 do
     a_dbus_send "$line"
 done
