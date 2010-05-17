@@ -340,6 +340,7 @@ if [ "$setterfromcommandline" != true ]; then
                     ;;
                 *)
                     WPSETTER=$wpsetter
+                    break
             esac
         fi
     done
