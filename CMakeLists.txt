@@ -326,9 +326,9 @@ install(FILES ${AWE_CONF_FILE_DEFAULT} DESTINATION ${AWESOME_SYSCONFDIR}
         RENAME ${AWE_CONF_FILE})
 if(GENERATE_MANPAGES)
     if(COMPRESS_MANPAGES)
-        set(regex "\\.(xml|[0-9])$")
+        set(regex "\\.(xml|txt|[0-9])$")
     else()
-        set(regex "\\.(xml|gz)$")
+        set(regex "\\.(xml|txt|gz)$")
     endif()
     install(DIRECTORY ${BUILD_DIR}/${relpath}/ DESTINATION ${AWESOME_MAN_PATH}
             REGEX ${regex} EXCLUDE )
