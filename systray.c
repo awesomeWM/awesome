@@ -27,6 +27,8 @@
 #include "systray.h"
 #include "window.h"
 #include "widget.h"
+#include "wibox.h"
+#include "common/array.h"
 #include "common/atoms.h"
 #include "common/xutil.h"
 
@@ -38,12 +40,57 @@
 void
 systray_init(int phys_screen)
 {
+    xcb_screen_t *xscreen = xutil_screen_get(globalconf.connection, phys_screen);
+
+    globalconf.screens.tab[phys_screen].systray.window = xcb_generate_id(globalconf.connection);
+    xcb_create_window(globalconf.connection, xscreen->root_depth,
+                      globalconf.screens.tab[phys_screen].systray.window,
+                      xscreen->root,
+                      -1, -1, 1, 1, 0,
+                      XCB_COPY_FROM_PARENT, xscreen->root_visual, 0, NULL);
+}
+
+
+/** Refresh all systrays registrations per physical screen
+ */
+void
+systray_refresh()
+{
+    bool has_systray;
+    int nscreen = xcb_setup_roots_length(xcb_get_setup(globalconf.connection));
+
+    for(int phys_screen = 0; phys_screen < nscreen; phys_screen++)
+    {
+        has_systray = false;
+        foreach(w, globalconf.wiboxes)
+            if(phys_screen == (*w)->ctx.phys_screen)
+                has_systray |= (*w)->has_systray;
+
+        if(has_systray)
+            systray_register(phys_screen);
+        else
+            systray_cleanup(phys_screen);
+    }
+}
+
+
+/** Register systray in X.
+ * \param phys_screen Physical screen.
+ */
+void
+systray_register(int phys_screen)
+{
     xcb_client_message_event_t ev;
     xcb_screen_t *xscreen = xutil_screen_get(globalconf.connection, phys_screen);
     char *atom_name;
     xcb_intern_atom_cookie_t atom_systray_q;
     xcb_intern_atom_reply_t *atom_systray_r;
     xcb_atom_t atom_systray;
+
+    /* Set registered even if it fails to don't try again unless forced */
+    if(globalconf.screens.tab[phys_screen].systray.registered)
+        return;
+    globalconf.screens.tab[phys_screen].systray.registered = true;
 
     /* Send requests */
     if(!(atom_name = xcb_atom_name_by_screen("_NET_SYSTEM_TRAY", phys_screen)))
@@ -56,13 +103,6 @@ systray_init(int phys_screen)
                                                a_strlen(atom_name), atom_name);
 
     p_delete(&atom_name);
-
-    globalconf.screens.tab[phys_screen].systray.window = xcb_generate_id(globalconf.connection);
-    xcb_create_window(globalconf.connection, xscreen->root_depth,
-                      globalconf.screens.tab[phys_screen].systray.window,
-                      xscreen->root,
-                      -1, -1, 1, 1, 0,
-                      XCB_COPY_FROM_PARENT, xscreen->root_visual, 0, NULL);
 
     /* Fill event */
     p_clear(&ev, 1);
@@ -100,6 +140,10 @@ systray_cleanup(int phys_screen)
 {
     xcb_intern_atom_reply_t *atom_systray_r;
     char *atom_name;
+
+    if(!globalconf.screens.tab[phys_screen].systray.registered)
+        return;
+    globalconf.screens.tab[phys_screen].systray.registered = false;
 
     if(!(atom_name = xcb_atom_name_by_screen("_NET_SYSTEM_TRAY", phys_screen))
        || !(atom_systray_r = xcb_intern_atom_reply(globalconf.connection,

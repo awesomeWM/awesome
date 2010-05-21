@@ -94,6 +94,8 @@ struct wibox_t
         /** The window's content and border */
         image_t *bounding;
     } shape;
+    /** Has wibox an attached systray **/
+    bool has_systray;
 };
 
 void wibox_unref_simplified(wibox_t **);

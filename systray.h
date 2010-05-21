@@ -26,6 +26,8 @@
 #include "common/xembed.h"
 
 void systray_init(int);
+void systray_refresh(void);
+void systray_register(int);
 void systray_cleanup(int);
 int systray_request_handle(xcb_window_t, int, xembed_info_t *);
 bool systray_iskdedockapp(xcb_window_t);
