@@ -22,6 +22,7 @@
 #ifndef AWESOME_EVENT_H
 #define AWESOME_EVENT_H
 
+#include "systray.h"
 #include "objects/wibox.h"
 #include "objects/client.h"
 
@@ -30,6 +31,7 @@ awesome_refresh(void)
 {
     banning_refresh();
     wibox_refresh();
+    systray_refresh();
     stack_refresh();
     return xcb_flush(globalconf.connection);
 }

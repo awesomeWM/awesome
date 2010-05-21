@@ -412,6 +412,8 @@ wibox_map(wibox_t *wibox)
 static void
 wibox_systray_refresh(wibox_t *wibox)
 {
+    wibox->has_systray = false;
+
     if(!wibox->screen)
         return;
 
@@ -425,6 +427,8 @@ wibox_systray_refresh(wibox_t *wibox)
             uint32_t config_win_vals_off[2] = { -512, -512 };
             xembed_window_t *em;
             int phys_screen = wibox->ctx.phys_screen;
+
+            wibox->has_systray = true;
 
             if(wibox->visible
                && systray->widget->isvisible
