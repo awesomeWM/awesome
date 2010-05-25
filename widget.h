@@ -54,8 +54,6 @@ struct widget_t
     bool isvisible;
 };
 
-void widget_node_delete(widget_node_t *);
-
 struct widget_node
 {
     /** The widget object */
@@ -63,7 +61,7 @@ struct widget_node
     /** The geometry where the widget was drawn */
     area_t geometry;
 };
-DO_ARRAY(widget_node_t, widget_node, widget_node_delete)
+DO_ARRAY(widget_node_t, widget_node, DO_NOTHING)
 
 widget_t *widget_getbycoords(orientation_t, widget_node_array_t *, int, int, int16_t *, int16_t *);
 void widget_render(wibox_t *);

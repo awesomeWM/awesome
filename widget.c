@@ -49,15 +49,6 @@ luaA_widget_gc(lua_State *L)
     return luaA_object_gc(L);
 }
 
-/** Delete a widget node structure.
- * \param node The node to destroy.
- */
-void
-widget_node_delete(widget_node_t *node)
-{
-    luaA_object_unref(globalconf.L, node->widget);
-}
-
 /** Get a widget node from a wibox by coords.
  * \param orientation Wibox orientation.
  * \param widgets The widget list.
@@ -100,16 +91,18 @@ widget_getbycoords(orientation_t orientation, widget_node_array_t *widgets,
 
 /** Convert a Lua table to a list of widget nodes.
  * \param L The Lua VM state.
+ * \param idx Index of the table where to store the widgets references.
  * \param widgets The linked list of widget node.
  */
 static void
-luaA_table2widgets(lua_State *L, widget_node_array_t *widgets)
+luaA_table2widgets(lua_State *L, int idx, widget_node_array_t *widgets)
 {
     if(lua_istable(L, -1))
     {
+        int table_idx = luaA_absindex(L, idx);
         lua_pushnil(L);
         while(luaA_next(L, -2))
-            luaA_table2widgets(L, widgets);
+            luaA_table2widgets(L, table_idx, widgets);
         /* remove the table */
         lua_pop(L, 1);
     }
@@ -120,7 +113,7 @@ luaA_table2widgets(lua_State *L, widget_node_array_t *widgets)
         {
             widget_node_t w;
             p_clear(&w, 1);
-            w.widget = luaA_object_ref(L, -1);
+            w.widget = luaA_object_ref_item(L, idx, -1);
             widget_node_array_append(widgets, w);
         }
         else
@@ -197,17 +190,19 @@ widget_geometries(wibox_t *wibox)
          * or the wibox size, depending on which is less.
          */
 
-        widget_node_array_t *widgets = &wibox->widgets;
-        widget_node_array_wipe(widgets);
-        widget_node_array_init(widgets);
-
         /* push wibox */
         luaA_object_push(globalconf.L, wibox);
+
+        widget_node_array_t *widgets = &wibox->widgets;
+        wibox_widget_node_array_wipe(globalconf.L, -1);
+        widget_node_array_init(widgets);
+
         /* push widgets table */
         luaA_object_push_item(globalconf.L, -1, wibox->widgets_table);
+        /* Convert widgets table */
+        luaA_table2widgets(globalconf.L, -2, widgets);
         /* remove wibox */
-        lua_remove(globalconf.L, -2);
-        luaA_table2widgets(globalconf.L, widgets);
+        lua_remove(globalconf.L, -1);
 
         lua_newtable(globalconf.L);
         for(int i = 0; i < widgets->len; i++)
@@ -297,15 +292,17 @@ widget_render(wibox_t *wibox)
 
     widget_node_array_t *widgets = &wibox->widgets;
 
-    widget_node_array_wipe(widgets);
-    widget_node_array_init(widgets);
     /* push wibox */
     luaA_object_push(globalconf.L, wibox);
+
+    wibox_widget_node_array_wipe(globalconf.L, -1);
+    widget_node_array_init(widgets);
+
     /* push widgets table */
     luaA_object_push_item(globalconf.L, -1, wibox->widgets_table);
+    luaA_table2widgets(L, -2, widgets);
     /* remove wibox */
-    lua_remove(globalconf.L, -2);
-    luaA_table2widgets(L, widgets);
+    lua_remove(globalconf.L, -1);
 
     /* get computed geometries */
     for(unsigned int i = 0; i < lua_objlen(L, -1); i++)
