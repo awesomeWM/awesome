@@ -84,6 +84,7 @@ struct wibox_t
 void wibox_unref_simplified(wibox_t **);
 
 ARRAY_FUNCS(wibox_t *, wibox, wibox_unref_simplified)
+void wibox_widget_node_array_wipe(lua_State *, int);
 
 void wibox_refresh(void);
 

@@ -76,6 +76,20 @@ luaA_wibox_gc(lua_State *L)
     return luaA_object_gc(L);
 }
 
+/** Wipe an array of widget_node. Release references to widgets.
+ * \param L The Lua VM state.
+ * \param idx The index of the wibox on the stack.
+ */
+void
+wibox_widget_node_array_wipe(lua_State *L, int idx)
+{
+    wibox_t *wibox = luaA_checkudata(L, idx, &wibox_class);
+    foreach(widget_node, wibox->widgets)
+        luaA_object_unref_item(globalconf.L, idx, widget_node);
+    widget_node_array_wipe(&wibox->widgets);
+}
+
+
 void
 wibox_unref_simplified(wibox_t **item)
 {
