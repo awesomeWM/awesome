@@ -52,6 +52,22 @@ function move(new_index, target_tag)
     capi.screen[scr]:tags(tmp_tags)
 end
 
+--- Add a tag.
+-- @param name The tag name, a string
+-- @param props The tags properties, a table
+-- @return The created tag
+function add(name, props)
+    local properties = props or {}
+    local newtag = capi.tag{name = name}
+    newtag.screen = properties.screen or capi.mouse.screen
+
+    for k, v in pairs(properties) do
+        setproperty(newtag, k, v)
+    end
+
+    return newtag
+end
+
 --- Create a set of tags and attach it to a screen.
 -- @param names The tag name, in a table
 -- @param screen The tag screen, or 1 if not set.
@@ -61,14 +77,15 @@ function new(names, screen, layout)
     local screen = screen or 1
     local tags = {}
     for id, name in ipairs(names) do
-        tags[#tags + 1] = capi.tag { name = name }
-        tags[#tags].screen = screen
+        table.insert(tags, id, add(name, {screen = screen,
+                                            layout = (layout and layout[id]) or
+                                                        layout}))
         -- Select the first tag.
         if id == 1 then
-            tags[#tags].selected = true
+            tags[id].selected = true
         end
-        setproperty(tags[#tags], "layout", layout and (layout[#tags] or layout[1]) or layout)
     end
+
     return tags
 end
 
