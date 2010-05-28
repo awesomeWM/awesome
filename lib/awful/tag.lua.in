@@ -259,6 +259,20 @@ function viewidx(i, screen)
     capi.screen[screen]:emit_signal("tag::history::update")
 end
 
+--- Get a tag's index in the screen[]:tags() table.
+-- @param query_tag The tag object to find. [selected()]
+-- @return The index of the tag, nil if the tag is not found.
+function getidx(query_tag)
+    local query_tag = query_tag or selected()
+    if query_tag == nil then return end
+
+    for i, t in ipairs(capi.screen[query_tag.screen]:tags()) do
+        if t == query_tag then
+            return i
+        end
+    end
+end
+
 --- View next tag. This is the same as tag.viewidx(1).
 -- @param screen The screen number.
 function viewnext(screen)
