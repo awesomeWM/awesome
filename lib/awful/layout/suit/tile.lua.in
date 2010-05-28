@@ -63,10 +63,10 @@ local function tile_group(cls, wa, orientation, fact, group)
         geom[x] = group.coord
         geom[y] = coord
         geom = cls[c]:geometry(geom)
-        coord = coord + geom[height]
-        unused = unused - geom[height]
+        coord = coord + geom[height] + cls[c].border_width * 2
+        unused = unused - geom[height] - cls[c].border_width * 2
         total_fact = total_fact - fact[i]
-        used_size = math.max(used_size, geom[width])
+        used_size = math.max(used_size, geom[width]) + cls[c].border_width * 2
     end
 
     return used_size
