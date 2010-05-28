@@ -30,6 +30,28 @@ data.tags = setmetatable({}, { __mode = 'k' })
 history = {}
 history.limit = 20
 
+--- Move a tag to an absolute position in the screen[]:tags() table.
+-- @param new_index Integer absolute position in the table to insert.
+function move(new_index, target_tag)
+    local target_tag = target_tag or selected()
+    local scr = target_tag.screen
+    local tmp_tags = capi.screen[scr]:tags()
+
+    if (not new_index) or (new_index < 1) or (new_index > #tmp_tags) then
+        return
+    end
+
+    for i, t in ipairs(tmp_tags) do
+        if t == target_tag then
+            table.remove(tmp_tags, i)
+            break
+        end
+    end
+
+    table.insert(tmp_tags, new_index, target_tag)
+    capi.screen[scr]:tags(tmp_tags)
+end
+
 --- Create a set of tags and attach it to a screen.
 -- @param names The tag name, in a table
 -- @param screen The tag screen, or 1 if not set.
