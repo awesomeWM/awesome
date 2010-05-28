@@ -38,7 +38,13 @@ local function spiral(p, spiral)
             wa.y = wa.y + wa.height
         end
 
-        c:geometry(wa)
+        local g = {
+            x = wa.x,
+            y = wa.y,
+            width = wa.width - 2 * c.border_width,
+            height = wa.height - 2 * c.border_width
+        }
+        c:geometry(g)
     end
 end
 

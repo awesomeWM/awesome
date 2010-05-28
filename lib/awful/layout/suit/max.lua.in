@@ -21,7 +21,13 @@ local function fmax(p, fs)
     end
 
     for k, c in pairs(p.clients) do
-        c:geometry(area)
+        local g = {
+            x = area.x,
+            y = area.y,
+            width = area.width - c.border_width * 2,
+            height = area.height - c.border_width * 2
+        }
+        c:geometry(g)
     end
 end
 

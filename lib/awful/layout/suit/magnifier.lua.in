@@ -55,7 +55,14 @@ function arrange(p)
         geometry.width = area.width
         geometry.height = area.height
     end
-    focus:geometry(geometry)
+
+    local g = {
+        x = geometry.x,
+        y = geometry.y,
+        width = geometry.width - focus.border_width * 2,
+        height = geometry.height - focus.border_width * 2
+    }
+    focus:geometry(g)
     focus:raise()
 
     if #cls > 1 then
@@ -83,7 +90,13 @@ function arrange(p)
         -- Then move clients that are after focused client.
         -- So the next focused window will be the one at the top of the screen.
         for k = 1, fidx - 1 do
-            cls[k]:geometry(geometry)
+            local g = {
+                x = geometry.x,
+                y = geometry.y,
+                width = geometry.width - cls[k].border_width * 2,
+                height = geometry.height - cls[k].border_width * 2
+            }
+            cls[k]:geometry(g)
             geometry.y = geometry.y + geometry.height
         end
     end

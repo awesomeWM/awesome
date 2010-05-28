@@ -58,8 +58,8 @@ local function tile_group(cls, wa, orientation, fact, group)
     local unused = wa[height]
     for c = group.first,group.last do
         local i = c - group.first +1
-        geom[width] = size
-        geom[height] = math.floor(unused * fact[i] / total_fact)
+        geom[width] = size - cls[c].border_width * 2
+        geom[height] = math.floor(unused * fact[i] / total_fact) - cls[c].border_width * 2
         geom[x] = group.coord
         geom[y] = coord
         geom = cls[c]:geometry(geom)

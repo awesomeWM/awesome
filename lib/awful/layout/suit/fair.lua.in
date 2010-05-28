@@ -34,7 +34,6 @@ local function fair(p, orientation)
 
                 g.x = wa.x + cell * g.width
                 g.y = wa.y + strip * g.height
-
             else
                 if #cls < (strips * cells) and strip == strips - 1 then
                     g.height = wa.height / (cells - ((strips * cells) - #cls))
@@ -47,6 +46,8 @@ local function fair(p, orientation)
                 g.y = wa.y + cell * g.height
             end
 
+            g.width = g.width - c.border_width * 2
+            g.height = g.height - c.border_width * 2
             c:geometry(g)
 
             cell = cell + 1
