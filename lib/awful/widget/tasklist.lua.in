@@ -42,9 +42,9 @@ local function tasklist_label(c, args)
     if c.maximized_horizontal then name = name .. '⬌' end
     if c.maximized_vertical then name = name .. "⬍" end
     if c.minimized then
-        name = name .. util.escape(c.icon_name) or util.escape(c.name) or util.escape("<untitled>")
+        name = name .. (util.escape(c.icon_name) or util.escape(c.name) or util.escape("<untitled>"))
     else
-        name = name .. util.escape(c.name) or util.escape("<untitled>")
+        name = name .. (util.escape(c.name) or util.escape("<untitled>"))
     end
     if capi.client.focus == c then
         bg = bg_focus
