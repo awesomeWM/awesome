@@ -6,6 +6,7 @@
 
 -- Grab environment we need
 local util = require("awful.util")
+local tostring = tostring
 local pairs = pairs
 local ipairs = ipairs
 local table = table
