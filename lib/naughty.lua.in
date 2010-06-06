@@ -460,7 +460,7 @@ if capi.dbus then
             if title ~= "" then
                 args.text = title
             else
-                return nil
+                return
             end
         end
         local score = 0
