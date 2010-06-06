@@ -279,8 +279,11 @@ a_dbus_convert_value(lua_State *L, int idx, DBusMessageIter *iter)
             int arraylen = lua_objlen(L, idx + 1);
 
             if(arraylen % 2 != 0)
-                luaL_error(globalconf.L,
-                           "your D-Bus signal handling method returned wrong number of arguments");
+            {
+                luaA_warn(globalconf.L,
+                          "your D-Bus signal handling method returned wrong number of arguments");
+                return;
+            }
 
             /* Push the array */
             lua_pushvalue(L, idx + 1);
@@ -339,7 +342,7 @@ a_dbus_convert_value(lua_State *L, int idx, DBusMessageIter *iter)
 
 /** Process a single request from D-Bus
  * \param dbus_connection  The connection to the D-Bus server.
- * \param msg  The D-Bus message request being sent to the D-Bus connection.
+ * \param msg The D-Bus message request being sent to the D-Bus connection.
  */
 static void
 a_dbus_process_request(DBusConnection *dbus_connection, DBusMessage *msg)
@@ -417,14 +420,22 @@ a_dbus_process_request(DBusConnection *dbus_connection, DBusMessage *msg)
             dbus_message_iter_init_append(reply, &iter);
 
             if(n % 2 != 0)
-                luaL_error(globalconf.L,
-                           "your D-Bus signal handling method returned wrong number of arguments");
+            {
+                luaA_warn(globalconf.L,
+                          "your D-Bus signal handling method returned wrong number of arguments");
+                /* Remove returned values from the stack */
+                lua_pop(L, - n);
+                return;
+            }
 
             /* i is negative */
             for(int i = n; i < 0; i += 2)
             {
                 if(!a_dbus_convert_value(globalconf.L, i, &iter))
-                    luaL_error(globalconf.L, "your D-Bus signal handling method returned bad data");
+                {
+                    luaA_warn(globalconf.L, "your D-Bus signal handling method returned bad data");
+                    return;
+                }
 
                 lua_remove(globalconf.L, i);
                 lua_remove(globalconf.L, i + 1);
