@@ -282,7 +282,7 @@ a_dbus_convert_value(lua_State *L, int idx, DBusMessageIter *iter)
             {
                 luaA_warn(globalconf.L,
                           "your D-Bus signal handling method returned wrong number of arguments");
-                return;
+                return false;
             }
 
             /* Push the array */
@@ -424,7 +424,7 @@ a_dbus_process_request(DBusConnection *dbus_connection, DBusMessage *msg)
                 luaA_warn(globalconf.L,
                           "your D-Bus signal handling method returned wrong number of arguments");
                 /* Remove returned values from the stack */
-                lua_pop(L, - n);
+                lua_pop(globalconf.L, - n);
                 return;
             }
 
