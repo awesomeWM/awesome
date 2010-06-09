@@ -358,18 +358,19 @@ event_handle_destroynotify(void *data __attribute__ ((unused)),
  */
 static void
 event_handle_widget_motionnotify(wibox_t *wibox,
-                                 widget_t **mouse_over,
                                  widget_t *widget)
 {
-    if(widget != *mouse_over)
+    if(widget != wibox->mouse_over)
     {
-        if(*mouse_over)
+        if(wibox->mouse_over)
         {
             /* Emit mouse leave signal on old widget:
              * - Push wibox.*/
             luaA_object_push(globalconf.L, wibox);
             /* - Push the widget the mouse was on */
-            luaA_object_push_item(globalconf.L, -1, *mouse_over);
+            luaA_object_push_item(globalconf.L, -1, wibox->mouse_over);
+            /* - Invert wibox/widget */
+            lua_insert(globalconf.L, -2);
             /* - Emit the signal mouse::leave with the wibox as argument */
             luaA_object_emit_signal(globalconf.L, -2, "mouse::leave", 1);
             /* - Remove the widget */
@@ -377,8 +378,7 @@ event_handle_widget_motionnotify(wibox_t *wibox,
 
             /* Re-push wibox */
             luaA_object_push(globalconf.L, wibox);
-            luaA_object_unref_item(globalconf.L, -1, *mouse_over);
-            *mouse_over = NULL;
+            luaA_object_unref_item(globalconf.L, -1, wibox->mouse_over);
             /* Remove the wibox */
             lua_pop(globalconf.L, 1);
         }
@@ -393,9 +393,6 @@ event_handle_widget_motionnotify(wibox_t *wibox,
             /* - Reference the widget into the wibox */
             luaA_object_ref_item(globalconf.L, -2, -1);
 
-            /* Store that this widget was the one with the mouse over */
-            *mouse_over = widget;
-
             /* Emit mouse::enter signal on new widget:
              * - Push the widget */
             luaA_object_push_item(globalconf.L, -1, widget);
@@ -407,6 +404,10 @@ event_handle_widget_motionnotify(wibox_t *wibox,
             /* - Remove the widget from the stack */
             lua_pop(globalconf.L, 1);
         }
+
+        /* Store that this widget was the one with the mouse over */
+        wibox->mouse_over = widget;
+
     }
 }
 
@@ -431,8 +432,8 @@ event_handle_motionnotify(void *data __attribute__ ((unused)),
                                          wibox->geometry.width,
                                          wibox->geometry.height,
                                          &ev->event_x, &ev->event_y);
-        if(w)
-            event_handle_widget_motionnotify(wibox, &wibox->mouse_over, w);
+
+        event_handle_widget_motionnotify(wibox, w);
     }
 
     return 0;
@@ -474,6 +475,8 @@ event_handle_leavenotify(void *data __attribute__ ((unused)),
             luaA_object_push(globalconf.L, wibox);
             /* Push the widget the mouse is over in this wibox */
             luaA_object_push_item(globalconf.L, -1, wibox->mouse_over);
+            /* Move the widget before the wibox */
+            lua_insert(globalconf.L, -2);
             /* Emit mouse::leave signal on widget the mouse was over with
              * its wibox as argument */
             luaA_object_emit_signal(globalconf.L, -2, "mouse::leave", 1);
@@ -512,8 +515,8 @@ event_handle_enternotify(void *data __attribute__ ((unused)),
                                          wibox->geometry.width,
                                          wibox->geometry.height,
                                          &ev->event_x, &ev->event_y);
-        if(w)
-            event_handle_widget_motionnotify(wibox, &wibox->mouse_over, w);
+
+        event_handle_widget_motionnotify(wibox, w);
 
         luaA_object_push(globalconf.L, wibox);
         luaA_object_emit_signal(globalconf.L, -1, "mouse::enter", 0);
