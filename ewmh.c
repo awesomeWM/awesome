@@ -444,6 +444,8 @@ ewmh_client_update_desktop(client_t *c)
                                 c->window, _NET_WM_DESKTOP, CARDINAL, 32, 1, &i);
             return;
         }
+    /* It doesn't have any tags, remove the property */
+    xcb_delete_property(globalconf.connection, c->window, _NET_WM_DESKTOP);
 }
 
 /** Update the client struts.
