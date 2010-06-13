@@ -502,7 +502,7 @@ ewmh_client_check_hints(client_t *c)
         desktop = *(uint32_t *) data;
         if(desktop == -1)
             c->sticky = true;
-        else
+        else if (desktop >= 0 && desktop < tags->len)
             for(int i = 0; i < tags->len; i++)
                 if(desktop == i)
                 {
@@ -511,6 +511,13 @@ ewmh_client_check_hints(client_t *c)
                 }
                 else
                     untag_client(c, tags->tab[i]);
+        else
+            /* Value out of bounds, just give it the first tag */
+            if (tags->len > 0)
+            {
+                luaA_object_push(globalconf.L, tags->tab[0]);
+                tag_client(c);
+            }
     }
 
     p_delete(&reply);
