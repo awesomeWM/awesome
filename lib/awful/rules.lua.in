@@ -130,7 +130,7 @@ function apply(c)
 
     -- If untagged, stick the client on the current one.
     if #c:tags() == 0 then
-        atag.withcurrent(c, startup)
+        atag.withcurrent(c)
     end
 
     -- Apply all callbacks from matched rules.
