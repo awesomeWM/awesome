@@ -34,9 +34,9 @@
  * \param state The state to set.
  */
 void
-xwindow_set_state(xcb_window_t win, long state)
+xwindow_set_state(xcb_window_t win, uint32_t state)
 {
-    long data[] = { state, XCB_NONE };
+    uint32_t data[] = { state, XCB_NONE };
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE, win,
                         WM_STATE, WM_STATE, 32, 2, data);
 }
