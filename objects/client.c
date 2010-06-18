@@ -762,10 +762,10 @@ client_set_fullscreen(lua_State *L, int cidx, bool s)
         }
         int abs_cidx = luaA_absindex(L, cidx); \
         lua_pushboolean(L, s);
-        luaA_object_emit_signal(L, abs_cidx, "request::fullscreen", 1);
         c->fullscreen = s;
-        stack_windows();
+        luaA_object_emit_signal(L, abs_cidx, "request::fullscreen", 1);
         luaA_object_emit_signal(L, abs_cidx, "property::fullscreen", 0);
+        stack_windows();
     }
 }
 
@@ -785,10 +785,10 @@ client_set_fullscreen(lua_State *L, int cidx, bool s)
             if(s) \
                 client_set_fullscreen(L, abs_cidx, false); \
             lua_pushboolean(L, s); \
-            luaA_object_emit_signal(L, abs_cidx, "request::maximized_" #type, 1); \
             c->maximized_##type = s; \
-            stack_windows(); \
+            luaA_object_emit_signal(L, abs_cidx, "request::maximized_" #type, 1); \
             luaA_object_emit_signal(L, abs_cidx, "property::maximized_" #type, 0); \
+            stack_windows(); \
         } \
     }
 DO_FUNCTION_CLIENT_MAXIMIZED(vertical)
