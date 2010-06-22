@@ -135,12 +135,8 @@ function new(screen, filter, buttons, style, template)
 
     local data = setmetatable({}, { __mode = 'k' })
     local u = function () tasklist_update(screen, w, buttons, filter, data, style, template) end
-    for s = 1, capi.screen.count() do
-        tag.attached_add_signal(s, "property::filtered", u)
-        capi.screen[s]:add_signal("tag::attach", u)
-        capi.screen[s]:add_signal("tag::detach", u)
-        capi.screen[s]:add_signal("tag::history::update", u)
-    end
+    capi.screen[screen]:add_signal("tag::detach", u)
+    tag.attached_add_signal(screen, "property::selected", u)
     capi.client.add_signal("new", function (c)
         c:add_signal("property::urgent", u)
         c:add_signal("property::floating", u)
