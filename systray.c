@@ -155,6 +155,10 @@ systray_request_handle(xcb_window_t embed_win, int phys_screen, xembed_info_t *i
                                  select_input_val);
     window_state_set(embed_win, XCB_WM_STATE_WITHDRAWN);
 
+    /* we grab the window, but also make sure it's automatically reparented back
+     * to the root window if we should die.
+     */
+    xcb_change_save_set(globalconf.connection, XCB_SET_MODE_INSERT, embed_win);
     xcb_reparent_window(globalconf.connection, embed_win,
                         globalconf.screens.tab[phys_screen].systray.window,
                         0, 0);
