@@ -427,6 +427,9 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
 
     xcb_change_window_attributes(globalconf.connection, w, XCB_CW_EVENT_MASK, select_input_val);
 
+    /* Make sure the window is automatically mapped if awesome exits or dies. */
+    xcb_change_save_set(globalconf.connection, XCB_SET_MODE_INSERT, w);
+
     client_t *c = client_new(globalconf.L);
 
     /* This cannot change, ever. */
