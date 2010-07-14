@@ -76,10 +76,6 @@ awesome_atexit(void)
         screen_nbr++)
         systray_cleanup(screen_nbr);
 
-    /* remap all clients since some WM won't handle them otherwise */
-    foreach(c, globalconf.clients)
-        client_unban(*c);
-
     /* Close Lua */
     lua_close(globalconf.L);
 
