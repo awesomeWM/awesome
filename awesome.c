@@ -68,14 +68,6 @@ awesome_atexit(void)
 
     a_dbus_cleanup();
 
-    /* reparent systray windows, otherwise they may die with their master */
-    for(int i = 0; i < globalconf.embedded.len; i++)
-    {
-        xcb_screen_t *s = xutil_screen_get(globalconf.connection,
-                                           globalconf.embedded.tab[i].phys_screen);
-        xembed_window_unembed(globalconf.connection, globalconf.embedded.tab[i].win, s->root);
-    }
-
     /* do this only for real screen */
     const xcb_setup_t *setup = xcb_get_setup(globalconf.connection);
     nscreens = setup ? xcb_setup_roots_length(setup) : -1;
