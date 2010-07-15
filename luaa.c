@@ -862,8 +862,10 @@ luaA_loadrc(const char *confpath, bool run)
             }
         }
         else
+        {
             lua_pop(globalconf.L, 1);
-        return true;
+            return true;
+        }
     }
     else
         fprintf(stderr, "%s\n", lua_tostring(globalconf.L, -1));
