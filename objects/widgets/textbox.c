@@ -39,6 +39,10 @@ typedef struct
 /** The textbox private data structure */
 typedef struct
 {
+    /** The actual text the textbox is set to */
+    char *text;
+    /** The length of text */
+    size_t text_len;
     draw_text_context_t data;
     /** Textbox width and height */
     int width, height;
@@ -207,6 +211,7 @@ textbox_destructor(widget_t *w)
 {
     textbox_data_t *d = w->data;
     draw_text_context_wipe(&d->data);
+    p_delete(&d->text);
     p_delete(&d);
 }
 
@@ -277,9 +282,9 @@ luaA_textbox_index(lua_State *L, awesome_token_t token)
         luaA_pushcolor(L, &d->border.color);
         return 1;
       case A_TK_TEXT:
-        if(d->data.len > 0)
+        if(d->text_len > 0)
         {
-            lua_pushlstring(L, d->data.text, d->data.len);
+            lua_pushlstring(L, d->text, d->text_len);
             return 1;
         }
         return 0;
@@ -376,20 +381,36 @@ luaA_textbox_newindex(lua_State *L, awesome_token_t token)
         {
             /* delete */
             draw_text_context_wipe(&d->data);
+            p_delete(&d->text);
+            d->text_len = 0;
             p_clear(&d->data, 1);
 
             if(buf)
             {
                 char *text;
                 ssize_t tlen;
+                bool success;
+
                 /* if text has been converted to UTF-8 */
                 if(draw_iso2utf8(buf, len, &text, &tlen))
                 {
-                    draw_text_context_init(&d->data, text, tlen);
+                    success = draw_text_context_init(&d->data, text, tlen);
+                    if(success)
+                    {
+                        d->text = p_dup(text, tlen);
+                        d->text_len = tlen;
+                    }
                     p_delete(&text);
                 }
                 else
-                    draw_text_context_init(&d->data, buf, len);
+                {
+                    success = draw_text_context_init(&d->data, buf, len);
+                    if(success)
+                    {
+                        d->text = p_dup(buf, len);
+                        d->text_len = len;
+                    }
+                }
 
                 d->extents = draw_text_extents(&d->data);
             }
