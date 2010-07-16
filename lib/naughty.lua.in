@@ -9,6 +9,7 @@ local pairs = pairs
 local table = table
 local type = type
 local string = string
+local pcall = pcall
 local capi = { screen = screen,
                awesome = awesome,
                dbus = dbus,
@@ -354,8 +355,18 @@ function notify(args)
     local textbox = capi.widget({ type = "textbox", align = "flex" })
     textbox:buttons(util.table.join(button({ }, 1, run), button({ }, 3, die)))
     layout.margins[textbox] = { right = margin, left = margin, bottom = margin, top = margin }
-    textbox.text = string.format('<span font_desc="%s"><b>%s</b>%s</span>', font, title, text:gsub("<br.->", "\n"))
     textbox.valign = "middle"
+
+    local function setText(pattern, replacements)
+        textbox.text = string.format('<span font_desc="%s"><b>%s</b>%s</span>', font, title, text:gsub(pattern, replacements))
+    end
+
+    -- First try to set the text while only interpreting <br>.
+    -- (Setting a textbox' .text to an invalid pattern throws a lua error)
+    if not pcall(setText, "<br.->", "\n") then
+        -- That failed, escape everything which might cause an error from pango
+        setText("[<>&]", { ['<'] = "&lt;", ['>'] = "&gt;", ['&'] = "&amp;" })
+    end
 
     -- create iconbox
     local iconbox = nil
