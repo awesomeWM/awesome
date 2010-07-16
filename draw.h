@@ -142,6 +142,7 @@ draw_text_context_wipe(draw_text_context_t *pdata)
         if(pdata->attr_list)
             pango_attr_list_unref(pdata->attr_list);
         p_delete(&pdata->text);
+        p_clear(pdata, 1);
     }
 }
 
