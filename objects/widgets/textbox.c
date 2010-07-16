@@ -413,6 +413,9 @@ luaA_textbox_newindex(lua_State *L, awesome_token_t token)
                 }
 
                 d->extents = draw_text_extents(&d->data);
+
+                if(!success)
+                    luaL_error(L, "Invalid markup in '%s'", buf);
             }
             else
                 p_clear(&d->extents, 1);
