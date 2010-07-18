@@ -148,6 +148,9 @@ stack_refresh()
     if(!need_stack_refresh)
         return;
 
+    /* XCB_NONE is an invalid value for XCB_CONFIG_WINDOW_SIBLING and will cause
+     * an error instead of changing the stacking order. This is a *good* thing.
+     * Else we would be forcing windows to redraw themselves. */
     xcb_window_t next = XCB_NONE;
 
     /* stack desktop windows */
