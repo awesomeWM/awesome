@@ -692,9 +692,14 @@ wibox_wipe(wibox_t *w)
 {
     if(w->window)
     {
+        int phys_screen = w->ctx.phys_screen;
+
         /* Activate BMA */
         client_ignore_enterleave_events();
         xcb_destroy_window(globalconf.connection, w->window);
+        /* Make sure we don't accidentally kill the systray window */
+        if(globalconf.screens.tab[phys_screen].systray.parent == w->window)
+            wibox_systray_kickout(phys_screen);
         /* Deactivate BMA */
         client_restore_enterleave_events();
         w->window = XCB_NONE;
