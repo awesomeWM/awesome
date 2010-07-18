@@ -430,6 +430,14 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
     /* Make sure the window is automatically mapped if awesome exits or dies. */
     xcb_change_save_set(globalconf.connection, XCB_SET_MODE_INSERT, w);
 
+    /* Move this window to the bottom of the stack. Without this we would force
+     * other windows which will be above this one to redraw themselves because
+     * this window occludes them for a tiny moment. The next stack_refresh()
+     * will fix this up and move the window to its correct place. */
+    xcb_configure_window(globalconf.connection, w,
+                         XCB_CONFIG_WINDOW_STACK_MODE,
+                         (uint32_t[]) { XCB_STACK_MODE_BELOW});
+
     client_t *c = client_new(globalconf.L);
 
     /* This cannot change, ever. */
