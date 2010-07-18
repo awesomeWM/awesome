@@ -33,6 +33,27 @@
 
 LUA_OBJECT_FUNCS(wibox_class, wibox_t, wibox)
 
+/** Kick out systray windows.
+ * \param phys_screen Physical screen number.
+ */
+static void
+wibox_systray_kickout(int phys_screen)
+{
+    xcb_screen_t *s = xutil_screen_get(globalconf.connection, phys_screen);
+
+    if(globalconf.screens.tab[phys_screen].systray.parent != s->root)
+    {
+        /* Who! Check that we're not deleting a wibox with a systray, because it
+         * may be its parent. If so, we reparent to root before, otherwise it will
+         * hurt very much. */
+        xcb_reparent_window(globalconf.connection,
+                            globalconf.screens.tab[phys_screen].systray.window,
+                            s->root, -512, -512);
+
+        globalconf.screens.tab[phys_screen].systray.parent = s->root;
+    }
+}
+
 /** Destroy all X resources of a wibox.
  * \param w The wibox to wipe.
  */
@@ -381,27 +402,6 @@ wibox_map(wibox_t *wibox)
     wibox_need_update(wibox);
     /* Stack this wibox correctly */
     stack_windows();
-}
-
-/** Kick out systray windows.
- * \param phys_screen Physical screen number.
- */
-static void
-wibox_systray_kickout(int phys_screen)
-{
-    xcb_screen_t *s = xutil_screen_get(globalconf.connection, phys_screen);
-
-    if(globalconf.screens.tab[phys_screen].systray.parent != s->root)
-    {
-        /* Who! Check that we're not deleting a wibox with a systray, because it
-         * may be its parent. If so, we reparent to root before, otherwise it will
-         * hurt very much. */
-        xcb_reparent_window(globalconf.connection,
-                            globalconf.screens.tab[phys_screen].systray.window,
-                            s->root, -512, -512);
-
-        globalconf.screens.tab[phys_screen].systray.parent = s->root;
-    }
 }
 
 static void
