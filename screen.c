@@ -72,10 +72,8 @@ screen_default_visual(xcb_screen_t *s)
     return NULL;
 }
 
-/** Get screens informations and fill global configuration.
- */
-void
-screen_scan(void)
+static bool
+screen_scan_randr(void)
 {
     /* Check for extension before checking for XRandR */
     if(xcb_get_extension_data(globalconf.connection, &xcb_randr_id)->present)
@@ -146,80 +144,102 @@ screen_scan(void)
                 globalconf.xinerama_is_active = true;
 
             globalconf.screens.tab[0].visual = screen_default_visual(xutil_screen_get(globalconf.connection, globalconf.default_screen));
+
+            return true;
         }
     }
-    else
+
+    return false;
+}
+
+static bool
+screen_scan_xinerama(void)
+{
+    /* Check for extension before checking for Xinerama */
+    if(xcb_get_extension_data(globalconf.connection, &xcb_xinerama_id)->present)
     {
-        /* Check for extension before checking for Xinerama */
-        if(xcb_get_extension_data(globalconf.connection, &xcb_xinerama_id)->present)
+        xcb_xinerama_is_active_reply_t *xia;
+        xia = xcb_xinerama_is_active_reply(globalconf.connection, xcb_xinerama_is_active(globalconf.connection), NULL);
+        globalconf.xinerama_is_active = xia->state;
+        p_delete(&xia);
+    }
+
+    if(globalconf.xinerama_is_active)
+    {
+        xcb_xinerama_query_screens_reply_t *xsq;
+        xcb_xinerama_screen_info_t *xsi;
+        int xinerama_screen_number;
+
+        xsq = xcb_xinerama_query_screens_reply(globalconf.connection,
+                                               xcb_xinerama_query_screens_unchecked(globalconf.connection),
+                                               NULL);
+
+        xsi = xcb_xinerama_query_screens_screen_info(xsq);
+        xinerama_screen_number = xcb_xinerama_query_screens_screen_info_length(xsq);
+
+        /* now check if screens overlaps (same x,y): if so, we take only the biggest one */
+        for(int screen = 0; screen < xinerama_screen_number; screen++)
         {
-            xcb_xinerama_is_active_reply_t *xia;
-            xia = xcb_xinerama_is_active_reply(globalconf.connection, xcb_xinerama_is_active(globalconf.connection), NULL);
-            globalconf.xinerama_is_active = xia->state;
-            p_delete(&xia);
-        }
-
-        if(globalconf.xinerama_is_active)
-        {
-            xcb_xinerama_query_screens_reply_t *xsq;
-            xcb_xinerama_screen_info_t *xsi;
-            int xinerama_screen_number;
-
-            xsq = xcb_xinerama_query_screens_reply(globalconf.connection,
-                                                   xcb_xinerama_query_screens_unchecked(globalconf.connection),
-                                                   NULL);
-
-            xsi = xcb_xinerama_query_screens_screen_info(xsq);
-            xinerama_screen_number = xcb_xinerama_query_screens_screen_info_length(xsq);
-
-            /* now check if screens overlaps (same x,y): if so, we take only the biggest one */
-            for(int screen = 0; screen < xinerama_screen_number; screen++)
+            bool drop = false;
+            foreach(screen_to_test, globalconf.screens)
+                if(xsi[screen].x_org == screen_to_test->geometry.x
+                   && xsi[screen].y_org == screen_to_test->geometry.y)
+                    {
+                        /* we already have a screen for this area, just check if
+                         * it's not bigger and drop it */
+                        drop = true;
+                        int i = screen_array_indexof(&globalconf.screens, screen_to_test);
+                        screen_to_test->geometry.width =
+                            MAX(xsi[screen].width, xsi[i].width);
+                        screen_to_test->geometry.height =
+                            MAX(xsi[screen].height, xsi[i].height);
+                    }
+            if(!drop)
             {
-                bool drop = false;
-                foreach(screen_to_test, globalconf.screens)
-                    if(xsi[screen].x_org == screen_to_test->geometry.x
-                       && xsi[screen].y_org == screen_to_test->geometry.y)
-                        {
-                            /* we already have a screen for this area, just check if
-                             * it's not bigger and drop it */
-                            drop = true;
-                            int i = screen_array_indexof(&globalconf.screens, screen_to_test);
-                            screen_to_test->geometry.width =
-                                MAX(xsi[screen].width, xsi[i].width);
-                            screen_to_test->geometry.height =
-                                MAX(xsi[screen].height, xsi[i].height);
-                        }
-                if(!drop)
-                {
-                    screen_t s;
-                    p_clear(&s, 1);
-                    s.geometry = screen_xsitoarea(xsi[screen]);
-                    screen_array_append(&globalconf.screens, s);
-                }
-            }
-
-            p_delete(&xsq);
-
-            xcb_screen_t *s = xutil_screen_get(globalconf.connection, globalconf.default_screen);
-            globalconf.screens.tab[0].visual = screen_default_visual(s);
-        }
-        else
-            /* One screen only / Zaphod mode */
-            for(int screen = 0;
-                screen < xcb_setup_roots_length(xcb_get_setup(globalconf.connection));
-                screen++)
-            {
-                xcb_screen_t *xcb_screen = xutil_screen_get(globalconf.connection, screen);
                 screen_t s;
                 p_clear(&s, 1);
-                s.geometry.x = 0;
-                s.geometry.y = 0;
-                s.geometry.width = xcb_screen->width_in_pixels;
-                s.geometry.height = xcb_screen->height_in_pixels;
-                s.visual = screen_default_visual(xcb_screen);
+                s.geometry = screen_xsitoarea(xsi[screen]);
                 screen_array_append(&globalconf.screens, s);
             }
+        }
+
+        p_delete(&xsq);
+
+        xcb_screen_t *s = xutil_screen_get(globalconf.connection, globalconf.default_screen);
+        globalconf.screens.tab[0].visual = screen_default_visual(s);
+
+        return true;
     }
+
+    return false;
+}
+
+static void screen_scan_x11(void)
+{
+    /* One screen only / Zaphod mode */
+    for(int screen = 0;
+        screen < xcb_setup_roots_length(xcb_get_setup(globalconf.connection));
+        screen++)
+    {
+        xcb_screen_t *xcb_screen = xutil_screen_get(globalconf.connection, screen);
+        screen_t s;
+        p_clear(&s, 1);
+        s.geometry.x = 0;
+        s.geometry.y = 0;
+        s.geometry.width = xcb_screen->width_in_pixels;
+        s.geometry.height = xcb_screen->height_in_pixels;
+        s.visual = screen_default_visual(xcb_screen);
+        screen_array_append(&globalconf.screens, s);
+    }
+}
+
+/** Get screens informations and fill global configuration.
+ */
+void
+screen_scan(void)
+{
+    if(!screen_scan_randr() && !screen_scan_xinerama())
+        screen_scan_x11();
 
     globalconf.screen_focus = globalconf.screens.tab;
 }
