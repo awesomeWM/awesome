@@ -662,7 +662,7 @@ client_resize(client_t *c, area_t geometry, bool hints)
     if(geometry.y + geometry.height < 0)
         geometry.y = 0;
 
-    if(hints)
+    if(hints && !c->fullscreen)
         geometry = client_geometry_hints(c, geometry);
 
     if(geometry.width == 0 || geometry.height == 0)
