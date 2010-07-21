@@ -878,7 +878,7 @@ client_resize(client_t *c, area_t geometry, bool hints)
     /* Real client geometry, please keep it contained to C code at the very least. */
     geometry_internal = titlebar_geometry_remove(c->titlebar, c->border_width, geometry);
 
-    if(hints)
+    if(hints && !c->fullscreen)
         geometry_internal = client_geometry_hints(c, geometry_internal);
 
     if(geometry_internal.width == 0 || geometry_internal.height == 0)
