@@ -91,6 +91,14 @@ screen_scan_randr(void)
             xcb_randr_get_screen_resources_cookie_t screen_res_c = xcb_randr_get_screen_resources(globalconf.connection, screen->root);
             xcb_randr_get_screen_resources_reply_t *screen_res_r = xcb_randr_get_screen_resources_reply(globalconf.connection, screen_res_c, NULL);
 
+            /* Only use the data from XRandR if there is more than one screen
+             * defined. This should work around the broken nvidia driver.  */
+            if (screen_res_r->num_crtcs <= 1)
+            {
+                p_delete(&screen_res_r);
+                return false;
+            }
+
             /* We go through CRTC, and build a screen for each one. */
             xcb_randr_crtc_t *randr_crtcs = xcb_randr_get_screen_resources_crtcs(screen_res_r);
 
