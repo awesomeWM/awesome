@@ -798,8 +798,8 @@ client_geometry_hints(client_t *c, area_t geometry)
         minw = minh = 0;
 
     if(c->size_hints.flags & XCB_SIZE_HINT_P_ASPECT
-       && c->size_hints.min_aspect_num > 0
        && c->size_hints.min_aspect_den > 0
+       && c->size_hints.max_aspect_den > 0
        && geometry.height - real_baseh > 0
        && geometry.width - real_basew > 0)
     {
@@ -812,7 +812,7 @@ client_geometry_hints(client_t *c, area_t geometry)
         double dx = (double) (geometry.width - real_basew);
         double dy = (double) (geometry.height - real_baseh);
         double min = (double) c->size_hints.min_aspect_num / (double) c->size_hints.min_aspect_den;
-        double max = (double) c->size_hints.max_aspect_num / (double) c->size_hints.min_aspect_den;
+        double max = (double) c->size_hints.max_aspect_num / (double) c->size_hints.max_aspect_den;
         double ratio = dx / dy;
         if(max > 0 && min > 0 && ratio > 0)
         {
