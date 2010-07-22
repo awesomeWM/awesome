@@ -765,12 +765,15 @@ area_t
 client_geometry_hints(client_t *c, area_t geometry)
 {
     int32_t basew, baseh, minw, minh;
+    int32_t real_basew = 0, real_baseh = 0;
 
     /* base size is substituted with min size if not specified */
     if(c->size_hints.flags & XCB_SIZE_HINT_P_SIZE)
     {
         basew = c->size_hints.base_width;
         baseh = c->size_hints.base_height;
+        real_basew = basew;
+        real_baseh = baseh;
     }
     else if(c->size_hints.flags & XCB_SIZE_HINT_P_MIN_SIZE)
     {
@@ -797,11 +800,17 @@ client_geometry_hints(client_t *c, area_t geometry)
     if(c->size_hints.flags & XCB_SIZE_HINT_P_ASPECT
        && c->size_hints.min_aspect_num > 0
        && c->size_hints.min_aspect_den > 0
-       && geometry.height - baseh > 0
-       && geometry.width - basew > 0)
+       && geometry.height - real_baseh > 0
+       && geometry.width - real_basew > 0)
     {
-        double dx = (double) (geometry.width - basew);
-        double dy = (double) (geometry.height - baseh);
+        /* ICCCM mandates:
+         * If a base size is provided along with the aspect ratio fields, the
+         * base size should be subtracted from the window size prior to checking
+         * that the aspect ratio falls in range. If a base size is not provided,
+         * nothing should be subtracted from the window size. (The minimum size
+         * is not to be used in place of the base size for this purpose.) */
+        double dx = (double) (geometry.width - real_basew);
+        double dy = (double) (geometry.height - real_baseh);
         double min = (double) c->size_hints.min_aspect_num / (double) c->size_hints.min_aspect_den;
         double max = (double) c->size_hints.max_aspect_num / (double) c->size_hints.min_aspect_den;
         double ratio = dx / dy;
@@ -811,15 +820,15 @@ client_geometry_hints(client_t *c, area_t geometry)
             {
                 dy = (dx * min + dy) / (min * min + 1);
                 dx = dy * min;
-                geometry.width = (int) dx + basew;
-                geometry.height = (int) dy + baseh;
+                geometry.width = (int) dx + real_basew;
+                geometry.height = (int) dy + real_baseh;
             }
             else if(ratio > max)
             {
                 dy = (dx * min + dy) / (max * max + 1);
                 dx = dy * min;
-                geometry.width = (int) dx + basew;
-                geometry.height = (int) dy + baseh;
+                geometry.width = (int) dx + real_basew;
+                geometry.height = (int) dy + real_baseh;
             }
         }
     }
