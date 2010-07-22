@@ -606,15 +606,16 @@ client_geometry_hints(client_t *c, area_t geometry)
         {
             if(ratio < min)
             {
-                dy = (dx * min + dy) / (min * min + 1);
-                dx = dy * min;
+                /* dx is lower than allowed, make dy lower to compensate this
+                 * (+ 0.5 to force proper rounding). */
+                dy = dx / min + 0.5;
                 geometry.width = (int) dx + real_basew;
                 geometry.height = (int) dy + real_baseh;
             }
             else if(ratio > max)
             {
-                dy = (dx * min + dy) / (max * max + 1);
-                dx = dy * min;
+                /* dx is too high, lower it (+0.5 for proper rounding) */
+                dx = dy * max + 0.5;
                 geometry.width = (int) dx + real_basew;
                 geometry.height = (int) dy + real_baseh;
             }
