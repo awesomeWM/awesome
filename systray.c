@@ -56,15 +56,15 @@ systray_init(int phys_screen)
 void
 systray_refresh()
 {
-    bool has_systray;
     int nscreen = xcb_setup_roots_length(xcb_get_setup(globalconf.connection));
 
     for(int phys_screen = 0; phys_screen < nscreen; phys_screen++)
     {
-        has_systray = false;
+        bool has_systray = false;
         foreach(w, globalconf.wiboxes)
-            if(phys_screen == (*w)->ctx.phys_screen)
-                has_systray |= (*w)->has_systray;
+            if(phys_screen == (*w)->ctx.phys_screen && (*w)->has_systray)
+                /* Can't use "break" with foreach() :( */
+                has_systray = true;
 
         if(has_systray)
             systray_register(phys_screen);
