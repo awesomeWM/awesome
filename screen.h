@@ -40,6 +40,7 @@ struct a_screen
         xcb_window_t window;
         /** Systray window parent */
         xcb_window_t parent;
+        /** Is awesome the systray owner? */
         bool registered;
     } systray;
     /** Previously focused client */
