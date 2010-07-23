@@ -815,6 +815,7 @@ luaA_init(xdgHandle* xdg)
     lua_pushliteral(L, ";" AWESOME_LUA_LIB_PATH "/?/init.lua");
     lua_concat(L, 3); /* concatenate with package.path */
     lua_setfield(L, 1, "path"); /* package.path = "concatenated string" */
+    lua_pop(L, 1); /* pop "package" */
 }
 
 static bool
