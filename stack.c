@@ -20,6 +20,7 @@
  */
 
 #include "ewmh.h"
+#include "screen.h"
 #include "stack.h"
 #include "objects/client.h"
 #include "objects/wibox.h"
@@ -116,7 +117,8 @@ client_layer_translator(client_t *c)
     /* first deal with user set attributes */
     if(c->ontop)
         return WINDOW_LAYER_ONTOP;
-    else if(c->fullscreen)
+    /* Fullscreen windows only get their own layer when they have the focus */
+    else if(c->fullscreen && globalconf.screen_focus->client_focus == c)
         return WINDOW_LAYER_FULLSCREEN;
     else if(c->above)
         return WINDOW_LAYER_ABOVE;
