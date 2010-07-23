@@ -516,7 +516,7 @@ client_layer_translator(client_t *c)
     /* first deal with user set attributes */
     if(c->ontop)
         return LAYER_ONTOP;
-    else if(c->fullscreen)
+    else if(c->fullscreen && globalconf.screen_focus->client_focus == c)
         return LAYER_FULLSCREEN;
     else if(c->above)
         return LAYER_ABOVE;
