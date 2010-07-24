@@ -985,6 +985,10 @@ client_unmanage(client_t *c)
 
     ewmh_update_net_client_list(c->phys_screen);
 
+    /* Remove this window from the save set since this shouldn't be made visible
+     * after a restart anymore. */
+    xcb_change_save_set(globalconf.connection, XCB_SET_MODE_DELETE, c->window);
+
     /* set client as invalid */
     c->invalid = true;
 
