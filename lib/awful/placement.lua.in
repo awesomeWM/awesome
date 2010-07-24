@@ -105,16 +105,17 @@ end
 function no_offscreen(c)
     local c = c or capi.client.focus
     local geometry = c:geometry()
+    local border = c.border_width
     local screen_geometry = capi.screen[c.screen].workarea
 
-    if geometry.x + geometry.width > screen_geometry.x + screen_geometry.width then
-        geometry.x = screen_geometry.x + screen_geometry.width - geometry.width
+    if geometry.x + geometry.width + 2*border > screen_geometry.x + screen_geometry.width then
+        geometry.x = screen_geometry.x + screen_geometry.width - geometry.width - 2*border
     elseif geometry.x < screen_geometry.x then
         geometry.x = screen_geometry.x
     end
 
-    if geometry.y + geometry.height > screen_geometry.y + screen_geometry.height then
-        geometry.y = screen_geometry.y + screen_geometry.height - geometry.height
+    if geometry.y + geometry.height + border > screen_geometry.y + screen_geometry.height then
+        geometry.y = screen_geometry.y + screen_geometry.height - geometry.height - 2*border
     elseif geometry.y < screen_geometry.y then
         geometry.y = screen_geometry.y
     end
