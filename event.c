@@ -704,6 +704,7 @@ event_handle_unmapnotify(void *data __attribute__ ((unused)),
             {
                 xembed_window_array_take(&globalconf.embedded, i);
                 widget_invalidate_bytype(widget_systray);
+                xcb_change_save_set(globalconf.connection, XCB_SET_MODE_DELETE, ev->window);
             }
 
     return 0;
