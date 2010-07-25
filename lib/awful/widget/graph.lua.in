@@ -85,6 +85,8 @@ local properties = { "width", "height", "border_color", "stack",
 local function update(graph)
     -- Create new empty image
     local img = capi.image.argb32(data[graph].width, data[graph].height, nil)
+    local max_value = data[graph].max_value
+    local values = data[graph].values
 
     local border_width = 0
     if data[graph].border_color then
@@ -93,6 +95,17 @@ local function update(graph)
 
     -- Draw a stacked graph
     if data[graph].stack then
+
+        if data[graph].scale then
+            for _, v in ipairs(values) do
+                for __, sv in ipairs(v) do
+                    if sv > max_value then
+                        max_value = sv
+                    end
+                end
+            end
+        end
+
         -- Draw the background first
         img:draw_rectangle(border_width, border_width,
                            data[graph].width - (2 * border_width),
@@ -105,14 +118,14 @@ local function update(graph)
 
             if data[graph].stack_colors then
                 for idx, color in ipairs(data[graph].stack_colors) do
-                    local values = data[graph].values[idx]
-                    if values and i < #values then
-                        local value = values[#values - i] + rel_i
+                    local stack_values = values[idx]
+                    if stack_values and i < #stack_values then
+                        local value = stack_values[#stack_values - i] + rel_i
 
                         img:draw_line(rel_x, border_width - 1 +
-                                          math.ceil((data[graph].height - 2 * border_width) * (1 - rel_i)),
+                                          math.ceil((data[graph].height - 2 * border_width) * (1 - (rel_i / max_value))),
                                       rel_x, border_width - 1 +
-                                          math.ceil((data[graph].height - 2 * border_width) * (1 - value)),
+                                          math.ceil((data[graph].height - 2 * border_width) * (1 - (value / max_value))),
                                       color or "red")
                         rel_i = value
                     end
@@ -120,8 +133,6 @@ local function update(graph)
             end
         end
     else
-        local values = data[graph].values
-        local max_value = data[graph].max_value
 
         if data[graph].scale then
             for _, v in ipairs(values) do
