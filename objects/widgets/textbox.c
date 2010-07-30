@@ -300,10 +300,10 @@ luaA_textbox_index(lua_State *L, awesome_token_t token)
           default:
             lua_pushliteral(L, "word");
             break;
-          case A_TK_CHAR:
+          case PANGO_WRAP_CHAR:
             lua_pushliteral(L, "char");
             break;
-          case A_TK_WORD_CHAR:
+          case PANGO_WRAP_WORD_CHAR:
             lua_pushliteral(L, "word_char");
             break;
         }
@@ -311,10 +311,10 @@ luaA_textbox_index(lua_State *L, awesome_token_t token)
       case A_TK_ELLIPSIZE:
         switch(d->ellip)
         {
-          case A_TK_START:
+          case PANGO_ELLIPSIZE_START:
             lua_pushliteral(L, "start");
             break;
-          case A_TK_MIDDLE:
+          case PANGO_ELLIPSIZE_MIDDLE:
             lua_pushliteral(L, "middle");
             break;
           default:
