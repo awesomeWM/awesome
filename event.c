@@ -743,10 +743,8 @@ static void
 event_handle_reparentnotify(xcb_reparent_notify_event_t *ev)
 {
     client_t *c;
-#warning ugly, gotta do this properly
-    return 0;
 
-    if((c = client_getbywin(ev->window)))
+    if((c = client_getbywin(ev->window)) && c->frame_window != ev->parent)
         client_unmanage(c);
 }
 
