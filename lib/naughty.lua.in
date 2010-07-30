@@ -365,7 +365,9 @@ function notify(args)
     -- (Setting a textbox' .text to an invalid pattern throws a lua error)
     if not pcall(setText, "<br.->", "\n") then
         -- That failed, escape everything which might cause an error from pango
-        setText("[<>&]", { ['<'] = "&lt;", ['>'] = "&gt;", ['&'] = "&amp;" })
+        if not pcall(setText, "[<>&]", { ['<'] = "&lt;", ['>'] = "&gt;", ['&'] = "&amp;" }) then
+            textbox.text = "<i>&lt;Invalid markup, cannot display message&gt;</i>"
+        end
     end
 
     -- create iconbox
