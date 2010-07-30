@@ -227,7 +227,21 @@ client_t *
 client_getbywin(xcb_window_t w)
 {
     foreach(c, globalconf.clients)
-        if((*c)->window == w || (*c)->frame_window == w)
+        if((*c)->window == w)
+            return *c;
+
+    return NULL;
+}
+
+/** Get a client by its frame window.
+ * \param w The client window to find.
+ * \return A client pointer if found, NULL otherwise.
+ */
+client_t *
+client_getbyframewin(xcb_window_t w)
+{
+    foreach(c, globalconf.clients)
+        if((*c)->frame_window == w)
             return *c;
 
     return NULL;

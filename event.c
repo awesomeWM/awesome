@@ -183,7 +183,7 @@ event_handle_button(xcb_button_press_event_t *ev)
             lua_pop(globalconf.L, 1);
 
     }
-    else if((c = client_getbywin(ev->event)))
+    else if((c = client_getbyframewin(ev->event)))
     {
         luaA_object_push(globalconf.L, c);
         event_button_callback(ev, &c->buttons, -1, 1, NULL);
@@ -412,7 +412,7 @@ event_handle_leavenotify(xcb_leave_notify_event_t *ev)
     if(ev->mode != XCB_NOTIFY_MODE_NORMAL)
         return;
 
-    if((c = client_getbywin(ev->event)))
+    if((c = client_getbyframewin(ev->event)))
     {
         luaA_object_push(globalconf.L, c);
         luaA_object_emit_signal(globalconf.L, -1, "mouse::leave", 0);
@@ -469,7 +469,7 @@ event_handle_enternotify(xcb_enter_notify_event_t *ev)
         lua_pop(globalconf.L, 1);
     }
 
-    if((c = client_getbywin(ev->event)))
+    if((c = client_getbyframewin(ev->event)))
     {
         luaA_object_push(globalconf.L, c);
         luaA_object_emit_signal(globalconf.L, -1, "mouse::enter", 0);
@@ -551,7 +551,7 @@ event_handle_key(xcb_key_press_event_t *ev)
         /* get keysym ignoring all modifiers */
         xcb_keysym_t keysym = keyresolv_get_keysym(ev->detail, 0);
         client_t *c;
-        if((c = client_getbywin(ev->event)))
+        if((c = client_getbyframewin(ev->event)))
         {
             luaA_object_push(globalconf.L, c);
             event_key_callback(ev, &c->keys, -1, 1, &keysym);
