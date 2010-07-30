@@ -227,7 +227,7 @@ client_t *
 client_getbywin(xcb_window_t w)
 {
     foreach(c, globalconf.clients)
-        if((*c)->window == w)
+        if((*c)->window == w || (*c)->frame_window == w)
             return *c;
 
     return NULL;
@@ -313,7 +313,7 @@ client_ban(client_t *c)
 {
     if(!c->isbanned)
     {
-        xcb_unmap_window(globalconf.connection, c->window);
+        xcb_unmap_window(globalconf.connection, c->frame_window);
 
         c->isbanned = true;
 
@@ -328,20 +328,32 @@ void
 client_ignore_enterleave_events(void)
 {
     foreach(c, globalconf.clients)
+    {
         xcb_change_window_attributes(globalconf.connection,
                                      (*c)->window,
                                      XCB_CW_EVENT_MASK,
                                      (const uint32_t []) { CLIENT_SELECT_INPUT_EVENT_MASK & ~(XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW) });
+        xcb_change_window_attributes(globalconf.connection,
+                                     (*c)->frame_window,
+                                     XCB_CW_EVENT_MASK,
+                                     (const uint32_t []) { FRAME_SELECT_INPUT_EVENT_MASK & ~(XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW) });
+    }
 }
 
 void
 client_restore_enterleave_events(void)
 {
     foreach(c, globalconf.clients)
+    {
         xcb_change_window_attributes(globalconf.connection,
                                      (*c)->window,
                                      XCB_CW_EVENT_MASK,
                                      (const uint32_t []) { CLIENT_SELECT_INPUT_EVENT_MASK });
+        xcb_change_window_attributes(globalconf.connection,
+                                     (*c)->frame_window,
+                                     XCB_CW_EVENT_MASK,
+                                     (const uint32_t []) { FRAME_SELECT_INPUT_EVENT_MASK });
+    }
 }
 
 /** Record that a client got focus.
@@ -439,6 +451,7 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
                          (uint32_t[]) { XCB_STACK_MODE_BELOW});
 
     client_t *c = client_new(globalconf.L);
+    xcb_screen_t *s = xutil_screen_get(globalconf.connection, phys_screen);
 
     /* This cannot change, ever. */
     c->phys_screen = phys_screen;
@@ -446,6 +459,23 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
     c->isbanned = true;
     /* Store window */
     c->window = w;
+    c->frame_window = xcb_generate_id(globalconf.connection);
+    xcb_create_window(globalconf.connection, s->root_depth, c->frame_window, s->root,
+                      wgeom->x, wgeom->y, wgeom->width, wgeom->height,
+                      wgeom->border_width, XCB_COPY_FROM_PARENT, s->root_visual,
+                      XCB_CW_BACK_PIXEL | XCB_CW_BORDER_PIXEL | XCB_CW_BIT_GRAVITY
+                      | XCB_CW_WIN_GRAVITY | XCB_CW_OVERRIDE_REDIRECT | XCB_CW_EVENT_MASK,
+                      (const uint32_t [])
+                      {
+                          globalconf.colors.bg.pixel,
+                          globalconf.colors.bg.pixel,
+                          XCB_GRAVITY_NORTH_WEST,
+                          XCB_GRAVITY_NORTH_WEST,
+                          1,
+                          FRAME_SELECT_INPUT_EVENT_MASK
+                      });
+    xcb_reparent_window(globalconf.connection, w, c->frame_window, 0, 0);
+    xcb_map_window(globalconf.connection, w);
     luaA_object_emit_signal(globalconf.L, -1, "property::window", 0);
 
     /* Duplicate client and push it in client list */
@@ -693,9 +723,11 @@ client_resize(client_t *c, area_t geometry, bool hints)
         client_ignore_enterleave_events();
 
         xcb_configure_window(globalconf.connection, c->window,
-                             XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y
-                             | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
-                             (uint32_t[]) { geometry.x, geometry.y, geometry.width, geometry.height });
+                XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
+                (uint32_t[]) { geometry.width, geometry.height });
+        xcb_configure_window(globalconf.connection, c->frame_window,
+                XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
+                (uint32_t[]) { geometry.x, geometry.y, geometry.width, geometry.height });
 
         client_restore_enterleave_events();
 
@@ -934,7 +966,7 @@ client_unban(client_t *c)
 {
     if(c->isbanned)
     {
-        xcb_map_window(globalconf.connection, c->window);
+        xcb_map_window(globalconf.connection, c->frame_window);
 
         c->isbanned = false;
     }
@@ -988,6 +1020,8 @@ client_unmanage(client_t *c)
     /* Remove this window from the save set since this shouldn't be made visible
      * after a restart anymore. */
     xcb_change_save_set(globalconf.connection, XCB_SET_MODE_DELETE, c->window);
+
+    xcb_destroy_window(globalconf.connection, c->frame_window);
 
     /* set client as invalid */
     c->invalid = true;
@@ -1651,8 +1685,8 @@ luaA_client_keys(lua_State *L)
     {
         luaA_key_array_set(L, 1, 2, keys);
         luaA_object_emit_signal(L, 1, "property::keys", 0);
-        xcb_ungrab_key(globalconf.connection, XCB_GRAB_ANY, c->window, XCB_BUTTON_MASK_ANY);
-        xwindow_grabkeys(c->window, keys);
+        xcb_ungrab_key(globalconf.connection, XCB_GRAB_ANY, c->frame_window, XCB_BUTTON_MASK_ANY);
+        xwindow_grabkeys(c->frame_window, keys);
     }
 
     return luaA_key_array_get(L, 1, keys);

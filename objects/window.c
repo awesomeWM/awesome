@@ -28,6 +28,14 @@
 
 LUA_CLASS_FUNCS(window, window_class)
 
+static xcb_window_t
+window_get(window_t *window)
+{
+    if (window->frame_window != XCB_NONE)
+        return window->frame_window;
+    return window->window;
+}
+
 static void
 window_wipe(window_t *window)
 {
@@ -47,7 +55,7 @@ luaA_window_buttons(lua_State *L)
     {
         luaA_button_array_set(L, 1, 2, &window->buttons);
         luaA_object_emit_signal(L, 1, "property::buttons", 0);
-        xwindow_buttons_grab(window->window, &window->buttons);
+        xwindow_buttons_grab(window_get(window), &window->buttons);
     }
 
     return luaA_button_array_get(L, 1, &window->buttons);
@@ -87,7 +95,7 @@ window_set_opacity(lua_State *L, int idx, double opacity)
     if(window->opacity != opacity)
     {
         window->opacity = opacity;
-        xwindow_set_opacity(window->window, opacity);
+        xwindow_set_opacity(window_get(window), opacity);
         luaA_object_emit_signal(L, idx, "property::opacity", 0);
     }
 }
@@ -141,7 +149,7 @@ luaA_window_set_border_color(lua_State *L, window_t *window)
     if(color_name &&
        xcolor_init_reply(xcolor_init_unchecked(&window->border_color, color_name, len)))
     {
-        xwindow_set_border_color(window->window, &window->border_color);
+        xwindow_set_border_color(window_get(window), &window->border_color);
         luaA_object_emit_signal(L, -3, "property::border_color", 0);
     }
 
@@ -162,7 +170,7 @@ window_set_border_width(lua_State *L, int idx, int width)
         return;
 
     if(window->window)
-        xcb_configure_window(globalconf.connection, window->window,
+        xcb_configure_window(globalconf.connection, window_get(window),
                              XCB_CONFIG_WINDOW_BORDER_WIDTH,
                              (uint32_t[]) { width });
 

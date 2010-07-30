@@ -96,9 +96,9 @@ stack_window_above(xcb_window_t w, xcb_window_t previous)
 static xcb_window_t
 stack_client_above(client_t *c, xcb_window_t previous)
 {
-    stack_window_above(c->window, previous);
+    stack_window_above(c->frame_window, previous);
 
-    previous = c->window;
+    previous = c->frame_window;
 
     /* stack transient window on top of their parents */
     foreach(node, globalconf.stack)

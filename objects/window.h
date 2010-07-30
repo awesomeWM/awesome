@@ -30,6 +30,8 @@
     LUA_OBJECT_HEADER \
     /** The X window number */ \
     xcb_window_t window; \
+    /** The frame window, might be XCB_NONE */ \
+    xcb_window_t frame_window; \
     /** Opacity */ \
     double opacity; \
     /** Strut */ \
