@@ -1031,11 +1031,15 @@ client_unmanage(client_t *c)
 
     ewmh_update_net_client_list(c->phys_screen);
 
+    xcb_screen_t *s = xutil_screen_get(globalconf.connection, c->phys_screen);
+    xcb_unmap_window(globalconf.connection, c->window);
+    xcb_reparent_window(globalconf.connection, c->window, s->root,
+            c->geometry.x, c->geometry.y);
+    xcb_destroy_window(globalconf.connection, c->frame_window);
+
     /* Remove this window from the save set since this shouldn't be made visible
      * after a restart anymore. */
     xcb_change_save_set(globalconf.connection, XCB_SET_MODE_DELETE, c->window);
-
-    xcb_destroy_window(globalconf.connection, c->frame_window);
 
     /* set client as invalid */
     c->invalid = true;

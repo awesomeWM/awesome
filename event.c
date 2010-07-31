@@ -630,7 +630,6 @@ event_handle_unmapnotify(xcb_unmap_notify_event_t *ev)
     if((c = client_getbywin(ev->window)))
     {
         client_unmanage(c);
-        xcb_unmap_window(globalconf.connection, ev->window);
     }
     else
         for(int i = 0; i < globalconf.embedded.len; i++)
