@@ -456,14 +456,6 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
     /* Make sure the window is automatically mapped if awesome exits or dies. */
     xcb_change_save_set(globalconf.connection, XCB_SET_MODE_INSERT, w);
 
-    /* Move this window to the bottom of the stack. Without this we would force
-     * other windows which will be above this one to redraw themselves because
-     * this window occludes them for a tiny moment. The next stack_refresh()
-     * will fix this up and move the window to its correct place. */
-    xcb_configure_window(globalconf.connection, w,
-                         XCB_CONFIG_WINDOW_STACK_MODE,
-                         (uint32_t[]) { XCB_STACK_MODE_BELOW});
-
     client_t *c = client_new(globalconf.L);
     xcb_screen_t *s = xutil_screen_get(globalconf.connection, phys_screen);
 
@@ -491,6 +483,14 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
     xcb_reparent_window(globalconf.connection, w, c->frame_window, 0, 0);
     xcb_map_window(globalconf.connection, w);
     luaA_object_emit_signal(globalconf.L, -1, "property::window", 0);
+
+    /* Move this window to the bottom of the stack. Without this we would force
+     * other windows which will be above this one to redraw themselves because
+     * this window occludes them for a tiny moment. The next stack_refresh()
+     * will fix this up and move the window to its correct place. */
+    xcb_configure_window(globalconf.connection, c->frame_window,
+                         XCB_CONFIG_WINDOW_STACK_MODE,
+                         (uint32_t[]) { XCB_STACK_MODE_BELOW});
 
     /* Duplicate client and push it in client list */
     lua_pushvalue(globalconf.L, -1);
