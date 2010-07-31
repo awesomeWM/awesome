@@ -70,6 +70,24 @@ stack_windows(void)
     need_stack_refresh = true;
 }
 
+/** Stack a window above another window, without causing errors.
+ * \param w The window.
+ * \param previous The window which should be below this window.
+ */
+static void
+stack_window_above(xcb_window_t w, xcb_window_t previous)
+{
+    if (previous == XCB_NONE)
+        /* This would cause an error from the X server. Also, if we really
+         * changed the stacking order of all windows, they'd all have to redraw
+         * themselves. Doing it like this is better. */
+        return;
+
+    xcb_configure_window(globalconf.connection, w,
+                         XCB_CONFIG_WINDOW_SIBLING | XCB_CONFIG_WINDOW_STACK_MODE,
+                         (uint32_t[]) { previous, XCB_STACK_MODE_ABOVE });
+}
+
 /** Stack a client above.
  * \param client The client.
  * \param previous The previous client on the stack.
@@ -78,9 +96,7 @@ stack_windows(void)
 static xcb_window_t
 stack_client_above(client_t *c, xcb_window_t previous)
 {
-    xcb_configure_window(globalconf.connection, c->window,
-                         XCB_CONFIG_WINDOW_SIBLING | XCB_CONFIG_WINDOW_STACK_MODE,
-                         (uint32_t[]) { previous, XCB_STACK_MODE_ABOVE });
+    stack_window_above(c->window, previous);
 
     previous = c->window;
 
@@ -150,9 +166,6 @@ stack_refresh()
     if(!need_stack_refresh)
         return;
 
-    /* XCB_NONE is an invalid value for XCB_CONFIG_WINDOW_SIBLING and will cause
-     * an error instead of changing the stacking order. This is a *good* thing.
-     * Else we would be forcing windows to redraw themselves. */
     xcb_window_t next = XCB_NONE;
 
     /* stack desktop windows */
@@ -165,10 +178,7 @@ stack_refresh()
     foreach(wibox, globalconf.wiboxes)
         if(!(*wibox)->ontop)
         {
-            xcb_configure_window(globalconf.connection,
-                                 (*wibox)->window,
-                                 XCB_CONFIG_WINDOW_SIBLING | XCB_CONFIG_WINDOW_STACK_MODE,
-                                 (uint32_t[]) { next, XCB_STACK_MODE_ABOVE });
+            stack_window_above((*wibox)->window, next);
             next = (*wibox)->window;
         }
 
@@ -182,10 +192,7 @@ stack_refresh()
     foreach(wibox, globalconf.wiboxes)
         if((*wibox)->ontop)
         {
-            xcb_configure_window(globalconf.connection,
-                                 (*wibox)->window,
-                                 XCB_CONFIG_WINDOW_SIBLING | XCB_CONFIG_WINDOW_STACK_MODE,
-                                 (uint32_t[]) { next, XCB_STACK_MODE_ABOVE });
+            stack_window_above((*wibox)->window, next);
             next = (*wibox)->window;
         }
 
