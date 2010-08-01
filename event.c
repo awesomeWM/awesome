@@ -275,6 +275,7 @@ event_handle_configurerequest(xcb_configure_request_event_t *ev)
         }
 
         if(!client_resize(c, geometry, false))
+            /* ICCCM 4.1.5 / 4.2.3, if nothing was changed, send an event saying so */
             xwindow_configure(c->window, geometry, c->border_width);
     }
     else

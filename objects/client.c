@@ -732,8 +732,13 @@ client_resize(client_t *c, area_t geometry, bool hints)
        || c->geometry.width != geometry.width
        || c->geometry.height != geometry.height)
     {
+        bool send_notice = false;
         screen_t *new_screen = screen_getbycoord(c->screen,
                                                  geometry.x, geometry.y);
+
+        if(c->geometry.width == geometry.width
+           && c->geometry.height == geometry.height)
+            send_notice = true;
 
         /* Also store geometry including border */
         c->geometry = geometry;
@@ -747,6 +752,10 @@ client_resize(client_t *c, area_t geometry, bool hints)
         xcb_configure_window(globalconf.connection, c->frame_window,
                 XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
                 (uint32_t[]) { geometry.x, geometry.y, geometry.width, geometry.height });
+
+        if(send_notice)
+            /* We are moving without changing the size, see ICCCM 4.2.3 */
+            xwindow_configure(c->window, geometry, c->border_width);
 
         client_restore_enterleave_events();
 
