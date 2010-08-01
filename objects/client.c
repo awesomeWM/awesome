@@ -484,6 +484,11 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
     xcb_map_window(globalconf.connection, w);
     luaA_object_emit_signal(globalconf.L, -1, "property::window", 0);
 
+    /* The frame window gets the border, not the real client window */
+    xcb_configure_window(globalconf.connection, w,
+                         XCB_CONFIG_WINDOW_BORDER_WIDTH,
+                         (uint32_t[]) { 0 });
+
     /* Move this window to the bottom of the stack. Without this we would force
      * other windows which will be above this one to redraw themselves because
      * this window occludes them for a tiny moment. The next stack_refresh()
