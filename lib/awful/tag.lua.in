@@ -96,6 +96,74 @@ function new(names, screen, layout)
     return tags
 end
 
+--- Find a suitable fallback tag.
+-- @param screen The screen number to look for a tag on. [mouse.screen]
+-- @param target A table of tags we consider unacceptable. [selectedlist(scr)]
+function find_fallback(screen, invalids)
+    local scr = screen or capi.mouse.screen
+    local t = invalids or selectedlist(scr)
+
+    for _, v in pairs(capi.screen[scr]:tags()) do
+        if not util.table.hasitem(t, v) then return v end
+    end
+end
+
+--- Delete a tag.
+-- @param target_tag Optional tag object to delete. [selected()]
+-- @param fallback_tag Tag to assign stickied tags to. [~selected()]
+-- @return Returns true if the tag is successfully deleted, nil otherwise.
+-- If there are no clients exclusively on this tag then delete it. Any
+-- stickied clients are assigned to the optional 'fallback_tag'.
+-- If after deleting the tag there is no selected tag, try and restore from
+-- history or select the first tag on the screen.
+function delete(target_tag, fallback_tag)
+    -- abort if no tag is passed or currently selected
+    local target_tag = target_tag or selected()
+    if target_tag == nil then return end
+
+    local ntags = #capi.screen[target_tag.screen]:tags()
+    local target_scr = target_tag.screen
+
+    -- We can't use the target tag as a fallback.
+    local fallback_tag = fallback_tag
+    if fallback_tag == target_tag then return end
+
+    -- No fallback_tag provided, try and get one.
+    if fallback_tag == nil then
+        fallback_tag = find_fallback(target_scr, {target_tag})
+    end
+
+    -- Abort if we would have un-tagged clients.
+    local clients = target_tag:clients()
+    if ( #clients > 0 and ntags <= 1 ) or fallback_tag == nil then return end
+
+    -- Move the clients we can off of this tag.
+    for _, c in pairs(clients) do
+
+        -- If a client has only this tag, or stickied clients with
+        -- nowhere to go, abort.
+        if (not c.sticky and #c:tags() == 1) or
+                                    (c.sticky and fallback_tag == nil) then
+            return
+        else
+            c:tags({fallback_tag})
+        end
+    end
+
+    -- delete the tag
+    target_tag.screen = nil
+
+    -- If no tags are visible, try and view one.
+    if selected(target_scr) == nil and ntags > 0 then
+        history.restore()
+        if selected(target_scr) == nil then
+            capi.screen[target_scr]:tags()[1].selected = true
+        end
+    end
+
+    return true
+end
+
 --- Update the tag history.
 -- @param obj Screen object.
 function history.update(obj)
