@@ -391,6 +391,8 @@ ewmh_process_state_atom(client_t *c, xcb_atom_t state, int set)
         else if(set == _NET_WM_STATE_TOGGLE)
             client_set_urgent(globalconf.L, -1, !c->urgent);
     }
+
+    lua_pop(globalconf.L, 1);
 }
 
 int
