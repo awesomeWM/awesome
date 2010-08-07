@@ -26,8 +26,12 @@
 #include <unistd.h>
 #include <signal.h>
 
-#include <xcb/xtest.h>
+#include <xcb/bigreq.h>
+#include <xcb/randr.h>
+#include <xcb/shape.h>
 #include <xcb/xcb_event.h>
+#include <xcb/xinerama.h>
+#include <xcb/xtest.h>
 
 #include "awesome.h"
 #include "spawn.h"
@@ -427,10 +431,12 @@ main(int argc, char **argv)
     if(xcb_connection_has_error(globalconf.connection))
         fatal("cannot open display");
 
-    /* check for xtest extension */
-    const xcb_query_extension_reply_t *xtest_query;
-    xtest_query = xcb_get_extension_data(globalconf.connection, &xcb_test_id);
-    globalconf.have_xtest = xtest_query->present;
+    /* Prefetch all the extensions we might need */
+    xcb_prefetch_extension_data(globalconf.connection, &xcb_big_requests_id);
+    xcb_prefetch_extension_data(globalconf.connection, &xcb_test_id);
+    xcb_prefetch_extension_data(globalconf.connection, &xcb_randr_id);
+    xcb_prefetch_extension_data(globalconf.connection, &xcb_xinerama_id);
+    xcb_prefetch_extension_data(globalconf.connection, &xcb_shape_id);
 
     /* initialize dbus */
     a_dbus_init();
@@ -474,6 +480,14 @@ main(int argc, char **argv)
 
     /* Set the default xerror handler */
     xutil_error_handler_catch_all_set(&globalconf.evenths, xerror, NULL);
+
+    /* Prefetch the maximum request length */
+    xcb_prefetch_maximum_request_length(globalconf.connection);
+
+    /* check for xtest extension */
+    const xcb_query_extension_reply_t *xtest_query;
+    xtest_query = xcb_get_extension_data(globalconf.connection, &xcb_test_id);
+    globalconf.have_xtest = xtest_query->present;
 
     /* Allocate the key symbols */
     globalconf.keysyms = xcb_key_symbols_alloc(globalconf.connection);
