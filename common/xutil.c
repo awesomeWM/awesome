@@ -93,16 +93,6 @@ xutil_lock_mask_get(xcb_connection_t *connection,
 /* Number of different errors */
 #define ERRORS_NBR 256
 
-void
-xutil_error_handler_catch_all_set(xcb_event_handlers_t *evenths,
-                                  xcb_generic_error_handler_t handler,
-                                  void *data)
-{
-    int err_num;
-    for(err_num = 0; err_num < ERRORS_NBR; err_num++)
-	xcb_event_set_error_handler(evenths, err_num, handler, data);
-}
-
 uint16_t
 xutil_key_mask_fromstr(const char *keyname, size_t len)
 {

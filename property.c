@@ -406,10 +406,10 @@ property_handle_net_wm_opacity(uint8_t state,
  * \param ev The event.
  * \return Status code, 0 if everything's fine.
  */
-static int
-handle_propertynotify(void *data,
-                      xcb_connection_t *c,
-                      xcb_property_notify_event_t *ev)
+int
+property_handle_propertynotify(void *data,
+                               xcb_connection_t *c,
+                               xcb_property_notify_event_t *ev)
 {
     uint32_t length;
     int (*handler)(uint8_t state,
@@ -475,12 +475,6 @@ handle_propertynotify(void *data,
 
     p_delete(&propr);
     return ret;
-}
-
-void a_xcb_set_property_handlers(void)
-{
-    /* Register our handler for PropertyNotify events */
-    xcb_event_set_property_notify_handler(&globalconf.evenths, handle_propertynotify, NULL);
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
