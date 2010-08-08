@@ -129,20 +129,18 @@ event_handle_mousegrabber(int x, int y, uint16_t mask)
 }
 
 /** The button press event handler.
- * \param data The type of mouse event.
- * \param connection The connection to the X server.
  * \param ev The event.
  */
-static int
-event_handle_button(void *data, xcb_connection_t *connection, xcb_button_press_event_t *ev)
+static void
+event_handle_button(xcb_button_press_event_t *ev)
 {
     int screen;
-    const int nb_screen = xcb_setup_roots_length(xcb_get_setup(connection));
+    const int nb_screen = xcb_setup_roots_length(xcb_get_setup(globalconf.connection));
     client_t *c;
     wibox_t *wibox;
 
     if(event_handle_mousegrabber(ev->root_x, ev->root_y, 1 << (ev->detail - 1 + 8)))
-        return 0;
+        return;
 
     /* ev->state is
      * button status (8 bits) + modifiers status (8 bits)
@@ -196,13 +194,11 @@ event_handle_button(void *data, xcb_connection_t *connection, xcb_button_press_e
     }
     else if(ev->child == XCB_NONE)
         for(screen = 0; screen < nb_screen; screen++)
-            if(xutil_screen_get(connection, screen)->root == ev->event)
+            if(xutil_screen_get(globalconf.connection, screen)->root == ev->event)
             {
                 event_button_callback(ev, &globalconf.buttons, 0, 0, NULL);
-                return 0;
+                return;
             }
-
-    return 0;
 }
 
 static void
@@ -252,13 +248,10 @@ event_handle_configurerequest_configure_window(xcb_configure_request_event_t *ev
 }
 
 /** The configure event handler.
- * \param data currently unused.
- * \param connection The connection to the X server.
  * \param ev The event.
  */
-static int
-event_handle_configurerequest(void *data __attribute__ ((unused)),
-                              xcb_connection_t *connection, xcb_configure_request_event_t *ev)
+static void
+event_handle_configurerequest(xcb_configure_request_event_t *ev)
 {
     client_t *c;
     area_t geometry;
@@ -300,42 +293,31 @@ event_handle_configurerequest(void *data __attribute__ ((unused)),
     }
     else
         event_handle_configurerequest_configure_window(ev);
-
-    return 0;
 }
 
 /** The configure notify event handler.
- * \param data currently unused.
- * \param connection The connection to the X server.
  * \param ev The event.
  */
-static int
-event_handle_configurenotify(void *data __attribute__ ((unused)),
-                             xcb_connection_t *connection, xcb_configure_notify_event_t *ev)
+static void
+event_handle_configurenotify(xcb_configure_notify_event_t *ev)
 {
     int screen_nbr;
     const xcb_screen_t *screen;
 
-    for(screen_nbr = 0; screen_nbr < xcb_setup_roots_length(xcb_get_setup (connection)); screen_nbr++)
-        if((screen = xutil_screen_get(connection, screen_nbr)) != NULL
+    for(screen_nbr = 0; screen_nbr < xcb_setup_roots_length(xcb_get_setup(globalconf.connection)); screen_nbr++)
+        if((screen = xutil_screen_get(globalconf.connection, screen_nbr)) != NULL
            && ev->window == screen->root
            && (ev->width != screen->width_in_pixels
                || ev->height != screen->height_in_pixels))
             /* it's not that we panic, but restart */
             awesome_restart();
-
-    return 0;
 }
 
 /** The destroy notify event handler.
- * \param data currently unused.
- * \param connection The connection to the X server.
  * \param ev The event.
  */
-static int
-event_handle_destroynotify(void *data __attribute__ ((unused)),
-                           xcb_connection_t *connection __attribute__ ((unused)),
-                           xcb_destroy_notify_event_t *ev)
+static void
+event_handle_destroynotify(xcb_destroy_notify_event_t *ev)
 {
     client_t *c;
 
@@ -348,8 +330,6 @@ event_handle_destroynotify(void *data __attribute__ ((unused)),
                 xembed_window_array_take(&globalconf.embedded, i);
                 widget_invalidate_bytype(widget_systray);
             }
-
-    return 0;
 }
 
 /** Handle a motion notify over widgets.
@@ -413,19 +393,15 @@ event_handle_widget_motionnotify(wibox_t *wibox,
 }
 
 /** The motion notify event handler.
- * \param data currently unused.
- * \param connection The connection to the X server.
  * \param ev The event.
  */
-static int
-event_handle_motionnotify(void *data __attribute__ ((unused)),
-                          xcb_connection_t *connection,
-                          xcb_motion_notify_event_t *ev)
+static void
+event_handle_motionnotify(xcb_motion_notify_event_t *ev)
 {
     wibox_t *wibox;
 
     if(event_handle_mousegrabber(ev->root_x, ev->root_y, ev->state))
-        return 0;
+        return;
 
     if((wibox = wibox_getbywin(ev->event)))
     {
@@ -436,25 +412,19 @@ event_handle_motionnotify(void *data __attribute__ ((unused)),
 
         event_handle_widget_motionnotify(wibox, w);
     }
-
-    return 0;
 }
 
 /** The leave notify event handler.
- * \param data currently unused.
- * \param connection The connection to the X server.
  * \param ev The event.
  */
-static int
-event_handle_leavenotify(void *data __attribute__ ((unused)),
-                         xcb_connection_t *connection,
-                         xcb_leave_notify_event_t *ev)
+static void
+event_handle_leavenotify(xcb_leave_notify_event_t *ev)
 {
     wibox_t *wibox;
     client_t *c;
 
     if(ev->mode != XCB_NOTIFY_MODE_NORMAL)
-        return 0;
+        return;
 
     if((c = client_getbytitlebarwin(ev->event)) || (c = client_getbywin(ev->event)))
     {
@@ -490,25 +460,19 @@ event_handle_leavenotify(void *data __attribute__ ((unused)),
         luaA_object_emit_signal(globalconf.L, -1, "mouse::leave", 0);
         lua_pop(globalconf.L, 1);
     }
-
-    return 0;
 }
 
 /** The enter notify event handler.
- * \param data currently unused.
- * \param connection The connection to the X server.
  * \param ev The event.
  */
-static int
-event_handle_enternotify(void *data __attribute__ ((unused)),
-                         xcb_connection_t *connection,
-                         xcb_enter_notify_event_t *ev)
+static void
+event_handle_enternotify(xcb_enter_notify_event_t *ev)
 {
     client_t *c;
     wibox_t *wibox;
 
     if(ev->mode != XCB_NOTIFY_MODE_NORMAL)
-        return 0;
+        return;
 
     if((wibox = wibox_getbywin(ev->event)))
     {
@@ -536,19 +500,13 @@ event_handle_enternotify(void *data __attribute__ ((unused)),
         luaA_object_emit_signal(globalconf.L, -1, "mouse::enter", 0);
         lua_pop(globalconf.L, 1);
     }
-
-    return 0;
 }
 
 /** The focus in event handler.
- * \param data currently unused.
- * \param connection The connection to the X server.
  * \param ev The event.
  */
-static int
-event_handle_focusin(void *data __attribute__ ((unused)),
-                     xcb_connection_t *connection,
-                     xcb_focus_in_event_t *ev)
+static void
+event_handle_focusin(xcb_focus_in_event_t *ev)
 {
     client_t *c;
 
@@ -572,18 +530,13 @@ event_handle_focusin(void *data __attribute__ ((unused)),
         default:
             break;
     }
-    return 0;
 }
 
 /** The expose event handler.
- * \param data currently unused.
- * \param connection The connection to the X server.
  * \param ev The event.
  */
-static int
-event_handle_expose(void *data __attribute__ ((unused)),
-                    xcb_connection_t *connection __attribute__ ((unused)),
-                    xcb_expose_event_t *ev)
+static void
+event_handle_expose(xcb_expose_event_t *ev)
 {
     wibox_t *wibox;
 
@@ -594,19 +547,13 @@ event_handle_expose(void *data __attribute__ ((unused)),
         wibox_refresh_pixmap_partial(wibox,
                                      ev->x, ev->y,
                                      ev->width, ev->height);
-
-    return 0;
 }
 
 /** The key press event handler.
- * \param data currently unused.
- * \param connection The connection to the X server.
  * \param ev The event.
  */
-static int
-event_handle_key(void *data __attribute__ ((unused)),
-                 xcb_connection_t *connection __attribute__ ((unused)),
-                 xcb_key_press_event_t *ev)
+static void
+event_handle_key(xcb_key_press_event_t *ev)
 {
     if(globalconf.keygrabber != LUA_REFNIL)
     {
@@ -636,38 +583,33 @@ event_handle_key(void *data __attribute__ ((unused)),
         else
             event_key_callback(ev, &globalconf.keys, 0, 0, &keysym);
     }
-
-    return 0;
 }
 
 /** The map request event handler.
- * \param data currently unused.
- * \param connection The connection to the X server.
  * \param ev The event.
  */
-static int
-event_handle_maprequest(void *data __attribute__ ((unused)),
-                        xcb_connection_t *connection, xcb_map_request_event_t *ev)
+static void
+event_handle_maprequest(xcb_map_request_event_t *ev)
 {
-    int phys_screen, ret = 0;
+    int phys_screen;
     client_t *c;
     xcb_get_window_attributes_cookie_t wa_c;
     xcb_get_window_attributes_reply_t *wa_r;
     xcb_get_geometry_cookie_t geom_c;
     xcb_get_geometry_reply_t *geom_r;
 
-    wa_c = xcb_get_window_attributes_unchecked(connection, ev->window);
+    wa_c = xcb_get_window_attributes_unchecked(globalconf.connection, ev->window);
 
-    if(!(wa_r = xcb_get_window_attributes_reply(connection, wa_c, NULL)))
-        return -1;
+    if(!(wa_r = xcb_get_window_attributes_reply(globalconf.connection, wa_c, NULL)))
+        return;
 
     if(wa_r->override_redirect)
         goto bailout;
 
     if(xembed_getbywin(&globalconf.embedded, ev->window))
     {
-        xcb_map_window(connection, ev->window);
-        xembed_window_activate(connection, ev->window);
+        xcb_map_window(globalconf.connection, ev->window);
+        xembed_window_activate(globalconf.connection, ev->window);
     }
     else if((c = client_getbywin(ev->window)))
     {
@@ -683,15 +625,14 @@ event_handle_maprequest(void *data __attribute__ ((unused)),
     }
     else
     {
-        geom_c = xcb_get_geometry_unchecked(connection, ev->window);
+        geom_c = xcb_get_geometry_unchecked(globalconf.connection, ev->window);
 
-        if(!(geom_r = xcb_get_geometry_reply(connection, geom_c, NULL)))
+        if(!(geom_r = xcb_get_geometry_reply(globalconf.connection, geom_c, NULL)))
         {
-            ret = -1;
             goto bailout;
         }
 
-        phys_screen = xutil_root2screen(connection, geom_r->root);
+        phys_screen = xutil_root2screen(globalconf.connection, geom_r->root);
 
         client_manage(ev->window, geom_r, phys_screen, false);
 
@@ -700,27 +641,23 @@ event_handle_maprequest(void *data __attribute__ ((unused)),
 
 bailout:
     p_delete(&wa_r);
-    return ret;
 }
 
 /** The unmap notify event handler.
- * \param data currently unused.
- * \param connection The connection to the X server.
  * \param ev The event.
  */
-static int
-event_handle_unmapnotify(void *data __attribute__ ((unused)),
-                         xcb_connection_t *connection, xcb_unmap_notify_event_t *ev)
+static void
+event_handle_unmapnotify(xcb_unmap_notify_event_t *ev)
 {
     client_t *c;
 
     if((c = client_getbywin(ev->window)))
     {
-        if(ev->event == xutil_screen_get(connection, c->phys_screen)->root
+        if(ev->event == xutil_screen_get(globalconf.connection, c->phys_screen)->root
            && XCB_EVENT_SENT(ev))
         {
             client_unmanage(c);
-            xcb_unmap_window(connection, ev->window);
+            xcb_unmap_window(globalconf.connection, ev->window);
         }
     }
     else
@@ -731,28 +668,22 @@ event_handle_unmapnotify(void *data __attribute__ ((unused)),
                 widget_invalidate_bytype(widget_systray);
                 xcb_change_save_set(globalconf.connection, XCB_SET_MODE_DELETE, ev->window);
             }
-
-    return 0;
 }
 
 /** The randr screen change notify event handler.
- * \param data currently unused.
- * \param connection The connection to the X server.
  * \param ev The event.
  */
-static int
-event_handle_randr_screen_change_notify(void *data __attribute__ ((unused)),
-                                        xcb_connection_t *connection __attribute__ ((unused)),
-                                        xcb_randr_screen_change_notify_event_t *ev)
+static void
+event_handle_randr_screen_change_notify(xcb_randr_screen_change_notify_event_t *ev)
 {
     /* Code  of  XRRUpdateConfiguration Xlib  function  ported to  XCB
      * (only the code relevant  to RRScreenChangeNotify) as the latter
      * doesn't provide this kind of function */
     if(ev->rotation & (XCB_RANDR_ROTATION_ROTATE_90 | XCB_RANDR_ROTATION_ROTATE_270))
-        xcb_randr_set_screen_size(connection, ev->root, ev->height, ev->width,
+        xcb_randr_set_screen_size(globalconf.connection, ev->root, ev->height, ev->width,
                                   ev->mheight, ev->mwidth);
     else
-        xcb_randr_set_screen_size(connection, ev->root, ev->width, ev->height,
+        xcb_randr_set_screen_size(globalconf.connection, ev->root, ev->width, ev->height,
                                   ev->mwidth, ev->mheight);
 
     /* XRRUpdateConfiguration also executes the following instruction
@@ -763,23 +694,17 @@ event_handle_randr_screen_change_notify(void *data __attribute__ ((unused)),
      */
 
     awesome_restart();
-
-    return 0;
 }
 
 /** The client message event handler.
- * \param data currently unused.
- * \param connection The connection to the X server.
  * \param ev The event.
  */
-static int
-event_handle_clientmessage(void *data __attribute__ ((unused)),
-                           xcb_connection_t *connection,
-                           xcb_client_message_event_t *ev)
+static void
+event_handle_clientmessage(xcb_client_message_event_t *ev)
 {
     /* check for startup notification messages */
     if(sn_xcb_display_process_event(globalconf.sndisplay, (xcb_generic_event_t *) ev))
-        return 0;
+        return;
 
     if(ev->type == WM_CHANGE_STATE)
     {
@@ -794,22 +719,18 @@ event_handle_clientmessage(void *data __attribute__ ((unused)),
         }
     }
     else if(ev->type == _XEMBED)
-        return xembed_process_client_message(ev);
+        xembed_process_client_message(ev);
     else if(ev->type == _NET_SYSTEM_TRAY_OPCODE)
-        return systray_process_client_message(ev);
-    return ewmh_process_client_message(ev);
+        systray_process_client_message(ev);
+    else
+        ewmh_process_client_message(ev);
 }
 
 /** The keymap change notify event handler.
- * \param data Unused data.
- * \param connection The connection to the X server.
  * \param ev The event.
- * \return Status code, 0 if everything's fine.
  */
-static int
-event_handle_mappingnotify(void *data,
-                           xcb_connection_t *connection,
-                           xcb_mapping_notify_event_t *ev)
+static void
+event_handle_mappingnotify(xcb_mapping_notify_event_t *ev)
 {
     if(ev->request == XCB_MAPPING_MODIFIER
        || ev->request == XCB_MAPPING_KEYBOARD)
@@ -826,39 +747,33 @@ event_handle_mappingnotify(void *data,
                             &globalconf.shiftlockmask, &globalconf.capslockmask,
                             &globalconf.modeswitchmask);
 
-        int nscreen = xcb_setup_roots_length(xcb_get_setup(connection));
+        int nscreen = xcb_setup_roots_length(xcb_get_setup(globalconf.connection));
 
         /* regrab everything */
         for(int phys_screen = 0; phys_screen < nscreen; phys_screen++)
         {
             xcb_screen_t *s = xutil_screen_get(globalconf.connection, phys_screen);
             /* yes XCB_BUTTON_MASK_ANY is also for grab_key even if it's look weird */
-            xcb_ungrab_key(connection, XCB_GRAB_ANY, s->root, XCB_BUTTON_MASK_ANY);
+            xcb_ungrab_key(globalconf.connection, XCB_GRAB_ANY, s->root, XCB_BUTTON_MASK_ANY);
             window_grabkeys(s->root, &globalconf.keys);
         }
 
         foreach(_c, globalconf.clients)
         {
             client_t *c = *_c;
-            xcb_ungrab_key(connection, XCB_GRAB_ANY, c->window, XCB_BUTTON_MASK_ANY);
+            xcb_ungrab_key(globalconf.connection, XCB_GRAB_ANY, c->window, XCB_BUTTON_MASK_ANY);
             window_grabkeys(c->window, &c->keys);
         }
     }
-
-    return 0;
 }
 
-static int
-event_handle_reparentnotify(void *data,
-                           xcb_connection_t *connection,
-                           xcb_reparent_notify_event_t *ev)
+static void
+event_handle_reparentnotify(xcb_reparent_notify_event_t *ev)
 {
     client_t *c;
 
     if((c = client_getbywin(ev->window)))
         client_unmanage(c);
-
-    return 0;
 }
 
 /** \brief awesome xerror function.
@@ -899,7 +814,7 @@ void event_handle(xcb_generic_event_t *event)
 
     switch(response_type)
     {
-#define EVENT(type, callback) case type: callback(NULL, globalconf.connection, (void *) event); return
+#define EVENT(type, callback) case type: callback((void *) event); return
         EVENT(XCB_BUTTON_PRESS, event_handle_button);
         EVENT(XCB_BUTTON_RELEASE, event_handle_button);
         EVENT(XCB_CONFIGURE_REQUEST, event_handle_configurerequest);
@@ -933,7 +848,7 @@ void event_handle(xcb_generic_event_t *event)
     }
 
     if (response_type == randr_screen_change_notify)
-        event_handle_randr_screen_change_notify(NULL, globalconf.connection, (void *) event);
+        event_handle_randr_screen_change_notify((void *) event);
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

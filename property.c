@@ -409,10 +409,8 @@ property_handle_net_wm_opacity(uint8_t state,
  * \param ev The event.
  * \return Status code, 0 if everything's fine.
  */
-int
-property_handle_propertynotify(void *data,
-                               xcb_connection_t *c,
-                               xcb_property_notify_event_t *ev)
+void
+property_handle_propertynotify(xcb_property_notify_event_t *ev)
 {
     uint32_t length;
     int (*handler)(uint8_t state,
@@ -429,7 +427,7 @@ property_handle_propertynotify(void *data,
     } else
 #define HANDLE_L(atom, cb) HANDLE(atom, cb, UINT_MAX)
 #define HANDLE_S(atom, cb) HANDLE(atom, cb, 1)
-#define END return 0
+#define END return
 
     /* Xembed stuff */
     HANDLE_L(_XEMBED_INFO, property_handle_xembed_info)
@@ -469,15 +467,13 @@ property_handle_propertynotify(void *data,
     if(ev->state != XCB_PROPERTY_DELETE)
     {
         xcb_get_property_cookie_t cookie =
-            xcb_get_property(c, 0, ev->window, ev->atom,
+            xcb_get_property(globalconf.connection, 0, ev->window, ev->atom,
                              XCB_GET_PROPERTY_TYPE_ANY, 0, length);
-        propr = xcb_get_property_reply(c, cookie, 0);
+        propr = xcb_get_property_reply(globalconf.connection, cookie, 0);
     }
 
-    int ret = (*handler)(ev->state, ev->window, ev->atom, propr);
-
+    (*handler)(ev->state, ev->window, ev->atom, propr);
     p_delete(&propr);
-    return ret;
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
