@@ -39,11 +39,13 @@
         bool no_reply = !reply; \
         if(no_reply) \
             reply = xcb_get_property_reply(globalconf.connection, \
-                                           xcb_get_any_property(globalconf.connection, \
-                                                                false, \
-                                                                c->window, \
-                                                                atom, \
-                                                                UINT_MAX), NULL); \
+                                           xcb_get_property(globalconf.connection, \
+                                                            false, \
+                                                            c->window, \
+                                                            atom, \
+                                                            XCB_GET_PROPERTY_TYPE_ANY, \
+                                                            0, \
+                                                            UINT_MAX), NULL); \
         luaA_object_push(globalconf.L, c); \
         setfunc(globalconf.L, -1, xutil_get_text_property_from_reply(reply)); \
         lua_pop(globalconf.L, 1); \
@@ -415,54 +417,89 @@ property_handle_net_wm_opacity(void *data __attribute__ ((unused)),
     return 0;
 }
 
-void a_xcb_set_property_handlers(void)
+/** The property notify event handler.
+ * \param data Unused data.
+ * \param connection The connection to the X server.
+ * \param ev The event.
+ * \return Status code, 0 if everything's fine.
+ */
+static int
+handle_propertynotify(void *data,
+                      xcb_connection_t *c,
+                      xcb_property_notify_event_t *ev)
 {
-    /* init */
-    xcb_property_handlers_init(&globalconf.prophs, &globalconf.evenths);
+    uint32_t length;
+    int (*handler)(void *data,
+                   xcb_connection_t *connection,
+                   uint8_t state,
+                   xcb_window_t window,
+                   xcb_atom_t name,
+                   xcb_get_property_reply_t *reply) = NULL;
+
+    /* Find the correct event handler */
+#define HANDLE(atom_, cb, len) \
+    if (ev->atom == atom_) \
+    { \
+        handler = cb; \
+        length = len; \
+    } else
+#define HANDLE_L(atom, cb) HANDLE(atom, cb, UINT_MAX)
+#define HANDLE_S(atom, cb) HANDLE(atom, cb, 1)
+#define END return 0
 
     /* Xembed stuff */
-    xcb_property_set_handler(&globalconf.prophs, _XEMBED_INFO, UINT_MAX,
-                             property_handle_xembed_info, NULL);
+    HANDLE_L(_XEMBED_INFO, property_handle_xembed_info)
 
     /* ICCCM stuff */
-    xcb_property_set_handler(&globalconf.prophs, WM_TRANSIENT_FOR, UINT_MAX,
-                             property_handle_wm_transient_for, NULL);
-    xcb_property_set_handler(&globalconf.prophs, WM_CLIENT_LEADER, UINT_MAX,
-                             property_handle_wm_client_leader, NULL);
-    xcb_property_set_handler(&globalconf.prophs, WM_NORMAL_HINTS, UINT_MAX,
-                             property_handle_wm_normal_hints, NULL);
-    xcb_property_set_handler(&globalconf.prophs, WM_HINTS, UINT_MAX,
-                             property_handle_wm_hints, NULL);
-    xcb_property_set_handler(&globalconf.prophs, WM_NAME, UINT_MAX,
-                             property_handle_wm_name, NULL);
-    xcb_property_set_handler(&globalconf.prophs, WM_ICON_NAME, UINT_MAX,
-                             property_handle_wm_icon_name, NULL);
-    xcb_property_set_handler(&globalconf.prophs, WM_CLASS, UINT_MAX,
-                             property_handle_wm_class, NULL);
-    xcb_property_set_handler(&globalconf.prophs, WM_PROTOCOLS, UINT_MAX,
-                             property_handle_wm_protocols, NULL);
-    xcb_property_set_handler(&globalconf.prophs, WM_CLIENT_MACHINE, UINT_MAX,
-                             property_handle_wm_client_machine, NULL);
-    xcb_property_set_handler(&globalconf.prophs, WM_WINDOW_ROLE, UINT_MAX,
-                             property_handle_wm_window_role, NULL);
+    HANDLE_L(WM_TRANSIENT_FOR, property_handle_wm_transient_for)
+    HANDLE_L(WM_CLIENT_LEADER, property_handle_wm_client_leader)
+    HANDLE_L(WM_NORMAL_HINTS, property_handle_wm_normal_hints)
+    HANDLE_L(WM_HINTS, property_handle_wm_hints)
+    HANDLE_L(WM_NAME, property_handle_wm_name)
+    HANDLE_L(WM_ICON_NAME, property_handle_wm_icon_name)
+    HANDLE_L(WM_CLASS, property_handle_wm_class)
+    HANDLE_L(WM_PROTOCOLS, property_handle_wm_protocols)
+    HANDLE_L(WM_CLIENT_MACHINE, property_handle_wm_client_machine)
+    HANDLE_L(WM_WINDOW_ROLE, property_handle_wm_window_role)
 
     /* EWMH stuff */
-    xcb_property_set_handler(&globalconf.prophs, _NET_WM_NAME, UINT_MAX,
-                             property_handle_net_wm_name, NULL);
-    xcb_property_set_handler(&globalconf.prophs, _NET_WM_ICON_NAME, UINT_MAX,
-                             property_handle_net_wm_icon_name, NULL);
-    xcb_property_set_handler(&globalconf.prophs, _NET_WM_STRUT_PARTIAL, UINT_MAX,
-                             property_handle_net_wm_strut_partial, NULL);
-    xcb_property_set_handler(&globalconf.prophs, _NET_WM_ICON, UINT_MAX,
-                             property_handle_net_wm_icon, NULL);
-    xcb_property_set_handler(&globalconf.prophs, _NET_WM_PID, UINT_MAX,
-                             property_handle_net_wm_pid, NULL);
-    xcb_property_set_handler(&globalconf.prophs, _NET_WM_WINDOW_OPACITY, 1,
-                             property_handle_net_wm_opacity, NULL);
+    HANDLE_L(_NET_WM_NAME, property_handle_net_wm_name)
+    HANDLE_L(_NET_WM_ICON_NAME, property_handle_net_wm_icon_name)
+    HANDLE_L(_NET_WM_STRUT_PARTIAL, property_handle_net_wm_strut_partial)
+    HANDLE_L(_NET_WM_ICON, property_handle_net_wm_icon)
+    HANDLE_L(_NET_WM_PID, property_handle_net_wm_pid)
+    HANDLE_S(_NET_WM_WINDOW_OPACITY, property_handle_net_wm_opacity)
 
     /* background change */
-    xcb_property_set_handler(&globalconf.prophs, _XROOTPMAP_ID, 1,
-                             property_handle_xrootpmap_id, NULL);
+    HANDLE_S(_XROOTPMAP_ID, property_handle_xrootpmap_id)
+
+    /* If nothing was found, return */
+    END;
+
+#undef HANDLE_L
+#undef HANDLE_S
+#undef END
+
+    /* Get the property, if needed. */
+    xcb_get_property_reply_t *propr = NULL;
+    if(ev->state != XCB_PROPERTY_DELETE)
+    {
+        xcb_get_property_cookie_t cookie =
+            xcb_get_property(c, 0, ev->window, ev->atom,
+                             XCB_GET_PROPERTY_TYPE_ANY, 0, length);
+        propr = xcb_get_property_reply(c, cookie, 0);
+    }
+
+    int ret = (*handler)(NULL, c, ev->state, ev->window, ev->atom, propr);
+
+    p_delete(&propr);
+    return ret;
+}
+
+void a_xcb_set_property_handlers(void)
+{
+    /* Register our handler for PropertyNotify events */
+    xcb_event_set_property_notify_handler(&globalconf.evenths, handle_propertynotify, NULL);
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

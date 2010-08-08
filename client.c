@@ -620,8 +620,8 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
      * startup id. */
     xcb_get_property_cookie_t startup_id_q = { 0 };
     if(!startup)
-        startup_id_q = xcb_get_any_property(globalconf.connection,
-                                            false, w, _NET_STARTUP_ID, UINT_MAX);
+        startup_id_q = xcb_get_property(globalconf.connection, false, w,
+                                        _NET_STARTUP_ID, XCB_GET_PROPERTY_TYPE_ANY, 0, UINT_MAX);
 
     xcb_change_window_attributes(globalconf.connection, w, XCB_CW_EVENT_MASK, select_input_val);
 
