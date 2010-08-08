@@ -64,7 +64,7 @@ static char *conffile;
  * \return The number of elements pushed on stack.
  */
 static int
-luaA_quit(lua_State *L __attribute__ ((unused)))
+luaA_quit(lua_State *L)
 {
     ev_unloop(globalconf.loop, 1);
     return 0;
@@ -91,7 +91,7 @@ luaA_exec(lua_State *L)
 /** Restart awesome.
  */
 static int
-luaA_restart(lua_State *L __attribute__ ((unused)))
+luaA_restart(lua_State *L)
 {
     awesome_restart();
     return 0;
