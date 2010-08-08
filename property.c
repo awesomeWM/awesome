@@ -53,9 +53,7 @@
             p_delete(&reply); \
     } \
     static int \
-    property_handle_##funcname(void *data, \
-                               xcb_connection_t *connection, \
-                               uint8_t state, \
+    property_handle_##funcname(uint8_t state, \
                                xcb_window_t window, \
                                xcb_atom_t name, \
                                xcb_get_property_reply_t *reply) \
@@ -78,9 +76,7 @@ HANDLE_TEXT_PROPERTY(wm_window_role, WM_WINDOW_ROLE, client_set_role)
 
 #define HANDLE_PROPERTY(name) \
     static int \
-    property_handle_##name(void *data, \
-                           xcb_connection_t *connection, \
-                           uint8_t state, \
+    property_handle_##name(uint8_t state, \
                            xcb_window_t window, \
                            xcb_atom_t name, \
                            xcb_get_property_reply_t *reply) \
@@ -243,9 +239,7 @@ property_update_wm_class(client_t *c, xcb_get_property_reply_t *reply)
 }
 
 static int
-property_handle_net_wm_strut_partial(void *data,
-                                     xcb_connection_t *connection,
-                                     uint8_t state,
+property_handle_net_wm_strut_partial(uint8_t state,
                                      xcb_window_t window,
                                      xcb_atom_t name,
                                      xcb_get_property_reply_t *reply)
@@ -339,17 +333,13 @@ property_update_wm_protocols(client_t *c, xcb_get_property_reply_t *reply)
 }
 
 /** The property notify event handler.
- * \param data currently unused.
- * \param connection The connection to the X server.
  * \param state currently unused
  * \param window The window to obtain update the property with.
  * \param name The protocol atom, currently unused.
  * \param reply (Optional) An existing reply.
  */
 static int
-property_handle_xembed_info(void *data __attribute__ ((unused)),
-                            xcb_connection_t *connection,
-                            uint8_t state,
+property_handle_xembed_info(uint8_t state,
                             xcb_window_t window,
                             xcb_atom_t name,
                             xcb_get_property_reply_t *reply)
@@ -357,15 +347,13 @@ property_handle_xembed_info(void *data __attribute__ ((unused)),
     xembed_window_t *emwin = xembed_getbywin(&globalconf.embedded, window);
 
     if(emwin)
-        xembed_property_update(connection, emwin, reply);
+        xembed_property_update(globalconf.connection, emwin, reply);
 
     return 0;
 }
 
 static int
-property_handle_xrootpmap_id(void *data __attribute__ ((unused)),
-                             xcb_connection_t *connection,
-                             uint8_t state,
+property_handle_xrootpmap_id(uint8_t state,
                              xcb_window_t window,
                              xcb_atom_t name,
                              xcb_get_property_reply_t *reply)
@@ -375,7 +363,7 @@ property_handle_xrootpmap_id(void *data __attribute__ ((unused)),
             (*w)->need_update = true;
     else
     {
-        int screen = xutil_root2screen(connection, window);
+        int screen = xutil_root2screen(globalconf.connection, window);
         foreach(w, globalconf.wiboxes)
             if(screen == screen_array_indexof(&globalconf.screens, (*w)->screen))
                (*w)->need_update = true;
@@ -385,9 +373,7 @@ property_handle_xrootpmap_id(void *data __attribute__ ((unused)),
 }
 
 static int
-property_handle_net_wm_opacity(void *data __attribute__ ((unused)),
-                               xcb_connection_t *connection,
-                               uint8_t state,
+property_handle_net_wm_opacity(uint8_t state,
                                xcb_window_t window,
                                xcb_atom_t name,
                                xcb_get_property_reply_t *reply)
@@ -426,9 +412,7 @@ handle_propertynotify(void *data,
                       xcb_property_notify_event_t *ev)
 {
     uint32_t length;
-    int (*handler)(void *data,
-                   xcb_connection_t *connection,
-                   uint8_t state,
+    int (*handler)(uint8_t state,
                    xcb_window_t window,
                    xcb_atom_t name,
                    xcb_get_property_reply_t *reply) = NULL;
@@ -487,7 +471,7 @@ handle_propertynotify(void *data,
         propr = xcb_get_property_reply(c, cookie, 0);
     }
 
-    int ret = (*handler)(NULL, c, ev->state, ev->window, ev->atom, propr);
+    int ret = (*handler)(ev->state, ev->window, ev->atom, propr);
 
     p_delete(&propr);
     return ret;
