@@ -151,7 +151,7 @@ window_opacity_get(xcb_window_t win)
 
     xcb_get_property_cookie_t prop_c =
         xcb_get_property_unchecked(globalconf.connection, false, win,
-                                   _NET_WM_WINDOW_OPACITY, CARDINAL, 0L, 1L);
+                                   _NET_WM_WINDOW_OPACITY, XCB_ATOM_CARDINAL, 0L, 1L);
 
     xcb_get_property_reply_t *prop_r =
         xcb_get_property_reply(globalconf.connection, prop_c, NULL);

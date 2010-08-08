@@ -52,7 +52,7 @@ luaA_selection_get(lua_State *L)
     }
 
     xcb_convert_selection(globalconf.connection, selection_window,
-                          PRIMARY, UTF8_STRING, XSEL_DATA, XCB_CURRENT_TIME);
+                          XCB_ATOM_PRIMARY, UTF8_STRING, XSEL_DATA, XCB_CURRENT_TIME);
     xcb_flush(globalconf.connection);
 
     xcb_generic_event_t *event;
@@ -83,7 +83,7 @@ luaA_selection_get(lua_State *L)
         xcb_selection_notify_event_t *event_notify =
             (xcb_selection_notify_event_t *) event;
 
-        if(event_notify->selection == PRIMARY
+        if(event_notify->selection == XCB_ATOM_PRIMARY
            && event_notify->property != XCB_NONE)
         {
             xcb_get_text_property_reply_t prop;
