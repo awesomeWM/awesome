@@ -39,9 +39,7 @@ void property_update_wm_window_role(client_t *, xcb_get_property_reply_t *);
 void property_update_net_wm_pid(client_t *, xcb_get_property_reply_t *);
 void property_update_net_wm_icon(client_t *, xcb_get_property_reply_t *);
 
-int property_handle_propertynotify(void *data,
-                                   xcb_connection_t *c,
-                                   xcb_property_notify_event_t *ev);
+void property_handle_propertynotify(xcb_property_notify_event_t *ev);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
