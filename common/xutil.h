@@ -56,10 +56,6 @@ void xutil_lock_mask_get(xcb_connection_t *, xcb_get_modifier_mapping_cookie_t,
                          xcb_key_symbols_t *,
                          uint16_t *, uint16_t *, uint16_t *, uint16_t *);
 
-/** Set the same handler for all errors */
-void xutil_error_handler_catch_all_set(xcb_event_handlers_t *,
-                                       xcb_generic_error_handler_t, void *);
-
 uint16_t xutil_key_mask_fromstr(const char *, size_t);
 void xutil_key_mask_tostr(uint16_t, const char **, size_t *);
 
