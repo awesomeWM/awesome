@@ -209,14 +209,14 @@ a_xcb_check_cb(EV_P_ ev_check *w, int revents)
         }
         else
         {
-            xcb_event_handle(&globalconf.evenths, event);
+            event_handle(event);
             p_delete(&event);
         }
     }
 
     if(mouse)
     {
-        xcb_event_handle(&globalconf.evenths, mouse);
+        event_handle(mouse);
         p_delete(&mouse);
     }
 }
@@ -225,20 +225,6 @@ static void
 a_xcb_io_cb(EV_P_ ev_io *w, int revents)
 {
     /* empty */
-}
-
-/** Startup Error handler to check if another window manager
- * is already running.
- * \param data Additional optional parameters data.
- * \param c X connection.
- * \param error Error event.
- */
-static int __attribute__ ((noreturn))
-xerrorstart(void * data __attribute__ ((unused)),
-            xcb_connection_t * c  __attribute__ ((unused)),
-            xcb_generic_error_t * error __attribute__ ((unused)))
-{
-    fatal("another window manager is already running");
 }
 
 static void
@@ -274,37 +260,6 @@ static void
 restart_on_signal(EV_P_ ev_signal *w, int revents)
 {
     awesome_restart();
-}
-
-/** \brief awesome xerror function.
- * There's no way to check accesses to destroyed windows, thus those cases are
- * ignored (especially on UnmapNotify's).  Other types of errors call Xlibs
- * default error handler, which may call exit.
- * \param data Currently unused.
- * \param c The connection to the X server.
- * \param e The error event.
- * \return 0 if no error, or xerror's xlib return status.
- */
-static int
-xerror(void *data __attribute__ ((unused)),
-       xcb_connection_t *c __attribute__ ((unused)),
-       xcb_generic_error_t *e)
-{
-    /* ignore this */
-    if(e->error_code == XCB_EVENT_ERROR_BAD_WINDOW
-       || (e->error_code == XCB_EVENT_ERROR_BAD_MATCH
-           && e->major_code == XCB_SET_INPUT_FOCUS)
-       || (e->error_code == XCB_EVENT_ERROR_BAD_VALUE
-           && e->major_code == XCB_KILL_CLIENT)
-       || (e->major_code == XCB_CONFIGURE_WINDOW
-           && e->error_code == XCB_EVENT_ERROR_BAD_MATCH))
-        return 0;
-
-    warn("X error: request=%s, error=%s",
-         xcb_event_get_request_label(e->major_code),
-         xcb_event_get_error_label(e->error_code));
-
-    return 0;
 }
 
 /** Print help and exit(2) with given exit_code.
@@ -458,10 +413,6 @@ main(int argc, char **argv)
     ev_prepare_start(globalconf.loop, &a_refresh);
     ev_unref(globalconf.loop);
 
-    /* Allocate a handler which will holds all errors and events */
-    xcb_event_handlers_init(globalconf.connection, &globalconf.evenths);
-    xutil_error_handler_catch_all_set(&globalconf.evenths, xerrorstart, NULL);
-
     for(screen_nbr = 0;
         screen_nbr < xcb_setup_roots_length(xcb_get_setup(globalconf.connection));
         screen_nbr++)
@@ -477,11 +428,10 @@ main(int argc, char **argv)
     /* Need to xcb_flush to validate error handler */
     xcb_aux_sync(globalconf.connection);
 
-    /* Process all errors in the queue if any */
-    xcb_event_poll_for_event_loop(&globalconf.evenths);
-
-    /* Set the default xerror handler */
-    xutil_error_handler_catch_all_set(&globalconf.evenths, xerror, NULL);
+    /* Process all errors in the queue if any. There can be no events yet, so if
+     * this function returns something, it must be an error. */
+    if (xcb_poll_for_event(globalconf.connection) != NULL)
+        fatal("another window manager is already running");
 
     /* Prefetch the maximum request length */
     xcb_prefetch_maximum_request_length(globalconf.connection);
@@ -557,11 +507,6 @@ main(int argc, char **argv)
 
     /* scan existing windows */
     scan();
-
-    /* process all errors in the queue if any */
-    xcb_event_poll_for_event_loop(&globalconf.evenths);
-    a_xcb_set_event_handlers();
-    a_xcb_set_property_handlers();
 
     /* we will receive events, stop grabbing server */
     xcb_ungrab_server(globalconf.connection);

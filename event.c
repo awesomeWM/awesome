@@ -29,6 +29,7 @@
 #include "event.h"
 #include "tag.h"
 #include "window.h"
+#include "property.h"
 #include "ewmh.h"
 #include "client.h"
 #include "widget.h"
@@ -860,36 +861,79 @@ event_handle_reparentnotify(void *data,
     return 0;
 }
 
-void a_xcb_set_event_handlers(void)
+/** \brief awesome xerror function.
+ * There's no way to check accesses to destroyed windows, thus those cases are
+ * ignored (especially on UnmapNotify's).
+ * \param e The error event.
+ */
+static void
+xerror(xcb_generic_error_t *e)
 {
-    const xcb_query_extension_reply_t *randr_query;
+    /* ignore this */
+    if(e->error_code == XCB_EVENT_ERROR_BAD_WINDOW
+       || (e->error_code == XCB_EVENT_ERROR_BAD_MATCH
+           && e->major_code == XCB_SET_INPUT_FOCUS)
+       || (e->error_code == XCB_EVENT_ERROR_BAD_VALUE
+           && e->major_code == XCB_KILL_CLIENT)
+       || (e->major_code == XCB_CONFIGURE_WINDOW
+           && e->error_code == XCB_EVENT_ERROR_BAD_MATCH))
+        return;
 
-    xcb_event_set_button_press_handler(&globalconf.evenths, event_handle_button, NULL);
-    xcb_event_set_button_release_handler(&globalconf.evenths, event_handle_button, NULL);
-    xcb_event_set_configure_request_handler(&globalconf.evenths, event_handle_configurerequest, NULL);
-    xcb_event_set_configure_notify_handler(&globalconf.evenths, event_handle_configurenotify, NULL);
-    xcb_event_set_destroy_notify_handler(&globalconf.evenths, event_handle_destroynotify, NULL);
-    xcb_event_set_enter_notify_handler(&globalconf.evenths, event_handle_enternotify, NULL);
-    xcb_event_set_leave_notify_handler(&globalconf.evenths, event_handle_leavenotify, NULL);
-    xcb_event_set_focus_in_handler(&globalconf.evenths, event_handle_focusin, NULL);
-    xcb_event_set_motion_notify_handler(&globalconf.evenths, event_handle_motionnotify, NULL);
-    xcb_event_set_expose_handler(&globalconf.evenths, event_handle_expose, NULL);
-    xcb_event_set_key_press_handler(&globalconf.evenths, event_handle_key, NULL);
-    xcb_event_set_key_release_handler(&globalconf.evenths, event_handle_key, NULL);
-    xcb_event_set_map_request_handler(&globalconf.evenths, event_handle_maprequest, NULL);
-    xcb_event_set_unmap_notify_handler(&globalconf.evenths, event_handle_unmapnotify, NULL);
-    xcb_event_set_client_message_handler(&globalconf.evenths, event_handle_clientmessage, NULL);
-    xcb_event_set_mapping_notify_handler(&globalconf.evenths, event_handle_mappingnotify, NULL);
-    xcb_event_set_reparent_notify_handler(&globalconf.evenths, event_handle_reparentnotify, NULL);
+    warn("X error: request=%s, error=%s",
+         xcb_event_get_request_label(e->major_code),
+         xcb_event_get_error_label(e->error_code));
 
-    /* check for randr extension */
-    randr_query = xcb_get_extension_data(globalconf.connection, &xcb_randr_id);
-    if(randr_query->present)
-        xcb_event_set_handler(&globalconf.evenths,
-                              randr_query->first_event + XCB_RANDR_SCREEN_CHANGE_NOTIFY,
-                              (xcb_generic_event_handler_t) event_handle_randr_screen_change_notify,
-                              NULL);
+    return;
+}
 
+void event_handle(xcb_generic_event_t *event)
+{
+    uint8_t response_type = XCB_EVENT_RESPONSE_TYPE(event);
+
+    if(response_type == 0)
+    {
+        /* This is an error, not a event */
+        xerror((xcb_generic_error_t *) event);
+        return;
+    }
+
+    switch(response_type)
+    {
+#define EVENT(type, callback) case type: callback(NULL, globalconf.connection, (void *) event); return
+        EVENT(XCB_BUTTON_PRESS, event_handle_button);
+        EVENT(XCB_BUTTON_RELEASE, event_handle_button);
+        EVENT(XCB_CONFIGURE_REQUEST, event_handle_configurerequest);
+        EVENT(XCB_CONFIGURE_NOTIFY, event_handle_configurenotify);
+        EVENT(XCB_DESTROY_NOTIFY, event_handle_destroynotify);
+        EVENT(XCB_ENTER_NOTIFY, event_handle_enternotify);
+        EVENT(XCB_CLIENT_MESSAGE, event_handle_clientmessage);
+        EVENT(XCB_EXPOSE, event_handle_expose);
+        EVENT(XCB_FOCUS_IN, event_handle_focusin);
+        EVENT(XCB_KEY_PRESS, event_handle_key);
+        EVENT(XCB_KEY_RELEASE, event_handle_key);
+        EVENT(XCB_LEAVE_NOTIFY, event_handle_leavenotify);
+        EVENT(XCB_MAPPING_NOTIFY, event_handle_mappingnotify);
+        EVENT(XCB_MAP_REQUEST, event_handle_maprequest);
+        EVENT(XCB_MOTION_NOTIFY, event_handle_motionnotify);
+        EVENT(XCB_PROPERTY_NOTIFY, property_handle_propertynotify);
+        EVENT(XCB_REPARENT_NOTIFY, event_handle_reparentnotify);
+        EVENT(XCB_UNMAP_NOTIFY, event_handle_unmapnotify);
+#undef EVENT
+    }
+
+    static uint8_t randr_screen_change_notify = 0;
+
+    if(randr_screen_change_notify == 0)
+    {
+        /* check for randr extension */
+        const xcb_query_extension_reply_t *randr_query;
+        randr_query = xcb_get_extension_data(globalconf.connection, &xcb_randr_id);
+        if(randr_query->present)
+            randr_screen_change_notify = randr_query->first_event + XCB_RANDR_SCREEN_CHANGE_NOTIFY;
+    }
+
+    if (response_type == randr_screen_change_notify)
+        event_handle_randr_screen_change_notify(NULL, globalconf.connection, (void *) event);
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

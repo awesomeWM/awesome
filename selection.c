@@ -74,7 +74,7 @@ luaA_selection_get(lua_State *L)
              * Anyway that's still brakes the socket or D-Bus, so maybe using
              * ev_loop() would be even better.
              */
-            xcb_event_handle(&globalconf.evenths, event);
+            event_handle(event);
             p_delete(&event);
             awesome_refresh();
             continue;

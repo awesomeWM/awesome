@@ -53,10 +53,6 @@ typedef struct
 {
     /** Connection ref */
     xcb_connection_t *connection;
-    /** Event and error handlers */
-    xcb_event_handlers_t evenths;
-    /** Property change handler */
-    xcb_property_handlers_t prophs;
     /** Default screen number */
     int default_screen;
     /** Keys symbol table */
