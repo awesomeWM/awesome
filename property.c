@@ -65,11 +65,11 @@
     }
 
 
-HANDLE_TEXT_PROPERTY(wm_name, WM_NAME, client_set_alt_name)
+HANDLE_TEXT_PROPERTY(wm_name, XCB_ATOM_WM_NAME, client_set_alt_name)
 HANDLE_TEXT_PROPERTY(net_wm_name, _NET_WM_NAME, client_set_name)
-HANDLE_TEXT_PROPERTY(wm_icon_name, WM_ICON_NAME, client_set_alt_icon_name)
+HANDLE_TEXT_PROPERTY(wm_icon_name, XCB_ATOM_WM_ICON_NAME, client_set_alt_icon_name)
 HANDLE_TEXT_PROPERTY(net_wm_icon_name, _NET_WM_ICON_NAME, client_set_icon_name)
-HANDLE_TEXT_PROPERTY(wm_client_machine, WM_CLIENT_MACHINE, client_set_machine)
+HANDLE_TEXT_PROPERTY(wm_client_machine, XCB_ATOM_WM_CLIENT_MACHINE, client_set_machine)
 HANDLE_TEXT_PROPERTY(wm_window_role, WM_WINDOW_ROLE, client_set_role)
 
 #undef HANDLE_TEXT_PROPERTY
@@ -138,7 +138,7 @@ property_update_wm_client_leader(client_t *c, xcb_get_property_reply_t *reply)
     if(no_reply)
     {
         client_leader_q = xcb_get_property_unchecked(globalconf.connection, false, c->window,
-                                                     WM_CLIENT_LEADER, WINDOW, 0, 32);
+                                                     WM_CLIENT_LEADER, XCB_ATOM_WINDOW, 1, 32);
 
         reply = xcb_get_property_reply(globalconf.connection, client_leader_q, NULL);
     }
@@ -279,7 +279,7 @@ property_update_net_wm_pid(client_t *c,
     if(no_reply)
     {
         xcb_get_property_cookie_t prop_c =
-            xcb_get_property_unchecked(globalconf.connection, false, c->window, _NET_WM_PID, CARDINAL, 0L, 1L);
+            xcb_get_property_unchecked(globalconf.connection, false, c->window, _NET_WM_PID, XCB_ATOM_CARDINAL, 0L, 1L);
         reply = xcb_get_property_reply(globalconf.connection, prop_c, NULL);
     }
 
@@ -430,15 +430,15 @@ property_handle_propertynotify(xcb_property_notify_event_t *ev)
     HANDLE_L(_XEMBED_INFO, property_handle_xembed_info)
 
     /* ICCCM stuff */
-    HANDLE_L(WM_TRANSIENT_FOR, property_handle_wm_transient_for)
+    HANDLE_L(XCB_ATOM_WM_TRANSIENT_FOR, property_handle_wm_transient_for)
     HANDLE_L(WM_CLIENT_LEADER, property_handle_wm_client_leader)
-    HANDLE_L(WM_NORMAL_HINTS, property_handle_wm_normal_hints)
-    HANDLE_L(WM_HINTS, property_handle_wm_hints)
-    HANDLE_L(WM_NAME, property_handle_wm_name)
-    HANDLE_L(WM_ICON_NAME, property_handle_wm_icon_name)
-    HANDLE_L(WM_CLASS, property_handle_wm_class)
+    HANDLE_L(XCB_ATOM_WM_NORMAL_HINTS, property_handle_wm_normal_hints)
+    HANDLE_L(XCB_ATOM_WM_HINTS, property_handle_wm_hints)
+    HANDLE_L(XCB_ATOM_WM_NAME, property_handle_wm_name)
+    HANDLE_L(XCB_ATOM_WM_ICON_NAME, property_handle_wm_icon_name)
+    HANDLE_L(XCB_ATOM_WM_CLASS, property_handle_wm_class)
     HANDLE_L(WM_PROTOCOLS, property_handle_wm_protocols)
-    HANDLE_L(WM_CLIENT_MACHINE, property_handle_wm_client_machine)
+    HANDLE_L(XCB_ATOM_WM_CLIENT_MACHINE, property_handle_wm_client_machine)
     HANDLE_L(WM_WINDOW_ROLE, property_handle_wm_window_role)
 
     /* EWMH stuff */

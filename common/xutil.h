@@ -27,6 +27,7 @@
 #include <xcb/xcb_aux.h>
 #include <xcb/xcb_event.h>
 #include <xcb/xcb_atom.h>
+#include <xcb/xproto.h>
 
 #include "common/array.h"
 #include "common/atoms.h"
@@ -35,7 +36,7 @@ static inline char *
 xutil_get_text_property_from_reply(xcb_get_property_reply_t *reply)
 {
     if(reply
-       && (reply->type == STRING
+       && (reply->type == XCB_ATOM_STRING
            || reply->type == UTF8_STRING
            || reply->type == COMPOUND_TEXT)
        && reply->format == 8

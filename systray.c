@@ -273,7 +273,7 @@ systray_iskdedockapp(xcb_window_t w)
      * thanks KDE. */
     kde_check_q = xcb_get_property_unchecked(globalconf.connection, false, w,
                                              _KDE_NET_WM_SYSTEM_TRAY_WINDOW_FOR,
-                                             WINDOW, 0, 1);
+                                             XCB_ATOM_WINDOW, 0, 1);
 
     kde_check = xcb_get_property_reply(globalconf.connection, kde_check_q, NULL);
 
