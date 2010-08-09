@@ -55,8 +55,7 @@
     } \
     static int \
     property_handle_##funcname(uint8_t state, \
-                               xcb_window_t window, \
-                               xcb_atom_t name) \
+                               xcb_window_t window) \
     { \
         client_t *c = client_getbywin(window); \
         if(c) \
@@ -77,8 +76,7 @@ HANDLE_TEXT_PROPERTY(wm_window_role, WM_WINDOW_ROLE, client_set_role)
 #define HANDLE_PROPERTY(name) \
     static int \
     property_handle_##name(uint8_t state, \
-                           xcb_window_t window, \
-                           xcb_atom_t name) \
+                           xcb_window_t window) \
     { \
         client_t *c = client_getbywin(window); \
         if(c) \
@@ -224,8 +222,7 @@ property_update_wm_class(client_t *c, xcb_get_property_cookie_t cookie)
 
 static int
 property_handle_net_wm_strut_partial(uint8_t state,
-                                     xcb_window_t window,
-                                     xcb_atom_t name)
+                                     xcb_window_t window)
 {
     client_t *c = client_getbywin(window);
 
@@ -313,8 +310,7 @@ property_update_wm_protocols(client_t *c, xcb_get_property_cookie_t cookie)
  */
 static int
 property_handle_xembed_info(uint8_t state,
-                            xcb_window_t window,
-                            xcb_atom_t name)
+                            xcb_window_t window)
 {
     xembed_window_t *emwin = xembed_getbywin(&globalconf.embedded, window);
 
@@ -334,8 +330,7 @@ property_handle_xembed_info(uint8_t state,
 
 static int
 property_handle_xrootpmap_id(uint8_t state,
-                             xcb_window_t window,
-                             xcb_atom_t name)
+                             xcb_window_t window)
 {
     if(globalconf.xinerama_is_active)
         foreach(w, globalconf.wiboxes)
@@ -353,8 +348,7 @@ property_handle_xrootpmap_id(uint8_t state,
 
 static int
 property_handle_net_wm_opacity(uint8_t state,
-                               xcb_window_t window,
-                               xcb_atom_t name)
+                               xcb_window_t window)
 {
     wibox_t *wibox = wibox_getbywin(window);
 
@@ -388,8 +382,7 @@ void
 property_handle_propertynotify(xcb_property_notify_event_t *ev)
 {
     int (*handler)(uint8_t state,
-                   xcb_window_t window,
-                   xcb_atom_t name) = NULL;
+                   xcb_window_t window) = NULL;
 
     /* Find the correct event handler */
 #define HANDLE(atom_, cb) \
@@ -431,7 +424,7 @@ property_handle_propertynotify(xcb_property_notify_event_t *ev)
 #undef HANDLE
 #undef END
 
-    (*handler)(ev->state, ev->window, ev->atom);
+    (*handler)(ev->state, ev->window);
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
