@@ -1043,6 +1043,13 @@ client_unmanage(client_t *c)
 
     ewmh_update_net_client_list(c->phys_screen);
 
+    /* Clear our event mask so that we don't receive any events from now on,
+     * especially not for the following requests. */
+    xcb_change_window_attributes(globalconf.connection,
+                                 c->window,
+                                 XCB_CW_EVENT_MASK,
+                                 (const uint32_t []) { 0 });
+
     xcb_screen_t *s = xutil_screen_get(globalconf.connection, c->phys_screen);
     xcb_unmap_window(globalconf.connection, c->window);
     xcb_reparent_window(globalconf.connection, c->window, s->root,
