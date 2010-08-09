@@ -24,20 +24,26 @@
 
 #include "globalconf.h"
 
-void property_update_wm_transient_for(client_t *, xcb_get_property_reply_t *);
-void property_update_wm_client_leader(client_t *c, xcb_get_property_reply_t *);
-void property_update_wm_normal_hints(client_t *, xcb_get_property_reply_t *);
-void property_update_wm_hints(client_t *, xcb_get_property_reply_t *);
-void property_update_wm_class(client_t *, xcb_get_property_reply_t *);
-void property_update_wm_name(client_t *, xcb_get_property_reply_t *);
-void property_update_net_wm_name(client_t *, xcb_get_property_reply_t *);
-void property_update_wm_icon_name(client_t *, xcb_get_property_reply_t *);
-void property_update_net_wm_icon_name(client_t *, xcb_get_property_reply_t *);
-void property_update_wm_protocols(client_t *, xcb_get_property_reply_t *);
-void property_update_wm_client_machine(client_t *, xcb_get_property_reply_t *);
-void property_update_wm_window_role(client_t *, xcb_get_property_reply_t *);
-void property_update_net_wm_pid(client_t *, xcb_get_property_reply_t *);
-void property_update_net_wm_icon(client_t *, xcb_get_property_reply_t *);
+#define PROPERTY(funcname) \
+    xcb_get_property_cookie_t property_get_##funcname(client_t *c); \
+    void property_update_##funcname(client_t *c, xcb_get_property_cookie_t cookie)
+
+PROPERTY(wm_name);
+PROPERTY(net_wm_name);
+PROPERTY(wm_icon_name);
+PROPERTY(net_wm_icon_name);
+PROPERTY(wm_client_machine);
+PROPERTY(wm_window_role);
+PROPERTY(wm_transient_for);
+PROPERTY(wm_client_leader);
+PROPERTY(wm_normal_hints);
+PROPERTY(wm_hints);
+PROPERTY(wm_class);
+PROPERTY(wm_protocols);
+PROPERTY(net_wm_pid);
+PROPERTY(net_wm_icon);
+
+#undef PROPERTY
 
 void property_handle_propertynotify(xcb_property_notify_event_t *ev);
 

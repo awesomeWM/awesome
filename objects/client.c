@@ -525,14 +525,14 @@ HANDLE_GEOM(height)
     luaA_object_emit_signal(globalconf.L, -1, "property::size_hints_honor", 0);
 
     /* update hints */
-    property_update_wm_normal_hints(c, NULL);
-    property_update_wm_hints(c, NULL);
-    property_update_wm_transient_for(c, NULL);
-    property_update_wm_client_leader(c, NULL);
-    property_update_wm_client_machine(c, NULL);
-    property_update_wm_window_role(c, NULL);
-    property_update_net_wm_pid(c, NULL);
-    property_update_net_wm_icon(c, NULL);
+    property_update_wm_normal_hints(c, property_get_wm_normal_hints(c));
+    property_update_wm_hints(c, property_get_wm_hints(c));
+    property_update_wm_transient_for(c, property_get_wm_transient_for(c));
+    property_update_wm_client_leader(c, property_get_wm_client_leader(c));
+    property_update_wm_client_machine(c, property_get_wm_client_machine(c));
+    property_update_wm_window_role(c, property_get_wm_window_role(c));
+    property_update_net_wm_pid(c, property_get_net_wm_pid(c));
+    property_update_net_wm_icon(c, property_get_net_wm_icon(c));
 
     window_set_opacity(globalconf.L, -1, xwindow_get_opacity(c->window));
 
@@ -543,12 +543,12 @@ HANDLE_GEOM(height)
     client_raise(c);
 
     /* update window title */
-    property_update_wm_name(c, NULL);
-    property_update_net_wm_name(c, NULL);
-    property_update_wm_icon_name(c, NULL);
-    property_update_net_wm_icon_name(c, NULL);
-    property_update_wm_class(c, NULL);
-    property_update_wm_protocols(c, NULL);
+    property_update_wm_name(c, property_get_wm_name(c));
+    property_update_net_wm_name(c, property_get_net_wm_name(c));
+    property_update_wm_icon_name(c, property_get_wm_icon_name(c));
+    property_update_net_wm_icon_name(c, property_get_net_wm_icon_name(c));
+    property_update_wm_class(c, property_get_wm_class(c));
+    property_update_wm_protocols(c, property_get_wm_protocols(c));
 
     /* update strut */
     ewmh_process_client_strut(c, NULL);

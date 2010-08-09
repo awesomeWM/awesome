@@ -31,26 +31,27 @@
 #include "common/atoms.h"
 #include "common/xutil.h"
 
-
 #define HANDLE_TEXT_PROPERTY(funcname, atom, setfunc) \
-    void \
-    property_update_##funcname(client_t *c, xcb_get_property_reply_t *reply) \
+    xcb_get_property_cookie_t \
+    property_get_##funcname(client_t *c) \
     { \
-        bool no_reply = !reply; \
-        if(no_reply) \
-            reply = xcb_get_property_reply(globalconf.connection, \
-                                           xcb_get_property(globalconf.connection, \
-                                                            false, \
-                                                            c->window, \
-                                                            atom, \
-                                                            XCB_GET_PROPERTY_TYPE_ANY, \
-                                                            0, \
-                                                            UINT_MAX), NULL); \
+        return xcb_get_property(globalconf.connection, \
+                                false, \
+                                c->window, \
+                                atom, \
+                                XCB_GET_PROPERTY_TYPE_ANY, \
+                                0, \
+                                UINT_MAX); \
+    } \
+    void \
+    property_update_##funcname(client_t *c, xcb_get_property_cookie_t cookie) \
+    { \
+        xcb_get_property_reply_t * reply = \
+                    xcb_get_property_reply(globalconf.connection, cookie, NULL); \
         luaA_object_push(globalconf.L, c); \
         setfunc(globalconf.L, -1, xutil_get_text_property_from_reply(reply)); \
         lua_pop(globalconf.L, 1); \
-        if(no_reply) \
-            p_delete(&reply); \
+        p_delete(&reply); \
     } \
     static int \
     property_handle_##funcname(uint8_t state, \
@@ -60,7 +61,7 @@
     { \
         client_t *c = client_getbywin(window); \
         if(c) \
-            property_update_##funcname(c, reply); \
+            property_update_##funcname(c, property_get_##funcname(c));\
         return 0; \
     }
 
@@ -83,7 +84,7 @@ HANDLE_TEXT_PROPERTY(wm_window_role, WM_WINDOW_ROLE, client_set_role)
     { \
         client_t *c = client_getbywin(window); \
         if(c) \
-            property_update_##name(c, reply); \
+            property_update_##name(c, property_get_##name(c));\
         return 0; \
     }
 
@@ -98,24 +99,21 @@ HANDLE_PROPERTY(net_wm_pid)
 
 #undef HANDLE_PROPERTY
 
+xcb_get_property_cookie_t
+property_get_wm_transient_for(client_t *c)
+{
+    return xcb_get_wm_transient_for_unchecked(globalconf.connection, c->window);
+}
+
 void
-property_update_wm_transient_for(client_t *c, xcb_get_property_reply_t *reply)
+property_update_wm_transient_for(client_t *c, xcb_get_property_cookie_t cookie)
 {
     xcb_window_t trans;
 
-    if(reply)
-    {
-        if(!xcb_get_wm_transient_for_from_reply(&trans, reply))
+    if(!xcb_get_wm_transient_for_reply(globalconf.connection,
+                                       cookie,
+                                       &trans, NULL))
             return;
-    }
-    else
-    {
-        if(!xcb_get_wm_transient_for_reply(globalconf.connection,
-                                            xcb_get_wm_transient_for_unchecked(globalconf.connection,
-                                                                               c->window),
-                                            &trans, NULL))
-            return;
-    }
 
     luaA_object_push(globalconf.L, c);
     client_set_type(globalconf.L, -1, WINDOW_TYPE_DIALOG);
@@ -124,76 +122,68 @@ property_update_wm_transient_for(client_t *c, xcb_get_property_reply_t *reply)
     lua_pop(globalconf.L, 1);
 }
 
+xcb_get_property_cookie_t
+property_get_wm_client_leader(client_t *c)
+{
+    return xcb_get_property_unchecked(globalconf.connection, false, c->window,
+                                      WM_CLIENT_LEADER, XCB_ATOM_WINDOW, 1, 32);
+}
+
 /** Update leader hint of a client.
  * \param c The client.
- * \param reply (Optional) An existing reply.
+ * \param cookie Cookie returned by property_get_wm_client_leader.
  */
 void
-property_update_wm_client_leader(client_t *c, xcb_get_property_reply_t *reply)
+property_update_wm_client_leader(client_t *c, xcb_get_property_cookie_t cookie)
 {
-    xcb_get_property_cookie_t client_leader_q;
+    xcb_get_property_reply_t *reply;
     void *data;
-    bool no_reply = !reply;
 
-    if(no_reply)
-    {
-        client_leader_q = xcb_get_property_unchecked(globalconf.connection, false, c->window,
-                                                     WM_CLIENT_LEADER, XCB_ATOM_WINDOW, 1, 32);
-
-        reply = xcb_get_property_reply(globalconf.connection, client_leader_q, NULL);
-    }
+    reply = xcb_get_property_reply(globalconf.connection, cookie, NULL);
 
     if(reply && reply->value_len && (data = xcb_get_property_value(reply)))
         c->leader_window = *(xcb_window_t *) data;
 
-    /* Only free when we created a reply ourselves. */
-    if(no_reply)
-        p_delete(&reply);
+    p_delete(&reply);
+}
+
+xcb_get_property_cookie_t
+property_get_wm_normal_hints(client_t *c)
+{
+    return xcb_get_wm_normal_hints_unchecked(globalconf.connection, c->window);
 }
 
 /** Update the size hints of a client.
  * \param c The client.
- * \param reply (Optional) An existing reply.
+ * \param cookie Cookie returned by property_get_wm_normal_hints.
  */
 void
-property_update_wm_normal_hints(client_t *c, xcb_get_property_reply_t *reply)
+property_update_wm_normal_hints(client_t *c, xcb_get_property_cookie_t cookie)
 {
-    if(reply)
-    {
-        if(!xcb_get_wm_size_hints_from_reply(&c->size_hints, reply))
-            return;
-    }
-    else
-    {
-        if(!xcb_get_wm_normal_hints_reply(globalconf.connection,
-                                          xcb_get_wm_normal_hints_unchecked(globalconf.connection,
-                                                                            c->window),
-                                          &c->size_hints, NULL))
-            return;
-    }
+    xcb_get_wm_normal_hints_reply(globalconf.connection,
+                                      cookie,
+                                      &c->size_hints, NULL);
+}
+
+xcb_get_property_cookie_t
+property_get_wm_hints(client_t *c)
+{
+    return xcb_get_wm_hints_unchecked(globalconf.connection, c->window);
 }
 
 /** Update the WM hints of a client.
  * \param c The client.
- * \param reply (Optional) An existing reply.
+ * \param cookie Cookie returned by property_get_wm_hints.
  */
 void
-property_update_wm_hints(client_t *c, xcb_get_property_reply_t *reply)
+property_update_wm_hints(client_t *c, xcb_get_property_cookie_t cookie)
 {
     xcb_wm_hints_t wmh;
 
-    if(reply)
-    {
-        if(!xcb_get_wm_hints_from_reply(&wmh, reply))
-            return;
-    }
-    else
-    {
-        if(!xcb_get_wm_hints_reply(globalconf.connection,
-                                  xcb_get_wm_hints_unchecked(globalconf.connection, c->window),
-                                  &wmh, NULL))
-            return;
-    }
+    if(!xcb_get_wm_hints_reply(globalconf.connection,
+                               cookie,
+                               &wmh, NULL))
+        return;
 
     luaA_object_push(globalconf.L, c);
     client_set_urgent(globalconf.L, -1, xcb_wm_hints_get_urgency(&wmh));
@@ -207,35 +197,31 @@ property_update_wm_hints(client_t *c, xcb_get_property_reply_t *reply)
     lua_pop(globalconf.L, 1);
 }
 
+xcb_get_property_cookie_t
+property_get_wm_class(client_t *c)
+{
+    return xcb_get_wm_class_unchecked(globalconf.connection, c->window);
+}
+
 /** Update WM_CLASS of a client.
  * \param c The client.
- * \param reply The reply to get property request, or NULL if none.
+ * \param cookie Cookie returned by property_get_wm_class.
  */
 void
-property_update_wm_class(client_t *c, xcb_get_property_reply_t *reply)
+property_update_wm_class(client_t *c, xcb_get_property_cookie_t cookie)
 {
     xcb_get_wm_class_reply_t hint;
 
-    if(reply)
-    {
-        if(!xcb_get_wm_class_from_reply(&hint, reply))
-            return;
-    }
-    else
-    {
-        if(!xcb_get_wm_class_reply(globalconf.connection,
-                                   xcb_get_wm_class_unchecked(globalconf.connection, c->window),
-                                   &hint, NULL))
-            return;
-    }
+    if(!xcb_get_wm_class_reply(globalconf.connection,
+                               cookie,
+                               &hint, NULL))
+        return;
 
     luaA_object_push(globalconf.L, c);
     client_set_class_instance(globalconf.L, -1, hint.class_name, hint.instance_name);
     lua_pop(globalconf.L, 1);
 
-    /* only delete reply if we get it ourselves */
-    if(!reply)
-        xcb_get_wm_class_reply_wipe(&hint);
+    xcb_get_wm_class_reply_wipe(&hint);
 }
 
 static int
@@ -252,36 +238,36 @@ property_handle_net_wm_strut_partial(uint8_t state,
     return 0;
 }
 
+xcb_get_property_cookie_t
+property_get_net_wm_icon(client_t *c)
+{
+    return ewmh_window_icon_get_unchecked(c->window);
+}
+
 void
-property_update_net_wm_icon(client_t *c,
-                            xcb_get_property_reply_t *reply)
+property_update_net_wm_icon(client_t *c, xcb_get_property_cookie_t cookie)
 {
     luaA_object_push(globalconf.L, c);
 
-    if(reply)
-    {
-        if(ewmh_window_icon_from_reply(reply))
-            client_set_icon(globalconf.L, -2, -1);
-    }
-    else if(ewmh_window_icon_get_reply(ewmh_window_icon_get_unchecked(c->window)))
+    if(ewmh_window_icon_get_reply(cookie))
         client_set_icon(globalconf.L, -2, -1);
 
     /* remove client */
     lua_pop(globalconf.L, 1);
 }
 
-void
-property_update_net_wm_pid(client_t *c,
-                           xcb_get_property_reply_t *reply)
+xcb_get_property_cookie_t
+property_get_net_wm_pid(client_t *c)
 {
-    bool no_reply = !reply;
+    return xcb_get_property_unchecked(globalconf.connection, false, c->window, _NET_WM_PID, XCB_ATOM_CARDINAL, 0L, 1L);
+}
 
-    if(no_reply)
-    {
-        xcb_get_property_cookie_t prop_c =
-            xcb_get_property_unchecked(globalconf.connection, false, c->window, _NET_WM_PID, XCB_ATOM_CARDINAL, 0L, 1L);
-        reply = xcb_get_property_reply(globalconf.connection, prop_c, NULL);
-    }
+void
+property_update_net_wm_pid(client_t *c, xcb_get_property_cookie_t cookie)
+{
+    xcb_get_property_reply_t *reply;
+
+    reply = xcb_get_property_reply(globalconf.connection, cookie, NULL);
 
     if(reply && reply->value_len)
     {
@@ -294,39 +280,29 @@ property_update_net_wm_pid(client_t *c,
         }
     }
 
-    if(no_reply)
-        p_delete(&reply);
+    p_delete(&reply);
+}
+
+xcb_get_property_cookie_t
+property_get_wm_protocols(client_t *c)
+{
+    return xcb_get_wm_protocols_unchecked(globalconf.connection, c->window, WM_PROTOCOLS);
 }
 
 /** Update the list of supported protocols for a client.
  * \param c The client.
- * \param reply The xcb property reply.
+ * \param cookie Cookie from property_get_wm_protocols.
  */
 void
-property_update_wm_protocols(client_t *c, xcb_get_property_reply_t *reply)
+property_update_wm_protocols(client_t *c, xcb_get_property_cookie_t cookie)
 {
     xcb_get_wm_protocols_reply_t protocols;
-    xcb_get_property_reply_t *reply_copy;
 
-    if(reply)
-    {
-        reply_copy = p_dup(reply, 1);
-
-        if(!xcb_get_wm_protocols_from_reply(reply_copy, &protocols))
-	{
-            p_delete(&reply_copy);
-            return;
-	}
-    }
-    else
-    {
-        /* If this fails for any reason, we still got the old value */
-        if(!xcb_get_wm_protocols_reply(globalconf.connection,
-                                      xcb_get_wm_protocols_unchecked(globalconf.connection,
-                                                                     c->window, WM_PROTOCOLS),
-                                      &protocols, NULL))
-            return;
-    }
+    /* If this fails for any reason, we still got the old value */
+    if(!xcb_get_wm_protocols_reply(globalconf.connection,
+                                   cookie,
+                                   &protocols, NULL))
+        return;
 
     xcb_get_wm_protocols_reply_wipe(&c->protocols);
     memcpy(&c->protocols, &protocols, sizeof(protocols));
