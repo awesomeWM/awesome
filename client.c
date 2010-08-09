@@ -1311,8 +1311,6 @@ client_unmanage(client_t *c)
     if(strut_has_value(&c->strut))
         screen_emit_signal(globalconf.L, c->screen, "property::workarea", 0);
 
-    window_state_set(c->window, XCB_WM_STATE_WITHDRAWN);
-
     titlebar_client_detach(c);
 
     ewmh_update_net_client_list(c->phys_screen);
@@ -1320,6 +1318,10 @@ client_unmanage(client_t *c)
     /* Remove this window from the save set since this shouldn't be made visible
      * after a restart anymore. */
     xcb_change_save_set(globalconf.connection, XCB_SET_MODE_DELETE, c->window);
+
+    /* Do this last to avoid races with clients. According to ICCCM, clients
+     * arent allowed to re-use the window until after this. */
+    window_state_set(c->window, XCB_WM_STATE_WITHDRAWN);
 
     /* set client as invalid */
     c->invalid = true;
