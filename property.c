@@ -56,8 +56,7 @@
     static int \
     property_handle_##funcname(uint8_t state, \
                                xcb_window_t window, \
-                               xcb_atom_t name, \
-                               xcb_get_property_reply_t *reply) \
+                               xcb_atom_t name) \
     { \
         client_t *c = client_getbywin(window); \
         if(c) \
@@ -79,8 +78,7 @@ HANDLE_TEXT_PROPERTY(wm_window_role, WM_WINDOW_ROLE, client_set_role)
     static int \
     property_handle_##name(uint8_t state, \
                            xcb_window_t window, \
-                           xcb_atom_t name, \
-                           xcb_get_property_reply_t *reply) \
+                           xcb_atom_t name) \
     { \
         client_t *c = client_getbywin(window); \
         if(c) \
@@ -227,13 +225,12 @@ property_update_wm_class(client_t *c, xcb_get_property_cookie_t cookie)
 static int
 property_handle_net_wm_strut_partial(uint8_t state,
                                      xcb_window_t window,
-                                     xcb_atom_t name,
-                                     xcb_get_property_reply_t *reply)
+                                     xcb_atom_t name)
 {
     client_t *c = client_getbywin(window);
 
     if(c)
-        ewmh_process_client_strut(c, reply);
+        ewmh_process_client_strut(c);
 
     return 0;
 }
@@ -317,13 +314,20 @@ property_update_wm_protocols(client_t *c, xcb_get_property_cookie_t cookie)
 static int
 property_handle_xembed_info(uint8_t state,
                             xcb_window_t window,
-                            xcb_atom_t name,
-                            xcb_get_property_reply_t *reply)
+                            xcb_atom_t name)
 {
     xembed_window_t *emwin = xembed_getbywin(&globalconf.embedded, window);
 
     if(emwin)
-        xembed_property_update(globalconf.connection, emwin, reply);
+    {
+        xcb_get_property_cookie_t cookie =
+            xcb_get_property(globalconf.connection, 0, window, _XEMBED_INFO,
+                             XCB_GET_PROPERTY_TYPE_ANY, 0, 3);
+        xcb_get_property_reply_t *propr =
+            xcb_get_property_reply(globalconf.connection, cookie, 0);
+        xembed_property_update(globalconf.connection, emwin, propr);
+        p_delete(&propr);
+    }
 
     return 0;
 }
@@ -331,8 +335,7 @@ property_handle_xembed_info(uint8_t state,
 static int
 property_handle_xrootpmap_id(uint8_t state,
                              xcb_window_t window,
-                             xcb_atom_t name,
-                             xcb_get_property_reply_t *reply)
+                             xcb_atom_t name)
 {
     if(globalconf.xinerama_is_active)
         foreach(w, globalconf.wiboxes)
@@ -351,15 +354,14 @@ property_handle_xrootpmap_id(uint8_t state,
 static int
 property_handle_net_wm_opacity(uint8_t state,
                                xcb_window_t window,
-                               xcb_atom_t name,
-                               xcb_get_property_reply_t *reply)
+                               xcb_atom_t name)
 {
     wibox_t *wibox = wibox_getbywin(window);
 
     if(wibox)
     {
         luaA_object_push(globalconf.L, wibox);
-        window_set_opacity(globalconf.L, -1, xwindow_get_opacity_from_reply(reply));
+        window_set_opacity(globalconf.L, -1, xwindow_get_opacity(wibox->window));
         lua_pop(globalconf.L, -1);
     }
     else
@@ -368,7 +370,7 @@ property_handle_net_wm_opacity(uint8_t state,
         if(c)
         {
             luaA_object_push(globalconf.L, c);
-            window_set_opacity(globalconf.L, -1, xwindow_get_opacity_from_reply(reply));
+            window_set_opacity(globalconf.L, -1, xwindow_get_opacity(c->window));
             lua_pop(globalconf.L, 1);
         }
     }
@@ -385,68 +387,51 @@ property_handle_net_wm_opacity(uint8_t state,
 void
 property_handle_propertynotify(xcb_property_notify_event_t *ev)
 {
-    uint32_t length;
     int (*handler)(uint8_t state,
                    xcb_window_t window,
-                   xcb_atom_t name,
-                   xcb_get_property_reply_t *reply) = NULL;
+                   xcb_atom_t name) = NULL;
 
     /* Find the correct event handler */
-#define HANDLE(atom_, cb, len) \
+#define HANDLE(atom_, cb) \
     if (ev->atom == atom_) \
     { \
         handler = cb; \
-        length = len; \
     } else
-#define HANDLE_L(atom, cb) HANDLE(atom, cb, UINT_MAX)
-#define HANDLE_S(atom, cb) HANDLE(atom, cb, 1)
 #define END return
 
     /* Xembed stuff */
-    HANDLE_L(_XEMBED_INFO, property_handle_xembed_info)
+    HANDLE(_XEMBED_INFO, property_handle_xembed_info)
 
     /* ICCCM stuff */
-    HANDLE_L(XCB_ATOM_WM_TRANSIENT_FOR, property_handle_wm_transient_for)
-    HANDLE_L(WM_CLIENT_LEADER, property_handle_wm_client_leader)
-    HANDLE_L(XCB_ATOM_WM_NORMAL_HINTS, property_handle_wm_normal_hints)
-    HANDLE_L(XCB_ATOM_WM_HINTS, property_handle_wm_hints)
-    HANDLE_L(XCB_ATOM_WM_NAME, property_handle_wm_name)
-    HANDLE_L(XCB_ATOM_WM_ICON_NAME, property_handle_wm_icon_name)
-    HANDLE_L(XCB_ATOM_WM_CLASS, property_handle_wm_class)
-    HANDLE_L(WM_PROTOCOLS, property_handle_wm_protocols)
-    HANDLE_L(XCB_ATOM_WM_CLIENT_MACHINE, property_handle_wm_client_machine)
-    HANDLE_L(WM_WINDOW_ROLE, property_handle_wm_window_role)
+    HANDLE(XCB_ATOM_WM_TRANSIENT_FOR, property_handle_wm_transient_for)
+    HANDLE(WM_CLIENT_LEADER, property_handle_wm_client_leader)
+    HANDLE(XCB_ATOM_WM_NORMAL_HINTS, property_handle_wm_normal_hints)
+    HANDLE(XCB_ATOM_WM_HINTS, property_handle_wm_hints)
+    HANDLE(XCB_ATOM_WM_NAME, property_handle_wm_name)
+    HANDLE(XCB_ATOM_WM_ICON_NAME, property_handle_wm_icon_name)
+    HANDLE(XCB_ATOM_WM_CLASS, property_handle_wm_class)
+    HANDLE(WM_PROTOCOLS, property_handle_wm_protocols)
+    HANDLE(XCB_ATOM_WM_CLIENT_MACHINE, property_handle_wm_client_machine)
+    HANDLE(WM_WINDOW_ROLE, property_handle_wm_window_role)
 
     /* EWMH stuff */
-    HANDLE_L(_NET_WM_NAME, property_handle_net_wm_name)
-    HANDLE_L(_NET_WM_ICON_NAME, property_handle_net_wm_icon_name)
-    HANDLE_L(_NET_WM_STRUT_PARTIAL, property_handle_net_wm_strut_partial)
-    HANDLE_L(_NET_WM_ICON, property_handle_net_wm_icon)
-    HANDLE_L(_NET_WM_PID, property_handle_net_wm_pid)
-    HANDLE_S(_NET_WM_WINDOW_OPACITY, property_handle_net_wm_opacity)
+    HANDLE(_NET_WM_NAME, property_handle_net_wm_name)
+    HANDLE(_NET_WM_ICON_NAME, property_handle_net_wm_icon_name)
+    HANDLE(_NET_WM_STRUT_PARTIAL, property_handle_net_wm_strut_partial)
+    HANDLE(_NET_WM_ICON, property_handle_net_wm_icon)
+    HANDLE(_NET_WM_PID, property_handle_net_wm_pid)
+    HANDLE(_NET_WM_WINDOW_OPACITY, property_handle_net_wm_opacity)
 
     /* background change */
-    HANDLE_S(_XROOTPMAP_ID, property_handle_xrootpmap_id)
+    HANDLE(_XROOTPMAP_ID, property_handle_xrootpmap_id)
 
     /* If nothing was found, return */
     END;
 
-#undef HANDLE_L
-#undef HANDLE_S
+#undef HANDLE
 #undef END
 
-    /* Get the property, if needed. */
-    xcb_get_property_reply_t *propr = NULL;
-    if(ev->state != XCB_PROPERTY_DELETE)
-    {
-        xcb_get_property_cookie_t cookie =
-            xcb_get_property(globalconf.connection, 0, ev->window, ev->atom,
-                             XCB_GET_PROPERTY_TYPE_ANY, 0, length);
-        propr = xcb_get_property_reply(globalconf.connection, cookie, 0);
-    }
-
-    (*handler)(ev->state, ev->window, ev->atom, propr);
-    p_delete(&propr);
+    (*handler)(ev->state, ev->window, ev->atom);
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

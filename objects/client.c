@@ -551,7 +551,7 @@ HANDLE_GEOM(height)
     property_update_wm_protocols(c, property_get_wm_protocols(c));
 
     /* update strut */
-    ewmh_process_client_strut(c, NULL);
+    ewmh_process_client_strut(c);
 
     ewmh_update_net_client_list(c->phys_screen);
 

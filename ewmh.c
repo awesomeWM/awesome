@@ -590,17 +590,14 @@ ewmh_client_check_hints(client_t *c)
  * \param strut_r (Optional) An existing reply.
  */
 void
-ewmh_process_client_strut(client_t *c, xcb_get_property_reply_t *strut_r)
+ewmh_process_client_strut(client_t *c)
 {
     void *data;
-    xcb_get_property_reply_t *mstrut_r = NULL;
+    xcb_get_property_reply_t *strut_r;
 
-    if(!strut_r)
-    {
-        xcb_get_property_cookie_t strut_q = xcb_get_property_unchecked(globalconf.connection, false, c->window,
-                                                                       _NET_WM_STRUT_PARTIAL, XCB_ATOM_CARDINAL, 0, 12);
-        strut_r = mstrut_r = xcb_get_property_reply(globalconf.connection, strut_q, NULL);
-    }
+    xcb_get_property_cookie_t strut_q = xcb_get_property_unchecked(globalconf.connection, false, c->window,
+                                                                   _NET_WM_STRUT_PARTIAL, XCB_ATOM_CARDINAL, 0, 12);
+    strut_r = xcb_get_property_reply(globalconf.connection, strut_q, NULL);
 
     if(strut_r
        && strut_r->value_len
@@ -640,7 +637,7 @@ ewmh_process_client_strut(client_t *c, xcb_get_property_reply_t *strut_r)
         }
     }
 
-    p_delete(&mstrut_r);
+    p_delete(&strut_r);
 }
 
 /** Send request to get NET_WM_ICON (EWMH)
@@ -654,7 +651,7 @@ ewmh_window_icon_get_unchecked(xcb_window_t w)
                                     _NET_WM_ICON, XCB_ATOM_CARDINAL, 0, UINT32_MAX);
 }
 
-int
+static int
 ewmh_window_icon_from_reply(xcb_get_property_reply_t *r)
 {
     uint32_t *data;
