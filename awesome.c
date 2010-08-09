@@ -172,9 +172,6 @@ scan(void)
                                                                   *(geom_wins[i]), NULL)))
                 continue;
 
-            /* The window can be mapped, so force it to be undrawn for startup */
-            xcb_unmap_window(globalconf.connection, wins[i]);
-
             client_manage(wins[i], geom_r, phys_screen, true);
 
             p_delete(&geom_r);

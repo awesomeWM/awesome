@@ -451,8 +451,6 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
         startup_id_q = xcb_get_property(globalconf.connection, false, w,
                                         _NET_STARTUP_ID, XCB_GET_PROPERTY_TYPE_ANY, 0, UINT_MAX);
 
-    xcb_change_window_attributes(globalconf.connection, w, XCB_CW_EVENT_MASK, select_input_val);
-
     /* Make sure the window is automatically mapped if awesome exits or dies. */
     xcb_change_save_set(globalconf.connection, XCB_SET_MODE_INSERT, w);
 
@@ -482,6 +480,11 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
                       });
     xcb_reparent_window(globalconf.connection, w, c->frame_window, 0, 0);
     xcb_map_window(globalconf.connection, w);
+
+    /* Do this now so that we don't get any events for the above
+     * (Else, reparent could cause an UnmapNotify) */
+    xcb_change_window_attributes(globalconf.connection, w, XCB_CW_EVENT_MASK, select_input_val);
+
     luaA_object_emit_signal(globalconf.L, -1, "property::window", 0);
 
     /* The frame window gets the border, not the real client window */
