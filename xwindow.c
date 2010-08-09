@@ -146,6 +146,16 @@ xwindow_grabkeys(xcb_window_t win, key_array_t *keys)
         xwindow_grabkey(win, *k);
 }
 
+/** Send a request for a window's opacity.
+ * \param win The window
+ * \return A cookie for xwindow_get_opacity_from_reply().
+ */
+xcb_get_property_cookie_t xwindow_get_opacity_unchecked(xcb_window_t win)
+{
+    return xcb_get_property_unchecked(globalconf.connection, false, win,
+                                      _NET_WM_WINDOW_OPACITY, XCB_ATOM_CARDINAL, 0L, 1L);
+}
+
 /** Get the opacity of a window.
  * \param win The window.
  * \return The opacity, between 0 and 1 or -1 or no opacity set.
@@ -153,32 +163,28 @@ xwindow_grabkeys(xcb_window_t win, key_array_t *keys)
 double
 xwindow_get_opacity(xcb_window_t win)
 {
-    double ret;
-
     xcb_get_property_cookie_t prop_c =
-        xcb_get_property_unchecked(globalconf.connection, false, win,
-                                   _NET_WM_WINDOW_OPACITY, XCB_ATOM_CARDINAL, 0L, 1L);
-
-    xcb_get_property_reply_t *prop_r =
-        xcb_get_property_reply(globalconf.connection, prop_c, NULL);
-
-    ret = xwindow_get_opacity_from_reply(prop_r);
-    p_delete(&prop_r);
-    return ret;
+        xwindow_get_opacity_unchecked(win);
+    return xwindow_get_opacity_from_cookie(prop_c);
 }
 
 /** Get the opacity of a window.
- * \param prop_r A reply to a get property request for _NET_WM_WINDOW_OPACITY.
+ * \param cookie A cookie for a reply to a get property request for _NET_WM_WINDOW_OPACITY.
  * \return The opacity, between 0 and 1.
  */
 double
-xwindow_get_opacity_from_reply(xcb_get_property_reply_t *prop_r)
+xwindow_get_opacity_from_cookie(xcb_get_property_cookie_t cookie)
 {
+    xcb_get_property_reply_t *prop_r =
+        xcb_get_property_reply(globalconf.connection, cookie, NULL);
+
     if(prop_r && prop_r->value_len && prop_r->format == 32)
     {
         uint32_t value = *(uint32_t *) xcb_get_property_value(prop_r);
+        p_delete(&prop_r);
         return (double) value / (double) 0xffffffff;
     }
+    p_delete(&prop_r);
 
     return -1;
 }

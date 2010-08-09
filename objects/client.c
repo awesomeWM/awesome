@@ -427,6 +427,47 @@ client_focus(client_t *c)
     client_set_focus(c, !c->nofocus);
 }
 
+static void
+client_update_properties(client_t *c)
+{
+    /* get all hints */
+    xcb_get_property_cookie_t wm_normal_hints   = property_get_wm_normal_hints(c);
+    xcb_get_property_cookie_t wm_hints          = property_get_wm_hints(c);
+    xcb_get_property_cookie_t wm_transient_for  = property_get_wm_transient_for(c);
+    xcb_get_property_cookie_t wm_client_leader  = property_get_wm_client_leader(c);
+    xcb_get_property_cookie_t wm_client_machine = property_get_wm_client_machine(c);
+    xcb_get_property_cookie_t wm_window_role    = property_get_wm_window_role(c);
+    xcb_get_property_cookie_t net_wm_pid        = property_get_net_wm_pid(c);
+    xcb_get_property_cookie_t net_wm_icon       = property_get_net_wm_icon(c);
+    xcb_get_property_cookie_t wm_name           = property_get_wm_name(c);
+    xcb_get_property_cookie_t net_wm_name       = property_get_net_wm_name(c);
+    xcb_get_property_cookie_t wm_icon_name      = property_get_wm_icon_name(c);
+    xcb_get_property_cookie_t net_wm_icon_name  = property_get_net_wm_icon_name(c);
+    xcb_get_property_cookie_t wm_class          = property_get_wm_class(c);
+    xcb_get_property_cookie_t wm_protocols      = property_get_wm_protocols(c);
+    xcb_get_property_cookie_t opacity           = xwindow_get_opacity_unchecked(c->window);
+
+    /* update strut */
+    ewmh_process_client_strut(c);
+
+    /* Now process all replies */
+    property_update_wm_normal_hints(c, wm_normal_hints);
+    property_update_wm_hints(c, wm_hints);
+    property_update_wm_transient_for(c, wm_transient_for);
+    property_update_wm_client_leader(c, wm_client_leader);
+    property_update_wm_client_machine(c, wm_client_machine);
+    property_update_wm_window_role(c, wm_window_role);
+    property_update_net_wm_pid(c, net_wm_pid);
+    property_update_net_wm_icon(c, net_wm_icon);
+    property_update_wm_name(c, wm_name);
+    property_update_net_wm_name(c, net_wm_name);
+    property_update_wm_icon_name(c, wm_icon_name);
+    property_update_net_wm_icon_name(c, net_wm_icon_name);
+    property_update_wm_class(c, wm_class);
+    property_update_wm_protocols(c, wm_protocols);
+    window_set_opacity(globalconf.L, -1, xwindow_get_opacity_from_cookie(opacity));
+}
+
 /** Manage a new client.
  * \param w The window.
  * \param wgeom Window geometry.
@@ -527,34 +568,14 @@ HANDLE_GEOM(height)
     c->size_hints_honor = true;
     luaA_object_emit_signal(globalconf.L, -1, "property::size_hints_honor", 0);
 
-    /* update hints */
-    property_update_wm_normal_hints(c, property_get_wm_normal_hints(c));
-    property_update_wm_hints(c, property_get_wm_hints(c));
-    property_update_wm_transient_for(c, property_get_wm_transient_for(c));
-    property_update_wm_client_leader(c, property_get_wm_client_leader(c));
-    property_update_wm_client_machine(c, property_get_wm_client_machine(c));
-    property_update_wm_window_role(c, property_get_wm_window_role(c));
-    property_update_net_wm_pid(c, property_get_net_wm_pid(c));
-    property_update_net_wm_icon(c, property_get_net_wm_icon(c));
-
-    window_set_opacity(globalconf.L, -1, xwindow_get_opacity(c->window));
+    /* update all properties */
+    client_update_properties(c);
 
     /* Then check clients hints */
     ewmh_client_check_hints(c);
 
     /* Push client in stack */
     client_raise(c);
-
-    /* update window title */
-    property_update_wm_name(c, property_get_wm_name(c));
-    property_update_net_wm_name(c, property_get_net_wm_name(c));
-    property_update_wm_icon_name(c, property_get_wm_icon_name(c));
-    property_update_net_wm_icon_name(c, property_get_net_wm_icon_name(c));
-    property_update_wm_class(c, property_get_wm_class(c));
-    property_update_wm_protocols(c, property_get_wm_protocols(c));
-
-    /* update strut */
-    ewmh_process_client_strut(c);
 
     ewmh_update_net_client_list(c->phys_screen);
 
