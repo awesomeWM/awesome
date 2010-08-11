@@ -1073,6 +1073,10 @@ client_unmanage(client_t *c)
                                  c->window,
                                  XCB_CW_EVENT_MASK,
                                  (const uint32_t []) { 0 });
+    xcb_change_window_attributes(globalconf.connection,
+                                 c->frame_window,
+                                 XCB_CW_EVENT_MASK,
+                                 (const uint32_t []) { 0 });
 
     xcb_screen_t *s = xutil_screen_get(globalconf.connection, c->phys_screen);
     xcb_unmap_window(globalconf.connection, c->window);
