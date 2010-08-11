@@ -630,10 +630,7 @@ event_handle_unmapnotify(xcb_unmap_notify_event_t *ev)
 
     if((c = client_getbywin(ev->window)))
     {
-        /* We got XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY on the root window.
-         * Ignore any UnmapNotifies we get due to that. */
-        if (ev->event == c->window)
-            client_unmanage(c);
+        client_unmanage(c);
     }
     else
         for(int i = 0; i < globalconf.embedded.len; i++)
