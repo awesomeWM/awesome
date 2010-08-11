@@ -748,7 +748,13 @@ event_handle_reparentnotify(xcb_reparent_notify_event_t *ev)
     client_t *c;
 
     if((c = client_getbywin(ev->window)) && c->frame_window != ev->parent)
-        client_unmanage(c);
+    {
+        /* Ignore reparents to the root window, they *might* be caused by
+         * ourselves if a client quickly unmaps and maps itself again. */
+        xcb_screen_t *s = xutil_screen_get(globalconf.connection, c->phys_screen);
+        if (ev->parent != s->root)
+            client_unmanage(c);
+    }
 }
 
 /** \brief awesome xerror function.
