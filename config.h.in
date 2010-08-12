@@ -6,5 +6,6 @@
 #define AWESOME_IS_BIG_ENDIAN @AWESOME_IS_BIG_ENDIAN@
 
 #cmakedefine WITH_DBUS
+#cmakedefine HAS_EXECINFO
 
 #endif //_CONFIG_H_
