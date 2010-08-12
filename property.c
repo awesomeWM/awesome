@@ -384,6 +384,8 @@ property_handle_propertynotify(xcb_property_notify_event_t *ev)
     int (*handler)(uint8_t state,
                    xcb_window_t window) = NULL;
 
+    globalconf.timestamp = ev->time;
+
     /* Find the correct event handler */
 #define HANDLE(atom_, cb) \
     if (ev->atom == atom_) \

@@ -96,6 +96,8 @@ typedef struct
     wibox_array_t wiboxes;
     /** The startup notification display struct */
     SnDisplay *sndisplay;
+    /** Latest timestamp we got from the X server */
+    xcb_timestamp_t timestamp;
 } awesome_t;
 
 extern awesome_t globalconf;
