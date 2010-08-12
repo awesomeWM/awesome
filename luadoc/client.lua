@@ -40,6 +40,7 @@ module("client")
 -- user_size, program_position, program_size, etc.
 -- @field sticky Set the client sticky, i.e. available on all tags.
 -- @field modal Indicate if the client is modal.
+-- @field focusable True if the client can receive the input focus.
 -- @class table
 -- @name client
 

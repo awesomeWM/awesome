@@ -1614,6 +1614,22 @@ luaA_client_get_icon(lua_State *L, client_t *c)
 }
 
 static int
+luaA_client_get_focusable(lua_State *L, client_t *c)
+{
+    bool ret;
+
+    /* A client can be focused if it doesnt have the "nofocus" hint...*/
+    if (!c->nofocus)
+        ret = true;
+    else
+        /* ...or if it knows the WM_TAKE_FOCUS protocol */
+        ret = client_hasproto(c, WM_TAKE_FOCUS);
+
+    lua_pushboolean(L, ret);
+    return 1;
+}
+
+static int
 luaA_client_get_size_hints(lua_State *L, client_t *c)
 {
     const char *u_or_p = NULL;
@@ -1956,6 +1972,10 @@ client_class_setup(lua_State *L)
     luaA_class_add_property(&client_class, A_TK_SIZE_HINTS,
                             NULL,
                             (lua_class_propfunc_t) luaA_client_get_size_hints,
+                            NULL);
+    luaA_class_add_property(&client_class, A_TK_FOCUSABLE,
+                            NULL,
+                            (lua_class_propfunc_t) luaA_client_get_focusable,
                             NULL);
 }
 
