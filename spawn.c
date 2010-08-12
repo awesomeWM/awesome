@@ -334,7 +334,7 @@ luaA_spawn(lua_State *L)
         sn_launcher_context_set_name(context, "awesome");
         sn_launcher_context_set_description(context, "awesome spawn");
         sn_launcher_context_set_binary_name(context, cmdname);
-        sn_launcher_context_initiate(context, "awesome", cmdname, XCB_CURRENT_TIME);
+        sn_launcher_context_initiate(context, "awesome", cmdname, globalconf.timestamp);
         p_delete(&cmdname);
 
         /* app will have AWESOME_SPAWN_TIMEOUT seconds to complete,
