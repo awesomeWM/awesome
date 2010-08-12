@@ -392,17 +392,13 @@ client_focus_update(client_t *c)
             /* Already focused */
             return;
     }
-    luaA_object_push(globalconf.L, c);
-    client_set_minimized(globalconf.L, -1, false);
-
-    /* unban the client before focusing for consistency */
-    client_unban(c);
 
     globalconf.screen_focus = &globalconf.screens.tab[c->phys_screen];
     globalconf.screen_focus->prev_client_focus = c;
     globalconf.screen_focus->client_focus = c;
 
     /* according to EWMH, we have to remove the urgent state from a client */
+    luaA_object_push(globalconf.L, c);
     client_set_urgent(globalconf.L, -1, false);
 
     luaA_class_emit_signal(globalconf.L, &client_class, "focus", 1);
@@ -420,6 +416,9 @@ client_focus(client_t *c)
 
     if(!client_maybevisible(c, c->screen))
         return;
+
+    /* X11 doesn't let you focus a window that isn't viewable */
+    client_unban(c);
 
     if (!c->nofocus)
         client_focus_update(c);
@@ -1021,6 +1020,11 @@ client_unban(client_t *c)
         xcb_map_window(globalconf.connection, c->frame_window);
 
         c->isbanned = false;
+
+        /* An unbanned clients shouldn't be minimized */
+        luaA_object_push(globalconf.L, c);
+        client_set_minimized(globalconf.L, -1, false);
+        lua_pop(globalconf.L, 1);
     }
 }
 
