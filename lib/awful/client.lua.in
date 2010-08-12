@@ -113,7 +113,8 @@ end
 function focus.filter(c)
     if c.type == "desktop"
         or c.type == "dock"
-        or c.type == "splash" then
+        or c.type == "splash"
+        or not c.focusable then
         return nil
     end
     return c
