@@ -167,14 +167,23 @@ endmacro()
 a_find_library(LIB_EV ev)
 # GNU libc has <execinfo.h> and backtrace() stuff. If this is not available, we
 # need libexecinfo.
+message(STATUS "checking for execinfo")
 try_compile(HAS_EXECINFO
     ${CMAKE_BINARY_DIR}
     ${CMAKE_SOURCE_DIR}/build-tests/execinfo.c)
 if(NOT HAS_EXECINFO)
-    a_find_library(LIB_EXECINFO execinfo)
-    set(AWESOME_REQUIRED_LIBRARIES
-        ${AWESOME_REQUIRED_LIBRARIES}
-        ${LIB_EXECINFO})
+    find_library(LIB_EXECINFO execinfo)
+    if(LIB_EXECINFO)
+        set(HAS_EXECINFO 1)
+        set(AWESOME_REQUIRED_LIBRARIES
+            ${AWESOME_REQUIRED_LIBRARIES}
+            ${LIB_EXECINFO})
+    endif()
+endif()
+if(HAS_EXECINFO)
+    message(STATUS "checking for execinfo -- found")
+else()
+    message(STATUS "checking for execinfo -- not found")
 endif()
 
 # Error check

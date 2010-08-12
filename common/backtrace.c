@@ -19,8 +19,12 @@
  *
  */
 
-#include <execinfo.h>
+#include "config.h"
 #include "common/backtrace.h"
+
+#ifdef HAS_EXECINFO
+#include <execinfo.h>
+#endif
 
 #define MAX_STACK_SIZE 32
 
@@ -30,6 +34,9 @@
 void
 backtrace_get(buffer_t *buf)
 {
+    buffer_init(buf);
+
+#ifdef HAS_EXECINFO
     void *stack[MAX_STACK_SIZE];
     char **bt;
     int stack_size;
@@ -37,7 +44,6 @@ backtrace_get(buffer_t *buf)
     stack_size = backtrace(stack, countof(stack));
     bt = backtrace_symbols(stack, stack_size);
 
-    buffer_init(buf);
     if(bt)
     {
         for(int i = 0; i < stack_size; i++)
@@ -49,6 +55,7 @@ backtrace_get(buffer_t *buf)
         p_delete(&bt);
     }
     else
+#endif
         buffer_addsl(buf, "Cannot get backtrace symbols.");
 }
 
