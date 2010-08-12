@@ -30,6 +30,7 @@ ellipsize
 end
 fg
 focus
+focusable
 font
 font_height
 fullscreen
