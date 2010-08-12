@@ -139,6 +139,8 @@ event_handle_button(xcb_button_press_event_t *ev)
     client_t *c;
     wibox_t *wibox;
 
+    globalconf.timestamp = ev->time;
+
     if(event_handle_mousegrabber(ev->root_x, ev->root_y, 1 << (ev->detail - 1 + 8)))
         return;
 
@@ -400,6 +402,8 @@ event_handle_motionnotify(xcb_motion_notify_event_t *ev)
 {
     wibox_t *wibox;
 
+    globalconf.timestamp = ev->time;
+
     if(event_handle_mousegrabber(ev->root_x, ev->root_y, ev->state))
         return;
 
@@ -422,6 +426,8 @@ event_handle_leavenotify(xcb_leave_notify_event_t *ev)
 {
     wibox_t *wibox;
     client_t *c;
+
+    globalconf.timestamp = ev->time;
 
     if(ev->mode != XCB_NOTIFY_MODE_NORMAL)
         return;
@@ -470,6 +476,8 @@ event_handle_enternotify(xcb_enter_notify_event_t *ev)
 {
     client_t *c;
     wibox_t *wibox;
+
+    globalconf.timestamp = ev->time;
 
     if(ev->mode != XCB_NOTIFY_MODE_NORMAL)
         return;
@@ -555,6 +563,8 @@ event_handle_expose(xcb_expose_event_t *ev)
 static void
 event_handle_key(xcb_key_press_event_t *ev)
 {
+    globalconf.timestamp = ev->time;
+
     if(globalconf.keygrabber != LUA_REFNIL)
     {
         lua_rawgeti(globalconf.L, LUA_REGISTRYINDEX, globalconf.keygrabber);

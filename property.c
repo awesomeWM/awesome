@@ -418,6 +418,8 @@ property_handle_propertynotify(xcb_property_notify_event_t *ev)
                    xcb_atom_t name,
                    xcb_get_property_reply_t *reply) = NULL;
 
+    globalconf.timestamp = ev->time;
+
     /* Find the correct event handler */
 #define HANDLE(atom_, cb, len) \
     if (ev->atom == atom_) \
