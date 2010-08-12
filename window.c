@@ -207,7 +207,7 @@ window_takefocus(xcb_window_t win)
     ev.response_type = XCB_CLIENT_MESSAGE;
     ev.window = win;
     ev.format = 32;
-    ev.data.data32[1] = XCB_CURRENT_TIME;
+    ev.data.data32[1] = globalconf.timestamp;
     ev.type = WM_PROTOCOLS;
     ev.data.data32[0] = WM_TAKE_FOCUS;
 

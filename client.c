@@ -301,7 +301,7 @@ client_unfocus(client_t *c)
      * the WM_TAKE_FOCUS protocol.
      */
     xcb_set_input_focus(globalconf.connection, XCB_INPUT_FOCUS_PARENT,
-                        root_win, XCB_CURRENT_TIME);
+                        root_win, globalconf.timestamp);
 
     client_unfocus_update(c);
 }
@@ -330,7 +330,7 @@ client_set_focus(client_t *c, bool set_input_focus)
     bool takefocus = client_hasproto(c, WM_TAKE_FOCUS);
     if(set_input_focus)
         xcb_set_input_focus(globalconf.connection, XCB_INPUT_FOCUS_PARENT,
-                            c->window, XCB_CURRENT_TIME);
+                            c->window, globalconf.timestamp);
     if(takefocus)
         window_takefocus(c->window);
 }
@@ -1350,7 +1350,7 @@ client_kill(client_t *c)
         ev.response_type = XCB_CLIENT_MESSAGE;
         ev.window = c->window;
         ev.format = 32;
-        ev.data.data32[1] = XCB_CURRENT_TIME;
+        ev.data.data32[1] = globalconf.timestamp;
         ev.type = WM_PROTOCOLS;
         ev.data.data32[0] = WM_DELETE_WINDOW;
 
