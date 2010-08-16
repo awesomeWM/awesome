@@ -55,12 +55,6 @@ awesome_t globalconf;
 /** argv used to run awesome */
 static char *awesome_argv;
 
-typedef struct
-{
-    xcb_window_t id;
-    xcb_query_tree_cookie_t tree_cookie;
-} root_win_t;
-
 /** Call before exiting.
  */
 void
@@ -89,22 +83,19 @@ static void
 scan(void)
 {
     int i, tree_c_len;
-    root_win_t root_win;
+    xcb_query_tree_cookie_t tree_c;
     xcb_query_tree_reply_t *tree_r;
     xcb_window_t *wins = NULL;
     xcb_get_window_attributes_reply_t *attr_r;
     xcb_get_geometry_reply_t *geom_r;
     long state;
 
-    /* Get the root window ID associated to this screen */
-    root_win.id = globalconf.screen->root;
-
     /* Get the window tree associated to this screen */
-    root_win.tree_cookie = xcb_query_tree_unchecked(globalconf.connection,
-                                                    root_win.id);
+    tree_c = xcb_query_tree_unchecked(globalconf.connection,
+                                      globalconf.screen->root);
 
     tree_r = xcb_query_tree_reply(globalconf.connection,
-                                  root_win.tree_cookie,
+                                  tree_c,
                                   NULL);
 
     if(!tree_r)
