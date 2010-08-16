@@ -176,8 +176,9 @@ wibox_shape_update(wibox_t *wibox)
 }
 
 static void
-wibox_draw_context_update(wibox_t *w, xcb_screen_t *s)
+wibox_draw_context_update(wibox_t *w)
 {
+    xcb_screen_t *s = globalconf.screen;
     xcolor_t fg = w->ctx.fg, bg = w->ctx.bg;
 
     draw_context_wipe(&w->ctx);
@@ -242,7 +243,7 @@ wibox_init(wibox_t *w)
                       w->geometry.width, w->geometry.height);
 
     /* Update draw context physical screen, important for Zaphod. */
-    wibox_draw_context_update(w, s);
+    wibox_draw_context_update(w);
 
     /* The default GC is just a newly created associated to the root window */
     w->gc = xcb_generate_id(globalconf.connection);
@@ -309,7 +310,7 @@ wibox_moveresize(lua_State *L, int udx, area_t geometry)
             xcb_screen_t *s = globalconf.screen;
             xcb_create_pixmap(globalconf.connection, s->root_depth, w->pixmap, s->root,
                               w->geometry.width, w->geometry.height);
-            wibox_draw_context_update(w, s);
+            wibox_draw_context_update(w);
         }
 
         /* Activate BMA */
@@ -378,12 +379,11 @@ wibox_set_orientation(lua_State *L, int udx, orientation_t o)
     wibox_t *w = luaA_checkudata(L, udx, &wibox_class);
     if(o != w->orientation)
     {
-        xcb_screen_t *s = globalconf.screen;
         w->orientation = o;
         /* orientation != East */
         if(w->pixmap != w->ctx.pixmap)
             xcb_free_pixmap(globalconf.connection, w->ctx.pixmap);
-        wibox_draw_context_update(w, s);
+        wibox_draw_context_update(w);
         luaA_object_emit_signal(L, udx, "property::orientation", 0);
     }
 }
