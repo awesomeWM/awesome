@@ -60,25 +60,5 @@ void xutil_lock_mask_get(xcb_connection_t *, xcb_get_modifier_mapping_cookie_t,
 uint16_t xutil_key_mask_fromstr(const char *, size_t);
 void xutil_key_mask_tostr(uint16_t, const char **, size_t *);
 
-/* Get the informations about the screen.
- * \param c X connection.
- * \param screen Screen number.
- * \return Screen informations (must not be freed!).
- */
-static inline xcb_screen_t *
-xutil_screen_get(xcb_connection_t *c, int screen)
-{
-    xcb_screen_t *s;
-
-    if(xcb_connection_has_error(c))
-        fatal("X connection invalid");
-
-    s = xcb_aux_get_screen(c, screen);
-
-    assert(s);
-
-    return s;
-}
-
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

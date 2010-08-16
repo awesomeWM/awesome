@@ -87,7 +87,6 @@ color_parse(const char *colstr, ssize_t len,
 color_init_cookie_t
 color_init_unchecked(color_t *color, const char *colstr, ssize_t len)
 {
-    xcb_screen_t *s = xutil_screen_get(globalconf.connection, globalconf.default_screen);
     color_init_cookie_t req;
 
     p_clear(&req, 1);
@@ -117,7 +116,8 @@ color_init_unchecked(color_t *color, const char *colstr, ssize_t len)
         req.color = color;
         req.colstr = colstr;
         req.cookie = xcb_alloc_named_color_unchecked(globalconf.connection,
-                                                     s->default_colormap, len,
+                                                     globalconf.screen->default_colormap,
+                                                     len,
                                                      colstr);
     }
 
@@ -168,7 +168,6 @@ color_init_reply(color_init_cookie_t req)
 xcolor_init_request_t
 xcolor_init_unchecked(xcolor_t *color, const char *colstr, ssize_t len)
 {
-    xcb_screen_t *s = xutil_screen_get(globalconf.connection, globalconf.default_screen);
     xcolor_init_request_t req;
     uint8_t red, green, blue, alpha;
 
@@ -197,7 +196,7 @@ xcolor_init_unchecked(xcolor_t *color, const char *colstr, ssize_t len)
 
         req.is_hexa = true;
         req.cookie_hexa = xcb_alloc_color_unchecked(globalconf.connection,
-                                                    s->default_colormap,
+                                                    globalconf.screen->default_colormap,
                                                     RGB_8TO16(red),
                                                     RGB_8TO16(green),
                                                     RGB_8TO16(blue));
@@ -206,7 +205,7 @@ xcolor_init_unchecked(xcolor_t *color, const char *colstr, ssize_t len)
     {
         req.is_hexa = false;
         req.cookie_named = xcb_alloc_named_color_unchecked(globalconf.connection,
-                                                           s->default_colormap, len,
+                                                           globalconf.screen->default_colormap, len,
                                                            colstr);
     }
 

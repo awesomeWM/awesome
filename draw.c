@@ -336,7 +336,6 @@ draw_text_extents(draw_text_context_t *data)
     cairo_t *cr;
     PangoLayout *layout;
     PangoRectangle ext;
-    xcb_screen_t *s = xutil_screen_get(globalconf.connection, globalconf.default_screen);
     area_t geom = { 0, 0, 0, 0 };
 
     if(data->len <= 0)
@@ -345,8 +344,8 @@ draw_text_extents(draw_text_context_t *data)
     surface = cairo_xcb_surface_create(globalconf.connection,
                                        globalconf.default_screen,
                                        globalconf.visual,
-                                       s->width_in_pixels,
-                                       s->height_in_pixels);
+                                       globalconf.screen->width_in_pixels,
+                                       globalconf.screen->height_in_pixels);
 
     cr = cairo_create(surface);
     layout = pango_cairo_create_layout(cr);

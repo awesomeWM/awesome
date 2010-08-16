@@ -251,7 +251,7 @@ widget_render(wibox_t *wibox)
         char *data;
         xcb_pixmap_t rootpix;
         xcb_get_property_cookie_t prop_c;
-        xcb_screen_t *s = xutil_screen_get(globalconf.connection, globalconf.default_screen);
+        xcb_screen_t *s = globalconf.screen;
         prop_c = xcb_get_property_unchecked(globalconf.connection, false, s->root, _XROOTPMAP_ID,
                                             XCB_ATOM_PIXMAP, 0, 1);
         if((prop_r = xcb_get_property_reply(globalconf.connection, prop_c, NULL)))

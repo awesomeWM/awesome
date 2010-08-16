@@ -41,8 +41,7 @@ keygrabber_grab(void)
     {
         if((xgb = xcb_grab_keyboard_reply(globalconf.connection,
                                           xcb_grab_keyboard(globalconf.connection, true,
-                                                            xutil_screen_get(globalconf.connection,
-                                                                               globalconf.default_screen)->root,
+                                                            globalconf.screen->root,
                                                             XCB_CURRENT_TIME, XCB_GRAB_MODE_ASYNC,
                                                             XCB_GRAB_MODE_ASYNC),
                                           NULL)))

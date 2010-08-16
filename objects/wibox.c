@@ -38,7 +38,7 @@ LUA_OBJECT_FUNCS(wibox_class, wibox_t, wibox)
 static void
 wibox_systray_kickout(void)
 {
-    xcb_screen_t *s = xutil_screen_get(globalconf.connection, globalconf.default_screen);
+    xcb_screen_t *s = globalconf.screen;
 
     if(globalconf.systray.parent != s->root)
     {
@@ -214,7 +214,7 @@ wibox_draw_context_update(wibox_t *w, xcb_screen_t *s)
 static void
 wibox_init(wibox_t *w)
 {
-    xcb_screen_t *s = xutil_screen_get(globalconf.connection, globalconf.default_screen);
+    xcb_screen_t *s = globalconf.screen;
 
     w->window = xcb_generate_id(globalconf.connection);
     xcb_create_window(globalconf.connection, s->root_depth, w->window, s->root,
@@ -306,7 +306,7 @@ wibox_moveresize(lua_State *L, int udx, area_t geometry)
             if(w->pixmap != w->ctx.pixmap)
                 xcb_free_pixmap(globalconf.connection, w->ctx.pixmap);
             w->pixmap = xcb_generate_id(globalconf.connection);
-            xcb_screen_t *s = xutil_screen_get(globalconf.connection, globalconf.default_screen);
+            xcb_screen_t *s = globalconf.screen;
             xcb_create_pixmap(globalconf.connection, s->root_depth, w->pixmap, s->root,
                               w->geometry.width, w->geometry.height);
             wibox_draw_context_update(w, s);
@@ -378,7 +378,7 @@ wibox_set_orientation(lua_State *L, int udx, orientation_t o)
     wibox_t *w = luaA_checkudata(L, udx, &wibox_class);
     if(o != w->orientation)
     {
-        xcb_screen_t *s = xutil_screen_get(globalconf.connection, globalconf.default_screen);
+        xcb_screen_t *s = globalconf.screen;
         w->orientation = o;
         /* orientation != East */
         if(w->pixmap != w->ctx.pixmap)

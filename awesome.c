@@ -97,7 +97,7 @@ scan(void)
     long state;
 
     /* Get the root window ID associated to this screen */
-    root_win.id = xutil_screen_get(globalconf.connection, globalconf.default_screen)->root;
+    root_win.id = globalconf.screen->root;
 
     /* Get the window tree associated to this screen */
     root_win.tree_cookie = xcb_query_tree_unchecked(globalconf.connection,
@@ -368,6 +368,8 @@ main(int argc, char **argv)
     if(xcb_connection_has_error(globalconf.connection))
         fatal("cannot open display");
 
+    globalconf.screen = xcb_aux_get_screen(globalconf.connection, globalconf.default_screen);
+
     /* Prefetch all the extensions we might need */
     xcb_prefetch_extension_data(globalconf.connection, &xcb_big_requests_id);
     xcb_prefetch_extension_data(globalconf.connection, &xcb_test_id);
@@ -398,7 +400,7 @@ main(int argc, char **argv)
 
         /* This causes an error if some other window manager is running */
         xcb_change_window_attributes(globalconf.connection,
-                                     xutil_screen_get(globalconf.connection, globalconf.default_screen)->root,
+                                     globalconf.screen->root,
                                      XCB_CW_EVENT_MASK, &select_input_val);
     }
 
@@ -478,7 +480,7 @@ main(int argc, char **argv)
         };
 
         xcb_change_window_attributes(globalconf.connection,
-                                     xutil_screen_get(globalconf.connection, globalconf.default_screen)->root,
+                                     globalconf.screen->root,
                                      XCB_CW_EVENT_MASK,
                                      change_win_vals);
     }

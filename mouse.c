@@ -71,7 +71,7 @@ mouse_query_pointer(xcb_window_t window, int16_t *x, int16_t *y, xcb_window_t *c
 static bool
 mouse_query_pointer_root(screen_t **s, int16_t *x, int16_t *y, xcb_window_t *child, uint16_t *mask)
 {
-    xcb_window_t root = xutil_screen_get(globalconf.connection, globalconf.default_screen)->root;
+    xcb_window_t root = globalconf.screen->root;
 
     if(mouse_query_pointer(root, x, y, child, mask))
     {
@@ -135,7 +135,6 @@ luaA_mouse_newindex(lua_State *L)
     size_t len;
     const char *attr = luaL_checklstring(L, 2, &len);
     int x, y = 0;
-    xcb_window_t root;
     int screen;
 
     switch(a_tokenize(attr, len))
@@ -144,12 +143,10 @@ luaA_mouse_newindex(lua_State *L)
         screen = luaL_checknumber(L, 3) - 1;
         luaA_checkscreen(screen);
 
-        root = xutil_screen_get(globalconf.connection, globalconf.default_screen)->root;
-
         x = globalconf.screens.tab[screen].geometry.x;
         y = globalconf.screens.tab[screen].geometry.y;
 
-        mouse_warp_pointer(root, x, y);
+        mouse_warp_pointer(globalconf.screen->root, x, y);
         break;
       default:
         return 0;
@@ -203,8 +200,6 @@ luaA_mouse_coords(lua_State *L)
 
     if(lua_gettop(L) >= 1)
     {
-        xcb_window_t root;
-
         luaA_checktable(L, 1);
         bool ignore_enter_notify = (lua_gettop(L) == 2 && luaA_checkboolean(L, 2));
 
@@ -214,13 +209,10 @@ luaA_mouse_coords(lua_State *L)
         x = luaA_getopt_number(L, 1, "x", mouse_x);
         y = luaA_getopt_number(L, 1, "y", mouse_y);
 
-        root = xutil_screen_get(globalconf.connection,
-                                screen_array_indexof(&globalconf.screens, screen))->root;
-
         if(ignore_enter_notify)
             client_ignore_enterleave_events();
 
-        mouse_warp_pointer(root, x, y);
+        mouse_warp_pointer(globalconf.screen->root, x, y);
 
         if(ignore_enter_notify)
             client_restore_enterleave_events();

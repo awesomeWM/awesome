@@ -39,7 +39,7 @@
 void
 systray_init(void)
 {
-    xcb_screen_t *xscreen = xutil_screen_get(globalconf.connection, globalconf.default_screen);
+    xcb_screen_t *xscreen = globalconf.screen;
 
     globalconf.systray.window = xcb_generate_id(globalconf.connection);
     xcb_create_window(globalconf.connection, xscreen->root_depth,
@@ -74,7 +74,7 @@ void
 systray_register(void)
 {
     xcb_client_message_event_t ev;
-    xcb_screen_t *xscreen = xutil_screen_get(globalconf.connection, globalconf.default_screen);
+    xcb_screen_t *xscreen = globalconf.screen;
     char *atom_name;
     xcb_intern_atom_cookie_t atom_systray_q;
     xcb_intern_atom_reply_t *atom_systray_r;
@@ -235,7 +235,7 @@ systray_process_client_message(xcb_client_message_event_t *ev)
         if(!(geom_r = xcb_get_geometry_reply(globalconf.connection, geom_c, NULL)))
             return -1;
 
-        if(xutil_screen_get(globalconf.connection, globalconf.default_screen)->root == geom_r->root)
+        if(globalconf.screen->root == geom_r->root)
             ret = systray_request_handle(ev->data.data32[2], NULL);
 
         p_delete(&geom_r);

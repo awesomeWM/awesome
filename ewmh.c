@@ -106,7 +106,7 @@ ewmh_update_desktop_geometry(void)
     uint32_t sizes[] = { geom.width, geom.height };
 
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
-                        xutil_screen_get(globalconf.connection, globalconf.default_screen)->root,
+                        globalconf.screen->root,
                         _NET_DESKTOP_GEOMETRY, XCB_ATOM_CARDINAL, 32, countof(sizes), sizes);
 }
 
@@ -121,7 +121,7 @@ ewmh_update_net_active_window(lua_State *L)
         win = XCB_NONE;
 
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
-			xutil_screen_get(globalconf.connection, globalconf.default_screen)->root,
+			globalconf.screen->root,
 			_NET_ACTIVE_WINDOW, XCB_ATOM_WINDOW, 32, 1, &win);
 
     return 0;
@@ -131,7 +131,7 @@ void
 ewmh_init(void)
 {
     xcb_window_t father;
-    xcb_screen_t *xscreen = xutil_screen_get(globalconf.connection, globalconf.default_screen);
+    xcb_screen_t *xscreen = globalconf.screen;
     xcb_atom_t atom[] =
     {
         _NET_SUPPORTED,
@@ -231,7 +231,7 @@ ewmh_update_net_client_list(void)
     }
 
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
-			xutil_screen_get(globalconf.connection, globalconf.default_screen)->root,
+			globalconf.screen->root,
 			_NET_CLIENT_LIST, XCB_ATOM_WINDOW, 32, n, wins);
 }
 
@@ -247,7 +247,7 @@ ewmh_update_net_client_list_stacking(void)
         wins[n++] = (*client)->window;
 
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
-			xutil_screen_get(globalconf.connection, globalconf.default_screen)->root,
+			globalconf.screen->root,
 			_NET_CLIENT_LIST_STACKING, XCB_ATOM_WINDOW, 32, n, wins);
 }
 
@@ -257,7 +257,7 @@ ewmh_update_net_numbers_of_desktop(void)
     uint32_t count = globalconf.screens.tab[0].tags.len;
 
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
-			xutil_screen_get(globalconf.connection, globalconf.default_screen)->root,
+			globalconf.screen->root,
 			_NET_NUMBER_OF_DESKTOPS, XCB_ATOM_CARDINAL, 32, 1, &count);
 }
 
@@ -267,7 +267,7 @@ ewmh_update_net_current_desktop(void)
     uint32_t idx = tags_get_first_selected_index(&globalconf.screens.tab[0]);
 
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
-                        xutil_screen_get(globalconf.connection, globalconf.default_screen)->root,
+                        globalconf.screen->root,
                         _NET_CURRENT_DESKTOP, XCB_ATOM_CARDINAL, 32, 1, &idx);
 }
 
@@ -285,7 +285,7 @@ ewmh_update_net_desktop_names(void)
     }
 
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
-			xutil_screen_get(globalconf.connection, globalconf.default_screen)->root,
+			globalconf.screen->root,
 			_NET_DESKTOP_NAMES, UTF8_STRING, 8, buf.len, buf.s);
     buffer_wipe(&buf);
 }

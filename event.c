@@ -192,7 +192,7 @@ event_handle_button(xcb_button_press_event_t *ev)
                          XCB_CURRENT_TIME);
     }
     else if(ev->child == XCB_NONE)
-        if(xutil_screen_get(globalconf.connection, globalconf.default_screen)->root == ev->event)
+        if(globalconf.screen->root == ev->event)
         {
             event_button_callback(ev, &globalconf.buttons, 0, 0, NULL);
             return;
@@ -287,7 +287,7 @@ event_handle_configurerequest(xcb_configure_request_event_t *ev)
 static void
 event_handle_configurenotify(xcb_configure_notify_event_t *ev)
 {
-    const xcb_screen_t *screen = xutil_screen_get(globalconf.connection, globalconf.default_screen);
+    const xcb_screen_t *screen = globalconf.screen;
 
     if(ev->window == screen->root
        && (ev->width != screen->width_in_pixels
@@ -721,7 +721,7 @@ event_handle_mappingnotify(xcb_mapping_notify_event_t *ev)
                             &globalconf.modeswitchmask);
 
         /* regrab everything */
-        xcb_screen_t *s = xutil_screen_get(globalconf.connection, globalconf.default_screen);
+        xcb_screen_t *s = globalconf.screen;
         /* yes XCB_BUTTON_MASK_ANY is also for grab_key even if it's look weird */
         xcb_ungrab_key(globalconf.connection, XCB_GRAB_ANY, s->root, XCB_BUTTON_MASK_ANY);
         xwindow_grabkeys(s->root, &globalconf.keys);
@@ -744,8 +744,7 @@ event_handle_reparentnotify(xcb_reparent_notify_event_t *ev)
     {
         /* Ignore reparents to the root window, they *might* be caused by
          * ourselves if a client quickly unmaps and maps itself again. */
-        xcb_screen_t *s = xutil_screen_get(globalconf.connection, globalconf.default_screen);
-        if (ev->parent != s->root)
+        if (ev->parent != globalconf.screen->root)
             client_unmanage(c);
     }
 }

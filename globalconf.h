@@ -111,6 +111,8 @@ typedef struct
     SnMonitorContext *snmonitor;
     /** The default visual, used to draw */
     xcb_visualtype_t *visual;
+    /** The screen's information */
+    xcb_screen_t *screen;
 } awesome_t;
 
 extern awesome_t globalconf;

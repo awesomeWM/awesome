@@ -266,7 +266,7 @@ void
 client_unfocus(client_t *c)
 {
 
-    xcb_window_t root_win = xutil_screen_get(globalconf.connection, globalconf.default_screen)->root;
+    xcb_window_t root_win = globalconf.screen->root;
     /* Set focus on root window, so no events leak to the current window.
      * This kind of inlines client_set_focus(), but a root window will never have
      * the WM_TAKE_FOCUS protocol.
@@ -491,7 +491,7 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, bool startup)
     xcb_change_save_set(globalconf.connection, XCB_SET_MODE_INSERT, w);
 
     client_t *c = client_new(globalconf.L);
-    xcb_screen_t *s = xutil_screen_get(globalconf.connection, globalconf.default_screen);
+    xcb_screen_t *s = globalconf.screen;
 
     /* consider the window banned */
     c->isbanned = true;
@@ -1076,9 +1076,8 @@ client_unmanage(client_t *c)
                                  XCB_CW_EVENT_MASK,
                                  (const uint32_t []) { 0 });
 
-    xcb_screen_t *s = xutil_screen_get(globalconf.connection, globalconf.default_screen);
     xcb_unmap_window(globalconf.connection, c->window);
-    xcb_reparent_window(globalconf.connection, c->window, s->root,
+    xcb_reparent_window(globalconf.connection, c->window, globalconf.screen->root,
             c->geometry.x, c->geometry.y);
     xcb_destroy_window(globalconf.connection, c->frame_window);
 

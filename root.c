@@ -86,7 +86,7 @@ luaA_root_fake_input(lua_State *L)
         {
             int screen = luaL_checknumber(L, 5) - 1;
             luaA_checkscreen(screen);
-            root = xutil_screen_get(globalconf.connection, screen)->root;
+            root = globalconf.screen->root;
         }
         break;
       default:
@@ -128,7 +128,7 @@ luaA_root_keys(lua_State *L)
         while(lua_next(L, 1))
             key_array_append(&globalconf.keys, luaA_object_ref_class(L, -1, &key_class));
 
-        xcb_screen_t *s = xutil_screen_get(globalconf.connection, globalconf.default_screen);
+        xcb_screen_t *s = globalconf.screen;
         xcb_ungrab_key(globalconf.connection, XCB_GRAB_ANY, s->root, XCB_BUTTON_MASK_ANY);
         xwindow_grabkeys(s->root, &globalconf.keys);
 
@@ -200,7 +200,7 @@ luaA_root_cursor(lua_State *L)
         uint32_t change_win_vals[] = { xcursor_new(globalconf.connection, cursor_font) };
 
         xcb_change_window_attributes(globalconf.connection,
-                                     xutil_screen_get(globalconf.connection, globalconf.default_screen)->root,
+                                     globalconf.screen->root,
                                      XCB_CW_CURSOR,
                                      change_win_vals);
     }

@@ -86,9 +86,7 @@ screen_scan_randr(void)
             /* A quick XRandR recall:
              * You have CRTC that manages a part of a SCREEN.
              * Each CRTC can draw stuff on one or more OUTPUT. */
-            xcb_screen_t *screen = xutil_screen_get(globalconf.connection, globalconf.default_screen);
-
-            xcb_randr_get_screen_resources_cookie_t screen_res_c = xcb_randr_get_screen_resources(globalconf.connection, screen->root);
+            xcb_randr_get_screen_resources_cookie_t screen_res_c = xcb_randr_get_screen_resources(globalconf.connection, globalconf.screen->root);
             xcb_randr_get_screen_resources_reply_t *screen_res_r = xcb_randr_get_screen_resources_reply(globalconf.connection, screen_res_c, NULL);
 
             /* Only use the data from XRandR if there is more than one screen
@@ -220,7 +218,7 @@ screen_scan_xinerama(void)
 static void screen_scan_x11(void)
 {
     /* One screen only / Zaphod mode */
-    xcb_screen_t *xcb_screen = xutil_screen_get(globalconf.connection, globalconf.default_screen);
+    xcb_screen_t *xcb_screen = globalconf.screen;
     screen_t s;
     p_clear(&s, 1);
     s.geometry.x = 0;
@@ -239,7 +237,7 @@ screen_scan(void)
         screen_scan_x11();
 
     globalconf.screen_focus = globalconf.screens.tab;
-    globalconf.visual = screen_default_visual(xutil_screen_get(globalconf.connection, globalconf.default_screen));
+    globalconf.visual = screen_default_visual(globalconf.screen);
 }
 
 /** Return the Xinerama screen number where the coordinates belongs to.
@@ -334,7 +332,7 @@ screen_area_get(screen_t *screen, bool strut)
 area_t
 display_area_get(void)
 {
-    xcb_screen_t *s = xutil_screen_get(globalconf.connection, globalconf.default_screen);
+    xcb_screen_t *s = globalconf.screen;
     area_t area = { .x = 0,
                     .y = 0,
                     .width = s->width_in_pixels,
