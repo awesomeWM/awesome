@@ -40,16 +40,16 @@ wibox_systray_kickout(void)
 {
     xcb_screen_t *s = xutil_screen_get(globalconf.connection, globalconf.default_screen);
 
-    if(globalconf.screens.tab[0].systray.parent != s->root)
+    if(globalconf.systray.parent != s->root)
     {
         /* Who! Check that we're not deleting a wibox with a systray, because it
          * may be its parent. If so, we reparent to root before, otherwise it will
          * hurt very much. */
         xcb_reparent_window(globalconf.connection,
-                            globalconf.screens.tab[0].systray.window,
+                            globalconf.systray.window,
                             s->root, -512, -512);
 
-        globalconf.screens.tab[0].systray.parent = s->root;
+        globalconf.systray.parent = s->root;
     }
 }
 
@@ -64,7 +64,7 @@ wibox_wipe_resources(wibox_t *w)
         /* Activate BMA */
         client_ignore_enterleave_events();
         /* Make sure we don't accidentally kill the systray window */
-        if(globalconf.screens.tab[0].systray.parent == w->window)
+        if(globalconf.systray.parent == w->window)
             wibox_systray_kickout();
         xcb_destroy_window(globalconf.connection, w->window);
         /* Deactivate BMA */
@@ -429,10 +429,10 @@ wibox_systray_refresh(wibox_t *wibox)
             {
                 /* Set background of the systray window. */
                 xcb_change_window_attributes(globalconf.connection,
-                                             globalconf.screens.tab[0].systray.window,
+                                             globalconf.systray.window,
                                              XCB_CW_BACK_PIXEL, config_back);
                 /* Map it. */
-                xcb_map_window(globalconf.connection, globalconf.screens.tab[0].systray.window);
+                xcb_map_window(globalconf.connection, globalconf.systray.window);
                 /* Move it. */
                 switch(wibox->orientation)
                 {
@@ -456,16 +456,16 @@ wibox_systray_refresh(wibox_t *wibox)
                     break;
                 }
                 /* reparent */
-                if(globalconf.screens.tab[0].systray.parent != wibox->window)
+                if(globalconf.systray.parent != wibox->window)
                 {
                     xcb_reparent_window(globalconf.connection,
-                                        globalconf.screens.tab[0].systray.window,
+                                        globalconf.systray.window,
                                         wibox->window,
                                         config_win_vals[0], config_win_vals[1]);
-                    globalconf.screens.tab[0].systray.parent = wibox->window;
+                    globalconf.systray.parent = wibox->window;
                 }
                 xcb_configure_window(globalconf.connection,
-                                     globalconf.screens.tab[0].systray.window,
+                                     globalconf.systray.window,
                                      XCB_CONFIG_WINDOW_X
                                      | XCB_CONFIG_WINDOW_Y
                                      | XCB_CONFIG_WINDOW_WIDTH

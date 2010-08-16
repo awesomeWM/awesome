@@ -34,15 +34,6 @@ struct a_screen
     area_t geometry;
     /** Tag list */
     tag_array_t tags;
-    /** Window that contains the systray */
-    struct
-    {
-        xcb_window_t window;
-        /** Systray window parent */
-        xcb_window_t parent;
-        /** Is awesome the systray owner? */
-        bool registered;
-    } systray;
     /** Previously focused client */
     client_t *prev_client_focus;
     /** Focused client */

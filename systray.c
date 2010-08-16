@@ -41,9 +41,9 @@ systray_init(void)
 {
     xcb_screen_t *xscreen = xutil_screen_get(globalconf.connection, globalconf.default_screen);
 
-    globalconf.screens.tab[0].systray.window = xcb_generate_id(globalconf.connection);
+    globalconf.systray.window = xcb_generate_id(globalconf.connection);
     xcb_create_window(globalconf.connection, xscreen->root_depth,
-                      globalconf.screens.tab[0].systray.window,
+                      globalconf.systray.window,
                       xscreen->root,
                       -1, -1, 1, 1, 0,
                       XCB_COPY_FROM_PARENT, xscreen->root_visual, 0, NULL);
@@ -81,9 +81,9 @@ systray_register(void)
     xcb_atom_t atom_systray;
 
     /* Set registered even if it fails to don't try again unless forced */
-    if(globalconf.screens.tab[0].systray.registered)
+    if(globalconf.systray.registered)
         return;
-    globalconf.screens.tab[0].systray.registered = true;
+    globalconf.systray.registered = true;
 
     /* Send requests */
     if(!(atom_name = xcb_atom_name_by_screen("_NET_SYSTEM_TRAY", globalconf.default_screen)))
@@ -104,7 +104,7 @@ systray_register(void)
     ev.format = 32;
     ev.type = MANAGER;
     ev.data.data32[0] = XCB_CURRENT_TIME;
-    ev.data.data32[2] = globalconf.screens.tab[0].systray.window;
+    ev.data.data32[2] = globalconf.systray.window;
     ev.data.data32[3] = ev.data.data32[4] = 0;
 
     if(!(atom_systray_r = xcb_intern_atom_reply(globalconf.connection, atom_systray_q, NULL)))
@@ -118,7 +118,7 @@ systray_register(void)
     p_delete(&atom_systray_r);
 
     xcb_set_selection_owner(globalconf.connection,
-                            globalconf.screens.tab[0].systray.window,
+                            globalconf.systray.window,
                             atom_systray,
                             XCB_CURRENT_TIME);
 
@@ -133,9 +133,9 @@ systray_cleanup(void)
     xcb_intern_atom_reply_t *atom_systray_r;
     char *atom_name;
 
-    if(!globalconf.screens.tab[0].systray.registered)
+    if(!globalconf.systray.registered)
         return;
-    globalconf.screens.tab[0].systray.registered = false;
+    globalconf.systray.registered = false;
 
     if(!(atom_name = xcb_atom_name_by_screen("_NET_SYSTEM_TRAY", globalconf.default_screen))
        || !(atom_systray_r = xcb_intern_atom_reply(globalconf.connection,
@@ -195,7 +195,7 @@ systray_request_handle(xcb_window_t embed_win, xembed_info_t *info)
      */
     xcb_change_save_set(globalconf.connection, XCB_SET_MODE_INSERT, embed_win);
     xcb_reparent_window(globalconf.connection, embed_win,
-                        globalconf.screens.tab[0].systray.window,
+                        globalconf.systray.window,
                         0, 0);
 
     em.win = embed_win;
@@ -206,7 +206,7 @@ systray_request_handle(xcb_window_t embed_win, xembed_info_t *info)
         xembed_info_get_reply(globalconf.connection, em_cookie, &em.info);
 
     xembed_embedded_notify(globalconf.connection, em.win,
-                           globalconf.screens.tab[0].systray.window,
+                           globalconf.systray.window,
                            MIN(XEMBED_VERSION, em.info.version));
 
     xembed_window_array_append(&globalconf.embedded, em);

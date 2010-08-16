@@ -72,7 +72,7 @@ systray_draw(widget_t *widget, draw_context_t *ctx,
     /* set wibox orientation */
     /** \todo stop setting that property on each redraw */
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
-                        globalconf.screens.tab[0].systray.window,
+                        globalconf.systray.window,
                         _NET_SYSTEM_TRAY_ORIENTATION, XCB_ATOM_CARDINAL, 32, 1, &orient);
 }
 

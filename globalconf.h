@@ -98,6 +98,15 @@ typedef struct
     SnDisplay *sndisplay;
     /** Latest timestamp we got from the X server */
     xcb_timestamp_t timestamp;
+    /** Window that contains the systray */
+    struct
+    {
+        xcb_window_t window;
+        /** Systray window parent */
+        xcb_window_t parent;
+        /** Is awesome the systray owner? */
+        bool registered;
+    } systray;
 } awesome_t;
 
 extern awesome_t globalconf;
