@@ -128,14 +128,9 @@ luaA_root_keys(lua_State *L)
         while(lua_next(L, 1))
             key_array_append(&globalconf.keys, luaA_object_ref_class(L, -1, &key_class));
 
-        int nscreen = xcb_setup_roots_length(xcb_get_setup(globalconf.connection));
-
-        for(int phys_screen = 0; phys_screen < nscreen; phys_screen++)
-        {
-            xcb_screen_t *s = xutil_screen_get(globalconf.connection, phys_screen);
-            xcb_ungrab_key(globalconf.connection, XCB_GRAB_ANY, s->root, XCB_BUTTON_MASK_ANY);
-            xwindow_grabkeys(s->root, &globalconf.keys);
-        }
+        xcb_screen_t *s = xutil_screen_get(globalconf.connection, globalconf.default_screen);
+        xcb_ungrab_key(globalconf.connection, XCB_GRAB_ANY, s->root, XCB_BUTTON_MASK_ANY);
+        xwindow_grabkeys(s->root, &globalconf.keys);
 
         return 1;
     }
@@ -204,13 +199,10 @@ luaA_root_cursor(lua_State *L)
     {
         uint32_t change_win_vals[] = { xcursor_new(globalconf.connection, cursor_font) };
 
-        for(int screen_nbr = 0;
-            screen_nbr < xcb_setup_roots_length(xcb_get_setup(globalconf.connection));
-            screen_nbr++)
-            xcb_change_window_attributes(globalconf.connection,
-                                         xutil_screen_get(globalconf.connection, screen_nbr)->root,
-                                         XCB_CW_CURSOR,
-                                         change_win_vals);
+        xcb_change_window_attributes(globalconf.connection,
+                                     xutil_screen_get(globalconf.connection, globalconf.default_screen)->root,
+                                     XCB_CW_CURSOR,
+                                     change_win_vals);
     }
     else
         luaA_warn(L, "invalid cursor %s", cursor_name);

@@ -253,7 +253,7 @@ client_getbyframewin(xcb_window_t w)
 void
 client_unfocus_update(client_t *c)
 {
-    globalconf.screens.tab[c->phys_screen].client_focus = NULL;
+    globalconf.screens.tab[0].client_focus = NULL;
 
     luaA_object_push(globalconf.L, c);
     luaA_class_emit_signal(globalconf.L, &client_class, "unfocus", 1);
@@ -266,7 +266,7 @@ void
 client_unfocus(client_t *c)
 {
 
-    xcb_window_t root_win = xutil_screen_get(globalconf.connection, c->phys_screen)->root;
+    xcb_window_t root_win = xutil_screen_get(globalconf.connection, globalconf.default_screen)->root;
     /* Set focus on root window, so no events leak to the current window.
      * This kind of inlines client_set_focus(), but a root window will never have
      * the WM_TAKE_FOCUS protocol.
@@ -311,11 +311,11 @@ client_set_focus(client_t *c, bool set_input_focus)
  */
 void client_ban_unfocus(client_t *c)
 {
-    if(globalconf.screens.tab[c->phys_screen].prev_client_focus == c)
-        globalconf.screens.tab[c->phys_screen].prev_client_focus = NULL;
+    if(globalconf.screens.tab[0].prev_client_focus == c)
+        globalconf.screens.tab[0].prev_client_focus = NULL;
 
     /* Wait until the last moment to take away the focus from the window. */
-    if(globalconf.screens.tab[c->phys_screen].client_focus == c)
+    if(globalconf.screens.tab[0].client_focus == c)
         client_unfocus(c);
 }
 
@@ -393,7 +393,7 @@ client_focus_update(client_t *c)
             return;
     }
 
-    globalconf.screen_focus = &globalconf.screens.tab[c->phys_screen];
+    globalconf.screen_focus = &globalconf.screens.tab[0];
     globalconf.screen_focus->prev_client_focus = c;
     globalconf.screen_focus->client_focus = c;
 
@@ -467,17 +467,16 @@ client_update_properties(client_t *c)
 /** Manage a new client.
  * \param w The window.
  * \param wgeom Window geometry.
- * \param phys_screen Physical screen number.
  * \param startup True if we are managing at startup time.
  */
 void
-client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, bool startup)
+client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, bool startup)
 {
     const uint32_t select_input_val[] = { CLIENT_SELECT_INPUT_EVENT_MASK };
 
     if(systray_iskdedockapp(w))
     {
-        systray_request_handle(w, phys_screen, NULL);
+        systray_request_handle(w, NULL);
         return;
     }
 
@@ -492,10 +491,8 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
     xcb_change_save_set(globalconf.connection, XCB_SET_MODE_INSERT, w);
 
     client_t *c = client_new(globalconf.L);
-    xcb_screen_t *s = xutil_screen_get(globalconf.connection, phys_screen);
+    xcb_screen_t *s = xutil_screen_get(globalconf.connection, globalconf.default_screen);
 
-    /* This cannot change, ever. */
-    c->phys_screen = phys_screen;
     /* consider the window banned */
     c->isbanned = true;
     /* Store window */
@@ -542,7 +539,7 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, int phys_screen, 
     client_array_push(&globalconf.clients, luaA_object_ref(globalconf.L, -1));
 
     /* Set the right screen */
-    screen_client_moveto(c, screen_getbycoord(&globalconf.screens.tab[phys_screen], wgeom->x, wgeom->y), false);
+    screen_client_moveto(c, screen_getbycoord(&globalconf.screens.tab[0], wgeom->x, wgeom->y), false);
 
     /* Store initial geometry and emits signals so we inform that geometry have
      * been set. */
@@ -573,7 +570,7 @@ HANDLE_GEOM(height)
     /* Push client in stack */
     client_raise(c);
 
-    ewmh_update_net_client_list(c->phys_screen);
+    ewmh_update_net_client_list();
 
     /* Always stay in NORMAL_STATE. Even though iconified seems more
      * appropriate sometimes. The only possible loss is that clients not using
@@ -730,7 +727,7 @@ client_resize(client_t *c, area_t geometry, bool hints)
     area_t area;
 
     /* offscreen appearance fixes */
-    area = display_area_get(c->phys_screen);
+    area = display_area_get();
 
     if(geometry.x > area.width)
         geometry.x = area.width - geometry.width;
@@ -1041,10 +1038,10 @@ client_unmanage(client_t *c)
             tc->transient_for = NULL;
     }
 
-    if(globalconf.screens.tab[c->phys_screen].prev_client_focus == c)
-        globalconf.screens.tab[c->phys_screen].prev_client_focus = NULL;
+    if(globalconf.screens.tab[0].prev_client_focus == c)
+        globalconf.screens.tab[0].prev_client_focus = NULL;
 
-    if(globalconf.screens.tab[c->phys_screen].client_focus == c)
+    if(globalconf.screens.tab[0].client_focus == c)
         client_unfocus(c);
 
     /* remove client from global list and everywhere else */
@@ -1066,7 +1063,7 @@ client_unmanage(client_t *c)
     if(strut_has_value(&c->strut))
         screen_emit_signal(globalconf.L, c->screen, "property::workarea", 0);
 
-    ewmh_update_net_client_list(c->phys_screen);
+    ewmh_update_net_client_list();
 
     /* Clear our event mask so that we don't receive any events from now on,
      * especially not for the following requests. */
@@ -1079,7 +1076,7 @@ client_unmanage(client_t *c)
                                  XCB_CW_EVENT_MASK,
                                  (const uint32_t []) { 0 });
 
-    xcb_screen_t *s = xutil_screen_get(globalconf.connection, c->phys_screen);
+    xcb_screen_t *s = xutil_screen_get(globalconf.connection, globalconf.default_screen);
     xcb_unmap_window(globalconf.connection, c->window);
     xcb_reparent_window(globalconf.connection, c->window, s->root,
             c->geometry.x, c->geometry.y);

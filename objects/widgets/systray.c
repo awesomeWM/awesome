@@ -46,12 +46,11 @@ systray_extents(lua_State *L, widget_t *widget)
     luaA_checkscreen(screen);
 
     area_t geometry;
-    int phys_screen = screen_virttophys(screen), n = 0;
+    int n = 0;
     systray_data_t *d = widget->data;
 
     for(int i = 0; i < globalconf.embedded.len; i++)
-        if(globalconf.embedded.tab[i].phys_screen == phys_screen)
-            n++;
+        n++;
 
     /** \todo use class hints */
     geometry.width  = d->height * n;
@@ -73,7 +72,7 @@ systray_draw(widget_t *widget, draw_context_t *ctx,
     /* set wibox orientation */
     /** \todo stop setting that property on each redraw */
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
-                        globalconf.screens.tab[p->ctx.phys_screen].systray.window,
+                        globalconf.screens.tab[0].systray.window,
                         _NET_SYSTEM_TRAY_ORIENTATION, XCB_ATOM_CARDINAL, 32, 1, &orient);
 }
 

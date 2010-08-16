@@ -71,17 +71,12 @@ mouse_query_pointer(xcb_window_t window, int16_t *x, int16_t *y, xcb_window_t *c
 static bool
 mouse_query_pointer_root(screen_t **s, int16_t *x, int16_t *y, xcb_window_t *child, uint16_t *mask)
 {
-    for(int screen = 0;
-        screen < xcb_setup_roots_length(xcb_get_setup(globalconf.connection));
-        screen++)
-    {
-        xcb_window_t root = xutil_screen_get(globalconf.connection, screen)->root;
+    xcb_window_t root = xutil_screen_get(globalconf.connection, globalconf.default_screen)->root;
 
-        if(mouse_query_pointer(root, x, y, child, mask))
-        {
-            *s = &globalconf.screens.tab[screen];
-            return true;
-        }
+    if(mouse_query_pointer(root, x, y, child, mask))
+    {
+        *s = &globalconf.screens.tab[0];
+        return true;
     }
     return false;
 }
@@ -141,7 +136,7 @@ luaA_mouse_newindex(lua_State *L)
     const char *attr = luaL_checklstring(L, 2, &len);
     int x, y = 0;
     xcb_window_t root;
-    int screen, phys_screen;
+    int screen;
 
     switch(a_tokenize(attr, len))
     {
@@ -149,9 +144,7 @@ luaA_mouse_newindex(lua_State *L)
         screen = luaL_checknumber(L, 3) - 1;
         luaA_checkscreen(screen);
 
-        /* we need the physical one to get the root window */
-        phys_screen = screen_virttophys(screen);
-        root = xutil_screen_get(globalconf.connection, phys_screen)->root;
+        root = xutil_screen_get(globalconf.connection, globalconf.default_screen)->root;
 
         x = globalconf.screens.tab[screen].geometry.x;
         y = globalconf.screens.tab[screen].geometry.y;

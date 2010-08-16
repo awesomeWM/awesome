@@ -35,16 +35,15 @@
 #define SYSTEM_TRAY_REQUEST_DOCK 0 /* Begin icon docking */
 
 /** Initialize systray information in X.
- * \param phys_screen Physical screen.
  */
 void
-systray_init(int phys_screen)
+systray_init(void)
 {
-    xcb_screen_t *xscreen = xutil_screen_get(globalconf.connection, phys_screen);
+    xcb_screen_t *xscreen = xutil_screen_get(globalconf.connection, globalconf.default_screen);
 
-    globalconf.screens.tab[phys_screen].systray.window = xcb_generate_id(globalconf.connection);
+    globalconf.screens.tab[0].systray.window = xcb_generate_id(globalconf.connection);
     xcb_create_window(globalconf.connection, xscreen->root_depth,
-                      globalconf.screens.tab[phys_screen].systray.window,
+                      globalconf.screens.tab[0].systray.window,
                       xscreen->root,
                       -1, -1, 1, 1, 0,
                       XCB_COPY_FROM_PARENT, xscreen->root_visual, 0, NULL);
@@ -54,46 +53,40 @@ systray_init(int phys_screen)
 /** Refresh all systrays registrations per physical screen
  */
 void
-systray_refresh()
+systray_refresh(void)
 {
-    int nscreen = xcb_setup_roots_length(xcb_get_setup(globalconf.connection));
+    bool has_systray = false;
+    foreach(w, globalconf.wiboxes)
+        if((*w)->has_systray)
+            /* Can't use "break" with foreach() :( */
+            has_systray = true;
 
-    for(int phys_screen = 0; phys_screen < nscreen; phys_screen++)
-    {
-        bool has_systray = false;
-        foreach(w, globalconf.wiboxes)
-            if(phys_screen == (*w)->ctx.phys_screen && (*w)->has_systray)
-                /* Can't use "break" with foreach() :( */
-                has_systray = true;
-
-        if(has_systray)
-            systray_register(phys_screen);
-        else
-            systray_cleanup(phys_screen);
-    }
+    if(has_systray)
+        systray_register();
+    else
+        systray_cleanup();
 }
 
 
 /** Register systray in X.
- * \param phys_screen Physical screen.
  */
 void
-systray_register(int phys_screen)
+systray_register(void)
 {
     xcb_client_message_event_t ev;
-    xcb_screen_t *xscreen = xutil_screen_get(globalconf.connection, phys_screen);
+    xcb_screen_t *xscreen = xutil_screen_get(globalconf.connection, globalconf.default_screen);
     char *atom_name;
     xcb_intern_atom_cookie_t atom_systray_q;
     xcb_intern_atom_reply_t *atom_systray_r;
     xcb_atom_t atom_systray;
 
     /* Set registered even if it fails to don't try again unless forced */
-    if(globalconf.screens.tab[phys_screen].systray.registered)
+    if(globalconf.screens.tab[0].systray.registered)
         return;
-    globalconf.screens.tab[phys_screen].systray.registered = true;
+    globalconf.screens.tab[0].systray.registered = true;
 
     /* Send requests */
-    if(!(atom_name = xcb_atom_name_by_screen("_NET_SYSTEM_TRAY", phys_screen)))
+    if(!(atom_name = xcb_atom_name_by_screen("_NET_SYSTEM_TRAY", globalconf.default_screen)))
     {
         warn("error getting systray atom");
         return;
@@ -111,7 +104,7 @@ systray_register(int phys_screen)
     ev.format = 32;
     ev.type = MANAGER;
     ev.data.data32[0] = XCB_CURRENT_TIME;
-    ev.data.data32[2] = globalconf.screens.tab[phys_screen].systray.window;
+    ev.data.data32[2] = globalconf.screens.tab[0].systray.window;
     ev.data.data32[3] = ev.data.data32[4] = 0;
 
     if(!(atom_systray_r = xcb_intern_atom_reply(globalconf.connection, atom_systray_q, NULL)))
@@ -125,7 +118,7 @@ systray_register(int phys_screen)
     p_delete(&atom_systray_r);
 
     xcb_set_selection_owner(globalconf.connection,
-                            globalconf.screens.tab[phys_screen].systray.window,
+                            globalconf.screens.tab[0].systray.window,
                             atom_systray,
                             XCB_CURRENT_TIME);
 
@@ -133,19 +126,18 @@ systray_register(int phys_screen)
 }
 
 /** Remove systray information in X.
- * \param phys_screen Physical screen.
  */
 void
-systray_cleanup(int phys_screen)
+systray_cleanup(void)
 {
     xcb_intern_atom_reply_t *atom_systray_r;
     char *atom_name;
 
-    if(!globalconf.screens.tab[phys_screen].systray.registered)
+    if(!globalconf.screens.tab[0].systray.registered)
         return;
-    globalconf.screens.tab[phys_screen].systray.registered = false;
+    globalconf.screens.tab[0].systray.registered = false;
 
-    if(!(atom_name = xcb_atom_name_by_screen("_NET_SYSTEM_TRAY", phys_screen))
+    if(!(atom_name = xcb_atom_name_by_screen("_NET_SYSTEM_TRAY", globalconf.default_screen))
        || !(atom_systray_r = xcb_intern_atom_reply(globalconf.connection,
                                                    xcb_intern_atom_unchecked(globalconf.connection,
                                                                              false,
@@ -170,12 +162,11 @@ systray_cleanup(int phys_screen)
 
 /** Handle a systray request.
  * \param embed_win The window to embed.
- * \param phys_screen The physical monitor to display on.
  * \param info The embedding info
  * \return 0 on no error.
  */
 int
-systray_request_handle(xcb_window_t embed_win, int phys_screen, xembed_info_t *info)
+systray_request_handle(xcb_window_t embed_win, xembed_info_t *info)
 {
     xembed_window_t em;
     xcb_get_property_cookie_t em_cookie;
@@ -204,11 +195,10 @@ systray_request_handle(xcb_window_t embed_win, int phys_screen, xembed_info_t *i
      */
     xcb_change_save_set(globalconf.connection, XCB_SET_MODE_INSERT, embed_win);
     xcb_reparent_window(globalconf.connection, embed_win,
-                        globalconf.screens.tab[phys_screen].systray.window,
+                        globalconf.screens.tab[0].systray.window,
                         0, 0);
 
     em.win = embed_win;
-    em.phys_screen = phys_screen;
 
     if(info)
         em.info = *info;
@@ -216,7 +206,7 @@ systray_request_handle(xcb_window_t embed_win, int phys_screen, xembed_info_t *i
         xembed_info_get_reply(globalconf.connection, em_cookie, &em.info);
 
     xembed_embedded_notify(globalconf.connection, em.win,
-                           globalconf.screens.tab[phys_screen].systray.window,
+                           globalconf.screens.tab[0].systray.window,
                            MIN(XEMBED_VERSION, em.info.version));
 
     xembed_window_array_append(&globalconf.embedded, em);
@@ -233,10 +223,9 @@ systray_request_handle(xcb_window_t embed_win, int phys_screen, xembed_info_t *i
 int
 systray_process_client_message(xcb_client_message_event_t *ev)
 {
-    int screen_nbr = 0, ret = 0;
+    int ret = 0;
     xcb_get_geometry_cookie_t geom_c;
     xcb_get_geometry_reply_t *geom_r;
-    xcb_screen_iterator_t iter;
 
     switch(ev->data.data32[1])
     {
@@ -246,12 +235,10 @@ systray_process_client_message(xcb_client_message_event_t *ev)
         if(!(geom_r = xcb_get_geometry_reply(globalconf.connection, geom_c, NULL)))
             return -1;
 
-        for(iter = xcb_setup_roots_iterator(xcb_get_setup(globalconf.connection)), screen_nbr = 0;
-            iter.rem && iter.data->root != geom_r->root; xcb_screen_next (&iter), ++screen_nbr);
+        if(xutil_screen_get(globalconf.connection, globalconf.default_screen)->root == geom_r->root)
+            ret = systray_request_handle(ev->data.data32[2], NULL);
 
         p_delete(&geom_r);
-
-        ret = systray_request_handle(ev->data.data32[2], screen_nbr, NULL);
         break;
     }
 

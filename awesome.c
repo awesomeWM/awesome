@@ -66,19 +66,11 @@ typedef struct
 void
 awesome_atexit(void)
 {
-    int screen_nbr, nscreens;
-
     signal_object_emit(globalconf.L, &global_signals, "exit", 0);
 
     a_dbus_cleanup();
 
-    /* do this only for real screen */
-    const xcb_setup_t *setup = xcb_get_setup(globalconf.connection);
-    nscreens = setup ? xcb_setup_roots_length(setup) : -1;
-    for(screen_nbr = 0;
-        screen_nbr < nscreens;
-        screen_nbr++)
-        systray_cleanup(screen_nbr);
+    systray_cleanup();
 
     /* Close Lua */
     lua_close(globalconf.L);
@@ -96,89 +88,82 @@ awesome_atexit(void)
 static void
 scan(void)
 {
-    int i, phys_screen, tree_c_len;
-    const int screen_max = xcb_setup_roots_length(xcb_get_setup(globalconf.connection));
-    root_win_t root_wins[screen_max];
+    int i, tree_c_len;
+    root_win_t root_win;
     xcb_query_tree_reply_t *tree_r;
     xcb_window_t *wins = NULL;
     xcb_get_window_attributes_reply_t *attr_r;
     xcb_get_geometry_reply_t *geom_r;
     long state;
 
-    for(phys_screen = 0; phys_screen < screen_max; phys_screen++)
-    {
-        /* Get the root window ID associated to this screen */
-        root_wins[phys_screen].id = xutil_screen_get(globalconf.connection, phys_screen)->root;
+    /* Get the root window ID associated to this screen */
+    root_win.id = xutil_screen_get(globalconf.connection, globalconf.default_screen)->root;
 
-        /* Get the window tree associated to this screen */
-        root_wins[phys_screen].tree_cookie = xcb_query_tree_unchecked(globalconf.connection,
-                                                                      root_wins[phys_screen].id);
+    /* Get the window tree associated to this screen */
+    root_win.tree_cookie = xcb_query_tree_unchecked(globalconf.connection,
+                                                    root_win.id);
+
+    tree_r = xcb_query_tree_reply(globalconf.connection,
+                                  root_win.tree_cookie,
+                                  NULL);
+
+    if(!tree_r)
+        return;
+
+    /* Get the tree of the children windows of the current root window */
+    if(!(wins = xcb_query_tree_children(tree_r)))
+        fatal("cannot get tree children");
+
+    tree_c_len = xcb_query_tree_children_length(tree_r);
+    xcb_get_window_attributes_cookie_t attr_wins[tree_c_len];
+    xcb_get_property_cookie_t state_wins[tree_c_len];
+
+    for(i = 0; i < tree_c_len; i++)
+    {
+        attr_wins[i] = xcb_get_window_attributes_unchecked(globalconf.connection,
+                                                           wins[i]);
+
+        state_wins[i] = xwindow_get_state_unchecked(wins[i]);
     }
 
-    for(phys_screen = 0; phys_screen < screen_max; phys_screen++)
-    {
-        tree_r = xcb_query_tree_reply(globalconf.connection,
-                                      root_wins[phys_screen].tree_cookie,
-                                      NULL);
+    xcb_get_geometry_cookie_t *geom_wins[tree_c_len];
 
-        if(!tree_r)
+    for(i = 0; i < tree_c_len; i++)
+    {
+        attr_r = xcb_get_window_attributes_reply(globalconf.connection,
+                                                 attr_wins[i],
+                                                 NULL);
+
+        state = xwindow_get_state_reply(state_wins[i]);
+
+        if(!attr_r || attr_r->override_redirect
+           || attr_r->map_state == XCB_MAP_STATE_UNMAPPED
+           || state == XCB_WM_STATE_WITHDRAWN)
+        {
+            geom_wins[i] = NULL;
+            p_delete(&attr_r);
+            continue;
+        }
+
+        p_delete(&attr_r);
+
+        /* Get the geometry of the current window */
+        geom_wins[i] = p_alloca(xcb_get_geometry_cookie_t, 1);
+        *(geom_wins[i]) = xcb_get_geometry_unchecked(globalconf.connection, wins[i]);
+    }
+
+    for(i = 0; i < tree_c_len; i++)
+    {
+        if(!geom_wins[i] || !(geom_r = xcb_get_geometry_reply(globalconf.connection,
+                                                              *(geom_wins[i]), NULL)))
             continue;
 
-        /* Get the tree of the children windows of the current root window */
-        if(!(wins = xcb_query_tree_children(tree_r)))
-            fatal("cannot get tree children");
+        client_manage(wins[i], geom_r, true);
 
-        tree_c_len = xcb_query_tree_children_length(tree_r);
-        xcb_get_window_attributes_cookie_t attr_wins[tree_c_len];
-        xcb_get_property_cookie_t state_wins[tree_c_len];
-
-        for(i = 0; i < tree_c_len; i++)
-        {
-            attr_wins[i] = xcb_get_window_attributes_unchecked(globalconf.connection,
-                                                               wins[i]);
-
-            state_wins[i] = xwindow_get_state_unchecked(wins[i]);
-        }
-
-        xcb_get_geometry_cookie_t *geom_wins[tree_c_len];
-
-        for(i = 0; i < tree_c_len; i++)
-        {
-            attr_r = xcb_get_window_attributes_reply(globalconf.connection,
-                                                     attr_wins[i],
-                                                     NULL);
-
-            state = xwindow_get_state_reply(state_wins[i]);
-
-            if(!attr_r || attr_r->override_redirect
-               || attr_r->map_state == XCB_MAP_STATE_UNMAPPED
-               || state == XCB_WM_STATE_WITHDRAWN)
-            {
-                geom_wins[i] = NULL;
-                p_delete(&attr_r);
-                continue;
-            }
-
-            p_delete(&attr_r);
-
-            /* Get the geometry of the current window */
-            geom_wins[i] = p_alloca(xcb_get_geometry_cookie_t, 1);
-            *(geom_wins[i]) = xcb_get_geometry_unchecked(globalconf.connection, wins[i]);
-        }
-
-        for(i = 0; i < tree_c_len; i++)
-        {
-            if(!geom_wins[i] || !(geom_r = xcb_get_geometry_reply(globalconf.connection,
-                                                                  *(geom_wins[i]), NULL)))
-                continue;
-
-            client_manage(wins[i], geom_r, phys_screen, true);
-
-            p_delete(&geom_r);
-        }
-
-        p_delete(&tree_r);
+        p_delete(&geom_r);
     }
+
+    p_delete(&tree_r);
 }
 
 static void
@@ -283,7 +268,7 @@ int
 main(int argc, char **argv)
 {
     char *confpath = NULL;
-    int xfd, i, screen_nbr, opt, colors_nbr;
+    int xfd, i, opt, colors_nbr;
     xcolor_init_request_t colors_reqs[2];
     ssize_t cmdlen = 1;
     xdgHandle xdg;
@@ -408,15 +393,12 @@ main(int argc, char **argv)
     ev_prepare_start(globalconf.loop, &a_refresh);
     ev_unref(globalconf.loop);
 
-    for(screen_nbr = 0;
-        screen_nbr < xcb_setup_roots_length(xcb_get_setup(globalconf.connection));
-        screen_nbr++)
     {
         const uint32_t select_input_val = XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT;
 
         /* This causes an error if some other window manager is running */
         xcb_change_window_attributes(globalconf.connection,
-                                     xutil_screen_get(globalconf.connection, screen_nbr)->root,
+                                     xutil_screen_get(globalconf.connection, globalconf.default_screen)->root,
                                      XCB_CW_EVENT_MASK, &select_input_val);
     }
 
@@ -465,13 +447,8 @@ main(int argc, char **argv)
                         &globalconf.modeswitchmask);
 
     /* do this only for real screen */
-    for(screen_nbr = 0;
-        screen_nbr < xcb_setup_roots_length(xcb_get_setup(globalconf.connection));
-        screen_nbr++)
-    {
-        ewmh_init(screen_nbr);
-        systray_init(screen_nbr);
-    }
+    ewmh_init();
+    systray_init();
 
     /* init spawn (sn) */
     spawn_init();
@@ -487,10 +464,6 @@ main(int argc, char **argv)
     /* scan existing windows */
     scan();
 
-    /* do this only for real screen */
-    for(screen_nbr = 0;
-        screen_nbr < xcb_setup_roots_length(xcb_get_setup(globalconf.connection));
-        screen_nbr++)
     {
         /* select for events */
         const uint32_t change_win_vals[] =
@@ -505,7 +478,7 @@ main(int argc, char **argv)
         };
 
         xcb_change_window_attributes(globalconf.connection,
-                                     xutil_screen_get(globalconf.connection, screen_nbr)->root,
+                                     xutil_screen_get(globalconf.connection, globalconf.default_screen)->root,
                                      XCB_CW_EVENT_MASK,
                                      change_win_vals);
     }

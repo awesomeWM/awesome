@@ -136,21 +136,4 @@ xutil_key_mask_tostr(uint16_t mask, const char **name, size_t *len)
     }
 }
 
-/** Convert a root window a physical screen ID.
- * \param connection The connection to the X server.
- * \param root Root window.
- * \return A physical screen number.
- */
-int
-xutil_root2screen(xcb_connection_t *connection, xcb_window_t root)
-{
-    xcb_screen_iterator_t iter;
-    int phys_screen = 0;
-
-    for(iter = xcb_setup_roots_iterator(xcb_get_setup(connection));
-        iter.rem && iter.data->root != root; xcb_screen_next(&iter), ++phys_screen);
-
-    return phys_screen;
-}
-
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

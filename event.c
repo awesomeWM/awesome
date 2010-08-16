@@ -133,8 +133,6 @@ event_handle_mousegrabber(int x, int y, uint16_t mask)
 static void
 event_handle_button(xcb_button_press_event_t *ev)
 {
-    int screen;
-    const int nb_screen = xcb_setup_roots_length(xcb_get_setup(globalconf.connection));
     client_t *c;
     wibox_t *wibox;
 
@@ -194,12 +192,11 @@ event_handle_button(xcb_button_press_event_t *ev)
                          XCB_CURRENT_TIME);
     }
     else if(ev->child == XCB_NONE)
-        for(screen = 0; screen < nb_screen; screen++)
-            if(xutil_screen_get(globalconf.connection, screen)->root == ev->event)
-            {
-                event_button_callback(ev, &globalconf.buttons, 0, 0, NULL);
-                return;
-            }
+        if(xutil_screen_get(globalconf.connection, globalconf.default_screen)->root == ev->event)
+        {
+            event_button_callback(ev, &globalconf.buttons, 0, 0, NULL);
+            return;
+        }
 }
 
 static void
@@ -290,16 +287,13 @@ event_handle_configurerequest(xcb_configure_request_event_t *ev)
 static void
 event_handle_configurenotify(xcb_configure_notify_event_t *ev)
 {
-    int screen_nbr;
-    const xcb_screen_t *screen;
+    const xcb_screen_t *screen = xutil_screen_get(globalconf.connection, globalconf.default_screen);
 
-    for(screen_nbr = 0; screen_nbr < xcb_setup_roots_length(xcb_get_setup(globalconf.connection)); screen_nbr++)
-        if((screen = xutil_screen_get(globalconf.connection, screen_nbr)) != NULL
-           && ev->window == screen->root
-           && (ev->width != screen->width_in_pixels
-               || ev->height != screen->height_in_pixels))
-            /* it's not that we panic, but restart */
-            awesome_restart();
+    if(ev->window == screen->root
+       && (ev->width != screen->width_in_pixels
+           || ev->height != screen->height_in_pixels))
+        /* it's not that we panic, but restart */
+        awesome_restart();
 }
 
 /** The destroy notify event handler.
@@ -578,7 +572,6 @@ event_handle_key(xcb_key_press_event_t *ev)
 static void
 event_handle_maprequest(xcb_map_request_event_t *ev)
 {
-    int phys_screen;
     client_t *c;
     xcb_get_window_attributes_cookie_t wa_c;
     xcb_get_window_attributes_reply_t *wa_r;
@@ -619,9 +612,7 @@ event_handle_maprequest(xcb_map_request_event_t *ev)
             goto bailout;
         }
 
-        phys_screen = xutil_root2screen(globalconf.connection, geom_r->root);
-
-        client_manage(ev->window, geom_r, phys_screen, false);
+        client_manage(ev->window, geom_r, false);
 
         p_delete(&geom_r);
     }
@@ -729,16 +720,11 @@ event_handle_mappingnotify(xcb_mapping_notify_event_t *ev)
                             &globalconf.shiftlockmask, &globalconf.capslockmask,
                             &globalconf.modeswitchmask);
 
-        int nscreen = xcb_setup_roots_length(xcb_get_setup(globalconf.connection));
-
         /* regrab everything */
-        for(int phys_screen = 0; phys_screen < nscreen; phys_screen++)
-        {
-            xcb_screen_t *s = xutil_screen_get(globalconf.connection, phys_screen);
-            /* yes XCB_BUTTON_MASK_ANY is also for grab_key even if it's look weird */
-            xcb_ungrab_key(globalconf.connection, XCB_GRAB_ANY, s->root, XCB_BUTTON_MASK_ANY);
-            xwindow_grabkeys(s->root, &globalconf.keys);
-        }
+        xcb_screen_t *s = xutil_screen_get(globalconf.connection, globalconf.default_screen);
+        /* yes XCB_BUTTON_MASK_ANY is also for grab_key even if it's look weird */
+        xcb_ungrab_key(globalconf.connection, XCB_GRAB_ANY, s->root, XCB_BUTTON_MASK_ANY);
+        xwindow_grabkeys(s->root, &globalconf.keys);
 
         foreach(_c, globalconf.clients)
         {
@@ -758,7 +744,7 @@ event_handle_reparentnotify(xcb_reparent_notify_event_t *ev)
     {
         /* Ignore reparents to the root window, they *might* be caused by
          * ourselves if a client quickly unmaps and maps itself again. */
-        xcb_screen_t *s = xutil_screen_get(globalconf.connection, c->phys_screen);
+        xcb_screen_t *s = xutil_screen_get(globalconf.connection, globalconf.default_screen);
         if (ev->parent != s->root)
             client_unmanage(c);
     }

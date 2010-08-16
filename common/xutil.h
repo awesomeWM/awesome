@@ -80,7 +80,5 @@ xutil_screen_get(xcb_connection_t *c, int screen)
     return s;
 }
 
-int xutil_root2screen(xcb_connection_t *, xcb_window_t);
-
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

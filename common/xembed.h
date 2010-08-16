@@ -42,7 +42,6 @@ typedef struct xembed_window xembed_window_t;
 struct xembed_window
 {
     xcb_window_t win;
-    int phys_screen;
     xembed_info_t info;
 };
 

@@ -98,43 +98,40 @@ ewmh_signal_on_client_new(lua_State *L)
 }
 
 /** Update the desktop geometry.
- * \param phys_screen The physical screen id.
  */
 static void
-ewmh_update_desktop_geometry(int phys_screen)
+ewmh_update_desktop_geometry(void)
 {
-    area_t geom = screen_area_get(&globalconf.screens.tab[phys_screen], false);
+    area_t geom = screen_area_get(&globalconf.screens.tab[0], false);
     uint32_t sizes[] = { geom.width, geom.height };
 
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
-                        xutil_screen_get(globalconf.connection, phys_screen)->root,
+                        xutil_screen_get(globalconf.connection, globalconf.default_screen)->root,
                         _NET_DESKTOP_GEOMETRY, XCB_ATOM_CARDINAL, 32, countof(sizes), sizes);
 }
 
 static int
 ewmh_update_net_active_window(lua_State *L)
 {
-    client_t *c = luaA_checkudata(L, 1, &client_class);
     xcb_window_t win;
 
-    if(globalconf.screen_focus->client_focus
-       && globalconf.screen_focus->client_focus->phys_screen == c->phys_screen)
+    if(globalconf.screen_focus->client_focus)
         win = globalconf.screen_focus->client_focus->window;
     else
         win = XCB_NONE;
 
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
-			xutil_screen_get(globalconf.connection, c->phys_screen)->root,
+			xutil_screen_get(globalconf.connection, globalconf.default_screen)->root,
 			_NET_ACTIVE_WINDOW, XCB_ATOM_WINDOW, 32, 1, &win);
 
     return 0;
 }
 
 void
-ewmh_init(int phys_screen)
+ewmh_init(void)
 {
     xcb_window_t father;
-    xcb_screen_t *xscreen = xutil_screen_get(globalconf.connection, phys_screen);
+    xcb_screen_t *xscreen = xutil_screen_get(globalconf.connection, globalconf.default_screen);
     xcb_atom_t atom[] =
     {
         _NET_SUPPORTED,
@@ -211,7 +208,7 @@ ewmh_init(int phys_screen)
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
                         father, _NET_WM_PID, XCB_ATOM_CARDINAL, 32, 1, &i);
 
-    ewmh_update_desktop_geometry(phys_screen);
+    ewmh_update_desktop_geometry();
 
     lua_pushcfunction(globalconf.L, ewmh_signal_on_client_new);
     luaA_class_add_signal(globalconf.L, &client_class, "new", -1);
@@ -222,7 +219,7 @@ ewmh_init(int phys_screen)
 }
 
 void
-ewmh_update_net_client_list(int phys_screen)
+ewmh_update_net_client_list(void)
 {
     xcb_window_t *wins = p_alloca(xcb_window_t, globalconf.clients.len);
 
@@ -230,68 +227,65 @@ ewmh_update_net_client_list(int phys_screen)
     foreach(_c, globalconf.clients)
     {
         client_t *c = *_c;
-        if(c->phys_screen == phys_screen)
-            wins[n++] = c->window;
+        wins[n++] = c->window;
     }
 
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
-			xutil_screen_get(globalconf.connection, phys_screen)->root,
+			xutil_screen_get(globalconf.connection, globalconf.default_screen)->root,
 			_NET_CLIENT_LIST, XCB_ATOM_WINDOW, 32, n, wins);
 }
 
 /** Set the client list in stacking order, bottom to top.
- * \param phys_screen The physical screen id.
  */
 void
-ewmh_update_net_client_list_stacking(int phys_screen)
+ewmh_update_net_client_list_stacking(void)
 {
     int n = 0;
     xcb_window_t *wins = p_alloca(xcb_window_t, globalconf.stack.len);
 
     foreach(client, globalconf.stack)
-        if((*client)->phys_screen == phys_screen)
-            wins[n++] = (*client)->window;
+        wins[n++] = (*client)->window;
 
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
-			xutil_screen_get(globalconf.connection, phys_screen)->root,
+			xutil_screen_get(globalconf.connection, globalconf.default_screen)->root,
 			_NET_CLIENT_LIST_STACKING, XCB_ATOM_WINDOW, 32, n, wins);
 }
 
 void
-ewmh_update_net_numbers_of_desktop(int phys_screen)
+ewmh_update_net_numbers_of_desktop(void)
 {
-    uint32_t count = globalconf.screens.tab[phys_screen].tags.len;
+    uint32_t count = globalconf.screens.tab[0].tags.len;
 
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
-			xutil_screen_get(globalconf.connection, phys_screen)->root,
+			xutil_screen_get(globalconf.connection, globalconf.default_screen)->root,
 			_NET_NUMBER_OF_DESKTOPS, XCB_ATOM_CARDINAL, 32, 1, &count);
 }
 
 void
-ewmh_update_net_current_desktop(int phys_screen)
+ewmh_update_net_current_desktop(void)
 {
-    uint32_t idx = tags_get_first_selected_index(&globalconf.screens.tab[phys_screen]);
+    uint32_t idx = tags_get_first_selected_index(&globalconf.screens.tab[0]);
 
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
-                        xutil_screen_get(globalconf.connection, phys_screen)->root,
+                        xutil_screen_get(globalconf.connection, globalconf.default_screen)->root,
                         _NET_CURRENT_DESKTOP, XCB_ATOM_CARDINAL, 32, 1, &idx);
 }
 
 void
-ewmh_update_net_desktop_names(int phys_screen)
+ewmh_update_net_desktop_names(void)
 {
     buffer_t buf;
 
     buffer_inita(&buf, BUFSIZ);
 
-    foreach(tag, globalconf.screens.tab[phys_screen].tags)
+    foreach(tag, globalconf.screens.tab[0].tags)
     {
         buffer_adds(&buf, tag_get_name(*tag));
         buffer_addc(&buf, '\0');
     }
 
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
-			xutil_screen_get(globalconf.connection, phys_screen)->root,
+			xutil_screen_get(globalconf.connection, globalconf.default_screen)->root,
 			_NET_DESKTOP_NAMES, UTF8_STRING, 8, buf.len, buf.s);
     buffer_wipe(&buf);
 }
@@ -399,16 +393,9 @@ int
 ewmh_process_client_message(xcb_client_message_event_t *ev)
 {
     client_t *c;
-    int screen;
 
     if(ev->type == _NET_CURRENT_DESKTOP)
-        for(screen = 0;
-            screen < xcb_setup_roots_length(xcb_get_setup(globalconf.connection));
-            screen++)
-        {
-            if(ev->window == xutil_screen_get(globalconf.connection, screen)->root)
-                tag_view_only_byindex(&globalconf.screens.tab[screen], ev->data.data32[0]);
-        }
+        tag_view_only_byindex(&globalconf.screens.tab[0], ev->data.data32[0]);
     else if(ev->type == _NET_CLOSE_WINDOW)
     {
         if((c = client_getbywin(ev->window)))

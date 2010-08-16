@@ -64,8 +64,7 @@ void screen_emit_signal(lua_State *, screen_t *, const char *, int);
 void screen_scan(void);
 screen_t *screen_getbycoord(screen_t *, int, int);
 area_t screen_area_get(screen_t *, bool);
-area_t display_area_get(int);
-int screen_virttophys(int);
+area_t display_area_get(void);
 void screen_client_moveto(client_t *, screen_t *, bool);
 
 #endif

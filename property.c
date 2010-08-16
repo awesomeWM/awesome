@@ -337,10 +337,8 @@ property_handle_xrootpmap_id(uint8_t state,
             (*w)->need_update = true;
     else
     {
-        int screen = xutil_root2screen(globalconf.connection, window);
         foreach(w, globalconf.wiboxes)
-            if(screen == screen_array_indexof(&globalconf.screens, (*w)->screen))
-               (*w)->need_update = true;
+           (*w)->need_update = true;
     }
 
     return 0;

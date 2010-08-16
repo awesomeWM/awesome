@@ -236,13 +236,10 @@ spawn_init(void)
 {
     globalconf.sndisplay = sn_xcb_display_new(globalconf.connection, NULL, NULL);
 
-    const int screen_max = xcb_setup_roots_length(xcb_get_setup(globalconf.connection));
-
-    for(int screen = 0; screen < screen_max; screen++)
-        globalconf.screens.tab[screen].snmonitor = sn_monitor_context_new(globalconf.sndisplay,
-                                                                          screen,
-                                                                          spawn_monitor_event,
-                                                                          NULL, NULL);
+    globalconf.screens.tab[0].snmonitor = sn_monitor_context_new(globalconf.sndisplay,
+                                                                 globalconf.default_screen,
+                                                                 spawn_monitor_event,
+                                                                 NULL, NULL);
 }
 
 static void
@@ -330,7 +327,7 @@ luaA_spawn(lua_State *L)
         else
             cmdname = a_strdup(cmd);
 
-        context = sn_launcher_context_new(globalconf.sndisplay, screen_virttophys(screen));
+        context = sn_launcher_context_new(globalconf.sndisplay, globalconf.default_screen);
         sn_launcher_context_set_name(context, "awesome");
         sn_launcher_context_set_description(context, "awesome spawn");
         sn_launcher_context_set_binary_name(context, cmdname);

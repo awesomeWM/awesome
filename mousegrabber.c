@@ -35,19 +35,7 @@
 static bool
 mousegrabber_grab(xcb_cursor_t cursor)
 {
-    xcb_window_t root = XCB_NONE;
-
-    for(int screen = 0;
-        screen < xcb_setup_roots_length(xcb_get_setup(globalconf.connection));
-        screen++)
-    {
-        int16_t x, y;
-        uint16_t mask;
-
-        root = xutil_screen_get(globalconf.connection, screen)->root;
-        if(mouse_query_pointer(root, &x, &y, NULL, &mask))
-            break;
-    }
+    xcb_window_t root = xutil_screen_get(globalconf.connection, globalconf.default_screen)->root;
 
     for(int i = 1000; i; i--)
     {

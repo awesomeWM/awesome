@@ -225,20 +225,15 @@ screen_scan_xinerama(void)
 static void screen_scan_x11(void)
 {
     /* One screen only / Zaphod mode */
-    for(int screen = 0;
-        screen < xcb_setup_roots_length(xcb_get_setup(globalconf.connection));
-        screen++)
-    {
-        xcb_screen_t *xcb_screen = xutil_screen_get(globalconf.connection, screen);
-        screen_t s;
-        p_clear(&s, 1);
-        s.geometry.x = 0;
-        s.geometry.y = 0;
-        s.geometry.width = xcb_screen->width_in_pixels;
-        s.geometry.height = xcb_screen->height_in_pixels;
-        s.visual = screen_default_visual(xcb_screen);
-        screen_array_append(&globalconf.screens, s);
-    }
+    xcb_screen_t *xcb_screen = xutil_screen_get(globalconf.connection, globalconf.default_screen);
+    screen_t s;
+    p_clear(&s, 1);
+    s.geometry.x = 0;
+    s.geometry.y = 0;
+    s.geometry.width = xcb_screen->width_in_pixels;
+    s.geometry.height = xcb_screen->height_in_pixels;
+    s.visual = screen_default_visual(xcb_screen);
+    screen_array_append(&globalconf.screens, s);
 }
 
 /** Get screens informations and fill global configuration.
@@ -339,31 +334,17 @@ screen_area_get(screen_t *screen, bool strut)
 }
 
 /** Get display info.
- * \param phys_screen Physical screen number.
  * \return The display area.
  */
 area_t
-display_area_get(int phys_screen)
+display_area_get(void)
 {
-    xcb_screen_t *s = xutil_screen_get(globalconf.connection, phys_screen);
+    xcb_screen_t *s = xutil_screen_get(globalconf.connection, globalconf.default_screen);
     area_t area = { .x = 0,
                     .y = 0,
                     .width = s->width_in_pixels,
                     .height = s->height_in_pixels };
     return area;
-}
-
-/** This returns the real X screen number for a logical
- * screen if Xinerama is active.
- * \param screen The logical screen.
- * \return The X screen.
- */
-int
-screen_virttophys(int screen)
-{
-    if(globalconf.xinerama_is_active)
-        return globalconf.default_screen;
-    return screen;
 }
 
 /** Move a client to a virtual screen.

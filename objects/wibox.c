@@ -34,23 +34,22 @@
 LUA_OBJECT_FUNCS(wibox_class, wibox_t, wibox)
 
 /** Kick out systray windows.
- * \param phys_screen Physical screen number.
  */
 static void
-wibox_systray_kickout(int phys_screen)
+wibox_systray_kickout(void)
 {
-    xcb_screen_t *s = xutil_screen_get(globalconf.connection, phys_screen);
+    xcb_screen_t *s = xutil_screen_get(globalconf.connection, globalconf.default_screen);
 
-    if(globalconf.screens.tab[phys_screen].systray.parent != s->root)
+    if(globalconf.screens.tab[0].systray.parent != s->root)
     {
         /* Who! Check that we're not deleting a wibox with a systray, because it
          * may be its parent. If so, we reparent to root before, otherwise it will
          * hurt very much. */
         xcb_reparent_window(globalconf.connection,
-                            globalconf.screens.tab[phys_screen].systray.window,
+                            globalconf.screens.tab[0].systray.window,
                             s->root, -512, -512);
 
-        globalconf.screens.tab[phys_screen].systray.parent = s->root;
+        globalconf.screens.tab[0].systray.parent = s->root;
     }
 }
 
@@ -62,13 +61,11 @@ wibox_wipe_resources(wibox_t *w)
 {
     if(w->window)
     {
-        int phys_screen = w->ctx.phys_screen;
-
         /* Activate BMA */
         client_ignore_enterleave_events();
         /* Make sure we don't accidentally kill the systray window */
-        if(globalconf.screens.tab[phys_screen].systray.parent == w->window)
-            wibox_systray_kickout(phys_screen);
+        if(globalconf.screens.tab[0].systray.parent == w->window)
+            wibox_systray_kickout();
         xcb_destroy_window(globalconf.connection, w->window);
         /* Deactivate BMA */
         client_restore_enterleave_events();
@@ -182,7 +179,6 @@ static void
 wibox_draw_context_update(wibox_t *w, xcb_screen_t *s)
 {
     xcolor_t fg = w->ctx.fg, bg = w->ctx.bg;
-    int phys_screen = w->ctx.phys_screen;
 
     draw_context_wipe(&w->ctx);
 
@@ -198,13 +194,13 @@ wibox_draw_context_update(wibox_t *w, xcb_screen_t *s)
                           w->ctx.pixmap, s->root,
                           w->geometry.height,
                           w->geometry.width);
-        draw_context_init(&w->ctx, phys_screen,
+        draw_context_init(&w->ctx,
                           w->geometry.height,
                           w->geometry.width,
                           w->ctx.pixmap, &fg, &bg);
         break;
       case East:
-        draw_context_init(&w->ctx, phys_screen,
+        draw_context_init(&w->ctx,
                           w->geometry.width,
                           w->geometry.height,
                           w->pixmap, &fg, &bg);
@@ -214,12 +210,11 @@ wibox_draw_context_update(wibox_t *w, xcb_screen_t *s)
 
 /** Initialize a wibox.
  * \param w The wibox to initialize.
- * \param phys_screen Physical screen number.
  */
 static void
-wibox_init(wibox_t *w, int phys_screen)
+wibox_init(wibox_t *w)
 {
-    xcb_screen_t *s = xutil_screen_get(globalconf.connection, phys_screen);
+    xcb_screen_t *s = xutil_screen_get(globalconf.connection, globalconf.default_screen);
 
     w->window = xcb_generate_id(globalconf.connection);
     xcb_create_window(globalconf.connection, s->root_depth, w->window, s->root,
@@ -247,7 +242,6 @@ wibox_init(wibox_t *w, int phys_screen)
                       w->geometry.width, w->geometry.height);
 
     /* Update draw context physical screen, important for Zaphod. */
-    w->ctx.phys_screen = phys_screen;
     wibox_draw_context_update(w, s);
 
     /* The default GC is just a newly created associated to the root window */
@@ -312,7 +306,7 @@ wibox_moveresize(lua_State *L, int udx, area_t geometry)
             if(w->pixmap != w->ctx.pixmap)
                 xcb_free_pixmap(globalconf.connection, w->ctx.pixmap);
             w->pixmap = xcb_generate_id(globalconf.connection);
-            xcb_screen_t *s = xutil_screen_get(globalconf.connection, w->ctx.phys_screen);
+            xcb_screen_t *s = xutil_screen_get(globalconf.connection, globalconf.default_screen);
             xcb_create_pixmap(globalconf.connection, s->root_depth, w->pixmap, s->root,
                               w->geometry.width, w->geometry.height);
             wibox_draw_context_update(w, s);
@@ -384,7 +378,7 @@ wibox_set_orientation(lua_State *L, int udx, orientation_t o)
     wibox_t *w = luaA_checkudata(L, udx, &wibox_class);
     if(o != w->orientation)
     {
-        xcb_screen_t *s = xutil_screen_get(globalconf.connection, w->ctx.phys_screen);
+        xcb_screen_t *s = xutil_screen_get(globalconf.connection, globalconf.default_screen);
         w->orientation = o;
         /* orientation != East */
         if(w->pixmap != w->ctx.pixmap)
@@ -426,7 +420,6 @@ wibox_systray_refresh(wibox_t *wibox)
             uint32_t config_win_vals[4];
             uint32_t config_win_vals_off[2] = { -512, -512 };
             xembed_window_t *em;
-            int phys_screen = wibox->ctx.phys_screen;
 
             wibox->has_systray = true;
 
@@ -436,10 +429,10 @@ wibox_systray_refresh(wibox_t *wibox)
             {
                 /* Set background of the systray window. */
                 xcb_change_window_attributes(globalconf.connection,
-                                             globalconf.screens.tab[phys_screen].systray.window,
+                                             globalconf.screens.tab[0].systray.window,
                                              XCB_CW_BACK_PIXEL, config_back);
                 /* Map it. */
-                xcb_map_window(globalconf.connection, globalconf.screens.tab[phys_screen].systray.window);
+                xcb_map_window(globalconf.connection, globalconf.screens.tab[0].systray.window);
                 /* Move it. */
                 switch(wibox->orientation)
                 {
@@ -463,16 +456,16 @@ wibox_systray_refresh(wibox_t *wibox)
                     break;
                 }
                 /* reparent */
-                if(globalconf.screens.tab[phys_screen].systray.parent != wibox->window)
+                if(globalconf.screens.tab[0].systray.parent != wibox->window)
                 {
                     xcb_reparent_window(globalconf.connection,
-                                        globalconf.screens.tab[phys_screen].systray.window,
+                                        globalconf.screens.tab[0].systray.window,
                                         wibox->window,
                                         config_win_vals[0], config_win_vals[1]);
-                    globalconf.screens.tab[phys_screen].systray.parent = wibox->window;
+                    globalconf.screens.tab[0].systray.parent = wibox->window;
                 }
                 xcb_configure_window(globalconf.connection,
-                                     globalconf.screens.tab[phys_screen].systray.window,
+                                     globalconf.screens.tab[0].systray.window,
                                      XCB_CONFIG_WINDOW_X
                                      | XCB_CONFIG_WINDOW_Y
                                      | XCB_CONFIG_WINDOW_WIDTH
@@ -483,7 +476,7 @@ wibox_systray_refresh(wibox_t *wibox)
                 config_win_vals[0] = 0;
             }
             else
-                return wibox_systray_kickout(phys_screen);
+                return wibox_systray_kickout();
 
             switch(wibox->orientation)
             {
@@ -492,25 +485,22 @@ wibox_systray_refresh(wibox_t *wibox)
                 for(int j = 0; j < globalconf.embedded.len; j++)
                 {
                     em = &globalconf.embedded.tab[j];
-                    if(em->phys_screen == phys_screen)
+                    if(config_win_vals[1] - config_win_vals[2] >= (uint32_t) wibox->geometry.y)
                     {
-                        if(config_win_vals[1] - config_win_vals[2] >= (uint32_t) wibox->geometry.y)
-                        {
-                            xcb_map_window(globalconf.connection, em->win);
-                            xcb_configure_window(globalconf.connection, em->win,
-                                                 XCB_CONFIG_WINDOW_X
-                                                 | XCB_CONFIG_WINDOW_Y
-                                                 | XCB_CONFIG_WINDOW_WIDTH
-                                                 | XCB_CONFIG_WINDOW_HEIGHT,
-                                                 config_win_vals);
-                            config_win_vals[1] -= config_win_vals[3];
-                        }
-                        else
-                            xcb_configure_window(globalconf.connection, em->win,
-                                                 XCB_CONFIG_WINDOW_X
-                                                 | XCB_CONFIG_WINDOW_Y,
-                                                 config_win_vals_off);
+                        xcb_map_window(globalconf.connection, em->win);
+                        xcb_configure_window(globalconf.connection, em->win,
+                                             XCB_CONFIG_WINDOW_X
+                                             | XCB_CONFIG_WINDOW_Y
+                                             | XCB_CONFIG_WINDOW_WIDTH
+                                             | XCB_CONFIG_WINDOW_HEIGHT,
+                                             config_win_vals);
+                        config_win_vals[1] -= config_win_vals[3];
                     }
+                    else
+                        xcb_configure_window(globalconf.connection, em->win,
+                                             XCB_CONFIG_WINDOW_X
+                                             | XCB_CONFIG_WINDOW_Y,
+                                             config_win_vals_off);
                 }
                 break;
               case South:
@@ -518,26 +508,23 @@ wibox_systray_refresh(wibox_t *wibox)
                 for(int j = 0; j < globalconf.embedded.len; j++)
                 {
                     em = &globalconf.embedded.tab[j];
-                    if(em->phys_screen == phys_screen)
+                    /* if(y + width <= wibox.y + systray.right) */
+                    if(config_win_vals[1] + config_win_vals[3] <= (uint32_t) wibox->geometry.y + AREA_RIGHT(systray->geometry))
                     {
-                        /* if(y + width <= wibox.y + systray.right) */
-                        if(config_win_vals[1] + config_win_vals[3] <= (uint32_t) wibox->geometry.y + AREA_RIGHT(systray->geometry))
-                        {
-                            xcb_map_window(globalconf.connection, em->win);
-                            xcb_configure_window(globalconf.connection, em->win,
-                                                 XCB_CONFIG_WINDOW_X
-                                                 | XCB_CONFIG_WINDOW_Y
-                                                 | XCB_CONFIG_WINDOW_WIDTH
-                                                 | XCB_CONFIG_WINDOW_HEIGHT,
-                                                 config_win_vals);
-                            config_win_vals[1] += config_win_vals[3];
-                        }
-                        else
-                            xcb_configure_window(globalconf.connection, em->win,
-                                                 XCB_CONFIG_WINDOW_X
-                                                 | XCB_CONFIG_WINDOW_Y,
-                                                 config_win_vals_off);
+                        xcb_map_window(globalconf.connection, em->win);
+                        xcb_configure_window(globalconf.connection, em->win,
+                                             XCB_CONFIG_WINDOW_X
+                                             | XCB_CONFIG_WINDOW_Y
+                                             | XCB_CONFIG_WINDOW_WIDTH
+                                             | XCB_CONFIG_WINDOW_HEIGHT,
+                                             config_win_vals);
+                        config_win_vals[1] += config_win_vals[3];
                     }
+                    else
+                        xcb_configure_window(globalconf.connection, em->win,
+                                             XCB_CONFIG_WINDOW_X
+                                             | XCB_CONFIG_WINDOW_Y,
+                                             config_win_vals_off);
                 }
                 break;
               case East:
@@ -545,26 +532,23 @@ wibox_systray_refresh(wibox_t *wibox)
                 for(int j = 0; j < globalconf.embedded.len; j++)
                 {
                     em = &globalconf.embedded.tab[j];
-                    if(em->phys_screen == phys_screen)
+                    /* if(x + width < systray.x + systray.width) */
+                    if(config_win_vals[0] + config_win_vals[2] <= (uint32_t) AREA_RIGHT(systray->geometry) + wibox->geometry.x)
                     {
-                        /* if(x + width < systray.x + systray.width) */
-                        if(config_win_vals[0] + config_win_vals[2] <= (uint32_t) AREA_RIGHT(systray->geometry) + wibox->geometry.x)
-                        {
-                            xcb_map_window(globalconf.connection, em->win);
-                            xcb_configure_window(globalconf.connection, em->win,
-                                                 XCB_CONFIG_WINDOW_X
-                                                 | XCB_CONFIG_WINDOW_Y
-                                                 | XCB_CONFIG_WINDOW_WIDTH
-                                                 | XCB_CONFIG_WINDOW_HEIGHT,
-                                                 config_win_vals);
-                            config_win_vals[0] += config_win_vals[2];
-                        }
-                        else
-                            xcb_configure_window(globalconf.connection, em->win,
-                                                 XCB_CONFIG_WINDOW_X
-                                                 | XCB_CONFIG_WINDOW_Y,
-                                                 config_win_vals_off);
+                        xcb_map_window(globalconf.connection, em->win);
+                        xcb_configure_window(globalconf.connection, em->win,
+                                             XCB_CONFIG_WINDOW_X
+                                             | XCB_CONFIG_WINDOW_Y
+                                             | XCB_CONFIG_WINDOW_WIDTH
+                                             | XCB_CONFIG_WINDOW_HEIGHT,
+                                             config_win_vals);
+                        config_win_vals[0] += config_win_vals[2];
                     }
+                    else
+                        xcb_configure_window(globalconf.connection, em->win,
+                                             XCB_CONFIG_WINDOW_X
+                                             | XCB_CONFIG_WINDOW_Y,
+                                             config_win_vals_off);
                 }
                 break;
             }
@@ -714,8 +698,6 @@ wibox_detach(lua_State *L, int udx)
 static void
 wibox_attach(lua_State *L, int udx, screen_t *s)
 {
-    int phys_screen = screen_virttophys(screen_array_indexof(&globalconf.screens, s));
-
     /* duplicate wibox */
     lua_pushvalue(L, udx);
     /* ref it */
@@ -739,7 +721,7 @@ wibox_attach(lua_State *L, int udx, screen_t *s)
 
     wibox_array_append(&globalconf.wiboxes, wibox);
 
-    wibox_init(wibox, phys_screen);
+    wibox_init(wibox);
 
     xwindow_set_cursor(wibox->window,
                       xcursor_new(globalconf.connection, xcursor_font_fromstr(wibox->cursor)));

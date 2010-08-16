@@ -25,13 +25,13 @@
 #include "globalconf.h"
 #include "strut.h"
 
-void ewmh_init(int);
-void ewmh_update_net_client_list(int);
-void ewmh_update_net_numbers_of_desktop(int);
-void ewmh_update_net_current_desktop(int);
-void ewmh_update_net_desktop_names(int);
+void ewmh_init(void);
+void ewmh_update_net_client_list(void);
+void ewmh_update_net_numbers_of_desktop(void);
+void ewmh_update_net_current_desktop(void);
+void ewmh_update_net_desktop_names(void);
 int ewmh_process_client_message(xcb_client_message_event_t *);
-void ewmh_update_net_client_list_stacking(int);
+void ewmh_update_net_client_list_stacking(void);
 void ewmh_client_check_hints(client_t *);
 void ewmh_client_update_desktop(client_t *);
 void ewmh_process_client_strut(client_t *);

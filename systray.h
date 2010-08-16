@@ -25,11 +25,11 @@
 #include <xcb/xcb.h>
 #include "common/xembed.h"
 
-void systray_init(int);
+void systray_init(void);
 void systray_refresh(void);
-void systray_register(int);
-void systray_cleanup(int);
-int systray_request_handle(xcb_window_t, int, xembed_info_t *);
+void systray_register(void);
+void systray_cleanup(void);
+int systray_request_handle(xcb_window_t, xembed_info_t *);
 bool systray_iskdedockapp(xcb_window_t);
 int systray_process_client_message(xcb_client_message_event_t *);
 int xembed_process_client_message(xcb_client_message_event_t *);

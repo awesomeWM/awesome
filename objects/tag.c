@@ -75,11 +75,9 @@ tag_view(lua_State *L, int udx, bool view)
 
         if(tag->screen)
         {
-            int screen_index = screen_array_indexof(&globalconf.screens, tag->screen);
-
             banning_need_update(tag->screen);
 
-            ewmh_update_net_current_desktop(screen_virttophys(screen_index));
+            ewmh_update_net_current_desktop();
         }
 
         luaA_object_emit_signal(L, udx, "property::selected", 0);
@@ -103,13 +101,10 @@ tag_append_to_screen(lua_State *L, int udx, screen_t *s)
         return;
     }
 
-    int screen_index = screen_array_indexof(&globalconf.screens, s);
-    int phys_screen = screen_virttophys(screen_index);
-
     tag->screen = s;
     tag_array_append(&s->tags, luaA_object_ref_class(globalconf.L, udx, &tag_class));
-    ewmh_update_net_numbers_of_desktop(phys_screen);
-    ewmh_update_net_desktop_names(phys_screen);
+    ewmh_update_net_numbers_of_desktop();
+    ewmh_update_net_desktop_names();
 
     luaA_object_push(globalconf.L, tag);
     luaA_object_emit_signal(L, -1, "property::screen", 0);
@@ -128,8 +123,6 @@ tag_remove_from_screen(tag_t *tag)
     if(!tag->screen)
         return;
 
-    int screen_index = screen_array_indexof(&globalconf.screens, tag->screen);
-    int phys_screen = screen_virttophys(screen_index);
     tag_array_t *tags = &tag->screen->tags;
 
     for(int i = 0; i < tags->len; i++)
@@ -143,8 +136,8 @@ tag_remove_from_screen(tag_t *tag)
     if(tag->selected)
         banning_need_update(tag->screen);
 
-    ewmh_update_net_numbers_of_desktop(phys_screen);
-    ewmh_update_net_desktop_names(phys_screen);
+    ewmh_update_net_numbers_of_desktop();
+    ewmh_update_net_desktop_names();
 
     screen_t *s = tag->screen;
     tag->screen = NULL;
