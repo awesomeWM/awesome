@@ -539,7 +539,7 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, bool startup)
     client_array_push(&globalconf.clients, luaA_object_ref(globalconf.L, -1));
 
     /* Set the right screen */
-    screen_client_moveto(c, screen_getbycoord(&globalconf.screens.tab[0], wgeom->x, wgeom->y), false);
+    screen_client_moveto(c, screen_getbycoord(wgeom->x, wgeom->y), false);
 
     /* Store initial geometry and emits signals so we inform that geometry have
      * been set. */
@@ -750,8 +750,7 @@ client_resize(client_t *c, area_t geometry, bool hints)
        || c->geometry.height != geometry.height)
     {
         bool send_notice = false;
-        screen_t *new_screen = screen_getbycoord(c->screen,
-                                                 geometry.x, geometry.y);
+        screen_t *new_screen = screen_getbycoord(geometry.x, geometry.y);
 
         if(c->geometry.width == geometry.width
            && c->geometry.height == geometry.height)

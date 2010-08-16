@@ -49,7 +49,7 @@ ARRAY_FUNCS(screen_t, screen, DO_NOTHING)
 
 void screen_emit_signal(lua_State *, screen_t *, const char *, int);
 void screen_scan(void);
-screen_t *screen_getbycoord(screen_t *, int, int);
+screen_t *screen_getbycoord(int, int);
 area_t screen_area_get(screen_t *, bool);
 area_t display_area_get(void);
 void screen_client_moveto(client_t *, screen_t *, bool);

@@ -61,7 +61,6 @@ mouse_query_pointer(xcb_window_t window, int16_t *x, int16_t *y, xcb_window_t *c
 }
 
 /** Get the pointer position on the screen.
- * \param s This will be set to the screen the mouse is on.
  * \param x This will be set to the Pointer-x-coordinate relative to window.
  * \param y This will be set to the Pointer-y-coordinate relative to window.
  * \param child This will be set to the window under the pointer.
@@ -69,13 +68,12 @@ mouse_query_pointer(xcb_window_t window, int16_t *x, int16_t *y, xcb_window_t *c
  * \return True on success, false if an error occurred.
  */
 static bool
-mouse_query_pointer_root(screen_t **s, int16_t *x, int16_t *y, xcb_window_t *child, uint16_t *mask)
+mouse_query_pointer_root(int16_t *x, int16_t *y, xcb_window_t *child, uint16_t *mask)
 {
     xcb_window_t root = globalconf.screen->root;
 
     if(mouse_query_pointer(root, x, y, child, mask))
     {
-        *s = &globalconf.screens.tab[0];
         return true;
     }
     return false;
@@ -111,10 +109,10 @@ luaA_mouse_index(lua_State *L)
     switch(a_tokenize(attr, len))
     {
       case A_TK_SCREEN:
-        if(!mouse_query_pointer_root(&screen, &mouse_x, &mouse_y, NULL, NULL))
+        if(!mouse_query_pointer_root(&mouse_x, &mouse_y, NULL, NULL))
             return 0;
 
-        screen  = screen_getbycoord(screen, mouse_x, mouse_y);
+        screen  = screen_getbycoord(mouse_x, mouse_y);
 
         lua_pushnumber(L, screen_array_indexof(&globalconf.screens, screen) + 1);
         break;
@@ -196,14 +194,13 @@ luaA_mouse_coords(lua_State *L)
     uint16_t mask;
     int x, y;
     int16_t mouse_x, mouse_y;
-    screen_t *screen;
 
     if(lua_gettop(L) >= 1)
     {
         luaA_checktable(L, 1);
         bool ignore_enter_notify = (lua_gettop(L) == 2 && luaA_checkboolean(L, 2));
 
-        if(!mouse_query_pointer_root(&screen, &mouse_x, &mouse_y, NULL, &mask))
+        if(!mouse_query_pointer_root(&mouse_x, &mouse_y, NULL, &mask))
             return 0;
 
         x = luaA_getopt_number(L, 1, "x", mouse_x);
@@ -220,7 +217,7 @@ luaA_mouse_coords(lua_State *L)
         lua_pop(L, 1);
     }
 
-    if(!mouse_query_pointer_root(&screen, &mouse_x, &mouse_y, NULL, &mask))
+    if(!mouse_query_pointer_root(&mouse_x, &mouse_y, NULL, &mask))
         return 0;
 
     return luaA_mouse_pushstatus(L, mouse_x, mouse_y, mask);
@@ -235,11 +232,10 @@ luaA_mouse_coords(lua_State *L)
 static int
 luaA_mouse_object_under_pointer(lua_State *L)
 {
-    screen_t *screen;
     int16_t mouse_x, mouse_y;
     xcb_window_t child;
 
-    if(!mouse_query_pointer_root(&screen, &mouse_x, &mouse_y, &child, NULL))
+    if(!mouse_query_pointer_root(&mouse_x, &mouse_y, &child, NULL))
         return 0;
 
     wibox_t *wibox;

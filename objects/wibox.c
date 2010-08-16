@@ -322,7 +322,7 @@ wibox_moveresize(lua_State *L, int udx, area_t geometry)
         /* Deactivate BMA */
         client_restore_enterleave_events();
 
-        w->screen = screen_getbycoord(w->screen, w->geometry.x, w->geometry.y);
+        w->screen = screen_getbycoord(w->geometry.x, w->geometry.y);
 
         if(mask_vals & XCB_CONFIG_WINDOW_X)
             luaA_object_emit_signal(L, udx, "property::x", 0);
@@ -710,7 +710,7 @@ wibox_attach(lua_State *L, int udx, screen_t *s)
 
     /* Check that the wibox coordinates matches the screen. */
     screen_t *cscreen =
-        screen_getbycoord(wibox->screen, wibox->geometry.x, wibox->geometry.y);
+        screen_getbycoord(wibox->geometry.x, wibox->geometry.y);
 
     /* If it does not match, move it to the screen coordinates */
     if(cscreen != wibox->screen)
