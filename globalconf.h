@@ -59,8 +59,6 @@ typedef struct
     xcb_key_symbols_t *keysyms;
     /** Logical screens */
     screen_array_t screens;
-    /** True if xinerama is active */
-    bool xinerama_is_active;
     /** Root window key bindings */
     key_array_t keys;
     /** Root window mouse bindings */

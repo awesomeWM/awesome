@@ -30,8 +30,6 @@ module("root")
 -- event, this is a boolean value which if true make the coordinates relatives.
 -- @param x In case of a motion event, this is the X coordinate.
 -- @param y In case of a motion event, this is the Y coordinate.
--- @param screen In case of a motion event, this is the screen number to move on.
--- If not specified, the current one is used.
 -- @name fake_input
 -- @class function
 

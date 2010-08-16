@@ -332,14 +332,8 @@ static int
 property_handle_xrootpmap_id(uint8_t state,
                              xcb_window_t window)
 {
-    if(globalconf.xinerama_is_active)
-        foreach(w, globalconf.wiboxes)
-            (*w)->need_update = true;
-    else
-    {
-        foreach(w, globalconf.wiboxes)
-           (*w)->need_update = true;
-    }
+    foreach(w, globalconf.wiboxes)
+       (*w)->need_update = true;
 
     return 0;
 }

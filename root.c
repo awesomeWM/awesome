@@ -41,7 +41,6 @@
  * event, this is a boolean value which if true make the coordinates relatives.
  * \lparam In case of a motion event, this is the X coordinate.
  * \lparam In case of a motion event, this is the Y coordinate.
- * \lparam In case of a motion event, this is the screen number to move on.
  * If not specified, the current one is used.
  */
 static int
@@ -57,7 +56,6 @@ luaA_root_fake_input(lua_State *L)
     const char *stype = luaL_checklstring(L, 1, &tlen);
     uint8_t type, detail;
     int x = 0, y = 0;
-    xcb_window_t root = XCB_NONE;
 
     switch(a_tokenize(stype, tlen))
     {
@@ -82,12 +80,6 @@ luaA_root_fake_input(lua_State *L)
         detail = luaA_checkboolean(L, 2); /* relative to the current position or not */
         x = luaL_checknumber(L, 3);
         y = luaL_checknumber(L, 4);
-        if(lua_gettop(L) == 5 && !globalconf.xinerama_is_active)
-        {
-            int screen = luaL_checknumber(L, 5) - 1;
-            luaA_checkscreen(screen);
-            root = globalconf.screen->root;
-        }
         break;
       default:
         return 0;
@@ -97,7 +89,7 @@ luaA_root_fake_input(lua_State *L)
                         type,
                         detail,
                         XCB_CURRENT_TIME,
-                        root,
+                        XCB_NONE,
                         x, y,
                         0);
     return 0;

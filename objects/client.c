@@ -1360,12 +1360,10 @@ luaA_client_geometry(lua_State *L)
 static int
 luaA_client_set_screen(lua_State *L, client_t *c)
 {
-    if(globalconf.xinerama_is_active)
-    {
-        int screen = luaL_checknumber(L, -1) - 1;
-        luaA_checkscreen(screen);
-        screen_client_moveto(c, &globalconf.screens.tab[screen], true);
-    }
+    int screen = luaL_checknumber(L, -1) - 1;
+    luaA_checkscreen(screen);
+    screen_client_moveto(c, &globalconf.screens.tab[screen], true);
+
     return 0;
 }
 

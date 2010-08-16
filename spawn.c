@@ -283,35 +283,18 @@ spawn_command(const gchar *command_line, GError **error)
  * \luastack
  * \lparam The command to launch.
  * \lparam Use startup-notification, true or false, default to true.
- * \lparam The optional screen number to spawn the command on.
  * \lreturn Process ID if everything is OK, or an error string if an error occured.
  */
 int
 luaA_spawn(lua_State *L)
 {
-    char *host, newdisplay[128];
     const char *cmd;
     bool use_sn = true;
-    int screen = 0, screenp, displayp;
 
     if(lua_gettop(L) >= 2)
         use_sn = luaA_checkboolean(L, 2);
 
-    if(lua_gettop(L) == 3)
-    {
-        screen = luaL_checknumber(L, 3) - 1;
-        luaA_checkscreen(screen);
-    }
-
     cmd = luaL_checkstring(L, 1);
-
-    if(!globalconf.xinerama_is_active)
-    {
-        xcb_parse_display(NULL, &host, &displayp, &screenp);
-        snprintf(newdisplay, sizeof(newdisplay), "%s:%d.%d", host, displayp, screen);
-        setenv("DISPLAY", newdisplay, 1);
-        p_delete(&host);
-    }
 
     SnLauncherContext *context = NULL;
     if(use_sn)

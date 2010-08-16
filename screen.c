@@ -145,10 +145,6 @@ screen_scan_randr(void)
 
             p_delete(&screen_res_r);
 
-            /* If RandR provides more than 2 active CRTC, Xinerama is enabled */
-            if(globalconf.screens.len > 1)
-                globalconf.xinerama_is_active = true;
-
             return true;
         }
     }
@@ -159,16 +155,18 @@ screen_scan_randr(void)
 static bool
 screen_scan_xinerama(void)
 {
+    bool xinerama_is_active = false;
+
     /* Check for extension before checking for Xinerama */
     if(xcb_get_extension_data(globalconf.connection, &xcb_xinerama_id)->present)
     {
         xcb_xinerama_is_active_reply_t *xia;
         xia = xcb_xinerama_is_active_reply(globalconf.connection, xcb_xinerama_is_active(globalconf.connection), NULL);
-        globalconf.xinerama_is_active = xia->state;
+        xinerama_is_active = xia->state;
         p_delete(&xia);
     }
 
-    if(globalconf.xinerama_is_active)
+    if(xinerama_is_active)
     {
         xcb_xinerama_query_screens_reply_t *xsq;
         xcb_xinerama_screen_info_t *xsi;
@@ -249,10 +247,6 @@ screen_scan(void)
 screen_t *
 screen_getbycoord(screen_t *screen, int x, int y)
 {
-    /* don't waste our time */
-    if(!globalconf.xinerama_is_active)
-        return screen;
-
     foreach(s, globalconf.screens)
         if((x < 0 || (x >= s->geometry.x && x < s->geometry.x + s->geometry.width))
            && (y < 0 || (y >= s->geometry.y && y < s->geometry.y + s->geometry.height)))
