@@ -236,10 +236,10 @@ spawn_init(void)
 {
     globalconf.sndisplay = sn_xcb_display_new(globalconf.connection, NULL, NULL);
 
-    globalconf.screens.tab[0].snmonitor = sn_monitor_context_new(globalconf.sndisplay,
-                                                                 globalconf.default_screen,
-                                                                 spawn_monitor_event,
-                                                                 NULL, NULL);
+    globalconf.snmonitor = sn_monitor_context_new(globalconf.sndisplay,
+                                                  globalconf.default_screen,
+                                                  spawn_monitor_event,
+                                                  NULL, NULL);
 }
 
 static void

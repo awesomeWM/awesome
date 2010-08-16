@@ -107,6 +107,8 @@ typedef struct
         /** Is awesome the systray owner? */
         bool registered;
     } systray;
+    /** The monitor of startup notifications */
+    SnMonitorContext *snmonitor;
 } awesome_t;
 
 extern awesome_t globalconf;
