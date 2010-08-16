@@ -151,8 +151,6 @@ screen_scan_randr(void)
             if(globalconf.screens.len > 1)
                 globalconf.xinerama_is_active = true;
 
-            globalconf.screens.tab[0].visual = screen_default_visual(xutil_screen_get(globalconf.connection, globalconf.default_screen));
-
             return true;
         }
     }
@@ -213,9 +211,6 @@ screen_scan_xinerama(void)
 
         p_delete(&xsq);
 
-        xcb_screen_t *s = xutil_screen_get(globalconf.connection, globalconf.default_screen);
-        globalconf.screens.tab[0].visual = screen_default_visual(s);
-
         return true;
     }
 
@@ -232,7 +227,6 @@ static void screen_scan_x11(void)
     s.geometry.y = 0;
     s.geometry.width = xcb_screen->width_in_pixels;
     s.geometry.height = xcb_screen->height_in_pixels;
-    s.visual = screen_default_visual(xcb_screen);
     screen_array_append(&globalconf.screens, s);
 }
 
@@ -245,6 +239,7 @@ screen_scan(void)
         screen_scan_x11();
 
     globalconf.screen_focus = globalconf.screens.tab;
+    globalconf.visual = screen_default_visual(xutil_screen_get(globalconf.connection, globalconf.default_screen));
 }
 
 /** Return the Xinerama screen number where the coordinates belongs to.

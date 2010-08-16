@@ -38,8 +38,6 @@ struct a_screen
     client_t *prev_client_focus;
     /** Focused client */
     client_t *client_focus;
-    /** The default visual, used to draw */
-    xcb_visualtype_t *visual;
     /** The signals emitted by screen objects */
     signal_array_t signals;
     /** True if the banning on this screen needs to be updated */

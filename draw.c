@@ -134,7 +134,7 @@ draw_context_init(draw_context_t *d,
     d->height = height;
     d->pixmap = px;
     d->surface = cairo_xcb_surface_create(globalconf.connection,
-                                          px, globalconf.screens.tab[0].visual,
+                                          px, globalconf.visual,
                                           width, height);
     d->cr = cairo_create(d->surface);
     d->layout = pango_cairo_create_layout(d->cr);
@@ -307,10 +307,10 @@ draw_rotate(draw_context_t *ctx,
     cairo_t *cr;
 
     surface = cairo_xcb_surface_create(globalconf.connection, dest,
-                                       globalconf.screens.tab[0].visual,
+                                       globalconf.visual,
                                        dest_w, dest_h);
     source = cairo_xcb_surface_create(globalconf.connection, src,
-                                      globalconf.screens.tab[0].visual,
+                                      globalconf.visual,
                                       src_w, src_h);
     cr = cairo_create (surface);
 
@@ -344,7 +344,7 @@ draw_text_extents(draw_text_context_t *data)
 
     surface = cairo_xcb_surface_create(globalconf.connection,
                                        globalconf.default_screen,
-                                       globalconf.screens.tab[0].visual,
+                                       globalconf.visual,
                                        s->width_in_pixels,
                                        s->height_in_pixels);
 

@@ -109,6 +109,8 @@ typedef struct
     } systray;
     /** The monitor of startup notifications */
     SnMonitorContext *snmonitor;
+    /** The default visual, used to draw */
+    xcb_visualtype_t *visual;
 } awesome_t;
 
 extern awesome_t globalconf;
