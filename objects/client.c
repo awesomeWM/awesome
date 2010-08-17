@@ -253,7 +253,7 @@ client_getbyframewin(xcb_window_t w)
 void
 client_unfocus_update(client_t *c)
 {
-    globalconf.screens.tab[0].client_focus = NULL;
+    globalconf.client_focus = NULL;
 
     luaA_object_push(globalconf.L, c);
     luaA_class_emit_signal(globalconf.L, &client_class, "unfocus", 1);
@@ -311,11 +311,11 @@ client_set_focus(client_t *c, bool set_input_focus)
  */
 void client_ban_unfocus(client_t *c)
 {
-    if(globalconf.screens.tab[0].prev_client_focus == c)
-        globalconf.screens.tab[0].prev_client_focus = NULL;
+    if(globalconf.prev_client_focus == c)
+        globalconf.prev_client_focus = NULL;
 
     /* Wait until the last moment to take away the focus from the window. */
-    if(globalconf.screens.tab[0].client_focus == c)
+    if(globalconf.client_focus == c)
         client_unfocus(c);
 }
 
@@ -379,23 +379,21 @@ client_focus_update(client_t *c)
     if(!client_maybevisible(c, c->screen))
     {
         /* Focus previously focused client */
-        client_focus(globalconf.screen_focus->prev_client_focus);
+        client_focus(globalconf.prev_client_focus);
         return;
     }
 
-    if(globalconf.screen_focus
-        && globalconf.screen_focus->client_focus)
+    if(globalconf.client_focus)
     {
-        if (globalconf.screen_focus->client_focus != c)
-            client_unfocus_update(globalconf.screen_focus->client_focus);
+        if (globalconf.client_focus != c)
+            client_unfocus_update(globalconf.client_focus);
         else
             /* Already focused */
             return;
     }
 
-    globalconf.screen_focus = &globalconf.screens.tab[0];
-    globalconf.screen_focus->prev_client_focus = c;
-    globalconf.screen_focus->client_focus = c;
+    globalconf.prev_client_focus = c;
+    globalconf.client_focus = c;
 
     /* according to EWMH, we have to remove the urgent state from a client */
     luaA_object_push(globalconf.L, c);
@@ -1037,10 +1035,10 @@ client_unmanage(client_t *c)
             tc->transient_for = NULL;
     }
 
-    if(globalconf.screens.tab[0].prev_client_focus == c)
-        globalconf.screens.tab[0].prev_client_focus = NULL;
+    if(globalconf.prev_client_focus == c)
+        globalconf.prev_client_focus = NULL;
 
-    if(globalconf.screens.tab[0].client_focus == c)
+    if(globalconf.client_focus == c)
         client_unfocus(c);
 
     /* remove client from global list and everywhere else */
@@ -1784,7 +1782,7 @@ luaA_client_module_index(lua_State *L)
     switch(a_tokenize(buf, len))
     {
       case A_TK_FOCUS:
-        return luaA_object_push(globalconf.L, globalconf.screen_focus->client_focus);
+        return luaA_object_push(globalconf.L, globalconf.client_focus);
         break;
       default:
         return 0;

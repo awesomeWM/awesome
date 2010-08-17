@@ -88,8 +88,10 @@ typedef struct
     int keygrabber;
     /** The mouse pointer grabber function */
     int mousegrabber;
-    /** Focused screen */
-    screen_t *screen_focus;
+    /** Previously focused client */
+    client_t *prev_client_focus;
+    /** Focused client */
+    client_t *client_focus;
     /** Wiboxes */
     wibox_array_t wiboxes;
     /** The startup notification display struct */

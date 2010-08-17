@@ -115,8 +115,8 @@ ewmh_update_net_active_window(lua_State *L)
 {
     xcb_window_t win;
 
-    if(globalconf.screen_focus->client_focus)
-        win = globalconf.screen_focus->client_focus->window;
+    if(globalconf.client_focus)
+        win = globalconf.client_focus->window;
     else
         win = XCB_NONE;
 

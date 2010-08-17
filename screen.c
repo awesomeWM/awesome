@@ -234,7 +234,6 @@ screen_scan(void)
     if(!screen_scan_randr() && !screen_scan_xinerama())
         screen_scan_x11();
 
-    globalconf.screen_focus = globalconf.screens.tab;
     globalconf.visual = screen_default_visual(globalconf.screen);
 }
 

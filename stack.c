@@ -134,7 +134,7 @@ client_layer_translator(client_t *c)
     if(c->ontop)
         return WINDOW_LAYER_ONTOP;
     /* Fullscreen windows only get their own layer when they have the focus */
-    else if(c->fullscreen && globalconf.screen_focus->client_focus == c)
+    else if(c->fullscreen && globalconf.client_focus == c)
         return WINDOW_LAYER_FULLSCREEN;
     else if(c->above)
         return WINDOW_LAYER_ABOVE;

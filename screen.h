@@ -34,10 +34,6 @@ struct a_screen
     area_t geometry;
     /** Tag list */
     tag_array_t tags;
-    /** Previously focused client */
-    client_t *prev_client_focus;
-    /** Focused client */
-    client_t *client_focus;
     /** The signals emitted by screen objects */
     signal_array_t signals;
     /** True if the banning on this screen needs to be updated */
