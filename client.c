@@ -1027,6 +1027,8 @@ client_set_fullscreen(lua_State *L, int cidx, bool s)
         }
         else
         {
+            /* The titlebar was banned, unban! */
+            titlebar_unban(c->titlebar);
             geometry = c->geometries.fullscreen;
             c->fullscreen = false;
             client_set_border_width(L, cidx, c->border_width_fs);
