@@ -418,6 +418,9 @@ client_focus(client_t *c)
     /* X11 doesn't let you focus a window that isn't viewable */
     client_unban(c);
 
+    if (!c->nofocus)
+        client_focus_update(c);
+
     client_set_focus(c, !c->nofocus);
 }
 
