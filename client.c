@@ -882,7 +882,10 @@ client_resize(client_t *c, area_t geometry, bool hints)
         geometry.y = 0;
 
     /* Real client geometry, please keep it contained to C code at the very least. */
-    geometry_internal = titlebar_geometry_remove(c->titlebar, c->border_width, geometry);
+    if (!c->fullscreen)
+        geometry_internal = titlebar_geometry_remove(c->titlebar, c->border_width, geometry);
+    else
+        geometry_internal = geometry;
 
     if(hints && !c->fullscreen)
         geometry_internal = client_geometry_hints(c, geometry_internal);
@@ -891,7 +894,10 @@ client_resize(client_t *c, area_t geometry, bool hints)
         return false;
 
     /* Also let client hints propagate to the "official" geometry. */
-    geometry = titlebar_geometry_add(c->titlebar, c->border_width, geometry_internal);
+    if (!c->fullscreen)
+        geometry = titlebar_geometry_add(c->titlebar, c->border_width, geometry_internal);
+    else
+        geometry = geometry_internal;
 
     if(c->geometries.internal.x != geometry_internal.x
        || c->geometries.internal.y != geometry_internal.y
