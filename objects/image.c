@@ -190,7 +190,6 @@ xcb_pixmap_t
 image_to_1bit_pixmap(image_t *image, xcb_drawable_t d)
 {
     xcb_pixmap_t pixmap;
-    xcb_gcontext_t gc;
     xcb_image_t *img;
     uint16_t width, height;
 
@@ -201,18 +200,13 @@ image_to_1bit_pixmap(image_t *image, xcb_drawable_t d)
     pixmap = xcb_generate_id(globalconf.connection);
     xcb_create_pixmap(globalconf.connection, 1, pixmap, d, width, height);
 
-    gc = xcb_generate_id(globalconf.connection);
-    xcb_create_gc(globalconf.connection, gc, pixmap, 0, NULL);
-
     /* Prepare the image */
     img = xcb_image_create_native(globalconf.connection, width, height,
             XCB_IMAGE_FORMAT_XY_BITMAP, 1, NULL, 0, NULL);
     image_draw_to_1bit_ximage(image, img);
 
     /* Paint the image to the pixmap */
-    xcb_image_put(globalconf.connection, pixmap, gc, img, 0, 0, 0);
-
-    xcb_free_gc(globalconf.connection, gc);
+    xcb_image_put(globalconf.connection, pixmap, globalconf.gc, img, 0, 0, 0);
 
     xcb_image_destroy(img);
 

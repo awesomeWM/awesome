@@ -281,7 +281,7 @@ widget_render(wibox_t *wibox)
                    break;
                  case East:
                    xcb_copy_area(globalconf.connection, rootpix,
-                                 wibox->pixmap, wibox->gc,
+                                 wibox->pixmap, globalconf.gc,
                                  x, y,
                                  0, 0,
                                  ctx->width, ctx->height);

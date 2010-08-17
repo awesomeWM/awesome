@@ -76,11 +76,6 @@ wibox_wipe_resources(wibox_t *w)
         xcb_free_pixmap(globalconf.connection, w->pixmap);
         w->pixmap = XCB_NONE;
     }
-    if(w->gc)
-    {
-        xcb_free_gc(globalconf.connection, w->gc);
-        w->gc = XCB_NONE;
-    }
     draw_context_wipe(&w->ctx);
 }
 
@@ -245,11 +240,6 @@ wibox_init(wibox_t *w)
     /* Update draw context physical screen, important for Zaphod. */
     wibox_draw_context_update(w);
 
-    /* The default GC is just a newly created associated to the root window */
-    w->gc = xcb_generate_id(globalconf.connection);
-    xcb_create_gc(globalconf.connection, w->gc, s->root, XCB_GC_FOREGROUND | XCB_GC_BACKGROUND,
-                  (const uint32_t[]) { s->black_pixel, s->white_pixel });
-
     wibox_shape_update(w);
 }
 
@@ -364,7 +354,7 @@ wibox_refresh_pixmap_partial(wibox_t *wibox,
                              uint16_t w, uint16_t h)
 {
     xcb_copy_area(globalconf.connection, wibox->pixmap,
-                  wibox->window, wibox->gc, x, y, x, y,
+                  wibox->window, globalconf.gc, x, y, x, y,
                   w, h);
 }
 

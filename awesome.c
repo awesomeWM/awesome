@@ -361,6 +361,12 @@ main(int argc, char **argv)
 
     globalconf.screen = xcb_aux_get_screen(globalconf.connection, globalconf.default_screen);
 
+    /* The default GC is just a newly created associated to the root window */
+    globalconf.gc = xcb_generate_id(globalconf.connection);
+    xcb_create_gc(globalconf.connection, globalconf.gc, globalconf.screen->root, XCB_GC_FOREGROUND | XCB_GC_BACKGROUND,
+                  (const uint32_t[]) { globalconf.screen->black_pixel, globalconf.screen->white_pixel });
+
+
     /* Prefetch all the extensions we might need */
     xcb_prefetch_extension_data(globalconf.connection, &xcb_big_requests_id);
     xcb_prefetch_extension_data(globalconf.connection, &xcb_test_id);

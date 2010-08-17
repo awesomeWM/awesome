@@ -111,6 +111,8 @@ typedef struct
     xcb_visualtype_t *visual;
     /** The screen's information */
     xcb_screen_t *screen;
+    /** A graphic context. */
+    xcb_gcontext_t gc;
 } awesome_t;
 
 extern awesome_t globalconf;
