@@ -191,6 +191,22 @@ titlebar_geometry_compute(client_t *c, area_t geometry, area_t *res)
     }
 }
 
+static void
+workaround_broken_titlebars(client_t *c)
+{
+    /* Ugly hack to fix #610 */
+    if(c->maximized_horizontal)
+    {
+        c->maximized_horizontal = false;
+        client_set_maximized_horizontal(globalconf.L, -1, true);
+    }
+    if(c->maximized_vertical)
+    {
+        c->maximized_vertical = false;
+        client_set_maximized_vertical(globalconf.L, -1, true);
+    }
+}
+
 /** Detach a wibox titlebar from its client.
  * \param c The client.
  */
@@ -212,6 +228,9 @@ titlebar_client_detach(client_t *c)
         hook_property(c, "titlebar");
         luaA_object_push(globalconf.L, c);
         luaA_object_emit_signal(globalconf.L, -1, "property::titlebar", 0);
+
+        workaround_broken_titlebars(c);
+
         lua_pop(globalconf.L, 1);
         client_stack();
     }
@@ -275,6 +294,9 @@ titlebar_client_attach(client_t *c)
 
     luaA_object_push(globalconf.L, c);
     luaA_object_emit_signal(globalconf.L, -1, "property::titlebar", 0);
+
+    workaround_broken_titlebars(c);
+
     lua_pop(globalconf.L, 1);
     client_stack();
 }
