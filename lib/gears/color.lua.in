@@ -1,0 +1,30 @@
+---------------------------------------------------------------------------
+-- @author Uli Schlachter
+-- @copyright 2010 Uli Schlachter
+-- @release @AWESOME_VERSION@
+---------------------------------------------------------------------------
+
+local setmetatable = setmetatable
+local string = string
+local table = table
+local tonumber = tonumber
+local unpack = unpack
+
+module("gears.color")
+
+-- Thanks to #lua for this. :)
+
+function parse_color(col)
+    local rgb = {}
+    for pair in string.gmatch(col, "[^#].") do
+        table.insert(rgb, tonumber(pair, 16) / 255)
+    end
+    while #rgb < 4 do
+        table.insert(rgb, 1)
+    end
+    return unpack(rgb)
+end
+
+setmetatable(_M, { __call = function (_, ...) return parse_color(...) end })
+
+-- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
