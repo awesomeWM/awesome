@@ -62,7 +62,7 @@ typedef struct
     /** Background color */
     color_t bg;
     /** Background image */
-    image_t *bg_image;
+    cairo_surface_t *bg_image;
     /** Background resize to wibox height. */
     bool bg_resize;
     /** Background alignment */
@@ -126,8 +126,8 @@ textbox_extents(lua_State *L, widget_t *widget)
 
     if(d->bg_image)
     {
-        int bgi_height = image_getheight(d->bg_image);
-        int bgi_width = image_getwidth(d->bg_image);
+        int bgi_height = cairo_image_surface_get_height(d->bg_image);
+        int bgi_width = cairo_image_surface_get_width(d->bg_image);
         double ratio = d->bg_resize ? (double) geometry.height / bgi_height : 1;
         geometry.width = MAX(d->extents.width + d->margin.left + d->margin.right, MAX(d->width, bgi_width * ratio));
     }
@@ -155,8 +155,8 @@ textbox_draw(widget_t *widget, draw_context_t *ctx, area_t geometry, wibox_t *p)
 
     if(d->bg_image)
     {
-        int bgi_height = image_getheight(d->bg_image);
-        int bgi_width = image_getwidth(d->bg_image);
+        int bgi_height = cairo_image_surface_get_height(d->bg_image);
+        int bgi_width = cairo_image_surface_get_width(d->bg_image);
         double ratio = d->bg_resize ? (double) geometry.height / bgi_height : 1;
         /* check there is enough space to draw the image */
         if(ratio * bgi_width <= geometry.width)
@@ -180,7 +180,7 @@ textbox_draw(widget_t *widget, draw_context_t *ctx, area_t geometry, wibox_t *p)
               default:
                 break;
             }
-            draw_image(ctx, x, y, ratio, d->bg_image);
+            draw_surface(ctx, x, y, ratio, d->bg_image);
         }
     }
 
@@ -210,6 +210,8 @@ textbox_destructor(widget_t *w)
 {
     textbox_data_t *d = w->data;
     draw_text_context_wipe(&d->data);
+    if(d->bg_image)
+        cairo_surface_destroy(d->bg_image);
     p_delete(&d->text);
     p_delete(&d);
 }
@@ -258,7 +260,7 @@ luaA_textbox_index(lua_State *L, const char *prop)
     else if(a_strcmp(prop, "bg_align") == 0)
         lua_pushstring(L, draw_align_tostr(d->bg_align));
     else if(a_strcmp(prop, "bg_image") == 0)
-        return luaA_object_push(L, d->bg_image);
+        return oocairo_surface_push(L, d->bg_image);
     else if(a_strcmp(prop, "bg") == 0)
         return luaA_pushcolor(L, &d->bg);
     else if(a_strcmp(prop, "margin") == 0)
@@ -338,9 +340,15 @@ luaA_textbox_newindex(lua_State *L, const char *prop)
         d->bg_resize = luaA_checkboolean(L, 3);
     else if(a_strcmp(prop, "bg_image") == 0)
     {
-        luaA_checkudataornil(L, -1, &image_class);
-        luaA_object_unref_item(L, 1, d->bg_image);
-        d->bg_image = luaA_object_ref_item(L, 1, 3);
+        if(lua_isnil(L, -1))
+        {
+            cairo_surface_destroy(d->bg_image);
+            d->bg_image = NULL;
+        } else {
+            cairo_surface_t *surface = luaA_image_to_surface(L, -1);
+            cairo_surface_destroy(d->bg_image);
+            d->bg_image = surface;
+        }
     }
     else if(a_strcmp(prop, "bg") == 0)
     {
