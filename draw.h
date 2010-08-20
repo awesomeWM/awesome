@@ -27,6 +27,8 @@
 
 #include <xcb/xcb.h>
 
+#include <oocairo.h>
+
 #include "objects/image.h"
 #include "color.h"
 #include "common/array.h"
@@ -132,6 +134,9 @@ void draw_rotate(draw_context_t *, xcb_drawable_t, xcb_drawable_t, int, int, int
 area_t draw_text_extents(draw_text_context_t *);
 alignment_t draw_align_fromstr(const char *);
 const char *draw_align_tostr(alignment_t);
+int luaA_surface_from_data(lua_State *L, int width, int height, uint32_t *data);
+cairo_surface_t *draw_dup_image_surface(cairo_surface_t *surface);
+
 
 static inline void
 draw_text_context_wipe(draw_text_context_t *pdata)

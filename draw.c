@@ -402,4 +402,62 @@ draw_align_tostr(alignment_t a)
     }
 }
 
+static cairo_user_data_key_t data_key;
+
+static inline void
+free_data(void *data)
+{
+    p_delete(&data);
+}
+
+/** Create a surface object on the lua stack from this image data.
+ * \param L The lua stack.
+ * \param width The width of the image.
+ * \param height The height of the image
+ * \param data The image's data in ARGB format, will be copied by this function.
+ * \return Number of items pushed on the lua stack.
+ */
+int
+luaA_surface_from_data(lua_State *L, int width, int height, uint32_t *data)
+{
+    unsigned long int len = width * height;
+    unsigned char *buffer = p_dup(data, len);
+    cairo_surface_t *surface =
+        cairo_image_surface_create_for_data(buffer,
+                                            CAIRO_FORMAT_ARGB32,
+                                            width,
+                                            height,
+                                            width*4);
+    /* This makes sure that buffer will be freed */
+    cairo_surface_set_user_data(surface, &data_key, buffer, &free_data);
+
+    /* This will increase the reference count of the surface */
+    int ret = oocairo_surface_push(globalconf.L, surface);
+    /* So we have to drop our own reference */
+    cairo_surface_destroy(surface);
+
+    return ret;
+}
+
+/** Duplicate the specified image surface.
+ * \param surface The surface to copy
+ * \return A pointer to a new cairo image surface.
+ */
+cairo_surface_t *
+draw_dup_image_surface(cairo_surface_t *surface)
+{
+    cairo_surface_t *res = cairo_image_surface_create(
+            cairo_image_surface_get_format(surface),
+            cairo_image_surface_get_width(surface),
+            cairo_image_surface_get_height(surface));
+
+    cairo_t *cr = cairo_create(res);
+    cairo_set_source_surface(cr, surface, 0, 0);
+    cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
+    cairo_paint(cr);
+    cairo_destroy(cr);
+
+    return res;
+}
+
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
