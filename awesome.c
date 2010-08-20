@@ -28,7 +28,6 @@
 
 #include <xcb/bigreq.h>
 #include <xcb/randr.h>
-#include <xcb/shape.h>
 #include <xcb/xcb_event.h>
 #include <xcb/xinerama.h>
 #include <xcb/xtest.h>
@@ -372,7 +371,6 @@ main(int argc, char **argv)
     xcb_prefetch_extension_data(globalconf.connection, &xcb_test_id);
     xcb_prefetch_extension_data(globalconf.connection, &xcb_randr_id);
     xcb_prefetch_extension_data(globalconf.connection, &xcb_xinerama_id);
-    xcb_prefetch_extension_data(globalconf.connection, &xcb_shape_id);
 
     /* initialize dbus */
     a_dbus_init();

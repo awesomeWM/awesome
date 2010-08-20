@@ -19,8 +19,6 @@
  *
  */
 
-#include <xcb/shape.h>
-
 #include "screen.h"
 #include "wibox.h"
 #include "objects/client.h"
@@ -114,62 +112,6 @@ wibox_need_update(wibox_t *wibox)
     wibox_clear_mouse_over(wibox);
 }
 
-static int
-have_shape(void)
-{
-    const xcb_query_extension_reply_t *reply;
-
-    reply = xcb_get_extension_data(globalconf.connection, &xcb_shape_id);
-    if (!reply || !reply->present)
-        return 0;
-
-    /* We don't need a specific version of SHAPE, no version check required */
-    return 1;
-}
-
-static void
-shape_update(xcb_window_t win, xcb_shape_kind_t kind, image_t *image, int offset)
-{
-    xcb_pixmap_t shape;
-
-    if(image)
-        shape = image_to_1bit_pixmap(image, win);
-    else
-        /* Reset the shape */
-        shape = XCB_NONE;
-
-    xcb_shape_mask(globalconf.connection, XCB_SHAPE_SO_SET, kind,
-                   win, offset, offset, shape);
-
-    if (shape != XCB_NONE)
-        xcb_free_pixmap(globalconf.connection, shape);
-}
-
-/** Update the window's shape.
- * \param wibox The simple window whose shape should be updated.
- */
-static void
-wibox_shape_update(wibox_t *wibox)
-{
-    if(wibox->window == XCB_NONE)
-        return;
-
-    if(!have_shape())
-    {
-        static bool warned = false;
-        if(!warned)
-            warn("The X server doesn't have the SHAPE extension; "
-                    "can't change window's shape");
-        warned = true;
-        return;
-    }
-
-    shape_update(wibox->window, XCB_SHAPE_SK_CLIP, wibox->shape.clip, 0);
-    shape_update(wibox->window, XCB_SHAPE_SK_BOUNDING, wibox->shape.bounding, - wibox->border_width);
-
-    wibox->need_shape_update = false;
-}
-
 static void
 wibox_draw_context_update(wibox_t *w)
 {
@@ -239,8 +181,6 @@ wibox_init(wibox_t *w)
 
     /* Update draw context physical screen, important for Zaphod. */
     wibox_draw_context_update(w);
-
-    wibox_shape_update(w);
 }
 
 /** Refresh the window content by copying its pixmap data to its window.
@@ -584,8 +524,6 @@ wibox_refresh(void)
 {
     foreach(w, globalconf.wiboxes)
     {
-        if((*w)->need_shape_update)
-            wibox_shape_update(*w);
         if((*w)->need_update)
             wibox_draw(*w);
     }
@@ -1163,41 +1101,6 @@ luaA_wibox_get_widgets(lua_State *L, wibox_t *wibox)
 {
     return luaA_object_push_item(L, 1, wibox->widgets_table);
 }
-
-static int
-luaA_wibox_set_shape_bounding(lua_State *L, wibox_t *wibox)
-{
-    luaA_checkudata(L, -1, &image_class);
-    luaA_object_unref_item(L, -3, wibox->shape.bounding);
-    wibox->shape.bounding = luaA_object_ref_item(L, -3, -1);
-    wibox->need_shape_update = true;
-    luaA_object_emit_signal(L, -2, "property::shape_bounding", 0);
-    return 0;
-}
-
-static int
-luaA_wibox_get_shape_bounding(lua_State *L, wibox_t *wibox)
-{
-    return luaA_object_push_item(L, 1, wibox->shape.bounding);
-}
-
-static int
-luaA_wibox_set_shape_clip(lua_State *L, wibox_t *wibox)
-{
-    luaA_checkudata(L, -1, &image_class);
-    luaA_object_unref_item(L, -3, wibox->shape.clip);
-    wibox->shape.clip = luaA_object_ref_item(L, -3, -1);
-    wibox->need_shape_update = true;
-    luaA_object_emit_signal(L, -2, "property::shape_clip", 0);
-    return 0;
-}
-
-static int
-luaA_wibox_get_shape_clip(lua_State *L, wibox_t *wibox)
-{
-    return luaA_object_push_item(L, 1, wibox->shape.clip);
-}
-
 void
 wibox_class_setup(lua_State *L)
 {
@@ -1274,14 +1177,6 @@ wibox_class_setup(lua_State *L)
                             (lua_class_propfunc_t) luaA_wibox_set_height,
                             (lua_class_propfunc_t) luaA_wibox_get_height,
                             (lua_class_propfunc_t) luaA_wibox_set_height);
-    luaA_class_add_property(&wibox_class, A_TK_SHAPE_BOUNDING,
-                            (lua_class_propfunc_t) luaA_wibox_set_shape_bounding,
-                            (lua_class_propfunc_t) luaA_wibox_get_shape_bounding,
-                            (lua_class_propfunc_t) luaA_wibox_set_shape_bounding);
-    luaA_class_add_property(&wibox_class, A_TK_SHAPE_CLIP,
-                            (lua_class_propfunc_t) luaA_wibox_set_shape_clip,
-                            (lua_class_propfunc_t) luaA_wibox_get_shape_clip,
-                            (lua_class_propfunc_t) luaA_wibox_set_shape_clip);
 
     signal_add(&wibox_class.signals, "mouse::enter");
     signal_add(&wibox_class.signals, "mouse::leave");
@@ -1294,8 +1189,6 @@ wibox_class_setup(lua_State *L)
     signal_add(&wibox_class.signals, "property::ontop");
     signal_add(&wibox_class.signals, "property::orientation");
     signal_add(&wibox_class.signals, "property::screen");
-    signal_add(&wibox_class.signals, "property::shape_bounding");
-    signal_add(&wibox_class.signals, "property::shape_clip");
     signal_add(&wibox_class.signals, "property::visible");
     signal_add(&wibox_class.signals, "property::widgets");
     signal_add(&wibox_class.signals, "property::width");

@@ -41,8 +41,6 @@ struct wibox_t
     widget_t *mouse_over;
     /** Need update */
     bool need_update;
-    /** Need shape update */
-    bool need_shape_update;
     /** Cursor */
     char *cursor;
     /** Background image */
@@ -55,14 +53,6 @@ struct wibox_t
     draw_context_t ctx;
     /** Orientation */
     orientation_t orientation;
-    /** The window's shape */
-    struct
-    {
-        /** The window's content */
-        image_t *clip;
-        /** The window's content and border */
-        image_t *bounding;
-    } shape;
     /** Has wibox an attached systray **/
     bool has_systray;
 };

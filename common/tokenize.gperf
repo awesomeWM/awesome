@@ -75,8 +75,6 @@ role
 screen
 selected
 session
-shape_bounding
-shape_clip
 Shift
 size_hints
 size_hints_honor

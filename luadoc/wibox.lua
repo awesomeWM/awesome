@@ -20,8 +20,6 @@ module("wibox")
 -- @field y The y coordinates.
 -- @field width The width of the wibox.
 -- @field height The height of the wibox.
--- @field shape_bounding Image describing the window's border shape.
--- @field shape_clip Image describing the window's content shape.
 -- @class table
 -- @name wibox
 
