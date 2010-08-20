@@ -657,7 +657,7 @@ ewmh_window_icon_from_reply(xcb_get_property_reply_t *r)
     if (!data[0] || !data[1] || len > r->length - 2)
         return 0;
 
-    return image_new_from_argb32(globalconf.L, data[0], data[1], data + 2);
+    return luaA_surface_from_data(globalconf.L, data[0], data[1], data + 2);
 }
 
 /** Get NET_WM_ICON.

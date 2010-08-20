@@ -50,6 +50,8 @@ client_wipe(client_t *c)
     p_delete(&c->alt_icon_name);
     p_delete(&c->name);
     p_delete(&c->alt_name);
+    if(c->icon)
+        cairo_surface_destroy(c->icon);
 }
 
 /** Change the clients urgency flag.
@@ -1092,12 +1094,17 @@ void
 client_set_icon(lua_State *L, int cidx, int iidx)
 {
     client_t *c = luaA_checkudata(L, cidx, &client_class);
-    /* convert index to absolute */
-    cidx = luaA_absindex(L, cidx);
-    iidx = luaA_absindex(L, iidx);
-    luaA_checkudata(L, iidx, &image_class);
-    luaA_object_unref_item(L, cidx, c->icon);
-    c->icon = luaA_object_ref_item(L, cidx, iidx);
+    if(lua_isnil(L, iidx))
+    {
+        if(c->icon)
+            cairo_surface_destroy(c->icon);
+        c->icon = NULL;
+    } else {
+        cairo_surface_t *surface = luaA_image_to_surface(L, iidx);
+        if(c->icon)
+            cairo_surface_destroy(c->icon);
+        c->icon = surface;
+    }
     luaA_object_emit_signal(L, cidx < iidx ? cidx : cidx - 1, "property::icon", 0);
 }
 
@@ -1464,7 +1471,9 @@ luaA_client_get_screen(lua_State *L, client_t *c)
 static int
 luaA_client_get_icon(lua_State *L, client_t *c)
 {
-    return luaA_object_push_item(L, -2, c->icon);
+    if(c->icon)
+        return oocairo_surface_push(L, c->icon);
+    return 0;
 }
 
 static int

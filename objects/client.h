@@ -87,7 +87,7 @@ struct client_t
     /** Key bindings */
     key_array_t keys;
     /** Icon */
-    image_t *icon;
+    cairo_surface_t *icon;
     /** Size hints */
     xcb_size_hints_t size_hints;
     bool size_hints_honor;
