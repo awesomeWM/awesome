@@ -44,7 +44,7 @@ struct wibox_t
     /** Cursor */
     char *cursor;
     /** Background image */
-    image_t *bg_image;
+    cairo_surface_t *bg_image;
     /** The pixmap copied to the window object. */
     xcb_pixmap_t pixmap;
     /** The window geometry. */

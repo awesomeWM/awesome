@@ -332,7 +332,7 @@ widget_render(wibox_t *wibox)
 
     /* draw background image, only if the background color is not opaque */
     if(wibox->bg_image && ctx->bg.alpha != 0xffff)
-        draw_image(ctx, 0, 0, 1.0, wibox->bg_image);
+        draw_surface(ctx, 0, 0, 1.0, wibox->bg_image);
 
     /* draw background color */
     xcolor_to_color(&ctx->bg, &col);

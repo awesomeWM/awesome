@@ -83,6 +83,8 @@ wibox_wipe(wibox_t *wibox)
     p_delete(&wibox->cursor);
     wibox_wipe_resources(wibox);
     widget_node_array_wipe(&wibox->widgets);
+    if(wibox->bg_image)
+        cairo_surface_destroy(wibox->bg_image);
 }
 
 /** Wipe an array of widget_node. Release references to widgets.
@@ -938,11 +940,19 @@ luaA_wibox_get_bg(lua_State *L, wibox_t *wibox)
 static int
 luaA_wibox_set_bg_image(lua_State *L, wibox_t *wibox)
 {
-    luaA_checkudata(L, -1, &image_class);
-    luaA_object_unref_item(L, -3, wibox->bg_image);
-    wibox->bg_image = luaA_object_ref_item(L, -3, -1);
+    if(lua_isnil(L, -1))
+    {
+        if(wibox->bg_image)
+            cairo_surface_destroy(wibox->bg_image);
+        wibox->bg_image = NULL;
+    } else {
+        cairo_surface_t *surface = luaA_image_to_surface(L, -1);
+        if(wibox->bg_image)
+            cairo_surface_destroy(wibox->bg_image);
+        wibox->bg_image = surface;
+    }
     wibox->need_update = true;
-    luaA_object_emit_signal(L, -2, "property::bg_image", 0);
+    luaA_object_emit_signal(L, -3, "property::bg_image", 0);
     return 0;
 }
 
@@ -954,7 +964,9 @@ luaA_wibox_set_bg_image(lua_State *L, wibox_t *wibox)
 static int
 luaA_wibox_get_bg_image(lua_State *L, wibox_t *wibox)
 {
-    return luaA_object_push_item(L, 1, wibox->bg_image);
+    if(wibox->bg_image)
+        return oocairo_surface_push(L, wibox->bg_image);
+    return 0;
 }
 
 /** Set the wibox on top status.
