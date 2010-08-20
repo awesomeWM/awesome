@@ -26,7 +26,7 @@
 typedef struct
 {
     /** Imagebox image */
-    image_t *image;
+    cairo_surface_t *image;
     color_t bg;
     bool resize;
 } imagebox_data_t;
@@ -39,8 +39,8 @@ imagebox_extents(lua_State *L, widget_t *widget)
 
     if(d->image)
     {
-        geometry.width = image_getwidth(d->image);
-        geometry.height = image_getheight(d->image);
+        geometry.width = cairo_image_surface_get_width(d->image);
+        geometry.height = cairo_image_surface_get_height(d->image);
     }
     else
     {
@@ -67,8 +67,8 @@ imagebox_draw(widget_t *widget, draw_context_t *ctx, area_t geometry, wibox_t *p
         if(d->bg.initialized)
             draw_rectangle(ctx, geometry, 1.0, true, &d->bg);
 
-        double ratio = d->resize ? (double) geometry.height / image_getheight(d->image) : 1;
-        draw_image(ctx, geometry.x, geometry.y, ratio, d->image);
+        double ratio = d->resize ? (double) geometry.height / cairo_image_surface_get_height(d->image) : 1;
+        draw_surface(ctx, geometry.x, geometry.y, ratio, d->image);
     }
 }
 
@@ -79,7 +79,56 @@ static void
 imagebox_destructor(widget_t *w)
 {
     imagebox_data_t *d = w->data;
+    if(d->image)
+        cairo_surface_destroy(d->image);
     p_delete(&d);
+}
+
+static int
+imagebox_set_image(lua_State *L, widget_t *widget, int idx)
+{
+    imagebox_data_t *d = widget->data;
+
+    if(lua_isnil(L, idx))
+    {
+        if(d->image)
+            cairo_surface_destroy(d->image);
+        d->image = NULL;
+    } else {
+        bool is_surface = false;
+        /* This inlines luaL_checkudata() but skips luaL_typerror() */
+        if(lua_getmetatable(L, idx))
+        {
+            lua_getfield(L, LUA_REGISTRYINDEX, OOCAIRO_MT_NAME_SURFACE);
+            if(lua_rawequal(L, -1, -2))
+                is_surface = true;
+            lua_pop(L, 2);
+        }
+        if(is_surface)
+        {
+            /* Ugly lua-OOCairo magic. */
+            cairo_surface_t **cairo_surface = (cairo_surface_t **)luaL_checkudata(L, idx, OOCAIRO_MT_NAME_SURFACE);
+
+            if(d->image)
+                cairo_surface_destroy(d->image);
+
+            d->image = draw_dup_image_surface(*cairo_surface);
+        } else {
+            luaA_checkudata(L, idx, &image_class);
+            image_t *image = (void *) lua_topointer(L, idx);
+            cairo_surface_t *surface = cairo_image_surface_create_for_data(
+                    image_getdata(image), CAIRO_FORMAT_ARGB32,
+                    image_getwidth(image), image_getheight(image),
+                    image_getwidth(image) * 4);
+            /* Cairo doesn't copy the data we give to it so we have to make a
+             * copy of the data. This is the lazy way to do that. */
+            d->image = draw_dup_image_surface(surface);
+            cairo_surface_destroy(surface);
+        }
+    }
+
+    widget_invalidate_bywidget(widget);
+    return 0;
 }
 
 /** Imagebox widget.
@@ -98,7 +147,7 @@ luaA_imagebox_index(lua_State *L, const char *prop)
     imagebox_data_t *d = widget->data;
 
     if(a_strcmp(prop, "image") == 0)
-        luaA_object_push_item(L, 1, d->image);
+        oocairo_surface_push(L, d->image);
     else if(a_strcmp(prop, "bg") == 0)
         luaA_pushcolor(L, &d->bg);
     else if(a_strcmp(prop, "resize") == 0)
@@ -121,11 +170,7 @@ luaA_imagebox_newindex(lua_State *L, const char *prop)
     imagebox_data_t *d = widget->data;
 
     if(a_strcmp(prop, "image") == 0)
-    {
-        luaA_checkudataornil(L, -1, &image_class);
-        luaA_object_unref_item(L, 1, d->image);
-        d->image = luaA_object_ref_item(L, 1, 3);
-    }
+        imagebox_set_image(L, widget, 3);
     else if(a_strcmp(prop, "bg") == 0)
     {
         const char *buf;
