@@ -1450,7 +1450,7 @@ luaA_client_get_content(lua_State *L, client_t *c)
                     data[y * ximage->width + x] |= 0xff000000; /* set alpha to 0xff */
                 }
 
-            retval = image_new_from_argb32(L, ximage->width, ximage->height, data);
+            retval = luaA_surface_from_data(L, ximage->width, ximage->height, data);
             p_delete(&data);
         }
         xcb_image_destroy(ximage);
