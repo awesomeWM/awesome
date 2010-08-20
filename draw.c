@@ -283,6 +283,25 @@ draw_image(draw_context_t *ctx, int x, int y, double ratio, image_t *image)
     draw_image_from_argb_data(ctx, x, y, image_getwidth(image), image_getheight(image), ratio, image_getdata(image));
 }
 
+/** Draw an image to a draw context.
+ * \param ctx Draw context to draw to.
+ * \param x X coordinate.
+ * \param y Y coordinate.
+ * \param ratio The ratio to apply to the image.
+ * \param source The image to draw.
+ */
+void
+draw_surface(draw_context_t *ctx, int x, int y,
+             double ratio, cairo_surface_t *source)
+{
+    cairo_t *cr = cairo_create(ctx->surface);
+    cairo_scale(cr, ratio, ratio);
+    cairo_set_source_surface(cr, source, x / ratio, y / ratio);
+    cairo_paint(cr);
+
+    cairo_destroy(cr);
+}
+
 /** Rotate a pixmap.
  * \param ctx Draw context to draw with.
  * \param src Drawable to draw from.
