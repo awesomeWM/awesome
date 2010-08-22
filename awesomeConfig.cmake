@@ -136,6 +136,8 @@ pkg_check_modules(AWESOME_REQUIRED REQUIRED
     x11
     pango>=1.19.3
     pangocairo>=1.19.3
+    oocairo
+    oopango
     xcb-randr
     xcb-xtest
     xcb-xinerama

@@ -29,6 +29,9 @@
 
 #include <basedir_fs.h>
 
+#include <oopango.h>
+#include <oocairo.h>
+
 #include "awesome.h"
 #include "config.h"
 #include "objects/timer.h"
@@ -800,7 +803,24 @@ luaA_init(xdgHandle* xdg)
     lua_pushliteral(L, ";" AWESOME_LUA_LIB_PATH "/?/init.lua");
     lua_concat(L, 3); /* concatenate with package.path */
     lua_setfield(L, 1, "path"); /* package.path = "concatenated string" */
-    lua_pop(L, 1); /* pop "package" */
+
+    lua_getfield(L, 1, "loaded");
+
+    /* Load oocairo */
+    if (luaopen_oocairo(L) != 1)
+        fatal("Loading oocairo failed");
+    lua_pushvalue(L, 3); /* Copy the module */
+    lua_setglobal(L, "oocairo"); /* Set the global entry */
+    lua_setfield(L, 2, "oocairo"); /* Make it require()able */
+
+    /* Load oopango */
+    if (luaopen_oopango(L) != 1)
+        fatal("Loading oopango failed");
+    lua_pushvalue(L, 3); /* Copy the module */
+    lua_setglobal(L, "oopango"); /* Set the global entry */
+    lua_setfield(L, 2, "oopango"); /* Make it require()able */
+
+    lua_pop(L, 2); /* pop "package" and "package.loaded" */
 
     signal_add(&global_signals, "debug::error");
     signal_add(&global_signals, "debug::index::miss");
