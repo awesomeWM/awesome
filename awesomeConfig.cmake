@@ -124,7 +124,7 @@ execute_process(
 # {{{ Required libraries
 #
 # this sets up:
-# AWESOME_REQUIRED_LIBRARIES
+# AWESOME_REQUIRED_LDFLAGS
 # AWESOME_REQUIRED_INCLUDE_DIRS
 
 # Use pkgconfig to get most of the libraries
@@ -175,8 +175,8 @@ if(NOT HAS_EXECINFO)
     find_library(LIB_EXECINFO execinfo)
     if(LIB_EXECINFO)
         set(HAS_EXECINFO 1)
-        set(AWESOME_REQUIRED_LIBRARIES
-            ${AWESOME_REQUIRED_LIBRARIES}
+        set(AWESOME_REQUIRED_LDFLAGS
+            ${AWESOME_REQUIRED_LDFLAGS}
             ${LIB_EXECINFO})
     endif()
 endif()
@@ -191,9 +191,9 @@ if(NOT LUA51_FOUND AND NOT LUA50_FOUND) # This is a workaround to a cmake bug
     message(FATAL_ERROR "lua library not found")
 endif()
 
-set(AWESOME_REQUIRED_LIBRARIES
+set(AWESOME_REQUIRED_LDFLAGS
     ${AWESOME_COMMON_REQUIRED_LDFLAGS}
-    ${AWESOME_REQUIRED_LIBRARIES}
+    ${AWESOME_REQUIRED_LDFLAGS}
     ${LIB_EV}
     ${LUA_LIBRARIES})
 
@@ -206,13 +206,13 @@ set(AWESOME_REQUIRED_INCLUDE_DIRS
 # {{{ Optional libraries
 #
 # this sets up:
-# AWESOME_OPTIONAL_LIBRARIES
+# AWESOME_OPTIONAL_LDFLAGS
 # AWESOME_OPTIONAL_INCLUDE_DIRS
 
 if(WITH_DBUS)
     pkg_check_modules(DBUS dbus-1)
     if(DBUS_FOUND)
-        set(AWESOME_OPTIONAL_LIBRARIES ${AWESOME_OPTIONAL_LIBRARIES} ${DBUS_LDFLAGS})
+        set(AWESOME_OPTIONAL_LDFLAGS ${AWESOME_OPTIONAL_LDFLAGS} ${DBUS_LDFLAGS})
         set(AWESOME_OPTIONAL_INCLUDE_DIRS ${AWESOME_OPTIONAL_INCLUDE_DIRS} ${DBUS_INCLUDE_DIRS})
     else()
         set(WITH_DBUS OFF)
