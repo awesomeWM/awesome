@@ -259,7 +259,7 @@ luaA_class_connect_signal_from_stack(lua_State *L, lua_class_t *lua_class,
                                      const char *name, int ud)
 {
     luaA_checkfunction(L, ud);
-    signal_add(&lua_class->signals, name, luaA_object_ref(L, ud));
+    signal_connect(&lua_class->signals, name, luaA_object_ref(L, ud));
 }
 
 void
@@ -268,7 +268,7 @@ luaA_class_disconnect_signal_from_stack(lua_State *L, lua_class_t *lua_class,
 {
     luaA_checkfunction(L, ud);
     void *ref = (void *) lua_topointer(L, ud);
-    signal_remove(&lua_class->signals, name, ref);
+    signal_disconnect(&lua_class->signals, name, ref);
     luaA_object_unref(L, (void *) ref);
     lua_remove(L, ud);
 }

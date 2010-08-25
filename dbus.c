@@ -763,7 +763,7 @@ luaA_dbus_connect_signal(lua_State *L)
     if(sig)
         luaA_warn(L, "cannot add signal %s on D-Bus, already existing", name);
     else
-        signal_add(&dbus_signals, name, luaA_object_ref(L, 2));
+        signal_connect(&dbus_signals, name, luaA_object_ref(L, 2));
     return 0;
 }
 
@@ -780,7 +780,7 @@ luaA_dbus_disconnect_signal(lua_State *L)
     const char *name = luaL_checkstring(L, 1);
     luaA_checkfunction(L, 2);
     const void *func = lua_topointer(L, 2);
-    signal_remove(&dbus_signals, name, func);
+    signal_disconnect(&dbus_signals, name, func);
     luaA_object_unref(L, (void *) func);
     return 0;
 }

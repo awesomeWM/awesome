@@ -543,7 +543,7 @@ luaA_screen_connect_signal(lua_State *L)
     screen_t *s = lua_touserdata(L, 1);
     const char *name = luaL_checkstring(L, 2);
     luaA_checkfunction(L, 3);
-    signal_add(&s->signals, name, luaA_object_ref(L, 3));
+    signal_connect(&s->signals, name, luaA_object_ref(L, 3));
     return 0;
 }
 
@@ -562,7 +562,7 @@ luaA_screen_disconnect_signal(lua_State *L)
     const char *name = luaL_checkstring(L, 2);
     luaA_checkfunction(L, 3);
     const void *ref = lua_topointer(L, 3);
-    signal_remove(&s->signals, name, ref);
+    signal_disconnect(&s->signals, name, ref);
     luaA_object_unref(L, (void *) ref);
     return 0;
 }

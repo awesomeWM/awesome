@@ -62,7 +62,7 @@ signal_array_getbyid(signal_array_t *arr, unsigned long id)
  * \param ref The reference to add.
  */
 static inline void
-signal_add(signal_array_t *arr, const char *name, const void *ref)
+signal_connect(signal_array_t *arr, const char *name, const void *ref)
 {
     unsigned long tok = a_strhash((const unsigned char *) name);
     signal_t *sigfound = signal_array_getbyid(arr, tok);
@@ -83,7 +83,7 @@ signal_add(signal_array_t *arr, const char *name, const void *ref)
  * \param ref The reference to remove.
  */
 static inline void
-signal_remove(signal_array_t *arr, const char *name, const void *ref)
+signal_disconnect(signal_array_t *arr, const char *name, const void *ref)
 {
     signal_t *sigfound = signal_array_getbyid(arr,
                                               a_strhash((const unsigned char *) name));
