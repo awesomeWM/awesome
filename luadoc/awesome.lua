@@ -38,13 +38,13 @@ module("awesome")
 --- Add a global signal.
 -- @param name A string with the event name.
 -- @param func The function to call.
--- @name add_signal
+-- @name connect_signal
 -- @class function
 
 --- Remove a global signal.
 -- @param name A string with the event name.
 -- @param func The function to call.
--- @name remove_signal
+-- @name disconnect_signal
 -- @class function
 
 --- Emit a global signal.

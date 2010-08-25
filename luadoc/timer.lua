@@ -24,13 +24,13 @@ module("timer")
 --- Add a signal.
 -- @param name A signal name.
 -- @param func A function to call when the signal is emitted.
--- @name add_signal
+-- @name connect_signal
 -- @class function
 
 --- Remove a signal.
 -- @param name A signal name.
 -- @param func A function to remove.
--- @name remove_signal
+-- @name disconnect_signal
 -- @class function
 
 --- Emit a signal.
