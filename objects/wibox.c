@@ -1282,6 +1282,20 @@ wibox_class_setup(lua_State *L)
                             (lua_class_propfunc_t) luaA_wibox_set_shape_clip,
                             (lua_class_propfunc_t) luaA_wibox_get_shape_clip,
                             (lua_class_propfunc_t) luaA_wibox_set_shape_clip);
+
+    signal_add(&wibox_class.signals, "property::border_width");
+    signal_add(&wibox_class.signals, "property::fg");
+    signal_add(&wibox_class.signals, "property::bg");
+    signal_add(&wibox_class.signals, "property::widgets");
+    signal_add(&wibox_class.signals, "property::x");
+    signal_add(&wibox_class.signals, "property::y");
+    signal_add(&wibox_class.signals, "property::width");
+    signal_add(&wibox_class.signals, "property::height");
+    signal_add(&wibox_class.signals, "property::ontop");
+    signal_add(&wibox_class.signals, "property::visible");
+    signal_add(&wibox_class.signals, "property::screen");
+    signal_add(&wibox_class.signals, "mouse::enter");
+    signal_add(&wibox_class.signals, "mouse::leave");
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

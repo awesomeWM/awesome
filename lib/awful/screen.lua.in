@@ -50,4 +50,8 @@ function padding(screen, padding)
     return data.padding[screen]
 end
 
+for s = 1, capi.screen.count() do
+    capi.screen[s]:add_signal("padding")
+end
+
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

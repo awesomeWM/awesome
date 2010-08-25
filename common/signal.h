@@ -55,7 +55,24 @@ signal_array_getbyid(signal_array_t *arr, unsigned long id)
     return signal_array_lookup(arr, &sig);
 }
 
-/** Add a signal inside a signal array.
+/** Add a signal to a signal array.
+ * Signals have to be added before they can be added or emitted.
+ * \param arr The signal array.
+ * \param name The signal name.
+ */
+static inline void
+signal_add(signal_array_t *arr, const char *name)
+{
+    unsigned long tok = a_strhash((const unsigned char *) name);
+    signal_t *sigfound = signal_array_getbyid(arr, tok);
+    if(!sigfound)
+    {
+        signal_t sig = { .id = tok };
+        signal_array_insert(arr, sig);
+    }
+}
+
+/** Connect a signal inside a signal array.
  * You are in charge of reference counting.
  * \param arr The signal array.
  * \param name The signal name.
@@ -69,14 +86,10 @@ signal_connect(signal_array_t *arr, const char *name, const void *ref)
     if(sigfound)
         cptr_array_append(&sigfound->sigfuncs, ref);
     else
-    {
-        signal_t sig = { .id = tok };
-        cptr_array_append(&sig.sigfuncs, ref);
-        signal_array_insert(arr, sig);
-    }
+        warn("Trying to connect to unknown signal '%s'", name);
 }
 
-/** Remove a signal inside a signal array.
+/** Disconnect a signal inside a signal array.
  * You are in charge of reference counting.
  * \param arr The signal array.
  * \param name The signal name.
@@ -88,12 +101,15 @@ signal_disconnect(signal_array_t *arr, const char *name, const void *ref)
     signal_t *sigfound = signal_array_getbyid(arr,
                                               a_strhash((const unsigned char *) name));
     if(sigfound)
+    {
         foreach(func, sigfound->sigfuncs)
             if(ref == *func)
             {
                 cptr_array_remove(&sigfound->sigfuncs, func);
                 break;
             }
+    } else
+        warn("Trying to disconnect from unknown signal '%s'", name);
 }
 
 #endif

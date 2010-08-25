@@ -507,7 +507,15 @@ end)
 
 capi.client.connect_signal("manage", withcurrent)
 
+capi.tag.add_signal("property::hide")
+capi.tag.add_signal("property::layout")
+capi.tag.add_signal("property::mwfact")
+capi.tag.add_signal("property::ncol")
+capi.tag.add_signal("property::nmaster")
+capi.tag.add_signal("property::windowfact")
+
 for s = 1, capi.screen.count() do
+    capi.screen[s]:add_signal("tag::history::update")
     capi.screen[s]:connect_signal("tag::history::update", history.update)
 end
 

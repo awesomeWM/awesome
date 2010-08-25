@@ -125,6 +125,11 @@ button_class_setup(lua_State *L)
                             (lua_class_propfunc_t) luaA_button_set_modifiers,
                             (lua_class_propfunc_t) luaA_button_get_modifiers,
                             (lua_class_propfunc_t) luaA_button_set_modifiers);
+
+    signal_add(&button_class.signals, "property::modifiers");
+    signal_add(&button_class.signals, "property::button");
+    signal_add(&button_class.signals, "press");
+    signal_add(&button_class.signals, "release");
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

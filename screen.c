@@ -72,6 +72,15 @@ screen_default_visual(xcb_screen_t *s)
     return NULL;
 }
 
+static void
+screen_add(screen_t new_screen)
+{
+    signal_add(&new_screen.signals, "tag::attach");
+    signal_add(&new_screen.signals, "tag::detach");
+    signal_add(&new_screen.signals, "property::workarea");
+    screen_array_append(&globalconf.screens, new_screen);
+}
+
 static bool
 screen_scan_randr(void)
 {
@@ -138,7 +147,7 @@ screen_scan_randr(void)
                     p_delete(&output_info_r);
                 }
 
-                screen_array_append(&globalconf.screens, new_screen);
+                screen_add(new_screen);
 
                 p_delete(&crtc_info_r);
             }
@@ -201,7 +210,7 @@ screen_scan_xinerama(void)
                 screen_t s;
                 p_clear(&s, 1);
                 s.geometry = screen_xsitoarea(xsi[screen]);
-                screen_array_append(&globalconf.screens, s);
+                screen_add(s);
             }
         }
 
@@ -223,7 +232,7 @@ static void screen_scan_x11(void)
     s.geometry.y = 0;
     s.geometry.width = xcb_screen->width_in_pixels;
     s.geometry.height = xcb_screen->height_in_pixels;
-    screen_array_append(&globalconf.screens, s);
+    screen_add(s);
 }
 
 /** Get screens informations and fill global configuration.
@@ -535,6 +544,22 @@ luaA_screen_index(lua_State *L)
  * \luastack
  * \lvalue A screen.
  * \lparam A signal name.
+ */
+static int
+luaA_screen_add_signal(lua_State *L)
+{
+    screen_t *s = lua_touserdata(L, 1);
+    const char *name = luaL_checkstring(L, 2);
+    signal_add(&s->signals, name);
+    return 0;
+}
+
+/** Connect a screen's signal.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ * \luastack
+ * \lvalue A screen.
+ * \lparam A signal name.
  * \lparam A function to call when the signal is emitted.
  */
 static int
@@ -619,6 +644,7 @@ const struct luaL_reg awesome_screen_methods[] =
 
 const struct luaL_reg awesome_screen_meta[] =
 {
+    { "add_signal", luaA_screen_add_signal },
     { "connect_signal", luaA_screen_connect_signal },
     { "disconnect_signal", luaA_screen_disconnect_signal },
     { "emit_signal", luaA_screen_emit_signal },

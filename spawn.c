@@ -85,6 +85,8 @@ spawn_monitor_timeout(struct ev_loop *loop, ev_timer *w, int revents)
              }
              lua_pop(globalconf.L, 1);
          }
+         else
+             warn("spawn::timeout signal is missing");
     }
     sn_startup_sequence_unref(w->data);
     p_delete(&w);
@@ -191,6 +193,8 @@ spawn_monitor_event(SnMonitorEvent *event, void *data)
         }
         lua_pop(globalconf.L, 1);
     }
+    else
+        warn("%s signal is missing", event_type_str);
 }
 
 /** Tell the spawn module that an app has been started.
@@ -240,6 +244,12 @@ spawn_init(void)
                                                   globalconf.default_screen,
                                                   spawn_monitor_event,
                                                   NULL, NULL);
+
+    signal_add(&global_signals, "spawn::timeout");
+    signal_add(&global_signals, "spawn::completed");
+    signal_add(&global_signals, "spawn::change");
+    signal_add(&global_signals, "spawn::initiated");
+    signal_add(&global_signals, "spawn::canceled");
 }
 
 static void

@@ -124,6 +124,8 @@ local function arrange_on_tagged(c, tag)
 end
 
 for s = 1, capi.screen.count() do
+    capi.screen[s]:add_signal("arrange")
+
     tag.attached_connect_signal(s, "property::mwfact", arrange_prop)
     tag.attached_connect_signal(s, "property::nmaster", arrange_prop)
     tag.attached_connect_signal(s, "property::ncol", arrange_prop)

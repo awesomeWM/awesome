@@ -223,7 +223,9 @@ signal_object_emit(lua_State *L, signal_array_t *arr, const char *name, int narg
             lua_remove(L, - nargs - nbfunc - 1 + i);
             luaA_dofunction(L, nargs, 0);
         }
-    }
+    } else
+        warn("Trying to emit unknown signal '%s'", name);
+
     /* remove args */
     lua_pop(L, nargs);
 }
@@ -266,7 +268,9 @@ luaA_object_emit_signal(lua_State *L, int oud,
             lua_remove(L, - nargs - nbfunc - 2 + i);
             luaA_dofunction(L, nargs + 1, 0);
         }
-    }
+    } else
+        luaL_error(L, "Trying to emit unknown signal '%s'", name);
+
     /* Then emit signal on the class */
     lua_pushvalue(L, oud);
     lua_insert(L, - nargs - 1);

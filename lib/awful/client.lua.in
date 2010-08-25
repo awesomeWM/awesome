@@ -834,6 +834,9 @@ function property.set(c, prop, value)
 end
 
 -- Register standards signals
+capi.client.add_signal("property::floating_geometry")
+capi.client.add_signal("property::floating")
+
 capi.client.connect_signal("focus", focus.history.add)
 capi.client.connect_signal("unmanage", focus.history.delete)
 

@@ -133,6 +133,9 @@ timer_class_setup(lua_State *L)
                             NULL,
                             (lua_class_propfunc_t) luaA_timer_get_started,
                             NULL);
+
+    signal_add(&timer_class.signals, "property::timeout");
+    signal_add(&timer_class.signals, "timeout");
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
