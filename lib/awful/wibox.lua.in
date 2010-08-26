@@ -326,10 +326,7 @@ local function update_wiboxes_on_struts(c)
 end
 
 -- Hook registered to reset all wiboxes position.
-capi.client.connect_signal("manage", function(c)
-    update_wiboxes_on_struts(c)
-    c:connect_signal("property::struts", update_wiboxes_on_struts)
-end)
+capi.client.connect_signal("property::struts", update_wiboxes_on_struts)
 capi.client.connect_signal("unmanage", update_wiboxes_on_struts)
 
 setmetatable(_M, { __call = function(_, ...) return new(...) end })
