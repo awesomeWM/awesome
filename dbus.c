@@ -397,8 +397,13 @@ a_dbus_process_request(DBusConnection *dbus_connection, DBusMessage *msg)
         nargs += a_dbus_message_iter(&iter);
 
     if(dbus_message_get_no_reply(msg))
+    {
+        signal_t *sigfound = signal_array_getbyid(&dbus_signals,
+                                                  a_strhash((const unsigned char *) NONULL(interface)));
         /* emit signals */
-        signal_object_emit(globalconf.L, &dbus_signals, NONULL(interface), nargs);
+        if(sigfound)
+            signal_object_emit(globalconf.L, &dbus_signals, NONULL(interface), nargs);
+    }
     else
     {
         signal_t *sig = signal_array_getbyid(&dbus_signals,
