@@ -508,6 +508,7 @@ end)
 capi.client.connect_signal("manage", withcurrent)
 
 capi.tag.add_signal("property::hide")
+capi.tag.add_signal("property::icon")
 capi.tag.add_signal("property::layout")
 capi.tag.add_signal("property::mwfact")
 capi.tag.add_signal("property::ncol")
