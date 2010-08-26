@@ -1910,11 +1910,14 @@ client_class_setup(lua_State *L)
     signal_add(&client_class.signals, "property::sticky");
     signal_add(&client_class.signals, "property::above");
     signal_add(&client_class.signals, "property::below");
+    signal_add(&client_class.signals, "property::ontop");
     signal_add(&client_class.signals, "property::minimized");
     signal_add(&client_class.signals, "property::urgent");
     signal_add(&client_class.signals, "property::hidden");
     signal_add(&client_class.signals, "property::icon");
     signal_add(&client_class.signals, "property::skip_taskbar");
+    signal_add(&client_class.signals, "property::type");
+    signal_add(&client_class.signals, "property::transient_for");
     signal_add(&client_class.signals, "request::fullscreen");
     signal_add(&client_class.signals, "request::maximized_horizontal");
     signal_add(&client_class.signals, "request::maximized_vertical");

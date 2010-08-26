@@ -1286,6 +1286,7 @@ wibox_class_setup(lua_State *L)
     signal_add(&wibox_class.signals, "property::border_width");
     signal_add(&wibox_class.signals, "property::fg");
     signal_add(&wibox_class.signals, "property::bg");
+    signal_add(&wibox_class.signals, "property::bg_image");
     signal_add(&wibox_class.signals, "property::widgets");
     signal_add(&wibox_class.signals, "property::x");
     signal_add(&wibox_class.signals, "property::y");
@@ -1294,6 +1295,10 @@ wibox_class_setup(lua_State *L)
     signal_add(&wibox_class.signals, "property::ontop");
     signal_add(&wibox_class.signals, "property::visible");
     signal_add(&wibox_class.signals, "property::screen");
+    signal_add(&wibox_class.signals, "property::orientation");
+    signal_add(&wibox_class.signals, "property::cursor");
+    signal_add(&wibox_class.signals, "property::shape_bounding");
+    signal_add(&wibox_class.signals, "property::shape_clip");
     signal_add(&wibox_class.signals, "mouse::enter");
     signal_add(&wibox_class.signals, "mouse::leave");
 }
