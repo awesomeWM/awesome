@@ -27,10 +27,8 @@ end
 
 atag.attached_connect_signal(nil, "property::selected", check_focus)
 client.connect_signal("unmanage", check_focus)
-client.connect_signal("new", function(c)
-    c:connect_signal("untagged", check_focus)
-    c:connect_signal("property::hidden", check_focus)
-    c:connect_signal("property::minimized", check_focus)
-end)
+client.connect_signal("untagged", check_focus)
+client.connect_signal("property::hidden", check_focus)
+client.connect_signal("property::minimized", check_focus)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
