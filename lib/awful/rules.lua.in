@@ -121,6 +121,8 @@ function apply(c)
             local geo = c:geometry();
             geo[property] = value
             c:geometry(geo);
+        elseif property == "focus" then
+            -- This will be handled below
         elseif type(c[property]) == "function" then
             c[property](c, value)
         else
