@@ -269,7 +269,7 @@ luaA_object_emit_signal(lua_State *L, int oud,
             luaA_dofunction(L, nargs + 1, 0);
         }
     } else
-        luaL_error(L, "Trying to emit unknown signal '%s'", name);
+        warn("Trying to emit unknown signal '%s'", name);
 
     /* Then emit signal on the class */
     lua_pushvalue(L, oud);
