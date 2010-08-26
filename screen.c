@@ -75,9 +75,9 @@ screen_default_visual(xcb_screen_t *s)
 static void
 screen_add(screen_t new_screen)
 {
+    signal_add(&new_screen.signals, "property::workarea");
     signal_add(&new_screen.signals, "tag::attach");
     signal_add(&new_screen.signals, "tag::detach");
-    signal_add(&new_screen.signals, "property::workarea");
     screen_array_append(&globalconf.screens, new_screen);
 }
 

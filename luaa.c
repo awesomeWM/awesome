@@ -817,9 +817,9 @@ luaA_init(xdgHandle* xdg)
     lua_setfield(L, 1, "path"); /* package.path = "concatenated string" */
     lua_pop(L, 1); /* pop "package" */
 
-    signal_add(&global_signals, "exit");
     signal_add(&global_signals, "debug::index::miss");
     signal_add(&global_signals, "debug::newindex::miss");
+    signal_add(&global_signals, "exit");
 }
 
 static bool

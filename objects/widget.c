@@ -585,11 +585,11 @@ widget_class_setup(lua_State *L)
                             (lua_class_propfunc_t) luaA_widget_get_type,
                             NULL);
 
-    signal_add(&widget_class.signals, "property::type");
-    signal_add(&widget_class.signals, "property::buttons");
-    signal_add(&widget_class.signals, "property::visible");
     signal_add(&widget_class.signals, "mouse::enter");
     signal_add(&widget_class.signals, "mouse::leave");
+    signal_add(&widget_class.signals, "property::buttons");
+    signal_add(&widget_class.signals, "property::type");
+    signal_add(&widget_class.signals, "property::visible");
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

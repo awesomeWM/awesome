@@ -235,9 +235,9 @@ key_class_setup(lua_State *L)
                             (lua_class_propfunc_t) luaA_key_get_modifiers,
                             (lua_class_propfunc_t) luaA_key_set_modifiers);
 
-    signal_add(&key_class.signals, "property::modifiers");
-    signal_add(&key_class.signals, "property::key");
     signal_add(&key_class.signals, "press");
+    signal_add(&key_class.signals, "property::key");
+    signal_add(&key_class.signals, "property::modifiers");
     signal_add(&key_class.signals, "release");
 }
 
