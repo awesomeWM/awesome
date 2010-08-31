@@ -67,7 +67,11 @@ systray_draw(widget_t *widget, draw_context_t *ctx,
     uint32_t orient = _NET_SYSTEM_TRAY_ORIENTATION_HORZ;
 
     systray_data_t *d = widget->data;
-    d->height = p->geometry.height;
+
+    if (p->orientation == East)
+        d->height = p->geometry.height;
+    else
+        d->height = p->geometry.width;
 
     /* set wibox orientation */
     /** \todo stop setting that property on each redraw */
