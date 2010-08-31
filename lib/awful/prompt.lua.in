@@ -286,7 +286,7 @@ function run(args, textbox, exe_callback, completion_callback, history_path, his
                     if n then
                         selection = selection:sub(1, n - 1)
                     end
-                    command = command .. selection
+                    command = command:sub(1, cur_pos - 1) .. selection .. command:sub(cur_pos)
                     cur_pos = cur_pos + #selection
                 end
             elseif key == "Home" then
