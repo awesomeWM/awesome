@@ -428,38 +428,26 @@ luaA_textbox_newindex(lua_State *L, awesome_token_t token)
         d->height = luaL_checknumber(L, 3);
         break;
       case A_TK_WRAP:
-        if((buf = luaL_checklstring(L, 3, &len)))
-            switch(a_tokenize(buf, len))
-            {
-              case A_TK_WORD:
+        if((buf = luaL_checkstring(L, 3)))
+        {
+            if(a_strcmp(buf, "word") == 0)
                 d->wrap = PANGO_WRAP_WORD;
-                break;
-              case A_TK_CHAR:
+            else if(a_strcmp(buf, "char") == 0)
                 d->wrap = PANGO_WRAP_CHAR;
-                break;
-              case A_TK_WORD_CHAR:
+            else if(a_strcmp(buf, "word_char") == 0)
                 d->wrap = PANGO_WRAP_WORD_CHAR;
-                break;
-              default:
-                break;
-            }
+        }
         break;
       case A_TK_ELLIPSIZE:
-        if((buf = luaL_checklstring(L, 3, &len)))
-            switch(a_tokenize(buf, len))
-            {
-              case A_TK_START:
+        if((buf = luaL_checkstring(L, 3)))
+        {
+            if(a_strcmp(buf, "start") == 0)
                 d->ellip = PANGO_ELLIPSIZE_START;
-                break;
-              case A_TK_MIDDLE:
+            else if(a_strcmp(buf, "middle") == 0)
                 d->ellip = PANGO_ELLIPSIZE_MIDDLE;
-                break;
-              case A_TK_END:
+            else if(a_strcmp(buf, "end") == 0)
                 d->ellip = PANGO_ELLIPSIZE_END;
-                break;
-              default:
-                break;
-            }
+        }
         break;
       default:
         return 0;
