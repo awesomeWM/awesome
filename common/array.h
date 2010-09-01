@@ -117,17 +117,13 @@
         while(l < r)                                                        \
         {                                                                   \
             int i = (r + l) / 2;                                            \
-            switch(cmp(&e, &arr->tab[i]))                                   \
-            {                                                               \
-              case -1:                                                      \
+            int res = cmp(&e, &arr->tab[i]);                                \
+            if(res == 0)                                                    \
+                return; /* Already added, ignore */                         \
+            if(res < 0)                                                     \
                 r = i;                                                      \
-                break;                                                      \
-              case 0:                                                       \
-                return;                                                     \
-              case 1:                                                       \
+            else                                                            \
                 l = i + 1;                                                  \
-                break;                                                      \
-            }                                                               \
         }                                                                   \
         pfx##_array_splice(arr, r, 0, &e, 1);                               \
     }                                                                       \
