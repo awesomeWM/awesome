@@ -84,7 +84,7 @@ imagebox_destructor(widget_t *w)
 
 /** Imagebox widget.
  * \param L The Lua VM state.
- * \param token The key token.
+ * \param prop The key that is being indexed.
  * \param resize Resize image.
  * \return The number of elements pushed on stack.
  * \luastack
@@ -92,25 +92,19 @@ imagebox_destructor(widget_t *w)
  * \lfield bg The background color to use.
  */
 static int
-luaA_imagebox_index(lua_State *L, awesome_token_t token)
+luaA_imagebox_index(lua_State *L, const char *prop)
 {
     widget_t *widget = luaA_checkudata(L, 1, &widget_class);
     imagebox_data_t *d = widget->data;
 
-    switch(token)
-    {
-      case A_TK_IMAGE:
+    if(a_strcmp(prop, "image") == 0)
         luaA_object_push_item(L, 1, d->image);
-        break;
-      case A_TK_BG:
+    else if(a_strcmp(prop, "bg") == 0)
         luaA_pushcolor(L, &d->bg);
-        break;
-      case A_TK_RESIZE:
+    else if(a_strcmp(prop, "resize") == 0)
         lua_pushboolean(L, d->resize);
-        break;
-      default:
+    else
         return 0;
-    }
 
     return 1;
 }
@@ -121,33 +115,30 @@ luaA_imagebox_index(lua_State *L, awesome_token_t token)
  * \return The number of elements pushed on stack.
  */
 static int
-luaA_imagebox_newindex(lua_State *L, awesome_token_t token)
+luaA_imagebox_newindex(lua_State *L, const char *prop)
 {
     widget_t *widget = luaA_checkudata(L, 1, &widget_class);
     imagebox_data_t *d = widget->data;
 
-    switch(token)
+    if(a_strcmp(prop, "image") == 0)
     {
-        const char *buf;
-        size_t len;
-
-      case A_TK_IMAGE:
         luaA_checkudataornil(L, -1, &image_class);
         luaA_object_unref_item(L, 1, d->image);
         d->image = luaA_object_ref_item(L, 1, 3);
-        break;
-      case A_TK_BG:
+    }
+    else if(a_strcmp(prop, "bg") == 0)
+    {
+        const char *buf;
+        size_t len;
         if(lua_isnil(L, 3))
             p_clear(&d->bg, 1);
         else if((buf = luaL_checklstring(L, 3, &len)))
             color_init_reply(color_init_unchecked(&d->bg, buf, len));
-        break;
-      case A_TK_RESIZE:
-        d->resize = luaA_checkboolean(L, 3);
-        break;
-      default:
-        return 0;
     }
+    else if(a_strcmp(prop, "resize") == 0)
+        d->resize = luaA_checkboolean(L, 3);
+    else
+        return 0;
 
     widget_invalidate_bywidget(widget);
 

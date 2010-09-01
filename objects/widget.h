@@ -43,9 +43,9 @@ struct widget_t
     /** Draw function */
     void (*draw)(widget_t *, draw_context_t *, area_t, wibox_t *);
     /** Index function */
-    int (*index)(lua_State *, awesome_token_t);
+    int (*index)(lua_State *, const char *);
     /** Newindex function */
-    int (*newindex)(lua_State *, awesome_token_t);
+    int (*newindex)(lua_State *, const char *);
     /** Misc private data */
     void *data;
     /** Button bindings */

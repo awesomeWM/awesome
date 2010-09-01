@@ -232,7 +232,7 @@ luaA_textbox_margin(lua_State *L)
 
 /** Textbox widget.
  * \param L The Lua VM state.
- * \param token The key token.
+ * \param prop The property's name.
  * \return The number of elements pushed on stack.
  * \luastack
  * \lfield text The text to display.
@@ -249,52 +249,43 @@ luaA_textbox_margin(lua_State *L)
  * \lfield bg_resize Background resize.
  */
 static int
-luaA_textbox_index(lua_State *L, awesome_token_t token)
+luaA_textbox_index(lua_State *L, const char *prop)
 {
     widget_t *widget = luaA_checkudata(L, 1, &widget_class);
     textbox_data_t *d = widget->data;
 
-    switch(token)
-    {
-      case A_TK_BG_RESIZE:
+    if(a_strcmp(prop, "bg_resize") == 0)
         lua_pushboolean(L, d->bg_resize);
-        return 1;
-      case A_TK_BG_ALIGN:
+    else if(a_strcmp(prop, "bg_align") == 0)
         lua_pushstring(L, draw_align_tostr(d->bg_align));
-        return 1;
-      case A_TK_BG_IMAGE:
+    else if(a_strcmp(prop, "bg_image") == 0)
         return luaA_object_push(L, d->bg_image);
-      case A_TK_BG:
+    else if(a_strcmp(prop, "bg") == 0)
         return luaA_pushcolor(L, &d->bg);
-      case A_TK_MARGIN:
+    else if(a_strcmp(prop, "margin") == 0)
         lua_pushcfunction(L, luaA_textbox_margin);
-        return 1;
-      case A_TK_ALIGN:
+    else if(a_strcmp(prop, "align") == 0)
         lua_pushstring(L, draw_align_tostr(d->align));
-        return 1;
-      case A_TK_VALIGN:
+    else if(a_strcmp(prop, "valign") == 0)
         lua_pushstring(L, draw_align_tostr(d->valign));
-        return 1;
-      case A_TK_BORDER_WIDTH:
+    else if(a_strcmp(prop, "border_width") == 0)
         lua_pushnumber(L, d->border.width);
-        return 1;
-      case A_TK_BORDER_COLOR:
+    else if(a_strcmp(prop, "border_color") == 0)
         luaA_pushcolor(L, &d->border.color);
-        return 1;
-      case A_TK_TEXT:
+    else if(a_strcmp(prop, "text") == 0)
+    {
         if(d->text_len > 0)
         {
             lua_pushlstring(L, d->text, d->text_len);
             return 1;
         }
         return 0;
-      case A_TK_WIDTH:
+    }
+    else if(a_strcmp(prop, "width") == 0)
         lua_pushnumber(L, d->width);
-        return 1;
-      case A_TK_HEIGHT:
+    else if(a_strcmp(prop, "height") == 0)
         lua_pushnumber(L, d->height);
-        return 1;
-      case A_TK_WRAP:
+    else if(a_strcmp(prop, "wrap") == 0)
         switch(d->wrap)
         {
           default:
@@ -307,8 +298,7 @@ luaA_textbox_index(lua_State *L, awesome_token_t token)
             lua_pushliteral(L, "word_char");
             break;
         }
-        return 1;
-      case A_TK_ELLIPSIZE:
+    else if(a_strcmp(prop, "ellipsize") == 0)
         switch(d->ellip)
         {
           case PANGO_ELLIPSIZE_START:
@@ -321,10 +311,10 @@ luaA_textbox_index(lua_State *L, awesome_token_t token)
             lua_pushliteral(L, "end");
             break;
         }
-        return 1;
-      default:
+    else
         return 0;
-    }
+
+    return 1;
 }
 
 /** The __newindex method for a textbox object.
@@ -333,49 +323,52 @@ luaA_textbox_index(lua_State *L, awesome_token_t token)
  * \return The number of elements pushed on stack.
  */
 static int
-luaA_textbox_newindex(lua_State *L, awesome_token_t token)
+luaA_textbox_newindex(lua_State *L, const char *prop)
 {
     size_t len = 0;
     widget_t *widget = luaA_checkudata(L, 1, &widget_class);
     const char *buf = NULL;
     textbox_data_t *d = widget->data;
 
-    switch(token)
+    if(a_strcmp(prop, "bg_align") == 0)
     {
-      case A_TK_BG_ALIGN:
         buf = luaL_checklstring(L, 3, &len);
         d->bg_align = draw_align_fromstr(buf, len);
-        break;
-      case A_TK_BG_RESIZE:
+    }
+    else if(a_strcmp(prop, "bg_resize") == 0)
         d->bg_resize = luaA_checkboolean(L, 3);
-        break;
-      case A_TK_BG_IMAGE:
+    else if(a_strcmp(prop, "bg_image") == 0)
+    {
         luaA_checkudataornil(L, -1, &image_class);
         luaA_object_unref_item(L, 1, d->bg_image);
         d->bg_image = luaA_object_ref_item(L, 1, 3);
-        break;
-      case A_TK_BG:
+    }
+    else if(a_strcmp(prop, "bg") == 0)
+    {
         if(lua_isnil(L, 3))
             p_clear(&d->bg, 1);
         else if((buf = luaL_checklstring(L, 3, &len)))
             color_init_reply(color_init_unchecked(&d->bg, buf, len));
-        break;
-      case A_TK_ALIGN:
+    }
+    else if(a_strcmp(prop, "align") == 0)
+    {
         if((buf = luaL_checklstring(L, 3, &len)))
             d->align = draw_align_fromstr(buf, len);
-        break;
-      case A_TK_VALIGN:
+    }
+    else if(a_strcmp(prop, "valign") == 0)
+    {
         if((buf = luaL_checklstring(L, 3, &len)))
             d->valign = draw_align_fromstr(buf, len);
-        break;
-      case A_TK_BORDER_COLOR:
+    }
+    else if(a_strcmp(prop, "border_color") == 0)
+    {
         if((buf = luaL_checklstring(L, 3, &len)))
             color_init_reply(color_init_unchecked(&d->border.color, buf, len));
-        break;
-      case A_TK_BORDER_WIDTH:
+    }
+    else if(a_strcmp(prop, "border_width") == 0)
         d->border.width = luaL_checknumber(L, 3);
-        break;
-      case A_TK_TEXT:
+    else if(a_strcmp(prop, "text") == 0)
+    {
         if(lua_isnil(L, 3)
            || (buf = luaL_checklstring(L, 3, &len)))
         {
@@ -420,14 +413,13 @@ luaA_textbox_newindex(lua_State *L, awesome_token_t token)
             else
                 p_clear(&d->extents, 1);
         }
-        break;
-      case A_TK_WIDTH:
+    }
+    else if(a_strcmp(prop, "width") == 0)
         d->width = luaL_checknumber(L, 3);
-        break;
-      case A_TK_HEIGHT:
+    else if(a_strcmp(prop, "height") == 0)
         d->height = luaL_checknumber(L, 3);
-        break;
-      case A_TK_WRAP:
+    else if(a_strcmp(prop, "wrap") == 0)
+    {
         if((buf = luaL_checkstring(L, 3)))
         {
             if(a_strcmp(buf, "word") == 0)
@@ -437,8 +429,9 @@ luaA_textbox_newindex(lua_State *L, awesome_token_t token)
             else if(a_strcmp(buf, "word_char") == 0)
                 d->wrap = PANGO_WRAP_WORD_CHAR;
         }
-        break;
-      case A_TK_ELLIPSIZE:
+    }
+    else if(a_strcmp(prop, "ellipsize") == 0)
+    {
         if((buf = luaL_checkstring(L, 3)))
         {
             if(a_strcmp(buf, "start") == 0)
@@ -448,10 +441,9 @@ luaA_textbox_newindex(lua_State *L, awesome_token_t token)
             else if(a_strcmp(buf, "end") == 0)
                 d->ellip = PANGO_ELLIPSIZE_END;
         }
-        break;
-      default:
-        return 0;
     }
+    else
+        return 0;
 
     widget_invalidate_bywidget(widget);
 

@@ -437,9 +437,7 @@ luaA_widget_buttons(lua_State *L)
 static int
 luaA_widget_index(lua_State *L)
 {
-    size_t len;
-    const char *prop = luaL_checklstring(L, 2, &len);
-    awesome_token_t token = a_tokenize(prop, len);
+    const char *prop = luaL_checkstring(L, 2);
 
     /* Try standard method */
     if(luaA_class_index(L))
@@ -447,7 +445,7 @@ luaA_widget_index(lua_State *L)
 
     /* Then call special widget index */
     widget_t *widget = luaA_checkudata(L, 1, &widget_class);
-    return widget->index ? widget->index(L, token) : 0;
+    return widget->index ? widget->index(L, prop) : 0;
 }
 
 /** Generic widget newindex.
@@ -457,16 +455,14 @@ luaA_widget_index(lua_State *L)
 static int
 luaA_widget_newindex(lua_State *L)
 {
-    size_t len;
-    const char *prop = luaL_checklstring(L, 2, &len);
-    awesome_token_t token = a_tokenize(prop, len);
+    const char *prop = luaL_checkstring(L, 2);
 
     /* Try standard method */
     luaA_class_newindex(L);
 
     /* Then call special widget newindex */
     widget_t *widget = luaA_checkudata(L, 1, &widget_class);
-    return widget->newindex ? widget->newindex(L, token) : 0;
+    return widget->newindex ? widget->newindex(L, prop) : 0;
 }
 
 static int
