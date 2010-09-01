@@ -117,11 +117,11 @@ button_class_setup(lua_State *L)
                      (lua_class_allocator_t) button_new, NULL, NULL,
                      luaA_class_index_miss_property, luaA_class_newindex_miss_property,
                      button_methods, button_meta);
-    luaA_class_add_property(&button_class, A_TK_BUTTON,
+    luaA_class_add_property(&button_class, "button",
                             (lua_class_propfunc_t) luaA_button_set_button,
                             (lua_class_propfunc_t) luaA_button_get_button,
                             (lua_class_propfunc_t) luaA_button_set_button);
-    luaA_class_add_property(&button_class, A_TK_MODIFIERS,
+    luaA_class_add_property(&button_class, "modifiers",
                             (lua_class_propfunc_t) luaA_button_set_modifiers,
                             (lua_class_propfunc_t) luaA_button_get_modifiers,
                             (lua_class_propfunc_t) luaA_button_set_modifiers);

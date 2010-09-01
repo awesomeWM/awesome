@@ -1125,55 +1125,55 @@ wibox_class_setup(lua_State *L)
                      NULL,
                      luaA_class_index_miss_property, luaA_class_newindex_miss_property,
                      wibox_methods, wibox_meta);
-    luaA_class_add_property(&wibox_class, A_TK_WIDGETS,
+    luaA_class_add_property(&wibox_class, "widgets",
                             (lua_class_propfunc_t) luaA_wibox_set_widgets,
                             (lua_class_propfunc_t) luaA_wibox_get_widgets,
                             (lua_class_propfunc_t) luaA_wibox_set_widgets);
-    luaA_class_add_property(&wibox_class, A_TK_VISIBLE,
+    luaA_class_add_property(&wibox_class, "visible",
                             (lua_class_propfunc_t) luaA_wibox_set_visible,
                             (lua_class_propfunc_t) luaA_wibox_get_visible,
                             (lua_class_propfunc_t) luaA_wibox_set_visible);
-    luaA_class_add_property(&wibox_class, A_TK_ORIENTATION,
+    luaA_class_add_property(&wibox_class, "orientation",
                             (lua_class_propfunc_t) luaA_wibox_set_orientation,
                             (lua_class_propfunc_t) luaA_wibox_get_orientation,
                             (lua_class_propfunc_t) luaA_wibox_set_orientation);
-    luaA_class_add_property(&wibox_class, A_TK_ONTOP,
+    luaA_class_add_property(&wibox_class, "ontop",
                             (lua_class_propfunc_t) luaA_wibox_set_ontop,
                             (lua_class_propfunc_t) luaA_wibox_get_ontop,
                             (lua_class_propfunc_t) luaA_wibox_set_ontop);
-    luaA_class_add_property(&wibox_class, A_TK_SCREEN,
+    luaA_class_add_property(&wibox_class, "screen",
                             NULL,
                             (lua_class_propfunc_t) luaA_wibox_get_screen,
                             (lua_class_propfunc_t) luaA_wibox_set_screen);
-    luaA_class_add_property(&wibox_class, A_TK_CURSOR,
+    luaA_class_add_property(&wibox_class, "cursor",
                             (lua_class_propfunc_t) luaA_wibox_set_cursor,
                             (lua_class_propfunc_t) luaA_wibox_get_cursor,
                             (lua_class_propfunc_t) luaA_wibox_set_cursor);
-    luaA_class_add_property(&wibox_class, A_TK_FG,
+    luaA_class_add_property(&wibox_class, "fg",
                             (lua_class_propfunc_t) luaA_wibox_set_fg,
                             (lua_class_propfunc_t) luaA_wibox_get_fg,
                             (lua_class_propfunc_t) luaA_wibox_set_fg);
-    luaA_class_add_property(&wibox_class, A_TK_BG,
+    luaA_class_add_property(&wibox_class, "bg",
                             (lua_class_propfunc_t) luaA_wibox_set_bg,
                             (lua_class_propfunc_t) luaA_wibox_get_bg,
                             (lua_class_propfunc_t) luaA_wibox_set_bg);
-    luaA_class_add_property(&wibox_class, A_TK_BG_IMAGE,
+    luaA_class_add_property(&wibox_class, "bg_image",
                             (lua_class_propfunc_t) luaA_wibox_set_bg_image,
                             (lua_class_propfunc_t) luaA_wibox_get_bg_image,
                             (lua_class_propfunc_t) luaA_wibox_set_bg_image);
-    luaA_class_add_property(&wibox_class, A_TK_X,
+    luaA_class_add_property(&wibox_class, "x",
                             (lua_class_propfunc_t) luaA_wibox_set_x,
                             (lua_class_propfunc_t) luaA_wibox_get_x,
                             (lua_class_propfunc_t) luaA_wibox_set_x);
-    luaA_class_add_property(&wibox_class, A_TK_Y,
+    luaA_class_add_property(&wibox_class, "y",
                             (lua_class_propfunc_t) luaA_wibox_set_y,
                             (lua_class_propfunc_t) luaA_wibox_get_y,
                             (lua_class_propfunc_t) luaA_wibox_set_y);
-    luaA_class_add_property(&wibox_class, A_TK_WIDTH,
+    luaA_class_add_property(&wibox_class, "width",
                             (lua_class_propfunc_t) luaA_wibox_set_width,
                             (lua_class_propfunc_t) luaA_wibox_get_width,
                             (lua_class_propfunc_t) luaA_wibox_set_width);
-    luaA_class_add_property(&wibox_class, A_TK_HEIGHT,
+    luaA_class_add_property(&wibox_class, "height",
                             (lua_class_propfunc_t) luaA_wibox_set_height,
                             (lua_class_propfunc_t) luaA_wibox_get_height,
                             (lua_class_propfunc_t) luaA_wibox_set_height);

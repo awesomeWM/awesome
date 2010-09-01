@@ -222,15 +222,15 @@ key_class_setup(lua_State *L)
                      (lua_class_allocator_t) key_new, NULL, NULL,
                      luaA_class_index_miss_property, luaA_class_newindex_miss_property,
                      key_methods, key_meta);
-    luaA_class_add_property(&key_class, A_TK_KEY,
+    luaA_class_add_property(&key_class, "key",
                             (lua_class_propfunc_t) luaA_key_set_key,
                             (lua_class_propfunc_t) luaA_key_get_key,
                             (lua_class_propfunc_t) luaA_key_set_key);
-    luaA_class_add_property(&key_class, A_TK_KEYSYM,
+    luaA_class_add_property(&key_class, "keysym",
                             NULL,
                             (lua_class_propfunc_t) luaA_key_get_keysym,
                             NULL);
-    luaA_class_add_property(&key_class, A_TK_MODIFIERS,
+    luaA_class_add_property(&key_class, "modifiers",
                             (lua_class_propfunc_t) luaA_key_set_modifiers,
                             (lua_class_propfunc_t) luaA_key_get_modifiers,
                             (lua_class_propfunc_t) luaA_key_set_modifiers);

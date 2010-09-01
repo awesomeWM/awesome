@@ -817,15 +817,15 @@ image_class_setup(lua_State *L)
                      NULL,
                      luaA_class_index_miss_property, luaA_class_newindex_miss_property,
                      image_methods, image_meta);
-    luaA_class_add_property(&image_class, A_TK_WIDTH,
+    luaA_class_add_property(&image_class, "width",
                             NULL,
                             (lua_class_propfunc_t) luaA_image_get_width,
                             NULL);
-    luaA_class_add_property(&image_class, A_TK_HEIGHT,
+    luaA_class_add_property(&image_class, "height",
                             NULL,
                             (lua_class_propfunc_t) luaA_image_get_height,
                             NULL);
-    luaA_class_add_property(&image_class, A_TK_ALPHA,
+    luaA_class_add_property(&image_class, "alpha",
                             NULL,
                             (lua_class_propfunc_t) luaA_image_get_alpha,
                             NULL);

@@ -1765,119 +1765,119 @@ client_class_setup(lua_State *L)
                      (lua_class_checker_t) client_checker,
                      luaA_class_index_miss_property, luaA_class_newindex_miss_property,
                      client_methods, client_meta);
-    luaA_class_add_property(&client_class, A_TK_NAME,
+    luaA_class_add_property(&client_class, "name",
                             NULL,
                             (lua_class_propfunc_t) luaA_client_get_name,
                             NULL);
-    luaA_class_add_property(&client_class, A_TK_TRANSIENT_FOR,
+    luaA_class_add_property(&client_class, "transient_for",
                             NULL,
                             (lua_class_propfunc_t) luaA_client_get_transient_for,
                             NULL);
-    luaA_class_add_property(&client_class, A_TK_SKIP_TASKBAR,
+    luaA_class_add_property(&client_class, "skip_taskbar",
                             (lua_class_propfunc_t) luaA_client_set_skip_taskbar,
                             (lua_class_propfunc_t) luaA_client_get_skip_taskbar,
                             (lua_class_propfunc_t) luaA_client_set_skip_taskbar);
-    luaA_class_add_property(&client_class, A_TK_CONTENT,
+    luaA_class_add_property(&client_class, "content",
                             NULL,
                             (lua_class_propfunc_t) luaA_client_get_content,
                             NULL);
-    luaA_class_add_property(&client_class, A_TK_TYPE,
+    luaA_class_add_property(&client_class, "type",
                             NULL,
                             (lua_class_propfunc_t) luaA_client_get_type,
                             NULL);
-    luaA_class_add_property(&client_class, A_TK_CLASS,
+    luaA_class_add_property(&client_class, "class",
                             NULL,
                             (lua_class_propfunc_t) luaA_client_get_class,
                             NULL);
-    luaA_class_add_property(&client_class, A_TK_INSTANCE,
+    luaA_class_add_property(&client_class, "instance",
                             NULL,
                             (lua_class_propfunc_t) luaA_client_get_instance,
                             NULL);
-    luaA_class_add_property(&client_class, A_TK_ROLE,
+    luaA_class_add_property(&client_class, "role",
                             NULL,
                             (lua_class_propfunc_t) luaA_client_get_role,
                             NULL);
-    luaA_class_add_property(&client_class, A_TK_PID,
+    luaA_class_add_property(&client_class, "pid",
                             NULL,
                             (lua_class_propfunc_t) luaA_client_get_pid,
                             NULL);
-    luaA_class_add_property(&client_class, A_TK_LEADER_WINDOW,
+    luaA_class_add_property(&client_class, "leader_window",
                             NULL,
                             (lua_class_propfunc_t) luaA_client_get_leader_window,
                             NULL);
-    luaA_class_add_property(&client_class, A_TK_MACHINE,
+    luaA_class_add_property(&client_class, "machine",
                             NULL,
                             (lua_class_propfunc_t) luaA_client_get_machine,
                             NULL);
-    luaA_class_add_property(&client_class, A_TK_ICON_NAME,
+    luaA_class_add_property(&client_class, "icon_name",
                             NULL,
                             (lua_class_propfunc_t) luaA_client_get_icon_name,
                             NULL);
-    luaA_class_add_property(&client_class, A_TK_SCREEN,
+    luaA_class_add_property(&client_class, "screen",
                             NULL,
                             (lua_class_propfunc_t) luaA_client_get_screen,
                             (lua_class_propfunc_t) luaA_client_set_screen);
-    luaA_class_add_property(&client_class, A_TK_HIDDEN,
+    luaA_class_add_property(&client_class, "hidden",
                             (lua_class_propfunc_t) luaA_client_set_hidden,
                             (lua_class_propfunc_t) luaA_client_get_hidden,
                             (lua_class_propfunc_t) luaA_client_set_hidden);
-    luaA_class_add_property(&client_class, A_TK_MINIMIZED,
+    luaA_class_add_property(&client_class, "minimized",
                             (lua_class_propfunc_t) luaA_client_set_minimized,
                             (lua_class_propfunc_t) luaA_client_get_minimized,
                             (lua_class_propfunc_t) luaA_client_set_minimized);
-    luaA_class_add_property(&client_class, A_TK_FULLSCREEN,
+    luaA_class_add_property(&client_class, "fullscreen",
                             (lua_class_propfunc_t) luaA_client_set_fullscreen,
                             (lua_class_propfunc_t) luaA_client_get_fullscreen,
                             (lua_class_propfunc_t) luaA_client_set_fullscreen);
-    luaA_class_add_property(&client_class, A_TK_MODAL,
+    luaA_class_add_property(&client_class, "modal",
                             (lua_class_propfunc_t) luaA_client_set_modal,
                             (lua_class_propfunc_t) luaA_client_get_modal,
                             (lua_class_propfunc_t) luaA_client_set_modal);
-    luaA_class_add_property(&client_class, A_TK_GROUP_WINDOW,
+    luaA_class_add_property(&client_class, "group_window",
                             NULL,
                             (lua_class_propfunc_t) luaA_client_get_group_window,
                             NULL);
-    luaA_class_add_property(&client_class, A_TK_MAXIMIZED_HORIZONTAL,
+    luaA_class_add_property(&client_class, "maximized_horizontal",
                             (lua_class_propfunc_t) luaA_client_set_maximized_horizontal,
                             (lua_class_propfunc_t) luaA_client_get_maximized_horizontal,
                             (lua_class_propfunc_t) luaA_client_set_maximized_horizontal);
-    luaA_class_add_property(&client_class, A_TK_MAXIMIZED_VERTICAL,
+    luaA_class_add_property(&client_class, "maximized_vertical",
                             (lua_class_propfunc_t) luaA_client_set_maximized_vertical,
                             (lua_class_propfunc_t) luaA_client_get_maximized_vertical,
                             (lua_class_propfunc_t) luaA_client_set_maximized_vertical);
-    luaA_class_add_property(&client_class, A_TK_ICON,
+    luaA_class_add_property(&client_class, "icon",
                             (lua_class_propfunc_t) luaA_client_set_icon,
                             (lua_class_propfunc_t) luaA_client_get_icon,
                             (lua_class_propfunc_t) luaA_client_set_icon);
-    luaA_class_add_property(&client_class, A_TK_ONTOP,
+    luaA_class_add_property(&client_class, "ontop",
                             (lua_class_propfunc_t) luaA_client_set_ontop,
                             (lua_class_propfunc_t) luaA_client_get_ontop,
                             (lua_class_propfunc_t) luaA_client_set_ontop);
-    luaA_class_add_property(&client_class, A_TK_ABOVE,
+    luaA_class_add_property(&client_class, "above",
                             (lua_class_propfunc_t) luaA_client_set_above,
                             (lua_class_propfunc_t) luaA_client_get_above,
                             (lua_class_propfunc_t) luaA_client_set_above);
-    luaA_class_add_property(&client_class, A_TK_BELOW,
+    luaA_class_add_property(&client_class, "below",
                             (lua_class_propfunc_t) luaA_client_set_below,
                             (lua_class_propfunc_t) luaA_client_get_below,
                             (lua_class_propfunc_t) luaA_client_set_below);
-    luaA_class_add_property(&client_class, A_TK_STICKY,
+    luaA_class_add_property(&client_class, "sticky",
                             (lua_class_propfunc_t) luaA_client_set_sticky,
                             (lua_class_propfunc_t) luaA_client_get_sticky,
                             (lua_class_propfunc_t) luaA_client_set_sticky);
-    luaA_class_add_property(&client_class, A_TK_SIZE_HINTS_HONOR,
+    luaA_class_add_property(&client_class, "size_hints_honor",
                             (lua_class_propfunc_t) luaA_client_set_size_hints_honor,
                             (lua_class_propfunc_t) luaA_client_get_size_hints_honor,
                             (lua_class_propfunc_t) luaA_client_set_size_hints_honor);
-    luaA_class_add_property(&client_class, A_TK_URGENT,
+    luaA_class_add_property(&client_class, "urgent",
                             (lua_class_propfunc_t) luaA_client_set_urgent,
                             (lua_class_propfunc_t) luaA_client_get_urgent,
                             (lua_class_propfunc_t) luaA_client_set_urgent);
-    luaA_class_add_property(&client_class, A_TK_SIZE_HINTS,
+    luaA_class_add_property(&client_class, "size_hints",
                             NULL,
                             (lua_class_propfunc_t) luaA_client_get_size_hints,
                             NULL);
-    luaA_class_add_property(&client_class, A_TK_FOCUSABLE,
+    luaA_class_add_property(&client_class, "focusable",
                             NULL,
                             (lua_class_propfunc_t) luaA_client_get_focusable,
                             NULL);

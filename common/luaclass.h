@@ -85,7 +85,7 @@ void luaA_class_setup(lua_State *, lua_class_t *, const char *, lua_class_t *,
                       lua_class_propfunc_t, lua_class_propfunc_t,
                       const struct luaL_reg[], const struct luaL_reg[]);
 
-void luaA_class_add_property(lua_class_t *, awesome_token_t,
+void luaA_class_add_property(lua_class_t *, const char *,
                              lua_class_propfunc_t, lua_class_propfunc_t, lua_class_propfunc_t);
 
 int luaA_usemetatable(lua_State *, int, int);

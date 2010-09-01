@@ -576,11 +576,11 @@ widget_class_setup(lua_State *L)
                      (lua_class_collector_t) widget_wipe,
                      NULL, NULL, NULL,
                      widget_methods, widget_meta);
-    luaA_class_add_property(&widget_class, A_TK_VISIBLE,
+    luaA_class_add_property(&widget_class, "visible",
                             (lua_class_propfunc_t) luaA_widget_set_visible,
                             (lua_class_propfunc_t) luaA_widget_get_visible,
                             (lua_class_propfunc_t) luaA_widget_set_visible);
-    luaA_class_add_property(&widget_class, A_TK_TYPE,
+    luaA_class_add_property(&widget_class, "type",
                             (lua_class_propfunc_t) luaA_widget_set_type,
                             (lua_class_propfunc_t) luaA_widget_get_type,
                             NULL);
