@@ -27,7 +27,6 @@
 #include <fcntl.h>
 
 #include "common/util.h"
-#include "common/tokenize.h"
 
 /** Print error and exit with EXIT_FAILURE code.
  */
@@ -59,23 +58,18 @@ _warn(int line, const char *fct, const char *fmt, ...)
 
 /** Get a position type from a string.
  * \param pos The position.
- * \param len The string length, -1 if unknown.
  * \return A position.
  */
 position_t
-position_fromstr(const char *pos, ssize_t len)
+position_fromstr(const char *pos)
 {
-    switch(a_tokenize(pos, len))
-    {
-      default:
-        return Top;
-      case A_TK_BOTTOM:
+    if(a_strcmp(pos, "bottom") == 0)
         return Bottom;
-      case A_TK_RIGHT:
+    if(a_strcmp(pos, "right") == 0)
         return Right;
-      case A_TK_LEFT:
+    if(a_strcmp(pos, "left") == 0)
         return Left;
-    }
+    return Top;
 }
 
 /** Convert a position type to a string.
@@ -97,21 +91,16 @@ position_tostr(position_t p)
 
 /** Get a orientation type from a string.
  * \param pos The orientation.
- * \param len The string length, -1 if unknown.
  * \return A orientation.
  */
 orientation_t
-orientation_fromstr(const char *pos, ssize_t len)
+orientation_fromstr(const char *pos)
 {
-    switch(a_tokenize(pos, len))
-    {
-      default:
-        return North;
-      case A_TK_SOUTH:
+    if(a_strcmp(pos, "south") == 0)
         return South;
-      case A_TK_EAST:
+    if(a_strcmp(pos, "east") == 0)
         return East;
-    }
+    return North;
 }
 
 /** Convert a orientation type to a string.

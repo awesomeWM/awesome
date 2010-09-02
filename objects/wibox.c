@@ -1035,11 +1035,10 @@ luaA_wibox_get_screen(lua_State *L, wibox_t *wibox)
 static int
 luaA_wibox_set_orientation(lua_State *L, wibox_t *wibox)
 {
-    size_t len;
-    const char *buf = luaL_checklstring(L, -1, &len);
+    const char *buf = luaL_checkstring(L, -1);
     if(buf)
     {
-        wibox_set_orientation(L, -3, orientation_fromstr(buf, len));
+        wibox_set_orientation(L, -3, orientation_fromstr(buf));
         wibox_need_update(wibox);
     }
     return 0;
