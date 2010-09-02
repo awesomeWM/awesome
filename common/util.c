@@ -56,39 +56,6 @@ _warn(int line, const char *fct, const char *fmt, ...)
     fprintf(stderr, "\n");
 }
 
-/** Get a position type from a string.
- * \param pos The position.
- * \return A position.
- */
-position_t
-position_fromstr(const char *pos)
-{
-    if(a_strcmp(pos, "bottom") == 0)
-        return Bottom;
-    if(a_strcmp(pos, "right") == 0)
-        return Right;
-    if(a_strcmp(pos, "left") == 0)
-        return Left;
-    return Top;
-}
-
-/** Convert a position type to a string.
- * \param p The position.
- * \return A position string.
- */
-const char *
-position_tostr(position_t p)
-{
-    switch(p)
-    {
-      case Top:      return "top";
-      case Bottom:   return "bottom";
-      case Right:    return "right";
-      case Left:     return "left";
-      default:       return NULL;
-    }
-}
-
 /** Get a orientation type from a string.
  * \param pos The orientation.
  * \return A orientation.
