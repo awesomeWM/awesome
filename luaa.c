@@ -310,13 +310,12 @@ luaA_wtable_ipairs(lua_State *L)
 static int
 luaA_wtable_index(lua_State *L)
 {
-    size_t len;
     const char *buf;
 
     lua_pushvalue(L, 2);
     /* check for size, waiting lua 5.2 and __len on tables */
-    if((buf = lua_tolstring(L, -1, &len)))
-        if(a_tokenize(buf, len) == A_TK_LEN)
+    if((buf = lua_tostring(L, -1)))
+        if(a_strcmp(buf, "len") == 0)
         {
             lua_pushnumber(L, lua_objlen(L, lua_upvalueindex(1)));
             return 1;
@@ -529,39 +528,28 @@ luaA_awesome_index(lua_State *L)
     if(luaA_usemetatable(L, 1, 2))
         return 1;
 
-    size_t len;
-    const char *buf = luaL_checklstring(L, 2, &len);
+    const char *buf = luaL_checkstring(L, 2);
 
-    switch(a_tokenize(buf, len))
+    if(a_strcmp(buf, "font") == 0)
     {
-      case A_TK_FONT:
-        {
-            char *font = pango_font_description_to_string(globalconf.font->desc);
-            lua_pushstring(L, font);
-            g_free(font);
-        }
-        break;
-      case A_TK_FONT_HEIGHT:
-        lua_pushnumber(L, globalconf.font->height);
-        break;
-      case A_TK_CONFFILE:
-        lua_pushstring(L, conffile);
-        break;
-      case A_TK_FG:
-        luaA_pushxcolor(L, globalconf.colors.fg);
-        break;
-      case A_TK_BG:
-        luaA_pushxcolor(L, globalconf.colors.bg);
-        break;
-      case A_TK_VERSION:
-        lua_pushliteral(L, AWESOME_VERSION);
-        break;
-      case A_TK_RELEASE:
-        lua_pushliteral(L, AWESOME_RELEASE);
-        break;
-      default:
-        return 0;
+        char *font = pango_font_description_to_string(globalconf.font->desc);
+        lua_pushstring(L, font);
+        g_free(font);
     }
+    else if(a_strcmp(buf, "font_height") == 0)
+        lua_pushnumber(L, globalconf.font->height);
+    else if(a_strcmp(buf, "conffile") == 0)
+        lua_pushstring(L, conffile);
+    else if(a_strcmp(buf, "fg") == 0)
+        luaA_pushxcolor(L, globalconf.colors.fg);
+    else if(a_strcmp(buf, "bg") == 0)
+        luaA_pushxcolor(L, globalconf.colors.bg);
+    else if(a_strcmp(buf, "version") == 0)
+        lua_pushliteral(L, AWESOME_VERSION);
+    else if(a_strcmp(buf, "release") == 0)
+        lua_pushliteral(L, AWESOME_RELEASE);
+    else
+        return 0;
 
     return 1;
 }
@@ -576,31 +564,28 @@ luaA_awesome_newindex(lua_State *L)
     if(luaA_usemetatable(L, 1, 2))
         return 1;
 
-    size_t len;
-    const char *buf = luaL_checklstring(L, 2, &len);
+    const char *buf = luaL_checkstring(L, 2);
 
-    switch(a_tokenize(buf, len))
+    if(a_strcmp(buf, "font") == 0)
     {
-      case A_TK_FONT:
-        {
-            const char *newfont = luaL_checkstring(L, 3);
-            font_delete(&globalconf.font);
-            globalconf.font = font_new(newfont);
-            /* refresh all wiboxes */
-            foreach(wibox, globalconf.wiboxes)
-                (*wibox)->need_update = true;
-        }
-        break;
-      case A_TK_FG:
+        const char *newfont = luaL_checkstring(L, 3);
+        font_delete(&globalconf.font);
+        globalconf.font = font_new(newfont);
+        /* refresh all wiboxes */
+        foreach(wibox, globalconf.wiboxes)
+            (*wibox)->need_update = true;
+    }
+    else if(a_strcmp(buf, "fg") == 0)
+    {
+        size_t len;
         if((buf = luaL_checklstring(L, 3, &len)))
            xcolor_init_reply(xcolor_init_unchecked(&globalconf.colors.fg, buf, len));
-        break;
-      case A_TK_BG:
+    }
+    else if(a_strcmp(buf, "bg") == 0)
+    {
+        size_t len;
         if((buf = luaL_checklstring(L, 3, &len)))
            xcolor_init_reply(xcolor_init_unchecked(&globalconf.colors.bg, buf, len));
-        break;
-      default:
-        return 0;
     }
 
     return 0;
