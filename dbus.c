@@ -647,21 +647,16 @@ a_dbus_cleanup(void)
 
 /** Retrieve the D-Bus bus by it's name
  * \param name The name of the bus
- * \param len The length of the name variable
  * \return The corresponding D-Bus connection
  */
 static DBusConnection *
-a_dbus_bus_getbyname(const char *name, size_t len)
+a_dbus_bus_getbyname(const char *name)
 {
-    switch(a_tokenize(name, len))
-    {
-      case A_TK_SYSTEM:
+    if(a_strcmp(name, "system") == 0)
         return dbus_connection_system;
-      case A_TK_SESSION:
+    if(a_strcmp(name, "session") == 0)
         return dbus_connection_session;
-      default:
-        return NULL;
-    }
+    return NULL;
 }
 
 /** Register a D-Bus name to receive message from.
@@ -675,10 +670,9 @@ a_dbus_bus_getbyname(const char *name, size_t len)
 static int
 luaA_dbus_request_name(lua_State *L)
 {
-    size_t len;
-    const char *bus = luaL_checklstring(L, 1, &len);
+    const char *bus = luaL_checkstring(L, 1);
     const char *name = luaL_checkstring(L, 2);
-    DBusConnection *dbus_connection = a_dbus_bus_getbyname(bus, len);
+    DBusConnection *dbus_connection = a_dbus_bus_getbyname(bus);
     lua_pushboolean(L, a_dbus_request_name(dbus_connection, name));
     return 1;
 }
@@ -694,10 +688,9 @@ luaA_dbus_request_name(lua_State *L)
 static int
 luaA_dbus_release_name(lua_State *L)
 {
-    size_t len;
-    const char *bus = luaL_checklstring(L, 1, &len);
+    const char *bus = luaL_checkstring(L, 1);
     const char *name = luaL_checkstring(L, 2);
-    DBusConnection *dbus_connection = a_dbus_bus_getbyname(bus, len);
+    DBusConnection *dbus_connection = a_dbus_bus_getbyname(bus);
     lua_pushboolean(L, a_dbus_release_name(dbus_connection, name));
     return 1;
 }
@@ -712,10 +705,9 @@ luaA_dbus_release_name(lua_State *L)
 static int
 luaA_dbus_add_match(lua_State *L)
 {
-    size_t len;
-    const char *bus = luaL_checklstring(L, 1, &len);
+    const char *bus = luaL_checkstring(L, 1);
     const char *name = luaL_checkstring(L, 2);
-    DBusConnection *dbus_connection = a_dbus_bus_getbyname(bus, len);
+    DBusConnection *dbus_connection = a_dbus_bus_getbyname(bus);
 
     if(dbus_connection)
     {
@@ -737,10 +729,9 @@ luaA_dbus_add_match(lua_State *L)
 static int
 luaA_dbus_remove_match(lua_State *L)
 {
-    size_t len;
-    const char *bus = luaL_checklstring(L, 1, &len);
+    const char *bus = luaL_checkstring(L, 1);
     const char *name = luaL_checkstring(L, 2);
-    DBusConnection *dbus_connection = a_dbus_bus_getbyname(bus, len);
+    DBusConnection *dbus_connection = a_dbus_bus_getbyname(bus);
 
     if(dbus_connection)
     {
