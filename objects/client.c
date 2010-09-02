@@ -1688,17 +1688,11 @@ luaA_client_keys(lua_State *L)
 static int
 luaA_client_module_index(lua_State *L)
 {
-    size_t len;
-    const char *buf = luaL_checklstring(L, 2, &len);
+    const char *buf = luaL_checkstring(L, 2);
 
-    switch(a_tokenize(buf, len))
-    {
-      case A_TK_FOCUS:
+    if(a_strcmp(buf, "focus") == 0)
         return luaA_object_push(globalconf.L, globalconf.client_focus);
-        break;
-      default:
-        return 0;
-    }
+    return 0;
 }
 
 /* Client module new index.
@@ -1708,18 +1702,13 @@ luaA_client_module_index(lua_State *L)
 static int
 luaA_client_module_newindex(lua_State *L)
 {
-    size_t len;
-    const char *buf = luaL_checklstring(L, 2, &len);
+    const char *buf = luaL_checkstring(L, 2);
     client_t *c;
 
-    switch(a_tokenize(buf, len))
+    if(a_strcmp(buf, "focus") == 0)
     {
-      case A_TK_FOCUS:
         c = luaA_checkudata(L, 3, &client_class);
         client_focus(c);
-        break;
-      default:
-        break;
     }
 
     return 0;
