@@ -89,9 +89,6 @@ xutil_lock_mask_get(xcb_connection_t *connection,
     p_delete(&modmap_r);
 }
 
-/* Number of different errors */
-#define ERRORS_NBR 256
-
 uint16_t
 xutil_key_mask_fromstr(const char *keyname)
 {
