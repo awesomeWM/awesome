@@ -25,7 +25,6 @@
 #include "globalconf.h"
 #include "objects/wibox.h"
 #include "luaa.h"
-#include "common/tokenize.h"
 #include "common/xutil.h"
 
 /** Get the pointer position.
@@ -101,24 +100,20 @@ mouse_warp_pointer(xcb_window_t window, int x, int y)
 static int
 luaA_mouse_index(lua_State *L)
 {
-    size_t len;
-    const char *attr = luaL_checklstring(L, 2, &len);
+    const char *attr = luaL_checkstring(L, 2);
     int16_t mouse_x, mouse_y;
     screen_t *screen;
 
-    switch(a_tokenize(attr, len))
+    if(a_strcmp(attr, "screen") == 0)
     {
-      case A_TK_SCREEN:
         if(!mouse_query_pointer_root(&mouse_x, &mouse_y, NULL, NULL))
             return 0;
 
         screen  = screen_getbycoord(mouse_x, mouse_y);
 
         lua_pushnumber(L, screen_array_indexof(&globalconf.screens, screen) + 1);
-        break;
-      default:
+    } else
         return 0;
-    }
 
     return 1;
 }
@@ -130,14 +125,12 @@ luaA_mouse_index(lua_State *L)
 static int
 luaA_mouse_newindex(lua_State *L)
 {
-    size_t len;
-    const char *attr = luaL_checklstring(L, 2, &len);
+    const char *attr = luaL_checkstring(L, 2);
     int x, y = 0;
     int screen;
 
-    switch(a_tokenize(attr, len))
+    if(a_strcmp(attr, "screen") == 0)
     {
-      case A_TK_SCREEN:
         screen = luaL_checknumber(L, 3) - 1;
         luaA_checkscreen(screen);
 
@@ -145,9 +138,6 @@ luaA_mouse_newindex(lua_State *L)
         y = globalconf.screens.tab[screen].geometry.y;
 
         mouse_warp_pointer(globalconf.screen->root, x, y);
-        break;
-      default:
-        return 0;
     }
 
     return 0;
