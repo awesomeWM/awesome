@@ -484,7 +484,6 @@ luaA_screen_tags(lua_State *L)
 static int
 luaA_screen_index(lua_State *L)
 {
-    size_t len;
     const char *buf;
     screen_t *s;
 
@@ -503,37 +502,30 @@ luaA_screen_index(lua_State *L)
     /* No, so remove everything. */
     lua_pop(L, 2);
 
-    buf = luaL_checklstring(L, 2, &len);
+    buf = luaL_checkstring(L, 2);
     s = lua_touserdata(L, 1);
 
-    switch(a_tokenize(buf, len))
-    {
-      case A_TK_INDEX:
+    if(a_strcmp(buf, "index") == 0)
         lua_pushinteger(L, screen_array_indexof(&globalconf.screens, s) + 1);
-        break;
-      case A_TK_GEOMETRY:
+    else if(a_strcmp(buf, "geometry") == 0)
         luaA_pusharea(L, s->geometry);
-        break;
-      case A_TK_WORKAREA:
+    else if(a_strcmp(buf, "workarea") == 0)
         luaA_pusharea(L, screen_area_get(s, true));
-        break;
-      case A_TK_OUTPUTS:
+    else if(a_strcmp(buf, "outputs") == 0)
+    {
+        lua_createtable(L, 0, s->outputs.len);
+        foreach(output, s->outputs)
         {
-            lua_createtable(L, 0, s->outputs.len);
-            foreach(output, s->outputs)
-            {
-                lua_createtable(L, 2, 0);
-                lua_pushinteger(L, output->mm_width);
-                lua_setfield(L, -2, "mm_width");
-                lua_pushinteger(L, output->mm_height);
-                lua_setfield(L, -2, "mm_height");
-                lua_setfield(L, -2, output->name);
-            }
+            lua_createtable(L, 2, 0);
+            lua_pushinteger(L, output->mm_width);
+            lua_setfield(L, -2, "mm_width");
+            lua_pushinteger(L, output->mm_height);
+            lua_setfield(L, -2, "mm_height");
+            lua_setfield(L, -2, output->name);
         }
-        break;
-      default:
-        return 0;
     }
+    else
+        return 0;
 
     return 1;
 }
