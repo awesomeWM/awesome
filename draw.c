@@ -32,7 +32,6 @@
 #include "globalconf.h"
 #include "screen.h"
 
-#include "common/tokenize.h"
 #include "common/xutil.h"
 
 /** Convert text from any charset to UTF-8 using iconv.
@@ -366,21 +365,22 @@ draw_text_extents(draw_text_context_t *data)
 /** Transform a string to a alignment_t type.
  * Recognized string are flex, fixed, left, center, middle or right.
  * \param align A string with align text.
- * \param len The string length.
  * \return An alignment_t type.
  */
 alignment_t
-draw_align_fromstr(const char *align, ssize_t len)
+draw_align_fromstr(const char *align)
 {
-    switch(a_tokenize(align, len))
-    {
-      case A_TK_CENTER: return AlignCenter;
-      case A_TK_RIGHT:  return AlignRight;
-      case A_TK_TOP:    return AlignTop;
-      case A_TK_BOTTOM: return AlignBottom;
-      case A_TK_MIDDLE: return AlignMiddle;
-      default:          return AlignLeft;
-    }
+    if(a_strcmp(align, "center") == 0)
+        return AlignCenter;
+    if(a_strcmp(align, "right") == 0)
+        return AlignRight;
+    if(a_strcmp(align, "top") == 0)
+        return AlignTop;
+    if(a_strcmp(align, "bottom") == 0)
+        return AlignBottom;
+    if(a_strcmp(align, "middle") == 0)
+        return AlignMiddle;
+    return AlignLeft;
 }
 
 /** Transform an alignment to a string.

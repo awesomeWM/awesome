@@ -332,8 +332,8 @@ luaA_textbox_newindex(lua_State *L, const char *prop)
 
     if(a_strcmp(prop, "bg_align") == 0)
     {
-        buf = luaL_checklstring(L, 3, &len);
-        d->bg_align = draw_align_fromstr(buf, len);
+        buf = luaL_checkstring(L, 3);
+        d->bg_align = draw_align_fromstr(buf);
     }
     else if(a_strcmp(prop, "bg_resize") == 0)
         d->bg_resize = luaA_checkboolean(L, 3);
@@ -352,13 +352,13 @@ luaA_textbox_newindex(lua_State *L, const char *prop)
     }
     else if(a_strcmp(prop, "align") == 0)
     {
-        if((buf = luaL_checklstring(L, 3, &len)))
-            d->align = draw_align_fromstr(buf, len);
+        if((buf = luaL_checkstring(L, 3)))
+            d->align = draw_align_fromstr(buf);
     }
     else if(a_strcmp(prop, "valign") == 0)
     {
-        if((buf = luaL_checklstring(L, 3, &len)))
-            d->valign = draw_align_fromstr(buf, len);
+        if((buf = luaL_checkstring(L, 3)))
+            d->valign = draw_align_fromstr(buf);
     }
     else if(a_strcmp(prop, "border_color") == 0)
     {
