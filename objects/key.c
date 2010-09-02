@@ -147,9 +147,8 @@ luaA_tomodifiers(lua_State *L, int ud)
     for(int i = 1; i <= len; i++)
     {
         lua_rawgeti(L, ud, i);
-        size_t blen;
-        const char *key = luaL_checklstring(L, -1, &blen);
-        mod |= xutil_key_mask_fromstr(key, blen);
+        const char *key = luaL_checkstring(L, -1);
+        mod |= xutil_key_mask_fromstr(key);
         lua_pop(L, 1);
     }
     return mod;

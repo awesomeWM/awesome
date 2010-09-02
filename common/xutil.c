@@ -29,7 +29,6 @@
 #include <xcb/xcb_icccm.h>
 
 #include "common/xutil.h"
-#include "common/tokenize.h"
 
 /** Get the lock masks (shiftlock, numlock, capslock, modeswitch).
  * \param connection The X connection.
@@ -94,23 +93,28 @@ xutil_lock_mask_get(xcb_connection_t *connection,
 #define ERRORS_NBR 256
 
 uint16_t
-xutil_key_mask_fromstr(const char *keyname, size_t len)
+xutil_key_mask_fromstr(const char *keyname)
 {
-    switch(a_tokenize(keyname, len))
-    {
-      case A_TK_SHIFT:   return XCB_MOD_MASK_SHIFT;
-      case A_TK_LOCK:    return XCB_MOD_MASK_LOCK;
-      case A_TK_CTRL:
-      case A_TK_CONTROL: return XCB_MOD_MASK_CONTROL;
-      case A_TK_MOD1:    return XCB_MOD_MASK_1;
-      case A_TK_MOD2:    return XCB_MOD_MASK_2;
-      case A_TK_MOD3:    return XCB_MOD_MASK_3;
-      case A_TK_MOD4:    return XCB_MOD_MASK_4;
-      case A_TK_MOD5:    return XCB_MOD_MASK_5;
+    if(a_strcmp(keyname, "Shift") == 0)
+      return XCB_MOD_MASK_SHIFT;
+    if(a_strcmp(keyname, "Lock") == 0)
+      return XCB_MOD_MASK_LOCK;
+    if(a_strcmp(keyname, "Ctrl") == 0 || a_strcmp(keyname, "Control") == 0)
+      return XCB_MOD_MASK_CONTROL;
+    if(a_strcmp(keyname, "Mod1") == 0)
+      return XCB_MOD_MASK_1;
+    if(a_strcmp(keyname, "Mod2") == 0)
+      return XCB_MOD_MASK_2;
+    if(a_strcmp(keyname, "Mod3") == 0)
+      return XCB_MOD_MASK_3;
+    if(a_strcmp(keyname, "Mod4") == 0)
+      return XCB_MOD_MASK_4;
+    if(a_strcmp(keyname, "Mod5") == 0)
+      return XCB_MOD_MASK_5;
+    if(a_strcmp(keyname, "Any") == 0)
       /* this is misnamed but correct */
-      case A_TK_ANY:     return XCB_BUTTON_MASK_ANY;
-      default:           return XCB_NO_SYMBOL;
-    }
+      return XCB_BUTTON_MASK_ANY;
+    return XCB_NO_SYMBOL;
 }
 
 void
