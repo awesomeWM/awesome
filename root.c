@@ -27,7 +27,6 @@
 #include "luaa.h"
 #include "xwindow.h"
 #include "common/xcursor.h"
-#include "common/tokenize.h"
 #include "common/xutil.h"
 
 /** Send fake events. Usually the current focused client will get it.
@@ -52,38 +51,39 @@ luaA_root_fake_input(lua_State *L)
         return 0;
     }
 
-    size_t tlen;
-    const char *stype = luaL_checklstring(L, 1, &tlen);
+    const char *stype = luaL_checkstring(L, 1);
     uint8_t type, detail;
     int x = 0, y = 0;
 
-    switch(a_tokenize(stype, tlen))
+    if(a_strcmp(stype, "key_press") == 0)
     {
-      case A_TK_KEY_PRESS:
         type = XCB_KEY_PRESS;
         detail = luaL_checknumber(L, 2); /* keycode */
-        break;
-      case A_TK_KEY_RELEASE:
+    }
+    else if(a_strcmp(stype, "key_release") == 0)
+    {
         type = XCB_KEY_RELEASE;
         detail = luaL_checknumber(L, 2); /* keycode */
-        break;
-      case A_TK_BUTTON_PRESS:
+    }
+    else if(a_strcmp(stype, "button_press") == 0)
+    {
         type = XCB_BUTTON_PRESS;
         detail = luaL_checknumber(L, 2); /* button number */
-        break;
-      case A_TK_BUTTON_RELEASE:
+    }
+    else if(a_strcmp(stype, "button_release") == 0)
+    {
         type = XCB_BUTTON_RELEASE;
         detail = luaL_checknumber(L, 2); /* button number */
-        break;
-      case A_TK_MOTION_NOTIFY:
+    }
+    else if(a_strcmp(stype, "motion_notify") == 0)
+    {
         type = XCB_MOTION_NOTIFY;
         detail = luaA_checkboolean(L, 2); /* relative to the current position or not */
         x = luaL_checknumber(L, 3);
         y = luaL_checknumber(L, 4);
-        break;
-      default:
-        return 0;
     }
+    else
+        return 0;
 
     xcb_test_fake_input(globalconf.connection,
                         type,
