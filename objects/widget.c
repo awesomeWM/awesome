@@ -502,24 +502,15 @@ luaA_widget_get_type(lua_State *L, widget_t *w)
 static int
 luaA_widget_set_type(lua_State *L, widget_t *w)
 {
-    size_t len;
-    const char *type = luaL_checklstring(L, -1, &len);
+    const char *type = luaL_checkstring(L, -1);
     widget_constructor_t *wc = NULL;
 
-    switch(a_tokenize(type, len))
-    {
-      case A_TK_TEXTBOX:
+    if(a_strcmp(type, "textbox") == 0)
         wc = widget_textbox;
-        break;
-      case A_TK_SYSTRAY:
+    else if(a_strcmp(type, "systray") == 0)
         wc = widget_systray;
-        break;
-      case A_TK_IMAGEBOX:
+    else if(a_strcmp(type, "imagebox") == 0)
         wc = widget_imagebox;
-        break;
-      default:
-        break;
-    }
 
     if(!wc)
         luaL_error(L, "unknown widget type: %s", type);
