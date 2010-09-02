@@ -21,7 +21,6 @@
 
 #include "objects/widget.h"
 #include "luaa.h"
-#include "common/tokenize.h"
 
 /** Padding type */
 typedef struct

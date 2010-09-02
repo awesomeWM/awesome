@@ -23,7 +23,6 @@
 #define AWESOME_COMMON_LUACLASS
 
 #include "common/signal.h"
-#include "common/tokenize.h"
 
 typedef struct lua_class_property lua_class_property_t;
 

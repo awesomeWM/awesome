@@ -50,7 +50,6 @@ a_find_program(LN_EXECUTABLE ln TRUE)
 a_find_program(GREP_EXECUTABLE grep TRUE)
 a_find_program(GIT_EXECUTABLE git FALSE)
 a_find_program(HOSTNAME_EXECUTABLE hostname FALSE)
-a_find_program(GPERF_EXECUTABLE gperf TRUE)
 # programs needed for man pages
 a_find_program(ASCIIDOC_EXECUTABLE asciidoc FALSE)
 a_find_program(XMLTO_EXECUTABLE xmlto FALSE)

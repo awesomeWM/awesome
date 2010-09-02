@@ -89,8 +89,7 @@ set(AWE_MAN_SRCS
 set(AWE_MAN_LANGS es fr de)
 
 add_executable(${PROJECT_AWE_NAME}
-    ${AWE_SRCS}
-    ${BUILD_DIR}/common/tokenize.c)
+    ${AWE_SRCS})
 
 set_target_properties(${PROJECT_AWE_NAME}
     PROPERTIES
@@ -121,30 +120,9 @@ add_custom_command(
     COMMENT "Generating atoms-intern.h"
     VERBATIM)
 
-# gperf
-add_custom_command(
-    COMMAND ${SOURCE_DIR}/build-utils/gperf.sh
-    ARGS    ${SOURCE_DIR}/common/tokenize.gperf
-            ${BUILD_DIR}/common/tokenize.h
-    OUTPUT  ${BUILD_DIR}/common/tokenize.h
-    DEPENDS ${SOURCE_DIR}/common/tokenize.gperf
-            ${SOURCE_DIR}/build-utils/gperf.sh
-    COMMENT "Generating common/tokenize.h")
-
-add_custom_command(
-    COMMAND ${SOURCE_DIR}/build-utils/gperf.sh
-    ARGS    ${SOURCE_DIR}/common/tokenize.gperf
-            ${BUILD_DIR}/common/tokenize.c
-    OUTPUT  ${BUILD_DIR}/common/tokenize.c
-    DEPENDS ${SOURCE_DIR}/common/tokenize.gperf
-            ${SOURCE_DIR}/build-utils/gperf.sh
-    COMMENT "Generating common/tokenize.c")
-
 add_custom_target(generated_sources
     DEPENDS ${BUILD_DIR}/common/atoms-intern.h
-            ${BUILD_DIR}/common/atoms-extern.h
-            ${BUILD_DIR}/common/tokenize.c
-            ${BUILD_DIR}/common/tokenize.h)
+            ${BUILD_DIR}/common/atoms-extern.h)
 
 # Default theme directory
 file(MAKE_DIRECTORY ${BUILD_DIR}/themes/default)
