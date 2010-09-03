@@ -131,7 +131,7 @@ function no_overlap(c)
     local areas = { capi.screen[c.screen].workarea }
     local geometry = c:geometry()
     for i, cl in pairs(cls) do
-        if cl ~= c and (client.floating.get(cl) or curlay == layout.suit.floating) then
+        if cl ~= c and cl.type ~= "desktop" and (client.floating.get(cl) or curlay == layout.suit.floating) then
             areas = area_remove(areas, cl:geometry())
         end
     end
