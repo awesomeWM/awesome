@@ -56,14 +56,8 @@ end
 --- Add a tag.
 -- @param name The tag name, a string
 -- @param props The tags properties, a table
--- @return The created tag or nil if not created.
--- If the name is a valid string then the tag will be created and each key,value
--- pair in 'props' table is iterated and applied to the tag. If the 'name'
--- argument is nil or its string length is zero then the function returns nil.
+-- @return The created tag
 function add(name, props)
-    -- abort if the name is not provided
-    if not name or #(tostring(name)) == 0 then return end
-
     local properties = props or {}
     local newtag = capi.tag{name = name}
     newtag.screen = properties.screen or capi.mouse.screen
