@@ -428,10 +428,10 @@ main(int argc, char **argv)
 
     /* init default font and colors */
     colors_reqs[0] = xcolor_init_unchecked(&globalconf.colors.fg,
-                                           "black", sizeof("black") - 1);
+                                           "#000000", sizeof("#000000") - 1);
 
     colors_reqs[1] = xcolor_init_unchecked(&globalconf.colors.bg,
-                                           "white", sizeof("white") - 1);
+                                           "#ffffff", sizeof("#ffffff") - 1);
 
     globalconf.font = font_new("sans 8");
 
