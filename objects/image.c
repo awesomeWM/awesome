@@ -468,19 +468,17 @@ luaA_image_draw_pixel(lua_State *L)
 {
     size_t len;
     color_t color;
-    color_init_cookie_t cookie;
     image_t *image = luaA_checkudata(L, 1, &image_class);
     int x = luaL_checkint(L, 2);
     int y = luaL_checkint(L, 3);
     const char *buf = luaL_checklstring(L, 4, &len);
 
-    cookie = color_init_unchecked(&color, buf, len);
     imlib_context_set_image(image->image);
-    color_init_reply(cookie);
 
     if((x > imlib_image_get_width()) || (y > imlib_image_get_height()))
         return 0;
 
+    color_init_unchecked(&color, buf, len);
     imlib_context_set_color(color.red, color.green, color.blue, color.alpha);
     imlib_image_draw_pixel(x, y, 1);
     image->isupdated = false;
@@ -502,7 +500,6 @@ luaA_image_draw_line(lua_State *L)
 {
     size_t len;
     color_t color;
-    color_init_cookie_t cookie;
     image_t *image = luaA_checkudata(L, 1, &image_class);
     int x1 = luaL_checkint(L, 2);
     int y1 = luaL_checkint(L, 3);
@@ -510,10 +507,9 @@ luaA_image_draw_line(lua_State *L)
     int y2 = luaL_checkint(L, 5);
     const char *buf = luaL_checklstring(L, 6, &len);
 
-    cookie = color_init_unchecked(&color, buf, len);
     imlib_context_set_image(image->image);
-    color_init_reply(cookie);
 
+    color_init_unchecked(&color, buf, len);
     imlib_context_set_color(color.red, color.green, color.blue, color.alpha);
     imlib_image_draw_line(x1, y1, x2, y2, 0);
     image->isupdated = false;
@@ -536,7 +532,6 @@ luaA_image_draw_rectangle(lua_State *L)
 {
     size_t len;
     color_t color;
-    color_init_cookie_t cookie;
     image_t *image = luaA_checkudata(L, 1, &image_class);
     int x = luaL_checkint(L, 2);
     int y = luaL_checkint(L, 3);
@@ -545,10 +540,9 @@ luaA_image_draw_rectangle(lua_State *L)
     int fill = luaA_checkboolean(L, 6);
     const char *buf = luaL_checklstring(L, 7, &len);
 
-    cookie = color_init_unchecked(&color, buf, len);
     imlib_context_set_image(image->image);
-    color_init_reply(cookie);
 
+    color_init_unchecked(&color, buf, len);
     imlib_context_set_color(color.red, color.green, color.blue, color.alpha);
     if(!fill)
         imlib_image_draw_rectangle(x, y, width, height);
@@ -583,7 +577,6 @@ luaA_table_to_color_range(lua_State *L, int ud)
         {
             color_t color;
 
-            color_init_cookie_t cookie = color_init_unchecked(&color, colstr, len);
 
             /* get value with colstr as key in table */
             lua_pushvalue(L, -1);
@@ -594,8 +587,7 @@ luaA_table_to_color_range(lua_State *L, int ud)
             /* remove distance */
             lua_pop(L, 1);
 
-            color_init_reply(cookie);
-
+            color_init_unchecked(&color, colstr, len);
             imlib_context_set_color(color.red, color.green, color.blue, color.alpha);
 
             imlib_add_color_to_color_range(distance);
@@ -661,7 +653,6 @@ luaA_image_draw_circle(lua_State *L)
 {
     size_t len;
     color_t color;
-    color_init_cookie_t cookie;
     image_t *image = luaA_checkudata(L, 1, &image_class);
     int x = luaL_checkint(L, 2);
     int y = luaL_checkint(L, 3);
@@ -670,10 +661,9 @@ luaA_image_draw_circle(lua_State *L)
     int fill = luaA_checkboolean(L, 6);
     const char *buf = luaL_checklstring(L, 7, &len);
 
-    cookie = color_init_unchecked(&color, buf, len);
     imlib_context_set_image(image->image);
-    color_init_reply(cookie);
 
+    color_init_unchecked(&color, buf, len);
     imlib_context_set_color(color.red, color.green, color.blue, color.alpha);
     if(!fill)
         imlib_image_draw_ellipse(x, y, ah, av);

@@ -82,79 +82,20 @@ color_parse(const char *colstr, ssize_t len,
  * \param color color_t struct to store color into.
  * \param colstr Color specification.
  * \param len The length of colstr (which still MUST be NULL terminated).
- * \return request informations.
- */
-color_init_cookie_t
-color_init_unchecked(color_t *color, const char *colstr, ssize_t len)
-{
-    color_init_cookie_t req;
-
-    p_clear(&req, 1);
-
-    if(!len)
-    {
-        req.has_error = true;
-        return req;
-    }
-
-    /* The color is given in RGB value */
-    if(colstr[0] == '#')
-    {
-        if(!color_parse(colstr, len, &color->red, &color->green, &color->blue, &color->alpha))
-        {
-            req.has_error = true;
-            return req;
-        }
-
-        color->initialized = true;
-
-        /* This means everything is done and _reply() will just return true */
-        req.color = NULL;
-    }
-    else
-    {
-        req.color = color;
-        req.colstr = colstr;
-        req.cookie = xcb_alloc_named_color_unchecked(globalconf.connection,
-                                                     globalconf.screen->default_colormap,
-                                                     len,
-                                                     colstr);
-    }
-
-    req.has_error = false;
-
-    return req;
-}
-
-/** Initialize a color.
- * \param req color_init request.
  * \return True if color allocation was successful.
  */
 bool
-color_init_reply(color_init_cookie_t req)
+color_init_unchecked(color_t *color, const char *colstr, ssize_t len)
 {
-    if(req.has_error)
+    if(!len)
         return false;
 
-    if(req.color == NULL)
-        return true;
+    /* The color is given in RGB value */
+    if(!color_parse(colstr, len, &color->red, &color->green, &color->blue, &color->alpha))
+        return false;
 
-    xcb_alloc_named_color_reply_t *named_color;
-
-    if((named_color = xcb_alloc_named_color_reply(globalconf.connection,
-                                                  req.cookie, NULL)))
-    {
-        req.color->red   = named_color->visual_red;
-        req.color->green = named_color->visual_green;
-        req.color->blue  = named_color->visual_blue;
-        req.color->alpha = 0xff;
-        req.color->initialized = true;
-        p_delete(&named_color);
-        return true;
-    }
-
-    warn("awesome: error, cannot allocate color '%s'", req.colstr);
-    return false;
+    color->initialized = true;
+    return true;
 }
 
 /** Send a request to initialize a X color.
@@ -183,31 +124,20 @@ xcolor_init_unchecked(xcolor_t *color, const char *colstr, ssize_t len)
     req.color = color;
 
     /* The color is given in RGB value */
-    if(colstr[0] == '#')
+    if(!color_parse(colstr, len, &red, &green, &blue, &alpha))
     {
-        if(!color_parse(colstr, len, &red, &green, &blue, &alpha))
-        {
-            warn("awesome: error, invalid color '%s'", colstr);
-            req.has_error = true;
-            return req;
-        }
-
-        req.alpha = RGB_8TO16(alpha);
-
-        req.is_hexa = true;
-        req.cookie_hexa = xcb_alloc_color_unchecked(globalconf.connection,
-                                                    globalconf.screen->default_colormap,
-                                                    RGB_8TO16(red),
-                                                    RGB_8TO16(green),
-                                                    RGB_8TO16(blue));
+        warn("awesome: error, invalid color '%s'", colstr);
+        req.has_error = true;
+        return req;
     }
-    else
-    {
-        req.is_hexa = false;
-        req.cookie_named = xcb_alloc_named_color_unchecked(globalconf.connection,
-                                                           globalconf.screen->default_colormap, len,
-                                                           colstr);
-    }
+
+    req.alpha = RGB_8TO16(alpha);
+
+    req.cookie_hexa = xcb_alloc_color_unchecked(globalconf.connection,
+                                                globalconf.screen->default_colormap,
+                                                RGB_8TO16(red),
+                                                RGB_8TO16(green),
+                                                RGB_8TO16(blue));
 
     req.has_error = false;
     req.colstr = colstr;
@@ -225,39 +155,19 @@ xcolor_init_reply(xcolor_init_request_t req)
     if(req.has_error)
         return false;
 
-    if(req.is_hexa)
-    {
-        xcb_alloc_color_reply_t *hexa_color;
+    xcb_alloc_color_reply_t *hexa_color;
 
-        if((hexa_color = xcb_alloc_color_reply(globalconf.connection,
-                                               req.cookie_hexa, NULL)))
-        {
-            req.color->pixel = hexa_color->pixel;
-            req.color->red   = hexa_color->red;
-            req.color->green = hexa_color->green;
-            req.color->blue  = hexa_color->blue;
-            req.color->alpha = req.alpha;
-            req.color->initialized = true;
-            p_delete(&hexa_color);
-            return true;
-        }
-    }
-    else
+    if((hexa_color = xcb_alloc_color_reply(globalconf.connection,
+                                           req.cookie_hexa, NULL)))
     {
-        xcb_alloc_named_color_reply_t *named_color;
-
-        if((named_color = xcb_alloc_named_color_reply(globalconf.connection,
-                                                      req.cookie_named, NULL)))
-        {
-            req.color->pixel = named_color->pixel;
-            req.color->red   = named_color->visual_red;
-            req.color->green = named_color->visual_green;
-            req.color->blue  = named_color->visual_blue;
-            req.color->alpha = req.alpha;
-            req.color->initialized = true;
-            p_delete(&named_color);
-            return true;
-        }
+        req.color->pixel = hexa_color->pixel;
+        req.color->red   = hexa_color->red;
+        req.color->green = hexa_color->green;
+        req.color->blue  = hexa_color->blue;
+        req.color->alpha = req.alpha;
+        req.color->initialized = true;
+        p_delete(&hexa_color);
+        return true;
     }
 
     warn("awesome: error, cannot allocate color '%s'", req.colstr);

@@ -347,7 +347,7 @@ luaA_textbox_newindex(lua_State *L, const char *prop)
         if(lua_isnil(L, 3))
             p_clear(&d->bg, 1);
         else if((buf = luaL_checklstring(L, 3, &len)))
-            color_init_reply(color_init_unchecked(&d->bg, buf, len));
+            color_init_unchecked(&d->bg, buf, len);
     }
     else if(a_strcmp(prop, "align") == 0)
     {
@@ -362,7 +362,7 @@ luaA_textbox_newindex(lua_State *L, const char *prop)
     else if(a_strcmp(prop, "border_color") == 0)
     {
         if((buf = luaL_checklstring(L, 3, &len)))
-            color_init_reply(color_init_unchecked(&d->border.color, buf, len));
+            color_init_unchecked(&d->border.color, buf, len);
     }
     else if(a_strcmp(prop, "border_width") == 0)
         d->border.width = luaL_checknumber(L, 3);

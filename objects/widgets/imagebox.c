@@ -133,7 +133,7 @@ luaA_imagebox_newindex(lua_State *L, const char *prop)
         if(lua_isnil(L, 3))
             p_clear(&d->bg, 1);
         else if((buf = luaL_checklstring(L, 3, &len)))
-            color_init_reply(color_init_unchecked(&d->bg, buf, len));
+            color_init_unchecked(&d->bg, buf, len);
     }
     else if(a_strcmp(prop, "resize") == 0)
         d->resize = luaA_checkboolean(L, 3);
