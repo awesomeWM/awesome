@@ -62,6 +62,15 @@ module("awful.rules")
 -- put in this global rules table. If the value of a rule is a string, then the
 -- match function is used to determine if the client matches the rule.</p>
 --
+-- <p> To match multiple clients to a rule one need to use slightly different 
+-- syntax:
+-- <br/>
+-- <code>
+-- { rule_any = { class = { "MPlayer", "Nitrogen" }, instance = { "xterm" } },
+--   properties = { floating = true } }
+-- </code>
+-- </p>
+--
 -- @class table
 -- @name rules
 rules = {}
@@ -87,13 +96,33 @@ function match(c, rule)
     return true
 end
 
+--- Check if a client match a rule. Multiple clients can be matched
+-- @param c The client.
+-- @param rules The rule to check.
+-- @return True if at least one rule is matched, false otherwise.
+function match_any(c, rule)
+    for field, values in pairs(rule) do
+        if c[field] then
+            for _, value in ipairs(values) do
+                if c[field] == value then
+                    return true
+                elseif type(c[field]) == "string" and c[field]:match(value) then
+                    return true
+                end
+            end
+        end
+    end
+    return false
+end
+
 --- Apply rules to a client.
 -- @param c The client.
 function apply(c)
     local props = {}
     local callbacks = {}
     for _, entry in ipairs(rules) do
-        if match(c, entry.rule) then
+        if  (entry.rule and match(c, entry.rule)) or
+            (entry.rule_any and match_any(c, entry.rule_any)) then
             if entry.properties then
                 for property, value in pairs(entry.properties) do
                     props[property] = value
