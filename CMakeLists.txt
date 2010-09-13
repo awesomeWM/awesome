@@ -249,21 +249,22 @@ endif()
 # }}}
 
 # {{{ Theme icons
-file(GLOB icon_sources ${SOURCE_DIR}/themes/*/titlebar/*.png)
+file(GLOB icon_sources RELATIVE ${SOURCE_DIR} ${SOURCE_DIR}/themes/*/titlebar/*.png)
 set(ALL_ICONS ${icon_sources})
+
+foreach(icon ${icon_sources})
+    # Copy all icons to the build dir to simplify the following code.
+    # Source paths are interpreted relative to ${SOURCE_DIR}, target paths
+    # relative to ${BUILD_DIR}.
+    get_filename_component(icon_path ${icon} PATH)
+    file(COPY ${icon} DESTINATION ${icon_path})
+endforeach()
 
 macro(a_icon_convert match replacement input)
     string(REPLACE ${match} ${replacement} output ${input})
 
     if(NOT ${input} STREQUAL ${output})
-        if(NOT ${output} MATCHES ${BUILD_DIR})
-            string(REPLACE ${SOURCE_DIR} ${BUILD_DIR} output ${output})
-        endif()
-
         set(ALL_ICONS ${ALL_ICONS} ${output})
-
-        get_filename_component(output_path ${output} PATH)
-        file(MAKE_DIRECTORY ${output_path})
 
         add_custom_command(
             COMMAND ${CONVERT_EXECUTABLE} ${input} ${ARGN} ${output}
@@ -315,8 +316,6 @@ if(GENERATE_MANPAGES)
 endif()
 install(DIRECTORY ${AWE_ICON_DIR} DESTINATION ${AWESOME_DATA_PATH})
 install(DIRECTORY ${BUILD_DIR}/themes DESTINATION ${AWESOME_DATA_PATH}
-    PATTERN "*.in" EXCLUDE)
-install(DIRECTORY ${SOURCE_DIR}/themes DESTINATION ${AWESOME_DATA_PATH}
     PATTERN "*.in" EXCLUDE)
 install(FILES ${AWE_DOC_FILES} DESTINATION ${AWESOME_DOC_PATH})
 install(FILES "awesome.desktop" DESTINATION ${AWESOME_XSESSION_PATH})
