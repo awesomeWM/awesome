@@ -758,13 +758,13 @@ static void
 xerror(xcb_generic_error_t *e)
 {
     /* ignore this */
-    if(e->error_code == XCB_EVENT_ERROR_BAD_WINDOW
-       || (e->error_code == XCB_EVENT_ERROR_BAD_MATCH
+    if(e->error_code == XCB_WINDOW
+       || (e->error_code == XCB_MATCH
            && e->major_code == XCB_SET_INPUT_FOCUS)
-       || (e->error_code == XCB_EVENT_ERROR_BAD_VALUE
+       || (e->error_code == XCB_VALUE
            && e->major_code == XCB_KILL_CLIENT)
-       || (e->major_code == XCB_CONFIGURE_WINDOW
-           && e->error_code == XCB_EVENT_ERROR_BAD_MATCH))
+       || (e->error_code == XCB_MATCH
+           && e->major_code == XCB_CONFIGURE_WINDOW))
         return;
 
     warn("X error: request=%s, error=%s",
