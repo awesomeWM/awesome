@@ -118,7 +118,7 @@ ewmh_update_net_client_list(lua_State *L)
 
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
                         globalconf.screen->root,
-			_NET_CLIENT_LIST, WINDOW, 32, n, wins);
+                        _NET_CLIENT_LIST, XCB_ATOM_WINDOW, 32, n, wins);
 
     return 0;
 }
