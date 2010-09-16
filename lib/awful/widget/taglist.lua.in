@@ -57,7 +57,7 @@ function new(screen, label, buttons)
                                         ["right"] = 0},
                          ["bg_resize"] = true
                        }
-    local data = setmetatable({}, { __mode = 'k' })
+    local data = setmetatable({}, { __mode = 'kv' })
     local u = function (s)
         if s == screen then
             taglist_update(s, w, label, buttons, data, widgets)

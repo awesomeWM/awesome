@@ -53,7 +53,7 @@ function new(label, buttons)
                          bg_resize = true,
                          bg_align  = "right"
                        }
-    local data = setmetatable({}, { __mode = 'k' })
+    local data = setmetatable({}, { __mode = 'kv' })
     local u = function () tasklist_update(w, buttons, label, data, widgets) end
     for s = 1, capi.screen.count() do
         tag.attached_add_signal(s, "property::selected", u)
