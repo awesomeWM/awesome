@@ -1450,6 +1450,7 @@ luaA_wibox_set_widgets(lua_State *L, wibox_t *wibox)
     }
     /* duplicate table because next function will eat it */
     lua_pushvalue(L, -1);
+    luaA_object_unref_item(L, -4, wibox->widgets_table);
     wibox->widgets_table = luaA_object_ref_item(L, -4, -1);
     luaA_object_emit_signal(L, -3, "property::widgets", 0);
     wibox_need_update(wibox);
