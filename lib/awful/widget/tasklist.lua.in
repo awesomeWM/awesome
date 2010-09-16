@@ -133,7 +133,7 @@ function new(screen, filter, buttons, style, template)
         layout = layout.horizontal.leftright
     }
 
-    local data = setmetatable({}, { __mode = 'k' })
+    local data = setmetatable({}, { __mode = 'kv' })
     local u = function () tasklist_update(screen, w, buttons, filter, data, style, template) end
     capi.screen[screen]:connect_signal("tag::detach", u)
     tag.attached_connect_signal(screen, "property::selected", u)

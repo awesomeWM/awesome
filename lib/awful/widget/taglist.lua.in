@@ -158,7 +158,7 @@ function new(screen, filter, buttons, style, template)
         layout = layout.horizontal.leftright
     }
 
-    local data = setmetatable({}, { __mode = 'k' })
+    local data = setmetatable({}, { __mode = 'vk' })
     local u = function (s)
         if s == screen then
             taglist_update(s, w, buttons, filter, data, style, template)
