@@ -51,8 +51,12 @@ function list_update(w, buttons, label, data, widgets, objects)
     for k = 1, #objects * 2, 2 do
         local o = objects[(k + 1) / 2]
         if buttons then
-            if not data[o] then
-                data[o] = { }
+            -- Use a local variable so that the garbage collector doesn't strike
+            -- between now and the :buttons() call.
+            local btns = data[o]
+            if not btns then
+                btns = {}
+                data[o] = btns
                 for kb, b in ipairs(buttons) do
                     -- Create a proxy button object: it will receive the real
                     -- press and release events, and will propagate them the the
@@ -61,11 +65,11 @@ function list_update(w, buttons, label, data, widgets, objects)
                     local btn = capi.button { modifiers = b.modifiers, button = b.button }
                     btn:add_signal("press", function () b:emit_signal("press", o) end)
                     btn:add_signal("release", function () b:emit_signal("release", o) end)
-                    data[o][#data[o] + 1] = btn
+                    btns[#btns + 1] = btn
                 end
             end
-            w[k]:buttons(data[o])
-            w[k + 1]:buttons(data[o])
+            w[k]:buttons(btns)
+            w[k + 1]:buttons(btns)
         end
 
         local text, bg, bg_image, icon = label(o)
