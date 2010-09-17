@@ -304,8 +304,18 @@ widget_render(wibox_t *wibox)
     /* remove wibox */
     lua_remove(globalconf.L, -1);
 
+    size_t num_widgets = lua_objlen(L, -1);
+    if(lua_objlen(L, -1) != (size_t) widgets->len)
+    {
+        warn("Widget layout returned wrong number of geometries. Got %d widgets and %lu geometries.",
+                widgets->len, (unsigned long) lua_objlen(L, -1));
+        /* Set num_widgets to min(widgets->len, lua_objlen(L, -1)); */
+        if(num_widgets > (size_t) widgets->len)
+            num_widgets = widgets->len;
+    }
+
     /* get computed geometries */
-    for(unsigned int i = 0; i < lua_objlen(L, -1); i++)
+    for(size_t i = 0; i < num_widgets; i++)
     {
         lua_pushnumber(L, i + 1);
         lua_gettable(L, -2);
