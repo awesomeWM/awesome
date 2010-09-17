@@ -58,7 +58,7 @@ wibox_widget_node_array_wipe(lua_State *L, int idx)
 {
     wibox_t *wibox = luaA_checkudata(L, idx, &wibox_class);
     foreach(widget_node, wibox->widgets)
-        luaA_object_unref_item(globalconf.L, idx, widget_node);
+        luaA_object_unref_item(globalconf.L, idx, widget_node->widget);
     widget_node_array_wipe(&wibox->widgets);
 }
 
