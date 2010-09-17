@@ -67,6 +67,8 @@ struct lua_class_t
     lua_class_propfunc_t newindex_miss_property;
     /** Function to call to check if an object is valid */
     lua_class_checker_t checker;
+    /** Number of instances of this class in lua */
+    unsigned int instances;
 };
 
 const char * luaA_typename(lua_State *, int);
@@ -133,13 +135,21 @@ luaA_checkudataornil(lua_State *L, int udx, lua_class_t *class)
         luaA_class_emit_signal(L, &(lua_class), luaL_checkstring(L, 1),        \
                                lua_gettop(L) - 1);                             \
         return 0;                                                              \
+    }                                                                          \
+                                                                               \
+    static inline int                                                          \
+    luaA_##prefix##_class_instances(lua_State *L)                              \
+    {                                                                          \
+        lua_pushnumber(L, (lua_class).instances);                              \
+        return 1;                                                              \
     }
 
 #define LUA_CLASS_METHODS(class) \
     { "add_signal", luaA_##class##_class_add_signal }, \
     { "connect_signal", luaA_##class##_class_connect_signal }, \
     { "disconnect_signal", luaA_##class##_class_disconnect_signal }, \
-    { "emit_signal", luaA_##class##_class_emit_signal },
+    { "emit_signal", luaA_##class##_class_emit_signal }, \
+    { "instances", luaA_##class##_class_instances }, \
 
 #define LUA_CLASS_META \
     { "__index", luaA_class_index }, \

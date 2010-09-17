@@ -33,3 +33,8 @@ module("tag")
 -- @param ... Various arguments, optional.
 -- @name emit_signal
 -- @class function
+
+--- Get the number of instances.
+-- @return The number of tag objects alive.
+-- @name instances
+-- @class function

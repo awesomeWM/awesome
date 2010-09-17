@@ -174,6 +174,7 @@ luaA_class_gc(lua_State *L)
     signal_array_wipe(&item->signals);
     /* Get the object class */
     lua_class_t *class = luaA_class_get(L, 1);
+    class->instances--;
     /* Call the collector function of the class, and all its parent classes */
     for(; class; class = class->parent)
         if(class->collector)
@@ -243,6 +244,7 @@ luaA_class_setup(lua_State *L, lua_class_t *class,
     class->newindex_miss_property = newindex_miss_property;
     class->checker = checker;
     class->parent = parent;
+    class->instances = 0;
 
     signal_add(&class->signals, "new");
 

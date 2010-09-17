@@ -167,6 +167,7 @@ int luaA_object_emit_signal_simple(lua_State *);
     {                                                                          \
         type *p = lua_newuserdata(L, sizeof(type));                            \
         p_clear(p, 1);                                                         \
+        (lua_class).instances++;                                               \
         luaA_settype(L, &(lua_class));                                         \
         lua_newtable(L);                                                       \
         lua_newtable(L);                                                       \
