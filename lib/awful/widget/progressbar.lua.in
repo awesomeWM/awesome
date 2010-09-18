@@ -28,8 +28,8 @@ local data = setmetatable({}, { __mode = "k" })
 -- @class function
 -- @param progressbar The progressbar.
 -- @param gradient_colors A table with gradients colors. The distance between each color
--- can also be specified. Example: { "red", "blue" } or { "red", "green",
--- "blue", blue = 10 } to specify blue distance from other colors.
+-- can also be specified. Example: { "#ff0000", "#0000ff" } or { "#ff0000", "#00ff00",
+-- "#0000ff", ["#0000ff"] = 10 } to specify blue distance from other colors.
 
 --- Set the progressbar foreground color.
 -- @name set_color
@@ -117,7 +117,7 @@ local function update(pbar)
     else
         img:draw_rectangle(border_width, border_width,
                            over_drawn_width, over_drawn_height,
-                           true, data[pbar].color or "red")
+                           true, data[pbar].color or "#ff0000")
     end
 
     -- Cover the part that is not set with a rectangle

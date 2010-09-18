@@ -30,8 +30,8 @@ local data = setmetatable({}, { __mode = "k" })
 -- @class function
 -- @param graph The graph.
 -- @param gradient_colors A table with gradients colors. The distance between each color
--- can also be specified. Example: { "red", "blue" } or { "red", "green",
--- "blue", blue = 10 } to specify blue distance from other colors.
+-- can also be specified. Example: { "#ff0000", "#0000ff" } or { "#ff0000", "#00ff00",
+-- "#0000ff", ["#0000ff"] = 10 } to specify blue distance from other colors.
 
 --- Set the graph foreground colors gradient angle. Default is 270 degrees
 -- (horizontal).
@@ -126,7 +126,7 @@ local function update(graph)
                                           math.ceil((data[graph].height - 2 * border_width) * (1 - (rel_i / max_value))),
                                       rel_x, border_width - 1 +
                                           math.ceil((data[graph].height - 2 * border_width) * (1 - (value / max_value))),
-                                      color or "red")
+                                      color or "#ff0000")
                         rel_i = value
                     end
                 end
@@ -153,7 +153,7 @@ local function update(graph)
             img:draw_rectangle(border_width, border_width,
                                data[graph].width - (2 * border_width),
                                data[graph].height - (2 * border_width),
-                               true, data[graph].color or "red")
+                               true, data[graph].color or "#ff0000")
         end
 
         -- Draw the background on no value
