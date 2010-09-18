@@ -420,7 +420,20 @@ luaA_image_crop(lua_State *L)
     new = image_new(L);
 
     imlib_context_set_image(image->image);
+    int ow = imlib_image_get_width(), oh = imlib_image_get_height();
     new->image = imlib_create_cropped_image(x, y, w, h);
+    imlib_context_set_image(new->image);
+    imlib_context_set_color(0, 0, 0, 0);
+    imlib_context_set_blend(0);
+    if(x < 0)
+        imlib_image_fill_rectangle(0, 0, -x, h);
+    if(y < 0)
+        imlib_image_fill_rectangle(x < 0 ? -x : 0, 0, w, -y);
+    if(x + w > ow)
+        imlib_image_fill_rectangle(ow - x, y < 0 ? -y : 0, x + w - ow, h);
+    if(y + h > oh)
+        imlib_image_fill_rectangle(x < 0 ? -x : 0, oh - y, x + w > ow ? ow - x : w, y + h - oh);
+    imlib_context_set_blend(1);
 
     return 1;
 }
