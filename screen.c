@@ -92,6 +92,8 @@ screen_scan_randr(void)
                                           xcb_randr_query_version(globalconf.connection, 1, 1), 0);
         if(version_reply)
         {
+            p_delete(&version_reply);
+
             /* A quick XRandR recall:
              * You have CRTC that manages a part of a SCREEN.
              * Each CRTC can draw stuff on one or more OUTPUT. */
