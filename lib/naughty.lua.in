@@ -298,7 +298,7 @@ function notify(args)
 
     -- replace notification if needed
     if args.replaces_id then
-        obj = getById(args.replaces_id)
+        local obj = getById(args.replaces_id)
         if obj then
             -- destroy this and ...
             destroy(obj)
