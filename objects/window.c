@@ -24,6 +24,7 @@
 #include "ewmh.h"
 #include "screen.h"
 #include "objects/window.h"
+#include "common/atoms.h"
 #include "common/luaobject.h"
 
 LUA_CLASS_FUNCS(window, window_class)
@@ -237,6 +238,74 @@ luaA_window_get_type(lua_State *L, window_t *w)
     return 1;
 }
 
+/** Set the window type.
+ * \param w The window object.
+ * \param type The window type to set
+ */
+void
+window_set_type(window_t *w, uint32_t type)
+{
+    if(w->type != type)
+    {
+        w->type = type;
+        if(w->window != XCB_WINDOW_NONE)
+            xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
+                                w->window, _NET_WM_WINDOW_TYPE, XCB_ATOM_ATOM, 32, 1, &type);
+        luaA_object_push(globalconf.L, w);
+        luaA_object_emit_signal(globalconf.L, -1, "property::type", 0);
+        lua_pop(globalconf.L, 1);
+    }
+}
+
+/** Set the window type.
+ * \param L The Lua VM state.
+ * \param window The window object.
+ * \return The number of elements pushed on stack.
+ */
+int
+luaA_window_set_type(lua_State *L, window_t *w)
+{
+    uint32_t type;
+    const char *buf = luaL_checkstring(L, -1);
+
+    if(a_strcmp(buf, "desktop") == 0)
+        type = _NET_WM_WINDOW_TYPE_DESKTOP;
+    else if(a_strcmp(buf, "dock") == 0)
+        type = _NET_WM_WINDOW_TYPE_DOCK;
+    else if(a_strcmp(buf, "splash") == 0)
+        type = _NET_WM_WINDOW_TYPE_SPLASH;
+    else if(a_strcmp(buf, "dialog") == 0)
+        type = _NET_WM_WINDOW_TYPE_DIALOG;
+    else if(a_strcmp(buf, "menu") == 0)
+        type = _NET_WM_WINDOW_TYPE_MENU;
+    else if(a_strcmp(buf, "toolbar") == 0)
+        type = _NET_WM_WINDOW_TYPE_TOOLBAR;
+    else if(a_strcmp(buf, "utility") == 0)
+        type = _NET_WM_WINDOW_TYPE_UTILITY;
+    else if(a_strcmp(buf, "dropdown_menu") == 0)
+        type = _NET_WM_WINDOW_TYPE_DROPDOWN_MENU;
+    else if(a_strcmp(buf, "popup_menu") == 0)
+        type = _NET_WM_WINDOW_TYPE_POPUP_MENU;
+    else if(a_strcmp(buf, "tooltip") == 0)
+        type = _NET_WM_WINDOW_TYPE_TOOLTIP;
+    else if(a_strcmp(buf, "notification") == 0)
+        type = _NET_WM_WINDOW_TYPE_NOTIFICATION;
+    else if(a_strcmp(buf, "combo") == 0)
+        type = _NET_WM_WINDOW_TYPE_COMBO;
+    else if(a_strcmp(buf, "dnd") == 0)
+        type = _NET_WM_WINDOW_TYPE_DND;
+    else if(a_strcmp(buf, "normal") == 0)
+        type = _NET_WM_WINDOW_TYPE_NORMAL;
+    else
+    {
+        warn("Unknown window type '%s'", buf);
+        return 0;
+    }
+
+    window_set_type(w, type);
+    return 0;
+}
+
 static int
 luaA_window_set_border_width(lua_State *L, window_t *c)
 {
@@ -290,6 +359,7 @@ window_class_setup(lua_State *L)
     signal_add(&window_class.signals, "property::buttons");
     signal_add(&window_class.signals, "property::opacity");
     signal_add(&window_class.signals, "property::struts");
+    signal_add(&window_class.signals, "property::type");
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

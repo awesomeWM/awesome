@@ -181,6 +181,11 @@ wibox_init(wibox_t *w)
 
     /* Update draw context physical screen, important for Zaphod. */
     wibox_draw_context_update(w);
+
+    /* Set the right type property */
+    uint32_t type = w->type;
+    w->type = 0;
+    window_set_type((window_t *) w, type);
 }
 
 /** Refresh the window content by copying its pixmap data to its window.
@@ -708,6 +713,9 @@ luaA_wibox_new(lua_State *L)
     if(!w->geometry.height)
         w->geometry.height = 1;
 
+    if(w->type == 0)
+        w->type = _NET_WM_WINDOW_TYPE_NORMAL;
+
     luaA_object_connect_signal(L, -2, "property::border_width", luaA_wibox_need_update);
 
     return 1;
@@ -1177,6 +1185,10 @@ wibox_class_setup(lua_State *L)
                             (lua_class_propfunc_t) luaA_wibox_set_height,
                             (lua_class_propfunc_t) luaA_wibox_get_height,
                             (lua_class_propfunc_t) luaA_wibox_set_height);
+    luaA_class_add_property(&wibox_class, "type",
+                            (lua_class_propfunc_t) luaA_window_set_type,
+                            (lua_class_propfunc_t) luaA_window_get_type,
+                            (lua_class_propfunc_t) luaA_window_set_type);
 
     signal_add(&wibox_class.signals, "mouse::enter");
     signal_add(&wibox_class.signals, "mouse::leave");
