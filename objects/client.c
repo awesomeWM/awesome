@@ -1434,7 +1434,7 @@ luaA_client_get_content(lua_State *L, client_t *c)
     {
         if(ximage->bpp >= 24)
         {
-            uint32_t *data = p_alloca(uint32_t, ximage->width * ximage->height);
+            uint32_t *data = p_new(uint32_t, ximage->width * ximage->height);
 
             for(int y = 0; y < ximage->height; y++)
                 for(int x = 0; x < ximage->width; x++)
@@ -1444,6 +1444,7 @@ luaA_client_get_content(lua_State *L, client_t *c)
                 }
 
             retval = image_new_from_argb32(L, ximage->width, ximage->height, data);
+            p_delete(&data);
         }
         xcb_image_destroy(ximage);
     }
