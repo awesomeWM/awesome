@@ -26,6 +26,29 @@
 #include "objects/button.h"
 #include "common/luaclass.h"
 
+/** Windows type */
+typedef enum
+{
+    WINDOW_TYPE_NORMAL = 0,
+    WINDOW_TYPE_DESKTOP,
+    WINDOW_TYPE_DOCK,
+    WINDOW_TYPE_SPLASH,
+    WINDOW_TYPE_DIALOG,
+    /* The ones below may have TRANSIENT_FOR, but are not plain dialogs.
+     * They were purposefully placed below DIALOG.
+     */
+    WINDOW_TYPE_MENU,
+    WINDOW_TYPE_TOOLBAR,
+    WINDOW_TYPE_UTILITY,
+    /* This ones are usually set on override-redirect windows. */
+    WINDOW_TYPE_DROPDOWN_MENU,
+    WINDOW_TYPE_POPUP_MENU,
+    WINDOW_TYPE_TOOLTIP,
+    WINDOW_TYPE_NOTIFICATION,
+    WINDOW_TYPE_COMBO,
+    WINDOW_TYPE_DND
+} window_type_t;
+
 #define WINDOW_OBJECT_HEADER \
     LUA_OBJECT_HEADER \
     /** The X window number */ \
@@ -43,7 +66,9 @@
     /** Border color */ \
     xcolor_t border_color; \
     /** Border width */ \
-    uint16_t border_width;
+    uint16_t border_width; \
+    /** The window type */ \
+    window_type_t type;
 
 /** Window structure */
 typedef struct
@@ -57,6 +82,7 @@ void window_class_setup(lua_State *);
 
 void window_set_opacity(lua_State *, int, double);
 void window_set_border_width(lua_State *, int, int);
+int luaA_window_get_type(lua_State *, window_t *);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

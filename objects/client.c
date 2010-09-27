@@ -1453,57 +1453,6 @@ luaA_client_get_content(lua_State *L, client_t *c)
 }
 
 static int
-luaA_client_get_type(lua_State *L, client_t *c)
-{
-    switch(c->type)
-    {
-      case WINDOW_TYPE_DESKTOP:
-        lua_pushliteral(L, "desktop");
-        break;
-      case WINDOW_TYPE_DOCK:
-        lua_pushliteral(L, "dock");
-        break;
-      case WINDOW_TYPE_SPLASH:
-        lua_pushliteral(L, "splash");
-        break;
-      case WINDOW_TYPE_DIALOG:
-        lua_pushliteral(L, "dialog");
-        break;
-      case WINDOW_TYPE_MENU:
-        lua_pushliteral(L, "menu");
-        break;
-      case WINDOW_TYPE_TOOLBAR:
-        lua_pushliteral(L, "toolbar");
-        break;
-      case WINDOW_TYPE_UTILITY:
-        lua_pushliteral(L, "utility");
-        break;
-      case WINDOW_TYPE_DROPDOWN_MENU:
-        lua_pushliteral(L, "dropdown_menu");
-        break;
-      case WINDOW_TYPE_POPUP_MENU:
-        lua_pushliteral(L, "popup_menu");
-        break;
-      case WINDOW_TYPE_TOOLTIP:
-        lua_pushliteral(L, "tooltip");
-        break;
-      case WINDOW_TYPE_NOTIFICATION:
-        lua_pushliteral(L, "notification");
-        break;
-      case WINDOW_TYPE_COMBO:
-        lua_pushliteral(L, "combo");
-        break;
-      case WINDOW_TYPE_DND:
-        lua_pushliteral(L, "dnd");
-        break;
-      case WINDOW_TYPE_NORMAL:
-        lua_pushliteral(L, "normal");
-        break;
-    }
-    return 1;
-}
-
-static int
 luaA_client_get_screen(lua_State *L, client_t *c)
 {
     if(!c->screen)
@@ -1773,7 +1722,7 @@ client_class_setup(lua_State *L)
                             NULL);
     luaA_class_add_property(&client_class, "type",
                             NULL,
-                            (lua_class_propfunc_t) luaA_client_get_type,
+                            (lua_class_propfunc_t) luaA_window_get_type,
                             NULL);
     luaA_class_add_property(&client_class, "class",
                             NULL,
