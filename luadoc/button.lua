@@ -29,6 +29,7 @@ module("button")
 -- @class function
 
 --- Get the number of instances.
+-- @param no_params luadoc is buggy.
 -- @return The number of button objects alive.
 -- @name instances
 -- @class function

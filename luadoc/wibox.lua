@@ -60,6 +60,7 @@ module("wibox")
 -- @class function
 
 --- Get the number of instances.
+-- @param no_params luadoc is buggy.
 -- @return The number of wibox objects alive.
 -- @name instances
 -- @class function

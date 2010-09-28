@@ -40,6 +40,7 @@ module("timer")
 -- @class function
 
 --- Get the number of instances.
+-- @param no_params luadoc is buggy.
 -- @return The number of timer objects alive.
 -- @name instances
 -- @class function

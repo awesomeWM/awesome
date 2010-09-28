@@ -130,6 +130,7 @@ module("image")
 -- @class function
 
 --- Get the number of instances.
+-- @param no_params luadoc is buggy.
 -- @return The number of image objects alive.
 -- @name instances
 -- @class function
