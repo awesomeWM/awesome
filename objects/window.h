@@ -84,7 +84,7 @@ void window_set_opacity(lua_State *, int, double);
 void window_set_border_width(lua_State *, int, int);
 int luaA_window_get_type(lua_State *, window_t *);
 int luaA_window_set_type(lua_State *, window_t *);
-void window_set_type(window_t *, uint32_t);
+uint32_t window_translate_type(window_type_t type);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

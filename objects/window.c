@@ -239,25 +239,6 @@ luaA_window_get_type(lua_State *L, window_t *w)
 }
 
 /** Set the window type.
- * \param w The window object.
- * \param type The window type to set
- */
-void
-window_set_type(window_t *w, uint32_t type)
-{
-    if(w->type != type)
-    {
-        w->type = type;
-        if(w->window != XCB_WINDOW_NONE)
-            xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
-                                w->window, _NET_WM_WINDOW_TYPE, XCB_ATOM_ATOM, 32, 1, &type);
-        luaA_object_push(globalconf.L, w);
-        luaA_object_emit_signal(globalconf.L, -1, "property::type", 0);
-        lua_pop(globalconf.L, 1);
-    }
-}
-
-/** Set the window type.
  * \param L The Lua VM state.
  * \param window The window object.
  * \return The number of elements pushed on stack.
@@ -265,45 +246,92 @@ window_set_type(window_t *w, uint32_t type)
 int
 luaA_window_set_type(lua_State *L, window_t *w)
 {
-    uint32_t type;
+    window_type_t type;
     const char *buf = luaL_checkstring(L, -1);
 
     if(a_strcmp(buf, "desktop") == 0)
-        type = _NET_WM_WINDOW_TYPE_DESKTOP;
+        type = WINDOW_TYPE_DESKTOP;
     else if(a_strcmp(buf, "dock") == 0)
-        type = _NET_WM_WINDOW_TYPE_DOCK;
+        type = WINDOW_TYPE_DOCK;
     else if(a_strcmp(buf, "splash") == 0)
-        type = _NET_WM_WINDOW_TYPE_SPLASH;
+        type = WINDOW_TYPE_SPLASH;
     else if(a_strcmp(buf, "dialog") == 0)
-        type = _NET_WM_WINDOW_TYPE_DIALOG;
+        type = WINDOW_TYPE_DIALOG;
     else if(a_strcmp(buf, "menu") == 0)
-        type = _NET_WM_WINDOW_TYPE_MENU;
+        type = WINDOW_TYPE_MENU;
     else if(a_strcmp(buf, "toolbar") == 0)
-        type = _NET_WM_WINDOW_TYPE_TOOLBAR;
+        type = WINDOW_TYPE_TOOLBAR;
     else if(a_strcmp(buf, "utility") == 0)
-        type = _NET_WM_WINDOW_TYPE_UTILITY;
+        type = WINDOW_TYPE_UTILITY;
     else if(a_strcmp(buf, "dropdown_menu") == 0)
-        type = _NET_WM_WINDOW_TYPE_DROPDOWN_MENU;
+        type = WINDOW_TYPE_DROPDOWN_MENU;
     else if(a_strcmp(buf, "popup_menu") == 0)
-        type = _NET_WM_WINDOW_TYPE_POPUP_MENU;
+        type = WINDOW_TYPE_POPUP_MENU;
     else if(a_strcmp(buf, "tooltip") == 0)
-        type = _NET_WM_WINDOW_TYPE_TOOLTIP;
+        type = WINDOW_TYPE_TOOLTIP;
     else if(a_strcmp(buf, "notification") == 0)
-        type = _NET_WM_WINDOW_TYPE_NOTIFICATION;
+        type = WINDOW_TYPE_NOTIFICATION;
     else if(a_strcmp(buf, "combo") == 0)
-        type = _NET_WM_WINDOW_TYPE_COMBO;
+        type = WINDOW_TYPE_COMBO;
     else if(a_strcmp(buf, "dnd") == 0)
-        type = _NET_WM_WINDOW_TYPE_DND;
+        type = WINDOW_TYPE_DND;
     else if(a_strcmp(buf, "normal") == 0)
-        type = _NET_WM_WINDOW_TYPE_NORMAL;
+        type = WINDOW_TYPE_NORMAL;
     else
     {
         warn("Unknown window type '%s'", buf);
         return 0;
     }
 
-    window_set_type(w, type);
+    if(w->type != type)
+    {
+        w->type = type;
+        if(w->window != XCB_WINDOW_NONE)
+            ewmh_update_window_type(w->window, window_translate_type(type));
+        luaA_object_emit_signal(globalconf.L, -3, "property::type", 0);
+    }
     return 0;
+}
+
+/** Translate a window_type_t into the corresponding EWMH atom.
+ * @param type The type to return.
+ * @return The EWMH atom for this type.
+ */
+uint32_t
+window_translate_type(window_type_t type)
+{
+    switch(type)
+    {
+    case WINDOW_TYPE_NORMAL:
+        return _NET_WM_WINDOW_TYPE_NORMAL;
+    case WINDOW_TYPE_DESKTOP:
+        return _NET_WM_WINDOW_TYPE_DESKTOP;
+    case WINDOW_TYPE_DOCK:
+        return _NET_WM_WINDOW_TYPE_DOCK;
+    case WINDOW_TYPE_SPLASH:
+        return _NET_WM_WINDOW_TYPE_SPLASH;
+    case WINDOW_TYPE_DIALOG:
+        return _NET_WM_WINDOW_TYPE_DIALOG;
+    case WINDOW_TYPE_MENU:
+        return _NET_WM_WINDOW_TYPE_MENU;
+    case WINDOW_TYPE_TOOLBAR:
+        return _NET_WM_WINDOW_TYPE_TOOLBAR;
+    case WINDOW_TYPE_UTILITY:
+        return _NET_WM_WINDOW_TYPE_UTILITY;
+    case WINDOW_TYPE_DROPDOWN_MENU:
+        return _NET_WM_WINDOW_TYPE_DROPDOWN_MENU;
+    case WINDOW_TYPE_POPUP_MENU:
+        return _NET_WM_WINDOW_TYPE_POPUP_MENU;
+    case WINDOW_TYPE_TOOLTIP:
+        return _NET_WM_WINDOW_TYPE_TOOLTIP;
+    case WINDOW_TYPE_NOTIFICATION:
+        return _NET_WM_WINDOW_TYPE_NOTIFICATION;
+    case WINDOW_TYPE_COMBO:
+        return _NET_WM_WINDOW_TYPE_COMBO;
+    case WINDOW_TYPE_DND:
+        return _NET_WM_WINDOW_TYPE_DND;
+    }
+    return _NET_WM_WINDOW_TYPE_NORMAL;
 }
 
 static int

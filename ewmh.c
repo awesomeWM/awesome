@@ -478,6 +478,17 @@ ewmh_update_strut(xcb_window_t window, strut_t *strut)
     }
 }
 
+/** Update the window type.
+ * \param window The window to update.
+ * \param type The new type to set.
+ */
+void
+ewmh_update_window_type(xcb_window_t window, uint32_t type)
+{
+    xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
+                        window, _NET_WM_WINDOW_TYPE, XCB_ATOM_ATOM, 32, 1, &type);
+}
+
 void
 ewmh_client_check_hints(client_t *c)
 {

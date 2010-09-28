@@ -183,9 +183,7 @@ wibox_init(wibox_t *w)
     wibox_draw_context_update(w);
 
     /* Set the right type property */
-    uint32_t type = w->type;
-    w->type = 0;
-    window_set_type((window_t *) w, type);
+    ewmh_update_window_type(w->window, window_translate_type(w->type));
 }
 
 /** Refresh the window content by copying its pixmap data to its window.
