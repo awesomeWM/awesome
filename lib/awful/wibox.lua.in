@@ -218,6 +218,8 @@ function new(arg)
     local position = arg.position or "top"
     local has_to_stretch = true
 
+    arg.type = arg.type or "dock"
+
     if position ~= "top" and position ~="bottom"
             and position ~= "left" and position ~= "right" then
         error("Invalid position in awful.wibox(), you may only use"
