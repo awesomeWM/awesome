@@ -197,7 +197,8 @@ local function add_item(data, num, item_info)
         fg = data.theme.fg_normal,
         bg = data.theme.bg_normal,
         border_color = data.theme.border,
-        border_width = data.theme.border_width
+        border_width = data.theme.border_width,
+        type = "popup_menu"
     })
 
     -- Create bindings
