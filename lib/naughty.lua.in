@@ -401,7 +401,8 @@ function notify(args)
     notification.box = capi.wibox({ fg = fg,
                                     bg = bg,
                                     border_color = border_color,
-                                    border_width = border_width })
+                                    border_width = border_width,
+                                    type = "notification" })
 
     if hover_timeout then notification.box:connect_signal("mouse::enter", hover_destroy) end
 
