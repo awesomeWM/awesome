@@ -784,6 +784,55 @@ luaA_image_get_alpha(lua_State *L, image_t *image)
     return 1;
 }
 
+/** Convert an image into a cairo image surface.
+ * \param image The image to convert.
+ * \returns A cairo surface with the same content. This surface must be
+ * destroyed by the caller!
+ */
+cairo_surface_t *
+image_to_surface(image_t *image)
+{
+    cairo_surface_t *ret;
+    cairo_surface_t *surface = cairo_image_surface_create_for_data(
+            image_getdata(image), CAIRO_FORMAT_ARGB32,
+            image_getwidth(image), image_getheight(image),
+            image_getwidth(image) * 4);
+    /* Cairo doesn't copy the data we give to it so we have to make a
+     * copy of the data. This is the lazy way to do that. */
+    ret = draw_dup_image_surface(surface);
+    cairo_surface_destroy(surface);
+    return ret;
+}
+
+/** Convert an image into a cairo image surface.
+ * \param L The Lua VM state.
+ * \param idx The index of the image in the lua stack
+ * \returns A cairo surface with the same content as the image. This surface
+ * must be destroyed by the caller!
+ */
+cairo_surface_t *
+luaA_image_to_surface(lua_State *L, int idx)
+{
+    bool is_surface = false;
+    /* This inlines luaL_checkudata() but skips luaL_typerror() */
+    if(lua_getmetatable(L, idx))
+    {
+        lua_getfield(L, LUA_REGISTRYINDEX, OOCAIRO_MT_NAME_SURFACE);
+        if(lua_rawequal(L, -1, -2))
+            is_surface = true;
+        lua_pop(L, 2);
+    }
+    if(is_surface)
+    {
+        cairo_surface_t **cairo_surface = (cairo_surface_t **)luaL_checkudata(L, idx, OOCAIRO_MT_NAME_SURFACE);
+        return draw_dup_image_surface(*cairo_surface);
+    }
+
+    luaA_checkudata(L, idx, &image_class);
+    image_t *image = (void *) lua_topointer(L, idx);
+    return image_to_surface(image);
+}
+
 void
 image_class_setup(lua_State *L)
 {
