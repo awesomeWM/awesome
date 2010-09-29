@@ -7,9 +7,9 @@
 local setmetatable = setmetatable
 local type = type
 local button = require("awful.button")
-local capi = { image = image,
-               widget = widget,
-               mouse = mouse }
+local capi = { widget = widget,
+               mouse = mouse,
+               oocairo = oocairo }
 
 module("awful.widget.button")
 
@@ -22,13 +22,17 @@ function new(args)
     if not args or not args.image then return end
     local img_release
     if type(args.image) == "string" then
-        img_release = capi.image(args.image)
-    elseif type(args.image) == "image" then
+        img_release = capi.oocairo.image_surface_create_from_png(args.image)
+    elseif type(args.image) == "userdata" and args.image.type and args.image:type() == "cairo_surface_t" then
         img_release = args.image
     else
         return
     end
-    local img_press = img_release:crop(-2, -2, img_release.width, img_release.height)
+    local img_press = capi.oocairo.image_surface_create("argb32", img_release:get_width(), img_release:get_height())
+    local cr = capi.oocairo.context_create(img_press)
+    cr:set_source(img_release, 2, 2)
+    cr:paint()
+
     args.type = "imagebox"
     local w = capi.widget(args)
     w.image = img_release
