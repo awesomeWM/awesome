@@ -26,21 +26,6 @@ local data = setmetatable({}, { __mode = "k" })
 -- @param graph The graph.
 -- @param color The border color to set.
 
---- Set the graph foreground color as a gradient.
--- @name set_gradient_colors
--- @class function
--- @param graph The graph.
--- @param gradient_colors A table with gradients colors. The distance between each color
--- can also be specified. Example: { "#ff0000", "#0000ff" } or { "#ff0000", "#00ff00",
--- "#0000ff", ["#0000ff"] = 10 } to specify blue distance from other colors.
-
---- Set the graph foreground colors gradient angle. Default is 270 degrees
--- (horizontal).
--- @name set_gradient_angle
--- @class function
--- @param graph The graph.
--- @param gradient_angle Angle of gradient in degrees.
-
 --- Set the graph foreground color.
 -- @name set_color
 -- @class function
@@ -80,8 +65,8 @@ local data = setmetatable({}, { __mode = "k" })
 -- @param stack_colors A table with stacking colors.
 
 local properties = { "width", "height", "border_color", "stack",
-                     "stack_colors", "gradient_colors", "gradient_angle",
-                     "color", "background_color", "max_value", "scale" }
+                     "stack_colors", "color", "background_color",
+                     "max_value", "scale" }
 
 local function update(graph)
     -- Create new empty image
@@ -147,20 +132,11 @@ local function update(graph)
             end
         end
 
-        -- Draw full gradient
-        if data[graph].gradient_colors then
-            img:draw_rectangle_gradient(border_width, border_width,
-                                        data[graph].width - (2 * border_width),
-                                        data[graph].height - (2 * border_width),
-                                        data[graph].gradient_colors,
-                                        data[graph].gradient_angle or 270)
-        else
-            cr:rectangle(border_width, border_width,
-                         data[graph].width - (2 * border_width),
-                         data[graph].height - (2 * border_width))
-            cr:set_source(color(data[graph].color or "#ff0000"))
-            cr:fill()
-        end
+        cr:rectangle(border_width, border_width,
+                     data[graph].width - (2 * border_width),
+                     data[graph].height - (2 * border_width))
+        cr:set_source(color(data[graph].color or "#ff0000"))
+        cr:fill()
 
         -- Draw the background on no value
         if #values ~= 0 then
