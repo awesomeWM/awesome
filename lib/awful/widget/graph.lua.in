@@ -9,9 +9,10 @@ local ipairs = ipairs
 local math = math
 local table = table
 local type = type
-local capi = { image = image,
+local capi = { oocairo = oocairo,
                widget = widget }
 local layout = require("awful.widget.layout")
+local color = require("gears.color")
 
 --- A graph widget.
 module("awful.widget.graph")
@@ -84,7 +85,8 @@ local properties = { "width", "height", "border_color", "stack",
 
 local function update(graph)
     -- Create new empty image
-    local img = capi.image.argb32(data[graph].width, data[graph].height, nil)
+    local img = capi.oocairo.image_surface_create("argb32", data[graph].width, data[graph].height)
+    local cr = capi.oocairo.context_create(img)
     local max_value = data[graph].max_value
     local values = data[graph].values
 
@@ -92,6 +94,8 @@ local function update(graph)
     if data[graph].border_color then
         border_width = 1
     end
+
+    cr:set_line_width(1)
 
     -- Draw a stacked graph
     if data[graph].stack then
@@ -107,33 +111,34 @@ local function update(graph)
         end
 
         -- Draw the background first
-        img:draw_rectangle(border_width, border_width,
-                           data[graph].width - (2 * border_width),
-                           data[graph].height,
-                           true, data[graph].background_color or "#000000aa")
+        cr:rectangle(border_width, border_width,
+                     data[graph].width - (2 * border_width),
+                     data[graph].height)
+        cr:set_source(color(data[graph].background_color or "#000000aa"))
+        cr:fill()
 
         for i = 0, data[graph].width - (2 * border_width) do
             local rel_i = 0
-            local rel_x = data[graph].width - border_width - i - 1
+            local rel_x = data[graph].width - border_width - i - 0.5
 
             if data[graph].stack_colors then
-                for idx, color in ipairs(data[graph].stack_colors) do
+                for idx, col in ipairs(data[graph].stack_colors) do
                     local stack_values = values[idx]
                     if stack_values and i < #stack_values then
                         local value = stack_values[#stack_values - i] + rel_i
 
-                        img:draw_line(rel_x, border_width - 1 +
-                                          math.ceil((data[graph].height - 2 * border_width) * (1 - (rel_i / max_value))),
-                                      rel_x, border_width - 1 +
-                                          math.ceil((data[graph].height - 2 * border_width) * (1 - (value / max_value))),
-                                      color or "#ff0000")
+                        cr:move_to(rel_x, border_width - 0.5 +
+                                          (data[graph].height - 2 * border_width) * (1 - (rel_i / max_value)))
+                        cr:line_to(rel_x, border_width - 0.5 +
+                                          (data[graph].height - 2 * border_width) * (1 - (value / max_value)))
+                        cr:set_source(color(col or "#ff0000"))
+                        cr:stroke()
                         rel_i = value
                     end
                 end
             end
         end
     else
-
         if data[graph].scale then
             for _, v in ipairs(values) do
                 if v > max_value then
@@ -150,10 +155,11 @@ local function update(graph)
                                         data[graph].gradient_colors,
                                         data[graph].gradient_angle or 270)
         else
-            img:draw_rectangle(border_width, border_width,
-                               data[graph].width - (2 * border_width),
-                               data[graph].height - (2 * border_width),
-                               true, data[graph].color or "#ff0000")
+            cr:rectangle(border_width, border_width,
+                         data[graph].width - (2 * border_width),
+                         data[graph].height - (2 * border_width))
+            cr:set_source(color(data[graph].color or "#ff0000"))
+            cr:fill()
         end
 
         -- Draw the background on no value
@@ -163,31 +169,34 @@ local function update(graph)
                 local value = values[#values - i]
                 if value >= 0 then
                     value = value / max_value
-                    img:draw_line(data[graph].width - border_width - i - 1,
-                                  border_width - 1 +
-                                      math.ceil((data[graph].height - 2 * border_width) * (1 - value)),
-                                  data[graph].width - border_width - i - 1,
-                                  border_width - 1,
-                                  data[graph].background_color or "#000000aa")
+                    cr:move_to(data[graph].width - border_width - i - 0.5,
+                               border_width - 0.5 +
+                                   (data[graph].height - 2 * border_width) * (1 - value))
+                    cr:line_to(data[graph].width - border_width - i - 0.5,
+                               border_width - 1)
                 end
             end
+            cr:set_source(color(data[graph].background_color or "#000000aa"))
+            cr:stroke()
         end
 
         -- If we didn't draw values in full length, draw a square
         -- over the last, left, part to reset everything to 0
         if #values < data[graph].width - (2 * border_width) then
-            img:draw_rectangle(border_width, border_width,
-                               data[graph].width - (2 * border_width) - #values,
-                               data[graph].height - (2 * border_width),
-                               true, data[graph].background_color or "#000000aa")
+            cr:rectangle(border_width, border_width,
+                         data[graph].width - (2 * border_width) - #values,
+                         data[graph].height - (2 * border_width))
+            cr:set_source(color(data[graph].background_color or "#000000aa"))
+            cr:fill()
         end
     end
 
     -- Draw the border last so that it overlaps already drawn values
     if data[graph].border_color then
         -- Draw the border
-        img:draw_rectangle(0, 0, data[graph].width, data[graph].height,
-                           false, data[graph].border_color or "white")
+        cr:rectangle(0.5, 0.5, data[graph].width - 0.5, data[graph].height - 0.5)
+        cr:set_source(color(data[graph].background_color or "#ffffff"))
+        cr:stroke()
     end
 
     -- Update the image
