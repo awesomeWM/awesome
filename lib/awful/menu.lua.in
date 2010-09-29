@@ -12,7 +12,6 @@ local string = string
 local type = type
 local setmetatable = setmetatable
 local wibox = wibox
-local image = image
 local widget = widget
 local button = require("awful.button")
 local capi =
@@ -20,7 +19,8 @@ local capi =
     screen = screen,
     mouse = mouse,
     client = client,
-    keygrabber = keygrabber
+    keygrabber = keygrabber,
+    oocairo = oocairo
 }
 local util = require("awful.util")
 local tags = require("awful.tag")
@@ -218,15 +218,23 @@ local function add_item(data, num, item_info)
     -- Set icon if needed
     local iconbox
     if item_info[3] then
-        local icon = type(item_info[3]) == "string" and image(item_info[3]) or item_info[3]
-        if icon.width > data.h or icon.height > data.h then
-            local width, height
-            if ((data.h/icon.height) * icon.width) > data.h then
-                width, height = data.h, (data.h / icon.width) * icon.height
+        local icon = type(item_info[3]) == "string" and capi.oocairo.image_surface_create_from_png(item_info[3]) or item_info[3]
+        local width = icon:get_width()
+        local height = icon:get_height()
+        if width > data.h or height > data.h then
+            local w, h
+            if ((data.h/height) * width) > data.h then
+                w, h = data.h, (data.h / width) * height
             else
-                width, height = (data.h / icon.height) * icon.width, data.h
+                w, h = (data.h / height) * width, data.h
             end
-            icon = icon:crop_and_scale(0, 0, icon.width, icon.height, width, height)
+            -- We need to scale the image to size w x h
+            local img = capi.oocairo.image_surface_create("argb32", w, h)
+            local cr = capi.oocairo.context_create(img)
+            cr:scale(w / width, h / height)
+            cr:set_source(icon, 0, 0)
+            cr:paint()
+            icon = img
         end
         iconbox = widget { type = "imagebox" }
         iconbox.image = icon
@@ -244,7 +252,7 @@ local function add_item(data, num, item_info)
     local submenu
     if type(item_info[2]) == "table" then
         submenu = widget({ type = "imagebox" })
-        submenu.image = data.theme.submenu_icon and image(data.theme.submenu_icon)
+        submenu.image = data.theme.submenu_icon and capi.oocairo.image_surface_create_from_png(data.theme.submenu_icon)
         submenu:buttons(bindings)
     end
 
