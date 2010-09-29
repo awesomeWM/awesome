@@ -10,8 +10,7 @@ local button = require("awful.button")
 local layout = require("awful.layout")
 local tag = require("awful.tag")
 local beautiful = require("beautiful")
-local capi = { image = image,
-               screen = screen,
+local capi = { oocairo = oocairo,
                widget = widget }
 
 --- Layoutbox widget.
@@ -20,7 +19,7 @@ module("awful.widget.layoutbox")
 local function update(w, screen)
     local layout = layout.getname(layout.get(screen))
     if layout and beautiful["layout_" ..layout] then
-        w.image = capi.image(beautiful["layout_" ..layout])
+        w.image = capi.oocairo.image_surface_create_from_png(beautiful["layout_" ..layout])
     else
         w.image = nil
     end
