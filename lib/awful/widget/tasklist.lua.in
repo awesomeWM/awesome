@@ -6,10 +6,8 @@
 
 -- Grab environment we need
 local capi = { screen = screen,
-               image = image,
                client = client }
 local ipairs = ipairs
-local type = type
 local setmetatable = setmetatable
 local table = table
 local common = require("awful.widget.common")
