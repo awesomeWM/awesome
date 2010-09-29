@@ -15,7 +15,7 @@ local capi = { screen = screen,
                dbus = dbus,
                widget = widget,
                wibox = wibox,
-               image = image,
+               oocairo = oocairo,
                timer = timer }
 local button = require("awful.button")
 local util = require("awful.util")
@@ -385,7 +385,7 @@ function notify(args)
             iconbox:buttons(util.table.join(button({ }, 1, run), button({ }, 3, die)))
             local img
             if type(icon) == "string" then
-                img = capi.image(icon)
+                img = capi.oocairo.image_surface_create_from_png(icon)
             else
                 img = icon
             end
@@ -516,7 +516,7 @@ if capi.dbus then
                     end
                 end
                 if imgdata then
-                    args.icon = capi.image.argb32(hints.icon_data[1], hints.icon_data[2], imgdata)
+                    args.icon = capi.oocairo.image.surface_create_from_data(imgdata, "argb32", hints.icon_data[1], hints.icon_data[2], hints.icon_data[1] * 4)
                 end
             end
             if replaces_id and replaces_id ~= "" and replaces_id ~= 0 then
