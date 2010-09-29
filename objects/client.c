@@ -1100,10 +1100,10 @@ client_set_icon(lua_State *L, int cidx, int iidx)
             cairo_surface_destroy(c->icon);
         c->icon = NULL;
     } else {
-        cairo_surface_t *surface = luaA_image_to_surface(L, iidx);
+        cairo_surface_t **cairo_surface = (cairo_surface_t **)luaL_checkudata(L, iidx, OOCAIRO_MT_NAME_SURFACE);
         if(c->icon)
             cairo_surface_destroy(c->icon);
-        c->icon = surface;
+        c->icon = draw_dup_image_surface(*cairo_surface);
     }
     luaA_object_emit_signal(L, cidx < iidx ? cidx : cidx - 1, "property::icon", 0);
 }

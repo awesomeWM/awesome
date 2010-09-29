@@ -345,9 +345,9 @@ luaA_textbox_newindex(lua_State *L, const char *prop)
             cairo_surface_destroy(d->bg_image);
             d->bg_image = NULL;
         } else {
-            cairo_surface_t *surface = luaA_image_to_surface(L, -1);
+            cairo_surface_t **cairo_surface = (cairo_surface_t **)luaL_checkudata(L, -1, OOCAIRO_MT_NAME_SURFACE);
             cairo_surface_destroy(d->bg_image);
-            d->bg_image = surface;
+            d->bg_image = draw_dup_image_surface(*cairo_surface);
         }
     }
     else if(a_strcmp(prop, "bg") == 0)

@@ -95,11 +95,10 @@ imagebox_set_image(lua_State *L, widget_t *widget, int idx)
             cairo_surface_destroy(d->image);
         d->image = NULL;
     } else {
-        cairo_surface_t *new_surface = luaA_image_to_surface(L, idx);
-
+        cairo_surface_t **cairo_surface = (cairo_surface_t **)luaL_checkudata(L, idx, OOCAIRO_MT_NAME_SURFACE);
         if(d->image)
             cairo_surface_destroy(d->image);
-        d->image = new_surface;
+        d->image = draw_dup_image_surface(*cairo_surface);
     }
 
     widget_invalidate_bywidget(widget);

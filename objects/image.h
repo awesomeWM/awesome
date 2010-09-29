@@ -32,8 +32,6 @@ int image_new_from_argb32(lua_State *L, int, int, uint32_t *);
 uint8_t * image_getdata(image_t *);
 int image_getwidth(image_t *);
 int image_getheight(image_t *);
-cairo_surface_t *image_to_surface(image_t *);
-cairo_surface_t *luaA_image_to_surface(lua_State *, int idx);
 
 xcb_pixmap_t image_to_1bit_pixmap(image_t *, xcb_drawable_t);
 

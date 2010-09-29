@@ -946,10 +946,10 @@ luaA_wibox_set_bg_image(lua_State *L, wibox_t *wibox)
             cairo_surface_destroy(wibox->bg_image);
         wibox->bg_image = NULL;
     } else {
-        cairo_surface_t *surface = luaA_image_to_surface(L, -1);
+        cairo_surface_t **cairo_surface = (cairo_surface_t **)luaL_checkudata(L, -1, OOCAIRO_MT_NAME_SURFACE);
         if(wibox->bg_image)
             cairo_surface_destroy(wibox->bg_image);
-        wibox->bg_image = surface;
+        wibox->bg_image = draw_dup_image_surface(*cairo_surface);
     }
     wibox->need_update = true;
     luaA_object_emit_signal(L, -3, "property::bg_image", 0);
