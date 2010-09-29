@@ -31,6 +31,7 @@
 
 #include "draw.h"
 #include "common/lualib.h"
+#include "common/luaclass.h"
 
 #define luaA_deprecate(L, repl) \
     do { \

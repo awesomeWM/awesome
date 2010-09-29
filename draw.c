@@ -236,53 +236,6 @@ draw_rectangle(draw_context_t *ctx, area_t geometry,
     }
 }
 
-/** Draw an image from ARGB data to a draw context.
- * Data should be stored as an array of alpha, red, blue, green for each pixel
- * and the array size should be w * h elements long.
- * \param ctx Draw context to draw to.
- * \param x X coordinate.
- * \param y Y coordinate.
- * \param w Width.
- * \param h Height.
- * \param ratio The ratio to apply to the image.
- * \param data The image pixels array.
- */
-static void
-draw_image_from_argb_data(draw_context_t *ctx, int x, int y, int w, int h,
-                          double ratio, unsigned char *data)
-{
-    cairo_t *cr;
-    cairo_surface_t *source;
-
-    source = cairo_image_surface_create_for_data(data, CAIRO_FORMAT_ARGB32, w, h,
-#if CAIRO_VERSION_MAJOR < 1 || (CAIRO_VERSION_MAJOR == 1 && CAIRO_VERSION_MINOR < 5) || (CAIRO_VERSION_MAJOR == 1 && CAIRO_VERSION_MINOR == 5 && CAIRO_VERSION_MICRO < 8)
-                                                 sizeof(unsigned char) * 4 * w);
-#else
-                                                 cairo_format_stride_for_width(CAIRO_FORMAT_ARGB32, w));
-#endif
-    cr = cairo_create(ctx->surface);
-    cairo_scale(cr, ratio, ratio);
-    cairo_set_source_surface(cr, source, x / ratio, y / ratio);
-
-    cairo_paint(cr);
-
-    cairo_destroy(cr);
-    cairo_surface_destroy(source);
-}
-
-/** Draw an image to a draw context.
- * \param ctx Draw context to draw to.
- * \param x X coordinate.
- * \param y Y coordinate.
- * \param ratio The ratio to apply to the image.
- * \param image The image to draw.
- */
-void
-draw_image(draw_context_t *ctx, int x, int y, double ratio, image_t *image)
-{
-    draw_image_from_argb_data(ctx, x, y, image_getwidth(image), image_getheight(image), ratio, image_getdata(image));
-}
-
 /** Draw an image to a draw context.
  * \param ctx Draw context to draw to.
  * \param x X coordinate.

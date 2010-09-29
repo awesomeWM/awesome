@@ -741,9 +741,6 @@ luaA_init(xdgHandle* xdg)
     /* Export button */
     button_class_setup(L);
 
-    /* Export image */
-    image_class_setup(L);
-
     /* Export tag */
     tag_class_setup(L);
 
