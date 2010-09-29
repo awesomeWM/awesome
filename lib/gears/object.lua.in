@@ -18,7 +18,7 @@ local function check(obj)
     end
 end
 
--- Find a given signal
+--- Find a given signal
 -- @param obj The object to search in
 -- @param name The signal to find
 -- @param error_msg Error message for if the signal is not found
@@ -31,7 +31,7 @@ local function find_signal(obj, name, error_msg)
     return obj._signals[name]
 end
 
--- Add a signal to an object. All signals must be added before they can be used.
+--- Add a signal to an object. All signals must be added before they can be used.
 -- @param obj The object
 -- @param name The name of the new signal.
 function add_signal(obj, name)
@@ -41,7 +41,7 @@ function add_signal(obj, name)
     end
 end
 
--- Connect to a signal
+--- Connect to a signal
 -- @param obj The object
 -- @param name The name of the signal
 -- @param func The callback to call when the signal is emitted
@@ -50,7 +50,7 @@ function connect_signal(obj, name, func)
     sig[func] = func
 end
 
--- Disonnect to a signal
+--- Disonnect to a signal
 -- @param obj The object
 -- @param name The name of the signal
 -- @param func The callback that should be disconnected
@@ -59,7 +59,7 @@ function disconnect_signal(obj, name, func)
     sig[func] = nil
 end
 
--- Emit a signal
+--- Emit a signal
 -- @param obj The object
 -- @param name The name of the signal
 -- @param ... Extra arguments for the callback functions. Each connected

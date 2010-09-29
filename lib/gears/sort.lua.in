@@ -15,7 +15,7 @@ local function less_than_comp(a, b)
     return a < b
 end
 
--- Sort a table. This interface should be identical to table.sort().
+--- Sort a table. This interface should be identical to table.sort().
 -- The difference to table.sort() is that this sort is stable.
 -- @param list The table to sort (we do an in-place sort!).
 -- @param comp Comparator used for the sorting
