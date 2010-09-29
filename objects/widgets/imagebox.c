@@ -95,36 +95,11 @@ imagebox_set_image(lua_State *L, widget_t *widget, int idx)
             cairo_surface_destroy(d->image);
         d->image = NULL;
     } else {
-        bool is_surface = false;
-        /* This inlines luaL_checkudata() but skips luaL_typerror() */
-        if(lua_getmetatable(L, idx))
-        {
-            lua_getfield(L, LUA_REGISTRYINDEX, OOCAIRO_MT_NAME_SURFACE);
-            if(lua_rawequal(L, -1, -2))
-                is_surface = true;
-            lua_pop(L, 2);
-        }
-        if(is_surface)
-        {
-            /* Ugly lua-OOCairo magic. */
-            cairo_surface_t **cairo_surface = (cairo_surface_t **)luaL_checkudata(L, idx, OOCAIRO_MT_NAME_SURFACE);
+        cairo_surface_t *new_surface = luaA_image_to_surface(L, idx);
 
-            if(d->image)
-                cairo_surface_destroy(d->image);
-
-            d->image = draw_dup_image_surface(*cairo_surface);
-        } else {
-            luaA_checkudata(L, idx, &image_class);
-            image_t *image = (void *) lua_topointer(L, idx);
-            cairo_surface_t *surface = cairo_image_surface_create_for_data(
-                    image_getdata(image), CAIRO_FORMAT_ARGB32,
-                    image_getwidth(image), image_getheight(image),
-                    image_getwidth(image) * 4);
-            /* Cairo doesn't copy the data we give to it so we have to make a
-             * copy of the data. This is the lazy way to do that. */
-            d->image = draw_dup_image_surface(surface);
-            cairo_surface_destroy(surface);
-        }
+        if(d->image)
+            cairo_surface_destroy(d->image);
+        d->image = new_surface;
     }
 
     widget_invalidate_bywidget(widget);
