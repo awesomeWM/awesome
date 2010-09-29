@@ -6,7 +6,6 @@
 ----------------------------------------------------------------------------
 
 -- Grab environment
-local io = io
 local os = os
 local print = print
 local pcall = pcall
@@ -15,12 +14,10 @@ local type = type
 local dofile = dofile
 local setmetatable = setmetatable
 local util = require("awful.util")
-local package = package
 local capi =
 {
     screen = screen,
-    awesome = awesome,
-    image = image
+    awesome = awesome
 }
 
 --- Theme library.
