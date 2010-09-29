@@ -16,8 +16,6 @@ local setmetatable = setmetatable
 local tostring = tostring
 local ipairs = ipairs
 local table = table
-local type = type
-local image = image
 local error = error
 
 --- Wibox module for awful.
