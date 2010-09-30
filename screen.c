@@ -57,21 +57,6 @@ screen_xsitoarea(xcb_xinerama_screen_info_t si)
     return a;
 }
 
-static xcb_visualtype_t *
-screen_default_visual(xcb_screen_t *s)
-{
-    xcb_depth_iterator_t depth_iter = xcb_screen_allowed_depths_iterator(s);
-
-    if(depth_iter.data)
-        for(; depth_iter.rem; xcb_depth_next (&depth_iter))
-            for(xcb_visualtype_iterator_t visual_iter = xcb_depth_visuals_iterator(depth_iter.data);
-                visual_iter.rem; xcb_visualtype_next (&visual_iter))
-                if(s->root_visual == visual_iter.data->visual_id)
-                    return visual_iter.data;
-
-    return NULL;
-}
-
 static void
 screen_add(screen_t new_screen)
 {
@@ -244,8 +229,6 @@ screen_scan(void)
 {
     if(!screen_scan_randr() && !screen_scan_xinerama())
         screen_scan_x11();
-
-    globalconf.visual = screen_default_visual(globalconf.screen);
 }
 
 /** Return the Xinerama screen number where the coordinates belongs to.
