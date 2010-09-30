@@ -432,7 +432,8 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, bool startup)
                       wgeom->x, wgeom->y, wgeom->width, wgeom->height,
                       wgeom->border_width, XCB_COPY_FROM_PARENT, globalconf.visual->visual_id,
                       XCB_CW_BACK_PIXEL | XCB_CW_BORDER_PIXEL | XCB_CW_BIT_GRAVITY
-                      | XCB_CW_WIN_GRAVITY | XCB_CW_OVERRIDE_REDIRECT | XCB_CW_EVENT_MASK,
+                      | XCB_CW_WIN_GRAVITY | XCB_CW_OVERRIDE_REDIRECT | XCB_CW_EVENT_MASK
+                      | XCB_CW_COLORMAP,
                       (const uint32_t [])
                       {
                           globalconf.colors.bg.pixel,
@@ -440,7 +441,8 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, bool startup)
                           XCB_GRAVITY_NORTH_WEST,
                           XCB_GRAVITY_NORTH_WEST,
                           1,
-                          FRAME_SELECT_INPUT_EVENT_MASK
+                          FRAME_SELECT_INPUT_EVENT_MASK,
+                          globalconf.default_cmap
                       });
     xcb_reparent_window(globalconf.connection, w, c->frame_window, 0, 0);
     xcb_map_window(globalconf.connection, w);

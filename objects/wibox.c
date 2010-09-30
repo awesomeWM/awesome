@@ -162,7 +162,7 @@ wibox_init(wibox_t *w)
                       w->geometry.width, w->geometry.height,
                       w->border_width, XCB_COPY_FROM_PARENT, globalconf.visual->visual_id,
                       XCB_CW_BACK_PIXEL | XCB_CW_BORDER_PIXEL | XCB_CW_BIT_GRAVITY
-                      | XCB_CW_OVERRIDE_REDIRECT | XCB_CW_EVENT_MASK,
+                      | XCB_CW_OVERRIDE_REDIRECT | XCB_CW_EVENT_MASK | XCB_CW_COLORMAP,
                       (const uint32_t [])
                       {
                           w->ctx.bg.pixel,
@@ -173,7 +173,8 @@ wibox_init(wibox_t *w)
                           | XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY | XCB_EVENT_MASK_ENTER_WINDOW
                           | XCB_EVENT_MASK_LEAVE_WINDOW | XCB_EVENT_MASK_STRUCTURE_NOTIFY
                           | XCB_EVENT_MASK_POINTER_MOTION | XCB_EVENT_MASK_EXPOSURE
-                          | XCB_EVENT_MASK_PROPERTY_CHANGE
+                          | XCB_EVENT_MASK_PROPERTY_CHANGE,
+                          globalconf.default_cmap
                       });
 
     /* Create a pixmap. */

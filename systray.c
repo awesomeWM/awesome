@@ -46,7 +46,14 @@ systray_init(void)
                       globalconf.systray.window,
                       xscreen->root,
                       -1, -1, 1, 1, 0,
-                      XCB_COPY_FROM_PARENT, globalconf.visual->visual_id, 0, NULL);
+                      XCB_COPY_FROM_PARENT, globalconf.visual->visual_id,
+                      XCB_CW_BACK_PIXEL | XCB_CW_BORDER_PIXEL | XCB_CW_COLORMAP,
+                      (const uint32_t [])
+                      {
+                          globalconf.colors.bg.pixel,
+                          globalconf.colors.bg.pixel,
+                          globalconf.default_cmap
+                      });
 }
 
 
