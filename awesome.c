@@ -378,12 +378,6 @@ main(int argc, char **argv)
     globalconf.default_depth = globalconf.screen->root_depth;
     globalconf.default_cmap = globalconf.screen->default_colormap;
 
-    /* The default GC is just a newly created associated to the root window */
-    globalconf.gc = xcb_generate_id(globalconf.connection);
-    xcb_create_gc(globalconf.connection, globalconf.gc, globalconf.screen->root, XCB_GC_FOREGROUND | XCB_GC_BACKGROUND,
-                  (const uint32_t[]) { globalconf.screen->black_pixel, globalconf.screen->white_pixel });
-
-
     /* Prefetch all the extensions we might need */
     xcb_prefetch_extension_data(globalconf.connection, &xcb_big_requests_id);
     xcb_prefetch_extension_data(globalconf.connection, &xcb_test_id);
@@ -467,6 +461,12 @@ main(int argc, char **argv)
 
     /* init spawn (sn) */
     spawn_init();
+
+    /* The default GC is just a newly created associated with a window with
+     * depth globalconf.default_depth */
+    globalconf.gc = xcb_generate_id(globalconf.connection);
+    xcb_create_gc(globalconf.connection, globalconf.gc, globalconf.systray.window, XCB_GC_FOREGROUND | XCB_GC_BACKGROUND,
+                  (const uint32_t[]) { globalconf.screen->black_pixel, globalconf.screen->white_pixel });
 
     /* Parse and run configuration file */
     if (!luaA_parserc(&xdg, confpath, true))
