@@ -104,6 +104,9 @@ xwindow_configure(xcb_window_t win, area_t geometry, int border)
 void
 xwindow_buttons_grab(xcb_window_t win, button_array_t *buttons)
 {
+    if(win == XCB_NONE)
+        return;
+
     /* Ungrab everything first */
     xcb_ungrab_button(globalconf.connection, XCB_BUTTON_INDEX_ANY, win, XCB_BUTTON_MASK_ANY);
 
