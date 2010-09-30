@@ -115,6 +115,10 @@ typedef struct
     xcb_screen_t *screen;
     /** A graphic context. */
     xcb_gcontext_t gc;
+    /** Our default depth */
+    uint8_t default_depth;
+    /** Our default color map */
+    xcb_colormap_t default_cmap;
 } awesome_t;
 
 extern awesome_t globalconf;

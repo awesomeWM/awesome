@@ -359,6 +359,8 @@ main(int argc, char **argv)
         fatal("cannot open display");
 
     globalconf.screen = xcb_aux_get_screen(globalconf.connection, globalconf.default_screen);
+    globalconf.default_depth = globalconf.screen->root_depth;
+    globalconf.default_cmap = globalconf.screen->default_colormap;
 
     /* The default GC is just a newly created associated to the root window */
     globalconf.gc = xcb_generate_id(globalconf.connection);
