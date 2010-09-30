@@ -157,7 +157,7 @@ scan(void)
 }
 
 static xcb_visualtype_t *
-a_default_visual(xcb_screen_t *s)
+screen_default_visual(xcb_screen_t *s)
 {
     xcb_depth_iterator_t depth_iter = xcb_screen_allowed_depths_iterator(s);
 
@@ -169,36 +169,6 @@ a_default_visual(xcb_screen_t *s)
                     return visual_iter.data;
 
     return NULL;
-}
-
-static xcb_visualtype_t *
-a_argb_visual(xcb_screen_t *s)
-{
-    xcb_depth_iterator_t depth_iter = xcb_screen_allowed_depths_iterator(s);
-
-    if(depth_iter.data)
-        for(; depth_iter.rem; xcb_depth_next (&depth_iter))
-            if(depth_iter.data->depth == 32)
-                for(xcb_visualtype_iterator_t visual_iter = xcb_depth_visuals_iterator(depth_iter.data);
-                    visual_iter.rem; xcb_visualtype_next (&visual_iter))
-                    return visual_iter.data;
-
-    return NULL;
-}
-
-static uint8_t
-a_visual_depth(xcb_screen_t *s, xcb_visualid_t vis)
-{
-    xcb_depth_iterator_t depth_iter = xcb_screen_allowed_depths_iterator(s);
-
-    if(depth_iter.data)
-        for(; depth_iter.rem; xcb_depth_next (&depth_iter))
-            for(xcb_visualtype_iterator_t visual_iter = xcb_depth_visuals_iterator(depth_iter.data);
-                visual_iter.rem; xcb_visualtype_next (&visual_iter))
-                if(vis == visual_iter.data->visual_id)
-                    return depth_iter.data->depth;
-
-    fatal("Could not find a visual's depth");
 }
 
 static void
@@ -404,19 +374,9 @@ main(int argc, char **argv)
         fatal("cannot open display");
 
     globalconf.screen = xcb_aux_get_screen(globalconf.connection, globalconf.default_screen);
-    globalconf.visual = a_argb_visual(globalconf.screen);
-    if(!globalconf.visual)
-        globalconf.visual = a_default_visual(globalconf.screen);
-    globalconf.default_depth = a_visual_depth(globalconf.screen, globalconf.visual->visual_id);
+    globalconf.visual = screen_default_visual(globalconf.screen);
+    globalconf.default_depth = globalconf.screen->root_depth;
     globalconf.default_cmap = globalconf.screen->default_colormap;
-    if(globalconf.default_depth != globalconf.screen->root_depth)
-    {
-        // We need our own color map if we aren't using the default depth
-        globalconf.default_cmap = xcb_generate_id(globalconf.connection);
-        xcb_create_colormap(globalconf.connection, XCB_COLORMAP_ALLOC_NONE,
-                globalconf.default_cmap, globalconf.screen->root,
-                globalconf.visual->visual_id);
-    }
 
     /* Prefetch all the extensions we might need */
     xcb_prefetch_extension_data(globalconf.connection, &xcb_big_requests_id);
