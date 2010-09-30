@@ -130,7 +130,7 @@ wibox_draw_context_update(wibox_t *w)
         /* we need a new pixmap this way [     ] to render */
         w->ctx.pixmap = xcb_generate_id(globalconf.connection);
         xcb_create_pixmap(globalconf.connection,
-                          s->root_depth,
+                          globalconf.default_depth,
                           w->ctx.pixmap, s->root,
                           w->geometry.height,
                           w->geometry.width);
@@ -157,10 +157,10 @@ wibox_init(wibox_t *w)
     xcb_screen_t *s = globalconf.screen;
 
     w->window = xcb_generate_id(globalconf.connection);
-    xcb_create_window(globalconf.connection, s->root_depth, w->window, s->root,
+    xcb_create_window(globalconf.connection, globalconf.default_depth, w->window, s->root,
                       w->geometry.x, w->geometry.y,
                       w->geometry.width, w->geometry.height,
-                      w->border_width, XCB_COPY_FROM_PARENT, s->root_visual,
+                      w->border_width, XCB_COPY_FROM_PARENT, globalconf.visual->visual_id,
                       XCB_CW_BACK_PIXEL | XCB_CW_BORDER_PIXEL | XCB_CW_BIT_GRAVITY
                       | XCB_CW_OVERRIDE_REDIRECT | XCB_CW_EVENT_MASK,
                       (const uint32_t [])
@@ -178,7 +178,7 @@ wibox_init(wibox_t *w)
 
     /* Create a pixmap. */
     w->pixmap = xcb_generate_id(globalconf.connection);
-    xcb_create_pixmap(globalconf.connection, s->root_depth, w->pixmap, s->root,
+    xcb_create_pixmap(globalconf.connection, globalconf.default_depth, w->pixmap, s->root,
                       w->geometry.width, w->geometry.height);
 
     /* Update draw context physical screen, important for Zaphod. */
@@ -243,7 +243,7 @@ wibox_moveresize(lua_State *L, int udx, area_t geometry)
                 xcb_free_pixmap(globalconf.connection, w->ctx.pixmap);
             w->pixmap = xcb_generate_id(globalconf.connection);
             xcb_screen_t *s = globalconf.screen;
-            xcb_create_pixmap(globalconf.connection, s->root_depth, w->pixmap, s->root,
+            xcb_create_pixmap(globalconf.connection, globalconf.default_depth, w->pixmap, s->root,
                               w->geometry.width, w->geometry.height);
             wibox_draw_context_update(w);
         }

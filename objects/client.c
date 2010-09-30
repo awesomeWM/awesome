@@ -428,9 +428,9 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, bool startup)
     /* Store window */
     c->window = w;
     c->frame_window = xcb_generate_id(globalconf.connection);
-    xcb_create_window(globalconf.connection, s->root_depth, c->frame_window, s->root,
+    xcb_create_window(globalconf.connection, globalconf.default_depth, c->frame_window, s->root,
                       wgeom->x, wgeom->y, wgeom->width, wgeom->height,
-                      wgeom->border_width, XCB_COPY_FROM_PARENT, s->root_visual,
+                      wgeom->border_width, XCB_COPY_FROM_PARENT, globalconf.visual->visual_id,
                       XCB_CW_BACK_PIXEL | XCB_CW_BORDER_PIXEL | XCB_CW_BIT_GRAVITY
                       | XCB_CW_WIN_GRAVITY | XCB_CW_OVERRIDE_REDIRECT | XCB_CW_EVENT_MASK,
                       (const uint32_t [])

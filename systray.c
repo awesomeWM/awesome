@@ -42,11 +42,11 @@ systray_init(void)
     xcb_screen_t *xscreen = globalconf.screen;
 
     globalconf.systray.window = xcb_generate_id(globalconf.connection);
-    xcb_create_window(globalconf.connection, xscreen->root_depth,
+    xcb_create_window(globalconf.connection, globalconf.default_depth,
                       globalconf.systray.window,
                       xscreen->root,
                       -1, -1, 1, 1, 0,
-                      XCB_COPY_FROM_PARENT, xscreen->root_visual, 0, NULL);
+                      XCB_COPY_FROM_PARENT, globalconf.visual->visual_id, 0, NULL);
 }
 
 

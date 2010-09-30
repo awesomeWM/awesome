@@ -134,7 +134,7 @@ xcolor_init_unchecked(xcolor_t *color, const char *colstr, ssize_t len)
     req.alpha = RGB_8TO16(alpha);
 
     req.cookie_hexa = xcb_alloc_color_unchecked(globalconf.connection,
-                                                globalconf.screen->default_colormap,
+                                                globalconf.default_cmap,
                                                 RGB_8TO16(red),
                                                 RGB_8TO16(green),
                                                 RGB_8TO16(blue));
