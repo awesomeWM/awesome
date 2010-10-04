@@ -42,18 +42,11 @@ systray_init(void)
     xcb_screen_t *xscreen = globalconf.screen;
 
     globalconf.systray.window = xcb_generate_id(globalconf.connection);
-    xcb_create_window(globalconf.connection, globalconf.default_depth,
+    xcb_create_window(globalconf.connection, xscreen->root_depth,
                       globalconf.systray.window,
                       xscreen->root,
                       -1, -1, 1, 1, 0,
-                      XCB_COPY_FROM_PARENT, globalconf.visual->visual_id,
-                      XCB_CW_BACK_PIXEL | XCB_CW_BORDER_PIXEL | XCB_CW_COLORMAP,
-                      (const uint32_t [])
-                      {
-                          globalconf.colors.bg.pixel,
-                          globalconf.colors.bg.pixel,
-                          globalconf.default_cmap
-                      });
+                      XCB_COPY_FROM_PARENT, xscreen->root_visual, 0, NULL);
 }
 
 
