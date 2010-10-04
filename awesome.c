@@ -464,9 +464,22 @@ main(int argc, char **argv)
 
     /* The default GC is just a newly created associated with a window with
      * depth globalconf.default_depth */
+    xcb_window_t tmp_win = xcb_generate_id(globalconf.connection);
     globalconf.gc = xcb_generate_id(globalconf.connection);
-    xcb_create_gc(globalconf.connection, globalconf.gc, globalconf.systray.window, XCB_GC_FOREGROUND | XCB_GC_BACKGROUND,
+    xcb_create_window(globalconf.connection, globalconf.default_depth,
+                      tmp_win, globalconf.screen->root,
+                      -1, -1, 1, 1, 0,
+                      XCB_COPY_FROM_PARENT, globalconf.visual->visual_id,
+                      XCB_CW_BACK_PIXEL | XCB_CW_BORDER_PIXEL | XCB_CW_COLORMAP,
+                      (const uint32_t [])
+                      {
+                          globalconf.colors.bg.pixel,
+                          globalconf.colors.bg.pixel,
+                          globalconf.default_cmap
+                      });
+    xcb_create_gc(globalconf.connection, globalconf.gc, tmp_win, XCB_GC_FOREGROUND | XCB_GC_BACKGROUND,
                   (const uint32_t[]) { globalconf.screen->black_pixel, globalconf.screen->white_pixel });
+    xcb_destroy_window(globalconf.connection, tmp_win);
 
     /* Parse and run configuration file */
     if (!luaA_parserc(&xdg, confpath, true))
