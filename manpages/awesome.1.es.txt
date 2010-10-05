@@ -50,6 +50,8 @@ OPCIONES
 '$XDG_CONFIG_HOME/awesome/rc.lua'.
 *-k*, *--check*::
     Verifica la sintaxis del archivo de configuración.
+*-a*, *--no-argb*::
+    No utilice colores ARGB.
 
 ATAJOS DE RAtÓN POR OMISIÓN
 ---------------------------

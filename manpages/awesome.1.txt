@@ -42,6 +42,8 @@ OPTIONS
     Use an alternate configuration file instead of '$XDG_CONFIG_HOME/awesome/rc.lua'.
 *-k*, *--check*::
     Check configuration file syntax.
+*-a*, *--no-argb*::
+    Don't use ARGB visuals.
 
 DEFAULT MOUSE BINDINGS
 -----------------------

@@ -52,6 +52,8 @@ OPTIONS
 '$XDG_CONFIG_HOME/awesome/rc.lua'.
 *-k*, *--check*::
     Vérifie la syntaxe du fichier de configuration.
+*-a*, *--no-argb*::
+    N'utiliser pas couleur ARGB.
 
 ASSOCIATIONS AVEC LA SOURIS (PAR DÉFAUT)
 ----------------------------------------

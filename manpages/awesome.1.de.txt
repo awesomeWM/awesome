@@ -32,7 +32,9 @@ OPTIONEN
 *-c*, *--config* 'Datei'::
     Nutzung einer alternativen Konfigurationsdatei, statt '$XDG_CONFIG_HOME/awesome/rc.lua'.
 *-k*, *--check*::
-    Überprüft die Syntax der Konfigurationsdatei.
+    Überprüft die Konfigurationsdatei auf Syntaxfehler.
+*-a*, *--no-argb*::
+    Verwende keine ARGB-Visuals
 
 TASTENBELEGUNG FÜR MAUSZEIGER
 -----------------------------

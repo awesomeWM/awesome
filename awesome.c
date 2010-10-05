@@ -307,12 +307,14 @@ main(int argc, char **argv)
     xcolor_init_request_t colors_reqs[2];
     ssize_t cmdlen = 1;
     xdgHandle xdg;
+    bool no_argb = false;
     static struct option long_options[] =
     {
         { "help",    0, NULL, 'h' },
         { "version", 0, NULL, 'v' },
         { "config",  1, NULL, 'c' },
         { "check",   0, NULL, 'k' },
+        { "no-argb", 0, NULL, 'a' },
         { NULL,      0, NULL, 0 }
     };
 
@@ -379,6 +381,9 @@ main(int argc, char **argv)
             else
                 fatal("-c option requires a file name");
             break;
+          case 'a':
+            no_argb = true;
+            break;
         }
 
     globalconf.loop = ev_default_loop(EVFLAG_NOSIGFD);
@@ -404,7 +409,8 @@ main(int argc, char **argv)
         fatal("cannot open display");
 
     globalconf.screen = xcb_aux_get_screen(globalconf.connection, globalconf.default_screen);
-    globalconf.visual = a_argb_visual(globalconf.screen);
+    if(!no_argb)
+        globalconf.visual = a_argb_visual(globalconf.screen);
     if(!globalconf.visual)
         globalconf.visual = a_default_visual(globalconf.screen);
     globalconf.default_depth = a_visual_depth(globalconf.screen, globalconf.visual->visual_id);
