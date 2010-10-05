@@ -344,6 +344,8 @@ widget_render(wibox_t *wibox)
             widgets->tab[i].widget->draw(widgets->tab[i].widget,
                                          ctx, widgets->tab[i].geometry, wibox);
 
+    cairo_surface_flush(ctx->surface);
+
     switch(wibox->orientation)
     {
         case South:
