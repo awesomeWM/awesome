@@ -303,8 +303,7 @@ int
 main(int argc, char **argv)
 {
     char *confpath = NULL;
-    int xfd, i, opt, colors_nbr;
-    xcolor_init_request_t colors_reqs[2];
+    int xfd, i, opt;
     ssize_t cmdlen = 1;
     xdgHandle xdg;
     bool no_argb = false;
@@ -484,17 +483,8 @@ main(int argc, char **argv)
     /* init screens information */
     screen_scan();
 
-    /* init default font and colors */
-    colors_reqs[0] = xcolor_init_unchecked(&globalconf.colors.fg,
-                                           "#000000", sizeof("#000000") - 1);
-
-    colors_reqs[1] = xcolor_init_unchecked(&globalconf.colors.bg,
-                                           "#ffffff", sizeof("#ffffff") - 1);
-
+    /* init default font */
     globalconf.font = font_new("sans 8");
-
-    for(colors_nbr = 0; colors_nbr < 2; colors_nbr++)
-        xcolor_init_reply(colors_reqs[colors_nbr]);
 
     xutil_lock_mask_get(globalconf.connection, xmapping_cookie,
                         globalconf.keysyms, &globalconf.numlockmask,
@@ -519,8 +509,8 @@ main(int argc, char **argv)
                       XCB_CW_BACK_PIXEL | XCB_CW_BORDER_PIXEL | XCB_CW_COLORMAP,
                       (const uint32_t [])
                       {
-                          globalconf.colors.bg.pixel,
-                          globalconf.colors.bg.pixel,
+                          globalconf.screen->black_pixel,
+                          globalconf.screen->black_pixel,
                           globalconf.default_cmap
                       });
     xcb_create_gc(globalconf.connection, globalconf.gc, tmp_win, XCB_GC_FOREGROUND | XCB_GC_BACKGROUND,

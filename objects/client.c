@@ -435,8 +435,8 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, bool startup)
                       | XCB_CW_COLORMAP,
                       (const uint32_t [])
                       {
-                          globalconf.colors.bg.pixel,
-                          globalconf.colors.bg.pixel,
+                          globalconf.screen->black_pixel,
+                          globalconf.screen->black_pixel,
                           XCB_GRAVITY_NORTH_WEST,
                           XCB_GRAVITY_NORTH_WEST,
                           1,

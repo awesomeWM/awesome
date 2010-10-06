@@ -400,10 +400,6 @@ luaA_awesome_index(lua_State *L)
         lua_pushnumber(L, globalconf.font->height);
     else if(a_strcmp(buf, "conffile") == 0)
         lua_pushstring(L, conffile);
-    else if(a_strcmp(buf, "fg") == 0)
-        luaA_pushxcolor(L, globalconf.colors.fg);
-    else if(a_strcmp(buf, "bg") == 0)
-        luaA_pushxcolor(L, globalconf.colors.bg);
     else if(a_strcmp(buf, "version") == 0)
         lua_pushliteral(L, AWESOME_VERSION);
     else if(a_strcmp(buf, "release") == 0)
@@ -431,18 +427,6 @@ luaA_awesome_newindex(lua_State *L)
         const char *newfont = luaL_checkstring(L, 3);
         font_delete(&globalconf.font);
         globalconf.font = font_new(newfont);
-    }
-    else if(a_strcmp(buf, "fg") == 0)
-    {
-        size_t len;
-        if((buf = luaL_checklstring(L, 3, &len)))
-           xcolor_init_reply(xcolor_init_unchecked(&globalconf.colors.fg, buf, len));
-    }
-    else if(a_strcmp(buf, "bg") == 0)
-    {
-        size_t len;
-        if((buf = luaL_checklstring(L, 3, &len)))
-           xcolor_init_reply(xcolor_init_unchecked(&globalconf.colors.bg, buf, len));
     }
 
     return 0;

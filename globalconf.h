@@ -75,11 +75,6 @@ typedef struct
     client_array_t stack;
     /** Lua VM state */
     lua_State *L;
-    /** Default colors */
-    struct
-    {
-        xcolor_t fg, bg;
-    } colors;
     /** Default font */
     font_t *font;
     /** The event loop */
