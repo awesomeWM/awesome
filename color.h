@@ -33,14 +33,12 @@ typedef struct
     uint16_t red;
     uint16_t green;
     uint16_t blue;
-    uint16_t alpha;
     bool initialized;
 } color_t;
 
 typedef struct
 {
     xcb_alloc_color_cookie_t cookie_hexa;
-    uint16_t alpha;
     color_t *color;
     bool has_error;
     const char *colstr;

@@ -35,35 +35,18 @@
  * \param red A pointer to the red color to fill.
  * \param green A pointer to the green color to fill.
  * \param blue A pointer to the blue color to fill.
- * \param alpha A pointer to the alpha color to fill.
  * \return True if everything alright.
  */
 static bool
 color_parse(const char *colstr, ssize_t len,
-            uint8_t *red, uint8_t *green, uint8_t *blue, uint8_t *alpha)
+            uint8_t *red, uint8_t *green, uint8_t *blue)
 {
     unsigned long colnum;
     char *p;
 
-    if(len == 7)
+    colnum = strtoul(colstr + 1, &p, 16);
+    if(len != 7 || (p - colstr) != 7 || colstr[0] != '#')
     {
-        colnum = strtoul(colstr + 1, &p, 16);
-        if(p - colstr != 7)
-            goto invalid;
-        *alpha = 0xff;
-    }
-    /* we have alpha */
-    else if(len == 9)
-    {
-        colnum = strtoul(colstr + 1, &p, 16);
-        if(p - colstr != 9)
-            goto invalid;
-        *alpha = colnum & 0xff;
-        colnum >>= 8;
-    }
-    else
-    {
-      invalid:
         warn("awesome: error, invalid color '%s'", colstr);
         return false;
     }
@@ -87,7 +70,7 @@ color_init_request_t
 color_init_unchecked(color_t *color, const char *colstr, ssize_t len)
 {
     color_init_request_t req;
-    uint8_t red, green, blue, alpha;
+    uint8_t red, green, blue;
 
     p_clear(&req, 1);
 
@@ -97,18 +80,15 @@ color_init_unchecked(color_t *color, const char *colstr, ssize_t len)
         return req;
     }
 
-    req.alpha = 0xffff;
     req.color = color;
 
     /* The color is given in RGB value */
-    if(!color_parse(colstr, len, &red, &green, &blue, &alpha))
+    if(!color_parse(colstr, len, &red, &green, &blue))
     {
         warn("awesome: error, invalid color '%s'", colstr);
         req.has_error = true;
         return req;
     }
-
-    req.alpha = RGB_8TO16(alpha);
 
     req.cookie_hexa = xcb_alloc_color_unchecked(globalconf.connection,
                                                 globalconf.default_cmap,
@@ -141,7 +121,6 @@ color_init_reply(color_init_request_t req)
         req.color->red   = hexa_color->red;
         req.color->green = hexa_color->green;
         req.color->blue  = hexa_color->blue;
-        req.color->alpha = req.alpha;
         req.color->initialized = true;
         p_delete(&hexa_color);
         return true;
@@ -162,14 +141,8 @@ luaA_pushcolor(lua_State *L, const color_t c)
     uint8_t r = (unsigned) c.red   * 0xff / 0xffff;
     uint8_t g = (unsigned) c.green * 0xff / 0xffff;
     uint8_t b = (unsigned) c.blue  * 0xff / 0xffff;
-    uint8_t a = (unsigned) c.alpha * 0xff / 0xffff;
     char s[10];
-    int len;
-    /* do not print alpha if it's full */
-    if(a == 0xff)
-        len = snprintf(s, sizeof(s), "#%02x%02x%02x", r, g, b);
-    else
-        len = snprintf(s, sizeof(s), "#%02x%02x%02x%02x", r, g, b, a);
+    int len = snprintf(s, sizeof(s), "#%02x%02x%02x", r, g, b);
     lua_pushlstring(L, s, len);
     return 1;
 }
