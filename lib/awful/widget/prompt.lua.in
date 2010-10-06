@@ -6,11 +6,12 @@
 
 local setmetatable = setmetatable
 
-local capi = { widget = widget }
 local completion = require("awful.completion")
 local util = require("awful.util")
 local prompt = require("awful.prompt")
 local layout = require("awful.widget.layout")
+local widget_base = require("wibox.widget.base")
+local textbox = require("wibox.widget.textbox")
 local type = type
 
 module("awful.widget.prompt")
@@ -31,19 +32,17 @@ local function run(promptbox)
 end
 
 --- Create a prompt widget which will launch a command.
--- @param args Standard widget table arguments, with prompt to change the
--- default prompt.
+-- @param args Arguments table. "prompt" is the prompt to use.
 -- @return A launcher widget.
 function new(args)
     local args = args or {}
-    local promptbox = {}
-    args.type = "textbox"
-    promptbox.widget = capi.widget(args)
-    promptbox.widget.ellipsize = "start"
-    promptbox[1] = promptbox.widget
+    local widget = textbox()
+    local promptbox = widget_base.make_widget(widget)
+
+    promptbox.widget = widget
+    promptbox.widget:set_ellipsize("start")
     promptbox.run = run
     promptbox.prompt = args.prompt or "Run: "
-    promptbox.layout = args.layout or layout.horizontal.leftright
     return promptbox
 end
 
