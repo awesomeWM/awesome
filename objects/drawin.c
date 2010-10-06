@@ -234,17 +234,17 @@ drawin_moveresize(lua_State *L, int udx, area_t geometry)
     }
     else
     {
-#define DO_drawin_GEOMETRY_CHECK_AND_EMIT(prop) \
+#define DO_DRAWIN_GEOMETRY_CHECK_AND_EMIT(prop) \
         if(w->geometry.prop != geometry.prop) \
         { \
             w->geometry.prop = geometry.prop; \
             luaA_object_emit_signal(L, udx, "property::" #prop, 0); \
         }
-        DO_drawin_GEOMETRY_CHECK_AND_EMIT(x)
-        DO_drawin_GEOMETRY_CHECK_AND_EMIT(y)
-        DO_drawin_GEOMETRY_CHECK_AND_EMIT(width)
-        DO_drawin_GEOMETRY_CHECK_AND_EMIT(height)
-#undef DO_drawin_GEOMETRY_CHECK_AND_EMIT
+        DO_DRAWIN_GEOMETRY_CHECK_AND_EMIT(x)
+        DO_DRAWIN_GEOMETRY_CHECK_AND_EMIT(y)
+        DO_DRAWIN_GEOMETRY_CHECK_AND_EMIT(width)
+        DO_DRAWIN_GEOMETRY_CHECK_AND_EMIT(height)
+#undef DO_DRAWIN_GEOMETRY_CHECK_AND_EMIT
     }
 }
 
@@ -257,8 +257,8 @@ drawin_moveresize(lua_State *L, int udx, area_t geometry)
  */
 void
 drawin_refresh_pixmap_partial(drawin_t *drawin,
-                             int16_t x, int16_t y,
-                             uint16_t w, uint16_t h)
+                              int16_t x, int16_t y,
+                              uint16_t w, uint16_t h)
 {
     xcb_copy_area(globalconf.connection, drawin->pixmap,
                   drawin->window, globalconf.gc, x, y, x, y,
@@ -441,7 +441,6 @@ luaA_drawin_new(lua_State *L)
     return 1;
 }
 
-
 /* Set or get the drawin geometry.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
@@ -479,9 +478,9 @@ static int
 luaA_drawin_set_x(lua_State *L, drawin_t *drawin)
 {
     drawin_moveresize(L, -3, (area_t) { .x = luaL_checknumber(L, -1),
-                                       .y = drawin->geometry.y,
-                                       .width = drawin->geometry.width,
-                                       .height = drawin->geometry.height });
+                                        .y = drawin->geometry.y,
+                                        .width = drawin->geometry.width,
+                                        .height = drawin->geometry.height });
     return 0;
 }
 
@@ -496,9 +495,9 @@ static int
 luaA_drawin_set_y(lua_State *L, drawin_t *drawin)
 {
     drawin_moveresize(L, -3, (area_t) { .x = drawin->geometry.x,
-                                       .y = luaL_checknumber(L, -1),
-                                       .width = drawin->geometry.width,
-                                       .height = drawin->geometry.height });
+                                        .y = luaL_checknumber(L, -1),
+                                        .width = drawin->geometry.width,
+                                        .height = drawin->geometry.height });
     return 0;
 }
 
@@ -516,9 +515,9 @@ luaA_drawin_set_width(lua_State *L, drawin_t *drawin)
     if(width <= 0)
         luaL_error(L, "invalid width");
     drawin_moveresize(L, -3, (area_t) { .x = drawin->geometry.x,
-                                       .y = drawin->geometry.y,
-                                       .width = width,
-                                       .height = drawin->geometry.height });
+                                        .y = drawin->geometry.y,
+                                        .width = width,
+                                        .height = drawin->geometry.height });
     return 0;
 }
 
