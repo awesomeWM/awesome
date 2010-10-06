@@ -225,6 +225,15 @@ a_xcb_check_cb(EV_P_ ev_check *w, int revents)
         }
         else
         {
+            uint8_t type = XCB_EVENT_RESPONSE_TYPE(event);
+            if((type == XCB_ENTER_NOTIFY || type == XCB_LEAVE_NOTIFY) && mouse)
+            {
+                /* Make sure enter/motion/leave events are handled in the
+                 * correct order */
+                event_handle(mouse);
+                p_delete(&mouse);
+                mouse = NULL;
+            }
             event_handle(event);
             p_delete(&event);
         }
