@@ -10,31 +10,24 @@ local button = require("awful.button")
 local layout = require("awful.layout")
 local tag = require("awful.tag")
 local beautiful = require("beautiful")
-local capi = { oocairo = oocairo,
-               widget = widget }
+local imagebox = require("wibox.widget.imagebox")
+local capi = { oocairo = oocairo }
 
 --- Layoutbox widget.
 module("awful.widget.layoutbox")
 
 local function update(w, screen)
     local layout = layout.getname(layout.get(screen))
-    if layout and beautiful["layout_" ..layout] then
-        w.image = capi.oocairo.image_surface_create_from_png(beautiful["layout_" ..layout])
-    else
-        w.image = nil
-    end
+    w:set_image(layout and beautiful["layout_" .. layout])
 end
 
 --- Create a layoutbox widget. It draws a picture with the current layout
 -- symbol of the current tag.
 -- @param screen The screen number that the layout will be represented for.
--- @param args Standard arguments for an imagebox widget.
 -- @return An imagebox widget configured as a layoutbox.
-function new(screen, args)
+function new(screen)
     local screen = screen or 1
-    local args = args or {}
-    args.type = "imagebox"
-    local w = capi.widget(args)
+    local w = imagebox()
     update(w, screen)
 
     local function update_on_tag_selection(tag)
