@@ -43,7 +43,6 @@ set(AWE_SRCS
     ${SOURCE_DIR}/draw.c
     ${SOURCE_DIR}/event.c
     ${SOURCE_DIR}/ewmh.c
-    ${SOURCE_DIR}/font.c
     ${SOURCE_DIR}/keygrabber.c
     ${SOURCE_DIR}/keyresolv.c
     ${SOURCE_DIR}/luaa.c

@@ -24,7 +24,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
-#include <glib/gspawn.h>
+#include <glib.h>
 
 #include "spawn.h"
 #include "screen.h"

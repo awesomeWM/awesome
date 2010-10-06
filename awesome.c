@@ -483,9 +483,6 @@ main(int argc, char **argv)
     /* init screens information */
     screen_scan();
 
-    /* init default font */
-    globalconf.font = font_new("sans 8");
-
     xutil_lock_mask_get(globalconf.connection, xmapping_cookie,
                         globalconf.keysyms, &globalconf.numlockmask,
                         &globalconf.shiftlockmask, &globalconf.capslockmask,

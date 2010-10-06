@@ -390,15 +390,7 @@ luaA_awesome_index(lua_State *L)
 
     const char *buf = luaL_checkstring(L, 2);
 
-    if(a_strcmp(buf, "font") == 0)
-    {
-        char *font = pango_font_description_to_string(globalconf.font->desc);
-        lua_pushstring(L, font);
-        g_free(font);
-    }
-    else if(a_strcmp(buf, "font_height") == 0)
-        lua_pushnumber(L, globalconf.font->height);
-    else if(a_strcmp(buf, "conffile") == 0)
+    if(a_strcmp(buf, "conffile") == 0)
         lua_pushstring(L, conffile);
     else if(a_strcmp(buf, "version") == 0)
         lua_pushliteral(L, AWESOME_VERSION);
@@ -408,28 +400,6 @@ luaA_awesome_index(lua_State *L)
         return 0;
 
     return 1;
-}
-
-/** Newindex function for the awesome global table.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- */
-static int
-luaA_awesome_newindex(lua_State *L)
-{
-    if(luaA_usemetatable(L, 1, 2))
-        return 1;
-
-    const char *buf = luaL_checkstring(L, 2);
-
-    if(a_strcmp(buf, "font") == 0)
-    {
-        const char *newfont = luaL_checkstring(L, 3);
-        font_delete(&globalconf.font);
-        globalconf.font = font_new(newfont);
-    }
-
-    return 0;
 }
 
 /** Add a global signal.
@@ -532,7 +502,6 @@ luaA_init(xdgHandle* xdg)
         { "emit_signal", luaA_awesome_emit_signal },
         { "systray", luaA_systray },
         { "__index", luaA_awesome_index },
-        { "__newindex", luaA_awesome_newindex },
         { NULL, NULL }
     };
 

@@ -32,7 +32,6 @@
 
 #include "objects/key.h"
 #include "color.h"
-#include "font.h"
 #include "common/xembed.h"
 
 typedef struct drawin_t drawin_t;
@@ -75,8 +74,6 @@ typedef struct
     client_array_t stack;
     /** Lua VM state */
     lua_State *L;
-    /** Default font */
-    font_t *font;
     /** The event loop */
     struct ev_loop *loop;
     /** The key grabber function */
