@@ -2,6 +2,8 @@
 require("awful")
 require("awful.autofocus")
 require("awful.rules")
+-- Widget and layout library
+require("wibox")
 -- Theme handling library
 require("beautiful")
 -- Notification library
@@ -70,10 +72,7 @@ mylauncher = awful.widget.launcher({ image = beautiful.awesome_icon,
 
 -- {{{ Wibox
 -- Create a textclock widget
-mytextclock = awful.widget.textclock({ align = "right" })
-
--- Create a systray
-mysystray = widget({ type = "systray" })
+mytextclock = awful.widget.textclock()
 
 -- Create a wibox for each screen and add it
 mywibox = {}
@@ -134,24 +133,25 @@ for s = 1, screen.count() do
     -- Create the wibox
     mywibox[s] = awful.wibox({ position = "top", screen = s })
 
-    -- Create a table with widgets that go to the right
-    right_aligned = {
-        layout = awful.widget.layout.horizontal.rightleft
-    }
-    if s == 1 then table.insert(right_aligned, mysystray) end
-    table.insert(right_aligned, mytextclock)
-    table.insert(right_aligned, mylayoutbox[s])
+    -- Widgets that are aligned to the left
+    local left_layout = wibox.layout.fixed.horizontal()
+    left_layout:add(mylauncher)
+    left_layout:add(mytaglist[s])
+    left_layout:add(mypromptbox[s])
 
-    -- Add widgets to the wibox - order matters
-    mywibox[s].widgets = {
-        mylauncher,
-        mytaglist[s],
-        mypromptbox[s],
-        right_aligned,
-        mytasklist[s],
-        layout = awful.widget.layout.horizontal.leftright,
-        height = mywibox[s].height
-    }
+    -- Widgets that are aligned to the right
+    local right_layout = wibox.layout.fixed.horizontal()
+    --if s == 1 then right_layout:add(wibox.widget.systray(true)) end
+    right_layout:add(mytextclock)
+    right_layout:add(mylayoutbox[s])
+
+    -- Now bring it all together (with the tasklist in the middle)
+    local layout = wibox.layout.align.horizontal()
+    layout:set_left(left_layout)
+    layout:set_middle(mytasklist[s])
+    layout:set_right(right_layout)
+
+    mywibox[s]:set_widget(layout)
 end
 -- }}}
 
