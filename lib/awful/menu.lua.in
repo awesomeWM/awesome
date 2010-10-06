@@ -11,9 +11,7 @@ local table = table
 local string = string
 local type = type
 local setmetatable = setmetatable
-local wibox = wibox
-local widget = widget
-local button = require("awful.button")
+local tonumber = tonumber
 local capi =
 {
     screen = screen,
@@ -22,11 +20,11 @@ local capi =
     keygrabber = keygrabber,
     oocairo = oocairo
 }
+local wibox = require("wibox")
+local button = require("awful.button")
 local util = require("awful.util")
 local tags = require("awful.tag")
-local layout = require("awful.widget.layout")
 local awbeautiful = require("beautiful")
-local tonumber = tonumber
 
 --- Creation of menus.
 module("awful.menu")
@@ -69,8 +67,8 @@ end
 
 local function item_leave(menu, num)
     if num > 0 then
-        menu.items[num].wibox.fg = menu.theme.fg_normal
-        menu.items[num].wibox.bg = menu.theme.bg_normal
+        menu.items[num].wibox:set_fg(menu.theme.fg_normal)
+        menu.items[num].wibox:set_bg(menu.theme.bg_normal)
     end
 end
 
@@ -137,8 +135,8 @@ local function item_enter(menu, num, mouse_event)
         item_leave(menu, menu.sel)
     end
 
-    menu.items[num].wibox.fg = menu.theme.fg_focus
-    menu.items[num].wibox.bg = menu.theme.bg_focus
+    menu.items[num].wibox:set_fg(menu.theme.fg_focus)
+    menu.items[num].wibox:set_bg(menu.theme.bg_focus)
     menu.sel = num
     cur_menu = menu
 
@@ -208,7 +206,7 @@ local function add_item(data, num, item_info)
     )
 
     -- Create the item label widget
-    local label = widget({ type = "textbox" })
+    local label = wibox.widget.textbox()
     local key = ''
     label.text = string.gsub(util.escape(item_info[1]), "&amp;(%w)",
                              function (l)
@@ -217,6 +215,8 @@ local function add_item(data, num, item_info)
                              end, 1)
     -- Set icon if needed
     local iconbox
+    local margin = wibox.layout.margin()
+    margin:set_widget(label)
     if item_info[3] then
         local icon = type(item_info[3]) == "string" and capi.oocairo.image_surface_create_from_png(item_info[3]) or item_info[3]
         local width = icon:get_width()
@@ -236,11 +236,11 @@ local function add_item(data, num, item_info)
             cr:paint()
             icon = img
         end
-        iconbox = widget { type = "imagebox" }
-        iconbox.image = icon
-        layout.margins[label] = { left = 2 }
+        iconbox = wibox.widget.imagebox()
+        iconbox:set_image(icon)
+        margin:set_left(2)
     else
-        layout.margins[label] = { left = data.h + 2 }
+        margin:set_left(data.h + 2)
     end
 
     item:buttons(bindings)
@@ -251,28 +251,31 @@ local function add_item(data, num, item_info)
     -- Create the submenu icon widget
     local submenu
     if type(item_info[2]) == "table" then
-        submenu = widget({ type = "imagebox" })
-        submenu.image = data.theme.submenu_icon and capi.oocairo.image_surface_create_from_png(data.theme.submenu_icon)
+        submenu = wibox.widget.imagebox()
+        if data.theme.submenu_icon then
+            submenu:set_image(capi.oocairo.image_surface_create_from_png(data.theme.submenu_icon))
+        end
         submenu:buttons(bindings)
     end
 
     -- Add widgets to the wibox
+    local left = wibox.layout.fixed.horizontal()
     if iconbox then
-        item.widgets = {
-            iconbox,
-            label,
-            { submenu, layout = layout.horizontal.rightleft },
-            layout = layout.horizontal.leftright
-        }
-    else
-        item.widgets = {
-            label,
-            { submenu, layout = layout.horizontal.rightleft },
-            layout = layout.horizontal.leftright
-        }
+        left:add(iconbox)
+    end
+    -- This contains the label
+    left:add(margin)
+
+    local layout = wibox.layout.align.horizontal()
+    layout:set_left(left)
+    if submenu then
+        layout:set_right(submenu)
     end
 
-    item.height = label:extents().height + 2
+    item:set_widget(layout)
+
+    local w, h = label:fit(0, 0)
+    item.height = h + 2
     item.ontop = true
 
     return { wibox = item, akey= key, cmd = item_info[2], returned_value=item_info[1] }
