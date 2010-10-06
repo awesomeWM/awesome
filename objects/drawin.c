@@ -260,6 +260,8 @@ drawin_refresh_pixmap_partial(drawin_t *drawin,
                               int16_t x, int16_t y,
                               uint16_t w, uint16_t h)
 {
+    /* Make cairo do all pending drawing */
+    cairo_surface_flush(drawin->surface);
     xcb_copy_area(globalconf.connection, drawin->pixmap,
                   drawin->window, globalconf.gc, x, y, x, y,
                   w, h);
@@ -636,6 +638,31 @@ luaA_drawin_set_visible(lua_State *L, drawin_t *drawin)
     return 0;
 }
 
+/** Get a drawin's surface
+ * \param L The Lua VM state.
+ * \param drawin The drawin object.
+ * \return The number of elements pushed on stack.
+ */
+static int
+luaA_drawin_get_surface(lua_State *L, drawin_t *drawin)
+{
+    return oocairo_surface_push(L, drawin->surface);
+}
+
+/** Refresh a drawin's content. This has to be called whenever some drawing to
+ * the drawin's surface has been done and should become visible.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ */
+static int
+luaA_drawin_refresh(lua_State *L)
+{
+    drawin_t *drawin = luaA_checkudata(L, 1, &drawin_class);
+    drawin_refresh_pixmap(drawin);
+
+    return 0;
+}
+
 void
 drawin_class_setup(lua_State *L)
 {
@@ -651,6 +678,7 @@ drawin_class_setup(lua_State *L)
         LUA_OBJECT_META(drawin)
         LUA_CLASS_META
         { "geometry", luaA_drawin_geometry },
+        { "refresh", luaA_drawin_refresh },
         { NULL, NULL },
     };
 
@@ -660,6 +688,10 @@ drawin_class_setup(lua_State *L)
                      NULL,
                      luaA_class_index_miss_property, luaA_class_newindex_miss_property,
                      drawin_methods, drawin_meta);
+    luaA_class_add_property(&drawin_class, "surface",
+                            NULL,
+                            (lua_class_propfunc_t) luaA_drawin_get_surface,
+                            NULL);
     luaA_class_add_property(&drawin_class, "visible",
                             (lua_class_propfunc_t) luaA_drawin_set_visible,
                             (lua_class_propfunc_t) luaA_drawin_get_visible,
