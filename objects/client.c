@@ -25,7 +25,6 @@
 #include "objects/tag.h"
 #include "ewmh.h"
 #include "screen.h"
-#include "wibox.h"
 #include "systray.h"
 #include "property.h"
 #include "spawn.h"

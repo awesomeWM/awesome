@@ -1,7 +1,8 @@
 /*
- * wibox.h - wibox functions header
+ * drawin.h - drawin functions header
  *
  * Copyright © 2007-2009 Julien Danjou <julien@danjou.info>
+ * Copyright ©      2010 Uli Schlachter <psychon@znc.in>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,15 +20,15 @@
  *
  */
 
-#ifndef AWESOME_OBJECTS_WIBOX_H
-#define AWESOME_OBJECTS_WIBOX_H
+#ifndef AWESOME_OBJECTS_DRAWIN_H
+#define AWESOME_OBJECTS_DRAWIN_H
 
 #include "objects/window.h"
 #include "common/luaobject.h"
 #include "draw.h"
 
-/** Wibox type */
-struct wibox_t
+/** Drawin type */
+struct drawin_t
 {
     WINDOW_OBJECT_HEADER
     /** Ontop */
@@ -48,17 +49,17 @@ struct wibox_t
     orientation_t orientation;
 };
 
-void wibox_unref_simplified(wibox_t **);
+void drawin_unref_simplified(drawin_t **);
 
-ARRAY_FUNCS(wibox_t *, wibox, wibox_unref_simplified)
+ARRAY_FUNCS(drawin_t *, drawin, drawin_unref_simplified)
 
-wibox_t * wibox_getbywin(xcb_window_t);
+drawin_t * drawin_getbywin(xcb_window_t);
 
-void wibox_refresh_pixmap_partial(wibox_t *, int16_t, int16_t, uint16_t, uint16_t);
+void drawin_refresh_pixmap_partial(drawin_t *, int16_t, int16_t, uint16_t, uint16_t);
 
-void wibox_class_setup(lua_State *);
+void drawin_class_setup(lua_State *);
 
-lua_class_t wibox_class;
+lua_class_t drawin_class;
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

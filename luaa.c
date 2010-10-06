@@ -41,6 +41,7 @@
 #include "spawn.h"
 #include "objects/tag.h"
 #include "objects/client.h"
+#include "objects/drawin.h"
 #include "screen.h"
 #include "event.h"
 #include "selection.h"
@@ -599,8 +600,8 @@ luaA_init(xdgHandle* xdg)
     /* Export window */
     window_class_setup(L);
 
-    /* Export wibox */
-    wibox_class_setup(L);
+    /* Export drawin */
+    drawin_class_setup(L);
 
     /* Export client */
     client_class_setup(L);

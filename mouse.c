@@ -23,7 +23,7 @@
 #include "screen.h"
 #include "objects/client.h"
 #include "globalconf.h"
-#include "objects/wibox.h"
+#include "objects/drawin.h"
 #include "luaa.h"
 #include "common/xutil.h"
 
@@ -228,11 +228,11 @@ luaA_mouse_object_under_pointer(lua_State *L)
     if(!mouse_query_pointer_root(&mouse_x, &mouse_y, &child, NULL))
         return 0;
 
-    wibox_t *wibox;
+    drawin_t *drawin;
     client_t *client;
-    if((wibox = wibox_getbywin(child)))
+    if((drawin = drawin_getbywin(child)))
     {
-        luaA_object_push(L, wibox);
+        luaA_object_push(L, drawin);
 
         return 1;
     }

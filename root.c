@@ -23,7 +23,7 @@
 
 #include "globalconf.h"
 #include "objects/button.h"
-#include "objects/wibox.h"
+#include "objects/drawin.h"
 #include "luaa.h"
 #include "xwindow.h"
 #include "common/xcursor.h"
@@ -202,20 +202,20 @@ luaA_root_cursor(lua_State *L)
     return 0;
 }
 
-/** Get the wiboxes attached to a screen.
+/** Get the drawins attached to a screen.
  * \param L The Lua VM state.
  * \return The number of element pushed on stack.
  * \luastack
- * \lreturn A table with all wiboxes.
+ * \lreturn A table with all drawins.
  */
 static int
-luaA_root_wiboxes(lua_State *L)
+luaA_root_drawins(lua_State *L)
 {
-    lua_createtable(L, globalconf.wiboxes.len, 0);
+    lua_createtable(L, globalconf.drawins.len, 0);
 
-    for(int i = 0; i < globalconf.wiboxes.len; i++)
+    for(int i = 0; i < globalconf.drawins.len; i++)
     {
-        luaA_object_push(L, globalconf.wiboxes.tab[i]);
+        luaA_object_push(L, globalconf.drawins.tab[i]);
         lua_rawseti(L, -2, i + 1);
     }
 
@@ -228,7 +228,7 @@ const struct luaL_reg awesome_root_lib[] =
     { "keys", luaA_root_keys },
     { "cursor", luaA_root_cursor },
     { "fake_input", luaA_root_fake_input },
-    { "wiboxes", luaA_root_wiboxes },
+    { "drawins", luaA_root_drawins },
     { NULL, NULL }
 };
 

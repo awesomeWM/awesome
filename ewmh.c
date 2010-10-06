@@ -29,7 +29,6 @@
 #include "objects/tag.h"
 #include "screen.h"
 #include "objects/client.h"
-#include "objects/wibox.h"
 #include "luaa.h"
 #include "common/atoms.h"
 #include "common/buffer.h"

@@ -70,10 +70,10 @@ set(AWE_SRCS
     ${SOURCE_DIR}/common/xutil.c
     ${SOURCE_DIR}/objects/button.c
     ${SOURCE_DIR}/objects/client.c
+    ${SOURCE_DIR}/objects/drawin.c
     ${SOURCE_DIR}/objects/key.c
     ${SOURCE_DIR}/objects/tag.c
     ${SOURCE_DIR}/objects/timer.c
-    ${SOURCE_DIR}/objects/wibox.c
     ${SOURCE_DIR}/objects/window.c)
 
 set(AWE_MAN_SRCS

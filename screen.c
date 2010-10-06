@@ -29,7 +29,7 @@
 #include "ewmh.h"
 #include "objects/tag.h"
 #include "objects/client.h"
-#include "objects/wibox.h"
+#include "objects/drawin.h"
 #include "luaa.h"
 #include "common/xutil.h"
 
@@ -298,10 +298,10 @@ screen_area_get(screen_t *screen, bool strut)
         if(client_isvisible(*c, screen))
             COMPUTE_STRUT(*c)
 
-    foreach(wibox, globalconf.wiboxes)
-        if((*wibox)->visible
-           && (*wibox)->screen == screen)
-            COMPUTE_STRUT(*wibox)
+    foreach(drawin, globalconf.drawins)
+        if((*drawin)->visible
+           && (*drawin)->screen == screen)
+            COMPUTE_STRUT(*drawin)
 
 #undef COMPUTE_STRUT
 

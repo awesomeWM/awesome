@@ -25,7 +25,7 @@
 #include "property.h"
 #include "objects/client.h"
 #include "ewmh.h"
-#include "objects/wibox.h"
+#include "objects/drawin.h"
 #include "xwindow.h"
 #include "luaa.h"
 #include "common/atoms.h"
@@ -334,7 +334,7 @@ property_handle_xrootpmap_id(uint8_t state,
 {
 #warning
 #if 0
-    foreach(w, globalconf.wiboxes)
+    foreach(w, globalconf.drawins)
        (*w)->need_update = true;
 #endif
 
@@ -345,12 +345,12 @@ static int
 property_handle_net_wm_opacity(uint8_t state,
                                xcb_window_t window)
 {
-    wibox_t *wibox = wibox_getbywin(window);
+    drawin_t *drawin = drawin_getbywin(window);
 
-    if(wibox)
+    if(drawin)
     {
-        luaA_object_push(globalconf.L, wibox);
-        window_set_opacity(globalconf.L, -1, xwindow_get_opacity(wibox->window));
+        luaA_object_push(globalconf.L, drawin);
+        window_set_opacity(globalconf.L, -1, xwindow_get_opacity(drawin->window));
         lua_pop(globalconf.L, -1);
     }
     else

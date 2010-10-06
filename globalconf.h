@@ -35,7 +35,7 @@
 #include "font.h"
 #include "common/xembed.h"
 
-typedef struct wibox_t wibox_t;
+typedef struct drawin_t drawin_t;
 typedef struct a_screen screen_t;
 typedef struct button_t button_t;
 typedef struct widget_t widget_t;
@@ -46,7 +46,7 @@ ARRAY_TYPE(button_t *, button)
 ARRAY_TYPE(tag_t *, tag)
 ARRAY_TYPE(screen_t, screen)
 ARRAY_TYPE(client_t *, client)
-ARRAY_TYPE(wibox_t *, wibox)
+ARRAY_TYPE(drawin_t *, drawin)
 
 /** Main configuration structure */
 typedef struct
@@ -92,8 +92,8 @@ typedef struct
     client_t *prev_client_focus;
     /** Focused client */
     client_t *client_focus;
-    /** Wiboxes */
-    wibox_array_t wiboxes;
+    /** Drawins */
+    drawin_array_t drawins;
     /** The startup notification display struct */
     SnDisplay *sndisplay;
     /** Latest timestamp we got from the X server */

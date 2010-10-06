@@ -26,7 +26,6 @@
 #include "screen.h"
 #include "systray.h"
 #include "xwindow.h"
-#include "objects/wibox.h"
 #include "common/array.h"
 #include "common/atoms.h"
 #include "common/xutil.h"

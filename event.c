@@ -29,6 +29,7 @@
 #include "event.h"
 #include "property.h"
 #include "objects/tag.h"
+#include "objects/drawin.h"
 #include "xwindow.h"
 #include "ewmh.h"
 #include "objects/client.h"
@@ -162,7 +163,7 @@ static void
 event_handle_button(xcb_button_press_event_t *ev)
 {
     client_t *c;
-    wibox_t *wibox;
+    drawin_t *drawin;
 
     globalconf.timestamp = ev->time;
 
@@ -175,23 +176,23 @@ event_handle_button(xcb_button_press_event_t *ev)
      * drop them */
     ev->state &= 0x00ff;
 
-    if((wibox = wibox_getbywin(ev->event))
-       || (wibox = wibox_getbywin(ev->child)))
+    if((drawin = drawin_getbywin(ev->event))
+       || (drawin = drawin_getbywin(ev->child)))
     {
-        /* If the wibox is child, then x,y are
+        /* If the drawin is child, then x,y are
          * relative to root window */
-        if(wibox->window == ev->child)
+        if(drawin->window == ev->child)
         {
-            ev->event_x -= wibox->geometry.x;
-            ev->event_y -= wibox->geometry.y;
+            ev->event_x -= drawin->geometry.x;
+            ev->event_y -= drawin->geometry.y;
         }
 
-        /* Push the wibox */
-        luaA_object_push(globalconf.L, wibox);
-        /* Duplicate the wibox */
+        /* Push the drawin */
+        luaA_object_push(globalconf.L, drawin);
+        /* Duplicate the drawin */
         lua_pushvalue(globalconf.L, -1);
         /* Handle the button event on it */
-        event_button_callback(ev, &wibox->buttons, -1, 1, NULL);
+        event_button_callback(ev, &drawin->buttons, -1, 1, NULL);
 
         /* And handle the button event on it again */
         event_emit_button(ev);
@@ -352,7 +353,7 @@ event_handle_motionnotify(xcb_motion_notify_event_t *ev)
 static void
 event_handle_leavenotify(xcb_leave_notify_event_t *ev)
 {
-    wibox_t *wibox;
+    drawin_t *drawin;
     client_t *c;
 
     globalconf.timestamp = ev->time;
@@ -367,9 +368,9 @@ event_handle_leavenotify(xcb_leave_notify_event_t *ev)
         lua_pop(globalconf.L, 1);
     }
 
-    if((wibox = wibox_getbywin(ev->event)))
+    if((drawin = drawin_getbywin(ev->event)))
     {
-        luaA_object_push(globalconf.L, wibox);
+        luaA_object_push(globalconf.L, drawin);
         luaA_object_emit_signal(globalconf.L, -1, "mouse::leave", 0);
         lua_pop(globalconf.L, 1);
     }
@@ -382,16 +383,16 @@ static void
 event_handle_enternotify(xcb_enter_notify_event_t *ev)
 {
     client_t *c;
-    wibox_t *wibox;
+    drawin_t *drawin;
 
     globalconf.timestamp = ev->time;
 
     if(ev->mode != XCB_NOTIFY_MODE_NORMAL)
         return;
 
-    if((wibox = wibox_getbywin(ev->event)))
+    if((drawin = drawin_getbywin(ev->event)))
     {
-        luaA_object_push(globalconf.L, wibox);
+        luaA_object_push(globalconf.L, drawin);
         luaA_object_emit_signal(globalconf.L, -1, "mouse::enter", 0);
         lua_pop(globalconf.L, 1);
     }
@@ -441,12 +442,12 @@ event_handle_focusin(xcb_focus_in_event_t *ev)
 static void
 event_handle_expose(xcb_expose_event_t *ev)
 {
-    wibox_t *wibox;
+    drawin_t *drawin;
 
-    if((wibox = wibox_getbywin(ev->window)))
-        wibox_refresh_pixmap_partial(wibox,
-                                     ev->x, ev->y,
-                                     ev->width, ev->height);
+    if((drawin = drawin_getbywin(ev->window)))
+        drawin_refresh_pixmap_partial(drawin,
+                                      ev->x, ev->y,
+                                      ev->width, ev->height);
 }
 
 /** The key press event handler.

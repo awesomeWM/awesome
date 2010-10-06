@@ -23,7 +23,6 @@
 #define AWESOME_EVENT_H
 
 #include "systray.h"
-#include "objects/wibox.h"
 #include "objects/client.h"
 
 static inline int

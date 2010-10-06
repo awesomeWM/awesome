@@ -23,7 +23,7 @@
 #include "screen.h"
 #include "stack.h"
 #include "objects/client.h"
-#include "objects/wibox.h"
+#include "objects/drawin.h"
 
 void
 stack_client_remove(client_t *c)
@@ -174,12 +174,12 @@ stack_refresh()
             if(client_layer_translator(*node) == layer)
                 next = stack_client_above(*node, next);
 
-    /* first stack not ontop wibox window */
-    foreach(wibox, globalconf.wiboxes)
-        if(!(*wibox)->ontop)
+    /* first stack not ontop drawin window */
+    foreach(drawin, globalconf.drawins)
+        if(!(*drawin)->ontop)
         {
-            stack_window_above((*wibox)->window, next);
-            next = (*wibox)->window;
+            stack_window_above((*drawin)->window, next);
+            next = (*drawin)->window;
         }
 
     /* then stack clients */
@@ -188,12 +188,12 @@ stack_refresh()
             if(client_layer_translator(*node) == layer)
                 next = stack_client_above(*node, next);
 
-    /* then stack ontop wibox window */
-    foreach(wibox, globalconf.wiboxes)
-        if((*wibox)->ontop)
+    /* then stack ontop drawin window */
+    foreach(drawin, globalconf.drawins)
+        if((*drawin)->ontop)
         {
-            stack_window_above((*wibox)->window, next);
-            next = (*wibox)->window;
+            stack_window_above((*drawin)->window, next);
+            next = (*drawin)->window;
         }
 
     need_stack_refresh = false;
