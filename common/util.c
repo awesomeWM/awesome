@@ -56,36 +56,6 @@ _warn(int line, const char *fct, const char *fmt, ...)
     fprintf(stderr, "\n");
 }
 
-/** Get a orientation type from a string.
- * \param pos The orientation.
- * \return A orientation.
- */
-orientation_t
-orientation_fromstr(const char *pos)
-{
-    if(a_strcmp(pos, "south") == 0)
-        return South;
-    if(a_strcmp(pos, "east") == 0)
-        return East;
-    return North;
-}
-
-/** Convert a orientation type to a string.
- * \param p The orientation.
- * \return A orientation string.
- */
-const char *
-orientation_tostr(orientation_t p)
-{
-    switch(p)
-    {
-      case North: return "north";
-      case South: return "south";
-      case East:  return "east";
-      default:    return NULL;
-    }
-}
-
 /** \brief safe limited strcpy.
  *
  * Copies at most min(<tt>n-1</tt>, \c l) characters from \c src into \c dst,

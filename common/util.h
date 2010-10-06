@@ -36,13 +36,6 @@
 #include <alloca.h>
 #endif
 
-typedef enum
-{
-    East = 0,
-    South,
-    North,
-} orientation_t;
-
 /** \brief replace \c NULL strings with empty strings */
 #define NONULL(x)       (x ? x : "")
 
@@ -329,8 +322,6 @@ void _fatal(int, const char *, const char *, ...)
 void _warn(int, const char *, const char *, ...)
     __attribute__ ((format(printf, 3, 4)));
 
-orientation_t orientation_fromstr(const char *);
-const char * orientation_tostr(orientation_t);
 void a_exec(const char *);
 
 #endif
