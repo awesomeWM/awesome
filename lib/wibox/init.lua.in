@@ -151,6 +151,48 @@ function geometry(box, ...)
     return box.drawin:geometry(...)
 end
 
+local function emit_difference(name, list, skip)
+    local function in_table(table, val)
+        for k, v in pairs(table) do
+            if v == val then
+                return true
+            end
+        end
+        return false
+    end
+
+    for k, v in pairs(list) do
+        if not in_table(skip, v) then
+            v:emit_signal(name)
+        end
+    end
+end
+
+local function handle_leave(wibox)
+    emit_difference("mouse::leave", wibox._widgets_under_mouse, {})
+    wibox._widgets_under_mouse = {}
+end
+
+local function handle_motion(wibox, x, y)
+    if x < 0 or y < 0 or x > wibox.drawin.width or y > wibox.drawin.height then
+        return handle_leave(wibox)
+    end
+
+    -- Build a plain list of all widgets on that point
+    local widgets_list = wibox:find_widgets(x, y)
+    local widgets = {}
+    for k, v in pairs(widgets_list) do
+        widgets[#widgets + 1] = v.widget
+    end
+
+    -- First, "leave" all widgets that were left
+    emit_difference("mouse::leave", wibox._widgets_under_mouse, widgets)
+    -- Then enter some widgets
+    emit_difference("mouse::enter", widgets, wibox._widgets_under_mouse)
+
+    wibox._widgets_under_mouse = widgets
+end
+
 local function setup_signals(wibox)
     local w = wibox.drawin
 
@@ -198,6 +240,9 @@ local function setup_signals(wibox)
     end
     button_signal("button::press")
     button_signal("button::release")
+
+    wibox:connect_signal("mouse::move", handle_motion)
+    wibox:connect_signal("mouse::leave", handle_leave)
 end
 
 local function new(args)
@@ -240,6 +285,7 @@ local function new(args)
     -- Due to the metatable below, we need this trick
     ret.widget = { __fake_widget = true }
     ret._widget_geometries = {}
+    ret._widgets_under_mouse = {}
 
     -- Redirect all non-existing indexes to the "real" drawin
     setmetatable(ret, {

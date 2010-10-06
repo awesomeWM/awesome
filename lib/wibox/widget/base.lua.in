@@ -76,6 +76,8 @@ function make_widget(proxy)
     -- Mouse input, oh noes!
     ret:add_signal("button::press")
     ret:add_signal("button::release")
+    ret:add_signal("mouse::enter")
+    ret:add_signal("mouse::leave")
 
     -- No buttons yet
     ret.widget_buttons = {}
