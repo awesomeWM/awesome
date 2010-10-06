@@ -30,6 +30,8 @@
 #include "common/xcursor.h"
 #include "common/xutil.h"
 
+#include <cairo-xcb.h>
+
 LUA_OBJECT_FUNCS(drawin_class, drawin_t, drawin)
 
 /** Kick out systray windows.
@@ -75,7 +77,11 @@ drawin_wipe_resources(drawin_t *w)
         xcb_free_pixmap(globalconf.connection, w->pixmap);
         w->pixmap = XCB_NONE;
     }
-    draw_context_wipe(&w->ctx);
+    if(w->surface)
+    {
+        cairo_surface_destroy(w->surface);
+        w->surface = NULL;
+    }
 }
 
 static void
@@ -83,8 +89,6 @@ drawin_wipe(drawin_t *drawin)
 {
     p_delete(&drawin->cursor);
     drawin_wipe_resources(drawin);
-    if(drawin->bg_image)
-        cairo_surface_destroy(drawin->bg_image);
 }
 
 void
@@ -94,37 +98,33 @@ drawin_unref_simplified(drawin_t **item)
 }
 
 static void
-drawin_draw_context_update(drawin_t *w)
+drawin_update_drawing(drawin_t *w)
 {
-    xcb_screen_t *s = globalconf.screen;
-    xcolor_t fg = w->ctx.fg, bg = w->ctx.bg;
-
-    draw_context_wipe(&w->ctx);
-
-    /* update draw context */
-    switch(w->orientation)
+    /* Clean up old stuff */
+    if(w->surface)
     {
-      case South:
-      case North:
-        /* we need a new pixmap this way [     ] to render */
-        w->ctx.pixmap = xcb_generate_id(globalconf.connection);
-        xcb_create_pixmap(globalconf.connection,
-                          globalconf.default_depth,
-                          w->ctx.pixmap, s->root,
-                          w->geometry.height,
-                          w->geometry.width);
-        draw_context_init(&w->ctx,
-                          w->geometry.height,
-                          w->geometry.width,
-                          w->ctx.pixmap, &fg, &bg);
-        break;
-      case East:
-        draw_context_init(&w->ctx,
-                          w->geometry.width,
-                          w->geometry.height,
-                          w->pixmap, &fg, &bg);
-        break;
+        /* In case lua still got a reference to the surface, it still won't be
+         * able to do anything with it because we finish it. */
+        cairo_surface_finish(w->surface);
+        cairo_surface_destroy(w->surface);
     }
+    if(w->pixmap)
+        xcb_free_pixmap(globalconf.connection, w->pixmap);
+
+    /* Create a pixmap */
+    xcb_screen_t *s = globalconf.screen;
+    w->pixmap = xcb_generate_id(globalconf.connection);
+    xcb_create_pixmap(globalconf.connection, globalconf.default_depth, w->pixmap, s->root,
+                      w->geometry.width, w->geometry.height);
+    /* and create a surface for that pixmap */
+    w->surface = cairo_xcb_surface_create(globalconf.connection,
+                                          w->pixmap, globalconf.visual,
+                                          w->geometry.width, w->geometry.height);
+    /* Make sure the pixmap doesn't contain garbage by filling it with black */
+    cairo_t *cr = cairo_create(w->surface);
+    cairo_set_operator(cr, CAIRO_OPERATOR_CLEAR);
+    cairo_paint(cr);
+    cairo_destroy(cr);
 }
 
 /** Initialize a drawin.
@@ -144,7 +144,7 @@ drawin_init(drawin_t *w)
                       | XCB_CW_OVERRIDE_REDIRECT | XCB_CW_EVENT_MASK | XCB_CW_COLORMAP,
                       (const uint32_t [])
                       {
-                          w->ctx.bg.pixel,
+                          s->black_pixel,
                           w->border_color.pixel,
                           XCB_GRAVITY_NORTH_WEST,
                           1,
@@ -156,13 +156,7 @@ drawin_init(drawin_t *w)
                           globalconf.default_cmap
                       });
 
-    /* Create a pixmap. */
-    w->pixmap = xcb_generate_id(globalconf.connection);
-    xcb_create_pixmap(globalconf.connection, globalconf.default_depth, w->pixmap, s->root,
-                      w->geometry.width, w->geometry.height);
-
-    /* Update draw context physical screen, important for Zaphod. */
-    drawin_draw_context_update(w);
+    drawin_update_drawing(w);
 
     /* Set the right type property */
     ewmh_update_window_type(w->window, window_translate_type(w->type));
@@ -216,17 +210,7 @@ drawin_moveresize(lua_State *L, int udx, area_t geometry)
         }
 
         if(mask_vals & (XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT))
-        {
-            xcb_free_pixmap(globalconf.connection, w->pixmap);
-            /* orientation != East */
-            if(w->pixmap != w->ctx.pixmap)
-                xcb_free_pixmap(globalconf.connection, w->ctx.pixmap);
-            w->pixmap = xcb_generate_id(globalconf.connection);
-            xcb_screen_t *s = globalconf.screen;
-            xcb_create_pixmap(globalconf.connection, globalconf.default_depth, w->pixmap, s->root,
-                              w->geometry.width, w->geometry.height);
-            drawin_draw_context_update(w);
-        }
+            drawin_update_drawing(w);
 
         /* Activate BMA */
         client_ignore_enterleave_events();
@@ -279,26 +263,6 @@ drawin_refresh_pixmap_partial(drawin_t *drawin,
     xcb_copy_area(globalconf.connection, drawin->pixmap,
                   drawin->window, globalconf.gc, x, y, x, y,
                   w, h);
-}
-
-/** Set drawin orientation.
- * \param L The Lua VM state.
- * \param udx The drawin to change orientation.
- * \param o The new orientation.
- */
-static void
-drawin_set_orientation(lua_State *L, int udx, orientation_t o)
-{
-    drawin_t *w = luaA_checkudata(L, udx, &drawin_class);
-    if(o != w->orientation)
-    {
-        w->orientation = o;
-        /* orientation != East */
-        if(w->pixmap != w->ctx.pixmap)
-            xcb_free_pixmap(globalconf.connection, w->ctx.pixmap);
-        drawin_draw_context_update(w);
-        luaA_object_emit_signal(L, udx, "property::orientation", 0);
-    }
 }
 
 static void
@@ -457,12 +421,6 @@ luaA_drawin_new(lua_State *L)
 
     drawin_t *w = luaA_checkudata(L, -1, &drawin_class);
 
-    if(!w->ctx.fg.initialized)
-        w->ctx.fg = globalconf.colors.fg;
-
-    if(!w->ctx.bg.initialized)
-        w->ctx.bg = globalconf.colors.bg;
-
     w->visible = true;
 
     if(!w->opacity)
@@ -591,104 +549,6 @@ luaA_drawin_get_height(lua_State *L, drawin_t *drawin)
     return 1;
 }
 
-/** Set the drawin foreground color.
- * \param L The Lua VM state.
- * \param drawin The drawin object.
- * \return The number of elements pushed on stack.
- */
-static int
-luaA_drawin_set_fg(lua_State *L, drawin_t *drawin)
-{
-    size_t len;
-    const char *buf = luaL_checklstring(L, -1, &len);
-    xcolor_init_reply(xcolor_init_unchecked(&drawin->ctx.fg, buf, len));
-    luaA_object_emit_signal(L, -3, "property::fg", 0);
-    return 0;
-}
-
-/** Get the drawin foreground color.
- * \param L The Lua VM state.
- * \param drawin The drawin object.
- * \return The number of elements pushed on stack.
- */
-static int
-luaA_drawin_get_fg(lua_State *L, drawin_t *drawin)
-{
-    return luaA_pushxcolor(L, drawin->ctx.fg);
-}
-
-/** Set the drawin background color.
- * \param L The Lua VM state.
- * \param drawin The drawin object.
- * \return The number of elements pushed on stack.
- */
-static int
-luaA_drawin_set_bg(lua_State *L, drawin_t *drawin)
-{
-    size_t len;
-    const char *buf = luaL_checklstring(L, -1, &len);
-    if(xcolor_init_reply(xcolor_init_unchecked(&drawin->ctx.bg, buf, len)))
-    {
-        uint32_t mask = XCB_CW_BACK_PIXEL;
-        uint32_t values[] = { drawin->ctx.bg.pixel };
-
-        if (drawin->window != XCB_NONE)
-            xcb_change_window_attributes(globalconf.connection,
-                                         drawin->window,
-                                         mask,
-                                         values);
-    }
-    luaA_object_emit_signal(L, -3, "property::bg", 0);
-    return 0;
-}
-
-/** Get the drawin background color.
- * \param L The Lua VM state.
- * \param drawin The drawin object.
- * \return The number of elements pushed on stack.
- */
-static int
-luaA_drawin_get_bg(lua_State *L, drawin_t *drawin)
-{
-    return luaA_pushxcolor(L, drawin->ctx.bg);
-}
-
-/** Set the drawin background image.
- * \param L The Lua VM state.
- * \param drawin The drawin object.
- * \return The number of elements pushed on stack.
- */
-static int
-luaA_drawin_set_bg_image(lua_State *L, drawin_t *drawin)
-{
-    if(lua_isnil(L, -1))
-    {
-        if(drawin->bg_image)
-            cairo_surface_destroy(drawin->bg_image);
-        drawin->bg_image = NULL;
-    } else {
-        cairo_surface_t **cairo_surface = (cairo_surface_t **)luaL_checkudata(L, -1, OOCAIRO_MT_NAME_SURFACE);
-        if(drawin->bg_image)
-            cairo_surface_destroy(drawin->bg_image);
-        drawin->bg_image = draw_dup_image_surface(*cairo_surface);
-    }
-    luaA_object_emit_signal(L, -3, "property::bg_image", 0);
-    return 0;
-}
-
-/** Get the drawin background image.
- * \param L The Lua VM state.
- * \param drawin The drawin object.
- * \return The number of elements pushed on stack.
- */
-static int
-luaA_drawin_get_bg_image(lua_State *L, drawin_t *drawin)
-{
-    if(drawin->bg_image)
-        return oocairo_surface_push(L, drawin->bg_image);
-    return 0;
-}
-
 /** Set the drawin on top status.
  * \param L The Lua VM state.
  * \param drawin The drawin object.
@@ -765,34 +625,6 @@ luaA_drawin_get_screen(lua_State *L, drawin_t *drawin)
     return 1;
 }
 
-/** Set the drawin orientation.
- * \param L The Lua VM state.
- * \param drawin The drawin object.
- * \return The number of elements pushed on stack.
- */
-static int
-luaA_drawin_set_orientation(lua_State *L, drawin_t *drawin)
-{
-    const char *buf = luaL_checkstring(L, -1);
-    if(buf)
-    {
-        drawin_set_orientation(L, -3, orientation_fromstr(buf));
-    }
-    return 0;
-}
-
-/** Get the drawin orientation.
- * \param L The Lua VM state.
- * \param drawin The drawin object.
- * \return The number of elements pushed on stack.
- */
-static int
-luaA_drawin_get_orientation(lua_State *L, drawin_t *drawin)
-{
-    lua_pushstring(L, orientation_tostr(drawin->orientation));
-    return 1;
-}
-
 /** Set the drawin visibility.
  * \param L The Lua VM state.
  * \param drawin The drawin object.
@@ -833,10 +665,6 @@ drawin_class_setup(lua_State *L)
                             (lua_class_propfunc_t) luaA_drawin_set_visible,
                             (lua_class_propfunc_t) luaA_drawin_get_visible,
                             (lua_class_propfunc_t) luaA_drawin_set_visible);
-    luaA_class_add_property(&drawin_class, "orientation",
-                            (lua_class_propfunc_t) luaA_drawin_set_orientation,
-                            (lua_class_propfunc_t) luaA_drawin_get_orientation,
-                            (lua_class_propfunc_t) luaA_drawin_set_orientation);
     luaA_class_add_property(&drawin_class, "ontop",
                             (lua_class_propfunc_t) luaA_drawin_set_ontop,
                             (lua_class_propfunc_t) luaA_drawin_get_ontop,
@@ -849,18 +677,6 @@ drawin_class_setup(lua_State *L)
                             (lua_class_propfunc_t) luaA_drawin_set_cursor,
                             (lua_class_propfunc_t) luaA_drawin_get_cursor,
                             (lua_class_propfunc_t) luaA_drawin_set_cursor);
-    luaA_class_add_property(&drawin_class, "fg",
-                            (lua_class_propfunc_t) luaA_drawin_set_fg,
-                            (lua_class_propfunc_t) luaA_drawin_get_fg,
-                            (lua_class_propfunc_t) luaA_drawin_set_fg);
-    luaA_class_add_property(&drawin_class, "bg",
-                            (lua_class_propfunc_t) luaA_drawin_set_bg,
-                            (lua_class_propfunc_t) luaA_drawin_get_bg,
-                            (lua_class_propfunc_t) luaA_drawin_set_bg);
-    luaA_class_add_property(&drawin_class, "bg_image",
-                            (lua_class_propfunc_t) luaA_drawin_set_bg_image,
-                            (lua_class_propfunc_t) luaA_drawin_get_bg_image,
-                            (lua_class_propfunc_t) luaA_drawin_set_bg_image);
     luaA_class_add_property(&drawin_class, "x",
                             (lua_class_propfunc_t) luaA_drawin_set_x,
                             (lua_class_propfunc_t) luaA_drawin_get_x,
@@ -884,14 +700,10 @@ drawin_class_setup(lua_State *L)
 
     signal_add(&drawin_class.signals, "mouse::enter");
     signal_add(&drawin_class.signals, "mouse::leave");
-    signal_add(&drawin_class.signals, "property::bg");
-    signal_add(&drawin_class.signals, "property::bg_image");
     signal_add(&drawin_class.signals, "property::border_width");
     signal_add(&drawin_class.signals, "property::cursor");
-    signal_add(&drawin_class.signals, "property::fg");
     signal_add(&drawin_class.signals, "property::height");
     signal_add(&drawin_class.signals, "property::ontop");
-    signal_add(&drawin_class.signals, "property::orientation");
     signal_add(&drawin_class.signals, "property::screen");
     signal_add(&drawin_class.signals, "property::visible");
     signal_add(&drawin_class.signals, "property::widgets");

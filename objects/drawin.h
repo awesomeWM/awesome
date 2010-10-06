@@ -37,16 +37,12 @@ struct drawin_t
     bool visible;
     /** Cursor */
     char *cursor;
-    /** Background image */
-    cairo_surface_t *bg_image;
     /** The pixmap copied to the window object. */
     xcb_pixmap_t pixmap;
+    /** Surface for drawing to the pixmap. */
+    cairo_surface_t *surface;
     /** The window geometry. */
     area_t geometry;
-    /** Draw context */
-    draw_context_t ctx;
-    /** Orientation */
-    orientation_t orientation;
 };
 
 void drawin_unref_simplified(drawin_t **);
