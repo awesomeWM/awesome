@@ -388,6 +388,8 @@ window_class_setup(lua_State *L)
     signal_add(&window_class.signals, "property::opacity");
     signal_add(&window_class.signals, "property::struts");
     signal_add(&window_class.signals, "property::type");
+    signal_add(&window_class.signals, "button::press");
+    signal_add(&window_class.signals, "button::release");
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

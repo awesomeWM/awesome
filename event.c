@@ -127,6 +127,35 @@ event_handle_mousegrabber(int x, int y, uint16_t mask)
     return false;
 }
 
+/** Emit a button signal.
+ * The top of the lua stack has to be the object on which to emit the event.
+ * \param ev The event to handle.
+ */
+static void
+event_emit_button(xcb_button_press_event_t *ev)
+{
+    const char *name;
+    switch(ev->response_type)
+    {
+    case XCB_BUTTON_PRESS:
+        name = "button::press";
+        break;
+    case XCB_BUTTON_RELEASE:
+        name = "button::release";
+        break;
+    default:
+        fatal("Invalid event type");
+    }
+
+    /* Push the event's info */
+    lua_pushnumber(globalconf.L, ev->event_x);
+    lua_pushnumber(globalconf.L, ev->event_y);
+    lua_pushnumber(globalconf.L, ev->detail);
+    luaA_pushmodifiers(globalconf.L, ev->state);
+    /* And emit the signal */
+    luaA_object_emit_signal(globalconf.L, -5, name, 4);
+}
+
 /** The button press event handler.
  * \param ev The event.
  */
@@ -165,6 +194,11 @@ event_handle_button(xcb_button_press_event_t *ev)
         /* Handle the button event on it */
         event_button_callback(ev, &wibox->buttons, -1, 1, NULL);
 
+        /* Duplicate the wibox */
+        lua_pushvalue(globalconf.L, -1);
+        /* And handle the button event on it again */
+        event_emit_button(ev);
+
         /* then try to match a widget binding */
         widget_t *w = widget_getbycoords(wibox->orientation, &wibox->widgets,
                                          wibox->geometry.width,
@@ -186,7 +220,12 @@ event_handle_button(xcb_button_press_event_t *ev)
     else if((c = client_getbyframewin(ev->event)))
     {
         luaA_object_push(globalconf.L, c);
+        /* Duplicate the client */
+        lua_pushvalue(globalconf.L, -1);
+        /* then check if any button objects match */
         event_button_callback(ev, &c->buttons, -1, 1, NULL);
+        /* And handle the button event on it again */
+        event_emit_button(ev);
         xcb_allow_events(globalconf.connection,
                          XCB_ALLOW_REPLAY_POINTER,
                          XCB_CURRENT_TIME);
