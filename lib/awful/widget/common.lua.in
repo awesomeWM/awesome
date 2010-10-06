@@ -50,20 +50,25 @@ function common.list_update(w, buttons, label, data, objects)
     -- update the widgets, creating them if needed
     w:reset()
     for i, o in ipairs(objects) do
-        local ib, tb, bgb, l
-        ib = wibox.widget.imagebox()
-        tb = wibox.widget.textbox()
-        bgb = wibox.widget.background()
+        local ib = wibox.widget.imagebox()
+        local tb = wibox.widget.textbox()
+        local bgb = wibox.widget.background()
         local m = wibox.layout.margin()
+        local l = wibox.layout.fixed.horizontal()
+
+        -- The textbox gets a margin to look better
         m:set_left(4)
         m:set_right(4)
         m:set_widget(tb)
-        bgb:set_widget(m)
-        l = wibox.layout.fixed.horizontal()
+
+        -- All of this is added in a fixed widget
         l:fill_space(true)
         l:add(ib)
-        l:add(bgb)
-        w:add(l)
+        l:add(m)
+
+        -- And all of this gets a background
+        bgb:set_widget(l)
+        w:add(bgb)
 
         if buttons then
             -- Use a local variable so that the garbage collector doesn't strike
@@ -83,7 +88,7 @@ function common.list_update(w, buttons, label, data, objects)
                     btns[#btns + 1] = btn
                 end
             end
-            l:buttons(btns)
+            bgb:buttons(btns)
         end
 
         local text, bg, bg_image, icon = label(o)
