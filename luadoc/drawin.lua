@@ -1,44 +1,46 @@
---- awesome wibox API
+--- awesome drawin API
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2008-2009 Julien Danjou
-module("wibox")
+module("drawin")
 
---- Wibox object.
+--- Drawin object.
 -- @field screen Screen number.
 -- @field border_width Border width.
 -- @field border_color Border color.
--- @field fg Foreground color.
--- @field bg Background color.
--- @field bg_image Background image.
 -- @field ontop On top of other windows.
 -- @field cursor The mouse cursor.
 -- @field visible Visibility.
--- @field orientation The drawing orientation: east, north or south.
--- @field widgets A table with all widgets drawn on this wibox.
--- @field opacity The opacity of the wibox, between 0 and 1.
+-- @field opacity The opacity of the drawin, between 0 and 1.
 -- @field x The x coordinates.
 -- @field y The y coordinates.
--- @field width The width of the wibox.
--- @field height The height of the wibox.
+-- @field width The width of the drawin.
+-- @field height The height of the drawin.
+-- @field surface A oocairo surface that can be used for drawing.
 -- @class table
--- @name wibox
+-- @name drawin
 
---- Get or set mouse buttons bindings to a wibox.
+--- Get or set mouse buttons bindings to a drawin.
 -- @param buttons_table A table of buttons objects, or nothing.
 -- @name buttons
 -- @class function
 
---- Get or set wibox struts.
+--- Get or set drawin struts.
 -- @param strut A table with new strut, or nothing
--- @return The wibox strut in a table.
+-- @return The drawin strut in a table.
 -- @name struts
 -- @class function
 
---- Get or set wibox geometry. That's the same as accessing or setting the x, y, width or height
--- properties of a wibox.
+--- Get or set drawin geometry. That's the same as accessing or setting the x, y, width or height
+-- properties of a drawin.
 -- @param A table with coordinates to modify.
--- @return A table with wibox coordinates and geometry.
+-- @return A table with drawin coordinates and geometry.
 -- @name geometry
+-- @class function
+
+--- Refresh the drawin. When you are drawing to the window's surface, you have
+-- call this function when you are done to make the result visible.
+-- @param no_params luadoc is buggy.
+-- @name refresh
 -- @class function
 
 --- Add a signal.
@@ -61,6 +63,6 @@ module("wibox")
 
 --- Get the number of instances.
 -- @param no_params luadoc is buggy.
--- @return The number of wibox objects alive.
+-- @return The number of drawin objects alive.
 -- @name instances
 -- @class function
