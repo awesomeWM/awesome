@@ -35,21 +35,21 @@ typedef struct
     uint16_t blue;
     uint16_t alpha;
     bool initialized;
-} xcolor_t;
+} color_t;
 
 typedef struct
 {
     xcb_alloc_color_cookie_t cookie_hexa;
     uint16_t alpha;
-    xcolor_t *color;
+    color_t *color;
     bool has_error;
     const char *colstr;
-} xcolor_init_request_t;
+} color_init_request_t;
 
-xcolor_init_request_t xcolor_init_unchecked(xcolor_t *, const char *, ssize_t);
-bool xcolor_init_reply(xcolor_init_request_t);
+color_init_request_t color_init_unchecked(color_t *, const char *, ssize_t);
+bool color_init_reply(color_init_request_t);
 
-int luaA_pushxcolor(lua_State *, const xcolor_t);
+int luaA_pushcolor(lua_State *, const color_t);
 
 #endif
 

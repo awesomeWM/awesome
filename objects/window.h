@@ -64,7 +64,7 @@ typedef enum
     /** Button bindings */ \
     button_array_t buttons; \
     /** Border color */ \
-    xcolor_t border_color; \
+    color_t border_color; \
     /** Border width */ \
     uint16_t border_width; \
     /** The window type */ \

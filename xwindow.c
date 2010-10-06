@@ -250,7 +250,7 @@ xwindow_set_cursor(xcb_window_t w, xcb_cursor_t c)
  * \param color The color.
  */
 void
-xwindow_set_border_color(xcb_window_t w, xcolor_t *color)
+xwindow_set_border_color(xcb_window_t w, color_t *color)
 {
     if(w)
         xcb_change_window_attributes(globalconf.connection, w, XCB_CW_BORDER_PIXEL, &color->pixel);

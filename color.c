@@ -78,15 +78,15 @@ color_parse(const char *colstr, ssize_t len,
 /** Send a request to initialize a X color.
  * If you are only interested in the rgba values and don't need the color's
  * pixel value, you should use color_init_unchecked() instead.
- * \param color xcolor_t struct to store color into.
+ * \param color color_t struct to store color into.
  * \param colstr Color specification.
  * \param len The length of colstr (which still MUST be NULL terminated).
  * \return request informations.
  */
-xcolor_init_request_t
-xcolor_init_unchecked(xcolor_t *color, const char *colstr, ssize_t len)
+color_init_request_t
+color_init_unchecked(color_t *color, const char *colstr, ssize_t len)
 {
-    xcolor_init_request_t req;
+    color_init_request_t req;
     uint8_t red, green, blue, alpha;
 
     p_clear(&req, 1);
@@ -123,11 +123,11 @@ xcolor_init_unchecked(xcolor_t *color, const char *colstr, ssize_t len)
 }
 
 /** Initialize a X color.
- * \param req xcolor_init request.
+ * \param req color_init request.
  * \return True if color allocation was successful.
  */
 bool
-xcolor_init_reply(xcolor_init_request_t req)
+color_init_reply(color_init_request_t req)
 {
     if(req.has_error)
         return false;
@@ -157,7 +157,7 @@ xcolor_init_reply(xcolor_init_request_t req)
  * \return The number of elements pushed on stack.
  */
 int
-luaA_pushxcolor(lua_State *L, const xcolor_t c)
+luaA_pushcolor(lua_State *L, const color_t c)
 {
     uint8_t r = (unsigned) c.red   * 0xff / 0xffff;
     uint8_t g = (unsigned) c.green * 0xff / 0xffff;
