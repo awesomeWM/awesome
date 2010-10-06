@@ -25,6 +25,7 @@ function draw_fixed(dir, widgets, fill_space, wibox, cr, width, height)
 
     for k, v in pairs(widgets) do
         local x, y, w, h
+        local in_dir
         if dir == "y" then
             x, y = 0, pos
             w, h = width, height - pos
@@ -32,6 +33,7 @@ function draw_fixed(dir, widgets, fill_space, wibox, cr, width, height)
                 _, h = v:fit(w, h);
             end
             pos = pos + h
+            in_dir = h
         else
             x, y = pos, 0
             w, h = width - pos, height
@@ -39,13 +41,14 @@ function draw_fixed(dir, widgets, fill_space, wibox, cr, width, height)
                 w, _ = v:fit(w, h);
             end
             pos = pos + w
+            in_dir = w
         end
-        base.draw_widget(wibox, cr, v, x, y, w, h)
 
-        if (dir == "y" and pos >= height) or
-            (dir ~= "y" and pos >= width) then
+        if (dir == "y" and pos > height) or
+            (dir ~= "y" and pos > width) then
             break
         end
+        base.draw_widget(wibox, cr, v, x, y, w, h)
     end
 end
 
