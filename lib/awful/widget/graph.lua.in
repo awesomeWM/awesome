@@ -9,10 +9,8 @@ local ipairs = ipairs
 local math = math
 local table = table
 local type = type
-local capi = { oocairo = oocairo,
-               widget = widget }
-local layout = require("awful.widget.layout")
 local color = require("gears.color")
+local base = require("wibox.widget.base")
 
 --- A graph widget.
 module("awful.widget.graph")
@@ -68,10 +66,7 @@ local properties = { "width", "height", "border_color", "stack",
                      "stack_colors", "color", "background_color",
                      "max_value", "scale" }
 
-local function update(graph)
-    -- Create new empty image
-    local img = capi.oocairo.image_surface_create("argb32", data[graph].width, data[graph].height)
-    local cr = capi.oocairo.context_create(img)
+function draw(graph, wibox, cr, width, height)
     local max_value = data[graph].max_value
     local values = data[graph].values
 
@@ -102,9 +97,9 @@ local function update(graph)
         cr:set_source(color(data[graph].background_color or "#000000aa"))
         cr:fill()
 
-        for i = 0, data[graph].width - (2 * border_width) do
+        for i = 0, width - (2 * border_width) do
             local rel_i = 0
-            local rel_x = data[graph].width - border_width - i - 0.5
+            local rel_x = width - border_width - i - 0.5
 
             if data[graph].stack_colors then
                 for idx, col in ipairs(data[graph].stack_colors) do
@@ -145,7 +140,7 @@ local function update(graph)
                 local value = values[#values - i]
                 if value >= 0 then
                     value = value / max_value
-                    cr:move_to(data[graph].width - border_width - i - 0.5,
+                    cr:move_to(width - border_width - i - 0.5,
                                border_width - 0.5 +
                                    (data[graph].height - 2 * border_width) * (1 - value))
                     cr:line_to(data[graph].width - border_width - i - 0.5,
@@ -158,7 +153,7 @@ local function update(graph)
 
         -- If we didn't draw values in full length, draw a square
         -- over the last, left, part to reset everything to 0
-        if #values < data[graph].width - (2 * border_width) then
+        if #values < width - (2 * border_width) then
             cr:rectangle(border_width, border_width,
                          data[graph].width - (2 * border_width) - #values,
                          data[graph].height - (2 * border_width))
@@ -171,12 +166,13 @@ local function update(graph)
     if data[graph].border_color then
         -- Draw the border
         cr:rectangle(0.5, 0.5, data[graph].width - 0.5, data[graph].height - 0.5)
-        cr:set_source(color(data[graph].background_color or "#ffffff"))
+        cr:set_source(color(data[graph].border_color or "#ffffff"))
         cr:stroke()
     end
+end
 
-    -- Update the image
-    graph.widget.image = img
+function fit(graph, width, height)
+    return data[graph].width, data[graph].height
 end
 
 --- Add a value to the graph
@@ -212,7 +208,7 @@ local function add_value(graph, value, group)
         table.remove(values, 1)
     end
 
-    update(graph)
+    graph:emit_signal("widget::updated")
     return graph
 end
 
@@ -223,7 +219,7 @@ end
 function set_height(graph, height)
     if height >= 5 then
         data[graph].height = height
-        update(graph)
+        graph:emit_signal("widget::updated")
     end
     return graph
 end
@@ -234,7 +230,7 @@ end
 function set_width(graph, width)
     if width >= 5 then
         data[graph].width = width
-        update(graph)
+        graph:emit_signal("widget::updated")
     end
     return graph
 end
@@ -244,7 +240,7 @@ for _, prop in ipairs(properties) do
     if not _M["set_" .. prop] then
         _M["set_" .. prop] = function(graph, value)
             data[graph][prop] = value
-            update(graph)
+            graph:emit_signal("widget::updated")
             return graph
         end
     end
@@ -256,28 +252,24 @@ end
 -- @return A graph widget.
 function new(args)
     local args = args or {}
-    args.type = "imagebox"
 
     local width = args.width or 100
     local height = args.height or 20
 
     if width < 5 or height < 5 then return end
 
-    local graph = {}
-    graph.widget = capi.widget(args)
-    graph.widget.resize = false
-    graph[1] = graph.widget
+    local graph = base.make_widget()
 
     data[graph] = { width = width, height = height, values = {}, max_value = 1 }
 
     -- Set methods
     graph.add_value = add_value
+    graph.draw = draw
+    graph.fit = fit
 
     for _, prop in ipairs(properties) do
         graph["set_" .. prop] = _M["set_" .. prop]
     end
-
-    graph.layout = args.layout or layout.horizontal.leftright
 
     return graph
 end

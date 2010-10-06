@@ -7,10 +7,7 @@
 local setmetatable = setmetatable
 local ipairs = ipairs
 local math = math
-local capi = { oocairo = oocairo,
-               widget = widget }
-local layout = require("awful.widget.layout")
-local color = require("gears.color")
+local base = require("wibox.widget.base")
 
 --- A progressbar widget.
 module("awful.widget.progressbar")
@@ -71,15 +68,11 @@ local properties = { "width", "height", "border_color",
                      "vertical", "value", "max_value",
                      "ticks", "ticks_gap", "ticks_size" }
 
-local function update(pbar)
-    local width = data[pbar].width or 100
-    local height = data[pbar].height or 20
+function draw(pbar, wibox, cr, width, height)
     local ticks_gap = data[pbar].ticks_gap or 1
     local ticks_size = data[pbar].ticks_size or 4
 
-    -- Create new empty image
-    local img = capi.oocairo.image_surface_create("argb32", width, height)
-    local cr = capi.oocairo.context_create(img)
+    -- We want one pixel wide lines
     cr:set_line_width(1)
 
     local value = data[pbar].value
@@ -96,14 +89,10 @@ local function update(pbar)
         cr:rectangle(0.5, 0.5, width - 0.5, height - 0.5)
         cr:set_source(color(data[pbar].border_color))
         cr:stroke()
+
         over_drawn_width = width - 2 -- remove 2 for borders
         over_drawn_height = height - 2 -- remove 2 for borders
         border_width = 1
-    end
-
-    local angle = 270
-    if data[pbar].vertical then
-        angle = 180
     end
 
     cr:rectangle(border_width, border_width,
@@ -160,9 +149,10 @@ local function update(pbar)
             cr:fill()
         end
     end
+end
 
-    -- Update the image
-    pbar.widget.image = img
+function fit(pbar, width, height)
+    return data[pbar].width, data[pbar].height
 end
 
 --- Set the progressbar value.
@@ -172,7 +162,7 @@ function set_value(pbar, value)
     local value = value or 0
     local max_value = data[pbar].max_value
     data[pbar].value = math.min(max_value, math.max(0, value))
-    update(pbar)
+    pbar:emit_signal("widget::updated")
     return pbar
 end
 
@@ -181,7 +171,7 @@ end
 -- @param height The height to set.
 function set_height(progressbar, height)
     data[progressbar].height = height
-    update(progressbar)
+    progressbar:emit_signal("widget::updated")
     return progressbar
 end
 
@@ -190,7 +180,7 @@ end
 -- @param width The width to set.
 function set_width(progressbar, width)
     data[progressbar].width = width
-    update(progressbar)
+    progressbar:emit_signal("widget::updated")
     return progressbar
 end
 
@@ -199,7 +189,7 @@ for _, prop in ipairs(properties) do
     if not _M["set_" .. prop] then
         _M["set_" .. prop] = function(pbar, value)
             data[pbar][prop] = value
-            update(pbar)
+            pbar:emit_signal("widget::updated")
             return pbar
         end
     end
@@ -216,11 +206,7 @@ function new(args)
 
     args.type = "imagebox"
 
-    local pbar = {}
-
-    pbar.widget = capi.widget(args)
-    pbar.widget.resize = false
-    pbar[1] = pbar.widget
+    local pbar = base.make_widget()
 
     data[pbar] = { width = width, height = height, value = 0, max_value = 1 }
 
@@ -229,7 +215,8 @@ function new(args)
         pbar["set_" .. prop] = _M["set_" .. prop]
     end
 
-    pbar.layout = args.layout or layout.horizontal.leftright
+    pbar.draw = draw
+    pbar.fit = fit
 
     return pbar
 end
