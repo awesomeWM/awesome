@@ -18,7 +18,7 @@ local common = require("awful.widget.common")
 local util = require("awful.util")
 local tag = require("awful.tag")
 local beautiful = require("beautiful")
-local layout = require("awful.widget.layout")
+local flex = require("wibox.layout.flex")
 
 --- Taglist widget module for awful
 module("awful.widget.taglist")
@@ -94,7 +94,7 @@ function taglist_label(t, args)
     return text, bg_color, bg_image, icon
 end
 
-local function taglist_update(s, w, buttons, filter, data, style, template)
+local function taglist_update(s, w, buttons, filter, data, style)
     local tags = {}
     for k, t in ipairs(capi.screen[s]:tags()) do
         if not tag.getproperty(t, "hide") and filter(t) then
@@ -104,7 +104,7 @@ local function taglist_update(s, w, buttons, filter, data, style, template)
 
     local function label(c) return taglist_label(c, style) end
 
-    common.list_update(w, buttons, label, data, template, tags)
+    common.list_update(w, buttons, label, data, tags)
 end
 
 --- Get the tag object the given widget appears on.
@@ -127,41 +127,13 @@ end
 -- squares_unsel Optional: a user provided image for unselected squares.
 -- squares_resize Optional: true or false to resize squares.
 -- font The font.
--- @param template The template to use for each item.
--- The default template:<br/>
--- <code>
---{<br/>
---&nbsp; {<br/>
---&nbsp; &nbsp; item = "icon"<br/>
---&nbsp; },<br/>
---&nbsp; {<br/>
---&nbsp; &nbsp; item = "title",<br/>
---&nbsp; &nbsp; bg_resize = true,<br/>
---&nbsp; },<br/>
---&nbsp; layout = layout.horizontal.leftright<br/>
---}<br/>
--- </code>
-function new(screen, filter, buttons, style, template)
-    local w = {
-        layout = layout.horizontal.leftright
-    }
-
-    template = template or {
-        {
-            item = "icon"
-        },
-        {
-            item = "title",
-            margin = { left  = 4, right = 4 },
-            bg_resize = true,
-        },
-        layout = layout.horizontal.leftright
-    }
+function new(screen, filter, buttons, style)
+    local w = flex.horizontal()
 
     local data = setmetatable({}, { __mode = 'vk' })
     local u = function (s)
         if s == screen then
-            taglist_update(s, w, buttons, filter, data, style, template)
+            taglist_update(s, w, buttons, filter, data, style)
         end
     end
     local uc = function (c) return u(c.screen) end

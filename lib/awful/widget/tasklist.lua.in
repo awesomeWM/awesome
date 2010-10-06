@@ -15,7 +15,7 @@ local beautiful = require("beautiful")
 local client = require("awful.client")
 local util = require("awful.util")
 local tag = require("awful.tag")
-local layout = require("awful.widget.layout")
+local flex = require("wibox.layout.flex")
 
 --- Tasklist widget module for awful
 module("awful.widget.tasklist")
@@ -64,7 +64,7 @@ local function tasklist_label(c, args)
     return text, bg, nil, c.icon
 end
 
-local function tasklist_update(s, w, buttons, filter, data, style, template)
+local function tasklist_update(s, w, buttons, filter, data, style)
     local clients = {}
     for k, c in ipairs(capi.client.get()) do
         if not (c.skip_taskbar or c.hidden
@@ -76,7 +76,7 @@ local function tasklist_update(s, w, buttons, filter, data, style, template)
 
     local function label(c) return tasklist_label(c, style) end
 
-    common.list_update(w, buttons, label, data, template, clients)
+    common.list_update(w, buttons, label, data, clients)
 end
 
 --- Create a new tasklist widget.
@@ -92,47 +92,11 @@ end
 -- fg_minimize The foreground color for minimized clients.
 -- floating_icon The icon for flating clients.
 -- font The font.
--- @param template The template to use for each item.
--- The default template:<br/>
--- <code>
--- {<br/>
--- &nbsp; {<br/>
--- &nbsp; &nbsp; item = "icon"<br/>
--- &nbsp; },<br/>
--- &nbsp; {<br/>
--- &nbsp; &nbsp; {<br/>
--- &nbsp; &nbsp; &nbsp; item = "title",<br/>
--- &nbsp; &nbsp; &nbsp; margin = { left  = 2, right = 2 },<br/>
--- &nbsp; &nbsp; &nbsp; bg_resize = true,<br/>
--- &nbsp; &nbsp; &nbsp; bg_align  = "right"<br/>
--- &nbsp; &nbsp; },<br/>
--- &nbsp; &nbsp; layout = layout.horizontal.flex<br/>
--- &nbsp; },<br/>
--- &nbsp; layout = layout.horizontal.leftright<br/>
--- }<br/>
--- </code>
-function new(screen, filter, buttons, style, template)
-    local w = {
-        layout = layout.horizontal.flex
-    }
-    template = template or {
-        {
-            item = "icon"
-        },
-        {
-            {
-                item = "title",
-                margin = { left  = 2, right = 2 },
-                bg_resize = true,
-                bg_align  = "right"
-            },
-            layout = layout.horizontal.flex
-        },
-        layout = layout.horizontal.leftright
-    }
+function new(screen, filter, buttons, style)
+    local w = flex.horizontal()
 
     local data = setmetatable({}, { __mode = 'kv' })
-    local u = function () tasklist_update(screen, w, buttons, filter, data, style, template) end
+    local u = function () tasklist_update(screen, w, buttons, filter, data, style) end
     capi.screen[screen]:connect_signal("tag::detach", u)
     tag.attached_connect_signal(screen, "property::selected", u)
     capi.client.connect_signal("property::urgent", u)
