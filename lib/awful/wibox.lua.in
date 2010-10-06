@@ -9,7 +9,6 @@ local capi =
 {
     awesome = awesome,
     screen = screen,
-    wibox = wibox,
     client = client
 }
 local setmetatable = setmetatable
@@ -17,6 +16,8 @@ local tostring = tostring
 local ipairs = ipairs
 local table = table
 local error = error
+local wibox = require("wibox")
+local beautiful = require("beautiful")
 
 --- Wibox module for awful.
 -- This module allows you to easily create wibox and attach them to the edge of
@@ -226,7 +227,7 @@ function new(arg)
 
     -- Set default size
     if position == "left" or position == "right" then
-        arg.width = arg.width or capi.awesome.font_height * 1.5
+        arg.width = arg.width or beautiful.get_font_height() * 1.5
         if arg.height then
             has_to_stretch = false
             if arg.screen then
@@ -237,7 +238,7 @@ function new(arg)
             end
         end
     else
-        arg.height = arg.height or capi.awesome.font_height * 1.5
+        arg.height = arg.height or beautiful.get_font_height() * 1.5
         if arg.width then
             has_to_stretch = false
             if arg.screen then
@@ -249,7 +250,7 @@ function new(arg)
         end
     end
 
-    local w = capi.wibox(arg)
+    local w = wibox(arg)
 
     w.screen = arg.screen or 1
 
