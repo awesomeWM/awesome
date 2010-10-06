@@ -23,16 +23,16 @@
 #define AWESOME_SYSTRAY_H
 
 #include <xcb/xcb.h>
+#include <lua.h>
 #include "common/xembed.h"
 
 void systray_init(void);
-void systray_refresh(void);
-void systray_register(void);
 void systray_cleanup(void);
 int systray_request_handle(xcb_window_t, xembed_info_t *);
 bool systray_iskdedockapp(xcb_window_t);
 int systray_process_client_message(xcb_client_message_event_t *);
 int xembed_process_client_message(xcb_client_message_event_t *);
+int luaA_systray(lua_State *);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

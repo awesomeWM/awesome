@@ -45,6 +45,7 @@
 #include "screen.h"
 #include "event.h"
 #include "selection.h"
+#include "systray.h"
 #include "common/xcursor.h"
 #include "common/buffer.h"
 #include "common/backtrace.h"
@@ -545,6 +546,7 @@ luaA_init(xdgHandle* xdg)
         { "connect_signal", luaA_awesome_connect_signal },
         { "disconnect_signal", luaA_awesome_disconnect_signal },
         { "emit_signal", luaA_awesome_emit_signal },
+        { "systray", luaA_systray },
         { "__index", luaA_awesome_index },
         { "__newindex", luaA_awesome_newindex },
         { NULL, NULL }
@@ -672,6 +674,7 @@ luaA_init(xdgHandle* xdg)
     signal_add(&global_signals, "debug::error");
     signal_add(&global_signals, "debug::index::miss");
     signal_add(&global_signals, "debug::newindex::miss");
+    signal_add(&global_signals, "systray::update");
     signal_add(&global_signals, "exit");
 }
 

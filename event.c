@@ -330,6 +330,7 @@ event_handle_destroynotify(xcb_destroy_notify_event_t *ev)
             if(globalconf.embedded.tab[i].win == ev->window)
             {
                 xembed_window_array_take(&globalconf.embedded, i);
+                luaA_systray_invalidate();
             }
 }
 
@@ -561,6 +562,7 @@ event_handle_unmapnotify(xcb_unmap_notify_event_t *ev)
             {
                 xembed_window_array_take(&globalconf.embedded, i);
                 xcb_change_save_set(globalconf.connection, XCB_SET_MODE_DELETE, ev->window);
+                luaA_systray_invalidate();
             }
 }
 

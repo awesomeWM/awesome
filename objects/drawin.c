@@ -27,6 +27,7 @@
 #include "xwindow.h"
 #include "luaa.h"
 #include "ewmh.h"
+#include "systray.h"
 #include "common/xcursor.h"
 #include "common/xutil.h"
 
@@ -37,20 +38,20 @@ LUA_OBJECT_FUNCS(drawin_class, drawin_t, drawin)
 /** Kick out systray windows.
  */
 static void
-drawin_systray_kickout(void)
+drawin_systray_kickout(drawin_t *w)
 {
-    xcb_screen_t *s = globalconf.screen;
-
-    if(globalconf.systray.parent != s->root)
+    if(globalconf.systray.parent == w)
     {
         /* Who! Check that we're not deleting a drawin with a systray, because it
          * may be its parent. If so, we reparent to root before, otherwise it will
          * hurt very much. */
+        systray_cleanup();
         xcb_reparent_window(globalconf.connection,
                             globalconf.systray.window,
-                            s->root, -512, -512);
+                            globalconf.screen->root,
+                            -512, -512);
 
-        globalconf.systray.parent = s->root;
+        globalconf.systray.parent = NULL;
     }
 }
 
@@ -65,8 +66,7 @@ drawin_wipe_resources(drawin_t *w)
         /* Activate BMA */
         client_ignore_enterleave_events();
         /* Make sure we don't accidentally kill the systray window */
-        if(globalconf.systray.parent == w->window)
-            drawin_systray_kickout();
+        drawin_systray_kickout(w);
         xcb_destroy_window(globalconf.connection, w->window);
         /* Deactivate BMA */
         client_restore_enterleave_events();

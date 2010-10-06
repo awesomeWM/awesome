@@ -23,12 +23,14 @@
 #include <xcb/xcb_icccm.h>
 #include <xcb/xcb_atom.h>
 
+#include "luaa.h"
 #include "screen.h"
 #include "systray.h"
 #include "xwindow.h"
 #include "common/array.h"
 #include "common/atoms.h"
 #include "common/xutil.h"
+#include "objects/drawin.h"
 
 #define SYSTEM_TRAY_REQUEST_DOCK 0 /* Begin icon docking */
 
@@ -47,31 +49,9 @@ systray_init(void)
                       XCB_COPY_FROM_PARENT, xscreen->root_visual, 0, NULL);
 }
 
-
-/** Refresh all systrays registrations per physical screen
- */
-void
-systray_refresh(void)
-{
-#warning
-#if 0
-    bool has_systray = false;
-    foreach(w, globalconf.wiboxes)
-        if((*w)->has_systray)
-            /* Can't use "break" with foreach() :( */
-            has_systray = true;
-
-    if(has_systray)
-        systray_register();
-    else
-        systray_cleanup();
-#endif
-}
-
-
 /** Register systray in X.
  */
-void
+static void
 systray_register(void)
 {
     xcb_client_message_event_t ev;
@@ -80,11 +60,6 @@ systray_register(void)
     xcb_intern_atom_cookie_t atom_systray_q;
     xcb_intern_atom_reply_t *atom_systray_r;
     xcb_atom_t atom_systray;
-
-    /* Set registered even if it fails to don't try again unless forced */
-    if(globalconf.systray.registered)
-        return;
-    globalconf.systray.registered = true;
 
     /* Send requests */
     if(!(atom_name = xcb_atom_name_by_screen("_NET_SYSTEM_TRAY", globalconf.default_screen)))
@@ -134,10 +109,6 @@ systray_cleanup(void)
     xcb_intern_atom_reply_t *atom_systray_r;
     char *atom_name;
 
-    if(!globalconf.systray.registered)
-        return;
-    globalconf.systray.registered = false;
-
     if(!(atom_name = xcb_atom_name_by_screen("_NET_SYSTEM_TRAY", globalconf.default_screen))
        || !(atom_systray_r = xcb_intern_atom_reply(globalconf.connection,
                                                    xcb_intern_atom_unchecked(globalconf.connection,
@@ -159,6 +130,9 @@ systray_cleanup(void)
                             XCB_CURRENT_TIME);
 
     p_delete(&atom_systray_r);
+
+    xcb_unmap_window(globalconf.connection,
+                     globalconf.systray.window);
 }
 
 /** Handle a systray request.
@@ -211,6 +185,7 @@ systray_request_handle(xcb_window_t embed_win, xembed_info_t *info)
                            MIN(XEMBED_VERSION, em.info.version));
 
     xembed_window_array_append(&globalconf.embedded, em);
+    luaA_systray_invalidate();
 
     return 0;
 }
@@ -285,6 +260,94 @@ xembed_process_client_message(xcb_client_message_event_t *ev)
         break;
     }
     return 0;
+}
+
+/** Inform lua that the systray needs to be updated.
+ */
+void
+luaA_systray_invalidate(void)
+{
+    signal_object_emit(globalconf.L, &global_signals, "systray::update", 0);
+}
+
+static void
+systray_update(int base_size, bool horizontal)
+{
+    if(base_size <= 0)
+        return;
+
+    /* Give the systray window the correct size */
+    uint32_t config_vals[4] = { base_size, base_size, 0, 0 };
+    if(horizontal)
+        config_vals[0] = base_size * globalconf.embedded.len;
+    else
+        config_vals[1] = base_size * globalconf.embedded.len;
+    xcb_configure_window(globalconf.connection,
+                         globalconf.systray.window,
+                         XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
+                         config_vals);
+
+    /* Now resize each embedded window */
+    config_vals[0] = config_vals[1] = 0;
+    config_vals[2] = config_vals[3] = base_size;
+    for(int i = 0; i < globalconf.embedded.len; i++)
+    {
+        xembed_window_t *em = &globalconf.embedded.tab[i];
+        xcb_configure_window(globalconf.connection, em->win,
+                             XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
+                             config_vals);
+        xcb_map_window(globalconf.connection, em->win);
+        if(horizontal)
+            config_vals[0] += base_size;
+        else
+            config_vals[1] += base_size;
+    }
+}
+
+/** Update the systray
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ * \luastack
+ * \lparam The drawin to display the systray in.
+ * \lparam x X position for the systray.
+ * \lparam y Y position for the systray.
+ * \lparam base_size The size (width and height) each systray item gets.
+ * \lparam horiz If true, the systray is horizontal, else vertical
+ */
+int
+luaA_systray(lua_State *L)
+{
+    if(lua_gettop(L) != 0)
+    {
+        drawin_t *w = luaA_checkudata(L, 1, &drawin_class);
+        int x = luaL_checknumber(L, 2);
+        int y = luaL_checknumber(L, 3);
+        int base_size = luaL_checknumber(L, 4);
+        bool horiz = lua_toboolean(L, 5);
+
+        if(globalconf.systray.parent == NULL)
+            systray_register();
+
+        globalconf.systray.parent = w;
+
+        if(globalconf.embedded.len != 0)
+        {
+            xcb_reparent_window(globalconf.connection,
+                                globalconf.systray.window,
+                                w->window,
+                                x, y);
+            systray_update(base_size, horiz);
+            xcb_map_window(globalconf.connection,
+                           globalconf.systray.window);
+        }
+        else
+            xcb_unmap_window(globalconf.connection,
+                             globalconf.systray.window);
+    }
+
+    lua_pushnumber(L, globalconf.embedded.len);
+    luaA_object_push(L, globalconf.systray.parent);
+    return 2;
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

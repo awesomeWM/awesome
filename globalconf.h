@@ -103,9 +103,7 @@ typedef struct
     {
         xcb_window_t window;
         /** Systray window parent */
-        xcb_window_t parent;
-        /** Is awesome the systray owner? */
-        bool registered;
+        drawin_t *parent;
     } systray;
     /** The monitor of startup notifications */
     SnMonitorContext *snmonitor;

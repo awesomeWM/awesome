@@ -22,14 +22,12 @@
 #ifndef AWESOME_EVENT_H
 #define AWESOME_EVENT_H
 
-#include "systray.h"
 #include "objects/client.h"
 
 static inline int
 awesome_refresh(void)
 {
     banning_refresh();
-    systray_refresh();
     stack_refresh();
     return xcb_flush(globalconf.connection);
 }
