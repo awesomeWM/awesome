@@ -18,7 +18,7 @@ local common = require("awful.widget.common")
 local util = require("awful.util")
 local tag = require("awful.tag")
 local beautiful = require("beautiful")
-local flex = require("wibox.layout.flex")
+local fixed = require("wibox.layout.fixed")
 
 --- Taglist widget module for awful
 module("awful.widget.taglist")
@@ -128,7 +128,7 @@ end
 -- squares_resize Optional: true or false to resize squares.
 -- font The font.
 function new(screen, filter, buttons, style)
-    local w = flex.horizontal()
+    local w = fixed.horizontal()
 
     local data = setmetatable({}, { __mode = 'vk' })
     local u = function (s)
