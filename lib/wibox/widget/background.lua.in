@@ -7,7 +7,7 @@
 local oocairo = require("oocairo")
 local base = require("wibox.widget.base")
 local color = require("gears.color")
-local widget_base = require("wibox.widget.base")
+local layout_base = require("wibox.layout.base")
 local setmetatable = setmetatable
 local pairs = pairs
 local type = type
@@ -34,7 +34,7 @@ function draw(box, wibox, cr, width, height)
 
     cr:restore()
 
-    box.widget:draw(wibox, cr, width, height)
+    layout_base.draw_widget(wibox, cr, box.widget, 0, 0, width, height)
 end
 
 --- Fit this widget into the given area
@@ -52,7 +52,7 @@ function set_widget(box, widget)
         box.widget:disconnect_signal("widget::updated", box._emit_updated)
     end
     if widget then
-        widget_base.check_widget(widget)
+        base.check_widget(widget)
         widget:connect_signal("widget::updated", box._emit_updated)
     end
     box.widget = widget
