@@ -15,9 +15,26 @@ local pairs = pairs
 
 module("wibox.widget.textbox")
 
+local function layout_create(cr)
+    if oopango.cairo_layout_create then
+        return oopango.cairo_layout_create(cr)
+    end
+    return oopango.cairo.layout_create(cr)
+end
+
+local function update_and_show(cr, layout)
+    if oopango.cairo_update_layout then
+        oopango.cairo_update_layout(cr, layout)
+        oopango.cairo_show_layout(cr, layout)
+    else
+        oopango.cairo.update_layout(cr, layout)
+        oopango.cairo.show_layout(cr, layout)
+    end
+end
+
 -- Setup a pango layout for the given textbox and cairo context
 local function setup_layout(box, cr, width, height)
-    local layout = oopango.cairo.layout_create(cr)
+    local layout = layout_create(cr)
     layout:set_ellipsize(box.ellipsize)
     layout:set_wrap(box.wrap)
     layout:set_width(oopango.units_from_number(width))
@@ -82,8 +99,7 @@ function draw(box, wibox, cr, width, height)
 
     local layout = setup_layout(box, cr, width, height)
 
-    oopango.cairo.update_layout(cr, layout)
-    oopango.cairo.show_layout(cr, layout)
+    update_and_show(cr, layout)
 end
 
 --- Fit the given textbox

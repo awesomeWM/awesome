@@ -44,7 +44,14 @@ local function set_font(f)
     -- Create a temporary surface that we need for computing the size :(
     local surface = capi.oocairo.image_surface_create("argb32", 1, 1)
     local cr = capi.oocairo.context_create(surface)
-    local layout = capi.oopango.cairo.layout_create(cr)
+    local layout
+    -- Api breakage in oopango
+    if capi.oopango.cairo_layout_create then
+        layout = capi.oopango.cairo_layout_create(cr)
+    else
+        layout = capi.oopango.cairo.layout_create(cr)
+    end
+
     layout:set_font_description(font)
 
     local width, height = layout:get_pixel_size()
