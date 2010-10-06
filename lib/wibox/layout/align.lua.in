@@ -80,13 +80,13 @@ end
 
 --- Set the layout's second widget. This is the centered one.
 function set_second(layout, widget)
-    widget_changed(layout, widget)
+    widget_changed(layout, layout.second, widget)
     layout.second = widget
 end
 
 --- Set the layout's third widget. This is the widget that is at the right/bottom
 function set_third(layout, widget)
-    widget_changed(layout, widget)
+    widget_changed(layout, layout.third, widget)
     layout.third = widget
 end
 
