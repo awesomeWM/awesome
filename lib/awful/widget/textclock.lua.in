@@ -6,27 +6,25 @@
 
 local setmetatable = setmetatable
 local os = os
-local capi = { widget = widget,
-               timer = timer }
+local textbox = require("wibox.widget.textbox")
+local capi = { timer = timer }
 
 --- Text clock widget.
 module("awful.widget.textclock")
 
 --- Create a textclock widget. It draws the time it is in a textbox.
--- @param args Standard arguments for textbox widget.
 -- @param format The time format. Default is " %a %b %d, %H:%M ".
 -- @param timeout How often update the time. Default is 60.
 -- @return A textbox widget.
-function new(args, format, timeout)
-    local args = args or {}
+function new(format, timeout)
     local format = format or " %a %b %d, %H:%M "
     local timeout = timeout or 60
-    args.type = "textbox"
-    local w = capi.widget(args)
+
+    local w = textbox()
     local timer = capi.timer { timeout = timeout }
-    w.text = os.date(format)
-    timer:connect_signal("timeout", function() w.text = os.date(format) end)
+    timer:connect_signal("timeout", function() w:set_markup(os.date(format)) end)
     timer:start()
+    timer:emit_signal("timeout")
     return w
 end
 
