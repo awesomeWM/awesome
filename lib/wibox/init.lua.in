@@ -158,7 +158,7 @@ local function setup_signals(wibox)
         wibox:add_signal(name)
         -- When "name" is emitted on wibox.drawin, also emit it on wibox
         w:connect_signal(name, function(_, ...)
-            wibox:emit_signal(name, wibox, ...)
+            wibox:emit_signal(name, ...)
         end)
     end
     clone_signal("mouse::enter")
