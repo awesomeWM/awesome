@@ -8,6 +8,7 @@ local setmetatable = setmetatable
 local ipairs = ipairs
 local math = math
 local base = require("wibox.widget.base")
+local color = require("gears.color")
 
 --- A progressbar widget.
 module("awful.widget.progressbar")

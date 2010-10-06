@@ -5,7 +5,6 @@
 -------------------------------------------------------------------------
 
 local mouse = mouse
-local widget = widget
 local wibox = wibox
 local screen = screen
 local timer = timer

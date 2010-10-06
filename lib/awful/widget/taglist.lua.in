@@ -5,8 +5,7 @@
 ---------------------------------------------------------------------------
 
 -- Grab environment we need
-local capi = { widget = widget,
-               screen = screen,
+local capi = { screen = screen,
                oocairo = oocairo,
                client = client }
 local type = type
