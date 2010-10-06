@@ -277,151 +277,6 @@ luaA_fixups(lua_State *L)
     lua_settable(L, LUA_GLOBALSINDEX);
 }
 
-/** __next function for wtable objects.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- */
-static int
-luaA_wtable_next(lua_State *L)
-{
-    /* upvalue 1 is content table */
-    if(lua_next(L, lua_upvalueindex(1)))
-        return 2;
-    lua_pushnil(L);
-    return 1;
-}
-
-/** __ipairs function for wtable objects.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- */
-static int
-luaA_wtable_ipairs(lua_State *L)
-{
-    /* push ipairs_aux */
-    lua_pushvalue(L, lua_upvalueindex(2));
-    /* push content table */
-    lua_pushvalue(L, lua_upvalueindex(1));
-    lua_pushinteger(L, 0);  /* and initial value */
-    return 3;
-}
-
-/** Index function of wtable objects.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- */
-static int
-luaA_wtable_index(lua_State *L)
-{
-    const char *buf;
-
-    lua_pushvalue(L, 2);
-    /* check for size, waiting lua 5.2 and __len on tables */
-    if((buf = lua_tostring(L, -1)))
-        if(a_strcmp(buf, "len") == 0)
-        {
-            lua_pushnumber(L, lua_objlen(L, lua_upvalueindex(1)));
-            return 1;
-        }
-    lua_pop(L, 1);
-
-    /* upvalue 1 is content table */
-    lua_rawget(L, lua_upvalueindex(1));
-    return 1;
-}
-
-/** Newindex function of wtable objects.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- */
-static int
-luaA_wtable_newindex(lua_State *L)
-{
-    bool invalid = false;
-
-    /* push key on top */
-    lua_pushvalue(L, 2);
-    /* get current key value in content table */
-    lua_rawget(L, lua_upvalueindex(1));
-    /* if value is a widget, notify change */
-    if(lua_istable(L, -1) || luaA_toudata(L, -1, &widget_class))
-        invalid = true;
-
-    lua_pop(L, 1); /* remove value */
-
-    /* if new value is a widget or a table */
-    if(lua_istable(L, 3))
-    {
-        luaA_table2wtable(L);
-        invalid = true;
-    }
-    else if(!invalid && luaA_toudata(L, 3, &widget_class))
-        invalid = true;
-
-    /* upvalue 1 is content table */
-    lua_rawset(L, lua_upvalueindex(1));
-
-    if(invalid)
-        luaA_wibox_invalidate_byitem(L, lua_topointer(L, 1));
-
-    return 0;
-}
-
-/** Convert the top element of the stack to a proxied wtable.
- * \param L The Lua VM state.
- */
-void
-luaA_table2wtable(lua_State *L)
-{
-    if(!lua_istable(L, -1))
-        return;
-
-    lua_newtable(L); /* create *real* content table */
-    lua_createtable(L, 0, 5); /* metatable */
-    lua_pushvalue(L, -2); /* copy content table */
-    lua_pushcfunction(L, luaA_ipairs_aux); /* push ipairs aux */
-    lua_pushcclosure(L, luaA_wtable_ipairs, 2);
-    lua_pushvalue(L, -3); /* copy content table */
-    lua_pushcclosure(L, luaA_wtable_next, 1); /* __next has the content table as upvalue */
-    lua_pushvalue(L, -4); /* copy content table */
-    lua_pushcclosure(L, luaA_wtable_index, 1); /* __index has the content table as upvalue */
-    lua_pushvalue(L, -5); /* copy content table */
-    lua_pushcclosure(L, luaA_wtable_newindex, 1); /* __newindex has the content table as upvalue */
-    /* set metatable field with just pushed closure */
-    lua_setfield(L, -5, "__newindex");
-    lua_setfield(L, -4, "__index");
-    lua_setfield(L, -3, "__next");
-    lua_setfield(L, -2, "__ipairs");
-    /* set metatable impossible to touch */
-    lua_pushliteral(L, "wtable");
-    lua_setfield(L, -2, "__metatable");
-    /* set new metatable on original table */
-    lua_setmetatable(L, -3);
-
-    /* initial key */
-    lua_pushnil(L);
-    /* go through original table */
-    while(lua_next(L, -3))
-    {
-        /* if convert value to wtable */
-        luaA_table2wtable(L);
-        /* copy key */
-        lua_pushvalue(L, -2);
-        /* move key before value */
-        lua_insert(L, -2);
-        /* set same value in content table */
-        lua_rawset(L, -4);
-        /* copy key */
-        lua_pushvalue(L, -1);
-        /* push the new value :-> */
-        lua_pushnil(L);
-        /* set orig[k] = nil */
-        lua_rawset(L, -5);
-    }
-    /* remove content table */
-    lua_pop(L, 1);
-}
-
 /** Look for an item: table, function, etc.
  * \param L The Lua VM state.
  * \param item The pointer item.
@@ -574,9 +429,6 @@ luaA_awesome_newindex(lua_State *L)
         const char *newfont = luaL_checkstring(L, 3);
         font_delete(&globalconf.font);
         globalconf.font = font_new(newfont);
-        /* refresh all wiboxes */
-        foreach(wibox, globalconf.wiboxes)
-            (*wibox)->need_update = true;
     }
     else if(a_strcmp(buf, "fg") == 0)
     {
@@ -749,9 +601,6 @@ luaA_init(xdgHandle* xdg)
 
     /* Export wibox */
     wibox_class_setup(L);
-
-    /* Export widget */
-    widget_class_setup(L);
 
     /* Export client */
     client_class_setup(L);

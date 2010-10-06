@@ -234,19 +234,6 @@ luaA_mouse_object_under_pointer(lua_State *L)
     {
         luaA_object_push(L, wibox);
 
-        int16_t x = mouse_x - wibox->geometry.x;
-        int16_t y = mouse_y - wibox->geometry.y;
-
-        widget_t *widget = widget_getbycoords(wibox->orientation, &wibox->widgets,
-                                              wibox->geometry.width,
-                                              wibox->geometry.height,
-                                              &x, &y);
-
-        if(widget)
-        {
-            luaA_object_push(L, widget);
-            return 2;
-        }
         return 1;
     }
     else if((client = client_getbyframewin(child)))

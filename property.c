@@ -332,8 +332,11 @@ static int
 property_handle_xrootpmap_id(uint8_t state,
                              xcb_window_t window)
 {
+#warning
+#if 0
     foreach(w, globalconf.wiboxes)
        (*w)->need_update = true;
+#endif
 
     return 0;
 }

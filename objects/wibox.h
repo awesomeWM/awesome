@@ -22,9 +22,9 @@
 #ifndef AWESOME_OBJECTS_WIBOX_H
 #define AWESOME_OBJECTS_WIBOX_H
 
-#include "objects/widget.h"
 #include "objects/window.h"
 #include "common/luaobject.h"
+#include "draw.h"
 
 /** Wibox type */
 struct wibox_t
@@ -34,13 +34,6 @@ struct wibox_t
     bool ontop;
     /** Visible */
     bool visible;
-    /** Widget list */
-    widget_node_array_t widgets;
-    void *widgets_table;
-    /** Widget the mouse is over */
-    widget_t *mouse_over;
-    /** Need update */
-    bool need_update;
     /** Cursor */
     char *cursor;
     /** Background image */
@@ -53,18 +46,11 @@ struct wibox_t
     draw_context_t ctx;
     /** Orientation */
     orientation_t orientation;
-    /** Has wibox an attached systray **/
-    bool has_systray;
 };
 
 void wibox_unref_simplified(wibox_t **);
 
 ARRAY_FUNCS(wibox_t *, wibox, wibox_unref_simplified)
-void wibox_widget_node_array_wipe(lua_State *, int);
-
-void wibox_refresh(void);
-
-void luaA_wibox_invalidate_byitem(lua_State *, const void *);
 
 wibox_t * wibox_getbywin(xcb_window_t);
 
@@ -73,8 +59,6 @@ void wibox_refresh_pixmap_partial(wibox_t *, int16_t, int16_t, uint16_t, uint16_
 void wibox_class_setup(lua_State *);
 
 lua_class_t wibox_class;
-
-void wibox_clear_mouse_over(wibox_t *);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

@@ -26,7 +26,6 @@
 #include "screen.h"
 #include "systray.h"
 #include "xwindow.h"
-#include "objects/widget.h"
 #include "objects/wibox.h"
 #include "common/array.h"
 #include "common/atoms.h"
@@ -55,6 +54,8 @@ systray_init(void)
 void
 systray_refresh(void)
 {
+#warning
+#if 0
     bool has_systray = false;
     foreach(w, globalconf.wiboxes)
         if((*w)->has_systray)
@@ -65,6 +66,7 @@ systray_refresh(void)
         systray_register();
     else
         systray_cleanup();
+#endif
 }
 
 
@@ -210,8 +212,6 @@ systray_request_handle(xcb_window_t embed_win, xembed_info_t *info)
                            MIN(XEMBED_VERSION, em.info.version));
 
     xembed_window_array_append(&globalconf.embedded, em);
-
-    widget_invalidate_bytype(widget_systray);
 
     return 0;
 }

@@ -32,7 +32,6 @@
 #include "xwindow.h"
 #include "ewmh.h"
 #include "objects/client.h"
-#include "objects/widget.h"
 #include "keyresolv.h"
 #include "keygrabber.h"
 #include "mousegrabber.h"
@@ -194,28 +193,8 @@ event_handle_button(xcb_button_press_event_t *ev)
         /* Handle the button event on it */
         event_button_callback(ev, &wibox->buttons, -1, 1, NULL);
 
-        /* Duplicate the wibox */
-        lua_pushvalue(globalconf.L, -1);
         /* And handle the button event on it again */
         event_emit_button(ev);
-
-        /* then try to match a widget binding */
-        widget_t *w = widget_getbycoords(wibox->orientation, &wibox->widgets,
-                                         wibox->geometry.width,
-                                         wibox->geometry.height,
-                                         &ev->event_x, &ev->event_y);
-        if(w)
-        {
-            /* Push widget (the wibox is already on stack) */
-            luaA_object_push_item(globalconf.L, -1, w);
-            /* Move widget before wibox */
-            lua_insert(globalconf.L, -2);
-            event_button_callback(ev, &w->buttons, -2, 2, NULL);
-        }
-        else
-            /* Remove the wibox, we did not use it */
-            lua_pop(globalconf.L, 1);
-
     }
     else if((c = client_getbyframewin(ev->event)))
     {
@@ -350,68 +329,7 @@ event_handle_destroynotify(xcb_destroy_notify_event_t *ev)
             if(globalconf.embedded.tab[i].win == ev->window)
             {
                 xembed_window_array_take(&globalconf.embedded, i);
-                widget_invalidate_bytype(widget_systray);
             }
-}
-
-/** Handle a motion notify over widgets.
- * \param wibox The wibox.
- * \param mouse_over The pointer to the registered mouse over widget.
- * \param widget The new widget the mouse is over.
- */
-static void
-event_handle_widget_motionnotify(wibox_t *wibox,
-                                 widget_t *widget)
-{
-    if(widget != wibox->mouse_over)
-    {
-        if(wibox->mouse_over)
-        {
-            /* Emit mouse leave signal on old widget:
-             * - Push wibox.*/
-            luaA_object_push(globalconf.L, wibox);
-            /* - Push the widget the mouse was on */
-            luaA_object_push_item(globalconf.L, -1, wibox->mouse_over);
-            /* - Invert wibox/widget */
-            lua_insert(globalconf.L, -2);
-            /* - Emit the signal mouse::leave with the wibox as argument */
-            luaA_object_emit_signal(globalconf.L, -2, "mouse::leave", 1);
-            /* - Remove the widget */
-            lua_pop(globalconf.L, 1);
-
-            /* Re-push wibox */
-            luaA_object_push(globalconf.L, wibox);
-            luaA_object_unref_item(globalconf.L, -1, wibox->mouse_over);
-            /* Remove the wibox */
-            lua_pop(globalconf.L, 1);
-        }
-        if(widget)
-        {
-            /* Get a ref on this widget so that it can't be unref'd from
-             * underneath us (-> invalid pointer dereference):
-             * - Push the wibox */
-            luaA_object_push(globalconf.L, wibox);
-            /* - Push the widget */
-            luaA_object_push_item(globalconf.L, -1, widget);
-            /* - Reference the widget into the wibox */
-            luaA_object_ref_item(globalconf.L, -2, -1);
-
-            /* Emit mouse::enter signal on new widget:
-             * - Push the widget */
-            luaA_object_push_item(globalconf.L, -1, widget);
-            /* - Move the widget before the wibox we pushed just above */
-            lua_insert(globalconf.L, -2);
-            /* - Emit the signal with the wibox as argument */
-
-            luaA_object_emit_signal(globalconf.L, -2, "mouse::enter", 1);
-            /* - Remove the widget from the stack */
-            lua_pop(globalconf.L, 1);
-        }
-
-        /* Store that this widget was the one with the mouse over */
-        wibox->mouse_over = widget;
-
-    }
 }
 
 /** The motion notify event handler.
@@ -420,22 +338,12 @@ event_handle_widget_motionnotify(wibox_t *wibox,
 static void
 event_handle_motionnotify(xcb_motion_notify_event_t *ev)
 {
-    wibox_t *wibox;
-
     globalconf.timestamp = ev->time;
 
     if(event_handle_mousegrabber(ev->root_x, ev->root_y, ev->state))
         return;
 
-    if((wibox = wibox_getbywin(ev->event)))
-    {
-        widget_t *w = widget_getbycoords(wibox->orientation, &wibox->widgets,
-                                         wibox->geometry.width,
-                                         wibox->geometry.height,
-                                         &ev->event_x, &ev->event_y);
-
-        event_handle_widget_motionnotify(wibox, w);
-    }
+#warning
 }
 
 /** The leave notify event handler.
@@ -461,22 +369,6 @@ event_handle_leavenotify(xcb_leave_notify_event_t *ev)
 
     if((wibox = wibox_getbywin(ev->event)))
     {
-        if(wibox->mouse_over)
-        {
-            /* Push the wibox */
-            luaA_object_push(globalconf.L, wibox);
-            /* Push the widget the mouse is over in this wibox */
-            luaA_object_push_item(globalconf.L, -1, wibox->mouse_over);
-            /* Move the widget before the wibox */
-            lua_insert(globalconf.L, -2);
-            /* Emit mouse::leave signal on widget the mouse was over with
-             * its wibox as argument */
-            luaA_object_emit_signal(globalconf.L, -2, "mouse::leave", 1);
-            /* Remove the widget from the stack */
-            lua_pop(globalconf.L, 1);
-            wibox_clear_mouse_over(wibox);
-        }
-
         luaA_object_push(globalconf.L, wibox);
         luaA_object_emit_signal(globalconf.L, -1, "mouse::leave", 0);
         lua_pop(globalconf.L, 1);
@@ -499,13 +391,6 @@ event_handle_enternotify(xcb_enter_notify_event_t *ev)
 
     if((wibox = wibox_getbywin(ev->event)))
     {
-        widget_t *w = widget_getbycoords(wibox->orientation, &wibox->widgets,
-                                         wibox->geometry.width,
-                                         wibox->geometry.height,
-                                         &ev->event_x, &ev->event_y);
-
-        event_handle_widget_motionnotify(wibox, w);
-
         luaA_object_push(globalconf.L, wibox);
         luaA_object_emit_signal(globalconf.L, -1, "mouse::enter", 0);
         lua_pop(globalconf.L, 1);
@@ -558,10 +443,7 @@ event_handle_expose(xcb_expose_event_t *ev)
 {
     wibox_t *wibox;
 
-    /* If the wibox got need_update set, skip this because it will be repainted
-     * soon anyway. Without this we could be painting garbage to the screen!
-     */
-    if((wibox = wibox_getbywin(ev->window)) && !wibox->need_update)
+    if((wibox = wibox_getbywin(ev->window)))
         wibox_refresh_pixmap_partial(wibox,
                                      ev->x, ev->y,
                                      ev->width, ev->height);
@@ -677,7 +559,6 @@ event_handle_unmapnotify(xcb_unmap_notify_event_t *ev)
             if(globalconf.embedded.tab[i].win == ev->window)
             {
                 xembed_window_array_take(&globalconf.embedded, i);
-                widget_invalidate_bytype(widget_systray);
                 xcb_change_save_set(globalconf.connection, XCB_SET_MODE_DELETE, ev->window);
             }
 }

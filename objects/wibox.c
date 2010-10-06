@@ -82,36 +82,14 @@ wibox_wipe(wibox_t *wibox)
 {
     p_delete(&wibox->cursor);
     wibox_wipe_resources(wibox);
-    widget_node_array_wipe(&wibox->widgets);
     if(wibox->bg_image)
         cairo_surface_destroy(wibox->bg_image);
 }
-
-/** Wipe an array of widget_node. Release references to widgets.
- * \param L The Lua VM state.
- * \param idx The index of the wibox on the stack.
- */
-void
-wibox_widget_node_array_wipe(lua_State *L, int idx)
-{
-    wibox_t *wibox = luaA_checkudata(L, idx, &wibox_class);
-    foreach(widget_node, wibox->widgets)
-        luaA_object_unref_item(globalconf.L, idx, widget_node->widget);
-    widget_node_array_wipe(&wibox->widgets);
-}
-
 
 void
 wibox_unref_simplified(wibox_t **item)
 {
     luaA_object_unref(globalconf.L, *item);
-}
-
-static void
-wibox_need_update(wibox_t *wibox)
-{
-    wibox->need_update = true;
-    wibox_clear_mouse_over(wibox);
 }
 
 static void
@@ -283,8 +261,6 @@ wibox_moveresize(lua_State *L, int udx, area_t geometry)
         DO_WIBOX_GEOMETRY_CHECK_AND_EMIT(height)
 #undef DO_WIBOX_GEOMETRY_CHECK_AND_EMIT
     }
-
-    wibox_need_update(w);
 }
 
 /** Refresh the window content by copying its pixmap data to its window.
@@ -333,164 +309,8 @@ wibox_map(wibox_t *wibox)
     xcb_map_window(globalconf.connection, wibox->window);
     /* Deactivate BMA */
     client_restore_enterleave_events();
-    /* We must make sure the wibox does not display garbage */
-    wibox_need_update(wibox);
     /* Stack this wibox correctly */
     stack_windows();
-}
-
-static void
-wibox_systray_refresh(wibox_t *wibox)
-{
-    wibox->has_systray = false;
-
-    if(!wibox->screen)
-        return;
-
-    for(int i = 0; i < wibox->widgets.len; i++)
-    {
-        widget_node_t *systray = &wibox->widgets.tab[i];
-        if(systray->widget->type == widget_systray)
-        {
-            uint32_t config_back[] = { wibox->ctx.bg.pixel };
-            uint32_t config_win_vals[4];
-            uint32_t config_win_vals_off[2] = { -512, -512 };
-            xembed_window_t *em;
-
-            wibox->has_systray = true;
-
-            if(wibox->visible
-               && systray->widget->isvisible
-               && systray->geometry.width)
-            {
-                /* Set background of the systray window. */
-                xcb_change_window_attributes(globalconf.connection,
-                                             globalconf.systray.window,
-                                             XCB_CW_BACK_PIXEL, config_back);
-                /* Map it. */
-                xcb_map_window(globalconf.connection, globalconf.systray.window);
-                /* Move it. */
-                switch(wibox->orientation)
-                {
-                  case North:
-                    config_win_vals[0] = systray->geometry.y;
-                    config_win_vals[1] = wibox->geometry.height - systray->geometry.x - systray->geometry.width;
-                    config_win_vals[2] = systray->geometry.height;
-                    config_win_vals[3] = systray->geometry.width;
-                    break;
-                  case South:
-                    config_win_vals[0] = systray->geometry.y;
-                    config_win_vals[1] = systray->geometry.x;
-                    config_win_vals[2] = systray->geometry.height;
-                    config_win_vals[3] = systray->geometry.width;
-                    break;
-                  case East:
-                    config_win_vals[0] = systray->geometry.x;
-                    config_win_vals[1] = systray->geometry.y;
-                    config_win_vals[2] = systray->geometry.width;
-                    config_win_vals[3] = systray->geometry.height;
-                    break;
-                }
-                /* reparent */
-                if(globalconf.systray.parent != wibox->window)
-                {
-                    xcb_reparent_window(globalconf.connection,
-                                        globalconf.systray.window,
-                                        wibox->window,
-                                        config_win_vals[0], config_win_vals[1]);
-                    globalconf.systray.parent = wibox->window;
-                }
-                xcb_configure_window(globalconf.connection,
-                                     globalconf.systray.window,
-                                     XCB_CONFIG_WINDOW_X
-                                     | XCB_CONFIG_WINDOW_Y
-                                     | XCB_CONFIG_WINDOW_WIDTH
-                                     | XCB_CONFIG_WINDOW_HEIGHT,
-                                     config_win_vals);
-                /* width = height = systray height */
-                config_win_vals[2] = config_win_vals[3] = systray->geometry.height;
-                config_win_vals[0] = 0;
-            }
-            else
-                return wibox_systray_kickout();
-
-            switch(wibox->orientation)
-            {
-              case North:
-                config_win_vals[1] = systray->geometry.width - config_win_vals[3];
-                for(int j = 0; j < globalconf.embedded.len; j++)
-                {
-                    em = &globalconf.embedded.tab[j];
-                    if(config_win_vals[1] - config_win_vals[2] >= (uint32_t) wibox->geometry.y)
-                    {
-                        xcb_map_window(globalconf.connection, em->win);
-                        xcb_configure_window(globalconf.connection, em->win,
-                                             XCB_CONFIG_WINDOW_X
-                                             | XCB_CONFIG_WINDOW_Y
-                                             | XCB_CONFIG_WINDOW_WIDTH
-                                             | XCB_CONFIG_WINDOW_HEIGHT,
-                                             config_win_vals);
-                        config_win_vals[1] -= config_win_vals[3];
-                    }
-                    else
-                        xcb_configure_window(globalconf.connection, em->win,
-                                             XCB_CONFIG_WINDOW_X
-                                             | XCB_CONFIG_WINDOW_Y,
-                                             config_win_vals_off);
-                }
-                break;
-              case South:
-                config_win_vals[1] = 0;
-                for(int j = 0; j < globalconf.embedded.len; j++)
-                {
-                    em = &globalconf.embedded.tab[j];
-                    /* if(y + width <= wibox.y + systray.right) */
-                    if(config_win_vals[1] + config_win_vals[3] <= (uint32_t) wibox->geometry.y + AREA_RIGHT(systray->geometry))
-                    {
-                        xcb_map_window(globalconf.connection, em->win);
-                        xcb_configure_window(globalconf.connection, em->win,
-                                             XCB_CONFIG_WINDOW_X
-                                             | XCB_CONFIG_WINDOW_Y
-                                             | XCB_CONFIG_WINDOW_WIDTH
-                                             | XCB_CONFIG_WINDOW_HEIGHT,
-                                             config_win_vals);
-                        config_win_vals[1] += config_win_vals[3];
-                    }
-                    else
-                        xcb_configure_window(globalconf.connection, em->win,
-                                             XCB_CONFIG_WINDOW_X
-                                             | XCB_CONFIG_WINDOW_Y,
-                                             config_win_vals_off);
-                }
-                break;
-              case East:
-                config_win_vals[1] = 0;
-                for(int j = 0; j < globalconf.embedded.len; j++)
-                {
-                    em = &globalconf.embedded.tab[j];
-                    /* if(x + width < systray.x + systray.width) */
-                    if(config_win_vals[0] + config_win_vals[2] <= (uint32_t) AREA_RIGHT(systray->geometry) + wibox->geometry.x)
-                    {
-                        xcb_map_window(globalconf.connection, em->win);
-                        xcb_configure_window(globalconf.connection, em->win,
-                                             XCB_CONFIG_WINDOW_X
-                                             | XCB_CONFIG_WINDOW_Y
-                                             | XCB_CONFIG_WINDOW_WIDTH
-                                             | XCB_CONFIG_WINDOW_HEIGHT,
-                                             config_win_vals);
-                        config_win_vals[0] += config_win_vals[2];
-                    }
-                    else
-                        xcb_configure_window(globalconf.connection, em->win,
-                                             XCB_CONFIG_WINDOW_X
-                                             | XCB_CONFIG_WINDOW_Y,
-                                             config_win_vals_off);
-                }
-                break;
-            }
-            break;
-        }
-    }
 }
 
 /** Get a wibox by its window.
@@ -506,48 +326,6 @@ wibox_getbywin(xcb_window_t win)
     return NULL;
 }
 
-/** Draw a wibox.
- * \param wibox The wibox to draw.
- */
-static void
-wibox_draw(wibox_t *wibox)
-{
-    if(wibox->visible)
-    {
-        widget_render(wibox);
-        wibox_refresh_pixmap(wibox);
-
-        wibox->need_update = false;
-    }
-
-    wibox_systray_refresh(wibox);
-}
-
-/** Refresh all wiboxes.
- */
-void
-wibox_refresh(void)
-{
-    foreach(w, globalconf.wiboxes)
-    {
-        if((*w)->need_update)
-            wibox_draw(*w);
-    }
-}
-
-/** Clear the wibox' mouse_over pointer.
- * \param wibox The wibox.
- */
-void
-wibox_clear_mouse_over(wibox_t *wibox)
-{
-    if (wibox->mouse_over)
-    {
-        luaA_object_unref(globalconf.L, wibox->mouse_over);
-        wibox->mouse_over = NULL;
-    }
-}
-
 /** Set a wibox visible or not.
  * \param L The Lua VM state.
  * \param udx The wibox.
@@ -560,7 +338,6 @@ wibox_set_visible(lua_State *L, int udx, bool v)
     if(v != wibox->visible)
     {
         wibox->visible = v;
-        wibox_clear_mouse_over(wibox);
 
         if(wibox->screen)
         {
@@ -575,9 +352,6 @@ wibox_set_visible(lua_State *L, int udx, bool v)
                 /* Active BMA */
                 client_restore_enterleave_events();
             }
-
-            /* kick out systray if needed */
-            wibox_systray_refresh(wibox);
         }
 
         luaA_object_emit_signal(L, udx, "property::visible", 0);
@@ -599,11 +373,8 @@ wibox_detach(lua_State *L, int udx)
         /* save visible state */
         v = wibox->visible;
         wibox->visible = false;
-        wibox_systray_refresh(wibox);
         /* restore visibility */
         wibox->visible = v;
-
-        wibox_clear_mouse_over(wibox);
 
         wibox_wipe_resources(wibox);
 
@@ -667,20 +438,11 @@ wibox_attach(lua_State *L, int udx, screen_t *s)
 
     if(wibox->visible)
         wibox_map(wibox);
-    else
-        wibox_need_update(wibox);
 
     luaA_object_emit_signal(L, udx, "property::screen", 0);
 
     if(strut_has_value(&wibox->strut))
         screen_emit_signal(L, wibox->screen, "property::workarea", 0);
-}
-
-static int
-luaA_wibox_need_update(lua_State *L)
-{
-    wibox_need_update(luaA_checkudata(L, 1, &wibox_class));
-    return 0;
 }
 
 /** Create a new wibox.
@@ -717,49 +479,9 @@ luaA_wibox_new(lua_State *L)
     if(w->type == 0)
         w->type = _NET_WM_WINDOW_TYPE_NORMAL;
 
-    luaA_object_connect_signal(L, -2, "property::border_width", luaA_wibox_need_update);
-
     return 1;
 }
 
-/** Check if a wibox widget table has an item.
- * \param L The Lua VM state.
- * \param wibox The wibox.
- * \param item The item to look for.
- */
-static bool
-luaA_wibox_hasitem(lua_State *L, wibox_t *wibox, const void *item)
-{
-    if(wibox->widgets_table)
-    {
-        luaA_object_push(L, wibox);
-        luaA_object_push_item(L, -1, wibox->widgets_table);
-        lua_remove(L, -2);
-        if(lua_topointer(L, -1) == item || luaA_hasitem(L, item))
-            return true;
-    }
-    return false;
-}
-
-/** Invalidate a wibox by a Lua object (table, etc).
- * \param L The Lua VM state.
- * \param item The object identifier.
- */
-void
-luaA_wibox_invalidate_byitem(lua_State *L, const void *item)
-{
-    foreach(w, globalconf.wiboxes)
-    {
-        wibox_t *wibox = *w;
-        if(luaA_wibox_hasitem(L, wibox, item))
-        {
-            /* update wibox */
-            wibox_need_update(wibox);
-            lua_pop(L, 1); /* remove widgets table */
-        }
-
-    }
-}
 
 /* Set or get the wibox geometry.
  * \param L The Lua VM state.
@@ -878,8 +600,7 @@ luaA_wibox_set_fg(lua_State *L, wibox_t *wibox)
 {
     size_t len;
     const char *buf = luaL_checklstring(L, -1, &len);
-    if(xcolor_init_reply(xcolor_init_unchecked(&wibox->ctx.fg, buf, len)))
-        wibox->need_update = true;
+    xcolor_init_reply(xcolor_init_unchecked(&wibox->ctx.fg, buf, len));
     luaA_object_emit_signal(L, -3, "property::fg", 0);
     return 0;
 }
@@ -909,8 +630,6 @@ luaA_wibox_set_bg(lua_State *L, wibox_t *wibox)
     {
         uint32_t mask = XCB_CW_BACK_PIXEL;
         uint32_t values[] = { wibox->ctx.bg.pixel };
-
-        wibox->need_update = true;
 
         if (wibox->window != XCB_NONE)
             xcb_change_window_attributes(globalconf.connection,
@@ -952,7 +671,6 @@ luaA_wibox_set_bg_image(lua_State *L, wibox_t *wibox)
             cairo_surface_destroy(wibox->bg_image);
         wibox->bg_image = draw_dup_image_surface(*cairo_surface);
     }
-    wibox->need_update = true;
     luaA_object_emit_signal(L, -3, "property::bg_image", 0);
     return 0;
 }
@@ -1058,7 +776,6 @@ luaA_wibox_set_orientation(lua_State *L, wibox_t *wibox)
     if(buf)
     {
         wibox_set_orientation(L, -3, orientation_fromstr(buf));
-        wibox_need_update(wibox);
     }
     return 0;
 }
@@ -1087,39 +804,6 @@ luaA_wibox_set_visible(lua_State *L, wibox_t *wibox)
     return 0;
 }
 
-/** Set the wibox widgets.
- * \param L The Lua VM state.
- * \param wibox The wibox object.
- * \return The number of elements pushed on stack.
- */
-static int
-luaA_wibox_set_widgets(lua_State *L, wibox_t *wibox)
-{
-    if(luaA_isloop(L, -1))
-    {
-        luaA_warn(L, "table is looping, cannot use this as widget table");
-        return 0;
-    }
-    /* duplicate table because next function will eat it */
-    lua_pushvalue(L, -1);
-    luaA_object_unref_item(L, -4, wibox->widgets_table);
-    wibox->widgets_table = luaA_object_ref_item(L, -4, -1);
-    luaA_object_emit_signal(L, -3, "property::widgets", 0);
-    wibox_need_update(wibox);
-    luaA_table2wtable(L);
-    return 0;
-}
-
-/** Get the wibox widgets.
- * \param L The Lua VM state.
- * \param wibox The wibox object.
- * \return The number of elements pushed on stack.
- */
-static int
-luaA_wibox_get_widgets(lua_State *L, wibox_t *wibox)
-{
-    return luaA_object_push_item(L, 1, wibox->widgets_table);
-}
 void
 wibox_class_setup(lua_State *L)
 {
@@ -1144,10 +828,6 @@ wibox_class_setup(lua_State *L)
                      NULL,
                      luaA_class_index_miss_property, luaA_class_newindex_miss_property,
                      wibox_methods, wibox_meta);
-    luaA_class_add_property(&wibox_class, "widgets",
-                            (lua_class_propfunc_t) luaA_wibox_set_widgets,
-                            (lua_class_propfunc_t) luaA_wibox_get_widgets,
-                            (lua_class_propfunc_t) luaA_wibox_set_widgets);
     luaA_class_add_property(&wibox_class, "visible",
                             (lua_class_propfunc_t) luaA_wibox_set_visible,
                             (lua_class_propfunc_t) luaA_wibox_get_visible,

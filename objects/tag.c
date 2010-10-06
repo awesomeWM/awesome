@@ -23,7 +23,6 @@
 #include "tag.h"
 #include "client.h"
 #include "ewmh.h"
-#include "widget.h"
 #include "luaa.h"
 
 /** Tag type */
