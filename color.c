@@ -75,29 +75,6 @@ color_parse(const char *colstr, ssize_t len,
     return true;
 }
 
-/** Send a request to initialize a color.
- * If you are only interested in the color's pixel value or need both, the pixel
- * value and the rgba components, use xcolor_init_unchecked() and/or
- * xcolor_to_color() instead.
- * \param color color_t struct to store color into.
- * \param colstr Color specification.
- * \param len The length of colstr (which still MUST be NULL terminated).
- * \return True if color allocation was successful.
- */
-bool
-color_init_unchecked(color_t *color, const char *colstr, ssize_t len)
-{
-    if(!len)
-        return false;
-
-    /* The color is given in RGB value */
-    if(!color_parse(colstr, len, &color->red, &color->green, &color->blue, &color->alpha))
-        return false;
-
-    color->initialized = true;
-    return true;
-}
-
 /** Send a request to initialize a X color.
  * If you are only interested in the rgba values and don't need the color's
  * pixel value, you should use color_init_unchecked() instead.
@@ -174,29 +151,6 @@ xcolor_init_reply(xcolor_init_request_t req)
     return false;
 }
 
-/** Convert a xcolor struct to a color one.
- * \param xcol The X color.
- * \param col The color.
- * \return True if everything has been converted.
- */
-bool
-xcolor_to_color(const xcolor_t *xcol, color_t *col)
-{
-    if (!xcol->initialized)
-    {
-        col->initialized = false;
-        return false;
-    }
-
-    col->initialized = true;
-    col->red   = RGB_16TO8(xcol->red);
-    col->green = RGB_16TO8(xcol->green);
-    col->blue  = RGB_16TO8(xcol->blue);
-    col->alpha = RGB_16TO8(xcol->alpha);
-
-    return true;
-}
-
 /** Push a color as a string onto the stack
  * \param L The Lua VM state.
  * \param c The color to push.
@@ -209,29 +163,6 @@ luaA_pushxcolor(lua_State *L, const xcolor_t c)
     uint8_t g = (unsigned) c.green * 0xff / 0xffff;
     uint8_t b = (unsigned) c.blue  * 0xff / 0xffff;
     uint8_t a = (unsigned) c.alpha * 0xff / 0xffff;
-    char s[10];
-    int len;
-    /* do not print alpha if it's full */
-    if(a == 0xff)
-        len = snprintf(s, sizeof(s), "#%02x%02x%02x", r, g, b);
-    else
-        len = snprintf(s, sizeof(s), "#%02x%02x%02x%02x", r, g, b, a);
-    lua_pushlstring(L, s, len);
-    return 1;
-}
-
-/** Push a color as a string onto the stack
- * \param L The Lua VM state.
- * \param c The color to push.
- * \return The number of elements pushed on stack.
- */
-int
-luaA_pushcolor(lua_State *L, const color_t *c)
-{
-    uint8_t r = c->red;
-    uint8_t g = c->green;
-    uint8_t b = c->blue;
-    uint8_t a = c->alpha;
     char s[10];
     int len;
     /* do not print alpha if it's full */
