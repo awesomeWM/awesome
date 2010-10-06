@@ -173,10 +173,10 @@ function run(args, textbox, exe_callback, completion_callback, history_path, his
     if not textbox or not exe_callback then
         return
     end
-    textbox.text = prompt_text_with_cursor{
+    textbox:set_markup(prompt_text_with_cursor{
         text = text, text_color = inv_col, cursor_color = cur_col,
         cursor_pos = cur_pos, cursor_ul = cur_ul, selectall = selectall,
-        font = font, prompt = prettyprompt }
+        font = font, prompt = prettyprompt })
 
     capi.keygrabber.run(
     function (modifiers, key, event)
@@ -187,13 +187,13 @@ function run(args, textbox, exe_callback, completion_callback, history_path, his
         -- Get out cases
         if (mod.Control and (key == "c" or key == "g"))
             or (not mod.Control and key == "Escape") then
-            textbox.text = ""
+            textbox:set_markup("")
             if done_callback then done_callback() end
             return false
         elseif (mod.Control and (key == "j" or key == "m"))
             or (not mod.Control and key == "Return")
             or (not mod.Control and key == "KP_Enter") then
-            textbox.text = ""
+            textbox:set_markup("")
             history_add(history_path, command)
             capi.keygrabber.stop()
             exe_callback(command)
@@ -257,10 +257,10 @@ function run(args, textbox, exe_callback, completion_callback, history_path, his
                         if ncomp == 1 then return true end
                         if ncomp == 2 then
                             command = command_before_comp
-                            textbox.text = prompt_text_with_cursor{
+                            textbox:set_markup(prompt_text_with_cursor{
                                 text = command_before_comp, text_color = inv_col, cursor_color = cur_col,
                                 cursor_pos = cur_pos, cursor_ul = cur_ul, selectall = selectall,
-                                font = font, prompt = prettyprompt }
+                                font = font, prompt = prettyprompt })
                             return true
                         end
 
@@ -342,10 +342,10 @@ function run(args, textbox, exe_callback, completion_callback, history_path, his
 
         -- Update textbox
         local function update()
-            textbox.text = prompt_text_with_cursor{
+            textbox:set_markup(prompt_text_with_cursor{
                 text = command, text_color = inv_col, cursor_color = cur_col,
                 cursor_pos = cur_pos, cursor_ul = cur_ul, selectall = selectall,
-                font = font, prompt = prettyprompt }
+                font = font, prompt = prettyprompt })
         end
 
         local success = pcall(update)
