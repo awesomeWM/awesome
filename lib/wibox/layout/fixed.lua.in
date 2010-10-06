@@ -99,10 +99,10 @@ end
 
 --- Reset a fixed layout. This removes all widgets from the layout.
 function reset(layout)
-    for k, v in pairs(layout.widget) do
+    for k, v in pairs(layout.widgets) do
         v:disconnect_signal("widget::updated", layout._emit_updated)
     end
-    layout.widget = {}
+    layout.widgets = {}
     layout:emit_signal("widget::updated")
 end
 
