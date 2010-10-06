@@ -163,6 +163,7 @@ local function setup_signals(wibox)
     end
     clone_signal("mouse::enter")
     clone_signal("mouse::leave")
+    clone_signal("mouse::move")
     clone_signal("property::border_color")
     clone_signal("property::border_width")
     clone_signal("property::buttons")

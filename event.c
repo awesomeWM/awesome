@@ -340,12 +340,31 @@ event_handle_destroynotify(xcb_destroy_notify_event_t *ev)
 static void
 event_handle_motionnotify(xcb_motion_notify_event_t *ev)
 {
+    drawin_t *w;
+    client_t *c;
+
     globalconf.timestamp = ev->time;
 
     if(event_handle_mousegrabber(ev->root_x, ev->root_y, ev->state))
         return;
 
-#warning
+    if((c = client_getbyframewin(ev->event)))
+    {
+        luaA_object_push(globalconf.L, c);
+        lua_pushnumber(globalconf.L, ev->event_x);
+        lua_pushnumber(globalconf.L, ev->event_y);
+        luaA_object_emit_signal(globalconf.L, -3, "mouse::move", 2);
+        lua_pop(globalconf.L, 1);
+    }
+
+    if((w = drawin_getbywin(ev->event)))
+    {
+        luaA_object_push(globalconf.L, w);
+        lua_pushnumber(globalconf.L, ev->event_x);
+        lua_pushnumber(globalconf.L, ev->event_y);
+        luaA_object_emit_signal(globalconf.L, -3, "mouse::move", 2);
+        lua_pop(globalconf.L, 1);
+    }
 }
 
 /** The leave notify event handler.
