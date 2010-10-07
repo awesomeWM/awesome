@@ -267,7 +267,7 @@ local function add_item(data, num, item_info)
     left:add(margin)
 
     local layout = wibox.layout.align.horizontal()
-    layout:set_left(left)
+    layout:set_middle(left)
     if submenu then
         layout:set_right(submenu)
     end
