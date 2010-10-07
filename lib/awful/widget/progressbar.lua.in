@@ -87,7 +87,7 @@ function draw(pbar, wibox, cr, width, height)
     local border_width = 0
     if data[pbar].border_color then
         -- Draw border
-        cr:rectangle(0.5, 0.5, width - 0.5, height - 0.5)
+        cr:rectangle(0.5, 0.5, width - 1, height - 1)
         cr:set_source(color(data[pbar].border_color))
         cr:stroke()
 
