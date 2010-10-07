@@ -35,28 +35,28 @@ end
 -- Setup a pango layout for the given textbox and cairo context
 local function setup_layout(box, cr, width, height)
     local layout = layout_create(cr)
-    layout:set_ellipsize(box.ellipsize)
-    layout:set_wrap(box.wrap)
+    layout:set_ellipsize(box._ellipsize)
+    layout:set_wrap(box._wrap)
     layout:set_width(oopango.units_from_number(width))
     layout:set_height(oopango.units_from_number(height))
 
-    if box.markup then
-        layout:set_markup(box.text)
+    if box._markup then
+        layout:set_markup(box._text)
     else
-        layout:set_text(box.text)
+        layout:set_text(box._text)
     end
 
-    if box.font then
-        layout:set_font_description(box.font)
+    if box._font then
+        layout:set_font_description(box._font)
     else
         layout:set_font_description(beautiful.get_font())
     end
 
     local ink, logical = layout:get_pixel_extents()
     local offset = 0
-    if box.valign == "center" then
+    if box._valign == "center" then
         offset = (height - logical.height) / 2
-    elseif box.valign == "bottom" then
+    elseif box._valign == "bottom" then
         offset = height - logical.height
     end
     if offset > 0 then
@@ -74,7 +74,7 @@ local function get_size(box, layout, width, height)
         height = 0
     }
 
-    if box.text then
+    if box._text then
         local layout = layout
 
         if not layout then
@@ -95,7 +95,7 @@ end
 
 --- Draw the given textbox on the given cairo context in the given geometry
 function draw(box, wibox, cr, width, height)
-    if not box.text then return end
+    if not box._text then return end
 
     local layout = setup_layout(box, cr, width, height)
 
@@ -118,16 +118,16 @@ end
 --- Set a textbox' text.
 -- @param text The text to set. This can contain pango markup (e.g. <b>bold</b>)
 function set_markup(box, text)
-    box.text = text
-    box.markup = true
+    box._text = text
+    box._markup = true
     box:emit_signal("widget::updated")
 end
 
 --- Set a textbox' text.
 -- @param text The text to display. Pango markup is ignored and shown as-is.
 function set_text(box, text)
-    box.text = text
-    box.markup = false
+    box._text = text
+    box._markup = false
     box:emit_signal("widget::updated")
 end
 
@@ -136,7 +136,7 @@ end
 function set_ellipsize(box, mode)
     local allowed = { none = true, start = true, middle = true, ["end"] = true }
     if allowed[mode] then
-        box.ellipsize = mode
+        box._ellipsize = mode
         box:emit_signal("widget::updated")
     end
 end
@@ -146,7 +146,7 @@ end
 function set_wrap(box, mode)
     local allowed = { word = true, char = true, word_char = true }
     if allowed[mode] then
-        box.wrap = mode
+        box._wrap = mode
         box:emit_signal("widget::updated")
     end
 end
@@ -156,7 +156,7 @@ end
 function set_valign(box, mode)
     local allowed = { top = true, center = true, bottom = true }
     if allowed[mode] then
-        box.valign = mode
+        box._valign = mode
         box:emit_signal("widget::updated")
     end
 end
@@ -171,9 +171,9 @@ local function new()
         end
     end
 
-    ret.ellipsize = "end"
-    ret.wrap = "word_char"
-    ret.valign = "center"
+    ret._ellipsize = "end"
+    ret._wrap = "word_char"
+    ret._valign = "center"
 
     return ret
 end
