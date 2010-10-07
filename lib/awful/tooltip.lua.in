@@ -10,6 +10,7 @@ local screen = screen
 local timer = timer
 local a_placement = require("awful.placement")
 local beautiful = require("beautiful")
+local textbox = require("wibox.widget.textbox")
 local setmetatable = setmetatable
 local ipairs = ipairs
 
@@ -76,9 +77,9 @@ end
 local function set_geometry(self)
     local my_geo = self.wibox:geometry()
     -- calculate width / height
-    n_s = self.wibox.widgets[1]:extents()
-    if my_geo.width ~= n_s.width or my_geo.height ~= n_s.height then
-        self.wibox:geometry(n_s)
+    local n_w, n_h = self.widget:fit(-1, -1)
+    if my_geo.width ~= n_w or my_geo.height ~= n_h then
+        self.wibox:geometry({ width = n_w, height = n_h })
         place(self)
     end
     if not self.wibox.visible then
@@ -122,8 +123,8 @@ end
 -- @param self The tooltip object.
 -- @param text New tooltip text.
 local function set_text(self, text)
-    self.wibox.widgets[1].text = '<span color="' .. data[self].fg
-        .. '" font_desc="' .. data[self].font .. '">' .. text .. "</span>"
+    self.widget:set_markup('<span color="' .. data[self].fg
+        .. '" font_desc="' .. data[self].font .. '">' .. text .. "</span>")
 end
 
 --- Change the tooltip's update interval.
@@ -179,10 +180,7 @@ local function new(args)
         visible = false,
     }
 
-    local my_textbox = widget({
-        type = "textbox",
-        name = "tooltip_textbox",
-        align="right"})
+    local my_textbox = textbox()
 
     -- private data
     data[self] = {
@@ -212,7 +210,8 @@ local function new(args)
     self.wibox.visible = false
     -- Who want a non ontop tooltip ?
     self.wibox.ontop = true
-    self.wibox.widgets = { my_textbox }
+    self.wibox:set_widget(my_textbox)
+    self.widget = my_textbox
 
     -- add some signals on both the tooltip and widget
     self.wibox:connect_signal("mouse::enter", data[self].hide)
