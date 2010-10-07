@@ -14,14 +14,13 @@ module("wibox.widget.systray")
 
 local created_systray = false
 local horizontal = true
-local base_size = 16
+local base_size = nil
 
 function draw(box, wibox, cr, width, height)
     local x, y, width, height = lbase.rect_to_device_geometry(cr, 0, 0, width, height)
     local num_entries = capi.awesome.systray()
 
-    local width, height = width, height
-    local in_dir, ortho, base_size
+    local in_dir, ortho, base
     if horizontal then
         in_dir, ortho = width, height
     else
@@ -37,16 +36,23 @@ end
 
 function fit(box, width, height)
     local num_entries = capi.awesome.systray()
-    if horizontal then
-        return base_size * num_entries, base_size
+    local base = base_size
+    if base == nil then
+        if width < height then
+            base = width
+        else
+            base = height
+        end
     end
-    return base_size, base_size * num_entries
+    if horizontal then
+        return base * num_entries, base
+    end
+    return base, base * num_entries
 end
 
-local function new(horiz)
+local function new()
     local ret = wbase.make_widget()
 
-    horizontal = horiz
     if created_systray then
         error("More than one systray created!")
     end
@@ -55,6 +61,7 @@ local function new(horiz)
     ret.fit = fit
     ret.draw = draw
     ret.set_base_size = function(_, size) base_size = size end
+    ret.set_horizontal = function(_, horiz) horizontal = horiz end
 
     capi.awesome.connect_signal("systray::update", function()
         ret:emit_signal("widget::updated")
