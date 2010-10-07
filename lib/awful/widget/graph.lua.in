@@ -92,8 +92,8 @@ function draw(graph, wibox, cr, width, height)
 
         -- Draw the background first
         cr:rectangle(border_width, border_width,
-                     data[graph].width - (2 * border_width),
-                     data[graph].height)
+                     width - (2 * border_width),
+                     height)
         cr:set_source(color(data[graph].background_color or "#000000aa"))
         cr:fill()
 
@@ -108,9 +108,9 @@ function draw(graph, wibox, cr, width, height)
                         local value = stack_values[#stack_values - i] + rel_i
 
                         cr:move_to(rel_x, border_width - 0.5 +
-                                          (data[graph].height - 2 * border_width) * (1 - (rel_i / max_value)))
+                                          (height - 2 * border_width) * (1 - (rel_i / max_value)))
                         cr:line_to(rel_x, border_width - 0.5 +
-                                          (data[graph].height - 2 * border_width) * (1 - (value / max_value)))
+                                          (height - 2 * border_width) * (1 - (value / max_value)))
                         cr:set_source(color(col or "#ff0000"))
                         cr:stroke()
                         rel_i = value
@@ -128,8 +128,8 @@ function draw(graph, wibox, cr, width, height)
         end
 
         cr:rectangle(border_width, border_width,
-                     data[graph].width - (2 * border_width),
-                     data[graph].height - (2 * border_width))
+                     width - (2 * border_width),
+                     height - (2 * border_width))
         cr:set_source(color(data[graph].color or "#ff0000"))
         cr:fill()
 
@@ -142,8 +142,8 @@ function draw(graph, wibox, cr, width, height)
                     value = value / max_value
                     cr:move_to(width - border_width - i - 0.5,
                                border_width - 0.5 +
-                                   (data[graph].height - 2 * border_width) * (1 - value))
-                    cr:line_to(data[graph].width - border_width - i - 0.5,
+                                   (height - 2 * border_width) * (1 - value))
+                    cr:line_to(width - border_width - i - 0.5,
                                border_width - 1)
                 end
             end
@@ -155,8 +155,8 @@ function draw(graph, wibox, cr, width, height)
         -- over the last, left, part to reset everything to 0
         if #values < width - (2 * border_width) then
             cr:rectangle(border_width, border_width,
-                         data[graph].width - (2 * border_width) - #values,
-                         data[graph].height - (2 * border_width))
+                         width - (2 * border_width) - #values,
+                         height - (2 * border_width))
             cr:set_source(color(data[graph].background_color or "#000000aa"))
             cr:fill()
         end
@@ -165,7 +165,7 @@ function draw(graph, wibox, cr, width, height)
     -- Draw the border last so that it overlaps already drawn values
     if data[graph].border_color then
         -- Draw the border
-        cr:rectangle(0.5, 0.5, data[graph].width - 0.5, data[graph].height - 0.5)
+        cr:rectangle(0.5, 0.5, width - 1, height - 1)
         cr:set_source(color(data[graph].border_color or "#ffffff"))
         cr:stroke()
     end
