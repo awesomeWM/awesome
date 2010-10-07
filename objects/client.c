@@ -937,9 +937,10 @@ client_unban(client_t *c)
 
 /** Unmanage a client.
  * \param c The client.
+ * \param window_valid Is the client's window still valid?
  */
 void
-client_unmanage(client_t *c)
+client_unmanage(client_t *c, bool window_valid)
 {
     tag_array_t *tags = &c->screen->tags;
 
@@ -979,27 +980,34 @@ client_unmanage(client_t *c)
 
     /* Clear our event mask so that we don't receive any events from now on,
      * especially not for the following requests. */
-    xcb_change_window_attributes(globalconf.connection,
-                                 c->window,
-                                 XCB_CW_EVENT_MASK,
-                                 (const uint32_t []) { 0 });
+    if(window_valid)
+        xcb_change_window_attributes(globalconf.connection,
+                                     c->window,
+                                     XCB_CW_EVENT_MASK,
+                                     (const uint32_t []) { 0 });
     xcb_change_window_attributes(globalconf.connection,
                                  c->frame_window,
                                  XCB_CW_EVENT_MASK,
                                  (const uint32_t []) { 0 });
 
-    xcb_unmap_window(globalconf.connection, c->window);
-    xcb_reparent_window(globalconf.connection, c->window, globalconf.screen->root,
-            c->geometry.x, c->geometry.y);
+    if(window_valid)
+    {
+        xcb_unmap_window(globalconf.connection, c->window);
+        xcb_reparent_window(globalconf.connection, c->window, globalconf.screen->root,
+                c->geometry.x, c->geometry.y);
+    }
     xcb_destroy_window(globalconf.connection, c->frame_window);
 
-    /* Remove this window from the save set since this shouldn't be made visible
-     * after a restart anymore. */
-    xcb_change_save_set(globalconf.connection, XCB_SET_MODE_DELETE, c->window);
+    if(window_valid)
+    {
+        /* Remove this window from the save set since this shouldn't be made visible
+         * after a restart anymore. */
+        xcb_change_save_set(globalconf.connection, XCB_SET_MODE_DELETE, c->window);
 
-    /* Do this last to avoid races with clients. According to ICCCM, clients
-     * arent allowed to re-use the window until after this. */
-    xwindow_set_state(c->window, XCB_WM_STATE_WITHDRAWN);
+        /* Do this last to avoid races with clients. According to ICCCM, clients
+         * arent allowed to re-use the window until after this. */
+        xwindow_set_state(c->window, XCB_WM_STATE_WITHDRAWN);
+    }
 
     /* set client as invalid */
     c->window = XCB_NONE;
@@ -1234,7 +1242,7 @@ static int
 luaA_client_unmanage(lua_State *L)
 {
     client_t *c = luaA_checkudata(L, 1, &client_class);
-    client_unmanage(c);
+    client_unmanage(c, true);
     return 0;
 }
 
