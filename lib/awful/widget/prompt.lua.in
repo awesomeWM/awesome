@@ -9,7 +9,6 @@ local setmetatable = setmetatable
 local completion = require("awful.completion")
 local util = require("awful.util")
 local prompt = require("awful.prompt")
-local layout = require("awful.widget.layout")
 local widget_base = require("wibox.widget.base")
 local textbox = require("wibox.widget.textbox")
 local type = type
