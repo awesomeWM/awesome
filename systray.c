@@ -328,14 +328,24 @@ luaA_systray(lua_State *L)
         if(globalconf.systray.parent == NULL)
             systray_register();
 
-        globalconf.systray.parent = w;
-
-        if(globalconf.embedded.len != 0)
-        {
+        if(globalconf.systray.parent != w)
             xcb_reparent_window(globalconf.connection,
                                 globalconf.systray.window,
                                 w->window,
                                 x, y);
+        else
+        {
+            uint32_t config_vals[2] = { x, y };
+            xcb_configure_window(globalconf.connection,
+                                 globalconf.systray.window,
+                                 XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y,
+                                 config_vals);
+        }
+
+        globalconf.systray.parent = w;
+
+        if(globalconf.embedded.len != 0)
+        {
             systray_update(base_size, horiz);
             xcb_map_window(globalconf.connection,
                            globalconf.systray.window);
