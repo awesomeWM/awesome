@@ -11,7 +11,6 @@ local ipairs = ipairs
 local pairs = pairs
 local setmetatable = setmetatable
 local capi = { button = button }
-local layout = require("awful.widget.layout")
 local util = require("awful.util")
 local imagebox = require("wibox.widget.imagebox")
 local textbox = require("wibox.widget.textbox")
