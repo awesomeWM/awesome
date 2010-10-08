@@ -99,8 +99,11 @@ end
 
 --- Returns a new margin layout.
 -- @param widget A widget to use (optional)
--- @param margin A margin to use on every side of the widget (optional)
-local function new(widget, margin)
+-- @param left A margin to use on the left side of the widget (optional)
+-- @param right A margin to use on the right side of the widget (optional)
+-- @param top A margin to use on the top side of the widget (optional)
+-- @param bottom A margin to use on the bottom side of the widget (optional)
+local function new(widget, left, right, top, bottom)
     local ret = widget_base.make_widget()
 
     for k, v in pairs(_M) do
@@ -113,7 +116,10 @@ local function new(widget, margin)
         ret:emit_signal("widget::updated")
     end
 
-    ret:set_margins(margin or 0)
+    ret:set_left(left or 0)
+    ret:set_right(right or 0)
+    ret:set_top(top or 0)
+    ret:set_bottom(bottom or 0)
 
     if widget then
         ret:set_widget(widget)

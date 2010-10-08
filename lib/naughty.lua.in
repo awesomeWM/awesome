@@ -383,9 +383,7 @@ function notify(args)
         -- if we have an icon, use it
         if icon then
             iconbox = wibox.widget.imagebox()
-            iconmargin = wibox.layout.margin()
-            iconmargin:set_widget(iconbox)
-            iconmargin:set_margins(margin)
+            iconmargin = wibox.layout.margin(iconbox, margin, margin, margin, margin)
             local img = icon
             if type(icon) == "string" then
                 img = capi.oocairo.image_surface_create_from_png(icon)

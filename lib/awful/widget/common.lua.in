@@ -52,13 +52,8 @@ function common.list_update(w, buttons, label, data, objects)
         local ib = wibox.widget.imagebox()
         local tb = wibox.widget.textbox()
         local bgb = wibox.widget.background()
-        local m = wibox.layout.margin()
+        local m = wibox.layout.margin(tb, 4, 4)
         local l = wibox.layout.fixed.horizontal()
-
-        -- The textbox gets a margin to look better
-        m:set_left(4)
-        m:set_right(4)
-        m:set_widget(tb)
 
         -- All of this is added in a fixed widget
         l:fill_space(true)
