@@ -187,7 +187,7 @@ client_getbyframewin(xcb_window_t w)
 static void
 client_unfocus_update(client_t *c)
 {
-    globalconf.client_focus = NULL;
+    globalconf.focus.client = NULL;
 
     luaA_object_push(globalconf.L, c);
     luaA_object_emit_signal(globalconf.L, -1, "unfocus", 0);
@@ -232,7 +232,7 @@ client_hasproto(client_t *c, xcb_atom_t atom)
 void client_ban_unfocus(client_t *c)
 {
     /* Wait until the last moment to take away the focus from the window. */
-    if(globalconf.client_focus == c)
+    if(globalconf.focus.client == c)
         client_unfocus(c);
 }
 
@@ -296,16 +296,16 @@ client_focus_update(client_t *c)
     if(!client_maybevisible(c, c->screen))
         return;
 
-    if(globalconf.client_focus)
+    if(globalconf.focus.client)
     {
-        if (globalconf.client_focus != c)
-            client_unfocus_update(globalconf.client_focus);
+        if (globalconf.focus.client != c)
+            client_unfocus_update(globalconf.focus.client);
         else
             /* Already focused */
             return;
     }
 
-    globalconf.client_focus = c;
+    globalconf.focus.client = c;
 
     /* according to EWMH, we have to remove the urgent state from a client */
     luaA_object_push(globalconf.L, c);
@@ -944,7 +944,7 @@ client_unmanage(client_t *c, bool window_valid)
             tc->transient_for = NULL;
     }
 
-    if(globalconf.client_focus == c)
+    if(globalconf.focus.client == c)
         client_unfocus(c);
 
     /* remove client from global list and everywhere else */
@@ -1648,7 +1648,7 @@ luaA_client_module_index(lua_State *L)
     const char *buf = luaL_checkstring(L, 2);
 
     if(a_strcmp(buf, "focus") == 0)
-        return luaA_object_push(globalconf.L, globalconf.client_focus);
+        return luaA_object_push(globalconf.L, globalconf.focus.client);
     return 0;
 }
 
