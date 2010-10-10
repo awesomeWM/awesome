@@ -294,7 +294,6 @@ client_focus_update(client_t *c)
     luaA_object_push(globalconf.L, c);
     client_set_urgent(globalconf.L, -1, false);
 
-    luaA_object_push(globalconf.L, c);
     luaA_object_emit_signal(globalconf.L, -1, "focus", 0);
     lua_pop(globalconf.L, 1);
 }
