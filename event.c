@@ -189,23 +189,18 @@ event_handle_button(xcb_button_press_event_t *ev)
 
         /* Push the drawin */
         luaA_object_push(globalconf.L, drawin);
-        /* Duplicate the drawin */
-        lua_pushvalue(globalconf.L, -1);
-        /* Handle the button event on it */
-        event_button_callback(ev, &drawin->buttons, -1, 1, NULL);
-
-        /* And handle the button event on it again */
+        /* and handle the button raw button event */
         event_emit_button(ev);
+        /* check if any button object matches */
+        event_button_callback(ev, &drawin->buttons, -1, 1, NULL);
     }
     else if((c = client_getbyframewin(ev->event)))
     {
         luaA_object_push(globalconf.L, c);
-        /* Duplicate the client */
-        lua_pushvalue(globalconf.L, -1);
+        /* And handle the button raw button event */
+        event_emit_button(ev);
         /* then check if any button objects match */
         event_button_callback(ev, &c->buttons, -1, 1, NULL);
-        /* And handle the button event on it again */
-        event_emit_button(ev);
         xcb_allow_events(globalconf.connection,
                          XCB_ALLOW_REPLAY_POINTER,
                          XCB_CURRENT_TIME);
