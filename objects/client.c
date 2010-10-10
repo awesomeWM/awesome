@@ -181,11 +181,11 @@ client_getbyframewin(xcb_window_t w)
     return NULL;
 }
 
-/** Record that a client lost focus.
- * \param c Client being unfocused
+/** Unfocus a client.
+ * \param c The client.
  */
 static void
-client_unfocus_update(client_t *c)
+client_unfocus(client_t *c)
 {
     globalconf.focus.client = NULL;
     globalconf.focus.need_update = true;
@@ -193,15 +193,6 @@ client_unfocus_update(client_t *c)
     luaA_object_push(globalconf.L, c);
     luaA_object_emit_signal(globalconf.L, -1, "unfocus", 0);
     lua_pop(globalconf.L, 1);
-}
-
-/** Unfocus a client.
- * \param c The client.
- */
-static void
-client_unfocus(client_t *c)
-{
-    client_unfocus_update(c);
 }
 
 /** Check if client supports atom a protocol in WM_PROTOCOL.
@@ -291,7 +282,7 @@ client_focus_update(client_t *c)
     if(globalconf.focus.client)
     {
         if (globalconf.focus.client != c)
-            client_unfocus_update(globalconf.focus.client);
+            client_unfocus(globalconf.focus.client);
         else
             /* Already focused */
             return;
