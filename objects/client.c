@@ -188,6 +188,7 @@ static void
 client_unfocus_update(client_t *c)
 {
     globalconf.focus.client = NULL;
+    globalconf.focus.need_update = true;
 
     luaA_object_push(globalconf.L, c);
     luaA_object_emit_signal(globalconf.L, -1, "unfocus", 0);
@@ -200,15 +201,6 @@ client_unfocus_update(client_t *c)
 static void
 client_unfocus(client_t *c)
 {
-
-    xcb_window_t root_win = globalconf.screen->root;
-    /* Set focus on root window, so no events leak to the current window.
-     * This kind of inlines client_set_focus(), but a root window will never have
-     * the WM_TAKE_FOCUS protocol.
-     */
-    xcb_set_input_focus(globalconf.connection, XCB_INPUT_FOCUS_PARENT,
-                        root_win, globalconf.timestamp);
-
     client_unfocus_update(c);
 }
 
@@ -329,19 +321,33 @@ client_focus(client_t *c)
     if(!client_maybevisible(c, c->screen))
         return;
 
-    /* X11 doesn't let you focus a window that isn't viewable */
-    client_unban(c);
+    client_focus_update(c);
+    globalconf.focus.need_update = true;
+}
 
-    /* Sets focus on window - using xcb_set_input_focus or WM_TAKE_FOCUS */
-    if(!c->nofocus)
+void
+client_focus_refresh(void)
+{
+    client_t *c = globalconf.focus.client;
+
+    if(!globalconf.focus.need_update)
+        return;
+    globalconf.focus.need_update = false;
+
+    if(c)
+    {
+        /* Sets focus on window - using xcb_set_input_focus or WM_TAKE_FOCUS */
+        if(!c->nofocus)
+            xcb_set_input_focus(globalconf.connection, XCB_INPUT_FOCUS_PARENT,
+                                c->window, globalconf.timestamp);
+
+        if(client_hasproto(c, WM_TAKE_FOCUS))
+            xwindow_takefocus(c->window);
+    }
+    else
+        /* Nothing has the focus, set the focus to the root window */
         xcb_set_input_focus(globalconf.connection, XCB_INPUT_FOCUS_PARENT,
-                            c->window, globalconf.timestamp);
-
-    if(client_hasproto(c, WM_TAKE_FOCUS))
-        xwindow_takefocus(c->window);
-
-    if (!c->nofocus)
-        client_focus_update(c);
+                            globalconf.screen->root, globalconf.timestamp);
 }
 
 static void

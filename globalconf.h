@@ -85,6 +85,8 @@ typedef struct
     {
         /** Focused client */
         client_t *client;
+        /** Is there a focus change pending? */
+        bool need_update;
     } focus;
     /** Drawins */
     drawin_array_t drawins;
