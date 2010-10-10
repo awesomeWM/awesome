@@ -244,7 +244,11 @@ property_update_net_wm_icon(client_t *c, xcb_get_property_cookie_t cookie)
     luaA_object_push(globalconf.L, c);
 
     if(ewmh_window_icon_get_reply(cookie))
+    {
         client_set_icon(globalconf.L, -2, -1);
+        /* remove icon */
+        lua_pop(globalconf.L, 1);
+    }
 
     /* remove client */
     lua_pop(globalconf.L, 1);
