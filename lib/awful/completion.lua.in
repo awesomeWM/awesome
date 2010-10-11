@@ -56,7 +56,7 @@ end
 -- @param cur_pos The cursor position.
 -- @param ncomp The element number to complete.
 -- @param shell The shell to use for completion (bash (default) or zsh).
--- @return The new command and the new cursor position.
+-- @return The new command, the new cursor position, the table of all matches.
 function shell(command, cur_pos, ncomp, shell)
     local wstart = 1
     local wend = 1
@@ -146,7 +146,7 @@ function shell(command, cur_pos, ncomp, shell)
     local str = command:sub(1, cword_start - 1) .. output[ncomp] .. command:sub(cword_end)
     cur_pos = cword_end + #output[ncomp] + 1
 
-    return str, cur_pos
+    return str, cur_pos, output
 end
 
 --- Run a generic completion.
@@ -156,7 +156,7 @@ end
 -- @param cur_pos The current cursor position.
 -- @param ncomp The number of yet requested completion using current text.
 -- @param keywords The keywords table uised for completion.
--- @return The new match and the new cursor position.
+-- @return The new match, the new cursor position, the table of all matches.
 function generic(text, cur_pos, ncomp, keywords)
     -- The keywords table may be empty
     if #keywords == 0 then
@@ -180,12 +180,12 @@ function generic(text, cur_pos, ncomp, keywords)
 
     -- if there are no matches just leave out with the current text and position
     if #matches == 0 then
-        return text, #text + 1
+        return text, #text + 1, matches
     end
 
     --  cycle around all matches
     ncomp = math.mod(ncomp - 1, #matches) + 1
-    return matches[ncomp], #matches[ncomp] + 1
+    return matches[ncomp], #matches[ncomp] + 1, matches
 end
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
