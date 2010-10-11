@@ -351,7 +351,37 @@ static int8_t const __utf32_clz_to_len[32] = {
     2, 2, 2, 2,         /* 0x00000080 */
     1, 1, 1, 1, 1, 1, 1 /* 0x00000001 */
 };
-#define utf8clen(c) __utf32_clz_to_len[__builtin_clz((uint32_t)(c) | 1)]
+
+#ifdef HAS___BUILTIN_CLZ
+#define a_clz(x) __builtin_clz(x)
+#else
+/*
+ * function stolen from x264/common/osdep.h
+ *
+ * osdep.h: h264 encoder
+ *
+ * Copyright (C) 2007-2008 x264 project
+ *
+ * Authors: Loren Merritt <lorenm@u.washington.edu>
+ *          Laurent Aimar <fenrir@via.ecp.fr>
+ *
+ * GPLv2 or higher.
+ */
+static inline int
+a_clz(uint32_t x)
+{
+    static uint8_t lut[16] = {4,3,2,2,1,1,1,1,0,0,0,0,0,0,0,0};
+    int y, z = (((x >> 16) - 1) >> 27) & 16;
+    x >>= z^16;
+    z += y = ((x - 0x100) >> 28) & 8;
+    x >>= y^8;
+    z += y = ((x - 0x10) >> 29) & 4;
+    x >>= y^4;
+    return z + lut[x];
+}
+#endif
+
+#define utf8clen(c) __utf32_clz_to_len[a_clz((uint32_t)(c) | 1)]
 
 static bool
 keysym_to_utf8(char *buf, const xcb_keysym_t ksym)

@@ -7,5 +7,6 @@
 
 #cmakedefine WITH_DBUS
 #cmakedefine HAS_EXECINFO
+#cmakedefine HAS___BUILTIN_CLZ
 
 #endif //_CONFIG_H_
