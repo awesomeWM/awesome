@@ -143,7 +143,7 @@ local function prompt_text_with_cursor(args)
 end
 
 --- Run a prompt in a box.
--- @param args A table with optional arguments: fg_cursor, bg_cursor, ul_cursor, prompt, text, selectall, font.
+-- @param args A table with optional arguments: fg_cursor, bg_cursor, ul_cursor, prompt, text, selectall, font, autoexec.
 -- @param textbox The textbox to use for the prompt.
 -- @param exe_callback The callback function to call with command as argument when finished.
 -- @param completion_callback The callback function to call to get completion.
@@ -178,6 +178,14 @@ function run(args, textbox, exe_callback, completion_callback, history_path, his
         cursor_pos = cur_pos, cursor_ul = cur_ul, selectall = selectall,
         font = font, prompt = prettyprompt }
 
+    local exec = function()
+        textbox.text = ""
+        history_add(history_path, command)
+        capi.keygrabber.stop()
+        exe_callback(command)
+        if done_callback then done_callback() end
+    end
+
     capi.keygrabber.run(
     function (modifiers, key, event)
         if event ~= "press" then return true end
@@ -193,11 +201,7 @@ function run(args, textbox, exe_callback, completion_callback, history_path, his
         elseif (mod.Control and (key == "j" or key == "m"))
             or (not mod.Control and key == "Return")
             or (not mod.Control and key == "KP_Enter") then
-            textbox.text = ""
-            history_add(history_path, command)
-            capi.keygrabber.stop()
-            exe_callback(command)
-            if done_callback then done_callback() end
+            exec()
             -- We already unregistered ourselves so we don't want to return
             -- true, otherwise we may unregister someone else.
             return true
@@ -269,9 +273,15 @@ function run(args, textbox, exe_callback, completion_callback, history_path, his
                         command_before_comp = command
                         cur_pos_before_comp = cur_pos
                     end
-                    command, cur_pos = completion_callback(command_before_comp, cur_pos_before_comp, ncomp)
+                    local matches
+                    command, cur_pos, matches = completion_callback(command_before_comp, cur_pos_before_comp, ncomp)
                     ncomp = ncomp + 1
                     key = ""
+                    -- execute if only one match found and autoexec flag set
+                    if matches and #matches == 1 and args.autoexec then
+                        exec()
+                        return true
+                    end
                 else
                     ncomp = 1
                 end
