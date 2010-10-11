@@ -218,14 +218,21 @@ while [ $# -gt 0 ]; do
             montage=`which montage`
             if test ! -z "$montage"; then
                 shift
-                cols="$1"; shift
-                fns=""
-                for i in `seq $cols`; do
-                    fns="$fns $1";
-                done;
-                shift
-                $montage $fns -geometry +0+0 -tile ${cols}x $CONFIG_DIR/montage.png
-                wallpaper=$CONFIG_DIR/montage.png
+                if [ $# -eq 0 ]; then
+                    echo "-m option need a columns argument"
+                    exit # no more args
+                else
+                    cols="$1"; shift
+                    fns=""
+                    i=$cols
+                    while [ $i -gt 0 ]; do
+                        fns="$fns $1"
+                        i=$(($i - 1))
+                    done
+                    shift
+                    $montage $fns -geometry +0+0 -tile ${cols}x $CONFIG_DIR/montage.png
+                    wallpaper=$CONFIG_DIR/montage.png
+                fi
             else
                 shift
                 echo "montage not found. Falling back to single image"
