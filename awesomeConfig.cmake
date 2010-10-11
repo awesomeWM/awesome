@@ -164,7 +164,6 @@ endmacro()
 a_find_library(LIB_EV ev)
 # GNU libc has <execinfo.h> and backtrace() stuff. If this is not available, we
 # need libexecinfo.
-message(STATUS "checking for execinfo")
 try_compile(HAS_EXECINFO
     ${CMAKE_BINARY_DIR}
     ${CMAKE_SOURCE_DIR}/build-tests/execinfo.c)
@@ -181,6 +180,16 @@ if(HAS_EXECINFO)
     message(STATUS "checking for execinfo -- found")
 else()
     message(STATUS "checking for execinfo -- not found")
+endif()
+
+# __builtin_clz is available since gcc 3.4
+try_compile(HAS___BUILTIN_CLZ
+    ${CMAKE_BINARY_DIR}
+    ${CMAKE_SOURCE_DIR}/build-tests/__builtin_clz.c)
+if(HAS___BUILTIN_CLZ)
+    message(STATUS "checking for __builtin_clz -- yes")
+else()
+    message(STATUS "checking for __builtin_clz -- no")
 endif()
 
 # Error check
