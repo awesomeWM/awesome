@@ -253,8 +253,7 @@ local function button_group(name, attrs, sfn, ...)
     s.attributes = attrs
     s.states = {}
 
-    for i = 1, #arg do
-        local state = arg[i]
+    for i, state in pairs({...}) do
         s.states[state.idx] = state
     end
 
