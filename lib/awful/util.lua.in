@@ -305,7 +305,7 @@ function table.keys_filter(t, ...)
     local keys = table.keys(t)
     local keys_filtered = { }
     for _, k in pairs(keys) do
-        for _, et in pairs(arg) do
+        for _, et in pairs({...}) do
             if type(t[k]) == et then
                 rtable.insert(keys_filtered, k)
                 break
