@@ -40,13 +40,15 @@ void
 systray_init(void)
 {
     xcb_screen_t *xscreen = globalconf.screen;
+    uint32_t values[] = { xscreen->white_pixel };
 
     globalconf.systray.window = xcb_generate_id(globalconf.connection);
     xcb_create_window(globalconf.connection, xscreen->root_depth,
                       globalconf.systray.window,
                       xscreen->root,
                       -1, -1, 1, 1, 0,
-                      XCB_COPY_FROM_PARENT, xscreen->root_visual, 0, NULL);
+                      XCB_COPY_FROM_PARENT, xscreen->root_visual,
+                      XCB_CW_BACK_PIXEL, values);
 }
 
 /** Register systray in X.
