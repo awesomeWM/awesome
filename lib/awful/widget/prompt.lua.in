@@ -23,7 +23,7 @@ local function run(promptbox)
                       function (...)
                           local result = util.spawn(...)
                           if type(result) == "string" then
-                              promptbox.widget.text = result
+                              promptbox.widget:set_text(result)
                           end
                       end,
                       completion.shell,
