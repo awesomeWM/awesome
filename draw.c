@@ -107,9 +107,23 @@ int
 luaA_surface_from_data(lua_State *L, int width, int height, uint32_t *data)
 {
     unsigned long int len = width * height;
-    unsigned char *buffer = p_dup(data, len);
-    cairo_surface_t *surface =
-        cairo_image_surface_create_for_data(buffer,
+    unsigned long int i;
+    uint32_t *buffer = p_new(uint32_t, len);
+    cairo_surface_t *surface;
+
+    /* Cairo wants premultiplied alpha, meh :( */
+    for(i = 0; i < len; i++)
+    {
+        uint8_t a = (data[i] >> 24) & 0xff;
+        double alpha = a / 255.0;
+        uint8_t r = ((data[i] >> 16) & 0xff) * alpha;
+        uint8_t g = ((data[i] >>  8) & 0xff) * alpha;
+        uint8_t b = ((data[i] >>  0) & 0xff) * alpha;
+        buffer[i] = (a << 24) | (r << 16) | (g << 8) | b;
+    }
+
+    surface =
+        cairo_image_surface_create_for_data((unsigned char *) buffer,
                                             CAIRO_FORMAT_ARGB32,
                                             width,
                                             height,
