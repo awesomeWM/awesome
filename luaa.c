@@ -628,6 +628,7 @@ luaA_init(xdgHandle* xdg)
     signal_add(&global_signals, "debug::index::miss");
     signal_add(&global_signals, "debug::newindex::miss");
     signal_add(&global_signals, "systray::update");
+    signal_add(&global_signals, "refresh");
     signal_add(&global_signals, "exit");
 }
 
@@ -717,6 +718,12 @@ luaA_class_newindex_miss_property(lua_State *L, lua_object_t *obj)
 {
     signal_object_emit(L, &global_signals, "debug::newindex::miss", 3);
     return 0;
+}
+
+void
+luaA_emit_refresh()
+{
+    signal_object_emit(globalconf.L, &global_signals, "refresh", 0);
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

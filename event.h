@@ -24,9 +24,13 @@
 
 #include "objects/client.h"
 
+/* luaa.c */
+void luaA_emit_refresh(void);
+
 static inline int
 awesome_refresh(void)
 {
+    luaA_emit_refresh();
     banning_refresh();
     stack_refresh();
     client_focus_refresh();
