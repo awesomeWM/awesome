@@ -10,7 +10,7 @@ require("wibox.widget")
 local capi = {
     drawin = drawin,
     oocairo = oocairo,
-    timer = timer
+    awesome = awesome
 }
 local setmetatable = setmetatable
 local pairs = pairs
@@ -257,19 +257,20 @@ local function new(args)
         end
     end
 
-    -- We use a timer with timeout 0, this makes sure that the wibox will only
-    -- redrawn once even if there are multiple widget::updated events
-    local t = capi.timer({ timeout = 0 })
-    local function update_wibox()
-        t:stop()
+    -- This is to make sure that the wibox will only be redrawn once even when
+    -- we receive multiple widget::updated signals.
+    ret._redraw_pending = false
+    ret._do_redraw = function()
+        ret._redraw_pending = false
+        capi.awesome.disconnect_signal("refresh", ret._do_redraw)
         do_redraw(ret)
     end
-    t:connect_signal("timeout", update_wibox)
 
-    -- Start our timer when the widget changed
+    -- Connect our signal when we need a redraw
     ret.draw = function()
-        if not t.started then
-            t:start()
+        if not ret._redraw_pending then
+            capi.awesome.connect_signal("refresh", ret._do_redraw)
+            ret._redraw_pending = true
         end
     end
 
