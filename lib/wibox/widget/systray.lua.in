@@ -6,6 +6,7 @@
 
 local wbase = require("wibox.widget.base")
 local lbase = require("wibox.layout.base")
+local beautiful = require("beautiful")
 local capi = { awesome = awesome }
 local setmetatable = setmetatable
 local error = error
@@ -19,6 +20,7 @@ local base_size = nil
 function draw(box, wibox, cr, width, height)
     local x, y, width, height = lbase.rect_to_device_geometry(cr, 0, 0, width, height)
     local num_entries = capi.awesome.systray()
+    local bg = beautiful.bg_systray or beautiful.bg_normal
 
     local in_dir, ortho, base
     if horizontal then
@@ -31,7 +33,7 @@ function draw(box, wibox, cr, width, height)
     else
         base = in_dir / num_entries
     end
-    capi.awesome.systray(wibox.drawin, x, y, base, horizontal)
+    capi.awesome.systray(wibox.drawin, x, y, base, horizontal, bg)
 end
 
 function fit(box, width, height)

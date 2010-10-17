@@ -321,11 +321,22 @@ luaA_systray(lua_State *L)
 {
     if(lua_gettop(L) != 0)
     {
+        size_t bg_len;
         drawin_t *w = luaA_checkudata(L, 1, &drawin_class);
         int x = luaL_checknumber(L, 2);
         int y = luaL_checknumber(L, 3);
         int base_size = luaL_checknumber(L, 4);
         bool horiz = lua_toboolean(L, 5);
+        const char *bg = luaL_checklstring(L, 6, &bg_len);
+        color_t bg_color;
+
+        if(color_init_reply(color_init_unchecked(&bg_color, bg, bg_len)))
+        {
+            uint32_t config_back[] = { bg_color.pixel };
+            xcb_change_window_attributes(globalconf.connection,
+                                         globalconf.systray.window,
+                                         XCB_CW_BACK_PIXEL, config_back);
+        }
 
         if(globalconf.systray.parent == NULL)
             systray_register();
