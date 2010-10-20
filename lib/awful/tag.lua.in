@@ -162,7 +162,6 @@ end
 -- @param obj Screen object.
 function history.update(obj)
     local s = obj.index
-    local curtags = capi.screen[s]:tags()
     -- create history table
     if not data.history[s] then
         data.history[s] = {}
