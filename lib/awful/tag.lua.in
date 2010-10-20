@@ -162,20 +162,38 @@ end
 -- @param obj Screen object.
 function history.update(obj)
     local s = obj.index
+    local curtags = selectedlist(s)
     -- create history table
     if not data.history[s] then
         data.history[s] = {}
-    -- limit history
-    elseif #data.history[s] >= history.limit then
-        for i = history.limit, #data.history[s] do
-            data.history[s][i] = nil
+    else
+        if data.history[s].current then
+            -- Check that the list is not identical
+            local identical = true
+            for idx, tag in ipairs(data.history[s].current) do
+                if curtags[idx] ~= tag then
+                    identical = false
+                    break
+                end
+            end
+
+            -- Do not update history the table are identical
+            if identical then return end
+        end
+
+        -- Limit history
+        if #data.history[s] >= history.limit then
+            for i = history.limit, #data.history[s] do
+                data.history[s][i] = nil
+            end
         end
     end
+
     -- store previously selected tags in the history table
     table.insert(data.history[s], 1, data.history[s].current)
     data.history[s].previous = data.history[s][1]
     -- store currently selected tags
-    data.history[s].current = setmetatable(selectedlist(s), { __mode = 'v' })
+    data.history[s].current = setmetatable(curtags, { __mode = 'v' })
 end
 
 --- Revert tag history.
