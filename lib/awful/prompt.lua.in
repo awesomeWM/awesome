@@ -236,7 +236,7 @@ function run(args, textbox, exe_callback, completion_callback, history_path, his
             elseif key == "u" then
                 command = command:sub(cur_pos, #command)
                 cur_pos = 1
-            elseif key == "w" then
+            elseif key == "w" or key == "BackSpace" then
                 local wstart = 1
                 local wend = 1
                 local cword_start = 1
