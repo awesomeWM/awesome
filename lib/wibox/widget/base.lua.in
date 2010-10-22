@@ -4,9 +4,9 @@
 -- @release @AWESOME_VERSION@
 ---------------------------------------------------------------------------
 
+local debug = require("gears.debug")
 local object = require("gears.object")
 local pairs = pairs
-local error = error
 local type = type
 local table = table
 
@@ -106,19 +106,14 @@ end
 --- Do some sanity checking on widget. This function raises a lua error if
 -- widget is not a valid widget.
 function check_widget(widget)
-    if type(widget) ~= "table" then
-        error("widget is not a table?!")
-    end
+    debug.assert(type(widget) == "table")
     for k, func in pairs({ "draw", "fit", "add_signal", "connect_signal", "disconnect_signal" }) do
-        if type(widget[func]) ~= "function" then
-            error("widget's " .. func .. "() is not a function?!")
-        end
+        debug.assert(type(widget[func]) == "function", func .. " is not a function")
     end
 
     local width, height = widget:fit(0, 0)
-    if type(width) ~= "number" or type(height) ~= "number" then
-        error("widget's fit() didn't return two numbers")
-    end
+    debug.assert(type(width) == "number")
+    debug.assert(type(height) == "number")
 end
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
