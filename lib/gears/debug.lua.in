@@ -1,0 +1,23 @@
+---------------------------------------------------------------------------
+-- @author Uli Schlachter
+-- @copyright 2010 Uli Schlachter
+-- @release @AWESOME_VERSION@
+---------------------------------------------------------------------------
+
+local error = error
+local tostring = tostring
+local traceback = debug.traceback
+
+module("gears.debug")
+
+--- Check that the given condition holds true, else throw an error
+-- @param cond If this is false, throw a lua error with a backtrace.
+-- @param message Message to print in the error (optional).
+function assert(cond, message)
+    local message = message or cond
+    if not cond then
+        error(traceback("Assertion failed: '" .. tostring(message) .. "'"))
+    end
+end
+
+-- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

@@ -5,6 +5,7 @@
 ---------------------------------------------------------------------------
 
 require("gears.color")
+require("gears.debug")
 require("gears.object")
 require("gears.sort")
 
