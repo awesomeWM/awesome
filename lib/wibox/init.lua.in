@@ -73,8 +73,8 @@ function find_widgets(wibox, x, y)
     -- Find all widgets that contain the point
     for k, v in pairs(wibox._widget_geometries) do
         local match = true
-        if v.x > x or v.x + v.width < x then match = false end
-        if v.y > y or v.y + v.height < y then match = false end
+        if v.x > x or v.x + v.width <= x then match = false end
+        if v.y > y or v.y + v.height <= y then match = false end
         if match then
             table.insert(matches, v)
         end
