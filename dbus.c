@@ -348,6 +348,7 @@ static void
 a_dbus_process_request(DBusConnection *dbus_connection, DBusMessage *msg)
 {
     const char *interface = dbus_message_get_interface(msg);
+    int old_top = lua_gettop(globalconf.L);
 
     lua_createtable(globalconf.L, 0, 5);
 
@@ -428,8 +429,8 @@ a_dbus_process_request(DBusConnection *dbus_connection, DBusMessage *msg)
             {
                 luaA_warn(globalconf.L,
                           "your D-Bus signal handling method returned wrong number of arguments");
-                /* Remove returned values from the stack */
-                lua_pop(globalconf.L, - n);
+                /* Restore stack */
+                lua_settop(globalconf.L, old_top);
                 return;
             }
 
@@ -439,6 +440,8 @@ a_dbus_process_request(DBusConnection *dbus_connection, DBusMessage *msg)
                 if(!a_dbus_convert_value(globalconf.L, i, &iter))
                 {
                     luaA_warn(globalconf.L, "your D-Bus signal handling method returned bad data");
+                    /* Restore stack */
+                    lua_settop(globalconf.L, old_top);
                     return;
                 }
 
@@ -450,6 +453,8 @@ a_dbus_process_request(DBusConnection *dbus_connection, DBusMessage *msg)
             dbus_message_unref(reply);
         }
     }
+    /* Restore stack */
+    lua_settop(globalconf.L, old_top);
 }
 
 /** Attempt to process all the requests in the D-Bus connection.
