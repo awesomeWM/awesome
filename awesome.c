@@ -224,7 +224,10 @@ a_xcb_check_cb(EV_P_ ev_check *w, int revents)
 static void
 a_xcb_io_cb(EV_P_ ev_io *w, int revents)
 {
-    /* empty */
+    /* a_xcb_check_cb() already handled all events */
+
+    if(xcb_connection_has_error(globalconf.connection))
+        fatal("X server connection broke");
 }
 
 static void
