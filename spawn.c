@@ -268,6 +268,7 @@ spawn_child_callback(gpointer user_data)
 
     sigemptyset(&empty);
     sigprocmask(SIG_SETMASK, &empty, NULL);
+    setsid();
 }
 
 /** Spawn a command.
