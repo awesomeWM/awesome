@@ -260,6 +260,12 @@ spawn_launchee_timeout(struct ev_loop *loop, ev_timer *w, int revents)
     p_delete(&w);
 }
 
+static void
+spawn_callback(gpointer user_data)
+{
+    setsid();
+}
+
 /** Spawn a command.
  * \param command_line The command line to launch.
  * \param error A error pointer to fill with the possible error from
@@ -277,7 +283,7 @@ spawn_command(const gchar *command_line, GError **error)
         return 0;
 
     retval = g_spawn_async(NULL, argv, NULL, G_SPAWN_SEARCH_PATH,
-                           NULL, NULL, &pid, error);
+                           spawn_callback, NULL, &pid, error);
     g_strfreev (argv);
 
     if (!retval)
