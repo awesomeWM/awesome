@@ -512,7 +512,8 @@ if capi.dbus then
             args.preset.callback(data, appname, replaces_id, icon, title, text, actions, hints, expire)) then
             if icon ~= "" then
                 args.icon = icon
-            elseif hints.icon_data then
+            elseif hints.icon_data or hints.image_data then
+                if hints.icon_data == nil then hints.icon_data = hints.image_data end
                 -- icon_data is an array:
                 -- 1 -> width, 2 -> height, 3 -> rowstride, 4 -> has alpha
                 -- 5 -> bits per sample, 6 -> channels, 7 -> data
