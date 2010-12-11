@@ -20,6 +20,7 @@
  */
 
 #include "common/luaobject.h"
+#include "common/backtrace.h"
 
 /** Setup the object system at startup.
  * \param L The Lua VM state.
@@ -113,6 +114,17 @@ luaA_object_decref(lua_State *L, int tud, void *pointer)
     lua_rawget(L, -2);
     /* Get the number of references and decrement it */
     int count = lua_tonumber(L, -1) - 1;
+    /* Did we find the item in our table? (tonumber(nil)-1) is -1 */
+    if (count < 0)
+    {
+        buffer_t buf;
+        backtrace_get(&buf);
+        warn("BUG: Reference not found: %d %p\n%s", tud, pointer, buf.s);
+
+        /* Pop reference count and metatable */
+        lua_pop(L, 2);
+        return;
+    }
     lua_pop(L, 1);
     /* Push the pointer (key) */
     lua_pushlightuserdata(L, pointer);
