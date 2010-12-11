@@ -255,33 +255,35 @@ luaA_object_emit_signal(lua_State *L, int oud,
     int oud_abs = luaA_absindex(L, oud);
     lua_object_t *obj = lua_touserdata(L, oud);
     if(!obj)
-        luaL_error(L, "trying to emit signal on non-object");
-    signal_t *sigfound = signal_array_getbyid(&obj->signals,
-                                              a_strhash((const unsigned char *) name));
-    if(sigfound)
-    {
-        int nbfunc = sigfound->sigfuncs.len;
-        luaL_checkstack(L, lua_gettop(L) + nbfunc + nargs + 2, "too much signal");
-        /* Push all functions and then execute, because this list can change
-         * while executing funcs. */
-        foreach(func, sigfound->sigfuncs)
-            luaA_object_push_item(L, oud_abs, (void *) *func);
-
-        for(int i = 0; i < nbfunc; i++)
+        warn("Trying to emit signal '%s' on non-object", name);
+    else {
+        signal_t *sigfound = signal_array_getbyid(&obj->signals,
+                                                  a_strhash((const unsigned char *) name));
+        if(sigfound)
         {
-            /* push object */
-            lua_pushvalue(L, oud_abs);
-            /* push all args */
-            for(int j = 0; j < nargs; j++)
+            int nbfunc = sigfound->sigfuncs.len;
+            luaL_checkstack(L, lua_gettop(L) + nbfunc + nargs + 2, "too much signal");
+            /* Push all functions and then execute, because this list can change
+             * while executing funcs. */
+            foreach(func, sigfound->sigfuncs)
+                luaA_object_push_item(L, oud_abs, (void *) *func);
+
+            for(int i = 0; i < nbfunc; i++)
+            {
+                /* push object */
+                lua_pushvalue(L, oud_abs);
+                /* push all args */
+                for(int j = 0; j < nargs; j++)
+                    lua_pushvalue(L, - nargs - nbfunc - 1 + i);
+                /* push first function */
                 lua_pushvalue(L, - nargs - nbfunc - 1 + i);
-            /* push first function */
-            lua_pushvalue(L, - nargs - nbfunc - 1 + i);
-            /* remove this first function */
-            lua_remove(L, - nargs - nbfunc - 2 + i);
-            luaA_dofunction(L, nargs + 1, 0);
-        }
-    } else
-        warn("Trying to emit unknown signal '%s'", name);
+                /* remove this first function */
+                lua_remove(L, - nargs - nbfunc - 2 + i);
+                luaA_dofunction(L, nargs + 1, 0);
+            }
+        } else
+            warn("Trying to emit unknown signal '%s'", name);
+    }
 
     /* Then emit signal on the class */
     lua_pushvalue(L, oud);
