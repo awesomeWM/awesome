@@ -724,8 +724,8 @@ end
 -- @param c the client
 function setwfact(wfact, c)
     -- get the currently selected window
-    local c =  c or capi.client.focus
-    if not c then return end
+    local c = c or capi.client.focus
+    if not c or not c:isvisible() then return end
 
     local t = tag.selected(c.screen)
     local w = idx(c)
