@@ -22,6 +22,8 @@ local sort = require("gears.sort")
 local beautiful = require("beautiful")
 local string_format = string.format
 
+--- This provides widget box windows. Every wibox can also be used as if it were
+-- a drawin. All drawin functions and properties are also available on wiboxes!
 module("wibox")
 
 local function do_redraw(wibox)
@@ -306,6 +308,12 @@ local function new(args)
 
     return ret
 end
+
+--- Redraw a wibox. You should never have to call this explicitely because it is
+-- automatically called when needed.
+-- @param wibox
+-- @name draw
+-- @class function
 
 setmetatable(_M, { __call = function(_, ...) return new(...) end })
 
