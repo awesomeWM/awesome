@@ -144,7 +144,7 @@ drawin_init(drawin_t *w)
                       | XCB_CW_OVERRIDE_REDIRECT | XCB_CW_EVENT_MASK | XCB_CW_COLORMAP,
                       (const uint32_t [])
                       {
-                          s->black_pixel,
+                          w->bg_color.pixel,
                           w->border_color.pixel,
                           XCB_GRAVITY_NORTH_WEST,
                           1,
@@ -472,9 +472,34 @@ luaA_drawin_geometry(lua_State *L)
     return luaA_pusharea(L, drawin->geometry);
 }
 
+/** Set the drawin background color.
+ * \param L The Lua VM state.
+ * \param drawin The drawin object.
+ * \return The number of elements pushed on stack.
+ */
+static int
+luaA_drawin_set_bg_color(lua_State *L, drawin_t *drawin)
+{
+    size_t len;
+    const char *color_name = luaL_checklstring(L, -1, &len);
+
+    if(color_name &&
+       color_init_reply(color_init_unchecked(&drawin->bg_color, color_name, len)))
+    {
+        if (drawin->window != XCB_NONE)
+            xcb_change_window_attributes(globalconf.connection, drawin->window,
+                    XCB_CW_BACK_PIXEL, &drawin->bg_color.pixel);
+        luaA_object_emit_signal(L, -3, "property::bg_color", 0);
+    }
+
+    return 0;
+}
+
+
 LUA_OBJECT_EXPORT_PROPERTY(drawin, drawin_t, ontop, lua_pushboolean)
 LUA_OBJECT_EXPORT_PROPERTY(drawin, drawin_t, cursor, lua_pushstring)
 LUA_OBJECT_EXPORT_PROPERTY(drawin, drawin_t, visible, lua_pushboolean)
+LUA_OBJECT_EXPORT_PROPERTY(drawin, drawin_t, bg_color, luaA_pushcolor)
 
 static int
 luaA_drawin_set_x(lua_State *L, drawin_t *drawin)
@@ -724,6 +749,10 @@ drawin_class_setup(lua_State *L)
                             (lua_class_propfunc_t) luaA_drawin_set_height,
                             (lua_class_propfunc_t) luaA_drawin_get_height,
                             (lua_class_propfunc_t) luaA_drawin_set_height);
+    luaA_class_add_property(&window_class, "bg_color",
+                            (lua_class_propfunc_t) luaA_drawin_set_bg_color,
+                            (lua_class_propfunc_t) luaA_drawin_get_bg_color,
+                            (lua_class_propfunc_t) luaA_drawin_set_bg_color);
     luaA_class_add_property(&drawin_class, "type",
                             (lua_class_propfunc_t) luaA_window_set_type,
                             (lua_class_propfunc_t) luaA_window_get_type,
@@ -731,6 +760,7 @@ drawin_class_setup(lua_State *L)
 
     signal_add(&drawin_class.signals, "mouse::enter");
     signal_add(&drawin_class.signals, "mouse::leave");
+    signal_add(&drawin_class.signals, "property::bg_color");
     signal_add(&drawin_class.signals, "property::border_width");
     signal_add(&drawin_class.signals, "property::cursor");
     signal_add(&drawin_class.signals, "property::height");
