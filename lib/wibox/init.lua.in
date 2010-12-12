@@ -20,6 +20,7 @@ local color = require("gears.color")
 local object = require("gears.object")
 local sort = require("gears.sort")
 local beautiful = require("beautiful")
+local string_format = string.format
 
 module("wibox")
 
@@ -116,9 +117,18 @@ end
 --          nil or a string that gears.color() understands.
 function set_bg(wibox, c)
     local c = c
+    local colstr = "#000000" -- Default if we can't figure out the color
     if type(c) == "string" then
         c = color(c)
     end
+    -- If this is a solid color, propagate the background color to the capi drawin
+    if c:get_type() == "solid" then
+        local r, g, b, a = c:get_rgba()
+        r, g, b, a = r * 255, g * 255, b * 255, a * 255
+        -- Alpha isn't supported for backgrounds
+        colstr = string_format("#%02x%02x%02x", r, g, b)
+    end
+    wibox.drawin.bg_color = colstr
     wibox.background_color = c
     wibox.draw()
 end
