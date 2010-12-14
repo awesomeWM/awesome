@@ -315,6 +315,14 @@ end
 -- @name draw
 -- @class function
 
+--- Widget box object.
+-- Every wibox "inherits" from a drawin and you can use all of drawin's
+-- functions directly on this as well. When creating a wibox, you can specify a
+-- "fg" and a "bg" color as keys in the table that is passed to the constructor.
+-- All other arguments will be passed to drawin's constructor.
+-- @class table
+-- @name drawin
+
 setmetatable(_M, { __call = function(_, ...) return new(...) end })
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
