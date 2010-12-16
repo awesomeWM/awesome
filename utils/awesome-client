@@ -1,25 +1,31 @@
 #!/bin/sh
 
-# rlwrap provides readline to stuff which doesn't know readline by itself
-RLWRAP=$(which rlwrap 2>/dev/null)
 READ_OPTIONS="-r"
 
-if [ "$RLWRAP" != "" ]
-then
-    if [ "$A_RERUN" = "" ]
-    then
-        A_RERUN="no" exec $RLWRAP $0
-    fi
-else
-    if [ "$BASH" ]
-    then
-        READ_OPTIONS=" -e"
-    fi
-fi
+tty 2>&1 > /dev/null
+ISATTY=$?
 
-if [ $BASH ]
+if [ "$ISATTY" = 0 ]
 then
-    READ_OPTIONS="$READ_OPTIONS -p awesome# "
+    # rlwrap provides readline to stuff which doesn't know readline by itself
+    RLWRAP=$(which rlwrap 2>/dev/null)
+    if [ "$RLWRAP" != "" ]
+    then
+        if [ "$A_RERUN" = "" ]
+        then
+            A_RERUN="no" exec $RLWRAP $0
+        fi
+    else
+        if [ "$BASH" ]
+        then
+            READ_OPTIONS=" -e"
+        fi
+    fi
+
+    if [ $BASH ]
+    then
+        READ_OPTIONS="$READ_OPTIONS -p awesome# "
+    fi
 fi
 
 DBUS_SEND=dbus-send
@@ -41,7 +47,12 @@ a_dbus_send()
         $DBUS_METHOD string:"$1" | tail -n +2
 }
 
-while read ${READ_OPTIONS} line
-do
-    a_dbus_send "$line"
-done
+if [ "$ISATTY" = 0 ]
+then
+    while read ${READ_OPTIONS} line
+    do
+        a_dbus_send "$line"
+    done
+else
+    a_dbus_send "`cat`"
+fi
