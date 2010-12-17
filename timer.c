@@ -100,6 +100,22 @@ luaA_timer_stop(lua_State *L)
     return 0;
 }
 
+static int
+luaA_timer_again(lua_State *L)
+{
+    atimer_t *timer = luaA_checkudata(L, 1, &timer_class);
+
+    ev_timer_again(globalconf.loop, &timer->timer);
+
+    if(!timer->started)
+    {
+        luaA_object_ref(L, 1);
+        timer->started = true;
+    }
+
+    return 0;
+}
+
 LUA_OBJECT_EXPORT_PROPERTY(timer, atimer_t, started, lua_pushboolean)
 
 void
@@ -118,6 +134,7 @@ timer_class_setup(lua_State *L)
             LUA_CLASS_META
             { "start", luaA_timer_start },
             { "stop", luaA_timer_stop },
+            { "again", luaA_timer_again },
             { "__gc", luaA_object_gc },
             { NULL, NULL },
     };
