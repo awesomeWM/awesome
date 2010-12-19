@@ -335,14 +335,6 @@ drawin_detach(lua_State *L, int udx)
     drawin_t *drawin = luaA_checkudata(L, udx, &drawin_class);
     if(drawin->screen)
     {
-        bool v;
-
-        /* save visible state */
-        v = drawin->visible;
-        drawin->visible = false;
-        /* restore visibility */
-        drawin->visible = v;
-
         drawin_wipe_resources(drawin);
 
         foreach(item, globalconf.drawins)
