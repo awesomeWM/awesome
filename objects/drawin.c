@@ -61,6 +61,14 @@ drawin_systray_kickout(drawin_t *w)
 static void
 drawin_wipe_resources(drawin_t *w)
 {
+    if(w->surface)
+    {
+        /* Make sure that cairo knows that this surface can't be unused anymore.
+         * This is needed since lua could still have a reference to it. */
+        cairo_surface_finish(w->surface);
+        cairo_surface_destroy(w->surface);
+        w->surface = NULL;
+    }
     if(w->window)
     {
         /* Activate BMA */
@@ -76,11 +84,6 @@ drawin_wipe_resources(drawin_t *w)
     {
         xcb_free_pixmap(globalconf.connection, w->pixmap);
         w->pixmap = XCB_NONE;
-    }
-    if(w->surface)
-    {
-        cairo_surface_destroy(w->surface);
-        w->surface = NULL;
     }
 }
 
