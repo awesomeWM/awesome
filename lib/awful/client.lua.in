@@ -670,7 +670,7 @@ end
 -- @return col the column number
 -- @return idx index of the client in the column
 -- @return num the number of visible clients in the column
-local function idx(c)
+function idx(c)
     local c = c or capi.client.focus
     if not c then return end
 
