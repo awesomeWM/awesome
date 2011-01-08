@@ -108,16 +108,23 @@ function fit(box, width, height)
     return res.width, res.height
 end
 
---- Test if a textbox' text is valid. If it isn't, a lua error will be thrown.
-function check(box)
-    -- This creates a pango layout for the string and so forces pango to verify
-    -- whether we have some sane input for it
-    get_size(box, nil, -1, -1)
+-- Test if a text is valid for a textbox. If it isn't, a lua error will be thrown.
+local function check_text(text, markup)
+    local surface = oocairo.image_surface_create("argb32", 1, 1)
+    local cr = oocairo.context_create(surface)
+    local layout = layout_create(cr)
+
+    if markup then
+        layout:set_markup(text)
+    else
+        layout:set_text(text)
+    end
 end
 
 --- Set a textbox' text.
 -- @param text The text to set. This can contain pango markup (e.g. <b>bold</b>)
 function set_markup(box, text)
+    check_text(text, true)
     box._text = text
     box._markup = true
     box:emit_signal("widget::updated")
@@ -126,6 +133,7 @@ end
 --- Set a textbox' text.
 -- @param text The text to display. Pango markup is ignored and shown as-is.
 function set_text(box, text)
+    check_text(text, false)
     box._text = text
     box._markup = false
     box:emit_signal("widget::updated")
