@@ -326,6 +326,8 @@ client_focus_refresh(void)
 
     if(c)
     {
+        /* Make sure this window is unbanned and e.g. not minimized */
+        client_unban(c);
         /* Sets focus on window - using xcb_set_input_focus or WM_TAKE_FOCUS */
         if(!c->nofocus)
             xcb_set_input_focus(globalconf.connection, XCB_INPUT_FOCUS_PARENT,
