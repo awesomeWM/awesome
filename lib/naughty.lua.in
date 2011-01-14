@@ -360,7 +360,7 @@ function notify(args)
         textbox:set_markup(string.format('<span font_desc="%s"><b>%s</b>%s</span>', font, title, text:gsub(pattern, replacements)))
     end
     local function setText()
-        textbox:set_text(string.format('%s %s', title, text)
+        textbox:set_text(string.format('%s %s', title, text))
     end
 
     -- First try to set the text while only interpreting <br>.
