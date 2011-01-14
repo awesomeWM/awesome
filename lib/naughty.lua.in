@@ -358,7 +358,6 @@ function notify(args)
 
     local function setText(pattern, replacements)
         textbox:set_markup(string.format('<span font_desc="%s"><b>%s</b>%s</span>', font, title, text:gsub(pattern, replacements)))
-        textbox:check()
     end
 
     -- First try to set the text while only interpreting <br>.
