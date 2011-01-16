@@ -12,6 +12,23 @@ module("keygrabber")
 -- @param func A callback function as described above.
 -- @name run
 -- @class function
+-- @usage Following function can be bound to a key, and used to resize a client
+-- using keyboard.
+-- <p><code>
+-- function resize(c) <br/>
+--     keygrabber.run(function(mod, key, event) </br>
+--     if event == "release" then return true end </br><br/>
+--
+--     if     key == 'Up'   then awful.client.moveresize(0, 0, 0, 5, c) <br/>
+--     elseif key == 'Down' then awful.client.moveresize(0, 0, 0, -5, c) <br/>
+--     elseif key == 'Right' then awful.client.moveresize(0, 0, 5, 0, c) <br/>
+--     elseif key == 'Left'  then awful.client.moveresize(0, 0, -5, 0, c) <br/>
+--     else   keygrabber.stop() <br/>
+--     end <br/><br/>
+--
+--     return true <br/>
+-- end <br/>
+-- </code></p>
 
 --- Stop grabbing the keyboard.
 -- @param -
