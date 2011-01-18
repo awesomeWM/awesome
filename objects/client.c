@@ -1169,7 +1169,26 @@ luaA_client_tags(lua_State *L)
     {
         luaA_checktable(L, 2);
         for(int i = 0; i < tags->len; i++)
-            untag_client(c, tags->tab[i]);
+        {
+            /* Only untag if we aren't going to add this tag again */
+            bool found = false;
+            lua_pushnil(L);
+            while(lua_next(L, 2))
+            {
+                tag_t *t = lua_touserdata(L, -1);
+                /* Pop the value from lua_next */
+                lua_pop(L, 1);
+                if (t != tags->tab[i])
+                    continue;
+
+                /* Pop the key from lua_next */
+                lua_pop(L, 1);
+                found = true;
+                break;
+            }
+            if(!found)
+                untag_client(c, tags->tab[i]);
+        }
         lua_pushnil(L);
         while(lua_next(L, 2))
             tag_client(c);
