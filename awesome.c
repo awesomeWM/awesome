@@ -365,7 +365,7 @@ main(int argc, char **argv)
     luaA_init(&xdg);
 
     /* check args */
-    while((opt = getopt_long(argc, argv, "vhkc:",
+    while((opt = getopt_long(argc, argv, "vhkc:a",
                              long_options, NULL)) != -1)
         switch(opt)
         {
