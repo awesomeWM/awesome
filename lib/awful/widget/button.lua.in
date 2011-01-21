@@ -24,6 +24,8 @@ function new(args)
         img_release = capi.oocairo.image_surface_create_from_png(args.image)
     elseif type(args.image) == "userdata" and args.image.type and args.image:type() == "cairo_surface_t" then
         img_release = args.image
+    elseif type(args.image) == "userdata" and args.image._NAME and args.image._NAME == "cairo surface object" then
+        img_release = args.image
     end
     local img_press = capi.oocairo.image_surface_create("argb32", img_release:get_width(), img_release:get_height())
     local cr = capi.oocairo.context_create(img_press)
