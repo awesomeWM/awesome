@@ -392,7 +392,7 @@ end
 --- Open a menu popup.
 -- @param menu Table containing the menu informations.<br/>
 -- <ul>
--- <li> Key items: Table containing the displayed items, each element is a tab containing: item name, triggered action, submenu table or function, item icon (optional). </li>
+-- <li> Key items: Table containing the displayed items. Each element is a table containing: item name, triggered action, submenu table or function, item icon (optional). </li>
 -- <li> Keys [fg|bg]_[focus|normal], border, border_width, submenu_icon, height and width override the default display for your menu, each of them are optional. </li>
 -- <li> Key auto_expand controls the submenu auto expand behaviour by setting it to true (default) or false. </li>
 -- </ul>
