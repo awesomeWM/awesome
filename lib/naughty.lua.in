@@ -35,6 +35,13 @@ module("naughty")
 --   Default: { "png", "gif" }
 -- @field default_preset Preset to be used by default.
 --   Default: config.presets.normal
+-- @field notify_callback Callback used to modify or reject notifications.
+--   Default: nil
+--   Example:
+--      naughty.config.notify_callback = function(args)
+--          args.text = 'prefix: ' .. args.text
+--          return args
+--      end
 -- @class table
 
 config = {}
@@ -42,6 +49,7 @@ config.padding = 4
 config.spacing = 1
 config.icon_dirs = { "/usr/share/pixmaps/", }
 config.icon_formats = { "png", "gif" }
+config.notify_callback = nil
 
 
 --- Notification Presets - a table containing presets for different purposes
@@ -271,6 +279,11 @@ end
 -- @usage naughty.notify({ title = "Achtung!", text = "You're idling", timeout = 0 })
 -- @return The notification object
 function notify(args)
+    if config.notify_callback then
+        args = config.notify_callback(args)
+        if not args then return end
+    end
+
     -- gather variables together
     local preset = args.preset or config.default_preset or {}
     local timeout = args.timeout or preset.timeout or 5
