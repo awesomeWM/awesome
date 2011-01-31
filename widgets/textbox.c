@@ -131,7 +131,7 @@ textbox_extents(lua_State *L, widget_t *widget)
         int bgi_height = image_getheight(d->bg_image);
         int bgi_width = image_getwidth(d->bg_image);
         double ratio = d->bg_resize ? (double) geometry.height / bgi_height : 1;
-        geometry.width = MAX(d->extents.width + d->margin.left + d->margin.right, MAX(d->width, bgi_width * ratio));
+        geometry.width = MAX(geometry.width, bgi_width * ratio);
     }
 
     geometry.x = geometry.y = 0;
