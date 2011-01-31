@@ -117,14 +117,14 @@ textbox_extents(lua_State *L, widget_t *widget)
 {
     textbox_data_t *d = widget->data;
     area_t geometry = d->extents;
-    geometry.width += d->margin.left + d->margin.left;
+    geometry.width += d->margin.left + d->margin.right;
     geometry.height += d->margin.bottom + d->margin.top;
 
     if(d->width)
         geometry.width = d->width;
 
     if(d->height)
-        geometry.width = d->height;
+        geometry.height = d->height;
 
     if(d->bg_image)
     {
