@@ -475,7 +475,7 @@ end
 -- Notify
 if capi.dbus then
     capi.dbus.add_signal("org.freedesktop.Notifications", function (data, appname, replaces_id, icon, title, text, actions, hints, expire)
-    args = { preset = { } }
+    args = { preset = config.default_preset }
     if data.member == "Notify" then
         if text ~= "" then
             args.text = text
