@@ -103,19 +103,21 @@ DO_CLIENT_SET_PROPERTY(pid)
 DO_CLIENT_SET_PROPERTY(skip_taskbar)
 #undef DO_CLIENT_SET_PROPERTY
 
-#define DO_CLIENT_SET_STRING_PROPERTY(prop) \
+#define DO_CLIENT_SET_STRING_PROPERTY2(prop, signal) \
     void \
     client_set_##prop(lua_State *L, int cidx, char *value) \
     { \
         client_t *c = luaA_checkudata(L, cidx, &client_class); \
         p_delete(&c->prop); \
         c->prop = value; \
-        luaA_object_emit_signal(L, cidx, "property::" #prop, 0); \
+        luaA_object_emit_signal(L, cidx, "property::" #signal, 0); \
     }
+#define DO_CLIENT_SET_STRING_PROPERTY(prop) \
+        DO_CLIENT_SET_STRING_PROPERTY2(prop, prop)
 DO_CLIENT_SET_STRING_PROPERTY(name)
-DO_CLIENT_SET_STRING_PROPERTY(alt_name)
+DO_CLIENT_SET_STRING_PROPERTY2(alt_name, name)
 DO_CLIENT_SET_STRING_PROPERTY(icon_name)
-DO_CLIENT_SET_STRING_PROPERTY(alt_icon_name)
+DO_CLIENT_SET_STRING_PROPERTY2(alt_icon_name, icon_name)
 DO_CLIENT_SET_STRING_PROPERTY(role)
 DO_CLIENT_SET_STRING_PROPERTY(machine)
 #undef DO_CLIENT_SET_STRING_PROPERTY
@@ -1851,8 +1853,6 @@ client_class_setup(lua_State *L)
     signal_add(&client_class.signals, "mouse::enter");
     signal_add(&client_class.signals, "mouse::leave");
     signal_add(&client_class.signals, "property::above");
-    signal_add(&client_class.signals, "property::alt_icon_name");
-    signal_add(&client_class.signals, "property::alt_name");
     signal_add(&client_class.signals, "property::below");
     signal_add(&client_class.signals, "property::class");
     signal_add(&client_class.signals, "property::fullscreen");
