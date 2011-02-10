@@ -627,8 +627,8 @@ end
 function floating.toggle(c)
     local c = c or capi.client.focus
     -- If it has been set to floating
-    if property.get(c, "floating") then
-        floating.set(c, nil)
+    if floating.get(c) then
+        floating.set(c, false)
     else
         floating.set(c, true)
     end
