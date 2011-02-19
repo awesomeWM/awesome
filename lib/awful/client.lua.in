@@ -640,6 +640,28 @@ function floating.delete(c)
     floating.set(c, nil)
 end
 
+--- Restore (=unminimize) a random client.
+-- @param s The screen to use.
+-- @return True if some client was restored.
+function restore(s)
+    local s = s or (capi.client.focus and capi.client.focus.screen) or mouse.screen
+    local cls = capi.client.get(s)
+    local tags = tag.selectedlist(s)
+    local mcls = {}
+    for k, c in pairs(cls) do
+        local ctags = c:tags()
+        if c.minimized then
+            for k, t in ipairs(tags) do
+                if util.table.hasitem(ctags, t) then
+                    c.minimized = false
+                    return true
+                end
+            end
+        end
+    end
+    return false
+end
+
 -- Normalize a set of numbers to 1
 -- @param set the set of numbers to normalize
 -- @param num the number of numbers to normalize
