@@ -106,6 +106,8 @@ Clients
     Maximise la fenêtre de l'application.
 *Mod4 + n*::
     Minimise la fenêtre de l'application.
+*Mod4 + Control + n*::
+    Restaurer la fenêtre.
 *Mod4 + f*::
     Affiche la fenêtre de l'application en plein écran.
 *Mod4 + Majuscule + c*::

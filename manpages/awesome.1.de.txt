@@ -86,6 +86,8 @@ Fenster
     Fenster maximieren.
 *Mod4 + n*::
     Fenster minimieren.
+*Mod4 + Control + n*::
+    Fenster wiederherstellen.
 *Mod4 + f*::
     Fenster auf Vollbild setzen.
 *Mod4 + Shift + c*::
