@@ -101,6 +101,8 @@ Clientes
     Maximiza el cliente actual.
 *Mod4 + n*::
     Minimiza el cliente actual.
+*Mod4 + Control + n*::
+    Restaurar el cliente.
 *Mod4 + f*::
     Activa o desactiva el modo de pantalla completa para el cliente actual.
 *Mod4 + Mayús + c*::
