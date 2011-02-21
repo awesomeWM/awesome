@@ -274,14 +274,15 @@ endif()
 
 # {{{ Theme icons
 file(GLOB icon_sources RELATIVE ${SOURCE_DIR} ${SOURCE_DIR}/themes/*/titlebar/*.png)
-set(ALL_ICONS ${icon_sources})
 
 foreach(icon ${icon_sources})
     # Copy all icons to the build dir to simplify the following code.
     # Source paths are interpreted relative to ${SOURCE_DIR}, target paths
     # relative to ${BUILD_DIR}.
     get_filename_component(icon_path ${icon} PATH)
+    get_filename_component(icon_name ${icon} NAME)
     file(COPY ${icon} DESTINATION ${icon_path})
+    set(ALL_ICONS ${ALL_ICONS} "${icon_path}/${icon_name}")
 endforeach()
 
 macro(a_icon_convert match replacement input)
