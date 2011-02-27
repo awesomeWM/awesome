@@ -1,6 +1,7 @@
 ---------------------------------------------------------------------------
 -- @author Uli Schlachter
--- @copyright 2010 Uli Schlachter
+-- @author dodo
+-- @copyright 2010, 2011 Uli Schlachter, dodo
 -- @release @AWESOME_VERSION@
 ---------------------------------------------------------------------------
 
@@ -35,6 +36,7 @@ end
 -- Setup a pango layout for the given textbox and cairo context
 local function setup_layout(box, cr, width, height)
     local layout = layout_create(cr)
+    layout:set_alignment(box._align)
     layout:set_ellipsize(box._ellipsize)
     layout:set_wrap(box._wrap)
     layout:set_width(oopango.units_from_number(width))
@@ -169,6 +171,16 @@ function set_valign(box, mode)
     end
 end
 
+--- Set a textbox' horizontal alignment
+-- @param mode Where should the textbox be drawn? "left", "center" or "right"
+function set_align(box, mode)
+    local allowed = { left = true, center = true, right = true }
+    if allowed[mode] then
+        box._align = mode
+        box:emit_signal("widget::updated")
+    end
+end
+
 -- Returns a new textbox
 local function new()
     local ret = base.make_widget()
@@ -182,6 +194,7 @@ local function new()
     ret._ellipsize = "end"
     ret._wrap = "word_char"
     ret._valign = "center"
+    ret._align = "left"
 
     return ret
 end
