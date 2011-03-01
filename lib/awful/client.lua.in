@@ -644,7 +644,7 @@ end
 -- @param s The screen to use.
 -- @return True if some client was restored.
 function restore(s)
-    local s = s or (capi.client.focus and capi.client.focus.screen) or mouse.screen
+    local s = s or (capi.client.focus and capi.client.focus.screen) or capi.mouse.screen
     local cls = capi.client.get(s)
     local tags = tag.selectedlist(s)
     local mcls = {}
