@@ -237,9 +237,13 @@ local function add_item(data, num, item_info)
             icon = img
         end
         iconbox = wibox.widget.imagebox()
-        iconbox:set_image(icon)
         margin:set_left(2)
-    else
+        if not iconbox:set_image(icon) then
+            -- Setting the image failed, it must be invalid
+            iconbox = nil
+        end
+    end
+    if not iconbox then
         margin:set_left(data.h + 2)
     end
 
