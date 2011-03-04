@@ -82,6 +82,14 @@ function set_image(box, image)
         image = result
     end
 
+    if image then
+        local w = image:get_width()
+        local h = image:get_height()
+        if w <= 0 or h <= 0 then
+            return false
+        end
+    end
+
     box.image = image
 
     box:emit_signal("widget::updated")
