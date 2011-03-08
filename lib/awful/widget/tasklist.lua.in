@@ -36,6 +36,7 @@ local function tasklist_label(c, args)
     local bg = nil
     local text = "<span font_desc='"..font.."'>"
     local name = ""
+    if c.ontop then name = name .. "⌃" end
     if client.floating.get(c) then name = name .. "✈" end
     if c.maximized_horizontal then name = name .. '⬌' end
     if c.maximized_vertical then name = name .. "⬍" end
@@ -100,6 +101,7 @@ function new(screen, filter, buttons, style)
     capi.screen[screen]:connect_signal("tag::detach", u)
     tag.attached_connect_signal(screen, "property::selected", u)
     capi.client.connect_signal("property::urgent", u)
+    capi.client.connect_signal("property::ontop", u)
     capi.client.connect_signal("property::floating", u)
     capi.client.connect_signal("property::maximized_horizontal", u)
     capi.client.connect_signal("property::maximized_vertical", u)
