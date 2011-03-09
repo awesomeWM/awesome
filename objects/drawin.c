@@ -94,6 +94,10 @@ drawin_unref_simplified(drawin_t **item)
 static void
 drawin_update_drawing(drawin_t *w)
 {
+    /* If this drawin isn't visible, we don't need an up-to-date cairo surface
+     * for it. (drawin_map() will later make sure we are called again) */
+    if(w->screen == NULL)
+        return;
     /* Clean up old stuff */
     if(w->surface)
     {
@@ -149,8 +153,6 @@ drawin_init(drawin_t *w)
                           | XCB_EVENT_MASK_PROPERTY_CHANGE,
                           globalconf.default_cmap
                       });
-
-    drawin_update_drawing(w);
 
     /* Set the right type property */
     ewmh_update_window_type(w->window, window_translate_type(w->type));
@@ -269,6 +271,7 @@ drawin_map(drawin_t *drawin)
     client_ignore_enterleave_events();
     /* Map the drawin */
     xcb_map_window(globalconf.connection, drawin->window);
+    drawin_update_drawing(drawin);
     /* Deactivate BMA */
     client_restore_enterleave_events();
     /* Stack this drawin correctly */
