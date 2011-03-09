@@ -176,73 +176,56 @@ static void
 drawin_moveresize(lua_State *L, int udx, area_t geometry)
 {
     drawin_t *w = luaA_checkudata(L, udx, &drawin_class);
-    if(w->window)
+    int number_of_vals = 0;
+    uint32_t moveresize_win_vals[4], mask_vals = 0;
+
+    if(w->geometry.x != geometry.x)
     {
-        int number_of_vals = 0;
-        uint32_t moveresize_win_vals[4], mask_vals = 0;
-
-        if(w->geometry.x != geometry.x)
-        {
-            w->geometry.x = moveresize_win_vals[number_of_vals++] = geometry.x;
-            mask_vals |= XCB_CONFIG_WINDOW_X;
-        }
-
-        if(w->geometry.y != geometry.y)
-        {
-            w->geometry.y = moveresize_win_vals[number_of_vals++] = geometry.y;
-            mask_vals |= XCB_CONFIG_WINDOW_Y;
-        }
-
-        if(geometry.width > 0 && w->geometry.width != geometry.width)
-        {
-            w->geometry.width = moveresize_win_vals[number_of_vals++] = geometry.width;
-            mask_vals |= XCB_CONFIG_WINDOW_WIDTH;
-        }
-
-        if(geometry.height > 0 && w->geometry.height != geometry.height)
-        {
-            w->geometry.height = moveresize_win_vals[number_of_vals++] = geometry.height;
-            mask_vals |= XCB_CONFIG_WINDOW_HEIGHT;
-        }
-
-        if(mask_vals & (XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT))
-            drawin_update_drawing(w);
-
-        /* Activate BMA */
-        client_ignore_enterleave_events();
-
-        if(mask_vals)
-            xcb_configure_window(globalconf.connection, w->window, mask_vals, moveresize_win_vals);
-
-        /* Deactivate BMA */
-        client_restore_enterleave_events();
-
-        if(w->screen)
-            w->screen = screen_getbycoord(w->geometry.x, w->geometry.y);
-
-        if(mask_vals & XCB_CONFIG_WINDOW_X)
-            luaA_object_emit_signal(L, udx, "property::x", 0);
-        if(mask_vals & XCB_CONFIG_WINDOW_Y)
-            luaA_object_emit_signal(L, udx, "property::y", 0);
-        if(mask_vals & XCB_CONFIG_WINDOW_WIDTH)
-            luaA_object_emit_signal(L, udx, "property::width", 0);
-        if(mask_vals & XCB_CONFIG_WINDOW_HEIGHT)
-            luaA_object_emit_signal(L, udx, "property::height", 0);
+        w->geometry.x = moveresize_win_vals[number_of_vals++] = geometry.x;
+        mask_vals |= XCB_CONFIG_WINDOW_X;
     }
-    else
+
+    if(w->geometry.y != geometry.y)
     {
-#define DO_DRAWIN_GEOMETRY_CHECK_AND_EMIT(prop) \
-        if(w->geometry.prop != geometry.prop) \
-        { \
-            w->geometry.prop = geometry.prop; \
-            luaA_object_emit_signal(L, udx, "property::" #prop, 0); \
-        }
-        DO_DRAWIN_GEOMETRY_CHECK_AND_EMIT(x)
-        DO_DRAWIN_GEOMETRY_CHECK_AND_EMIT(y)
-        DO_DRAWIN_GEOMETRY_CHECK_AND_EMIT(width)
-        DO_DRAWIN_GEOMETRY_CHECK_AND_EMIT(height)
-#undef DO_DRAWIN_GEOMETRY_CHECK_AND_EMIT
+        w->geometry.y = moveresize_win_vals[number_of_vals++] = geometry.y;
+        mask_vals |= XCB_CONFIG_WINDOW_Y;
     }
+
+    if(geometry.width > 0 && w->geometry.width != geometry.width)
+    {
+        w->geometry.width = moveresize_win_vals[number_of_vals++] = geometry.width;
+        mask_vals |= XCB_CONFIG_WINDOW_WIDTH;
+    }
+
+    if(geometry.height > 0 && w->geometry.height != geometry.height)
+    {
+        w->geometry.height = moveresize_win_vals[number_of_vals++] = geometry.height;
+        mask_vals |= XCB_CONFIG_WINDOW_HEIGHT;
+    }
+
+    if(mask_vals & (XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT))
+        drawin_update_drawing(w);
+
+    /* Activate BMA */
+    client_ignore_enterleave_events();
+
+    if(mask_vals)
+        xcb_configure_window(globalconf.connection, w->window, mask_vals, moveresize_win_vals);
+
+    /* Deactivate BMA */
+    client_restore_enterleave_events();
+
+    if(w->screen)
+        w->screen = screen_getbycoord(w->geometry.x, w->geometry.y);
+
+    if(mask_vals & XCB_CONFIG_WINDOW_X)
+        luaA_object_emit_signal(L, udx, "property::x", 0);
+    if(mask_vals & XCB_CONFIG_WINDOW_Y)
+        luaA_object_emit_signal(L, udx, "property::y", 0);
+    if(mask_vals & XCB_CONFIG_WINDOW_WIDTH)
+        luaA_object_emit_signal(L, udx, "property::width", 0);
+    if(mask_vals & XCB_CONFIG_WINDOW_HEIGHT)
+        luaA_object_emit_signal(L, udx, "property::height", 0);
 }
 
 /** Refresh the window content by copying its pixmap data to its window.
@@ -481,9 +464,8 @@ luaA_drawin_set_bg_color(lua_State *L, drawin_t *drawin)
     if(color_name &&
        color_init_reply(color_init_unchecked(&drawin->bg_color, color_name, len)))
     {
-        if (drawin->window != XCB_NONE)
-            xcb_change_window_attributes(globalconf.connection, drawin->window,
-                    XCB_CW_BACK_PIXEL, &drawin->bg_color.pixel);
+        xcb_change_window_attributes(globalconf.connection, drawin->window,
+                XCB_CW_BACK_PIXEL, &drawin->bg_color.pixel);
         luaA_object_emit_signal(L, -3, "property::bg_color", 0);
     }
 
