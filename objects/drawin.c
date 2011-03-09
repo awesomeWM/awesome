@@ -55,12 +55,10 @@ drawin_systray_kickout(drawin_t *w)
     }
 }
 
-/** Destroy all X resources of a drawin.
- * \param w The drawin to wipe.
- */
 static void
-drawin_wipe_resources(drawin_t *w)
+drawin_wipe(drawin_t *w)
 {
+    p_delete(&w->cursor);
     if(w->surface)
     {
         /* Make sure that cairo knows that this surface can't be unused anymore.
@@ -85,13 +83,6 @@ drawin_wipe_resources(drawin_t *w)
         xcb_free_pixmap(globalconf.connection, w->pixmap);
         w->pixmap = XCB_NONE;
     }
-}
-
-static void
-drawin_wipe(drawin_t *drawin)
-{
-    p_delete(&drawin->cursor);
-    drawin_wipe_resources(drawin);
 }
 
 void
@@ -224,7 +215,8 @@ drawin_moveresize(lua_State *L, int udx, area_t geometry)
         /* Deactivate BMA */
         client_restore_enterleave_events();
 
-        w->screen = screen_getbycoord(w->geometry.x, w->geometry.y);
+        if(w->screen)
+            w->screen = screen_getbycoord(w->geometry.x, w->geometry.y);
 
         if(mask_vals & XCB_CONFIG_WINDOW_X)
             luaA_object_emit_signal(L, udx, "property::x", 0);
@@ -338,7 +330,12 @@ drawin_detach(lua_State *L, int udx)
     drawin_t *drawin = luaA_checkudata(L, udx, &drawin_class);
     if(drawin->screen)
     {
-        drawin_wipe_resources(drawin);
+        /* Active BMA */
+        client_ignore_enterleave_events();
+        /* Unmap window */
+        xcb_unmap_window(globalconf.connection, drawin->window);
+        /* Active BMA */
+        client_restore_enterleave_events();
 
         foreach(item, globalconf.drawins)
             if(*item == drawin)
@@ -388,8 +385,6 @@ drawin_attach(lua_State *L, int udx, screen_t *s)
 
     drawin_array_append(&globalconf.drawins, drawin);
 
-    drawin_init(drawin);
-
     xwindow_set_cursor(drawin->window,
                       xcursor_new(globalconf.connection, xcursor_font_fromstr(drawin->cursor)));
 
@@ -434,6 +429,8 @@ luaA_drawin_new(lua_State *L)
 
     if(w->type == 0)
         w->type = _NET_WM_WINDOW_TYPE_NORMAL;
+
+    drawin_init(w);
 
     return 1;
 }
