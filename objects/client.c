@@ -573,6 +573,7 @@ client_resize(client_t *c, area_t geometry)
             send_notice = true;
 
         /* Also store geometry including border */
+        area_t old_geometry = c->geometry;
         c->geometry = geometry;
 
         /* Ignore all spurious enter/leave notify events */
@@ -595,11 +596,14 @@ client_resize(client_t *c, area_t geometry)
 
         luaA_object_push(globalconf.L, c);
         luaA_object_emit_signal(globalconf.L, -1, "property::geometry", 0);
-        /** \todo This need to be VERIFIED before it is emitted! */
-        luaA_object_emit_signal(globalconf.L, -1, "property::x", 0);
-        luaA_object_emit_signal(globalconf.L, -1, "property::y", 0);
-        luaA_object_emit_signal(globalconf.L, -1, "property::width", 0);
-        luaA_object_emit_signal(globalconf.L, -1, "property::height", 0);
+        if (old_geometry.x != geometry.x)
+            luaA_object_emit_signal(globalconf.L, -1, "property::x", 0);
+        if (old_geometry.y != geometry.y)
+            luaA_object_emit_signal(globalconf.L, -1, "property::y", 0);
+        if (old_geometry.width != geometry.width)
+            luaA_object_emit_signal(globalconf.L, -1, "property::width", 0);
+        if (old_geometry.height != geometry.height)
+            luaA_object_emit_signal(globalconf.L, -1, "property::height", 0);
         lua_pop(globalconf.L, 1);
 
         return true;
