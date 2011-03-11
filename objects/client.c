@@ -533,110 +533,6 @@ HANDLE_GEOM(height)
     lua_pop(globalconf.L, 1);
 }
 
-/** Compute client geometry with respect to its geometry hints.
- * \param c The client.
- * \param geometry The geometry that the client might receive.
- * \return The geometry the client must take respecting its hints.
- */
-area_t
-client_geometry_hints(client_t *c, area_t geometry)
-{
-    int32_t basew, baseh, minw, minh;
-    int32_t real_basew = 0, real_baseh = 0;
-
-    /* base size is substituted with min size if not specified */
-    if(c->size_hints.flags & XCB_SIZE_HINT_P_SIZE)
-    {
-        basew = c->size_hints.base_width;
-        baseh = c->size_hints.base_height;
-        real_basew = basew;
-        real_baseh = baseh;
-    }
-    else if(c->size_hints.flags & XCB_SIZE_HINT_P_MIN_SIZE)
-    {
-        basew = c->size_hints.min_width;
-        baseh = c->size_hints.min_height;
-    }
-    else
-        basew = baseh = 0;
-
-    /* min size is substituted with base size if not specified */
-    if(c->size_hints.flags & XCB_SIZE_HINT_P_MIN_SIZE)
-    {
-        minw = c->size_hints.min_width;
-        minh = c->size_hints.min_height;
-    }
-    else if(c->size_hints.flags & XCB_SIZE_HINT_P_SIZE)
-    {
-        minw = c->size_hints.base_width;
-        minh = c->size_hints.base_height;
-    }
-    else
-        minw = minh = 0;
-
-    if(c->size_hints.flags & XCB_SIZE_HINT_P_ASPECT
-       && c->size_hints.min_aspect_den > 0
-       && c->size_hints.max_aspect_den > 0
-       && geometry.height - real_baseh > 0
-       && geometry.width - real_basew > 0)
-    {
-        /* ICCCM mandates:
-         * If a base size is provided along with the aspect ratio fields, the
-         * base size should be subtracted from the window size prior to checking
-         * that the aspect ratio falls in range. If a base size is not provided,
-         * nothing should be subtracted from the window size. (The minimum size
-         * is not to be used in place of the base size for this purpose.) */
-        double dx = (double) (geometry.width - real_basew);
-        double dy = (double) (geometry.height - real_baseh);
-        double min = (double) c->size_hints.min_aspect_num / (double) c->size_hints.min_aspect_den;
-        double max = (double) c->size_hints.max_aspect_num / (double) c->size_hints.max_aspect_den;
-        double ratio = dx / dy;
-        if(max > 0 && min > 0 && ratio > 0)
-        {
-            if(ratio < min)
-            {
-                /* dx is lower than allowed, make dy lower to compensate this
-                 * (+ 0.5 to force proper rounding). */
-                dy = dx / min + 0.5;
-                geometry.width = (int) dx + real_basew;
-                geometry.height = (int) dy + real_baseh;
-            }
-            else if(ratio > max)
-            {
-                /* dx is too high, lower it (+0.5 for proper rounding) */
-                dx = dy * max + 0.5;
-                geometry.width = (int) dx + real_basew;
-                geometry.height = (int) dy + real_baseh;
-            }
-        }
-    }
-
-    if(minw)
-        geometry.width = MAX(geometry.width, minw);
-    if(minh)
-        geometry.height = MAX(geometry.height, minh);
-
-    if(c->size_hints.flags & XCB_SIZE_HINT_P_MAX_SIZE)
-    {
-        if(c->size_hints.max_width)
-            geometry.width = MIN(geometry.width, c->size_hints.max_width);
-        if(c->size_hints.max_height)
-            geometry.height = MIN(geometry.height, c->size_hints.max_height);
-    }
-
-    if(c->size_hints.flags & (XCB_SIZE_HINT_P_RESIZE_INC | XCB_SIZE_HINT_BASE_SIZE)
-       && c->size_hints.width_inc && c->size_hints.height_inc)
-    {
-        uint16_t t1 = geometry.width, t2 = geometry.height;
-        unsigned_subtract(t1, basew);
-        unsigned_subtract(t2, baseh);
-        geometry.width -= t1 % c->size_hints.width_inc;
-        geometry.height -= t2 % c->size_hints.height_inc;
-    }
-
-    return geometry;
-}
-
 /** Resize client window.
  * The sizes given as parameters are with borders!
  * \param c Client to resize.
@@ -645,7 +541,7 @@ client_geometry_hints(client_t *c, area_t geometry)
  * \return true if an actual resize occurred.
  */
 bool
-client_resize(client_t *c, area_t geometry, bool hints)
+client_resize(client_t *c, area_t geometry)
 {
     area_t area;
 
@@ -660,9 +556,6 @@ client_resize(client_t *c, area_t geometry, bool hints)
         geometry.x = 0;
     if(geometry.y + geometry.height < 0)
         geometry.y = 0;
-
-    if(hints && !c->fullscreen)
-        geometry = client_geometry_hints(c, geometry);
 
     if(geometry.width == 0 || geometry.height == 0)
         return false;
@@ -1284,7 +1177,7 @@ luaA_client_geometry(lua_State *L)
             geometry.height = luaA_getopt_number(L, 2, "height", c->geometry.height);
         }
 
-        client_resize(c, geometry, c->size_hints_honor);
+        client_resize(c, geometry);
     }
 
     return luaA_pusharea(L, c->geometry);

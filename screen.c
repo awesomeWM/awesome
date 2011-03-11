@@ -378,7 +378,7 @@ screen_client_moveto(client_t *c, screen_t *new_screen, bool doresize)
         new_geometry.y = to.y + to.height - new_geometry.height;
 
     /* move / resize the client */
-    client_resize(c, new_geometry, false);
+    client_resize(c, new_geometry);
     luaA_object_push(globalconf.L, c);
     luaA_object_emit_signal(globalconf.L, -1, "property::screen", 0);
     lua_pop(globalconf.L, 1);

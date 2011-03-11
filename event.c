@@ -287,7 +287,7 @@ event_handle_configurerequest(xcb_configure_request_event_t *ev)
             lua_pop(globalconf.L, 1);
         }
 
-        if(!client_resize(c, geometry, false))
+        if(!client_resize(c, geometry))
             /* ICCCM 4.1.5 / 4.2.3, if nothing was changed, send an event saying so */
             xwindow_configure(c->window, geometry, c->border_width);
     }
