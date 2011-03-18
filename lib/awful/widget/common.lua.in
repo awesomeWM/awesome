@@ -9,6 +9,7 @@ local math = math
 local type = type
 local ipairs = ipairs
 local pairs = pairs
+local pcall = pcall
 local setmetatable = setmetatable
 local capi = { button = button }
 local util = require("awful.util")
@@ -86,7 +87,10 @@ function common.list_update(w, buttons, label, data, objects)
         end
 
         local text, bg, bg_image, icon = label(o)
-        tb:set_markup(text)
+        -- The text might be invalid, so use pcall
+        if not pcall(tb.set_markup, tb, text) then
+            tb:set_markup("<i>&lt;Invalid text&gt;</i>")
+        end
         bgb:set_bg(bg)
         bgb:set_bgimage(bg_image)
         ib:set_image(icon)
