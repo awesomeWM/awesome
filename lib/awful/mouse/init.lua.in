@@ -110,6 +110,8 @@ function client.snap(c, snap, x, y, fixed_x, fixed_y)
     local c = c or client.focus
     local cur_geom = c:geometry()
     local geom = c:geometry()
+    geom.width = geom.width + (2 * c.border_width)
+    geom.height = geom.height + (2 * c.border_width)
     local edge = "none"
     local edge2 = "none"
     geom.x = x or geom.x
@@ -145,6 +147,9 @@ function client.snap(c, snap, x, y, fixed_x, fixed_y)
     -- It's easiest to undo changes afterwards if they're not allowed
     if fixed_x then geom.x = cur_geom.x end
     if fixed_y then geom.y = cur_geom.y end
+
+    geom.width = geom.width - (2 * c.border_width)
+    geom.height = geom.height - (2 * c.border_width)
 
     return geom
 end
