@@ -87,7 +87,7 @@ luaA_exec(lua_State *L)
 {
     const char *cmd = luaL_checkstring(L, 1);
 
-    awesome_atexit();
+    awesome_atexit(false);
 
     a_exec(cmd);
     return 0;

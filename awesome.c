@@ -57,9 +57,10 @@ static char *awesome_argv;
 /** Call before exiting.
  */
 void
-awesome_atexit(void)
+awesome_atexit(bool restart)
 {
-    signal_object_emit(globalconf.L, &global_signals, "exit", 0);
+    lua_pushboolean(globalconf.L, restart);
+    signal_object_emit(globalconf.L, &global_signals, "exit", 1);
 
     a_dbus_cleanup();
 
@@ -276,7 +277,7 @@ exit_on_signal(EV_P_ ev_signal *w, int revents)
 void
 awesome_restart(void)
 {
-    awesome_atexit();
+    awesome_atexit(true);
     a_exec(awesome_argv);
 }
 
@@ -571,7 +572,7 @@ main(int argc, char **argv)
     ev_ref(globalconf.loop);
     ev_io_stop(globalconf.loop, &xio);
 
-    awesome_atexit();
+    awesome_atexit(false);
 
     return EXIT_SUCCESS;
 }
