@@ -196,7 +196,7 @@ end
 -- @param notification Notification object to be destroyed
 -- @return True if the popup was successfully destroyed, nil otherwise
 function destroy(notification)
-    if notification and notification.box.screen then
+    if notification and notification.box.visible then
         if suspended then
             for k, v in pairs(notifications.suspended) do
                 if v.box == notification.box then
@@ -205,12 +205,12 @@ function destroy(notification)
                 end
             end
         end
-        local scr = notification.box.screen
-        table.remove(notifications[notification.box.screen][notification.position], notification.idx)
+        local scr = notification.screen
+        table.remove(notifications[scr][notification.position], notification.idx)
         if notification.timer then
             notification.timer:stop()
         end
-        notification.box.screen = nil
+        notification.box.visible = false
         arrange(scr)
         return true
     end
@@ -305,7 +305,7 @@ function notify(args)
     local fg = args.fg or preset.fg or beautiful.fg_normal or '#ffffff'
     local bg = args.bg or preset.bg or beautiful.bg_normal or '#535d6c'
     local border_color = args.border_color or preset.border_color or beautiful.bg_focus or '#535d6c'
-    local notification = {}
+    local notification = { screen = screen }
 
     -- replace notification if needed
     if args.replaces_id then
@@ -469,7 +469,7 @@ function notify(args)
                                 x = offset.x,
                                 y = offset.y })
     notification.box.opacity = opacity
-    notification.box.screen = screen
+    notification.box.visible = true
     notification.idx = offset.idx
 
     -- populate widgets
