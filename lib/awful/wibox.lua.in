@@ -46,7 +46,7 @@ end
 -- @param screen If the wibox it not attached to a screen, specified on which
 -- screen the position should be set.
 function set_position(wibox, position, screen)
-    local screen = screen or wibox.screen or 1
+    local screen = screen or 1
     local area = capi.screen[screen].geometry
 
     -- The "length" of a wibox is always chosen to be the optimal size
@@ -131,7 +131,6 @@ function attach(wibox, position)
     wibox:connect_signal("property::height", wibox_update_strut)
     wibox:connect_signal("property::visible", wibox_update_strut)
 
-    wibox:connect_signal("property::screen", call_wibox_position_hook_on_prop_update)
     wibox:connect_signal("property::width", call_wibox_position_hook_on_prop_update)
     wibox:connect_signal("property::height", call_wibox_position_hook_on_prop_update)
     wibox:connect_signal("property::visible", call_wibox_position_hook_on_prop_update)
@@ -145,7 +144,7 @@ end
 -- screen where to align. Otherwise 1 is assumed.
 function align(wibox, align, screen)
     local position = get_position(wibox)
-    local screen = screen or wibox.screen or 1
+    local screen = screen or 1
     local area = capi.screen[screen].workarea
 
     if position == "right" then
@@ -190,7 +189,6 @@ end
 -- @param wibox The wibox.
 -- @param screen The screen to stretch on, or the wibox screen.
 function stretch(wibox, screen)
-    local screen = screen or wibox.screen
     if screen then
         local position = get_position(wibox)
         local area = capi.screen[screen].workarea
@@ -252,11 +250,11 @@ function new(arg)
 
     local w = wibox(arg)
 
-    w.screen = arg.screen or 1
+    w.visible = true
 
     attach(w, position)
     if has_to_stretch then
-        stretch(w)
+        stretch(w, arg.screen or 1)
     else
         align(w, arg.align)
     end
