@@ -78,7 +78,7 @@ function hide(menu)
     -- Remove items from screen
     for i = 1, #menu.items do
         item_leave(menu, i)
-        menu.items[i].wibox.screen = nil
+        menu.items[i].wibox.visible = false
     end
     if menu.active_child then
         menu.active_child:hide()
@@ -364,7 +364,7 @@ function show(menu, args)
         wibox.height = menu.h
         wibox.x = menu.x
         wibox.y = menu.y + (num - 1) * (menu.h + wibox.border_width)
-        wibox.screen = screen_index
+        wibox.visible = true
     end
 
     if menu.parent then
@@ -386,7 +386,7 @@ end
 -- @param args.keygrabber A boolean enabling or not the keyboard navigation.
 -- @param args.coords Menu position {x,y}
 function toggle(menu, args)
-    if menu.items[1] and menu.items[1].wibox.screen then
+    if menu.items[1] and menu.items[1].wibox.visible then
         menu:hide()
     else
         menu:show(args)
