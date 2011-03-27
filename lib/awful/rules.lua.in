@@ -74,6 +74,30 @@ module("awful.rules")
 -- </code>
 -- </p>
 --
+-- <p> To match multiple clients with an exception one can couple 'except' or
+-- 'except_any' with the rules:
+-- <br/>
+-- <code>
+-- { rule = { class = "Firefox" },
+--   except = { instance = "Navigator" },
+--   properties = {floating = true},
+-- },
+-- </code>
+-- <br/>
+-- <code>
+-- { rule_any = { class = { "Pidgin", "Xchat" } },
+--   except_any = { role = { "conversation" } },
+--   properties = { tag = tags[1][1] }
+-- }
+-- <br/>
+-- <code>
+-- { rule = {},
+--   except_any = { class = { "Firefox", "Vim" } },
+--   properties = { floating = true }
+-- }
+-- </code>
+-- </p>
+--
 -- @class table
 -- @name rules
 rules = {}
@@ -83,6 +107,7 @@ rules = {}
 -- @param rule The rule to check.
 -- @return True if it matches, false otherwise.
 function match(c, rule)
+    if not rule then return false end
     for field, value in pairs(rule) do
         if c[field] then
             if type(c[field]) == "string" then
@@ -104,6 +129,7 @@ end
 -- @param rules The rule to check.
 -- @return True if at least one rule is matched, false otherwise.
 function match_any(c, rule)
+    if not rule then return false end
     for field, values in pairs(rule) do
         if c[field] then
             for _, value in ipairs(values) do
@@ -124,8 +150,8 @@ function apply(c)
     local props = {}
     local callbacks = {}
     for _, entry in ipairs(rules) do
-        if  (entry.rule and match(c, entry.rule)) or
-            (entry.rule_any and match_any(c, entry.rule_any)) then
+        if (match(c, entry.rule) or match_any(c, entry.rule_any)) and
+            (not match(c, entry.except) and not match_any(c, entry.except_any)) then
             if entry.properties then
                 for property, value in pairs(entry.properties) do
                     props[property] = value
