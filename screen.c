@@ -299,9 +299,13 @@ screen_area_get(screen_t *screen, bool strut)
             COMPUTE_STRUT(*c)
 
     foreach(drawin, globalconf.drawins)
-        if((*drawin)->visible
-           && (*drawin)->screen == screen)
-            COMPUTE_STRUT(*drawin)
+        if((*drawin)->visible)
+        {
+            screen_t *d_screen =
+                screen_getbycoord((*drawin)->geometry.x, (*drawin)->geometry.y);
+            if (d_screen == screen)
+                COMPUTE_STRUT(*drawin)
+        }
 
 #undef COMPUTE_STRUT
 

@@ -58,6 +58,20 @@ drawin_systray_kickout(drawin_t *w)
 static void
 drawin_wipe(drawin_t *w)
 {
+    /* The drawin must already be unmapped, else it
+     * couldn't be garbage collected -> no unmap needed */
+    foreach(item, globalconf.drawins)
+        if(*item == w)
+        {
+            drawin_array_remove(&globalconf.drawins, item);
+            break;
+        }
+    if(strut_has_value(&w->strut))
+    {
+        screen_t *screen =
+            screen_getbycoord(w->geometry.x, w->geometry.y);
+        screen_emit_signal(globalconf.L, screen, "property::workarea", 0);
+    }
     p_delete(&w->cursor);
     if(w->surface)
     {
@@ -96,7 +110,7 @@ drawin_update_drawing(drawin_t *w)
 {
     /* If this drawin isn't visible, we don't need an up-to-date cairo surface
      * for it. (drawin_map() will later make sure we are called again) */
-    if(w->screen == NULL)
+    if(!w->visible)
         return;
     /* Clean up old stuff */
     if(w->surface)
@@ -139,7 +153,8 @@ drawin_init(drawin_t *w)
                       w->geometry.width, w->geometry.height,
                       w->border_width, XCB_COPY_FROM_PARENT, globalconf.visual->visual_id,
                       XCB_CW_BACK_PIXEL | XCB_CW_BORDER_PIXEL | XCB_CW_BIT_GRAVITY
-                      | XCB_CW_OVERRIDE_REDIRECT | XCB_CW_EVENT_MASK | XCB_CW_COLORMAP,
+                      | XCB_CW_OVERRIDE_REDIRECT | XCB_CW_EVENT_MASK | XCB_CW_COLORMAP
+                      | XCB_CW_CURSOR,
                       (const uint32_t [])
                       {
                           w->bg_color.pixel,
@@ -151,11 +166,15 @@ drawin_init(drawin_t *w)
                           | XCB_EVENT_MASK_LEAVE_WINDOW | XCB_EVENT_MASK_STRUCTURE_NOTIFY
                           | XCB_EVENT_MASK_POINTER_MOTION | XCB_EVENT_MASK_EXPOSURE
                           | XCB_EVENT_MASK_PROPERTY_CHANGE,
-                          globalconf.default_cmap
+                          globalconf.default_cmap,
+                          xcursor_new(globalconf.connection, xcursor_font_fromstr(w->cursor))
                       });
 
-    /* Set the right type property */
+    /* Set the right properties */
     ewmh_update_window_type(w->window, window_translate_type(w->type));
+    ewmh_update_strut(w->window, &w->strut);
+
+    drawin_array_append(&globalconf.drawins, w);
 }
 
 /** Refresh the window content by copying its pixmap data to its window.
@@ -214,9 +233,6 @@ drawin_moveresize(lua_State *L, int udx, area_t geometry)
 
     /* Deactivate BMA */
     client_restore_enterleave_events();
-
-    if(w->screen)
-        w->screen = screen_getbycoord(w->geometry.x, w->geometry.y);
 
     if(mask_vals & XCB_CONFIG_WINDOW_X)
         luaA_object_emit_signal(L, udx, "property::x", 0);
@@ -287,105 +303,28 @@ drawin_set_visible(lua_State *L, int udx, bool v)
     {
         drawin->visible = v;
 
-        if(drawin->screen)
+        if(drawin->visible)
         {
-            if(drawin->visible)
-                drawin_map(drawin);
-            else
-            {
-                /* Active BMA */
-                client_ignore_enterleave_events();
-                /* Unmap window */
-                xcb_unmap_window(globalconf.connection, drawin->window);
-                /* Active BMA */
-                client_restore_enterleave_events();
-            }
+            drawin_map(drawin);
+            /* duplicate drawin */
+            lua_pushvalue(L, udx);
+            /* ref it */
+            luaA_object_ref_class(globalconf.L, -1, &drawin_class);
+        }
+        else
+        {
+            /* Active BMA */
+            client_ignore_enterleave_events();
+            /* Unmap window */
+            xcb_unmap_window(globalconf.connection, drawin->window);
+            /* Active BMA */
+            client_restore_enterleave_events();
+            /* unref it */
+            luaA_object_unref(globalconf.L, drawin);
         }
 
         luaA_object_emit_signal(L, udx, "property::visible", 0);
     }
-}
-
-/** Remove a drawin from a screen.
- * \param L The Lua VM state.
- * \param udx drawin to detach from screen.
- */
-static void
-drawin_detach(lua_State *L, int udx)
-{
-    drawin_t *drawin = luaA_checkudata(L, udx, &drawin_class);
-    if(drawin->screen)
-    {
-        /* Active BMA */
-        client_ignore_enterleave_events();
-        /* Unmap window */
-        xcb_unmap_window(globalconf.connection, drawin->window);
-        /* Active BMA */
-        client_restore_enterleave_events();
-
-        foreach(item, globalconf.drawins)
-            if(*item == drawin)
-            {
-                drawin_array_remove(&globalconf.drawins, item);
-                break;
-            }
-
-        if(strut_has_value(&drawin->strut))
-            screen_emit_signal(L, drawin->screen, "property::workarea", 0);
-
-        drawin->screen = NULL;
-        luaA_object_emit_signal(L, udx, "property::screen", 0);
-
-        luaA_object_unref(globalconf.L, drawin);
-    }
-}
-
-/** Attach a drawin that is on top of the stack.
- * \param L The Lua VM state.
- * \param udx The drawin to attach.
- * \param s The screen to attach the drawin to.
- */
-static void
-drawin_attach(lua_State *L, int udx, screen_t *s)
-{
-    /* duplicate drawin */
-    lua_pushvalue(L, udx);
-    /* ref it */
-    drawin_t *drawin = luaA_object_ref_class(globalconf.L, -1, &drawin_class);
-
-    drawin_detach(L, udx);
-
-    /* Set the drawin screen */
-    drawin->screen = s;
-
-    /* Check that the drawin coordinates matches the screen. */
-    screen_t *cscreen =
-        screen_getbycoord(drawin->geometry.x, drawin->geometry.y);
-
-    /* If it does not match, move it to the screen coordinates */
-    if(cscreen != drawin->screen)
-        drawin_moveresize(L, udx, (area_t) { .x = s->geometry.x,
-                                            .y = s->geometry.y,
-                                            .width = drawin->geometry.width,
-                                            .height = drawin->geometry.height });
-
-    drawin_array_append(&globalconf.drawins, drawin);
-
-    xwindow_set_cursor(drawin->window,
-                      xcursor_new(globalconf.connection, xcursor_font_fromstr(drawin->cursor)));
-
-    if(drawin->opacity != -1)
-        xwindow_set_opacity(drawin->window, drawin->opacity);
-
-    ewmh_update_strut(drawin->window, &drawin->strut);
-
-    if(drawin->visible)
-        drawin_map(drawin);
-
-    luaA_object_emit_signal(L, udx, "property::screen", 0);
-
-    if(strut_has_value(&drawin->strut))
-        screen_emit_signal(L, drawin->screen, "property::workarea", 0);
 }
 
 /** Create a new drawin.
@@ -399,7 +338,7 @@ luaA_drawin_new(lua_State *L)
 
     drawin_t *w = luaA_checkudata(L, -1, &drawin_class);
 
-    w->visible = true;
+    w->visible = false;
 
     if(!w->opacity)
         w->opacity = -1;
@@ -594,40 +533,6 @@ luaA_drawin_set_cursor(lua_State *L, drawin_t *drawin)
     return 0;
 }
 
-/** Set the drawin screen.
- * \param L The Lua VM state.
- * \param drawin The drawin object.
- * \return The number of elements pushed on stack.
- */
-static int
-luaA_drawin_set_screen(lua_State *L, drawin_t *drawin)
-{
-    if(lua_isnil(L, -1))
-        drawin_detach(L, -3);
-    else
-    {
-        int screen = luaL_checknumber(L, -1) - 1;
-        luaA_checkscreen(screen);
-        if(!drawin->screen || screen != screen_array_indexof(&globalconf.screens, drawin->screen))
-            drawin_attach(L, -3, &globalconf.screens.tab[screen]);
-    }
-    return 0;
-}
-
-/** Get the drawin screen.
- * \param L The Lua VM state.
- * \param drawin The drawin object.
- * \return The number of elements pushed on stack.
- */
-static int
-luaA_drawin_get_screen(lua_State *L, drawin_t *drawin)
-{
-    if(!drawin->screen)
-        return 0;
-    lua_pushnumber(L, screen_array_indexof(&globalconf.screens, drawin->screen) + 1);
-    return 1;
-}
-
 /** Set the drawin visibility.
  * \param L The Lua VM state.
  * \param drawin The drawin object.
@@ -702,10 +607,6 @@ drawin_class_setup(lua_State *L)
                             (lua_class_propfunc_t) luaA_drawin_set_ontop,
                             (lua_class_propfunc_t) luaA_drawin_get_ontop,
                             (lua_class_propfunc_t) luaA_drawin_set_ontop);
-    luaA_class_add_property(&drawin_class, "screen",
-                            NULL,
-                            (lua_class_propfunc_t) luaA_drawin_get_screen,
-                            (lua_class_propfunc_t) luaA_drawin_set_screen);
     luaA_class_add_property(&drawin_class, "cursor",
                             (lua_class_propfunc_t) luaA_drawin_set_cursor,
                             (lua_class_propfunc_t) luaA_drawin_get_cursor,
@@ -742,7 +643,6 @@ drawin_class_setup(lua_State *L)
     signal_add(&drawin_class.signals, "property::cursor");
     signal_add(&drawin_class.signals, "property::height");
     signal_add(&drawin_class.signals, "property::ontop");
-    signal_add(&drawin_class.signals, "property::screen");
     signal_add(&drawin_class.signals, "property::visible");
     signal_add(&drawin_class.signals, "property::widgets");
     signal_add(&drawin_class.signals, "property::width");

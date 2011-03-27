@@ -59,8 +59,6 @@ typedef enum
     double opacity; \
     /** Strut */ \
     strut_t strut; \
-    /** Client logical screen */ \
-    screen_t *screen; \
     /** Button bindings */ \
     button_array_t buttons; \
     /** Border color */ \

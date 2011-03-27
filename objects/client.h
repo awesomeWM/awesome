@@ -42,6 +42,8 @@
 struct client_t
 {
     WINDOW_OBJECT_HEADER
+    /** Client logical screen */
+    screen_t *screen;
     /** Client name */
     char *name, *alt_name, *icon_name, *alt_icon_name;
     /** WM_CLASS stuff */
