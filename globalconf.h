@@ -113,6 +113,8 @@ typedef struct
     uint8_t default_depth;
     /** Our default color map */
     xcb_colormap_t default_cmap;
+    /** Do we have to reban clients? */
+    bool need_lazy_banning;
 } awesome_t;
 
 extern awesome_t globalconf;

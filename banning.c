@@ -27,54 +27,45 @@
  * \param screen The screen to arrange.
  */
 void
-banning_need_update(screen_t *screen)
+banning_need_update(void)
 {
     /* We update the complete banning only once per main loop to avoid
      * excessive updates...  */
-    screen->need_lazy_banning = true;
+    globalconf.need_lazy_banning = true;
 
     /* But if a client will be banned in our next update we unfocus it now. */
     foreach(_c, globalconf.clients)
     {
         client_t *c = *_c;
 
-        /* we don't touch other screens windows */
-        if(!client_isvisible(c, screen) && c->screen == screen)
+        if(!client_isvisible(c, c->screen))
             client_ban_unfocus(c);
     }
 }
 
-static void
-reban(screen_t *screen)
+/** Check all clients if they need to rebanned
+ */
+void
+banning_refresh(void)
 {
-    if (!screen->need_lazy_banning)
+    if (!globalconf.need_lazy_banning)
         return;
 
-    screen->need_lazy_banning = false;
+    globalconf.need_lazy_banning = false;
 
     client_ignore_enterleave_events();
 
     foreach(c, globalconf.clients)
-        if(client_isvisible(*c, screen))
+        if(client_isvisible(*c, (*c)->screen))
             client_unban(*c);
 
     /* Some people disliked the short flicker of background, so we first unban everything.
      * Afterwards we ban everything we don't want. This should avoid that. */
     foreach(c, globalconf.clients)
-        /* we don't touch other screens windows */
-        if(!client_isvisible(*c, screen) && (*c)->screen == screen)
+        if(!client_isvisible(*c, (*c)->screen))
             client_ban(*c);
 
     client_restore_enterleave_events();
-}
-
-/** Check all screens if they need to rebanned
- */
-void
-banning_refresh(void)
-{
-    foreach(screen, globalconf.screens)
-        reban(screen);
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80

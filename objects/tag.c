@@ -74,7 +74,7 @@ tag_view(lua_State *L, int udx, bool view)
 
         if(tag->screen)
         {
-            banning_need_update(tag->screen);
+            banning_need_update();
 
             ewmh_update_net_current_desktop();
         }
@@ -133,7 +133,7 @@ tag_remove_from_screen(tag_t *tag)
 
     /* tag was selected? If so, reban */
     if(tag->selected)
-        banning_need_update(tag->screen);
+        banning_need_update();
 
     ewmh_update_net_numbers_of_desktop();
     ewmh_update_net_desktop_names();
@@ -181,7 +181,7 @@ tag_client(client_t *c)
 
     client_array_append(&t->clients, c);
     ewmh_client_update_desktop(c);
-    banning_need_update((c)->screen);
+    banning_need_update();
 
     tag_client_emit_signal(globalconf.L, t, c, "tagged");
 }
@@ -197,7 +197,7 @@ untag_client(client_t *c, tag_t *t)
         if(t->clients.tab[i] == c)
         {
             client_array_take(&t->clients, i);
-            banning_need_update((c)->screen);
+            banning_need_update();
             ewmh_client_update_desktop(c);
             tag_client_emit_signal(globalconf.L, t, c, "untagged");
             luaA_object_unref(globalconf.L, t);

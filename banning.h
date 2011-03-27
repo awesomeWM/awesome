@@ -24,7 +24,7 @@
 
 #include "globalconf.h"
 
-void banning_need_update(screen_t *);
+void banning_need_update(void);
 void banning_refresh(void);
 
 #endif

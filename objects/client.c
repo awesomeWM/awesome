@@ -625,7 +625,7 @@ client_set_minimized(lua_State *L, int cidx, bool s)
     if(c->minimized != s)
     {
         c->minimized = s;
-        banning_need_update((c)->screen);
+        banning_need_update();
         if(s)
             xwindow_set_state(c->window, XCB_WM_STATE_ICONIC);
         else
@@ -649,7 +649,7 @@ client_set_sticky(lua_State *L, int cidx, bool s)
     if(c->sticky != s)
     {
         c->sticky = s;
-        banning_need_update((c)->screen);
+        banning_need_update();
         luaA_object_emit_signal(L, cidx, "property::sticky", 0);
     }
 }
@@ -1204,7 +1204,7 @@ luaA_client_set_hidden(lua_State *L, client_t *c)
     if(b != c->hidden)
     {
         c->hidden = b;
-        banning_need_update((c)->screen);
+        banning_need_update();
         if(strut_has_value(&c->strut))
             screen_emit_signal(globalconf.L, c->screen, "property::workarea", 0);
         luaA_object_emit_signal(L, -3, "property::hidden", 0);

@@ -36,8 +36,6 @@ struct a_screen
     tag_array_t tags;
     /** The signals emitted by screen objects */
     signal_array_t signals;
-    /** True if the banning on this screen needs to be updated */
-    bool need_lazy_banning;
     /** The screen outputs informations */
     screen_output_array_t outputs;
 };
