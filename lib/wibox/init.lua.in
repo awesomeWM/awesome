@@ -27,7 +27,7 @@ local string_format = string.format
 module("wibox")
 
 local function do_redraw(wibox)
-    if not wibox.drawin.screen or not wibox.drawin.visible then
+    if not wibox.drawin.visible then
         return
     end
 
@@ -225,7 +225,6 @@ local function setup_signals(wibox)
     clone_signal("property::height")
     clone_signal("property::ontop")
     clone_signal("property::opacity")
-    clone_signal("property::screen")
     clone_signal("property::struts")
     clone_signal("property::visible")
     clone_signal("property::widgets")
@@ -236,7 +235,6 @@ local function setup_signals(wibox)
     -- Update the wibox when its geometry changes
     w:connect_signal("property::height", wibox.draw)
     w:connect_signal("property::width", wibox.draw)
-    w:connect_signal("property::screen", wibox.draw)
     w:connect_signal("property::visible", wibox.draw)
 
     local function button_signal(name)
