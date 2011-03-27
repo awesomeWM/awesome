@@ -295,7 +295,7 @@ screen_area_get(screen_t *screen, bool strut)
     }
 
     foreach(c, globalconf.clients)
-        if(client_isvisible(*c, screen))
+        if((*c)->screen == screen && client_isvisible(*c))
             COMPUTE_STRUT(*c)
 
     foreach(drawin, globalconf.drawins)

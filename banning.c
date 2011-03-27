@@ -38,7 +38,7 @@ banning_need_update(void)
     {
         client_t *c = *_c;
 
-        if(!client_isvisible(c, c->screen))
+        if(!client_isvisible(c))
             client_ban_unfocus(c);
     }
 }
@@ -56,13 +56,13 @@ banning_refresh(void)
     client_ignore_enterleave_events();
 
     foreach(c, globalconf.clients)
-        if(client_isvisible(*c, (*c)->screen))
+        if(client_isvisible(*c))
             client_unban(*c);
 
     /* Some people disliked the short flicker of background, so we first unban everything.
      * Afterwards we ban everything we don't want. This should avoid that. */
     foreach(c, globalconf.clients)
-        if(!client_isvisible(*c, (*c)->screen))
+        if(!client_isvisible(*c))
             client_ban(*c);
 
     client_restore_enterleave_events();

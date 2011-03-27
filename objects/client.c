@@ -141,17 +141,15 @@ client_set_class_instance(lua_State *L, int cidx, const char *class, const char 
  * \return true if the client is visible, false otherwise.
  */
 bool
-client_maybevisible(client_t *c, screen_t *screen)
+client_maybevisible(client_t *c)
 {
-    if(screen && c->screen == screen)
-    {
-        if(c->sticky || c->type == WINDOW_TYPE_DESKTOP)
+    if(c->sticky || c->type == WINDOW_TYPE_DESKTOP)
+        return true;
+
+    foreach(tag, c->screen->tags)
+        if(tag_get_selected(*tag) && is_client_tagged(c, *tag))
             return true;
 
-        foreach(tag, screen->tags)
-            if(tag_get_selected(*tag) && is_client_tagged(c, *tag))
-                return true;
-    }
     return false;
 }
 
@@ -278,7 +276,7 @@ client_restore_enterleave_events(void)
 void
 client_focus_update(client_t *c)
 {
-    if(!client_maybevisible(c, c->screen))
+    if(!client_maybevisible(c))
         return;
 
     if(globalconf.focus.client)
@@ -310,7 +308,7 @@ client_focus(client_t *c)
     if(!c && globalconf.clients.len && !(c = globalconf.clients.tab[0]))
         return;
 
-    if(!client_maybevisible(c, c->screen))
+    if(!client_maybevisible(c))
         return;
 
     client_focus_update(c);
@@ -976,7 +974,7 @@ static int
 luaA_client_isvisible(lua_State *L)
 {
     client_t *c = luaA_checkudata(L, 1, &client_class);
-    lua_pushboolean(L, client_isvisible(c, c->screen));
+    lua_pushboolean(L, client_isvisible(c));
     return 1;
 }
 

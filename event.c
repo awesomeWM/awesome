@@ -531,7 +531,7 @@ event_handle_maprequest(xcb_map_request_event_t *ev)
     else if((c = client_getbywin(ev->window)))
     {
         /* Check that it may be visible, but not asked to be hidden */
-        if(client_maybevisible(c, c->screen) && !c->hidden)
+        if(client_maybevisible(c) && !c->hidden)
         {
             luaA_object_push(globalconf.L, c);
             client_set_minimized(globalconf.L, -1, false);
