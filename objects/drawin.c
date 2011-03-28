@@ -60,12 +60,6 @@ drawin_wipe(drawin_t *w)
 {
     /* The drawin must already be unmapped, else it
      * couldn't be garbage collected -> no unmap needed */
-    foreach(item, globalconf.drawins)
-        if(*item == w)
-        {
-            drawin_array_remove(&globalconf.drawins, item);
-            break;
-        }
     if(strut_has_value(&w->strut))
     {
         screen_t *screen =
@@ -173,8 +167,6 @@ drawin_init(drawin_t *w)
     /* Set the right properties */
     ewmh_update_window_type(w->window, window_translate_type(w->type));
     ewmh_update_strut(w->window, &w->strut);
-
-    drawin_array_append(&globalconf.drawins, w);
 }
 
 /** Refresh the window content by copying its pixmap data to its window.
@@ -275,6 +267,20 @@ drawin_map(drawin_t *drawin)
     client_restore_enterleave_events();
     /* Stack this drawin correctly */
     stack_windows();
+    /* Add it to the list of visible drawins */
+    drawin_array_append(&globalconf.drawins, drawin);
+}
+
+static void
+drawin_unmap(drawin_t *drawin)
+{
+    xcb_unmap_window(globalconf.connection, drawin->window);
+    foreach(item, globalconf.drawins)
+        if(*item == drawin)
+        {
+            drawin_array_remove(&globalconf.drawins, item);
+            break;
+        }
 }
 
 /** Get a drawin by its window.
@@ -316,7 +322,7 @@ drawin_set_visible(lua_State *L, int udx, bool v)
             /* Active BMA */
             client_ignore_enterleave_events();
             /* Unmap window */
-            xcb_unmap_window(globalconf.connection, drawin->window);
+            drawin_unmap(drawin);
             /* Active BMA */
             client_restore_enterleave_events();
             /* unref it */
