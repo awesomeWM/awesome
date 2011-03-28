@@ -138,6 +138,9 @@ function client.snap(c, snap, x, y, fixed_x, fixed_y)
         c:struts(struts)
     end
 
+    geom.x = geom.x - (2 * c.border_width)
+    geom.y = geom.y - (2 * c.border_width)
+
     for k, snapper in ipairs(aclient.visible(c.screen)) do
         if snapper ~= c then
             geom = snap_outside(geom, snapper:geometry(), snap)
@@ -150,6 +153,8 @@ function client.snap(c, snap, x, y, fixed_x, fixed_y)
 
     geom.width = geom.width - (2 * c.border_width)
     geom.height = geom.height - (2 * c.border_width)
+    geom.x = geom.x + (2 * c.border_width)
+    geom.y = geom.y + (2 * c.border_width)
 
     return geom
 end
