@@ -36,7 +36,7 @@ module("awful.rules")
 -- can add:
 -- <br/>
 -- <code>
--- { rule = { instance = "firefox" }
+-- { rule = { instance = "firefox" },
 --   properties = { tag = mytagobject } }
 -- </code>
 -- </p>
@@ -44,7 +44,7 @@ module("awful.rules")
 -- immediately switch to that tag you can add:
 -- <br/>
 -- <code>
--- { rule = { class = "Emacs" }
+-- { rule = { class = "Emacs" },
 --   properties = { tag = mytagobject, switchtotag = true } }
 -- </code>
 -- </p>
