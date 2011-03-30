@@ -132,6 +132,7 @@ local function get_layout(dir)
     ret.reset = reset
     ret.fill_space = fill_space
     ret.widgets = {}
+    ret.get_dir = function () return dir end
     ret._emit_updated = function()
         ret:emit_signal("widget::updated")
     end

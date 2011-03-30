@@ -105,6 +105,7 @@ local function get_layout(dir)
     local ret = widget_base.make_widget()
     ret.draw = draw_dir
     ret.fit = function(box, ...) return ... end
+    ret.get_dir = function () return dir end
     ret._emit_updated = function()
         ret:emit_signal("widget::updated")
     end
