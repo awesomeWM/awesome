@@ -34,7 +34,14 @@ function draw(box, wibox, cr, width, height)
 
     cr:restore()
 
+    if box.foreground then
+        cr:save()
+        cr:set_source(box.foreground)
+    end
     layout_base.draw_widget(wibox, cr, box.widget, 0, 0, width, height)
+    if box.foreground then
+        cr:restore()
+    end
 end
 
 --- Fit this widget into the given area
@@ -65,6 +72,16 @@ function set_bg(box, bg)
         box.background = color(bg)
     else
         box.background = nil
+    end
+    box._emit_updated()
+end
+
+--- Set the foreground to use
+function set_fg(box, fg)
+    if fg then
+        box.foreground = color(fg)
+    else
+        box.foreground = nil
     end
     box._emit_updated()
 end
