@@ -19,7 +19,7 @@ theme.fg_focus      = "#2e3436"
 theme.fg_urgent     = "#2e3436"
 theme.fg_minimize   = "#2e3436"
 
-theme.border_width  = "2"
+theme.border_width  = 2
 theme.border_normal = "#dae3e0"
 theme.border_focus  = "#729fcf"
 theme.border_marked = "#eeeeec"
@@ -47,8 +47,8 @@ theme.taglist_squares_unsel = "@AWESOME_THEMES_PATH@/default/taglist/squarew.png
 theme.wallpaper_cmd         = { "awsetbg @AWESOME_THEMES_PATH@/sky/sky-background.png" }
 theme.taglist_squares       = "true"
 theme.titlebar_close_button = "true"
-theme.menu_height           = "15"
-theme.menu_width            = "100"
+theme.menu_height           = 15
+theme.menu_width            = 100
 
 -- Define the image to load
 theme.titlebar_close_button_normal = "@AWESOME_THEMES_PATH@/default/titlebar/close_normal.png"
