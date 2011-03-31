@@ -298,7 +298,7 @@ function show(menu, args)
     local screen_index = capi.mouse.screen
     local keygrabber = args.keygrabber or false
 
-    menu.wibox.screen = screen_index
+    menu.wibox.visible = true
     if not set_size(menu) then return end
     set_coords(menu, screen_index, coords)
 
@@ -440,7 +440,7 @@ function delete(menu, num)
     local item = menu.items[num]
     if not item then return end
     item.widget:disconnect_signal("mouse::enter", item._mouse)
-    item.widget.screen = nil
+    item.widget.visible = false
     table.remove(menu.items, num)
     if menu.sel == num then
         menu:item_leave(menu.sel)
