@@ -298,7 +298,6 @@ function show(menu, args)
     local screen_index = capi.mouse.screen
     local keygrabber = args.keygrabber or false
 
-    menu.wibox.visible = true
     if not set_size(menu) then return end
     set_coords(menu, screen_index, coords)
 
