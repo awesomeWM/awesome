@@ -320,6 +320,7 @@ main(int argc, char **argv)
     ssize_t cmdlen = 1;
     xdgHandle xdg;
     bool no_argb = false;
+    xcb_generic_event_t *event;
     static struct option long_options[] =
     {
         { "help",    0, NULL, 'h' },
@@ -446,10 +447,6 @@ main(int argc, char **argv)
     /* initialize dbus */
     a_dbus_init();
 
-    /* Grab server */
-    xcb_grab_server(globalconf.connection);
-    xcb_flush(globalconf.connection);
-
     /* Get the file descriptor corresponding to the X connection */
     xfd = xcb_get_file_descriptor(globalconf.connection);
     ev_io_init(&xio, &a_xcb_io_cb, xfd, EV_READ);
@@ -460,6 +457,22 @@ main(int argc, char **argv)
     ev_prepare_init(&a_refresh, &a_refresh_cb);
     ev_prepare_start(globalconf.loop, &a_refresh);
     ev_unref(globalconf.loop);
+
+    /* Grab server */
+    xcb_grab_server(globalconf.connection);
+
+    /* Make sure there are no pending events. Since we didn't really do anything
+     * at all yet, we will just discard all events which we received so far.
+     * The above GrabServer should make sure no new events are generated. */
+    xcb_aux_sync(globalconf.connection);
+    while ((event = xcb_poll_for_event(globalconf.connection)) != NULL)
+    {
+        /* Make sure errors are printed */
+        uint8_t response_type = XCB_EVENT_RESPONSE_TYPE(event);
+        if(response_type == 0)
+            event_handle(event);
+        p_delete(&event);
+    }
 
     {
         const uint32_t select_input_val = XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT;
