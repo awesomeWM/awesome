@@ -123,8 +123,9 @@ end
 -- @param self The tooltip object.
 -- @param text New tooltip text.
 local function set_text(self, text)
+    self.widget:set_font(data[self].font)
     self.widget:set_markup('<span color="' .. data[self].fg
-        .. '" font_desc="' .. data[self].font .. '">' .. text .. "</span>")
+        .. '">' .. text .. "</span>")
 end
 
 --- Change the tooltip's update interval.

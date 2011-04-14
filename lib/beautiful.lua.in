@@ -27,19 +27,20 @@ module("beautiful")
 
 -- Local data
 local theme
-local font
-local font_height
+local descs = {}
+local fonts = {}
+local active_font
 
-function get_font()
-    return font
-end
-
-function get_font_height()
-    return font_height
-end
-
-local function set_font(f)
-    font = capi.oopango.font_description_from_string(f)
+local function load_font(name)
+    name = name or active_font
+    if name and type(name) ~= "string" and descs[name] then
+        name = descs[name]
+    end
+    if fonts[name] then
+        return fonts[name]
+    end
+    -- load new font
+    local desc = capi.oopango.font_description_from_string(name)
 
     -- Create a temporary surface that we need for computing the size :(
     local surface = capi.oocairo.image_surface_create("argb32", 1, 1)
@@ -52,10 +53,25 @@ local function set_font(f)
         layout = capi.oopango.cairo.layout_create(cr)
     end
 
-    layout:set_font_description(font)
+    layout:set_font_description(desc)
 
     local width, height = layout:get_pixel_size()
-    font_height = height
+    local font = { name = name, description = desc, height = height }
+    fonts[name] = font
+    descs[desc] = name
+    return font
+end
+
+local function set_font(name)
+    active_font = load_font(name).name
+end
+
+function get_font(name)
+    return load_font(name).description
+end
+
+function get_font_height(name)
+    return load_font(name).height
 end
 
 --- Init function, should be runned at the beginning of configuration file.

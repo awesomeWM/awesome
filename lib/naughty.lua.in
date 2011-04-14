@@ -367,10 +367,11 @@ function notify(args)
     local marginbox = wibox.layout.margin()
     marginbox:set_margins(margin)
     marginbox:set_widget(textbox)
-    textbox.valign = "middle"
+    textbox:set_valign("middle")
+    textbox:set_font(font)
 
     local function setMarkup(pattern, replacements)
-        textbox:set_markup(string.format('<span font_desc="%s"><b>%s</b>%s</span>', font, title, text:gsub(pattern, replacements)))
+        textbox:set_markup(string.format('<b>%s</b>%s', title, text:gsub(pattern, replacements)))
     end
     local function setText()
         textbox:set_text(string.format('%s %s', title, text))

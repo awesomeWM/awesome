@@ -88,6 +88,7 @@ local function load_theme(a, b)
                  fallback.menu_height or 16
     ret.width = a.width or b.menu_width or b.width or
                 fallback.menu_width or 100
+    ret.font = a.font or b.font or fallback.font
     for _, prop in ipairs({"width", "height", "menu_width"}) do
         if type(ret[prop]) ~= "number" then ret[prop] = tonumber(ret[prop]) end
     end
@@ -504,6 +505,7 @@ function entry(parent, args)
     -- Create the item label widget
     local label = wibox.widget.textbox()
     local key = ''
+    label:set_font(args.theme.font)
     label:set_markup(string.gsub(
         util.escape(args.text), "&amp;(%w)",
         function (l)

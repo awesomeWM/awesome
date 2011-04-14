@@ -225,7 +225,7 @@ function new(arg)
 
     -- Set default size
     if position == "left" or position == "right" then
-        arg.width = arg.width or beautiful.get_font_height() * 1.5
+        arg.width = arg.width or beautiful.get_font_height(arg.font) * 1.5
         if arg.height then
             has_to_stretch = false
             if arg.screen then
@@ -236,7 +236,7 @@ function new(arg)
             end
         end
     else
-        arg.height = arg.height or beautiful.get_font_height() * 1.5
+        arg.height = arg.height or beautiful.get_font_height(arg.font) * 1.5
         if arg.width then
             has_to_stretch = false
             if arg.screen then

@@ -138,7 +138,6 @@ local function prompt_text_with_cursor(args)
     end
 
     ret = prompt .. text_start .. "<span background=\"" .. util.color_strip_alpha(args.cursor_color) .. "\" foreground=\"" .. util.color_strip_alpha(args.text_color) .. "\" underline=\"" .. underline .. "\">" .. char .. "</span>" .. text_end .. spacer
-    if args.font then ret = "<span font_desc='" .. args.font .. "'>" .. ret .. "</span>" end
     return ret
 end
 
@@ -173,10 +172,11 @@ function run(args, textbox, exe_callback, completion_callback, history_path, his
     if not textbox or not exe_callback then
         return
     end
+    textbox:set_font(font)
     textbox:set_markup(prompt_text_with_cursor{
         text = text, text_color = inv_col, cursor_color = cur_col,
         cursor_pos = cur_pos, cursor_ul = cur_ul, selectall = selectall,
-        font = font, prompt = prettyprompt })
+        prompt = prettyprompt })
 
     local exec = function()
         textbox:set_markup("")
@@ -261,10 +261,11 @@ function run(args, textbox, exe_callback, completion_callback, history_path, his
                         if ncomp == 1 then return true end
                         if ncomp == 2 then
                             command = command_before_comp
+                            textbox:set_font(font)
                             textbox:set_markup(prompt_text_with_cursor{
                                 text = command_before_comp, text_color = inv_col, cursor_color = cur_col,
                                 cursor_pos = cur_pos, cursor_ul = cur_ul, selectall = selectall,
-                                font = font, prompt = prettyprompt })
+                                prompt = prettyprompt })
                             return true
                         end
 
@@ -352,10 +353,11 @@ function run(args, textbox, exe_callback, completion_callback, history_path, his
 
         -- Update textbox
         local function update()
+            textbox:set_font(font)
             textbox:set_markup(prompt_text_with_cursor{
                 text = command, text_color = inv_col, cursor_color = cur_col,
                 cursor_pos = cur_pos, cursor_ul = cur_ul, selectall = selectall,
-                font = font, prompt = prettyprompt })
+                prompt = prettyprompt })
         end
 
         local success = pcall(update)

@@ -41,17 +41,12 @@ local function setup_layout(box, cr, width, height)
     layout:set_wrap(box._wrap)
     layout:set_width(oopango.units_from_number(width))
     layout:set_height(oopango.units_from_number(height))
+    layout:set_font_description(beautiful.get_font(box._font))
 
     if box._markup then
         layout:set_markup(box._text)
     else
         layout:set_text(box._text)
-    end
-
-    if box._font then
-        layout:set_font_description(box._font)
-    else
-        layout:set_font_description(beautiful.get_font())
     end
 
     local ink, logical = layout:get_pixel_extents()
@@ -179,6 +174,12 @@ function set_align(box, mode)
         box._align = mode
         box:emit_signal("widget::updated")
     end
+end
+
+--- Set a textbox' font
+-- @param font The font description as string
+function set_font(box, font)
+    box._font = beautiful.get_font(font)
 end
 
 -- Returns a new textbox
