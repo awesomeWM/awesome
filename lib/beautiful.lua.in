@@ -27,8 +27,8 @@ module("beautiful")
 
 -- Local data
 local theme
-local descs = {}
-local fonts = {}
+local descs = setmetatable({}, { __mode = 'k' })
+local fonts = setmetatable({}, { __mode = 'v' })
 local active_font
 
 local function load_font(name)
