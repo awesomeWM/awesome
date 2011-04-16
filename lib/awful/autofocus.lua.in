@@ -37,6 +37,7 @@ end
 atag.attached_add_signal(nil, "property::selected", check_focus_screen)
 client.add_signal("unmanage", check_focus)
 client.add_signal("new", function(c)
+    c:add_signal("tagged", check_focus)
     c:add_signal("untagged", check_focus)
     c:add_signal("property::hidden", check_focus)
     c:add_signal("property::minimized", check_focus)
