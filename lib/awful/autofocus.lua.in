@@ -36,6 +36,7 @@ end
 
 atag.attached_connect_signal(nil, "property::selected", check_focus_screen)
 client.connect_signal("unmanage", check_focus)
+client.connect_signal("tagged", check_focus)
 client.connect_signal("untagged", check_focus)
 client.connect_signal("property::hidden", check_focus)
 client.connect_signal("property::minimized", check_focus)
