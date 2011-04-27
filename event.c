@@ -619,7 +619,7 @@ event_handle_clientmessage(xcb_client_message_event_t *ev)
         client_t *c;
         if((c = client_getbywin(ev->window))
            && ev->format == 32
-           && ev->data.data32[0] == XCB_WM_STATE_ICONIC)
+           && ev->data.data32[0] == XCB_ICCCM_WM_STATE_ICONIC)
         {
             luaA_object_push(globalconf.L, c);
             client_set_minimized(globalconf.L, -1, true);

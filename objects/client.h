@@ -85,7 +85,7 @@ struct client_t
     /** Window holding command needed to start it (session management related) */
     xcb_window_t leader_window;
     /** Client's WM_PROTOCOLS property */
-    xcb_get_wm_protocols_reply_t protocols;
+    xcb_icccm_get_wm_protocols_reply_t protocols;
     /** Key bindings */
     key_array_t keys;
     /** Icon */
@@ -187,8 +187,8 @@ client_raise(client_t *c)
 static inline bool
 client_isfixed(client_t *c)
 {
-    return (c->size_hints.flags & XCB_SIZE_HINT_P_MAX_SIZE
-            && c->size_hints.flags & XCB_SIZE_HINT_P_MIN_SIZE
+    return (c->size_hints.flags & XCB_ICCCM_SIZE_HINT_P_MAX_SIZE
+            && c->size_hints.flags & XCB_ICCCM_SIZE_HINT_P_MIN_SIZE
             && c->size_hints.max_width == c->size_hints.min_width
             && c->size_hints.max_height == c->size_hints.min_height
             && c->size_hints.max_width

@@ -25,7 +25,6 @@
 #include "common/util.h"
 
 #include <xcb/xcb.h>
-#include <xcb/xcb_atom.h>
 #include <xcb/xcb_icccm.h>
 
 #include "common/xutil.h"

@@ -98,7 +98,7 @@ HANDLE_PROPERTY(net_wm_pid)
 xcb_get_property_cookie_t
 property_get_wm_transient_for(client_t *c)
 {
-    return xcb_get_wm_transient_for_unchecked(globalconf.connection, c->window);
+    return xcb_icccm_get_wm_transient_for_unchecked(globalconf.connection, c->window);
 }
 
 void
@@ -106,9 +106,9 @@ property_update_wm_transient_for(client_t *c, xcb_get_property_cookie_t cookie)
 {
     xcb_window_t trans;
 
-    if(!xcb_get_wm_transient_for_reply(globalconf.connection,
-                                       cookie,
-                                       &trans, NULL))
+    if(!xcb_icccm_get_wm_transient_for_reply(globalconf.connection,
+					     cookie,
+					     &trans, NULL))
             return;
 
     luaA_object_push(globalconf.L, c);
@@ -146,7 +146,7 @@ property_update_wm_client_leader(client_t *c, xcb_get_property_cookie_t cookie)
 xcb_get_property_cookie_t
 property_get_wm_normal_hints(client_t *c)
 {
-    return xcb_get_wm_normal_hints_unchecked(globalconf.connection, c->window);
+    return xcb_icccm_get_wm_normal_hints_unchecked(globalconf.connection, c->window);
 }
 
 /** Update the size hints of a client.
@@ -156,15 +156,15 @@ property_get_wm_normal_hints(client_t *c)
 void
 property_update_wm_normal_hints(client_t *c, xcb_get_property_cookie_t cookie)
 {
-    xcb_get_wm_normal_hints_reply(globalconf.connection,
-                                      cookie,
-                                      &c->size_hints, NULL);
+    xcb_icccm_get_wm_normal_hints_reply(globalconf.connection,
+					cookie,
+					&c->size_hints, NULL);
 }
 
 xcb_get_property_cookie_t
 property_get_wm_hints(client_t *c)
 {
-    return xcb_get_wm_hints_unchecked(globalconf.connection, c->window);
+    return xcb_icccm_get_wm_hints_unchecked(globalconf.connection, c->window);
 }
 
 /** Update the WM hints of a client.
@@ -174,20 +174,20 @@ property_get_wm_hints(client_t *c)
 void
 property_update_wm_hints(client_t *c, xcb_get_property_cookie_t cookie)
 {
-    xcb_wm_hints_t wmh;
+    xcb_icccm_wm_hints_t wmh;
 
-    if(!xcb_get_wm_hints_reply(globalconf.connection,
-                               cookie,
-                               &wmh, NULL))
+    if(!xcb_icccm_get_wm_hints_reply(globalconf.connection,
+				     cookie,
+				     &wmh, NULL))
         return;
 
     luaA_object_push(globalconf.L, c);
-    client_set_urgent(globalconf.L, -1, xcb_wm_hints_get_urgency(&wmh));
+    client_set_urgent(globalconf.L, -1, xcb_icccm_wm_hints_get_urgency(&wmh));
 
-    if(wmh.flags & XCB_WM_HINT_INPUT)
+    if(wmh.flags & XCB_ICCCM_WM_HINT_INPUT)
         c->nofocus = !wmh.input;
 
-    if(wmh.flags & XCB_WM_HINT_WINDOW_GROUP)
+    if(wmh.flags & XCB_ICCCM_WM_HINT_WINDOW_GROUP)
         client_set_group_window(globalconf.L, -1, wmh.window_group);
 
     lua_pop(globalconf.L, 1);
@@ -196,7 +196,7 @@ property_update_wm_hints(client_t *c, xcb_get_property_cookie_t cookie)
 xcb_get_property_cookie_t
 property_get_wm_class(client_t *c)
 {
-    return xcb_get_wm_class_unchecked(globalconf.connection, c->window);
+    return xcb_icccm_get_wm_class_unchecked(globalconf.connection, c->window);
 }
 
 /** Update WM_CLASS of a client.
@@ -206,18 +206,18 @@ property_get_wm_class(client_t *c)
 void
 property_update_wm_class(client_t *c, xcb_get_property_cookie_t cookie)
 {
-    xcb_get_wm_class_reply_t hint;
+    xcb_icccm_get_wm_class_reply_t hint;
 
-    if(!xcb_get_wm_class_reply(globalconf.connection,
-                               cookie,
-                               &hint, NULL))
+    if(!xcb_icccm_get_wm_class_reply(globalconf.connection,
+				     cookie,
+				     &hint, NULL))
         return;
 
     luaA_object_push(globalconf.L, c);
     client_set_class_instance(globalconf.L, -1, hint.class_name, hint.instance_name);
     lua_pop(globalconf.L, 1);
 
-    xcb_get_wm_class_reply_wipe(&hint);
+    xcb_icccm_get_wm_class_reply_wipe(&hint);
 }
 
 static int
@@ -284,7 +284,8 @@ property_update_net_wm_pid(client_t *c, xcb_get_property_cookie_t cookie)
 xcb_get_property_cookie_t
 property_get_wm_protocols(client_t *c)
 {
-    return xcb_get_wm_protocols_unchecked(globalconf.connection, c->window, WM_PROTOCOLS);
+    return xcb_icccm_get_wm_protocols_unchecked(globalconf.connection,
+						c->window, WM_PROTOCOLS);
 }
 
 /** Update the list of supported protocols for a client.
@@ -294,15 +295,15 @@ property_get_wm_protocols(client_t *c)
 void
 property_update_wm_protocols(client_t *c, xcb_get_property_cookie_t cookie)
 {
-    xcb_get_wm_protocols_reply_t protocols;
+    xcb_icccm_get_wm_protocols_reply_t protocols;
 
     /* If this fails for any reason, we still got the old value */
-    if(!xcb_get_wm_protocols_reply(globalconf.connection,
-                                   cookie,
-                                   &protocols, NULL))
+    if(!xcb_icccm_get_wm_protocols_reply(globalconf.connection,
+					 cookie,
+					 &protocols, NULL))
         return;
 
-    xcb_get_wm_protocols_reply_wipe(&c->protocols);
+    xcb_icccm_get_wm_protocols_reply_wipe(&c->protocols);
     memcpy(&c->protocols, &protocols, sizeof(protocols));
 }
 
