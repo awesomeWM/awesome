@@ -60,7 +60,7 @@ uint32_t
 window_state_get_reply(xcb_get_property_cookie_t cookie)
 {
     /* If no property is set, we just assume a sane default. */
-    uint32_t result = XCB_WM_STATE_NORMAL;
+    uint32_t result = XCB_ICCCM_WM_STATE_NORMAL;
     xcb_get_property_reply_t *prop_r;
 
     if((prop_r = xcb_get_property_reply(globalconf.connection, cookie, NULL)))
@@ -187,7 +187,7 @@ window_opacity_set(xcb_window_t win, double opacity)
     {
         uint32_t real_opacity = opacity * 0xffffffff;
         xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE, win,
-                            _NET_WM_WINDOW_OPACITY, CARDINAL, 32, 1L, &real_opacity);
+                            _NET_WM_WINDOW_OPACITY, XCB_ATOM_CARDINAL, 32, 1L, &real_opacity);
     }
     else
         xcb_delete_property(globalconf.connection, win, _NET_WM_WINDOW_OPACITY);

@@ -226,7 +226,7 @@ ewmh_update_net_active_window(int phys_screen)
 
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
 			xutil_screen_get(globalconf.connection, phys_screen)->root,
-			_NET_ACTIVE_WINDOW, WINDOW, 32, 1, &win);
+			_NET_ACTIVE_WINDOW, XCB_ATOM_WINDOW, 32, 1, &win);
 }
 
 static void
@@ -425,7 +425,7 @@ ewmh_client_update_hints(client_t *c)
         state[i++] = _NET_WM_STATE_DEMANDS_ATTENTION;
 
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
-                        c->window, _NET_WM_STATE, ATOM, 32, i, state);
+                        c->window, _NET_WM_STATE, XCB_ATOM_ATOM, 32, i, state);
 }
 
 /** Update the client active desktop.

@@ -721,7 +721,7 @@ event_handle_clientmessage(xcb_client_message_event_t *ev)
         client_t *c;
         if((c = client_getbywin(ev->window))
            && ev->format == 32
-           && ev->data.data32[0] == XCB_WM_STATE_ICONIC)
+           && ev->data.data32[0] == XCB_ICCCM_WM_STATE_ICONIC)
         {
             luaA_object_push(globalconf.L, c);
             client_set_minimized(globalconf.L, -1, true);
@@ -795,13 +795,13 @@ static void
 xerror(xcb_generic_error_t *e)
 {
     /* ignore this */
-    if(e->error_code == XCB_EVENT_ERROR_BAD_WINDOW
-       || (e->error_code == XCB_EVENT_ERROR_BAD_MATCH
+    if(e->error_code == XCB_WINDOW
+       || (e->error_code == XCB_MATCH
            && e->major_code == XCB_SET_INPUT_FOCUS)
-       || (e->error_code == XCB_EVENT_ERROR_BAD_VALUE
+       || (e->error_code == XCB_VALUE
            && e->major_code == XCB_KILL_CLIENT)
        || (e->major_code == XCB_CONFIGURE_WINDOW
-           && e->error_code == XCB_EVENT_ERROR_BAD_MATCH))
+           && e->error_code == XCB_MATCH))
         return;
 
     warn("X error: request=%s, error=%s",

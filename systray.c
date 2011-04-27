@@ -197,7 +197,7 @@ systray_request_handle(xcb_window_t embed_win, int phys_screen, xembed_info_t *i
 
     xcb_change_window_attributes(globalconf.connection, embed_win, XCB_CW_EVENT_MASK,
                                  select_input_val);
-    window_state_set(embed_win, XCB_WM_STATE_WITHDRAWN);
+    window_state_set(embed_win, XCB_ICCCM_WM_STATE_WITHDRAWN);
 
     /* we grab the window, but also make sure it's automatically reparented back
      * to the root window if we should die.

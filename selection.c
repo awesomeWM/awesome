@@ -86,18 +86,18 @@ luaA_selection_get(lua_State *L)
         if(event_notify->selection == XCB_ATOM_PRIMARY
            && event_notify->property != XCB_NONE)
         {
-            xcb_get_text_property_reply_t prop;
+            xcb_icccm_get_text_property_reply_t prop;
             xcb_get_property_cookie_t cookie =
-                xcb_get_text_property(globalconf.connection,
-                                      event_notify->requestor,
-                                      event_notify->property);
+                xcb_icccm_get_text_property(globalconf.connection,
+                                            event_notify->requestor,
+                                            event_notify->property);
 
-            if(xcb_get_text_property_reply(globalconf.connection,
-                                           cookie, &prop, NULL))
+            if(xcb_icccm_get_text_property_reply(globalconf.connection,
+                                                 cookie, &prop, NULL))
             {
                 lua_pushlstring(L, prop.name, prop.name_len);
 
-                xcb_get_text_property_reply_wipe(&prop);
+                xcb_icccm_get_text_property_reply_wipe(&prop);
 
                 xcb_delete_property(globalconf.connection,
                                     event_notify->requestor,

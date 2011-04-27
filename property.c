@@ -105,14 +105,14 @@ property_update_wm_transient_for(client_t *c, xcb_get_property_reply_t *reply)
 
     if(reply)
     {
-        if(!xcb_get_wm_transient_for_from_reply(&trans, reply))
+        if(!xcb_icccm_get_wm_transient_for_from_reply(&trans, reply))
             return;
     }
     else
     {
-        if(!xcb_get_wm_transient_for_reply(globalconf.connection,
-                                            xcb_get_wm_transient_for_unchecked(globalconf.connection,
-                                                                               c->window),
+        if(!xcb_icccm_get_wm_transient_for_reply(globalconf.connection,
+                                            xcb_icccm_get_wm_transient_for_unchecked(globalconf.connection,
+                                                                                     c->window),
                                             &trans, NULL))
             return;
     }
@@ -160,15 +160,15 @@ property_update_wm_normal_hints(client_t *c, xcb_get_property_reply_t *reply)
 {
     if(reply)
     {
-        if(!xcb_get_wm_size_hints_from_reply(&c->size_hints, reply))
+        if(!xcb_icccm_get_wm_size_hints_from_reply(&c->size_hints, reply))
             return;
     }
     else
     {
-        if(!xcb_get_wm_normal_hints_reply(globalconf.connection,
-                                          xcb_get_wm_normal_hints_unchecked(globalconf.connection,
-                                                                            c->window),
-                                          &c->size_hints, NULL))
+        if(!xcb_icccm_get_wm_normal_hints_reply(globalconf.connection,
+                                                xcb_icccm_get_wm_normal_hints_unchecked(globalconf.connection,
+                                                                                        c->window),
+                                                &c->size_hints, NULL))
             return;
     }
 }
@@ -180,31 +180,31 @@ property_update_wm_normal_hints(client_t *c, xcb_get_property_reply_t *reply)
 void
 property_update_wm_hints(client_t *c, xcb_get_property_reply_t *reply)
 {
-    xcb_wm_hints_t wmh;
+    xcb_icccm_wm_hints_t wmh;
 
     if(reply)
     {
-        if(!xcb_get_wm_hints_from_reply(&wmh, reply))
+        if(!xcb_icccm_get_wm_hints_from_reply(&wmh, reply))
             return;
     }
     else
     {
-        if(!xcb_get_wm_hints_reply(globalconf.connection,
-                                  xcb_get_wm_hints_unchecked(globalconf.connection, c->window),
-                                  &wmh, NULL))
+        if(!xcb_icccm_get_wm_hints_reply(globalconf.connection,
+                                         xcb_icccm_get_wm_hints_unchecked(globalconf.connection, c->window),
+                                         &wmh, NULL))
             return;
     }
 
     luaA_object_push(globalconf.L, c);
-    client_set_urgent(globalconf.L, -1, xcb_wm_hints_get_urgency(&wmh));
-    if(wmh.flags & XCB_WM_HINT_STATE &&
-       wmh.initial_state == XCB_WM_STATE_WITHDRAWN)
+    client_set_urgent(globalconf.L, -1, xcb_icccm_wm_hints_get_urgency(&wmh));
+    if(wmh.flags & XCB_ICCCM_WM_HINT_STATE &&
+       wmh.initial_state == XCB_ICCCM_WM_STATE_WITHDRAWN)
         client_set_border_width(globalconf.L, -1, 0);
 
-    if(wmh.flags & XCB_WM_HINT_INPUT)
+    if(wmh.flags & XCB_ICCCM_WM_HINT_INPUT)
         c->nofocus = !wmh.input;
 
-    if(wmh.flags & XCB_WM_HINT_WINDOW_GROUP)
+    if(wmh.flags & XCB_ICCCM_WM_HINT_WINDOW_GROUP)
         client_set_group_window(globalconf.L, -1, wmh.window_group);
 
     lua_pop(globalconf.L, 1);
@@ -217,18 +217,18 @@ property_update_wm_hints(client_t *c, xcb_get_property_reply_t *reply)
 void
 property_update_wm_class(client_t *c, xcb_get_property_reply_t *reply)
 {
-    xcb_get_wm_class_reply_t hint;
+    xcb_icccm_get_wm_class_reply_t hint;
 
     if(reply)
     {
-        if(!xcb_get_wm_class_from_reply(&hint, reply))
+        if(!xcb_icccm_get_wm_class_from_reply(&hint, reply))
             return;
     }
     else
     {
-        if(!xcb_get_wm_class_reply(globalconf.connection,
-                                   xcb_get_wm_class_unchecked(globalconf.connection, c->window),
-                                   &hint, NULL))
+        if(!xcb_icccm_get_wm_class_reply(globalconf.connection,
+                                         xcb_icccm_get_wm_class_unchecked(globalconf.connection, c->window),
+                                         &hint, NULL))
             return;
     }
 
@@ -238,7 +238,7 @@ property_update_wm_class(client_t *c, xcb_get_property_reply_t *reply)
 
     /* only delete reply if we get it ourselves */
     if(!reply)
-        xcb_get_wm_class_reply_wipe(&hint);
+        xcb_icccm_get_wm_class_reply_wipe(&hint);
 }
 
 static int
@@ -308,30 +308,30 @@ property_update_net_wm_pid(client_t *c,
 void
 property_update_wm_protocols(client_t *c, xcb_get_property_reply_t *reply)
 {
-    xcb_get_wm_protocols_reply_t protocols;
+    xcb_icccm_get_wm_protocols_reply_t protocols;
     xcb_get_property_reply_t *reply_copy;
 
     if(reply)
     {
         reply_copy = p_dup(reply, 1);
 
-        if(!xcb_get_wm_protocols_from_reply(reply_copy, &protocols))
-	{
+        if(!xcb_icccm_get_wm_protocols_from_reply(reply_copy, &protocols))
+        {
             p_delete(&reply_copy);
             return;
-	}
+        }
     }
     else
     {
         /* If this fails for any reason, we still got the old value */
-        if(!xcb_get_wm_protocols_reply(globalconf.connection,
-                                      xcb_get_wm_protocols_unchecked(globalconf.connection,
-                                                                     c->window, WM_PROTOCOLS),
-                                      &protocols, NULL))
+        if(!xcb_icccm_get_wm_protocols_reply(globalconf.connection,
+                                             xcb_icccm_get_wm_protocols_unchecked(globalconf.connection,
+                                                                                  c->window, WM_PROTOCOLS),
+                                             &protocols, NULL))
             return;
     }
 
-    xcb_get_wm_protocols_reply_wipe(&c->protocols);
+    xcb_icccm_get_wm_protocols_reply_wipe(&c->protocols);
     memcpy(&c->protocols, &protocols, sizeof(protocols));
 }
 

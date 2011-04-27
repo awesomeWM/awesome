@@ -154,7 +154,7 @@ scan(void)
 
             if(!attr_r || attr_r->override_redirect
                || attr_r->map_state == XCB_MAP_STATE_UNMAPPED
-               || state == XCB_WM_STATE_WITHDRAWN)
+               || state == XCB_ICCCM_WM_STATE_WITHDRAWN)
             {
                 geom_wins[i] = NULL;
                 p_delete(&attr_r);
