@@ -46,7 +46,6 @@ end
 -- @param screen If the wibox it not attached to a screen, specified on which
 -- screen the position should be set.
 function set_position(wibox, position, screen)
-    local screen = screen or 1
     local area = capi.screen[screen].geometry
 
     -- The "length" of a wibox is always chosen to be the optimal size
@@ -73,7 +72,7 @@ end
 -- Reset all wiboxes positions.
 local function update_all_wiboxes_position()
     for _, wprop in ipairs(wiboxes) do
-        set_position(wprop.wibox, wprop.position)
+        set_position(wprop.wibox, wprop.position, wprop.screen)
     end
 end
 
@@ -105,7 +104,7 @@ end
 -- will be attached.
 -- @param wibox The wibox to attach.
 -- @param position The position of the wibox: top, bottom, left or right.
-function attach(wibox, position)
+function attach(wibox, position, screen)
     -- Store wibox as attached in a weak-valued table
     local wibox_prop_table
     -- Start from end since we sometimes remove items
@@ -122,7 +121,7 @@ function attach(wibox, position)
     end
 
     if not wibox_prop_table then
-        table.insert(wiboxes, setmetatable({ wibox = wibox, position = position }, { __mode = 'v' }))
+        table.insert(wiboxes, setmetatable({ wibox = wibox, position = position, screen = screen }, { __mode = 'v' }))
     else
         wibox_prop_table.position = position
     end
@@ -144,7 +143,6 @@ end
 -- screen where to align. Otherwise 1 is assumed.
 function align(wibox, align, screen)
     local position = get_position(wibox)
-    local screen = screen or 1
     local area = capi.screen[screen].workarea
 
     if position == "right" then
@@ -214,6 +212,7 @@ function new(arg)
     local arg = arg or {}
     local position = arg.position or "top"
     local has_to_stretch = true
+    local screen = arg.screen or 1
 
     arg.type = arg.type or "dock"
 
@@ -252,14 +251,14 @@ function new(arg)
 
     w.visible = true
 
-    attach(w, position)
+    attach(w, position, screen)
     if has_to_stretch then
-        stretch(w, arg.screen or 1)
+        stretch(w, screen)
     else
-        align(w, arg.align)
+        align(w, arg.align, screen)
     end
 
-    set_position(w, position)
+    set_position(w, position, screen)
 
     return w
 end
