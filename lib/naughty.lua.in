@@ -371,7 +371,7 @@ function notify(args)
     textbox:set_font(font)
 
     local function setMarkup(pattern, replacements)
-        textbox:set_markup(string.format('<b>%s</b>%s', title, text:gsub(pattern, replacements)))
+        textbox:set_markup(string.format('<b>%s</b>%s', title:gsub(pattern, replacements), text:gsub(pattern, replacements)))
     end
     local function setText()
         textbox:set_text(string.format('%s %s', title, text))
