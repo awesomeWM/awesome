@@ -371,7 +371,7 @@ function notify(args)
     textbox.valign = "middle"
 
     local function setText(pattern, replacements)
-        textbox.text = string.format('<span font_desc="%s"><b>%s</b>%s</span>', font, title, text:gsub(pattern, replacements))
+        textbox.text = string.format('<span font_desc="%s"><b>%s</b>%s</span>', font, title:gsub(pattern, replacements), text:gsub(pattern, replacements))
     end
 
     -- First try to set the text while only interpreting <br>.
