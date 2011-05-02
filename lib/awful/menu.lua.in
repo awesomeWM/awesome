@@ -51,15 +51,16 @@ end
 local cur_menu
 
 --- Key bindings for menu navigation.
--- Keys are: up, down, exec, back, close. Value are table with a list of valid
+-- Keys are: up, down, exec, enter, back, close. Value are table with a list of valid
 -- keys for the action, i.e. menu_keys.up =  { "j", "k" } will bind 'j' and 'k'
 -- key to up action. This is common to all created menu.
 -- @class table
 -- @name menu_keys
 menu_keys = { up = { "Up" },
               down = { "Down" },
-              exec = { "Return", "Right" },
               back = { "Left" },
+              exec = { "Return" },
+              enter = { "Right" },
               close = { "Escape" } }
 
 
@@ -180,7 +181,7 @@ local function check_access_key(menu, key)
    for i, item in ipairs(menu.items) do
       if item.akey == key then
             menu:item_enter(i)
-            menu:exec(i)
+            menu:exec(i, { exec = true })
             return
       end
    end
@@ -202,8 +203,10 @@ local function grabber(mod, key, event)
     elseif util.table.hasitem(menu_keys.down, key) then
         local sel_new = sel+1 > #cur_menu.items and 1 or sel+1
         cur_menu:item_enter(sel_new)
-    elseif sel > 0 and util.table.hasitem(menu_keys.exec, key) then
+    elseif sel > 0 and util.table.hasitem(menu_keys.enter, key) then
         cur_menu:exec(sel)
+    elseif sel > 0 and util.table.hasitem(menu_keys.exec, key) then
+        cur_menu:exec(sel, { exec = true })
     elseif util.table.hasitem(menu_keys.back, key) then
         cur_menu:hide()
     elseif util.table.hasitem(menu_keys.close, key) then
@@ -216,24 +219,43 @@ local function grabber(mod, key, event)
 end
 
 
-function exec(menu, num, mouse_event)
+function exec(menu, num, opts)
+    opts = opts or {}
     local item = menu.items[num]
     if not item then return end
     local cmd = item.cmd
     if type(cmd) == "table" then
+        local action = cmd.cmd
         if #cmd == 0 then
+            if opts.exec and action and type(action) == "function" then
+                action()
+            end
             return
         end
         if not menu.child[num] then
             menu.child[num] = new(cmd, menu)
         end
-
-        if menu.active_child then
+        local can_invoke_action = opts.exec and
+            action and type(action) == "function" and
+            (not opts.mouse or (opts.mouse and (menu.auto_expand or
+            (menu.active_child == menu.child[num] and
+            menu.active_child.wibox.visible))))
+        if can_invoke_action then
+            local visible = action(menu.child[num], item)
+            if not visible then
+                get_root(menu):hide()
+                return
+            else
+                menu.child[num]:update()
+            end
+        end
+        if menu.active_child and menu.active_child ~= menu.child[num] then
             menu.active_child:hide()
-            menu.active_child = nil
         end
         menu.active_child = menu.child[num]
-        menu.active_child:show()
+        if not menu.active_child.visible then
+            menu.active_child:show()
+        end
     elseif type(cmd) == "string" then
         get_root(menu):hide()
         util.spawn(cmd)
@@ -244,7 +266,7 @@ function exec(menu, num, mouse_event)
         else
             menu:update()
             if menu.items[num] then
-                menu:item_enter(num, mouse_event)
+                menu:item_enter(num, opts)
             end
         end
         if action and type(action) == "function" then
@@ -253,7 +275,8 @@ function exec(menu, num, mouse_event)
     end
 end
 
-function item_enter(menu, num, mouse_event)
+function item_enter(menu, num, opts)
+    opts = opts or {}
     local item = menu.items[num]
     if num == nil or menu.sel == num or not item then
         return
@@ -266,14 +289,14 @@ function item_enter(menu, num, mouse_event)
     cur_menu = menu
     menu.sel = num
 
-    if menu.auto_expand and mouse_event then
+    if menu.auto_expand and opts.hover then
         if menu.active_child then
             menu.active_child:hide()
             menu.active_child = nil
         end
 
         if type(item.cmd) == "table" then
-            menu:exec(num)
+            menu:exec(num, otps)
         end
     end
 end
@@ -406,14 +429,14 @@ function add(menu, args, index)
         button({}, 3, function () menu:hide() end),
         button({}, 1, function ()
             local num = util.table.hasitem(menu.items, item)
-            menu:item_enter(num)
-            menu:exec(num)
+            menu:item_enter(num, { mouse = true })
+            menu:exec(num, { exec = true, mouse = true })
         end )))
 
 
     item._mouse = function ()
         local num = util.table.hasitem(menu.items, item)
-        menu:item_enter(num, true)
+        menu:item_enter(num, { hover = true, moue = true })
     end
     item.widget:connect_signal("mouse::enter", item._mouse)
 
