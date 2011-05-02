@@ -53,7 +53,7 @@ else
 fi
 
 # The wallpapersetter is selected in this order
-wpsetters="${wpsetters:=Esetroot habak feh hsetroot chbg fvwm-root display qiv xv xsri xli xsetbg wmsetbg xsetroot}" # broken icewmbg'
+wpsetters="${wpsetters:=Esetroot habak feh hsetroot chbg fvwm-root imlibsetroot display qiv xv xsri xli xsetbg wmsetbg xsetroot}" # broken icewmbg'
 lastwallpaper="${CONFIG_DIR}/lastwallpaper"
 
 
@@ -473,6 +473,12 @@ errormessages with aterm. Don't use it unless you have to."
 a solid background. If you want to have a background image you should install Esetroot or feh."
         wallpaper='#535d6c'
         ;;
+     imlibsetroot)
+       tile='-t -p c'
+       full='-s f'
+       center='-p c'
+       aspect='-s a'
+       ;;
     '')
         message \
 "I can't find an app to set the wallpaper with. You can install one in
