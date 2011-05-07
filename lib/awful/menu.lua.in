@@ -296,7 +296,7 @@ function item_enter(menu, num, opts)
         end
 
         if type(item.cmd) == "table" then
-            menu:exec(num, otps)
+            menu:exec(num, opts)
         end
     end
 end

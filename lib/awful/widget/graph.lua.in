@@ -53,7 +53,7 @@ local data = setmetatable({}, { __mode = "k" })
 --- Set the graph to draw stacks. Default is false.
 -- @name set_stack
 -- @class function
--- @param progressbar The graph.
+-- @param graph The graph.
 -- @param stack A boolean value.
 
 --- Set the graph stacking colors. Order matters.
