@@ -56,7 +56,8 @@ function urgent.get()
 end
 
 --- Jump to the client that received the urgent hint first.
-function urgent.jumpto()
+-- @param merge If true then merge tags when clients are not visible.
+function urgent.jumpto(merge)
     local c = urgent.get()
     if c then
         local s = capi.client.focus and capi.client.focus.screen or capi.mouse.screen
@@ -64,10 +65,17 @@ function urgent.jumpto()
         if s ~= c.screen then
             capi.mouse.screen = c.screen
         end
-        -- focus the tag only if the client is not sticky
-        if not c.sticky then
-           tag.viewonly(c:tags()[1])
+
+        -- Try to make client visible, this also covers e.g. sticky
+        local t = c:tags()[1]
+        if t and not c:isvisible() then
+            if merge then
+                t.selected = true
+            else
+                tag.viewonly(t)
+            end
         end
+
         -- focus the client
         capi.client.focus = c
         c:raise()
