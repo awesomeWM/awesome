@@ -60,12 +60,6 @@ drawin_wipe(drawin_t *w)
 {
     /* The drawin must already be unmapped, else it
      * couldn't be garbage collected -> no unmap needed */
-    if(strut_has_value(&w->strut))
-    {
-        screen_t *screen =
-            screen_getbycoord(w->geometry.x, w->geometry.y);
-        screen_emit_signal(globalconf.L, screen, "property::workarea", 0);
-    }
     p_delete(&w->cursor);
     if(w->surface)
     {
@@ -330,6 +324,12 @@ drawin_set_visible(lua_State *L, int udx, bool v)
         }
 
         luaA_object_emit_signal(L, udx, "property::visible", 0);
+        if(strut_has_value(&drawin->strut))
+        {
+            screen_t *screen =
+                screen_getbycoord(drawin->geometry.x, drawin->geometry.y);
+            screen_emit_signal(globalconf.L, screen, "property::workarea", 0);
+        }
     }
 }
 
