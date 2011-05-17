@@ -85,6 +85,8 @@ local function load_theme(a, b)
                     fallback.menu_bg_normal or fallback.bg_normal
     ret.submenu_icon= a.submenu_icon or b.menu_submenu_icon or b.submenu_icon or
                       fallback.menu_submenu_icon or fallback.submenu_icon
+    ret.submenu = a.submenu or b.menu_submenu or b.submenu or
+                      fallback.menu_submenu or fallback.submenu or "▶"
     ret.height = a.height or b.menu_height or b.height or
                  fallback.menu_height or 16
     ret.width = a.width or b.menu_width or b.width or
@@ -574,13 +576,17 @@ function entry(parent, args)
         margin:set_left(args.theme.height + 2)
     end
     -- Create the submenu icon widget
-    local submenu_icon
+    local submenu
     if type(args.cmd) == "table" then
-        submenu_icon = wibox.widget.imagebox()
         if args.theme.submenu_icon then
-            submenu_icon:set_image(
+            submenu = wibox.widget.imagebox()
+            submenu:set_image(
                 capi.oocairo.image_surface_create_from_png(
                 args.theme.submenu_icon))
+        else
+            submenu = wibox.widget.textbox()
+            submenu:set_font(args.theme.font)
+            submenu:set_text(args.theme.submenu)
         end
     end
     -- Add widgets to the wibox
@@ -593,12 +599,13 @@ function entry(parent, args)
 
     local layout = wibox.layout.align.horizontal()
     layout:set_middle(left)
-    if submenu_icon then
-        layout:set_right(submenu_icon)
+    if submenu then
+        layout:set_right(submenu)
     end
 
     return table_update(ret, {
         label = label,
+        sep = submenu,
         icon = iconbox,
         widget = layout,
         cmd = args.cmd,
