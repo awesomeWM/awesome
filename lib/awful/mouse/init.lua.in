@@ -147,14 +147,14 @@ function client.snap(c, snap, x, y, fixed_x, fixed_y)
         end
     end
 
-    -- It's easiest to undo changes afterwards if they're not allowed
-    if fixed_x then geom.x = cur_geom.x end
-    if fixed_y then geom.y = cur_geom.y end
-
     geom.width = geom.width - (2 * c.border_width)
     geom.height = geom.height - (2 * c.border_width)
     geom.x = geom.x + (2 * c.border_width)
     geom.y = geom.y + (2 * c.border_width)
+
+    -- It's easiest to undo changes afterwards if they're not allowed
+    if fixed_x then geom.x = cur_geom.x end
+    if fixed_y then geom.y = cur_geom.y end
 
     return geom
 end
