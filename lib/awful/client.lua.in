@@ -478,7 +478,6 @@ function movetoscreen(c, s)
         if s > sc then s = 1 elseif s < 1 then s = sc end
         sel.screen = s
         capi.mouse.coords(capi.screen[s].geometry)
-        capi.client.focus = sel
     end
 end
 
