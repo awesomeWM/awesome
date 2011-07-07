@@ -264,9 +264,13 @@ screen_client_moveto(client_t *c, screen_t *new_screen, bool doresize)
 {
     screen_t *old_screen = c->screen;
     area_t from, to;
+    bool had_focus = false;
 
     if(new_screen == c->screen)
         return;
+
+    if (globalconf.screens.tab[c->phys_screen].client_focus == c)
+        had_focus = true;
 
     c->screen = new_screen;
 
@@ -284,6 +288,8 @@ screen_client_moveto(client_t *c, screen_t *new_screen, bool doresize)
         luaA_object_push(globalconf.L, c);
         luaA_object_emit_signal(globalconf.L, -1, "property::screen", 0);
         lua_pop(globalconf.L, 1);
+        if(had_focus)
+            client_focus(c);
         return;
     }
 
@@ -337,6 +343,8 @@ screen_client_moveto(client_t *c, screen_t *new_screen, bool doresize)
     luaA_object_push(globalconf.L, c);
     luaA_object_emit_signal(globalconf.L, -1, "property::screen", 0);
     lua_pop(globalconf.L, 1);
+    if(had_focus)
+        client_focus(c);
 }
 
 /** Push a screen onto the stack.
