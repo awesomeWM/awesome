@@ -139,6 +139,15 @@ function resume()
     notifications.suspended = { }
 end
 
+--- Toggle notification state
+function toggle()
+    if suspended then
+        resume()
+    else
+        suspend()
+    end
+end
+
 -- Evaluate desired position of the notification by index - internal
 -- @param idx Index of the notification
 -- @param position top_right | top_left | bottom_right | bottom_left
