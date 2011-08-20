@@ -59,18 +59,6 @@ mousegrabber_grab(xcb_cursor_t cursor)
     return false;
 }
 
-/** Handle mouse motion events.
- * \param L Lua stack to push the pointer motion.
- * \param x The received mouse event x component.
- * \param y The received mouse event y component.
- * \param mask The received mouse event bit mask.
- */
-void
-mousegrabber_handleevent(lua_State *L, int x, int y, uint16_t mask)
-{
-    luaA_mouse_pushstatus(L, x, y, mask);
-}
-
 /** Grab the mouse pointer and list motions, calling callback function at each
  * motion. The callback function must return a boolean value: true to
  * continue grabbing, false to stop.

@@ -64,6 +64,8 @@ typedef struct
     button_array_t buttons;
     /** Modifiers masks */
     uint16_t numlockmask, shiftlockmask, capslockmask, modeswitchmask;
+    /** Bitmask for currently pressed buttons */
+    uint32_t buttons_pressed;
     /** Check for XTest extension */
     bool have_xtest;
     /** Clients list */
