@@ -324,7 +324,7 @@ function notify(args)
             destroy(obj)
         end
         -- ... may use its ID
-        if args.replaces_id < counter then
+        if args.replaces_id <= counter then
             notification.id = args.replaces_id
         else
             counter = counter + 1
