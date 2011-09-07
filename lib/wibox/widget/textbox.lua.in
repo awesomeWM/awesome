@@ -23,32 +23,32 @@ local function layout_create(cr)
     return oopango.cairo.layout_create(cr)
 end
 
-local function update_and_show(cr, layout)
+local function layout_update(cr, layout)
     if oopango.cairo_update_layout then
         oopango.cairo_update_layout(cr, layout)
-        oopango.cairo_show_layout(cr, layout)
     else
         oopango.cairo.update_layout(cr, layout)
+    end
+end
+
+local function layout_show(cr, layout)
+    if oopango.cairo_show_layout then
+        oopango.cairo_show_layout(cr, layout)
+    else
         oopango.cairo.show_layout(cr, layout)
     end
 end
 
 -- Setup a pango layout for the given textbox and cairo context
-local function setup_layout(box, cr, width, height)
-    local layout = layout_create(cr)
-    layout:set_alignment(box._align)
-    layout:set_ellipsize(box._ellipsize)
-    layout:set_wrap(box._wrap)
+local function setup_layout(box, width, height)
+    local layout = box._layout
     layout:set_width(oopango.units_from_number(width))
     layout:set_height(oopango.units_from_number(height))
-    layout:set_font_description(beautiful.get_font(box._font))
+end
 
-    if box._markup then
-        layout:set_markup(box._text)
-    else
-        layout:set_text(box._text)
-    end
-
+--- Draw the given textbox on the given cairo context in the given geometry
+function draw(box, wibox, cr, width, height)
+    layout_update(cr, box._layout)
     local ink, logical = layout:get_pixel_extents()
     local offset = 0
     if box._valign == "center" then
@@ -56,65 +56,35 @@ local function setup_layout(box, cr, width, height)
     elseif box._valign == "bottom" then
         offset = height - logical.height
     end
-    if offset > 0 then
-        cr:move_to(0, offset)
-    end
-
-    return layout
-end
-
--- Get the size that the given textbox covers.
--- If layout is given, it's :get_width()/get_height() is honoured.
-local function get_size(box, layout, width, height)
-    local ret = {
-        width = 0,
-        height = 0
-    }
-
-    if box._text then
-        local layout = layout
-
-        if not layout then
-            -- Create a temporary surface that we need for computing the extents :(
-            local surface = oocairo.image_surface_create("argb32", 1, 1)
-            local cr = oocairo.context_create(surface)
-            layout = setup_layout(box, cr, width, height)
-        end
-
-        local ink, logical = layout:get_pixel_extents()
-
-        ret.width = logical.width
-        ret.height = logical.height
-    end
-
-    return ret
-end
-
---- Draw the given textbox on the given cairo context in the given geometry
-function draw(box, wibox, cr, width, height)
-    if not box._text then return end
-
-    local layout = setup_layout(box, cr, width, height)
-
-    update_and_show(cr, layout)
+    cr:move_to(0, offset)
+    layout_show(cr, box._layout)
 end
 
 --- Fit the given textbox
 function fit(box, width, height)
-    local res = get_size(box, nil, width, height)
-    return res.width, res.height
+    setup_layout(box, width, height)
+    local ink, logical = box._layout:get_pixel_extents()
+    return logical.width, logical.height
 end
 
+-- Return a pango layout which can be used if no cairo context is available
+local function get_temp_layout()
+    local surface = oocairo.image_surface_create("argb32", 0, 0)
+    local cr = oocairo.context_create(surface)
+    return layout_create(cr)
+end
+
+local temp_layout
 -- Test if a text is valid for a textbox. If it isn't, a lua error will be thrown.
 local function check_text(text, markup)
-    local surface = oocairo.image_surface_create("argb32", 1, 1)
-    local cr = oocairo.context_create(surface)
-    local layout = layout_create(cr)
+    if not temp_layout then
+        temp_layout = get_temp_layout()
+    end
 
     if markup then
-        layout:set_markup(text)
+        temp_layout:set_markup(text)
     else
-        layout:set_text(text)
+        temp_layout:set_text(text)
     end
 end
 
@@ -122,8 +92,7 @@ end
 -- @param text The text to set. This can contain pango markup (e.g. <b>bold</b>)
 function set_markup(box, text)
     check_text(text, true)
-    box._text = text
-    box._markup = true
+    box._layout:set_markup(text)
     box:emit_signal("widget::updated")
 end
 
@@ -131,8 +100,7 @@ end
 -- @param text The text to display. Pango markup is ignored and shown as-is.
 function set_text(box, text)
     check_text(text, false)
-    box._text = text
-    box._markup = false
+    box._layout:set_text(text)
     box:emit_signal("widget::updated")
 end
 
@@ -141,7 +109,7 @@ end
 function set_ellipsize(box, mode)
     local allowed = { none = true, start = true, middle = true, ["end"] = true }
     if allowed[mode] then
-        box._ellipsize = mode
+        box._layout:set_ellipsize(mode)
         box:emit_signal("widget::updated")
     end
 end
@@ -151,7 +119,7 @@ end
 function set_wrap(box, mode)
     local allowed = { word = true, char = true, word_char = true }
     if allowed[mode] then
-        box._wrap = mode
+        box._layout:set_wrap(mode)
         box:emit_signal("widget::updated")
     end
 end
@@ -171,7 +139,7 @@ end
 function set_align(box, mode)
     local allowed = { left = true, center = true, right = true }
     if allowed[mode] then
-        box._align = mode
+        box._layout:set_alignment(mode)
         box:emit_signal("widget::updated")
     end
 end
@@ -179,7 +147,7 @@ end
 --- Set a textbox' font
 -- @param font The font description as string
 function set_font(box, font)
-    box._font = beautiful.get_font(font)
+    box._layout:set_font_description(beautiful.get_font(font))
 end
 
 -- Returns a new textbox
@@ -192,10 +160,13 @@ local function new()
         end
     end
 
-    ret._ellipsize = "end"
-    ret._wrap = "word_char"
-    ret._valign = "center"
-    ret._align = "left"
+    -- Spot the hack: Temporary surface to make pango happy
+    ret._layout = get_temp_layout()
+    ret:set_ellipsize("end")
+    ret:set_wrap("word_char")
+    ret:set_valign("center")
+    ret:set_align("left")
+    ret:set_font()
 
     return ret
 end
