@@ -69,4 +69,4 @@ int luaA_surface_from_data(lua_State *L, int width, int height, uint32_t *data);
 cairo_surface_t *draw_dup_image_surface(cairo_surface_t *surface);
 
 #endif
-// vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
+// vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

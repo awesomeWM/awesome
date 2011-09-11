@@ -49,4 +49,4 @@ area_t display_area_get(void);
 void screen_client_moveto(client_t *, screen_t *, bool);
 
 #endif
-// vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
+// vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

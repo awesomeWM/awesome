@@ -57,4 +57,4 @@ luaA_tostrut(lua_State *L, int idx, strut_t *strut)
     strut->bottom = luaA_getopt_number(L, idx, "bottom", strut->bottom);
 }
 
-// vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
+// vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

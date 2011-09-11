@@ -136,4 +136,4 @@ xutil_key_mask_tostr(uint16_t mask, const char **name, size_t *len)
     }
 }
 
-// vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
+// vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

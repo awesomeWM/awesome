@@ -395,4 +395,4 @@ window_class_setup(lua_State *L)
     signal_add(&window_class.signals, "mouse::move");
 }
 
-// vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
+// vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

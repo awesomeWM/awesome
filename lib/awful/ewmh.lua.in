@@ -107,4 +107,4 @@ client.connect_signal("request::maximized_vertical", maximized_vertical)
 client.connect_signal("request::fullscreen", fullscreen)
 client.connect_signal("property::screen", screen_change)
 
--- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
+-- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

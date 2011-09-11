@@ -965,4 +965,4 @@ keyresolv_get_keysym(xcb_keycode_t detail, uint16_t state)
     return XCB_NO_SYMBOL;
 }
 
-// vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
+// vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

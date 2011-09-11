@@ -726,4 +726,4 @@ luaA_emit_refresh()
     signal_object_emit(globalconf.L, &global_signals, "refresh", 0);
 }
 
-// vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
+// vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

@@ -256,4 +256,4 @@ xwindow_set_border_color(xcb_window_t w, color_t *color)
         xcb_change_window_attributes(globalconf.connection, w, XCB_CW_BORDER_PIXEL, &color->pixel);
 }
 
-// vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
+// vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
