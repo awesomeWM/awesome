@@ -542,15 +542,11 @@ client_layer_translator(client_t *c)
  * \todo It might be worth stopping to restack everyone and only stack `c'
  * relatively to the first matching in the list.
  */
-void
-client_stack_refresh()
+static void
+client_stack_refresh_screen(int screen)
 {
     uint32_t config_win_vals[2];
     layer_t layer;
-
-    if (!globalconf.client_need_stack_refresh)
-        return;
-    globalconf.client_need_stack_refresh = false;
 
     config_win_vals[0] = XCB_NONE;
     config_win_vals[1] = XCB_STACK_MODE_ABOVE;
@@ -558,7 +554,7 @@ client_stack_refresh()
     /* stack desktop windows */
     for(layer = LAYER_DESKTOP; layer < LAYER_BELOW; layer++)
         foreach(node, globalconf.stack)
-            if(client_layer_translator(*node) == layer)
+            if((*node)->phys_screen == screen && client_layer_translator(*node) == layer)
                 config_win_vals[0] = client_stack_above(*node,
                                                         config_win_vals[0]);
 
@@ -566,7 +562,7 @@ client_stack_refresh()
     foreach(_sb, globalconf.wiboxes)
     {
         wibox_t *sb = *_sb;
-        if(!sb->ontop)
+        if(sb->ctx.phys_screen == screen && !sb->ontop)
         {
             xcb_configure_window(globalconf.connection,
                                  sb->window,
@@ -579,7 +575,7 @@ client_stack_refresh()
     /* then stack clients */
     for(layer = LAYER_BELOW; layer < LAYER_COUNT; layer++)
         foreach(node, globalconf.stack)
-            if(client_layer_translator(*node) == layer)
+            if((*node)->phys_screen == screen && client_layer_translator(*node) == layer)
                 config_win_vals[0] = client_stack_above(*node,
                                                         config_win_vals[0]);
 
@@ -587,7 +583,7 @@ client_stack_refresh()
     foreach(_sb, globalconf.wiboxes)
     {
         wibox_t *sb = *_sb;
-        if(sb->ontop)
+        if(sb->ctx.phys_screen == screen && sb->ontop)
         {
             xcb_configure_window(globalconf.connection,
                                  sb->window,
@@ -596,6 +592,19 @@ client_stack_refresh()
             config_win_vals[0] = sb->window;
         }
     }
+}
+
+void
+client_stack_refresh()
+{
+    if (!globalconf.client_need_stack_refresh)
+        return;
+    globalconf.client_need_stack_refresh = false;
+
+    for(int screen = 0;
+            screen < xcb_setup_roots_length(xcb_get_setup(globalconf.connection));
+            screen++)
+        client_stack_refresh_screen(screen);
 }
 
 /** Manage a new client.
