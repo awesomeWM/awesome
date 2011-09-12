@@ -333,6 +333,24 @@ drawin_set_visible(lua_State *L, int udx, bool v)
     }
 }
 
+static drawin_t *
+drawin_allocator(lua_State *L)
+{
+    drawin_t *w = drawin_new(L);
+
+    w->visible = false;
+
+    w->opacity = -1;
+    w->cursor = a_strdup("left_ptr");
+    w->geometry.width = 1;
+    w->geometry.height = 1;
+    w->type = _NET_WM_WINDOW_TYPE_NORMAL;
+
+    drawin_init(w);
+
+    return w;
+}
+
 /** Create a new drawin.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
@@ -341,27 +359,6 @@ static int
 luaA_drawin_new(lua_State *L)
 {
     luaA_class_new(L, &drawin_class);
-
-    drawin_t *w = luaA_checkudata(L, -1, &drawin_class);
-
-    w->visible = false;
-
-    if(!w->opacity)
-        w->opacity = -1;
-
-    if(!w->cursor)
-        w->cursor = a_strdup("left_ptr");
-
-    if(!w->geometry.width)
-        w->geometry.width = 1;
-
-    if(!w->geometry.height)
-        w->geometry.height = 1;
-
-    if(w->type == 0)
-        w->type = _NET_WM_WINDOW_TYPE_NORMAL;
-
-    drawin_init(w);
 
     return 1;
 }
@@ -596,7 +593,7 @@ drawin_class_setup(lua_State *L)
     };
 
     luaA_class_setup(L, &drawin_class, "drawin", &window_class,
-                     (lua_class_allocator_t) drawin_new,
+                     (lua_class_allocator_t) drawin_allocator,
                      (lua_class_collector_t) drawin_wipe,
                      NULL,
                      luaA_class_index_miss_property, luaA_class_newindex_miss_property,
