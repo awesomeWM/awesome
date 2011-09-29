@@ -430,7 +430,7 @@ case $WPSETTER in
         full='--bg-scale'
         tile='--bg-tile'
         center='--bg-center'
-        aspect=$full
+        aspect='--bg-fill'
         debugstory=$standardok
         ;;
     hsetroot)
