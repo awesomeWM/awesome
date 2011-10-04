@@ -397,6 +397,8 @@ luaA_tag_clients(lua_State *L)
     lua_createtable(L, clients->len, 0);
     for(i = 0; i < clients->len; i++)
     {
+        if(clients->tab[i]->type == WINDOW_TYPE_DESKTOP)
+            continue;
         luaA_object_push(L, clients->tab[i]);
         lua_rawseti(L, -2, i + 1);
     }
