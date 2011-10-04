@@ -35,43 +35,32 @@ local function replace_in_template(t, ib, tb)
 end
 
 function common.list_update(w, buttons, label, data, objects)
-    -- Hack: if it has been registered as a widget in a wibox,
-    -- it's w.len since __len meta does not work on table until Lua 5.2.
-    -- Otherwise it's standard #w.
-    local len = (w.len or #w)
-
-    -- Remove excessive widgets
-    if len > #objects then
-        for i = #objects, len do
-            w[i] = nil
-        end
-    end
-
     -- update the widgets, creating them if needed
     w:reset()
     for i, o in ipairs(objects) do
-        local ib = wibox.widget.imagebox()
-        local tb = wibox.widget.textbox()
-        local bgb = wibox.widget.background()
-        local m = wibox.layout.margin(tb, 4, 4)
-        local l = wibox.layout.fixed.horizontal()
+        local cache = data[o]
+        local ib, tb, bgb, m, l
+        if cache then
+            ib = cache.ib
+            tb = cache.tb
+            bgb = cache.bgb
+        else
+            ib = wibox.widget.imagebox()
+            tb = wibox.widget.textbox()
+            bgb = wibox.widget.background()
+            m = wibox.layout.margin(tb, 4, 4)
+            l = wibox.layout.fixed.horizontal()
 
-        -- All of this is added in a fixed widget
-        l:fill_space(true)
-        l:add(ib)
-        l:add(m)
+            -- All of this is added in a fixed widget
+            l:fill_space(true)
+            l:add(ib)
+            l:add(m)
 
-        -- And all of this gets a background
-        bgb:set_widget(l)
-        w:add(bgb)
+            -- And all of this gets a background
+            bgb:set_widget(l)
 
-        if buttons then
-            -- Use a local variable so that the garbage collector doesn't strike
-            -- between now and the :buttons() call.
-            local btns = data[o]
-            if not btns then
-                btns = {}
-                data[o] = btns
+            if buttons then
+                local btns = {}
                 for kb, b in ipairs(buttons) do
                     -- Create a proxy button object: it will receive the real
                     -- press and release events, and will propagate them the the
@@ -82,8 +71,14 @@ function common.list_update(w, buttons, label, data, objects)
                     btn:connect_signal("release", function () b:emit_signal("release", o) end)
                     btns[#btns + 1] = btn
                 end
+                bgb:buttons(btns)
             end
-            bgb:buttons(btns)
+
+            data[o] = {
+                ib = ib,
+                tb = tb,
+                bgb = bgb
+            }
         end
 
         local text, bg, bg_image, icon = label(o)
@@ -94,6 +89,7 @@ function common.list_update(w, buttons, label, data, objects)
         bgb:set_bg(bg)
         bgb:set_bgimage(bg_image)
         ib:set_image(icon)
+        w:add(bgb)
    end
 end
 

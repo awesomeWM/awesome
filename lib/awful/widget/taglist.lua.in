@@ -129,7 +129,7 @@ end
 function new(screen, filter, buttons, style)
     local w = fixed.horizontal()
 
-    local data = setmetatable({}, { __mode = 'vk' })
+    local data = setmetatable({}, { __mode = 'k' })
     local u = function (s)
         if s == screen then
             taglist_update(s, w, buttons, filter, data, style)

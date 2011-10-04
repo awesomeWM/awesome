@@ -96,7 +96,7 @@ end
 function new(screen, filter, buttons, style)
     local w = flex.horizontal()
 
-    local data = setmetatable({}, { __mode = 'kv' })
+    local data = setmetatable({}, { __mode = 'k' })
     local u = function () tasklist_update(screen, w, buttons, filter, data, style) end
     capi.screen[screen]:connect_signal("tag::detach", u)
     tag.attached_connect_signal(screen, "property::selected", u)
