@@ -244,7 +244,7 @@ client_maybevisible(client_t *c, screen_t *screen)
 {
     if(screen && c->screen == screen)
     {
-        if(c->sticky || c->type == WINDOW_TYPE_DESKTOP)
+        if(c->sticky)
             return true;
 
         foreach(tag, screen->tags)
