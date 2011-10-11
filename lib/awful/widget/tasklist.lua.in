@@ -26,6 +26,8 @@ filter = {}
 local function tasklist_label(c, args)
     if not args then args = {} end
     local theme = beautiful.get()
+    local fg_normal = args.fg_normal or theme.tasklist_fg_normal or theme.fg_normal
+    local bg_normal = args.bg_normal or theme.tasklist_bg_normal or theme.bg_normal
     local fg_focus = args.fg_focus or theme.tasklist_fg_focus or theme.fg_focus
     local bg_focus = args.bg_focus or theme.tasklist_bg_focus or theme.bg_focus
     local fg_urgent = args.fg_urgent or theme.tasklist_fg_urgent or theme.fg_urgent
@@ -50,7 +52,7 @@ local function tasklist_label(c, args)
         if fg_focus then
             text = text .. "<span color='"..util.color_strip_alpha(fg_focus).."'>"..name.."</span>"
         else
-            text = text .. name
+            text = text .. "<span color='"..util.color_strip_alpha(fg_normal).."'>"..name.."</span>"
         end
     elseif c.urgent and fg_urgent then
         bg = bg_urgent
@@ -59,7 +61,8 @@ local function tasklist_label(c, args)
         bg = bg_minimize
         text = text .. "<span color='"..util.color_strip_alpha(fg_minimize).."'>"..name.."</span>"
     else
-        text = text .. name
+        bg = bg_normal
+        text = text .. "<span color='"..util.color_strip_alpha(fg_normal).."'>"..name.."</span>"
     end
     text = text .. "</span>"
     return text, bg, nil, c.icon
@@ -85,6 +88,8 @@ end
 -- @param filter Filter function to define what clients will be listed.
 -- @param buttons A table with buttons binding to set.
 -- @param style The style overrides default theme.
+-- bg_normal The background color for unfocused client.
+-- fg_normal The foreground color for unfocused client.
 -- bg_focus The background color for focused client.
 -- fg_focus The foreground color for focused client.
 -- bg_urgent The background color for urgent clients.
