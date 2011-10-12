@@ -404,7 +404,8 @@ screen_client_moveto(client_t *c, screen_t *new_screen, bool doresize)
 static int
 luaA_pushscreen(lua_State *L, screen_t *s)
 {
-    lua_pushlightuserdata(L, s);
+    screen_t **ps = lua_newuserdata(L, sizeof(*ps));
+    *ps = s;
     luaL_getmetatable(L, "screen");
     lua_setmetatable(L, -2);
     return 1;
@@ -443,7 +444,8 @@ luaA_screen_module_index(lua_State *L)
 static int
 luaA_screen_tags(lua_State *L)
 {
-    screen_t *s = luaL_checkudata(L, 1, "screen");
+    screen_t **ps = luaL_checkudata(L, 1, "screen");
+    screen_t *s = *ps;
 
     if(lua_gettop(L) == 2)
     {
@@ -481,6 +483,7 @@ static int
 luaA_screen_index(lua_State *L)
 {
     const char *buf;
+    screen_t **ps;
     screen_t *s;
 
     /* Get metatable of the screen. */
@@ -499,7 +502,8 @@ luaA_screen_index(lua_State *L)
     lua_pop(L, 2);
 
     buf = luaL_checkstring(L, 2);
-    s = lua_touserdata(L, 1);
+    ps = luaL_checkudata(L, 1, "screen");
+    s = *ps;
 
     if(a_strcmp(buf, "index") == 0)
         lua_pushinteger(L, screen_array_indexof(&globalconf.screens, s) + 1);
@@ -526,6 +530,23 @@ luaA_screen_index(lua_State *L)
     return 1;
 }
 
+/** A screen.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ */
+static int
+luaA_screen_equal(lua_State *L)
+{
+    screen_t **ps1;
+    screen_t **ps2;
+
+    ps1 = luaL_checkudata(L, 1, "screen");
+    ps2 = luaL_checkudata(L, 2, "screen");
+    lua_pushboolean(L, *ps1 == *ps2);
+
+    return 1;
+}
+
 /** Add a signal to a screen.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
@@ -536,7 +557,8 @@ luaA_screen_index(lua_State *L)
 static int
 luaA_screen_add_signal(lua_State *L)
 {
-    screen_t *s = lua_touserdata(L, 1);
+    screen_t **ps = luaL_checkudata(L, 1, "screen");
+    screen_t *s = *ps;
     const char *name = luaL_checkstring(L, 2);
     signal_add(&s->signals, name);
     return 0;
@@ -553,7 +575,8 @@ luaA_screen_add_signal(lua_State *L)
 static int
 luaA_screen_connect_signal(lua_State *L)
 {
-    screen_t *s = lua_touserdata(L, 1);
+    screen_t **ps = luaL_checkudata(L, 1, "screen");
+    screen_t *s = *ps;
     const char *name = luaL_checkstring(L, 2);
     luaA_checkfunction(L, 3);
     signal_connect(&s->signals, name, luaA_object_ref(L, 3));
@@ -571,7 +594,8 @@ luaA_screen_connect_signal(lua_State *L)
 static int
 luaA_screen_disconnect_signal(lua_State *L)
 {
-    screen_t *s = lua_touserdata(L, 1);
+    screen_t **ps = luaL_checkudata(L, 1, "screen");
+    screen_t *s = *ps;
     const char *name = luaL_checkstring(L, 2);
     luaA_checkfunction(L, 3);
     const void *ref = lua_topointer(L, 3);
@@ -605,7 +629,8 @@ screen_emit_signal(lua_State *L, screen_t *screen, const char *name, int nargs)
 static int
 luaA_screen_emit_signal(lua_State *L)
 {
-    screen_emit_signal(L, lua_touserdata(L, 1), luaL_checkstring(L, 2), lua_gettop(L) - 2);
+    screen_t **ps = luaL_checkudata(L, 1, "screen");
+    screen_emit_signal(L, *ps, luaL_checkstring(L, 2), lua_gettop(L) - 2);
     return 0;
 }
 
@@ -638,6 +663,7 @@ const struct luaL_reg awesome_screen_meta[] =
     { "emit_signal", luaA_screen_emit_signal },
     { "tags", luaA_screen_tags },
     { "__index", luaA_screen_index },
+    { "__eq", luaA_screen_equal },
     { NULL, NULL }
 };
 
