@@ -53,12 +53,6 @@
 
 awesome_t globalconf;
 
-typedef struct
-{
-    xcb_window_t id;
-    xcb_query_tree_cookie_t tree_cookie;
-} root_win_t;
-
 /** Call before exiting.
  */
 void
@@ -96,11 +90,10 @@ awesome_atexit(bool restart)
 /** Scan X to find windows to manage.
  */
 static void
-scan(void)
+scan(xcb_query_tree_cookie_t tree_c[])
 {
     int i, phys_screen, tree_c_len;
     const int screen_max = xcb_setup_roots_length(xcb_get_setup(globalconf.connection));
-    root_win_t root_wins[screen_max];
     xcb_query_tree_reply_t *tree_r;
     xcb_window_t *wins = NULL;
     xcb_get_window_attributes_reply_t *attr_r;
@@ -109,18 +102,8 @@ scan(void)
 
     for(phys_screen = 0; phys_screen < screen_max; phys_screen++)
     {
-        /* Get the root window ID associated to this screen */
-        root_wins[phys_screen].id = xutil_screen_get(globalconf.connection, phys_screen)->root;
-
-        /* Get the window tree associated to this screen */
-        root_wins[phys_screen].tree_cookie = xcb_query_tree_unchecked(globalconf.connection,
-                                                                      root_wins[phys_screen].id);
-    }
-
-    for(phys_screen = 0; phys_screen < screen_max; phys_screen++)
-    {
         tree_r = xcb_query_tree_reply(globalconf.connection,
-                                      root_wins[phys_screen].tree_cookie,
+                                      tree_c[phys_screen],
                                       NULL);
 
         if(!tree_r)
@@ -486,10 +469,12 @@ main(int argc, char **argv)
                         &globalconf.shiftlockmask, &globalconf.capslockmask,
                         &globalconf.modeswitchmask);
 
+    /* Get the window tree associated to this screen */
+    const int screen_max = xcb_setup_roots_length(xcb_get_setup(globalconf.connection));
+    xcb_query_tree_cookie_t tree_c[screen_max];
+
     /* do this only for real screen */
-    for(screen_nbr = 0;
-        screen_nbr < xcb_setup_roots_length(xcb_get_setup(globalconf.connection));
-        screen_nbr++)
+    for(screen_nbr = 0; screen_nbr < screen_max; screen_nbr++)
     {
         /* select for events */
         const uint32_t change_win_vals[] =
@@ -503,6 +488,9 @@ main(int argc, char **argv)
                 | XCB_EVENT_MASK_FOCUS_CHANGE
         };
 
+        tree_c[screen_nbr] = xcb_query_tree_unchecked(globalconf.connection,
+                                                      xutil_screen_get(globalconf.connection, screen_nbr)->root);
+
         xcb_change_window_attributes(globalconf.connection,
                                      xutil_screen_get(globalconf.connection, screen_nbr)->root,
                                      XCB_CW_EVENT_MASK,
@@ -514,19 +502,15 @@ main(int argc, char **argv)
     /* init spawn (sn) */
     spawn_init();
 
+    /* we will receive events, stop grabbing server */
+    xcb_ungrab_server(globalconf.connection);
+
     /* Parse and run configuration file */
     if (!luaA_parserc(&xdg, confpath, true))
         fatal("couldn't find any rc file");
 
-    p_delete(&confpath);
+    scan(tree_c);
 
-    xdgWipeHandle(&xdg);
-
-    /* scan existing windows */
-    scan();
-
-    /* we will receive events, stop grabbing server */
-    xcb_ungrab_server(globalconf.connection);
     xcb_flush(globalconf.connection);
 
     /* main event loop */
