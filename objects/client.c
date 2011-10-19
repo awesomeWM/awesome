@@ -433,8 +433,34 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, bool startup)
                           FRAME_SELECT_INPUT_EVENT_MASK,
                           globalconf.default_cmap
                       });
+
+    if (startup)
+    {
+        /* The client is already mapped, thus we must be sure that we don't send
+         * ourselves an UnmapNotify due to the xcb_reparent_window().
+         *
+         * Grab the server to make sure we don't lose any events.
+         */
+        uint32_t no_event[] = { 0 };
+        xcb_grab_server(globalconf.connection);
+
+        xcb_change_window_attributes(globalconf.connection,
+                                     globalconf.screen->root,
+                                     XCB_CW_EVENT_MASK,
+                                     no_event);
+    }
+
     xcb_reparent_window(globalconf.connection, w, c->frame_window, 0, 0);
     xcb_map_window(globalconf.connection, w);
+
+    if (startup)
+    {
+        xcb_change_window_attributes(globalconf.connection,
+                                     globalconf.screen->root,
+                                     XCB_CW_EVENT_MASK,
+                                     ROOT_WINDOW_EVENT_MASK);
+        xcb_ungrab_server(globalconf.connection);
+    }
 
     /* Do this now so that we don't get any events for the above
      * (Else, reparent could cause an UnmapNotify) */

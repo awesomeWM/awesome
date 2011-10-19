@@ -80,19 +80,14 @@ awesome_atexit(bool restart)
 /** Scan X to find windows to manage.
  */
 static void
-scan(void)
+scan(xcb_query_tree_cookie_t tree_c)
 {
     int i, tree_c_len;
-    xcb_query_tree_cookie_t tree_c;
     xcb_query_tree_reply_t *tree_r;
     xcb_window_t *wins = NULL;
     xcb_get_window_attributes_reply_t *attr_r;
     xcb_get_geometry_reply_t *geom_r;
     long state;
-
-    /* Get the window tree associated to this screen */
-    tree_c = xcb_query_tree_unchecked(globalconf.connection,
-                                      globalconf.screen->root);
 
     tree_r = xcb_query_tree_reply(globalconf.connection,
                                   tree_c,
@@ -321,6 +316,7 @@ main(int argc, char **argv)
     xdgHandle xdg;
     bool no_argb = false;
     xcb_generic_event_t *event;
+    xcb_query_tree_cookie_t tree_c;
     static struct option long_options[] =
     {
         { "help",    0, NULL, 'h' },
@@ -541,6 +537,18 @@ main(int argc, char **argv)
                   (const uint32_t[]) { globalconf.screen->black_pixel, globalconf.screen->white_pixel });
     xcb_destroy_window(globalconf.connection, tmp_win);
 
+    /* Get the window tree associated to this screen */
+    tree_c = xcb_query_tree_unchecked(globalconf.connection,
+                                      globalconf.screen->root);
+
+    xcb_change_window_attributes(globalconf.connection,
+                                 globalconf.screen->root,
+                                 XCB_CW_EVENT_MASK,
+                                 ROOT_WINDOW_EVENT_MASK);
+
+    /* we will receive events, stop grabbing server */
+    xcb_ungrab_server(globalconf.connection);
+
     /* Parse and run configuration file */
     if (!luaA_parserc(&xdg, confpath, true))
         fatal("couldn't find any rc file");
@@ -550,17 +558,8 @@ main(int argc, char **argv)
     xdgWipeHandle(&xdg);
 
     /* scan existing windows */
-    scan();
+    scan(tree_c);
 
-    {
-        xcb_change_window_attributes(globalconf.connection,
-                                     globalconf.screen->root,
-                                     XCB_CW_EVENT_MASK,
-                                     ROOT_WINDOW_EVENT_MASK);
-    }
-
-    /* we will receive events, stop grabbing server */
-    xcb_ungrab_server(globalconf.connection);
     xcb_flush(globalconf.connection);
 
     /* main event loop */
