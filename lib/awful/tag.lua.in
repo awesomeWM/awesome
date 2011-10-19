@@ -463,7 +463,7 @@ end
 -- @param c The client to tag.
 -- @param startup Optional: don't do anything if true.
 function withcurrent(c, startup)
-    if startup ~= true and c.sticky == false then
+    if startup ~= true then
         if #c:tags() == 0 then
             c:tags(selectedlist(c.screen))
         end
