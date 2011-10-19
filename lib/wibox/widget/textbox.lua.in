@@ -49,6 +49,7 @@ end
 --- Draw the given textbox on the given cairo context in the given geometry
 function draw(box, wibox, cr, width, height)
     layout_update(cr, box._layout)
+    setup_layout(box, width, height)
     local ink, logical = box._layout:get_pixel_extents()
     local offset = 0
     if box._valign == "center" then
