@@ -34,6 +34,17 @@
 #include "color.h"
 #include "common/xembed.h"
 
+#define ROOT_WINDOW_EVENT_MASK \
+    (const uint32_t []) { \
+        XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT | XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY \
+      | XCB_EVENT_MASK_ENTER_WINDOW \
+      | XCB_EVENT_MASK_LEAVE_WINDOW \
+      | XCB_EVENT_MASK_STRUCTURE_NOTIFY \
+      | XCB_EVENT_MASK_BUTTON_PRESS \
+      | XCB_EVENT_MASK_BUTTON_RELEASE \
+      | XCB_EVENT_MASK_FOCUS_CHANGE \
+    }
+
 typedef struct drawin_t drawin_t;
 typedef struct a_screen screen_t;
 typedef struct button_t button_t;

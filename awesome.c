@@ -553,21 +553,10 @@ main(int argc, char **argv)
     scan();
 
     {
-        /* select for events */
-        const uint32_t change_win_vals[] =
-        {
-            XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT | XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY
-                | XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW
-                | XCB_EVENT_MASK_STRUCTURE_NOTIFY
-                | XCB_EVENT_MASK_BUTTON_PRESS
-                | XCB_EVENT_MASK_BUTTON_RELEASE
-                | XCB_EVENT_MASK_FOCUS_CHANGE
-        };
-
         xcb_change_window_attributes(globalconf.connection,
                                      globalconf.screen->root,
                                      XCB_CW_EVENT_MASK,
-                                     change_win_vals);
+                                     ROOT_WINDOW_EVENT_MASK);
     }
 
     /* we will receive events, stop grabbing server */
