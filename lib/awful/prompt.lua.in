@@ -43,10 +43,12 @@ local function history_check_load(id, max)
 	-- Read history file
 	if f then
             for line in f:lines() do
-                table.insert(data.history[id].table, line)
-                if #data.history[id].table >= data.history[id].max then
-                   break
-		end
+                if util.table.hasitem(data.history[id].table, line) == nil then
+                        table.insert(data.history[id].table, line)
+                        if #data.history[id].table >= data.history[id].max then
+                           break
+                        end
+                end
             end
             f:close()
 	end
@@ -90,7 +92,7 @@ end
 local function history_add(id, command)
     if data.history[id] then
         if command ~= ""
-            and command ~= data.history[id].table[#data.history[id].table] then
+            and util.table.hasitem(data.history[id].table, command) == nil then
             table.insert(data.history[id].table, command)
 
             -- Do not exceed our max_cmd
