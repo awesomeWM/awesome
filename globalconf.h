@@ -33,6 +33,7 @@
 #include "objects/key.h"
 #include "color.h"
 #include "common/xembed.h"
+#include "common/buffer.h"
 
 #define ROOT_WINDOW_EVENT_MASK \
     (const uint32_t []) { \
@@ -87,6 +88,8 @@ typedef struct
     client_array_t stack;
     /** Lua VM state */
     lua_State *L;
+    /** All errors messages from loading config files */
+    buffer_t startup_errors;
     /** The event loop */
     struct ev_loop *loop;
     /** The key grabber function */

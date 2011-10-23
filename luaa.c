@@ -396,6 +396,13 @@ luaA_awesome_index(lua_State *L)
         lua_pushliteral(L, AWESOME_VERSION);
     else if(a_strcmp(buf, "release") == 0)
         lua_pushliteral(L, AWESOME_RELEASE);
+    else if(a_strcmp(buf, "startup_errors") == 0)
+    {
+        if (globalconf.startup_errors.len == 0)
+            return 0;
+        lua_pushstring(L, globalconf.startup_errors.s);
+        return 1;
+    }
     else
         return 0;
 
@@ -632,6 +639,14 @@ luaA_init(xdgHandle* xdg)
     signal_add(&global_signals, "exit");
 }
 
+static void
+luaA_startup_error(const char *err)
+{
+    if (globalconf.startup_errors.len > 0)
+        buffer_addsl(&globalconf.startup_errors, "\n\n");
+    buffer_adds(&globalconf.startup_errors, err);
+}
+
 static bool
 luaA_loadrc(const char *confpath, bool run)
 {
@@ -644,7 +659,9 @@ luaA_loadrc(const char *confpath, bool run)
             conffile = a_strdup(confpath);
             if(lua_pcall(globalconf.L, 0, LUA_MULTRET, 0))
             {
-                fprintf(stderr, "%s\n", lua_tostring(globalconf.L, -1));
+                const char *err = lua_tostring(globalconf.L, -1);
+                luaA_startup_error(err);
+                fprintf(stderr, "%s\n", err);
                 /* An error happened, so reset this. */
                 conffile = NULL;
             }
@@ -658,7 +675,11 @@ luaA_loadrc(const char *confpath, bool run)
         }
     }
     else
-        fprintf(stderr, "%s\n", lua_tostring(globalconf.L, -1));
+    {
+        const char *err = lua_tostring(globalconf.L, -1);
+        luaA_startup_error(err);
+        fprintf(stderr, "%s\n", err);
+    }
 
     return false;
 }
