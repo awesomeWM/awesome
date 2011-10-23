@@ -574,6 +574,10 @@ luaA_awesome_index(lua_State *L)
       case A_TK_RELEASE:
         lua_pushliteral(L, AWESOME_RELEASE);
         break;
+      case A_TK_STARTUP_ERRORS:
+        if (globalconf.startup_errors.len == 0)
+            return 0;
+        lua_pushstring(L, globalconf.startup_errors.s);
       default:
         return 0;
     }
@@ -846,6 +850,14 @@ luaA_init(xdgHandle* xdg)
     lua_setfield(L, 1, "path"); /* package.path = "concatenated string" */
 }
 
+static void
+luaA_startup_error(const char *err)
+{
+    if (globalconf.startup_errors.len > 0)
+        buffer_addsl(&globalconf.startup_errors, "\n\n");
+    buffer_adds(&globalconf.startup_errors, err);
+}
+
 static bool
 luaA_loadrc(const char *confpath, bool run)
 {
@@ -858,7 +870,9 @@ luaA_loadrc(const char *confpath, bool run)
             globalconf.conffile = a_strdup(confpath);
             if(lua_pcall(globalconf.L, 0, LUA_MULTRET, 0))
             {
-                fprintf(stderr, "%s\n", lua_tostring(globalconf.L, -1));
+                const char *err = lua_tostring(globalconf.L, -1);
+                luaA_startup_error(err);
+                fprintf(stderr, "%s\n", err);
                 /* An error happened, so reset this. */
                 globalconf.conffile = NULL;
             }
@@ -872,7 +886,11 @@ luaA_loadrc(const char *confpath, bool run)
         }
     }
     else
-        fprintf(stderr, "%s\n", lua_tostring(globalconf.L, -1));
+    {
+        const char *err = lua_tostring(globalconf.L, -1);
+        luaA_startup_error(err);
+        fprintf(stderr, "%s\n", err);
+    }
 
     return false;
 }

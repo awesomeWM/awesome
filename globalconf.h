@@ -34,6 +34,7 @@
 #include "color.h"
 #include "font.h"
 #include "common/xembed.h"
+#include "common/buffer.h"
 
 typedef struct wibox_t wibox_t;
 typedef struct a_screen screen_t;
@@ -81,6 +82,8 @@ typedef struct
     char *argv;
     /** Lua VM state */
     lua_State *L;
+    /** All errors messages from loading config files */
+    buffer_t startup_errors;
     /** Default colors */
     struct
     {
