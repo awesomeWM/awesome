@@ -26,6 +26,13 @@ module("awful.prompt")
 local data = {}
 data.history = {}
 
+local search_term = nil
+local function itera (inc,a, i)
+	i = i + inc
+	local v = a[i]
+	if v then return i,v end
+end
+
 -- Load history file in history table
 -- @param id The data.history identifier which is the path to the filename
 -- @param max Optional parameter, the maximum number of entries in file
@@ -166,6 +173,8 @@ function run(args, textbox, exe_callback, completion_callback, history_path, his
     local font = args.font or theme.font
     local selectall = args.selectall
 
+    search_term=nil
+
     history_check_load(history_path, history_max)
     local history_index = history_items(history_path) + 1
     -- The cursor position
@@ -224,6 +233,26 @@ function run(args, textbox, exe_callback, completion_callback, history_path, his
                 end
             elseif key == "e" then
                 cur_pos = #command + 1
+            elseif key == "r" then
+                search_term = search_term or command:sub(1, cur_pos - 1)
+                for i,v in (function(a,i) return itera(-1,a,i) end), data.history[history_path].table, history_index do
+                    if v:find(search_term) ~= nil then
+                        command=v
+                        history_index=i
+                        cur_pos=#command+1
+                        break
+                    end
+                end
+            elseif key == "s" then
+                search_term = search_term or command:sub(1, cur_pos - 1)
+                for i,v in (function(a,i) return itera(1,a,i) end), data.history[history_path].table, history_index do
+                    if v:find(search_term) ~= nil then
+                        command=v
+                        history_index=i
+                        cur_pos=#command+1
+                        break
+                    end
+                end
             elseif key == "f" then
                 if cur_pos <= #command then
                     cur_pos = cur_pos + 1
@@ -238,6 +267,24 @@ function run(args, textbox, exe_callback, completion_callback, history_path, his
             elseif key == "u" then
                 command = command:sub(cur_pos, #command)
                 cur_pos = 1
+            elseif key == "Up" then
+                search_term = search_term or command:sub(1, cur_pos - 1)
+                for i,v in (function(a,i) return itera(-1,a,i) end), data.history[history_path].table, history_index do
+                    if v:find('^'..search_term) ~= nil then
+                        command=v
+                        history_index=i
+                        break
+                    end
+                end
+            elseif key == "Down" then
+                search_term = search_term or command:sub(1, cur_pos - 1)
+                for i,v in (function(a,i) return itera(1,a,i) end), data.history[history_path].table, history_index do
+                    if v:find('^'..search_term) ~= nil then
+                        command=v
+                        history_index=i
+                        break
+                    end
+                end
             elseif key == "w" or key == "BackSpace" then
                 local wstart = 1
                 local wend = 1
