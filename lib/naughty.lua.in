@@ -243,20 +243,6 @@ local function getById(id)
     end
 end
 
--- Search for an icon in specified directories with a specified format
--- @param icon Name of the icon
--- @return full path of the icon, or nil of no icon was found
-local function getIcon(name)
-    for d, dir in pairs(config.icon_dirs) do
-        for f, format in pairs(config.icon_formats) do
-            local icon = dir .. name .. "." .. format
-            if util.file_readable(icon) then
-                return icon
-            end
-        end
-    end
-end
-
 --- Create notification. args is a dictionary of (optional) arguments.
 -- @param text Text of the notification. Default: ''
 -- @param title Title of the notification. Default: nil
@@ -397,7 +383,7 @@ function notify(args)
     if icon then
         -- try to guess icon if the provided one is non-existent/readable
         if type(icon) == "string" and not util.file_readable(icon) then
-            icon = getIcon(icon)
+            icon = util.geticonpath(icon, config.icon_formats, config.icon_dirs)
         end
 
         -- if we have an icon, use it
