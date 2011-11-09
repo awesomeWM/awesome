@@ -29,6 +29,17 @@ module("beautiful")
 -- Local data
 local theme
 
+local wallpaper = {}
+-- Checks the entries in the wallpaper_cmd are valid.
+-- @param tw A table with wallpaper commands.
+-- @return False if tw length is zero or if any entries in tw are not strings.
+function wallpaper.is_valid(tw)
+    for _, v in pairs(tw) do
+        if type(v) ~= 'string' then return false end
+    end
+    return (#tw > 0) and true
+end
+
 --- Init function, should be runned at the beginning of configuration file.
 -- @param path The theme file path.
 function init(path)
@@ -49,7 +60,7 @@ function init(path)
             end
 
             -- setup wallpaper
-            if theme.wallpaper_cmd then
+            if wallpaper.is_valid(theme.wallpaper_cmd) then
                 for s = 1, capi.screen.count() do
                     util.spawn(theme.wallpaper_cmd[util.cycle(#theme.wallpaper_cmd, s)], false, s)
                 end
