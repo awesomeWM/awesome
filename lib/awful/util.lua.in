@@ -50,10 +50,11 @@ function color_strip_alpha(color)
 end
 
 --- Make i cycle.
--- @param t A length.
+-- @param t A length. Must be greater than zero.
 -- @param i An absolute index to fit into #t.
--- @return The object at new index.
+-- @return An integer in (1, t) or nil if t is less than or equal to zero.
 function cycle(t, i)
+    if t < 1 then return end
     while i > t do i = i - t end
     while i < 1 do i = i + t end
     return i
