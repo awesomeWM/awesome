@@ -157,14 +157,11 @@ luaA_mouse_pushstatus(lua_State *L, int x, int y)
 
     lua_createtable(L, 5, 0);
 
-    const int max_button = sizeof(globalconf.buttons_pressed) * 8;
-    int mask = 1;
-    for (int i = 1; i <= max_button; i++, mask <<= 1)
+    const unsigned int max_button = sizeof(globalconf.buttons_pressed) * 8;
+    unsigned int mask = 1;
+    for (unsigned int i = 1; i <= max_button; i++, mask <<= 1)
     {
-        if(globalconf.buttons_pressed & mask)
-            lua_pushboolean(L, true);
-        else
-            lua_pushboolean(L, false);
+        lua_pushboolean(L, globalconf.buttons_pressed & mask);
         lua_rawseti(L, -2, i);
     }
     lua_setfield(L, -2, "buttons");
