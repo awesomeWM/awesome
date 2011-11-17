@@ -48,6 +48,7 @@ mouse_query_pointer(xcb_window_t window, int16_t *x, int16_t *y, xcb_window_t *c
 
     *x = query_ptr_r->win_x;
     *y = query_ptr_r->win_y;
+
     if(child)
         *child = query_ptr_r->child;
 
@@ -63,16 +64,10 @@ mouse_query_pointer(xcb_window_t window, int16_t *x, int16_t *y, xcb_window_t *c
  * \param mask This will be set to the current buttons state.
  * \return True on success, false if an error occurred.
  */
-static bool
+static inline bool
 mouse_query_pointer_root(int16_t *x, int16_t *y, xcb_window_t *child)
 {
-    xcb_window_t root = globalconf.screen->root;
-
-    if(mouse_query_pointer(root, x, y, child))
-    {
-        return true;
-    }
-    return false;
+    return mouse_query_pointer(globalconf.screen->root, x, y, child);
 }
 
 /** Set the pointer position.
@@ -84,7 +79,7 @@ static inline void
 mouse_warp_pointer(xcb_window_t window, int x, int y)
 {
     xcb_warp_pointer(globalconf.connection, XCB_NONE, window,
-                     0, 0, 0, 0, x, y );
+                     0, 0, 0, 0, x, y);
 }
 
 /** Mouse library.
@@ -101,17 +96,15 @@ luaA_mouse_index(lua_State *L)
     int16_t mouse_x, mouse_y;
     screen_t *screen;
 
-    if(a_strcmp(attr, "screen") == 0)
-    {
-        if(!mouse_query_pointer_root(&mouse_x, &mouse_y, NULL))
-            return 0;
-
-        screen  = screen_getbycoord(mouse_x, mouse_y);
-
-        lua_pushnumber(L, screen_array_indexof(&globalconf.screens, screen) + 1);
-    } else
+    /* attr is not "screen"?! */
+    if (A_STRNEQ(attr, "screen"))
         return 0;
 
+    if (!mouse_query_pointer_root(&mouse_x, &mouse_y, NULL))
+        return 0;
+
+    screen = screen_getbycoord(mouse_x, mouse_y);
+    lua_pushnumber(L, screen_array_indexof(&globalconf.screens, screen) + 1);
     return 1;
 }
 
@@ -126,17 +119,16 @@ luaA_mouse_newindex(lua_State *L)
     int x, y = 0;
     int screen;
 
-    if(a_strcmp(attr, "screen") == 0)
-    {
-        screen = luaL_checknumber(L, 3) - 1;
-        luaA_checkscreen(screen);
+    if (A_STRNEQ(attr, "screen"))
+        return 0;
 
-        x = globalconf.screens.tab[screen].geometry.x;
-        y = globalconf.screens.tab[screen].geometry.y;
+    screen = luaL_checknumber(L, 3) - 1;
+    luaA_checkscreen(screen);
 
-        mouse_warp_pointer(globalconf.screen->root, x, y);
-    }
+    x = globalconf.screens.tab[screen].geometry.x;
+    y = globalconf.screens.tab[screen].geometry.y;
 
+    mouse_warp_pointer(globalconf.screen->root, x, y);
     return 0;
 }
 
@@ -223,13 +215,11 @@ luaA_mouse_object_under_pointer(lua_State *L)
 
     drawin_t *drawin;
     client_t *client;
+
     if((drawin = drawin_getbywin(child)))
-    {
         luaA_object_push(L, drawin);
 
-        return 1;
-    }
-    else if((client = client_getbyframewin(child)))
+    if((client = client_getbyframewin(child)))
         return luaA_object_push(globalconf.L, client);
 
     return 0;

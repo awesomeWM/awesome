@@ -55,27 +55,27 @@ luaA_root_fake_input(lua_State *L)
     uint8_t type, detail;
     int x = 0, y = 0;
 
-    if(a_strcmp(stype, "key_press") == 0)
+    if (A_STREQ(stype, "key_press"))
     {
         type = XCB_KEY_PRESS;
         detail = luaL_checknumber(L, 2); /* keycode */
     }
-    else if(a_strcmp(stype, "key_release") == 0)
+    else if(A_STREQ(stype, "key_release"))
     {
         type = XCB_KEY_RELEASE;
         detail = luaL_checknumber(L, 2); /* keycode */
     }
-    else if(a_strcmp(stype, "button_press") == 0)
+    else if(A_STREQ(stype, "button_press"))
     {
         type = XCB_BUTTON_PRESS;
         detail = luaL_checknumber(L, 2); /* button number */
     }
-    else if(a_strcmp(stype, "button_release") == 0)
+    else if(A_STREQ(stype, "button_release"))
     {
         type = XCB_BUTTON_RELEASE;
         detail = luaL_checknumber(L, 2); /* button number */
     }
-    else if(a_strcmp(stype, "motion_notify") == 0)
+    else if(A_STREQ(stype, "motion_notify"))
     {
         type = XCB_MOTION_NOTIFY;
         detail = luaA_checkboolean(L, 2); /* relative to the current position or not */

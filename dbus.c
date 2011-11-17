@@ -657,9 +657,9 @@ a_dbus_cleanup(void)
 static DBusConnection *
 a_dbus_bus_getbyname(const char *name)
 {
-    if(a_strcmp(name, "system") == 0)
+    if(A_STREQ(name, "system"))
         return dbus_connection_system;
-    if(a_strcmp(name, "session") == 0)
+    if(A_STREQ(name, "session"))
         return dbus_connection_session;
     return NULL;
 }

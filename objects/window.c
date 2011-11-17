@@ -251,33 +251,33 @@ luaA_window_set_type(lua_State *L, window_t *w)
     window_type_t type;
     const char *buf = luaL_checkstring(L, -1);
 
-    if(a_strcmp(buf, "desktop") == 0)
+    if (A_STREQ(buf, "desktop"))
         type = WINDOW_TYPE_DESKTOP;
-    else if(a_strcmp(buf, "dock") == 0)
+    else if(A_STREQ(buf, "dock"))
         type = WINDOW_TYPE_DOCK;
-    else if(a_strcmp(buf, "splash") == 0)
+    else if(A_STREQ(buf, "splash"))
         type = WINDOW_TYPE_SPLASH;
-    else if(a_strcmp(buf, "dialog") == 0)
+    else if(A_STREQ(buf, "dialog"))
         type = WINDOW_TYPE_DIALOG;
-    else if(a_strcmp(buf, "menu") == 0)
+    else if(A_STREQ(buf, "menu"))
         type = WINDOW_TYPE_MENU;
-    else if(a_strcmp(buf, "toolbar") == 0)
+    else if(A_STREQ(buf, "toolbar"))
         type = WINDOW_TYPE_TOOLBAR;
-    else if(a_strcmp(buf, "utility") == 0)
+    else if(A_STREQ(buf, "utility"))
         type = WINDOW_TYPE_UTILITY;
-    else if(a_strcmp(buf, "dropdown_menu") == 0)
+    else if(A_STREQ(buf, "dropdown_menu"))
         type = WINDOW_TYPE_DROPDOWN_MENU;
-    else if(a_strcmp(buf, "popup_menu") == 0)
+    else if(A_STREQ(buf, "popup_menu"))
         type = WINDOW_TYPE_POPUP_MENU;
-    else if(a_strcmp(buf, "tooltip") == 0)
+    else if(A_STREQ(buf, "tooltip"))
         type = WINDOW_TYPE_TOOLTIP;
-    else if(a_strcmp(buf, "notification") == 0)
+    else if(A_STREQ(buf, "notification"))
         type = WINDOW_TYPE_NOTIFICATION;
-    else if(a_strcmp(buf, "combo") == 0)
+    else if(A_STREQ(buf, "combo"))
         type = WINDOW_TYPE_COMBO;
-    else if(a_strcmp(buf, "dnd") == 0)
+    else if(A_STREQ(buf, "dnd"))
         type = WINDOW_TYPE_DND;
-    else if(a_strcmp(buf, "normal") == 0)
+    else if(A_STREQ(buf, "normal"))
         type = WINDOW_TYPE_NORMAL;
     else
     {
@@ -289,9 +289,10 @@ luaA_window_set_type(lua_State *L, window_t *w)
     {
         w->type = type;
         if(w->window != XCB_WINDOW_NONE)
-            ewmh_update_window_type(w->window, window_translate_type(type));
+            ewmh_update_window_type(w->window, window_translate_type(w->type));
         luaA_object_emit_signal(globalconf.L, -3, "property::type", 0);
     }
+
     return 0;
 }
 

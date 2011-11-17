@@ -49,7 +49,7 @@ draw_iso2utf8(const char *iso, size_t len, char **dest, ssize_t *dlen)
     static int8_t dont_need_convert = -1;
 
     if(dont_need_convert == -1)
-        dont_need_convert = !a_strcmp(nl_langinfo(CODESET), "UTF-8");
+        dont_need_convert = A_STREQ(nl_langinfo(CODESET), "UTF-8");
 
     if(!len || dont_need_convert)
         return false;

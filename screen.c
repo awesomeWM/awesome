@@ -425,7 +425,7 @@ luaA_screen_module_index(lua_State *L)
     if((name = lua_tostring(L, 2)))
         foreach(screen, globalconf.screens)
             foreach(output, screen->outputs)
-                if(!a_strcmp(output->name, name))
+                if(A_STREQ(output->name, name))
                     return luaA_pushscreen(L, screen);
 
     int screen = luaL_checknumber(L, 2) - 1;
@@ -505,29 +505,43 @@ luaA_screen_index(lua_State *L)
     ps = luaL_checkudata(L, 1, "screen");
     s = *ps;
 
-    if(a_strcmp(buf, "index") == 0)
+    if(A_STREQ(buf, "index"))
+    {
         lua_pushinteger(L, screen_array_indexof(&globalconf.screens, s) + 1);
-    else if(a_strcmp(buf, "geometry") == 0)
+        return 1;
+    }
+
+    if(A_STREQ(buf, "geometry"))
+    {
         luaA_pusharea(L, s->geometry);
-    else if(a_strcmp(buf, "workarea") == 0)
+        return 1;
+    }
+
+    if(A_STREQ(buf, "workarea"))
+    {
         luaA_pusharea(L, screen_area_get(s, true));
-    else if(a_strcmp(buf, "outputs") == 0)
+        return 1;
+    }
+
+    if(A_STREQ(buf, "outputs"))
     {
         lua_createtable(L, 0, s->outputs.len);
         foreach(output, s->outputs)
         {
             lua_createtable(L, 2, 0);
+
             lua_pushinteger(L, output->mm_width);
             lua_setfield(L, -2, "mm_width");
             lua_pushinteger(L, output->mm_height);
             lua_setfield(L, -2, "mm_height");
+
             lua_setfield(L, -2, output->name);
         }
+        /* The table of tables we created. */
+        return 1;
     }
-    else
-        return 0;
 
-    return 1;
+    return 0;
 }
 
 /** A screen.

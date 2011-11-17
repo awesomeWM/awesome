@@ -91,23 +91,23 @@ xutil_lock_mask_get(xcb_connection_t *connection,
 uint16_t
 xutil_key_mask_fromstr(const char *keyname)
 {
-    if(a_strcmp(keyname, "Shift") == 0)
+    if (A_STREQ(keyname, "Shift"))
       return XCB_MOD_MASK_SHIFT;
-    if(a_strcmp(keyname, "Lock") == 0)
+    if (A_STREQ(keyname, "Lock"))
       return XCB_MOD_MASK_LOCK;
-    if(a_strcmp(keyname, "Ctrl") == 0 || a_strcmp(keyname, "Control") == 0)
+    if (A_STREQ(keyname, "Ctrl") || A_STREQ(keyname, "Control"))
       return XCB_MOD_MASK_CONTROL;
-    if(a_strcmp(keyname, "Mod1") == 0)
+    if (A_STREQ(keyname, "Mod1"))
       return XCB_MOD_MASK_1;
-    if(a_strcmp(keyname, "Mod2") == 0)
+    if(A_STREQ(keyname, "Mod2"))
       return XCB_MOD_MASK_2;
-    if(a_strcmp(keyname, "Mod3") == 0)
+    if(A_STREQ(keyname, "Mod3"))
       return XCB_MOD_MASK_3;
-    if(a_strcmp(keyname, "Mod4") == 0)
+    if(A_STREQ(keyname, "Mod4"))
       return XCB_MOD_MASK_4;
-    if(a_strcmp(keyname, "Mod5") == 0)
+    if(A_STREQ(keyname, "Mod5"))
       return XCB_MOD_MASK_5;
-    if(a_strcmp(keyname, "Any") == 0)
+    if(A_STREQ(keyname, "Any"))
       /* this is misnamed but correct */
       return XCB_BUTTON_MASK_ANY;
     return XCB_NO_SYMBOL;

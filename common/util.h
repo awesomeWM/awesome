@@ -234,6 +234,9 @@ static inline int a_strcmp(const char *a, const char *b)
     return strcmp(NONULL(a), NONULL(b));
 }
 
+#define  A_STREQ(a, b) (((a) == (b)) || a_strcmp(a, b) == 0)
+#define A_STRNEQ(a, b) (!A_STREQ(a, b))
+
 /** \brief \c NULL resistant strcasecmp.
  * \param[in]  a     the first string.
  * \param[in]  b     the second string.
@@ -244,6 +247,9 @@ static inline int a_strcasecmp(const char *a, const char *b)
 {
     return strcasecmp(NONULL(a), NONULL(b));
 }
+
+#define  A_STREQ_CASE(a, b) (((a) == (b)) || a_strcasecmp(a, b) == 0)
+#define A_STRNEQ_CASE(a, b) (!A_STRCASEEQ(a, b))
 
 /** \brief \c NULL resistant strncmp.
  * \param[in]  a     the first string.
@@ -256,6 +262,9 @@ static inline int a_strncmp(const char *a, const char *b, ssize_t n)
 {
     return strncmp(NONULL(a), NONULL(b), n);
 }
+
+#define  A_STREQ_N(a, b, n) (((a) == (b)) || (n) == ((ssize_t) 0) || a_strncmp(a, b, n) == 0)
+#define A_STRNEQ_N(a, b) (!A_STREQN(a, b))
 
 ssize_t a_strncpy(char *dst, ssize_t n, const char *src, ssize_t l) __attribute__((nonnull(1)));
 ssize_t a_strcpy(char *dst, ssize_t n, const char *src) __attribute__((nonnull(1)));

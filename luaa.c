@@ -390,23 +390,31 @@ luaA_awesome_index(lua_State *L)
 
     const char *buf = luaL_checkstring(L, 2);
 
-    if(a_strcmp(buf, "conffile") == 0)
-        lua_pushstring(L, conffile);
-    else if(a_strcmp(buf, "version") == 0)
-        lua_pushliteral(L, AWESOME_VERSION);
-    else if(a_strcmp(buf, "release") == 0)
-        lua_pushliteral(L, AWESOME_RELEASE);
-    else if(a_strcmp(buf, "startup_errors") == 0)
+    if(A_STREQ(buf, "conffile"))
     {
-        if (globalconf.startup_errors.len == 0)
-            return 0;
+        lua_pushstring(L, conffile);
+        return 1;
+    }
+
+    if(A_STREQ(buf, "version"))
+    {
+        lua_pushliteral(L, AWESOME_VERSION);
+        return 1;
+    }
+
+    if(A_STREQ(buf, "release"))
+    {
+        lua_pushliteral(L, AWESOME_RELEASE);
+        return 1;
+    }
+
+    if(A_STREQ(buf, "startup_errors") && globalconf.startup_errors.len != 0)
+    {
         lua_pushstring(L, globalconf.startup_errors.s);
         return 1;
     }
-    else
-        return 0;
 
-    return 1;
+    return 0;
 }
 
 /** Add a global signal.

@@ -1587,7 +1587,7 @@ luaA_client_module_index(lua_State *L)
 {
     const char *buf = luaL_checkstring(L, 2);
 
-    if(a_strcmp(buf, "focus") == 0)
+    if (A_STREQ(buf, "focus"))
         return luaA_object_push(globalconf.L, globalconf.focus.client);
     return 0;
 }
@@ -1602,7 +1602,7 @@ luaA_client_module_newindex(lua_State *L)
     const char *buf = luaL_checkstring(L, 2);
     client_t *c;
 
-    if(a_strcmp(buf, "focus") == 0)
+    if (A_STREQ(buf, "focus"))
     {
         c = luaA_checkudata(L, 3, &client_class);
         client_focus(c);

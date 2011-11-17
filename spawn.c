@@ -210,17 +210,17 @@ spawn_start_notify(client_t *c, const char * startup_id)
         bool found = false;
         const char *seqid = sn_startup_sequence_get_id(seq);
 
-        if(!a_strcmp(seqid, startup_id))
+        if (A_STRNEQ(seqid, startup_id))
             found = true;
         else
         {
             const char *seqclass = sn_startup_sequence_get_wmclass(seq);
-            if(!a_strcmp(seqclass, c->class) || !a_strcmp(seqclass, c->instance))
+            if (A_STREQ(seqclass, c->class) || A_STREQ(seqclass, c->instance))
                 found = true;
             else
             {
                 const char *seqbin = sn_startup_sequence_get_binary_name(seq);
-                if(!a_strcasecmp(seqbin, c->class) || !a_strcasecmp(seqbin, c->instance))
+                if (A_STREQ_CASE(seqbin, c->class) || A_STREQ_CASE(seqbin, c->instance))
                     found = true;
             }
         }

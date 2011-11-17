@@ -114,7 +114,7 @@ xcursor_font_fromstr(const char *s)
 {
     if(s)
         for(int i = 0; i < countof(xcursor_font); i++)
-            if(xcursor_font[i] && !a_strcmp(s, xcursor_font[i]))
+            if(xcursor_font[i] && A_STREQ(s, xcursor_font[i]))
                 return i;
     return 0;
 }
