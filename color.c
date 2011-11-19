@@ -26,8 +26,9 @@
 #include "globalconf.h"
 #include "common/xutil.h"
 
-#define RGB_8TO16(i)   (0xffff * ((i) & 0xff) / 0xff)
-#define RGB_16TO8(i)   (0xff * ((i) & 0xffff) / 0xffff)
+/* 0xFFFF / 0xFF == 0x101 (257) */
+#define RGB_8TO16(i) (((i) & 0xff)   * 0x101)
+#define RGB_16TO8(i) (((i) & 0xffff) / 0x101)
 
 /** Parse an hexadecimal color string to its component.
  * \param colstr The color string.
@@ -45,7 +46,7 @@ color_parse(const char *colstr, ssize_t len,
     char *p;
 
     colnum = strtoul(colstr + 1, &p, 16);
-    if(len != 7 || (p - colstr) != 7 || colstr[0] != '#')
+    if(len != 7 || colstr[0] != '#' || (p - colstr) != 7)
     {
         warn("awesome: error, invalid color '%s'", colstr);
         return false;
@@ -138,9 +139,10 @@ color_init_reply(color_init_request_t req)
 int
 luaA_pushcolor(lua_State *L, const color_t c)
 {
-    uint8_t r = (unsigned) c.red   * 0xff / 0xffff;
-    uint8_t g = (unsigned) c.green * 0xff / 0xffff;
-    uint8_t b = (unsigned) c.blue  * 0xff / 0xffff;
+    uint8_t r = RGB_16TO8(c.red);
+    uint8_t g = RGB_16TO8(c.green);
+    uint8_t b = RGB_16TO8(c.blue);
+
     char s[10];
     int len = snprintf(s, sizeof(s), "#%02x%02x%02x", r, g, b);
     lua_pushlstring(L, s, len);
