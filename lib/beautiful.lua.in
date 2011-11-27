@@ -29,11 +29,11 @@ module("beautiful")
 -- Local data
 local theme
 
-local wallpaper = {}
 -- Checks the entries in the wallpaper_cmd are valid.
 -- @param tw A table with wallpaper commands.
--- @return False if tw length is zero or if any entries in tw are not strings.
-function wallpaper.is_valid(tw)
+-- @return False if there is no way that this can be a valid wallpaper cmd.
+local function wallpaper_is_valid(tw)
+    if type(tw) ~= 'table' then return false end
     for _, v in pairs(tw) do
         if type(v) ~= 'string' then return false end
     end
@@ -60,9 +60,14 @@ function init(path)
             end
 
             -- setup wallpaper
-            if wallpaper.is_valid(theme.wallpaper_cmd) then
+            if wallpaper_is_valid(theme.wallpaper_cmd) then
                 for s = 1, capi.screen.count() do
                     util.spawn(theme.wallpaper_cmd[util.cycle(#theme.wallpaper_cmd, s)], false, s)
+                end
+            else
+                if theme.wallpaper_cmd then
+                    -- There is a wallpaper_cmd, but wallpaper_is_valid doesn't like it
+                    print("W: beautiful: invalid wallpaper_cmd in theme file " .. path)
                 end
             end
             if theme.font then capi.awesome.font = theme.font end
