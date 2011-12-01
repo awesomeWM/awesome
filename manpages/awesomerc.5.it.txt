@@ -1,0 +1,64 @@
+awesomerc(5)
+===========
+
+NOME
+----
+
+awesomerc - File di configurazione per il gestore di finestre awesome
+
+SINOSSI
+-------
+*awesome* cerca un file di configurazione nel seguente ordine:
+
+* $XDG_CONFIG_HOME/awesome/rc.lua
+* $HOME/.config/awesome/rc.lua
+* XDG_CONFIG_DIRS/awesome/rc.lua
+
+DESCRIZIONE
+-----------
+Il file *rc.lua* contiene informazione di configurazione per *awesome*.
+Può essere utilizzato per configurare il comportamento e l'aspetto di
+awesome in vari modi. Può essere assimilato a un programma/script Lua
+eseguito all'avvio da *awesome*. Perciò, dovrebbe usare l'API Lua di
+awesome descritta nella sezione API.
+Questo file è letto all'avvio.
+
+API LUA DI AWESOME
+------------------
+La documentazione per l'API Lua può essere trovata nella directory luadoc.
+
+FORMATO COLORI
+--------------
+Il formato dei colori in *awesome* è o un nome colore standard di X
+(come blue, darkblue, lightred, ecc.) o un colore in formato esadecimale
+(#rrggbb o #rrggbbaa).
+Usando il formato esadecimale, si può anche specificare un canale alpha:
+ciò significa che #00ff00 disegnerà un verde puro, ma #00ff00aa
+imposterà il canale alpha a `aa' e mescolerà il verde con il colore
+sottostante.
+
+FORMATO TESTI
+-------------
+Si possono usare le marcature (makup) Pango in una stringa di testo.
+Questo consente di formattare il testo generato dentro i widgets.
+La documentazione per i markup Pango può essere trovata nella
+documentazione Pango a
+http://library.gnome.org/devel/pango/stable/PangoMarkupFormat.html.
+
+Un esempio di un markup Pango: <span weight="bold" foreground="#336699">...</span>.
+
+VEDI ANCHE
+----------
+awesome(1) awesome-client(1)
+
+AUTORI
+------
+Scritto da Julien Danjou <julien@danjou.info>.
+
+WWW
+---
+http://awesome.naquadah.org
+
+TRADUZIONE
+----------
+Questa pagina di manuale è stata tradotta da Gianluca Fiore.

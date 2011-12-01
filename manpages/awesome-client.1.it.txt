@@ -1,0 +1,45 @@
+awesome-client(1)
+=================
+
+NOME
+----
+
+awesome-client - esecutore remoto per il gestore di finestre awesome
+
+SINOSSI
+-------
+
+awesome-client
+
+DESCRIZIONE
+-----------
+
+awesome-client è un'interfaccia a riga di comando per awesome.
+Comunica con awesome via D-Bus, consentendo l'esecuzione remota di
+codice Lua.
+
+UTILIZZO
+--------
+awesome-client riceve comandi dall'ingresso standard e li invia via
+D-Bus ad awesome.
+Se 'rlwrap' è installato, sarà utilizzato per fornire un'interfaccia da
+riga di comando per le funzionalità di readline.
+
+Il modulo 'awful.remote' deve essere caricato per far funzionare questo
+comando.
+
+VEDI ANCHE
+----------
+awesome(1) awesomerc(5)
+
+AUTORI
+------
+Julien Danjou <julien@danjou.info>
+
+WWW
+---
+http://awesome.naquadah.org
+
+TRADUZIONE
+----------
+Questa pagina di manuale è stata tradotta da Gianluca Fiore.
