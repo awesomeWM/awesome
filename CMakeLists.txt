@@ -88,7 +88,7 @@ set(AWE_MAN_SRCS
     ${SOURCE_DIR}/manpages/awsetbg.1.txt
     ${SOURCE_DIR}/manpages/awesome-client.1.txt
     ${SOURCE_DIR}/manpages/awesomerc.5.txt)
-set(AWE_MAN_LANGS es fr de ru)
+set(AWE_MAN_LANGS it es fr de ru)
 
 add_executable(${PROJECT_AWE_NAME}
     ${AWE_SRCS}

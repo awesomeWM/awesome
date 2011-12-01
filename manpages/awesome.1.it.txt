@@ -1,0 +1,203 @@
+
+awesome(1)
+==========
+
+NOME
+----
+
+awesome - gestore di finestre awesome
+
+SINOSSI
+--------
+
+*awesome* [*-v* | *--version*] [*-h* | *--help*] [*-c* | *--config* 'FILE'] [*-k* | *--check*]
+
+DESCRIZIONE
+-----------
+
+*awesome* è un gestore di finestre per X. Gestisce le finestre con differenti
+schemi (layouts), come floating o tiled. Qualsiasi schema può essere applicato
+dinamicamente, ottimizzando l'ambiente per l'applicazione in uso e il compito
+correntemente eseguito.
+
+In uno schema tiled, le finestre sono gestite in un'area principale (master) e
+in una impilabile (stacking). L'area principale contiene le finestre che
+necessitano della maggiore attenzione, laddove invece l'area impilabile
+contiente tutte le altre. In uno schema floating le finestre possono essere
+ridimensionate e mosse liberamente. Le finestre di dialogo sono sempre gestite
+come floating, a prescindere dello schema correntemente applicato. Gli schemi
+a spirale e calante (dwindle) sono casi speciali dell'impilabile dove l'area
+impilabile è impostata in una spirale per il primo o in un frattale
+rettangolare per il secondo.
+
+Le finestre sono raggruppate per etichette (tags) in awesome. Ognuna può
+essere etichettata con una o più etichette. Selezionando certe etichette si
+visualizzano tutte le finestre con le stesse.
+
+*awesome* può contenere piccoli wiboxes che possono mostrare qualsiasi valore:
+tutte le etichette disponibili, lo schema (layout) corrente, i titoli delle
+finestre visibili, testo, e ecc..
+
+OPZIONI
+-------
+*-v*, *--version*::
+	Mostra informazioni sulla versione sull'uscita standard, e esce dal
+	programma.
+*-h*, *--help*::
+	Mostra informazioni di aiuto, e esce dal programma.
+*-c*, *--config* 'FILE'::
+	Usa un file di configurazione alternativo invece di
+	'$XDG_CONFIG_HOME/awesome/rc.lua'.
+*-k*, *--check*::
+	Verifica la sintassi del file di configurazione.
+*-a*, *--no-argb*::
+	Non usare visuali ARGB.
+
+DEFAULT SCORCIATOIE CON IL MOUSE
+--------------------------------
+Navigazione
+~~~~~~~~~~~
+
+*Tasto1* sul nome di un'etichetta::
+	Mostra l'etichetta.
+*Tasto4*, *Tasto5* sul nome di un'etichetta::
+	Passa all'etichetta precedente o seguente.
+*Tasto4*, *Tasto5* sulla finestra principale::
+	Passa all'etichetta precedente o seguente.
+*Tasto1*, *Tasto3*, *Tasto4*, *Tasto5* sul simbolo di uno schema (layout)::
+	Passa allo schema precedente o seguente.
+
+Modifica dello schema
+~~~~~~~~~~~~~~~~~~~~~
+*Mod4 + Tasto1* sul nome di un'etichetta::
+	Etichetta il cliente attuale con solo questa etichetta.
+*Mod4 + Tasto3* sul nome di un'etichetta::
+	Attiva o disattiva questa etichetta per il cliente.
+*Tasto3* sul nome di un'etichetta::
+	Aggiungi questa etichetta alla vista corrente.
+*Mod4 + Tasto1* su una finestra cliente::
+	Muove la finestra.
+*Mod4 + Tasto3* su una finestra cliente::
+	Ridimensiona la finestra.
+
+DEFAULT SCORCIATOIE DA TASTIERA
+-------------------------------
+Controllo del gestore di finestre
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*Mod4 + Control + r*::
+	Riavvia *awesome*.
+*Mod4 + Shift + q*::
+	Esce da *awesome*.
+*Mod4 + r*::
+	Esegue una linea di comando nella barra di stato.
+*Mod4 + x*::
+	Esegue una linea di comando per eseguire codice Lua nella barra di stato.
+*Mod4 + Invio*::
+	Lancia un emulatore di terminale.
+*Mod4 + w*::
+	Apre il menù principale.
+
+Clienti
+~~~~~~~
+*Mod4 + m*::
+	Massimizza il cliente.
+*Mod4 + n*::
+	Minimizza il cliente.
+*Mod4 + Control + n*::
+	Ripristina il cliente.
+*Mod4 + f*::
+	Attiva o disattiva la modalità a tutto schermo per il cliente attuale.
+*Mod4 + Shift + c*::
+	Termina (kill) il cliente attuale.
+*Mod4 + t*::
+	Attiva o disattiva la modalità "sempre visibile" (on top) per il cliente
+	attuale.
+
+Navigazione
+~~~~~~~~~~~
+*Mod4 + j*::
+	Passa il focus al cliente seguente.
+*Mod4 + k*::
+	Passa il focus al cliente precedente.
+*Mod4 + u*::
+	Passa il focusa al primo cliente urgente.
+*Mod4 + Left*::
+	Mostra l'etichetta precedente.
+*Mod4 + Right*::
+	Mostra l'etichetta seguente.
+*Mod4 + 1-9*::
+	Passa all'etichetta 1-9.
+*Mod4 + Control + j*::
+	Passa il focus allo schermo seguente.
+*Mod4 + Control + k*::
+	Passa il focus allo schermo precedente.
+*Mod4 + Escape*::
+	Passa il focus alle etichette precedentemente selezionate.
+
+Modifica dello schema
+~~~~~~~~~~~~~~~~~~~~~
+*Mod4 + Shift + j*::
+	Scambia il cliente corrente con il seguente.
+*Mod4 + Shift + k*::
+	Scambia il cliente corrente con il precedente.
+*Mod4 + o*::
+	Invia il cliente allo schermo seguente.
+*Mod4 + h*::
+	Diminuisce il fattore di larghezza dell'area principale del 5%.
+*Mod4 + l*::
+	Incrementa il fattore di larghezza dell'area principale del 5%.
+*Mod4 + Shift + h*::
+	Incrementa il numero di finestre nell'area principale di 1.
+*Mod4 + Shift + l*::
+	Diminuisce il numero di finestre nell'area principale di 1.
+*Mod4 + Control + h*::
+	Aumenta il numero di colonne per le finestre nell'area di impilamento di
+	1.
+*Mod4 + Control + l*::
+	Diminuisce il numero di colonne per le finestre nell'area di impilamento
+	di 1.
+*Mod4 + spazio*::
+	Passa allo schema seguente.
+*Mod4 + Shift + spazio*::
+	Passa allo schema precedente.
+*Mod4 + Control + spazio*::
+	Attiva o disattiva lo stato floating del cliente attuale.
+*Mod4 + Control + Invio*::
+	Scambia il cliente attuale con quello nell'area principale.
+*Mod4 + Control + 1-9*::
+	Attiva o disattiva la vista dell'etichetta 1-9.
+*Mod4 + Shift + 1-9*::
+	Etichetta il cliente con il tag 1-9.
+*Mod4 + Shift + Control + 1-9*::
+	Attiva o disattiva l'etichetta per il cliente attuale.
+*Mod4 + Shift + F1-9*::
+	Etichetta i clienti marcati con l'etichetta 1-9.
+
+PERSONALIZZAZIONE
+-----------------
+*awesome* si può personalizzare tramite il file '$XDG_CONFIG_HOME/awesome/rc.lua'.
+
+SEGNALI
+-------
+*awesome* può essere riavviato inviandogli il segnale SIGHUP.
+
+VEDI ANCHE
+----------
+*awesomerc*(5) *awesome-client*(1)
+
+BUGS
+----
+Ovviamente non vi sono bug in *awesome*. Ma vi possono essere comportamenti
+inattesi.
+
+AUTORI
+------
+Julien Danjou <julien@danjou.info> e altri.
+
+WWW
+---
+http://awesome.naquadah.org
+
+TRADUZIONE
+---------
+Questa pagina di manuale è stata tradotta da Gianluca Fiore.
