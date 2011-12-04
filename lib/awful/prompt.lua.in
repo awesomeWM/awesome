@@ -97,9 +97,9 @@ end
 -- @param id The data.history identifier
 -- @param command The command to add
 local function history_add(id, command)
-    if data.history[id] then
-        if command ~= ""
-            and util.table.hasitem(data.history[id].table, command) == nil then
+    if data.history[id] and command ~= "" then
+        local index = util.table.hasitem(data.history[id].table, command)
+        if index == nil then
             table.insert(data.history[id].table, command)
 
             -- Do not exceed our max_cmd
@@ -107,6 +107,11 @@ local function history_add(id, command)
                 table.remove(data.history[id].table, 1)
             end
 
+            history_save(id)
+        else
+            -- Bump this command to the end of history
+            table.remove(data.history[id].table, index)
+            table.insert(data.history[id].table, command)
             history_save(id)
         end
     end
