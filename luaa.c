@@ -640,6 +640,7 @@ luaA_init(xdgHandle* xdg)
     lua_pop(L, 2); /* pop "package" and "package.loaded" */
 
     signal_add(&global_signals, "debug::error");
+    signal_add(&global_signals, "debug::deprecation");
     signal_add(&global_signals, "debug::index::miss");
     signal_add(&global_signals, "debug::newindex::miss");
     signal_add(&global_signals, "systray::update");
