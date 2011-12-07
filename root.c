@@ -19,6 +19,8 @@
  *
  */
 
+#include <X11/keysym.h>
+#include <X11/XF86keysym.h>
 #include <xcb/xtest.h>
 
 #include "globalconf.h"
@@ -28,6 +30,23 @@
 #include "xwindow.h"
 #include "common/xcursor.h"
 #include "common/xutil.h"
+
+static xcb_keycode_t
+_string_to_key_code(const char *s)
+{
+    xcb_keysym_t keysym;
+    xcb_keycode_t *keycodes;
+
+    keysym   = XStringToKeysym(s);
+    keycodes = xcb_key_symbols_get_keycode(globalconf.keysyms, keysym);
+
+    if(keycodes) {
+        return keycodes[0]; /* XXX only returning the first is probably not
+                             * the best */
+    } else {
+        return 0;
+    }
+}
 
 /** Send fake events. Usually the current focused client will get it.
  * \param L The Lua VM state.
@@ -58,12 +77,20 @@ luaA_root_fake_input(lua_State *L)
     if (A_STREQ(stype, "key_press"))
     {
         type = XCB_KEY_PRESS;
-        detail = luaL_checknumber(L, 2); /* keycode */
+        if(lua_type(L, 2) == LUA_TSTRING) {
+            detail = _string_to_key_code(lua_tostring(L, 2)); /* keysym */
+        } else {
+            detail = luaL_checknumber(L, 2); /* keycode */
+        }
     }
     else if(A_STREQ(stype, "key_release"))
     {
         type = XCB_KEY_RELEASE;
-        detail = luaL_checknumber(L, 2); /* keycode */
+        if(lua_type(L, 2) == LUA_TSTRING) {
+            detail = _string_to_key_code(lua_tostring(L, 2)); /* keysym */
+        } else {
+            detail = luaL_checknumber(L, 2); /* keycode */
+        }
     }
     else if(A_STREQ(stype, "button_press"))
     {
