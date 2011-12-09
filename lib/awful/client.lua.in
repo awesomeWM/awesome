@@ -580,9 +580,9 @@ end
 capi.client.connect_signal("new", function(c)
     local function store_init_geometry(c)
         property.set(c, "floating_geometry", c:geometry())
-        c:disconnect_signal("property::geometry", store_init_geometry)
+        c:disconnect_signal("property::border_width", store_init_geometry)
     end
-    c:connect_signal("property::geometry", store_init_geometry)
+    c:connect_signal("property::border_width", store_init_geometry)
 end)
 
 capi.client.connect_signal("manage", function(c)
