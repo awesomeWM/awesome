@@ -135,7 +135,6 @@ local function set_coords(menu, screen_idx, m_coords)
     if menu.parent then
         local w, h = item_position(menu.parent, menu)
         w = w + menu.parent.theme.border_width
-        h = h + menu.parent.theme.border_width
 
         menu.y = menu.parent.y + h + menu.height > screen_h and
                  screen_h - menu.height or menu.parent.y + h
