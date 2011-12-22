@@ -9,6 +9,7 @@ module("mousegrabber")
 -- The function is called with one argument:
 -- a table containing modifiers pointer coordinates.
 -- @param func A callback function as described above.
+-- @param cursor The name of a X cursor to use while grabbing.
 -- @name run
 -- @class function
 
