@@ -130,7 +130,6 @@ function set_bg(wibox, c)
         -- Alpha isn't supported for backgrounds
         colstr = string_format("#%02x%02x%02x", r, g, b)
     end
-    wibox.drawin.bg_color = colstr
     wibox.background_color = c
     wibox.draw()
 end

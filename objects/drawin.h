@@ -37,8 +37,6 @@ struct drawin_t
     bool visible;
     /** Cursor */
     char *cursor;
-    /** Background color */
-    color_t bg_color;
     /** The pixmap copied to the window object. */
     xcb_pixmap_t pixmap;
     /** Surface for drawing to the pixmap. */
