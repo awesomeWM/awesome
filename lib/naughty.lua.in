@@ -509,17 +509,12 @@ if capi.dbus then
                 return
             end
         end
-        local score = 0
         for i, obj in pairs(config.mapping) do
             local filter, preset, s = obj[1], obj[2], 0
             if (not filter.urgency or filter.urgency == hints.urgency) and
                (not filter.category or filter.category == hints.category) and
                (not filter.appname or filter.appname == appname) then
-                for j, el in pairs(filter) do s = s + 1 end
-                if s > score then
-                    score = s
-                    args.preset = preset
-                end
+                   args.preset = util.table.join(args.preset, preset)
             end
         end
         if not args.preset.callback or (type(args.preset.callback) == "function" and
