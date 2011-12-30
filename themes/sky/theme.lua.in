@@ -35,6 +35,8 @@ theme.layout_tilebottom      = "@AWESOME_THEMES_PATH@/sky/layouts/tilebottom.png
 theme.layout_tileleft        = "@AWESOME_THEMES_PATH@/sky/layouts/tileleft.png"
 theme.layout_tile            = "@AWESOME_THEMES_PATH@/sky/layouts/tile.png"
 theme.layout_tiletop         = "@AWESOME_THEMES_PATH@/sky/layouts/tiletop.png"
+theme.layout_spiral          = "@AWESOME_THEMES_PATH@/sky/layouts/spiral.png"
+theme.layout_dwindle         = "@AWESOME_THEMES_PATH@/sky/layouts/dwindle.png"
 
 theme.awesome_icon           = "@AWESOME_THEMES_PATH@/sky/awesome-icon.png"
 
