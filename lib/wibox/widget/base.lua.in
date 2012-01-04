@@ -92,7 +92,6 @@ function make_widget(proxy)
     end)
 
     if proxy then
-        ret.size = function(_, ...) return proxy:size(...) end
         ret.draw = function(_, ...) return proxy:draw(...) end
         ret.fit = function(_, ...) return proxy:fit(...) end
         proxy:connect_signal("widget::updated", function()
