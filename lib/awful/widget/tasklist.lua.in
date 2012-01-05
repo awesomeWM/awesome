@@ -38,10 +38,17 @@ local function tasklist_label(c, args)
     local bg = nil
     local text = "<span font_desc='"..font.."'>"
     local name = ""
-    if c.ontop then name = name .. "⌃" end
-    if client.floating.get(c) then name = name .. "✈" end
-    if c.maximized_horizontal then name = name .. '⬌' end
-    if c.maximized_vertical then name = name .. "⬍" end
+
+    -- symbol to use to indicate certain client properties
+    local ontop = args.ontop or theme.tasklist_ontop or '⌃'
+    local floating = args.floating or theme.tasklist_floating or '✈'
+    local maximized_horizontal = args.maximized_horizontal or theme.tasklist_maximized_horizontal or '⬌'
+    local maximized_vertical = args.maximized_vertical or theme.tasklist_maximized_vertical or '⬍'
+
+    if c.ontop then name = name .. ontop end
+    if client.floating.get(c) then name = name .. floating end
+    if c.maximized_horizontal then name = name .. maximized_horizontal end
+    if c.maximized_vertical then name = name .. maximized_vertical end
     if c.minimized then
         name = name .. (util.escape(c.icon_name) or util.escape(c.name) or util.escape("<untitled>"))
     else
@@ -96,7 +103,10 @@ end
 -- fg_urgent The foreground color for urgent clients.
 -- bg_minimize The background color for minimized clients.
 -- fg_minimize The foreground color for minimized clients.
--- floating_icon The icon for flating clients.
+-- floating Symbol to use for floating clients.
+-- ontop Symbol to use for ontop clients.
+-- maximized_horizontal Symbol to use for clients that have been horizontally maximized.
+-- maximized_vertical Symbol to use for clients that have been vertically maximized.
 -- font The font.
 function new(screen, filter, buttons, style)
     local w = flex.horizontal()
