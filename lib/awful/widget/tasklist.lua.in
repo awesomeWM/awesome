@@ -40,11 +40,13 @@ local function tasklist_label(c, args)
     local name = ""
 
     -- symbol to use to indicate certain client properties
+    local sticky = args.sticky or theme.tasklist_sticky or "▪"
     local ontop = args.ontop or theme.tasklist_ontop or '⌃'
     local floating = args.floating or theme.tasklist_floating or '✈'
     local maximized_horizontal = args.maximized_horizontal or theme.tasklist_maximized_horizontal or '⬌'
     local maximized_vertical = args.maximized_vertical or theme.tasklist_maximized_vertical or '⬍'
 
+    if c.sticky then name = name .. sticky end
     if c.ontop then name = name .. ontop end
     if client.floating.get(c) then name = name .. floating end
     if c.maximized_horizontal then name = name .. maximized_horizontal end
@@ -116,6 +118,7 @@ function new(screen, filter, buttons, style)
     capi.screen[screen]:connect_signal("tag::detach", u)
     tag.attached_connect_signal(screen, "property::selected", u)
     capi.client.connect_signal("property::urgent", u)
+    capi.client.connect_signal("property::sticky", u)
     capi.client.connect_signal("property::ontop", u)
     capi.client.connect_signal("property::floating", u)
     capi.client.connect_signal("property::maximized_horizontal", u)
