@@ -24,7 +24,7 @@ local ipairs = ipairs
 --  <code>
 --  myclock = awful.widget.textclock({}, "%T", 1)<br/>
 --  myclock_t = awful.tooltip({<br/>
---      objects = { K },<br/>
+--      objects = { myclock },<br/>
 --      timer_function = function()<br/>
 --              return os.date("Today is %A %B %d %Y\nThe time is %T")<br/>
 --          end,<br/>
@@ -36,7 +36,7 @@ local ipairs = ipairs
 --     myclock_t:add_to_object(obj1)<br/>
 --     myclock_t:add_to_object(obj2)<br/>
 -- </code>
--- Now the same tooltip is attached to <code>K</code>, <code>obj1</code>,
+-- Now the same tooltip is attached to <code>myclock</code>, <code>obj1</code>,
 --    <code>obj2</code>.<br/>
 -- </p>
 -- <p>How to remove tooltip from many objects?<br/>
@@ -44,7 +44,7 @@ local ipairs = ipairs
 --     myclock_t:remove_from_object(obj1)<br/>
 --     myclock_t:remove_from_object(obj2)<br/>
 -- </code>
--- Now the same tooltip is only attached to <code>K</code>.<br/>
+-- Now the same tooltip is only attached to <code>myclock</code>.<br/>
 -- </p>
 module("awful.tooltip")
 
