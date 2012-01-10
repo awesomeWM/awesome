@@ -260,7 +260,7 @@ end
 --- Increase master width factor.
 -- @param add Value to add to master width factor.
 function incmwfact(add, t)
-    setmwfact(getmwfact(t) + add)
+    setmwfact(getmwfact(t) + add, t)
 end
 
 --- Get master width factor.
@@ -290,7 +290,7 @@ end
 --- Increase the number of master windows.
 -- @param add Value to add to number of master windows.
 function incnmaster(add, t)
-    setnmaster(getnmaster(t) + add)
+    setnmaster(getnmaster(t) + add, t)
 end
 
 
@@ -328,7 +328,7 @@ end
 --- Increase number of column windows.
 -- @param add Value to add to number of column windows.
 function incncol(add, t)
-    setncol(getncol(t) + add)
+    setncol(getncol(t) + add, t)
 end
 
 --- View no tag.
