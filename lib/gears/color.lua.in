@@ -86,8 +86,8 @@ end
 -- For the explanation of "<stops>", see add_stops().
 -- @param arg The argument describing the pattern
 -- @return a cairo pattern object
--- @nname create_linear_pattern
--- @nclass function
+-- @name create_linear_pattern
+-- @class function
 
 --- Create a radial pattern object.
 -- The pattern is created from a string. This string should have the following
@@ -97,8 +97,8 @@ end
 -- For the explanation of "<stops>", see add_stops().
 -- @param arg The argument describing the pattern
 -- @return a cairo pattern object
--- @nname create_radial_pattern
--- @nclass function
+-- @name create_radial_pattern
+-- @class function
 
 for k, v in pairs({ linear = capi.oocairo.pattern_create_linear,
                     radial = capi.oocairo.pattern_create_radial}) do
