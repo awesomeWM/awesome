@@ -130,7 +130,7 @@ types = {
 -- This function can create solid, linear, radial and png patterns. In general,
 -- patterns are specified as "type:arguments". "arguments" is specific to the
 -- pattern used. For example, one can use
--- "linear:50,50,10:55,55,30:0,#ff0000:0.5,#00ff00:1,#0000ff"
+-- "radial:50,50,10:55,55,30:0,#ff0000:0.5,#00ff00:1,#0000ff"
 -- Any argument that cannot be understood is passed to create_solid_pattern().
 -- @see create_solid_pattern, create_png_pattern, create_linear_pattern,
 --      create_radial_pattern
