@@ -662,26 +662,9 @@ luaA_screen_count(lua_State *L)
     return 1;
 }
 
-/** Get a screen by coordinates.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- *
- * \luastack
- * \lreturn The screen count, at least 1.
- */
-static int
-luaA_screen_by_coords(lua_State *L)
-{
-    int x = luaL_checknumber(L, 1);
-    int y = luaL_checknumber(L, 2);
-    luaA_pushscreen(L, screen_getbycoord(x, y));
-    return 1;
-}
-
 const struct luaL_reg awesome_screen_methods[] =
 {
     { "count", luaA_screen_count },
-    { "by_coords", luaA_screen_by_coords },
     { "__index", luaA_screen_module_index },
     { NULL, NULL }
 };
