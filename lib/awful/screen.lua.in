@@ -20,6 +20,22 @@ module("awful.screen")
 local data = {}
 data.padding = {}
 
+---
+-- Return Xinerama screen number corresponding to the given (pixel) coordinates.
+-- The number returned can be used as an index into the global
+-- `screen` table/object.
+-- @param x The x coordinate
+-- @param y The y coordinate
+function getbycoord(x, y)
+    for i = 1, capi.screen:count() do
+        local geometry = capi.screen[i].geometry
+        if((x < 0 or (x >= geometry.x and x < geometry.x + geometry.width))
+           and (y < 0 or (y >= geometry.y and y < geometry.y + geometry.height))) then
+            return i;
+        end
+    end
+end
+
 --- Give the focus to a screen, and move pointer.
 -- @param screen Screen number.
 function focus(screen)
