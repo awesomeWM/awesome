@@ -17,6 +17,7 @@ local capi =
 }
 local client = require("awful.client")
 local layout = require("awful.layout")
+local a_screen = require("awful.screen")
 
 --- Places client according to special criteria.
 module("awful.placement")
@@ -105,8 +106,9 @@ end
 function no_offscreen(c)
     local c = c or capi.client.focus
     local geometry = c:geometry()
+    local screen   = c.screen or a_screen.getbycoord(geometry.x, geometry.y)
     local border = c.border_width
-    local screen_geometry = capi.screen[c.screen].workarea
+    local screen_geometry = capi.screen[screen].workarea
 
     if geometry.x + geometry.width + 2*border > screen_geometry.x + screen_geometry.width then
         geometry.x = screen_geometry.x + screen_geometry.width - geometry.width
@@ -126,10 +128,11 @@ end
 --- Place the client where there's place available with minimum overlap.
 -- @param c The client.
 function no_overlap(c)
-    local cls = client.visible(c.screen)
-    local curlay = layout.get()
-    local areas = { capi.screen[c.screen].workarea }
     local geometry = c:geometry()
+    local screen   = c.screen or a_screen.getbycoord(geometry.x, geometry.y)
+    local cls = client.visible(screen)
+    local curlay = layout.get()
+    local areas = { capi.screen[screen].workarea }
     for i, cl in pairs(cls) do
         if cl ~= c and cl.type ~= "desktop" and (client.floating.get(cl) or curlay == layout.suit.floating) then
             areas = area_remove(areas, cl:geometry())
@@ -192,11 +195,12 @@ end
 function centered(c, p)
     local c = c or capi.client.focus
     local c_geometry = c:geometry()
+    local screen = c.screen or a_screen.getbycoord(c_geometry.x, c_geometry.y)
     local s_geometry
     if p then
         s_geometry = p:geometry()
     else
-        s_geometry = capi.screen[c.screen].geometry
+        s_geometry = capi.screen[screen].geometry
     end
     return c:geometry({ x = s_geometry.x + (s_geometry.width - c_geometry.width) / 2,
                         y = s_geometry.y + (s_geometry.height - c_geometry.height) / 2 })
@@ -209,11 +213,12 @@ end
 function center_horizontal(c, p)
     local c = c or capi.client.focus
     local c_geometry = c:geometry()
+    local screen = c.screen or a_screen.getbycoord(c_geometry.x, c_geometry.y)
     local s_geometry
     if p then
         s_geometry = p:geometry()
     else
-        s_geometry = capi.screen[c.screen].geometry
+        s_geometry = capi.screen[screen].geometry
     end
     return c:geometry({ x = s_geometry.x + (s_geometry.width - c_geometry.width) / 2 })
 end
@@ -225,11 +230,12 @@ end
 function center_vertical(c, p)
     local c = c or capi.client.focus
     local c_geometry = c:geometry()
+    local screen = c.screen or a_screen.getbycoord(c_geometry.x, c_geometry.y)
     local s_geometry
     if p then
         s_geometry = p:geometry()
     else
-        s_geometry = capi.screen[c.screen].geometry
+        s_geometry = capi.screen[screen].geometry
     end
     return c:geometry({ y = s_geometry.y + (s_geometry.height - c_geometry.height) / 2 })
 end
