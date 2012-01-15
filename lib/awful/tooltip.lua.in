@@ -92,8 +92,6 @@ end
 local function show(self)
     -- do nothing if the tooltip is already shown
     if self.visible then return end
-    -- make sure the tooltip is on the same screen as the mouse
-    self.wibox.screen = mouse.screen
     if data[self].timer then
         if not data[self].timer.started then
             data[self].timer_function()

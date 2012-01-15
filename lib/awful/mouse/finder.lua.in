@@ -77,8 +77,6 @@ local function show(self)
     -- do nothing if the mouse finder is already shown
     if data[self].wibox.visible then return end
     if not data[self].timer.started then
-        -- make sure the mouse finder is on the same screen as the mouse
-        data[self].wibox.screen = mouse.screen
         data[self].wibox:geometry({width = data[self].radius, height = data[self].radius })
         a_wibox.rounded_corners(data[self].wibox, data[self].radius/2 -1)
         data[self].timer:start()
