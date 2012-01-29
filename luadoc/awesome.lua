@@ -35,6 +35,12 @@ module("awesome")
 -- @param use_sn Use startup-notification, true or false, default to true.
 -- @return Process ID if everything is OK, or an error string if an error occured.
 
+--- Load an image
+-- @param name The file name
+-- @return An oocairo image surface
+-- @name load_image
+-- @class function
+
 --- Add a global signal.
 -- @param name A string with the event name.
 -- @param func The function to call.

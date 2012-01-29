@@ -102,6 +102,19 @@ luaA_restart(lua_State *L)
     return 0;
 }
 
+/** Load an image from a given path.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ * \luastack
+ * \lparam The command line to execute.
+ */
+static int
+luaA_load_image(lua_State *L)
+{
+    const char *filename = luaL_checkstring(L, 1);
+    return draw_load_image(L, filename);
+}
+
 /** UTF-8 aware string length computing.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
@@ -516,6 +529,7 @@ luaA_init(xdgHandle* xdg)
         { "disconnect_signal", luaA_awesome_disconnect_signal },
         { "emit_signal", luaA_awesome_emit_signal },
         { "systray", luaA_systray },
+        { "load_image", luaA_load_image },
         { "__index", luaA_awesome_index },
         { NULL, NULL }
     };

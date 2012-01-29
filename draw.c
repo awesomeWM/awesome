@@ -29,6 +29,8 @@
 #include <ctype.h>
 #include <math.h>
 
+#include <Imlib2.h>
+
 #include "globalconf.h"
 #include "screen.h"
 
@@ -158,6 +160,71 @@ draw_dup_image_surface(cairo_surface_t *surface)
     cairo_destroy(cr);
 
     return res;
+}
+
+static const char *
+image_imlib_load_strerror(Imlib_Load_Error e)
+{
+    switch(e)
+    {
+      case IMLIB_LOAD_ERROR_FILE_DOES_NOT_EXIST:
+        return "no such file or directory";
+      case IMLIB_LOAD_ERROR_FILE_IS_DIRECTORY:
+        return "file is a directory";
+      case IMLIB_LOAD_ERROR_PERMISSION_DENIED_TO_READ:
+        return "read permission denied";
+      case IMLIB_LOAD_ERROR_NO_LOADER_FOR_FILE_FORMAT:
+        return "no loader for file format";
+      case IMLIB_LOAD_ERROR_PATH_TOO_LONG:
+        return "path too long";
+      case IMLIB_LOAD_ERROR_PATH_COMPONENT_NON_EXISTANT:
+        return "path component non existent";
+      case IMLIB_LOAD_ERROR_PATH_COMPONENT_NOT_DIRECTORY:
+        return "path component not a directory";
+      case IMLIB_LOAD_ERROR_PATH_POINTS_OUTSIDE_ADDRESS_SPACE:
+        return "path points outside address space";
+      case IMLIB_LOAD_ERROR_TOO_MANY_SYMBOLIC_LINKS:
+        return "too many symbolic links";
+      case IMLIB_LOAD_ERROR_OUT_OF_MEMORY:
+        return "out of memory";
+      case IMLIB_LOAD_ERROR_OUT_OF_FILE_DESCRIPTORS:
+        return "out of file descriptors";
+      case IMLIB_LOAD_ERROR_PERMISSION_DENIED_TO_WRITE:
+        return "write permission denied";
+      case IMLIB_LOAD_ERROR_OUT_OF_DISK_SPACE:
+        return "out of disk space";
+      case IMLIB_LOAD_ERROR_UNKNOWN:
+        return "unknown error, that's really bad";
+      case IMLIB_LOAD_ERROR_NONE:
+        return "no error, oops";
+    }
+
+    return "unknown error";
+}
+
+/** Load the specified path into a cairo surface
+ * \param L Lua state
+ * \param path file to load
+ * \return A cairo image surface or NULL on error.
+ */
+int
+draw_load_image(lua_State *L, const char *path)
+{
+    Imlib_Image imimage;
+    Imlib_Load_Error e = IMLIB_LOAD_ERROR_NONE;
+    int ret;
+
+    imimage = imlib_load_image_with_error_return(path, &e);
+    if (!imimage) {
+        luaL_error(L, "Cannot load image '%s': %s", path, image_imlib_load_strerror(e));
+        return 0;
+    }
+
+    imlib_context_set_image(imimage);
+    ret = luaA_surface_from_data(L, imlib_image_get_width(),
+            imlib_image_get_height(), imlib_image_get_data_for_reading_only());
+    imlib_free_image_and_decache();
+    return ret;
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

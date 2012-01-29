@@ -67,6 +67,7 @@ a_iso2utf8(const char *str, ssize_t len, char **dest, ssize_t *dlen)
 
 int luaA_surface_from_data(lua_State *L, int width, int height, uint32_t *data);
 cairo_surface_t *draw_dup_image_surface(cairo_surface_t *surface);
+int draw_load_image(lua_State *L, const char *path);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
