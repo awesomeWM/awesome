@@ -6,7 +6,7 @@
 
 -- Grab environment we need
 local capi = { screen = screen,
-               oocairo = oocairo,
+               awesome = awesome,
                client = client }
 local type = type
 local setmetatable = setmetatable
@@ -53,7 +53,7 @@ function taglist_label(t, args)
             local seltags = sel:tags()
             for _, v in ipairs(seltags) do
                 if v == t then
-                    bg_image = capi.oocairo.image_surface_create_from_png(taglist_squares_sel)
+                    bg_image = capi.awesome.load_image(taglist_squares_sel)
                     bg_resize = taglist_squares_resize == "true"
                     is_selected = true
                     break
@@ -64,7 +64,7 @@ function taglist_label(t, args)
     if not is_selected then
         local cls = t:clients()
         if #cls > 0 and taglist_squares_unsel then
-            bg_image = capi.oocairo.image_surface_create_from_png(taglist_squares_unsel)
+            bg_image = capi.awesome.load_image(taglist_squares_unsel)
             bg_resize = taglist_squares_resize == "true"
         end
         for k, c in pairs(cls) do
@@ -87,7 +87,7 @@ function taglist_label(t, args)
     if tag.geticon(t) and type(tag.geticon(t)) == "image" then
         icon = tag.geticon(t)
     elseif tag.geticon(t) then
-        icon = capi.oocairo.image_surface_create_from_png(tag.geticon(t))
+        icon = capi.awesome.load_image(tag.geticon(t))
     end
 
     return text, bg_color, bg_image, icon

@@ -4,13 +4,13 @@
 -- @release @AWESOME_VERSION@
 ---------------------------------------------------------------------------
 
-local oocairo = require("oocairo")
 local base = require("wibox.widget.base")
 local setmetatable = setmetatable
 local pairs = pairs
 local type = type
 local pcall = pcall
 local print = print
+local awesome = awesome
 
 module("wibox.widget.imagebox")
 
@@ -74,7 +74,7 @@ function set_image(box, image)
     local image = image
 
     if type(image) == "string" then
-        local success, result = pcall(oocairo.image_surface_create_from_png, image)
+        local success, result = pcall(awesome.load_image, image)
         if not success then
             print("Error while reading '" .. image .. "': " .. result)
             return false

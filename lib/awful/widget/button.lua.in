@@ -9,6 +9,7 @@ local type = type
 local button = require("awful.button")
 local imagebox = require("wibox.widget.imagebox")
 local capi = { mouse = mouse,
+               awesome = awesome,
                oocairo = oocairo }
 
 module("awful.widget.button")
@@ -21,7 +22,7 @@ function new(args)
     if not args or not args.image then return end
     local img_release
     if type(args.image) == "string" then
-        img_release = capi.oocairo.image_surface_create_from_png(args.image)
+        img_release = capi.awesome.load_image(args.image)
     elseif type(args.image) == "userdata" and args.image.type and args.image:type() == "cairo_surface_t" then
         img_release = args.image
     elseif type(args.image) == "userdata" and args.image._NAME and args.image._NAME == "cairo surface object" then

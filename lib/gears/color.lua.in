@@ -12,6 +12,7 @@ local unpack = unpack
 local pairs = pairs
 local type = type
 local capi = {
+    awesome = awesome,
     oocairo = oocairo
 }
 
@@ -63,7 +64,7 @@ end
 -- @param file The filename of the file
 -- @return a cairo pattern object
 function create_png_pattern(file)
-    local image = capi.oocairo.image_surface_create_from_png(file)
+    local image = capi.awesome.load_image(file)
     return capi.oocairo.pattern_create_for_surface(image)
 end
 

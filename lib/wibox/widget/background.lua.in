@@ -11,6 +11,7 @@ local layout_base = require("wibox.layout.base")
 local setmetatable = setmetatable
 local pairs = pairs
 local type = type
+local awesome = awesome
 
 module("wibox.widget.background")
 
@@ -91,7 +92,7 @@ function set_bgimage(box, image)
     local image = image
 
     if type(image) == "string" then
-        image = oocairo.image_surface_create_from_png(image)
+        image = awesome.load_image(image)
     end
 
     box.bgimage = image

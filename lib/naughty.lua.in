@@ -14,6 +14,7 @@ local capi = { screen = screen,
                awesome = awesome,
                dbus = dbus,
                timer = timer,
+               awesome = awesome,
                oocairo = oocairo }
 local button = require("awful.button")
 local util = require("awful.util")
@@ -400,7 +401,7 @@ function notify(args)
             iconmargin = wibox.layout.margin(iconbox, margin, margin, margin, margin)
             local img = icon
             if type(icon) == "string" then
-                img = capi.oocairo.image_surface_create_from_png(icon)
+                img = capi.awesome.load_image(icon)
             else
                 img = icon
             end

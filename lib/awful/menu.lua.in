@@ -28,6 +28,7 @@ local capi = {
     mouse = mouse,
     client = client,
     keygrabber = keygrabber,
+    awesome = awesome,
     oocairo = oocairo }
 
 
@@ -543,7 +544,7 @@ function entry(parent, args)
     if args.icon then
         icon = args.icon
         if type(icon) == "string" then
-            icon = capi.oocairo.image_surface_create_from_png(icon)
+            icon = capi.awesome.load_image(icon)
         end
     end
     if icon then
@@ -580,7 +581,7 @@ function entry(parent, args)
         if args.theme.submenu_icon then
             submenu = wibox.widget.imagebox()
             submenu:set_image(
-                capi.oocairo.image_surface_create_from_png(
+                capi.awesome.load_image(
                 args.theme.submenu_icon))
         else
             submenu = wibox.widget.textbox()
