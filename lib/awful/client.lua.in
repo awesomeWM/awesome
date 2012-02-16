@@ -862,6 +862,30 @@ function property.set(c, prop, value)
     c:emit_signal("property::" .. prop)
 end
 
+---
+-- Returns an iterator to cycle through, starting from the client in focus or
+-- the given index, all clients that match a given criteria.
+-- @param filter a function that returns true to indicate a positive match
+-- @param start  what index to start iterating from.  Defaults to using the
+-- index of the currently focused client.
+-- @param s      which screen to use.  nil means all screens.
+-- @usage e.g.: un-minimize all urxvt instances
+-- <p><code>
+-- local urxvt = function (c) <br/>
+-- return awful.rules.match(c, {class = "URxvt"}) <br/>
+-- end <br/>
+-- </br>
+-- for c in awful.client.cycle(urxvt) do <br/>
+-- c.minimized = false <br/>
+-- end <br/>
+-- </code></p>
+function cycle(filter, start, s)
+    local clients = capi.client.get(s)
+    local focused = capi.client.focus
+    local start   = start or util.table.hasitem(clients, focused)
+    return util.table.cycle(clients, filter, start)
+end
+
 -- Register standards signals
 capi.client.add_signal("property::floating_geometry")
 capi.client.add_signal("property::floating")
