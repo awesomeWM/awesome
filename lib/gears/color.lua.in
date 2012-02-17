@@ -9,6 +9,7 @@ local string = string
 local table = table
 local tonumber = tonumber
 local unpack = unpack
+local ipairs = ipairs
 local pairs = pairs
 local type = type
 local capi = {
@@ -56,6 +57,8 @@ function create_solid_pattern(col)
     local col = col
     if col == nil then
         col = "#000000"
+    elseif type(col) == "table" then
+        col = col.color
     end
     return capi.oocairo.pattern_create_rgba(parse_color(col))
 end
@@ -64,15 +67,19 @@ end
 -- @param file The filename of the file
 -- @return a cairo pattern object
 function create_png_pattern(file)
+    local file = file
+    if type(file) == "table" then
+        file = file.file
+    end
     local image = capi.awesome.load_image(file)
     return capi.oocairo.pattern_create_for_surface(image)
 end
 
---- Add stops to the given pattern.
+-- Add stops to the given pattern.
 -- @param p The cairo pattern to add stops to
 -- @param iterator An iterator that returns strings. Each of those strings
 --                 should be in the form place,color where place is in [0, 1].
-function add_stops(p, iterator)
+local function add_iterator_stops(p, iterator)
     for k in iterator do
         local sub = string.gmatch(k, "[^,]+")
         local point, color = sub(), sub()
@@ -80,46 +87,81 @@ function add_stops(p, iterator)
     end
 end
 
+-- Add a list of stops to a given pattern
+local function add_stops_table(pat, arg)
+    for _, stop in ipairs(arg) do
+        pat:add_color_stop_rgba(stop[1], parse_color(stop[2]))
+    end
+end
+
+-- Create a pattern from a string
+local function string_pattern(creator, arg)
+    local iterator = string.gmatch(arg, "[^:]+")
+    -- Create a table where each entry is a number from the original string
+    local args = { parse_numbers(iterator()) }
+    local to = { parse_numbers(iterator()) }
+    -- Now merge those two tables
+    for k, v in pairs(to) do
+        table.insert(args, v)
+    end
+    -- And call our creator function with the values
+    local p = v(unpack(args))
+
+    add_iterator_stops(p, iterator)
+    return p
+end
+
 --- Create a linear pattern object.
 -- The pattern is created from a string. This string should have the following
 -- form: "x0,y0:x1,y1:&#60;stops&#62;"
+-- Alternatively, the pattern can be specified as a table:
+-- { type = "linear", from = { x0, y0 }, to = { x1, y1 },
+-- stops = { &#60stops&#62 } }
 -- x0,y0 and x1,y1 are the start and stop point of the pattern.
--- For the explanation of "&#60;stops&#62;", see add_stops().
+-- For the explanation of "&#60;stops&#62;", see create_pattern().
 -- @param arg The argument describing the pattern
 -- @return a cairo pattern object
--- @name create_linear_pattern
--- @class function
+function create_linear_pattern(arg)
+    local pat
+
+    if type(arg) == "string" then
+        return string_pattern(capi.oocairo.pattern_create_linear, arg)
+    elseif type(arg) ~= "table" then
+        error("Wrong argument type: " .. type(arg))
+    end
+
+    pat = capi.oocairo.pattern_create_linear(arg.from[1], arg.from[2], arg.to[1], arg.to[2])
+    add_stops_table(pat, arg.stops)
+    return pat
+end
 
 --- Create a radial pattern object.
 -- The pattern is created from a string. This string should have the following
 -- form: "x0,y0,r0:x1,y1,r1:&#60stops&#62"
+-- Alternatively, the pattern can be specified as a table:
+-- { type = "radial", from = { x0, y0, r0 }, to = { x1, y1, r1 },
+-- stops = { &#60stops&#62 } }
 -- x0,y0 and x1,y1 are the start and stop point of the pattern.
 -- r0 and r1 are the radii of the start / stop circle.
--- For the explanation of "&#60stops&#62", see add_stops().
+-- For the explanation of "&#60;stops&#62;", see create_pattern().
 -- @param arg The argument describing the pattern
 -- @return a cairo pattern object
--- @name create_radial_pattern
--- @class function
+function create_radial_pattern(arg)
+    local pat
 
-for k, v in pairs({ linear = capi.oocairo.pattern_create_linear,
-                    radial = capi.oocairo.pattern_create_radial}) do
-    _M["create_" .. k .. "_pattern"] = function(arg)
-        local iterator = string.gmatch(arg, "[^:]+")
-        -- Create a table where each entry is a number from the original string
-        local args = { parse_numbers(iterator()) }
-        local to = { parse_numbers(iterator()) }
-        -- Now merge those two tables
-        for k, v in pairs(to) do
-            table.insert(args, v)
-        end
-        -- And call our creator function with the values
-        local p = v(unpack(args))
-
-        add_stops(p, iterator)
-        return p
+    if type(arg) == "string" then
+        return string_pattern(capi.oocairo.pattern_create_radial, arg)
+    elseif type(arg) ~= "table" then
+        error("Wrong argument type: " .. type(arg))
     end
+
+    pat = capi.oocairo.pattern_create_radial(arg.from[1], arg.from[2], arg.from[3],
+            arg.to[1], arg.to[2], arg.to[3])
+    add_stops_table(pat, arg.stops)
+    return pat
 end
 
+--- Mapping of all supported color types. New entries can be added.
 types = {
     solid = create_solid_pattern,
     png = create_png_pattern,
@@ -129,9 +171,13 @@ types = {
 
 --- Create a pattern from a given string.
 -- This function can create solid, linear, radial and png patterns. In general,
--- patterns are specified as "type:arguments". "arguments" is specific to the
--- pattern used. For example, one can use
+-- patterns are specified as strings formatted as"type:arguments". "arguments"
+-- is specific to the pattern used. For example, one can use
 -- "radial:50,50,10:55,55,30:0,#ff0000:0.5,#00ff00:1,#0000ff"
+-- Alternatively, patterns can be specified via tables. In this case, the
+-- table's 'type' member specifies the type. For example:
+-- { type = "radial", from = { 50, 50, 10 }, to = { 55, 55, 30 },
+--   stops = { { 0, "#ff0000" }, { 0.5, "#00ff00" }, { 1, "#0000ff" } } }
 -- Any argument that cannot be understood is passed to create_solid_pattern().
 -- @see create_solid_pattern, create_png_pattern, create_linear_pattern,
 --      create_radial_pattern
@@ -144,6 +190,11 @@ function create_pattern(col)
             local pos = string.len(t)
             local arg = string.sub(col, pos + 2)
             return types[t](arg)
+        end
+    elseif type(col) == "table" then
+        local t = col.type
+        if types[t] then
+            return types[t](col)
         end
     end
     return create_solid_pattern(col)
