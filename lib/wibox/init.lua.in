@@ -120,7 +120,7 @@ end
 function set_bg(wibox, c)
     local c = c
     local colstr = "#000000" -- Default if we can't figure out the color
-    if type(c) == "string" then
+    if type(c) == "string" or type(c) == "table" then
         c = color(c)
     end
     -- If this is a solid color, propagate the background color to the capi drawin
@@ -140,7 +140,7 @@ end
 --          nil or a string that gears.color() understands.
 function set_fg(wibox, c)
     local c = c
-    if type(c) == "string" then
+    if type(c) == "string" or type(c) == "table" then
         c = color(c)
     end
     wibox.foreground_color = c
