@@ -9,7 +9,6 @@ awesome
 
 SYNOPSIS
 --------
-
 *awesome* recherche son fichier de configuration dans l'ordre suivant :
 
 * $XDG_CONFIG_HOME/awesome/rc.lua
@@ -31,18 +30,14 @@ section API.  Ce fichier est lu au démarrage.
 API LUA DE AWESOME
 ------------------
 
-Documentation for the Lua API can be found in the luadoc directory.
+La documentation pour l'API de Lua se trouve dans le répertoire luadoc.
 
 FORMAT DES COULEURS
 -------------------
-
 Le format des couleurs dans *awesome* est soit en noms de couleurs au
-standard X (blue, darkblue, lightred, etc.), soit en format hexadécimal de
-couleurs (#rrggbb ou #rrggbbaa).
+standard X (blue, darkblue, lightred, etc.), soit en format hexadécimal de couleurs (#rrggbb ou #rrggbbaa).
 Si vous utilisez le format hexadécimal, vous pouvez aussi spécifier un
-canal alpha : cela signifie que #00ff00 représentant du vert pur, #00ff00aa
-mettra le canal alpha à la valeur « aa » et mélangera le vert pur à
-la couleur en arrière-plan.
+canal alpha : cela signifie que #00ff00 représentant du vert pur, #00ff00aa mettra le canal alpha à la valeur « aa » et mélangera le vert pur à la couleur en arrière-plan.
 
 FORMAT DE TEXTE
 ---------------
@@ -75,10 +70,8 @@ TRADUCTION
 ----------
 
 Ce document est une traduction, réalisée par Jean-Luc Duflot
-<jl POING duflot CHEZ laposte POING net> le 25 mars 2010.
+<jl POING duflot CHEZ laposte POING net> le 20 février 2012.
 L'équipe de traduction a fait le maximum pour réaliser une adaptation
 française de qualité.
-La version anglaise la plus à jour de ce document est toujours consultable
-via la commande : LANGUAGE=en man awesomerc.
-N'hésitez pas à signaler à l'auteur ou au traducteur, selon le cas, toute
-erreur dans cette page de manuel.
+La version anglaise la plus à jour de ce document est toujours consultable via la commande : LANGUAGE=en man awesomerc.
+N'hésitez pas à signaler à l'auteur ou au traducteur, selon le cas, toute erreur dans cette page de manuel.

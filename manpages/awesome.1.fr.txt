@@ -15,31 +15,22 @@ DESCRIPTION
 -----------
 
 *awesome* est un gestionnaire de fenêtres pour X.
-Il gère les fenêtres avec diverses mises en page, par exemple flottante ou
-juxtaposée.
+Il gère les fenêtres avec diverses mises en page, par exemple flottante ou juxtaposée.
 Toutes les mises en page peuvent être appliquées dynamiquement, pour
-optimiser l'environnement pour l'application utilisée et la tâche en cours
-d'exécution.
+optimiser l'environnement pour l'application utilisée et la tâche en cours d'exécution.
 
 Avec la mise en page juxtaposée, les fenêtres sont gérées avec une zone
 maître et une zone d'empilage.
-La zone maître contient les fenêtres qui nécessitent le plus d'attention,
-tandis que la zone d'empilage contient toutes les autres fenêtres.
-Avec la mise en page flottante, les fenêtres peuvent être redimensionnées
-et déplacées à la demande. Les fenêtres de dialogue sont toujours gérées
-d'une manière flottante, quelle que soit la mise en page en cours.
-Les mises en forme spirale ou décroissante sont des modes spéciaux de mise
-en forme juxtaposée, où la zone d'empilage est présentée en spirale pour la
-première, ou comme une fractale rectangulaire pour la seconde.
+La zone maître contient les fenêtres qui nécessitent le plus d'attention, tandis que la zone d'empilage contient toutes les autres fenêtres.
+Avec la mise en page flottante, les fenêtres peuvent être redimensionnées et déplacées à la demande. Les fenêtres de dialogue sont toujours gérées d'une manière flottante, quelle que soit la mise en page en cours.
+Les mises en forme spirale ou décroissante sont des modes spéciaux de mise en forme juxtaposée, où la zone d'empilage est présentée en spirale pour la première, ou comme une fractale rectangulaire pour la seconde.
 
 Dans awesome les fenêtres sont groupées en onglets.
 Chaque fenêtre peut être affectée à  un ou plusieurs onglets.
 En sélectionnant plusieurs onglets on peut afficher toutes les fenêtres
 affectées à ces onglets.
 
-*awesome* peut contenir des petites boîtes graphiques qui peuvent afficher
-tout ce que vous désirez : tous les onglets disponibles, la mise en page
-courante, le titre des fenêtres visibles, du texte, etc.
+*awesome* peut contenir des petites boîtes graphiques qui peuvent afficher tout ce que vous désirez : tous les onglets disponibles, la mise en page courante, le titre des fenêtres visibles, du texte, etc.
 
 OPTIONS
 -------
@@ -52,11 +43,14 @@ OPTIONS
 '$XDG_CONFIG_HOME/awesome/rc.lua'.
 *-k*, *--check*::
     Vérifie la syntaxe du fichier de configuration.
+*-a*, *--no-argb*::
+    N'utilise pas le codage ARGB.
 
 ASSOCIATIONS AVEC LA SOURIS (PAR DÉFAUT)
 ----------------------------------------
 Navigation
 ~~~~~~~~~~
+
 *Bouton1* sur le nom de l'onglet::
     Affiche le contenu de l'onglet.
 *Bouton4*, *Bouton5* sur le nom de l'onglet::
@@ -98,20 +92,18 @@ Contrôle du gestionnaire de fenêtres
 
 Clients
 ~~~~~~~
-*Mod4 + Majuscule + r*::
-    Réaffiche la fenêtre focalisée.
 *Mod4 + m*::
     Maximise la fenêtre de l'application.
 *Mod4 + n*::
     Minimise la fenêtre de l'application.
 *Mod4 + Control + n*::
-    Restaurer la fenêtre.
+    Restaure la fenêtre.
 *Mod4 + f*::
     Affiche la fenêtre de l'application en plein écran.
 *Mod4 + Majuscule + c*::
     Ferme la fenêtre focalisée.
 *Mod4 + t*::
-    Marque la fenêtre de l'application.
+    Met la fenêtre de l'application au premier plan.
 
 Navigation
 ~~~~~~~~~~
@@ -191,7 +183,7 @@ des comportements inattendus...
 
 AUTEURS
 -------
-Julien Danjou <julien@danjou.info> and others.
+Julien Danjou <julien@danjou.info> et d'autres personnes.
 
 WWW
 ---
@@ -200,11 +192,9 @@ http://awesome.naquadah.org
 TRADUCTION
 ----------
 Ce document est une traduction, réalisée par Jean-Luc Duflot
-<jl POING duflot CHEZ laposte POING net> le 25 mars 2010.
+<jl POING duflot CHEZ laposte POING net> le 20 février 2012.
 
 L'équipe de traduction a fait le maximum pour réaliser une adaptation
 française de qualité.
-La version anglaise la plus à jour de ce document est toujours consultable
-via la commande : LANGUAGE=en man awesome.
-N'hésitez pas à signaler à l'auteur ou au traducteur, selon le cas, toute
-erreur dans cette page de manuel.
+La version anglaise la plus à jour de ce document est toujours consultable via la commande : LANGUAGE=en man awesome.
+N'hésitez pas à signaler à l'auteur ou au traducteur, selon le cas, toute erreur dans cette page de manuel.
