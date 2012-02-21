@@ -17,8 +17,7 @@ cette application.
 Vous n'avez pas à configurer *awsetbg*, puisqu'il utilise seulement la
 première application trouvée.
 
-De plus, il mémorise le dernier papier peint mis en place, donc vous n'avez
-pas à éditer quoi que ce soit pour en changer.
+De plus, il mémorise le dernier papier peint mis en place, donc vous n'avez pas à éditer quoi que ce soit pour en changer.
 
 OPTIONS
 -------
@@ -29,8 +28,7 @@ OPTIONS
 *-t* file::
     Met en place le papier peint spécifié en mosaïque.
 *-a* file::
-    Maximise le papier peint, tout en préservant sa forme.
-    Si l'application choisie ne supporte pas cette option, le plein écran
+    Maximise le papier peint, tout en préservant sa forme. Si l'application choisie ne supporte pas cette option, le plein écran
 est utilisé comme solution de rechange.
 *-u* wallpapersetter::
     Utilise l'outil de mise en place de papier peint spécifié.
@@ -40,16 +38,13 @@ est utilisé comme solution de rechange.
 *-F, -C, -T, -A, -U, -R*::
     Identique à l'option en minuscule, mais sans mémorisation.
 *-l*::
-    Met en place le papier peint précédent.
-    Si l'option -r a été utilisée précédemment, un autre papier peint du
-même répertoire sera choisi aléatoirement.
+    Met en place le papier peint précédent. Si l'option -r a été utilisée précédemment, un autre papier peint du même répertoire sera choisi aléatoirement.
 *-i*::
     Affiche des informations utiles sur la meilleure application pour
 mettre en place le papier peint voulu.
 *-m #*::
     Utilise la commande montage pour créer une grande image (l'image doit
-correspondre à la taille de l'écran).
-    Nécéssite la commande montage(1).
+correspondre à la taille de l'écran). Nécéssite la commande montage(1).
     # est le nombre d'écrans (colonnes dans montage).
 *-p*::
     Affiche des infobulles utiles.
@@ -60,12 +55,10 @@ FICHIERS
 --------
 
 Le fichier $XDG_CACHE_HOME/awesome/lastwallpaper ou
-$HOME/.cache/awesome/lastwallpaper contient le dernier papier peint mis en
-place, à utiliser avec l'option -l.
+$HOME/.cache/awesome/lastwallpaper contient le dernier papier peint mis en place, à utiliser avec l'option -l.
 
 VARIABLES D'ENVIRONNEMENT
 -------------------------
-
 *wpsetters*::
     Outils de mise en place de papier peint à utiliser.
 *DISPLAY*::
@@ -93,11 +86,9 @@ TRADUCTION
 ----------
 
 Ce document est une traduction, réalisée par Jean-Luc Duflot
-<jl POING duflot CHEZ laposte POING net> le 25 mars 2010.
+<jl POING duflot CHEZ laposte POING net> le 20 février 2012.
 
 L'équipe de traduction a fait le maximum pour réaliser une adaptation
 française de qualité.
-La version anglaise la plus à jour de ce document est toujours consultable
-via la commande : LANGUAGE=en man awsetbg.
-N'hésitez pas à signaler à l'auteur ou au traducteur, selon le cas, toute
-erreur dans cette page de manuel.
+La version anglaise la plus à jour de ce document est toujours consultable via la commande : LANGUAGE=en man awsetbg.
+N'hésitez pas à signaler à l'auteur ou au traducteur, selon le cas, toute erreur dans cette page de manuel.
