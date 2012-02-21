@@ -516,8 +516,6 @@ event_handle_key(xcb_key_press_event_t *ev)
                 warn("error running function: %s", lua_tostring(globalconf.L, -1));
                 luaA_keygrabber_stop(globalconf.L);
             }
-            else if(!lua_isboolean(globalconf.L, -1) || !lua_toboolean(globalconf.L, -1))
-                luaA_keygrabber_stop(globalconf.L);
         }
         lua_pop(globalconf.L, 1);  /* pop returned value or function if not called */
     }

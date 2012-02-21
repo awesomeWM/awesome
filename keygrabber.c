@@ -88,8 +88,7 @@ keygrabber_handlekpress(lua_State *L, xcb_key_press_event_t *e)
 }
 
 /** Grab keyboard and read pressed keys, calling callback function at each key
- * pressed. The callback function must return a boolean value: true to
- * continue grabbing, false to stop.
+ * press, until keygrabber.stop is called.
  * The function is called with 3 arguments:
  * a table containing modifiers keys, a string with the key pressed and a
  * string with either "press" or "release" to indicate the event type.
