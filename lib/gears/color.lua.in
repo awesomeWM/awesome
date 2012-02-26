@@ -105,7 +105,7 @@ local function string_pattern(creator, arg)
         table.insert(args, v)
     end
     -- And call our creator function with the values
-    local p = v(unpack(args))
+    local p = creator(unpack(args))
 
     add_iterator_stops(p, iterator)
     return p
