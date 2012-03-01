@@ -194,9 +194,7 @@ end
 
 
 local function grabber(mod, key, event)
-    if event == "release" then
-       return true
-    end
+    if event ~= "press" then return end
 
     local sel = cur_menu.sel or 0
     if util.table.hasitem(menu_keys.up, key) then
@@ -216,8 +214,6 @@ local function grabber(mod, key, event)
     else
         check_access_key(cur_menu, key)
     end
-
-    return true
 end
 
 
