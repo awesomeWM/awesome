@@ -202,6 +202,15 @@ function run(args, textbox, exe_callback, completion_callback, history_path, his
         if done_callback then done_callback() end
     end
 
+    -- Update textbox
+    local function update()
+        textbox:set_font(font)
+        textbox:set_markup(prompt_text_with_cursor{
+                               text = command, text_color = inv_col, cursor_color = cur_col,
+                               cursor_pos = cur_pos, cursor_ul = cur_ul, selectall = selectall,
+                               prompt = prettyprompt })
+    end
+
     capi.keygrabber.run(
     function (modifiers, key, event)
         if event ~= "press" then return end
@@ -404,15 +413,6 @@ function run(args, textbox, exe_callback, completion_callback, history_path, his
                 cur_pos = #command + 1
             end
             selectall = nil
-        end
-
-        -- Update textbox
-        local function update()
-            textbox:set_font(font)
-            textbox:set_markup(prompt_text_with_cursor{
-                text = command, text_color = inv_col, cursor_color = cur_col,
-                cursor_pos = cur_pos, cursor_ul = cur_ul, selectall = selectall,
-                prompt = prettyprompt })
         end
 
         local success = pcall(update)
