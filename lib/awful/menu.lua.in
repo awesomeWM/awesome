@@ -316,26 +316,16 @@ end
 
 --- Show a menu.
 -- @param menu The menu to show.
--- @param args.keygrabber A boolean enabling or not the keyboard navigation.
 -- @param args.coords Menu position defaulting to mouse.coords()
 function show(menu, args)
     args = args or {}
     local coords = args.coords or nil
     local screen_index = capi.mouse.screen
-    local keygrabber = args.keygrabber or false
 
     if not set_size(menu) then return end
     set_coords(menu, screen_index, coords)
 
-    if menu.parent then
-        menu.keygrabber = menu.parent.keygrabber
-    elseif keygrabber ~= nil then
-        menu.keygrabber = keygrabber
-    else
-        menu.keygrabber = false
-    end
-
-    if not cur_menu and menu.keygrabber then
+    if not cur_menu then
         capi.keygrabber.run(grabber)
     end
     cur_menu = menu
@@ -358,7 +348,7 @@ function hide(menu)
     if cur_menu == menu then
         cur_menu = cur_menu.parent
     end
-    if not cur_menu and menu.keygrabber then
+    if not cur_menu then
         capi.keygrabber.stop()
     end
     menu.wibox.visible = false
@@ -366,7 +356,6 @@ end
 
 --- Toggle menu visibility.
 -- @param menu The menu to show if it's hidden, or to hide if it's shown.
--- @param args.keygrabber A boolean enabling or not the keyboard navigation.
 -- @param args.coords Menu position {x,y}
 function toggle(menu, args)
     if menu.wibox.visible then
@@ -380,9 +369,7 @@ end
 -- @param menu The mnenu to update.
 function update(menu)
     if menu.wibox.visible then
-        menu:show({
-            keygrabber = menu.keygrabber,
-            coords = { x = menu.x, y = menu.y } })
+        menu:show({ coords = { x = menu.x, y = menu.y } })
     end
 end
 
@@ -488,7 +475,6 @@ end
 
 --- Build a popup menu with running clients and shows it.
 -- @param menu Menu table, see new() function for more informations
--- @param args.keygrabber A boolean enabling or not the keyboard navigation.
 -- @return The menu.
 function clients(menu, args) -- FIXME crude api
     menu = menu or {}
@@ -644,9 +630,7 @@ end
 -- &nbsp;&nbsp;&nbsp;          }                                           <br/>
 -- &nbsp;&nbsp;            end                                             <br/>
 -- &nbsp;                end                                               <br/>
--- &nbsp;                m = awful.menu(terms)                             <br/>
--- &nbsp;                m:show({keygrabber=true})                         <br/>
--- &nbsp;                return m                                          <br/>
+-- &nbsp;                awful.menu(terms):show()                          <br/>
 --                     end                                                 <br/>
 --</code></p>
 function new(args, parent)
