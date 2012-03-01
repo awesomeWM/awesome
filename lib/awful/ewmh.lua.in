@@ -27,14 +27,14 @@ end
 -- @param set Set or unset the maximized values.
 local function maximized_horizontal(window, set)
     if set then
-        store_geometry(window, "maximized")
+        store_geometry(window, "maximized_horizontal")
         local g = screen[window.screen].workarea
         window:geometry { width = g.width, x = g.x }
-    elseif data[window] and data[window].maximized
-        and data[window].maximized.x
-        and data[window].maximized.width then
-        window:geometry { width = data[window].maximized.width,
-                          x = data[window].maximized.x }
+    elseif data[window] and data[window].maximized_horizontal
+        and data[window].maximized_horizontal.x
+        and data[window].maximized_horizontal.width then
+        local g = data[window].maximized_horizontal
+        window:geometry { width = g.width, x = g.x }
     end
 end
 
@@ -43,14 +43,14 @@ end
 -- @param set Set or unset the maximized values.
 local function maximized_vertical(window, set)
     if set then
-        store_geometry(window, "maximized")
+        store_geometry(window, "maximized_vertical")
         local g = screen[window.screen].workarea
         window:geometry { height = g.height, y = g.y }
-    elseif data[window] and data[window].maximized
-        and data[window].maximized.y
-        and data[window].maximized.height then
-        window:geometry { height = data[window].maximized.height,
-                          y = data[window].maximized.y }
+    elseif data[window] and data[window].maximized_vertical
+        and data[window].maximized_vertical.y
+        and data[window].maximized_vertical.height then
+        local g = data[window].maximized_vertical
+        window:geometry { height = g.height, y = g.y }
     end
 end
 
