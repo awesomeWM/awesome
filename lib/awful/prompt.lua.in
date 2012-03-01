@@ -163,7 +163,9 @@ end
 -- @param history_path Optional parameter: file path where the history should be saved, set nil to disable history
 -- @param history_max Optional parameter: set the maximum entries in history file, 50 by default
 -- @param done_callback Optional parameter: the callback function to always call without arguments, regardless of whether the prompt was cancelled.
-function run(args, textbox, exe_callback, completion_callback, history_path, history_max, done_callback)
+-- @param changed_callback Optional parameter: the callback function to call with command as argument when a command was changed.
+-- @param keypressed_callback Optional parameter: the callback function to call with mod table, key and command as arguments when a key was pressed.
+function run(args, textbox, exe_callback, completion_callback, history_path, history_max, done_callback, changed_callback, keypressed_callback)
     local theme = beautiful.get()
     if not args then args = {} end
     local command = args.text or ""
@@ -217,6 +219,31 @@ function run(args, textbox, exe_callback, completion_callback, history_path, his
         -- Convert index array to hash table
         local mod = {}
         for k, v in ipairs(modifiers) do mod[v] = true end
+
+        -- Call the user specified callback. If it returns true as
+        -- the first result then return from the function. Treat the
+        -- second and third results as a new command and new prompt
+        -- to be set (if provided)
+        if keypressed_callback then
+            local user_catched, new_command, new_prompt =
+                keypressed_callback(mod, key, command)
+            if new_command or new_prompt then
+                if new_command then
+                    command = new_command
+                end
+                if new_prompt then
+                    prettyprompt = new_prompt
+                end
+                update()
+            end
+            if user_catched then
+                if changed_callback then
+                    changed_callback(command)
+                end
+                return
+            end
+        end
+
         -- Get out cases
         if (mod.Control and (key == "c" or key == "g"))
             or (not mod.Control and key == "Escape") then
@@ -429,6 +456,10 @@ function run(args, textbox, exe_callback, completion_callback, history_path, his
             command = command:sub(1, cur_pos - 2) .. command:sub(cur_pos)
             cur_pos = cur_pos - 1
             success = pcall(update)
+        end
+
+        if changed_callback then
+            changed_callback(command)
         end
     end)
 end
