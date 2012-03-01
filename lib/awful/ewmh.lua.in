@@ -29,7 +29,8 @@ local function maximized_horizontal(window, set)
     if set then
         store_geometry(window, "maximized_horizontal")
         local g = screen[window.screen].workarea
-        window:geometry { width = g.width, x = g.x }
+        local bw = window.border_width or 0
+        window:geometry { width = g.width - 2*bw, x = g.x }
     elseif data[window] and data[window].maximized_horizontal
         and data[window].maximized_horizontal.x
         and data[window].maximized_horizontal.width then
@@ -45,7 +46,8 @@ local function maximized_vertical(window, set)
     if set then
         store_geometry(window, "maximized_vertical")
         local g = screen[window.screen].workarea
-        window:geometry { height = g.height, y = g.y }
+        local bw = window.border_width or 0
+        window:geometry { height = g.height - 2*bw, y = g.y }
     elseif data[window] and data[window].maximized_vertical
         and data[window].maximized_vertical.y
         and data[window].maximized_vertical.height then
