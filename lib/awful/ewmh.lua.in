@@ -74,15 +74,23 @@ end
 
 local function screen_change(window)
     if data[window] then
-        for _, reqtype in ipairs({ "maximized", "fullscreen" }) do
+        for _, reqtype in ipairs({ "maximized_vertical", "maximized_horizontal", "fullscreen" }) do
             if data[window][reqtype] then
                 if data[window][reqtype].width then
                     data[window][reqtype].width = math.min(data[window][reqtype].width,
                                                            screen[window.screen].workarea.width)
+                    if reqtype == "maximized_horizontal" then
+                        local bw = window.border_width or 0
+                        data[window][reqtype].width = data[window][reqtype].width - 2*bw
+                    end
                 end
                 if data[window][reqtype].height then
                     data[window][reqtype].height = math.min(data[window][reqtype].height,
                                                              screen[window.screen].workarea.height)
+                    if reqtype == "maximized_vertical" then
+                        local bw = window.border_width or 0
+                        data[window][reqtype].height = data[window][reqtype].height - 2*bw
+                    end
                 end
                 if data[window][reqtype].screen then
                     local from = screen[data[window][reqtype].screen].workarea
