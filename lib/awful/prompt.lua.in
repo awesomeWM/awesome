@@ -211,6 +211,7 @@ function run(args, textbox, exe_callback, completion_callback, history_path, his
         -- Get out cases
         if (mod.Control and (key == "c" or key == "g"))
             or (not mod.Control and key == "Escape") then
+            capi.keygrabber.stop()
             textbox:set_markup("")
             if done_callback then done_callback() end
             return false
