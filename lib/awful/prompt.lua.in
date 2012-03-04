@@ -204,7 +204,7 @@ function run(args, textbox, exe_callback, completion_callback, history_path, his
 
     capi.keygrabber.run(
     function (modifiers, key, event)
-        if event ~= "press" then return true end
+        if event ~= "press" then return end
         -- Convert index array to hash table
         local mod = {}
         for k, v in ipairs(modifiers) do mod[v] = true end
@@ -221,7 +221,7 @@ function run(args, textbox, exe_callback, completion_callback, history_path, his
             exec()
             -- We already unregistered ourselves so we don't want to return
             -- true, otherwise we may unregister someone else.
-            return true
+            return
         end
 
         -- Control cases
@@ -313,7 +313,7 @@ function run(args, textbox, exe_callback, completion_callback, history_path, his
             if completion_callback then
                 if key == "Tab" or key == "ISO_Left_Tab" then
                     if key == "ISO_Left_Tab" then
-                        if ncomp == 1 then return true end
+                        if ncomp == 1 then return end
                         if ncomp == 2 then
                             command = command_before_comp
                             textbox:set_font(font)
@@ -321,7 +321,7 @@ function run(args, textbox, exe_callback, completion_callback, history_path, his
                                 text = command_before_comp, text_color = inv_col, cursor_color = cur_col,
                                 cursor_pos = cur_pos, cursor_ul = cur_ul, selectall = selectall,
                                 prompt = prettyprompt })
-                            return true
+                            return
                         end
 
                         ncomp = ncomp - 2
@@ -336,7 +336,7 @@ function run(args, textbox, exe_callback, completion_callback, history_path, his
                     -- execute if only one match found and autoexec flag set
                     if matches and #matches == 1 and args.autoexec then
                         exec()
-                        return true
+                        return
                     end
                 else
                     ncomp = 1
@@ -430,8 +430,6 @@ function run(args, textbox, exe_callback, completion_callback, history_path, his
             cur_pos = cur_pos - 1
             success = pcall(update)
         end
-
-        return true
     end)
 end
 
