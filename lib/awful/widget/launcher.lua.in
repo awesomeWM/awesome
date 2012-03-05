@@ -20,6 +20,7 @@ function new(args)
     local w = wbutton(args)
     if not w then return end
 
+    local b
     if args.command then
        b = util.table.join(w:buttons(), button({}, 1, nil, function () util.spawn(args.command) end))
     elseif args.menu then
