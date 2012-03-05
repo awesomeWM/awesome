@@ -11,6 +11,7 @@ local os = os
 local table = table
 local math = math
 local print = print
+local pairs = pairs
 local util = require("awful.util")
 
 --- Completion module.
@@ -172,11 +173,11 @@ function generic(text, cur_pos, ncomp, keywords)
 
     -- Filter out only keywords starting with text
     local matches = {}
-    table.foreach(keywords, function(_, x)
-        if x:sub(1 , #text) == text then
+    for _, x in pairs(keywords) do
+        if x:sub(1, #text) == text then
             table.insert(matches, x)
         end
-    end)
+    end
 
     -- if there are no matches just leave out with the current text and position
     if #matches == 0 then
