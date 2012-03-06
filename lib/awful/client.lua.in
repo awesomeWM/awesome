@@ -39,6 +39,32 @@ floating = {}
 dockable = {}
 property = {}
 
+---
+-- Jump to the given client.  Takes care of focussing the screen, the right tag,
+-- etc.
+-- @param merge If true then merge tags when clients are not visible.
+function jumpto(c, merge)
+    local s = capi.client.focus and capi.client.focus.screen or capi.mouse.screen
+    -- focus the screen
+    if s ~= c.screen then
+        capi.mouse.screen = c.screen
+    end
+
+    -- Try to make client visible, this also covers e.g. sticky
+    local t = c:tags()[1]
+    if t and not c:isvisible() then
+        if merge then
+            t.selected = true
+        else
+            tag.viewonly(t)
+        end
+    end
+
+    -- focus the client
+    capi.client.focus = c
+    c:raise()
+end
+
 --- Get the first client that got the urgent hint.
 -- @return The first urgent client.
 function urgent.get()
@@ -60,25 +86,7 @@ end
 function urgent.jumpto(merge)
     local c = urgent.get()
     if c then
-        local s = capi.client.focus and capi.client.focus.screen or capi.mouse.screen
-        -- focus the screen
-        if s ~= c.screen then
-            capi.mouse.screen = c.screen
-        end
-
-        -- Try to make client visible, this also covers e.g. sticky
-        local t = c:tags()[1]
-        if t and not c:isvisible() then
-            if merge then
-                t.selected = true
-            else
-                tag.viewonly(t)
-            end
-        end
-
-        -- focus the client
-        capi.client.focus = c
-        c:raise()
+        jumpto(c, merge)
     end
 end
 
