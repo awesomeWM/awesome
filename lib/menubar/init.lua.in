@@ -1,0 +1,269 @@
+---------------------------------------------------------------------------
+-- @author Alexander Yakushev &lt;yakushev.alex@gmail.com&gt;
+-- @copyright 2011-2012 Alexander Yakushev
+-- @release @AWESOME_VERSION@
+---------------------------------------------------------------------------
+
+-- Grab environment we need
+local capi = { client = client,
+               screen = screen }
+local setmetatable = setmetatable
+local pairs = pairs
+local ipairs = ipairs
+local table = table
+local theme = require("beautiful")
+local menu_gen = require("menubar.menu_gen")
+local prompt = require("awful.prompt")
+local awful = require("awful")
+local common = require("awful.widget.common")
+local tonumber = tonumber
+local string = string
+local mouse = mouse
+local math = math
+local keygrabber = keygrabber
+local wibox = require("wibox")
+
+module("menubar")
+
+-- Options section
+
+-- When true the .desktop files will be reparsed only when the
+-- extension is initialized. Use this if menubar takes much time to
+-- open.
+cache_entries = true
+
+-- When true the categories will be shown alongside application
+-- entries.
+show_categories = true
+
+-- Specifies the geometry of the menubar. This is a table with the keys
+-- x, y, width and height. Missing values are replaced via the screen's
+-- geometry. However, missing height is replaced by the font size.
+geometry = { width = nil,
+             height = nil,
+             x = nil,
+             y = nil }
+
+-- Private section
+local current_item = 1
+local previous_item = nil
+local current_category = nil
+local shownitems = nil
+local instance = { prompt = nil,
+                   widget = nil,
+                   wibox = nil }
+
+local common_args = { w = wibox.layout.fixed.horizontal(),
+                      data = setmetatable({}, { __mode = 'kv' }) }
+
+-- Wrap the text with the color span tag.
+-- @param s The text.
+-- @param c The desired text color.
+-- @return the text wrapped in a span tag.
+local function colortext(s, c)
+    return "<span color='" .. c .. "'>" .. s .. "</span>"
+end
+
+-- Generate a pattern matching expression that ignores case.
+-- @param s Original pattern matching expresion.
+local function nocase (s)
+    s = string.gsub(s, "%a",
+                    function (c)
+                        return string.format("[%s%s]", string.lower(c),
+                                             string.upper(c))
+                    end)
+    return s
+end
+
+-- Get how the menu item should be displayed.
+-- @param o The menu item.
+-- @return item name, item background color, background image, item icon.
+local function label(o)
+    if o.focused then
+        local color = awful.util.color_strip_alpha(theme.fg_focus)
+        return colortext(o.name, color), theme.bg_focus, nil, o.icon
+    else
+        return o.name, theme.bg_normal, nil, o.icon
+    end
+end
+
+-- Perform an action for the given menu item.
+-- @param o The menu item.
+-- @return if the function processed the callback, new awful.prompt command, new awful.prompt prompt text.
+local function perform_action(o)
+    if not o or o.empty then
+        return true
+    end
+    if o.key then
+        current_category = o.key
+        local new_prompt = shownitems[current_item].name .. ": "
+        previous_item = current_item
+        current_item = 1
+        return true, "", new_prompt
+    elseif shownitems[current_item].cmdline then
+        awful.util.spawn(shownitems[current_item].cmdline)
+        hide()
+        return true
+    end
+end
+
+-- Update the menubar according to the command entered by user.
+-- @param query The text to filter entries by.
+local function menulist_update(query)
+    local query = query or ""
+    shownitems = {}
+    local match_inside = {}
+
+    -- First we add entries which names match the command from the
+    -- beginning to the table shownitems, and the ones that contain
+    -- command in the middle to the table match_inside.
+
+    -- Add the categories
+    if show_categories then
+        for _, v in pairs(menu_gen.all_categories) do
+            v.focused = false
+            if not current_category and v.use then
+                if string.match(v.name, nocase(query)) then
+                    if string.match(v.name, "^" .. nocase(query)) then
+                        table.insert(shownitems, v)
+                    else
+                        table.insert(match_inside, v)
+                    end
+                end
+            end
+        end
+    end
+
+    -- Add the applications
+    for i, v in ipairs(menu_entries) do
+        v.focused = false
+        if not current_category or v.category == current_category then
+            if string.match(v.name, nocase(query)) then
+                if string.match(v.name, "^" .. nocase(query)) then
+                    table.insert(shownitems, v)
+                else
+                    table.insert(match_inside, v)
+                end
+            end
+        end
+    end
+
+    -- Now add items from match_inside to shownitems
+    for i, v in ipairs(match_inside) do
+        table.insert(shownitems, v)
+    end
+
+    if #shownitems > 0 then
+        if current_item > #shownitems then
+            current_item = #shownitems
+        end
+        shownitems[current_item].focused = true
+    else
+        table.insert(shownitems, { name = "&lt;no matches&gt;", icon = nil,
+                                   empty = true })
+    end
+
+    common.list_update(common_args.w, nil, label,
+                       common_args.data,
+                       shownitems)
+end
+
+-- Create the menubar wibox and widgets.
+local function initialize()
+    instance.wibox = wibox({})
+    instance.widget = get()
+    instance.wibox.ontop = true
+    instance.prompt = awful.widget.prompt()
+    local layout = wibox.layout.fixed.horizontal()
+    layout:add(instance.prompt)
+    layout:add(instance.widget)
+    instance.wibox:set_widget(layout)
+end
+
+--- Refresh menubar's cache by reloading .desktop files.
+function refresh()
+    menu_entries = menu_gen.generate()
+end
+
+-- Awful.prompt keypressed callback to be used when the user presses a key.
+-- @param mod Table of key combination modifiers (Control, Shift).
+-- @param key The key that was pressed.
+-- @param comm The current command in the prompt.
+-- @return if the function processed the callback, new awful.prompt command, new awful.prompt prompt text.
+local function prompt_keypressed_callback(mod, key, comm)
+    if key == "Left" or (mod.Control and key == "j") then
+        current_item = math.max(current_item - 1, 1)
+        return true
+    elseif key == "Right" or (mod.Control and key == "k") then
+        current_item = current_item + 1
+        return true
+    elseif key == "BackSpace" then
+        if comm == "" and current_category then
+            current_category = nil
+            current_item = previous_item
+            return true, nil, "Run app: "
+        end
+    elseif key == "Escape" then
+        if current_category then
+            current_category = nil
+            current_item = previous_item
+            return true, nil, "Run app: "
+        end
+    elseif key == "Return" then
+        return perform_action(shownitems[current_item])
+    end
+    return false
+end
+
+--- Show the menubar on the given screen.
+-- @param scr Screen number.
+function show(scr)
+    if not instance.wibox then
+        initialize()
+    elseif instance.wibox.visible then -- Menu already shown, exit
+        return
+    elseif not cache_entries then
+        refresh()
+    end
+
+    -- Set position and size
+    scr = scr or mouse.screen or 1
+    local scrgeom = capi.screen[scr].workarea
+    instance.wibox:geometry({x = geometry.x or scrgeom.x,
+                             y = geometry.y or scrgeom.y,
+                             height = geometry.height or theme.get_font_height() * 1.5,
+                             width = geometry.width or scrgeom.width})
+
+    current_item = 1
+    current_category = nil
+    menulist_update()
+    prompt.run({ prompt = "Run app: " }, instance.prompt.widget, function(s) end,
+               nil, awful.util.getdir("cache") .. "/history_menu", nil, hide,
+               menulist_update,
+               prompt_keypressed_callback)
+    instance.wibox.visible = true
+end
+
+--- Hide the menubar.
+function hide()
+    keygrabber.stop()
+    instance.wibox.visible = false
+end
+
+--- Get a menubar wibox.
+-- @return menubar wibox.
+function get()
+    if app_folders then
+        menu_gen.all_menu_dirs = app_folders
+    end
+    refresh()
+    -- Add to each category the name of its key in all_categories
+    for k, v in pairs(menu_gen.all_categories) do
+        v.key = k
+    end
+    return common_args.w
+end
+
+setmetatable(_M, { __call = function(_, ...) return get(...) end })
+
+-- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

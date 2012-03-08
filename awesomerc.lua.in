@@ -8,6 +8,7 @@ require("wibox")
 require("beautiful")
 -- Notification library
 require("naughty")
+require("menubar")
 
 -- {{{ Error handling
 -- Check if awesome encountered an error during startup and fell back to
@@ -93,6 +94,9 @@ mymainmenu = awful.menu({ items = { { "awesome", myawesomemenu, beautiful.awesom
 
 mylauncher = awful.widget.launcher({ image = beautiful.awesome_icon,
                                      menu = mymainmenu })
+
+-- Menubar configuration
+menubar.utils.terminal = terminal -- Set the terminal for applications that require it
 -- }}}
 
 -- {{{ Wibox
@@ -251,7 +255,9 @@ globalkeys = awful.util.table.join(
                   mypromptbox[mouse.screen].widget,
                   awful.util.eval, nil,
                   awful.util.getdir("cache") .. "/history_eval")
-              end)
+              end),
+    -- Menubar
+    awful.key({ modkey }, "p", function() menubar.show() end)
 )
 
 clientkeys = awful.util.table.join(
