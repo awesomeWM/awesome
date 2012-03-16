@@ -7,6 +7,9 @@
 local error = error
 local tostring = tostring
 local traceback = debug.traceback
+local print = print
+local type = type
+local pairs = pairs
 
 module("gears.debug")
 
@@ -18,6 +21,48 @@ function assert(cond, message)
     if not cond then
         error(traceback("Assertion failed: '" .. tostring(message) .. "'"))
     end
+end
+
+-- Given a table (or any other data) return a string that contains its
+-- tag, value and type. If data is a table then recursively call d_raw
+-- on each of its values.
+-- @param data Value to inspect.
+-- @param shift Spaces to indent lines with.
+-- @param tag The name of the value.
+-- @return a string which contains tag, value, value type and table key/value
+-- pairs if data is a table.
+local function dump_raw(data, shift, tag)
+    local result = ""
+
+    if tag then
+        result = result .. tostring(tag) .. " : " .. tostring(data)
+    end
+
+    if type(data) ~= "table" then
+        return result .. " (" .. type(data) .. ")"
+    end
+
+    shift = (shift or "") .. "  "
+    for k, v in pairs(data) do
+        result = result .. "\n" .. shift .. dump_raw(v, shift, k)
+    end
+
+    return result
+end
+
+--- Inspect the value in data.
+-- @param data Value to inspect.
+-- @param tag The name of the value.
+-- @return a string that contains the expanded value of data.
+function dump_return(data, tag)
+    return dump_raw(data, nil, tag)
+end
+
+--- Print the table (or any other value) to the console.
+-- @param data Table to print.
+-- @param tag The name of the table.
+function dump(data, tag)
+    print(dump_return(data, tag))
 end
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
