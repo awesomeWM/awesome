@@ -51,4 +51,4 @@ capi.awesome.add_signal("spawn::canceled", unregister_hook)
 capi.awesome.add_signal("spawn::completed", unregister_hook)
 capi.awesome.add_signal("spawn::timeout", unregister_hook)
 
--- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
+-- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

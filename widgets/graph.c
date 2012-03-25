@@ -625,4 +625,4 @@ static const struct luaL_reg awesome_graph_meta[] __attribute__ ((unused)) =
     { "plot_data_add", luaA_graph_plot_data_add },
 };
 
-// vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
+// vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

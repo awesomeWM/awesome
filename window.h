@@ -39,4 +39,4 @@ void window_takefocus(xcb_window_t);
 void window_set_cursor(xcb_window_t, xcb_cursor_t);
 
 #endif
-// vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
+// vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

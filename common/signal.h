@@ -98,4 +98,4 @@ signal_remove(signal_array_t *arr, const char *name, const void *ref)
 
 #endif
 
-// vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
+// vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
