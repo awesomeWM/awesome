@@ -897,6 +897,38 @@ function iterate(filter, start, s)
     return util.table.iterate(clients, filter, start)
 end
 
+---
+-- <p>Switch to a client matching the given condition if running, else spawn it.
+-- If multiple clients match the given condition then the next one is
+-- focussed.</p>
+--
+-- @param cmd     the command to execute
+-- @param matcher a function that returns true to indicate a matching client
+-- @param merge   if true then merge tags when clients are not visible
+--
+-- @usage run or raise urxvt (perhaps, with tabs) on modkey + semicolon
+-- <p><code>
+-- awful.key({ modkey, }, 'semicolon', function ()            <br/>
+--   local matcher = function (c)                             <br/>
+--     return awful.rules.match(c, {class = 'URxvt'}) <br/>
+--   end                                                      <br/>
+--   awful.client.run_or_raise('urxvt', matcher)
+-- end);
+-- </code></p>
+function run_or_raise(cmd, matcher, merge)
+    local clients = capi.client.get()
+    local findex  = util.table.hasitem(clients, capi.client.focus) or 1
+    local start   = util.cycle(#clients, findex + 1)
+
+    for c in iterate(matcher, start) do
+        jumpto(c, merge)
+        return
+    end
+
+    -- client not found, spawn it
+    util.spawn(cmd)
+end
+
 -- Register standards signals
 capi.client.add_signal("property::floating_geometry")
 capi.client.add_signal("property::floating")
