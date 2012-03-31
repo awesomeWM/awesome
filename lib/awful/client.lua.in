@@ -42,6 +42,7 @@ property = {}
 ---
 -- Jump to the given client.  Takes care of focussing the screen, the right tag,
 -- etc.
+-- @param c the client to jump to
 -- @param merge If true then merge tags when clients are not visible.
 function jumpto(c, merge)
     local s = capi.client.focus and capi.client.focus.screen or capi.mouse.screen
