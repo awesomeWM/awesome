@@ -370,11 +370,12 @@ end
 ---
 -- Returns an iterator to cycle through, starting from the first element or the
 -- given index, all elments of a table that match a given criteria.
+--
 -- @param t      the table to iterate
 -- @param filter a function that returns true to indicate a positive match
 -- @param start  what index to start iterating from.  Default is 1 (=> start of
 -- the table)
-function table.cycle(t, filter, start)
+function table.iterate(t, filter, start)
     local count  = 0
     local index  = start or 1
     local length = #t
