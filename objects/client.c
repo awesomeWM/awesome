@@ -319,6 +319,7 @@ void
 client_focus_refresh(void)
 {
     client_t *c = globalconf.focus.client;
+    xcb_window_t win = globalconf.screen->root;
 
     if(!globalconf.focus.need_update)
         return;
@@ -330,16 +331,24 @@ client_focus_refresh(void)
         client_unban(c);
         /* Sets focus on window - using xcb_set_input_focus or WM_TAKE_FOCUS */
         if(!c->nofocus)
-            xcb_set_input_focus(globalconf.connection, XCB_INPUT_FOCUS_PARENT,
-                                c->window, globalconf.timestamp);
+            win = c->window;
+        else
+            /* Focus the root window to make sure the previously focused client
+             * doesn't get any input in case WM_TAKE_FOCUS gets ignored.
+             */
+            win = globalconf.screen->root;
 
         if(client_hasproto(c, WM_TAKE_FOCUS))
             xwindow_takefocus(c->window);
     }
-    else
-        /* Nothing has the focus, set the focus to the root window */
-        xcb_set_input_focus(globalconf.connection, XCB_INPUT_FOCUS_PARENT,
-                            globalconf.screen->root, globalconf.timestamp);
+
+    /* If nothing has the focused or the currently focused client doesn't want
+     * us to focus it, this sets the focus to the root window. This makes sure
+     * the previously focused client actually gets unfocused. Alternatively, the
+     * new client gets the input focus.
+     */
+    xcb_set_input_focus(globalconf.connection, XCB_INPUT_FOCUS_PARENT,
+                        win, globalconf.timestamp);
 }
 
 static void
