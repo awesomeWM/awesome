@@ -112,6 +112,8 @@ function label.all(t, args)
     local bg_focus = args.bg_focus or theme.taglist_bg_focus or theme.bg_focus
     local fg_urgent = args.fg_urgent or theme.taglist_fg_urgent or theme.fg_urgent
     local bg_urgent = args.bg_urgent or theme.taglist_bg_urgent or theme.bg_urgent
+    local bg_occupied = args.bg_occupied or theme.taglist_bg_occupied
+    local fg_occupied = args.fg_occupied or theme.taglist_fg_occupied
     local taglist_squares_sel = args.squares_sel or theme.taglist_squares_sel
     local taglist_squares_unsel = args.squares_unsel or theme.taglist_squares_unsel
     local taglist_squares_resize = theme.taglist_squares_resize or args.squares_resize or "true"
@@ -144,9 +146,13 @@ function label.all(t, args)
     end
     if not is_selected then
         local cls = t:clients()
-        if #cls > 0 and taglist_squares_unsel then
-            bg_image = capi.image(taglist_squares_unsel)
-            bg_resize = taglist_squares_resize == "true"
+        if #cls > 0 then
+            if taglist_squares_unsel then
+                bg_image = capi.image(taglist_squares_unsel)
+                bg_resize = taglist_squares_resize == "true"
+            end
+            if bg_occupied then bg_color = bg_occupied end
+            if fg_occupied then fg_color = fg_occupied end
         end
         for k, c in pairs(cls) do
             if c.urgent then
