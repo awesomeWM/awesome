@@ -46,6 +46,13 @@ color_parse(const char *colstr, ssize_t len,
     char *p;
 
     colnum = strtoul(colstr + 1, &p, 16);
+    if(len == 9 && (p - colstr) == 9)
+    {
+        /* We ignore the alpha component */
+        colnum >>= 8;
+        len -= 2;
+        p -= 2;
+    }
     if(len != 7 || colstr[0] != '#' || (p - colstr) != 7)
     {
         warn("awesome: error, invalid color '%s'", colstr);
