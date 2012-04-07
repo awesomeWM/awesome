@@ -359,6 +359,15 @@ property_handle_net_wm_opacity(uint8_t state,
     return 0;
 }
 
+static int
+property_handle_xrootpmap_id(uint8_t state,
+                             xcb_window_t window)
+{
+    signal_object_emit(globalconf.L, &global_signals, "wallpaper_changed", 0);
+    return 0;
+}
+
+
 /** The property notify event handler.
  * \param data Unused data.
  * \param connection The connection to the X server.
@@ -403,6 +412,9 @@ property_handle_propertynotify(xcb_property_notify_event_t *ev)
     HANDLE(_NET_WM_ICON, property_handle_net_wm_icon)
     HANDLE(_NET_WM_PID, property_handle_net_wm_pid)
     HANDLE(_NET_WM_WINDOW_OPACITY, property_handle_net_wm_opacity)
+
+    /* background change */
+    HANDLE(_XROOTPMAP_ID, property_handle_xrootpmap_id)
 
     /* If nothing was found, return */
     END;

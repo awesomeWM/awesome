@@ -658,6 +658,7 @@ luaA_init(xdgHandle* xdg)
     signal_add(&global_signals, "debug::index::miss");
     signal_add(&global_signals, "debug::newindex::miss");
     signal_add(&global_signals, "systray::update");
+    signal_add(&global_signals, "wallpaper_changed");
     signal_add(&global_signals, "refresh");
     signal_add(&global_signals, "exit");
 }
