@@ -180,8 +180,8 @@ end
 -- @return A table with all .desktop entries.
 function parse_dir(dir)
     local programs = {}
-    local files = io.popen('find '.. dir ..' -maxdepth 1 -name "*.desktop"'):lines()
-    for file in files do
+    local files = io.popen('find '.. dir ..' -maxdepth 1 -name "*.desktop"')
+    for file in files:lines() do
         table.insert(programs, parse(file))
     end
     return programs
