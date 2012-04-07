@@ -10,6 +10,7 @@ require("wibox.widget")
 local capi = {
     drawin = drawin,
     oocairo = oocairo,
+    root = root,
     awesome = awesome
 }
 local setmetatable = setmetatable
@@ -34,9 +35,17 @@ local function do_redraw(wibox)
     local geom = wibox.drawin:geometry()
     local cr = capi.oocairo.context_create(wibox.drawin.surface)
 
-    -- Clear the drawin
+    -- Draw the background
     cr:save()
-    cr:set_operator("source")
+    -- This is pseudo-transparency: We draw the wallpaper in the background
+    local wallpaper = capi.root.wallpaper()
+    if wallpaper then
+        cr:set_operator("source")
+        cr:set_source(wallpaper, -wibox.drawin.x, -wibox.drawin.y)
+        cr:paint()
+    end
+
+    cr:set_operator("over")
     cr:set_source(wibox.background_color)
     cr:paint()
     cr:restore()
@@ -234,7 +243,14 @@ local function setup_signals(wibox)
     -- Update the wibox when its geometry changes
     w:connect_signal("property::height", wibox.draw)
     w:connect_signal("property::width", wibox.draw)
-    w:connect_signal("property::visible", wibox.draw)
+    w:connect_signal("property::visible", function()
+        if w.visible then
+            capi.awesome.connect_signal("wallpaper_changed", wibox.draw)
+            wibox.draw()
+        else
+            capi.awesome.disconnect_signal("wallpaper_changed", wibox.draw)
+        end
+    end)
 
     local function button_signal(name)
         w:connect_signal(name, function(w, x, y, ...)
