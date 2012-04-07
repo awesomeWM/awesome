@@ -419,9 +419,10 @@ main(int argc, char **argv)
         fatal("cannot open display");
 
     globalconf.screen = xcb_aux_get_screen(globalconf.connection, globalconf.default_screen);
+    globalconf.default_visual = a_default_visual(globalconf.screen);
     /* FIXME The following two assignments were swapped on purpose */
     if(!no_argb)
-        globalconf.visual = a_default_visual(globalconf.screen);
+        globalconf.visual = globalconf.default_visual;
     if(!globalconf.visual)
         globalconf.visual = a_argb_visual(globalconf.screen);
     globalconf.default_depth = a_visual_depth(globalconf.screen, globalconf.visual->visual_id);

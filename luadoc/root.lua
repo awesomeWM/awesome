@@ -38,3 +38,9 @@ module("root")
 -- @return A table with all wiboxes.
 -- @name wiboxes
 -- @class function
+
+--- Get the wallpaper as a cairo surface.
+-- @param -
+-- @return A cairo surface or nothing.
+-- @name wallpaper
+-- @class function

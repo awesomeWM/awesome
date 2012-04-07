@@ -119,8 +119,10 @@ typedef struct
     } systray;
     /** The monitor of startup notifications */
     SnMonitorContext *snmonitor;
-    /** The default visual, used to draw */
+    /** The visual, used to draw */
     xcb_visualtype_t *visual;
+    /** The screen's default visual */
+    xcb_visualtype_t *default_visual;
     /** The screen's information */
     xcb_screen_t *screen;
     /** A graphic context. */

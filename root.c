@@ -22,6 +22,7 @@
 #include <X11/keysym.h>
 #include <X11/XF86keysym.h>
 #include <xcb/xtest.h>
+#include <cairo-xcb.h>
 
 #include "globalconf.h"
 #include "objects/button.h"
@@ -249,6 +250,43 @@ luaA_root_drawins(lua_State *L)
     return 1;
 }
 
+/** Get the screen's wallpaper
+ * \param L The Lua VM state.
+ * \return The number of element pushed on stack.
+ * \luastack
+ * \lreturn A cairo surface for the wallpaper.
+ */
+static int
+luaA_root_wallpaper(lua_State *L)
+{
+    xcb_get_property_cookie_t prop_c;
+    xcb_get_property_reply_t *prop_r;
+    xcb_pixmap_t *rootpix;
+    cairo_surface_t *surface;
+    int ret;
+
+    prop_c = xcb_get_property_unchecked(globalconf.connection, false,
+            globalconf.screen->root, _XROOTPMAP_ID, XCB_ATOM_PIXMAP, 0, 1);
+    prop_r = xcb_get_property_reply(globalconf.connection, prop_c, NULL);
+
+    if (!prop_r || !prop_r->value_len)
+        return 0;
+
+    rootpix = xcb_get_property_value(prop_r);
+    if (!rootpix)
+        return 0;
+
+    /* We can't query the pixmap's values (or even if that pixmap exists at
+     * all), so let's just assume that it uses the default visual and is as
+     * large as the root window. Everything else wouldn't make sense.
+     */
+    surface = cairo_xcb_surface_create(globalconf.connection, *rootpix, globalconf.default_visual,
+            globalconf.screen->width_in_pixels, globalconf.screen->height_in_pixels);
+    ret = oocairo_surface_push(globalconf.L, surface);
+    cairo_surface_destroy(surface);
+    return ret;
+}
+
 const struct luaL_reg awesome_root_lib[] =
 {
     { "buttons", luaA_root_buttons },
@@ -256,6 +294,7 @@ const struct luaL_reg awesome_root_lib[] =
     { "cursor", luaA_root_cursor },
     { "fake_input", luaA_root_fake_input },
     { "drawins", luaA_root_drawins },
+    { "wallpaper", luaA_root_wallpaper },
     { NULL, NULL }
 };
 
