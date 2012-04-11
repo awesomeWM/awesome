@@ -420,11 +420,10 @@ main(int argc, char **argv)
 
     globalconf.screen = xcb_aux_get_screen(globalconf.connection, globalconf.default_screen);
     globalconf.default_visual = a_default_visual(globalconf.screen);
-    /* FIXME The following two assignments were swapped on purpose */
     if(!no_argb)
-        globalconf.visual = globalconf.default_visual;
-    if(!globalconf.visual)
         globalconf.visual = a_argb_visual(globalconf.screen);
+    if(!globalconf.visual)
+        globalconf.visual = globalconf.default_visual;
     globalconf.default_depth = a_visual_depth(globalconf.screen, globalconf.visual->visual_id);
     globalconf.default_cmap = globalconf.screen->default_colormap;
     if(globalconf.default_depth != globalconf.screen->root_depth)
