@@ -35,11 +35,11 @@ local function dump_raw(data, shift, tag)
     local result = ""
 
     if tag then
-        result = result .. tostring(tag) .. " : " .. tostring(data)
+        result = result .. tostring(tag) .. " : "
     end
 
     if type(data) ~= "table" then
-        return result .. " (" .. type(data) .. ")"
+        return result .. tostring(data) .. " (" .. type(data) .. ")"
     end
 
     shift = (shift or "") .. "  "
