@@ -22,6 +22,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include <lualib.h>
+#include <lauxlib.h>
+
 #include "config.h"
 #include "common/version.h"
 #include "awesome-version-internal.h"
@@ -46,6 +49,14 @@ eprint_version(void)
 	   __GNUC__, __GNUC_MINOR__, __GNUC_PATCHLEVEL__);
 #endif
     printf(" (%s@%s)\n", AWESOME_COMPILE_BY, AWESOME_COMPILE_HOSTNAME);
+
+    lua_State *L = lua_open();
+    luaopen_base(L);
+    lua_getglobal(L, "_VERSION");
+    printf(" • Compiled against "  LUA_RELEASE
+           " (running with %s)\n", lua_tostring(L, -1));
+    lua_close(L);
+
     printf(" • D-Bus support: ");
 #ifdef WITH_DBUS
     printf("✔\n");
