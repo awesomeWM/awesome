@@ -10,6 +10,7 @@ local wibox = require("wibox")
 local button = require("awful.button")
 local util = require("awful.util")
 local tags = require("awful.tag")
+local keygrabber = require("awful.keygrabber")
 local beautiful = require("beautiful")
 local object = require("gears.object")
 local setmetatable = setmetatable
@@ -27,7 +28,6 @@ local capi = {
     screen = screen,
     mouse = mouse,
     client = client,
-    keygrabber = keygrabber,
     awesome = awesome,
     oocairo = oocairo }
 
@@ -48,8 +48,6 @@ local table_merge = function (t, set)
     end
 end
 
-
-local cur_menu
 
 --- Key bindings for menu navigation.
 -- Keys are: up, down, exec, enter, back, close. Value are table with a list of valid
@@ -193,26 +191,26 @@ local function check_access_key(menu, key)
 end
 
 
-local function grabber(mod, key, event)
+local function grabber(menu, mod, key, event)
     if event ~= "press" then return end
 
-    local sel = cur_menu.sel or 0
+    local sel = menu.sel or 0
     if util.table.hasitem(menu_keys.up, key) then
-        local sel_new = sel-1 < 1 and #cur_menu.items or sel-1
-        cur_menu:item_enter(sel_new)
+        local sel_new = sel-1 < 1 and #menu.items or sel-1
+        menu:item_enter(sel_new)
     elseif util.table.hasitem(menu_keys.down, key) then
-        local sel_new = sel+1 > #cur_menu.items and 1 or sel+1
-        cur_menu:item_enter(sel_new)
+        local sel_new = sel+1 > #menu.items and 1 or sel+1
+        menu:item_enter(sel_new)
     elseif sel > 0 and util.table.hasitem(menu_keys.enter, key) then
-        cur_menu:exec(sel)
+        menu:exec(sel)
     elseif sel > 0 and util.table.hasitem(menu_keys.exec, key) then
-        cur_menu:exec(sel, { exec = true })
+        menu:exec(sel, { exec = true })
     elseif util.table.hasitem(menu_keys.back, key) then
-        cur_menu:hide()
+        menu:hide()
     elseif util.table.hasitem(menu_keys.close, key) then
-        get_root(cur_menu):hide()
+        get_root(menu):hide()
     else
-        check_access_key(cur_menu, key)
+        check_access_key(menu, key)
     end
 end
 
@@ -284,7 +282,6 @@ function item_enter(menu, num, opts)
     --print("sel", num, menu.sel, item.theme.bg_focus)
     item._background:set_fg(item.theme.fg_focus)
     item._background:set_bg(item.theme.bg_focus)
-    cur_menu = menu
     menu.sel = num
 
     if menu.auto_expand and opts.hover then
@@ -321,10 +318,7 @@ function show(menu, args)
     if not set_size(menu) then return end
     set_coords(menu, screen_index, coords)
 
-    if not cur_menu then
-        capi.keygrabber.run(grabber)
-    end
-    cur_menu = menu
+    keygrabber.run(menu._keygrabber)
     menu.wibox.visible = true
 end
 
@@ -341,12 +335,7 @@ function hide(menu)
     end
     menu.sel = nil
 
-    if cur_menu == menu then
-        cur_menu = cur_menu.parent
-    end
-    if not cur_menu then
-        capi.keygrabber.stop()
-    end
+    keygrabber.stop(menu._keygrabber)
     menu.wibox.visible = false
 end
 
@@ -661,6 +650,10 @@ function new(args, parent)
     for i, v in ipairs(args) do  menu:add(v)  end
     if args.items then
         for i, v in pairs(args.items) do  menu:add(v)  end
+    end
+
+    menu._keygrabber = function (...)
+        grabber(menu, ...)
     end
 
     menu.wibox = wibox({
