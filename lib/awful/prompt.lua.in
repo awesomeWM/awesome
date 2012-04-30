@@ -13,9 +13,9 @@ local ipairs = ipairs
 local pcall = pcall
 local capi =
 {
-    keygrabber = keygrabber,
     selection = selection
 }
+local keygrabber = require("awful.keygrabber")
 local util = require("awful.util")
 local beautiful = require("beautiful")
 
@@ -166,6 +166,7 @@ end
 -- @param changed_callback Optional parameter: the callback function to call with command as argument when a command was changed.
 -- @param keypressed_callback Optional parameter: the callback function to call with mod table, key and command as arguments when a key was pressed.
 function run(args, textbox, exe_callback, completion_callback, history_path, history_max, done_callback, changed_callback, keypressed_callback)
+    local grabber
     local theme = beautiful.get()
     if not args then args = {} end
     local command = args.text or ""
@@ -199,7 +200,7 @@ function run(args, textbox, exe_callback, completion_callback, history_path, his
     local exec = function()
         textbox:set_markup("")
         history_add(history_path, command)
-        capi.keygrabber.stop()
+        keygrabber.stop(grabber)
         exe_callback(command)
         if done_callback then done_callback() end
     end
@@ -213,7 +214,7 @@ function run(args, textbox, exe_callback, completion_callback, history_path, his
                                prompt = prettyprompt })
     end
 
-    capi.keygrabber.run(
+    grabber = keygrabber.run(
     function (modifiers, key, event)
         if event ~= "press" then return end
         -- Convert index array to hash table
@@ -247,7 +248,7 @@ function run(args, textbox, exe_callback, completion_callback, history_path, his
         -- Get out cases
         if (mod.Control and (key == "c" or key == "g"))
             or (not mod.Control and key == "Escape") then
-            capi.keygrabber.stop()
+            keygrabber.stop(grabber)
             textbox:set_markup("")
             if done_callback then done_callback() end
             return false
