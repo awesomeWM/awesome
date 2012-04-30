@@ -20,7 +20,6 @@ local tonumber = tonumber
 local string = string
 local mouse = mouse
 local math = math
-local keygrabber = keygrabber
 local wibox = require("wibox")
 
 module("menubar")
@@ -246,7 +245,6 @@ end
 
 --- Hide the menubar.
 function hide()
-    keygrabber.stop()
     instance.wibox.visible = false
 end
 
