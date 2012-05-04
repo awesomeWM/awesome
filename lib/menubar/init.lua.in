@@ -240,10 +240,12 @@ function show(scr)
     current_item = 1
     current_category = nil
     menulist_update()
-    awful.prompt.run({ prompt = "Run app: " }, instance.prompt.widget, function(s) end,
-               nil, awful.util.getdir("cache") .. "/history_menu", nil, hide,
-               menulist_update,
-               prompt_keypressed_callback)
+    awful.prompt.run({ prompt = "Run: " }, instance.prompt.widget,
+                function(s) end,            -- exe_callback function set to do nothing
+                awful.completion.shell,     -- completion_callback
+                awful.util.getdir("cache") .. "/history_menu",
+                nil, hide, menulist_update, prompt_keypressed_callback
+                )
     instance.wibox.visible = true
 end
 
