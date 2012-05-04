@@ -14,6 +14,7 @@ local awful = require("awful")
 local common = require("awful.widget.common")
 local theme = require("beautiful")
 local menu_gen = require("menubar.menu_gen")
+local menu_utils = require("menubar.utils")
 local wibox = require("wibox")
 
 -- Standard lua
@@ -213,7 +214,21 @@ local function prompt_keypressed_callback(mod, key, comm)
             current_item = previous_item
             return true, nil, "Run app: "
         end
+    elseif key == "Home" then
+        current_item = 1
+        return true
+    elseif key == "End" then
+        current_item = #shownitems
+        return true
     elseif key == "Return" then
+        if mod.Control then
+            current_item = #shownitems
+            if mod.Mod1 then
+                -- add a terminal to the cmdline
+                shownitems[current_item].cmdline = menu_utils.terminal
+                        .. " -e " .. shownitems[current_item].cmdline
+            end
+        end
         return perform_action(shownitems[current_item])
     end
     return false
