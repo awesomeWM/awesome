@@ -136,12 +136,14 @@ local function menulist_update(query)
         end
     end
 
-    -- Add the applications
+    -- Add the applications according to their name and cmdline
     for i, v in ipairs(menu_entries) do
         v.focused = false
         if not current_category or v.category == current_category then
-            if string.match(v.name, nocase(query)) then
-                if string.match(v.name, "^" .. nocase(query)) then
+            if string.match(v.name, nocase(query))
+                or string.match(v.cmdline, nocase(query)) then
+                if string.match(v.name, "^" .. nocase(query))
+                    or string.match(v.cmdline, "^" .. nocase(query)) then
                     table.insert(shownitems, v)
                 else
                     table.insert(match_inside, v)
