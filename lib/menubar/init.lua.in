@@ -93,9 +93,6 @@ end
 -- @param o The menu item.
 -- @return if the function processed the callback, new awful.prompt command, new awful.prompt prompt text.
 local function perform_action(o)
-    if not o or o.empty then
-        return true
-    end
     if o.key then
         current_category = o.key
         local new_prompt = shownitems[current_item].name .. ": "
@@ -158,13 +155,15 @@ local function menulist_update(query)
     end
 
     if #shownitems > 0 then
+        -- Insert a run item value as the last choice
+        table.insert(shownitems, { name = "Exec: " .. query, cmdline = query, icon = nil })
+
         if current_item > #shownitems then
             current_item = #shownitems
         end
         shownitems[current_item].focused = true
     else
-        table.insert(shownitems, { name = "&lt;no matches&gt;", icon = nil,
-                                   empty = true })
+        table.insert(shownitems, { name = "", cmdline = query, icon = nil })
     end
 
     common.list_update(common_args.w, nil, label,
