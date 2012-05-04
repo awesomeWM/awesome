@@ -5,22 +5,25 @@
 ---------------------------------------------------------------------------
 
 -- Grab environment we need
-local capi = { client = client,
-               screen = screen }
-local setmetatable = setmetatable
+local capi = {
+    client = client,
+    mouse = mouse,
+    screen = screen
+}
+local awful = require("awful")
+local common = require("awful.widget.common")
+local theme = require("beautiful")
+local menu_gen = require("menubar.menu_gen")
+local wibox = require("wibox")
+
+-- Standard lua
 local pairs = pairs
 local ipairs = ipairs
 local table = table
-local theme = require("beautiful")
-local menu_gen = require("menubar.menu_gen")
-local prompt = require("awful.prompt")
-local awful = require("awful")
-local common = require("awful.widget.common")
 local tonumber = tonumber
 local string = string
-local mouse = mouse
 local math = math
-local wibox = require("wibox")
+local setmetatable = setmetatable
 
 module("menubar")
 
@@ -226,7 +229,7 @@ function show(scr)
     end
 
     -- Set position and size
-    scr = scr or mouse.screen or 1
+    scr = scr or capi.mouse.screen or 1
     local scrgeom = capi.screen[scr].workarea
     instance.wibox:geometry({x = geometry.x or scrgeom.x,
                              y = geometry.y or scrgeom.y,
@@ -236,7 +239,7 @@ function show(scr)
     current_item = 1
     current_category = nil
     menulist_update()
-    prompt.run({ prompt = "Run app: " }, instance.prompt.widget, function(s) end,
+    awful.prompt.run({ prompt = "Run app: " }, instance.prompt.widget, function(s) end,
                nil, awful.util.getdir("cache") .. "/history_menu", nil, hide,
                menulist_update,
                prompt_keypressed_callback)
