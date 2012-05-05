@@ -674,7 +674,7 @@ client_set_minimized(lua_State *L, int cidx, bool s)
  * \param cidx The client index.
  * \param s Set or not the client hidden.
  */
-void
+static void
 client_set_hidden(lua_State *L, int cidx, bool s)
 {
     client_t *c = luaA_checkudata(L, cidx, &client_class);
