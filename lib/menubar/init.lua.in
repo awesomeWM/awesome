@@ -206,13 +206,13 @@ local function prompt_keypressed_callback(mod, key, comm)
         if comm == "" and current_category then
             current_category = nil
             current_item = previous_item
-            return true, nil, "Run app: "
+            return true, nil, "Run: "
         end
     elseif key == "Escape" then
         if current_category then
             current_category = nil
             current_item = previous_item
-            return true, nil, "Run app: "
+            return true, nil, "Run: "
         end
     elseif key == "Home" then
         current_item = 1
