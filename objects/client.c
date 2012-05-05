@@ -669,6 +669,26 @@ client_set_minimized(lua_State *L, int cidx, bool s)
     }
 }
 
+/** Set a client hidden, or not.
+ * \param L The Lua VM state.
+ * \param cidx The client index.
+ * \param s Set or not the client hidden.
+ */
+void
+client_set_hidden(lua_State *L, int cidx, bool s)
+{
+    client_t *c = luaA_checkudata(L, cidx, &client_class);
+
+    if(c->hidden != s)
+    {
+        c->hidden = s;
+        banning_need_update();
+        if(strut_has_value(&c->strut))
+            screen_emit_signal(globalconf.L, c->screen, "property::workarea", 0);
+        luaA_object_emit_signal(L, cidx, "property::hidden", 0);
+    }
+}
+
 /** Set a client sticky, or not.
  * \param L The Lua VM state.
  * \param cidx The client index.
@@ -850,9 +870,10 @@ client_unban(client_t *c)
 
         c->isbanned = false;
 
-        /* An unbanned clients shouldn't be minimized */
+        /* An unbanned client shouldn't be minimized or hidden */
         luaA_object_push(globalconf.L, c);
         client_set_minimized(globalconf.L, -1, false);
+        client_set_hidden(globalconf.L, -1, false);
         lua_pop(globalconf.L, 1);
     }
 }
@@ -1233,15 +1254,7 @@ luaA_client_set_screen(lua_State *L, client_t *c)
 static int
 luaA_client_set_hidden(lua_State *L, client_t *c)
 {
-    bool b = luaA_checkboolean(L, -1);
-    if(b != c->hidden)
-    {
-        c->hidden = b;
-        banning_need_update();
-        if(strut_has_value(&c->strut))
-            screen_emit_signal(globalconf.L, c->screen, "property::workarea", 0);
-        luaA_object_emit_signal(L, -3, "property::hidden", 0);
-    }
+    client_set_hidden(L, -3, luaA_checkboolean(L, -1));
     return 0;
 }
 
