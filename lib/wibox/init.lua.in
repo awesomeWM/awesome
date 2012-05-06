@@ -127,8 +127,7 @@ end
 -- @param c The background to use. This must either be a cairo pattern object,
 --          nil or a string that gears.color() understands.
 function set_bg(wibox, c)
-    local c = c
-    local colstr = "#000000" -- Default if we can't figure out the color
+    local c = c or "#000000"
     if type(c) == "string" or type(c) == "table" then
         c = color(c)
     end
@@ -148,7 +147,7 @@ end
 -- @param c The foreground to use. This must either be a cairo pattern object,
 --          nil or a string that gears.color() understands.
 function set_fg(wibox, c)
-    local c = c
+    local c = c or "#FFFFFF"
     if type(c) == "string" or type(c) == "table" then
         c = color(c)
     end
