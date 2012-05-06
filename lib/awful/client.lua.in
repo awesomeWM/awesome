@@ -412,7 +412,7 @@ end
 --- Set the client as slave: put it at the end of other windows.
 -- @param c The window to set as slave.
 function setslave(c)
-    local cls = capi.client.get(screen)
+    local cls = capi.client.get(c.screen)
     for k, v in pairs(cls) do
         c:swap(v)
     end
