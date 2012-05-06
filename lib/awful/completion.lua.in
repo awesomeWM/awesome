@@ -12,6 +12,7 @@ local table = table
 local math = math
 local print = print
 local pairs = pairs
+local string = string
 local util = require("awful.util")
 
 --- Completion module.
@@ -88,21 +89,22 @@ function shell(command, cur_pos, ncomp, shell)
         i = i + 1
     end
 
-    if cword_index == 1 then
+    if cword_index == 1 and not string.find(words[cword_index], "/") then
         comptype = "command"
     end
 
     local shell_cmd
     if shell == "zsh" or (not shell and os.getenv("SHELL"):match("zsh$")) then
         if comptype == "file" then
-            shell_cmd = "/usr/bin/env zsh -c 'local -a res; res=( " .. words[cword_index] .. "* ); print -l -- ${res[@]}'"
+            shell_cmd = "/usr/bin/env zsh -c 'local -a res; res=( " .. words[cword_index] .. "* ); print -ln -- ${res[@]}'"
         else
             -- check commands, aliases, builtins, functions and reswords
             shell_cmd = "/usr/bin/env zsh -c 'local -a res; "..
             "res=( "..
             "\"${(k)commands[@]}\" \"${(k)aliases[@]}\" \"${(k)builtins[@]}\" \"${(k)functions[@]}\" \"${(k)reswords[@]}\" "..
+            "${PWD}/*(:t)"..
             "); "..
-            "print -l -- ${(M)res[@]:#"..words[cword_index].."*}'"
+            "print -ln -- ${(M)res[@]:#"..words[cword_index].."*}'"
         end
     else
         if bashcomp_funcs[words[1]] then
