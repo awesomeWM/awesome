@@ -101,8 +101,9 @@ local function perform_action(o)
         return true, "", new_prompt
     elseif shownitems[current_item].cmdline then
         awful.util.spawn(shownitems[current_item].cmdline)
-        hide()
-        return true
+        -- Let awful.prompt execute dummy exec_callback and
+        -- done_callback to stop the keygrabber properly.
+        return false
     end
 end
 
