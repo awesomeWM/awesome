@@ -28,6 +28,22 @@ local setmetatable = setmetatable
 
 module("menubar")
 
+--- List of menubar keybindings:
+-- <p><ul>
+-- <li>"Left"  | "C-j" select an item on the left</li>
+-- <li>"Right" | "C-k" select an item on the right</li>
+-- <li>"Backspace"     exit the current category if we are in any</li>
+-- <li>"Escape"        exit the current directory or exit menubar</li>
+-- <li>"Home"          select the first item</li>
+-- <li>"End"           select the last</li>
+-- <li>"Return"        execute the entry</li>
+-- <li>"C-Return"      execute the command with awful.util.spawn</li>
+-- <li>"C-M-Return"    execute the command in a terminal</li>
+-- </ul></p>
+--
+-- @class table
+-- @name Menubar keybindings
+
 -- Options section
 
 -- When true the .desktop files will be reparsed only when the
