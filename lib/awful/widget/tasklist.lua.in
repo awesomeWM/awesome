@@ -154,8 +154,7 @@ end
 -- @return true if c is on screen, false otherwise
 function filter.alltags(c, screen)
     -- Only print client on the same screen as this widget
-    if c.screen ~= screen then return false end
-    return true
+    return c.screen == screen
 end
 
 --- Filtering function to include only the clients from currently selected tags.
@@ -213,10 +212,7 @@ end
 -- @return true if c is focused on screen, false otherwise
 function filter.focused(c, screen)
     -- Only print client on the same screen as this widget
-    if c.screen == screen and capi.client.focus == c then
-        return true
-    end
-    return false
+    return c.screen == screen and capi.client.focus == c
 end
 
 setmetatable(_M, { __call = function(_, ...) return new(...) end })
