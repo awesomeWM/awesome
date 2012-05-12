@@ -24,13 +24,7 @@ end
 --- Handle a button event on a widget. This is used internally.
 function handle_button(event, widget, x, y, button, modifiers)
     local function is_any(mod)
-        if #mod ~= 1 then
-            return false
-        end
-        if mod[1] ~= "Any" then
-            return false
-        end
-        return true
+        return #mod == 1 and mod[1] == "Any"
     end
 
     local function tables_equal(a, b)
