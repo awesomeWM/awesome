@@ -67,10 +67,7 @@ function match(key, pressed_mod, pressed_key)
     end
     -- If the number of pressed modifier is ~=, it is probably >, so this is not
     -- the same, return false.
-    if #pressed_mod ~= #mod then
-        return false
-    end
-    return true
+    return #pressed_mod == #mod
 end
 
 setmetatable(_M, { __call = function(_, ...) return new(...) end })
