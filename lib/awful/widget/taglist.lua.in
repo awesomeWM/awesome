@@ -172,11 +172,7 @@ end
 -- @param screen The screen we are drawing on.
 -- @return true if t is not empty, else false
 function filter.noempty(t, args)
-    if #t:clients() > 0 or t.selected then
-        return true
-    end
-
-    return false
+    return #t:clients() > 0 or t.selected
 end
 
 --- Filtering function to include all tags on the screen.
