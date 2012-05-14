@@ -10,6 +10,7 @@ require("wibox.layout.align")
 require("wibox.layout.flex")
 require("wibox.layout.rotate")
 require("wibox.layout.margin")
+require("wibox.layout.mirror")
 
 module("wibox.layout")
 
