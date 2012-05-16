@@ -112,9 +112,29 @@ local function screen_change(window)
     end
 end
 
+-- Update a client's settings when its border width changes
+local function border_change(window)
+    -- Fix up the geometry in case this window needs to cover the whole screen.
+    local bw = window.border_width or 0
+    local g = screen[window.screen].workarea
+    if window.maximized_vertical then
+        window:geometry { height = g.height - 2*bw, y = g.y }
+    end
+    if window.maximized_horizontal then
+        window:geometry { height = g.height - 2*bw, y = g.y }
+    end
+    if window.fullscreen then
+        -- This *will* cause an endless loop if some other property::border_width
+        -- signal dares to change the border width, too, so don't do that!
+        window.border_width = 0
+        window:geometry(screen[window.screen].geometry)
+    end
+end
+
 client.connect_signal("request::maximized_horizontal", maximized_horizontal)
 client.connect_signal("request::maximized_vertical", maximized_vertical)
 client.connect_signal("request::fullscreen", fullscreen)
 client.connect_signal("property::screen", screen_change)
+client.connect_signal("property::border_width", border_change)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
