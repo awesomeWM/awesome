@@ -135,7 +135,7 @@ static void
 event_emit_button(xcb_button_press_event_t *ev)
 {
     const char *name;
-    switch(ev->response_type)
+    switch(XCB_EVENT_RESPONSE_TYPE(ev))
     {
     case XCB_BUTTON_PRESS:
         name = "button::press";
@@ -172,7 +172,7 @@ event_update_button_state(uint8_t response_type, uint8_t button)
         return;
     }
 
-    switch(response_type)
+    switch(response_type & XCB_EVENT_RESPONSE_TYPE_MASK)
     {
     case XCB_BUTTON_PRESS:
         /* Set the (button-1)-st bit */
