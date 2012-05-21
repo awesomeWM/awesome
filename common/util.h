@@ -32,7 +32,7 @@
 #include <assert.h>
 #include <stdio.h>
 
-#if !(defined (__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__))
+#if !(defined (__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined (__DragonFly__))
 #include <alloca.h>
 #endif
 
