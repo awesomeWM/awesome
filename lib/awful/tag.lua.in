@@ -500,10 +500,7 @@ capi.client.connect_signal("manage", function(c, startup)
     -- If we are not managing this application at startup,
     -- move it to the screen where the mouse is.
     -- We only do it for "normal" windows (i.e. no dock, etc).
-    if not startup
-        and c.type ~= "desktop"
-        and c.type ~= "dock"
-        and c.type ~= "splash" then
+    if not startup and c.type ~= "desktop" and c.type ~= "dock" then
         if c.transient_for then
             c.screen = c.transient_for.screen
             if not c.sticky then
