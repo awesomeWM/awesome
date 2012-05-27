@@ -44,9 +44,8 @@ local function load_font(name)
     -- load new font
     local desc = Pango.FontDescription.from_string(name)
 
-    -- Create a temporary surface that we need for computing the size :(
-    local surface = cairo.ImageSurface(cairo.Format.ARGB32, 1, 1)
-    local layout = PangoCairo.create_layout(cairo.Context(surface))
+    local ctx = PangoCairo.font_map_get_default():create_context()
+    local layout = Pango.Layout.new(ctx)
     layout:set_font_description(desc)
 
     local width, height = layout:get_pixel_size()

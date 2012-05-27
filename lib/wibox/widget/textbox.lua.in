@@ -48,13 +48,6 @@ function fit(box, width, height)
     return logical.width, logical.height
 end
 
--- Return a pango layout which can be used if no cairo context is available
-local function get_temp_layout()
-    local surface = cairo.ImageSurface(cairo.Format.ARGB32, 0, 0)
-    local cr = cairo.Context(surface)
-    return PangoCairo.create_layout(cr)
-end
-
 --- Set a textbox' text.
 -- @param text The text to set. This can contain pango markup (e.g. <b>bold</b>)
 function set_markup(box, text)
@@ -131,8 +124,9 @@ local function new()
         end
     end
 
-    -- Spot the hack: Temporary surface to make pango happy
-    ret._layout = get_temp_layout()
+    local ctx = PangoCairo.font_map_get_default():create_context()
+    ret._layout = Pango.Layout.new(ctx)
+
     ret:set_ellipsize("end")
     ret:set_wrap("word_char")
     ret:set_valign("center")
