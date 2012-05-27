@@ -1,0 +1,35 @@
+---------------------------------------------------------------------------
+-- @author Uli Schlachter
+-- @copyright 2012 Uli Schlachter
+-- @release @AWESOME_VERSION@
+---------------------------------------------------------------------------
+
+local setmetatable = setmetatable
+local type = type
+local capi = { awesome = awesome }
+local cairo = require("lgi").cairo
+
+module("gears.surface")
+
+--- Try to convert the argument into an lgi cairo surface.
+-- This is usually needed for loading images by file name.
+function load(surface)
+    -- Nil is not changed
+    if not surface then
+        return nil
+    end
+    -- lgi cairo surfaces don't get changed either
+    if cairo.Surface:is_type_of(surface) then
+        return surface
+    end
+    -- Strings are assumed to be file names and get loaded
+    if type(surface) == "string" then
+        surface = capi.awesome.load_image(surface)
+    end
+    -- Everything else gets forced into a surface
+    return cairo.Surface(surface, true)
+end
+
+setmetatable(_M, { __call = function(_, ...) return load(...) end })
+
+-- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

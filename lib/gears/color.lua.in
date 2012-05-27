@@ -12,10 +12,8 @@ local unpack = unpack
 local ipairs = ipairs
 local pairs = pairs
 local type = type
-local capi = {
-    awesome = awesome,
-    oocairo = oocairo
-}
+local cairo = require("lgi").cairo
+local surface = require("gears.surface")
 
 module("gears.color")
 
@@ -60,7 +58,7 @@ function create_solid_pattern(col)
     elseif type(col) == "table" then
         col = col.color
     end
-    return capi.oocairo.pattern_create_rgba(parse_color(col))
+    return cairo.Pattern.create_rgba(parse_color(col))
 end
 
 --- Create an image pattern from a png file
@@ -71,8 +69,8 @@ function create_png_pattern(file)
     if type(file) == "table" then
         file = file.file
     end
-    local image = capi.awesome.load_image(file)
-    return capi.oocairo.pattern_create_for_surface(image)
+    local image = surface.load(file)
+    return cairo.Pattern.create_for_surface(image)
 end
 
 -- Add stops to the given pattern.
@@ -125,12 +123,12 @@ function create_linear_pattern(arg)
     local pat
 
     if type(arg) == "string" then
-        return string_pattern(capi.oocairo.pattern_create_linear, arg)
+        return string_pattern(cairo.Pattern.create_linear, arg)
     elseif type(arg) ~= "table" then
         error("Wrong argument type: " .. type(arg))
     end
 
-    pat = capi.oocairo.pattern_create_linear(arg.from[1], arg.from[2], arg.to[1], arg.to[2])
+    pat = cairo.Pattern.create_linear(arg.from[1], arg.from[2], arg.to[1], arg.to[2])
     add_stops_table(pat, arg.stops)
     return pat
 end
@@ -150,12 +148,12 @@ function create_radial_pattern(arg)
     local pat
 
     if type(arg) == "string" then
-        return string_pattern(capi.oocairo.pattern_create_radial, arg)
+        return string_pattern(cairo.Pattern.create_radial, arg)
     elseif type(arg) ~= "table" then
         error("Wrong argument type: " .. type(arg))
     end
 
-    pat = capi.oocairo.pattern_create_radial(arg.from[1], arg.from[2], arg.from[3],
+    pat = cairo.Pattern.create_radial(arg.from[1], arg.from[2], arg.from[3],
             arg.to[1], arg.to[2], arg.to[3])
     add_stops_table(pat, arg.stops)
     return pat

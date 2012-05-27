@@ -15,7 +15,7 @@ module("drawin")
 -- @field y The y coordinates.
 -- @field width The width of the drawin.
 -- @field height The height of the drawin.
--- @field surface A oocairo surface that can be used for drawing.
+-- @field surface A cairo surface as light user datum that can be used for drawing.
 -- @class table
 -- @name drawin
 

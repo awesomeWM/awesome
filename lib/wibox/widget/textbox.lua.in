@@ -5,50 +5,30 @@
 -- @release @AWESOME_VERSION@
 ---------------------------------------------------------------------------
 
-local oopango = require("oopango")
-local oocairo = require("oocairo")
 local base = require("wibox.widget.base")
 local beautiful = require("beautiful")
+local lgi = require("lgi")
+local cairo = lgi.cairo
+local Pango = lgi.Pango
+local PangoCairo = lgi.PangoCairo
 local type = type
 local unpack = unpack
 local setmetatable = setmetatable
 local pairs = pairs
+local error = error
 
 module("wibox.widget.textbox")
-
-local function layout_create(cr)
-    if oopango.cairo_layout_create then
-        return oopango.cairo_layout_create(cr)
-    end
-    return oopango.cairo.layout_create(cr)
-end
-
-local function layout_update(cr, layout)
-    if oopango.cairo_update_layout then
-        oopango.cairo_update_layout(cr, layout)
-    else
-        oopango.cairo.update_layout(cr, layout)
-    end
-end
-
-local function layout_show(cr, layout)
-    if oopango.cairo_show_layout then
-        oopango.cairo_show_layout(cr, layout)
-    else
-        oopango.cairo.show_layout(cr, layout)
-    end
-end
 
 -- Setup a pango layout for the given textbox and cairo context
 local function setup_layout(box, width, height)
     local layout = box._layout
-    layout:set_width(oopango.units_from_number(width))
-    layout:set_height(oopango.units_from_number(height))
+    layout.width = Pango.units_from_double(width)
+    layout.height = Pango.units_from_double(height)
 end
 
 --- Draw the given textbox on the given cairo context in the given geometry
 function draw(box, wibox, cr, width, height)
-    layout_update(cr, box._layout)
+    cr:update_layout(box._layout)
     setup_layout(box, width, height)
     local ink, logical = box._layout:get_pixel_extents()
     local offset = 0
@@ -58,7 +38,7 @@ function draw(box, wibox, cr, width, height)
         offset = height - logical.height
     end
     cr:move_to(0, offset)
-    layout_show(cr, box._layout)
+    cr:show_layout(box._layout)
 end
 
 --- Fit the given textbox
@@ -70,47 +50,37 @@ end
 
 -- Return a pango layout which can be used if no cairo context is available
 local function get_temp_layout()
-    local surface = oocairo.image_surface_create("argb32", 0, 0)
-    local cr = oocairo.context_create(surface)
-    return layout_create(cr)
-end
-
-local temp_layout
--- Test if a text is valid for a textbox. If it isn't, a lua error will be thrown.
-local function check_text(text, markup)
-    if not temp_layout then
-        temp_layout = get_temp_layout()
-    end
-
-    if markup then
-        temp_layout:set_markup(text)
-    else
-        temp_layout:set_text(text)
-    end
+    local surface = cairo.ImageSurface(cairo.Format.ARGB32, 0, 0)
+    local cr = cairo.Context(surface)
+    return PangoCairo.create_layout(cr)
 end
 
 --- Set a textbox' text.
 -- @param text The text to set. This can contain pango markup (e.g. <b>bold</b>)
 function set_markup(box, text)
-    check_text(text, true)
-    box._layout:set_markup(text)
+    local attr, parsed = Pango.parse_markup(text, -1, 0)
+    -- In case of error, attr is false and parsed is an error message
+    if not attr then error(parsed) end
+
+    box._layout.text = parsed
+    box._layout.attributes = attr
     box:emit_signal("widget::updated")
 end
 
 --- Set a textbox' text.
 -- @param text The text to display. Pango markup is ignored and shown as-is.
 function set_text(box, text)
-    check_text(text, false)
-    box._layout:set_text(text)
+    box._layout.text = text
+    box._layout.attributes = nil
     box:emit_signal("widget::updated")
 end
 
 --- Set a textbox' ellipsize mode.
 -- @param mode Where should long lines be shortened? "start", "middle" or "end"
 function set_ellipsize(box, mode)
-    local allowed = { none = true, start = true, middle = true, ["end"] = true }
+    local allowed = { none = "NONE", start = "START", middle = "MIDDLE", ["end"] = "END" }
     if allowed[mode] then
-        box._layout:set_ellipsize(mode)
+        box._layout:set_ellipsize(allowed[mode])
         box:emit_signal("widget::updated")
     end
 end
@@ -118,9 +88,9 @@ end
 --- Set a textbox' wrap mode.
 -- @param mode Where to wrap? After "word", "char" or "word_char"
 function set_wrap(box, mode)
-    local allowed = { word = true, char = true, word_char = true }
+    local allowed = { word = "WORD", char = "CHAR", word_char = "WORD_CHAR" }
     if allowed[mode] then
-        box._layout:set_wrap(mode)
+        box._layout:set_wrap(allowed[mode])
         box:emit_signal("widget::updated")
     end
 end
@@ -138,9 +108,9 @@ end
 --- Set a textbox' horizontal alignment
 -- @param mode Where should the textbox be drawn? "left", "center" or "right"
 function set_align(box, mode)
-    local allowed = { left = true, center = true, right = true }
+    local allowed = { left = "LEFT", center = "CENTER", right = "RIGHT" }
     if allowed[mode] then
-        box._layout:set_alignment(mode)
+        box._layout:set_alignment(allowed[mode])
         box:emit_signal("widget::updated")
     end
 end

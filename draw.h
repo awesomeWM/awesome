@@ -23,7 +23,7 @@
 #define AWESOME_COMMON_DRAW_H
 
 #include <xcb/xcb.h>
-#include <oocairo.h>
+#include <cairo.h>
 
 #include "common/util.h"
 

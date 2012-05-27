@@ -532,7 +532,9 @@ luaA_drawin_set_visible(lua_State *L, drawin_t *drawin)
 static int
 luaA_drawin_get_surface(lua_State *L, drawin_t *drawin)
 {
-    return oocairo_surface_push(L, drawin->surface);
+    /* Lua gets its own reference which it will have to destroy */
+    lua_pushlightuserdata(L, cairo_surface_reference(drawin->surface));
+    return 1;
 }
 
 /** Refresh a drawin's content. This has to be called whenever some drawing to

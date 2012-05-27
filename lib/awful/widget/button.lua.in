@@ -8,9 +8,9 @@ local setmetatable = setmetatable
 local type = type
 local button = require("awful.button")
 local imagebox = require("wibox.widget.imagebox")
-local capi = { mouse = mouse,
-               awesome = awesome,
-               oocairo = oocairo }
+local surface = require("gears.surface")
+local cairo = require("lgi").cairo
+local capi = { mouse = mouse }
 
 module("awful.widget.button")
 
@@ -20,17 +20,10 @@ module("awful.widget.button")
 -- @return A textbox widget configured as a button.
 function new(args)
     if not args or not args.image then return end
-    local img_release
-    if type(args.image) == "string" then
-        img_release = capi.awesome.load_image(args.image)
-    elseif type(args.image) == "userdata" and args.image.type and args.image:type() == "cairo_surface_t" then
-        img_release = args.image
-    elseif type(args.image) == "userdata" and args.image._NAME and args.image._NAME == "cairo surface object" then
-        img_release = args.image
-    end
-    local img_press = capi.oocairo.image_surface_create("argb32", img_release:get_width(), img_release:get_height())
-    local cr = capi.oocairo.context_create(img_press)
-    cr:set_source(img_release, 2, 2)
+    local img_release = surface.load(args.image)
+    local img_press = cairo.ImageSurface(cairo.Format.ARGB32, img_release.width, img_release.height)
+    local cr = cairo.Context(img_press)
+    cr:set_source_surface(img_release, 2, 2)
     cr:paint()
 
     local w = imagebox()

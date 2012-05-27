@@ -133,12 +133,10 @@ luaA_surface_from_data(lua_State *L, int width, int height, uint32_t *data)
     /* This makes sure that buffer will be freed */
     cairo_surface_set_user_data(surface, &data_key, buffer, &free_data);
 
-    /* This will increase the reference count of the surface */
-    int ret = oocairo_surface_push(globalconf.L, surface);
-    /* So we have to drop our own reference */
-    cairo_surface_destroy(surface);
+    /* lua has to make sure to free the ref or we have a leak */
+    lua_pushlightuserdata(L, surface);
 
-    return ret;
+    return 1;
 }
 
 /** Duplicate the specified image surface.

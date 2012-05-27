@@ -18,6 +18,7 @@ local util = require("awful.util")
 local tag = require("awful.tag")
 local beautiful = require("beautiful")
 local fixed = require("wibox.layout.fixed")
+local surface = require("gears.surface")
 
 --- Taglist widget module for awful
 module("awful.widget.taglist")
@@ -55,7 +56,7 @@ function taglist_label(t, args)
             local seltags = sel:tags()
             for _, v in ipairs(seltags) do
                 if v == t then
-                    bg_image = capi.awesome.load_image(taglist_squares_sel)
+                    bg_image = surface.load(taglist_squares_sel)
                     bg_resize = taglist_squares_resize == "true"
                     is_selected = true
                     break
@@ -67,7 +68,7 @@ function taglist_label(t, args)
         local cls = t:clients()
         if #cls > 0 then
             if taglist_squares_unsel then
-                bg_image = capi.awesome.load_image(taglist_squares_unsel)
+                bg_image = surface.load(taglist_squares_unsel)
                 bg_resize = taglist_squares_resize == "true"
             end
             if bg_occupied then bg_color = bg_occupied end
@@ -93,7 +94,7 @@ function taglist_label(t, args)
     if tag.geticon(t) and type(tag.geticon(t)) == "image" then
         icon = tag.geticon(t)
     elseif tag.geticon(t) then
-        icon = capi.awesome.load_image(tag.geticon(t))
+        icon = surface.load(tag.geticon(t))
     end
 
     return text, bg_color, bg_image, icon

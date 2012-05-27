@@ -9,7 +9,6 @@ require("wibox.widget")
 
 local capi = {
     drawin = drawin,
-    oocairo = oocairo,
     root = root,
     awesome = awesome
 }
@@ -17,11 +16,13 @@ local setmetatable = setmetatable
 local pairs = pairs
 local type = type
 local table = table
+local string_format = string.format
 local color = require("gears.color")
 local object = require("gears.object")
 local sort = require("gears.sort")
 local beautiful = require("beautiful")
-local string_format = string.format
+local surface = require("gears.surface")
+local cairo = require("lgi").cairo
 
 --- This provides widget box windows. Every wibox can also be used as if it were
 -- a drawin. All drawin functions and properties are also available on wiboxes!
@@ -33,19 +34,19 @@ local function do_redraw(wibox)
     end
 
     local geom = wibox.drawin:geometry()
-    local cr = capi.oocairo.context_create(wibox.drawin.surface)
+    local cr = cairo.Context(surface(wibox.drawin.surface))
 
     -- Draw the background
     cr:save()
     -- This is pseudo-transparency: We draw the wallpaper in the background
-    local wallpaper = capi.root.wallpaper()
+    local wallpaper = surface(capi.root.wallpaper())
     if wallpaper then
-        cr:set_operator("source")
-        cr:set_source(wallpaper, -wibox.drawin.x, -wibox.drawin.y)
+        cr.operator = cairo.Operator.SOURCE
+        cr:set_source_surface(wallpaper, -wibox.drawin.x, -wibox.drawin.y)
         cr:paint()
     end
 
-    cr:set_operator("over")
+    cr.operator = cairo.Operator.OVER
     cr:set_source(wibox.background_color)
     cr:paint()
     cr:restore()

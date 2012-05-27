@@ -37,7 +37,7 @@ module("awesome")
 
 --- Load an image
 -- @param name The file name
--- @return An oocairo image surface
+-- @return A cairo image surface as light user datum
 -- @name load_image
 -- @class function
 

@@ -14,12 +14,14 @@ local type = type
 local dofile = dofile
 local setmetatable = setmetatable
 local util = require("awful.util")
+local lgi = require("lgi")
+local cairo = lgi.cairo
+local Pango = lgi.Pango
+local PangoCairo = lgi.PangoCairo
 local capi =
 {
     screen = screen,
-    awesome = awesome,
-    oocairo = oocairo,
-    oopango = oopango
+    awesome = awesome
 }
 
 --- Theme library.
@@ -40,19 +42,11 @@ local function load_font(name)
         return fonts[name]
     end
     -- load new font
-    local desc = capi.oopango.font_description_from_string(name)
+    local desc = Pango.FontDescription.from_string(name)
 
     -- Create a temporary surface that we need for computing the size :(
-    local surface = capi.oocairo.image_surface_create("argb32", 1, 1)
-    local cr = capi.oocairo.context_create(surface)
-    local layout
-    -- Api breakage in oopango
-    if capi.oopango.cairo_layout_create then
-        layout = capi.oopango.cairo_layout_create(cr)
-    else
-        layout = capi.oopango.cairo.layout_create(cr)
-    end
-
+    local surface = cairo.ImageSurface(cairo.Format.ARGB32, 1, 1)
+    local layout = PangoCairo.create_layout(cairo.Context(surface))
     layout:set_font_description(desc)
 
     local width, height = layout:get_pixel_size()

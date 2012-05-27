@@ -14,12 +14,13 @@ local capi = { screen = screen,
                awesome = awesome,
                dbus = dbus,
                timer = timer,
-               awesome = awesome,
-               oocairo = oocairo }
+               awesome = awesome }
 local button = require("awful.button")
 local util = require("awful.util")
 local bt = require("beautiful")
 local wibox = require("wibox")
+local surface = require("gears.surface")
+local cairo = require("lgi").cairo
 
 --- Notification library
 module("naughty")
@@ -399,17 +400,12 @@ function notify(args)
         if icon then
             iconbox = wibox.widget.imagebox()
             iconmargin = wibox.layout.margin(iconbox, margin, margin, margin, margin)
-            local img = icon
-            if type(icon) == "string" then
-                img = capi.awesome.load_image(icon)
-            else
-                img = icon
-            end
+            local img = surface.load(icon)
             if icon_size then
-                local scaled = capi.oocairo.image_surface_create("argb32", icon_size, icon_size)
-                local cr = capi.oocairo.context_create(scaled)
+                local scaled = cairo.ImageSurface(cairo.Format.ARGB32, icon_size, icon_size)
+                local cr = cairo.Context(scaled)
                 cr:scale(icon_size / img:get_height(), icon_size / img:get_width())
-                cr:set_source(img, 0, 0)
+                cr:set_source_surface(img, 0, 0)
                 cr:paint()
                 img = scaled
             end
@@ -543,7 +539,8 @@ if capi.dbus then
                     end
                 end
                 if imgdata then
-                    args.icon = capi.oocairo.image_surface_create_from_data(imgdata, "argb32", hints.icon_data[1], hints.icon_data[2], hints.icon_data[1] * 4)
+                    args.icon = cairo.ImageSurface.create_for_data(imgdata,
+                        cairo.Format.ARGB32, hints.icon_data[1], hints.icon_data[2], hints.icon_data[1] * 4)
                 end
             end
             if replaces_id and replaces_id ~= "" and replaces_id ~= 0 then

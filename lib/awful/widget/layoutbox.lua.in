@@ -11,7 +11,6 @@ local layout = require("awful.layout")
 local tag = require("awful.tag")
 local beautiful = require("beautiful")
 local imagebox = require("wibox.widget.imagebox")
-local capi = { oocairo = oocairo }
 
 --- Layoutbox widget.
 module("awful.widget.layoutbox")

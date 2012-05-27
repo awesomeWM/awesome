@@ -13,6 +13,8 @@ local tags = require("awful.tag")
 local keygrabber = require("awful.keygrabber")
 local beautiful = require("beautiful")
 local object = require("gears.object")
+local surface = require("gears.surface")
+local cairo = require("lgi").cairo
 local setmetatable = setmetatable
 local tonumber = tonumber
 local string = string
@@ -27,9 +29,7 @@ local capi = {
     timer = timer,
     screen = screen,
     mouse = mouse,
-    client = client,
-    awesome = awesome,
-    oocairo = oocairo }
+    client = client }
 
 
 module("awful.menu")
@@ -515,7 +515,7 @@ function entry(parent, args)
     if args.icon then
         icon = args.icon
         if type(icon) == "string" then
-            icon = capi.awesome.load_image(icon)
+            icon = surface.load(icon)
         end
     end
     if icon then
@@ -529,10 +529,10 @@ function entry(parent, args)
                 w, h = (args.theme.height / ih) * iw, args.theme.height
             end
             -- We need to scale the image to size w x h
-            local img = capi.oocairo.image_surface_create("argb32", w, h)
-            local cr = capi.oocairo.context_create(img)
+            local img = cairo.ImageSurface(cairo.Format.ARGB32, w, h)
+            local cr = cairo.Context(img)
             cr:scale(w / iw, h / ih)
-            cr:set_source(icon, 0, 0)
+            cr:set_source_surface(icon, 0, 0)
             cr:paint()
             icon = img
         end
@@ -551,9 +551,7 @@ function entry(parent, args)
     if type(args.cmd) == "table" then
         if args.theme.submenu_icon then
             submenu = wibox.widget.imagebox()
-            submenu:set_image(
-                capi.awesome.load_image(
-                args.theme.submenu_icon))
+            submenu:set_image(surface.load(args.theme.submenu_icon))
         else
             submenu = wibox.widget.textbox()
             submenu:set_font(args.theme.font)

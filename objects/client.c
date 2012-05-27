@@ -1043,17 +1043,15 @@ void
 client_set_icon(lua_State *L, int cidx, int iidx)
 {
     client_t *c = luaA_checkudata(L, cidx, &client_class);
-    if(lua_isnil(L, iidx))
+    cairo_surface_t *surf = NULL;
+    if(!lua_isnil(L, iidx))
     {
-        if(c->icon)
-            cairo_surface_destroy(c->icon);
-        c->icon = NULL;
-    } else {
-        cairo_surface_t **cairo_surface = (cairo_surface_t **)luaL_checkudata(L, iidx, OOCAIRO_MT_NAME_SURFACE);
-        if(c->icon)
-            cairo_surface_destroy(c->icon);
-        c->icon = draw_dup_image_surface(*cairo_surface);
+        cairo_surface_t **cairo_surface = (cairo_surface_t **)lua_touserdata(L, iidx);
+        surf = draw_dup_image_surface(*cairo_surface);
     }
+    if(c->icon)
+        cairo_surface_destroy(c->icon);
+    c->icon = surf;
     luaA_object_emit_signal(L, cidx < iidx ? cidx : cidx - 1, "property::icon", 0);
 }
 
@@ -1431,9 +1429,11 @@ luaA_client_get_screen(lua_State *L, client_t *c)
 static int
 luaA_client_get_icon(lua_State *L, client_t *c)
 {
-    if(c->icon)
-        return oocairo_surface_push(L, c->icon);
-    return 0;
+    if(!c->icon)
+        return 0;
+    /* lua gets its own reference which it will have to destroy */
+    lua_pushlightuserdata(L, cairo_surface_reference(c->icon));
+    return 1;
 }
 
 static int

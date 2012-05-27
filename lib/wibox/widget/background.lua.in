@@ -4,14 +4,14 @@
 -- @release @AWESOME_VERSION@
 ---------------------------------------------------------------------------
 
-local oocairo = require("oocairo")
 local base = require("wibox.widget.base")
 local color = require("gears.color")
 local layout_base = require("wibox.layout.base")
+local surface = require("gears.surface")
+local cairo = require("lgi").cairo
 local setmetatable = setmetatable
 local pairs = pairs
 local type = type
-local awesome = awesome
 
 module("wibox.widget.background")
 
@@ -28,7 +28,7 @@ function draw(box, wibox, cr, width, height)
         cr:paint()
     end
     if box.bgimage then
-        local pattern = oocairo.pattern_create_for_surface(box.bgimage)
+        local pattern = cairo.Pattern.create_for_surface(box.bgimage)
         cr:set_source(pattern)
         cr:paint()
     end
@@ -89,13 +89,7 @@ end
 
 --- Set the background image to use
 function set_bgimage(box, image)
-    local image = image
-
-    if type(image) == "string" then
-        image = awesome.load_image(image)
-    end
-
-    box.bgimage = image
+    box.bgimage = surface.load(image)
     box._emit_updated()
 end
 

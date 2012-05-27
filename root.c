@@ -263,7 +263,6 @@ luaA_root_wallpaper(lua_State *L)
     xcb_get_property_reply_t *prop_r;
     xcb_pixmap_t *rootpix;
     cairo_surface_t *surface;
-    int ret;
 
     prop_c = xcb_get_property_unchecked(globalconf.connection, false,
             globalconf.screen->root, _XROOTPMAP_ID, XCB_ATOM_PIXMAP, 0, 1);
@@ -282,9 +281,10 @@ luaA_root_wallpaper(lua_State *L)
      */
     surface = cairo_xcb_surface_create(globalconf.connection, *rootpix, globalconf.default_visual,
             globalconf.screen->width_in_pixels, globalconf.screen->height_in_pixels);
-    ret = oocairo_surface_push(globalconf.L, surface);
-    cairo_surface_destroy(surface);
-    return ret;
+
+    /* lua has to make sure this surface gets destroyed */
+    lua_pushlightuserdata(L, surface);
+    return 1;
 }
 
 const struct luaL_reg awesome_root_lib[] =
