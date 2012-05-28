@@ -406,7 +406,7 @@ function notify(args)
     if icon then
         -- try to guess icon if the provided one is non-existent/readable
         if type(icon) == "string" and not util.file_readable(icon) then
-            icon = util.geticonpath(icon, config.icon_formats, config.icon_dirs)
+            icon = util.geticonpath(icon, config.icon_formats, config.icon_dirs, icon_size)
         end
 
         -- if we have an icon, use it

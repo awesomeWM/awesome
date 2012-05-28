@@ -180,12 +180,22 @@ end
 -- @param iconname The name of the icon to search for.
 -- @param exts Table of image extensions allowed, otherwise { 'png', gif' }
 -- @param dirs Table of dirs to search, otherwise { '/usr/share/pixmaps/' }
-function geticonpath(iconname, exts, dirs)
+-- @param size Optional size. If this is specified, subdirectories <size>x<size>
+--             of the dirs are searched first
+function geticonpath(iconname, exts, dirs, size)
     exts = exts or { 'png', 'gif' }
     dirs = dirs or { '/usr/share/pixmaps/' }
     for _, d in pairs(dirs) do
         for _, e in pairs(exts) do
-            local icon = d .. iconname .. '.' .. e
+            local icon
+            if size then
+                icon = string.format("%s%ux%u/%s.%s",
+                       d, size, size, iconname, e)
+                if file_readable(icon) then
+                    return icon
+                end
+            end
+            icon = d .. iconname .. '.' .. e
             if file_readable(icon) then
                 return icon
             end 
