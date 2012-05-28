@@ -241,17 +241,13 @@ property_get_net_wm_icon(client_t *c)
 void
 property_update_net_wm_icon(client_t *c, xcb_get_property_cookie_t cookie)
 {
-    luaA_object_push(globalconf.L, c);
+    cairo_surface_t *surface = ewmh_window_icon_get_reply(cookie);
 
-    if(ewmh_window_icon_get_reply(cookie))
-    {
-        client_set_icon(globalconf.L, -2, -1);
-        /* remove icon */
-        lua_pop(globalconf.L, 1);
-    }
+    if(!surface)
+        return;
 
-    /* remove client */
-    lua_pop(globalconf.L, 1);
+    client_set_icon(c, surface);
+    cairo_surface_destroy(surface);
 }
 
 xcb_get_property_cookie_t

@@ -634,7 +634,7 @@ ewmh_window_icon_get_unchecked(xcb_window_t w)
                                     _NET_WM_ICON, XCB_ATOM_CARDINAL, 0, UINT32_MAX);
 }
 
-static int
+static cairo_surface_t *
 ewmh_window_icon_from_reply(xcb_get_property_reply_t *r)
 {
     uint32_t *data;
@@ -655,20 +655,20 @@ ewmh_window_icon_from_reply(xcb_get_property_reply_t *r)
     if (!data[0] || !data[1] || len > r->length - 2)
         return 0;
 
-    return luaA_surface_from_data(globalconf.L, data[0], data[1], data + 2);
+    return draw_surface_from_data(data[0], data[1], data + 2);
 }
 
 /** Get NET_WM_ICON.
  * \param cookie The cookie.
  * \return The number of elements on stack.
  */
-int
+cairo_surface_t *
 ewmh_window_icon_get_reply(xcb_get_property_cookie_t cookie)
 {
     xcb_get_property_reply_t *r = xcb_get_property_reply(globalconf.connection, cookie, NULL);
-    int ret = ewmh_window_icon_from_reply(r);
+    cairo_surface_t *surface = ewmh_window_icon_from_reply(r);
     p_delete(&r);
-    return ret;
+    return surface;
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

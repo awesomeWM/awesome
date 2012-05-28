@@ -22,6 +22,8 @@
 #ifndef AWESOME_EWMH_H
 #define AWESOME_EWMH_H
 
+#include <cairo.h>
+
 #include "globalconf.h"
 #include "strut.h"
 
@@ -37,7 +39,7 @@ void ewmh_process_client_strut(client_t *);
 void ewmh_update_strut(xcb_window_t, strut_t *);
 void ewmh_update_window_type(xcb_window_t window, uint32_t type);
 xcb_get_property_cookie_t ewmh_window_icon_get_unchecked(xcb_window_t);
-int ewmh_window_icon_get_reply(xcb_get_property_cookie_t);
+cairo_surface_t *ewmh_window_icon_get_reply(xcb_get_property_cookie_t);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

@@ -1040,19 +1040,17 @@ luaA_client_isvisible(lua_State *L)
  * \param iidx The image index on the stack.
  */
 void
-client_set_icon(lua_State *L, int cidx, int iidx)
+client_set_icon(client_t *c, cairo_surface_t *s)
 {
-    client_t *c = luaA_checkudata(L, cidx, &client_class);
-    cairo_surface_t *surf = NULL;
-    if(!lua_isnil(L, iidx))
-    {
-        cairo_surface_t **cairo_surface = (cairo_surface_t **)lua_touserdata(L, iidx);
-        surf = draw_dup_image_surface(*cairo_surface);
-    }
+    if (s)
+        s = draw_dup_image_surface(s);
     if(c->icon)
         cairo_surface_destroy(c->icon);
-    c->icon = surf;
-    luaA_object_emit_signal(L, cidx < iidx ? cidx : cidx - 1, "property::icon", 0);
+    c->icon = s;
+
+    luaA_object_push(globalconf.L, c);
+    luaA_object_emit_signal(globalconf.L, -1, "property::icon", 0);
+    lua_pop(globalconf.L, 1);
 }
 
 /** Kill a client.
@@ -1294,7 +1292,10 @@ luaA_client_set_maximized_vertical(lua_State *L, client_t *c)
 static int
 luaA_client_set_icon(lua_State *L, client_t *c)
 {
-    client_set_icon(L, -3, -1);
+    cairo_surface_t *surf = NULL;
+    if(!lua_isnil(L, -1))
+        surf = (cairo_surface_t *)lua_touserdata(L, -1);
+    client_set_icon(c, surf);
     return 0;
 }
 
@@ -1393,7 +1394,7 @@ luaA_client_get_content(lua_State *L, client_t *c)
                                         c->geometry.width,
                                         c->geometry.height,
                                         ~0, XCB_IMAGE_FORMAT_Z_PIXMAP);
-    int retval = 0;
+    cairo_surface_t *surface = NULL;
 
     if(ximage)
     {
@@ -1408,13 +1409,18 @@ luaA_client_get_content(lua_State *L, client_t *c)
                     data[y * ximage->width + x] |= 0xff000000; /* set alpha to 0xff */
                 }
 
-            retval = luaA_surface_from_data(L, ximage->width, ximage->height, data);
+            surface = draw_surface_from_data(ximage->width, ximage->height, data);
             p_delete(&data);
         }
         xcb_image_destroy(ximage);
     }
 
-    return retval;
+    if (!surface)
+        return 0;
+
+    /* lua has to make sure to free the ref or we have a leak */
+    lua_pushlightuserdata(L, surface);
+    return 1;
 }
 
 static int

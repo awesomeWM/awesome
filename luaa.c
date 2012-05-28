@@ -109,7 +109,12 @@ static int
 luaA_load_image(lua_State *L)
 {
     const char *filename = luaL_checkstring(L, 1);
-    return draw_load_image(L, filename);
+    cairo_surface_t *surface = draw_load_image(L, filename);
+    if (!surface)
+        return 0;
+    /* lua has to make sure to free the ref or we have a leak */
+    lua_pushlightuserdata(L, surface);
+    return 1;
 }
 
 /** UTF-8 aware string length computing.

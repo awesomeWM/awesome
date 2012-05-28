@@ -105,8 +105,8 @@ free_data(void *data)
  * \param data The image's data in ARGB format, will be copied by this function.
  * \return Number of items pushed on the lua stack.
  */
-int
-luaA_surface_from_data(lua_State *L, int width, int height, uint32_t *data)
+cairo_surface_t *
+draw_surface_from_data(int width, int height, uint32_t *data)
 {
     unsigned long int len = width * height;
     unsigned long int i;
@@ -133,10 +133,7 @@ luaA_surface_from_data(lua_State *L, int width, int height, uint32_t *data)
     /* This makes sure that buffer will be freed */
     cairo_surface_set_user_data(surface, &data_key, buffer, &free_data);
 
-    /* lua has to make sure to free the ref or we have a leak */
-    lua_pushlightuserdata(L, surface);
-
-    return 1;
+    return surface;
 }
 
 /** Duplicate the specified image surface.
@@ -205,21 +202,21 @@ image_imlib_load_strerror(Imlib_Load_Error e)
  * \param path file to load
  * \return A cairo image surface or NULL on error.
  */
-int
+cairo_surface_t *
 draw_load_image(lua_State *L, const char *path)
 {
     Imlib_Image imimage;
     Imlib_Load_Error e = IMLIB_LOAD_ERROR_NONE;
-    int ret;
+    cairo_surface_t *ret;
 
     imimage = imlib_load_image_with_error_return(path, &e);
     if (!imimage) {
         luaL_error(L, "Cannot load image '%s': %s", path, image_imlib_load_strerror(e));
-        return 0;
+        return NULL;
     }
 
     imlib_context_set_image(imimage);
-    ret = luaA_surface_from_data(L, imlib_image_get_width(),
+    ret = draw_surface_from_data(imlib_image_get_width(),
             imlib_image_get_height(), imlib_image_get_data_for_reading_only());
     imlib_free_image_and_decache();
     return ret;
