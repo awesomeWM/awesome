@@ -53,9 +53,9 @@ config.notify_callback = nil
 
 
 --- Notification Presets - a table containing presets for different purposes
--- Preset is a table of any parameters available to notify()
+-- Preset is a table of any parameters available to notify(), overriding default
+-- values (@see defaults)
 -- You have to pass a reference of a preset in your notify() call to use the preset
--- At least the default preset named "normal" has to be defined
 -- The presets "low", "normal" and "critical" are used for notifications over DBUS
 -- @name config.presets
 -- @field low The preset for notifications with low urgency level
@@ -75,7 +75,19 @@ config.presets = {
     }
 }
 
-config.default_preset = config.presets.normal
+-- @name config.defaults
+-- holds the default values for the parameters to @see notify(). These
+-- can optionally be overridden by specifying a preset (@see config.presets)
+-- @class table
+config.defaults = {
+    timeout = 5,
+    text = "",
+    screen = 1,
+    ontop = true,
+    margin = "5",
+    border_width = "1",
+    position = "top_right"
+}
 
 -- DBUS Notification constants
 urgency = {
@@ -280,21 +292,22 @@ function notify(args)
     end
 
     -- gather variables together
-    local preset = args.preset or config.default_preset or {}
-    local timeout = args.timeout or preset.timeout or 5
+    local preset = util.table.join(config.default_preset or {},
+        args.preset or config.presets.normal or {})
+    local timeout = args.timeout or preset.timeout
     local icon = args.icon or preset.icon
     local icon_size = args.icon_size or preset.icon_size
-    local text = args.text or preset.text or ""
+    local text = args.text or preset.text
     local title = args.title or preset.title
-    local screen = args.screen or preset.screen or 1
-    local ontop = args.ontop or preset.ontop or true
+    local screen = args.screen or preset.screen
+    local ontop = args.ontop or preset.ontop
     local width = args.width or preset.width
     local height = args.height or preset.height
     local hover_timeout = args.hover_timeout or preset.hover_timeout
     local opacity = args.opacity or preset.opacity
-    local margin = args.margin or preset.margin or "5"
-    local border_width = args.border_width or preset.border_width or "1"
-    local position = args.position or preset.position or "top_right"
+    local margin = args.margin or preset.margin
+    local border_width = args.border_width or preset.border_width
+    local position = args.position or preset.position
 
     -- beautiful
     local beautiful = bt.get()
