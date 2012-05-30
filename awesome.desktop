@@ -1,6 +1,7 @@
-[Desktop Entry] 
+[Desktop Entry]
 Encoding=UTF-8
 Name=awesome
 Comment=Highly configurable framework window manager
 TryExec=awesome
 Exec=awesome
+Type=Application
