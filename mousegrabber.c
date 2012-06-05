@@ -134,10 +134,24 @@ luaA_mousegrabber_stop(lua_State *L)
     return 0;
 }
 
+/** Check if mousegrabber is running.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ * \luastack
+ * \lreturn A boolean value, true if mousegrabber is running, false otherwise.
+ */
+static int
+luaA_mousegrabber_isrunning(lua_State *L)
+{
+    lua_pushboolean(L, globalconf.mousegrabber != LUA_REFNIL);
+    return 1;
+}
+
 const struct luaL_reg awesome_mousegrabber_lib[] =
 {
     { "run", luaA_mousegrabber_run },
     { "stop", luaA_mousegrabber_stop },
+    { "isrunning", luaA_mousegrabber_isrunning },
     { NULL, NULL }
 };
 
