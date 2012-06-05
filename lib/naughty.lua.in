@@ -525,8 +525,9 @@ if capi.dbus then
                    args.preset = util.table.join(args.preset, preset)
             end
         end
-        if not args.preset.callback or (type(args.preset.callback) == "function" and
-            args.preset.callback(data, appname, replaces_id, icon, title, text, actions, hints, expire)) then
+        local preset = args.preset or config.defaults
+        if not preset.callback or (type(preset.callback) == "function" and
+            preset.callback(data, appname, replaces_id, icon, title, text, actions, hints, expire)) then
             if icon ~= "" then
                 args.icon = icon
             elseif hints.icon_data or hints.image_data then
