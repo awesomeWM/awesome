@@ -351,12 +351,12 @@ LUA_OBJECT_EXPORT_PROPERTY(window, window_t, border_width, lua_pushnumber)
 void
 window_class_setup(lua_State *L)
 {
-    static const struct luaL_reg window_methods[] =
+    static const struct luaL_Reg window_methods[] =
     {
         { NULL, NULL }
     };
 
-    static const struct luaL_reg window_meta[] =
+    static const struct luaL_Reg window_meta[] =
     {
         { "struts", luaA_window_struts },
         { "buttons", luaA_window_buttons },

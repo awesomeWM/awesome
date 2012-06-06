@@ -662,14 +662,14 @@ luaA_screen_count(lua_State *L)
     return 1;
 }
 
-const struct luaL_reg awesome_screen_methods[] =
+const struct luaL_Reg awesome_screen_methods[] =
 {
     { "count", luaA_screen_count },
     { "__index", luaA_screen_module_index },
     { NULL, NULL }
 };
 
-const struct luaL_reg awesome_screen_meta[] =
+const struct luaL_Reg awesome_screen_meta[] =
 {
     { "add_signal", luaA_screen_add_signal },
     { "connect_signal", luaA_screen_connect_signal },

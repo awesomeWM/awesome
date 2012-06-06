@@ -789,7 +789,7 @@ luaA_dbus_disconnect_signal(lua_State *L)
     return 0;
 }
 
-const struct luaL_reg awesome_dbus_lib[] =
+const struct luaL_Reg awesome_dbus_lib[] =
 {
     { "request_name", luaA_dbus_request_name },
     { "release_name", luaA_dbus_release_name },

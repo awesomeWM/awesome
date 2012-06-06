@@ -287,7 +287,7 @@ luaA_root_wallpaper(lua_State *L)
     return 1;
 }
 
-const struct luaL_reg awesome_root_lib[] =
+const struct luaL_Reg awesome_root_lib[] =
 {
     { "buttons", luaA_root_buttons },
     { "keys", luaA_root_keys },

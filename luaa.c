@@ -48,15 +48,15 @@
 #include "common/backtrace.h"
 
 #ifdef WITH_DBUS
-extern const struct luaL_reg awesome_dbus_lib[];
+extern const struct luaL_Reg awesome_dbus_lib[];
 #endif
-extern const struct luaL_reg awesome_keygrabber_lib[];
-extern const struct luaL_reg awesome_mousegrabber_lib[];
-extern const struct luaL_reg awesome_root_lib[];
-extern const struct luaL_reg awesome_mouse_methods[];
-extern const struct luaL_reg awesome_mouse_meta[];
-extern const struct luaL_reg awesome_screen_methods[];
-extern const struct luaL_reg awesome_screen_meta[];
+extern const struct luaL_Reg awesome_keygrabber_lib[];
+extern const struct luaL_Reg awesome_mousegrabber_lib[];
+extern const struct luaL_Reg awesome_root_lib[];
+extern const struct luaL_Reg awesome_mouse_methods[];
+extern const struct luaL_Reg awesome_mouse_meta[];
+extern const struct luaL_Reg awesome_screen_methods[];
+extern const struct luaL_Reg awesome_screen_meta[];
 
 /** Path to config file */
 static char *conffile;
@@ -521,7 +521,7 @@ void
 luaA_init(xdgHandle* xdg)
 {
     lua_State *L;
-    static const struct luaL_reg awesome_lib[] =
+    static const struct luaL_Reg awesome_lib[] =
     {
         { "quit", luaA_quit },
         { "exec", luaA_exec },

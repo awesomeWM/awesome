@@ -1648,7 +1648,7 @@ client_checker(client_t *c)
 void
 client_class_setup(lua_State *L)
 {
-    static const struct luaL_reg client_methods[] =
+    static const struct luaL_Reg client_methods[] =
     {
         LUA_CLASS_METHODS(client)
         { "get", luaA_client_get },
@@ -1657,7 +1657,7 @@ client_class_setup(lua_State *L)
         { NULL, NULL }
     };
 
-    static const struct luaL_reg client_meta[] =
+    static const struct luaL_Reg client_meta[] =
     {
         LUA_OBJECT_META(client)
         LUA_CLASS_META

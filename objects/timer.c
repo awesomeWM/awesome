@@ -121,14 +121,14 @@ LUA_OBJECT_EXPORT_PROPERTY(timer, atimer_t, started, lua_pushboolean)
 void
 timer_class_setup(lua_State *L)
 {
-    static const struct luaL_reg timer_methods[] =
+    static const struct luaL_Reg timer_methods[] =
     {
         LUA_CLASS_METHODS(timer)
         { "__call", luaA_timer_new },
         { NULL, NULL }
     };
 
-    static const struct luaL_reg timer_meta[] =
+    static const struct luaL_Reg timer_meta[] =
     {
         LUA_OBJECT_META(timer)
             LUA_CLASS_META

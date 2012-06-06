@@ -123,7 +123,7 @@ luaA_mousegrabber_isrunning(lua_State *L)
     return 1;
 }
 
-const struct luaL_reg awesome_mousegrabber_lib[] =
+const struct luaL_Reg awesome_mousegrabber_lib[] =
 {
     { "run", luaA_mousegrabber_run },
     { "stop", luaA_mousegrabber_stop },

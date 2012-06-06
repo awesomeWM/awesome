@@ -142,7 +142,7 @@ luaA_keygrabber_isrunning(lua_State *L)
     return 1;
 }
 
-const struct luaL_reg awesome_keygrabber_lib[] =
+const struct luaL_Reg awesome_keygrabber_lib[] =
 {
     { "run", luaA_keygrabber_run },
     { "stop", luaA_keygrabber_stop },

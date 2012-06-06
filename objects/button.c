@@ -99,14 +99,14 @@ luaA_button_set_button(lua_State *L, button_t *b)
 void
 button_class_setup(lua_State *L)
 {
-    static const struct luaL_reg button_methods[] =
+    static const struct luaL_Reg button_methods[] =
     {
         LUA_CLASS_METHODS(button)
         { "__call", luaA_button_new },
         { NULL, NULL }
     };
 
-    static const struct luaL_reg button_meta[] =
+    static const struct luaL_Reg button_meta[] =
     {
         LUA_OBJECT_META(button)
         LUA_CLASS_META

@@ -124,8 +124,8 @@ luaA_typename(lua_State *L, int idx)
 
 void
 luaA_openlib(lua_State *L, const char *name,
-             const struct luaL_reg methods[],
-             const struct luaL_reg meta[])
+             const struct luaL_Reg methods[],
+             const struct luaL_Reg meta[])
 {
     luaL_newmetatable(L, name);                                        /* 1 */
     lua_pushvalue(L, -1);           /* dup metatable                      2 */
@@ -206,8 +206,8 @@ luaA_class_setup(lua_State *L, lua_class_t *class,
                  lua_class_checker_t checker,
                  lua_class_propfunc_t index_miss_property,
                  lua_class_propfunc_t newindex_miss_property,
-                 const struct luaL_reg methods[],
-                 const struct luaL_reg meta[])
+                 const struct luaL_Reg methods[],
+                 const struct luaL_Reg meta[])
 {
     /* Create the object metatable */
     lua_newtable(L);

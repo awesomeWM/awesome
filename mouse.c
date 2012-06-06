@@ -225,7 +225,7 @@ luaA_mouse_object_under_pointer(lua_State *L)
     return 0;
 }
 
-const struct luaL_reg awesome_mouse_methods[] =
+const struct luaL_Reg awesome_mouse_methods[] =
 {
     { "__index", luaA_mouse_index },
     { "__newindex", luaA_mouse_newindex },
@@ -233,7 +233,7 @@ const struct luaL_reg awesome_mouse_methods[] =
     { "object_under_pointer", luaA_mouse_object_under_pointer },
     { NULL, NULL }
 };
-const struct luaL_reg awesome_mouse_meta[] =
+const struct luaL_Reg awesome_mouse_meta[] =
 {
     { NULL, NULL }
 };

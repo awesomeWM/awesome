@@ -79,12 +79,12 @@ void luaA_class_connect_signal_from_stack(lua_State *, lua_class_t *, const char
 void luaA_class_disconnect_signal_from_stack(lua_State *, lua_class_t *, const char *, int);
 void luaA_class_emit_signal(lua_State *, lua_class_t *, const char *, int);
 
-void luaA_openlib(lua_State *, const char *, const struct luaL_reg[], const struct luaL_reg[]);
+void luaA_openlib(lua_State *, const char *, const struct luaL_Reg[], const struct luaL_Reg[]);
 void luaA_class_setup(lua_State *, lua_class_t *, const char *, lua_class_t *,
                       lua_class_allocator_t, lua_class_collector_t,
                       lua_class_checker_t,
                       lua_class_propfunc_t, lua_class_propfunc_t,
-                      const struct luaL_reg[], const struct luaL_reg[]);
+                      const struct luaL_Reg[], const struct luaL_Reg[]);
 
 void luaA_class_add_property(lua_class_t *, const char *,
                              lua_class_propfunc_t, lua_class_propfunc_t, lua_class_propfunc_t);

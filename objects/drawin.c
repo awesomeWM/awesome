@@ -554,14 +554,14 @@ luaA_drawin_refresh(lua_State *L)
 void
 drawin_class_setup(lua_State *L)
 {
-    static const struct luaL_reg drawin_methods[] =
+    static const struct luaL_Reg drawin_methods[] =
     {
         LUA_CLASS_METHODS(drawin)
         { "__call", luaA_drawin_new },
         { NULL, NULL }
     };
 
-    static const struct luaL_reg drawin_meta[] =
+    static const struct luaL_Reg drawin_meta[] =
     {
         LUA_OBJECT_META(drawin)
         LUA_CLASS_META
