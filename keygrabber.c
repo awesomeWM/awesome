@@ -129,10 +129,24 @@ luaA_keygrabber_stop(lua_State *L)
     return 0;
 }
 
+/** Check if keygrabber is running.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ * \luastack
+ * \lreturn A boolean value, true if keygrabber is running, false otherwise.
+ */
+static int
+luaA_keygrabber_isrunning(lua_State *L)
+{
+    lua_pushboolean(L, globalconf.keygrabber != LUA_REFNIL);
+    return 1;
+}
+
 const struct luaL_reg awesome_keygrabber_lib[] =
 {
     { "run", luaA_keygrabber_run },
     { "stop", luaA_keygrabber_stop },
+    { "isrunning", luaA_keygrabber_isrunning },
     { NULL, NULL }
 };
 
