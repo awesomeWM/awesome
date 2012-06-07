@@ -276,7 +276,7 @@ a_dbus_convert_value(lua_State *L, int idx, DBusMessageIter *iter)
                                              type + 1,
                                              &subiter);
 
-            int arraylen = lua_objlen(L, idx + 1);
+            int arraylen = luaA_rawlen(L, idx + 1);
 
             if(arraylen % 2 != 0)
             {

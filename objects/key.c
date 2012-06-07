@@ -142,7 +142,7 @@ uint16_t
 luaA_tomodifiers(lua_State *L, int ud)
 {
     luaA_checktable(L, ud);
-    ssize_t len = lua_objlen(L, ud);
+    ssize_t len = luaA_rawlen(L, ud);
     uint16_t mod = XCB_NONE;
     for(int i = 1; i <= len; i++)
     {

@@ -94,6 +94,16 @@ luaA_setuservalue(lua_State *L, int idx)
 #endif
 } 
 
+static inline size_t
+luaA_rawlen(lua_State *L, int idx)
+{
+#if LUA_VERSION_NUM >= 502
+    return lua_rawlen(L, idx);
+#else
+    return lua_objlen(L, idx);
+#endif
+}
+
 static inline bool
 luaA_checkboolean(lua_State *L, int n)
 {

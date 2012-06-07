@@ -53,7 +53,7 @@ void luaA_dumpstack(lua_State *L)
             break;
           default:
             fprintf(stderr, "%d: %s\t#%d\t%p\n", i, lua_typename(L, t),
-                    (int) lua_objlen(L, i),
+                    (int) luaA_rawlen(L, i),
                     lua_topointer(L, i));
             break;
         }
