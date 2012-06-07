@@ -47,11 +47,38 @@
             luaL_error(L, "invalid screen number: %d", screen + 1); \
     } while(0)
 
+/** Print a warning about some Lua code.
+ * This is less mean than luaL_error() which setjmp via lua_error() and kills
+ * everything. This only warn, it's up to you to then do what's should be done.
+ * \param L The Lua VM state.
+ * \param fmt The warning message.
+ */
+static inline void __attribute__ ((format(printf, 2, 3)))
+luaA_warn(lua_State *L, const char *fmt, ...)
+{
+    va_list ap;
+    luaL_where(L, 1);
+    fprintf(stderr, "%sW: ", lua_tostring(L, -1));
+    lua_pop(L, 1);
+    va_start(ap, fmt);
+    vfprintf(stderr, fmt, ap);
+    va_end(ap);
+    fprintf(stderr, "\n");
+}
+
+static inline int
+luaA_typerror(lua_State *L, int narg, const char *tname)
+{
+    const char *msg = lua_pushfstring(L, "%s expected, got %s",
+                                      tname, luaL_typename(L, narg));
+    return luaL_argerror(L, narg, msg);
+}
+
 static inline bool
 luaA_checkboolean(lua_State *L, int n)
 {
     if(!lua_isboolean(L, n))
-        luaL_typerror(L, n, "boolean");
+        luaA_typerror(L, n, "boolean");
     return lua_toboolean(L, n);
 }
 
@@ -165,33 +192,6 @@ luaA_dofunction_from_registry(lua_State *L, int ref, int nargs, int nret)
 {
     lua_rawgeti(L, LUA_REGISTRYINDEX, ref);
     return luaA_dofunction(L, nargs, nret);
-}
-
-/** Print a warning about some Lua code.
- * This is less mean than luaL_error() which setjmp via lua_error() and kills
- * everything. This only warn, it's up to you to then do what's should be done.
- * \param L The Lua VM state.
- * \param fmt The warning message.
- */
-static inline void __attribute__ ((format(printf, 2, 3)))
-luaA_warn(lua_State *L, const char *fmt, ...)
-{
-    va_list ap;
-    luaL_where(L, 1);
-    fprintf(stderr, "%sW: ", lua_tostring(L, -1));
-    lua_pop(L, 1);
-    va_start(ap, fmt);
-    vfprintf(stderr, fmt, ap);
-    va_end(ap);
-    fprintf(stderr, "\n");
-}
-
-static inline int
-luaA_typerror(lua_State *L, int narg, const char *tname)
-{
-    const char *msg = lua_pushfstring(L, "%s expected, got %s",
-                                      tname, luaL_typename(L, narg));
-    return luaL_argerror(L, narg, msg);
 }
 
 void luaA_init(xdgHandle *);
