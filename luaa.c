@@ -271,27 +271,22 @@ luaA_fixups(lua_State *L)
     lua_setfield(L, -2, "wlen");
     lua_pop(L, 1);
     /* replace next */
-    lua_pushliteral(L, "next");
     lua_pushcfunction(L, luaAe_next);
-    lua_settable(L, LUA_GLOBALSINDEX);
+    lua_setglobal(L, "next");
     /* replace pairs */
-    lua_pushliteral(L, "pairs");
     lua_pushcfunction(L, luaAe_next);
     lua_pushcclosure(L, luaAe_pairs, 1); /* pairs get next as upvalue */
-    lua_settable(L, LUA_GLOBALSINDEX);
+    lua_setglobal(L, "pairs");
     /* replace ipairs */
-    lua_pushliteral(L, "ipairs");
     lua_pushcfunction(L, luaA_ipairs_aux);
     lua_pushcclosure(L, luaAe_ipairs, 1);
-    lua_settable(L, LUA_GLOBALSINDEX);
+    lua_setglobal(L, "ipairs");
     /* replace type */
-    lua_pushliteral(L, "type");
     lua_pushcfunction(L, luaAe_type);
-    lua_settable(L, LUA_GLOBALSINDEX);
+    lua_setglobal(L, "type");
     /* set selection */
-    lua_pushliteral(L, "selection");
     lua_pushcfunction(L, luaA_selection_get);
-    lua_settable(L, LUA_GLOBALSINDEX);
+    lua_setglobal(L, "selection");
 }
 
 /** Look for an item: table, function, etc.
