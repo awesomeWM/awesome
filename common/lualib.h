@@ -28,11 +28,17 @@
 /** Lua function to call on dofuction() error */
 lua_CFunction lualib_dofunction_on_error;
 
-#define luaA_checkfunction(L, n) \
-    do { \
-        if(!lua_isfunction(L, n)) \
-            luaL_typerror(L, n, "function"); \
-    } while(0)
+static inline void luaA_checkfunction(lua_State *L, int idx)
+{
+    if(!lua_isfunction(L, idx))
+        luaL_typerror(L, idx, "function");
+}
+
+static inline void luaA_checktable(lua_State *L, int idx)
+{
+    if(!lua_istable(L, idx))
+        luaL_typerror(L, idx, "table");
+}
 
 /** Dump the Lua stack. Useful for debugging.
  * \param L The Lua VM state.
@@ -114,12 +120,6 @@ luaA_dofunction(lua_State *L, int nargs, int nret)
     lua_remove(L, error_func_pos);
     return true;
 }
-
-#define luaA_checktable(L, n) \
-    do { \
-        if(!lua_istable(L, n)) \
-            luaL_typerror(L, n, "table"); \
-    } while(0)
 
 #endif
 
