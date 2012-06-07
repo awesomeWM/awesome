@@ -23,6 +23,7 @@
 #define AWESOME_COMMON_LUAOBJECT
 
 #include "common/luaclass.h"
+#include "luaa.h"
 
 #define LUAA_OBJECT_REGISTRY_KEY "awesome.object.registry"
 
@@ -41,7 +42,7 @@ static inline void *
 luaA_object_ref_item(lua_State *L, int ud, int iud)
 {
     /* Get the env table from the object */
-    lua_getfenv(L, ud);
+    luaA_getuservalue(L, ud);
     void *pointer = luaA_object_incref(L, -1, iud < 0 ? iud - 1 : iud);
     /* Remove env table */
     lua_pop(L, 1);
@@ -57,7 +58,7 @@ static inline void
 luaA_object_unref_item(lua_State *L, int ud, void *pointer)
 {
     /* Get the env table from the object */
-    lua_getfenv(L, ud);
+    luaA_getuservalue(L, ud);
     /* Decrement */
     luaA_object_decref(L, -1, pointer);
     /* Remove env table */
@@ -74,7 +75,7 @@ static inline int
 luaA_object_push_item(lua_State *L, int ud, void *pointer)
 {
     /* Get env table of the object */
-    lua_getfenv(L, ud);
+    luaA_getuservalue(L, ud);
     /* Push key */
     lua_pushlightuserdata(L, pointer);
     /* Get env.pointer */
@@ -172,7 +173,7 @@ int luaA_object_emit_signal_simple(lua_State *);
         lua_newtable(L);                                                       \
         lua_newtable(L);                                                       \
         lua_setmetatable(L, -2);                                               \
-        lua_setfenv(L, -2);                                                    \
+        luaA_setuservalue(L, -2);                                              \
         lua_pushvalue(L, -1);                                                  \
         /** @todo This is wrong we shouldn't copy the existing signals from */ \
         /* the class, but I'm too lazy for doing this correctly right now. */  \

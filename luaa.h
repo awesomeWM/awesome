@@ -74,6 +74,26 @@ luaA_typerror(lua_State *L, int narg, const char *tname)
     return luaL_argerror(L, narg, msg);
 }
 
+static inline void
+luaA_getuservalue(lua_State *L, int idx)
+{
+#if LUA_VERSION_NUM >= 502
+    lua_getuservalue(L, idx);
+#else
+    lua_getfenv(L, idx);
+#endif
+} 
+
+static inline void
+luaA_setuservalue(lua_State *L, int idx)
+{
+#if LUA_VERSION_NUM >= 502
+    lua_setuservalue(L, idx);
+#else
+    lua_setfenv(L, idx);
+#endif
+} 
+
 static inline bool
 luaA_checkboolean(lua_State *L, int n)
 {
