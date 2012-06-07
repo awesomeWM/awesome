@@ -21,6 +21,7 @@
 
 #include "common/luaclass.h"
 #include "common/luaobject.h"
+#include "luaa.h"
 
 struct lua_class_property
 {
@@ -76,7 +77,7 @@ luaA_checkudata(lua_State *L, int ud, lua_class_t *class)
 {
     void *p = luaA_toudata(L, ud, class);
     if(!p)
-        luaL_typerror(L, ud, class->name);
+        luaA_typerror(L, ud, class->name);
     else if(class->checker && !class->checker(p))
         luaL_error(L, "invalid object");
     return p;

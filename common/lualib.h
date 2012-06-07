@@ -23,56 +23,20 @@
 #define AWESOME_COMMON_LUALIB
 
 #include <lauxlib.h>
+
 #include "common/util.h"
+#include "common/luaclass.h"
 
 /** Lua function to call on dofuction() error */
 lua_CFunction lualib_dofunction_on_error;
 
-static inline void luaA_checkfunction(lua_State *L, int idx)
-{
-    if(!lua_isfunction(L, idx))
-        luaL_typerror(L, idx, "function");
-}
-
-static inline void luaA_checktable(lua_State *L, int idx)
-{
-    if(!lua_istable(L, idx))
-        luaL_typerror(L, idx, "table");
-}
+void luaA_checkfunction(lua_State *, int);
+void luaA_checktable(lua_State *, int);
 
 /** Dump the Lua stack. Useful for debugging.
  * \param L The Lua VM state.
  */
-static inline void
-luaA_dumpstack(lua_State *L)
-{
-    fprintf(stderr, "-------- Lua stack dump ---------\n");
-    for(int i = lua_gettop(L); i; i--)
-    {
-        int t = lua_type(L, i);
-        switch (t)
-        {
-          case LUA_TSTRING:
-            fprintf(stderr, "%d: string: `%s'\n", i, lua_tostring(L, i));
-            break;
-          case LUA_TBOOLEAN:
-            fprintf(stderr, "%d: bool:   %s\n", i, lua_toboolean(L, i) ? "true" : "false");
-            break;
-          case LUA_TNUMBER:
-            fprintf(stderr, "%d: number: %g\n", i, lua_tonumber(L, i));
-            break;
-          case LUA_TNIL:
-            fprintf(stderr, "%d: nil\n", i);
-            break;
-          default:
-            fprintf(stderr, "%d: %s\t#%d\t%p\n", i, lua_typename(L, t),
-                    (int) lua_objlen(L, i),
-                    lua_topointer(L, i));
-            break;
-        }
-    }
-    fprintf(stderr, "------- Lua stack dump end ------\n");
-}
+void luaA_dumpstack(lua_State *);
 
 /** Convert s stack index to positive.
  * \param L The Lua VM state.

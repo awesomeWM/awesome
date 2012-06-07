@@ -186,6 +186,14 @@ luaA_warn(lua_State *L, const char *fmt, ...)
     fprintf(stderr, "\n");
 }
 
+static inline int
+luaA_typerror(lua_State *L, int narg, const char *tname)
+{
+    const char *msg = lua_pushfstring(L, "%s expected, got %s",
+                                      tname, luaL_typename(L, narg));
+    return luaL_argerror(L, narg, msg);
+}
+
 void luaA_init(xdgHandle *);
 bool luaA_parserc(xdgHandle *, const char *, bool);
 bool luaA_hasitem(lua_State *, const void *);
