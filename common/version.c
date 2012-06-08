@@ -50,7 +50,7 @@ eprint_version(void)
 #endif
     printf(" (%s@%s)\n", AWESOME_COMPILE_BY, AWESOME_COMPILE_HOSTNAME);
 
-    lua_State *L = lua_open();
+    lua_State *L = luaL_newstate();
     luaopen_base(L);
     lua_getglobal(L, "_VERSION");
     printf(" • Compiled against "  LUA_RELEASE
