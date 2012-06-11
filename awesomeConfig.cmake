@@ -223,19 +223,12 @@ endif()
 # }}}
 
 # {{{ Install path and configuration variables
-if(DEFINED PREFIX)
-    set(PREFIX ${PREFIX} CACHE PATH "install prefix")
-    set(CMAKE_INSTALL_PREFIX ${PREFIX})
-else()
-    set(PREFIX ${CMAKE_INSTALL_PREFIX} CACHE PATH "install prefix")
-endif()
-
 #If a sysconfdir is specified, use it instead
 #of the default configuration dir.
 if(DEFINED SYSCONFDIR)
     set(SYSCONFDIR ${SYSCONFDIR} CACHE PATH "config directory")
 else()
-    set(SYSCONFDIR ${PREFIX}/etc CACHE PATH "config directory")
+    set(SYSCONFDIR ${CMAKE_INSTALL_PREFIX}/etc CACHE PATH "config directory")
 endif()
 
 #If an XDG Config Dir is specificed, use it instead
@@ -250,25 +243,25 @@ endif()
 if(DEFINED AWESOME_DOC_PATH)
     set(AWESOME_DOC_PATH ${AWESOME_DOC_PATH} CACHE PATH "awesome docs directory")
 else()
-    set(AWESOME_DOC_PATH ${PREFIX}/share/doc/${PROJECT_AWE_NAME} CACHE PATH "awesome docs directory")
+    set(AWESOME_DOC_PATH ${CMAKE_INSTALL_PREFIX}/share/doc/${PROJECT_AWE_NAME} CACHE PATH "awesome docs directory")
 endif()
 
 # setting AWESOME_XSESSION_PATH
 if(DEFINED AWESOME_XSESSION_PATH)
     set(AWESOME_XSESSION_PATH ${AWESOME_XSESSION_PATH} CACHE PATH "awesome xsessions directory")
 else()
-    set(AWESOME_XSESSION_PATH ${PREFIX}/share/xsessions CACHE PATH "awesome xsessions directory")
+    set(AWESOME_XSESSION_PATH ${CMAKE_INSTALL_PREFIX}/share/xsessions CACHE PATH "awesome xsessions directory")
 endif()
 
 # set man path
 if(DEFINED AWESOME_MAN_PATH)
    set(AWESOME_MAN_PATH ${AWESOME_MAN_PATH} CACHE PATH "awesome manpage directory")
 else()
-   set(AWESOME_MAN_PATH ${PREFIX}/share/man CACHE PATH "awesome manpage directory")
+   set(AWESOME_MAN_PATH ${CMAKE_INSTALL_PREFIX}/share/man CACHE PATH "awesome manpage directory")
 endif()
 
 # Hide to avoid confusion
-mark_as_advanced(CMAKE_INSTALL_PREFIX)
+mark_as_advanced(CMAKE_INSTALL_CMAKE_INSTALL_PREFIX)
 
 set(AWESOME_VERSION          ${VERSION})
 set(AWESOME_COMPILE_MACHINE  ${CMAKE_SYSTEM_PROCESSOR})
@@ -276,7 +269,7 @@ set(AWESOME_COMPILE_HOSTNAME ${BUILDHOSTNAME})
 set(AWESOME_COMPILE_BY       $ENV{USER})
 set(AWESOME_RELEASE          ${CODENAME})
 set(AWESOME_SYSCONFDIR       ${XDG_CONFIG_DIR}/${PROJECT_AWE_NAME})
-set(AWESOME_DATA_PATH        ${PREFIX}/share/${PROJECT_AWE_NAME})
+set(AWESOME_DATA_PATH        ${CMAKE_INSTALL_PREFIX}/share/${PROJECT_AWE_NAME})
 set(AWESOME_LUA_LIB_PATH     ${AWESOME_DATA_PATH}/lib)
 set(AWESOME_ICON_PATH        ${AWESOME_DATA_PATH}/icons)
 set(AWESOME_THEMES_PATH      ${AWESOME_DATA_PATH}/themes)
