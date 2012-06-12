@@ -10,7 +10,8 @@ local capi = {
     keygrabber = keygrabber }
 
 --- Keygrabber Stack
-module("awful.keygrabber")
+-- awful.keygrabber
+local keygrabber = {}
 
 -- Private data
 local grabbers = {}
@@ -29,7 +30,7 @@ end
 --- Stop grabbing the keyboard for the provided callback.
 -- When no callback is given, the least grabber gets removed (last one added to the stack).
 -- @param g The key grabber that must be removed.
-function stop(g)
+function keygrabber.stop(g)
     for i, v in ipairs(grabbers) do
         if v == g then
             table.remove(grabbers, i)
@@ -71,9 +72,9 @@ end
 --   end) <br/>
 -- end <br/>
 -- </code></p>
-function run(g)
+function keygrabber.run(g)
     -- Remove the grabber if its in stack
-    stop(g)
+    keygrabber.stop(g)
     -- Record the grabber has latest added
     table.insert(grabbers, 1, g)
     -- start the keygrabber if its not running already
@@ -83,5 +84,7 @@ function run(g)
     end
     return g
 end
+
+return keygrabber
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

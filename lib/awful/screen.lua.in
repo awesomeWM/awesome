@@ -15,7 +15,8 @@ local util = require("awful.util")
 local client = require("awful.client")
 
 --- Screen module for awful
-module("awful.screen")
+-- awful.screen
+local screen = {}
 
 local data = {}
 data.padding = {}
@@ -26,7 +27,7 @@ data.padding = {}
 -- `screen` table/object.
 -- @param x The x coordinate
 -- @param y The y coordinate
-function getbycoord(x, y)
+function screen.getbycoord(x, y)
     for i = 1, capi.screen:count() do
         local geometry = capi.screen[i].geometry
         if((x < 0 or (x >= geometry.x and x < geometry.x + geometry.width))
@@ -38,36 +39,38 @@ end
 
 --- Give the focus to a screen, and move pointer.
 -- @param screen Screen number.
-function focus(screen)
-    if screen > capi.screen.count() then screen = capi.mouse.screen end
-    local c = client.focus.history.get(screen, 0)
+function screen.focus(_screen)
+    if _screen > capi.screen.count() then _screen = capi.mouse.screen end
+    local c = client.focus.history.get(_screen, 0)
     if c then capi.client.focus = c end
     -- Move the mouse on the screen
-    capi.mouse.screen = screen
+    capi.mouse.screen = _screen
 end
 
 --- Give the focus to a screen, and move pointer, but relative to the current
 -- focused screen.
 -- @param i Value to add to the current focused screen index. 1 will focus next
 -- screen, -1 would focus the previous one.
-function focus_relative(i)
-    return focus(util.cycle(capi.screen.count(), capi.mouse.screen + i))
+function screen.focus_relative(i)
+    return screen.focus(util.cycle(capi.screen.count(), capi.mouse.screen + i))
 end
 
 --- Get or set the screen padding.
 -- @param screen The screen object to change the padding on
 -- @param padding The padding, an table with 'top', 'left', 'right' and/or
 -- 'bottom'. Can be nil if you only want to retrieve padding
-function padding(screen, padding)
+function screen.padding(_screen, padding)
     if padding then
-        data.padding[screen] = padding
-        screen:emit_signal("padding")
+        data.padding[_screen] = padding
+        _screen:emit_signal("padding")
     end
-    return data.padding[screen]
+    return data.padding[_screen]
 end
 
 for s = 1, capi.screen.count() do
     capi.screen[s]:add_signal("padding")
 end
+
+return screen
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

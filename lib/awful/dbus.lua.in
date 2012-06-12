@@ -10,7 +10,7 @@ local dbus = dbus
 --- D-Bus module for awful.
 -- This module simply request the org.naquadah.awesome.awful name on the D-Bus
 -- for futur usage by other awful modules.
-module("awful.dbus")
+-- awful.dbus
 
 if dbus then
     dbus.request_name("session", "org.naquadah.awesome.awful")

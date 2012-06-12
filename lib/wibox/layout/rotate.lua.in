@@ -106,7 +106,7 @@ end
 local function new()
     local ret = widget_base.make_widget()
 
-    for k, v in pairs(_M) do
+    for k, v in pairs(rotate) do
         if type(v) == "function" then
             ret[k] = v
         end

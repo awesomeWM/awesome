@@ -15,7 +15,7 @@ local dbus = dbus
 local type = type
 
 --- Remote control module allowing usage of awesome-client.
-module("awful.remote")
+-- awful.remote
 
 if dbus then
     dbus.connect_signal("org.naquadah.awesome.awful.Remote", function(data, code)

@@ -107,7 +107,7 @@ local function new()
     ret.horizontal = false
     ret.vertical = false
 
-    for k, v in pairs(_M) do
+    for k, v in pairs(mirror) do
         if type(v) == "function" then
             ret[k] = v
         end

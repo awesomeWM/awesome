@@ -17,7 +17,8 @@ local util = require("awful.util")
 
 --- Completion module.
 -- This module store a set of function using shell to complete commands name.
-module("awful.completion")
+-- awful.completion
+local completion = {}
 
 -- mapping of command/completion function
 local bashcomp_funcs = {}
@@ -26,7 +27,7 @@ local bashcomp_src = "@SYSCONFDIR@/bash_completion"
 --- Enable programmable bash completion in awful.completion.bash at the price of
 -- a slight overhead.
 -- @param src The bash completion source file, /etc/bash_completion by default.
-function bashcomp_load(src)
+function completion.bashcomp_load(src)
     if src then bashcomp_src = src end
     local c, err = io.popen("/usr/bin/env bash -c 'source " .. bashcomp_src .. "; complete -p'")
     if c then
@@ -59,7 +60,7 @@ end
 -- @param ncomp The element number to complete.
 -- @param shell The shell to use for completion (bash (default) or zsh).
 -- @return The new command, the new cursor position, the table of all matches.
-function shell(command, cur_pos, ncomp, shell)
+function completion.shell(command, cur_pos, ncomp, shell)
     local wstart = 1
     local wend = 1
     local words = {}
@@ -160,7 +161,7 @@ end
 -- @param ncomp The number of yet requested completion using current text.
 -- @param keywords The keywords table uised for completion.
 -- @return The new match, the new cursor position, the table of all matches.
-function generic(text, cur_pos, ncomp, keywords)
+function completion.generic(text, cur_pos, ncomp, keywords)
     -- The keywords table may be empty
     if #keywords == 0 then
         return text, #text + 1
@@ -190,5 +191,7 @@ function generic(text, cur_pos, ncomp, keywords)
     ncomp = math.fmod(ncomp - 1, #matches) + 1
     return matches[ncomp], #matches[ncomp] + 1, matches
 end
+
+return completion
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

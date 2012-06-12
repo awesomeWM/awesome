@@ -20,7 +20,8 @@ local util = require("awful.util")
 local beautiful = require("beautiful")
 
 --- Prompt module for awful
-module("awful.prompt")
+-- awful.prompt
+local prompt = {}
 
 --- Private data
 local data = {}
@@ -131,7 +132,7 @@ end
 local function prompt_text_with_cursor(args)
     local char, spacer, text_start, text_end, ret
     local text = args.text or ""
-    local prompt = args.prompt or ""
+    local _prompt = args.prompt or ""
     local underline = args.cursor_ul or "none"
 
     if args.selectall then
@@ -151,7 +152,7 @@ local function prompt_text_with_cursor(args)
         text_end = util.escape(text:sub(args.cursor_pos + 1))
     end
 
-    ret = prompt .. text_start .. "<span background=\"" .. util.color_strip_alpha(args.cursor_color) .. "\" foreground=\"" .. util.color_strip_alpha(args.text_color) .. "\" underline=\"" .. underline .. "\">" .. char .. "</span>" .. text_end .. spacer
+    ret = _prompt .. text_start .. "<span background=\"" .. util.color_strip_alpha(args.cursor_color) .. "\" foreground=\"" .. util.color_strip_alpha(args.text_color) .. "\" underline=\"" .. underline .. "\">" .. char .. "</span>" .. text_end .. spacer
     return ret
 end
 
@@ -165,7 +166,7 @@ end
 -- @param done_callback Optional parameter: the callback function to always call without arguments, regardless of whether the prompt was cancelled.
 -- @param changed_callback Optional parameter: the callback function to call with command as argument when a command was changed.
 -- @param keypressed_callback Optional parameter: the callback function to call with mod table, key and command as arguments when a key was pressed.
-function run(args, textbox, exe_callback, completion_callback, history_path, history_max, done_callback, changed_callback, keypressed_callback)
+function prompt.run(args, textbox, exe_callback, completion_callback, history_path, history_max, done_callback, changed_callback, keypressed_callback)
     local grabber
     local theme = beautiful.get()
     if not args then args = {} end
@@ -464,5 +465,7 @@ function run(args, textbox, exe_callback, completion_callback, history_path, his
         end
     end)
 end
+
+return prompt
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

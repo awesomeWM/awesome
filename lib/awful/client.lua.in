@@ -21,30 +21,31 @@ local capi =
 }
 
 --- Useful client manipulation functions.
-module("awful.client")
+-- awful.client
+local client = {}
 
 -- Private data
-data = {}
-data.focus = {}
-data.urgent = {}
-data.marked = {}
-data.properties = setmetatable({}, { __mode = 'k' })
+client.data = {}
+client.data.focus = {}
+client.data.urgent = {}
+client.data.marked = {}
+client.data.properties = setmetatable({}, { __mode = 'k' })
 
 -- Functions
-urgent = {}
-focus = {}
-focus.history = {}
-swap = {}
-floating = {}
-dockable = {}
-property = {}
+client.urgent = {}
+client.focus = {}
+client.focus.history = {}
+client.swap = {}
+client.floating = {}
+client.dockable = {}
+client.property = {}
 
 ---
 -- Jump to the given client.  Takes care of focussing the screen, the right tag,
 -- etc.
 -- @param c the client to jump to
 -- @param merge If true then merge tags when clients are not visible.
-function jumpto(c, merge)
+function client.jumpto(c, merge)
     local s = capi.client.focus and capi.client.focus.screen or capi.mouse.screen
     -- focus the screen
     if s ~= c.screen then
@@ -68,9 +69,9 @@ end
 
 --- Get the first client that got the urgent hint.
 -- @return The first urgent client.
-function urgent.get()
-    if #data.urgent > 0 then
-        return data.urgent[1]
+function client.urgent.get()
+    if #client.data.urgent > 0 then
+        return client.data.urgent[1]
     else
         -- fallback behaviour: iterate through clients and get the first urgent
         local clients = capi.client.get()
@@ -84,28 +85,28 @@ end
 
 --- Jump to the client that received the urgent hint first.
 -- @param merge If true then merge tags when clients are not visible.
-function urgent.jumpto(merge)
-    local c = urgent.get()
+function client.urgent.jumpto(merge)
+    local c = client.urgent.get()
     if c then
-        jumpto(c, merge)
+        client.jumpto(c, merge)
     end
 end
 
 --- Adds client to urgent stack.
 -- @param c The client object.
 -- @param prop The property which is updated.
-function urgent.add(c, prop)
+function client.urgent.add(c, prop)
     if type(c) == "client" and prop == "urgent" and c.urgent then
-        table.insert(data.urgent, c)
+        table.insert(client.data.urgent, c)
     end
 end
 
 --- Remove client from urgent stack.
 -- @param c The client object.
-function urgent.delete(c)
-    for k, cl in ipairs(data.urgent) do
+function client.urgent.delete(c)
+    for k, cl in ipairs(client.data.urgent) do
         if c == cl then
-            table.remove(data.urgent, k)
+            table.remove(client.data.urgent, k)
             break
         end
     end
@@ -113,10 +114,10 @@ end
 
 --- Remove a client from the focus history
 -- @param c The client that must be removed.
-function focus.history.delete(c)
-    for k, v in ipairs(data.focus) do
+function client.focus.history.delete(c)
+    for k, v in ipairs(client.data.focus) do
         if v == c then
-            table.remove(data.focus, k)
+            table.remove(client.data.focus, k)
             break
         end
     end
@@ -127,7 +128,7 @@ end
 -- not registered and cannot get focus.
 -- @param c A client.
 -- @return The same client if it's ok, nil otherwise.
-function focus.filter(c)
+function client.focus.filter(c)
     if c.type == "desktop"
         or c.type == "dock"
         or c.type == "splash"
@@ -139,11 +140,11 @@ end
 
 --- Update client focus history.
 -- @param c The client that has been focused.
-function focus.history.add(c)
+function client.focus.history.add(c)
     -- Remove the client if its in stack
-    focus.history.delete(c)
+    client.focus.history.delete(c)
     -- Record the client has latest focused
-    table.insert(data.focus, 1, c)
+    table.insert(client.data.focus, 1, c)
 end
 
 --- Get the latest focused client for a screen in history.
@@ -151,11 +152,11 @@ end
 -- @param idx The index: 0 will return first candidate,
 -- 1 will return second, etc.
 -- @return A client.
-function focus.history.get(screen, idx)
+function client.focus.history.get(screen, idx)
     -- When this counter is equal to idx, we return the client
     local counter = 0
-    local vc = visible(screen)
-    for k, c in ipairs(data.focus) do
+    local vc = client.visible(screen)
+    for k, c in ipairs(client.data.focus) do
         if c.screen == screen then
             for j, vcc in ipairs(vc) do
                 if vcc == c then
@@ -173,7 +174,7 @@ function focus.history.get(screen, idx)
     -- that passes the filter.
     if counter == 0 then
         for k, v in ipairs(vc) do
-            if focus.filter(v) then
+            if client.focus.filter(v) then
                 return v
             end
         end
@@ -181,7 +182,7 @@ function focus.history.get(screen, idx)
 end
 
 --- Focus the previous client in history.
-function focus.history.previous()
+function client.focus.history.previous()
     local sel = capi.client.focus
     local s
     if sel then
@@ -189,14 +190,14 @@ function focus.history.previous()
     else
         s = capi.mouse.screen
     end
-    local c = focus.history.get(s, 1)
+    local c = client.focus.history.get(s, 1)
     if c then capi.client.focus = c end
 end
 
 --- Get visible clients from a screen.
 -- @param screen The screen number, or nil for all screens.
 -- @return A table with all visible clients.
-function visible(screen)
+function client.visible(screen)
     local cls = capi.client.get(screen)
     local vcls = {}
     for k, c in pairs(cls) do
@@ -210,12 +211,12 @@ end
 --- Get visible and tiled clients
 -- @param screen The screen number, or nil for all screens.
 -- @return A tabl with all visible and tiled clients.
-function tiled(screen)
-    local clients = visible(screen)
+function client.tiled(screen)
+    local clients = client.visible(screen)
     local tclients = {}
     -- Remove floating clients
     for k, c in pairs(clients) do
-        if not floating.get(c) then
+        if not client.floating.get(c) then
             table.insert(tclients, c)
         end
     end
@@ -227,16 +228,16 @@ end
 -- @param i The index.
 -- @param c Optional client.
 -- @return A client, or nil if no client is available.
-function next(i, c)
+function client.next(i, c)
     -- Get currently focused client
     local sel = c or capi.client.focus
     if sel then
         -- Get all visible clients
-        local cls = visible(sel.screen)
+        local cls = client.visible(sel.screen)
         local fcls = {}
         -- Remove all non-normal clients
         for idx, c in ipairs(cls) do
-            if focus.filter(c) or c == sel then
+            if client.focus.filter(c) or c == sel then
                 table.insert(fcls, c)
             end
         end
@@ -307,7 +308,7 @@ local function get_client_in_direction(dir, c)
         local geometry = sel:geometry()
         local dist, dist_min
         local target = nil
-        local cls = visible(sel.screen)
+        local cls = client.visible(sel.screen)
 
         -- We check each client.
         for i, c in ipairs(cls) do
@@ -332,7 +333,7 @@ end
 --- Focus a client by the given direction.
 -- @param dir The direction, can be either "up", "down", "left" or "right".
 -- @param c Optional client.
-function focus.bydirection(dir, c)
+function client.focus.bydirection(dir, c)
     local sel = c or capi.client.focus
     if sel then
         local target = get_client_in_direction(dir, sel)
@@ -347,8 +348,8 @@ end
 --- Focus a client by its relative index.
 -- @param i The index.
 -- @param c Optional client.
-function focus.byidx(i, c)
-    local target = next(i, c)
+function client.focus.byidx(i, c)
+    local target = client.next(i, c)
     if target then
         capi.client.focus = target
     end
@@ -357,7 +358,7 @@ end
 --- Swap a client with another client in the given direction
 -- @param dir The direction, can be either "up", "down", "left" or "right".
 -- @param c Optional client.
-function swap.bydirection(dir, c)
+function client.swap.bydirection(dir, c)
     local sel = c or capi.client.focus
     if sel then
         local target = get_client_in_direction(dir, sel)
@@ -372,7 +373,7 @@ end
 --- Swap a client by its relative index.
 -- @param i The index.
 -- @param c Optional client, otherwise focused one is used.
-function swap.byidx(i, c)
+function client.swap.byidx(i, c)
     local sel = c or capi.client.focus
     local target = next(i, sel)
     if target then
@@ -383,9 +384,9 @@ end
 --- Cycle clients.
 -- @param clockwise True to cycle clients clockwise.
 -- @param screen Optional screen where to cycle clients.
-function cycle(clockwise, screen)
+function client.cycle(clockwise, screen)
     local screen = screen or capi.mouse.screen
-    local cls = visible(screen)
+    local cls = client.visible(screen)
     -- We can't rotate without at least 2 clients, buddy.
     if #cls >= 2 then
         local c = table.remove(cls, 1)
@@ -404,14 +405,14 @@ end
 --- Get the master window.
 -- @param screen Optional screen number, otherwise screen mouse is used.
 -- @return The master window.
-function getmaster(screen)
+function client.getmaster(screen)
     local s = screen or capi.mouse.screen
-    return visible(s)[1]
+    return client.visible(s)[1]
 end
 
 --- Set the client as slave: put it at the end of other windows.
 -- @param c The window to set as slave.
-function setslave(c)
+function client.setslave(c)
     local cls = capi.client.get(c.screen)
     for k, v in pairs(cls) do
         c:swap(v)
@@ -424,7 +425,7 @@ end
 -- @param w The relative width.
 -- @param h The relative height.
 -- @param c The optional client, otherwise focused one is used.
-function moveresize(x, y, w, h, c)
+function client.moveresize(x, y, w, h, c)
     local sel = c or capi.client.focus
     local geometry = sel:geometry()
     geometry['x'] = geometry['x'] + x
@@ -437,7 +438,7 @@ end
 --- Move a client to a tag.
 -- @param target The tag to move the client to.
 -- @param c Optional client to move, otherwise the focused one is used.
-function movetotag(target, c)
+function client.movetotag(target, c)
     local sel = c or capi.client.focus
     if sel and target.screen then
         -- Set client on the same screen as the tag.
@@ -449,7 +450,7 @@ end
 --- Toggle a tag on a client.
 -- @param target The tag to toggle.
 -- @param c Optional client to toggle, otherwise the focused one is used.
-function toggletag(target, c)
+function client.toggletag(target, c)
     local sel = c or capi.client.focus
     -- Check that tag and client screen are identical
     if sel and sel.screen == target.screen then
@@ -475,7 +476,7 @@ end
 --- Move a client to a screen. Default is next screen, cycling.
 -- @param c The client to move.
 -- @param s The screen number, default to current + 1.
-function movetoscreen(c, s)
+function client.movetoscreen(c, s)
     local sel = c or capi.client.focus
     if sel then
         local sc = capi.screen.count()
@@ -491,16 +492,16 @@ end
 --- Mark a client, and then call 'marked' hook.
 -- @param c The client to mark, the focused one if not specified.
 -- @return True if the client has been marked. False if the client was already marked.
-function mark(c)
+function client.mark(c)
     local cl = c or capi.client.focus
     if cl then
-        for k, v in pairs(data.marked) do
+        for k, v in pairs(client.data.marked) do
             if cl == v then
                 return false
             end
         end
 
-        table.insert(data.marked, cl)
+        table.insert(client.data.marked, cl)
 
         -- Call callback
         cl:emit_signal("marked")
@@ -511,12 +512,12 @@ end
 --- Unmark a client and then call 'unmarked' hook.
 -- @param c The client to unmark, or the focused one if not specified.
 -- @return True if the client has been unmarked. False if the client was not marked.
-function unmark(c)
+function client.unmark(c)
     local cl = c or capi.client.focus
 
-    for k, v in pairs(data.marked) do
+    for k, v in pairs(client.data.marked) do
         if cl == v then
-            table.remove(data.marked, k)
+            table.remove(client.data.marked, k)
             cl:emit_signal("unmarked")
             return true
         end
@@ -527,10 +528,10 @@ end
 
 --- Check if a client is marked.
 -- @param c The client to check, or the focused one otherwise.
-function ismarked(c)
+function client.ismarked(c)
     local cl = c or capi.client.focus
     if cl then
-        for k, v in pairs(data.marked) do
+        for k, v in pairs(client.data.marked) do
             if cl == v then
                 return true
             end
@@ -541,23 +542,23 @@ end
 
 --- Toggle a client as marked.
 -- @param c The client to toggle mark.
-function togglemarked(c)
+function client.togglemarked(c)
     local cl = c or capi.client.focus
 
-    if not mark(c) then
-        unmark(c)
+    if not client.mark(c) then
+        client.unmark(c)
     end
 end
 
 --- Return the marked clients and empty the marked table.
 -- @return A table with all marked clients.
-function getmarked()
-    for k, v in pairs(data.marked) do
+function client.getmarked()
+    for k, v in pairs(client.data.marked) do
         v:emit_signal("unmarked")
     end
 
-    t = data.marked
-    data.marked = {}
+    t = client.data.marked
+    client.data.marked = {}
     return t
 end
 
@@ -565,28 +566,28 @@ end
 -- Floating client are not handled by tiling layouts.
 -- @param c A client.
 -- @param s True or false.
-function floating.set(c, s)
+function client.floating.set(c, s)
     local c = c or capi.client.focus
-    if c and property.get(c, "floating") ~= s then
-        property.set(c, "floating", s)
+    if c and client.property.get(c, "floating") ~= s then
+        client.property.set(c, "floating", s)
         local screen = c.screen
         if s == true then
-            c:geometry(property.get(c, "floating_geometry"))
+            c:geometry(client.property.get(c, "floating_geometry"))
         end
         c.screen = screen
     end
 end
 
 local function store_floating_geometry(c)
-    if floating.get(c) then
-        property.set(c, "floating_geometry", c:geometry())
+    if client.floating.get(c) then
+        client.property.set(c, "floating_geometry", c:geometry())
     end
 end
 
 -- Store the initial client geometry.
 capi.client.connect_signal("new", function(c)
     local function store_init_geometry(c)
-        property.set(c, "floating_geometry", c:geometry())
+        client.property.set(c, "floating_geometry", c:geometry())
         c:disconnect_signal("property::border_width", store_init_geometry)
     end
     c:connect_signal("property::border_width", store_init_geometry)
@@ -598,7 +599,7 @@ end)
 
 --- Return if a client has a fixe size or not.
 -- @param c The client.
-function isfixed(c)
+function client.isfixed(c)
     local c = c or capi.client.focus
     if not c then return end
     local h = c.size_hints
@@ -618,10 +619,10 @@ end
 -- @return True or false. Note that some windows might be floating even if you
 -- did not set them manually. For example, windows with a type different than
 -- normal.
-function floating.get(c)
+function client.floating.get(c)
     local c = c or capi.client.focus
     if c then
-        local value = property.get(c, "floating")
+        local value = client.property.get(c, "floating")
         if value ~= nil then
             return value
         end
@@ -629,7 +630,7 @@ function floating.get(c)
             or c.fullscreen
             or c.maximized_vertical
             or c.maximized_horizontal
-            or isfixed(c) then
+            or client.isfixed(c) then
             return true
         end
         return false
@@ -638,26 +639,26 @@ end
 
 --- Toggle the floating state of a client between 'auto' and 'true'.
 -- @param c A client.
-function floating.toggle(c)
+function client.floating.toggle(c)
     local c = c or capi.client.focus
     -- If it has been set to floating
-    if floating.get(c) then
-        floating.set(c, false)
+    if client.floating.get(c) then
+        client.floating.set(c, false)
     else
-        floating.set(c, true)
+        client.floating.set(c, true)
     end
 end
 
 --- Remove the floating information on a client.
 -- @param c The client.
-function floating.delete(c)
-    floating.set(c, nil)
+function client.floating.delete(c)
+    client.floating.set(c, nil)
 end
 
 --- Restore (=unminimize) a random client.
 -- @param s The screen to use.
 -- @return True if some client was restored.
-function restore(s)
+function client.restore(s)
     local s = s or (capi.client.focus and capi.client.focus.screen) or capi.mouse.screen
     local cls = capi.client.get(s)
     local tags = tag.selectedlist(s)
@@ -706,11 +707,11 @@ end
 -- @return col the column number
 -- @return idx index of the client in the column
 -- @return num the number of visible clients in the column
-function idx(c)
+function client.idx(c)
     local c = c or capi.client.focus
     if not c then return end
 
-    local clients = tiled(c.screen)
+    local clients = client.tiled(c.screen)
     local idx = nil
     for k, cl in ipairs(clients) do
         if cl == c then
@@ -758,15 +759,15 @@ end
 --- Set the window factor of a client
 -- @param wfact the window factor value
 -- @param c the client
-function setwfact(wfact, c)
+function client.setwfact(wfact, c)
     -- get the currently selected window
     local c = c or capi.client.focus
     if not c or not c:isvisible() then return end
 
     local t = tag.selected(c.screen)
-    local w = idx(c)
+    local w = client.idx(c)
 
-    local cls = tiled(t.screen)
+    local cls = client.tiled(t.screen)
     local nmaster = tag.getnmaster(t)
 
     -- n is the number of windows currently visible for which we have to be concerned with the properties
@@ -797,13 +798,13 @@ end
 --- Increment a client's window factor
 -- @param add amount to increase the client's window
 -- @param c the client
-function incwfact(add, c)
+function client.incwfact(add, c)
     local c = c or capi.client.focus
     if not c then return end
 
     local t = tag.selected(c.screen)
 
-    local w = idx(c)
+    local w = client.idx(c)
 
     local nmaster = tag.getnmaster(t)
     local data = tag.getproperty(t, "windowfact") or {}
@@ -822,8 +823,8 @@ end
 -- @return True or false. Note that some windows might be dockable even if you
 -- did not set them manually. For example, windows with a type "utility", "toolbar" 
 -- or "dock"
-function dockable.get(c)
-    local value = property.get(c, "dockable")
+function client.dockable.get(c)
+    local value = client.property.get(c, "dockable")
 
     -- Some sane defaults
     if value == nil then
@@ -842,17 +843,17 @@ end
 -- to the edge of the workarea.
 -- @param c A client.
 -- @param value True or false.
-function dockable.set(c, value)
-    property.set(c, "dockable", value)
+function client.dockable.set(c, value)
+    client.property.set(c, "dockable", value)
 end
 
 --- Get a client property.
 -- @param c The client.
 -- @param prop The property name.
 -- @return The property.
-function property.get(c, prop)
-    if data.properties[c] then
-        return data.properties[c][prop]
+function client.property.get(c, prop)
+    if client.data.properties[c] then
+        return client.data.properties[c][prop]
     end
 end
 
@@ -861,11 +862,11 @@ end
 -- @param c The client.
 -- @param prop The property name.
 -- @param value The value.
-function property.set(c, prop, value)
-    if not data.properties[c] then
-        data.properties[c] = {}
+function client.property.set(c, prop, value)
+    if not client.data.properties[c] then
+        client.data.properties[c] = {}
     end
-    data.properties[c][prop] = value
+    client.data.properties[c][prop] = value
     c:emit_signal("property::" .. prop)
 end
 
@@ -888,7 +889,7 @@ end
 --   c.minimized = false <br/>
 -- end <br/>
 -- </code></p>
-function iterate(filter, start, s)
+function client.iterate(filter, start, s)
     local clients = capi.client.get(s)
     local focused = capi.client.focus
     local start   = start or util.table.hasitem(clients, focused)
@@ -913,13 +914,13 @@ end
 --   awful.client.run_or_raise('urxvt', matcher)
 -- end);
 -- </code></p>
-function run_or_raise(cmd, matcher, merge)
+function client.run_or_raise(cmd, matcher, merge)
     local clients = capi.client.get()
     local findex  = util.table.hasitem(clients, capi.client.focus) or 1
     local start   = util.cycle(#clients, findex + 1)
 
     for c in iterate(matcher, start) do
-        jumpto(c, merge)
+        client.jumpto(c, merge)
         return
     end
 
@@ -932,13 +933,15 @@ capi.client.add_signal("property::floating_geometry")
 capi.client.add_signal("property::floating")
 capi.client.add_signal("property::dockable")
 
-capi.client.connect_signal("focus", focus.history.add)
-capi.client.connect_signal("unmanage", focus.history.delete)
+capi.client.connect_signal("focus", client.focus.history.add)
+capi.client.connect_signal("unmanage", client.focus.history.delete)
 
-capi.client.connect_signal("manage", function(c) c:connect_signal("property::urgent", urgent.add) end)
-capi.client.connect_signal("focus", urgent.delete)
-capi.client.connect_signal("unmanage", urgent.delete)
+capi.client.connect_signal("manage", function(c) c:connect_signal("property::urgent", client.urgent.add) end)
+capi.client.connect_signal("focus", client.urgent.delete)
+capi.client.connect_signal("unmanage", client.urgent.delete)
 
-capi.client.connect_signal("unmanage", floating.delete)
+capi.client.connect_signal("unmanage", client.floating.delete)
+
+return client
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

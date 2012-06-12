@@ -11,7 +11,7 @@ local ipairs = ipairs
 local math = math
 
 --- Implements EWMH requests handling.
-module("awful.ewmh")
+-- awful.ewmh
 
 local data = setmetatable({}, { __mode = 'k' })
 

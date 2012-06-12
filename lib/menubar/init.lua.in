@@ -193,7 +193,7 @@ end
 -- Create the menubar wibox and widgets.
 local function initialize()
     instance.wibox = wibox({})
-    instance.widget = get()
+    instance.widget = menubar.get()
     instance.wibox.ontop = true
     instance.prompt = awful.widget.prompt()
     local layout = wibox.layout.fixed.horizontal()

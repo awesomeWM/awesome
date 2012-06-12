@@ -14,11 +14,11 @@ local capi =
 }
 
 --- Startup notification module for awful
-module("awful.startup_notification")
+-- awful.startup_notification
 
 local app_starting = {}
 
-cursor_waiting = "watch"
+local cursor_waiting = "watch"
 
 local function update_cursor()
     if #app_starting > 0 then

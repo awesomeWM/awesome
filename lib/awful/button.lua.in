@@ -11,7 +11,8 @@ local capi = { button = button }
 local util = require("awful.util")
 
 --- Create easily new buttons objects ignoring certain modifiers.
-module("awful.button")
+-- awful.button
+local button = { mt = {} }
 
 --- Modifiers to ignore.
 -- By default this is initialized as { "Lock", "Mod2" }
@@ -19,7 +20,7 @@ module("awful.button")
 -- when pressing keys.
 -- @name ignore_modifiers
 -- @class table
-ignore_modifiers = { "Lock", "Mod2" }
+local ignore_modifiers = { "Lock", "Mod2" }
 
 --- Create a new button to use as binding.
 -- This function is useful to create several buttons from one, because it will use
@@ -31,12 +32,12 @@ ignore_modifiers = { "Lock", "Mod2" }
 -- CapsLock off.
 -- @see button
 -- @return A table with one or several button objects.
-function new(mod, button, press, release)
+function button.new(mod, _button, press, release)
     local ret = {}
     local subsets = util.subsets(ignore_modifiers)
     for _, set in ipairs(subsets) do
         ret[#ret + 1] = capi.button({ modifiers = util.table.join(mod, set),
-                                      button = button })
+                                      button = _button })
         if press then
             ret[#ret]:connect_signal("press", function(bobj, ...) press(...) end)
         end
@@ -47,6 +48,10 @@ function new(mod, button, press, release)
     return ret
 end
 
-setmetatable(_M, { __call = function(_, ...) return new(...) end })
+function button.mt:__call(...)
+    return button.new(...)
+end
+
+return setmetatable(button, button.mt)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

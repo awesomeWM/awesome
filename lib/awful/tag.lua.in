@@ -20,7 +20,8 @@ local capi =
 }
 
 --- Useful functions for tag manipulation.
-module("awful.tag")
+-- awful.tag
+local tag = { mt = {} }
 
 -- Private data
 local data = {}
@@ -28,13 +29,13 @@ data.history = {}
 data.tags = setmetatable({}, { __mode = 'k' })
 
 -- History functions
-history = {}
-history.limit = 20
+tag.history = {}
+tag.history.limit = 20
 
 --- Move a tag to an absolute position in the screen[]:tags() table.
 -- @param new_index Integer absolute position in the table to insert.
-function move(new_index, target_tag)
-    local target_tag = target_tag or selected()
+function tag.move(new_index, target_tag)
+    local target_tag = target_tag or tag.selected()
     local scr = target_tag.screen
     local tmp_tags = capi.screen[scr]:tags()
 
@@ -57,13 +58,13 @@ end
 -- @param name The tag name, a string
 -- @param props The tags properties, a table
 -- @return The created tag
-function add(name, props)
+function tag.add(name, props)
     local properties = props or {}
     local newtag = capi.tag{name = name}
     newtag.screen = properties.screen or capi.mouse.screen
 
     for k, v in pairs(properties) do
-        setproperty(newtag, k, v)
+        tag.setproperty(newtag, k, v)
     end
 
     return newtag
@@ -74,11 +75,11 @@ end
 -- @param screen The tag screen, or 1 if not set.
 -- @param layout The layout or layout table to set for this tags by default.
 -- @return A table with all created tags.
-function new(names, screen, layout)
+function tag.new(names, screen, layout)
     local screen = screen or 1
     local tags = {}
     for id, name in ipairs(names) do
-        table.insert(tags, id, add(name, {screen = screen,
+        table.insert(tags, id, tag.add(name, {screen = screen,
                                             layout = (layout and layout[id]) or
                                                         layout}))
         -- Select the first tag.
@@ -93,9 +94,9 @@ end
 --- Find a suitable fallback tag.
 -- @param screen The screen number to look for a tag on. [mouse.screen]
 -- @param target A table of tags we consider unacceptable. [selectedlist(scr)]
-function find_fallback(screen, invalids)
+function tag.find_fallback(screen, invalids)
     local scr = screen or capi.mouse.screen
-    local t = invalids or selectedlist(scr)
+    local t = invalids or tag.selectedlist(scr)
 
     for _, v in pairs(capi.screen[scr]:tags()) do
         if not util.table.hasitem(t, v) then return v end
@@ -110,9 +111,9 @@ end
 -- stickied clients are assigned to the optional 'fallback_tag'.
 -- If after deleting the tag there is no selected tag, try and restore from
 -- history or select the first tag on the screen.
-function delete(target_tag, fallback_tag)
+function tag.delete(target_tag, fallback_tag)
     -- abort if no tag is passed or currently selected
-    local target_tag = target_tag or selected()
+    local target_tag = target_tag or tag.selected()
     if target_tag == nil then return end
 
     local ntags = #capi.screen[target_tag.screen]:tags()
@@ -124,7 +125,7 @@ function delete(target_tag, fallback_tag)
 
     -- No fallback_tag provided, try and get one.
     if fallback_tag == nil then
-        fallback_tag = find_fallback(target_scr, {target_tag})
+        fallback_tag = tag.find_fallback(target_scr, {target_tag})
     end
 
     -- Abort if we would have un-tagged clients.
@@ -148,9 +149,9 @@ function delete(target_tag, fallback_tag)
     target_tag.screen = nil
 
     -- If no tags are visible, try and view one.
-    if selected(target_scr) == nil and ntags > 0 then
-        history.restore()
-        if selected(target_scr) == nil then
+    if tag.selected(target_scr) == nil and ntags > 0 then
+        tag.history.restore()
+        if tag.selected(target_scr) == nil then
             capi.screen[target_scr]:tags()[1].selected = true
         end
     end
@@ -160,9 +161,9 @@ end
 
 --- Update the tag history.
 -- @param obj Screen object.
-function history.update(obj)
+function tag.history.update(obj)
     local s = obj.index
-    local curtags = selectedlist(s)
+    local curtags = tag.selectedlist(s)
     -- create history table
     if not data.history[s] then
         data.history[s] = {}
@@ -170,8 +171,8 @@ function history.update(obj)
         if data.history[s].current then
             -- Check that the list is not identical
             local identical = true
-            for idx, tag in ipairs(data.history[s].current) do
-                if curtags[idx] ~= tag then
+            for idx, _tag in ipairs(data.history[s].current) do
+                if curtags[idx] ~= _tag then
                     identical = false
                     break
                 end
@@ -182,8 +183,8 @@ function history.update(obj)
         end
 
         -- Limit history
-        if #data.history[s] >= history.limit then
-            for i = history.limit, #data.history[s] do
+        if #data.history[s] >= tag.history.limit then
+            for i = tag.history.limit, #data.history[s] do
                 data.history[s][i] = nil
             end
         end
@@ -201,20 +202,20 @@ end
 -- @param idx Index in history. Defaults to "previous" which is a special index
 -- toggling between last two selected sets of tags. Number (eg 1) will go back
 -- to the given index in history.
-function history.restore(screen, idx)
+function tag.history.restore(screen, idx)
     local s = screen or capi.mouse.screen
     local i = idx or "previous"
-    local sel = selectedlist(s)
+    local sel = tag.selectedlist(s)
     -- do nothing if history empty
     if not data.history[s] or not data.history[s][i] then return end
     -- if all tags been deleted, try next entry
     if #data.history[s][i] == 0 then
         if i == "previous" then i = 0 end
-        history.restore(s, i + 1)
+        tag.history.restore(s, i + 1)
         return
     end
     -- deselect all tags
-    viewnone(s)
+    tag.viewnone(s)
     -- select tags from the history entry
     for _, t in ipairs(data.history[s][i]) do
         t.selected = true
@@ -230,7 +231,7 @@ end
 --- Return a table with all visible tags
 -- @param s Screen number.
 -- @return A table with all selected tags.
-function selectedlist(s)
+function tag.selectedlist(s)
     local screen = s or capi.mouse.screen
     local tags = capi.screen[screen]:tags()
     local vtags = {}
@@ -244,96 +245,96 @@ end
 
 --- Return only the first visible tag.
 -- @param s Screen number.
-function selected(s)
-    return selectedlist(s)[1]
+function tag.selected(s)
+    return tag.selectedlist(s)[1]
 end
 
 --- Set master width factor.
 -- @param mwfact Master width factor.
-function setmwfact(mwfact, t)
-    local t = t or selected()
+function tag.setmwfact(mwfact, t)
+    local t = t or tag.selected()
     if mwfact >= 0 and mwfact <= 1 then
-        setproperty(t, "mwfact", mwfact)
+        tag.setproperty(t, "mwfact", mwfact)
     end
 end
 
 --- Increase master width factor.
 -- @param add Value to add to master width factor.
-function incmwfact(add, t)
-    setmwfact(getmwfact(t) + add, t)
+function tag.incmwfact(add, t)
+    tag.setmwfact(tag.getmwfact(t) + add, t)
 end
 
 --- Get master width factor.
 -- @param t Optional tag.
-function getmwfact(t)
-    local t = t or selected()
-    return getproperty(t, "mwfact") or 0.5
+function tag.getmwfact(t)
+    local t = t or tag.selected()
+    return tag.getproperty(t, "mwfact") or 0.5
 end
 
 --- Set the number of master windows.
 -- @param nmaster The number of master windows.
 -- @param t Optional tag.
-function setnmaster(nmaster, t)
-    local t = t or selected()
+function tag.setnmaster(nmaster, t)
+    local t = t or tag.selected()
     if nmaster >= 0 then
-        setproperty(t, "nmaster", nmaster)
+        tag.setproperty(t, "nmaster", nmaster)
     end
 end
 
 --- Get the number of master windows.
 -- @param t Optional tag.
-function getnmaster(t)
-    local t = t or selected()
-    return getproperty(t, "nmaster") or 1
+function tag.getnmaster(t)
+    local t = t or tag.selected()
+    return tag.getproperty(t, "nmaster") or 1
 end
 
 --- Increase the number of master windows.
 -- @param add Value to add to number of master windows.
-function incnmaster(add, t)
-    setnmaster(getnmaster(t) + add, t)
+function tag.incnmaster(add, t)
+    tag.setnmaster(tag.getnmaster(t) + add, t)
 end
 
 
 --- Set the tag icon
 -- @param icon the icon to set, either path or image object
 -- @param tag the tag
-function seticon(icon, tag)
-    local tag = tag or selected()
-    setproperty(tag, "icon", icon)
+function tag.seticon(icon, _tag)
+    local _tag = _tag or tag.selected()
+    tag.setproperty(_tag, "icon", icon)
 end
 
 --- Get the tag icon
 -- @param t the tag
-function geticon(tag)
-    local tag = tag or selected()
-    return getproperty(tag, "icon")
+function tag.geticon(_tag)
+    local _tag = _tag or tag.selected()
+    return tag.getproperty(_tag, "icon")
 end
 
 --- Set number of column windows.
 -- @param ncol The number of column.
-function setncol(ncol, t)
-    local t = t or selected()
+function tag.setncol(ncol, t)
+    local t = t or tag.selected()
     if ncol >= 1 then
-        setproperty(t, "ncol", ncol)
+        tag.setproperty(t, "ncol", ncol)
     end
 end
 
 --- Get number of column windows.
 -- @param t Optional tag.
-function getncol(t)
-    local t = t or selected()
-    return getproperty(t, "ncol") or 1
+function tag.getncol(t)
+    local t = t or tag.selected()
+    return tag.getproperty(t, "ncol") or 1
 end
 
 --- Increase number of column windows.
 -- @param add Value to add to number of column windows.
-function incncol(add, t)
-    setncol(getncol(t) + add, t)
+function tag.incncol(add, t)
+    tag.setncol(tag.getncol(t) + add, t)
 end
 
 --- View no tag.
 -- @param Optional screen number.
-function viewnone(screen)
+function tag.viewnone(screen)
     local tags = capi.screen[screen or capi.mouse.screen]:tags()
     for i, t in pairs(tags) do
         t.selected = false
@@ -343,17 +344,17 @@ end
 --- View a tag by its taglist index.
 -- @param i The relative index to see.
 -- @param screen Optional screen number.
-function viewidx(i, screen)
+function tag.viewidx(i, screen)
     local screen = screen and screen.index or capi.mouse.screen
     local tags = capi.screen[screen]:tags()
     local showntags = {}
     for k, t in ipairs(tags) do
-        if not getproperty(t, "hide") then
+        if not tag.getproperty(t, "hide") then
             table.insert(showntags, t)
         end
     end
-    local sel = selected(screen)
-    viewnone(screen)
+    local sel = tag.selected(screen)
+    tag.viewnone(screen)
     for k, t in ipairs(showntags) do
         if t == sel then
             showntags[util.cycle(#showntags, k + i)].selected = true
@@ -365,8 +366,8 @@ end
 --- Get a tag's index in the screen[]:tags() table.
 -- @param query_tag The tag object to find. [selected()]
 -- @return The index of the tag, nil if the tag is not found.
-function getidx(query_tag)
-    local query_tag = query_tag or selected()
+function tag.getidx(query_tag)
+    local query_tag = query_tag or tag.selected()
     if query_tag == nil then return end
 
     for i, t in ipairs(capi.screen[query_tag.screen]:tags()) do
@@ -378,24 +379,24 @@ end
 
 --- View next tag. This is the same as tag.viewidx(1).
 -- @param screen The screen number.
-function viewnext(screen)
-    return viewidx(1, screen)
+function tag.viewnext(screen)
+    return tag.viewidx(1, screen)
 end
 
 --- View previous tag. This is the same a tag.viewidx(-1).
 -- @param screen The screen number.
-function viewprev(screen)
-    return viewidx(-1, screen)
+function tag.viewprev(screen)
+    return tag.viewidx(-1, screen)
 end
 
 --- View only a tag.
 -- @param t The tag object.
-function viewonly(t)
+function tag.viewonly(t)
     local tags = capi.screen[t.screen]:tags()
     -- First, untag everyone except the viewed tag.
-    for _, tag in pairs(tags) do
-        if tag ~= t then
-            tag.selected = false
+    for _, _tag in pairs(tags) do
+        if _tag ~= t then
+            _tag.selected = false
         end
     end
     -- Then, set this one to selected.
@@ -408,22 +409,22 @@ end
 --- View only a set of tags.
 -- @param tags A table with tags to view only.
 -- @param screen Optional screen number of the tags.
-function viewmore(tags, screen)
+function tag.viewmore(tags, screen)
     local screen_tags = capi.screen[screen or capi.mouse.screen]:tags()
-    for _, tag in ipairs(screen_tags) do
-        if not util.table.hasitem(tags, tag) then
-            tag.selected = false
+    for _, _tag in ipairs(screen_tags) do
+        if not util.table.hasitem(tags, _tag) then
+            _tag.selected = false
         end
     end
-    for _, tag in ipairs(tags) do
-        tag.selected = true
+    for _, _tag in ipairs(tags) do
+        _tag.selected = true
     end
     capi.screen[screen]:emit_signal("tag::history::update")
 end
 
 --- Toggle selection of a tag
 -- @param tag Tag to be toggled
-function viewtoggle(t)
+function tag.viewtoggle(t)
     t.selected = not t.selected
     capi.screen[t.screen]:emit_signal("tag::history::update")
 end
@@ -431,17 +432,17 @@ end
 --- Get tag data table.
 -- @param tag The Tag.
 -- @return The data table.
-function getdata(tag)
-    return data.tags[tag]
+function tag.getdata(_tag)
+    return data.tags[_tag]
 end
 
 --- Get a tag property.
 -- @param tag The tag.
 -- @param prop The property name.
 -- @return The property.
-function getproperty(tag, prop)
-    if data.tags[tag] then
-        return data.tags[tag][prop]
+function tag.getproperty(_tag, prop)
+    if data.tags[_tag] then
+        return data.tags[_tag][prop]
     end
 end
 
@@ -451,41 +452,41 @@ end
 -- @param tag The tag.
 -- @param prop The property name.
 -- @param value The value.
-function setproperty(tag, prop, value)
-    if not data.tags[tag] then
-        data.tags[tag] = {}
+function tag.setproperty(_tag, prop, value)
+    if not data.tags[_tag] then
+        data.tags[_tag] = {}
     end
-    data.tags[tag][prop] = value
-    tag:emit_signal("property::" .. prop)
+    data.tags[_tag][prop] = value
+    _tag:emit_signal("property::" .. prop)
 end
 
 --- Tag a client with the set of current tags.
 -- @param c The client to tag.
 -- @param startup Optional: don't do anything if true.
-function withcurrent(c, startup)
+function tag.withcurrent(c, startup)
     if startup ~= true then
         if #c:tags() == 0 then
-            c:tags(selectedlist(c.screen))
+            c:tags(tag.selectedlist(c.screen))
         end
     end
 end
 
 local function attached_connect_signal_screen(screen, sig, func)
-    capi.screen[screen]:connect_signal("tag::attach", function (s, tag)
-        tag:connect_signal(sig, func)
+    capi.screen[screen]:connect_signal("tag::attach", function (s, _tag)
+        _tag:connect_signal(sig, func)
     end)
-    capi.screen[screen]:connect_signal("tag::detach", function (s, tag)
-        tag:disconnect_signal(sig, func)
+    capi.screen[screen]:connect_signal("tag::detach", function (s, _tag)
+        _tag:disconnect_signal(sig, func)
     end)
-    for _, tag in ipairs(capi.screen[screen]:tags()) do
-        tag:connect_signal(sig, func)
+    for _, _tag in ipairs(capi.screen[screen]:tags()) do
+        _tag:connect_signal(sig, func)
     end
 end
 
 --- Add a signal to all attached tag and all tag that will be attached in the
 -- future. When a tag is detach from the screen, its signal is removed.
 -- @param screen The screen concerned, or all if nil.
-function attached_connect_signal(screen, ...)
+function tag.attached_connect_signal(screen, ...)
     if screen then
         attached_connect_signal_screen(screen, ...)
     else
@@ -510,10 +511,10 @@ capi.client.connect_signal("manage", function(c, startup)
             c.screen = capi.mouse.screen
         end
     end
-    c:connect_signal("property::screen", withcurrent)
+    c:connect_signal("property::screen", tag.withcurrent)
 end)
 
-capi.client.connect_signal("manage", withcurrent)
+capi.client.connect_signal("manage", tag.withcurrent)
 
 capi.tag.add_signal("property::hide")
 capi.tag.add_signal("property::icon")
@@ -525,9 +526,13 @@ capi.tag.add_signal("property::windowfact")
 
 for s = 1, capi.screen.count() do
     capi.screen[s]:add_signal("tag::history::update")
-    capi.screen[s]:connect_signal("tag::history::update", history.update)
+    capi.screen[s]:connect_signal("tag::history::update", tag.history.update)
 end
 
-setmetatable(_M, { __call = function (_, ...) return new(...) end })
+function tag.mt:__call(...)
+    return tag.new(...)
+end
+
+return setmetatable(tag, tag.mt)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

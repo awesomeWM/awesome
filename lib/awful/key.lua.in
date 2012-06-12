@@ -11,7 +11,8 @@ local capi = { key = key }
 local util = require("awful.util")
 
 --- Create easily new key objects ignoring certain modifiers.
-module("awful.key")
+-- awful.key
+local key = { mt = {} }
 
 --- Modifiers to ignore.
 -- By default this is initialized as { "Lock", "Mod2" }
@@ -19,7 +20,7 @@ module("awful.key")
 -- when pressing keys.
 -- @name ignore_modifiers
 -- @class table
-ignore_modifiers = { "Lock", "Mod2" }
+local ignore_modifiers = { "Lock", "Mod2" }
 
 --- Create a new key to use as binding.
 -- This function is useful to create several keys from one, because it will use
@@ -31,12 +32,12 @@ ignore_modifiers = { "Lock", "Mod2" }
 -- CapsLock off.
 -- @see capi.key
 -- @return A table with one or several key objects.
-function new(mod, key, press, release)
+function key.new(mod, _key, press, release)
     local ret = {}
     local subsets = util.subsets(ignore_modifiers)
     for _, set in ipairs(subsets) do
         ret[#ret + 1] = capi.key({ modifiers = util.table.join(mod, set),
-                                   key = key })
+                                   key = _key })
         if press then
             ret[#ret]:connect_signal("press", function(kobj, ...) press(...) end)
         end
@@ -51,11 +52,11 @@ end
 -- @param key The key object.
 -- @param pressed_mod The modifiers to compare with.
 -- @param pressed_key The key to compare with.
-function match(key, pressed_mod, pressed_key)
+function key.match(_key, pressed_mod, pressed_key)
     -- First, compare key.
-    if pressed_key ~= key.key then return false end
+    if pressed_key ~= _key.key then return false end
     -- Then, compare mod
-    local mod = key.modifiers
+    local mod = _key.modifiers
     -- For each modifier of the key object, check that the modifier has been
     -- pressed.
     for _, m in ipairs(mod) do
@@ -70,6 +71,10 @@ function match(key, pressed_mod, pressed_key)
     return #pressed_mod == #mod
 end
 
-setmetatable(_M, { __call = function(_, ...) return new(...) end })
+function key.mt:__call(...)
+    return key.new(...)
+end
+
+return setmetatable(key, key.mt)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

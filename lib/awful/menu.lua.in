@@ -32,7 +32,8 @@ local capi = {
     client = client }
 
 
-module("awful.menu")
+-- awful.menu
+local menu = { mt = {} }
 
 
 local table_update = function (t, set)
@@ -98,16 +99,16 @@ local function load_theme(a, b)
 end
 
 
-local function item_position(menu, child)
+local function item_position(_menu, child)
     local in_dir, other, a, b = 0, 0, "height", "width"
-    local dir = menu.layout.get_dir and menu.layout:get_dir() or "y"
+    local dir = _menu.layout.get_dir and _menu.layout:get_dir() or "y"
     if dir == "x" then  a, b = b, a  end
 
-    local in_dir, other = 0, menu[b]
-    local num = util.table.hasitem(menu.child, child)
+    local in_dir, other = 0, _menu[b]
+    local num = util.table.hasitem(_menu.child, child)
     if num then
         for i = 0, num - 1 do
-            local item = menu.items[i]
+            local item = _menu.items[i]
             if item then
                 other = math.max(other, item[b])
                 in_dir = in_dir + item[a]
@@ -120,104 +121,104 @@ local function item_position(menu, child)
 end
 
 
-local function set_coords(menu, screen_idx, m_coords)
+local function set_coords(_menu, screen_idx, m_coords)
     local s_geometry = capi.screen[screen_idx].workarea
     local screen_w = s_geometry.x + s_geometry.width
     local screen_h = s_geometry.y + s_geometry.height
 
-    menu.width = menu.wibox.width
-    menu.height = menu.wibox.height
+    _menu.width = _menu.wibox.width
+    _menu.height = _menu.wibox.height
 
-    menu.x = menu.wibox.x
-    menu.y = menu.wibox.y
+    _menu.x = _menu.wibox.x
+    _menu.y = _menu.wibox.y
 
-    if menu.parent then
-        local w, h = item_position(menu.parent, menu)
-        w = w + menu.parent.theme.border_width
+    if _menu.parent then
+        local w, h = item_position(_menu.parent, _menu)
+        w = w + _menu.parent.theme.border_width
 
-        menu.y = menu.parent.y + h + menu.height > screen_h and
-                 screen_h - menu.height or menu.parent.y + h
-        menu.x = menu.parent.x + w + menu.width > screen_w and
-                 menu.parent.x - menu.width or menu.parent.x + w
+        _menu.y = _menu.parent.y + h + _menu.height > screen_h and
+                 screen_h - _menu.height or _menu.parent.y + h
+        _menu.x = _menu.parent.x + w + _menu.width > screen_w and
+                 _menu.parent.x - _menu.width or _menu.parent.x + w
     else
         if m_coords == nil then
             m_coords = capi.mouse.coords()
             m_coords.x = m_coords.x + 1
             m_coords.y = m_coords.y + 1
         end
-        menu.y = m_coords.y < s_geometry.y and s_geometry.y or m_coords.y
-        menu.x = m_coords.x < s_geometry.x and s_geometry.x or m_coords.x
+        _menu.y = m_coords.y < s_geometry.y and s_geometry.y or m_coords.y
+        _menu.x = m_coords.x < s_geometry.x and s_geometry.x or m_coords.x
 
-        menu.y = menu.y + menu.height > screen_h and
-                 screen_h - menu.height or menu.y
-        menu.x = menu.x + menu.width  > screen_w and
-                 screen_w - menu.width  or menu.x
+        _menu.y = _menu.y + _menu.height > screen_h and
+                 screen_h - _menu.height or _menu.y
+        _menu.x = _menu.x + _menu.width  > screen_w and
+                 screen_w - _menu.width  or _menu.x
     end
 
-    menu.wibox.x = menu.x
-    menu.wibox.y = menu.y
+    _menu.wibox.x = _menu.x
+    _menu.wibox.y = _menu.y
 end
 
 
-local function set_size(menu)
+local function set_size(_menu)
     local in_dir, other, a, b = 0, 0, "height", "width"
-    local dir = menu.layout.get_dir and menu.layout:get_dir() or "y"
+    local dir = _menu.layout.get_dir and _menu.layout:get_dir() or "y"
     if dir == "x" then  a, b = b, a  end
-    for _, item in ipairs(menu.items) do
+    for _, item in ipairs(_menu.items) do
         other = math.max(other, item[b])
         in_dir = in_dir + item[a]
     end
-    menu[a], menu[b] = in_dir, other
+    _menu[a], _menu[b] = in_dir, other
     if in_dir > 0 and other > 0 then
-        menu.wibox[a] = in_dir
-        menu.wibox[b] = other
+        _menu.wibox[a] = in_dir
+        _menu.wibox[b] = other
         return true
     end
     return false
 end
 
 
-local function check_access_key(menu, key)
-   for i, item in ipairs(menu.items) do
+local function check_access_key(_menu, key)
+   for i, item in ipairs(_menu.items) do
       if item.akey == key then
-            menu:item_enter(i)
-            menu:exec(i, { exec = true })
+            _menu:item_enter(i)
+            _menu:exec(i, { exec = true })
             return
       end
    end
-   if menu.parent then
-      check_access_key(menu.parent, key)
+   if _menu.parent then
+      check_access_key(_menu.parent, key)
    end
 end
 
 
-local function grabber(menu, mod, key, event)
+local function grabber(_menu, mod, key, event)
     if event ~= "press" then return end
 
-    local sel = menu.sel or 0
+    local sel = _menu.sel or 0
     if util.table.hasitem(menu_keys.up, key) then
-        local sel_new = sel-1 < 1 and #menu.items or sel-1
-        menu:item_enter(sel_new)
+        local sel_new = sel-1 < 1 and #_menu.items or sel-1
+        _menu:item_enter(sel_new)
     elseif util.table.hasitem(menu_keys.down, key) then
-        local sel_new = sel+1 > #menu.items and 1 or sel+1
-        menu:item_enter(sel_new)
+        local sel_new = sel+1 > #_menu.items and 1 or sel+1
+        _menu:item_enter(sel_new)
     elseif sel > 0 and util.table.hasitem(menu_keys.enter, key) then
-        menu:exec(sel)
+        _menu:exec(sel)
     elseif sel > 0 and util.table.hasitem(menu_keys.exec, key) then
-        menu:exec(sel, { exec = true })
+        _menu:exec(sel, { exec = true })
     elseif util.table.hasitem(menu_keys.back, key) then
-        menu:hide()
+        _menu:hide()
     elseif util.table.hasitem(menu_keys.close, key) then
-        get_root(menu):hide()
+        menu.get_root(_menu):hide()
     else
-        check_access_key(menu, key)
+        check_access_key(_menu, key)
     end
 end
 
 
-function exec(menu, num, opts)
+function menu.exec(_menu, num, opts)
     opts = opts or {}
-    local item = menu.items[num]
+    local item = _menu.items[num]
     if not item then return end
     local cmd = item.cmd
     if type(cmd) == "table" then
@@ -228,41 +229,41 @@ function exec(menu, num, opts)
             end
             return
         end
-        if not menu.child[num] then
-            menu.child[num] = new(cmd, menu)
+        if not _menu.child[num] then
+            _menu.child[num] = menu.new(cmd, _menu)
         end
         local can_invoke_action = opts.exec and
             action and type(action) == "function" and
-            (not opts.mouse or (opts.mouse and (menu.auto_expand or
-            (menu.active_child == menu.child[num] and
-            menu.active_child.wibox.visible))))
+            (not opts.mouse or (opts.mouse and (_menu.auto_expand or
+            (_menu.active_child == _menu.child[num] and
+            _menu.active_child.wibox.visible))))
         if can_invoke_action then
-            local visible = action(menu.child[num], item)
+            local visible = action(_menu.child[num], item)
             if not visible then
-                get_root(menu):hide()
+                menu.get_root(_menu):hide()
                 return
             else
-                menu.child[num]:update()
+                _menu.child[num]:update()
             end
         end
-        if menu.active_child and menu.active_child ~= menu.child[num] then
-            menu.active_child:hide()
+        if _menu.active_child and _menu.active_child ~= _menu.child[num] then
+            _menu.active_child:hide()
         end
-        menu.active_child = menu.child[num]
-        if not menu.active_child.visible then
-            menu.active_child:show()
+        _menu.active_child = _menu.child[num]
+        if not _menu.active_child.visible then
+            _menu.active_child:show()
         end
     elseif type(cmd) == "string" then
-        get_root(menu):hide()
+        menu.get_root(_menu):hide()
         util.spawn(cmd)
     elseif type(cmd) == "function" then
-        local visible, action = cmd(item, menu)
+        local visible, action = cmd(item, _menu)
         if not visible then
-            get_root(menu):hide()
+            menu.get_root(_menu):hide()
         else
-            menu:update()
-            if menu.items[num] then
-                menu:item_enter(num, opts)
+            _menu:update()
+            if _menu.items[num] then
+                _menu:item_enter(num, opts)
             end
         end
         if action and type(action) == "function" then
@@ -271,35 +272,35 @@ function exec(menu, num, opts)
     end
 end
 
-function item_enter(menu, num, opts)
+function menu.item_enter(_menu, num, opts)
     opts = opts or {}
-    local item = menu.items[num]
-    if num == nil or menu.sel == num or not item then
+    local item = _menu.items[num]
+    if num == nil or _menu.sel == num or not item then
         return
-    elseif menu.sel then
-        menu:item_leave(menu.sel)
+    elseif _menu.sel then
+        _menu:item_leave(_menu.sel)
     end
     --print("sel", num, menu.sel, item.theme.bg_focus)
     item._background:set_fg(item.theme.fg_focus)
     item._background:set_bg(item.theme.bg_focus)
-    menu.sel = num
+    _menu.sel = num
 
-    if menu.auto_expand and opts.hover then
-        if menu.active_child then
-            menu.active_child:hide()
-            menu.active_child = nil
+    if _menu.auto_expand and opts.hover then
+        if _menu.active_child then
+            _menu.active_child:hide()
+            _menu.active_child = nil
         end
 
         if type(item.cmd) == "table" then
-            menu:exec(num, opts)
+            _menu:exec(num, opts)
         end
     end
 end
 
 
-function item_leave(menu, num)
+function menu.item_leave(_menu, num)
     --print("leave", num)
-    local item = menu.items[num]
+    local item = _menu.items[num]
     if item then
         item._background:set_fg(item.theme.fg_normal)
         item._background:set_bg(item.theme.bg_normal)
@@ -308,77 +309,77 @@ end
 
 
 --- Show a menu.
--- @param menu The menu to show.
+-- @param _menu The menu to show.
 -- @param args.coords Menu position defaulting to mouse.coords()
-function show(menu, args)
+function menu.show(_menu, args)
     args = args or {}
     local coords = args.coords or nil
     local screen_index = capi.mouse.screen
 
-    if not set_size(menu) then return end
-    set_coords(menu, screen_index, coords)
+    if not set_size(_menu) then return end
+    set_coords(_menu, screen_index, coords)
 
-    keygrabber.run(menu._keygrabber)
-    menu.wibox.visible = true
+    keygrabber.run(_menu._keygrabber)
+    _menu.wibox.visible = true
 end
 
 --- Hide a menu popup.
--- @param menu The menu to hide.
-function hide(menu)
+-- @param _menu The menu to hide.
+function menu.hide(_menu)
     -- Remove items from screen
-    for i = 1, #menu.items do
-        menu:item_leave(i)
+    for i = 1, #_menu.items do
+        _menu:item_leave(i)
     end
-    if menu.active_child then
-        menu.active_child:hide()
-        menu.active_child = nil
+    if _menu.active_child then
+        _menu.active_child:hide()
+        _menu.active_child = nil
     end
-    menu.sel = nil
+    _menu.sel = nil
 
-    keygrabber.stop(menu._keygrabber)
-    menu.wibox.visible = false
+    keygrabber.stop(_menu._keygrabber)
+    _menu.wibox.visible = false
 end
 
 --- Toggle menu visibility.
--- @param menu The menu to show if it's hidden, or to hide if it's shown.
+-- @param _menu The menu to show if it's hidden, or to hide if it's shown.
 -- @param args.coords Menu position {x,y}
-function toggle(menu, args)
-    if menu.wibox.visible then
-        menu:hide()
+function menu.toggle(_menu, args)
+    if _menu.wibox.visible then
+        _menu:hide()
     else
-        menu:show(args)
+        _menu:show(args)
     end
 end
 
 --- Update menu content
--- @param menu The mnenu to update.
-function update(menu)
-    if menu.wibox.visible then
-        menu:show({ coords = { x = menu.x, y = menu.y } })
+-- @param _menu The mnenu to update.
+function menu.update(_menu)
+    if _menu.wibox.visible then
+        _menu:show({ coords = { x = _menu.x, y = _menu.y } })
     end
 end
 
 
 --- Get the elder parent so for example when you kill
 -- it, it will destroy the whole family.
--- @param menu The sub menu of the menu family.
-function get_root(menu)
-    return menu.parent and get_root(menu.parent) or menu
+-- @param _menu The sub menu of the menu family.
+function menu.get_root(_menu)
+    return _menu.parent and menu.get_root(_menu.parent) or _menu
 end
 
 --- Add a new menu entry
--- @param menu The parent menu
+-- @param _menu The parent menu
 -- @param args The item params
 -- @param args.new (Default: awful.menu.entry) The menu entry constructor
 -- @param args.theme (Optional) The menu entry theme
 -- @param args.* params needed for the menu entry constructor
 -- @param index (Optional) the index where the new entry will inserted
-function add(menu, args, index)
+function menu.add(_menu, args, index)
     if not args then return end
-    local theme = load_theme(args.theme or {}, menu.theme)
+    local theme = load_theme(args.theme or {}, _menu.theme)
     args.theme = theme
-    args.new = args.new or entry
-    local success, item = pcall(args.new, menu, args)
+    args.new = args.new or menu.entry
+    local success, item = pcall(args.new, _menu, args)
     if not success then
         print("Error while creating menu entry: " .. item)
         return
@@ -387,7 +388,7 @@ function add(menu, args, index)
         print("Error while checking menu entry: no property widget found.")
         return
     end
-    item.parent = menu
+    item.parent = _menu
     item.theme = item.theme or theme
     item.width = item.width or theme.width
     item.height = item.height or theme.height
@@ -400,69 +401,69 @@ function add(menu, args, index)
 
     -- Create bindings
     item._background:buttons(util.table.join(
-        button({}, 3, function () menu:hide() end),
+        button({}, 3, function () _menu:hide() end),
         button({}, 1, function ()
-            local num = util.table.hasitem(menu.items, item)
-            menu:item_enter(num, { mouse = true })
-            menu:exec(num, { exec = true, mouse = true })
+            local num = util.table.hasitem(_menu.items, item)
+            _menu:item_enter(num, { mouse = true })
+            _menu:exec(num, { exec = true, mouse = true })
         end )))
 
 
     item._mouse = function ()
-        local num = util.table.hasitem(menu.items, item)
-        menu:item_enter(num, { hover = true, moue = true })
+        local num = util.table.hasitem(_menu.items, item)
+        _menu:item_enter(num, { hover = true, moue = true })
     end
     item.widget:connect_signal("mouse::enter", item._mouse)
 
     if index then
-        menu.layout:reset()
-        table.insert(menu.items, index, item)
-        for _, i in ipairs(menu.items) do
-            menu.layout:add(i._background)
+        _menu.layout:reset()
+        table.insert(_menu.items, index, item)
+        for _, i in ipairs(_menu.items) do
+            _menu.layout:add(i._background)
         end
     else
-        table.insert(menu.items, item)
-        menu.layout:add(item._background)
+        table.insert(_menu.items, item)
+        _menu.layout:add(item._background)
     end
     return item
 end
 
 -- Delete menu entry at given position
--- @param menu The menu
+-- @param _menu The menu
 -- @param num The position in the table of the menu entry to be deleted; can be also the menu entry itself
-function delete(menu, num)
+function menu.delete(_menu, num)
     if type(num) == "table" then
-        num = util.table.hasitem(menu.items, num)
+        num = util.table.hasitem(_menu.items, num)
     end
-    local item = menu.items[num]
+    local item = _menu.items[num]
     if not item then return end
     item.widget:disconnect_signal("mouse::enter", item._mouse)
     item.widget.visible = false
-    table.remove(menu.items, num)
-    if menu.sel == num then
-        menu:item_leave(menu.sel)
-        menu.sel = nil
+    table.remove(_menu.items, num)
+    if _menu.sel == num then
+        _menu:item_leave(_menu.sel)
+        _menu.sel = nil
     end
-    menu.layout:reset()
-    for _, i in ipairs(menu.items) do
-        menu.layout:add(i._background)
+    _menu.layout:reset()
+    for _, i in ipairs(_menu.items) do
+        _menu.layout:add(i._background)
     end
-    if menu.child[num] then
-         menu.child[num]:hide()
-        if menu.active_child == menu.child[num] then
-            menu.active_child = nil
+    if _menu.child[num] then
+         _menu.child[num]:hide()
+        if _menu.active_child == _menu.child[num] then
+            _menu.active_child = nil
         end
-        table.remove(menu.child, num)
+        table.remove(_menu.child, num)
     end
 end
 
 --------------------------------------------------------------------------------
 
 --- Build a popup menu with running clients and shows it.
--- @param menu Menu table, see new() function for more informations
+-- @param _menu Menu table, see new() function for more informations
 -- @return The menu.
-function clients(menu, args) -- FIXME crude api
-    menu = menu or {}
+function menu.clients(_menu, args) -- FIXME crude api
+    _menu = _menu or {}
     local cls = capi.client.get()
     local cls_t = {}
     for k, c in pairs(cls) do
@@ -492,7 +493,7 @@ end
 -- @param parent The parent menu
 -- @param args the item params
 -- @return table with 'widget', 'cmd', 'akey' and all the properties the user wants to change
-function entry(parent, args)
+function menu.entry(parent, args)
     args = args or {}
     args.text = args[1] or args.text or ""
     args.cmd = args[2] or args.cmd
@@ -616,20 +617,20 @@ end
 -- &nbsp;                awful.menu(terms):show()                          <br/>
 --                     end                                                 <br/>
 --</code></p>
-function new(args, parent)
+function menu.new(args, parent)
     args = args or {}
     args.layout = args.layout or wibox.layout.flex.vertical
-    local menu = table_update(object(), {
-        item_enter = item_enter,
-        item_leave = item_leave,
-        get_root = get_root,
-        delete = delete,
-        update = update,
-        toggle = toggle,
-        hide = hide,
-        show = show,
-        exec = exec,
-        add = add,
+    local _menu = table_update(object(), {
+        item_enter = menu.item_enter,
+        item_leave = menu.item_leave,
+        get_root = menu.get_root,
+        delete = menu.delete,
+        update = menu.update,
+        toggle = menu.toggle,
+        hide = menu.hide,
+        show = menu.show,
+        exec = menu.exec,
+        add = menu.add,
         child = {},
         items = {},
         parent = parent,
@@ -637,39 +638,43 @@ function new(args, parent)
         theme = load_theme(args.theme or {}, parent and parent.theme) })
 
     if parent then
-        menu.auto_expand = parent.auto_expand
+        _menu.auto_expand = parent.auto_expand
     elseif args.auto_expand ~= nil then
-        menu.auto_expand = args.auto_expand
+        _menu.auto_expand = args.auto_expand
     else
-        menu.auto_expand = true
+        _menu.auto_expand = true
     end
 
     -- Create items
-    for i, v in ipairs(args) do  menu:add(v)  end
+    for i, v in ipairs(args) do  _menu:add(v)  end
     if args.items then
-        for i, v in pairs(args.items) do  menu:add(v)  end
+        for i, v in pairs(args.items) do  _menu:add(v)  end
     end
 
-    menu._keygrabber = function (...)
-        grabber(menu, ...)
+    _menu._keygrabber = function (...)
+        grabber(_menu, ...)
     end
 
-    menu.wibox = wibox({
+    _menu.wibox = wibox({
         ontop = true,
-        fg = menu.theme.fg_normal,
-        bg = menu.theme.bg_normal,
-        border_color = menu.theme.border,
-        border_width = menu.theme.border_width,
+        fg = _menu.theme.fg_normal,
+        bg = _menu.theme.bg_normal,
+        border_color = _menu.theme.border,
+        border_width = _menu.theme.border_width,
         type = "popup_menu" })
-    menu.wibox.visible = false
-    menu.wibox:set_widget(menu.layout)
-    set_size(menu)
+    _menu.wibox.visible = false
+    _menu.wibox:set_widget(_menu.layout)
+    set_size(_menu)
 
-    menu.x = menu.wibox.x
-    menu.y = menu.wibox.y
-    return menu
+    _menu.x = _menu.wibox.x
+    _menu.y = _menu.wibox.y
+    return _menu
 end
 
-setmetatable(_M, { __call = function (_, ...) return new(...) end })
+function menu.mt:__call(...)
+    return menu.new(...)
+end
+
+return setmetatable(menu, menu.mt)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

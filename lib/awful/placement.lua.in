@@ -20,7 +20,8 @@ local layout = require("awful.layout")
 local a_screen = require("awful.screen")
 
 --- Places client according to special criteria.
-module("awful.placement")
+-- awful.placement
+local placement = {}
 
 -- Check if an area intersect another area.
 -- @param a The area.
@@ -103,7 +104,7 @@ end
 --- Place the client so no part of it will be outside the screen.
 -- @param c The client.
 -- @return The new client geometry.
-function no_offscreen(c)
+function placement.no_offscreen(c)
     local c = c or capi.client.focus
     local geometry = c:geometry()
     local screen   = c.screen or a_screen.getbycoord(geometry.x, geometry.y)
@@ -127,7 +128,7 @@ end
 
 --- Place the client where there's place available with minimum overlap.
 -- @param c The client.
-function no_overlap(c)
+function placement.no_overlap(c)
     local geometry = c:geometry()
     local screen   = c.screen or a_screen.getbycoord(geometry.x, geometry.y)
     local cls = client.visible(screen)
@@ -180,7 +181,7 @@ end
 --- Place the client under the mouse.
 -- @param c The client.
 -- @return The new client geometry.
-function under_mouse(c)
+function placement.under_mouse(c)
     local c = c or capi.client.focus
     local c_geometry = c:geometry()
     local m_coords = capi.mouse.coords()
@@ -192,7 +193,7 @@ end
 -- @param c The client.
 -- @param p The parent (optional, nil for screen centering).
 -- @return The new client geometry.
-function centered(c, p)
+function placement.centered(c, p)
     local c = c or capi.client.focus
     local c_geometry = c:geometry()
     local screen = c.screen or a_screen.getbycoord(c_geometry.x, c_geometry.y)
@@ -210,7 +211,7 @@ end
 -- @param c The client.
 -- @param p The parent (optional, nil for screen centering).
 -- @return The new client geometry.
-function center_horizontal(c, p)
+function placement.center_horizontal(c, p)
     local c = c or capi.client.focus
     local c_geometry = c:geometry()
     local screen = c.screen or a_screen.getbycoord(c_geometry.x, c_geometry.y)
@@ -227,7 +228,7 @@ end
 -- @param c The client.
 -- @param p The parent (optional, nil for screen centering).
 -- @return The new client geometry.
-function center_vertical(c, p)
+function placement.center_vertical(c, p)
     local c = c or capi.client.focus
     local c_geometry = c:geometry()
     local screen = c.screen or a_screen.getbycoord(c_geometry.x, c_geometry.y)
@@ -240,5 +241,6 @@ function center_vertical(c, p)
     return c:geometry({ y = s_geometry.y + (s_geometry.height - c_geometry.height) / 2 })
 end
 
+return placement
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

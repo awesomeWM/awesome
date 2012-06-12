@@ -22,7 +22,8 @@ local beautiful = require("beautiful")
 --- Wibox module for awful.
 -- This module allows you to easily create wibox and attach them to the edge of
 -- a screen.
-module("awful.wibox")
+-- awful.wibox
+local awfulwibox = { mt = {} }
 
 -- Array of table with wiboxes inside.
 -- It's an array so it is ordered.
@@ -31,7 +32,7 @@ local wiboxes = {}
 --- Get a wibox position if it has been set, or return top.
 -- @param wibox The wibox
 -- @return The wibox position.
-function get_position(wibox)
+function awfulwibox.get_position(wibox)
     for _, wprop in ipairs(wiboxes) do
         if wprop.wibox == wibox then
             return wprop.position
@@ -45,7 +46,7 @@ end
 -- @param position The position: top, bottom left or right.
 -- @param screen If the wibox it not attached to a screen, specified on which
 -- screen the position should be set.
-function set_position(wibox, position, screen)
+function awfulwibox.set_position(wibox, position, screen)
     local area = capi.screen[screen].geometry
 
     -- The "length" of a wibox is always chosen to be the optimal size
@@ -72,7 +73,7 @@ end
 -- Reset all wiboxes positions.
 local function update_all_wiboxes_position()
     for _, wprop in ipairs(wiboxes) do
-        set_position(wprop.wibox, wprop.position, wprop.screen)
+        awfulwibox.set_position(wprop.wibox, wprop.position, wprop.screen)
     end
 end
 
@@ -104,7 +105,7 @@ end
 -- will be attached.
 -- @param wibox The wibox to attach.
 -- @param position The position of the wibox: top, bottom, left or right.
-function attach(wibox, position, screen)
+function awfulwibox.attach(wibox, position, screen)
     -- Store wibox as attached in a weak-valued table
     local wibox_prop_table
     -- Start from end since we sometimes remove items
@@ -141,8 +142,8 @@ end
 -- @param align The alignment: left, right or center.
 -- @param screen If the wibox is not attached to any screen, you can specify the
 -- screen where to align. Otherwise 1 is assumed.
-function align(wibox, align, screen)
-    local position = get_position(wibox)
+function awfulwibox.align(wibox, align, screen)
+    local position = awfulwibox.get_position(wibox)
     local area = capi.screen[screen].workarea
 
     if position == "right" then
@@ -186,9 +187,9 @@ end
 --- Stretch a wibox so it takes all screen width or height.
 -- @param wibox The wibox.
 -- @param screen The screen to stretch on, or the wibox screen.
-function stretch(wibox, screen)
+function awfulwibox.stretch(wibox, screen)
     if screen then
-        local position = get_position(wibox)
+        local position = awfulwibox.get_position(wibox)
         local area = capi.screen[screen].workarea
         if position == "right" or position == "left" then
             wibox.height = area.height - (2 * wibox.border_width)
@@ -208,7 +209,7 @@ end
 -- You can also set the screen key with a screen number to attach the wibox.
 -- If not specified, 1 is assumed.
 -- @return The wibox created.
-function new(arg)
+function awfulwibox.new(arg)
     local arg = arg or {}
     local position = arg.position or "top"
     local has_to_stretch = true
@@ -251,14 +252,14 @@ function new(arg)
 
     w.visible = true
 
-    attach(w, position, screen)
+    awfulwibox.attach(w, position, screen)
     if has_to_stretch then
-        stretch(w, screen)
+        awfulwibox.stretch(w, screen)
     else
-        align(w, arg.align, screen)
+        awfulwibox.align(w, arg.align, screen)
     end
 
-    set_position(w, position, screen)
+    awfulwibox.set_position(w, position, screen)
 
     return w
 end
@@ -275,6 +276,10 @@ end
 capi.client.connect_signal("property::struts", update_wiboxes_on_struts)
 capi.client.connect_signal("unmanage", update_wiboxes_on_struts)
 
-setmetatable(_M, { __call = function(_, ...) return new(...) end })
+function awfulwibox.mt:__call(...)
+    return awfulwibox.new(...)
+end
+
+return setmetatable(awfulwibox, awfulwibox.mt)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

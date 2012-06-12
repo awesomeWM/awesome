@@ -46,7 +46,8 @@ local ipairs = ipairs
 -- </code>
 -- Now the same tooltip is only attached to <code>myclock</code>.<br/>
 -- </p>
-module("awful.tooltip")
+-- awful.tooltip
+local tooltip = { mt = {} }
 
 local data = setmetatable({}, { __mode = 'k' })
 
@@ -225,6 +226,10 @@ local function new(args)
     return self
 end
 
-setmetatable(_M, { __call = function(_, ...) return new(...) end })
+function tooltip.mt:__call(...)
+    return new(...)
+end
+
+return setmetatable(tooltip, tooltip.mt)
 
 -- vim: ft=lua:et:sw=4:ts=4:sts=4:enc=utf-8:tw=78

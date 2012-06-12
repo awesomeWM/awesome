@@ -8,12 +8,12 @@ local client = client
 local math = math
 
 --- Implements ICCCM handling.
-module("awful.icccm")
+-- awful.icccm
 
 -- Make sure we don't get into an endless loop
 local size_hints_lock = false
 
-function apply_size_hints(c)
+local function apply_size_hints(c)
     if size_hints_lock then return end
     if not c.size_hints_honor then return end
     -- Fullscreen clients don't get size hints applied!
