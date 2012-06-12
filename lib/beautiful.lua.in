@@ -25,7 +25,7 @@ local capi =
 }
 
 --- Theme library.
-module("beautiful")
+local beautiful = { mt = {} }
 
 -- Local data
 local theme
@@ -59,17 +59,17 @@ local function set_font(name)
     active_font = load_font(name).name
 end
 
-function get_font(name)
+function beautiful.get_font(name)
     return load_font(name).description
 end
 
-function get_font_height(name)
+function beautiful.get_font_height(name)
     return load_font(name).height
 end
 
 --- Init function, should be runned at the beginning of configuration file.
 -- @param path The theme file path.
-function init(path)
+function beautiful.init(path)
     if path then
         local success
         success, theme = pcall(function() return dofile(path) end)
@@ -105,13 +105,17 @@ end
 
 --- Get the current theme.
 -- @return The current theme table.
-function get()
+function beautiful.get()
     return theme
+end
+
+function beautiful.mt:__index(k)
+    return theme[k]
 end
 
 -- Set the default font
 set_font("sans 8")
 
-setmetatable(_M, { __index = function(t, k) return theme[k] end })
+return setmetatable(beautiful, beautiful.mt)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

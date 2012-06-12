@@ -5,7 +5,7 @@ require("awful.rules")
 -- Widget and layout library
 require("wibox")
 -- Theme handling library
-require("beautiful")
+local beautiful = require("beautiful")
 -- Notification library
 require("naughty")
 require("menubar")
