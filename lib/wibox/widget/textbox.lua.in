@@ -16,7 +16,8 @@ local setmetatable = setmetatable
 local pairs = pairs
 local error = error
 
-module("wibox.widget.textbox")
+-- wibox.widget.textbox
+local textbox = { mt = {} }
 
 -- Setup a pango layout for the given textbox and cairo context
 local function setup_layout(box, width, height)
@@ -26,7 +27,7 @@ local function setup_layout(box, width, height)
 end
 
 --- Draw the given textbox on the given cairo context in the given geometry
-function draw(box, wibox, cr, width, height)
+function textbox.draw(box, wibox, cr, width, height)
     cr:update_layout(box._layout)
     setup_layout(box, width, height)
     local ink, logical = box._layout:get_pixel_extents()
@@ -41,7 +42,7 @@ function draw(box, wibox, cr, width, height)
 end
 
 --- Fit the given textbox
-function fit(box, width, height)
+function textbox.fit(box, width, height)
     setup_layout(box, width, height)
     local ink, logical = box._layout:get_pixel_extents()
     return logical.width, logical.height
@@ -49,7 +50,7 @@ end
 
 --- Set a textbox' text.
 -- @param text The text to set. This can contain pango markup (e.g. <b>bold</b>)
-function set_markup(box, text)
+function textbox.set_markup(box, text)
     local attr, parsed = Pango.parse_markup(text, -1, 0)
     -- In case of error, attr is false and parsed is an error message
     if not attr then error(parsed) end
@@ -61,7 +62,7 @@ end
 
 --- Set a textbox' text.
 -- @param text The text to display. Pango markup is ignored and shown as-is.
-function set_text(box, text)
+function textbox.set_text(box, text)
     box._layout.text = text
     box._layout.attributes = nil
     box:emit_signal("widget::updated")
@@ -69,7 +70,7 @@ end
 
 --- Set a textbox' ellipsize mode.
 -- @param mode Where should long lines be shortened? "start", "middle" or "end"
-function set_ellipsize(box, mode)
+function textbox.set_ellipsize(box, mode)
     local allowed = { none = "NONE", start = "START", middle = "MIDDLE", ["end"] = "END" }
     if allowed[mode] then
         box._layout:set_ellipsize(allowed[mode])
@@ -79,7 +80,7 @@ end
 
 --- Set a textbox' wrap mode.
 -- @param mode Where to wrap? After "word", "char" or "word_char"
-function set_wrap(box, mode)
+function textbox.set_wrap(box, mode)
     local allowed = { word = "WORD", char = "CHAR", word_char = "WORD_CHAR" }
     if allowed[mode] then
         box._layout:set_wrap(allowed[mode])
@@ -89,7 +90,7 @@ end
 
 --- Set a textbox' vertical alignment
 -- @param mode Where should the textbox be drawn? "top", "center" or "bottom"
-function set_valign(box, mode)
+function textbox.set_valign(box, mode)
     local allowed = { top = true, center = true, bottom = true }
     if allowed[mode] then
         box._valign = mode
@@ -99,7 +100,7 @@ end
 
 --- Set a textbox' horizontal alignment
 -- @param mode Where should the textbox be drawn? "left", "center" or "right"
-function set_align(box, mode)
+function textbox.set_align(box, mode)
     local allowed = { left = "LEFT", center = "CENTER", right = "RIGHT" }
     if allowed[mode] then
         box._layout:set_alignment(allowed[mode])
@@ -109,7 +110,7 @@ end
 
 --- Set a textbox' font
 -- @param font The font description as string
-function set_font(box, font)
+function textbox.set_font(box, font)
     box._layout:set_font_description(beautiful.get_font(font))
 end
 
@@ -117,7 +118,7 @@ end
 local function new()
     local ret = base.make_widget()
 
-    for k, v in pairs(_M) do
+    for k, v in pairs(textbox) do
         if type(v) == "function" then
             ret[k] = v
         end
@@ -135,6 +136,10 @@ local function new()
     return ret
 end
 
-setmetatable(_M, { __call = function (_, ...) return new(...) end })
+function textbox.mt:__call(...)
+    return new(...)
+end
+
+return setmetatable(textbox, textbox.mt)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

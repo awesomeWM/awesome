@@ -12,10 +12,11 @@ local type = type
 local pcall = pcall
 local print = print
 
-module("wibox.widget.imagebox")
+-- wibox.widget.imagebox
+local imagebox = { mt = {} }
 
 --- Draw an imagebox with the given cairo context in the given geometry.
-function draw(box, wibox, cr, width, height)
+function imagebox.draw(box, wibox, cr, width, height)
     if not box.image then return end
 
     cr:save()
@@ -37,7 +38,7 @@ function draw(box, wibox, cr, width, height)
 end
 
 --- Fit the imagebox into the given geometry
-function fit(box, width, height)
+function imagebox.fit(box, width, height)
     if not box.image then
         return 0, 0
     end
@@ -70,7 +71,7 @@ end
 --- Set an imagebox' image
 -- @param image Either a string or a cairo image surface. A string is
 --              interpreted as the path to a png image file.
-function set_image(box, image)
+function imagebox.set_image(box, image)
     local image = image
 
     if type(image) == "string" then
@@ -101,7 +102,7 @@ end
 --- Should the image be resized to fit into the available space?
 -- @param allowed If false, the image will be clipped, else it will be resized
 --                to fit into the available space.
-function set_resize(box, allowed)
+function imagebox.set_resize(box, allowed)
     box.resize_forbidden = not allowed
     box:emit_signal("widget::updated")
 end
@@ -110,7 +111,7 @@ end
 local function new()
     local ret = base.make_widget()
 
-    for k, v in pairs(_M) do
+    for k, v in pairs(imagebox) do
         if type(v) == "function" then
             ret[k] = v
         end
@@ -119,6 +120,10 @@ local function new()
     return ret
 end
 
-setmetatable(_M, { __call = function (_, ...) return new(...) end })
+function imagebox.mt:__call(...)
+    return new(...)
+end
+
+return setmetatable(imagebox, imagebox.mt)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

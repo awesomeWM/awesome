@@ -13,10 +13,11 @@ local setmetatable = setmetatable
 local pairs = pairs
 local type = type
 
-module("wibox.widget.background")
+-- wibox.widget.background
+local background = { mt = {} }
 
 --- Draw this widget
-function draw(box, wibox, cr, width, height)
+function background.draw(box, wibox, cr, width, height)
     if not box.widget then
         return
     end
@@ -46,7 +47,7 @@ function draw(box, wibox, cr, width, height)
 end
 
 --- Fit this widget into the given area
-function fit(box, width, height)
+function background.fit(box, width, height)
     if not box.widget then
         return 0, 0
     end
@@ -55,7 +56,7 @@ function fit(box, width, height)
 end
 
 --- Set the widget that is drawn on top of the background
-function set_widget(box, widget)
+function background.set_widget(box, widget)
     if box.widget then
         box.widget:disconnect_signal("widget::updated", box._emit_updated)
     end
@@ -68,7 +69,7 @@ function set_widget(box, widget)
 end
 
 --- Set the background to use
-function set_bg(box, bg)
+function background.set_bg(box, bg)
     if bg then
         box.background = color(bg)
     else
@@ -78,7 +79,7 @@ function set_bg(box, bg)
 end
 
 --- Set the foreground to use
-function set_fg(box, fg)
+function background.set_fg(box, fg)
     if fg then
         box.foreground = color(fg)
     else
@@ -88,7 +89,7 @@ function set_fg(box, fg)
 end
 
 --- Set the background image to use
-function set_bgimage(box, image)
+function background.set_bgimage(box, image)
     box.bgimage = surface.load(image)
     box._emit_updated()
 end
@@ -96,7 +97,7 @@ end
 local function new()
     local ret = base.make_widget()
 
-    for k, v in pairs(_M) do
+    for k, v in pairs(background) do
         if type(v) == "function" then
             ret[k] = v
         end
@@ -109,6 +110,10 @@ local function new()
     return ret
 end
 
-setmetatable(_M, { __call = function (_, ...) return new(...) end })
+function background.mt:__call(...)
+    return new(...)
+end
+
+return setmetatable(background, background.mt)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

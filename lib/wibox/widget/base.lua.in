@@ -10,19 +10,20 @@ local pairs = pairs
 local type = type
 local table = table
 
-module("wibox.widget.base")
+-- wibox.widget.base
+local base = {}
 
 --- Set/get a widget's buttons
-function buttons(widget, buttons)
-    if buttons then
-        widget.widget_buttons = buttons
+function base.buttons(widget, _buttons)
+    if _buttons then
+        widget.widget_buttons = _buttons
     end
 
     return widget.widget_buttons
 end
 
 --- Handle a button event on a widget. This is used internally.
-function handle_button(event, widget, x, y, button, modifiers)
+function base.handle_button(event, widget, x, y, button, modifiers)
     local function is_any(mod)
         return #mod == 1 and mod[1] == "Any"
     end
@@ -62,7 +63,7 @@ end
 -- that the needed signals are added and mouse input handling is set up.
 -- @param proxy If this is set, the returned widget will be a proxy for this
 --              widget. It will be equivalent to this widget.
-function make_widget(proxy)
+function base.make_widget(proxy)
     local ret = object()
 
     -- This signal is used by layouts to find out when they have to update.
@@ -75,14 +76,14 @@ function make_widget(proxy)
 
     -- No buttons yet
     ret.widget_buttons = {}
-    ret.buttons = buttons
+    ret.buttons = base.buttons
 
     -- Make buttons work
     ret:connect_signal("button::press", function(...)
-        return handle_button("press", ...)
+        return base.handle_button("press", ...)
     end)
     ret:connect_signal("button::release", function(...)
-        return handle_button("release", ...)
+        return base.handle_button("release", ...)
     end)
 
     if proxy then
@@ -98,7 +99,7 @@ end
 
 --- Do some sanity checking on widget. This function raises a lua error if
 -- widget is not a valid widget.
-function check_widget(widget)
+function base.check_widget(widget)
     debug.assert(type(widget) == "table")
     for k, func in pairs({ "draw", "fit", "add_signal", "connect_signal", "disconnect_signal" }) do
         debug.assert(type(widget[func]) == "function", func .. " is not a function")
@@ -108,5 +109,7 @@ function check_widget(widget)
     debug.assert(type(width) == "number")
     debug.assert(type(height) == "number")
 end
+
+return base
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

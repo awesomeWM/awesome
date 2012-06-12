@@ -11,13 +11,14 @@ local capi = { awesome = awesome }
 local setmetatable = setmetatable
 local error = error
 
-module("wibox.widget.systray")
+-- wibox.widget.systray
+local systray = { mt = {} }
 
 local created_systray = false
 local horizontal = true
 local base_size = nil
 
-function draw(box, wibox, cr, width, height)
+function systray.draw(box, wibox, cr, width, height)
     local x, y, width, height = lbase.rect_to_device_geometry(cr, 0, 0, width, height)
     local num_entries = capi.awesome.systray()
     local bg = beautiful.bg_systray or beautiful.bg_normal
@@ -36,7 +37,7 @@ function draw(box, wibox, cr, width, height)
     capi.awesome.systray(wibox.drawin, x, y, base, horizontal, bg)
 end
 
-function fit(box, width, height)
+function systray.fit(box, width, height)
     local num_entries = capi.awesome.systray()
     local base = base_size
     if base == nil then
@@ -60,8 +61,8 @@ local function new()
     end
     created_systray = true
 
-    ret.fit = fit
-    ret.draw = draw
+    ret.fit = systray.fit
+    ret.draw = systray.draw
     ret.set_base_size = function(_, size) base_size = size end
     ret.set_horizontal = function(_, horiz) horizontal = horiz end
 
@@ -72,6 +73,10 @@ local function new()
     return ret
 end
 
-setmetatable(_M, { __call = function (_, ...) return new(...) end })
+function systray.mt:__call(...)
+    return new(...)
+end
+
+return setmetatable(systray, systray.mt)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
