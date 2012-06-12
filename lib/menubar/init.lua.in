@@ -13,8 +13,6 @@ local capi = {
 local awful = require("awful")
 local common = require("awful.widget.common")
 local theme = require("beautiful")
-local menu_gen = require("menubar.menu_gen")
-local menu_utils = require("menubar.utils")
 local wibox = require("wibox")
 
 -- Standard lua
@@ -26,7 +24,10 @@ local string = string
 local math = math
 local setmetatable = setmetatable
 
-module("menubar")
+-- menubar
+local menubar = { mt = {} }
+menubar.menu_gen = require("menubar.menu_gen")
+menubar.utils = require("menubar.utils")
 
 --- List of menubar keybindings:
 -- <p><ul>
@@ -49,19 +50,19 @@ module("menubar")
 -- When true the .desktop files will be reparsed only when the
 -- extension is initialized. Use this if menubar takes much time to
 -- open.
-cache_entries = true
+local cache_entries = true
 
 -- When true the categories will be shown alongside application
 -- entries.
-show_categories = true
+local show_categories = true
 
 -- Specifies the geometry of the menubar. This is a table with the keys
 -- x, y, width and height. Missing values are replaced via the screen's
 -- geometry. However, missing height is replaced by the font size.
-geometry = { width = nil,
-             height = nil,
-             x = nil,
-             y = nil }
+local geometry = { width = nil,
+                   height = nil,
+                   x = nil,
+                   y = nil }
 
 -- Private section
 local current_item = 1
@@ -202,7 +203,7 @@ local function initialize()
 end
 
 --- Refresh menubar's cache by reloading .desktop files.
-function refresh()
+function menubar.refresh()
     menu_entries = menu_gen.generate()
 end
 
@@ -241,7 +242,7 @@ local function prompt_keypressed_callback(mod, key, comm)
             current_item = #shownitems
             if mod.Mod1 then
                 -- add a terminal to the cmdline
-                shownitems[current_item].cmdline = menu_utils.terminal
+                shownitems[current_item].cmdline = menubar.utils.terminal
                         .. " -e " .. shownitems[current_item].cmdline
             end
         end
@@ -252,13 +253,13 @@ end
 
 --- Show the menubar on the given screen.
 -- @param scr Screen number.
-function show(scr)
+function menubar.show(scr)
     if not instance.wibox then
         initialize()
     elseif instance.wibox.visible then -- Menu already shown, exit
         return
     elseif not cache_entries then
-        refresh()
+        menubar.refresh()
     end
 
     -- Set position and size
@@ -276,23 +277,23 @@ function show(scr)
                 function(s) end,            -- exe_callback function set to do nothing
                 awful.completion.shell,     -- completion_callback
                 awful.util.getdir("cache") .. "/history_menu",
-                nil, hide, menulist_update, prompt_keypressed_callback
+                nil, menubar.hide, menulist_update, prompt_keypressed_callback
                 )
     instance.wibox.visible = true
 end
 
 --- Hide the menubar.
-function hide()
+function menubar.hide()
     instance.wibox.visible = false
 end
 
 --- Get a menubar wibox.
 -- @return menubar wibox.
-function get()
+function menubar.get()
     if app_folders then
         menu_gen.all_menu_dirs = app_folders
     end
-    refresh()
+    menubar.refresh()
     -- Add to each category the name of its key in all_categories
     for k, v in pairs(menu_gen.all_categories) do
         v.key = k
@@ -300,6 +301,10 @@ function get()
     return common_args.w
 end
 
-setmetatable(_M, { __call = function(_, ...) return get(...) end })
+function menubar.mt:__call(...)
+    return menubar.get(...)
+end
+
+return setmetatable(menubar, menubar.mt)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

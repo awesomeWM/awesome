@@ -13,7 +13,8 @@ local awful_util = require("awful.util")
 local theme = require("beautiful")
 
 -- Utility module for menubar
-module("menubar.utils")
+-- menubar.utils
+local utils = {}
 
 -- NOTE: This icons/desktop files module was written according to the
 -- following freedesktop.org specifications:
@@ -23,14 +24,14 @@ module("menubar.utils")
 -- Options section
 
 -- Terminal which applications that need terminal would open in.
-terminal = 'xterm'
+utils.terminal = 'xterm'
 
 -- The default icon for applications that don't provide any icon in
 -- their .desktop files.
-default_icon = nil
+local default_icon = nil
 
 -- Name of the WM for the OnlyShownIn entry in the .desktop file.
-wm_name = "awesome"
+local wm_name = "awesome"
 
 -- Private section
 
@@ -66,7 +67,7 @@ end
 --- Lookup an icon in different folders of the filesystem.
 -- @param icon_file Short or full name of the icon.
 -- @return full name of the icon.
-function lookup_icon(icon_file)
+function utils.lookup_icon(icon_file)
     if not icon_file or icon_file == "" then
         return default_icon
     end
@@ -121,7 +122,7 @@ end
 --- Parse a .desktop file.
 -- @param file The .desktop file.
 -- @return A table with file entries.
-function parse(file)
+function utils.parse(file)
     local program = { show = true, file = file }
     for line in io.lines(file) do
         for key, value in line:gmatch("(%w+)=(.+)") do
@@ -166,7 +167,7 @@ function parse(file)
             cmdline = cmdline:gsub('%%i', '')
         end
         if program.Terminal == "true" then
-            cmdline = terminal .. ' -e ' .. cmdline
+            cmdline = utils.terminal .. ' -e ' .. cmdline
         end
         program.cmdline = cmdline
     end
@@ -178,7 +179,7 @@ end
 -- @param dir The directory.
 -- @param icons_size, The icons sizes, optional.
 -- @return A table with all .desktop entries.
-function parse_dir(dir)
+function utils.parse_dir(dir)
     local programs = {}
     local files = io.popen('find '.. dir ..' -maxdepth 1 -name "*.desktop"')
     for file in files:lines() do
@@ -186,5 +187,7 @@ function parse_dir(dir)
     end
     return programs
 end
+
+return utils
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

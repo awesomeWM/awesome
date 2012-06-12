@@ -8,7 +8,7 @@ require("wibox")
 local beautiful = require("beautiful")
 -- Notification library
 local naughty = require("naughty")
-require("menubar")
+local menubar = require("menubar")
 
 -- {{{ Error handling
 -- Check if awesome encountered an error during startup and fell back to
