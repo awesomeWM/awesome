@@ -4,9 +4,6 @@
 -- @release @AWESOME_VERSION@
 ---------------------------------------------------------------------------
 
-require("wibox.layout")
-require("wibox.widget")
-
 local capi = {
     drawin = drawin,
     root = root,
@@ -26,15 +23,18 @@ local cairo = require("lgi").cairo
 
 --- This provides widget box windows. Every wibox can also be used as if it were
 -- a drawin. All drawin functions and properties are also available on wiboxes!
-module("wibox")
+-- wibox
+local wibox = { mt = {} }
+wibox.layout = require("wibox.layout")
+wibox.widget = require("wibox.widget")
 
-local function do_redraw(wibox)
-    if not wibox.drawin.visible then
+local function do_redraw(_wibox)
+    if not _wibox.drawin.visible then
         return
     end
 
-    local geom = wibox.drawin:geometry()
-    local cr = cairo.Context(surface(wibox.drawin.surface))
+    local geom = _wibox.drawin:geometry()
+    local cr = cairo.Context(surface(_wibox.drawin.surface))
 
     -- Draw the background
     cr:save()
@@ -42,36 +42,36 @@ local function do_redraw(wibox)
     local wallpaper = surface(capi.root.wallpaper())
     if wallpaper then
         cr.operator = cairo.Operator.SOURCE
-        cr:set_source_surface(wallpaper, -wibox.drawin.x, -wibox.drawin.y)
+        cr:set_source_surface(wallpaper, -_wibox.drawin.x, -_wibox.drawin.y)
         cr:paint()
     end
 
     cr.operator = cairo.Operator.OVER
-    cr:set_source(wibox.background_color)
+    cr:set_source(_wibox.background_color)
     cr:paint()
     cr:restore()
 
     -- Draw the widget
-    wibox._widget_geometries = {}
-    if wibox.widget and not wibox.widget.__fake_widget then
-        cr:set_source(wibox.foreground_color)
-        wibox.widget:draw(wibox, cr, geom.width, geom.height)
-        wibox:widget_at(wibox.widget, 0, 0, geom.width, geom.height)
+    _wibox._widget_geometries = {}
+    if _wibox.widget and not _wibox.widget.__fake_widget then
+        cr:set_source(_wibox.foreground_color)
+        _wibox.widget:draw(_wibox, cr, geom.width, geom.height)
+        _wibox:widget_at(_wibox.widget, 0, 0, geom.width, geom.height)
     end
 
-    wibox.drawin:refresh()
+    _wibox.drawin:refresh()
 end
 
 --- Register a widget's position.
 -- This is internal, don't call it yourself! Only wibox.layout.base.draw_widget
 -- is allowed to call this.
-function widget_at(wibox, widget, x, y, width, height)
+function wibox.widget_at(_wibox, widget, x, y, width, height)
     local t = {
         widget = widget,
         x = x, y = y,
         width = width, height = height
     }
-    table.insert(wibox._widget_geometries, t)
+    table.insert(_wibox._widget_geometries, t)
 end
 
 --- Find a widget by a point.
@@ -81,10 +81,10 @@ end
 -- @param y Y coordinate of the point
 -- @return A sorted table with all widgets that contain the given point. The
 --         widgets are sorted by relevance.
-function find_widgets(wibox, x, y)
+function wibox.find_widgets(_wibox, x, y)
     local matches = {}
     -- Find all widgets that contain the point
-    for k, v in pairs(wibox._widget_geometries) do
+    for k, v in pairs(_wibox._widget_geometries) do
         local match = true
         if v.x > x or v.x + v.width <= x then match = false end
         if v.y > y or v.y + v.height <= y then match = false end
@@ -106,61 +106,61 @@ function find_widgets(wibox, x, y)
 end
 
 --- Set the widget that the wibox displays
-function set_widget(wibox, widget)
-    if wibox.widget and not wibox.widget.__fake_widget then
+function wibox.set_widget(_wibox, widget)
+    if _wibox.widget and not _wibox.widget.__fake_widget then
         -- Disconnect from the old widget so that we aren't updated due to it
-        wibox.widget:disconnect_signal("widget::updated", wibox.draw)
+        _wibox.widget:disconnect_signal("widget::updated", _wibox.draw)
     end
 
     if not widget then
-        wibox.widget = { __fake_widget = true }
+        _wibox.widget = { __fake_widget = true }
     else
-        wibox.widget = widget
-        widget:connect_signal("widget::updated", wibox.draw)
+        _wibox.widget = widget
+        widget:connect_signal("widget::updated", _wibox.draw)
     end
 
     -- Make sure the wibox is updated
-    wibox.draw()
+    _wibox.draw()
 end
 
 --- Set the background of the wibox
 -- @param wibox The wibox to use
 -- @param c The background to use. This must either be a cairo pattern object,
 --          nil or a string that gears.color() understands.
-function set_bg(wibox, c)
+function wibox.set_bg(_wibox, c)
     local c = c or "#000000"
     if type(c) == "string" or type(c) == "table" then
         c = color(c)
     end
-    wibox.background_color = c
-    wibox.draw()
+    _wibox.background_color = c
+    _wibox.draw()
 end
 
 --- Set the foreground of the wibox
 -- @param wibox The wibox to use
 -- @param c The foreground to use. This must either be a cairo pattern object,
 --          nil or a string that gears.color() understands.
-function set_fg(wibox, c)
+function wibox.set_fg(_wibox, c)
     local c = c or "#FFFFFF"
     if type(c) == "string" or type(c) == "table" then
         c = color(c)
     end
-    wibox.foreground_color = c
-    wibox.draw()
+    _wibox.foreground_color = c
+    _wibox.draw()
 end
 
 --- Helper function to make wibox:buttons() work as expected
-function buttons(box, ...)
+function wibox.buttons(box, ...)
     return box.drawin:buttons(...)
 end
 
 --- Helper function to make wibox:struts() work as expected
-function struts(box, ...)
+function wibox.struts(box, ...)
     return box.drawin:struts(...)
 end
 
 --- Helper function to make wibox:geometry() work as expected
-function geometry(box, ...)
+function wibox.geometry(box, ...)
     return box.drawin:geometry(...)
 end
 
@@ -181,39 +181,39 @@ local function emit_difference(name, list, skip)
     end
 end
 
-local function handle_leave(wibox)
-    emit_difference("mouse::leave", wibox._widgets_under_mouse, {})
-    wibox._widgets_under_mouse = {}
+local function handle_leave(_wibox)
+    emit_difference("mouse::leave", _wibox._widgets_under_mouse, {})
+    _wibox._widgets_under_mouse = {}
 end
 
-local function handle_motion(wibox, x, y)
-    if x < 0 or y < 0 or x > wibox.drawin.width or y > wibox.drawin.height then
-        return handle_leave(wibox)
+local function handle_motion(_wibox, x, y)
+    if x < 0 or y < 0 or x > _wibox.drawin.width or y > _wibox.drawin.height then
+        return handle_leave(_wibox)
     end
 
     -- Build a plain list of all widgets on that point
-    local widgets_list = wibox:find_widgets(x, y)
+    local widgets_list = _wibox:find_widgets(x, y)
     local widgets = {}
     for k, v in pairs(widgets_list) do
         widgets[#widgets + 1] = v.widget
     end
 
     -- First, "leave" all widgets that were left
-    emit_difference("mouse::leave", wibox._widgets_under_mouse, widgets)
+    emit_difference("mouse::leave", _wibox._widgets_under_mouse, widgets)
     -- Then enter some widgets
-    emit_difference("mouse::enter", widgets, wibox._widgets_under_mouse)
+    emit_difference("mouse::enter", widgets, _wibox._widgets_under_mouse)
 
-    wibox._widgets_under_mouse = widgets
+    _wibox._widgets_under_mouse = widgets
 end
 
-local function setup_signals(wibox)
-    local w = wibox.drawin
+local function setup_signals(_wibox)
+    local w = _wibox.drawin
 
     local function clone_signal(name)
-        wibox:add_signal(name)
+        _wibox:add_signal(name)
         -- When "name" is emitted on wibox.drawin, also emit it on wibox
         w:connect_signal(name, function(_, ...)
-            wibox:emit_signal(name, ...)
+            _wibox:emit_signal(name, ...)
         end)
     end
     clone_signal("mouse::enter")
@@ -234,20 +234,20 @@ local function setup_signals(wibox)
     clone_signal("property::y")
 
     -- Update the wibox when its geometry changes
-    w:connect_signal("property::height", wibox.draw)
-    w:connect_signal("property::width", wibox.draw)
+    w:connect_signal("property::height", _wibox.draw)
+    w:connect_signal("property::width", _wibox.draw)
     w:connect_signal("property::visible", function()
         if w.visible then
-            capi.awesome.connect_signal("wallpaper_changed", wibox.draw)
-            wibox.draw()
+            capi.awesome.connect_signal("wallpaper_changed", _wibox.draw)
+            _wibox.draw()
         else
-            capi.awesome.disconnect_signal("wallpaper_changed", wibox.draw)
+            capi.awesome.disconnect_signal("wallpaper_changed", _wibox.draw)
         end
     end)
 
     local function button_signal(name)
         w:connect_signal(name, function(w, x, y, ...)
-            local widgets = wibox:find_widgets(x, y)
+            local widgets = _wibox:find_widgets(x, y)
             for k, v in pairs(widgets) do
                 -- Calculate x/y inside of the widget
                 local lx = x - v.x
@@ -259,8 +259,8 @@ local function setup_signals(wibox)
     button_signal("button::press")
     button_signal("button::release")
 
-    wibox:connect_signal("mouse::move", handle_motion)
-    wibox:connect_signal("mouse::leave", handle_leave)
+    _wibox:connect_signal("mouse::move", handle_motion)
+    _wibox:connect_signal("mouse::leave", handle_leave)
 end
 
 local function new(args)
@@ -269,7 +269,7 @@ local function new(args)
 
     ret.drawin = w
 
-    for k, v in pairs(_M) do
+    for k, v in pairs(wibox) do
         if type(v) == "function" then
             ret[k] = v
         end
@@ -329,6 +329,10 @@ end
 -- @class table
 -- @name drawin
 
-setmetatable(_M, { __call = function(_, ...) return new(...) end })
+function wibox.mt:__call(...)
+    return new(...)
+end
+
+return setmetatable(wibox, wibox.mt)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

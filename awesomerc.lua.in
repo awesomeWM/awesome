@@ -3,7 +3,7 @@ require("awful")
 require("awful.autofocus")
 require("awful.rules")
 -- Widget and layout library
-require("wibox")
+local wibox = require("wibox")
 -- Theme handling library
 local beautiful = require("beautiful")
 -- Notification library
