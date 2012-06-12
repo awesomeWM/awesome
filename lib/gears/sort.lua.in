@@ -9,7 +9,8 @@ local ipairs = ipairs
 local table = table
 local error = error
 
-module("gears.sort")
+-- gears.sort
+local sort = { mt = {} }
 
 local function less_than_comp(a, b)
     return a < b
@@ -19,7 +20,7 @@ end
 -- The difference to table.sort() is that this sort is stable.
 -- @param list The table to sort (we do an in-place sort!).
 -- @param comp Comparator used for the sorting
-function sort(list, comp)
+function sort.sort(list, comp)
     local comp = comp or less_than_comp
 
     -- A table could contain non-integer keys which we have to ignore.
@@ -53,10 +54,10 @@ function sort(list, comp)
     end
 end
 
-function test()
+function sort.test()
     local function test_one(t)
         local len = #t
-        sort(t)
+        sort.sort(t)
         if len ~= #t then
             error("Table lost entries during sort!")
         end
@@ -78,6 +79,10 @@ function test()
     return true
 end
 
-setmetatable(_M, { __call = function (_, ...) return sort(...) end })
+function sort.mt:__call(...)
+    return sort.sort(...)
+end
+
+return setmetatable(sort, sort.mt)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

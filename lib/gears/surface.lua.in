@@ -13,27 +13,32 @@ if tonumber(require("lgi.version")) <= 0.5 then
     error("lgi too old, need at least version 0.7 (not yet released?) or recent git")
 end
 
-module("gears.surface")
+-- gears.surface
+local surface = { mt = {} }
 
 --- Try to convert the argument into an lgi cairo surface.
 -- This is usually needed for loading images by file name.
-function load(surface)
+function surface.load(_surface)
     -- Nil is not changed
-    if not surface then
+    if not _surface then
         return nil
     end
     -- lgi cairo surfaces don't get changed either
-    if cairo.Surface:is_type_of(surface) then
-        return surface
+    if cairo.Surface:is_type_of(_surface) then
+        return _surface
     end
     -- Strings are assumed to be file names and get loaded
-    if type(surface) == "string" then
-        surface = capi.awesome.load_image(surface)
+    if type(_surface) == "string" then
+        _surface = capi.awesome.load_image(_surface)
     end
     -- Everything else gets forced into a surface
-    return cairo.Surface(surface, true)
+    return cairo.Surface(_surface, true)
 end
 
-setmetatable(_M, { __call = function(_, ...) return load(...) end })
+function surface.mt:__call(...)
+    return surface.load(...)
+end
+
+return setmetatable(surface, surface.mt)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

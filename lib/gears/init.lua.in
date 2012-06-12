@@ -4,12 +4,15 @@
 -- @release @AWESOME_VERSION@
 ---------------------------------------------------------------------------
 
-require("gears.color")
-require("gears.debug")
-require("gears.object")
-require("gears.sort")
-require("gears.surface")
+-- gears
 
-module("gears")
+return
+{
+    color = require("gears.color");
+    debug = require("gears.debug");
+    object = require("gears.object");
+    sort = require("gears.sort");
+    surface = require("gears.surface");
+}
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

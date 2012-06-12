@@ -11,12 +11,13 @@ local print = print
 local type = type
 local pairs = pairs
 
-module("gears.debug")
+-- gears.debug
+local debug = {}
 
 --- Check that the given condition holds true, else throw an error
 -- @param cond If this is false, throw a lua error with a backtrace.
 -- @param message Message to print in the error (optional).
-function assert(cond, message)
+function debug.assert(cond, message)
     local message = message or cond
     if not cond then
         error(traceback("Assertion failed: '" .. tostring(message) .. "'"))
@@ -54,15 +55,17 @@ end
 -- @param data Value to inspect.
 -- @param tag The name of the value.
 -- @return a string that contains the expanded value of data.
-function dump_return(data, tag)
+function debug.dump_return(data, tag)
     return dump_raw(data, nil, tag)
 end
 
 --- Print the table (or any other value) to the console.
 -- @param data Table to print.
 -- @param tag The name of the table.
-function dump(data, tag)
+function debug.dump(data, tag)
     print(dump_return(data, tag))
 end
+
+return debug
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

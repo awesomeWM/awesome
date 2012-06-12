@@ -15,7 +15,7 @@ local type = type
 local cairo = require("lgi").cairo
 local surface = require("gears.surface")
 
-module("gears.color")
+local color = { mt = {} }
 
 --- Parse a HTML-color.
 -- This function can parse colors like #rrggbb and #rrggbbaa.
@@ -23,7 +23,7 @@ module("gears.color")
 -- Thanks to #lua for this. :)
 -- @param col The color to parse
 -- @return 4 values which each are in the range [0, 1].
-function parse_color(col)
+function color.parse_color(col)
     local rgb = {}
     for pair in string.gmatch(col, "[^#].") do
         local i = tonumber(pair, 16)
@@ -51,20 +51,20 @@ end
 --- Create a solid pattern
 -- @param col The color for the pattern
 -- @return A cairo pattern object
-function create_solid_pattern(col)
+function color.create_solid_pattern(col)
     local col = col
     if col == nil then
         col = "#000000"
     elseif type(col) == "table" then
         col = col.color
     end
-    return cairo.Pattern.create_rgba(parse_color(col))
+    return cairo.Pattern.create_rgba(color.parse_color(col))
 end
 
 --- Create an image pattern from a png file
 -- @param file The filename of the file
 -- @return a cairo pattern object
-function create_png_pattern(file)
+function color.create_png_pattern(file)
     local file = file
     if type(file) == "table" then
         file = file.file
@@ -80,15 +80,15 @@ end
 local function add_iterator_stops(p, iterator)
     for k in iterator do
         local sub = string.gmatch(k, "[^,]+")
-        local point, color = sub(), sub()
-        p:add_color_stop_rgba(point, parse_color(color))
+        local point, clr = sub(), sub()
+        p:add_color_stop_rgba(point, color.parse_color(clr))
     end
 end
 
 -- Add a list of stops to a given pattern
 local function add_stops_table(pat, arg)
     for _, stop in ipairs(arg) do
-        pat:add_color_stop_rgba(stop[1], parse_color(stop[2]))
+        pat:add_color_stop_rgba(stop[1], color.parse_color(stop[2]))
     end
 end
 
@@ -119,7 +119,7 @@ end
 -- For the explanation of "&#60;stops&#62;", see create_pattern().
 -- @param arg The argument describing the pattern
 -- @return a cairo pattern object
-function create_linear_pattern(arg)
+function color.create_linear_pattern(arg)
     local pat
 
     if type(arg) == "string" then
@@ -144,7 +144,7 @@ end
 -- For the explanation of "&#60;stops&#62;", see create_pattern().
 -- @param arg The argument describing the pattern
 -- @return a cairo pattern object
-function create_radial_pattern(arg)
+function color.create_radial_pattern(arg)
     local pat
 
     if type(arg) == "string" then
@@ -160,11 +160,11 @@ function create_radial_pattern(arg)
 end
 
 --- Mapping of all supported color types. New entries can be added.
-types = {
-    solid = create_solid_pattern,
-    png = create_png_pattern,
-    linear = create_linear_pattern,
-    radial = create_radial_pattern
+local types = {
+    solid = color.create_solid_pattern,
+    png = color.create_png_pattern,
+    linear = color.create_linear_pattern,
+    radial = color.create_radial_pattern
 }
 
 --- Create a pattern from a given string.
@@ -181,7 +181,7 @@ types = {
 --      create_radial_pattern
 -- @param col The string describing the pattern.
 -- @return a cairo pattern object
-function create_pattern(col)
+function color.create_pattern(col)
     if type(col) == "string" then
         local t = string.match(col, "[^:]+")
         if types[t] then
@@ -195,9 +195,13 @@ function create_pattern(col)
             return types[t](col)
         end
     end
-    return create_solid_pattern(col)
+    return color.create_solid_pattern(col)
 end
 
-setmetatable(_M, { __call = function (_, ...) return create_pattern(...) end })
+function color.mt:__call(...)
+    return color.create_pattern(...)
+end
+
+return setmetatable(color, color.mt)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
