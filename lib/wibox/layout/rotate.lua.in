@@ -13,7 +13,8 @@ local tostring = tostring
 local base = require("wibox.layout.base")
 local widget_base = require("wibox.widget.base")
 
-module("wibox.layout.rotate")
+-- wibox.layout.rotate
+local rotate = { mt = {} }
 
 local function transform(layout, width, height)
     local dir = layout:get_direction()
@@ -24,7 +25,7 @@ local function transform(layout, width, height)
 end
 
 --- Draw this layout
-function draw(layout, wibox, cr, width, height)
+function rotate.draw(layout, wibox, cr, width, height)
     if not layout.widget then return { width = 0, height = 0 } end
 
     cr:save()
@@ -50,7 +51,7 @@ function draw(layout, wibox, cr, width, height)
 end
 
 --- Fit this layout into the given area
-function fit(layout, width, height)
+function rotate.fit(layout, width, height)
     if not layout.widget then
         return 0, 0
     end
@@ -58,7 +59,7 @@ function fit(layout, width, height)
 end
 
 --- Set the widget that this layout rotates.
-function set_widget(layout, widget)
+function rotate.set_widget(layout, widget)
     if layout.widget then
         layout.widget:disconnect_signal("widget::updated", layout._emit_updated)
     end
@@ -71,14 +72,14 @@ function set_widget(layout, widget)
 end
 
 --- Reset this layout. The widget will be removed and the rotation reset.
-function reset(layout)
+function rotate.reset(layout)
     layout.direction = nil
     layout:set_widget(nil)
 end
 
 --- Set the direction of this rotating layout. Valid values are "north", "east",
 -- "south" and "west". On an invalid value, this function will throw an error.
-function set_direction(layout, dir)
+function rotate.set_direction(layout, dir)
     local allowed = {
         north = true,
         east = true,
@@ -95,7 +96,7 @@ function set_direction(layout, dir)
 end
 
 --- Get the direction of this rotating layout
-function get_direction(layout)
+function rotate.get_direction(layout)
     return layout.direction or "north"
 end
 
@@ -118,6 +119,10 @@ local function new()
     return ret
 end
 
-setmetatable(_M, { __call = function(_, ...) return new(...) end })
+function rotate.mt:__call(...)
+    return new(...)
+end
+
+return setmetatable(rotate, rotate.mt)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

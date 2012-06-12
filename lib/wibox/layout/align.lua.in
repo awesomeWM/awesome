@@ -11,7 +11,8 @@ local type = type
 local base = require("wibox.layout.base")
 local widget_base = require("wibox.widget.base")
 
-module("wibox.layout.align")
+-- wibox.layout.align
+local align = {}
 
 -- Draw the given align layout. dir describes the orientation of the layout, "x"
 -- means horizontal while "y" is vertical.
@@ -73,24 +74,24 @@ local function widget_changed(layout, old_w, new_w)
 end
 
 --- Set the layout's first widget. This is the widget that is at the left/top
-function set_first(layout, widget)
+function align.set_first(layout, widget)
     widget_changed(layout, layout.first, widget)
     layout.first = widget
 end
 
 --- Set the layout's second widget. This is the centered one.
-function set_second(layout, widget)
+function align.set_second(layout, widget)
     widget_changed(layout, layout.second, widget)
     layout.second = widget
 end
 
 --- Set the layout's third widget. This is the widget that is at the right/bottom
-function set_third(layout, widget)
+function align.set_third(layout, widget)
     widget_changed(layout, layout.third, widget)
     layout.third = widget
 end
 
-function reset(layout)
+function align.reset(layout)
     for k, v in pairs({ "first", "second", "third" }) do
         layout[v] = nil
     end
@@ -110,7 +111,7 @@ local function get_layout(dir)
         ret:emit_signal("widget::updated")
     end
 
-    for k, v in pairs(_M) do
+    for k, v in pairs(align) do
         if type(v) == "function" then
             ret[k] = v
         end
@@ -123,7 +124,7 @@ end
 -- three widgets. The widget set via :set_left() is left-aligned. :set_right()
 -- sets a widget which will be right-aligned. The remaining space between those
 -- two will be given to the widget set via :set_middle().
-function horizontal()
+function align.horizontal()
     local ret = get_layout("x")
 
     ret.set_left = ret.set_first
@@ -137,7 +138,7 @@ end
 -- three widgets. The widget set via :set_top() is top-aligned. :set_bottom()
 -- sets a widget which will be bottom-aligned. The remaining space between those
 -- two will be given to the widget set via :set_middle().
-function vertical()
+function align.vertical()
     local ret = get_layout("y")
 
     ret.set_top = ret.set_first
@@ -146,5 +147,7 @@ function vertical()
 
     return ret
 end
+
+return align
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

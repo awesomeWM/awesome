@@ -4,14 +4,17 @@
 -- @release @AWESOME_VERSION@
 ---------------------------------------------------------------------------
 
-require("wibox.layout.base")
-require("wibox.layout.fixed")
-require("wibox.layout.align")
-require("wibox.layout.flex")
-require("wibox.layout.rotate")
-require("wibox.layout.margin")
-require("wibox.layout.mirror")
+-- wibox.layout
 
-module("wibox.layout")
+return
+{
+    base = require("wibox.layout.base");
+    fixed = require("wibox.layout.fixed");
+    align = require("wibox.layout.align");
+    flex = require("wibox.layout.flex");
+    rotate = require("wibox.layout.rotate");
+    margin = require("wibox.layout.margin");
+    mirror = require("wibox.layout.mirror");
+}
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

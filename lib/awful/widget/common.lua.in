@@ -13,6 +13,7 @@ local pcall = pcall
 local setmetatable = setmetatable
 local capi = { button = button }
 local util = require("awful.util")
+local wibox = require("wibox")
 local imagebox = require("wibox.widget.imagebox")
 local textbox = require("wibox.widget.textbox")
 

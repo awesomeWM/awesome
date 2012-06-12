@@ -10,10 +10,11 @@ local setmetatable = setmetatable
 local base = require("wibox.layout.base")
 local widget_base = require("wibox.widget.base")
 
-module("wibox.layout.margin")
+-- wibox.layout.margin
+local margin = { mt = {} }
 
 --- Draw a margin layout
-function draw(layout, wibox, cr, width, height)
+function margin.draw(layout, wibox, cr, width, height)
     local x = layout.left
     local y = layout.top
     local w = layout.right
@@ -27,7 +28,7 @@ function draw(layout, wibox, cr, width, height)
 end
 
 --- Fit a margin layout into the given space
-function fit(layout, width, height)
+function margin.fit(layout, width, height)
     local extra_w = layout.left + layout.right
     local extra_h = layout.top + layout.bottom
     local w, h = 0, 0
@@ -38,7 +39,7 @@ function fit(layout, width, height)
 end
 
 --- Set the widget that this layout adds a margin on.
-function set_widget(layout, widget)
+function margin.set_widget(layout, widget)
     if layout.widget then
         layout.widget:disconnect_signal("widget::updated", layout._emit_updated)
     end
@@ -51,7 +52,7 @@ function set_widget(layout, widget)
 end
 
 --- Set all the margins to val.
-function set_margins(layout, val)
+function margin.set_margins(layout, val)
     layout.left = val
     layout.right = val
     layout.top = val
@@ -60,7 +61,7 @@ function set_margins(layout, val)
 end
 
 --- Reset this layout. The widget will be unreferenced and the margins set to 0.
-function reset(layout)
+function margin.reset(layout)
     layout:set_widget(nil)
     layout:set_margins(0)
 end
@@ -91,7 +92,7 @@ end
 
 -- Create setters for each direction
 for k, v in pairs({ "left", "right", "top", "bottom" }) do
-    _M["set_" .. v] = function(layout, val)
+    margin["set_" .. v] = function(layout, val)
         layout[v] = val
         layout:emit_signal("widget::updated")
     end
@@ -106,7 +107,7 @@ end
 local function new(widget, left, right, top, bottom)
     local ret = widget_base.make_widget()
 
-    for k, v in pairs(_M) do
+    for k, v in pairs(margin) do
         if type(v) == "function" then
             ret[k] = v
         end
@@ -128,6 +129,10 @@ local function new(widget, left, right, top, bottom)
     return ret
 end
 
-setmetatable(_M, { __call = function(_, ...) return new(...) end })
+function margin.mt:__call(...)
+    return new(...)
+end
+
+return setmetatable(margin, margin.mt)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

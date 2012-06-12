@@ -11,7 +11,8 @@ local table = table
 local pairs = pairs
 local floor = math.floor
 
-module("wibox.layout.flex")
+-- wibox.layout.flex
+local flex = {}
 
 local function round(x)
     return floor(x + 0.5)
@@ -24,7 +25,7 @@ end
 -- @param width The available width.
 -- @param height The available height.
 -- @return The total space needed by the layout.
-function draw_flex(dir, widgets, wibox, cr, width, height)
+function flex.draw_flex(dir, widgets, wibox, cr, width, height)
     local pos = 0
 
     local num = #widgets
@@ -72,7 +73,7 @@ end
 
 local function get_layout(dir)
     local function draw(layout, wibox, cr, width, height)
-        draw_flex(dir, layout.widgets, wibox, cr, width, height)
+        flex.draw_flex(dir, layout.widgets, wibox, cr, width, height)
     end
 
     local function fit(layout, width, height)
@@ -95,14 +96,16 @@ end
 
 --- Returns a new horizontal flex layout. A flex layout shares the available space
 -- equally among all widgets. Widgets can be added via :add(widget).
-function horizontal()
+function flex.horizontal()
     return get_layout("x")
 end
 
 --- Returns a new vertical flex layout. A flex layout shares the available space
 -- equally among all widgets. Widgets can be added via :add(widget).
-function vertical()
+function flex.vertical()
     return get_layout("y")
 end
+
+return flex
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
