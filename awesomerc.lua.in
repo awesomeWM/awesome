@@ -7,7 +7,7 @@ require("wibox")
 -- Theme handling library
 local beautiful = require("beautiful")
 -- Notification library
-require("naughty")
+local naughty = require("naughty")
 require("menubar")
 
 -- {{{ Error handling
