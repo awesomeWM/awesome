@@ -160,7 +160,7 @@ function color.create_radial_pattern(arg)
 end
 
 --- Mapping of all supported color types. New entries can be added.
-local types = {
+color.types = {
     solid = color.create_solid_pattern,
     png = color.create_png_pattern,
     linear = color.create_linear_pattern,
@@ -184,15 +184,15 @@ local types = {
 function color.create_pattern(col)
     if type(col) == "string" then
         local t = string.match(col, "[^:]+")
-        if types[t] then
+        if color.types[t] then
             local pos = string.len(t)
             local arg = string.sub(col, pos + 2)
-            return types[t](arg)
+            return color.types[t](arg)
         end
     elseif type(col) == "table" then
         local t = col.type
-        if types[t] then
-            return types[t](col)
+        if color.types[t] then
+            return color.types[t](col)
         end
     end
     return color.create_solid_pattern(col)
