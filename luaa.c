@@ -549,22 +549,22 @@ luaA_init(xdgHandle* xdg)
     luaA_openlib(L, "awesome", awesome_lib, awesome_lib);
 
     /* Export root lib */
-    luaL_register(L, "root", awesome_root_lib);
-    lua_pop(L, 1); /* luaL_register() leaves the table on stack */
+    luaA_registerlib(L, "root", awesome_root_lib);
+    lua_pop(L, 1); /* luaA_registerlib() leaves the table on stack */
 
 #ifdef WITH_DBUS
     /* Export D-Bus lib */
-    luaL_register(L, "dbus", awesome_dbus_lib);
-    lua_pop(L, 1); /* luaL_register() leaves the table on stack */
+    luaA_registerlib(L, "dbus", awesome_dbus_lib);
+    lua_pop(L, 1); /* luaA_registerlib() leaves the table on stack */
 #endif
 
     /* Export keygrabber lib */
-    luaL_register(L, "keygrabber", awesome_keygrabber_lib);
-    lua_pop(L, 1); /* luaL_register() leaves the table on stack */
+    luaA_registerlib(L, "keygrabber", awesome_keygrabber_lib);
+    lua_pop(L, 1); /* luaA_registerlib() leaves the table on stack */
 
     /* Export mousegrabber lib */
-    luaL_register(L, "mousegrabber", awesome_mousegrabber_lib);
-    lua_pop(L, 1); /* luaL_register() leaves the table on stack */
+    luaA_registerlib(L, "mousegrabber", awesome_mousegrabber_lib);
+    lua_pop(L, 1); /* luaA_registerlib() leaves the table on stack */
 
     /* Export screen */
     luaA_openlib(L, "screen", awesome_screen_methods, awesome_screen_meta);
