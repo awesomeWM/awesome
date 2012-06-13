@@ -10,7 +10,6 @@ local type = type
 local capi = { screen = screen, client = client }
 local tag = require("awful.tag")
 local util = require("awful.util")
-local suit = require("awful.layout.suit")
 local ascreen = require("awful.screen")
 local capi = {
     screen = screen,
@@ -20,7 +19,9 @@ local capi = {
 local client = require("awful.client")
 
 --- Layout module for awful
-module("awful.layout")
+-- awful.layout
+local layout = {}
+layout.suit = require("awful.layout.suit")
 
 -- This is a special lock used by the arrange function.
 -- This avoids recurring call by emitted signals.
@@ -29,18 +30,18 @@ local arrange_lock = false
 --- Get the current layout.
 -- @param screen The screen number.
 -- @return The layout function.
-function get(screen)
+function layout.get(screen)
     local t = tag.selected(screen)
-    return tag.getproperty(t, "layout") or suit.floating
+    return tag.getproperty(t, "layout") or layout.suit.floating
 end
 
 --- Change the layout of the current tag.
 -- @param layouts A table of layouts.
 -- @param i Relative index.
-function inc(layouts, i)
+function layout.inc(layouts, i)
     local t = tag.selected()
     if t then
-        local curlayout = get()
+        local curlayout = layout.get()
         local curindex
         local rev_layouts = {}
         for k, v in ipairs(layouts) do
@@ -51,21 +52,21 @@ function inc(layouts, i)
         end
         if curindex then
             local newindex = util.cycle(#layouts, curindex + i)
-            set(layouts[newindex])
+            layout.set(layouts[newindex])
         end
     end
 end
 
 --- Set the layout function of the current tag.
 -- @param layout Layout name.
-function set(layout, t)
+function layout.set(_layout, t)
     t = t or tag.selected()
-    tag.setproperty(t, "layout", layout)
+    tag.setproperty(t, "layout", _layout)
 end
 
 --- Arrange a screen using its current layout.
 -- @param screen The screen to arrange.
-function arrange(screen)
+function layout.arrange(screen)
     if arrange_lock then return end
     arrange_lock = true
     local p = {}
@@ -81,7 +82,7 @@ function arrange(screen)
     p.geometry = capi.screen[screen].geometry
     p.clients = client.tiled(screen)
     p.screen = screen
-    get(screen).arrange(p)
+    layout.get(screen).arrange(p)
     capi.screen[screen]:emit_signal("arrange")
     arrange_lock = false
 end
@@ -89,12 +90,12 @@ end
 --- Get the current layout name.
 -- @param layout The layout.
 -- @return The layout name.
-function getname(layout)
-    local layout = layout or get()
-    return layout.name
+function layout.getname(_layout)
+    local _layout = _layout or layout.get()
+    return _layout.name
 end
 
-local function arrange_prop(obj) arrange(obj.screen) end
+local function arrange_prop(obj) layout.arrange(obj.screen) end
 
 capi.client.connect_signal("property::size_hints_honor", arrange_prop)
 capi.client.connect_signal("property::struts", arrange_prop)
@@ -110,11 +111,11 @@ capi.client.connect_signal("property::geometry", arrange_prop)
 -- If prop is screen, we do not know what was the previous screen, so
 -- let's arrange all screens :-(
 capi.client.connect_signal("property::screen", function(c)
-    for screen = 1, capi.screen.count() do arrange(screen) end end)
+    for screen = 1, capi.screen.count() do layout.arrange(screen) end end)
 
 local function arrange_on_tagged(c, tag)
     if not tag.screen then return end
-    arrange(tag.screen)
+    layout.arrange(tag.screen)
     if not capi.client.focus or not capi.client.focus:isvisible() then
         local c = client.focus.history.get(tag.screen, 0)
         if c then capi.client.focus = c end
@@ -132,24 +133,26 @@ for s = 1, capi.screen.count() do
     tag.attached_connect_signal(s, "property::selected", arrange_prop)
     tag.attached_connect_signal(s, "tagged", arrange_prop)
     capi.screen[s]:connect_signal("property::workarea", function(screen)
-        arrange(screen.index)
+        layout.arrange(screen.index)
     end)
     capi.screen[s]:connect_signal("tag::attach", function (screen, tag)
-        arrange(screen.index)
+        layout.arrange(screen.index)
     end)
     capi.screen[s]:connect_signal("tag::detach", function (screen, tag)
-        arrange(screen.index)
+        layout.arrange(screen.index)
     end)
     capi.screen[s]:connect_signal("padding", function (screen)
-        arrange(screen.index)
+        layout.arrange(screen.index)
     end)
 end
 
-capi.client.connect_signal("focus", function(c) arrange(c.screen) end)
+capi.client.connect_signal("focus", function(c) layout.arrange(c.screen) end)
 capi.client.connect_signal("list", function()
                                    for screen = 1, capi.screen.count() do
-                                       arrange(screen)
+                                       layout.arrange(screen)
                                    end
                                end)
+
+return layout
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
