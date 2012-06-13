@@ -31,7 +31,9 @@ local setmetatable = setmetatable
 -- The mouse_finder color<br/>
 -- <code>theme.mouse_finder_color = "#ff0000"</code><br/>
 -- </p>
-module("awful.mouse.finder")
+
+-- awful.mouse.finder
+local finder = { mt = {} }
 
 -- Mouse finder private data.
 -- @name data
@@ -112,7 +114,7 @@ end
 
 --- Find the mouse on the screen
 -- @param self A mouse finder object.
-function find(self)
+function finder.find(self)
     show(self)
 end
 
@@ -143,6 +145,10 @@ local function new()
     return self
 end
 
-setmetatable(_M, { __call = function(_, ...) return new(...) end })
+function finder.mt:__call(...)
+    return new(...)
+end
+
+return setmetatable(finder, finder.mt)
 
 -- vim: ft=lua:et:sw=4:ts=4:sts=4:enc=utf-8:tw=78

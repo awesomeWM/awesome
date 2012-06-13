@@ -23,17 +23,18 @@ local capi =
     mousegrabber = mousegrabber,
 }
 
-require("awful.mouse.finder")
+local finder = require("awful.mouse.finder")
 
 --- Mouse module for awful
-module("awful.mouse")
+-- awful.mouse
+local mouse = {}
 
-client = {}
-wibox = {}
+mouse.client = {}
+mouse.wibox = {}
 
 --- Get the client object under the pointer.
 -- @return The client object under the pointer, if one can be found.
-function client_under_pointer()
+function mouse.client_under_pointer()
     local obj = capi.mouse.object_under_pointer()
     if type(obj) == "client" then
         return obj
@@ -42,7 +43,7 @@ end
 
 --- Get the wibox object under the pointer.
 -- @return The wibox object under the pointer, if one can be found.
-function wibox_under_pointer()
+function mouse.wibox_under_pointer()
     local obj = capi.mouse.object_under_pointer()
     if type(obj) == "wibox" then
         return obj
@@ -51,7 +52,7 @@ end
 
 --- Get the widget under the pointer.
 -- @return The widget object under the pointer, if it can be found.
-function widget_under_pointer()
+function mouse.widget_under_pointer()
     local obj, obj2 = capi.mouse.object_under_pointer()
     if type(obj2) == "widget" then
         return obj2
@@ -105,9 +106,9 @@ end
 -- @param y The client y coordinate.
 -- @param fixed_x True if the client isn't allowed to move in the x direction.
 -- @param fixed_y True if the client isn't allowed to move in the y direction.
-function client.snap(c, snap, x, y, fixed_x, fixed_y)
+function mouse.client.snap(c, snap, x, y, fixed_x, fixed_y)
     local snap = snap or 8
-    local c = c or client.focus
+    local c = c or mouse.client.focus
     local cur_geom = c:geometry()
     local geom = c:geometry()
     geom.width = geom.width + (2 * c.border_width)
@@ -162,7 +163,7 @@ end
 --- Move a client.
 -- @param c The client to move, or the focused one if nil.
 -- @param snap The pixel to snap clients.
-function client.move(c, snap)
+function mouse.client.move(c, snap)
     local c = c or capi.client.focus
 
     if not c
@@ -183,28 +184,28 @@ function client.move(c, snap)
     local fixed_x = c.maximized_horizontal
     local fixed_y = c.maximized_vertical
 
-    capi.mousegrabber.run(function (mouse)
-                              for k, v in ipairs(mouse.buttons) do
+    capi.mousegrabber.run(function (_mouse)
+                              for k, v in ipairs(_mouse.buttons) do
                                   if v then
                                       local lay = layout.get(c.screen)
                                       if lay == layout.suit.floating or aclient.floating.get(c) then
-                                          local x = mouse.x - dist_x
-                                          local y = mouse.y - dist_y
-                                          c:geometry(client.snap(c, snap, x, y, fixed_x, fixed_y))
+                                          local x = _mouse.x - dist_x
+                                          local y = _mouse.y - dist_y
+                                          c:geometry(mouse.client.snap(c, snap, x, y, fixed_x, fixed_y))
                                       elseif lay ~= layout.suit.magnifier then
                                           -- Only move the client to the mouse
                                           -- screen if the target screen is not
                                           -- floating.
                                           -- Otherwise, we move if via geometry.
                                           if layout.get(capi.mouse.screen) == layout.suit.floating then
-                                              local x = mouse.x - dist_x
-                                              local y = mouse.y - dist_y
-                                              c:geometry(client.snap(c, snap, x, y, fixed_x, fixed_y))
+                                              local x = _mouse.x - dist_x
+                                              local y = _mouse.y - dist_y
+                                              c:geometry(mouse.client.snap(c, snap, x, y, fixed_x, fixed_y))
                                           else
                                               c.screen = capi.mouse.screen
                                           end
                                           if layout.get(c.screen) ~= layout.suit.floating then
-                                              local c_u_m = client_under_pointer()
+                                              local c_u_m = mouse.client_under_pointer()
                                               if c_u_m and not aclient.floating.get(c_u_m) then
                                                   if c_u_m ~= c then
                                                       c:swap(c_u_m)
@@ -219,18 +220,18 @@ function client.move(c, snap)
                           end, "fleur")
 end
 
-client.dragtotag = { }
+mouse.client.dragtotag = { }
 
 --- Move a client to a tag by drag'n'dropping it over a taglist widget
 -- @param c The client to move
-function client.dragtotag.widget(c)
-    capi.mousegrabber.run(function (mouse)
+function mouse.client.dragtotag.widget(c)
+    capi.mousegrabber.run(function (_mouse)
                               local button_down = false
-                              for _, v in ipairs(mouse.buttons) do
+                              for _, v in ipairs(_mouse.buttons) do
                                   if v then button_down = true end
                               end
                               if not button_down then
-                                  local w = widget_under_pointer()
+                                  local w = mouse.widget_under_pointer()
                                   if w and widget.taglist.gettag(w) then
                                       local t = widget.taglist.gettag(w)
                                       if t.screen ~= c.screen then
@@ -246,16 +247,16 @@ end
 
 --- Move a client to a tag by dragging it onto the left / right side of the screen
 -- @param c The client to move
-function client.dragtotag.border(c)
-    capi.mousegrabber.run(function (mouse)
+function mouse.client.dragtotag.border(c)
+    capi.mousegrabber.run(function (_mouse)
                                 local button_down = false
-                                for _, v in ipairs(mouse.buttons) do
+                                for _, v in ipairs(_mouse.buttons) do
                                     if v then button_down = true end
                                 end
                                 local wa = capi.screen[c.screen].workarea
-                                if mouse.x >= wa.x + wa.width then
+                                if _mouse.x >= wa.x + wa.width then
                                     capi.mouse.coords({ x = wa.x + wa.width - 1 })
-                                elseif mouse.x <= wa.x then
+                                elseif _mouse.x <= wa.x then
                                     capi.mouse.coords({ x = wa.x + 1 })
                                 end
                                 if not button_down then
@@ -267,11 +268,11 @@ function client.dragtotag.border(c)
                                             idx = i
                                         end
                                     end
-                                    if mouse.x > wa.x + wa.width - 10 then
+                                    if _mouse.x > wa.x + wa.width - 10 then
                                         local newtag = tags[util.cycle(#tags, idx + 1)]
                                         aclient.movetotag(newtag, c)
                                         tag.viewnext()
-                                    elseif mouse.x < wa.x + 10 then
+                                    elseif _mouse.x < wa.x + 10 then
                                         local newtag = tags[util.cycle(#tags, idx - 1)]
                                         aclient.movetotag(newtag, c)
                                         tag.viewprev()
@@ -284,8 +285,8 @@ end
 
 --- Move the wibox under the cursor
 --@param w The wibox to move, or none to use that under the pointer
-function wibox.move(w)
-    local w = w or wibox_under_pointer()
+function mouse.wibox.move(w)
+    local w = w or mouse.wibox_under_pointer()
     if not w then return end
 
     local offset = {
@@ -293,7 +294,7 @@ function wibox.move(w)
         y = w.y - capi.mouse.coords().y
     }
 
-    capi.mousegrabber.run(function (mouse)
+    capi.mousegrabber.run(function (_mouse)
         local button_down = false
         if awibox.get_position(w) == "floating" then
             w.x = capi.mouse.coords().x + offset.x
@@ -312,7 +313,7 @@ function wibox.move(w)
             end
             w.screen = capi.mouse.screen
         end
-        for k, v in ipairs(mouse.buttons) do
+        for k, v in ipairs(_mouse.buttons) do
             if v then button_down = true end
         end
         if not button_down then
@@ -327,7 +328,7 @@ end
 -- @param corner The corner to use: auto, top_left, top_right, bottom_left,
 -- bottom_right. Default is auto, and auto find the nearest corner.
 -- @return Actual used corner and x and y coordinates.
-function client.corner(c, corner)
+function mouse.client.corner(c, corner)
     local c = c or capi.client.focus
     if not c then return end
 
@@ -369,7 +370,7 @@ function client.corner(c, corner)
 end
 
 local function client_resize_magnifier(c, corner)
-    local corner, x, y = client.corner(c, corner)
+    local corner, x, y = mouse.client.corner(c, corner)
     capi.mouse.coords({ x = x, y = y })
 
     local wa = capi.screen[c.screen].workarea
@@ -377,11 +378,11 @@ local function client_resize_magnifier(c, corner)
     local center_y = wa.y + wa.height / 2
     local maxdist_pow = (wa.width^2 + wa.height^2) / 4
 
-    capi.mousegrabber.run(function (mouse)
-                              for k, v in ipairs(mouse.buttons) do
+    capi.mousegrabber.run(function (_mouse)
+                              for k, v in ipairs(_mouse.buttons) do
                                   if v then
-                                      local dx = center_x - mouse.x
-                                      local dy = center_y - mouse.y
+                                      local dx = center_x - _mouse.x
+                                      local dy = center_y - _mouse.y
                                       local dist = dx^2 + dy^2
 
                                       -- New master width factor
@@ -439,11 +440,11 @@ local function client_resize_tiled(c, lay)
         capi.mouse.coords({ y = wa.y + wa.height * (1 - mwfact), x= g.x + offset })
     end
 
-    capi.mousegrabber.run(function (mouse)
-                              for k, v in ipairs(mouse.buttons) do
+    capi.mousegrabber.run(function (_mouse)
+                              for k, v in ipairs(_mouse.buttons) do
                                   if v then
-                                      local fact_x = (mouse.x - wa.x) / wa.width
-                                      local fact_y = (mouse.y - wa.y) / wa.height
+                                      local fact_x = (_mouse.x - wa.x) / wa.width
+                                      local fact_y = (_mouse.y - wa.y) / wa.height
                                       local mwfact
 
                                       local g = c:geometry()
@@ -453,15 +454,15 @@ local function client_resize_tiled(c, lay)
                                       local wfact
                                       local wfact_x, wfact_y
                                       if (g.y+g.height+15) > (wa.y+wa.height) then
-                                          wfact_y = (g.y + g.height - mouse.y) / wa.height
+                                          wfact_y = (g.y + g.height - _mouse.y) / wa.height
                                       else
-                                          wfact_y = (mouse.y - g.y) / wa.height
+                                          wfact_y = (_mouse.y - g.y) / wa.height
                                       end
 
                                       if (g.x+g.width+15) > (wa.x+wa.width) then
-                                          wfact_x = (g.x + g.width - mouse.x) / wa.width
+                                          wfact_x = (g.x + g.width - _mouse.x) / wa.width
                                       else
-                                          wfact_x = (mouse.x - g.x) / wa.width
+                                          wfact_x = (_mouse.x - g.x) / wa.width
                                       end
 
 
@@ -489,14 +490,14 @@ local function client_resize_tiled(c, lay)
 end
 
 local function client_resize_floating(c, corner, fixed_x, fixed_y)
-    local corner, x, y = client.corner(c, corner)
+    local corner, x, y = mouse.client.corner(c, corner)
     local g = c:geometry()
 
     -- Warp mouse pointer
     capi.mouse.coords({ x = x, y = y })
 
-    capi.mousegrabber.run(function (mouse)
-                              for k, v in ipairs(mouse.buttons) do
+    capi.mousegrabber.run(function (_mouse)
+                              for k, v in ipairs(_mouse.buttons) do
                                   if v then
                                       -- Ignore screen changes
                                       if not aclient.floating.get(c)
@@ -506,21 +507,21 @@ local function client_resize_floating(c, corner, fixed_x, fixed_y)
 
                                       local ng
                                       if corner == "bottom_right" then
-                                          ng = { width = mouse.x - g.x,
-                                                 height = mouse.y - g.y }
+                                          ng = { width = _mouse.x - g.x,
+                                                 height = _mouse.y - g.y }
                                       elseif corner == "bottom_left" then
-                                          ng = { x = mouse.x,
-                                                 width = (g.x + g.width) - mouse.x,
-                                                 height = mouse.y - g.y }
+                                          ng = { x = _mouse.x,
+                                                 width = (g.x + g.width) - _mouse.x,
+                                                 height = _mouse.y - g.y }
                                       elseif corner == "top_left" then
-                                          ng = { x = mouse.x,
-                                                 width = (g.x + g.width) - mouse.x,
-                                                 y = mouse.y,
-                                                 height = (g.y + g.height) - mouse.y }
+                                          ng = { x = _mouse.x,
+                                                 width = (g.x + g.width) - _mouse.x,
+                                                 y = _mouse.y,
+                                                 height = (g.y + g.height) - _mouse.y }
                                       else
-                                          ng = { width = mouse.x - g.x,
-                                                 y = mouse.y,
-                                                 height = (g.y + g.height) - mouse.y }
+                                          ng = { width = _mouse.x - g.x,
+                                                 y = _mouse.y,
+                                                 height = (g.y + g.height) - _mouse.y }
                                       end
                                       if ng.width <= 0 then ng.width = nil end
                                       if ng.height <= 0 then ng.height = nil end
@@ -554,7 +555,7 @@ end
 --- Resize a client.
 -- @param c The client to resize, or the focused one by default.
 -- @param corner The corner to grab on resize. Auto detected by default.
-function client.resize(c, corner)
+function mouse.client.resize(c, corner)
     local c = c or capi.client.focus
 
     if not c then return end
@@ -587,5 +588,7 @@ end
 
 -- Set the cursor at startup
 capi.root.cursor("left_ptr")
+
+return mouse
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
