@@ -80,7 +80,7 @@ function draw(graph, wibox, cr, width, height)
     -- Draw the background first
     cr:rectangle(border_width, border_width,
                  width - (2 * border_width),
-                 height)
+                 height - (2 * border_width))
     cr:set_source(color(data[graph].background_color or "#000000aa"))
     cr:fill()
 
@@ -99,16 +99,16 @@ function draw(graph, wibox, cr, width, height)
 
         for i = 0, width - (2 * border_width) do
             local rel_i = 0
-            local rel_x = border_width + i
+            local rel_x = border_width + i + 0.5
 
             if data[graph].stack_colors then
                 for idx, col in ipairs(data[graph].stack_colors) do
                     local stack_values = values[idx]
                     if stack_values and i < #stack_values then
                         local value = stack_values[#stack_values - i] + rel_i
-                        cr:move_to(rel_x, border_width - 0.5 +
+                        cr:move_to(rel_x, border_width +
                                           (height - 2 * border_width) * (1 - (rel_i / max_value)))
-                        cr:line_to(rel_x, border_width - 0.5 +
+                        cr:line_to(rel_x, border_width +
                                           (height - 2 * border_width) * (1 - (value / max_value)))
                         cr:set_source(color(col or "#ff0000"))
                         cr:stroke()
@@ -133,9 +133,9 @@ function draw(graph, wibox, cr, width, height)
                 local value = values[#values - i]
                 if value >= 0 then
                     value = value / max_value
-                    cr:move_to(border_width + i - 0.5, border_width - 0.5 +
+                    cr:move_to(border_width + i + 0.5, border_width +
                                   (height - 2 * border_width) * (1 - value))
-                    cr:line_to(border_width + i - 0.5, border_width +
+                    cr:line_to(border_width + i + 0.5, border_width +
                                   (height - 2 * border_width))
                 end
             end
@@ -184,7 +184,7 @@ local function add_value(graph, value, group)
     table.insert(values, value)
 
     local border_width = 0
-    if data[graph].border then border_width = 2 end
+    if data[graph].border_color then border_width = 2 end
 
     -- Ensure we never have more data than we can draw
     while #values > data[graph].width - border_width do
