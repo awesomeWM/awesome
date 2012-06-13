@@ -4,17 +4,20 @@
 -- @release @AWESOME_VERSION@
 ---------------------------------------------------------------------------
 
-require("awful.widget.taglist")
-require("awful.widget.tasklist")
-require("awful.widget.button")
-require("awful.widget.launcher")
-require("awful.widget.prompt")
-require("awful.widget.progressbar")
-require("awful.widget.graph")
-require("awful.widget.layoutbox")
-require("awful.widget.textclock")
-
 --- Widget module for awful
-module("awful.widget")
+-- awful.widget
+
+return
+{
+    taglist = require("awful.widget.taglist");
+    tasklist = require("awful.widget.tasklist");
+    button = require("awful.widget.button");
+    launcher = require("awful.widget.launcher");
+    prompt = require("awful.widget.prompt");
+    progressbar = require("awful.widget.progressbar");
+    graph = require("awful.widget.graph");
+    layoutbox = require("awful.widget.layoutbox");
+    textclock = require("awful.widget.textclock");
+}
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

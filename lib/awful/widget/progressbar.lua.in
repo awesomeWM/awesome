@@ -11,7 +11,8 @@ local base = require("wibox.widget.base")
 local color = require("gears.color")
 
 --- A progressbar widget.
-module("awful.widget.progressbar")
+-- awful.widget.progressbar
+local progressbar = { mt = {} }
 
 local data = setmetatable({}, { __mode = "k" })
 
@@ -69,7 +70,7 @@ local properties = { "width", "height", "border_color",
                      "vertical", "value", "max_value",
                      "ticks", "ticks_gap", "ticks_size" }
 
-function draw(pbar, wibox, cr, width, height)
+function progressbar.draw(pbar, wibox, cr, width, height)
     local ticks_gap = data[pbar].ticks_gap or 1
     local ticks_size = data[pbar].ticks_size or 4
 
@@ -152,14 +153,14 @@ function draw(pbar, wibox, cr, width, height)
     end
 end
 
-function fit(pbar, width, height)
+function progressbar.fit(pbar, width, height)
     return data[pbar].width, data[pbar].height
 end
 
 --- Set the progressbar value.
 -- @param pbar The progress bar.
 -- @param value The progress bar value between 0 and 1.
-function set_value(pbar, value)
+function progressbar.set_value(pbar, value)
     local value = value or 0
     local max_value = data[pbar].max_value
     data[pbar].value = math.min(max_value, math.max(0, value))
@@ -170,25 +171,25 @@ end
 --- Set the progressbar height.
 -- @param progressbar The progressbar.
 -- @param height The height to set.
-function set_height(progressbar, height)
-    data[progressbar].height = height
-    progressbar:emit_signal("widget::updated")
-    return progressbar
+function progressbar.set_height(_progressbar, height)
+    data[_progressbar].height = height
+    _progressbar:emit_signal("widget::updated")
+    return _progressbar
 end
 
 --- Set the progressbar width.
 -- @param progressbar The progressbar.
 -- @param width The width to set.
-function set_width(progressbar, width)
-    data[progressbar].width = width
-    progressbar:emit_signal("widget::updated")
-    return progressbar
+function progressbar.set_width(_progressbar, width)
+    data[_progressbar].width = width
+    _progressbar:emit_signal("widget::updated")
+    return _progressbar
 end
 
 -- Build properties function
 for _, prop in ipairs(properties) do
-    if not _M["set_" .. prop] then
-        _M["set_" .. prop] = function(pbar, value)
+    if not progressbar["set_" .. prop] then
+        progressbar["set_" .. prop] = function(pbar, value)
             data[pbar][prop] = value
             pbar:emit_signal("widget::updated")
             return pbar
@@ -200,7 +201,7 @@ end
 -- @param args Standard widget() arguments. You should add width and height
 -- key to set progressbar geometry.
 -- @return A progressbar widget.
-function new(args)
+function progressbar.new(args)
     local args = args or {}
     local width = args.width or 100
     local height = args.height or 20
@@ -213,15 +214,19 @@ function new(args)
 
     -- Set methods
     for _, prop in ipairs(properties) do
-        pbar["set_" .. prop] = _M["set_" .. prop]
+        pbar["set_" .. prop] = progressbar["set_" .. prop]
     end
 
-    pbar.draw = draw
-    pbar.fit = fit
+    pbar.draw = progressbar.draw
+    pbar.fit = progressbar.fit
 
     return pbar
 end
 
-setmetatable(_M, { __call = function(_, ...) return new(...) end })
+function progressbar.mt:__call(...)
+    return progressbar.new(...)
+end
+
+return setmetatable(progressbar, progressbar.mt)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

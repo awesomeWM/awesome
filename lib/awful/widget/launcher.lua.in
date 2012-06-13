@@ -9,13 +9,14 @@ local util = require("awful.util")
 local wbutton = require("awful.widget.button")
 local button = require("awful.button")
 
-module("awful.widget.launcher")
+-- awful.widget.launcher
+local launcher = { mt = {} }
 
 --- Create a button widget which will launch a command.
 -- @param args Standard widget table arguments, plus image for the image path
 -- and command for the command to run on click, or either menu to create menu.
 -- @return A launcher widget.
-function new(args)
+function launcher.new(args)
     if not args.command and not args.menu then return end
     local w = wbutton(args)
     if not w then return end
@@ -31,6 +32,10 @@ function new(args)
     return w
 end
 
-setmetatable(_M, { __call = function (_, ...) return new(...) end })
+function launcher.mt:__call(...)
+    return launcher.new(...)
+end
+
+return setmetatable(launcher, launcher.mt)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

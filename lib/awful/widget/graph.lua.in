@@ -13,7 +13,8 @@ local color = require("gears.color")
 local base = require("wibox.widget.base")
 
 --- A graph widget.
-module("awful.widget.graph")
+-- awful.widget.graph
+local graph = { mt = {} }
 
 local data = setmetatable({}, { __mode = "k" })
 
@@ -66,27 +67,27 @@ local properties = { "width", "height", "border_color", "stack",
                      "stack_colors", "color", "background_color",
                      "max_value", "scale" }
 
-function draw(graph, wibox, cr, width, height)
-    local max_value = data[graph].max_value
-    local values = data[graph].values
+function graph.draw(_graph, wibox, cr, width, height)
+    local max_value = data[_graph].max_value
+    local values = data[_graph].values
 
     cr:set_line_width(1)
 
     -- Draw the background first
-    cr:set_source(color(data[graph].background_color or "#000000aa"))
+    cr:set_source(color(data[_graph].background_color or "#000000aa"))
     cr:paint()
 
     -- Account for the border width
     cr:save()
-    if data[graph].border_color then
+    if data[_graph].border_color then
         cr:translate(1, 1)
         width, height = width - 2, height - 2
     end
 
     -- Draw a stacked graph
-    if data[graph].stack then
+    if data[_graph].stack then
 
-        if data[graph].scale then
+        if data[_graph].scale then
             for _, v in ipairs(values) do
                 for __, sv in ipairs(v) do
                     if sv > max_value then
@@ -100,8 +101,8 @@ function draw(graph, wibox, cr, width, height)
             local rel_i = 0
             local rel_x = i + 0.5
 
-            if data[graph].stack_colors then
-                for idx, col in ipairs(data[graph].stack_colors) do
+            if data[_graph].stack_colors then
+                for idx, col in ipairs(data[_graph].stack_colors) do
                     local stack_values = values[idx]
                     if stack_values and i < #stack_values then
                         local value = stack_values[#stack_values - i] + rel_i
@@ -115,7 +116,7 @@ function draw(graph, wibox, cr, width, height)
             end
         end
     else
-        if data[graph].scale then
+        if data[_graph].scale then
             for _, v in ipairs(values) do
                 if v > max_value then
                     max_value = v
@@ -134,7 +135,7 @@ function draw(graph, wibox, cr, width, height)
                     cr:line_to(i + 0.5, height)
                 end
             end
-            cr:set_source(color(data[graph].color or "#ff0000"))
+            cr:set_source(color(data[_graph].color or "#ff0000"))
             cr:stroke()
         end
 
@@ -144,88 +145,88 @@ function draw(graph, wibox, cr, width, height)
     cr:restore()
 
     -- Draw the border last so that it overlaps already drawn values
-    if data[graph].border_color then
+    if data[_graph].border_color then
         -- We decremented these by two above
         width, height = width + 2, height + 2
 
         -- Draw the border
         cr:rectangle(0.5, 0.5, width - 1, height - 1)
-        cr:set_source(color(data[graph].border_color or "#ffffff"))
+        cr:set_source(color(data[_graph].border_color or "#ffffff"))
         cr:stroke()
     end
 end
 
-function fit(graph, width, height)
-    return data[graph].width, data[graph].height
+function graph.fit(_graph, width, height)
+    return data[_graph].width, data[_graph].height
 end
 
 --- Add a value to the graph
 -- @param graph The graph.
 -- @param value The value between 0 and 1.
 -- @param group The stack color group index.
-local function add_value(graph, value, group)
-    if not graph then return end
+local function add_value(_graph, value, group)
+    if not _graph then return end
 
     local value = value or 0
-    local values = data[graph].values
-    local max_value = data[graph].max_value
+    local values = data[_graph].values
+    local max_value = data[_graph].max_value
     value = math.max(0, value)
-    if not data[graph].scale then
+    if not data[_graph].scale then
         value = math.min(max_value, value)
     end
 
-    if data[graph].stack and group then
-        if not  data[graph].values[group]
-        or type(data[graph].values[group]) ~= "table"
+    if data[_graph].stack and group then
+        if not  data[_graph].values[group]
+        or type(data[_graph].values[group]) ~= "table"
         then
-            data[graph].values[group] = {}
+            data[_graph].values[group] = {}
         end
-        values = data[graph].values[group]
+        values = data[_graph].values[group]
     end
     table.insert(values, value)
 
     local border_width = 0
-    if data[graph].border_color then border_width = 2 end
+    if data[_graph].border_color then border_width = 2 end
 
     -- Ensure we never have more data than we can draw
-    while #values > data[graph].width - border_width do
+    while #values > data[_graph].width - border_width do
         table.remove(values, 1)
     end
 
-    graph:emit_signal("widget::updated")
-    return graph
+    _graph:emit_signal("widget::updated")
+    return _graph
 end
 
 
 --- Set the graph height.
 -- @param graph The graph.
 -- @param height The height to set.
-function set_height(graph, height)
+function graph.set_height(_graph, height)
     if height >= 5 then
-        data[graph].height = height
-        graph:emit_signal("widget::updated")
+        data[_graph].height = height
+        _graph:emit_signal("widget::updated")
     end
-    return graph
+    return _graph
 end
 
 --- Set the graph width.
 -- @param graph The graph.
 -- @param width The width to set.
-function set_width(graph, width)
+function graph.set_width(_graph, width)
     if width >= 5 then
-        data[graph].width = width
-        graph:emit_signal("widget::updated")
+        data[_graph].width = width
+        _graph:emit_signal("widget::updated")
     end
-    return graph
+    return _graph
 end
 
 -- Build properties function
 for _, prop in ipairs(properties) do
-    if not _M["set_" .. prop] then
-        _M["set_" .. prop] = function(graph, value)
-            data[graph][prop] = value
-            graph:emit_signal("widget::updated")
-            return graph
+    if not graph["set_" .. prop] then
+        graph["set_" .. prop] = function(_graph, value)
+            data[_graph][prop] = value
+            _graph:emit_signal("widget::updated")
+            return _graph
         end
     end
 end
@@ -234,7 +235,7 @@ end
 -- @param args Standard widget() arguments. You should add width and height
 -- key to set graph geometry.
 -- @return A graph widget.
-function new(args)
+function graph.new(args)
     local args = args or {}
 
     local width = args.width or 100
@@ -242,22 +243,26 @@ function new(args)
 
     if width < 5 or height < 5 then return end
 
-    local graph = base.make_widget()
+    local _graph = base.make_widget()
 
-    data[graph] = { width = width, height = height, values = {}, max_value = 1 }
+    data[_graph] = { width = width, height = height, values = {}, max_value = 1 }
 
     -- Set methods
-    graph.add_value = add_value
-    graph.draw = draw
-    graph.fit = fit
+    _graph.add_value = add_value
+    _graph.draw = graph.draw
+    _graph.fit = graph.fit
 
     for _, prop in ipairs(properties) do
-        graph["set_" .. prop] = _M["set_" .. prop]
+        _graph["set_" .. prop] = _M["set_" .. prop]
     end
 
-    return graph
+    return _graph
 end
 
-setmetatable(_M, { __call = function(_, ...) return new(...) end })
+function graph.mt:__call(...)
+    return graph.new(...)
+end
+
+return setmetatable(graph, graph.mt)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

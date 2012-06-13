@@ -21,11 +21,11 @@ local fixed = require("wibox.layout.fixed")
 local surface = require("gears.surface")
 
 --- Taglist widget module for awful
-module("awful.widget.taglist")
+-- awful.widget.taglist
+local taglist = { mt = {} }
+taglist.filter = {}
 
-filter = {}
-
-function taglist_label(t, args)
+function taglist.taglist_label(t, args)
     if not args then args = {} end
     local theme = beautiful.get()
     local fg_focus = args.fg_focus or theme.taglist_fg_focus or theme.fg_focus
@@ -108,7 +108,7 @@ local function taglist_update(s, w, buttons, filter, data, style)
         end
     end
 
-    local function label(c) return taglist_label(c, style) end
+    local function label(c) return taglist.taglist_label(c, style) end
 
     common.list_update(w, buttons, label, data, tags)
 end
@@ -116,7 +116,7 @@ end
 --- Get the tag object the given widget appears on.
 -- @param widget The widget the look for.
 -- @return The tag object.
-function gettag(widget)
+function taglist.gettag(widget)
     return common.tagwidgets[widget]
 end
 
@@ -133,7 +133,7 @@ end
 -- squares_unsel Optional: a user provided image for unselected squares.
 -- squares_resize Optional: true or false to resize squares.
 -- font The font.
-function new(screen, filter, buttons, style)
+function taglist.new(screen, filter, buttons, style)
     local w = fixed.horizontal()
 
     local data = setmetatable({}, { __mode = 'k' })
@@ -172,7 +172,7 @@ end
 -- @param t The tag.
 -- @param screen The screen we are drawing on.
 -- @return true if t is not empty, else false
-function filter.noempty(t, args)
+function taglist.filter.noempty(t, args)
     return #t:clients() > 0 or t.selected
 end
 
@@ -180,10 +180,14 @@ end
 -- @param t The tag.
 -- @param screen The screen we are drawing on.
 -- @return true
-function filter.all(t, args)
+function taglist.filter.all(t, args)
     return true
 end
 
-setmetatable(_M, { __call = function(_, ...) return new(...) end })
+function taglist.mt:__call(...)
+    return taglist.new(...)
+end
+
+return setmetatable(taglist, taglist.mt)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

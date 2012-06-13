@@ -18,10 +18,11 @@ local tag = require("awful.tag")
 local flex = require("wibox.layout.flex")
 
 --- Tasklist widget module for awful
-module("awful.widget.tasklist")
+-- awful.widget.tasklist
+local tasklist = { mt = {} }
 
 -- Public structures
-filter = {}
+tasklist.filter = {}
 
 local function tasklist_label(c, args)
     if not args then args = {} end
@@ -110,7 +111,7 @@ end
 -- maximized_horizontal Symbol to use for clients that have been horizontally maximized.
 -- maximized_vertical Symbol to use for clients that have been vertically maximized.
 -- font The font.
-function new(screen, filter, buttons, style)
+function tasklist.new(screen, filter, buttons, style)
     local w = flex.horizontal()
 
     local data = setmetatable({}, { __mode = 'k' })
@@ -144,7 +145,7 @@ end
 -- @param c The client.
 -- @param screen The screen we are drawing on.
 -- @return true
-function filter.allscreen(c, screen)
+function tasklist.filter.allscreen(c, screen)
     return true
 end
 
@@ -152,7 +153,7 @@ end
 -- @param c The client.
 -- @param screen The screen we are drawing on.
 -- @return true if c is on screen, false otherwise
-function filter.alltags(c, screen)
+function tasklist.filter.alltags(c, screen)
     -- Only print client on the same screen as this widget
     return c.screen == screen
 end
@@ -161,7 +162,7 @@ end
 -- @param c The client.
 -- @param screen The screen we are drawing on.
 -- @return true if c is in a selected tag on screen, false otherwise
-function filter.currenttags(c, screen)
+function tasklist.filter.currenttags(c, screen)
     -- Only print client on the same screen as this widget
     if c.screen ~= screen then return false end
     -- Include sticky client too
@@ -184,7 +185,7 @@ end
 -- @param c The client.
 -- @param screen The screen we are drawing on.
 -- @return true if c is in a selected tag on screen and is minimized, false otherwise
-function filter.minimizedcurrenttags(c, screen)
+function tasklist.filter.minimizedcurrenttags(c, screen)
     -- Only print client on the same screen as this widget
     if c.screen ~= screen then return false end
     -- Include sticky client
@@ -210,11 +211,15 @@ end
 -- @param c The client.
 -- @param screen The screen we are drawing on.
 -- @return true if c is focused on screen, false otherwise
-function filter.focused(c, screen)
+function tasklist.filter.focused(c, screen)
     -- Only print client on the same screen as this widget
     return c.screen == screen and capi.client.focus == c
 end
 
-setmetatable(_M, { __call = function(_, ...) return new(...) end })
+function tasklist.mt:__call(...)
+    return tasklist.new(...)
+end
+
+return setmetatable(tasklist, tasklist.mt)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

@@ -13,7 +13,8 @@ local beautiful = require("beautiful")
 local imagebox = require("wibox.widget.imagebox")
 
 --- Layoutbox widget.
-module("awful.widget.layoutbox")
+-- awful.widget.layoutbox
+local layoutbox = { mt = {} }
 
 local function update(w, screen)
     local layout = layout.getname(layout.get(screen))
@@ -24,7 +25,7 @@ end
 -- symbol of the current tag.
 -- @param screen The screen number that the layout will be represented for.
 -- @return An imagebox widget configured as a layoutbox.
-function new(screen)
+function layoutbox.new(screen)
     local screen = screen or 1
     local w = imagebox()
     update(w, screen)
@@ -39,6 +40,10 @@ function new(screen)
     return w
 end
 
-setmetatable(_M, { __call = function(_, ...) return new(...) end })
+function layoutbox.mt:__call(...)
+    return layoutbox.new(...)
+end
+
+return setmetatable(layoutbox, layoutbox.mt)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
