@@ -169,7 +169,7 @@ function generic(text, cur_pos, ncomp, keywords)
     -- if no text had been typed yet, then we could start cycling around all
     -- keywords with out filtering and move the cursor at the end of keyword
     if text == nil or #text == 0 then
-        ncomp = math.mod(ncomp - 1, #keywords) + 1
+        ncomp = math.fmod(ncomp - 1, #keywords) + 1
         return keywords[ncomp], #keywords[ncomp] + 2
     end
 
@@ -187,7 +187,7 @@ function generic(text, cur_pos, ncomp, keywords)
     end
 
     --  cycle around all matches
-    ncomp = math.mod(ncomp - 1, #matches) + 1
+    ncomp = math.fmod(ncomp - 1, #matches) + 1
     return matches[ncomp], #matches[ncomp] + 1, matches
 end
 

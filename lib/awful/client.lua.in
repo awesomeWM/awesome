@@ -735,7 +735,7 @@ function idx(c)
     -- minimum number of clients per column
     local percol = math.floor(nother / ncol)
     -- number of columns with an extra client
-    local overcol = math.mod(nother, ncol)
+    local overcol = math.fmod(nother, ncol)
     -- number of columns filled with [percol] clients
     local regcol = ncol - overcol
 
