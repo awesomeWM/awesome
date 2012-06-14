@@ -5,9 +5,12 @@
 ---------------------------------------------------------------------------
 
 --- Dummy function for floating layout
-module("awful.layout.suit.floating")
+-- awful.layout.suit.floating
+local floating = {}
 
-function arrange()
+function floating.arrange()
 end
 
-name = "floating"
+floating.name = "floating"
+
+return floating

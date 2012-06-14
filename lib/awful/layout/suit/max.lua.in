@@ -9,7 +9,8 @@ local pairs = pairs
 local client = require("awful.client")
 
 --- Maximized and fullscreen layouts module for awful
-module("awful.layout.suit.max")
+-- awful.layout.suit.max
+local max = {}
 
 local function fmax(p, fs)
     -- Fullscreen?
@@ -33,15 +34,17 @@ end
 
 --- Maximized layout.
 -- @param screen The screen to arrange.
-name = "max"
-function arrange(p)
+max.name = "max"
+function max.arrange(p)
     return fmax(p, false)
 end
 
 --- Fullscreen layout.
 -- @param screen The screen to arrange.
-fullscreen = {}
-fullscreen.name = "fullscreen"
-function fullscreen.arrange(p)
+max.fullscreen = {}
+max.fullscreen.name = "fullscreen"
+function max.fullscreen.arrange(p)
     return fmax(p, true)
 end
+
+return max

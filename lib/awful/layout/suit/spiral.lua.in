@@ -8,9 +8,10 @@
 -- Grab environment we need
 local ipairs = ipairs
 
-module("awful.layout.suit.spiral")
+-- awful.layout.suit.spiral
+local spiral = {}
 
-local function spiral(p, spiral)
+local function do_spiral(p, _spiral)
     local wa = p.workarea
     local cls = p.clients
     local n = #cls
@@ -24,17 +25,17 @@ local function spiral(p, spiral)
             end
         end
 
-        if k % 4 == 0 and spiral then
+        if k % 4 == 0 and _spiral then
             wa.x = wa.x - wa.width
         elseif k % 2 == 0 or
-            (k % 4 == 3 and k < n and spiral) then
+            (k % 4 == 3 and k < n and _spiral) then
             wa.x = wa.x + wa.width
         end
 
-        if k % 4 == 1 and k ~= 1 and spiral then
+        if k % 4 == 1 and k ~= 1 and _spiral then
             wa.y = wa.y - wa.height
         elseif k % 2 == 1 and k ~= 1 or
-            (k % 4 == 0 and k < n and spiral) then
+            (k % 4 == 0 and k < n and _spiral) then
             wa.y = wa.y + wa.height
         end
 
@@ -49,16 +50,18 @@ local function spiral(p, spiral)
 end
 
 --- Dwindle layout
-dwindle = {}
-dwindle.name = "dwindle"
-function dwindle.arrange(p)
-    return spiral(p, false)
+spiral.dwindle = {}
+spiral.dwindle.name = "dwindle"
+function spiral.dwindle.arrange(p)
+    return do_spiral(p, false)
 end
 
 --- Spiral layout
-name = "spiral"
-function arrange(p)
-    return spiral(p, true)
+spiral.name = "spiral"
+function spiral.arrange(p)
+    return do_spiral(p, true)
 end
+
+return spiral
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

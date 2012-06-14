@@ -16,9 +16,10 @@ local capi =
 local client = require("awful.client")
 
 --- Magnifier layout module for awful
-module("awful.layout.suit.magnifier")
+-- awful.layout.suit.magnifier
+local magnifier = {}
 
-function arrange(p)
+function magnifier.arrange(p)
     -- Fullscreen?
     local area = p.workarea
     local cls = p.clients
@@ -102,4 +103,6 @@ function arrange(p)
     end
 end
 
-name = "magnifier"
+magnifier.name = "magnifier"
+
+return magnifier

@@ -9,9 +9,10 @@ local ipairs = ipairs
 local math = math
 
 --- Fair layouts module for awful
-module("awful.layout.suit.fair")
+-- awful.layout.suit.fair
+local fair = {}
 
-local function fair(p, orientation)
+local function do_fair(p, orientation)
     local wa = p.workarea
     local cls = p.clients
 
@@ -61,15 +62,17 @@ end
 
 --- Horizontal fair layout.
 -- @param screen The screen to arrange.
-horizontal = {}
-horizontal.name = "fairh"
-function horizontal.arrange(p)
-    return fair(p, "east")
+fair.horizontal = {}
+fair.horizontal.name = "fairh"
+function fair.horizontal.arrange(p)
+    return do_fair(p, "east")
 end
 
 -- Vertical fair layout.
 -- @param screen The screen to arrange.
-name = "fairv"
-function arrange(p)
-    return fair(p, "south")
+fair.name = "fairv"
+function fair.arrange(p)
+    return do_fair(p, "south")
 end
+
+return fair
