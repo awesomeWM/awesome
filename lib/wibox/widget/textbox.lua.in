@@ -12,7 +12,6 @@ local cairo = lgi.cairo
 local Pango = lgi.Pango
 local PangoCairo = lgi.PangoCairo
 local type = type
-local unpack = unpack
 local setmetatable = setmetatable
 local pairs = pairs
 local error = error

@@ -7,8 +7,8 @@
 local setmetatable = setmetatable
 local string = string
 local table = table
+local unpack = unpack or table.unpack -- v5.1: unpack, v5.2: table.unpack
 local tonumber = tonumber
-local unpack = unpack
 local ipairs = ipairs
 local pairs = pairs
 local type = type

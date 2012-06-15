@@ -10,8 +10,8 @@ local loadstring = loadstring
 local tostring = tostring
 local ipairs = ipairs
 local table = table
+local unpack = unpack or table.unpack -- v5.1: unpack, v5.2: table.unpack
 local dbus = dbus
-local unpack = unpack
 local type = type
 
 --- Remote control module allowing usage of awesome-client.
