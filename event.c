@@ -804,9 +804,11 @@ xerror(xcb_generic_error_t *e)
            && e->error_code == XCB_MATCH))
         return;
 
-    warn("X error: request=%s, error=%s",
+    warn("X error: request=%s (major %d, minor %d), error=%s (%d)",
          xcb_event_get_request_label(e->major_code),
-         xcb_event_get_error_label(e->error_code));
+         e->major_code, e->minor_code,
+         xcb_event_get_error_label(e->error_code),
+         e->error_code);
 
     return;
 }
