@@ -57,7 +57,7 @@ end
 -- bg: the background color.
 -- fg_focus: the foreground color for focused window.
 -- fg_focus: the background color for focused window.
--- width: the titlebar width
+-- height: the titlebar height
 function add(c, args)
     if not c or (c.type ~= "normal" and c.type ~= "dialog") then return end
     if not args then args = {} end
