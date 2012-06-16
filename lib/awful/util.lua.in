@@ -8,7 +8,7 @@
 local os = os
 local io = io
 local assert = assert
-local loadstring = loadstring
+local load = loadstring or load -- v5.1 - loadstring, v5.2 - load
 local loadfile = loadfile
 local debug = debug
 local pairs = pairs
@@ -108,7 +108,7 @@ end
 --- Eval Lua code.
 -- @return The return value of Lua code.
 function util.eval(s)
-    return assert(loadstring(s))()
+    return assert(load(s))()
 end
 
 local xml_entity_names = { ["'"] = "&apos;", ["\""] = "&quot;", ["<"] = "&lt;", [">"] = "&gt;", ["&"] = "&amp;" };
