@@ -5,9 +5,9 @@
 -------------------------------------------------------------------------
 
 local mouse = mouse
-local wibox = wibox
 local screen = screen
 local timer = timer
+local wibox = require("wibox")
 local a_placement = require("awful.placement")
 local a_wibox = require("awful.wibox")
 local beautiful = require("beautiful")

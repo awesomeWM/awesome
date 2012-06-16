@@ -22,7 +22,7 @@ local function draw(dir, layout, wibox, cr, width, height)
     local size_limit = dir == "y" and height or width
 
     if layout.first then
-        local w, h = width, height
+        local w, h, _ = width, height, nil
         if dir == "y" then
             _, h = layout.first:fit(w, h)
             size_first = h
@@ -34,7 +34,7 @@ local function draw(dir, layout, wibox, cr, width, height)
     end
 
     if layout.third and size_first < size_limit then
-        local w, h, x, y
+        local w, h, x, y, _
         if dir == "y" then
             w, h = width, height - size_first
             _, h = layout.third:fit(w, h)

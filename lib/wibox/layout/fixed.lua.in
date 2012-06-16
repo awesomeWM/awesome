@@ -25,7 +25,7 @@ function fixed.draw_fixed(dir, widgets, fill_space, wibox, cr, width, height)
     local pos = 0
 
     for k, v in pairs(widgets) do
-        local x, y, w, h
+        local x, y, w, h, _
         local in_dir
         if dir == "y" then
             x, y = 0, pos

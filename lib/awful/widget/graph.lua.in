@@ -253,7 +253,7 @@ function graph.new(args)
     _graph.fit = graph.fit
 
     for _, prop in ipairs(properties) do
-        _graph["set_" .. prop] = _M["set_" .. prop]
+        _graph["set_" .. prop] = graph["set_" .. prop]
     end
 
     return _graph
