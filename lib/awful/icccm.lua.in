@@ -102,7 +102,7 @@ local function apply_size_hints(c)
 
     -- Handle the size increment
     if hints.width_inc and hints.width_inc > 0 then
-        function apply_inc(size, inc, base)
+        local function apply_inc(size, inc, base)
             local i = size - base
             if i < 0 then i = 0 end
             -- Round size down to a multiple of inc, ignoring the base size

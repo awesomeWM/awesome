@@ -29,7 +29,7 @@ local function tile_group(cls, wa, orientation, fact, group)
     end
 
     -- make this more generic (not just width)
-    available = wa[width] - (group.coord - wa[x])
+    local available = wa[width] - (group.coord - wa[x])
 
     -- find our total values
     local total_fact = 0

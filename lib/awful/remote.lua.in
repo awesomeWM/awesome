@@ -22,8 +22,8 @@ if dbus then
         if data.member == "Eval" then
             local f, e = load(code)
             if f then
-                results = { f() }
-                retvals = {}
+                local results = { f() }
+                local retvals = {}
                 for _, v in ipairs(results) do
                     local t = type(v)
                     if t == "boolean" then
