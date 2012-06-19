@@ -375,7 +375,7 @@ end
 -- @param c Optional client, otherwise focused one is used.
 function client.swap.byidx(i, c)
     local sel = c or capi.client.focus
-    local target = next(i, sel)
+    local target = client.next(i, sel)
     if target then
         target:swap(sel)
     end
