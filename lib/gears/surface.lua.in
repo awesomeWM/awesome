@@ -9,7 +9,7 @@ local type = type
 local capi = { awesome = awesome }
 local cairo = require("lgi").cairo
 
-if tonumber(require("lgi.version")) <= 0.5 then
+if tonumber(string.match(require('lgi.version'), '(%d%.%d)')) <= 0.5 then
     error("lgi too old, need at least version 0.7 (not yet released?) or recent git")
 end
 
