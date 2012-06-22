@@ -193,7 +193,7 @@ local function get_offset(screen, position, idx, width, height)
     -- if positioned outside workarea, destroy oldest popup and recalculate
     if v.y + height > ws.y + ws.height or v.y < ws.y then
         idx = idx - 1
-        destroy(notifications[screen][position][1])
+        naughty.destroy(notifications[screen][position][1])
         v = get_offset(screen, position, idx, width, height)
     end
     if not v.idx then v.idx = idx end
@@ -568,7 +568,7 @@ if capi.dbus then
     elseif data.member == "CloseNotification" then
         local obj = getById(appname)
         if obj then
-           destroy(obj)
+           naughty.destroy(obj)
         end
     elseif data.member == "GetServerInfo" or data.member == "GetServerInformation" then
         -- name of notification app, name of vender, version
