@@ -482,7 +482,7 @@ function menu.clients(_menu, args) -- FIXME crude api
     args.items = args.items or {}
     table_merge(args.items, cls_t)
 
-    local m = new(args)
+    local m = menu.new(args)
     m:show(args)
     return m
 end
