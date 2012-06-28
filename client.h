@@ -201,7 +201,6 @@ void client_unfocus(client_t *);
 void client_unfocus_update(client_t *);
 void client_stack_refresh(void);
 bool client_hasproto(client_t *, xcb_atom_t);
-void client_set_focus(client_t *, bool);
 void client_ignore_enterleave_events(void);
 void client_restore_enterleave_events(void);
 void client_class_setup(lua_State *);

@@ -320,21 +320,6 @@ client_hasproto(client_t *c, xcb_atom_t atom)
     return false;
 }
 
-/** Sets focus on window - using xcb_set_input_focus or WM_TAKE_FOCUS
- * \param c Client that should get focus
- * \param set_input_focus Should we call xcb_set_input_focus
- */
-void
-client_set_focus(client_t *c, bool set_input_focus)
-{
-    bool takefocus = client_hasproto(c, WM_TAKE_FOCUS);
-    if(set_input_focus)
-        xcb_set_input_focus(globalconf.connection, XCB_INPUT_FOCUS_PARENT,
-                            c->window, globalconf.timestamp);
-    if(takefocus)
-        window_takefocus(c->window);
-}
-
 /** Prepare banning a client by running all needed lua events.
  * \param c The client.
  */
@@ -447,9 +432,14 @@ client_focus(client_t *c)
     client_unban(c);
 
     if (!c->nofocus)
+    {
         client_focus_update(c);
+        xcb_set_input_focus(globalconf.connection, XCB_INPUT_FOCUS_PARENT,
+                            c->window, globalconf.timestamp);
+    }
 
-    client_set_focus(c, !c->nofocus);
+    if(client_hasproto(c, WM_TAKE_FOCUS))
+        window_takefocus(c->window);
 }
 
 /** Stack a window below.
