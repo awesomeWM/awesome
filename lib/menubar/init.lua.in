@@ -138,7 +138,7 @@ local function menulist_update(query)
 
     -- Add the categories
     if show_categories then
-        for _, v in pairs(menu_gen.all_categories) do
+        for _, v in pairs(menubar.menu_gen.all_categories) do
             v.focused = false
             if not current_category and v.use then
                 if string.match(v.name, nocase(query)) then
@@ -204,7 +204,7 @@ end
 
 --- Refresh menubar's cache by reloading .desktop files.
 function menubar.refresh()
-    menu_entries = menu_gen.generate()
+    menu_entries = menubar.menu_gen.generate()
 end
 
 -- Awful.prompt keypressed callback to be used when the user presses a key.
@@ -291,11 +291,11 @@ end
 -- @return menubar wibox.
 function menubar.get()
     if app_folders then
-        menu_gen.all_menu_dirs = app_folders
+        menubar.menu_gen.all_menu_dirs = app_folders
     end
     menubar.refresh()
     -- Add to each category the name of its key in all_categories
-    for k, v in pairs(menu_gen.all_categories) do
+    for k, v in pairs(menubar.menu_gen.all_categories) do
         v.key = k
     end
     return common_args.w

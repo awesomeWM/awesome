@@ -143,7 +143,7 @@ function utils.parse(file)
 
     -- Look up for a icon.
     if program.Icon then
-        program.icon_path = lookup_icon(program.Icon)
+        program.icon_path = utils.lookup_icon(program.Icon)
     end
 
     -- Split categories into a table. Categories are written in one
@@ -183,7 +183,7 @@ function utils.parse_dir(dir)
     local programs = {}
     local files = io.popen('find '.. dir ..' -maxdepth 1 -name "*.desktop"')
     for file in files:lines() do
-        table.insert(programs, parse(file))
+        table.insert(programs, utils.parse(file))
     end
     return programs
 end

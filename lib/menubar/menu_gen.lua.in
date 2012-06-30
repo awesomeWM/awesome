@@ -79,7 +79,7 @@ end
 -- @return all menu entries.
 function menu_gen.generate()
     -- Update icons for category entries
-    lookup_category_icons()
+    menu_gen.lookup_category_icons()
 
     local result = {}
 
