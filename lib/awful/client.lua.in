@@ -210,7 +210,7 @@ end
 
 --- Get visible and tiled clients
 -- @param screen The screen number, or nil for all screens.
--- @return A tabl with all visible and tiled clients.
+-- @return A table with all visible and tiled clients.
 function client.tiled(screen)
     local clients = client.visible(screen)
     local tclients = {}
