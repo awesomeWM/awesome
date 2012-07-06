@@ -28,7 +28,6 @@ end
 function rotate.draw(layout, wibox, cr, width, height)
     if not layout.widget then return { width = 0, height = 0 } end
 
-    cr:save()
     local dir = layout:get_direction()
 
     if dir == "west" then
@@ -44,10 +43,7 @@ function rotate.draw(layout, wibox, cr, width, height)
 
     -- Since we rotated, we might have to swap width and height.
     -- transform() does that for us.
-    layout.widget:draw(wibox, cr, transform(layout, width, height))
-
-    -- Undo the rotation and translation from above.
-    cr:restore()
+    base.draw_widget(wibox, cr, layout.widget, 0, 0, transform(layout, width, height))
 end
 
 --- Fit this layout into the given area
