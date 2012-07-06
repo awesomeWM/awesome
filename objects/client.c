@@ -322,7 +322,7 @@ client_focus(client_t *c)
     if(!c && globalconf.clients.len && !(c = globalconf.clients.tab[0]))
         return;
 
-    if(!client_maybevisible(c))
+    if(!client_maybevisible(c) || c == globalconf.focus.client)
         return;
 
     client_focus_update(c);
