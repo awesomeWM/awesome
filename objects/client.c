@@ -181,18 +181,27 @@ client_getbyframewin(xcb_window_t w)
     return NULL;
 }
 
+/** Unfocus a client (internal).
+ * \param c The client.
+ */
+static void
+client_unfocus_internal(client_t *c)
+{
+    globalconf.focus.client = NULL;
+
+    luaA_object_push(globalconf.L, c);
+    luaA_object_emit_signal(globalconf.L, -1, "unfocus", 0);
+    lua_pop(globalconf.L, 1);
+}
+
 /** Unfocus a client.
  * \param c The client.
  */
 static void
 client_unfocus(client_t *c)
 {
-    globalconf.focus.client = NULL;
+    client_unfocus_internal(c);
     globalconf.focus.need_update = true;
-
-    luaA_object_push(globalconf.L, c);
-    luaA_object_emit_signal(globalconf.L, -1, "unfocus", 0);
-    lua_pop(globalconf.L, 1);
 }
 
 /** Check if client supports atom a protocol in WM_PROTOCOL.
@@ -281,11 +290,16 @@ client_focus_update(client_t *c)
 
     if(globalconf.focus.client)
     {
-        if (globalconf.focus.client != c)
-            client_unfocus(globalconf.focus.client);
-        else
+        if (globalconf.focus.client == c)
             /* Already focused */
             return;
+
+        /* When we are called due to a FocusIn event (=old focused client
+         * already unfocused), we don't want to cause a SetInputFocus,
+         * because the client which has focus now could be using globally
+         * active input model (or 'no input').
+         */
+        client_unfocus_internal(globalconf.focus.client);
     }
 
     globalconf.focus.client = c;
