@@ -65,6 +65,8 @@ local rules = {}
 -- <p>If a client matches multiple rules, their applied in the order they are
 -- put in this global rules table. If the value of a rule is a string, then the
 -- match function is used to determine if the client matches the rule.</p>
+-- <p>If the value of a property is a function, that function gets called and
+-- function's return value is used for the property.</p>
 --
 -- <p> To match multiple clients to a rule one need to use slightly different 
 -- syntax:
@@ -165,6 +167,9 @@ function rules.apply(c)
     end
 
     for property, value in pairs(props) do
+        if property ~= "focus" and type(value) == "function" then
+            value = value(c)
+        end
         if property == "floating" then
             aclient.floating.set(c, value)
         elseif property == "tag" then
@@ -198,7 +203,7 @@ function rules.apply(c)
 
     -- Do this at last so we do not erase things done by the focus
     -- signal.
-    if props.focus then
+    if props.focus and (type(props.focus) ~= "function" or props.focus(c)) then
         client.focus = c
     end
 end
