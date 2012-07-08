@@ -459,6 +459,11 @@ event_handle_enternotify(xcb_enter_notify_event_t *ev)
 static void
 event_handle_focusin(xcb_focus_in_event_t *ev)
 {
+    if (ev->mode == XCB_NOTIFY_MODE_GRAB
+            || ev->mode == XCB_NOTIFY_MODE_UNGRAB)
+        /* Ignore focus changes due to keyboard grabs */
+        return;
+
     /* Events that we are interested in: */
     switch(ev->detail)
     {
