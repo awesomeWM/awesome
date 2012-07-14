@@ -25,6 +25,7 @@
 #include <unistd.h>
 #include <limits.h>
 #include <fcntl.h>
+#include <errno.h>
 
 #include "common/util.h"
 
@@ -121,6 +122,7 @@ a_exec(const char *cmd)
         shell = "/bin/sh";
 
     execl(shell, shell, "-c", cmd, NULL);
+    fatal("execv() failed: %s", strerror(errno));
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
