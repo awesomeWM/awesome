@@ -256,7 +256,7 @@ signal_fatal(int signum)
 {
     buffer_t buf;
     backtrace_get(&buf);
-    fatal("dumping backtrace\n%s", buf.s);
+    fatal("signal %d, dumping backtrace\n%s", signum, buf.s);
 }
 
 /** Function to exit on some signals.
