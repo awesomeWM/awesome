@@ -39,8 +39,8 @@ module("root")
 -- @name wiboxes
 -- @class function
 
---- Get the wallpaper as a cairo surface.
--- @param -
+--- Get the wallpaper as a cairo surface or set it as a cairo pattern.
+-- @param pattern A cairo pattern as light userdata
 -- @return A cairo surface or nothing.
 -- @name wallpaper
 -- @class function

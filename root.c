@@ -32,6 +32,87 @@
 #include "common/xcursor.h"
 #include "common/xutil.h"
 
+static void
+root_set_wallpaper_pixmap(xcb_connection_t *c, xcb_pixmap_t p)
+{
+    xcb_get_property_cookie_t prop_c;
+    xcb_get_property_reply_t *prop_r;
+    const xcb_screen_t *screen = globalconf.screen;
+
+    /* We now have the pattern painted to the pixmap p. Now turn p into the root
+     * window's background pixmap.
+     */
+    xcb_change_window_attributes(c, screen->root, XCB_CW_BACK_PIXMAP, &p);
+    xcb_clear_area(c, 0, screen->root, 0, 0, 0, 0);
+
+    prop_c = xcb_get_property_unchecked(c, false,
+            screen->root, ESETROOT_PMAP_ID, XCB_ATOM_PIXMAP, 0, 1);
+
+    /* Theoretically, this should be enough to set the wallpaper. However, to
+     * make pseudo-transparency work, clients need a way to get the wallpaper.
+     * You can't query a window's back pixmap, so properties are (ab)used.
+     */
+    xcb_change_property(c, XCB_PROP_MODE_REPLACE, screen->root, _XROOTPMAP_ID, XCB_ATOM_PIXMAP, 32, 1, &p);
+    xcb_change_property(c, XCB_PROP_MODE_REPLACE, screen->root, ESETROOT_PMAP_ID, XCB_ATOM_PIXMAP, 32, 1, &p);
+
+    /* Now make sure that the old wallpaper is freed (but only do this for ESETROOT_PMAP_ID) */
+    prop_r = xcb_get_property_reply(c, prop_c, NULL);
+    if (prop_r && prop_r->value_len)
+    {
+        xcb_pixmap_t *rootpix = xcb_get_property_value(prop_r);
+        if (rootpix)
+            xcb_kill_client(c, *rootpix);
+    }
+    free(prop_r);
+}
+
+static bool
+root_set_wallpaper(cairo_pattern_t *pattern)
+{
+    xcb_connection_t *c = xcb_connect(NULL, NULL);
+    xcb_pixmap_t p = xcb_generate_id(c);
+    /* globalconf.connection should be connected to the same X11 server, so we
+     * can just use the info from that other connection.
+     */
+    const xcb_screen_t *screen = globalconf.screen;
+    uint16_t width = screen->width_in_pixels;
+    uint16_t height = screen->height_in_pixels;
+    bool result = false;
+    cairo_surface_t *surface;
+    cairo_device_t *device;
+    cairo_t *cr;
+
+    if (xcb_connection_has_error(c))
+        goto disconnect;
+
+    xcb_create_pixmap(c, screen->root_depth, p, screen->root, width, height);
+    surface = cairo_xcb_surface_create(c, p, draw_default_visual(screen), width, height);
+    device = cairo_device_reference(cairo_surface_get_device(surface));
+    cr = cairo_create(surface);
+    /* Paint the pattern to the surface */
+    cairo_set_source(cr, pattern);
+    cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
+    cairo_paint(cr);
+    cairo_destroy(cr);
+    cairo_surface_finish(surface);
+    cairo_surface_destroy(surface);
+    /* Make sure that cairo doesn't try to use the connection later again */
+    assert(device != NULL);
+    cairo_device_finish(device);
+    cairo_device_destroy(device);
+
+    root_set_wallpaper_pixmap(c, p);
+
+    /* Make sure our pixmap is not destroyed when we disconnect. */
+    xcb_set_close_down_mode(c, XCB_CLOSE_DOWN_RETAIN_PERMANENT);
+
+    result = true;
+disconnect:
+    xcb_flush(c);
+    xcb_disconnect(c);
+    return result;
+}
+
 static xcb_keycode_t
 _string_to_key_code(const char *s)
 {
@@ -264,16 +345,30 @@ luaA_root_wallpaper(lua_State *L)
     xcb_pixmap_t *rootpix;
     cairo_surface_t *surface;
 
+    if(lua_gettop(L) == 1)
+    {
+        cairo_pattern_t *pattern = (cairo_pattern_t *)lua_touserdata(L, -1);
+        lua_pushboolean(L, root_set_wallpaper(pattern));
+        /* Don't return the wallpaper, it's too easy to get memleaks */
+        return 1;
+    }
+
     prop_c = xcb_get_property_unchecked(globalconf.connection, false,
             globalconf.screen->root, _XROOTPMAP_ID, XCB_ATOM_PIXMAP, 0, 1);
     prop_r = xcb_get_property_reply(globalconf.connection, prop_c, NULL);
 
     if (!prop_r || !prop_r->value_len)
+    {
+        free(prop_r);
         return 0;
+    }
 
     rootpix = xcb_get_property_value(prop_r);
     if (!rootpix)
+    {
+        free(prop_r);
         return 0;
+    }
 
     /* We can't query the pixmap's values (or even if that pixmap exists at
      * all), so let's just assume that it uses the default visual and is as
@@ -284,6 +379,7 @@ luaA_root_wallpaper(lua_State *L)
 
     /* lua has to make sure this surface gets destroyed */
     lua_pushlightuserdata(L, surface);
+    free(prop_r);
     return 1;
 }
 
