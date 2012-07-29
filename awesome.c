@@ -152,51 +152,6 @@ scan(xcb_query_tree_cookie_t tree_c)
     p_delete(&tree_r);
 }
 
-static xcb_visualtype_t *
-a_default_visual(xcb_screen_t *s)
-{
-    xcb_depth_iterator_t depth_iter = xcb_screen_allowed_depths_iterator(s);
-
-    if(depth_iter.data)
-        for(; depth_iter.rem; xcb_depth_next (&depth_iter))
-            for(xcb_visualtype_iterator_t visual_iter = xcb_depth_visuals_iterator(depth_iter.data);
-                visual_iter.rem; xcb_visualtype_next (&visual_iter))
-                if(s->root_visual == visual_iter.data->visual_id)
-                    return visual_iter.data;
-
-    return NULL;
-}
-
-static xcb_visualtype_t *
-a_argb_visual(xcb_screen_t *s)
-{
-    xcb_depth_iterator_t depth_iter = xcb_screen_allowed_depths_iterator(s);
-
-    if(depth_iter.data)
-        for(; depth_iter.rem; xcb_depth_next (&depth_iter))
-            if(depth_iter.data->depth == 32)
-                for(xcb_visualtype_iterator_t visual_iter = xcb_depth_visuals_iterator(depth_iter.data);
-                    visual_iter.rem; xcb_visualtype_next (&visual_iter))
-                    return visual_iter.data;
-
-    return NULL;
-}
-
-static uint8_t
-a_visual_depth(xcb_screen_t *s, xcb_visualid_t vis)
-{
-    xcb_depth_iterator_t depth_iter = xcb_screen_allowed_depths_iterator(s);
-
-    if(depth_iter.data)
-        for(; depth_iter.rem; xcb_depth_next (&depth_iter))
-            for(xcb_visualtype_iterator_t visual_iter = xcb_depth_visuals_iterator(depth_iter.data);
-                visual_iter.rem; xcb_visualtype_next (&visual_iter))
-                if(vis == visual_iter.data->visual_id)
-                    return depth_iter.data->depth;
-
-    fatal("Could not find a visual's depth");
-}
-
 static void
 a_refresh_cb(EV_P_ ev_prepare *w, int revents)
 {
@@ -419,12 +374,12 @@ main(int argc, char **argv)
         fatal("cannot open display");
 
     globalconf.screen = xcb_aux_get_screen(globalconf.connection, globalconf.default_screen);
-    globalconf.default_visual = a_default_visual(globalconf.screen);
+    globalconf.default_visual = draw_default_visual(globalconf.screen);
     if(!no_argb)
-        globalconf.visual = a_argb_visual(globalconf.screen);
+        globalconf.visual = draw_argb_visual(globalconf.screen);
     if(!globalconf.visual)
         globalconf.visual = globalconf.default_visual;
-    globalconf.default_depth = a_visual_depth(globalconf.screen, globalconf.visual->visual_id);
+    globalconf.default_depth = draw_visual_depth(globalconf.screen, globalconf.visual->visual_id);
     globalconf.default_cmap = globalconf.screen->default_colormap;
     if(globalconf.default_depth != globalconf.screen->root_depth)
     {

@@ -69,5 +69,9 @@ cairo_surface_t *draw_surface_from_data(int width, int height, uint32_t *data);
 cairo_surface_t *draw_dup_image_surface(cairo_surface_t *surface);
 cairo_surface_t *draw_load_image(lua_State *L, const char *path);
 
+xcb_visualtype_t *draw_default_visual(const xcb_screen_t *s);
+xcb_visualtype_t *draw_argb_visual(const xcb_screen_t *s);
+uint8_t draw_visual_depth(const xcb_screen_t *s, xcb_visualid_t vis);
+
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
