@@ -86,12 +86,6 @@ function beautiful.init(path)
                 end
             end
 
-            -- setup wallpaper
-            if theme.wallpaper_cmd then
-                for s = 1, capi.screen.count() do
-                    util.spawn(theme.wallpaper_cmd[util.cycle(#theme.wallpaper_cmd, s)], false, s)
-                end
-            end
             if theme.font then set_font(theme.font) end
             if theme.fg_normal then capi.awesome.fg = theme.fg_normal end
             if theme.bg_normal then capi.awesome.bg = theme.bg_normal end
