@@ -80,31 +80,19 @@
         }                                            \
     } while (0)
 
-
-#ifdef __GNUC__
-
-#define p_delete(mem_pp)                           \
-    do {                                           \
-        typeof(**(mem_pp)) **__ptr = (mem_pp);     \
-        free(*__ptr);                              \
-        *__ptr = NULL;                             \
-    } while(0)
-
-#define likely(expr)    __builtin_expect(!!(expr), 1)
-#define unlikely(expr)  __builtin_expect((expr), 0)
-
-#else
-
-#define p_delete(mem_p)                            \
-    do {                                           \
-        void *__ptr = (mem_p);                     \
-        free(*__ptr);                              \
-        *(void **)__ptr = NULL;                    \
+#define p_delete(mem_p)                              \
+    do {                                             \
+        void **__ptr = (void **) (mem_p);            \
+        free(*__ptr);                                \
+        *(void **)__ptr = NULL;                      \
     } while (0)
 
+#ifdef __GNUC__
+#define likely(expr)    __builtin_expect(!!(expr), 1)
+#define unlikely(expr)  __builtin_expect((expr), 0)
+#else
 #define likely(expr)    expr
 #define unlikely(expr)  expr
-
 #endif
 
 static inline void * __attribute__ ((malloc)) xmalloc(ssize_t size)
