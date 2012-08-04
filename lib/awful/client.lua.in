@@ -919,7 +919,7 @@ function client.run_or_raise(cmd, matcher, merge)
     local findex  = util.table.hasitem(clients, capi.client.focus) or 1
     local start   = util.cycle(#clients, findex + 1)
 
-    for c in iterate(matcher, start) do
+    for c in client.iterate(matcher, start) do
         client.jumpto(c, merge)
         return
     end
