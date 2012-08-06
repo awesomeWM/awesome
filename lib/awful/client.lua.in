@@ -775,7 +775,7 @@ function client.setwfact(wfact, c)
     local colfact = data[w.col]
 
     colfact[w.idx] = wfact
-    rest = 1-wfact
+    local rest = 1-wfact
 
     -- calculate the current denominator
     local total = 0
