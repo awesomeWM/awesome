@@ -410,6 +410,15 @@ function client.getmaster(screen)
     return client.visible(s)[1]
 end
 
+--- Set the client as master: put it at the beginning of other windows.
+-- @param c The window to set as master.
+function client.setmaster(c)
+    local cls = util.table.reverse(capi.client.get(c.screen))
+    for k, v in pairs(cls) do
+        c:swap(v)
+    end
+end
+
 --- Set the client as slave: put it at the end of other windows.
 -- @param c The window to set as slave.
 function client.setslave(c)
