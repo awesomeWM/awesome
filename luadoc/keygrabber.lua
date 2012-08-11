@@ -34,3 +34,9 @@ module("keygrabber")
 -- @param -
 -- @name stop
 -- @class function
+
+--- Check if the keygrabber is running.
+-- @param -
+-- @return A boolean value, true if running, false otherwise.
+-- @name isrunning
+-- @class function
