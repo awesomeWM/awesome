@@ -82,6 +82,13 @@ set(AWE_MAN_SRCS
     ${SOURCE_DIR}/manpages/awesomerc.5.txt)
 set(AWE_MAN_LANGS it es fr de ru)
 
+# Don't strip RPATH if compiling on Solaris
+if (${CMAKE_SYSTEM_NAME} MATCHES "SunOS")
+    set(CMAKE_SKIP_BUILD_RPATH FALSE)
+    set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+    set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+endif()
+
 add_executable(${PROJECT_AWE_NAME}
     ${AWE_SRCS})
 
