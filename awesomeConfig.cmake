@@ -62,7 +62,7 @@ include(FindDoxygen)
 # pkg-config
 include(FindPkgConfig)
 # lua 5.1
-include(FindLua51) #Due to a cmake bug, you will see Lua50 on screen
+include(FindLua51)
 # }}}
 
 # {{{ Check if documentation can be build
