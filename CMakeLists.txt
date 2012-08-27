@@ -94,9 +94,12 @@ add_executable(${PROJECT_AWE_NAME}
     ${AWE_SRCS}
     ${BUILD_DIR}/common/tokenize.c)
 
-set_target_properties(${PROJECT_AWE_NAME}
-    PROPERTIES
-    LINK_FLAGS -export-dynamic)
+# FreeBSD requires dynamic linking
+if(${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD")
+    set_target_properties(${PROJECT_AWE_NAME}
+        PROPERTIES
+        LINK_FLAGS -export-dynamic)
+endif()
 
 target_link_libraries(${PROJECT_AWE_NAME}
     ${AWESOME_COMMON_REQUIRED_LDFLAGS}
