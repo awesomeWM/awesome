@@ -63,7 +63,7 @@ end
 -- @param data Table to print.
 -- @param tag The name of the table.
 function debug.dump(data, tag)
-    print(dump_return(data, tag))
+    print(debug.dump_return(data, tag))
 end
 
 return debug
