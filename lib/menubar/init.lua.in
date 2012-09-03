@@ -55,6 +55,10 @@ menubar.geometry = { width = nil,
                      x = nil,
                      y = nil }
 
+-- Allows user to specify custom parameters for prompt.run function
+-- (like colors).
+menubar.prompt_args = {}
+
 -- Private section
 local current_item = 1
 local previous_item = nil
@@ -265,7 +269,10 @@ function menubar.show(scr)
     current_item = 1
     current_category = nil
     menulist_update()
-    awful.prompt.run({ prompt = "Run: " }, instance.prompt.widget,
+
+    local prompt_args = menubar.prompt_args or {}
+    prompt_args.prompt = "Run: "
+    awful.prompt.run(prompt_args, instance.prompt.widget,
                 function(s) end,            -- exe_callback function set to do nothing
                 awful.completion.shell,     -- completion_callback
                 awful.util.getdir("cache") .. "/history_menu",
