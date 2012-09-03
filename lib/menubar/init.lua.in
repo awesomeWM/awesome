@@ -15,15 +15,6 @@ local common = require("awful.widget.common")
 local theme = require("beautiful")
 local wibox = require("wibox")
 
--- Standard lua
-local pairs = pairs
-local ipairs = ipairs
-local table = table
-local tonumber = tonumber
-local string = string
-local math = math
-local setmetatable = setmetatable
-
 -- menubar
 local menubar = { mt = {} }
 menubar.menu_gen = require("menubar.menu_gen")
@@ -50,19 +41,19 @@ menubar.utils = require("menubar.utils")
 -- When true the .desktop files will be reparsed only when the
 -- extension is initialized. Use this if menubar takes much time to
 -- open.
-local cache_entries = true
+menubar.cache_entries = true
 
 -- When true the categories will be shown alongside application
 -- entries.
-local show_categories = true
+menubar.show_categories = true
 
 -- Specifies the geometry of the menubar. This is a table with the keys
 -- x, y, width and height. Missing values are replaced via the screen's
 -- geometry. However, missing height is replaced by the font size.
-local geometry = { width = nil,
-                   height = nil,
-                   x = nil,
-                   y = nil }
+menubar.geometry = { width = nil,
+                     height = nil,
+                     x = nil,
+                     y = nil }
 
 -- Private section
 local current_item = 1
@@ -137,7 +128,7 @@ local function menulist_update(query)
     -- command in the middle to the table match_inside.
 
     -- Add the categories
-    if show_categories then
+    if menubar.show_categories then
         for _, v in pairs(menubar.menu_gen.all_categories) do
             v.focused = false
             if not current_category and v.use then
@@ -258,13 +249,14 @@ function menubar.show(scr)
         initialize()
     elseif instance.wibox.visible then -- Menu already shown, exit
         return
-    elseif not cache_entries then
+    elseif not menubar.cache_entries then
         menubar.refresh()
     end
 
     -- Set position and size
     scr = scr or capi.mouse.screen or 1
     local scrgeom = capi.screen[scr].workarea
+    local geometry = menubar.geometry
     instance.wibox:geometry({x = geometry.x or scrgeom.x,
                              y = geometry.y or scrgeom.y,
                              height = geometry.height or theme.get_font_height() * 1.5,
