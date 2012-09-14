@@ -517,6 +517,9 @@ if capi.dbus then
                 return
             end
         end
+        if appname ~= "" then
+            args.appname = appname
+        end
         for i, obj in pairs(naughty.config.mapping) do
             local filter, preset, s = obj[1], obj[2], 0
             if (not filter.urgency or filter.urgency == hints.urgency) and
