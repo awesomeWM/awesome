@@ -37,14 +37,28 @@ function screen.getbycoord(x, y)
     end
 end
 
---- Give the focus to a screen, and move pointer.
+--- Give the focus to a screen, and move pointer. Keeps relative position of the pointer on the screen.
 -- @param screen Screen number.
 function screen.focus(_screen)
     if _screen > capi.screen.count() then _screen = capi.mouse.screen end
+
+    -- screen and pos for current screen
+    local s = capi.mouse.screen
+    local pos = capi.mouse.coords()
+
+    -- keep relative mouse position on the new screen
+    local relx = (pos.x - capi.screen[s].geometry.x) / capi.screen[s].geometry.width
+    local rely = (pos.y - capi.screen[s].geometry.y) / capi.screen[s].geometry.height
+
+    pos.x = capi.screen[_screen].geometry.x + relx * capi.screen[_screen].geometry.width
+    pos.y = capi.screen[_screen].geometry.y + rely * capi.screen[_screen].geometry.height
+
+   -- move cursor without triggering signals mouse::enter and mouse::leave
+    capi.mouse.screen = _screen
+    capi.mouse.coords(pos, true)
+
     local c = client.focus.history.get(_screen, 0)
     if c then capi.client.focus = c end
-    -- Move the mouse on the screen
-    capi.mouse.screen = _screen
 end
 
 --- Give the focus to a screen, and move pointer, by physical position relative to current screen.
