@@ -666,7 +666,7 @@ end
 
 --- Restore (=unminimize) a random client.
 -- @param s The screen to use.
--- @return True if some client was restored.
+-- @return The restored client if some client was restored, otherwise nil.
 function client.restore(s)
     local s = s or (capi.client.focus and capi.client.focus.screen) or capi.mouse.screen
     local cls = capi.client.get(s)
@@ -678,12 +678,12 @@ function client.restore(s)
             for k, t in ipairs(tags) do
                 if util.table.hasitem(ctags, t) then
                     c.minimized = false
-                    return true
+                    return c
                 end
             end
         end
     end
-    return false
+    return nil
 end
 
 -- Normalize a set of numbers to 1
@@ -830,7 +830,7 @@ end
 --- Get a client dockable state.
 -- @param c A client.
 -- @return True or false. Note that some windows might be dockable even if you
--- did not set them manually. For example, windows with a type "utility", "toolbar" 
+-- did not set them manually. For example, windows with a type "utility", "toolbar"
 -- or "dock"
 function client.dockable.get(c)
     local value = client.property.get(c, "dockable")
