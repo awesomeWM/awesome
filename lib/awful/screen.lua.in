@@ -47,6 +47,23 @@ function screen.focus(_screen)
     capi.mouse.screen = _screen
 end
 
+--- Give the focus to a screen, and move pointer, by physical position relative to current screen.
+-- @param dir The direction, can be either "up", "down", "left" or "right".
+-- @param screen Screen number.
+function screen.focus_bydirection(dir, _screen)
+    local sel = _screen or capi.mouse.screen
+    if sel then
+        local geomtbl = {}
+        for s = 1, capi.screen.count() do
+            geomtbl[s] = capi.screen[s].geometry
+        end
+        local target = util.get_rectangle_in_direction(dir, geomtbl, capi.screen[sel].geometry)
+        if target then
+            return screen.focus(target)
+        end
+    end
+end
+
 --- Give the focus to a screen, and move pointer, but relative to the current
 -- focused screen.
 -- @param i Value to add to the current focused screen index. 1 will focus next
