@@ -12,7 +12,9 @@ local capi =
     client = client
 }
 local util = require("awful.util")
-local client = require("awful.client")
+
+-- we use require("awful.client") inside functions to prevent circular dependencies.
+local client
 
 --- Screen module for awful
 -- awful.screen
@@ -40,6 +42,7 @@ end
 --- Give the focus to a screen, and move pointer. Keeps relative position of the pointer on the screen.
 -- @param screen Screen number.
 function screen.focus(_screen)
+    client = client or require("awful.client")
     if _screen > capi.screen.count() then _screen = capi.mouse.screen end
 
     -- screen and pos for current screen

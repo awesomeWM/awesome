@@ -20,9 +20,13 @@ local capi =
     screen = screen,
 }
 
+-- we use require("awful.screen") inside functions to prevent circular dependencies.
+local screen
+
 --- Useful client manipulation functions.
 -- awful.client
 local client = {}
+
 
 -- Private data
 client.data = {}
@@ -277,6 +281,7 @@ end
 -- @param dir The direction, can be either "up", "down", "left" or "right".
 -- @param c Optional client.
 function client.focus.global_bydirection(dir, c)
+    screen = screen or require("awful.screen")
     local sel = c or capi.client.focus
     local scr = capi.mouse.screen
     if sel then
@@ -288,7 +293,7 @@ function client.focus.global_bydirection(dir, c)
 
     -- if focus not changed, we must change screen
     if sel == capi.client.focus then
-        awful.screen.focus_bydirection(dir, scr)
+        screen.focus_bydirection(dir, scr)
         if scr ~= capi.mouse.screen then
             local cltbl = client.visible(capi.mouse.screen)
             local geomtbl = {}
@@ -338,10 +343,11 @@ end
 -- @param dir The direction, can be either "up", "down", "left" or "right".
 -- @param c Optional client.
 function client.swap.global_bydirection(dir, c)
+    screen = screen or require("awful.screen")
     local sel = c or capi.client.focus
-    local screen = capi.mouse.screen
+    local scr = capi.mouse.screen
     if sel then
-        screen = sel.screen
+        scr = sel.screen
     end
 
     if sel then
@@ -355,15 +361,15 @@ function client.swap.global_bydirection(dir, c)
 
         -- swapping to an empty screen
         elseif sel.screen ~= c.screen and sel == c then
-	    awful.client.movetoscreen(sel, capi.mouse.screen)
+            client.movetoscreen(sel, capi.mouse.screen)
 
         --swapping to a nonempty screen
         elseif sel.screen ~= c.screen and sel ~= c then
-	    awful.client.movetoscreen(sel, c.screen)
-            awful.client.movetoscreen(c, screen)
+            client.movetoscreen(sel, c.screen)
+            client.movetoscreen(c, scr)
         end
 
-        awful.screen.focus(sel.screen)
+        screen.focus(sel.screen)
         capi.client.focus = sel
     end
 end
@@ -484,6 +490,7 @@ end
 -- @param c The client to move.
 -- @param s The screen number, default to current + 1.
 function client.movetoscreen(c, s)
+    screen = screen or require("awful.screen")
     local sel = c or capi.client.focus
     if sel then
         local sc = capi.screen.count()
@@ -492,7 +499,7 @@ function client.movetoscreen(c, s)
         end
         if s > sc then s = 1 elseif s < 1 then s = sc end
         sel.screen = s
-        awful.screen.focus(s)
+        screen.focus(s)
     end
 end
 
@@ -577,11 +584,11 @@ function client.floating.set(c, s)
     local c = c or capi.client.focus
     if c and client.property.get(c, "floating") ~= s then
         client.property.set(c, "floating", s)
-        local screen = c.screen
+        local scr = c.screen
         if s == true then
             c:geometry(client.property.get(c, "floating_geometry"))
         end
-        c.screen = screen
+        c.screen = scr
     end
 end
 
