@@ -799,7 +799,7 @@ wibox_attach(lua_State *L, int udx, screen_t *s)
     wibox_init(wibox, phys_screen);
 
     window_set_cursor(wibox->window,
-                      xcursor_new(globalconf.connection, xcursor_font_fromstr(wibox->cursor)));
+                      xcursor_new(globalconf.display, xcursor_font_fromstr(wibox->cursor)));
 
     if(wibox->opacity != -1)
         window_opacity_set(wibox->window, wibox->opacity);
@@ -1316,7 +1316,7 @@ luaA_wibox_set_cursor(lua_State *L, wibox_t *wibox)
         uint16_t cursor_font = xcursor_font_fromstr(buf);
         if(cursor_font)
         {
-            xcb_cursor_t cursor = xcursor_new(globalconf.connection, cursor_font);
+            xcb_cursor_t cursor = xcursor_new(globalconf.display, cursor_font);
             p_delete(&wibox->cursor);
             wibox->cursor = a_strdup(buf);
             window_set_cursor(wibox->window, cursor);

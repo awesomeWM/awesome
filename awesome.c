@@ -33,6 +33,8 @@
 #include <xcb/xinerama.h>
 #include <xcb/xtest.h>
 
+#include <X11/Xlib-xcb.h>
+
 #include "awesome.h"
 #include "spawn.h"
 #include "client.h"
@@ -373,7 +375,15 @@ main(int argc, char **argv)
     sigaction(SIGSEGV, &sa, 0);
 
     /* X stuff */
-    globalconf.connection = xcb_connect(NULL, &globalconf.default_screen);
+    globalconf.display = XOpenDisplay(NULL);
+    if (globalconf.display == NULL)
+        fatal("cannot open display");
+
+    globalconf.default_screen = XDefaultScreen(globalconf.display);
+
+    globalconf.connection = XGetXCBConnection(globalconf.display);
+
+    /* Double checking then everything is OK. */
     if(xcb_connection_has_error(globalconf.connection))
         fatal("cannot open display");
 

@@ -229,7 +229,7 @@ luaA_root_cursor(lua_State *L)
 
     if(cursor_font)
     {
-        uint32_t change_win_vals[] = { xcursor_new(globalconf.connection, cursor_font) };
+        uint32_t change_win_vals[] = { xcursor_new(globalconf.display, cursor_font) };
 
         for(int screen_nbr = 0;
             screen_nbr < xcb_setup_roots_length(xcb_get_setup(globalconf.connection));

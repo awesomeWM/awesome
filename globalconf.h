@@ -52,6 +52,8 @@ ARRAY_TYPE(wibox_t *, wibox)
 /** Main configuration structure */
 typedef struct
 {
+    /** Xlib Display ref [for Xcursors] */
+    Display * display;
     /** Connection ref */
     xcb_connection_t *connection;
     /** Default screen number */
