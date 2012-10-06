@@ -132,6 +132,7 @@ pkg_check_modules(AWESOME_REQUIRED REQUIRED
     glib-2.0
     cairo
     x11
+    xcursor
     xcb-randr
     xcb-xtest
     xcb-xinerama

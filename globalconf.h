@@ -63,6 +63,8 @@ ARRAY_TYPE(drawin_t *, drawin)
 /** Main configuration structure */
 typedef struct
 {
+    /** Xlib Display */
+    Display * display;
     /** Connection ref */
     xcb_connection_t *connection;
     /** Default screen number */

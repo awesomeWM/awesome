@@ -19,9 +19,6 @@
  *
  */
 
-/* CURSORFONT */
-#include <X11/Xlibint.h>
-
 #include "common/xcursor.h"
 #include "common/util.h"
 
@@ -137,25 +134,12 @@ xcursor_font_tostr(uint16_t c)
  * \return Allocated cursor font.
  */
 xcb_cursor_t
-xcursor_new(xcb_connection_t *conn, uint16_t cursor_font)
+xcursor_new(Display *conn, uint16_t cursor_font)
 {
-    static xcb_font_t font = XCB_NONE;
     static xcb_cursor_t xcursor[countof(xcursor_font)];
 
-    /* Get the font for the cursor */
-    if(!font)
-    {
-        font = xcb_generate_id(conn);
-        xcb_open_font(conn, font, sizeof(CURSORFONT) - 1, CURSORFONT);
-    }
-
-    if(!xcursor[cursor_font])
-    {
-        xcursor[cursor_font] = xcb_generate_id(conn);
-        xcb_create_glyph_cursor(conn, xcursor[cursor_font], font, font,
-                                cursor_font, cursor_font + 1,
-                                0, 0, 0,
-                                65535, 65535, 65535);
+    if (!xcursor[cursor_font]) {
+        xcursor[cursor_font] = XcursorLibraryLoadCursor(conn, xcursor_font_tostr(cursor_font));
     }
 
     return xcursor[cursor_font];
