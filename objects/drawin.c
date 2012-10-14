@@ -592,8 +592,6 @@ drawin_class_setup(lua_State *L)
                             (lua_class_propfunc_t) luaA_window_get_type,
                             (lua_class_propfunc_t) luaA_window_set_type);
 
-    signal_add(&drawin_class.signals, "mouse::enter");
-    signal_add(&drawin_class.signals, "mouse::leave");
     signal_add(&drawin_class.signals, "property::border_width");
     signal_add(&drawin_class.signals, "property::cursor");
     signal_add(&drawin_class.signals, "property::height");

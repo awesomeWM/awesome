@@ -220,10 +220,12 @@ event_handle_button(xcb_button_press_event_t *ev)
             ev->event_y -= drawin->geometry.y;
         }
 
-        /* Push the drawin */
+        /* Push the drawable */
         luaA_object_push(globalconf.L, drawin);
+        luaA_object_push_item(globalconf.L, -1, drawin->drawable);
         /* and handle the button raw button event */
         event_emit_button(ev);
+        lua_pop(globalconf.L, 1);
         /* check if any button object matches */
         event_button_callback(ev, &drawin->buttons, -1, 1, NULL);
     }
@@ -232,6 +234,19 @@ event_handle_button(xcb_button_press_event_t *ev)
         luaA_object_push(globalconf.L, c);
         /* And handle the button raw button event */
         event_emit_button(ev);
+        /* then check if a titlebar was "hit" */
+        int x = ev->event_x, y = ev->event_y;
+        drawable_t *d = client_get_drawable_offset(c, &x, &y);
+        if (d)
+        {
+            /* Copy the event so that we can fake x/y */
+            xcb_button_press_event_t event = *ev;
+            event.event_x = x;
+            event.event_y = y;
+            luaA_object_push_item(globalconf.L, -1, d);
+            event_emit_button(&event);
+            lua_pop(globalconf.L, 1);
+        }
         /* then check if any button objects match */
         event_button_callback(ev, &c->buttons, -1, 1, NULL);
         xcb_allow_events(globalconf.connection,
@@ -382,16 +397,29 @@ event_handle_motionnotify(xcb_motion_notify_event_t *ev)
         lua_pushnumber(globalconf.L, ev->event_x);
         lua_pushnumber(globalconf.L, ev->event_y);
         luaA_object_emit_signal(globalconf.L, -3, "mouse::move", 2);
+
+        /* now check if a titlebar was "hit" */
+        int x = ev->event_x, y = ev->event_y;
+        drawable_t *d = client_get_drawable_offset(c, &x, &y);
+        if (d)
+        {
+            luaA_object_push_item(globalconf.L, -1, d);
+            lua_pushnumber(globalconf.L, x);
+            lua_pushnumber(globalconf.L, y);
+            luaA_object_emit_signal(globalconf.L, -3, "mouse::move", 2);
+            lua_pop(globalconf.L, 1);
+        }
         lua_pop(globalconf.L, 1);
     }
 
     if((w = drawin_getbywin(ev->event)))
     {
         luaA_object_push(globalconf.L, w);
+        luaA_object_push_item(globalconf.L, -1, w->drawable);
         lua_pushnumber(globalconf.L, ev->event_x);
         lua_pushnumber(globalconf.L, ev->event_y);
         luaA_object_emit_signal(globalconf.L, -3, "mouse::move", 2);
-        lua_pop(globalconf.L, 1);
+        lua_pop(globalconf.L, 2);
     }
 }
 
@@ -413,14 +441,22 @@ event_handle_leavenotify(xcb_leave_notify_event_t *ev)
     {
         luaA_object_push(globalconf.L, c);
         luaA_object_emit_signal(globalconf.L, -1, "mouse::leave", 0);
+        drawable_t *d = client_get_drawable(c, ev->event_x, ev->event_y);
+        if (d)
+        {
+            luaA_object_push_item(globalconf.L, -1, d);
+            luaA_object_emit_signal(globalconf.L, -1, "mouse::leave", 0);
+            lua_pop(globalconf.L, 1);
+        }
         lua_pop(globalconf.L, 1);
     }
 
     if((drawin = drawin_getbywin(ev->event)))
     {
         luaA_object_push(globalconf.L, drawin);
+        luaA_object_push_item(globalconf.L, -1, drawin->drawable);
         luaA_object_emit_signal(globalconf.L, -1, "mouse::leave", 0);
-        lua_pop(globalconf.L, 1);
+        lua_pop(globalconf.L, 2);
     }
 }
 
@@ -441,14 +477,22 @@ event_handle_enternotify(xcb_enter_notify_event_t *ev)
     if((drawin = drawin_getbywin(ev->event)))
     {
         luaA_object_push(globalconf.L, drawin);
+        luaA_object_push_item(globalconf.L, -1, drawin->drawable);
         luaA_object_emit_signal(globalconf.L, -1, "mouse::enter", 0);
-        lua_pop(globalconf.L, 1);
+        lua_pop(globalconf.L, 2);
     }
 
     if((c = client_getbyframewin(ev->event)))
     {
         luaA_object_push(globalconf.L, c);
         luaA_object_emit_signal(globalconf.L, -1, "mouse::enter", 0);
+        drawable_t *d = client_get_drawable(c, ev->event_x, ev->event_y);
+        if (d)
+        {
+            luaA_object_push_item(globalconf.L, -1, d);
+            luaA_object_emit_signal(globalconf.L, -1, "mouse::enter", 0);
+            lua_pop(globalconf.L, 1);
+        }
         lua_pop(globalconf.L, 1);
     }
 }
@@ -496,11 +540,14 @@ static void
 event_handle_expose(xcb_expose_event_t *ev)
 {
     drawin_t *drawin;
+    client_t *client;
 
     if((drawin = drawin_getbywin(ev->window)))
         drawin_refresh_pixmap_partial(drawin,
                                       ev->x, ev->y,
                                       ev->width, ev->height);
+    if ((client = client_getbyframewin(ev->window)))
+        client_refresh(client);
 }
 
 /** The key press event handler.

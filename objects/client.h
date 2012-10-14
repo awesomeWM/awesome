@@ -27,6 +27,7 @@
 #include "draw.h"
 #include "banning.h"
 #include "objects/window.h"
+#include "objects/drawable.h"
 #include "common/luaobject.h"
 
 #define CLIENT_SELECT_INPUT_EVENT_MASK (XCB_EVENT_MASK_STRUCTURE_NOTIFY \
@@ -36,7 +37,20 @@
 #define FRAME_SELECT_INPUT_EVENT_MASK (XCB_EVENT_MASK_STRUCTURE_NOTIFY \
                                        | XCB_EVENT_MASK_ENTER_WINDOW \
                                        | XCB_EVENT_MASK_LEAVE_WINDOW \
-                                       | XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT)
+                                       | XCB_EVENT_MASK_EXPOSURE \
+                                       | XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT \
+                                       | XCB_EVENT_MASK_POINTER_MOTION \
+                                       | XCB_EVENT_MASK_BUTTON_PRESS \
+                                       | XCB_EVENT_MASK_BUTTON_RELEASE)
+
+typedef enum {
+    CLIENT_TITLEBAR_TOP = 0,
+    CLIENT_TITLEBAR_RIGHT = 1,
+    CLIENT_TITLEBAR_BOTTOM = 2,
+    CLIENT_TITLEBAR_LEFT = 3,
+    /* This is not a valid value, but the number of valid values */
+    CLIENT_TITLEBAR_COUNT = 4
+} client_titlebar_t;
 
 /** client_t type */
 struct client_t
@@ -101,6 +115,15 @@ struct client_t
     uint32_t pid;
     /** Window it is transient for */
     client_t *transient_for;
+    /** Titelbar information */
+    struct {
+        /** The size of this bar. */
+        uint16_t size;
+        /** The pixmap for double buffering. */
+        xcb_pixmap_t pixmap;
+        /** The drawable for this bar. */
+        drawable_t *drawable;
+    } titlebar[CLIENT_TITLEBAR_COUNT];
 };
 
 ARRAY_FUNCS(client_t *, client, DO_NOTHING)
@@ -150,7 +173,10 @@ void client_focus_refresh(void);
 bool client_hasproto(client_t *, xcb_atom_t);
 void client_ignore_enterleave_events(void);
 void client_restore_enterleave_events(void);
+void client_refresh(client_t *);
 void client_class_setup(lua_State *);
+drawable_t *client_get_drawable(client_t *, int, int);
+drawable_t *client_get_drawable_offset(client_t *, int *, int *);
 
 /** Put client on top of the stack.
  * \param c The client to raise.

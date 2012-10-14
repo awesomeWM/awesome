@@ -21,6 +21,7 @@
 
 #include <xcb/xcb_atom.h>
 #include <xcb/xcb_image.h>
+#include <cairo-xcb.h>
 
 #include "objects/tag.h"
 #include "ewmh.h"
@@ -32,6 +33,9 @@
 #include "xwindow.h"
 #include "common/atoms.h"
 #include "common/xutil.h"
+
+static area_t titlebar_get_area(client_t *c, client_titlebar_t bar);
+static drawable_t *titlebar_get_drawable(lua_State *L, client_t *c, int cl_idx, client_titlebar_t bar);
 
 /** Collect a client.
  * \param L The Lua VM state.
@@ -580,6 +584,96 @@ HANDLE_GEOM(height)
     lua_pop(globalconf.L, 1);
 }
 
+static void
+client_resize_do(client_t *c, area_t geometry)
+{
+    bool send_notice = false;
+    screen_t *new_screen = screen_getbycoord(geometry.x, geometry.y);
+
+    if(c->geometry.width == geometry.width
+       && c->geometry.height == geometry.height)
+        send_notice = true;
+
+    /* Also store geometry including border */
+    area_t old_geometry = c->geometry;
+    c->geometry = geometry;
+
+    /* Ignore all spurious enter/leave notify events */
+    client_ignore_enterleave_events();
+
+    /* Configure the client for its new size */
+    area_t real_geometry = geometry;
+    real_geometry.x = c->titlebar[CLIENT_TITLEBAR_LEFT].size;
+    real_geometry.y = c->titlebar[CLIENT_TITLEBAR_TOP].size;
+    real_geometry.width -= c->titlebar[CLIENT_TITLEBAR_LEFT].size;
+    real_geometry.width -= c->titlebar[CLIENT_TITLEBAR_RIGHT].size;
+    real_geometry.height -= c->titlebar[CLIENT_TITLEBAR_TOP].size;
+    real_geometry.height -= c->titlebar[CLIENT_TITLEBAR_BOTTOM].size;
+
+    xcb_configure_window(globalconf.connection, c->window,
+            XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
+            (uint32_t[]) { real_geometry.x, real_geometry.y, real_geometry.width, real_geometry.height });
+    xcb_configure_window(globalconf.connection, c->frame_window,
+            XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
+            (uint32_t[]) { geometry.x, geometry.y, geometry.width, geometry.height });
+
+    if(send_notice)
+        /* We are moving without changing the size, see ICCCM 4.2.3 */
+        xwindow_configure(c->window, geometry, c->border_width);
+
+    client_restore_enterleave_events();
+
+    screen_client_moveto(c, new_screen, false);
+
+    luaA_object_push(globalconf.L, c);
+    luaA_object_emit_signal(globalconf.L, -1, "property::geometry", 0);
+    if (old_geometry.x != geometry.x)
+        luaA_object_emit_signal(globalconf.L, -1, "property::x", 0);
+    if (old_geometry.y != geometry.y)
+        luaA_object_emit_signal(globalconf.L, -1, "property::y", 0);
+    if (old_geometry.width != geometry.width)
+        luaA_object_emit_signal(globalconf.L, -1, "property::width", 0);
+    if (old_geometry.height != geometry.height)
+        luaA_object_emit_signal(globalconf.L, -1, "property::height", 0);
+    lua_pop(globalconf.L, 1);
+
+    /* Update all titlebars */
+    for (client_titlebar_t bar = CLIENT_TITLEBAR_TOP; bar < CLIENT_TITLEBAR_COUNT; bar++) {
+        if (c->titlebar[bar].drawable == NULL && c->titlebar[bar].size == 0)
+            continue;
+
+        luaA_object_push(globalconf.L, c);
+        drawable_t *drawable = titlebar_get_drawable(globalconf.L, c, -1, bar);
+
+        /* Get rid of the old state */
+        drawable_set_surface(drawable, NULL);
+        if (c->titlebar[bar].pixmap != XCB_NONE)
+            xcb_free_pixmap(globalconf.connection, c->titlebar[bar].pixmap);
+
+        /* And get us some new state */
+        area_t area = titlebar_get_area(c, bar);
+        if (c->titlebar[bar].size != 0)
+        {
+            c->titlebar[bar].pixmap = xcb_generate_id(globalconf.connection);
+            xcb_create_pixmap(globalconf.connection, globalconf.default_depth, c->titlebar[bar].pixmap,
+                              globalconf.screen->root, area.width, area.height);
+            cairo_surface_t *surface = cairo_xcb_surface_create(globalconf.connection,
+                                                                c->titlebar[bar].pixmap, globalconf.visual,
+                                                                area.width, area.height);
+            drawable_set_surface(drawable, surface);
+        }
+
+        /* Convert to global coordinates */
+        area.x += geometry.x;
+        area.y += geometry.y;
+        luaA_object_push_item(globalconf.L, -1, drawable);
+        drawable_set_geometry(drawable, -1, area);
+
+        /* Pop the client and the drawable */
+        lua_pop(globalconf.L, 2);
+    }
+}
+
 /** Resize client window.
  * The sizes given as parameters are with borders!
  * \param c Client to resize.
@@ -604,6 +698,11 @@ client_resize(client_t *c, area_t geometry)
     if(geometry.y + geometry.height < 0)
         geometry.y = 0;
 
+    if(geometry.width < c->titlebar[CLIENT_TITLEBAR_LEFT].size + c->titlebar[CLIENT_TITLEBAR_RIGHT].size)
+        return false;
+    if(geometry.height < c->titlebar[CLIENT_TITLEBAR_TOP].size + c->titlebar[CLIENT_TITLEBAR_BOTTOM].size)
+        return false;
+
     if(geometry.width == 0 || geometry.height == 0)
         return false;
 
@@ -612,46 +711,7 @@ client_resize(client_t *c, area_t geometry)
        || c->geometry.width != geometry.width
        || c->geometry.height != geometry.height)
     {
-        bool send_notice = false;
-        screen_t *new_screen = screen_getbycoord(geometry.x, geometry.y);
-
-        if(c->geometry.width == geometry.width
-           && c->geometry.height == geometry.height)
-            send_notice = true;
-
-        /* Also store geometry including border */
-        area_t old_geometry = c->geometry;
-        c->geometry = geometry;
-
-        /* Ignore all spurious enter/leave notify events */
-        client_ignore_enterleave_events();
-
-        xcb_configure_window(globalconf.connection, c->window,
-                XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
-                (uint32_t[]) { geometry.width, geometry.height });
-        xcb_configure_window(globalconf.connection, c->frame_window,
-                XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
-                (uint32_t[]) { geometry.x, geometry.y, geometry.width, geometry.height });
-
-        if(send_notice)
-            /* We are moving without changing the size, see ICCCM 4.2.3 */
-            xwindow_configure(c->window, geometry, c->border_width);
-
-        client_restore_enterleave_events();
-
-        screen_client_moveto(c, new_screen, false);
-
-        luaA_object_push(globalconf.L, c);
-        luaA_object_emit_signal(globalconf.L, -1, "property::geometry", 0);
-        if (old_geometry.x != geometry.x)
-            luaA_object_emit_signal(globalconf.L, -1, "property::x", 0);
-        if (old_geometry.y != geometry.y)
-            luaA_object_emit_signal(globalconf.L, -1, "property::y", 0);
-        if (old_geometry.width != geometry.width)
-            luaA_object_emit_signal(globalconf.L, -1, "property::width", 0);
-        if (old_geometry.height != geometry.height)
-            luaA_object_emit_signal(globalconf.L, -1, "property::height", 0);
-        lua_pop(globalconf.L, 1);
+        client_resize_do(c, geometry);
 
         return true;
     }
@@ -1215,6 +1275,136 @@ luaA_client_unmanage(lua_State *L)
     return 0;
 }
 
+static area_t
+titlebar_get_area(client_t *c, client_titlebar_t bar)
+{
+    area_t result = c->geometry;
+    result.x = result.y = 0;
+
+    // Let's try some ascii art:
+    // ---------------------------
+    // |         Top             |
+    // |-------------------------|
+    // |L|                     |R|
+    // |e|                     |i|
+    // |f|                     |g|
+    // |t|                     |h|
+    // | |                     |t|
+    // |-------------------------|
+    // |        Bottom           |
+    // ---------------------------
+
+    switch (bar) {
+    case CLIENT_TITLEBAR_BOTTOM:
+        result.y = c->geometry.height - c->titlebar[bar].size;
+        /* Fall through */
+    case CLIENT_TITLEBAR_TOP:
+        result.height = c->titlebar[bar].size;
+        break;
+    case CLIENT_TITLEBAR_RIGHT:
+        result.x = c->geometry.width - c->titlebar[bar].size;
+        /* Fall through */
+    case CLIENT_TITLEBAR_LEFT:
+        result.y = c->titlebar[CLIENT_TITLEBAR_TOP].size;
+        result.width = c->titlebar[bar].size;
+        result.height -= c->titlebar[CLIENT_TITLEBAR_TOP].size;
+        result.height -= c->titlebar[CLIENT_TITLEBAR_BOTTOM].size;
+        break;
+    default:
+        fatal("Unknown titlebar kind %d\n", (int) bar);
+    }
+
+    return result;
+}
+
+drawable_t *
+client_get_drawable_offset(client_t *c, int *x, int *y)
+{
+    for (client_titlebar_t bar = CLIENT_TITLEBAR_TOP; bar < CLIENT_TITLEBAR_COUNT; bar++) {
+        area_t area = titlebar_get_area(c, bar);
+        if (AREA_LEFT(area) > *x || AREA_RIGHT(area) <= *x)
+            continue;
+        if (AREA_TOP(area) > *y || AREA_BOTTOM(area) <= *y)
+            continue;
+
+        *x -= area.x;
+        *y -= area.y;
+        return c->titlebar[bar].drawable;
+    }
+
+    return NULL;
+}
+
+drawable_t *
+client_get_drawable(client_t *c, int x, int y)
+{
+    return client_get_drawable_offset(c, &x, &y);
+}
+
+void
+client_refresh(client_t *c)
+{
+    for (client_titlebar_t bar = CLIENT_TITLEBAR_TOP; bar < CLIENT_TITLEBAR_COUNT; bar++) {
+        if (c->titlebar[bar].drawable == NULL || c->titlebar[bar].drawable->surface == NULL)
+            continue;
+
+        area_t area = titlebar_get_area(c, bar);
+        cairo_surface_flush(c->titlebar[bar].drawable->surface);
+        xcb_copy_area(globalconf.connection, c->titlebar[bar].pixmap, c->frame_window,
+                globalconf.gc, 0, 0, area.x, area.y, area.width, area.height);
+    }
+}
+
+static drawable_t *
+titlebar_get_drawable(lua_State *L, client_t *c, int cl_idx, client_titlebar_t bar)
+{
+    if (c->titlebar[bar].drawable == NULL)
+    {
+        cl_idx = luaA_absindex(L, cl_idx);
+        drawable_allocator(L, NULL, (drawable_refresh_callback *) client_refresh, c);
+        c->titlebar[bar].drawable = luaA_object_ref_item(L, cl_idx, -1);
+    }
+
+    return c->titlebar[bar].drawable;
+}
+
+static void
+titlebar_resize(client_t *c, client_titlebar_t bar, int size)
+{
+    if (size < 0)
+        return;
+
+    if (size == c->titlebar[bar].size)
+        return;
+
+    /* Now resize the client (and titlebars!) suitably */
+    c->titlebar[bar].size = size;
+    client_resize_do(c, c->geometry);
+}
+
+#define HANDLE_TITLEBAR(name, index)                              \
+static int                                                        \
+luaA_client_titlebar_ ## name(lua_State *L)                       \
+{                                                                 \
+    client_t *c = luaA_checkudata(L, 1, &client_class);           \
+                                                                  \
+    if (lua_gettop(L) == 2)                                       \
+    {                                                             \
+        if (lua_isnil(L, 2))                                      \
+            titlebar_resize(c, index, 0);                         \
+        else                                                      \
+            titlebar_resize(c, index, luaL_checknumber(L, 2));    \
+    }                                                             \
+                                                                  \
+    luaA_object_push_item(L, 1, titlebar_get_drawable(L, c, 1, index)); \
+    lua_pushnumber(L, c->titlebar[index].size);                   \
+    return 2;                                                     \
+}
+HANDLE_TITLEBAR(top, CLIENT_TITLEBAR_TOP)
+HANDLE_TITLEBAR(right, CLIENT_TITLEBAR_RIGHT)
+HANDLE_TITLEBAR(bottom, CLIENT_TITLEBAR_BOTTOM)
+HANDLE_TITLEBAR(left, CLIENT_TITLEBAR_LEFT)
+
 /** Return client geometry.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
@@ -1684,6 +1874,10 @@ client_class_setup(lua_State *L)
         { "raise", luaA_client_raise },
         { "lower", luaA_client_lower },
         { "unmanage", luaA_client_unmanage },
+        { "titlebar_top", luaA_client_titlebar_top },
+        { "titlebar_right", luaA_client_titlebar_right },
+        { "titlebar_bottom", luaA_client_titlebar_bottom },
+        { "titlebar_left", luaA_client_titlebar_left },
         { NULL, NULL }
     };
 
@@ -1813,8 +2007,11 @@ client_class_setup(lua_State *L)
     signal_add(&client_class.signals, "focus");
     signal_add(&client_class.signals, "list");
     signal_add(&client_class.signals, "manage");
+    signal_add(&client_class.signals, "button::press");
+    signal_add(&client_class.signals, "button::release");
     signal_add(&client_class.signals, "mouse::enter");
     signal_add(&client_class.signals, "mouse::leave");
+    signal_add(&client_class.signals, "mouse::move");
     signal_add(&client_class.signals, "property::above");
     signal_add(&client_class.signals, "property::below");
     signal_add(&client_class.signals, "property::class");
