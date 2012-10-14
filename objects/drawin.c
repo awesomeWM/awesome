@@ -61,14 +61,7 @@ drawin_wipe(drawin_t *w)
     /* The drawin must already be unmapped, else it
      * couldn't be garbage collected -> no unmap needed */
     p_delete(&w->cursor);
-    if(w->surface)
-    {
-        /* Make sure that cairo knows that this surface can't be unused anymore.
-         * This is needed since lua could still have a reference to it. */
-        cairo_surface_finish(w->surface);
-        cairo_surface_destroy(w->surface);
-        w->surface = NULL;
-    }
+    cairo_surface_finish(w->drawable->surface);
     if(w->window)
     {
         /* Activate BMA */
@@ -85,6 +78,8 @@ drawin_wipe(drawin_t *w)
         xcb_free_pixmap(globalconf.connection, w->pixmap);
         w->pixmap = XCB_NONE;
     }
+    luaA_object_unref_item(globalconf.L, -1, w->drawable);
+    w->drawable = NULL;
 }
 
 void
@@ -94,20 +89,14 @@ drawin_unref_simplified(drawin_t **item)
 }
 
 static void
-drawin_update_drawing(drawin_t *w)
+drawin_update_drawing(drawin_t *w, int widx)
 {
     /* If this drawin isn't visible, we don't need an up-to-date cairo surface
      * for it. (drawin_map() will later make sure we are called again) */
     if(!w->visible)
         return;
     /* Clean up old stuff */
-    if(w->surface)
-    {
-        /* In case lua still got a reference to the surface, it still won't be
-         * able to do anything with it because we finish it. */
-        cairo_surface_finish(w->surface);
-        cairo_surface_destroy(w->surface);
-    }
+    drawable_set_surface(w->drawable, NULL);
     if(w->pixmap)
         xcb_free_pixmap(globalconf.connection, w->pixmap);
 
@@ -117,14 +106,14 @@ drawin_update_drawing(drawin_t *w)
     xcb_create_pixmap(globalconf.connection, globalconf.default_depth, w->pixmap, s->root,
                       w->geometry.width, w->geometry.height);
     /* and create a surface for that pixmap */
-    w->surface = cairo_xcb_surface_create(globalconf.connection,
-                                          w->pixmap, globalconf.visual,
-                                          w->geometry.width, w->geometry.height);
-    /* Make sure the pixmap doesn't contain garbage by filling it with black */
-    cairo_t *cr = cairo_create(w->surface);
-    cairo_set_operator(cr, CAIRO_OPERATOR_CLEAR);
-    cairo_paint(cr);
-    cairo_destroy(cr);
+    cairo_surface_t *surface = cairo_xcb_surface_create(globalconf.connection,
+                                                        w->pixmap, globalconf.visual,
+                                                        w->geometry.width, w->geometry.height);
+    drawable_set_surface(w->drawable, surface);
+
+    luaA_object_push_item(globalconf.L, widx, w->drawable);
+    drawable_set_geometry(w->drawable, -1, w->geometry);
+    lua_pop(globalconf.L, 1);
 }
 
 /** Initialize a drawin.
@@ -208,7 +197,7 @@ drawin_moveresize(lua_State *L, int udx, area_t geometry)
     }
 
     if(mask_vals & (XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT))
-        drawin_update_drawing(w);
+        drawin_update_drawing(w, udx);
 
     /* Activate BMA */
     client_ignore_enterleave_events();
@@ -241,21 +230,24 @@ drawin_refresh_pixmap_partial(drawin_t *drawin,
                               int16_t x, int16_t y,
                               uint16_t w, uint16_t h)
 {
+    if (!drawin->visible)
+        return;
+
     /* Make cairo do all pending drawing */
-    cairo_surface_flush(drawin->surface);
+    cairo_surface_flush(drawin->drawable->surface);
     xcb_copy_area(globalconf.connection, drawin->pixmap,
                   drawin->window, globalconf.gc, x, y, x, y,
                   w, h);
 }
 
 static void
-drawin_map(drawin_t *drawin)
+drawin_map(drawin_t *drawin, int widx)
 {
     /* Activate BMA */
     client_ignore_enterleave_events();
     /* Map the drawin */
     xcb_map_window(globalconf.connection, drawin->window);
-    drawin_update_drawing(drawin);
+    drawin_update_drawing(drawin, widx);
     /* Deactivate BMA */
     client_restore_enterleave_events();
     /* Stack this drawin correctly */
@@ -304,7 +296,7 @@ drawin_set_visible(lua_State *L, int udx, bool v)
 
         if(drawin->visible)
         {
-            drawin_map(drawin);
+            drawin_map(drawin, udx);
             /* duplicate drawin */
             lua_pushvalue(L, udx);
             /* ref it */
@@ -344,6 +336,9 @@ drawin_allocator(lua_State *L)
     w->geometry.width = 1;
     w->geometry.height = 1;
     w->type = _NET_WM_WINDOW_TYPE_NORMAL;
+
+    drawable_allocator(L, NULL, (drawable_refresh_callback *) drawin_refresh_pixmap, w);
+    w->drawable = luaA_object_ref_item(L, -2, -1);
 
     drawin_init(w);
 
@@ -524,31 +519,16 @@ luaA_drawin_set_visible(lua_State *L, drawin_t *drawin)
     return 0;
 }
 
-/** Get a drawin's surface
+/** Get a drawin's drawable
  * \param L The Lua VM state.
  * \param drawin The drawin object.
  * \return The number of elements pushed on stack.
  */
 static int
-luaA_drawin_get_surface(lua_State *L, drawin_t *drawin)
+luaA_drawin_get_drawable(lua_State *L, drawin_t *drawin)
 {
-    /* Lua gets its own reference which it will have to destroy */
-    lua_pushlightuserdata(L, cairo_surface_reference(drawin->surface));
+    luaA_object_push_item(L, -2, drawin->drawable);
     return 1;
-}
-
-/** Refresh a drawin's content. This has to be called whenever some drawing to
- * the drawin's surface has been done and should become visible.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- */
-static int
-luaA_drawin_refresh(lua_State *L)
-{
-    drawin_t *drawin = luaA_checkudata(L, 1, &drawin_class);
-    drawin_refresh_pixmap(drawin);
-
-    return 0;
 }
 
 void
@@ -566,7 +546,6 @@ drawin_class_setup(lua_State *L)
         LUA_OBJECT_META(drawin)
         LUA_CLASS_META
         { "geometry", luaA_drawin_geometry },
-        { "refresh", luaA_drawin_refresh },
         { NULL, NULL },
     };
 
@@ -576,9 +555,9 @@ drawin_class_setup(lua_State *L)
                      NULL,
                      luaA_class_index_miss_property, luaA_class_newindex_miss_property,
                      drawin_methods, drawin_meta);
-    luaA_class_add_property(&drawin_class, "surface",
+    luaA_class_add_property(&drawin_class, "drawable",
                             NULL,
-                            (lua_class_propfunc_t) luaA_drawin_get_surface,
+                            (lua_class_propfunc_t) luaA_drawin_get_drawable,
                             NULL);
     luaA_class_add_property(&drawin_class, "visible",
                             (lua_class_propfunc_t) luaA_drawin_set_visible,

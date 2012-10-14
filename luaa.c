@@ -39,6 +39,7 @@
 #include "objects/tag.h"
 #include "objects/client.h"
 #include "objects/drawin.h"
+#include "objects/drawable.h"
 #include "screen.h"
 #include "event.h"
 #include "selection.h"
@@ -580,6 +581,9 @@ luaA_init(xdgHandle* xdg)
 
     /* Export window */
     window_class_setup(L);
+
+    /* Export drawable */
+    drawable_class_setup(L);
 
     /* Export drawin */
     drawin_class_setup(L);

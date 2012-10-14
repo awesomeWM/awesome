@@ -1,8 +1,8 @@
 /*
- * drawin.h - drawin functions header
+ * drawable.h - drawable functions header
  *
  * Copyright © 2007-2009 Julien Danjou <julien@danjou.info>
- * Copyright ©      2010 Uli Schlachter <psychon@znc.in>
+ * Copyright © 2010-2012 Uli Schlachter <psychon@znc.in>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,43 +20,33 @@
  *
  */
 
-#ifndef AWESOME_OBJECTS_DRAWIN_H
-#define AWESOME_OBJECTS_DRAWIN_H
+#ifndef AWESOME_OBJECTS_DRAWABLE_H
+#define AWESOME_OBJECTS_DRAWABLE_H
 
-#include "objects/window.h"
-#include "common/luaobject.h"
-#include "objects/drawable.h"
-#include "draw.h"
+#include "common/luaclass.h"
+#include "globalconf.h"
 
-/** Drawin type */
-struct drawin_t
+typedef void drawable_refresh_callback(void *);
+
+/** drawable type */
+struct drawable_t
 {
-    WINDOW_OBJECT_HEADER
-    /** Ontop */
-    bool ontop;
-    /** Visible */
-    bool visible;
-    /** Cursor */
-    char *cursor;
-    /** The pixmap for double buffering. */
-    xcb_pixmap_t pixmap;
-    /** The drawable for this drawin. */
-    drawable_t *drawable;
-    /** The window geometry. */
+    LUA_OBJECT_HEADER
+    /** Surface for drawing. */
+    cairo_surface_t *surface;
+    /** The geometry of the drawable (in root window coordinates). */
     area_t geometry;
+    /** Callback for refreshing. */
+    drawable_refresh_callback *refresh_callback;
+    /** Data for refresh callback. */
+    void *refresh_data;
 };
 
-void drawin_unref_simplified(drawin_t **);
-
-ARRAY_FUNCS(drawin_t *, drawin, drawin_unref_simplified)
-
-drawin_t * drawin_getbywin(xcb_window_t);
-
-void drawin_refresh_pixmap_partial(drawin_t *, int16_t, int16_t, uint16_t, uint16_t);
-
-void drawin_class_setup(lua_State *);
-
-lua_class_t drawin_class;
+drawable_t *drawable_allocator(lua_State *, cairo_surface_t *,
+        drawable_refresh_callback *, void *);
+void drawable_set_surface(drawable_t *, cairo_surface_t *);
+void drawable_set_geometry(drawable_t *, int, area_t);
+void drawable_class_setup(lua_State *);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

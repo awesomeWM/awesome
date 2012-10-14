@@ -34,7 +34,7 @@ local function do_redraw(_wibox)
     end
 
     local geom = _wibox.drawin:geometry()
-    local cr = cairo.Context(surface(_wibox.drawin.surface))
+    local cr = cairo.Context(surface(_wibox.drawin.drawable.surface))
 
     -- Draw the background
     cr:save()
@@ -59,7 +59,7 @@ local function do_redraw(_wibox)
         _wibox:widget_at(_wibox.widget, 0, 0, geom.width, geom.height)
     end
 
-    _wibox.drawin:refresh()
+    _wibox.drawin.drawable:refresh()
 end
 
 --- Register a widget's position.

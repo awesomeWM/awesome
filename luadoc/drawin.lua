@@ -15,7 +15,7 @@ module("drawin")
 -- @field y The y coordinates.
 -- @field width The width of the drawin.
 -- @field height The height of the drawin.
--- @field surface A cairo surface as light user datum that can be used for drawing.
+-- @field drawable The drawin's drawable.
 -- @class table
 -- @name drawin
 
@@ -35,12 +35,6 @@ module("drawin")
 -- @param A table with coordinates to modify.
 -- @return A table with drawin coordinates and geometry.
 -- @name geometry
--- @class function
-
---- Refresh the drawin. When you are drawing to the window's surface, you have
--- call this function when you are done to make the result visible.
--- @param no_params luadoc is buggy.
--- @name refresh
 -- @class function
 
 --- Add a signal.

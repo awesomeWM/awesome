@@ -70,6 +70,7 @@ set(AWE_SRCS
     ${SOURCE_DIR}/common/xutil.c
     ${SOURCE_DIR}/objects/button.c
     ${SOURCE_DIR}/objects/client.c
+    ${SOURCE_DIR}/objects/drawable.c
     ${SOURCE_DIR}/objects/drawin.c
     ${SOURCE_DIR}/objects/key.c
     ${SOURCE_DIR}/objects/tag.c

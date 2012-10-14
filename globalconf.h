@@ -47,6 +47,7 @@
       | XCB_EVENT_MASK_PROPERTY_CHANGE \
     }
 
+typedef struct drawable_t drawable_t;
 typedef struct drawin_t drawin_t;
 typedef struct a_screen screen_t;
 typedef struct button_t button_t;
