@@ -27,7 +27,7 @@ end
 local function find_signal(obj, name, error_msg)
     check(obj)
     if not obj._signals[name] then
-        error("Trying to " .. error_msg .. " non-existent signal")
+        error("Trying to " .. error_msg .. " non-existent signal '" .. name .. "'")
     end
     return obj._signals[name]
 end
