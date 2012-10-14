@@ -24,6 +24,7 @@
 
 #include <xcb/xcb.h>
 #include <cairo.h>
+#include <lua.h>
 
 #include "common/util.h"
 
