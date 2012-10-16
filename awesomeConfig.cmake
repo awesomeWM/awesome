@@ -130,6 +130,7 @@ pkg_check_modules(AWESOME_COMMON_REQUIRED REQUIRED
 
 pkg_check_modules(AWESOME_REQUIRED REQUIRED
     glib-2.0
+    gdk-pixbuf-2.0
     cairo
     x11
     x11-xcb
@@ -144,7 +145,6 @@ pkg_check_modules(AWESOME_REQUIRED REQUIRED
     cairo-xcb
     libstartup-notification-1.0>=0.10
     xproto>=7.0.15
-    imlib2
     libxdg-basedir>=1.0.0)
 
 if(NOT AWESOME_REQUIRED_FOUND OR NOT AWESOME_COMMON_REQUIRED_FOUND)

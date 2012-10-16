@@ -29,7 +29,7 @@
 #include <ctype.h>
 #include <math.h>
 
-#include <Imlib2.h>
+#include <gdk-pixbuf/gdk-pixbuf.h>
 
 #include "globalconf.h"
 #include "screen.h"
@@ -98,7 +98,7 @@ free_data(void *data)
     p_delete(&data);
 }
 
-/** Create a surface object on the lua stack from this image data.
+/** Create a surface object from this image data.
  * \param L The lua stack.
  * \param width The width of the image.
  * \param height The height of the image
@@ -136,6 +136,62 @@ draw_surface_from_data(int width, int height, uint32_t *data)
     return surface;
 }
 
+/** Create a surface object from this pixbuf
+ * \param buf The pixbuf
+ * \return Number of items pushed on the lua stack.
+ */
+static cairo_surface_t *
+draw_surface_from_pixbuf(GdkPixbuf *buf)
+{
+    int width = gdk_pixbuf_get_width(buf);
+    int height = gdk_pixbuf_get_height(buf);
+    int pix_stride = gdk_pixbuf_get_rowstride(buf);
+    guchar *pixels = gdk_pixbuf_get_pixels(buf);
+    int channels = gdk_pixbuf_get_n_channels(buf);
+    cairo_surface_t *surface;
+    int cairo_stride;
+    unsigned char *cairo_pixels;
+
+    cairo_format_t format = CAIRO_FORMAT_ARGB32;
+    if (channels == 3)
+        format = CAIRO_FORMAT_RGB24;
+
+    surface = cairo_image_surface_create(format, width, height);
+    cairo_surface_flush(surface);
+    cairo_stride = cairo_image_surface_get_stride(surface);
+    cairo_pixels = cairo_image_surface_get_data(surface);
+
+    for (int y = 0; y < height; y++)
+    {
+        guchar *row = pixels;
+        uint32_t *cairo = (uint32_t *) cairo_pixels;
+        for (int x = 0; x < width; x++) {
+            if (channels == 3)
+            {
+                uint8_t r = *row++;
+                uint8_t g = *row++;
+                uint8_t b = *row++;
+                *cairo++ = (r << 16) | (g << 8) | b;
+            } else {
+                uint8_t r = *row++;
+                uint8_t g = *row++;
+                uint8_t b = *row++;
+                uint8_t a = *row++;
+                double alpha = a / 255.0;
+                r = r * alpha;
+                g = g * alpha;
+                b = b * alpha;
+                *cairo++ = (a << 24) | (r << 16) | (g << 8) | b;
+            }
+        }
+        pixels += pix_stride;
+        cairo_pixels += cairo_stride;
+    }
+
+    cairo_surface_mark_dirty(surface);
+    return surface;
+}
+
 /** Duplicate the specified image surface.
  * \param surface The surface to copy
  * \return A pointer to a new cairo image surface.
@@ -157,46 +213,6 @@ draw_dup_image_surface(cairo_surface_t *surface)
     return res;
 }
 
-static const char *
-image_imlib_load_strerror(Imlib_Load_Error e)
-{
-    switch(e)
-    {
-      case IMLIB_LOAD_ERROR_FILE_DOES_NOT_EXIST:
-        return "no such file or directory";
-      case IMLIB_LOAD_ERROR_FILE_IS_DIRECTORY:
-        return "file is a directory";
-      case IMLIB_LOAD_ERROR_PERMISSION_DENIED_TO_READ:
-        return "read permission denied";
-      case IMLIB_LOAD_ERROR_NO_LOADER_FOR_FILE_FORMAT:
-        return "no loader for file format";
-      case IMLIB_LOAD_ERROR_PATH_TOO_LONG:
-        return "path too long";
-      case IMLIB_LOAD_ERROR_PATH_COMPONENT_NON_EXISTANT:
-        return "path component non existent";
-      case IMLIB_LOAD_ERROR_PATH_COMPONENT_NOT_DIRECTORY:
-        return "path component not a directory";
-      case IMLIB_LOAD_ERROR_PATH_POINTS_OUTSIDE_ADDRESS_SPACE:
-        return "path points outside address space";
-      case IMLIB_LOAD_ERROR_TOO_MANY_SYMBOLIC_LINKS:
-        return "too many symbolic links";
-      case IMLIB_LOAD_ERROR_OUT_OF_MEMORY:
-        return "out of memory";
-      case IMLIB_LOAD_ERROR_OUT_OF_FILE_DESCRIPTORS:
-        return "out of file descriptors";
-      case IMLIB_LOAD_ERROR_PERMISSION_DENIED_TO_WRITE:
-        return "write permission denied";
-      case IMLIB_LOAD_ERROR_OUT_OF_DISK_SPACE:
-        return "out of disk space";
-      case IMLIB_LOAD_ERROR_UNKNOWN:
-        return "unknown error, that's really bad";
-      case IMLIB_LOAD_ERROR_NONE:
-        return "no error, oops";
-    }
-
-    return "unknown error";
-}
-
 /** Load the specified path into a cairo surface
  * \param L Lua state
  * \param path file to load
@@ -205,20 +221,21 @@ image_imlib_load_strerror(Imlib_Load_Error e)
 cairo_surface_t *
 draw_load_image(lua_State *L, const char *path)
 {
-    Imlib_Image imimage;
-    Imlib_Load_Error e = IMLIB_LOAD_ERROR_NONE;
+    GError *error = NULL;
     cairo_surface_t *ret;
+    GdkPixbuf *buf = gdk_pixbuf_new_from_file(path, &error);
 
-    imimage = imlib_load_image_with_error_return(path, &e);
-    if (!imimage) {
-        luaL_error(L, "Cannot load image '%s': %s", path, image_imlib_load_strerror(e));
+    if (!buf) {
+        luaL_where(L, 1);
+        lua_pushstring(L, error->message);
+        lua_concat(L, 2);
+        g_error_free(error);
+        lua_error(L);
         return NULL;
     }
 
-    imlib_context_set_image(imimage);
-    ret = draw_surface_from_data(imlib_image_get_width(),
-            imlib_image_get_height(), imlib_image_get_data_for_reading_only());
-    imlib_free_image_and_decache();
+    ret = draw_surface_from_pixbuf(buf);
+    g_object_unref(buf);
     return ret;
 }
 
