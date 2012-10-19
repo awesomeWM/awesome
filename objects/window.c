@@ -131,11 +131,11 @@ static int
 luaA_window_get_opacity(lua_State *L, window_t *window)
 {
     if(window->opacity >= 0)
-    {
         lua_pushnumber(L, window->opacity);
-        return 1;
-    }
-    return 0;
+    else
+        /* Let's always return some "good" value */
+        lua_pushnumber(L, 1);
+    return 1;
 }
 
 /** Set the window border color.
