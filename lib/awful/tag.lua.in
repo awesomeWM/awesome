@@ -479,15 +479,11 @@ function tag.withcurrent(c, startup)
 end
 
 local function attached_connect_signal_screen(screen, sig, func)
-    capi.screen[screen]:connect_signal("tag::attach", function (s, _tag)
-        _tag:connect_signal(sig, func)
+    capi.tag.connect_signal(sig, function(_tag, ...)
+        if tag.getscreen(_tag) == screen then
+            func(_tag)
+        end
     end)
-    capi.screen[screen]:connect_signal("tag::detach", function (s, _tag)
-        _tag:disconnect_signal(sig, func)
-    end)
-    for _, _tag in ipairs(tag.gettags(screen)) do
-        _tag:connect_signal(sig, func)
-    end
 end
 
 --- Add a signal to all attached tag and all tag that will be attached in the
@@ -497,9 +493,7 @@ function tag.attached_connect_signal(screen, ...)
     if screen then
         attached_connect_signal_screen(screen, ...)
     else
-        for screen = 1, capi.screen.count() do
-            attached_connect_signal_screen(screen, ...)
-        end
+        capi.tag.connect_signal(...)
     end
 end
 
