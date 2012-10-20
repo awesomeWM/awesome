@@ -32,8 +32,6 @@ struct a_screen
 {
     /** Screen geometry */
     area_t geometry;
-    /** Tag list */
-    tag_array_t tags;
     /** The signals emitted by screen objects */
     signal_array_t signals;
     /** The screen outputs informations */

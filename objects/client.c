@@ -150,7 +150,7 @@ client_maybevisible(client_t *c)
     if(c->sticky)
         return true;
 
-    foreach(tag, c->screen->tags)
+    foreach(tag, globalconf.tags)
         if(tag_get_selected(*tag) && is_client_tagged(c, *tag))
             return true;
 
@@ -959,8 +959,6 @@ client_unban(client_t *c)
 void
 client_unmanage(client_t *c, bool window_valid)
 {
-    tag_array_t *tags = &c->screen->tags;
-
     /* Reset transient_for attributes of widows that maybe referring to us */
     foreach(_tc, globalconf.clients)
     {
@@ -980,8 +978,8 @@ client_unmanage(client_t *c, bool window_valid)
             break;
         }
     stack_client_remove(c);
-    for(int i = 0; i < tags->len; i++)
-        untag_client(c, tags->tab[i]);
+    for(int i = 0; i < globalconf.tags.len; i++)
+        untag_client(c, globalconf.tags.tab[i]);
 
     luaA_object_push(globalconf.L, c);
     luaA_object_emit_signal(globalconf.L, -1, "unmanage", 0);
@@ -1185,13 +1183,12 @@ static int
 luaA_client_tags(lua_State *L)
 {
     client_t *c = luaA_checkudata(L, 1, &client_class);
-    tag_array_t *tags = &c->screen->tags;
     int j = 0;
 
     if(lua_gettop(L) == 2)
     {
         luaA_checktable(L, 2);
-        for(int i = 0; i < tags->len; i++)
+        for(int i = 0; i < globalconf.tags.len; i++)
         {
             /* Only untag if we aren't going to add this tag again */
             bool found = false;
@@ -1201,7 +1198,7 @@ luaA_client_tags(lua_State *L)
                 tag_t *t = lua_touserdata(L, -1);
                 /* Pop the value from lua_next */
                 lua_pop(L, 1);
-                if (t != tags->tab[i])
+                if (t != globalconf.tags.tab[i])
                     continue;
 
                 /* Pop the key from lua_next */
@@ -1210,7 +1207,7 @@ luaA_client_tags(lua_State *L)
                 break;
             }
             if(!found)
-                untag_client(c, tags->tab[i]);
+                untag_client(c, globalconf.tags.tab[i]);
         }
         lua_pushnil(L);
         while(lua_next(L, 2))
@@ -1219,7 +1216,7 @@ luaA_client_tags(lua_State *L)
     }
 
     lua_newtable(L);
-    foreach(tag, *tags)
+    foreach(tag, globalconf.tags)
         if(is_client_tagged(c, *tag))
         {
             luaA_object_push(L, *tag);

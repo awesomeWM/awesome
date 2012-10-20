@@ -137,6 +137,8 @@ typedef struct
     xcb_colormap_t default_cmap;
     /** Do we have to reban clients? */
     bool need_lazy_banning;
+    /** Tag list */
+    tag_array_t tags;
 } awesome_t;
 
 extern awesome_t globalconf;

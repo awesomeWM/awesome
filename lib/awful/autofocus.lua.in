@@ -24,17 +24,18 @@ local function check_focus(obj)
 end
 
 -- Give focus on tag selection change.
--- @param obj An object that should have a .screen property.
-local function check_focus_screen(obj)
-    check_focus(obj)
-    if client.focus and client.focus.screen ~= obj.screen then
-        local c = nil
-        c = aclient.focus.history.get(obj.screen, 0)
+-- @param tag A tag object
+local function check_focus_tag(t)
+    local s = atag.getscreen(t)
+    if not s then return end
+    check_focus({ screen = s })
+    if client.focus and client.focus.screen ~= s then
+        local c = aclient.focus.history.get(s, 0)
         if c then client.focus = c end
     end
 end
 
-atag.attached_connect_signal(nil, "property::selected", check_focus_screen)
+atag.attached_connect_signal(nil, "property::selected", check_focus_tag)
 client.connect_signal("unmanage", check_focus)
 client.connect_signal("tagged", check_focus)
 client.connect_signal("untagged", check_focus)

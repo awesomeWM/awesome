@@ -383,6 +383,25 @@ luaA_root_wallpaper(lua_State *L)
     return 1;
 }
 
+/** Get the screen's wallpaper
+ * \param L The Lua VM state.
+ * \return The number of element pushed on stack.
+ * \luastack
+ * \lreturn A cairo surface for the wallpaper.
+ */
+static int
+luaA_root_tags(lua_State *L)
+{
+    lua_createtable(L, globalconf.tags.len, 0);
+    for(int i = 0; i < globalconf.tags.len; i++)
+    {
+        luaA_object_push(L, globalconf.tags.tab[i]);
+        lua_rawseti(L, -2, i + 1);
+    }
+
+    return 1;
+}
+
 const struct luaL_Reg awesome_root_lib[] =
 {
     { "buttons", luaA_root_buttons },
@@ -391,6 +410,7 @@ const struct luaL_Reg awesome_root_lib[] =
     { "fake_input", luaA_root_fake_input },
     { "drawins", luaA_root_drawins },
     { "wallpaper", luaA_root_wallpaper },
+    { "tags", luaA_root_tags },
     { NULL, NULL }
 };
 

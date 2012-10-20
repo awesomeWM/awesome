@@ -143,18 +143,15 @@ function taglist.new(screen, filter, buttons, style)
         end
     end
     local uc = function (c) return u(c.screen) end
+    local ut = function (t) return u(tag.getscreen(t)) end
     capi.client.connect_signal("focus", uc)
     capi.client.connect_signal("unfocus", uc)
-    tag.attached_connect_signal(screen, "property::selected", uc)
-    tag.attached_connect_signal(screen, "property::icon", uc)
-    tag.attached_connect_signal(screen, "property::hide", uc)
-    tag.attached_connect_signal(screen, "property::name", uc)
-    capi.screen[screen]:connect_signal("tag::attach", function(screen, tag)
-            u(screen.index)
-        end)
-    capi.screen[screen]:connect_signal("tag::detach", function(screen, tag)
-            u(screen.index)
-        end)
+    tag.attached_connect_signal(screen, "property::selected", ut)
+    tag.attached_connect_signal(screen, "property::icon", ut)
+    tag.attached_connect_signal(screen, "property::hide", ut)
+    tag.attached_connect_signal(screen, "property::name", ut)
+    tag.attached_connect_signal(screen, "property::activated", ut)
+    tag.attached_connect_signal(screen, "property::screen", ut)
     capi.client.connect_signal("property::urgent", uc)
     capi.client.connect_signal("property::screen", function(c)
         -- If client change screen, refresh it anyway since we don't from

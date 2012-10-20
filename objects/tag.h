@@ -24,13 +24,11 @@
 
 #include "client.h"
 
-int tags_get_first_selected_index(screen_t *);
+int tags_get_first_selected_index(void);
 void tag_client(client_t *);
 void untag_client(client_t *, tag_t *);
 bool is_client_tagged(client_t *, tag_t *);
-void tag_view_only_byindex(screen_t *, int);
-void tag_append_to_screen(lua_State *, int, screen_t *);
-void tag_remove_from_screen(tag_t *);
+void tag_view_only_byindex(int);
 void tag_unref_simplified(tag_t **);
 
 ARRAY_FUNCS(tag_t *, tag, tag_unref_simplified)

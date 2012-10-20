@@ -120,24 +120,22 @@ local function arrange_on_tagged(c, tag)
         if c then capi.client.focus = c end
     end
 end
+local function arrange_tag(t)
+    layout.arrange(tag.getscreen(t))
+end
 
 for s = 1, capi.screen.count() do
     capi.screen[s]:add_signal("arrange")
 
-    tag.attached_connect_signal(s, "property::mwfact", arrange_prop)
-    tag.attached_connect_signal(s, "property::nmaster", arrange_prop)
-    tag.attached_connect_signal(s, "property::ncol", arrange_prop)
-    tag.attached_connect_signal(s, "property::layout", arrange_prop)
-    tag.attached_connect_signal(s, "property::windowfact", arrange_prop)
-    tag.attached_connect_signal(s, "property::selected", arrange_prop)
-    tag.attached_connect_signal(s, "tagged", arrange_prop)
+    tag.attached_connect_signal(s, "property::mwfact", arrange_tag)
+    tag.attached_connect_signal(s, "property::nmaster", arrange_tag)
+    tag.attached_connect_signal(s, "property::ncol", arrange_tag)
+    tag.attached_connect_signal(s, "property::layout", arrange_tag)
+    tag.attached_connect_signal(s, "property::windowfact", arrange_tag)
+    tag.attached_connect_signal(s, "property::selected", arrange_tag)
+    tag.attached_connect_signal(s, "property::activated", arrange_tag)
+    tag.attached_connect_signal(s, "tagged", arrange_tag)
     capi.screen[s]:connect_signal("property::workarea", function(screen)
-        layout.arrange(screen.index)
-    end)
-    capi.screen[s]:connect_signal("tag::attach", function (screen, tag)
-        layout.arrange(screen.index)
-    end)
-    capi.screen[s]:connect_signal("tag::detach", function (screen, tag)
         layout.arrange(screen.index)
     end)
     capi.screen[s]:connect_signal("padding", function (screen)

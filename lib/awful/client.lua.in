@@ -453,9 +453,10 @@ end
 -- @param c Optional client to move, otherwise the focused one is used.
 function client.movetotag(target, c)
     local sel = c or capi.client.focus
-    if sel and target.screen then
+    local s = tag.getscreen(target)
+    if sel and s then
         -- Set client on the same screen as the tag.
-        sel.screen = target.screen
+        sel.screen = s
         sel:tags({ target })
     end
 end

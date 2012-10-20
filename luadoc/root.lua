@@ -44,3 +44,9 @@ module("root")
 -- @return A cairo surface or nothing.
 -- @name wallpaper
 -- @class function
+
+--- Get the attached tags.
+-- @param -
+-- @return A table with all tags.
+-- @name tags
+-- @class function

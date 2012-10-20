@@ -116,8 +116,8 @@ function tasklist.new(screen, filter, buttons, style)
 
     local data = setmetatable({}, { __mode = 'k' })
     local u = function () tasklist_update(screen, w, buttons, filter, data, style) end
-    capi.screen[screen]:connect_signal("tag::detach", u)
     tag.attached_connect_signal(screen, "property::selected", u)
+    tag.attached_connect_signal(screen, "property::activated", u)
     capi.client.connect_signal("property::urgent", u)
     capi.client.connect_signal("property::sticky", u)
     capi.client.connect_signal("property::ontop", u)

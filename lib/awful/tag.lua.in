@@ -16,7 +16,8 @@ local capi =
     tag = tag,
     screen = screen,
     mouse = mouse,
-    client = client
+    client = client,
+    root = root
 }
 
 --- Useful functions for tag manipulation.
@@ -60,8 +61,8 @@ end
 -- @return The created tag
 function tag.add(name, props)
     local properties = props or {}
-    local newtag = capi.tag{name = name}
-    newtag.screen = properties.screen or capi.mouse.screen
+    local newtag = capi.tag{ name = name, activated = true }
+    properties.screen = properties.screen or capi.mouse.screen
 
     for k, v in pairs(properties) do
         tag.setproperty(newtag, k, v)
@@ -232,7 +233,27 @@ end
 -- @param s Screen number
 -- @return A table with all available tags
 function tag.gettags(s)
-    return capi.screen[s]:tags()
+    local tags = {}
+    for i, t in ipairs(root.tags()) do
+        if tag.getscreen(t) == s then
+            table.insert(tags, t)
+        end
+    end
+    return tags
+end
+
+--- Set a tag's screen
+-- @param t tag object
+-- @param s Screen number
+function tag.setscreen(t, s)
+    tag.setproperty(t, "screen", s)
+end
+
+--- Get a tag's screen
+-- @param t tag object
+-- @return Screen number
+function tag.getscreen(t)
+    return tag.getproperty(t, "screen")
 end
 
 --- Return a table with all visible tags
@@ -472,9 +493,16 @@ end
 -- @param startup Optional: don't do anything if true.
 function tag.withcurrent(c, startup)
     if startup ~= true then
-        if #c:tags() == 0 then
-            c:tags(tag.selectedlist(c.screen))
+        local tags = {}
+        for k, t in ipairs(c:tags()) do
+            if tag.getscreen(t) == c.screen then
+                table.insert(tags, t)
+            end
         end
+        if #tags == 0 then
+            tags = tag.selectedlist(c.screen)
+        end
+        c:tags(tags)
     end
 end
 
@@ -524,6 +552,7 @@ capi.tag.add_signal("property::mwfact")
 capi.tag.add_signal("property::ncol")
 capi.tag.add_signal("property::nmaster")
 capi.tag.add_signal("property::windowfact")
+capi.tag.add_signal("property::screen")
 
 for s = 1, capi.screen.count() do
     capi.screen[s]:add_signal("tag::history::update")

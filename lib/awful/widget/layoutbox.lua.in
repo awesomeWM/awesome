@@ -30,8 +30,8 @@ function layoutbox.new(screen)
     local w = imagebox()
     update(w, screen)
 
-    local function update_on_tag_selection(tag)
-        return update(w, tag.screen)
+    local function update_on_tag_selection(t)
+        return update(w, tag.getscreen(t))
     end
 
     tag.attached_connect_signal(screen, "property::selected", update_on_tag_selection)

@@ -239,7 +239,7 @@ ewmh_update_net_client_list_stacking(void)
 void
 ewmh_update_net_numbers_of_desktop(void)
 {
-    uint32_t count = globalconf.screens.tab[0].tags.len;
+    uint32_t count = globalconf.tags.len;
 
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
 			globalconf.screen->root,
@@ -249,7 +249,7 @@ ewmh_update_net_numbers_of_desktop(void)
 void
 ewmh_update_net_current_desktop(void)
 {
-    uint32_t idx = tags_get_first_selected_index(&globalconf.screens.tab[0]);
+    uint32_t idx = tags_get_first_selected_index();
 
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
                         globalconf.screen->root,
@@ -263,7 +263,7 @@ ewmh_update_net_desktop_names(void)
 
     buffer_inita(&buf, BUFSIZ);
 
-    foreach(tag, globalconf.screens.tab[0].tags)
+    foreach(tag, globalconf.tags)
     {
         buffer_adds(&buf, tag_get_name(*tag));
         buffer_addc(&buf, '\0');
@@ -380,7 +380,7 @@ ewmh_process_client_message(xcb_client_message_event_t *ev)
     client_t *c;
 
     if(ev->type == _NET_CURRENT_DESKTOP)
-        tag_view_only_byindex(&globalconf.screens.tab[0], ev->data.data32[0]);
+        tag_view_only_byindex(ev->data.data32[0]);
     else if(ev->type == _NET_CLOSE_WINDOW)
     {
         if((c = client_getbywin(ev->window)))
@@ -390,19 +390,17 @@ ewmh_process_client_message(xcb_client_message_event_t *ev)
     {
         if((c = client_getbywin(ev->window)))
         {
-            tag_array_t *tags = &c->screen->tags;
-
             if(ev->data.data32[0] == 0xffffffff)
                 c->sticky = true;
             else
-                for(int i = 0; i < tags->len; i++)
+                for(int i = 0; i < globalconf.tags.len; i++)
                     if((int)ev->data.data32[0] == i)
                     {
-                        luaA_object_push(globalconf.L, tags->tab[i]);
+                        luaA_object_push(globalconf.L, globalconf.tags.tab[i]);
                         tag_client(c);
                     }
                     else
-                        untag_client(c, tags->tab[i]);
+                        untag_client(c, globalconf.tags.tab[i]);
         }
     }
     else if(ev->type == _NET_WM_STATE)
@@ -433,10 +431,9 @@ void
 ewmh_client_update_desktop(client_t *c)
 {
     int i;
-    tag_array_t *tags = &c->screen->tags;
 
-    for(i = 0; i < tags->len; i++)
-        if(is_client_tagged(c, tags->tab[i]))
+    for(i = 0; i < globalconf.tags.len; i++)
+        if(is_client_tagged(c, globalconf.tags.tab[i]))
         {
             xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
                                 c->window, _NET_WM_DESKTOP, XCB_ATOM_CARDINAL, 32, 1, &i);
@@ -509,25 +506,23 @@ ewmh_client_check_hints(client_t *c)
     reply = xcb_get_property_reply(globalconf.connection, c0, NULL);
     if(reply && reply->value_len && (data = xcb_get_property_value(reply)))
     {
-        tag_array_t *tags = &c->screen->tags;
-
         desktop = *(uint32_t *) data;
         if(desktop == -1)
             c->sticky = true;
-        else if (desktop >= 0 && desktop < tags->len)
-            for(int i = 0; i < tags->len; i++)
+        else if (desktop >= 0 && desktop < globalconf.tags.len)
+            for(int i = 0; i < globalconf.tags.len; i++)
                 if(desktop == i)
                 {
-                    luaA_object_push(globalconf.L, tags->tab[i]);
+                    luaA_object_push(globalconf.L, globalconf.tags.tab[i]);
                     tag_client(c);
                 }
                 else
-                    untag_client(c, tags->tab[i]);
+                    untag_client(c, globalconf.tags.tab[i]);
         else
             /* Value out of bounds, just give it the first tag */
-            if (tags->len > 0)
+            if (globalconf.tags.len > 0)
             {
-                luaA_object_push(globalconf.L, tags->tab[0]);
+                luaA_object_push(globalconf.L, globalconf.tags.tab[0]);
                 tag_client(c);
             }
     }

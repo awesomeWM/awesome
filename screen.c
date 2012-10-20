@@ -60,8 +60,6 @@ static void
 screen_add(screen_t new_screen)
 {
     signal_add(&new_screen.signals, "property::workarea");
-    signal_add(&new_screen.signals, "tag::attach");
-    signal_add(&new_screen.signals, "tag::detach");
     screen_array_append(&globalconf.screens, new_screen);
 }
 
@@ -352,11 +350,6 @@ screen_client_moveto(client_t *c, screen_t *new_screen, bool doresize)
 
     c->screen = new_screen;
 
-    /* If client was on a screen, remove old tags */
-    if(old_screen)
-        foreach(old_tag, old_screen->tags)
-            untag_client(c, *old_tag);
-
     if(!doresize)
     {
         luaA_object_push(globalconf.L, c);
@@ -431,45 +424,6 @@ luaA_screen_module_index(lua_State *L)
     int screen = luaL_checknumber(L, 2) - 1;
     luaA_checkscreen(screen);
     return luaA_pushscreen(L, &globalconf.screens.tab[screen]);
-}
-
-/** Get screen tags.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- * \luastack
- * \lparam None or a table of tags to set to the screen.
- * The table must contains at least one tag.
- * \return A table with all screen tags.
- */
-static int
-luaA_screen_tags(lua_State *L)
-{
-    screen_t **ps = luaL_checkudata(L, 1, "screen");
-    screen_t *s = *ps;
-
-    if(lua_gettop(L) == 2)
-    {
-        luaA_checktable(L, 2);
-
-        /* Detach all tags, but go backward since the array len will change */
-        for(int i = s->tags.len - 1; i >= 0; i--)
-            tag_remove_from_screen(s->tags.tab[i]);
-
-        lua_pushnil(L);
-        while(lua_next(L, 2))
-            tag_append_to_screen(L, -1, s);
-    }
-    else
-    {
-        lua_createtable(L, s->tags.len, 0);
-        for(int i = 0; i < s->tags.len; i++)
-        {
-            luaA_object_push(L, s->tags.tab[i]);
-            lua_rawseti(L, -2, i + 1);
-        }
-    }
-
-    return 1;
 }
 
 /** A screen.
@@ -675,7 +629,6 @@ const struct luaL_Reg awesome_screen_meta[] =
     { "connect_signal", luaA_screen_connect_signal },
     { "disconnect_signal", luaA_screen_disconnect_signal },
     { "emit_signal", luaA_screen_emit_signal },
-    { "tags", luaA_screen_tags },
     { "__index", luaA_screen_index },
     { "__eq", luaA_screen_equal },
     { NULL, NULL }

@@ -34,9 +34,3 @@ module("screen")
 -- @param ... Various arguments, optional.
 -- @name emit_signal
 -- @class function
-
---- Get or set screen tags.
--- @param tags_table None or a table of tags to set to the screen.
--- The table must contains at least one tag.
--- @name tags
--- @class function

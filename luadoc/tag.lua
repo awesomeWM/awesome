@@ -5,8 +5,8 @@ module("tag")
 
 --- Tag object.
 -- @field name Tag name.
--- @field screen Screen number of the tag.
--- @field selected True if the client is selected to be viewed.
+-- @field selected True if the tag is selected to be viewed.
+-- @field activated True if the tag is active and can be used.
 -- @class table
 -- @name tag
 
