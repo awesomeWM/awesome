@@ -102,7 +102,7 @@ end
 
 local function taglist_update(s, w, buttons, filter, data, style)
     local tags = {}
-    for k, t in ipairs(capi.screen[s]:tags()) do
+    for k, t in ipairs(tag.gettags(s)) do
         if not tag.getproperty(t, "hide") and filter(t) then
             table.insert(tags, t)
         end

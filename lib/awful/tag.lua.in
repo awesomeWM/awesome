@@ -228,12 +228,19 @@ function tag.history.restore(screen, idx)
     if i ~= "previous" then table.remove(data.history[s], i) end
 end
 
+--- Get a list of all tags on a screen
+-- @param s Screen number
+-- @return A table with all available tags
+function tag.gettags(s)
+    return capi.screen[s]:tags()
+end
+
 --- Return a table with all visible tags
 -- @param s Screen number.
 -- @return A table with all selected tags.
 function tag.selectedlist(s)
     local screen = s or capi.mouse.screen
-    local tags = capi.screen[screen]:tags()
+    local tags = tag.gettags(screen)
     local vtags = {}
     for i, t in pairs(tags) do
         if t.selected then
@@ -335,7 +342,7 @@ end
 --- View no tag.
 -- @param Optional screen number.
 function tag.viewnone(screen)
-    local tags = capi.screen[screen or capi.mouse.screen]:tags()
+    local tags = tag.gettags(screen or capi.mouse.screen)
     for i, t in pairs(tags) do
         t.selected = false
     end
@@ -346,7 +353,7 @@ end
 -- @param screen Optional screen number.
 function tag.viewidx(i, screen)
     local screen = screen or capi.mouse.screen
-    local tags = capi.screen[screen]:tags()
+    local tags = tag.gettags(screen)
     local showntags = {}
     for k, t in ipairs(tags) do
         if not tag.getproperty(t, "hide") then
@@ -363,14 +370,14 @@ function tag.viewidx(i, screen)
     capi.screen[screen]:emit_signal("tag::history::update")
 end
 
---- Get a tag's index in the screen[]:tags() table.
+--- Get a tag's index in the gettags() table.
 -- @param query_tag The tag object to find. [selected()]
 -- @return The index of the tag, nil if the tag is not found.
 function tag.getidx(query_tag)
     local query_tag = query_tag or tag.selected()
     if query_tag == nil then return end
 
-    for i, t in ipairs(capi.screen[query_tag.screen]:tags()) do
+    for i, t in ipairs(tag.gettags(query_tag.screen)) do
         if t == query_tag then
             return i
         end
@@ -392,7 +399,7 @@ end
 --- View only a tag.
 -- @param t The tag object.
 function tag.viewonly(t)
-    local tags = capi.screen[t.screen]:tags()
+    local tags = tag.gettags(tag.getscreen(t))
     -- First, untag everyone except the viewed tag.
     for _, _tag in pairs(tags) do
         if _tag ~= t then
@@ -403,14 +410,14 @@ function tag.viewonly(t)
     -- We need to do that in 2 operations so we avoid flickering and several tag
     -- selected at the same time.
     t.selected = true
-    capi.screen[t.screen]:emit_signal("tag::history::update")
+    capi.screen[tag.getscreen(t)]:emit_signal("tag::history::update")
 end
 
 --- View only a set of tags.
 -- @param tags A table with tags to view only.
 -- @param screen Optional screen number of the tags.
 function tag.viewmore(tags, screen)
-    local screen_tags = capi.screen[screen or capi.mouse.screen]:tags()
+    local screen_tags = tag.gettags(screen or capi.mouse.screen)
     for _, _tag in ipairs(screen_tags) do
         if not util.table.hasitem(tags, _tag) then
             _tag.selected = false
@@ -426,7 +433,7 @@ end
 -- @param tag Tag to be toggled
 function tag.viewtoggle(t)
     t.selected = not t.selected
-    capi.screen[t.screen]:emit_signal("tag::history::update")
+    capi.screen[tag.getscreen(t)]:emit_signal("tag::history::update")
 end
 
 --- Get tag data table.
@@ -478,7 +485,7 @@ local function attached_connect_signal_screen(screen, sig, func)
     capi.screen[screen]:connect_signal("tag::detach", function (s, _tag)
         _tag:disconnect_signal(sig, func)
     end)
-    for _, _tag in ipairs(capi.screen[screen]:tags()) do
+    for _, _tag in ipairs(tag.gettags(screen)) do
         _tag:connect_signal(sig, func)
     end
 end
