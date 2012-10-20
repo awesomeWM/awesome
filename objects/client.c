@@ -646,7 +646,8 @@ client_resize_do(client_t *c, area_t geometry)
         drawable_t *drawable = titlebar_get_drawable(globalconf.L, c, -1, bar);
 
         /* Get rid of the old state */
-        drawable_set_surface(drawable, NULL);
+        luaA_object_push_item(globalconf.L, -1, drawable);
+        drawable_set_surface(drawable, -1, NULL);
         if (c->titlebar[bar].pixmap != XCB_NONE)
             xcb_free_pixmap(globalconf.connection, c->titlebar[bar].pixmap);
 
@@ -660,13 +661,12 @@ client_resize_do(client_t *c, area_t geometry)
             cairo_surface_t *surface = cairo_xcb_surface_create(globalconf.connection,
                                                                 c->titlebar[bar].pixmap, globalconf.visual,
                                                                 area.width, area.height);
-            drawable_set_surface(drawable, surface);
+            drawable_set_surface(drawable, -1, surface);
         }
 
         /* Convert to global coordinates */
         area.x += geometry.x;
         area.y += geometry.y;
-        luaA_object_push_item(globalconf.L, -1, drawable);
         drawable_set_geometry(drawable, -1, area);
 
         /* Pop the client and the drawable */
@@ -1361,7 +1361,7 @@ titlebar_get_drawable(lua_State *L, client_t *c, int cl_idx, client_titlebar_t b
     if (c->titlebar[bar].drawable == NULL)
     {
         cl_idx = luaA_absindex(L, cl_idx);
-        drawable_allocator(L, NULL, (drawable_refresh_callback *) client_refresh, c);
+        drawable_allocator(L, (drawable_refresh_callback *) client_refresh, c);
         c->titlebar[bar].drawable = luaA_object_ref_item(L, cl_idx, -1);
     }
 

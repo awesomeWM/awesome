@@ -42,9 +42,8 @@ struct drawable_t
     void *refresh_data;
 };
 
-drawable_t *drawable_allocator(lua_State *, cairo_surface_t *,
-        drawable_refresh_callback *, void *);
-void drawable_set_surface(drawable_t *, cairo_surface_t *);
+drawable_t *drawable_allocator(lua_State *, drawable_refresh_callback *, void *);
+void drawable_set_surface(drawable_t *, int, cairo_surface_t *);
 void drawable_set_geometry(drawable_t *, int, area_t);
 void drawable_class_setup(lua_State *);
 

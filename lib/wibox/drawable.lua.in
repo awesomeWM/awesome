@@ -201,10 +201,7 @@ function drawable.new(d, widget_arg)
         end
     end
     capi.awesome.connect_signal("wallpaper_changed", ret.draw)
-    d:connect_signal("property::x", ret.draw)
-    d:connect_signal("property::y", ret.draw)
-    d:connect_signal("property::width", ret.draw)
-    d:connect_signal("property::height", ret.draw)
+    d:connect_signal("property::surface", ret.draw)
 
     -- Set the default background
     ret:set_bg(beautiful.bg_normal)

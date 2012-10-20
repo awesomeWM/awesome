@@ -29,23 +29,26 @@ static lua_class_t drawable_class;
 LUA_OBJECT_FUNCS(drawable_class, drawable_t, drawable)
 
 drawable_t *
-drawable_allocator(lua_State *L, cairo_surface_t *surface, drawable_refresh_callback *callback, void *data)
+drawable_allocator(lua_State *L, drawable_refresh_callback *callback, void *data)
 {
     drawable_t *d = drawable_new(L);
     d->refresh_callback = callback;
     d->refresh_data = data;
-    drawable_set_surface(d, surface);
+    d->surface = NULL;
     return d;
 }
 
 static void
 drawable_wipe(drawable_t *d)
 {
-    drawable_set_surface(d, NULL);
+    if (!d->surface)
+        return;
+    cairo_surface_finish(d->surface);
+    cairo_surface_destroy(d->surface);
 }
 
 void
-drawable_set_surface(drawable_t *d, cairo_surface_t *surface)
+drawable_set_surface(drawable_t *d, int didx, cairo_surface_t *surface)
 {
     if (d->surface) {
         cairo_surface_finish(d->surface);
@@ -54,13 +57,14 @@ drawable_set_surface(drawable_t *d, cairo_surface_t *surface)
 
     d->surface = cairo_surface_reference(surface);
 
-    if (d->surface != NULL)
+    if (d->surface)
     {
         /* Make sure the surface doesn't contain garbage by filling it with black */
         cairo_t *cr = cairo_create(surface);
         cairo_set_operator(cr, CAIRO_OPERATOR_CLEAR);
         cairo_paint(cr);
         cairo_destroy(cr);
+        luaA_object_emit_signal(globalconf.L, didx, "property::surface", 0);
     }
 }
 
@@ -157,6 +161,7 @@ drawable_class_setup(lua_State *L)
     signal_add(&drawable_class.signals, "property::width");
     signal_add(&drawable_class.signals, "property::x");
     signal_add(&drawable_class.signals, "property::y");
+    signal_add(&drawable_class.signals, "property::surface");
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

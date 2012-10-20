@@ -96,7 +96,8 @@ drawin_update_drawing(drawin_t *w, int widx)
     if(!w->visible)
         return;
     /* Clean up old stuff */
-    drawable_set_surface(w->drawable, NULL);
+    luaA_object_push_item(globalconf.L, widx, w->drawable);
+    drawable_set_surface(w->drawable, -1, NULL);
     if(w->pixmap)
         xcb_free_pixmap(globalconf.connection, w->pixmap);
 
@@ -109,9 +110,7 @@ drawin_update_drawing(drawin_t *w, int widx)
     cairo_surface_t *surface = cairo_xcb_surface_create(globalconf.connection,
                                                         w->pixmap, globalconf.visual,
                                                         w->geometry.width, w->geometry.height);
-    drawable_set_surface(w->drawable, surface);
-
-    luaA_object_push_item(globalconf.L, widx, w->drawable);
+    drawable_set_surface(w->drawable, -1, surface);
     drawable_set_geometry(w->drawable, -1, w->geometry);
     lua_pop(globalconf.L, 1);
 }
@@ -337,7 +336,7 @@ drawin_allocator(lua_State *L)
     w->geometry.height = 1;
     w->type = _NET_WM_WINDOW_TYPE_NORMAL;
 
-    drawable_allocator(L, NULL, (drawable_refresh_callback *) drawin_refresh_pixmap, w);
+    drawable_allocator(L, (drawable_refresh_callback *) drawin_refresh_pixmap, w);
     w->drawable = luaA_object_ref_item(L, -2, -1);
 
     drawin_init(w);
