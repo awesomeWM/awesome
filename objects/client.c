@@ -990,6 +990,25 @@ client_unmanage(client_t *c, bool window_valid)
     if(strut_has_value(&c->strut))
         screen_emit_signal(globalconf.L, c->screen, "property::workarea", 0);
 
+    /* Get rid of all titlebars */
+    for (client_titlebar_t bar = CLIENT_TITLEBAR_TOP; bar < CLIENT_TITLEBAR_COUNT; bar++) {
+        if (c->titlebar[bar].drawable == NULL)
+            continue;
+
+        luaA_object_push(globalconf.L, c);
+        luaA_object_push_item(globalconf.L, -1, c->titlebar[bar].drawable);
+
+        /* Make the drawable unusable */
+        drawable_set_surface(c->titlebar[bar].drawable, -1, NULL);
+        if (c->titlebar[bar].pixmap != XCB_NONE)
+            xcb_free_pixmap(globalconf.connection, c->titlebar[bar].pixmap);
+
+        /* And forget about it */
+        luaA_object_unref_item(globalconf.L, -2, c->titlebar[bar].drawable);
+        c->titlebar[bar].drawable = NULL;
+        lua_pop(globalconf.L, 2);
+    }
+
     /* Clear our event mask so that we don't receive any events from now on,
      * especially not for the following requests. */
     if(window_valid)
