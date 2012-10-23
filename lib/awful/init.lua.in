@@ -29,6 +29,7 @@ return
     tooltip = require("awful.tooltip");
     ewmh = require("awful.ewmh");
     icccm = require("awful.icccm");
+    titlebar = require("awful.titlebar");
 }
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
