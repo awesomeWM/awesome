@@ -375,8 +375,8 @@ main(int argc, char **argv)
     if (globalconf.display == NULL) {
         fatal("cannot open display");
     }
+    XSetEventQueueOwner(globalconf.display, XCBOwnsEventQueue);
     globalconf.default_screen = XDefaultScreen(globalconf.display);
-
     globalconf.connection = XGetXCBConnection(globalconf.display);
 
     /* Double checking that connection is good and operatable with xcb */
