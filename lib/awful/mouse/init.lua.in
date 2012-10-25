@@ -234,8 +234,9 @@ function mouse.client.dragtotag.widget(c)
                                   local w = mouse.widget_under_pointer()
                                   if w and widget.taglist.gettag(w) then
                                       local t = widget.taglist.gettag(w)
-                                      if t.screen ~= c.screen then
-                                          aclient.movetoscreen(c, t.screen)
+                                      local s = tag.getscreen(t)
+                                      if s ~= c.screen then
+                                          aclient.movetoscreen(c, s)
                                       end
                                       aclient.movetotag(t, c)
                                   end

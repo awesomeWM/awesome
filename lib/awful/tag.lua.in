@@ -37,7 +37,7 @@ tag.history.limit = 20
 -- @param new_index Integer absolute position in the table to insert.
 function tag.move(new_index, target_tag)
     local target_tag = target_tag or tag.selected()
-    local scr = target_tag.screen
+    local scr = tag.getscreen(target_tag)
     local tmp_tags = capi.screen[scr]:tags()
 
     if (not new_index) or (new_index < 1) or (new_index > #tmp_tags) then
@@ -117,8 +117,8 @@ function tag.delete(target_tag, fallback_tag)
     local target_tag = target_tag or tag.selected()
     if target_tag == nil then return end
 
-    local ntags = #capi.screen[target_tag.screen]:tags()
-    local target_scr = target_tag.screen
+    local target_scr = tag.getscreen(target_tag)
+    local ntags = #capi.screen[target_scr]:tags()
 
     -- We can't use the target tag as a fallback.
     local fallback_tag = fallback_tag
@@ -147,7 +147,7 @@ function tag.delete(target_tag, fallback_tag)
     end
 
     -- delete the tag
-    target_tag.screen = nil
+    data.tags[target_tag].screen = nil
 
     -- If no tags are visible, try and view one.
     if tag.selected(target_scr) == nil and ntags > 0 then
@@ -398,7 +398,7 @@ function tag.getidx(query_tag)
     local query_tag = query_tag or tag.selected()
     if query_tag == nil then return end
 
-    for i, t in ipairs(tag.gettags(query_tag.screen)) do
+    for i, t in ipairs(tag.gettags(tag.getscreen(query_tag))) do
         if t == query_tag then
             return i
         end
