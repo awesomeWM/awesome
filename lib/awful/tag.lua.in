@@ -38,7 +38,7 @@ tag.history.limit = 20
 function tag.move(new_index, target_tag)
     local target_tag = target_tag or tag.selected()
     local scr = tag.getscreen(target_tag)
-    local tmp_tags = capi.screen[scr]:tags()
+    local tmp_tags = tag.gettags(scr)
 
     if (not new_index) or (new_index < 1) or (new_index > #tmp_tags) then
         return
@@ -52,7 +52,10 @@ function tag.move(new_index, target_tag)
     end
 
     table.insert(tmp_tags, new_index, target_tag)
-    capi.screen[scr]:tags(tmp_tags)
+
+    for _, tmp_tag in ipairs(tmp_tags) do
+        tag.setscreen(tmp_tag, scr)
+    end
 end
 
 --- Add a tag.
@@ -99,7 +102,7 @@ function tag.find_fallback(screen, invalids)
     local scr = screen or capi.mouse.screen
     local t = invalids or tag.selectedlist(scr)
 
-    for _, v in pairs(capi.screen[scr]:tags()) do
+    for _, v in pairs(tag.gettags(scr)) do
         if not util.table.hasitem(t, v) then return v end
     end
 end
@@ -118,7 +121,7 @@ function tag.delete(target_tag, fallback_tag)
     if target_tag == nil then return end
 
     local target_scr = tag.getscreen(target_tag)
-    local ntags = #capi.screen[target_scr]:tags()
+    local ntags = #tag.gettags(target_scr)
 
     -- We can't use the target tag as a fallback.
     local fallback_tag = fallback_tag
@@ -153,7 +156,7 @@ function tag.delete(target_tag, fallback_tag)
     if tag.selected(target_scr) == nil and ntags > 0 then
         tag.history.restore()
         if tag.selected(target_scr) == nil then
-            capi.screen[target_scr]:tags()[1].selected = true
+            tag.gettags(target_scr)[1].selected = true
         end
     end
 
