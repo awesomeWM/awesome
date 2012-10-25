@@ -174,7 +174,7 @@ function rules.apply(c)
             aclient.floating.set(c, value)
         elseif property == "tag" then
             c:tags({ value })
-            c.screen = value.screen
+            c.screen = atag.getscreen(value)
         elseif property == "switchtotag" and value and props.tag then
             atag.viewonly(props.tag)
         elseif property == "height" or property == "width" or
