@@ -584,6 +584,22 @@ HANDLE_GEOM(height)
     lua_pop(globalconf.L, 1);
 }
 
+/** Send a synthetic configure event to a window.
+ */
+void
+client_send_configure(client_t *c)
+{
+    area_t geometry = c->geometry;
+    geometry.x += c->titlebar[CLIENT_TITLEBAR_LEFT].size;
+    geometry.y += c->titlebar[CLIENT_TITLEBAR_TOP].size;
+    geometry.width -= c->titlebar[CLIENT_TITLEBAR_LEFT].size;
+    geometry.width -= c->titlebar[CLIENT_TITLEBAR_RIGHT].size;
+    geometry.height -= c->titlebar[CLIENT_TITLEBAR_TOP].size;
+    geometry.height -= c->titlebar[CLIENT_TITLEBAR_BOTTOM].size;
+
+    xwindow_configure(c->window, geometry, c->border_width);
+}
+
 static void
 client_resize_do(client_t *c, area_t geometry)
 {
@@ -610,16 +626,16 @@ client_resize_do(client_t *c, area_t geometry)
     real_geometry.height -= c->titlebar[CLIENT_TITLEBAR_TOP].size;
     real_geometry.height -= c->titlebar[CLIENT_TITLEBAR_BOTTOM].size;
 
-    xcb_configure_window(globalconf.connection, c->window,
-            XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
-            (uint32_t[]) { real_geometry.x, real_geometry.y, real_geometry.width, real_geometry.height });
     xcb_configure_window(globalconf.connection, c->frame_window,
             XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
             (uint32_t[]) { geometry.x, geometry.y, geometry.width, geometry.height });
+    xcb_configure_window(globalconf.connection, c->window,
+            XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
+            (uint32_t[]) { real_geometry.x, real_geometry.y, real_geometry.width, real_geometry.height });
 
     if(send_notice)
         /* We are moving without changing the size, see ICCCM 4.2.3 */
-        xwindow_configure(c->window, geometry, c->border_width);
+        client_send_configure(c);
 
     client_restore_enterleave_events();
 

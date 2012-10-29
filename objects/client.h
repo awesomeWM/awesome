@@ -175,6 +175,7 @@ void client_ignore_enterleave_events(void);
 void client_restore_enterleave_events(void);
 void client_refresh(client_t *);
 void client_class_setup(lua_State *);
+void client_send_configure(client_t *);
 drawable_t *client_get_drawable(client_t *, int, int);
 drawable_t *client_get_drawable_offset(client_t *, int *, int *);
 
