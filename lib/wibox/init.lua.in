@@ -88,6 +88,21 @@ local function setup_signals(_wibox)
     clone_signal("property::width")
     clone_signal("property::x")
     clone_signal("property::y")
+
+    local d = _wibox._drawable
+    local function clone_signal(name)
+        _wibox:add_signal(name)
+        -- When "name" is emitted on wibox.drawin, also emit it on wibox
+        d:connect_signal(name, function(_, ...)
+            _wibox:emit_signal(name, ...)
+        end)
+    end
+    clone_signal("button::press")
+    clone_signal("button::release")
+    clone_signal("mouse::enter")
+    clone_signal("mouse::leave")
+    clone_signal("mouse::move")
+    clone_signal("property::surface")
 end
 
 local function new(args)

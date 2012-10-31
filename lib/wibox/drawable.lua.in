@@ -174,10 +174,33 @@ local function handle_motion(_drawable, x, y)
     _drawable._widgets_under_mouse = widgets
 end
 
+local function setup_signals(_drawable)
+    local d = _drawable.drawable
+
+    local function clone_signal(name)
+        _drawable:add_signal(name)
+        -- When "name" is emitted on wibox.drawin, also emit it on wibox
+        d:connect_signal(name, function(_, ...)
+            _drawable:emit_signal(name, ...)
+        end)
+    end
+    clone_signal("button::press")
+    clone_signal("button::release")
+    clone_signal("mouse::enter")
+    clone_signal("mouse::leave")
+    clone_signal("mouse::move")
+    clone_signal("property::surface")
+    clone_signal("property::width")
+    clone_signal("property::height")
+    clone_signal("property::x")
+    clone_signal("property::y")
+end
+
 function drawable.new(d, widget_arg, redraw_hook)
     local ret = object()
     ret.drawable = d
     ret.widget_arg = widget_arg or ret
+    setup_signals(ret)
 
     for k, v in pairs(drawable) do
         if type(v) == "function" then
