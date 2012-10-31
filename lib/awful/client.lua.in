@@ -782,7 +782,7 @@ function client.setwfact(wfact, c)
     local t = tag.selected(c.screen)
     local w = client.idx(c)
 
-    local cls = client.tiled(t.screen)
+    local cls = client.tiled(tag.getscreen(t))
     local nmaster = tag.getnmaster(t)
 
     -- n is the number of windows currently visible for which we have to be concerned with the properties
