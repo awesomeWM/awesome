@@ -602,7 +602,6 @@ drawin_class_setup(lua_State *L)
     signal_add(&drawin_class.signals, "property::height");
     signal_add(&drawin_class.signals, "property::ontop");
     signal_add(&drawin_class.signals, "property::visible");
-    signal_add(&drawin_class.signals, "property::widgets");
     signal_add(&drawin_class.signals, "property::width");
     signal_add(&drawin_class.signals, "property::x");
     signal_add(&drawin_class.signals, "property::y");
