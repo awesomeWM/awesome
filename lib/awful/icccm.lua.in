@@ -13,6 +13,21 @@ local math = math
 -- Make sure we don't get into an endless loop
 local size_hints_lock = false
 
+local function get_titlebar_size(c)
+    local res, _ = {}
+    _, res.top = c:titlebar_top()
+    _, res.right = c:titlebar_right()
+    _, res.bottom = c:titlebar_bottom()
+    _, res.left = c:titlebar_left()
+
+    res.x = res.left
+    res.y = res.top
+    res.width = res.left + res.right
+    res.height = res.top + res.bottom
+
+    return res
+end
+
 local function apply_size_hints(c)
     if size_hints_lock then return end
     if not c.size_hints_honor then return end
@@ -23,6 +38,11 @@ local function apply_size_hints(c)
 
     local geom = c:geometry()
     local hints = c.size_hints
+    local titlebar = get_titlebar_size(c)
+
+    -- Apply size hints to the client size without titlebars
+    geom.width = geom.width - titlebar.width
+    geom.height = geom.height - titlebar.height
 
     local basew, baseh
     local real_basew, real_baseh = 0, 0
@@ -112,7 +132,7 @@ local function apply_size_hints(c)
         geom.height = apply_inc(geom.height, hints.height_inc, baseh)
     end
 
-    c:geometry(geom)
+    c:geometry({ width = geom.width + titlebar.width, height = geom.height + titlebar.height })
 
     size_hints_lock = false
 end
