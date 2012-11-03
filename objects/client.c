@@ -604,6 +604,7 @@ static void
 client_resize_do(client_t *c, area_t geometry, bool force_notice)
 {
     bool send_notice = force_notice;
+    bool hide_titlebars = c->fullscreen;
     screen_t *new_screen = screen_getbycoord(geometry.x, geometry.y);
 
     if(c->geometry.width == geometry.width
@@ -619,12 +620,15 @@ client_resize_do(client_t *c, area_t geometry, bool force_notice)
 
     /* Configure the client for its new size */
     area_t real_geometry = geometry;
-    real_geometry.x = c->titlebar[CLIENT_TITLEBAR_LEFT].size;
-    real_geometry.y = c->titlebar[CLIENT_TITLEBAR_TOP].size;
-    real_geometry.width -= c->titlebar[CLIENT_TITLEBAR_LEFT].size;
-    real_geometry.width -= c->titlebar[CLIENT_TITLEBAR_RIGHT].size;
-    real_geometry.height -= c->titlebar[CLIENT_TITLEBAR_TOP].size;
-    real_geometry.height -= c->titlebar[CLIENT_TITLEBAR_BOTTOM].size;
+    if (!hide_titlebars)
+    {
+        real_geometry.x = c->titlebar[CLIENT_TITLEBAR_LEFT].size;
+        real_geometry.y = c->titlebar[CLIENT_TITLEBAR_TOP].size;
+        real_geometry.width -= c->titlebar[CLIENT_TITLEBAR_LEFT].size;
+        real_geometry.width -= c->titlebar[CLIENT_TITLEBAR_RIGHT].size;
+        real_geometry.height -= c->titlebar[CLIENT_TITLEBAR_TOP].size;
+        real_geometry.height -= c->titlebar[CLIENT_TITLEBAR_BOTTOM].size;
+    }
 
     xcb_configure_window(globalconf.connection, c->frame_window,
             XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
@@ -666,10 +670,11 @@ client_resize_do(client_t *c, area_t geometry, bool force_notice)
         drawable_set_surface(drawable, -1, NULL);
         if (c->titlebar[bar].pixmap != XCB_NONE)
             xcb_free_pixmap(globalconf.connection, c->titlebar[bar].pixmap);
+        c->titlebar[bar].pixmap = XCB_NONE;
 
         /* And get us some new state */
         area_t area = titlebar_get_area(c, bar);
-        if (c->titlebar[bar].size != 0)
+        if (c->titlebar[bar].size != 0 && !hide_titlebars)
         {
             c->titlebar[bar].pixmap = xcb_generate_id(globalconf.connection);
             xcb_create_pixmap(globalconf.connection, globalconf.default_depth, c->titlebar[bar].pixmap,
@@ -683,6 +688,8 @@ client_resize_do(client_t *c, area_t geometry, bool force_notice)
         /* Convert to global coordinates */
         area.x += geometry.x;
         area.y += geometry.y;
+        if (hide_titlebars)
+            area.width = area.height = 0;
         drawable_set_geometry(drawable, -1, area);
 
         /* Pop the client and the drawable */
