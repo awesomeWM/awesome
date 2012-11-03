@@ -601,9 +601,9 @@ client_send_configure(client_t *c)
 }
 
 static void
-client_resize_do(client_t *c, area_t geometry)
+client_resize_do(client_t *c, area_t geometry, bool force_notice)
 {
-    bool send_notice = false;
+    bool send_notice = force_notice;
     screen_t *new_screen = screen_getbycoord(geometry.x, geometry.y);
 
     if(c->geometry.width == geometry.width
@@ -727,7 +727,7 @@ client_resize(client_t *c, area_t geometry)
        || c->geometry.width != geometry.width
        || c->geometry.height != geometry.height)
     {
-        client_resize_do(c, geometry);
+        client_resize_do(c, geometry, false);
 
         return true;
     }
@@ -1409,9 +1409,25 @@ titlebar_resize(client_t *c, client_titlebar_t bar, int size)
     if (size == c->titlebar[bar].size)
         return;
 
-    /* Now resize the client (and titlebars!) suitably */
+    /* Now resize the client (and titlebars!) suitably (the client without
+     * titlebars should keep its current size!) */
+    area_t geometry = c->geometry;
+    int change = size - c->titlebar[bar].size;
+    switch (bar) {
+    case CLIENT_TITLEBAR_TOP:
+    case CLIENT_TITLEBAR_BOTTOM:
+        geometry.height += change;
+        break;
+    case CLIENT_TITLEBAR_RIGHT:
+    case CLIENT_TITLEBAR_LEFT:
+        geometry.width += change;
+        break;
+    default:
+        fatal("Unknown titlebar kind %d\n", (int) bar);
+    }
+
     c->titlebar[bar].size = size;
-    client_resize_do(c, c->geometry);
+    client_resize_do(c, geometry, true);
 }
 
 #define HANDLE_TITLEBAR(name, index)                              \
