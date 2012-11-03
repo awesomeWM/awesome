@@ -16,6 +16,8 @@ local object = require("gears.object")
 local sort = require("gears.sort")
 local surface = require("gears.surface")
 
+local drawables = setmetatable({}, { __mode = 'k' })
+
 local function do_redraw(self)
     local cr = cairo.Context(surface(self.drawable.surface))
     local geom = self.drawable:geometry();
@@ -224,7 +226,7 @@ function drawable.new(d, widget_arg, redraw_hook)
             ret._redraw_pending = true
         end
     end
-    capi.awesome.connect_signal("wallpaper_changed", ret.draw)
+    drawables[ret.draw] = true
     d:connect_signal("property::surface", ret.draw)
 
     -- Set the default background
@@ -257,6 +259,14 @@ function drawable.new(d, widget_arg, redraw_hook)
 
     return ret
 end
+
+-- Redraw all drawables when the wallpaper changes
+capi.awesome.connect_signal("wallpaper_changed", function()
+    local k
+    for k in pairs(drawables) do
+        k()
+    end
+end)
 
 --- Handling of drawables. A drawable is something that can be drawn to.
 -- @class table
