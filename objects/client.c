@@ -628,6 +628,9 @@ client_resize_do(client_t *c, area_t geometry, bool force_notice)
         real_geometry.width -= c->titlebar[CLIENT_TITLEBAR_RIGHT].size;
         real_geometry.height -= c->titlebar[CLIENT_TITLEBAR_TOP].size;
         real_geometry.height -= c->titlebar[CLIENT_TITLEBAR_BOTTOM].size;
+    } else {
+        real_geometry.x = 0;
+        real_geometry.y = 0;
     }
 
     xcb_configure_window(globalconf.connection, c->frame_window,
