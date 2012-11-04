@@ -81,7 +81,6 @@ local function set_geometry(self)
     local n_w, n_h = self.widget:fit(-1, -1)
     if my_geo.width ~= n_w or my_geo.height ~= n_h then
         self.wibox:geometry({ width = n_w, height = n_h })
-        place(self)
     end
     if not self.wibox.visible then
        place(self)
@@ -125,6 +124,7 @@ local function set_text(self, text)
     self.widget:set_font(data[self].font)
     self.widget:set_markup('<span color="' .. data[self].fg
         .. '">' .. text .. "</span>")
+    set_geometry(self)
 end
 
 --- Change the tooltip's update interval.
@@ -167,7 +167,7 @@ end
 --- Create a new tooltip and link it to a widget.
 -- @param args Arguments for tooltip creation may containt:<br/>
 -- <code>timeout</code>: The timeout value for update_func.<br/>
--- <code>timer_function</code>: A function to dynamicaly change the tooltip
+-- <code>timer_function</code>: A function to dynamically change the tooltip
 --     text.<br/>
 -- <code>objects</code>: A list of objects linked to the tooltip.<br/>
 -- @return The created tooltip.
@@ -201,14 +201,13 @@ local function new(args)
         data[self].timer = timer { timeout = args.timeout and args.timeout or 1 }
         data[self].timer_function = function()
                 self:set_text(args.timer_function())
-                set_geometry(self)
             end
         data[self].timer:connect_signal("timeout", data[self].timer_function)
     end
 
     -- set tooltip properties
     self.wibox.visible = false
-    -- Who want a non ontop tooltip ?
+    -- Who wants a non ontop tooltip ?
     self.wibox.ontop = true
     self.wibox:set_widget(my_textbox)
     self.widget = my_textbox
