@@ -32,6 +32,7 @@
 #include "common/xutil.h"
 
 #include <cairo-xcb.h>
+#include <xcb/shape.h>
 
 LUA_OBJECT_FUNCS(drawin_class, drawin_t, drawin)
 
@@ -536,6 +537,38 @@ luaA_drawin_get_drawable(lua_State *L, drawin_t *drawin)
     return 1;
 }
 
+/** Set the drawin's bounding shape.
+ * \param L The Lua VM state.
+ * \param drawin The drawin object.
+ * \return The number of elements pushed on stack.
+ */
+static int
+luaA_drawin_set_shape_bounding(lua_State *L, drawin_t *drawin)
+{
+    cairo_surface_t *surf = NULL;
+    if(!lua_isnil(L, -1))
+        surf = (cairo_surface_t *)lua_touserdata(L, -1);
+    xwindow_set_shape(drawin->window, drawin->geometry.width, drawin->geometry.width,
+            XCB_SHAPE_SK_BOUNDING, surf, -drawin->border_width);
+    return 0;
+}
+
+/** Set the drawin's clip shape.
+ * \param L The Lua VM state.
+ * \param drawin The drawin object.
+ * \return The number of elements pushed on stack.
+ */
+static int
+luaA_drawin_set_shape_clip(lua_State *L, drawin_t *drawin)
+{
+    cairo_surface_t *surf = NULL;
+    if(!lua_isnil(L, -1))
+        surf = (cairo_surface_t *)lua_touserdata(L, -1);
+    xwindow_set_shape(drawin->window, drawin->geometry.width, drawin->geometry.width,
+            XCB_SHAPE_SK_CLIP, surf, 0);
+    return 0;
+}
+
 void
 drawin_class_setup(lua_State *L)
 {
@@ -596,6 +629,14 @@ drawin_class_setup(lua_State *L)
                             (lua_class_propfunc_t) luaA_window_set_type,
                             (lua_class_propfunc_t) luaA_window_get_type,
                             (lua_class_propfunc_t) luaA_window_set_type);
+    luaA_class_add_property(&drawin_class, "shape_bounding",
+                            (lua_class_propfunc_t) luaA_drawin_set_shape_bounding,
+                            NULL,
+                            (lua_class_propfunc_t) luaA_drawin_set_shape_bounding);
+    luaA_class_add_property(&drawin_class, "shape_clip",
+                            (lua_class_propfunc_t) luaA_drawin_set_shape_clip,
+                            NULL,
+                            (lua_class_propfunc_t) luaA_drawin_set_shape_clip);
 
     signal_add(&drawin_class.signals, "property::border_width");
     signal_add(&drawin_class.signals, "property::cursor");

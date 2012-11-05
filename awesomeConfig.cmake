@@ -138,6 +138,7 @@ pkg_check_modules(AWESOME_REQUIRED REQUIRED
     xcb-randr
     xcb-xtest
     xcb-xinerama
+    xcb-shape
     xcb-util>=0.3.8
     xcb-keysyms>=0.3.4
     xcb-icccm>=0.3.8

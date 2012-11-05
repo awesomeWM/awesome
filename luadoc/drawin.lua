@@ -16,6 +16,8 @@ module("drawin")
 -- @field width The width of the drawin.
 -- @field height The height of the drawin.
 -- @field drawable The drawin's drawable.
+-- @field shape_bounding The drawin's bounding shape as a (native) cairo surface.
+-- @field shape_clip The drawin's clip shape as a (native) cairo surface.
 -- @class table
 -- @name drawin
 

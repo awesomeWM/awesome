@@ -25,6 +25,8 @@
 #include "globalconf.h"
 #include "draw.h"
 
+enum xcb_shape_sk_t;
+
 void xwindow_set_state(xcb_window_t, uint32_t);
 xcb_get_property_cookie_t xwindow_get_state_unchecked(xcb_window_t);
 uint32_t xwindow_get_state_reply(xcb_get_property_cookie_t);
@@ -38,6 +40,7 @@ void xwindow_grabkeys(xcb_window_t, key_array_t *);
 void xwindow_takefocus(xcb_window_t);
 void xwindow_set_cursor(xcb_window_t, xcb_cursor_t);
 void xwindow_set_border_color(xcb_window_t, color_t *);
+void xwindow_set_shape(xcb_window_t, int, int, enum xcb_shape_sk_t, cairo_surface_t *, int);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

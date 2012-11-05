@@ -21,6 +21,8 @@
 
 #include <xcb/xcb.h>
 #include <xcb/xcb_atom.h>
+#include <xcb/shape.h>
+#include <cairo-xcb.h>
 
 #include "xwindow.h"
 #include "objects/button.h"
@@ -254,6 +256,44 @@ xwindow_set_border_color(xcb_window_t w, color_t *color)
 {
     if(w)
         xcb_change_window_attributes(globalconf.connection, w, XCB_CW_BORDER_PIXEL, &color->pixel);
+}
+
+/** Turn a cairo surface into a pixmap with depth 1 */
+static xcb_pixmap_t
+xwindow_shape_pixmap(int width, int height, cairo_surface_t *surf)
+{
+    xcb_pixmap_t pixmap = xcb_generate_id(globalconf.connection);
+    cairo_surface_t *dest;
+    cairo_t *cr;
+
+    xcb_create_pixmap(globalconf.connection, 1, pixmap, globalconf.screen->root, width, height);
+    dest = cairo_xcb_surface_create_for_bitmap(globalconf.connection, globalconf.screen, pixmap, width, height);
+
+    cr = cairo_create(dest);
+    cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
+    cairo_set_source_surface(cr, surf, 0, 0);
+    cairo_paint(cr);
+
+    cairo_destroy(cr);
+    cairo_surface_flush(dest);
+    cairo_surface_finish(dest);
+    cairo_surface_destroy(dest);
+
+    return pixmap;
+}
+
+/** Set one of a window's shapes */
+void
+xwindow_set_shape(xcb_window_t win, int width, int height, enum xcb_shape_sk_t kind, cairo_surface_t *surf, int offset)
+{
+    xcb_pixmap_t pixmap = XCB_NONE;
+    if (surf)
+        pixmap = xwindow_shape_pixmap(width, height, surf);
+
+    xcb_shape_mask(globalconf.connection, XCB_SHAPE_SO_SET, kind, win, offset, offset, pixmap);
+
+    if (pixmap != XCB_NONE)
+        xcb_free_pixmap(globalconf.connection, pixmap);
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
