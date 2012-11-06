@@ -548,7 +548,7 @@ luaA_drawin_set_shape_bounding(lua_State *L, drawin_t *drawin)
     cairo_surface_t *surf = NULL;
     if(!lua_isnil(L, -1))
         surf = (cairo_surface_t *)lua_touserdata(L, -1);
-    xwindow_set_shape(drawin->window, drawin->geometry.width, drawin->geometry.width,
+    xwindow_set_shape(drawin->window, drawin->geometry.width, drawin->geometry.height,
             XCB_SHAPE_SK_BOUNDING, surf, -drawin->border_width);
     return 0;
 }
@@ -564,7 +564,7 @@ luaA_drawin_set_shape_clip(lua_State *L, drawin_t *drawin)
     cairo_surface_t *surf = NULL;
     if(!lua_isnil(L, -1))
         surf = (cairo_surface_t *)lua_touserdata(L, -1);
-    xwindow_set_shape(drawin->window, drawin->geometry.width, drawin->geometry.width,
+    xwindow_set_shape(drawin->window, drawin->geometry.width, drawin->geometry.height,
             XCB_SHAPE_SK_CLIP, surf, 0);
     return 0;
 }
