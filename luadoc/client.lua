@@ -41,6 +41,8 @@ module("client")
 -- @field sticky Set the client sticky, i.e. available on all tags.
 -- @field modal Indicate if the client is modal.
 -- @field focusable True if the client can receive the input focus.
+-- @field shape_bounding The client's bounding shape as a (native) cairo surface.
+-- @field shape_clip The client's clip shape as a (native) cairo surface.
 -- @class table
 -- @name client
 

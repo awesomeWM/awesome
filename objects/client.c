@@ -21,6 +21,7 @@
 
 #include <xcb/xcb_atom.h>
 #include <xcb/xcb_image.h>
+#include <xcb/shape.h>
 #include <cairo-xcb.h>
 
 #include "objects/tag.h"
@@ -1843,6 +1844,38 @@ luaA_client_get_size_hints(lua_State *L, client_t *c)
     return 1;
 }
 
+/** Set the client's bounding shape.
+ * \param L The Lua VM state.
+ * \param client The client object.
+ * \return The number of elements pushed on stack.
+ */
+static int
+luaA_client_set_shape_bounding(lua_State *L, client_t *c)
+{
+    cairo_surface_t *surf = NULL;
+    if(!lua_isnil(L, -1))
+        surf = (cairo_surface_t *)lua_touserdata(L, -1);
+    xwindow_set_shape(c->frame_window, c->geometry.width, c->geometry.height,
+            XCB_SHAPE_SK_BOUNDING, surf, -c->border_width);
+    return 0;
+}
+
+/** Set the client's clip shape.
+ * \param L The Lua VM state.
+ * \param client The client object.
+ * \return The number of elements pushed on stack.
+ */
+static int
+luaA_client_set_shape_clip(lua_State *L, client_t *c)
+{
+    cairo_surface_t *surf = NULL;
+    if(!lua_isnil(L, -1))
+        surf = (cairo_surface_t *)lua_touserdata(L, -1);
+    xwindow_set_shape(c->frame_window, c->geometry.width, c->geometry.height,
+            XCB_SHAPE_SK_CLIP, surf, 0);
+    return 0;
+}
+
 /** Get or set keys bindings for a client.
  * \param L The Lua VM state.
  * \return The number of element pushed on stack.
@@ -2061,6 +2094,14 @@ client_class_setup(lua_State *L)
                             NULL,
                             (lua_class_propfunc_t) luaA_client_get_focusable,
                             NULL);
+    luaA_class_add_property(&client_class, "shape_bounding",
+                            (lua_class_propfunc_t) luaA_client_set_shape_bounding,
+                            NULL,
+                            (lua_class_propfunc_t) luaA_client_set_shape_bounding);
+    luaA_class_add_property(&client_class, "shape_clip",
+                            (lua_class_propfunc_t) luaA_client_set_shape_clip,
+                            NULL,
+                            (lua_class_propfunc_t) luaA_client_set_shape_clip);
 
     signal_add(&client_class.signals, "focus");
     signal_add(&client_class.signals, "list");
