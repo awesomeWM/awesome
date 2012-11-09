@@ -836,6 +836,8 @@ client_set_fullscreen(lua_State *L, int cidx, bool s)
         c->fullscreen = s;
         luaA_object_emit_signal(L, abs_cidx, "request::fullscreen", 1);
         luaA_object_emit_signal(L, abs_cidx, "property::fullscreen", 0);
+        /* Force a client resize, so that titlebars get shown/hidden */
+        client_resize_do(c, c->geometry, true);
         stack_windows();
     }
 }
