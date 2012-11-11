@@ -336,7 +336,7 @@ end
 -- @return A new table containing all keys from the arguments.
 function util.table.join(...)
     local ret = {}
-    for i, t in ipairs({...}) do
+    for i, t in pairs({...}) do
         if t then
             for k, v in pairs(t) do
                 if type(k) == "number" then
