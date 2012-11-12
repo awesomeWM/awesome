@@ -1857,7 +1857,9 @@ luaA_client_set_shape_bounding(lua_State *L, client_t *c)
     cairo_surface_t *surf = NULL;
     if(!lua_isnil(L, -1))
         surf = (cairo_surface_t *)lua_touserdata(L, -1);
-    xwindow_set_shape(c->frame_window, c->geometry.width, c->geometry.height,
+    xwindow_set_shape(c->frame_window,
+            c->geometry.width + (c->border_width * 2),
+            c->geometry.height + (c->border_width * 2),
             XCB_SHAPE_SK_BOUNDING, surf, -c->border_width);
     return 0;
 }
