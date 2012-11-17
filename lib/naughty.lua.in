@@ -538,25 +538,37 @@ if capi.dbus then
                 -- icon_data is an array:
                 -- 1 -> width, 2 -> height, 3 -> rowstride, 4 -> has alpha
                 -- 5 -> bits per sample, 6 -> channels, 7 -> data
+                local width, height, rowstride = hints.icon_data[1], hints.icon_data[2], hints.icon_data[3]
 
                 local imgdata = ""
+                local format, bpp
                 -- If has alpha (ARGB32)
                 if hints.icon_data[6] == 4 then
-                    for i = 1, #hints.icon_data[7], 4 do
-                        imgdata = imgdata .. hints.icon_data[7]:sub(i, i + 2):reverse()
-                        imgdata = imgdata .. hints.icon_data[7]:sub(i + 3, i + 3)
-                    end
+                    format, bpp = cairo.Format.ARGB32, 4
                 -- If has not alpha (RGB24)
                 elseif hints.icon_data[6] == 3 then
-                    for i = 1, #hints.icon_data[7], 3 do
-                        imgdata = imgdata .. hints.icon_data[7]:sub(i , i + 2):reverse()
-                        imgdata = imgdata .. string.format("%c", 255) -- alpha is 255
+                    format, bpp = cairo.Format.RGB24, 3
+                end
+                -- Figure out some stride magic (cairo dictates rowstride)
+                local stride = cairo.Format.stride_for_width(format, width)
+                local append = string.format("%c", 0):rep(stride - 4 * width)
+                local offset = 0
+                -- Now convert each row on its own
+                for y = 1, height do
+                    for i = 1 + offset, width * bpp + offset, bpp do
+                        imgdata = imgdata .. hints.icon_data[7]:sub(i, i + 2):reverse()
+                        if bpp == 4 then
+                            imgdata = imgdata .. hints.icon_data[7]:sub(i + 3, i + 3)
+                        else
+                            imgdata = imgdata .. string.format("%c", 255)
+                        end
                     end
+                    -- Handle rowstride, offset is stride for the input, append for output
+                    offset = offset + rowstride
+                    imgdata = imgdata .. append
                 end
-                if imgdata then
-                    args.icon = cairo.ImageSurface.create_for_data(imgdata,
-                        cairo.Format.ARGB32, hints.icon_data[1], hints.icon_data[2], hints.icon_data[1] * 4)
-                end
+                args.icon = cairo.ImageSurface.create_for_data(imgdata, format,
+                    width, height, stride)
             end
             if replaces_id and replaces_id ~= "" and replaces_id ~= 0 then
                 args.replaces_id = replaces_id
