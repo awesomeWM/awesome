@@ -14,56 +14,56 @@ local widget_base = require("wibox.widget.base")
 local margin = { mt = {} }
 
 --- Draw a margin layout
-function margin.draw(layout, wibox, cr, width, height)
-    local x = layout.left
-    local y = layout.top
-    local w = layout.right
-    local h = layout.bottom
+function margin:draw(wibox, cr, width, height)
+    local x = self.left
+    local y = self.top
+    local w = self.right
+    local h = self.bottom
 
-    if not layout.widget or width <= x + w or height <= y + h then
+    if not self.widget or width <= x + w or height <= y + h then
         return
     end
 
-    base.draw_widget(wibox, cr, layout.widget, x, y, width - x - w, height - y - h)
+    base.draw_widget(wibox, cr, self.widget, x, y, width - x - w, height - y - h)
 end
 
 --- Fit a margin layout into the given space
-function margin.fit(layout, width, height)
-    local extra_w = layout.left + layout.right
-    local extra_h = layout.top + layout.bottom
+function margin:fit(width, height)
+    local extra_w = self.left + self.right
+    local extra_h = self.top + self.bottom
     local w, h = 0, 0
-    if layout.widget then
-        w, h = layout.widget:fit(width - extra_w, height - extra_h)
+    if self.widget then
+        w, h = self.widget:fit(width - extra_w, height - extra_h)
     end
     return w + extra_w, h + extra_h
 end
 
 --- Set the widget that this layout adds a margin on.
-function margin.set_widget(layout, widget)
-    if layout.widget then
-        layout.widget:disconnect_signal("widget::updated", layout._emit_updated)
+function margin:set_widget(widget)
+    if self.widget then
+        self.widget:disconnect_signal("widget::updated", self._emit_updated)
     end
     if widget then
         widget_base.check_widget(widget)
-        widget:connect_signal("widget::updated", layout._emit_updated)
+        widget:connect_signal("widget::updated", self._emit_updated)
     end
-    layout.widget = widget
-    layout._emit_updated()
+    self.widget = widget
+    self._emit_updated()
 end
 
 --- Set all the margins to val.
-function margin.set_margins(layout, val)
-    layout.left = val
-    layout.right = val
-    layout.top = val
-    layout.bottom = val
-    layout:emit_signal("widget::updated")
+function margin:set_margins(val)
+    self.left = val
+    self.right = val
+    self.top = val
+    self.bottom = val
+    self:emit_signal("widget::updated")
 end
 
 --- Reset this layout. The widget will be unreferenced and the margins set to 0.
-function margin.reset(layout)
-    layout:set_widget(nil)
-    layout:set_margins(0)
+function margin:reset()
+    self:set_widget(nil)
+    self:set_margins(0)
 end
 
 --- Set the left margin that this layout adds to its widget.

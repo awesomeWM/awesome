@@ -30,39 +30,37 @@ wibox.widget = require("wibox.widget")
 wibox.drawable = require("wibox.drawable")
 
 --- Set the widget that the wibox displays
-function wibox.set_widget(_wibox, widget)
-    _wibox._drawable:set_widget(widget)
+function wibox:set_widget(widget)
+    self._drawable:set_widget(widget)
 end
 
 --- Set the background of the wibox
--- @param wibox The wibox to use
 -- @param c The background to use. This must either be a cairo pattern object,
 --          nil or a string that gears.color() understands.
-function wibox.set_bg(_wibox, c)
-    _wibox._drawable:set_bg(c)
+function wibox:set_bg(c)
+    self._drawable:set_bg(c)
 end
 
 --- Set the foreground of the wibox
--- @param wibox The wibox to use
 -- @param c The foreground to use. This must either be a cairo pattern object,
 --          nil or a string that gears.color() understands.
-function wibox.set_fg(_wibox, c)
-    _wibox._drawable:set_fg(c)
+function wibox:set_fg(c)
+    self._drawable:set_fg(c)
 end
 
 --- Helper function to make wibox:buttons() work as expected
-function wibox.buttons(box, ...)
-    return box.drawin:buttons(...)
+function wibox:buttons(...)
+    return self.drawin:buttons(...)
 end
 
 --- Helper function to make wibox:struts() work as expected
-function wibox.struts(box, ...)
-    return box.drawin:struts(...)
+function wibox:struts(...)
+    return self.drawin:struts(...)
 end
 
 --- Helper function to make wibox:geometry() work as expected
-function wibox.geometry(box, ...)
-    return box.drawin:geometry(...)
+function wibox:geometry(...)
+    return self.drawin:geometry(...)
 end
 
 local function setup_signals(_wibox)

@@ -25,10 +25,10 @@ local function transform(layout, width, height)
 end
 
 --- Draw this layout
-function rotate.draw(layout, wibox, cr, width, height)
-    if not layout.widget then return { width = 0, height = 0 } end
+function rotate:draw(wibox, cr, width, height)
+    if not self.widget then return { width = 0, height = 0 } end
 
-    local dir = layout:get_direction()
+    local dir = self:get_direction()
 
     if dir == "west" then
         cr:rotate(pi / 2)
@@ -43,39 +43,39 @@ function rotate.draw(layout, wibox, cr, width, height)
 
     -- Since we rotated, we might have to swap width and height.
     -- transform() does that for us.
-    base.draw_widget(wibox, cr, layout.widget, 0, 0, transform(layout, width, height))
+    base.draw_widget(wibox, cr, self.widget, 0, 0, transform(self, width, height))
 end
 
 --- Fit this layout into the given area
-function rotate.fit(layout, width, height)
-    if not layout.widget then
+function rotate:fit(self, width, height)
+    if not self.widget then
         return 0, 0
     end
-    return transform(layout, layout.widget:fit(transform(layout, width, height)))
+    return transform(self, self.widget:fit(transform(self, width, height)))
 end
 
 --- Set the widget that this layout rotates.
-function rotate.set_widget(layout, widget)
-    if layout.widget then
-        layout.widget:disconnect_signal("widget::updated", layout._emit_updated)
+function rotate:set_widget(widget)
+    if self.widget then
+        self.widget:disconnect_signal("widget::updated", self._emit_updated)
     end
     if widget then
         widget_base.check_widget(widget)
-        widget:connect_signal("widget::updated", layout._emit_updated)
+        widget:connect_signal("widget::updated", self._emit_updated)
     end
-    layout.widget = widget
-    layout._emit_updated()
+    self.widget = widget
+    self._emit_updated()
 end
 
 --- Reset this layout. The widget will be removed and the rotation reset.
-function rotate.reset(layout)
-    layout.direction = nil
-    layout:set_widget(nil)
+function rotate:reset()
+    self.direction = nil
+    self:set_widget(nil)
 end
 
 --- Set the direction of this rotating layout. Valid values are "north", "east",
 -- "south" and "west". On an invalid value, this function will throw an error.
-function rotate.set_direction(layout, dir)
+function rotate:set_direction(dir)
     local allowed = {
         north = true,
         east = true,
@@ -87,13 +87,13 @@ function rotate.set_direction(layout, dir)
         error("Invalid direction for rotate layout: " .. tostring(dir))
     end
 
-    layout.direction = dir
-    layout._emit_updated()
+    self.direction = dir
+    self._emit_updated()
 end
 
 --- Get the direction of this rotating layout
-function rotate.get_direction(layout)
-    return layout.direction or "north"
+function rotate:get_direction()
+    return self.direction or "north"
 end
 
 --- Returns a new rotate layout. A rotate layout rotates a given widget. Use

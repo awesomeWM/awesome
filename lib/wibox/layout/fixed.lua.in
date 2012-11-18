@@ -54,11 +54,11 @@ function fixed.draw_fixed(dir, widgets, fill_space, wibox, cr, width, height)
 end
 
 --- Add a widget to the given fixed layout
-function fixed.add(layout, widget)
+function fixed:add(widget)
     widget_base.check_widget(widget)
-    table.insert(layout.widgets, widget)
-    widget:connect_signal("widget::updated", layout._emit_updated)
-    layout._emit_updated()
+    table.insert(self.widgets, widget)
+    widget:connect_signal("widget::updated", self._emit_updated)
+    self._emit_updated()
 end
 
 --- Fit the fixed layout into the given space
@@ -102,20 +102,20 @@ function fixed.fit_fixed(dir, widgets, orig_width, orig_height)
 end
 
 --- Reset a fixed layout. This removes all widgets from the layout.
-function fixed.reset(layout)
-    for k, v in pairs(layout.widgets) do
-        v:disconnect_signal("widget::updated", layout._emit_updated)
+function fixed:reset()
+    for k, v in pairs(self.widgets) do
+        v:disconnect_signal("widget::updated", self._emit_updated)
     end
-    layout.widgets = {}
-    layout:emit_signal("widget::updated")
+    self.widgets = {}
+    self:emit_signal("widget::updated")
 end
 
 --- Set the layout's fill_space property. If this property is true, the last
 -- widget will get all the space that is left. If this is false, the last widget
 -- won't be handled specially and there can be space left unused.
-function fixed.fill_space(layout, val)
-    layout._fill_space = val
-    layout:emit_signal("widget::updated")
+function fixed:fill_space(val)
+    self._fill_space = val
+    self:emit_signal("widget::updated")
 end
 
 local function get_layout(dir)

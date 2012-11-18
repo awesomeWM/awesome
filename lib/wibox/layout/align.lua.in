@@ -74,28 +74,28 @@ local function widget_changed(layout, old_w, new_w)
 end
 
 --- Set the layout's first widget. This is the widget that is at the left/top
-function align.set_first(layout, widget)
-    widget_changed(layout, layout.first, widget)
-    layout.first = widget
+function align:set_first(widget)
+    widget_changed(self, self.first, widget)
+    self.first = widget
 end
 
 --- Set the layout's second widget. This is the centered one.
-function align.set_second(layout, widget)
-    widget_changed(layout, layout.second, widget)
-    layout.second = widget
+function align:set_second(widget)
+    widget_changed(self, self.second, widget)
+    self.second = widget
 end
 
 --- Set the layout's third widget. This is the widget that is at the right/bottom
-function align.set_third(layout, widget)
-    widget_changed(layout, layout.third, widget)
-    layout.third = widget
+function align:set_third(widget)
+    widget_changed(self, self.third, widget)
+    self.third = widget
 end
 
-function align.reset(layout)
+function align:reset()
     for k, v in pairs({ "first", "second", "third" }) do
-        layout[v] = nil
+        self[v] = nil
     end
-    layout:emit_signal("widget::updated")
+    self:emit_signal("widget::updated")
 end
 
 local function get_layout(dir)

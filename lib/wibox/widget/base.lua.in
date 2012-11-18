@@ -14,12 +14,12 @@ local table = table
 local base = {}
 
 --- Set/get a widget's buttons
-function base.buttons(widget, _buttons)
+function base:buttons(_buttons)
     if _buttons then
-        widget.widget_buttons = _buttons
+        self.widget_buttons = _buttons
     end
 
-    return widget.widget_buttons
+    return self.widget_buttons
 end
 
 --- Handle a button event on a widget. This is used internally.

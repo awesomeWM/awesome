@@ -17,81 +17,81 @@ local type = type
 local background = { mt = {} }
 
 --- Draw this widget
-function background.draw(box, wibox, cr, width, height)
-    if not box.widget then
+function background:draw(wibox, cr, width, height)
+    if not self.widget then
         return
     end
 
     cr:save()
 
-    if box.background then
-        cr:set_source(box.background)
+    if self.background then
+        cr:set_source(self.background)
         cr:paint()
     end
-    if box.bgimage then
-        local pattern = cairo.Pattern.create_for_surface(box.bgimage)
+    if self.bgimage then
+        local pattern = cairo.Pattern.create_for_surface(self.bgimage)
         cr:set_source(pattern)
         cr:paint()
     end
 
     cr:restore()
 
-    if box.foreground then
+    if self.foreground then
         cr:save()
-        cr:set_source(box.foreground)
+        cr:set_source(self.foreground)
     end
-    layout_base.draw_widget(wibox, cr, box.widget, 0, 0, width, height)
-    if box.foreground then
+    layout_base.draw_widget(wibox, cr, self.widget, 0, 0, width, height)
+    if self.foreground then
         cr:restore()
     end
 end
 
 --- Fit this widget into the given area
-function background.fit(box, width, height)
-    if not box.widget then
+function background:fit(width, height)
+    if not self.widget then
         return 0, 0
     end
 
-    return box.widget:fit(width, height)
+    return self.widget:fit(width, height)
 end
 
 --- Set the widget that is drawn on top of the background
-function background.set_widget(box, widget)
-    if box.widget then
-        box.widget:disconnect_signal("widget::updated", box._emit_updated)
+function background:set_widget(widget)
+    if self.widget then
+        self.widget:disconnect_signal("widget::updated", self._emit_updated)
     end
     if widget then
         base.check_widget(widget)
-        widget:connect_signal("widget::updated", box._emit_updated)
+        widget:connect_signal("widget::updated", self._emit_updated)
     end
-    box.widget = widget
-    box._emit_updated()
+    self.widget = widget
+    self._emit_updated()
 end
 
 --- Set the background to use
-function background.set_bg(box, bg)
+function background:set_bg(bg)
     if bg then
-        box.background = color(bg)
+        self.background = color(bg)
     else
-        box.background = nil
+        self.background = nil
     end
-    box._emit_updated()
+    self._emit_updated()
 end
 
 --- Set the foreground to use
-function background.set_fg(box, fg)
+function background:set_fg(fg)
     if fg then
-        box.foreground = color(fg)
+        self.foreground = color(fg)
     else
-        box.foreground = nil
+        self.foreground = nil
     end
-    box._emit_updated()
+    self._emit_updated()
 end
 
 --- Set the background image to use
-function background.set_bgimage(box, image)
-    box.bgimage = surface.load(image)
-    box._emit_updated()
+function background:set_bgimage(image)
+    self.bgimage = surface.load(image)
+    self._emit_updated()
 end
 
 local function new()
