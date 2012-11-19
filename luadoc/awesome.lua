@@ -9,7 +9,7 @@ module("awesome")
 -- @field fg The default foreground color.
 -- @field bg The default background color.
 -- @field version The version of awesome.
--- #field release The release name of awesome.
+-- @field release The release name of awesome.
 -- @field conffile The configuration file which has been loaded.
 -- @class table
 -- @name awesome
