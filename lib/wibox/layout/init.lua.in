@@ -4,6 +4,7 @@
 -- @release @AWESOME_VERSION@
 ---------------------------------------------------------------------------
 
+--- Collection of layouts that can be used in widget boxes
 -- wibox.layout
 
 return

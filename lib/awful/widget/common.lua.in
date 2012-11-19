@@ -17,6 +17,7 @@ local wibox = require("wibox")
 local imagebox = require("wibox.widget.imagebox")
 local textbox = require("wibox.widget.textbox")
 
+--- Common utilities for awful widgets
 local common = {}
 
 -- Recursively processes a template, replacing the tables representing the icon and

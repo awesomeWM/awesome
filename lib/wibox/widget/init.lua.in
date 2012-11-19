@@ -4,7 +4,7 @@
 -- @release @AWESOME_VERSION@
 ---------------------------------------------------------------------------
 
--- wibox.widget
+--- wibox.widget
 
 return
 {

@@ -11,7 +11,7 @@ local capi = { awesome = awesome }
 local setmetatable = setmetatable
 local error = error
 
--- wibox.widget.systray
+--- wibox.widget.systray
 local systray = { mt = {} }
 
 local created_systray = false
