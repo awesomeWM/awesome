@@ -30,7 +30,7 @@ local ignore_modifiers = { "Lock", "Mod2" }
 -- ignored by default by this function), creating key binding with this function
 -- will return 2 key objects: one with CapsLock on, and the other one with
 -- CapsLock off.
--- @see capi.key
+-- @see key
 -- @return A table with one or several key objects.
 function key.new(mod, _key, press, release)
     local ret = {}
@@ -49,7 +49,7 @@ function key.new(mod, _key, press, release)
 end
 
 --- Compare a key object with modifiers and key.
--- @param key The key object.
+-- @param _key The key object.
 -- @param pressed_mod The modifiers to compare with.
 -- @param pressed_key The key to compare with.
 function key.match(_key, pressed_mod, pressed_key)

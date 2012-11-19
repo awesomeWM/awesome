@@ -23,7 +23,7 @@ end
 -- @param obj The object to search in
 -- @param name The signal to find
 -- @param error_msg Error message for if the signal is not found
--- @returns The signal table
+-- @return The signal table
 local function find_signal(obj, name, error_msg)
     check(obj)
     if not obj._signals[name] then

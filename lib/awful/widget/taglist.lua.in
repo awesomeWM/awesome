@@ -167,7 +167,7 @@ end
 
 --- Filtering function to include all nonempty tags on the screen.
 -- @param t The tag.
--- @param screen The screen we are drawing on.
+-- @param args unused list of extra arguments.
 -- @return true if t is not empty, else false
 function taglist.filter.noempty(t, args)
     return #t:clients() > 0 or t.selected
@@ -175,7 +175,7 @@ end
 
 --- Filtering function to include all tags on the screen.
 -- @param t The tag.
--- @param screen The screen we are drawing on.
+-- @param args unused list of extra arguments.
 -- @return true
 function taglist.filter.all(t, args)
     return true

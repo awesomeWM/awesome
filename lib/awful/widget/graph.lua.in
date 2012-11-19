@@ -161,7 +161,7 @@ function graph.fit(_graph, width, height)
 end
 
 --- Add a value to the graph
--- @param graph The graph.
+-- @param _graph The graph.
 -- @param value The value between 0 and 1.
 -- @param group The stack color group index.
 local function add_value(_graph, value, group)
@@ -199,25 +199,24 @@ end
 
 
 --- Set the graph height.
--- @param graph The graph.
 -- @param height The height to set.
-function graph.set_height(_graph, height)
+function graph:set_height(height)
     if height >= 5 then
-        data[_graph].height = height
-        _graph:emit_signal("widget::updated")
+        data[self].height = height
+        self:emit_signal("widget::updated")
     end
-    return _graph
+    return self
 end
 
 --- Set the graph width.
 -- @param graph The graph.
 -- @param width The width to set.
-function graph.set_width(_graph, width)
+function graph:set_width(width)
     if width >= 5 then
-        data[_graph].width = width
-        _graph:emit_signal("widget::updated")
+        data[self].width = width
+        self:emit_signal("widget::updated")
     end
-    return _graph
+    return self
 end
 
 -- Build properties function

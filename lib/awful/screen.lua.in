@@ -66,7 +66,7 @@ end
 
 --- Give the focus to a screen, and move pointer, by physical position relative to current screen.
 -- @param dir The direction, can be either "up", "down", "left" or "right".
--- @param screen Screen number.
+-- @param _screen Screen number.
 function screen.focus_bydirection(dir, _screen)
     local sel = _screen or capi.mouse.screen
     if sel then
@@ -90,7 +90,7 @@ function screen.focus_relative(i)
 end
 
 --- Get or set the screen padding.
--- @param screen The screen object to change the padding on
+-- @param _screen The screen object to change the padding on
 -- @param padding The padding, an table with 'top', 'left', 'right' and/or
 -- 'bottom'. Can be nil if you only want to retrieve padding
 function screen.padding(_screen, padding)

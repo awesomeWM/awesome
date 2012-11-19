@@ -17,6 +17,7 @@ local fixed = {}
 -- @param widgets The widgets to draw.
 -- @param fill_space Use all the available space, giving all that is left to the
 --                   last widget
+-- @param wibox The wibox that this widget is drawn to.
 -- @param cr The cairo context to use.
 -- @param width The available width.
 -- @param height The available height.

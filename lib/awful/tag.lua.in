@@ -35,6 +35,8 @@ tag.history.limit = 20
 
 --- Move a tag to an absolute position in the screen[]:tags() table.
 -- @param new_index Integer absolute position in the table to insert.
+-- @param target_tag The tag that should be moved. If null, the currently
+-- selected tag is used.
 function tag.move(new_index, target_tag)
     local target_tag = target_tag or tag.selected()
     local scr = tag.getscreen(target_tag)
@@ -97,7 +99,7 @@ end
 
 --- Find a suitable fallback tag.
 -- @param screen The screen number to look for a tag on. [mouse.screen]
--- @param target A table of tags we consider unacceptable. [selectedlist(scr)]
+-- @param invalids A table of tags we consider unacceptable. [selectedlist(scr)]
 function tag.find_fallback(screen, invalids)
     local scr = screen or capi.mouse.screen
     local t = invalids or tag.selectedlist(scr)
@@ -282,6 +284,7 @@ end
 
 --- Set master width factor.
 -- @param mwfact Master width factor.
+-- @param t The tag to modify, if null tag.selected() is used.
 function tag.setmwfact(mwfact, t)
     local t = t or tag.selected()
     if mwfact >= 0 and mwfact <= 1 then
@@ -291,6 +294,7 @@ end
 
 --- Increase master width factor.
 -- @param add Value to add to master width factor.
+-- @param t The tag to modify, if null tag.selected() is used.
 function tag.incmwfact(add, t)
     tag.setmwfact(tag.getmwfact(t) + add, t)
 end
@@ -321,6 +325,7 @@ end
 
 --- Increase the number of master windows.
 -- @param add Value to add to number of master windows.
+-- @param t The tag to modify, if null tag.selected() is used.
 function tag.incnmaster(add, t)
     tag.setnmaster(tag.getnmaster(t) + add, t)
 end
@@ -328,14 +333,14 @@ end
 
 --- Set the tag icon
 -- @param icon the icon to set, either path or image object
--- @param tag the tag
+-- @param _tag the tag
 function tag.seticon(icon, _tag)
     local _tag = _tag or tag.selected()
     tag.setproperty(_tag, "icon", icon)
 end
 
 --- Get the tag icon
--- @param t the tag
+-- @param _tag the tag
 function tag.geticon(_tag)
     local _tag = _tag or tag.selected()
     return tag.getproperty(_tag, "icon")
@@ -343,6 +348,7 @@ end
 
 --- Set number of column windows.
 -- @param ncol The number of column.
+-- @param t The tag to modify, if null tag.selected() is used.
 function tag.setncol(ncol, t)
     local t = t or tag.selected()
     if ncol >= 1 then
@@ -359,6 +365,7 @@ end
 
 --- Increase number of column windows.
 -- @param add Value to add to number of column windows.
+-- @param t The tag to modify, if null tag.selected() is used.
 function tag.incncol(add, t)
     tag.setncol(tag.getncol(t) + add, t)
 end
@@ -468,7 +475,7 @@ function tag.getdata(_tag)
 end
 
 --- Get a tag property.
--- @param tag The tag.
+-- @param _tag The tag.
 -- @param prop The property name.
 -- @return The property.
 function tag.getproperty(_tag, prop)
@@ -480,7 +487,7 @@ end
 --- Set a tag property.
 -- This properties are internal to awful. Some are used to draw taglist, or to
 -- handle layout, etc.
--- @param tag The tag.
+-- @param _tag The tag.
 -- @param prop The property name.
 -- @param value The value.
 function tag.setproperty(_tag, prop, value)

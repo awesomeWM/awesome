@@ -26,27 +26,24 @@ local cairo = require("lgi").cairo
 local naughty = {}
 
 --- Naughty configuration - a table containing common popup settings.
--- @name config
--- @field padding Space between popups and edge of the workarea. Default: 4
--- @field spacing Spacing between popups. Default: 1
--- @field icon_dirs List of directories that will be checked by getIcon()
+naughty.config = {}
+--- Space between popups and edge of the workarea. Default: 4
+naughty.config.padding = 4
+--- Spacing between popups. Default: 1
+naughty.config.spacing = 1
+--- List of directories that will be checked by getIcon()
 --   Default: { "/usr/share/pixmaps/", }
--- @field icon_formats List of formats that will be checked by getIcon()
+naughty.config.icon_dirs = { "/usr/share/pixmaps/", }
+--- List of formats that will be checked by getIcon()
 --   Default: { "png", "gif" }
--- @field notify_callback Callback used to modify or reject notifications.
+naughty.config.icon_formats = { "png", "gif" }
+--- Callback used to modify or reject notifications.
 --   Default: nil
 --   Example:
 --      naughty.config.notify_callback = function(args)
 --          args.text = 'prefix: ' .. args.text
 --          return args
 --      end
--- @class table
-
-naughty.config = {}
-naughty.config.padding = 4
-naughty.config.spacing = 1
-naughty.config.icon_dirs = { "/usr/share/pixmaps/", }
-naughty.config.icon_formats = { "png", "gif" }
 naughty.config.notify_callback = nil
 
 
@@ -55,12 +52,10 @@ naughty.config.notify_callback = nil
 -- values (@see defaults)
 -- You have to pass a reference of a preset in your notify() call to use the preset
 -- The presets "low", "normal" and "critical" are used for notifications over DBUS
--- @name config.presets
 -- @field low The preset for notifications with low urgency level
 -- @field normal The default preset for every notification without a preset that will also be used for normal urgency level
 -- @field critical The preset for notifications with a critical urgency level
 -- @class table
-
 naughty.config.presets = {
     normal = {},
     low = {
@@ -75,8 +70,8 @@ naughty.config.presets = {
 
 --- Default values for the params to notify().
 -- These can optionally be overridden by specifying a preset
--- @see config.presets
--- @see notify
+-- @see naughty.config.presets
+-- @see naughty.notify
 naughty.config.defaults = {
     timeout = 5,
     text = "",
@@ -95,7 +90,6 @@ local urgency = {
 }
 
 --- DBUS notification to preset mapping
--- @name config.mapping
 -- The first element is an object containing the filter
 -- If the rules in the filter matches the associated preset will be applied
 -- The rules object can contain: urgency, category, appname

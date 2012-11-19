@@ -105,6 +105,7 @@ end
 -- will be attached.
 -- @param wibox The wibox to attach.
 -- @param position The position of the wibox: top, bottom, left or right.
+-- @param screen TODO, this seems to be unused
 function awfulwibox.attach(wibox, position, screen)
     -- Store wibox as attached in a weak-valued table
     local wibox_prop_table
@@ -202,7 +203,7 @@ function awfulwibox.stretch(wibox, screen)
 end
 
 --- Create a new wibox and attach it to a screen edge.
--- @see capi.wibox
+-- @see wibox
 -- @param args A table with standard arguments to wibox() creator.
 -- You can add also position key with value top, bottom, left or right.
 -- You can also use width or height in % and set align to center, right or left.

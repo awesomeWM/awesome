@@ -57,7 +57,8 @@ function layout.inc(layouts, i)
 end
 
 --- Set the layout function of the current tag.
--- @param layout Layout name.
+-- @param _layout Layout name.
+-- @param t The tag to modify, if null tag.selected() is used.
 function layout.set(_layout, t)
     t = t or tag.selected()
     tag.setproperty(t, "layout", _layout)

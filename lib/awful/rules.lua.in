@@ -129,7 +129,7 @@ end
 
 --- Check if a client match a rule. Multiple clients can be matched
 -- @param c The client.
--- @param rules The rule to check.
+-- @param rule The rule to check.
 -- @return True if at least one rule is matched, false otherwise.
 function rules.match_any(c, rule)
     if not rule then return false end

@@ -21,6 +21,7 @@ end
 --- Draw a flex layout. Each widget gets an equal share of the available space
 -- @param dir "x" for a horizontal layout and "y" for vertical.
 -- @param widgets The widgets to draw.
+-- @param wibox The wibox that this widget is drawn to.
 -- @param cr The cairo context to use.
 -- @param width The available width.
 -- @param height The available height.

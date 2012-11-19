@@ -158,32 +158,29 @@ function progressbar.fit(pbar, width, height)
 end
 
 --- Set the progressbar value.
--- @param pbar The progress bar.
 -- @param value The progress bar value between 0 and 1.
-function progressbar.set_value(pbar, value)
+function progressbar:set_value(value)
     local value = value or 0
-    local max_value = data[pbar].max_value
-    data[pbar].value = math.min(max_value, math.max(0, value))
-    pbar:emit_signal("widget::updated")
-    return pbar
+    local max_value = data[self].max_value
+    data[self].value = math.min(max_value, math.max(0, value))
+    self:emit_signal("widget::updated")
+    return self
 end
 
 --- Set the progressbar height.
--- @param progressbar The progressbar.
 -- @param height The height to set.
-function progressbar.set_height(_progressbar, height)
-    data[_progressbar].height = height
-    _progressbar:emit_signal("widget::updated")
-    return _progressbar
+function progressbar:set_height(height)
+    data[self].height = height
+    self:emit_signal("widget::updated")
+    return self
 end
 
 --- Set the progressbar width.
--- @param progressbar The progressbar.
 -- @param width The width to set.
-function progressbar.set_width(_progressbar, width)
-    data[_progressbar].width = width
-    _progressbar:emit_signal("widget::updated")
-    return _progressbar
+function progressbar:set_width(width)
+    data[self].width = width
+    self:emit_signal("widget::updated")
+    return self
 end
 
 -- Build properties function

@@ -53,7 +53,7 @@ end
 
 --- Get the size of a cairo surface
 -- @param surf The surface you are interested in
--- @returns The surface's width and height
+-- @return The surface's width and height
 local function surface_size(surf)
     local cr = cairo.Context(surf)
     local x, y, w, h = cr:clip_extents()
