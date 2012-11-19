@@ -33,43 +33,39 @@ local function find_signal(obj, name, error_msg)
 end
 
 --- Add a signal to an object. All signals must be added before they can be used.
--- @param obj The object
 -- @param name The name of the new signal.
-function object.add_signal(obj, name)
-    check(obj)
-    if not obj._signals[name] then
-        obj._signals[name] = {}
+function object:add_signal(name)
+    check(self)
+    if not self._signals[name] then
+        self._signals[name] = {}
     end
 end
 
 --- Connect to a signal
--- @param obj The object
 -- @param name The name of the signal
 -- @param func The callback to call when the signal is emitted
-function object.connect_signal(obj, name, func)
-    local sig = find_signal(obj, name, "connect to")
+function object:connect_signal(name, func)
+    local sig = find_signal(self, name, "connect to")
     sig[func] = func
 end
 
 --- Disonnect to a signal
--- @param obj The object
 -- @param name The name of the signal
 -- @param func The callback that should be disconnected
-function object.disconnect_signal(obj, name, func)
-    local sig = find_signal(obj, name, "disconnect from")
+function object:disconnect_signal(name, func)
+    local sig = find_signal(self, name, "disconnect from")
     sig[func] = nil
 end
 
 --- Emit a signal
--- @param obj The object
 -- @param name The name of the signal
 -- @param ... Extra arguments for the callback functions. Each connected
 --            function receives the object as first argument and then any extra
 --            arguments that are given to emit_signal()
-function object.emit_signal(obj, name, ...)
-    local sig = find_signal(obj, name, "emit")
+function object:emit_signal(name, ...)
+    local sig = find_signal(self, name, "emit")
     for func in pairs(sig) do
-        func(obj, ...)
+        func(self, ...)
     end
 end
 
