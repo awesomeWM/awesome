@@ -4,7 +4,6 @@
 module("selection")
 
 --- Get the selection (clipboard) content.
--- @param -
 -- @return A string with the selection (clipboard) content.
 -- @name selection
 -- @class function

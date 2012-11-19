@@ -12,7 +12,6 @@ module("screen")
 -- @name screen
 
 --- Get the number of screen.
--- @param -
 -- @return The screen count, at least 1.
 -- @name count
 -- @class function

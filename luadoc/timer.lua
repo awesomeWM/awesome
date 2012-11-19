@@ -12,12 +12,10 @@ module("timer")
 -- @name timer
 
 --- Start the timer.
--- @param -
 -- @name start
 -- @class function
 
 --- Stop the timer.
--- @param -
 -- @name stop
 -- @class function
 
@@ -40,7 +38,6 @@ module("timer")
 -- @class function
 
 --- Get the number of instances.
--- @param no_params luadoc is buggy.
 -- @return The number of timer objects alive.
 -- @name instances
 -- @class function

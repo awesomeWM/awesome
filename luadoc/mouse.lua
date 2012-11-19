@@ -17,7 +17,6 @@ module("mouse")
 -- @class function
 
 --- Get the client or any object which is under the pointer.
--- @param -
 -- @return A client or nil.
 -- @name object_under_pointer
 -- @class function

@@ -34,7 +34,6 @@ module("root")
 -- @class function
 
 --- Get the wiboxes attached to a screen.
--- @param -
 -- @return A table with all wiboxes.
 -- @name wiboxes
 -- @class function
@@ -46,7 +45,6 @@ module("root")
 -- @class function
 
 --- Get the attached tags.
--- @param -
 -- @return A table with all tags.
 -- @name tags
 -- @class function

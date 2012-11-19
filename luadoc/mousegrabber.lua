@@ -14,12 +14,10 @@ module("mousegrabber")
 -- @class function
 
 --- Stop grabbing the mouse pointer.
--- @param -
 -- @name stop
 -- @class function
 
 --- Check if the mousegrabber is running.
--- @param -
 -- @return A boolean value, true if running, false otherwise.
 -- @name isrunning
 -- @class function

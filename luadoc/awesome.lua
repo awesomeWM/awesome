@@ -15,7 +15,6 @@ module("awesome")
 -- @name awesome
 
 --- Quit awesome.
--- @param -
 -- @name quit
 -- @class function
 
@@ -26,7 +25,6 @@ module("awesome")
 -- @class function
 
 --- Restart awesome.
--- @param -
 -- @name restart
 -- @class function
 

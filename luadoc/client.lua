@@ -53,7 +53,6 @@ module("client")
 -- @class function
 
 --- Check if a client is visible on its screen.
--- @param -
 -- @return A boolean value, true if the client is visible, false otherwise.
 -- @name isvisible
 -- @class function
@@ -89,7 +88,6 @@ module("client")
 -- @class function
 
 --- Kill a client.
--- @param -
 -- @name kill
 -- @class function
 
@@ -99,17 +97,14 @@ module("client")
 -- @class function
 
 --- Raise a client on top of others which are on the same layer.
--- @param -
 -- @name raise
 -- @class function
 
 --- Lower a client on bottom of others which are on the same layer.
--- @param -
 -- @name lower
 -- @class function
 
 --- Stop managing a client.
--- @param -
 -- @name unmanage
 -- @class function
 
@@ -132,7 +127,6 @@ module("client")
 -- @class function
 
 --- Get the number of instances.
--- @param no_params luadoc is buggy.
 -- @return The number of client objects alive.
 -- @name instances
 -- @class function

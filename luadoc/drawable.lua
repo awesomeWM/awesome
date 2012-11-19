@@ -6,16 +6,15 @@ module("drawable")
 --- Drawable object.
 -- @field surface The drawable's cairo surface.
 -- @name drawable
+-- @class table
 
 --- Get drawable geometry. The geometry consists of x, y, width and height.
--- @param no_params luadoc is buggy.
 -- @return A table with drawable coordinates and geometry.
 -- @name geometry
 -- @class function
 
 --- Refresh the drawable. When you are drawing to the surface, you have
 -- call this function when you are done to make the result visible.
--- @param no_params luadoc is buggy.
 -- @name refresh
 -- @class function
 
@@ -38,7 +37,6 @@ module("drawable")
 -- @class function
 
 --- Get the number of instances.
--- @param no_params luadoc is buggy.
 -- @return The number of drawable objects alive.
 -- @name instances
 -- @class function
