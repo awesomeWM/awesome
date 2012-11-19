@@ -21,8 +21,6 @@ include_directories(
     ${AWESOME_REQUIRED_INCLUDE_DIRS}
     ${AWESOME_OPTIONAL_INCLUDE_DIRS})
 
-file(GLOB_RECURSE AWE_LUA_FILES ${BUILD_DIR}/lib/*.lua ${BUILD_DIR}/luadoc/*.lua)
-
 set(AWE_CONF_FILE_DEFAULT ${BUILD_DIR}/awesomerc.lua)
 set(AWE_CONF_FILE rc.lua)
 
@@ -230,24 +228,15 @@ endif()
 # }}}
 
 # {{{ Lua API Documentation
-if(GENERATE_LUADOC)
-
+if(GENERATE_DOC)
     if(NOT BUILD_DIR STREQUAL SOURCE_DIR)
         file(MAKE_DIRECTORY ${BUILD_DIR}/lib)
     endif()
 
-    set(luadoc_c_srcs "")
+    file(GLOB_RECURSE AWE_LUA_FILES ${BUILD_DIR}/lib/*.lua ${BUILD_DIR}/luadoc/*.lua)
 
-    # Generate documentation of lib//0lua
-    file(GLOB_RECURSE lua_lib_files ${BUILD_DIR}/lib/*.lua
-        ${SOURCE_DIR}/luadoc/*.lua)
-    foreach(filename ${lua_lib_files})
-        file(RELATIVE_PATH filename ${BUILD_DIR} ${filename})
-        set(luadoc_srcs ${luadoc_srcs} ${filename})
-    endforeach()
-
-    add_custom_target(luadoc ALL
-        COMMAND ${LUADOC_EXECUTABLE} ${luadoc_srcs} -d ${BUILD_DIR}/luadoc --nofiles
+    add_custom_target(ldoc ALL
+        COMMAND ${LDOC_EXECUTABLE} .
         WORKING_DIRECTORY ${BUILD_DIR}
         DEPENDS ${AWE_LUA_FILES})
 endif()
@@ -326,8 +315,8 @@ install(DIRECTORY ${SOURCE_DIR}/themes DESTINATION ${AWESOME_DATA_PATH}
     PATTERN "*.in" EXCLUDE)
 install(FILES ${AWE_DOC_FILES} DESTINATION ${AWESOME_DOC_PATH})
 install(FILES "awesome.desktop" DESTINATION ${AWESOME_XSESSION_PATH})
-if(GENERATE_LUADOC)
-    install(DIRECTORY ${BUILD_DIR}/luadoc DESTINATION ${AWESOME_DOC_PATH})
+if(GENERATE_DOC)
+    install(DIRECTORY ${BUILD_DIR}/doc DESTINATION ${AWESOME_DOC_PATH})
 endif()
 # }}}
 

@@ -13,7 +13,7 @@ set(CMAKE_BUILD_TYPE RELEASE)
 option(WITH_DBUS "build with D-BUS" ON)
 option(GENERATE_MANPAGES "generate manpages" ON)
 option(COMPRESS_MANPAGES "compress manpages" ON)
-option(GENERATE_LUADOC "generate luadoc" ON)
+option(GENERATE_DOC "generate API documentation" ON)
 
 # {{{ CFLAGS
 add_definitions(-std=gnu99 -ggdb3 -rdynamic -fno-strict-aliasing -Wall -Wextra
@@ -54,7 +54,7 @@ a_find_program(XMLTO_EXECUTABLE xmlto FALSE)
 a_find_program(GZIP_EXECUTABLE gzip FALSE)
 # lua documentation
 a_find_program(LUA_EXECUTABLE lua FALSE)
-a_find_program(LUADOC_EXECUTABLE luadoc FALSE)
+a_find_program(LDOC_EXECUTABLE ldoc.lua FALSE)
 # theme graphics
 a_find_program(CONVERT_EXECUTABLE convert TRUE)
 # doxygen
@@ -83,10 +83,10 @@ if(GENERATE_MANPAGES)
     endif()
 endif()
 
-if(GENERATE_LUADOC)
-    if(NOT LUADOC_EXECUTABLE)
-        message(STATUS "Not generating luadoc. Missing: luadoc")
-        set(GENERATE_LUADOC OFF)
+if(GENERATE_DOC)
+    if(NOT LDOC_EXECUTABLE)
+        message(STATUS "Not generating API documentation. Missing: ldoc")
+        set(GENERATE_DOC OFF)
     endif()
 endif()
 # }}}
@@ -280,9 +280,10 @@ set(AWESOME_THEMES_PATH      ${AWESOME_DATA_PATH}/themes)
 
 # {{{ Configure files
 file(GLOB_RECURSE awesome_lua_configure_files RELATIVE ${SOURCE_DIR} ${SOURCE_DIR}/lib/*.lua.in ${SOURCE_DIR}/themes/*/*.lua.in)
-set(AWESOME_CONFIGURE_FILES 
+set(AWESOME_CONFIGURE_FILES
     ${awesome_lua_configure_files}
     config.h.in
+    config.ld.in
     awesomerc.lua.in
     awesome-version-internal.h.in
     awesome.doxygen.in)
