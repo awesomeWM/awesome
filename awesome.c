@@ -35,6 +35,8 @@
 
 #include <X11/Xlib-xcb.h>
 
+#include <glib-unix.h>
+
 #include "awesome.h"
 #include "spawn.h"
 #include "objects/client.h"
@@ -76,8 +78,6 @@ awesome_atexit(bool restart)
 
     /* Disconnect *after* closing lua */
     xcb_disconnect(globalconf.connection);
-
-    ev_default_destroy();
 }
 
 /** Scan X to find windows to manage.
@@ -156,13 +156,7 @@ scan(xcb_query_tree_cookie_t tree_c)
 }
 
 static void
-a_refresh_cb(EV_P_ ev_prepare *w, int revents)
-{
-    awesome_refresh();
-}
-
-static void
-a_xcb_check_cb(EV_P_ ev_check *w, int revents)
+a_xcb_check(void)
 {
     xcb_generic_event_t *mouse = NULL, *event;
 
@@ -200,13 +194,25 @@ a_xcb_check_cb(EV_P_ ev_check *w, int revents)
     }
 }
 
-static void
-a_xcb_io_cb(EV_P_ ev_io *w, int revents)
+static gboolean
+a_xcb_io_cb(GIOChannel *source, GIOCondition cond, gpointer data)
 {
-    /* a_xcb_check_cb() already handled all events */
+    /* a_xcb_check() already handled all events */
 
     if(xcb_connection_has_error(globalconf.connection))
         fatal("X server connection broke");
+
+    return TRUE;
+}
+
+static gint
+a_glib_poll(GPollFD *ufds, guint nfsd, gint timeout)
+{
+    guint res;
+    awesome_refresh();
+    res = g_poll(ufds, nfsd, timeout);
+    a_xcb_check();
+    return res;
 }
 
 static void
@@ -218,13 +224,13 @@ signal_fatal(int signum)
 }
 
 /** Function to exit on some signals.
- * \param w the signal received, unused
- * \param revents currently unused
+ * \param data currently unused
  */
-static void
-exit_on_signal(EV_P_ ev_signal *w, int revents)
+static gboolean
+exit_on_signal(gpointer data)
 {
-    ev_unloop(EV_A_ 1);
+    g_main_loop_quit(globalconf.loop);
+    return TRUE;
 }
 
 void
@@ -235,13 +241,13 @@ awesome_restart(void)
 }
 
 /** Function to restart awesome on some signals.
- * \param w the signal received, unused
- * \param revents Currently unused
+ * \param data currently unused
  */
-static void
-restart_on_signal(EV_P_ ev_signal *w, int revents)
+static gboolean
+restart_on_signal(gpointer data)
 {
     awesome_restart();
+    return TRUE;
 }
 
 /** Print help and exit(2) with given exit_code.
@@ -284,14 +290,6 @@ main(int argc, char **argv)
         { "no-argb", 0, NULL, 'a' },
         { NULL,      0, NULL, 0 }
     };
-
-    /* event loop watchers */
-    ev_io xio    = { .fd = -1 };
-    ev_check xcheck;
-    ev_prepare a_refresh;
-    ev_signal sigint;
-    ev_signal sigterm;
-    ev_signal sighup;
 
     /* clear the globalconf structure */
     p_clear(&globalconf, 1);
@@ -354,18 +352,10 @@ main(int argc, char **argv)
             break;
         }
 
-    globalconf.loop = ev_default_loop(EVFLAG_NOSIGFD);
-
     /* register function for signals */
-    ev_signal_init(&sigint, exit_on_signal, SIGINT);
-    ev_signal_init(&sigterm, exit_on_signal, SIGTERM);
-    ev_signal_init(&sighup, restart_on_signal, SIGHUP);
-    ev_signal_start(globalconf.loop, &sigint);
-    ev_signal_start(globalconf.loop, &sigterm);
-    ev_signal_start(globalconf.loop, &sighup);
-    ev_unref(globalconf.loop);
-    ev_unref(globalconf.loop);
-    ev_unref(globalconf.loop);
+    g_unix_signal_add(SIGINT, exit_on_signal, NULL);
+    g_unix_signal_add(SIGTERM, exit_on_signal, NULL);
+    g_unix_signal_add(SIGHUP, restart_on_signal, NULL);
 
     struct sigaction sa = { .sa_handler = signal_fatal, .sa_flags = 0 };
     sigemptyset(&sa.sa_mask);
@@ -408,19 +398,17 @@ main(int argc, char **argv)
     xcb_prefetch_extension_data(globalconf.connection, &xcb_xinerama_id);
     xcb_prefetch_extension_data(globalconf.connection, &xcb_shape_id);
 
+    /* Setup the main context */
+    g_main_context_set_poll_func(g_main_context_default(), &a_glib_poll);
+
     /* initialize dbus */
     a_dbus_init();
 
     /* Get the file descriptor corresponding to the X connection */
     xfd = xcb_get_file_descriptor(globalconf.connection);
-    ev_io_init(&xio, &a_xcb_io_cb, xfd, EV_READ);
-    ev_io_start(globalconf.loop, &xio);
-    ev_check_init(&xcheck, &a_xcb_check_cb);
-    ev_check_start(globalconf.loop, &xcheck);
-    ev_unref(globalconf.loop);
-    ev_prepare_init(&a_refresh, &a_refresh_cb);
-    ev_prepare_start(globalconf.loop, &a_refresh);
-    ev_unref(globalconf.loop);
+    GIOChannel *channel = g_io_channel_unix_new(xfd);
+    g_io_add_watch(channel, G_IO_IN, a_xcb_io_cb, NULL);
+    g_io_channel_unref(channel);
 
     /* Grab server */
     xcb_grab_server(globalconf.connection);
@@ -531,15 +519,10 @@ main(int argc, char **argv)
     xcb_flush(globalconf.connection);
 
     /* main event loop */
-    ev_loop(globalconf.loop, 0);
-
-    /* cleanup event loop */
-    ev_ref(globalconf.loop);
-    ev_check_stop(globalconf.loop, &xcheck);
-    ev_ref(globalconf.loop);
-    ev_prepare_stop(globalconf.loop, &a_refresh);
-    ev_ref(globalconf.loop);
-    ev_io_stop(globalconf.loop, &xio);
+    globalconf.loop = g_main_loop_new(NULL, FALSE);
+    g_main_loop_run(globalconf.loop);
+    g_main_loop_unref(globalconf.loop);
+    globalconf.loop = NULL;
 
     awesome_atexit(false);
 

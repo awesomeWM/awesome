@@ -19,8 +19,6 @@
  *
  */
 
-#include <ev.h>
-
 #include "globalconf.h"
 #include "luaa.h"
 #include "timer.h"
@@ -30,27 +28,26 @@ typedef struct
 {
     LUA_OBJECT_HEADER
     bool started;
-    struct ev_timer timer;
+    guint source_id;
+    double timeout;
 } atimer_t;
 
 static lua_class_t timer_class;
 LUA_OBJECT_FUNCS(timer_class, atimer_t, timer)
 
-static void
-ev_timer_emit_signal(struct ev_loop *loop, struct ev_timer *w, int revents)
+static gboolean
+timer_emit_signal(gpointer data)
 {
-    luaA_object_push(globalconf.L, w->data);
+    luaA_object_push(globalconf.L, data);
     luaA_object_emit_signal(globalconf.L, -1, "timeout", 0);
     lua_pop(globalconf.L, 1);
+    return TRUE;
 }
 
 static int
 luaA_timer_new(lua_State *L)
 {
     luaA_class_new(L, &timer_class);
-    atimer_t *timer = luaA_checkudata(L, -1, &timer_class);
-    timer->timer.data = timer;
-    ev_set_cb(&timer->timer, ev_timer_emit_signal);
     return 1;
 }
 
@@ -58,7 +55,7 @@ static int
 luaA_timer_set_timeout(lua_State *L, atimer_t *timer)
 {
     double timeout = luaL_checknumber(L, -1);
-    ev_timer_set(&timer->timer, timeout, timeout);
+    timer->timeout = timeout;
     luaA_object_emit_signal(L, -3, "property::timeout", 0);
     return 0;
 }
@@ -66,7 +63,7 @@ luaA_timer_set_timeout(lua_State *L, atimer_t *timer)
 static int
 luaA_timer_get_timeout(lua_State *L, atimer_t *timer)
 {
-    lua_pushnumber(L, timer->timer.repeat);
+    lua_pushnumber(L, timer->timeout);
     return 1;
 }
 
@@ -79,8 +76,8 @@ luaA_timer_start(lua_State *L)
     else
     {
         luaA_object_ref(L, 1);
-        ev_timer_start(globalconf.loop, &timer->timer);
         timer->started = true;
+        timer->source_id = g_timeout_add(timer->timeout * 1000, timer_emit_signal, timer);
     }
     return 0;
 }
@@ -91,7 +88,7 @@ luaA_timer_stop(lua_State *L)
     atimer_t *timer = luaA_checkudata(L, 1, &timer_class);
     if(timer->started)
     {
-        ev_timer_stop(globalconf.loop, &timer->timer);
+        g_source_remove(timer->source_id);
         luaA_object_unref(L, timer);
         timer->started = false;
     }
@@ -105,13 +102,12 @@ luaA_timer_again(lua_State *L)
 {
     atimer_t *timer = luaA_checkudata(L, 1, &timer_class);
 
-    ev_timer_again(globalconf.loop, &timer->timer);
-
-    if(!timer->started)
-    {
+    if (timer->started)
+        g_source_remove(timer->source_id);
+    else
         luaA_object_ref(L, 1);
-        timer->started = true;
-    }
+    timer->started = true;
+    timer->source_id = g_timeout_add(timer->timeout * 1000, timer_emit_signal, timer);
 
     return 0;
 }

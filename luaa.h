@@ -22,8 +22,6 @@
 #ifndef AWESOME_LUA_H
 #define AWESOME_LUA_H
 
-#include <ev.h>
-
 #include <lua.h>
 #include <lauxlib.h>
 

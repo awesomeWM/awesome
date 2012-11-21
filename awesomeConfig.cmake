@@ -159,9 +159,6 @@ macro(a_find_library variable library)
     endif()
 endmacro()
 
-# Check for libev
-a_find_library(LIB_EV ev)
-
 # Check for backtrace_symbols()
 include(CheckFunctionExists)
 check_function_exists(backtrace_symbols HAS_EXECINFO)
@@ -198,7 +195,6 @@ endif()
 set(AWESOME_REQUIRED_LDFLAGS
     ${AWESOME_COMMON_REQUIRED_LDFLAGS}
     ${AWESOME_REQUIRED_LDFLAGS}
-    ${LIB_EV}
     ${LUA_LIBRARIES})
 
 set(AWESOME_REQUIRED_INCLUDE_DIRS

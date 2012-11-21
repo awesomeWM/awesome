@@ -25,7 +25,7 @@
 #define SN_API_NOT_YET_FROZEN
 #include <libsn/sn.h>
 
-#include <ev.h>
+#include <glib.h>
 
 #include <xcb/xcb_icccm.h>
 #include <xcb/xcb_keysyms.h>
@@ -94,8 +94,8 @@ typedef struct
     lua_State *L;
     /** All errors messages from loading config files */
     buffer_t startup_errors;
-    /** The event loop */
-    struct ev_loop *loop;
+    /** main loop that awesome is running on */
+    GMainLoop *loop;
     /** The key grabber function */
     int keygrabber;
     /** The mouse pointer grabber function */

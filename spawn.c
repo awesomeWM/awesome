@@ -64,10 +64,10 @@ spawn_sequence_remove(SnStartupSequence *s)
     return false;
 }
 
-static void
-spawn_monitor_timeout(struct ev_loop *loop, ev_timer *w, int revents)
+static gboolean
+spawn_monitor_timeout(gpointer sequence)
 {
-    if(spawn_sequence_remove(w->data))
+    if(spawn_sequence_remove(sequence))
     {
          signal_t *sig = signal_array_getbyid(&global_signals,
                                               a_strhash((const unsigned char *) "spawn::timeout"));
@@ -75,7 +75,7 @@ spawn_monitor_timeout(struct ev_loop *loop, ev_timer *w, int revents)
          {
              /* send a timeout signal */
              lua_createtable(globalconf.L, 0, 2);
-             lua_pushstring(globalconf.L, sn_startup_sequence_get_id(w->data));
+             lua_pushstring(globalconf.L, sn_startup_sequence_get_id(sequence));
              lua_setfield(globalconf.L, -2, "id");
              foreach(func, sig->sigfuncs)
              {
@@ -88,8 +88,8 @@ spawn_monitor_timeout(struct ev_loop *loop, ev_timer *w, int revents)
          else
              warn("spawn::timeout signal is missing");
     }
-    sn_startup_sequence_unref(w->data);
-    p_delete(&w);
+    sn_startup_sequence_unref(sequence);
+    return FALSE;
 }
 
 static void
@@ -114,12 +114,9 @@ spawn_monitor_event(SnMonitorEvent *event, void *data)
 
         /* Add a timeout function so we do not wait for this event to complete
          * for ever */
-        struct ev_timer *ev_timeout = p_new(struct ev_timer, 1);
-        ev_timer_init(ev_timeout, spawn_monitor_timeout, AWESOME_SPAWN_TIMEOUT, 0.);
+        g_timeout_add_seconds(AWESOME_SPAWN_TIMEOUT, spawn_monitor_timeout, sequence);
         /* ref the sequence for the callback event */
         sn_startup_sequence_ref(sequence);
-        ev_timeout->data = sequence;
-        ev_timer_start(globalconf.loop, ev_timeout);
         break;
       case SN_MONITOR_EVENT_CHANGED:
         event_type_str = "spawn::change";
@@ -252,12 +249,12 @@ spawn_init(void)
     signal_add(&global_signals, "spawn::timeout");
 }
 
-static void
-spawn_launchee_timeout(struct ev_loop *loop, ev_timer *w, int revents)
+static gboolean
+spawn_launchee_timeout(gpointer context)
 {
-    sn_launcher_context_complete(w->data);
-    sn_launcher_context_unref(w->data);
-    p_delete(&w);
+    sn_launcher_context_complete(context);
+    sn_launcher_context_unref(context);
+    return FALSE;
 }
 
 static void
@@ -335,10 +332,7 @@ luaA_spawn(lua_State *L)
 
         /* app will have AWESOME_SPAWN_TIMEOUT seconds to complete,
          * or the timeout function will terminate the launch sequence anyway */
-        struct ev_timer *ev_timeout = p_new(struct ev_timer, 1);
-        ev_timer_init(ev_timeout, spawn_launchee_timeout, AWESOME_SPAWN_TIMEOUT, 0.);
-        ev_timeout->data = context;
-        ev_timer_start(globalconf.loop, ev_timeout);
+        g_timeout_add_seconds(AWESOME_SPAWN_TIMEOUT, spawn_launchee_timeout, context);
         sn_launcher_context_setup_child_process(context);
     }
 

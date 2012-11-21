@@ -21,8 +21,6 @@
 
 #define _GNU_SOURCE
 
-#include <ev.h>
-
 #include <lua.h>
 #include <lauxlib.h>
 #include <lualib.h>
@@ -69,7 +67,7 @@ static char *conffile;
 static int
 luaA_quit(lua_State *L)
 {
-    ev_unloop(globalconf.loop, 1);
+    g_main_loop_quit(globalconf.loop);
     return 0;
 }
 

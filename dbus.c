@@ -22,10 +22,10 @@
 #include "config.h"
 
 #include "dbus.h"
+#include <glib.h>
 
 #ifdef WITH_DBUS
 
-#include <ev.h>
 #include <dbus/dbus.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -35,8 +35,8 @@
 
 static DBusConnection *dbus_connection_session = NULL;
 static DBusConnection *dbus_connection_system = NULL;
-ev_io dbusio_ses = { .fd = -1 };
-ev_io dbusio_sys = { .fd = -1 };
+static GSource *session_source = NULL;
+static GSource *system_source = NULL;
 
 static signal_array_t dbus_signals;
 
@@ -45,17 +45,14 @@ static signal_array_t dbus_signals;
  * \param dbusio The D-Bus event watcher
  */
 static void
-a_dbus_cleanup_bus(DBusConnection *dbus_connection, ev_io *dbusio)
+a_dbus_cleanup_bus(DBusConnection *dbus_connection, GSource **source)
 {
     if(!dbus_connection)
         return;
 
-    if(dbusio->fd >= 0)
-    {
-        ev_ref(EV_DEFAULT_UC);
-        ev_io_stop(EV_DEFAULT_UC_ dbusio);
-        dbusio->fd = -1;
-    }
+    if (*source != NULL)
+        g_source_destroy(*source);
+    *source = NULL;
 
     /* This is a shared connection owned by libdbus
      * Do not close it, only unref
@@ -462,7 +459,7 @@ a_dbus_process_request(DBusConnection *dbus_connection, DBusMessage *msg)
  * \param dbusio The D-Bus event watcher
  */
 static void
-a_dbus_process_requests_on_bus(DBusConnection *dbus_connection, ev_io *dbusio)
+a_dbus_process_requests_on_bus(DBusConnection *dbus_connection, GSource **source)
 {
     DBusMessage *msg;
     int nmsg = 0;
@@ -476,7 +473,7 @@ a_dbus_process_requests_on_bus(DBusConnection *dbus_connection, ev_io *dbusio)
 
         if(dbus_message_is_signal(msg, DBUS_INTERFACE_LOCAL, "Disconnected"))
         {
-            a_dbus_cleanup_bus(dbus_connection, dbusio);
+            a_dbus_cleanup_bus(dbus_connection, source);
             dbus_message_unref(msg);
             return;
         }
@@ -496,20 +493,22 @@ a_dbus_process_requests_on_bus(DBusConnection *dbus_connection, ev_io *dbusio)
  * \param w The D-Bus event watcher
  * \param revents (not used)
  */
-static void
-a_dbus_process_requests_session(EV_P_ ev_io *w, int revents)
+static gboolean
+a_dbus_process_requests_session(GIOChannel *source, GIOCondition cond, gpointer data)
 {
-    a_dbus_process_requests_on_bus(dbus_connection_session, w);
+    a_dbus_process_requests_on_bus(dbus_connection_session, &session_source);
+    return TRUE;
 }
 
 /** Foreword D-Bus process system requests on too the correct function.
  * \param w The D-Bus event watcher
  * \param revents (not used)
  */
-static void
-a_dbus_process_requests_system(EV_P_ ev_io *w, int revents)
+static gboolean
+a_dbus_process_requests_system(GIOChannel *source, GIOCondition cond, gpointer data)
 {
-    a_dbus_process_requests_on_bus(dbus_connection_system, w);
+    a_dbus_process_requests_on_bus(dbus_connection_system, &system_source);
+    return TRUE;
 }
 
 /** Attempt to request a D-Bus name
@@ -588,13 +587,12 @@ a_dbus_release_name(DBusConnection *dbus_connection, const char *name)
 /** Attempt to create a new connection to D-Bus
  * \param type The bus type to use when connecting to D-Bus
  * \param type_name The bus type name eg: "session" or "system"
- * \param dbusio The D-Bus event watcher
  * \param cb Function callback to use when processing requests
+ * \param source A new GSource that will be used for watching the dbus connection.
  * \return The requested D-Bus connection on success, NULL on failure.
  */
 static DBusConnection *
-a_dbus_connect(DBusBusType type, const char *type_name,
-               ev_io *dbusio, void *cb)
+a_dbus_connect(DBusBusType type, const char *type_name, GIOFunc cb, GSource **source)
 {
     int fd;
     DBusConnection *dbus_connection;
@@ -614,16 +612,16 @@ a_dbus_connect(DBusBusType type, const char *type_name,
         dbus_connection_set_exit_on_disconnect(dbus_connection, false);
         if(dbus_connection_get_unix_fd(dbus_connection, &fd))
         {
-            fcntl(fd, F_SETFD, FD_CLOEXEC);
+            GIOChannel *channel = g_io_channel_unix_new(fd);
+            *source = g_io_create_watch(channel, G_IO_IN);
+            g_io_channel_unref(channel);
 
-            ev_io_init(dbusio, cb, fd, EV_READ);
-            ev_io_start(EV_DEFAULT_UC_ dbusio);
-            ev_unref(EV_DEFAULT_UC);
+            fcntl(fd, F_SETFD, FD_CLOEXEC);
         }
         else
         {
             warn("cannot get D-Bus connection file descriptor");
-            a_dbus_cleanup_bus(dbus_connection, dbusio);
+            a_dbus_cleanup_bus(dbus_connection, source);
         }
     }
 
@@ -636,9 +634,9 @@ void
 a_dbus_init(void)
 {
     dbus_connection_session = a_dbus_connect(DBUS_BUS_SESSION, "session",
-                                             &dbusio_ses, a_dbus_process_requests_session);
+                                             a_dbus_process_requests_session, &session_source);
     dbus_connection_system = a_dbus_connect(DBUS_BUS_SYSTEM, "system",
-                                            &dbusio_sys, a_dbus_process_requests_system);
+                                            a_dbus_process_requests_system, &system_source);
 }
 
 /** Cleanup the D-Bus session and system
@@ -646,8 +644,8 @@ a_dbus_init(void)
 void
 a_dbus_cleanup(void)
 {
-    a_dbus_cleanup_bus(dbus_connection_session, &dbusio_ses);
-    a_dbus_cleanup_bus(dbus_connection_system, &dbusio_sys);
+    a_dbus_cleanup_bus(dbus_connection_session, &session_source);
+    a_dbus_cleanup_bus(dbus_connection_system, &system_source);
 }
 
 /** Retrieve the D-Bus bus by it's name
