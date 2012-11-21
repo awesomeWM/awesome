@@ -59,6 +59,18 @@ screen_xsitoarea(xcb_xinerama_screen_info_t si)
 static void
 screen_add(screen_t new_screen)
 {
+    foreach(screen_to_test, globalconf.screens)
+        if(new_screen.geometry.x == screen_to_test->geometry.x
+           && new_screen.geometry.y == screen_to_test->geometry.y)
+            {
+                /* we already have a screen for this area, just check if
+                 * it's not bigger and drop it */
+                screen_to_test->geometry.width =
+                    MAX(new_screen.geometry.width, screen_to_test->geometry.width);
+                screen_to_test->geometry.height =
+                    MAX(new_screen.geometry.height, screen_to_test->geometry.height);
+                return;
+            }
     signal_add(&new_screen.signals, "property::workarea");
     screen_array_append(&globalconf.screens, new_screen);
 }
@@ -175,27 +187,10 @@ screen_scan_xinerama(void)
         /* now check if screens overlaps (same x,y): if so, we take only the biggest one */
         for(int screen = 0; screen < xinerama_screen_number; screen++)
         {
-            bool drop = false;
-            foreach(screen_to_test, globalconf.screens)
-                if(xsi[screen].x_org == screen_to_test->geometry.x
-                   && xsi[screen].y_org == screen_to_test->geometry.y)
-                    {
-                        /* we already have a screen for this area, just check if
-                         * it's not bigger and drop it */
-                        drop = true;
-                        int i = screen_array_indexof(&globalconf.screens, screen_to_test);
-                        screen_to_test->geometry.width =
-                            MAX(xsi[screen].width, xsi[i].width);
-                        screen_to_test->geometry.height =
-                            MAX(xsi[screen].height, xsi[i].height);
-                    }
-            if(!drop)
-            {
-                screen_t s;
-                p_clear(&s, 1);
-                s.geometry = screen_xsitoarea(xsi[screen]);
-                screen_add(s);
-            }
+            screen_t s;
+            p_clear(&s, 1);
+            s.geometry = screen_xsitoarea(xsi[screen]);
+            screen_add(s);
         }
 
         p_delete(&xsq);
