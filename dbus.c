@@ -494,7 +494,7 @@ a_dbus_process_requests_on_bus(DBusConnection *dbus_connection, GSource **source
  * \param revents (not used)
  */
 static gboolean
-a_dbus_process_requests_session(GIOChannel *source, GIOCondition cond, gpointer data)
+a_dbus_process_requests_session(gpointer data)
 {
     a_dbus_process_requests_on_bus(dbus_connection_session, &session_source);
     return TRUE;
@@ -505,7 +505,7 @@ a_dbus_process_requests_session(GIOChannel *source, GIOCondition cond, gpointer 
  * \param revents (not used)
  */
 static gboolean
-a_dbus_process_requests_system(GIOChannel *source, GIOCondition cond, gpointer data)
+a_dbus_process_requests_system(gpointer data)
 {
     a_dbus_process_requests_on_bus(dbus_connection_system, &system_source);
     return TRUE;
@@ -592,7 +592,7 @@ a_dbus_release_name(DBusConnection *dbus_connection, const char *name)
  * \return The requested D-Bus connection on success, NULL on failure.
  */
 static DBusConnection *
-a_dbus_connect(DBusBusType type, const char *type_name, GIOFunc cb, GSource **source)
+a_dbus_connect(DBusBusType type, const char *type_name, GSourceFunc cb, GSource **source)
 {
     int fd;
     DBusConnection *dbus_connection;
@@ -615,6 +615,8 @@ a_dbus_connect(DBusBusType type, const char *type_name, GIOFunc cb, GSource **so
             GIOChannel *channel = g_io_channel_unix_new(fd);
             *source = g_io_create_watch(channel, G_IO_IN);
             g_io_channel_unref(channel);
+            g_source_set_callback(*source, cb, NULL, NULL);
+            g_source_attach(*source, NULL);
 
             fcntl(fd, F_SETFD, FD_CLOEXEC);
         }
