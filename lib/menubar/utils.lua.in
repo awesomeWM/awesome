@@ -31,7 +31,7 @@ utils.terminal = 'xterm'
 local default_icon = nil
 
 -- Name of the WM for the OnlyShownIn entry in the .desktop file.
-local wm_name = "awesome"
+utils.wm_name = "awesome"
 
 -- Private section
 
@@ -136,8 +136,8 @@ function utils.parse(file)
     end
 
     -- Only show the program if there is no OnlyShowIn attribute
-    -- or if it's equal to 'awesome'
-    if program.OnlyShowIn ~= nil and program.OnlyShowIn ~= wm_name then
+    -- or if it's equal to utils.wm_name
+    if program.OnlyShowIn ~= nil and program.OnlyShowIn ~= utils.wm_name then
         program.show = false
     end
 
