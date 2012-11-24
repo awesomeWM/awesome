@@ -106,6 +106,7 @@ end
 -- @param o The menu item.
 -- @return if the function processed the callback, new awful.prompt command, new awful.prompt prompt text.
 local function perform_action(o)
+    if not o then return end
     if o.key then
         current_category = o.key
         local new_prompt = shownitems[current_item].name .. ": "
