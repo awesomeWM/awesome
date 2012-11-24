@@ -100,7 +100,7 @@ luaA_object_incref(lua_State *L, int tud, int oud)
  * \return A pointer to the object.
  */
 void
-luaA_object_decref(lua_State *L, int tud, void *pointer)
+luaA_object_decref(lua_State *L, int tud, const void *pointer)
 {
     if(!pointer)
         return;
@@ -109,7 +109,7 @@ luaA_object_decref(lua_State *L, int tud, void *pointer)
     /* Get the metatable */
     lua_getmetatable(L, tud);
     /* Push the pointer (key) */
-    lua_pushlightuserdata(L, pointer);
+    lua_pushlightuserdata(L, (void *) pointer);
     /* Get the number of references */
     lua_rawget(L, -2);
     /* Get the number of references and decrement it */
@@ -127,7 +127,7 @@ luaA_object_decref(lua_State *L, int tud, void *pointer)
     }
     lua_pop(L, 1);
     /* Push the pointer (key) */
-    lua_pushlightuserdata(L, pointer);
+    lua_pushlightuserdata(L, (void *) pointer);
     /* Hasn't the ref reached 0? */
     if(count)
         lua_pushinteger(L, count);
@@ -143,7 +143,7 @@ luaA_object_decref(lua_State *L, int tud, void *pointer)
     if(!count)
     {
         /* Yes? So remove it from table */
-        lua_pushlightuserdata(L, pointer);
+        lua_pushlightuserdata(L, (void *) pointer);
         /* Push nil as value */
         lua_pushnil(L);
         /* table[pointer] = nil */
@@ -222,7 +222,7 @@ signal_object_emit(lua_State *L, signal_array_t *arr, const char *name, int narg
         /* Push all functions and then execute, because this list can change
          * while executing funcs. */
         foreach(func, sigfound->sigfuncs)
-            luaA_object_push(L, (void *) *func);
+            luaA_object_push(L, *func);
 
         for(int i = 0; i < nbfunc; i++)
         {
@@ -267,7 +267,7 @@ luaA_object_emit_signal(lua_State *L, int oud,
         /* Push all functions and then execute, because this list can change
          * while executing funcs. */
         foreach(func, sigfound->sigfuncs)
-            luaA_object_push_item(L, oud_abs, (void *) *func);
+            luaA_object_push_item(L, oud_abs, *func);
 
         for(int i = 0; i < nbfunc; i++)
         {

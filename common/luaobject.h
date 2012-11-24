@@ -30,7 +30,7 @@
 int luaA_settype(lua_State *, lua_class_t *);
 void luaA_object_setup(lua_State *);
 void * luaA_object_incref(lua_State *, int, int);
-void luaA_object_decref(lua_State *, int, void *);
+void luaA_object_decref(lua_State *, int, const void *);
 
 /** Store an item in the environment table of an object.
  * \param L The Lua VM state.
@@ -72,12 +72,12 @@ luaA_object_unref_item(lua_State *L, int ud, void *pointer)
  * \return The number of element pushed on stack.
  */
 static inline int
-luaA_object_push_item(lua_State *L, int ud, void *pointer)
+luaA_object_push_item(lua_State *L, int ud, const void *pointer)
 {
     /* Get env table of the object */
     luaA_getuservalue(L, ud);
     /* Push key */
-    lua_pushlightuserdata(L, pointer);
+    lua_pushlightuserdata(L, (void *) pointer);
     /* Get env.pointer */
     lua_rawget(L, -2);
     /* Remove env table */
@@ -127,7 +127,7 @@ luaA_object_ref_class(lua_State *L, int oud, lua_class_t *class)
  * \param oud The object index on the stack.
  */
 static inline void
-luaA_object_unref(lua_State *L, void *pointer)
+luaA_object_unref(lua_State *L, const void *pointer)
 {
     luaA_object_registry_push(L);
     luaA_object_decref(L, -1, pointer);
@@ -140,10 +140,10 @@ luaA_object_unref(lua_State *L, void *pointer)
  * \return The number of element pushed on stack.
  */
 static inline int
-luaA_object_push(lua_State *L, void *pointer)
+luaA_object_push(lua_State *L, const void *pointer)
 {
     luaA_object_registry_push(L);
-    lua_pushlightuserdata(L, pointer);
+    lua_pushlightuserdata(L, (void *) pointer);
     lua_rawget(L, -2);
     lua_remove(L, -2);
     return 1;
