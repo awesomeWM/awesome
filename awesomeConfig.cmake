@@ -16,10 +16,10 @@ option(COMPRESS_MANPAGES "compress manpages" ON)
 option(GENERATE_DOC "generate API documentation" ON)
 
 # {{{ CFLAGS
-add_definitions(-std=gnu99 -ggdb3 -rdynamic -fno-strict-aliasing -Wall -Wextra
+add_definitions(-O1 -std=gnu99 -ggdb3 -rdynamic -fno-strict-aliasing -Wall -Wextra
     -Wchar-subscripts -Wundef -Wshadow -Wcast-align -Wwrite-strings
     -Wsign-compare -Wunused -Wno-unused-parameter -Wuninitialized -Winit-self
-    -Wpointer-arith -Wredundant-decls -Wformat-nonliteral
+    -Wpointer-arith -Wformat-nonliteral
     -Wno-format-zero-length -Wmissing-format-attribute -Wmissing-prototypes
     -Wstrict-prototypes)
 # }}}
