@@ -509,10 +509,7 @@ function menu.entry(parent, args)
     local margin = wibox.layout.margin()
     margin:set_widget(label)
     if args.icon then
-        icon = args.icon
-        if type(icon) == "string" then
-            icon = surface.load(icon)
-        end
+        icon = surface.load(args.icon)
     end
     if icon then
         local iw = icon:get_width()
