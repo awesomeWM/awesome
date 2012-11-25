@@ -94,7 +94,7 @@ function background:set_bgimage(image)
     self._emit_updated()
 end
 
-local function new()
+local function new(widget)
     local ret = base.make_widget()
 
     for k, v in pairs(background) do
@@ -106,6 +106,8 @@ local function new()
     ret._emit_updated = function()
         ret:emit_signal("widget::updated")
     end
+
+    ret:set_widget(widget)
 
     return ret
 end

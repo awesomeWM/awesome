@@ -115,7 +115,7 @@ function textbox:set_font(font)
 end
 
 -- Returns a new textbox
-local function new()
+local function new(text, ignore_markup)
     local ret = base.make_widget()
 
     for k, v in pairs(textbox) do
@@ -132,6 +132,14 @@ local function new()
     ret:set_valign("center")
     ret:set_align("left")
     ret:set_font()
+
+    if text then
+        if ignore_markup then
+            ret:set_text(text)
+        else
+            ret:set_markup(text)
+        end
+    end
 
     return ret
 end

@@ -108,13 +108,23 @@ function imagebox:set_resize(allowed)
 end
 
 -- Returns a new imagebox
-local function new()
+-- @param image the image to display, may be nil
+-- @param resize_allowed If false, the image will be clipped, else it will be resized
+--                       to fit into the available space.
+local function new(image, resize_allowed)
     local ret = base.make_widget()
 
     for k, v in pairs(imagebox) do
         if type(v) == "function" then
             ret[k] = v
         end
+    end
+
+    if image then
+        ret:set_image(image)
+    end
+    if resize_allowed ~= nil then
+        ret:set_resize(resize_allowed)
     end
 
     return ret
