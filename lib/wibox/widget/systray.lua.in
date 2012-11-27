@@ -21,7 +21,7 @@ local base_size = nil
 function systray:draw(wibox, cr, width, height)
     local x, y, width, height = lbase.rect_to_device_geometry(cr, 0, 0, width, height)
     local num_entries = capi.awesome.systray()
-    local bg = beautiful.bg_systray or beautiful.bg_normal
+    local bg = beautiful.bg_systray or beautiful.bg_normal or "#000000"
 
     local in_dir, ortho, base
     if horizontal then

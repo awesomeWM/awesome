@@ -97,6 +97,14 @@ function base.make_widget(proxy)
     return ret
 end
 
+--- Generate an empty widget which takes no space and displays nothing
+function base.empty_widget()
+    local widget = base.make_widget()
+    widget.draw = function() end
+    widget.fit = function() return 0, 0 end
+    return widget
+end
+
 --- Do some sanity checking on widget. This function raises a lua error if
 -- widget is not a valid widget.
 function base.check_widget(widget)

@@ -28,7 +28,7 @@ local capi =
 local beautiful = { mt = {} }
 
 -- Local data
-local theme
+local theme = {}
 local descs = setmetatable({}, { __mode = 'k' })
 local fonts = setmetatable({}, { __mode = 'v' })
 local active_font

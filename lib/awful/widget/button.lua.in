@@ -8,6 +8,7 @@ local setmetatable = setmetatable
 local type = type
 local button = require("awful.button")
 local imagebox = require("wibox.widget.imagebox")
+local widget = require("wibox.widget.base")
 local surface = require("gears.surface")
 local cairo = require("lgi").cairo
 local capi = { mouse = mouse }
@@ -20,7 +21,9 @@ local button = { mt = {} }
 -- @param args Widget arguments. "image" is the image to display.
 -- @return A textbox widget configured as a button.
 function button.new(args)
-    if not args or not args.image then return end
+    if not args or not args.image then
+        return widget.empty_widget()
+    end
     local img_release = surface.load(args.image)
     local img_press = cairo.ImageSurface(cairo.Format.ARGB32, img_release.width, img_release.height)
     local cr = cairo.Context(img_press)
