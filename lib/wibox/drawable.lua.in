@@ -198,7 +198,7 @@ local function setup_signals(_drawable)
     clone_signal("property::y")
 end
 
-function drawable.new(d, widget_arg, redraw_hook)
+function drawable.new(d, widget_arg)
     local ret = object()
     ret.drawable = d
     ret.widget_arg = widget_arg or ret
@@ -213,7 +213,6 @@ function drawable.new(d, widget_arg, redraw_hook)
     -- Only redraw a drawable once, even when we get told to do so multiple times.
     ret._redraw_pending = false
     ret._do_redraw = function()
-        if redraw_hook then redraw_hook(ret) end
         ret._redraw_pending = false
         capi.awesome.disconnect_signal("refresh", ret._do_redraw)
         do_redraw(ret)

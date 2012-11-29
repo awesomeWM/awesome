@@ -70,24 +70,29 @@ local function new(c, args)
 
     local ret
     if not bars[position] then
-        ret = drawable(d, nil, function()
-            -- On redraw, update the fg and bg colors of the titlebar
+        ret = drawable(d, nil)
+        local function update_colors()
             local args = bars[position].args
             ret:set_bg(get_color("bg", c, args))
             ret:set_fg(get_color("fg", c, args))
-        end)
+        end
 
         bars[position] = {
             args = args,
-            drawable = ret
+            drawable = ret,
+            update_colors = update_colors
         }
+
+        -- Update the colors when focus changes
+        c:connect_signal("focus", update_colors)
+        c:connect_signal("unfocus", update_colors)
     else
         bars[position].args = args
         ret = bars[position].drawable
     end
 
-    -- Make sure the titlebar is (re-)drawn
-    ret.draw()
+    -- Make sure the titlebar has the right colors applied
+    bars[position].update_colors()
 
     return ret
 end
