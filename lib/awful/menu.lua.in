@@ -56,7 +56,7 @@ end
 -- key to up action. This is common to all created menu.
 -- @class table
 -- @name menu_keys
-menu_keys = { up = { "Up" },
+menu.menu_keys = { up = { "Up" },
               down = { "Down" },
               back = { "Left" },
               exec = { "Return" },
@@ -196,19 +196,19 @@ local function grabber(_menu, mod, key, event)
     if event ~= "press" then return end
 
     local sel = _menu.sel or 0
-    if util.table.hasitem(menu_keys.up, key) then
+    if util.table.hasitem(menu.menu_keys.up, key) then
         local sel_new = sel-1 < 1 and #_menu.items or sel-1
         _menu:item_enter(sel_new)
-    elseif util.table.hasitem(menu_keys.down, key) then
+    elseif util.table.hasitem(menu.menu_keys.down, key) then
         local sel_new = sel+1 > #_menu.items and 1 or sel+1
         _menu:item_enter(sel_new)
-    elseif sel > 0 and util.table.hasitem(menu_keys.enter, key) then
+    elseif sel > 0 and util.table.hasitem(menu.menu_keys.enter, key) then
         _menu:exec(sel)
-    elseif sel > 0 and util.table.hasitem(menu_keys.exec, key) then
+    elseif sel > 0 and util.table.hasitem(menu.menu_keys.exec, key) then
         _menu:exec(sel, { exec = true })
-    elseif util.table.hasitem(menu_keys.back, key) then
+    elseif util.table.hasitem(menu.menu_keys.back, key) then
         _menu:hide()
-    elseif util.table.hasitem(menu_keys.close, key) then
+    elseif util.table.hasitem(menu.menu_keys.close, key) then
         menu.get_root(_menu):hide()
     else
         check_access_key(_menu, key)

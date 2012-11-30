@@ -28,7 +28,7 @@ local capi =
 local util = {}
 util.table = {}
 
-shell = os.getenv("SHELL") or "/bin/sh"
+util.shell = os.getenv("SHELL") or "/bin/sh"
 
 function util.deprecate(see)
     io.stderr:write("W: awful: function is deprecated")
@@ -84,7 +84,7 @@ end
 -- @param screen The screen where to run the command.
 function util.spawn_with_shell(cmd, screen)
     if cmd and cmd ~= "" then
-        cmd = shell .. " -c \"" .. cmd .. "\""
+        cmd = util.shell .. " -c \"" .. cmd .. "\""
         return capi.awesome.spawn(cmd, false, screen or capi.mouse.screen)
     end
 end
