@@ -150,7 +150,7 @@ function utils.parse(file)
     -- line separated by semicolon.
     if program.Categories then
         program.categories = {}
-        for category in program.Categories:gfind('[^;]+') do
+        for category in program.Categories:gmatch('[^;]+') do
             table.insert(program.categories, category)
         end
     end
