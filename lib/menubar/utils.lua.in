@@ -124,11 +124,28 @@ end
 -- @return A table with file entries.
 function utils.parse(file)
     local program = { show = true, file = file }
+    local desktop_entry = false
+
+    -- Parse the .desktop file.
+    -- We are interested in [Desktop Entry] group only.
     for line in io.lines(file) do
-        for key, value in line:gmatch("(%w+)=(.+)") do
-            program[key] = value
+        if not desktop_entry and line == "[Desktop Entry]" then
+            desktop_entry = true
+        else
+            if line:sub(1, 1) == "[" and line:sub(-1) == "]" then
+                -- A declaration of new group - stop parsing
+                break
+            end
+
+            -- Grab the values
+            for key, value in line:gmatch("(%w+)%s*=%s*(.+)") do
+                program[key] = value
+            end
         end
     end
+
+    -- In case [Desktop Entry] was not found
+    if not desktop_entry then return nil end
 
     -- Don't show program if NoDisplay attribute is false
     if program.NoDisplay and string.lower(program.NoDisplay) == "true" then
@@ -183,7 +200,10 @@ function utils.parse_dir(dir)
     local programs = {}
     local files = io.popen('find '.. dir ..' -maxdepth 1 -name "*.desktop" 2>/dev/null')
     for file in files:lines() do
-        table.insert(programs, utils.parse(file))
+        local program = utils.parse(file)
+        if program then
+            table.insert(programs, program)
+        end
     end
     return programs
 end
