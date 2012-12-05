@@ -47,7 +47,7 @@ function rotate:draw(wibox, cr, width, height)
 end
 
 --- Fit this layout into the given area
-function rotate:fit(self, width, height)
+function rotate:fit(width, height)
     if not self.widget then
         return 0, 0
     end
