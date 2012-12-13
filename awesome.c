@@ -74,7 +74,15 @@ awesome_atexit(bool restart)
     /* Close Lua */
     lua_close(globalconf.L);
 
-    xcb_flush(globalconf.connection);
+    /* X11 is a great protocol. There is a save-set so that reparenting WMs
+     * don't kill clients when they shut down. However, when a focused windows
+     * is saved, the focus will move to its parent with revert-to none.
+     * Immediately afterwards, this parent is destroyed and the focus is gone.
+     * Work around this by placing the focus where we like it to be.
+     */
+    xcb_set_input_focus(globalconf.connection, XCB_INPUT_FOCUS_POINTER_ROOT,
+            XCB_NONE, XCB_CURRENT_TIME);
+    xcb_aux_sync(globalconf.connection);
 
     /* Disconnect *after* closing lua */
     xcb_disconnect(globalconf.connection);
@@ -369,6 +377,8 @@ main(int argc, char **argv)
     XSetEventQueueOwner(globalconf.display, XCBOwnsEventQueue);
     globalconf.default_screen = XDefaultScreen(globalconf.display);
     globalconf.connection = XGetXCBConnection(globalconf.display);
+    /* We have no clue where the input focus is right now */
+    globalconf.focus.need_update = true;
 
     /* Double checking that connection is good and operatable with xcb */
     if(xcb_connection_has_error(globalconf.connection))
