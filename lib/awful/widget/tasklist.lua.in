@@ -188,10 +188,10 @@ end
 function tasklist.filter.minimizedcurrenttags(c, screen)
     -- Only print client on the same screen as this widget
     if c.screen ~= screen then return false end
-    -- Include sticky client
-    if c.sticky then return true end
     -- Check client is minimized
     if not c.minimized then return false end
+    -- Include sticky client
+    if c.sticky then return true end
     local tags = tag.gettags(screen)
     for k, t in ipairs(tags) do
         -- Select only minimized clients
