@@ -500,12 +500,6 @@ local function client_resize_floating(c, corner, fixed_x, fixed_y)
     capi.mousegrabber.run(function (_mouse)
                               for k, v in ipairs(_mouse.buttons) do
                                   if v then
-                                      -- Ignore screen changes
-                                      if not aclient.floating.get(c)
-                                          and capi.mouse.screen ~= c.screen then
-                                          return true
-                                      end
-
                                       local ng
                                       if corner == "bottom_right" then
                                           ng = { width = _mouse.x - g.x,
