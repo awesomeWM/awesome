@@ -6,7 +6,7 @@
 
 local setmetatable = setmetatable
 local type = type
-local button = require("awful.button")
+local abutton = require("awful.button")
 local imagebox = require("wibox.widget.imagebox")
 local widget = require("wibox.widget.base")
 local surface = require("gears.surface")
@@ -32,7 +32,7 @@ function button.new(args)
 
     local w = imagebox()
     w:set_image(img_release)
-    w:buttons(button({}, 1, function () w:set_image(img_press) end, function () w:set_image(img_release) end))
+    w:buttons(abutton({}, 1, function () w:set_image(img_press) end, function () w:set_image(img_release) end))
     return w
 end
 
