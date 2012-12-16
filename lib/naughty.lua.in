@@ -108,16 +108,13 @@ local counter = 1
 -- True if notifying is suspended
 local suspended = false
 
---- Index of notifications. See config table for valid 'position' values.
--- Each element is a table consisting of:
+--- Index of notifications per screen and position. See config table for valid
+-- 'position' values. Each element is a table consisting of:
 -- @field box Wibox object containing the popup
 -- @field height Popup height
 -- @field width Popup width
 -- @field die Function to be executed on timeout
 -- @field id Unique notification id based on a counter
--- @name naughty.notifications[screen][position]
--- @class table
-
 naughty.notifications = { suspended = { } }
 for s = 1, capi.screen.count() do
     naughty.notifications[s] = {
