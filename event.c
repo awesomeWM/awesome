@@ -216,8 +216,8 @@ event_handle_button(xcb_button_press_event_t *ev)
          * relative to root window */
         if(drawin->window == ev->child)
         {
-            ev->event_x -= drawin->geometry.x;
-            ev->event_y -= drawin->geometry.y;
+            ev->event_x -= drawin->geometry.x + drawin->border_width;
+            ev->event_y -= drawin->geometry.y + drawin->border_width;
         }
 
         /* Push the drawable */
