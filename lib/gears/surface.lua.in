@@ -11,7 +11,8 @@ local cairo = require("lgi").cairo
 
 -- This checks for '<= 0.5' because there are git versions after 0.6 which still
 -- identify themselves as 0.6 but already have the needed cairo support
-if tonumber(string.match(require('lgi.version'), '(%d%.%d)')) <= 0.5 then
+local ver_major,ver_minor = string.match(require('lgi.version'),'(%d)%.(%d)')
+if ( (tonumber(ver_major)<=0) and (tonumber(ver_minor)<=5) ) then
     error("lgi too old, need at least version 0.6.1")
 end
 
