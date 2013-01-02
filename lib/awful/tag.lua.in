@@ -55,7 +55,8 @@ function tag.move(new_index, target_tag)
 
     table.insert(tmp_tags, new_index, target_tag)
 
-    for _, tmp_tag in ipairs(tmp_tags) do
+    for i, tmp_tag in ipairs(tmp_tags) do
+        tag.setproperty(tmp_tag, "index", i)
         tag.setscreen(tmp_tag, scr)
     end
 end
@@ -244,6 +245,22 @@ function tag.gettags(s)
             table.insert(tags, t)
         end
     end
+
+    local without_index = 0
+    for _, t in ipairs(tags) do
+        if not tag.getproperty(t, "index") then
+            without_index = without_index + 1
+        end
+    end
+    if without_index > 0 then
+        for _, t in ipairs(tags) do
+            if not tag.getproperty(t, "index") then
+                tag.setproperty(t, "index", (#tags - without_index + 1))
+            end
+        end
+    end
+
+    table.sort(tags, function(a, b) return tag.getproperty(a, "index") < tag.getproperty(b, "index") end)
     return tags
 end
 
@@ -563,6 +580,7 @@ capi.tag.add_signal("property::ncol")
 capi.tag.add_signal("property::nmaster")
 capi.tag.add_signal("property::windowfact")
 capi.tag.add_signal("property::screen")
+capi.tag.add_signal("property::index")
 
 for s = 1, capi.screen.count() do
     capi.screen[s]:add_signal("tag::history::update")
