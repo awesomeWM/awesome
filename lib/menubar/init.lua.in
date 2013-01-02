@@ -233,7 +233,7 @@ local function prompt_keypressed_callback(mod, key, comm)
     elseif key == "End" then
         current_item = #shownitems
         return true
-    elseif key == "Return" then
+    elseif key == "Return" or key == "KP_Enter" then
         if mod.Control then
             current_item = #shownitems
             if mod.Mod1 then
