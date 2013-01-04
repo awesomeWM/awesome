@@ -36,6 +36,8 @@ function taglist.taglist_label(t, args)
     local fg_occupied = args.fg_occupied or theme.taglist_fg_occupied
     local taglist_squares_sel = args.squares_sel or theme.taglist_squares_sel
     local taglist_squares_unsel = args.squares_unsel or theme.taglist_squares_unsel
+    local taglist_squares_sel_empty = args.squares_sel_empty or theme.taglist_squares_sel_empty
+    local taglist_squares_unsel_empty = args.squares_unsel_empty or theme.taglist_squares_unsel_empty
     local taglist_squares_resize = theme.taglist_squares_resize or args.squares_resize or "true"
     local font = args.font or theme.taglist_font or theme.font or ""
     local text = "<span font_desc='"..font.."'>"
@@ -56,7 +58,7 @@ function taglist.taglist_label(t, args)
             local seltags = sel:tags()
             for _, v in ipairs(seltags) do
                 if v == t then
-                    bg_image = surface.load(taglist_squares_sel)
+                    bg_image = taglist_squares_sel
                     bg_resize = taglist_squares_resize == "true"
                     is_selected = true
                     break
@@ -64,15 +66,23 @@ function taglist.taglist_label(t, args)
             end
         end
     end
-    if not is_selected then
+    if t:clients() == 0 and t.selected and taglist_squares_sel_empty then
+        bg_image = taglist_squares_sel_empty
+        bg_resize = taglist_squares_resize == "true"
+    elseif not is_selected then
         local cls = t:clients()
         if #cls > 0 then
             if taglist_squares_unsel then
-                bg_image = surface.load(taglist_squares_unsel)
+                bg_image = taglist_squares_unsel
                 bg_resize = taglist_squares_resize == "true"
             end
             if bg_occupied then bg_color = bg_occupied end
             if fg_occupied then fg_color = fg_occupied end
+        else
+            if taglist_squares_unsel_empty then
+                bg_image = taglist_squares_unsel_empty
+                bg_resize = taglist_squares_resize == "true"
+            end
         end
         for k, c in pairs(cls) do
             if c.urgent then
@@ -140,6 +150,8 @@ end
 -- fg_urgent The foreground color for urgent clients.
 -- squares_sel Optional: a user provided image for selected squares.
 -- squares_unsel Optional: a user provided image for unselected squares.
+-- squares_sel_empty Optional: a user provided image for selected squares for empty tags.
+-- squares_unsel_empty Optional: a user provided image for unselected squares for empty tags.
 -- squares_resize Optional: true or false to resize squares.
 -- font The font.
 function taglist.new(screen, filter, buttons, style, update_function, base_widget)
