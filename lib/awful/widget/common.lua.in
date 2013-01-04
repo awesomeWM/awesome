@@ -48,6 +48,7 @@ function common.list_update(w, buttons, label, data, objects)
             ib = cache.ib
             tb = cache.tb
             bgb = cache.bgb
+            m   = cache.m
         else
             ib = wibox.widget.imagebox()
             tb = wibox.widget.textbox()
@@ -68,7 +69,8 @@ function common.list_update(w, buttons, label, data, objects)
             data[o] = {
                 ib = ib,
                 tb = tb,
-                bgb = bgb
+                bgb = bgb,
+                m   = m
             }
         end
 
@@ -78,6 +80,9 @@ function common.list_update(w, buttons, label, data, objects)
             tb:set_markup("<i>&lt;Invalid text&gt;</i>")
         end
         bgb:set_bg(bg)
+        if type(bg_image) == "function" then
+            bg_image = bg_image(tb,o,m,objects,i)
+        end
         bgb:set_bgimage(bg_image)
         ib:set_image(icon)
         w:add(bgb)
