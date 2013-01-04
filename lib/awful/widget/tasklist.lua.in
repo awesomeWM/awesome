@@ -35,10 +35,16 @@ local function tasklist_label(c, args)
     local bg_urgent = args.bg_urgent or theme.tasklist_bg_urgent or theme.bg_urgent
     local fg_minimize = args.fg_minimize or theme.tasklist_fg_minimize or theme.fg_minimize
     local bg_minimize = args.bg_minimize or theme.tasklist_bg_minimize or theme.bg_minimize
+    local bg_image_normal = args.bg_image_normal or theme.bg_image_normal
+    local bg_image_focus = args.bg_image_focus or theme.bg_image_focus
+    local bg_image_urgent = args.bg_image_urgent or theme.bg_image_urgent
+    local bg_image_minimize = args.bg_image_minimize or theme.bg_image_minimize
+    local tasklist_disable_icon = args.tasklist_disable_icon or theme.tasklist_disable_icon or false
     local font = args.font or theme.tasklist_font or theme.font or ""
     local bg = nil
     local text = "<span font_desc='"..font.."'>"
     local name = ""
+    local bg_image = nil
 
     -- symbol to use to indicate certain client properties
     local sticky = args.sticky or theme.tasklist_sticky or "▪"
@@ -62,6 +68,7 @@ local function tasklist_label(c, args)
     end
     if capi.client.focus == c then
         bg = bg_focus
+        bg_image = bg_image_focus
         if fg_focus then
             text = text .. "<span color='"..util.color_strip_alpha(fg_focus).."'>"..name.."</span>"
         else
@@ -70,15 +77,18 @@ local function tasklist_label(c, args)
     elseif c.urgent and fg_urgent then
         bg = bg_urgent
         text = text .. "<span color='"..util.color_strip_alpha(fg_urgent).."'>"..name.."</span>"
+        bg_image = bg_image_urgent
     elseif c.minimized and fg_minimize and bg_minimize then
         bg = bg_minimize
         text = text .. "<span color='"..util.color_strip_alpha(fg_minimize).."'>"..name.."</span>"
+        bg_image = bg_image_minimize
     else
         bg = bg_normal
         text = text .. "<span color='"..util.color_strip_alpha(fg_normal).."'>"..name.."</span>"
+        bg_image = bg_image_normal
     end
     text = text .. "</span>"
-    return text, bg, nil, c.icon
+    return text, bg, bg_image, not tasklist_disable_icon and c.icon or nil
 end
 
 local function tasklist_update(s, w, buttons, filter, data, style, update_function)
