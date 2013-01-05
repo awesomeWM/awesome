@@ -18,28 +18,28 @@ local function round(x)
     return floor(x + 0.5)
 end
 
---- Draw a flex layout. Each widget gets an equal share of the available space
--- @param dir "x" for a horizontal layout and "y" for vertical.
--- @param widgets The widgets to draw.
+flex.fit = fixed.fit
+
+--- Draw a flex layout. Each widget gets an equal share of the available space.
 -- @param wibox The wibox that this widget is drawn to.
 -- @param cr The cairo context to use.
 -- @param width The available width.
 -- @param height The available height.
 -- @return The total space needed by the layout.
-function flex.draw_flex(dir, widgets, wibox, cr, width, height)
+function flex:draw(wibox, cr, width, height)
     local pos = 0
 
-    local num = #widgets
+    local num = #self.widgets
     local space_per_item
-    if dir == "y" then
+    if self.dir == "y" then
         space_per_item = height / num
     else
         space_per_item = width / num
     end
 
-    for k, v in pairs(widgets) do
+    for k, v in pairs(self.widgets) do
         local x, y, w, h
-        if dir == "y" then
+        if self.dir == "y" then
             x, y = 0, round(pos)
             w, h = width, floor(space_per_item)
         else
@@ -50,44 +50,39 @@ function flex.draw_flex(dir, widgets, wibox, cr, width, height)
 
         pos = pos + space_per_item
 
-        if (dir == "y" and pos >= height) or
-            (dir ~= "y" and pos >= width) then
+        if (self.dir == "y" and pos >= height) or
+            (self.dir ~= "y" and pos >= width) then
             break
         end
     end
 end
 
-local function add(layout, widget)
+function flex:add(widget)
     widget_base.check_widget(widget)
-    table.insert(layout.widgets, widget)
-    widget:connect_signal("widget::updated", layout._emit_updated)
-    layout._emit_updated()
+    table.insert(self.widgets, widget)
+    widget:connect_signal("widget::updated", self._emit_updated)
+    self._emit_updated()
 end
 
-local function reset(layout)
-    for k, v in pairs(layout.widgets) do
-        v:disconnect_signal("widget::updated", layout._emit_updated)
+function flex:reset()
+    for k, v in pairs(self.widgets) do
+        v:disconnect_signal("widget::updated", self._emit_updated)
     end
-    layout.widgets = {}
-    layout:emit_signal("widget::updated")
+    self.widgets = {}
+    self:emit_signal("widget::updated")
 end
 
 local function get_layout(dir)
-    local function draw(layout, wibox, cr, width, height)
-        flex.draw_flex(dir, layout.widgets, wibox, cr, width, height)
-    end
-
-    local function fit(layout, width, height)
-        return fixed.fit_fixed(dir, layout.widgets, width, height)
-    end
-
     local ret = widget_base.make_widget()
-    ret.draw = draw
-    ret.fit = fit
-    ret.add = add
-    ret.reset = reset
+
+    for k, v in pairs(flex) do
+        if type(v) == "function" then
+            ret[k] = v
+        end
+    end
+
+    ret.dir = dir
     ret.widgets = {}
-    ret.get_dir = function () return dir end
     ret._emit_updated = function()
         ret:emit_signal("widget::updated")
     end

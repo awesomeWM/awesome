@@ -14,51 +14,55 @@ local widget_base = require("wibox.widget.base")
 -- wibox.layout.align
 local align = {}
 
--- Draw the given align layout. dir describes the orientation of the layout, "x"
--- means horizontal while "y" is vertical.
-local function draw(dir, layout, wibox, cr, width, height)
+--- Draw an align layout.
+-- @param wibox The wibox that this widget is drawn to.
+-- @param cr The cairo context to use.
+-- @param width The available width.
+-- @param height The available height.
+-- @return The total space needed by the layout.
+function align:draw(wibox, cr, width, height)
     local size_first = 0
     local size_third = 0
-    local size_limit = dir == "y" and height or width
+    local size_limit = self.dir == "y" and height or width
 
-    if layout.first then
+    if self.first then
         local w, h, _ = width, height, nil
-        if dir == "y" then
-            _, h = layout.first:fit(w, h)
+        if self.dir == "y" then
+            _, h = self.first:fit(w, h)
             size_first = h
         else
-            w, _ = layout.first:fit(w, h)
+            w, _ = self.first:fit(w, h)
             size_first = w
         end
-        base.draw_widget(wibox, cr, layout.first, 0, 0, w, h)
+        base.draw_widget(wibox, cr, self.first, 0, 0, w, h)
     end
 
-    if layout.third and size_first < size_limit then
+    if self.third and size_first < size_limit then
         local w, h, x, y, _
-        if dir == "y" then
+        if self.dir == "y" then
             w, h = width, height - size_first
-            _, h = layout.third:fit(w, h)
+            _, h = self.third:fit(w, h)
             x, y = 0, height - h
             size_third = h
         else
             w, h = width - size_first, height
-            w, _ = layout.third:fit(w, h)
+            w, _ = self.third:fit(w, h)
             x, y = width - w, 0
             size_third = w
         end
-        base.draw_widget(wibox, cr, layout.third, x, y, w, h)
+        base.draw_widget(wibox, cr, self.third, x, y, w, h)
     end
 
-    if layout.second and size_first + size_third < size_limit then
+    if self.second and size_first + size_third < size_limit then
         local x, y, w, h
-        if dir == "y" then
+        if self.dir == "y" then
             x, y = 0, size_first
             w, h = width, size_limit - size_first - size_third
         else
             x, y = size_first, 0
             w, h = size_limit - size_first - size_third, height
         end
-        base.draw_widget(wibox, cr, layout.second, x, y, w, h)
+        base.draw_widget(wibox, cr, self.second, x, y, w, h)
     end
 end
 
@@ -99,14 +103,9 @@ function align:reset()
 end
 
 local function get_layout(dir)
-    local function draw_dir(layout, wibox, cr, width, height)
-        draw(dir, layout, wibox, cr, width, height)
-    end
-
     local ret = widget_base.make_widget()
-    ret.draw = draw_dir
     ret.fit = function(box, ...) return ... end
-    ret.get_dir = function () return dir end
+    ret.dir = dir
     ret._emit_updated = function()
         ret:emit_signal("widget::updated")
     end

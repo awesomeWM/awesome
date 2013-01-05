@@ -13,25 +13,21 @@ local pairs = pairs
 local fixed = {}
 
 --- Draw a fixed layout. Each widget gets just the space it asks for.
--- @param dir "x" for a horizontal layout and "y" for vertical.
--- @param widgets The widgets to draw.
--- @param fill_space Use all the available space, giving all that is left to the
---                   last widget
 -- @param wibox The wibox that this widget is drawn to.
 -- @param cr The cairo context to use.
 -- @param width The available width.
 -- @param height The available height.
 -- @return The total space needed by the layout.
-function fixed.draw_fixed(dir, widgets, fill_space, wibox, cr, width, height)
+function fixed:draw(wibox, cr, width, height)
     local pos = 0
 
-    for k, v in pairs(widgets) do
+    for k, v in pairs(self.widgets) do
         local x, y, w, h, _
         local in_dir
-        if dir == "y" then
+        if self.dir == "y" then
             x, y = 0, pos
             w, h = width, height - pos
-            if k ~= #widgets or not fill_space then
+            if k ~= #self.widgets or not self.fill_space then
                 _, h = v:fit(w, h);
             end
             pos = pos + h
@@ -39,15 +35,15 @@ function fixed.draw_fixed(dir, widgets, fill_space, wibox, cr, width, height)
         else
             x, y = pos, 0
             w, h = width - pos, height
-            if k ~= #widgets or not fill_space then
+            if k ~= #self.widgets or not self.fill_space then
                 w, _ = v:fit(w, h);
             end
             pos = pos + w
             in_dir = w
         end
 
-        if (dir == "y" and pos > height) or
-            (dir ~= "y" and pos > width) then
+        if (self.dir == "y" and pos > height) or
+            (self.dir ~= "y" and pos > width) then
             break
         end
         base.draw_widget(wibox, cr, v, x, y, w, h)
@@ -63,18 +59,16 @@ function fixed:add(widget)
 end
 
 --- Fit the fixed layout into the given space
--- @param dir "x" for a horizontal layout and "y" for vertical.
--- @param widgets The widgets to fit.
 -- @param orig_width The available width.
 -- @param orig_height The available height.
-function fixed.fit_fixed(dir, widgets, orig_width, orig_height)
+function fixed:fit(orig_width, orig_height)
     local width, height = orig_width, orig_height
     local used_in_dir, used_max = 0, 0
 
-    for k, v in pairs(widgets) do
+    for k, v in pairs(self.widgets) do
         local w, h = v:fit(width, height)
         local in_dir, max
-        if dir == "y" then
+        if self.dir == "y" then
             max, in_dir = w, h
             height = height - in_dir
         else
@@ -87,7 +81,7 @@ function fixed.fit_fixed(dir, widgets, orig_width, orig_height)
         used_in_dir = used_in_dir + in_dir
 
         if width <= 0 or height <= 0 then
-            if dir == "y" then
+            if self.dir == "y" then
                 used_in_dir = orig_height
             else
                 used_in_dir = orig_width
@@ -96,7 +90,7 @@ function fixed.fit_fixed(dir, widgets, orig_width, orig_height)
         end
     end
 
-    if dir == "y" then
+    if self.dir == "y" then
         return used_max, used_in_dir
     end
     return used_in_dir, used_max
@@ -120,21 +114,16 @@ function fixed:fill_space(val)
 end
 
 local function get_layout(dir)
-    local function draw(layout, ...)
-        fixed.draw_fixed(dir, layout.widgets, layout._fill_space, ...)
-    end
-    local function fit(layout, ...)
-        return fixed.fit_fixed(dir, layout.widgets, ...)
+    local ret = widget_base.make_widget()
+
+    for k, v in pairs(fixed) do
+        if type(v) == "function" then
+            ret[k] = v
+        end
     end
 
-    local ret = widget_base.make_widget()
-    ret.draw = draw
-    ret.fit = fit
-    ret.add = fixed.add
-    ret.reset = fixed.reset
-    ret.fill_space = fixed.fill_space
+    ret.dir = dir
     ret.widgets = {}
-    ret.get_dir = function () return dir end
     ret._emit_updated = function()
         ret:emit_signal("widget::updated")
     end
