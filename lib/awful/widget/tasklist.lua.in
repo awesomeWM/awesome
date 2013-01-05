@@ -78,7 +78,7 @@ local function tasklist_label(c, args)
     return text, bg, nil, c.icon
 end
 
-local function tasklist_update(s, w, buttons, filter, data, style)
+local function tasklist_update(s, w, buttons, filter, data, style, update_function)
     local clients = {}
     for k, c in ipairs(capi.client.get()) do
         if not (c.skip_taskbar or c.hidden
@@ -90,14 +90,23 @@ local function tasklist_update(s, w, buttons, filter, data, style)
 
     local function label(c) return tasklist_label(c, style) end
 
-    common.list_update(w, buttons, label, data, clients)
+    update_function(w, buttons, label, data, clients)
 end
 
---- Create a new tasklist widget.
+--- Create a new tasklist widget. The last two arguments (update_function
+-- and base_widget) serve to customize the layout of the tasklist (eg. to
+-- make it vertical). For that, you will need to copy the
+-- awful.widget.common.list_update function, make your changes to it
+-- and pass it as update_function here. Also change the base_widget if the
+-- default is not what you want.
 -- @param screen The screen to draw tasklist for.
 -- @param filter Filter function to define what clients will be listed.
 -- @param buttons A table with buttons binding to set.
 -- @param style The style overrides default theme.
+-- @param update_function Optional function to create a tag widget on each
+--        update. @see awful.widget.common.
+-- @param base_widget Optional container widget for tag widgets. Default
+--        is wibox.layout.flex.horizontal().
 -- bg_normal The background color for unfocused client.
 -- fg_normal The foreground color for unfocused client.
 -- bg_focus The background color for focused client.
@@ -111,11 +120,12 @@ end
 -- maximized_horizontal Symbol to use for clients that have been horizontally maximized.
 -- maximized_vertical Symbol to use for clients that have been vertically maximized.
 -- font The font.
-function tasklist.new(screen, filter, buttons, style)
-    local w = flex.horizontal()
+function tasklist.new(screen, filter, buttons, style, update_function, base_widget)
+    local uf = update_function or common.list_update
+    local w = base_widget or flex.horizontal()
 
     local data = setmetatable({}, { __mode = 'k' })
-    local u = function () tasklist_update(screen, w, buttons, filter, data, style) end
+    local u = function () tasklist_update(screen, w, buttons, filter, data, style, uf) end
     tag.attached_connect_signal(screen, "property::selected", u)
     tag.attached_connect_signal(screen, "property::activated", u)
     capi.client.connect_signal("property::urgent", u)

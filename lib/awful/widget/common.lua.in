@@ -36,6 +36,24 @@ local function replace_in_template(t, ib, tb)
     end
 end
 
+function common.create_buttons(buttons, object)
+    if buttons then
+        local btns = {}
+        for kb, b in ipairs(buttons) do
+            -- Create a proxy button object: it will receive the real
+            -- press and release events, and will propagate them the the
+            -- button object the user provided, but with the object as
+            -- argument.
+            local btn = capi.button { modifiers = b.modifiers, button = b.button }
+            btn:connect_signal("press", function () b:emit_signal("press", object) end)
+            btn:connect_signal("release", function () b:emit_signal("release", object) end)
+            btns[#btns + 1] = btn
+        end
+
+        return btns
+    end
+end
+
 function common.list_update(w, buttons, label, data, objects)
     -- update the widgets, creating them if needed
     w:reset()
@@ -61,20 +79,7 @@ function common.list_update(w, buttons, label, data, objects)
             -- And all of this gets a background
             bgb:set_widget(l)
 
-            if buttons then
-                local btns = {}
-                for kb, b in ipairs(buttons) do
-                    -- Create a proxy button object: it will receive the real
-                    -- press and release events, and will propagate them the the
-                    -- button object the user provided, but with the object as
-                    -- argument.
-                    local btn = capi.button { modifiers = b.modifiers, button = b.button }
-                    btn:connect_signal("press", function () b:emit_signal("press", o) end)
-                    btn:connect_signal("release", function () b:emit_signal("release", o) end)
-                    btns[#btns + 1] = btn
-                end
-                bgb:buttons(btns)
-            end
+            bgb:buttons(common.create_buttons(buttons, o))
 
             data[o] = {
                 ib = ib,
