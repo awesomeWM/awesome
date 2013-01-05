@@ -29,14 +29,18 @@ data.padding = {}
 -- `screen` table/object.
 -- @param x The x coordinate
 -- @param y The y coordinate
-function screen.getbycoord(x, y)
+-- @param default Optional default return value. If unspecified, 1 is returned.
+function screen.getbycoord(x, y, default)
     for i = 1, capi.screen:count() do
         local geometry = capi.screen[i].geometry
         if((x < 0 or (x >= geometry.x and x < geometry.x + geometry.width))
            and (y < 0 or (y >= geometry.y and y < geometry.y + geometry.height))) then
-            return i;
+            return i
         end
     end
+    -- No caller expects a nil result here, so just make something up
+    if default == nil then return 1 end
+    return default
 end
 
 --- Give the focus to a screen, and move pointer. Keeps relative position of the pointer on the screen.
