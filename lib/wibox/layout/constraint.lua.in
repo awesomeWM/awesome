@@ -1,0 +1,143 @@
+---------------------------------------------------------------------------
+-- @author Lukáš Hrázký
+-- @copyright 2012 Lukáš Hrázký
+-- @release @AWESOME_VERSION@
+---------------------------------------------------------------------------
+
+local pairs = pairs
+local type = type
+local setmetatable = setmetatable
+local base = require("wibox.layout.base")
+local widget_base = require("wibox.widget.base")
+local math = math
+
+-- wibox.layout.constraint
+local constraint = { mt = {} }
+
+--- Draw a constraint layout
+function constraint:draw(wibox, cr, width, height)
+    if not self.widget then
+        return
+    end
+
+    local w, h = self:fit(width, height)
+
+    base.draw_widget(wibox, cr, self.widget, 0, 0, w, h)
+end
+
+--- Fit a constraint layout into the given space
+function constraint:fit(width, height)
+    local w, h
+    if self.widget then
+        w, h = self.widget:fit(width, height)
+    else
+        w, h = 0, 0
+    end
+
+    if self._width > 0 then
+        if self.strategy == "exact" then
+            w = self._width
+        else
+            w = math[self.strategy](w, self._width)
+        end
+    end
+
+    if self._height > 0 then
+        if self.strategy == "exact" then
+            h = self._height
+        else
+            h = math[self.strategy](h, self._height)
+        end
+    end
+
+    return w, h
+end
+
+--- Set the widget that this layout adds a constraint on.
+function constraint:set_widget(widget)
+    if self.widget then
+        self.widget:disconnect_signal("widget::updated", self._emit_updated)
+    end
+    if widget then
+        widget_base.check_widget(widget)
+        widget:connect_signal("widget::updated", self._emit_updated)
+    end
+    self.widget = widget
+    self:emit_signal("widget::updated")
+end
+
+--- Set the strategy to use for the constraining. Valid values are 'max',
+-- 'min' or 'exact'. Throws an error on invalid values.
+function constraint:set_strategy(val)
+    local allowed = {
+        max = true,
+        min = true,
+        exact = true
+    }
+
+    if not allowed[val] then
+        error("Invalid strategy for constraint layout: " .. tostring(val))
+    end
+
+    self.strategy = val
+    self:emit_signal("widget::updated")
+end
+
+--- Set the maximum width to val.
+function constraint:set_width(val)
+    self._width = val
+    self:emit_signal("widget::updated")
+end
+
+--- Set the maximum height to val.
+function constraint:set_height(val)
+    self._height = val
+    self:emit_signal("widget::updated")
+end
+
+--- Reset this layout. The widget will be unreferenced, strategy set to "max"
+-- and the constraints set to 0.
+function constraint:reset()
+    self.strategy = "max"
+    self._width = 0
+    self._height = 0
+    self:set_widget(nil)
+end
+
+--- Returns a new constraint layout.
+-- @param widget A widget to use (optional)
+-- @param strategy How to constraint the size. 'max' (default), 'min' or
+-- 'exact'. (optional)
+-- @param width The maximum width of the widget. 0 for no limit. (optional)
+-- @param height The maximum height of the widget. 0 for no limit. (optional)
+local function new(widget, strategy, width, height)
+    local ret = widget_base.make_widget()
+
+    for k, v in pairs(constraint) do
+        if type(v) == "function" then
+            ret[k] = v
+        end
+    end
+
+    ret._emit_updated = function()
+        ret:emit_signal("widget::updated")
+    end
+
+    ret:set_strategy(strategy or "max")
+    ret:set_width(width or 0)
+    ret:set_height(height or 0)
+
+    if widget then
+        ret:set_widget(widget)
+    end
+
+    return ret
+end
+
+function constraint.mt:__call(...)
+    return new(...)
+end
+
+return setmetatable(constraint, constraint.mt)
+
+-- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
