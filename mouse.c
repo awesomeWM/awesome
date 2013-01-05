@@ -217,7 +217,7 @@ luaA_mouse_object_under_pointer(lua_State *L)
     client_t *client;
 
     if((drawin = drawin_getbywin(child)))
-        luaA_object_push(L, drawin);
+        return luaA_object_push(L, drawin);
 
     if((client = client_getbyframewin(child)))
         return luaA_object_push(globalconf.L, client);
