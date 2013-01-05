@@ -560,7 +560,7 @@ function menu.entry(parent, args)
     left:add(margin)
 
     local layout = wibox.layout.align.horizontal()
-    layout:set_middle(left)
+    layout:set_left(left)
     if submenu then
         layout:set_right(submenu)
     end

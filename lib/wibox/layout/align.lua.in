@@ -56,11 +56,15 @@ function align:draw(wibox, cr, width, height)
     if self.second and size_first + size_third < size_limit then
         local x, y, w, h
         if self.dir == "y" then
-            x, y = 0, size_first
             w, h = width, size_limit - size_first - size_third
+            local real_w, real_h = self.second:fit(w, h)
+            x, y = 0, size_first + h / 2 - real_h / 2
+            w, h = real_w, real_h
         else
-            x, y = size_first, 0
             w, h = size_limit - size_first - size_third, height
+            local real_w, real_h = self.second:fit(w, h)
+            x, y = size_first + w / 2 - real_w / 2, 0
+            w, h = real_w, real_h
         end
         base.draw_widget(wibox, cr, self.second, x, y, w, h)
     end
