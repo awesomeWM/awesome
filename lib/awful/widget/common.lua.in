@@ -20,22 +20,6 @@ local textbox = require("wibox.widget.textbox")
 --- Common utilities for awful widgets
 local common = {}
 
--- Recursively processes a template, replacing the tables representing the icon and
--- the title with the widgets ib and tb
-local function replace_in_template(t, ib, tb)
-    for i, v in ipairs(t) do
-        if type(t[i]) == "table" then
-            if v.item == "icon" then
-                t[i] = ib
-            elseif v.item == "title" then
-                t[i] = tb
-            else
-                replace_in_template(v, ib, tb)
-            end
-        end
-    end
-end
-
 function common.create_buttons(buttons, object)
     if buttons then
         local btns = {}
