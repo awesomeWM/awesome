@@ -82,9 +82,6 @@ local function set_geometry(self)
     if my_geo.width ~= n_w or my_geo.height ~= n_h then
         self.wibox:geometry({ width = n_w, height = n_h })
     end
-    if not self.wibox.visible then
-       place(self)
-    end
 end
 
 -- Show a tooltip.
@@ -99,6 +96,7 @@ local function show(self)
         end
     end
     set_geometry(self)
+    place(self)
     self.wibox.visible = true
     self.visible = true
 end
