@@ -5,7 +5,6 @@
 ---------------------------------------------------------------------------
 
 local base = require("wibox.layout.base")
-local fixed = require("wibox.layout.fixed")
 local widget_base = require("wibox.widget.base")
 local table = table
 local pairs = pairs
@@ -17,8 +16,6 @@ local flex = {}
 local function round(x)
     return floor(x + 0.5)
 end
-
-flex.fit = fixed.fit
 
 --- Draw a flex layout. Each widget gets an equal share of the available space.
 -- @param wibox The wibox that this widget is drawn to.
@@ -62,6 +59,31 @@ function flex:add(widget)
     table.insert(self.widgets, widget)
     widget:connect_signal("widget::updated", self._emit_updated)
     self._emit_updated()
+end
+
+--- Fit the flex layout into the given space.
+-- @param orig_width The available width.
+-- @param orig_height The available height.
+function flex:fit(orig_width, orig_height)
+    local used_max = 0
+
+    for k, v in pairs(self.widgets) do
+        local w, h = v:fit(orig_width, orig_height)
+        local max
+        if self.dir == "y" then
+            max = w
+        else
+            max = h
+        end
+        if max > used_max then
+            used_max = max
+        end
+    end
+
+    if self.dir == "y" then
+        return used_max, orig_height
+    end
+    return orig_width, used_max
 end
 
 function flex:reset()
