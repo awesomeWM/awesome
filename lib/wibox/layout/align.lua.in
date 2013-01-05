@@ -95,6 +95,30 @@ function align:set_third(widget)
     self.third = widget
 end
 
+--- Fit the align layout into the given space. The align layout will
+-- take all available space in its direction and the maximum size of
+-- it's all three inner widgets in the other axis.
+-- @param orig_width The available width.
+-- @param orig_height The available height.
+function align:fit(orig_width, orig_height)
+    local used_max = 0
+
+    for k, v in pairs{self.first, self.second, self.third} do
+        local w, h = v:fit(orig_width, orig_height)
+
+        local max = self.dir == "y" and w or h
+
+        if max > used_max then
+            used_max = max
+        end
+    end
+
+    if self.dir == "y" then
+        return used_max, orig_height
+    end
+    return orig_width, used_max
+end
+
 function align:reset()
     for k, v in pairs({ "first", "second", "third" }) do
         self[v] = nil
@@ -104,7 +128,6 @@ end
 
 local function get_layout(dir)
     local ret = widget_base.make_widget()
-    ret.fit = function(box, ...) return ... end
     ret.dir = dir
     ret._emit_updated = function()
         ret:emit_signal("widget::updated")
