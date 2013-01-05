@@ -39,6 +39,7 @@ function taglist.taglist_label(t, args)
     local taglist_squares_sel_empty = args.squares_sel_empty or theme.taglist_squares_sel_empty
     local taglist_squares_unsel_empty = args.squares_unsel_empty or theme.taglist_squares_unsel_empty
     local taglist_squares_resize = theme.taglist_squares_resize or args.squares_resize or "true"
+    local taglist_disable_icon = args.taglist_disable_icon or theme.taglist_disable_icon or false
     local font = args.font or theme.taglist_font or theme.font or ""
     local text = "<span font_desc='"..font.."'>"
     local sel = capi.client.focus
@@ -101,13 +102,15 @@ function taglist.taglist_label(t, args)
         end
     end
     text = text .. "</span>"
-    if tag.geticon(t) and type(tag.geticon(t)) == "image" then
-        icon = tag.geticon(t)
-    elseif tag.geticon(t) then
-        icon = surface.load(tag.geticon(t))
+    if not taglist_disable_icon then
+        if tag.geticon(t) and type(tag.geticon(t)) == "image" then
+            icon = tag.geticon(t)
+        elseif tag.geticon(t) then
+            icon = surface.load(tag.geticon(t))
+        end
     end
 
-    return text, bg_color, bg_image, icon
+    return text, bg_color, bg_image, not taglist_disable_icon and icon or nil
 end
 
 local function taglist_update(s, w, buttons, filter, data, style, update_function)
