@@ -7,6 +7,8 @@
 local pairs = pairs
 local pcall = pcall
 local print = print
+local min = math.min
+local max = math.max
 
 -- wibox.layout.base
 local base = {}
@@ -14,15 +16,6 @@ local base = {}
 --- Figure out the geometry in device coordinate space. This will break if
 -- someone rotates the coordinate space by a non-multiple of 90°.
 function base.rect_to_device_geometry(cr, x, y, width, height)
-    local function min(a, b)
-        if a < b then return a end
-        return b
-    end
-    local function max(a, b)
-        if a > b then return a end
-        return b
-    end
-
     local x1, y1 = cr:user_to_device(x, y)
     local x2, y2 = cr:user_to_device(x + width, y + height)
     local x = min(x1, x2)
