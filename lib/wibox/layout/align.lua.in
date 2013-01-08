@@ -59,12 +59,12 @@ function align:draw(wibox, cr, width, height)
             w, h = width, size_limit - size_first - size_third
             local real_w, real_h = self.second:fit(w, h)
             x, y = 0, size_first + h / 2 - real_h / 2
-            w, h = real_w, real_h
+            h = real_h
         else
             w, h = size_limit - size_first - size_third, height
             local real_w, real_h = self.second:fit(w, h)
             x, y = size_first + w / 2 - real_w / 2, 0
-            w, h = real_w, real_h
+            w = real_w
         end
         base.draw_widget(wibox, cr, self.second, x, y, w, h)
     end
