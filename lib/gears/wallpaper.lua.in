@@ -155,6 +155,38 @@ function wallpaper.maximized(surf, s, ignore_aspect, offset)
     wallpaper.set(img)
 end
 
+--- Set a fitting wallpaper.
+-- @param surf The wallpaper to set. Either a cairo surface or a file name.
+-- @param s The screen whose wallpaper should be set. Can be nil, in which case
+--          all screens are set.
+-- @param background The background color that should be used. Gets handled via
+--                   gears.color. The default is black.
+function wallpaper.fit(surf, s, background)
+    local geom, img, cr = prepare_wallpaper(s)
+    local surf = surface(surf)
+    local background = color(background)
+
+    -- Fill the area with the background
+    cr.operator = cairo.Operator.SOURCE
+    cr.source = background
+    cr:paint()
+
+    -- Now fit the surface
+    local w, h = surface_size(surf)
+    local scale = geom.width / w
+    if h * scale > geom.height then
+       scale = geom.height / h
+    end
+    cr:translate((geom.width - (w * scale)) / 2, (geom.height - (h * scale)) / 2)
+    cr:rectangle(0, 0, w * scale, h * scale)
+    cr:clip()
+    cr:scale(scale, scale)
+    cr:set_source_surface(surf, 0, 0)
+    cr:paint()
+
+    wallpaper.set(img)
+end
+
 return wallpaper
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
