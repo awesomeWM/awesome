@@ -55,8 +55,10 @@ end
 -- @return An integer in (1, t) or nil if t is less than or equal to zero.
 function util.cycle(t, i)
     if t < 1 then return end
-    while i > t do i = i - t end
-    while i < 1 do i = i + t end
+    i = i % t
+    if i == 0 then
+        i = t
+    end
     return i
 end
 
