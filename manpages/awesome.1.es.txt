@@ -167,8 +167,6 @@ Modificación del esquema
     Etiqueta al cliente actual con la etiqueta 1-9.
 *Mod4 + Mayús + Control + 1-9*::
     Activa o desactiva la etiqueta 1-9 para el cliente actual.
-*Mod4 + Mayús + F1-9*::
-    Etiqueta a los clientes marcados con la etiqueta 1-9.
 
 PERSONALIZACIÓN
 ---------------

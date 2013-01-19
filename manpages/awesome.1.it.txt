@@ -170,8 +170,6 @@ Modifica dello schema
 	Etichetta il cliente con il tag 1-9.
 *Mod4 + Shift + Control + 1-9*::
 	Attiva o disattiva l'etichetta per il cliente attuale.
-*Mod4 + Shift + F1-9*::
-	Etichetta i clienti marcati con l'etichetta 1-9.
 
 PERSONALIZZAZIONE
 -----------------

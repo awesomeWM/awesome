@@ -150,8 +150,6 @@ Anordnungsänderung
     Markiere Fenster mit Bezeichner.
 *Mod4 + Shift + Control + 1-9*::
     Wechsel des Bezeichners des Fensters.
-*Mod4 + Shift + F1-9*::
-    Markiere aktives Fenster mit Bezeichner.
 
 ANPASSUNG
 ---------

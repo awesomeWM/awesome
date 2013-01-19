@@ -160,8 +160,6 @@ Layout modification
     Déplace la fenêtre courante dans l'onglet 1 à 9.
 *Mod4 + Majuscule + Contrôle + 1-9*::
     Ajoute ou retire la fenêtre courante à l'onglet 1 à 9.
-*Mod4 + Majuscule + F1-9*::
-    Déplace les applications marquées vers l'onglet 1 à 9.
 
 PERSONNALISATION
 -----------------

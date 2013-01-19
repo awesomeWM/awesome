@@ -159,8 +159,6 @@ Layout modification
     Tag client with tag.
 *Mod4 + Shift + Control + 1-9*::
     Toggle tag on client.
-*Mod4 + Shift + F1-9*::
-    Tag marked clients with tag.
 
 CUSTOMIZATION
 -------------
