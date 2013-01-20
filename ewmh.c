@@ -415,8 +415,10 @@ ewmh_process_client_message(xcb_client_message_event_t *ev)
     }
     else if(ev->type == _NET_ACTIVE_WINDOW)
     {
-        if((c = client_getbywin(ev->window)))
+        if((c = client_getbywin(ev->window))) {
             client_focus(c);
+            client_raise(c);
+        }
     }
 
     return 0;
