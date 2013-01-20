@@ -34,6 +34,10 @@ function flex:draw(wibox, cr, width, height)
         space_per_item = width / num
     end
 
+    if self._max_widget_size then
+        space_per_item = math.min(space_per_item, self._max_widget_size)
+    end
+
     for k, v in pairs(self.widgets) do
         local x, y, w, h
         if self.dir == "y" then
@@ -61,11 +65,25 @@ function flex:add(widget)
     self._emit_updated()
 end
 
+--- Set the maximum size the widgets in this layout will take (that is,
+-- maximum width for horizontal and maximum height for vertical).
+-- @param val The maximum size of the widget.
+function flex:set_max_widget_size(val)
+    self._max_widget_size = val
+    self:emit_signal("widget::updated")
+end
+
 --- Fit the flex layout into the given space.
 -- @param orig_width The available width.
 -- @param orig_height The available height.
 function flex:fit(orig_width, orig_height)
     local used_max = 0
+    local used_in_dir = self.dir == "y" and orig_height or orig_width
+
+    if self._max_widget_size then
+        used_in_dir = math.min(used_in_dir,
+            #self.widgets * self._max_widget_size)
+    end
 
     for k, v in pairs(self.widgets) do
         local w, h = v:fit(orig_width, orig_height)
@@ -81,9 +99,9 @@ function flex:fit(orig_width, orig_height)
     end
 
     if self.dir == "y" then
-        return used_max, orig_height
+        return used_max, used_in_dir
     end
-    return orig_width, used_max
+    return used_in_dir, used_max
 end
 
 function flex:reset()
@@ -91,6 +109,7 @@ function flex:reset()
         v:disconnect_signal("widget::updated", self._emit_updated)
     end
     self.widgets = {}
+    self._max_widget_size = nil
     self:emit_signal("widget::updated")
 end
 
