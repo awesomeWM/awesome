@@ -79,15 +79,23 @@ root_set_wallpaper(cairo_pattern_t *pattern)
     uint16_t height = screen->height_in_pixels;
     bool result = false;
     cairo_surface_t *surface;
-    cairo_device_t *device;
     cairo_t *cr;
 
     if (xcb_connection_has_error(c))
         goto disconnect;
 
+    /* Create a pixmap and make sure it is already created, because we are going
+     * to use it from the other X11 connection (Juggling with X11 connections
+     * is a really, really bad idea).
+     */
     xcb_create_pixmap(c, screen->root_depth, p, screen->root, width, height);
-    surface = cairo_xcb_surface_create(c, p, draw_default_visual(screen), width, height);
-    device = cairo_device_reference(cairo_surface_get_device(surface));
+    xcb_aux_sync(c);
+
+    /* Now paint to the picture from the main connection so that cairo sees that
+     * it can tell the X server to copy between the (possible) old pixmap and
+     * the new one directly and doesn't need GetImage and PutImage.
+     */
+    surface = cairo_xcb_surface_create(globalconf.connection, p, draw_default_visual(screen), width, height);
     cr = cairo_create(surface);
     /* Paint the pattern to the surface */
     cairo_set_source(cr, pattern);
@@ -96,10 +104,7 @@ root_set_wallpaper(cairo_pattern_t *pattern)
     cairo_destroy(cr);
     cairo_surface_finish(surface);
     cairo_surface_destroy(surface);
-    /* Make sure that cairo doesn't try to use the connection later again */
-    assert(device != NULL);
-    cairo_device_finish(device);
-    cairo_device_destroy(device);
+    xcb_aux_sync(globalconf.connection);
 
     root_set_wallpaper_pixmap(c, p);
 
