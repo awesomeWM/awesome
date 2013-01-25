@@ -289,20 +289,22 @@ end
 -- @param gB The second rectangle.
 -- @return The distance between the screens.
 local function calculate_distance(dir, _gA, _gB)
-    local gA = _gA
-    local gB = _gB
+    local gAx = _gA.x
+    local gAy = _gA.y
+    local gBx = _gB.x
+    local gBy = _gB.y
 
     if dir == "up" then
-        gB.y = gB.y + gB.height
+        gBy = _gB.y + _gB.height
     elseif dir == "down" then
-        gA.y = gA.y + gA.height
+        gAy = _gA.y + _gA.height
     elseif dir == "left" then
-        gB.x = gB.x + gB.width
+        gBx = _gB.x + _gB.width
     elseif dir == "right" then
-        gA.x = gA.x + gA.width
+        gAx = _gA.x + _gA.width
     end
 
-    return math.sqrt(math.pow(gB.x - gA.x, 2) + math.pow(gB.y - gA.y, 2))
+    return math.sqrt(math.pow(gBx - gAx, 2) + math.pow(gBy - gAy, 2))
 end
 
 -- Get the nearest rectangle in the given direction. Every rectangle is specified as a table
