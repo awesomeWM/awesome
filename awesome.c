@@ -34,6 +34,7 @@
 #include <xcb/shape.h>
 
 #include <X11/Xlib-xcb.h>
+#include <X11/XKBlib.h>
 
 #include <glib-unix.h>
 
@@ -368,6 +369,9 @@ main(int argc, char **argv)
     struct sigaction sa = { .sa_handler = signal_fatal, .sa_flags = 0 };
     sigemptyset(&sa.sa_mask);
     sigaction(SIGSEGV, &sa, 0);
+
+    /* XLib sucks */
+    XkbIgnoreExtension(True);
 
     /* X stuff */
     globalconf.display = XOpenDisplay(NULL);
