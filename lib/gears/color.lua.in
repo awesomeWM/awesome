@@ -182,6 +182,10 @@ color.types = {
 -- @param col The string describing the pattern.
 -- @return a cairo pattern object
 function color.create_pattern(col)
+    -- If it already is a cairo pattern, just leave it as that
+    if cairo.Pattern:is_type_of(col) then
+        return col
+    end
     if type(col) == "string" then
         local t = string.match(col, "[^:]+")
         if color.types[t] then
