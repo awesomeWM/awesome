@@ -4,7 +4,7 @@ set(PROJECT_AWE_NAME awesome)
 # `git describe` later.
 set(VERSION devel)
 
-set(CODENAME "White Christmas")
+set(CODENAME "Never Gonna Give You Up")
 
 project(${PROJECT_AWE_NAME} C)
 
