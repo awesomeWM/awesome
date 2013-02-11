@@ -524,8 +524,11 @@ event_handle_focusin(xcb_focus_in_event_t *ev)
           {
             client_t *c;
 
-            if((c = client_getbywin(ev->event)))
+            if((c = client_getbywin(ev->event))) {
+                /* If there is still a pending focus change, do it now. */
+                client_focus_refresh();
                 client_focus_update(c);
+            }
           }
         /* all other events are ignored */
         default:
