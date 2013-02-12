@@ -37,8 +37,9 @@ local function prepare_wallpaper(s)
     local img = surface(root.wallpaper())
 
     if not img then
-        -- No wallpaper yet
-        img = cairo.ImageSurface(cairo.Format.RGB24, root_geom.width, root_geom.height)
+        -- No wallpaper yet, create an image surface for just the part we need
+        img = cairo.ImageSurface(cairo.Format.RGB24, geom.width, geom.height)
+        img:set_device_offset(-geom.x, -geom.y)
     end
 
     local cr = cairo.Context(img)
