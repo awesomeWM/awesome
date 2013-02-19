@@ -37,10 +37,11 @@ end
 --- Change the layout of the current tag.
 -- @param layouts A table of layouts.
 -- @param i Relative index.
-function layout.inc(layouts, i)
-    local t = tag.selected()
+-- @param s The screen number. 
+function layout.inc(layouts, i, s)
+    local t = tag.selected(s)
     if t then
-        local curlayout = layout.get()
+        local curlayout = layout.get(s)
         local curindex
         local rev_layouts = {}
         for k, v in ipairs(layouts) do
@@ -51,7 +52,7 @@ function layout.inc(layouts, i)
         end
         if curindex then
             local newindex = util.cycle(#layouts, curindex + i)
-            layout.set(layouts[newindex])
+            layout.set(layouts[newindex], t)
         end
     end
 end
