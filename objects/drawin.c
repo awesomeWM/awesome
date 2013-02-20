@@ -62,7 +62,7 @@ drawin_wipe(drawin_t *w)
     /* The drawin must already be unmapped, else it
      * couldn't be garbage collected -> no unmap needed */
     p_delete(&w->cursor);
-    cairo_surface_finish(w->drawable->surface);
+    drawable_unset_surface(w->drawable);
     if(w->window)
     {
         /* Activate BMA */
@@ -98,7 +98,7 @@ drawin_update_drawing(drawin_t *w, int widx)
         return;
     /* Clean up old stuff */
     luaA_object_push_item(globalconf.L, widx, w->drawable);
-    drawable_set_surface(w->drawable, -1, NULL);
+    drawable_unset_surface(w->drawable);
     if(w->pixmap)
         xcb_free_pixmap(globalconf.connection, w->pixmap);
 
@@ -111,8 +111,7 @@ drawin_update_drawing(drawin_t *w, int widx)
     cairo_surface_t *surface = cairo_xcb_surface_create(globalconf.connection,
                                                         w->pixmap, globalconf.visual,
                                                         w->geometry.width, w->geometry.height);
-    drawable_set_surface(w->drawable, -1, surface);
-    drawable_set_geometry(w->drawable, -1, w->geometry);
+    drawable_set_surface(w->drawable, -1, surface, w->geometry);
     lua_pop(globalconf.L, 1);
 }
 

@@ -668,33 +668,38 @@ client_resize_do(client_t *c, area_t geometry, bool force_notice)
 
         luaA_object_push(globalconf.L, c);
         drawable_t *drawable = titlebar_get_drawable(globalconf.L, c, -1, bar);
-
-        /* Get rid of the old state */
         luaA_object_push_item(globalconf.L, -1, drawable);
-        drawable_set_surface(drawable, -1, NULL);
-        if (c->titlebar[bar].pixmap != XCB_NONE)
-            xcb_free_pixmap(globalconf.connection, c->titlebar[bar].pixmap);
-        c->titlebar[bar].pixmap = XCB_NONE;
 
-        /* And get us some new state */
         area_t area = titlebar_get_area(c, bar);
-        if (c->titlebar[bar].size != 0 && !hide_titlebars)
-        {
-            c->titlebar[bar].pixmap = xcb_generate_id(globalconf.connection);
-            xcb_create_pixmap(globalconf.connection, globalconf.default_depth, c->titlebar[bar].pixmap,
-                              globalconf.screen->root, area.width, area.height);
-            cairo_surface_t *surface = cairo_xcb_surface_create(globalconf.connection,
-                                                                c->titlebar[bar].pixmap, globalconf.visual,
-                                                                area.width, area.height);
-            drawable_set_surface(drawable, -1, surface);
-        }
 
         /* Convert to global coordinates */
         area.x += geometry.x;
         area.y += geometry.y;
         if (hide_titlebars)
             area.width = area.height = 0;
-        drawable_set_geometry(drawable, -1, area);
+
+        if (old_geometry.width != geometry.width || old_geometry.height != geometry.height ||
+                drawable->geometry.width == 0 || drawable->geometry.height == 0) {
+            /* Get rid of the old state */
+            drawable_unset_surface(drawable);
+            if (c->titlebar[bar].pixmap != XCB_NONE)
+                xcb_free_pixmap(globalconf.connection, c->titlebar[bar].pixmap);
+            c->titlebar[bar].pixmap = XCB_NONE;
+
+            /* And get us some new state */
+            if (c->titlebar[bar].size != 0 && !hide_titlebars)
+            {
+                c->titlebar[bar].pixmap = xcb_generate_id(globalconf.connection);
+                xcb_create_pixmap(globalconf.connection, globalconf.default_depth, c->titlebar[bar].pixmap,
+                                  globalconf.screen->root, area.width, area.height);
+                cairo_surface_t *surface = cairo_xcb_surface_create(globalconf.connection,
+                                                                    c->titlebar[bar].pixmap, globalconf.visual,
+                                                                    area.width, area.height);
+                drawable_set_surface(drawable, -1, surface, area);
+            } else
+                drawable_set_geometry(drawable, -1, area);
+        } else
+            drawable_set_geometry(drawable, -1, area);
 
         /* Pop the client and the drawable */
         lua_pop(globalconf.L, 2);
@@ -1028,7 +1033,7 @@ client_unmanage(client_t *c, bool window_valid)
         luaA_object_push_item(globalconf.L, -1, c->titlebar[bar].drawable);
 
         /* Make the drawable unusable */
-        drawable_set_surface(c->titlebar[bar].drawable, -1, NULL);
+        drawable_unset_surface(c->titlebar[bar].drawable);
         if (c->titlebar[bar].pixmap != XCB_NONE)
             xcb_free_pixmap(globalconf.connection, c->titlebar[bar].pixmap);
 

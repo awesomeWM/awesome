@@ -48,24 +48,27 @@ drawable_wipe(drawable_t *d)
 }
 
 void
-drawable_set_surface(drawable_t *d, int didx, cairo_surface_t *surface)
+drawable_unset_surface(drawable_t *d)
 {
-    if (d->surface) {
-        cairo_surface_finish(d->surface);
-        cairo_surface_destroy(d->surface);
-    }
+    if (!d->surface)
+        return;
+    cairo_surface_finish(d->surface);
+    cairo_surface_destroy(d->surface);
+    d->surface = NULL;
+}
 
+void
+drawable_set_surface(drawable_t *d, int didx, cairo_surface_t *surface, area_t geom)
+{
+    drawable_unset_surface(d);
     d->surface = cairo_surface_reference(surface);
-
-    if (d->surface)
-    {
-        /* Make sure the surface doesn't contain garbage by filling it with black */
-        cairo_t *cr = cairo_create(surface);
-        cairo_set_operator(cr, CAIRO_OPERATOR_CLEAR);
-        cairo_paint(cr);
-        cairo_destroy(cr);
-        luaA_object_emit_signal(globalconf.L, didx, "property::surface", 0);
-    }
+    /* Make sure the surface doesn't contain garbage by filling it with black */
+    cairo_t *cr = cairo_create(surface);
+    cairo_set_operator(cr, CAIRO_OPERATOR_CLEAR);
+    cairo_paint(cr);
+    cairo_destroy(cr);
+    drawable_set_geometry(d, didx, geom);
+    luaA_object_emit_signal(globalconf.L, didx, "property::surface", 0);
 }
 
 void
