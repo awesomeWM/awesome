@@ -230,6 +230,9 @@ function drawable.new(d, widget_arg)
     end
     drawables[ret.draw] = true
     d:connect_signal("property::surface", ret.draw)
+    -- We don't need width/height, because this case emits property::surface
+    d:connect_signal("property::x", ret.draw)
+    d:connect_signal("property::y", ret.draw)
 
     -- Set the default background
     ret:set_bg(beautiful.bg_normal)
