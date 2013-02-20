@@ -19,7 +19,10 @@ local surface = require("gears.surface")
 local drawables = setmetatable({}, { __mode = 'k' })
 
 local function do_redraw(self)
-    local cr = cairo.Context(surface(self.drawable.surface))
+    local surf = surface(self.drawable.surface)
+    -- The surface can be nil if the drawable's parent was already finalized
+    if not surf then return end
+    local cr = cairo.Context(surf)
     local geom = self.drawable:geometry();
     local x, y, width, height = geom.x, geom.y, geom.width, geom.height
 
