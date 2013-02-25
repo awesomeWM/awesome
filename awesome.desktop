@@ -2,7 +2,6 @@
 Encoding=UTF-8
 Name=awesome
 Comment=Highly configurable framework window manager
-NoDisplay=true
 TryExec=awesome
 Exec=awesome
 Type=Application
