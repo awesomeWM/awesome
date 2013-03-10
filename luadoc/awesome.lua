@@ -29,7 +29,7 @@ module("awesome")
 -- @class function
 
 --- Spawn a program.
--- @param cmd The command to launch.
+-- @param cmd The command to launch. Either a string or a table of strings.
 -- @param use_sn Use startup-notification, true or false, default to true.
 -- @return Process ID if everything is OK, or an error string if an error occured.
 

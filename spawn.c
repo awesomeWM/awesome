@@ -263,29 +263,40 @@ spawn_callback(gpointer user_data)
     setsid();
 }
 
-/** Spawn a command.
- * \param command_line The command line to launch.
- * \param error A error pointer to fill with the possible error from
- * g_spawn_async.
- * \return g_spawn_async value.
+/** Parse a command line.
+ * \param L The Lua VM state.
+ * \param idx The index of the argument that we should parse
+ * \return The argv array for the new process.
  */
-static GPid
-spawn_command(const gchar *command_line, GError **error)
+static gchar **
+parse_command(lua_State *L, int idx)
 {
-    gboolean retval;
-    GPid pid;
-    gchar **argv = 0;
+    gchar **argv = NULL;
 
-    if(!g_shell_parse_argv(command_line, NULL, &argv, error))
-        return 0;
+    if (lua_isstring(L, idx))
+    {
+        const char *cmd = luaL_checkstring(L, idx);
+        if(!g_shell_parse_argv(cmd, NULL, &argv, NULL))
+            return NULL;
+    }
+    else if (lua_istable(L, idx))
+    {
+        size_t i, len = luaA_rawlen(L, idx);
+        argv = g_new0(gchar *, len + 1);
 
-    retval = g_spawn_async(NULL, argv, NULL, G_SPAWN_SEARCH_PATH,
-                           spawn_callback, NULL, &pid, error);
-    g_strfreev (argv);
+        for (i = 0; i < len; i++)
+        {
+            lua_rawgeti(L, idx, i+1);
+            argv[i] = g_strdup(lua_tostring(L, -1));
+            lua_pop(L, 1);
+        }
+    }
+    else
+    {
+        luaL_error(L, "Invalid argument to spawn(), expect string or table");
+    }
 
-    if (!retval)
-        return 0;
-    return pid;
+    return argv;
 }
 
 /** Spawn a program.
@@ -301,27 +312,31 @@ spawn_command(const gchar *command_line, GError **error)
 int
 luaA_spawn(lua_State *L)
 {
-    const char *cmd;
+    gchar **argv = NULL;
     bool use_sn = true;
+    gboolean retval;
+    GPid pid;
 
     if(lua_gettop(L) >= 2)
         use_sn = luaA_checkboolean(L, 2);
 
-    cmd = luaL_checkstring(L, 1);
+    argv = parse_command(L, 1);
+    if(!argv)
+        return 0;
 
     SnLauncherContext *context = NULL;
     if(use_sn)
     {
         char *cmdname, *space;
-        const char *first_no_space_char = cmd;
+        const char *first_no_space_char = argv[0];
         /* Look for the first char which is not space */
         while(*first_no_space_char && *first_no_space_char == ' ')
             first_no_space_char++;
         /* Look for space in the string to get the command name. */
         if((space = strchr(first_no_space_char, ' ')))
-            cmdname = a_strndup(cmd, space - cmd);
+            cmdname = a_strndup(argv[0], space - argv[0]);
         else
-            cmdname = a_strdup(cmd);
+            cmdname = a_strdup(argv[0]);
 
         context = sn_launcher_context_new(globalconf.sndisplay, globalconf.default_screen);
         sn_launcher_context_set_name(context, "awesome");
@@ -337,8 +352,10 @@ luaA_spawn(lua_State *L)
     }
 
     GError *error = NULL;
-    GPid pid = spawn_command(cmd, &error);
-    if(!pid)
+    retval = g_spawn_async(NULL, argv, NULL, G_SPAWN_SEARCH_PATH,
+                           spawn_callback, NULL, &pid, &error);
+    g_strfreev(argv);
+    if(!retval)
     {
         /* push error on stack */
         lua_pushstring(L, error->message);
