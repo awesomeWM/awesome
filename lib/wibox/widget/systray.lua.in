@@ -15,7 +15,6 @@ local abs = math.abs
 --- wibox.widget.systray
 local systray = { mt = {} }
 
-local created_systray = false
 local horizontal = true
 local base_size = nil
 
@@ -61,11 +60,6 @@ end
 
 local function new()
     local ret = wbase.make_widget()
-
-    if created_systray then
-        error("More than one systray created!")
-    end
-    created_systray = true
 
     ret.fit = systray.fit
     ret.draw = systray.draw
