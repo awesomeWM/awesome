@@ -9,6 +9,7 @@ local pairs = pairs
 local table = table
 local type = type
 local string = string
+local tostring = tostring
 local pcall = pcall
 local capi = { screen = screen,
                awesome = awesome,
@@ -395,26 +396,34 @@ function naughty.notify(args)
     if icon then
         -- try to guess icon if the provided one is non-existent/readable
         if type(icon) == "string" and not util.file_readable(icon) then
-            icon = util.geticonpath(icon, naughty.config.icon_formats, naughty.config.icon_dirs, icon_size)
+            icon = util.geticonpath(icon, naughty.config.icon_formats, naughty.config.icon_dirs, icon_size) or icon
+        end
+
+        -- is the icon file readable?
+        local success, res = pcall(function() return surface.load(icon) end)
+        if success then
+            icon = res
+        else
+            io.stderr:write(string.format("naughty: Couldn't load image '%s': %s\n", tostring(icon), res))
+            icon = nil
         end
 
         -- if we have an icon, use it
         if icon then
             iconbox = wibox.widget.imagebox()
             iconmargin = wibox.layout.margin(iconbox, margin, margin, margin, margin)
-            local img = surface.load(icon)
             if icon_size then
                 local scaled = cairo.ImageSurface(cairo.Format.ARGB32, icon_size, icon_size)
                 local cr = cairo.Context(scaled)
-                cr:scale(icon_size / img:get_height(), icon_size / img:get_width())
-                cr:set_source_surface(img, 0, 0)
+                cr:scale(icon_size / icon:get_height(), icon_size / icon:get_width())
+                cr:set_source_surface(icon, 0, 0)
                 cr:paint()
-                img = scaled
+                icon = scaled
             end
             iconbox:set_resize(false)
-            iconbox:set_image(img)
-            icon_w = img:get_width()
-            icon_h = img:get_height()
+            iconbox:set_image(icon)
+            icon_w = icon:get_width()
+            icon_h = icon:get_height()
         end
     end
 
