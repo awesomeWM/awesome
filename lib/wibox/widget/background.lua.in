@@ -94,7 +94,11 @@ function background:set_bgimage(image)
     self._emit_updated()
 end
 
-local function new(widget)
+--- Returns a new background layout. A background layout applies a background
+-- and foreground color to another widget.
+-- @param widget The widget to display (optional)
+-- @param bg The background to use for that widget (optional)
+local function new(widget, bg)
     local ret = base.make_widget()
 
     for k, v in pairs(background) do
@@ -108,6 +112,7 @@ local function new(widget)
     end
 
     ret:set_widget(widget)
+    ret:set_bg(bg)
 
     return ret
 end

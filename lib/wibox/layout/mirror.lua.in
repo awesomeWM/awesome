@@ -98,7 +98,9 @@ end
 -- :set_widget() to set the widget and
 -- :set_horizontal() and :set_vertical() for the direction.
 -- horizontal and vertical are by default false which doesn't change anything.
-local function new()
+-- @param widget The widget to display (optional)
+-- @param reflection A table describing the reflection to apply (optional)
+local function new(widget, reflection)
     local ret = widget_base.make_widget()
     ret.horizontal = false
     ret.vertical = false
@@ -112,6 +114,9 @@ local function new()
     ret._emit_updated = function()
         ret:emit_signal("widget::updated")
     end
+
+    ret:set_widget(widget)
+    ret:set_reflection(reflection or {})
 
     return ret
 end
