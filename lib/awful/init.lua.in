@@ -28,7 +28,6 @@ return
     startup_notification = require("awful.startup_notification");
     tooltip = require("awful.tooltip");
     ewmh = require("awful.ewmh");
-    icccm = require("awful.icccm");
     titlebar = require("awful.titlebar");
 }
 

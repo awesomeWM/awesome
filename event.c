@@ -335,7 +335,7 @@ event_handle_configurerequest(xcb_configure_request_event_t *ev)
             lua_pop(globalconf.L, 1);
         }
 
-        if(!client_resize(c, geometry))
+        if(!client_resize(c, geometry, false))
             /* ICCCM 4.1.5 / 4.2.3, if nothing was changed, send an event saying so */
             client_send_configure(c);
     }

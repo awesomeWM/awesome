@@ -585,28 +585,153 @@ HANDLE_GEOM(height)
     lua_pop(globalconf.L, 1);
 }
 
+static void
+client_remove_titlebar_geometry(client_t *c, area_t *geometry)
+{
+    geometry->x += c->titlebar[CLIENT_TITLEBAR_LEFT].size;
+    geometry->y += c->titlebar[CLIENT_TITLEBAR_TOP].size;
+    geometry->width -= c->titlebar[CLIENT_TITLEBAR_LEFT].size;
+    geometry->width -= c->titlebar[CLIENT_TITLEBAR_RIGHT].size;
+    geometry->height -= c->titlebar[CLIENT_TITLEBAR_TOP].size;
+    geometry->height -= c->titlebar[CLIENT_TITLEBAR_BOTTOM].size;
+}
+
+static void
+client_add_titlebar_geometry(client_t *c, area_t *geometry)
+{
+    geometry->x -= c->titlebar[CLIENT_TITLEBAR_LEFT].size;
+    geometry->y -= c->titlebar[CLIENT_TITLEBAR_TOP].size;
+    geometry->width += c->titlebar[CLIENT_TITLEBAR_LEFT].size;
+    geometry->width += c->titlebar[CLIENT_TITLEBAR_RIGHT].size;
+    geometry->height += c->titlebar[CLIENT_TITLEBAR_TOP].size;
+    geometry->height += c->titlebar[CLIENT_TITLEBAR_BOTTOM].size;
+}
+
 /** Send a synthetic configure event to a window.
  */
 void
 client_send_configure(client_t *c)
 {
     area_t geometry = c->geometry;
-    geometry.x += c->titlebar[CLIENT_TITLEBAR_LEFT].size;
-    geometry.y += c->titlebar[CLIENT_TITLEBAR_TOP].size;
-    geometry.width -= c->titlebar[CLIENT_TITLEBAR_LEFT].size;
-    geometry.width -= c->titlebar[CLIENT_TITLEBAR_RIGHT].size;
-    geometry.height -= c->titlebar[CLIENT_TITLEBAR_TOP].size;
-    geometry.height -= c->titlebar[CLIENT_TITLEBAR_BOTTOM].size;
 
+    client_remove_titlebar_geometry(c, &geometry);
     xwindow_configure(c->window, geometry, c->border_width);
 }
 
+/** Apply size hints to the client's new geometry.
+ */
+static area_t
+client_apply_size_hints(client_t *c, area_t geometry)
+{
+    int32_t minw = 0, minh = 0;
+    int32_t basew = 0, baseh = 0, real_basew = 0, real_baseh = 0;
+
+    if (c->fullscreen)
+        return geometry;
+
+    /* Size hints are applied to the window without any decoration */
+    client_remove_titlebar_geometry(c, &geometry);
+
+    if(c->size_hints.flags & XCB_ICCCM_SIZE_HINT_P_SIZE)
+    {
+        basew = c->size_hints.base_width;
+        baseh = c->size_hints.base_height;
+        real_basew = basew;
+        real_baseh = baseh;
+    }
+    else if(c->size_hints.flags & XCB_ICCCM_SIZE_HINT_P_MIN_SIZE)
+    {
+        /* base size is substituted with min size if not specified */
+        basew = c->size_hints.min_width;
+        baseh = c->size_hints.min_height;
+    }
+
+    if(c->size_hints.flags & XCB_ICCCM_SIZE_HINT_P_MIN_SIZE)
+    {
+        minw = c->size_hints.min_width;
+        minh = c->size_hints.min_height;
+    }
+    else if(c->size_hints.flags & XCB_ICCCM_SIZE_HINT_P_SIZE)
+    {
+        /* min size is substituted with base size if not specified */
+        minw = c->size_hints.base_width;
+        minh = c->size_hints.base_height;
+    }
+
+    /* Handle the size aspect ratio */
+    if(c->size_hints.flags & XCB_ICCCM_SIZE_HINT_P_ASPECT
+            && c->size_hints.min_aspect_den > 0
+            && c->size_hints.max_aspect_den > 0
+            && geometry.height > real_baseh
+            && geometry.width > real_basew)
+    {
+        /* ICCCM mandates:
+         * If a base size is provided along with the aspect ratio fields, the base size should be subtracted from the
+         * window size prior to checking that the aspect ratio falls in range. If a base size is not provided, nothing
+         * should be subtracted from the window size. (The minimum size is not to be used in place of the base size for
+         * this purpose.)
+         */
+         double dx = geometry.width - real_basew;
+         double dy = geometry.height - real_baseh;
+         double ratio = dx / dy;
+         double min = c->size_hints.min_aspect_num / (double) c->size_hints.min_aspect_den;
+         double max = c->size_hints.max_aspect_num / (double) c->size_hints.max_aspect_den;
+
+         if(max > 0 && min > 0 && ratio > 0)
+         {
+             if(ratio < min)
+             {
+                 /* dx is lower than allowed, make dy lower to compensate this (+ 0.5 to force proper rounding). */
+                 dy = dx / min + 0.5;
+                 geometry.width  = dx + real_basew;
+                 geometry.height = dy + real_baseh;
+             } else if(ratio > max)
+             {
+                 /* dx is too high, lower it (+0.5 for proper rounding) */
+                 dx = dy * max + 0.5;
+                 geometry.width  = dx + real_basew;
+                 geometry.height = dy + real_baseh;
+             }
+         }
+    }
+
+    /* Handle the minimum size */
+    geometry.width = MAX(geometry.width, minw);
+    geometry.height = MAX(geometry.height, minh);
+
+    /* Handle the maximum size */
+    if(c->size_hints.flags & XCB_ICCCM_SIZE_HINT_P_MAX_SIZE)
+    {
+        if(c->size_hints.max_width)
+            geometry.width = MIN(geometry.width, c->size_hints.max_width);
+        if(c->size_hints.max_height)
+            geometry.height = MIN(geometry.height, c->size_hints.max_height);
+    }
+
+    /* Handle the size increment */
+    if(c->size_hints.flags & (XCB_ICCCM_SIZE_HINT_P_RESIZE_INC | XCB_ICCCM_SIZE_HINT_BASE_SIZE)
+       && c->size_hints.width_inc && c->size_hints.height_inc)
+    {
+        uint16_t t1 = geometry.width, t2 = geometry.height;
+        unsigned_subtract(t1, basew);
+        unsigned_subtract(t2, baseh);
+        geometry.width -= t1 % c->size_hints.width_inc;
+        geometry.height -= t2 % c->size_hints.height_inc;
+    }
+
+    client_add_titlebar_geometry(c, &geometry);
+    return geometry;
+}
+
 static void
-client_resize_do(client_t *c, area_t geometry, bool force_notice)
+client_resize_do(client_t *c, area_t geometry, bool force_notice, bool honor_hints)
 {
     bool send_notice = force_notice;
     bool hide_titlebars = c->fullscreen;
     screen_t *new_screen = screen_getbycoord(geometry.x, geometry.y);
+
+    if (honor_hints)
+        geometry = client_apply_size_hints(c, geometry);
 
     if(c->geometry.width == geometry.width
        && c->geometry.height == geometry.height)
@@ -710,11 +835,11 @@ client_resize_do(client_t *c, area_t geometry, bool force_notice)
  * The sizes given as parameters are with borders!
  * \param c Client to resize.
  * \param geometry New window geometry.
- * \param hints Use size hints.
+ * \param honor_hints Use size hints.
  * \return true if an actual resize occurred.
  */
 bool
-client_resize(client_t *c, area_t geometry)
+client_resize(client_t *c, area_t geometry, bool honor_hints)
 {
     area_t area;
 
@@ -743,7 +868,7 @@ client_resize(client_t *c, area_t geometry)
        || c->geometry.width != geometry.width
        || c->geometry.height != geometry.height)
     {
-        client_resize_do(c, geometry, false);
+        client_resize_do(c, geometry, false, honor_hints);
 
         return true;
     }
@@ -842,7 +967,7 @@ client_set_fullscreen(lua_State *L, int cidx, bool s)
         luaA_object_emit_signal(L, abs_cidx, "request::fullscreen", 1);
         luaA_object_emit_signal(L, abs_cidx, "property::fullscreen", 0);
         /* Force a client resize, so that titlebars get shown/hidden */
-        client_resize_do(c, c->geometry, true);
+        client_resize_do(c, c->geometry, true, false);
         stack_windows();
     }
 }
@@ -1445,7 +1570,7 @@ titlebar_resize(client_t *c, client_titlebar_t bar, int size)
     }
 
     c->titlebar[bar].size = size;
-    client_resize_do(c, geometry, true);
+    client_resize_do(c, geometry, true, false);
 }
 
 #define HANDLE_TITLEBAR(name, index)                              \
@@ -1501,7 +1626,7 @@ luaA_client_geometry(lua_State *L)
             geometry.height = luaA_getopt_number(L, 2, "height", c->geometry.height);
         }
 
-        client_resize(c, geometry);
+        client_resize(c, geometry, true);
     }
 
     return luaA_pusharea(L, c->geometry);
