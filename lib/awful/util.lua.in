@@ -86,7 +86,7 @@ end
 -- @param screen The screen where to run the command.
 function util.spawn_with_shell(cmd, screen)
     if cmd and cmd ~= "" then
-        cmd = util.shell .. " -c \"" .. cmd .. "\""
+        cmd = { util.shell, "-c", cmd }
         return capi.awesome.spawn(cmd, false, screen or capi.mouse.screen)
     end
 end
