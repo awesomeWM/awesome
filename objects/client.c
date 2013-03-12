@@ -1626,7 +1626,7 @@ luaA_client_geometry(lua_State *L)
             geometry.height = luaA_getopt_number(L, 2, "height", c->geometry.height);
         }
 
-        client_resize(c, geometry, true);
+        client_resize(c, geometry, c->size_hints_honor);
     }
 
     return luaA_pusharea(L, c->geometry);
