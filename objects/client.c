@@ -614,7 +614,8 @@ client_send_configure(client_t *c)
 {
     area_t geometry = c->geometry;
 
-    client_remove_titlebar_geometry(c, &geometry);
+    if (!c->fullscreen)
+        client_remove_titlebar_geometry(c, &geometry);
     xwindow_configure(c->window, geometry, c->border_width);
 }
 
