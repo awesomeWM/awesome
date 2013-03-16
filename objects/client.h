@@ -188,10 +188,8 @@ client_raise(client_t *c)
     client_t *tc = c;
     int counter = 0;
 
-    /* Find number of transient layers.
-     * We limit the counter to the stack length: if some case, a buggy
-     * application might set transient_for as a loop… */
-    for(counter = 0; tc->transient_for && counter <= globalconf.stack.len; counter++)
+    /* Find number of transient layers. */
+    for(counter = 0; tc->transient_for; counter++)
         tc = tc->transient_for;
 
     /* Push them in reverse order. */
