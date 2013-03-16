@@ -256,6 +256,7 @@ function tag.gettags(s)
         for _, t in ipairs(tags) do
             if not tag.getproperty(t, "index") then
                 tag.setproperty(t, "index", (#tags - without_index + 1))
+                without_index = without_index - 1
             end
         end
     end
