@@ -23,6 +23,11 @@ local wibox = require("wibox")
 local surface = require("gears.surface")
 local cairo = require("lgi").cairo
 
+local schar = string.char
+local sbyte = string.byte
+local tcat = table.concat
+local tins = table.insert
+
 --- Notification library
 local naughty = {}
 
@@ -535,40 +540,44 @@ if capi.dbus then
                 args.icon = icon
             elseif hints.icon_data or hints.image_data then
                 if hints.icon_data == nil then hints.icon_data = hints.image_data end
-                -- icon_data is an array:
-                -- 1 -> width, 2 -> height, 3 -> rowstride, 4 -> has alpha
-                -- 5 -> bits per sample, 6 -> channels, 7 -> data
-                local width, height, rowstride = hints.icon_data[1], hints.icon_data[2], hints.icon_data[3]
 
-                local imgdata = ""
-                local format, bpp
-                -- If has alpha (ARGB32)
-                if hints.icon_data[6] == 4 then
-                    format, bpp = cairo.Format.ARGB32, 4
-                -- If has not alpha (RGB24)
-                elseif hints.icon_data[6] == 3 then
-                    format, bpp = cairo.Format.RGB24, 3
-                end
+                -- icon_data is an array:
+                -- 1 -> width
+                -- 2 -> height
+                -- 3 -> rowstride
+                -- 4 -> has alpha
+                -- 5 -> bits per sample
+                -- 6 -> channels
+                -- 7 -> data
+                local w, h, rowstride, _, _, channels, data = unpack(hints.icon_data)
+
+                local format = cairo.Format[channels == 4 and 'ARGB32' or 'RGB24']
+
                 -- Figure out some stride magic (cairo dictates rowstride)
-                local stride = cairo.Format.stride_for_width(format, width)
-                local append = string.format("%c", 0):rep(stride - 4 * width)
+                local stride = cairo.Format.stride_for_width(format, w)
+                local append = schar(0):rep(stride - 4 * w)
                 local offset = 0
+
                 -- Now convert each row on its own
-                for y = 1, height do
-                    for i = 1 + offset, width * bpp + offset, bpp do
-                        imgdata = imgdata .. hints.icon_data[7]:sub(i, i + 2):reverse()
-                        if bpp == 4 then
-                            imgdata = imgdata .. hints.icon_data[7]:sub(i + 3, i + 3)
-                        else
-                            imgdata = imgdata .. string.format("%c", 255)
-                        end
+                local rows = {}
+
+                for y = 1, h do
+                    local this_row = {}
+
+                    for i = 1 + offset, w * channels + offset, channels do
+                        local R, G, B, A = sbyte(data, i, i + channels - 1)
+                        tins(this_row, schar(B, G, R, A or 255))
                     end
+
                     -- Handle rowstride, offset is stride for the input, append for output
+                    tins(this_row, append)
+                    tins(rows, tcat(this_row))
+
                     offset = offset + rowstride
-                    imgdata = imgdata .. append
                 end
-                args.icon = cairo.ImageSurface.create_for_data(imgdata, format,
-                    width, height, stride)
+
+                args.icon = cairo.ImageSurface.create_for_data(tcat(rows), format,
+                    w, h, stride)
             end
             if replaces_id and replaces_id ~= "" and replaces_id ~= 0 then
                 args.replaces_id = replaces_id
