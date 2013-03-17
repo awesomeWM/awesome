@@ -41,21 +41,12 @@ function mouse.client_under_pointer()
     end
 end
 
---- Get the wibox object under the pointer.
--- @return The wibox object under the pointer, if one can be found.
-function mouse.wibox_under_pointer()
+--- Get the drawin object under the pointer.
+-- @return The drawin object under the pointer, if one can be found.
+function mouse.drawin_under_pointer()
     local obj = capi.mouse.object_under_pointer()
-    if type(obj) == "wibox" then
+    if type(obj) == "drawin" then
         return obj
-    end
-end
-
---- Get the widget under the pointer.
--- @return The widget object under the pointer, if it can be found.
-function mouse.widget_under_pointer()
-    local obj, obj2 = capi.mouse.object_under_pointer()
-    if type(obj2) == "widget" then
-        return obj2
     end
 end
 
