@@ -58,7 +58,7 @@ end
 function drawable:widget_at(widget, x, y, width, height)
     local t = {
         widget = widget,
-        x = x, y = y,
+        x = x, y = y,drawable = self,
         width = width, height = height
     }
     table.insert(self._widget_geometries, t)
@@ -140,7 +140,7 @@ end
 local function emit_difference(name, list, skip)
     local function in_table(table, val)
         for k, v in pairs(table) do
-            if v == val then
+            if v.widget == val.widget then
                 return true
             end
         end
@@ -149,7 +149,7 @@ local function emit_difference(name, list, skip)
 
     for k, v in pairs(list) do
         if not in_table(skip, v) then
-            v:emit_signal(name)
+            v.widget:emit_signal(name,v)
         end
     end
 end
@@ -166,17 +166,13 @@ local function handle_motion(_drawable, x, y)
 
     -- Build a plain list of all widgets on that point
     local widgets_list = _drawable:find_widgets(x, y)
-    local widgets = {}
-    for k, v in pairs(widgets_list) do
-        widgets[#widgets + 1] = v.widget
-    end
 
     -- First, "leave" all widgets that were left
-    emit_difference("mouse::leave", _drawable._widgets_under_mouse, widgets)
+    emit_difference("mouse::leave", _drawable._widgets_under_mouse, widgets_list)
     -- Then enter some widgets
-    emit_difference("mouse::enter", widgets, _drawable._widgets_under_mouse)
+    emit_difference("mouse::enter", widgets_list, _drawable._widgets_under_mouse)
 
-    _drawable._widgets_under_mouse = widgets
+    _drawable._widgets_under_mouse = widgets_list
 end
 
 local function setup_signals(_drawable)
@@ -243,13 +239,13 @@ function drawable.new(d, widget_arg)
     ret._widgets_under_mouse = {}
 
     local function button_signal(name)
-        d:connect_signal(name, function(d, x, y, ...)
+        d:connect_signal(name, function(d, x, y, button, modifiers)
             local widgets = ret:find_widgets(x, y)
             for k, v in pairs(widgets) do
                 -- Calculate x/y inside of the widget
                 local lx = x - v.x
                 local ly = y - v.y
-                v.widget:emit_signal(name, lx, ly, ...)
+                v.widget:emit_signal(name, lx, ly, button, modifiers,v)
             end
         end)
     end

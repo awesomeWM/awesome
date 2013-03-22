@@ -23,7 +23,7 @@ function base:buttons(_buttons)
 end
 
 --- Handle a button event on a widget. This is used internally.
-function base.handle_button(event, widget, x, y, button, modifiers)
+function base.handle_button(event, widget, x, y, button, modifiers, geometry)
     local function is_any(mod)
         return #mod == 1 and mod[1] == "Any"
     end
@@ -55,7 +55,7 @@ function base.handle_button(event, widget, x, y, button, modifiers)
 
     -- Emit the signals
     for k, v in pairs(matches) do
-        v:emit_signal(event)
+        v:emit_signal(event,geometry)
     end
 end
 
