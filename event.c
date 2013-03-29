@@ -113,7 +113,7 @@ event_handle_mousegrabber(int x, int y, uint16_t mask)
     if(globalconf.mousegrabber != LUA_REFNIL)
     {
         lua_rawgeti(globalconf.L, LUA_REGISTRYINDEX, globalconf.mousegrabber);
-        luaA_mouse_pushstatus(globalconf.L, x, y);
+        mousegrabber_handleevent(globalconf.L, x, y, mask);
         if(lua_pcall(globalconf.L, 1, 1, 0))
         {
             warn("error running function: %s", lua_tostring(globalconf.L, -1));
@@ -156,37 +156,6 @@ event_emit_button(xcb_button_press_event_t *ev)
     luaA_object_emit_signal(globalconf.L, -5, name, 4);
 }
 
-/** Update the global button state
- * \param response_type XCB_BUTTON_PRESS or XCB_BUTTON_RELEASE
- * \param button Button being changed
- */
-static void
-event_update_button_state(uint8_t response_type, uint8_t button)
-{
-    /* There is no button 0! */
-    const unsigned int max_button = sizeof(globalconf.buttons_pressed) * 8;
-    uint32_t mask = 1 << (button - 1);
-
-    if (button > max_button) {
-        warn("Button %d pressed, but we only support %d buttons", button, max_button);
-        return;
-    }
-
-    switch(response_type & XCB_EVENT_RESPONSE_TYPE_MASK)
-    {
-    case XCB_BUTTON_PRESS:
-        /* Set the (button-1)-st bit */
-        globalconf.buttons_pressed |= mask;
-        break;
-    case XCB_BUTTON_RELEASE:
-        /* Clear the (button-1)-st bit */
-        globalconf.buttons_pressed &= ~mask;
-        break;
-    default:
-        fatal("Invalid event type");
-    }
-}
-
 /** The button press event handler.
  * \param ev The event.
  */
@@ -197,8 +166,6 @@ event_handle_button(xcb_button_press_event_t *ev)
     drawin_t *drawin;
 
     globalconf.timestamp = ev->time;
-
-    event_update_button_state(ev->response_type, ev->detail);
 
     if(event_handle_mousegrabber(ev->root_x, ev->root_y, 1 << (ev->detail - 1 + 8)))
         return;

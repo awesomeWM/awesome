@@ -32,10 +32,11 @@
  * \param x will be set to the Pointer-x-coordinate relative to window
  * \param y will be set to the Pointer-y-coordinate relative to window
  * \param child Will be set to the window under the pointer.
+ * \param mask will be set to the current buttons state
  * \return true on success, false if an error occurred
  **/
-static bool
-mouse_query_pointer(xcb_window_t window, int16_t *x, int16_t *y, xcb_window_t *child)
+bool
+mouse_query_pointer(xcb_window_t window, int16_t *x, int16_t *y, xcb_window_t *child, uint16_t *mask)
 {
     xcb_query_pointer_cookie_t query_ptr_c;
     xcb_query_pointer_reply_t *query_ptr_r;
@@ -49,6 +50,8 @@ mouse_query_pointer(xcb_window_t window, int16_t *x, int16_t *y, xcb_window_t *c
     *x = query_ptr_r->win_x;
     *y = query_ptr_r->win_y;
 
+    if(mask)
+        *mask = query_ptr_r->mask;
     if(child)
         *child = query_ptr_r->child;
 
@@ -64,10 +67,12 @@ mouse_query_pointer(xcb_window_t window, int16_t *x, int16_t *y, xcb_window_t *c
  * \param mask This will be set to the current buttons state.
  * \return True on success, false if an error occurred.
  */
-static inline bool
-mouse_query_pointer_root(int16_t *x, int16_t *y, xcb_window_t *child)
+static bool
+mouse_query_pointer_root(int16_t *x, int16_t *y, xcb_window_t *child, uint16_t *mask)
 {
-    return mouse_query_pointer(globalconf.screen->root, x, y, child);
+    xcb_window_t root = globalconf.screen->root;
+
+    return mouse_query_pointer(root, x, y, child, mask);
 }
 
 /** Set the pointer position.
@@ -100,7 +105,7 @@ luaA_mouse_index(lua_State *L)
     if (A_STRNEQ(attr, "screen"))
         return 0;
 
-    if (!mouse_query_pointer_root(&mouse_x, &mouse_y, NULL))
+    if (!mouse_query_pointer_root(&mouse_x, &mouse_y, NULL, NULL))
         return 0;
 
     screen = screen_getbycoord(mouse_x, mouse_y);
@@ -139,7 +144,7 @@ luaA_mouse_newindex(lua_State *L)
  * \param mask The button mask.
  */
 int
-luaA_mouse_pushstatus(lua_State *L, int x, int y)
+luaA_mouse_pushstatus(lua_State *L, int x, int y, uint16_t mask)
 {
     lua_createtable(L, 0, 2);
     lua_pushnumber(L, x);
@@ -149,12 +154,15 @@ luaA_mouse_pushstatus(lua_State *L, int x, int y)
 
     lua_createtable(L, 5, 0);
 
-    const unsigned int max_button = sizeof(globalconf.buttons_pressed) * 8;
-    unsigned int mask = 1;
-    for (unsigned int i = 1; i <= max_button; i++, mask <<= 1)
+    int i = 1;
+
+    for(uint16_t maski = XCB_BUTTON_MASK_1; maski <= XCB_BUTTON_MASK_5; maski <<= 1)
     {
-        lua_pushboolean(L, globalconf.buttons_pressed & mask);
-        lua_rawseti(L, -2, i);
+        if(mask & maski)
+            lua_pushboolean(L, true);
+        else
+            lua_pushboolean(L, false);
+        lua_rawseti(L, -2, i++);
     }
     lua_setfield(L, -2, "buttons");
     return 1;
@@ -167,6 +175,7 @@ luaA_mouse_pushstatus(lua_State *L, int x, int y)
 static int
 luaA_mouse_coords(lua_State *L)
 {
+    uint16_t mask;
     int x, y;
     int16_t mouse_x, mouse_y;
 
@@ -175,7 +184,7 @@ luaA_mouse_coords(lua_State *L)
         luaA_checktable(L, 1);
         bool ignore_enter_notify = (lua_gettop(L) == 2 && luaA_checkboolean(L, 2));
 
-        if(!mouse_query_pointer_root(&mouse_x, &mouse_y, NULL))
+        if(!mouse_query_pointer_root(&mouse_x, &mouse_y, NULL, &mask))
             return 0;
 
         x = luaA_getopt_number(L, 1, "x", mouse_x);
@@ -192,10 +201,10 @@ luaA_mouse_coords(lua_State *L)
         lua_pop(L, 1);
     }
 
-    if(!mouse_query_pointer_root(&mouse_x, &mouse_y, NULL))
+    if(!mouse_query_pointer_root(&mouse_x, &mouse_y, NULL, &mask))
         return 0;
 
-    return luaA_mouse_pushstatus(L, mouse_x, mouse_y);
+    return luaA_mouse_pushstatus(L, mouse_x, mouse_y, mask);
 }
 
 /** Get the client which is under the pointer.
@@ -210,7 +219,7 @@ luaA_mouse_object_under_pointer(lua_State *L)
     int16_t mouse_x, mouse_y;
     xcb_window_t child;
 
-    if(!mouse_query_pointer_root(&mouse_x, &mouse_y, &child))
+    if(!mouse_query_pointer_root(&mouse_x, &mouse_y, &child, NULL))
         return 0;
 
     drawin_t *drawin;
