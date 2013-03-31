@@ -45,7 +45,10 @@ mouse_query_pointer(xcb_window_t window, int16_t *x, int16_t *y, xcb_window_t *c
     query_ptr_r = xcb_query_pointer_reply(globalconf.connection, query_ptr_c, NULL);
 
     if(!query_ptr_r || !query_ptr_r->same_screen)
+    {
+        p_delete(&query_ptr_r);
         return false;
+    }
 
     *x = query_ptr_r->win_x;
     *y = query_ptr_r->win_y;
