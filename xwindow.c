@@ -89,8 +89,8 @@ xwindow_configure(xcb_window_t win, area_t geometry, int border)
     ce.response_type = XCB_CONFIGURE_NOTIFY;
     ce.event = win;
     ce.window = win;
-    ce.x = geometry.x;
-    ce.y = geometry.y;
+    ce.x = geometry.x + border;
+    ce.y = geometry.y + border;
     ce.width = geometry.width;
     ce.height = geometry.height;
     ce.border_width = border;
