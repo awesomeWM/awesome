@@ -285,21 +285,50 @@ event_handle_configurerequest(xcb_configure_request_event_t *ev)
     if((c = client_getbywin(ev->window)))
     {
         area_t geometry = c->geometry;
+        int16_t diff_w = 0, diff_h = 0, diff_border = 0;
 
         if(ev->value_mask & XCB_CONFIG_WINDOW_X)
             geometry.x = ev->x;
         if(ev->value_mask & XCB_CONFIG_WINDOW_Y)
             geometry.y = ev->y;
         if(ev->value_mask & XCB_CONFIG_WINDOW_WIDTH)
+        {
+            uint16_t old_w = geometry.width;
             geometry.width = ev->width;
+            /* The ConfigureRequest specifies the size of the client window, we want the frame */
+            geometry.width += c->titlebar[CLIENT_TITLEBAR_LEFT].size;
+            geometry.width += c->titlebar[CLIENT_TITLEBAR_RIGHT].size;
+            diff_w = geometry.width - old_w;
+        }
         if(ev->value_mask & XCB_CONFIG_WINDOW_HEIGHT)
+        {
+            uint16_t old_h = geometry.height;
             geometry.height = ev->height;
-
+            /* The ConfigureRequest specifies the size of the client window, we want the frame */
+            geometry.height += c->titlebar[CLIENT_TITLEBAR_TOP].size;
+            geometry.height += c->titlebar[CLIENT_TITLEBAR_BOTTOM].size;
+            diff_h = geometry.height - old_h;
+        }
         if(ev->value_mask & XCB_CONFIG_WINDOW_BORDER_WIDTH)
         {
+            diff_border = ev->border_width - c->border_width;
+            diff_h += diff_border;
+            diff_w += diff_border;
+
             luaA_object_push(globalconf.L, c);
             window_set_border_width(globalconf.L, -1, ev->border_width);
             lua_pop(globalconf.L, 1);
+        }
+
+        /* If the client resizes without moving itself, apply window gravity */
+        if(c->size_hints.flags & XCB_ICCCM_SIZE_HINT_P_WIN_GRAVITY)
+        {
+            int16_t diff_x = 0, diff_y = 0;
+            xwindow_translate_for_gravity(c->size_hints.win_gravity, diff_border, diff_border, diff_w, diff_h, &diff_x, &diff_y);
+            if(!(ev->value_mask & XCB_CONFIG_WINDOW_X))
+                geometry.x += diff_x;
+            if(!(ev->value_mask & XCB_CONFIG_WINDOW_Y))
+                geometry.y += diff_y;
         }
 
         if(!client_resize(c, geometry, false))

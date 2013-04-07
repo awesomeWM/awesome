@@ -296,4 +296,64 @@ xwindow_set_shape(xcb_window_t win, int width, int height, enum xcb_shape_sk_t k
         xcb_free_pixmap(globalconf.connection, pixmap);
 }
 
+/** Calculate the position change that a window needs applied.
+ * \param gravity The window gravity that should be used.
+ * \param change_width_before The window width difference that will be applied.
+ * \param change_height_before The window height difference that will be applied.
+ * \param change_width_after The window width difference that will be applied.
+ * \param change_height_after The window height difference that will be applied.
+ * \param dx On return, this will be set to the amount the pixel has to be moved.
+ * \param dy On return, this will be set to the amount the pixel has to be moved.
+ */
+void xwindow_translate_for_gravity(xcb_gravity_t gravity, int16_t change_width_before, int16_t change_height_before,
+        int16_t change_width_after, int16_t change_height_after, int16_t *dx, int16_t *dy)
+{
+    int16_t x = 0, y = 0;
+    int16_t change_height = change_height_before + change_height_after;
+    int16_t change_width = change_width_before + change_width_after;
+
+    switch (gravity) {
+    case XCB_GRAVITY_WIN_UNMAP:
+    case XCB_GRAVITY_NORTH_WEST:
+        break;
+    case XCB_GRAVITY_NORTH:
+        x = -change_width / 2;
+        break;
+    case XCB_GRAVITY_NORTH_EAST:
+        x = -change_width;
+        break;
+    case XCB_GRAVITY_WEST:
+        y = -change_height / 2;
+        break;
+    case XCB_GRAVITY_CENTER:
+        x = -change_width / 2;
+        y = -change_height / 2;
+        break;
+    case XCB_GRAVITY_EAST:
+        x = -change_width;
+        y = -change_height / 2;
+        break;
+    case XCB_GRAVITY_SOUTH_WEST:
+        y = -change_height;
+        break;
+    case XCB_GRAVITY_SOUTH:
+        x = -change_width / 2;
+        y = -change_height;
+        break;
+    case XCB_GRAVITY_SOUTH_EAST:
+        x = -change_width;
+        y = -change_height;
+        break;
+    case XCB_GRAVITY_STATIC:
+        x = -change_width_before;
+        x = -change_height_before;
+        break;
+    }
+
+    if (dx)
+        *dx = x;
+    if (dy)
+        *dy = y;
+}
+
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

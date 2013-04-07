@@ -41,6 +41,7 @@ void xwindow_takefocus(xcb_window_t);
 void xwindow_set_cursor(xcb_window_t, xcb_cursor_t);
 void xwindow_set_border_color(xcb_window_t, color_t *);
 void xwindow_set_shape(xcb_window_t, int, int, enum xcb_shape_sk_t, cairo_surface_t *, int);
+void xwindow_translate_for_gravity(xcb_gravity_t, int16_t, int16_t, int16_t, int16_t, int16_t *, int16_t *);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
