@@ -140,7 +140,7 @@ local function set_defaults(self)
     self.wibox.border_width = beautiful.tooltip_border_width or beautiful.border_width or 1
     self.wibox.border_color = beautiful.tooltip_border_color or beautiful.border_normal or "#ffcb60"
     self.wibox.opacity = beautiful.tooltip_opacity or 1
-    self.wibox.bg = beautiful.tooltip_bg_color or beautiful.bg_focus or "#ffcb60"
+    self.wibox:set_bg(beautiful.tooltip_bg_color or beautiful.bg_focus or "#ffcb60")
     data[self].fg = beautiful.tooltip_fg_color or beautiful.fg_focus or "#000000"
     data[self].font = beautiful.tooltip_font or beautiful.font or "terminus 6"
 end
