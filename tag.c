@@ -401,6 +401,7 @@ tag_view(Tag *tag, Bool view)
     ewmh_update_net_current_desktop(screen_virttophys(tag->screen));
     widget_invalidate_cache(tag->screen, WIDGET_CACHE_TAGS);
     globalconf.screens[tag->screen].need_arrange = True;
+    client_focus(NULL, tag->screen, True);
 }
 
 /** View only this tag.
