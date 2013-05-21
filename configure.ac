@@ -117,6 +117,8 @@ PKG_CHECK_MODULES([xinerama], [xinerama],,
    [AC_MSG_ERROR([awesome requires Xinerama.])])
 PKG_CHECK_MODULES([xrandr], [xrandr],,
    [AC_MSG_ERROR([awesome requires Xrandr.])])
+PKG_CHECK_MODULES([xkb], [xkbui],,
+	[AC_MSG_ERROR([awesome requires XKB.])])
 AC_ARG_WITH([gtk], AS_HELP_STRING([--with-gtk], [Build with gtk library (default: disabled)]))
 
 if test "x$with_gtk" == "xyes"; then

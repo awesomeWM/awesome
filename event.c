@@ -20,6 +20,7 @@
  */
 
 #include <X11/keysym.h>
+#include <X11/XKBlib.h>
 #include <X11/Xatom.h>
 #include <X11/Xutil.h>
 #include <X11/extensions/shape.h>
@@ -350,7 +351,7 @@ event_handle_keypress(XEvent *e)
             break;
         }
 
-    keysym = XKeycodeToKeysym(globalconf.display, (KeyCode) ev->keycode, 0);
+    keysym = XkbKeycodeToKeysym(globalconf.display, (KeyCode) ev->keycode, 0, 0);
 
     for(k = globalconf.keys; k; k = k->next)
         if(((k->keycode && ev->keycode == k->keycode) || (k->keysym && keysym == k->keysym)) &&
