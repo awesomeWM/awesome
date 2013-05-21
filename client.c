@@ -177,6 +177,22 @@ client_ban(Client *c)
         XUnmapWindow(globalconf.display, c->titlebar.sw->window);
 }
 
+void
+client_seturgent(Client *c, Bool set) {
+    XWMHints *wmh = XGetWMHints(globalconf.display, c->win);
+    if (!wmh)
+        return;
+    if (set)
+        wmh->flags |= XUrgencyHint;
+    else
+        wmh->flags &= ~(XUrgencyHint);
+
+    XSetWMHints(globalconf.display, c->win, wmh);
+    XFree(wmh);
+    c->isurgent = set;
+    client_updatewmhints(c);
+}
+
 /** Give focus to client, or to first client if c is NULL
  * \param c client
  * \param screen Screen ID
@@ -222,6 +238,8 @@ client_focus(Client *c, int screen, Bool raise)
          * will appear under the mouse, grabbuttons */
         window_grabbuttons(c->win, c->phys_screen);
         phys_screen = c->phys_screen;
+        /* ICCCM requires us to unset the urgent hint on focus */
+        client_seturgent(c, 0);
     }
     else
     {
