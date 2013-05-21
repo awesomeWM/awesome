@@ -744,8 +744,14 @@ draw_image(DrawCtx *ctx, int x, int y, int wanted_h, const char *filename)
     Imlib_Image image;
     Imlib_Load_Error e = IMLIB_LOAD_ERROR_NONE;
 
-    if(!(image = imlib_load_image_with_error_return(filename, &e)))
-        return warn("cannot load image %s: %s\n", filename, draw_imlib_load_strerror(e));
+    if (!filename) {
+        warn("cannot load image");
+        return;
+    }
+    if(!(image = imlib_load_image_with_error_return(filename, &e))) {
+        warn("cannot load image %s: %s\n", filename, draw_imlib_load_strerror(e));
+        return;
+    }
 
     imlib_context_set_image(image);
     h = imlib_image_get_height();
@@ -783,6 +789,9 @@ draw_get_image_size(const char *filename)
     area_t size = { -1, -1, -1, -1, NULL, NULL };
     Imlib_Image image;
     Imlib_Load_Error e = IMLIB_LOAD_ERROR_NONE;
+
+	 if (!filename)
+		 return size;
 
     if((image = imlib_load_image_with_error_return(filename, &e)))
     {
