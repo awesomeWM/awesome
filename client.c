@@ -200,7 +200,7 @@ client_seturgent(Client *c, Bool set) {
  * \return true if a window (even root) has received focus, false otherwise
  */
 Bool
-client_focus(Client *c, int screen, Bool raise)
+client_focus(Client *c, int screen, Bool c_raise)
 {
     int phys_screen;
 
@@ -232,7 +232,7 @@ client_focus(Client *c, int screen, Bool raise)
                          globalconf.screens[screen].styles.focus.border.pixel);
         titlebar_draw(c);
         XSetInputFocus(globalconf.display, c->win, RevertToPointerRoot, CurrentTime);
-        if(raise)
+        if(c_raise)
             client_stack(c);
         /* since we're dropping EnterWindow events and sometimes the window
          * will appear under the mouse, grabbuttons */
