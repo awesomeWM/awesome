@@ -53,6 +53,7 @@ static Atom net_wm_state;
 static Atom net_wm_state_sticky;
 static Atom net_wm_state_skip_taskbar;
 static Atom net_wm_state_fullscreen;
+static Atom net_wm_state_demands_attention;
 
 static Atom utf8_string;
 
@@ -85,6 +86,7 @@ static AtomItem AtomNames[] =
     { "_NET_WM_STATE_STICKY", &net_wm_state_sticky },
     { "_NET_WM_STATE_SKIP_TASKBAR", &net_wm_state_skip_taskbar },
     { "_NET_WM_STATE_FULLSCREEN", &net_wm_state_fullscreen },
+    { "_NET_WM_STATE_DEMANDS_ATTENTION", &net_wm_state_demands_attention },
 
     { "UTF8_STRING", &utf8_string },
 };
@@ -136,6 +138,7 @@ ewmh_set_supported_hints(int phys_screen)
     atom[i++] = net_wm_state_sticky;
     atom[i++] = net_wm_state_skip_taskbar;
     atom[i++] = net_wm_state_fullscreen;
+    atom[i++] = net_wm_state_demands_attention;
 
     XChangeProperty(globalconf.display, RootWindow(globalconf.display, phys_screen),
                     net_supported, XA_ATOM, 32,
@@ -246,6 +249,14 @@ ewmh_process_state_atom(Client *c, Atom state, int set)
             c->skiptb = True;
             c->skip = True;
         }
+    }
+    else if(state == net_wm_state_demands_attention) {
+        if (set == _NET_WM_STATE_REMOVE)
+            client_seturgent(c, False);
+        else if (set == _NET_WM_STATE_ADD)
+            client_seturgent(c, True);
+        else if (set == _NET_WM_STATE_TOGGLE)
+            client_seturgent(c, !c->isurgent);
     }
     else if(state == net_wm_state_fullscreen)
     {
