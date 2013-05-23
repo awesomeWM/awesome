@@ -50,7 +50,7 @@ tag_new(const char *name, Layout *layout, double mwfact, int nmaster, int ncol)
 
     tag->mwfact = mwfact;
     if(tag->mwfact <= 0 || tag->mwfact >= 1)
-        tag->mwfact = 0.5;
+        tag->mwfact = 1.0 / 1.618; /* Reverse of the golden ratio */
 
     if((tag->nmaster = nmaster) < 0)
         tag->nmaster = 1;
