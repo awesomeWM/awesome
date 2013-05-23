@@ -44,6 +44,9 @@ To zoom focused window on screen 0:
 
     echo 0 client_zoom | awesome-client
 
+To execute a command on all active screens, use -1 as the screen number:
+
+    echo -1 tag_view 3 | awesome-client
 
 SEE ALSO
 --------

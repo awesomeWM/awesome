@@ -135,6 +135,23 @@ uicb_spawn(int screen, char *arg)
     wait(0);
 }
 
+static void
+__uicb_run_args(Uicb* fun, int screen, char *cmd) {
+    char *argcpy = NULL;
+    const char *arg;
+    ssize_t len;
+
+    if (cmd && (a_strlen(cmd) > 0)) {
+        ssize_t len = a_strlen(cmd);
+        argcpy = p_new(char, len);
+        a_strncpy(argcpy, len + 1, cmd, len);
+    }
+
+    fun(screen, argcpy);
+    if (argcpy)
+        p_delete(&argcpy);
+}
+
 /** Run the uicb
  * \param cmd the uicb command to parse
  * \return 0 on succes, -1 on failure
@@ -144,31 +161,25 @@ __uicb_run(char *cmd)
 {
     char *p, *argcpy;
     const char *arg;
+    char *tmp;
     int screen;
     ssize_t len;
     Uicb *uicb;
 
     len = a_strlen(cmd);
-    p = strtok(cmd, " ");
-    if (!p)
-    {
+
+    p = strsep(&cmd, " ");
+    screen = (int) strtol(p, &tmp, 10);
+    if ((*tmp != '\0') || (screen > globalconf.screens_info->nscreen) || (screen < -1)) {
+        warn("invalid screen: %s\n", p);
+        return -1;
+    }
+
+    p = strsep(&cmd, " ");
+    if ((!p) || (*p == '\0')) {
         warn("ignoring malformed command\n");
         return -1;
     }
-    screen = atoi(cmd);
-    if(screen >= globalconf.screens_info->nscreen || screen < 0)
-    {
-        warn("invalid screen specified: %i\n", screen);
-        return -1;
-    }
-
-    p = strtok(NULL, " ");
-    if (!p)
-    {
-        warn("ignoring malformed command.\n");
-        return -1;
-    }
-
     uicb = name_func_lookup(p, UicbList);
     if (!uicb)
     {
@@ -176,18 +187,11 @@ __uicb_run(char *cmd)
         return -1;
     }
 
-    if (p + a_strlen(p) < cmd + len)
-    {
-        arg = p + a_strlen(p) + 1;
-        len = a_strlen(arg);
-        /* Allow our callees to modify this string. */
-        argcpy = p_new(char, len + 1);
-        a_strncpy(argcpy, len + 1,  arg, len);
-        uicb(screen, argcpy);
-        p_delete(&argcpy);
-    }
-    else
-        uicb(screen, NULL);
+    if (screen == -1) {
+        for (int x = 0; x < globalconf.screens_info->nscreen; x++)
+            __uicb_run_args(uicb, x, cmd);
+    } else
+        __uicb_run_args(uicb, screen, cmd);
 
     return 0;
 }
