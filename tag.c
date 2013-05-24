@@ -483,7 +483,7 @@ uicb_tag_create(int screen, char *arg)
     if(!a_strlen(arg))
         return;
 
-    tag = tag_new(arg, globalconf.screens[screen].layouts, 0.5, 1, 1);
+    tag = tag_new(arg, globalconf.screens[screen].layouts, 0.618, 1, 1);
     tag_append_to_screen(tag, screen);
 }
 

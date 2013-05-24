@@ -482,7 +482,7 @@ cfg_opt_t tag_opts[] =
     /** Default layout for this tag. */
     CFG_STR((char *) "layout", (char *) "tile", CFGF_NONE),
     /** Default master width factor for this tag. */
-    CFG_FLOAT((char *) "mwfact", 0.5, CFGF_NONE),
+    CFG_FLOAT((char *) "mwfact", 0.618, CFGF_NONE),
     /** Default number of master windows for this tag. */
     CFG_INT((char *) "nmaster", 1, CFGF_NONE),
     /** Default number of window columns for this tag. */

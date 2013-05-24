@@ -467,7 +467,7 @@ config_parse_screen(cfg_t *cfg, int screen)
     else
     {
         warn("fatal: no tags found in configuration file\n");
-        tag = tag_new("default", virtscreen->layouts, 0.5, 1, 1);
+        tag = tag_new("default", virtscreen->layouts, 0.618, 1, 1);
         tag_push_to_screen(tag, screen);
     }
 
