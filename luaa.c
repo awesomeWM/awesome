@@ -666,7 +666,10 @@ luaA_loadrc(const char *confpath, bool run)
             /* Set the conffile right now so it can be used inside the
              * configuration file. */
             conffile = a_strdup(confpath);
-            if(lua_pcall(globalconf.L, 0, LUA_MULTRET, 0))
+            /* Move error handling function before function */
+            lua_pushcfunction(globalconf.L, luaA_dofunction_on_error);
+            lua_insert(globalconf.L, -2);
+            if(lua_pcall(globalconf.L, 0, LUA_MULTRET, -2))
             {
                 const char *err = lua_tostring(globalconf.L, -1);
                 luaA_startup_error(err);
