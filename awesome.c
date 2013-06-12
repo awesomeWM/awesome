@@ -288,6 +288,7 @@ main(int argc, char **argv)
     ssize_t cmdlen = 1;
     xdgHandle xdg;
     bool no_argb = false;
+    bool run_test = false;
     xcb_generic_event_t *event;
     xcb_query_tree_cookie_t tree_c;
     static struct option long_options[] =
@@ -340,16 +341,8 @@ main(int argc, char **argv)
             exit_help(EXIT_SUCCESS);
             break;
           case 'k':
-            if(!luaA_parserc(&xdg, confpath, false))
-            {
-                fprintf(stderr, "✘ Configuration file syntax error.\n");
-                return EXIT_FAILURE;
-            }
-            else
-            {
-                fprintf(stderr, "✔ Configuration file syntax OK.\n");
-                return EXIT_SUCCESS;
-            }
+            run_test = true;
+            break;
           case 'c':
             if(a_strlen(optarg))
                 confpath = a_strdup(optarg);
@@ -360,6 +353,20 @@ main(int argc, char **argv)
             no_argb = true;
             break;
         }
+
+    if (run_test)
+    {
+        if(!luaA_parserc(&xdg, confpath, false))
+        {
+            fprintf(stderr, "✘ Configuration file syntax error.\n");
+            return EXIT_FAILURE;
+        }
+        else
+        {
+            fprintf(stderr, "✔ Configuration file syntax OK.\n");
+            return EXIT_SUCCESS;
+        }
+    }
 
     /* register function for signals */
     g_unix_signal_add(SIGINT, exit_on_signal, NULL);
