@@ -35,7 +35,7 @@ module("client")
 -- @field maximized_vertical The client is maximized vertically or not.
 -- @field transient_for The client the window is transient for.
 -- @field group_window Window identification unique to a group of windows.
--- @field leader_id Identification unique to windows spawned by the same command.
+-- @field leader_window Identification unique to windows spawned by the same command.
 -- @field size_hints A table with size hints of the client: user_position,
 -- user_size, program_position, program_size, etc.
 -- @field sticky Set the client sticky, i.e. available on all tags.
