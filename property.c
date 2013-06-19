@@ -122,7 +122,7 @@ xcb_get_property_cookie_t
 property_get_wm_client_leader(client_t *c)
 {
     return xcb_get_property_unchecked(globalconf.connection, false, c->window,
-                                      WM_CLIENT_LEADER, XCB_ATOM_WINDOW, 1, 32);
+                                      WM_CLIENT_LEADER, XCB_ATOM_WINDOW, 0, 32);
 }
 
 /** Update leader hint of a client.
