@@ -113,6 +113,11 @@ DO_CLIENT_SET_PROPERTY(skip_taskbar)
     client_set_##prop(lua_State *L, int cidx, char *value) \
     { \
         client_t *c = luaA_checkudata(L, cidx, &client_class); \
+        if (A_STREQ(c->prop, value)) \
+        { \
+            p_delete(&value); \
+            return; \
+        } \
         p_delete(&c->prop); \
         c->prop = value; \
         luaA_object_emit_signal(L, cidx, "property::" #signal, 0); \
