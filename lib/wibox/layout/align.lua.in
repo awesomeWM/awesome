@@ -28,10 +28,10 @@ function align:draw(wibox, cr, width, height)
     if self.first then
         local w, h, _ = width, height, nil
         if self.dir == "y" then
-            _, h = self.first:fit(w, h)
+            _, h = base.fit_widget(self.first, w, h)
             size_first = h
         else
-            w, _ = self.first:fit(w, h)
+            w, _ = base.fit_widget(self.first, w, h)
             size_first = w
         end
         base.draw_widget(wibox, cr, self.first, 0, 0, w, h)
@@ -41,12 +41,12 @@ function align:draw(wibox, cr, width, height)
         local w, h, x, y, _
         if self.dir == "y" then
             w, h = width, height - size_first
-            _, h = self.third:fit(w, h)
+            _, h = base.fit_widget(self.third, w, h)
             x, y = 0, height - h
             size_third = h
         else
             w, h = width - size_first, height
-            w, _ = self.third:fit(w, h)
+            w, _ = base.fit_widget(self.third, w, h)
             x, y = width - w, 0
             size_third = w
         end
@@ -57,12 +57,12 @@ function align:draw(wibox, cr, width, height)
         local x, y, w, h
         if self.dir == "y" then
             w, h = width, size_limit - size_first - size_third
-            local real_w, real_h = self.second:fit(w, h)
+            local real_w, real_h = base.fit_widget(self.second, w, h)
             x, y = 0, size_first + h / 2 - real_h / 2
             h = real_h
         else
             w, h = size_limit - size_first - size_third, height
-            local real_w, real_h = self.second:fit(w, h)
+            local real_w, real_h = base.fit_widget(self.second, w, h)
             x, y = size_first + w / 2 - real_w / 2, 0
             w = real_w
         end
@@ -108,7 +108,7 @@ function align:fit(orig_width, orig_height)
     local used_max = 0
 
     for k, v in pairs{self.first, self.second, self.third} do
-        local w, h = v:fit(orig_width, orig_height)
+        local w, h = base.fit_widget(v, orig_width, orig_height)
 
         local max = self.dir == "y" and w or h
 

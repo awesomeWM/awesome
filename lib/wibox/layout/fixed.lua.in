@@ -28,7 +28,7 @@ function fixed:draw(wibox, cr, width, height)
             x, y = 0, pos
             w, h = width, height - pos
             if k ~= #self.widgets or not self.fill_space then
-                _, h = v:fit(w, h);
+                _, h = base.fit_widget(v, w, h);
             end
             pos = pos + h
             in_dir = h
@@ -36,7 +36,7 @@ function fixed:draw(wibox, cr, width, height)
             x, y = pos, 0
             w, h = width - pos, height
             if k ~= #self.widgets or not self.fill_space then
-                w, _ = v:fit(w, h);
+                w, _ = base.fit_widget(v, w, h);
             end
             pos = pos + w
             in_dir = w
@@ -66,7 +66,7 @@ function fixed:fit(orig_width, orig_height)
     local used_in_dir, used_max = 0, 0
 
     for k, v in pairs(self.widgets) do
-        local w, h = v:fit(width, height)
+        local w, h = base.fit_widget(v, width, height)
         local in_dir, max
         if self.dir == "y" then
             max, in_dir = w, h

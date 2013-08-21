@@ -49,7 +49,7 @@ function mirror:fit(...)
     if not self.widget then
         return 0, 0
     end
-    return self.widget:fit(...)
+    return base.fit_widget(self.widget, ...)
 end
 
 --- Set the widget that this layout mirrors.

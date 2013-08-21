@@ -90,7 +90,7 @@ function flex:fit(orig_width, orig_height)
     local sub_width  = self.dir == "y" and orig_width  or floor(used_in_dir / #self.widgets)
 
     for k, v in pairs(self.widgets) do
-        local w, h = v:fit(sub_width, sub_height)
+        local w, h = base.fit_widget(v, sub_width, sub_height)
         local max
         if self.dir == "y" then
             max = w
