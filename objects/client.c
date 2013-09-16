@@ -1789,11 +1789,16 @@ LUA_OBJECT_EXPORT_PROPERTY(client, client_t, maximized_vertical, lua_pushboolean
 static int
 luaA_client_get_content(lua_State *L, client_t *c)
 {
-    xcb_image_t *ximage = xcb_image_get(globalconf.connection,
+    xcb_image_t *ximage;
+    int width  = c->geometry.width;
+    int height = c->geometry.height;
+
+    width  -= c->titlebar[CLIENT_TITLEBAR_LEFT].size + c->titlebar[CLIENT_TITLEBAR_RIGHT].size;
+    height -= c->titlebar[CLIENT_TITLEBAR_TOP].size + c->titlebar[CLIENT_TITLEBAR_BOTTOM].size;
+    ximage = xcb_image_get(globalconf.connection,
                                         c->window,
                                         0, 0,
-                                        c->geometry.width,
-                                        c->geometry.height,
+                                        width, height,
                                         ~0, XCB_IMAGE_FORMAT_Z_PIXMAP);
     cairo_surface_t *surface = NULL;
 
