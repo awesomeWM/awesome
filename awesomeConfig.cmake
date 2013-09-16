@@ -142,7 +142,6 @@ pkg_check_modules(AWESOME_REQUIRED REQUIRED
     xcb-util>=0.3.8
     xcb-keysyms>=0.3.4
     xcb-icccm>=0.3.8
-    xcb-image>=0.3.0
     cairo-xcb
     libstartup-notification-1.0>=0.10
     xproto>=7.0.15

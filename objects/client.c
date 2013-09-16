@@ -20,7 +20,6 @@
  */
 
 #include <xcb/xcb_atom.h>
-#include <xcb/xcb_image.h>
 #include <xcb/shape.h>
 #include <cairo-xcb.h>
 
