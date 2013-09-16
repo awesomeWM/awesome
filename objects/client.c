@@ -1789,43 +1789,29 @@ LUA_OBJECT_EXPORT_PROPERTY(client, client_t, maximized_vertical, lua_pushboolean
 static int
 luaA_client_get_content(lua_State *L, client_t *c)
 {
-    xcb_image_t *ximage;
+    xcb_get_window_attributes_cookie_t cookie;
+    xcb_get_window_attributes_reply_t *attr;
+    cairo_surface_t *surface;
     int width  = c->geometry.width;
     int height = c->geometry.height;
 
+    /* Just the client size without decorations */
     width  -= c->titlebar[CLIENT_TITLEBAR_LEFT].size + c->titlebar[CLIENT_TITLEBAR_RIGHT].size;
     height -= c->titlebar[CLIENT_TITLEBAR_TOP].size + c->titlebar[CLIENT_TITLEBAR_BOTTOM].size;
-    ximage = xcb_image_get(globalconf.connection,
-                                        c->window,
-                                        0, 0,
-                                        width, height,
-                                        ~0, XCB_IMAGE_FORMAT_Z_PIXMAP);
-    cairo_surface_t *surface = NULL;
 
-    if(ximage)
-    {
-        if(ximage->bpp >= 24)
-        {
-            uint32_t *data = p_new(uint32_t, ximage->width * ximage->height);
+    cookie = xcb_get_window_attributes(globalconf.connection, c->window);
+    attr = xcb_get_window_attributes_reply(globalconf.connection, cookie, NULL);
 
-            for(int y = 0; y < ximage->height; y++)
-                for(int x = 0; x < ximage->width; x++)
-                {
-                    data[y * ximage->width + x] = xcb_image_get_pixel(ximage, x, y);
-                    data[y * ximage->width + x] |= 0xff000000; /* set alpha to 0xff */
-                }
-
-            surface = draw_surface_from_data(ximage->width, ximage->height, data);
-            p_delete(&data);
-        }
-        xcb_image_destroy(ximage);
-    }
-
-    if (!surface)
+    if (!attr)
         return 0;
+
+    surface = cairo_xcb_surface_create(globalconf.connection, c->window,
+                                       draw_find_visual(globalconf.screen, attr->visual),
+                                       width, height);
 
     /* lua has to make sure to free the ref or we have a leak */
     lua_pushlightuserdata(L, surface);
+    free(attr);
     return 1;
 }
 
