@@ -54,7 +54,10 @@ a_find_program(XMLTO_EXECUTABLE xmlto FALSE)
 a_find_program(GZIP_EXECUTABLE gzip FALSE)
 # lua documentation
 a_find_program(LUA_EXECUTABLE lua FALSE)
-a_find_program(LDOC_EXECUTABLE ldoc.lua FALSE)
+a_find_program(LDOC_EXECUTABLE ldoc FALSE)
+if(NOT LDOC_EXECUTABLE)
+    a_find_program(LDOC_EXECUTABLE ldoc.lua FALSE)
+endif()
 # theme graphics
 a_find_program(CONVERT_EXECUTABLE convert TRUE)
 # doxygen
