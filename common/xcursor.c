@@ -22,6 +22,8 @@
 #include "common/xcursor.h"
 #include "common/util.h"
 
+#include <X11/cursorfont.h>
+
 static char const * const xcursor_font[] =
 {
     [XC_X_cursor] = "X_cursor",
@@ -129,17 +131,17 @@ xcursor_font_tostr(uint16_t c)
 
 /** Equivalent to 'XCreateFontCursor()', error are handled by the
  * default current error handler.
- * \param conn The connection to the X server.
+ * \param ctx The xcb-cursor context.
  * \param cursor_font Type of cursor to use.
  * \return Allocated cursor font.
  */
 xcb_cursor_t
-xcursor_new(Display *conn, uint16_t cursor_font)
+xcursor_new(xcb_cursor_context_t *ctx, uint16_t cursor_font)
 {
     static xcb_cursor_t xcursor[countof(xcursor_font)];
 
     if (!xcursor[cursor_font]) {
-        xcursor[cursor_font] = XcursorLibraryLoadCursor(conn, xcursor_font_tostr(cursor_font));
+        xcursor[cursor_font] = xcb_cursor_load_cursor(ctx, xcursor_font_tostr(cursor_font));
     }
 
     return xcursor[cursor_font];

@@ -22,14 +22,12 @@
 #ifndef AWESOME_COMMON_XCURSORS_H
 #define AWESOME_COMMON_XCURSORS_H
 
-#include <X11/cursorfont.h>
 #include <xcb/xcb.h>
-
-#include <X11/Xcursor/Xcursor.h>
+#include <xcb/xcb_cursor.h>
 
 uint16_t xcursor_font_fromstr(const char *);
 const char * xcursor_font_tostr(uint16_t);
-xcb_cursor_t xcursor_new(Display *, uint16_t);
+xcb_cursor_t xcursor_new(xcb_cursor_context_t *, uint16_t);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

@@ -33,9 +33,6 @@
 #include <xcb/xtest.h>
 #include <xcb/shape.h>
 
-#include <X11/Xlib-xcb.h>
-#include <X11/XKBlib.h>
-
 #include <glib-unix.h>
 
 #include "awesome.h"
@@ -86,6 +83,7 @@ awesome_atexit(bool restart)
     xcb_aux_sync(globalconf.connection);
 
     /* Disconnect *after* closing lua */
+    xcb_cursor_context_free(globalconf.cursor_ctx);
     xcb_disconnect(globalconf.connection);
 }
 
@@ -377,21 +375,11 @@ main(int argc, char **argv)
     sigemptyset(&sa.sa_mask);
     sigaction(SIGSEGV, &sa, 0);
 
-    /* XLib sucks */
-    XkbIgnoreExtension(True);
-
-    /* X stuff */
-    globalconf.display = XOpenDisplay(NULL);
-    if (globalconf.display == NULL) {
-        fatal("cannot open display");
-    }
-    XSetEventQueueOwner(globalconf.display, XCBOwnsEventQueue);
-    globalconf.default_screen = XDefaultScreen(globalconf.display);
-    globalconf.connection = XGetXCBConnection(globalconf.display);
     /* We have no clue where the input focus is right now */
     globalconf.focus.need_update = true;
 
-    /* Double checking that connection is good and operatable with xcb */
+    /* X stuff */
+    globalconf.connection = xcb_connect(NULL, &globalconf.default_screen);
     if(xcb_connection_has_error(globalconf.connection))
         fatal("cannot open display");
 
@@ -418,6 +406,9 @@ main(int argc, char **argv)
     xcb_prefetch_extension_data(globalconf.connection, &xcb_randr_id);
     xcb_prefetch_extension_data(globalconf.connection, &xcb_xinerama_id);
     xcb_prefetch_extension_data(globalconf.connection, &xcb_shape_id);
+
+    if (xcb_cursor_context_new(globalconf.connection, globalconf.screen, &globalconf.cursor_ctx) < 0)
+        fatal("Failed to initialize xcb-cursor");
 
     /* Setup the main context */
     g_main_context_set_poll_func(g_main_context_default(), &a_glib_poll);

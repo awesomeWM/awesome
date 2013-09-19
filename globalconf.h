@@ -29,6 +29,7 @@
 
 #include <xcb/xcb_icccm.h>
 #include <xcb/xcb_keysyms.h>
+#include <xcb/xcb_cursor.h>
 
 #include "objects/key.h"
 #include "color.h"
@@ -64,12 +65,12 @@ ARRAY_TYPE(drawin_t *, drawin)
 /** Main configuration structure */
 typedef struct
 {
-    /** Xlib Display */
-    Display * display;
     /** Connection ref */
     xcb_connection_t *connection;
     /** Default screen number */
     int default_screen;
+    /** xcb-cursor context */
+    xcb_cursor_context_t *cursor_ctx;
     /** Keys symbol table */
     xcb_key_symbols_t *keysyms;
     /** Logical screens */

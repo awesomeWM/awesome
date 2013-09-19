@@ -142,7 +142,7 @@ drawin_init(drawin_t *w)
                           | XCB_EVENT_MASK_POINTER_MOTION | XCB_EVENT_MASK_EXPOSURE
                           | XCB_EVENT_MASK_PROPERTY_CHANGE,
                           globalconf.default_cmap,
-                          xcursor_new(globalconf.display, xcursor_font_fromstr(w->cursor))
+                          xcursor_new(globalconf.cursor_ctx, xcursor_font_fromstr(w->cursor))
                       });
 
     /* Set the right properties */
@@ -502,7 +502,7 @@ luaA_drawin_set_cursor(lua_State *L, drawin_t *drawin)
         uint16_t cursor_font = xcursor_font_fromstr(buf);
         if(cursor_font)
         {
-            xcb_cursor_t cursor = xcursor_new(globalconf.display, cursor_font);
+            xcb_cursor_t cursor = xcursor_new(globalconf.cursor_ctx, cursor_font);
             p_delete(&drawin->cursor);
             drawin->cursor = a_strdup(buf);
             xwindow_set_cursor(drawin->window, cursor);

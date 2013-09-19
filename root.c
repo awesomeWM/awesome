@@ -303,7 +303,7 @@ luaA_root_cursor(lua_State *L)
 
     if(cursor_font)
     {
-        uint32_t change_win_vals[] = { xcursor_new(globalconf.display, cursor_font) };
+        uint32_t change_win_vals[] = { xcursor_new(globalconf.cursor_ctx, cursor_font) };
 
         xcb_change_window_attributes(globalconf.connection,
                                      globalconf.screen->root,

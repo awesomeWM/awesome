@@ -94,7 +94,7 @@ luaA_mousegrabber_run(lua_State *L)
 
     if(cfont)
     {
-        xcb_cursor_t cursor = xcursor_new(globalconf.display, cfont);
+        xcb_cursor_t cursor = xcursor_new(globalconf.cursor_ctx, cfont);
 
         luaA_registerfct(L, 1, &globalconf.mousegrabber);
 
