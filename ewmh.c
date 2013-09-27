@@ -75,19 +75,6 @@ ewmh_client_update_hints(lua_State *L)
     return 0;
 }
 
-/** Update the desktop geometry.
- */
-static void
-ewmh_update_desktop_geometry(void)
-{
-    area_t geom = screen_area_get(&globalconf.screens.tab[0], false);
-    uint32_t sizes[] = { geom.width, geom.height };
-
-    xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
-                        globalconf.screen->root,
-                        _NET_DESKTOP_GEOMETRY, XCB_ATOM_CARDINAL, 32, countof(sizes), sizes);
-}
-
 static int
 ewmh_update_net_active_window(lua_State *L)
 {
@@ -137,7 +124,6 @@ ewmh_init(void)
         _NET_CURRENT_DESKTOP,
         _NET_DESKTOP_NAMES,
         _NET_ACTIVE_WINDOW,
-        _NET_DESKTOP_GEOMETRY,
         _NET_CLOSE_WINDOW,
         _NET_WM_NAME,
         _NET_WM_STRUT_PARTIAL,
@@ -202,7 +188,6 @@ ewmh_init(void)
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
                         father, _NET_WM_PID, XCB_ATOM_CARDINAL, 32, 1, &i);
 
-    ewmh_update_desktop_geometry();
 
     luaA_class_connect_signal(globalconf.L, &client_class, "focus", ewmh_update_net_active_window);
     luaA_class_connect_signal(globalconf.L, &client_class, "unfocus", ewmh_update_net_active_window);
