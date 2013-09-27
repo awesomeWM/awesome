@@ -76,6 +76,12 @@ screen_add(screen_t new_screen)
 }
 
 static bool
+screens_exist(void)
+{
+    return globalconf.screens.len > 0;
+}
+
+static bool
 screen_scan_randr(void)
 {
     /* Check for extension before checking for XRandR */
@@ -150,7 +156,7 @@ screen_scan_randr(void)
 
             p_delete(&screen_res_r);
 
-            return true;
+            return screens_exist();
         }
     }
 
@@ -195,7 +201,7 @@ screen_scan_xinerama(void)
 
         p_delete(&xsq);
 
-        return true;
+        return screens_exist();
     }
 
     return false;
