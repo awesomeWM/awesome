@@ -121,8 +121,8 @@ a_exec(const char *cmd)
     if(!shell && !(shell = getenv("SHELL")))
         shell = "/bin/sh";
 
-    execl(shell, shell, "-c", cmd, NULL);
-    fatal("execv() failed: %s", strerror(errno));
+    execlp(shell, shell, "-c", cmd, NULL);
+    fatal("execlp() failed: %s", strerror(errno));
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
