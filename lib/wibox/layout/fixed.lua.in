@@ -27,7 +27,7 @@ function fixed:draw(wibox, cr, width, height)
         if self.dir == "y" then
             x, y = 0, pos
             w, h = width, height - pos
-            if k ~= #self.widgets or not self.fill_space then
+            if k ~= #self.widgets or not self._fill_space then
                 _, h = base.fit_widget(v, w, h);
             end
             pos = pos + h
@@ -35,7 +35,7 @@ function fixed:draw(wibox, cr, width, height)
         else
             x, y = pos, 0
             w, h = width - pos, height
-            if k ~= #self.widgets or not self.fill_space then
+            if k ~= #self.widgets or not self._fill_space then
                 w, _ = base.fit_widget(v, w, h);
             end
             pos = pos + w
