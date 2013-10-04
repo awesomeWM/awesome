@@ -1558,16 +1558,23 @@ titlebar_resize(client_t *c, client_titlebar_t bar, int size)
         return;
 
     /* Now resize the client (and titlebars!) suitably (the client without
-     * titlebars should keep its current size!) */
+     * titlebars should keep its current size!)
+     * TODO: I guess that this should honor the client's window gravity, right
+     * now we pretend to have static gravity. See awesome_atexit().
+     */
     area_t geometry = c->geometry;
     int change = size - c->titlebar[bar].size;
     switch (bar) {
     case CLIENT_TITLEBAR_TOP:
+        geometry.y -= change;
+        /* fall through */;
     case CLIENT_TITLEBAR_BOTTOM:
         geometry.height += change;
         break;
-    case CLIENT_TITLEBAR_RIGHT:
     case CLIENT_TITLEBAR_LEFT:
+        geometry.x -= change;
+        /* fall through */;
+    case CLIENT_TITLEBAR_RIGHT:
         geometry.width += change;
         break;
     default:
