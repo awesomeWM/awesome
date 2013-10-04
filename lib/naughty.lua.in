@@ -556,6 +556,14 @@ if capi.dbus then
                 -- 7 -> data
                 local w, h, rowstride, _, _, channels, data = unpack(hints.icon_data)
 
+                -- Do the arguments look sane? (e.g. we have enough data)
+                local expected_length = rowstride * (h - 1) + w * channels
+                if w < 0 or h < 0 or rowstride < 0 or (channels ~= 3 and channels ~= 4) or
+                    string.len(data) < expected_length then
+                    w = 0
+                    h = 0
+                end
+
                 local format = cairo.Format[channels == 4 and 'ARGB32' or 'RGB24']
 
                 -- Figure out some stride magic (cairo dictates rowstride)
