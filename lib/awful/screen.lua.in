@@ -61,7 +61,6 @@ function screen.focus(_screen)
     pos.y = capi.screen[_screen].geometry.y + rely * capi.screen[_screen].geometry.height
 
    -- move cursor without triggering signals mouse::enter and mouse::leave
-    capi.mouse.screen = _screen
     capi.mouse.coords(pos, true)
 
     local c = client.focus.history.get(_screen, 0)
