@@ -105,16 +105,26 @@ void
 property_update_wm_transient_for(client_t *c, xcb_get_property_cookie_t cookie)
 {
     xcb_window_t trans;
+    int counter;
+    client_t *tc, *tmp;
 
     if(!xcb_icccm_get_wm_transient_for_reply(globalconf.connection,
 					     cookie,
 					     &trans, NULL))
             return;
 
+    tmp = tc = client_getbywin(trans);
+
     luaA_object_push(globalconf.L, c);
     client_set_type(globalconf.L, -1, WINDOW_TYPE_DIALOG);
     client_set_above(globalconf.L, -1, false);
-    client_set_transient_for(globalconf.L, -1, client_getbywin(trans));
+
+    /* Verify that there are no loops in the transient_for relation */
+    for(counter = 0; tmp != NULL && counter <= globalconf.stack.len; counter++)
+        tmp = tmp->transient_for;
+    if (counter <= globalconf.stack.len)
+        client_set_transient_for(globalconf.L, -1, tc);
+
     lua_pop(globalconf.L, 1);
 }
 
