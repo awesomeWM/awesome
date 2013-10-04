@@ -36,6 +36,8 @@ struct a_screen
     signal_array_t signals;
     /** The screen outputs informations */
     screen_output_array_t outputs;
+    /** The lua userdata representing this screen */
+    void *userdata;
 };
 ARRAY_FUNCS(screen_t, screen, DO_NOTHING)
 

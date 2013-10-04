@@ -71,8 +71,17 @@ screen_add(screen_t new_screen)
                     MAX(new_screen.geometry.height, screen_to_test->geometry.height);
                 return;
             }
+
     signal_add(&new_screen.signals, "property::workarea");
     screen_array_append(&globalconf.screens, new_screen);
+
+    /* Allocate the lua userdata object representing this screen */
+    screen_t *s = &globalconf.screens.tab[globalconf.screens.len-1];
+    screen_t **ps = lua_newuserdata(globalconf.L, sizeof(*ps));
+    *ps = s;
+    luaL_getmetatable(globalconf.L, "screen");
+    lua_setmetatable(globalconf.L, -2);
+    s->userdata = luaA_object_ref(globalconf.L, -1);
 }
 
 static bool
@@ -398,10 +407,7 @@ screen_client_moveto(client_t *c, screen_t *new_screen, bool doresize)
 static int
 luaA_pushscreen(lua_State *L, screen_t *s)
 {
-    screen_t **ps = lua_newuserdata(L, sizeof(*ps));
-    *ps = s;
-    luaL_getmetatable(L, "screen");
-    lua_setmetatable(L, -2);
+    luaA_object_push(L, s->userdata);
     return 1;
 }
 
@@ -497,23 +503,6 @@ luaA_screen_index(lua_State *L)
     }
 
     return 0;
-}
-
-/** A screen.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- */
-static int
-luaA_screen_equal(lua_State *L)
-{
-    screen_t **ps1;
-    screen_t **ps2;
-
-    ps1 = luaL_checkudata(L, 1, "screen");
-    ps2 = luaL_checkudata(L, 2, "screen");
-    lua_pushboolean(L, *ps1 == *ps2);
-
-    return 1;
 }
 
 /** Add a signal to a screen.
@@ -631,7 +620,6 @@ const struct luaL_Reg awesome_screen_meta[] =
     { "disconnect_signal", luaA_screen_disconnect_signal },
     { "emit_signal", luaA_screen_emit_signal },
     { "__index", luaA_screen_index },
-    { "__eq", luaA_screen_equal },
     { NULL, NULL }
 };
 
