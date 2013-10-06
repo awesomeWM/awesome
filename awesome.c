@@ -181,13 +181,13 @@ a_xcb_check(void)
         else
         {
             uint8_t type = XCB_EVENT_RESPONSE_TYPE(event);
-            if((type == XCB_ENTER_NOTIFY || type == XCB_LEAVE_NOTIFY) && mouse)
+            if(mouse && (type == XCB_ENTER_NOTIFY || type == XCB_LEAVE_NOTIFY
+                        || type == XCB_BUTTON_PRESS || type == XCB_BUTTON_RELEASE))
             {
-                /* Make sure enter/motion/leave events are handled in the
-                 * correct order */
+                /* Make sure enter/motion/leave/press/release events are handled
+                 * in the correct order */
                 event_handle(mouse);
                 p_delete(&mouse);
-                mouse = NULL;
             }
             event_handle(event);
             p_delete(&event);
