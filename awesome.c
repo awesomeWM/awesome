@@ -65,12 +65,6 @@ awesome_atexit(bool restart)
     lua_pushboolean(globalconf.L, restart);
     signal_object_emit(globalconf.L, &global_signals, "exit", 1);
 
-    /* TODO: Reparent windows back to root window, placing them according to
-     * their window gravity. Right now we pretend to use static gravity and that
-     * works automatically thanks to xcb_change_save_set(). See
-     * titlebar_resize().
-     */
-
     a_dbus_cleanup();
 
     systray_cleanup();
