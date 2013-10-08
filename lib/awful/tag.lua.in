@@ -518,20 +518,17 @@ end
 
 --- Tag a client with the set of current tags.
 -- @param c The client to tag.
--- @param startup Optional: don't do anything if true.
-function tag.withcurrent(c, startup)
-    if startup ~= true then
-        local tags = {}
-        for k, t in ipairs(c:tags()) do
-            if tag.getscreen(t) == c.screen then
-                table.insert(tags, t)
-            end
+function tag.withcurrent(c)
+    local tags = {}
+    for k, t in ipairs(c:tags()) do
+        if tag.getscreen(t) == c.screen then
+            table.insert(tags, t)
         end
-        if #tags == 0 then
-            tags = tag.selectedlist(c.screen)
-        end
-        c:tags(tags)
     end
+    if #tags == 0 then
+        tags = tag.selectedlist(c.screen)
+    end
+    c:tags(tags)
 end
 
 local function attached_connect_signal_screen(screen, sig, func)
