@@ -207,7 +207,8 @@ a_xcb_io_cb(GIOChannel *source, GIOCondition cond, gpointer data)
     /* a_xcb_check() already handled all events */
 
     if(xcb_connection_has_error(globalconf.connection))
-        fatal("X server connection broke");
+        fatal("X server connection broke (error %d)",
+                xcb_connection_has_error(globalconf.connection));
 
     return TRUE;
 }
@@ -381,7 +382,7 @@ main(int argc, char **argv)
     /* X stuff */
     globalconf.connection = xcb_connect(NULL, &globalconf.default_screen);
     if(xcb_connection_has_error(globalconf.connection))
-        fatal("cannot open display");
+        fatal("cannot open display (error %d)", xcb_connection_has_error(globalconf.connection));
 
     globalconf.screen = xcb_aux_get_screen(globalconf.connection, globalconf.default_screen);
     globalconf.default_visual = draw_default_visual(globalconf.screen);
