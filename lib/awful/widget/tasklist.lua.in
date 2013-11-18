@@ -27,8 +27,8 @@ tasklist.filter = {}
 local function tasklist_label(c, args)
     if not args then args = {} end
     local theme = beautiful.get()
-    local fg_normal = args.fg_normal or theme.tasklist_fg_normal or theme.fg_normal
-    local bg_normal = args.bg_normal or theme.tasklist_bg_normal or theme.bg_normal
+    local fg_normal = args.fg_normal or theme.tasklist_fg_normal or theme.fg_normal or "#ffffff"
+    local bg_normal = args.bg_normal or theme.tasklist_bg_normal or theme.bg_normal or "#000000"
     local fg_focus = args.fg_focus or theme.tasklist_fg_focus or theme.fg_focus
     local bg_focus = args.bg_focus or theme.tasklist_bg_focus or theme.bg_focus
     local fg_urgent = args.fg_urgent or theme.tasklist_fg_urgent or theme.fg_urgent
