@@ -154,6 +154,7 @@ function tag.delete(target_tag, fallback_tag)
 
     -- delete the tag
     data.tags[target_tag].screen = nil
+    target_tag.activated = false
 
     -- If no tags are visible, try and view one.
     if tag.selected(target_scr) == nil and ntags > 0 then
