@@ -119,9 +119,14 @@ property_update_wm_transient_for(client_t *c, xcb_get_property_cookie_t cookie)
     client_set_type(globalconf.L, -1, WINDOW_TYPE_DIALOG);
     client_set_above(globalconf.L, -1, false);
 
-    /* Verify that there are no loops in the transient_for relation */
+    /* Verify that there are no loops in the transient_for relation after we are done */
     for(counter = 0; tmp != NULL && counter <= globalconf.stack.len; counter++)
+    {
+        if (tmp == c)
+            /* We arrived back at the client we started from, so there is a loop */
+            counter = globalconf.stack.len+1;
         tmp = tmp->transient_for;
+    }
     if (counter <= globalconf.stack.len)
         client_set_transient_for(globalconf.L, -1, tc);
 
