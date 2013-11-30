@@ -34,6 +34,8 @@ function taglist.taglist_label(t, args)
     local bg_urgent = args.bg_urgent or theme.taglist_bg_urgent or theme.bg_urgent
     local bg_occupied = args.bg_occupied or theme.taglist_bg_occupied
     local fg_occupied = args.fg_occupied or theme.taglist_fg_occupied
+    local bg_empty = args.bg_empty or theme.taglist_bg_empty
+    local fg_empty = args.fg_empty or theme.taglist_fg_empty
     local taglist_squares_sel = args.squares_sel or theme.taglist_squares_sel
     local taglist_squares_unsel = args.squares_unsel or theme.taglist_squares_unsel
     local taglist_squares_sel_empty = args.squares_sel_empty or theme.taglist_squares_sel_empty
@@ -84,6 +86,8 @@ function taglist.taglist_label(t, args)
                 bg_image = taglist_squares_unsel_empty
                 bg_resize = taglist_squares_resize == "true"
             end
+            if bg_empty then bg_color = bg_empty end
+            if fg_empty then fg_color = fg_empty end
         end
         for k, c in pairs(cls) do
             if c.urgent then
