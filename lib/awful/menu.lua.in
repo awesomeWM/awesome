@@ -463,7 +463,7 @@ function menu:clients(args) -- FIXME crude api
     local cls_t = {}
     for k, c in pairs(cls) do
         cls_t[#cls_t + 1] = {
-            util.escape(c.name) or "",
+            c.name or "",
             function ()
                 if not c:isvisible() then
                     tags.viewmore(c:tags(), c.screen)
