@@ -458,7 +458,7 @@ end
 -- @param _menu Menu table, see new() function for more informations
 -- @return The menu.
 function menu:clients(args) -- FIXME crude api
-    _menu = self or {}
+    local _menu = self or {}
     local cls = capi.client.get()
     local cls_t = {}
     for k, c in pairs(cls) do
