@@ -23,14 +23,14 @@ local utils = {}
 
 -- Options section
 
--- Terminal which applications that need terminal would open in.
+--- Terminal which applications that need terminal would open in.
 utils.terminal = 'xterm'
 
 -- The default icon for applications that don't provide any icon in
 -- their .desktop files.
 local default_icon = nil
 
--- Name of the WM for the OnlyShownIn entry in the .desktop file.
+--- Name of the WM for the OnlyShownIn entry in the .desktop file.
 utils.wm_name = "awesome"
 
 -- Private section

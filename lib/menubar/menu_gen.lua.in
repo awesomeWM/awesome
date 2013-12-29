@@ -17,11 +17,11 @@ local menu_gen = {}
 
 -- Options section
 
--- Specifies all directories where menubar should look for .desktop
+--- Specifies all directories where menubar should look for .desktop
 -- files. The search is not recursive.
 menu_gen.all_menu_dirs = { '/usr/share/applications/', '/usr/local/share/applications/' }
 
--- Specify the mapping of .desktop Categories section to the
+--- Specify the mapping of .desktop Categories section to the
 -- categories in the menubar. If "use" flag is set to false then any of
 -- the applications that fall only to this category will not be shown.
 menu_gen.all_categories = {

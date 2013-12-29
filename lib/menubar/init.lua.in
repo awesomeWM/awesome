@@ -38,16 +38,16 @@ menubar.utils = require("menubar.utils")
 
 -- Options section
 
--- When true the .desktop files will be reparsed only when the
+--- When true the .desktop files will be reparsed only when the
 -- extension is initialized. Use this if menubar takes much time to
 -- open.
 menubar.cache_entries = true
 
--- When true the categories will be shown alongside application
+--- When true the categories will be shown alongside application
 -- entries.
 menubar.show_categories = true
 
--- Specifies the geometry of the menubar. This is a table with the keys
+--- Specifies the geometry of the menubar. This is a table with the keys
 -- x, y, width and height. Missing values are replaced via the screen's
 -- geometry. However, missing height is replaced by the font size.
 menubar.geometry = { width = nil,
@@ -55,7 +55,7 @@ menubar.geometry = { width = nil,
                      x = nil,
                      y = nil }
 
--- Allows user to specify custom parameters for prompt.run function
+--- Allows user to specify custom parameters for prompt.run function
 -- (like colors).
 menubar.prompt_args = {}
 
