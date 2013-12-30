@@ -467,7 +467,8 @@ end
 -- @param tags A table with tags to view only.
 -- @param screen Optional screen number of the tags.
 function tag.viewmore(tags, screen)
-    local screen_tags = tag.gettags(screen or capi.mouse.screen)
+    local screen = screen or capi.mouse.screen
+    local screen_tags = tag.gettags(screen)
     for _, _tag in ipairs(screen_tags) do
         if not util.table.hasitem(tags, _tag) then
             _tag.selected = false
