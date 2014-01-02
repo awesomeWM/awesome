@@ -8,6 +8,7 @@ local setmetatable = setmetatable
 local table = table
 local pairs = pairs
 local type = type
+local floor = math.floor
 local base = require("wibox.layout.base")
 local widget_base = require("wibox.widget.base")
 
@@ -19,48 +20,89 @@ local align = {}
 -- @param cr The cairo context to use.
 -- @param width The available width.
 -- @param height The available height.
--- @return The total space needed by the layout.
 function align:draw(wibox, cr, width, height)
     local size_first = 0
-    local size_third = 0
-    local size_limit = self.dir == "y" and height or width
+    local size_remains = self.dir == "y" and height or width
 
+    if self._expand ~= "inside" and self.second then
+        local w, h = base.fit_widget(self.second, width, height)
+        local size_second = self.dir == "y" and h or w
+        if size_second >= size_remains then
+            base.draw_widget(wibox, cr, self.second, 0, 0, width, height)
+            return
+        else
+            size_remains = floor((size_remains - size_second) / 2)
+        end
+    end
     if self.first then
         local w, h, _ = width, height, nil
-        if self.dir == "y" then
-            _, h = base.fit_widget(self.first, w, h)
-            size_first = h
+        if self._expand ~= "outside" or not self.second then
+            if self.dir == "y" then
+                _, h = base.fit_widget(self.first, width, size_remains)
+                size_first = h
+                if self._expand == "inside" or not self.second then
+                    size_remains = size_remains - h
+                end
+            else
+                w, _ = base.fit_widget(self.first, size_remains, height)
+                size_first = w
+                if self._expand == "inside" or not self.second then
+                    size_remains = size_remains - w
+                end
+            end
         else
-            w, _ = base.fit_widget(self.first, w, h)
-            size_first = w
+            if self.dir == "y" then
+                h = size_remains
+            else
+                w = size_remains
+            end
         end
         base.draw_widget(wibox, cr, self.first, 0, 0, w, h)
     end
 
-    if self.third and size_first < size_limit then
-        local w, h, x, y, _
-        if self.dir == "y" then
-            w, h = width, height - size_first
-            _, h = base.fit_widget(self.third, w, h)
-            x, y = 0, height - h
-            size_third = h
+    if self.third and size_remains > 0 then
+        local w, h, _ = width, height, nil
+        if self._expand ~= "outside" then
+            if self.dir == "y" then
+                _, h = base.fit_widget(self.third, width, size_remains)
+                if self._expand == "inside" then
+                    size_remains = size_remains - h
+                end
+            else
+                w, _ = base.fit_widget(self.third, size_remains, height)
+                if self._expand == "inside" then
+                    size_remains = size_remains - w
+                end
+            end
         else
-            w, h = width - size_first, height
-            w, _ = base.fit_widget(self.third, w, h)
-            x, y = width - w, 0
-            size_third = w
+            if self.dir == "y" then
+                h = size_remains
+            else
+                w = size_remains
+            end
         end
+        local x, y = width - w, height - h
         base.draw_widget(wibox, cr, self.third, x, y, w, h)
     end
 
-    if self.second and size_first + size_third < size_limit then
-        local x, y, w, h
-        if self.dir == "y" then
-            w, h = width, size_limit - size_first - size_third
-            x, y = 0, size_first
+    if self.second and size_remains > 0 then
+        local x, y, w, h = 0, 0, width, height
+        if self._expand == "inside" then
+            if self.dir == "y" then
+                h = size_remains
+                x, y = 0, size_first
+            else
+                w = size_remains
+                x, y = size_first, 0
+            end
         else
-            w, h = size_limit - size_first - size_third, height
-            x, y = size_first, 0
+            if self.dir == "y" then
+                _, h = base.fit_widget(self.second, width, size_remains)
+                y = floor( (height - h)/2 )
+            else
+                w, _ = base.fit_widget(self.second, width, size_remains)
+                x = floor( (width -w)/2 )
+            end
         end
         base.draw_widget(wibox, cr, self.second, x, y, w, h)
     end
@@ -120,6 +162,26 @@ function align:fit(orig_width, orig_height)
     end
     return used_in_dir, used_in_other
 end
+--- Set the expand mode which determines how sub widgets expand to take up
+-- unused space. Options are:
+--  "inside" - Default option. Size of outside widgets is determined using their
+--              fit function. Second, middle, or center widget expands to fill
+--              remaining space.
+-- "outside" - Center widget is sized using its fit function and placed in the
+--              center of the allowed space. Outside widgets expand (or contract)
+--              to fill remaining space on their side.
+--    "none" - All widgets are sized using their fit function, drawn to only the
+--              returned space, or remaining space, whichever is smaller. Center
+--              widget gets priority.
+-- @param mode How to use unused space. "inside" (default) "outside" or "none"
+function align:set_expand(mode)
+    if mode == "none" or mode == "outside" then
+        self._expand = mode
+    else
+        self._expand = "inside"
+    end
+    self:emit_signal("widget::updated")
+end
 
 function align:reset()
     for k, v in pairs({ "first", "second", "third" }) do
@@ -140,6 +202,8 @@ local function get_layout(dir)
             ret[k] = v
         end
     end
+
+    ret:set_expand("inside")
 
     return ret
 end
