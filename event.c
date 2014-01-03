@@ -21,6 +21,7 @@
 
 #include <xcb/xcb.h>
 #include <xcb/randr.h>
+#include <xcb/shape.h>
 #include <xcb/xcb_atom.h>
 #include <xcb/xcb_icccm.h>
 #include <xcb/xcb_event.h>
@@ -686,6 +687,24 @@ event_handle_randr_screen_change_notify(xcb_randr_screen_change_notify_event_t *
     awesome_restart();
 }
 
+/** The shape notify event handler.
+ * \param ev The event.
+ */
+static void
+event_handle_shape_notify(xcb_shape_notify_event_t *ev)
+{
+    client_t *c = client_getbywin(ev->affected_window);
+    if (c)
+    {
+        luaA_object_push(globalconf.L, c);
+        if (ev->shape_kind == XCB_SHAPE_SK_BOUNDING)
+            luaA_object_emit_signal(globalconf.L, -1, "property::shape_client_bounding", 0);
+        if (ev->shape_kind == XCB_SHAPE_SK_CLIP)
+            luaA_object_emit_signal(globalconf.L, -1, "property::shape_client_clip", 0);
+        lua_pop(globalconf.L, 1);
+    }
+}
+
 /** The client message event handler.
  * \param ev The event.
  */
@@ -829,6 +848,7 @@ void event_handle(xcb_generic_event_t *event)
     }
 
     static uint8_t randr_screen_change_notify = 0;
+    static uint8_t shape_notify = 0;
 
     if(randr_screen_change_notify == 0)
     {
@@ -838,9 +858,19 @@ void event_handle(xcb_generic_event_t *event)
         if(randr_query->present)
             randr_screen_change_notify = randr_query->first_event + XCB_RANDR_SCREEN_CHANGE_NOTIFY;
     }
+    if(shape_notify == 0)
+    {
+        /* check for shape extension */
+        const xcb_query_extension_reply_t *shape_query;
+        shape_query = xcb_get_extension_data(globalconf.connection, &xcb_shape_id);
+        if(shape_query->present)
+            shape_notify = shape_query->first_event + XCB_SHAPE_NOTIFY;
+    }
 
     if (response_type == randr_screen_change_notify)
         event_handle_randr_screen_change_notify((void *) event);
+    if (response_type == shape_notify)
+        event_handle_shape_notify((void *) event);
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

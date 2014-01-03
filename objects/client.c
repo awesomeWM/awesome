@@ -440,6 +440,8 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, bool startup)
 
     /* Make sure the window is automatically mapped if awesome exits or dies. */
     xcb_change_save_set(globalconf.connection, XCB_SET_MODE_INSERT, w);
+    if (globalconf.have_shape)
+        xcb_shape_select_input(globalconf.connection, w, 1);
 
     client_t *c = client_new(globalconf.L);
     xcb_screen_t *s = globalconf.screen;
@@ -1198,6 +1200,8 @@ client_unmanage(client_t *c, bool window_valid)
         /* Remove this window from the save set since this shouldn't be made visible
          * after a restart anymore. */
         xcb_change_save_set(globalconf.connection, XCB_SET_MODE_DELETE, c->window);
+        if (globalconf.have_shape)
+            xcb_shape_select_input(globalconf.connection, c->window, 0);
 
         /* Do this last to avoid races with clients. According to ICCCM, clients
          * arent allowed to re-use the window until after this. */
@@ -1972,7 +1976,39 @@ luaA_client_get_size_hints(lua_State *L, client_t *c)
     return 1;
 }
 
-/** Set the client's bounding shape.
+/** Get the client's child window bounding shape.
+ * \param L The Lua VM state.
+ * \param client The client object.
+ * \return The number of elements pushed on stack.
+ */
+static int
+luaA_client_get_client_shape_bounding(lua_State *L, client_t *c)
+{
+    cairo_surface_t *surf = xwindow_get_shape(c->window, XCB_SHAPE_SK_BOUNDING);
+    if (!surf)
+        return 0;
+    /* lua has to make sure to free the ref or we have a leak */
+    lua_pushlightuserdata(L, surf);
+    return 1;
+}
+
+/** Get the client's frame window bounding shape.
+ * \param L The Lua VM state.
+ * \param client The client object.
+ * \return The number of elements pushed on stack.
+ */
+static int
+luaA_client_get_shape_bounding(lua_State *L, client_t *c)
+{
+    cairo_surface_t *surf = xwindow_get_shape(c->frame_window, XCB_SHAPE_SK_BOUNDING);
+    if (!surf)
+        return 0;
+    /* lua has to make sure to free the ref or we have a leak */
+    lua_pushlightuserdata(L, surf);
+    return 1;
+}
+
+/** Set the client's frame window bounding shape.
  * \param L The Lua VM state.
  * \param client The client object.
  * \return The number of elements pushed on stack.
@@ -1987,10 +2023,43 @@ luaA_client_set_shape_bounding(lua_State *L, client_t *c)
             c->geometry.width + (c->border_width * 2),
             c->geometry.height + (c->border_width * 2),
             XCB_SHAPE_SK_BOUNDING, surf, -c->border_width);
+    luaA_object_emit_signal(L, -3, "property::shape_bounding", 0);
     return 0;
 }
 
-/** Set the client's clip shape.
+/** Get the client's child window clip shape.
+ * \param L The Lua VM state.
+ * \param client The client object.
+ * \return The number of elements pushed on stack.
+ */
+static int
+luaA_client_get_client_shape_clip(lua_State *L, client_t *c)
+{
+    cairo_surface_t *surf = xwindow_get_shape(c->window, XCB_SHAPE_SK_CLIP);
+    if (!surf)
+        return 0;
+    /* lua has to make sure to free the ref or we have a leak */
+    lua_pushlightuserdata(L, surf);
+    return 1;
+}
+
+/** Get the client's frame window clip shape.
+ * \param L The Lua VM state.
+ * \param client The client object.
+ * \return The number of elements pushed on stack.
+ */
+static int
+luaA_client_get_shape_clip(lua_State *L, client_t *c)
+{
+    cairo_surface_t *surf = xwindow_get_shape(c->frame_window, XCB_SHAPE_SK_CLIP);
+    if (!surf)
+        return 0;
+    /* lua has to make sure to free the ref or we have a leak */
+    lua_pushlightuserdata(L, surf);
+    return 1;
+}
+
+/** Set the client's frame window clip shape.
  * \param L The Lua VM state.
  * \param client The client object.
  * \return The number of elements pushed on stack.
@@ -2003,6 +2072,7 @@ luaA_client_set_shape_clip(lua_State *L, client_t *c)
         surf = (cairo_surface_t *)lua_touserdata(L, -1);
     xwindow_set_shape(c->frame_window, c->geometry.width, c->geometry.height,
             XCB_SHAPE_SK_CLIP, surf, 0);
+    luaA_object_emit_signal(L, -3, "property::shape_clip", 0);
     return 0;
 }
 
@@ -2226,12 +2296,20 @@ client_class_setup(lua_State *L)
                             NULL);
     luaA_class_add_property(&client_class, "shape_bounding",
                             (lua_class_propfunc_t) luaA_client_set_shape_bounding,
-                            NULL,
+                            (lua_class_propfunc_t) luaA_client_get_shape_bounding,
                             (lua_class_propfunc_t) luaA_client_set_shape_bounding);
     luaA_class_add_property(&client_class, "shape_clip",
                             (lua_class_propfunc_t) luaA_client_set_shape_clip,
-                            NULL,
+                            (lua_class_propfunc_t) luaA_client_get_shape_clip,
                             (lua_class_propfunc_t) luaA_client_set_shape_clip);
+    luaA_class_add_property(&client_class, "client_shape_bounding",
+                            NULL,
+                            (lua_class_propfunc_t) luaA_client_get_client_shape_bounding,
+                            NULL);
+    luaA_class_add_property(&client_class, "client_shape_clip",
+                            NULL,
+                            (lua_class_propfunc_t) luaA_client_get_client_shape_clip,
+                            NULL);
 
     signal_add(&client_class.signals, "focus");
     signal_add(&client_class.signals, "list");
@@ -2263,6 +2341,10 @@ client_class_setup(lua_State *L)
     signal_add(&client_class.signals, "property::pid");
     signal_add(&client_class.signals, "property::role");
     signal_add(&client_class.signals, "property::screen");
+    signal_add(&client_class.signals, "property::shape_bounding");
+    signal_add(&client_class.signals, "property::shape_client_bounding");
+    signal_add(&client_class.signals, "property::shape_client_clip");
+    signal_add(&client_class.signals, "property::shape_clip");
     signal_add(&client_class.signals, "property::size_hints_honor");
     signal_add(&client_class.signals, "property::skip_taskbar");
     signal_add(&client_class.signals, "property::sticky");

@@ -83,6 +83,8 @@ typedef struct
     uint16_t numlockmask, shiftlockmask, capslockmask, modeswitchmask;
     /** Check for XTest extension */
     bool have_xtest;
+    /** Check for SHAPE extension */
+    bool have_shape;
     /** Clients list */
     client_array_t clients;
     /** Embedded windows */

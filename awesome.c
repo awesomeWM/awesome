@@ -460,9 +460,13 @@ main(int argc, char **argv)
     xcb_prefetch_maximum_request_length(globalconf.connection);
 
     /* check for xtest extension */
-    const xcb_query_extension_reply_t *xtest_query;
-    xtest_query = xcb_get_extension_data(globalconf.connection, &xcb_test_id);
-    globalconf.have_xtest = xtest_query->present;
+    const xcb_query_extension_reply_t *query;
+    query = xcb_get_extension_data(globalconf.connection, &xcb_test_id);
+    globalconf.have_xtest = query->present;
+
+    /* check for shape extension */
+    query = xcb_get_extension_data(globalconf.connection, &xcb_shape_id);
+    globalconf.have_shape = query->present;
 
     /* Allocate the key symbols */
     globalconf.keysyms = xcb_key_symbols_alloc(globalconf.connection);

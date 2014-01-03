@@ -536,6 +536,22 @@ luaA_drawin_get_drawable(lua_State *L, drawin_t *drawin)
     return 1;
 }
 
+/** Get the drawin's bounding shape.
+ * \param L The Lua VM state.
+ * \param drawin The drawin object.
+ * \return The number of elements pushed on stack.
+ */
+static int
+luaA_drawin_get_shape_bounding(lua_State *L, drawin_t *drawin)
+{
+    cairo_surface_t *surf = xwindow_get_shape(drawin->window, XCB_SHAPE_SK_BOUNDING);
+    if (!surf)
+        return 0;
+    /* lua has to make sure to free the ref or we have a leak */
+    lua_pushlightuserdata(L, surf);
+    return 1;
+}
+
 /** Set the drawin's bounding shape.
  * \param L The Lua VM state.
  * \param drawin The drawin object.
@@ -547,9 +563,28 @@ luaA_drawin_set_shape_bounding(lua_State *L, drawin_t *drawin)
     cairo_surface_t *surf = NULL;
     if(!lua_isnil(L, -1))
         surf = (cairo_surface_t *)lua_touserdata(L, -1);
-    xwindow_set_shape(drawin->window, drawin->geometry.width, drawin->geometry.height,
+    xwindow_set_shape(drawin->window,
+            drawin->geometry.width + 2*drawin->border_width,
+            drawin->geometry.height + 2*drawin->border_width,
             XCB_SHAPE_SK_BOUNDING, surf, -drawin->border_width);
+    luaA_object_emit_signal(L, -3, "property::shape_bounding", 0);
     return 0;
+}
+
+/** Get the drawin's clip shape.
+ * \param L The Lua VM state.
+ * \param drawin The drawin object.
+ * \return The number of elements pushed on stack.
+ */
+static int
+luaA_drawin_get_shape_clip(lua_State *L, drawin_t *drawin)
+{
+    cairo_surface_t *surf = xwindow_get_shape(drawin->window, XCB_SHAPE_SK_CLIP);
+    if (!surf)
+        return 0;
+    /* lua has to make sure to free the ref or we have a leak */
+    lua_pushlightuserdata(L, surf);
+    return 1;
 }
 
 /** Set the drawin's clip shape.
@@ -565,6 +600,7 @@ luaA_drawin_set_shape_clip(lua_State *L, drawin_t *drawin)
         surf = (cairo_surface_t *)lua_touserdata(L, -1);
     xwindow_set_shape(drawin->window, drawin->geometry.width, drawin->geometry.height,
             XCB_SHAPE_SK_CLIP, surf, 0);
+    luaA_object_emit_signal(L, -3, "property::shape_clip", 0);
     return 0;
 }
 
@@ -630,13 +666,15 @@ drawin_class_setup(lua_State *L)
                             (lua_class_propfunc_t) luaA_window_set_type);
     luaA_class_add_property(&drawin_class, "shape_bounding",
                             (lua_class_propfunc_t) luaA_drawin_set_shape_bounding,
-                            NULL,
+                            (lua_class_propfunc_t) luaA_drawin_get_shape_bounding,
                             (lua_class_propfunc_t) luaA_drawin_set_shape_bounding);
     luaA_class_add_property(&drawin_class, "shape_clip",
                             (lua_class_propfunc_t) luaA_drawin_set_shape_clip,
-                            NULL,
+                            (lua_class_propfunc_t) luaA_drawin_get_shape_clip,
                             (lua_class_propfunc_t) luaA_drawin_set_shape_clip);
 
+    signal_add(&client_class.signals, "property::shape_bounding");
+    signal_add(&client_class.signals, "property::shape_clip");
     signal_add(&drawin_class.signals, "property::border_width");
     signal_add(&drawin_class.signals, "property::cursor");
     signal_add(&drawin_class.signals, "property::height");
