@@ -57,14 +57,10 @@ function align:draw(wibox, cr, width, height)
         local x, y, w, h
         if self.dir == "y" then
             w, h = width, size_limit - size_first - size_third
-            local real_w, real_h = base.fit_widget(self.second, w, h)
-            x, y = 0, size_first + h / 2 - real_h / 2
-            h = real_h
+            x, y = 0, size_first
         else
             w, h = size_limit - size_first - size_third, height
-            local real_w, real_h = base.fit_widget(self.second, w, h)
-            x, y = size_first + w / 2 - real_w / 2, 0
-            w = real_w
+            x, y = size_first, 0
         end
         base.draw_widget(wibox, cr, self.second, x, y, w, h)
     end
@@ -100,27 +96,29 @@ function align:set_third(widget)
 end
 
 --- Fit the align layout into the given space. The align layout will
--- take all available space in its direction and the maximum size of
--- it's all three inner widgets in the other axis.
+-- ask for the sum of the sizes of its sub-widgets in its direction
+-- and the largest sized sub widget in the other direction.
 -- @param orig_width The available width.
 -- @param orig_height The available height.
 function align:fit(orig_width, orig_height)
-    local used_max = 0
+    local used_in_dir = 0
+    local used_in_other = 0
 
     for k, v in pairs{self.first, self.second, self.third} do
         local w, h = base.fit_widget(v, orig_width, orig_height)
 
         local max = self.dir == "y" and w or h
-
-        if max > used_max then
-            used_max = max
+        if max > used_in_other then
+            used_in_other = max
         end
+
+        used_in_dir = used_in_dir + (self.dir == "y" and h or w)
     end
 
     if self.dir == "y" then
-        return used_max, orig_height
+        return used_in_other, used_in_dir
     end
-    return orig_width, used_max
+    return used_in_dir, used_in_other
 end
 
 function align:reset()
