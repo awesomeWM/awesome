@@ -21,25 +21,49 @@ local align = {}
 -- @param width The available width.
 -- @param height The available height.
 function align:draw(wibox, cr, width, height)
+    -- Draw will have to deal with all three align modes and should work in a
+    -- way that makes sense if one or two of the widgets are missing (if they
+    -- are all missing, it won't draw anything.) It should also handle the case
+    -- where the fit something that isn't set to expand (for instance the
+    -- outside widgets when the expand mode is "inside" or any of the widgets
+    -- when the expand mode is "none" wants to take up more space than is
+    -- allowed.
     local size_first = 0
+    -- start with all the space given by the parent, subtract as we go along
     local size_remains = self.dir == "y" and height or width
 
+    -- we will prioritize the middle widget unless the expand mode is "inside"
+    --  if it is, we prioritize the first widget by not doing this block also,
+    --  if the second widget doesn't exist, we will prioritise the first one
+    --  instead
     if self._expand ~= "inside" and self.second then
         local w, h = base.fit_widget(self.second, width, height)
         local size_second = self.dir == "y" and h or w
+        -- if all the space is taken, skip the rest, and draw just the middle
+        -- widget
         if size_second >= size_remains then
             base.draw_widget(wibox, cr, self.second, 0, 0, width, height)
             return
         else
+            -- the middle widget is sized first, the outside widgets are given
+            --  the remaining space if available we will draw later
             size_remains = floor((size_remains - size_second) / 2)
         end
     end
     if self.first then
         local w, h, _ = width, height, nil
-        if self._expand ~= "outside" or not self.second then
+        -- we use the fit function for the "inside" and "none" modes, but
+        --  ignore it for the "outside" mode, which will force it to expand
+        --  into the remaining space
+        if self._expand ~= "outside" then
             if self.dir == "y" then
                 _, h = base.fit_widget(self.first, width, size_remains)
                 size_first = h
+                -- for "inside", the third widget will get a chance to use the
+                --  remaining space, then the middle widget. For "none" we give
+                --  the third widget the remaining space if there was no second
+                --  widget to take up any space (as the first if block is skipped
+                --  if this is the case)
                 if self._expand == "inside" or not self.second then
                     size_remains = size_remains - h
                 end
@@ -59,12 +83,13 @@ function align:draw(wibox, cr, width, height)
         end
         base.draw_widget(wibox, cr, self.first, 0, 0, w, h)
     end
-
+    -- size_remains will be <= 0 if first used all the space
     if self.third and size_remains > 0 then
         local w, h, _ = width, height, nil
         if self._expand ~= "outside" then
             if self.dir == "y" then
                 _, h = base.fit_widget(self.third, width, size_remains)
+                -- give the middle widget the rest of the space for "inside" mode
                 if self._expand == "inside" then
                     size_remains = size_remains - h
                 end
@@ -84,7 +109,8 @@ function align:draw(wibox, cr, width, height)
         local x, y = width - w, height - h
         base.draw_widget(wibox, cr, self.third, x, y, w, h)
     end
-
+    -- here we either draw the second widget in the space set aside for it
+    -- in the beginning, or in the remaining space, if it is "inside"
     if self.second and size_remains > 0 then
         local x, y, w, h = 0, 0, width, height
         if self._expand == "inside" then
