@@ -77,35 +77,33 @@ end
 -- @param orig_width The available width.
 -- @param orig_height The available height.
 function flex:fit(orig_width, orig_height)
-    local used_max = 0
-    local used_in_dir = self.dir == "y" and orig_height or orig_width
+    local used_in_dir = 0
+    local used_in_other = 0
+
+    -- Figure out the maximum size we can give out to sub-widgets
+    local sub_height = self.dir == "x" and orig_height or floor(orig_height / #self.widgets)
+    local sub_width  = self.dir == "y" and orig_width  or floor(orig_width / #self.widgets)
+
+    for k, v in pairs(self.widgets) do
+        local w, h = base.fit_widget(v, sub_width, sub_height)
+
+        local max = self.dir == "y" and w or h
+        if max > used_in_other then
+            used_in_other = max
+        end
+
+        used_in_dir = used_in_dir + (self.dir == "y" and h or w)
+    end
 
     if self._max_widget_size then
         used_in_dir = math.min(used_in_dir,
             #self.widgets * self._max_widget_size)
     end
 
-    -- Figure out the maximum size we can give out to sub-widgets
-    local sub_height = self.dir == "x" and orig_height or floor(used_in_dir / #self.widgets)
-    local sub_width  = self.dir == "y" and orig_width  or floor(used_in_dir / #self.widgets)
-
-    for k, v in pairs(self.widgets) do
-        local w, h = base.fit_widget(v, sub_width, sub_height)
-        local max
-        if self.dir == "y" then
-            max = w
-        else
-            max = h
-        end
-        if max > used_max then
-            used_max = max
-        end
-    end
-
     if self.dir == "y" then
-        return used_max, used_in_dir
+        return used_in_other, used_in_dir
     end
-    return used_in_dir, used_max
+    return used_in_dir, used_in_other
 end
 
 function flex:reset()
