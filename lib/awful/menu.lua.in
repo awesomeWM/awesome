@@ -455,10 +455,12 @@ end
 --------------------------------------------------------------------------------
 
 --- Build a popup menu with running clients and shows it.
--- @param _menu Menu table, see new() function for more informations
+-- @param args Menu table, see new() function for more informations
+-- @param item_args Table that will be merged into each item, see new() for more
+--        informations.
 -- @return The menu.
-function menu:clients(args) -- FIXME crude api
-    local _menu = self or {}
+function menu.clients(args, item_args)
+    local args = args or args1
     local cls = capi.client.get()
     local cls_t = {}
     for k, c in pairs(cls) do
@@ -472,6 +474,13 @@ function menu:clients(args) -- FIXME crude api
                 c:raise()
             end,
             c.icon }
+        if item_args then
+            if type(item_args) == "function" then
+                table_merge(cls_t[#cls_t], item_args(c))
+            else
+                table_merge(cls_t[#cls_t], item_args)
+            end
+        end
     end
     args = args or {}
     args.items = args.items or {}
