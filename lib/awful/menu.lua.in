@@ -460,7 +460,6 @@ end
 --        informations.
 -- @return The menu.
 function menu.clients(args, item_args)
-    local args = args or args1
     local cls = capi.client.get()
     local cls_t = {}
     for k, c in pairs(cls) do
