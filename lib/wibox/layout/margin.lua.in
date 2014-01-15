@@ -9,6 +9,8 @@ local type = type
 local setmetatable = setmetatable
 local base = require("wibox.layout.base")
 local widget_base = require("wibox.widget.base")
+local gcolor = require("gears.color")
+local cairo = require("lgi").cairo
 
 -- wibox.layout.margin
 local margin = { mt = {} }
@@ -19,9 +21,20 @@ function margin:draw(wibox, cr, width, height)
     local y = self.top
     local w = self.right
     local h = self.bottom
+    local color = self.color
 
     if not self.widget or width <= x + w or height <= y + h then
         return
+    end
+
+    if color then
+        cr:save()
+        cr:set_source(color)
+        cr:rectangle(0, 0, width, height)
+        cr:rectangle(x, y, width - x - w, height - y - h)
+        cr:set_fill_rule(cairo.FillRule.EVEN_ODD)
+        cr:fill()
+        cr:restore()
     end
 
     base.draw_widget(wibox, cr, self.widget, x, y, width - x - w, height - y - h)
@@ -60,10 +73,18 @@ function margin:set_margins(val)
     self:emit_signal("widget::updated")
 end
 
---- Reset this layout. The widget will be unreferenced and the margins set to 0.
+--- Set the margins color to color
+function margin:set_color(color)
+    self.color = color and gcolor(color)
+    self._emit_updated()
+end
+
+--- Reset this layout. The widget will be unreferenced, the margins set to 0
+-- and the color erased
 function margin:reset()
     self:set_widget(nil)
     self:set_margins(0)
+    self:set_color(nil)
 end
 
 --- Set the left margin that this layout adds to its widget.
@@ -104,7 +125,8 @@ end
 -- @param right A margin to use on the right side of the widget (optional)
 -- @param top A margin to use on the top side of the widget (optional)
 -- @param bottom A margin to use on the bottom side of the widget (optional)
-local function new(widget, left, right, top, bottom)
+-- @param color A color for the margins (optional)
+local function new(widget, left, right, top, bottom, color)
     local ret = widget_base.make_widget()
 
     for k, v in pairs(margin) do
@@ -121,6 +143,8 @@ local function new(widget, left, right, top, bottom)
     ret:set_right(right or 0)
     ret:set_top(top or 0)
     ret:set_bottom(bottom or 0)
+
+    ret:set_color(color)
 
     if widget then
         ret:set_widget(widget)
