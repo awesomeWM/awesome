@@ -280,7 +280,7 @@ function prompt.run(args, textbox, exe_callback, completion_callback, history_pa
             elseif key == "r" then
                 search_term = search_term or command:sub(1, cur_pos - 1)
                 for i,v in (function(a,i) return itera(-1,a,i) end), data.history[history_path].table, history_index do
-                    if v:find(search_term) ~= nil then
+                    if v:find(search_term,1,true) ~= nil then
                         command=v
                         history_index=i
                         cur_pos=#command+1
@@ -290,7 +290,7 @@ function prompt.run(args, textbox, exe_callback, completion_callback, history_pa
             elseif key == "s" then
                 search_term = search_term or command:sub(1, cur_pos - 1)
                 for i,v in (function(a,i) return itera(1,a,i) end), data.history[history_path].table, history_index do
-                    if v:find(search_term) ~= nil then
+                    if v:find(search_term,1,true) ~= nil then
                         command=v
                         history_index=i
                         cur_pos=#command+1
@@ -314,7 +314,7 @@ function prompt.run(args, textbox, exe_callback, completion_callback, history_pa
             elseif key == "Up" then
                 search_term = command:sub(1, cur_pos - 1) or ""
                 for i,v in (function(a,i) return itera(-1,a,i) end), data.history[history_path].table, history_index do
-                    if v:find('^'..search_term) ~= nil then
+                    if v:find(search_term,1,true) == 1 then
                         command=v
                         history_index=i
                         break
@@ -323,7 +323,7 @@ function prompt.run(args, textbox, exe_callback, completion_callback, history_pa
             elseif key == "Down" then
                 search_term = command:sub(1, cur_pos - 1) or ""
                 for i,v in (function(a,i) return itera(1,a,i) end), data.history[history_path].table, history_index do
-                    if v:find('^'..search_term) ~= nil then
+                    if v:find(search_term,1,true) == 1 then
                         command=v
                         history_index=i
                         break
