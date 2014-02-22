@@ -312,7 +312,7 @@ function prompt.run(args, textbox, exe_callback, completion_callback, history_pa
                 command = command:sub(cur_pos, #command)
                 cur_pos = 1
             elseif key == "Up" then
-                search_term = search_term or command:sub(1, cur_pos - 1)
+                search_term = command:sub(1, cur_pos - 1) or ""
                 for i,v in (function(a,i) return itera(-1,a,i) end), data.history[history_path].table, history_index do
                     if v:find('^'..search_term) ~= nil then
                         command=v
@@ -321,7 +321,7 @@ function prompt.run(args, textbox, exe_callback, completion_callback, history_pa
                     end
                 end
             elseif key == "Down" then
-                search_term = search_term or command:sub(1, cur_pos - 1)
+                search_term = command:sub(1, cur_pos - 1) or ""
                 for i,v in (function(a,i) return itera(1,a,i) end), data.history[history_path].table, history_index do
                     if v:find('^'..search_term) ~= nil then
                         command=v
