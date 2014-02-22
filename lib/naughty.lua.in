@@ -61,7 +61,6 @@ naughty.config.notify_callback = nil
 -- @field low The preset for notifications with low urgency level
 -- @field normal The default preset for every notification without a preset that will also be used for normal urgency level
 -- @field critical The preset for notifications with a critical urgency level
--- @class table
 naughty.config.presets = {
     normal = {},
     low = {
