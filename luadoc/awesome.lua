@@ -11,6 +11,7 @@ module("awesome")
 -- @field version The version of awesome.
 -- @field release The release name of awesome.
 -- @field conffile The configuration file which has been loaded.
+-- @field composite_manager_running True if a composite manager is running.
 -- @class table
 -- @name awesome
 

@@ -27,6 +27,8 @@
 
 #include <basedir_fs.h>
 
+#include <xcb/xcb_atom.h>
+
 #include "awesome.h"
 #include "config.h"
 #include "objects/timer.h"
@@ -59,6 +61,43 @@ extern const struct luaL_Reg awesome_screen_meta[];
 
 /** Path to config file */
 static char *conffile;
+
+/** Check whether a composite manager is running.
+ * \return True if such a manager is running.
+ */
+static bool
+composite_manager_running(void)
+{
+    xcb_intern_atom_reply_t *atom_r;
+    xcb_get_selection_owner_reply_t *selection_r;
+    char *atom_name;
+    bool result;
+
+    if(!(atom_name = xcb_atom_name_by_screen("_NET_WM_CM", globalconf.default_screen)))
+    {
+        warn("error getting composite manager atom");
+        return false;
+    }
+
+    atom_r = xcb_intern_atom_reply(globalconf.connection,
+                                   xcb_intern_atom_unchecked(globalconf.connection, false,
+                                                             a_strlen(atom_name), atom_name),
+                                   NULL);
+    p_delete(&atom_name);
+    if(!atom_r)
+        return false;
+
+    selection_r = xcb_get_selection_owner_reply(globalconf.connection,
+                                                xcb_get_selection_owner_unchecked(globalconf.connection,
+                                                                                  atom_r->atom),
+                                                NULL);
+    p_delete(&atom_r);
+
+    result = selection_r != NULL && selection_r->owner != XCB_NONE;
+    p_delete(&selection_r);
+
+    return result;
+}
 
 /** Quit awesome.
  * \param L The Lua VM state.
@@ -420,6 +459,12 @@ luaA_awesome_index(lua_State *L)
     if(A_STREQ(buf, "startup_errors") && globalconf.startup_errors.len != 0)
     {
         lua_pushstring(L, globalconf.startup_errors.s);
+        return 1;
+    }
+
+    if(A_STREQ(buf, "composite_manager_running"))
+    {
+        lua_pushboolean(L, composite_manager_running());
         return 1;
     }
 
