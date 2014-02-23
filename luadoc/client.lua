@@ -45,6 +45,7 @@ module("client")
 -- @field shape_clip The client's clip shape as set by awesome as a (native) cairo surface.
 -- @field shape_client_bounding The client's bounding shape as set by the program as a (native) cairo surface.
 -- @field shape_client_clip The client's clip shape as set by the program as a (native) cairo surface.
+-- @field blob A string containing data that will still be available after awesome restarts.
 -- @class table
 -- @name client
 

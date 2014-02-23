@@ -124,6 +124,11 @@ struct client_t
         /** The drawable for this bar. */
         drawable_t *drawable;
     } titlebar[CLIENT_TITLEBAR_COUNT];
+    /** The blob! */
+    struct {
+        char *data;
+        size_t length;
+    } blob;
 };
 
 ARRAY_FUNCS(client_t *, client, DO_NOTHING)
