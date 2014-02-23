@@ -17,6 +17,7 @@ local sort = require("gears.sort")
 local surface = require("gears.surface")
 
 local drawables = setmetatable({}, { __mode = 'k' })
+local wallpaper = nil
 
 local function do_redraw(self)
     local surf = surface(self.drawable.surface)
@@ -31,7 +32,9 @@ local function do_redraw(self)
 
     if not capi.awesome.composite_manager_running then
         -- This is pseudo-transparency: We draw the wallpaper in the background
-        local wallpaper = surface(capi.root.wallpaper())
+        if not wallpaper then
+            wallpaper = surface(capi.root.wallpaper())
+        end
         if wallpaper then
             cr.operator = cairo.Operator.SOURCE
             cr:set_source_surface(wallpaper, -x, -y)
@@ -39,6 +42,7 @@ local function do_redraw(self)
         end
         cr.operator = cairo.Operator.OVER
     else
+        -- This is true transparency: We draw a translucent background
         cr.operator = cairo.Operator.SOURCE
     end
 
@@ -269,6 +273,7 @@ end
 -- Redraw all drawables when the wallpaper changes
 capi.awesome.connect_signal("wallpaper_changed", function()
     local k
+    wallpaper = nil
     for k in pairs(drawables) do
         k()
     end
