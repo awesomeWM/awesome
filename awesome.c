@@ -288,7 +288,6 @@ main(int argc, char **argv)
     xdgHandle xdg;
     bool no_argb = false;
     bool run_test = false;
-    xcb_generic_event_t *event;
     xcb_query_tree_cookie_t tree_c;
     static struct option long_options[] =
     {
@@ -426,35 +425,17 @@ main(int argc, char **argv)
     /* Grab server */
     xcb_grab_server(globalconf.connection);
 
-    /* Make sure there are no pending events. Since we didn't really do anything
-     * at all yet, we will just discard all events which we received so far.
-     * The above GrabServer should make sure no new events are generated. */
-    xcb_aux_sync(globalconf.connection);
-    while ((event = xcb_poll_for_event(globalconf.connection)) != NULL)
-    {
-        /* Make sure errors are printed */
-        uint8_t response_type = XCB_EVENT_RESPONSE_TYPE(event);
-        if(response_type == 0)
-            event_handle(event);
-        p_delete(&event);
-    }
-
     {
         const uint32_t select_input_val = XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT;
+        xcb_void_cookie_t cookie;
 
         /* This causes an error if some other window manager is running */
-        xcb_change_window_attributes(globalconf.connection,
-                                     globalconf.screen->root,
-                                     XCB_CW_EVENT_MASK, &select_input_val);
+        cookie = xcb_change_window_attributes_checked(globalconf.connection,
+                                                      globalconf.screen->root,
+                                                      XCB_CW_EVENT_MASK, &select_input_val);
+        if (xcb_request_check(globalconf.connection, cookie))
+            fatal("another window manager is already running");
     }
-
-    /* Need to xcb_flush to validate error handler */
-    xcb_aux_sync(globalconf.connection);
-
-    /* Process all errors in the queue if any. There can be no events yet, so if
-     * this function returns something, it must be an error. */
-    if (xcb_poll_for_event(globalconf.connection) != NULL)
-        fatal("another window manager is already running");
 
     /* Prefetch the maximum request length */
     xcb_prefetch_maximum_request_length(globalconf.connection);
