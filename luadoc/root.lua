@@ -33,9 +33,9 @@ module("root")
 -- @name fake_input
 -- @class function
 
---- Get the wiboxes attached to a screen.
--- @return A table with all wiboxes.
--- @name wiboxes
+--- Get the drawins attached to a screen.
+-- @return A table with all drawins.
+-- @name drawins
 -- @class function
 
 --- Get the wallpaper as a cairo surface or set it as a cairo pattern.

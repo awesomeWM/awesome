@@ -4,7 +4,6 @@
 module("mouse")
 
 --- Mouse library.
--- @field coords Mouse coordinates.
 -- @field screen Mouse screen number.
 -- @class table
 -- @name mouse

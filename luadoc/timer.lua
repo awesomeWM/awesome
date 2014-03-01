@@ -19,6 +19,10 @@ module("timer")
 -- @name stop
 -- @class function
 
+--- Restart the timer.
+-- @name again
+-- @class function
+
 --- Add a signal.
 -- @param name A signal name.
 -- @param func A function to call when the signal is emitted.

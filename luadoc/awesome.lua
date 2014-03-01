@@ -4,13 +4,10 @@
 module("awesome")
 
 --- awesome global table.
--- @field font The default font.
--- @field font_height The default font height.
--- @field fg The default foreground color.
--- @field bg The default background color.
 -- @field version The version of awesome.
 -- @field release The release name of awesome.
 -- @field conffile The configuration file which has been loaded.
+-- @field startup_errors Error message for errors that occured during startup.
 -- @field composite_manager_running True if a composite manager is running.
 -- @class table
 -- @name awesome
