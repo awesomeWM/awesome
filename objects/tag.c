@@ -23,6 +23,7 @@
 #include "client.h"
 #include "ewmh.h"
 #include "luaa.h"
+#include "screen.h"
 
 /** Tag type */
 struct tag
@@ -170,12 +171,15 @@ tag_view_only_byindex(int dindex)
     if(dindex < 0 || dindex >= globalconf.tags.len)
         return;
 
+    /* FIXME: should not reset tags from the non-current screen */
     foreach(tag, globalconf.tags)
     {
         luaA_object_push(globalconf.L, *tag);
         tag_view(globalconf.L, -1, *tag == globalconf.tags.tab[dindex]);
         lua_pop(globalconf.L, 1);
     }
+
+    screen_emit_signal(globalconf.L, screen_getcurrent(), "tag::history::update", 0);
 }
 
 /** Create a new tag.
