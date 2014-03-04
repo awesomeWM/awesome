@@ -23,6 +23,7 @@
 #include "client.h"
 #include "ewmh.h"
 #include "luaa.h"
+#include "screen.h"
 
 /** Tag type */
 struct tag
@@ -161,7 +162,22 @@ tags_get_first_selected_index(void)
     return 0;
 }
 
+/** Get the screen for a tag, by iterating over the tag's clients.
+ * \param t The tag.
+ */
+static screen_t *
+get_screen_for_tag(tag_t *t)
+{
+    for(int i = 0; i < t->clients.len; i++)
+        if(t->clients.tab[i]->screen)
+        {
+            return t->clients.tab[i]->screen;
+        }
+    return NULL;
+}
+
 /** View only a tag, selected by its index.
+ * This will try to only de-select tags on the same screen.
  * \param dindex The index.
  */
 void
@@ -170,8 +186,14 @@ tag_view_only_byindex(int dindex)
     if(dindex < 0 || dindex >= globalconf.tags.len)
         return;
 
+    tag_t *sel_tag = globalconf.tags.tab[dindex];
+    screen_t *tag_screen = get_screen_for_tag(sel_tag);
+
     foreach(tag, globalconf.tags)
     {
+        if(*tag != sel_tag && tag_screen != get_screen_for_tag(*tag))
+            continue;
+
         luaA_object_push(globalconf.L, *tag);
         tag_view(globalconf.L, -1, *tag == globalconf.tags.tab[dindex]);
         lua_pop(globalconf.L, 1);
