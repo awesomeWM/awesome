@@ -162,7 +162,24 @@ tags_get_first_selected_index(void)
     return 0;
 }
 
+/** Get the screen for a tag, by iterating over the tag's clients.
+ * \param t The tag.
+ */
+static screen_t *
+get_screen_for_tag(tag_t *t)
+{
+    /* Get screen from tag's clients. */
+    /* screen_t *screen; */
+    for(int i = 0; i < t->clients.len; i++)
+        if(t->clients.tab[i]->screen)
+        {
+            return t->clients.tab[i]->screen;
+        }
+    return 0;
+}
+
 /** View only a tag, selected by its index.
+ * This will try to only de-select tags on the same screen.
  * \param dindex The index.
  */
 void
@@ -171,15 +188,21 @@ tag_view_only_byindex(int dindex)
     if(dindex < 0 || dindex >= globalconf.tags.len)
         return;
 
-    /* FIXME: should not reset tags from the non-current screen */
+    tag_t *sel_tag = globalconf.tags.tab[dindex];
+    screen_t *tag_screen = get_screen_for_tag(sel_tag);
+
     foreach(tag, globalconf.tags)
     {
-        luaA_object_push(globalconf.L, *tag);
-        tag_view(globalconf.L, -1, *tag == globalconf.tags.tab[dindex]);
-        lua_pop(globalconf.L, 1);
+        if(*tag == sel_tag || tag_screen == get_screen_for_tag(*tag))
+        {
+            luaA_object_push(globalconf.L, *tag);
+            tag_view(globalconf.L, -1, *tag == globalconf.tags.tab[dindex]);
+            lua_pop(globalconf.L, 1);
+        }
     }
 
-    screen_emit_signal(globalconf.L, screen_getcurrent(), "tag::history::update", 0);
+    if(tag_screen)
+        screen_emit_signal(globalconf.L, tag_screen, "tag::history::update", 0);
 }
 
 /** Create a new tag.
