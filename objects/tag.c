@@ -198,6 +198,9 @@ tag_view_only_byindex(int dindex)
         tag_view(globalconf.L, -1, *tag == globalconf.tags.tab[dindex]);
         lua_pop(globalconf.L, 1);
     }
+
+    if(tag_screen)
+        screen_emit_signal(globalconf.L, tag_screen, "tag::history::update", 0);
 }
 
 /** Create a new tag.
