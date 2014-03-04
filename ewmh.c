@@ -403,6 +403,13 @@ ewmh_process_client_message(xcb_client_message_event_t *ev)
         if((c = client_getbywin(ev->window))) {
             client_focus(c);
             client_raise(c);
+
+            /* If the client is not visible by now, set the urgent flag. */
+            if(!client_isvisible(c)) {
+                luaA_object_push(globalconf.L, c);
+                client_set_urgent(globalconf.L, -1, true);
+                lua_pop(globalconf.L, 1);
+            }
         }
     }
 
