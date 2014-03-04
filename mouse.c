@@ -70,7 +70,7 @@ mouse_query_pointer(xcb_window_t window, int16_t *x, int16_t *y, xcb_window_t *c
  * \param mask This will be set to the current buttons state.
  * \return True on success, false if an error occurred.
  */
-static bool
+bool
 mouse_query_pointer_root(int16_t *x, int16_t *y, xcb_window_t *child, uint16_t *mask)
 {
     xcb_window_t root = globalconf.screen->root;

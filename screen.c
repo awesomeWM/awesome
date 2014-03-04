@@ -32,6 +32,7 @@
 #include "objects/drawin.h"
 #include "luaa.h"
 #include "common/xutil.h"
+#include "mouse.h"
 
 struct screen_output_t
 {
@@ -254,6 +255,20 @@ screen_getbycoord(int x, int y)
 
     /* No screen found, let's be creative. */
     return &globalconf.screens.tab[0];
+}
+
+/** Return the Xinerama screen number where the mouse is.
+ * \return Screen pointer or screen param if no match or no multi-head.
+ */
+screen_t *
+screen_getcurrent()
+{
+    int16_t mouse_x, mouse_y;
+
+    if (!mouse_query_pointer_root(&mouse_x, &mouse_y, NULL, NULL))
+        return 0;
+
+    return screen_getbycoord(mouse_x, mouse_y);
 }
 
 /** Get screens info.
