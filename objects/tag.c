@@ -193,12 +193,12 @@ tag_view_only_byindex(int dindex)
 
     foreach(tag, globalconf.tags)
     {
-        if(*tag == sel_tag || tag_screen == get_screen_for_tag(*tag))
-        {
-            luaA_object_push(globalconf.L, *tag);
-            tag_view(globalconf.L, -1, *tag == globalconf.tags.tab[dindex]);
-            lua_pop(globalconf.L, 1);
-        }
+        if(*tag != sel_tag && tag_screen != get_screen_for_tag(*tag))
+            continue;
+
+        luaA_object_push(globalconf.L, *tag);
+        tag_view(globalconf.L, -1, *tag == globalconf.tags.tab[dindex]);
+        lua_pop(globalconf.L, 1);
     }
 
     if(tag_screen)
