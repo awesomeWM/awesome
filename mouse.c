@@ -109,7 +109,16 @@ luaA_mouse_index(lua_State *L)
         return 0;
 
     if (!mouse_query_pointer_root(&mouse_x, &mouse_y, NULL, NULL))
-        return 0;
+    {
+        /* Nothing ever handles mouse.screen being nil. Lying is better than
+         * having lots of lua errors in this case.
+         */
+        if (globalconf.focus.client)
+            lua_pushnumber(L, screen_array_indexof(&globalconf.screens, globalconf.focus.client->screen) + 1);
+        else
+            lua_pushnumber(L, 1);
+        return 1;
+    }
 
     screen = screen_getbycoord(mouse_x, mouse_y);
     lua_pushnumber(L, screen_array_indexof(&globalconf.screens, screen) + 1);
