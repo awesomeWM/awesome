@@ -113,8 +113,8 @@ local function screen_change(window)
     end
 end
 
--- Update a client's settings when its geometry changes
-local function geometry_change(window)
+-- Update a client's settings when its border width changes
+local function border_change(window)
     -- Fix up the geometry in case this window needs to cover the whole screen.
     local bw = window.border_width or 0
     local g = screen[window.screen].workarea
@@ -147,8 +147,7 @@ client.connect_signal("request::maximized_horizontal", maximized_horizontal)
 client.connect_signal("request::maximized_vertical", maximized_vertical)
 client.connect_signal("request::fullscreen", fullscreen)
 client.connect_signal("property::screen", screen_change)
-client.connect_signal("property::border_width", geometry_change)
-client.connect_signal("property::geometry", geometry_change)
+client.connect_signal("property::border_width", border_change)
 
 return ewmh
 
