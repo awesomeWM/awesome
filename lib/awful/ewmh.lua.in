@@ -122,7 +122,7 @@ local function border_change(window)
         window:geometry { height = g.height - 2*bw, y = g.y }
     end
     if window.maximized_horizontal then
-        window:geometry { height = g.height - 2*bw, y = g.y }
+        window:geometry { width = g.width - 2*bw, x = g.x }
     end
     if window.fullscreen then
         -- This *will* cause an endless loop if some other property::border_width
