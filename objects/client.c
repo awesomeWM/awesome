@@ -2401,6 +2401,7 @@ client_class_setup(lua_State *L)
     signal_add(&client_class.signals, "property::window");
     signal_add(&client_class.signals, "property::x");
     signal_add(&client_class.signals, "property::y");
+    signal_add(&client_class.signals, "request::activate");
     signal_add(&client_class.signals, "request::fullscreen");
     signal_add(&client_class.signals, "request::maximized_horizontal");
     signal_add(&client_class.signals, "request::maximized_vertical");

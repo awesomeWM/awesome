@@ -401,8 +401,9 @@ ewmh_process_client_message(xcb_client_message_event_t *ev)
     else if(ev->type == _NET_ACTIVE_WINDOW)
     {
         if((c = client_getbywin(ev->window))) {
-            client_focus(c);
-            client_raise(c);
+            luaA_object_push(globalconf.L, c);
+            luaA_object_emit_signal(globalconf.L, -1, "request::activate", 0);
+            lua_pop(globalconf.L, 1);
         }
     }
 
