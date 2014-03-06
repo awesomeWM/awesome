@@ -796,8 +796,6 @@ client_resize_do(client_t *c, area_t geometry, bool force_notice, bool honor_hin
 
     client_restore_enterleave_events();
 
-    screen_client_moveto(c, new_screen, false);
-
     luaA_object_push(globalconf.L, c);
     luaA_object_emit_signal(globalconf.L, -1, "property::geometry", 0);
     if (old_geometry.x != geometry.x)
@@ -809,6 +807,8 @@ client_resize_do(client_t *c, area_t geometry, bool force_notice, bool honor_hin
     if (old_geometry.height != geometry.height)
         luaA_object_emit_signal(globalconf.L, -1, "property::height", 0);
     lua_pop(globalconf.L, 1);
+
+    screen_client_moveto(c, new_screen, false);
 
     /* Update all titlebars */
     for (client_titlebar_t bar = CLIENT_TITLEBAR_TOP; bar < CLIENT_TITLEBAR_COUNT; bar++) {
