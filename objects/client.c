@@ -431,10 +431,6 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, bool startup)
         return;
     }
 
-    xcb_get_property_cookie_t blob_q;
-    blob_q = xcb_get_property(globalconf.connection, false, w, AWESOME_NAQUADAH_BLOB,
-                              XCB_GET_PROPERTY_TYPE_ANY, 0, UINT_MAX);
-
     /* If this is a new client that just has been launched, then request its
      * startup id. */
     xcb_get_property_cookie_t startup_id_q = { 0 };
@@ -498,19 +494,6 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, bool startup)
                                      XCB_CW_EVENT_MASK,
                                      ROOT_WINDOW_EVENT_MASK);
         xcb_ungrab_server(globalconf.connection);
-    }
-
-    {
-        /* Request our response */
-        xcb_get_property_reply_t *reply =
-            xcb_get_property_reply(globalconf.connection, blob_q, NULL);
-
-        if (reply)
-        {
-            c->blob.length = xcb_get_property_value_length(reply);
-            c->blob.data = p_dup((char *) xcb_get_property_value(reply), c->blob.length);
-        }
-        p_delete(&reply);
     }
 
     /* Do this now so that we don't get any events for the above
@@ -1784,13 +1767,6 @@ luaA_client_get_icon_name(lua_State *L, client_t *c)
     return 1;
 }
 
-static int
-luaA_client_get_blob(lua_State *L, client_t *c)
-{
-    lua_pushlstring(L, NONULL(c->blob.data), c->blob.length);
-    return 1;
-}
-
 LUA_OBJECT_EXPORT_PROPERTY(client, client_t, class, lua_pushstring)
 LUA_OBJECT_EXPORT_PROPERTY(client, client_t, instance, lua_pushstring)
 LUA_OBJECT_EXPORT_PROPERTY(client, client_t, machine, lua_pushstring)
@@ -2100,23 +2076,6 @@ luaA_client_set_shape_clip(lua_State *L, client_t *c)
     return 0;
 }
 
-/** Set the client's blob.
- * \param L The Lua VM state.
- * \param client The client object.
- * \return The number of elements pushed on stack.
- */
-static int
-luaA_client_set_blob(lua_State *L, client_t *c)
-{
-    const char *blob = luaL_checklstring(L, -1, &c->blob.length);
-
-    p_delete(&c->blob.data);
-    c->blob.data = p_dup(blob, c->blob.length);
-    xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE, c->window,
-                        AWESOME_NAQUADAH_BLOB, AWESOME_NAQUADAH_BLOB, 8, c->blob.length, blob);
-    return 0;
-}
-
 /** Get or set keys bindings for a client.
  * \param L The Lua VM state.
  * \return The number of element pushed on stack.
@@ -2351,10 +2310,6 @@ client_class_setup(lua_State *L)
                             NULL,
                             (lua_class_propfunc_t) luaA_client_get_client_shape_clip,
                             NULL);
-    luaA_class_add_property(&client_class, "blob",
-                            (lua_class_propfunc_t) luaA_client_set_blob,
-                            (lua_class_propfunc_t) luaA_client_get_blob,
-                            (lua_class_propfunc_t) luaA_client_set_blob);
 
     signal_add(&client_class.signals, "focus");
     signal_add(&client_class.signals, "list");
