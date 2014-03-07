@@ -37,6 +37,12 @@ module("awesome")
 -- @name load_image
 -- @class function
 
+--- Register a new xproperty.
+-- @param name The name of the X11 property
+-- @param type One of "string", "number" or "boolean"
+-- @name register_xproperty
+-- @class function
+
 --- Add a global signal.
 -- @param name A string with the event name.
 -- @param func The function to call.

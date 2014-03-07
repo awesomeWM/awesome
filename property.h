@@ -46,6 +46,29 @@ PROPERTY(net_wm_icon);
 #undef PROPERTY
 
 void property_handle_propertynotify(xcb_property_notify_event_t *ev);
+int luaA_register_xproperty(lua_State *L);
+
+struct xproperty {
+    xcb_atom_t atom;
+    const char *name;
+    enum {
+        /* UTF8_STRING */
+        PROP_STRING,
+        /* CARDINAL */
+        PROP_NUMBER,
+        /* CARDINAL with values 0 and 1 (or "0 and != 0") */
+        PROP_BOOLEAN
+    } type;
+};
+
+static inline int
+xproperty_cmp(const void *a, const void *b)
+{
+    const xproperty_t *x = a, *y = b;
+    return x->atom - y->atom;
+}
+
+BARRAY_FUNCS(xproperty_t, xproperty, DO_NOTHING, xproperty_cmp)
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

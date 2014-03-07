@@ -42,6 +42,7 @@
 #include "objects/drawable.h"
 #include "screen.h"
 #include "event.h"
+#include "property.h"
 #include "selection.h"
 #include "systray.h"
 #include "common/xcursor.h"
@@ -573,6 +574,7 @@ luaA_init(xdgHandle* xdg)
         { "emit_signal", luaA_awesome_emit_signal },
         { "systray", luaA_systray },
         { "load_image", luaA_load_image },
+        { "register_xproperty", luaA_register_xproperty },
         { "__index", luaA_awesome_index },
         { NULL, NULL }
     };

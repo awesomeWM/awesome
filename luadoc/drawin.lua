@@ -40,6 +40,17 @@ module("drawin")
 -- @name geometry
 -- @class function
 
+--- Change a xproperty.
+-- @param name The name of the X11 property
+-- @param value The new value for the property
+-- @name set_xproperty
+-- @class function
+
+--- Get the value of a xproperty.
+-- @param name The name of the X11 property
+-- @name get_xproperty
+-- @class function
+
 --- Add a signal.
 -- @param name A signal name.
 -- @param func A function to call when the signal is emitted.

@@ -23,6 +23,7 @@
 #include "xwindow.h"
 #include "ewmh.h"
 #include "screen.h"
+#include "property.h"
 #include "objects/window.h"
 #include "common/atoms.h"
 #include "common/luaobject.h"
@@ -296,6 +297,101 @@ luaA_window_set_type(lua_State *L, window_t *w)
     return 0;
 }
 
+static xproperty_t *
+luaA_find_xproperty(lua_State *L, int idx)
+{
+    const char *name = luaL_checkstring(L, idx);
+    foreach(prop, globalconf.xproperties)
+        if (A_STREQ(prop->name, name))
+            return prop;
+    luaL_argerror(L, idx, "Unknown xproperty");
+    return NULL;
+}
+
+/** Set an xproperty.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ */
+static int
+luaA_window_set_xproperty(lua_State *L)
+{
+    window_t *w = luaA_checkudata(L, 1, &window_class);
+    xproperty_t *prop = luaA_find_xproperty(L, 2);
+    xcb_atom_t type;
+    uint8_t format;
+    size_t len;
+    uint32_t number;
+    const void *data;
+
+    if(lua_isnil(L, 3))
+    {
+        xcb_delete_property(globalconf.connection, w->window, prop->atom);
+    } else {
+        if(prop->type == PROP_STRING)
+        {
+            data = luaL_checklstring(L, 3, &len);
+            type = UTF8_STRING;
+            format = 8;
+        } else if(prop->type == PROP_NUMBER || prop->type == PROP_BOOLEAN)
+        {
+            if (prop->type == PROP_NUMBER)
+                number = luaL_checkinteger(L, 3);
+            else
+                number = luaA_checkboolean(L, 3);
+            data = &number;
+            len = 1;
+            type = XCB_ATOM_CARDINAL;
+            format = 32;
+        } else
+            fatal("Got an xproperty with invalid type");
+
+        xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE, w->window,
+                            prop->atom, type, format, len, data);
+    }
+    return 0;
+}
+
+/** Get an xproperty.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ */
+static int
+luaA_window_get_xproperty(lua_State *L)
+{
+    window_t *w = luaA_checkudata(L, 1, &window_class);
+    xproperty_t *prop = luaA_find_xproperty(L, 2);
+    xcb_atom_t type;
+    void *data;
+    xcb_get_property_reply_t *reply;
+
+    type = prop->type == PROP_STRING ? UTF8_STRING : XCB_ATOM_CARDINAL;
+    reply = xcb_get_property_reply(globalconf.connection,
+            xcb_get_property_unchecked(globalconf.connection, false, w->window,
+                prop->atom, type, 0, 4), NULL);
+    if(!reply)
+        return 0;
+
+    data = xcb_get_property_value(reply);
+
+    if(prop->type == PROP_STRING)
+        lua_pushlstring(L, data, reply->value_len);
+    else
+    {
+        if(reply->value_len <= 0)
+        {
+            p_delete(&reply);
+            return 0;
+        }
+        if(prop->type == PROP_NUMBER)
+            lua_pushinteger(L, *(uint32_t *) data);
+        else
+            lua_pushboolean(L, *(uint32_t *) data);
+    }
+
+    p_delete(&reply);
+    return 1;
+}
+
 /** Translate a window_type_t into the corresponding EWMH atom.
  * @param type The type to return.
  * @return The EWMH atom for this type.
@@ -360,6 +456,8 @@ window_class_setup(lua_State *L)
     {
         { "struts", luaA_window_struts },
         { "buttons", luaA_window_buttons },
+        { "set_xproperty", luaA_window_set_xproperty },
+        { "get_xproperty", luaA_window_get_xproperty },
         { NULL, NULL }
     };
 

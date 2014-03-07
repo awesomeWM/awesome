@@ -55,12 +55,14 @@ typedef struct button_t button_t;
 typedef struct widget_t widget_t;
 typedef struct client_t client_t;
 typedef struct tag tag_t;
+typedef struct xproperty xproperty_t;
 
 ARRAY_TYPE(button_t *, button)
 ARRAY_TYPE(tag_t *, tag)
 ARRAY_TYPE(screen_t, screen)
 ARRAY_TYPE(client_t *, client)
 ARRAY_TYPE(drawin_t *, drawin)
+ARRAY_TYPE(xproperty_t, xproperty)
 
 /** Main configuration structure */
 typedef struct
@@ -140,6 +142,8 @@ typedef struct
     bool need_lazy_banning;
     /** Tag list */
     tag_array_t tags;
+    /** List of registered xproperties */
+    xproperty_array_t xproperties;
 } awesome_t;
 
 extern awesome_t globalconf;
