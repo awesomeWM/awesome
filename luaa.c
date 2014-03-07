@@ -426,9 +426,11 @@ luaA_isloop(lua_State *L, int idx)
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
  * \luastack
- * \lfield font The default font.
- * \lfield font_height The default font height.
  * \lfield conffile The configuration file which has been loaded.
+ * \lfield version The version of awesome.
+ * \lfield release The release name of awesome.
+ * \lfield startup_errors Error message for errors that occured during startup.
+ * \lfield composite_manager_running True if a composite manager is running.
  */
 static int
 luaA_awesome_index(lua_State *L)
