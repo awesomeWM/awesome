@@ -46,13 +46,37 @@ signal_wipe(signal_t *sig)
     cptr_array_wipe(&sig->sigfuncs);
 }
 
-DO_BARRAY(signal_t, signal, signal_wipe, signal_cmp)
+ARRAY_TYPE_EXTRA(signal_t, signal, struct signal_array_t *inherits_from)
+BARRAY_FUNCS(signal_t, signal, signal_wipe, signal_cmp)
 
 static inline signal_t *
 signal_array_getbyid(signal_array_t *arr, unsigned long id)
 {
     signal_t sig = { .id = id };
-    return signal_array_lookup(arr, &sig);
+    signal_t *result;
+
+    result = signal_array_lookup(arr, &sig);
+    if(result)
+        return result;
+
+    /* The signal doesn't exist yet. Check if some of our inherits_from have the
+     * signal and if yes, add it.
+     */
+    signal_array_t *inherit = arr->inherits_from;
+    while(inherit != NULL)
+    {
+        if(signal_array_lookup(inherit, &sig))
+            break;
+        inherit = inherit->inherits_from;
+    }
+    if(inherit)
+    {
+        /* Add the signal to this array to pretend it always existed */
+        signal_array_insert(arr, sig);
+        result = signal_array_lookup(arr, &sig);
+        assert(result != NULL);
+    }
+    return result;
 }
 
 /** Add a signal to a signal array.

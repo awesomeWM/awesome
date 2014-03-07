@@ -34,6 +34,13 @@
         int len, size;                                                      \
     } pfx##_array_t;
 
+#define ARRAY_TYPE_EXTRA(type_t, pfx, extra)                                \
+    typedef struct pfx##_array_t {                                          \
+        type_t *tab;                                                        \
+        int len, size;                                                      \
+        extra;                                                              \
+    } pfx##_array_t;
+
 #define foreach(var, array) \
     for(int __foreach_index_##var = 0; \
         __foreach_index_##var < (array).len; \

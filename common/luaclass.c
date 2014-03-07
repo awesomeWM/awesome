@@ -249,14 +249,8 @@ luaA_class_setup(lua_State *L, lua_class_t *class,
 
     signal_add(&class->signals, "new");
 
-    /** @todo This is ugly :/ */
-    /* Copy all signals from the parent */
     if (parent)
-        foreach(sig, parent->signals)
-        {
-            signal_t s = { .id = sig->id };
-            signal_array_insert(&class->signals, s);
-        }
+        class->signals.inherits_from = &parent->signals;
 
     lua_class_array_append(&luaA_classes, class);
 }

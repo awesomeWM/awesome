@@ -175,13 +175,7 @@ int luaA_object_emit_signal_simple(lua_State *);
         lua_setmetatable(L, -2);                                               \
         luaA_setuservalue(L, -2);                                              \
         lua_pushvalue(L, -1);                                                  \
-        /** @todo This is wrong we shouldn't copy the existing signals from */ \
-        /* the class, but I'm too lazy for doing this correctly right now. */  \
-        foreach(sig, (lua_class).signals)                                      \
-        {                                                                      \
-            signal_t s = { .id = sig->id };                                    \
-            signal_array_insert(&p->signals, s);                               \
-        }                                                                      \
+        p->signals.inherits_from = &(lua_class).signals;                       \
         luaA_class_emit_signal(L, &(lua_class), "new", 1);                     \
         return p;                                                              \
     }
