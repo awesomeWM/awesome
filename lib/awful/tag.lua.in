@@ -571,6 +571,7 @@ capi.client.connect_signal("manage", function(c, startup)
 end)
 
 capi.client.connect_signal("manage", tag.withcurrent)
+capi.tag.connect_signal("request::select", tag.viewonly)
 
 capi.tag.add_signal("property::hide")
 capi.tag.add_signal("property::icon")

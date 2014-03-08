@@ -365,7 +365,15 @@ ewmh_process_client_message(xcb_client_message_event_t *ev)
     client_t *c;
 
     if(ev->type == _NET_CURRENT_DESKTOP)
-        tag_view_only_byindex(ev->data.data32[0]);
+    {
+        int idx = ev->data.data32[0];
+        if (idx >= 0 && idx < globalconf.tags.len)
+        {
+            luaA_object_push(globalconf.L, globalconf.tags.tab[idx]);
+            luaA_object_emit_signal(globalconf.L, -1, "request::select", 0);
+            lua_pop(globalconf.L, 1);
+        }
+    }
     else if(ev->type == _NET_CLOSE_WINDOW)
     {
         if((c = client_getbywin(ev->window)))

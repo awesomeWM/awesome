@@ -28,7 +28,6 @@ int tags_get_first_selected_index(void);
 void tag_client(client_t *);
 void untag_client(client_t *, tag_t *);
 bool is_client_tagged(client_t *, tag_t *);
-void tag_view_only_byindex(int);
 void tag_unref_simplified(tag_t **);
 
 ARRAY_FUNCS(tag_t *, tag, tag_unref_simplified)
