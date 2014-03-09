@@ -166,6 +166,35 @@ end
 -- @param done_callback Optional parameter: the callback function to always call without arguments, regardless of whether the prompt was cancelled.
 -- @param changed_callback Optional parameter: the callback function to call with command as argument when a command was changed.
 -- @param keypressed_callback Optional parameter: the callback function to call with mod table, key and command as arguments when a key was pressed.
+-- @usage The following readline keyboard shortcuts are implemented as expected:
+-- <ul>
+-- <li><code>CTRL+A</code></li>
+-- <li><code>CTRL+B</code></li>
+-- <li><code>CTRL+C</code></li>
+-- <li><code>CTRL+D</code></li>
+-- <li><code>CTRL+E</code></li>
+-- <li><code>CTRL+J</code></li>
+-- <li><code>CTRL+M</code></li>
+-- <li><code>CTRL+F</code></li>
+-- <li><code>CTRL+H</code></li>
+-- <li><code>CTRL+K</code></li>
+-- <li><code>CTRL+U</code></li>
+-- <li><code>CTRL+W</code></li>
+-- <li><code>CTRL+BASKPACE</code></li>
+-- <li><code>SHIFT+INSERT</code></li>
+-- <li><code>HOME</code></li>
+-- <li><code>END</code></li>
+-- <li>arrow keys</li>
+-- </ul>
+-- <br/>
+-- The following shortcuts implement additional history manipulation commands where the search term is defined as the substring of command from first character to cursor position
+-- <ul>
+-- <li><code>CTRL+R</code>: reverse history search, matches any history entry containing search term</li>
+-- <li><code>CTRL+S</code>: forward history search, matches any history entry containing search term</li>
+-- <li><code>CTRL+UP</code>: ZSH up line or search, matches any history entry starting with search term</li>
+-- <li><code>CTRL+DOWN</code>: ZSH down line or search, matches any history entry starting with search term</li>
+-- <li><code>CTRL+DELETE</code>: delete the currently visible history entry from history file. <br/>Does not delete new commands or history entries under user editing</li>
+-- </ul>
 function prompt.run(args, textbox, exe_callback, completion_callback, history_path, history_max, done_callback, changed_callback, keypressed_callback)
     local grabber
     local theme = beautiful.get()
@@ -251,6 +280,7 @@ function prompt.run(args, textbox, exe_callback, completion_callback, history_pa
             or (not mod.Control and key == "Escape") then
             keygrabber.stop(grabber)
             textbox:set_markup("")
+            history_save(history_path)
             if done_callback then done_callback() end
             return false
         elseif (mod.Control and (key == "j" or key == "m"))
@@ -346,6 +376,25 @@ function prompt.run(args, textbox, exe_callback, completion_callback, history_pa
                 end
                 command = command:sub(1, cword_start - 1) .. command:sub(cword_end + 1)
                 cur_pos = cword_start
+            elseif key == "Delete" then
+                -- delete from history only if:
+                --  we are not dealing with a new command
+                --  the user has not edited an existing entry
+                if command == data.history[history_path].table[history_index] then
+                    table.remove(data.history[history_path].table, history_index)
+                    if history_index <= history_items(history_path) then
+                        command = data.history[history_path].table[history_index]
+                        cur_pos = #command + 2
+                    elseif history_index > 1 then
+                        history_index = history_index - 1
+
+                        command = data.history[history_path].table[history_index]
+                        cur_pos = #command + 2
+                    else
+                        command = ""
+                        cur_pos = 1
+                    end
+                end
             end
         else
             if completion_callback then
