@@ -363,11 +363,13 @@ luaA_window_get_xproperty(lua_State *L)
     xcb_atom_t type;
     void *data;
     xcb_get_property_reply_t *reply;
+    uint32_t length;
 
     type = prop->type == PROP_STRING ? UTF8_STRING : XCB_ATOM_CARDINAL;
+    length = prop->type == PROP_STRING ? UINT32_MAX : 1;
     reply = xcb_get_property_reply(globalconf.connection,
             xcb_get_property_unchecked(globalconf.connection, false, w->window,
-                prop->atom, type, 0, 4), NULL);
+                prop->atom, type, 0, length), NULL);
     if(!reply)
         return 0;
 
