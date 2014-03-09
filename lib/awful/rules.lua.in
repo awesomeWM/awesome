@@ -105,7 +105,7 @@ local rules = {}
 -- @name rules
 rules.rules = {}
 
---- Check if a client match a rule.
+--- Check if a client matches a rule.
 -- @param c The client.
 -- @param rule The rule to check.
 -- @return True if it matches, false otherwise.
@@ -127,7 +127,7 @@ function rules.match(c, rule)
     return true
 end
 
---- Check if a client match a rule. Multiple clients can be matched
+--- Check if a client matches any part of a rule.
 -- @param c The client.
 -- @param rule The rule to check.
 -- @return True if at least one rule is matched, false otherwise.
@@ -147,22 +147,46 @@ function rules.match_any(c, rule)
     return false
 end
 
+--- Get list of matching rules for a client.
+-- @param c The client.
+-- @param rule The rules to check. List with "rule", "rule_any", "except" and
+-- "except_any" keys.
+-- @return The list of matched rules.
+function rules.matching_rules(c, _rules)
+    local result = {}
+    for _, entry in ipairs(_rules) do
+        if (rules.match(c, entry.rule) or rules.match_any(c, entry.rule_any)) and
+            (not rules.match(c, entry.except) and not rules.match_any(c, entry.except_any)) then
+            table.insert(result, entry)
+        end
+    end
+    return result
+end
+
+--- Check if a client matches a given set of rules.
+-- @param c The client.
+-- @param rule The rules to check. List with "rule", "rule_any", "except" and
+-- "except_any" keys.
+-- @return True if at least one rule is matched, false otherwise.
+function rules.does_match(c, rules)
+    local result = rules.matching_rules(c, rules)
+    return #result == 0 and false or result
+end
+
 --- Apply rules to a client.
 -- @param c The client.
 function rules.apply(c)
     local props = {}
     local callbacks = {}
-    for _, entry in ipairs(rules.rules) do
-        if (rules.match(c, entry.rule) or rules.match_any(c, entry.rule_any)) and
-            (not rules.match(c, entry.except) and not rules.match_any(c, entry.except_any)) then
-            if entry.properties then
-                for property, value in pairs(entry.properties) do
-                    props[property] = value
-                end
+
+    for _, entry in ipairs(rules.matching_rules(c, rules.rules)) do
+        if entry.properties then
+            for property, value in pairs(entry.properties) do
+                props[property] = value
             end
-            if entry.callback then
-                table.insert(callbacks, entry.callback)
-            end
+        end
+        if entry.callback then
+            table.insert(callbacks, entry.callback)
         end
     end
 
