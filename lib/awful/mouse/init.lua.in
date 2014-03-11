@@ -165,8 +165,6 @@ function mouse.client.move(c, snap)
         return
     end
 
-    c:raise()
-
     local orig = c:geometry()
     local m_c = capi.mouse.coords()
     local dist_x = m_c.x - orig.x
