@@ -272,6 +272,7 @@ static gchar **
 parse_command(lua_State *L, int idx)
 {
     gchar **argv = NULL;
+    idx = luaA_absindex(L, idx);
 
     if (lua_isstring(L, idx))
     {
@@ -282,12 +283,24 @@ parse_command(lua_State *L, int idx)
     else if (lua_istable(L, idx))
     {
         size_t i, len = luaA_rawlen(L, idx);
-        argv = g_new0(gchar *, len + 1);
 
+        /* First verify that the table is sane: All integer keys must contain
+         * strings. Do this by pushing them all onto the stack.
+         */
         for (i = 0; i < len; i++)
         {
             lua_rawgeti(L, idx, i+1);
-            argv[i] = g_strdup(lua_tostring(L, -1));
+            if (lua_type(L, -1) != LUA_TSTRING)
+                luaL_error(L, "Non-string argument at table index %d", i+1);
+        }
+
+        /* From this point on nothing can go wrong and so we can safely allocate
+         * memory.
+         */
+        argv = g_new0(gchar *, len + 1);
+        for (i = 0; i < len; i++)
+        {
+            argv[len - i - 1] = g_strdup(lua_tostring(L, -1));
             lua_pop(L, 1);
         }
     }
