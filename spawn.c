@@ -321,8 +321,11 @@ luaA_spawn(lua_State *L)
         use_sn = luaA_checkboolean(L, 2);
 
     argv = parse_command(L, 1);
-    if(!argv)
+    if(!argv || !argv[0])
+    {
+        g_strfreev(argv);
         return 0;
+    }
 
     SnLauncherContext *context = NULL;
     if(use_sn)
