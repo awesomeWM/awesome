@@ -343,23 +343,11 @@ luaA_spawn(lua_State *L)
     SnLauncherContext *context = NULL;
     if(use_sn)
     {
-        char *cmdname, *space;
-        const char *first_no_space_char = argv[0];
-        /* Look for the first char which is not space */
-        while(*first_no_space_char && *first_no_space_char == ' ')
-            first_no_space_char++;
-        /* Look for space in the string to get the command name. */
-        if((space = strchr(first_no_space_char, ' ')))
-            cmdname = a_strndup(argv[0], space - argv[0]);
-        else
-            cmdname = a_strdup(argv[0]);
-
         context = sn_launcher_context_new(globalconf.sndisplay, globalconf.default_screen);
         sn_launcher_context_set_name(context, "awesome");
         sn_launcher_context_set_description(context, "awesome spawn");
-        sn_launcher_context_set_binary_name(context, cmdname);
-        sn_launcher_context_initiate(context, "awesome", cmdname, globalconf.timestamp);
-        p_delete(&cmdname);
+        sn_launcher_context_set_binary_name(context, argv[0]);
+        sn_launcher_context_initiate(context, "awesome", argv[0], globalconf.timestamp);
 
         /* app will have AWESOME_SPAWN_TIMEOUT seconds to complete,
          * or the timeout function will terminate the launch sequence anyway */
