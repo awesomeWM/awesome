@@ -234,6 +234,8 @@ function tag.history.restore(screen, idx)
     data.history[s].previous = setmetatable(sel, { __mode = 'v' })
     -- remove the reverted history entry
     if i ~= "previous" then table.remove(data.history[s], i) end
+
+    capi.screen[s]:emit_signal("tag::history::update")
 end
 
 --- Get a list of all tags on a screen
