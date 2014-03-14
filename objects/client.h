@@ -150,6 +150,7 @@ void client_set_below(lua_State *, int, bool);
 void client_set_modal(lua_State *, int, bool);
 void client_set_ontop(lua_State *, int, bool);
 void client_set_fullscreen(lua_State *, int, bool);
+void client_set_maximized(lua_State *, int, bool);
 void client_set_maximized_horizontal(lua_State *, int, bool);
 void client_set_maximized_vertical(lua_State *, int, bool);
 void client_set_minimized(lua_State *, int, bool);

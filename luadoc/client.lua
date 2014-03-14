@@ -31,6 +31,7 @@ module("client")
 -- @field above The client is above normal windows.
 -- @field below The client is below normal windows.
 -- @field fullscreen The client is fullscreen or not.
+-- @field maximized The client is maximized (horizontally and vertically) or not.
 -- @field maximized_horizontal The client is maximized horizontally or not.
 -- @field maximized_vertical The client is maximized vertically or not.
 -- @field transient_for The client the window is transient for.

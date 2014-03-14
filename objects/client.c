@@ -961,8 +961,7 @@ client_set_fullscreen(lua_State *L, int cidx, bool s)
         if(s)
         {
             /* remove any max state */
-            client_set_maximized_horizontal(L, cidx, false);
-            client_set_maximized_vertical(L, cidx, false);
+            client_set_maximized(L, cidx, false);
             /* You can only be part of one of the special layers. */
             client_set_below(L, cidx, false);
             client_set_above(L, cidx, false);
@@ -977,6 +976,16 @@ client_set_fullscreen(lua_State *L, int cidx, bool s)
         client_resize_do(c, c->geometry, true, false);
         stack_windows();
     }
+}
+
+/** Get a clients maximized state (horizontally and vertically).
+ * \param c The client.
+ * \return The maximized state.
+ */
+static int
+client_get_maximized(client_t *c)
+{
+    return c->maximized_horizontal && c->maximized_vertical;
 }
 
 /** Set a client horizontally|vertically maximized.
@@ -995,15 +1004,30 @@ client_set_fullscreen(lua_State *L, int cidx, bool s)
             if(s) \
                 client_set_fullscreen(L, abs_cidx, false); \
             lua_pushboolean(L, s); \
+            int max_before = client_get_maximized(c); \
             c->maximized_##type = s; \
             luaA_object_emit_signal(L, abs_cidx, "request::maximized_" #type, 1); \
             luaA_object_emit_signal(L, abs_cidx, "property::maximized_" #type, 0); \
+            if(max_before != client_get_maximized(c)) \
+                luaA_object_emit_signal(L, abs_cidx, "property::maximized", 0); \
             stack_windows(); \
         } \
     }
 DO_FUNCTION_CLIENT_MAXIMIZED(vertical)
 DO_FUNCTION_CLIENT_MAXIMIZED(horizontal)
 #undef DO_FUNCTION_CLIENT_MAXIMIZED
+
+/** Set a client maximized (horizontally and vertically).
+ * \param L The Lua VM state.
+ * \param cidx The client index.
+ * \param s Set or not the client maximized attribute.
+ */
+void
+client_set_maximized(lua_State *L, int cidx, bool s)
+{
+    client_set_maximized_horizontal(L, cidx, s);
+    client_set_maximized_vertical(L, cidx, s);
+}
 
 /** Set a client above, or not.
  * \param L The Lua VM state.
@@ -1680,6 +1704,13 @@ luaA_client_set_modal(lua_State *L, client_t *c)
 }
 
 static int
+luaA_client_set_maximized(lua_State *L, client_t *c)
+{
+    client_set_maximized(L, -3, luaA_checkboolean(L, -1));
+    return 0;
+}
+
+static int
 luaA_client_set_maximized_horizontal(lua_State *L, client_t *c)
 {
     client_set_maximized_horizontal(L, -3, luaA_checkboolean(L, -1));
@@ -1788,6 +1819,13 @@ LUA_OBJECT_EXPORT_PROPERTY(client, client_t, sticky, lua_pushboolean)
 LUA_OBJECT_EXPORT_PROPERTY(client, client_t, size_hints_honor, lua_pushboolean)
 LUA_OBJECT_EXPORT_PROPERTY(client, client_t, maximized_horizontal, lua_pushboolean)
 LUA_OBJECT_EXPORT_PROPERTY(client, client_t, maximized_vertical, lua_pushboolean)
+
+static int
+luaA_client_get_maximized(lua_State *L, client_t *c)
+{
+    lua_pushboolean(L, client_get_maximized(c));
+    return 1;
+}
 
 static int
 luaA_client_get_content(lua_State *L, client_t *c)
@@ -2250,6 +2288,10 @@ client_class_setup(lua_State *L)
                             NULL,
                             (lua_class_propfunc_t) luaA_client_get_group_window,
                             NULL);
+    luaA_class_add_property(&client_class, "maximized",
+                            (lua_class_propfunc_t) luaA_client_set_maximized,
+                            (lua_class_propfunc_t) luaA_client_get_maximized,
+                            (lua_class_propfunc_t) luaA_client_set_maximized);
     luaA_class_add_property(&client_class, "maximized_horizontal",
                             (lua_class_propfunc_t) luaA_client_set_maximized_horizontal,
                             (lua_class_propfunc_t) luaA_client_get_maximized_horizontal,
@@ -2332,6 +2374,7 @@ client_class_setup(lua_State *L)
     signal_add(&client_class.signals, "property::instance");
     signal_add(&client_class.signals, "property::keys");
     signal_add(&client_class.signals, "property::machine");
+    signal_add(&client_class.signals, "property::maximized");
     signal_add(&client_class.signals, "property::maximized_horizontal");
     signal_add(&client_class.signals, "property::maximized_vertical");
     signal_add(&client_class.signals, "property::minimized");
