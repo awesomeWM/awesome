@@ -436,11 +436,13 @@ end
 
 --- Clone a table
 -- @param t the table to clone
+-- @param deep Create a deep clone? (default: true)
 -- @return a clone of t
-function util.table.clone(t)
+function util.table.clone(t, deep)
+    local deep = deep == nil and true or deep
     local c = { }
     for k, v in pairs(t) do
-        if type(v) == "table" then
+        if deep and type(v) == "table" then
             c[k] = util.table.clone(v)
         else
             c[k] = v
