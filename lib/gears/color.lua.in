@@ -70,7 +70,9 @@ function color.create_png_pattern(file)
         file = file.file
     end
     local image = surface.load(file)
-    return cairo.Pattern.create_for_surface(image)
+    local pattern = cairo.Pattern.create_for_surface(image)
+    cairo.Pattern.set_extend(pattern,cairo.Extend.REPEAT)
+    return pattern
 end
 
 -- Add stops to the given pattern.
