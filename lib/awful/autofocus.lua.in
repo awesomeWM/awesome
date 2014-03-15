@@ -10,7 +10,7 @@ local aclient = require("awful.client")
 local atag = require("awful.tag")
 
 --- When loaded, this module makes sure that there's always a client that will have focus
--- on event such as tag switching, client unmanaging, etc.
+-- on events such as tag switching, client unmanaging, etc.
 -- awful.autofocus
 
 -- Give focus when clients appear/disappear.
