@@ -120,6 +120,7 @@ scan(xcb_query_tree_cookie_t tree_c)
     tree_c_len = xcb_query_tree_children_length(tree_r);
     xcb_get_window_attributes_cookie_t attr_wins[tree_c_len];
     xcb_get_property_cookie_t state_wins[tree_c_len];
+    xcb_get_geometry_cookie_t geom_wins[tree_c_len];
 
     for(i = 0; i < tree_c_len; i++)
     {
@@ -127,15 +128,15 @@ scan(xcb_query_tree_cookie_t tree_c)
                                                            wins[i]);
 
         state_wins[i] = xwindow_get_state_unchecked(wins[i]);
+        geom_wins[i] = xcb_get_geometry_unchecked(globalconf.connection, wins[i]);
     }
-
-    xcb_get_geometry_cookie_t *geom_wins[tree_c_len];
 
     for(i = 0; i < tree_c_len; i++)
     {
         attr_r = xcb_get_window_attributes_reply(globalconf.connection,
                                                  attr_wins[i],
                                                  NULL);
+        geom_r = xcb_get_geometry_reply(globalconf.connection, geom_wins[i], NULL);
 
         state = xwindow_get_state_reply(state_wins[i]);
 
@@ -143,26 +144,14 @@ scan(xcb_query_tree_cookie_t tree_c)
            || attr_r->map_state == XCB_MAP_STATE_UNMAPPED
            || state == XCB_ICCCM_WM_STATE_WITHDRAWN)
         {
-            geom_wins[i] = NULL;
             p_delete(&attr_r);
+            p_delete(&geom_r);
             continue;
         }
 
-        p_delete(&attr_r);
-
-        /* Get the geometry of the current window */
-        geom_wins[i] = p_alloca(xcb_get_geometry_cookie_t, 1);
-        *(geom_wins[i]) = xcb_get_geometry_unchecked(globalconf.connection, wins[i]);
-    }
-
-    for(i = 0; i < tree_c_len; i++)
-    {
-        if(!geom_wins[i] || !(geom_r = xcb_get_geometry_reply(globalconf.connection,
-                                                              *(geom_wins[i]), NULL)))
-            continue;
-
         client_manage(wins[i], geom_r, true);
 
+        p_delete(&attr_r);
         p_delete(&geom_r);
     }
 
