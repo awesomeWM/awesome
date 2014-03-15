@@ -55,23 +55,22 @@ end
 -- A callback can return false to pass the events to the next key grabber in the stack.
 -- @param g The key grabber callback that will get the key events until it will be deleted or a new grabber is added.
 -- @return the given callback `g`
--- @usage Following function can be bound to a key, and used to resize a client
+-- @usage The following function can be bound to a key, and used to resize a client
 -- using keyboard.
--- <p><code>
--- function resize(c) <br/>
---   local grabber = awful.keygrabber.run(function(mod, key, event) </br>
---     if event == "release" then return end </br></br>
 --
---     if     key == 'Up'   then awful.client.moveresize(0, 0, 0, 5, c) <br/>
---     elseif key == 'Down' then awful.client.moveresize(0, 0, 0, -5, c) <br/>
---     elseif key == 'Right' then awful.client.moveresize(0, 0, 5, 0, c) <br/>
---     elseif key == 'Left'  then awful.client.moveresize(0, 0, -5, 0, c) <br/>
---     else   awful.keygrabber.stop(grabber) <br/>
---     end <br/><br/>
+-- function resize(c)
+--   local grabber = awful.keygrabber.run(function(mod, key, event)
+--     if event == "release" then return end
 --
---   end) <br/>
--- end <br/>
--- </code></p>
+--     if     key == 'Up'   then awful.client.moveresize(0, 0, 0, 5, c)
+--     elseif key == 'Down' then awful.client.moveresize(0, 0, 0, -5, c)
+--     elseif key == 'Right' then awful.client.moveresize(0, 0, 5, 0, c)
+--     elseif key == 'Left'  then awful.client.moveresize(0, 0, -5, 0, c)
+--     else   awful.keygrabber.stop(grabber)
+--     end
+--
+--   end)
+-- end
 function keygrabber.run(g)
     -- Remove the grabber if its in stack
     keygrabber.stop(g)

@@ -77,7 +77,7 @@ local function do_tile(param, orientation)
     local t = tag.selected(param.screen)
     orientation = orientation or "right"
 
-    -- this handles are different orientations
+    -- This handles all different orientations.
     local height = "height"
     local width = "width"
     local x = "x"
