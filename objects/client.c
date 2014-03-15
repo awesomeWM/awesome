@@ -1149,7 +1149,7 @@ client_unban(client_t *c)
 void
 client_unmanage(client_t *c, bool window_valid)
 {
-    /* Reset transient_for attributes of widows that maybe referring to us */
+    /* Reset transient_for attributes of windows that might be referring to us */
     foreach(_tc, globalconf.clients)
     {
         client_t *tc = *_tc;
@@ -1629,7 +1629,7 @@ HANDLE_TITLEBAR(right, CLIENT_TITLEBAR_RIGHT)
 HANDLE_TITLEBAR(bottom, CLIENT_TITLEBAR_BOTTOM)
 HANDLE_TITLEBAR(left, CLIENT_TITLEBAR_LEFT)
 
-/** Return client geometry.
+/** Return or set client geometry.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
  * \luastack
