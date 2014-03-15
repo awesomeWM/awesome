@@ -64,6 +64,8 @@ struct client_t
     char *class, *instance;
     /** Window geometry */
     area_t geometry;
+    /** Startup ID */
+    char *startup_id;
     /** True if the client is sticky */
     bool sticky;
     /** Has urgency hint */

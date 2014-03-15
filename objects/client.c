@@ -53,6 +53,7 @@ client_wipe(client_t *c)
     p_delete(&c->alt_icon_name);
     p_delete(&c->name);
     p_delete(&c->alt_name);
+    p_delete(&c->startup_id);
     if(c->icon)
         cairo_surface_destroy(c->icon);
 }
@@ -577,9 +578,9 @@ HANDLE_GEOM(height)
             xcb_get_property_reply(globalconf.connection, startup_id_q, NULL);
         /* Say spawn that a client has been started, with startup id as argument */
         char *startup_id = xutil_get_text_property_from_reply(reply);
+        c->startup_id = startup_id;
         p_delete(&reply);
         spawn_start_notify(c, startup_id);
-        p_delete(&startup_id);
     }
 
     luaA_class_emit_signal(globalconf.L, &client_class, "list", 0);
@@ -1820,6 +1821,7 @@ LUA_OBJECT_EXPORT_PROPERTY(client, client_t, sticky, lua_pushboolean)
 LUA_OBJECT_EXPORT_PROPERTY(client, client_t, size_hints_honor, lua_pushboolean)
 LUA_OBJECT_EXPORT_PROPERTY(client, client_t, maximized_horizontal, lua_pushboolean)
 LUA_OBJECT_EXPORT_PROPERTY(client, client_t, maximized_vertical, lua_pushboolean)
+LUA_OBJECT_EXPORT_PROPERTY(client, client_t, startup_id, lua_pushstring)
 
 static int
 luaA_client_get_maximized(lua_State *L, client_t *c)
@@ -2335,6 +2337,10 @@ client_class_setup(lua_State *L)
                             (lua_class_propfunc_t) luaA_client_set_shape_clip,
                             (lua_class_propfunc_t) luaA_client_get_shape_clip,
                             (lua_class_propfunc_t) luaA_client_set_shape_clip);
+luaA_class_add_property(&client_class, "startup_id",
+                            NULL,
+                            (lua_class_propfunc_t) luaA_client_get_startup_id,
+                            NULL);
     luaA_class_add_property(&client_class, "client_shape_bounding",
                             NULL,
                             (lua_class_propfunc_t) luaA_client_get_client_shape_bounding,
