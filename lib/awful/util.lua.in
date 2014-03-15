@@ -72,7 +72,8 @@ end
 --- Spawn a program.
 -- @param cmd The command.
 -- @param sn Enable startup-notification.
--- @return The awesome.spawn return value.
+-- @return The forked PID or an error message
+-- @return The startup notification UID, if the spawn was successful
 function util.spawn(cmd, sn)
     if cmd and cmd ~= "" then
         if sn == nil then sn = true end
