@@ -165,7 +165,7 @@ ewmh_init(void)
                         xscreen->root, _NET_SUPPORTED, XCB_ATOM_ATOM, 32,
                         countof(atom), atom);
 
-    /* create our own window */
+    /* Create our own window */
     father = xcb_generate_id(globalconf.connection);
     xcb_create_window(globalconf.connection, xscreen->root_depth,
                       father, xscreen->root, -1, -1, 1, 1, 0,
@@ -179,11 +179,11 @@ ewmh_init(void)
                         father, _NET_SUPPORTING_WM_CHECK, XCB_ATOM_WINDOW, 32,
                         1, &father);
 
-    /* set the window manager name */
+    /* Set the window manager name */
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
                         father, _NET_WM_NAME, UTF8_STRING, 8, 7, "awesome");
 
-    /* set the window manager PID */
+    /* Set the window manager PID */
     i = getpid();
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
                         father, _NET_WM_PID, XCB_ATOM_CARDINAL, 32, 1, &i);
