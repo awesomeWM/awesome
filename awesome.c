@@ -149,7 +149,7 @@ scan(xcb_query_tree_cookie_t tree_c)
             continue;
         }
 
-        client_manage(wins[i], geom_r, true);
+        client_manage(wins[i], geom_r, attr_r, true);
 
         p_delete(&attr_r);
         p_delete(&geom_r);

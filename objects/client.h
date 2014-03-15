@@ -106,6 +106,9 @@ struct client_t
     cairo_surface_t *icon;
     /** Size hints */
     xcb_size_hints_t size_hints;
+    /** The visualtype that c->window uses */
+    xcb_visualtype_t *visualtype;
+    /** Do we honor the client's size hints? */
     bool size_hints_honor;
     /** Machine the client is running on. */
     char *machine;
@@ -140,7 +143,7 @@ client_t * client_getbyframewin(xcb_window_t);
 void client_ban(client_t *);
 void client_ban_unfocus(client_t *);
 void client_unban(client_t *);
-void client_manage(xcb_window_t, xcb_get_geometry_reply_t *, bool);
+void client_manage(xcb_window_t, xcb_get_geometry_reply_t *, xcb_get_window_attributes_reply_t *, bool);
 bool client_resize(client_t *, area_t, bool);
 void client_unmanage(client_t *, bool);
 void client_kill(client_t *);

@@ -421,7 +421,7 @@ client_update_properties(client_t *c)
  * \param startup True if we are managing at startup time.
  */
 void
-client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, bool startup)
+client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, xcb_get_window_attributes_reply_t *wattr, bool startup)
 {
     const uint32_t select_input_val[] = { CLIENT_SELECT_INPUT_EVENT_MASK };
 
@@ -448,8 +448,9 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, bool startup)
 
     /* consider the window banned */
     c->isbanned = true;
-    /* Store window */
+    /* Store window and visual */
     c->window = w;
+    c->visualtype = draw_find_visual(globalconf.screen, wattr->visual);
     c->frame_window = xcb_generate_id(globalconf.connection);
     xcb_create_window(globalconf.connection, globalconf.default_depth, c->frame_window, s->root,
                       wgeom->x, wgeom->y, wgeom->width, wgeom->height,
@@ -1830,8 +1831,6 @@ luaA_client_get_maximized(lua_State *L, client_t *c)
 static int
 luaA_client_get_content(lua_State *L, client_t *c)
 {
-    xcb_get_window_attributes_cookie_t cookie;
-    xcb_get_window_attributes_reply_t *attr;
     cairo_surface_t *surface;
     int width  = c->geometry.width;
     int height = c->geometry.height;
@@ -1840,19 +1839,11 @@ luaA_client_get_content(lua_State *L, client_t *c)
     width  -= c->titlebar[CLIENT_TITLEBAR_LEFT].size + c->titlebar[CLIENT_TITLEBAR_RIGHT].size;
     height -= c->titlebar[CLIENT_TITLEBAR_TOP].size + c->titlebar[CLIENT_TITLEBAR_BOTTOM].size;
 
-    cookie = xcb_get_window_attributes(globalconf.connection, c->window);
-    attr = xcb_get_window_attributes_reply(globalconf.connection, cookie, NULL);
-
-    if (!attr)
-        return 0;
-
     surface = cairo_xcb_surface_create(globalconf.connection, c->window,
-                                       draw_find_visual(globalconf.screen, attr->visual),
-                                       width, height);
+                                       c->visualtype, width, height);
 
     /* lua has to make sure to free the ref or we have a leak */
     lua_pushlightuserdata(L, surface);
-    free(attr);
     return 1;
 }
 
