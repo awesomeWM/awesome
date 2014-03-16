@@ -115,41 +115,6 @@ drawin_update_drawing(drawin_t *w, int widx)
     lua_pop(globalconf.L, 1);
 }
 
-/** Initialize a drawin.
- * \param w The drawin to initialize.
- */
-static void
-drawin_init(drawin_t *w)
-{
-    xcb_screen_t *s = globalconf.screen;
-
-    w->window = xcb_generate_id(globalconf.connection);
-    xcb_create_window(globalconf.connection, globalconf.default_depth, w->window, s->root,
-                      w->geometry.x, w->geometry.y,
-                      w->geometry.width, w->geometry.height,
-                      w->border_width, XCB_COPY_FROM_PARENT, globalconf.visual->visual_id,
-                      XCB_CW_BORDER_PIXEL | XCB_CW_BIT_GRAVITY
-                      | XCB_CW_OVERRIDE_REDIRECT | XCB_CW_EVENT_MASK | XCB_CW_COLORMAP
-                      | XCB_CW_CURSOR,
-                      (const uint32_t [])
-                      {
-                          w->border_color.pixel,
-                          XCB_GRAVITY_NORTH_WEST,
-                          1,
-                          XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT
-                          | XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY | XCB_EVENT_MASK_ENTER_WINDOW
-                          | XCB_EVENT_MASK_LEAVE_WINDOW | XCB_EVENT_MASK_STRUCTURE_NOTIFY
-                          | XCB_EVENT_MASK_POINTER_MOTION | XCB_EVENT_MASK_EXPOSURE
-                          | XCB_EVENT_MASK_PROPERTY_CHANGE,
-                          globalconf.default_cmap,
-                          xcursor_new(globalconf.cursor_ctx, xcursor_font_fromstr(w->cursor))
-                      });
-
-    /* Set the right properties */
-    ewmh_update_window_type(w->window, window_translate_type(w->type));
-    ewmh_update_strut(w->window, &w->strut);
-}
-
 /** Refresh the window content by copying its pixmap data to its window.
  * \param w The drawin to refresh.
  */
@@ -332,6 +297,7 @@ drawin_set_visible(lua_State *L, int udx, bool v)
 static drawin_t *
 drawin_allocator(lua_State *L)
 {
+    xcb_screen_t *s = globalconf.screen;
     drawin_t *w = drawin_new(L);
 
     w->visible = false;
@@ -345,7 +311,31 @@ drawin_allocator(lua_State *L)
     drawable_allocator(L, (drawable_refresh_callback *) drawin_refresh_pixmap, w);
     w->drawable = luaA_object_ref_item(L, -2, -1);
 
-    drawin_init(w);
+    w->window = xcb_generate_id(globalconf.connection);
+    xcb_create_window(globalconf.connection, globalconf.default_depth, w->window, s->root,
+                      w->geometry.x, w->geometry.y,
+                      w->geometry.width, w->geometry.height,
+                      w->border_width, XCB_COPY_FROM_PARENT, globalconf.visual->visual_id,
+                      XCB_CW_BORDER_PIXEL | XCB_CW_BIT_GRAVITY
+                      | XCB_CW_OVERRIDE_REDIRECT | XCB_CW_EVENT_MASK | XCB_CW_COLORMAP
+                      | XCB_CW_CURSOR,
+                      (const uint32_t [])
+                      {
+                          w->border_color.pixel,
+                          XCB_GRAVITY_NORTH_WEST,
+                          1,
+                          XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT
+                          | XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY | XCB_EVENT_MASK_ENTER_WINDOW
+                          | XCB_EVENT_MASK_LEAVE_WINDOW | XCB_EVENT_MASK_STRUCTURE_NOTIFY
+                          | XCB_EVENT_MASK_POINTER_MOTION | XCB_EVENT_MASK_EXPOSURE
+                          | XCB_EVENT_MASK_PROPERTY_CHANGE,
+                          globalconf.default_cmap,
+                          xcursor_new(globalconf.cursor_ctx, xcursor_font_fromstr(w->cursor))
+                      });
+
+    /* Set the right properties */
+    ewmh_update_window_type(w->window, window_translate_type(w->type));
+    ewmh_update_strut(w->window, &w->strut);
 
     return w;
 }
