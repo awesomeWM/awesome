@@ -137,7 +137,7 @@ function ewmh.activate(c)
     if c:isvisible() then
         client.focus = c
         c:raise()
-    else
+    elseif not awesome.startup then
         c.urgent = true
     end
 end
