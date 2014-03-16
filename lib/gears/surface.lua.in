@@ -8,6 +8,7 @@ local setmetatable = setmetatable
 local type = type
 local capi = { awesome = awesome }
 local cairo = require("lgi").cairo
+local color = nil
 
 -- This checks for '<= 0.5' because there are git versions after 0.6 which still
 -- identify themselves as 0.6 but already have the needed cairo support
@@ -49,6 +50,84 @@ function surface.get_size(surf)
     local cr = cairo.Context(surf)
     local x, y, w, h = cr:clip_extents()
     return w, h
+end
+
+
+--- Setup a surface to be transformed
+-- @return A new surface
+-- @return a context
+-- @return the mask surface
+function create_transformation_mask(sur,height,width,padding)
+    -- Get size
+    local ic = surface(sur)
+    local icp = cairo.Pattern.create_for_surface(ic)
+    local sw,sh = surface.get_size(ic)
+    local height,width = height or sh,width or sw
+    local padding = padding or 2
+    local main_ratio = (sw > sh) and sw or sh
+    local ratio = (height-padding) / main_ratio
+
+    -- Create matrix
+    local matrix = cairo.Matrix()
+    cairo.Matrix.init_scale(matrix,ratio,ratio)
+    matrix:translate(height/2-6,padding/2)
+
+    --Copy to surface
+    local img = cairo.ImageSurface.create(cairo.Format.ARGB32, width, height)
+    local cr = cairo.Context(img)
+    cr:set_operator(cairo.Operator.CREAR)
+    cr:paint()
+    cr:set_operator(cairo.Operator.SOURCE)
+    cr:set_matrix(matrix)
+    cr:set_source(icp)
+    cr:paint()
+
+    --Generate the mask
+    local mask = ic:create_similar(cairo.Content.ALPHA, sw, sh)
+    local cr4 = cairo.Context(mask)
+    cr4:set_source(icp)
+    cr4:paint()
+
+    return img,cr,mask
+end
+
+--- Return a surface where colors have been replaced by a tint
+-- @param sur A surface or image path
+-- @param col The tint color
+-- @param height The height of the resulting surface
+-- @param width The width of the resulting surface
+-- @param padding a padding
+-- @return A new surface
+function surface.tint(sur,col,height,width,padding)
+    local img,cr,mask= create_transformation_mask(sur,height,width,padding)
+
+    -- Apply the tint
+    cr:set_operator(cairo.Operator.HSL_COLOR)
+    if not color then
+        color = require("gears.color")
+    end
+    cr:set_source(color(col))
+    cr:mask(cairo.Pattern.create_for_surface(mask))
+    return img
+end
+
+--- Return a desaturated surface
+-- @param sur A surface or image path
+-- @param factor The desaturation strength (0-1)
+-- @param height The height of the resulting surface
+-- @param width The width of the resulting surface
+-- @param padding a padding
+-- @return A new surface
+function surface.desaturate(sur,factor,height,width,padding)
+    local img,cr,mask= create_transformation_mask(sur,height,width,padding)
+    local factor = factor or 1
+
+    -- Apply desaturation
+    cr:set_source_rgba(0,0,0,factor)
+    cr:set_operator(cairo.Operator.HSL_SATURATION)
+    cr:mask(cairo.Pattern.create_for_surface(mask))
+
+    return img
 end
 
 return setmetatable(surface, surface.mt)
