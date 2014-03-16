@@ -385,7 +385,7 @@ ewmh_process_client_message(xcb_client_message_event_t *ev)
         {
             if(ev->data.data32[0] == 0xffffffff)
                 c->sticky = true;
-            else
+            else if (globalconf.honor_ewmh_desktop)
                 for(int i = 0; i < globalconf.tags.len; i++)
                     if((int)ev->data.data32[0] == i)
                     {

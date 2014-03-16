@@ -317,6 +317,7 @@ main(int argc, char **argv)
     p_clear(&globalconf, 1);
     globalconf.keygrabber = LUA_REFNIL;
     globalconf.mousegrabber = LUA_REFNIL;
+    globalconf.honor_ewmh_desktop = true;
     buffer_init(&globalconf.startup_errors);
 
     /* save argv */
