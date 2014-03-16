@@ -202,6 +202,57 @@ function color.create_pattern(col)
     return color.create_solid_pattern(col)
 end
 
+--- Check if a pattern is opaque.
+-- A pattern is transparent if the background on which it gets drawn (with
+-- operator OVER) doesn't influence the visual result.
+-- @param col An argument that create_pattern() accepts
+-- @return The pattern if it is surely opaque, else nil
+function color.create_opaque_pattern(col)
+    local pattern = color.create_pattern(col)
+    local type = pattern:get_type()
+    local extend = pattern:get_extend()
+
+    if type == "SOLID" then
+        local status, r, g, b, a = pattern:get_rgba()
+        if a ~= 1 then
+            return
+        end
+        return pattern
+    elseif type == "SURFACE" then
+        if pattern:get_surface():get_content() ~= "COLOR" then
+            -- The surface has an alpha channel which *might* be non-opaque
+            return
+        end
+
+        -- Only the "NONE" extend mode is forbidden, everything else doesn't
+        -- introduce transparent parts
+        if pattern:get_extend() == "NONE" then
+            return
+        end
+
+        return pattern
+    elseif type == "LINEAR" then
+        local status, stops = pattern:get_color_stop_count()
+
+        -- No color stops or extend NONE -> pattern *might* contain transparency
+        if stops == 0 or pattern:get_extend() == "NONE" then
+            return
+        end
+
+        -- Now check if any of the color stops contain transparency
+        for i = 0, stops - 1 do
+            local status, offset, r, g, b, a = pattern:get_color_stop_rgba(i)
+            if a ~= 1 then
+                return
+            end
+        end
+        return pattern
+    end
+
+    -- Unknown type, e.g. mesh or raster source or unsupported type (radial
+    -- gradients can do weird self-intersections)
+end
+
 function color.mt:__call(...)
     return color.create_pattern(...)
 end
