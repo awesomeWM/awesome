@@ -119,6 +119,7 @@ drawin_update_drawing(drawin_t *w, int widx)
                                                         w->pixmap, globalconf.visual,
                                                         w->geometry.width, w->geometry.height);
     drawable_set_surface(w->drawable, -1, surface, w->geometry);
+    cairo_surface_destroy(surface);
     lua_pop(globalconf.L, 1);
 }
 
