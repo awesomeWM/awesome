@@ -430,6 +430,7 @@ luaA_isloop(lua_State *L, int idx)
  * \lfield conffile The configuration file which has been loaded.
  * \lfield version The version of awesome.
  * \lfield release The release name of awesome.
+ * \lfield startup True if we are still in startup, false otherwise.
  * \lfield startup_errors Error message for errors that occured during startup.
  * \lfield composite_manager_running True if a composite manager is running.
  */
@@ -456,6 +457,12 @@ luaA_awesome_index(lua_State *L)
     if(A_STREQ(buf, "release"))
     {
         lua_pushliteral(L, AWESOME_RELEASE);
+        return 1;
+    }
+
+    if(A_STREQ(buf, "startup"))
+    {
+        lua_pushboolean(L, globalconf.loop == NULL);
         return 1;
     }
 
