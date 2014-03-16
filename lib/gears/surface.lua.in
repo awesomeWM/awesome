@@ -56,6 +56,15 @@ function surface.mt:__call(...)
     return surface.load(...)
 end
 
+--- Get the size of a cairo surface
+-- @param surf The surface you are interested in
+-- @return The surface's width and height
+function surface.get_size(surf)
+    local cr = cairo.Context(surf)
+    local x, y, w, h = cr:clip_extents()
+    return w - x, h - y
+end
+
 return setmetatable(surface, surface.mt)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
