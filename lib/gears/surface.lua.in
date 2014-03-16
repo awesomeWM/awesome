@@ -39,6 +39,78 @@ function surface.load(_surface)
     return cairo.Surface(_surface, true)
 end
 
+
+--- Compose multiple surfaces as one
+--
+-- Examples:
+--    gears.surface.compose({base_surface,surface2,{layer=other_surface,matrix=matrix},{layer=arr2,x=12}})
+--
+-- Each table element can be a surface, a path or a table with "x","y","layer","matrix" and "scale" as keys.
+-- The matrix are standard cairo matrix
+-- @note Please note that the first layer cannot be a table
+-- @param layer_table An array of surfaces
+-- @return A new composed surface with the same dimensions as layer_table[1]
+function surface.compose(layer_table)
+    local base,cr,base_w,base_h = nil,nil
+    for k=1,#layer_table do --Do NOT use ipairs here as the array have some nils
+        local v = layer_table[k]
+        if not base then
+            base = v
+            if type(v) == "string" then
+                base = cairo.ImageSurface.create_from_png(base)
+                base_w,base_h = surface.get_size(base)
+                cr = cairo.Context(base)
+            else
+                base_w,base_h = surface.get_size(v)
+                base = v:create_similar(cairo.Content.COLOR_ALPHA, base_w,base_h)
+                cr = cairo.Context(base)
+                cr:set_source_surface(v)
+                cr:paint()
+            end
+        elseif v then
+            local s,x,y,matrix,scale,height = v,0,0,nil,false,nil
+            local layer_type=type(s)
+            if layer_type == "table" then
+                x,y,matrix,scale,height = v.x,v.y,v.matrix,v.scale,v.height
+                s = s.layer
+                layer_type = type(s)
+            end
+            if layer_type == "string" then
+                s = cairo.ImageSurface.create_from_png(s)
+            elseif layer_type == "userdata" then
+                s = surface.load(s)
+            end
+
+            if scale then
+                local sw,sh = s:get_width(),s:get_height()
+                local ratio = ((sw > sh) and sw or sh) / ((height or base_h or 16)-4)
+                local matrix2 = cairo.Matrix()
+                cairo.Matrix.init_scale(matrix2,ratio,ratio)
+                if y == "align" then
+                    if base_h > sh then
+                        y = (base_h -sh)/2
+                    else
+                        y = (sh - base_h)/2
+                    end
+                end
+                matrix2:translate(-x,-y)
+                local pattern = cairo.Pattern.create_for_surface(s)
+                pattern:set_matrix(matrix2)
+                cr:set_source(pattern)
+            elseif matrix then
+                local pattern = cairo.Pattern.create_for_surface(s)
+                pattern:set_matrix(matrix)
+                cr:set_source(pattern)
+                cr:move_to(x,y)
+            else
+                cr:set_source_surface(s,x,y)
+            end
+            cr:paint()
+        end
+    end
+    return base
+end
+
 function surface.mt:__call(...)
     return surface.load(...)
 end
