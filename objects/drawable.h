@@ -32,6 +32,8 @@ typedef void drawable_refresh_callback(void *);
 struct drawable_t
 {
     LUA_OBJECT_HEADER
+    /** The pixmap we are drawing to. */
+    xcb_pixmap_t pixmap;
     /** Surface for drawing. */
     cairo_surface_t *surface;
     /** The geometry of the drawable (in root window coordinates). */
@@ -43,8 +45,6 @@ struct drawable_t
 };
 
 drawable_t *drawable_allocator(lua_State *, drawable_refresh_callback *, void *);
-void drawable_unset_surface(drawable_t *);
-void drawable_set_surface(drawable_t *, int, cairo_surface_t *, area_t);
 void drawable_set_geometry(drawable_t *, int, area_t);
 void drawable_class_setup(lua_State *);
 
