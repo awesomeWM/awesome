@@ -35,40 +35,25 @@ drawable_allocator(lua_State *L, drawable_refresh_callback *callback, void *data
     d->refresh_callback = callback;
     d->refresh_data = data;
     d->surface = NULL;
+    d->pixmap = XCB_NONE;
     return d;
+}
+
+static void
+drawable_unset_surface(drawable_t *d)
+{
+    cairo_surface_finish(d->surface);
+    cairo_surface_destroy(d->surface);
+    if (d->pixmap)
+        xcb_free_pixmap(globalconf.connection, d->pixmap);
+    d->surface = NULL;
+    d->pixmap = XCB_NONE;
 }
 
 static void
 drawable_wipe(drawable_t *d)
 {
-    if (!d->surface)
-        return;
-    cairo_surface_finish(d->surface);
-    cairo_surface_destroy(d->surface);
-}
-
-void
-drawable_unset_surface(drawable_t *d)
-{
-    if (!d->surface)
-        return;
-    cairo_surface_finish(d->surface);
-    cairo_surface_destroy(d->surface);
-    d->surface = NULL;
-}
-
-void
-drawable_set_surface(drawable_t *d, int didx, cairo_surface_t *surface, area_t geom)
-{
     drawable_unset_surface(d);
-    d->surface = cairo_surface_reference(surface);
-    /* Make sure the surface doesn't contain garbage by filling it with black */
-    cairo_t *cr = cairo_create(surface);
-    cairo_set_operator(cr, CAIRO_OPERATOR_CLEAR);
-    cairo_paint(cr);
-    cairo_destroy(cr);
-    drawable_set_geometry(d, didx, geom);
-    luaA_object_emit_signal(globalconf.L, didx, "property::surface", 0);
 }
 
 void
@@ -76,6 +61,20 @@ drawable_set_geometry(drawable_t *d, int didx, area_t geom)
 {
     area_t old = d->geometry;
     d->geometry = geom;
+
+    bool size_changed = (old.width != geom.width) || (old.height != geom.height);
+    if (size_changed)
+        drawable_unset_surface(d);
+    if (size_changed && geom.width > 0 && geom.height > 0)
+    {
+        d->pixmap = xcb_generate_id(globalconf.connection);
+        xcb_create_pixmap(globalconf.connection, globalconf.default_depth, d->pixmap,
+                          globalconf.screen->root, geom.width, geom.height);
+        d->surface = cairo_xcb_surface_create(globalconf.connection,
+                                              d->pixmap, globalconf.visual,
+                                              geom.width, geom.height);
+        luaA_object_emit_signal(globalconf.L, didx, "property::surface", 0);
+    }
 
     if (old.x != geom.x)
         luaA_object_emit_signal(globalconf.L, didx, "property::x", 0);

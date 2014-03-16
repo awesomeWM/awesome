@@ -121,8 +121,6 @@ struct client_t
     struct {
         /** The size of this bar. */
         uint16_t size;
-        /** The pixmap for double buffering. */
-        xcb_pixmap_t pixmap;
         /** The drawable for this bar. */
         drawable_t *drawable;
     } titlebar[CLIENT_TITLEBAR_COUNT];
