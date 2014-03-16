@@ -829,6 +829,7 @@ client_resize_do(client_t *c, area_t geometry, bool force_notice, bool honor_hin
                                                                     c->titlebar[bar].pixmap, globalconf.visual,
                                                                     area.width, area.height);
                 drawable_set_surface(drawable, -1, surface, area);
+                cairo_surface_destroy(surface);
             } else
                 drawable_set_geometry(drawable, -1, area);
         } else
