@@ -478,6 +478,33 @@ luaA_awesome_index(lua_State *L)
         return 1;
     }
 
+    if(A_STREQ(buf, "honor_ewmh_desktop")) {
+        lua_pushboolean(L, globalconf.honor_ewmh_desktop);
+        return 1;
+    }
+
+    return 0;
+}
+
+/** awesome global table setter.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ * \luastack
+ * \lfield a variable from globalconf
+ */
+static int
+luaA_awesome_new_index(lua_State *L)
+{
+    if(luaA_usemetatable(L, 1, 2))
+        return 1;
+
+    const char *buf = luaL_checkstring(L, 2);
+
+    if(A_STREQ(buf, "honor_ewmh_desktop") && lua_isboolean(L,3))
+    {
+        const int honor = lua_toboolean(L, 3);
+        globalconf.honor_ewmh_desktop = honor;
+    }
     return 0;
 }
 
@@ -583,6 +610,7 @@ luaA_init(xdgHandle* xdg)
         { "load_image", luaA_load_image },
         { "register_xproperty", luaA_register_xproperty },
         { "__index", luaA_awesome_index },
+        { "__newindex", luaA_awesome_new_index },
         { NULL, NULL }
     };
 

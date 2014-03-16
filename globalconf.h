@@ -144,6 +144,8 @@ typedef struct
     tag_array_t tags;
     /** List of registered xproperties */
     xproperty_array_t xproperties;
+    /** Honor/Ignore _NET_WM_DESKTOP desktop */
+    bool honor_ewmh_desktop;
 } awesome_t;
 
 extern awesome_t globalconf;
