@@ -179,7 +179,7 @@ void client_focus_refresh(void);
 bool client_hasproto(client_t *, xcb_atom_t);
 void client_ignore_enterleave_events(void);
 void client_restore_enterleave_events(void);
-void client_refresh(client_t *);
+void client_refresh_partial(client_t *, int16_t, int16_t, uint16_t, uint16_t);
 void client_class_setup(lua_State *);
 void client_send_configure(client_t *);
 drawable_t *client_get_drawable(client_t *, int, int);

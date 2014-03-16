@@ -1551,17 +1551,43 @@ client_get_drawable(client_t *c, int x, int y)
     return client_get_drawable_offset(c, &x, &y);
 }
 
+static void
+client_refresh_titlebar_partial(client_t *c, client_titlebar_t bar, int16_t x, int16_t y, uint16_t width, uint16_t height)
+{
+    if(c->titlebar[bar].drawable == NULL || c->titlebar[bar].drawable->surface == NULL)
+        return;
+    area_t area = titlebar_get_area(c, bar);
+    /* Is the titlebar part of the area that should get redrawn? */
+    if (AREA_LEFT(area) >= x + width || AREA_RIGHT(area) <= x)
+        return;
+    if (AREA_TOP(area) >= y + height || AREA_BOTTOM(area) <= y)
+        return;
+    /* Redraw the affected parts */
+    cairo_surface_flush(c->titlebar[bar].drawable->surface);
+    xcb_copy_area(globalconf.connection, c->titlebar[bar].pixmap, c->frame_window,
+            globalconf.gc, x - area.x, y - area.y, x, y, width, height);
+}
+
+#define HANDLE_TITLEBAR_REFRESH(name, index)                                                \
+static void                                                                                 \
+client_refresh_titlebar_ ## name(client_t *c)                                               \
+{                                                                                           \
+    area_t area = titlebar_get_area(c, index);                                              \
+    client_refresh_titlebar_partial(c, index, area.x, area.y, area.width, area.height);     \
+}
+HANDLE_TITLEBAR_REFRESH(top, CLIENT_TITLEBAR_TOP)
+HANDLE_TITLEBAR_REFRESH(right, CLIENT_TITLEBAR_RIGHT)
+HANDLE_TITLEBAR_REFRESH(bottom, CLIENT_TITLEBAR_BOTTOM)
+HANDLE_TITLEBAR_REFRESH(left, CLIENT_TITLEBAR_LEFT)
+
+/**
+ * Refresh all titlebars that are in the specified rectangle
+ */
 void
-client_refresh(client_t *c)
+client_refresh_partial(client_t *c, int16_t x, int16_t y, uint16_t width, uint16_t height)
 {
     for (client_titlebar_t bar = CLIENT_TITLEBAR_TOP; bar < CLIENT_TITLEBAR_COUNT; bar++) {
-        if (c->titlebar[bar].drawable == NULL || c->titlebar[bar].drawable->surface == NULL)
-            continue;
-
-        area_t area = titlebar_get_area(c, bar);
-        cairo_surface_flush(c->titlebar[bar].drawable->surface);
-        xcb_copy_area(globalconf.connection, c->titlebar[bar].pixmap, c->frame_window,
-                globalconf.gc, 0, 0, area.x, area.y, area.width, area.height);
+        client_refresh_titlebar_partial(c, bar, x, y, width, height);
     }
 }
 
@@ -1571,7 +1597,22 @@ titlebar_get_drawable(lua_State *L, client_t *c, int cl_idx, client_titlebar_t b
     if (c->titlebar[bar].drawable == NULL)
     {
         cl_idx = luaA_absindex(L, cl_idx);
-        drawable_allocator(L, (drawable_refresh_callback *) client_refresh, c);
+        switch (bar) {
+        case CLIENT_TITLEBAR_TOP:
+            drawable_allocator(L, (drawable_refresh_callback *) client_refresh_titlebar_top, c);
+            break;
+        case CLIENT_TITLEBAR_BOTTOM:
+            drawable_allocator(L, (drawable_refresh_callback *) client_refresh_titlebar_bottom, c);
+            break;
+        case CLIENT_TITLEBAR_RIGHT:
+            drawable_allocator(L, (drawable_refresh_callback *) client_refresh_titlebar_right, c);
+            break;
+        case CLIENT_TITLEBAR_LEFT:
+            drawable_allocator(L, (drawable_refresh_callback *) client_refresh_titlebar_left, c);
+            break;
+        default:
+            fatal("Unknown titlebar kind %d\n", (int) bar);
+        }
         c->titlebar[bar].drawable = luaA_object_ref_item(L, cl_idx, -1);
     }
 
