@@ -632,7 +632,7 @@ event_handle_maprequest(xcb_map_request_event_t *ev)
             goto bailout;
         }
 
-        client_manage(ev->window, geom_r, wa_r, false);
+        client_manage(ev->window, geom_r, wa_r);
 
         p_delete(&geom_r);
     }

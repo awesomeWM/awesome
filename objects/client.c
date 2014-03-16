@@ -422,7 +422,7 @@ client_update_properties(client_t *c)
  * \param startup True if we are managing at startup time.
  */
 void
-client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, xcb_get_window_attributes_reply_t *wattr, bool startup)
+client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, xcb_get_window_attributes_reply_t *wattr)
 {
     const uint32_t select_input_val[] = { CLIENT_SELECT_INPUT_EVENT_MASK };
 
@@ -434,10 +434,9 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, xcb_get_window_at
 
     /* If this is a new client that just has been launched, then request its
      * startup id. */
-    xcb_get_property_cookie_t startup_id_q = { 0 };
-    if(!startup)
-        startup_id_q = xcb_get_property(globalconf.connection, false, w,
-                                        _NET_STARTUP_ID, XCB_GET_PROPERTY_TYPE_ANY, 0, UINT_MAX);
+    xcb_get_property_cookie_t startup_id_q = xcb_get_property(globalconf.connection, false,
+                                                              w, _NET_STARTUP_ID,
+                                                              XCB_GET_PROPERTY_TYPE_ANY, 0, UINT_MAX);
 
     /* Make sure the window is automatically mapped if awesome exits or dies. */
     xcb_change_save_set(globalconf.connection, XCB_SET_MODE_INSERT, w);
@@ -470,33 +469,25 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, xcb_get_window_at
                           globalconf.default_cmap
                       });
 
-    if (startup)
-    {
-        /* The client is already mapped, thus we must be sure that we don't send
-         * ourselves an UnmapNotify due to the xcb_reparent_window().
-         *
-         * Grab the server to make sure we don't lose any events.
-         */
-        uint32_t no_event[] = { 0 };
-        xcb_grab_server(globalconf.connection);
+    /* The client may already be mapped, thus we must be sure that we don't send
+     * ourselves an UnmapNotify due to the xcb_reparent_window().
+     *
+     * Grab the server to make sure we don't lose any events.
+     */
+    uint32_t no_event[] = { 0 };
+    xcb_grab_server(globalconf.connection);
 
-        xcb_change_window_attributes(globalconf.connection,
-                                     globalconf.screen->root,
-                                     XCB_CW_EVENT_MASK,
-                                     no_event);
-    }
-
+    xcb_change_window_attributes(globalconf.connection,
+                                 globalconf.screen->root,
+                                 XCB_CW_EVENT_MASK,
+                                 no_event);
     xcb_reparent_window(globalconf.connection, w, c->frame_window, 0, 0);
     xcb_map_window(globalconf.connection, w);
-
-    if (startup)
-    {
-        xcb_change_window_attributes(globalconf.connection,
-                                     globalconf.screen->root,
-                                     XCB_CW_EVENT_MASK,
-                                     ROOT_WINDOW_EVENT_MASK);
-        xcb_ungrab_server(globalconf.connection);
-    }
+    xcb_change_window_attributes(globalconf.connection,
+                                 globalconf.screen->root,
+                                 XCB_CW_EVENT_MASK,
+                                 ROOT_WINDOW_EVENT_MASK);
+    xcb_ungrab_server(globalconf.connection);
 
     /* Do this now so that we don't get any events for the above
      * (Else, reparent could cause an UnmapNotify) */
@@ -571,24 +562,19 @@ HANDLE_GEOM(height)
      */
     xwindow_set_state(c->window, XCB_ICCCM_WM_STATE_NORMAL);
 
-    if(!startup)
-    {
-        /* Request our response */
-        xcb_get_property_reply_t *reply =
-            xcb_get_property_reply(globalconf.connection, startup_id_q, NULL);
-        /* Say spawn that a client has been started, with startup id as argument */
-        char *startup_id = xutil_get_text_property_from_reply(reply);
-        c->startup_id = startup_id;
-        p_delete(&reply);
-        spawn_start_notify(c, startup_id);
-    }
+    /* Request our response */
+    xcb_get_property_reply_t *reply =
+        xcb_get_property_reply(globalconf.connection, startup_id_q, NULL);
+    /* Say spawn that a client has been started, with startup id as argument */
+    char *startup_id = xutil_get_text_property_from_reply(reply);
+    c->startup_id = startup_id;
+    p_delete(&reply);
+    spawn_start_notify(c, startup_id);
 
     luaA_class_emit_signal(globalconf.L, &client_class, "list", 0);
 
-    /* client is still on top of the stack; push startup value,
-     * and emit signals with one arg */
-    lua_pushboolean(globalconf.L, startup);
-    luaA_object_emit_signal(globalconf.L, -2, "manage", 1);
+    /* client is still on top of the stack; emit signal */
+    luaA_object_emit_signal(globalconf.L, -1, "manage", 0);
     /* pop client */
     lua_pop(globalconf.L, 1);
 }
