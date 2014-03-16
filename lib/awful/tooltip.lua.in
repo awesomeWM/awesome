@@ -11,6 +11,7 @@ local wibox = require("wibox")
 local a_placement = require("awful.placement")
 local beautiful = require("beautiful")
 local textbox = require("wibox.widget.textbox")
+local background = require("wibox.widget.background")
 local setmetatable = setmetatable
 local ipairs = ipairs
 
@@ -78,7 +79,7 @@ end
 local function set_geometry(self)
     local my_geo = self.wibox:geometry()
     -- calculate width / height
-    local n_w, n_h = self.widget:fit(-1, -1)
+    local n_w, n_h = self.textbox:fit(-1, -1)
     if my_geo.width ~= n_w or my_geo.height ~= n_h then
         self.wibox:geometry({ width = n_w, height = n_h })
     end
@@ -119,9 +120,8 @@ end
 -- @param self The tooltip object.
 -- @param text New tooltip text.
 local function set_text(self, text)
-    self.widget:set_font(data[self].font)
-    self.widget:set_markup('<span color="' .. data[self].fg
-        .. '">' .. text .. "</span>")
+    self.textbox:set_font(data[self].font)
+    self.textbox:set_text(text)
     set_geometry(self)
 end
 
@@ -178,8 +178,6 @@ local function new(args)
         visible = false,
     }
 
-    local my_textbox = textbox()
-
     -- private data
     data[self] = {
         show = function() show(self) end,
@@ -207,8 +205,10 @@ local function new(args)
     self.wibox.visible = false
     -- Who wants a non ontop tooltip ?
     self.wibox.ontop = true
-    self.wibox:set_widget(my_textbox)
-    self.widget = my_textbox
+    self.textbox = textbox()
+    self.background = background(self.textbox)
+    self.background:set_fg(data[self].fg)
+    self.wibox:set_widget(self.background)
 
     -- add some signals on both the tooltip and widget
     self.wibox:connect_signal("mouse::enter", data[self].hide)
