@@ -92,15 +92,22 @@ drawin_unref_simplified(drawin_t **item)
 static void
 drawin_update_drawing(drawin_t *w, int widx)
 {
-    /* If this drawin isn't visible, we don't need an up-to-date cairo surface
-     * for it. (drawin_map() will later make sure we are called again) */
-    if(!w->visible)
-        return;
     /* Clean up old stuff */
     luaA_object_push_item(globalconf.L, widx, w->drawable);
     drawable_unset_surface(w->drawable);
     if(w->pixmap)
+    {
         xcb_free_pixmap(globalconf.connection, w->pixmap);
+        w->pixmap = XCB_NONE;
+    }
+
+    /* If this drawin isn't visible, we don't need an up-to-date cairo surface
+     * for it. (drawin_map() will later make sure we are called again) */
+    if(!w->visible)
+    {
+        lua_pop(globalconf.L, 1);
+        return;
+    }
 
     /* Create a pixmap */
     xcb_screen_t *s = globalconf.screen;
@@ -217,13 +224,15 @@ drawin_map(drawin_t *drawin, int widx)
     client_ignore_enterleave_events();
     /* Map the drawin */
     xcb_map_window(globalconf.connection, drawin->window);
-    drawin_update_drawing(drawin, widx);
     /* Deactivate BMA */
     client_restore_enterleave_events();
     /* Stack this drawin correctly */
     stack_windows();
     /* Add it to the list of visible drawins */
     drawin_array_append(&globalconf.drawins, drawin);
+    /* Make sure it has a surface */
+    if(drawin->drawable->surface == NULL)
+        drawin_update_drawing(drawin, widx);
 }
 
 static void
