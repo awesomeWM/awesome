@@ -38,6 +38,8 @@ struct drawable_t
     cairo_surface_t *surface;
     /** The geometry of the drawable (in root window coordinates). */
     area_t geometry;
+    /** Surface contents are undefined if this is false. */
+    bool refreshed;
     /** Callback for refreshing. */
     drawable_refresh_callback *refresh_callback;
     /** Data for refresh callback. */

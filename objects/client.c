@@ -1524,14 +1524,18 @@ client_get_drawable(client_t *c, int x, int y)
 static void
 client_refresh_titlebar_partial(client_t *c, client_titlebar_t bar, int16_t x, int16_t y, uint16_t width, uint16_t height)
 {
-    if(c->titlebar[bar].drawable == NULL || c->titlebar[bar].drawable->pixmap == XCB_NONE)
+    if(c->titlebar[bar].drawable == NULL
+            || c->titlebar[bar].drawable->pixmap == XCB_NONE
+            || !c->titlebar[bar].drawable->refreshed)
         return;
-    area_t area = titlebar_get_area(c, bar);
+
     /* Is the titlebar part of the area that should get redrawn? */
+    area_t area = titlebar_get_area(c, bar);
     if (AREA_LEFT(area) >= x + width || AREA_RIGHT(area) <= x)
         return;
     if (AREA_TOP(area) >= y + height || AREA_BOTTOM(area) <= y)
         return;
+
     /* Redraw the affected parts */
     cairo_surface_flush(c->titlebar[bar].drawable->surface);
     xcb_copy_area(globalconf.connection, c->titlebar[bar].drawable->pixmap, c->frame_window,

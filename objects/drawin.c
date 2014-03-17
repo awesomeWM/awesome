@@ -177,7 +177,7 @@ drawin_refresh_pixmap_partial(drawin_t *drawin,
                               int16_t x, int16_t y,
                               uint16_t w, uint16_t h)
 {
-    if (!drawin->drawable || !drawin->drawable->pixmap)
+    if (!drawin->drawable || !drawin->drawable->pixmap || !drawin->drawable->refreshed)
         return;
 
     /* Make cairo do all pending drawing */
