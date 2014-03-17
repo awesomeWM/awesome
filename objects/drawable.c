@@ -34,6 +34,7 @@ drawable_allocator(lua_State *L, drawable_refresh_callback *callback, void *data
     drawable_t *d = drawable_new(L);
     d->refresh_callback = callback;
     d->refresh_data = data;
+    d->refreshed = false;
     d->surface = NULL;
     d->pixmap = XCB_NONE;
     return d;
@@ -46,6 +47,7 @@ drawable_unset_surface(drawable_t *d)
     cairo_surface_destroy(d->surface);
     if (d->pixmap)
         xcb_free_pixmap(globalconf.connection, d->pixmap);
+    d->refreshed = false;
     d->surface = NULL;
     d->pixmap = XCB_NONE;
 }
@@ -108,6 +110,7 @@ static int
 luaA_drawable_refresh(lua_State *L)
 {
     drawable_t *drawable = luaA_checkudata(L, 1, &drawable_class);
+    drawable->refreshed = true;
     (*drawable->refresh_callback)(drawable->refresh_data);
 
     return 0;
