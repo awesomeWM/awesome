@@ -2421,6 +2421,7 @@ luaA_class_add_property(&client_class, "startup_id",
     signal_add(&client_class.signals, "request::fullscreen");
     signal_add(&client_class.signals, "request::maximized_horizontal");
     signal_add(&client_class.signals, "request::maximized_vertical");
+    signal_add(&client_class.signals, "request::tag");
     signal_add(&client_class.signals, "tagged");
     signal_add(&client_class.signals, "unfocus");
     signal_add(&client_class.signals, "unmanage");
