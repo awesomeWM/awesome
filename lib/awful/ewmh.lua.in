@@ -142,7 +142,17 @@ function ewmh.activate(c)
     end
 end
 
+-- Tag a window with its requested tag
+function ewmh.tag(c, t)
+    if not t then
+        c.sticky = true
+    else
+        c:tags({ t })
+    end
+end
+
 client.connect_signal("request::activate", ewmh.activate)
+client.connect_signal("request::tag", ewmh.tag)
 client.connect_signal("request::maximized_horizontal", maximized_horizontal)
 client.connect_signal("request::maximized_vertical", maximized_vertical)
 client.connect_signal("request::fullscreen", fullscreen)

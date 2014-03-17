@@ -366,18 +366,19 @@ ewmh_process_desktop(client_t *c, uint32_t desktop)
     if(desktop == 0xffffffff)
     {
         luaA_object_push(globalconf.L, c);
-        client_set_sticky(globalconf.L, -1, true);
+        lua_pushnil(globalconf.L);
+        luaA_object_emit_signal(globalconf.L, -2, "request::tag", 1);
+        /* Pop the client, arguments are already popped */
         lua_pop(globalconf.L, 1);
     }
     else if (idx >= 0 && idx < globalconf.tags.len)
-        for(int i = 0; i < globalconf.tags.len; i++)
-            if(idx == i)
-            {
-                luaA_object_push(globalconf.L, globalconf.tags.tab[i]);
-                tag_client(c);
-            }
-            else
-                untag_client(c, globalconf.tags.tab[i]);
+    {
+        luaA_object_push(globalconf.L, c);
+        luaA_object_push(globalconf.L, globalconf.tags.tab[idx]);
+        luaA_object_emit_signal(globalconf.L, -2, "request::tag", 1);
+        /* Pop the client, arguments are already popped */
+        lua_pop(globalconf.L, 1);
+    }
 }
 
 int
