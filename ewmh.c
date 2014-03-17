@@ -374,13 +374,6 @@ ewmh_process_desktop(client_t *c, uint32_t desktop)
             }
             else
                 untag_client(c, globalconf.tags.tab[i]);
-    else
-        /* Value out of bounds, just give it the first tag */
-        if (globalconf.tags.len > 0)
-        {
-            luaA_object_push(globalconf.L, globalconf.tags.tab[0]);
-            tag_client(c);
-        }
 }
 
 int
