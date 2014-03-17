@@ -364,7 +364,11 @@ ewmh_process_desktop(client_t *c, uint32_t desktop)
 {
     int idx = desktop;
     if(desktop == 0xffffffff)
-        c->sticky = true;
+    {
+        luaA_object_push(globalconf.L, c);
+        client_set_sticky(globalconf.L, -1, true);
+        lua_pop(globalconf.L, 1);
+    }
     else if (idx >= 0 && idx < globalconf.tags.len)
         for(int i = 0; i < globalconf.tags.len; i++)
             if(idx == i)
