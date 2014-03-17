@@ -2362,7 +2362,7 @@ client_class_setup(lua_State *L)
                             (lua_class_propfunc_t) luaA_client_set_shape_clip,
                             (lua_class_propfunc_t) luaA_client_get_shape_clip,
                             (lua_class_propfunc_t) luaA_client_set_shape_clip);
-luaA_class_add_property(&client_class, "startup_id",
+    luaA_class_add_property(&client_class, "startup_id",
                             NULL,
                             (lua_class_propfunc_t) luaA_client_get_startup_id,
                             NULL);
