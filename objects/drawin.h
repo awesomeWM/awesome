@@ -38,8 +38,6 @@ struct drawin_t
     bool visible;
     /** Cursor */
     char *cursor;
-    /** The pixmap for double buffering. */
-    xcb_pixmap_t pixmap;
     /** The drawable for this drawin. */
     drawable_t *drawable;
     /** The window geometry. */

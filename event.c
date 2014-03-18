@@ -547,7 +547,7 @@ event_handle_expose(xcb_expose_event_t *ev)
                                       ev->x, ev->y,
                                       ev->width, ev->height);
     if ((client = client_getbyframewin(ev->window)))
-        client_refresh(client);
+        client_refresh_partial(client, ev->x, ev->y, ev->width, ev->height);
 }
 
 /** The key press event handler.
@@ -632,7 +632,7 @@ event_handle_maprequest(xcb_map_request_event_t *ev)
             goto bailout;
         }
 
-        client_manage(ev->window, geom_r, wa_r, false);
+        client_manage(ev->window, geom_r, wa_r);
 
         p_delete(&geom_r);
     }

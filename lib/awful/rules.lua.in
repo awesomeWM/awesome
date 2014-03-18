@@ -173,7 +173,7 @@ function rules.does_match(c, rules)
     return #result == 0 and false or result
 end
 
---- Apply rules to a client.
+--- Apply awful.rules.rules to a client.
 -- @param c The client.
 function rules.apply(c)
     local props = {}
@@ -190,6 +190,15 @@ function rules.apply(c)
         end
     end
 
+    rules.execute(c, props, callbacks)
+end
+
+
+--- Apply properties and callbacks to a client.
+-- @param c The client.
+-- @param props Properties to apply.
+-- @param callbacks Callbacks to apply.
+function rules.execute(c, props, callbacks)
     for property, value in pairs(props) do
         if property ~= "focus" and type(value) == "function" then
             value = value(c)
@@ -220,7 +229,7 @@ function rules.apply(c)
         atag.withcurrent(c)
     end
 
-    -- Apply all callbacks from matched rules.
+    -- Apply all callbacks.
     for i, callback in pairs(callbacks) do
         callback(c)
     end

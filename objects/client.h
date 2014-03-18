@@ -124,8 +124,6 @@ struct client_t
     struct {
         /** The size of this bar. */
         uint16_t size;
-        /** The pixmap for double buffering. */
-        xcb_pixmap_t pixmap;
         /** The drawable for this bar. */
         drawable_t *drawable;
     } titlebar[CLIENT_TITLEBAR_COUNT];
@@ -145,7 +143,7 @@ client_t * client_getbyframewin(xcb_window_t);
 void client_ban(client_t *);
 void client_ban_unfocus(client_t *);
 void client_unban(client_t *);
-void client_manage(xcb_window_t, xcb_get_geometry_reply_t *, xcb_get_window_attributes_reply_t *, bool);
+void client_manage(xcb_window_t, xcb_get_geometry_reply_t *, xcb_get_window_attributes_reply_t *);
 bool client_resize(client_t *, area_t, bool);
 void client_unmanage(client_t *, bool);
 void client_kill(client_t *);
@@ -179,7 +177,7 @@ void client_focus_refresh(void);
 bool client_hasproto(client_t *, xcb_atom_t);
 void client_ignore_enterleave_events(void);
 void client_restore_enterleave_events(void);
-void client_refresh(client_t *);
+void client_refresh_partial(client_t *, int16_t, int16_t, uint16_t, uint16_t);
 void client_class_setup(lua_State *);
 void client_send_configure(client_t *);
 drawable_t *client_get_drawable(client_t *, int, int);

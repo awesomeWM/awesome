@@ -422,7 +422,7 @@ client_update_properties(client_t *c)
  * \param startup True if we are managing at startup time.
  */
 void
-client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, xcb_get_window_attributes_reply_t *wattr, bool startup)
+client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, xcb_get_window_attributes_reply_t *wattr)
 {
     const uint32_t select_input_val[] = { CLIENT_SELECT_INPUT_EVENT_MASK };
 
@@ -434,10 +434,9 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, xcb_get_window_at
 
     /* If this is a new client that just has been launched, then request its
      * startup id. */
-    xcb_get_property_cookie_t startup_id_q = { 0 };
-    if(!startup)
-        startup_id_q = xcb_get_property(globalconf.connection, false, w,
-                                        _NET_STARTUP_ID, XCB_GET_PROPERTY_TYPE_ANY, 0, UINT_MAX);
+    xcb_get_property_cookie_t startup_id_q = xcb_get_property(globalconf.connection, false,
+                                                              w, _NET_STARTUP_ID,
+                                                              XCB_GET_PROPERTY_TYPE_ANY, 0, UINT_MAX);
 
     /* Make sure the window is automatically mapped if awesome exits or dies. */
     xcb_change_save_set(globalconf.connection, XCB_SET_MODE_INSERT, w);
@@ -470,33 +469,25 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, xcb_get_window_at
                           globalconf.default_cmap
                       });
 
-    if (startup)
-    {
-        /* The client is already mapped, thus we must be sure that we don't send
-         * ourselves an UnmapNotify due to the xcb_reparent_window().
-         *
-         * Grab the server to make sure we don't lose any events.
-         */
-        uint32_t no_event[] = { 0 };
-        xcb_grab_server(globalconf.connection);
+    /* The client may already be mapped, thus we must be sure that we don't send
+     * ourselves an UnmapNotify due to the xcb_reparent_window().
+     *
+     * Grab the server to make sure we don't lose any events.
+     */
+    uint32_t no_event[] = { 0 };
+    xcb_grab_server(globalconf.connection);
 
-        xcb_change_window_attributes(globalconf.connection,
-                                     globalconf.screen->root,
-                                     XCB_CW_EVENT_MASK,
-                                     no_event);
-    }
-
+    xcb_change_window_attributes(globalconf.connection,
+                                 globalconf.screen->root,
+                                 XCB_CW_EVENT_MASK,
+                                 no_event);
     xcb_reparent_window(globalconf.connection, w, c->frame_window, 0, 0);
     xcb_map_window(globalconf.connection, w);
-
-    if (startup)
-    {
-        xcb_change_window_attributes(globalconf.connection,
-                                     globalconf.screen->root,
-                                     XCB_CW_EVENT_MASK,
-                                     ROOT_WINDOW_EVENT_MASK);
-        xcb_ungrab_server(globalconf.connection);
-    }
+    xcb_change_window_attributes(globalconf.connection,
+                                 globalconf.screen->root,
+                                 XCB_CW_EVENT_MASK,
+                                 ROOT_WINDOW_EVENT_MASK);
+    xcb_ungrab_server(globalconf.connection);
 
     /* Do this now so that we don't get any events for the above
      * (Else, reparent could cause an UnmapNotify) */
@@ -571,24 +562,19 @@ HANDLE_GEOM(height)
      */
     xwindow_set_state(c->window, XCB_ICCCM_WM_STATE_NORMAL);
 
-    if(!startup)
-    {
-        /* Request our response */
-        xcb_get_property_reply_t *reply =
-            xcb_get_property_reply(globalconf.connection, startup_id_q, NULL);
-        /* Say spawn that a client has been started, with startup id as argument */
-        char *startup_id = xutil_get_text_property_from_reply(reply);
-        c->startup_id = startup_id;
-        p_delete(&reply);
-        spawn_start_notify(c, startup_id);
-    }
+    /* Request our response */
+    xcb_get_property_reply_t *reply =
+        xcb_get_property_reply(globalconf.connection, startup_id_q, NULL);
+    /* Say spawn that a client has been started, with startup id as argument */
+    char *startup_id = xutil_get_text_property_from_reply(reply);
+    c->startup_id = startup_id;
+    p_delete(&reply);
+    spawn_start_notify(c, startup_id);
 
     luaA_class_emit_signal(globalconf.L, &client_class, "list", 0);
 
-    /* client is still on top of the stack; push startup value,
-     * and emit signals with one arg */
-    lua_pushboolean(globalconf.L, startup);
-    luaA_object_emit_signal(globalconf.L, -2, "manage", 1);
+    /* client is still on top of the stack; emit signal */
+    luaA_object_emit_signal(globalconf.L, -1, "manage", 0);
     /* pop client */
     lua_pop(globalconf.L, 1);
 }
@@ -811,29 +797,7 @@ client_resize_do(client_t *c, area_t geometry, bool force_notice, bool honor_hin
         area.y += geometry.y;
         if (hide_titlebars)
             area.width = area.height = 0;
-
-        if (old_geometry.width != geometry.width || old_geometry.height != geometry.height ||
-                drawable->geometry.width == 0 || drawable->geometry.height == 0) {
-            /* Get rid of the old state */
-            drawable_unset_surface(drawable);
-            if (c->titlebar[bar].pixmap != XCB_NONE)
-                xcb_free_pixmap(globalconf.connection, c->titlebar[bar].pixmap);
-            c->titlebar[bar].pixmap = XCB_NONE;
-
-            /* And get us some new state */
-            if (c->titlebar[bar].size != 0 && !hide_titlebars)
-            {
-                c->titlebar[bar].pixmap = xcb_generate_id(globalconf.connection);
-                xcb_create_pixmap(globalconf.connection, globalconf.default_depth, c->titlebar[bar].pixmap,
-                                  globalconf.screen->root, area.width, area.height);
-                cairo_surface_t *surface = cairo_xcb_surface_create(globalconf.connection,
-                                                                    c->titlebar[bar].pixmap, globalconf.visual,
-                                                                    area.width, area.height);
-                drawable_set_surface(drawable, -1, surface, area);
-            } else
-                drawable_set_geometry(drawable, -1, area);
-        } else
-            drawable_set_geometry(drawable, -1, area);
+        drawable_set_geometry(drawable, -1, area);
 
         /* Pop the client and the drawable */
         lua_pop(globalconf.L, 2);
@@ -1187,18 +1151,11 @@ client_unmanage(client_t *c, bool window_valid)
         if (c->titlebar[bar].drawable == NULL)
             continue;
 
+        /* Forget about the drawable */
         luaA_object_push(globalconf.L, c);
-        luaA_object_push_item(globalconf.L, -1, c->titlebar[bar].drawable);
-
-        /* Make the drawable unusable */
-        drawable_unset_surface(c->titlebar[bar].drawable);
-        if (c->titlebar[bar].pixmap != XCB_NONE)
-            xcb_free_pixmap(globalconf.connection, c->titlebar[bar].pixmap);
-
-        /* And forget about it */
-        luaA_object_unref_item(globalconf.L, -2, c->titlebar[bar].drawable);
+        luaA_object_unref_item(globalconf.L, -1, c->titlebar[bar].drawable);
         c->titlebar[bar].drawable = NULL;
-        lua_pop(globalconf.L, 2);
+        lua_pop(globalconf.L, 1);
     }
 
     /* Clear our event mask so that we don't receive any events from now on,
@@ -1551,17 +1508,47 @@ client_get_drawable(client_t *c, int x, int y)
     return client_get_drawable_offset(c, &x, &y);
 }
 
+static void
+client_refresh_titlebar_partial(client_t *c, client_titlebar_t bar, int16_t x, int16_t y, uint16_t width, uint16_t height)
+{
+    if(c->titlebar[bar].drawable == NULL
+            || c->titlebar[bar].drawable->pixmap == XCB_NONE
+            || !c->titlebar[bar].drawable->refreshed)
+        return;
+
+    /* Is the titlebar part of the area that should get redrawn? */
+    area_t area = titlebar_get_area(c, bar);
+    if (AREA_LEFT(area) >= x + width || AREA_RIGHT(area) <= x)
+        return;
+    if (AREA_TOP(area) >= y + height || AREA_BOTTOM(area) <= y)
+        return;
+
+    /* Redraw the affected parts */
+    cairo_surface_flush(c->titlebar[bar].drawable->surface);
+    xcb_copy_area(globalconf.connection, c->titlebar[bar].drawable->pixmap, c->frame_window,
+            globalconf.gc, x - area.x, y - area.y, x, y, width, height);
+}
+
+#define HANDLE_TITLEBAR_REFRESH(name, index)                                                \
+static void                                                                                 \
+client_refresh_titlebar_ ## name(client_t *c)                                               \
+{                                                                                           \
+    area_t area = titlebar_get_area(c, index);                                              \
+    client_refresh_titlebar_partial(c, index, area.x, area.y, area.width, area.height);     \
+}
+HANDLE_TITLEBAR_REFRESH(top, CLIENT_TITLEBAR_TOP)
+HANDLE_TITLEBAR_REFRESH(right, CLIENT_TITLEBAR_RIGHT)
+HANDLE_TITLEBAR_REFRESH(bottom, CLIENT_TITLEBAR_BOTTOM)
+HANDLE_TITLEBAR_REFRESH(left, CLIENT_TITLEBAR_LEFT)
+
+/**
+ * Refresh all titlebars that are in the specified rectangle
+ */
 void
-client_refresh(client_t *c)
+client_refresh_partial(client_t *c, int16_t x, int16_t y, uint16_t width, uint16_t height)
 {
     for (client_titlebar_t bar = CLIENT_TITLEBAR_TOP; bar < CLIENT_TITLEBAR_COUNT; bar++) {
-        if (c->titlebar[bar].drawable == NULL || c->titlebar[bar].drawable->surface == NULL)
-            continue;
-
-        area_t area = titlebar_get_area(c, bar);
-        cairo_surface_flush(c->titlebar[bar].drawable->surface);
-        xcb_copy_area(globalconf.connection, c->titlebar[bar].pixmap, c->frame_window,
-                globalconf.gc, 0, 0, area.x, area.y, area.width, area.height);
+        client_refresh_titlebar_partial(c, bar, x, y, width, height);
     }
 }
 
@@ -1571,7 +1558,22 @@ titlebar_get_drawable(lua_State *L, client_t *c, int cl_idx, client_titlebar_t b
     if (c->titlebar[bar].drawable == NULL)
     {
         cl_idx = luaA_absindex(L, cl_idx);
-        drawable_allocator(L, (drawable_refresh_callback *) client_refresh, c);
+        switch (bar) {
+        case CLIENT_TITLEBAR_TOP:
+            drawable_allocator(L, (drawable_refresh_callback *) client_refresh_titlebar_top, c);
+            break;
+        case CLIENT_TITLEBAR_BOTTOM:
+            drawable_allocator(L, (drawable_refresh_callback *) client_refresh_titlebar_bottom, c);
+            break;
+        case CLIENT_TITLEBAR_RIGHT:
+            drawable_allocator(L, (drawable_refresh_callback *) client_refresh_titlebar_right, c);
+            break;
+        case CLIENT_TITLEBAR_LEFT:
+            drawable_allocator(L, (drawable_refresh_callback *) client_refresh_titlebar_left, c);
+            break;
+        default:
+            fatal("Unknown titlebar kind %d\n", (int) bar);
+        }
         c->titlebar[bar].drawable = luaA_object_ref_item(L, cl_idx, -1);
     }
 
@@ -2337,7 +2339,7 @@ client_class_setup(lua_State *L)
                             (lua_class_propfunc_t) luaA_client_set_shape_clip,
                             (lua_class_propfunc_t) luaA_client_get_shape_clip,
                             (lua_class_propfunc_t) luaA_client_set_shape_clip);
-luaA_class_add_property(&client_class, "startup_id",
+    luaA_class_add_property(&client_class, "startup_id",
                             NULL,
                             (lua_class_propfunc_t) luaA_client_get_startup_id,
                             NULL);
@@ -2400,6 +2402,7 @@ luaA_class_add_property(&client_class, "startup_id",
     signal_add(&client_class.signals, "request::fullscreen");
     signal_add(&client_class.signals, "request::maximized_horizontal");
     signal_add(&client_class.signals, "request::maximized_vertical");
+    signal_add(&client_class.signals, "request::tag");
     signal_add(&client_class.signals, "tagged");
     signal_add(&client_class.signals, "unfocus");
     signal_add(&client_class.signals, "unmanage");

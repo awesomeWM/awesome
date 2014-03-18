@@ -25,7 +25,8 @@ die()
 lua -e 'require("lgi")' || die
 
 # Check the version number
-lua -e 'if tonumber(string.match(require("lgi.version"), "(%d%.%d)")) <= 0.5 then error("lgi too old, need at least version 0.6.1") end' || die
+# Keep this in sync with lib/gears/surface.lua.in!
+lua -e 'if tonumber(string.match(require("lgi.version"), "(%d%.%d)")) < 0.7 then error("lgi too old, need at least version 0.7.0") end' || die
 
 # Check for the needed gi files
 lua -e 'l = require("lgi") assert(l.cairo, l.Pango, l.PangoCairo)' || die
