@@ -613,9 +613,7 @@ capi.client.connect_signal("new", function(c)
     c:connect_signal("property::border_width", store_init_geometry)
 end)
 
-capi.client.connect_signal("manage", function(c)
-    c:connect_signal("property::geometry", store_floating_geometry)
-end)
+capi.client.connect_signal("property::geometry", store_floating_geometry)
 
 --- Return if a client has a fixe size or not.
 -- @param c The client.
@@ -958,7 +956,7 @@ capi.client.add_signal("unmarked")
 capi.client.connect_signal("focus", client.focus.history.add)
 capi.client.connect_signal("unmanage", client.focus.history.delete)
 
-capi.client.connect_signal("manage", function(c) c:connect_signal("property::urgent", client.urgent.add) end)
+capi.client.connect_signal("property::urgent", client.urgent.add)
 capi.client.connect_signal("focus", client.urgent.delete)
 capi.client.connect_signal("unmanage", client.urgent.delete)
 
