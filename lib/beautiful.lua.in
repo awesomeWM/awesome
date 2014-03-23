@@ -87,8 +87,6 @@ function beautiful.init(path)
             end
 
             if theme.font then set_font(theme.font) end
-            if theme.fg_normal then capi.awesome.fg = theme.fg_normal end
-            if theme.bg_normal then capi.awesome.bg = theme.bg_normal end
         else
             return print("E: beautiful: error loading theme file " .. path)
         end
