@@ -32,6 +32,12 @@ end
 -- @param height The available height for the widget
 -- @return The width and height that the widget wants to use
 function base.fit_widget(widget, width, height)
+    -- Sanitize the input. This also filters out e.g. NaN.
+    local width = math.max(0, width)
+    local height = math.max(0, height)
+
+    -- Since the geometry cache is a weak table, we have to be careful when
+    -- doing lookups. We can't do "if cache[width] ~= nil then"!
     local cache = widget._fit_geometry_cache
     local result = cache[width]
     if not result then
