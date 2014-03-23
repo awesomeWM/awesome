@@ -41,14 +41,18 @@ local function load_font(name)
     if fonts[name] then
         return fonts[name]
     end
-    -- load new font
+
+    -- Load new font
     local desc = Pango.FontDescription.from_string(name)
-
     local ctx = PangoCairo.font_map_get_default():create_context()
-    local layout = Pango.Layout.new(ctx)
-    layout:set_font_description(desc)
 
-    local width, height = layout:get_pixel_size()
+    -- Apply default values from the context (e.g. a default font size)
+    desc:merge(ctx:get_font_description(), false)
+
+    -- Calculate fond height
+    local metrics = ctx:get_metrics(desc, nil)
+    local height = math.ceil((metrics:get_ascent() + metrics:get_descent()) / Pango.SCALE)
+
     local font = { name = name, description = desc, height = height }
     fonts[name] = font
     descs[desc] = name
