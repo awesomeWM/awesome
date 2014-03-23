@@ -242,8 +242,10 @@ luaA_awesome_index(lua_State *L)
         return 1;
     }
 
-    if(A_STREQ(buf, "startup_errors") && globalconf.startup_errors.len != 0)
+    if(A_STREQ(buf, "startup_errors"))
     {
+        if (globalconf.startup_errors.len == 0)
+            return 0;
         lua_pushstring(L, globalconf.startup_errors.s);
         return 1;
     }
