@@ -55,6 +55,10 @@ function imagebox:fit(width, height)
         h = height
     end
 
+    if h == 0 or w == 0 then
+        return 0, 0
+    end
+
     if not self.resize_forbidden then
         local aspect = width / w
         local aspect_h = height / h
