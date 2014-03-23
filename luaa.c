@@ -358,6 +358,8 @@ luaA_init(xdgHandle* xdg)
         { "systray", luaA_systray },
         { "load_image", luaA_load_image },
         { "register_xproperty", luaA_register_xproperty },
+        { "set_xproperty", luaA_set_xproperty },
+        { "get_xproperty", luaA_get_xproperty },
         { "__index", luaA_awesome_index },
         { NULL, NULL }
     };

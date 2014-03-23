@@ -525,4 +525,24 @@ luaA_register_xproperty(lua_State *L)
     return 0;
 }
 
+/** Set an xproperty.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ */
+int
+luaA_set_xproperty(lua_State *L)
+{
+    return window_set_xproperty(L, globalconf.screen->root, 1, 2);
+}
+
+/** Get an xproperty.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ */
+int
+luaA_get_xproperty(lua_State *L)
+{
+    return window_get_xproperty(L, globalconf.screen->root, 1);
+}
+
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
