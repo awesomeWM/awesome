@@ -210,6 +210,8 @@ signal_array_t global_signals;
 
 int luaA_class_index_miss_property(lua_State *, lua_object_t *);
 int luaA_class_newindex_miss_property(lua_State *, lua_object_t *);
+int luaA_default_index(lua_State *);
+int luaA_default_newindex(lua_State *);
 
 void luaA_systray_invalidate(void);
 

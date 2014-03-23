@@ -254,7 +254,7 @@ luaA_awesome_index(lua_State *L)
         return 1;
     }
 
-    return 0;
+    return luaA_default_index(L);
 }
 
 /** Add a global signal.
@@ -361,6 +361,7 @@ luaA_init(xdgHandle* xdg)
         { "set_xproperty", luaA_set_xproperty },
         { "get_xproperty", luaA_get_xproperty },
         { "__index", luaA_awesome_index },
+        { "__newindex", luaA_default_newindex },
         { NULL, NULL }
     };
 
@@ -595,6 +596,18 @@ void
 luaA_emit_refresh()
 {
     signal_object_emit(globalconf.L, &global_signals, "refresh", 0);
+}
+
+int
+luaA_default_index(lua_State *L)
+{
+    return luaA_class_index_miss_property(L, NULL);
+}
+
+int
+luaA_default_newindex(lua_State *L)
+{
+    return luaA_class_newindex_miss_property(L, NULL);
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

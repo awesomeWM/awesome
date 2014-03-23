@@ -140,6 +140,8 @@ const struct luaL_Reg awesome_mousegrabber_lib[] =
     { "run", luaA_mousegrabber_run },
     { "stop", luaA_mousegrabber_stop },
     { "isrunning", luaA_mousegrabber_isrunning },
+    { "__index", luaA_default_index },
+    { "__newindex", luaA_default_newindex },
     { NULL, NULL }
 };
 
