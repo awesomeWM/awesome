@@ -433,6 +433,8 @@ const struct luaL_Reg awesome_root_lib[] =
     { "drawins", luaA_root_drawins },
     { "wallpaper", luaA_root_wallpaper },
     { "tags", luaA_root_tags },
+    { "__index", luaA_default_index },
+    { "__newindex", luaA_default_newindex },
     { NULL, NULL }
 };
 
