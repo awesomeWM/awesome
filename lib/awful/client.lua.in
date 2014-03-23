@@ -952,6 +952,8 @@ end
 capi.client.add_signal("property::floating_geometry")
 capi.client.add_signal("property::floating")
 capi.client.add_signal("property::dockable")
+capi.client.add_signal("marked")
+capi.client.add_signal("unmarked")
 
 capi.client.connect_signal("focus", client.focus.history.add)
 capi.client.connect_signal("unmanage", client.focus.history.delete)
