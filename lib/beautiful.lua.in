@@ -72,17 +72,20 @@ end
 function beautiful.init(path)
     if path then
         local success
+
+        -- try and grab user's $HOME directory and expand '~'
+        local homedir = os.getenv("HOME")
+        path = path:gsub("^~/", homedir .. "/")
+
         success, theme = pcall(function() return dofile(path) end)
 
         if not success then
             return print("E: beautiful: error loading theme file " .. theme)
         elseif theme then
-            -- try and grab user's $HOME directory
-            local homedir = os.getenv("HOME")
             -- expand '~'
             if homedir then
                 for k, v in pairs(theme) do
-                    if type(v) == "string" then theme[k] = v:gsub("~", homedir) end
+                    if type(v) == "string" then theme[k] = v:gsub("^~/", homedir .. "/") end
                 end
             end
 
