@@ -206,8 +206,8 @@ function rules.execute(c, props, callbacks)
         if property == "floating" then
             aclient.floating.set(c, value)
         elseif property == "tag" then
-            c.screen = atag.getscreen(value)
             c:tags({ value })
+            c.screen = atag.getscreen(value)
         elseif property == "switchtotag" and value and props.tag then
             atag.viewonly(props.tag)
         elseif property == "height" or property == "width" or
