@@ -147,6 +147,7 @@ function ewmh.tag(c, t)
     if not t then
         c.sticky = true
     else
+        c.screen = awful.tag.getscreen(t)
         c:tags({ t })
     end
 end
