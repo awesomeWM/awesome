@@ -21,7 +21,9 @@ function debug.assert(cond, message)
     local message = message or cond
     if not cond then
         error(traceback("Assertion failed: '" .. tostring(message) .. "'"))
+        return false
     end
+    return true
 end
 
 -- Given a table (or any other data) return a string that contains its
