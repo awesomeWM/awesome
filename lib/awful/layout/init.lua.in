@@ -22,6 +22,22 @@ local client = require("awful.client")
 local layout = {}
 layout.suit = require("awful.layout.suit")
 
+-- The default list of layouts
+layout.layouts = {
+    layout.suit.floating,
+    layout.suit.tile,
+    layout.suit.tile.left,
+    layout.suit.tile.bottom,
+    layout.suit.tile.top,
+    layout.suit.fair,
+    layout.suit.fair.horizontal,
+    layout.suit.spiral,
+    layout.suit.spiral.dwindle,
+    layout.suit.max,
+    layout.suit.max.fullscreen,
+    layout.suit.magnifier
+}
+
 -- This is a special lock used by the arrange function.
 -- This avoids recurring call by emitted signals.
 local arrange_lock = false
