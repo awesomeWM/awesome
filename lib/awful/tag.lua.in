@@ -270,7 +270,22 @@ end
 -- @param t tag object
 -- @param s Screen number
 function tag.setscreen(t, s)
+    if not tag or type(t) ~= "tag" or not s then return end
+
+    -- Keeping the old index make very little sense when chaning screen
+    tag.setproperty(t, "index", nil)
+
+    local old_screen = tag.getproperty(t,"screen")
+
+    -- Change the screen
     tag.setproperty(t, "screen", s)
+
+    --Prevent some very strange side effects, does create some issue with multitag clients
+    for k,c in ipairs(t:clients()) do
+        c.screen = s --Move all clients
+        c:tags({t})
+    end
+    tag.history.restore(old_screen,1)
 end
 
 --- Get a tag's screen
