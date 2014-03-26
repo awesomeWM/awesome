@@ -308,36 +308,31 @@ luaA_find_xproperty(lua_State *L, int idx)
     return NULL;
 }
 
-/** Set an xproperty.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- */
-static int
-luaA_window_set_xproperty(lua_State *L)
+int
+window_set_xproperty(lua_State *L, xcb_window_t window, int prop_idx, int value_idx)
 {
-    window_t *w = luaA_checkudata(L, 1, &window_class);
-    xproperty_t *prop = luaA_find_xproperty(L, 2);
+    xproperty_t *prop = luaA_find_xproperty(L, prop_idx);
     xcb_atom_t type;
     uint8_t format;
     size_t len;
     uint32_t number;
     const void *data;
 
-    if(lua_isnil(L, 3))
+    if(lua_isnil(L, value_idx))
     {
-        xcb_delete_property(globalconf.connection, w->window, prop->atom);
+        xcb_delete_property(globalconf.connection, window, prop->atom);
     } else {
         if(prop->type == PROP_STRING)
         {
-            data = luaL_checklstring(L, 3, &len);
+            data = luaL_checklstring(L, value_idx, &len);
             type = UTF8_STRING;
             format = 8;
         } else if(prop->type == PROP_NUMBER || prop->type == PROP_BOOLEAN)
         {
             if (prop->type == PROP_NUMBER)
-                number = luaL_checkinteger(L, 3);
+                number = luaL_checkinteger(L, value_idx);
             else
-                number = luaA_checkboolean(L, 3);
+                number = luaA_checkboolean(L, value_idx);
             data = &number;
             len = 1;
             type = XCB_ATOM_CARDINAL;
@@ -345,21 +340,16 @@ luaA_window_set_xproperty(lua_State *L)
         } else
             fatal("Got an xproperty with invalid type");
 
-        xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE, w->window,
+        xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE, window,
                             prop->atom, type, format, len, data);
     }
     return 0;
 }
 
-/** Get an xproperty.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- */
-static int
-luaA_window_get_xproperty(lua_State *L)
+int
+window_get_xproperty(lua_State *L, xcb_window_t window, int prop_idx)
 {
-    window_t *w = luaA_checkudata(L, 1, &window_class);
-    xproperty_t *prop = luaA_find_xproperty(L, 2);
+    xproperty_t *prop = luaA_find_xproperty(L, prop_idx);
     xcb_atom_t type;
     void *data;
     xcb_get_property_reply_t *reply;
@@ -368,7 +358,7 @@ luaA_window_get_xproperty(lua_State *L)
     type = prop->type == PROP_STRING ? UTF8_STRING : XCB_ATOM_CARDINAL;
     length = prop->type == PROP_STRING ? UINT32_MAX : 1;
     reply = xcb_get_property_reply(globalconf.connection,
-            xcb_get_property_unchecked(globalconf.connection, false, w->window,
+            xcb_get_property_unchecked(globalconf.connection, false, window,
                 prop->atom, type, 0, length), NULL);
     if(!reply)
         return 0;
@@ -392,6 +382,28 @@ luaA_window_get_xproperty(lua_State *L)
 
     p_delete(&reply);
     return 1;
+}
+
+/** Set an xproperty.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ */
+static int
+luaA_window_set_xproperty(lua_State *L)
+{
+    window_t *w = luaA_checkudata(L, 1, &window_class);
+    return window_set_xproperty(L, w->window, 2, 3);
+}
+
+/** Get an xproperty.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ */
+static int
+luaA_window_get_xproperty(lua_State *L)
+{
+    window_t *w = luaA_checkudata(L, 1, &window_class);
+    return window_get_xproperty(L, w->window, 2);
 }
 
 /** Translate a window_type_t into the corresponding EWMH atom.

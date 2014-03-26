@@ -147,6 +147,8 @@ const struct luaL_Reg awesome_keygrabber_lib[] =
     { "run", luaA_keygrabber_run },
     { "stop", luaA_keygrabber_stop },
     { "isrunning", luaA_keygrabber_isrunning },
+    { "__index", luaA_default_index },
+    { "__newindex", luaA_default_newindex },
     { NULL, NULL }
 };
 

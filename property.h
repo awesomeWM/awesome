@@ -47,6 +47,8 @@ PROPERTY(net_wm_icon);
 
 void property_handle_propertynotify(xcb_property_notify_event_t *ev);
 int luaA_register_xproperty(lua_State *L);
+int luaA_set_xproperty(lua_State *L);
+int luaA_get_xproperty(lua_State *L);
 
 struct xproperty {
     xcb_atom_t atom;

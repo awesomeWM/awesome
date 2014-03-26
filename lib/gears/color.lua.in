@@ -236,7 +236,8 @@ function color.create_opaque_pattern(col)
         end
         return pattern
     elseif type == "SURFACE" then
-        if pattern:get_surface():get_content() ~= "COLOR" then
+        local status, surface = pattern:get_surface()
+        if status ~= "SUCCESS" or surface.content ~= "COLOR" then
             -- The surface has an alpha channel which *might* be non-opaque
             return
         end

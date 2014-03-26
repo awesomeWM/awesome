@@ -9,6 +9,7 @@ local client = client
 local screen = screen
 local ipairs = ipairs
 local math = math
+local atag = require("awful.tag")
 
 --- Implements EWMH requests handling.
 -- awful.ewmh
@@ -147,6 +148,7 @@ function ewmh.tag(c, t)
     if not t then
         c.sticky = true
     else
+        c.screen = atag.getscreen(t)
         c:tags({ t })
     end
 end

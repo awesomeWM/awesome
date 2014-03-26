@@ -168,124 +168,6 @@ luaA_mbstrlen(lua_State *L)
     return 1;
 }
 
-/** Overload standard Lua next function to use __next key on metatable.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- */
-static int
-luaAe_next(lua_State *L)
-{
-    if(luaL_getmetafield(L, 1, "__next"))
-    {
-        lua_insert(L, 1);
-        lua_call(L, lua_gettop(L) - 1, LUA_MULTRET);
-        return lua_gettop(L);
-    }
-
-    luaL_checktype(L, 1, LUA_TTABLE);
-    lua_settop(L, 2);
-    if(lua_next(L, 1))
-        return 2;
-    lua_pushnil(L);
-    return 1;
-}
-
-/** Overload lua_next() function by using __next metatable field
- * to get next elements.
- * \param L The Lua VM stack.
- * \param idx The index number of elements in stack.
- * \return 1 if more elements to come, 0 otherwise.
- */
-static int
-luaA_next(lua_State *L, int idx)
-{
-    if(luaL_getmetafield(L, idx, "__next"))
-    {
-        /* if idx is relative, reduce it since we got __next */
-        if(idx < 0) idx--;
-        /* copy table and then move key */
-        lua_pushvalue(L, idx);
-        lua_pushvalue(L, -3);
-        lua_remove(L, -4);
-        lua_pcall(L, 2, 2, 0);
-        /* next returned nil, it's the end */
-        if(lua_isnil(L, -1))
-        {
-            /* remove nil */
-            lua_pop(L, 2);
-            return 0;
-        }
-        return 1;
-    }
-    else if(lua_istable(L, idx))
-        return lua_next(L, idx);
-    /* remove the key */
-    lua_pop(L, 1);
-    return 0;
-}
-
-/** Generic pairs function.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- */
-static int
-luaA_generic_pairs(lua_State *L)
-{
-    lua_pushvalue(L, lua_upvalueindex(1));  /* return generator, */
-    lua_pushvalue(L, 1);  /* state, */
-    lua_pushnil(L);  /* and initial value */
-    return 3;
-}
-
-/** Overload standard pairs function to use __pairs field of metatables.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- */
-static int
-luaAe_pairs(lua_State *L)
-{
-    if(luaL_getmetafield(L, 1, "__pairs"))
-    {
-        lua_insert(L, 1);
-        lua_call(L, lua_gettop(L) - 1, LUA_MULTRET);
-        return lua_gettop(L);
-    }
-
-    luaL_checktype(L, 1, LUA_TTABLE);
-    return luaA_generic_pairs(L);
-}
-
-static int
-luaA_ipairs_aux(lua_State *L)
-{
-    int i = luaL_checkint(L, 2) + 1;
-    luaL_checktype(L, 1, LUA_TTABLE);
-    lua_pushinteger(L, i);
-    lua_rawgeti(L, 1, i);
-    return (lua_isnil(L, -1)) ? 0 : 2;
-}
-
-/** Overload standard ipairs function to use __ipairs field of metatables.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- */
-static int
-luaAe_ipairs(lua_State *L)
-{
-    if(luaL_getmetafield(L, 1, "__ipairs"))
-    {
-        lua_insert(L, 1);
-        lua_call(L, lua_gettop(L) - 1, LUA_MULTRET);
-        return lua_gettop(L);
-    }
-
-    luaL_checktype(L, 1, LUA_TTABLE);
-    lua_pushvalue(L, lua_upvalueindex(1));
-    lua_pushvalue(L, 1);
-    lua_pushinteger(L, 0);  /* and initial value */
-    return 3;
-}
-
 /** Enhanced type() function which recognize awesome objects.
  * \param L The Lua VM state.
  * \return The number of arguments pushed on the stack.
@@ -309,118 +191,12 @@ luaA_fixups(lua_State *L)
     lua_pushcfunction(L, luaA_mbstrlen);
     lua_setfield(L, -2, "wlen");
     lua_pop(L, 1);
-    /* replace next */
-    lua_pushcfunction(L, luaAe_next);
-    lua_setglobal(L, "next");
-    /* replace pairs */
-    lua_pushcfunction(L, luaAe_next);
-    lua_pushcclosure(L, luaAe_pairs, 1); /* pairs get next as upvalue */
-    lua_setglobal(L, "pairs");
-    /* replace ipairs */
-    lua_pushcfunction(L, luaA_ipairs_aux);
-    lua_pushcclosure(L, luaAe_ipairs, 1);
-    lua_setglobal(L, "ipairs");
     /* replace type */
     lua_pushcfunction(L, luaAe_type);
     lua_setglobal(L, "type");
     /* set selection */
     lua_pushcfunction(L, luaA_selection_get);
     lua_setglobal(L, "selection");
-}
-
-/** Look for an item: table, function, etc.
- * \param L The Lua VM state.
- * \param item The pointer item.
- */
-bool
-luaA_hasitem(lua_State *L, const void *item)
-{
-    lua_pushnil(L);
-    while(luaA_next(L, -2))
-    {
-        if(lua_topointer(L, -1) == item)
-        {
-            /* remove value and key */
-            lua_pop(L, 2);
-            return true;
-        }
-        if(lua_istable(L, -1))
-            if(luaA_hasitem(L, item))
-            {
-                /* remove key and value */
-                lua_pop(L, 2);
-                return true;
-            }
-        /* remove value */
-        lua_pop(L, 1);
-    }
-    return false;
-}
-
-/** Browse a table pushed on top of the index, and put all its table and
- * sub-table into an array.
- * \param L The Lua VM state.
- * \param elems The elements array.
- * \return False if we encounter an elements already in list.
- */
-static bool
-luaA_isloop_check(lua_State *L, cptr_array_t *elems)
-{
-    if(lua_istable(L, -1))
-    {
-        const void *object = lua_topointer(L, -1);
-
-        /* Check that the object table is not already in the list */
-        for(int i = 0; i < elems->len; i++)
-            if(elems->tab[i] == object)
-                return false;
-
-        /* push the table in the elements list */
-        cptr_array_append(elems, object);
-
-        /* look every object in the "table" */
-        lua_pushnil(L);
-        while(luaA_next(L, -2))
-        {
-            if(!luaA_isloop_check(L, elems))
-            {
-                /* remove key and value */
-                lua_pop(L, 2);
-                return false;
-            }
-            /* remove value, keep key for next iteration */
-            lua_pop(L, 1);
-        }
-    }
-    return true;
-}
-
-/** Check if a table is a loop. When using tables as direct acyclic digram,
- * this is useful.
- * \param L The Lua VM state.
- * \param idx The index of the table in the stack
- * \return True if the table loops.
- */
-bool
-luaA_isloop(lua_State *L, int idx)
-{
-    /* elems is an elements array that we will fill with all array we
-     * encounter while browsing the tables */
-    cptr_array_t elems;
-
-    cptr_array_init(&elems);
-
-    /* push table on top */
-    lua_pushvalue(L, idx);
-
-    bool ret = luaA_isloop_check(L, &elems);
-
-    /* remove pushed table */
-    lua_pop(L, 1);
-
-    cptr_array_wipe(&elems);
-
-    return !ret;
 }
 
 /** awesome global table.
@@ -466,8 +242,10 @@ luaA_awesome_index(lua_State *L)
         return 1;
     }
 
-    if(A_STREQ(buf, "startup_errors") && globalconf.startup_errors.len != 0)
+    if(A_STREQ(buf, "startup_errors"))
     {
+        if (globalconf.startup_errors.len == 0)
+            return 0;
         lua_pushstring(L, globalconf.startup_errors.s);
         return 1;
     }
@@ -478,7 +256,7 @@ luaA_awesome_index(lua_State *L)
         return 1;
     }
 
-    return 0;
+    return luaA_default_index(L);
 }
 
 /** Add a global signal.
@@ -582,7 +360,10 @@ luaA_init(xdgHandle* xdg)
         { "systray", luaA_systray },
         { "load_image", luaA_load_image },
         { "register_xproperty", luaA_register_xproperty },
+        { "set_xproperty", luaA_set_xproperty },
+        { "get_xproperty", luaA_get_xproperty },
         { "__index", luaA_awesome_index },
+        { "__newindex", luaA_default_newindex },
         { NULL, NULL }
     };
 
@@ -817,6 +598,18 @@ void
 luaA_emit_refresh()
 {
     signal_object_emit(globalconf.L, &global_signals, "refresh", 0);
+}
+
+int
+luaA_default_index(lua_State *L)
+{
+    return luaA_class_index_miss_property(L, NULL);
+}
+
+int
+luaA_default_newindex(lua_State *L)
+{
+    return luaA_class_newindex_miss_property(L, NULL);
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

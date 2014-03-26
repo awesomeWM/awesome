@@ -642,8 +642,8 @@ drawin_class_setup(lua_State *L)
                             (lua_class_propfunc_t) luaA_drawin_get_shape_clip,
                             (lua_class_propfunc_t) luaA_drawin_set_shape_clip);
 
-    signal_add(&client_class.signals, "property::shape_bounding");
-    signal_add(&client_class.signals, "property::shape_clip");
+    signal_add(&drawin_class.signals, "property::shape_bounding");
+    signal_add(&drawin_class.signals, "property::shape_clip");
     signal_add(&drawin_class.signals, "property::border_width");
     signal_add(&drawin_class.signals, "property::cursor");
     signal_add(&drawin_class.signals, "property::height");

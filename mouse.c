@@ -106,7 +106,7 @@ luaA_mouse_index(lua_State *L)
 
     /* attr is not "screen"?! */
     if (A_STRNEQ(attr, "screen"))
-        return 0;
+        return luaA_default_index(L);
 
     if (!mouse_query_pointer_root(&mouse_x, &mouse_y, NULL, NULL))
     {
@@ -137,7 +137,7 @@ luaA_mouse_newindex(lua_State *L)
     int screen;
 
     if (A_STRNEQ(attr, "screen"))
-        return 0;
+        return luaA_default_newindex(L);
 
     screen = luaL_checknumber(L, 3) - 1;
     luaA_checkscreen(screen);

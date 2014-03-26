@@ -394,20 +394,28 @@ property_handle_propertynotify_xproperty(xcb_property_notify_event_t *ev)
         /* Property is not registered */
         return;
 
-    obj = client_getbywin(ev->window);
-    if(!obj)
-        obj = drawin_getbywin(ev->window);
-    if(!obj)
-        return;
+    if (ev->window != globalconf.screen->root)
+    {
+        obj = client_getbywin(ev->window);
+        if(!obj)
+            obj = drawin_getbywin(ev->window);
+        if(!obj)
+            return;
+    } else
+        obj = NULL;
 
     /* Get us the name of the property */
     buffer_inita(&buf, a_strlen(prop->name) + a_strlen("xproperty::") + 1);
     buffer_addf(&buf, "xproperty::%s", prop->name);
 
     /* And emit the right signal */
-    luaA_object_push(globalconf.L, obj);
-    luaA_object_emit_signal(globalconf.L, -1, buf.s, 0);
-    lua_pop(globalconf.L, 1);
+    if (obj)
+    {
+        luaA_object_push(globalconf.L, obj);
+        luaA_object_emit_signal(globalconf.L, -1, buf.s, 0);
+        lua_pop(globalconf.L, 1);
+    } else
+        signal_object_emit(globalconf.L, &global_signals, buf.s, 0);
     buffer_wipe(&buf);
 }
 
@@ -519,10 +527,31 @@ luaA_register_xproperty(lua_State *L)
         property.name = a_strdup(name);
         xproperty_array_insert(&globalconf.xproperties, property);
         signal_add(&window_class.signals, buf.s);
+        signal_add(&global_signals, buf.s);
         buffer_wipe(&buf);
     }
 
     return 0;
+}
+
+/** Set an xproperty.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ */
+int
+luaA_set_xproperty(lua_State *L)
+{
+    return window_set_xproperty(L, globalconf.screen->root, 1, 2);
+}
+
+/** Get an xproperty.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ */
+int
+luaA_get_xproperty(lua_State *L)
+{
+    return window_get_xproperty(L, globalconf.screen->root, 1);
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

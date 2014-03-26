@@ -502,7 +502,7 @@ luaA_screen_index(lua_State *L)
         return 1;
     }
 
-    return 0;
+    return luaA_default_index(L);
 }
 
 /** Add a signal to a screen.
@@ -610,6 +610,7 @@ const struct luaL_Reg awesome_screen_methods[] =
 {
     { "count", luaA_screen_count },
     { "__index", luaA_screen_module_index },
+    { "__newindex", luaA_default_newindex },
     { NULL, NULL }
 };
 
@@ -620,6 +621,7 @@ const struct luaL_Reg awesome_screen_meta[] =
     { "disconnect_signal", luaA_screen_disconnect_signal },
     { "emit_signal", luaA_screen_emit_signal },
     { "__index", luaA_screen_index },
+    { "__newindex", luaA_default_newindex },
     { NULL, NULL }
 };
 
