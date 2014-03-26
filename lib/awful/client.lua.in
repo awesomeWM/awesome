@@ -502,10 +502,8 @@ function client.movetoscreen(c, s)
             s = sel.screen + 1
         end
         if s > sc then s = 1 elseif s < 1 then s = sc end
-        if #tag.selectedlist(s) > 0 then
-            sel.screen = s
-            screen.focus(s)
-        end
+        sel.screen = s
+        screen.focus(s)
     end
 end
 
