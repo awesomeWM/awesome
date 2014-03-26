@@ -270,7 +270,22 @@ end
 -- @param t tag object
 -- @param s Screen number
 function tag.setscreen(t, s)
+    local s = s or capi.mouse.screen
+
+    -- Keeping the old index make very little sense when changing screen
+    tag.setproperty(t, "index", nil)
+
+    local old_screen = tag.getproperty(t,"screen")
+
+    -- Change the screen
     tag.setproperty(t, "screen", s)
+
+    -- Make sure the client's screen matches its tags
+    for k,c in ipairs(t:clients()) do
+        c.screen = s --Move all clients
+        c:tags({t})
+    end
+    tag.history.restore(old_screen,1)
 end
 
 --- Get a tag's screen
