@@ -530,7 +530,12 @@ function tag.withcurrent(c)
     if #tags == 0 then
         tags = tag.selectedlist(c.screen)
     end
-    c:tags(tags)
+    if #tags == 0 then
+        tags = tag.gettags(c.screen)
+    end
+    if #tags ~= 0 then
+        c:tags(tags)
+    end
 end
 
 local function attached_connect_signal_screen(screen, sig, func)
