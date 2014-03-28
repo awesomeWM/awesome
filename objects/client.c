@@ -1176,7 +1176,11 @@ client_unmanage(client_t *c, bool window_valid)
         xcb_reparent_window(globalconf.connection, c->window, globalconf.screen->root,
                 c->geometry.x, c->geometry.y);
     }
+
+    /* Ignore all spurious enter/leave notify events */
+    client_ignore_enterleave_events();
     xcb_destroy_window(globalconf.connection, c->frame_window);
+    client_restore_enterleave_events();
 
     if(window_valid)
     {
