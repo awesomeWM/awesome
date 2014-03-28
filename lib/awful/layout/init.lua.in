@@ -51,11 +51,12 @@ function layout.get(screen)
 end
 
 --- Change the layout of the current tag.
--- @param layouts A table of layouts.
 -- @param i Relative index.
 -- @param s The screen number. 
-function layout.inc(layouts, i, s)
+-- @param layouts A table of layouts. (optional)
+function layout.inc(i, s, layouts)
     local t = tag.selected(s)
+    local layouts = layouts or layout.layouts
     if t then
         local curlayout = layout.get(s)
         local curindex
