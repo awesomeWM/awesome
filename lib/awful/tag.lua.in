@@ -158,7 +158,7 @@ function tag.delete(target_tag, fallback_tag)
 
     -- If no tags are visible, try and view one.
     if tag.selected(target_scr) == nil and ntags > 0 then
-        tag.history.restore()
+        tag.history.restore(nil, 1)
         if tag.selected(target_scr) == nil then
             tag.gettags(target_scr)[1].selected = true
         end
