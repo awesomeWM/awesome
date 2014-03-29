@@ -14,6 +14,7 @@ local pairs = pairs
 local type = type
 local cairo = require("lgi").cairo
 local surface = require("gears.surface")
+local beautiful = require("beautiful")
 
 local color = { mt = {} }
 
@@ -70,7 +71,23 @@ function color.create_png_pattern(file)
         file = file.file
     end
     local image = surface.load(file)
-    return cairo.Pattern.create_for_surface(image)
+    local pattern = cairo.Pattern.create_for_surface(image)
+    cairo.Pattern.set_extend(pattern,cairo.Extend.REPEAT)
+    return pattern
+end
+
+--- Apply a "fill" mask on an image
+-- This can be used to turn any images into a monochrome one
+-- @param img A file or a surface
+-- @param mask A color, gradient, pattern or nothing.
+--             beautiful.icon_mask an beautiful.fg_normal are used as fallbacks
+function color.apply_mask(img,mask_col)
+    img = surface(img)
+    local cr = cairo.Context(img)
+    cr:set_source(color(mask_col or beautiful.icon_mask or beautiful.fg_normal))
+    cr:set_operator(cairo.Operator.IN)
+    cr:paint()
+    return img
 end
 
 -- Add stops to the given pattern.

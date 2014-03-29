@@ -52,15 +52,6 @@ local function prepare_wallpaper(s)
     return geom, img, cr
 end
 
---- Get the size of a cairo surface
--- @param surf The surface you are interested in
--- @return The surface's width and height
-local function surface_size(surf)
-    local cr = cairo.Context(surf)
-    local x, y, w, h = cr:clip_extents()
-    return w, h
-end
-
 --- Set the current wallpaper.
 -- @param pattern The wallpaper that should be set. This can be a cairo surface,
 --                a description for gears.color or a cairo pattern.
@@ -94,7 +85,7 @@ function wallpaper.centered(surf, s, background)
     cr:paint()
 
     -- Now center the surface
-    local w, h = surface_size(surf)
+    local w, h = surface.get_size(surf)
     cr:translate((geom.width - w) / 2, (geom.height - h) / 2)
     cr:rectangle(0, 0, w, h)
     cr:clip()
@@ -135,7 +126,7 @@ end
 function wallpaper.maximized(surf, s, ignore_aspect, offset)
     local geom, img, cr = prepare_wallpaper(s)
     local surf = surface(surf)
-    local w, h = surface_size(surf)
+    local w, h = surface.get_size(surf)
     local aspect_w = geom.width / w
     local aspect_h = geom.height / h
 
@@ -173,7 +164,7 @@ function wallpaper.fit(surf, s, background)
     cr:paint()
 
     -- Now fit the surface
-    local w, h = surface_size(surf)
+    local w, h = surface.get_size(surf)
     local scale = geom.width / w
     if h * scale > geom.height then
        scale = geom.height / h
