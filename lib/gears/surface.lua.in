@@ -17,14 +17,17 @@ end
 
 -- gears.surface
 local surface = { mt = {} }
+local surface_cache = setmetatable({}, { __mode = 'v' })
 
 --- Try to convert the argument into an lgi cairo surface.
 -- This is usually needed for loading images by file name.
-function surface.load(_surface)
+function surface.load_uncached(_surface)
     -- Nil is not changed
     if not _surface then
         return nil
     end
+    -- Remove from cache if it was cached
+    surface_cache[_surface] = nil
     -- lgi cairo surfaces don't get changed either
     if cairo.Surface:is_type_of(_surface) then
         return _surface
@@ -35,6 +38,18 @@ function surface.load(_surface)
     end
     -- Everything else gets forced into a surface
     return cairo.Surface(_surface, true)
+end
+
+function surface.load(_surface)
+    if type(_surface) == "string" then
+        local cache = surface_cache[_surface]
+        if not cache then
+            cache = surface.load_uncached(_surface)
+            surface_cache[_surface] = cache
+        end
+        return cache
+    end
+    return surface.load_uncached(_surface)
 end
 
 function surface.mt:__call(...)
