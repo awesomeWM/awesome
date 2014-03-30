@@ -59,7 +59,7 @@ typedef struct xproperty xproperty_t;
 
 ARRAY_TYPE(button_t *, button)
 ARRAY_TYPE(tag_t *, tag)
-ARRAY_TYPE(screen_t, screen)
+ARRAY_TYPE(screen_t *, screen)
 ARRAY_TYPE(client_t *, client)
 ARRAY_TYPE(drawin_t *, drawin)
 ARRAY_TYPE(xproperty_t, xproperty)

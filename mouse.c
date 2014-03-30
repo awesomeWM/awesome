@@ -114,14 +114,14 @@ luaA_mouse_index(lua_State *L)
          * having lots of lua errors in this case.
          */
         if (globalconf.focus.client)
-            lua_pushnumber(L, screen_array_indexof(&globalconf.screens, globalconf.focus.client->screen) + 1);
+            lua_pushnumber(L, screen_get_index(globalconf.focus.client->screen));
         else
             lua_pushnumber(L, 1);
         return 1;
     }
 
     screen = screen_getbycoord(mouse_x, mouse_y);
-    lua_pushnumber(L, screen_array_indexof(&globalconf.screens, screen) + 1);
+    lua_pushnumber(L, screen_get_index(screen));
     return 1;
 }
 
@@ -142,8 +142,8 @@ luaA_mouse_newindex(lua_State *L)
     screen = luaL_checknumber(L, 3) - 1;
     luaA_checkscreen(screen);
 
-    x = globalconf.screens.tab[screen].geometry.x;
-    y = globalconf.screens.tab[screen].geometry.y;
+    x = globalconf.screens.tab[screen]->geometry.x;
+    y = globalconf.screens.tab[screen]->geometry.y;
 
     mouse_warp_pointer(globalconf.screen->root, x, y);
     return 0;

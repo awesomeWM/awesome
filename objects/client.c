@@ -847,6 +847,14 @@ client_resize(client_t *c, area_t geometry, bool honor_hints)
     return false;
 }
 
+static void
+client_emit_property_workarea_on_screen(lua_State *L, client_t *c)
+{
+    luaA_object_push(L, c->screen);
+    luaA_object_emit_signal(L, -1, "property::workarea", 0);
+    lua_pop(L, 1);
+}
+
 /** Set a client minimized, or not.
  * \param L The Lua VM state.
  * \param cidx The client index.
@@ -866,7 +874,7 @@ client_set_minimized(lua_State *L, int cidx, bool s)
         else
             xwindow_set_state(c->window, XCB_ICCCM_WM_STATE_NORMAL);
         if(strut_has_value(&c->strut))
-            screen_emit_signal(globalconf.L, c->screen, "property::workarea", 0);
+            client_emit_property_workarea_on_screen(L, c);
         luaA_object_emit_signal(L, cidx, "property::minimized", 0);
     }
 }
@@ -886,7 +894,7 @@ client_set_hidden(lua_State *L, int cidx, bool s)
         c->hidden = s;
         banning_need_update();
         if(strut_has_value(&c->strut))
-            screen_emit_signal(globalconf.L, c->screen, "property::workarea", 0);
+            client_emit_property_workarea_on_screen(L, c);
         luaA_object_emit_signal(L, cidx, "property::hidden", 0);
     }
 }
@@ -1142,7 +1150,7 @@ client_unmanage(client_t *c, bool window_valid)
     luaA_class_emit_signal(globalconf.L, &client_class, "list", 0);
 
     if(strut_has_value(&c->strut))
-        screen_emit_signal(globalconf.L, c->screen, "property::workarea", 0);
+        client_emit_property_workarea_on_screen(globalconf.L, c);
 
     /* Get rid of all titlebars */
     for (client_titlebar_t bar = CLIENT_TITLEBAR_TOP; bar < CLIENT_TITLEBAR_COUNT; bar++) {
@@ -1253,7 +1261,7 @@ luaA_client_get(lua_State *L)
     {
         luaA_checkscreen(screen);
         foreach(c, globalconf.clients)
-            if((*c)->screen == &globalconf.screens.tab[screen])
+            if((*c)->screen == globalconf.screens.tab[screen])
             {
                 luaA_object_push(L, *c);
                 lua_rawseti(L, -2, i++);
@@ -1676,7 +1684,7 @@ luaA_client_set_screen(lua_State *L, client_t *c)
 {
     int screen = luaL_checknumber(L, -1) - 1;
     luaA_checkscreen(screen);
-    screen_client_moveto(c, &globalconf.screens.tab[screen], true);
+    screen_client_moveto(c, globalconf.screens.tab[screen], true);
 
     return 0;
 }
@@ -1858,7 +1866,7 @@ luaA_client_get_screen(lua_State *L, client_t *c)
 {
     if(!c->screen)
         return 0;
-    lua_pushnumber(L, 1 + screen_array_indexof(&globalconf.screens, c->screen));
+    lua_pushnumber(L, screen_get_index(c->screen));
     return 1;
 }
 

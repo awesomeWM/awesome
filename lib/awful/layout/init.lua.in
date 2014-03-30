@@ -152,9 +152,8 @@ local function arrange_tag(t)
     layout.arrange(tag.getscreen(t))
 end
 
+capi.screen.add_signal("arrange")
 for s = 1, capi.screen.count() do
-    capi.screen[s]:add_signal("arrange")
-
     tag.attached_connect_signal(s, "property::mwfact", arrange_tag)
     tag.attached_connect_signal(s, "property::nmaster", arrange_tag)
     tag.attached_connect_signal(s, "property::ncol", arrange_tag)

@@ -603,8 +603,8 @@ capi.tag.add_signal("property::windowfact")
 capi.tag.add_signal("property::screen")
 capi.tag.add_signal("property::index")
 
+capi.screen.add_signal("tag::history::update")
 for s = 1, capi.screen.count() do
-    capi.screen[s]:add_signal("tag::history::update")
     capi.screen[s]:connect_signal("tag::history::update", tag.history.update)
 end
 

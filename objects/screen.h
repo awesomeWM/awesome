@@ -30,21 +30,18 @@ ARRAY_TYPE(screen_output_t, screen_output)
 
 struct a_screen
 {
+    LUA_OBJECT_HEADER
     /** Screen geometry */
     area_t geometry;
-    /** The signals emitted by screen objects */
-    signal_array_t signals;
     /** The screen outputs informations */
     screen_output_array_t outputs;
-    /** The lua userdata representing this screen */
-    void *userdata;
 };
-ARRAY_FUNCS(screen_t, screen, DO_NOTHING)
+ARRAY_FUNCS(screen_t *, screen, DO_NOTHING)
 
-void screen_emit_signal(lua_State *, screen_t *, const char *, int);
+void screen_class_setup(lua_State *L);
 void screen_scan(void);
 screen_t *screen_getbycoord(int, int);
-area_t screen_area_get(screen_t *, bool);
+int screen_get_index(screen_t *);
 area_t display_area_get(void);
 void screen_client_moveto(client_t *, screen_t *, bool);
 

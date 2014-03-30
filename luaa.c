@@ -57,8 +57,6 @@ extern const struct luaL_Reg awesome_mousegrabber_lib[];
 extern const struct luaL_Reg awesome_root_lib[];
 extern const struct luaL_Reg awesome_mouse_methods[];
 extern const struct luaL_Reg awesome_mouse_meta[];
-extern const struct luaL_Reg awesome_screen_methods[];
-extern const struct luaL_Reg awesome_screen_meta[];
 
 /** Path to config file */
 static char *conffile;
@@ -402,11 +400,11 @@ luaA_init(xdgHandle* xdg)
     luaA_registerlib(L, "mousegrabber", awesome_mousegrabber_lib);
     lua_pop(L, 1); /* luaA_registerlib() leaves the table on stack */
 
-    /* Export screen */
-    luaA_openlib(L, "screen", awesome_screen_methods, awesome_screen_meta);
-
     /* Export mouse */
     luaA_openlib(L, "mouse", awesome_mouse_methods, awesome_mouse_meta);
+
+    /* Export screen */
+    screen_class_setup(L);
 
     /* Export button */
     button_class_setup(L);

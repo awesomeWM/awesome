@@ -80,7 +80,11 @@ luaA_window_struts(lua_State *L)
         /* FIXME: Only emit if the workarea actually changed
          * (= window is visible, only on the right screen)? */
         foreach(s, globalconf.screens)
-            screen_emit_signal(L, s, "property::workarea", 0);
+        {
+            luaA_object_push(L, *s);
+            luaA_object_emit_signal(L, -1, "property::workarea", 0);
+            lua_pop(L, 1);
+        }
     }
 
     return luaA_pushstrut(L, window->strut);
