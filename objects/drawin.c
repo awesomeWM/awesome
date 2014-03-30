@@ -72,12 +72,6 @@ drawin_wipe(drawin_t *w)
     w->drawable = NULL;
 }
 
-void
-drawin_unref_simplified(drawin_t **item)
-{
-    luaA_object_unref(globalconf.L, *item);
-}
-
 static void
 drawin_update_drawing(drawin_t *w, int widx)
 {

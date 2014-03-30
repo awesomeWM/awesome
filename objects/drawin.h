@@ -44,9 +44,7 @@ struct drawin_t
     area_t geometry;
 };
 
-void drawin_unref_simplified(drawin_t **);
-
-ARRAY_FUNCS(drawin_t *, drawin, drawin_unref_simplified)
+ARRAY_FUNCS(drawin_t *, drawin, DO_NOTHING)
 
 drawin_t * drawin_getbywin(xcb_window_t);
 
