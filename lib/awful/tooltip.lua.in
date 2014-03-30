@@ -124,6 +124,14 @@ local function set_text(self, text)
     set_geometry(self)
 end
 
+--- Change displayed text.
+-- @param self The tooltip object.
+-- @param text New tooltip text, including pango markup.
+local function set_markup(self, text)
+    self.textbox:set_markup(text)
+    set_geometry(self)
+end
+
 --- Change the tooltip's update interval.
 -- @param self A tooltip object.
 -- @param timeout The timeout value.
@@ -160,6 +168,7 @@ end
 -- @see add_to_object
 -- @see set_timeout
 -- @see set_text
+-- @see set_markup
 local function new(args)
     local self = {
         wibox =  wibox({ }),
@@ -174,6 +183,7 @@ local function new(args)
 
     -- export functions
     self.set_text = set_text
+    self.set_markup = set_markup
     self.set_timeout = set_timeout
     self.add_to_object = add_to_object
     self.remove_from_object = remove_from_object
@@ -182,7 +192,7 @@ local function new(args)
     if args.timer_function then
         data[self].timer = timer { timeout = args.timeout and args.timeout or 1 }
         data[self].timer_function = function()
-                self:set_text(args.timer_function())
+                self:set_markup(args.timer_function())
             end
         data[self].timer:connect_signal("timeout", data[self].timer_function)
     end
