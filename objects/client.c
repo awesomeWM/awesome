@@ -24,8 +24,8 @@
 #include <cairo-xcb.h>
 
 #include "objects/tag.h"
+#include "objects/screen.h"
 #include "ewmh.h"
-#include "screen.h"
 #include "systray.h"
 #include "property.h"
 #include "spawn.h"

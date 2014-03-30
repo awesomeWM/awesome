@@ -20,10 +20,9 @@
  *
  */
 
-#include "screen.h"
 #include "drawin.h"
 #include "objects/client.h"
-#include "screen.h"
+#include "objects/screen.h"
 #include "xwindow.h"
 #include "luaa.h"
 #include "ewmh.h"

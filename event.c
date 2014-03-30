@@ -39,7 +39,7 @@
 #include "mousegrabber.h"
 #include "luaa.h"
 #include "systray.h"
-#include "screen.h"
+#include "objects/screen.h"
 #include "common/atoms.h"
 #include "common/xutil.h"
 

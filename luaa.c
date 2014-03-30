@@ -40,7 +40,7 @@
 #include "objects/client.h"
 #include "objects/drawin.h"
 #include "objects/drawable.h"
-#include "screen.h"
+#include "objects/screen.h"
 #include "event.h"
 #include "property.h"
 #include "selection.h"

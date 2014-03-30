@@ -20,7 +20,6 @@
  */
 
 #include "ewmh.h"
-#include "screen.h"
 #include "stack.h"
 #include "objects/client.h"
 #include "objects/drawin.h"

@@ -20,7 +20,7 @@
  */
 
 #include "mouse.h"
-#include "screen.h"
+#include "objects/screen.h"
 #include "objects/client.h"
 #include "globalconf.h"
 #include "objects/drawin.h"

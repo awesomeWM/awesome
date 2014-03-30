@@ -25,11 +25,11 @@
 #include <xcb/xinerama.h>
 #include <xcb/randr.h>
 
-#include "screen.h"
-#include "ewmh.h"
+#include "objects/screen.h"
 #include "objects/tag.h"
 #include "objects/client.h"
 #include "objects/drawin.h"
+#include "ewmh.h"
 #include "luaa.h"
 #include "common/xutil.h"
 

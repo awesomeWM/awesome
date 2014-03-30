@@ -21,11 +21,11 @@
 
 #include <xcb/xcb_atom.h>
 
-#include "screen.h"
 #include "property.h"
-#include "objects/client.h"
 #include "ewmh.h"
+#include "objects/client.h"
 #include "objects/drawin.h"
+#include "objects/screen.h"
 #include "xwindow.h"
 #include "luaa.h"
 #include "common/atoms.h"

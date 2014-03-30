@@ -26,9 +26,9 @@
 #include <xcb/xcb_atom.h>
 
 #include "ewmh.h"
-#include "objects/tag.h"
-#include "screen.h"
 #include "objects/client.h"
+#include "objects/screen.h"
+#include "objects/tag.h"
 #include "luaa.h"
 #include "common/atoms.h"
 #include "common/buffer.h"

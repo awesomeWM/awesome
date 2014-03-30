@@ -24,7 +24,6 @@
 #include <xcb/xcb_atom.h>
 
 #include "luaa.h"
-#include "screen.h"
 #include "systray.h"
 #include "xwindow.h"
 #include "common/array.h"
