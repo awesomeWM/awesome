@@ -120,7 +120,6 @@ end
 -- @param self The tooltip object.
 -- @param text New tooltip text.
 local function set_text(self, text)
-    self.textbox:set_font(data[self].font)
     self.textbox:set_text(text)
     set_geometry(self)
 end
@@ -132,17 +131,6 @@ local function set_timeout(self, timeout)
     if data[self].timer then
         data[self].timer.timeout = timeout
     end
-end
-
--- Load Default values.
--- @param self A tooltip object.
-local function set_defaults(self)
-    self.wibox.border_width = beautiful.tooltip_border_width or beautiful.border_width or 1
-    self.wibox.border_color = beautiful.tooltip_border_color or beautiful.border_normal or "#ffcb60"
-    self.wibox.opacity = beautiful.tooltip_opacity or 1
-    self.wibox:set_bg(beautiful.tooltip_bg_color or beautiful.bg_focus or "#ffcb60")
-    data[self].fg = beautiful.tooltip_fg_color or beautiful.fg_focus or "#000000"
-    data[self].font = beautiful.tooltip_font or beautiful.font or "terminus 6"
 end
 
 --- Add tooltip to an object.
@@ -190,8 +178,6 @@ local function new(args)
     self.add_to_object = add_to_object
     self.remove_from_object = remove_from_object
 
-    set_defaults(self)
-
     -- setup the timer action only if needed
     if args.timer_function then
         data[self].timer = timer { timeout = args.timeout and args.timeout or 1 }
@@ -201,13 +187,22 @@ local function new(args)
         data[self].timer:connect_signal("timeout", data[self].timer_function)
     end
 
+    -- Set default properties
+    self.wibox.border_width = beautiful.tooltip_border_width or beautiful.border_width or 1
+    self.wibox.border_color = beautiful.tooltip_border_color or beautiful.border_normal or "#ffcb60"
+    self.wibox.opacity = beautiful.tooltip_opacity or 1
+    self.wibox:set_bg(beautiful.tooltip_bg_color or beautiful.bg_focus or "#ffcb60")
+    local fg = beautiful.tooltip_fg_color or beautiful.fg_focus or "#000000"
+    local font = beautiful.tooltip_font or beautiful.font or "terminus 6"
+
     -- set tooltip properties
     self.wibox.visible = false
     -- Who wants a non ontop tooltip ?
     self.wibox.ontop = true
     self.textbox = textbox()
+    self.textbox:set_font(font)
     self.background = background(self.textbox)
-    self.background:set_fg(data[self].fg)
+    self.background:set_fg(fg)
     self.wibox:set_widget(self.background)
 
     -- add some signals on both the tooltip and widget
