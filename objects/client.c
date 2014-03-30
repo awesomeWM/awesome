@@ -455,12 +455,10 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, xcb_get_window_at
     xcb_create_window(globalconf.connection, globalconf.default_depth, c->frame_window, s->root,
                       wgeom->x, wgeom->y, wgeom->width, wgeom->height,
                       wgeom->border_width, XCB_COPY_FROM_PARENT, globalconf.visual->visual_id,
-                      XCB_CW_BACK_PIXEL | XCB_CW_BORDER_PIXEL | XCB_CW_BIT_GRAVITY
-                      | XCB_CW_WIN_GRAVITY | XCB_CW_OVERRIDE_REDIRECT | XCB_CW_EVENT_MASK
-                      | XCB_CW_COLORMAP,
+                      XCB_CW_BORDER_PIXEL | XCB_CW_BIT_GRAVITY | XCB_CW_WIN_GRAVITY
+                      | XCB_CW_OVERRIDE_REDIRECT | XCB_CW_EVENT_MASK | XCB_CW_COLORMAP,
                       (const uint32_t [])
                       {
-                          globalconf.screen->black_pixel,
                           globalconf.screen->black_pixel,
                           XCB_GRAVITY_NORTH_WEST,
                           XCB_GRAVITY_NORTH_WEST,
