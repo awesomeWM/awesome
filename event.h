@@ -22,10 +22,17 @@
 #ifndef AWESOME_EVENT_H
 #define AWESOME_EVENT_H
 
-#include "objects/client.h"
+#include "banning.h"
+#include "globalconf.h"
+#include "stack.h"
+
+#include <xcb/xcb.h>
 
 /* luaa.c */
 void luaA_emit_refresh(void);
+
+/* objects/client.c */
+void client_focus_refresh(void);
 
 static inline int
 awesome_refresh(void)

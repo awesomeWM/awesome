@@ -24,9 +24,7 @@
 #define AWESOME_OBJECTS_DRAWIN_H
 
 #include "objects/window.h"
-#include "common/luaobject.h"
 #include "objects/drawable.h"
-#include "draw.h"
 
 /** Drawin type */
 struct drawin_t

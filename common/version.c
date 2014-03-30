@@ -19,15 +19,15 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "config.h"
+#include "common/version.h"
+#include "awesome-version-internal.h"
+
 #include <stdlib.h>
 #include <stdio.h>
 
 #include <lualib.h>
 #include <lauxlib.h>
-
-#include "config.h"
-#include "common/version.h"
-#include "awesome-version-internal.h"
 
 /** \brief Print version message and quit program.
  * \param executable program name

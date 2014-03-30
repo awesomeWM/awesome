@@ -24,6 +24,9 @@
 
 #include "common/signal.h"
 
+#include <lua.h>
+#include <lauxlib.h>
+
 typedef struct lua_class_property lua_class_property_t;
 
 ARRAY_TYPE(lua_class_property_t, lua_class_property)

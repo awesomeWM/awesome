@@ -23,16 +23,21 @@
 #define AWESOME_OBJECTS_BUTTON_H
 
 #include "globalconf.h"
+#include "common/luaclass.h"
+#include "common/luaobject.h"
+
+#include <stdint.h>
+#include <xcb/xcb.h>
 
 /** Mouse buttons bindings */
-struct button_t
+typedef struct button_t
 {
     LUA_OBJECT_HEADER
     /** Key modifiers */
     uint16_t modifiers;
     /** Mouse button number */
     xcb_button_t button;
-};
+} button_t;
 
 lua_class_t button_class;
 LUA_OBJECT_FUNCS(button_class, button_t, button)

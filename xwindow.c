@@ -19,14 +19,13 @@
  *
  */
 
+#include "xwindow.h"
+#include "common/atoms.h"
+#include "objects/button.h"
+
 #include <xcb/xcb.h>
-#include <xcb/xcb_atom.h>
 #include <xcb/shape.h>
 #include <cairo-xcb.h>
-
-#include "xwindow.h"
-#include "objects/button.h"
-#include "common/atoms.h"
 
 /** Mask shorthands */
 #define BUTTONMASK     (XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_BUTTON_RELEASE)

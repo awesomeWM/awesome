@@ -20,6 +20,7 @@
  */
 
 #include "tag.h"
+#include "banning.h"
 #include "client.h"
 #include "ewmh.h"
 #include "luaa.h"

@@ -19,14 +19,11 @@
  *
  */
 
-#include "luaa.h"
-#include "xwindow.h"
-#include "ewmh.h"
-#include "property.h"
-#include "objects/screen.h"
 #include "objects/window.h"
 #include "common/atoms.h"
-#include "common/luaobject.h"
+#include "ewmh.h"
+#include "property.h"
+#include "xwindow.h"
 
 LUA_CLASS_FUNCS(window, window_class)
 

@@ -19,18 +19,16 @@
  *
  */
 
-#include <X11/keysym.h>
-#include <X11/XF86keysym.h>
-#include <xcb/xtest.h>
-#include <cairo-xcb.h>
-
 #include "globalconf.h"
-#include "objects/button.h"
-#include "objects/drawin.h"
-#include "luaa.h"
-#include "xwindow.h"
+
+#include "common/atoms.h"
 #include "common/xcursor.h"
-#include "common/xutil.h"
+#include "objects/button.h"
+#include "xwindow.h"
+
+#include <xcb/xtest.h>
+#include <xcb/xcb_aux.h>
+#include <cairo-xcb.h>
 
 static void
 root_set_wallpaper_pixmap(xcb_connection_t *c, xcb_pixmap_t p)

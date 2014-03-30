@@ -19,17 +19,15 @@
  *
  */
 
+#include "systray.h"
+#include "common/atoms.h"
+#include "objects/drawin.h"
+#include "xwindow.h"
+#include "globalconf.h"
+
 #include <xcb/xcb.h>
 #include <xcb/xcb_icccm.h>
 #include <xcb/xcb_atom.h>
-
-#include "luaa.h"
-#include "systray.h"
-#include "xwindow.h"
-#include "common/array.h"
-#include "common/atoms.h"
-#include "common/xutil.h"
-#include "objects/drawin.h"
 
 #define SYSTEM_TRAY_REQUEST_DOCK 0 /* Begin icon docking */
 

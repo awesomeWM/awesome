@@ -24,6 +24,8 @@
 
 #include "globalconf.h"
 #include "draw.h"
+#include "common/array.h"
+#include "common/luaclass.h"
 
 typedef struct screen_output_t screen_output_t;
 ARRAY_TYPE(screen_output_t, screen_output)

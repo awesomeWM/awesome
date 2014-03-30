@@ -27,11 +27,10 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <assert.h>
+#include "common/buffer.h"
+
 #include <sysexits.h>
 #include <stdio.h>
-
-#include "common/buffer.h"
 
 char buffer_slop[1];
 

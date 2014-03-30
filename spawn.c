@@ -19,16 +19,10 @@
  *
  */
 
-#include <unistd.h>
-#include <errno.h>
-#include <sys/types.h>
-#include <sys/wait.h>
-
-#include <glib.h>
-
 #include "spawn.h"
-#include "luaa.h"
-#include "event.h"
+
+#include <unistd.h>
+#include <glib.h>
 
 /** 20 seconds timeout */
 #define AWESOME_SPAWN_TIMEOUT 20.0

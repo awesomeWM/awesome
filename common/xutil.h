@@ -24,13 +24,9 @@
 
 #include <xcb/xcb.h>
 #include <xcb/xcb_keysyms.h>
-#include <xcb/xcb_aux.h>
-#include <xcb/xcb_event.h>
-#include <xcb/xcb_atom.h>
-#include <xcb/xproto.h>
 
-#include "common/array.h"
 #include "common/atoms.h"
+#include "common/util.h"
 
 static inline char *
 xutil_get_text_property_from_reply(xcb_get_property_reply_t *reply)

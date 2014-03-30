@@ -20,12 +20,11 @@
  */
 
 #include "mouse.h"
-#include "objects/screen.h"
-#include "objects/client.h"
+#include "common/util.h"
 #include "globalconf.h"
+#include "objects/client.h"
 #include "objects/drawin.h"
-#include "luaa.h"
-#include "common/xutil.h"
+#include "objects/screen.h"
 
 /** Get the pointer position.
  * \param window The window to get position on.

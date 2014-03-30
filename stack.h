@@ -22,7 +22,7 @@
 #ifndef AWESOME_STACK_H
 #define AWESOME_STACK_H
 
-#include "globalconf.h"
+typedef struct client_t client_t;
 
 void stack_client_remove(client_t *);
 void stack_client_push(client_t *);

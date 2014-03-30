@@ -21,7 +21,6 @@
 
 #include "common/luaclass.h"
 #include "common/luaobject.h"
-#include "luaa.h"
 
 struct lua_class_property
 {

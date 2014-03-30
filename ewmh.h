@@ -23,9 +23,11 @@
 #define AWESOME_EWMH_H
 
 #include <cairo.h>
+#include <xcb/xcb.h>
 
-#include "globalconf.h"
 #include "strut.h"
+
+typedef struct client_t client_t;
 
 void ewmh_init(void);
 void ewmh_update_net_numbers_of_desktop(void);

@@ -19,20 +19,22 @@
  *
  */
 
+#include "objects/client.h"
+#include "common/atoms.h"
+#include "common/xutil.h"
+#include "event.h"
+#include "ewmh.h"
+#include "objects/drawable.h"
+#include "objects/screen.h"
+#include "objects/tag.h"
+#include "property.h"
+#include "spawn.h"
+#include "systray.h"
+#include "xwindow.h"
+
 #include <xcb/xcb_atom.h>
 #include <xcb/shape.h>
 #include <cairo-xcb.h>
-
-#include "objects/tag.h"
-#include "objects/screen.h"
-#include "ewmh.h"
-#include "systray.h"
-#include "property.h"
-#include "spawn.h"
-#include "luaa.h"
-#include "xwindow.h"
-#include "common/atoms.h"
-#include "common/xutil.h"
 
 static area_t titlebar_get_area(client_t *c, client_titlebar_t bar);
 static drawable_t *titlebar_get_drawable(lua_State *L, client_t *c, int cl_idx, client_titlebar_t bar);

@@ -19,20 +19,16 @@
  *
  */
 
+#include "ewmh.h"
+#include "objects/client.h"
+#include "objects/tag.h"
+#include "common/atoms.h"
+
 #include <sys/types.h>
 #include <unistd.h>
 
 #include <xcb/xcb.h>
 #include <xcb/xcb_atom.h>
-
-#include "ewmh.h"
-#include "objects/client.h"
-#include "objects/screen.h"
-#include "objects/tag.h"
-#include "luaa.h"
-#include "common/atoms.h"
-#include "common/buffer.h"
-#include "common/xutil.h"
 
 #define _NET_WM_STATE_REMOVE 0
 #define _NET_WM_STATE_ADD 1

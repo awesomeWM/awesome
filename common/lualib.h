@@ -22,10 +22,9 @@
 #ifndef AWESOME_COMMON_LUALIB
 #define AWESOME_COMMON_LUALIB
 
-#include <lauxlib.h>
+#include <lua.h>
 
 #include "common/util.h"
-#include "common/luaclass.h"
 
 /** Lua function to call on dofuction() error */
 lua_CFunction lualib_dofunction_on_error;

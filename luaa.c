@@ -21,6 +21,24 @@
 
 #define _GNU_SOURCE
 
+#include "luaa.h"
+#include "globalconf.h"
+#include "awesome-version-internal.h"
+#include "awesome.h"
+#include "common/backtrace.h"
+#include "config.h"
+#include "event.h"
+#include "objects/client.h"
+#include "objects/drawable.h"
+#include "objects/drawin.h"
+#include "objects/screen.h"
+#include "objects/tag.h"
+#include "objects/timer.h"
+#include "property.h"
+#include "selection.h"
+#include "spawn.h"
+#include "systray.h"
+
 #include <lua.h>
 #include <lauxlib.h>
 #include <lualib.h>
@@ -28,26 +46,6 @@
 #include <basedir_fs.h>
 
 #include <xcb/xcb_atom.h>
-
-#include "awesome.h"
-#include "config.h"
-#include "objects/timer.h"
-#include "awesome-version-internal.h"
-#include "ewmh.h"
-#include "luaa.h"
-#include "spawn.h"
-#include "objects/tag.h"
-#include "objects/client.h"
-#include "objects/drawin.h"
-#include "objects/drawable.h"
-#include "objects/screen.h"
-#include "event.h"
-#include "property.h"
-#include "selection.h"
-#include "systray.h"
-#include "common/xcursor.h"
-#include "common/buffer.h"
-#include "common/backtrace.h"
 
 #ifdef WITH_DBUS
 extern const struct luaL_Reg awesome_dbus_lib[];

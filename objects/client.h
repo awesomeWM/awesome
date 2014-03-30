@@ -22,13 +22,8 @@
 #ifndef AWESOME_OBJECTS_CLIENT_H
 #define AWESOME_OBJECTS_CLIENT_H
 
-#include "mouse.h"
 #include "stack.h"
-#include "draw.h"
-#include "banning.h"
 #include "objects/window.h"
-#include "objects/drawable.h"
-#include "common/luaobject.h"
 
 #define CLIENT_SELECT_INPUT_EVENT_MASK (XCB_EVENT_MASK_STRUCTURE_NOTIFY \
                                         | XCB_EVENT_MASK_PROPERTY_CHANGE \
@@ -173,7 +168,6 @@ void client_set_icon(client_t *c, cairo_surface_t *s);
 void client_set_skip_taskbar(lua_State *, int, bool);
 void client_focus(client_t *);
 void client_focus_update(client_t *);
-void client_focus_refresh(void);
 bool client_hasproto(client_t *, xcb_atom_t);
 void client_ignore_enterleave_events(void);
 void client_restore_enterleave_events(void);

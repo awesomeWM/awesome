@@ -19,15 +19,13 @@
  *
  */
 
+#include "common/xutil.h"
+
 /* XCB doesn't provide keysyms definition */
 #include <X11/keysym.h>
 
-#include "common/util.h"
-
 #include <xcb/xcb.h>
 #include <xcb/xcb_icccm.h>
-
-#include "common/xutil.h"
 
 /** Get the lock masks (shiftlock, numlock, capslock, modeswitch).
  * \param connection The X connection.

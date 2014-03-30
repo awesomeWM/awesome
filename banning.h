@@ -22,8 +22,6 @@
 #ifndef AWESOME_BANNING_H
 #define AWESOME_BANNING_H
 
-#include "globalconf.h"
-
 void banning_need_update(void);
 void banning_refresh(void);
 

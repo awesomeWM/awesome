@@ -19,15 +19,8 @@
  *
  */
 
-#include <xcb/xcb.h>
-#include <xcb/randr.h>
-#include <xcb/shape.h>
-#include <xcb/xcb_atom.h>
-#include <xcb/xcb_icccm.h>
-#include <xcb/xcb_event.h>
-
-#include "awesome.h"
 #include "event.h"
+#include "awesome.h"
 #include "property.h"
 #include "objects/tag.h"
 #include "objects/drawin.h"
@@ -42,6 +35,13 @@
 #include "objects/screen.h"
 #include "common/atoms.h"
 #include "common/xutil.h"
+
+#include <xcb/xcb.h>
+#include <xcb/randr.h>
+#include <xcb/shape.h>
+#include <xcb/xcb_atom.h>
+#include <xcb/xcb_icccm.h>
+#include <xcb/xcb_event.h>
 
 #define DO_EVENT_HOOK_CALLBACK(type, xcbtype, xcbeventprefix, arraytype, match) \
     static void \

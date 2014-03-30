@@ -22,9 +22,10 @@
 #ifndef AWESOME_OBJECTS_WINDOW_H
 #define AWESOME_OBJECTS_WINDOW_H
 
-#include "strut.h"
-#include "objects/button.h"
+#include "color.h"
 #include "common/luaclass.h"
+#include "objects/button.h"
+#include "strut.h"
 
 /** Windows type */
 typedef enum

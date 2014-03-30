@@ -20,8 +20,8 @@
  */
 
 #include "config.h"
-
 #include "dbus.h"
+
 #include <glib.h>
 
 #ifdef WITH_DBUS

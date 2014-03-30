@@ -28,7 +28,6 @@
 #include <stdbool.h>
 
 #include "common/array.h"
-#include "common/util.h"
 
 /** XEMBED information for a window.
  */

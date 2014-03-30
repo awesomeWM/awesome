@@ -19,9 +19,8 @@
  *
  */
 
-#include <cairo-xcb.h>
-
 #include "config.h"
+#include "draw.h"
 
 #include <langinfo.h>
 #include <iconv.h>
@@ -30,10 +29,8 @@
 #include <math.h>
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
-
-#include "globalconf.h"
-#include "objects/screen.h"
-#include "common/xutil.h"
+#include <cairo-xcb.h>
+#include <lauxlib.h>
 
 /** Convert text from any charset to UTF-8 using iconv.
  * \param iso The ISO string to convert.

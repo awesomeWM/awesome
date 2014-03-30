@@ -21,14 +21,13 @@
  */
 
 #include "drawin.h"
+#include "common/atoms.h"
+#include "common/xcursor.h"
+#include "ewmh.h"
 #include "objects/client.h"
 #include "objects/screen.h"
-#include "xwindow.h"
-#include "luaa.h"
-#include "ewmh.h"
 #include "systray.h"
-#include "common/xcursor.h"
-#include "common/xutil.h"
+#include "xwindow.h"
 
 #include <cairo-xcb.h>
 #include <xcb/shape.h>

@@ -21,6 +21,8 @@
  */
 
 #include "drawable.h"
+#include "common/luaobject.h"
+#include "globalconf.h"
 
 #include <cairo-xcb.h>
 

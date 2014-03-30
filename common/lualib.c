@@ -17,6 +17,7 @@
  *
  */
 
+#include "common/lualib.h"
 #include "luaa.h"
 
 void luaA_checkfunction(lua_State *L, int idx)

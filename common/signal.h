@@ -22,7 +22,6 @@
 #ifndef AWESOME_COMMON_SIGNAL
 #define AWESOME_COMMON_SIGNAL
 
-#include "common/lualib.h"
 #include "common/array.h"
 
 DO_ARRAY(const void *, cptr, DO_NOTHING)

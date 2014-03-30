@@ -21,12 +21,9 @@
 
 #include <unistd.h>
 
-#include "globalconf.h"
 #include "keygrabber.h"
-#include "objects/key.h"
-#include "luaa.h"
+#include "globalconf.h"
 #include "keyresolv.h"
-#include "common/xutil.h"
 
 /** Grab the keyboard.
  * \return True if keyboard was grabbed.

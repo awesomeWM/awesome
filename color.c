@@ -20,11 +20,10 @@
  *
  */
 
-#include <ctype.h>
-
 #include "color.h"
 #include "globalconf.h"
-#include "common/xutil.h"
+
+#include <ctype.h>
 
 /* 0xFFFF / 0xFF == 0x101 (257) */
 #define RGB_8TO16(i) (((i) & 0xff)   * 0x101)

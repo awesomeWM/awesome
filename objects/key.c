@@ -20,14 +20,12 @@
  *
  */
 
+#include "objects/key.h"
+#include "common/xutil.h"
+#include "keyresolv.h"
+
 /* XStringToKeysym() and XKeysymToString */
 #include <X11/Xlib.h>
-
-#include "globalconf.h"
-#include "luaa.h"
-#include "keyresolv.h"
-#include "common/xutil.h"
-#include "common/luaobject.h"
 
 static void
 luaA_keystore(lua_State *L, int ud, const char *str, ssize_t len)

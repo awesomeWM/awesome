@@ -22,7 +22,9 @@
 #ifndef AWESOME_SPAWN_H
 #define AWESOME_SPAWN_H
 
-#include "globalconf.h"
+#include "objects/client.h"
+
+#include <lua.h>
 
 void spawn_init(void);
 void spawn_start_notify(client_t *, const char *);

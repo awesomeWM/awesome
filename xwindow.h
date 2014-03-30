@@ -23,7 +23,7 @@
 #define AWESOME_WINDOW_H
 
 #include "globalconf.h"
-#include "draw.h"
+#include "color.h"
 
 enum xcb_shape_sk_t;
 

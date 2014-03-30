@@ -25,6 +25,8 @@
 #include <lua.h>
 #include <xcb/xcb.h>
 
+#include <stdbool.h>
+
 int luaA_keygrabber_stop(lua_State *);
 bool keygrabber_handlekpress(lua_State *, xcb_key_press_event_t *);
 

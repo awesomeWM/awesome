@@ -19,8 +19,8 @@
  *
  */
 
-#include "ewmh.h"
 #include "stack.h"
+#include "ewmh.h"
 #include "objects/client.h"
 #include "objects/drawin.h"
 

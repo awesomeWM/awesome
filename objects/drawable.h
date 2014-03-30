@@ -24,7 +24,7 @@
 #define AWESOME_OBJECTS_DRAWABLE_H
 
 #include "common/luaclass.h"
-#include "globalconf.h"
+#include "draw.h"
 
 typedef void drawable_refresh_callback(void *);
 
@@ -45,6 +45,7 @@ struct drawable_t
     /** Data for refresh callback. */
     void *refresh_data;
 };
+typedef struct drawable_t drawable_t;
 
 drawable_t *drawable_allocator(lua_State *, drawable_refresh_callback *, void *);
 void drawable_set_geometry(drawable_t *, int, area_t);

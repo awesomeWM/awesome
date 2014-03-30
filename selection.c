@@ -20,12 +20,13 @@
  *
  */
 
-#include <xcb/xcb_atom.h>
-
 #include "selection.h"
-#include "event.h"
+#include "globalconf.h"
 #include "common/atoms.h"
-#include "common/xutil.h"
+#include "event.h"
+
+#include <xcb/xcb_atom.h>
+#include <xcb/xcb_event.h>
 
 static xcb_window_t selection_window = XCB_NONE;
 

@@ -19,17 +19,15 @@
  *
  */
 
-#include <xcb/xcb_atom.h>
-
 #include "property.h"
+#include "common/atoms.h"
+#include "common/xutil.h"
 #include "ewmh.h"
 #include "objects/client.h"
 #include "objects/drawin.h"
-#include "objects/screen.h"
 #include "xwindow.h"
-#include "luaa.h"
-#include "common/atoms.h"
-#include "common/xutil.h"
+
+#include <xcb/xcb_atom.h>
 
 #define HANDLE_TEXT_PROPERTY(funcname, atom, setfunc) \
     xcb_get_property_cookie_t \

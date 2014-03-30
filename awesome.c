@@ -19,6 +19,23 @@
  *
  */
 
+#include "awesome.h"
+
+#include "banning.h"
+#include "common/atoms.h"
+#include "common/backtrace.h"
+#include "common/version.h"
+#include "common/xutil.h"
+#include "dbus.h"
+#include "event.h"
+#include "ewmh.h"
+#include "globalconf.h"
+#include "objects/client.h"
+#include "objects/screen.h"
+#include "spawn.h"
+#include "systray.h"
+#include "xwindow.h"
+
 #include <getopt.h>
 
 #include <locale.h>
@@ -29,29 +46,13 @@
 
 #include <xcb/bigreq.h>
 #include <xcb/randr.h>
+#include <xcb/xcb_aux.h>
 #include <xcb/xcb_event.h>
 #include <xcb/xinerama.h>
 #include <xcb/xtest.h>
 #include <xcb/shape.h>
 
 #include <glib-unix.h>
-
-#include "awesome.h"
-#include "spawn.h"
-#include "objects/client.h"
-#include "objects/screen.h"
-#include "xwindow.h"
-#include "ewmh.h"
-#include "dbus.h"
-#include "systray.h"
-#include "event.h"
-#include "property.h"
-#include "luaa.h"
-#include "common/version.h"
-#include "common/atoms.h"
-#include "common/xcursor.h"
-#include "common/xutil.h"
-#include "common/backtrace.h"
 
 awesome_t globalconf;
 

@@ -20,8 +20,8 @@
  */
 
 #include "banning.h"
-#include "objects/screen.h"
-#include "objects/tag.h"
+#include "globalconf.h"
+#include "objects/client.h"
 
 /** Reban windows following current selected tags.
  * \param screen The screen to arrange.

@@ -20,14 +20,14 @@
  *
  */
 
+#include "common/util.h"
+
 #include <stdarg.h>
 #include <sys/wait.h>
 #include <unistd.h>
 #include <limits.h>
 #include <fcntl.h>
 #include <errno.h>
-
-#include "common/util.h"
 
 /** Print error and exit with EXIT_FAILURE code.
  */

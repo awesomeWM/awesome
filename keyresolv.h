@@ -23,6 +23,7 @@
 #define AWESOME_KEYRESOLV_H
 
 #include <xcb/xcb.h>
+#include <stdbool.h>
 
 xcb_keysym_t keyresolv_get_keysym(xcb_keycode_t, uint16_t);
 bool keyresolv_keysym_to_string(xcb_keysym_t, char *, ssize_t);

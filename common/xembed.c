@@ -21,7 +21,6 @@
  */
 
 #include "common/xembed.h"
-#include "common/xutil.h"
 #include "common/util.h"
 #include "common/atoms.h"
 

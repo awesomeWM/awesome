@@ -20,12 +20,12 @@
  *
  */
 
+#include "keyresolv.h"
+#include "globalconf.h"
+
 /* XCB doesn't provide keysyms definition */
 #include <X11/keysym.h>
 #include <X11/XF86keysym.h>
-
-#include "globalconf.h"
-#include "keyresolv.h"
 
 /** XCB equivalent of XLookupString which translate the keycode given
  * by PressEvent to a KeySym and a string

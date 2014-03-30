@@ -22,7 +22,7 @@
 #ifndef AWESOME_PROPERTY_H
 #define AWESOME_PROPERTY_H
 
-#include "globalconf.h"
+#include "objects/client.h"
 
 #define PROPERTY(funcname) \
     xcb_get_property_cookie_t property_get_##funcname(client_t *c); \
