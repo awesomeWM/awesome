@@ -59,6 +59,20 @@ screen_wipe(screen_t *s)
     screen_output_array_wipe(&s->outputs);
 }
 
+/** Get a screen argument from the lua stack */
+screen_t *
+luaA_checkscreen(lua_State *L, int sidx)
+{
+    if (lua_isnumber(L, sidx))
+    {
+        int screen = lua_tointeger(L, sidx);
+        if(screen < 1 || screen > globalconf.screens.len)
+            luaL_error(L, "invalid screen number: %d", screen);
+        return globalconf.screens.tab[screen - 1];
+    } else
+        return luaA_checkudata(L, sidx, &screen_class);
+}
+
 static inline area_t
 screen_xsitoarea(xcb_xinerama_screen_info_t si)
 {
@@ -439,9 +453,7 @@ luaA_screen_module_index(lua_State *L)
                 if(A_STREQ(output->name, name))
                     return luaA_object_push(L, screen);
 
-    int screen = luaL_checknumber(L, 2) - 1;
-    luaA_checkscreen(screen);
-    return luaA_object_push(L, globalconf.screens.tab[screen]);
+    return luaA_object_push(L, luaA_checkscreen(L, 2));
 }
 
 LUA_OBJECT_EXPORT_PROPERTY(screen, screen_t, geometry, luaA_pusharea)

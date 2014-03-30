@@ -133,19 +133,13 @@ static int
 luaA_mouse_newindex(lua_State *L)
 {
     const char *attr = luaL_checkstring(L, 2);
-    int x, y = 0;
-    int screen;
+    screen_t *screen;
 
     if (A_STRNEQ(attr, "screen"))
         return luaA_default_newindex(L);
 
-    screen = luaL_checknumber(L, 3) - 1;
-    luaA_checkscreen(screen);
-
-    x = globalconf.screens.tab[screen]->geometry.x;
-    y = globalconf.screens.tab[screen]->geometry.y;
-
-    mouse_warp_pointer(globalconf.screen->root, x, y);
+    screen = luaA_checkscreen(L, 3);
+    mouse_warp_pointer(globalconf.screen->root, screen->geometry.x, screen->geometry.y);
     return 0;
 }
 

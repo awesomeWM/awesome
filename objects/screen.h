@@ -45,5 +45,7 @@ int screen_get_index(screen_t *);
 area_t display_area_get(void);
 void screen_client_moveto(client_t *, screen_t *, bool);
 
+screen_t *luaA_checkscreen(lua_State *, int);
+
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

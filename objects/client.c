@@ -1245,28 +1245,19 @@ client_kill(client_t *c)
 static int
 luaA_client_get(lua_State *L)
 {
-    int i = 1, screen;
+    int i = 1;
+    screen_t *screen = NULL;
 
-    screen = luaL_optnumber(L, 1, 0) - 1;
+    if(!lua_isnoneornil(L, 1))
+        screen = luaA_checkscreen(L, 1);
 
     lua_newtable(L);
-
-    if(screen == -1)
-        foreach(c, globalconf.clients)
+    foreach(c, globalconf.clients)
+        if(screen == NULL || (*c)->screen == screen)
         {
             luaA_object_push(L, *c);
             lua_rawseti(L, -2, i++);
         }
-    else
-    {
-        luaA_checkscreen(screen);
-        foreach(c, globalconf.clients)
-            if((*c)->screen == globalconf.screens.tab[screen])
-            {
-                luaA_object_push(L, *c);
-                lua_rawseti(L, -2, i++);
-            }
-    }
 
     return 1;
 }
@@ -1682,10 +1673,7 @@ luaA_client_geometry(lua_State *L)
 static int
 luaA_client_set_screen(lua_State *L, client_t *c)
 {
-    int screen = luaL_checknumber(L, -1) - 1;
-    luaA_checkscreen(screen);
-    screen_client_moveto(c, globalconf.screens.tab[screen], true);
-
+    screen_client_moveto(c, luaA_checkscreen(L, -1), true);
     return 0;
 }
 

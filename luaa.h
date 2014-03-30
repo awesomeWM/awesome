@@ -39,12 +39,6 @@
         signal_object_emit(L, &global_signals, "debug::deprecation", 1); \
     } while(0)
 
-#define luaA_checkscreen(screen) \
-    do { \
-        if(screen < 0 || screen >= globalconf.screens.len) \
-            luaL_error(L, "invalid screen number: %d", screen + 1); \
-    } while(0)
-
 /** Print a warning about some Lua code.
  * This is less mean than luaL_error() which setjmp via lua_error() and kills
  * everything. This only warn, it's up to you to then do what's should be done.
