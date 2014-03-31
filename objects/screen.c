@@ -41,7 +41,7 @@ struct screen_output_t
 static void
 screen_output_wipe(screen_output_t *output)
 {
-    p_delete(&output);
+    p_delete(&output->name);
 }
 
 ARRAY_FUNCS(screen_output_t, screen_output, screen_output_wipe)
