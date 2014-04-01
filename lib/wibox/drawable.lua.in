@@ -12,6 +12,7 @@ local capi = {
 local beautiful = require("beautiful")
 local cairo = require("lgi").cairo
 local color = require("gears.color")
+local debug = require("gears.debug")
 local object = require("gears.object")
 local sort = require("gears.sort")
 local surface = require("gears.surface")
@@ -59,6 +60,8 @@ local function do_redraw(self)
     end
 
     self.drawable:refresh()
+
+    debug.assert(cr.status == "SUCCESS", "Cairo context entered error state: " .. cr.status)
 end
 
 --- Register a widget's position.
