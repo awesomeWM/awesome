@@ -197,7 +197,7 @@ end
 --- Apply properties and callbacks to a client.
 -- @param c The client.
 -- @param props Properties to apply.
--- @param callbacks Callbacks to apply.
+-- @param callbacks Callbacks to apply (optional).
 function rules.execute(c, props, callbacks)
     for property, value in pairs(props) do
         if property ~= "focus" and type(value) == "function" then
@@ -230,8 +230,10 @@ function rules.execute(c, props, callbacks)
     end
 
     -- Apply all callbacks.
-    for i, callback in pairs(callbacks) do
-        callback(c)
+    if callbacks then
+        for i, callback in pairs(callbacks) do
+            callback(c)
+        end
     end
 
     -- Do this at last so we do not erase things done by the focus
