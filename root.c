@@ -79,7 +79,6 @@ root_set_wallpaper(cairo_pattern_t *pattern)
     uint16_t height = screen->height_in_pixels;
     bool result = false;
     cairo_surface_t *surface;
-    cairo_device_t *device;
     cairo_t *cr;
 
     if (xcb_connection_has_error(c))
@@ -97,7 +96,6 @@ root_set_wallpaper(cairo_pattern_t *pattern)
      * the new one directly and doesn't need GetImage and PutImage.
      */
     surface = cairo_xcb_surface_create(globalconf.connection, p, draw_default_visual(screen), width, height);
-    device = cairo_device_reference(cairo_surface_get_device(surface));
     cr = cairo_create(surface);
     /* Paint the pattern to the surface */
     cairo_set_source(cr, pattern);
@@ -106,9 +104,6 @@ root_set_wallpaper(cairo_pattern_t *pattern)
     cairo_destroy(cr);
     cairo_surface_finish(surface);
     cairo_surface_destroy(surface);
-    /* Finish the device so we safely call xcb_disconnect() */
-    cairo_device_finish(device);
-    cairo_device_destroy(device);
     xcb_aux_sync(globalconf.connection);
 
     root_set_wallpaper_pixmap(c, p);
