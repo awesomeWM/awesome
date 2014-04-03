@@ -187,7 +187,8 @@ function color.create_pattern(col)
     if cairo.Pattern:is_type_of(col) then
         return col
     end
-    local result = col and pattern_cache[col]
+    local col = col or "#000000"
+    local result = pattern_cache[col]
     if result then
         return result
     end
