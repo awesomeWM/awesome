@@ -6,13 +6,13 @@ Building and installation
 -------------------------
 After extracting the dist tarball, run:
 
-  make
+    make
 
 This will create a build directory, run cmake in it and build awesome.
 
 After building is finished, you can install:
 
-  make install # you might need root permissions
+    make install  # you might need root permissions
 
 Running awesome
 ---------------
@@ -31,13 +31,21 @@ the DISPLAY environment variable is set correctly, e.g.:
 
 Configuration
 -------------
-The configuration of awesome is done by creating a $XDG_CONFIG_HOME/awesome/rc.lua file.
+The configuration of awesome is done by creating a
+`$XDG_CONFIG_HOME/awesome/rc.lua` file.
+
 An example configuration named "awesomerc.lua.in" is provided in the source.
 
 Troubleshooting
 ---------------
 In most systems any message printed by awesome (including warnings and errors)
-are written to $HOME/.xsession-errors.
+are written to `$HOME/.xsession-errors`.
 
-If awesome does not start or the configuration file is not producing the desired
-results the user should examine this file to gain insight into the problem.
+If awesome does not start or the configuration file is not producing the
+desired results the user should examine this file to gain insight into the
+problem.
+
+Reporting issues
+----------------
+Please report any issues you may find at https://awesome.naquadah.org/bugs/ .
+You can submit pull requests at https://github.com/awesomeWM/awesome .
