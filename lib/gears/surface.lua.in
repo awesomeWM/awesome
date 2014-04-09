@@ -22,6 +22,7 @@ local surface_cache = setmetatable({}, { __mode = 'v' })
 --- Try to convert the argument into an lgi cairo surface.
 -- This is usually needed for loading images by file name.
 function surface.load_uncached(_surface)
+    local file
     -- Nil is not changed
     if not _surface then
         return nil
@@ -34,20 +35,24 @@ function surface.load_uncached(_surface)
     end
     -- Strings are assumed to be file names and get loaded
     if type(_surface) == "string" then
-        _surface = capi.awesome.load_image(_surface)
+        file = _surface
+        _surface = capi.awesome.load_image(file)
     end
     -- Everything else gets forced into a surface
-    return cairo.Surface(_surface, true)
+    _surface = cairo.Surface(_surface, true)
+    -- If we loaded a file, cache it
+    if file then
+        surface_cache[file] = _surface
+    end
+    return _surface
 end
 
 function surface.load(_surface)
     if type(_surface) == "string" then
         local cache = surface_cache[_surface]
-        if not cache then
-            cache = surface.load_uncached(_surface)
-            surface_cache[_surface] = cache
+        if cache then
+            return cache
         end
-        return cache
     end
     return surface.load_uncached(_surface)
 end
