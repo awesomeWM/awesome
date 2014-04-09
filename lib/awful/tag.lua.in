@@ -56,8 +56,8 @@ function tag.move(new_index, target_tag)
     table.insert(tmp_tags, new_index, target_tag)
 
     for i, tmp_tag in ipairs(tmp_tags) do
-        tag.setproperty(tmp_tag, "index", i)
         tag.setscreen(tmp_tag, scr)
+        tag.setproperty(tmp_tag, "index", i)
     end
 end
 
