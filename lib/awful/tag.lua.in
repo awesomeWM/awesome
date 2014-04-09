@@ -271,11 +271,11 @@ end
 -- @param s Screen number
 function tag.setscreen(t, s)
     local s = s or capi.mouse.screen
+    local old_screen = tag.getproperty(t, "screen")
+    if s == old_screen then return end
 
     -- Keeping the old index make very little sense when changing screen
     tag.setproperty(t, "index", nil)
-
-    local old_screen = tag.getproperty(t,"screen")
 
     -- Change the screen
     tag.setproperty(t, "screen", s)
