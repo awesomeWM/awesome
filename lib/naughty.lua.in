@@ -409,7 +409,7 @@ function naughty.notify(args)
         end
 
         -- is the icon file readable?
-        local success, res = pcall(function() return surface.load(icon) end)
+        local success, res = pcall(function() return surface.load_uncached(icon) end)
         if success then
             icon = res
         else
