@@ -185,20 +185,23 @@ end
 --             of the dirs are searched first
 function util.geticonpath(iconname, exts, dirs, size)
     exts = exts or { 'png', 'gif' }
-    dirs = dirs or { '/usr/share/pixmaps/' }
+    dirs = dirs or { '/usr/share/pixmaps/', '/usr/share/icons/hicolor/' }
+    icontypes = { 'apps', 'actions',  'categories',  'emblems',
+    'mimetypes',  'status', 'devices', 'extras', 'places', 'stock' }
     for _, d in pairs(dirs) do
+        local icon
         for _, e in pairs(exts) do
-            local icon
-            if size then
-                icon = string.format("%s%ux%u/%s.%s",
-                       d, size, size, iconname, e)
-                if util.file_readable(icon) then
-                    return icon
-                end
-            end
             icon = d .. iconname .. '.' .. e
             if util.file_readable(icon) then
                 return icon
+            end
+            if size then
+                for _, t in pairs(icontypes) do
+                    icon = string.format("%s%ux%u/%s/%s.%s", d, size, size, t, iconname, e)
+                    if util.file_readable(icon) then
+                        return icon
+                    end
+                end
             end
         end
     end
