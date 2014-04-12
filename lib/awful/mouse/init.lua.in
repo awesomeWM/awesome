@@ -211,30 +211,6 @@ end
 
 mouse.client.dragtotag = { }
 
---- Move a client to a tag by drag'n'dropping it over a taglist widget
--- @param c The client to move
-function mouse.client.dragtotag.widget(c)
-    capi.mousegrabber.run(function (_mouse)
-                              local button_down = false
-                              for _, v in ipairs(_mouse.buttons) do
-                                  if v then button_down = true end
-                              end
-                              if not button_down then
-                                  local w = mouse.widget_under_pointer()
-                                  if w and widget.taglist.gettag(w) then
-                                      local t = widget.taglist.gettag(w)
-                                      local s = tag.getscreen(t)
-                                      if s ~= c.screen then
-                                          aclient.movetoscreen(c, s)
-                                      end
-                                      aclient.movetotag(t, c)
-                                  end
-                                  return false
-                              end
-                              return true
-                          end, "fleur")
-end
-
 --- Move a client to a tag by dragging it onto the left / right side of the screen
 -- @param c The client to move
 function mouse.client.dragtotag.border(c)

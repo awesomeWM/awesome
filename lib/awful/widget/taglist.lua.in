@@ -130,13 +130,6 @@ local function taglist_update(s, w, buttons, filter, data, style, update_functio
     update_function(w, buttons, label, data, tags)
 end
 
---- Get the tag object the given widget appears on.
--- @param widget The widget the look for.
--- @return The tag object.
-function taglist.gettag(widget)
-    return common.tagwidgets[widget]
-end
-
 --- Create a new taglist widget. The last two arguments (update_function
 -- and base_widget) serve to customize the layout of the taglist (eg. to
 -- make it vertical). For that, you will need to copy the
