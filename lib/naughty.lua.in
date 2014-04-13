@@ -403,6 +403,10 @@ function naughty.notify(args)
     local iconmargin = nil
     local icon_w, icon_h = 0, 0
     if icon then
+        -- Is this really an URI instead of a path?
+        if type(icon) == "string" and string.sub(icon, 1, 7) == "file://" then
+            icon = string.sub(icon, 8)
+        end
         -- try to guess icon if the provided one is non-existent/readable
         if type(icon) == "string" and not util.file_readable(icon) then
             icon = util.geticonpath(icon, naughty.config.icon_formats, naughty.config.icon_dirs, icon_size) or icon
