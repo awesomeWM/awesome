@@ -204,7 +204,7 @@ end
 
 --- Create a new wibox and attach it to a screen edge.
 -- @see wibox
--- @param args A table with standard arguments to wibox() creator.
+-- @param arg A table with standard arguments to wibox() creator.
 -- You can add also position key with value top, bottom, left or right.
 -- You can also use width or height in % and set align to center, right or left.
 -- You can also set the screen key with a screen number to attach the wibox.

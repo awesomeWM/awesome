@@ -61,11 +61,12 @@ naughty.config.notify_callback = nil
 -- @field low The preset for notifications with low urgency level
 -- @field normal The default preset for every notification without a preset that will also be used for normal urgency level
 -- @field critical The preset for notifications with a critical urgency level
+-- @table naughty.config.presets
 naughty.config.presets = {
-    normal = {},
     low = {
         timeout = 5
     },
+    normal = {},
     critical = {
         bg = "#ff0000",
         fg = "#ffffff",
@@ -120,6 +121,7 @@ local suspended = false
 -- @field width Popup width
 -- @field die Function to be executed on timeout
 -- @field id Unique notification id based on a counter
+-- @table naughty.notifications
 naughty.notifications = { suspended = { } }
 for s = 1, capi.screen.count() do
     naughty.notifications[s] = {

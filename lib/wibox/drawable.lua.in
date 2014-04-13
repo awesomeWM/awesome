@@ -124,7 +124,6 @@ function drawable:set_widget(widget)
 end
 
 --- Set the background of the drawable
--- @param drawable The drawable to use
 -- @param c The background to use. This must either be a cairo pattern object,
 --          nil or a string that gears.color() understands.
 function drawable:set_bg(c)
@@ -155,7 +154,6 @@ function drawable:set_bg(c)
 end
 
 --- Set the foreground of the drawable
--- @param drawable The drawable to use
 -- @param c The foreground to use. This must either be a cairo pattern object,
 --          nil or a string that gears.color() understands.
 function drawable:set_fg(c)

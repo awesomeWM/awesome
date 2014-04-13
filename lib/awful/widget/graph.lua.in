@@ -209,7 +209,6 @@ function graph:set_height(height)
 end
 
 --- Set the graph width.
--- @param graph The graph.
 -- @param width The width to set.
 function graph:set_width(width)
     if width >= 5 then

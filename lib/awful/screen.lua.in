@@ -44,7 +44,7 @@ function screen.getbycoord(x, y, default)
 end
 
 --- Give the focus to a screen, and move pointer. Keeps relative position of the pointer on the screen.
--- @param screen Screen number.
+-- @param _screen Screen number.
 function screen.focus(_screen)
     client = client or require("awful.client")
     if _screen > capi.screen.count() then _screen = capi.mouse.screen end

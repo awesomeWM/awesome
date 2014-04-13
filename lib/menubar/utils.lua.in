@@ -194,7 +194,6 @@ end
 
 --- Parse a directory with .desktop files
 -- @param dir The directory.
--- @param icons_size, The icons sizes, optional.
 -- @return A table with all .desktop entries.
 function utils.parse_dir(dir)
     local programs = {}

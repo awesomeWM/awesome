@@ -115,7 +115,7 @@ function layout.arrange(screen)
 end
 
 --- Get the current layout name.
--- @param layout The layout.
+-- @param _layout The layout.
 -- @return The layout name.
 function layout.getname(_layout)
     local _layout = _layout or layout.get()
