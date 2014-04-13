@@ -23,9 +23,9 @@
 
 #include "luaa.h"
 #include "globalconf.h"
-#include "awesome-version-internal.h"
 #include "awesome.h"
 #include "common/backtrace.h"
+#include "common/version.h"
 #include "config.h"
 #include "event.h"
 #include "objects/client.h"
@@ -222,13 +222,13 @@ luaA_awesome_index(lua_State *L)
 
     if(A_STREQ(buf, "version"))
     {
-        lua_pushliteral(L, AWESOME_VERSION);
+        lua_pushstring(L, awesome_version_string());
         return 1;
     }
 
     if(A_STREQ(buf, "release"))
     {
-        lua_pushliteral(L, AWESOME_RELEASE);
+        lua_pushstring(L, awesome_release_string());
         return 1;
     }
 

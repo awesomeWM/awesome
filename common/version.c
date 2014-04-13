@@ -66,4 +66,22 @@ eprint_version(void)
     exit(EXIT_SUCCESS);
 }
 
+/** Get version string.
+ * \return A string describing the current version.
+ */
+const char *
+awesome_version_string(void)
+{
+    return AWESOME_VERSION;
+}
+
+/** Get release string.
+ * \return A string describing the code name of the relase.
+ */
+const char *
+awesome_release_string(void)
+{
+    return AWESOME_RELEASE;
+}
+
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
