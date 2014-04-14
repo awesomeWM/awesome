@@ -43,6 +43,7 @@ client.swap = {}
 client.floating = {}
 client.dockable = {}
 client.property = {}
+client.shape = require("awful.client.shape")
 
 ---
 -- Jump to the given client.  Takes care of focussing the screen, the right tag,
