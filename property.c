@@ -198,7 +198,9 @@ property_update_wm_hints(client_t *c, xcb_get_property_cookie_t cookie)
         return;
 
     luaA_object_push(L, c);
-    client_set_urgent(L, -1, xcb_icccm_wm_hints_get_urgency(&wmh));
+
+    lua_pushboolean(L, xcb_icccm_wm_hints_get_urgency(&wmh));
+    luaA_object_emit_signal(L, -2, "request::urgent", 1);
 
     if(wmh.flags & XCB_ICCCM_WM_HINT_INPUT)
         c->nofocus = !wmh.input;

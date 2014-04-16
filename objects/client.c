@@ -2524,6 +2524,7 @@ client_class_setup(lua_State *L)
     signal_add(&client_class.signals, "request::maximized_horizontal");
     signal_add(&client_class.signals, "request::maximized_vertical");
     signal_add(&client_class.signals, "request::tag");
+    signal_add(&client_class.signals, "request::urgent");
     signal_add(&client_class.signals, "tagged");
     signal_add(&client_class.signals, "unfocus");
     signal_add(&client_class.signals, "unmanage");
