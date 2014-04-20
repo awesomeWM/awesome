@@ -18,6 +18,7 @@ local capi =
     client = client,
     mouse = mouse,
     screen = screen,
+    awesome = awesome,
 }
 
 -- we use require("awful.screen") inside functions to prevent circular dependencies.
@@ -34,6 +35,8 @@ client.data.focus = {}
 client.data.urgent = {}
 client.data.marked = {}
 client.data.properties = setmetatable({}, { __mode = 'k' })
+client.data.persistent_properties_registered = {} -- keys are names of persistent properties, value always true
+client.data.persistent_properties_loaded = setmetatable({}, { __mode = 'k' }) -- keys are clients, value always true
 
 -- Functions
 client.urgent = {}
@@ -869,6 +872,15 @@ end
 -- @param prop The property name.
 -- @return The property.
 function client.property.get(c, prop)
+    if not client.data.persistent_properties_loaded[c] then
+        client.data.persistent_properties_loaded[c] = true
+        for p in pairs(client.data.persistent_properties_registered) do
+            local value = c:get_xproperty("awful.client.property." .. prop)
+            if value ~= nil then
+                client.property.set(c, p, value)
+            end
+        end
+    end
     if client.data.properties[c] then
         return client.data.properties[c][prop]
     end
@@ -883,8 +895,29 @@ function client.property.set(c, prop, value)
     if not client.data.properties[c] then
         client.data.properties[c] = {}
     end
+    if client.data.persistent_properties_registered[prop] then
+        c:set_xproperty("awful.client.property." .. prop, value)
+    end
     client.data.properties[c][prop] = value
     c:emit_signal("property::" .. prop)
+end
+
+--- Set a client property to be persistent across restarts (via X properties).
+-- @param c The client.
+-- @param prop The property name.
+-- @param type The type (used for register_xproperty).
+--             One of "string", "number" or "boolean".
+function client.property.persist(c, prop, type)
+    local xprop = "awful.client.property." .. prop
+    capi.awesome.register_xproperty(xprop, type)
+    client.data.persistent_properties_registered[prop] = true
+
+    -- Make already-set properties persistent
+    for c, tab in pairs(client.data.properties) do
+        if client.data.properties[c] and client.data.properties[c][prop] ~= nil then
+            c:set_xproperty(xprop, client.data.properties[c][prop])
+        end
+    end
 end
 
 ---
@@ -960,6 +993,9 @@ capi.client.connect_signal("focus", client.urgent.delete)
 capi.client.connect_signal("unmanage", client.urgent.delete)
 
 capi.client.connect_signal("unmanage", client.floating.delete)
+
+-- Register persistent properties
+client.property.persist(c, "floating", "boolean")
 
 return client
 
