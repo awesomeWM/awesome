@@ -85,12 +85,9 @@ function taglist.taglist_label(t, args)
             if bg_empty then bg_color = bg_empty end
             if fg_empty then fg_color = fg_empty end
         end
-        for k, c in pairs(cls) do
-            if c.urgent then
-                if bg_urgent then bg_color = bg_urgent end
-                if fg_urgent then fg_color = fg_urgent end
-                break
-            end
+        if tag.getproperty(t, "urgent") then
+            if bg_urgent then bg_color = bg_urgent end
+            if fg_urgent then fg_color = fg_urgent end
         end
     end
     if t.selected then
@@ -175,7 +172,7 @@ function taglist.new(screen, filter, buttons, style, update_function, base_widge
     tag.attached_connect_signal(screen, "property::activated", ut)
     tag.attached_connect_signal(screen, "property::screen", ut)
     tag.attached_connect_signal(screen, "property::index", ut)
-    capi.client.connect_signal("property::urgent", uc)
+    tag.attached_connect_signal(screen, "property::urgent", ut)
     capi.client.connect_signal("property::screen", function(c)
         -- If client change screen, refresh it anyway since we don't from
         -- which screen it was coming :-)
