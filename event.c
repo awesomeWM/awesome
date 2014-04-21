@@ -196,6 +196,16 @@ event_handle_button(xcb_button_press_event_t *ev)
         lua_pop(globalconf.L, 1);
         /* check if any button object matches */
         event_button_callback(ev, &drawin->buttons, -1, 1, NULL);
+        /* Either we are receiving this due to ButtonPress/Release on the root
+         * window or because we grabbed the button on the window. In the later
+         * case we have to call AllowEvents.
+         * Use AsyncPointer instead of ReplayPointer so that the event is
+         * "eaten" instead of being handled again on the root window.
+         */
+        if(ev->child == XCB_NONE)
+            xcb_allow_events(globalconf.connection,
+                             XCB_ALLOW_ASYNC_POINTER,
+                             XCB_CURRENT_TIME);
     }
     else if((c = client_getbyframewin(ev->event)))
     {
