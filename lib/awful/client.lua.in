@@ -903,11 +903,10 @@ function client.property.set(c, prop, value)
 end
 
 --- Set a client property to be persistent across restarts (via X properties).
--- @param c The client.
 -- @param prop The property name.
 -- @param type The type (used for register_xproperty).
 --             One of "string", "number" or "boolean".
-function client.property.persist(c, prop, type)
+function client.property.persist(prop, type)
     local xprop = "awful.client.property." .. prop
     capi.awesome.register_xproperty(xprop, type)
     client.data.persistent_properties_registered[prop] = true
@@ -995,7 +994,7 @@ capi.client.connect_signal("unmanage", client.urgent.delete)
 capi.client.connect_signal("unmanage", client.floating.delete)
 
 -- Register persistent properties
-client.property.persist(c, "floating", "boolean")
+client.property.persist("floating", "boolean")
 
 return client
 
