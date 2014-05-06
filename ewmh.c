@@ -422,7 +422,8 @@ ewmh_process_client_message(xcb_client_message_event_t *ev)
     {
         if((c = client_getbywin(ev->window))) {
             luaA_object_push(globalconf.L, c);
-            luaA_object_emit_signal(globalconf.L, -1, "request::activate", 0);
+            lua_pushstring(globalconf.L,"ewmh");
+            luaA_object_emit_signal(globalconf.L, -2, "request::activate", 1);
             lua_pop(globalconf.L, 1);
         }
     }
