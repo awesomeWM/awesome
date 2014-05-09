@@ -51,6 +51,7 @@ function taglist.taglist_label(t, args)
     local icon
     local bg_resize = false
     local is_selected = false
+    local cls = t:clients()
     if t.selected then
         bg_color = bg_focus
         fg_color = fg_focus
@@ -69,11 +70,10 @@ function taglist.taglist_label(t, args)
             end
         end
     end
-    if t:clients() == 0 and t.selected and taglist_squares_sel_empty then
+    if #cls == 0 and t.selected and taglist_squares_sel_empty then
         bg_image = taglist_squares_sel_empty
         bg_resize = taglist_squares_resize == "true"
     elseif not is_selected then
-        local cls = t:clients()
         if #cls > 0 then
             if taglist_squares_unsel then
                 bg_image = taglist_squares_unsel
