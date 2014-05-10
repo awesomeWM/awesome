@@ -268,7 +268,7 @@ luaA_systray_invalidate(void)
 }
 
 static void
-systray_update(int base_size, bool horizontal, bool reverse)
+systray_update(int base_size, bool horizontal, bool reverse, int spacing)
 {
     if(base_size <= 0)
         return;
@@ -276,9 +276,9 @@ systray_update(int base_size, bool horizontal, bool reverse)
     /* Give the systray window the correct size */
     uint32_t config_vals[4] = { base_size, base_size, 0, 0 };
     if(horizontal)
-        config_vals[0] = base_size * globalconf.embedded.len;
+        config_vals[0] = base_size * globalconf.embedded.len + spacing * (globalconf.embedded.len - 1);
     else
-        config_vals[1] = base_size * globalconf.embedded.len;
+        config_vals[1] = base_size * globalconf.embedded.len + spacing * (globalconf.embedded.len - 1);
     xcb_configure_window(globalconf.connection,
                          globalconf.systray.window,
                          XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
@@ -301,9 +301,9 @@ systray_update(int base_size, bool horizontal, bool reverse)
                              config_vals);
         xcb_map_window(globalconf.connection, em->win);
         if(horizontal)
-            config_vals[0] += base_size;
+            config_vals[0] += base_size + spacing;
         else
-            config_vals[1] += base_size;
+            config_vals[1] += base_size + spacing;
     }
 }
 
@@ -318,6 +318,7 @@ systray_update(int base_size, bool horizontal, bool reverse)
  * \lparam horiz If true, the systray is horizontal, else vertical
  * \lparam bg Color of the systray background
  * \lparam revers If true, the systray icon order will be reversed, else default
+ * \lparam spacing The size of the spacing between icons
  */
 int
 luaA_systray(lua_State *L)
@@ -332,6 +333,7 @@ luaA_systray(lua_State *L)
         bool horiz = lua_toboolean(L, 5);
         const char *bg = luaL_checklstring(L, 6, &bg_len);
         bool revers = lua_toboolean(L, 7);
+        int spacing = luaL_checknumber(L, 8);
         color_t bg_color;
 
         if(color_init_reply(color_init_unchecked(&bg_color, bg, bg_len)))
@@ -363,7 +365,7 @@ luaA_systray(lua_State *L)
 
         if(globalconf.embedded.len != 0)
         {
-            systray_update(base_size, horiz, revers);
+            systray_update(base_size, horiz, revers, spacing);
             xcb_map_window(globalconf.connection,
                            globalconf.systray.window);
         }

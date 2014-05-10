@@ -23,6 +23,7 @@ function systray:draw(wibox, cr, width, height)
     local x, y, _, _ = lbase.rect_to_device_geometry(cr, 0, 0, width, height)
     local num_entries = capi.awesome.systray()
     local bg = beautiful.bg_systray or beautiful.bg_normal or "#000000"
+    local spacing = beautiful.systray_icon_spacing or 0
 
     -- Figure out if the cairo context is rotated
     local dir_x, dir_y = cr:user_to_device_distance(1, 0)
@@ -40,12 +41,13 @@ function systray:draw(wibox, cr, width, height)
     else
         base = in_dir / num_entries
     end
-    capi.awesome.systray(wibox.drawin, x, y, base, is_rotated, bg, reverse)
+    capi.awesome.systray(wibox.drawin, x, y, base, is_rotated, bg, reverse, spacing)
 end
 
 function systray:fit(width, height)
     local num_entries = capi.awesome.systray()
     local base = base_size
+    local spacing = beautiful.systray_icon_spacing or 0
     if base == nil then
         if width < height then
             base = width
@@ -53,10 +55,11 @@ function systray:fit(width, height)
             base = height
         end
     end
+    base = base + spacing
     if horizontal then
-        return base * num_entries, base
+        return base * num_entries - spacing, base
     end
-    return base, base * num_entries
+    return base, base * num_entries - spacing
 end
 
 local function new(revers)
