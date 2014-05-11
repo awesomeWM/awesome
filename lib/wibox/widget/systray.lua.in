@@ -48,6 +48,9 @@ function systray:fit(width, height)
     local num_entries = capi.awesome.systray()
     local base = base_size
     local spacing = beautiful.systray_icon_spacing or 0
+    if num_entries == 0 then
+        return 0, 0
+    end
     if base == nil then
         if width < height then
             base = width
