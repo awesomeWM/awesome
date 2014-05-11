@@ -315,10 +315,10 @@ systray_update(int base_size, bool horizontal, bool reverse, int spacing)
  * \lparam x X position for the systray.
  * \lparam y Y position for the systray.
  * \lparam base_size The size (width and height) each systray item gets.
- * \lparam horiz If true, the systray is horizontal, else vertical
- * \lparam bg Color of the systray background
- * \lparam revers If true, the systray icon order will be reversed, else default
- * \lparam spacing The size of the spacing between icons
+ * \lparam horiz If true, the systray is horizontal, else vertical.
+ * \lparam bg Color of the systray background.
+ * \lparam revers If true, the systray icon order will be reversed, else default.
+ * \lparam spacing The size of the spacing between icons.
  */
 int
 luaA_systray(lua_State *L)
@@ -327,13 +327,13 @@ luaA_systray(lua_State *L)
     {
         size_t bg_len;
         drawin_t *w = luaA_checkudata(L, 1, &drawin_class);
-        int x = luaL_checknumber(L, 2);
-        int y = luaL_checknumber(L, 3);
-        int base_size = luaL_checknumber(L, 4);
+        int x = luaL_checkinteger(L, 2);
+        int y = luaL_checkinteger(L, 3);
+        int base_size = luaL_checkinteger(L, 4);
         bool horiz = lua_toboolean(L, 5);
         const char *bg = luaL_checklstring(L, 6, &bg_len);
         bool revers = lua_toboolean(L, 7);
-        int spacing = luaL_checknumber(L, 8);
+        int spacing = luaL_checkinteger(L, 8);
         color_t bg_color;
 
         if(color_init_reply(color_init_unchecked(&bg_color, bg, bg_len)))
@@ -374,7 +374,7 @@ luaA_systray(lua_State *L)
                              globalconf.systray.window);
     }
 
-    lua_pushnumber(L, globalconf.embedded.len);
+    lua_pushinteger(L, globalconf.embedded.len);
     luaA_object_push(L, globalconf.systray.parent);
     return 2;
 }
