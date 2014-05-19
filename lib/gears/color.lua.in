@@ -114,13 +114,13 @@ end
 
 --- Create a linear pattern object.
 -- The pattern is created from a string. This string should have the following
--- form: "x0,y0:x1,y1:&#60;stops&#62;"
+-- form: `"x0, y0:x1, y1:<stops>"`
 -- Alternatively, the pattern can be specified as a table:
--- { type = "linear", from = { x0, y0 }, to = { x1, y1 },
--- stops = { &#60stops&#62 } }
--- x0,y0 and x1,y1 are the start and stop point of the pattern.
--- For the explanation of "&#60;stops&#62;", see @{create_pattern}.
--- @param arg The argument describing the pattern
+--     { type = "linear", from = { x0, y0 }, to = { x1, y1 },
+--       stops = { <stops> } }
+-- `x0,y0` and `x1,y1` are the start and stop point of the pattern.
+-- For the explanation of `<stops>`, see `color.create_pattern`.
+-- @tparam string|table arg The argument describing the pattern.
 -- @return a cairo pattern object
 function color.create_linear_pattern(arg)
     local pat
@@ -138,14 +138,14 @@ end
 
 --- Create a radial pattern object.
 -- The pattern is created from a string. This string should have the following
--- form: "x0,y0,r0:x1,y1,r1:&#60stops&#62"
+-- form: `"x0, y0, r0:x1, y1, r1:<stops>"`
 -- Alternatively, the pattern can be specified as a table:
--- { type = "radial", from = { x0, y0, r0 }, to = { x1, y1, r1 },
--- stops = { &#60stops&#62 } }
--- x0,y0 and x1,y1 are the start and stop point of the pattern.
--- r0 and r1 are the radii of the start / stop circle.
--- For the explanation of "&#60;stops&#62;", see @{create_pattern}.
--- @param arg The argument describing the pattern
+--     { type = "radial", from = { x0, y0, r0 }, to = { x1, y1, r1 },
+--       stops = { <stops> } }
+-- `x0,y0` and `x1,y1` are the start and stop point of the pattern.
+-- `r0` and `r1` are the radii of the start / stop circle.
+-- For the explanation of `<stops>`, see `color.create_pattern`.
+-- @tparam string|table arg The argument describing the pattern
 -- @return a cairo pattern object
 function color.create_radial_pattern(arg)
     local pat
@@ -171,10 +171,11 @@ color.types = {
 }
 
 --- Create a pattern from a given string.
--- For full documentation of this function, please refer to create_pattern().
--- This difference between @{create_pattern} and this function is that this
--- function does not insert the generated objects into the pattern cache. Thus,
--- you are allowed to modify the returned object.
+-- For full documentation of this function, please refer to
+-- `color.create_pattern`.  The difference between `color.create_pattern`
+-- and this function is that this function does not insert the generated
+-- objects into the pattern cache. Thus, you are allowed to modify the
+-- returned object.
 -- @see create_pattern
 -- @param col The string describing the pattern.
 -- @return a cairo pattern object
