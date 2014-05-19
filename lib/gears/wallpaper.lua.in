@@ -2,13 +2,13 @@
 -- @author Uli Schlachter
 -- @copyright 2012 Uli Schlachter
 -- @release @AWESOME_VERSION@
+-- @module gears.wallpaper
 ---------------------------------------------------------------------------
 
 local cairo = require("lgi").cairo
 local color = require("gears.color")
 local surface = require("gears.surface")
 
--- gears.wallpaper
 local wallpaper = { mt = {} }
 
 -- The size of the root window
@@ -30,8 +30,8 @@ end
 --- Prepare the needed state for setting a wallpaper
 -- @param s The screen to set the wallpaper on or nil for all screens
 -- @return The available geometry (table with entries width and height), a
---         that should be used for setting the wallpaper and a cairo context
---         for drawing to this surface
+--   that should be used for setting the wallpaper and a cairo context for
+--   drawing to this surface
 local function prepare_wallpaper(s)
     local geom = s and screen[s].geometry or root_geom
     local img = surface(root.wallpaper())
@@ -54,7 +54,7 @@ end
 
 --- Set the current wallpaper.
 -- @param pattern The wallpaper that should be set. This can be a cairo surface,
---                a description for gears.color or a cairo pattern.
+--   a description for gears.color or a cairo pattern.
 function wallpaper.set(pattern)
     if cairo.Surface:is_type_of(pattern) then
         pattern = cairo.Pattern.create_for_surface(pattern)
@@ -71,9 +71,9 @@ end
 --- Set a centered wallpaper.
 -- @param surf The wallpaper to center. Either a cairo surface or a file name.
 -- @param s The screen whose wallpaper should be set. Can be nil, in which case
---          all screens are set.
+--   all screens are set.
 -- @param background The background color that should be used. Gets handled via
---                   gears.color. The default is black.
+--   gears.color. The default is black.
 function wallpaper.centered(surf, s, background)
     local geom, img, cr = prepare_wallpaper(s)
     local surf = surface(surf)
@@ -98,7 +98,7 @@ end
 --- Set a tiled wallpaper.
 -- @param surf The wallpaper to tile. Either a cairo surface or a file name.
 -- @param s The screen whose wallpaper should be set. Can be nil, in which case
---          all screens are set.
+--   all screens are set.
 -- @param offset This can be set to a table with entries x and y.
 function wallpaper.tiled(surf, s, offset)
     local geom, img, cr = prepare_wallpaper(s)
@@ -119,9 +119,9 @@ end
 --- Set a maximized wallpaper.
 -- @param surf The wallpaper to set. Either a cairo surface or a file name.
 -- @param s The screen whose wallpaper should be set. Can be nil, in which case
---          all screens are set.
+--   all screens are set.
 -- @param ignore_aspect If this is true, the image's aspect ratio is ignored.
---                      The default is to honor the aspect ratio.
+--   The default is to honor the aspect ratio.
 -- @param offset This can be set to a table with entries x and y.
 function wallpaper.maximized(surf, s, ignore_aspect, offset)
     local geom, img, cr = prepare_wallpaper(s)
@@ -154,9 +154,9 @@ end
 --- Set a fitting wallpaper.
 -- @param surf The wallpaper to set. Either a cairo surface or a file name.
 -- @param s The screen whose wallpaper should be set. Can be nil, in which case
---          all screens are set.
+--   all screens are set.
 -- @param background The background color that should be used. Gets handled via
---                   gears.color. The default is black.
+--   gears.color. The default is black.
 function wallpaper.fit(surf, s, background)
     local geom, img, cr = prepare_wallpaper(s)
     local surf = surface(surf)

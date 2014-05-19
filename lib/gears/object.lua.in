@@ -2,6 +2,7 @@
 -- @author Uli Schlachter
 -- @copyright 2010 Uli Schlachter
 -- @release @AWESOME_VERSION@
+-- @classmod gears.object
 ---------------------------------------------------------------------------
 
 local setmetatable = setmetatable
@@ -9,7 +10,6 @@ local pairs = pairs
 local type = type
 local error = error
 
--- gears.object
 local object = { mt = {} }
 
 -- Verify that obj is indeed a valid object as returned by new()
@@ -60,10 +60,11 @@ function object:disconnect_signal(name, func)
 end
 
 --- Emit a signal
+--
 -- @param name The name of the signal
 -- @param ... Extra arguments for the callback functions. Each connected
---            function receives the object as first argument and then any extra
---            arguments that are given to emit_signal()
+--   function receives the object as first argument and then any extra arguments
+--   that are given to emit_signal()
 function object:emit_signal(name, ...)
     local sig = find_signal(self, name, "emit")
     for func in pairs(sig) do
