@@ -1,7 +1,10 @@
 ---------------------------------------------------------------------------
+-- Utility module for menubar
+--
 -- @author Antonio Terceiro
 -- @copyright 2009, 2011-2012 Antonio Terceiro, Alexander Yakushev
 -- @release @AWESOME_VERSION@
+-- @module menubar.utils
 ---------------------------------------------------------------------------
 
 -- Grab environment
@@ -12,8 +15,6 @@ local string = string
 local awful_util = require("awful.util")
 local theme = require("beautiful")
 
--- Utility module for menubar
--- menubar.utils
 local utils = {}
 
 -- NOTE: This icons/desktop files module was written according to the
