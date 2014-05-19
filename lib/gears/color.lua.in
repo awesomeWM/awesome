@@ -114,12 +114,12 @@ end
 
 --- Create a linear pattern object.
 -- The pattern is created from a string. This string should have the following
--- form: "x0,y0:x1,y1:&#60;stops&#62;"
+-- form: `"x0, y0:x1, y1:<stops>"`
 -- Alternatively, the pattern can be specified as a table:
--- { type = "linear", from = { x0, y0 }, to = { x1, y1 },
--- stops = { &#60stops&#62 } }
--- x0,y0 and x1,y1 are the start and stop point of the pattern.
--- For the explanation of "&#60;stops&#62;", see create_pattern().
+--     { type = "linear", from = { x0, y0 }, to = { x1, y1 },
+--       stops = { <stops> } }
+-- `x0,y0` and `x1,y1` are the start and stop point of the pattern.
+-- For the explanation of `<stops>`, see `color.create_pattern`.
 -- @param arg The argument describing the pattern
 -- @return a cairo pattern object
 function color.create_linear_pattern(arg)
@@ -138,13 +138,13 @@ end
 
 --- Create a radial pattern object.
 -- The pattern is created from a string. This string should have the following
--- form: "x0,y0,r0:x1,y1,r1:&#60stops&#62"
+-- form: `"x0, y0, r0:x1, y1, r1:<stops>"`
 -- Alternatively, the pattern can be specified as a table:
--- { type = "radial", from = { x0, y0, r0 }, to = { x1, y1, r1 },
--- stops = { &#60stops&#62 } }
--- x0,y0 and x1,y1 are the start and stop point of the pattern.
--- r0 and r1 are the radii of the start / stop circle.
--- For the explanation of "&#60;stops&#62;", see create_pattern().
+--     { type = "radial", from = { x0, y0, r0 }, to = { x1, y1, r1 },
+--       stops = { <stops> } }
+-- `x0,y0` and `x1,y1` are the start and stop point of the pattern.
+-- `r0` and `r1` are the radii of the start / stop circle.
+-- For the explanation of `<stops>`, see `color.create_pattern`.
 -- @param arg The argument describing the pattern
 -- @return a cairo pattern object
 function color.create_radial_pattern(arg)
@@ -174,14 +174,16 @@ color.types = {
 -- This function can create solid, linear, radial and png patterns. In general,
 -- patterns are specified as strings formatted as"type:arguments". "arguments"
 -- is specific to the pattern used. For example, one can use
--- "radial:50,50,10:55,55,30:0,#ff0000:0.5,#00ff00:1,#0000ff"
+-- `"radial:50,50,10:55,55,30:0,#ff0000:0.5,#00ff00:1,#0000ff"`
 -- Alternatively, patterns can be specified via tables. In this case, the
 -- table's 'type' member specifies the type. For example:
--- { type = "radial", from = { 50, 50, 10 }, to = { 55, 55, 30 },
---   stops = { { 0, "#ff0000" }, { 0.5, "#00ff00" }, { 1, "#0000ff" } } }
+--    { type = "radial", from = { 50, 50, 10 }, to = { 55, 55, 30 },
+--      stops = { { 0, "#ff0000" }, { 0.5, "#00ff00" }, { 1, "#0000ff" } } }
 -- Any argument that cannot be understood is passed to create_solid_pattern().
--- @see create_solid_pattern, create_png_pattern, create_linear_pattern,
---      create_radial_pattern
+-- @see create_solid_pattern
+-- @see create_png_pattern
+-- @see create_linear_pattern
+-- @see create_radial_pattern
 -- @param col The string describing the pattern.
 -- @return a cairo pattern object
 function color.create_pattern(col)
