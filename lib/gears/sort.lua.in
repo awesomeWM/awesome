@@ -2,6 +2,7 @@
 -- @author Uli Schlachter
 -- @copyright 2010 Uli Schlachter
 -- @release @AWESOME_VERSION@
+-- @module gears.sort
 ---------------------------------------------------------------------------
 
 local setmetatable = setmetatable
@@ -9,7 +10,6 @@ local ipairs = ipairs
 local table = table
 local error = error
 
--- gears.sort
 local sort = { mt = {} }
 
 local function less_than_comp(a, b)

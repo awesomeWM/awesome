@@ -2,6 +2,7 @@
 -- @author Uli Schlachter
 -- @copyright 2010 Uli Schlachter
 -- @release @AWESOME_VERSION@
+-- @module gears.debug
 ---------------------------------------------------------------------------
 
 local error = error
@@ -11,12 +12,12 @@ local print = print
 local type = type
 local pairs = pairs
 
--- gears.debug
 local debug = {}
 
 --- Check that the given condition holds true, else throw an error
+--
 -- @param cond If this is false, throw a lua error with a backtrace.
--- @param message Message to print in the error (optional).
+-- @param[opt] message Message to print in the error (optional).
 function debug.assert(cond, message)
     local message = message or cond
     if not cond then
