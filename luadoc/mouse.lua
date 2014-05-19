@@ -1,9 +1,10 @@
 --- awesome mouse API
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2008-2009 Julien Danjou
-module("mouse")
+-- @module mouse
 
 --- Mouse library.
+--
 -- @field screen Mouse screen number.
 -- @table mouse
 

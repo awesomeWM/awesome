@@ -1,12 +1,11 @@
 --- awesome keygrabber API
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2008-2009 Julien Danjou
-module("keygrabber")
+-- @module keygrabber
 
 ---
 -- Grab keyboard input and read pressed keys, calling a callback function at
--- each keypress, until @{keygrabber.stop} is called.
---
+-- each keypress, until `keygrabber.stop` is called.
 -- The callback function receives three arguments:
 -- <ul>
 --   <li>a table containing modifiers keys</li>
@@ -14,29 +13,26 @@ module("keygrabber")
 --   <li>a string with either "press" or "release" to indicate the event type.</li>
 -- </ul>
 -- @param callback A callback function as described above.
--- @name run
--- @class function
--- @usage
--- -- The following function can be bound to a key, and used to resize a client
--- -- using the keyboard.
--- function resize(c)
---   keygrabber.run(function(mod, key, event)
---     if event == "release" then return end
+-- @function run
+-- @usage The following function can be bound to a key, and will be used to
+--        resize a client using keyboard.
 --
---     if     key == 'Up'    then awful.client.moveresize(0, 0, 0, 5, c)
---     elseif key == 'Down'  then awful.client.moveresize(0, 0, 0, -5, c)
---     elseif key == 'Right' then awful.client.moveresize(0, 0, 5, 0, c)
---     elseif key == 'Left'  then awful.client.moveresize(0, 0, -5, 0, c)
---     else   keygrabber.stop()
+--     function resize(c)
+--       keygrabber.run(function(mod, key, event)
+--         if event == "release" then return end
+--
+--         if     key == 'Up'   then awful.client.moveresize(0, 0, 0, 5, c)
+--         elseif key == 'Down' then awful.client.moveresize(0, 0, 0, -5, c)
+--         elseif key == 'Right' then awful.client.moveresize(0, 0, 5, 0, c)
+--         elseif key == 'Left'  then awful.client.moveresize(0, 0, -5, 0, c)
+--         else   keygrabber.stop()
+--         end
+--       end)
 --     end
---   end)
--- end
 
 --- Stop grabbing the keyboard.
--- @name stop
--- @class function
+-- @function stop
 
 --- Check if the keygrabber is running.
 -- @return A boolean value, true if running, false otherwise.
--- @name isrunning
--- @class function
+-- @function isrunning
