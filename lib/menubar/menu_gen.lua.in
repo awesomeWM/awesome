@@ -1,7 +1,10 @@
 ---------------------------------------------------------------------------
+-- Menu generation module for menubar
+--
 -- @author Antonio Terceiro
 -- @copyright 2009, 2011-2012 Antonio Terceiro, Alexander Yakushev
 -- @release @AWESOME_VERSION@
+-- @module menubar.menu_gen
 ---------------------------------------------------------------------------
 
 -- Grab environment
@@ -11,8 +14,6 @@ local ipairs = ipairs
 local string = string
 local table = table
 
--- Menu generation module for menubar
--- menubar.menu_gen
 local menu_gen = {}
 
 -- Options section
