@@ -2,12 +2,39 @@
 project='awesome'
 title='awesome API documentation'
 description='highly configurable X window manager'
---format='markdown' or should it be discount? what is that anyway? how about plain?
+
+-- More on it: https://github.com/stevedonovan/LDoc/blob/master/doc/doc.md#markdown-support
+format='markdown'
 dir='doc'
-file={ 'lib/', '@SOURCE_DIR@/luadoc' }
+
+-- Make the docs prettier
+pretty='lua'
+backtick_references=true
+merge=true
+readme='README.md'
 
 -- Setup @client to be an alias for "@tparam client.client"
 tparam_alias('client', 'client.client')
-
+tparam_alias('tag', 'tag')
 -- Should be default, but is not.  Sets up "@tab" => "@tparam table".
 tparam_alias('tab', 'table')
+
+file = {
+    'lib/',
+    'luadoc/',
+    readme,
+    exclude = {
+        -- exclude these modules, as they do not contain any written
+        -- documentation
+        'lib/awful/autofocus.lua',
+        'lib/awful/dbus.lua',
+        'lib/awful/ewmh.lua',
+        'lib/awful/remote.lua',
+        'lib/awful/startup_notification.lua',
+
+        -- exclude layout, but we need an extra bit of documentation elsewhere.
+        'lib/awful/layout/suit/'
+    }
+}
+
+-- vim: filetype=lua
