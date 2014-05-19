@@ -447,7 +447,7 @@ function tag.incncol(add, t)
 end
 
 --- View no tag.
--- @param Optional screen number.
+-- @tparam int screen Optional screen number.
 function tag.viewnone(screen)
     local tags = tag.gettags(screen or capi.mouse.screen)
     for i, t in pairs(tags) do
@@ -538,14 +538,14 @@ function tag.viewmore(tags, screen)
 end
 
 --- Toggle selection of a tag
--- @param tag Tag to be toggled
+-- @tparam tag t Tag to be toggled
 function tag.viewtoggle(t)
     t.selected = not t.selected
     capi.screen[tag.getscreen(t)]:emit_signal("tag::history::update")
 end
 
 --- Get tag data table.
--- @param tag The Tag.
+-- @tparam tag _tag The tag.
 -- @return The data table.
 function tag.getdata(_tag)
     return data.tags[_tag]
@@ -553,7 +553,7 @@ end
 
 --- Get a tag property.
 -- @param _tag The tag.
--- @param prop The property name.
+-- @tparam string prop The property name.
 -- @return The property.
 function tag.getproperty(_tag, prop)
     if data.tags[_tag] then

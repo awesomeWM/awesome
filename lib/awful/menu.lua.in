@@ -308,6 +308,7 @@ end
 
 
 --- Show a menu.
+-- @param args The arguments
 -- @param args.coords Menu position defaulting to mouse.coords()
 function menu:show(args)
     args = args or {}
@@ -338,7 +339,7 @@ function menu:hide()
 end
 
 --- Toggle menu visibility.
--- @param _menu The menu to show if it's hidden, or to hide if it's shown.
+-- @param args The arguments
 -- @param args.coords Menu position {x,y}
 function menu:toggle(args)
     if self.wibox.visible then
