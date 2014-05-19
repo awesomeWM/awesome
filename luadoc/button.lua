@@ -1,34 +1,30 @@
 --- awesome button API
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2008-2009 Julien Danjou
-module("button")
+-- @classmod button
 
 --- Button object.
--- @field button The mouse button number, or 0 for any button.
--- @field modifiers The modifier key table that should be pressed while the
--- button is pressed.
--- @class table
--- @name button
+--
+-- @tfield int button The mouse button number, or 0 for any button.
+-- @tfield table modifiers The modifier key table that should be pressed while the
+--   button is pressed.
+-- @table button
 
 --- Add a signal.
--- @param name A signal name.
--- @param func A function to call when the signal is emitted.
--- @name connect_signal
--- @class function
+-- @tparam string name A signal name.
+-- @tparam func func A function to call when the signal is emitted.
+-- @function connect_signal
 
 --- Remove a signal.
--- @param name A signal name.
--- @param func A function to remove.
--- @name disconnect_signal
--- @class function
+-- @tparam string name A signal name.
+-- @tparam func func A function to remove.
+-- @function disconnect_signal
 
 --- Emit a signal.
--- @param name A signal name.
+-- @tparam string name A signal name.
 -- @param ... Various arguments, optional.
--- @name emit_signal
--- @class function
+-- @function emit_signal
 
 --- Get the number of instances.
--- @return The number of button objects alive.
--- @name instances
--- @class function
+-- @treturn int The number of button objects alive.
+-- @function instances
