@@ -1,7 +1,10 @@
 ---------------------------------------------------------------------------
+--- Tasklist widget module for awful
+--
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2008-2009 Julien Danjou
 -- @release @AWESOME_VERSION@
+-- @classmod awful.widget.tasklist
 ---------------------------------------------------------------------------
 
 -- Grab environment we need
@@ -17,8 +20,6 @@ local util = require("awful.util")
 local tag = require("awful.tag")
 local flex = require("wibox.layout.flex")
 
---- Tasklist widget module for awful
--- awful.widget.tasklist
 local tasklist = { mt = {} }
 
 -- Public structures

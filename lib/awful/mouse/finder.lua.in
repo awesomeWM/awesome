@@ -1,7 +1,10 @@
 -------------------------------------------------------------------------
+-- Mouse finder for awful
+--
 -- @author Sébastien Gross &lt;seb•ɱɩɲʋʃ•awesome•ɑƬ•chezwam•ɖɵʈ•org&gt
 -- @copyright 2009 Sébastien Gross
 -- @release @AWESOME_VERSION@
+-- @module awful.mouse.finder
 -------------------------------------------------------------------------
 
 local mouse = mouse
@@ -15,24 +18,23 @@ local setmetatable = setmetatable
 
 --- Find the mouse pointer on the screen.
 -- Mouse finder highlights the mouse cursor on the screen
--- <p>To enable this feature, a <code>awful.mouse.finder</code> object needs to
--- be bound to a key:<br/>
--- <code>mymousefinder = awful.mouse.finder()</code><br/>
--- Then bind the <code>find</code> function a key binding.
--- <p>Some configuration variable can be set in the theme:<br/>
--- The mouse_finder display duration<br/>
--- <code>theme.mouse_finder_timeout = 3</code><br/>
--- The animation speed<br/>
--- <code>theme.mouse_finder_animate_timeout = 0.05</code><br/>
--- The mouse_finder radius<br/>
--- <code>theme.mouse_finder_radius = 20</code><br/>
--- The growth factor<br/>
--- <code>theme.mouse_finder_factor = 2</code><br/>
--- The mouse_finder color<br/>
--- <code>theme.mouse_finder_color = "#ff0000"</code><br/>
--- </p>
+-- To enable this feature, a `awful.mouse.finder` object needs to be bound to a
+-- key:
+--     mymousefinder = awful.mouse.finder()
+-- Then bind the `find` function a key binding.
+--
+-- Some configuration variable can be set in the theme:
+-- The mouse_finder display duration
+--     theme.mouse_finder_timeout = 3
+-- The animation speed
+--     theme.mouse_finder_animate_timeout = 0.05
+-- The mouse_finder radius
+--     theme.mouse_finder_radius = 20
+-- The growth factor
+--     theme.mouse_finder_factor = 2
+-- The mouse_finder color
+--     theme.mouse_finder_color = "#ff0000"
 
--- awful.mouse.finder
 local finder = { mt = {} }
 
 -- Mouse finder private data.
@@ -151,4 +153,4 @@ end
 
 return setmetatable(finder, finder.mt)
 
--- vim: ft=lua:et:sw=4:ts=4:sts=4:enc=utf-8:tw=78
+-- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

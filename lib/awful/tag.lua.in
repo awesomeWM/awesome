@@ -1,7 +1,10 @@
 ---------------------------------------------------------------------------
+--- Useful functions for tag manipulation.
+--
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2008 Julien Danjou
 -- @release @AWESOME_VERSION@
+-- @module awful.tag
 ---------------------------------------------------------------------------
 
 -- Grab environment we need
@@ -20,8 +23,6 @@ local capi =
     root = root
 }
 
---- Useful functions for tag manipulation.
--- awful.tag
 local tag = { mt = {} }
 
 -- Private data
@@ -510,7 +511,7 @@ function tag.getdata(_tag)
 end
 
 --- Get a tag property.
--- @param _tag The tag.
+-- @tparam tag _tag The tag.
 -- @tparam string prop The property name.
 -- @return The property.
 function tag.getproperty(_tag, prop)

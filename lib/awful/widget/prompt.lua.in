@@ -2,6 +2,7 @@
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2009 Julien Danjou
 -- @release @AWESOME_VERSION@
+-- @classmod awful.widget.prompt
 ---------------------------------------------------------------------------
 
 local setmetatable = setmetatable
@@ -13,10 +14,10 @@ local widget_base = require("wibox.widget.base")
 local textbox = require("wibox.widget.textbox")
 local type = type
 
--- awful.widget.prompt
 local widgetprompt = { mt = {} }
 
 --- Run method for promptbox.
+--
 -- @param promptbox The promptbox to run.
 local function run(promptbox)
     return prompt.run({ prompt = promptbox.prompt },
@@ -32,6 +33,7 @@ local function run(promptbox)
 end
 
 --- Create a prompt widget which will launch a command.
+--
 -- @param args Arguments table. "prompt" is the prompt to use.
 -- @return A launcher widget.
 function widgetprompt.new(args)

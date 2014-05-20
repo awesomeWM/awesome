@@ -1,7 +1,10 @@
 ---------------------------------------------------------------------------
+--- Screen module for awful
+--
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2008 Julien Danjou
 -- @release @AWESOME_VERSION@
+-- @module awful.screen
 ---------------------------------------------------------------------------
 
 -- Grab environment we need
@@ -16,8 +19,6 @@ local util = require("awful.util")
 -- we use require("awful.client") inside functions to prevent circular dependencies.
 local client
 
---- Screen module for awful
--- awful.screen
 local screen = {}
 
 local data = {}

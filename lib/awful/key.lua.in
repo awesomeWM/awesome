@@ -1,7 +1,10 @@
 ---------------------------------------------------------------------------
+--- Create easily new key objects ignoring certain modifiers.
+--
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2009 Julien Danjou
 -- @release @AWESOME_VERSION@
+-- @module awful.key
 ---------------------------------------------------------------------------
 
 -- Grab environment we need
@@ -10,8 +13,6 @@ local ipairs = ipairs
 local capi = { key = key }
 local util = require("awful.util")
 
---- Create easily new key objects ignoring certain modifiers.
--- awful.key
 local key = { mt = {} }
 
 --- Modifiers to ignore.
