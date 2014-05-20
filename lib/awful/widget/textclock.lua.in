@@ -1,7 +1,10 @@
 ---------------------------------------------------------------------------
+--- Text clock widget.
+--
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2009 Julien Danjou
 -- @release @AWESOME_VERSION@
+-- @classmod awful.widget.textclock
 ---------------------------------------------------------------------------
 
 local setmetatable = setmetatable
@@ -9,8 +12,6 @@ local os = os
 local textbox = require("wibox.widget.textbox")
 local timer = require("gears.timer")
 
---- Text clock widget.
--- awful.widget.textclock
 local textclock = { mt = {} }
 
 -- This lowers the timeout so that it occurs "correctly". For example, a timeout
@@ -20,6 +21,7 @@ local function calc_timeout(real_timeout)
 end
 
 --- Create a textclock widget. It draws the time it is in a textbox.
+--
 -- @param format The time format. Default is " %a %b %d, %H:%M ".
 -- @param timeout How often update the time. Default is 60.
 -- @return A textbox widget.

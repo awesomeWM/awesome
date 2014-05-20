@@ -1,40 +1,43 @@
+-------------------------------------------------------------------------
 --- Tooltip module for awesome objects.
 --
 -- A tooltip is a small hint displayed when the mouse cursor
 -- hovers a specific item.
 -- In awesome, a tooltip can be linked with almost any
--- object having a <code>connect_signal()</code> method and receiving
--- <code>mouse::enter</code> and <code>mouse::leave</code> signals.
--- <p>How to create a tooltip?<br/>
---  <code>
---  myclock = awful.widget.textclock({}, "%T", 1)<br/>
---  myclock_t = awful.tooltip({<br/>
---      objects = { myclock },<br/>
---      timer_function = function()<br/>
---              return os.date("Today is %A %B %d %Y\nThe time is %T")<br/>
---          end,<br/>
---      })<br/>
---  </code>
--- </p>
--- <p>How to add the same tooltip to several objects?<br/>
--- <code>
---     myclock_t:add_to_object(obj1)<br/>
---     myclock_t:add_to_object(obj2)<br/>
--- </code>
--- Now the same tooltip is attached to <code>myclock</code>, <code>obj1</code>,
---    <code>obj2</code>.<br/>
--- </p>
--- <p>How to remove tooltip from many objects?<br/>
--- <code>
---     myclock_t:remove_from_object(obj1)<br/>
---     myclock_t:remove_from_object(obj2)<br/>
--- </code>
--- Now the same tooltip is only attached to <code>myclock</code>.<br/>
--- </p>
+-- object having a `:connect_signal()` method and receiving
+-- `mouse::enter` and `mouse::leave` signals.
 --
--- @author Sébastien Gross &lt;seb•ɱɩɲʋʃ•awesome•ɑƬ•chezwam•ɖɵʈ•org&gt
+-- How to create a tooltip?
+-- ---
+--
+--     myclock = awful.widget.textclock({}, "%T", 1)
+--     myclock_t = awful.tooltip({
+--         objects = { myclock },
+--         timer_function = function()
+--                 return os.date("Today is %A %B %d %Y\nThe time is %T")
+--             end,
+--         })
+--
+-- How to add the same tooltip to several objects?
+-- ---
+--
+--     myclock_t:add_to_object(obj1)
+--     myclock_t:add_to_object(obj2)
+--
+-- Now the same tooltip is attached to `myclock`, `obj1`, `obj2`.
+--
+-- How to remove tooltip from many objects?
+-- ---
+--
+--     myclock_t:remove_from_object(obj1)
+--     myclock_t:remove_from_object(obj2)
+--
+-- Now the same tooltip is only attached to `myclock`.
+--
+-- @author Sébastien Gross &lt;seb•ɱɩɲʋʃ•awesome•ɑƬ•chezwam•ɖɵʈ•org&gt;
 -- @copyright 2009 Sébastien Gross
 -- @release @AWESOME_VERSION@
+-- @module awful.tooltip
 -------------------------------------------------------------------------
 
 local mouse = mouse
@@ -73,6 +76,7 @@ local function place(self)
 end
 
 -- Place the tooltip under the mouse.
+--
 -- @param self A tooltip object.
 local function set_geometry(self)
     local my_geo = self.wibox:geometry()
@@ -84,6 +88,7 @@ local function set_geometry(self)
 end
 
 -- Show a tooltip.
+--
 -- @param self The tooltip to show.
 local function show(self)
     -- do nothing if the tooltip is already shown
@@ -101,6 +106,7 @@ local function show(self)
 end
 
 -- Hide a tooltip.
+--
 -- @param self The tooltip to hide.
 local function hide(self)
     -- do nothing if the tooltip is already hidden
@@ -115,6 +121,7 @@ local function hide(self)
 end
 
 --- Change displayed text.
+--
 -- @param self The tooltip object.
 -- @param text New tooltip text.
 tooltip.set_text = function(self, text)
@@ -123,6 +130,7 @@ tooltip.set_text = function(self, text)
 end
 
 --- Change displayed text.
+--
 -- @param self The tooltip object.
 -- @param text New tooltip text, including pango markup.
 tooltip.set_markup = function(self, text)
@@ -131,6 +139,7 @@ tooltip.set_markup = function(self, text)
 end
 
 --- Change the tooltip's update interval.
+--
 -- @param self A tooltip object.
 -- @param timeout The timeout value.
 -- @function set_timeout
@@ -141,6 +150,7 @@ tooltip.set_timeout = function(self, timeout)
 end
 
 --- Add tooltip to an object.
+--
 -- @param self The tooltip.
 -- @param object An object.
 tooltip.add_to_object = function(self, object)
@@ -149,6 +159,7 @@ tooltip.add_to_object = function(self, object)
 end
 
 --- Remove tooltip from an object.
+--
 -- @param self The tooltip.
 -- @param object An object.
 -- @function remove_from_object

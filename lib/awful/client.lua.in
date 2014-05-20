@@ -5,7 +5,6 @@
 -- @copyright 2008 Julien Danjou
 -- @release @AWESOME_VERSION@
 -- @module awful.client
--- @alias client
 ---------------------------------------------------------------------------
 
 -- Grab environment we need
@@ -281,6 +280,7 @@ function client.next(i, c)
 end
 
 --- Focus a client by the given direction.
+--
 -- @tparam string dir The direction, can be either 
 --   `"up"`, `"down"`, `"left"` or `"right"`.
 -- @client[opt] c Optional client.
@@ -303,6 +303,7 @@ function client.focus.bydirection(dir, c)
 end
 
 --- Focus a client by the given direction. Moves across screens.
+--
 -- @param dir The direction, can be either "up", "down", "left" or "right".
 -- @client[opt] c Optional client.
 function client.focus.global_bydirection(dir, c)
@@ -335,6 +336,7 @@ function client.focus.global_bydirection(dir, c)
 end
 
 --- Focus a client by its relative index.
+--
 -- @param i The index.
 -- @client[opt] c Optional client.
 function client.focus.byidx(i, c)

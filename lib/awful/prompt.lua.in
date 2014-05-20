@@ -1,7 +1,10 @@
 ---------------------------------------------------------------------------
+--- Prompt module for awful
+--
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2008 Julien Danjou
 -- @release @AWESOME_VERSION@
+-- @module awful.prompt
 ---------------------------------------------------------------------------
 
 -- Grab environment we need
@@ -19,8 +22,6 @@ local keygrabber = require("awful.keygrabber")
 local util = require("awful.util")
 local beautiful = require("beautiful")
 
---- Prompt module for awful
--- awful.prompt
 local prompt = {}
 
 --- Private data

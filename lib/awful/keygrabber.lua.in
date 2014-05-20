@@ -1,7 +1,10 @@
 ---------------------------------------------------------------------------
+--- Keygrabber Stack
+--
 -- @author dodo
 -- @copyright 2012 dodo
 -- @release @AWESOME_VERSION@
+-- @module awful.keygrabber
 ---------------------------------------------------------------------------
 
 local ipairs = ipairs
@@ -9,8 +12,6 @@ local table = table
 local capi = {
     keygrabber = keygrabber }
 
---- Keygrabber Stack
--- awful.keygrabber
 local keygrabber = {}
 
 -- Private data

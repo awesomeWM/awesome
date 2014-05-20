@@ -1,7 +1,10 @@
 ---------------------------------------------------------------------------
+--- Implements EWMH requests handling.
+--
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2009 Julien Danjou
 -- @release @AWESOME_VERSION@
+-- @module awful.ewmh
 ---------------------------------------------------------------------------
 
 local setmetatable = setmetatable
@@ -12,8 +15,6 @@ local math = math
 local atag = require("awful.tag")
 local aclient = require("awful.client")
 
---- Implements EWMH requests handling.
--- awful.ewmh
 local ewmh = {}
 
 local data = setmetatable({}, { __mode = 'k' })
@@ -26,6 +27,7 @@ local function store_geometry(window, reqtype)
 end
 
 -- Maximize a window horizontally.
+--
 -- @param window The window.
 -- @param set Set or unset the maximized values.
 local function maximized_horizontal(window, set)
@@ -43,6 +45,7 @@ local function maximized_horizontal(window, set)
 end
 
 -- Maximize a window vertically.
+--
 -- @param window The window.
 -- @param set Set or unset the maximized values.
 local function maximized_vertical(window, set)
@@ -60,6 +63,7 @@ local function maximized_vertical(window, set)
 end
 
 -- Fullscreen a window.
+--
 -- @param window The window.
 -- @param set Set or unset the fullscreen values.
 local function fullscreen(window, set)
@@ -139,7 +143,9 @@ local function geometry_change(window)
     geometry_change_lock = false
 end
 
--- Activate a window
+--- Activate a window
+--
+-- @client c A client to use
 function ewmh.activate(c)
     if awesome.startup or c:isvisible() then
         client.focus = c
@@ -149,7 +155,10 @@ function ewmh.activate(c)
     end
 end
 
--- Tag a window with its requested tag
+--- Tag a window with its requested tag
+-- 
+-- @client c A client to tag
+-- @tag[opt] t A tag to use. If omitted, then the client is made sticky.
 function ewmh.tag(c, t)
     if not t then
         c.sticky = true

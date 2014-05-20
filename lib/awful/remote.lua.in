@@ -1,7 +1,10 @@
 ---------------------------------------------------------------------------
+--- Remote control module allowing usage of awesome-client.
+--
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2009 Julien Danjou
 -- @release @AWESOME_VERSION@
+-- @module awful.remote
 ---------------------------------------------------------------------------
 
 -- Grab environment we need
@@ -13,9 +16,6 @@ local table = table
 local unpack = unpack or table.unpack -- v5.1: unpack, v5.2: table.unpack
 local dbus = dbus
 local type = type
-
---- Remote control module allowing usage of awesome-client.
--- awful.remote
 
 if dbus then
     dbus.connect_signal("org.naquadah.awesome.awful.Remote", function(data, code)
