@@ -30,6 +30,9 @@ file = {
         'lib/awful/remote.lua',
         'lib/awful/startup_notification.lua',
 
+        -- Ignore some parts of the widget library
+        'lib/awful/widget/common.lua',
+
         -- exclude layout, but we need an extra bit of documentation elsewhere.
         'lib/awful/layout/suit/'
     }
