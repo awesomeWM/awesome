@@ -3,6 +3,7 @@
 -- @author dodo
 -- @copyright 2010, 2011 Uli Schlachter, dodo
 -- @release @AWESOME_VERSION@
+-- @module wibox.widget.textbox
 ---------------------------------------------------------------------------
 
 local base = require("wibox.widget.base")
@@ -16,7 +17,6 @@ local setmetatable = setmetatable
 local pairs = pairs
 local error = error
 
--- wibox.widget.textbox
 local textbox = { mt = {} }
 
 -- Setup a pango layout for the given textbox and cairo context

@@ -2,6 +2,7 @@
 -- @author Uli Schlachter
 -- @copyright 2010 Uli Schlachter
 -- @release @AWESOME_VERSION@
+-- @module wibox.layout.rotate
 ---------------------------------------------------------------------------
 
 local error = error
@@ -13,7 +14,6 @@ local tostring = tostring
 local base = require("wibox.layout.base")
 local widget_base = require("wibox.widget.base")
 
--- wibox.layout.rotate
 local rotate = { mt = {} }
 
 local function transform(layout, width, height)

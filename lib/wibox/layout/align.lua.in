@@ -2,6 +2,7 @@
 -- @author Uli Schlachter
 -- @copyright 2010 Uli Schlachter
 -- @release @AWESOME_VERSION@
+-- @module wibox.layout.align
 ---------------------------------------------------------------------------
 
 local setmetatable = setmetatable
@@ -12,7 +13,6 @@ local floor = math.floor
 local base = require("wibox.layout.base")
 local widget_base = require("wibox.widget.base")
 
--- wibox.layout.align
 local align = {}
 
 --- Draw an align layout.

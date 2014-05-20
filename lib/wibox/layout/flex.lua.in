@@ -2,6 +2,7 @@
 -- @author Uli Schlachter
 -- @copyright 2010 Uli Schlachter
 -- @release @AWESOME_VERSION@
+-- @module wibox.layout.flex
 ---------------------------------------------------------------------------
 
 local base = require("wibox.layout.base")
@@ -10,7 +11,6 @@ local table = table
 local pairs = pairs
 local floor = math.floor
 
--- wibox.layout.flex
 local flex = {}
 
 local function round(x)

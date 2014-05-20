@@ -2,6 +2,7 @@
 -- @author Uli Schlachter
 -- @copyright 2010 Uli Schlachter
 -- @release @AWESOME_VERSION@
+-- @module wibox.widget.imagebox
 ---------------------------------------------------------------------------
 
 local base = require("wibox.widget.base")
@@ -12,7 +13,6 @@ local type = type
 local pcall = pcall
 local print = print
 
--- wibox.widget.imagebox
 local imagebox = { mt = {} }
 
 --- Draw an imagebox with the given cairo context in the given geometry.

@@ -2,6 +2,7 @@
 -- @author Lukáš Hrázký
 -- @copyright 2012 Lukáš Hrázký
 -- @release @AWESOME_VERSION@
+-- @module wibox.layout.constraint
 ---------------------------------------------------------------------------
 
 local pairs = pairs
@@ -11,7 +12,6 @@ local base = require("wibox.layout.base")
 local widget_base = require("wibox.widget.base")
 local math = math
 
--- wibox.layout.constraint
 local constraint = { mt = {} }
 
 --- Draw a constraint layout
