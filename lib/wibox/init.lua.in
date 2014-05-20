@@ -2,6 +2,7 @@
 -- @author Uli Schlachter
 -- @copyright 2010 Uli Schlachter
 -- @release @AWESOME_VERSION@
+-- @module wibox
 ---------------------------------------------------------------------------
 
 local capi = {
@@ -36,14 +37,14 @@ end
 
 --- Set the background of the wibox
 -- @param c The background to use. This must either be a cairo pattern object,
---          nil or a string that gears.color() understands.
+--   nil or a string that gears.color() understands.
 function wibox:set_bg(c)
     self._drawable:set_bg(c)
 end
 
 --- Set the foreground of the wibox
 -- @param c The foreground to use. This must either be a cairo pattern object,
---          nil or a string that gears.color() understands.
+--   nil or a string that gears.color() understands.
 function wibox:set_fg(c)
     self._drawable:set_fg(c)
 end
@@ -130,16 +131,14 @@ end
 --- Redraw a wibox. You should never have to call this explicitely because it is
 -- automatically called when needed.
 -- @param wibox
--- @name draw
--- @class function
+-- @function draw
 
 --- Widget box object.
 -- Every wibox "inherits" from a drawin and you can use all of drawin's
 -- functions directly on this as well. When creating a wibox, you can specify a
 -- "fg" and a "bg" color as keys in the table that is passed to the constructor.
 -- All other arguments will be passed to drawin's constructor.
--- @class table
--- @name drawin
+-- @table drawin
 
 function wibox.mt:__call(...)
     return new(...)
