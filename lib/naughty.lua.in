@@ -4,6 +4,7 @@
 -- @author koniu &lt;gkusnierz@gmail.com&gt;
 -- @copyright 2008 koniu
 -- @release @AWESOME_VERSION@
+-- @module naughty
 ----------------------------------------------------------------------------
 
 -- Package environment
@@ -33,32 +34,40 @@ local tins = table.insert
 local naughty = {}
 
 --- Naughty configuration - a table containing common popup settings.
+-- @table naughty.config
 naughty.config = {}
---- Space between popups and edge of the workarea. Default: 4
+--- Space between popups and edge of the workarea.
+-- Default: 4
+-- @table naughty.config.padding
 naughty.config.padding = 4
 --- Spacing between popups. Default: `1`
+-- @table naughty.config.spacing
 naughty.config.spacing = 1
---- List of directories that will be checked by getIcon()
---   Default: `{ "/usr/share/pixmaps/", }`
+--- List of directories that will be checked by getIcon().
+-- Default: `{ "/usr/share/pixmaps/", }`
+-- @table naughty.config.icon_dirs
 naughty.config.icon_dirs = { "/usr/share/pixmaps/", }
---- List of formats that will be checked by getIcon()
---   Default: `{ "png", "gif" }`
+--- List of formats that will be checked by getIcon().
+-- Default: `{ "png", "gif" }`
+-- @table naughty.config.icon_formats
 naughty.config.icon_formats = { "png", "gif" }
 --- Callback used to modify or reject notifications.
---   Default: `nil`
---   Example:
---      naughty.config.notify_callback = function(args)
---          args.text = 'prefix: ' .. args.text
---          return args
---      end
+-- Default: `nil`
+-- @usage
+-- naughty.config.notify_callback = function(args)
+--     args.text = 'prefix: ' .. args.text
+--     return args
+-- end
+-- @table naughty.config.notify_callback
 naughty.config.notify_callback = nil
 
 
---- Notification Presets - a table containing presets for different purposes
+--- Notification Presets - a table containing presets for different purposes.
 -- Preset is a table of any parameters available to notify(), overriding default
 -- values (`naughty.config.defaults`)
 -- You have to pass a reference of a preset in your notify() call to use the preset
 -- The presets "low", "normal" and "critical" are used for notifications over DBUS
+--
 -- @field low The preset for notifications with low urgency level
 -- @field normal The default preset for every notification without a preset that will also be used for normal urgency level
 -- @field critical The preset for notifications with a critical urgency level
@@ -77,8 +86,10 @@ naughty.config.presets = {
 
 --- Default values for the params to notify().
 -- These can optionally be overridden by specifying a preset
+--
 -- @see naughty.config.presets
 -- @see naughty.notify
+-- @table naughty.config.defaults
 naughty.config.defaults = {
     timeout = 5,
     text = "",
@@ -96,12 +107,16 @@ local urgency = {
     critical = "\2"
 }
 
---- DBUS notification to preset mapping
+--- DBUS notification to preset mapping.
 -- The first element is an object containing the filter
 -- If the rules in the filter matches the associated preset will be applied
 -- The rules object can contain: urgency, category, appname
 -- The second element is the preset
-
+--
+-- @field 1 low urgency
+-- @field 2 normal urgency
+-- @field 3 critical urgency
+-- @table naughty.config.mapping
 naughty.config.mapping = {
     {{urgency = urgency.low}, naughty.config.presets.low},
     {{urgency = urgency.normal}, naughty.config.presets.normal},
@@ -115,14 +130,15 @@ local counter = 1
 -- True if notifying is suspended
 local suspended = false
 
---- Index of notifications per screen and position. See config table for valid
--- 'position' values. Each element is a table consisting of:
+--- Index of notifications per screen and position.
+--  See config table for valid 'position' values.
+--  Each element is a table consisting of:
 -- @field box Wibox object containing the popup
 -- @field height Popup height
 -- @field width Popup width
 -- @field die Function to be executed on timeout
 -- @field id Unique notification id based on a counter
--- @table naughty.notifications
+-- @table notifications
 naughty.notifications = { suspended = { } }
 for s = 1, capi.screen.count() do
     naughty.notifications[s] = {
@@ -262,18 +278,18 @@ end
 --   Default: nil
 -- @tparam int args.screen Target screen for the notification. Default: 1
 -- @tparam string args.position Corner of the workarea displaying the popups.
---   Values: "top_right" (default), "top_left", "bottom_left", "bottom_right".
+--   Values: `"top_right"` (default), `"top_left"`, `"bottom_left"`, `"bottom_right"`.
 -- @tparam bool args.ontop Boolean forcing popups to display on top. Default: true
 -- @tparam int args.height Popup height. Default: nil (auto)
 -- @tparam int args.width Popup width. Default: nil (auto)
 -- @tparam string args.font Notification font. Default: beautiful.font or awesome.font
 -- @tparam string args.icon Path to icon. Default: nil
 -- @tparam int args.icon_size Desired icon size in px. Default: nil
--- @tparam string args.fg Foreground color. Default: beautiful.fg_focus or '#ffffff'
--- @tparam string args.bg Background color. Default: beautiful.bg_focus or '#535d6c'
+-- @tparam string args.fg Foreground color. Default: `beautiful.fg_focus` or `'#ffffff'`
+-- @tparam string args.bg Background color. Default: `beautiful.bg_focus` or `'#535d6c'`
 -- @tparam int args.border_width Border width. Default: 1
 -- @tparam string args.border_color Border color.
---   Default: beautiful.border_focus or '#535d6c'
+--   Default: `beautiful.border_focus` or `'#535d6c'`
 -- @tparam func args.run Function to run on left click. Default: nil
 -- @tparam table args.preset Table with any of the above parameters. Note: Any parameters
 --   specified directly in args will override ones defined in the preset.
