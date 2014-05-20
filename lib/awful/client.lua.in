@@ -1,7 +1,11 @@
 ---------------------------------------------------------------------------
+--- Useful client manipulation functions.
+--
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2008 Julien Danjou
 -- @release @AWESOME_VERSION@
+-- @module awful.client
+-- @alias client
 ---------------------------------------------------------------------------
 
 -- Grab environment we need
@@ -24,10 +28,7 @@ local capi =
 -- we use require("awful.screen") inside functions to prevent circular dependencies.
 local screen
 
---- Useful client manipulation functions.
--- awful.client
 local client = {}
-
 
 -- Private data
 client.data = {}
@@ -48,11 +49,11 @@ client.dockable = {}
 client.property = {}
 client.shape = require("awful.client.shape")
 
----
--- Jump to the given client.  Takes care of focussing the screen, the right tag,
--- etc.
--- @param c the client to jump to
--- @param merge If true then merge tags when clients are not visible.
+--- Jump to the given client.
+-- Takes care of focussing the screen, the right tag, etc.
+--
+-- @client c the client to jump to
+-- @tparam bool merge If true then merge tags when clients are not visible.
 function client.jumpto(c, merge)
     local s = capi.client.focus and capi.client.focus.screen or capi.mouse.screen
     -- focus the screen
@@ -76,7 +77,8 @@ function client.jumpto(c, merge)
 end
 
 --- Get the first client that got the urgent hint.
--- @return The first urgent client.
+--
+-- @treturn client The first urgent client.
 function client.urgent.get()
     if #client.data.urgent > 0 then
         return client.data.urgent[1]
@@ -92,7 +94,8 @@ function client.urgent.get()
 end
 
 --- Jump to the client that received the urgent hint first.
--- @param merge If true then merge tags when clients are not visible.
+--
+-- @tparam bool merge If true then merge tags when clients are not visible.
 function client.urgent.jumpto(merge)
     local c = client.urgent.get()
     if c then
@@ -101,7 +104,8 @@ function client.urgent.jumpto(merge)
 end
 
 --- Adds client to urgent stack.
--- @param c The client object.
+--
+-- @client c The client object.
 -- @param prop The property which is updated.
 function client.urgent.add(c, prop)
     if type(c) == "client" and prop == "urgent" and c.urgent then
@@ -110,7 +114,8 @@ function client.urgent.add(c, prop)
 end
 
 --- Remove client from urgent stack.
--- @param c The client object.
+--
+-- @client c The client object.
 function client.urgent.delete(c)
     for k, cl in ipairs(client.data.urgent) do
         if c == cl then
@@ -121,7 +126,8 @@ function client.urgent.delete(c)
 end
 
 --- Remove a client from the focus history
--- @param c The client that must be removed.
+--
+-- @client c The client that must be removed.
 function client.focus.history.delete(c)
     for k, v in ipairs(client.data.focus) do
         if v == c then
@@ -134,7 +140,8 @@ end
 --- Filter out window that we do not want handled by focus.
 -- This usually means that desktop, dock and splash windows are
 -- not registered and cannot get focus.
--- @param c A client.
+--
+-- @client c A client.
 -- @return The same client if it's ok, nil otherwise.
 function client.focus.filter(c)
     if c.type == "desktop"
@@ -147,7 +154,8 @@ function client.focus.filter(c)
 end
 
 --- Update client focus history.
--- @param c The client that has been focused.
+--
+-- @client c The client that has been focused.
 function client.focus.history.add(c)
     -- Remove the client if its in stack
     client.focus.history.delete(c)
@@ -156,9 +164,10 @@ function client.focus.history.add(c)
 end
 
 --- Get the latest focused client for a screen in history.
+--
 -- @param screen The screen number to look for.
 -- @param idx The index: 0 will return first candidate,
--- 1 will return second, etc.
+--   1 will return second, etc.
 -- @return A client.
 function client.focus.history.get(screen, idx)
     -- When this counter is equal to idx, we return the client
@@ -203,6 +212,7 @@ function client.focus.history.previous()
 end
 
 --- Get visible clients from a screen.
+--
 -- @param screen The screen number, or nil for all screens.
 -- @return A table with all visible clients.
 function client.visible(screen)
@@ -217,6 +227,7 @@ function client.visible(screen)
 end
 
 --- Get visible and tiled clients
+--
 -- @param screen The screen number, or nil for all screens.
 -- @return A table with all visible and tiled clients.
 function client.tiled(screen)
@@ -234,11 +245,17 @@ function client.tiled(screen)
     return tclients
 end
 
---- Get a client by its relative index to the focused window.
--- @usage Set i to 1 to get next, -1 to get previous.
--- @param i The index.
--- @param c Optional client.
+--- Get a client by its relative index to another client.
+-- If no client is passed, the focused client will be used.
+--
+-- @tparam int i The index.
+-- @client[opt] c Optional client.
 -- @return A client, or nil if no client is available.
+--
+-- @usage -- focus the next window in the index
+-- awful.client.next(1)
+-- -- focus the previous
+-- awful.client.next(-1)
 function client.next(i, c)
     -- Get currently focused client
     local sel = c or capi.client.focus
@@ -264,8 +281,9 @@ function client.next(i, c)
 end
 
 --- Focus a client by the given direction.
--- @param dir The direction, can be either "up", "down", "left" or "right".
--- @param c Optional client.
+-- @tparam string dir The direction, can be either 
+--   `"up"`, `"down"`, `"left"` or `"right"`.
+-- @client[opt] c Optional client.
 function client.focus.bydirection(dir, c)
     local sel = c or capi.client.focus
     if sel then
@@ -286,7 +304,7 @@ end
 
 --- Focus a client by the given direction. Moves across screens.
 -- @param dir The direction, can be either "up", "down", "left" or "right".
--- @param c Optional client.
+-- @client[opt] c Optional client.
 function client.focus.global_bydirection(dir, c)
     screen = screen or require("awful.screen")
     local sel = c or capi.client.focus
@@ -318,7 +336,7 @@ end
 
 --- Focus a client by its relative index.
 -- @param i The index.
--- @param c Optional client.
+-- @client[opt] c Optional client.
 function client.focus.byidx(i, c)
     local target = client.next(i, c)
     if target then
@@ -328,7 +346,7 @@ end
 
 --- Swap a client with another client in the given direction
 -- @param dir The direction, can be either "up", "down", "left" or "right".
--- @param c Optional client.
+-- @client[opt] c Optional client.
 function client.swap.bydirection(dir, c)
     local sel = c or capi.client.focus
     if sel then
@@ -348,7 +366,7 @@ end
 
 --- Swap a client with another client in the given direction. Swaps across screens.
 -- @param dir The direction, can be either "up", "down", "left" or "right".
--- @param c Optional client.
+-- @client[opt] c Optional client.
 function client.swap.global_bydirection(dir, c)
     screen = screen or require("awful.screen")
     local sel = c or capi.client.focus
@@ -383,7 +401,7 @@ end
 
 --- Swap a client by its relative index.
 -- @param i The index.
--- @param c Optional client, otherwise focused one is used.
+-- @client[opt] c Optional client, otherwise focused one is used.
 function client.swap.byidx(i, c)
     local sel = c or capi.client.focus
     local target = client.next(i, sel)
@@ -393,8 +411,9 @@ function client.swap.byidx(i, c)
 end
 
 --- Cycle clients.
+--
 -- @param clockwise True to cycle clients clockwise.
--- @param screen Optional screen where to cycle clients.
+-- @param[opt] screen Optional screen where to cycle clients.
 function client.cycle(clockwise, screen)
     local screen = screen or capi.mouse.screen
     local cls = client.visible(screen)
@@ -414,7 +433,8 @@ function client.cycle(clockwise, screen)
 end
 
 --- Get the master window.
--- @param screen Optional screen number, otherwise screen mouse is used.
+--
+-- @param[opt] screen Optional screen number, otherwise screen mouse is used.
 -- @return The master window.
 function client.getmaster(screen)
     local s = screen or capi.mouse.screen
@@ -422,7 +442,8 @@ function client.getmaster(screen)
 end
 
 --- Set the client as master: put it at the beginning of other windows.
--- @param c The window to set as master.
+--
+-- @client c The window to set as master.
 function client.setmaster(c)
     local cls = util.table.reverse(capi.client.get(c.screen))
     for k, v in pairs(cls) do
@@ -431,7 +452,7 @@ function client.setmaster(c)
 end
 
 --- Set the client as slave: put it at the end of other windows.
--- @param c The window to set as slave.
+-- @client c The window to set as slave.
 function client.setslave(c)
     local cls = capi.client.get(c.screen)
     for k, v in pairs(cls) do
@@ -444,7 +465,7 @@ end
 -- @param y The relative y coordinate.
 -- @param w The relative width.
 -- @param h The relative height.
--- @param c The optional client, otherwise focused one is used.
+-- @client[opt] c The optional client, otherwise focused one is used.
 function client.moveresize(x, y, w, h, c)
     local sel = c or capi.client.focus
     local geometry = sel:geometry()
@@ -457,7 +478,7 @@ end
 
 --- Move a client to a tag.
 -- @param target The tag to move the client to.
--- @param c Optional client to move, otherwise the focused one is used.
+-- @client[opt] c Optional client to move, otherwise the focused one is used.
 function client.movetotag(target, c)
     local sel = c or capi.client.focus
     local s = tag.getscreen(target)
@@ -470,7 +491,7 @@ end
 
 --- Toggle a tag on a client.
 -- @param target The tag to toggle.
--- @param c Optional client to toggle, otherwise the focused one is used.
+-- @client[opt] c Optional client to toggle, otherwise the focused one is used.
 function client.toggletag(target, c)
     local sel = c or capi.client.focus
     -- Check that tag and client screen are identical
@@ -495,7 +516,7 @@ function client.toggletag(target, c)
 end
 
 --- Move a client to a screen. Default is next screen, cycling.
--- @param c The client to move.
+-- @client c The client to move.
 -- @param s The screen number, default to current + 1.
 function client.movetoscreen(c, s)
     screen = screen or require("awful.screen")
@@ -512,7 +533,7 @@ function client.movetoscreen(c, s)
 end
 
 --- Mark a client, and then call 'marked' hook.
--- @param c The client to mark, the focused one if not specified.
+-- @client c The client to mark, the focused one if not specified.
 -- @return True if the client has been marked. False if the client was already marked.
 function client.mark(c)
     local cl = c or capi.client.focus
@@ -532,7 +553,7 @@ function client.mark(c)
 end
 
 --- Unmark a client and then call 'unmarked' hook.
--- @param c The client to unmark, or the focused one if not specified.
+-- @client c The client to unmark, or the focused one if not specified.
 -- @return True if the client has been unmarked. False if the client was not marked.
 function client.unmark(c)
     local cl = c or capi.client.focus
@@ -549,7 +570,7 @@ function client.unmark(c)
 end
 
 --- Check if a client is marked.
--- @param c The client to check, or the focused one otherwise.
+-- @client c The client to check, or the focused one otherwise.
 function client.ismarked(c)
     local cl = c or capi.client.focus
     if cl then
@@ -563,7 +584,7 @@ function client.ismarked(c)
 end
 
 --- Toggle a client as marked.
--- @param c The client to toggle mark.
+-- @client c The client to toggle mark.
 function client.togglemarked(c)
     local cl = c or capi.client.focus
 
@@ -586,7 +607,7 @@ end
 
 --- Set a client floating state, overriding auto-detection.
 -- Floating client are not handled by tiling layouts.
--- @param c A client.
+-- @client c A client.
 -- @param s True or false.
 function client.floating.set(c, s)
     local c = c or capi.client.focus
@@ -618,7 +639,7 @@ end)
 capi.client.connect_signal("property::geometry", store_floating_geometry)
 
 --- Return if a client has a fixe size or not.
--- @param c The client.
+-- @client c The client.
 function client.isfixed(c)
     local c = c or capi.client.focus
     if not c then return end
@@ -635,7 +656,7 @@ function client.isfixed(c)
 end
 
 --- Get a client floating state.
--- @param c A client.
+-- @client c A client.
 -- @return True or false. Note that some windows might be floating even if you
 -- did not set them manually. For example, windows with a type different than
 -- normal.
@@ -658,7 +679,7 @@ function client.floating.get(c)
 end
 
 --- Toggle the floating state of a client between 'auto' and 'true'.
--- @param c A client.
+-- @client c A client.
 function client.floating.toggle(c)
     local c = c or capi.client.focus
     -- If it has been set to floating
@@ -670,7 +691,7 @@ function client.floating.toggle(c)
 end
 
 --- Remove the floating information on a client.
--- @param c The client.
+-- @client c The client.
 function client.floating.delete(c)
     client.floating.set(c, nil)
 end
@@ -723,7 +744,8 @@ end
 
 --- Calculate a client's column number, index in that column, and
 -- number of visible clients in this column.
--- @param c the client
+--
+-- @client c the client
 -- @return col the column number
 -- @return idx index of the client in the column
 -- @return num the number of visible clients in the column
@@ -777,8 +799,9 @@ end
 
 
 --- Set the window factor of a client
+--
 -- @param wfact the window factor value
--- @param c the client
+-- @client c the client
 function client.setwfact(wfact, c)
     -- get the currently selected window
     local c = c or capi.client.focus
@@ -816,8 +839,9 @@ function client.setwfact(wfact, c)
 end
 
 --- Increment a client's window factor
+--
 -- @param add amount to increase the client's window
--- @param c the client
+-- @client c the client
 function client.incwfact(add, c)
     local c = c or capi.client.focus
     if not c then return end
@@ -839,10 +863,11 @@ function client.incwfact(add, c)
 end
 
 --- Get a client dockable state.
--- @param c A client.
+--
+-- @client c A client.
 -- @return True or false. Note that some windows might be dockable even if you
--- did not set them manually. For example, windows with a type "utility", "toolbar"
--- or "dock"
+--   did not set them manually. For example, windows with a type "utility",
+--   "toolbar" or "dock"
 function client.dockable.get(c)
     local value = client.property.get(c, "dockable")
 
@@ -861,14 +886,16 @@ end
 --- Set a client dockable state, overriding auto-detection.
 -- With this enabled you can dock windows by moving them from the center
 -- to the edge of the workarea.
--- @param c A client.
+--
+-- @client c A client.
 -- @param value True or false.
 function client.dockable.set(c, value)
     client.property.set(c, "dockable", value)
 end
 
 --- Get a client property.
--- @param c The client.
+--
+-- @client c The client.
 -- @param prop The property name.
 -- @return The property.
 function client.property.get(c, prop)
@@ -887,8 +914,9 @@ function client.property.get(c, prop)
 end
 
 --- Set a client property.
--- This properties are internal to awful. Some are used to move clients, etc.
--- @param c The client.
+-- These properties are internal to awful. Some are used to move clients, etc.
+--
+-- @client c The client.
 -- @param prop The property name.
 -- @param value The value.
 function client.property.set(c, prop, value)
@@ -903,9 +931,10 @@ function client.property.set(c, prop, value)
 end
 
 --- Set a client property to be persistent across restarts (via X properties).
+--
 -- @param prop The property name.
 -- @param type The type (used for register_xproperty).
---             One of "string", "number" or "boolean".
+--   One of "string", "number" or "boolean".
 function client.property.persist(prop, type)
     local xprop = "awful.client.property." .. prop
     capi.awesome.register_xproperty(xprop, type)
@@ -925,19 +954,17 @@ end
 --
 -- @param filter a function that returns true to indicate a positive match
 -- @param start  what index to start iterating from.  Defaults to using the
--- index of the currently focused client.
--- @param s      which screen to use.  nil means all screens.
+--   index of the currently focused client.
+-- @param s which screen to use.  nil means all screens.
 --
--- @usage e.g.: un-minimize all urxvt instances
--- <p><code>
--- local urxvt = function (c) <br/>
---   return awful.rules.match(c, {class = "URxvt"}) <br/>
--- end <br/>
--- </br>
--- for c in awful.client.iterate(urxvt) do <br/>
---   c.minimized = false <br/>
--- end <br/>
--- </code></p>
+-- @usage -- un-minimize all urxvt instances
+-- local urxvt = function (c)
+--   return awful.rules.match(c, {class = "URxvt"})
+-- end
+--
+-- for c in awful.client.iterate(urxvt) do
+--   c.minimized = false
+-- end
 function client.iterate(filter, start, s)
     local clients = capi.client.get(s)
     local focused = capi.client.focus
@@ -946,23 +973,21 @@ function client.iterate(filter, start, s)
 end
 
 ---
--- <p>Switch to a client matching the given condition if running, else spawn it.
+-- Switch to a client matching the given condition if running, else spawn it.
 -- If multiple clients match the given condition then the next one is
--- focussed.</p>
+-- focussed.
 --
--- @param cmd     the command to execute
+-- @param cmd the command to execute
 -- @param matcher a function that returns true to indicate a matching client
--- @param merge   if true then merge tags when clients are not visible
+-- @param merge if true then merge tags when clients are not visible
 --
--- @usage run or raise urxvt (perhaps, with tabs) on modkey + semicolon
--- <p><code>
--- awful.key({ modkey, }, 'semicolon', function ()            <br/>
---   local matcher = function (c)                             <br/>
---     return awful.rules.match(c, {class = 'URxvt'}) <br/>
---   end                                                      <br/>
---   awful.client.run_or_raise('urxvt', matcher)
+-- @usage -- run or raise urxvt (perhaps, with tabs) on modkey + semicolon
+-- awful.key({ modkey, }, 'semicolon', function ()
+--     local matcher = function (c)
+--         return awful.rules.match(c, {class = 'URxvt'})
+--     end
+--     awful.client.run_or_raise('urxvt', matcher)
 -- end);
--- </code></p>
 function client.run_or_raise(cmd, matcher, merge)
     local clients = capi.client.get()
     local findex  = util.table.hasitem(clients, capi.client.focus) or 1
