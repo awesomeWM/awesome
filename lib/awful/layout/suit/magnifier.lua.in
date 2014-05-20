@@ -1,7 +1,10 @@
 ---------------------------------------------------------------------------
+--- Magnifier layout module for awful
+--
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2008 Julien Danjou
 -- @release @AWESOME_VERSION@
+-- @module awful.layout.suit.magnifier
 ---------------------------------------------------------------------------
 
 -- Grab environment we need
@@ -17,8 +20,6 @@ local capi =
 }
 local client = require("awful.client")
 
---- Magnifier layout module for awful
--- awful.layout.suit.magnifier
 local magnifier = {}
 
 function magnifier.mouse_resize_handler(c, corner, x, y)
