@@ -11,16 +11,20 @@ dir='doc'
 pretty='lua'
 backtick_references=true
 merge=true
-readme='README.md'
+topics={
+    'README.md',
+    'CONTRIBUTING.md',
+}
 
+-- Aliases for custom types
 tparam_alias('client', 'client')
 tparam_alias('tag', 'tag')
 
 -- file={ 'lib/', '@SOURCE_DIR@/luadoc' }
 file = { 
-    'lib/',
+    -- LUA libraries
     'luadoc/',
-    readme,
+    'lib/',
     exclude = {
         -- exclude these modules, as they do not contain any written
         -- documentation
