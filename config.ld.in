@@ -11,7 +11,10 @@ dir='doc'
 pretty='lua'
 backtick_references=true
 merge=true
-readme='README.md'
+topics={
+    'README.md',
+    'CONTRIBUTING.md',
+}
 
 -- Setup @client to be an alias for "@tparam client.client"
 tparam_alias('client', 'client.client')
@@ -19,10 +22,11 @@ tparam_alias('tag', 'tag')
 -- Should be default, but is not.  Sets up "@tab" => "@tparam table".
 tparam_alias('tab', 'table')
 
+-- file={ 'lib/', '@SOURCE_DIR@/luadoc' }
 file = {
-    'lib/',
+    -- LUA libraries
     'luadoc/',
-    readme,
+    'lib/',
     exclude = {
         -- exclude these modules, as they do not contain any written
         -- documentation
