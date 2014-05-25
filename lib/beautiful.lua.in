@@ -74,7 +74,8 @@ function beautiful.get_font_height(name)
 end
 
 --- Init function, should be runned at the beginning of configuration file.
--- @param path The theme file path.
+--
+-- @string path The theme file path.
 function beautiful.init(path)
     if path then
         local success
@@ -105,7 +106,8 @@ function beautiful.init(path)
 end
 
 --- Get the current theme.
--- @return The current theme table.
+--
+-- @treturn table The current theme table.
 function beautiful.get()
     return theme
 end
