@@ -1,4 +1,5 @@
 -- Configuration file for ldoc
+
 project='awesome'
 title='awesome documentation'
 description='highly configurable X window manager'
@@ -9,6 +10,7 @@ dir='doc'
 
 -- Make the docs prettier
 pretty='lua'
+style="!pale"
 backtick_references=true
 merge=true
 topics={
