@@ -35,6 +35,10 @@ local descs = setmetatable({}, { __mode = 'k' })
 local fonts = setmetatable({}, { __mode = 'v' })
 local active_font
 
+--- Load a font name
+--
+-- @param Font name, which can be a string or a table
+-- @local here
 local function load_font(name)
     name = name or active_font
     if name and type(name) ~= "string" and descs[name] then
@@ -61,14 +65,24 @@ local function load_font(name)
     return font
 end
 
+--- Set an active font
+--
+-- @param name The font
+-- @local here
 local function set_font(name)
     active_font = load_font(name).name
 end
 
+--- Get a font description
+--
+-- @param name The name of the font
 function beautiful.get_font(name)
     return load_font(name).description
 end
 
+--- Get the heigh of a font
+--
+-- @param name Name of the font
 function beautiful.get_font_height(name)
     return load_font(name).height
 end
