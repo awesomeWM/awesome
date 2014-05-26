@@ -1,10 +1,11 @@
-Bugs
-===
+# Contrubuting
+
+
+## Bugs
 
 Please look at http://awesome.naquadah.org/bugs/
 
-Style
-===
+## Style
 
 If you intend to patch and contribute to awesome, please respect the
 following guidelines.
@@ -39,13 +40,11 @@ Imitate the existing code style. For concrete rules:
 
 A vim modeline is set in each file to respect this.
 
-Patches
-===
+## Patches
 
 If you plan to submit patches, you should follow the following guidelines.
 
-Commits
----
+### Commits
 
 - make commits of logical units;
 - do not modify piece of code not related to your commit;
@@ -61,8 +60,7 @@ Commits
   commit message (or just use the option `-s` when commiting);
 - make sure that you have tests for the bug you are fixing.
 
-Patches
----
+### Patches
 
 - use `git format-patch -M` to create the patch;
 - do *not* PGP sign your patch;

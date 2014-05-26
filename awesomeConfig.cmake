@@ -272,11 +272,16 @@ set(AWESOME_THEMES_PATH      ${AWESOME_DATA_PATH}/themes)
 # }}}
 
 # {{{ Configure files
-file(GLOB_RECURSE awesome_lua_configure_files RELATIVE ${SOURCE_DIR} ${SOURCE_DIR}/lib/*.lua.in ${SOURCE_DIR}/themes/*/*.lua.in)
+file(GLOB_RECURSE awesome_lua_configure_files RELATIVE 
+    ${SOURCE_DIR}
+    ${SOURCE_DIR}/lib/*.lua.in
+    ${SOURCE_DIR}/docs/capi/*.lua.in
+    ${SOURCE_DIR}/docs/*.md
+    ${SOURCE_DIR}/themes/*/*.lua.in)
 set(AWESOME_CONFIGURE_FILES
     ${awesome_lua_configure_files}
     config.h.in
-    config.ld.in
+    docs/config.ld.in
     awesomerc.lua.in
     awesome-version-internal.h.in
     awesome.doxygen.in)
@@ -295,4 +300,4 @@ foreach(file ${AWESOME_CONFIGURE_FILES})
 endforeach()
 #}}}
 
-# vim: filetype=cmake:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
+# vim: filetype=cmake:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80:foldmethod=marker
