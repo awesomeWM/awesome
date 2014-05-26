@@ -31,48 +31,50 @@ local tins = table.insert
 
 local naughty = {}
 
---- Naughty configuration - a table containing common popup settings.
---
--- @table naughty.config
--- @field padding Space between popups and edge of the workarea.
---   Default: `4`
--- @field spacing Spacing between popups.
---   Default: `1`
--- @field icon_dirs List of directories that will be checked by `getIcon()`.
---   Default: `{ "/usr/share/pixmaps/", }`
--- @field icon_formats List of formats that will be checked by `getIcon()`.
---   Default: `{ "png", "gif" }`
--- @field notify_callback Callback used to modify or reject notifications.
---   Default: `nil`
---    naughty.config.notify_callback = function(args)
---        args.text = 'prefix: ' .. args.text
---        return args
---    end
---
--- @field presets Notification Presets - a table containing presets for
---   different purposes.  Preset is a table of any parameters available to
---   `notify()`, overriding default values (`naughty.config.defaults`) You have
---   to pass a reference of a preset in your notify() call to use the preset The
---   presets `"low"`, `"normal"` and `"critical"` are used for notifications
---   over DBUS.
---
--- @field presets.low The preset for notifications with low urgency level.
--- @field presets.normal The default preset for every notification without a
---   preset that will also be used for normal urgency level.
--- @field presets.critical The preset for notifications with a critical urgency
---   level.
---
--- @field defaults Default values for the params to `notify()`.
--- These can optionally be overridden by specifying a preset.
---
--- @field mapping DBUS notification to preset mapping.
---   The first element is an object containing the filter If the rules in the
---   filter matches the associated preset will be applied The rules object can
---   contain: urgency, category, appname The second element is the preset
---
--- @field mapping.1 low urgency
--- @field mapping.2 normal urgency
--- @field mapping.3 critical urgency
+--[[--
+Naughty configuration - a table containing common popup settings.
+
+@table naughty.config
+@field padding Space between popups and edge of the workarea.
+   Default: `4`
+@field spacing Spacing between popups.
+   Default: `1`
+@field icon_dirs List of directories that will be checked by `getIcon()`.
+   Default: `{ "/usr/share/pixmaps/", }`
+@field icon_formats List of formats that will be checked by `getIcon()`.
+   Default: `{ "png", "gif" }`
+@field notify_callback Callback used to modify or reject notifications.
+   Default: `nil`
+    naughty.config.notify_callback = function(args)
+        args.text = 'prefix: ' .. args.text
+        return args
+    end
+
+@field presets Notification Presets - a table containing presets for
+   different purposes.  Preset is a table of any parameters available to
+   `notify()`, overriding default values (`naughty.config.defaults`) You have
+   to pass a reference of a preset in your notify() call to use the preset The
+   presets `"low"`, `"normal"` and `"critical"` are used for notifications
+   over DBUS.
+
+@field presets.low The preset for notifications with low urgency level.
+@field presets.normal The default preset for every notification without a
+   preset that will also be used for normal urgency level.
+@field presets.critical The preset for notifications with a critical urgency
+   level.
+
+@field defaults Default values for the params to `notify()`.
+   These can optionally be overridden by specifying a preset.
+
+@field mapping DBUS notification to preset mapping.
+   The first element is an object containing the filter If the rules in the
+   filter matches the associated preset will be applied The rules object can
+   contain: urgency, category, appname The second element is the preset
+
+@field mapping.1 low urgency
+@field mapping.2 normal urgency
+@field mapping.3 critical urgency
+--]]
 --
 naughty.config = {
     padding = 4,
@@ -120,8 +122,9 @@ local counter = 1
 local suspended = false
 
 --- Index of notifications per screen and position.
---  See config table for valid 'position' values.
---  Each element is a table consisting of:
+-- See config table for valid 'position' values.
+-- Each element is a table consisting of:
+--
 -- @field box Wibox object containing the popup
 -- @field height Popup height
 -- @field width Popup width
@@ -164,13 +167,15 @@ function naughty.toggle()
     end
 end
 
--- Evaluate desired position of the notification by index - internal
+--- Evaluate desired position of the notification by index - internal
+--
 -- @param idx Index of the notification
 -- @param position top_right | top_left | bottom_right | bottom_left
 --             | top_middle | bottom_middle
 -- @param height Popup height
 -- @param width Popup width (optional)
 -- @return Absolute position and index in { x = X, y = Y, idx = I } table
+-- @local here
 local function get_offset(screen, position, idx, width, height)
     local ws = capi.screen[screen].workarea
     local v = {}
@@ -210,8 +215,10 @@ local function get_offset(screen, position, idx, width, height)
     return v
 end
 
--- Re-arrange notifications according to their position and index - internal
+--- Re-arrange notifications according to their position and index - internal
+--
 -- @return None
+-- @local here
 local function arrange(screen)
     for p,pos in pairs(naughty.notifications[screen]) do
         for i,notification in pairs(naughty.notifications[screen][p]) do
@@ -223,6 +230,7 @@ local function arrange(screen)
 end
 
 --- Destroy notification by notification object
+--
 -- @param notification Notification object to be destroyed
 -- @param reason One of the reasons from notificationClosedReason
 -- @return True if the popup was successfully destroyed, nil otherwise
@@ -250,7 +258,8 @@ function naughty.destroy(notification, reason)
     end
 end
 
--- Get notification by ID
+--- Get notification by ID
+--
 -- @param id ID of the notification
 -- @return notification object if it was found, nil otherwise
 function naughty.getById(id)
@@ -266,9 +275,9 @@ function naughty.getById(id)
     end
 end
 
---- Create notification.
+--- Create a notification.
 --
--- @tab args The argument table containing any of the arguments bellow.
+-- @tab args The argument table containing any of the arguments below.
 -- @string args.text Text of the notification.
 --   Default: ''
 -- @string args.title Title of the notification.
