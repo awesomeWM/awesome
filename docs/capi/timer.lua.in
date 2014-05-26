@@ -1,6 +1,7 @@
 --- awesome timer API
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2009 Julien Danjou
+-- @release @AWESOME_VERSION@
 -- @classmod timer
 
 --- Timer object. This type of object is useful when triggering events in a repeatedly.

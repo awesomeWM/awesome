@@ -27,10 +27,12 @@ set(AWE_CONF_FILE rc.lua)
 set(AWE_ICON_DIR ${SOURCE_DIR}/icons)
 set(AWE_THEMES_DIR ${SOURCE_DIR}/themes)
 
+set(AWE_DOC_DIR ${BUILD_DIR}/docs)
+
 set(AWE_DOC_FILES
-    ${SOURCE_DIR}/AUTHORS
-    ${SOURCE_DIR}/BUGS
-    ${SOURCE_DIR}/README.md
+    ${AWE_DOC_DIR}/00-authors.md
+    ${AWE_DOC_DIR}/01-readme.md
+    ${AWE_DOC_DIR}/02-contributing.md
     ${SOURCE_DIR}/LICENSE)
 
 set(AWE_SRCS
@@ -237,12 +239,13 @@ if(GENERATE_DOC)
         file(MAKE_DIRECTORY ${BUILD_DIR}/lib)
     endif()
 
-    file(GLOB_RECURSE AWE_LUA_FILES ${BUILD_DIR}/lib/*.lua ${BUILD_DIR}/luadoc/*.lua)
+    file(GLOB_RECURSE AWE_LUA_FILES ${BUILD_DIR}/lib/*.lua ${AWE_DOC_DIR}/capi/*.lua)
+    file(GLOB_RECURSE AWE_MD_FILES ${AWE_DOC_DIR}/*.md)
 
     add_custom_target(ldoc ALL
         COMMAND ${LDOC_EXECUTABLE} .
-        WORKING_DIRECTORY ${BUILD_DIR}
-        DEPENDS ${AWE_LUA_FILES})
+        WORKING_DIRECTORY ${AWE_DOC_DIR}
+        DEPENDS ${AWE_LUA_FILES} ${AWE_MD_FILES})
 endif()
 # }}}
 
@@ -324,4 +327,4 @@ if(GENERATE_DOC)
 endif()
 # }}}
 
-# vim: filetype=cmake:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
+# vim: filetype=cmake:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80:foldmethod=marker

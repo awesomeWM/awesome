@@ -1,10 +1,8 @@
-awesome
-=======
+# awesome
 
 awesome is a highly configurable, next generation framework window manager for X.
 
-Building and installation
--------------------------
+## Building and installation
 
 After extracting the dist tarball, run:
 
@@ -16,8 +14,7 @@ After building is finished, you can install:
 
     make install  # you might need root permissions
 
-Running awesome
----------------
+## Running awesome
 
 You can directly select awesome from your display manager. If not, you can
 add the following line to your .xinitrc to start awesome using startx
@@ -32,16 +29,14 @@ the `DISPLAY` environment variable is set correctly, e.g.:
 
 (This will start awesome on display `:1` of the host foo.bar.)
 
-Configuration
--------------
+## Configuration
 
 The configuration of awesome is done by creating a
 `$XDG_CONFIG_HOME/awesome/rc.lua` file.
 
 An example configuration named `awesomerc.lua.in` is provided in the source.
 
-Troubleshooting
----------------
+## Troubleshooting
 
 In most systems any message printed by awesome (including warnings and errors)
 are written to `$HOME/.xsession-errors`.
@@ -50,9 +45,15 @@ If awesome does not start or the configuration file is not producing the
 desired results the user should examine this file to gain insight into the
 problem.
 
-Reporting issues
-----------------
+## Reporting issues
 
 Please report any issues you may find on [our bugtracker](https://awesome.naquadah.org/bugs/).
 You can also submit pull requests on the [github repository](https://github.com/awesomeWM/awesome).
-Please read the @{CONTRIBUTING.md} guide for any coding, documentation or patch guidelines.
+Please read the @{02-contributing.md} guide for any coding, documentation or patch guidelines.
+
+## License
+
+The project is licensed under GNU General Publice License v2 or later.
+You can read it online 
+([v2](http://www.gnu.org/licenses/gpl-2.0.html)
+or [v3](http://www.gnu.org/licenses/gpl.html))
