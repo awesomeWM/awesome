@@ -43,9 +43,6 @@ macro(a_find_program var prg req)
     endif()
 endmacro()
 
-a_find_program(CAT_EXECUTABLE cat TRUE)
-a_find_program(LN_EXECUTABLE ln TRUE)
-a_find_program(GREP_EXECUTABLE grep TRUE)
 a_find_program(GIT_EXECUTABLE git FALSE)
 a_find_program(HOSTNAME_EXECUTABLE hostname FALSE)
 # programs needed for man pages
@@ -53,7 +50,6 @@ a_find_program(ASCIIDOC_EXECUTABLE asciidoc FALSE)
 a_find_program(XMLTO_EXECUTABLE xmlto FALSE)
 a_find_program(GZIP_EXECUTABLE gzip FALSE)
 # lua documentation
-a_find_program(LUA_EXECUTABLE lua FALSE)
 a_find_program(LDOC_EXECUTABLE ldoc FALSE)
 if(NOT LDOC_EXECUTABLE)
     a_find_program(LDOC_EXECUTABLE ldoc.lua FALSE)
