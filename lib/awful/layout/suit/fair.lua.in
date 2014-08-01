@@ -1,15 +1,16 @@
 ---------------------------------------------------------------------------
+--- Fair layouts module for awful
+--
 -- @author Josh Komoroske
 -- @copyright 2012 Josh Komoroske
 -- @release @AWESOME_VERSION@
+-- @module awful.layout.suit.fair
 ---------------------------------------------------------------------------
 
 -- Grab environment we need
 local ipairs = ipairs
 local math = math
 
---- Fair layouts module for awful
--- awful.layout.suit.fair
 local fair = {}
 
 local function do_fair(p, orientation)

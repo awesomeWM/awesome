@@ -1,7 +1,10 @@
 ---------------------------------------------------------------------------
+--- Apply rules to clients at startup.
+--
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2009 Julien Danjou
 -- @release @AWESOME_VERSION@
+-- @module awful.rules
 ---------------------------------------------------------------------------
 
 -- Grab environment we need
@@ -13,102 +16,82 @@ local pairs = pairs
 local aclient = require("awful.client")
 local atag = require("awful.tag")
 
---- Apply rules to clients at startup.
--- awful.rules
 local rules = {}
 
---- This is the global rules table.
--- <p>You should fill this table with your rule and properties to apply.
--- For example, if you want to set xterm maximized at startup, you can add:
--- <br/>
--- <code>
--- { rule = { class = "xterm" },
---   properties = { maximized_vertical = true, maximized_horizontal = true } }
--- </code>
--- </p>
--- <p>If you want to set mplayer floating at startup, you can add:
--- <br/>
--- <code>
--- { rule = { name = "MPlayer" },
---   properties = { floating = true } }
--- </code>
--- </p>
--- <p>If you want to put Firefox on a specific tag at startup, you
--- can add:
--- <br/>
--- <code>
--- { rule = { instance = "firefox" },
---   properties = { tag = mytagobject } }
--- </code>
--- </p>
--- <p>If you want to put Emacs on a specific tag at startup, and
--- immediately switch to that tag you can add:
--- <br/>
--- <code>
--- { rule = { class = "Emacs" },
---   properties = { tag = mytagobject, switchtotag = true } }
--- </code>
--- </p>
--- <p>If you want to apply a custom callback to execute when a rule matched,
--- for example to pause playing music from mpd when you start dosbox, you
--- can add:
--- <br/>
--- <code>
--- { rule = { class = "dosbox" },
---   callback = function(c)
---      awful.util.spawn('mpc pause')
---   end }
--- </code>
--- </p>
--- <p>Note that all "rule" entries need to match. If any of the entry does not
--- match, the rule won't be applied.</p>
--- <p>If a client matches multiple rules, their applied in the order they are
--- put in this global rules table. If the value of a rule is a string, then the
--- match function is used to determine if the client matches the rule.</p>
--- <p>If the value of a property is a function, that function gets called and
--- function's return value is used for the property.</p>
---
--- <p> To match multiple clients to a rule one need to use slightly different 
--- syntax:
--- <br/>
--- <code>
--- { rule_any = { class = { "MPlayer", "Nitrogen" }, instance = { "xterm" } },
---   properties = { floating = true } }
--- </code>
--- </p>
---
--- <p> To match multiple clients with an exception one can couple 'except' or
--- 'except_any' with the rules:
--- <br/>
--- <code>
--- { rule = { class = "Firefox" },
---   except = { instance = "Navigator" },
---   properties = {floating = true},
--- },
--- </code>
--- <br/>
--- <code>
--- { rule_any = { class = { "Pidgin", "Xchat" } },
---   except_any = { role = { "conversation" } },
---   properties = { tag = tags[1][1] }
--- }
--- <br/>
--- <code>
--- { rule = {},
---   except_any = { class = { "Firefox", "Vim" } },
---   properties = { floating = true }
--- }
--- </code>
--- </p>
---
--- @class table
--- @name rules
+--[[--
+This is the global rules table.
+
+You should fill this table with your rule and properties to apply.
+For example, if you want to set xterm maximized at startup, you can add:
+
+    { rule = { class = "xterm" },
+      properties = { maximized_vertical = true, maximized_horizontal = true } }
+
+If you want to set mplayer floating at startup, you can add:
+
+    { rule = { name = "MPlayer" },
+      properties = { floating = true } }
+
+If you want to put Firefox on a specific tag at startup, you can add:
+
+    { rule = { instance = "firefox" },
+      properties = { tag = mytagobject } }
+
+If you want to put Emacs on a specific tag at startup, and immediately switch
+to that tag you can add:
+
+    { rule = { class = "Emacs" },
+      properties = { tag = mytagobject, switchtotag = true } }
+
+If you want to apply a custom callback to execute when a rule matched,
+for example to pause playing music from mpd when you start dosbox, you
+can add:
+
+    { rule = { class = "dosbox" },
+      callback = function(c)
+         awful.util.spawn('mpc pause')
+      end }
+
+Note that all "rule" entries need to match. If any of the entry does not
+match, the rule won't be applied.
+
+If a client matches multiple rules, their applied in the order they are
+put in this global rules table. If the value of a rule is a string, then the
+match function is used to determine if the client matches the rule.
+
+If the value of a property is a function, that function gets called and
+function's return value is used for the property.
+
+To match multiple clients to a rule one need to use slightly different
+syntax:
+
+    { rule_any = { class = { "MPlayer", "Nitrogen" }, instance = { "xterm" } },
+      properties = { floating = true } }
+
+To match multiple clients with an exception one can couple `rules.except` or
+`rules.except_any` with the rules:
+
+    { rule = { class = "Firefox" },
+      except = { instance = "Navigator" },
+      properties = {floating = true},
+    },
+
+    { rule_any = { class = { "Pidgin", "Xchat" } },
+      except_any = { role = { "conversation" } },
+      properties = { tag = tags[1][1] }
+    }
+
+    { rule = {},
+      except_any = { class = { "Firefox", "Vim" } },
+      properties = { floating = true }
+    }
+]]--
 rules.rules = {}
 
 --- Check if a client matches a rule.
--- @param c The client.
--- @param rule The rule to check.
--- @return True if it matches, false otherwise.
+-- @tparam client c The client.
+-- @tparam table rule The rule to check.
+-- @treturn bool True if it matches, false otherwise.
 function rules.match(c, rule)
     if not rule then return false end
     for field, value in pairs(rule) do
@@ -128,9 +111,9 @@ function rules.match(c, rule)
 end
 
 --- Check if a client matches any part of a rule.
--- @param c The client.
--- @param rule The rule to check.
--- @return True if at least one rule is matched, false otherwise.
+-- @tparam client c The client.
+-- @tparam table rule The rule to check.
+-- @treturn bool True if at least one rule is matched, false otherwise.
 function rules.match_any(c, rule)
     if not rule then return false end
     for field, values in pairs(rule) do
@@ -148,10 +131,10 @@ function rules.match_any(c, rule)
 end
 
 --- Get list of matching rules for a client.
--- @param c The client.
--- @param _rules The rules to check. List with "rule", "rule_any", "except" and
--- "except_any" keys.
--- @return The list of matched rules.
+-- @tparam client c The client.
+-- @tparam rules _rules The rules to check. List with "rule", "rule_any", "except" and
+--  "except_any" keys.
+-- @treturn table The list of matched rules.
 function rules.matching_rules(c, _rules)
     local result = {}
     for _, entry in ipairs(_rules) do
@@ -164,17 +147,17 @@ function rules.matching_rules(c, _rules)
 end
 
 --- Check if a client matches a given set of rules.
--- @param c The client.
--- @param rules The rules to check. List with "rule", "rule_any", "except" and
--- "except_any" keys.
--- @return True if at least one rule is matched, false otherwise.
+-- @tparam client c The client.
+-- @tparam table rules The rules to check. List with "rule", "rule_any", "except" and
+--  "except_any" keys.
+-- @treturn bool True if at least one rule is matched, false otherwise.
 function rules.does_match(c, rules)
     local result = rules.matching_rules(c, rules)
     return #result == 0 and false or result
 end
 
 --- Apply awful.rules.rules to a client.
--- @param c The client.
+-- @tparam client c The client.
 function rules.apply(c)
     local props = {}
     local callbacks = {}
@@ -195,9 +178,9 @@ end
 
 
 --- Apply properties and callbacks to a client.
--- @param c The client.
--- @param props Properties to apply.
--- @param callbacks Callbacks to apply (optional).
+-- @tparam client c The client.
+-- @tparam table props Properties to apply.
+-- @tparam func callbacks Callbacks to apply (optional).
 function rules.execute(c, props, callbacks)
     for property, value in pairs(props) do
         if property ~= "focus" and type(value) == "function" then

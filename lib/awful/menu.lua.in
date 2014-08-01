@@ -1,9 +1,12 @@
 --------------------------------------------------------------------------------
+--- A menu for awful
+--
 -- @author Damien Leone &lt;damien.leone@gmail.com&gt;
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @author dodo
 -- @copyright 2008, 2011 Damien Leone, Julien Danjou, dodo
 -- @release @AWESOME_VERSION@
+-- @module awful.menu
 --------------------------------------------------------------------------------
 
 local wibox = require("wibox")
@@ -32,7 +35,6 @@ local capi = {
     client = client }
 
 
--- awful.menu
 local menu = { mt = {} }
 
 
@@ -309,6 +311,7 @@ end
 
 
 --- Show a menu.
+-- @param args The arguments
 -- @param args.coords Menu position defaulting to mouse.coords()
 function menu:show(args)
     args = args or {}
@@ -339,7 +342,7 @@ function menu:hide()
 end
 
 --- Toggle menu visibility.
--- @param _menu The menu to show if it's hidden, or to hide if it's shown.
+-- @param args The arguments
 -- @param args.coords Menu position {x,y}
 function menu:toggle(args)
     if self.wibox.visible then

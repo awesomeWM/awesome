@@ -1,7 +1,10 @@
 ---------------------------------------------------------------------------
+--- A graph widget.
+--
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2009 Julien Danjou
 -- @release @AWESOME_VERSION@
+-- @classmod awful.widget.graph
 ---------------------------------------------------------------------------
 
 local setmetatable = setmetatable
@@ -12,54 +15,52 @@ local type = type
 local color = require("gears.color")
 local base = require("wibox.widget.base")
 
---- A graph widget.
--- awful.widget.graph
 local graph = { mt = {} }
 
 local data = setmetatable({}, { __mode = "k" })
 
 --- Set the graph border color.
 -- If the value is nil, no border will be drawn.
--- @name set_border_color
--- @class function
+--
+-- @function set_border_color
 -- @param graph The graph.
 -- @param color The border color to set.
 
 --- Set the graph foreground color.
--- @name set_color
--- @class function
+--
+-- @function set_color
 -- @param graph The graph.
 -- @param color The graph color.
 
 --- Set the graph background color.
--- @name set_background_color
--- @class function
+--
+-- @function set_background_color
 -- @param graph The graph.
 -- @param color The graph background color.
 
 --- Set the maximum value the graph should handle.
 -- If "scale" is also set, the graph never scales up below this value, but it
 -- automatically scales down to make all data fit.
--- @name set_max_value
--- @class function
+--
+-- @function set_max_value
 -- @param graph The graph.
 -- @param value The value.
 
 --- Set the graph to automatically scale its values. Default is false.
--- @name set_scale
--- @class function
+--
+-- @function set_scale
 -- @param graph The graph.
 -- @param scale A boolean value
 
 --- Set the graph to draw stacks. Default is false.
--- @name set_stack
--- @class function
+--
+-- @function set_stack
 -- @param graph The graph.
 -- @param stack A boolean value.
 
 --- Set the graph stacking colors. Order matters.
--- @name set_stack_colors
--- @class function
+--
+-- @function set_stack_colors
 -- @param graph The graph.
 -- @param stack_colors A table with stacking colors.
 

@@ -2,6 +2,7 @@
 -- @author Uli Schlachter
 -- @copyright 2010 Uli Schlachter
 -- @release @AWESOME_VERSION@
+-- @module wibox.layout.fixed
 ---------------------------------------------------------------------------
 
 local base = require("wibox.layout.base")
@@ -9,7 +10,6 @@ local widget_base = require("wibox.widget.base")
 local table = table
 local pairs = pairs
 
--- wibox.layout.fixed
 local fixed = {}
 
 --- Draw a fixed layout. Each widget gets just the space it asks for.

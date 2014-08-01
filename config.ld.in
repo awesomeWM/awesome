@@ -1,7 +1,0 @@
--- Configuration file for ldoc
-project='awesome'
-title='awesome API documentation'
-description='highly configurable X window manager'
---format='markdown' or should it be discount? what is that anyway? how about plain?
-dir='doc'
-file={ 'lib/', '@SOURCE_DIR@/luadoc' }

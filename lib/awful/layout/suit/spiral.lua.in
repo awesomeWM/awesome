@@ -1,15 +1,18 @@
 ---------------------------------------------------------------------------
+--- Dwindle and spiral layouts
+--
 -- @author Uli Schlachter &lt;psychon@znc.in&gt;
 -- @copyright 2009 Uli Schlachter
 -- @copyright 2008 Julien Danjou
 -- @release @AWESOME_VERSION@
+--
+-- @module awful.layout.suit.spiral
 ---------------------------------------------------------------------------
 
 -- Grab environment we need
 local ipairs = ipairs
 local math = math
 
--- awful.layout.suit.spiral
 local spiral = {}
 
 local function do_spiral(p, _spiral)

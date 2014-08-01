@@ -1,7 +1,10 @@
 ---------------------------------------------------------------------------
+--- Places client according to special criteria.
+--
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2008 Julien Danjou
 -- @release @AWESOME_VERSION@
+-- @module awful.placement
 ---------------------------------------------------------------------------
 
 -- Grab environment we need
@@ -19,8 +22,6 @@ local client = require("awful.client")
 local layout = require("awful.layout")
 local a_screen = require("awful.screen")
 
---- Places client according to special criteria.
--- awful.placement
 local placement = {}
 
 -- Check if an area intersect another area.
