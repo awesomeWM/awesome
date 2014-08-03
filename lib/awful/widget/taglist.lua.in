@@ -51,10 +51,6 @@ function taglist.taglist_label(t, args)
     local icon
     local bg_resize = false
     local is_selected = false
-    if t.selected then
-        bg_color = bg_focus
-        fg_color = fg_focus
-    end
     if sel then
         if taglist_squares_sel then
             -- Check that the selected clients is tagged with 't'.
@@ -96,6 +92,10 @@ function taglist.taglist_label(t, args)
                 break
             end
         end
+    end
+    if t.selected then
+        bg_color = bg_focus
+        fg_color = fg_focus
     end
     if not tag.getproperty(t, "icon_only") then
         if fg_color then
