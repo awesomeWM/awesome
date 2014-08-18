@@ -323,6 +323,10 @@ systray_update(int base_size, bool horizontal, bool reverse, int spacing)
 int
 luaA_systray(lua_State *L)
 {
+
+    if(globalconf.systray.parent == NULL)
+        systray_register();
+
     if(lua_gettop(L) != 0)
     {
         size_t bg_len;
@@ -343,9 +347,6 @@ luaA_systray(lua_State *L)
                                          globalconf.systray.window,
                                          XCB_CW_BACK_PIXEL, config_back);
         }
-
-        if(globalconf.systray.parent == NULL)
-            systray_register();
 
         if(globalconf.systray.parent != w)
             xcb_reparent_window(globalconf.connection,
