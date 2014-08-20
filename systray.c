@@ -77,6 +77,11 @@ systray_register(void)
     xcb_client_message_event_t ev;
     xcb_screen_t *xscreen = globalconf.screen;
 
+    if(globalconf.systray.registered)
+        return;
+
+    globalconf.systray.registered = true;
+
     /* Fill event */
     p_clear(&ev, 1);
     ev.response_type = XCB_CLIENT_MESSAGE;
@@ -101,6 +106,11 @@ systray_register(void)
 void
 systray_cleanup(void)
 {
+    if(!globalconf.systray.registered)
+        return;
+
+    globalconf.systray.registered = false;
+
     xcb_set_selection_owner(globalconf.connection,
                             XCB_NONE,
                             globalconf.systray.atom,
@@ -299,9 +309,7 @@ systray_update(int base_size, bool horizontal, bool reverse)
 int
 luaA_systray(lua_State *L)
 {
-
-    if(globalconf.systray.parent == NULL)
-        systray_register();
+    systray_register();
 
     if(lua_gettop(L) != 0)
     {
