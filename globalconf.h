@@ -119,6 +119,8 @@ typedef struct
     struct
     {
         xcb_window_t window;
+        /** Atom for _NET_SYSTEM_TRAY_%d */
+        xcb_atom_t atom;
         /** Systray window parent */
         drawin_t *parent;
     } systray;
