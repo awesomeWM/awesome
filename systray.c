@@ -39,6 +39,9 @@
 void
 systray_init(void)
 {
+    xcb_intern_atom_cookie_t atom_systray_q;
+    xcb_intern_atom_reply_t *atom_systray_r;
+    char *atom_name;
     xcb_screen_t *xscreen = globalconf.screen;
 
     globalconf.systray.window = xcb_generate_id(globalconf.connection);
@@ -48,6 +51,22 @@ systray_init(void)
                       -1, -1, 1, 1, 0,
                       XCB_COPY_FROM_PARENT, xscreen->root_visual,
                       0, NULL);
+
+    atom_name = xcb_atom_name_by_screen("_NET_SYSTEM_TRAY", globalconf.default_screen);
+    if(!atom_name)
+        fatal("error getting systray atom name");
+
+    atom_systray_q = xcb_intern_atom_unchecked(globalconf.connection, false,
+                                               a_strlen(atom_name), atom_name);
+
+    p_delete(&atom_name);
+
+    atom_systray_r = xcb_intern_atom_reply(globalconf.connection, atom_systray_q, NULL);
+    if(!atom_systray_r)
+        fatal("error getting systray atom");
+
+    globalconf.systray.atom = atom_systray_r->atom;
+    p_delete(&atom_systray_r);
 }
 
 /** Register systray in X.
@@ -57,22 +76,6 @@ systray_register(void)
 {
     xcb_client_message_event_t ev;
     xcb_screen_t *xscreen = globalconf.screen;
-    char *atom_name;
-    xcb_intern_atom_cookie_t atom_systray_q;
-    xcb_intern_atom_reply_t *atom_systray_r;
-    xcb_atom_t atom_systray;
-
-    /* Send requests */
-    if(!(atom_name = xcb_atom_name_by_screen("_NET_SYSTEM_TRAY", globalconf.default_screen)))
-    {
-        warn("error getting systray atom");
-        return;
-    }
-
-    atom_systray_q = xcb_intern_atom_unchecked(globalconf.connection, false,
-                                               a_strlen(atom_name), atom_name);
-
-    p_delete(&atom_name);
 
     /* Fill event */
     p_clear(&ev, 1);
@@ -81,22 +84,13 @@ systray_register(void)
     ev.format = 32;
     ev.type = MANAGER;
     ev.data.data32[0] = XCB_CURRENT_TIME;
+    ev.data.data32[1] = globalconf.systray.atom;
     ev.data.data32[2] = globalconf.systray.window;
     ev.data.data32[3] = ev.data.data32[4] = 0;
 
-    if(!(atom_systray_r = xcb_intern_atom_reply(globalconf.connection, atom_systray_q, NULL)))
-    {
-        warn("error getting systray atom");
-        return;
-    }
-
-    ev.data.data32[1] = atom_systray = atom_systray_r->atom;
-
-    p_delete(&atom_systray_r);
-
     xcb_set_selection_owner(globalconf.connection,
                             globalconf.systray.window,
-                            atom_systray,
+                            globalconf.systray.atom,
                             XCB_CURRENT_TIME);
 
     xcb_send_event(globalconf.connection, false, xscreen->root, 0xFFFFFF, (char *) &ev);
@@ -107,30 +101,10 @@ systray_register(void)
 void
 systray_cleanup(void)
 {
-    xcb_intern_atom_reply_t *atom_systray_r;
-    char *atom_name;
-
-    if(!(atom_name = xcb_atom_name_by_screen("_NET_SYSTEM_TRAY", globalconf.default_screen))
-       || !(atom_systray_r = xcb_intern_atom_reply(globalconf.connection,
-                                                   xcb_intern_atom_unchecked(globalconf.connection,
-                                                                             false,
-                                                                             a_strlen(atom_name),
-                                                                             atom_name),
-                                                   NULL)))
-    {
-        warn("error getting systray atom");
-        p_delete(&atom_name);
-        return;
-    }
-
-    p_delete(&atom_name);
-
     xcb_set_selection_owner(globalconf.connection,
                             XCB_NONE,
-                            atom_systray_r->atom,
+                            globalconf.systray.atom,
                             XCB_CURRENT_TIME);
-
-    p_delete(&atom_systray_r);
 
     xcb_unmap_window(globalconf.connection,
                      globalconf.systray.window);
