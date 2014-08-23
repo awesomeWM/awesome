@@ -325,4 +325,15 @@ if(GENERATE_DOC)
 endif()
 # }}}
 
+# {{{ Unit tests
+find_program(BUSTED_EXECUTABLE busted)
+if(BUSTED_EXECUTABLE)
+    add_custom_target(check ALL
+        ${BUSTED_EXECUTABLE} "--lpath=${CMAKE_BINARY_DIR}/lib/?.lua;${CMAKE_BINARY_DIR}/lib/?/init.lua;spec/?.lua"
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        VERBATIM)
+    add_custom_target(test DEPENDS check)
+endif()
+# }}}
+
 # vim: filetype=cmake:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
