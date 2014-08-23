@@ -107,6 +107,7 @@ target_link_libraries(${PROJECT_AWE_NAME}
 add_custom_target(lgi-check ALL
     COMMAND ${SOURCE_DIR}/build-utils/lgi-check.sh)
 
+# {{{ Generated sources
 # atoms
 file(MAKE_DIRECTORY ${BUILD_DIR}/common)
 add_custom_command(
