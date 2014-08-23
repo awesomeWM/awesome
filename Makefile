@@ -44,4 +44,4 @@ distclean:
 	$(MAKE) -C ${builddir} $@
 	$(and $(filter clean,$@),$(RM) $(BUILDLN) $(TARGETS))
 
-.PHONY: cmake-build cmake install $(BUILDLN)
+.PHONY: cmake-build cmake install distclean $(BUILDLN)
