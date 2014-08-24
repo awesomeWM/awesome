@@ -55,6 +55,9 @@ client.shape = require("awful.client.shape")
 -- @param merge If true then merge tags when clients are not visible.
 function client.jumpto(c, merge)
     local s = capi.client.focus and capi.client.focus.screen or capi.mouse.screen
+    -- Mark the client as focused, so autofocus does no magic.
+    capi.client.focus = c
+
     -- focus the screen
     if s ~= c.screen then
         capi.mouse.screen = c.screen
@@ -70,7 +73,7 @@ function client.jumpto(c, merge)
         end
     end
 
-    -- focus the client
+    -- Focus the client again, after it has been made visible.
     capi.client.focus = c
     c:raise()
 end
