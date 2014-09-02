@@ -593,30 +593,29 @@ end
 -- <li> Key auto_expand controls the submenu auto expand behaviour by setting it to true (default) or false. </li>
 -- </ul>
 -- @param parent Specify the parent menu if we want to open a submenu, this value should never be set by the user.
--- @usage The following function builds, and shows a menu of clients that match
--- a particular rule. Bound to a key, it can for example be used to select from
--- dozens of terminals open on several tags. With the use of
--- <code>match_any</code> instead of <code>match</code>, menu of clients with
--- different classes can also be build.
+-- @usage -- The following function builds and shows a menu of clients that match
+-- -- a particular rule.
+-- -- Bound to a key, it can be used to select from dozens of terminals open on
+-- -- several tags.
+-- -- When using @{awful.rules.match_any} instead of @{awful.rules.match},
+-- -- a menu of clients with different classes could be build.
 --
--- <p><code>
---                     function terminal_menu ()                           <br/>
--- &nbsp;                terms = {}                                        <br/>
--- &nbsp;                for i, c in pairs(client.get()) do                <br/>
--- &nbsp;&nbsp;            if awful.rules.match(c, {class = "URxvt"}) then <br/>
--- &nbsp;&nbsp;&nbsp;        terms[i] =                                    <br/>
--- &nbsp;&nbsp;&nbsp;          {c.name,                                    <br/>
--- &nbsp;&nbsp;&nbsp;           function()                                 <br/>
--- &nbsp;&nbsp;&nbsp;&nbsp;       awful.tag.viewonly(c:tags()[1])          <br/>
--- &nbsp;&nbsp;&nbsp;&nbsp;       client.focus = c                         <br/>
--- &nbsp;&nbsp;&nbsp;           end,                                       <br/>
--- &nbsp;&nbsp;&nbsp;           c.icon                                     <br/>
--- &nbsp;&nbsp;&nbsp;          }                                           <br/>
--- &nbsp;&nbsp;            end                                             <br/>
--- &nbsp;                end                                               <br/>
--- &nbsp;                awful.menu(terms):show()                          <br/>
---                     end                                                 <br/>
---</code></p>
+-- function terminal_menu ()
+--   terms = {}
+--   for i, c in pairs(client.get()) do
+--     if awful.rules.match(c, {class = "URxvt"}) then
+--       terms[i] =
+--         {c.name,
+--          function()
+--            awful.tag.viewonly(c:tags()[1])
+--            client.focus = c
+--          end,
+--          c.icon
+--         }
+--     end
+--   end
+--   awful.menu(terms):show()
+-- end
 function menu.new(args, parent)
     args = args or {}
     args.layout = args.layout or wibox.layout.flex.vertical

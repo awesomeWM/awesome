@@ -235,8 +235,7 @@ function client.tiled(screen)
 end
 
 --- Get a client by its relative index to the focused window.
--- @usage Set i to 1 to get next, -1 to get previous.
--- @param i The index.
+-- @param i The index. Use 1 to get next, -1 to get previous.
 -- @param c Optional client.
 -- @return A client, or nil if no client is available.
 function client.next(i, c)
@@ -928,16 +927,15 @@ end
 -- index of the currently focused client.
 -- @param s      which screen to use.  nil means all screens.
 --
--- @usage e.g.: un-minimize all urxvt instances
--- <p><code>
--- local urxvt = function (c) <br/>
---   return awful.rules.match(c, {class = "URxvt"}) <br/>
--- end <br/>
--- </br>
--- for c in awful.client.iterate(urxvt) do <br/>
---   c.minimized = false <br/>
--- end <br/>
--- </code></p>
+-- @usage
+-- -- e.g. to un-minimize all urxvt instances:
+-- local urxvt = function (c)
+--   return awful.rules.match(c, {class = "URxvt"})
+-- end
+--
+-- for c in awful.client.iterate(urxvt) do
+--   c.minimized = false
+-- end
 function client.iterate(filter, start, s)
     local clients = capi.client.get(s)
     local focused = capi.client.focus
@@ -946,23 +944,23 @@ function client.iterate(filter, start, s)
 end
 
 ---
--- <p>Switch to a client matching the given condition if running, else spawn it.
+-- Switch to a client matching the given condition if running, else spawn it.
+--
 -- If multiple clients match the given condition then the next one is
--- focussed.</p>
+-- focussed.
 --
 -- @param cmd     the command to execute
 -- @param matcher a function that returns true to indicate a matching client
 -- @param merge   if true then merge tags when clients are not visible
 --
--- @usage run or raise urxvt (perhaps, with tabs) on modkey + semicolon
--- <p><code>
--- awful.key({ modkey, }, 'semicolon', function ()            <br/>
---   local matcher = function (c)                             <br/>
---     return awful.rules.match(c, {class = 'URxvt'}) <br/>
---   end                                                      <br/>
+-- @usage
+-- -- run or raise urxvt (perhaps, with tabs) on modkey + semicolon
+-- awful.key({ modkey, }, 'semicolon', function ()
+--   local matcher = function (c)
+--     return awful.rules.match(c, {class = 'URxvt'})
+--   end
 --   awful.client.run_or_raise('urxvt', matcher)
 -- end);
--- </code></p>
 function client.run_or_raise(cmd, matcher, merge)
     local clients = capi.client.get()
     local findex  = util.table.hasitem(clients, capi.client.focus) or 1

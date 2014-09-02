@@ -4,31 +4,33 @@
 module("keygrabber")
 
 ---
--- Grab keyboard and read pressed keys, calling callback function at each key
--- press, until keygrabber.stop is called.
--- The callback function is passed three arguments:
--- a table containing modifiers keys, a string with the key pressed and a
--- string with either "press" or "release" to indicate the event type.
+-- Grab keyboard input and read pressed keys, calling a callback function at
+-- each keypress, until @{keygrabber.stop} is called.
+--
+-- The callback function receives three arguments:
+-- <ul>
+--   <li>a table containing modifiers keys</li>
+--   <li>a string with the pressed key</li>
+--   <li>a string with either "press" or "release" to indicate the event type.</li>
+-- </ul>
 -- @param callback A callback function as described above.
 -- @name run
 -- @class function
--- @usage Following function can be bound to a key, and used to resize a client
--- using keyboard.
--- <p><code>
--- function resize(c) <br/>
---   keygrabber.run(function(mod, key, event) </br>
---     if event == "release" then return end </br></br>
+-- @usage
+-- -- The following function can be bound to a key, and used to resize a client
+-- -- using the keyboard.
+-- function resize(c)
+--   keygrabber.run(function(mod, key, event)
+--     if event == "release" then return end
 --
---     if     key == 'Up'   then awful.client.moveresize(0, 0, 0, 5, c) <br/>
---     elseif key == 'Down' then awful.client.moveresize(0, 0, 0, -5, c) <br/>
---     elseif key == 'Right' then awful.client.moveresize(0, 0, 5, 0, c) <br/>
---     elseif key == 'Left'  then awful.client.moveresize(0, 0, -5, 0, c) <br/>
---     else   keygrabber.stop() <br/>
---     end <br/><br/>
---
---   end) <br/>
--- end <br/>
--- </code></p>
+--     if     key == 'Up'    then awful.client.moveresize(0, 0, 0, 5, c)
+--     elseif key == 'Down'  then awful.client.moveresize(0, 0, 0, -5, c)
+--     elseif key == 'Right' then awful.client.moveresize(0, 0, 5, 0, c)
+--     elseif key == 'Left'  then awful.client.moveresize(0, 0, -5, 0, c)
+--     else   keygrabber.stop()
+--     end
+--   end)
+-- end
 
 --- Stop grabbing the keyboard.
 -- @name stop
