@@ -50,15 +50,20 @@ local function tasklist_label(c, args)
     local sticky = args.sticky or theme.tasklist_sticky or "▪"
     local ontop = args.ontop or theme.tasklist_ontop or '⌃'
     local floating = args.floating or theme.tasklist_floating or '✈'
+    local maximized = args.maximized or theme.tasklist_maximized or '<b>+</b>'
     local maximized_horizontal = args.maximized_horizontal or theme.tasklist_maximized_horizontal or '⬌'
     local maximized_vertical = args.maximized_vertical or theme.tasklist_maximized_vertical or '⬍'
 
     if not theme.tasklist_plain_task_name then
         if c.sticky then name = name .. sticky end
         if c.ontop then name = name .. ontop end
-        if client.floating.get(c) then name = name .. floating end
-        if c.maximized_horizontal then name = name .. maximized_horizontal end
-        if c.maximized_vertical then name = name .. maximized_vertical end
+        if c.maximized then
+            name = name .. maximized
+        else
+            if c.maximized_horizontal then name = name .. maximized_horizontal end
+            if c.maximized_vertical then name = name .. maximized_vertical end
+            if client.floating.get(c) then name = name .. floating end
+        end
     end
 
     if c.minimized then
@@ -120,19 +125,22 @@ end
 --        update. @see awful.widget.common.
 -- @param base_widget Optional container widget for tag widgets. Default
 --        is wibox.layout.flex.horizontal().
--- bg_normal The background color for unfocused client.
--- fg_normal The foreground color for unfocused client.
--- bg_focus The background color for focused client.
--- fg_focus The foreground color for focused client.
--- bg_urgent The background color for urgent clients.
--- fg_urgent The foreground color for urgent clients.
--- bg_minimize The background color for minimized clients.
--- fg_minimize The foreground color for minimized clients.
--- floating Symbol to use for floating clients.
--- ontop Symbol to use for ontop clients.
--- maximized_horizontal Symbol to use for clients that have been horizontally maximized.
--- maximized_vertical Symbol to use for clients that have been vertically maximized.
--- font The font.
+--   <ul>
+--   <li><code>bg_normal</code> The background color for unfocused client.</li>
+--   <li><code>fg_normal</code> The foreground color for unfocused client.</li>
+--   <li><code>bg_focus</code> The background color for focused client.</li>
+--   <li><code>fg_focus</code> The foreground color for focused client.</li>
+--   <li><code>bg_urgent</code> The background color for urgent clients.</li>
+--   <li><code>fg_urgent</code> The foreground color for urgent clients.</li>
+--   <li><code>bg_minimize</code> The background color for minimized clients.</li>
+--   <li><code>fg_minimize</code> The foreground color for minimized clients.</li>
+--   <li><code>floating</code> Symbol to use for floating clients.</li>
+--   <li><code>ontop</code> Symbol to use for ontop clients.</li>
+--   <li><code>maximized</code> Symbol to use for clients that have been maximized (vertically and horizontally).</li>
+--   <li><code>maximized_horizontal</code> Symbol to use for clients that have been horizontally maximized.</li>
+--   <li><code>maximized_vertical</code> Symbol to use for clients that have been vertically maximized.</li>
+--   <li><code>font</code> The font.</li>
+--   </ul>
 function tasklist.new(screen, filter, buttons, style, update_function, base_widget)
     local uf = update_function or common.list_update
     local w = base_widget or flex.horizontal()
