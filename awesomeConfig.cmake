@@ -60,8 +60,8 @@ a_find_program(CONVERT_EXECUTABLE convert TRUE)
 include(FindDoxygen)
 # pkg-config
 include(FindPkgConfig)
-# lua 5.1
-include(FindLua51)
+# lua
+include(FindLua)
 # }}}
 
 # {{{ Check if documentation can be build
@@ -187,11 +187,6 @@ if(HAS___BUILTIN_CLZ)
     message(STATUS "checking for __builtin_clz -- yes")
 else()
     message(STATUS "checking for __builtin_clz -- no")
-endif()
-
-# Error check
-if(NOT LUA51_FOUND AND NOT LUA50_FOUND) # This is a workaround to a cmake bug
-    message(FATAL_ERROR "lua library not found")
 endif()
 
 set(AWESOME_REQUIRED_LDFLAGS
