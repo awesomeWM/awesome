@@ -15,6 +15,7 @@ If you plan to submit patches, here's a checklist:
   "Signed-off-by: Your Name <you@example.com>" line to the
   commit message (or just use the option "-s" when commiting);
 - make sure that you have tests for the bug you are fixing.
+- if possible, add a unit test to the test suite under spec/.
 
  Patch:
 
