@@ -119,7 +119,7 @@ end
 -- { type = "linear", from = { x0, y0 }, to = { x1, y1 },
 -- stops = { &#60stops&#62 } }
 -- x0,y0 and x1,y1 are the start and stop point of the pattern.
--- For the explanation of "&#60;stops&#62;", see create_pattern().
+-- For the explanation of "&#60;stops&#62;", see @{create_pattern}.
 -- @param arg The argument describing the pattern
 -- @return a cairo pattern object
 function color.create_linear_pattern(arg)
@@ -144,7 +144,7 @@ end
 -- stops = { &#60stops&#62 } }
 -- x0,y0 and x1,y1 are the start and stop point of the pattern.
 -- r0 and r1 are the radii of the start / stop circle.
--- For the explanation of "&#60;stops&#62;", see create_pattern().
+-- For the explanation of "&#60;stops&#62;", see @{create_pattern}.
 -- @param arg The argument describing the pattern
 -- @return a cairo pattern object
 function color.create_radial_pattern(arg)
@@ -172,7 +172,7 @@ color.types = {
 
 --- Create a pattern from a given string.
 -- For full documentation of this function, please refer to create_pattern().
--- This difference between create_pattern() and this function is that this
+-- This difference between @{create_pattern} and this function is that this
 -- function does not insert the generated objects into the pattern cache. Thus,
 -- you are allowed to modify the returned object.
 -- @see create_pattern
@@ -209,11 +209,11 @@ end
 -- table's 'type' member specifies the type. For example:
 -- { type = "radial", from = { 50, 50, 10 }, to = { 55, 55, 30 },
 --   stops = { { 0, "#ff0000" }, { 0.5, "#00ff00" }, { 1, "#0000ff" } } }
--- Any argument that cannot be understood is passed to create_solid_pattern().
+-- Any argument that cannot be understood is passed to @{create_solid_pattern}.
 --
 -- Please note that you MUST NOT modify the returned pattern, for example by
 -- calling :set_matrix() on it, because this function uses a cache and your
--- changes could thus have unintended side effects. Use create_pattern_uncached
+-- changes could thus have unintended side effects. Use @{create_pattern_uncached}
 -- if you need to modify the returned pattern.
 -- @see create_pattern_uncached, create_solid_pattern, create_png_pattern,
 --      create_linear_pattern, create_radial_pattern
@@ -236,7 +236,7 @@ end
 --- Check if a pattern is opaque.
 -- A pattern is transparent if the background on which it gets drawn (with
 -- operator OVER) doesn't influence the visual result.
--- @param col An argument that create_pattern() accepts
+-- @param col An argument that @{create_pattern} accepts
 -- @return The pattern if it is surely opaque, else nil
 function color.create_opaque_pattern(col)
     local pattern = color.create_pattern(col)
