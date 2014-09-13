@@ -171,6 +171,36 @@ color.types = {
 }
 
 --- Create a pattern from a given string.
+-- For full documentation of this function, please refer to create_pattern().
+-- This difference between create_pattern() and this function is that this
+-- function does not insert the generated objects into the pattern cache. Thus,
+-- you are allowed to modify the returned object.
+-- @see create_pattern
+-- @param col The string describing the pattern.
+-- @return a cairo pattern object
+function color.create_pattern_uncached(col)
+    -- If it already is a cairo pattern, just leave it as that
+    if cairo.Pattern:is_type_of(col) then
+        return col
+    end
+    local col = col or "#000000"
+    if type(col) == "string" then
+        local t = string.match(col, "[^:]+")
+        if color.types[t] then
+            local pos = string.len(t)
+            local arg = string.sub(col, pos + 2)
+            return color.types[t](arg)
+        end
+    elseif type(col) == "table" then
+        local t = col.type
+        if color.types[t] then
+            return color.types[t](col)
+        end
+    end
+    return color.create_solid_pattern(col)
+end
+
+--- Create a pattern from a given string.
 -- This function can create solid, linear, radial and png patterns. In general,
 -- patterns are specified as strings formatted as"type:arguments". "arguments"
 -- is specific to the pattern used. For example, one can use
@@ -180,8 +210,13 @@ color.types = {
 -- { type = "radial", from = { 50, 50, 10 }, to = { 55, 55, 30 },
 --   stops = { { 0, "#ff0000" }, { 0.5, "#00ff00" }, { 1, "#0000ff" } } }
 -- Any argument that cannot be understood is passed to create_solid_pattern().
--- @see create_solid_pattern, create_png_pattern, create_linear_pattern,
---      create_radial_pattern
+--
+-- Please note that you MUST NOT modify the returned pattern, for example by
+-- calling :set_matrix() on it, because this function uses a cache and your
+-- changes could thus have unintended side effects. Use create_pattern_uncached
+-- if you need to modify the returned pattern.
+-- @see create_pattern_uncached, create_solid_pattern, create_png_pattern,
+--      create_linear_pattern, create_radial_pattern
 -- @param col The string describing the pattern.
 -- @return a cairo pattern object
 function color.create_pattern(col)
@@ -191,26 +226,10 @@ function color.create_pattern(col)
     end
     local col = col or "#000000"
     local result = pattern_cache[col]
-    if result then
-        return result
-    end
-    if type(col) == "string" then
-        local t = string.match(col, "[^:]+")
-        if color.types[t] then
-            local pos = string.len(t)
-            local arg = string.sub(col, pos + 2)
-            result = color.types[t](arg)
-        end
-    elseif type(col) == "table" then
-        local t = col.type
-        if color.types[t] then
-            result = color.types[t](col)
-        end
-    end
     if not result then
-        result = color.create_solid_pattern(col)
+        result = color.create_pattern_uncached(col)
+        pattern_cache[col] = result
     end
-    pattern_cache[col] = result
     return result
 end
 

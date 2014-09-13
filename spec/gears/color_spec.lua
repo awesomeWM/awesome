@@ -151,17 +151,14 @@ describe("gears.color", function()
             end)
 
             it("with NONE repeat", function()
-                -- XXX: Can't use color() here because else the returned object
-                -- ends up in the pattern cache. What should we do about that?
-                local pattern = color.create_linear_pattern("0,0:0,10:0,#00ff00ff:1,#ff00ffff")
+                local pattern = color.create_pattern_uncached("linear:0,0:0,10:0,#00ff00ff:1,#ff00ffff")
                 pattern:set_extend("NONE")
                 assert.is_not.opaque(pattern)
             end)
         end)
 
         it("opaque linear pattern", function()
-            local pattern = color("linear:0,0:0,10:0,#00ff00ff:1,#ff00ffff")
-            assert.is.opaque(pattern)
+            assert.is.opaque("linear:0,0:0,10:0,#00ff00ff:1,#ff00ffff")
         end)
 
         it("opaque surface pattern", function()
@@ -195,6 +192,18 @@ describe("gears.color", function()
         else
             pending("unsupported pattern type")
         end
+    end)
+
+    describe("pattern cache", function()
+        it("caching works", function()
+            assert.is.equal(color("#00ff00"), color("#00ff00"))
+        end)
+
+        it("create_pattern_uncached does not cache", function()
+            -- Since tests run in order, the above test already inserted
+            -- "#00ff00" into the cache
+            assert.is_not.equal(color.create_pattern_uncached("#00ff00"), color.create_pattern_uncached("#00ff00"))
+        end)
     end)
 end)
 
