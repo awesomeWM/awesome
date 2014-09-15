@@ -24,15 +24,22 @@ function button.new(args)
     if not args or not args.image then
         return widget.empty_widget()
     end
-    local img_release = surface.load(args.image)
-    local img_press = cairo.ImageSurface(cairo.Format.ARGB32, img_release.width, img_release.height)
-    local cr = cairo.Context(img_press)
-    cr:set_source_surface(img_release, 2, 2)
-    cr:paint()
 
     local w = imagebox()
-    w:set_image(img_release)
-    w:buttons(abutton({}, 1, function () w:set_image(img_press) end, function () w:set_image(img_release) end))
+    local orig_set_image = w.set_image
+    local img_release
+    local img_press
+
+    w.set_image = function(w, image)
+        img_release = surface.load(image)
+        img_press = img_release:create_similar(cairo.Content.COLOR_ALPHA, img_release.width, img_release.height)
+        local cr = cairo.Context(img_press)
+        cr:set_source_surface(img_release, 2, 2)
+        cr:paint()
+        orig_set_image(w, img_release)
+    end
+    w:set_image(args.image)
+    w:buttons(abutton({}, 1, function () orig_set_image(w, img_press) end, function () orig_set_image(w, img_release) end))
     return w
 end
 
