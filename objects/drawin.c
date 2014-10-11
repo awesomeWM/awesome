@@ -82,11 +82,6 @@ drawin_unref_simplified(drawin_t **item)
 static void
 drawin_update_drawing(drawin_t *w, int widx)
 {
-    /* If this drawin isn't visible, we don't need an up-to-date cairo surface
-     * for it. (drawin_map() will later make sure we are called again) */
-    if(!w->visible)
-        return;
-
     luaA_object_push_item(globalconf.L, widx, w->drawable);
     drawable_set_geometry(w->drawable, -1, w->geometry);
     lua_pop(globalconf.L, 1);
