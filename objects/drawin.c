@@ -137,14 +137,7 @@ drawin_moveresize(lua_State *L, int udx, area_t geometry)
         mask_vals |= XCB_CONFIG_WINDOW_HEIGHT;
     }
 
-    if(mask_vals & (XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT))
-        drawin_update_drawing(w, udx);
-    else {
-        /* We still have to set x/y */
-        luaA_object_push_item(L, udx, w->drawable);
-        drawable_set_geometry(w->drawable, -1, w->geometry);
-        lua_pop(L, 1);
-    }
+    drawin_update_drawing(w, udx);
 
     /* Activate BMA */
     client_ignore_enterleave_events();
