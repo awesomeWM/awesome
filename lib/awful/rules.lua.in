@@ -193,12 +193,11 @@ function rules.apply(c)
     rules.execute(c, props, callbacks)
 end
 
-
---- Apply properties and callbacks to a client.
+--- Apply properies to a client
 -- @param c The client.
 -- @param props Properties to apply.
--- @param callbacks Callbacks to apply (optional).
-function rules.execute(c, props, callbacks)
+function rules.apply_properties(c,props)
+    if not c or props then return end
     for property, value in pairs(props) do
         if property ~= "focus" and type(value) == "function" then
             value = value(c)
@@ -223,6 +222,14 @@ function rules.execute(c, props, callbacks)
             c[property] = value
         end
     end
+end
+
+--- Apply properties, set a tag and call a callbacks for a client
+-- @param c The client.
+-- @param props Properties to apply.
+-- @param callbacks Callbacks to apply (optional).
+function rules.execute(c, props, callbacks)
+    rules.apply_properties(c,props)
 
     -- If untagged, stick the client on the current one.
     if #c:tags() == 0 then
