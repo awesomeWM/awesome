@@ -209,6 +209,21 @@ function utils.parse_dir(dir)
     return programs
 end
 
+--- Slice a table to given range.
+-- @param original_table Original table.
+-- @param range_start Range start.
+-- @param range_finish Range finish.
+-- @return A sliced table.
+function utils.table_range(original_table, range_start, range_finish)
+    range_finish = range_finish or #original_table
+    local result = {}
+    for i=range_start,range_finish do
+        table.insert(result, original_table[i])
+    end
+    return result
+end
+
+
 return utils
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

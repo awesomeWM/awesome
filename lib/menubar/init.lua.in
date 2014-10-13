@@ -38,6 +38,10 @@ menubar.utils = require("menubar.utils")
 
 -- Options section
 
+--- When variable set to number then list will start to "scrolL"
+-- after focusing on item #N in the menu.
+menubar.start_scroll_on_item = nil
+
 --- When true the .desktop files will be reparsed only when the
 -- extension is initialized. Use this if menubar takes much time to
 -- open.
@@ -179,6 +183,23 @@ local function menulist_update(query)
         shownitems[current_item].focused = true
     else
         table.insert(shownitems, { name = "", cmdline = query, icon = nil })
+    end
+
+    if menubar.start_scroll_on_item then
+        -- limit number of items before drawing them
+        if current_item > menubar.start_scroll_on_item then
+            shownitems = menubar.utils.table_range(
+                shownitems,
+                current_item - math.floor(menubar.start_scroll_on_item/2)
+            )
+        end
+        if #shownitems > menubar.start_scroll_on_item * 2 then
+            shownitems = menubar.utils.table_range(
+                shownitems,
+                1,
+                menubar.start_scroll_on_item * 2
+            )
+        end
     end
 
     common.list_update(common_args.w, nil, label,
