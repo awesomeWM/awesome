@@ -74,7 +74,7 @@ local function tile_group(cls, wa, orientation, fact, group)
 end
 
 local function do_tile(param, orientation)
-    local t = tag.selected(param.screen)
+    local t = param.tag or tag.selected(param.screen)
     orientation = orientation or "right"
 
     -- This handles all different orientations.
