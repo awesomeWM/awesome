@@ -178,11 +178,13 @@ function tag.history.update(obj)
     else
         if data.history[s].current then
             -- Check that the list is not identical
-            local identical = true
-            for idx, _tag in ipairs(data.history[s].current) do
-                if curtags[idx] ~= _tag then
-                    identical = false
-                    break
+            local identical = #data.history[s].current == #curtags
+            if identical then
+                for idx, _tag in ipairs(data.history[s].current) do
+                    if curtags[idx] ~= _tag then
+                        identical = false
+                        break
+                    end
                 end
             end
 
