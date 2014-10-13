@@ -18,6 +18,7 @@ local capi =
 {
     selection = selection
 }
+local g_debug = require("gears.debug")
 local keygrabber = require("awful.keygrabber")
 local util = require("awful.util")
 local beautiful = require("beautiful")
@@ -224,7 +225,7 @@ end
 -- user editing.
 --
 -- @tparam table args A table with optional arguments: `fg_cursor`, `bg_cursor`,
--- `ul_cursor`, `prompt`, `text`, `selectall`, `font`, `autoexec`.
+-- `ul_cursor`, `prompt`, `text`, `selectall`, `font`, `autoexec`, `hooks`.
 -- @param textbox The textbox to use for the prompt.
 -- @param exe_callback The callback function to call with command as argument
 -- when finished.
@@ -239,6 +240,13 @@ end
 -- with command as argument when a command was changed.
 -- @param[opt] keypressed_callback The callback function to call
 -- with mod table, key and command as arguments when a key was pressed.
+--
+-- The "hooks" argument use a syntax similar to awful.key:
+-- <code> hooks = {
+--     {{ "Control" }, "Return", function(text) end } ,
+--     {{  }, "Tab", function(text) end }
+-- } </code>
+
 function prompt.run(args, textbox, exe_callback, completion_callback, history_path, history_max, done_callback, changed_callback, keypressed_callback)
     local grabber
     local theme = beautiful.get()
@@ -253,6 +261,7 @@ function prompt.run(args, textbox, exe_callback, completion_callback, history_pa
     local text = args.text or ""
     local font = args.font or theme.font
     local selectall = args.selectall
+    local hooks = {}
 
     search_term=nil
 
@@ -262,20 +271,36 @@ function prompt.run(args, textbox, exe_callback, completion_callback, history_pa
     local cur_pos = (selectall and 1) or text:wlen() + 1
     -- The completion element to use on completion request.
     local ncomp = 1
-    if not textbox or not exe_callback then
+    if not textbox or not (exe_callback or args.hooks) then
         return
     end
+
+    -- Build the hook map
+    for k,v in ipairs(args.hooks or {}) do
+        if #v == 3 then
+            local mods,key,callback = unpack(v)
+            if type(callback) == "function" then
+                hooks[key] = hooks[key] or {}
+                hooks[key][#hooks[key]+1] = v
+            else
+                g_debug.assert("The hook 3rd paramater has to be a function")
+            end
+        else
+            g_debug.assert("The hook has to have 3 parameters")
+        end
+    end
+
     textbox:set_font(font)
     textbox:set_markup(prompt_text_with_cursor{
         text = text, text_color = inv_col, cursor_color = cur_col,
         cursor_pos = cur_pos, cursor_ul = cur_ul, selectall = selectall,
         prompt = prettyprompt })
 
-    local exec = function()
+    local function exec(cb)
         textbox:set_markup("")
         history_add(history_path, command)
         keygrabber.stop(grabber)
-        exe_callback(command)
+        cb(command)
         if done_callback then done_callback() end
     end
 
@@ -319,6 +344,22 @@ function prompt.run(args, textbox, exe_callback, completion_callback, history_pa
             end
         end
 
+        -- User defined cases
+        if hooks[key] then
+            for k,v in ipairs(hooks[key]) do
+                if #modifiers == #v[1] then
+                    local match = true
+                    for k2,v2 in ipairs(v[1]) do
+                        match = match and mod[v2]
+                    end
+                    if match or #modifiers == 0 then
+                        exec(v[3])
+                        return
+                    end
+                end
+            end
+        end
+
         -- Get out cases
         if (mod.Control and (key == "c" or key == "g"))
             or (not mod.Control and key == "Escape") then
@@ -330,7 +371,7 @@ function prompt.run(args, textbox, exe_callback, completion_callback, history_pa
         elseif (mod.Control and (key == "j" or key == "m"))
             or (not mod.Control and key == "Return")
             or (not mod.Control and key == "KP_Enter") then
-            exec()
+            exec(exe_callback)
             -- We already unregistered ourselves so we don't want to return
             -- true, otherwise we may unregister someone else.
             return
@@ -497,7 +538,7 @@ function prompt.run(args, textbox, exe_callback, completion_callback, history_pa
                     key = ""
                     -- execute if only one match found and autoexec flag set
                     if matches and #matches == 1 and args.autoexec then
-                        exec()
+                        exec(exe_callback)
                         return
                     end
                 else
