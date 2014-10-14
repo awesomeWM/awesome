@@ -167,7 +167,8 @@ function tag.delete(target_tag, fallback_tag)
         if (not c.sticky and #c:tags() == 1) or
                                     (c.sticky and fallback_tag == nil) then
             return
-        else
+        -- If a client has multiple tags, then do not move it to fallback
+        elseif #c:tags() < 2 then
             c:tags({fallback_tag})
         end
     end
