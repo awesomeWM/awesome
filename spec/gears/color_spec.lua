@@ -36,16 +36,15 @@ describe("gears.color", function()
     end)
 
     local function test_pattern_stops(pattern, stops)
-        local i = 0
-        for off, stop in pairs(stops) do
-            local status, offset, r, g, b, a = pattern:get_color_stop_rgba(i)
-            assert.is.same(offset, off)
-            assert.is.same({ r, g, b, a }, stop)
-            i = i + 1
+        for i, stop in pairs(stops) do
+            local status, offset, r, g, b, a = pattern:get_color_stop_rgba(i - 1)
+            assert.is.same("SUCCESS", status)
+            assert.is.same(offset, stop.offset)
+            assert.is.same({ r, g, b, a }, stop.rgba)
         end
 
         assert.is.same({ pattern:get_color_stop_count() },
-                { "SUCCESS", i })
+                { "SUCCESS", #stops })
     end
 
     local function test_linear_pattern(pattern, from, to, stops)
@@ -67,18 +66,18 @@ describe("gears.color", function()
                 }
             })
             test_linear_pattern(pattern, { 2, 10 }, { 102, 110}, {
-                    [0]   = { 1, 0, 0, 1 },
-                    [0.5] = { 0, 1, 0, 1 },
-                    [1]   = { 0, 0, 1, 1 }
+                    { offset = 0,   rgba = { 1, 0, 0, 1 }},
+                    { offset = 0.5, rgba = { 0, 1, 0, 1 }},
+                    { offset = 1,   rgba = { 0, 0, 1, 1 }}
                 })
         end)
 
         it("string description", function()
             local pattern = color("linear:2,10:102,110:0,#ff0000:0.5,#00ff00:1,#0000ff")
             test_linear_pattern(pattern, { 2, 10 }, { 102, 110 }, {
-                    [0]   = { 1, 0, 0, 1 },
-                    [0.5] = { 0, 1, 0, 1 },
-                    [1]   = { 0, 0, 1, 1 }
+                    { offset = 0,   rgba = { 1, 0, 0, 1 }},
+                    { offset = 0.5, rgba = { 0, 1, 0, 1 }},
+                    { offset = 1,   rgba = { 0, 0, 1, 1 }}
                 })
         end)
     end)
@@ -102,18 +101,18 @@ describe("gears.color", function()
                 }
             })
             test_radial_pattern(pattern, { 2, 10, 42 }, { 102, 110, 142 }, {
-                    [0]   = { 1, 0, 0, 1 },
-                    [0.5] = { 0, 1, 0, 1 },
-                    [1]   = { 0, 0, 1, 1 }
+                    { offset = 0,   rgba = { 1, 0, 0, 1 }},
+                    { offset = 0.5, rgba = { 0, 1, 0, 1 }},
+                    { offset = 1,   rgba = { 0, 0, 1, 1 }}
                 })
         end)
 
         it("string description", function()
             local pattern = color("radial:2,10,42:102,110,142:0,#ff0000:0.5,#00ff00:1,#0000ff")
             test_radial_pattern(pattern, { 2, 10, 42 }, { 102, 110, 142 }, {
-                    [0]   = { 1, 0, 0, 1 },
-                    [0.5] = { 0, 1, 0, 1 },
-                    [1]   = { 0, 0, 1, 1 }
+                    { offset = 0,   rgba = { 1, 0, 0, 1 }},
+                    { offset = 0.5, rgba = { 0, 1, 0, 1 }},
+                    { offset = 1,   rgba = { 0, 0, 1, 1 }}
                 })
         end)
     end)
