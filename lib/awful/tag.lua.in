@@ -61,6 +61,18 @@ function tag.move(new_index, target_tag)
     end
 end
 
+--- Swap 2 tags
+-- @param tag1 The first tag
+-- @param tag2 The second tag
+function tag.swap(tag1,tag2)
+    local idx1, idx2 = tag.getidx(tag1),tag.getidx(tag2)
+    local src2, src1 = tag.getscreen(tag2),tag.getscreen(tag1)
+    tag.setscreen(tag2,src1)
+    tag.move(idx1,tag2)
+    tag.setscreen(tag1,scr2)
+    tag.move(idx2,tag1)
+end
+
 --- Add a tag.
 -- @param name The tag name, a string
 -- @param props The tags properties, a table
