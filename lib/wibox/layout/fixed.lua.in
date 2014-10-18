@@ -19,7 +19,7 @@ local fixed = {}
 -- @param height The available height.
 -- @return The total space needed by the layout.
 function fixed:draw(wibox, cr, width, height)
-    local pos = 0
+    local pos,spacing = 0,self._spacing or 0
 
     for k, v in pairs(self.widgets) do
         local x, y, w, h, _
@@ -30,7 +30,7 @@ function fixed:draw(wibox, cr, width, height)
             if k ~= #self.widgets or not self._fill_space then
                 _, h = base.fit_widget(v, w, h);
             end
-            pos = pos + h
+            pos = pos + h + spacing
             in_dir = h
         else
             x, y = pos, 0
@@ -38,12 +38,12 @@ function fixed:draw(wibox, cr, width, height)
             if k ~= #self.widgets or not self._fill_space then
                 w, _ = base.fit_widget(v, w, h);
             end
-            pos = pos + w
+            pos = pos + w + spacing
             in_dir = w
         end
 
-        if (self.dir == "y" and pos > height) or
-            (self.dir ~= "y" and pos > width) then
+        if (self.dir == "y" and pos-spacing > height) or
+            (self.dir ~= "y" and pos-spacing > width) then
             break
         end
         base.draw_widget(wibox, cr, v, x, y, w, h)
@@ -90,10 +90,12 @@ function fixed:fit(orig_width, orig_height)
         end
     end
 
+    local spacing = ((self._spacing or 0)*(#self.widgets-1))
+
     if self.dir == "y" then
-        return used_max, used_in_dir
+        return used_max, used_in_dir + spacing
     end
-    return used_in_dir, used_max
+    return used_in_dir + spacing, used_max
 end
 
 --- Reset a fixed layout. This removes all widgets from the layout.
@@ -143,6 +145,12 @@ end
 -- Widgets can be added via :add().
 function fixed.vertical()
     return get_layout("y")
+end
+
+-- Add spacing between each layout widgets
+function fixed:set_spacing(spacing)
+    self._spacing = spacing
+    self:emit_signal("widget::updated")
 end
 
 return fixed
