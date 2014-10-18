@@ -1584,8 +1584,10 @@ titlebar_get_drawable(lua_State *L, client_t *c, int cl_idx, client_titlebar_t b
 }
 
 static void
-titlebar_resize(client_t *c, client_titlebar_t bar, int size)
+titlebar_resize(lua_State *L, int cidx, client_t *c, client_titlebar_t bar, int size)
 {
+    const char *property_name;
+
     if (size < 0)
         return;
 
@@ -1598,12 +1600,20 @@ titlebar_resize(client_t *c, client_titlebar_t bar, int size)
     int change = size - c->titlebar[bar].size;
     switch (bar) {
     case CLIENT_TITLEBAR_TOP:
+        geometry.height += change;
+        property_name = "property::titlebar_top";
+        break;
     case CLIENT_TITLEBAR_BOTTOM:
         geometry.height += change;
+        property_name = "property::titlebar_bottom";
         break;
     case CLIENT_TITLEBAR_RIGHT:
+        geometry.width += change;
+        property_name = "property::titlebar_right";
+        break;
     case CLIENT_TITLEBAR_LEFT:
         geometry.width += change;
+        property_name = "property::titlebar_left";
         break;
     default:
         fatal("Unknown titlebar kind %d\n", (int) bar);
@@ -1611,6 +1621,8 @@ titlebar_resize(client_t *c, client_titlebar_t bar, int size)
 
     c->titlebar[bar].size = size;
     client_resize_do(c, geometry, true, false);
+
+    luaA_object_emit_signal(L, cidx, property_name, 0);
 }
 
 #define HANDLE_TITLEBAR(name, index)                              \
@@ -1622,9 +1634,9 @@ luaA_client_titlebar_ ## name(lua_State *L)                       \
     if (lua_gettop(L) == 2)                                       \
     {                                                             \
         if (lua_isnil(L, 2))                                      \
-            titlebar_resize(c, index, 0);                         \
+            titlebar_resize(L, 1, c, index, 0);                   \
         else                                                      \
-            titlebar_resize(c, index, luaL_checknumber(L, 2));    \
+            titlebar_resize(L, 1, c, index, luaL_checknumber(L, 2)); \
     }                                                             \
                                                                   \
     luaA_object_push_item(L, 1, titlebar_get_drawable(L, c, 1, index)); \
@@ -2391,6 +2403,10 @@ client_class_setup(lua_State *L)
     signal_add(&client_class.signals, "property::skip_taskbar");
     signal_add(&client_class.signals, "property::sticky");
     signal_add(&client_class.signals, "property::struts");
+    signal_add(&client_class.signals, "property::titlebar_bottom");
+    signal_add(&client_class.signals, "property::titlebar_left");
+    signal_add(&client_class.signals, "property::titlebar_right");
+    signal_add(&client_class.signals, "property::titlebar_top");
     signal_add(&client_class.signals, "property::transient_for");
     signal_add(&client_class.signals, "property::type");
     signal_add(&client_class.signals, "property::urgent");
