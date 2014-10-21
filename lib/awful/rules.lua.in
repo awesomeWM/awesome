@@ -12,6 +12,7 @@ local ipairs = ipairs
 local pairs = pairs
 local aclient = require("awful.client")
 local atag = require("awful.tag")
+local aplacement = require("awful.placement")
 
 --- Apply rules to clients at startup.
 -- awful.rules
@@ -193,36 +194,151 @@ function rules.apply(c)
     rules.execute(c, props, callbacks)
 end
 
+--- Get a property value
+-- @param c The client.
+-- @param property The property name
+-- @param value The property value
+-- @param ignore_function A table of properties where functions should not be executed
+local funcion get_property(c,property,value,ignore_function)
+    if not property or not value then return end
 
---- Apply properties and callbacks to a client.
+    if type(property) ~= "function" or ignore_function[property] then
+        return value
+    else
+        return value(c)
+    end
+    return  and value or (ignore_function[property] and property or )
+end
+
+--- Apply properies to a client
 -- @param c The client.
 -- @param props Properties to apply.
--- @param callbacks Callbacks to apply (optional).
-function rules.execute(c, props, callbacks)
-    for property, value in pairs(props) do
-        if property ~= "focus" and type(value) == "function" then
-            value = value(c)
+-- @param ignore_function An optional table of properties where functions should not be executed
+-- @return Tags that have been assigned
+function rules.apply_properties(c,props,ignore_function)
+    if not c or props then return end
+    local ignore_function,ret = ignore_function or {"focus"},nil
+
+    -- Make the client floating
+    if props.floating then
+        aclient.floating.set(c, get_property(c,"floating",props.floating,ignore_function))
+        props.floating = nil
+    end
+
+    -- Create a new tag if necessary
+    if props.new_tag then
+        local tag = get_property(c,"new_tag",props.new_tag,ignore_function)
+        local tag_type = type(tag)
+        if tag_type == "tag" then
+            c:tags({tag})
+            ret = {tag}
+        else
+            -- Assume it is a tag property table
+            c:tags({atag.add(tag_type=="table" and tag.name or c.class,tag_type=="table" and tag or {})})
         end
-        if property == "floating" then
-            aclient.floating.set(c, value)
-        elseif property == "tag" then
-            c.screen = atag.getscreen(value)
-            c:tags({ value })
-        elseif property == "switchtotag" and value and props.tag then
-            atag.viewonly(props.tag)
-        elseif property == "height" or property == "width" or
-                property == "x" or property == "y" then
-            local geo = c:geometry();
-            geo[property] = value
-            c:geometry(geo);
-        elseif property == "focus" then
-            -- This will be handled below
-        elseif type(c[property]) == "function" then
+        props.new_tag = nil
+    -- Assign client to a tag or set of tags
+    elseif props.tag or props.tags then
+        -- Both cannot be used at once, choose "tag", assume they are equivalent
+        local property = props.tag and "tag" or "tags"
+        local tags = get_property(c,property,props[property],ignore_function)
+
+        if type(tags) == "table" and #tags > 0 then
+            -- Mixing screens for a single client cause issues
+            local screen,filtered_tags = atag.getscreen(tags[1]) or c.screen,{}
+            for k,t in ipairs(tags) do
+                if atag.getscreen(t) == screen then
+                    filtered_tags[#filtered_tags+1] = t
+                end
+            end
+            c:tags(filtered_tags)
+            ret = filtered_tags
+        else
+            c.screen = atag.getscreen(tags) or c.screen
+            c:tags({ tags })
+            ret = { tags }
+        end
+        props.tag,props.tags = nil,nil
+    end
+
+    -- Switch to a tag or tags
+    if props.switchtotag then
+        local tags = get_property(c,"switchtotag",props.switchtotag,ignore_function)
+        if type(tags) == "table" then
+            -- Get all tag screens
+            local screens = {}
+            for k,t in ipairs(tags) do
+                screens[atag.getscreen(t)] = true
+            end
+
+            -- Unselect all tags from those screens
+            for s,v in pairs(screens) do
+                atag.viewnone(s)
+            end
+
+            -- Select all tags
+            for k,t in ipairs(tags) do
+                t.selected = true
+            end
+        elseif type(tags) == "tag" then
+            atag.viewonly(tags)
+        else
+            atag.viewmore(c:tags())
+        end
+        props.switchtotag = nil
+    end
+
+    -- Handle all geometry value
+    for k,property in ipairs {"height","width","x","y"} do
+        if props[property] then
+            local geo = c:geometry()
+            geo[property] = get_property(c,property, props[property],ignore_function)
+            c:geometry(geo)
+            props[property] = nil
+        end
+    end
+
+    --Center client
+    if props.centered then
+        local value = get_property(c,"centered",props.centered,ignore_function)
+        if value then
+            aplacement.centered(c, nil)
+        end
+        props.centered = nil
+    end
+
+    --Set slave or master
+    if props.slave or props.master then
+        -- Both cannot be used at once, choose "slave"
+        local property = props.slave and "slave" or "master"
+        local value = get_property(c,property,props[property],ignore_function)
+        if value then
+            aclient["set"..property](c, true)
+        end
+        props.slave,props.master = nil,nil
+    end
+
+    -- Forward all other properties to the client itself
+    for property, value in pairs(props) do
+        local value = get_property(c,property, value, ignore_function)
+        if type(c[property]) == "function" then
             c[property](c, value)
         else
             c[property] = value
         end
     end
+
+    return ret
+end
+
+--- Apply properties, set a tag and call a callbacks for a client
+-- @param c The client.
+-- @param props Properties to apply.
+-- @param callbacks Callbacks to apply (optional).
+function rules.execute(c, props, callbacks)
+    local focus = get_property(c,"focus",props.focus)
+    props.focus = nil
+    rules.apply_properties(c,props)
 
     -- If untagged, stick the client on the current one.
     if #c:tags() == 0 then
@@ -238,7 +354,7 @@ function rules.execute(c, props, callbacks)
 
     -- Do this at last so we do not erase things done by the focus
     -- signal.
-    if props.focus and (type(props.focus) ~= "function" or props.focus(c)) then
+    if focus then
         c:emit_signal('request::activate')
     end
 end
