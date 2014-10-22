@@ -11,13 +11,40 @@ local tag = require("awful.tag")
 local capi =
 {
     client = client,
-    screen = screen
+    screen = screen,
+    mouse = mouse,
+    mousegrabber = mousegrabber
 }
 local client = require("awful.client")
 
 --- Magnifier layout module for awful
 -- awful.layout.suit.magnifier
 local magnifier = {}
+
+function magnifier.mouse_resize_handler(c, corner, x, y)
+    capi.mouse.coords({ x = x, y = y })
+
+    local wa = capi.screen[c.screen].workarea
+    local center_x = wa.x + wa.width / 2
+    local center_y = wa.y + wa.height / 2
+    local maxdist_pow = (wa.width^2 + wa.height^2) / 4
+
+    capi.mousegrabber.run(function (_mouse)
+                              for k, v in ipairs(_mouse.buttons) do
+                                  if v then
+                                      local dx = center_x - _mouse.x
+                                      local dy = center_y - _mouse.y
+                                      local dist = dx^2 + dy^2
+
+                                      -- New master width factor
+                                      local mwfact = dist / maxdist_pow
+                                      tag.setmwfact(math.min(math.max(0.01, mwfact), 0.99), tag.selected(c.screen))
+                                      return true
+                                  end
+                              end
+                              return false
+                          end, corner .. "_corner")
+end
 
 function magnifier.arrange(p)
     -- Fullscreen?
