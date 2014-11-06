@@ -294,21 +294,18 @@ client_restore_enterleave_events(void)
 
 /** Record that a client got focus.
  * \param c The client.
+ * \return true if the client focus changed, false otherwise.
  */
-void
+bool
 client_focus_update(client_t *c)
 {
     lua_State *L = globalconf_get_lua_State();
 
     if(!client_maybevisible(c))
-        return;
+        return false;
 
-    if(globalconf.focus.client)
+    if(globalconf.focus.client && globalconf.focus.client != c)
     {
-        if (globalconf.focus.client == c)
-            /* Already focused */
-            return;
-
         /* When we are called due to a FocusIn event (=old focused client
          * already unfocused), we don't want to cause a SetInputFocus,
          * because the client which has focus now could be using globally
@@ -317,14 +314,20 @@ client_focus_update(client_t *c)
         client_unfocus_internal(globalconf.focus.client);
     }
 
+    bool focused_new = globalconf.focus.client != c;
     globalconf.focus.client = c;
 
-    /* according to EWMH, we have to remove the urgent state from a client */
+    /* According to EWMH, we have to remove the urgent state from a client.
+     * This should be done also for the current/focused client (FS#1310). */
     luaA_object_push(L, c);
     client_set_urgent(L, -1, false);
 
-    luaA_object_emit_signal(L, -1, "focus", 0);
+    if(focused_new)
+        luaA_object_emit_signal(L, -1, "focus", 0);
+
     lua_pop(L, 1);
+
+    return focused_new;
 }
 
 /** Give focus to client, or to first client if client is NULL.
@@ -337,11 +340,8 @@ client_focus(client_t *c)
     if(!c && globalconf.clients.len && !(c = globalconf.clients.tab[0]))
         return;
 
-    if(!client_maybevisible(c) || c == globalconf.focus.client)
-        return;
-
-    client_focus_update(c);
-    globalconf.focus.need_update = true;
+    if(client_focus_update(c))
+        globalconf.focus.need_update = true;
 }
 
 void
