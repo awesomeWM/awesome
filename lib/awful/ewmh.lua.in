@@ -135,10 +135,10 @@ end
 
 -- Activate a window
 function ewmh.activate(c)
-    if c:isvisible() then
+    if awesome.startup or c:isvisible() then
         client.focus = c
         c:raise()
-    elseif not awesome.startup then
+    else
         c.urgent = true
     end
 end
