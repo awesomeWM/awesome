@@ -46,16 +46,20 @@ function tag.move(new_index, target_tag)
         return
     end
 
+    local rm_index = nil
+
     for i, t in ipairs(tmp_tags) do
         if t == target_tag then
             table.remove(tmp_tags, i)
+            rm_index = i
             break
         end
     end
 
     table.insert(tmp_tags, new_index, target_tag)
 
-    for i, tmp_tag in ipairs(tmp_tags) do
+    for i=new_index < rm_index and new_index or rm_index, #tmp_tags do
+        local tmp_tag = tmp_tags[i]
         tag.setscreen(tmp_tag, scr)
         tag.setproperty(tmp_tag, "index", i)
     end
@@ -79,8 +83,22 @@ end
 -- @return The created tag
 function tag.add(name, props)
     local properties = props or {}
-    local newtag = capi.tag{ name = name, activated = true }
+
+    -- Be sure to set the screen before the tag is activated to avoid function
+    -- connected to property::activated to be called without a valid tag.
+    -- set properies cannot be used as this has to be set before the first signal
+    -- is sent
     properties.screen = properties.screen or capi.mouse.screen
+
+    -- Index is also required
+    properties.index = (#tag.gettags(properties.screen))+1
+
+    local newtag = capi.tag{ name = name }
+
+    -- Start with a fresh property table to avoid collisions with unsupported data
+    data.tags[newtag] = {screen=properties.screen, index=properties.index}
+
+    newtag.activated = true
 
     for k, v in pairs(properties) do
         tag.setproperty(newtag, k, v)
@@ -133,10 +151,12 @@ end
 function tag.delete(target_tag, fallback_tag)
     -- abort if no tag is passed or currently selected
     local target_tag = target_tag or tag.selected()
-    if target_tag == nil then return end
+    if target_tag == nil or target_tag.activated == false then return end
 
     local target_scr = tag.getscreen(target_tag)
-    local ntags = #tag.gettags(target_scr)
+    local tags       = tag.gettags(target_scr)
+    local idx        = tag.getidx(target_tag)
+    local ntags      = #tags
 
     -- We can't use the target tag as a fallback.
     local fallback_tag = fallback_tag
@@ -169,11 +189,16 @@ function tag.delete(target_tag, fallback_tag)
     data.tags[target_tag].screen = nil
     target_tag.activated = false
 
+    -- Update all indexes
+    for i=idx+1,#tags do
+        tag.setproperty(tags[i], "index", i-1)
+    end
+
     -- If no tags are visible, try and view one.
     if tag.selected(target_scr) == nil and ntags > 0 then
         tag.history.restore(nil, 1)
         if tag.selected(target_scr) == nil then
-            tag.gettags(target_scr)[1].selected = true
+            tags[tags[1] == target_tag and 2 or 1].selected = true
         end
     end
 
@@ -262,22 +287,9 @@ function tag.gettags(s)
         end
     end
 
-    local without_index = 0
-    for _, t in ipairs(tags) do
-        if not tag.getproperty(t, "index") then
-            without_index = without_index + 1
-        end
-    end
-    if without_index > 0 then
-        for _, t in ipairs(tags) do
-            if not tag.getproperty(t, "index") then
-                tag.setproperty(t, "index", (#tags - without_index + 1))
-                without_index = without_index - 1
-            end
-        end
-    end
-
-    table.sort(tags, function(a, b) return tag.getproperty(a, "index") < tag.getproperty(b, "index") end)
+    table.sort(tags, function(a, b)
+        return (tag.getproperty(a, "index") or 9999) < (tag.getproperty(b, "index") or 9999) 
+    end)
     return tags
 end
 
@@ -286,6 +298,7 @@ end
 -- @param s Screen number
 function tag.setscreen(t, s)
     local s = s or capi.mouse.screen
+    local sel = tag.selected
     local old_screen = tag.getproperty(t, "screen")
     if s == old_screen then return end
 
@@ -300,7 +313,18 @@ function tag.setscreen(t, s)
         c.screen = s --Move all clients
         c:tags({t})
     end
-    tag.history.restore(old_screen,1)
+
+    -- Update all indexes
+    for _,screen in ipairs {old_screen,s} do
+        for i,t in ipairs(tag.gettags(screen)) do
+            tag.setproperty(t, "index", i)
+        end
+    end
+
+    -- Restore the old screen history if the tag was selected
+    if sel then
+        tag.history.restore(old_screen,1)
+    end
 end
 
 --- Get a tag's screen
