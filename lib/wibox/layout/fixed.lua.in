@@ -147,7 +147,8 @@ function fixed.vertical()
     return get_layout("y")
 end
 
--- Add spacing between each layout widgets
+--- Add spacing between each layout widgets
+-- @param spacing Spacing between widgets.
 function fixed:set_spacing(spacing)
     self._spacing = spacing
     self:emit_signal("widget::updated")
