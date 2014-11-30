@@ -55,11 +55,11 @@ end
 -- key to up action. This is common to all created menu.
 -- @class table
 -- @name menu_keys
-menu.menu_keys = { up = { "Up" },
-              down = { "Down" },
-              back = { "Left" },
+menu.menu_keys = { up = { "Up", "k" },
+              down = { "Down", "j" },
+              back = { "Left", "h" },
               exec = { "Return" },
-              enter = { "Right" },
+              enter = { "Right", "l" },
               close = { "Escape" } }
 
 
