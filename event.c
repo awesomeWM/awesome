@@ -299,9 +299,17 @@ event_handle_configurerequest(xcb_configure_request_event_t *ev)
         int16_t diff_w = 0, diff_h = 0, diff_border = 0;
 
         if(ev->value_mask & XCB_CONFIG_WINDOW_X)
+        {
             geometry.x = ev->x;
+            /* The ConfigureRequest specifies the position of the outer corner of the client window, we want the frame */
+            geometry.x -= c->border_width;
+        }
         if(ev->value_mask & XCB_CONFIG_WINDOW_Y)
+        {
             geometry.y = ev->y;
+            /* The ConfigureRequest specifies the position of the outer corner of the client window, we want the frame */
+            geometry.y -= c->border_width;
+        }
         if(ev->value_mask & XCB_CONFIG_WINDOW_WIDTH)
         {
             uint16_t old_w = geometry.width;
