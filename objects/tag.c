@@ -95,17 +95,18 @@ tag_client_emit_signal(lua_State *L, tag_t *t, client_t *c, const char *signame)
 }
 
 /** Tag a client with the tag on top of the stack.
+ * \param L The Lua VM state.
  * \param c the client to tag
  */
 void
-tag_client(client_t *c)
+tag_client(lua_State *L, client_t *c)
 {
-    tag_t *t = luaA_object_ref_class(globalconf.L, -1, &tag_class);
+    tag_t *t = luaA_object_ref_class(L, -1, &tag_class);
 
     /* don't tag twice */
     if(is_client_tagged(c, t))
     {
-        luaA_object_unref(globalconf.L, t);
+        luaA_object_unref(L, t);
         return;
     }
 
@@ -113,7 +114,7 @@ tag_client(client_t *c)
     ewmh_client_update_desktop(c);
     banning_need_update();
 
-    tag_client_emit_signal(globalconf.L, t, c, "tagged");
+    tag_client_emit_signal(L, t, c, "tagged");
 }
 
 /** Untag a client with specified tag.
@@ -218,7 +219,7 @@ luaA_tag_clients(lua_State *L)
             client_t *c = luaA_checkudata(L, -1, &client_class);
             /* push tag on top of the stack */
             lua_pushvalue(L, 1);
-            tag_client(c);
+            tag_client(L, c);
             lua_pop(L, 1);
         }
     }

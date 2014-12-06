@@ -1384,7 +1384,7 @@ luaA_client_tags(lua_State *L)
         }
         lua_pushnil(L);
         while(lua_next(L, 2))
-            tag_client(c);
+            tag_client(L, c);
         lua_pop(L, 1);
     }
 

@@ -25,7 +25,7 @@
 #include "client.h"
 
 int tags_get_first_selected_index(void);
-void tag_client(client_t *);
+void tag_client(lua_State *, client_t *);
 void untag_client(client_t *, tag_t *);
 bool is_client_tagged(client_t *, tag_t *);
 void tag_unref_simplified(tag_t **);
