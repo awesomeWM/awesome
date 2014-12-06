@@ -231,7 +231,7 @@ drawin_set_visible(lua_State *L, int udx, bool v)
             /* duplicate drawin */
             lua_pushvalue(L, udx);
             /* ref it */
-            luaA_object_ref_class(globalconf.L, -1, &drawin_class);
+            luaA_object_ref_class(L, -1, &drawin_class);
         }
         else
         {
@@ -242,7 +242,7 @@ drawin_set_visible(lua_State *L, int udx, bool v)
             /* Active BMA */
             client_restore_enterleave_events();
             /* unref it */
-            luaA_object_unref(globalconf.L, drawin);
+            luaA_object_unref(L, drawin);
         }
 
         luaA_object_emit_signal(L, udx, "property::visible", 0);
