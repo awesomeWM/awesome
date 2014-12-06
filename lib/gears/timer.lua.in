@@ -1,0 +1,100 @@
+---------------------------------------------------------------------------
+-- @author Uli Schlachter
+-- @copyright 2014 Uli Schlachter
+-- @release @AWESOME_VERSION@
+---------------------------------------------------------------------------
+
+local setmetatable = setmetatable
+local pairs = pairs
+local tonumber = tonumber
+local traceback = debug.traceback
+local glib = require("lgi").GLib
+local object = require("gears.object")
+
+--- Timer objects. This type of object is useful when triggering events repeatedly.
+-- The timer will emit the "timeout" signal every N seconds, N being the timeout
+-- value.
+-- @field timeout Interval in seconds to emit the timeout signal. Can be any
+-- value, including floating point ones (i.e. 1.5 seconds).
+-- @field started Read-only boolean field indicating if the timer has been
+-- started.
+-- @class table
+-- @name timer
+
+local timer = { mt = {} }
+
+--- Start the timer.
+function timer:start()
+    if self.data.source_id ~= nil then
+        print(traceback("timer already started"))
+        return
+    end
+    self.data.source_id = glib.timeout_add(glib.PRIORITY_DEFAULT, self.data.timeout * 1000, function()
+        local success, message = pcall(function()
+            self:emit_signal("timeout")
+        end)
+        assert(success, message)
+        return true
+    end)
+end
+
+--- Stop the timer.
+function timer:stop()
+    if self.data.source_id == nil then
+        print(traceback("timer not started"))
+        return
+    end
+    glib.source_remove(self.data.source_id)
+    self.data.source_id = nil
+end
+
+--- Restart the timer.
+function timer:again()
+    if self.data.source_id ~= nil then
+        self:stop()
+    end
+    self:start()
+end
+
+local timer_instance_mt = {
+    __index = function(self, property)
+        if property == "timeout" then
+            return self.data.timeout
+        elseif property == "started" then
+            return self.data.source_id ~= nil
+        end
+
+        return timer[property]
+    end,
+
+    __newindex = function(self, property, value)
+        if property == "timeout" then
+            self.data.timeout = tonumber(value)
+            self:emit_signal("property::timeout")
+        end
+    end
+}
+
+local function new(args)
+    local ret = object()
+
+    ret:add_signal("property::timeout")
+    ret:add_signal("timeout")
+
+    ret.data = { timeout = 0 }
+    setmetatable(ret, timer_instance_mt)
+
+    for k, v in pairs(args) do
+        ret[k] = v
+    end
+
+    return ret
+end
+
+function timer.mt:__call(...)
+    return new(...)
+end
+
+return setmetatable(timer, timer.mt)
+
+-- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

@@ -72,7 +72,6 @@ set(AWE_SRCS
     ${SOURCE_DIR}/objects/key.c
     ${SOURCE_DIR}/objects/screen.c
     ${SOURCE_DIR}/objects/tag.c
-    ${SOURCE_DIR}/objects/timer.c
     ${SOURCE_DIR}/objects/window.c)
 
 set(AWE_MAN_SRCS

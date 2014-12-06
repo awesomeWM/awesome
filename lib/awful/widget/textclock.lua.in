@@ -7,7 +7,7 @@
 local setmetatable = setmetatable
 local os = os
 local textbox = require("wibox.widget.textbox")
-local capi = { timer = timer }
+local timer = require("gears.timer")
 
 --- Text clock widget.
 -- awful.widget.textclock
@@ -22,10 +22,10 @@ function textclock.new(format, timeout)
     local timeout = timeout or 60
 
     local w = textbox()
-    local timer = capi.timer { timeout = timeout }
-    timer:connect_signal("timeout", function() w:set_markup(os.date(format)) end)
-    timer:start()
-    timer:emit_signal("timeout")
+    local t = timer { timeout = timeout }
+    t:connect_signal("timeout", function() w:set_markup(os.date(format)) end)
+    t:start()
+    t:emit_signal("timeout")
     return w
 end
 

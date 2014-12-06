@@ -26,7 +26,6 @@ local table = table
 local type = type
 local math = math
 local capi = {
-    timer = timer,
     screen = screen,
     mouse = mouse,
     client = client }

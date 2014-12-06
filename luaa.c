@@ -33,7 +33,6 @@
 #include "objects/drawin.h"
 #include "objects/screen.h"
 #include "objects/tag.h"
-#include "objects/timer.h"
 #include "property.h"
 #include "selection.h"
 #include "spawn.h"
@@ -424,9 +423,6 @@ luaA_init(xdgHandle* xdg)
 
     /* Export keys */
     key_class_setup(L);
-
-    /* Export timer */
-    timer_class_setup(L);
 
     /* add Lua search paths */
     lua_getglobal(L, "package");

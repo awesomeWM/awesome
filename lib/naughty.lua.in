@@ -14,8 +14,8 @@ local pcall = pcall
 local capi = { screen = screen,
                awesome = awesome,
                dbus = dbus,
-               timer = timer,
                awesome = awesome }
+local timer = require("gears.timer")
 local button = require("awful.button")
 local util = require("awful.util")
 local bt = require("beautiful")
@@ -342,7 +342,7 @@ function naughty.notify(args)
     -- hook destroy
     local die = function () naughty.destroy(notification) end
     if timeout > 0 then
-        local timer_die = capi.timer { timeout = timeout }
+        local timer_die = timer { timeout = timeout }
         timer_die:connect_signal("timeout", die)
         if not suspended then
             timer_die:start()
@@ -364,7 +364,7 @@ function naughty.notify(args)
             die()
         else
             if notification.timer then notification.timer:stop() end
-            notification.timer = capi.timer { timeout = hover_timeout }
+            notification.timer = timer { timeout = hover_timeout }
             notification.timer:connect_signal("timeout", die)
             notification.timer:start()
         end
