@@ -259,7 +259,7 @@ a_dbus_convert_value(lua_State *L, int idx, DBusMessageIter *iter)
 {
     /* i is the type name, i+1 the value */
     size_t len;
-    const char *type = lua_tolstring(globalconf.L, idx, &len);
+    const char *type = lua_tolstring(L, idx, &len);
 
     if(!type || len < 1)
         return false;
@@ -277,7 +277,7 @@ a_dbus_convert_value(lua_State *L, int idx, DBusMessageIter *iter)
 
             if(arraylen % 2 != 0)
             {
-                luaA_warn(globalconf.L,
+                luaA_warn(L,
                           "your D-Bus signal handling method returned wrong number of arguments");
                 return false;
             }
@@ -302,14 +302,14 @@ a_dbus_convert_value(lua_State *L, int idx, DBusMessageIter *iter)
         break;
       case DBUS_TYPE_BOOLEAN:
         {
-            dbus_bool_t b = lua_toboolean(globalconf.L, idx + 1);
+            dbus_bool_t b = lua_toboolean(L, idx + 1);
             dbus_message_iter_append_basic(iter, DBUS_TYPE_BOOLEAN, &b);
         }
         break;
 #define DBUS_MSG_RETURN_HANDLE_TYPE_STRING(dbustype) \
       case dbustype: \
         { \
-            const char *s = lua_tostring(globalconf.L, idx + 1); \
+            const char *s = lua_tostring(L, idx + 1); \
             if(s) \
                 dbus_message_iter_append_basic(iter, dbustype, &s); \
         } \
@@ -320,7 +320,7 @@ a_dbus_convert_value(lua_State *L, int idx, DBusMessageIter *iter)
 #define DBUS_MSG_RETURN_HANDLE_TYPE_NUMBER(type, dbustype) \
       case dbustype: \
         { \
-           type num = lua_tonumber(globalconf.L, idx + 1); \
+           type num = lua_tonumber(L, idx + 1); \
            dbus_message_iter_append_basic(iter, dbustype, &num); \
         } \
         break;

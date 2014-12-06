@@ -223,7 +223,7 @@ luaA_root_keys(lua_State *L)
         luaA_checktable(L, 1);
 
         foreach(key, globalconf.keys)
-            luaA_object_unref(globalconf.L, *key);
+            luaA_object_unref(L, *key);
 
         key_array_wipe(&globalconf.keys);
         key_array_init(&globalconf.keys);
@@ -265,7 +265,7 @@ luaA_root_buttons(lua_State *L)
         luaA_checktable(L, 1);
 
         foreach(button, globalconf.buttons)
-            luaA_object_unref(globalconf.L, *button);
+            luaA_object_unref(L, *button);
 
         button_array_wipe(&globalconf.buttons);
         button_array_init(&globalconf.buttons);

@@ -378,7 +378,7 @@ client_focus_refresh(void)
 }
 
 static void
-client_update_properties(client_t *c)
+client_update_properties(lua_State *L, int cidx, client_t *c)
 {
     /* get all hints */
     xcb_get_property_cookie_t wm_normal_hints   = property_get_wm_normal_hints(c);
@@ -415,7 +415,7 @@ client_update_properties(client_t *c)
     property_update_net_wm_icon_name(c, net_wm_icon_name);
     property_update_wm_class(c, wm_class);
     property_update_wm_protocols(c, wm_protocols);
-    window_set_opacity(globalconf.L, -1, xwindow_get_opacity_from_cookie(opacity));
+    window_set_opacity(L, cidx, xwindow_get_opacity_from_cookie(opacity));
 }
 
 /** Manage a new client.
@@ -536,7 +536,7 @@ HANDLE_GEOM(height)
     luaA_object_emit_signal(globalconf.L, -1, "property::size_hints_honor", 0);
 
     /* update all properties */
-    client_update_properties(c);
+    client_update_properties(globalconf.L, -1, c);
 
     /* Then check clients hints */
     ewmh_client_check_hints(c);

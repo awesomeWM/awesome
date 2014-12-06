@@ -292,7 +292,7 @@ luaA_window_set_type(lua_State *L, window_t *w)
         w->type = type;
         if(w->window != XCB_WINDOW_NONE)
             ewmh_update_window_type(w->window, window_translate_type(w->type));
-        luaA_object_emit_signal(globalconf.L, -3, "property::type", 0);
+        luaA_object_emit_signal(L, -3, "property::type", 0);
     }
 
     return 0;
