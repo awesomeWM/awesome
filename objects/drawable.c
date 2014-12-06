@@ -61,8 +61,9 @@ drawable_wipe(drawable_t *d)
 }
 
 void
-drawable_set_geometry(drawable_t *d, int didx, area_t geom)
+drawable_set_geometry(lua_State *L, int didx, area_t geom)
 {
+    drawable_t *d = luaA_checkudata(L, didx, &drawable_class);
     area_t old = d->geometry;
     d->geometry = geom;
 
@@ -77,17 +78,17 @@ drawable_set_geometry(drawable_t *d, int didx, area_t geom)
         d->surface = cairo_xcb_surface_create(globalconf.connection,
                                               d->pixmap, globalconf.visual,
                                               geom.width, geom.height);
-        luaA_object_emit_signal(globalconf.L, didx, "property::surface", 0);
+        luaA_object_emit_signal(L, didx, "property::surface", 0);
     }
 
     if (old.x != geom.x)
-        luaA_object_emit_signal(globalconf.L, didx, "property::x", 0);
+        luaA_object_emit_signal(L, didx, "property::x", 0);
     if (old.y != geom.y)
-        luaA_object_emit_signal(globalconf.L, didx, "property::y", 0);
+        luaA_object_emit_signal(L, didx, "property::y", 0);
     if (old.width != geom.width)
-        luaA_object_emit_signal(globalconf.L, didx, "property::width", 0);
+        luaA_object_emit_signal(L, didx, "property::width", 0);
     if (old.height != geom.height)
-        luaA_object_emit_signal(globalconf.L, didx, "property::height", 0);
+        luaA_object_emit_signal(L, didx, "property::height", 0);
 }
 
 /** Get a drawable's surface

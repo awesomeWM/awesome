@@ -797,7 +797,7 @@ client_resize_do(client_t *c, area_t geometry, bool force_notice, bool honor_hin
         area.y += geometry.y;
         if (hide_titlebars)
             area.width = area.height = 0;
-        drawable_set_geometry(drawable, -1, area);
+        drawable_set_geometry(globalconf.L, -1, area);
 
         /* Pop the client and the drawable */
         lua_pop(globalconf.L, 2);

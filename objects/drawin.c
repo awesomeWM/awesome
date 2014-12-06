@@ -72,11 +72,12 @@ drawin_wipe(drawin_t *w)
 }
 
 static void
-drawin_update_drawing(drawin_t *w, int widx)
+drawin_update_drawing(lua_State *L, int widx)
 {
-    luaA_object_push_item(globalconf.L, widx, w->drawable);
-    drawable_set_geometry(w->drawable, -1, w->geometry);
-    lua_pop(globalconf.L, 1);
+    drawin_t *w = luaA_checkudata(L, widx, &drawin_class);
+    luaA_object_push_item(L, widx, w->drawable);
+    drawable_set_geometry(L, -1, w->geometry);
+    lua_pop(L, 1);
 }
 
 /** Refresh the window content by copying its pixmap data to its window.
@@ -124,7 +125,7 @@ drawin_moveresize(lua_State *L, int udx, area_t geometry)
         mask_vals |= XCB_CONFIG_WINDOW_HEIGHT;
     }
 
-    drawin_update_drawing(w, udx);
+    drawin_update_drawing(L, udx);
 
     /* Activate BMA */
     client_ignore_enterleave_events();
@@ -168,8 +169,9 @@ drawin_refresh_pixmap_partial(drawin_t *drawin,
 }
 
 static void
-drawin_map(drawin_t *drawin, int widx)
+drawin_map(lua_State *L, int widx)
 {
+    drawin_t *drawin = luaA_checkudata(L, widx, &drawin_class);
     /* Activate BMA */
     client_ignore_enterleave_events();
     /* Map the drawin */
@@ -182,7 +184,7 @@ drawin_map(drawin_t *drawin, int widx)
     drawin_array_append(&globalconf.drawins, drawin);
     /* Make sure it has a surface */
     if(drawin->drawable->surface == NULL)
-        drawin_update_drawing(drawin, widx);
+        drawin_update_drawing(L, widx);
 }
 
 static void
@@ -225,7 +227,7 @@ drawin_set_visible(lua_State *L, int udx, bool v)
 
         if(drawin->visible)
         {
-            drawin_map(drawin, udx);
+            drawin_map(L, udx);
             /* duplicate drawin */
             lua_pushvalue(L, udx);
             /* ref it */

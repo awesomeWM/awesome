@@ -48,7 +48,7 @@ struct drawable_t
 typedef struct drawable_t drawable_t;
 
 drawable_t *drawable_allocator(lua_State *, drawable_refresh_callback *, void *);
-void drawable_set_geometry(drawable_t *, int, area_t);
+void drawable_set_geometry(lua_State *, int, area_t);
 void drawable_class_setup(lua_State *);
 
 #endif
