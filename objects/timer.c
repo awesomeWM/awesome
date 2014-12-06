@@ -38,9 +38,10 @@ LUA_OBJECT_FUNCS(timer_class, atimer_t, timer)
 static gboolean
 timer_emit_signal(gpointer data)
 {
-    luaA_object_push(globalconf.L, data);
-    luaA_object_emit_signal(globalconf.L, -1, "timeout", 0);
-    lua_pop(globalconf.L, 1);
+    lua_State *L = globalconf_get_lua_State();
+    luaA_object_push(L, data);
+    luaA_object_emit_signal(L, -1, "timeout", 0);
+    lua_pop(L, 1);
     return TRUE;
 }
 

@@ -47,19 +47,20 @@
     static void \
     event_##xcbtype##_callback(xcb_##xcbtype##_press_event_t *ev, \
                                arraytype *arr, \
+                               lua_State *L, \
                                int oud, \
                                int nargs, \
                                void *data) \
     { \
-        int abs_oud = oud < 0 ? ((lua_gettop(globalconf.L) + 1) + oud) : oud; \
+        int abs_oud = oud < 0 ? ((lua_gettop(L) + 1) + oud) : oud; \
         int item_matching = 0; \
         foreach(item, *arr) \
             if(match(ev, *item, data)) \
             { \
                 if(oud) \
-                    luaA_object_push_item(globalconf.L, abs_oud, *item); \
+                    luaA_object_push_item(L, abs_oud, *item); \
                 else \
-                    luaA_object_push(globalconf.L, *item); \
+                    luaA_object_push(L, *item); \
                 item_matching++; \
             } \
         for(; item_matching > 0; item_matching--) \
@@ -68,18 +69,18 @@
             { \
               case xcbeventprefix##_PRESS: \
                 for(int i = 0; i < nargs; i++) \
-                    lua_pushvalue(globalconf.L, - nargs - item_matching); \
-                luaA_object_emit_signal(globalconf.L, - nargs - 1, "press", nargs); \
+                    lua_pushvalue(L, - nargs - item_matching); \
+                luaA_object_emit_signal(L, - nargs - 1, "press", nargs); \
                 break; \
               case xcbeventprefix##_RELEASE: \
                 for(int i = 0; i < nargs; i++) \
-                    lua_pushvalue(globalconf.L, - nargs - item_matching); \
-                luaA_object_emit_signal(globalconf.L, - nargs - 1, "release", nargs); \
+                    lua_pushvalue(L, - nargs - item_matching); \
+                luaA_object_emit_signal(L, - nargs - 1, "release", nargs); \
                 break; \
             } \
-            lua_pop(globalconf.L, 1); \
+            lua_pop(L, 1); \
         } \
-        lua_pop(globalconf.L, nargs); \
+        lua_pop(L, nargs); \
     }
 
 static bool
@@ -113,16 +114,17 @@ event_handle_mousegrabber(int x, int y, uint16_t mask)
 {
     if(globalconf.mousegrabber != LUA_REFNIL)
     {
-        lua_rawgeti(globalconf.L, LUA_REGISTRYINDEX, globalconf.mousegrabber);
-        mousegrabber_handleevent(globalconf.L, x, y, mask);
-        if(lua_pcall(globalconf.L, 1, 1, 0))
+        lua_State *L = globalconf_get_lua_State();
+        lua_rawgeti(L, LUA_REGISTRYINDEX, globalconf.mousegrabber);
+        mousegrabber_handleevent(L, x, y, mask);
+        if(lua_pcall(L, 1, 1, 0))
         {
-            warn("error running function: %s", lua_tostring(globalconf.L, -1));
-            luaA_mousegrabber_stop(globalconf.L);
+            warn("error running function: %s", lua_tostring(L, -1));
+            luaA_mousegrabber_stop(L);
         }
-        else if(!lua_isboolean(globalconf.L, -1) || !lua_toboolean(globalconf.L, -1))
-            luaA_mousegrabber_stop(globalconf.L);
-        lua_pop(globalconf.L, 1);  /* pop returned value */
+        else if(!lua_isboolean(L, -1) || !lua_toboolean(L, -1))
+            luaA_mousegrabber_stop(L);
+        lua_pop(L, 1);  /* pop returned value */
         return true;
     }
     return false;
@@ -130,10 +132,11 @@ event_handle_mousegrabber(int x, int y, uint16_t mask)
 
 /** Emit a button signal.
  * The top of the lua stack has to be the object on which to emit the event.
+ * \param L The Lua VM state.
  * \param ev The event to handle.
  */
 static void
-event_emit_button(xcb_button_press_event_t *ev)
+event_emit_button(lua_State *L, xcb_button_press_event_t *ev)
 {
     const char *name;
     switch(XCB_EVENT_RESPONSE_TYPE(ev))
@@ -149,12 +152,12 @@ event_emit_button(xcb_button_press_event_t *ev)
     }
 
     /* Push the event's info */
-    lua_pushnumber(globalconf.L, ev->event_x);
-    lua_pushnumber(globalconf.L, ev->event_y);
-    lua_pushnumber(globalconf.L, ev->detail);
-    luaA_pushmodifiers(globalconf.L, ev->state);
+    lua_pushnumber(L, ev->event_x);
+    lua_pushnumber(L, ev->event_y);
+    lua_pushnumber(L, ev->detail);
+    luaA_pushmodifiers(L, ev->state);
     /* And emit the signal */
-    luaA_object_emit_signal(globalconf.L, -5, name, 4);
+    luaA_object_emit_signal(L, -5, name, 4);
 }
 
 /** The button press event handler.
@@ -163,6 +166,7 @@ event_emit_button(xcb_button_press_event_t *ev)
 static void
 event_handle_button(xcb_button_press_event_t *ev)
 {
+    lua_State *L = globalconf_get_lua_State();
     client_t *c;
     drawin_t *drawin;
 
@@ -189,13 +193,13 @@ event_handle_button(xcb_button_press_event_t *ev)
         }
 
         /* Push the drawable */
-        luaA_object_push(globalconf.L, drawin);
-        luaA_object_push_item(globalconf.L, -1, drawin->drawable);
+        luaA_object_push(L, drawin);
+        luaA_object_push_item(L, -1, drawin->drawable);
         /* and handle the button raw button event */
-        event_emit_button(ev);
-        lua_pop(globalconf.L, 1);
+        event_emit_button(L, ev);
+        lua_pop(L, 1);
         /* check if any button object matches */
-        event_button_callback(ev, &drawin->buttons, -1, 1, NULL);
+        event_button_callback(ev, &drawin->buttons, L, -1, 1, NULL);
         /* Either we are receiving this due to ButtonPress/Release on the root
          * window or because we grabbed the button on the window. In the later
          * case we have to call AllowEvents.
@@ -209,9 +213,9 @@ event_handle_button(xcb_button_press_event_t *ev)
     }
     else if((c = client_getbyframewin(ev->event)))
     {
-        luaA_object_push(globalconf.L, c);
+        luaA_object_push(L, c);
         /* And handle the button raw button event */
-        event_emit_button(ev);
+        event_emit_button(L, ev);
         /* then check if a titlebar was "hit" */
         int x = ev->event_x, y = ev->event_y;
         drawable_t *d = client_get_drawable_offset(c, &x, &y);
@@ -221,12 +225,12 @@ event_handle_button(xcb_button_press_event_t *ev)
             xcb_button_press_event_t event = *ev;
             event.event_x = x;
             event.event_y = y;
-            luaA_object_push_item(globalconf.L, -1, d);
-            event_emit_button(&event);
-            lua_pop(globalconf.L, 1);
+            luaA_object_push_item(L, -1, d);
+            event_emit_button(L, &event);
+            lua_pop(L, 1);
         }
         /* then check if any button objects match */
-        event_button_callback(ev, &c->buttons, -1, 1, NULL);
+        event_button_callback(ev, &c->buttons, L, -1, 1, NULL);
         xcb_allow_events(globalconf.connection,
                          XCB_ALLOW_REPLAY_POINTER,
                          XCB_CURRENT_TIME);
@@ -234,7 +238,7 @@ event_handle_button(xcb_button_press_event_t *ev)
     else if(ev->child == XCB_NONE)
         if(globalconf.screen->root == ev->event)
         {
-            event_button_callback(ev, &globalconf.buttons, 0, 0, NULL);
+            event_button_callback(ev, &globalconf.buttons, L, 0, 0, NULL);
             return;
         }
 }
@@ -330,13 +334,15 @@ event_handle_configurerequest(xcb_configure_request_event_t *ev)
         }
         if(ev->value_mask & XCB_CONFIG_WINDOW_BORDER_WIDTH)
         {
+            lua_State *L = globalconf_get_lua_State();
+
             diff_border = ev->border_width - c->border_width;
             diff_h += diff_border;
             diff_w += diff_border;
 
-            luaA_object_push(globalconf.L, c);
-            window_set_border_width(globalconf.L, -1, ev->border_width);
-            lua_pop(globalconf.L, 1);
+            luaA_object_push(L, c);
+            window_set_border_width(L, -1, ev->border_width);
+            lua_pop(L, 1);
         }
 
         /* If the client resizes without moving itself, apply window gravity */
@@ -398,6 +404,7 @@ event_handle_destroynotify(xcb_destroy_notify_event_t *ev)
 static void
 event_handle_motionnotify(xcb_motion_notify_event_t *ev)
 {
+    lua_State *L = globalconf_get_lua_State();
     drawin_t *w;
     client_t *c;
 
@@ -408,33 +415,33 @@ event_handle_motionnotify(xcb_motion_notify_event_t *ev)
 
     if((c = client_getbyframewin(ev->event)))
     {
-        luaA_object_push(globalconf.L, c);
-        lua_pushnumber(globalconf.L, ev->event_x);
-        lua_pushnumber(globalconf.L, ev->event_y);
-        luaA_object_emit_signal(globalconf.L, -3, "mouse::move", 2);
+        luaA_object_push(L, c);
+        lua_pushnumber(L, ev->event_x);
+        lua_pushnumber(L, ev->event_y);
+        luaA_object_emit_signal(L, -3, "mouse::move", 2);
 
         /* now check if a titlebar was "hit" */
         int x = ev->event_x, y = ev->event_y;
         drawable_t *d = client_get_drawable_offset(c, &x, &y);
         if (d)
         {
-            luaA_object_push_item(globalconf.L, -1, d);
-            lua_pushnumber(globalconf.L, x);
-            lua_pushnumber(globalconf.L, y);
-            luaA_object_emit_signal(globalconf.L, -3, "mouse::move", 2);
-            lua_pop(globalconf.L, 1);
+            luaA_object_push_item(L, -1, d);
+            lua_pushnumber(L, x);
+            lua_pushnumber(L, y);
+            luaA_object_emit_signal(L, -3, "mouse::move", 2);
+            lua_pop(L, 1);
         }
-        lua_pop(globalconf.L, 1);
+        lua_pop(L, 1);
     }
 
     if((w = drawin_getbywin(ev->event)))
     {
-        luaA_object_push(globalconf.L, w);
-        luaA_object_push_item(globalconf.L, -1, w->drawable);
-        lua_pushnumber(globalconf.L, ev->event_x);
-        lua_pushnumber(globalconf.L, ev->event_y);
-        luaA_object_emit_signal(globalconf.L, -3, "mouse::move", 2);
-        lua_pop(globalconf.L, 2);
+        luaA_object_push(L, w);
+        luaA_object_push_item(L, -1, w->drawable);
+        lua_pushnumber(L, ev->event_x);
+        lua_pushnumber(L, ev->event_y);
+        luaA_object_emit_signal(L, -3, "mouse::move", 2);
+        lua_pop(L, 2);
     }
 }
 
@@ -444,6 +451,7 @@ event_handle_motionnotify(xcb_motion_notify_event_t *ev)
 static void
 event_handle_leavenotify(xcb_leave_notify_event_t *ev)
 {
+    lua_State *L = globalconf_get_lua_State();
     drawin_t *drawin;
     client_t *c;
 
@@ -454,24 +462,24 @@ event_handle_leavenotify(xcb_leave_notify_event_t *ev)
 
     if((c = client_getbyframewin(ev->event)))
     {
-        luaA_object_push(globalconf.L, c);
-        luaA_object_emit_signal(globalconf.L, -1, "mouse::leave", 0);
+        luaA_object_push(L, c);
+        luaA_object_emit_signal(L, -1, "mouse::leave", 0);
         drawable_t *d = client_get_drawable(c, ev->event_x, ev->event_y);
         if (d)
         {
-            luaA_object_push_item(globalconf.L, -1, d);
-            luaA_object_emit_signal(globalconf.L, -1, "mouse::leave", 0);
-            lua_pop(globalconf.L, 1);
+            luaA_object_push_item(L, -1, d);
+            luaA_object_emit_signal(L, -1, "mouse::leave", 0);
+            lua_pop(L, 1);
         }
-        lua_pop(globalconf.L, 1);
+        lua_pop(L, 1);
     }
 
     if((drawin = drawin_getbywin(ev->event)))
     {
-        luaA_object_push(globalconf.L, drawin);
-        luaA_object_push_item(globalconf.L, -1, drawin->drawable);
-        luaA_object_emit_signal(globalconf.L, -1, "mouse::leave", 0);
-        lua_pop(globalconf.L, 2);
+        luaA_object_push(L, drawin);
+        luaA_object_push_item(L, -1, drawin->drawable);
+        luaA_object_emit_signal(L, -1, "mouse::leave", 0);
+        lua_pop(L, 2);
     }
 }
 
@@ -481,6 +489,7 @@ event_handle_leavenotify(xcb_leave_notify_event_t *ev)
 static void
 event_handle_enternotify(xcb_enter_notify_event_t *ev)
 {
+    lua_State *L = globalconf_get_lua_State();
     client_t *c;
     drawin_t *drawin;
 
@@ -491,24 +500,24 @@ event_handle_enternotify(xcb_enter_notify_event_t *ev)
 
     if((drawin = drawin_getbywin(ev->event)))
     {
-        luaA_object_push(globalconf.L, drawin);
-        luaA_object_push_item(globalconf.L, -1, drawin->drawable);
-        luaA_object_emit_signal(globalconf.L, -1, "mouse::enter", 0);
-        lua_pop(globalconf.L, 2);
+        luaA_object_push(L, drawin);
+        luaA_object_push_item(L, -1, drawin->drawable);
+        luaA_object_emit_signal(L, -1, "mouse::enter", 0);
+        lua_pop(L, 2);
     }
 
     if((c = client_getbyframewin(ev->event)))
     {
-        luaA_object_push(globalconf.L, c);
-        luaA_object_emit_signal(globalconf.L, -1, "mouse::enter", 0);
+        luaA_object_push(L, c);
+        luaA_object_emit_signal(L, -1, "mouse::enter", 0);
         drawable_t *d = client_get_drawable(c, ev->event_x, ev->event_y);
         if (d)
         {
-            luaA_object_push_item(globalconf.L, -1, d);
-            luaA_object_emit_signal(globalconf.L, -1, "mouse::enter", 0);
-            lua_pop(globalconf.L, 1);
+            luaA_object_push_item(L, -1, d);
+            luaA_object_emit_signal(L, -1, "mouse::enter", 0);
+            lua_pop(L, 1);
         }
-        lua_pop(globalconf.L, 1);
+        lua_pop(L, 1);
     }
 }
 
@@ -574,20 +583,21 @@ event_handle_expose(xcb_expose_event_t *ev)
 static void
 event_handle_key(xcb_key_press_event_t *ev)
 {
+    lua_State *L = globalconf_get_lua_State();
     globalconf.timestamp = ev->time;
 
     if(globalconf.keygrabber != LUA_REFNIL)
     {
-        lua_rawgeti(globalconf.L, LUA_REGISTRYINDEX, globalconf.keygrabber);
-        if(keygrabber_handlekpress(globalconf.L, ev))
+        lua_rawgeti(L, LUA_REGISTRYINDEX, globalconf.keygrabber);
+        if(keygrabber_handlekpress(L, ev))
         {
-            if(lua_pcall(globalconf.L, 3, 1, 0))
+            if(lua_pcall(L, 3, 1, 0))
             {
-                warn("error running function: %s", lua_tostring(globalconf.L, -1));
-                luaA_keygrabber_stop(globalconf.L);
+                warn("error running function: %s", lua_tostring(L, -1));
+                luaA_keygrabber_stop(L);
             }
         }
-        lua_pop(globalconf.L, 1);  /* pop returned value or function if not called */
+        lua_pop(L, 1);  /* pop returned value or function if not called */
     }
     else
     {
@@ -596,11 +606,11 @@ event_handle_key(xcb_key_press_event_t *ev)
         client_t *c;
         if((c = client_getbyframewin(ev->event)))
         {
-            luaA_object_push(globalconf.L, c);
-            event_key_callback(ev, &c->keys, -1, 1, &keysym);
+            luaA_object_push(L, c);
+            event_key_callback(ev, &c->keys, L, -1, 1, &keysym);
         }
         else
-            event_key_callback(ev, &globalconf.keys, 0, 0, &keysym);
+            event_key_callback(ev, &globalconf.keys, L, 0, 0, &keysym);
     }
 }
 
@@ -634,9 +644,10 @@ event_handle_maprequest(xcb_map_request_event_t *ev)
         /* Check that it may be visible, but not asked to be hidden */
         if(client_maybevisible(c) && !c->hidden)
         {
-            luaA_object_push(globalconf.L, c);
-            client_set_minimized(globalconf.L, -1, false);
-            lua_pop(globalconf.L, 1);
+            lua_State *L = globalconf_get_lua_State();
+            luaA_object_push(L, c);
+            client_set_minimized(L, -1, false);
+            lua_pop(L, 1);
             /* it will be raised, so just update ourself */
             client_raise(c);
         }
@@ -714,12 +725,13 @@ event_handle_shape_notify(xcb_shape_notify_event_t *ev)
     client_t *c = client_getbywin(ev->affected_window);
     if (c)
     {
-        luaA_object_push(globalconf.L, c);
+        lua_State *L = globalconf_get_lua_State();
+        luaA_object_push(L, c);
         if (ev->shape_kind == XCB_SHAPE_SK_BOUNDING)
-            luaA_object_emit_signal(globalconf.L, -1, "property::shape_client_bounding", 0);
+            luaA_object_emit_signal(L, -1, "property::shape_client_bounding", 0);
         if (ev->shape_kind == XCB_SHAPE_SK_CLIP)
-            luaA_object_emit_signal(globalconf.L, -1, "property::shape_client_clip", 0);
-        lua_pop(globalconf.L, 1);
+            luaA_object_emit_signal(L, -1, "property::shape_client_clip", 0);
+        lua_pop(L, 1);
     }
 }
 
@@ -740,9 +752,10 @@ event_handle_clientmessage(xcb_client_message_event_t *ev)
            && ev->format == 32
            && ev->data.data32[0] == XCB_ICCCM_WM_STATE_ICONIC)
         {
-            luaA_object_push(globalconf.L, c);
-            client_set_minimized(globalconf.L, -1, true);
-            lua_pop(globalconf.L, 1);
+            lua_State *L = globalconf_get_lua_State();
+            luaA_object_push(L, c);
+            client_set_minimized(L, -1, true);
+            lua_pop(L, 1);
         }
     }
     else if(ev->type == _XEMBED)

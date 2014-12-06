@@ -144,6 +144,8 @@ screen_scan_randr(void)
 
             for(int i = 0; i < screen_res_r->num_crtcs; i++)
             {
+                lua_State *L = globalconf_get_lua_State();
+
                 /* Get info on the output crtc */
                 xcb_randr_get_crtc_info_cookie_t crtc_info_c = xcb_randr_get_crtc_info(globalconf.connection, randr_crtcs[i], XCB_CURRENT_TIME);
                 xcb_randr_get_crtc_info_reply_t *crtc_info_r = xcb_randr_get_crtc_info_reply(globalconf.connection, crtc_info_c, NULL);
@@ -153,7 +155,7 @@ screen_scan_randr(void)
                     continue;
 
                 /* Prepare the new screen */
-                screen_t *new_screen = screen_new(globalconf.L);
+                screen_t *new_screen = screen_new(L);
                 new_screen->geometry.x = crtc_info_r->x;
                 new_screen->geometry.y = crtc_info_r->y;
                 new_screen->geometry.width= crtc_info_r->width;
@@ -179,7 +181,7 @@ screen_scan_randr(void)
                     p_delete(&output_info_r);
                 }
 
-                screen_add(globalconf.L, -1);
+                screen_add(L, -1);
 
                 p_delete(&crtc_info_r);
             }
@@ -223,9 +225,10 @@ screen_scan_xinerama(void)
         /* now check if screens overlaps (same x,y): if so, we take only the biggest one */
         for(int screen = 0; screen < xinerama_screen_number; screen++)
         {
-            screen_t *s = screen_new(globalconf.L);
+            lua_State *L = globalconf_get_lua_State();
+            screen_t *s = screen_new(L);
             s->geometry = screen_xsitoarea(xsi[screen]);
-            screen_add(globalconf.L, -1);
+            screen_add(L, -1);
         }
 
         p_delete(&xsq);
@@ -239,13 +242,14 @@ screen_scan_xinerama(void)
 static void screen_scan_x11(void)
 {
     /* One screen only / Zaphod mode */
+    lua_State *L = globalconf_get_lua_State();
     xcb_screen_t *xcb_screen = globalconf.screen;
-    screen_t *s = screen_new(globalconf.L);
+    screen_t *s = screen_new(L);
     s->geometry.x = 0;
     s->geometry.y = 0;
     s->geometry.width = xcb_screen->width_in_pixels;
     s->geometry.height = xcb_screen->height_in_pixels;
-    screen_add(globalconf.L, -1);
+    screen_add(L, -1);
 }
 
 /** Get screens informations and fill global configuration.
@@ -367,6 +371,7 @@ display_area_get(void)
 void
 screen_client_moveto(client_t *c, screen_t *new_screen, bool doresize)
 {
+    lua_State *L = globalconf_get_lua_State();
     screen_t *old_screen = c->screen;
     area_t from, to;
     bool had_focus = false;
@@ -381,9 +386,9 @@ screen_client_moveto(client_t *c, screen_t *new_screen, bool doresize)
 
     if(!doresize)
     {
-        luaA_object_push(globalconf.L, c);
-        luaA_object_emit_signal(globalconf.L, -1, "property::screen", 0);
-        lua_pop(globalconf.L, 1);
+        luaA_object_push(L, c);
+        luaA_object_emit_signal(L, -1, "property::screen", 0);
+        lua_pop(L, 1);
         if(had_focus)
             client_focus(c);
         return;
@@ -411,9 +416,9 @@ screen_client_moveto(client_t *c, screen_t *new_screen, bool doresize)
 
     /* move / resize the client */
     client_resize(c, new_geometry, false);
-    luaA_object_push(globalconf.L, c);
-    luaA_object_emit_signal(globalconf.L, -1, "property::screen", 0);
-    lua_pop(globalconf.L, 1);
+    luaA_object_push(L, c);
+    luaA_object_emit_signal(L, -1, "property::screen", 0);
+    lua_pop(L, 1);
     if(had_focus)
         client_focus(c);
 }

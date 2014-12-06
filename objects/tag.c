@@ -46,7 +46,8 @@ LUA_OBJECT_FUNCS(tag_class, tag_t, tag)
 void
 tag_unref_simplified(tag_t **tag)
 {
-    luaA_object_unref(globalconf.L, *tag);
+    lua_State *L = globalconf_get_lua_State();
+    luaA_object_unref(L, *tag);
 }
 
 static void
@@ -79,8 +80,9 @@ tag_view(lua_State *L, int udx, bool view)
 }
 
 static void
-tag_client_emit_signal(lua_State *L, tag_t *t, client_t *c, const char *signame)
+tag_client_emit_signal(tag_t *t, client_t *c, const char *signame)
 {
+    lua_State *L = globalconf_get_lua_State();
     luaA_object_push(L, c);
     luaA_object_push(L, t);
     /* emit signal on client, with new tag as argument */
@@ -114,7 +116,7 @@ tag_client(lua_State *L, client_t *c)
     ewmh_client_update_desktop(c);
     banning_need_update();
 
-    tag_client_emit_signal(L, t, c, "tagged");
+    tag_client_emit_signal(t, c, "tagged");
 }
 
 /** Untag a client with specified tag.
@@ -127,11 +129,12 @@ untag_client(client_t *c, tag_t *t)
     for(int i = 0; i < t->clients.len; i++)
         if(t->clients.tab[i] == c)
         {
+            lua_State *L = globalconf_get_lua_State();
             client_array_take(&t->clients, i);
             banning_need_update();
             ewmh_client_update_desktop(c);
-            tag_client_emit_signal(globalconf.L, t, c, "untagged");
-            luaA_object_unref(globalconf.L, t);
+            tag_client_emit_signal(t, c, "untagged");
+            luaA_object_unref(L, t);
             return;
         }
 }

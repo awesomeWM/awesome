@@ -107,6 +107,7 @@ ewmh_update_net_client_list(lua_State *L)
 void
 ewmh_init(void)
 {
+    lua_State *L = globalconf_get_lua_State();
     xcb_window_t father;
     xcb_screen_t *xscreen = globalconf.screen;
     xcb_atom_t atom[] =
@@ -185,20 +186,20 @@ ewmh_init(void)
                         father, _NET_WM_PID, XCB_ATOM_CARDINAL, 32, 1, &i);
 
 
-    luaA_class_connect_signal(globalconf.L, &client_class, "focus", ewmh_update_net_active_window);
-    luaA_class_connect_signal(globalconf.L, &client_class, "unfocus", ewmh_update_net_active_window);
-    luaA_class_connect_signal(globalconf.L, &client_class, "manage", ewmh_update_net_client_list);
-    luaA_class_connect_signal(globalconf.L, &client_class, "unmanage", ewmh_update_net_client_list);
-    luaA_class_connect_signal(globalconf.L, &client_class, "property::modal" , ewmh_client_update_hints);
-    luaA_class_connect_signal(globalconf.L, &client_class, "property::fullscreen" , ewmh_client_update_hints);
-    luaA_class_connect_signal(globalconf.L, &client_class, "property::maximized_horizontal" , ewmh_client_update_hints);
-    luaA_class_connect_signal(globalconf.L, &client_class, "property::maximized_vertical" , ewmh_client_update_hints);
-    luaA_class_connect_signal(globalconf.L, &client_class, "property::sticky" , ewmh_client_update_hints);
-    luaA_class_connect_signal(globalconf.L, &client_class, "property::skip_taskbar" , ewmh_client_update_hints);
-    luaA_class_connect_signal(globalconf.L, &client_class, "property::above" , ewmh_client_update_hints);
-    luaA_class_connect_signal(globalconf.L, &client_class, "property::below" , ewmh_client_update_hints);
-    luaA_class_connect_signal(globalconf.L, &client_class, "property::minimized" , ewmh_client_update_hints);
-    luaA_class_connect_signal(globalconf.L, &client_class, "property::urgent" , ewmh_client_update_hints);
+    luaA_class_connect_signal(L, &client_class, "focus", ewmh_update_net_active_window);
+    luaA_class_connect_signal(L, &client_class, "unfocus", ewmh_update_net_active_window);
+    luaA_class_connect_signal(L, &client_class, "manage", ewmh_update_net_client_list);
+    luaA_class_connect_signal(L, &client_class, "unmanage", ewmh_update_net_client_list);
+    luaA_class_connect_signal(L, &client_class, "property::modal" , ewmh_client_update_hints);
+    luaA_class_connect_signal(L, &client_class, "property::fullscreen" , ewmh_client_update_hints);
+    luaA_class_connect_signal(L, &client_class, "property::maximized_horizontal" , ewmh_client_update_hints);
+    luaA_class_connect_signal(L, &client_class, "property::maximized_vertical" , ewmh_client_update_hints);
+    luaA_class_connect_signal(L, &client_class, "property::sticky" , ewmh_client_update_hints);
+    luaA_class_connect_signal(L, &client_class, "property::skip_taskbar" , ewmh_client_update_hints);
+    luaA_class_connect_signal(L, &client_class, "property::above" , ewmh_client_update_hints);
+    luaA_class_connect_signal(L, &client_class, "property::below" , ewmh_client_update_hints);
+    luaA_class_connect_signal(L, &client_class, "property::minimized" , ewmh_client_update_hints);
+    luaA_class_connect_signal(L, &client_class, "property::urgent" , ewmh_client_update_hints);
 }
 
 /** Set the client list in stacking order, bottom to top.
@@ -259,121 +260,123 @@ ewmh_update_net_desktop_names(void)
 static void
 ewmh_process_state_atom(client_t *c, xcb_atom_t state, int set)
 {
-    luaA_object_push(globalconf.L, c);
+    lua_State *L = globalconf_get_lua_State();
+    luaA_object_push(L, c);
 
     if(state == _NET_WM_STATE_STICKY)
     {
         if(set == _NET_WM_STATE_REMOVE)
-            client_set_sticky(globalconf.L, -1, false);
+            client_set_sticky(L, -1, false);
         else if(set == _NET_WM_STATE_ADD)
-            client_set_sticky(globalconf.L, -1, true);
+            client_set_sticky(L, -1, true);
         else if(set == _NET_WM_STATE_TOGGLE)
-            client_set_sticky(globalconf.L, -1, !c->sticky);
+            client_set_sticky(L, -1, !c->sticky);
     }
     else if(state == _NET_WM_STATE_SKIP_TASKBAR)
     {
         if(set == _NET_WM_STATE_REMOVE)
-            client_set_skip_taskbar(globalconf.L, -1, false);
+            client_set_skip_taskbar(L, -1, false);
         else if(set == _NET_WM_STATE_ADD)
-            client_set_skip_taskbar(globalconf.L, -1, true);
+            client_set_skip_taskbar(L, -1, true);
         else if(set == _NET_WM_STATE_TOGGLE)
-            client_set_skip_taskbar(globalconf.L, -1, !c->skip_taskbar);
+            client_set_skip_taskbar(L, -1, !c->skip_taskbar);
     }
     else if(state == _NET_WM_STATE_FULLSCREEN)
     {
         if(set == _NET_WM_STATE_REMOVE)
-            client_set_fullscreen(globalconf.L, -1, false);
+            client_set_fullscreen(L, -1, false);
         else if(set == _NET_WM_STATE_ADD)
-            client_set_fullscreen(globalconf.L, -1, true);
+            client_set_fullscreen(L, -1, true);
         else if(set == _NET_WM_STATE_TOGGLE)
-            client_set_fullscreen(globalconf.L, -1, !c->fullscreen);
+            client_set_fullscreen(L, -1, !c->fullscreen);
     }
     else if(state == _NET_WM_STATE_MAXIMIZED_HORZ)
     {
         if(set == _NET_WM_STATE_REMOVE)
-            client_set_maximized_horizontal(globalconf.L, -1, false);
+            client_set_maximized_horizontal(L, -1, false);
         else if(set == _NET_WM_STATE_ADD)
-            client_set_maximized_horizontal(globalconf.L, -1, true);
+            client_set_maximized_horizontal(L, -1, true);
         else if(set == _NET_WM_STATE_TOGGLE)
-            client_set_maximized_horizontal(globalconf.L, -1, !c->maximized_horizontal);
+            client_set_maximized_horizontal(L, -1, !c->maximized_horizontal);
     }
     else if(state == _NET_WM_STATE_MAXIMIZED_VERT)
     {
         if(set == _NET_WM_STATE_REMOVE)
-            client_set_maximized_vertical(globalconf.L, -1, false);
+            client_set_maximized_vertical(L, -1, false);
         else if(set == _NET_WM_STATE_ADD)
-            client_set_maximized_vertical(globalconf.L, -1, true);
+            client_set_maximized_vertical(L, -1, true);
         else if(set == _NET_WM_STATE_TOGGLE)
-            client_set_maximized_vertical(globalconf.L, -1, !c->maximized_vertical);
+            client_set_maximized_vertical(L, -1, !c->maximized_vertical);
     }
     else if(state == _NET_WM_STATE_ABOVE)
     {
         if(set == _NET_WM_STATE_REMOVE)
-            client_set_above(globalconf.L, -1, false);
+            client_set_above(L, -1, false);
         else if(set == _NET_WM_STATE_ADD)
-            client_set_above(globalconf.L, -1, true);
+            client_set_above(L, -1, true);
         else if(set == _NET_WM_STATE_TOGGLE)
-            client_set_above(globalconf.L, -1, !c->above);
+            client_set_above(L, -1, !c->above);
     }
     else if(state == _NET_WM_STATE_BELOW)
     {
         if(set == _NET_WM_STATE_REMOVE)
-            client_set_below(globalconf.L, -1, false);
+            client_set_below(L, -1, false);
         else if(set == _NET_WM_STATE_ADD)
-            client_set_below(globalconf.L, -1, true);
+            client_set_below(L, -1, true);
         else if(set == _NET_WM_STATE_TOGGLE)
-            client_set_below(globalconf.L, -1, !c->below);
+            client_set_below(L, -1, !c->below);
     }
     else if(state == _NET_WM_STATE_MODAL)
     {
         if(set == _NET_WM_STATE_REMOVE)
-            client_set_modal(globalconf.L, -1, false);
+            client_set_modal(L, -1, false);
         else if(set == _NET_WM_STATE_ADD)
-            client_set_modal(globalconf.L, -1, true);
+            client_set_modal(L, -1, true);
         else if(set == _NET_WM_STATE_TOGGLE)
-            client_set_modal(globalconf.L, -1, !c->modal);
+            client_set_modal(L, -1, !c->modal);
     }
     else if(state == _NET_WM_STATE_HIDDEN)
     {
         if(set == _NET_WM_STATE_REMOVE)
-            client_set_minimized(globalconf.L, -1, false);
+            client_set_minimized(L, -1, false);
         else if(set == _NET_WM_STATE_ADD)
-            client_set_minimized(globalconf.L, -1, true);
+            client_set_minimized(L, -1, true);
         else if(set == _NET_WM_STATE_TOGGLE)
-            client_set_minimized(globalconf.L, -1, !c->minimized);
+            client_set_minimized(L, -1, !c->minimized);
     }
     else if(state == _NET_WM_STATE_DEMANDS_ATTENTION)
     {
         if(set == _NET_WM_STATE_REMOVE)
-            client_set_urgent(globalconf.L, -1, false);
+            client_set_urgent(L, -1, false);
         else if(set == _NET_WM_STATE_ADD)
-            client_set_urgent(globalconf.L, -1, true);
+            client_set_urgent(L, -1, true);
         else if(set == _NET_WM_STATE_TOGGLE)
-            client_set_urgent(globalconf.L, -1, !c->urgent);
+            client_set_urgent(L, -1, !c->urgent);
     }
 
-    lua_pop(globalconf.L, 1);
+    lua_pop(L, 1);
 }
 
 static void
 ewmh_process_desktop(client_t *c, uint32_t desktop)
 {
+    lua_State *L = globalconf_get_lua_State();
     int idx = desktop;
     if(desktop == 0xffffffff)
     {
-        luaA_object_push(globalconf.L, c);
-        lua_pushnil(globalconf.L);
-        luaA_object_emit_signal(globalconf.L, -2, "request::tag", 1);
+        luaA_object_push(L, c);
+        lua_pushnil(L);
+        luaA_object_emit_signal(L, -2, "request::tag", 1);
         /* Pop the client, arguments are already popped */
-        lua_pop(globalconf.L, 1);
+        lua_pop(L, 1);
     }
     else if (idx >= 0 && idx < globalconf.tags.len)
     {
-        luaA_object_push(globalconf.L, c);
-        luaA_object_push(globalconf.L, globalconf.tags.tab[idx]);
-        luaA_object_emit_signal(globalconf.L, -2, "request::tag", 1);
+        luaA_object_push(L, c);
+        luaA_object_push(L, globalconf.tags.tab[idx]);
+        luaA_object_emit_signal(L, -2, "request::tag", 1);
         /* Pop the client, arguments are already popped */
-        lua_pop(globalconf.L, 1);
+        lua_pop(L, 1);
     }
 }
 
@@ -387,9 +390,10 @@ ewmh_process_client_message(xcb_client_message_event_t *ev)
         int idx = ev->data.data32[0];
         if (idx >= 0 && idx < globalconf.tags.len)
         {
-            luaA_object_push(globalconf.L, globalconf.tags.tab[idx]);
-            luaA_object_emit_signal(globalconf.L, -1, "request::select", 0);
-            lua_pop(globalconf.L, 1);
+            lua_State *L = globalconf_get_lua_State();
+            luaA_object_push(L, globalconf.tags.tab[idx]);
+            luaA_object_emit_signal(L, -1, "request::select", 0);
+            lua_pop(L, 1);
         }
     }
     else if(ev->type == _NET_CLOSE_WINDOW)
@@ -417,10 +421,11 @@ ewmh_process_client_message(xcb_client_message_event_t *ev)
     else if(ev->type == _NET_ACTIVE_WINDOW)
     {
         if((c = client_getbywin(ev->window))) {
-            luaA_object_push(globalconf.L, c);
-            lua_pushstring(globalconf.L,"ewmh");
-            luaA_object_emit_signal(globalconf.L, -2, "request::activate", 1);
-            lua_pop(globalconf.L, 1);
+            lua_State *L = globalconf_get_lua_State();
+            luaA_object_push(L, c);
+            lua_pushstring(L, "ewmh");
+            luaA_object_emit_signal(L, -2, "request::activate", 1);
+            lua_pop(L, 1);
         }
     }
 
@@ -595,9 +600,10 @@ ewmh_process_client_strut(client_t *c)
             c->strut.bottom_start_x = strut[10];
             c->strut.bottom_end_x = strut[11];
 
-            luaA_object_push(globalconf.L, c);
-            luaA_object_emit_signal(globalconf.L, -1, "property::struts", 0);
-            lua_pop(globalconf.L, 1);
+            lua_State *L = globalconf_get_lua_State();
+            luaA_object_push(L, c);
+            luaA_object_emit_signal(L, -1, "property::struts", 0);
+            lua_pop(L, 1);
         }
     }
 

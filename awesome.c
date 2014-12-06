@@ -70,15 +70,16 @@ static float main_loop_iteration_limit = 0.1;
 void
 awesome_atexit(bool restart)
 {
-    lua_pushboolean(globalconf.L, restart);
-    signal_object_emit(globalconf.L, &global_signals, "exit", 1);
+    lua_State *L = globalconf_get_lua_State();
+    lua_pushboolean(L, restart);
+    signal_object_emit(L, &global_signals, "exit", 1);
 
     a_dbus_cleanup();
 
     systray_cleanup();
 
     /* Close Lua */
-    lua_close(globalconf.L);
+    lua_close(L);
 
     /* X11 is a great protocol. There is a save-set so that reparenting WMs
      * don't kill clients when they shut down. However, when a focused windows

@@ -67,16 +67,17 @@ spawn_monitor_timeout(gpointer sequence)
          if(sig)
          {
              /* send a timeout signal */
-             lua_createtable(globalconf.L, 0, 2);
-             lua_pushstring(globalconf.L, sn_startup_sequence_get_id(sequence));
-             lua_setfield(globalconf.L, -2, "id");
+             lua_State *L = globalconf_get_lua_State();
+             lua_createtable(L, 0, 2);
+             lua_pushstring(L, sn_startup_sequence_get_id(sequence));
+             lua_setfield(L, -2, "id");
              foreach(func, sig->sigfuncs)
              {
-                 lua_pushvalue(globalconf.L, -1);
-                 luaA_object_push(globalconf.L, (void *) *func);
-                 luaA_dofunction(globalconf.L, 1, 0);
+                 lua_pushvalue(L, -1);
+                 luaA_object_push(L, (void *) *func);
+                 luaA_dofunction(L, 1, 0);
              }
-             lua_pop(globalconf.L, 1);
+             lua_pop(L, 1);
          }
          else
              warn("spawn::timeout signal is missing");
@@ -88,12 +89,13 @@ spawn_monitor_timeout(gpointer sequence)
 static void
 spawn_monitor_event(SnMonitorEvent *event, void *data)
 {
+    lua_State *L = globalconf_get_lua_State();
     SnStartupSequence *sequence = sn_monitor_event_get_startup_sequence(event);
     SnMonitorEventType event_type = sn_monitor_event_get_type(event);
 
-    lua_createtable(globalconf.L, 0, 2);
-    lua_pushstring(globalconf.L, sn_startup_sequence_get_id(sequence));
-    lua_setfield(globalconf.L, -2, "id");
+    lua_createtable(L, 0, 2);
+    lua_pushstring(L, sn_startup_sequence_get_id(sequence));
+    lua_setfield(L, -2, "id");
 
     const char *event_type_str = NULL;
 
@@ -131,35 +133,35 @@ spawn_monitor_event(SnMonitorEvent *event, void *data)
             const char *s = sn_startup_sequence_get_name(sequence);
             if(s)
             {
-                lua_pushstring(globalconf.L, s);
-                lua_setfield(globalconf.L, -2, "name");
+                lua_pushstring(L, s);
+                lua_setfield(L, -2, "name");
             }
 
             if((s = sn_startup_sequence_get_description(sequence)))
             {
-                lua_pushstring(globalconf.L, s);
-                lua_setfield(globalconf.L, -2, "description");
+                lua_pushstring(L, s);
+                lua_setfield(L, -2, "description");
             }
 
-            lua_pushnumber(globalconf.L, sn_startup_sequence_get_workspace(sequence));
-            lua_setfield(globalconf.L, -2, "workspace");
+            lua_pushnumber(L, sn_startup_sequence_get_workspace(sequence));
+            lua_setfield(L, -2, "workspace");
 
             if((s = sn_startup_sequence_get_binary_name(sequence)))
             {
-                lua_pushstring(globalconf.L, s);
-                lua_setfield(globalconf.L, -2, "binary_name");
+                lua_pushstring(L, s);
+                lua_setfield(L, -2, "binary_name");
             }
 
             if((s = sn_startup_sequence_get_icon_name(sequence)))
             {
-                lua_pushstring(globalconf.L, s);
-                lua_setfield(globalconf.L, -2, "icon_name");
+                lua_pushstring(L, s);
+                lua_setfield(L, -2, "icon_name");
             }
 
             if((s = sn_startup_sequence_get_wmclass(sequence)))
             {
-                lua_pushstring(globalconf.L, s);
-                lua_setfield(globalconf.L, -2, "wmclass");
+                lua_pushstring(L, s);
+                lua_setfield(L, -2, "wmclass");
             }
         }
         break;
@@ -177,11 +179,11 @@ spawn_monitor_event(SnMonitorEvent *event, void *data)
     {
         foreach(func, sig->sigfuncs)
         {
-            lua_pushvalue(globalconf.L, -1);
-            luaA_object_push(globalconf.L, (void *) *func);
-            luaA_dofunction(globalconf.L, 1, 0);
+            lua_pushvalue(L, -1);
+            luaA_object_push(L, (void *) *func);
+            luaA_dofunction(L, 1, 0);
         }
-        lua_pop(globalconf.L, 1);
+        lua_pop(L, 1);
     }
     else
         warn("%s signal is missing", event_type_str);

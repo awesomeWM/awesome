@@ -363,7 +363,7 @@ luaA_init(xdgHandle* xdg)
         { NULL, NULL }
     };
 
-    L = globalconf.L = luaL_newstate();
+    L = globalconf.L.real_L_dont_use_directly = luaL_newstate();
 
     /* Set panic function */
     lua_atpanic(L, luaA_panic);
@@ -492,7 +492,8 @@ luaA_startup_error(const char *err)
 static bool
 luaA_loadrc(const char *confpath, bool run)
 {
-    if(!luaL_loadfile(globalconf.L, confpath))
+    lua_State *L = globalconf_get_lua_State();
+    if(!luaL_loadfile(L, confpath))
     {
         if(run)
         {
@@ -500,11 +501,11 @@ luaA_loadrc(const char *confpath, bool run)
              * configuration file. */
             conffile = a_strdup(confpath);
             /* Move error handling function before function */
-            lua_pushcfunction(globalconf.L, luaA_dofunction_on_error);
-            lua_insert(globalconf.L, -2);
-            if(lua_pcall(globalconf.L, 0, LUA_MULTRET, -2))
+            lua_pushcfunction(L, luaA_dofunction_on_error);
+            lua_insert(L, -2);
+            if(lua_pcall(L, 0, LUA_MULTRET, -2))
             {
-                const char *err = lua_tostring(globalconf.L, -1);
+                const char *err = lua_tostring(L, -1);
                 luaA_startup_error(err);
                 fprintf(stderr, "%s\n", err);
                 /* An error happened, so reset this. */
@@ -515,13 +516,13 @@ luaA_loadrc(const char *confpath, bool run)
         }
         else
         {
-            lua_pop(globalconf.L, 1);
+            lua_pop(L, 1);
             return true;
         }
     }
     else
     {
-        const char *err = lua_tostring(globalconf.L, -1);
+        const char *err = lua_tostring(L, -1);
         luaA_startup_error(err);
         fprintf(stderr, "%s\n", err);
     }
@@ -593,7 +594,8 @@ luaA_class_newindex_miss_property(lua_State *L, lua_object_t *obj)
 void
 luaA_emit_refresh()
 {
-    signal_object_emit(globalconf.L, &global_signals, "refresh", 0);
+    lua_State *L = globalconf_get_lua_State();
+    signal_object_emit(L, &global_signals, "refresh", 0);
 }
 
 int

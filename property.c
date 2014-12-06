@@ -44,11 +44,12 @@
     void \
     property_update_##funcname(client_t *c, xcb_get_property_cookie_t cookie) \
     { \
+        lua_State *L = globalconf_get_lua_State(); \
         xcb_get_property_reply_t * reply = \
                     xcb_get_property_reply(globalconf.connection, cookie, NULL); \
-        luaA_object_push(globalconf.L, c); \
-        setfunc(globalconf.L, -1, xutil_get_text_property_from_reply(reply)); \
-        lua_pop(globalconf.L, 1); \
+        luaA_object_push(L, c); \
+        setfunc(L, -1, xutil_get_text_property_from_reply(reply)); \
+        lua_pop(L, 1); \
         p_delete(&reply); \
     } \
     static int \
@@ -102,6 +103,7 @@ property_get_wm_transient_for(client_t *c)
 void
 property_update_wm_transient_for(client_t *c, xcb_get_property_cookie_t cookie)
 {
+    lua_State *L = globalconf_get_lua_State();
     xcb_window_t trans;
     int counter;
     client_t *tc, *tmp;
@@ -113,9 +115,9 @@ property_update_wm_transient_for(client_t *c, xcb_get_property_cookie_t cookie)
 
     tmp = tc = client_getbywin(trans);
 
-    luaA_object_push(globalconf.L, c);
-    client_set_type(globalconf.L, -1, WINDOW_TYPE_DIALOG);
-    client_set_above(globalconf.L, -1, false);
+    luaA_object_push(L, c);
+    client_set_type(L, -1, WINDOW_TYPE_DIALOG);
+    client_set_above(L, -1, false);
 
     /* Verify that there are no loops in the transient_for relation after we are done */
     for(counter = 0; tmp != NULL && counter <= globalconf.stack.len; counter++)
@@ -126,9 +128,9 @@ property_update_wm_transient_for(client_t *c, xcb_get_property_cookie_t cookie)
         tmp = tmp->transient_for;
     }
     if (counter <= globalconf.stack.len)
-        client_set_transient_for(globalconf.L, -1, tc);
+        client_set_transient_for(L, -1, tc);
 
-    lua_pop(globalconf.L, 1);
+    lua_pop(L, 1);
 }
 
 xcb_get_property_cookie_t
@@ -187,6 +189,7 @@ property_get_wm_hints(client_t *c)
 void
 property_update_wm_hints(client_t *c, xcb_get_property_cookie_t cookie)
 {
+    lua_State *L = globalconf_get_lua_State();
     xcb_icccm_wm_hints_t wmh;
 
     if(!xcb_icccm_get_wm_hints_reply(globalconf.connection,
@@ -194,16 +197,16 @@ property_update_wm_hints(client_t *c, xcb_get_property_cookie_t cookie)
 				     &wmh, NULL))
         return;
 
-    luaA_object_push(globalconf.L, c);
-    client_set_urgent(globalconf.L, -1, xcb_icccm_wm_hints_get_urgency(&wmh));
+    luaA_object_push(L, c);
+    client_set_urgent(L, -1, xcb_icccm_wm_hints_get_urgency(&wmh));
 
     if(wmh.flags & XCB_ICCCM_WM_HINT_INPUT)
         c->nofocus = !wmh.input;
 
     if(wmh.flags & XCB_ICCCM_WM_HINT_WINDOW_GROUP)
-        client_set_group_window(globalconf.L, -1, wmh.window_group);
+        client_set_group_window(L, -1, wmh.window_group);
 
-    lua_pop(globalconf.L, 1);
+    lua_pop(L, 1);
 }
 
 xcb_get_property_cookie_t
@@ -219,6 +222,7 @@ property_get_wm_class(client_t *c)
 void
 property_update_wm_class(client_t *c, xcb_get_property_cookie_t cookie)
 {
+    lua_State *L = globalconf_get_lua_State();
     xcb_icccm_get_wm_class_reply_t hint;
 
     if(!xcb_icccm_get_wm_class_reply(globalconf.connection,
@@ -226,9 +230,9 @@ property_update_wm_class(client_t *c, xcb_get_property_cookie_t cookie)
 				     &hint, NULL))
         return;
 
-    luaA_object_push(globalconf.L, c);
-    client_set_class_instance(globalconf.L, -1, hint.class_name, hint.instance_name);
-    lua_pop(globalconf.L, 1);
+    luaA_object_push(L, c);
+    client_set_class_instance(L, -1, hint.class_name, hint.instance_name);
+    lua_pop(L, 1);
 
     xcb_icccm_get_wm_class_reply_wipe(&hint);
 }
@@ -281,9 +285,10 @@ property_update_net_wm_pid(client_t *c, xcb_get_property_cookie_t cookie)
         uint32_t *rdata = xcb_get_property_value(reply);
         if(rdata)
         {
-            luaA_object_push(globalconf.L, c);
-            client_set_pid(globalconf.L, -1, *rdata);
-            lua_pop(globalconf.L, 1);
+            lua_State *L = globalconf_get_lua_State();
+            luaA_object_push(L, c);
+            client_set_pid(L, -1, *rdata);
+            lua_pop(L, 1);
         }
     }
 
@@ -346,22 +351,23 @@ static int
 property_handle_net_wm_opacity(uint8_t state,
                                xcb_window_t window)
 {
+    lua_State *L = globalconf_get_lua_State();
     drawin_t *drawin = drawin_getbywin(window);
 
     if(drawin)
     {
-        luaA_object_push(globalconf.L, drawin);
-        window_set_opacity(globalconf.L, -1, xwindow_get_opacity(drawin->window));
-        lua_pop(globalconf.L, -1);
+        luaA_object_push(L, drawin);
+        window_set_opacity(L, -1, xwindow_get_opacity(drawin->window));
+        lua_pop(L, -1);
     }
     else
     {
         client_t *c = client_getbywin(window);
         if(c)
         {
-            luaA_object_push(globalconf.L, c);
-            window_set_opacity(globalconf.L, -1, xwindow_get_opacity(c->window));
-            lua_pop(globalconf.L, 1);
+            luaA_object_push(L, c);
+            window_set_opacity(L, -1, xwindow_get_opacity(c->window));
+            lua_pop(L, 1);
         }
     }
 
@@ -372,7 +378,8 @@ static int
 property_handle_xrootpmap_id(uint8_t state,
                              xcb_window_t window)
 {
-    signal_object_emit(globalconf.L, &global_signals, "wallpaper_changed", 0);
+    lua_State *L = globalconf_get_lua_State();
+    signal_object_emit(L, &global_signals, "wallpaper_changed", 0);
     return 0;
 }
 
@@ -382,6 +389,7 @@ property_handle_xrootpmap_id(uint8_t state,
 static void
 property_handle_propertynotify_xproperty(xcb_property_notify_event_t *ev)
 {
+    lua_State *L = globalconf_get_lua_State();
     xproperty_t *prop;
     xproperty_t lookup = { .atom = ev->atom };
     buffer_t buf;
@@ -409,11 +417,11 @@ property_handle_propertynotify_xproperty(xcb_property_notify_event_t *ev)
     /* And emit the right signal */
     if (obj)
     {
-        luaA_object_push(globalconf.L, obj);
-        luaA_object_emit_signal(globalconf.L, -1, buf.s, 0);
-        lua_pop(globalconf.L, 1);
+        luaA_object_push(L, obj);
+        luaA_object_emit_signal(L, -1, buf.s, 0);
+        lua_pop(L, 1);
     } else
-        signal_object_emit(globalconf.L, &global_signals, buf.s, 0);
+        signal_object_emit(L, &global_signals, buf.s, 0);
     buffer_wipe(&buf);
 }
 

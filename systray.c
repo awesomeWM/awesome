@@ -248,7 +248,8 @@ xembed_process_client_message(xcb_client_message_event_t *ev)
 void
 luaA_systray_invalidate(void)
 {
-    signal_object_emit(globalconf.L, &global_signals, "systray::update", 0);
+    lua_State *L = globalconf_get_lua_State();
+    signal_object_emit(L, &global_signals, "systray::update", 0);
 }
 
 static void

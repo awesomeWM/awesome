@@ -91,8 +91,10 @@ typedef struct
     xembed_window_array_t embedded;
     /** Stack client history */
     client_array_t stack;
-    /** Lua VM state */
-    lua_State *L;
+    /** Lua VM state (opaque to avoid mis-use, see globalconf_get_lua_State()) */
+    struct {
+        lua_State *real_L_dont_use_directly;
+    } L;
     /** All errors messages from loading config files */
     buffer_t startup_errors;
     /** main loop that awesome is running on */
@@ -149,6 +151,13 @@ typedef struct
 } awesome_t;
 
 extern awesome_t globalconf;
+
+/** You should always use this as lua_State *L = globalconf_get_lua_State().
+ * That way it becomes harder to introduce coroutine-related problems.
+ */
+static inline lua_State *globalconf_get_lua_State(void) {
+    return globalconf.L.real_L_dont_use_directly;
+}
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
