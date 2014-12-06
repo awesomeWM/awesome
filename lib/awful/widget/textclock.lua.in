@@ -6,12 +6,21 @@
 
 local setmetatable = setmetatable
 local os = os
+local fmod = math.fmod
 local textbox = require("wibox.widget.textbox")
 local timer = require("gears.timer")
 
 --- Text clock widget.
 -- awful.widget.textclock
 local textclock = { mt = {} }
+
+-- This lowers the timeout so that it occurs "correctly". For example, a timeout
+-- of 60 is rounded so that it occurs the next time the clock reads ":00 seconds".
+local function calc_timeout(real_timeout)
+    local date = os.date("*t")
+    local date_time = (date.hour * 60 + date.min) * 60 + date.sec
+    return real_timeout - fmod(date_time, real_timeout)
+end
 
 --- Create a textclock widget. It draws the time it is in a textbox.
 -- @param format The time format. Default is " %a %b %d, %H:%M ".
@@ -23,7 +32,11 @@ function textclock.new(format, timeout)
 
     local w = textbox()
     local t = timer { timeout = timeout }
-    t:connect_signal("timeout", function() w:set_markup(os.date(format)) end)
+    t:connect_signal("timeout", function()
+        w:set_markup(os.date(format))
+        t.timeout = calc_timeout(timeout)
+        t:again()
+    end)
     t:start()
     t:emit_signal("timeout")
     return w
