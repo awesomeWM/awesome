@@ -72,6 +72,8 @@ struct lua_class_t
     lua_class_checker_t checker;
     /** Number of instances of this class in lua */
     unsigned int instances;
+    /** Class tostring method */
+    lua_class_propfunc_t tostring;
 };
 
 const char * luaA_typename(lua_State *, int);
@@ -99,6 +101,11 @@ int luaA_class_new(lua_State *, lua_class_t *);
 
 void * luaA_checkudata(lua_State *, int, lua_class_t *);
 void * luaA_toudata(lua_State *L, int ud, lua_class_t *);
+
+static inline void luaA_class_set_tostring(lua_class_t *class, lua_class_propfunc_t callback)
+{
+    class->tostring = callback;
+}
 
 static inline void *
 luaA_checkudataornil(lua_State *L, int udx, lua_class_t *class)

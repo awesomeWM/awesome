@@ -2156,6 +2156,19 @@ luaA_client_keys(lua_State *L)
     return luaA_key_array_get(L, 1, keys);
 }
 
+static int
+client_tostring(lua_State *L, client_t *c)
+{
+    char *name = c->name ? c->name : c->alt_name;
+    ssize_t len = a_strlen(name);
+    ssize_t limit = 20;
+
+    lua_pushlstring(L, name, MIN(len, limit));
+    if (len > limit)
+        lua_pushstring(L, "...");
+    return len > limit ? 2 : 1;
+}
+
 /* Client module.
  * \param L The Lua VM state.
  * \return The number of pushed elements.
@@ -2233,6 +2246,7 @@ client_class_setup(lua_State *L)
                      (lua_class_checker_t) client_checker,
                      luaA_class_index_miss_property, luaA_class_newindex_miss_property,
                      client_methods, client_meta);
+    luaA_class_set_tostring(&client_class, (lua_class_propfunc_t) client_tostring);
     luaA_class_add_property(&client_class, "name",
                             NULL,
                             (lua_class_propfunc_t) luaA_client_get_name,

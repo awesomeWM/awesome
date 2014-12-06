@@ -244,6 +244,7 @@ luaA_class_setup(lua_State *L, lua_class_t *class,
     class->newindex_miss_property = newindex_miss_property;
     class->checker = checker;
     class->parent = parent;
+    class->tostring = NULL;
     class->instances = 0;
 
     signal_add(&class->signals, "new");
