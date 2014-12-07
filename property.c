@@ -205,6 +205,19 @@ property_update_wm_hints(client_t *c, xcb_get_property_cookie_t cookie)
     if(wmh.flags & XCB_ICCCM_WM_HINT_WINDOW_GROUP)
         client_set_group_window(globalconf.L, -1, wmh.window_group);
 
+    if(!c->have_ewmh_icon)
+    {
+        if(wmh.flags & XCB_ICCCM_WM_HINT_ICON_PIXMAP)
+        {
+            if(wmh.flags & XCB_ICCCM_WM_HINT_ICON_MASK)
+                client_set_icon_from_pixmaps(c, wmh.icon_pixmap, wmh.icon_mask);
+            else
+                client_set_icon_from_pixmaps(c, wmh.icon_pixmap, XCB_NONE);
+        }
+        else
+            client_set_icon(c, NULL);
+    }
+
     lua_pop(globalconf.L, 1);
 }
 
@@ -261,6 +274,7 @@ property_update_net_wm_icon(client_t *c, xcb_get_property_cookie_t cookie)
     if(!surface)
         return;
 
+    c->have_ewmh_icon = true;
     client_set_icon(c, surface);
     cairo_surface_destroy(surface);
 }

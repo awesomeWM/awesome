@@ -1312,6 +1312,71 @@ client_set_icon(client_t *c, cairo_surface_t *s)
     lua_pop(globalconf.L, 1);
 }
 
+/** Set a client icon.
+ * \param c The client to change.
+ * \param icon A bitmap containing the icon.
+ * \param mask A mask for the bitmap (optional)
+ */
+void
+client_set_icon_from_pixmaps(client_t *c, xcb_pixmap_t icon, xcb_pixmap_t mask)
+{
+    xcb_get_geometry_cookie_t geom_icon_c, geom_mask_c;
+    xcb_get_geometry_reply_t *geom_icon_r, *geom_mask_r = NULL;
+    cairo_surface_t *s_icon, *result;
+
+    geom_icon_c = xcb_get_geometry_unchecked(globalconf.connection, icon);
+    if (mask)
+        geom_mask_c = xcb_get_geometry_unchecked(globalconf.connection, mask);
+    geom_icon_r = xcb_get_geometry_reply(globalconf.connection, geom_icon_c, NULL);
+    if (mask)
+        geom_mask_r = xcb_get_geometry_reply(globalconf.connection, geom_mask_c, NULL);
+
+    if (!geom_icon_r || (mask && !geom_mask_r))
+        goto out;
+    if ((geom_icon_r->depth != 1 && geom_icon_r->depth != globalconf.screen->root_depth)
+            || (geom_mask_r && geom_mask_r->depth != 1))
+    {
+        warn("Got pixmaps with depth (%d, %d) while processing icon, but only depth 1 and %d are allowed",
+                geom_icon_r->depth, geom_mask_r ? geom_mask_r->depth : 0, globalconf.screen->root_depth);
+        goto out;
+    }
+
+    if (geom_icon_r->depth == 1)
+        s_icon = cairo_xcb_surface_create_for_bitmap(globalconf.connection,
+                globalconf.screen, icon, geom_icon_r->width, geom_icon_r->height);
+    else
+        s_icon = cairo_xcb_surface_create(globalconf.connection, icon, globalconf.default_visual,
+                geom_icon_r->width, geom_icon_r->height);
+    result = s_icon;
+
+    if (mask)
+    {
+        cairo_surface_t *s_mask;
+        cairo_t *cr;
+
+        result = cairo_surface_create_similar(s_icon, CAIRO_CONTENT_COLOR_ALPHA, geom_icon_r->width, geom_icon_r->height);
+        s_mask = cairo_xcb_surface_create_for_bitmap(globalconf.connection,
+                globalconf.screen, mask, geom_icon_r->width, geom_icon_r->height);
+        cr = cairo_create(result);
+
+        cairo_set_source_surface(cr, s_icon, 0, 0);
+        cairo_mask_surface(cr, s_mask, 0, 0);
+        cairo_surface_destroy(s_mask);
+        cairo_destroy(cr);
+    }
+
+    client_set_icon(c, result);
+
+    cairo_surface_destroy(result);
+    if (result != s_icon)
+        cairo_surface_destroy(s_icon);
+
+out:
+    p_delete(&geom_icon_r);
+    p_delete(&geom_mask_r);
+}
+
+
 /** Kill a client.
  * \param L The Lua VM state.
  *

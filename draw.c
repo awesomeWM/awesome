@@ -192,6 +192,18 @@ draw_surface_from_pixbuf(GdkPixbuf *buf)
     return surface;
 }
 
+static void
+get_surface_size(cairo_surface_t *surface, int *width, int *height)
+{
+    double x1, y1, x2, y2;
+    cairo_t *cr = cairo_create(surface);
+
+    cairo_clip_extents(cr, &x1, &y1, &x2, &y2);
+    cairo_destroy(cr);
+    *width = x2 - x1;
+    *height = y2 - y1;
+}
+
 /** Duplicate the specified image surface.
  * \param surface The surface to copy
  * \return A pointer to a new cairo image surface.
@@ -199,10 +211,15 @@ draw_surface_from_pixbuf(GdkPixbuf *buf)
 cairo_surface_t *
 draw_dup_image_surface(cairo_surface_t *surface)
 {
-    cairo_surface_t *res = cairo_image_surface_create(
-            cairo_image_surface_get_format(surface),
-            cairo_image_surface_get_width(surface),
-            cairo_image_surface_get_height(surface));
+    cairo_surface_t *res;
+    int width, height;
+
+    get_surface_size(surface, &width, &height);
+#if CAIRO_VERSION_MAJOR == 1 && CAIRO_VERSION_MINOR > 12
+    res = cairo_surface_create_similar_image(surface, CAIRO_FORMAT_ARGB32, width, height);
+#else
+    res = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height);
+#endif
 
     cairo_t *cr = cairo_create(res);
     cairo_set_source_surface(cr, surface, 0, 0);
