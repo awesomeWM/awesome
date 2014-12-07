@@ -7,6 +7,14 @@
 --- AWesome Functions very UsefuL
 -- awful
 
+-- TODO: This is a hack for backwards-compatibility with 3.5, remove!
+local util = require("awful.util")
+local gtimer = require("gears.timer")
+function timer(...)
+    util.deprecate("gears.timer")
+    return gtimer(...)
+end
+
 return
 {
     client = require("awful.client");
