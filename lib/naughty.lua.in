@@ -361,7 +361,11 @@ function naughty.notify(args)
     end
     notification.die = die
 
+    local has_default_action = false;
     local run = function ()
+        if has_default_action then
+            sendActionInvoked(notification.id, "default")
+        end
         if args.run then
             args.run(notification)
         else
@@ -420,7 +424,10 @@ function naughty.notify(args)
         for i , v in ipairs(actions) do
             if i % 2 == 1 then
                 actionid = v
-            else
+                if actionid == "default" then
+                    has_default_action = true;
+                end
+            elseif actionid ~= nil and actionid ~= "default" then
                 action = v
                 local actiontextbox = wibox.widget.textbox()
                 local actionmarginbox = wibox.layout.margin()
@@ -563,7 +570,10 @@ function naughty.notify(args)
     notification.box:set_widget(completelayout)
 
     -- Setup the mouse events
-    layout:buttons(util.table.join(button({ }, 1, run), button({ }, 3, function() die(notificationClosedReason.dismissedByUser) end)))
+    layout:buttons(util.table.join(button({ }, 1, run),
+                                   button({ }, 3, function()
+                                        die(notificationClosedReason.dismissedByUser)
+                                    end)))
 
     -- insert the notification to the table
     table.insert(naughty.notifications[screen][notification.position], notification)
