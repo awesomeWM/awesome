@@ -284,6 +284,7 @@ end
 -- @param callback function that will be called with all arguments
 --  the notification will only be displayed if the function returns true
 --  note: this function is only relevant to notifications sent via dbus
+-- @param actions array of pair of String:String for each action (id:localized text)
 -- @usage naughty.notify({ title = "Achtung!", text = "You're idling", timeout = 0 })
 -- @return The notification object
 function naughty.notify(args)
@@ -309,6 +310,7 @@ function naughty.notify(args)
     local margin = args.margin or preset.margin
     local border_width = args.border_width or preset.border_width
     local position = args.position or preset.position
+    local actions = args.actions
     local escape_pattern = "[<>&]"
     local escape_subs = { ['<'] = "&lt;", ['>'] = "&gt;", ['&'] = "&amp;" }
 
@@ -408,6 +410,53 @@ function naughty.notify(args)
         end
     end
 
+    local actionslayout = wibox.layout.fixed.vertical()
+    local actions_max_width = 0
+    local actions_total_height = 0
+    if actions then
+        local action
+        local actionid
+        -- create actions box
+        for i , v in ipairs(actions) do
+            if i % 2 == 1 then
+                actionid = v
+            else
+                action = v
+                local actiontextbox = wibox.widget.textbox()
+                local actionmarginbox = wibox.layout.margin()
+                actionmarginbox:set_margins(margin)
+                actionmarginbox:set_widget(actiontextbox)
+                actiontextbox:set_valign("middle")
+                actiontextbox:set_font(font)
+                actiontextbox:set_markup(string.format('<b>%s</b>', action))
+                -- calculate the height
+                local w, h = actiontextbox:fit(-1, -1)
+                local height = h + 2 * margin
+
+                -- calculate the width
+                w, h = actiontextbox:fit(-1, -1)
+                local width = w + 2 * margin
+
+                actionmarginbox:buttons(util.table.join(
+                button({ }, 1, function()
+                    sendActionInvoked(notification.id, actionid)
+                    die(2)
+                end),
+                button({ }, 3, function()
+                    sendActionInvoked(notification.id, actionid)
+                    die(2)
+                end))
+                )
+                actionslayout:add(actionmarginbox)
+
+                actions_total_height = actions_total_height + height
+                if actions_max_width < width then
+                    actions_max_width = width
+                end
+            end
+        end
+    end
+
     -- create iconbox
     local iconbox = nil
     local iconmargin = nil
@@ -465,10 +514,16 @@ function naughty.notify(args)
         end
     end
 
+    height = height + actions_total_height
+
     -- calculate the width
     if not width then
         local w, h = textbox:fit(-1, -1)
         width = w + (iconbox and icon_w + 2 * margin or 0) + 2 * margin
+    end
+
+    if width < actions_max_width then
+        width = actions_max_width
     end
 
     -- crop to workarea size if too big
@@ -501,7 +556,11 @@ function naughty.notify(args)
         layout:add(iconmargin)
     end
     layout:add(marginbox)
-    notification.box:set_widget(layout)
+
+    local completelayout = wibox.layout.fixed.vertical()
+    completelayout:add(layout)
+    completelayout:add(actionslayout)
+    notification.box:set_widget(completelayout)
 
     -- Setup the mouse events
     layout:buttons(util.table.join(button({ }, 1, run), button({ }, 3, function() die(notificationClosedReason.dismissedByUser) end)))
@@ -548,6 +607,7 @@ if capi.dbus then
             end
         end
         local preset = args.preset or naughty.config.defaults
+        args.actions = actions
         if not preset.callback or (type(preset.callback) == "function" and
             preset.callback(data, appname, replaces_id, icon, title, text, actions, hints, expire)) then
             if icon ~= "" then
@@ -623,7 +683,7 @@ if capi.dbus then
     elseif data.member == "GetCapabilities" then
         -- We actually do display the body of the message, we support <b>, <i>
         -- and <u> in the body and we handle static (non-animated) icons.
-        return "as", { "s", "body", "s", "body-markup", "s", "icon-static" }
+        return "as", { "s", "body", "s", "body-markup", "s", "icon-static", "s", "actions" }
     end
     end)
 
@@ -672,6 +732,10 @@ if capi.dbus then
           <arg name="id" type="u" direction="out"/>
           <arg name="reason" type="u" direction="out"/>
        </signal>
+       <signal name="ActionInvoked">
+          <arg name="id" type="u" direction="out"/>
+          <arg name="action_key" type="s" direction="out"/>
+       </signal>
       </interface>
     </node>]=]
         return "s", xml
@@ -680,6 +744,13 @@ if capi.dbus then
 
     -- listen for dbus notification requests
     capi.dbus.request_name("session", "org.freedesktop.Notifications")
+end
+
+function sendActionInvoked(notificationId, action)
+    res = capi.dbus.emit_signal("session", "/org/freedesktop/Notifications",
+    "org.freedesktop.Notifications", "ActionInvoked",
+    "i", notificationId,
+    "s", action)
 end
 
 function sendNotificationClosed(notificationId, reason)
