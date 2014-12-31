@@ -94,6 +94,13 @@ local urgency = {
     critical = "\2"
 }
 
+local notificationClosedReason = {
+    expired = 1,
+    dismissedByUser = 2,
+    dismissedByCommand = 3,
+    undefined = 4
+}
+
 --- DBUS notification to preset mapping
 -- The first element is an object containing the filter
 -- If the rules in the filter matches the associated preset will be applied
@@ -344,7 +351,7 @@ function naughty.notify(args)
     end
     if timeout > 0 then
         local timer_die = capi.timer { timeout = timeout }
-        timer_die:connect_signal("timeout", function() die(1) end)
+        timer_die:connect_signal("timeout", function() die(notificationClosedReason.expired) end)
         if not suspended then
             timer_die:start()
         end
@@ -356,13 +363,13 @@ function naughty.notify(args)
         if args.run then
             args.run(notification)
         else
-            die(2)
+            die(notificationClosedReason.dismissedByUser)
         end
     end
 
     local hover_destroy = function ()
         if hover_timeout == 0 then
-            die(1)
+            die(notificationClosedReason.expired)
         else
             if notification.timer then notification.timer:stop() end
             notification.timer = capi.timer { timeout = hover_timeout }
@@ -497,7 +504,7 @@ function naughty.notify(args)
     notification.box:set_widget(layout)
 
     -- Setup the mouse events
-    layout:buttons(util.table.join(button({ }, 1, run), button({ }, 3, function() die(2) end)))
+    layout:buttons(util.table.join(button({ }, 1, run), button({ }, 3, function() die(notificationClosedReason.dismissedByUser) end)))
 
     -- insert the notification to the table
     table.insert(naughty.notifications[screen][notification.position], notification)
