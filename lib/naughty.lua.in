@@ -338,10 +338,13 @@ function naughty.notify(args)
     if title then title = title .. "\n" else title = "" end
 
     -- hook destroy
-    local die = function () naughty.destroy(notification) end
+    local die = function (reason)
+        naughty.destroy(notification)
+        sendNotificationClosed(notification.id, reason)
+    end
     if timeout > 0 then
         local timer_die = capi.timer { timeout = timeout }
-        timer_die:connect_signal("timeout", die)
+        timer_die:connect_signal("timeout", function() die(1) end)
         if not suspended then
             timer_die:start()
         end
@@ -353,17 +356,17 @@ function naughty.notify(args)
         if args.run then
             args.run(notification)
         else
-            die()
+            die(2)
         end
     end
 
     local hover_destroy = function ()
         if hover_timeout == 0 then
-            die()
+            die(1)
         else
             if notification.timer then notification.timer:stop() end
             notification.timer = capi.timer { timeout = hover_timeout }
-            notification.timer:connect_signal("timeout", die)
+            notification.timer:connect_signal("timeout", function() die(1) end)
             notification.timer:start()
         end
     end
@@ -494,7 +497,7 @@ function naughty.notify(args)
     notification.box:set_widget(layout)
 
     -- Setup the mouse events
-    layout:buttons(util.table.join(button({ }, 1, run), button({ }, 3, die)))
+    layout:buttons(util.table.join(button({ }, 1, run), button({ }, 3, function() die(2) end)))
 
     -- insert the notification to the table
     table.insert(naughty.notifications[screen][notification.position], notification)
@@ -604,6 +607,7 @@ if capi.dbus then
     elseif data.member == "CloseNotification" then
         local obj = getById(appname)
         if obj then
+           sendNotificationClosed(obj.id, 3)
            naughty.destroy(obj)
         end
     elseif data.member == "GetServerInfo" or data.member == "GetServerInformation" then
@@ -657,6 +661,10 @@ if capi.dbus then
           <arg name="return_vendor" type="s" direction="out"/>
           <arg name="return_version" type="s" direction="out"/>
        </method>
+       <signal name="NotificationClosed">
+          <arg name="id" type="u" direction="out"/>
+          <arg name="reason" type="u" direction="out"/>
+       </signal>
       </interface>
     </node>]=]
         return "s", xml
@@ -665,6 +673,13 @@ if capi.dbus then
 
     -- listen for dbus notification requests
     capi.dbus.request_name("session", "org.freedesktop.Notifications")
+end
+
+function sendNotificationClosed(notificationId, reason)
+    res = capi.dbus.emit_signal("session", "/org/freedesktop/Notifications",
+    "org.freedesktop.Notifications", "NotificationClosed",
+    "i", notificationId,
+    "i", reason)
 end
 
 return naughty
