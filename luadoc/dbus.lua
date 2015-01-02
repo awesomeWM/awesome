@@ -41,3 +41,17 @@ module("dbus")
 -- @param func The function to call.
 -- @name disconnect_signal
 -- @class function
+
+-- Emit a signal on the D-Bus.
+-- @param bus A string indicating if we are using system or session bus.
+-- @param path A string with the dbus path.
+-- @param interface A string with the dbus interface.
+-- @param method A string with the dbus method name.
+-- @param type_1st_arg type of 1st argument
+-- @param value_1st_arg value of 1st argument
+-- @param type_2nd_arg type of 2nd argument
+-- @param value_2nd_arg value of 2nd argument
+-- ... etc
+-- @name emit_signal
+-- @class function
+--
