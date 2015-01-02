@@ -812,16 +812,13 @@ luaA_dbus_emit_signal(lua_State *L)
     const char *path = luaL_checkstring(L, 2);
     const char *itface = luaL_checkstring(L, 3);
     const char *name = luaL_checkstring(L, 4);
-    lua_remove(L, 1);
-    lua_remove(L, 1);
-    lua_remove(L, 1);
-    lua_remove(L, 1);
     DBusConnection *dbus_connection = a_dbus_bus_getbyname(bus_name);
     DBusMessage* msg = dbus_message_new_signal(path, itface, name);
 
     DBusMessageIter iter;
     dbus_message_iter_init_append(msg, &iter);
-    int nargs = lua_gettop(L);
+    int top = lua_gettop(L);
+    int nargs = top - 4;
 
     if(nargs % 2 != 0)
     {
@@ -830,7 +827,7 @@ luaA_dbus_emit_signal(lua_State *L)
         lua_pushboolean(L, 0);
         return 1;
     }
-    for(int i = 1; i < nargs; i += 2) {
+    for(int i = 5; i < top; i += 2) {
         if(!a_dbus_convert_value(L, i, &iter))
         {
             luaA_warn(L, "your D-Bus signal emitting method has bad argument type");
