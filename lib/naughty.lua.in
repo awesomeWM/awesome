@@ -258,6 +258,20 @@ local function getById(id)
     end
 end
 
+local function sendActionInvoked(notificationId, action)
+    res = capi.dbus.emit_signal("session", "/org/freedesktop/Notifications",
+    "org.freedesktop.Notifications", "ActionInvoked",
+    "i", notificationId,
+    "s", action)
+end
+
+local function sendNotificationClosed(notificationId, reason)
+    res = capi.dbus.emit_signal("session", "/org/freedesktop/Notifications",
+    "org.freedesktop.Notifications", "NotificationClosed",
+    "i", notificationId,
+    "i", reason)
+end
+
 --- Create notification. args is a dictionary of (optional) arguments.
 -- @param text Text of the notification. Default: ''
 -- @param title Title of the notification. Default: nil
@@ -449,11 +463,11 @@ function naughty.notify(args)
                 actionmarginbox:buttons(util.table.join(
                 button({ }, 1, function()
                     sendActionInvoked(notification.id, actionid)
-                    die(2)
+                    die(notificationClosedReason.dismissedByUser)
                 end),
                 button({ }, 3, function()
                     sendActionInvoked(notification.id, actionid)
-                    die(2)
+                    die(notificationClosedReason.dismissedByUser)
                 end))
                 )
                 actionslayout:add(actionmarginbox)
@@ -690,7 +704,7 @@ if capi.dbus then
     elseif data.member == "CloseNotification" then
         local obj = getById(appname)
         if obj then
-           sendNotificationClosed(obj.id, 3)
+           sendNotificationClosed(obj.id, notificationClosedReason.dismissedByCommand)
            naughty.destroy(obj)
         end
     elseif data.member == "GetServerInfo" or data.member == "GetServerInformation" then
@@ -760,20 +774,6 @@ if capi.dbus then
 
     -- listen for dbus notification requests
     capi.dbus.request_name("session", "org.freedesktop.Notifications")
-end
-
-function sendActionInvoked(notificationId, action)
-    res = capi.dbus.emit_signal("session", "/org/freedesktop/Notifications",
-    "org.freedesktop.Notifications", "ActionInvoked",
-    "i", notificationId,
-    "s", action)
-end
-
-function sendNotificationClosed(notificationId, reason)
-    res = capi.dbus.emit_signal("session", "/org/freedesktop/Notifications",
-    "org.freedesktop.Notifications", "NotificationClosed",
-    "i", notificationId,
-    "i", reason)
 end
 
 return naughty
