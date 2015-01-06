@@ -6,7 +6,6 @@
 
 local setmetatable = setmetatable
 local os = os
-local fmod = math.fmod
 local textbox = require("wibox.widget.textbox")
 local timer = require("gears.timer")
 
@@ -17,9 +16,7 @@ local textclock = { mt = {} }
 -- This lowers the timeout so that it occurs "correctly". For example, a timeout
 -- of 60 is rounded so that it occurs the next time the clock reads ":00 seconds".
 local function calc_timeout(real_timeout)
-    local date = os.date("*t")
-    local date_time = (date.hour * 60 + date.min) * 60 + date.sec
-    return real_timeout - fmod(date_time, real_timeout)
+    return real_timeout - os.time() % real_timeout
 end
 
 --- Create a textclock widget. It draws the time it is in a textbox.
