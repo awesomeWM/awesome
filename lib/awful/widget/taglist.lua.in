@@ -196,6 +196,14 @@ function taglist.filter.noempty(t, args)
     return #t:clients() > 0 or t.selected
 end
 
+--- Filtering function to include selected tags on the screen.
+-- @param t The tag.
+-- @param args unused list of extra arguments.
+-- @return true if t is not empty, else false
+function taglist.filter.selected(t, args)
+    return t.selected
+end
+
 --- Filtering function to include all tags on the screen.
 -- @param t The tag.
 -- @param args unused list of extra arguments.
