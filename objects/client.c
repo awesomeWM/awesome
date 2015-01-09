@@ -548,22 +548,7 @@ HANDLE_GEOM(height)
     /* Push client in stack */
     stack_client_push(c);
 
-    /* Always stay in NORMAL_STATE. Even though iconified seems more
-     * appropriate sometimes. The only possible loss is that clients not using
-     * visibility events may continue to process data (when banned).
-     * Without any exposes or other events the cost should be fairly limited though.
-     *
-     * Some clients may expect the window to be unmapped when STATE_ICONIFIED.
-     * Two conflicting parts of the ICCCM v2.0 (section 4.1.4):
-     *
-     * "Normal -> Iconic - The client should send a ClientMessage event as described later in this section."
-     * (note no explicit mention of unmapping, while Normal->Widthdrawn does mention that)
-     *
-     * "Once a client's window has left the Withdrawn state, the window will be mapped
-     * if it is in the Normal state and the window will be unmapped if it is in the Iconic state."
-     *
-     * At this stage it's just safer to keep it in normal state and avoid confusion.
-     */
+    /* Put the window in normal state. */
     xwindow_set_state(c->window, XCB_ICCCM_WM_STATE_NORMAL);
 
     /* Request our response */
@@ -877,9 +862,40 @@ client_set_minimized(lua_State *L, int cidx, bool s)
         c->minimized = s;
         banning_need_update();
         if(s)
+        {
+            /* ICCCM: To transition from ICONIC to NORMAL state, the client
+             * should just map the window. Thus, iconic clients need to be
+             * unmapped, else the MapWindow request doesn't have any effect.
+             */
             xwindow_set_state(c->window, XCB_ICCCM_WM_STATE_ICONIC);
+
+            uint32_t no_event[] = { 0 };
+            const uint32_t select_input_val[] = { CLIENT_SELECT_INPUT_EVENT_MASK };
+            xcb_grab_server(globalconf.connection);
+            xcb_change_window_attributes(globalconf.connection,
+                                         globalconf.screen->root,
+                                         XCB_CW_EVENT_MASK,
+                                         no_event);
+            xcb_change_window_attributes(globalconf.connection,
+                                         c->window,
+                                         XCB_CW_EVENT_MASK,
+                                         no_event);
+            xcb_unmap_window(globalconf.connection, c->window);
+            xcb_change_window_attributes(globalconf.connection,
+                                         globalconf.screen->root,
+                                         XCB_CW_EVENT_MASK,
+                                         ROOT_WINDOW_EVENT_MASK);
+            xcb_change_window_attributes(globalconf.connection,
+                                         c->window,
+                                         XCB_CW_EVENT_MASK,
+                                         select_input_val);
+            xcb_ungrab_server(globalconf.connection);
+        }
         else
+        {
             xwindow_set_state(c->window, XCB_ICCCM_WM_STATE_NORMAL);
+            xcb_map_window(globalconf.connection, c->window);
+        }
         if(strut_has_value(&c->strut))
             client_emit_property_workarea_on_screen(L, c);
         luaA_object_emit_signal(L, cidx, "property::minimized", 0);
