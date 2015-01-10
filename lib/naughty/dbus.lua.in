@@ -181,7 +181,7 @@ capi.dbus.connect_signal("org.freedesktop.Notifications", function (data, appnam
         end
         return "u", "0"
     elseif data.member == "CloseNotification" then
-        local obj = getById(appname)
+        local obj = naughty.getById(appname)
         if obj then
            naughty.destroy(obj, naughty.notificationClosedReason.dismissedByCommand)
         end

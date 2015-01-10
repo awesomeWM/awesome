@@ -224,7 +224,7 @@ end
 -- Get notification by ID
 -- @param id ID of the notification
 -- @return notification object if it was found, nil otherwise
-local function getById(id)
+function naughty.getById(id)
     -- iterate the notifications to get the notfications with the correct ID
     for s = 1, capi.screen.count() do
         for p,pos in pairs(naughty.notifications[s]) do
@@ -308,7 +308,7 @@ function naughty.notify(args)
 
     -- replace notification if needed
     if args.replaces_id then
-        local obj = getById(args.replaces_id)
+        local obj = naughty.getById(args.replaces_id)
         if obj then
             -- destroy this and ...
             naughty.destroy(obj, naughty.notificationClosedReason.silent)
