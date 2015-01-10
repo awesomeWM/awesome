@@ -12,8 +12,6 @@ local string = string
 local tostring = tostring
 local pcall = pcall
 local capi = { screen = screen,
-               awesome = awesome,
-               dbus = dbus,
                awesome = awesome }
 local timer = require("gears.timer")
 local button = require("awful.button")
@@ -22,11 +20,6 @@ local bt = require("beautiful")
 local wibox = require("wibox")
 local surface = require("gears.surface")
 local cairo = require("lgi").cairo
-
-local schar = string.char
-local sbyte = string.byte
-local tcat = table.concat
-local tins = table.insert
 
 --- Notification library
 local naughty = {}
@@ -88,31 +81,12 @@ naughty.config.defaults = {
     position = "top_right"
 }
 
--- DBUS Notification constants
-local urgency = {
-    low = "\0",
-    normal = "\1",
-    critical = "\2"
-}
-
 naughty.notificationClosedReason = {
     silent = -1,
     expired = 1,
     dismissedByUser = 2,
     dismissedByCommand = 3,
     undefined = 4
-}
-
---- DBUS notification to preset mapping
--- The first element is an object containing the filter
--- If the rules in the filter matches the associated preset will be applied
--- The rules object can contain: urgency, category, appname
--- The second element is the preset
-
-naughty.config.mapping = {
-    {{urgency = urgency.low}, naughty.config.presets.low},
-    {{urgency = urgency.normal}, naughty.config.presets.normal},
-    {{urgency = urgency.critical}, naughty.config.presets.critical}
 }
 
 -- Counter for the notifications
@@ -263,24 +237,6 @@ local function getById(id)
     end
 end
 
-local function sendActionInvoked(notificationId, action)
-    if capi.dbus then
-        capi.dbus.emit_signal("session", "/org/freedesktop/Notifications",
-        "org.freedesktop.Notifications", "ActionInvoked",
-        "i", notificationId,
-        "s", action)
-    end
-end
-
-local function sendNotificationClosed(notificationId, reason)
-    if capi.dbus then
-        capi.dbus.emit_signal("session", "/org/freedesktop/Notifications",
-        "org.freedesktop.Notifications", "NotificationClosed",
-        "i", notificationId,
-        "i", reason)
-    end
-end
-
 --- Create notification. args is a dictionary of (optional) arguments.
 -- @param text Text of the notification. Default: ''
 -- @param title Title of the notification. Default: nil
@@ -377,7 +333,6 @@ function naughty.notify(args)
     -- hook destroy
     local die = function (reason)
         naughty.destroy(notification, reason)
-        sendNotificationClosed(notification.id, reason)
     end
     if timeout > 0 then
         local timer_die = timer { timeout = timeout }
@@ -389,11 +344,7 @@ function naughty.notify(args)
     end
     notification.die = die
 
-    local has_default_action = false;
     local run = function ()
-        if has_default_action then
-            sendActionInvoked(notification.id, "default")
-        end
         if args.run then
             args.run(notification)
         else
@@ -597,199 +548,6 @@ function naughty.notify(args)
 
     -- return the notification
     return notification
-end
-
--- DBUS/Notification support
--- Notify
-if capi.dbus then
-    capi.dbus.connect_signal("org.freedesktop.Notifications", function (data, appname, replaces_id, icon, title, text, actions, hints, expire)
-    local args = { }
-    if data.member == "Notify" then
-        if text ~= "" then
-            args.text = text
-            if title ~= "" then
-                args.title = title
-            end
-        else
-            if title ~= "" then
-                args.text = title
-            else
-                return
-            end
-        end
-        if appname ~= "" then
-            args.appname = appname
-        end
-        for i, obj in pairs(naughty.config.mapping) do
-            local filter, preset, s = obj[1], obj[2], 0
-            if (not filter.urgency or filter.urgency == hints.urgency) and
-               (not filter.category or filter.category == hints.category) and
-               (not filter.appname or filter.appname == appname) then
-                   args.preset = util.table.join(args.preset, preset)
-            end
-        end
-        local preset = args.preset or naughty.config.defaults
-        local notification
-        if actions then
-            args.actions = {}
-
-            local actionid
-            -- create actions callbacks
-            for i , v in ipairs(actions) do
-                if i % 2 == 1 then
-                    actionid = v
-                elseif actionid == "default" then
-                    args.run = function()
-                        sendActionInvoked(notification.id, "default")
-                        naughty.destroy(notification, naughty.notificationClosedReason.dismissedByUser)
-                    end
-                    actionid = nil
-                elseif actionid ~= nil then
-                    local action = actionid
-                    args.actions[actionid] = function()
-                        sendActionInvoked(notification.id, action)
-                        naughty.destroy(notification, naughty.notificationClosedReason.dismissedByUser)
-                    end
-                    actionid = nil
-                end
-            end
-        end
-        if not preset.callback or (type(preset.callback) == "function" and
-            preset.callback(data, appname, replaces_id, icon, title, text, actions, hints, expire)) then
-            if icon ~= "" then
-                args.icon = icon
-            elseif hints.icon_data or hints.image_data then
-                if hints.icon_data == nil then hints.icon_data = hints.image_data end
-
-                -- icon_data is an array:
-                -- 1 -> width
-                -- 2 -> height
-                -- 3 -> rowstride
-                -- 4 -> has alpha
-                -- 5 -> bits per sample
-                -- 6 -> channels
-                -- 7 -> data
-                local w, h, rowstride, _, _, channels, data = unpack(hints.icon_data)
-
-                -- Do the arguments look sane? (e.g. we have enough data)
-                local expected_length = rowstride * (h - 1) + w * channels
-                if w < 0 or h < 0 or rowstride < 0 or (channels ~= 3 and channels ~= 4) or
-                    string.len(data) < expected_length then
-                    w = 0
-                    h = 0
-                end
-
-                local format = cairo.Format[channels == 4 and 'ARGB32' or 'RGB24']
-
-                -- Figure out some stride magic (cairo dictates rowstride)
-                local stride = cairo.Format.stride_for_width(format, w)
-                local append = schar(0):rep(stride - 4 * w)
-                local offset = 0
-
-                -- Now convert each row on its own
-                local rows = {}
-
-                for y = 1, h do
-                    local this_row = {}
-
-                    for i = 1 + offset, w * channels + offset, channels do
-                        local R, G, B, A = sbyte(data, i, i + channels - 1)
-                        tins(this_row, schar(B, G, R, A or 255))
-                    end
-
-                    -- Handle rowstride, offset is stride for the input, append for output
-                    tins(this_row, append)
-                    tins(rows, tcat(this_row))
-
-                    offset = offset + rowstride
-                end
-
-                args.icon = cairo.ImageSurface.create_for_data(tcat(rows), format,
-                    w, h, stride)
-            end
-            if replaces_id and replaces_id ~= "" and replaces_id ~= 0 then
-                args.replaces_id = replaces_id
-            end
-            if expire and expire > -1 then
-                args.timeout = expire / 1000
-            end
-            notification = naughty.notify(args)
-            return "u", notification.id
-        end
-        return "u", "0"
-    elseif data.member == "CloseNotification" then
-        local obj = getById(appname)
-        if obj then
-           sendNotificationClosed(obj.id, naughty.notificationClosedReason.dismissedByCommand)
-           naughty.destroy(obj, naughty.notificationClosedReason.dismissedByCommand)
-        end
-    elseif data.member == "GetServerInfo" or data.member == "GetServerInformation" then
-        -- name of notification app, name of vender, version
-        return "s", "naughty", "s", "awesome", "s", capi.awesome.version:match("%d.%d"), "s", "1.0"
-    elseif data.member == "GetCapabilities" then
-        -- We actually do display the body of the message, we support <b>, <i>
-        -- and <u> in the body and we handle static (non-animated) icons.
-        return "as", { "s", "body", "s", "body-markup", "s", "icon-static", "s", "actions" }
-    end
-    end)
-
-    capi.dbus.connect_signal("org.freedesktop.DBus.Introspectable",
-    function (data, text)
-    if data.member == "Introspect" then
-        local xml = [=[<!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object
-    Introspection 1.0//EN"
-    "http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
-    <node>
-      <interface name="org.freedesktop.DBus.Introspectable">
-        <method name="Introspect">
-          <arg name="data" direction="out" type="s"/>
-        </method>
-      </interface>
-      <interface name="org.freedesktop.Notifications">
-        <method name="GetCapabilities">
-          <arg name="caps" type="as" direction="out"/>
-        </method>
-        <method name="CloseNotification">
-          <arg name="id" type="u" direction="in"/>
-        </method>
-        <method name="Notify">
-          <arg name="app_name" type="s" direction="in"/>
-          <arg name="id" type="u" direction="in"/>
-          <arg name="icon" type="s" direction="in"/>
-          <arg name="summary" type="s" direction="in"/>
-          <arg name="body" type="s" direction="in"/>
-          <arg name="actions" type="as" direction="in"/>
-          <arg name="hints" type="a{sv}" direction="in"/>
-          <arg name="timeout" type="i" direction="in"/>
-          <arg name="return_id" type="u" direction="out"/>
-        </method>
-        <method name="GetServerInformation">
-          <arg name="return_name" type="s" direction="out"/>
-          <arg name="return_vendor" type="s" direction="out"/>
-          <arg name="return_version" type="s" direction="out"/>
-          <arg name="return_spec_version" type="s" direction="out"/>
-        </method>
-        <method name="GetServerInfo">
-          <arg name="return_name" type="s" direction="out"/>
-          <arg name="return_vendor" type="s" direction="out"/>
-          <arg name="return_version" type="s" direction="out"/>
-       </method>
-       <signal name="NotificationClosed">
-          <arg name="id" type="u" direction="out"/>
-          <arg name="reason" type="u" direction="out"/>
-       </signal>
-       <signal name="ActionInvoked">
-          <arg name="id" type="u" direction="out"/>
-          <arg name="action_key" type="s" direction="out"/>
-       </signal>
-      </interface>
-    </node>]=]
-        return "s", xml
-    end
-    end)
-
-    -- listen for dbus notification requests
-    capi.dbus.request_name("session", "org.freedesktop.Notifications")
 end
 
 return naughty
