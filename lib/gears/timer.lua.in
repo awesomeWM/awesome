@@ -33,7 +33,9 @@ function timer:start()
         local success, message = pcall(function()
             self:emit_signal("timeout")
         end)
-        assert(success, message)
+        if not success then
+            print(message)
+        end
         return true
     end)
 end
