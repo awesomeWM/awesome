@@ -25,7 +25,7 @@ local tins = table.insert
 local naughty = require("naughty.core")
 
 --- Notification library, dbus bindings
-local dbus = {}
+local dbus = { config = {} }
 
 -- DBUS Notification constants
 local urgency = {
