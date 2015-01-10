@@ -310,7 +310,8 @@ end
 -- @param callback function that will be called with all arguments
 --  the notification will only be displayed if the function returns true
 --  note: this function is only relevant to notifications sent via dbus
--- @param actions array of pair of String:String for each action (id:localized text)
+-- @param actions mapping that maps a string to a callback when this action is
+--  selected
 -- @usage naughty.notify({ title = "Achtung!", text = "You're idling", timeout = 0 })
 -- @return The notification object
 function naughty.notify(args)
@@ -445,48 +446,28 @@ function naughty.notify(args)
     local actions_max_width = 0
     local actions_total_height = 0
     if actions then
-        local action
-        local actionid
-        -- create actions box
-        for i , v in ipairs(actions) do
-            if i % 2 == 1 then
-                actionid = v
-                if actionid == "default" then
-                    has_default_action = true;
-                end
-            elseif actionid ~= nil and actionid ~= "default" then
-                action = v
-                local actiontextbox = wibox.widget.textbox()
-                local actionmarginbox = wibox.layout.margin()
-                actionmarginbox:set_margins(margin)
-                actionmarginbox:set_widget(actiontextbox)
-                actiontextbox:set_valign("middle")
-                actiontextbox:set_font(font)
-                actiontextbox:set_markup(string.format('<b>%s</b>', action))
-                -- calculate the height
-                local w, h = actiontextbox:fit(-1, -1)
-                local height = h + 2 * margin
+        for action, callback in pairs(actions) do
+            local actiontextbox = wibox.widget.textbox()
+            local actionmarginbox = wibox.layout.margin()
+            actionmarginbox:set_margins(margin)
+            actionmarginbox:set_widget(actiontextbox)
+            actiontextbox:set_valign("middle")
+            actiontextbox:set_font(font)
+            actiontextbox:set_markup(string.format('<b>%s</b>', action))
+            -- calculate the height and width
+            local w, h = actiontextbox:fit(-1, -1)
+            local height = h + 2 * margin
+            local width = w + 2 * margin
 
-                -- calculate the width
-                w, h = actiontextbox:fit(-1, -1)
-                local width = w + 2 * margin
+            actionmarginbox:buttons(util.table.join(
+                button({ }, 1, callback),
+                button({ }, 3, callback)
+                ))
+            actionslayout:add(actionmarginbox)
 
-                actionmarginbox:buttons(util.table.join(
-                button({ }, 1, function()
-                    sendActionInvoked(notification.id, actionid)
-                    die(naughty.notificationClosedReason.dismissedByUser)
-                end),
-                button({ }, 3, function()
-                    sendActionInvoked(notification.id, actionid)
-                    die(naughty.notificationClosedReason.dismissedByUser)
-                end))
-                )
-                actionslayout:add(actionmarginbox)
-
-                actions_total_height = actions_total_height + height
-                if actions_max_width < width then
-                    actions_max_width = width
-                end
+            actions_total_height = actions_total_height + height
+            if actions_max_width < width then
+                actions_max_width = width
             end
         end
     end
@@ -648,7 +629,31 @@ if capi.dbus then
             end
         end
         local preset = args.preset or naughty.config.defaults
-        args.actions = actions
+        local notification
+        if actions then
+            args.actions = {}
+
+            local actionid
+            -- create actions callbacks
+            for i , v in ipairs(actions) do
+                if i % 2 == 1 then
+                    actionid = v
+                elseif actionid == "default" then
+                    args.run = function()
+                        sendActionInvoked(notification.id, "default")
+                        naughty.destroy(notification, naughty.notificationClosedReason.dismissedByUser)
+                    end
+                    actionid = nil
+                elseif actionid ~= nil then
+                    local action = actionid
+                    args.actions[actionid] = function()
+                        sendActionInvoked(notification.id, action)
+                        naughty.destroy(notification, naughty.notificationClosedReason.dismissedByUser)
+                    end
+                    actionid = nil
+                end
+            end
+        end
         if not preset.callback or (type(preset.callback) == "function" and
             preset.callback(data, appname, replaces_id, icon, title, text, actions, hints, expire)) then
             if icon ~= "" then
@@ -708,8 +713,8 @@ if capi.dbus then
             if expire and expire > -1 then
                 args.timeout = expire / 1000
             end
-            local id = naughty.notify(args).id
-            return "u", id
+            notification = naughty.notify(args)
+            return "u", notification.id
         end
         return "u", "0"
     elseif data.member == "CloseNotification" then
