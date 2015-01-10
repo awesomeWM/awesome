@@ -259,17 +259,21 @@ local function getById(id)
 end
 
 local function sendActionInvoked(notificationId, action)
-    res = capi.dbus.emit_signal("session", "/org/freedesktop/Notifications",
-    "org.freedesktop.Notifications", "ActionInvoked",
-    "i", notificationId,
-    "s", action)
+    if capi.dbus then
+        capi.dbus.emit_signal("session", "/org/freedesktop/Notifications",
+        "org.freedesktop.Notifications", "ActionInvoked",
+        "i", notificationId,
+        "s", action)
+    end
 end
 
 local function sendNotificationClosed(notificationId, reason)
-    res = capi.dbus.emit_signal("session", "/org/freedesktop/Notifications",
-    "org.freedesktop.Notifications", "NotificationClosed",
-    "i", notificationId,
-    "i", reason)
+    if capi.dbus then
+        capi.dbus.emit_signal("session", "/org/freedesktop/Notifications",
+        "org.freedesktop.Notifications", "NotificationClosed",
+        "i", notificationId,
+        "i", reason)
+    end
 end
 
 --- Create notification. args is a dictionary of (optional) arguments.
