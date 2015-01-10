@@ -95,7 +95,8 @@ local urgency = {
     critical = "\2"
 }
 
-local notificationClosedReason = {
+naughty.notificationClosedReason = {
+    silent = -1,
     expired = 1,
     dismissedByUser = 2,
     dismissedByCommand = 3,
@@ -220,8 +221,9 @@ end
 
 --- Destroy notification by notification object
 -- @param notification Notification object to be destroyed
+-- @param reason One of the reasons from notificationClosedReason
 -- @return True if the popup was successfully destroyed, nil otherwise
-function naughty.destroy(notification)
+function naughty.destroy(notification, reason)
     if notification and notification.box.visible then
         if suspended then
             for k, v in pairs(naughty.notifications.suspended) do
@@ -238,6 +240,9 @@ function naughty.destroy(notification)
         end
         notification.box.visible = false
         arrange(scr)
+        if notification.destroy_cb and reason ~= naughty.notificationClosedReason.silent then
+            notification.destroy_cb(reason or naughty.notificationClosedReason.undefined)
+        end
         return true
     end
 end
@@ -298,6 +303,7 @@ end
 -- @param border_color Border color.
 --   Default: beautiful.border_focus or '#535d6c'
 -- @param run Function to run on left click. Default: nil
+-- @param destroy Function to run when notification is destroyed. Default: nil
 -- @param preset Table with any of the above parameters. Note: Any parameters
 --   specified directly in args will override ones defined in the preset.
 -- @param replaces_id Replace the notification with the given ID
@@ -331,6 +337,7 @@ function naughty.notify(args)
     local border_width = args.border_width or preset.border_width
     local position = args.position or preset.position
     local actions = args.actions
+    local destroy_cb = args.destroy
     local escape_pattern = "[<>&]"
     local escape_subs = { ['<'] = "&lt;", ['>'] = "&gt;", ['&'] = "&amp;" }
 
@@ -340,14 +347,14 @@ function naughty.notify(args)
     local fg = args.fg or preset.fg or beautiful.fg_normal or '#ffffff'
     local bg = args.bg or preset.bg or beautiful.bg_normal or '#535d6c'
     local border_color = args.border_color or preset.border_color or beautiful.bg_focus or '#535d6c'
-    local notification = { screen = screen }
+    local notification = { screen = screen, destroy_cb = destroy_cb }
 
     -- replace notification if needed
     if args.replaces_id then
         local obj = getById(args.replaces_id)
         if obj then
             -- destroy this and ...
-            naughty.destroy(obj)
+            naughty.destroy(obj, naughty.notificationClosedReason.silent)
         end
         -- ... may use its ID
         if args.replaces_id <= counter then
@@ -368,12 +375,12 @@ function naughty.notify(args)
 
     -- hook destroy
     local die = function (reason)
-        naughty.destroy(notification)
+        naughty.destroy(notification, reason)
         sendNotificationClosed(notification.id, reason)
     end
     if timeout > 0 then
         local timer_die = timer { timeout = timeout }
-        timer_die:connect_signal("timeout", function() die(notificationClosedReason.expired) end)
+        timer_die:connect_signal("timeout", function() die(naughty.notificationClosedReason.expired) end)
         if not suspended then
             timer_die:start()
         end
@@ -389,17 +396,17 @@ function naughty.notify(args)
         if args.run then
             args.run(notification)
         else
-            die(notificationClosedReason.dismissedByUser)
+            die(naughty.notificationClosedReason.dismissedByUser)
         end
     end
 
     local hover_destroy = function ()
         if hover_timeout == 0 then
-            die(notificationClosedReason.expired)
+            die(naughty.notificationClosedReason.expired)
         else
             if notification.timer then notification.timer:stop() end
             notification.timer = timer { timeout = hover_timeout }
-            notification.timer:connect_signal("timeout", function() die(notificationClosedReason.expired) end)
+            notification.timer:connect_signal("timeout", function() die(naughty.notificationClosedReason.expired) end)
             notification.timer:start()
         end
     end
@@ -467,11 +474,11 @@ function naughty.notify(args)
                 actionmarginbox:buttons(util.table.join(
                 button({ }, 1, function()
                     sendActionInvoked(notification.id, actionid)
-                    die(notificationClosedReason.dismissedByUser)
+                    die(naughty.notificationClosedReason.dismissedByUser)
                 end),
                 button({ }, 3, function()
                     sendActionInvoked(notification.id, actionid)
-                    die(notificationClosedReason.dismissedByUser)
+                    die(naughty.notificationClosedReason.dismissedByUser)
                 end))
                 )
                 actionslayout:add(actionmarginbox)
@@ -596,7 +603,7 @@ function naughty.notify(args)
     -- Setup the mouse events
     layout:buttons(util.table.join(button({ }, 1, run),
                                    button({ }, 3, function()
-                                        die(notificationClosedReason.dismissedByUser)
+                                        die(naughty.notificationClosedReason.dismissedByUser)
                                     end)))
 
     -- insert the notification to the table
@@ -708,8 +715,8 @@ if capi.dbus then
     elseif data.member == "CloseNotification" then
         local obj = getById(appname)
         if obj then
-           sendNotificationClosed(obj.id, notificationClosedReason.dismissedByCommand)
-           naughty.destroy(obj)
+           sendNotificationClosed(obj.id, naughty.notificationClosedReason.dismissedByCommand)
+           naughty.destroy(obj, naughty.notificationClosedReason.dismissedByCommand)
         end
     elseif data.member == "GetServerInfo" or data.member == "GetServerInformation" then
         -- name of notification app, name of vender, version
