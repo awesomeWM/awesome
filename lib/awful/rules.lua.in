@@ -224,11 +224,6 @@ function rules.execute(c, props, callbacks)
         end
     end
 
-    -- If untagged, stick the client on the current one.
-    if #c:tags() == 0 then
-        atag.withcurrent(c)
-    end
-
     -- Apply all callbacks.
     if callbacks then
         for i, callback in pairs(callbacks) do
@@ -244,7 +239,6 @@ function rules.execute(c, props, callbacks)
 end
 
 client.connect_signal("manage", rules.apply)
-client.disconnect_signal("manage", atag.withcurrent)
 
 return rules
 
