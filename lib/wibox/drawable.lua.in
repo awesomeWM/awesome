@@ -16,6 +16,7 @@ local debug = require("gears.debug")
 local object = require("gears.object")
 local sort = require("gears.sort")
 local surface = require("gears.surface")
+local timer = require("gears.timer")
 
 local drawables = setmetatable({}, { __mode = 'k' })
 local wallpaper = nil
@@ -241,14 +242,13 @@ function drawable.new(d, widget_arg)
     ret._redraw_pending = false
     ret._do_redraw = function()
         ret._redraw_pending = false
-        capi.awesome.disconnect_signal("refresh", ret._do_redraw)
         do_redraw(ret)
     end
 
     -- Connect our signal when we need a redraw
     ret.draw = function()
         if not ret._redraw_pending then
-            capi.awesome.connect_signal("refresh", ret._do_redraw)
+            timer.delayed_call(ret._do_redraw)
             ret._redraw_pending = true
         end
     end
