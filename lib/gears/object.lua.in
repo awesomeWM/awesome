@@ -36,6 +36,7 @@ end
 -- @param name The name of the new signal.
 function object:add_signal(name)
     check(self)
+    assert(type(name) == "string", "name must be a string, got: " .. type(name))
     if not self._signals[name] then
         self._signals[name] = {}
     end
@@ -45,6 +46,7 @@ end
 -- @param name The name of the signal
 -- @param func The callback to call when the signal is emitted
 function object:connect_signal(name, func)
+    assert(type(func) == "function", "callback must be a function, got: " .. type(func))
     local sig = find_signal(self, name, "connect to")
     sig[func] = func
 end
