@@ -74,6 +74,13 @@ awesome_atexit(bool restart)
     lua_pushboolean(L, restart);
     signal_object_emit(L, &global_signals, "exit", 1);
 
+    /* Move clients where we want them to be */
+    foreach(c, globalconf.clients)
+    {
+        xcb_reparent_window(globalconf.connection, (*c)->window, globalconf.screen->root,
+                (*c)->geometry.x, (*c)->geometry.y);
+    }
+
     a_dbus_cleanup();
 
     systray_cleanup();
