@@ -239,6 +239,7 @@ a_dbus_message_iter(DBusMessageIter *iter)
           DBUS_MSG_HANDLE_TYPE_NUMBER(uint32_t, DBUS_TYPE_UINT32)
           DBUS_MSG_HANDLE_TYPE_NUMBER(int64_t, DBUS_TYPE_INT64)
           DBUS_MSG_HANDLE_TYPE_NUMBER(uint64_t, DBUS_TYPE_UINT64)
+          DBUS_MSG_HANDLE_TYPE_NUMBER(double, DBUS_TYPE_DOUBLE)
 #undef DBUS_MSG_HANDLE_TYPE_NUMBER
           case DBUS_TYPE_STRING:
             {
