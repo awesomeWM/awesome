@@ -97,7 +97,9 @@ function completion.shell(command, cur_pos, ncomp, shell)
     local shell_cmd
     if shell == "zsh" or (not shell and os.getenv("SHELL"):match("zsh$")) then
         if comptype == "file" then
-            shell_cmd = "/usr/bin/env zsh -c 'local -a res; res=( " .. words[cword_index] .. "* ); print -ln -- ${res[@]}'"
+            -- NOTE: wrapped in ${} to make `${"~/.X"}*` work (`"~/X."*` does not).
+            shell_cmd = "/usr/bin/env zsh -c 'local -a res; res=( "
+                .. string.format('${%q}', words[cword_index]) .. "* ); print -ln -- ${res[@]}'"
         else
             -- check commands, aliases, builtins, functions and reswords
             shell_cmd = "/usr/bin/env zsh -c 'local -a res; "..
@@ -105,7 +107,7 @@ function completion.shell(command, cur_pos, ncomp, shell)
             "\"${(k)commands[@]}\" \"${(k)aliases[@]}\" \"${(k)builtins[@]}\" \"${(k)functions[@]}\" \"${(k)reswords[@]}\" "..
             "${PWD}/*(:t)"..
             "); "..
-            "print -ln -- ${(M)res[@]:#"..words[cword_index].."*}'"
+            "print -ln -- ${(M)res[@]:#" .. string.format('%q', words[cword_index]) .. "*}'"
         end
     else
         if bashcomp_funcs[words[1]] then
@@ -116,7 +118,8 @@ function completion.shell(command, cur_pos, ncomp, shell)
             "COMP_COUNT=" .. cur_pos ..  "; COMP_CWORD=" .. cword_index-1 .. "; " ..
             bashcomp_funcs[words[1]] .. "; __print_completions'"
         else
-            shell_cmd = "/usr/bin/env bash -c 'compgen -A " .. comptype .. " " .. words[cword_index] .. "'"
+            shell_cmd = "/usr/bin/env bash -c 'compgen -A " .. comptype .. " "
+                .. string.format('%q', words[cword_index]) .. "'"
         end
     end
     local c, err = io.popen(shell_cmd .. " | sort -u")
@@ -126,7 +129,7 @@ function completion.shell(command, cur_pos, ncomp, shell)
         while true do
             local line = c:read("*line")
             if not line then break end
-            if os.execute("test -d " .. line) == 0 then
+            if os.execute("test -d " .. string.format('%q', line)) == 0 then
                 line = line .. "/"
             end
             table.insert(output, bash_escape(line))
