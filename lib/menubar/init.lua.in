@@ -79,11 +79,19 @@ local function colortext(s, c)
     return "<span color='" .. c .. "'>" .. s .. "</span>"
 end
 
+--- Quote special chars in a pattern for gsub.
+-- Source: http://stackoverflow.com/a/20778724/15690
+local quotepattern = '(['..("%^$().[]*+-?"):gsub("(.)", "%%%1")..'])'
+string.quote = function(str)
+    return str:gsub(quotepattern, "%%%1")
+end
+
 -- Generate a pattern matching expression that ignores case.
--- @param s Original pattern matching expresion.
+-- @param s Original pattern matching expression.
 local function nocase (s)
-    s = string.gsub(s, "%a",
+    s = string.gsub(s, ".",
                     function (c)
+                        c = string.quote(c)
                         return string.format("[%s%s]", string.lower(c),
                                              string.upper(c))
                     end)
