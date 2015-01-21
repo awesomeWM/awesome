@@ -28,7 +28,8 @@ local function grabber(mod, key, event)
 end
 
 --- Stop grabbing the keyboard for the provided callback.
--- When no callback is given, the least grabber gets removed (last one added to the stack).
+-- When no callback is given, the last grabber gets removed (last one added to
+-- the stack).
 -- @param g The key grabber that must be removed.
 function keygrabber.stop(g)
     for i, v in ipairs(grabbers) do
@@ -37,7 +38,7 @@ function keygrabber.stop(g)
             break
         end
     end
-    -- stop the global key grabber if the last grabber disappears from stack
+    -- Stop the global key grabber if the last grabber disappears from stack.
     if #grabbers == 0 then
         keygrabbing = false
         capi.keygrabber.stop()
