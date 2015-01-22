@@ -81,17 +81,14 @@ end
 
 --- Quote special chars in a pattern for gsub.
 -- Source: http://stackoverflow.com/a/20778724/15690
-local quotepattern = '(['..("%^$().[]*+-?"):gsub("(.)", "%%%1")..'])'
-string.quote = function(str)
-    return str:gsub(quotepattern, "%%%1")
-end
+local quotepattern = '['..("%^$().[]*+-?"):gsub("(.)", "%%%1")..']'
 
 -- Generate a pattern matching expression that ignores case.
 -- @param s Original pattern matching expression.
-local function nocase (s)
+local function query_to_pattern (s)
+    s = string.gsub(s, quotepattern, "%%%1")
     s = string.gsub(s, ".",
                     function (c)
-                        c = string.quote(c)
                         return string.format("[%s%s]", string.lower(c),
                                              string.upper(c))
                     end)
@@ -133,6 +130,7 @@ end
 -- @param query The text to filter entries by.
 local function menulist_update(query)
     local query = query or ""
+    query = query_to_pattern(query)
     shownitems = {}
     local match_inside = {}
 
@@ -145,8 +143,8 @@ local function menulist_update(query)
         for _, v in pairs(menubar.menu_gen.all_categories) do
             v.focused = false
             if not current_category and v.use then
-                if string.match(v.name, nocase(query)) then
-                    if string.match(v.name, "^" .. nocase(query)) then
+                if string.match(v.name, query) then
+                    if string.match(v.name, "^" .. query) then
                         table.insert(shownitems, v)
                     else
                         table.insert(match_inside, v)
@@ -160,10 +158,10 @@ local function menulist_update(query)
     for i, v in ipairs(menu_entries) do
         v.focused = false
         if not current_category or v.category == current_category then
-            if string.match(v.name, nocase(query))
-                or string.match(v.cmdline, nocase(query)) then
-                if string.match(v.name, "^" .. nocase(query))
-                    or string.match(v.cmdline, "^" .. nocase(query)) then
+            if string.match(v.name, query)
+                or string.match(v.cmdline, query) then
+                if string.match(v.name, "^" .. query)
+                    or string.match(v.cmdline, "^" .. query) then
                     table.insert(shownitems, v)
                 else
                     table.insert(match_inside, v)
