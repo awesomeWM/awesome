@@ -7,7 +7,6 @@
 
 local base = require("wibox.widget.base")
 local beautiful = require("beautiful")
-local theme = beautiful.get()
 local lgi = require("lgi")
 local cairo = lgi.cairo
 local Pango = lgi.Pango
