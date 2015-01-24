@@ -7,6 +7,7 @@
 
 local base = require("wibox.widget.base")
 local beautiful = require("beautiful")
+local theme = beautiful.get()
 local lgi = require("lgi")
 local cairo = lgi.cairo
 local Pango = lgi.Pango
@@ -136,7 +137,7 @@ local function new(text, ignore_markup)
     ret:set_wrap("word_char")
     ret:set_valign("center")
     ret:set_align("left")
-    ret:set_font()
+    ret:set_font(theme and theme.font)
 
     if text then
         if ignore_markup then
