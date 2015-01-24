@@ -122,6 +122,7 @@ function completion.shell(command, cur_pos, ncomp, shell)
                 .. string.format('%q', words[cword_index]) .. "'"
         end
     end
+    print(string.format('DEBUG: completion: shell_cmd: %s', shell_cmd))
     local c, err = io.popen(shell_cmd .. " | sort -u")
     local output = {}
     i = 0
