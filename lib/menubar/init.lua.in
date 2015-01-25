@@ -79,17 +79,6 @@ local function colortext(s, c)
     return "<span color='" .. c .. "'>" .. s .. "</span>"
 end
 
--- Generate a pattern matching expression that ignores case.
--- @param s Original pattern matching expresion.
-local function nocase (s)
-    s = string.gsub(s, "%a",
-                    function (c)
-                        return string.format("[%s%s]", string.lower(c),
-                                             string.upper(c))
-                    end)
-    return s
-end
-
 -- Get how the menu item should be displayed.
 -- @param o The menu item.
 -- @return item name, item background color, background image, item icon.
@@ -125,6 +114,7 @@ end
 -- @param query The text to filter entries by.
 local function menulist_update(query)
     local query = query or ""
+    local pattern = awful.util.query_to_pattern(query)
     shownitems = {}
     local match_inside = {}
 
@@ -137,8 +127,8 @@ local function menulist_update(query)
         for _, v in pairs(menubar.menu_gen.all_categories) do
             v.focused = false
             if not current_category and v.use then
-                if string.match(v.name, nocase(query)) then
-                    if string.match(v.name, "^" .. nocase(query)) then
+                if string.match(v.name, pattern) then
+                    if string.match(v.name, "^" .. pattern) then
                         table.insert(shownitems, v)
                     else
                         table.insert(match_inside, v)
@@ -152,10 +142,10 @@ local function menulist_update(query)
     for i, v in ipairs(menu_entries) do
         v.focused = false
         if not current_category or v.category == current_category then
-            if string.match(v.name, nocase(query))
-                or string.match(v.cmdline, nocase(query)) then
-                if string.match(v.name, "^" .. nocase(query))
-                    or string.match(v.cmdline, "^" .. nocase(query)) then
+            if string.match(v.name, pattern)
+                or string.match(v.cmdline, pattern) then
+                if string.match(v.name, "^" .. pattern)
+                    or string.match(v.cmdline, "^" .. pattern) then
                     table.insert(shownitems, v)
                 else
                     table.insert(match_inside, v)
