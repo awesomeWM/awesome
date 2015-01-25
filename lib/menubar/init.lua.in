@@ -79,15 +79,21 @@ local function colortext(s, c)
     return "<span color='" .. c .. "'>" .. s .. "</span>"
 end
 
---- Quote special chars in a pattern for gsub.
+-- Escape all special pattern-matching characters so that lua interprets them
+-- literally instead of as a character class
 -- Source: http://stackoverflow.com/a/20778724/15690
-local quotepattern = '['..("%^$().[]*+-?"):gsub("(.)", "%%%1")..']'
+local function quote(s)
+    -- All special characters escaped in a string: %%, %^, %$, ...
+    local quotepattern = '['..("%^$().[]*+-?"):gsub("(.)", "%%%1")..']'
+    return string.gsub(s, quotepattern, "%%%1")
+end
 
 -- Generate a pattern matching expression that ignores case.
 -- @param s Original pattern matching expression.
-local function query_to_pattern (s)
-    s = string.gsub(s, quotepattern, "%%%1")
-    s = string.gsub(s, ".",
+local function query_to_pattern (q)
+    s = quote(q)
+    -- Poor man's case-insensitive character matching
+    s = string.gsub(s, "%a",
                     function (c)
                         return string.format("[%s%s]", string.lower(c),
                                              string.upper(c))
@@ -130,7 +136,7 @@ end
 -- @param query The text to filter entries by.
 local function menulist_update(query)
     local query = query or ""
-    query = query_to_pattern(query)
+    local pattern = query_to_pattern(query)
     shownitems = {}
     local match_inside = {}
 
@@ -143,8 +149,8 @@ local function menulist_update(query)
         for _, v in pairs(menubar.menu_gen.all_categories) do
             v.focused = false
             if not current_category and v.use then
-                if string.match(v.name, query) then
-                    if string.match(v.name, "^" .. query) then
+                if string.match(v.name, pattern) then
+                    if string.match(v.name, "^" .. pattern) then
                         table.insert(shownitems, v)
                     else
                         table.insert(match_inside, v)
@@ -158,10 +164,10 @@ local function menulist_update(query)
     for i, v in ipairs(menu_entries) do
         v.focused = false
         if not current_category or v.category == current_category then
-            if string.match(v.name, query)
-                or string.match(v.cmdline, query) then
-                if string.match(v.name, "^" .. query)
-                    or string.match(v.cmdline, "^" .. query) then
+            if string.match(v.name, pattern)
+                or string.match(v.cmdline, pattern) then
+                if string.match(v.name, "^" .. pattern)
+                    or string.match(v.cmdline, "^" .. pattern) then
                     table.insert(shownitems, v)
                 else
                     table.insert(match_inside, v)
