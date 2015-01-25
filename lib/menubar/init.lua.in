@@ -79,28 +79,6 @@ local function colortext(s, c)
     return "<span color='" .. c .. "'>" .. s .. "</span>"
 end
 
--- Escape all special pattern-matching characters so that lua interprets them
--- literally instead of as a character class
--- Source: http://stackoverflow.com/a/20778724/15690
-local function quote(s)
-    -- All special characters escaped in a string: %%, %^, %$, ...
-    local quotepattern = '['..("%^$().[]*+-?"):gsub("(.)", "%%%1")..']'
-    return string.gsub(s, quotepattern, "%%%1")
-end
-
--- Generate a pattern matching expression that ignores case.
--- @param s Original pattern matching expression.
-local function query_to_pattern (q)
-    s = quote(q)
-    -- Poor man's case-insensitive character matching
-    s = string.gsub(s, "%a",
-                    function (c)
-                        return string.format("[%s%s]", string.lower(c),
-                                             string.upper(c))
-                    end)
-    return s
-end
-
 -- Get how the menu item should be displayed.
 -- @param o The menu item.
 -- @return item name, item background color, background image, item icon.
@@ -136,7 +114,7 @@ end
 -- @param query The text to filter entries by.
 local function menulist_update(query)
     local query = query or ""
-    local pattern = query_to_pattern(query)
+    local pattern = awful.util.query_to_pattern(query)
     shownitems = {}
     local match_inside = {}
 
