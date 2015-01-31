@@ -373,6 +373,7 @@ screen_client_moveto(client_t *c, screen_t *new_screen, bool doresize)
 {
     lua_State *L = globalconf_get_lua_State();
     screen_t *old_screen = c->screen;
+    int old_screen_idx = screen_get_index(old_screen);
     area_t from, to;
     bool had_focus = false;
 
@@ -387,7 +388,11 @@ screen_client_moveto(client_t *c, screen_t *new_screen, bool doresize)
     if(!doresize)
     {
         luaA_object_push(L, c);
-        luaA_object_emit_signal(L, -1, "property::screen", 0);
+        if(old_screen_idx != 0)
+            lua_pushinteger(L, old_screen_idx);
+        else
+            lua_pushnil(L);
+        luaA_object_emit_signal(L, -2, "property::screen", 1);
         lua_pop(L, 1);
         if(had_focus)
             client_focus(c);
@@ -417,7 +422,11 @@ screen_client_moveto(client_t *c, screen_t *new_screen, bool doresize)
     /* move / resize the client */
     client_resize(c, new_geometry, false);
     luaA_object_push(L, c);
-    luaA_object_emit_signal(L, -1, "property::screen", 0);
+    if(old_screen_idx != 0)
+        lua_pushinteger(L, old_screen_idx);
+    else
+        lua_pushnil(L);
+    luaA_object_emit_signal(L, -2, "property::screen", 1);
     lua_pop(L, 1);
     if(had_focus)
         client_focus(c);

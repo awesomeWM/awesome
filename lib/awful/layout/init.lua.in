@@ -140,10 +140,12 @@ capi.client.connect_signal("property::border_width", arrange_prop)
 capi.client.connect_signal("property::hidden", arrange_prop)
 capi.client.connect_signal("property::floating", arrange_prop)
 capi.client.connect_signal("property::geometry", arrange_prop)
--- If prop is screen, we do not know what was the previous screen, so
--- let's arrange all screens :-(
-capi.client.connect_signal("property::screen", function(c)
-    for screen = 1, capi.screen.count() do layout.arrange(screen) end end)
+capi.client.connect_signal("property::screen", function(c, old_screen)
+    if old_screen then
+        layout.arrange(old_screen)
+    end
+    layout.arrange(c.screen)
+end)
 
 local function arrange_on_tagged(c, tag)
     if not tag.screen then return end
