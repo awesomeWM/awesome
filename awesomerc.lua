@@ -273,12 +273,12 @@ globalkeys = awful.util.table.join(
               end),
 
     -- Prompt
-    awful.key({ modkey },            "r",     function () mypromptbox[mouse.screen]:run() end),
+    awful.key({ modkey },            "r",     function () mypromptbox[awful.screen.focused()]:run() end),
 
     awful.key({ modkey }, "x",
               function ()
                   awful.prompt.run({ prompt = "Run Lua code: " },
-                  mypromptbox[mouse.screen].widget,
+                  mypromptbox[awful.screen.focused()].widget,
                   awful.util.eval, nil,
                   awful.util.getdir("cache") .. "/history_eval")
               end),
@@ -318,7 +318,7 @@ for i = 1, 9 do
         -- View tag only.
         awful.key({ modkey }, "#" .. i + 9,
                   function ()
-                        local screen = mouse.screen
+                        local screen = awful.screen.focused()
                         local tag = awful.tag.gettags(screen)[i]
                         if tag then
                            awful.tag.viewonly(tag)
@@ -327,7 +327,7 @@ for i = 1, 9 do
         -- Toggle tag.
         awful.key({ modkey, "Control" }, "#" .. i + 9,
                   function ()
-                      local screen = mouse.screen
+                      local screen = awful.screen.focused()
                       local tag = awful.tag.gettags(screen)[i]
                       if tag then
                          awful.tag.viewtoggle(tag)

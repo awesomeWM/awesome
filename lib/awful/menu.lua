@@ -32,6 +32,7 @@ local capi = {
     screen = screen,
     mouse = mouse,
     client = client }
+local screen = require("awful.screen")
 
 
 local menu = { mt = {} }
@@ -315,7 +316,7 @@ end
 function menu:show(args)
     args = args or {}
     local coords = args.coords or nil
-    local screen_index = capi.mouse.screen
+    local screen_index = screen.focused()
 
     if not set_size(self) then return end
     set_coords(self, screen_index, coords)

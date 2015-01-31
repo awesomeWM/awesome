@@ -54,10 +54,11 @@ client.shape = require("awful.client.shape")
 -- @client c the client to jump to
 -- @tparam bool merge If true then merge tags when clients are not visible.
 function client.jumpto(c, merge)
-    local s = capi.client.focus and capi.client.focus.screen or capi.mouse.screen
+    screen = screen or require("awful.screen")
+    local s = screen.focused()
     -- focus the screen
     if s ~= c.screen then
-        capi.mouse.screen = c.screen
+        screen.focus(c.screen)
     end
 
     -- Try to make client visible, this also covers e.g. sticky
@@ -204,12 +205,7 @@ end
 --- Focus the previous client in history.
 function client.focus.history.previous()
     local sel = capi.client.focus
-    local s
-    if sel then
-        s = sel.screen
-    else
-        s = capi.mouse.screen
-    end
+    local s = sel and sel.screen or awful.screen.focused()
     local c = client.focus.history.get(s, 1)
     if c then
         c:emit_signal("request::activate", "client.focus.history.previous",
@@ -317,7 +313,7 @@ end
 function client.focus.global_bydirection(dir, c)
     screen = screen or require("awful.screen")
     local sel = c or capi.client.focus
-    local scr = capi.mouse.screen
+    local scr = awful.screen.focused()
     if sel then
         scr = sel.screen
     end
@@ -328,8 +324,8 @@ function client.focus.global_bydirection(dir, c)
     -- if focus not changed, we must change screen
     if sel == capi.client.focus then
         screen.focus_bydirection(dir, scr)
-        if scr ~= capi.mouse.screen then
-            local cltbl = client.visible(capi.mouse.screen)
+        if scr ~= awful.screen.focused() then
+            local cltbl = client.visible(awful.screen.focused())
             local geomtbl = {}
             for i,cl in ipairs(cltbl) do
                 geomtbl[i] = cl:geometry()
@@ -383,7 +379,7 @@ end
 function client.swap.global_bydirection(dir, c)
     screen = screen or require("awful.screen")
     local sel = c or capi.client.focus
-    local scr = capi.mouse.screen
+    local scr = awful.screen.focused()
     if sel then
         scr = sel.screen
     end
@@ -399,7 +395,7 @@ function client.swap.global_bydirection(dir, c)
 
         -- swapping to an empty screen
         elseif sel.screen ~= c.screen and sel == c then
-            client.movetoscreen(sel, capi.mouse.screen)
+            client.movetoscreen(sel, awful.screen.focused())
 
         -- swapping to a nonempty screen
         elseif sel.screen ~= c.screen and sel ~= c then
@@ -429,7 +425,7 @@ end
 -- @param clockwise True to cycle clients clockwise.
 -- @param[opt] screen The screen where to cycle clients.
 function client.cycle(clockwise, screen)
-    local screen = screen or capi.mouse.screen
+    local screen = screen or awful.screen.focused()
     local cls = client.visible(screen)
     -- We can't rotate without at least 2 clients, buddy.
     if #cls >= 2 then
@@ -451,7 +447,7 @@ end
 -- @param[opt] screen The screen number, otherwise screen mouse is used.
 -- @return The master window.
 function client.getmaster(screen)
-    local s = screen or capi.mouse.screen
+    local s = screen or awful.screen.focused()
     return client.visible(s)[1]
 end
 
@@ -714,7 +710,7 @@ end
 -- @param s The screen to use.
 -- @return The restored client if some client was restored, otherwise nil.
 function client.restore(s)
-    local s = s or (capi.client.focus and capi.client.focus.screen) or capi.mouse.screen
+    local s = s or (capi.client.focus and capi.client.focus.screen) or awful.screen.focused()
     local cls = capi.client.get(s)
     local tags = tag.selectedlist(s)
     local mcls = {}

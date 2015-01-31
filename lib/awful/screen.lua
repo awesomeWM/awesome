@@ -46,7 +46,7 @@ end
 
 --- Give the focus to a screen, and move pointer.
 -- Keeps relative position of the pointer on the screen.
--- @param _screen Screen number.
+-- @param _screen Screen number (defaults / falls back to mouse.screen).
 function screen.focus(_screen)
     client = client or require("awful.client")
     if _screen > capi.screen.count() then _screen = capi.mouse.screen end
@@ -75,7 +75,7 @@ end
 -- @param dir The direction, can be either "up", "down", "left" or "right".
 -- @param _screen Screen number.
 function screen.focus_bydirection(dir, _screen)
-    local sel = _screen or capi.mouse.screen
+    local sel = _screen or screen.focused()
     if sel then
         local geomtbl = {}
         for s = 1, capi.screen.count() do
@@ -93,7 +93,7 @@ end
 -- @param i Value to add to the current focused screen index. 1 will focus next
 -- screen, -1 would focus the previous one.
 function screen.focus_relative(i)
-    return screen.focus(util.cycle(capi.screen.count(), capi.mouse.screen + i))
+    return screen.focus(util.cycle(capi.screen.count(), screen.focused() + i))
 end
 
 --- Get or set the screen padding.
@@ -106,6 +106,12 @@ function screen.padding(_screen, padding)
         _screen:emit_signal("padding")
     end
     return data.padding[_screen]
+end
+
+--- Get the focused screen.
+-- This can be replaced in a user's config.
+function screen.focused()
+    return capi.mouse.screen
 end
 
 capi.screen.add_signal("padding")
