@@ -1898,6 +1898,19 @@ luaA_client_get_name(lua_State *L, client_t *c)
     return 1;
 }
 
+/** Set the client name.
+ * \param L The Lua VM state.
+ * \param client The client to name.
+ * \return The number of elements pushed on stack.
+ */
+static int
+luaA_client_set_name(lua_State *L, client_t *c)
+{
+    const char *name = luaL_checkstring(L, -1);
+    client_set_name(L, 1, a_strdup(name));
+    return 0;
+}
+
 static int
 luaA_client_get_icon_name(lua_State *L, client_t *c)
 {
@@ -2329,9 +2342,9 @@ client_class_setup(lua_State *L)
                      client_methods, client_meta);
     luaA_class_set_tostring(&client_class, (lua_class_propfunc_t) client_tostring);
     luaA_class_add_property(&client_class, "name",
-                            NULL,
+                            (lua_class_propfunc_t) luaA_client_set_name,
                             (lua_class_propfunc_t) luaA_client_get_name,
-                            NULL);
+                            (lua_class_propfunc_t) luaA_client_set_name);
     luaA_class_add_property(&client_class, "transient_for",
                             NULL,
                             (lua_class_propfunc_t) luaA_client_get_transient_for,
