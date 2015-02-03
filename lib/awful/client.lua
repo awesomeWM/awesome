@@ -542,8 +542,15 @@ function client.movetoscreen(c, s)
             s = sel.screen + 1
         end
         if s > sc then s = 1 elseif s < 1 then s = sc end
-        sel.screen = s
-        screen.focus(s)
+        if sel.screen ~= s then
+            local sel_is_focused = sel == capi.client.focus
+            sel.screen = s
+            screen.focus(s)
+
+            if sel_is_focused then
+                sel:emit_signal("request::activate", "client.movetoscreen")
+            end
+        end
     end
 end
 
