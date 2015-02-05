@@ -84,6 +84,7 @@ function utils.lookup_icon(icon_file)
             table.insert(icon_theme_paths, '/usr/share/icons/' .. icon_theme .. '/')
             -- TODO also look in parent icon themes, as in freedesktop.org specification
         end
+        table.insert(icon_theme_paths, os.getenv("HOME")..'/.local/share/icons/hicolor/')
         table.insert(icon_theme_paths, '/usr/share/icons/hicolor/') -- fallback theme
 
         for i, icon_theme_directory in ipairs(icon_theme_paths) do
