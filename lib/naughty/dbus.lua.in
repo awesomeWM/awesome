@@ -47,17 +47,21 @@ dbus.config.mapping = {
 }
 
 local function sendActionInvoked(notificationId, action)
-    capi.dbus.emit_signal("session", "/org/freedesktop/Notifications",
-    "org.freedesktop.Notifications", "ActionInvoked",
-    "i", notificationId,
-    "s", action)
+    if capi.dbus then
+        capi.dbus.emit_signal("session", "/org/freedesktop/Notifications",
+        "org.freedesktop.Notifications", "ActionInvoked",
+        "i", notificationId,
+        "s", action)
+    end
 end
 
 local function sendNotificationClosed(notificationId, reason)
-    capi.dbus.emit_signal("session", "/org/freedesktop/Notifications",
-    "org.freedesktop.Notifications", "NotificationClosed",
-    "i", notificationId,
-    "i", reason)
+    if capi.dbus then
+        capi.dbus.emit_signal("session", "/org/freedesktop/Notifications",
+        "org.freedesktop.Notifications", "NotificationClosed",
+        "i", notificationId,
+        "i", reason)
+    end
 end
 
 local function convert_icon(w, h, rowstride, channels, data)
