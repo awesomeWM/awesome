@@ -64,6 +64,30 @@ local function is_format_supported(icon_file)
     return false
 end
 
+-- Split with pattern
+-- @param pString a string cut out
+-- @parma pPattern the separator
+function split(pString,pPattern)
+   local Table = {}  -- NOTE: use {n = 0} in Lua-5.0
+   local fpat = "(.-)" .. pPattern
+   local last_end = 1
+   local s, e, cap = pString:find(fpat, 1)
+   while s do
+          if s ~= 1 or cap ~= "" then
+         table.insert(Table,cap)
+          end
+          last_end = e+1
+          s, e, cap = pString:find(fpat, last_end)
+   end
+   if last_end <= #pString then
+          cap = pString:sub(last_end)
+          table.insert(Table, cap)
+   end
+   return Table
+end
+
+
+
 --- Lookup an icon in different folders of the filesystem.
 -- @param icon_file Short or full name of the icon.
 -- @return full name of the icon.
@@ -80,11 +104,14 @@ function utils.lookup_icon(icon_file)
         local icon_path = {}
         local icon_theme_paths = {}
         local icon_theme = theme.icon_theme
+        local xdg_data_dirs = os.getenv("XDG_DATA_DIRS")
         if icon_theme then
             table.insert(icon_theme_paths, '/usr/share/icons/' .. icon_theme .. '/')
             -- TODO also look in parent icon themes, as in freedesktop.org specification
         end
-        table.insert(icon_theme_paths, os.getenv("HOME")..'/.local/share/icons/hicolor/')
+        for k,path in pairs(split(xdg_data_dirs,":")) do
+            table.insert(icon_theme_paths,path )
+        end 
         table.insert(icon_theme_paths, '/usr/share/icons/hicolor/') -- fallback theme
 
         for i, icon_theme_directory in ipairs(icon_theme_paths) do
