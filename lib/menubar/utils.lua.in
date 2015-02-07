@@ -64,30 +64,6 @@ local function is_format_supported(icon_file)
     return false
 end
 
--- Split with pattern
--- @param pString a string cut out
--- @parma pPattern the separator
-function split(pString,pPattern)
-   local Table = {}  -- NOTE: use {n = 0} in Lua-5.0
-   local fpat = "(.-)" .. pPattern
-   local last_end = 1
-   local s, e, cap = pString:find(fpat, 1)
-   while s do
-          if s ~= 1 or cap ~= "" then
-         table.insert(Table,cap)
-          end
-          last_end = e+1
-          s, e, cap = pString:find(fpat, last_end)
-   end
-   if last_end <= #pString then
-          cap = pString:sub(last_end)
-          table.insert(Table, cap)
-   end
-   return Table
-end
-
-
-
 --- Lookup an icon in different folders of the filesystem.
 -- @param icon_file Short or full name of the icon.
 -- @return full name of the icon.
@@ -104,16 +80,17 @@ function utils.lookup_icon(icon_file)
         local icon_path = {}
         local icon_theme_paths = {}
         local icon_theme = theme.icon_theme
-        local xdg_data_dirs = os.getenv("XDG_DATA_DIRS")
+        local glib = require("lgi").GLib
+        local paths = glib.get_system_data_dirs()
+        table.insert(paths,1,glib.get_user_data_dir())
+        for k,dossier in ipairs(paths)do
         if icon_theme then
-            table.insert(icon_theme_paths, '/usr/share/icons/' .. icon_theme .. '/')
+            table.insert(icon_theme_paths, dossier..'/icons/' .. icon_theme .. '/')
             -- TODO also look in parent icon themes, as in freedesktop.org specification
         end
-        for k,path in pairs(split(xdg_data_dirs,":")) do
-            table.insert(icon_theme_paths,path )
-        end 
-        table.insert(icon_theme_paths, '/usr/share/icons/hicolor/') -- fallback theme
-
+     
+        table.insert(icon_theme_paths, dossier..'/icons/hicolor/') -- fallback theme
+        end
         for i, icon_theme_directory in ipairs(icon_theme_paths) do
             for j, size in ipairs(all_icon_sizes) do
                 table.insert(icon_path, icon_theme_directory .. size .. '/apps/')
@@ -124,10 +101,11 @@ function utils.lookup_icon(icon_file)
                 table.insert(icon_path, icon_theme_directory .. size .. '/status/')
             end
         end
+        for k,dossier in ipairs(paths)do
         -- lowest priority fallbacks
-        table.insert(icon_path, '/usr/share/pixmaps/')
-        table.insert(icon_path, '/usr/share/icons/')
-
+        table.insert(icon_path, dossier..'/pixmaps/')
+        table.insert(icon_path, dossier..'/icons/')
+        end
         for i, directory in ipairs(icon_path) do
             if is_format_supported(icon_file) and awful_util.file_readable(directory .. icon_file) then
                 return directory .. icon_file
