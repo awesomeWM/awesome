@@ -82,10 +82,10 @@ function utils.lookup_icon(icon_file)
         local icon_theme = theme.icon_theme
         local paths = glib.get_system_data_dirs()
         table.insert(paths,1,glib.get_user_data_dir())
+        table.insert(paths,1,glib.get_home_dir() .. '/.icons')
         for k,dir in ipairs(paths)do
             if icon_theme then
                 table.insert(icon_theme_paths, dir..'/icons/' .. icon_theme .. '/')
-                -- TODO also look in parent icon themes, as in freedesktop.org specification
             end
             table.insert(icon_theme_paths, dir..'/icons/hicolor/') -- fallback theme
         end
