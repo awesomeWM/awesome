@@ -385,6 +385,20 @@ window_get_xproperty(lua_State *L, xcb_window_t window, int prop_idx)
     return 1;
 }
 
+int
+window_has_xproperty(lua_State *L, xcb_window_t window, int prop_idx)
+{
+    const char *name = luaL_checkstring(L, prop_idx);
+    bool found = false;
+    foreach(prop, globalconf.xproperties)
+        if (A_STREQ(prop->name, name)) {
+            found = true;
+            break;
+        }
+    lua_pushboolean(L, found);
+    return 1;
+}
+
 /** Set an xproperty.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
@@ -405,6 +419,17 @@ luaA_window_get_xproperty(lua_State *L)
 {
     window_t *w = luaA_checkudata(L, 1, &window_class);
     return window_get_xproperty(L, w->window, 2);
+}
+
+/** Check if an xproperty exists / has been registered.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ */
+static int
+luaA_window_has_xproperty(lua_State *L)
+{
+    window_t *w = luaA_checkudata(L, 1, &window_class);
+    return window_has_xproperty(L, w->window, 2);
 }
 
 /** Translate a window_type_t into the corresponding EWMH atom.
@@ -473,6 +498,7 @@ window_class_setup(lua_State *L)
         { "buttons", luaA_window_buttons },
         { "set_xproperty", luaA_window_set_xproperty },
         { "get_xproperty", luaA_window_get_xproperty },
+        { "has_xproperty", luaA_window_has_xproperty },
         { NULL, NULL }
     };
 
