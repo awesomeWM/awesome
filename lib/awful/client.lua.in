@@ -874,7 +874,7 @@ function client.property.get(c, prop)
     if not client.data.persistent_properties_loaded[c] then
         client.data.persistent_properties_loaded[c] = true
         for p in pairs(client.data.persistent_properties_registered) do
-            local value = c:get_xproperty("awful.client.property." .. prop)
+            local value = c:get_xproperty("awful.client.property." .. p)
             if value ~= nil then
                 client.property.set(c, p, value)
             end
