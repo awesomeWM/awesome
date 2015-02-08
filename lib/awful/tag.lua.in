@@ -31,6 +31,12 @@ local data = {}
 data.history = {}
 data.tags = setmetatable({}, { __mode = 'k' })
 
+data.properties = setmetatable({}, { __mode = 'k' })
+data.persistent_properties_registered = {} -- keys are names of persistent properties, value is the type.
+data.persistent_properties_loaded = setmetatable({}, { __mode = 'k' }) -- keys are tags, value always true.
+
+tag.property = {}
+
 -- History functions
 tag.history = {}
 tag.history.limit = 20
@@ -86,10 +92,10 @@ end
 function tag.add(name, props)
     local properties = props or {}
 
-    -- Be sure to set the screen before the tag is activated to avoid function
+    -- Be sure to set the screen before the tag is activated to avoid functions
     -- connected to property::activated to be called without a valid tag.
-    -- set properies cannot be used as this has to be set before the first signal
-    -- is sent
+    -- "property.set" cannot be used as this has to be set before the first
+    -- signal is sent.
     properties.screen = properties.screen or capi.mouse.screen
 
     -- Index is also required
@@ -97,8 +103,12 @@ function tag.add(name, props)
 
     local newtag = capi.tag{ name = name }
 
-    -- Start with a fresh property table to avoid collisions with unsupported data
+    -- Start with a fresh property table to avoid collisions with unsupported data.
     data.tags[newtag] = {screen=properties.screen, index=properties.index}
+
+    for p, type in pairs(data.persistent_properties_registered) do
+        tag.property.persist_for_tag(newtag, p, type)
+    end
 
     newtag.activated = true
 
@@ -557,23 +567,101 @@ end
 -- @tparam string prop The property name.
 -- @return The property.
 function tag.getproperty(_tag, prop)
-    if data.tags[_tag] then
-        return data.tags[_tag][prop]
+    util.deprecate("awful.tag.property.get")
+    return tag.property.get(_tag, prop)
+end
+
+function tag.setproperty(_tag, prop, value)
+    util.deprecate("awful.tag.property.set")
+    return tag.property.set(_tag, prop, value)
+end
+
+
+function tag.get_id(t)
+    return data.tags[t].screen .. '_' .. t.name
+end
+
+--- Get a tag property.
+-- @param _tag The tag.
+-- @param prop The property name.
+-- @return The property value.
+function tag.property.get(t, prop)
+    if t and not data.persistent_properties_loaded[t] then
+        data.persistent_properties_loaded[t] = true
+        for p in pairs(data.persistent_properties_registered) do
+            local value = awesome.get_xproperty("awful.tag.property."
+                .. tag.get_id(t) .. '.' .. p)
+            if value ~= nil then
+                if p == "layout" then
+                    -- HACK
+                    local alayout = require("awful.layout")
+                    value = alayout.get_by_name(value)
+                end
+                if value ~= nil then
+                    tag.property.set(t, p, value)
+                end
+            end
+            print("GET: awful.tag.property."
+                            .. tag.get_id(t) .. '.' .. p .. ' => ' .. tostring(value))
+        end
+    end
+    if data.tags[t] then
+        return data.tags[t][prop]
     end
 end
 
 --- Set a tag property.
--- This properties are internal to awful. Some are used to draw taglist, or to
+-- These properties are internal to awful. Some are used to draw taglist, or to
 -- handle layout, etc.
--- @param _tag The tag.
+-- @param t The tag.
 -- @param prop The property name.
 -- @param value The value.
-function tag.setproperty(_tag, prop, value)
-    if not data.tags[_tag] then
-        data.tags[_tag] = {}
+function tag.property.set(t, prop, value)
+    if not data.tags[t] then
+        data.tags[t] = {}
     end
-    data.tags[_tag][prop] = value
-    _tag:emit_signal("property::" .. prop)
+    if prop == "layout" then
+        if type(value) == "string" then
+            local alayout = require("awful.layout")
+            value = alayout.get_by_name(value)
+        end
+    end
+    if data.persistent_properties_registered[prop] then
+        local xprop = "awful.tag.property." .. tag.get_id(t) .. '.' .. prop
+        local xvalue = prop == "layout" and value and value.name or value
+        print("SET: " .. xprop .. " => " .. tostring(xvalue))
+        awesome.set_xproperty(xprop, xvalue)
+    end
+    data.tags[t][prop] = value
+    t:emit_signal("property::" .. prop)
+end
+
+function tag.property.persist_for_tag(t, prop, type)
+    xprop = "awful.tag.property." .. tag.get_id(t) .. "." .. prop
+    print("REGISTER: awful.tag.property." .. tag.get_id(t) .. "." .. prop)
+    awesome.register_xproperty(xprop, type)
+end
+
+--- Set a tag property to be persistent across restarts (via X properties).
+-- @param t The tag.
+-- @param prop The property name.
+-- @param type The type (used for register_xproperty).
+--             One of "string", "number" or "boolean".
+function tag.property.persist(prop, type)
+    local xprop
+    for _, t in ipairs(root.tags()) do
+        tag.property.persist_for_tag(t, prop, type)
+    end
+
+    -- Make already-set properties persistent
+    for t in pairs(data.properties) do
+        if data.properties[t] and data.properties[t][prop] ~= nil then
+            xprop = "awful.tag.property." .. tag.get_id(t) .. "." .. prop
+            awesome.set_xproperty(xprop, data.properties[t][prop])
+        end
+    end
+
+    data.persistent_properties_registered[prop] = type
 end
 
 --- Tag a client with the set of current tags.
@@ -685,6 +773,10 @@ capi.screen.add_signal("tag::history::update")
 for s = 1, capi.screen.count() do
     capi.screen[s]:connect_signal("tag::history::update", tag.history.update)
 end
+
+-- Register persistent properties.
+-- This uses the screen and index properties for the key/name.
+tag.property.persist("layout", "string")
 
 function tag.mt:__call(...)
     return tag.new(...)
