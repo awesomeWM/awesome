@@ -49,9 +49,8 @@ local all_icon_sizes = {
     '16x16'
 }
 
--- List of supported icon formats. Ignore SVG because Awesome doesn't
--- support it.
-local icon_formats = { "png", "xpm" }
+-- List of supported icon formats.
+local icon_formats = { "png", "xpm", "svg" }
 
 -- Check whether the icon format is supported.
 -- @param icon_file Filename of the icon.
