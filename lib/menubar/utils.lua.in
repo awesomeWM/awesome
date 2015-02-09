@@ -65,6 +65,40 @@ local function is_format_supported(icon_file)
     return false
 end
 
+local icon_lookup_path = nil
+local function get_icon_lookup_path()
+    if not icon_lookup_path then
+        icon_lookup_path = {}
+        local icon_theme_paths = {}
+        local icon_theme = theme.icon_theme
+        local paths = glib.get_system_data_dirs()
+        table.insert(paths, 1, glib.get_user_data_dir())
+        table.insert(paths, 1, glib.get_home_dir() .. '/.icons')
+        for k,dir in ipairs(paths)do
+            if icon_theme then
+                table.insert(icon_theme_paths, dir..'/icons/' .. icon_theme .. '/')
+            end
+            table.insert(icon_theme_paths, dir..'/icons/hicolor/') -- fallback theme
+        end
+        for i, icon_theme_directory in ipairs(icon_theme_paths) do
+            for j, size in ipairs(all_icon_sizes) do
+                table.insert(icon_lookup_path, icon_theme_directory .. size .. '/apps/')
+                table.insert(icon_lookup_path, icon_theme_directory .. size .. '/actions/')
+                table.insert(icon_lookup_path, icon_theme_directory .. size .. '/devices/')
+                table.insert(icon_lookup_path, icon_theme_directory .. size .. '/places/')
+                table.insert(icon_lookup_path, icon_theme_directory .. size .. '/categories/')
+                table.insert(icon_lookup_path, icon_theme_directory .. size .. '/status/')
+            end
+        end
+        for k,dir in ipairs(paths)do
+            -- lowest priority fallbacks
+            table.insert(icon_lookup_path, dir..'/pixmaps/')
+            table.insert(icon_lookup_path, dir..'/icons/')
+        end
+    end
+    return icon_lookup_path
+end
+
 --- Lookup an icon in different folders of the filesystem.
 -- @param icon_file Short or full name of the icon.
 -- @return full name of the icon.
@@ -76,36 +110,9 @@ function utils.lookup_icon(icon_file)
     if icon_file:sub(1, 1) == '/' and is_format_supported(icon_file) then
         -- If the path to the icon is absolute and its format is
         -- supported, do not perform a lookup.
-        return icon_file
+        return awful_util.file_readable(icon_file) and icon_file or nil
     else
-        local icon_path = {}
-        local icon_theme_paths = {}
-        local icon_theme = theme.icon_theme
-        local paths = glib.get_system_data_dirs()
-        table.insert(paths,1,glib.get_user_data_dir())
-        table.insert(paths,1,glib.get_home_dir() .. '/.icons')
-        for k,dir in ipairs(paths)do
-            if icon_theme then
-                table.insert(icon_theme_paths, dir..'/icons/' .. icon_theme .. '/')
-            end
-            table.insert(icon_theme_paths, dir..'/icons/hicolor/') -- fallback theme
-        end
-        for i, icon_theme_directory in ipairs(icon_theme_paths) do
-            for j, size in ipairs(all_icon_sizes) do
-                table.insert(icon_path, icon_theme_directory .. size .. '/apps/')
-                table.insert(icon_path, icon_theme_directory .. size .. '/actions/')
-                table.insert(icon_path, icon_theme_directory .. size .. '/devices/')
-                table.insert(icon_path, icon_theme_directory .. size .. '/places/')
-                table.insert(icon_path, icon_theme_directory .. size .. '/categories/')
-                table.insert(icon_path, icon_theme_directory .. size .. '/status/')
-            end
-        end
-        for k,dir in ipairs(paths)do
-            -- lowest priority fallbacks
-            table.insert(icon_path, dir..'/pixmaps/')
-            table.insert(icon_path, dir..'/icons/')
-        end
-        for i, directory in ipairs(icon_path) do
+        for i, directory in ipairs(get_icon_lookup_path()) do
             if is_format_supported(icon_file) and awful_util.file_readable(directory .. icon_file) then
                 return directory .. icon_file
             else
