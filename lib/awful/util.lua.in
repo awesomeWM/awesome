@@ -30,13 +30,21 @@ util.table = {}
 
 util.shell = os.getenv("SHELL") or "/bin/sh"
 
+local displayed_deprecations = {}
+--- Display a deprecation notice, but only once per traceback.
+-- @param see Optional message to a new method / function to use.
 function util.deprecate(see)
+    local tb = debug.traceback()
+    if util.table.hasitem(displayed_deprecations, tb) then
+        return
+    end
+    table.insert(displayed_deprecations, tb)
     io.stderr:write("W: awful: function is deprecated")
     if see then
         io.stderr:write(", see " .. see)
     end
     io.stderr:write("\n")
-    io.stderr:write(debug.traceback())
+    io.stderr:write(tb)
 end
 
 --- Strip alpha part of color.
