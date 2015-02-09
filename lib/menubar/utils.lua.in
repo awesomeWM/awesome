@@ -82,11 +82,6 @@ local function get_icon_lookup_path()
         for i, icon_theme_directory in ipairs(icon_theme_paths) do
             for j, size in ipairs(all_icon_sizes) do
                 table.insert(icon_lookup_path, icon_theme_directory .. size .. '/apps/')
-                table.insert(icon_lookup_path, icon_theme_directory .. size .. '/actions/')
-                table.insert(icon_lookup_path, icon_theme_directory .. size .. '/devices/')
-                table.insert(icon_lookup_path, icon_theme_directory .. size .. '/places/')
-                table.insert(icon_lookup_path, icon_theme_directory .. size .. '/categories/')
-                table.insert(icon_lookup_path, icon_theme_directory .. size .. '/status/')
             end
         end
         for k,dir in ipairs(paths)do
