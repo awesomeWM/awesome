@@ -179,6 +179,7 @@ end
 -- Create the menubar wibox and widgets.
 local function initialize()
     instance.wibox = wibox({})
+    menubar.utils.icon_path = menubar.utils.init_paths()
     instance.widget = menubar.get()
     instance.wibox.ontop = true
     instance.prompt = awful.widget.prompt()
@@ -186,6 +187,7 @@ local function initialize()
     layout:add(instance.prompt)
     layout:add(instance.widget)
     instance.wibox:set_widget(layout)
+   
 end
 
 --- Refresh menubar's cache by reloading .desktop files.
