@@ -83,6 +83,7 @@ function imagebox:set_image(image)
         local success, result = pcall(surface.load, image)
         if not success then
             print("Error while reading '" .. image .. "': " .. result)
+            print(debug.traceback())
             return false
         end
         image = result
