@@ -234,4 +234,4 @@ end
 
 return setmetatable(tooltip, tooltip.mt)
 
--- vim: ft=lua:et:sw=4:ts=4:sts=4:enc=utf-8:tw=78
+-- vim: ft=lua:et:sw=4:ts=4:sts=4:tw=78
