@@ -114,8 +114,13 @@ local function screen_change(window)
     end
 end
 
--- Update a client's settings when its border width changes
-local function border_change(window)
+-- Update a client's settings when its geometry changes, skipping signals
+-- resulting from calls within.
+local geometry_change_lock = false
+local function geometry_change(window)
+    if geometry_change_lock then return end
+    geometry_change_lock = true
+
     -- Fix up the geometry in case this window needs to cover the whole screen.
     local bw = window.border_width or 0
     local g = screen[window.screen].workarea
@@ -126,11 +131,11 @@ local function border_change(window)
         window:geometry { width = g.width - 2*bw, x = g.x }
     end
     if window.fullscreen then
-        -- This *will* cause an endless loop if some other property::border_width
-        -- signal dares to change the border width, too, so don't do that!
         window.border_width = 0
         window:geometry(screen[window.screen].geometry)
     end
+
+    geometry_change_lock = false
 end
 
 -- Activate a window
@@ -159,7 +164,8 @@ client.connect_signal("request::maximized_horizontal", maximized_horizontal)
 client.connect_signal("request::maximized_vertical", maximized_vertical)
 client.connect_signal("request::fullscreen", fullscreen)
 client.connect_signal("property::screen", screen_change)
-client.connect_signal("property::border_width", border_change)
+client.connect_signal("property::border_width", geometry_change)
+client.connect_signal("property::geometry", geometry_change)
 
 return ewmh
 
