@@ -32,7 +32,7 @@ data.history = {}
 data.tags = setmetatable({}, { __mode = 'k' })
 
 data.properties = setmetatable({}, { __mode = 'k' })
-data.persistent_properties_registered = {} -- keys are names of persistent properties, value is the type.
+data.persistent_properties_registered = {} -- keys are names of persistent properties, value is a table of {type, conversion_function}.
 data.persistent_properties_loaded = setmetatable({}, { __mode = 'k' }) -- keys are tags, value always true.
 
 tag.property = {}
@@ -106,8 +106,8 @@ function tag.add(name, props)
     -- Start with a fresh property table to avoid collisions with unsupported data.
     data.tags[newtag] = {screen=properties.screen, index=properties.index}
 
-    for p, type in pairs(data.persistent_properties_registered) do
-        tag.property.persist_for_tag(newtag, p, type)
+    for p, pmeta in pairs(data.persistent_properties_registered) do
+        tag.property.persist_for_tag(newtag, p, pmeta.type)
     end
 
     newtag.activated = true
@@ -584,6 +584,9 @@ end
 
 
 function tag.get_id(t)
+    if not data.tags[t] then
+        return nil
+    end
     return data.tags[t].screen .. '_' .. t.name
 end
 
@@ -594,17 +597,17 @@ end
 function tag.property.get(t, prop)
     if t and not data.persistent_properties_loaded[t] then
         data.persistent_properties_loaded[t] = true
-        for p in pairs(data.persistent_properties_registered) do
-            local value = awesome.get_xproperty("awful.tag.property."
+        for p, pmeta in pairs(data.persistent_properties_registered) do
+            local xvalue = awesome.get_xproperty("awful.tag.property."
                 .. tag.get_id(t) .. '.' .. p)
-            if value ~= nil then
-                if p == "layout" then
-                    -- HACK
-                    local alayout = require("awful.layout")
-                    value = alayout.get_by_name(value)
+            local value
+
+            if xvalue ~= nil then
+                if pmeta and pmeta.convert_f then
+                    value = pmeta.convert_f.from_xproperty(xvalue)
                 end
                 if value ~= nil then
-                    tag.property.set(t, p, value)
+                    tag.property.set(t, p, value, true)  -- Skip setting xproperty again.
                 end
             end
             print("GET: awful.tag.property."
@@ -622,20 +625,22 @@ end
 -- @param t The tag.
 -- @param prop The property name.
 -- @param value The value.
-function tag.property.set(t, prop, value)
+-- @param skip_xprop Skip setting the X property (internal).
+function tag.property.set(t, prop, value, skip_xprop)
+    assert(type(t) == "tag", "tag.property.set: "..type(t).." given instead of tag.")
     if not data.tags[t] then
         data.tags[t] = {}
     end
-    if prop == "layout" then
-        if type(value) == "string" then
-            local alayout = require("awful.layout")
-            value = alayout.get_by_name(value)
-        end
-    end
-    if data.persistent_properties_registered[prop] then
+    if not skip_xprop and data.persistent_properties_registered[prop] then
         local xprop = "awful.tag.property." .. tag.get_id(t) .. '.' .. prop
-        local xvalue = prop == "layout" and value and value.name or value
-        print("SET: " .. xprop .. " => " .. tostring(xvalue))
+        local xvalue
+
+        local pmeta = data.persistent_properties_registered[prop]
+        if pmeta and pmeta.convert_f then
+            xvalue = pmeta.convert_f.to_xproperty(value)
+        else
+            xvalue = value
+        end
         awesome.set_xproperty(xprop, xvalue)
     end
     data.tags[t][prop] = value
@@ -644,16 +649,38 @@ end
 
 function tag.property.persist_for_tag(t, prop, type)
     xprop = "awful.tag.property." .. tag.get_id(t) .. "." .. prop
-    print("REGISTER: awful.tag.property." .. tag.get_id(t) .. "." .. prop)
     awesome.register_xproperty(xprop, type)
 end
+
+
+-- Helper methods for conversion from/to X properties.
+-- These need to get cleaned up / refactored.
+local convert_float = {}
+convert_float.to_xproperty = function (float)
+    return tostring(float)
+end
+convert_float.from_xproperty = function (s)
+    return tonumber(s)
+end
+
+local convert_layout = {}
+convert_layout.to_xproperty = function (layout)
+    return layout.name
+end
+convert_layout.from_xproperty = function (s)
+    local alayout = require("awful.layout")
+    return alayout.get_by_name(s)
+end
+
 
 --- Set a tag property to be persistent across restarts (via X properties).
 -- @param t The tag.
 -- @param prop The property name.
 -- @param type The type (used for register_xproperty).
 --             One of "string", "number" or "boolean".
-function tag.property.persist(prop, type)
+-- @param convert_f Table object with to_xproperty/from_xproperty
+--                  functions, for conversion.
+function tag.property.persist(prop, type, convert_f)
     local xprop
     for _, t in ipairs(root.tags()) do
         tag.property.persist_for_tag(t, prop, type)
@@ -667,7 +694,9 @@ function tag.property.persist(prop, type)
         end
     end
 
-    data.persistent_properties_registered[prop] = type
+    data.persistent_properties_registered[prop] = {
+        type=type, convert_f=convert_f
+    }
 end
 
 --- Tag a client with the set of current tags.
@@ -692,7 +721,7 @@ end
 
 local function attached_connect_signal_screen(screen, sig, func)
     capi.tag.connect_signal(sig, function(_tag, ...)
-        if tag.getscreen(_tag) == screen then
+        if _tag.activated and tag.getscreen(_tag) == screen then
             func(_tag)
         end
     end)
@@ -782,7 +811,13 @@ end
 
 -- Register persistent properties.
 -- This uses the screen and index properties for the key/name.
-tag.property.persist("layout", "string")
+tag.property.persist("hide",       "boolean")
+tag.property.persist("icon",       "string")
+tag.property.persist("layout",     "string", convert_layout)
+tag.property.persist("mwfact",     "string", convert_float)
+tag.property.persist("ncol",       "number")
+tag.property.persist("nmaster",    "number")
+tag.property.persist("windowfact", "string", convert_float)
 
 function tag.mt:__call(...)
     return tag.new(...)
