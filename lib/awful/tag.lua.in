@@ -6,7 +6,6 @@
 
 -- Grab environment we need
 local util = require("awful.util")
-local timer = require("gears.timer")
 local tostring = tostring
 local pairs = pairs
 local ipairs = ipairs
