@@ -16,6 +16,7 @@ local capi = {
     client = client
 }
 local client = require("awful.client")
+local timer = require("gears.timer")
 
 --- Layout module for awful
 -- awful.layout
@@ -96,22 +97,26 @@ end
 function layout.arrange(screen)
     if arrange_lock then return end
     arrange_lock = true
-    local p = {}
-    p.workarea = capi.screen[screen].workarea
-    -- Handle padding
-    local padding = ascreen.padding(capi.screen[screen])
-    if padding then
-        p.workarea.x = p.workarea.x + (padding.left or 0)
-        p.workarea.y = p.workarea.y + (padding.top or 0)
-        p.workarea.width = p.workarea.width - ((padding.left or 0 ) + (padding.right or 0))
-        p.workarea.height = p.workarea.height - ((padding.top or 0) + (padding.bottom or 0))
-    end
-    p.geometry = capi.screen[screen].geometry
-    p.clients = client.tiled(screen)
-    p.screen = screen
-    layout.get(screen).arrange(p)
-    capi.screen[screen]:emit_signal("arrange")
-    arrange_lock = false
+
+    timer.delayed_call(function()
+        local p = {}
+        p.workarea = capi.screen[screen].workarea
+        -- Handle padding
+        local padding = ascreen.padding(capi.screen[screen])
+        if padding then
+            p.workarea.x = p.workarea.x + (padding.left or 0)
+            p.workarea.y = p.workarea.y + (padding.top or 0)
+            p.workarea.width = p.workarea.width - ((padding.left or 0 ) + (padding.right or 0))
+            p.workarea.height = p.workarea.height - ((padding.top or 0) + (padding.bottom or 0))
+        end
+        p.geometry = capi.screen[screen].geometry
+        p.clients = client.tiled(screen)
+        p.screen = screen
+        layout.get(screen).arrange(p)
+        capi.screen[screen]:emit_signal("arrange")
+
+        arrange_lock = false
+    end)
 end
 
 --- Get the current layout name.
