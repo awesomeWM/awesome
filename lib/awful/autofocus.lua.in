@@ -8,6 +8,7 @@ local client = client
 local screen = screen
 local aclient = require("awful.client")
 local atag = require("awful.tag")
+local timer = require("gears.timer")
 
 --- When loaded, this module makes sure that there's always a client that will have focus
 -- on events such as tag switching, client unmanaging, etc.
@@ -23,6 +24,12 @@ local function check_focus(obj)
     end
 end
 
+-- Check client focus (delayed).
+-- @param obj An object that should have a .screen property.
+local function check_focus_delayed(obj)
+    timer.delayed_call(check_focus, {screen = obj.screen})
+end
+
 -- Give focus on tag selection change.
 -- @param tag A tag object
 local function check_focus_tag(t)
@@ -35,11 +42,13 @@ local function check_focus_tag(t)
     end
 end
 
-atag.attached_connect_signal(nil, "property::selected", check_focus_tag)
-client.connect_signal("unmanage", check_focus)
-client.connect_signal("tagged", check_focus)
-client.connect_signal("untagged", check_focus)
-client.connect_signal("property::hidden", check_focus)
-client.connect_signal("property::minimized", check_focus)
+tag.connect_signal("property::selected", function (t)
+    timer.delayed_call(check_focus_tag, t)
+end)
+client.connect_signal("unmanage",            check_focus_delayed)
+client.connect_signal("tagged",              check_focus_delayed)
+client.connect_signal("untagged",            check_focus_delayed)
+client.connect_signal("property::hidden",    check_focus_delayed)
+client.connect_signal("property::minimized", check_focus_delayed)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
