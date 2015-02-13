@@ -102,23 +102,24 @@ timer.new = function(args)
     return ret
 end
 
-local delayed_calls = {}
-capi.awesome.connect_signal("refresh", function()
-    for _, callback in ipairs(delayed_calls) do
-        local success, message = pcall(unpack(callback))
-        if not success then
-            print(message)
-        end
-    end
-    delayed_calls = {}
-end)
-
---- Call the given function at the end of the current main loop iteration
+--- Call the given function at the end of the current main loop iteration.
+-- The function will be called once by default.  You can return true to be
+-- called again.
 -- @tparam function callback The function that should be called
 -- @param ... Arguments to the callback function
 function timer.delayed_call(callback, ...)
     assert(type(callback) == "function", "callback must be a function, got: " .. type(callback))
-    table.insert(delayed_calls, { callback, ... })
+
+    local callback = { callback, ... }
+    glib.idle_add(glib.PRIORITY_DEFAULT_IDLE, function()
+        local success, message = pcall(unpack(callback))
+        if not success then
+            print("Error in delayed_call: " .. tostring(message))
+        elseif message ~= nil then
+            return message  -- Allow to control being called again.
+        end
+        return false  -- Only call it once.
+    end)
 end
 
 function timer.mt:__call(...)
