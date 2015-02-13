@@ -253,9 +253,14 @@ luaA_object_emit_signal(lua_State *L, int oud,
                         const char *name, int nargs)
 {
     int oud_abs = luaA_absindex(L, oud);
-    lua_object_t *obj = lua_touserdata(L, oud);
+    lua_class_t *lua_class = luaA_class_get(L, oud);
+    lua_object_t *obj = luaA_toudata(L, oud, lua_class);
     if(!obj) {
         warn("Trying to emit signal '%s' on non-object", name);
+        return;
+    }
+    else if(lua_class->checker && !lua_class->checker(obj)) {
+        warn("Trying to emit signal '%s' on invalid object", name);
         return;
     }
     signal_t *sigfound = signal_array_getbyid(&obj->signals,
