@@ -210,14 +210,14 @@ function utils.parse_dir(dir)
 end
 
 --- Slice a table to given range.
--- @param original_table Original table.
--- @param range_start Range start.
--- @param range_finish Range finish.
--- @return A sliced table.
+-- @tparam table original_table Original table.
+-- @tparam number range_start Range start.
+-- @tparam number range_finish Range finish.
+-- @treturn table A sliced table.
 function utils.table_range(original_table, range_start, range_finish)
     range_finish = range_finish or #original_table
     local result = {}
-    for i=range_start,range_finish do
+    for i = range_start, range_finish do
         table.insert(result, original_table[i])
     end
     return result
