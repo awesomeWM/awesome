@@ -76,8 +76,12 @@ function common.list_update(w, buttons, label, data, objects)
 
         local text, bg, bg_image, icon = label(o)
         -- The text might be invalid, so use pcall
-        if not pcall(tb.set_markup, tb, text) then
-            tb:set_markup("<i>&lt;Invalid text&gt;</i>")
+        if text == nil or text == "" then
+            m:set_margins(0)
+        else
+            if not pcall(tb.set_markup, tb, text) then
+                tb:set_markup("<i>&lt;Invalid text&gt;</i>")
+            end
         end
         bgb:set_bg(bg)
         if type(bg_image) == "function" then
