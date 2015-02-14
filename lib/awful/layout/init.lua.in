@@ -92,13 +92,18 @@ function layout.set(_layout, t)
     tag.setproperty(t, "layout", _layout)
 end
 
+-- Delay one arrange call per screen.
+local delayed_arrange = {}
 --- Arrange a screen using its current layout.
 -- @param screen The screen to arrange.
 function layout.arrange(screen)
-    if arrange_lock then return end
-    arrange_lock = true
+    if delayed_arrange[screen] then return end
+    delayed_arrange[screen] = true
 
     timer.delayed_call(function()
+        if arrange_lock then return end
+        arrange_lock = true
+
         local p = {}
         p.workarea = capi.screen[screen].workarea
         -- Handle padding
@@ -116,6 +121,7 @@ function layout.arrange(screen)
         capi.screen[screen]:emit_signal("arrange")
 
         arrange_lock = false
+        delayed_arrange[screen] = nil
     end)
 end
 
