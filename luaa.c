@@ -474,6 +474,7 @@ luaA_init(xdgHandle* xdg)
     signal_add(&global_signals, "systray::update");
     signal_add(&global_signals, "wallpaper_changed");
     signal_add(&global_signals, "refresh");
+    signal_add(&global_signals, "startup");
     signal_add(&global_signals, "exit");
 }
 
@@ -585,6 +586,13 @@ luaA_class_newindex_miss_property(lua_State *L, lua_object_t *obj)
 {
     signal_object_emit(L, &global_signals, "debug::newindex::miss", 3);
     return 0;
+}
+
+void
+luaA_emit_startup()
+{
+    lua_State *L = globalconf_get_lua_State();
+    signal_object_emit(L, &global_signals, "startup", 0);
 }
 
 void

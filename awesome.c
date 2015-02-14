@@ -539,7 +539,7 @@ main(int argc, char **argv)
     /* scan existing windows */
     scan(tree_c);
 
-    xcb_flush(globalconf.connection);
+    luaA_emit_startup();
 
     /* Setup the main context */
     g_main_context_set_poll_func(g_main_context_default(), &a_glib_poll);
