@@ -545,10 +545,6 @@ main(int argc, char **argv)
     g_main_context_set_poll_func(g_main_context_default(), &a_glib_poll);
     gettimeofday(&last_wakeup, NULL);
 
-    /* Do all deferred work now once outside of the loop to get awesome.startup
-     * right. */
-    awesome_refresh();
-
     /* main event loop */
     globalconf.loop = g_main_loop_new(NULL, FALSE);
     g_main_loop_run(globalconf.loop);
