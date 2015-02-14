@@ -632,9 +632,7 @@ capi.client.connect_signal("manage", function(c)
     c:connect_signal("property::screen", tag.withcurrent)
 end)
 
-capi.client.connect_signal("manage", function(c)
-    timer.delayed_call(tag.withcurrent, c)
-end)
+capi.client.connect_signal("manage", tag.withcurrent)
 capi.tag.connect_signal("request::select", tag.viewonly)
 
 capi.tag.add_signal("property::hide")

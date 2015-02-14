@@ -12,7 +12,6 @@ local ipairs = ipairs
 local pairs = pairs
 local aclient = require("awful.client")
 local atag = require("awful.tag")
-local timer = require("gears.timer")
 
 --- Apply rules to clients at startup.
 -- awful.rules
@@ -235,10 +234,7 @@ function rules.execute(c, props, callbacks)
     -- Do this at last so we do not erase things done by the focus
     -- signal.
     if props.focus and (type(props.focus) ~= "function" or props.focus(c)) then
-        local cb = function(c)
-            c:emit_signal('request::activate', "rules")
-        end
-        timer.delayed_call(cb, c)
+        c:emit_signal('request::activate',"rules")
     end
 end
 
