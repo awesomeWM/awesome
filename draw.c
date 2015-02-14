@@ -95,7 +95,6 @@ free_data(void *data)
 }
 
 /** Create a surface object from this image data.
- * \param L The lua stack.
  * \param width The width of the image.
  * \param height The height of the image
  * \param data The image's data in ARGB format, will be copied by this function.

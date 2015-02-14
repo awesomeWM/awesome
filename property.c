@@ -338,8 +338,6 @@ property_update_wm_protocols(client_t *c, xcb_get_property_cookie_t cookie)
 /** The property notify event handler.
  * \param state currently unused
  * \param window The window to obtain update the property with.
- * \param name The protocol atom, currently unused.
- * \param reply (Optional) An existing reply.
  */
 static int
 property_handle_xembed_info(uint8_t state,

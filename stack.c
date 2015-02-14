@@ -88,7 +88,7 @@ stack_window_above(xcb_window_t w, xcb_window_t previous)
 }
 
 /** Stack a client above.
- * \param client The client.
+ * \param c The client.
  * \param previous The previous client on the stack.
  * \return The next-previous!
  */

@@ -42,7 +42,7 @@ static signal_array_t dbus_signals;
 
 /** Clean up the D-Bus connection data members
  * \param dbus_connection The D-Bus connection to clean up
- * \param dbusio The D-Bus event watcher
+ * \param source The D-Bus source
  */
 static void
 a_dbus_cleanup_bus(DBusConnection *dbus_connection, GSource **source)
@@ -459,7 +459,7 @@ a_dbus_process_request(DBusConnection *dbus_connection, DBusMessage *msg)
 
 /** Attempt to process all the requests in the D-Bus connection.
  * \param dbus_connection The D-Bus connection to process from
- * \param dbusio The D-Bus event watcher
+ * \param source The D-Bus source
  */
 static void
 a_dbus_process_requests_on_bus(DBusConnection *dbus_connection, GSource **source)
@@ -493,8 +493,7 @@ a_dbus_process_requests_on_bus(DBusConnection *dbus_connection, GSource **source
 }
 
 /** Foreword D-Bus process session requests on too the correct function.
- * \param w The D-Bus event watcher
- * \param revents (not used)
+ * \param data
  */
 static gboolean
 a_dbus_process_requests_session(gpointer data)
@@ -504,8 +503,7 @@ a_dbus_process_requests_session(gpointer data)
 }
 
 /** Foreword D-Bus process system requests on too the correct function.
- * \param w The D-Bus event watcher
- * \param revents (not used)
+ * \param data
  */
 static gboolean
 a_dbus_process_requests_system(gpointer data)

@@ -24,7 +24,6 @@
 #include "objects/client.h"
 
 /** Reban windows following current selected tags.
- * \param screen The screen to arrange.
  */
 void
 banning_need_update(void)
