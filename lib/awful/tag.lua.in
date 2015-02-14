@@ -632,7 +632,40 @@ capi.client.connect_signal("manage", function(c)
     c:connect_signal("property::screen", tag.withcurrent)
 end)
 
+-- Keep track of the number of urgent clients.
+local function update_urgent(c,t)
+    local modif = c.urgent == true and 1 or -1
+    local count = tag.getproperty(t,"urgent_count")  or 0
+    count = (count + modif) >= 0 and (count + modif) or 0
+    tag.setproperty(t,"urgent"      , count > 0)
+    tag.setproperty(t,"urgent_count", count    )
+end
+
+-- Update the urgent counter when a client is tagged.
+local function client_tagged(c,t)
+    if c.urgent then
+        update_urgent(c,t)
+    end
+end
+
+-- Update the urgent counter when a client is untagged.
+local function client_untagged(c,t)
+    if c.urgent then
+        update_urgent(c,t)
+    end
+end
+
+-- Count the urgent clients.
+local function urgent_callback(c)
+    for k,t in ipairs(c:tags()) do
+        update_urgent(c,t)
+    end
+end
+
+capi.client.connect_signal("property::urgent", urgent_callback)
 capi.client.connect_signal("manage", tag.withcurrent)
+capi.client.connect_signal("untagged", client_untagged)
+capi.client.connect_signal("tagged", client_tagged)
 capi.tag.connect_signal("request::select", tag.viewonly)
 
 capi.tag.add_signal("property::hide")
@@ -644,6 +677,8 @@ capi.tag.add_signal("property::nmaster")
 capi.tag.add_signal("property::windowfact")
 capi.tag.add_signal("property::screen")
 capi.tag.add_signal("property::index")
+capi.tag.add_signal("property::urgent")
+capi.tag.add_signal("property::urgent_count")
 
 capi.screen.add_signal("tag::history::update")
 for s = 1, capi.screen.count() do

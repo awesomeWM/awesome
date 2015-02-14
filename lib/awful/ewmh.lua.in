@@ -10,6 +10,7 @@ local screen = screen
 local ipairs = ipairs
 local math = math
 local atag = require("awful.tag")
+local aclient = require("awful.client")
 
 --- Implements EWMH requests handling.
 -- awful.ewmh
@@ -158,8 +159,15 @@ function ewmh.tag(c, t)
     end
 end
 
+function ewmh.urgent(c, urgent)
+    if c ~= client.focus and not aclient.property.get(c,"ignore_urgent") then
+        c.urgent = urgent
+    end
+end
+
 client.connect_signal("request::activate", ewmh.activate)
 client.connect_signal("request::tag", ewmh.tag)
+client.connect_signal("request::urgent", ewmh.urgent)
 client.connect_signal("request::maximized_horizontal", maximized_horizontal)
 client.connect_signal("request::maximized_vertical", maximized_vertical)
 client.connect_signal("request::fullscreen", fullscreen)
