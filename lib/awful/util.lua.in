@@ -17,6 +17,7 @@ local type = type
 local rtable = table
 local pairs = pairs
 local string = string
+local glib = require("lgi").GLib
 local capi =
 {
     awesome = awesome,
@@ -30,13 +31,21 @@ util.table = {}
 
 util.shell = os.getenv("SHELL") or "/bin/sh"
 
+local displayed_deprecations = {}
+--- Display a deprecation notice, but only once per traceback.
+-- @param see Optional message to a new method / function to use.
 function util.deprecate(see)
+    local tb = debug.traceback()
+    local tbhash = glib.String():append(tb):hash()
+    if displayed_deprecations[tbhash] then
+        return
+    end
+    displayed_deprecations[tbhash] = true
     io.stderr:write("W: awful: function is deprecated")
     if see then
         io.stderr:write(", see " .. see)
     end
-    io.stderr:write("\n")
-    io.stderr:write(debug.traceback())
+    io.stderr:write("\n" .. tb .. "\n")
 end
 
 --- Strip alpha part of color.
