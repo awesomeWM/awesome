@@ -505,17 +505,6 @@ function util.query_to_pattern(q)
     return s
 end
 
-function util.unittest()
-    local function testquery(q, s)
-        print('testquery("'..q..'", "'..s..'")')
-        local p = util.query_to_pattern("downlow")
-        local s = "DownLow"
-        assert(s:match(p))
-    end
-    testquery("downlow", "DownLow")
-    testquery("%word", "%word")
-end
-
 return util
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
