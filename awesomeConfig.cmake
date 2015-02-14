@@ -94,7 +94,7 @@ endif()
 if(EXISTS ${SOURCE_DIR}/.git/HEAD AND GIT_EXECUTABLE)
     # get current version
     execute_process(
-        COMMAND ${GIT_EXECUTABLE} describe
+        COMMAND ${GIT_EXECUTABLE} describe --dirty
         WORKING_DIRECTORY ${SOURCE_DIR}
         OUTPUT_VARIABLE VERSION
         OUTPUT_STRIP_TRAILING_WHITESPACE)
