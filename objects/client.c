@@ -301,9 +301,6 @@ client_focus_update(client_t *c)
 {
     lua_State *L = globalconf_get_lua_State();
 
-    if(!client_maybevisible(c))
-        return false;
-
     if(globalconf.focus.client && globalconf.focus.client != c)
     {
         /* When we are called due to a FocusIn event (=old focused client
@@ -354,7 +351,7 @@ client_focus_refresh(void)
         return;
     globalconf.focus.need_update = false;
 
-    if(c)
+    if(c && client_maybevisible(c))
     {
         /* Make sure this window is unbanned and e.g. not minimized */
         client_unban(c);
@@ -1135,6 +1132,9 @@ client_unban(client_t *c)
         client_set_minimized(L, -1, false);
         client_set_hidden(L, -1, false);
         lua_pop(L, 1);
+
+        if (globalconf.focus.client == c)
+            globalconf.focus.need_update = true;
     }
 }
 
