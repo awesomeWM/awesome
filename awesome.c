@@ -539,6 +539,7 @@ main(int argc, char **argv)
     /* scan existing windows */
     scan(tree_c);
 
+    luaA_emit_startup();
     xcb_flush(globalconf.connection);
 
     /* Setup the main context */
