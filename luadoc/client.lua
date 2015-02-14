@@ -67,6 +67,14 @@ module("client")
 -- @name geometry
 -- @class function
 
+--- Apply size hints to a size.
+-- @param width Desired width of client
+-- @param height Desired height of client
+-- @return Actual width of client
+-- @return Actual height of client
+-- @name apply_size_hints
+-- @class function
+
 --- Return client struts (reserved space at the edge of the screen).
 -- @param struts A table with new strut values, or none.
 -- @return A table with strut values.
