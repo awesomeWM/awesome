@@ -10,6 +10,7 @@ local screen = screen
 local ipairs = ipairs
 local math = math
 local atag = require("awful.tag")
+local timer = require("gears.timer")
 
 --- Implements EWMH requests handling.
 -- awful.ewmh
@@ -148,6 +149,11 @@ function ewmh.activate(c)
     end
 end
 
+-- Call ewmh.activate, at the end of the event loop.
+function ewmh.activate_delayed(c)
+    timer.delayed_call(ewmh.activate, c)
+end
+
 -- Tag a window with its requested tag
 function ewmh.tag(c, t)
     if not t then
@@ -158,7 +164,7 @@ function ewmh.tag(c, t)
     end
 end
 
-client.connect_signal("request::activate", ewmh.activate)
+client.connect_signal("request::activate", ewmh.activate_delayed)
 client.connect_signal("request::tag", ewmh.tag)
 client.connect_signal("request::maximized_horizontal", maximized_horizontal)
 client.connect_signal("request::maximized_vertical", maximized_vertical)
