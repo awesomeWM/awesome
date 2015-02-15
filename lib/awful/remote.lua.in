@@ -5,7 +5,7 @@
 ---------------------------------------------------------------------------
 
 -- Grab environment we need
-require("awful.dbus")
+local adbus = require("awful.dbus")
 local load = loadstring or load -- v5.1 - loadstring, v5.2 - load
 local tostring = tostring
 local ipairs = ipairs
@@ -18,7 +18,7 @@ local type = type
 -- awful.remote
 
 if dbus then
-    dbus.connect_signal("org.naquadah.awesome.awful.Remote", function(data, code)
+    dbus.connect_signal(adbus.name .. ".Remote", function(data, code)
         if data.member == "Eval" then
             local f, e = load(code)
             if f then

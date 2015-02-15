@@ -8,12 +8,19 @@
 local dbus = dbus
 
 --- D-Bus module for awful.
--- This module simply request the org.naquadah.awesome.awful name on the D-Bus
--- for futur usage by other awful modules.
+-- This module simply requests the org.naquadah.awesome.awful name on the D-Bus
+-- for future usage by other awful modules.
 -- awful.dbus
 
+local adbus = {}
+
 if dbus then
-    dbus.request_name("session", "org.naquadah.awesome.awful")
+    -- Build D-Bus request name, based on $DISPLAY.
+    adbus.name = "org.naquadah.awesome.awful.d"
+        .. os.getenv("DISPLAY"):gsub('^:', ''):gsub('%.0$', ''):gsub('[:.]', '_') or "0"
+    dbus.request_name("session", adbus.name)
 end
+
+return adbus
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
