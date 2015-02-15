@@ -1,3 +1,4 @@
+--- Timer objects and functions.
 ---------------------------------------------------------------------------
 -- @author Uli Schlachter
 -- @copyright 2014 Uli Schlachter
@@ -18,12 +19,12 @@ local object = require("gears.object")
 --- Timer objects. This type of object is useful when triggering events repeatedly.
 -- The timer will emit the "timeout" signal every N seconds, N being the timeout
 -- value.
--- @field timeout Interval in seconds to emit the timeout signal. Can be any
--- value, including floating point ones (i.e. 1.5 seconds).
--- @field started Read-only boolean field indicating if the timer has been
--- started.
--- @class table
--- @name timer
+-- @tfield number timeout Interval in seconds to emit the timeout signal.
+--                        Can be any value, including floating point ones
+--                        (e.g. 1.5 seconds).
+-- @tfield boolean started Read-only boolean field indicating if the timer has been
+--                         started.
+-- @table timer
 
 local timer = { mt = {} }
 
@@ -81,7 +82,11 @@ local timer_instance_mt = {
     end
 }
 
-local function new(args)
+--- Create a new timer object.
+-- @tparam table args Arguments.
+-- @tparam number args.timeout Timeout in seconds (e.g. 1.5).
+-- @treturn timer
+timer.new = function(args)
     local ret = object()
 
     ret:add_signal("property::timeout")
@@ -109,7 +114,7 @@ capi.awesome.connect_signal("refresh", function()
 end)
 
 --- Call the given function at the end of the current main loop iteration
--- @param callback The function that should be called
+-- @tparam function callback The function that should be called
 -- @param ... Arguments to the callback function
 function timer.delayed_call(callback, ...)
     assert(type(callback) == "function", "callback must be a function, got: " .. type(callback))
@@ -117,7 +122,7 @@ function timer.delayed_call(callback, ...)
 end
 
 function timer.mt:__call(...)
-    return new(...)
+    return timer.new(...)
 end
 
 return setmetatable(timer, timer.mt)
