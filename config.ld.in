@@ -5,3 +5,9 @@ description='highly configurable X window manager'
 --format='markdown' or should it be discount? what is that anyway? how about plain?
 dir='doc'
 file={ 'lib/', '@SOURCE_DIR@/luadoc' }
+
+-- Setup @client to be an alias for "@tparam client.client"
+tparam_alias('client', 'client.client')
+
+-- Should be default, but is not.  Sets up "@tab" => "@tparam table".
+tparam_alias('tab', 'table')

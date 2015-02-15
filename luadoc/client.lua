@@ -105,7 +105,7 @@ module("client")
 -- @class function
 
 --- Swap a client with another one in global client list.
--- @param c A client to swap with.
+-- @client A client to swap with.
 -- @name swap
 -- @class function
 
