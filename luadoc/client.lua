@@ -47,6 +47,7 @@ module("client")
 -- @field shape_client_bounding The client's bounding shape as set by the program as a (native) cairo surface.
 -- @field shape_client_clip The client's clip shape as set by the program as a (native) cairo surface.
 -- @field startup_id The FreeDesktop StartId.
+-- @field valid If the client that this object refers to is still managed by awesome.
 -- @class table
 -- @name client
 
