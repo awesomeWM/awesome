@@ -35,7 +35,7 @@
 #define _NET_WM_STATE_TOGGLE 2
 
 /** Update client EWMH hints.
- * \param c The client.
+ * \param L The Lua VM state.
  */
 static int
 ewmh_client_update_hints(lua_State *L)
@@ -562,7 +562,6 @@ ewmh_client_check_hints(client_t *c)
 
 /** Process the WM strut of a client.
  * \param c The client.
- * \param strut_r (Optional) An existing reply.
  */
 void
 ewmh_process_client_strut(client_t *c)
