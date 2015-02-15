@@ -287,13 +287,22 @@ luaA_object_emit_signal(lua_State *L, int oud,
         int nbfunc = sigfound->sigfuncs.len;
         luaL_checkstack(L, nbfunc + nargs + 2, "too much signal");
 
-        const char *objname = lua_tostring(L, oud_abs);
-        debug("Emitting signal '%s' on %s (%d funcs)", name, objname, nbfunc);
+        /* if( name != "refresh" ) { */
+            const char *objname = lua_tostring(L, oud_abs);
+            debug("Emitting signal '%s' on %s (%d funcs)", name, objname, nbfunc);
+            luaA_dumpstack(L);
+        /* } */
 
         /* Push all functions and then execute, because this list can change
          * while executing funcs. */
         foreach(func, sigfound->sigfuncs)
             luaA_object_push_item(L, oud_abs, *func);
+
+        /* lua_pushvalue(L, oud_abs); */
+        /* lua_class = luaA_class_get(L, oud_abs); */
+        /* luaA_object_tostring_idx(L, oud_abs); */
+        /* const char *objname = lua_tostring(L, -1); */
+        /* lua_pop(L, 1); */
 
         for(int i = 0; i < nbfunc; i++)
         {

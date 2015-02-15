@@ -223,6 +223,7 @@ end
 local delayed_calls = {}
 capi.awesome.connect_signal("refresh", function()
     for _, callback in ipairs(delayed_calls) do
+        print("D: awesome: delayed_call: " .. tostring(callback[1]))
         protected_call(unpack(callback))
     end
     delayed_calls = {}
