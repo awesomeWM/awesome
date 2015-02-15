@@ -112,7 +112,13 @@ function layout.arrange(screen)
         p.geometry = capi.screen[screen].geometry
         p.clients = client.tiled(screen)
         p.screen = screen
+        p.geometries = setmetatable({}, {__mode = "k"})
         layout.get(screen).arrange(p)
+        for c, g in pairs(p.geometries) do
+            g.width = g.width - c.border_width * 2
+            g.height = g.height - c.border_width * 2
+            c:geometry(g)
+        end
         capi.screen[screen]:emit_signal("arrange")
 
         arrange_lock = false

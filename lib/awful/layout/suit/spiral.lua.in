@@ -50,10 +50,10 @@ local function do_spiral(p, _spiral)
         local g = {
             x = wa.x,
             y = wa.y,
-            width = wa.width - 2 * c.border_width,
-            height = wa.height - 2 * c.border_width
+            width = wa.width,
+            height = wa.height
         }
-        c:geometry(g)
+        p.geometries[c] = g
     end
 end
 
