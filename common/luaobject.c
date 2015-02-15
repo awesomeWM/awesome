@@ -242,6 +242,7 @@ signal_object_emit(lua_State *L, signal_array_t *arr, const char *name, int narg
         foreach(func, sigfound->sigfuncs)
             luaA_object_push(L, *func);
 
+        debug("Emitting class signal '%s' (%d funcs)", name, nbfunc);
         for(int i = 0; i < nbfunc; i++)
         {
             /* push all args */
@@ -285,6 +286,10 @@ luaA_object_emit_signal(lua_State *L, int oud,
     {
         int nbfunc = sigfound->sigfuncs.len;
         luaL_checkstack(L, nbfunc + nargs + 2, "too much signal");
+
+        const char *objname = lua_tostring(L, oud_abs);
+        debug("Emitting signal '%s' on %s (%d funcs)", name, objname, nbfunc);
+
         /* Push all functions and then execute, because this list can change
          * while executing funcs. */
         foreach(func, sigfound->sigfuncs)
