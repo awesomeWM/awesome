@@ -17,7 +17,6 @@ local type = type
 local rtable = table
 local pairs = pairs
 local string = string
-local glib = require("lgi").GLib
 local capi =
 {
     awesome = awesome,
@@ -36,11 +35,10 @@ local displayed_deprecations = {}
 -- @param see Optional message to a new method / function to use.
 function util.deprecate(see)
     local tb = debug.traceback()
-    local tbhash = glib.String():append(tb):hash()
-    if displayed_deprecations[tbhash] then
+    if displayed_deprecations[tb] then
         return
     end
-    displayed_deprecations[tbhash] = true
+    displayed_deprecations[tb] = true
     io.stderr:write("W: awful: function is deprecated")
     if see then
         io.stderr:write(", see " .. see)
