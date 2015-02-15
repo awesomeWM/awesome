@@ -94,6 +94,8 @@ function layout.set(_layout, t)
     tag.setproperty(t, "layout", _layout)
 end
 
+-- Delay one arrange call per screen.
+local delayed_arrange = {}
 --- Arrange a screen using its current layout.
 -- @param screen The screen to arrange.
 function layout.arrange(screen)
