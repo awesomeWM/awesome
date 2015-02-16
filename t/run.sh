@@ -11,16 +11,29 @@ eval $(dbus-launch --sh-syntax)
 
 root_dir=$PWD/..
 
+# Travis.
+if [ "$CI" = true ]; then
+    HEADLESS=1
+else
+    HEADLESS=0
+fi
+
 XEPHYR=Xephyr
+XVFB=Xvfb
 AWESOME=$root_dir/build/awesome
 RC_FILE=$root_dir/build/awesomerc.lua
 D=:5
 SIZE=1024x768
 
-# export XEPHYR_PAUSE=1000
-"$XEPHYR" $D -ac -name xephyr_$D -noreset -screen "$SIZE" $XEPHYR_OPTIONS &
-sleep 1
-xephyr_pid=$(pgrep -n Xephyr)
+if [ $HEADLESS = 1 ]; then
+    "$XVFB" $D &
+    xserver_pid=$(pgrep -n Xvfb)
+else
+    # export XEPHYR_PAUSE=1000
+    "$XEPHYR" $D -ac -name xephyr_$D -noreset -screen "$SIZE" $XEPHYR_OPTIONS &
+    sleep 1
+    xserver_pid=$(pgrep -n Xephyr)
+fi
 # Toggles debugging mode, using XEPHYR_PAUSE.
 # pkill -USR1 Xephyr
 
@@ -44,7 +57,7 @@ awesome_pid=$(pgrep -n awesome)
 cd -
 
 # Cleanup on exit.
-trap "set +e; kill -TERM $awesome_pid 2>/dev/null ; kill -TERM $xephyr_pid 2>/dev/null" 0 2 3 15
+trap "set +e; kill -TERM $awesome_pid 2>/dev/null ; kill -TERM $xserver_pid 2>/dev/null" 0 2 3 15
 
 restart_awesome=0
 errors=0
@@ -54,7 +67,7 @@ for f in $this_dir/*.lua; do
     fi
 
     # Send the test file to awesome.
-    cat $f | DISPLAY=$D awesome-client 2>&1 || true
+    cat $f | DISPLAY=$D $root_dir/utils/awesome-client 2>&1 || true
 
     # Tail the log and quit, when awesome quits.
     tail -f --pid $awesome_pid $awesome_log
@@ -68,6 +81,6 @@ for f in $this_dir/*.lua; do
     reload=1
 done
 
-kill $xephyr_pid
+kill $xserver_pid
 
 [ $errors = 0 ] && exit 0 || exit 1

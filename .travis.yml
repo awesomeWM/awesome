@@ -26,5 +26,15 @@ before_install:
  - ./autogen.sh && sudo make install
  - cd ..
 
+ # Too old on travis.
+ #  - sudo apt-get install -qq lua-lgi
+ - sudo apt-get install -qq gir1.2-pango-1.0
+
+ - sudo apt-get install -qq luarocks libgirepository1.0-dev
+ - sudo luarocks install lgi
+ - sudo luarocks install busted
+
+ - make
+
  # Not available on default Travis image:
  # lua-ldoc
