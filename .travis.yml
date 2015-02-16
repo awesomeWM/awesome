@@ -1,0 +1,30 @@
+language: c
+
+env:
+  - LUA=5.1
+  # - LUA=5.2
+  # - LUA=5.3
+
+compiler:
+  - gcc
+  # - clang
+
+script:
+  - make check
+  - t/run.sh
+
+before_install:
+ - sudo apt-get update -qq
+ - sudo apt-get install -qq xserver-xephyr
+ - sudo apt-get install -qq libcairo2-dev xmlto asciidoc cmake libxcb-xtest0-dev libxcb-icccm4-dev libxcb-randr0-dev libxcb-keysyms1-dev libxcb-xinerama0-dev libdbus-1-dev libxdg-basedir-dev libstartup-notification0-dev imagemagick libxcb1-dev libxcb-shape0-dev libxcb-util0-dev libgdk-pixbuf2.0-dev libglib2.0-dev libxcb-image0-dev
+ - sudo apt-get install -qq lua$LUA liblua$LUA-dev
+
+ # Not available on default Travis image: libxcb-cursor-dev
+ - sudo apt-get install -qq xutils-dev libxcb-render-util0-dev gperf
+ - git clone --recursive git://anongit.freedesktop.org/xcb/util-cursor
+ - cd util-cursor
+ - ./autogen.sh && sudo make install
+ - cd ..
+
+ # Not available on default Travis image:
+ # lua-ldoc
