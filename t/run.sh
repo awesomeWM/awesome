@@ -1,6 +1,7 @@
 #!/bin/sh
 
 set -e
+set -x
 
 # Change to current dir (POSIXly).
 cd -P -- "$(dirname -- "$0")"
