@@ -28,6 +28,7 @@ SIZE=1024x768
 
 if [ $HEADLESS = 1 ]; then
     "$XVFB" $D &
+    sleep 1
     xserver_pid=$(pgrep -n Xvfb)
 else
     # export XEPHYR_PAUSE=1000

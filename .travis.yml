@@ -34,7 +34,7 @@ install:
  - git clone --recursive git://anongit.freedesktop.org/xcb/util-cursor
  - cd util-cursor
  - ./autogen.sh && sudo make install
- - ldconfig
+ - sudo ldconfig
  - cd ..
 
  # lgi: too old on travis, install it via luarocks.
