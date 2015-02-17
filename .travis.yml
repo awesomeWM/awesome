@@ -16,13 +16,16 @@ before_install:
 
 install:
  # Based on "apt-get build-depends awesome":
- - sudo apt-get install -qq libcairo2-dev xmlto cmake libxcb-xtest0-dev libxcb-icccm4-dev libxcb-randr0-dev libxcb-keysyms1-dev libxcb-xinerama0-dev libdbus-1-dev libxdg-basedir-dev libstartup-notification0-dev imagemagick libxcb1-dev libxcb-shape0-dev libxcb-util0-dev libgdk-pixbuf2.0-dev libglib2.0-dev libxcb-image0-dev
+ - sudo apt-get install -qq cmake imagemagick libcairo2-dev libdbus-1-dev libgdk-pixbuf2.0-dev libglib2.0-dev libstartup-notification0-dev libxcb-icccm4-dev libxcb-image0-dev libxcb-keysyms1-dev libxcb-randr0-dev libxcb-shape0-dev libxcb-util0-dev libxcb-xinerama0-dev libxcb-xtest0-dev libxcb1-dev libxdg-basedir-dev
+
+ # Test deps.
+ - sudo apt-get install -qq dbus-x11
 
  # Install Lua.
  - sudo apt-get install -qq lua$LUA liblua$LUA-dev
 
  # Not necessary for all, maybe when testing generating docs.
- #  - sudo apt-get install -qq asciidoc
+ #  - sudo apt-get install -qq asciidoc xmlto
  # Not available on default Travis image:
  # lua-ldoc
 
@@ -31,6 +34,7 @@ install:
  - git clone --recursive git://anongit.freedesktop.org/xcb/util-cursor
  - cd util-cursor
  - ./autogen.sh && sudo make install
+ - ldconfig
  - cd ..
 
  # lgi: too old on travis, install it via luarocks.
@@ -42,7 +46,6 @@ install:
  - tar xf luarocks-2.2.0.tar.gz
  - cd luarocks-2.2.0
  - ./configure --lua-version=$LUA
- - make
  - sudo make install
  - cd ..
 
