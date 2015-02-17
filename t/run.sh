@@ -41,6 +41,8 @@ fi
 cd $root_dir/build
 
 LUA_PATH="$(lua -e 'print(package.path)');lib/?.lua;lib/?/init.lua"
+# Add test dir (for _runner.lua).
+LUA_PATH="$LUA_PATH;../t/?.lua"
 XDG_CONFIG_HOME="./"
 export LUA_PATH
 export XDG_CONFIG_HOME
@@ -49,25 +51,45 @@ export XDG_CONFIG_HOME
 awesome_log=/tmp/_awesome_test.log
 echo "awesome_log: $awesome_log"
 
-# Start awesome.
-DISPLAY=$D "$AWESOME" -c "$RC_FILE" $AWESOME_OPTIONS > $awesome_log 2>&1 &
-sleep 1
-awesome_pid=$(pgrep -n awesome)
-
 cd -
 
-# Cleanup on exit.
-trap "set +e; kill -TERM $awesome_pid 2>/dev/null ; kill -TERM $xserver_pid 2>/dev/null" 0 2 3 15
 
-restart_awesome=0
+kill_childs() {
+    for p in $awesome_pid $xserver_pid; do
+        kill -TERM $p 2>/dev/null || true
+    done
+}
+# Cleanup on errors / aborting.
+set_trap() {
+    trap "kill_childs" 2 3 15
+}
+set_trap
+
+# Start awesome.
+start_awesome() {
+    (cd $root_dir/build; \
+        DISPLAY=$D "$AWESOME" -c "$RC_FILE" $AWESOME_OPTIONS > $awesome_log 2>&1 &)
+    sleep 1
+    awesome_pid=$(pgrep -nf "awesome -c $RC_FILE")
+    set_trap
+}
+
+# Count errors.
 errors=0
-for f in $this_dir/*.lua; do
-    if [ $restart_awesome = 1 ]; then
-        kill -HUP $awesome_pid
-    fi
+
+# Get test files: test*, or the ones provided as args.
+if [ $# != 0 ]; then
+    tests="$@"
+else
+    tests=$this_dir/test*.lua
+fi
+
+for f in $tests; do
+    echo "== Running $f =="
+    start_awesome
 
     # Send the test file to awesome.
-    cat $f | DISPLAY=$D $root_dir/utils/awesome-client 2>&1 || true
+    cat $f | DISPLAY=$D $root_dir/utils/awesome-client 2>&1
 
     # Tail the log and quit, when awesome quits.
     tail -f --pid $awesome_pid $awesome_log
@@ -77,10 +99,8 @@ for f in $this_dir/*.lua; do
         grep --color -o --binary-files=text -E '^Error.*|.*assertion failed.*' $awesome_log
         errors=$(expr $errors + 1)
     fi
-
-    reload=1
 done
 
-kill $xserver_pid
+kill_childs
 
 [ $errors = 0 ] && exit 0 || exit 1

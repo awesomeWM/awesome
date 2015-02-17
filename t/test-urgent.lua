@@ -1,7 +1,6 @@
 --- Tests for urgent property.
 
 awful = require("awful")
-timer = require("gears.timer")
 
 -- Some basic assertion that the tag is not marked "urgent" already.
 assert(awful.tag.getproperty(tags[1][2], "urgent") == nil)
@@ -75,58 +74,6 @@ local steps = {
       end
     end
   end,
-
 }
 
-
--- Setup timer/timeout to limit waiting for signal and quitting awesome.
--- This would be common for all tests.
-local t = timer({timeout=0.1})
-local wait=50
-local step=1
-local step_count=0
-t:connect_signal("timeout", function() timer.delayed_call(function()
-  io.flush()  -- for "tail -f".
-  step_count = step_count + 1
-  local step_as_string = step..'/'..#steps..' (@'..step_count..')'
-
-  -- Call the current step's function.
-  local success, result = pcall(steps[step], step_count)
-
-  if not success then
-    io.stderr:write('Error: running function for step '
-      ..step_as_string..': '..tostring(result)..'!\n')
-    t:stop()
-    return  -- keep awesome open on error.
-
-  elseif result then
-    -- true: test succeeded.
-    if step < #steps then
-      -- Next step.
-      step = step+1
-      step_count = 0
-      wait = 5
-      t:again()
-      return
-    end
-
-  elseif result == false then
-    error("Step "..step_as_string.." failed.")
-    assert(false)
-
-  else
-    wait = wait-1
-    -- io.stderr:write('wait:'..wait.."\n")
-    if wait > 0 then
-      t:again()
-      return
-    else
-      io.stderr:write("Error: timeout waiting for signal in step "
-        ..step_as_string..".\n")
-      t:stop()
-      return  -- keep awesome open on error.
-    end
-  end
-  awesome.quit()
-end) end)
-t:start()
+require("_runner").run_steps(steps)
