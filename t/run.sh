@@ -43,7 +43,7 @@ cd $root_dir/build
 
 LUA_PATH="$(lua -e 'print(package.path)');lib/?.lua;lib/?/init.lua"
 # Add test dir (for _runner.lua).
-LUA_PATH="$LUA_PATH;../t/?.lua"
+LUA_PATH="$LUA_PATH;$this_dir/?.lua"
 XDG_CONFIG_HOME="./"
 export LUA_PATH
 export XDG_CONFIG_HOME

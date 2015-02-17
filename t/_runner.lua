@@ -6,6 +6,17 @@ runner = {
   quit_awesome_on_timeout = false
 }
 
+
+-- Helpers.
+
+--- Add some rules to awful.rules.rules, after the defaults.
+local default_rules = awful.util.table.clone(awful.rules.rules)
+runner.add_to_default_rules = function(r)
+  awful.rules.rules = awful.util.table.clone(default_rules)
+  table.insert(awful.rules.rules, r)
+end
+
+
 runner.run_steps = function(steps)
   -- Setup timer/timeout to limit waiting for signal and quitting awesome.
   -- This would be common for all tests.
@@ -59,6 +70,10 @@ runner.run_steps = function(steps)
           return
         end
       end
+    end
+    -- Remove any clients.
+    for _,c in ipairs(client.get()) do
+      c:kill()
     end
     awesome.quit()
   end) end)
