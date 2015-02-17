@@ -633,9 +633,8 @@ capi.client.connect_signal("manage", function(c)
 end)
 
 -- Keep track of the number of urgent clients.
-local function update_urgent(c,t)
-    local modif = c.urgent == true and 1 or -1
-    local count = tag.getproperty(t,"urgent_count")  or 0
+local function update_urgent(c, t, modif)
+    local count = tag.getproperty(t, "urgent_count") or 0
     count = (count + modif) >= 0 and (count + modif) or 0
     tag.setproperty(t,"urgent"      , count > 0)
     tag.setproperty(t,"urgent_count", count    )
@@ -644,21 +643,21 @@ end
 -- Update the urgent counter when a client is tagged.
 local function client_tagged(c,t)
     if c.urgent then
-        update_urgent(c,t)
+        update_urgent(c, t, 1)
     end
 end
 
 -- Update the urgent counter when a client is untagged.
 local function client_untagged(c,t)
     if c.urgent then
-        update_urgent(c,t)
+        update_urgent(c, t, -1)
     end
 end
 
 -- Count the urgent clients.
 local function urgent_callback(c)
     for k,t in ipairs(c:tags()) do
-        update_urgent(c,t)
+        update_urgent(c, t, c.urgent and 1 or -1)
     end
 end
 
