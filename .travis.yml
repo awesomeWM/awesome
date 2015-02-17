@@ -1,8 +1,8 @@
 language: c
 
 env:
-  - LUA=5.1
-  # - LUA=5.2
+  # - LUA=5.1
+  - LUA=5.2
   # - LUA=5.3
 
 compiler:
