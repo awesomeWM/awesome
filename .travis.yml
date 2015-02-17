@@ -15,6 +15,8 @@ script:
 
 before_install:
  - sudo apt-get update -qq
+
+install:
  - sudo apt-get install -qq xserver-xephyr
  - sudo apt-get install -qq libcairo2-dev xmlto asciidoc cmake libxcb-xtest0-dev libxcb-icccm4-dev libxcb-randr0-dev libxcb-keysyms1-dev libxcb-xinerama0-dev libdbus-1-dev libxdg-basedir-dev libstartup-notification0-dev imagemagick libxcb1-dev libxcb-shape0-dev libxcb-util0-dev libgdk-pixbuf2.0-dev libglib2.0-dev libxcb-image0-dev
  - sudo apt-get install -qq lua$LUA liblua$LUA-dev
@@ -30,7 +32,16 @@ before_install:
  #  - sudo apt-get install -qq lua-lgi
  - sudo apt-get install -qq gir1.2-pango-1.0
 
- - sudo apt-get install -qq luarocks libgirepository1.0-dev
+ # Install luarocks (for the selected Lua version).
+ - wget http://keplerproject.github.io/luarocks/releases/luarocks-2.2.0.tar.gz
+ - tar xf luarocks-2.2.0.tar.gz
+ - cd luarocks-2.2.0
+ - ./configure --lua-version=$LUA
+ - make
+ - sudo make install
+ - cd ..
+
+ - sudo apt-get install -qq libgirepository1.0-dev
  - sudo luarocks install lgi
  - sudo luarocks install busted
 
