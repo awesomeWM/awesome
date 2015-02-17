@@ -69,13 +69,13 @@ end
 --- Swap 2 tags
 -- @param tag1 The first tag
 -- @param tag2 The second tag
-function tag.swap(tag1,tag2)
-    local idx1, idx2 = tag.getidx(tag1),tag.getidx(tag2)
-    local src2, src1 = tag.getscreen(tag2),tag.getscreen(tag1)
-    tag.setscreen(tag2,src1)
-    tag.move(idx1,tag2)
-    tag.setscreen(tag1,scr2)
-    tag.move(idx2,tag1)
+function tag.swap(tag1, tag2)
+    local idx1, idx2 = tag.getidx(tag1), tag.getidx(tag2)
+    local src2, src1 = tag.getscreen(tag2), tag.getscreen(tag1)
+    tag.setscreen(tag2, src1)
+    tag.move(idx1, tag2)
+    tag.setscreen(tag1, scr2)
+    tag.move(idx2, tag1)
 end
 
 --- Add a tag.
@@ -191,7 +191,7 @@ function tag.delete(target_tag, fallback_tag)
     target_tag.activated = false
 
     -- Update all indexes
-    for i=idx+1,#tags do
+    for i=idx+1, #tags do
         tag.setproperty(tags[i], "index", i-1)
     end
 
@@ -318,7 +318,7 @@ function tag.setscreen(t, s)
     end
 
     -- Update all indexes
-    for _,screen in ipairs {old_screen,s} do
+    for _,screen in ipairs {old_screen, s} do
         for i,t in ipairs(tag.gettags(screen)) do
             tag.setproperty(t, "index", i)
         end
@@ -326,7 +326,7 @@ function tag.setscreen(t, s)
 
     -- Restore the old screen history if the tag was selected
     if sel then
-        tag.history.restore(old_screen,1)
+        tag.history.restore(old_screen, 1)
     end
 end
 
@@ -636,19 +636,19 @@ end)
 local function update_urgent(c, t, modif)
     local count = tag.getproperty(t, "urgent_count") or 0
     count = (count + modif) >= 0 and (count + modif) or 0
-    tag.setproperty(t,"urgent"      , count > 0)
-    tag.setproperty(t,"urgent_count", count    )
+    tag.setproperty(t, "urgent"      , count > 0)
+    tag.setproperty(t, "urgent_count", count    )
 end
 
 -- Update the urgent counter when a client is tagged.
-local function client_tagged(c,t)
+local function client_tagged(c, t)
     if c.urgent then
         update_urgent(c, t, 1)
     end
 end
 
 -- Update the urgent counter when a client is untagged.
-local function client_untagged(c,t)
+local function client_untagged(c, t)
     if c.urgent then
         update_urgent(c, t, -1)
     end
