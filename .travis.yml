@@ -56,3 +56,5 @@ install:
  #  - sudo luarocks install busted
 
  - make
+ # Install themes etc, e.g. /usr/local/share/awesome/themes/default/theme.lua.
+ - sudo make install
