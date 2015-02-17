@@ -47,5 +47,5 @@ problem.
 
 Reporting issues
 ----------------
-Please report any issues you may find at https://awesome.naquadah.org/bugs/ .
-You can submit pull requests at https://github.com/awesomeWM/awesome .
+Please report any issues you may find at https://github.com/awesomeWM/awesome/issues.
+You can submit pull requests at https://github.com/awesomeWM/awesome.
