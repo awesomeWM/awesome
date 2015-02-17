@@ -1,16 +1,14 @@
 language: c
 
 env:
-  # - LUA=5.1
-  - LUA=5.2
-  # - LUA=5.3
+  - LUA=5.1
 
 compiler:
   - gcc
   # - clang
 
 script:
-  - make check
+  # - make check
   - t/run.sh
 
 before_install:
