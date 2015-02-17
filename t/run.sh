@@ -69,9 +69,16 @@ set_trap
 # Start awesome.
 start_awesome() {
     (cd $root_dir/build; \
-        DISPLAY=$D "$AWESOME" -c "$RC_FILE" $AWESOME_OPTIONS > $awesome_log 2>&1 &)
+        DISPLAY=$D "$AWESOME" -c "$RC_FILE" $AWESOME_OPTIONS > $awesome_log 2>&1 || true &)
     sleep 1
-    awesome_pid=$(pgrep -nf "awesome -c $RC_FILE")
+    awesome_pid=$(pgrep -nf "awesome -c $RC_FILE" || true)
+
+    if [ -z $awesome_pid ]; then
+        echo "Error: Failed to start awesome (-c $RC_FILE)!"
+        echo "Log:"
+        cat "$awesome_log"
+        exit 1
+    fi
     set_trap
 }
 
