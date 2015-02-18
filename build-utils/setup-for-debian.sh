@@ -59,4 +59,6 @@ cd ..
 
 sudo apt-get install -qq libgirepository1.0-dev
 sudo luarocks install lgi
-sudo luarocks install busted
+
+# HACK: script "make check", ref: https://github.com/awesomeWM/awesome/pull/139
+# sudo luarocks install busted
