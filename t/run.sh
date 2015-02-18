@@ -27,7 +27,7 @@ D=:5
 SIZE=1024x768
 
 if [ $HEADLESS = 1 ]; then
-    "$XVFB" $D &
+    "$XVFB" $D -screen 0 1280x1024x24 &
     sleep 1
     xserver_pid=$(pgrep -n Xvfb)
 else
