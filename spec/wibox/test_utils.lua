@@ -7,7 +7,9 @@ local object = require("gears.object")
 local wbase = require("wibox.widget.base")
 local lbase = require("wibox.layout.base")
 local say = require("say")
-local assert_util = require("luassert.util")
+local assert = require("luassert")
+local spy = require("luassert.spy")
+local stub = require("luassert.stub")
 
 local real_draw_widget = lbase.draw_widget
 local widgets_drawn = nil

@@ -6,7 +6,6 @@
 local color = require("gears.color")
 local cairo = require("lgi").cairo
 local say = require("say")
-local assert_util = require("luassert.util")
 
 describe("gears.color", function()
     describe("parse_color", function()
