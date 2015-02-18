@@ -7,7 +7,7 @@ set -x
 cd -P -- "$(dirname -- "$0")"
 this_dir=$PWD
 
-# Use a separate D-Bus session.
+# Use a separate D-Bus session; sets $DBUS_SESSION_BUS_PID.
 eval $(dbus-launch --sh-syntax)
 
 root_dir=$PWD/..
@@ -57,7 +57,7 @@ cd -
 
 
 kill_childs() {
-    for p in $awesome_pid $xserver_pid; do
+    for p in $awesome_pid $xserver_pid $DBUS_SESSION_BUS_PID; do
         kill -TERM $p 2>/dev/null || true
     done
 }
