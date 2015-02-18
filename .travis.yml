@@ -8,53 +8,28 @@ compiler:
   # - clang
 
 script:
-  # - make check
-  - t/run.sh
+  # Included in "make install".
+  # - chroot /debian make -C /awesome check
+  - chroot /mnt/debian /awesome/t/run.sh
 
 before_install:
  - sudo apt-get update -qq
 
 install:
- # Based on "apt-get build-depends awesome":
- - sudo apt-get install -qq cmake imagemagick libcairo2-dev libdbus-1-dev libgdk-pixbuf2.0-dev libglib2.0-dev libstartup-notification0-dev libxcb-icccm4-dev libxcb-image0-dev libxcb-keysyms1-dev libxcb-randr0-dev libxcb-shape0-dev libxcb-util0-dev libxcb-xinerama0-dev libxcb-xtest0-dev libxcb1-dev libxdg-basedir-dev
+ # NOTE: might not require sudo and could use container based environment
+ #       if debootstrap and fakechroot would be available.
 
- # Test deps.
- - sudo apt-get install -qq dbus-x11
+ # Install and setup Debian chroot.
+ - sudo apt-get install -qq debootstrap
+ - sudo debootstrap --variant=minbase testing /mnt/debian
+ - sudo mount -t proc proc /mnt/debian/proc
+ - sudo mount -t sysfs sysfs /mnt/debian/sys
+ - sudo cp /etc/hosts /mnt/debian/etc/hosts
 
- # Install Lua.
- - sudo apt-get install -qq lua$LUA liblua$LUA-dev
+ - sudo cp -a . /mnt/debian/awesome
 
- # Not necessary for all, maybe when testing generating docs.
- #  - sudo apt-get install -qq asciidoc xmlto
- # Not available on default Travis image:
- # lua-ldoc
+ - sudo chroot /mnt/debian /awesome/build-utils/setup-for-debian.sh $LUA
 
- # Not available on default Travis image: libxcb-cursor-dev
- - sudo apt-get install -qq xutils-dev libxcb-render-util0-dev gperf
- - git clone --recursive git://anongit.freedesktop.org/xcb/util-cursor
- - cd util-cursor
- - ./autogen.sh && sudo make install
- - sudo ldconfig
- - cd ..
-
- # lgi: too old on travis, install it via luarocks.
- #  - sudo apt-get install -qq lua-lgi
- - sudo apt-get install -qq gir1.2-pango-1.0
-
- # Install luarocks (for the selected Lua version).
- - wget http://keplerproject.github.io/luarocks/releases/luarocks-2.2.0.tar.gz
- - tar xf luarocks-2.2.0.tar.gz
- - cd luarocks-2.2.0
- - ./configure --lua-version=$LUA
- - sudo make install
- - cd ..
-
- - sudo apt-get install -qq libgirepository1.0-dev
- - sudo luarocks install lgi
-
- # HACK: skip "make check", which fails on Travis.
- #  - sudo luarocks install busted
-
- - make
- # Install themes etc, e.g. /usr/local/share/awesome/themes/default/theme.lua.
- - sudo make install
+ # Build awesome and install themes etc, e.g.
+ # /usr/local/share/awesome/themes/default/theme.lua.
+ - sudo chroot /mnt/debian make -C /awesome install
