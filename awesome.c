@@ -437,6 +437,9 @@ main(int argc, char **argv)
     if (xcb_cursor_context_new(globalconf.connection, globalconf.screen, &globalconf.cursor_ctx) < 0)
         fatal("Failed to initialize xcb-cursor");
 
+    /* Did we get some usable data from the above X11 setup? */
+    draw_test_cairo_xcb();
+
     /* initialize dbus */
     a_dbus_init();
 
