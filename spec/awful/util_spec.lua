@@ -5,7 +5,6 @@
 
 local util = require("awful.util")
 local say = require("say")
-local assert_util = require("luassert.util")
 
 describe("awful.util", function()
     it("table.keys_filter", function()
