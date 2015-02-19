@@ -38,7 +38,8 @@ then
 fi
 
 DBUS_PATH=/
-DBUS_DEST=org.naquadah.awesome.awful
+DBUS_DEST=org.naquadah.awesome.awful.d$(echo ${DISPLAY:-"0"} \
+    | sed -e 's/\.0$//' -e 's/^://' | tr ':.' '_')
 DBUS_METHOD=${DBUS_DEST}.Remote.Eval
 
 a_dbus_send()
