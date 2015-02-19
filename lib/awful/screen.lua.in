@@ -43,7 +43,8 @@ function screen.getbycoord(x, y, default)
     return default
 end
 
---- Give the focus to a screen, and move pointer. Keeps relative position of the pointer on the screen.
+--- Give the focus to a screen, and move pointer.
+-- Keeps relative position of the pointer on the screen.
 -- @param _screen Screen number.
 function screen.focus(_screen)
     client = client or require("awful.client")

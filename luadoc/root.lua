@@ -11,8 +11,8 @@ module("root")
 -- @class function
 
 --- Get or set global key bindings.
--- This binding will be available when you'll press keys on root window.
--- @param keys_array An array of key bindings objects, or nothing.
+-- These binding will be available when you press keys on the root window.
+-- @param keys_array An array of key binding objects, or nothing.
 -- @return The array of key bindings objects of this client.
 -- @name keys
 -- @class function

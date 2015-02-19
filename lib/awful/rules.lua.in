@@ -106,8 +106,8 @@ local rules = {}
 rules.rules = {}
 
 --- Check if a client matches a rule.
--- @param c The client.
--- @param rule The rule to check.
+-- @client c The client.
+-- @tab rule The rule to check.
 -- @return True if it matches, false otherwise.
 function rules.match(c, rule)
     if not rule then return false end
@@ -128,8 +128,8 @@ function rules.match(c, rule)
 end
 
 --- Check if a client matches any part of a rule.
--- @param c The client.
--- @param rule The rule to check.
+-- @client c The client.
+-- @tab rule The rule to check.
 -- @return True if at least one rule is matched, false otherwise.
 function rules.match_any(c, rule)
     if not rule then return false end
@@ -148,10 +148,10 @@ function rules.match_any(c, rule)
 end
 
 --- Get list of matching rules for a client.
--- @param c The client.
--- @param _rules The rules to check. List with "rule", "rule_any", "except" and
--- "except_any" keys.
--- @return The list of matched rules.
+-- @client c The client.
+-- @tab _rules The rules to check. List with "rule", "rule_any", "except" and
+--             "except_any" keys.
+-- @treturn table The list of matched rules.
 function rules.matching_rules(c, _rules)
     local result = {}
     for _, entry in ipairs(_rules) do
@@ -164,17 +164,17 @@ function rules.matching_rules(c, _rules)
 end
 
 --- Check if a client matches a given set of rules.
--- @param c The client.
--- @param rules The rules to check. List with "rule", "rule_any", "except" and
--- "except_any" keys.
--- @return True if at least one rule is matched, false otherwise.
+-- @client c The client.
+-- @tab rules The rules to check. List with "rule", "rule_any", "except" and
+--                     "except_any" keys.
+-- @treturn boolean True if at least one rule is matched, false otherwise.
 function rules.does_match(c, rules)
     local result = rules.matching_rules(c, rules)
     return #result == 0 and false or result
 end
 
 --- Apply awful.rules.rules to a client.
--- @param c The client.
+-- @client c The client.
 function rules.apply(c)
     local props = {}
     local callbacks = {}
@@ -195,9 +195,9 @@ end
 
 
 --- Apply properties and callbacks to a client.
--- @param c The client.
--- @param props Properties to apply.
--- @param callbacks Callbacks to apply (optional).
+-- @client c The client.
+-- @tab props Properties to apply.
+-- @tab callbacks Callbacks to apply (optional).
 function rules.execute(c, props, callbacks)
     for property, value in pairs(props) do
         if property ~= "focus" and type(value) == "function" then

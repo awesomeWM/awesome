@@ -669,7 +669,7 @@ function client.floating.toggle(c)
 end
 
 --- Remove the floating information on a client.
--- @param c The client.
+-- @client c The client.
 function client.floating.delete(c)
     client.floating.set(c, nil)
 end
