@@ -78,10 +78,7 @@ start_awesome() {
         echo "Error: Failed to start awesome (-c $RC_FILE)!"
         echo "Log:"
         cat "$awesome_log"
-        # TEST
-        pgrep awesome ||     echo "pgrep awesome failed."
-        pgrep -n awesome ||  echo "pgrep -n awesome failed."
-        pgrep -nf awesome || echo "pgrep -nf awesome failed."
+        kill_childs
         exit 1
     fi
     set_trap
