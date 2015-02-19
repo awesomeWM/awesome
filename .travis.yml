@@ -13,7 +13,7 @@ script:
   - sudo chroot /mnt/debian /awesome/t/run.sh
 
 before_install:
- - sudo apt-get update -qq
+#  - sudo apt-get update -qq
 
 install:
  # NOTE: might not require sudo and could use container based environment
