@@ -10,7 +10,7 @@ compiler:
 script:
   # Included in "make install".
   # - chroot /debian make -C /awesome check
-  - chroot /mnt/debian /awesome/t/run.sh
+  - sudo chroot /mnt/debian /awesome/t/run.sh
 
 before_install:
  - sudo apt-get update -qq
