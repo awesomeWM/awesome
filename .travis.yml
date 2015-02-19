@@ -44,4 +44,5 @@ install:
 
  # Build awesome and install themes etc, e.g.
  # /usr/local/share/awesome/themes/default/theme.lua.
+ - sudo chroot /mnt/debian make -C /awesome
  - sudo chroot /mnt/debian make -C /awesome install
