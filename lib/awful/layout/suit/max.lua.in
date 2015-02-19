@@ -25,10 +25,10 @@ local function fmax(p, fs)
         local g = {
             x = area.x,
             y = area.y,
-            width = area.width - c.border_width * 2,
-            height = area.height - c.border_width * 2
+            width = area.width,
+            height = area.height
         }
-        c:geometry(g)
+        p.geometries[c] = g
     end
 end
 

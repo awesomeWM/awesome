@@ -117,7 +117,7 @@ local function mouse_resize_handler(c, corner, x, y, orientation)
                           end, cursor)
 end
 
-local function tile_group(cls, wa, orientation, fact, group)
+local function tile_group(gs, cls, wa, orientation, fact, group)
     -- get our orientation right
     local height = "height"
     local width = "width"
@@ -142,7 +142,6 @@ local function tile_group(cls, wa, orientation, fact, group)
         local i = c - group.first +1
         local size_hints = cls[c].size_hints
         local size_hint = size_hints["min_"..width] or size_hints["base_"..width] or 0
-        size_hint = size_hint + cls[c].border_width*2
         size = math.max(size_hint, size)
 
         -- calculate the height
@@ -156,20 +155,22 @@ local function tile_group(cls, wa, orientation, fact, group)
     size = math.min(size, available)
 
     local coord = wa[y]
-    local geom = {}
     local used_size = 0
     local unused = wa[height]
     for c = group.first,group.last do
+        local geom = {}
+        local hints = {}
         local i = c - group.first +1
-        geom[width] = size - cls[c].border_width * 2
-        geom[height] = math.floor(unused * fact[i] / total_fact) - cls[c].border_width * 2
+        geom[width] = size
+        geom[height] = math.floor(unused * fact[i] / total_fact)
         geom[x] = group.coord
         geom[y] = coord
-        geom = cls[c]:geometry(geom)
-        coord = coord + geom[height] + cls[c].border_width * 2
-        unused = unused - geom[height] - cls[c].border_width * 2
+        gs[cls[c]] = geom
+        hints.width, hints.height = cls[c]:apply_size_hints(geom.width, geom.height)
+        coord = coord + hints[height]
+        unused = unused - hints[height]
         total_fact = total_fact - fact[i]
-        used_size = math.max(used_size, geom[width] + cls[c].border_width * 2)
+        used_size = math.max(used_size, hints[width])
     end
 
     return used_size
@@ -191,6 +192,7 @@ local function do_tile(param, orientation)
         y = "x"
     end
 
+    local gs = param.geometries
     local cls = param.clients
     local nmaster = math.min(tag.getnmaster(t), #cls)
     local nother = math.max(#cls - nmaster,0)
@@ -223,7 +225,7 @@ local function do_tile(param, orientation)
             if not data[0] then
                 data[0] = {}
             end
-            coord = coord + tile_group(cls, wa, orientation, data[0], {first=1, last=nmaster, coord = coord, size = size})
+            coord = coord + tile_group(gs, cls, wa, orientation, data[0], {first=1, last=nmaster, coord = coord, size = size})
         end
 
         if not place_master and nother > 0 then
@@ -243,7 +245,7 @@ local function do_tile(param, orientation)
                 if not data[i] then
                     data[i] = {}
                 end
-                coord = coord + tile_group(cls, wa, orientation, data[i], { first = first, last = last, coord = coord, size = size })
+                coord = coord + tile_group(gs, cls, wa, orientation, data[i], { first = first, last = last, coord = coord, size = size })
             end
         end
         place_master = not place_master

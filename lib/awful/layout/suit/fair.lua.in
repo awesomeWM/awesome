@@ -64,8 +64,6 @@ local function do_fair(p, orientation)
                 g.x = g.width * col
             end
 
-            g.height = g.height - c.border_width * 2
-            g.width = g.width - c.border_width * 2
             g.y = g.y + wa.y
             g.x = g.x + wa.x
 
@@ -75,7 +73,7 @@ local function do_fair(p, orientation)
                 g.x, g.y = g.y, g.x
             end
 
-            c:geometry(g)
+            p.geometries[c] = g
         end
     end
 end
