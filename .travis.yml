@@ -41,8 +41,11 @@ install:
  - sudo mount -t proc proc /mnt/debian/proc
  - sudo mount -t sysfs sysfs /mnt/debian/sys
  - sudo cp /etc/hosts /mnt/debian/etc/hosts
+ # For xterm.
+ - sudo mount --bind /dev/pts /mnt/debian/dev/pts
 
  # Build awesome and install themes etc, e.g.
  # /usr/local/share/awesome/themes/default/theme.lua.
+ # Use the default target first to create the "build" symlink.
  - sudo chroot /mnt/debian make -C /awesome
  - sudo chroot /mnt/debian make -C /awesome install
