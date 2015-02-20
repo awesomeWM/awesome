@@ -15,7 +15,7 @@ local util = require("awful.util")
 
 local button = { mt = {} }
 
--- Modifiers to ignore.
+--- Modifiers to ignore.
 --
 -- By default this is initialized as `{ "Lock", "Mod2" }`
 -- so the `Caps Lock` or `Num Lock` modifier are not taking into account by awesome

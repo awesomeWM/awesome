@@ -113,7 +113,7 @@ function imagebox:set_resize(allowed)
     self:emit_signal("widget::updated")
 end
 
--- Returns a new imagebox
+--- Returns a new imagebox
 -- @param image the image to display, may be nil
 -- @param resize_allowed If false, the image will be clipped, else it will be resized
 --                       to fit into the available space.

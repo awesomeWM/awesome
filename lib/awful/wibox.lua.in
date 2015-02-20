@@ -26,7 +26,7 @@ local beautiful = require("beautiful")
 
 local awfulwibox = { mt = {} }
 
--- Array of table with wiboxes inside.
+--- Array of table with wiboxes inside.
 -- It's an array so it is ordered.
 local wiboxes = {}
 
@@ -71,7 +71,7 @@ function awfulwibox.set_position(wibox, position, screen)
     end
 end
 
--- Reset all wiboxes positions.
+--- Reset all wiboxes positions.
 local function update_all_wiboxes_position()
     for _, wprop in ipairs(wiboxes) do
         awfulwibox.set_position(wprop.wibox, wprop.position, wprop.screen)

@@ -167,13 +167,14 @@ function naughty.toggle()
     end
 end
 
--- Evaluate desired position of the notification by index - internal
+--- Evaluate desired position of the notification by index - internal
 --
--- @param idx Index of the notification
+-- @param screen Screen to use
 -- @param position top_right | top_left | bottom_right | bottom_left
 --             | top_middle | bottom_middle
--- @param height Popup height
+-- @param idx Index of the notification
 -- @param width Popup width (optional)
+-- @param height Popup height
 -- @return Absolute position and index in { x = X, y = Y, idx = I } table
 local function get_offset(screen, position, idx, width, height)
     local ws = capi.screen[screen].workarea
@@ -214,7 +215,7 @@ local function get_offset(screen, position, idx, width, height)
     return v
 end
 
--- Re-arrange notifications according to their position and index - internal
+--- Re-arrange notifications according to their position and index - internal
 --
 -- @return None
 local function arrange(screen)
@@ -256,7 +257,7 @@ function naughty.destroy(notification, reason)
     end
 end
 
--- Get notification by ID
+--- Get notification by ID
 --
 -- @param id ID of the notification
 -- @return notification object if it was found, nil otherwise

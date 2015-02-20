@@ -1,5 +1,5 @@
 ---------------------------------------------------------------------------
--- Menu generation module for menubar
+--- Menu generation module for menubar
 --
 -- @author Antonio Terceiro
 -- @copyright 2009, 2011-2012 Antonio Terceiro, Alexander Yakushev
@@ -60,7 +60,7 @@ function menu_gen.lookup_category_icons()
     end
 end
 
--- Get category key name and whether it is used by its app_type.
+--- Get category key name and whether it is used by its app_type.
 -- @param app_type Application category as written in .desktop file.
 -- @return category key name in all_categories, whether the category is used
 local function get_category_name_and_usage_by_type(app_type)
@@ -71,7 +71,7 @@ local function get_category_name_and_usage_by_type(app_type)
     end
 end
 
--- Remove CR\LF newline from the end of the string.
+--- Remove CR\LF newline from the end of the string.
 -- @param s string to trim
 local function trim(s)
     if not s then return end

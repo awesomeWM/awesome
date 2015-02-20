@@ -25,7 +25,7 @@ function debug.assert(cond, message)
     end
 end
 
--- Given a table (or any other data) return a string that contains its
+--- Given a table (or any other data) return a string that contains its
 -- tag, value and type. If data is a table then recursively call d_raw
 -- on each of its values.
 -- @param data Value to inspect.

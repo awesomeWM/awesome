@@ -1,22 +1,7 @@
 -------------------------------------------------------------------------
--- Mouse finder for awful
+--- Mouse finder for awful
 --
--- @author Sébastien Gross &lt;seb•ɱɩɲʋʃ•awesome•ɑƬ•chezwam•ɖɵʈ•org&gt
--- @copyright 2009 Sébastien Gross
--- @release @AWESOME_VERSION@
--- @module awful.mouse.finder
--------------------------------------------------------------------------
-
-local mouse = mouse
-local screen = screen
-local timer = require("gears.timer")
-local wibox = require("wibox")
-local a_placement = require("awful.placement")
-local a_wibox = require("awful.wibox")
-local beautiful = require("beautiful")
-local setmetatable = setmetatable
-
---- Find the mouse pointer on the screen.
+-- Find the mouse pointer on the screen.
 -- Mouse finder highlights the mouse cursor on the screen
 -- To enable this feature, a `awful.mouse.finder` object needs to be bound to a
 -- key:
@@ -34,10 +19,25 @@ local setmetatable = setmetatable
 --     theme.mouse_finder_factor = 2
 -- The mouse_finder color
 --     theme.mouse_finder_color = "#ff0000"
+--
+-- @author Sébastien Gross &lt;seb•ɱɩɲʋʃ•awesome•ɑƬ•chezwam•ɖɵʈ•org&gt
+-- @copyright 2009 Sébastien Gross
+-- @release @AWESOME_VERSION@
+-- @module awful.mouse.finder
+-------------------------------------------------------------------------
+
+local mouse = mouse
+local screen = screen
+local timer = require("gears.timer")
+local wibox = require("wibox")
+local a_placement = require("awful.placement")
+local a_wibox = require("awful.wibox")
+local beautiful = require("beautiful")
+local setmetatable = setmetatable
 
 local finder = { mt = {} }
 
--- Mouse finder private data.
+--- Mouse finder private data.
 -- @name data
 -- @field color Background color.
 -- @field hide The hide() function.
@@ -47,14 +47,14 @@ local finder = { mt = {} }
 -- @field wibox The mouse finder wibox show on the screen.
 local data = setmetatable({}, { __mode = 'k' })
 
--- Place a mouse finder on the screen.
+--- Place a mouse finder on the screen.
 -- @param self A mouse finder object.
 local function place(self)
     a_placement.under_mouse(data[self].wibox)
     a_placement.no_offscreen(data[self].wibox)
 end
 
--- Animate a mouse finder.
+--- Animate a mouse finder.
 -- @param self A mouse finder object.
 local function animate(self)
     local r = data[self].wibox:geometry().width
@@ -76,7 +76,7 @@ local function animate(self)
 end
 
 
--- Show a mouse finder.
+--- Show a mouse finder.
 -- @param self The mouse finder to show.
 local function show(self)
     -- do nothing if the mouse finder is already shown
@@ -92,7 +92,7 @@ local function show(self)
     data[self].wibox.visible = true
 end
 
--- Hide a mouse finder.
+--- Hide a mouse finder.
 -- @param self The mouse finder to hide.
 local function hide(self)
     -- do nothing if the mouse finder is already hidden
@@ -104,7 +104,7 @@ local function hide(self)
     data[self].wibox.visible = false
 end
 
--- Load Default values.
+--- Load Default values.
 -- @param self A mouse finder object.
 local function set_defaults(self)
     data[self].wibox.border_width = 0

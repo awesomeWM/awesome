@@ -1,5 +1,5 @@
 ---------------------------------------------------------------------------
--- Utility module for menubar
+--- Utility module for menubar
 --
 -- @author Antonio Terceiro
 -- @copyright 2009, 2011-2012 Antonio Terceiro, Alexander Yakushev
@@ -29,7 +29,7 @@ local utils = {}
 --- Terminal which applications that need terminal would open in.
 utils.terminal = 'xterm'
 
--- The default icon for applications that don't provide any icon in
+--- The default icon for applications that don't provide any icon in
 -- their .desktop files.
 local default_icon = nil
 
@@ -51,10 +51,10 @@ local all_icon_sizes = {
     '16x16'
 }
 
--- List of supported icon formats.
+--- List of supported icon formats.
 local icon_formats = { "png", "xpm", "svg" }
 
--- Check whether the icon format is supported.
+--- Check whether the icon format is supported.
 -- @param icon_file Filename of the icon.
 -- @return true if format is supported, false otherwise.
 local function is_format_supported(icon_file)

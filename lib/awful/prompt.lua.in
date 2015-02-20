@@ -35,7 +35,7 @@ local function itera (inc,a, i)
 	if v then return i,v end
 end
 
--- Load history file in history table
+--- Load history file in history table
 -- @param id The data.history identifier which is the path to the filename
 -- @param max Optional parameter, the maximum number of entries in file
 local function history_check_load(id, max)
@@ -64,7 +64,7 @@ local function history_check_load(id, max)
     end
 end
 
--- Save history table in history file
+--- Save history table in history file
 -- @param id The data.history identifier
 local function history_save(id)
     if data.history[id] then
@@ -84,7 +84,7 @@ local function history_save(id)
     end
 end
 
--- Return the number of items in history table regarding the id
+--- Return the number of items in history table regarding the id
 -- @param id The data.history identifier
 -- @return the number of items in history table, -1 if history is disabled
 local function history_items(id)
@@ -95,7 +95,7 @@ local function history_items(id)
     end
 end
 
--- Add an entry to the history file
+--- Add an entry to the history file
 -- @param id The data.history identifier
 -- @param command The command to add
 local function history_add(id, command)
@@ -120,16 +120,16 @@ local function history_add(id, command)
 end
 
 
--- Draw the prompt text with a cursor.
--- @param args The table of arguments.
--- @param text The text.
--- @param font The font.
--- @param prompt The text prefix.
--- @param text_color The text color.
--- @param cursor_color The cursor color.
--- @param cursor_pos The cursor position.
--- @param cursor_ul The cursor underline style.
--- @param selectall If true cursor is rendered on the entire text.
+--- Draw the prompt text with a cursor.
+-- @tparam table args The table of arguments.
+-- @field text The text.
+-- @field font The font.
+-- @field prompt The text prefix.
+-- @field text_color The text color.
+-- @field cursor_color The cursor color.
+-- @field cursor_pos The cursor position.
+-- @field cursor_ul The cursor underline style.
+-- @field selectall If true cursor is rendered on the entire text.
 local function prompt_text_with_cursor(args)
     local char, spacer, text_start, text_end, ret
     local text = args.text or ""

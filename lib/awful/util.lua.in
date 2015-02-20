@@ -277,7 +277,7 @@ function util.subsets(set)
     return ret
 end
 
--- Return true whether rectangle B is in the right direction
+--- Return true whether rectangle B is in the right direction
 -- compared to rectangle A.
 -- @param dir The direction.
 -- @param gA The geometric specification for rectangle A.
@@ -296,12 +296,12 @@ local function is_in_direction(dir, gA, gB)
     return false
 end
 
--- Calculate distance between two points.
+--- Calculate distance between two points.
 -- i.e: if we want to move to the right, we will take the right border
 -- of the currently focused screen and the left side of the checked screen.
 -- @param dir The direction.
--- @param gA The first rectangle.
--- @param gB The second rectangle.
+-- @param _gA The first rectangle.
+-- @param _gB The second rectangle.
 -- @return The distance between the screens.
 local function calculate_distance(dir, _gA, _gB)
     local gAx = _gA.x
@@ -322,7 +322,7 @@ local function calculate_distance(dir, _gA, _gB)
     return math.sqrt(math.pow(gBx - gAx, 2) + math.pow(gBy - gAy, 2))
 end
 
--- Get the nearest rectangle in the given direction. Every rectangle is specified as a table
+--- Get the nearest rectangle in the given direction. Every rectangle is specified as a table
 -- with 'x', 'y', 'width', 'height' keys, the same as client or screen geometries.
 -- @param dir The direction, can be either "up", "down", "left" or "right".
 -- @param recttbl A table of rectangle specifications.

@@ -87,7 +87,7 @@ function fair.horizontal.arrange(p)
     return do_fair(p, "east")
 end
 
--- Vertical fair layout.
+--- Vertical fair layout.
 -- @param screen The screen to arrange.
 fair.name = "fairv"
 function fair.arrange(p)

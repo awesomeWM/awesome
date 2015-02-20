@@ -82,7 +82,7 @@ function color.create_png_pattern(file)
     return pattern
 end
 
--- Add stops to the given pattern.
+--- Add stops to the given pattern.
 -- @param p The cairo pattern to add stops to
 -- @param iterator An iterator that returns strings. Each of those strings
 --   should be in the form place,color where place is in [0, 1].
@@ -94,14 +94,14 @@ local function add_iterator_stops(p, iterator)
     end
 end
 
--- Add a list of stops to a given pattern
+--- Add a list of stops to a given pattern
 local function add_stops_table(pat, arg)
     for _, stop in ipairs(arg) do
         pat:add_color_stop_rgba(stop[1], color.parse_color(stop[2]))
     end
 end
 
--- Create a pattern from a string
+--- Create a pattern from a string
 local function string_pattern(creator, arg)
     local iterator = string.gmatch(arg, "[^:]+")
     -- Create a table where each entry is a number from the original string

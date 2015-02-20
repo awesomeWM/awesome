@@ -16,7 +16,7 @@ local aclient = require("awful.client")
 local atag = require("awful.tag")
 local timer = require("gears.timer")
 
--- Give focus when clients appear/disappear.
+--- Give focus when clients appear/disappear.
 --
 -- @param obj An object that should have a .screen property.
 local function check_focus(obj)
@@ -29,13 +29,13 @@ local function check_focus(obj)
     end
 end
 
--- Check client focus (delayed).
+--- Check client focus (delayed).
 -- @param obj An object that should have a .screen property.
 local function check_focus_delayed(obj)
     timer.delayed_call(check_focus, {screen = obj.screen})
 end
 
--- Give focus on tag selection change.
+--- Give focus on tag selection change.
 --
 -- @param tag A tag object
 local function check_focus_tag(t)

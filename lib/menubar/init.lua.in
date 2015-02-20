@@ -81,7 +81,7 @@ local instance = { prompt = nil,
 local common_args = { w = wibox.layout.fixed.horizontal(),
                       data = setmetatable({}, { __mode = 'kv' }) }
 
--- Wrap the text with the color span tag.
+--- Wrap the text with the color span tag.
 -- @param s The text.
 -- @param c The desired text color.
 -- @return the text wrapped in a span tag.
@@ -89,7 +89,7 @@ local function colortext(s, c)
     return "<span color='" .. c .. "'>" .. s .. "</span>"
 end
 
--- Get how the menu item should be displayed.
+--- Get how the menu item should be displayed.
 -- @param o The menu item.
 -- @return item name, item background color, background image, item icon.
 local function label(o)
@@ -101,7 +101,7 @@ local function label(o)
     end
 end
 
--- Perform an action for the given menu item.
+--- Perform an action for the given menu item.
 -- @param o The menu item.
 -- @return if the function processed the callback, new awful.prompt command, new awful.prompt prompt text.
 local function perform_action(o)
@@ -120,8 +120,8 @@ local function perform_action(o)
     end
 end
 
--- Cut item list to return only current page
--- @tparam table all_item All items list
+--- Cut item list to return only current page.
+-- @tparam table all_item All items list.
 -- @tparam str query Search query.
 -- @return table List of items for current page.
 local function get_current_page(all_items, query)
@@ -159,8 +159,8 @@ local function get_current_page(all_items, query)
     return current_page
 end
 
--- Update the menubar according to the command entered by user.
--- @param query The text to filter entries by.
+--- Update the menubar according to the command entered by user.
+-- @tparam str query Search query.
 local function menulist_update(query)
     query = query or ""
     shownitems = {}
@@ -225,7 +225,7 @@ local function menulist_update(query)
                        get_current_page(shownitems, query))
 end
 
--- Create the menubar wibox and widgets.
+--- Create the menubar wibox and widgets.
 local function initialize()
     instance.wibox = wibox({})
     instance.widget = menubar.get()
@@ -242,7 +242,7 @@ function menubar.refresh()
     menubar.menu_entries = menubar.menu_gen.generate()
 end
 
--- Awful.prompt keypressed callback to be used when the user presses a key.
+--- Awful.prompt keypressed callback to be used when the user presses a key.
 -- @param mod Table of key combination modifiers (Control, Shift).
 -- @param key The key that was pressed.
 -- @param comm The current command in the prompt.

@@ -35,9 +35,9 @@ local descs = setmetatable({}, { __mode = 'k' })
 local fonts = setmetatable({}, { __mode = 'v' })
 local active_font
 
--- Load a font name
+--- Load a font name
 --
--- @param Font name, which can be a string or a table
+-- @param name Font name, which can be a string or a table
 local function load_font(name)
     name = name or active_font
     if name and type(name) ~= "string" and descs[name] then
@@ -64,7 +64,7 @@ local function load_font(name)
     return font
 end
 
--- Set an active font
+--- Set an active font
 --
 -- @param name The font
 local function set_font(name)

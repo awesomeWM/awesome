@@ -425,8 +425,7 @@ function menu:add(args, index)
     return item
 end
 
--- Delete menu entry at given position
--- @param _menu The menu
+--- Delete menu entry at given position
 -- @param num The position in the table of the menu entry to be deleted; can be also the menu entry itself
 function menu:delete(num)
     if type(num) == "table" then

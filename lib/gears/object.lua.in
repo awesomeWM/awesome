@@ -12,7 +12,7 @@ local error = error
 
 local object = { mt = {} }
 
--- Verify that obj is indeed a valid object as returned by new()
+--- Verify that obj is indeed a valid object as returned by new()
 local function check(obj)
     if type(obj) ~= "table" or type(obj._signals) ~= "table" then
         error("add_signal() called on non-object")
@@ -72,7 +72,7 @@ function object:emit_signal(name, ...)
     end
 end
 
--- Returns a new object. You can call :emit_signal(), :disconnect_signal,
+--- Returns a new object. You can call :emit_signal(), :disconnect_signal,
 -- :connect_signal() and :add_signal() on the resulting object.
 local function new()
     local ret = {}

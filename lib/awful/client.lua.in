@@ -720,7 +720,7 @@ function client.restore(s)
     return nil
 end
 
--- Normalize a set of numbers to 1
+--- Normalize a set of numbers to 1
 -- @param set the set of numbers to normalize
 -- @param num the number of numbers to normalize
 local function normalize(set, num)

@@ -26,7 +26,7 @@ local function store_geometry(window, reqtype)
     data[window][reqtype].screen = window.screen
 end
 
--- Maximize a window horizontally.
+--- Maximize a window horizontally.
 --
 -- @param window The window.
 -- @param set Set or unset the maximized values.
@@ -44,7 +44,7 @@ local function maximized_horizontal(window, set)
     end
 end
 
--- Maximize a window vertically.
+--- Maximize a window vertically.
 --
 -- @param window The window.
 -- @param set Set or unset the maximized values.
@@ -62,7 +62,7 @@ local function maximized_vertical(window, set)
     end
 end
 
--- Fullscreen a window.
+--- Fullscreen a window.
 --
 -- @param window The window.
 -- @param set Set or unset the fullscreen values.
@@ -119,7 +119,7 @@ local function screen_change(window)
     end
 end
 
--- Update a client's settings when its geometry changes, skipping signals
+--- Update a client's settings when its geometry changes, skipping signals
 -- resulting from calls within.
 local geometry_change_lock = false
 local function geometry_change(window)

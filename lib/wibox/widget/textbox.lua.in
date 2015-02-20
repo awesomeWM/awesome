@@ -19,7 +19,7 @@ local error = error
 
 local textbox = { mt = {} }
 
--- Setup a pango layout for the given textbox and cairo context
+--- Setup a pango layout for the given textbox and cairo context
 local function setup_layout(box, width, height)
     local layout = box._layout
     layout.width = Pango.units_from_double(width)
