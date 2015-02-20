@@ -1,4 +1,6 @@
-# awesome
+# Readme
+
+## About awesome
 
 awesome is a highly configurable, next generation framework window manager for X.
 

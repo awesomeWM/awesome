@@ -13,6 +13,8 @@ pretty='lua'
 style="!pale"
 backtick_references=true
 merge=true
+use_markdown_titles = true
+wrap=true
 topics={
     '00-authors.md',
     '01-readme.md',
@@ -24,6 +26,12 @@ tparam_alias('client', 'client.client')
 tparam_alias('tag', 'tag')
 -- Should be default, but is not.  Sets up "@tab" => "@tparam table".
 tparam_alias('tab', 'table')
+
+-- More fitting section names
+kind_names={topic='Documentation',module='Libraries'}
+
+-- Sort modules alphabetically
+sort_modules=true
 
 file = {
     -- LUA libraries
