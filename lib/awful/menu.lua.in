@@ -588,18 +588,18 @@ end
 --------------------------------------------------------------------------------
 
 --- Create a menu popup.
--- @param args Table containing the menu informations.<br/>
--- <ul>
--- <li> Key items: Table containing the displayed items. Each element is a table by default (when element 'new' is awful.menu.entry) containing: item name, triggered action, submenu table or function, item icon (optional). </li>
--- <li> Keys theme.[fg|bg]_[focus|normal], theme.border_color, theme.border_width, theme.submenu_icon, theme.height and theme.width override the default display for your menu and/or of your menu entry, each of them are optional. </li>
--- <li> Key auto_expand controls the submenu auto expand behaviour by setting it to true (default) or false. </li>
--- </ul>
+-- @param args Table containing the menu informations.
+--
+-- * Key items: Table containing the displayed items. Each element is a table by default (when element 'new' is awful.menu.entry) containing: item name, triggered action, submenu table or function, item icon (optional).
+-- * Keys theme.[fg|bg]_[focus|normal], theme.border_color, theme.border_width, theme.submenu_icon, theme.height and theme.width override the default display for your menu and/or of your menu entry, each of them are optional.
+-- * Key auto_expand controls the submenu auto expand behaviour by setting it to true (default) or false.
+--
 -- @param parent Specify the parent menu if we want to open a submenu, this value should never be set by the user.
 -- @usage -- The following function builds and shows a menu of clients that match
 -- -- a particular rule.
 -- -- Bound to a key, it can be used to select from dozens of terminals open on
 -- -- several tags.
--- -- When using @{awful.rules.match_any} instead of @{awful.rules.match},
+-- -- When using @{rules.match_any} instead of @{rules.match},
 -- -- a menu of clients with different classes could be build.
 --
 -- function terminal_menu ()

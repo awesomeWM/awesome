@@ -158,32 +158,32 @@ local function prompt_text_with_cursor(args)
 end
 
 --- Run a prompt in a box.
--- <p>The following readline keyboard shortcuts are implemented as expected:</p>
+--
+-- The following readline keyboard shortcuts are implemented as expected:
 -- <kbd>CTRL+A</kbd>, <kbd>CTRL+B</kbd>, <kbd>CTRL+C</kbd>, <kbd>CTRL+D</kbd>,
 -- <kbd>CTRL+E</kbd>, <kbd>CTRL+J</kbd>, <kbd>CTRL+M</kbd>, <kbd>CTRL+F</kbd>,
 -- <kbd>CTRL+H</kbd>, <kbd>CTRL+K</kbd>, <kbd>CTRL+U</kbd>, <kbd>CTRL+W</kbd>,
 -- <kbd>CTRL+BACKSPACE</kbd>, <kbd>SHIFT+INSERT</kbd>, <kbd>HOME</kbd>,
 -- <kbd>END</kbd> and arrow keys.
--- <p>The following shortcuts implement additional history manipulation commands
+--
+-- The following shortcuts implement additional history manipulation commands
 -- where the search term is defined as the substring of the command from first
--- character to cursor position.</p>
--- <ul>
--- <li><code>CTRL+R</code>: reverse history search, matches any history entry
--- containing search term.</li>
--- <li><code>CTRL+S</code>: forward history search, matches any history entry
--- containing search term.</li>
--- <li><code>CTRL+UP</code>: ZSH up line or search, matches any history entry
--- starting with search term.</li>
--- <li><code>CTRL+DOWN</code>: ZSH down line or search, matches any history
--- entry starting with search term.</li>
--- <li><code>CTRL+DELETE</code>: delete the currently visible history entry from
--- history file.
--- This does not delete new commands or history entries under user editing.</li>
--- </ul>
--- @param args A table with optional arguments: <code>fg_cursor</code>,
--- <code>bg_cursor</code>, <code>ul_cursor</code>, <code>prompt</code>,
--- <code>text</code>, <code>selectall</code>, <code>font</code>,
--- <code>autoexec</code>.
+-- character to cursor position.
+--
+-- * <kbd>CTRL+R</kbd>: reverse history search, matches any history entry
+-- containing search term.
+-- * <kbd>CTRL+S</kbd>: forward history search, matches any history entry
+-- containing search term.
+-- * <kbd>CTRL+UP</kbd>: ZSH up line or search, matches any history entry
+-- starting with search term.
+-- * <kbd>CTRL+DOWN</kbd>: ZSH down line or search, matches any history
+-- entry starting with search term.
+-- * <kbd>CTRL+DELETE</kbd>: delete the currently visible history entry from
+-- history file. This does not delete new commands or history entries under
+-- user editing.
+--
+-- @tparam table args A table with optional arguments: `fg_cursor`, `bg_cursor`,
+-- `ul_cursor`, `prompt`, `text`, `selectall`, `font`, `autoexec`.
 -- @param textbox The textbox to use for the prompt.
 -- @param exe_callback The callback function to call with command as argument
 -- when finished.
