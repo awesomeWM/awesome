@@ -1,9 +1,9 @@
-# Contrubuting
+# Contributing
 
 
 ## Bugs
 
-Please look at http://awesome.naquadah.org/bugs/
+Please look at `https://github.com/awesomeWM/awesome/issues`.
 
 ## Style
 
@@ -59,6 +59,7 @@ If you plan to submit patches, you should follow the following guidelines.
   `Signed-off-by: Your Name <you@example.com>` line to the
   commit message (or just use the option `-s` when commiting);
 - make sure that you have tests for the bug you are fixing.
+- if possible, add a unit test to the test suite under spec/.
 
 ### Patches
 
