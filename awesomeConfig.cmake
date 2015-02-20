@@ -272,7 +272,7 @@ set(AWESOME_THEMES_PATH      ${AWESOME_DATA_PATH}/themes)
 # }}}
 
 # {{{ Configure files
-file(GLOB_RECURSE awesome_lua_configure_files RELATIVE 
+file(GLOB_RECURSE awesome_lua_configure_files RELATIVE
     ${SOURCE_DIR}
     ${SOURCE_DIR}/lib/*.lua.in
     ${SOURCE_DIR}/docs/capi/*.lua.in

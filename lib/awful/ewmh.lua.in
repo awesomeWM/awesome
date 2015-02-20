@@ -156,7 +156,7 @@ function ewmh.activate(c)
 end
 
 --- Tag a window with its requested tag
--- 
+--
 -- @client c A client to tag
 -- @tag[opt] t A tag to use. If omitted, then the client is made sticky.
 function ewmh.tag(c, t)

@@ -281,7 +281,7 @@ end
 
 --- Focus a client by the given direction.
 --
--- @tparam string dir The direction, can be either 
+-- @tparam string dir The direction, can be either
 --   `"up"`, `"down"`, `"left"` or `"right"`.
 -- @client[opt] c Optional client.
 function client.focus.bydirection(dir, c)
