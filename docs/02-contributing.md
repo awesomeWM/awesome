@@ -56,7 +56,7 @@ If you plan to submit patches, you should follow the following guidelines.
 - the first line of the commit message should be a short;
   description and should skip the full stop;
 - if you want your work included, add a
-  `Signed-off-by: Your Name <you@example.com>` line to the
+  `Signed-off-by: Your Name &lt;you@example.com>` line to the
   commit message (or just use the option `-s` when commiting);
 - make sure that you have tests for the bug you are fixing.
 - if possible, add a unit test to the test suite under spec/.
