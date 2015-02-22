@@ -5,19 +5,31 @@
 -- Mouse finder highlights the mouse cursor on the screen
 -- To enable this feature, a `awful.mouse.finder` object needs to be bound to a
 -- key:
+--
 --     mymousefinder = awful.mouse.finder()
+--
 -- Then bind the `find` function a key binding.
 --
 -- Some configuration variable can be set in the theme:
+--
 -- The mouse_finder display duration
+--
 --     theme.mouse_finder_timeout = 3
+--
 -- The animation speed
+--
 --     theme.mouse_finder_animate_timeout = 0.05
+--
 -- The mouse_finder radius
+--
 --     theme.mouse_finder_radius = 20
+--
 -- The growth factor
+--
 --     theme.mouse_finder_factor = 2
+--
 -- The mouse_finder color
+--
 --     theme.mouse_finder_color = "#ff0000"
 --
 -- @author Sébastien Gross &lt;seb•ɱɩɲʋʃ•awesome•ɑƬ•chezwam•ɖɵʈ•org&gt
