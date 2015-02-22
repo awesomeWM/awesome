@@ -173,17 +173,6 @@ capi.client.connect_signal("property::screen", function(c, old_screen)
     layout.arrange(c.screen)
 end)
 
-local function arrange_on_tagged(c, tag)
-    if not tag.screen then return end
-    layout.arrange(tag.screen)
-    if not capi.client.focus or not capi.client.focus:isvisible() then
-        local c = client.focus.history.get(tag.screen, 0)
-        if c then
-            c:emit_signal("request::activate", "layout.arrange_on_tagged",
-                          {raise=false})
-        end
-    end
-end
 local function arrange_tag(t)
     layout.arrange(tag.getscreen(t))
 end
