@@ -50,7 +50,7 @@ local setmetatable = setmetatable
 local finder = { mt = {} }
 
 --- Mouse finder private data.
--- @name data
+-- @table data
 -- @field color Background color.
 -- @field hide The hide() function.
 -- @field show The show() function.
