@@ -108,8 +108,10 @@ naughty.notifications = { suspended = { } }
 for s = 1, capi.screen.count() do
     naughty.notifications[s] = {
         top_left = {},
+        top_middle = {},
         top_right = {},
         bottom_left = {},
+        bottom_middle = {},
         bottom_right = {},
     }
 end
@@ -141,6 +143,7 @@ end
 -- Evaluate desired position of the notification by index - internal
 -- @param idx Index of the notification
 -- @param position top_right | top_left | bottom_right | bottom_left
+--             | top_middle | bottom_middle
 -- @param height Popup height
 -- @param width Popup width (optional)
 -- @return Absolute position and index in { x = X, y = Y, idx = I } table
@@ -153,6 +156,8 @@ local function get_offset(screen, position, idx, width, height)
     -- calculate x
     if position:match("left") then
         v.x = ws.x + naughty.config.padding
+    elseif position:match("middle") then
+        v.x = (ws.width / 2) - (width / 2)
     else
         v.x = ws.x + ws.width - (width + naughty.config.padding)
     end
@@ -246,7 +251,8 @@ end
 --   Default: nil
 -- @param screen Target screen for the notification. Default: 1
 -- @param position Corner of the workarea displaying the popups.
---   Values: "top_right" (default), "top_left", "bottom_left", "bottom_right".
+--   Values: "top_right" (default), "top_left", "bottom_left", "bottom_right",
+--             "top_middle", "bottom_middle".
 -- @param ontop Boolean forcing popups to display on top. Default: true
 -- @param height Popup height. Default: nil (auto)
 -- @param width Popup width. Default: nil (auto)
