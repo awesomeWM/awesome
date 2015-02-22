@@ -383,6 +383,30 @@ function tag.getmwfact(t)
     return tag.getproperty(t, "mwfact") or 0.5
 end
 
+--- Set the spacing between clients
+-- @param useless_gap The spacing between clients
+-- @param t The tag to modify, if null tag.selected() is used.
+function tag.setgap(useless_gap, t)
+    local t = t or tag.selected()
+    if useless_gap >= 0 then
+        tag.setproperty(t, "useless_gap", useless_gap)
+    end
+end
+
+--- Increase the spacing between clients
+-- @param add Value to add to the spacing between clients
+-- @param t The tag to modify, if null tag.selected() is used.
+function tag.incgap(add, t)
+    tag.setgap(tag.getgap(t) + add, t)
+end
+
+--- Get the spacing between clients
+-- @param t Optional tag.
+function tag.getgap(t)
+    local t = t or tag.selected()
+    return tag.getproperty(t, "useless_gap") or 0
+end
+
 --- Set the number of master windows.
 -- @param nmaster The number of master windows.
 -- @param[opt] t The tag.
@@ -673,6 +697,7 @@ capi.tag.add_signal("property::icon")
 capi.tag.add_signal("property::icon_only")
 capi.tag.add_signal("property::layout")
 capi.tag.add_signal("property::mwfact")
+capi.tag.add_signal("property::useless_gap")
 capi.tag.add_signal("property::ncol")
 capi.tag.add_signal("property::nmaster")
 capi.tag.add_signal("property::windowfact")
