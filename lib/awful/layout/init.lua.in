@@ -97,7 +97,7 @@ end
 --- Arrange a screen using its current layout.
 -- @param screen The screen to arrange.
 function layout.arrange(screen)
-    if delayed_arrange[screen] then return end
+    if not screen or delayed_arrange[screen] then return end
     delayed_arrange[screen] = true
 
     timer.delayed_call(function()
