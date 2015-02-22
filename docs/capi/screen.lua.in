@@ -4,37 +4,37 @@
 -- @release @AWESOME_VERSION@
 -- @module screen
 
---- Screen is a table where indexes are screen number. You can use screen[1]
+--- Screen is a table where indexes are screen numbers. You can use `screen[1]`
 -- to get access to the first screen, etc. Alternatively, if RANDR information
 -- is available, you can use output names for finding screen objects.
 -- Each screen has a set of properties.
 --
--- @field geometry The screen coordinates. Immutable.
--- @field workarea The screen workarea.
--- @field index The screen number.
--- @field outputs If RANDR information is available, a list of outputs for this
---   screen and their size in mm.
+-- @tfield table geometry The screen coordinates. Immutable.
+-- @tfield table workarea The screen workarea.
+-- @tfield int index The screen number.
+-- @tfield table outputs If RANDR information is available, a list of outputs
+--   for this screen and their size in mm.
 -- @table screen
 
---- Get the number of screen.
+--- Get the number of screens.
 --
 -- @return The screen count, at least 1.
 -- @function count
 
 --- Add a signal to a screen.
 --
--- @param name A signal name.
--- @param func A function to call when the signal is emitted.
+-- @string name A signal name.
+-- @func func A function to call when the signal is emitted.
 -- @function connect_signal
 
 --- Remove a signal to a screen.
 --
--- @param name A signal name.
--- @param func A function to remove
+-- @string name A signal name.
+-- @func func A function to remove
 -- @function disconnect_signal
 
 --- Emit a signal to a screen.
 --
--- @param name A signal name.
+-- @string name A signal name.
 -- @param ... Various arguments, optional.
 -- @function emit_signal
