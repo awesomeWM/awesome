@@ -32,6 +32,7 @@
 #include "mousegrabber.h"
 #include "luaa.h"
 #include "systray.h"
+#include "xkb.h"
 #include "objects/screen.h"
 #include "common/atoms.h"
 #include "common/xutil.h"
@@ -42,6 +43,7 @@
 #include <xcb/xcb_atom.h>
 #include <xcb/xcb_icccm.h>
 #include <xcb/xcb_event.h>
+#include <xcb/xkb.h>
 
 #define DO_EVENT_HOOK_CALLBACK(type, xcbtype, xcbeventprefix, arraytype, match) \
     static void \
@@ -880,6 +882,7 @@ void event_handle(xcb_generic_event_t *event)
 
     static uint8_t randr_screen_change_notify = 0;
     static uint8_t shape_notify = 0;
+    static uint8_t xkb_notify = 0;
 
     if(randr_screen_change_notify == 0)
     {
@@ -898,10 +901,21 @@ void event_handle(xcb_generic_event_t *event)
             shape_notify = shape_query->first_event + XCB_SHAPE_NOTIFY;
     }
 
+    if(xkb_notify == 0)
+    {
+        /* check for xkb extension */
+        const xcb_query_extension_reply_t *xkb_query;
+        xkb_query = xcb_get_extension_data(globalconf.connection, &xcb_xkb_id);
+        if(xkb_query->present)
+            xkb_notify = xkb_query->first_event;
+    }
+
     if (response_type == randr_screen_change_notify)
         event_handle_randr_screen_change_notify((void *) event);
     if (response_type == shape_notify)
         event_handle_shape_notify((void *) event);
+    if (response_type == xkb_notify)
+        event_handle_xkb_notify((void *) event);
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

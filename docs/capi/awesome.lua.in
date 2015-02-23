@@ -75,3 +75,16 @@
 -- @param name A string with the event name.
 -- @param ... Signal arguments.
 -- @function emit_signal
+
+--- Switch keyboard layout group.
+-- @param num keyboard layout number, integer from 0 to 3
+-- @function xkb_set_layout_group
+
+--- Get current keyboard layout group.
+-- @return current keyboard layout number
+-- @function xkb_get_layout_group
+
+
+--- Get description of configured layouts
+-- @return String with description of configured layouts
+-- @function xkb_get_group_names

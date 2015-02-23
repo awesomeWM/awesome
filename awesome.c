@@ -26,6 +26,7 @@
 #include "common/backtrace.h"
 #include "common/version.h"
 #include "common/xutil.h"
+#include "xkb.h"
 #include "dbus.h"
 #include "event.h"
 #include "ewmh.h"
@@ -498,6 +499,9 @@ main(int argc, char **argv)
 
     /* init spawn (sn) */
     spawn_init();
+
+    /* init xkb */
+    xkb_init();
 
     /* The default GC is just a newly created associated with a window with
      * depth globalconf.default_depth */
