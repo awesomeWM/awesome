@@ -42,8 +42,6 @@ layout.layouts = {
 -- This is a special lock used by the arrange function.
 -- This avoids recurring call by emitted signals.
 local arrange_lock = false
--- Delay one arrange call per screen.
-local delayed_arrange = {}
 
 --- Get the current layout.
 -- @param screen The screen number.
@@ -97,38 +95,32 @@ end
 --- Arrange a screen using its current layout.
 -- @param screen The screen to arrange.
 function layout.arrange(screen)
-    if not screen or delayed_arrange[screen] then return end
-    delayed_arrange[screen] = true
+    if arrange_lock then return end
+    arrange_lock = true
 
-    timer.delayed_call(function()
-        if arrange_lock then return end
-        arrange_lock = true
+    local p = {}
+    p.workarea = capi.screen[screen].workarea
+    -- Handle padding
+    local padding = ascreen.padding(capi.screen[screen])
+    if padding then
+        p.workarea.x = p.workarea.x + (padding.left or 0)
+        p.workarea.y = p.workarea.y + (padding.top or 0)
+        p.workarea.width = p.workarea.width - ((padding.left or 0 ) + (padding.right or 0))
+        p.workarea.height = p.workarea.height - ((padding.top or 0) + (padding.bottom or 0))
+    end
+    p.geometry = capi.screen[screen].geometry
+    p.clients = client.tiled(screen)
+    p.screen = screen
+    p.geometries = setmetatable({}, {__mode = "k"})
+    layout.get(screen).arrange(p)
+    for c, g in pairs(p.geometries) do
+        g.width = g.width - c.border_width * 2
+        g.height = g.height - c.border_width * 2
+        c:geometry(g)
+    end
+    capi.screen[screen]:emit_signal("arrange")
 
-        local p = {}
-        p.workarea = capi.screen[screen].workarea
-        -- Handle padding
-        local padding = ascreen.padding(capi.screen[screen])
-        if padding then
-            p.workarea.x = p.workarea.x + (padding.left or 0)
-            p.workarea.y = p.workarea.y + (padding.top or 0)
-            p.workarea.width = p.workarea.width - ((padding.left or 0 ) + (padding.right or 0))
-            p.workarea.height = p.workarea.height - ((padding.top or 0) + (padding.bottom or 0))
-        end
-        p.geometry = capi.screen[screen].geometry
-        p.clients = client.tiled(screen)
-        p.screen = screen
-        p.geometries = setmetatable({}, {__mode = "k"})
-        layout.get(screen).arrange(p)
-        for c, g in pairs(p.geometries) do
-            g.width = g.width - c.border_width * 2
-            g.height = g.height - c.border_width * 2
-            c:geometry(g)
-        end
-        capi.screen[screen]:emit_signal("arrange")
-
-        arrange_lock = false
-        delayed_arrange[screen] = nil
-    end)
+    arrange_lock = false
 end
 
 --- Get the current layout name.
