@@ -16,9 +16,10 @@ local theme = require("beautiful")
 local wibox = require("wibox")
 
 -- menubar
-local menubar = { mt = {} }
+local menubar = { mt = {}, menu_entries = {} }
 menubar.menu_gen = require("menubar.menu_gen")
 menubar.utils = require("menubar.utils")
+local compute_text_width = menubar.utils.compute_text_width
 
 --- List of menubar keybindings:
 -- <p><ul>
@@ -54,6 +55,15 @@ menubar.geometry = { width = nil,
                      height = nil,
                      x = nil,
                      y = nil }
+
+--- Width of blank space left in the right side.
+menubar.right_margin = 50
+
+--- Label used for "Next page", default "▶▶".
+menubar.right_label = "▶▶"
+
+--- Label used for "Previous page", default "◀◀".
+menubar.left_label = "◀◀"
 
 --- Allows user to specify custom parameters for prompt.run function
 -- (like colors).
@@ -110,12 +120,51 @@ local function perform_action(o)
     end
 end
 
+-- Cut item list to return only current page
+-- @tparam table all_item All items list
+-- @tparam str query Search query.
+-- @return table List of items for current page.
+local function get_current_page(all_items, query)
+    if not instance.prompt.width then
+        instance.prompt.width = compute_text_width(instance.prompt.prompt)
+    end
+    if not menubar.left_label_width then
+        menubar.left_label_width = compute_text_width(menubar.left_label)
+    end
+    if not menubar.right_label_width then
+        menubar.right_label_width = compute_text_width(menubar.right_label)
+    end
+    local available_space = instance.geometry.width - menubar.right_margin -
+        menubar.right_label_width - menubar.left_label_width -
+        compute_text_width(query) - instance.prompt.width
+
+    local width_sum = 0
+    local current_page = {}
+    for i, item in ipairs(all_items) do
+        item.width = item.width or
+            compute_text_width(" " .. item.name) +
+            (item.icon and instance.geometry.height or 0)
+        if width_sum + item.width > available_space then
+            if current_item < i then
+                table.insert(current_page, { name = menubar.right_label, icon = nil })
+                break
+            end
+            current_page = { { name = menubar.left_label, icon = nil }, item, }
+            width_sum = item.width
+        else
+            table.insert(current_page, item)
+            width_sum = width_sum + item.width
+        end
+    end
+    return current_page
+end
+
 -- Update the menubar according to the command entered by user.
 -- @param query The text to filter entries by.
 local function menulist_update(query)
-    local query = query or ""
-    local pattern = awful.util.query_to_pattern(query)
+    query = query or ""
     shownitems = {}
+    local pattern = awful.util.query_to_pattern(query)
     local match_inside = {}
 
     -- First we add entries which names match the command from the
@@ -139,7 +188,7 @@ local function menulist_update(query)
     end
 
     -- Add the applications according to their name and cmdline
-    for i, v in ipairs(menu_entries) do
+    for i, v in ipairs(menubar.menu_entries) do
         v.focused = false
         if not current_category or v.category == current_category then
             if string.match(v.name, pattern)
@@ -173,7 +222,7 @@ local function menulist_update(query)
 
     common.list_update(common_args.w, nil, label,
                        common_args.data,
-                       shownitems)
+                       get_current_page(shownitems, query))
 end
 
 -- Create the menubar wibox and widgets.
@@ -190,7 +239,7 @@ end
 
 --- Refresh menubar's cache by reloading .desktop files.
 function menubar.refresh()
-    menu_entries = menubar.menu_gen.generate()
+    menubar.menu_entries = menubar.menu_gen.generate()
 end
 
 -- Awful.prompt keypressed callback to be used when the user presses a key.
@@ -252,10 +301,11 @@ function menubar.show(scr)
     scr = scr or capi.mouse.screen or 1
     local scrgeom = capi.screen[scr].workarea
     local geometry = menubar.geometry
-    instance.wibox:geometry({x = geometry.x or scrgeom.x,
+    instance.geometry = {x = geometry.x or scrgeom.x,
                              y = geometry.y or scrgeom.y,
                              height = geometry.height or theme.get_font_height() * 1.5,
-                             width = geometry.width or scrgeom.width})
+                             width = geometry.width or scrgeom.width}
+    instance.wibox:geometry(instance.geometry)
 
     current_item = 1
     current_category = nil
@@ -280,9 +330,6 @@ end
 --- Get a menubar wibox.
 -- @return menubar wibox.
 function menubar.get()
-    if app_folders then
-        menubar.menu_gen.all_menu_dirs = app_folders
-    end
     menubar.refresh()
     -- Add to each category the name of its key in all_categories
     for k, v in pairs(menubar.menu_gen.all_categories) do
