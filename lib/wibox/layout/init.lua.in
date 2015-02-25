@@ -4,7 +4,7 @@
 -- @author Uli Schlachter
 -- @copyright 2010 Uli Schlachter
 -- @release @AWESOME_VERSION@
--- @module wibox.layout
+-- @classmod wibox.layout
 ---------------------------------------------------------------------------
 
 return

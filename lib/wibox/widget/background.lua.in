@@ -2,7 +2,7 @@
 -- @author Uli Schlachter
 -- @copyright 2010 Uli Schlachter
 -- @release @AWESOME_VERSION@
--- @module wibox.widget.background
+-- @classmod wibox.widget.background
 ---------------------------------------------------------------------------
 
 local base = require("wibox.widget.base")

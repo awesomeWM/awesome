@@ -2,7 +2,7 @@
 -- @author dodo
 -- @copyright 2012 dodo
 -- @release @AWESOME_VERSION@
--- @module wibox.layout.mirror
+-- @classmod wibox.layout.mirror
 ---------------------------------------------------------------------------
 
 local type = type

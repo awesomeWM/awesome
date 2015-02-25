@@ -3,7 +3,7 @@
 -- @author dodo
 -- @copyright 2010, 2011 Uli Schlachter, dodo
 -- @release @AWESOME_VERSION@
--- @module wibox.widget.textbox
+-- @classmod wibox.widget.textbox
 ---------------------------------------------------------------------------
 
 local base = require("wibox.widget.base")

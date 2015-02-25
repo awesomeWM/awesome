@@ -2,7 +2,7 @@
 -- @author Uli Schlachter
 -- @copyright 2010 Uli Schlachter
 -- @release @AWESOME_VERSION@
--- @module wibox.layout.flex
+-- @classmod wibox.layout.flex
 ---------------------------------------------------------------------------
 
 local base = require("wibox.layout.base")

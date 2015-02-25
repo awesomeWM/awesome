@@ -4,7 +4,7 @@
 -- @author Uli Schlachter
 -- @copyright 2012 Uli Schlachter
 -- @release @AWESOME_VERSION@
--- @module wibox.drawable
+-- @classmod wibox.drawable
 ---------------------------------------------------------------------------
 
 local drawable = {}

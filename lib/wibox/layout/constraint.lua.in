@@ -2,7 +2,7 @@
 -- @author Lukáš Hrázký
 -- @copyright 2012 Lukáš Hrázký
 -- @release @AWESOME_VERSION@
--- @module wibox.layout.constraint
+-- @classmod wibox.layout.constraint
 ---------------------------------------------------------------------------
 
 local pairs = pairs
