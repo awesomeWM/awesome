@@ -31,6 +31,7 @@ local data = setmetatable({}, { __mode = "k" })
 -- @function set_color
 -- @param graph The graph.
 -- @param color The graph color.
+-- @see gears.color.create_pattern
 
 --- Set the graph background color.
 --
