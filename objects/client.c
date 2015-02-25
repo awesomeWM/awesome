@@ -867,10 +867,15 @@ client_set_minimized(lua_State *L, int cidx, bool s)
             xwindow_set_state(c->window, XCB_ICCCM_WM_STATE_ICONIC);
 
             uint32_t no_event[] = { 0 };
-            const uint32_t select_input_val[] = { CLIENT_SELECT_INPUT_EVENT_MASK };
+            const uint32_t client_select_input_val[] = { CLIENT_SELECT_INPUT_EVENT_MASK };
+            const uint32_t frame_select_input_val[] = { FRAME_SELECT_INPUT_EVENT_MASK };
             xcb_grab_server(globalconf.connection);
             xcb_change_window_attributes(globalconf.connection,
                                          globalconf.screen->root,
+                                         XCB_CW_EVENT_MASK,
+                                         no_event);
+            xcb_change_window_attributes(globalconf.connection,
+                                         c->frame_window,
                                          XCB_CW_EVENT_MASK,
                                          no_event);
             xcb_change_window_attributes(globalconf.connection,
@@ -883,9 +888,13 @@ client_set_minimized(lua_State *L, int cidx, bool s)
                                          XCB_CW_EVENT_MASK,
                                          ROOT_WINDOW_EVENT_MASK);
             xcb_change_window_attributes(globalconf.connection,
+                                         c->frame_window,
+                                         XCB_CW_EVENT_MASK,
+                                         frame_select_input_val);
+            xcb_change_window_attributes(globalconf.connection,
                                          c->window,
                                          XCB_CW_EVENT_MASK,
-                                         select_input_val);
+                                         client_select_input_val);
             xcb_ungrab_server(globalconf.connection);
         }
         else
