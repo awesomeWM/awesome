@@ -185,12 +185,13 @@ function util.getdir(d)
 end
 
 --- Search for an icon and return the full path.
--- It searches for the icon path under the directories given w/the right ext
+-- It searches for the icon path under the given directories with respect to the
+-- given extensions for the icon filename.
 -- @param iconname The name of the icon to search for.
 -- @param exts Table of image extensions allowed, otherwise { 'png', gif' }
 -- @param dirs Table of dirs to search, otherwise { '/usr/share/pixmaps/' }
--- @param size Optional size. If this is specified, subdirectories <size>x<size>
---             of the dirs are searched first
+-- @tparam string size Optional size. If this is specified, subdirectories `x`
+--   of the dirs are searched first.
 function util.geticonpath(iconname, exts, dirs, size)
     local exts = exts or { 'png', 'gif' }
     local dirs = dirs or { '/usr/share/pixmaps/', '/usr/share/icons/hicolor/' }
