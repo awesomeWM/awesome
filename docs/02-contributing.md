@@ -1,6 +1,5 @@
 # Contributing
 
-
 ## Bugs
 
 Please look at `https://github.com/awesomeWM/awesome/issues`.
@@ -27,14 +26,14 @@ Imitate the existing code style. For concrete rules:
 
  - Use `/* */` for comments;
 
- - Use the API: there's a list of `a_*()` function you should use instead
-   of the standard libc ones. There is also common API for linked list,
+ - Use the API: there's a list of `a_*()` functions you should use instead
+   of the standard libc ones. There is also a common API for linked lists,
    tabulars, etc.;
 
  - Be *clear* in what you do;
 
  - Prefix your function name with the module they are enhancing,
-   i.e. if you add a function to manipulate a tag prefix it with `tag_`.
+   i.e. if you add a function to manipulate a tag prefix it with `tag_`;
 
  - Write documentation for any new functions, options, whatever.
 
@@ -44,34 +43,36 @@ A vim modeline is set in each file to respect this.
 
 For documentation purposes LDoc---see
 [here](https://stevedonovan.github.io/ldoc/manual/doc.md.html) for its
-documentation---is used. Comments, that shall be parsed by LDoc have the following format:
+documentation---is used. Comments that shall be parsed by LDoc have the
+following format:
 
     --- summary.
     -- Description; this can extend over
     -- several lines
-    
+
     -----------------
     -- This will also do.
-    
+
     --[[--
      Summary. A description
      ...;
     ]]
 
-One can use the full power of [Markdown](http://daringfireball.net/projects/markdown)
-with the extensions of [Discount](http://www.pell.portland.or.us/~orc/Code/discount/)
-for mark-up in the comments.
+One can use the full power of
+[Markdown](http://daringfireball.net/projects/markdown) with the extensions of
+[Discount](http://www.pell.portland.or.us/~orc/Code/discount/) for mark-up in
+the comments.
 
 Every module and class should have a short description at its beginning which
-should include `@author author`, `@copyright year author`,
-`@release @AWESOME_VERSION@` and `@module module-name` or `@classmod class-name`.
+should include `@author author`, `@copyright year author`, `@release
+@AWESOME_VERSION@` and `@module module-name` or `@classmod class-name`.
 Parameters of functions should be documented by `@param parameter description`,
 return values via `@return description` or `@treturn type description`. For a
-more comprehensive description of the available tags see the
-[LDoc documentation](https://stevedonovan.github.io/ldoc/manual/doc.md.html).
+more comprehensive description of the available tags see the [LDoc
+documentation](https://stevedonovan.github.io/ldoc/manual/doc.md.html).
 
-In addition to the regular tags provided by LDoc there are also some aliases for
-tags defined in `docs/config.ld`.
+In addition to the regular tags provided by LDoc there are also some aliases
+for tags defined in `docs/config.ld`.
 
 ## Patches
 
@@ -91,7 +92,7 @@ If you plan to submit patches, you should follow the following guidelines.
 - if you want your work included, add a
   `Signed-off-by: Your Name &lt;you@example.com>` line to the
   commit message (or just use the option `-s` when committing);
-- make sure that you have tests for the bug you are fixing.
+- make sure that you have tests for the bug you are fixing;
 - if possible, add a unit test to the test suite under spec/.
 
 ### Patches
