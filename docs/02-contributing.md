@@ -15,7 +15,7 @@ Imitate the existing code style. For concrete rules:
  - Use 4 spaces indentation, do not use tabulator characters;
 
  - Place braces alone on new lines, and do not place braces for single
-   line statement where it is not needed, i.e no:
+   line statement where it is not needed, i.e. no:
 
     if(bla) {
         x = 1;
@@ -29,7 +29,7 @@ Imitate the existing code style. For concrete rules:
 
  - Use the API: there's a list of `a_*()` function you should use instead
    of the standard libc ones. There is also common API for linked list,
-   tabulars, etc;
+   tabulars, etc.;
 
  - Be *clear* in what you do;
 
@@ -50,14 +50,14 @@ If you plan to submit patches, you should follow the following guidelines.
 - do not modify piece of code not related to your commit;
 - do not try to fix style of code you are not writing,
   it's just adding noise for no gain;
-- check for unnecessary whitespace with `git diff --check` before commiting;
+- check for unnecessary whitespace with `git diff --check` before committing;
 - do not check in commented out code or unneeded files;
 - provide a meaningful commit message;
 - the first line of the commit message should be a short;
   description and should skip the full stop;
 - if you want your work included, add a
   `Signed-off-by: Your Name &lt;you@example.com>` line to the
-  commit message (or just use the option `-s` when commiting);
+  commit message (or just use the option `-s` when committing);
 - make sure that you have tests for the bug you are fixing.
 - if possible, add a unit test to the test suite under spec/.
 
