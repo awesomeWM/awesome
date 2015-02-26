@@ -123,25 +123,24 @@ end
 -- @param buttons A table with buttons binding to set.
 -- @param style The style overrides default theme.
 -- @param update_function Optional function to create a tag widget on each
---        update. @see awful.widget.common.
--- @param base_widget Optional container widget for tag widgets. Default
---        is wibox.layout.flex.horizontal().
---   <ul>
---   <li><code>bg_normal</code> The background color for unfocused client.</li>
---   <li><code>fg_normal</code> The foreground color for unfocused client.</li>
---   <li><code>bg_focus</code> The background color for focused client.</li>
---   <li><code>fg_focus</code> The foreground color for focused client.</li>
---   <li><code>bg_urgent</code> The background color for urgent clients.</li>
---   <li><code>fg_urgent</code> The foreground color for urgent clients.</li>
---   <li><code>bg_minimize</code> The background color for minimized clients.</li>
---   <li><code>fg_minimize</code> The foreground color for minimized clients.</li>
---   <li><code>floating</code> Symbol to use for floating clients.</li>
---   <li><code>ontop</code> Symbol to use for ontop clients.</li>
---   <li><code>maximized</code> Symbol to use for clients that have been maximized (vertically and horizontally).</li>
---   <li><code>maximized_horizontal</code> Symbol to use for clients that have been horizontally maximized.</li>
---   <li><code>maximized_vertical</code> Symbol to use for clients that have been vertically maximized.</li>
---   <li><code>font</code> The font.</li>
---   </ul>
+--   update. See `awful.widget.common.list_update`.
+-- @tparam table base_widget Optional container widget for tag widgets. Default
+--   is `wibox.layout.flex.horizontal`.
+-- @param base_widget.bg_normal The background color for unfocused client.
+-- @param base_widget.bg_normal The background color for unfocused client.
+-- @param base_widget.fg_normal The foreground color for unfocused client.
+-- @param base_widget.bg_focus The background color for focused client.
+-- @param base_widget.fg_focus The foreground color for focused client.
+-- @param base_widget.bg_urgent The background color for urgent clients.
+-- @param base_widget.fg_urgent The foreground color for urgent clients.
+-- @param base_widget.bg_minimize The background color for minimized clients.
+-- @param base_widget.fg_minimize The foreground color for minimized clients.
+-- @param base_widget.floating Symbol to use for floating clients.
+-- @param base_widget.ontop Symbol to use for ontop clients.
+-- @param base_widget.maximized Symbol to use for clients that have been maximized (vertically and horizontally).
+-- @param base_widget.maximized_horizontal Symbol to use for clients that have been horizontally maximized.
+-- @param base_widget.maximized_vertical Symbol to use for clients that have been vertically maximized.
+-- @param base_widget.font The font.
 function tasklist.new(screen, filter, buttons, style, update_function, base_widget)
     local uf = update_function or common.list_update
     local w = base_widget or flex.horizontal()
