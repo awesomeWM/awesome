@@ -64,8 +64,8 @@ One can use the full power of
 the comments.
 
 Every module and class should have a short description at its beginning which
-should include `@author author`, `@copyright year author`, `@release
-@AWESOME_VERSION@` and `@module module-name` or `@classmod class-name`.
+should include `@author author`, `@copyright year author`,
+`@release @AWESOME_VERSION@` and `@module module-name` or `@classmod class-name`.
 Parameters of functions should be documented by `@param parameter description`,
 return values via `@return description` or `@treturn type description`. For a
 more comprehensive description of the available tags see the [LDoc
@@ -90,7 +90,7 @@ If you plan to submit patches, you should follow the following guidelines.
 - the first line of the commit message should be a short;
   description and should skip the full stop;
 - if you want your work included, add a
-  `Signed-off-by: Your Name &lt;you@example.com>` line to the
+  `Signed-off-by: Your Name <you@example.com>` line to the
   commit message (or just use the option `-s` when committing);
 - make sure that you have tests for the bug you are fixing;
 - if possible, add a unit test to the test suite under spec/.
