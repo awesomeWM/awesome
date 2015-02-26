@@ -288,6 +288,7 @@ file(GLOB_RECURSE awesome_lua_configure_files RELATIVE
     ${SOURCE_DIR}/lib/*.lua
     ${SOURCE_DIR}/themes/*/*.lua)
 set(AWESOME_CONFIGURE_FILES
+    ${awesome_c_configure_files}
     ${awesome_lua_configure_files}
     config.h
     docs/config.ld
@@ -315,6 +316,5 @@ foreach(file ${AWESOME_ADDITIONAL_FILES})
                    COPYONLY)
 endforeach()
 #}}}
-
 
 # vim: filetype=cmake:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80:foldmethod=marker

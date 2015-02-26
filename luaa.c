@@ -19,6 +19,14 @@
  *
  */
 
+/** awesome core API
+ *
+ * @author Julien Danjou &lt;julien@danjou.info&gt;
+ * @copyright 2008-2009 Julien Danjou
+ * @release @AWESOME_VERSION@
+ * @module awesome
+ */
+
 #define _GNU_SOURCE
 
 #include "luaa.h"
@@ -97,8 +105,7 @@ composite_manager_running(void)
 }
 
 /** Quit awesome.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
+ * @function quit
  */
 static int
 luaA_quit(lua_State *L)
@@ -109,10 +116,9 @@ luaA_quit(lua_State *L)
 
 /** Execute another application, probably a window manager, to replace
  * awesome.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- * \luastack
- * \lparam The command line to execute.
+ *
+ * @param cmd The command line to execute.
+ * @function exec
  */
 static int
 luaA_exec(lua_State *L)
@@ -126,6 +132,7 @@ luaA_exec(lua_State *L)
 }
 
 /** Restart awesome.
+ * @function restart
  */
 static int
 luaA_restart(lua_State *L)
@@ -135,10 +142,10 @@ luaA_restart(lua_State *L)
 }
 
 /** Load an image from a given path.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- * \luastack
- * \lparam The command line to execute.
+ *
+ * @param name The file name.
+ * @return A cairo surface as light user datum.
+ * @function load_image
  */
 static int
 luaA_load_image(lua_State *L)
@@ -196,15 +203,14 @@ luaA_fixups(lua_State *L)
 }
 
 /** awesome global table.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- * \luastack
- * \lfield conffile The configuration file which has been loaded.
- * \lfield version The version of awesome.
- * \lfield release The release name of awesome.
- * \lfield startup True if we are still in startup, false otherwise.
- * \lfield startup_errors Error message for errors that occured during startup.
- * \lfield composite_manager_running True if a composite manager is running.
+ * @field version The version of awesome.
+ * @field release The release name of awesome.
+ * @field conffile The configuration file which has been loaded.
+ * @field startup True if we are still in startup, false otherwise.
+ * @field startup_errors Error message for errors that occured during
+ *  startup.
+ * @field composite_manager_running True if a composite manager is running.
+ * @table awesome
  */
 static int
 luaA_awesome_index(lua_State *L)
@@ -256,11 +262,10 @@ luaA_awesome_index(lua_State *L)
 }
 
 /** Add a global signal.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- * \luastack
- * \lparam A string with the event name.
- * \lparam The function to call.
+ *
+ * @param name A string with the event name.
+ * @param func The function to call.
+ * @function connect_signal
  */
 static int
 luaA_awesome_connect_signal(lua_State *L)
@@ -272,11 +277,10 @@ luaA_awesome_connect_signal(lua_State *L)
 }
 
 /** Remove a global signal.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- * \luastack
- * \lparam A string with the event name.
- * \lparam The function to call.
+ *
+ * @param name A string with the event name.
+ * @param func The function to call.
+ * @function disconnect_signal
  */
 static int
 luaA_awesome_disconnect_signal(lua_State *L)
@@ -290,11 +294,10 @@ luaA_awesome_disconnect_signal(lua_State *L)
 }
 
 /** Emit a global signal.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- * \luastack
- * \lparam A string with the event name.
- * \lparam The function to call.
+ *
+ * @param name A string with the event name.
+ * @param ... The signal arguments.
+ * @function emit_signal
  */
 static int
 luaA_awesome_emit_signal(lua_State *L)
@@ -471,16 +474,49 @@ luaA_init(xdgHandle* xdg)
 
     lua_pop(L, 2); /* pop "package" and "package.loaded" */
 
+    /** A call into the lua code aborted with an error
+     * @signal debug::error
+     */
     signal_add(&global_signals, "debug::error");
+    /** A deprecated lua function was called
+     * @signal debug::deprecation
+     */
     signal_add(&global_signals, "debug::deprecation");
+    /** An invalid key was read from an object (e.g. c.foo)
+     * @signal debug::index::miss
+     */
     signal_add(&global_signals, "debug::index::miss");
+    /** An invalid key was written to an object (e.g. c.foo = "bar")
+     * @signal debug::newindex::miss
+     */
     signal_add(&global_signals, "debug::newindex::miss");
+    /**
+     * @signal systray::update
+     */
     signal_add(&global_signals, "systray::update");
+    /**
+     * @signal wallpaper_changed
+     */
     signal_add(&global_signals, "wallpaper_changed");
+    /**
+     * @signal xkb::map_changed
+     */
     signal_add(&global_signals, "xkb::map_changed");
+    /**
+     * @signal xkb::group_changed
+     */
     signal_add(&global_signals, "xkb::group_changed");
+    /**
+     * @signal refresh
+     */
     signal_add(&global_signals, "refresh");
+    /**
+     * @signal startup
+     */
     signal_add(&global_signals, "startup");
+    /**
+     * @signal exit
+     */
     signal_add(&global_signals, "exit");
 }
 

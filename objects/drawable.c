@@ -20,11 +20,34 @@
  *
  */
 
+/** awesome drawable API
+ *
+ * Furthermore to the classes described here, one can also use signals as
+ * described in @{signals}.
+ *
+ * @author Uli Schlachter &lt;psychon@znc.in&gt;
+ * @copyright 2012 Uli Schlachter
+ * @release @AWESOME_VERSION@
+ * @classmod drawable
+ */
+
 #include "drawable.h"
 #include "common/luaobject.h"
 #include "globalconf.h"
 
 #include <cairo-xcb.h>
+
+/** Drawable object.
+ *
+ * @field surface The drawable's cairo surface.
+ * @function drawable
+ */
+
+/** Get the number of instances.
+ *
+ * @return The number of drawable objects alive.
+ * @function instances
+ */
 
 static lua_class_t drawable_class;
 
@@ -106,8 +129,8 @@ luaA_drawable_get_surface(lua_State *L, drawable_t *drawable)
 
 /** Refresh a drawable's content. This has to be called whenever some drawing to
  * the drawable's surface has been done and should become visible.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
+ *
+ * @function refresh
  */
 static int
 luaA_drawable_refresh(lua_State *L)
@@ -119,11 +142,10 @@ luaA_drawable_refresh(lua_State *L)
     return 0;
 }
 
-/** Return drawable geometry.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- * \luastack
- * \lreturn A table with drawable coordinates.
+/** Get drawable geometry. The geometry consists of x, y, width and height.
+ *
+ * @return A table with drawable coordinates and geometry.
+ * @function geometry
  */
 static int
 luaA_drawable_geometry(lua_State *L)
@@ -160,15 +182,45 @@ drawable_class_setup(lua_State *L)
                             (lua_class_propfunc_t) luaA_drawable_get_surface,
                             NULL);
 
+    /**
+     * @signal button::press
+     */
     signal_add(&drawable_class.signals, "button::press");
+    /**
+     * @signal button::release
+     */
     signal_add(&drawable_class.signals, "button::release");
+    /**
+     * @signal mouse::enter
+     */
     signal_add(&drawable_class.signals, "mouse::enter");
+    /**
+     * @signal mouse::leave
+     */
     signal_add(&drawable_class.signals, "mouse::leave");
+    /**
+     * @signal mouse::move
+     */
     signal_add(&drawable_class.signals, "mouse::move");
+    /**
+     * @signal property::height
+     */
     signal_add(&drawable_class.signals, "property::height");
+    /**
+     * @signal property::width
+     */
     signal_add(&drawable_class.signals, "property::width");
+    /**
+     * @signal property::x
+     */
     signal_add(&drawable_class.signals, "property::x");
+    /**
+     * @signal property::y
+     */
     signal_add(&drawable_class.signals, "property::y");
+    /**
+     * @signal property::surface
+     */
     signal_add(&drawable_class.signals, "property::surface");
 }
 

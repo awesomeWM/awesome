@@ -19,6 +19,14 @@
  *
  */
 
+/** Handling of X properties.
+ *
+ * This can not be used as a standalone class, but is instead referenced
+ * explicitely in the classes, where it can be used. In the respective
+ * classes,it then can be used via `classname:get_xproperty(...)` etc.
+ * @classmod xproperties
+ */
+
 #include "objects/window.h"
 #include "common/atoms.h"
 #include "ewmh.h"
@@ -385,9 +393,11 @@ window_get_xproperty(lua_State *L, xcb_window_t window, int prop_idx)
     return 1;
 }
 
-/** Set an xproperty.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
+/** Change a xproperty.
+ *
+ * @param name The name of the X11 property
+ * @param value The new value for the property
+ * @function set_xproperty
  */
 static int
 luaA_window_set_xproperty(lua_State *L)
@@ -396,9 +406,10 @@ luaA_window_set_xproperty(lua_State *L)
     return window_set_xproperty(L, w->window, 2, 3);
 }
 
-/** Get an xproperty.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
+/** Get the value of a xproperty.
+ *
+ * @param name The name of the X11 property
+ * @function get_xproperty
  */
 static int
 luaA_window_get_xproperty(lua_State *L)
@@ -407,7 +418,7 @@ luaA_window_get_xproperty(lua_State *L)
     return window_get_xproperty(L, w->window, 2);
 }
 
-/** Translate a window_type_t into the corresponding EWMH atom.
+/* Translate a window_type_t into the corresponding EWMH atom.
  * @param type The type to return.
  * @return The EWMH atom for this type.
  */
@@ -498,11 +509,29 @@ window_class_setup(lua_State *L)
                             (lua_class_propfunc_t) luaA_window_get_border_width,
                             (lua_class_propfunc_t) luaA_window_set_border_width);
 
+    /**
+     * @signal property::border_color
+     */
     signal_add(&window_class.signals, "property::border_color");
+    /**
+     * @signal property::border_width
+     */
     signal_add(&window_class.signals, "property::border_width");
+    /**
+     * @signal property::buttons
+     */
     signal_add(&window_class.signals, "property::buttons");
+    /**
+     * @signal property::opacity
+     */
     signal_add(&window_class.signals, "property::opacity");
+    /**
+     * @signal property::struts
+     */
     signal_add(&window_class.signals, "property::struts");
+    /**
+     * @signal property::type
+     */
     signal_add(&window_class.signals, "property::type");
 }
 

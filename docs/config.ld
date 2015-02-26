@@ -26,6 +26,8 @@ tparam_alias('client', 'client.client')
 tparam_alias('tag', 'tag')
 -- Should be default, but is not.  Sets up "@tab" => "@tparam table".
 tparam_alias('tab', 'table')
+-- New type for signals
+new_type("signal", "Signals", false, "Arguments")
 
 -- More fitting section names
 kind_names={topic='Documentation', module='Libraries'}
@@ -34,8 +36,19 @@ kind_names={topic='Documentation', module='Libraries'}
 sort_modules=true
 
 file = {
+    -- C parts of libraries
+    '../dbus.c',
+    '../keygrabber.c',
+    '../luaa.c',
+    '../mouse.c',
+    '../mousegrabber.c',
+    '../root.c',
+    '../selection.c',
+    '../spawn.c',
+    '../xkb.c',
+    '../common/luaobject.c',
+    '../objects/',
     -- LUA libraries
-    'capi/',
     '../lib/',
     exclude = {
         -- exclude these modules, as they do not contain any written

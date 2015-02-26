@@ -230,7 +230,7 @@ if(GENERATE_DOC)
         file(MAKE_DIRECTORY ${BUILD_DIR}/lib)
     endif()
 
-    file(GLOB_RECURSE AWE_LUA_FILES ${BUILD_DIR}/lib/*.lua ${AWE_DOC_DIR}/capi/*.lua)
+    file(GLOB_RECURSE AWE_LUA_FILES ${BUILD_DIR}/lib/*.lua)
     file(GLOB_RECURSE AWE_MD_FILES ${AWE_DOC_DIR}/*.md)
 
     add_custom_target(ldoc ALL

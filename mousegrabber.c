@@ -19,6 +19,13 @@
  *
  */
 
+/** awesome mousegrabber API
+ * @author Julien Danjou &lt;julien@danjou.info&gt;
+ * @copyright 2008-2009 Julien Danjou
+ * @release @AWESOME_VERSION@
+ * @module mousegrabber
+ */
+
 #include "mousegrabber.h"
 #include "common/xcursor.h"
 #include "mouse.h"
@@ -76,12 +83,9 @@ mousegrabber_handleevent(lua_State *L, int x, int y, uint16_t mask)
  * The function is called with one argument:
  * a table containing modifiers pointer coordinates.
  *
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- *
- * \luastack
- *
- * \lparam A callback function as described above.
+ * @param func A callback function as described above.
+ * @param cursor The name of a X cursor to use while grabbing.
+ * @function run
  */
 static int
 luaA_mousegrabber_run(lua_State *L)
@@ -110,8 +114,8 @@ luaA_mousegrabber_run(lua_State *L)
 }
 
 /** Stop grabbing the mouse pointer.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
+ *
+ * @function stop
  */
 int
 luaA_mousegrabber_stop(lua_State *L)
@@ -122,10 +126,9 @@ luaA_mousegrabber_stop(lua_State *L)
 }
 
 /** Check if mousegrabber is running.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- * \luastack
- * \lreturn A boolean value, true if mousegrabber is running, false otherwise.
+ *
+ * @return A boolean value, true if running, false otherwise.
+ * function isrunning
  */
 static int
 luaA_mousegrabber_isrunning(lua_State *L)

@@ -19,11 +19,40 @@
  *
  */
 
+/** awesome tag API
+ *
+ * Furthermore to the classes described here, one can also use signals as
+ * described in @{signals}.
+ *
+ * Some signal names are starting with a dot. These dots are artefacts from
+ * the documentation generation, you get the real signal name by
+ * removing the starting dot.
+ *
+ * @author Julien Danjou &lt;julien@danjou.info&gt;
+ * @copyright 2008-2009 Julien Danjou
+ * @release @AWESOME_VERSION@
+ * @classmod tag
+ */
+
 #include "tag.h"
 #include "banning.h"
 #include "client.h"
 #include "ewmh.h"
 #include "luaa.h"
+
+/** Tag object.
+ *
+ * @field name Tag name.
+ * @field selected True if the tag is selected to be viewed.
+ * @field activated True if the tag is active and can be used.
+ * @table tag
+ */
+
+/** Get the number of instances.
+ *
+ * @return The number of tag objects alive.
+ * @function instances
+ */
 
 /** Tag type */
 struct tag
@@ -179,11 +208,11 @@ luaA_tag_new(lua_State *L)
 }
 
 /** Get or set the clients attached to this tag.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- * \luastack
- * \lparam None or a table of clients to set.
- * \lreturn A table with the clients attached to this tags.
+ *
+ * @param clients_table None or a table of clients to set as being tagged with
+ *  this tag.
+ * @return A table with the clients attached to this tags.
+ * @function clients
  */
 static int
 luaA_tag_clients(lua_State *L)
@@ -350,11 +379,29 @@ tag_class_setup(lua_State *L)
                             (lua_class_propfunc_t) luaA_tag_get_activated,
                             (lua_class_propfunc_t) luaA_tag_set_activated);
 
+    /**
+     * @signal property::name
+     */
     signal_add(&tag_class.signals, "property::name");
+    /**
+     * @signal property::selected
+     */
     signal_add(&tag_class.signals, "property::selected");
+    /**
+     * @signal property::activated
+     */
     signal_add(&tag_class.signals, "property::activated");
+    /**
+     * @signal request::select
+     */
     signal_add(&tag_class.signals, "request::select");
+    /**
+     * @signal tagged
+     */
     signal_add(&tag_class.signals, "tagged");
+    /**
+     * @signal untagged
+     */
     signal_add(&tag_class.signals, "untagged");
 }
 
