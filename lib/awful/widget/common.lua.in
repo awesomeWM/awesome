@@ -2,6 +2,7 @@
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2008-2009 Julien Danjou
 -- @release @AWESOME_VERSION@
+-- @classmod awful.widget.common
 ---------------------------------------------------------------------------
 
 -- Grab environment we need
@@ -20,6 +21,10 @@ local textbox = require("wibox.widget.textbox")
 --- Common utilities for awful widgets
 local common = {}
 
+--- Common method to create buttons.
+-- @tab buttons
+-- @param object
+-- @treturn table
 function common.create_buttons(buttons, object)
     if buttons then
         local btns = {}
@@ -38,6 +43,14 @@ function common.create_buttons(buttons, object)
     end
 end
 
+--- Common update method.
+-- @param w The widget.
+-- @tab buttons
+-- @func label Function to generate label parameters from an object.
+--   The function gets passed an object from `objects`, and
+--   has to return `text`, `bg`, `bg_image`, `icon`.
+-- @tab data Current data/cache, indexed by objects.
+-- @tab objects Objects to be displayed / updated.
 function common.list_update(w, buttons, label, data, objects)
     -- update the widgets, creating them if needed
     w:reset()
@@ -75,7 +88,7 @@ function common.list_update(w, buttons, label, data, objects)
         end
 
         local text, bg, bg_image, icon = label(o)
-        -- The text might be invalid, so use pcall
+        -- The text might be invalid, so use pcall.
         if text == nil or text == "" then
             m:set_margins(0)
         else
