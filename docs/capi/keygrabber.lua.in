@@ -8,11 +8,11 @@
 -- Grab keyboard input and read pressed keys, calling a callback function at
 -- each keypress, until `keygrabber.stop` is called.
 -- The callback function receives three arguments:
--- <ul>
---   <li>a table containing modifiers keys</li>
---   <li>a string with the pressed key</li>
---   <li>a string with either "press" or "release" to indicate the event type.</li>
--- </ul>
+--
+-- * a table containing modifiers keys
+-- * a string with the pressed key
+-- * a string with either "press" or "release" to indicate the event type.
+--
 -- @param callback A callback function as described above.
 -- @function run
 -- @usage The following function can be bound to a key, and will be used to
