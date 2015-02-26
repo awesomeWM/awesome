@@ -121,7 +121,7 @@ local function perform_action(o)
 end
 
 --- Cut item list to return only current page.
--- @tparam table all_item All items list.
+-- @tparam table all_items All items list.
 -- @tparam str query Search query.
 -- @return table List of items for current page.
 local function get_current_page(all_items, query)
