@@ -19,7 +19,35 @@
  *
  */
 
+/** awesome button API
+ *
+ * Furthermore to the classes described here, one can also use signals as
+ * described in @{signals}.
+ *
+ * Some signal names are starting with a dot. These dots are artefacts from
+ * the documentation generation, you get the real signal name by
+ * removing the starting dot.
+ *
+ * @author Julien Danjou &lt;julien@danjou.info&gt;
+ * @copyright 2008-2009 Julien Danjou
+ * @release @AWESOME_VERSION@
+ * @classmod button
+ */
+
 #include "button.h"
+
+/** Button object.
+ *
+ * @tfield int button The mouse button number, or 0 for any button.
+ * @tfield table modifiers The modifier key table that should be pressed while the
+ *   button is pressed.
+ * @table button
+ */
+
+/** Get the number of instances.
+ * @treturn int The number of button objects alive.
+ * @function instances
+ */
 
 /** Create a new mouse button bindings.
  * \param L The Lua VM state.
@@ -123,9 +151,23 @@ button_class_setup(lua_State *L)
                             (lua_class_propfunc_t) luaA_button_get_modifiers,
                             (lua_class_propfunc_t) luaA_button_set_modifiers);
 
+    /** When bound mouse button + modifiers are pressed.
+     * @param ... One or more arguments are possible
+     * @signal .press
+     */
     signal_add(&button_class.signals, "press");
+    /** When property changes.
+     * @signal property::button
+     */
     signal_add(&button_class.signals, "property::button");
+    /** When property changes.
+     * @signal property::modifiers
+     */
     signal_add(&button_class.signals, "property::modifiers");
+    /** When bound mouse button + modifiers are pressed.
+     * @param ... One or more arguments are possible
+     * @signal .release
+     */
     signal_add(&button_class.signals, "release");
 }
 

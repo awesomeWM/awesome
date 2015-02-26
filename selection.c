@@ -20,6 +20,13 @@
  *
  */
 
+/** awesome selection (clipboard) API
+ * @author Julien Danjou &lt;julien@danjou.info&gt;
+ * @copyright 2008-2009 Julien Danjou
+ * @release @AWESOME_VERSION@
+ * @module selection
+ */
+
 #include "selection.h"
 #include "globalconf.h"
 #include "common/atoms.h"
@@ -27,6 +34,12 @@
 
 #include <xcb/xcb_atom.h>
 #include <xcb/xcb_event.h>
+
+/** Get the selection (clipboard) content.
+ *
+ * @return A string with the selection (clipboard) content.
+ * @function selection
+ */
 
 static xcb_window_t selection_window = XCB_NONE;
 
