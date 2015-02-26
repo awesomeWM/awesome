@@ -36,8 +36,8 @@ local function itera (inc,a, i)
 end
 
 --- Load history file in history table
--- @param id The data.history identifier which is the path to the filename
--- @param max Optional parameter, the maximum number of entries in file
+-- @param id The data.history identifier which is the path to the filename.
+-- @param[opt] max The maximum number of entries in file.
 local function history_check_load(id, max)
     if id and id ~= ""
         and not data.history[id] then
@@ -188,15 +188,15 @@ end
 -- @param exe_callback The callback function to call with command as argument
 -- when finished.
 -- @param completion_callback The callback function to call to get completion.
--- @param history_path Optional parameter: file path where the history should be
+-- @param[opt] history_path File path where the history should be
 -- saved, set nil to disable history
--- @param history_max Optional parameter: set the maximum entries in history
+-- @param[opt] history_max Set the maximum entries in history
 -- file, 50 by default
--- @param done_callback Optional parameter: the callback function to always call
+-- @param[opt] done_callback The callback function to always call
 -- without arguments, regardless of whether the prompt was cancelled.
--- @param changed_callback Optional parameter: the callback function to call
+-- @param[opt] changed_callback The callback function to call
 -- with command as argument when a command was changed.
--- @param keypressed_callback Optional parameter: the callback function to call
+-- @param[opt] keypressed_callback The callback function to call
 -- with mod table, key and command as arguments when a key was pressed.
 function prompt.run(args, textbox, exe_callback, completion_callback, history_path, history_max, done_callback, changed_callback, keypressed_callback)
     local grabber

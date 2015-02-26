@@ -377,7 +377,7 @@ function tag.incmwfact(add, t)
 end
 
 --- Get master width factor.
--- @param t Optional tag.
+-- @param[opt] t The tag.
 function tag.getmwfact(t)
     local t = t or tag.selected()
     return tag.getproperty(t, "mwfact") or 0.5
@@ -385,7 +385,7 @@ end
 
 --- Set the number of master windows.
 -- @param nmaster The number of master windows.
--- @param t Optional tag.
+-- @param[opt] t The tag.
 function tag.setnmaster(nmaster, t)
     local t = t or tag.selected()
     if nmaster >= 0 then
@@ -394,7 +394,7 @@ function tag.setnmaster(nmaster, t)
 end
 
 --- Get the number of master windows.
--- @param t Optional tag.
+-- @param[opt] t The tag.
 function tag.getnmaster(t)
     local t = t or tag.selected()
     return tag.getproperty(t, "nmaster") or 1
@@ -434,7 +434,7 @@ function tag.setncol(ncol, t)
 end
 
 --- Get number of column windows.
--- @param t Optional tag.
+-- @param[opt] t The tag.
 function tag.getncol(t)
     local t = t or tag.selected()
     return tag.getproperty(t, "ncol") or 1
@@ -448,7 +448,7 @@ function tag.incncol(add, t)
 end
 
 --- View no tag.
--- @tparam int screen Optional screen number.
+-- @tparam[opt] int screen The screen number.
 function tag.viewnone(screen)
     local tags = tag.gettags(screen or capi.mouse.screen)
     for i, t in pairs(tags) do
@@ -458,7 +458,7 @@ end
 
 --- View a tag by its taglist index.
 -- @param i The relative index to see.
--- @param screen Optional screen number.
+-- @param[opt] screen The screen number.
 function tag.viewidx(i, screen)
     local screen = screen or capi.mouse.screen
     local tags = tag.gettags(screen)
@@ -523,7 +523,7 @@ end
 
 --- View only a set of tags.
 -- @param tags A table with tags to view only.
--- @param screen Optional screen number of the tags.
+-- @param[opt] screen The screen number of the tags.
 function tag.viewmore(tags, screen)
     local screen = screen or capi.mouse.screen
     local screen_tags = tag.gettags(screen)

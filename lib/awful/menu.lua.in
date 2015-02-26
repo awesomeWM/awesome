@@ -366,11 +366,11 @@ function menu:get_root()
 end
 
 --- Add a new menu entry.
--- args.new (Default: awful.menu.entry) The menu entry constructor.
--- args.theme (Optional) The menu entry theme.
 -- args.* params needed for the menu entry constructor.
 -- @param args The item params
--- @param index (Optional) the index where the new entry will inserted
+-- @param args.new (Default: awful.menu.entry) The menu entry constructor.
+-- @param[opt] args.theme The menu entry theme.
+-- @param[opt] index The index where the new entry will inserted.
 function menu:add(args, index)
     if not args then return end
     local theme = load_theme(args.theme or {}, self.theme)

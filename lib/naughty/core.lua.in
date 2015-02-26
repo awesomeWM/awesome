@@ -173,7 +173,7 @@ end
 -- @param position top_right | top_left | bottom_right | bottom_left
 --             | top_middle | bottom_middle
 -- @param idx Index of the notification
--- @param width Popup width (optional)
+-- @param[opt] width Popup width.
 -- @param height Popup height
 -- @return Absolute position and index in { x = X, y = Y, idx = I } table
 local function get_offset(screen, position, idx, width, height)

@@ -96,8 +96,8 @@ end
 
 --- Returns a new background layout. A background layout applies a background
 -- and foreground color to another widget.
--- @param widget The widget to display (optional)
--- @param bg The background to use for that widget (optional)
+-- @param[opt] widget The widget to display.
+-- @param[opt] bg The background to use for that widget.
 local function new(widget, bg)
     local ret = base.make_widget()
 

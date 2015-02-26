@@ -194,7 +194,7 @@ end
 
 --- Place the client centered with respect to a parent or the clients screen.
 -- @param c The client.
--- @param p The parent (optional, nil for screen centering).
+-- @param[opt] p The parent (nil for screen centering).
 -- @return The new client geometry.
 function placement.centered(c, p)
     local c = c or capi.client.focus
@@ -212,7 +212,7 @@ end
 
 --- Place the client centered on the horizontal axis with respect to a parent or the clients screen.
 -- @param c The client.
--- @param p The parent (optional, nil for screen centering).
+-- @param[opt] p The parent (nil for screen centering).
 -- @return The new client geometry.
 function placement.center_horizontal(c, p)
     local c = c or capi.client.focus
@@ -229,7 +229,7 @@ end
 
 --- Place the client centered on the vertical axis with respect to a parent or the clients screen.
 -- @param c The client.
--- @param p The parent (optional, nil for screen centering).
+-- @param[opt] p The parent (nil for screen centering).
 -- @return The new client geometry.
 function placement.center_vertical(c, p)
     local c = c or capi.client.focus

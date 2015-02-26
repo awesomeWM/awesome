@@ -55,7 +55,7 @@ end
 --- Get a client's titlebar
 -- @class function
 -- @param c The client for which a titlebar is wanted.
--- @param args An optional table with extra arguments for the titlebar. The
+-- @param[opt] args A table with extra arguments for the titlebar. The
 -- "size" is the height of the titlebar. Available "position" values are top,
 -- left, right and bottom. Additionally, the foreground and background colors
 -- can be configured via e.g. "bg_normal" and "bg_focus".
@@ -104,7 +104,7 @@ end
 
 --- Show a client's titlebar.
 -- @param c The client whose titlebar is modified
--- @param position Optional position of the titlebar. Must be one of "left",
+-- @param[opt] position The position of the titlebar. Must be one of "left",
 --        "right", "top", "bottom". Default is "top".
 function titlebar.show(c, position)
     local position = position or "top"
@@ -116,7 +116,7 @@ end
 
 --- Hide a client's titlebar.
 -- @param c The client whose titlebar is modified
--- @param position Optional position of the titlebar. Must be one of "left",
+-- @param[opt] position The position of the titlebar. Must be one of "left",
 --        "right", "top", "bottom". Default is "top".
 function titlebar.hide(c, position)
     local position = position or "top"
@@ -125,7 +125,7 @@ end
 
 --- Toggle a client's titlebar, hiding it if it is visible, otherwise showing it.
 -- @param c The client whose titlebar is modified
--- @param position Optional position of the titlebar. Must be one of "left",
+-- @param[opt] position The position of the titlebar. Must be one of "left",
 --        "right", "top", "bottom". Default is "top".
 function titlebar.toggle(c, position)
     local position = position or "top"

@@ -120,12 +120,12 @@ for k, v in pairs({ "left", "right", "top", "bottom" }) do
 end
 
 --- Returns a new margin layout.
--- @param widget A widget to use (optional)
--- @param left A margin to use on the left side of the widget (optional)
--- @param right A margin to use on the right side of the widget (optional)
--- @param top A margin to use on the top side of the widget (optional)
--- @param bottom A margin to use on the bottom side of the widget (optional)
--- @param color A color for the margins (optional)
+-- @param[opt] widget A widget to use.
+-- @param[opt] left A margin to use on the left side of the widget.
+-- @param[opt] right A margin to use on the right side of the widget.
+-- @param[opt] top A margin to use on the top side of the widget.
+-- @param[opt] bottom A margin to use on the bottom side of the widget.
+-- @param[opt] color A color for the margins.
 local function new(widget, left, right, top, bottom, color)
     local ret = widget_base.make_widget()
 

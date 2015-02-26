@@ -54,7 +54,7 @@
 
 --- Get all clients into a table.
 --
--- @param screen An optional screen number.
+-- @param[opt] screen A screen number.
 -- @return A table with all clients.
 -- @function get
 
@@ -147,7 +147,7 @@
 --- Emit a signal.
 --
 -- @param name A signal name.
--- @param ... Various arguments, optional.
+-- @param[opt] ... Various arguments.
 -- @function emit_signal
 
 --- Get the number of instances.

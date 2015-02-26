@@ -36,5 +36,5 @@
 --- Emit a signal to a screen.
 --
 -- @string name A signal name.
--- @param ... Various arguments, optional.
+-- @param[opt] ... Various arguments.
 -- @function emit_signal

@@ -180,7 +180,7 @@ end
 --- Apply properties and callbacks to a client.
 -- @client c The client.
 -- @tab props Properties to apply.
--- @tab callbacks Callbacks to apply (optional).
+-- @tab[opt] callbacks Callbacks to apply.
 function rules.execute(c, props, callbacks)
     for property, value in pairs(props) do
         if property ~= "focus" and type(value) == "function" then

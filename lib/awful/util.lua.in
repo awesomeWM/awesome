@@ -33,7 +33,7 @@ util.shell = os.getenv("SHELL") or "/bin/sh"
 
 local displayed_deprecations = {}
 --- Display a deprecation notice, but only once per traceback.
--- @param see Optional message to a new method / function to use.
+-- @param[opt] see The message to a new method / function to use.
 function util.deprecate(see)
     local tb = debug.traceback()
     if displayed_deprecations[tb] then
@@ -190,7 +190,7 @@ end
 -- @param iconname The name of the icon to search for.
 -- @param exts Table of image extensions allowed, otherwise { 'png', gif' }
 -- @param dirs Table of dirs to search, otherwise { '/usr/share/pixmaps/' }
--- @tparam string size Optional size. If this is specified, subdirectories `x`
+-- @tparam[opt] string size The size. If this is specified, subdirectories `x`
 --   of the dirs are searched first.
 function util.geticonpath(iconname, exts, dirs, size)
     local exts = exts or { 'png', 'gif' }

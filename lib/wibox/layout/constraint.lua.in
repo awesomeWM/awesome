@@ -103,11 +103,11 @@ end
 -- that respect the widget's size, eg. fixed layout. In layouts that don't
 -- (fully) respect widget's requested size, the inner widget still might get
 -- drawn with a size that does not fit the constraint, eg. in flex layout.
--- @param widget A widget to use (optional)
--- @param strategy How to constraint the size. 'max' (default), 'min' or
--- 'exact'. (optional)
--- @param width The maximum width of the widget. nil for no limit. (optional)
--- @param height The maximum height of the widget. nil for no limit. (optional)
+-- @param[opt] widget A widget to use.
+-- @param[opt] strategy How to constraint the size. 'max' (default), 'min' or
+-- 'exact'.
+-- @param[opt] width The maximum width of the widget. nil for no limit.
+-- @param[opt] height The maximum height of the widget. nil for no limit.
 local function new(widget, strategy, width, height)
     local ret = widget_base.make_widget()
 

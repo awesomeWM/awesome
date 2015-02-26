@@ -122,9 +122,9 @@ end
 -- @param filter Filter function to define what clients will be listed.
 -- @param buttons A table with buttons binding to set.
 -- @param style The style overrides default theme.
--- @param update_function Optional function to create a tag widget on each
+-- @param[opt] update_function Function to create a tag widget on each
 --   update. See `awful.widget.common.list_update`.
--- @tparam table base_widget Optional container widget for tag widgets. Default
+-- @tparam[opt] table base_widget Container widget for tag widgets. Default
 --   is `wibox.layout.flex.horizontal`.
 -- @param base_widget.bg_normal The background color for unfocused client.
 -- @param base_widget.bg_normal The background color for unfocused client.

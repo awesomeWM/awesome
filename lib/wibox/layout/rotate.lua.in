@@ -99,8 +99,8 @@ end
 --- Returns a new rotate layout. A rotate layout rotates a given widget. Use
 -- :set_widget() to set the widget and :set_direction() for the direction.
 -- The default direction is "north" which doesn't change anything.
--- @param widget The widget to display (optional)
--- @param dir The direction to rotate to (optional)
+-- @param[opt] widget The widget to display.
+-- @param[opt] dir The direction to rotate to.
 local function new(widget, dir)
     local ret = widget_base.make_widget()
 

@@ -248,7 +248,7 @@ end
 -- If no client is passed, the focused client will be used.
 --
 -- @tparam int i The index.  Use 1 to get the next, -1 to get the previous.
--- @client[opt] c Optional client.
+-- @client[opt] c The client.
 -- @return A client, or nil if no client is available.
 --
 -- @usage -- focus the next window in the index
@@ -283,7 +283,7 @@ end
 --
 -- @tparam string dir The direction, can be either
 --   `"up"`, `"down"`, `"left"` or `"right"`.
--- @client[opt] c Optional client.
+-- @client[opt] c The client.
 function client.focus.bydirection(dir, c)
     local sel = c or capi.client.focus
     if sel then
@@ -305,7 +305,7 @@ end
 --- Focus a client by the given direction. Moves across screens.
 --
 -- @param dir The direction, can be either "up", "down", "left" or "right".
--- @client[opt] c Optional client.
+-- @client[opt] c The client.
 function client.focus.global_bydirection(dir, c)
     screen = screen or require("awful.screen")
     local sel = c or capi.client.focus
@@ -338,7 +338,7 @@ end
 --- Focus a client by its relative index.
 --
 -- @param i The index.
--- @client[opt] c Optional client.
+-- @client[opt] c The client.
 function client.focus.byidx(i, c)
     local target = client.next(i, c)
     if target then
@@ -348,7 +348,7 @@ end
 
 --- Swap a client with another client in the given direction
 -- @param dir The direction, can be either "up", "down", "left" or "right".
--- @client[opt] c Optional client.
+-- @client[opt] c The client.
 function client.swap.bydirection(dir, c)
     local sel = c or capi.client.focus
     if sel then
@@ -368,7 +368,7 @@ end
 
 --- Swap a client with another client in the given direction. Swaps across screens.
 -- @param dir The direction, can be either "up", "down", "left" or "right".
--- @client[opt] c Optional client.
+-- @client[opt] c The client.
 function client.swap.global_bydirection(dir, c)
     screen = screen or require("awful.screen")
     local sel = c or capi.client.focus
@@ -403,7 +403,7 @@ end
 
 --- Swap a client by its relative index.
 -- @param i The index.
--- @client[opt] c Optional client, otherwise focused one is used.
+-- @client[opt] c The client, otherwise focused one is used.
 function client.swap.byidx(i, c)
     local sel = c or capi.client.focus
     local target = client.next(i, sel)
@@ -415,7 +415,7 @@ end
 --- Cycle clients.
 --
 -- @param clockwise True to cycle clients clockwise.
--- @param[opt] screen Optional screen where to cycle clients.
+-- @param[opt] screen The screen where to cycle clients.
 function client.cycle(clockwise, screen)
     local screen = screen or capi.mouse.screen
     local cls = client.visible(screen)
@@ -436,7 +436,7 @@ end
 
 --- Get the master window.
 --
--- @param[opt] screen Optional screen number, otherwise screen mouse is used.
+-- @param[opt] screen The screen number, otherwise screen mouse is used.
 -- @return The master window.
 function client.getmaster(screen)
     local s = screen or capi.mouse.screen
@@ -467,7 +467,7 @@ end
 -- @param y The relative y coordinate.
 -- @param w The relative width.
 -- @param h The relative height.
--- @client[opt] c The optional client, otherwise focused one is used.
+-- @client[opt] c The client, otherwise focused one is used.
 function client.moveresize(x, y, w, h, c)
     local sel = c or capi.client.focus
     local geometry = sel:geometry()
@@ -480,7 +480,7 @@ end
 
 --- Move a client to a tag.
 -- @param target The tag to move the client to.
--- @client[opt] c Optional client to move, otherwise the focused one is used.
+-- @client[opt] c The client to move, otherwise the focused one is used.
 function client.movetotag(target, c)
     local sel = c or capi.client.focus
     local s = tag.getscreen(target)
@@ -493,7 +493,7 @@ end
 
 --- Toggle a tag on a client.
 -- @param target The tag to toggle.
--- @client[opt] c Optional client to toggle, otherwise the focused one is used.
+-- @client[opt] c The client to toggle, otherwise the focused one is used.
 function client.toggletag(target, c)
     local sel = c or capi.client.focus
     -- Check that tag and client screen are identical
