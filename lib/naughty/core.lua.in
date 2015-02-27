@@ -274,6 +274,85 @@ function naughty.getById(id)
     end
 end
 
+--- Install expiration timer for notification object.
+-- @tparam notification notification Notification object.
+-- @tparam number timeout Time in seconds to be set as expiration timeout.
+local function set_timeout(notification, timeout)
+    local die = function (reason)
+        naughty.destroy(notification, reason)
+    end
+    if timeout > 0 then
+        local timer_die = timer { timeout = timeout }
+        timer_die:connect_signal("timeout", function() die(naughty.notificationClosedReason.expired) end)
+        if not suspended then
+            timer_die:start()
+        end
+        notification.timer = timer_die
+    end
+    notification.die = die
+end
+
+--- Set new notification timeout.
+-- @tparam notification notification Notification object, which timer is to be reset.
+-- @tparam number new_timeout Time in seconds after which notification disappears.
+-- @return None.
+function naughty.reset_timeout(notification, new_timeout)
+    if notification.timer then notification.timer:stop() end
+
+    local timeout = timeout or notification.timeout
+    set_timeout(notification, timeout)
+    notification.timeout = timeout
+
+    notification.timer:start()
+end
+
+--- Escape and set title and text for notification object.
+-- @tparam notification notification Notification object.
+-- @tparam string title Title of notification.
+-- @tparam string text Main text of notification.
+-- @return None.
+local function set_text(notification, title, text)
+    local escape_pattern = "[<>&]"
+    local escape_subs = { ['<'] = "&lt;", ['>'] = "&gt;", ['&'] = "&amp;" }
+
+    local textbox = notification.textbox
+
+    local function setMarkup(pattern, replacements)
+        textbox:set_markup(string.format('<b>%s</b>%s', title, text:gsub(pattern, replacements)))
+    end
+    local function setText()
+        textbox:set_text(string.format('%s %s', title, text))
+    end
+
+    -- Since the title cannot contain markup, it must be escaped first so that
+    -- it is not interpreted by Pango later.
+    title = title:gsub(escape_pattern, escape_subs)
+    -- Try to set the text while only interpreting <br>.
+    -- (Setting a textbox' .text to an invalid pattern throws a lua error)
+    if not pcall(setMarkup, "<br.->", "\n") then
+        -- That failed, escape everything which might cause an error from pango
+        if not pcall(setMarkup, escape_pattern, escape_subs) then
+            -- Ok, just ignore all pango markup. If this fails, we got some invalid utf8
+            if not pcall(setText) then
+                textbox:set_markup("<i>&lt;Invalid markup or UTF8, cannot display message&gt;</i>")
+            end
+        end
+    end
+end
+
+--- Replace title and text of an existing notification.
+-- @tparam notification notification Notification object, which contents are to be replaced.
+-- @tparam string new_title New title of notification. If not specified, old title remains unchanged.
+-- @tparam string new_text New text of notification. If not specified, old text remains unchanged.
+-- @return None.
+function naughty.replace_text(notification, new_title, new_text)
+    local title = new_title
+
+    if title then title = title .. "\n" else title = "" end
+
+    set_text(notification, title, new_text)
+end
+
 --- Create a notification.
 --
 -- @tab args The argument table containing any of the arguments below.
@@ -351,8 +430,6 @@ function naughty.notify(args)
     local position = args.position or preset.position
     local actions = args.actions
     local destroy_cb = args.destroy
-    local escape_pattern = "[<>&]"
-    local escape_subs = { ['<'] = "&lt;", ['>'] = "&gt;", ['&'] = "&amp;" }
 
     -- beautiful
     local beautiful = bt.get()
@@ -360,7 +437,7 @@ function naughty.notify(args)
     local fg = args.fg or preset.fg or beautiful.fg_normal or '#ffffff'
     local bg = args.bg or preset.bg or beautiful.bg_normal or '#535d6c'
     local border_color = args.border_color or preset.border_color or beautiful.bg_focus or '#535d6c'
-    local notification = { screen = screen, destroy_cb = destroy_cb }
+    local notification = { screen = screen, destroy_cb = destroy_cb, timeout = timeout }
 
     -- replace notification if needed
     if args.replaces_id then
@@ -387,18 +464,8 @@ function naughty.notify(args)
     if title then title = title .. "\n" else title = "" end
 
     -- hook destroy
-    local die = function (reason)
-        naughty.destroy(notification, reason)
-    end
-    if timeout > 0 then
-        local timer_die = timer { timeout = timeout }
-        timer_die:connect_signal("timeout", function() die(naughty.notificationClosedReason.expired) end)
-        if not suspended then
-            timer_die:start()
-        end
-        notification.timer = timer_die
-    end
-    notification.die = die
+    set_timeout(notification, timeout)
+    local die = notification.die
 
     local run = function ()
         if args.run then
@@ -427,27 +494,9 @@ function naughty.notify(args)
     textbox:set_valign("middle")
     textbox:set_font(font)
 
-    local function setMarkup(pattern, replacements)
-        textbox:set_markup(string.format('<b>%s</b>%s', title, text:gsub(pattern, replacements)))
-    end
-    local function setText()
-        textbox:set_text(string.format('%s %s', title, text))
-    end
+    notification.textbox = textbox
 
-    -- Since the title cannot contain markup, it must be escaped first so that
-    -- it is not interpreted by Pango later.
-    title = title:gsub(escape_pattern, escape_subs)
-    -- Try to set the text while only interpreting <br>.
-    -- (Setting a textbox' .text to an invalid pattern throws a lua error)
-    if not pcall(setMarkup, "<br.->", "\n") then
-        -- That failed, escape everything which might cause an error from pango
-        if not pcall(setMarkup, escape_pattern, escape_subs) then
-            -- Ok, just ignore all pango markup. If this fails, we got some invalid utf8
-            if not pcall(setText) then
-                textbox:set_markup("<i>&lt;Invalid markup or UTF8, cannot display message&gt;</i>")
-            end
-        end
-    end
+    set_text(notification, title, text)
 
     local actionslayout = wibox.layout.fixed.vertical()
     local actions_max_width = 0
