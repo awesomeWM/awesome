@@ -2,6 +2,7 @@
 -- @author Uli Schlachter
 -- @copyright 2010 Uli Schlachter
 -- @release @AWESOME_VERSION@
+-- @classmod wibox.widget.base
 ---------------------------------------------------------------------------
 
 local debug = require("gears.debug")
@@ -11,7 +12,6 @@ local pairs = pairs
 local type = type
 local table = table
 
--- wibox.widget.base
 local base = {}
 
 --- Set/get a widget's buttons

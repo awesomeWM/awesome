@@ -1,8 +1,10 @@
---- Timer objects and functions.
 ---------------------------------------------------------------------------
+--- Timer objects and functions.
+--
 -- @author Uli Schlachter
 -- @copyright 2014 Uli Schlachter
 -- @release @AWESOME_VERSION@
+-- @module gears.timer
 ---------------------------------------------------------------------------
 
 local capi = { awesome = awesome }

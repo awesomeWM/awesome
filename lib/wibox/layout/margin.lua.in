@@ -2,6 +2,7 @@
 -- @author Uli Schlachter
 -- @copyright 2010 Uli Schlachter
 -- @release @AWESOME_VERSION@
+-- @classmod wibox.layout.margin
 ---------------------------------------------------------------------------
 
 local pairs = pairs
@@ -12,7 +13,6 @@ local widget_base = require("wibox.widget.base")
 local gcolor = require("gears.color")
 local cairo = require("lgi").cairo
 
--- wibox.layout.margin
 local margin = { mt = {} }
 
 --- Draw a margin layout
@@ -120,12 +120,12 @@ for k, v in pairs({ "left", "right", "top", "bottom" }) do
 end
 
 --- Returns a new margin layout.
--- @param widget A widget to use (optional)
--- @param left A margin to use on the left side of the widget (optional)
--- @param right A margin to use on the right side of the widget (optional)
--- @param top A margin to use on the top side of the widget (optional)
--- @param bottom A margin to use on the bottom side of the widget (optional)
--- @param color A color for the margins (optional)
+-- @param[opt] widget A widget to use.
+-- @param[opt] left A margin to use on the left side of the widget.
+-- @param[opt] right A margin to use on the right side of the widget.
+-- @param[opt] top A margin to use on the top side of the widget.
+-- @param[opt] bottom A margin to use on the bottom side of the widget.
+-- @param[opt] color A color for the margins.
 local function new(widget, left, right, top, bottom, color)
     local ret = widget_base.make_widget()
 

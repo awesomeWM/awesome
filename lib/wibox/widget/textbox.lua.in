@@ -3,6 +3,7 @@
 -- @author dodo
 -- @copyright 2010, 2011 Uli Schlachter, dodo
 -- @release @AWESOME_VERSION@
+-- @classmod wibox.widget.textbox
 ---------------------------------------------------------------------------
 
 local base = require("wibox.widget.base")
@@ -16,10 +17,9 @@ local setmetatable = setmetatable
 local pairs = pairs
 local error = error
 
--- wibox.widget.textbox
 local textbox = { mt = {} }
 
--- Setup a pango layout for the given textbox and cairo context
+--- Setup a pango layout for the given textbox and cairo context
 local function setup_layout(box, width, height)
     local layout = box._layout
     layout.width = Pango.units_from_double(width)
@@ -55,8 +55,8 @@ end
 
 --- Set the text of the textbox (with Pango markup).
 -- @param text The text to set. This can contain pango markup (e.g.
--- <pre><b>bold</b></pre>). You can use awful.util.escape to escape
--- parts of it.
+--   `<b>bold</b>`). You can use awful.util.escape to escape
+--   parts of it.
 function textbox:set_markup(text)
     local attr, parsed = Pango.parse_markup(text, -1, 0)
     -- In case of error, attr is false and parsed is an error message

@@ -1,7 +1,10 @@
 ---------------------------------------------------------------------------
+--- Prompt module for awful
+--
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2008 Julien Danjou
 -- @release @AWESOME_VERSION@
+-- @module awful.prompt
 ---------------------------------------------------------------------------
 
 -- Grab environment we need
@@ -19,8 +22,6 @@ local keygrabber = require("awful.keygrabber")
 local util = require("awful.util")
 local beautiful = require("beautiful")
 
---- Prompt module for awful
--- awful.prompt
 local prompt = {}
 
 --- Private data
@@ -34,9 +35,9 @@ local function itera (inc,a, i)
 	if v then return i,v end
 end
 
--- Load history file in history table
--- @param id The data.history identifier which is the path to the filename
--- @param max Optional parameter, the maximum number of entries in file
+--- Load history file in history table
+-- @param id The data.history identifier which is the path to the filename.
+-- @param[opt] max The maximum number of entries in file.
 local function history_check_load(id, max)
     if id and id ~= ""
         and not data.history[id] then
@@ -63,7 +64,7 @@ local function history_check_load(id, max)
     end
 end
 
--- Save history table in history file
+--- Save history table in history file
 -- @param id The data.history identifier
 local function history_save(id)
     if data.history[id] then
@@ -83,7 +84,7 @@ local function history_save(id)
     end
 end
 
--- Return the number of items in history table regarding the id
+--- Return the number of items in history table regarding the id
 -- @param id The data.history identifier
 -- @return the number of items in history table, -1 if history is disabled
 local function history_items(id)
@@ -94,7 +95,7 @@ local function history_items(id)
     end
 end
 
--- Add an entry to the history file
+--- Add an entry to the history file
 -- @param id The data.history identifier
 -- @param command The command to add
 local function history_add(id, command)
@@ -119,16 +120,16 @@ local function history_add(id, command)
 end
 
 
--- Draw the prompt text with a cursor.
--- @param args The table of arguments.
--- @param text The text.
--- @param font The font.
--- @param prompt The text prefix.
--- @param text_color The text color.
--- @param cursor_color The cursor color.
--- @param cursor_pos The cursor position.
--- @param cursor_ul The cursor underline style.
--- @param selectall If true cursor is rendered on the entire text.
+--- Draw the prompt text with a cursor.
+-- @tparam table args The table of arguments.
+-- @field text The text.
+-- @field font The font.
+-- @field prompt The text prefix.
+-- @field text_color The text color.
+-- @field cursor_color The cursor color.
+-- @field cursor_pos The cursor position.
+-- @field cursor_ul The cursor underline style.
+-- @field selectall If true cursor is rendered on the entire text.
 local function prompt_text_with_cursor(args)
     local char, spacer, text_start, text_end, ret
     local text = args.text or ""
@@ -157,45 +158,45 @@ local function prompt_text_with_cursor(args)
 end
 
 --- Run a prompt in a box.
--- <p>The following readline keyboard shortcuts are implemented as expected:</p>
+--
+-- The following readline keyboard shortcuts are implemented as expected:
 -- <kbd>CTRL+A</kbd>, <kbd>CTRL+B</kbd>, <kbd>CTRL+C</kbd>, <kbd>CTRL+D</kbd>,
 -- <kbd>CTRL+E</kbd>, <kbd>CTRL+J</kbd>, <kbd>CTRL+M</kbd>, <kbd>CTRL+F</kbd>,
 -- <kbd>CTRL+H</kbd>, <kbd>CTRL+K</kbd>, <kbd>CTRL+U</kbd>, <kbd>CTRL+W</kbd>,
 -- <kbd>CTRL+BACKSPACE</kbd>, <kbd>SHIFT+INSERT</kbd>, <kbd>HOME</kbd>,
 -- <kbd>END</kbd> and arrow keys.
--- <p>The following shortcuts implement additional history manipulation commands
+--
+-- The following shortcuts implement additional history manipulation commands
 -- where the search term is defined as the substring of the command from first
--- character to cursor position.</p>
--- <ul>
--- <li><code>CTRL+R</code>: reverse history search, matches any history entry
--- containing search term.</li>
--- <li><code>CTRL+S</code>: forward history search, matches any history entry
--- containing search term.</li>
--- <li><code>CTRL+UP</code>: ZSH up line or search, matches any history entry
--- starting with search term.</li>
--- <li><code>CTRL+DOWN</code>: ZSH down line or search, matches any history
--- entry starting with search term.</li>
--- <li><code>CTRL+DELETE</code>: delete the currently visible history entry from
--- history file.
--- This does not delete new commands or history entries under user editing.</li>
--- </ul>
--- @param args A table with optional arguments: <code>fg_cursor</code>,
--- <code>bg_cursor</code>, <code>ul_cursor</code>, <code>prompt</code>,
--- <code>text</code>, <code>selectall</code>, <code>font</code>,
--- <code>autoexec</code>.
+-- character to cursor position.
+--
+-- * <kbd>CTRL+R</kbd>: reverse history search, matches any history entry
+-- containing search term.
+-- * <kbd>CTRL+S</kbd>: forward history search, matches any history entry
+-- containing search term.
+-- * <kbd>CTRL+UP</kbd>: ZSH up line or search, matches any history entry
+-- starting with search term.
+-- * <kbd>CTRL+DOWN</kbd>: ZSH down line or search, matches any history
+-- entry starting with search term.
+-- * <kbd>CTRL+DELETE</kbd>: delete the currently visible history entry from
+-- history file. This does not delete new commands or history entries under
+-- user editing.
+--
+-- @tparam table args A table with optional arguments: `fg_cursor`, `bg_cursor`,
+-- `ul_cursor`, `prompt`, `text`, `selectall`, `font`, `autoexec`.
 -- @param textbox The textbox to use for the prompt.
 -- @param exe_callback The callback function to call with command as argument
 -- when finished.
 -- @param completion_callback The callback function to call to get completion.
--- @param history_path Optional parameter: file path where the history should be
+-- @param[opt] history_path File path where the history should be
 -- saved, set nil to disable history
--- @param history_max Optional parameter: set the maximum entries in history
+-- @param[opt] history_max Set the maximum entries in history
 -- file, 50 by default
--- @param done_callback Optional parameter: the callback function to always call
+-- @param[opt] done_callback The callback function to always call
 -- without arguments, regardless of whether the prompt was cancelled.
--- @param changed_callback Optional parameter: the callback function to call
+-- @param[opt] changed_callback The callback function to call
 -- with command as argument when a command was changed.
--- @param keypressed_callback Optional parameter: the callback function to call
+-- @param[opt] keypressed_callback The callback function to call
 -- with mod table, key and command as arguments when a key was pressed.
 function prompt.run(args, textbox, exe_callback, completion_callback, history_path, history_max, done_callback, changed_callback, keypressed_callback)
     local grabber

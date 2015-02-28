@@ -1,7 +1,10 @@
 ---------------------------------------------------------------------------
+--- Handle client shapes.
+--
 -- @author Uli Schlachter &lt;psychon@znc.in&gt;
 -- @copyright 2014 Uli Schlachter
 -- @release @AWESOME_VERSION@
+-- @module awful.client.shape
 ---------------------------------------------------------------------------
 
 -- Grab environment we need
@@ -12,14 +15,12 @@ local capi =
     client = client,
 }
 
---- Handle client shapes.
--- awful.client.shape
 local shape = {}
 shape.update = {}
 
 --- Get one of a client's shapes and transform it to include window decorations
--- @param c The client whose shape should be retrieved
--- @param shape Either "bounding" or "clip"
+-- @client c The client whose shape should be retrieved
+-- @tparam string shape Either "bounding" or "clip"
 function shape.get_transformed(c, shape)
     local border = shape == "bounding" and c.border_width or 0
     local shape = surface(c["client_shape_" .. shape])
@@ -51,7 +52,7 @@ function shape.get_transformed(c, shape)
 end
 
 --- Update a client's bounding shape from the shape the client set itself
--- @param c The client to act on
+-- @client c The client to act on
 function shape.update.bounding(c)
     local res = shape.get_transformed(c, "bounding")
     c.shape_bounding = res and res._native
@@ -62,7 +63,7 @@ function shape.update.bounding(c)
 end
 
 --- Update a client's clip shape from the shape the client set itself
--- @param c The client to act on
+-- @client c The client to act on
 function shape.update.clip(c)
     local res = shape.get_transformed(c, "clip")
     c.shape_clip = res and res._native
@@ -73,7 +74,7 @@ function shape.update.clip(c)
 end
 
 --- Update all of a client's shapes from the shapes the client set itself
--- @param c The client to act on
+-- @client c The client to act on
 function shape.update.all(c)
     shape.update.bounding(c)
     shape.update.clip(c)

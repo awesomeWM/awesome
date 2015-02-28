@@ -1,10 +1,12 @@
 ---------------------------------------------------------------------------
+--- Dummy function for floating layout
+--
 -- @author Gregor Best
 -- @copyright 2008 Gregor Best
 -- @release @AWESOME_VERSION@
+-- @module awful.layout.suit.floating
 ---------------------------------------------------------------------------
 
---- Dummy function for floating layout
 -- Grab environment we need
 local math = math
 local ipairs = ipairs
@@ -14,7 +16,6 @@ local capi =
     mousegrabber = mousegrabber
 }
 
--- awful.layout.suit.floating
 local floating = {}
 
 function floating.mouse_resize_handler(c, corner, x, y)

@@ -1,7 +1,10 @@
 ---------------------------------------------------------------------------
+--- Screen module for awful
+--
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2008 Julien Danjou
 -- @release @AWESOME_VERSION@
+-- @module awful.screen
 ---------------------------------------------------------------------------
 
 -- Grab environment we need
@@ -16,8 +19,6 @@ local util = require("awful.util")
 -- we use require("awful.client") inside functions to prevent circular dependencies.
 local client
 
---- Screen module for awful
--- awful.screen
 local screen = {}
 
 local data = {}
@@ -29,7 +30,7 @@ data.padding = {}
 -- `screen` table/object.
 -- @param x The x coordinate
 -- @param y The y coordinate
--- @param default Optional default return value. If unspecified, 1 is returned.
+-- @param[opt] default The default return value. If unspecified, 1 is returned.
 function screen.getbycoord(x, y, default)
     for i = 1, capi.screen:count() do
         local geometry = capi.screen[i].geometry

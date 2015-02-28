@@ -2,6 +2,7 @@
 -- @author Uli Schlachter
 -- @copyright 2010 Uli Schlachter
 -- @release @AWESOME_VERSION@
+-- @classmod wibox.widget.background
 ---------------------------------------------------------------------------
 
 local base = require("wibox.widget.base")
@@ -13,7 +14,6 @@ local setmetatable = setmetatable
 local pairs = pairs
 local type = type
 
--- wibox.widget.background
 local background = { mt = {} }
 
 --- Draw this widget
@@ -96,8 +96,8 @@ end
 
 --- Returns a new background layout. A background layout applies a background
 -- and foreground color to another widget.
--- @param widget The widget to display (optional)
--- @param bg The background to use for that widget (optional)
+-- @param[opt] widget The widget to display.
+-- @param[opt] bg The background to use for that widget.
 local function new(widget, bg)
     local ret = base.make_widget()
 

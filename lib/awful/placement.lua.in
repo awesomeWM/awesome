@@ -1,7 +1,10 @@
 ---------------------------------------------------------------------------
+--- Places client according to special criteria.
+--
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2008 Julien Danjou
 -- @release @AWESOME_VERSION@
+-- @module awful.placement
 ---------------------------------------------------------------------------
 
 -- Grab environment we need
@@ -19,11 +22,9 @@ local client = require("awful.client")
 local layout = require("awful.layout")
 local a_screen = require("awful.screen")
 
---- Places client according to special criteria.
--- awful.placement
 local placement = {}
 
--- Check if an area intersect another area.
+--- Check if an area intersect another area.
 -- @param a The area.
 -- @param b The other area.
 -- @return True if they intersect, false otherwise.
@@ -34,7 +35,7 @@ local function area_intersect_area(a, b)
             and b.y + b.height > a.y)
 end
 
--- Get the intersect area between a and b.
+--- Get the intersect area between a and b.
 -- @param a The area.
 -- @param b The other area.
 -- @return The intersect area.
@@ -47,7 +48,7 @@ local function area_intersect_area_get(a, b)
     return g
 end
 
--- Remove an area from a list, splitting the space between several area that
+--- Remove an area from a list, splitting the space between several area that
 -- can overlap.
 -- @param areas Table of areas.
 -- @param elem Area to remove.
@@ -193,7 +194,7 @@ end
 
 --- Place the client centered with respect to a parent or the clients screen.
 -- @param c The client.
--- @param p The parent (optional, nil for screen centering).
+-- @param[opt] p The parent (nil for screen centering).
 -- @return The new client geometry.
 function placement.centered(c, p)
     local c = c or capi.client.focus
@@ -211,7 +212,7 @@ end
 
 --- Place the client centered on the horizontal axis with respect to a parent or the clients screen.
 -- @param c The client.
--- @param p The parent (optional, nil for screen centering).
+-- @param[opt] p The parent (nil for screen centering).
 -- @return The new client geometry.
 function placement.center_horizontal(c, p)
     local c = c or capi.client.focus
@@ -228,7 +229,7 @@ end
 
 --- Place the client centered on the vertical axis with respect to a parent or the clients screen.
 -- @param c The client.
--- @param p The parent (optional, nil for screen centering).
+-- @param[opt] p The parent (nil for screen centering).
 -- @return The new client geometry.
 function placement.center_vertical(c, p)
     local c = c or capi.client.focus

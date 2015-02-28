@@ -2,6 +2,7 @@
 -- @author Uli Schlachter
 -- @copyright 2010 Uli Schlachter
 -- @release @AWESOME_VERSION@
+-- @module gears.color
 ---------------------------------------------------------------------------
 
 local setmetatable = setmetatable
@@ -19,11 +20,13 @@ local color = { mt = {} }
 local pattern_cache = setmetatable({}, { __mode = 'v' })
 
 --- Parse a HTML-color.
--- This function can parse colors like #rrggbb and #rrggbbaa.
--- For example, parse_color("#00ff00ff") would return 0, 1, 0, 1.
+-- This function can parse colors like `#rrggbb` and `#rrggbbaa`.
 -- Thanks to #lua for this. :)
+--
 -- @param col The color to parse
 -- @return 4 values which each are in the range [0, 1].
+-- @usage -- This will return 0, 1, 0, 1
+-- gears.color.parse_color("#00ff00ff")
 function color.parse_color(col)
     local rgb = {}
     for pair in string.gmatch(col, "[^#].") do
@@ -39,7 +42,8 @@ function color.parse_color(col)
 end
 
 --- Find all numbers in a string
--- @param s The string to parse
+--
+-- @tparam string s The string to parse
 -- @return Each number found as a separate value
 local function parse_numbers(s)
     local res = {}
@@ -50,6 +54,7 @@ local function parse_numbers(s)
 end
 
 --- Create a solid pattern
+--
 -- @param col The color for the pattern
 -- @return A cairo pattern object
 function color.create_solid_pattern(col)
@@ -63,6 +68,7 @@ function color.create_solid_pattern(col)
 end
 
 --- Create an image pattern from a png file
+--
 -- @param file The filename of the file
 -- @return a cairo pattern object
 function color.create_png_pattern(file)
@@ -76,10 +82,10 @@ function color.create_png_pattern(file)
     return pattern
 end
 
--- Add stops to the given pattern.
+--- Add stops to the given pattern.
 -- @param p The cairo pattern to add stops to
 -- @param iterator An iterator that returns strings. Each of those strings
---                 should be in the form place,color where place is in [0, 1].
+--   should be in the form place,color where place is in [0, 1].
 local function add_iterator_stops(p, iterator)
     for k in iterator do
         local sub = string.gmatch(k, "[^,]+")
@@ -88,14 +94,14 @@ local function add_iterator_stops(p, iterator)
     end
 end
 
--- Add a list of stops to a given pattern
+--- Add a list of stops to a given pattern
 local function add_stops_table(pat, arg)
     for _, stop in ipairs(arg) do
         pat:add_color_stop_rgba(stop[1], color.parse_color(stop[2]))
     end
 end
 
--- Create a pattern from a string
+--- Create a pattern from a string
 local function string_pattern(creator, arg)
     local iterator = string.gmatch(arg, "[^:]+")
     -- Create a table where each entry is a number from the original string
@@ -114,13 +120,13 @@ end
 
 --- Create a linear pattern object.
 -- The pattern is created from a string. This string should have the following
--- form: "x0,y0:x1,y1:&#60;stops&#62;"
+-- form: `"x0, y0:x1, y1:<stops>"`
 -- Alternatively, the pattern can be specified as a table:
--- { type = "linear", from = { x0, y0 }, to = { x1, y1 },
--- stops = { &#60stops&#62 } }
--- x0,y0 and x1,y1 are the start and stop point of the pattern.
--- For the explanation of "&#60;stops&#62;", see @{create_pattern}.
--- @param arg The argument describing the pattern
+--    { type = "linear", from = { x0, y0 }, to = { x1, y1 },
+--      stops = { <stops> } }
+-- `x0,y0` and `x1,y1` are the start and stop point of the pattern.
+-- For the explanation of `<stops>`, see `color.create_pattern`.
+-- @tparam string|table arg The argument describing the pattern.
 -- @return a cairo pattern object
 function color.create_linear_pattern(arg)
     local pat
@@ -138,14 +144,14 @@ end
 
 --- Create a radial pattern object.
 -- The pattern is created from a string. This string should have the following
--- form: "x0,y0,r0:x1,y1,r1:&#60stops&#62"
+-- form: `"x0, y0, r0:x1, y1, r1:<stops>"`
 -- Alternatively, the pattern can be specified as a table:
--- { type = "radial", from = { x0, y0, r0 }, to = { x1, y1, r1 },
--- stops = { &#60stops&#62 } }
--- x0,y0 and x1,y1 are the start and stop point of the pattern.
--- r0 and r1 are the radii of the start / stop circle.
--- For the explanation of "&#60;stops&#62;", see @{create_pattern}.
--- @param arg The argument describing the pattern
+--    { type = "radial", from = { x0, y0, r0 }, to = { x1, y1, r1 },
+--      stops = { <stops> } }
+-- `x0,y0` and `x1,y1` are the start and stop point of the pattern.
+-- `r0` and `r1` are the radii of the start / stop circle.
+-- For the explanation of `<stops>`, see `color.create_pattern`.
+-- @tparam string|table arg The argument describing the pattern
 -- @return a cairo pattern object
 function color.create_radial_pattern(arg)
     local pat
@@ -171,10 +177,11 @@ color.types = {
 }
 
 --- Create a pattern from a given string.
--- For full documentation of this function, please refer to create_pattern().
--- This difference between @{create_pattern} and this function is that this
--- function does not insert the generated objects into the pattern cache. Thus,
--- you are allowed to modify the returned object.
+-- For full documentation of this function, please refer to
+-- `color.create_pattern`.  The difference between `color.create_pattern`
+-- and this function is that this function does not insert the generated
+-- objects into the pattern cache. Thus, you are allowed to modify the
+-- returned object.
 -- @see create_pattern
 -- @param col The string describing the pattern.
 -- @return a cairo pattern object
@@ -236,7 +243,7 @@ end
 --- Check if a pattern is opaque.
 -- A pattern is transparent if the background on which it gets drawn (with
 -- operator OVER) doesn't influence the visual result.
--- @param col An argument that @{create_pattern} accepts
+-- @param col An argument that `create_pattern` accepts.
 -- @return The pattern if it is surely opaque, else nil
 function color.create_opaque_pattern(col)
     local pattern = color.create_pattern(col)

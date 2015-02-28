@@ -2,6 +2,7 @@
 -- @author Uli Schlachter
 -- @copyright 2010 Uli Schlachter
 -- @release @AWESOME_VERSION@
+-- @classmod gears.object
 ---------------------------------------------------------------------------
 
 local setmetatable = setmetatable
@@ -9,10 +10,9 @@ local pairs = pairs
 local type = type
 local error = error
 
--- gears.object
 local object = { mt = {} }
 
--- Verify that obj is indeed a valid object as returned by new()
+--- Verify that obj is indeed a valid object as returned by new()
 local function check(obj)
     if type(obj) ~= "table" or type(obj._signals) ~= "table" then
         error("add_signal() called on non-object")
@@ -60,10 +60,11 @@ function object:disconnect_signal(name, func)
 end
 
 --- Emit a signal
+--
 -- @param name The name of the signal
 -- @param ... Extra arguments for the callback functions. Each connected
---            function receives the object as first argument and then any extra
---            arguments that are given to emit_signal()
+--   function receives the object as first argument and then any extra arguments
+--   that are given to emit_signal()
 function object:emit_signal(name, ...)
     local sig = find_signal(self, name, "emit")
     for func in pairs(sig) do
@@ -71,7 +72,7 @@ function object:emit_signal(name, ...)
     end
 end
 
--- Returns a new object. You can call :emit_signal(), :disconnect_signal,
+--- Returns a new object. You can call :emit_signal(), :disconnect_signal,
 -- :connect_signal() and :add_signal() on the resulting object.
 local function new()
     local ret = {}

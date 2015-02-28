@@ -1,7 +1,12 @@
 ---------------------------------------------------------------------------
+--- Wibox module for awful.
+-- This module allows you to easily create wibox and attach them to the edge of
+-- a screen.
+--
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2009 Julien Danjou
 -- @release @AWESOME_VERSION@
+-- @module awful.wibox
 ---------------------------------------------------------------------------
 
 -- Grab environment we need
@@ -19,13 +24,9 @@ local error = error
 local wibox = require("wibox")
 local beautiful = require("beautiful")
 
---- Wibox module for awful.
--- This module allows you to easily create wibox and attach them to the edge of
--- a screen.
--- awful.wibox
 local awfulwibox = { mt = {} }
 
--- Array of table with wiboxes inside.
+--- Array of table with wiboxes inside.
 -- It's an array so it is ordered.
 local wiboxes = {}
 
@@ -70,7 +71,7 @@ function awfulwibox.set_position(wibox, position, screen)
     end
 end
 
--- Reset all wiboxes positions.
+--- Reset all wiboxes positions.
 local function update_all_wiboxes_position()
     for _, wprop in ipairs(wiboxes) do
         awfulwibox.set_position(wprop.wibox, wprop.position, wprop.screen)

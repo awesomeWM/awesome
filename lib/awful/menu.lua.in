@@ -1,9 +1,12 @@
 --------------------------------------------------------------------------------
+--- A menu for awful
+--
 -- @author Damien Leone &lt;damien.leone@gmail.com&gt;
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @author dodo
 -- @copyright 2008, 2011 Damien Leone, Julien Danjou, dodo
 -- @release @AWESOME_VERSION@
+-- @module awful.menu
 --------------------------------------------------------------------------------
 
 local wibox = require("wibox")
@@ -31,7 +34,6 @@ local capi = {
     client = client }
 
 
--- awful.menu
 local menu = { mt = {} }
 
 
@@ -308,6 +310,7 @@ end
 
 
 --- Show a menu.
+-- @param args The arguments
 -- @param args.coords Menu position defaulting to mouse.coords()
 function menu:show(args)
     args = args or {}
@@ -338,7 +341,7 @@ function menu:hide()
 end
 
 --- Toggle menu visibility.
--- @param _menu The menu to show if it's hidden, or to hide if it's shown.
+-- @param args The arguments
 -- @param args.coords Menu position {x,y}
 function menu:toggle(args)
     if self.wibox.visible then
@@ -363,11 +366,11 @@ function menu:get_root()
 end
 
 --- Add a new menu entry.
--- args.new (Default: awful.menu.entry) The menu entry constructor.
--- args.theme (Optional) The menu entry theme.
 -- args.* params needed for the menu entry constructor.
 -- @param args The item params
--- @param index (Optional) the index where the new entry will inserted
+-- @param args.new (Default: awful.menu.entry) The menu entry constructor.
+-- @param[opt] args.theme The menu entry theme.
+-- @param[opt] index The index where the new entry will inserted.
 function menu:add(args, index)
     if not args then return end
     local theme = load_theme(args.theme or {}, self.theme)
@@ -422,8 +425,7 @@ function menu:add(args, index)
     return item
 end
 
--- Delete menu entry at given position
--- @param _menu The menu
+--- Delete menu entry at given position
 -- @param num The position in the table of the menu entry to be deleted; can be also the menu entry itself
 function menu:delete(num)
     if type(num) == "table" then
@@ -585,18 +587,18 @@ end
 --------------------------------------------------------------------------------
 
 --- Create a menu popup.
--- @param args Table containing the menu informations.<br/>
--- <ul>
--- <li> Key items: Table containing the displayed items. Each element is a table by default (when element 'new' is awful.menu.entry) containing: item name, triggered action, submenu table or function, item icon (optional). </li>
--- <li> Keys theme.[fg|bg]_[focus|normal], theme.border_color, theme.border_width, theme.submenu_icon, theme.height and theme.width override the default display for your menu and/or of your menu entry, each of them are optional. </li>
--- <li> Key auto_expand controls the submenu auto expand behaviour by setting it to true (default) or false. </li>
--- </ul>
+-- @param args Table containing the menu informations.
+--
+-- * Key items: Table containing the displayed items. Each element is a table by default (when element 'new' is awful.menu.entry) containing: item name, triggered action, submenu table or function, item icon (optional).
+-- * Keys theme.[fg|bg]_[focus|normal], theme.border_color, theme.border_width, theme.submenu_icon, theme.height and theme.width override the default display for your menu and/or of your menu entry, each of them are optional.
+-- * Key auto_expand controls the submenu auto expand behaviour by setting it to true (default) or false.
+--
 -- @param parent Specify the parent menu if we want to open a submenu, this value should never be set by the user.
 -- @usage -- The following function builds and shows a menu of clients that match
 -- -- a particular rule.
 -- -- Bound to a key, it can be used to select from dozens of terminals open on
 -- -- several tags.
--- -- When using @{awful.rules.match_any} instead of @{awful.rules.match},
+-- -- When using @{rules.match_any} instead of @{rules.match},
 -- -- a menu of clients with different classes could be build.
 --
 -- function terminal_menu ()

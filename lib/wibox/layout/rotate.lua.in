@@ -2,6 +2,7 @@
 -- @author Uli Schlachter
 -- @copyright 2010 Uli Schlachter
 -- @release @AWESOME_VERSION@
+-- @classmod wibox.layout.rotate
 ---------------------------------------------------------------------------
 
 local error = error
@@ -13,7 +14,6 @@ local tostring = tostring
 local base = require("wibox.layout.base")
 local widget_base = require("wibox.widget.base")
 
--- wibox.layout.rotate
 local rotate = { mt = {} }
 
 local function transform(layout, width, height)
@@ -99,8 +99,8 @@ end
 --- Returns a new rotate layout. A rotate layout rotates a given widget. Use
 -- :set_widget() to set the widget and :set_direction() for the direction.
 -- The default direction is "north" which doesn't change anything.
--- @param widget The widget to display (optional)
--- @param dir The direction to rotate to (optional)
+-- @param[opt] widget The widget to display.
+-- @param[opt] dir The direction to rotate to.
 local function new(widget, dir)
     local ret = widget_base.make_widget()
 

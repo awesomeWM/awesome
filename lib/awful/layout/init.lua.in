@@ -1,7 +1,10 @@
 ---------------------------------------------------------------------------
+--- Layout module for awful
+--
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2008 Julien Danjou
 -- @release @AWESOME_VERSION@
+-- @module awful.layout
 ---------------------------------------------------------------------------
 
 -- Grab environment we need
@@ -18,9 +21,11 @@ local capi = {
 local client = require("awful.client")
 local timer = require("gears.timer")
 
---- Layout module for awful
--- awful.layout
 local layout = {}
+
+--- Default predefined layouts
+--
+-- @fixme Add documentation on available layouts as all of them are hidden
 layout.suit = require("awful.layout.suit")
 
 -- The default list of layouts
@@ -56,7 +61,7 @@ end
 --- Change the layout of the current tag.
 -- @param i Relative index.
 -- @param s The screen number. 
--- @param layouts A table of layouts. (optional)
+-- @param[opt] layouts A table of layouts.
 function layout.inc(i, s, layouts)
     local t = tag.selected(s)
     local layouts = layouts or layout.layouts

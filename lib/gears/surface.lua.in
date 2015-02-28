@@ -2,6 +2,7 @@
 -- @author Uli Schlachter
 -- @copyright 2012 Uli Schlachter
 -- @release @AWESOME_VERSION@
+-- @module gears.surface
 ---------------------------------------------------------------------------
 
 local setmetatable = setmetatable
@@ -15,7 +16,6 @@ if tonumber(ver_major) <= 0 and tonumber(ver_minor) < 7 then
     error("lgi too old, need at least version 0.7.0")
 end
 
--- gears.surface
 local surface = { mt = {} }
 local surface_cache = setmetatable({}, { __mode = 'v' })
 

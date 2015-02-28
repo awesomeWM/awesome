@@ -1,7 +1,10 @@
 ---------------------------------------------------------------------------
+--- Layoutbox widget.
+--
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2009 Julien Danjou
 -- @release @AWESOME_VERSION@
+-- @classmod awful.widget.layoutbox
 ---------------------------------------------------------------------------
 
 local setmetatable = setmetatable
@@ -12,8 +15,6 @@ local tag = require("awful.tag")
 local beautiful = require("beautiful")
 local imagebox = require("wibox.widget.imagebox")
 
---- Layoutbox widget.
--- awful.widget.layoutbox
 local layoutbox = { mt = {} }
 
 local function update(w, screen)

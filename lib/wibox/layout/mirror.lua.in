@@ -2,6 +2,7 @@
 -- @author dodo
 -- @copyright 2012 dodo
 -- @release @AWESOME_VERSION@
+-- @classmod wibox.layout.mirror
 ---------------------------------------------------------------------------
 
 local type = type
@@ -12,7 +13,6 @@ local setmetatable = setmetatable
 local base = require("wibox.layout.base")
 local widget_base = require("wibox.widget.base")
 
--- wibox.layout.mirror
 local mirror = { mt = {} }
 
 --- Draw this layout
@@ -98,8 +98,8 @@ end
 -- :set_widget() to set the widget and
 -- :set_horizontal() and :set_vertical() for the direction.
 -- horizontal and vertical are by default false which doesn't change anything.
--- @param widget The widget to display (optional)
--- @param reflection A table describing the reflection to apply (optional)
+-- @param[opt] widget The widget to display.
+-- @param[opt] reflection A table describing the reflection to apply.
 local function new(widget, reflection)
     local ret = widget_base.make_widget()
     ret.horizontal = false

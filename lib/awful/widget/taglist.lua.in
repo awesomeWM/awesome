@@ -1,7 +1,10 @@
 ---------------------------------------------------------------------------
+--- Taglist widget module for awful
+--
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2008-2009 Julien Danjou
 -- @release @AWESOME_VERSION@
+-- @classmod awful.widget.taglist
 ---------------------------------------------------------------------------
 
 -- Grab environment we need
@@ -20,8 +23,6 @@ local beautiful = require("beautiful")
 local fixed = require("wibox.layout.fixed")
 local surface = require("gears.surface")
 
---- Taglist widget module for awful
--- awful.widget.taglist
 local taglist = { mt = {} }
 taglist.filter = {}
 
@@ -138,20 +139,20 @@ end
 -- @param filter Filter function to define what clients will be listed.
 -- @param buttons A table with buttons binding to set.
 -- @param style The style overrides default theme.
--- @param update_function Optional function to create a tag widget on each
+-- @param[opt] update_function Function to create a tag widget on each
 --        update. @see awful.widget.common.
--- @param base_widget Optional container widget for tag widgets. Default
+-- @param[opt] base_widget Optional container widget for tag widgets. Default
 --        is wibox.layout.fixed.horizontal().
--- bg_focus The background color for focused client.
--- fg_focus The foreground color for focused client.
--- bg_urgent The background color for urgent clients.
--- fg_urgent The foreground color for urgent clients.
--- squares_sel Optional: a user provided image for selected squares.
--- squares_unsel Optional: a user provided image for unselected squares.
--- squares_sel_empty Optional: a user provided image for selected squares for empty tags.
--- squares_unsel_empty Optional: a user provided image for unselected squares for empty tags.
--- squares_resize Optional: true or false to resize squares.
--- font The font.
+-- @param base_widget.bg_focus The background color for focused client.
+-- @param base_widget.fg_focus The foreground color for focused client.
+-- @param base_widget.bg_urgent The background color for urgent clients.
+-- @param base_widget.fg_urgent The foreground color for urgent clients.
+-- @param[opt] base_widget.squares_sel A user provided image for selected squares.
+-- @param[opt] base_widget.squares_unsel A user provided image for unselected squares.
+-- @param[opt] base_widget.squares_sel_empty A user provided image for selected squares for empty tags.
+-- @param[opt] base_widget.squares_unsel_empty A user provided image for unselected squares for empty tags.
+-- @param[opt] base_widget.squares_resize True or false to resize squares.
+-- @param base_widget.font The font.
 function taglist.new(screen, filter, buttons, style, update_function, base_widget)
     local uf = update_function or common.list_update
     local w = base_widget or fixed.horizontal()

@@ -1,8 +1,13 @@
 ---------------------------------------------------------------------------
+--- Completion module.
+--
+-- This module store a set of function using shell to complete commands name.
+--
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @author Sébastien Gross &lt;seb-awesome@chezwam.org&gt;
 -- @copyright 2008 Julien Danjou, Sébastien Gross
 -- @release @AWESOME_VERSION@
+-- @module awful.completion
 ---------------------------------------------------------------------------
 
 -- Grab environment we need
@@ -15,9 +20,6 @@ local pairs = pairs
 local string = string
 local util = require("awful.util")
 
---- Completion module.
--- This module store a set of function using shell to complete commands name.
--- awful.completion
 local completion = {}
 
 -- mapping of command/completion function

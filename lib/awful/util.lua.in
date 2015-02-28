@@ -1,7 +1,10 @@
 ---------------------------------------------------------------------------
+--- Utility module for awful
+--
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2008 Julien Danjou
 -- @release @AWESOME_VERSION@
+-- @module awful.util
 ---------------------------------------------------------------------------
 
 -- Grab environment we need
@@ -23,8 +26,6 @@ local capi =
     mouse = mouse
 }
 
---- Utility module for awful
--- awful.util
 local util = {}
 util.table = {}
 
@@ -32,7 +33,7 @@ util.shell = os.getenv("SHELL") or "/bin/sh"
 
 local displayed_deprecations = {}
 --- Display a deprecation notice, but only once per traceback.
--- @param see Optional message to a new method / function to use.
+-- @param[opt] see The message to a new method / function to use.
 function util.deprecate(see)
     local tb = debug.traceback()
     if displayed_deprecations[tb] then
@@ -184,12 +185,13 @@ function util.getdir(d)
 end
 
 --- Search for an icon and return the full path.
--- It searches for the icon path under the directories given w/the right ext
+-- It searches for the icon path under the given directories with respect to the
+-- given extensions for the icon filename.
 -- @param iconname The name of the icon to search for.
 -- @param exts Table of image extensions allowed, otherwise { 'png', gif' }
 -- @param dirs Table of dirs to search, otherwise { '/usr/share/pixmaps/' }
--- @param size Optional size. If this is specified, subdirectories <size>x<size>
---             of the dirs are searched first
+-- @tparam[opt] string size The size. If this is specified, subdirectories `x`
+--   of the dirs are searched first.
 function util.geticonpath(iconname, exts, dirs, size)
     local exts = exts or { 'png', 'gif' }
     local dirs = dirs or { '/usr/share/pixmaps/', '/usr/share/icons/hicolor/' }
@@ -276,7 +278,7 @@ function util.subsets(set)
     return ret
 end
 
--- Return true whether rectangle B is in the right direction
+--- Return true whether rectangle B is in the right direction
 -- compared to rectangle A.
 -- @param dir The direction.
 -- @param gA The geometric specification for rectangle A.
@@ -295,12 +297,12 @@ local function is_in_direction(dir, gA, gB)
     return false
 end
 
--- Calculate distance between two points.
+--- Calculate distance between two points.
 -- i.e: if we want to move to the right, we will take the right border
 -- of the currently focused screen and the left side of the checked screen.
 -- @param dir The direction.
--- @param gA The first rectangle.
--- @param gB The second rectangle.
+-- @param _gA The first rectangle.
+-- @param _gB The second rectangle.
 -- @return The distance between the screens.
 local function calculate_distance(dir, _gA, _gB)
     local gAx = _gA.x
@@ -321,7 +323,7 @@ local function calculate_distance(dir, _gA, _gB)
     return math.sqrt(math.pow(gBx - gAx, 2) + math.pow(gBy - gAy, 2))
 end
 
--- Get the nearest rectangle in the given direction. Every rectangle is specified as a table
+--- Get the nearest rectangle in the given direction. Every rectangle is specified as a table
 -- with 'x', 'y', 'width', 'height' keys, the same as client or screen geometries.
 -- @param dir The direction, can be either "up", "down", "left" or "right".
 -- @param recttbl A table of rectangle specifications.

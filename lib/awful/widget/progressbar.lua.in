@@ -1,7 +1,10 @@
 ---------------------------------------------------------------------------
+--- A progressbar widget.
+--
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2009 Julien Danjou
 -- @release @AWESOME_VERSION@
+-- @classmod awful.widget.progressbar
 ---------------------------------------------------------------------------
 
 local setmetatable = setmetatable
@@ -10,58 +13,56 @@ local math = math
 local base = require("wibox.widget.base")
 local color = require("gears.color")
 
---- A progressbar widget.
--- awful.widget.progressbar
 local progressbar = { mt = {} }
 
 local data = setmetatable({}, { __mode = "k" })
 
 --- Set the progressbar border color.
 -- If the value is nil, no border will be drawn.
--- @name set_border_color
--- @class function
+--
+-- @function set_border_color
 -- @param progressbar The progressbar.
 -- @param color The border color to set.
 
 --- Set the progressbar foreground color.
--- @name set_color
--- @class function
+--
+-- @function set_color
 -- @param progressbar The progressbar.
 -- @param color The progressbar color.
 
 --- Set the progressbar background color.
--- @name set_background_color
--- @class function
+--
+-- @function set_background_color
 -- @param progressbar The progressbar.
 -- @param color The progressbar background color.
 
 --- Set the progressbar to draw vertically. Default is false.
--- @name set_vertical
--- @class function
+--
+-- @function set_vertical
 -- @param progressbar The progressbar.
 -- @param vertical A boolean value.
 
 --- Set the progressbar to draw ticks. Default is false.
--- @name set_ticks
--- @class function
+--
+-- @function set_ticks
 -- @param progressbar The progressbar.
 -- @param ticks A boolean value.
 
 --- Set the progressbar ticks gap.
--- @name set_ticks_gap
--- @class function
+--
+-- @function set_ticks_gap
 -- @param progressbar The progressbar.
 -- @param value The value.
 
 --- Set the progressbar ticks size.
--- @name set_ticks_size
--- @class function
+--
+-- @function set_ticks_size
 -- @param progressbar The progressbar.
 -- @param value The value.
 
 --- Set the maximum value the progressbar should handle.
--- @name set_max_value
--- @class function
+--
+-- @function set_max_value
 -- @param progressbar The progressbar.
 -- @param value The value.
 

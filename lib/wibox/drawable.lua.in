@@ -1,7 +1,10 @@
 ---------------------------------------------------------------------------
+--- Handling of drawables. A drawable is something that can be drawn to.
+--
 -- @author Uli Schlachter
 -- @copyright 2012 Uli Schlachter
 -- @release @AWESOME_VERSION@
+-- @classmod wibox.drawable
 ---------------------------------------------------------------------------
 
 local drawable = {}
@@ -82,7 +85,7 @@ end
 -- @param x X coordinate of the point
 -- @param y Y coordinate of the point
 -- @return A sorted table with all widgets that contain the given point. The
---         widgets are sorted by relevance.
+--   widgets are sorted by relevance.
 function drawable:find_widgets(x, y)
     local matches = {}
     -- Find all widgets that contain the point
@@ -126,7 +129,7 @@ end
 
 --- Set the background of the drawable
 -- @param c The background to use. This must either be a cairo pattern object,
---          nil or a string that gears.color() understands.
+--   nil or a string that gears.color() understands.
 function drawable:set_bg(c)
     local c = c or "#000000"
     if type(c) == "string" or type(c) == "table" then
@@ -156,7 +159,7 @@ end
 
 --- Set the foreground of the drawable
 -- @param c The foreground to use. This must either be a cairo pattern object,
---          nil or a string that gears.color() understands.
+--   nil or a string that gears.color() understands.
 function drawable:set_fg(c)
     local c = c or "#FFFFFF"
     if type(c) == "string" or type(c) == "table" then
@@ -298,10 +301,6 @@ capi.awesome.connect_signal("wallpaper_changed", function()
         k()
     end
 end)
-
---- Handling of drawables. A drawable is something that can be drawn to.
--- @class table
--- @name drawable
 
 return setmetatable(drawable, { __call = function(_, ...) return drawable.new(...) end })
 
