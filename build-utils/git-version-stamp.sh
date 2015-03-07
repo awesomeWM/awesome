@@ -13,7 +13,7 @@ die()
 }
 
 STAMP=`cat "$1" 2> /dev/null`
-CURRENT=`git describe 2>/dev/null`
+CURRENT=`git describe --dirty 2>/dev/null`
 
 if [ -z "$STAMP" -o -z "$CURRENT" ]
 then
