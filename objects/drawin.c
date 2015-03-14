@@ -83,6 +83,16 @@
  * @function instances
  */
 
+/** Set a __index metamethod for all drawin instances.
+ * @tparam function cb The meta-method
+ * @function set_index_miss_handler
+ */
+
+/** Set a __newindex metamethod for all drawin instances.
+ * @tparam function cb The meta-method
+ * @function set_newindex_miss_handler
+ */
+
 LUA_OBJECT_FUNCS(drawin_class, drawin_t, drawin)
 
 /** Kick out systray windows.

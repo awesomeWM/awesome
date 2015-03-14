@@ -54,6 +54,22 @@
  * @table screen
  */
 
+/** Get the number of instances.
+ *
+ * @return The number of screen objects alive.
+ * @function instances
+ */
+
+/** Set a __index metamethod for all screen instances.
+ * @tparam function cb The meta-method
+ * @function set_index_miss_handler
+ */
+
+/** Set a __newindex metamethod for all screen instances.
+ * @tparam function cb The meta-method
+ * @function set_newindex_miss_handler
+ */
+
 struct screen_output_t
 {
     /** The XRandR names of the output */

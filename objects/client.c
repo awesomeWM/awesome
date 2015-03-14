@@ -126,6 +126,16 @@
  * @function instances
  */
 
+/** Set a __index metamethod for all client instances.
+ * @tparam function cb The meta-method
+ * @function set_index_miss_handler
+ */
+
+/** Set a __newindex metamethod for all client instances.
+ * @tparam function cb The meta-method
+ * @function set_newindex_miss_handler
+ */
+
 static area_t titlebar_get_area(client_t *c, client_titlebar_t bar);
 static drawable_t *titlebar_get_drawable(lua_State *L, client_t *c, int cl_idx, client_titlebar_t bar);
 

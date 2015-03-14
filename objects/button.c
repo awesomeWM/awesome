@@ -49,6 +49,16 @@
  * @function instances
  */
 
+/** Set a __index metamethod for all button instances.
+ * @tparam function cb The meta-method
+ * @function set_index_miss_handler
+ */
+
+/** Set a __newindex metamethod for all button instances.
+ * @tparam function cb The meta-method
+ * @function set_newindex_miss_handler
+ */
+
 /** Create a new mouse button bindings.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.

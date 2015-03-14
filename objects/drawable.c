@@ -49,6 +49,16 @@
  * @function instances
  */
 
+/** Set a __index metamethod for all drawable instances.
+ * @tparam function cb The meta-method
+ * @function set_index_miss_handler
+ */
+
+/** Set a __newindex metamethod for all drawable instances.
+ * @tparam function cb The meta-method
+ * @function set_newindex_miss_handler
+ */
+
 static lua_class_t drawable_class;
 
 LUA_OBJECT_FUNCS(drawable_class, drawable_t, drawable)
