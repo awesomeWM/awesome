@@ -2326,8 +2326,11 @@ luaA_client_module_newindex(lua_State *L)
 
     if (A_STREQ(buf, "focus"))
     {
-        c = luaA_checkudata(L, 3, &client_class);
-        client_focus(c);
+        c = luaA_checkudataornil(L, 3, &client_class);
+        if (c)
+            client_focus(c);
+        else if (globalconf.focus.client)
+            client_unfocus(globalconf.focus.client);
     }
 
     return 0;
