@@ -636,9 +636,23 @@ function client.floating.set(c, s)
     end
 end
 
+--- Store floating geometry, without overwriting x/y and width/height
+-- for fullscreen/maximized clients.
 local function store_floating_geometry(c)
     if client.floating.get(c) then
-        client.property.set(c, "floating_geometry", c:geometry())
+        local stored = client.property.get(c, "floating_geometry")
+        local update = c:geometry()
+        if stored then
+            if c.fullscreen or c.maximized_horizontal then
+                update.width = stored.width
+                update.x = stored.x
+            end
+            if c.fullscreen or c.maximized_vertical then
+                update.height = stored.height
+                update.y = stored.y
+            end
+        end
+        client.property.set(c, "floating_geometry", update)
     end
 end
 
