@@ -641,18 +641,35 @@ end
 local function store_floating_geometry(c)
     if client.floating.get(c) then
         local stored = client.property.get(c, "floating_geometry")
+        local stored_by_screen = client.property.get(c, "floating_geometry_by_screen") or {}
         local update = c:geometry()
-        if stored then
-            if c.fullscreen or c.maximized_horizontal then
-                update.width = stored.width
-                update.x = stored.x
+        local update_screen = update
+
+        local ignore_fullscreen_maximized = function(c, update, stored)
+            if stored then
+                if c.fullscreen or c.maximized_horizontal then
+                    update.width = stored.width
+                    update.x = stored.x
+                end
+                if c.fullscreen or c.maximized_vertical then
+                    update.height = stored.height
+                    update.y = stored.y
+                end
             end
-            if c.fullscreen or c.maximized_vertical then
-                update.height = stored.height
-                update.y = stored.y
-            end
+            return update
         end
+        update = ignore_fullscreen_maximized(c, update, stored)
         client.property.set(c, "floating_geometry", update)
+
+        -- Update "by screen" setting only if not changing to a new screen.
+        if not stored_by_screen.last_screen then
+            stored_by_screen.last_screen = c.screen
+        end
+        if stored_by_screen.last_screen == c.screen then
+            stored_by_screen[c.screen] = ignore_fullscreen_maximized(
+                c, update_screen, stored_by_screen[c.screen])
+            client.property.set(c, "floating_geometry_by_screen", stored_by_screen)
+        end
     end
 end
 
@@ -660,12 +677,25 @@ end
 capi.client.connect_signal("new", function(c)
     local function store_init_geometry(c)
         client.property.set(c, "floating_geometry", c:geometry())
+        client.property.set(c, "floating_geometry_by_screen", {[c.screen]=c:geometry()})
         c:disconnect_signal("property::border_width", store_init_geometry)
     end
     c:connect_signal("property::border_width", store_init_geometry)
 end)
 
 capi.client.connect_signal("property::geometry", store_floating_geometry)
+
+--- Restore floating geometry on screen changes.
+local function restore_floating_geometry(c, oldscreen)
+    local stored = client.property.get(c, "floating_geometry_by_screen") or {}
+    if stored[c.screen] then
+        c:geometry(stored[c.screen])
+    end
+    -- Indicate that it is OK to update/set it.
+    stored.last_screen = c.screen
+    client.property.set(c, "floating_geometry_by_screen", stored)
+end
+capi.client.connect_signal("property::screen", restore_floating_geometry)
 
 --- Return if a client has a fixe size or not.
 -- @client c The client.
@@ -1046,6 +1076,7 @@ end
 
 -- Register standards signals
 capi.client.add_signal("property::floating_geometry")
+capi.client.add_signal("property::floating_geometry_by_screen")
 capi.client.add_signal("property::floating")
 capi.client.add_signal("property::dockable")
 capi.client.add_signal("marked")
