@@ -670,6 +670,7 @@ capi.tag.connect_signal("request::select", tag.viewonly)
 
 capi.tag.add_signal("property::hide")
 capi.tag.add_signal("property::icon")
+capi.tag.add_signal("property::icon_only")
 capi.tag.add_signal("property::layout")
 capi.tag.add_signal("property::mwfact")
 capi.tag.add_signal("property::ncol")
