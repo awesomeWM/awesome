@@ -160,7 +160,11 @@ function tasklist.new(screen, filter, buttons, style, update_function, base_widg
     capi.client.connect_signal("property::icon_name", u)
     capi.client.connect_signal("property::icon", u)
     capi.client.connect_signal("property::skip_taskbar", u)
-    capi.client.connect_signal("property::screen", u)
+    capi.client.connect_signal("property::screen", function(c, old_screen)
+        if screen == c.screen or screen == old_screen then
+            u()
+        end
+    end)
     capi.client.connect_signal("property::hidden", u)
     capi.client.connect_signal("tagged", u)
     capi.client.connect_signal("untagged", u)

@@ -175,10 +175,10 @@ function taglist.new(screen, filter, buttons, style, update_function, base_widge
     tag.attached_connect_signal(screen, "property::screen", ut)
     tag.attached_connect_signal(screen, "property::index", ut)
     tag.attached_connect_signal(screen, "property::urgent", ut)
-    capi.client.connect_signal("property::screen", function(c)
-        -- If client change screen, refresh it anyway since we don't from
-        -- which screen it was coming :-)
-        u(screen)
+    capi.client.connect_signal("property::screen", function(c, old_screen)
+        if screen == c.screen or screen == old_screen then
+            u(screen)
+        end
     end)
     capi.client.connect_signal("tagged", uc)
     capi.client.connect_signal("untagged", uc)
