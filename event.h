@@ -33,11 +33,13 @@ void luaA_emit_refresh(void);
 
 /* objects/client.c */
 void client_focus_refresh(void);
+void client_geometry_commit(void);
 
 static inline int
 awesome_refresh(void)
 {
     luaA_emit_refresh();
+    client_geometry_commit();
     banning_refresh();
     stack_refresh();
     client_focus_refresh();

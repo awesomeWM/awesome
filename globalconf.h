@@ -149,6 +149,8 @@ typedef struct
     xcb_colormap_t default_cmap;
     /** Do we have to reban clients? */
     bool need_lazy_banning;
+    /** Do we have to handle new geometries for clients? */
+    bool need_geometry_commit;
     /** Tag list */
     tag_array_t tags;
     /** List of registered xproperties */

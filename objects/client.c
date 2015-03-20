@@ -794,12 +794,94 @@ client_apply_size_hints(client_t *c, area_t geometry)
     return geometry;
 }
 
+/** Commit pending geometry changed.
+ */
+void
+client_geometry_commit()
+{
+    if (!globalconf.need_geometry_commit)
+        return;
+
+    globalconf.need_geometry_commit = false;
+
+    lua_State *L = globalconf_get_lua_State();
+    foreach(_c, globalconf.clients)
+    {
+        client_t *c = *_c;
+        if (!c->need_geometry_commit)
+            continue;
+
+        bool hide_titlebars = c->fullscreen;
+        area_t geometry = c->geometry;
+
+        /* Ignore all spurious enter/leave notify events */
+        client_ignore_enterleave_events();
+
+        /* Configure the client for its new size */
+        area_t real_geometry = geometry;
+        if (!hide_titlebars)
+        {
+            real_geometry.x = c->titlebar[CLIENT_TITLEBAR_LEFT].size;
+            real_geometry.y = c->titlebar[CLIENT_TITLEBAR_TOP].size;
+            real_geometry.width -= c->titlebar[CLIENT_TITLEBAR_LEFT].size;
+            real_geometry.width -= c->titlebar[CLIENT_TITLEBAR_RIGHT].size;
+            real_geometry.height -= c->titlebar[CLIENT_TITLEBAR_TOP].size;
+            real_geometry.height -= c->titlebar[CLIENT_TITLEBAR_BOTTOM].size;
+        } else {
+            real_geometry.x = 0;
+            real_geometry.y = 0;
+        }
+
+        xcb_configure_window(globalconf.connection, c->frame_window,
+                XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
+                (uint32_t[]) { geometry.x, geometry.y, geometry.width, geometry.height });
+        xcb_configure_window(globalconf.connection, c->window,
+                XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
+                (uint32_t[]) { real_geometry.x, real_geometry.y, real_geometry.width, real_geometry.height });
+
+        if(c->need_geometry_commit_send_notice)
+            /* We are moving without changing the size, see ICCCM 4.2.3 */
+            client_send_configure(c);
+
+        client_restore_enterleave_events();
+
+        /* Update all titlebars */
+        for (client_titlebar_t bar = CLIENT_TITLEBAR_TOP; bar < CLIENT_TITLEBAR_COUNT; bar++) {
+            if (c->titlebar[bar].drawable == NULL && c->titlebar[bar].size == 0)
+                continue;
+
+            luaA_object_push(L, c);
+            drawable_t *drawable = titlebar_get_drawable(L, c, -1, bar);
+            luaA_object_push_item(L, -1, drawable);
+
+            area_t area = titlebar_get_area(c, bar);
+
+            /* Convert to global coordinates */
+            area.x += geometry.x;
+            area.y += geometry.y;
+            if (hide_titlebars)
+                area.width = area.height = 0;
+            drawable_set_geometry(L, -1, area);
+
+            /* Pop the client and the drawable */
+            lua_pop(L, 2);
+        }
+    }
+}
+
+static void
+client_need_geometry_commit(client_t *c, bool send_notice)
+{
+    globalconf.need_geometry_commit = true;
+    c->need_geometry_commit = true;
+    c->need_geometry_commit_send_notice = send_notice;
+}
+
 static void
 client_resize_do(client_t *c, area_t geometry, bool force_notice, bool honor_hints)
 {
     lua_State *L = globalconf_get_lua_State();
     bool send_notice = force_notice;
-    bool hide_titlebars = c->fullscreen;
     screen_t *new_screen = screen_getbycoord(geometry.x, geometry.y);
 
     if (honor_hints)
@@ -813,36 +895,7 @@ client_resize_do(client_t *c, area_t geometry, bool force_notice, bool honor_hin
     area_t old_geometry = c->geometry;
     c->geometry = geometry;
 
-    /* Ignore all spurious enter/leave notify events */
-    client_ignore_enterleave_events();
-
-    /* Configure the client for its new size */
-    area_t real_geometry = geometry;
-    if (!hide_titlebars)
-    {
-        real_geometry.x = c->titlebar[CLIENT_TITLEBAR_LEFT].size;
-        real_geometry.y = c->titlebar[CLIENT_TITLEBAR_TOP].size;
-        real_geometry.width -= c->titlebar[CLIENT_TITLEBAR_LEFT].size;
-        real_geometry.width -= c->titlebar[CLIENT_TITLEBAR_RIGHT].size;
-        real_geometry.height -= c->titlebar[CLIENT_TITLEBAR_TOP].size;
-        real_geometry.height -= c->titlebar[CLIENT_TITLEBAR_BOTTOM].size;
-    } else {
-        real_geometry.x = 0;
-        real_geometry.y = 0;
-    }
-
-    xcb_configure_window(globalconf.connection, c->frame_window,
-            XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
-            (uint32_t[]) { geometry.x, geometry.y, geometry.width, geometry.height });
-    xcb_configure_window(globalconf.connection, c->window,
-            XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
-            (uint32_t[]) { real_geometry.x, real_geometry.y, real_geometry.width, real_geometry.height });
-
-    if(send_notice)
-        /* We are moving without changing the size, see ICCCM 4.2.3 */
-        client_send_configure(c);
-
-    client_restore_enterleave_events();
+    client_need_geometry_commit(c, send_notice);
 
     luaA_object_push(L, c);
     luaA_object_emit_signal(L, -1, "property::geometry", 0);
@@ -857,28 +910,6 @@ client_resize_do(client_t *c, area_t geometry, bool force_notice, bool honor_hin
     lua_pop(L, 1);
 
     screen_client_moveto(c, new_screen, false);
-
-    /* Update all titlebars */
-    for (client_titlebar_t bar = CLIENT_TITLEBAR_TOP; bar < CLIENT_TITLEBAR_COUNT; bar++) {
-        if (c->titlebar[bar].drawable == NULL && c->titlebar[bar].size == 0)
-            continue;
-
-        luaA_object_push(L, c);
-        drawable_t *drawable = titlebar_get_drawable(L, c, -1, bar);
-        luaA_object_push_item(L, -1, drawable);
-
-        area_t area = titlebar_get_area(c, bar);
-
-        /* Convert to global coordinates */
-        area.x += geometry.x;
-        area.y += geometry.y;
-        if (hide_titlebars)
-            area.width = area.height = 0;
-        drawable_set_geometry(L, -1, area);
-
-        /* Pop the client and the drawable */
-        lua_pop(L, 2);
-    }
 }
 
 /** Resize client window.
