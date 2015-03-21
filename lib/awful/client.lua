@@ -10,6 +10,7 @@
 -- Grab environment we need
 local util = require("awful.util")
 local tag = require("awful.tag")
+local timer = require("gears.timer")
 local pairs = pairs
 local type = type
 local ipairs = ipairs
@@ -35,6 +36,8 @@ do
         __newindex = error -- Just to be sure in case anything ever does this
     })
 end
+-- we use require("awful.layout") inside functions to prevent circular dependencies.
+local layout
 local client = {}
 
 -- Private data
@@ -636,10 +639,22 @@ function client.floating.set(c, s)
     end
 end
 
+
+local ignore_floating_geometry_for_client = {}
+
+--- Is a client considered to be floating (via property and layout)?
+local handle_floating_geometry = function(c)
+    layout = layout or require("awful.layout")
+    return (client.property.get(c, "floating")  -- really floating clients.
+        or layout.get(c.screen) == layout.suit.floating)
+        and not ignore_floating_geometry_for_client[c]
+end
+
 --- Store floating geometry, without overwriting x/y and width/height
--- for fullscreen/maximized clients.
+-- for fullscreen/maximized clients.  This gets done for floating clients
+-- and the floating layout.
 local function store_floating_geometry(c)
-    if client.floating.get(c) then
+    if handle_floating_geometry(c) then
         local stored = client.property.get(c, "floating_geometry")
         local stored_by_screen = client.property.get(c, "floating_geometry_by_screen") or {}
         local update = c:geometry()
@@ -662,9 +677,6 @@ local function store_floating_geometry(c)
         client.property.set(c, "floating_geometry", update)
 
         -- Update "by screen" setting only if not changing to a new screen.
-        if not stored_by_screen.last_screen then
-            stored_by_screen.last_screen = c.screen
-        end
         if stored_by_screen.last_screen == c.screen then
             stored_by_screen[c.screen] = ignore_fullscreen_maximized(
                 c, update_screen, stored_by_screen[c.screen])
@@ -677,7 +689,10 @@ end
 capi.client.connect_signal("new", function(c)
     local function store_init_geometry(c)
         client.property.set(c, "floating_geometry", c:geometry())
-        client.property.set(c, "floating_geometry_by_screen", {[c.screen]=c:geometry()})
+        client.property.set(c, "floating_geometry_by_screen", {
+            [c.screen]=c:geometry(),
+            last_screen=c.screen
+        })
         c:disconnect_signal("property::border_width", store_init_geometry)
     end
     c:connect_signal("property::border_width", store_init_geometry)
@@ -685,17 +700,66 @@ end)
 
 capi.client.connect_signal("property::geometry", store_floating_geometry)
 
---- Restore floating geometry on screen changes.
-local function restore_floating_geometry(c, oldscreen)
+--- Restore floating geometry.
+-- @client c
+-- @int oldscreen Old screen (not used).
+local in_restore_floating_geometry = false
+local function restore_floating_geometry(c)
     local stored = client.property.get(c, "floating_geometry_by_screen") or {}
     if stored[c.screen] then
         c:geometry(stored[c.screen])
     end
-    -- Indicate that it is OK to update/set it.
+    client.property.set(c, "floating_geometry_by_screen", stored)
+end
+
+--- Restore floating geometry on screen changes.
+-- @client c
+-- @tparam int oldscreen
+local function restore_floating_geometry_on_screen(c, oldscreen)
+    restore_floating_geometry(c)
+    -- Indicate that it is OK to update/set it (via geometry signal).
+    local stored = client.property.get(c, "floating_geometry_by_screen") or {}
     stored.last_screen = c.screen
     client.property.set(c, "floating_geometry_by_screen", stored)
 end
-capi.client.connect_signal("property::screen", restore_floating_geometry)
+capi.client.connect_signal("property::screen", restore_floating_geometry_on_screen)
+
+--- Restore floating geometry when switching to the floating layout.
+-- @tparam tag t
+local function restore_floating_geometry_for_tag(t)
+    layout = layout or require("awful.layout")
+    if tag.getproperty(t, "layout") == layout.suit.floating then
+        for k, c in pairs(client.visible(s)) do
+            if handle_floating_geometry(c) then
+                restore_floating_geometry(c)
+            end
+        end
+    end
+end
+-- Attach to screen's arrange signal delayed, because awful.layout gets loaded
+-- later.
+timer.delayed_call(function ()
+    for s = 1, capi.screen.count() do
+        tag.attached_connect_signal(s, "property::layout", restore_floating_geometry_for_tag)
+    end
+end)
+
+--- Use property signals to
+-- a) ignore resize events through ewmh responding to request::*
+-- b) restore the geometry.
+capi.client.connect_signal("property::maximized_horizontal", function (c)
+    ignore_floating_geometry_for_client[c] = c.maximized_horizontal
+    if not c.maximized_horizontal then restore_floating_geometry(c) end
+end)
+capi.client.connect_signal("property::maximized_vertical", function (c)
+    ignore_floating_geometry_for_client[c] = c.maximized_vertical
+    if not c.maximized_vertical then restore_floating_geometry(c) end
+end)
+capi.client.connect_signal("property::fullscreen", function (c)
+    ignore_floating_geometry_for_client[c] = c.fullscreen
+    if not c.fullscreen then restore_floating_geometry(c) end
+end)
+
 
 --- Return if a client has a fixe size or not.
 -- @client c The client.
