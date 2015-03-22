@@ -128,9 +128,13 @@ struct client_t
         /** The drawable for this bar. */
         drawable_t *drawable;
     } titlebar[CLIENT_TITLEBAR_COUNT];
-    /** Client's geometry needs to be committed. */
-    bool need_geometry_commit;
-    bool need_geometry_commit_send_notice;
+    struct
+    {
+        /** Client's geometry needs to be committed. */
+        bool needed;
+        /** A notice has to be send (internally). */
+        bool send_notice;
+    } geometry_refresh;
 };
 
 ARRAY_FUNCS(client_t *, client, DO_NOTHING)

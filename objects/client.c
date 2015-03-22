@@ -794,28 +794,27 @@ client_apply_size_hints(client_t *c, area_t geometry)
     return geometry;
 }
 
-/** Commit pending geometry changed.
+/** Commit pending geometry changes.
  */
 void
-client_geometry_commit()
+client_geometry_refresh()
 {
-    if (!globalconf.need_geometry_commit)
+    if (!globalconf.need_geometry_refresh)
         return;
 
-    globalconf.need_geometry_commit = false;
+    globalconf.need_geometry_refresh = false;
 
-    lua_State *L = globalconf_get_lua_State();
+    /* Ignore all spurious enter/leave notify events */
+    client_ignore_enterleave_events();
+
     foreach(_c, globalconf.clients)
     {
         client_t *c = *_c;
-        if (!c->need_geometry_commit)
+        if (!c->geometry_refresh.needed)
             continue;
 
         bool hide_titlebars = c->fullscreen;
         area_t geometry = c->geometry;
-
-        /* Ignore all spurious enter/leave notify events */
-        client_ignore_enterleave_events();
 
         /* Configure the client for its new size */
         area_t real_geometry = geometry;
@@ -839,42 +838,19 @@ client_geometry_commit()
                 XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
                 (uint32_t[]) { real_geometry.x, real_geometry.y, real_geometry.width, real_geometry.height });
 
-        if(c->need_geometry_commit_send_notice)
+        if(c->geometry_refresh.send_notice)
             /* We are moving without changing the size, see ICCCM 4.2.3 */
             client_send_configure(c);
-
-        client_restore_enterleave_events();
-
-        /* Update all titlebars */
-        for (client_titlebar_t bar = CLIENT_TITLEBAR_TOP; bar < CLIENT_TITLEBAR_COUNT; bar++) {
-            if (c->titlebar[bar].drawable == NULL && c->titlebar[bar].size == 0)
-                continue;
-
-            luaA_object_push(L, c);
-            drawable_t *drawable = titlebar_get_drawable(L, c, -1, bar);
-            luaA_object_push_item(L, -1, drawable);
-
-            area_t area = titlebar_get_area(c, bar);
-
-            /* Convert to global coordinates */
-            area.x += geometry.x;
-            area.y += geometry.y;
-            if (hide_titlebars)
-                area.width = area.height = 0;
-            drawable_set_geometry(L, -1, area);
-
-            /* Pop the client and the drawable */
-            lua_pop(L, 2);
-        }
     }
+    client_restore_enterleave_events();
 }
 
 static void
-client_need_geometry_commit(client_t *c, bool send_notice)
+client_need_geometry_refresh(client_t *c, bool send_notice)
 {
-    globalconf.need_geometry_commit = true;
-    c->need_geometry_commit = true;
-    c->need_geometry_commit_send_notice = send_notice;
+    globalconf.need_geometry_refresh = true;
+    c->geometry_refresh.needed = true;
+    c->geometry_refresh.send_notice = send_notice;
 }
 
 static void
@@ -882,6 +858,7 @@ client_resize_do(client_t *c, area_t geometry, bool force_notice, bool honor_hin
 {
     lua_State *L = globalconf_get_lua_State();
     bool send_notice = force_notice;
+    bool hide_titlebars = c->fullscreen;
     screen_t *new_screen = screen_getbycoord(geometry.x, geometry.y);
 
     if (honor_hints)
@@ -895,7 +872,7 @@ client_resize_do(client_t *c, area_t geometry, bool force_notice, bool honor_hin
     area_t old_geometry = c->geometry;
     c->geometry = geometry;
 
-    client_need_geometry_commit(c, send_notice);
+    client_need_geometry_refresh(c, send_notice);
 
     luaA_object_push(L, c);
     luaA_object_emit_signal(L, -1, "property::geometry", 0);
@@ -910,6 +887,28 @@ client_resize_do(client_t *c, area_t geometry, bool force_notice, bool honor_hin
     lua_pop(L, 1);
 
     screen_client_moveto(c, new_screen, false);
+
+    /* Update all titlebars */
+    for (client_titlebar_t bar = CLIENT_TITLEBAR_TOP; bar < CLIENT_TITLEBAR_COUNT; bar++) {
+        if (c->titlebar[bar].drawable == NULL && c->titlebar[bar].size == 0)
+            continue;
+
+        luaA_object_push(L, c);
+        drawable_t *drawable = titlebar_get_drawable(L, c, -1, bar);
+        luaA_object_push_item(L, -1, drawable);
+
+        area_t area = titlebar_get_area(c, bar);
+
+        /* Convert to global coordinates */
+        area.x += geometry.x;
+        area.y += geometry.y;
+        if (hide_titlebars)
+            area.width = area.height = 0;
+        drawable_set_geometry(L, -1, area);
+
+        /* Pop the client and the drawable */
+        lua_pop(L, 2);
+    }
 }
 
 /** Resize client window.
