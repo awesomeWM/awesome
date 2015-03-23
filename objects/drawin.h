@@ -40,6 +40,11 @@ struct drawin_t
     drawable_t *drawable;
     /** The window geometry. */
     area_t geometry;
+    struct
+    {
+        /** Drawin's opacity needs to be committed. */
+        bool opacity;
+    } property_refresh;
 };
 
 ARRAY_FUNCS(drawin_t *, drawin, DO_NOTHING)

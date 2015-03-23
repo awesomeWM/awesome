@@ -70,15 +70,25 @@ typedef enum
     window_type_t type;
 
 /** Window structure */
-typedef struct
+typedef struct window_t
 {
     WINDOW_OBJECT_HEADER
+    /** Properties needed to be committed/refreshed.
+     * Common to drawin and client. */
+    struct
+    {
+        /** Window's opacity needs to be committed. */
+        bool opacity;
+    } property_refresh;
 } window_t;
 
 lua_class_t window_class;
 
+ARRAY_FUNCS(window_t *, window, DO_NOTHING)
+
 void window_class_setup(lua_State *);
 
+void window_properties_refresh(void);
 void window_set_opacity(lua_State *, int, double);
 void window_set_border_width(lua_State *, int, int);
 int luaA_window_get_type(lua_State *, window_t *);

@@ -131,10 +131,12 @@ struct client_t
     struct
     {
         /** Client's geometry needs to be committed. */
-        bool needed;
+        bool geometry;
         /** A notice has to be send (internally). */
         bool send_notice;
-    } geometry_refresh;
+        /** Client's opacity needs to be committed. */
+        bool opacity;
+    } property_refresh;
 };
 
 ARRAY_FUNCS(client_t *, client, DO_NOTHING)

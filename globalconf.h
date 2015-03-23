@@ -55,12 +55,14 @@ typedef struct button_t button_t;
 typedef struct client_t client_t;
 typedef struct tag tag_t;
 typedef struct xproperty xproperty_t;
+typedef struct window_t window_t;
 
 ARRAY_TYPE(button_t *, button)
 ARRAY_TYPE(tag_t *, tag)
 ARRAY_TYPE(screen_t *, screen)
 ARRAY_TYPE(client_t *, client)
 ARRAY_TYPE(drawin_t *, drawin)
+ARRAY_TYPE(window_t *, window)
 ARRAY_TYPE(xproperty_t, xproperty)
 
 /** Main configuration structure */
@@ -149,8 +151,10 @@ typedef struct
     xcb_colormap_t default_cmap;
     /** Do we have to reban clients? */
     bool need_lazy_banning;
-    /** Do we have to handle new geometries for clients? */
-    bool need_geometry_refresh;
+    /** Do we have to handle changed properties (e.g. geometry) for clients? */
+    bool need_client_properties_refresh;
+    /** List of clients and drawins which need properties to be committed. */
+    window_array_t need_properties_refresh;
     /** Tag list */
     tag_array_t tags;
     /** List of registered xproperties */
