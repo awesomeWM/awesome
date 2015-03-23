@@ -56,8 +56,6 @@ if(NOT LDOC_EXECUTABLE)
 endif()
 # theme graphics
 a_find_program(CONVERT_EXECUTABLE convert TRUE)
-# doxygen
-include(FindDoxygen)
 # pkg-config
 include(FindPkgConfig)
 # lua
@@ -278,8 +276,7 @@ set(AWESOME_CONFIGURE_FILES
     config.h.in
     docs/config.ld.in
     awesomerc.lua.in
-    awesome-version-internal.h.in
-    awesome.doxygen.in)
+    awesome-version-internal.h.in)
 
 macro(a_configure_file file)
     string(REGEX REPLACE ".in\$" "" outfile ${file})

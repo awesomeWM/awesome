@@ -225,14 +225,6 @@ if(GENERATE_MANPAGES)
 endif()
 # }}}
 
-# {{{ Doxygen
-if(DOXYGEN_EXECUTABLE)
-    add_custom_target(doc
-        COMMAND ${DOXYGEN_EXECUTABLE} awesome.doxygen
-        WORKING_DIRECTORY ${BUILD_DIR})
-endif()
-# }}}
-
 # {{{ Lua API Documentation
 if(GENERATE_DOC)
     if(NOT BUILD_DIR STREQUAL SOURCE_DIR)
