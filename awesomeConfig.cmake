@@ -265,31 +265,44 @@ set(AWESOME_THEMES_PATH      ${AWESOME_DATA_PATH}/themes)
 # }}}
 
 # {{{ Configure files
+file(GLOB_RECURSE awesome_c_configure_files RELATIVE
+    ${SOURCE_DIR}
+    ${SOURCE_DIR}/*.c
+    ${SOURCE_DIR}/*.h
+    ${SOURCE_DIR}/*/*.c
+    ${SOURCE_DIR}/*/*.h)
 file(GLOB_RECURSE awesome_lua_configure_files RELATIVE
     ${SOURCE_DIR}
-    ${SOURCE_DIR}/lib/*.lua.in
-    ${SOURCE_DIR}/docs/capi/*.lua.in
-    ${SOURCE_DIR}/docs/*.md
-    ${SOURCE_DIR}/themes/*/*.lua.in)
+    ${SOURCE_DIR}/lib/*.lua
+    ${SOURCE_DIR}/themes/*/*.lua)
 set(AWESOME_CONFIGURE_FILES
     ${awesome_lua_configure_files}
-    config.h.in
-    docs/config.ld.in
-    awesomerc.lua.in
-    awesome-version-internal.h.in)
-
-macro(a_configure_file file)
-    string(REGEX REPLACE ".in\$" "" outfile ${file})
-    message(STATUS "Configuring ${outfile}")
-    configure_file(${SOURCE_DIR}/${file}
-                   ${BUILD_DIR}/${outfile}
-                   ESCAPE_QUOTE
-                   @ONLY)
-endmacro()
+    config.h
+    docs/config.ld
+    awesomerc.lua
+    awesome-version-internal.h)
 
 foreach(file ${AWESOME_CONFIGURE_FILES})
-    a_configure_file(${file})
+    configure_file(${SOURCE_DIR}/${file}
+                   ${BUILD_DIR}/${file}
+                   ESCAPE_QUOTE
+                   @ONLY)
 endforeach()
 #}}}
+
+# {{{ Copy additional files
+file(GLOB_RECURSE awesome_md_docs RELATIVE
+    ${SOURCE_DIR}
+    ${SOURCE_DIR}/docs/*.md)
+set(AWESOME_ADDITIONAL_FILES
+    ${awesome_md_docs})
+
+foreach(file ${AWESOME_ADDITIONAL_FILES})
+    configure_file(${SOURCE_DIR}/${file}
+                   ${BUILD_DIR}/${file}
+                   COPYONLY)
+endforeach()
+#}}}
+
 
 # vim: filetype=cmake:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80:foldmethod=marker
