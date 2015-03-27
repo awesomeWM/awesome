@@ -15,7 +15,6 @@ endif()
 include(awesomeConfig.cmake)
 
 include_directories(
-    ${SOURCE_DIR}
     ${BUILD_DIR}
     ${AWESOME_COMMON_REQUIRED_INCLUDE_DIRS}
     ${AWESOME_REQUIRED_INCLUDE_DIRS}
@@ -36,45 +35,45 @@ set(AWE_DOC_FILES
     ${SOURCE_DIR}/LICENSE)
 
 set(AWE_SRCS
-    ${SOURCE_DIR}/awesome.c
-    ${SOURCE_DIR}/banning.c
-    ${SOURCE_DIR}/color.c
-    ${SOURCE_DIR}/dbus.c
-    ${SOURCE_DIR}/draw.c
-    ${SOURCE_DIR}/event.c
-    ${SOURCE_DIR}/ewmh.c
-    ${SOURCE_DIR}/keygrabber.c
-    ${SOURCE_DIR}/luaa.c
-    ${SOURCE_DIR}/mouse.c
-    ${SOURCE_DIR}/mousegrabber.c
-    ${SOURCE_DIR}/property.c
-    ${SOURCE_DIR}/root.c
-    ${SOURCE_DIR}/selection.c
-    ${SOURCE_DIR}/spawn.c
-    ${SOURCE_DIR}/stack.c
-    ${SOURCE_DIR}/strut.c
-    ${SOURCE_DIR}/systray.c
-    ${SOURCE_DIR}/xwindow.c
-    ${SOURCE_DIR}/xkb.c
-    ${SOURCE_DIR}/common/atoms.c
-    ${SOURCE_DIR}/common/backtrace.c
-    ${SOURCE_DIR}/common/buffer.c
-    ${SOURCE_DIR}/common/luaclass.c
-    ${SOURCE_DIR}/common/lualib.c
-    ${SOURCE_DIR}/common/luaobject.c
-    ${SOURCE_DIR}/common/util.c
-    ${SOURCE_DIR}/common/version.c
-    ${SOURCE_DIR}/common/xcursor.c
-    ${SOURCE_DIR}/common/xembed.c
-    ${SOURCE_DIR}/common/xutil.c
-    ${SOURCE_DIR}/objects/button.c
-    ${SOURCE_DIR}/objects/client.c
-    ${SOURCE_DIR}/objects/drawable.c
-    ${SOURCE_DIR}/objects/drawin.c
-    ${SOURCE_DIR}/objects/key.c
-    ${SOURCE_DIR}/objects/screen.c
-    ${SOURCE_DIR}/objects/tag.c
-    ${SOURCE_DIR}/objects/window.c)
+    ${BUILD_DIR}/awesome.c
+    ${BUILD_DIR}/banning.c
+    ${BUILD_DIR}/color.c
+    ${BUILD_DIR}/dbus.c
+    ${BUILD_DIR}/draw.c
+    ${BUILD_DIR}/event.c
+    ${BUILD_DIR}/ewmh.c
+    ${BUILD_DIR}/keygrabber.c
+    ${BUILD_DIR}/luaa.c
+    ${BUILD_DIR}/mouse.c
+    ${BUILD_DIR}/mousegrabber.c
+    ${BUILD_DIR}/property.c
+    ${BUILD_DIR}/root.c
+    ${BUILD_DIR}/selection.c
+    ${BUILD_DIR}/spawn.c
+    ${BUILD_DIR}/stack.c
+    ${BUILD_DIR}/strut.c
+    ${BUILD_DIR}/systray.c
+    ${BUILD_DIR}/xwindow.c
+    ${BUILD_DIR}/xkb.c
+    ${BUILD_DIR}/common/atoms.c
+    ${BUILD_DIR}/common/backtrace.c
+    ${BUILD_DIR}/common/buffer.c
+    ${BUILD_DIR}/common/luaclass.c
+    ${BUILD_DIR}/common/lualib.c
+    ${BUILD_DIR}/common/luaobject.c
+    ${BUILD_DIR}/common/util.c
+    ${BUILD_DIR}/common/version.c
+    ${BUILD_DIR}/common/xcursor.c
+    ${BUILD_DIR}/common/xembed.c
+    ${BUILD_DIR}/common/xutil.c
+    ${BUILD_DIR}/objects/button.c
+    ${BUILD_DIR}/objects/client.c
+    ${BUILD_DIR}/objects/drawable.c
+    ${BUILD_DIR}/objects/drawin.c
+    ${BUILD_DIR}/objects/key.c
+    ${BUILD_DIR}/objects/screen.c
+    ${BUILD_DIR}/objects/tag.c
+    ${BUILD_DIR}/objects/window.c)
 
 set(AWE_MAN_SRCS
     ${SOURCE_DIR}/manpages/awesome.1.txt
