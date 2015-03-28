@@ -95,7 +95,8 @@ xwindow_configure(xcb_window_t win, area_t geometry, int border)
     ce.border_width = border;
     ce.above_sibling = XCB_NONE;
     ce.override_redirect = false;
-    xcb_send_event(globalconf.connection, false, win, XCB_EVENT_MASK_STRUCTURE_NOTIFY, (char *) &ce);
+    xcb_send_event(globalconf.connection, false, win,
+                   XCB_EVENT_MASK_STRUCTURE_NOTIFY, (char *) &ce);
 }
 
 /** Grab or ungrab buttons on a window.
@@ -154,7 +155,8 @@ xwindow_grabkeys(xcb_window_t win, key_array_t *keys)
  * \param win The window
  * \return A cookie for xwindow_get_opacity_from_reply().
  */
-xcb_get_property_cookie_t xwindow_get_opacity_unchecked(xcb_window_t win)
+xcb_get_property_cookie_t
+xwindow_get_opacity_unchecked(xcb_window_t win)
 {
     return xcb_get_property_unchecked(globalconf.connection, false, win,
                                       _NET_WM_WINDOW_OPACITY, XCB_ATOM_CARDINAL, 0L, 1L);
