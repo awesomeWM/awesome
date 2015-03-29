@@ -1030,6 +1030,37 @@ function client.run_or_raise(cmd, matcher, merge)
     util.spawn(cmd)
 end
 
+--- Get a matching transient_for client (if any).
+-- @client c The client.
+-- @tparam function matcher A function that should return true, if
+--   a matching parent client is found.
+-- @treturn client.client|nil The matching parent client or nil.
+function client.get_transient_for_matching(c, matcher)
+    local tc = c.transient_for
+    while tc do
+        if matcher(tc) then
+            return tc
+        end
+        tc = tc.transient_for
+    end
+    return nil
+end
+
+--- Is a client transient for another one?
+-- @client c The child client (having transient_for).
+-- @client c2 The parent client to check.
+-- @treturn client.client|nil The parent client or nil.
+function client.is_transient_for(c, c2)
+    local tc = c
+    while tc.transient_for do
+        if tc.transient_for == c2 then
+            return tc
+        end
+        tc = tc.transient_for
+    end
+    return nil
+end
+
 -- Register standards signals
 capi.client.add_signal("property::floating_geometry")
 capi.client.add_signal("property::floating")
