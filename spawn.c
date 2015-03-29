@@ -19,6 +19,14 @@
  *
  */
 
+/** awesome core API
+ *
+ * @author Julien Danjou &lt;julien@danjou.info&gt;
+ * @copyright 2008-2009 Julien Danjou
+ * @release @AWESOME_VERSION@
+ * @module awesome
+ */
+
 #include "spawn.h"
 
 #include <unistd.h>
@@ -237,10 +245,30 @@ spawn_init(void)
                                                   spawn_monitor_event,
                                                   NULL, NULL);
 
+    /** For some reason the application aborted startup
+     * @param arg Table which only got the "id" key set
+     * @signal spawn::canceled
+     */
     signal_add(&global_signals, "spawn::canceled");
+    /** When one of the fields from the @{spawn::initiated} table changes
+     * @param arg Table which describes the spawn event
+     * @signal spawn::change
+     */
     signal_add(&global_signals, "spawn::change");
+    /** An application finished starting
+     * @param arg Table which only got the "id" key set
+     * @signal spawn::completed
+     */
     signal_add(&global_signals, "spawn::completed");
+    /** When a new client is beginning to start
+     * @param arg Table which describes the spawn event
+     * @signal spawn::initiated
+     */
     signal_add(&global_signals, "spawn::initiated");
+    /** An application started a spawn event but didn't start in time.
+     * @param arg Table which only got the "id" key set
+     * @signal spawn::timeout
+     */
     signal_add(&global_signals, "spawn::timeout");
 }
 
@@ -310,12 +338,11 @@ parse_command(lua_State *L, int idx)
 /** Spawn a program.
  * This function is multi-head (Zaphod) aware and will set display to
  * the right screen according to mouse position.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack
- * \luastack
- * \lparam The command to launch.
- * \lparam Use startup-notification, true or false, default to true.
- * \lreturn Process ID if everything is OK, or an error string if an error occured.
+ *
+ * @param cmd The command to launch.
+ * @param use_sn Use startup-notification, true or false, default to true.
+ * @return Process ID if everything is OK, or an error string if an error occured.
+ * @function spawn
  */
 int
 luaA_spawn(lua_State *L)

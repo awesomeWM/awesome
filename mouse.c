@@ -19,12 +19,31 @@
  *
  */
 
+/** awesome mouse API
+ * @author Julien Danjou &lt;julien@danjou.info&gt;
+ * @copyright 2008-2009 Julien Danjou
+ * @release @AWESOME_VERSION@
+ * @module mouse
+ */
+
 #include "mouse.h"
 #include "common/util.h"
 #include "globalconf.h"
 #include "objects/client.h"
 #include "objects/drawin.h"
 #include "objects/screen.h"
+
+/** Mouse library.
+ *
+ * @field screen Mouse screen number.
+ * @table mouse
+ */
+
+/** A table with X and Y coordinates.
+ * @field x X coordinate.
+ * @field y Y coordinate.
+ * @table coords_table
+ */
 
 /** Get the pointer position.
  * \param window The window to get position on.
@@ -174,8 +193,13 @@ luaA_mouse_pushstatus(lua_State *L, int x, int y, uint16_t mask)
 }
 
 /** Get or set the mouse coords.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
+ *
+ * @tparam coords_table coords_table None or a table with x and y keys as mouse
+ *  coordinates.
+ * @tparam boolean silent Disable mouse::enter or mouse::leave events that
+ *  could be triggered by the pointer when moving.
+ * @treturn coords_table A table with mouse coordinates.
+ * @function coords
  */
 static int
 luaA_mouse_coords(lua_State *L)
@@ -212,11 +236,10 @@ luaA_mouse_coords(lua_State *L)
     return luaA_mouse_pushstatus(L, mouse_x, mouse_y, mask);
 }
 
-/** Get the client which is under the pointer.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- * \luastack
- * \lreturn A client or nil.
+/** Get the client or any object which is under the pointer.
+ *
+ * @treturn client.client|nil A client or nil.
+ * @function object_under_pointer
  */
 static int
 luaA_mouse_object_under_pointer(lua_State *L)

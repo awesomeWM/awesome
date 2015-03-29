@@ -292,7 +292,7 @@ function tag.gettags(s)
     end
 
     table.sort(tags, function(a, b)
-        return (tag.getproperty(a, "index") or 9999) < (tag.getproperty(b, "index") or 9999) 
+        return (tag.getproperty(a, "index") or 9999) < (tag.getproperty(b, "index") or 9999)
     end)
     return tags
 end

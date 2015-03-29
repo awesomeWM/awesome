@@ -20,12 +20,44 @@
  *
  */
 
+/** awesome key API
+ *
+ * Furthermore to the classes described here, one can also use signals as
+ * described in @{signals}.
+ *
+ * Some signal names are starting with a dot. These dots are artefacts from
+ * the documentation generation, you get the real signal name by
+ * removing the starting dot.
+ *
+ * @author Julien Danjou &lt;julien@danjou.info&gt;
+ * @copyright 2008-2009 Julien Danjou
+ * @release @AWESOME_VERSION@
+ * @classmod key
+ */
+
 #include "objects/key.h"
 #include "common/xutil.h"
 #include "keyresolv.h"
 
 /* XStringToKeysym() and XKeysymToString */
 #include <X11/Xlib.h>
+
+/** Key object.
+ *
+ * @field key The key to press to triggers an event.
+ * @field keysym Same as key, but return the name of the key symbol. It can
+ *   be identical to key, but for characters like '.' it will return 'period'.
+ * @field modifiers The modifier key that should be pressed while the key is
+ *   pressed. An array with all the modifiers. Valid modifiers are: Any, Mod1,
+ *   Mod2, Mod3, Mod4, Mod5, Shift, Lock and Control.
+ * @table key
+ */
+
+/** Get the number of instances.
+ *
+ * @return The number of key objects alive.
+ * @function instances
+ */
 
 static void
 luaA_keystore(lua_State *L, int ud, const char *str, ssize_t len)
@@ -232,9 +264,21 @@ key_class_setup(lua_State *L)
                             (lua_class_propfunc_t) luaA_key_get_modifiers,
                             (lua_class_propfunc_t) luaA_key_set_modifiers);
 
+    /**
+     * @signal .press
+     */
     signal_add(&key_class.signals, "press");
+    /**
+     * @signal property::key
+     */
     signal_add(&key_class.signals, "property::key");
+    /**
+     * @signal property::modifiers
+     */
     signal_add(&key_class.signals, "property::modifiers");
+    /**
+     * @signal .release
+     */
     signal_add(&key_class.signals, "release");
 }
 
