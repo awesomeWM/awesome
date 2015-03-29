@@ -79,7 +79,17 @@ local function tasklist_label(c, args)
     else
         name = name .. (util.escape(c.name) or util.escape("<untitled>"))
     end
-    if capi.client.focus == c then
+    local focused = capi.client.focus == c
+    -- Handle transient_for: the first parent that does not skip the taskbar
+    -- is considered to be focused, if the real client has skip_taskbar.
+    if not focused and capi.client.focus and capi.client.focus.skip_taskbar
+        and client.get_transient_for_matching(capi.client.focus,
+                                              function(c)
+                                                  return not c.skip_taskbar
+                                              end) == c then
+        focused = true
+    end
+    if focused then
         bg = bg_focus
         text = text .. "<span color='"..fg_focus.."'>"..name.."</span>"
         bg_image = bg_image_focus
