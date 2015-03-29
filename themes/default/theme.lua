@@ -91,7 +91,7 @@ theme.layout_dwindle = "@AWESOME_THEMES_PATH@/default/layouts/dwindlew.png"
 
 theme.awesome_icon = "@AWESOME_ICON_PATH@/awesome16.png"
 
--- Define the icon theme for application icons. If not set then the icons 
+-- Define the icon theme for application icons. If not set then the icons
 -- from /usr/share/icons and /usr/share/icons/hicolor will be used.
 theme.icon_theme = nil
 

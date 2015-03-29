@@ -60,7 +60,7 @@ end
 
 --- Change the layout of the current tag.
 -- @param i Relative index.
--- @param s The screen number. 
+-- @param s The screen number.
 -- @param[opt] layouts A table of layouts.
 function layout.inc(i, s, layouts)
     local t = tag.selected(s)
