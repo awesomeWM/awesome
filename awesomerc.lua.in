@@ -434,12 +434,18 @@ client.connect_signal("manage", function (c)
     end
 end)
 
--- Enable sloppy focus
+-- Enable sloppy focus.
+local sloppy_last_coords = {x=nil, y=nil}
 client.connect_signal("mouse::enter", function(c)
+    local mcoords = mouse.coords()
     if awful.layout.get(c.screen) ~= awful.layout.suit.magnifier
-        and awful.client.focus.filter(c) then
-        client.focus = c
+            and awful.client.focus.filter(c) then
+        -- Skip focusing the client if the mouse wasn't moved.
+        if mcoords.x ~= sloppy_last_coords.x or mcoords.y ~= sloppy_last_coords.y then
+            client.focus = c
+        end
     end
+    sloppy_last_coords = mcoords
 end)
 
 client.connect_signal("focus", function(c) c.border_color = beautiful.border_focus end)
