@@ -71,8 +71,10 @@ function completion.shell(command, cur_pos, ncomp, shell)
     local i = 1
     local comptype = "file"
 
-    -- do nothing if we are on a letter, i.e. not at len + 1 or on a space
-    if cur_pos ~= #command + 1 and command:sub(cur_pos, cur_pos) ~= " " then
+    -- Do nothing if we are on a letter, i.e. not at len + 1 or on a space,
+    -- which might be escaped.
+    if cur_pos ~= #command + 1 and (command:sub(cur_pos, cur_pos) ~= " "
+        or command:sub(cur_pos-1, cur_pos-1) == "\\") then
         return command, cur_pos
     elseif #command == 0 then
         return command, cur_pos
