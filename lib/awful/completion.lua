@@ -81,7 +81,11 @@ function completion.shell(command, cur_pos, ncomp, shell)
     end
 
     while wend <= #command do
-        wend = command:find(" ", wstart)
+        wend, nextw = command:find(" +", wstart)
+        -- Skip escaped spaces.
+        while wend and command:sub(wend-1, wend-1) == "\\" do
+            wend, nextw = command:find(" +", wend + 1)
+        end
         if not wend then wend = #command + 1 end
         table.insert(words, command:sub(wstart, wend - 1))
         if cur_pos >= wstart and cur_pos <= wend + 1 then
@@ -89,8 +93,10 @@ function completion.shell(command, cur_pos, ncomp, shell)
             cword_end = wend
             cword_index = i
         end
-        wstart = wend + 1
-        i = i + 1
+        if nextw then
+            wstart = nextw + 1
+            i = i + 1
+        end
     end
 
     if cword_index == 1 and not string.find(words[cword_index], "/") then
