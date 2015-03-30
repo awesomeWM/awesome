@@ -549,11 +549,12 @@ function prompt.run(args, textbox, exe_callback, completion_callback, history_pa
                                 text = command_before_comp, text_color = inv_col, cursor_color = cur_col,
                                 cursor_pos = cur_pos, cursor_ul = cur_ul, selectall = selectall,
                                 prompt = prettyprompt })
+                            ncomp = 1
                             return
                         end
 
                         ncomp = ncomp - 2
-                    elseif ncomp == 1 then
+                    elseif ncomp == 1 and not command_before_comp then
                         command_before_comp = command
                         cur_pos_before_comp = cur_pos
                     end
