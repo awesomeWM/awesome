@@ -99,9 +99,11 @@ function completion.shell(command, cur_pos, ncomp, shell)
     local shell_cmd
     if shell == "zsh" or (not shell and os.getenv("SHELL"):match("zsh$")) then
         if comptype == "file" then
-            -- NOTE: wrapped in ${} to make `${"~/.X"}*` work (`"~/X."*` does not).
-            shell_cmd = "/usr/bin/env zsh -c 'local -a res; res=( "
-                .. string.format('${%q}', words[cword_index]) .. "* ); print -ln -- ${res[@]}'"
+            -- NOTE: ${~:-"..."} turns on GLOB_SUBST, useful for expansion of
+            -- "~/" ($HOME).  ${:-"foo"} is the string "foo" as var.
+            shell_cmd = "/usr/bin/env zsh -c 'local -a res; res=( ${~:-"
+                .. string.format('%q', words[cword_index]) .. "}* ); "
+                .. "print -ln -- ${res[@]}'"
         else
             -- check commands, aliases, builtins, functions and reswords
             shell_cmd = "/usr/bin/env zsh -c 'local -a res; "..
