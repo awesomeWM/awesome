@@ -827,7 +827,7 @@ luaA_dbus_emit_signal(lua_State *L)
 
     if(nargs % 2 != 0)
     {
-        luaA_warn(L, "your D-Bus signal emiting method has wrong number of arguments");
+        luaA_warn(L, "your D-Bus signal emitting method has wrong number of arguments");
         dbus_message_unref(msg);
         lua_pushboolean(L, 0);
         return 1;
