@@ -397,6 +397,23 @@ a_dbus_process_request(DBusConnection *dbus_connection, DBusMessage *msg)
     if(dbus_message_iter_init(msg, &iter))
         nargs += a_dbus_message_iter(L, &iter);
 
+    if (dbus_message_get_reply_serial(msg))
+    {
+        char buf[27];
+        snprintf(buf, sizeof(buf), "reply %d%c", dbus_message_get_reply_serial(msg), '\0');
+        signal_t *sigfound = signal_array_getbyid(&dbus_signals,
+                                                  a_strhash((const unsigned char *) &buf));
+        /* emit signals */
+        if(sigfound) {
+            /* copy stack */
+            for (int i = 0; i < nargs; i++) {
+                lua_pushvalue(L, -nargs);
+            }
+            signal_object_emit(L, &dbus_signals, (const char *) &buf, nargs);
+        }
+
+    }
+
     if(dbus_message_get_no_reply(msg))
     {
         signal_t *sigfound = signal_array_getbyid(&dbus_signals,
@@ -846,6 +863,63 @@ luaA_dbus_emit_signal(lua_State *L)
     return 1;
 }
 
+/** Call a method on the D-Bus.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ * \luastack
+ * \lparam A string indicating if we are using system or session bus.
+ * \lparam A string with the dbus destination.
+ * \lparam A string with the dbus path.
+ * \lparam A string with the dbus interface.
+ * \lparam A string with the dbus method name.
+ * \lparam type of 1st arg
+ * \lparam 1st arg value
+ * \lparam type of 2nd arg
+ * \lparam 2nd arg value
+ * ... etc
+ */
+static int
+luaA_dbus_call_method(lua_State *L)
+{
+    const char *bus_name = luaL_checkstring(L, 1);
+    const char *destination = luaL_checkstring(L, 2);
+    const char *path = luaL_checkstring(L, 3);
+    const char *itface = luaL_checkstring(L, 4);
+    const char *method = luaL_checkstring(L, 5);
+    DBusConnection *dbus_connection = a_dbus_bus_getbyname(bus_name);
+    DBusMessage* msg = dbus_message_new_method_call(destination, path, itface, method);
+    if (msg == NULL) {
+        luaA_warn(L, "your D-Bus method calling method error'd");
+        return 0;
+    }
+
+    DBusMessageIter iter;
+    dbus_message_iter_init_append(msg, &iter);
+    int top = lua_gettop(L);
+    int nargs = top - 5;
+
+    if(nargs % 2 != 0)
+    {
+        luaA_warn(L, "your D-Bus method calling method has wrong number of arguments");
+        dbus_message_unref(msg);
+        return 0;
+    }
+    for(int i = 6; i < top; i += 2) {
+        if(!a_dbus_convert_value(L, i, &iter))
+        {
+            luaA_warn(L, "your D-Bus method calling method has bad argument type");
+            dbus_message_unref(msg);
+            return 0;
+        }
+    }
+    uint32_t serial = 0;
+    dbus_connection_send(dbus_connection, msg, &serial);
+    dbus_message_unref(msg);
+    dbus_connection_flush(dbus_connection);
+    lua_pushnumber(L, serial);
+    return 1;
+}
+
 const struct luaL_Reg awesome_dbus_lib[] =
 {
     { "request_name", luaA_dbus_request_name },
@@ -855,6 +929,7 @@ const struct luaL_Reg awesome_dbus_lib[] =
     { "connect_signal", luaA_dbus_connect_signal },
     { "disconnect_signal", luaA_dbus_disconnect_signal },
     { "emit_signal", luaA_dbus_emit_signal },
+    { "call_method", luaA_dbus_call_method },
     { "__index", luaA_default_index },
     { "__newindex", luaA_default_newindex },
     { NULL, NULL }
