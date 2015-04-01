@@ -797,7 +797,7 @@ luaA_dbus_disconnect_signal(lua_State *L)
  * \lparam A string indicating if we are using system or session bus.
  * \lparam A string with the dbus path.
  * \lparam A string with the dbus interface.
- * \lparam A string with the dbus method name.
+ * \lparam A string with the dbus signal name.
  * \lparam type of 1st arg
  * \lparam 1st arg value
  * \lparam type of 2nd arg
