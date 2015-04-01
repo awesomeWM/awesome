@@ -819,6 +819,10 @@ luaA_dbus_emit_signal(lua_State *L)
     const char *name = luaL_checkstring(L, 4);
     DBusConnection *dbus_connection = a_dbus_bus_getbyname(bus_name);
     DBusMessage* msg = dbus_message_new_signal(path, itface, name);
+    if (msg == NULL) {
+        luaA_warn(L, "your D-Bus signal emitting method error'd");
+        return 0;
+    }
 
     DBusMessageIter iter;
     dbus_message_iter_init_append(msg, &iter);
