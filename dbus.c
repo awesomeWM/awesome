@@ -847,6 +847,7 @@ luaA_dbus_emit_signal(lua_State *L)
     }
     dbus_connection_send(dbus_connection, msg, NULL);
     dbus_message_unref(msg);
+    dbus_connection_flush(dbus_connection);
     lua_pushboolean(L, 1);
     return 1;
 }
