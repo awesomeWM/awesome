@@ -60,7 +60,7 @@ end
 
 --- Change the layout of the current tag.
 -- @param i Relative index.
--- @param s The screen number. 
+-- @param s The screen number.
 -- @param[opt] layouts A table of layouts.
 function layout.inc(i, s, layouts)
     local t = tag.selected(s)
@@ -169,7 +169,9 @@ local function arrange_on_tagged(c, tag)
     layout.arrange(tag.screen)
     if not capi.client.focus or not capi.client.focus:isvisible() then
         local c = client.focus.history.get(tag.screen, 0)
-        if c then capi.client.focus = c end
+        if c then
+            c:emit_signal("request::activate", "layout.arrange_on_tagged")
+        end
     end
 end
 local function arrange_tag(t)
