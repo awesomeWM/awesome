@@ -391,6 +391,12 @@ a_dbus_process_request(DBusConnection *dbus_connection, DBusMessage *msg)
     lua_pushstring(L, s);
     lua_setfield(L, -2, "member");
 
+    s = dbus_message_get_sender(msg);
+    if(s != NULL) {
+        lua_pushstring(L, s);
+        lua_setfield(L, -2, "sender");
+    }
+
     if(dbus_connection == dbus_connection_system)
         lua_pushliteral(L, "system");
     else
