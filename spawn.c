@@ -264,7 +264,7 @@ spawn_callback(gpointer user_data)
  * \return The argv array for the new process.
  */
 static gchar **
-parse_command(lua_State *L, int idx)
+parse_command(lua_State *L, int idx, GError **error)
 {
     gchar **argv = NULL;
     idx = luaA_absindex(L, idx);
@@ -272,7 +272,7 @@ parse_command(lua_State *L, int idx)
     if (lua_isstring(L, idx))
     {
         const char *cmd = luaL_checkstring(L, idx);
-        if(!g_shell_parse_argv(cmd, NULL, &argv, NULL))
+        if(!g_shell_parse_argv(cmd, NULL, &argv, error))
             return NULL;
     }
     else if (lua_istable(L, idx))
@@ -328,11 +328,15 @@ luaA_spawn(lua_State *L)
     if(lua_gettop(L) >= 2)
         use_sn = luaA_checkboolean(L, 2);
 
-    argv = parse_command(L, 1);
+    GError *error = NULL;
+    argv = parse_command(L, 1, &error);
     if(!argv || !argv[0])
     {
         g_strfreev(argv);
-        return 0;
+        /* push error on stack */
+        lua_pushfstring(L, "spawn: parse error: %s", error->message);
+        g_error_free(error);
+        return 1;
     }
 
     SnLauncherContext *context = NULL;
@@ -350,7 +354,6 @@ luaA_spawn(lua_State *L)
         sn_launcher_context_setup_child_process(context);
     }
 
-    GError *error = NULL;
     retval = g_spawn_async(NULL, argv, NULL, G_SPAWN_SEARCH_PATH,
                            spawn_callback, NULL, &pid, &error);
     g_strfreev(argv);
