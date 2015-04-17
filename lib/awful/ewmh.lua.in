@@ -106,11 +106,21 @@ local function screen_change(window)
                     if data[window][reqtype].x then
                         new_x = to.x + data[window][reqtype].x - from.x
                         if new_x > to.x + to.width then new_x = to.x end
+                        -- Move window if it overlaps the new area to the right.
+                        if new_x + data[window][reqtype].width > to.x + to.width then
+                            new_x = to.x + to.width - data[window][reqtype].width
+                        end
+                        if new_x < to.x then new_x = to.x end
                         data[window][reqtype].x = new_x
                     end
                     if data[window][reqtype].y then
                         new_y = to.y + data[window][reqtype].y - from.y
                         if new_y > to.y + to.width then new_y = to.y end
+                        -- Move window if it overlaps the new area to the bottom.
+                        if new_y + data[window][reqtype].height > to.y + to.height then
+                            new_y = to.y + to.height - data[window][reqtype].height
+                        end
+                        if new_y < to.y then new_y = to.y end
                         data[window][reqtype].y = new_y
                     end
                 end
