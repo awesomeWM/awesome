@@ -37,6 +37,7 @@
 #include "selection.h"
 #include "spawn.h"
 #include "systray.h"
+#include "xkb.h"
 
 #include <lua.h>
 #include <lauxlib.h>
@@ -359,6 +360,9 @@ luaA_init(xdgHandle* xdg)
         { "get_xproperty", luaA_get_xproperty },
         { "__index", luaA_awesome_index },
         { "__newindex", luaA_default_newindex },
+        { "xkb_set_layout_group", luaA_xkb_set_layout_group},
+        { "xkb_get_layout_group", luaA_xkb_get_layout_group},
+        { "xkb_get_group_names", luaA_xkb_get_group_names},
         { NULL, NULL }
     };
 
@@ -473,6 +477,8 @@ luaA_init(xdgHandle* xdg)
     signal_add(&global_signals, "debug::newindex::miss");
     signal_add(&global_signals, "systray::update");
     signal_add(&global_signals, "wallpaper_changed");
+    signal_add(&global_signals, "xkb::map_changed");
+    signal_add(&global_signals, "xkb::group_changed");
     signal_add(&global_signals, "refresh");
     signal_add(&global_signals, "startup");
     signal_add(&global_signals, "exit");

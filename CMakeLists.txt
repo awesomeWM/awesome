@@ -56,6 +56,7 @@ set(AWE_SRCS
     ${SOURCE_DIR}/strut.c
     ${SOURCE_DIR}/systray.c
     ${SOURCE_DIR}/xwindow.c
+    ${SOURCE_DIR}/xkb.c
     ${SOURCE_DIR}/common/atoms.c
     ${SOURCE_DIR}/common/backtrace.c
     ${SOURCE_DIR}/common/buffer.c
