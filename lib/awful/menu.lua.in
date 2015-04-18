@@ -422,6 +422,9 @@ function menu:add(args, index)
         table.insert(self.items, item)
         self.layout:add(item._background)
     end
+    if self.wibox then
+        set_size(self)
+    end
     return item
 end
 
@@ -450,6 +453,9 @@ function menu:delete(num)
             self.active_child = nil
         end
         table.remove(self.child, num)
+    end
+    if self.wibox then
+        set_size(self)
     end
 end
 
