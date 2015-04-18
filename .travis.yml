@@ -1,0 +1,75 @@
+language: c
+env:
+  matrix:
+    # Note: luarocks does not work with Lua 5.0.
+    # - LUA=5.0 LUAPKG=50  LUALIB=/usr/lib/liblua50.so
+    # Disable 5.1 for now: no need to test both 5.1 and 5.2 currently.
+    # - LUA=5.1 LUAPKG=5.1 LUALIB=/usr/lib/x86_64-linux-gnu/liblua5.1.so
+    - LUA=5.2 LUAPKG=5.2 LUALIB=/usr/lib/x86_64-linux-gnu/liblua5.2.so
+install:
+  # Travis boilerplate: the apt-get cache might be out of date.
+  - sudo apt-get update -qq
+
+  # Do not install recommended packages with apt-get.
+  - echo 'APT::Install-Recommends "false";' | sudo tee /etc/apt/apt.conf.d/no-recommends
+
+  # Install dependencies according to:
+  # apt-cache showsrc awesome | grep -E '^(Version|Build-Depends)'
+  - sudo apt-get install libcairo2-dev xmlto asciidoc libpango1.0-dev cmake gperf luadoc libxcb-xtest0-dev libxcb-icccm4-dev libxcb-randr0-dev libxcb-keysyms1-dev libxcb-xinerama0-dev libxcb-image0-dev libev-dev libimlib2-dev libdbus-1-dev libxdg-basedir-dev libstartup-notification0-dev imagemagick libxcb1-dev libxcb-shape0-dev libxcb-util0-dev libxcursor-dev libx11-xcb-dev
+  # Install Lua (per env).
+  - sudo apt-get install liblua${LUAPKG}-dev lua${LUAPKG}
+
+  # For missing libxcb-cursor-dev.
+  - sudo apt-get install -qq xutils-dev libxcb-render-util0-dev gperf
+  - git clone --recursive --depth 1 git://anongit.freedesktop.org/xcb/util-cursor
+  - cd util-cursor
+  - ./autogen.sh && ./configure && sudo make install
+  - sudo ldconfig
+  - cd ..
+
+  # For xcb-proto >= 1.11, required by libxcb.
+  - git clone --recursive --depth 1 git://anongit.freedesktop.org/xcb/proto
+  - cd proto
+  - ./autogen.sh && ./configure && sudo make install
+  - cd ..
+
+  # Updated utils (xorg-macros) for manually building libxcb-xkb-dev.
+  - git clone --recursive --depth 1 git://anongit.freedesktop.org/xorg/util/macros
+  - cd macros
+  - ./autogen.sh && ./configure && sudo make install
+  - export PKG_CONFIG_PATH=/usr/local/share/pkgconfig:$PKG_CONFIG_PATH
+  - export ACLOCAL_PATH=/usr/local/share/aclocal:$ACLOCAL_PATH
+  - cd ..
+  # For missing libxcb-xkb-dev.
+  - git clone --recursive --depth 1 git://anongit.freedesktop.org/xcb/libxcb
+  - cd libxcb
+  - ./autogen.sh && ./configure && sudo make install
+  - sudo ldconfig
+  - cd ..
+
+  # lgi: is too old on travis, install it via luarocks.
+  # - sudo apt-get install -qq lua-lgi
+  - sudo apt-get install -qq gir1.2-pango-1.0
+
+  # Install luarocks (for the selected Lua version).
+  - wget http://keplerproject.github.io/luarocks/releases/luarocks-2.2.1.tar.gz
+  - tar xf luarocks-2.2.1.tar.gz
+  - cd luarocks-2.2.1
+  - ./configure --lua-version=$LUA
+  - sudo make install
+  - cd ..
+
+  - sudo apt-get install -qq libgirepository1.0-dev
+  - sudo luarocks install lgi
+
+  # Install busted for "make check".
+  - sudo luarocks install busted
+
+  # Install ldoc for building docs.
+  - sudo luarocks install ldoc
+
+script:
+  - export CMAKE_ARGS="-DLUA_LIBRARY=${LUALIB} -DLUA_INCLUDE_DIR=/usr/include/lua${LUAPKG}"
+  - make
+  - sudo make install
+  - awesome --version

@@ -53,6 +53,9 @@ Please report any issues you may find on [our bugtracker](https://github.com/awe
 You can submit pull requests on the [github repository](https://github.com/awesomeWM/awesome).
 Please read the @{02-contributing.md} guide for any coding, documentation or patch guidelines.
 
+## Status
+[![Build Status](https://travis-ci.org/awesomeWM/awesome.svg?branch=master)](https://travis-ci.org/awesomeWM/awesome)
+
 ## License
 
 The project is licensed under GNU General Publice License v2 or later.
