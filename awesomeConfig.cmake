@@ -140,7 +140,9 @@ pkg_check_modules(AWESOME_REQUIRED REQUIRED
     xcb-util>=0.3.8
     xcb-keysyms>=0.3.4
     xcb-icccm>=0.3.8
-    xcb-xkb>=1.11
+    # NOTE: it's not clear what version is required, but 1.10 works at least.
+    # See https://github.com/awesomeWM/awesome/pull/149#issuecomment-94208356.
+    xcb-xkb
     cairo-xcb
     libstartup-notification-1.0>=0.10
     xproto>=7.0.15
