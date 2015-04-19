@@ -102,7 +102,7 @@ end
 
 local function item_position(_menu, child)
     local in_dir, other, a, b = 0, 0, "height", "width"
-    local dir = _menu.layout.get_dir and _menu.layout:get_dir() or "y"
+    local dir = _menu.layout.dir or "y"
     if dir == "x" then  a, b = b, a  end
 
     local in_dir, other = 0, _menu[b]
@@ -163,7 +163,7 @@ end
 
 local function set_size(_menu)
     local in_dir, other, a, b = 0, 0, "height", "width"
-    local dir = _menu.layout.get_dir and _menu.layout:get_dir() or "y"
+    local dir = _menu.layout.dir or "y"
     if dir == "x" then  a, b = b, a  end
     for _, item in ipairs(_menu.items) do
         other = math.max(other, item[b])
@@ -422,6 +422,9 @@ function menu:add(args, index)
         table.insert(self.items, item)
         self.layout:add(item._background)
     end
+    if self.wibox then
+        set_size(self)
+    end
     return item
 end
 
@@ -450,6 +453,9 @@ function menu:delete(num)
             self.active_child = nil
         end
         table.remove(self.child, num)
+    end
+    if self.wibox then
+        set_size(self)
     end
 end
 
