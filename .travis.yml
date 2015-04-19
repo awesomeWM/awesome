@@ -23,27 +23,35 @@ install:
   - sudo apt-get install -qq xutils-dev libxcb-render-util0-dev gperf
   - git clone --recursive --depth 1 git://anongit.freedesktop.org/xcb/util-cursor
   - cd util-cursor
-  - ./autogen.sh && ./configure && sudo make install
+  - ./autogen.sh
+  - ./configure
+  - sudo make install
   - sudo ldconfig
   - cd ..
 
   # For xcb-proto >= 1.11, required by libxcb.
   - git clone --recursive --depth 1 git://anongit.freedesktop.org/xcb/proto
   - cd proto
-  - ./autogen.sh && ./configure && sudo make install
+  - ./autogen.sh
+  - ./configure
+  - sudo make install
   - cd ..
 
   # Updated utils (xorg-macros) for manually building libxcb-xkb-dev.
   - git clone --recursive --depth 1 git://anongit.freedesktop.org/xorg/util/macros
   - cd macros
-  - ./autogen.sh && ./configure && sudo make install
+  - ./autogen.sh
+  - ./configure
+  - sudo make install
   - export PKG_CONFIG_PATH=/usr/local/share/pkgconfig:$PKG_CONFIG_PATH
   - export ACLOCAL_PATH=/usr/local/share/aclocal:$ACLOCAL_PATH
   - cd ..
   # For missing libxcb-xkb-dev.
   - git clone --recursive --depth 1 git://anongit.freedesktop.org/xcb/libxcb
   - cd libxcb
-  - ./autogen.sh && ./configure && sudo make install
+  - ./autogen.sh
+  - ./configure
+  - sudo make install
   - sudo ldconfig
   - cd ..
 
