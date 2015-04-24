@@ -73,7 +73,7 @@ local function animate(self)
     -- Check if the object should be grown or shrinked
     -- the minimum radius is -data[self].factor because:
     -- 1. factor is alway negative when shrinking
-    -- 2. geometry() does not hande negative values
+    -- 2. geometry() does not handle negative values
     if data[self].factor > 0 and r >= data[self].radius
         or data[self].factor < 0 and r <= -data[self].factor then
             data[self].factor = -data[self].factor
