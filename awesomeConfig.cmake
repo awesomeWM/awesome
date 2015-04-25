@@ -188,7 +188,7 @@ else()
 endif()
 
 # Error check
-if(NOT LUA51_FOUND AND NOT LUA50_FOUND) # This is a workaround to a cmake bug
+if(NOT LUA52_FOUND AND NOT LUA51_FOUND AND NOT LUA50_FOUND) # This is a workaround to a cmake bug
     message(FATAL_ERROR "lua library not found")
 endif()
 

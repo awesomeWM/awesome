@@ -1,0 +1,51 @@
+language: c
+
+env:
+  - LUA=5.1
+
+compiler:
+  - gcc
+  # - clang
+
+script:
+  # Included in "make install".
+  # - chroot /debian make -C /awesome check
+  - sudo chroot /mnt/debian /awesome/t/run.sh
+
+before_install:
+#  - sudo apt-get update -qq
+
+install:
+ # NOTE: might not require sudo and could use container based environment
+ #       if debootstrap and fakechroot would be available.
+
+ # Install and setup Debian chroot.
+ # NOTE: used via cache (below).
+ #  - sudo apt-get install -qq debootstrap
+ #  - sudo debootstrap --variant=minbase testing /mnt/debian
+
+ # Download and use cached Debian chroot.
+ # This is built using debootstrap and build-utils/setup-for-debian.sh.
+ - cd /mnt
+ - sudo wget --no-check-certificate http://codeprobe.de/tmp/debian-chroot-awesome-travis-lua$LUA.tar.xz
+ # Contains debian/ folder.
+ - sudo tar xf debian-chroot-awesome-travis-lua$LUA.tar.xz
+ - cd -
+
+ - sudo cp -a . /mnt/debian/awesome
+
+ # Setup Debian chroot.
+ # NOTE: used via cache (above).
+ #  - sudo chroot /mnt/debian /awesome/build-utils/setup-for-debian.sh $LUA
+
+ - sudo mount -t proc proc /mnt/debian/proc
+ - sudo mount -t sysfs sysfs /mnt/debian/sys
+ - sudo cp /etc/hosts /mnt/debian/etc/hosts
+ # For xterm.
+ - sudo mount --bind /dev/pts /mnt/debian/dev/pts
+
+ # Build awesome and install themes etc, e.g.
+ # /usr/local/share/awesome/themes/default/theme.lua.
+ # Use the default target first to create the "build" symlink.
+ - sudo chroot /mnt/debian make -C /awesome
+ - sudo chroot /mnt/debian make -C /awesome install
