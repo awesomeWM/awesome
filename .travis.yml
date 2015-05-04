@@ -78,6 +78,4 @@ install:
 
 script:
   - export CMAKE_ARGS="-DLUA_LIBRARY=${LUALIB} -DLUA_INCLUDE_DIR=/usr/include/lua${LUAPKG}"
-  - make
-  - sudo make install
-  - awesome --version
+  - make && sudo make install && awesome --version
