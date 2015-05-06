@@ -476,7 +476,7 @@ function menu.clients(args, item_args)
                 if not c:isvisible() then
                     tags.viewmore(c:tags(), c.screen)
                 end
-                capi.client.focus = c
+                c:emit_signal("request::activate", "menu.clients")
                 c:raise()
             end,
             c.icon }
