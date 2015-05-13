@@ -348,7 +348,7 @@ end
 function client.focus.byidx(i, c)
     local target = client.next(i, c)
     if target then
-        target:emit_signal("request::activate", "client.focus.byidx", false)
+        target:emit_signal("request::activate", "client.focus.byidx", true)
     end
 end
 
