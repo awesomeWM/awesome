@@ -66,7 +66,9 @@ function screen.focus(_screen)
     capi.mouse.coords(pos, true)
 
     local c = client.focus.history.get(_screen, 0)
-    if c then capi.client.focus = c end
+    if c then
+        c:emit_signal("request::focus", "screen.focus")
+    end
 end
 
 --- Give the focus to a screen, and move pointer, by physical position relative to current screen.

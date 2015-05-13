@@ -165,6 +165,14 @@ function ewmh.activate(c)
     end
 end
 
+--- Focus a window.
+--
+-- @client c The client.
+-- @tparam string context The context where this signal was used.
+function ewmh.focus(c, context)
+    client.focus = c
+end
+
 --- Tag a window with its requested tag
 --
 -- @client c A client to tag
@@ -185,6 +193,7 @@ function ewmh.urgent(c, urgent)
 end
 
 client.connect_signal("request::activate", ewmh.activate)
+client.connect_signal("request::focus", ewmh.focus)
 client.connect_signal("request::tag", ewmh.tag)
 client.connect_signal("request::urgent", ewmh.urgent)
 client.connect_signal("request::maximized_horizontal", maximized_horizontal)

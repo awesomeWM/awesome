@@ -71,7 +71,7 @@ function client.jumpto(c, merge)
     end
 
     -- focus the client
-    capi.client.focus = c
+    c:emit_signal("request::focus", "client.jumpto")
     c:raise()
 end
 
@@ -213,7 +213,9 @@ function client.focus.history.previous()
         s = capi.mouse.screen
     end
     local c = client.focus.history.get(s, 1)
-    if c then capi.client.focus = c end
+    if c then
+        c:emit_signal("request::focus", "client.focus.history.previous")
+    end
 end
 
 --- Get visible clients from a screen.
@@ -303,7 +305,7 @@ function client.focus.bydirection(dir, c)
 
         -- If we found a client to focus, then do it.
         if target then
-            capi.client.focus = cltbl[target]
+            cltbl[target]:emit_signal("request::focus", "client.focus.bydirection")
         end
     end
 end
@@ -335,7 +337,7 @@ function client.focus.global_bydirection(dir, c)
             local target = util.get_rectangle_in_direction(dir, geomtbl, capi.screen[scr].geometry)
 
             if target then
-                capi.client.focus = cltbl[target]
+                cltbl[target]:emit_signal("request::focus", "client.focus.global_bydirection")
             end
         end
     end
@@ -348,7 +350,7 @@ end
 function client.focus.byidx(i, c)
     local target = client.next(i, c)
     if target then
-        capi.client.focus = target
+        target:emit_signal("request::focus", "client.focus.byidx")
     end
 end
 
@@ -403,7 +405,7 @@ function client.swap.global_bydirection(dir, c)
         end
 
         screen.focus(sel.screen)
-        capi.client.focus = sel
+        sel:emit_signal("request::focus", "client.swap.global_bydirection")
     end
 end
 
