@@ -143,6 +143,11 @@ for s = 1, capi.screen.count() do
     }
 end
 
+--- Notification state
+function naughty.is_suspended()
+    return suspended
+end
+
 --- Suspend notifications
 function naughty.suspend()
     suspended = true
