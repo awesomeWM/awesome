@@ -33,12 +33,10 @@ local function update_layout(keyboardlayout)
    keyboardlayout.layout = {};
    local group_names = awesome.xkb_get_group_names();
 
--- typical layout string looks like "pc+us+ru:2+de:3+ba:4+inet"
--- and we want to get only three mathes: "us", "ru:2", "de:3" "ba:4"
--- also please note, that numbers of groups reported by xkb_get_group_names
--- is greater by one of the real group number
-
-
+-- A typical layout string looks like "pc+us+ru:2+de:3+ba:4+inet",
+-- and we want to get only three matches: "us", "ru:2", "de:3" "ba:4".
+-- Please note that numbers of groups reported by xkb_get_group_names
+-- is greater by one than the real group number.
    local first_group = string.match(group_names, "+(%a+)");
    if (not first_group) then
       error ("Failed to get list of keyboard groups");
