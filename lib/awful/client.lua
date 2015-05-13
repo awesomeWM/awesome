@@ -70,9 +70,7 @@ function client.jumpto(c, merge)
         end
     end
 
-    -- focus the client
-    c:emit_signal("request::focus", "client.jumpto")
-    c:raise()
+    c:emit_signal("request::activate", "client.jumpto", true)
 end
 
 --- Get the first client that got the urgent hint.
@@ -214,7 +212,7 @@ function client.focus.history.previous()
     end
     local c = client.focus.history.get(s, 1)
     if c then
-        c:emit_signal("request::focus", "client.focus.history.previous")
+        c:emit_signal("request::activate", "client.focus.history.previous", false)
     end
 end
 
@@ -305,7 +303,7 @@ function client.focus.bydirection(dir, c)
 
         -- If we found a client to focus, then do it.
         if target then
-            cltbl[target]:emit_signal("request::focus", "client.focus.bydirection")
+            cltbl[target]:emit_signal("request::activate", "client.focus.bydirection", false)
         end
     end
 end
@@ -337,7 +335,7 @@ function client.focus.global_bydirection(dir, c)
             local target = util.get_rectangle_in_direction(dir, geomtbl, capi.screen[scr].geometry)
 
             if target then
-                cltbl[target]:emit_signal("request::focus", "client.focus.global_bydirection")
+                cltbl[target]:emit_signal("request::activate", "client.focus.global_bydirection", false)
             end
         end
     end
@@ -350,7 +348,7 @@ end
 function client.focus.byidx(i, c)
     local target = client.next(i, c)
     if target then
-        target:emit_signal("request::focus", "client.focus.byidx")
+        target:emit_signal("request::activate", "client.focus.byidx", false)
     end
 end
 
@@ -405,7 +403,7 @@ function client.swap.global_bydirection(dir, c)
         end
 
         screen.focus(sel.screen)
-        sel:emit_signal("request::focus", "client.swap.global_bydirection")
+        sel:emit_signal("request::activate", "client.swap.global_bydirection", false)
     end
 end
 

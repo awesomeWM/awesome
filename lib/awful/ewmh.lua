@@ -156,21 +156,17 @@ end
 --- Activate a window
 --
 -- @client c A client to use
-function ewmh.activate(c)
-    if awesome.startup or c:isvisible() then
-        client.focus = c
-        c:raise()
-    else
-        c.urgent = true
-    end
-end
-
---- Focus a window.
---
--- @client c The client.
 -- @tparam string context The context where this signal was used.
-function ewmh.focus(c, context)
+-- @tparam boolean raise Should the client be raised?
+function ewmh.activate(c, context, raise)
     client.focus = c
+    if raise then
+        if awesome.startup or c:isvisible() then
+            c:raise()
+        else
+            c.urgent = true
+        end
+    end
 end
 
 --- Tag a window with its requested tag
@@ -193,7 +189,6 @@ function ewmh.urgent(c, urgent)
 end
 
 client.connect_signal("request::activate", ewmh.activate)
-client.connect_signal("request::focus", ewmh.focus)
 client.connect_signal("request::tag", ewmh.tag)
 client.connect_signal("request::urgent", ewmh.urgent)
 client.connect_signal("request::maximized_horizontal", maximized_horizontal)

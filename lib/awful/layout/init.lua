@@ -179,7 +179,7 @@ local function arrange_on_tagged(c, tag)
     if not capi.client.focus or not capi.client.focus:isvisible() then
         local c = client.focus.history.get(tag.screen, 0)
         if c then
-            c:emit_signal("request::focus", "layout.arrange_on_tagged")
+            c:emit_signal("request::activate", "layout.arrange_on_tagged", false)
         end
     end
 end

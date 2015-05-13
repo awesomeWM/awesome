@@ -476,8 +476,7 @@ function menu.clients(args, item_args)
                 if not c:isvisible() then
                     tags.viewmore(c:tags(), c.screen)
                 end
-                c:emit_signal("request::focus", "menu.clients")
-                c:raise()
+                c:emit_signal("request::activate", "menu.clients", true)
             end,
             c.icon }
         if item_args then

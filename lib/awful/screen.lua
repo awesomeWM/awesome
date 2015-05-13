@@ -67,7 +67,7 @@ function screen.focus(_screen)
 
     local c = client.focus.history.get(_screen, 0)
     if c then
-        c:emit_signal("request::focus", "screen.focus")
+        c:emit_signal("request::activate", "screen.focus", false)
     end
 end
 
