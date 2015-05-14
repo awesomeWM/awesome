@@ -55,6 +55,7 @@ set(AWE_SRCS
     ${BUILD_DIR}/systray.c
     ${BUILD_DIR}/xwindow.c
     ${BUILD_DIR}/xkb.c
+    ${BUILD_DIR}/xrdb.c
     ${BUILD_DIR}/common/atoms.c
     ${BUILD_DIR}/common/backtrace.c
     ${BUILD_DIR}/common/buffer.c
@@ -136,6 +137,7 @@ add_custom_target(generated_sources
 file(MAKE_DIRECTORY ${BUILD_DIR}/themes/default)
 file(MAKE_DIRECTORY ${BUILD_DIR}/themes/sky)
 file(MAKE_DIRECTORY ${BUILD_DIR}/themes/zenburn)
+file(MAKE_DIRECTORY ${BUILD_DIR}/themes/xresources)
 add_dependencies(${PROJECT_AWE_NAME} generated_sources)
 # }}}
 
