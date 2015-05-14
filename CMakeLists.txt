@@ -44,7 +44,6 @@ set(AWE_SRCS
     ${SOURCE_DIR}/event.c
     ${SOURCE_DIR}/ewmh.c
     ${SOURCE_DIR}/keygrabber.c
-    ${SOURCE_DIR}/keyresolv.c
     ${SOURCE_DIR}/luaa.c
     ${SOURCE_DIR}/mouse.c
     ${SOURCE_DIR}/mousegrabber.c

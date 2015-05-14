@@ -23,10 +23,13 @@
 #define AWESOME_XKB_H
 
 #include <xcb/xcb.h>
+#include <xkbcommon/xkbcommon.h>
+#include <xkbcommon/xkbcommon-x11.h>
 #include <lua.h>
 
 void event_handle_xkb_notify(xcb_generic_event_t* event);
 void xkb_init(void);
+void xkb_free(void);
 
 int luaA_xkb_set_layout_group(lua_State *L);
 int luaA_xkb_get_layout_group(lua_State *L);

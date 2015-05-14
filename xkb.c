@@ -22,6 +22,8 @@
 #include "xkb.h"
 #include "globalconf.h"
 #include <xcb/xkb.h>
+#include <xkbcommon/xkbcommon.h>
+#include <xkbcommon/xkbcommon-x11.h>
 
 
 /* \brief switch keyboard layout
@@ -114,12 +116,82 @@ luaA_xkb_get_group_names(lua_State *L)
     return 1;
 }
 
+/** Fill globalconf.xkb_state based on connection and context
+*/
+static void
+xkb_fill_state(void)
+{
+    xcb_connection_t *conn = globalconf.connection;
+
+    int32_t device_id = xkb_x11_get_core_keyboard_device_id(conn);
+    if (device_id == -1)
+        fatal("Failed while getting XKB device id");
+    
+    struct xkb_keymap *xkb_keymap = xkb_x11_keymap_new_from_device(
+                                globalconf.xkb_ctx,
+                                conn,
+                                device_id,
+                                XKB_KEYMAP_COMPILE_NO_FLAGS);
+
+
+    if (!xkb_keymap)
+        fatal("Failed while getting XKB keymap from device");
+    
+    globalconf.xkb_state = xkb_x11_state_new_from_device(xkb_keymap,
+                                                         conn,
+                                                         device_id);
+    if (!globalconf.xkb_state)
+        fatal("Failed while getting XKB state from device");
+
+	/* xkb_keymap is no longer referenced directly; decreasing refcount */
+    xkb_keymap_unref(xkb_keymap);
+}
+
+
+/** Loads xkb context, state and keymap to globalconf.
+ * These variables should be freed by xkb_free_keymap() afterwards
+*/
+static void
+xkb_init_keymap(void)
+{
+    globalconf.xkb_ctx = xkb_context_new(XKB_CONTEXT_NO_FLAGS);
+    if (!globalconf.xkb_ctx)
+        fatal("Failed while getting XKB context");
+    
+	xkb_fill_state();
+}
+
+/** Frees xkb context, state and keymap from globalconf.
+ * This should be used when these variables will not be used anymore
+ */
+static void
+xkb_free_keymap(void)
+{
+    xkb_state_unref(globalconf.xkb_state);
+    xkb_context_unref(globalconf.xkb_ctx);
+}
+
+/** Rereads the state of keyboard from X.
+ * This call should be used after changing keyboard layouts or using dead keys
+ */
+static void
+xkb_reload_keymap(void)
+{
+    xkb_state_unref(globalconf.xkb_state);
+	xkb_fill_state();
+}
+
 /** The xkb notify event handler.
  * \param event The event.
  */
-void event_handle_xkb_notify(xcb_generic_event_t* event)
+void
+event_handle_xkb_notify(xcb_generic_event_t* event)
 {
     lua_State *L = globalconf_get_lua_State();
+
+    /* something has changed, reload keymap in case someone pressed dead key */
+    xkb_reload_keymap();
+
     /* The pad0 field of xcb_generic_event_t contains the event sub-type,
      * unfortunately xkb doesn't provide a usable struct for getting this in a
      * nicer way*/
@@ -132,6 +204,7 @@ void event_handle_xkb_notify(xcb_generic_event_t* event)
           {
               signal_object_emit(L, &global_signals, "xkb::map_changed", 0);
           }
+
           break;
         }
       case XCB_XKB_NAMES_NOTIFY:
@@ -142,21 +215,25 @@ void event_handle_xkb_notify(xcb_generic_event_t* event)
       case XCB_XKB_STATE_NOTIFY:
         {
           xcb_xkb_state_notify_event_t *state_notify_event = (void*)event;
+
           if (state_notify_event->changed & XCB_XKB_STATE_PART_GROUP_STATE)
           {
               lua_pushnumber(L, state_notify_event->group);
               signal_object_emit(L, &global_signals, "xkb::group_changed", 1);
           }
+
           break;
         }
     }
 }
 
 /** Initialize XKB support
+ * This call allocates resources, that should be freed by calling xkb_free()
  */
-
-void xkb_init(void)
+void
+xkb_init(void)
 {
+
     /* check that XKB extension present in this X server */
     const xcb_query_extension_reply_t *xkb_r;
     xkb_r = xcb_get_extension_data(globalconf.connection, &xcb_xkb_id);
@@ -182,4 +259,14 @@ void xkb_init(void)
                                   0,
                                   0);
 
+    /* load keymap to use when resolving keypresses */
+    xkb_init_keymap();
+}
+
+/** Frees resources allocated by xkb_init()
+ */
+void
+xkb_free(void)
+{
+    xkb_free_keymap();
 }

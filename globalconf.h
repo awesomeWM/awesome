@@ -148,6 +148,10 @@ typedef struct
     tag_array_t tags;
     /** List of registered xproperties */
     xproperty_array_t xproperties;
+    /* xkb context */
+    struct xkb_context *xkb_ctx;
+    /* xkb state of dead keys on keyboard */
+    struct xkb_state *xkb_state;
 } awesome_t;
 
 extern awesome_t globalconf;

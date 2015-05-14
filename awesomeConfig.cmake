@@ -143,6 +143,8 @@ pkg_check_modules(AWESOME_REQUIRED REQUIRED
     # NOTE: it's not clear what version is required, but 1.10 works at least.
     # See https://github.com/awesomeWM/awesome/pull/149#issuecomment-94208356.
     xcb-xkb
+    xkbcommon
+    xkbcommon-x11
     cairo-xcb
     libstartup-notification-1.0>=0.10
     xproto>=7.0.15
@@ -195,7 +197,8 @@ endif()
 set(AWESOME_REQUIRED_LDFLAGS
     ${AWESOME_COMMON_REQUIRED_LDFLAGS}
     ${AWESOME_REQUIRED_LDFLAGS}
-    ${LUA_LIBRARIES})
+    ${LUA_LIBRARIES}
+    )
 
 set(AWESOME_REQUIRED_INCLUDE_DIRS
     ${AWESOME_COMMON_REQUIRED_INCLUDE_DIRS}

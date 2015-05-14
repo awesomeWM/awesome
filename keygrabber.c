@@ -20,10 +20,13 @@
  */
 
 #include <unistd.h>
+#include <stdio.h>
+#include <stdint.h>
+#include <xkbcommon/xkbcommon.h>
+#include <xkbcommon/xkbcommon-x11.h>
 
 #include "keygrabber.h"
 #include "globalconf.h"
-#include "keyresolv.h"
 
 /** Grab the keyboard.
  * \return True if keyboard was grabbed.
@@ -51,6 +54,19 @@ keygrabber_grab(void)
     return false;
 }
 
+/** Returns, whether the \0-terminated char in UTF8 is control char.
+ * Control characters are either characters without UTF8 representation like XF86MonBrightnessUp
+ * or backspace and the other characters in ASCII table before space
+ *
+ * \param buf input buffer
+ * \return True if the input buffer is control character.
+ */
+static bool
+is_control(char *buf)
+{
+    return (buf[0] >= 0 && buf[0] < 0x20) || buf[0] == 0x7f;
+}
+
 /** Handle keypress event.
  * \param L Lua stack to push the key pressed.
  * \param e Received XKeyEvent.
@@ -59,13 +75,20 @@ keygrabber_grab(void)
 bool
 keygrabber_handlekpress(lua_State *L, xcb_key_press_event_t *e)
 {
-    /* transfer event (keycode + modifiers) to keysym */
-    xcb_keysym_t ksym = keyresolv_get_keysym(e->detail, e->state);
-
     /* convert keysym to string */
     char buf[MAX(MB_LEN_MAX, 32)];
-    if(!keyresolv_keysym_to_string(ksym, buf, countof(buf)))
-        return false;
+
+    /* snprintf-like return value could be used here, but that should not be
+     * necessary, as we have buffer big enough */
+    xkb_state_key_get_utf8(globalconf.xkb_state, e->detail, buf, countof(buf) );
+
+    if (is_control(buf))
+    {
+        /* use text names for control characters */
+        xkb_keysym_t keysym = xkb_state_key_get_one_sym(globalconf.xkb_state, e->detail);
+        xkb_keysym_get_name(keysym, buf, countof(buf) );
+    }
+
 
     luaA_pushmodifiers(L, e->state);
 
@@ -80,6 +103,7 @@ keygrabber_handlekpress(lua_State *L, xcb_key_press_event_t *e)
         lua_pushliteral(L, "release");
         break;
     }
+
 
     return true;
 }
