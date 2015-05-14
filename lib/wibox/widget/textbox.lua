@@ -132,6 +132,7 @@ local function new(text, ignore_markup)
     end
 
     local ctx = PangoCairo.font_map_get_default():create_context()
+    ctx:set_resolution(beautiful.xresources.get_dpi())
     ret._layout = Pango.Layout.new(ctx)
 
     ret:set_ellipsize("end")
