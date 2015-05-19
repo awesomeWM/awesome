@@ -23,6 +23,7 @@ local schar = string.char
 local sbyte = string.byte
 local tcat = table.concat
 local tins = table.insert
+local unpack = unpack or table.unpack -- v5.1: unpack, v5.2: table.unpack
 local naughty = require("naughty.core")
 
 --- Notification library, dbus bindings
