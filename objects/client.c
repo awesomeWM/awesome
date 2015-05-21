@@ -956,10 +956,10 @@ client_set_focusable(lua_State *L, int cidx, bool s)
 {
     client_t *c = luaA_checkudata(L, cidx, &client_class);
 
-    if(c->focusable != s)
+    if(c->focusable != s || !c->focusable_set)
     {
         c->focusable = s;
-        banning_need_update();
+        c->focusable_set = true;
         luaA_object_emit_signal(L, cidx, "property::focusable", 0);
     }
 }
@@ -1901,10 +1901,8 @@ luaA_client_set_focusable(lua_State *L, client_t *c)
 {
     if(lua_isnil(L, -1))
         c->focusable_set = false;
-    else {
-        c->focusable_set = true;
+    else
         client_set_focusable(L, -3, luaA_checkboolean(L, -1));
-    }
     return 0;
 }
 
@@ -2567,6 +2565,7 @@ client_class_setup(lua_State *L)
     signal_add(&client_class.signals, "property::above");
     signal_add(&client_class.signals, "property::below");
     signal_add(&client_class.signals, "property::class");
+    signal_add(&client_class.signals, "property::focusable");
     signal_add(&client_class.signals, "property::fullscreen");
     signal_add(&client_class.signals, "property::geometry");
     signal_add(&client_class.signals, "property::group_window");
