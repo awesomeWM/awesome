@@ -20,8 +20,6 @@
  */
 
 #include <unistd.h>
-#include <stdio.h>
-#include <stdint.h>
 #include <xkbcommon/xkbcommon.h>
 #include <xkbcommon/xkbcommon-x11.h>
 

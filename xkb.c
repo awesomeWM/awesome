@@ -143,7 +143,7 @@ xkb_fill_state(void)
     if (!globalconf.xkb_state)
         fatal("Failed while getting XKB state from device");
 
-	/* xkb_keymap is no longer referenced directly; decreasing refcount */
+    /* xkb_keymap is no longer referenced directly; decreasing refcount */
     xkb_keymap_unref(xkb_keymap);
 }
 
@@ -158,7 +158,7 @@ xkb_init_keymap(void)
     if (!globalconf.xkb_ctx)
         fatal("Failed while getting XKB context");
     
-	xkb_fill_state();
+    xkb_fill_state();
 }
 
 /** Frees xkb context, state and keymap from globalconf.
@@ -172,13 +172,14 @@ xkb_free_keymap(void)
 }
 
 /** Rereads the state of keyboard from X.
- * This call should be used after changing keyboard layouts or using dead keys
+ * This call should be used after receiving NewKeyboardNotify or MapNotify,
+ * as written in http://xkbcommon.org/doc/current/group__x11.html
  */
 static void
 xkb_reload_keymap(void)
 {
     xkb_state_unref(globalconf.xkb_state);
-	xkb_fill_state();
+    xkb_fill_state();
 }
 
 /** The xkb notify event handler.
@@ -189,9 +190,6 @@ event_handle_xkb_notify(xcb_generic_event_t* event)
 {
     lua_State *L = globalconf_get_lua_State();
 
-    /* something has changed, reload keymap in case someone pressed dead key */
-    xkb_reload_keymap();
-
     /* The pad0 field of xcb_generic_event_t contains the event sub-type,
      * unfortunately xkb doesn't provide a usable struct for getting this in a
      * nicer way*/
@@ -200,11 +198,18 @@ event_handle_xkb_notify(xcb_generic_event_t* event)
       case XCB_XKB_NEW_KEYBOARD_NOTIFY:
         {
           xcb_xkb_new_keyboard_notify_event_t *new_keyboard_event = (void*)event;
+
+          xkb_reload_keymap();
+
           if (new_keyboard_event->changed & XCB_XKB_NKN_DETAIL_KEYCODES)
           {
               signal_object_emit(L, &global_signals, "xkb::map_changed", 0);
           }
-
+          break;
+        }
+      case XCB_XKB_MAP_NOTIFY:
+        {
+          xkb_reload_keymap();
           break;
         }
       case XCB_XKB_NAMES_NOTIFY:
@@ -215,6 +220,14 @@ event_handle_xkb_notify(xcb_generic_event_t* event)
       case XCB_XKB_STATE_NOTIFY:
         {
           xcb_xkb_state_notify_event_t *state_notify_event = (void*)event;
+
+          xkb_state_update_mask(globalconf.xkb_state, 
+                                state_notify_event->baseMods,
+                                state_notify_event->latchedMods,
+                                state_notify_event->lockedMods,
+                                state_notify_event->baseGroup,
+                                state_notify_event->latchedGroup,
+                                state_notify_event->lockedGroup);
 
           if (state_notify_event->changed & XCB_XKB_STATE_PART_GROUP_STATE)
           {

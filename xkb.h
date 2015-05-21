@@ -23,8 +23,6 @@
 #define AWESOME_XKB_H
 
 #include <xcb/xcb.h>
-#include <xkbcommon/xkbcommon.h>
-#include <xkbcommon/xkbcommon-x11.h>
 #include <lua.h>
 
 void event_handle_xkb_notify(xcb_generic_event_t* event);
