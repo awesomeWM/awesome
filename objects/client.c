@@ -946,6 +946,24 @@ client_set_sticky(lua_State *L, int cidx, bool s)
     }
 }
 
+/** Set a client focusable, or not.
+ * \param L The Lua VM state.
+ * \param cidx The client index.
+ * \param s Set or not the client's focusable property.
+ */
+static void
+client_set_focusable(lua_State *L, int cidx, bool s)
+{
+    client_t *c = luaA_checkudata(L, cidx, &client_class);
+
+    if(c->focusable != s || !c->focusable_set)
+    {
+        c->focusable = s;
+        c->focusable_set = true;
+        luaA_object_emit_signal(L, cidx, "property::focusable", 0);
+    }
+}
+
 /** Set a client fullscreen, or not.
  * \param L The Lua VM state.
  * \param cidx The client index.
@@ -1879,6 +1897,16 @@ luaA_client_set_icon(lua_State *L, client_t *c)
 }
 
 static int
+luaA_client_set_focusable(lua_State *L, client_t *c)
+{
+    if(lua_isnil(L, -1))
+        c->focusable_set = false;
+    else
+        client_set_focusable(L, -3, luaA_checkboolean(L, -1));
+    return 0;
+}
+
+static int
 luaA_client_set_sticky(lua_State *L, client_t *c)
 {
     client_set_sticky(L, -3, luaA_checkboolean(L, -1));
@@ -2028,8 +2056,11 @@ luaA_client_get_focusable(lua_State *L, client_t *c)
 {
     bool ret;
 
+    if (c->focusable_set)
+        ret = c->focusable;
+
     /* A client can be focused if it doesnt have the "nofocus" hint...*/
-    if (!c->nofocus)
+    else if (!c->nofocus)
         ret = true;
     else
         /* ...or if it knows the WM_TAKE_FOCUS protocol */
@@ -2499,9 +2530,9 @@ client_class_setup(lua_State *L)
                             (lua_class_propfunc_t) luaA_client_get_size_hints,
                             NULL);
     luaA_class_add_property(&client_class, "focusable",
-                            NULL,
+                            (lua_class_propfunc_t) luaA_client_set_focusable,
                             (lua_class_propfunc_t) luaA_client_get_focusable,
-                            NULL);
+                            (lua_class_propfunc_t) luaA_client_set_focusable);
     luaA_class_add_property(&client_class, "shape_bounding",
                             (lua_class_propfunc_t) luaA_client_set_shape_bounding,
                             (lua_class_propfunc_t) luaA_client_get_shape_bounding,
@@ -2534,6 +2565,7 @@ client_class_setup(lua_State *L)
     signal_add(&client_class.signals, "property::above");
     signal_add(&client_class.signals, "property::below");
     signal_add(&client_class.signals, "property::class");
+    signal_add(&client_class.signals, "property::focusable");
     signal_add(&client_class.signals, "property::fullscreen");
     signal_add(&client_class.signals, "property::geometry");
     signal_add(&client_class.signals, "property::group_window");

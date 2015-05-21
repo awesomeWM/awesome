@@ -91,6 +91,10 @@ struct client_t
     bool skip_taskbar;
     /** True if the client cannot have focus */
     bool nofocus;
+    /** True if the client is focusable.  Overrides nofocus, and can be set
+     * from Lua. */
+    bool focusable;
+    bool focusable_set;
     /** Window of the group leader */
     xcb_window_t group_window;
     /** Window holding command needed to start it (session management related) */
