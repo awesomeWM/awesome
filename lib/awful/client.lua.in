@@ -156,10 +156,12 @@ end
 --
 -- @client c The client that has been focused.
 function client.focus.history.add(c)
-    -- Remove the client if its in stack
-    client.focus.history.delete(c)
-    -- Record the client has latest focused
-    table.insert(client.data.focus, 1, c)
+    if client.focus.filter(c) then
+        -- Remove the client if its in stack
+        client.focus.history.delete(c)
+        -- Record the client has latest focused
+        table.insert(client.data.focus, 1, c)
+    end
 end
 
 --- Get the latest focused client for a screen in history.
