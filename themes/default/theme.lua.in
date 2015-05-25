@@ -88,6 +88,10 @@ theme.layout_tile = "@AWESOME_THEMES_PATH@/default/layouts/tilew.png"
 theme.layout_tiletop = "@AWESOME_THEMES_PATH@/default/layouts/tiletopw.png"
 theme.layout_spiral  = "@AWESOME_THEMES_PATH@/default/layouts/spiralw.png"
 theme.layout_dwindle = "@AWESOME_THEMES_PATH@/default/layouts/dwindlew.png"
+theme.layout_cornernw = "@AWESOME_THEMES_PATH@/default/layouts/cornernww.png"
+theme.layout_cornerne = "@AWESOME_THEMES_PATH@/default/layouts/cornernew.png"
+theme.layout_cornersw = "@AWESOME_THEMES_PATH@/default/layouts/cornersww.png"
+theme.layout_cornerse = "@AWESOME_THEMES_PATH@/default/layouts/cornersew.png"
 
 theme.awesome_icon = "@AWESOME_ICON_PATH@/awesome16.png"
 
