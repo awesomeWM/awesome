@@ -164,33 +164,39 @@ end
 
 --- Get the latest focused client for a screen in history.
 --
--- @param screen The screen number to look for.
--- @param idx The index: 0 will return first candidate,
+-- @tparam int screen The screen number to look for.
+-- @tparam int idx The index: 0 will return first candidate,
 --   1 will return second, etc.
--- @return A client.
-function client.focus.history.get(screen, idx)
+-- @tparam function An optional filter.  If no client is found in the first
+--                  iteration, client.focus.filter is used by default to get
+--                  any client.
+-- @treturn client A client.
+function client.focus.history.get(screen, idx, filter)
     -- When this counter is equal to idx, we return the client
     local counter = 0
     local vc = client.visible(screen)
     for k, c in ipairs(client.data.focus) do
         if c.screen == screen then
-            for j, vcc in ipairs(vc) do
-                if vcc == c then
-                    if counter == idx then
-                        return c
+            if not filter or filter(c) then
+                for j, vcc in ipairs(vc) do
+                    if vcc == c then
+                        if counter == idx then
+                            return c
+                        end
+                        -- We found one, increment the counter only.
+                        counter = counter + 1
+                        break
                     end
-                    -- We found one, increment the counter only.
-                    counter = counter + 1
-                    break
                 end
             end
         end
     end
     -- Argh nobody found in history, give the first one visible if there is one
     -- that passes the filter.
+    local filter = filter or client.focus.filter
     if counter == 0 then
         for k, v in ipairs(vc) do
-            if client.focus.filter(v) then
+            if filter(v) then
                 return v
             end
         end
