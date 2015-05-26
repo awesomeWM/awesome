@@ -263,13 +263,27 @@ xkb_init(void)
         fatal("Required xkb extension is not supported");
     }
     unsigned int map = XCB_XKB_EVENT_TYPE_STATE_NOTIFY | XCB_XKB_EVENT_TYPE_MAP_NOTIFY | XCB_XKB_EVENT_TYPE_NEW_KEYBOARD_NOTIFY;
+
+    //
+    // These maps are provided to allow key remapping,
+    // that could be used in awesome
+    //
+    uint16_t map_parts = XCB_XKB_MAP_PART_KEY_TYPES |
+                         XCB_XKB_MAP_PART_KEY_SYMS |
+                         XCB_XKB_MAP_PART_MODIFIER_MAP |
+                         XCB_XKB_MAP_PART_EXPLICIT_COMPONENTS |
+                         XCB_XKB_MAP_PART_KEY_ACTIONS |
+                         XCB_XKB_MAP_PART_KEY_BEHAVIORS |
+                         XCB_XKB_MAP_PART_VIRTUAL_MODS | 
+                         XCB_XKB_MAP_PART_VIRTUAL_MOD_MAP;
+
     xcb_xkb_select_events_checked(globalconf.connection,
                                   XCB_XKB_ID_USE_CORE_KBD,
                                   map,
                                   0,
                                   map,
-                                  0,
-                                  0,
+                                  map_parts,
+                                  map_parts,
                                   0);
 
     /* load keymap to use when resolving keypresses */
