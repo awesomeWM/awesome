@@ -6,6 +6,10 @@ env:
     # Disable 5.1 for now: no need to test both 5.1 and 5.2 currently.
     # - LUA=5.1 LUAPKG=5.1 LUALIB=/usr/lib/x86_64-linux-gnu/liblua5.1.so
     - LUA=5.2 LUAPKG=5.2 LUALIB=/usr/lib/x86_64-linux-gnu/liblua5.2.so
+
+before_install:
+  - cmake --version
+
 install:
   # Travis boilerplate: the apt-get cache might be out of date.
   - sudo apt-get update -qq
