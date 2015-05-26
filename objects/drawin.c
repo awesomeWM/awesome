@@ -360,7 +360,7 @@ luaA_drawin_set_x(lua_State *L, drawin_t *drawin)
 static int
 luaA_drawin_get_x(lua_State *L, drawin_t *drawin)
 {
-    lua_pushnumber(L, drawin->geometry.x);
+    lua_pushinteger(L, drawin->geometry.x);
     return 1;
 }
 
@@ -377,7 +377,7 @@ luaA_drawin_set_y(lua_State *L, drawin_t *drawin)
 static int
 luaA_drawin_get_y(lua_State *L, drawin_t *drawin)
 {
-    lua_pushnumber(L, drawin->geometry.y);
+    lua_pushinteger(L, drawin->geometry.y);
     return 1;
 }
 
@@ -397,7 +397,7 @@ luaA_drawin_set_width(lua_State *L, drawin_t *drawin)
 static int
 luaA_drawin_get_width(lua_State *L, drawin_t *drawin)
 {
-    lua_pushnumber(L, drawin->geometry.width);
+    lua_pushinteger(L, drawin->geometry.width);
     return 1;
 }
 
@@ -417,7 +417,7 @@ luaA_drawin_set_height(lua_State *L, drawin_t *drawin)
 static int
 luaA_drawin_get_height(lua_State *L, drawin_t *drawin)
 {
-    lua_pushnumber(L, drawin->geometry.height);
+    lua_pushinteger(L, drawin->geometry.height);
     return 1;
 }
 

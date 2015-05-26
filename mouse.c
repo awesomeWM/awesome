@@ -113,14 +113,14 @@ luaA_mouse_index(lua_State *L)
          * having lots of lua errors in this case.
          */
         if (globalconf.focus.client)
-            lua_pushnumber(L, screen_get_index(globalconf.focus.client->screen));
+            lua_pushinteger(L, screen_get_index(globalconf.focus.client->screen));
         else
-            lua_pushnumber(L, 1);
+            lua_pushinteger(L, 1);
         return 1;
     }
 
     screen = screen_getbycoord(mouse_x, mouse_y);
-    lua_pushnumber(L, screen_get_index(screen));
+    lua_pushinteger(L, screen_get_index(screen));
     return 1;
 }
 
@@ -152,9 +152,9 @@ int
 luaA_mouse_pushstatus(lua_State *L, int x, int y, uint16_t mask)
 {
     lua_createtable(L, 0, 2);
-    lua_pushnumber(L, x);
+    lua_pushinteger(L, x);
     lua_setfield(L, -2, "x");
-    lua_pushnumber(L, y);
+    lua_pushinteger(L, y);
     lua_setfield(L, -2, "y");
 
     lua_createtable(L, 5, 0);

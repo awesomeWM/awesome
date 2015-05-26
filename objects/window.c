@@ -455,9 +455,9 @@ luaA_window_set_border_width(lua_State *L, window_t *c)
     return 0;
 }
 
-LUA_OBJECT_EXPORT_PROPERTY(window, window_t, window, lua_pushnumber)
+LUA_OBJECT_EXPORT_PROPERTY(window, window_t, window, lua_pushinteger)
 LUA_OBJECT_EXPORT_PROPERTY(window, window_t, border_color, luaA_pushcolor)
-LUA_OBJECT_EXPORT_PROPERTY(window, window_t, border_width, lua_pushnumber)
+LUA_OBJECT_EXPORT_PROPERTY(window, window_t, border_width, lua_pushinteger)
 
 void
 window_class_setup(lua_State *L)

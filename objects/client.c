@@ -1758,7 +1758,7 @@ luaA_client_titlebar_ ## name(lua_State *L)                       \
     }                                                             \
                                                                   \
     luaA_object_push_item(L, 1, titlebar_get_drawable(L, c, 1, index)); \
-    lua_pushnumber(L, c->titlebar[index].size);                   \
+    lua_pushinteger(L, c->titlebar[index].size);                   \
     return 2;                                                     \
 }
 HANDLE_TITLEBAR(top, CLIENT_TITLEBAR_TOP)
@@ -1825,8 +1825,8 @@ luaA_client_apply_size_hints(lua_State *L)
     if (c->size_hints_honor)
         geometry = client_apply_size_hints(c, geometry);
 
-    lua_pushnumber(L, geometry.width);
-    lua_pushnumber(L, geometry.height);
+    lua_pushinteger(L, geometry.width);
+    lua_pushinteger(L, geometry.height);
     return 2;
 }
 
@@ -1989,9 +1989,9 @@ LUA_OBJECT_EXPORT_PROPERTY(client, client_t, machine, lua_pushstring)
 LUA_OBJECT_EXPORT_PROPERTY(client, client_t, role, lua_pushstring)
 LUA_OBJECT_EXPORT_PROPERTY(client, client_t, transient_for, luaA_object_push)
 LUA_OBJECT_EXPORT_PROPERTY(client, client_t, skip_taskbar, lua_pushboolean)
-LUA_OBJECT_EXPORT_PROPERTY(client, client_t, leader_window, lua_pushnumber)
-LUA_OBJECT_EXPORT_PROPERTY(client, client_t, group_window, lua_pushnumber)
-LUA_OBJECT_EXPORT_PROPERTY(client, client_t, pid, lua_pushnumber)
+LUA_OBJECT_EXPORT_PROPERTY(client, client_t, leader_window, lua_pushinteger)
+LUA_OBJECT_EXPORT_PROPERTY(client, client_t, group_window, lua_pushinteger)
+LUA_OBJECT_EXPORT_PROPERTY(client, client_t, pid, lua_pushinteger)
 LUA_OBJECT_EXPORT_PROPERTY(client, client_t, hidden, lua_pushboolean)
 LUA_OBJECT_EXPORT_PROPERTY(client, client_t, minimized, lua_pushboolean)
 LUA_OBJECT_EXPORT_PROPERTY(client, client_t, fullscreen, lua_pushboolean)
@@ -2037,7 +2037,7 @@ luaA_client_get_screen(lua_State *L, client_t *c)
 {
     if(!c->screen)
         return 0;
-    lua_pushnumber(L, screen_get_index(c->screen));
+    lua_pushinteger(L, screen_get_index(c->screen));
     return 1;
 }
 
@@ -2085,9 +2085,9 @@ luaA_client_get_size_hints(lua_State *L, client_t *c)
     if(u_or_p)
     {
         lua_createtable(L, 0, 2);
-        lua_pushnumber(L, c->size_hints.x);
+        lua_pushinteger(L, c->size_hints.x);
         lua_setfield(L, -2, "x");
-        lua_pushnumber(L, c->size_hints.y);
+        lua_pushinteger(L, c->size_hints.y);
         lua_setfield(L, -2, "y");
         lua_setfield(L, -2, u_or_p);
         u_or_p = NULL;
@@ -2101,54 +2101,54 @@ luaA_client_get_size_hints(lua_State *L, client_t *c)
     if(u_or_p)
     {
         lua_createtable(L, 0, 2);
-        lua_pushnumber(L, c->size_hints.width);
+        lua_pushinteger(L, c->size_hints.width);
         lua_setfield(L, -2, "width");
-        lua_pushnumber(L, c->size_hints.height);
+        lua_pushinteger(L, c->size_hints.height);
         lua_setfield(L, -2, "height");
         lua_setfield(L, -2, u_or_p);
     }
 
     if(c->size_hints.flags & XCB_ICCCM_SIZE_HINT_P_MIN_SIZE)
     {
-        lua_pushnumber(L, c->size_hints.min_width);
+        lua_pushinteger(L, c->size_hints.min_width);
         lua_setfield(L, -2, "min_width");
-        lua_pushnumber(L, c->size_hints.min_height);
+        lua_pushinteger(L, c->size_hints.min_height);
         lua_setfield(L, -2, "min_height");
     }
 
     if(c->size_hints.flags & XCB_ICCCM_SIZE_HINT_P_MAX_SIZE)
     {
-        lua_pushnumber(L, c->size_hints.max_width);
+        lua_pushinteger(L, c->size_hints.max_width);
         lua_setfield(L, -2, "max_width");
-        lua_pushnumber(L, c->size_hints.max_height);
+        lua_pushinteger(L, c->size_hints.max_height);
         lua_setfield(L, -2, "max_height");
     }
 
     if(c->size_hints.flags & XCB_ICCCM_SIZE_HINT_P_RESIZE_INC)
     {
-        lua_pushnumber(L, c->size_hints.width_inc);
+        lua_pushinteger(L, c->size_hints.width_inc);
         lua_setfield(L, -2, "width_inc");
-        lua_pushnumber(L, c->size_hints.height_inc);
+        lua_pushinteger(L, c->size_hints.height_inc);
         lua_setfield(L, -2, "height_inc");
     }
 
     if(c->size_hints.flags & XCB_ICCCM_SIZE_HINT_P_ASPECT)
     {
-        lua_pushnumber(L, c->size_hints.min_aspect_num);
+        lua_pushinteger(L, c->size_hints.min_aspect_num);
         lua_setfield(L, -2, "min_aspect_num");
-        lua_pushnumber(L, c->size_hints.min_aspect_den);
+        lua_pushinteger(L, c->size_hints.min_aspect_den);
         lua_setfield(L, -2, "min_aspect_den");
-        lua_pushnumber(L, c->size_hints.max_aspect_num);
+        lua_pushinteger(L, c->size_hints.max_aspect_num);
         lua_setfield(L, -2, "max_aspect_num");
-        lua_pushnumber(L, c->size_hints.max_aspect_den);
+        lua_pushinteger(L, c->size_hints.max_aspect_den);
         lua_setfield(L, -2, "max_aspect_den");
     }
 
     if(c->size_hints.flags & XCB_ICCCM_SIZE_HINT_BASE_SIZE)
     {
-        lua_pushnumber(L, c->size_hints.base_width);
+        lua_pushinteger(L, c->size_hints.base_width);
         lua_setfield(L, -2, "base_width");
-        lua_pushnumber(L, c->size_hints.base_height);
+        lua_pushinteger(L, c->size_hints.base_height);
         lua_setfield(L, -2, "base_height");
     }
 
