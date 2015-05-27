@@ -262,7 +262,8 @@ xkb_init(void)
     {
         fatal("Required xkb extension is not supported");
     }
-    unsigned int map = XCB_XKB_EVENT_TYPE_STATE_NOTIFY | XCB_XKB_EVENT_TYPE_MAP_NOTIFY | XCB_XKB_EVENT_TYPE_NEW_KEYBOARD_NOTIFY;
+
+    uint16_t map = XCB_XKB_EVENT_TYPE_STATE_NOTIFY | XCB_XKB_EVENT_TYPE_MAP_NOTIFY | XCB_XKB_EVENT_TYPE_NEW_KEYBOARD_NOTIFY;
 
     //
     // These maps are provided to allow key remapping,
@@ -295,5 +296,14 @@ xkb_init(void)
 void
 xkb_free(void)
 {
+    // unsubscribe from all events
+    xcb_xkb_select_events_checked(globalconf.connection,
+                          XCB_XKB_ID_USE_CORE_KBD,
+                          0,
+                          0,
+                          0,
+                          0,
+                          0,
+                          0);
     xkb_free_keymap();
 }
