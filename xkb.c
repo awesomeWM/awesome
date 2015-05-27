@@ -210,10 +210,6 @@ event_handle_xkb_notify(xcb_generic_event_t* event)
       case XCB_XKB_MAP_NOTIFY:
         {
           xkb_reload_keymap();
-          break;
-        }
-      case XCB_XKB_NAMES_NOTIFY:
-        {
           signal_object_emit(L, &global_signals, "xkb::map_changed", 0);
           break;
         }
