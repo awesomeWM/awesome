@@ -25,7 +25,6 @@
 #include <xkbcommon/xkbcommon.h>
 #include <xkbcommon/xkbcommon-x11.h>
 
-
 /* \brief switch keyboard layout
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
@@ -243,20 +242,18 @@ void
 xkb_init(void)
 {
 
-    /* check that XKB extension present in this X server */
-    const xcb_query_extension_reply_t *xkb_r;
-    xkb_r = xcb_get_extension_data(globalconf.connection, &xcb_xkb_id);
-    if (!xkb_r || !xkb_r->present)
-    {
-        fatal("Xkb extension not present");
-    }
+    int success_xkb = xkb_x11_setup_xkb_extension(globalconf.connection,
+                                              XKB_X11_MIN_MAJOR_XKB_VERSION,
+                                              XKB_X11_MIN_MINOR_XKB_VERSION,
+                                              0,
+                                              NULL,
+                                              NULL,
+                                              NULL,
+                                              NULL);
 
-    /* check xkb version */
-    xcb_xkb_use_extension_cookie_t ext_cookie = xcb_xkb_use_extension(globalconf.connection, 1, 0);
-    xcb_xkb_use_extension_reply_t *ext_reply = xcb_xkb_use_extension_reply (globalconf.connection, ext_cookie, NULL);
-    if (!ext_reply || !ext_reply->supported)
-    {
-        fatal("Required xkb extension is not supported");
+
+    if (!success_xkb) {
+        fatal("XKB not found or not supported");
     }
 
     uint16_t map = XCB_XKB_EVENT_TYPE_STATE_NOTIFY | XCB_XKB_EVENT_TYPE_MAP_NOTIFY | XCB_XKB_EVENT_TYPE_NEW_KEYBOARD_NOTIFY;
