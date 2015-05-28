@@ -124,9 +124,12 @@ function layout.arrange(screen)
         p.screen = screen
         p.geometries = setmetatable({}, {__mode = "k"})
         layout.get(screen).arrange(p)
+        local clientPadding = 5
         for c, g in pairs(p.geometries) do
-            g.width = g.width - c.border_width * 2
-            g.height = g.height - c.border_width * 2
+            g.width = g.width - 2*c.border_width - 2*clientPadding
+            g.height = g.height - 2*c.border_width - 2*clientPadding
+            g.x = g.x + clientPadding
+            g.y = g.y + clientPadding
             c:geometry(g)
         end
         capi.screen[screen]:emit_signal("arrange")
