@@ -67,6 +67,7 @@ awful.layout.layouts = {
     awful.layout.suit.max.fullscreen,
     awful.layout.suit.magnifier
 }
+awful.layout.client_padding = 0
 -- }}}
 
 -- {{{ Wallpaper
