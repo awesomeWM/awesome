@@ -64,9 +64,9 @@ install:
   - sudo apt-get install -qq gir1.2-pango-1.0
 
   # Install luarocks (for the selected Lua version).
-  - wget http://keplerproject.github.io/luarocks/releases/luarocks-2.2.1.tar.gz
-  - tar xf luarocks-2.2.1.tar.gz
-  - cd luarocks-2.2.1
+  - wget http://keplerproject.github.io/luarocks/releases/luarocks-2.2.2.tar.gz
+  - tar xf luarocks-2.2.2.tar.gz
+  - cd luarocks-2.2.2
   - ./configure --lua-version=$LUA
   - sudo make install
   - cd ..
