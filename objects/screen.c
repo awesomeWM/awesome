@@ -512,7 +512,7 @@ luaA_screen_get_workarea(lua_State *L, screen_t *s)
 static int
 luaA_screen_count(lua_State *L)
 {
-    lua_pushnumber(L, globalconf.screens.len);
+    lua_pushinteger(L, globalconf.screens.len);
     return 1;
 }
 
