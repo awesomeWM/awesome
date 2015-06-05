@@ -55,6 +55,7 @@ set(AWE_SRCS
     ${BUILD_DIR}/systray.c
     ${BUILD_DIR}/xwindow.c
     ${BUILD_DIR}/xkb.c
+    ${BUILD_DIR}/xrdb.c
     ${BUILD_DIR}/common/atoms.c
     ${BUILD_DIR}/common/backtrace.c
     ${BUILD_DIR}/common/buffer.c

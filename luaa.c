@@ -46,6 +46,7 @@
 #include "spawn.h"
 #include "systray.h"
 #include "xkb.h"
+#include "xrdb.h"
 
 #include <lua.h>
 #include <lauxlib.h>
@@ -366,6 +367,7 @@ luaA_init(xdgHandle* xdg)
         { "xkb_set_layout_group", luaA_xkb_set_layout_group},
         { "xkb_get_layout_group", luaA_xkb_get_layout_group},
         { "xkb_get_group_names", luaA_xkb_get_group_names},
+        { "xrdb_get_value", luaA_xrdb_get_value},
         { NULL, NULL }
     };
 

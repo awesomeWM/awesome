@@ -11,21 +11,21 @@ local theme = {}
 
 theme.font          = "sans 8"
 
-theme.bg_normal     = xrdb.bg
-theme.bg_focus      = xrdb["12"]
-theme.bg_urgent     = xrdb["9"]
-theme.bg_minimize   = xrdb["8"]
+theme.bg_normal     = xrdb.background
+theme.bg_focus      = xrdb.color12
+theme.bg_urgent     = xrdb.color9
+theme.bg_minimize   = xrdb.color8
 theme.bg_systray    = theme.bg_normal
 
-theme.fg_normal     = xrdb.fg
+theme.fg_normal     = xrdb.foreground
 theme.fg_focus      = theme.bg_normal
 theme.fg_urgent     = theme.bg_normal
 theme.fg_minimize   = theme.bg_normal
 
 theme.border_width  = dpi(1)
-theme.border_normal = xrdb["0"]
+theme.border_normal = xrdb.color0
 theme.border_focus  = theme.bg_focus
-theme.border_marked = xrdb["10"]
+theme.border_marked = xrdb.color10
 
 -- There are other variable sets
 -- overriding the default one when
@@ -157,9 +157,9 @@ local function wallpaper()
     local img = cairo.ImageSurface(cairo.Format.ARGB32, width, height)
     local cr = cairo.Context(img)
 
-    local bg = xrdb["8"]
-    local fg = xrdb["7"]
-    local alt_fg = xrdb["12"]
+    local bg = xrdb.color8
+    local fg = xrdb.color7
+    local alt_fg = xrdb.color12
     if not is_dark_bg then
         bg, fg = fg, bg
     end

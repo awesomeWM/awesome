@@ -9,83 +9,62 @@
 
 -- Grab environment
 local print = print
+local awesome = awesome
 
 local xresources = {}
 
 local fallback = {
   --black
-  ["0"] = '#000000',
-  ["8"] = '#465457',
+  color0 = '#000000',
+  color8 = '#465457',
   --red
-  ["1"] = '#cb1578',
-  ["9"] = '#dc5e86',
+  color1 = '#cb1578',
+  color9 = '#dc5e86',
   --green
-  ["2"] = '#8ecb15',
-  ["10"] = '#9edc60',
+  color2 = '#8ecb15',
+  color10 = '#9edc60',
   --yellow
-  ["3"] = '#cb9a15',
-  ["11"] = '#dcb65e',
+  color3 = '#cb9a15',
+  color11 = '#dcb65e',
   --blue
-  ["4"] = '#6f15cb',
-  ["12"] = '#7e5edc',
+  color4 = '#6f15cb',
+  color12 = '#7e5edc',
   --purple
-  ["5"] = '#cb15c9',
-  ["13"] = '#b75edc',
+  color5 = '#cb15c9',
+  color13 = '#b75edc',
   --cyan
-  ["6"] = '#15b4cb',
-  ["14"] = '#5edcb4',
+  color6 = '#15b4cb',
+  color14 = '#5edcb4',
   --white
-  ["7"] = '#888a85',
-  ["15"] = '#ffffff',
+  color7 = '#888a85',
+  color15 = '#ffffff',
   --
-  bg  = '#0e0021',
-  fg  = '#bcbcbc',
+  background  = '#0e0021',
+  foreground  = '#bcbcbc',
 }
 
 --- Get current base colorscheme from xrdb.
--- @treturn table Color table with keys 'bg', 'fg' and '0'..'15'
+-- @treturn table Color table with keys 'background', 'foreground' and 'color0'..'color15'
 function xresources.get_current_theme()
+    local keys = { 'background', 'foreground' }
+    for i=0,15 do table.insert(keys, "color"..i) end
     local colors = {}
-    local output = io.popen("xrdb -query")
-    local query = output:read('*a')
-    output:close()
-    for i,color in string.gmatch(query, "%*color(%d+):[^#]*(#[%a%d]+)") do
-        colors[i] = color
+    for _, key in ipairs(keys) do
+        colors[key] = awesome.xrdb_get_value("", key)
+        if not colors[key] then
+            print("W: beautiful: can't get colorscheme from xrdb (using fallback).")
+            return fallback
+        end
     end
-    if not colors["15"] then
-        colors = fallback
-        print("W: beautiful: can't get colorscheme from xrdb (using fallback):")
-        print(query)
-    end
-    colors.bg = string.match(query, "*background:[^#]*(#[%a%d]+)") or fallback.bg
-    colors.fg = string.match(query, "*foreground:[^#]*(#[%a%d]+)") or fallback.fg
     return colors
 end
 
 
---- Get DPI value from xsettingsd or xrdb as a fallback.
+--- Get DPI value from xrdb.
 -- @treturn number DPI value.
 function xresources.get_dpi()
-
-    local function get_dpi()
-        local function get_dpi_common(exec, key)
-            local output = io.popen(exec)
-            local query = output:read('*a')
-            local dpi = tonumber(string.match(query, key.."[%s]+([%d]+)"))
-            output:close()
-            return dpi
-        end
-        local dpi = get_dpi_common("dump_xsettings", "Xft/DPI")
-        if dpi then return dpi/1024 end
-        print("W: beautiful: can't get dpi from xsettingsd (using xrdb)")
-        dpi = get_dpi_common("xrdb -query", "dpi:")
-        if dpi then return dpi end
-        print("E: beautiful: can't get dpi from xrdb (using default value)")
-        return 96
-    end
-
     if not xresources.dpi then
-        xresources.dpi = get_dpi()
+        xresources.dpi = tonumber(awesome.xrdb_get_value("", "Xft.dpi") or 96)
     end
     return xresources.dpi
 end
