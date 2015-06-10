@@ -26,44 +26,35 @@ install:
 
   # For missing libxcb-cursor-dev.
   - sudo apt-get install -qq xutils-dev libxcb-render-util0-dev gperf
-  - git clone --recursive --depth 1 git://anongit.freedesktop.org/xcb/util-cursor
-  - cd util-cursor
-  - ./autogen.sh
+  - wget http://xcb.freedesktop.org/dist/xcb-util-cursor-0.1.2.tar.gz
+  - tar xf xcb-util-cursor-0.1.2.tar.gz
+  - cd xcb-util-cursor-0.1.2
   - ./configure
   - sudo make install
   - sudo ldconfig
   - cd ..
 
   # For xcb-proto >= 1.11, required by libxcb.
-  - git clone --recursive --depth 1 git://anongit.freedesktop.org/xcb/proto
-  - cd proto
-  - ./autogen.sh
+  - wget http://xcb.freedesktop.org/dist/xcb-proto-1.11.tar.bz2
+  - tar xf xcb-proto-1.11.tar.bz2
+  - cd xcb-proto-1.11
   - ./configure
   - sudo make install
   - cd ..
 
-  # Updated utils (xorg-macros) for manually building libxcb-xkb-dev.
-  - git clone --recursive --depth 1 git://anongit.freedesktop.org/xorg/util/macros
-  - cd macros
-  - ./autogen.sh
-  - ./configure
-  - sudo make install
-  - export PKG_CONFIG_PATH=/usr/local/share/pkgconfig:$PKG_CONFIG_PATH
-  - export ACLOCAL_PATH=/usr/local/share/aclocal:$ACLOCAL_PATH
-  - cd ..
   # For missing libxcb-xkb-dev.
-  - git clone --recursive --depth 1 git://anongit.freedesktop.org/xcb/libxcb
-  - cd libxcb
-  - ./autogen.sh
+  - wget http://xcb.freedesktop.org/dist/libxcb-1.11.tar.bz2
+  - tar xf libxcb-1.11.tar.bz2
+  - cd libxcb-1.11
   - ./configure
   - sudo make install
   - sudo ldconfig
   - cd ..
 
   # For missing libxcbcommon-dev/libxcbcommon-x11-dev (PR #227).
-  - git clone --recursive --depth 1 https://github.com/xkbcommon/libxkbcommon.git
-  - cd libxkbcommon
-  - ./autogen.sh
+  - wget http://xkbcommon.org/download/libxkbcommon-0.5.0.tar.xz
+  - tar xf libxkbcommon-0.5.0.tar.xz
+  - cd libxkbcommon-0.5.0
   - ./configure
   - sudo make install
   - sudo ldconfig
