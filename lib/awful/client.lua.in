@@ -167,9 +167,9 @@ end
 -- @tparam int screen The screen number to look for.
 -- @tparam int idx The index: 0 will return first candidate,
 --   1 will return second, etc.
--- @tparam function An optional filter.  If no client is found in the first
---                  iteration, client.focus.filter is used by default to get
---                  any client.
+-- @tparam function filter An optional filter.  If no client is found in the
+--         first iteration, client.focus.filter is used by default to get any
+--         client.
 -- @treturn client A client.
 function client.focus.history.get(screen, idx, filter)
     -- When this counter is equal to idx, we return the client
