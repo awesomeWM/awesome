@@ -27,7 +27,6 @@
 #include "xwindow.h"
 #include "ewmh.h"
 #include "objects/client.h"
-#include "keyresolv.h"
 #include "keygrabber.h"
 #include "mousegrabber.h"
 #include "luaa.h"
@@ -604,7 +603,7 @@ event_handle_key(xcb_key_press_event_t *ev)
     else
     {
         /* get keysym ignoring all modifiers */
-        xcb_keysym_t keysym = keyresolv_get_keysym(ev->detail, 0);
+        xcb_keysym_t keysym = xcb_key_symbols_get_keysym(globalconf.keysyms, ev->detail, 0);
         client_t *c;
         if((c = client_getbyframewin(ev->event)))
         {

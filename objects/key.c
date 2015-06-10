@@ -22,10 +22,11 @@
 
 #include "objects/key.h"
 #include "common/xutil.h"
-#include "keyresolv.h"
+#include "xkb.h"
 
 /* XStringToKeysym() and XKeysymToString */
 #include <X11/Xlib.h>
+#include <xkbcommon/xkbcommon.h>
 
 static void
 luaA_keystore(lua_State *L, int ud, const char *str, ssize_t len)
@@ -174,8 +175,10 @@ luaA_key_get_key(lua_State *L, keyb_t *k)
     else
     {
         char buf[MAX(MB_LEN_MAX, 32)];
-        if(!keyresolv_keysym_to_string(k->keysym, buf, countof(buf)))
+
+        if (xkb_keysym_get_name(k->keysym, buf, countof(buf)) < 0) {
             return 0;
+        }
 
         lua_pushstring(L, buf);
     }

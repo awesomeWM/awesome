@@ -99,6 +99,8 @@ awesome_atexit(bool restart)
             XCB_NONE, XCB_CURRENT_TIME);
     xcb_aux_sync(globalconf.connection);
 
+    xkb_free();
+
     /* Disconnect *after* closing lua */
     xcb_cursor_context_free(globalconf.cursor_ctx);
     xcb_disconnect(globalconf.connection);
