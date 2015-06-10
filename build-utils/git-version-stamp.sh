@@ -7,17 +7,19 @@
 
 die()
 {
-        echo "$0: WARNING: version stamp update failed."
-        #exit 1 # not important enough to stop the build.
-        exit 0
+    echo "$0: WARNING: version stamp update failed: $1."
+    #exit 1 # not important enough to stop the build.
+    exit 0
 }
 
 STAMP=`cat "$1" 2> /dev/null`
-CURRENT=`git describe --dirty 2>/dev/null`
+if [ -z "$STAMP" ]; then
+    die "Missing STAMP: $1"
+fi
 
-if [ -z "$STAMP" -o -z "$CURRENT" ]
-then
-     die
+CURRENT=`git describe --dirty 2>/dev/null`
+if [ -z "$CURRENT" ]; then
+    die "git describe failed: $(git describe --dirty)."
 fi
 
 if [ "$STAMP" != "$CURRENT" ]
