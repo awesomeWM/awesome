@@ -41,7 +41,11 @@ layout.layouts = {
     layout.suit.spiral.dwindle,
     layout.suit.max,
     layout.suit.max.fullscreen,
-    layout.suit.magnifier
+    layout.suit.magnifier,
+    layout.suit.corner.nw,
+    layout.suit.corner.ne,
+    layout.suit.corner.sw,
+    layout.suit.corner.se,
 }
 
 -- This is a special lock used by the arrange function.

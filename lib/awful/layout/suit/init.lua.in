@@ -8,6 +8,7 @@
 
 return
 {
+    corner = require("awful.layout.suit.corner");
     max = require("awful.layout.suit.max");
     tile = require("awful.layout.suit.tile");
     fair = require("awful.layout.suit.fair");
