@@ -95,6 +95,10 @@ theme.layout_max        = "@AWESOME_THEMES_PATH@/zenburn/layouts/max.png"
 theme.layout_fullscreen = "@AWESOME_THEMES_PATH@/zenburn/layouts/fullscreen.png"
 theme.layout_magnifier  = "@AWESOME_THEMES_PATH@/zenburn/layouts/magnifier.png"
 theme.layout_floating   = "@AWESOME_THEMES_PATH@/zenburn/layouts/floating.png"
+theme.layout_cornernw   = "@AWESOME_THEMES_PATH@/zenburn/layouts/cornernw.png"
+theme.layout_cornerne   = "@AWESOME_THEMES_PATH@/zenburn/layouts/cornerne.png"
+theme.layout_cornersw   = "@AWESOME_THEMES_PATH@/zenburn/layouts/cornersw.png"
+theme.layout_cornerse   = "@AWESOME_THEMES_PATH@/zenburn/layouts/cornerse.png"
 -- }}}
 
 -- {{{ Titlebar
