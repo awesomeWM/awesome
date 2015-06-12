@@ -34,8 +34,8 @@ local function do_corner(p, orientation)
     master.width = master_factor * wa.width
     master.height = master_factor * wa.height
 
-    number_privileged_win = math.ceil((#cls - 1)/2)
-    number_unprivileged_win = (#cls - 1) - number_privileged_win
+    local number_privileged_win = math.ceil((#cls - 1)/2)
+    local number_unprivileged_win = (#cls - 1) - number_privileged_win
 
     -- Define some obvious parameters
     column.width = wa.width - master.width
