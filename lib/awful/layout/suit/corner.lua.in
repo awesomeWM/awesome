@@ -110,28 +110,28 @@ local function do_corner(p, orientation)
             g = {
                 x = master.x,
                 y = master.y,
-                width = master.width - (2 * c.border_width),
-                height = master.height - (2 * c.border_width)
+                width = master.width,
+                height = master.height
             }
         -- handle column windows
         elseif i % 2 == 0 then
             g = {
                 x = column.x + column.win_idx * column.x_increment,
                 y = column.y + column.win_idx * column.y_increment,
-                width = column.win_width - (2 * c.border_width),
-                height = column.win_height - (2 * c.border_width)
+                width = column.win_width,
+                height = column.win_height
             }
             column.win_idx = column.win_idx + 1
         else
             g = {
                 x = row.x + row.win_idx * row.x_increment,
                 y = row.y + row.win_idx * row.y_increment,
-                width = row.win_width - (2 * c.border_width),
-                height = row.win_height - (2 * c.border_width)
+                width = row.win_width,
+                height = row.win_height
             }
             row.win_idx = row.win_idx + 1
         end
-        c:geometry(g)
+        p.geometries[c] = g
     end
 end
 
