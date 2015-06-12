@@ -11,6 +11,7 @@ local setmetatable = setmetatable
 local os = os
 local textbox = require("wibox.widget.textbox")
 local timer = require("gears.timer")
+local DateTime = require("lgi").GLib.DateTime
 
 local textclock = { mt = {} }
 
@@ -32,7 +33,7 @@ function textclock.new(format, timeout)
     local w = textbox()
     local t = timer { timeout = timeout }
     t:connect_signal("timeout", function()
-        w:set_markup(require("lgi").GLib.DateTime.new_now_local():format(format))
+        w:set_markup(DateTime.new_now_local():format(format))
         t.timeout = calc_timeout(timeout)
         t:again()
     end)
