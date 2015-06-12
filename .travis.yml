@@ -69,6 +69,7 @@ install:
   - tar xf luarocks-2.2.2.tar.gz
   - cd luarocks-2.2.2
   - ./configure --lua-version=$LUA
+  - make build
   - sudo make install
   - cd ..
 
