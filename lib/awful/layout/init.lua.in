@@ -67,6 +67,11 @@ end
 -- @param s The screen number. 
 -- @param[opt] layouts A table of layouts.
 function layout.inc(i, s, layouts)
+    if type(i) == "table" then
+        -- Older versions of this function had arguments (layouts, i, s), but
+        -- this was changed so that 'layouts' can be an optional parameter
+        layouts, i, s = i, s, layouts
+    end
     local t = tag.selected(s)
     local layouts = layouts or layout.layouts
     if t then
