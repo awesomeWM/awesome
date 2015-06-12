@@ -964,6 +964,22 @@ client_set_focusable(lua_State *L, int cidx, bool s)
     }
 }
 
+/** Unset a client's focusable property and make it use the default again.
+ * \param L The Lua VM state.
+ * \param cidx The client index.
+ */
+static void
+client_unset_focusable(lua_State *L, int cidx)
+{
+    client_t *c = luaA_checkudata(L, cidx, &client_class);
+
+    if(c->focusable_set)
+    {
+        c->focusable_set = false;
+        luaA_object_emit_signal(L, cidx, "property::focusable", 0);
+    }
+}
+
 /** Set a client fullscreen, or not.
  * \param L The Lua VM state.
  * \param cidx The client index.
@@ -1900,7 +1916,7 @@ static int
 luaA_client_set_focusable(lua_State *L, client_t *c)
 {
     if(lua_isnil(L, -1))
-        c->focusable_set = false;
+        client_unset_focusable(L, -3);
     else
         client_set_focusable(L, -3, luaA_checkboolean(L, -1));
     return 0;
