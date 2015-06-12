@@ -5,8 +5,7 @@
 -- @classmod wibox.widget.keyboardlayout
 ---------------------------------------------------------------------------
 
-local capi = {awesome = awesome,
-              awful = awful}
+local capi = {awesome = awesome}
 local setmetatable = setmetatable
 local os = os
 local textbox = require("wibox.widget.textbox")
