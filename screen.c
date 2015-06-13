@@ -422,7 +422,7 @@ luaA_screen_module_index(lua_State *L)
 {
     const char *name;
 
-    if((name = lua_tostring(L, 2)))
+    if(lua_type(L, 2) == LUA_TSTRING && (name = lua_tostring(L, 2)))
         foreach(screen, globalconf.screens)
             foreach(output, screen->outputs)
                 if(A_STREQ(output->name, name))
