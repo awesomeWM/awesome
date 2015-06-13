@@ -38,21 +38,7 @@ function base.fit_widget(widget, width, height)
     local width = math.max(0, width)
     local height = math.max(0, height)
 
-    -- Since the geometry cache is a weak table, we have to be careful when
-    -- doing lookups. We can't do "if cache[width] ~= nil then"!
-    local cache = widget._fit_geometry_cache
-    local result = cache[width]
-    if not result then
-        result = {}
-        cache[width] = result
-    end
-    cache, result = result, result[height]
-    if not result then
-        local w, h = widget:fit(width, height)
-        result = { width = w, height = h }
-        cache[height] = result
-    end
-    return result.width, result.height
+    return widget._fit_geometry_cache:get(width, height)
 end
 
 --- Draw a widget via a cairo context

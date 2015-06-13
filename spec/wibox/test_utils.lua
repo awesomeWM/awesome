@@ -4,6 +4,7 @@
 ---------------------------------------------------------------------------
 
 local object = require("gears.object")
+local cache = require("gears.cache")
 local wbase = require("wibox.widget.base")
 local lbase = require("wibox.layout.base")
 local say = require("say")
@@ -64,7 +65,7 @@ return {
             return width or 10, height or 10
         end
         w.draw = function() end
-        w._fit_geometry_cache = {}
+        w._fit_geometry_cache = cache.new(w.fit)
 
         spy.on(w, "fit")
         stub(w, "draw")
