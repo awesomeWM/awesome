@@ -52,7 +52,7 @@ local function sendActionInvoked(notificationId, action)
     if capi.dbus then
         capi.dbus.emit_signal("session", "/org/freedesktop/Notifications",
         "org.freedesktop.Notifications", "ActionInvoked",
-        "i", notificationId,
+        "u", notificationId,
         "s", action)
     end
 end
@@ -61,8 +61,8 @@ local function sendNotificationClosed(notificationId, reason)
     if capi.dbus then
         capi.dbus.emit_signal("session", "/org/freedesktop/Notifications",
         "org.freedesktop.Notifications", "NotificationClosed",
-        "i", notificationId,
-        "i", reason)
+        "u", notificationId,
+        "u", reason)
     end
 end
 
