@@ -8,19 +8,16 @@
 local pairs = pairs
 local type = type
 local setmetatable = setmetatable
-local base = require("wibox.layout.base")
-local widget_base = require("wibox.widget.base")
+local base = require("wibox.widget.base")
 local math = math
 
 local constraint = { mt = {} }
 
---- Draw a constraint layout
-function constraint:draw(context, cr, width, height)
-    if not self.widget then
-        return
+--- Layout a constraint layout
+function constraint:layout(context, width, height)
+    if self.widget then
+        return { base.place_widget_at(self.widget, 0, 0, width, height) }
     end
-
-    base.draw_widget(context, cr, self.widget, 0, 0, width, height)
 end
 
 --- Fit a constraint layout into the given space
@@ -43,15 +40,8 @@ end
 
 --- Set the widget that this layout adds a constraint on.
 function constraint:set_widget(widget)
-    if self.widget then
-        self.widget:disconnect_signal("widget::updated", self._emit_updated)
-    end
-    if widget then
-        widget_base.check_widget(widget)
-        widget:weak_connect_signal("widget::updated", self._emit_updated)
-    end
     self.widget = widget
-    self:emit_signal("widget::updated")
+    self:emit_signal("widget::layout_changed")
 end
 
 --- Set the strategy to use for the constraining. Valid values are 'max',
@@ -74,19 +64,19 @@ function constraint:set_strategy(val)
     end
 
     self._strategy = func[val]
-    self:emit_signal("widget::updated")
+    self:emit_signal("widget::layout_changed")
 end
 
 --- Set the maximum width to val. nil for no width limit.
 function constraint:set_width(val)
     self._width = val
-    self:emit_signal("widget::updated")
+    self:emit_signal("widget::layout_changed")
 end
 
 --- Set the maximum height to val. nil for no height limit.
 function constraint:set_height(val)
     self._height = val
-    self:emit_signal("widget::updated")
+    self:emit_signal("widget::layout_changed")
 end
 
 --- Reset this layout. The widget will be unreferenced, strategy set to "max"
@@ -115,10 +105,6 @@ local function new(widget, strategy, width, height)
         if type(v) == "function" then
             ret[k] = v
         end
-    end
-
-    ret._emit_updated = function()
-        ret:emit_signal("widget::updated")
     end
 
     ret:set_strategy(strategy or "max")
