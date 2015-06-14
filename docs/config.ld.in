@@ -2,7 +2,7 @@
 
 project='awesome'
 title='awesome API documentation'
-description='highly configurable X window manager'
+description='API documentation for awesome, a highly configurable X window manager (version @AWESOME_VERSION@).'
 
 -- More on it: https://github.com/stevedonovan/LDoc/blob/master/doc/doc.md#markdown-support
 format='discount'
@@ -13,7 +13,7 @@ pretty='lua'
 style="!pale"
 backtick_references=true
 merge=true
-use_markdown_titles = true
+use_markdown_titles=true
 wrap=true
 topics={
     '00-authors.md',
@@ -28,7 +28,7 @@ tparam_alias('tag', 'tag')
 tparam_alias('tab', 'table')
 
 -- More fitting section names
-kind_names={topic='Documentation',module='Libraries'}
+kind_names={topic='Documentation', module='Libraries'}
 
 -- Sort modules alphabetically
 sort_modules=true
