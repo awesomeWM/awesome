@@ -5,6 +5,7 @@
 
 local flex = require("wibox.layout.flex")
 local utils = require("wibox.test_utils")
+local p = require("wibox.widget.base").place_widget_at
 
 describe("wibox.layout.flex", function()
     local layout
@@ -12,16 +13,12 @@ describe("wibox.layout.flex", function()
         layout = flex.vertical()
     end)
 
-    before_each(utils.stub_draw_widget)
-    after_each(utils.revert_draw_widget)
-
     it("empty layout fit", function()
         assert.widget_fit(layout, { 10, 10 }, { 0, 0 })
-        utils.check_widgets_drawn({})
     end)
 
-    it("empty layout draw", function()
-        layout:draw(nil, nil, 0, 0)
+    it("empty layout layout", function()
+        assert.widget_layout(layout, { 0, 0 }, {})
     end)
 
     describe("with widgets", function()
@@ -42,12 +39,11 @@ describe("wibox.layout.flex", function()
                 assert.widget_fit(layout, { 100, 100 }, { 15, 35 })
             end)
 
-            it("draw", function()
-                layout:draw("wibox", "cr", 100, 100)
-                utils.check_widgets_drawn({
-                    { first,  0,  0, 100, 33 },
-                    { second, 0, 33, 100, 33 },
-                    { third,  0, 67, 100, 33 },
+            it("layout", function()
+                assert.widget_layout(layout, { 100, 100 }, {
+                    p(first,  0,  0, 100, 33),
+                    p(second, 0, 33, 100, 33),
+                    p(third,  0, 67, 100, 33),
                 })
             end)
         end)
@@ -57,12 +53,11 @@ describe("wibox.layout.flex", function()
                 assert.widget_fit(layout, { 5, 100 }, { 5, 35 })
             end)
 
-            it("draw", function()
-                layout:draw("wibox", "cr", 5, 100)
-                utils.check_widgets_drawn({
-                    { first,  0,  0, 5, 33 },
-                    { second, 0, 33, 5, 33 },
-                    { third,  0, 67, 5, 33 },
+            it("layout", function()
+                assert.widget_layout(layout, { 5, 100 }, {
+                    p(first,  0,  0, 5, 33),
+                    p(second, 0, 33, 5, 33),
+                    p(third,  0, 67, 5, 33),
                 })
             end)
         end)
@@ -72,12 +67,11 @@ describe("wibox.layout.flex", function()
                 assert.widget_fit(layout, { 100, 20 }, { 15, 20 })
             end)
 
-            it("draw", function()
-                layout:draw("wibox", "cr", 100, 20)
-                utils.check_widgets_drawn({
-                    { first,  0,  0, 100, 6 },
-                    { second, 0,  7, 100, 6 },
-                    { third,  0, 13, 100, 6 },
+            it("layout", function()
+                assert.widget_layout(layout, { 100, 20 }, {
+                    p(first,  0,  0, 100, 6),
+                    p(second, 0,  7, 100, 6),
+                    p(third,  0, 13, 100, 6),
                 })
             end)
         end)
