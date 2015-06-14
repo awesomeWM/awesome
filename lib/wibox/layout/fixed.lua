@@ -5,8 +5,7 @@
 -- @classmod wibox.layout.fixed
 ---------------------------------------------------------------------------
 
-local base = require("wibox.layout.base")
-local widget_base = require("wibox.widget.base")
+local base = require("wibox.widget.base")
 local table = table
 local pairs = pairs
 
@@ -45,14 +44,14 @@ function fixed:layout(context, width, height)
             (self.dir ~= "y" and pos-spacing > width) then
             break
         end
-        table.insert(result, widget_base.place_widget_at(v, x, y, w, h))
+        table.insert(result, base.place_widget_at(v, x, y, w, h))
     end
     return result
 end
 
 --- Add a widget to the given fixed layout
 function fixed:add(widget)
-    widget_base.check_widget(widget)
+    base.check_widget(widget)
     table.insert(self.widgets, widget)
     self:emit_signal("widget::layout_changed")
 end
@@ -113,7 +112,7 @@ function fixed:fill_space(val)
 end
 
 local function get_layout(dir)
-    local ret = widget_base.make_widget()
+    local ret = base.make_widget()
 
     for k, v in pairs(fixed) do
         if type(v) == "function" then

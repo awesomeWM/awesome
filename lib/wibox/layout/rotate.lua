@@ -11,8 +11,7 @@ local pi = math.pi
 local type = type
 local setmetatable = setmetatable
 local tostring = tostring
-local base = require("wibox.layout.base")
-local widget_base = require("wibox.widget.base")
+local base = require("wibox.widget.base")
 local Matrix = require("lgi").cairo.Matrix
 
 local rotate = { mt = {} }
@@ -61,7 +60,7 @@ end
 --- Set the widget that this layout rotates.
 function rotate:set_widget(widget)
     if widget then
-        widget_base.check_widget(widget)
+        base.check_widget(widget)
     end
     self.widget = widget
     self:emit_signal("widget::layout_changed")
@@ -102,7 +101,7 @@ end
 -- @param[opt] widget The widget to display.
 -- @param[opt] dir The direction to rotate to.
 local function new(widget, dir)
-    local ret = widget_base.make_widget()
+    local ret = base.make_widget()
 
     for k, v in pairs(rotate) do
         if type(v) == "function" then
