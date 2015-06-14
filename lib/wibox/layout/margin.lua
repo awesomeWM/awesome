@@ -8,8 +8,7 @@
 local pairs = pairs
 local type = type
 local setmetatable = setmetatable
-local base = require("wibox.layout.base")
-local widget_base = require("wibox.widget.base")
+local base = require("wibox.widget.base")
 local gcolor = require("gears.color")
 local cairo = require("lgi").cairo
 
@@ -28,16 +27,24 @@ function margin:draw(context, cr, width, height)
     end
 
     if color then
-        cr:save()
         cr:set_source(color)
         cr:rectangle(0, 0, width, height)
         cr:rectangle(x, y, width - x - w, height - y - h)
         cr:set_fill_rule(cairo.FillRule.EVEN_ODD)
         cr:fill()
-        cr:restore()
     end
+end
 
-    base.draw_widget(context, cr, self.widget, x, y, width - x - w, height - y - h)
+--- Layout a margin layout
+function margin:layout(context, width, height)
+    if self.widget then
+        local x = self.left
+        local y = self.top
+        local w = self.right
+        local h = self.bottom
+
+        return { base.place_widget_at(self.widget, x, y, width - x - w, height - y - h) }
+    end
 end
 
 --- Fit a margin layout into the given space
@@ -53,15 +60,11 @@ end
 
 --- Set the widget that this layout adds a margin on.
 function margin:set_widget(widget)
-    if self.widget then
-        self.widget:disconnect_signal("widget::updated", self._emit_updated)
-    end
     if widget then
-        widget_base.check_widget(widget)
-        widget:weak_connect_signal("widget::updated", self._emit_updated)
+        base.check_widget(widget)
     end
     self.widget = widget
-    self._emit_updated()
+    self:emit_signal("widget::layout_changed")
 end
 
 --- Set all the margins to val.
@@ -70,13 +73,13 @@ function margin:set_margins(val)
     self.right = val
     self.top = val
     self.bottom = val
-    self:emit_signal("widget::updated")
+    self:emit_signal("widget::layout_changed")
 end
 
 --- Set the margins color to color
 function margin:set_color(color)
     self.color = color and gcolor(color)
-    self._emit_updated()
+    self:emit_signal("widget::redraw_needed")
 end
 
 --- Reset this layout. The widget will be unreferenced, the margins set to 0
@@ -115,7 +118,7 @@ end
 for k, v in pairs({ "left", "right", "top", "bottom" }) do
     margin["set_" .. v] = function(layout, val)
         layout[v] = val
-        layout:emit_signal("widget::updated")
+        layout:emit_signal("widget::layout_changed")
     end
 end
 
@@ -127,16 +130,12 @@ end
 -- @param[opt] bottom A margin to use on the bottom side of the widget.
 -- @param[opt] color A color for the margins.
 local function new(widget, left, right, top, bottom, color)
-    local ret = widget_base.make_widget()
+    local ret = base.make_widget()
 
     for k, v in pairs(margin) do
         if type(v) == "function" then
             ret[k] = v
         end
-    end
-
-    ret._emit_updated = function()
-        ret:emit_signal("widget::updated")
     end
 
     ret:set_left(left or 0)
