@@ -5,6 +5,7 @@
 
 local fixed = require("wibox.layout.fixed")
 local utils = require("wibox.test_utils")
+local p = require("wibox.widget.base").place_widget_at
 
 describe("wibox.layout.fixed", function()
     local layout
@@ -12,16 +13,12 @@ describe("wibox.layout.fixed", function()
         layout = fixed.vertical()
     end)
 
-    before_each(utils.stub_draw_widget)
-    after_each(utils.revert_draw_widget)
-
     it("empty layout fit", function()
         assert.widget_fit(layout, { 10, 10 }, { 0, 0 })
     end)
 
-    it("empty layout draw", function()
-        layout:draw(nil, nil, 0, 0)
-        utils.check_widgets_drawn({})
+    it("empty layout layout", function()
+        assert.widget_layout(layout, { 0, 0 }, {})
     end)
 
     describe("with widgets", function()
@@ -42,12 +39,11 @@ describe("wibox.layout.fixed", function()
                 assert.widget_fit(layout, { 100, 100 }, { 15, 35 })
             end)
 
-            it("draw", function()
-                layout:draw("wibox", "cr", 100, 100)
-                utils.check_widgets_drawn({
-                    { first,  0,  0, 100, 10 },
-                    { second, 0, 10, 100, 15 },
-                    { third,  0, 25, 100, 10 },
+            it("layout", function()
+                assert.widget_layout(layout, { 100, 100 }, {
+                    p(first,  0,  0, 100, 10),
+                    p(second, 0, 10, 100, 15),
+                    p(third,  0, 25, 100, 10),
                 })
             end)
         end)
@@ -57,28 +53,25 @@ describe("wibox.layout.fixed", function()
                 assert.widget_fit(layout, { 5, 100 }, { 5, 35 })
             end)
 
-            it("draw", function()
-                layout:draw("wibox", "cr", 5, 100)
-                utils.check_widgets_drawn({
-                    { first,  0,  0, 5, 10 },
-                    { second, 0, 10, 5, 15 },
-                    { third,  0, 25, 5, 10 },
+            it("layout", function()
+                assert.widget_layout(layout, { 5, 100 }, {
+                    p(first,  0,  0, 5, 10),
+                    p(second, 0, 10, 5, 15),
+                    p(third,  0, 25, 5, 10),
                 })
             end)
         end)
 
         describe("without enough width", function()
             it("fit", function()
-                -- XXX: Is this really what should happen?
                 assert.widget_fit(layout, { 100, 20 }, { 15, 20 })
             end)
 
-            it("draw", function()
-                layout:draw("wibox", "cr", 100, 20)
-                utils.check_widgets_drawn({
-                    { first,  0,  0, 100, 10 },
-                    { second, 0, 10, 100, 10 },
-                    { third,  0, 20, 100,  0 },
+            it("layout", function()
+                assert.widget_layout(layout, { 100, 20 }, {
+                    p(first,  0,  0, 100, 10),
+                    p(second, 0, 10, 100, 10),
+                    p(third,  0, 20, 100,  0),
                 })
             end)
         end)

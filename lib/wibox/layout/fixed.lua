@@ -12,13 +12,12 @@ local pairs = pairs
 
 local fixed = {}
 
---- Draw a fixed layout. Each widget gets just the space it asks for.
+--- Layout a fixed layout. Each widget gets just the space it asks for.
 -- @param context The context in which we are drawn.
--- @param cr The cairo context to use.
 -- @param width The available width.
 -- @param height The available height.
--- @return The total space needed by the layout.
-function fixed:draw(context, cr, width, height)
+function fixed:layout(context, width, height)
+    local result = {}
     local pos,spacing = 0,self._spacing or 0
 
     for k, v in pairs(self.widgets) do
@@ -46,16 +45,16 @@ function fixed:draw(context, cr, width, height)
             (self.dir ~= "y" and pos-spacing > width) then
             break
         end
-        base.draw_widget(context, cr, v, x, y, w, h)
+        table.insert(result, widget_base.place_widget_at(v, x, y, w, h))
     end
+    return result
 end
 
 --- Add a widget to the given fixed layout
 function fixed:add(widget)
     widget_base.check_widget(widget)
     table.insert(self.widgets, widget)
-    widget:weak_connect_signal("widget::updated", self._emit_updated)
-    self._emit_updated()
+    self:emit_signal("widget::layout_changed")
 end
 
 --- Fit the fixed layout into the given space
@@ -101,11 +100,8 @@ end
 
 --- Reset a fixed layout. This removes all widgets from the layout.
 function fixed:reset()
-    for k, v in pairs(self.widgets) do
-        v:disconnect_signal("widget::updated", self._emit_updated)
-    end
     self.widgets = {}
-    self:emit_signal("widget::updated")
+    self:emit_signal("widget::layout_changed")
 end
 
 --- Set the layout's fill_space property. If this property is true, the last
@@ -113,7 +109,7 @@ end
 -- won't be handled specially and there can be space left unused.
 function fixed:fill_space(val)
     self._fill_space = val
-    self:emit_signal("widget::updated")
+    self:emit_signal("widget::layout_changed")
 end
 
 local function get_layout(dir)
@@ -127,9 +123,6 @@ local function get_layout(dir)
 
     ret.dir = dir
     ret.widgets = {}
-    ret._emit_updated = function()
-        ret:emit_signal("widget::updated")
-    end
 
     return ret
 end
@@ -152,7 +145,7 @@ end
 -- @param spacing Spacing between widgets.
 function fixed:set_spacing(spacing)
     self._spacing = spacing
-    self:emit_signal("widget::updated")
+    self:emit_signal("widget::layout_changed")
 end
 
 return fixed
