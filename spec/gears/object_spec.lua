@@ -12,13 +12,19 @@ describe("gears.object", function()
         obj:add_signal("signal")
     end)
 
-    it("connect non-existent signal", function()
+    it("strong connect non-existent signal", function()
         assert.has.errors(function()
             obj:connect_signal("foo", function() end)
         end)
     end)
 
-    it("disconnect non-existent signal", function()
+    it("weak connect non-existent signal", function()
+        assert.has.errors(function()
+            obj:weak_connect_signal("foo", function() end)
+        end)
+    end)
+
+    it("strong disconnect non-existent signal", function()
         assert.has.errors(function()
             obj:disconnect_signal("foo", function() end)
         end)
@@ -30,16 +36,27 @@ describe("gears.object", function()
         end)
     end)
 
-    it("connecting and emitting signal", function()
+    it("strong connecting and emitting signal", function()
         local called = false
-        obj:connect_signal("signal", function()
+        local function cb()
             called = true
-        end)
+        end
+        obj:connect_signal("signal", cb)
         obj:emit_signal("signal")
         assert.is_true(called)
     end)
 
-    it("connecting, disconnecting and emitting signal", function()
+    it("weak connecting and emitting signal", function()
+        local called = false
+        local function cb()
+            called = true
+        end
+        obj:weak_connect_signal("signal", cb)
+        obj:emit_signal("signal")
+        assert.is_true(called)
+    end)
+
+    it("strong connecting, disconnecting and emitting signal", function()
         local called = false
         local function cb()
             called = true
@@ -50,12 +67,63 @@ describe("gears.object", function()
         assert.is_false(called)
     end)
 
+    it("weak connecting, disconnecting and emitting signal", function()
+        local called = false
+        local function cb()
+            called = true
+        end
+        obj:weak_connect_signal("signal", cb)
+        obj:disconnect_signal("signal", cb)
+        obj:emit_signal("signal")
+        assert.is_false(called)
+    end)
+
     it("arguments to signal", function()
         obj:connect_signal("signal", function(arg1, arg2)
             assert.is.equal(obj, arg1)
             assert.is.same(42, arg2)
         end)
+        obj:weak_connect_signal("signal", function(arg1, arg2)
+            assert.is.equal(obj, arg1)
+            assert.is.same(42, arg2)
+        end)
         obj:emit_signal("signal", 42)
+    end)
+
+    it("strong non-auto disconnect", function()
+        local called = false
+        obj:connect_signal("signal", function()
+            called = true
+        end)
+        collectgarbage("collect")
+        obj:emit_signal("signal")
+        assert.is_true(called)
+    end)
+
+    it("weak auto disconnect", function()
+        local called = false
+        obj:weak_connect_signal("signal", function()
+            called = true
+        end)
+        collectgarbage("collect")
+        obj:emit_signal("signal")
+        assert.is_false(called)
+    end)
+
+    it("strong connect after weak connect", function()
+        local function cb() end
+        obj:weak_connect_signal("signal", cb)
+        assert.has.errors(function()
+            obj:connect_signal("signal", cb)
+        end)
+    end)
+
+    it("weak connect after strong connect", function()
+        local function cb() end
+        obj:connect_signal("signal", cb)
+        assert.has.errors(function()
+            obj:weak_connect_signal("signal", cb)
+        end)
     end)
 end)
 
