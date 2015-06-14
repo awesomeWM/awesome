@@ -140,7 +140,7 @@ local function widget_changed(layout, old_w, new_w)
     end
     if new_w then
         widget_base.check_widget(new_w)
-        new_w:connect_signal("widget::updated", layout._emit_updated)
+        new_w:weak_connect_signal("widget::updated", layout._emit_updated)
     end
     layout._emit_updated()
 end
