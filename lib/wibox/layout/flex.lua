@@ -5,8 +5,7 @@
 -- @classmod wibox.layout.flex
 ---------------------------------------------------------------------------
 
-local base = require("wibox.layout.base")
-local widget_base = require("wibox.widget.base")
+local base = require("wibox.widget.base")
 local table = table
 local pairs = pairs
 local floor = math.floor
@@ -48,7 +47,7 @@ function flex:layout(context, width, height)
             x, y = round(pos), 0
             w, h = floor(space_per_item), height
         end
-        table.insert(result, widget_base.place_widget_at(v, x, y, w, h))
+        table.insert(result, base.place_widget_at(v, x, y, w, h))
 
         pos = pos + space_per_item + spacing
 
@@ -98,7 +97,7 @@ function flex:fit(context, orig_width, orig_height)
 end
 
 function flex:add(widget)
-    widget_base.check_widget(widget)
+    base.check_widget(widget)
     table.insert(self.widgets, widget)
     self:emit_signal("widget::layout_changed")
 end
@@ -125,7 +124,7 @@ function flex:reset()
 end
 
 local function get_layout(dir)
-    local ret = widget_base.make_widget()
+    local ret = base.make_widget()
 
     for k, v in pairs(flex) do
         if type(v) == "function" then

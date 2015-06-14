@@ -6,19 +6,18 @@
 local object = require("gears.object")
 local cache = require("gears.cache")
 local matrix_equals = require("gears.matrix").equals
-local wbase = require("wibox.widget.base")
-local lbase = require("wibox.layout.base")
+local base = require("wibox.widget.base")
 local say = require("say")
 local assert = require("luassert")
 local spy = require("luassert.spy")
 local stub = require("luassert.stub")
 
-local real_draw_widget = wbase.draw_widget
+local real_draw_widget = base.draw_widget
 local widgets_drawn = nil
 
 -- This function would reject stubbed widgets
-local real_check_widget = wbase.check_widget
-wbase.check_widget = function()
+local real_check_widget = base.check_widget
+base.check_widget = function()
 end
 
 local function stub_draw_widget(wibox, cr, widget, x, y, width, height)
@@ -36,7 +35,7 @@ local function widget_fit(state, arguments)
     local widget = arguments[1]
     local given = arguments[2]
     local expected = arguments[3]
-    local w, h = lbase.fit_widget({ "fake context" }, widget, given[1], given[2])
+    local w, h = base.fit_widget({ "fake context" }, widget, given[1], given[2])
 
     local fits = expected[1] == w and expected[2] == h
     if state.mod == fits then
@@ -117,12 +116,12 @@ return {
     end,
 
     stub_draw_widget = function()
-        lbase.draw_widget = stub_draw_widget
+        base.draw_widget = stub_draw_widget
         widgets_drawn = {}
     end,
 
     revert_draw_widget = function()
-        lbase.draw_widget = real_draw_widget
+        base.draw_widget = real_draw_widget
         widgets_drawn = nil
     end,
 

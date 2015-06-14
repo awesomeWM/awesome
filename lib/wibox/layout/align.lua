@@ -10,8 +10,7 @@ local table = table
 local pairs = pairs
 local type = type
 local floor = math.floor
-local base = require("wibox.layout.base")
-local widget_base = require("wibox.widget.base")
+local base = require("wibox.widget.base")
 
 local align = {}
 
@@ -46,7 +45,7 @@ function align:layout(context, width, height)
         -- if all the space is taken, skip the rest, and draw just the middle
         -- widget
         if size_second >= size_remains then
-            return { widget_base.place_widget_at(self.second, 0, 0, width, height) }
+            return { base.place_widget_at(self.second, 0, 0, width, height) }
         else
             -- the middle widget is sized first, the outside widgets are given
             --  the remaining space if available we will draw later
@@ -84,7 +83,7 @@ function align:layout(context, width, height)
                 w = size_remains
             end
         end
-        table.insert(result, widget_base.place_widget_at(self.first, 0, 0, w, h))
+        table.insert(result, base.place_widget_at(self.first, 0, 0, w, h))
     end
     -- size_remains will be <= 0 if first used all the space
     if self.third and size_remains > 0 then
@@ -110,7 +109,7 @@ function align:layout(context, width, height)
             end
         end
         local x, y = width - w, height - h
-        table.insert(result, widget_base.place_widget_at(self.third, x, y, w, h))
+        table.insert(result, base.place_widget_at(self.third, x, y, w, h))
     end
     -- here we either draw the second widget in the space set aside for it
     -- in the beginning, or in the remaining space, if it is "inside"
@@ -133,7 +132,7 @@ function align:layout(context, width, height)
                 x = floor( (width -w)/2 )
             end
         end
-        table.insert(result, widget_base.place_widget_at(self.second, x, y, w, h))
+        table.insert(result, base.place_widget_at(self.second, x, y, w, h))
     end
     return result
 end
@@ -212,7 +211,7 @@ function align:reset()
 end
 
 local function get_layout(dir)
-    local ret = widget_base.make_widget()
+    local ret = base.make_widget()
     ret.dir = dir
 
     for k, v in pairs(align) do

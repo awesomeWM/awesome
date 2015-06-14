@@ -9,7 +9,6 @@
 
 return
 {
-    base = require("wibox.layout.base");
     fixed = require("wibox.layout.fixed");
     align = require("wibox.layout.align");
     flex = require("wibox.layout.flex");
