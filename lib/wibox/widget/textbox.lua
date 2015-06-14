@@ -70,7 +70,8 @@ function textbox:set_markup(text)
     self._markup = text
     self._layout.text = parsed
     self._layout.attributes = attr
-    self:emit_signal("widget::updated")
+    self:emit_signal("widget::redraw_needed")
+    self:emit_signal("widget::layout_changed")
 end
 
 --- Set a textbox' text.
@@ -82,7 +83,8 @@ function textbox:set_text(text)
     self._markup = nil
     self._layout.text = text
     self._layout.attributes = nil
-    self:emit_signal("widget::updated")
+    self:emit_signal("widget::redraw_needed")
+    self:emit_signal("widget::layout_changed")
 end
 
 --- Set a textbox' ellipsize mode.
@@ -94,7 +96,8 @@ function textbox:set_ellipsize(mode)
             return
         end
         self._layout:set_ellipsize(allowed[mode])
-        self:emit_signal("widget::updated")
+        self:emit_signal("widget::redraw_needed")
+        self:emit_signal("widget::layout_changed")
     end
 end
 
@@ -107,7 +110,8 @@ function textbox:set_wrap(mode)
             return
         end
         self._layout:set_wrap(allowed[mode])
-        self:emit_signal("widget::updated")
+        self:emit_signal("widget::redraw_needed")
+        self:emit_signal("widget::layout_changed")
     end
 end
 
@@ -120,7 +124,8 @@ function textbox:set_valign(mode)
             return
         end
         self._valign = mode
-        self:emit_signal("widget::updated")
+        self:emit_signal("widget::redraw_needed")
+        self:emit_signal("widget::layout_changed")
     end
 end
 
@@ -133,7 +138,8 @@ function textbox:set_align(mode)
             return
         end
         self._layout:set_alignment(allowed[mode])
-        self:emit_signal("widget::updated")
+        self:emit_signal("widget::redraw_needed")
+        self:emit_signal("widget::layout_changed")
     end
 end
 
@@ -141,6 +147,8 @@ end
 -- @param font The font description as string
 function textbox:set_font(font)
     self._layout:set_font_description(beautiful.get_font(font))
+    self:emit_signal("widget::redraw_needed")
+    self:emit_signal("widget::layout_changed")
 end
 
 -- Returns a new textbox
