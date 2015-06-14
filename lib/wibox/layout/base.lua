@@ -26,7 +26,7 @@ function base.fit_widget(context, widget, width, height)
     local width = math.max(0, width)
     local height = math.max(0, height)
 
-    local w, h = widget._fit_geometry_cache:get(context, width, height)
+    local w, h = widget:fit(context, width, height)
 
     -- Also sanitize the output.
     w = math.max(0, math.min(w, width))
