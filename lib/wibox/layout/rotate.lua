@@ -13,6 +13,7 @@ local setmetatable = setmetatable
 local tostring = tostring
 local base = require("wibox.layout.base")
 local widget_base = require("wibox.widget.base")
+local Matrix = require("lgi").cairo.Matrix
 
 local rotate = { mt = {} }
 
@@ -24,28 +25,29 @@ local function transform(layout, width, height)
     return width, height
 end
 
---- Draw this layout
-function rotate:draw(context, cr, width, height)
+--- Layout this layout
+function rotate:layout(context, width, height)
     if not self.widget or not self.widget.visible then
         return
     end
 
     local dir = self:get_direction()
 
+    local m = Matrix.create_identity()
     if dir == "west" then
-        cr:rotate(pi / 2)
-        cr:translate(0, -width)
+        m:rotate(pi / 2)
+        m:translate(0, -width)
     elseif dir == "south" then
-        cr:rotate(pi)
-        cr:translate(-width, -height)
+        m:rotate(pi)
+        m:translate(-width, -height)
     elseif dir == "east" then
-        cr:rotate(3 * pi / 2)
-        cr:translate(-height, 0)
+        m:rotate(3 * pi / 2)
+        m:translate(-height, 0)
     end
 
     -- Since we rotated, we might have to swap width and height.
     -- transform() does that for us.
-    base.draw_widget(context, cr, self.widget, 0, 0, transform(self, width, height))
+    return { base.place_widget_via_matrix(self.widget, m, transform(self, width, height)) }
 end
 
 --- Fit this layout into the given area
@@ -58,15 +60,11 @@ end
 
 --- Set the widget that this layout rotates.
 function rotate:set_widget(widget)
-    if self.widget then
-        self.widget:disconnect_signal("widget::updated", self._emit_updated)
-    end
     if widget then
         widget_base.check_widget(widget)
-        widget:weak_connect_signal("widget::updated", self._emit_updated)
     end
     self.widget = widget
-    self._emit_updated()
+    self:emit_signal("widget::layout_changed")
 end
 
 --- Reset this layout. The widget will be removed and the rotation reset.
@@ -90,7 +88,7 @@ function rotate:set_direction(dir)
     end
 
     self.direction = dir
-    self._emit_updated()
+    self:emit_signal("widget::layout_changed")
 end
 
 --- Get the direction of this rotating layout
@@ -110,10 +108,6 @@ local function new(widget, dir)
         if type(v) == "function" then
             ret[k] = v
         end
-    end
-
-    ret._emit_updated = function()
-        ret:emit_signal("widget::updated")
     end
 
     ret:set_widget(widget)
