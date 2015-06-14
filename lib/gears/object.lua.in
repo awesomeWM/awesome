@@ -38,7 +38,10 @@ function object:add_signal(name)
     check(self)
     assert(type(name) == "string", "name must be a string, got: " .. type(name))
     if not self._signals[name] then
-        self._signals[name] = {}
+        self._signals[name] = {
+            strong = {},
+            weak = setmetatable({}, { __mode = "k" })
+        }
     end
 end
 
@@ -48,7 +51,19 @@ end
 function object:connect_signal(name, func)
     assert(type(func) == "function", "callback must be a function, got: " .. type(func))
     local sig = find_signal(self, name, "connect to")
-    sig[func] = func
+    assert(sig.weak[func] == nil, "Trying to connect a strong callback which is already connected weakly")
+    sig.strong[func] = true
+end
+
+--- Connect to a signal weakly. This allows the callback function to be garbage
+-- collected and automatically disconnects the signal when that happens.
+-- @param name The name of the signal
+-- @param func The callback to call when the signal is emitted
+function object:weak_connect_signal(name, func)
+    assert(type(func) == "function", "callback must be a function, got: " .. type(func))
+    local sig = find_signal(self, name, "connect to")
+    assert(sig.strong[func] == nil, "Trying to connect a weak callback which is already connected strongly")
+    sig.weak[func] = true
 end
 
 --- Disonnect to a signal
@@ -56,7 +71,8 @@ end
 -- @param func The callback that should be disconnected
 function object:disconnect_signal(name, func)
     local sig = find_signal(self, name, "disconnect from")
-    sig[func] = nil
+    sig.weak[func] = nil
+    sig.strong[func] = nil
 end
 
 --- Emit a signal
@@ -67,7 +83,10 @@ end
 --   that are given to emit_signal()
 function object:emit_signal(name, ...)
     local sig = find_signal(self, name, "emit")
-    for func in pairs(sig) do
+    for func in pairs(sig.strong) do
+        func(self, ...)
+    end
+    for func in pairs(sig.weak) do
         func(self, ...)
     end
 end
