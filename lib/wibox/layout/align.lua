@@ -15,12 +15,13 @@ local widget_base = require("wibox.widget.base")
 
 local align = {}
 
---- Draw an align layout.
+--- Calculate the layout of an align layout.
 -- @param context The context in which we are drawn.
--- @param cr The cairo context to use.
 -- @param width The available width.
 -- @param height The available height.
-function align:draw(context, cr, width, height)
+function align:layout(context, width, height)
+    local result = {}
+
     -- Draw will have to deal with all three align modes and should work in a
     -- way that makes sense if one or two of the widgets are missing (if they
     -- are all missing, it won't draw anything.) It should also handle the case
@@ -42,8 +43,7 @@ function align:draw(context, cr, width, height)
         -- if all the space is taken, skip the rest, and draw just the middle
         -- widget
         if size_second >= size_remains then
-            base.draw_widget(context, cr, self.second, 0, 0, width, height)
-            return
+            return { widget_base.place_widget_at(self.second, 0, 0, width, height) }
         else
             -- the middle widget is sized first, the outside widgets are given
             --  the remaining space if available we will draw later
@@ -81,7 +81,7 @@ function align:draw(context, cr, width, height)
                 w = size_remains
             end
         end
-        base.draw_widget(context, cr, self.first, 0, 0, w, h)
+        table.insert(result, widget_base.place_widget_at(self.first, 0, 0, w, h))
     end
     -- size_remains will be <= 0 if first used all the space
     if self.third and size_remains > 0 then
@@ -107,7 +107,7 @@ function align:draw(context, cr, width, height)
             end
         end
         local x, y = width - w, height - h
-        base.draw_widget(context, cr, self.third, x, y, w, h)
+        table.insert(result, widget_base.place_widget_at(self.third, x, y, w, h))
     end
     -- here we either draw the second widget in the space set aside for it
     -- in the beginning, or in the remaining space, if it is "inside"
@@ -130,37 +130,27 @@ function align:draw(context, cr, width, height)
                 x = floor( (width -w)/2 )
             end
         end
-        base.draw_widget(context, cr, self.second, x, y, w, h)
+        table.insert(result, widget_base.place_widget_at(self.second, x, y, w, h))
     end
-end
-
-local function widget_changed(layout, old_w, new_w)
-    if old_w then
-        old_w:disconnect_signal("widget::updated", layout._emit_updated)
-    end
-    if new_w then
-        widget_base.check_widget(new_w)
-        new_w:weak_connect_signal("widget::updated", layout._emit_updated)
-    end
-    layout._emit_updated()
+    return result
 end
 
 --- Set the layout's first widget. This is the widget that is at the left/top
 function align:set_first(widget)
-    widget_changed(self, self.first, widget)
     self.first = widget
+    self:emit_signal("widget::layout_changed")
 end
 
 --- Set the layout's second widget. This is the centered one.
 function align:set_second(widget)
-    widget_changed(self, self.second, widget)
     self.second = widget
+    self:emit_signal("widget::layout_changed")
 end
 
 --- Set the layout's third widget. This is the widget that is at the right/bottom
 function align:set_third(widget)
-    widget_changed(self, self.third, widget)
     self.third = widget
+    self:emit_signal("widget::layout_changed")
 end
 
 --- Fit the align layout into the given space. The align layout will
@@ -189,6 +179,7 @@ function align:fit(context, orig_width, orig_height)
     end
     return used_in_dir, used_in_other
 end
+
 --- Set the expand mode which determines how sub widgets expand to take up
 -- unused space. Options are:
 --  "inside" - Default option. Size of outside widgets is determined using their
@@ -207,22 +198,19 @@ function align:set_expand(mode)
     else
         self._expand = "inside"
     end
-    self:emit_signal("widget::updated")
+    self:emit_signal("widget::layout_changed")
 end
 
 function align:reset()
     for k, v in pairs({ "first", "second", "third" }) do
         self[v] = nil
     end
-    self:emit_signal("widget::updated")
+    self:emit_signal("widget::layout_changed")
 end
 
 local function get_layout(dir)
     local ret = widget_base.make_widget()
     ret.dir = dir
-    ret._emit_updated = function()
-        ret:emit_signal("widget::updated")
-    end
 
     for k, v in pairs(align) do
         if type(v) == "function" then
