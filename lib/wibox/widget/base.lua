@@ -9,6 +9,7 @@ local debug = require("gears.debug")
 local object = require("gears.object")
 local cache = require("gears.cache")
 local matrix = require("gears.matrix")
+local Matrix = require("lgi").cairo.Matrix
 local setmetatable = setmetatable
 local pairs = pairs
 local type = type
@@ -68,6 +69,40 @@ function base.handle_button(event, widget, x, y, button, modifiers, geometry)
     end
 end
 
+--- Create widget placement information. This should be used for a widget's
+-- :layout() callback.
+-- @param widget The widget that should be placed.
+-- @param mat A cairo matrix transforming from the parent widget's coordinate
+--        system. For example, use cairo.Matrix.create_translate(1, 2) to draw a
+--        widget at position (1, 2) relative to the parent widget.
+-- @param width The width of the widget in its own coordinate system. That is,
+--        after applying the transformation matrix.
+-- @param height The height of the widget in its own coordinate system. That is,
+--        after applying the transformation matrix.
+-- @return An opaque object that can be returned from :layout()
+function base.place_widget_via_matrix(widget, mat, width, height)
+    return {
+        _widget = widget,
+        _width = width,
+        _height = height,
+        _matrix = matrix.copy(mat)
+    }
+end
+
+--- Create widget placement information. This should be used for a widget's
+-- :layout() callback.
+-- @param widget The widget that should be placed.
+-- @param x The x coordinate for the widget.
+-- @param y The y coordinate for the widget.
+-- @param width The width of the widget in its own coordinate system. That is,
+--        after applying the transformation matrix.
+-- @param height The height of the widget in its own coordinate system. That is,
+--        after applying the transformation matrix.
+-- @return An opaque object that can be returned from :layout()
+function base.place_widget_at(widget, x, y, width, height)
+    return base.place_widget_via_matrix(widget, Matrix.create_translate(x, y), width, height)
+end
+
 --- Create a new widget. All widgets have to be generated via this function so
 -- that the needed signals are added and mouse input handling is set up.
 -- @param proxy If this is set, the returned widget will be a proxy for this
@@ -78,12 +113,21 @@ function base.make_widget(proxy, widget_name)
     local ret = object()
 
     -- This signal is used by layouts to find out when they have to update.
-    ret:add_signal("widget::updated")
+    ret:add_signal("widget::layout_changed")
+    ret:add_signal("widget::redraw_needed")
     -- Mouse input, oh noes!
     ret:add_signal("button::press")
     ret:add_signal("button::release")
     ret:add_signal("mouse::enter")
     ret:add_signal("mouse::leave")
+
+    -- Backwards compatibility
+    -- TODO: Remove this
+    ret:add_signal("widget::updated")
+    ret:connect_signal("widget::updated", function()
+        ret:emit_signal("widget::layout_changed")
+        ret:emit_signal("widget::redraw_needed")
+    end)
 
     -- No buttons yet
     ret.widget_buttons = {}
@@ -98,21 +142,47 @@ function base.make_widget(proxy, widget_name)
     end)
 
     if proxy then
-        ret.draw = function(_, ...) return proxy:draw(...) end
-        ret.fit = function(_, ...) return proxy:fit(...) end
-        proxy:connect_signal("widget::updated", function()
-            ret:emit_signal("widget::updated")
+        ret.fit = function(_, ...) return proxy._fit_geometry_cache:get(...) end
+        ret.layout = function(_, context, width, height)
+            return { base.place_widget_at(proxy, 0, 0, width, height) }
+        end
+        proxy:connect_signal("widget::layout_changed", function()
+            ret:emit_signal("widget::layout_changed")
+        end)
+        proxy:connect_signal("widget::redraw_needed", function()
+            ret:emit_signal("widget::redraw_needed")
         end)
     end
 
-    -- Add a geometry for base.fit_widget() that is cleared when necessary
-    local function cb(...)
-        return ret:fit(...)
+    -- Add caches for :fit() and :layout()
+    local function layout_cb(...)
+        if ret.layout then
+            return ret:layout(...)
+        end
     end
-    ret._fit_geometry_cache = cache.new(cb)
-    ret:connect_signal("widget::updated", function()
-        ret._fit_geometry_cache = cache.new(cb)
-    end)
+    local function fit_cb(context, width, height)
+        local w, h = 0, 0
+        if ret.fit then
+            w, h = ret:fit(context, width, height)
+        else
+            -- If it has no fit method, calculate based on the size of children
+            local children = ret._layout_cache:get(context, width, height)
+            for _, info in ipairs(children or {}) do
+                local x, y, w2, h2 = matrix.transform_rectangle(info._matrix,
+                    0, 0, info._width, info._height)
+                w, h = math.max(w, x + w2), math.max(h, y + h2)
+            end
+        end
+        -- Fix up the result that was returned
+        w = math.max(0, math.min(width, w))
+        h = math.max(0, math.min(height, h))
+        return w, h
+    end
+    ret._clear_widget_fit_layout_cache = function()
+        ret._fit_geometry_cache = cache.new(fit_cb)
+        ret._layout_cache = cache.new(layout_cb)
+    end
+    ret._clear_widget_fit_layout_cache()
 
     -- Add visible property and setter.
     ret.visible = true
@@ -135,23 +205,16 @@ end
 
 --- Generate an empty widget which takes no space and displays nothing
 function base.empty_widget()
-    local widget = base.make_widget()
-    widget.draw = function() end
-    widget.fit = function() return 0, 0 end
-    return widget
+    return base.make_widget()
 end
 
 --- Do some sanity checking on widget. This function raises a lua error if
 -- widget is not a valid widget.
 function base.check_widget(widget)
     debug.assert(type(widget) == "table")
-    for k, func in pairs({ "draw", "fit", "add_signal", "connect_signal", "disconnect_signal" }) do
+    for k, func in pairs({ "add_signal", "connect_signal", "disconnect_signal" }) do
         debug.assert(type(widget[func]) == "function", func .. " is not a function")
     end
-
-    local width, height = widget:fit({}, 0, 0)
-    debug.assert(type(width) == "number")
-    debug.assert(type(height) == "number")
 end
 
 return base
