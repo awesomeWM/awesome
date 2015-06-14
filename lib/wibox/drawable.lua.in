@@ -120,7 +120,7 @@ function drawable:set_widget(widget)
 
     self.widget = widget
     if widget then
-        widget:connect_signal("widget::updated", self.draw)
+        widget:weak_connect_signal("widget::updated", self.draw)
     end
 
     -- Make sure the widget gets drawn
