@@ -22,6 +22,7 @@ local client = require("awful.client")
 local timer = require("gears.timer")
 
 local layout = {}
+layout.client_padding = 0
 
 --- Default predefined layouts
 --
@@ -134,8 +135,10 @@ function layout.arrange(screen)
         p.geometries = setmetatable({}, {__mode = "k"})
         layout.get(screen).arrange(p)
         for c, g in pairs(p.geometries) do
-            g.width = g.width - c.border_width * 2
-            g.height = g.height - c.border_width * 2
+            g.width = g.width - 2*c.border_width - 2*layout.client_padding
+            g.height = g.height - 2*c.border_width - 2*layout.client_padding
+            g.x = g.x + layout.client_padding
+            g.y = g.y + layout.client_padding
             c:geometry(g)
         end
         capi.screen[screen]:emit_signal("arrange")

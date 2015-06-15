@@ -71,6 +71,7 @@ awful.layout.layouts = {
     -- awful.layout.suit.corner.sw,
     -- awful.layout.suit.corner.se,
 }
+awful.layout.client_padding = 0
 -- }}}
 
 -- {{{ Wallpaper
