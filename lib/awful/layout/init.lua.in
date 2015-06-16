@@ -10,14 +10,15 @@
 -- Grab environment we need
 local ipairs = ipairs
 local type = type
-local tag = require("awful.tag")
 local util = require("awful.util")
 local ascreen = require("awful.screen")
 local capi = {
     screen = screen,
     awesome = awesome,
-    client = client
+    client = client,
+    tag = tag
 }
+local tag = require("awful.tag")
 local client = require("awful.client")
 local timer = require("gears.timer")
 
@@ -173,28 +174,22 @@ capi.client.connect_signal("property::screen", function(c, old_screen)
     layout.arrange(c.screen)
 end)
 
-local function arrange_on_tagged(c, tag)
-    if not tag.screen then return end
-    layout.arrange(tag.screen)
-    if not capi.client.focus or not capi.client.focus:isvisible() then
-        local c = client.focus.history.get(tag.screen, 0)
-        if c then capi.client.focus = c end
-    end
-end
 local function arrange_tag(t)
     layout.arrange(tag.getscreen(t))
 end
 
 capi.screen.add_signal("arrange")
+
+capi.tag.connect_signal("property::mwfact", arrange_tag)
+capi.tag.connect_signal("property::nmaster", arrange_tag)
+capi.tag.connect_signal("property::ncol", arrange_tag)
+capi.tag.connect_signal("property::layout", arrange_tag)
+capi.tag.connect_signal("property::windowfact", arrange_tag)
+capi.tag.connect_signal("property::selected", arrange_tag)
+capi.tag.connect_signal("property::activated", arrange_tag)
+capi.tag.connect_signal("tagged", arrange_tag)
+
 for s = 1, capi.screen.count() do
-    tag.attached_connect_signal(s, "property::mwfact", arrange_tag)
-    tag.attached_connect_signal(s, "property::nmaster", arrange_tag)
-    tag.attached_connect_signal(s, "property::ncol", arrange_tag)
-    tag.attached_connect_signal(s, "property::layout", arrange_tag)
-    tag.attached_connect_signal(s, "property::windowfact", arrange_tag)
-    tag.attached_connect_signal(s, "property::selected", arrange_tag)
-    tag.attached_connect_signal(s, "property::activated", arrange_tag)
-    tag.attached_connect_signal(s, "tagged", arrange_tag)
     capi.screen[s]:connect_signal("property::workarea", function(screen)
         layout.arrange(screen.index)
     end)
