@@ -85,6 +85,11 @@ install:
   # Install ldoc for building docs.
   - sudo luarocks install ldoc
 
+  # Install CMake 3+, via http://www.cmake.org/download/#latest.
+  - wget http://www.cmake.org/files/v3.2/cmake-3.2.3-Linux-x86_64.tar.Z
+  - tar xf cmake-3.2.3-Linux-x86_64.tar.Z
+  - PATH=$PWD/cmake-3.2.3-Linux-x86_64/bin:$PATH
+
 script:
   - export CMAKE_ARGS="-DLUA_LIBRARY=${LUALIB} -DLUA_INCLUDE_DIR=/usr/include/lua${LUAPKG}"
-  - make && sudo make install && awesome --version
+  - make && sudo env PATH=$PATH make install && awesome --version
