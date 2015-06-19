@@ -298,7 +298,7 @@ set(AWESOME_CONFIGURE_FILES
 foreach(file ${AWESOME_CONFIGURE_FILES})
     configure_file(${SOURCE_DIR}/${file}
                    ${BUILD_DIR}/${file}
-                   ESCAPE_QUOTE
+                   ESCAPE_QUOTES
                    @ONLY)
 endforeach()
 #}}}
