@@ -403,7 +403,9 @@ function client.swap.global_bydirection(dir, c)
         end
 
         screen.focus(sel.screen)
-        capi.client.focus = sel
+        if sel == capi.client.focus then
+            sel:emit_signal("request::activate", "client.swap.global_bydirection")
+        end
     end
 end
 
