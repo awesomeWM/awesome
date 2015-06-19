@@ -430,7 +430,13 @@ ewmh_process_client_message(xcb_client_message_event_t *ev)
             lua_State *L = globalconf_get_lua_State();
             luaA_object_push(L, c);
             lua_pushstring(L, "ewmh");
+
+            /* Create table argument with raise=true. */
+            lua_newtable(L);
+            lua_pushstring(L, "raise");
             lua_pushboolean(L, true);
+            lua_settable(L, -3);
+
             luaA_object_emit_signal(L, -3, "request::activate", 2);
             lua_pop(L, 1);
         }
