@@ -54,7 +54,7 @@ local function load_font(name)
     -- Apply default values from the context (e.g. a default font size)
     desc:merge(ctx:get_font_description(), false)
 
-    -- Calculate fond height
+    -- Calculate font height.
     local metrics = ctx:get_metrics(desc, nil)
     local height = math.ceil((metrics:get_ascent() + metrics:get_descent()) / Pango.SCALE)
 

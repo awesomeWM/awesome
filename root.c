@@ -135,7 +135,7 @@ _string_to_key_code(const char *s)
 
 /** Send fake events. Usually the current focused client will get it.
  * \param L The Lua VM state.
- * \return The number of element pushed on stack.
+ * \return The number of elements pushed on stack.
  * \luastack
  * \lparam The event type: key_press, key_release, button_press, button_release
  * or motion_notify.
@@ -208,9 +208,9 @@ luaA_root_fake_input(lua_State *L)
 }
 
 /** Get or set global key bindings.
- * This binding will be available when you'll press keys on root window.
+ * This binding will be available when you'll press keys on the root window.
  * \param L The Lua VM state.
- * \return The number of element pushed on stack.
+ * \return The number of elements pushed on stack.
  * \luastack
  * \lparam An array of key bindings objects, or nothing.
  * \lreturn The array of key bindings objects of this client.
@@ -250,9 +250,9 @@ luaA_root_keys(lua_State *L)
 }
 
 /** Get or set global mouse bindings.
- * This binding will be available when you'll click on root window.
+ * This binding will be available when you'll click on the root window.
  * \param L The Lua VM state.
- * \return The number of element pushed on stack.
+ * \return The number of elements pushed on stack.
  * \luastack
  * \lparam An array of mouse button bindings objects, or nothing.
  * \lreturn The array of mouse button bindings objects.
@@ -289,7 +289,7 @@ luaA_root_buttons(lua_State *L)
 
 /** Set the root cursor.
  * \param L The Lua VM state.
- * \return The number of element pushed on stack.
+ * \return The number of elements pushed on stack.
  * \luastack
  * \lparam A X cursor name.
  */
@@ -316,7 +316,7 @@ luaA_root_cursor(lua_State *L)
 
 /** Get the drawins attached to a screen.
  * \param L The Lua VM state.
- * \return The number of element pushed on stack.
+ * \return The number of elements pushed on stack.
  * \luastack
  * \lreturn A table with all drawins.
  */
@@ -336,7 +336,7 @@ luaA_root_drawins(lua_State *L)
 
 /** Get the screen's wallpaper
  * \param L The Lua VM state.
- * \return The number of element pushed on stack.
+ * \return The number of elements pushed on stack.
  * \luastack
  * \lreturn A cairo surface for the wallpaper.
  */
@@ -400,7 +400,7 @@ luaA_root_wallpaper(lua_State *L)
 
 /** Get the screen's wallpaper
  * \param L The Lua VM state.
- * \return The number of element pushed on stack.
+ * \return The number of elements pushed on stack.
  * \luastack
  * \lreturn A cairo surface for the wallpaper.
  */
