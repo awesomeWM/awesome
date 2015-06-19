@@ -25,14 +25,19 @@ local ignore_modifiers = { "Lock", "Mod2" }
 
 --- Create a new key to use as binding.
 -- This function is useful to create several keys from one, because it will use
--- the ignore_modifier variable to create more key with or without the ignored
--- modifiers activated.
+-- the ignore_modifier variable to create several keys with and without the
+-- ignored modifiers activated.
 -- For example if you want to ignore CapsLock in your keybinding (which is
--- ignored by default by this function), creating key binding with this function
--- will return 2 key objects: one with CapsLock on, and the other one with
--- CapsLock off.
--- @see key
--- @return A table with one or several key objects.
+-- ignored by default by this function), creating a key binding with this
+-- function will return 2 key objects: one with CapsLock on, and another one
+-- with CapsLock off.
+-- @see key.key
+-- @tparam table mod A list of modifier keys.  Valid modifiers are: Any, Mod1,
+--   Mod2, Mod3, Mod4, Mod5, Shift, Lock and Control.
+-- @tparam string _key The key to trigger an event.
+-- @tparam function press Callback for when the key is pressed.
+-- @tparam function release Callback for when the key is released.
+-- @treturn table A table with one or several key objects.
 function key.new(mod, _key, press, release)
     local ret = {}
     local subsets = util.subsets(ignore_modifiers)
