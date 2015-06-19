@@ -55,7 +55,6 @@ file = {
         -- documentation
         '../lib/awful/autofocus.lua',
         '../lib/awful/dbus.lua',
-        '../lib/awful/ewmh.lua',
         '../lib/awful/init.lua',
         '../lib/awful/remote.lua',
         '../lib/awful/startup_notification.lua',
