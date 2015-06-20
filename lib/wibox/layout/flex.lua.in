@@ -62,7 +62,7 @@ end
 function flex:add(widget)
     widget_base.check_widget(widget)
     table.insert(self.widgets, widget)
-    widget:connect_signal("widget::updated", self._emit_updated)
+    widget:weak_connect_signal("widget::updated", self._emit_updated)
     self._emit_updated()
 end
 

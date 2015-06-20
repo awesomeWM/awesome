@@ -58,7 +58,7 @@ function margin:set_widget(widget)
     end
     if widget then
         widget_base.check_widget(widget)
-        widget:connect_signal("widget::updated", self._emit_updated)
+        widget:weak_connect_signal("widget::updated", self._emit_updated)
     end
     self.widget = widget
     self._emit_updated()
