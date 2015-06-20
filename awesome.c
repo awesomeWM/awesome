@@ -325,6 +325,10 @@ main(int argc, char **argv)
         { NULL,      0, NULL, 0 }
     };
 
+    /* Make stdout/stderr line buffered. */
+    setvbuf(stdout, NULL, _IOLBF, 0);
+    setvbuf(stderr, NULL, _IOLBF, 0);
+
     /* clear the globalconf structure */
     p_clear(&globalconf, 1);
     globalconf.keygrabber = LUA_REFNIL;
