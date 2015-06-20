@@ -179,6 +179,11 @@ luaA_class_gc(lua_State *L)
     for(; class; class = class->parent)
         if(class->collector)
             class->collector(item);
+    /* Unset its metatable so that e.g. luaA_toudata() will no longer accept
+     * this object. This is needed since other __gc methods can still use this.
+     */
+    lua_newtable(L);
+    lua_setmetatable(L, 1);
     return 0;
 }
 
