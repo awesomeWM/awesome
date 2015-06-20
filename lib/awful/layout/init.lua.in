@@ -62,6 +62,16 @@ function layout.get(screen)
     return tag.getproperty(t, "layout") or layout.suit.floating
 end
 
+--- Get a layout by name.
+-- @return The layout function.
+function layout.get_by_name(name)
+    for _,layout in ipairs(layout.layouts) do
+        if layout.name == name then
+            return layout
+        end
+    end
+end
+
 --- Change the layout of the current tag.
 -- @param i Relative index.
 -- @param s The screen number. 
@@ -101,7 +111,7 @@ function layout.inc(i, s, layouts)
 end
 
 --- Set the layout function of the current tag.
--- @param _layout Layout name.
+-- @param _layout Layout.
 -- @param t The tag to modify, if null tag.selected() is used.
 function layout.set(_layout, t)
     t = t or tag.selected()
