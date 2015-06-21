@@ -195,7 +195,7 @@ local function add_value(_graph, value, group)
         table.remove(values, 1)
     end
 
-    _graph:emit_signal("widget::updated")
+    _graph:emit_signal("widget::redraw_needed")
     return _graph
 end
 
@@ -205,7 +205,7 @@ end
 function graph:set_height(height)
     if height >= 5 then
         data[self].height = height
-        self:emit_signal("widget::updated")
+        self:emit_signal("widget::layout_changed")
     end
     return self
 end
@@ -215,7 +215,7 @@ end
 function graph:set_width(width)
     if width >= 5 then
         data[self].width = width
-        self:emit_signal("widget::updated")
+        self:emit_signal("widget::layout_changed")
     end
     return self
 end
@@ -226,7 +226,7 @@ for _, prop in ipairs(properties) do
         graph["set_" .. prop] = function(_graph, value)
             if data[_graph][prop] ~= value then
                 data[_graph][prop] = value
-                _graph:emit_signal("widget::updated")
+                _graph:emit_signal("widget::redraw_needed")
             end
             return _graph
         end

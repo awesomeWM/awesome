@@ -164,7 +164,7 @@ function progressbar:set_value(value)
     local value = value or 0
     local max_value = data[self].max_value
     data[self].value = math.min(max_value, math.max(0, value))
-    self:emit_signal("widget::updated")
+    self:emit_signal("widget::redraw_needed")
     return self
 end
 
@@ -172,7 +172,7 @@ end
 -- @param height The height to set.
 function progressbar:set_height(height)
     data[self].height = height
-    self:emit_signal("widget::updated")
+    self:emit_signal("widget::layout_changed")
     return self
 end
 
@@ -180,7 +180,7 @@ end
 -- @param width The width to set.
 function progressbar:set_width(width)
     data[self].width = width
-    self:emit_signal("widget::updated")
+    self:emit_signal("widget::layout_changed")
     return self
 end
 
@@ -189,7 +189,7 @@ for _, prop in ipairs(properties) do
     if not progressbar["set_" .. prop] then
         progressbar["set_" .. prop] = function(pbar, value)
             data[pbar][prop] = value
-            pbar:emit_signal("widget::updated")
+            pbar:emit_signal("widget::redraw_needed")
             return pbar
         end
     end
