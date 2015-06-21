@@ -30,6 +30,7 @@
 #include <xcb/xcb_icccm.h>
 #include <xcb/xcb_keysyms.h>
 #include <xcb/xcb_cursor.h>
+#include <X11/Xresource.h>
 
 #include "objects/key.h"
 #include "common/xembed.h"
@@ -65,6 +66,10 @@ ARRAY_TYPE(xproperty_t, xproperty)
 /** Main configuration structure */
 typedef struct
 {
+    /** Xlib Display */
+    Display *display;
+    /** X Resources DB */
+    XrmDatabase xrmdb;
     /** Connection ref */
     xcb_connection_t *connection;
     /** Default screen number */

@@ -130,6 +130,7 @@ pkg_check_modules(AWESOME_REQUIRED REQUIRED
     gdk-pixbuf-2.0
     cairo
     x11
+    x11-xcb
     xcb-cursor
     xcb-randr
     xcb-xtest

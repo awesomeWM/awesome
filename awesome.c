@@ -53,6 +53,9 @@
 #include <xcb/xtest.h>
 #include <xcb/shape.h>
 
+#include <X11/Xlib-xcb.h>
+#include <X11/XKBlib.h>
+
 #include <glib-unix.h>
 
 awesome_t globalconf;
@@ -412,8 +415,16 @@ main(int argc, char **argv)
     /* We have no clue where the input focus is right now */
     globalconf.focus.need_update = true;
 
+    /* XLib sucks */
+    XkbIgnoreExtension(True);
+
     /* X stuff */
-    globalconf.connection = xcb_connect(NULL, &globalconf.default_screen);
+    globalconf.display = XOpenDisplay(NULL);
+    if (globalconf.display == NULL)
+        fatal("Cannot open display");
+    XSetEventQueueOwner(globalconf.display, XCBOwnsEventQueue);
+    globalconf.default_screen = XDefaultScreen(globalconf.display);
+    globalconf.connection = XGetXCBConnection(globalconf.display);;
     if(xcb_connection_has_error(globalconf.connection))
         fatal("cannot open display (error %d)", xcb_connection_has_error(globalconf.connection));
 

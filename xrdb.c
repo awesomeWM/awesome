@@ -26,28 +26,19 @@
 
 #include <string.h>
 
-Display *dpy;
-XrmDatabase xrmdb;
-
 /* \brief open X display and X Resources DB
  */
 static void xrdb_init(void) {
-  /**/
-  /* Open display with Xlib */
-  /**/
-  char *displayname = NULL;
-  if (!(dpy = XOpenDisplay(displayname)))
-    fatal("Can't open display.\n");
   XrmInitialize(); // @TODO: it works without it but in docs it's said what it's
                    // needed
-  if (!(xrmdb = XrmGetDatabase(dpy))) {
+  if (!(globalconf.xrmdb = XrmGetDatabase(globalconf.display))) {
 
     /* taken from xpbiff: */
     /* >> what a hack; need to initialize dpy->db */
-    (void)XGetDefault(dpy, "", "");
+    (void)XGetDefault(globalconf.display, "", "");
     /**/
 
-    if (!(xrmdb = XrmGetDatabase(dpy)))
+    if (!(globalconf.xrmdb = XrmGetDatabase(globalconf.display)))
       warn("Can't open xrdb\n");
   }
 }
@@ -61,7 +52,7 @@ static void xrdb_init(void) {
  * \lreturn string xrdb value or nil if not exists. \
  */
 int luaA_xrdb_get_value(lua_State *L) {
-  if (!xrmdb)
+  if (!globalconf.xrmdb)
     xrdb_init();
 
   char *resource_type;
@@ -70,7 +61,7 @@ int luaA_xrdb_get_value(lua_State *L) {
   const char *resource_class = luaL_checkstring(L, 1);
   const char *resource_name = luaL_checkstring(L, 2);
 
-  resource_code = XrmGetResource(xrmdb, resource_name, resource_class,
+  resource_code = XrmGetResource(globalconf.xrmdb, resource_name, resource_class,
                                  &resource_type, &resource_value);
   if (resource_code && (strcmp(resource_type, "String") == 0)) {
     lua_pushstring(L, (char *)resource_value.addr);
