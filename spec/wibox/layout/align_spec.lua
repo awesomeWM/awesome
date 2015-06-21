@@ -222,6 +222,50 @@ describe("wibox.layout.align", function()
             end)
         end)
     end)
+
+    describe("emitting signals", function()
+        local layout, layout_changed
+        before_each(function()
+            layout = align.vertical()
+            layout:connect_signal("widget::layout_changed", function()
+                layout_changed = layout_changed + 1
+            end)
+            layout_changed = 0
+        end)
+
+        it("set first", function()
+            local w1, w2 = {}, {}
+            assert.is.equal(layout_changed, 0)
+            layout:set_first(w1)
+            assert.is.equal(layout_changed, 1)
+            layout:set_first(w2)
+            assert.is.equal(layout_changed, 2)
+            layout:set_first(w2)
+            assert.is.equal(layout_changed, 2)
+        end)
+
+        it("set second", function()
+            local w1, w2 = {}, {}
+            assert.is.equal(layout_changed, 0)
+            layout:set_second(w1)
+            assert.is.equal(layout_changed, 1)
+            layout:set_second(w2)
+            assert.is.equal(layout_changed, 2)
+            layout:set_second(w2)
+            assert.is.equal(layout_changed, 2)
+        end)
+
+        it("set third", function()
+            local w1, w2 = {}, {}
+            assert.is.equal(layout_changed, 0)
+            layout:set_third(w1)
+            assert.is.equal(layout_changed, 1)
+            layout:set_third(w2)
+            assert.is.equal(layout_changed, 2)
+            layout:set_third(w2)
+            assert.is.equal(layout_changed, 2)
+        end)
+    end)
 end)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
