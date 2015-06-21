@@ -303,7 +303,7 @@ macro(a_configure_file file)
     message(STATUS "Configuring ${outfile}")
     configure_file(${SOURCE_DIR}/${file}
                    ${BUILD_DIR}/${outfile}
-                   ESCAPE_QUOTE
+                   ESCAPE_QUOTES
                    @ONLY)
 endmacro()
 
