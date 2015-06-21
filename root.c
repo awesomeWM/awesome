@@ -19,6 +19,13 @@
  *
  */
 
+/** awesome root window API
+ * @author Julien Danjou &lt;julien@danjou.info&gt;
+ * @copyright 2008-2009 Julien Danjou
+ * @release @AWESOME_VERSION@
+ * @module root
+ */
+
 #include "globalconf.h"
 
 #include "common/atoms.h"
@@ -133,18 +140,17 @@ _string_to_key_code(const char *s)
     }
 }
 
-/** Send fake events. Usually the current focused client will get it.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- * \luastack
- * \lparam The event type: key_press, key_release, button_press, button_release
- * or motion_notify.
- * \lparam The detail: in case of a key event, this is the keycode to send, in
- * case of a button event this is the number of the button. In case of a motion
- * event, this is a boolean value which if true make the coordinates relatives.
- * \lparam In case of a motion event, this is the X coordinate.
- * \lparam In case of a motion event, this is the Y coordinate.
- * If not specified, the current one is used.
+/** Send fake events. Usually the currently focused client will get it.
+ *
+ * @param event_type The event type: key_press, key_release, button_press,
+ *  button_release or motion_notify.
+ * @param detail The detail: in case of a key event, this is the keycode
+ *  to send, in case of a button event this is the number of the button. In
+ *  case of a motion event, this is a boolean value which if true makes the
+ *  coordinates relatives.
+ * @param x In case of a motion event, this is the X coordinate.
+ * @param y In case of a motion event, this is the Y coordinate.
+ * @function fake_input
  */
 static int
 luaA_root_fake_input(lua_State *L)
@@ -208,12 +214,11 @@ luaA_root_fake_input(lua_State *L)
 }
 
 /** Get or set global key bindings.
- * This binding will be available when you'll press keys on the root window.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- * \luastack
- * \lparam An array of key bindings objects, or nothing.
- * \lreturn The array of key bindings objects of this client.
+ * These bindings will be available when you press keys on the root window.
+ *
+ * @tparam table|nil keys_array An array of key binding objects, or nothing.
+ * @return The array of key bindings objects of this client.
+ * @function keys
  */
 static int
 luaA_root_keys(lua_State *L)
@@ -250,12 +255,11 @@ luaA_root_keys(lua_State *L)
 }
 
 /** Get or set global mouse bindings.
- * This binding will be available when you'll click on the root window.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- * \luastack
- * \lparam An array of mouse button bindings objects, or nothing.
- * \lreturn The array of mouse button bindings objects.
+ * This binding will be available when you click on the root window.
+ *
+ * @param button_table An array of mouse button bindings objects, or nothing.
+ * @return The array of mouse button bindings objects.
+ * @function buttons
  */
 static int
 luaA_root_buttons(lua_State *L)
@@ -288,10 +292,9 @@ luaA_root_buttons(lua_State *L)
 }
 
 /** Set the root cursor.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- * \luastack
- * \lparam A X cursor name.
+ *
+ * @param cursor_name A X cursor name.
+ * @function cursor
  */
 static int
 luaA_root_cursor(lua_State *L)
@@ -315,10 +318,9 @@ luaA_root_cursor(lua_State *L)
 }
 
 /** Get the drawins attached to a screen.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- * \luastack
- * \lreturn A table with all drawins.
+ *
+ * @return A table with all drawins.
+ * @function drawins
  */
 static int
 luaA_root_drawins(lua_State *L)
@@ -334,11 +336,11 @@ luaA_root_drawins(lua_State *L)
     return 1;
 }
 
-/** Get the screen's wallpaper
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- * \luastack
- * \lreturn A cairo surface for the wallpaper.
+/** Get the wallpaper as a cairo surface or set it as a cairo pattern.
+ *
+ * @param pattern A cairo pattern as light userdata
+ * @return A cairo surface or nothing.
+ * @function wallpaper
  */
 static int
 luaA_root_wallpaper(lua_State *L)
@@ -398,11 +400,9 @@ luaA_root_wallpaper(lua_State *L)
     return 1;
 }
 
-/** Get the screen's wallpaper
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- * \luastack
- * \lreturn A cairo surface for the wallpaper.
+/** Get the attached tags.
+ * @return A table with all tags.
+ * @function tags
  */
 static int
 luaA_root_tags(lua_State *L)

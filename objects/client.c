@@ -19,6 +19,21 @@
  *
  */
 
+/** awesome client API
+ *
+ * Furthermore to the classes described here, one can also use signals as
+ * described in @{signals} and X properties as described in @{xproperties}.
+ *
+ * Some signal names are starting with a dot. These dots are artefacts from
+ * the documentation generation, you get the real signal name by
+ * removing the starting dot.
+ *
+ * @author Julien Danjou &lt;julien@danjou.info&gt;
+ * @copyright 2008-2009 Julien Danjou
+ * @release @AWESOME_VERSION@
+ * @classmod client
+ */
+
 #include "objects/client.h"
 #include "common/atoms.h"
 #include "common/xutil.h"
@@ -35,6 +50,75 @@
 #include <xcb/xcb_atom.h>
 #include <xcb/shape.h>
 #include <cairo-xcb.h>
+
+/** Client object.
+ *
+ * @field window The X window id.
+ * @field name The client title.
+ * @field skip_taskbar True if the client does not want to be in taskbar.
+ * @field type The window type (desktop, normal, dock, …).
+ * @field class The client class.
+ * @field instance The client instance.
+ * @field pid The client PID, if available.
+ * @field role The window role, if available.
+ * @field machine The machine client is running on.
+ * @field icon_name The client name when iconified.
+ * @field icon The client icon.
+ * @field screen Client screen.
+ * @field hidden Define if the client must be hidden, i.e. never mapped,
+ *   invisible in taskbar.
+ * @field minimized Define it the client must be iconify, i.e. only visible in
+ *   taskbar.
+ * @field size_hints_honor Honor size hints, i.e. respect size ratio.
+ * @field border_width The client border width.
+ * @field border_color The client border color.
+ * @field urgent The client urgent state.
+ * @field content An image representing the client window content (screenshot).
+ * @field focus The focused client.
+ * @field opacity The client opacity between 0 and 1.
+ * @field ontop The client is on top of every other windows.
+ * @field above The client is above normal windows.
+ * @field below The client is below normal windows.
+ * @field fullscreen The client is fullscreen or not.
+ * @field maximized The client is maximized (horizontally and vertically) or not.
+ * @field maximized_horizontal The client is maximized horizontally or not.
+ * @field maximized_vertical The client is maximized vertically or not.
+ * @field transient_for The client the window is transient for.
+ * @field group_window Window identification unique to a group of windows.
+ * @field leader_window Identification unique to windows spawned by the same command.
+ * @field size_hints A table with size hints of the client: user_position,
+ *   user_size, program_position, program_size, etc.
+ * @field sticky Set the client sticky, i.e. available on all tags.
+ * @field modal Indicate if the client is modal.
+ * @field focusable True if the client can receive the input focus.
+ * @field shape_bounding The client's bounding shape as set by awesome as a (native) cairo surface.
+ * @field shape_clip The client's clip shape as set by awesome as a (native) cairo surface.
+ * @field shape_client_bounding The client's bounding shape as set by the program as a (native) cairo surface.
+ * @field shape_client_clip The client's clip shape as set by the program as a (native) cairo surface.
+ * @field startup_id The FreeDesktop StartId.
+ * @field valid If the client that this object refers to is still managed by awesome.
+ * @table client
+ */
+
+/** Return client struts (reserved space at the edge of the screen).
+ *
+ * @param struts A table with new strut values, or none.
+ * @return A table with strut values.
+ * @function struts
+ */
+
+/** Get or set mouse buttons bindings for a client.
+ *
+ * @param buttons_table An array of mouse button bindings objects, or nothing.
+ * @return A table with all buttons.
+ * @function buttons
+ */
+
+/** Get the number of instances.
+ *
+ * @return The number of client objects alive.
+ * @function instances
+ */
 
 static area_t titlebar_get_area(client_t *c, client_titlebar_t bar);
 static drawable_t *titlebar_get_drawable(lua_State *L, client_t *c, int cl_idx, client_titlebar_t bar);
@@ -1305,11 +1389,10 @@ client_kill(client_t *c)
 }
 
 /** Get all clients into a table.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- * \luastack
- * \lparam An optional screen number.
- * \lreturn A table with all clients.
+ *
+ * @param[opt] screen A screen number.
+ * @return A table with all clients.
+ * @function get
  */
 static int
 luaA_client_get(lua_State *L)
@@ -1332,11 +1415,9 @@ luaA_client_get(lua_State *L)
 }
 
 /** Check if a client is visible on its screen.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- * \luastack
- * \lvalue A client.
- * \lreturn A boolean value, true if the client is visible, false otherwise.
+ *
+ * @return A boolean value, true if the client is visible, false otherwise.
+ * @function isvisible
  */
 static int
 luaA_client_isvisible(lua_State *L)
@@ -1433,10 +1514,8 @@ out:
 
 
 /** Kill a client.
- * \param L The Lua VM state.
  *
- * \luastack
- * \lvalue A client.
+ * @function kill
  */
 static int
 luaA_client_kill(lua_State *L)
@@ -1446,11 +1525,9 @@ luaA_client_kill(lua_State *L)
     return 0;
 }
 
-/** Swap a client with another one.
- * \param L The Lua VM state.
- * \luastack
- * \lvalue A client.
- * \lparam A client to swap with.
+/** Swap a client with another one in global client list.
+ * @client A client to swap with.
+ * @function swap
  */
 static int
 luaA_client_swap(lua_State *L)
@@ -1481,10 +1558,11 @@ luaA_client_swap(lua_State *L)
 }
 
 /** Access or set the client tags.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- * \lparam A table with tags to set, or none to get the current tags table.
- * \return The clients tag.
+ *
+ * @param tags_table A table with tags to set, or none to get the current tags
+ *  table.
+ * @return A table with all tags.
+ * @function tags
  */
 static int
 luaA_client_tags(lua_State *L)
@@ -1534,9 +1612,8 @@ luaA_client_tags(lua_State *L)
 }
 
 /** Raise a client on top of others which are on the same layer.
- * \param L The Lua VM state.
- * \luastack
- * \lvalue A client.
+ *
+ * @function raise
  */
 static int
 luaA_client_raise(lua_State *L)
@@ -1547,9 +1624,8 @@ luaA_client_raise(lua_State *L)
 }
 
 /** Lower a client on bottom of others which are on the same layer.
- * \param L The Lua VM state.
- * \luastack
- * \lvalue A client.
+ *
+ * @function lower
  */
 static int
 luaA_client_lower(lua_State *L)
@@ -1566,10 +1642,8 @@ luaA_client_lower(lua_State *L)
 }
 
 /** Stop managing a client.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- * \luastack
- * \lvalue A client.
+ *
+ * @function unmanage
  */
 static int
 luaA_client_unmanage(lua_State *L)
@@ -1783,11 +1857,10 @@ HANDLE_TITLEBAR(bottom, CLIENT_TITLEBAR_BOTTOM)
 HANDLE_TITLEBAR(left, CLIENT_TITLEBAR_LEFT)
 
 /** Return or set client geometry.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- * \luastack
- * \lparam A table with new coordinates, or none.
- * \lreturn A table with client coordinates.
+ *
+ * @param arg1 A table with new coordinates, or none.
+ * @return A table with client coordinates.
+ * @function geometry
  */
 static int
 luaA_client_geometry(lua_State *L)
@@ -1818,14 +1891,13 @@ luaA_client_geometry(lua_State *L)
     return luaA_pusharea(L, c->geometry);
 }
 
-/** Apply size hints to a lua-specified geometry.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- * \luastack
- * \lparam Desired width of client.
- * \lparam Desired height of client.
- * \lreturn Corrected width.
- * \lreturn Corrected height.
+/** Apply size hints to a size.
+ *
+ * @param width Desired width of client
+ * @param height Desired height of client
+ * @return Actual width of client
+ * @return Actual height of client
+ * @function apply_size_hints
  */
 static int
 luaA_client_apply_size_hints(lua_State *L)
@@ -2310,12 +2382,10 @@ luaA_client_set_shape_clip(lua_State *L, client_t *c)
 }
 
 /** Get or set keys bindings for a client.
- * \param L The Lua VM state.
- * \return The number of element pushed on stack.
- * \luastack
- * \lvalue A client.
- * \lparam An array of key bindings objects, or nothing.
- * \return The array of key bindings objects of this client.
+ *
+ * @param keys_table An array of key bindings objects, or nothing.
+ * @return A table with all keys.
+ * @function keys
  */
 static int
 luaA_client_keys(lua_State *L)
@@ -2570,66 +2640,249 @@ client_class_setup(lua_State *L)
                             (lua_class_propfunc_t) luaA_client_get_client_shape_clip,
                             NULL);
 
+    /** when a client gains focus
+     * @signal .focus
+     */
     signal_add(&client_class.signals, "focus");
+    /** Before manage, after unmanage, and when clients swap.
+     * @signal .list
+     */
     signal_add(&client_class.signals, "list");
+    /**
+     * @signal .manage
+     */
     signal_add(&client_class.signals, "manage");
+    /**
+     * @signal button::press
+     */
     signal_add(&client_class.signals, "button::press");
+    /**
+     * @signal button::release
+     */
     signal_add(&client_class.signals, "button::release");
+    /**
+     * @signal mouse::enter
+     */
     signal_add(&client_class.signals, "mouse::enter");
+    /**
+     * @signal mouse::leave
+     */
     signal_add(&client_class.signals, "mouse::leave");
+    /**
+     * @signal mouse::move
+     */
     signal_add(&client_class.signals, "mouse::move");
+    /**
+     * @signal property::above
+     */
     signal_add(&client_class.signals, "property::above");
+    /**
+     * @signal property::below
+     */
     signal_add(&client_class.signals, "property::below");
+    /**
+     * @signal property::class
+     */
     signal_add(&client_class.signals, "property::class");
+    /**
+     * @signal property::focusable
+     */
     signal_add(&client_class.signals, "property::focusable");
+    /**
+     * @signal property::fullscreen
+     */
     signal_add(&client_class.signals, "property::fullscreen");
+    /**
+     * @signal property::geometry
+     */
     signal_add(&client_class.signals, "property::geometry");
+    /**
+     * @signal property::group_window
+     */
     signal_add(&client_class.signals, "property::group_window");
+    /**
+     * @signal property::height
+     */
     signal_add(&client_class.signals, "property::height");
+    /**
+     * @signal property::hidden
+     */
     signal_add(&client_class.signals, "property::hidden");
+    /**
+     * @signal property::icon
+     */
     signal_add(&client_class.signals, "property::icon");
+    /**
+     * @signal property::icon_name
+     */
     signal_add(&client_class.signals, "property::icon_name");
+    /**
+     * @signal property::instance
+     */
     signal_add(&client_class.signals, "property::instance");
+    /**
+     * @signal property::keys
+     */
     signal_add(&client_class.signals, "property::keys");
+    /**
+     * @signal property::machine
+     */
     signal_add(&client_class.signals, "property::machine");
+    /**
+     * @signal property::maximized
+     */
     signal_add(&client_class.signals, "property::maximized");
+    /**
+     * @signal property::maximized_horizontal
+     */
     signal_add(&client_class.signals, "property::maximized_horizontal");
+    /**
+     * @signal property::maximized_vertical
+     */
     signal_add(&client_class.signals, "property::maximized_vertical");
+    /**
+     * @signal property::minimized
+     */
     signal_add(&client_class.signals, "property::minimized");
+    /**
+     * @signal property::modal
+     */
     signal_add(&client_class.signals, "property::modal");
+    /**
+     * @signal property::name
+     */
     signal_add(&client_class.signals, "property::name");
+    /**
+     * @signal property::ontop
+     */
     signal_add(&client_class.signals, "property::ontop");
+    /**
+     * @signal property::pid
+     */
     signal_add(&client_class.signals, "property::pid");
+    /**
+     * @signal property::role
+     */
     signal_add(&client_class.signals, "property::role");
+    /**
+     * @signal property::screen
+     */
     signal_add(&client_class.signals, "property::screen");
+    /**
+     * @signal property::shape_bounding
+     */
     signal_add(&client_class.signals, "property::shape_bounding");
+    /**
+     * @signal property::shape_client_bounding
+     */
     signal_add(&client_class.signals, "property::shape_client_bounding");
+    /**
+     * @signal property::shape_client_clip
+     */
     signal_add(&client_class.signals, "property::shape_client_clip");
+    /**
+     * @signal property::shape_clip
+     */
     signal_add(&client_class.signals, "property::shape_clip");
+    /**
+     * @signal property::size_hints_honor
+     */
     signal_add(&client_class.signals, "property::size_hints_honor");
+    /**
+     * @signal property::skip_taskbar
+     */
     signal_add(&client_class.signals, "property::skip_taskbar");
+    /**
+     * @signal property::sticky
+     */
     signal_add(&client_class.signals, "property::sticky");
+    /**
+     * @signal property::struts
+     */
     signal_add(&client_class.signals, "property::struts");
+    /**
+     * @signal property::titlebar_bottom
+     */
     signal_add(&client_class.signals, "property::titlebar_bottom");
+    /**
+     * @signal property::titlebar_left
+     */
     signal_add(&client_class.signals, "property::titlebar_left");
+    /**
+     * @signal property::titlebar_right
+     */
     signal_add(&client_class.signals, "property::titlebar_right");
+    /**
+     * @signal property::titlebar_top
+     */
     signal_add(&client_class.signals, "property::titlebar_top");
+    /**
+     * @signal property::transient_for
+     */
     signal_add(&client_class.signals, "property::transient_for");
+    /**
+     * @signal property::type
+     */
     signal_add(&client_class.signals, "property::type");
+    /**
+     * @signal property::urgent
+     */
     signal_add(&client_class.signals, "property::urgent");
+    /**
+     * @signal property::width
+     */
     signal_add(&client_class.signals, "property::width");
+    /**
+     * @signal property::window
+     */
     signal_add(&client_class.signals, "property::window");
+    /**
+     * @signal property::x
+     */
     signal_add(&client_class.signals, "property::x");
+    /**
+     * @signal property::y
+     */
     signal_add(&client_class.signals, "property::y");
+    /**
+     * @signal request::activate
+     */
     signal_add(&client_class.signals, "request::activate");
+    /**
+     * @signal request::fullscreen
+     */
     signal_add(&client_class.signals, "request::fullscreen");
+    /**
+     * @signal request::maximized_horizontal
+     */
     signal_add(&client_class.signals, "request::maximized_horizontal");
+    /**
+     * @signal request::maximized_vertical
+     */
     signal_add(&client_class.signals, "request::maximized_vertical");
+    /**
+     * @signal request::tag
+     */
     signal_add(&client_class.signals, "request::tag");
+    /**
+     * @signal request::urgent
+     */
     signal_add(&client_class.signals, "request::urgent");
+    /** when client is tagged
+     * @signal .tagged
+     */
     signal_add(&client_class.signals, "tagged");
+    /** when a client looses focus
+     * @signal .unfocus
+     */
     signal_add(&client_class.signals, "unfocus");
+    /**
+     * @signal .unmanage
+     */
     signal_add(&client_class.signals, "unmanage");
+    /** when client looses tag
+     * @signal .untagged
+     */
     signal_add(&client_class.signals, "untagged");
 }
 

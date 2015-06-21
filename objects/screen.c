@@ -19,6 +19,17 @@
  *
  */
 
+/** awesome screen API
+ *
+ * Furthermore to the classes described here, one can also use signals as
+ * described in @{signals}.
+ *
+ * @author Julien Danjou &lt;julien@danjou.info&gt;
+ * @copyright 2008-2009 Julien Danjou
+ * @release @AWESOME_VERSION@
+ * @classmod screen
+ */
+
 #include "objects/screen.h"
 #include "banning.h"
 #include "objects/client.h"
@@ -29,6 +40,19 @@
 #include <xcb/xcb.h>
 #include <xcb/xinerama.h>
 #include <xcb/randr.h>
+
+/** Screen is a table where indexes are screen numbers. You can use `screen[1]`
+ * to get access to the first screen, etc. Alternatively, if RANDR information
+ * is available, you can use output names for finding screen objects.
+ * Each screen has a set of properties.
+ *
+ * @tfield table geometry The screen coordinates. Immutable.
+ * @tfield table workarea The screen workarea.
+ * @tfield int index The screen number.
+ * @tfield table outputs If RANDR information is available, a list of outputs
+ *   for this screen and their size in mm.
+ * @table screen
+ */
 
 struct screen_output_t
 {
@@ -502,12 +526,10 @@ luaA_screen_get_workarea(lua_State *L, screen_t *s)
     return 1;
 }
 
-/** Get the screen count.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
+/** Get the number of screens.
  *
- * \luastack
- * \lreturn The screen count, at least 1.
+ * @return The screen count, at least 1.
+ * @function count
  */
 static int
 luaA_screen_count(lua_State *L)
@@ -557,6 +579,9 @@ screen_class_setup(lua_State *L)
                             NULL,
                             (lua_class_propfunc_t) luaA_screen_get_workarea,
                             NULL);
+    /**
+     * @signal property::workarea
+     */
     signal_add(&screen_class.signals, "property::workarea");
 }
 

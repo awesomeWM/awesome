@@ -19,17 +19,21 @@
  *
  */
 
+/**
+ * @module awesome
+ */
+
 #include "xkb.h"
 #include "globalconf.h"
 #include <xcb/xkb.h>
 #include <xkbcommon/xkbcommon.h>
 #include <xkbcommon/xkbcommon-x11.h>
 
-/* \brief switch keyboard layout
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- * \luastack
- * \lparam layout number, integer from 0 to 3
+/**
+ * Switch keyboard layout.
+ *
+ * @function xkb_set_layout_group
+ * @tparam integer num keyboard layout number, integer from 0 to 3
  */
 int
 luaA_xkb_set_layout_group(lua_State *L)
@@ -40,11 +44,11 @@ luaA_xkb_set_layout_group(lua_State *L)
     return 0;
 }
 
-/* \brief get current layout number
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- * \luastack
- * \lreturn current layout number, integer from 0 to 3
+/**
+ * Get current layout number.
+ *
+ * @function xkb_get_layout_group
+ * @treturn integer num Current layout number, integer from 0 to 3.
  */
 int
 luaA_xkb_get_layout_group(lua_State *L)
@@ -65,12 +69,12 @@ luaA_xkb_get_layout_group(lua_State *L)
     return 1;
 }
 
-/* \brief get layout short names
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- * \luastack
- * \lreturn string describing current layout settings, \
- * example: 'pc+us+de:2+inet(evdev)+group(alt_shift_toggle)+ctrl(nocaps)'
+/**
+ * Get layout short names.
+ *
+ * @function xkb_get_group_names
+ * @treturn string A string describing the current layout settings,
+ *   e.g.: 'pc+us+de:2+inet(evdev)+group(alt_shift_toggle)+ctrl(nocaps)'
  */
 int
 luaA_xkb_get_group_names(lua_State *L)

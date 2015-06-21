@@ -74,7 +74,7 @@ luaA_getuservalue(lua_State *L, int idx)
 #else
     lua_getfenv(L, idx);
 #endif
-} 
+}
 
 static inline void
 luaA_setuservalue(lua_State *L, int idx)
@@ -84,7 +84,7 @@ luaA_setuservalue(lua_State *L, int idx)
 #else
     lua_setfenv(L, idx);
 #endif
-} 
+}
 
 static inline size_t
 luaA_rawlen(lua_State *L, int idx)

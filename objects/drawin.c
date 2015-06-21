@@ -20,6 +20,17 @@
  *
  */
 
+/** awesome drawin API
+ *
+ * Furthermore to the classes described here, one can also use signals as
+ * described in @{signals} and X properties as described in @{xproperties}.
+ *
+ * @author Julien Danjou &lt;julien@danjou.info&gt;
+ * @copyright 2008-2009 Julien Danjou
+ * @release @AWESOME_VERSION@
+ * @classmod drawin
+ */
+
 #include "drawin.h"
 #include "common/atoms.h"
 #include "common/xcursor.h"
@@ -31,6 +42,45 @@
 
 #include <cairo-xcb.h>
 #include <xcb/shape.h>
+
+/** Drawin object.
+ *
+ * @field border_width Border width.
+ * @field border_color Border color.
+ * @field ontop On top of other windows.
+ * @field cursor The mouse cursor.
+ * @field visible Visibility.
+ * @field opacity The opacity of the drawin, between 0 and 1.
+ * @field type The window type (desktop, normal, dock, …).
+ * @field x The x coordinates.
+ * @field y The y coordinates.
+ * @field width The width of the drawin.
+ * @field height The height of the drawin.
+ * @field drawable The drawin's drawable.
+ * @field window The X window id.
+ * @field shape_bounding The drawin's bounding shape as a (native) cairo surface.
+ * @field shape_clip The drawin's clip shape as a (native) cairo surface.
+ * @table drawin
+ */
+
+/** Get or set mouse buttons bindings to a drawin.
+ *
+ * @param buttons_table A table of buttons objects, or nothing.
+ * @function buttons
+ */
+
+/** Get or set drawin struts.
+ *
+ * @param strut A table with new strut, or nothing
+ * @return The drawin strut in a table.
+ * @function struts
+ */
+
+/** Get the number of instances.
+ *
+ * @return The number of drawin objects alive.
+ * @function instances
+ */
 
 LUA_OBJECT_FUNCS(drawin_class, drawin_t, drawin)
 
@@ -313,12 +363,12 @@ luaA_drawin_new(lua_State *L)
     return 1;
 }
 
-/* Set or get the drawin geometry.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- * \luastack
- * \lparam An optional table with drawin geometry.
- * \lreturn The drawin geometry.
+/** Get or set drawin geometry. That's the same as accessing or setting the x,
+ * y, width or height properties of a drawin.
+ *
+ * @param A table with coordinates to modify.
+ * @return A table with drawin coordinates and geometry.
+ * @function geometry
  */
 static int
 luaA_drawin_geometry(lua_State *L)
@@ -624,15 +674,45 @@ drawin_class_setup(lua_State *L)
                             (lua_class_propfunc_t) luaA_drawin_get_shape_clip,
                             (lua_class_propfunc_t) luaA_drawin_set_shape_clip);
 
+    /**
+     * @signal property::shape_bounding
+     */
     signal_add(&drawin_class.signals, "property::shape_bounding");
+    /**
+     * @signal property::shape_clip
+     */
     signal_add(&drawin_class.signals, "property::shape_clip");
+    /**
+     * @signal property::border_width
+     */
     signal_add(&drawin_class.signals, "property::border_width");
+    /**
+     * @signal property::cursor
+     */
     signal_add(&drawin_class.signals, "property::cursor");
+    /**
+     * @signal property::height
+     */
     signal_add(&drawin_class.signals, "property::height");
+    /**
+     * @signal property::ontop
+     */
     signal_add(&drawin_class.signals, "property::ontop");
+    /**
+     * @signal property::visible
+     */
     signal_add(&drawin_class.signals, "property::visible");
+    /**
+     * @signal property::width
+     */
     signal_add(&drawin_class.signals, "property::width");
+    /**
+     * @signal property::x
+     */
     signal_add(&drawin_class.signals, "property::x");
+    /**
+     * @signal property::y
+     */
     signal_add(&drawin_class.signals, "property::y");
 }
 

@@ -56,12 +56,10 @@ if(NOT LDOC_EXECUTABLE)
 endif()
 # theme graphics
 a_find_program(CONVERT_EXECUTABLE convert TRUE)
-# doxygen
-include(FindDoxygen)
 # pkg-config
 include(FindPkgConfig)
-# lua 5.1
-include(FindLua51)
+# lua
+include(FindLua)
 # }}}
 
 # {{{ Check if documentation can be build
@@ -189,11 +187,6 @@ else()
     message(STATUS "checking for __builtin_clz -- no")
 endif()
 
-# Error check
-if(NOT LUA51_FOUND AND NOT LUA50_FOUND) # This is a workaround to a cmake bug
-    message(FATAL_ERROR "lua library not found")
-endif()
-
 set(AWESOME_REQUIRED_LDFLAGS
     ${AWESOME_COMMON_REQUIRED_LDFLAGS}
     ${AWESOME_REQUIRED_LDFLAGS}
@@ -284,31 +277,43 @@ set(AWESOME_THEMES_PATH      ${AWESOME_DATA_PATH}/themes)
 # }}}
 
 # {{{ Configure files
+file(GLOB_RECURSE awesome_c_configure_files RELATIVE
+    ${SOURCE_DIR}
+    ${SOURCE_DIR}/*.c
+    ${SOURCE_DIR}/*.h
+    ${SOURCE_DIR}/*/*.c
+    ${SOURCE_DIR}/*/*.h)
 file(GLOB_RECURSE awesome_lua_configure_files RELATIVE
     ${SOURCE_DIR}
-    ${SOURCE_DIR}/lib/*.lua.in
-    ${SOURCE_DIR}/docs/capi/*.lua.in
-    ${SOURCE_DIR}/docs/*.md
-    ${SOURCE_DIR}/themes/*/*.lua.in)
+    ${SOURCE_DIR}/lib/*.lua
+    ${SOURCE_DIR}/themes/*/*.lua)
 set(AWESOME_CONFIGURE_FILES
+    ${awesome_c_configure_files}
     ${awesome_lua_configure_files}
-    config.h.in
-    docs/config.ld.in
-    awesomerc.lua.in
-    awesome-version-internal.h.in
-    awesome.doxygen.in)
-
-macro(a_configure_file file)
-    string(REGEX REPLACE ".in\$" "" outfile ${file})
-    message(STATUS "Configuring ${outfile}")
-    configure_file(${SOURCE_DIR}/${file}
-                   ${BUILD_DIR}/${outfile}
-                   ESCAPE_QUOTE
-                   @ONLY)
-endmacro()
+    config.h
+    docs/config.ld
+    awesomerc.lua
+    awesome-version-internal.h)
 
 foreach(file ${AWESOME_CONFIGURE_FILES})
-    a_configure_file(${file})
+    configure_file(${SOURCE_DIR}/${file}
+                   ${BUILD_DIR}/${file}
+                   ESCAPE_QUOTES
+                   @ONLY)
+endforeach()
+#}}}
+
+# {{{ Copy additional files
+file(GLOB_RECURSE awesome_md_docs RELATIVE
+    ${SOURCE_DIR}
+    ${SOURCE_DIR}/docs/*.md)
+set(AWESOME_ADDITIONAL_FILES
+    ${awesome_md_docs})
+
+foreach(file ${AWESOME_ADDITIONAL_FILES})
+    configure_file(${SOURCE_DIR}/${file}
+                   ${BUILD_DIR}/${file}
+                   COPYONLY)
 endforeach()
 #}}}
 

@@ -19,6 +19,13 @@
  *
  */
 
+/** awesome D-Bus API
+ * @author Julien Danjou &lt;julien@danjou.info&gt;
+ * @copyright 2008-2009 Julien Danjou
+ * @release @AWESOME_VERSION@
+ * @module dbus
+ */
+
 #include "config.h"
 #include "dbus.h"
 
@@ -666,12 +673,11 @@ a_dbus_bus_getbyname(const char *name)
 }
 
 /** Register a D-Bus name to receive message from.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- * \luastack
- * \lparam A string indicating if we are using system or session bus.
- * \lparam A string with the name of the D-Bus name to register.
- * \lreturn True if everything worked fine, false otherwise.
+ *
+ * @param bus A string indicating if we are using system or session bus.
+ * @param name A string with the name of the D-Bus name to register.
+ * @return True if everything worked fine, false otherwise.
+ * @function request_name
  */
 static int
 luaA_dbus_request_name(lua_State *L)
@@ -684,12 +690,11 @@ luaA_dbus_request_name(lua_State *L)
 }
 
 /** Release a D-Bus name.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- * \luastack
- * \lparam A string indicating if we are using system or session bus.
- * \lparam A string with the name of the D-Bus name to unregister.
- * \lreturn True if everything worked fine, false otherwise.
+ *
+ * @param bus A string indicating if we are using system or session bus.
+ * @param name A string with the name of the D-Bus name to unregister.
+ * @return True if everything worked fine, false otherwise.
+ * @function release_name
  */
 static int
 luaA_dbus_release_name(lua_State *L)
@@ -702,11 +707,10 @@ luaA_dbus_release_name(lua_State *L)
 }
 
 /** Add a match rule to match messages going through the message bus.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- * \luastack
- * \lparam A string indicating if we are using system or session bus.
- * \lparam A string with the name of the match rule.
+ *
+ * @param bus A string indicating if we are using system or session bus.
+ * @param name A string with the name of the match rule.
+ * @function add_match
  */
 static int
 luaA_dbus_add_match(lua_State *L)
@@ -726,11 +730,10 @@ luaA_dbus_add_match(lua_State *L)
 
 /** Remove a previously added match rule "by value"
  * (the most recently-added identical rule gets removed).
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- * \luastack
- * \lparam A string indicating if we are using system or session bus.
- * \lparam A string with the name of the match rule.
+ *
+ * @param bus A string indicating if we are using system or session bus.
+ * @param name A string with the name of the match rule.
+ * @function remove_match
  */
 static int
 luaA_dbus_remove_match(lua_State *L)
@@ -749,11 +752,10 @@ luaA_dbus_remove_match(lua_State *L)
 }
 
 /** Add a signal receiver on the D-Bus.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- * \luastack
- * \lparam A string with the interface name.
- * \lparam The function to call.
+ *
+ * @param interface A string with the interface name.
+ * @param func The function to call.
+ * @function connect_signal
  */
 static int
 luaA_dbus_connect_signal(lua_State *L)
@@ -772,12 +774,11 @@ luaA_dbus_connect_signal(lua_State *L)
     return 0;
 }
 
-/** Add a signal receiver on the D-Bus.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- * \luastack
- * \lparam A string with the interface name.
- * \lparam The function to call.
+/** Remove a signal receiver on the D-Bus.
+ *
+ * @param interface A string with the interface name.
+ * @param func The function to call.
+ * @function disconnect_signal
  */
 static int
 luaA_dbus_disconnect_signal(lua_State *L)
@@ -791,18 +792,17 @@ luaA_dbus_disconnect_signal(lua_State *L)
 }
 
 /** Emit a signal on the D-Bus.
- * \param L The Lua VM state.
- * \return The number of elements pushed on stack.
- * \luastack
- * \lparam A string indicating if we are using system or session bus.
- * \lparam A string with the dbus path.
- * \lparam A string with the dbus interface.
- * \lparam A string with the dbus method name.
- * \lparam type of 1st arg
- * \lparam 1st arg value
- * \lparam type of 2nd arg
- * \lparam 2nd arg value
+ *
+ * @param bus A string indicating if we are using system or session bus.
+ * @param path A string with the dbus path.
+ * @param interface A string with the dbus interface.
+ * @param method A string with the dbus method name.
+ * @param type_1st_arg type of 1st argument
+ * @param value_1st_arg value of 1st argument
+ * @param type_2nd_arg type of 2nd argument
+ * @param value_2nd_arg value of 2nd argument
  * ... etc
+ * @function emit_signal
  */
 static int
 luaA_dbus_emit_signal(lua_State *L)
