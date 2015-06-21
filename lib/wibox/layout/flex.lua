@@ -22,7 +22,7 @@ end
 -- @param height The available height.
 function flex:layout(context, width, height)
     local result = {}
-    local pos,spacing = 0,self._spacing or 0
+    local pos,spacing = 0, self._spacing
     local num = #self.widgets
     local total_spacing = (spacing*(num-1))
 
@@ -87,7 +87,7 @@ function flex:fit(context, orig_width, orig_height)
             #self.widgets * self._max_widget_size)
     end
 
-    local spacing = ((self._spacing or 0)*(#self.widgets-1))
+    local spacing = self._spacing * (#self.widgets-1)
 
     if self.dir == "y" then
         return used_in_other, used_in_dir + spacing
@@ -105,15 +105,19 @@ end
 -- maximum width for horizontal and maximum height for vertical).
 -- @param val The maximum size of the widget.
 function flex:set_max_widget_size(val)
-    self._max_widget_size = val
-    self:emit_signal("widget::layout_changed")
+    if self._max_widget_size ~= val then
+        self._max_widget_size = val
+        self:emit_signal("widget::layout_changed")
+    end
 end
 
 --- Add spacing between each layout widgets
 -- @param spacing Spacing between widgets.
 function flex:set_spacing(spacing)
-    self._spacing = spacing
-    self:emit_signal("widget::layout_changed")
+    if self._spacing ~= spacing then
+        self._spacing = spacing
+        self:emit_signal("widget::layout_changed")
+    end
 end
 
 function flex:reset()
@@ -133,6 +137,7 @@ local function get_layout(dir)
 
     ret.dir = dir
     ret.widgets = {}
+    ret:set_spacing(0)
 
     return ret
 end
