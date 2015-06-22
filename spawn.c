@@ -362,6 +362,7 @@ luaA_spawn(lua_State *L)
         g_strfreev(argv);
         /* push error on stack */
         lua_pushfstring(L, "spawn: parse error: %s", error->message);
+        warn("%s", lua_tostring(L, -1));
         g_error_free(error);
         return 1;
     }
@@ -388,6 +389,7 @@ luaA_spawn(lua_State *L)
     {
         /* push error on stack */
         lua_pushstring(L, error->message);
+        warn("%s", lua_tostring(L, -1));
         g_error_free(error);
         if(context)
             sn_launcher_context_complete(context);
