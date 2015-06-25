@@ -70,9 +70,7 @@ function client.jumpto(c, merge)
         end
     end
 
-    -- focus the client
-    capi.client.focus = c
-    c:raise()
+    c:emit_signal("request::activate", "client.jumpto", {raise=true})
 end
 
 --- Get the first client that got the urgent hint.
@@ -213,7 +211,10 @@ function client.focus.history.previous()
         s = capi.mouse.screen
     end
     local c = client.focus.history.get(s, 1)
-    if c then capi.client.focus = c end
+    if c then
+        c:emit_signal("request::activate", "client.focus.history.previous",
+                      {raise=false})
+    end
 end
 
 --- Get visible clients from a screen.
@@ -303,7 +304,8 @@ function client.focus.bydirection(dir, c)
 
         -- If we found a client to focus, then do it.
         if target then
-            capi.client.focus = cltbl[target]
+            cltbl[target]:emit_signal("request::activate",
+                                      "client.focus.bydirection", {raise=false})
         end
     end
 end
@@ -335,7 +337,9 @@ function client.focus.global_bydirection(dir, c)
             local target = util.get_rectangle_in_direction(dir, geomtbl, capi.screen[scr].geometry)
 
             if target then
-                capi.client.focus = cltbl[target]
+                cltbl[target]:emit_signal("request::activate",
+                                          "client.focus.global_bydirection",
+                                          {raise=false})
             end
         end
     end
@@ -348,7 +352,8 @@ end
 function client.focus.byidx(i, c)
     local target = client.next(i, c)
     if target then
-        capi.client.focus = target
+        target:emit_signal("request::activate", "client.focus.byidx",
+                           {raise=true})
     end
 end
 
@@ -396,14 +401,15 @@ function client.swap.global_bydirection(dir, c)
         elseif sel.screen ~= c.screen and sel == c then
             client.movetoscreen(sel, capi.mouse.screen)
 
-        --swapping to a nonempty screen
+        -- swapping to a nonempty screen
         elseif sel.screen ~= c.screen and sel ~= c then
             client.movetoscreen(sel, c.screen)
             client.movetoscreen(c, scr)
         end
 
         screen.focus(sel.screen)
-        capi.client.focus = sel
+        sel:emit_signal("request::activate", "client.swap.global_bydirection",
+                        {raise=false})
     end
 end
 
