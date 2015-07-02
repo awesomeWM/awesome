@@ -10,6 +10,7 @@
 -- Grab environment we need
 local util = require("awful.util")
 local timer = require("gears.timer")
+local beautiful = require("beautiful")
 local tostring = tostring
 local pairs = pairs
 local ipairs = ipairs
@@ -404,7 +405,7 @@ end
 -- @param t Optional tag.
 function tag.getgap(t)
     local t = t or tag.selected()
-    return tag.getproperty(t, "useless_gap") or 0
+    return tag.getproperty(t, "useless_gap") or beautiful.useless_gap or 0
 end
 
 --- Set the number of master windows.
