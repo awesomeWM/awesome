@@ -134,9 +134,12 @@ function layout.arrange(screen)
         p.screen = screen
         p.geometries = setmetatable({}, {__mode = "k"})
         layout.get(screen).arrange(p)
+        local useless_gap = tag.getgap(tag.selected(screen))
         for c, g in pairs(p.geometries) do
-            g.width = g.width - c.border_width * 2
-            g.height = g.height - c.border_width * 2
+            g.width = g.width - c.border_width * 2 - useless_gap * 2
+            g.height = g.height - c.border_width * 2 - useless_gap * 2
+            g.x = g.x + useless_gap
+            g.y = g.y + useless_gap
             c:geometry(g)
         end
         capi.screen[screen]:emit_signal("arrange")
@@ -187,6 +190,7 @@ capi.tag.connect_signal("property::layout", arrange_tag)
 capi.tag.connect_signal("property::windowfact", arrange_tag)
 capi.tag.connect_signal("property::selected", arrange_tag)
 capi.tag.connect_signal("property::activated", arrange_tag)
+capi.tag.connect_signal("property::useless_gap", arrange_tag)
 capi.tag.connect_signal("tagged", arrange_tag)
 
 for s = 1, capi.screen.count() do
