@@ -10,14 +10,15 @@
 -- Grab environment we need
 local ipairs = ipairs
 local type = type
-local tag = require("awful.tag")
 local util = require("awful.util")
 local ascreen = require("awful.screen")
 local capi = {
     screen = screen,
     awesome = awesome,
-    client = client
+    client = client,
+    tag = tag
 }
+local tag = require("awful.tag")
 local client = require("awful.client")
 local timer = require("gears.timer")
 
@@ -120,22 +121,26 @@ function layout.arrange(screen)
 
         local p = {}
         p.workarea = capi.screen[screen].workarea
+        local useless_gap = tag.getgap(tag.selected(screen))
         -- Handle padding
-        local padding = ascreen.padding(capi.screen[screen])
-        if padding then
-            p.workarea.x = p.workarea.x + (padding.left or 0)
-            p.workarea.y = p.workarea.y + (padding.top or 0)
-            p.workarea.width = p.workarea.width - ((padding.left or 0 ) + (padding.right or 0))
-            p.workarea.height = p.workarea.height - ((padding.top or 0) + (padding.bottom or 0))
-        end
+        local padding = ascreen.padding(capi.screen[screen]) or {}
+        p.workarea.x = p.workarea.x + (padding.left or 0) + useless_gap
+        p.workarea.y = p.workarea.y + (padding.top or 0) + useless_gap
+        p.workarea.width = p.workarea.width - ((padding.left or 0 ) +
+            (padding.right or 0) + useless_gap * 2)
+        p.workarea.height = p.workarea.height - ((padding.top or 0) +
+            (padding.bottom or 0) + useless_gap * 2)
+
         p.geometry = capi.screen[screen].geometry
         p.clients = client.tiled(screen)
         p.screen = screen
         p.geometries = setmetatable({}, {__mode = "k"})
         layout.get(screen).arrange(p)
         for c, g in pairs(p.geometries) do
-            g.width = g.width - c.border_width * 2
-            g.height = g.height - c.border_width * 2
+            g.width = g.width - c.border_width * 2 - useless_gap * 2
+            g.height = g.height - c.border_width * 2 - useless_gap * 2
+            g.x = g.x + useless_gap
+            g.y = g.y + useless_gap
             c:geometry(g)
         end
         capi.screen[screen]:emit_signal("arrange")
@@ -173,31 +178,23 @@ capi.client.connect_signal("property::screen", function(c, old_screen)
     layout.arrange(c.screen)
 end)
 
-local function arrange_on_tagged(c, tag)
-    if not tag.screen then return end
-    layout.arrange(tag.screen)
-    if not capi.client.focus or not capi.client.focus:isvisible() then
-        local c = client.focus.history.get(tag.screen, 0)
-        if c then
-            c:emit_signal("request::activate", "layout.arrange_on_tagged",
-                          {raise=false})
-        end
-    end
-end
 local function arrange_tag(t)
     layout.arrange(tag.getscreen(t))
 end
 
 capi.screen.add_signal("arrange")
+
+capi.tag.connect_signal("property::mwfact", arrange_tag)
+capi.tag.connect_signal("property::nmaster", arrange_tag)
+capi.tag.connect_signal("property::ncol", arrange_tag)
+capi.tag.connect_signal("property::layout", arrange_tag)
+capi.tag.connect_signal("property::windowfact", arrange_tag)
+capi.tag.connect_signal("property::selected", arrange_tag)
+capi.tag.connect_signal("property::activated", arrange_tag)
+capi.tag.connect_signal("property::useless_gap", arrange_tag)
+capi.tag.connect_signal("tagged", arrange_tag)
+
 for s = 1, capi.screen.count() do
-    tag.attached_connect_signal(s, "property::mwfact", arrange_tag)
-    tag.attached_connect_signal(s, "property::nmaster", arrange_tag)
-    tag.attached_connect_signal(s, "property::ncol", arrange_tag)
-    tag.attached_connect_signal(s, "property::layout", arrange_tag)
-    tag.attached_connect_signal(s, "property::windowfact", arrange_tag)
-    tag.attached_connect_signal(s, "property::selected", arrange_tag)
-    tag.attached_connect_signal(s, "property::activated", arrange_tag)
-    tag.attached_connect_signal(s, "tagged", arrange_tag)
     capi.screen[s]:connect_signal("property::workarea", function(screen)
         layout.arrange(screen.index)
     end)
