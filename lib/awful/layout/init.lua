@@ -121,20 +121,21 @@ function layout.arrange(screen)
 
         local p = {}
         p.workarea = capi.screen[screen].workarea
+        local useless_gap = tag.getgap(tag.selected(screen))
         -- Handle padding
-        local padding = ascreen.padding(capi.screen[screen])
-        if padding then
-            p.workarea.x = p.workarea.x + (padding.left or 0)
-            p.workarea.y = p.workarea.y + (padding.top or 0)
-            p.workarea.width = p.workarea.width - ((padding.left or 0 ) + (padding.right or 0))
-            p.workarea.height = p.workarea.height - ((padding.top or 0) + (padding.bottom or 0))
-        end
+        local padding = ascreen.padding(capi.screen[screen]) or {}
+        p.workarea.x = p.workarea.x + (padding.left or 0) + useless_gap
+        p.workarea.y = p.workarea.y + (padding.top or 0) + useless_gap
+        p.workarea.width = p.workarea.width - ((padding.left or 0 ) +
+            (padding.right or 0) + useless_gap * 2)
+        p.workarea.height = p.workarea.height - ((padding.top or 0) +
+            (padding.bottom or 0) + useless_gap * 2)
+
         p.geometry = capi.screen[screen].geometry
         p.clients = client.tiled(screen)
         p.screen = screen
         p.geometries = setmetatable({}, {__mode = "k"})
         layout.get(screen).arrange(p)
-        local useless_gap = tag.getgap(tag.selected(screen))
         for c, g in pairs(p.geometries) do
             g.width = g.width - c.border_width * 2 - useless_gap * 2
             g.height = g.height - c.border_width * 2 - useless_gap * 2
