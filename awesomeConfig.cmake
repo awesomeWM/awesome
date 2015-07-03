@@ -278,14 +278,14 @@ set(AWESOME_THEMES_PATH      ${AWESOME_DATA_PATH}/themes)
 # }}}
 
 # {{{ Configure files
-file(GLOB_RECURSE awesome_c_configure_files RELATIVE
-    ${SOURCE_DIR}
+file(GLOB awesome_c_configure_files RELATIVE ${SOURCE_DIR}
     ${SOURCE_DIR}/*.c
     ${SOURCE_DIR}/*.h
-    ${SOURCE_DIR}/*/*.c
-    ${SOURCE_DIR}/*/*.h)
-file(GLOB_RECURSE awesome_lua_configure_files RELATIVE
-    ${SOURCE_DIR}
+    ${SOURCE_DIR}/common/*.c
+    ${SOURCE_DIR}/common/*.h
+    ${SOURCE_DIR}/objects/*.c
+    ${SOURCE_DIR}/objects/*.h)
+file(GLOB_RECURSE awesome_lua_configure_files RELATIVE ${SOURCE_DIR}
     ${SOURCE_DIR}/lib/*.lua
     ${SOURCE_DIR}/themes/*/*.lua)
 set(AWESOME_CONFIGURE_FILES
@@ -305,8 +305,7 @@ endforeach()
 #}}}
 
 # {{{ Copy additional files
-file(GLOB_RECURSE awesome_md_docs RELATIVE
-    ${SOURCE_DIR}
+file(GLOB awesome_md_docs RELATIVE ${SOURCE_DIR}
     ${SOURCE_DIR}/docs/*.md)
 set(AWESOME_ADDITIONAL_FILES
     ${awesome_md_docs})
