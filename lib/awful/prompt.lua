@@ -64,6 +64,42 @@ local function history_check_load(id, max)
     end
 end
 
+local function is_word_char(c)
+    if string.find("[{[(,.:;_-+=@/ ]", c) then
+        return false
+    else
+        return true
+    end
+end
+
+local function cword_start(s, pos)
+    local i = pos
+    if i > 1 then
+        i = i - 1
+    end
+    while i >= 1 and not is_word_char(s:sub(i, i)) do
+        i = i - 1
+    end
+    while i >= 1 and is_word_char(s:sub(i, i)) do
+        i = i - 1
+    end
+    if i <= #s then
+        i = i + 1
+    end
+    return i
+end
+
+local function cword_end(s, pos)
+    local i = pos
+    while i <= #s and not is_word_char(s:sub(i, i)) do
+        i = i + 1
+    end
+    while i <= #s and  is_word_char(s:sub(i, i)) do
+        i = i + 1
+    end
+    return i
+end
+
 --- Save history table in history file
 -- @param id The data.history identifier
 local function history_save(id)
@@ -308,6 +344,25 @@ function prompt.run(args, textbox, exe_callback, completion_callback, history_pa
                 if cur_pos <= #command then
                     command = command:sub(1, cur_pos - 1) .. command:sub(cur_pos + 1)
                 end
+            elseif key == "p" then
+                if history_index > 1 then
+                    history_index = history_index - 1
+
+                    command = data.history[history_path].table[history_index]
+                    cur_pos = #command + 2
+                end
+            elseif key == "n" then
+                if history_index < history_items(history_path) then
+                    history_index = history_index + 1
+
+                    command = data.history[history_path].table[history_index]
+                    cur_pos = #command + 2
+                elseif history_index == history_items(history_path) then
+                    history_index = history_index + 1
+
+                    command = ""
+                    cur_pos = 1
+                end
             elseif key == "e" then
                 cur_pos = #command + 1
             elseif key == "r" then
@@ -398,6 +453,18 @@ function prompt.run(args, textbox, exe_callback, completion_callback, history_pa
                         cur_pos = 1
                     end
                 end
+            end
+        elseif mod.Mod1 or mod.Mod3 then
+            if key == "b" then
+                cur_pos = cword_start(command, cur_pos)
+            elseif key == "f" then
+                cur_pos = cword_end(command, cur_pos)
+            elseif key == "d" then
+                command = command:sub(1, cur_pos - 1) .. command:sub(cword_end(command, cur_pos))
+            elseif key == "BackSpace" then
+                wstart = cword_start(command, cur_pos)
+                command = command:sub(1, wstart - 1) .. command:sub(cur_pos)
+                cur_pos = wstart
             end
         else
             if completion_callback then
