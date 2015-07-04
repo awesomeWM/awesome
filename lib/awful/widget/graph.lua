@@ -225,6 +225,7 @@ for _, prop in ipairs(properties) do
     if not graph["set_" .. prop] then
         graph["set_" .. prop] = function(_graph, value)
             data[_graph][prop] = value
+            _graph[prop] = value
             _graph:emit_signal("widget::updated")
             return _graph
         end
@@ -254,6 +255,7 @@ function graph.new(args)
 
     for _, prop in ipairs(properties) do
         _graph["set_" .. prop] = graph["set_" .. prop]
+        _graph[prop] = data[_graph][prop]
     end
 
     return _graph
