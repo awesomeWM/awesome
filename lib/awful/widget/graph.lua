@@ -229,6 +229,11 @@ for _, prop in ipairs(properties) do
             return _graph
         end
     end
+    if not graph["get_" .. prop] then
+        graph["get_" .. prop] = function(_graph)
+            return data[_graph][prop]
+        end
+    end
 end
 
 --- Create a graph widget.
@@ -254,6 +259,7 @@ function graph.new(args)
 
     for _, prop in ipairs(properties) do
         _graph["set_" .. prop] = graph["set_" .. prop]
+        _graph["get_" .. prop] = graph["get_" .. prop]
     end
 
     return _graph
