@@ -42,6 +42,8 @@
 /** A table with X and Y coordinates.
  * @field x X coordinate.
  * @field y Y coordinate.
+ * @field buttons Table containing the status of buttons, e.g. field [1] is true
+ *        when button 1 is pressed.
  * @table coords_table
  */
 
