@@ -48,9 +48,18 @@ end
 
 
 function theme_assets.wallpaper(bg, fg, alt_fg, s)
-    s = s or screen.primary
-    local height = s.workarea.height
-    local width = s.workarea.width
+    -- s = s or screen.primary
+    local height, width
+    if s then
+        height = s.workarea.height
+        width = s.workarea.width
+    else
+        width, height = 1, 1
+        for _s in screen do
+            height = math.max(_s.workarea.height, height)
+            width = math.max(_s.workarea.width, width)
+        end
+    end
     local img = cairo.RecordingSurface(cairo.Content.COLOR,
         cairo.Rectangle { x = 0, y = 0, width = width, height = height })
     local cr = cairo.Context(img)
