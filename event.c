@@ -173,8 +173,18 @@ event_handle_button(xcb_button_press_event_t *ev)
 
     globalconf.timestamp = ev->time;
 
-    if(event_handle_mousegrabber(ev->root_x, ev->root_y, 1 << (ev->detail - 1 + 8)))
-        return;
+    {
+        /* ev->state contains the state before the event. Compute the state
+         * after the event for the mousegrabber.
+         */
+        uint16_t state = ev->state, change = 1 << (ev->detail - 1 + 8);
+        if (XCB_EVENT_RESPONSE_TYPE(ev) == XCB_BUTTON_PRESS)
+            state |= change;
+        else
+            state &= ~change;
+        if(event_handle_mousegrabber(ev->root_x, ev->root_y, state))
+            return;
+    }
 
     /* ev->state is
      * button status (8 bits) + modifiers status (8 bits)
