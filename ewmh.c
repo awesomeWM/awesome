@@ -104,6 +104,23 @@ ewmh_update_net_client_list(lua_State *L)
     return 0;
 }
 
+static int
+ewmh_client_update_frame_extents(lua_State *L)
+{
+    client_t *c = luaA_checkudata(L, 1, &client_class);;
+    uint32_t extents[4];
+
+    extents[0] = c->border_width + c->titlebar[CLIENT_TITLEBAR_LEFT].size;
+    extents[1] = c->border_width + c->titlebar[CLIENT_TITLEBAR_RIGHT].size;
+    extents[2] = c->border_width + c->titlebar[CLIENT_TITLEBAR_TOP].size;
+    extents[3] = c->border_width + c->titlebar[CLIENT_TITLEBAR_BOTTOM].size;
+
+    xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
+            c->window, _NET_FRAME_EXTENTS, XCB_ATOM_CARDINAL, 32, 4, extents);
+
+    return 0;
+}
+
 void
 ewmh_init(void)
 {
@@ -122,6 +139,7 @@ ewmh_init(void)
         _NET_DESKTOP_NAMES,
         _NET_ACTIVE_WINDOW,
         _NET_CLOSE_WINDOW,
+        _NET_FRAME_EXTENTS,
         _NET_WM_NAME,
         _NET_WM_STRUT_PARTIAL,
         _NET_WM_ICON_NAME,
@@ -200,6 +218,12 @@ ewmh_init(void)
     luaA_class_connect_signal(L, &client_class, "property::below" , ewmh_client_update_hints);
     luaA_class_connect_signal(L, &client_class, "property::minimized" , ewmh_client_update_hints);
     luaA_class_connect_signal(L, &client_class, "property::urgent" , ewmh_client_update_hints);
+    luaA_class_connect_signal(L, &client_class, "property::titlebar_top" , ewmh_client_update_frame_extents);
+    luaA_class_connect_signal(L, &client_class, "property::titlebar_bottom" , ewmh_client_update_frame_extents);
+    luaA_class_connect_signal(L, &client_class, "property::titlebar_right" , ewmh_client_update_frame_extents);
+    luaA_class_connect_signal(L, &client_class, "property::titlebar_left" , ewmh_client_update_frame_extents);
+    luaA_class_connect_signal(L, &client_class, "property::border_width" , ewmh_client_update_frame_extents);
+    luaA_class_connect_signal(L, &client_class, "manage", ewmh_client_update_frame_extents);
 }
 
 /** Set the client list in stacking order, bottom to top.
