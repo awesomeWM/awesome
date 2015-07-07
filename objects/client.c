@@ -97,6 +97,7 @@
  * @field shape_client_clip The client's clip shape as set by the program as a (native) cairo surface.
  * @field startup_id The FreeDesktop StartId.
  * @field valid If the client that this object refers to is still managed by awesome.
+ * @field first_tag The first tag of the client.  Optimized form of `c:tags()[1]`.
  * @table client
  */
 
@@ -1612,12 +1613,9 @@ luaA_client_tags(lua_State *L)
 }
 
 /** Get the first tag of a client.
- *
- * @treturn tag
- * @function first_tag
  */
 static int
-luaA_client_first_tag(lua_State *L)
+luaA_client_get_first_tag(lua_State *L)
 {
     client_t *c = luaA_checkudata(L, 1, &client_class);
 
@@ -2500,7 +2498,6 @@ client_class_setup(lua_State *L)
         { "geometry", luaA_client_geometry },
         { "apply_size_hints", luaA_client_apply_size_hints },
         { "tags", luaA_client_tags },
-        { "first_tag", luaA_client_first_tag },
         { "kill", luaA_client_kill },
         { "swap", luaA_client_swap },
         { "raise", luaA_client_raise },
@@ -2659,6 +2656,10 @@ client_class_setup(lua_State *L)
     luaA_class_add_property(&client_class, "client_shape_clip",
                             NULL,
                             (lua_class_propfunc_t) luaA_client_get_client_shape_clip,
+                            NULL);
+    luaA_class_add_property(&client_class, "first_tag",
+                            NULL,
+                            (lua_class_propfunc_t) luaA_client_get_first_tag,
                             NULL);
 
     /** when a client gains focus
