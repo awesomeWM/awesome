@@ -395,12 +395,14 @@ tag_class_setup(lua_State *L)
      * @signal request::select
      */
     signal_add(&tag_class.signals, "request::select");
-    /**
+    /** When a client gets tagged with this tag.
      * @signal tagged
+     * @client c The tagged client.
      */
     signal_add(&tag_class.signals, "tagged");
-    /**
+    /** When a client gets untagged with this tag.
      * @signal untagged
+     * @client c The untagged client.
      */
     signal_add(&tag_class.signals, "untagged");
 }

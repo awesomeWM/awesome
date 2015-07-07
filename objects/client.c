@@ -2640,7 +2640,7 @@ client_class_setup(lua_State *L)
                             (lua_class_propfunc_t) luaA_client_get_client_shape_clip,
                             NULL);
 
-    /** when a client gains focus
+    /** When a client gains focus.
      * @signal .focus
      */
     signal_add(&client_class.signals, "focus");
@@ -2868,11 +2868,12 @@ client_class_setup(lua_State *L)
      * @signal request::urgent
      */
     signal_add(&client_class.signals, "request::urgent");
-    /** when client is tagged
+    /** When a client gets tagged.
      * @signal .tagged
+     * @tag t The tag object.
      */
     signal_add(&client_class.signals, "tagged");
-    /** when a client looses focus
+    /** When a client gets unfocused.
      * @signal .unfocus
      */
     signal_add(&client_class.signals, "unfocus");
@@ -2880,8 +2881,9 @@ client_class_setup(lua_State *L)
      * @signal .unmanage
      */
     signal_add(&client_class.signals, "unmanage");
-    /** when client looses tag
+    /** When a client gets untagged.
      * @signal .untagged
+     * @tag t The tag object.
      */
     signal_add(&client_class.signals, "untagged");
 }
