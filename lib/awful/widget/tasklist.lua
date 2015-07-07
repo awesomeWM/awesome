@@ -148,18 +148,15 @@ function tasklist.new(screen, filter, buttons, style, update_function, base_widg
 
     local data = setmetatable({}, { __mode = 'k' })
 
-    local delayed_update
+    local queued_update = false
     local u = function ()
         -- Add a delayed callback for the first update.
-        if not delayed_update then
+        if not queued_update then
             timer.delayed_call(function()
-                delayed_update()
-                delayed_update = nil
+                tasklist_update(screen, w, buttons, filter, data, style, uf)
+                queued_update = nil
             end)
-        end
-        -- Change the function used in the delayed callback.
-        delayed_update = function()
-            tasklist_update(screen, w, buttons, filter, data, style, uf)
+            queued_update = true
         end
     end
     tag.attached_connect_signal(screen, "property::selected", u)
