@@ -22,6 +22,7 @@ local tag = require("awful.tag")
 local beautiful = require("beautiful")
 local fixed = require("wibox.layout.fixed")
 local surface = require("gears.surface")
+local timer = require("gears.timer")
 
 local taglist = { mt = {} }
 taglist.filter = {}
@@ -158,8 +159,19 @@ function taglist.new(screen, filter, buttons, style, update_function, base_widge
     local w = base_widget or fixed.horizontal()
 
     local data = setmetatable({}, { __mode = 'k' })
+    local delayed_update
     local u = function (s)
-        if s == screen then
+        if s ~= screen then return end
+
+        -- Add a delayed callback for the first update.
+        if not delayed_update then
+            timer.delayed_call(function()
+                delayed_update()
+                delayed_update = nil
+            end)
+        end
+        -- Change the function used in the delayed callback.
+        delayed_update = function()
             taglist_update(s, w, buttons, filter, data, style, uf)
         end
     end
