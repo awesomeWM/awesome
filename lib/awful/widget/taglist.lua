@@ -159,20 +159,18 @@ function taglist.new(screen, filter, buttons, style, update_function, base_widge
     local w = base_widget or fixed.horizontal()
 
     local data = setmetatable({}, { __mode = 'k' })
-    local delayed_update
+
+    local queued_update = {}
     local u = function (s)
         if s ~= screen then return end
 
         -- Add a delayed callback for the first update.
-        if not delayed_update then
+        if not queued_update[s] then
             timer.delayed_call(function()
-                delayed_update()
-                delayed_update = nil
+                taglist_update(s, w, buttons, filter, data, style, uf)
+                queued_update[s] = false
             end)
-        end
-        -- Change the function used in the delayed callback.
-        delayed_update = function()
-            taglist_update(s, w, buttons, filter, data, style, uf)
+            queued_update[s] = true
         end
     end
     local uc = function (c) return u(c.screen) end
