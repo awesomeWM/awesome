@@ -176,14 +176,15 @@ function tag.delete(target_tag, fallback_tag)
 
     -- Move the clients we can off of this tag.
     for _, c in pairs(clients) do
+        local nb_tags = #c:tags()
 
         -- If a client has only this tag, or stickied clients with
         -- nowhere to go, abort.
-        if (not c.sticky and #c:tags() == 1) or
+        if (not c.sticky and nb_tags == 1) or
                                     (c.sticky and fallback_tag == nil) then
             return
         -- If a client has multiple tags, then do not move it to fallback
-        elseif #c:tags() < 2 then
+        elseif nb_tags < 2 then
             c:tags({fallback_tag})
         end
     end
