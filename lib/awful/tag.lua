@@ -598,8 +598,10 @@ function tag.setproperty(_tag, prop, value)
     if not data.tags[_tag] then
         data.tags[_tag] = {}
     end
-    data.tags[_tag][prop] = value
-    _tag:emit_signal("property::" .. prop)
+    if data.tags[_tag][prop] ~= value then
+        data.tags[_tag][prop] = value
+        _tag:emit_signal("property::" .. prop)
+    end
 end
 
 --- Tag a client with the set of current tags.
