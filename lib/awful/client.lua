@@ -937,11 +937,13 @@ function client.property.set(c, prop, value)
     if not client.data.properties[c] then
         client.data.properties[c] = {}
     end
-    if client.data.persistent_properties_registered[prop] then
-        c:set_xproperty("awful.client.property." .. prop, value)
+    if client.data.properties[c][prop] ~= value then
+        if client.data.persistent_properties_registered[prop] then
+            c:set_xproperty("awful.client.property." .. prop, value)
+        end
+        client.data.properties[c][prop] = value
+        c:emit_signal("property::" .. prop)
     end
-    client.data.properties[c][prop] = value
-    c:emit_signal("property::" .. prop)
 end
 
 --- Set a client property to be persistent across restarts (via X properties).
