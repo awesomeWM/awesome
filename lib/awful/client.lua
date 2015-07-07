@@ -61,7 +61,7 @@ function client.jumpto(c, merge)
     end
 
     -- Try to make client visible, this also covers e.g. sticky
-    local t = c:tags()[1]
+    local t = c:first_tag()
     if t and not c:isvisible() then
         if merge then
             t.selected = true

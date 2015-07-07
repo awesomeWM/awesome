@@ -1611,6 +1611,26 @@ luaA_client_tags(lua_State *L)
     return 1;
 }
 
+/** Get the first tag of a client.
+ *
+ * @treturn tag
+ * @function first_tag
+ */
+static int
+luaA_client_first_tag(lua_State *L)
+{
+    client_t *c = luaA_checkudata(L, 1, &client_class);
+
+    foreach(tag, globalconf.tags)
+        if(is_client_tagged(c, *tag))
+        {
+            luaA_object_push(L, *tag);
+            return 1;
+        }
+
+    return 0;
+}
+
 /** Raise a client on top of others which are on the same layer.
  *
  * @function raise
@@ -2480,6 +2500,7 @@ client_class_setup(lua_State *L)
         { "geometry", luaA_client_geometry },
         { "apply_size_hints", luaA_client_apply_size_hints },
         { "tags", luaA_client_tags },
+        { "first_tag", luaA_client_first_tag },
         { "kill", luaA_client_kill },
         { "swap", luaA_client_swap },
         { "raise", luaA_client_raise },
