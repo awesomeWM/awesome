@@ -19,6 +19,7 @@ local client = require("awful.client")
 local util = require("awful.util")
 local tag = require("awful.tag")
 local flex = require("wibox.layout.flex")
+local timer = require("gears.timer")
 
 local tasklist = { mt = {} }
 
@@ -146,7 +147,21 @@ function tasklist.new(screen, filter, buttons, style, update_function, base_widg
     local w = base_widget or flex.horizontal()
 
     local data = setmetatable({}, { __mode = 'k' })
-    local u = function () tasklist_update(screen, w, buttons, filter, data, style, uf) end
+
+    local delayed_update
+    local u = function ()
+        -- Add a delayed callback for the first update.
+        if not delayed_update then
+            timer.delayed_call(function()
+                delayed_update()
+                delayed_update = nil
+            end)
+        end
+        -- Change the function used in the delayed callback.
+        delayed_update = function()
+            tasklist_update(screen, w, buttons, filter, data, style, uf)
+        end
+    end
     tag.attached_connect_signal(screen, "property::selected", u)
     tag.attached_connect_signal(screen, "property::activated", u)
     capi.client.connect_signal("property::urgent", u)
