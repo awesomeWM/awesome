@@ -110,6 +110,7 @@ end
 
 --- Get the focused screen.
 -- This can be replaced in a user's config.
+-- @treturn number
 function screen.focused()
     return capi.mouse.screen
 end
