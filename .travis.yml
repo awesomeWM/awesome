@@ -77,10 +77,7 @@ install:
   - sudo luarocks install lgi
 
   # Install busted for "make check".
-  # Use luassert 1.7.6 (1.7.7 causes infinite loop).
-  # Ref: https://github.com/Olivine-Labs/luassert/issues/118
-  - sudo luarocks install luassert 1.7.6
-  - sudo luarocks install busted 2.0.rc8
+  - sudo luarocks install busted
 
   # Install ldoc for building docs.
   - sudo luarocks install ldoc
