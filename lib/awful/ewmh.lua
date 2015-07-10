@@ -161,7 +161,7 @@ end
 -- @tparam boolean hints.raise should the client be raised? (default false)
 function ewmh.activate(c, context, hints)
     client.focus = c
-    if raise then
+    if hints.raise then
         if awesome.startup or c:isvisible() then
             c:raise()
         else
