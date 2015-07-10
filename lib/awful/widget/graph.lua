@@ -224,8 +224,10 @@ end
 for _, prop in ipairs(properties) do
     if not graph["set_" .. prop] then
         graph["set_" .. prop] = function(_graph, value)
-            data[_graph][prop] = value
-            _graph:emit_signal("widget::updated")
+            if data[_graph][prop] ~= value then
+                data[_graph][prop] = value
+                _graph:emit_signal("widget::updated")
+            end
             return _graph
         end
     end
