@@ -99,8 +99,8 @@ function taglist.taglist_label(t, args)
     if not tag.getproperty(t, "icon_only") then
         text = "<span font_desc='"..font.."'>"
         if fg_color then
-            text = text .. "<span color='"..util.color_strip_alpha(fg_color).."'>" ..
-                (util.escape(t.name) or "") .. "</span>"
+            text = text .. "<span color='" .. util.ensure_pango_color(fg_color) ..
+                "'>" .. (util.escape(t.name) or "") .. "</span>"
         else
             text = text .. (util.escape(t.name) or "")
         end
