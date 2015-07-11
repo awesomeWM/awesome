@@ -214,8 +214,7 @@ function rules.execute(c, props, callbacks)
         end
     end
 
-    -- Do this at last so we do not erase things done by the focus
-    -- signal.
+    -- Do this at last so we do not erase things done by the focus signal.
     if props.focus and (type(props.focus) ~= "function" or props.focus(c)) then
         c:emit_signal('request::activate', "rules", {raise=true})
     end

@@ -39,7 +39,7 @@ static void xrdb_init(void) {
     /**/
 
     if (!(globalconf.xrmdb = XrmGetDatabase(globalconf.display)))
-      warn("Can't open xrdb\n");
+      warn("Cannot open xrdb.");
   }
 }
 

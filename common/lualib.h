@@ -26,7 +26,7 @@
 
 #include "common/util.h"
 
-/** Lua function to call on dofuction() error */
+/** Lua function to call on dofunction() error */
 lua_CFunction lualib_dofunction_on_error;
 
 void luaA_checkfunction(lua_State *, int);
