@@ -75,7 +75,7 @@ is_control(char *buf)
 /** Handle keypress event.
  * \param L Lua stack to push the key pressed.
  * \param e Received XKeyEvent.
- * \return True if a key was successfully get, false otherwise.
+ * \return True if a key was successfully retrieved, false otherwise.
  */
 bool
 keygrabber_handlekpress(lua_State *L, xcb_key_press_event_t *e)

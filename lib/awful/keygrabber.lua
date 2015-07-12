@@ -80,11 +80,11 @@ end
 --   end)
 -- end
 function keygrabber.run(g)
-    -- Remove the grabber if its in stack
+    -- Remove the grabber if it is in the stack.
     keygrabber.stop(g)
-    -- Record the grabber has latest added
+    -- Record the grabber that has been added most recently.
     table.insert(grabbers, 1, g)
-    -- start the keygrabber if its not running already
+    -- Start the keygrabber if it is not running already.
     if not keygrabbing then
         keygrabbing = true
         capi.keygrabber.run(grabber)

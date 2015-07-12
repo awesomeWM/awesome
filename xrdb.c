@@ -39,7 +39,7 @@ static void xrdb_init(void) {
     /**/
 
     if (!(globalconf.xrmdb = XrmGetDatabase(globalconf.display)))
-      warn("Can't open xrdb\n");
+      warn("Cannot open xrdb.");
   }
 }
 
@@ -67,7 +67,10 @@ int luaA_xrdb_get_value(lua_State *L) {
     lua_pushstring(L, (char *)resource_value.addr);
     return 1;
   } else {
-    luaA_warn(L, "Failed to get xrdb value");
+    if (strlen(resource_class))
+      luaA_warn(L, "Failed to get xrdb value '%s' (class '%s').", resource_name, resource_class);
+    else
+      luaA_warn(L, "Failed to get xrdb value '%s'.", resource_name);
     return 0;
   }
 }
