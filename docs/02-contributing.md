@@ -14,26 +14,31 @@ Imitate the existing code style. For concrete rules:
  - Use 4 spaces indentation, do not use tabulator characters;
 
  - Place braces alone on new lines, and do not place braces for single
-   line statement where it is not needed, i.e. no:
+   line statement where it is not needed, i.e.:
 
-    if(bla) {
+    if(foo)
         x = 1;
+
+    if(foo)
+    {
+        x = 1;
+        bar();
     }
 
  - Do not put a space after if, for, while or function call statements;
 
- - The preferred line length is 80 characters;
+ - The preferred maximum line length is 80 characters;
 
  - Use `/* */` for comments;
 
- - Use the API: there's a list of `a_*()` functions you should use instead
+ - Use the API: there is a list of `a_*()` functions you should use instead
    of the standard libc ones. There is also a common API for linked lists,
    tabulars, etc.;
 
  - Be *clear* in what you do;
 
- - Prefix your function name with the module they are enhancing,
-   i.e. if you add a function to manipulate a tag prefix it with `tag_`;
+ - Prefix your function names with the module they are enhancing,
+   i.e. if you add a function to manipulate a tag, prefix it with `tag_`;
 
  - Write documentation for any new functions, options, whatever.
 
