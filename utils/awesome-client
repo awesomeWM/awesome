@@ -1,13 +1,12 @@
-#!/bin/sh
-
-READ_OPTIONS="-r"
+#!/bin/bash
 
 tty 2>&1 > /dev/null
 ISATTY=$?
 
 if [ "$ISATTY" = 0 ]
 then
-    # rlwrap provides readline to stuff which doesn't know readline by itself
+    # rlwrap provides readline functionality for "read", which is more enhanced
+    # than bash's "read" itself.
     RLWRAP=$(which rlwrap 2>/dev/null)
     if [ "$RLWRAP" != "" ]
     then
@@ -15,16 +14,10 @@ then
         then
             A_RERUN="no" exec $RLWRAP $0
         fi
+        READ_CMD="read"
     else
-        if [ "$BASH" ]
-        then
-            READ_OPTIONS=" -e"
-        fi
-    fi
-
-    if [ $BASH ]
-    then
-        READ_OPTIONS="$READ_OPTIONS -p awesome# "
+        # No rlwrap: use bash's readline.
+        READ_CMD="read -e"
     fi
 fi
 
@@ -55,10 +48,10 @@ a_dbus_send()
 
 if [ "$ISATTY" = 0 ]
 then
-    while read ${READ_OPTIONS} line
+    while $READ_CMD -p "awesome# " -r line
     do
         a_dbus_send "$line"
     done
 else
-    a_dbus_send "`cat`"
+    a_dbus_send "$(cat)"
 fi
