@@ -209,8 +209,9 @@ local function get_offset(screen, position, idx, width, height)
         v.y = ws.y + ws.height - (naughty.config.padding + height + existing)
     end
 
-    -- Find old notification to replace in case there's not enough room.
-    -- This tries to skip notification without a timeout, e.g. critical ones.
+    -- Find old notification to replace in case there is not enough room.
+    -- This tries to skip permanent notifications (without a timeout),
+    -- e.g. critical ones.
     local find_old_to_replace = function()
         for i = 1, idx-1, 1 do
             local n = naughty.notifications[screen][position][i]
@@ -224,8 +225,8 @@ local function get_offset(screen, position, idx, width, height)
 
     -- if positioned outside workarea, destroy oldest popup and recalculate
     if v.y + height > ws.y + ws.height or v.y < ws.y then
-        idx = idx - 1
         naughty.destroy(find_old_to_replace())
+        idx = idx - 1
         v = get_offset(screen, position, idx, width, height)
     end
     if not v.idx then v.idx = idx end
