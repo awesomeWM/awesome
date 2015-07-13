@@ -20,9 +20,9 @@ local keygrabbing = false
 
 
 local function grabber(mod, key, event)
-    for i, g in ipairs(grabbers) do
+    for i, keygrabber_function in ipairs(grabbers) do
         -- continue if the grabber explicitly returns false
-        if g(mod, key, event) ~= false then
+        if keygrabber_function(mod, key, event) ~= false then
             break
         end
     end
