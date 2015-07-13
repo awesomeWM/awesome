@@ -37,13 +37,20 @@ local descs = setmetatable({}, { __mode = 'k' })
 local fonts = setmetatable({}, { __mode = 'v' })
 local active_font
 
---- Load a font name
+--- Load a font from a string or a font description.
 --
--- @param name Font name, which can be a string or a table
+-- @see https://developer.gnome.org/pango/stable/pango-Fonts.html#pango-font-description-from-string
+-- @tparam string|lgi.Pango.FontDescription name Font, which can be a
+--   string or a lgi.Pango.FontDescription.
+-- @treturn table A table with `name`, `description` and `height`.
 local function load_font(name)
     name = name or active_font
-    if name and type(name) ~= "string" and descs[name] then
-        name = descs[name]
+    if name and type(name) ~= "string" then
+        if descs[name] then
+            name = descs[name]
+        else
+            name = name:to_string()
+        end
     end
     if fonts[name] then
         return fonts[name]
@@ -74,14 +81,30 @@ local function set_font(name)
     active_font = load_font(name).name
 end
 
---- Get a font description
+--- Get a font description.
 --
--- @param name The name of the font
+-- @see https://developer.gnome.org/pango/stable/pango-Fonts.html#PangoFontDescription
+-- @tparam string|lgi.Pango.FontDescription name The name of the font.
+-- @treturn lgi.Pango.FontDescription
 function beautiful.get_font(name)
     return load_font(name).description
 end
 
---- Get the heigh of a font
+--- Get a new font with merged attributes, based on another one.
+--
+-- @tparam string|Pango.FontDescription name The base font.
+-- @tparam string merge Attributes that should be merged, e.g. "bold".
+-- @see https://developer.gnome.org/pango/stable/pango-Fonts.html#pango-font-description-from-string
+-- @treturn lgi.Pango.FontDescription
+function beautiful.get_merged_font(name, merge)
+    local font = beautiful.get_font(name)
+    local merge = Pango.FontDescription.from_string(merge)
+    local merged = font:copy_static()
+    merged:merge(merge, true)
+    return beautiful.get_font(merged:to_string())
+end
+
+--- Get the height of a font.
 --
 -- @param name Name of the font
 function beautiful.get_font_height(name)
