@@ -1,13 +1,17 @@
-#!/bin/sh
+#!/bin/bash
 
-READ_OPTIONS="-r"
+# Use bash's pipefail option to get errors during failure in a command
+# pipeline.  This is useful to get notified about an error from dbus-send
+# when used with "|tail".
+set -o pipefail
 
 tty 2>&1 > /dev/null
 ISATTY=$?
 
 if [ "$ISATTY" = 0 ]
 then
-    # rlwrap provides readline to stuff which doesn't know readline by itself
+    # rlwrap provides readline functionality for "read", which is more enhanced
+    # than bash's "read" itself.
     RLWRAP=$(which rlwrap 2>/dev/null)
     if [ "$RLWRAP" != "" ]
     then
@@ -15,16 +19,10 @@ then
         then
             A_RERUN="no" exec $RLWRAP $0
         fi
+        READ_CMD="read"
     else
-        if [ "$BASH" ]
-        then
-            READ_OPTIONS=" -e"
-        fi
-    fi
-
-    if [ $BASH ]
-    then
-        READ_OPTIONS="$READ_OPTIONS -p awesome# "
+        # No rlwrap: use bash's readline.
+        READ_CMD="read -e"
     fi
 fi
 
@@ -43,16 +41,21 @@ DBUS_METHOD=${DBUS_DEST}.Remote.Eval
 
 a_dbus_send()
 {
-    $DBUS_SEND --dest=$DBUS_DEST --type=method_call --print-reply $DBUS_PATH \
-        $DBUS_METHOD string:"$1" | tail -n +2
+    $DBUS_SEND --dest=$DBUS_DEST --type=method_call --print-reply \
+        $DBUS_PATH $DBUS_METHOD string:"$1" | tail -n +2
+    ret=$?
+    if [ "$ret" != 0 ] && [ "$ISATTY" != 0 ]; then
+        echo "E: $DBUS_SEND failed." >&2
+        exit $ret
+    fi
 }
 
 if [ "$ISATTY" = 0 ]
 then
-    while read ${READ_OPTIONS} line
+    while $READ_CMD -p "awesome# " -r line
     do
         a_dbus_send "$line"
     done
 else
-    a_dbus_send "`cat`"
+    a_dbus_send "$(cat)"
 fi
