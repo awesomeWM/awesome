@@ -161,8 +161,8 @@ function tasklist.new(screen, filter, buttons, style, update_function, base_widg
         -- Add a delayed callback for the first update.
         if not queued_update then
             timer.delayed_call(function()
+                queued_update = false
                 tasklist_update(screen, w, buttons, filter, data, style, uf)
-                queued_update = nil
             end)
             queued_update = true
         end
