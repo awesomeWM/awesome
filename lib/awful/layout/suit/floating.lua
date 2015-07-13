@@ -28,10 +28,12 @@ function floating.mouse_resize_handler(c, corner, x, y)
     -- Warp mouse pointer
     capi.mouse.coords({ x = x, y = y })
 
+    local prev_coords = {}
     capi.mousegrabber.run(function (_mouse)
                               for k, v in ipairs(_mouse.buttons) do
                                   if v then
                                       local ng
+                                      prev_coords = { x =_mouse.x, y = _mouse.y }
                                       if corner == "bottom_right" then
                                           ng = { width = _mouse.x - g.x,
                                                  height = _mouse.y - g.y }
@@ -74,7 +76,7 @@ function floating.mouse_resize_handler(c, corner, x, y)
                                       return true
                                   end
                               end
-                              return false
+                              return prev_coords.x == _mouse.x and prev_coords.y == _mouse.y
                           end, corner .. "_corner")
 end
 
