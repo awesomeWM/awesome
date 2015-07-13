@@ -69,9 +69,11 @@ local function mouse_resize_handler(c, corner, x, y, orientation)
         capi.mouse.coords({ y = wa.y + wa.height * (1 - mwfact), x= g.x + offset })
     end
 
+    local prev_coords = {}
     capi.mousegrabber.run(function (_mouse)
                               for k, v in ipairs(_mouse.buttons) do
                                   if v then
+                                      prev_coords = { x =_mouse.x, y = _mouse.y }
                                       local fact_x = (_mouse.x - wa.x) / wa.width
                                       local fact_y = (_mouse.y - wa.y) / wa.height
                                       local mwfact
@@ -114,7 +116,7 @@ local function mouse_resize_handler(c, corner, x, y, orientation)
                                       return true
                                   end
                               end
-                              return false
+                              return prev_coords.x == _mouse.x and prev_coords.y == _mouse.y
                           end, cursor)
 end
 
