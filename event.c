@@ -116,11 +116,11 @@ event_handle_mousegrabber(int x, int y, uint16_t mask)
     if(globalconf.mousegrabber != LUA_REFNIL)
     {
         lua_State *L = globalconf_get_lua_State();
-        lua_rawgeti(L, LUA_REGISTRYINDEX, globalconf.mousegrabber);
         mousegrabber_handleevent(L, x, y, mask);
-        if(lua_pcall(L, 1, 1, 0))
+        lua_rawgeti(L, LUA_REGISTRYINDEX, globalconf.mousegrabber);
+        if(!luaA_dofunction(L, 1, 1))
         {
-            warn("error running function: %s", lua_tostring(L, -1));
+            warn("Stopping mousegrabber.");
             luaA_mousegrabber_stop(L);
         }
         else if(!lua_isboolean(L, -1) || !lua_toboolean(L, -1))
@@ -599,16 +599,17 @@ event_handle_key(xcb_key_press_event_t *ev)
 
     if(globalconf.keygrabber != LUA_REFNIL)
     {
-        lua_rawgeti(L, LUA_REGISTRYINDEX, globalconf.keygrabber);
         if(keygrabber_handlekpress(L, ev))
         {
-            if(lua_pcall(L, 3, 1, 0))
+            lua_rawgeti(L, LUA_REGISTRYINDEX, globalconf.keygrabber);
+
+            if(!luaA_dofunction(L, 3, 1))
             {
-                warn("error running function: %s", lua_tostring(L, -1));
+                warn("Stopping keygrabber.");
                 luaA_keygrabber_stop(L);
             }
+            lua_pop(L, 1);
         }
-        lua_pop(L, 1);  /* pop returned value or function if not called */
     }
     else
     {
