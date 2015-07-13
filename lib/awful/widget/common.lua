@@ -91,7 +91,7 @@ function common.list_update(w, buttons, label, data, objects)
             }
         end
 
-        local text, bg, bg_image, icon = label(o)
+        local text, bg, bg_image, icon = label(o, tb)
         -- The text might be invalid, so use pcall.
         if text == nil or text == "" then
             tbm:set_margins(0)
