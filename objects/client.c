@@ -97,6 +97,7 @@
  * @field shape_client_clip The client's clip shape as set by the program as a (native) cairo surface.
  * @field startup_id The FreeDesktop StartId.
  * @field valid If the client that this object refers to is still managed by awesome.
+ * @field first_tag The first tag of the client.  Optimized form of `c:tags()[1]`.
  * @table client
  */
 
@@ -1559,9 +1560,11 @@ luaA_client_swap(lua_State *L)
 
 /** Access or set the client tags.
  *
- * @param tags_table A table with tags to set, or none to get the current tags
- *  table.
- * @return A table with all tags.
+ * Use the `first_tag` field to access the first tag of a client directly.
+ *
+ * @tparam table tags_table A table with tags to set, or `nil` to get the
+ *   current tags.
+ * @treturn table A table with all tags.
  * @function tags
  */
 static int
@@ -1609,6 +1612,23 @@ luaA_client_tags(lua_State *L)
         }
 
     return 1;
+}
+
+/** Get the first tag of a client.
+ */
+static int
+luaA_client_get_first_tag(lua_State *L)
+{
+    client_t *c = luaA_checkudata(L, 1, &client_class);
+
+    foreach(tag, globalconf.tags)
+        if(is_client_tagged(c, *tag))
+        {
+            luaA_object_push(L, *tag);
+            return 1;
+        }
+
+    return 0;
 }
 
 /** Raise a client on top of others which are on the same layer.
@@ -2638,6 +2658,10 @@ client_class_setup(lua_State *L)
     luaA_class_add_property(&client_class, "client_shape_clip",
                             NULL,
                             (lua_class_propfunc_t) luaA_client_get_client_shape_clip,
+                            NULL);
+    luaA_class_add_property(&client_class, "first_tag",
+                            NULL,
+                            (lua_class_propfunc_t) luaA_client_get_first_tag,
                             NULL);
 
     /** When a client gains focus.
