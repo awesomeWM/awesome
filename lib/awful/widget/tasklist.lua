@@ -26,7 +26,7 @@ local tasklist = { mt = {} }
 -- Public structures
 tasklist.filter = {}
 
-local function tasklist_label(c, args)
+local function tasklist_label(c, args, tb)
     if not args then args = {} end
     local theme = beautiful.get()
     local fg_normal = util.ensure_pango_color(args.fg_normal or theme.tasklist_fg_normal or theme.fg_normal, "white")
@@ -43,8 +43,11 @@ local function tasklist_label(c, args)
     local bg_image_minimize = args.bg_image_minimize or theme.bg_image_minimize
     local tasklist_disable_icon = args.tasklist_disable_icon or theme.tasklist_disable_icon or false
     local font = args.font or theme.tasklist_font or theme.font or ""
+    local font_focus = args.font_focus or theme.tasklist_font_focus or theme.font_focus or font or ""
+    local font_minimized = args.font_minimized or theme.tasklist_font_minimized or theme.font_minimized or font or ""
+    local font_urgent = args.font_urgent or theme.tasklist_font_urgent or theme.font_urgent or font or ""
     local bg = nil
-    local text = "<span font_desc='"..font.."'>"
+    local text = ""
     local name = ""
     local bg_image = nil
 
@@ -93,20 +96,23 @@ local function tasklist_label(c, args)
         bg = bg_focus
         text = text .. "<span color='"..fg_focus.."'>"..name.."</span>"
         bg_image = bg_image_focus
+        font = font_focus
     elseif c.urgent then
         bg = bg_urgent
         text = text .. "<span color='"..fg_urgent.."'>"..name.."</span>"
         bg_image = bg_image_urgent
+        font = font_urgent
     elseif c.minimized then
         bg = bg_minimize
         text = text .. "<span color='"..fg_minimize.."'>"..name.."</span>"
         bg_image = bg_image_minimize
+        font = font_minimized
     else
         bg = bg_normal
         text = text .. "<span color='"..fg_normal.."'>"..name.."</span>"
         bg_image = bg_image_normal
     end
-    text = text .. "</span>"
+    tb:set_font(font)
     return text, bg, bg_image, not tasklist_disable_icon and c.icon or nil
 end
 
@@ -120,7 +126,7 @@ local function tasklist_update(s, w, buttons, filter, data, style, update_functi
         end
     end
 
-    local function label(c) return tasklist_label(c, style) end
+    local function label(c, tb) return tasklist_label(c, style, tb) end
 
     update_function(w, buttons, label, data, clients)
 end
