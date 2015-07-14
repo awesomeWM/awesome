@@ -831,7 +831,19 @@ function client.setwfact(wfact, c)
     local data = tag.getproperty(t, "windowfact") or {}
     local colfact = data[w.col]
 
+    local need_normalize = colfact ~= nil
+
+    if not need_normalize then
+        colfact = {}
+    end
+
     colfact[w.idx] = wfact
+
+    if not need_normalize then
+        t:emit_signal("property::windowfact")
+        return
+    end
+
     local rest = 1-wfact
 
     -- calculate the current denominator
@@ -866,7 +878,7 @@ function client.incwfact(add, c)
 
     local nmaster = tag.getnmaster(t)
     local data = tag.getproperty(t, "windowfact") or {}
-    local colfact = data[w.col]
+    local colfact = data[w.col] or {}
     curr = colfact[w.idx] or 1
     colfact[w.idx] = curr + add
 
