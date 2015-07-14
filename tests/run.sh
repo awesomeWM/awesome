@@ -1,7 +1,11 @@
 #!/bin/sh
 
 set -e
-set -x
+
+# Be verbose on Travis.
+if [ "$CI" = true ]; then
+    set -x
+fi
 
 # Change to file's dir (POSIXly).
 cd -P -- "$(dirname -- "$0")"
@@ -69,7 +73,7 @@ export XDG_CONFIG_HOME
 awesome_log=/tmp/_awesome_test.log
 echo "awesome_log: $awesome_log"
 
-cd -
+cd - >/dev/null
 
 
 kill_childs() {
@@ -79,25 +83,61 @@ kill_childs() {
 }
 # Cleanup on errors / aborting.
 set_trap() {
-    trap "kill_childs" 2 3 15
+    trap "kill_childs" 0 2 3 15
 }
 set_trap
 
+AWESOME_CLIENT="$root_dir/utils/awesome-client"
+
 # Start awesome.
 start_awesome() {
-    (cd $root_dir/build; \
-        DISPLAY=$D "$AWESOME" -c "$RC_FILE" $AWESOME_OPTIONS > $awesome_log 2>&1 || true &)
-    sleep 1
-    awesome_pid=$(pgrep -nf "awesome -c $RC_FILE" || true)
+    (
+        export DISPLAY="$D"
+        cd $root_dir/build
+        # Setup xrdb, for awesome's xresources backend / queries.
+        echo "Xft.dpi: 96" | xrdb
+        "$AWESOME" -c "$RC_FILE" $AWESOME_OPTIONS > $awesome_log 2>&1 &
+    )
 
-    if [ -z $awesome_pid ]; then
-        echo "Error: Failed to start awesome (-c $RC_FILE)!"
-        echo "Log:"
-        cat "$awesome_log"
-        kill_childs
-        exit 1
-    fi
-    set_trap
+    # Get PID of awesome.
+    awesome_pid=
+    max_wait=30
+    while true; do
+        awesome_pid="$(pgrep -nf "awesome -c $RC_FILE")"
+        if [ -n "$awesome_pid" ]; then
+            break;
+        fi
+        max_wait=$(expr $max_wait - 1)
+        if [ "$max_wait" -lt 0 ]; then
+            echo "Error: Failed to start awesome (-c $RC_FILE)!"
+            echo "Log:"
+            cat "$awesome_log"
+            exit 1
+        fi
+        sleep 0.1
+    done
+
+    # Wait until the interface for awesome-client is ready (D-Bus interface).
+    client_reply=
+    max_wait=50
+    while true; do
+        set +e
+        client_reply=$(echo 'return 1' | DISPLAY=$D "$AWESOME_CLIENT" 2>&1)
+        ret=$?
+        set -e
+        if [ $ret = 0 ]; then
+            break
+        fi
+        max_wait=$(expr $max_wait - 1)
+        if [ "$max_wait" -lt 0 ]; then
+            echo "Error: did not receive a successful reply via awesome-client!"
+            echo "Last reply: $client_reply."
+            echo "Log:"
+            cat "$awesome_log"
+            exit 1
+        fi
+        sleep 0.1
+    done
 }
 
 # Count errors.
@@ -108,7 +148,7 @@ for f in $tests; do
     start_awesome
 
     # Send the test file to awesome.
-    cat $f | DISPLAY=$D $root_dir/utils/awesome-client 2>&1
+    cat $f | DISPLAY=$D "$AWESOME_CLIENT" 2>&1
 
     # Tail the log and quit, when awesome quits.
     tail -f --pid $awesome_pid $awesome_log
@@ -124,7 +164,5 @@ for f in $tests; do
         fi
     fi
 done
-
-kill_childs
 
 [ $errors = 0 ] && exit 0 || exit 1
