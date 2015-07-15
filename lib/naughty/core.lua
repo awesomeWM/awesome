@@ -515,10 +515,6 @@ function naughty.notify(args)
             actiontextbox:set_valign("middle")
             actiontextbox:set_font(font)
             actiontextbox:set_markup(string.format('<b>%s</b>', action))
-            -- calculate the height and width
-            local w, h = actiontextbox:fit(-1, -1)
-            local height = h + 2 * margin
-            local width = w + 2 * margin
 
             actionmarginbox:buttons(util.table.join(
                 button({ }, 1, callback),
@@ -526,6 +522,8 @@ function naughty.notify(args)
                 ))
             actionslayout:add(actionmarginbox)
 
+            -- Calculate the width and height.
+            local width, height = actionmarginbox:fit(-1, -1)
             actions_total_height = actions_total_height + height
             if actions_max_width < width then
                 actions_max_width = width
@@ -586,20 +584,24 @@ function naughty.notify(args)
 
     -- calculate the height
     if not height then
-        local w, h = textbox:fit(-1, -1)
-        if iconbox and icon_h + 2 * margin > h + 2 * margin then
-            height = icon_h + 2 * margin
-        else
-            height = h + 2 * margin
+        local _, h = marginbox:fit(-1, -1)
+        if iconmargin then
+            local _, h2 = iconmargin:fit(-1, -1)
+            h = math.max(h, h2)
         end
+        height = h
     end
 
     height = height + actions_total_height
 
     -- calculate the width
     if not width then
-        local w, h = textbox:fit(-1, -1)
-        width = w + (iconbox and icon_w + 2 * margin or 0) + 2 * margin
+        local w, _ = marginbox:fit(-1, -1)
+        if iconmargin then
+            local w2, _ = iconmargin:fit(-1, -1)
+            w = math.max(w, w2)
+        end
+        width = w
     end
 
     if width < actions_max_width then
