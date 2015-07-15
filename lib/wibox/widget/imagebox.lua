@@ -38,7 +38,11 @@ function imagebox:draw(wibox, cr, width, height)
     cr:restore()
 end
 
---- Fit the imagebox into the given geometry
+--- Fit the imagebox into the given geometry.
+-- @tparam number width Available width, -1 for unrestricted.
+-- @tparam number height Available height, -1 for unrestricted.
+-- @treturn number The width that the imagebox wants to use.
+-- @treturn number The height that the imagebox wants to use.
 function imagebox:fit(width, height)
     if not self._image then
         return 0, 0
@@ -46,6 +50,9 @@ function imagebox:fit(width, height)
 
     local w = self._image:get_width()
     local h = self._image:get_height()
+
+    width = width == -1 and w or width
+    height = height == -1 and h or height
 
     if w > width then
         h = h * width / w
