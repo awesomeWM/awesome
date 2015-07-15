@@ -409,6 +409,36 @@ function tag.getgap(t)
     return tag.getproperty(t, "useless_gap") or beautiful.useless_gap or 0
 end
 
+--- Set sizing policy for the master client(s)
+-- @tparam string policy Can be set to
+-- "expand" (fill all the available workarea) or
+-- "mwfact" (fill only an area inside the master width factor)
+-- @tparam tag t The tag to modify, if null tag.selected() is used.
+function tag.setmfpol(enabled, t)
+    local t = t or tag.selected()
+    tag.setproperty(t, "master_fill_policy", enabled)
+end
+
+--- Toggle sizing policy for the master client(s)
+-- @tparam tag t The tag to modify, if null tag.selected() is used.
+function tag.togglemfpol(t)
+    if tag.getmfpol(t) == "expand" then
+        tag.setmfpol("mwfact", t)
+    else
+        tag.setmfpol("expand", t)
+    end
+end
+
+--- Get sizing policy for the master client(s)
+-- @tparam tag t Optional tag.
+-- @treturn string Can be set to
+-- "expand" (fill all the available workarea) or
+-- "mwfact" (fill only an area inside the master width factor)
+function tag.getmfpol(t)
+    local t = t or tag.selected()
+    return tag.getproperty(t, "master_fill_policy") or "expand"
+end
+
 --- Set the number of master windows.
 -- @param nmaster The number of master windows.
 -- @param[opt] t The tag.
@@ -702,6 +732,7 @@ capi.tag.add_signal("property::icon_only")
 capi.tag.add_signal("property::layout")
 capi.tag.add_signal("property::mwfact")
 capi.tag.add_signal("property::useless_gap")
+capi.tag.add_signal("property::master_fill_policy")
 capi.tag.add_signal("property::ncol")
 capi.tag.add_signal("property::nmaster")
 capi.tag.add_signal("property::windowfact")

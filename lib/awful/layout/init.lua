@@ -192,6 +192,7 @@ capi.tag.connect_signal("property::windowfact", arrange_tag)
 capi.tag.connect_signal("property::selected", arrange_tag)
 capi.tag.connect_signal("property::activated", arrange_tag)
 capi.tag.connect_signal("property::useless_gap", arrange_tag)
+capi.tag.connect_signal("property::master_fill_policy", arrange_tag)
 capi.tag.connect_signal("tagged", arrange_tag)
 
 for s = 1, capi.screen.count() do
