@@ -48,6 +48,7 @@ local a_placement = require("awful.placement")
 local beautiful = require("beautiful")
 local textbox = require("wibox.widget.textbox")
 local background = require("wibox.widget.background")
+local dpi = require("beautiful").xresources.apply_dpi
 local setmetatable = setmetatable
 local ipairs = ipairs
 
@@ -82,6 +83,8 @@ local function set_geometry(self)
     local my_geo = self.wibox:geometry()
     -- calculate width / height
     local n_w, n_h = self.textbox:fit(-1, -1)
+    n_w = n_w + self.marginbox.left + self.marginbox.right
+    n_h = n_h + self.marginbox.top + self.marginbox.bottom
     if my_geo.width ~= n_w or my_geo.height ~= n_h then
         self.wibox:geometry({ width = n_w, height = n_h })
     end
@@ -177,6 +180,8 @@ end
 -- @tparam table    args.objects A list of objects linked to the tooltip.
 -- @tparam number   args.delay_show Delay showing the tooltip by this many
 --                                  seconds.
+-- @tparam integer  args.margin_leftright The left/right margin for the text.
+-- @tparam integer  args.margin_topbottom The top/bottom margin for the text.
 -- @return The created tooltip.
 -- @see add_to_object
 -- @see set_timeout
@@ -237,7 +242,12 @@ tooltip.new = function(args)
     self.textbox:set_font(font)
     self.background = background(self.textbox)
     self.background:set_fg(fg)
-    self.wibox:set_widget(self.background)
+
+    -- Add margin.
+    local m_lr = args.margin_leftright or math.ceil(dpi(5))
+    local m_tb = args.margin_topbottom or math.ceil(dpi(3))
+    self.marginbox = wibox.layout.margin(self.background, m_lr, m_lr, m_tb, m_tb)
+    self.wibox:set_widget(self.marginbox)
 
     -- add some signals on both the tooltip and widget
     self.wibox:connect_signal("mouse::enter", data[self].hide)
