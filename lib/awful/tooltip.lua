@@ -48,6 +48,7 @@ local a_placement = require("awful.placement")
 local beautiful = require("beautiful")
 local textbox = require("wibox.widget.textbox")
 local background = require("wibox.widget.background")
+local base = require("wibox.layout.base")
 local setmetatable = setmetatable
 local ipairs = ipairs
 
@@ -81,7 +82,7 @@ end
 local function set_geometry(self)
     local my_geo = self.wibox:geometry()
     -- calculate width / height
-    local n_w, n_h = self.textbox:fit(-1, -1)
+    local n_w, n_h = base.fit_widget(self.textbox, -1, -1)
     if my_geo.width ~= n_w or my_geo.height ~= n_h then
         self.wibox:geometry({ width = n_w, height = n_h })
     end

@@ -41,7 +41,11 @@ function textbox:draw(wibox, cr, width, height)
     cr:show_layout(self._layout)
 end
 
---- Fit the given textbox
+--- Fit the textbox into the given geometry.
+-- @tparam number width Available width, -1 for unrestricted.
+-- @tparam number height Available height, -1 for unrestricted.
+-- @treturn number The width that the textbox wants to use.
+-- @treturn number The height that the textbox wants to use.
 function textbox:fit(width, height)
     setup_layout(self, width, height)
     local ink, logical = self._layout:get_pixel_extents()
