@@ -409,7 +409,7 @@ function tag.getgap(t)
     return tag.getproperty(t, "useless_gap") or beautiful.useless_gap or 0
 end
 
---- Set sizing policy for the master client(s)
+--- Set size fill policy for the master client(s)
 -- @tparam string policy Can be set to
 -- "expand" (fill all the available workarea) or
 -- "mwfact" (fill only an area inside the master width factor)
@@ -419,7 +419,7 @@ function tag.setmfpol(enabled, t)
     tag.setproperty(t, "master_fill_policy", enabled)
 end
 
---- Toggle sizing policy for the master client(s)
+--- Toggle size fill policy for the master client(s)
 -- @tparam tag t The tag to modify, if null tag.selected() is used.
 function tag.togglemfpol(t)
     if tag.getmfpol(t) == "expand" then
@@ -429,7 +429,7 @@ function tag.togglemfpol(t)
     end
 end
 
---- Get sizing policy for the master client(s)
+--- Get size fill policy for the master client(s)
 -- @tparam tag t Optional tag.
 -- @treturn string Can be set to
 -- "expand" (fill all the available workarea) or
