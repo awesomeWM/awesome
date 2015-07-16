@@ -103,7 +103,7 @@ start_awesome() {
     awesome_pid=
     max_wait=30
     while true; do
-        awesome_pid="$(pgrep -nf "awesome -c $RC_FILE")"
+        awesome_pid="$(pgrep -nf "awesome -c $RC_FILE" || true)"
         if [ -n "$awesome_pid" ]; then
             break;
         fi
