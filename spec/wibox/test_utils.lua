@@ -59,6 +59,7 @@ return {
 
     widget_stub = function(width, height)
         local w = object()
+        w.visible = true
         w:add_signal("widget::updated")
 
         w.fit = function()

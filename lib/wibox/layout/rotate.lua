@@ -26,7 +26,9 @@ end
 
 --- Draw this layout
 function rotate:draw(wibox, cr, width, height)
-    if not self.widget then return { width = 0, height = 0 } end
+    if not self.widget or not self.widget.visible then
+        return { width = 0, height = 0 }
+    end
 
     local dir = self:get_direction()
 
