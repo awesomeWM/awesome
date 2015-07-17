@@ -107,6 +107,15 @@ function base.make_widget(proxy, widget_name)
         ret._fit_geometry_cache = cache.new(cb)
     end)
 
+    -- Add visible property and setter.
+    ret.visible = true
+    function ret:set_visible(b)
+        if b ~= self.visible then
+            self.visible = b
+            self:emit_signal("widget::updated")
+        end
+    end
+
     -- Add __tostring method to metatable.
     ret.widget_name = widget_name or object.modulename(3)
     local mt = {}

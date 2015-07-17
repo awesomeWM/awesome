@@ -18,7 +18,7 @@ local background = { mt = {} }
 
 --- Draw this widget
 function background:draw(wibox, cr, width, height)
-    if not self.widget then
+    if not self.widget or not self.widget.visible then
         return
     end
 

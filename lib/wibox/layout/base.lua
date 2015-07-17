@@ -34,6 +34,9 @@ end
 -- @param height The available height for the widget
 -- @return The width and height that the widget wants to use
 function base.fit_widget(widget, width, height)
+    if not widget.visible then
+        return 0, 0
+    end
     -- Sanitize the input. This also filters out e.g. NaN.
     local width = math.max(0, width)
     local height = math.max(0, height)
@@ -50,6 +53,9 @@ end
 -- @param width The widget's width
 -- @param height The widget's height
 function base.draw_widget(wibox, cr, widget, x, y, width, height)
+    if not widget.visible then
+        return
+    end
     -- Use save() / restore() so that our modifications aren't permanent
     cr:save()
 
