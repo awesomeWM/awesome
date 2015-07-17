@@ -51,6 +51,8 @@ local function tasklist_label(c, args)
     -- symbol to use to indicate certain client properties
     local sticky = args.sticky or theme.tasklist_sticky or "▪"
     local ontop = args.ontop or theme.tasklist_ontop or '⌃'
+    local above = args.above or theme.tasklist_above or '▴'
+    local below = args.below or theme.tasklist_below or '▾'
     local floating = args.floating or theme.tasklist_floating or '✈'
     local maximized = args.maximized or theme.tasklist_maximized or '<b>+</b>'
     local maximized_horizontal = args.maximized_horizontal or theme.tasklist_maximized_horizontal or '⬌'
@@ -58,7 +60,11 @@ local function tasklist_label(c, args)
 
     if not theme.tasklist_plain_task_name then
         if c.sticky then name = name .. sticky end
-        if c.ontop then name = name .. ontop end
+
+        if c.ontop then name = name .. ontop
+        elseif c.above then name = name .. above
+        elseif c.below then name = name .. below end
+
         if c.maximized then
             name = name .. maximized
         else
@@ -138,6 +144,8 @@ end
 -- @param base_widget.fg_minimize The foreground color for minimized clients.
 -- @param base_widget.floating Symbol to use for floating clients.
 -- @param base_widget.ontop Symbol to use for ontop clients.
+-- @param base_widget.above Symbol to use for clients kept above others.
+-- @param base_widget.below Symbol to use for clients kept below others.
 -- @param base_widget.maximized Symbol to use for clients that have been maximized (vertically and horizontally).
 -- @param base_widget.maximized_horizontal Symbol to use for clients that have been horizontally maximized.
 -- @param base_widget.maximized_vertical Symbol to use for clients that have been vertically maximized.
@@ -164,6 +172,8 @@ function tasklist.new(screen, filter, buttons, style, update_function, base_widg
     capi.client.connect_signal("property::urgent", u)
     capi.client.connect_signal("property::sticky", u)
     capi.client.connect_signal("property::ontop", u)
+    capi.client.connect_signal("property::above", u)
+    capi.client.connect_signal("property::below", u)
     capi.client.connect_signal("property::floating", u)
     capi.client.connect_signal("property::maximized_horizontal", u)
     capi.client.connect_signal("property::maximized_vertical", u)
