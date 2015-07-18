@@ -298,7 +298,7 @@ function menubar.show(scr)
     end
 
     -- Set position and size
-    scr = scr or capi.mouse.screen or 1
+    scr = scr or awful.screen.focused() or 1
     local scrgeom = capi.screen[scr].workarea
     local geometry = menubar.geometry
     instance.geometry = {x = geometry.x or scrgeom.x,

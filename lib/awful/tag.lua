@@ -9,6 +9,7 @@
 
 -- Grab environment we need
 local util = require("awful.util")
+local ascreen = require("awful.screen")
 local timer = require("gears.timer")
 local beautiful = require("beautiful")
 local tostring = tostring
@@ -91,7 +92,7 @@ function tag.add(name, props)
     -- connected to property::activated to be called without a valid tag.
     -- set properies cannot be used as this has to be set before the first signal
     -- is sent
-    properties.screen = properties.screen or capi.mouse.screen
+    properties.screen = properties.screen or ascreen.focused()
 
     -- Index is also required
     properties.index = (#tag.gettags(properties.screen))+1
@@ -132,10 +133,10 @@ function tag.new(names, screen, layout)
 end
 
 --- Find a suitable fallback tag.
--- @param screen The screen number to look for a tag on. [mouse.screen]
+-- @param screen The screen number to look for a tag on. [awful.screen.focused()]
 -- @param invalids A table of tags we consider unacceptable. [selectedlist(scr)]
 function tag.find_fallback(screen, invalids)
-    local scr = screen or capi.mouse.screen
+    local scr = screen or ascreen.focused()
     local t = invalids or tag.selectedlist(scr)
 
     for _, v in pairs(tag.gettags(scr)) do
@@ -255,7 +256,7 @@ end
 -- toggling between last two selected sets of tags. Number (eg 1) will go back
 -- to the given index in history.
 function tag.history.restore(screen, idx)
-    local s = screen or capi.mouse.screen
+    local s = screen or ascreen.focused()
     local i = idx or "previous"
     local sel = tag.selectedlist(s)
     -- do nothing if history empty
@@ -303,7 +304,7 @@ end
 -- @param t tag object
 -- @param s Screen number
 function tag.setscreen(t, s)
-    local s = s or capi.mouse.screen
+    local s = s or ascreen.focused()
     local sel = tag.selected
     local old_screen = tag.getproperty(t, "screen")
     if s == old_screen then return end
@@ -344,7 +345,7 @@ end
 -- @param s Screen number.
 -- @return A table with all selected tags.
 function tag.selectedlist(s)
-    local screen = s or capi.mouse.screen
+    local screen = s or ascreen.focused()
     local tags = tag.gettags(screen)
     local vtags = {}
     for i, t in pairs(tags) do
@@ -476,7 +477,7 @@ end
 --- View no tag.
 -- @tparam[opt] int screen The screen number.
 function tag.viewnone(screen)
-    local tags = tag.gettags(screen or capi.mouse.screen)
+    local tags = tag.gettags(screen or ascreen.focused())
     for i, t in pairs(tags) do
         t.selected = false
     end
@@ -486,7 +487,7 @@ end
 -- @param i The relative index to see.
 -- @param[opt] screen The screen number.
 function tag.viewidx(i, screen)
-    local screen = screen or capi.mouse.screen
+    local screen = screen or ascreen.focused()
     local tags = tag.gettags(screen)
     local showntags = {}
     for k, t in ipairs(tags) do
@@ -551,7 +552,7 @@ end
 -- @param tags A table with tags to view only.
 -- @param[opt] screen The screen number of the tags.
 function tag.viewmore(tags, screen)
-    local screen = screen or capi.mouse.screen
+    local screen = screen or ascreen.focused()
     local screen_tags = tag.gettags(screen)
     for _, _tag in ipairs(screen_tags) do
         if not util.table.hasitem(tags, _tag) then
@@ -655,7 +656,7 @@ capi.client.connect_signal("manage", function(c)
                 c:tags(c.transient_for:tags())
             end
         else
-            c.screen = capi.mouse.screen
+            c.screen = ascreen.focused()
         end
     end
     c:connect_signal("property::screen", tag.withcurrent)
