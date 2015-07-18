@@ -126,6 +126,13 @@ errors=0
 
 for f in $tests; do
     echo "== Running $f =="
+
+    if [ ! -r $f ]; then
+        echo "===> ERROR $f is not readable! <==="
+        errors=$(expr $errors + 1)
+        continue
+    fi
+
     start_awesome
 
     # Send the test file to awesome.
