@@ -21,7 +21,6 @@ local steps = {
     else
       local c = client.get()[1]
       if c then
-        print(c.border_color)
         assert(c.border_color == "#ff0000")
         return true
       end

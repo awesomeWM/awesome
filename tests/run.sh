@@ -42,19 +42,13 @@ SIZE=1024x768
 if [ $HEADLESS = 1 ]; then
     "$XVFB" $D -screen 0 ${SIZE}x24 &
     xserver_pid=$!
-    sleep 1
 else
     # export XEPHYR_PAUSE=1000
-    # if [ -f /tmp/.X5-lock ]; then
-    #     echo "Xephyr is already running for display $D.. aborting." >&2
-    #     exit 1
-    # fi
     "$XEPHYR" $D -ac -name xephyr_$D -noreset -screen "$SIZE" $XEPHYR_OPTIONS &
     xserver_pid=$!
-    sleep 1
+    # Toggles debugging mode, using XEPHYR_PAUSE.
+    # ( sleep 1; kill -USR1 $xserver_pid ) &
 fi
-# Toggles debugging mode, using XEPHYR_PAUSE.
-# pkill -USR1 Xephyr
 
 # Use a separate D-Bus session; sets $DBUS_SESSION_BUS_PID.
 eval $(DISPLAY="$D" dbus-launch --sh-syntax --exit-with-session)
@@ -68,7 +62,6 @@ XDG_CONFIG_HOME="./"
 export LUA_PATH
 export XDG_CONFIG_HOME
 
-# awesome_log=$(mktemp)
 awesome_log=/tmp/_awesome_test.log
 echo "awesome_log: $awesome_log"
 
