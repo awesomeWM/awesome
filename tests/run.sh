@@ -18,9 +18,6 @@ else
     tests=$this_dir/test*.lua
 fi
 
-# Use a separate D-Bus session; sets $DBUS_SESSION_BUS_PID.
-eval $(dbus-launch --sh-syntax)
-
 root_dir=$PWD/..
 
 # Travis.
@@ -59,6 +56,8 @@ fi
 # Toggles debugging mode, using XEPHYR_PAUSE.
 # pkill -USR1 Xephyr
 
+# Use a separate D-Bus session; sets $DBUS_SESSION_BUS_PID.
+eval $(DISPLAY="$D" dbus-launch --sh-syntax --exit-with-session)
 
 cd $root_dir/build
 
@@ -77,7 +76,7 @@ cd - >/dev/null
 
 
 kill_childs() {
-    for p in $awesome_pid $xserver_pid $DBUS_SESSION_BUS_PID; do
+    for p in $awesome_pid $xserver_pid; do
         kill -TERM $p 2>/dev/null || true
     done
 }
