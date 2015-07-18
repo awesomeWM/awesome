@@ -44,8 +44,8 @@ SIZE=1024x768
 
 if [ $HEADLESS = 1 ]; then
     "$XVFB" $D -screen 0 ${SIZE}x24 &
+    xserver_pid=$!
     sleep 1
-    xserver_pid=$(pgrep -n Xvfb)
 else
     # export XEPHYR_PAUSE=1000
     # if [ -f /tmp/.X5-lock ]; then
@@ -53,8 +53,8 @@ else
     #     exit 1
     # fi
     "$XEPHYR" $D -ac -name xephyr_$D -noreset -screen "$SIZE" $XEPHYR_OPTIONS &
+    xserver_pid=$!
     sleep 1
-    xserver_pid=$(pgrep -n Xephyr)
 fi
 # Toggles debugging mode, using XEPHYR_PAUSE.
 # pkill -USR1 Xephyr
@@ -91,31 +91,13 @@ AWESOME_CLIENT="$root_dir/utils/awesome-client"
 
 # Start awesome.
 start_awesome() {
-    (
-        export DISPLAY="$D"
-        cd $root_dir/build
-        # Setup xrdb, for awesome's xresources backend / queries.
-        echo "Xft.dpi: 96" | xrdb
-        "$AWESOME" -c "$RC_FILE" $AWESOME_OPTIONS > $awesome_log 2>&1 &
-    )
-
-    # Get PID of awesome.
-    awesome_pid=
-    max_wait=30
-    while true; do
-        awesome_pid="$(pgrep -nf "awesome -c $RC_FILE" || true)"
-        if [ -n "$awesome_pid" ]; then
-            break;
-        fi
-        max_wait=$(expr $max_wait - 1)
-        if [ "$max_wait" -lt 0 ]; then
-            echo "Error: Failed to start awesome (-c $RC_FILE)!"
-            echo "Log:"
-            cat "$awesome_log"
-            exit 1
-        fi
-        sleep 0.1
-    done
+    export DISPLAY="$D"
+    cd $root_dir/build
+    # Setup xrdb, for awesome's xresources backend / queries.
+    echo "Xft.dpi: 96" | DISPLAY="$D" xrdb
+    DISPLAY="$D" "$AWESOME" -c "$RC_FILE" $AWESOME_OPTIONS > $awesome_log 2>&1 &
+    awesome_pid=$!
+    cd - >/dev/null
 
     # Wait until the interface for awesome-client is ready (D-Bus interface).
     client_reply=
