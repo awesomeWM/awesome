@@ -79,14 +79,35 @@ set_trap() {
 }
 set_trap
 
+# Wait for DISPLAY to be available, and setup xrdb,
+# for awesome's xresources backend / queries.
+max_wait=60
+while true; do
+    set +e
+    reply="$(echo "Xft.dpi: 96" | DISPLAY="$D" xrdb 2>&1)"
+    ret=$?
+    set -e
+    if [ $ret = 0 ]; then
+        break
+    fi
+    max_wait=$(expr $max_wait - 1)
+    if [ "$max_wait" -lt 0 ]; then
+        echo "Error: failed to setup xrdb!"
+        echo "Last reply: $reply."
+        echo "Log:"
+        cat "$awesome_log"
+        exit 1
+    fi
+    sleep 0.05
+done
+
+
 AWESOME_CLIENT="$root_dir/utils/awesome-client"
 
 # Start awesome.
 start_awesome() {
     export DISPLAY="$D"
     cd $root_dir/build
-    # Setup xrdb, for awesome's xresources backend / queries.
-    echo "Xft.dpi: 96" | DISPLAY="$D" xrdb
     DISPLAY="$D" "$AWESOME" -c "$RC_FILE" $AWESOME_OPTIONS > $awesome_log 2>&1 &
     awesome_pid=$!
     cd - >/dev/null
