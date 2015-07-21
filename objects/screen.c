@@ -445,14 +445,18 @@ screen_client_moveto(client_t *c, screen_t *new_screen, bool doresize)
     /* move / resize the client */
     client_resize(c, new_geometry, false);
 
-    /* emit signal */
-    luaA_object_push(L, c);
-    if(old_screen_idx != 0)
-        lua_pushinteger(L, old_screen_idx);
-    else
-        lua_pushnil(L);
-    luaA_object_emit_signal(L, -2, "property::screen", 1);
-    lua_pop(L, 1);
+    /* Emit signal, but only in case the call to client_resize had not changed
+     * it already. */
+    if(old_screen != c->screen)
+    {
+        luaA_object_push(L, c);
+        if(old_screen_idx != 0)
+            lua_pushinteger(L, old_screen_idx);
+        else
+            lua_pushnil(L);
+        luaA_object_emit_signal(L, -2, "property::screen", 1);
+        lua_pop(L, 1);
+    }
 
     if(had_focus)
         client_focus(c);
