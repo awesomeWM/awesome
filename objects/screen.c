@@ -285,8 +285,7 @@ screen_scan(void)
         screen_scan_x11();
 }
 
-/** Return the Xinerama screen number where the coordinates belongs to.
- * \param screen The logical screen number.
+/** Return the first screen number where the coordinates belong to.
  * \param x X coordinate
  * \param y Y coordinate
  * \return Screen pointer or screen param if no match or no multi-head.
@@ -295,12 +294,24 @@ screen_t *
 screen_getbycoord(int x, int y)
 {
     foreach(s, globalconf.screens)
-        if((x < 0 || (x >= (*s)->geometry.x && x < (*s)->geometry.x + (*s)->geometry.width))
-           && (y < 0 || (y >= (*s)->geometry.y && y < (*s)->geometry.y + (*s)->geometry.height)))
+        if(screen_coord_in_screen(*s, x, y))
             return *s;
 
     /* No screen found, let's be creative. */
     return globalconf.screens.tab[0];
+}
+
+/** Are the given coordinates in a given screen?
+ * \param screen The logical screen number.
+ * \param x X coordinate
+ * \param y Y coordinate
+ * \return True if the X/Y coordinates are in the given screen.
+ */
+bool
+screen_coord_in_screen(screen_t *s, int x, int y)
+{
+    return (x < 0 || (x >= s->geometry.x && x < s->geometry.x + s->geometry.width))
+           && (y < 0 || (y >= s->geometry.y && y < s->geometry.y + s->geometry.height));
 }
 
 /** Get screens info.

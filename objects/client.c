@@ -795,7 +795,10 @@ client_resize_do(client_t *c, area_t geometry, bool force_notice, bool honor_hin
     lua_State *L = globalconf_get_lua_State();
     bool send_notice = force_notice;
     bool hide_titlebars = c->fullscreen;
-    screen_t *new_screen = screen_getbycoord(geometry.x, geometry.y);
+
+    screen_t *new_screen = c->screen;
+    if(!screen_coord_in_screen(new_screen, geometry.x, geometry.y))
+        new_screen = screen_getbycoord(geometry.x, geometry.y);
 
     if (honor_hints)
         geometry = client_apply_size_hints(c, geometry);
