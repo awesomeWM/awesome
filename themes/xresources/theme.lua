@@ -22,8 +22,8 @@ theme.fg_focus      = theme.bg_normal
 theme.fg_urgent     = theme.bg_normal
 theme.fg_minimize   = theme.bg_normal
 
-theme.useless_gap   = dpi(5)
-theme.border_width  = dpi(1)
+theme.useless_gap   = math.ceil(dpi(5))
+theme.border_width  = math.ceil(dpi(1))
 theme.border_normal = xrdb.color0
 theme.border_focus  = theme.bg_focus
 theme.border_marked = xrdb.color10
@@ -43,8 +43,8 @@ theme.border_marked = xrdb.color10
 -- menu_[bg|fg]_[normal|focus]
 -- menu_[border_color|border_width]
 theme.menu_submenu_icon = "@AWESOME_THEMES_PATH@/default/submenu.png"
-theme.menu_height = dpi(16)
-theme.menu_width  = dpi(100)
+theme.menu_height = math.ceil(dpi(16))
+theme.menu_width  = math.ceil(dpi(100))
 
 -- You can add as many variables as
 -- you wish and access them by using
@@ -127,7 +127,7 @@ end
 theme.awesome_icon = awesome_icon()
 
 -- Taglist squares:
-local taglist_square_size = dpi(4)
+local taglist_square_size = math.ceil(dpi(4))
 
 local function taglist_squares_sel()
     local size = taglist_square_size
