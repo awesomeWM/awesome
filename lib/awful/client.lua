@@ -24,9 +24,17 @@ local capi =
     awesome = awesome,
 }
 
--- we use require("awful.screen") inside functions to prevent circular dependencies.
+-- We use a metatable to prevent circular dependency loops.
 local screen
-
+do
+    screen = setmetatable({}, {
+        __index = function(t, k)
+            screen = require("awful.screen")
+            return screen[k]
+        end,
+        _newindex = error -- Just to be sure in case anything ever does this
+    })
+end
 local client = {}
 
 -- Private data
@@ -54,7 +62,6 @@ client.shape = require("awful.client.shape")
 -- @client c the client to jump to
 -- @tparam bool merge If true then merge tags when clients are not visible.
 function client.jumpto(c, merge)
-    screen = screen or require("awful.screen")
     local s = screen.focused()
     -- focus the screen
     if s ~= c.screen then
@@ -205,7 +212,7 @@ end
 --- Focus the previous client in history.
 function client.focus.history.previous()
     local sel = capi.client.focus
-    local s = sel and sel.screen or awful.screen.focused()
+    local s = sel and sel.screen or screen.focused()
     local c = client.focus.history.get(s, 1)
     if c then
         c:emit_signal("request::activate", "client.focus.history.previous",
@@ -316,12 +323,8 @@ end
 -- @client[opt] c The client.
 -- @tparam[opt=false] boolean stacked Use stacking order?
 function client.focus.global_bydirection(dir, c, stacked)
-    screen = screen or require("awful.screen")
     local sel = c or capi.client.focus
-    local scr = awful.screen.focused()
-    if sel then
-        scr = sel.screen
-    end
+    local scr = sel and sel.screen or screen.focused
 
     -- change focus inside the screen
     client.focus.bydirection(dir, sel)
@@ -329,8 +332,8 @@ function client.focus.global_bydirection(dir, c, stacked)
     -- if focus not changed, we must change screen
     if sel == capi.client.focus then
         screen.focus_bydirection(dir, scr)
-        if scr ~= awful.screen.focused() then
-            local cltbl = client.visible(awful.screen.focused(), stacked)
+        if scr ~= screen.focused() then
+            local cltbl = client.visible(screen.focused(), stacked)
             local geomtbl = {}
             for i,cl in ipairs(cltbl) do
                 geomtbl[i] = cl:geometry()
@@ -383,12 +386,8 @@ end
 -- @param dir The direction, can be either "up", "down", "left" or "right".
 -- @client[opt] c The client.
 function client.swap.global_bydirection(dir, c)
-    screen = screen or require("awful.screen")
     local sel = c or capi.client.focus
-    local scr = awful.screen.focused()
-    if sel then
-        scr = sel.screen
-    end
+    local scr = sel and sel.screen or screen.focused()
 
     if sel then
         -- move focus
@@ -401,7 +400,7 @@ function client.swap.global_bydirection(dir, c)
 
         -- swapping to an empty screen
         elseif sel.screen ~= c.screen and sel == c then
-            client.movetoscreen(sel, awful.screen.focused())
+            client.movetoscreen(sel, screen.focused())
 
         -- swapping to a nonempty screen
         elseif sel.screen ~= c.screen and sel ~= c then
@@ -432,7 +431,7 @@ end
 -- @param[opt] screen The screen where to cycle clients.
 -- @tparam[opt=false] boolean stacked Use stacking order?
 function client.cycle(clockwise, screen, stacked)
-    local screen = screen or awful.screen.focused()
+    s = s or screen.focused()
     local cls = client.visible(screen, stacked)
     -- We can't rotate without at least 2 clients, buddy.
     if #cls >= 2 then
@@ -451,10 +450,10 @@ end
 
 --- Get the master window.
 --
--- @param[opt] screen The screen number, otherwise screen mouse is used.
+-- @param[opt] s The screen number, defaults to focused screen.
 -- @return The master window.
-function client.getmaster(screen)
-    local s = screen or awful.screen.focused()
+function client.getmaster(s)
+    s = s or screen.focused()
     return client.visible(s)[1]
 end
 
@@ -536,7 +535,6 @@ end
 -- @client c The client to move.
 -- @param s The screen number, default to current + 1.
 function client.movetoscreen(c, s)
-    screen = screen or require("awful.screen")
     local sel = c or capi.client.focus
     if sel then
         local sc = capi.screen.count()
@@ -717,7 +715,7 @@ end
 -- @param s The screen to use.
 -- @return The restored client if some client was restored, otherwise nil.
 function client.restore(s)
-    local s = s or (capi.client.focus and capi.client.focus.screen) or awful.screen.focused()
+    s = s or screen.focused()
     local cls = capi.client.get(s)
     local tags = tag.selectedlist(s)
     local mcls = {}
