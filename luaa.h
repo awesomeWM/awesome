@@ -56,6 +56,9 @@ luaA_warn(lua_State *L, const char *fmt, ...)
     vfprintf(stderr, fmt, ap);
     va_end(ap);
     fprintf(stderr, "\n");
+
+    luaL_traceback(L, L, NULL, 2);
+    fprintf(stderr, "%s\n", lua_tostring(L, -1));
 }
 
 static inline int
@@ -63,6 +66,8 @@ luaA_typerror(lua_State *L, int narg, const char *tname)
 {
     const char *msg = lua_pushfstring(L, "%s expected, got %s",
                                       tname, luaL_typename(L, narg));
+    luaL_traceback(L, L, NULL, 2);
+    lua_concat(L, 2);
     return luaL_argerror(L, narg, msg);
 }
 

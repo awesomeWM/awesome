@@ -29,7 +29,9 @@ runner.run_steps = function(steps)
     local step_as_string = step..'/'..#steps..' (@'..step_count..')'
 
     -- Call the current step's function.
-    local success, result = pcall(steps[step], step_count)
+    local success, result = xpcall(function()
+        return steps[step](step_count)
+      end, debug.traceback)
 
     if not success then
       io.stderr:write('Error: running function for step '

@@ -103,7 +103,8 @@ function beautiful.init(config)
         if type(config) == 'string' then
             -- Expand the '~' $HOME shortcut
             config = config:gsub("^~/", homedir .. "/")
-            success, theme = pcall(function() return dofile(config) end)
+            success, theme = xpcall(function() return dofile(config) end,
+                                    debug.traceback)
         elseif type(config) == 'table' then
             success = true
             theme = config

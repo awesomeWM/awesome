@@ -37,12 +37,11 @@ function timer:start()
         return
     end
     self.data.source_id = glib.timeout_add(glib.PRIORITY_DEFAULT, self.data.timeout * 1000, function()
-        local success, message = pcall(function()
-            self:emit_signal("timeout")
-        end)
-        if not success then
-            print(message)
-        end
+        local success, message = xpcall(function()
+                self:emit_signal("timeout")
+            end, function(err)
+                print(debug.traceback("Error during executing timeout handler: "..tostring(err)))
+            end)
         return true
     end)
 end
@@ -107,10 +106,11 @@ end
 local delayed_calls = {}
 capi.awesome.connect_signal("refresh", function()
     for _, callback in ipairs(delayed_calls) do
-        local success, message = pcall(unpack(callback))
-        if not success then
-            print(message)
-        end
+        local success, message = xpcall(function()
+                callback[1](unpack(callback, 2))
+            end, function(err)
+                print(debug.traceback("Error during delayed call: "..tostring(err)))
+            end)
     end
     delayed_calls = {}
 end)
