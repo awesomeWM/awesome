@@ -83,7 +83,7 @@ end
 
 --- Get a font description.
 --
--- @see https://developer.gnome.org/pango/stable/pango-Fonts.html#PangoFontDescription
+-- See https://developer.gnome.org/pango/stable/pango-Fonts.html#PangoFontDescription.
 -- @tparam string|lgi.Pango.FontDescription name The name of the font.
 -- @treturn lgi.Pango.FontDescription
 function beautiful.get_font(name)
@@ -92,9 +92,9 @@ end
 
 --- Get a new font with merged attributes, based on another one.
 --
+-- See https://developer.gnome.org/pango/stable/pango-Fonts.html#pango-font-description-from-string.
 -- @tparam string|Pango.FontDescription name The base font.
 -- @tparam string merge Attributes that should be merged, e.g. "bold".
--- @see https://developer.gnome.org/pango/stable/pango-Fonts.html#pango-font-description-from-string
 -- @treturn lgi.Pango.FontDescription
 function beautiful.get_merged_font(name, merge)
     local font = beautiful.get_font(name)
