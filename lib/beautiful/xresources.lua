@@ -91,9 +91,9 @@ end
 --- Compute resulting size applying current DPI value (optionally per screen).
 -- @tparam number size Size
 -- @tparam[opt] integer s The screen.
--- @treturn number Resulting size
+-- @treturn integer Resulting size (using `math.ceil`).
 function xresources.apply_dpi(size, s)
-    return size/96*xresources.get_dpi(s)
+    return math.ceil(size/96*xresources.get_dpi(s))
 end
 
 return xresources

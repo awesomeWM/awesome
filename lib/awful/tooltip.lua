@@ -244,8 +244,8 @@ tooltip.new = function(args)
     self.background:set_fg(fg)
 
     -- Add margin.
-    local m_lr = args.margin_leftright or math.ceil(dpi(5))
-    local m_tb = args.margin_topbottom or math.ceil(dpi(3))
+    local m_lr = args.margin_leftright or dpi(5)
+    local m_tb = args.margin_topbottom or dpi(3)
     self.marginbox = wibox.layout.margin(self.background, m_lr, m_lr, m_tb, m_tb)
     self.wibox:set_widget(self.marginbox)
 
