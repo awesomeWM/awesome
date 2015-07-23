@@ -85,6 +85,7 @@ install:
 
   # Install ldoc for building docs.
   - sudo luarocks install ldoc
+  - sudo luarocks install lua-discount
 
   # Install CMake 3+, via http://www.cmake.org/download/#latest.
   - wget http://www.cmake.org/files/v3.2/cmake-3.2.3-Linux-x86_64.tar.Z
