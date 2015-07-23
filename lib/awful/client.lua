@@ -215,10 +215,11 @@ end
 
 --- Get visible clients from a screen.
 --
--- @param screen The screen number, or nil for all screens.
--- @return A table with all visible clients.
-function client.visible(screen)
-    local cls = capi.client.get(screen)
+-- @tparam[opt] integer screen The screen number, or nil for all screens.
+-- @tparam[opt=false] boolean stacked Use stacking order?
+-- @treturn table A table with all visible clients.
+function client.visible(screen, stacked)
+    local cls = capi.client.get(screen, stacked)
     local vcls = {}
     for k, c in pairs(cls) do
         if c:isvisible() then
@@ -230,10 +231,11 @@ end
 
 --- Get visible and tiled clients
 --
--- @param screen The screen number, or nil for all screens.
--- @return A table with all visible and tiled clients.
-function client.tiled(screen)
-    local clients = client.visible(screen)
+-- @tparam integer screen The screen number, or nil for all screens.
+-- @tparam[opt=false] boolean stacked Use stacking order?
+-- @treturn table A table with all visible and tiled clients.
+function client.tiled(screen, stacked)
+    local clients = client.visible(screen, stacked)
     local tclients = {}
     -- Remove floating clients
     for k, c in pairs(clients) do
@@ -252,18 +254,19 @@ end
 --
 -- @tparam int i The index.  Use 1 to get the next, -1 to get the previous.
 -- @client[opt] c The client.
+-- @tparam[opt=false] boolean stacked Use stacking order?
 -- @return A client, or nil if no client is available.
 --
 -- @usage -- focus the next window in the index
 -- awful.client.next(1)
 -- -- focus the previous
 -- awful.client.next(-1)
-function client.next(i, c)
+function client.next(i, c, stacked)
     -- Get currently focused client
     local sel = c or capi.client.focus
     if sel then
         -- Get all visible clients
-        local cls = client.visible(sel.screen)
+        local cls = client.visible(sel.screen, stacked)
         local fcls = {}
         -- Remove all non-normal clients
         for idx, c in ipairs(cls) do
@@ -287,10 +290,11 @@ end
 -- @tparam string dir The direction, can be either
 --   `"up"`, `"down"`, `"left"` or `"right"`.
 -- @client[opt] c The client.
-function client.focus.bydirection(dir, c)
+-- @tparam[opt=false] boolean stacked Use stacking order?
+function client.focus.bydirection(dir, c, stacked)
     local sel = c or capi.client.focus
     if sel then
-        local cltbl = client.visible(sel.screen)
+        local cltbl = client.visible(sel.screen, stacked)
         local geomtbl = {}
         for i,cl in ipairs(cltbl) do
             geomtbl[i] = cl:geometry()
@@ -310,7 +314,8 @@ end
 --
 -- @param dir The direction, can be either "up", "down", "left" or "right".
 -- @client[opt] c The client.
-function client.focus.global_bydirection(dir, c)
+-- @tparam[opt=false] boolean stacked Use stacking order?
+function client.focus.global_bydirection(dir, c, stacked)
     screen = screen or require("awful.screen")
     local sel = c or capi.client.focus
     local scr = awful.screen.focused()
@@ -325,7 +330,7 @@ function client.focus.global_bydirection(dir, c)
     if sel == capi.client.focus then
         screen.focus_bydirection(dir, scr)
         if scr ~= awful.screen.focused() then
-            local cltbl = client.visible(awful.screen.focused())
+            local cltbl = client.visible(awful.screen.focused(), stacked)
             local geomtbl = {}
             for i,cl in ipairs(cltbl) do
                 geomtbl[i] = cl:geometry()
@@ -353,13 +358,14 @@ function client.focus.byidx(i, c)
     end
 end
 
---- Swap a client with another client in the given direction
--- @param dir The direction, can be either "up", "down", "left" or "right".
--- @client[opt] c The client.
-function client.swap.bydirection(dir, c)
+--- Swap a client with another client in the given direction.
+-- @tparam string dir The direction, can be either "up", "down", "left" or "right".
+-- @client[opt=focused] c The client.
+-- @tparam[opt=false] boolean stacked Use stacking order?
+function client.swap.bydirection(dir, c, stacked)
     local sel = c or capi.client.focus
     if sel then
-        local cltbl = client.visible(sel.screen)
+        local cltbl = client.visible(sel.screen, stacked)
         local geomtbl = {}
         for i,cl in ipairs(cltbl) do
             geomtbl[i] = cl:geometry()
@@ -424,9 +430,10 @@ end
 --
 -- @param clockwise True to cycle clients clockwise.
 -- @param[opt] screen The screen where to cycle clients.
-function client.cycle(clockwise, screen)
+-- @tparam[opt=false] boolean stacked Use stacking order?
+function client.cycle(clockwise, screen, stacked)
     local screen = screen or awful.screen.focused()
-    local cls = client.visible(screen)
+    local cls = client.visible(screen, stacked)
     -- We can't rotate without at least 2 clients, buddy.
     if #cls >= 2 then
         local c = table.remove(cls, 1)
