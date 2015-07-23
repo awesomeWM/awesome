@@ -6,6 +6,10 @@ env:
     # Disable 5.1 for now: no need to test both 5.1 and 5.2 currently.
     # - LUA=5.1 LUAPKG=5.1 LUALIB=/usr/lib/x86_64-linux-gnu/liblua5.1.so
     - LUA=5.2 LUAPKG=5.2 LUALIB=/usr/lib/x86_64-linux-gnu/liblua5.2.so
+  global:
+    # Secure token to push to gh-pages.
+    - secure: "LZxt9559+V3qJMdVgmKW4RYTt8ZINooex/qsnoEJUtZloj/eFNG4COT2z6a2yeH2tKWzknCsmV9nLPJiNEA2KLcyqDhjFQvJwKmsBuhGUmLyeQgfenjweorRjO8NT18X1SAEUXAMnClPu+OeTDs4BAuVn5foGZ7xpcRg2E+j2mc="
+
 
 before_install:
   - cmake --version
@@ -93,3 +97,8 @@ install:
 script:
   - export CMAKE_ARGS="-DLUA_LIBRARY=${LUALIB} -DLUA_INCLUDE_DIR=/usr/include/lua${LUAPKG}"
   - make && sudo env PATH=$PATH make install && awesome --version && tests/run.sh
+
+# Push updated API docs.
+after_success:
+  # NOTE: stdout/stderr might/should be discarded to not leak sensitive information.
+  - '[ "$TRAVIS_BRANCH" = "master" ] && [ "$TRAVIS_PULL_REQUEST" = false ] && { echo "Uploading documentation..." && cd build/doc && git init && git config user.name "awesome-robot on Travis CI" && git config user.email "awesome-robot@users.noreply.github.com" && git add . && git commit -m "Deployed to Github Pages via Travis" && git push --force --quiet "https://${GH_TOKEN}@github.com/awesomeWM/apidoc" master:gh-pages || echo "Uploading docs failed!"; } || echo "Not uploading docs for $TRAVIS_BRANCH:$TRAVIS_PULL_REQUEST."'
