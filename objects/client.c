@@ -1391,8 +1391,10 @@ client_kill(client_t *c)
 
 /** Get all clients into a table.
  *
- * @param[opt] screen A screen number.
- * @return A table with all clients.
+ * @tparam[opt] integer screen A screen number to filter clients on.
+ * @tparam[opt] boolean stacked Return clients in stacking order? (ordered from
+ *   top to bottom).
+ * @treturn table A table with clients.
  * @function get
  */
 static int
@@ -1400,17 +1402,33 @@ luaA_client_get(lua_State *L)
 {
     int i = 1;
     screen_t *screen = NULL;
+    bool stacked = false;
 
     if(!lua_isnoneornil(L, 1))
         screen = luaA_checkscreen(L, 1);
 
+    if(!lua_isnoneornil(L, 2))
+        stacked = luaA_checkboolean(L, 2);
+
     lua_newtable(L);
-    foreach(c, globalconf.clients)
-        if(screen == NULL || (*c)->screen == screen)
-        {
-            luaA_object_push(L, *c);
-            lua_rawseti(L, -2, i++);
-        }
+    if(stacked)
+    {
+        foreach_reverse(c, globalconf.stack)
+            if(screen == NULL || (*c)->screen == screen)
+            {
+                luaA_object_push(L, *c);
+                lua_rawseti(L, -2, i++);
+            }
+    }
+    else
+    {
+        foreach(c, globalconf.clients)
+            if(screen == NULL || (*c)->screen == screen)
+            {
+                luaA_object_push(L, *c);
+                lua_rawseti(L, -2, i++);
+            }
+    }
 
     return 1;
 }
