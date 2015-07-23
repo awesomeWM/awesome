@@ -89,14 +89,16 @@ endif()
 # }}}
 
 # {{{ Version stamp
-if(EXISTS ${SOURCE_DIR}/.git/HEAD AND GIT_EXECUTABLE)
+if(OVERRIDE_VERSION)
+    set(VERSION ${OVERRIDE_VERSION})
+elseif(EXISTS ${SOURCE_DIR}/.git/HEAD AND GIT_EXECUTABLE)
     # get current version
     execute_process(
         COMMAND ${GIT_EXECUTABLE} describe --dirty
         WORKING_DIRECTORY ${SOURCE_DIR}
         OUTPUT_VARIABLE VERSION
         OUTPUT_STRIP_TRAILING_WHITESPACE)
-    # file the git-version-stamp.sh script will look into
+    # File the build-utils/git-version-stamp.sh script will look into.
     set(VERSION_STAMP_FILE ${BUILD_DIR}/.version_stamp)
     file(WRITE ${VERSION_STAMP_FILE} ${VERSION})
     # create a version_stamp target later
