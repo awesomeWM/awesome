@@ -112,6 +112,21 @@ function object.mt:__call(...)
     return new(...)
 end
 
+--- Helper function to get the module name out of `debug.getinfo`.
+-- @usage
+--  local mt = {}
+--  mt.__tostring = function(o)
+--      return require("gears.object").modulename(debug.getinfo(1, 'S'))
+--  end
+--  return setmetatable(ret, mt)
+--
+-- @tparam table info Result from `debug.getinfo(level, 'S')`, where level
+--   is typically 1 or 2.
+-- @treturn string The module name, e.g. "wibox.widget.background".
+function object.modulename(info)
+    return info.source:gsub('.*/lib/', ''):gsub("/", "."):gsub("%.lua", "")
+end
+
 return setmetatable(object, object.mt)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

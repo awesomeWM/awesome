@@ -5,7 +5,7 @@
 -- @classmod wibox.widget.base
 ---------------------------------------------------------------------------
 
-local debug = require("gears.debug")
+local gears_debug = require("gears.debug")
 local object = require("gears.object")
 local setmetatable = setmetatable
 local pairs = pairs
@@ -101,7 +101,14 @@ function base.make_widget(proxy)
         ret._fit_geometry_cache = setmetatable({}, { __mode = 'v' })
     end)
 
-    return ret
+    -- Add __tostring method to metatable.  This requires to get the current
+    -- call stack in advance.
+    local debug_info = debug.getinfo(2, 'S')
+    local mt = {}
+    mt.__tostring = function(o)
+        return object.modulename(debug_info)
+    end
+    return setmetatable(ret, mt)
 end
 
 --- Generate an empty widget which takes no space and displays nothing
@@ -115,14 +122,14 @@ end
 --- Do some sanity checking on widget. This function raises a lua error if
 -- widget is not a valid widget.
 function base.check_widget(widget)
-    debug.assert(type(widget) == "table")
+    gears_debug.assert(type(widget) == "table")
     for k, func in pairs({ "draw", "fit", "add_signal", "connect_signal", "disconnect_signal" }) do
-        debug.assert(type(widget[func]) == "function", func .. " is not a function")
+        gears_debug.assert(type(widget[func]) == "function", func .. " is not a function")
     end
 
     local width, height = widget:fit(0, 0)
-    debug.assert(type(width) == "number")
-    debug.assert(type(height) == "number")
+    gears_debug.assert(type(width) == "number")
+    gears_debug.assert(type(height) == "number")
 end
 
 return base
