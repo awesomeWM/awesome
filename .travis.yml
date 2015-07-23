@@ -6,6 +6,10 @@ env:
     # Disable 5.1 for now: no need to test both 5.1 and 5.2 currently.
     # - LUA=5.1 LUAPKG=5.1 LUALIB=/usr/lib/x86_64-linux-gnu/liblua5.1.so
     - LUA=5.2 LUAPKG=5.2 LUALIB=/usr/lib/x86_64-linux-gnu/liblua5.2.so
+  global:
+    # Secure token to push to gh-pages.
+    - secure: "LZxt9559+V3qJMdVgmKW4RYTt8ZINooex/qsnoEJUtZloj/eFNG4COT2z6a2yeH2tKWzknCsmV9nLPJiNEA2KLcyqDhjFQvJwKmsBuhGUmLyeQgfenjweorRjO8NT18X1SAEUXAMnClPu+OeTDs4BAuVn5foGZ7xpcRg2E+j2mc="
+
 
 before_install:
   - cmake --version
@@ -91,8 +95,19 @@ install:
   - sudo apt-get install -qq dbus-x11 xterm xdotool xterm xvfb
 
   # Determine custom version.
-  - '[ "$TRAVIS_PULL_REQUEST" = false ] && version="${TRAVIS_BRANCH}-g$(git rev-parse --short HEAD)-$(date -Iseconds)" || version="${TRAVIS_BRANCH}-PR${TRAVIS_PULL_REQUEST}-g$(git rev-parse --short HEAD)-$(date -Iseconds)"'
+  - '[ "$TRAVIS_PULL_REQUEST" = false ] && AWESOME_VERSION="${TRAVIS_BRANCH}-g$(git rev-parse --short HEAD)-$(date -Iseconds)" || AWESOME_VERSION="${TRAVIS_BRANCH}-PR${TRAVIS_PULL_REQUEST}-g$(git rev-parse --short HEAD)-$(date -Iseconds)"'
 
 script:
-  - export CMAKE_ARGS="-DLUA_LIBRARY=${LUALIB} -DLUA_INCLUDE_DIR=/usr/include/lua${LUAPKG} -D OVERRIDE_VERSION=$version"
+  - export CMAKE_ARGS="-DLUA_LIBRARY=${LUALIB} -DLUA_INCLUDE_DIR=/usr/include/lua${LUAPKG} -D OVERRIDE_VERSION=$AWESOME_VERSION"
   - make && sudo env PATH=$PATH make install && awesome --version && tests/run.sh
+
+# Push updated API docs.
+after_success:
+  - REPO_APIDOC="https://${GH_TOKEN}@github.com/awesomeWM/apidoc"
+  # Export these to not add "git config" calls to the long command.
+  - export GIT_AUTHOR_NAME="awesome-robot on Travis CI"
+  - export GIT_AUTHOR_EMAIL="awesome-robot@users.noreply.github.com"
+  - export GIT_COMMITTER_NAME="$GIT_AUTHOR_NAME"
+  - export GIT_COMMITTER_EMAIL="$GIT_AUTHOR_EMAIL"
+  # NOTE: stdout/stderr might/should be discarded to not leak sensitive information.
+  - '[ "$TRAVIS_BRANCH" = "master" ] && [ "$TRAVIS_PULL_REQUEST" = false ] && { echo "Uploading documentation..." && cd build/doc && git clone --branch gh-pages --bare $REPO_APIDOC .git && git config core.bare false && git reset && git add --all . && git commit -m "Updated docs for $AWESOME_VERSION via Travis" && git push --quiet origin gh-pages || echo "Uploading docs failed!"; } || echo "Not uploading docs for $TRAVIS_BRANCH:$TRAVIS_PULL_REQUEST."'
