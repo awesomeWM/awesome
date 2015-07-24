@@ -265,7 +265,6 @@ screen_scan_xinerama(void)
 
 static void screen_scan_x11(void)
 {
-    /* One screen only / Zaphod mode */
     lua_State *L = globalconf_get_lua_State();
     xcb_screen_t *xcb_screen = globalconf.screen;
     screen_t *s = screen_new(L);

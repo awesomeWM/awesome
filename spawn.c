@@ -336,8 +336,7 @@ parse_command(lua_State *L, int idx, GError **error)
 }
 
 /** Spawn a program.
- * This function is multi-head (Zaphod) aware and will set display to
- * the right screen according to mouse position.
+ * The program will be started on the default screen.
  *
  * @param cmd The command to launch.
  * @param use_sn Use startup-notification, true or false, default to true.
