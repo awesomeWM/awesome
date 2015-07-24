@@ -34,14 +34,14 @@ the `DISPLAY` environment variable is set correctly, e.g.:
 ## Configuration
 
 The configuration of awesome is done by creating a
-`$XDG_CONFIG_HOME/awesome/rc.lua` file.
+`$XDG_CONFIG_HOME/awesome/rc.lua` file, typically `~/.config/awesome/rc.lua`.
 
 An example configuration named `awesomerc.lua.in` is provided in the source.
 
 ## Troubleshooting
 
-In most systems any message printed by awesome (including warnings and errors)
-are written to `$HOME/.xsession-errors`.
+On most systems any message printed by awesome (including warnings and errors)
+is written to `~/.xsession-errors`.
 
 If awesome does not start or the configuration file is not producing the
 desired results the user should examine this file to gain insight into the
@@ -55,6 +55,11 @@ Please read the @{02-contributing.md} guide for any coding, documentation or pat
 
 ## Status
 [![Build Status](https://travis-ci.org/awesomeWM/awesome.svg?branch=master)](https://travis-ci.org/awesomeWM/awesome)
+
+## Documentation
+
+Online documentation is available at http://awesome.naquadah.org/doc/, and
+can be built using `make ldoc`.
 
 ## License
 
