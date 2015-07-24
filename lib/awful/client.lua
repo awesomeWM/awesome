@@ -76,7 +76,7 @@ end
 
 --- Get the first client that got the urgent hint.
 --
--- @treturn client The first urgent client.
+-- @treturn client.object The first urgent client.
 function client.urgent.get()
     if #client.data.urgent > 0 then
         return client.data.urgent[1]
@@ -169,7 +169,7 @@ end
 -- @tparam function filter An optional filter.  If no client is found in the
 --         first iteration, client.focus.filter is used by default to get any
 --         client.
--- @treturn client A client.
+-- @treturn client.object A client.
 function client.focus.history.get(screen, idx, filter)
     -- When this counter is equal to idx, we return the client
     local counter = 0

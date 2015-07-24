@@ -81,7 +81,7 @@ documentation](https://stevedonovan.github.io/ldoc/manual/doc.md.html).
 
 In addition to the regular tags provided by LDoc there are also some aliases
 for typed parameters defined in `docs/config.ld`, e.g. `@client` for
-`@tparam client.client`, `@tag` for `@tparam tag` and `@tab` for
+`@tparam client.object`, `@tag` for `@tparam tag` and `@tab` for
 `@tparam table`).
 
 ## Patches

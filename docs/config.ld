@@ -21,8 +21,8 @@ topics={
     '02-contributing.md',
 }
 
--- Setup @client to be an alias for "@tparam client.client"
-tparam_alias('client', 'client.client')
+-- Setup @client to be an alias for "@tparam client.object"
+tparam_alias('client', 'client.object')
 tparam_alias('tag', 'tag')
 -- Should be default, but is not.  Sets up "@tab" => "@tparam table".
 tparam_alias('tab', 'table')
