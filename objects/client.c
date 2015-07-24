@@ -51,6 +51,12 @@
 #include <xcb/shape.h>
 #include <cairo-xcb.h>
 
+/** Client class.
+ *
+ * @table class
+ * @field focus The focused `client.object`.
+ */
+
 /** Client object.
  *
  * @field window The X window id.
@@ -74,7 +80,6 @@
  * @field border_color The client border color.
  * @field urgent The client urgent state.
  * @field content An image representing the client window content (screenshot).
- * @field focus The focused client.
  * @field opacity The client opacity between 0 and 1.
  * @field ontop The client is on top of every other windows.
  * @field above The client is above normal windows.
@@ -98,7 +103,7 @@
  * @field startup_id The FreeDesktop StartId.
  * @field valid If the client that this object refers to is still managed by awesome.
  * @field first_tag The first tag of the client.  Optimized form of `c:tags()[1]`.
- * @table client
+ * @table object
  */
 
 /** Return client struts (reserved space at the edge of the screen).

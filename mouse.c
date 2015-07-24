@@ -240,7 +240,7 @@ luaA_mouse_coords(lua_State *L)
 
 /** Get the client or any object which is under the pointer.
  *
- * @treturn client.client|nil A client or nil.
+ * @treturn client.object|nil A client or nil.
  * @function object_under_pointer
  */
 static int
