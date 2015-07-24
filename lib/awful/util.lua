@@ -40,11 +40,15 @@ function util.deprecate(see)
         return
     end
     displayed_deprecations[tb] = true
-    io.stderr:write("W: awful: function is deprecated")
+
+    -- Get function name/desc from caller.
+    local info = debug.getinfo(2, "nS")
+    local funcname = info.name or "?"
+    io.stderr:write("W: awful: function " .. funcname .. " is deprecated")
     if see then
         io.stderr:write(", see " .. see)
     end
-    io.stderr:write("\n" .. tb .. "\n")
+    io.stderr:write(".\n" .. tb .. "\n")
 end
 
 --- Strip alpha part of color.
