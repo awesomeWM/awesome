@@ -64,7 +64,9 @@ end
 -- that the needed signals are added and mouse input handling is set up.
 -- @param proxy If this is set, the returned widget will be a proxy for this
 --              widget. It will be equivalent to this widget.
-function base.make_widget(proxy)
+-- @tparam[opt] string name Name of the widget.  If not set, it will be set
+--   automatically via `gears.object.modulename`.
+function base.make_widget(proxy, name)
     local ret = object()
 
     -- This signal is used by layouts to find out when they have to update.
@@ -101,12 +103,11 @@ function base.make_widget(proxy)
         ret._fit_geometry_cache = setmetatable({}, { __mode = 'v' })
     end)
 
-    -- Add __tostring method to metatable.  This requires to get the current
-    -- call stack in advance.
-    local debug_info = debug.getinfo(2, 'S')
+    -- Add __tostring method to metatable.
+    ret.widget_name = name or object.modulename(3)
     local mt = {}
     mt.__tostring = function(o)
-        return object.modulename(debug_info)
+        return ret.widget_name
     end
     return setmetatable(ret, mt)
 end

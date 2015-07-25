@@ -116,15 +116,15 @@ end
 -- @usage
 --  local mt = {}
 --  mt.__tostring = function(o)
---      return require("gears.object").modulename(debug.getinfo(1, 'S'))
+--      return require("gears.object").modulename(2)
 --  end
 --  return setmetatable(ret, mt)
 --
--- @tparam table info Result from `debug.getinfo(level, 'S')`, where level
---   is typically 1 or 2.
+-- @tparam[opt=2] integer level Level for `debug.getinfo(level, "S")`.
+--   Typically 2 or 3.
 -- @treturn string The module name, e.g. "wibox.widget.background".
-function object.modulename(info)
-    return info.source:gsub('.*/lib/', ''):gsub("/", "."):gsub("%.lua", "")
+function object.modulename(level)
+    return debug.getinfo(level, "S").source:gsub(".*/lib/", ""):gsub("/", "."):gsub("%.lua", "")
 end
 
 return setmetatable(object, object.mt)
