@@ -5,7 +5,7 @@
 -- @classmod wibox.widget.base
 ---------------------------------------------------------------------------
 
-local gears_debug = require("gears.debug")
+local debug = require("gears.debug")
 local object = require("gears.object")
 local setmetatable = setmetatable
 local pairs = pairs
@@ -123,14 +123,14 @@ end
 --- Do some sanity checking on widget. This function raises a lua error if
 -- widget is not a valid widget.
 function base.check_widget(widget)
-    gears_debug.assert(type(widget) == "table")
+    debug.assert(type(widget) == "table")
     for k, func in pairs({ "draw", "fit", "add_signal", "connect_signal", "disconnect_signal" }) do
-        gears_debug.assert(type(widget[func]) == "function", func .. " is not a function")
+        debug.assert(type(widget[func]) == "function", func .. " is not a function")
     end
 
     local width, height = widget:fit(0, 0)
-    gears_debug.assert(type(width) == "number")
-    gears_debug.assert(type(height) == "number")
+    debug.assert(type(width) == "number")
+    debug.assert(type(height) == "number")
 end
 
 return base
