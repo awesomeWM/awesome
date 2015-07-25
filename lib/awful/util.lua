@@ -78,10 +78,12 @@ function util.mkdir(dir)
 end
 
 --- Spawn a program.
--- @param cmd The command.
--- @param sn Enable startup-notification.
--- @return The forked PID or an error message
--- @return The startup notification UID, if the spawn was successful
+-- The program gets started on the default screen.
+-- @tparam string|table cmd The command.
+-- @tparam boolean sn Enable startup-notification.
+-- @treturn[1] integer The forked PID.
+-- @treturn[1] string The startup notification ID, if `sn` is true.
+-- @treturn[2] string Error message.
 function util.spawn(cmd, sn)
     if cmd and cmd ~= "" then
         if sn == nil then sn = true end
@@ -90,11 +92,16 @@ function util.spawn(cmd, sn)
 end
 
 --- Spawn a program using the shell.
--- @param cmd The command.
-function util.spawn_with_shell(cmd)
+-- @tparam string cmd The command.
+-- @tparam[opt=false] boolean sn Enable startup-notification?
+-- @treturn[1] integer The forked PID.
+-- @treturn[1] string The startup notification ID, if `sn` is true.
+-- @treturn[2] string Error message.
+function util.spawn_with_shell(cmd, sn)
+    sn = sn or false
     if cmd and cmd ~= "" then
         cmd = { util.shell, "-c", cmd }
-        return capi.awesome.spawn(cmd, false)
+        return util.spawn(cmd, sn)
     end
 end
 

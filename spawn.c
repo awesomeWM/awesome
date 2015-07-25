@@ -338,9 +338,11 @@ parse_command(lua_State *L, int idx, GError **error)
 /** Spawn a program.
  * The program will be started on the default screen.
  *
- * @param cmd The command to launch.
- * @param use_sn Use startup-notification, true or false, default to true.
- * @return Process ID if everything is OK, or an error string if an error occured.
+ * @tparam string|table cmd The command to launch.
+ * @tparam[opt=true] boolean use_sn Use startup-notification?
+ * @treturn[1] integer Process ID if everything is OK.
+ * @treturn[1] string Startup-notification ID, if `use_sn` is true.
+ * @treturn[2] string An error string if an error occured.
  * @function spawn
  */
 int
