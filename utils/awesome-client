@@ -54,6 +54,9 @@ if [ "$ISATTY" = 0 ]
 then
     while $READ_CMD -p "awesome# " -r line
     do
+        if [ "$line" = "" ]; then
+            continue
+        fi
         a_dbus_send "$line"
     done
 else
