@@ -35,6 +35,7 @@
 #include "objects/client.h"
 #include "objects/drawin.h"
 
+#include <math.h>
 #include <stdio.h>
 
 #include <xcb/xcb.h>
@@ -297,8 +298,19 @@ screen_getbycoord(int x, int y)
         if(screen_coord_in_screen(*s, x, y))
             return *s;
 
-    /* No screen found, let's be creative. */
-    return globalconf.screens.tab[0];
+    /* No screen found, find nearest screen. */
+    screen_t * nearest_screen = globalconf.screens.tab[0];
+    int nearest_dist = INT_MAX;
+    foreach(s, globalconf.screens)
+    {
+        int dist = sqrt(pow((*s)->geometry.x - x, 2) + pow((*s)->geometry.y - y, 2));
+        if( dist < nearest_dist )
+        {
+            nearest_dist = dist;
+            nearest_screen = (*s);
+        }
+    }
+    return nearest_screen;
 }
 
 /** Are the given coordinates in a given screen?
@@ -310,8 +322,8 @@ screen_getbycoord(int x, int y)
 bool
 screen_coord_in_screen(screen_t *s, int x, int y)
 {
-    return (x < 0 || (x >= s->geometry.x && x < s->geometry.x + s->geometry.width))
-           && (y < 0 || (y >= s->geometry.y && y < s->geometry.y + s->geometry.height));
+    return (x >= s->geometry.x && x < s->geometry.x + s->geometry.width)
+           && (y >= s->geometry.y && y < s->geometry.y + s->geometry.height);
 }
 
 /** Get screens info.
