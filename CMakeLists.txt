@@ -327,7 +327,6 @@ if(BUSTED_EXECUTABLE)
         ${BUSTED_EXECUTABLE} "--lpath=${CMAKE_BINARY_DIR}/lib/?.lua;${CMAKE_BINARY_DIR}/lib/?/init.lua;spec/?.lua"
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
         VERBATIM)
-    add_custom_target(test DEPENDS check)
 endif()
 # }}}
 
