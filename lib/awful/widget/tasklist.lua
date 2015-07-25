@@ -29,14 +29,14 @@ tasklist.filter = {}
 local function tasklist_label(c, args)
     if not args then args = {} end
     local theme = beautiful.get()
-    local fg_normal = args.fg_normal or theme.tasklist_fg_normal or theme.fg_normal or "#ffffff"
+    local fg_normal = util.ensure_pango_color(args.fg_normal or theme.tasklist_fg_normal or theme.fg_normal, "white")
     local bg_normal = args.bg_normal or theme.tasklist_bg_normal or theme.bg_normal or "#000000"
-    local fg_focus = args.fg_focus or theme.tasklist_fg_focus or theme.fg_focus
-    local bg_focus = args.bg_focus or theme.tasklist_bg_focus or theme.bg_focus
-    local fg_urgent = args.fg_urgent or theme.tasklist_fg_urgent or theme.fg_urgent
-    local bg_urgent = args.bg_urgent or theme.tasklist_bg_urgent or theme.bg_urgent
-    local fg_minimize = args.fg_minimize or theme.tasklist_fg_minimize or theme.fg_minimize
-    local bg_minimize = args.bg_minimize or theme.tasklist_bg_minimize or theme.bg_minimize
+    local fg_focus = util.ensure_pango_color(args.fg_focus or theme.tasklist_fg_focus or theme.fg_focus, fg_normal)
+    local bg_focus = args.bg_focus or theme.tasklist_bg_focus or theme.bg_focus or bg_normal
+    local fg_urgent = util.ensure_pango_color(args.fg_urgent or theme.tasklist_fg_urgent or theme.fg_urgent, fg_normal)
+    local bg_urgent = args.bg_urgent or theme.tasklist_bg_urgent or theme.bg_urgent or bg_normal
+    local fg_minimize = util.ensure_pango_color(args.fg_minimize or theme.tasklist_fg_minimize or theme.fg_minimize, fg_normal)
+    local bg_minimize = args.bg_minimize or theme.tasklist_bg_minimize or theme.bg_minimize or bg_normal
     local bg_image_normal = args.bg_image_normal or theme.bg_image_normal
     local bg_image_focus = args.bg_image_focus or theme.bg_image_focus
     local bg_image_urgent = args.bg_image_urgent or theme.bg_image_urgent
@@ -81,23 +81,19 @@ local function tasklist_label(c, args)
     end
     if capi.client.focus == c then
         bg = bg_focus
+        text = text .. "<span color='"..fg_focus.."'>"..name.."</span>"
         bg_image = bg_image_focus
-        if fg_focus then
-            text = text .. "<span color='"..util.color_strip_alpha(fg_focus).."'>"..name.."</span>"
-        else
-            text = text .. "<span color='"..util.color_strip_alpha(fg_normal).."'>"..name.."</span>"
-        end
-    elseif c.urgent and fg_urgent then
+    elseif c.urgent then
         bg = bg_urgent
-        text = text .. "<span color='"..util.color_strip_alpha(fg_urgent).."'>"..name.."</span>"
+        text = text .. "<span color='"..fg_urgent.."'>"..name.."</span>"
         bg_image = bg_image_urgent
-    elseif c.minimized and fg_minimize and bg_minimize then
+    elseif c.minimized then
         bg = bg_minimize
-        text = text .. "<span color='"..util.color_strip_alpha(fg_minimize).."'>"..name.."</span>"
+        text = text .. "<span color='"..fg_minimize.."'>"..name.."</span>"
         bg_image = bg_image_minimize
     else
         bg = bg_normal
-        text = text .. "<span color='"..util.color_strip_alpha(fg_normal).."'>"..name.."</span>"
+        text = text .. "<span color='"..fg_normal.."'>"..name.."</span>"
         bg_image = bg_image_normal
     end
     text = text .. "</span>"

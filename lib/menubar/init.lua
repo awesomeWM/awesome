@@ -86,7 +86,7 @@ local common_args = { w = wibox.layout.fixed.horizontal(),
 -- @param c The desired text color.
 -- @return the text wrapped in a span tag.
 local function colortext(s, c)
-    return "<span color='" .. c .. "'>" .. s .. "</span>"
+    return "<span color='" .. awful.util.ensure_pango_color(c) .. "'>" .. s .. "</span>"
 end
 
 --- Get how the menu item should be displayed.
@@ -94,8 +94,7 @@ end
 -- @return item name, item background color, background image, item icon.
 local function label(o)
     if o.focused then
-        local color = awful.util.color_strip_alpha(theme.fg_focus)
-        return colortext(o.name, color), theme.bg_focus, nil, o.icon
+        return colortext(o.name, theme.fg_focus), theme.bg_focus, nil, o.icon
     else
         return o.name, theme.bg_normal, nil, o.icon
     end

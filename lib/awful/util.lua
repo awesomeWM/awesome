@@ -20,6 +20,8 @@ local type = type
 local rtable = table
 local pairs = pairs
 local string = string
+local lgi = require("lgi")
+local Pango = lgi.Pango
 local capi =
 {
     awesome = awesome,
@@ -51,14 +53,13 @@ function util.deprecate(see)
     io.stderr:write(".\n" .. tb .. "\n")
 end
 
---- Strip alpha part of color.
+--- Get a valid color for Pango markup
 -- @param color The color.
--- @return The color without alpha channel.
-function util.color_strip_alpha(color)
-    if color:len() == 9 then
-        color = color:sub(1, 7)
-    end
-    return color
+-- @tparam string fallback The color to return if the first is invalid. (default: black)
+-- @treturn string color if it is valid, else fallback.
+function util.ensure_pango_color(color, fallback)
+    color = tostring(color)
+    return Pango.Color.parse(Pango.Color(), color) and color or fallback or "black"
 end
 
 --- Make i cycle.
