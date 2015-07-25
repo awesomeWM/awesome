@@ -92,7 +92,7 @@ function util.spawn(cmd, sn)
 end
 
 --- Spawn a program using the shell.
--- @tparam string|table cmd The command.
+-- @tparam string cmd The command.
 -- @tparam[opt=false] boolean sn Enable startup-notification?
 -- @treturn[1] integer The forked PID.
 -- @treturn[1] string The startup notification ID, if `sn` is true.
