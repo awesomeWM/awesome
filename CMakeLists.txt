@@ -326,11 +326,13 @@ if(BUSTED_EXECUTABLE)
     add_custom_target(check-unit ALL
         ${BUSTED_EXECUTABLE} "--lpath=${CMAKE_BINARY_DIR}/lib/?.lua;${CMAKE_BINARY_DIR}/lib/?/init.lua;spec/?.lua"
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        COMMENT "Running unit tests"
         VERBATIM)
 endif()
 add_custom_target(check-integration
     "${CMAKE_SOURCE_DIR}/tests/run.sh"
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    COMMENT "Running integration tests"
     VERBATIM)
 if(BUSTED_EXECUTABLE)
     add_custom_target(check DEPENDS check-integration check-unit)
