@@ -320,13 +320,22 @@ if(GENERATE_DOC)
 endif()
 # }}}
 
-# {{{ Unit tests
+# {{{ Tests
 find_program(BUSTED_EXECUTABLE busted)
 if(BUSTED_EXECUTABLE)
-    add_custom_target(check ALL
+    add_custom_target(check-unit ALL
         ${BUSTED_EXECUTABLE} "--lpath=${CMAKE_BINARY_DIR}/lib/?.lua;${CMAKE_BINARY_DIR}/lib/?/init.lua;spec/?.lua"
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
         VERBATIM)
+endif()
+add_custom_target(check-integration
+    "${CMAKE_SOURCE_DIR}/tests/run.sh"
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    VERBATIM)
+if(BUSTED_EXECUTABLE)
+    add_custom_target(check DEPENDS check-integration check-unit)
+else()
+    add_custom_target(check DEPENDS check-integration)
 endif()
 # }}}
 
