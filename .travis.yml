@@ -106,10 +106,8 @@ script:
 after_success:
   - REPO_APIDOC="https://${GH_TOKEN}@github.com/awesomeWM/apidoc"
   # Export these to not add "git config" calls to the long command.
-  - export GIT_AUTHOR_NAME="awesome-robot on Travis CI"
-  - export GIT_AUTHOR_EMAIL="awesome-robot@users.noreply.github.com"
-  - export GIT_COMMITTER_NAME="$GIT_AUTHOR_NAME"
-  - export GIT_COMMITTER_EMAIL="$GIT_AUTHOR_EMAIL"
+  - export GIT_COMMITTER_NAME="awesome-robot on Travis CI"
+  - export GIT_COMMITTER_EMAIL="awesome-robot@users.noreply.github.com"
   # For testing the PR itself:
   - TRAVIS_PULL_REQUEST=false
   # NOTE: stdout/stderr might/should be discarded to not leak sensitive information.
