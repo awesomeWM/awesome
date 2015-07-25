@@ -64,9 +64,9 @@ end
 -- that the needed signals are added and mouse input handling is set up.
 -- @param proxy If this is set, the returned widget will be a proxy for this
 --              widget. It will be equivalent to this widget.
--- @tparam[opt] string name Name of the widget.  If not set, it will be set
---   automatically via `gears.object.modulename`.
-function base.make_widget(proxy, name)
+-- @tparam[opt] string widget_name Name of the widget.  If not set, it will be
+--   set automatically via `gears.object.modulename`.
+function base.make_widget(proxy, widget_name)
     local ret = object()
 
     -- This signal is used by layouts to find out when they have to update.
@@ -104,7 +104,7 @@ function base.make_widget(proxy, name)
     end)
 
     -- Add __tostring method to metatable.
-    ret.widget_name = name or object.modulename(3)
+    ret.widget_name = widget_name or object.modulename(3)
     local mt = {}
     mt.__tostring = function(o)
         return ret.widget_name
