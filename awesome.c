@@ -85,6 +85,19 @@ awesome_atexit(bool restart)
                 (*c)->geometry.x, (*c)->geometry.y);
     }
 
+    if (restart)
+    {
+        /* Save the client order across restarts */
+        xcb_window_t *wins = p_alloca(xcb_window_t, globalconf.clients.len);
+        int n = 0;
+        foreach(client, globalconf.clients)
+            wins[n++] = (*client)->window;
+
+        xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
+                            globalconf.screen->root,
+                            AWESOME_CLIENT_ORDER, XCB_ATOM_WINDOW, 32, n, wins);
+    }
+
     a_dbus_cleanup();
 
     systray_cleanup();
@@ -109,6 +122,36 @@ awesome_atexit(bool restart)
     xcb_disconnect(globalconf.connection);
 }
 
+/** Restore the client order after a restart */
+static void
+restore_client_order(xcb_get_property_cookie_t prop_cookie)
+{
+    int client_idx = 0;
+    xcb_window_t *windows;
+    xcb_get_property_reply_t *reply;
+
+    reply = xcb_get_property_reply(globalconf.connection, prop_cookie, NULL);
+    if (!reply || reply->format != 32 || reply->value_len == 0) {
+        p_delete(&reply);
+        return;
+    }
+
+    windows = xcb_get_property_value(reply);
+    for (uint32_t i = 0; i < reply->value_len; i++)
+        /* Find windows[i] and swap it to where it belongs */
+        foreach(c, globalconf.clients)
+            if ((*c)->window == windows[i])
+            {
+                client_t *tmp = *c;
+                *c = globalconf.clients.tab[client_idx];
+                globalconf.clients.tab[client_idx] = tmp;
+                client_idx++;
+            }
+
+    luaA_class_emit_signal(globalconf_get_lua_State(), &client_class, "list", 0);
+    p_delete(&reply);
+}
+
 /** Scan X to find windows to manage.
  */
 static void
@@ -119,6 +162,7 @@ scan(xcb_query_tree_cookie_t tree_c)
     xcb_window_t *wins = NULL;
     xcb_get_window_attributes_reply_t *attr_r;
     xcb_get_geometry_reply_t *geom_r;
+    xcb_get_property_cookie_t prop_cookie;
     long state;
 
     tree_r = xcb_query_tree_reply(globalconf.connection,
@@ -127,6 +171,11 @@ scan(xcb_query_tree_cookie_t tree_c)
 
     if(!tree_r)
         return;
+
+    /* This gets the property and deletes it */
+    prop_cookie = xcb_get_property_unchecked(globalconf.connection, true,
+                          globalconf.screen->root, AWESOME_CLIENT_ORDER,
+                          XCB_ATOM_WINDOW, 0, UINT_MAX);
 
     /* Get the tree of the children windows of the current root window */
     if(!(wins = xcb_query_tree_children(tree_r)))
@@ -171,6 +220,8 @@ scan(xcb_query_tree_cookie_t tree_c)
     }
 
     p_delete(&tree_r);
+
+    restore_client_order(prop_cookie);
 }
 
 static void
