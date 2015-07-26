@@ -102,7 +102,10 @@ script:
   - export CMAKE_ARGS="-DLUA_LIBRARY=${LUALIB} -DLUA_INCLUDE_DIR=/usr/include/lua${LUAPKG} -D OVERRIDE_VERSION=$AWESOME_VERSION"
   - make && sudo env PATH=$PATH make install && awesome --version && tests/run.sh
 
-# Push updated API docs.
+# Push updated API docs for non-PRs builds on master.
+# It uses "diff -I .." to check if there are relevant changes, and then adds
+# them in two separate commits.  This allows to more easily see real changes to
+# the documentation.
 after_success:
   - REPO_APIDOC="https://${GH_TOKEN}@github.com/awesomeWM/apidoc"
   # Export these to not add "git config" calls to the long command.
@@ -111,4 +114,4 @@ after_success:
   - export GIT_COMMITTER_NAME="$GIT_AUTHOR_NAME"
   - export GIT_COMMITTER_EMAIL="$GIT_AUTHOR_EMAIL"
   # NOTE: stdout/stderr might/should be discarded to not leak sensitive information.
-  - '[ "$TRAVIS_BRANCH" = "master" ] && [ "$TRAVIS_PULL_REQUEST" = false ] && { echo "Uploading documentation..." && cd build/doc && git clone --branch gh-pages --bare $REPO_APIDOC .git && git config core.bare false && git reset && git add --all . && git commit -m "Updated docs for $AWESOME_VERSION via Travis" && git push --quiet origin gh-pages || echo "Uploading docs failed!"; } || echo "Not uploading docs for $TRAVIS_BRANCH:$TRAVIS_PULL_REQUEST."'
+  - '[ "$TRAVIS_BRANCH" = "master" ] && [ "$TRAVIS_PULL_REQUEST" = false ] && { echo "Uploading documentation..." && cd build && git clone --quiet --branch gh-pages $REPO_APIDOC apidoc && diff -Nur apidoc doc -I "Last updated" -I "<strong>Release</strong>:" -I "(version master-" -x .git > /tmp/p1; { echo "Patch:"; cat /tmp/p1; } && cd apidoc && patch -p1 < /tmp/p1 && git add --all . && git commit -m "Update docs for $AWESOME_VERSION via Travis" && { mv .git ../doc && cd ../doc && git add --all . && git commit -m "minor: update timestamps/version" && git push --quiet origin gh-pages || echo "Uploading docs failed!"; } || echo "Documentation has not changed."; } || echo "Not uploading docs for $TRAVIS_BRANCH:$TRAVIS_PULL_REQUEST."'
