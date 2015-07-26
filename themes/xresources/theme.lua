@@ -95,6 +95,10 @@ theme.layout_tile = "@AWESOME_THEMES_PATH@/default/layouts/tile" .. pf .. ".png"
 theme.layout_tiletop = "@AWESOME_THEMES_PATH@/default/layouts/tiletop" .. pf .. ".png"
 theme.layout_spiral  = "@AWESOME_THEMES_PATH@/default/layouts/spiral" .. pf .. ".png"
 theme.layout_dwindle = "@AWESOME_THEMES_PATH@/default/layouts/dwindle" .. pf .. ".png"
+theme.layout_cornernw = "@AWESOME_THEMES_PATH@/default/layouts/cornernw" .. pf .. ".png"
+theme.layout_cornerne = "@AWESOME_THEMES_PATH@/default/layouts/cornerne" .. pf .. ".png"
+theme.layout_cornersw = "@AWESOME_THEMES_PATH@/default/layouts/cornersw" .. pf .. ".png"
+theme.layout_cornerse = "@AWESOME_THEMES_PATH@/default/layouts/cornerse" .. pf .. ".png"
 
 
 -- Define the icon theme for application icons. If not set then the icons 
