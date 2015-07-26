@@ -91,8 +91,8 @@
  * @field transient_for The client the window is transient for.
  * @field group_window Window identification unique to a group of windows.
  * @field leader_window Identification unique to windows spawned by the same command.
- * @field size_hints A table with size hints of the client: user_position,
- *   user_size, program_position, program_size, etc.
+ * @field size_hints A table with size hints of the client: `user_position`,
+ *   `user_size`, `program_position`, `program_size`, etc.
  * @field sticky Set the client sticky, i.e. available on all tags.
  * @field modal Indicate if the client is modal.
  * @field focusable True if the client can receive the input focus.
@@ -1935,8 +1935,8 @@ HANDLE_TITLEBAR(left, CLIENT_TITLEBAR_LEFT)
 
 /** Return or set client geometry.
  *
- * @param arg1 A table with new coordinates, or none.
- * @return A table with client coordinates.
+ * @tparam table|nil geo A table with new coordinates, or nil.
+ * @treturn table A table with client geometry and coordinates.
  * @function geometry
  */
 static int
