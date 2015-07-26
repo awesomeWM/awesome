@@ -72,8 +72,8 @@ awesome_atexit(bool restart)
     lua_pushboolean(globalconf.L, restart);
     signal_object_emit(globalconf.L, &global_signals, "exit", 1);
 
-    /* Move clients where we want them to be */
-    foreach(c, globalconf.clients)
+    /* Move clients where we want them to be and keep the stacking order intact */
+    foreach(c, globalconf.stack)
     {
         xcb_reparent_window(globalconf.connection, (*c)->window, globalconf.screen->root,
                 (*c)->geometry.x, (*c)->geometry.y);
