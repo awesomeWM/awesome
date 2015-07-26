@@ -79,7 +79,7 @@ awesome_atexit(bool restart)
     signal_object_emit(L, &global_signals, "exit", 1);
 
     /* Move clients where we want them to be */
-    foreach(c, globalconf.clients)
+    foreach_reverse(c, globalconf.clients)
     {
         xcb_reparent_window(globalconf.connection, (*c)->window, globalconf.screen->root,
                 (*c)->geometry.x, (*c)->geometry.y);
@@ -93,7 +93,7 @@ awesome_atexit(bool restart)
     lua_close(L);
 
     /* X11 is a great protocol. There is a save-set so that reparenting WMs
-     * don't kill clients when they shut down. However, when a focused windows
+     * don't kill clients when they shut down. However, when a focused window
      * is saved, the focus will move to its parent with revert-to none.
      * Immediately afterwards, this parent is destroyed and the focus is gone.
      * Work around this by placing the focus where we like it to be.
