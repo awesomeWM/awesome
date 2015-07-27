@@ -66,15 +66,6 @@ Naughty configuration - a table containing common popup settings.
 
 @field defaults Default values for the params to `notify()`.
    These can optionally be overridden by specifying a preset.
-
-@field mapping DBUS notification to preset mapping.
-   The first element is an object containing the filter If the rules in the
-   filter matches the associated preset will be applied The rules object can
-   contain: urgency, category, appname The second element is the preset
-
-@field mapping.1 low urgency
-@field mapping.2 normal urgency
-@field mapping.3 critical urgency
 --]]
 --
 naughty.config = {

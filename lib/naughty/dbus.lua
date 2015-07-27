@@ -36,12 +36,15 @@ local urgency = {
     critical = "\2"
 }
 
---- DBUS notification to preset mapping
--- The first element is an object containing the filter
--- If the rules in the filter matches the associated preset will be applied
--- The rules object can contain: urgency, category, appname
--- The second element is the preset
-
+--- DBUS notification to preset mapping.
+-- The first element is an object containing the filter.
+-- If the rules in the filter match, the associated preset will be applied.
+-- The rules object can contain the following keys: urgency, category, appname.
+-- The second element is the preset.
+-- @tfield table 1 low urgency
+-- @tfield table 2 normal urgency
+-- @tfield table 3 critical urgency
+-- @table config.mapping
 dbus.config.mapping = {
     {{urgency = urgency.low}, naughty.config.presets.low},
     {{urgency = urgency.normal}, naughty.config.presets.normal},
