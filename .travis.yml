@@ -95,22 +95,13 @@ install:
   - sudo apt-get install -qq dbus-x11 xterm xdotool xterm xvfb
 
   # Determine custom version.
-  - '[ "$TRAVIS_PULL_REQUEST" = false ] && AWESOME_VERSION="${TRAVIS_BRANCH}-g$(git rev-parse --short HEAD)-$(date -Iseconds)" || AWESOME_VERSION="${TRAVIS_BRANCH}-PR${TRAVIS_PULL_REQUEST}-g$(git rev-parse --short HEAD)-$(date -Iseconds)"'
+  - export AWESOME_VERSION="${TRAVIS_BRANCH}-g$(git rev-parse --short HEAD)"
+  - 'if [ "$TRAVIS_PULL_REQUEST" != false ]; then AWESOME_VERSION="${AWESOME_VERSION}-PR${TRAVIS_PULL_REQUEST}"; fi'
 
 script:
   - export CMAKE_ARGS="-DLUA_LIBRARY=${LUALIB} -DLUA_INCLUDE_DIR=/usr/include/lua${LUAPKG} -D OVERRIDE_VERSION=$AWESOME_VERSION"
   - make && sudo env PATH=$PATH make install && awesome --version && tests/run.sh
 
-# Push updated API docs for non-PRs builds on master.
-# It uses "diff -I .." to check if there are relevant changes, and then adds
-# them in two separate commits.  This allows to more easily see real changes to
-# the documentation.
 after_success:
-  - REPO_APIDOC="https://${GH_TOKEN}@github.com/awesomeWM/apidoc"
-  # Export these to not add "git config" calls to the long command.
-  - export GIT_AUTHOR_NAME="awesome-robot on Travis CI"
-  - export GIT_AUTHOR_EMAIL="awesome-robot@users.noreply.github.com"
-  - export GIT_COMMITTER_NAME="$GIT_AUTHOR_NAME"
-  - export GIT_COMMITTER_EMAIL="$GIT_AUTHOR_EMAIL"
-  # NOTE: stdout/stderr might/should be discarded to not leak sensitive information.
-  - '[ "BUILD_APIDOC" = "true" ] && [ "$TRAVIS_BRANCH" = "master" ] && [ "$TRAVIS_PULL_REQUEST" = false ] && { echo "Uploading documentation..." && cd build && git clone --quiet --branch gh-pages $REPO_APIDOC apidoc && diff -Nur apidoc doc -I "Last updated" -I "<strong>Release</strong>:" -I "(version master-" -x .git > /tmp/p1; { echo "Patch:"; cat /tmp/p1; } && cd apidoc && patch -p1 < /tmp/p1 && git add --all . && git commit -m "Update docs for $AWESOME_VERSION via Travis" && { mv .git ../doc && cd ../doc && git add --all . && git commit -m "minor: update timestamps/version" && git push --quiet origin gh-pages || echo "Uploading docs failed!"; } || echo "Documentation has not changed."; } || echo "Not uploading docs for $TRAVIS_BRANCH:$TRAVIS_PULL_REQUEST."'
+  # Push updated API docs for relevant branches, e.g. non-PRs builds on master.
+  - if [ "BUILD_APIDOC" = "true" ]; then build-utils/travis-apidoc.sh; fi
