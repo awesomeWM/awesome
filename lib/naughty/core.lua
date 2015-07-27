@@ -18,6 +18,7 @@ local capi = { screen = screen,
                awesome = awesome }
 local timer = require("gears.timer")
 local button = require("awful.button")
+local screen = require("awful.screen")
 local util = require("awful.util")
 local bt = require("beautiful")
 local wibox = require("wibox")
@@ -384,8 +385,7 @@ end
 --   Default: 5
 -- @int args.hover_timeout Delay in seconds after which hovered popup disappears.
 --   Default: nil
--- @int args.screen Target screen for the notification.
---   Default: 1
+-- @int[opt=focused] args.screen Target screen for the notification.
 -- @string args.position Corner of the workarea displaying the popups.
 --   Values: `"top_right"` (default), `"top_left"`, `"bottom_left"`,
 --           `"bottom_right"`, `"top_middle"`, `"bottom_middle"`.
@@ -438,7 +438,7 @@ function naughty.notify(args)
     local icon_size = args.icon_size or preset.icon_size
     local text = args.text or preset.text
     local title = args.title or preset.title
-    local screen = args.screen or preset.screen
+    local screen = args.screen or preset.screen or screen.focused()
     local ontop = args.ontop or preset.ontop
     local width = args.width or preset.width
     local height = args.height or preset.height
