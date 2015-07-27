@@ -36,36 +36,24 @@ local naughty = {}
 Naughty configuration - a table containing common popup settings.
 
 @table naughty.config
-@field padding Space between popups and edge of the workarea.
-   Default: `4`
-@field spacing Spacing between popups.
-   Default: `1`
-@field icon_dirs List of directories that will be checked by `getIcon()`.
-   Default: `{ "/usr/share/pixmaps/", }`
-@field icon_formats List of formats that will be checked by `getIcon()`.
-   Default: `{ "png", "gif" }`
-@field notify_callback Callback used to modify or reject notifications.
-   Default: `nil`
+@tfield[opt=4] int padding Space between popups and edge of the workarea.
+@tfield[opt=1] int spacing Spacing between popups.
+@tfield[opt={"/usr/share/pixmaps/"}] table icon_dirs List of directories
+  that will be checked by `getIcon()`.
+@tfield[opt={ "png", "gif" }] table icon_formats List of formats that will be
+  checked by `getIcon()`.
+@tfield[opt] function notify_callback Callback used to modify or reject
+notifications, e.g.
     naughty.config.notify_callback = function(args)
         args.text = 'prefix: ' .. args.text
         return args
     end
 
-@field presets Notification Presets - a table containing presets for
-   different purposes.  Preset is a table of any parameters available to
-   `notify()`, overriding default values (`naughty.config.defaults`) You have
-   to pass a reference of a preset in your notify() call to use the preset The
-   presets `"low"`, `"normal"` and `"critical"` are used for notifications
-   over DBUS.
+@tfield table presets Notification presets.  See `config.presets`.
 
-@field presets.low The preset for notifications with low urgency level.
-@field presets.normal The default preset for every notification without a
-   preset that will also be used for normal urgency level.
-@field presets.critical The preset for notifications with a critical urgency
-   level.
+@tfield table defaults Default values for the params to `notify()`.  These can
+  optionally be overridden by specifying a preset.  See `config.defaults`.
 
-@field defaults Default values for the params to `notify()`.
-   These can optionally be overridden by specifying a preset.
 --]]
 --
 naughty.config = {
@@ -76,6 +64,27 @@ naughty.config = {
     notify_callback = nil,
 }
 
+--- Notification presets for `naughty.notify`.
+-- This holds presets for different purposes.  A preset is a table of any
+-- parameters for `notify()`, overriding the default values
+-- (`naughty.config.defaults`).
+--
+-- You have to pass a reference of a preset in your `notify()` as the `preset`
+-- argument.
+--
+-- The presets `"low"`, `"normal"` and `"critical"` are used for notifications
+-- over DBUS.
+--
+-- @table config.presets
+-- @tfield table low The preset for notifications with low urgency level.
+-- @tfield[opt=5] int low.timeout
+-- @tfield[opt=empty] table normal The default preset for every notification without a
+--   preset that will also be used for normal urgency level.
+-- @tfield table critical The preset for notifications with a critical urgency
+--   level.
+-- @tfield[opt="#ff0000"] string critical.bg
+-- @tfield[opt="#ffffff"] string critical.fg
+-- @tfield[opt=0] string critical.timeout
 naughty.config.presets = {
     low = {
         timeout = 5
@@ -88,13 +97,23 @@ naughty.config.presets = {
     }
 }
 
+--- Defaults for `naughty.notify`.
+--
+-- @table config.defaults
+-- @tfield[opt=5] int timeout
+-- @tfield[opt=""] string text
+-- @tfield[opt] int screen Defaults to `awful.screen.focused`.
+-- @tfield[opt=true] boolean ontop
+-- @tfield[opt=5] int margin
+-- @tfield[opt=1] int border_width
+-- @tfield[opt="top_right"] string position
 naughty.config.defaults = {
     timeout = 5,
     text = "",
-    screen = 1,
+    screen = nil,
     ontop = true,
-    margin = "5",
-    border_width = "1",
+    margin = 5,
+    border_width = 1,
     position = "top_right"
 }
 
@@ -367,52 +386,36 @@ end
 --- Create a notification.
 --
 -- @tab args The argument table containing any of the arguments below.
--- @string args.text Text of the notification.
---   Default: ''
--- @string args.title Title of the notification.
---   Default: nil
--- @int args.timeout Time in seconds after which popup expires.
+-- @string[opt=""] args.text Text of the notification.
+-- @string[opt] args.title Title of the notification.
+-- @int[opt=5] args.timeout Time in seconds after which popup expires.
 --   Set 0 for no timeout.
---   Default: 5
--- @int args.hover_timeout Delay in seconds after which hovered popup disappears.
---   Default: nil
+-- @int[opt] args.hover_timeout Delay in seconds after which hovered popup disappears.
 -- @int[opt=focused] args.screen Target screen for the notification.
--- @string args.position Corner of the workarea displaying the popups.
---   Values: `"top_right"` (default), `"top_left"`, `"bottom_left"`,
---           `"bottom_right"`, `"top_middle"`, `"bottom_middle"`.
--- @bool args.ontop Boolean forcing popups to display on top.
---   Default: true
--- @int args.height Popup height.
---   Default: nil (auto)
--- @int args.width Popup width.
---   Default: nil (auto)
--- @string args.font Notification font.
---   Default: beautiful.font or awesome.font
--- @string args.icon Path to icon.
---   Default: nil
--- @int args.icon_size Desired icon size in px.
---   Default: nil
--- @string args.fg Foreground color.
---   Default: `beautiful.fg_focus` or `'#ffffff'`
--- @string args.bg Background color.
---   Default: `beautiful.bg_focus` or `'#535d6c'`
--- @int args.border_width Border width.
---   Default: 1
--- @string args.border_color Border color.
---   Default: `beautiful.border_focus` or `'#535d6c'`
--- @tparam func args.run Function to run on left click. Default: nil
--- @tparam func args.destroy Function to run when notification is destroyed. Default: nil.
--- @tparam table args.preset Table with any of the above parameters.
---                          Note: Any parameters specified directly in args
---                          will override ones defined in the preset.
--- @tparam int args.replaces_id Replace the notification with the given ID.
--- @tparam func args.callback Function that will be called with all arguments.
---                            The notification will only be displayed if the
---                            function returns true.
---                            Note: this function is only relevant to
---                            notifications sent via dbus.
--- @tparam table args.actions Mapping that maps a string to a callback when this
---                            action is selected.
+-- @string[opt="top_right"] args.position Corner of the workarea displaying the popups.
+--   Values: `"top_right"`, `"top_left"`, `"bottom_left"`,
+--   `"bottom_right"`, `"top_middle"`, `"bottom_middle"`.
+-- @bool[opt=true] args.ontop Boolean forcing popups to display on top.
+-- @int[opt=auto] args.height Popup height.
+-- @int[opt=auto] args.width Popup width.
+-- @string[opt=beautiful.font or awesome.font] args.font Notification font.
+-- @string[opt] args.icon Path to icon.
+-- @int[opt] args.icon_size Desired icon size in px.
+-- @string[opt=`beautiful.fg_focus` or `'#ffffff'`] args.fg Foreground color.
+-- @string[opt=`beautiful.bg_focus` or `'#535d6c'`] args.bg Background color.
+-- @int[opt=1] args.border_width Border width.
+-- @string[opt=`beautiful.border_focus` or `'#535d6c'`] args.border_color Border color.
+-- @tparam[opt] func args.run Function to run on left click.
+-- @tparam[opt] func args.destroy Function to run when notification is destroyed.
+-- @tparam[opt] table args.preset Table with any of the above parameters.
+--   Note: Any parameters specified directly in args will override ones defined
+--   in the preset.
+-- @tparam[opt] int args.replaces_id Replace the notification with the given ID.
+-- @tparam[opt] func args.callback Function that will be called with all arguments.
+--   The notification will only be displayed if the function returns true.
+--   Note: this function is only relevant to notifications sent via dbus.
+-- @tparam[opt] table args.actions Mapping that maps a string to a callback when this
+--   action is selected.
 -- @usage naughty.notify({ title = "Achtung!", text = "You're idling", timeout = 0 })
 -- @return The notification object
 function naughty.notify(args)
