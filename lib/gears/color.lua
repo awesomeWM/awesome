@@ -17,7 +17,7 @@ local cairo = require("lgi").cairo
 local surface = require("gears.surface")
 
 local color = { mt = {} }
-local pattern_cache = setmetatable({}, { __mode = 'v' })
+local pattern_cache
 
 --- Parse a HTML-color.
 -- This function can parse colors like `#rrggbb` and `#rrggbbaa`.
@@ -231,13 +231,7 @@ function color.create_pattern(col)
     if cairo.Pattern:is_type_of(col) then
         return col
     end
-    local col = col or "#000000"
-    local result = pattern_cache[col]
-    if not result then
-        result = color.create_pattern_uncached(col)
-        pattern_cache[col] = result
-    end
-    return result
+    return pattern_cache:get(col or "#000000")
 end
 
 --- Check if a pattern is opaque.
@@ -295,6 +289,8 @@ end
 function color.mt:__call(...)
     return color.create_pattern(...)
 end
+
+pattern_cache = require("gears.cache").new(color.create_pattern_uncached)
 
 return setmetatable(color, color.mt)
 

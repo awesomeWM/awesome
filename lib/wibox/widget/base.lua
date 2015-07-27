@@ -7,6 +7,7 @@
 
 local debug = require("gears.debug")
 local object = require("gears.object")
+local cache = require("gears.cache")
 local setmetatable = setmetatable
 local pairs = pairs
 local type = type
@@ -98,9 +99,12 @@ function base.make_widget(proxy, widget_name)
     end
 
     -- Add a geometry for base.fit_widget() that is cleared when necessary
-    ret._fit_geometry_cache = setmetatable({}, { __mode = 'v' })
+    local function cb(...)
+        return ret:fit(...)
+    end
+    ret._fit_geometry_cache = cache.new(cb)
     ret:connect_signal("widget::updated", function()
-        ret._fit_geometry_cache = setmetatable({}, { __mode = 'v' })
+        ret._fit_geometry_cache = cache.new(cb)
     end)
 
     -- Add __tostring method to metatable.
