@@ -60,7 +60,7 @@ buffer_init(buffer_t *buf)
 }
 
 /** Initialize a buffer with data.
- * \param b The buffer to ini.
+ * \param b The buffer to init.
  * \param buf The data to set.
  * \param size Data size.
  */
