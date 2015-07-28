@@ -32,7 +32,7 @@ do
             screen = require("awful.screen")
             return screen[k]
         end,
-        _newindex = error -- Just to be sure in case anything ever does this
+        __newindex = error -- Just to be sure in case anything ever does this
     })
 end
 local client = {}
