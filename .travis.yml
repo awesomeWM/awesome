@@ -3,8 +3,7 @@ env:
   matrix:
     # Note: luarocks does not work with Lua 5.0.
     # - LUA=5.0 LUAPKG=50  LUALIB=/usr/lib/liblua50.so
-    # Disable 5.1 for now: no need to test both 5.1 and 5.2 currently.
-    # - LUA=5.1 LUAPKG=5.1 LUALIB=/usr/lib/x86_64-linux-gnu/liblua5.1.so
+    - LUA=5.1 LUAPKG=5.1 LUALIB=/usr/lib/x86_64-linux-gnu/liblua5.1.so
     - LUA=5.2 LUAPKG=5.2 LUALIB=/usr/lib/x86_64-linux-gnu/liblua5.2.so
   global:
     # Secure token to push to gh-pages.
