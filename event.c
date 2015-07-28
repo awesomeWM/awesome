@@ -801,14 +801,11 @@ event_handle_mappingnotify(xcb_mapping_notify_event_t *ev)
 
         /* regrab everything */
         xcb_screen_t *s = globalconf.screen;
-        /* yes XCB_BUTTON_MASK_ANY is also for grab_key even if it's look weird */
-        xcb_ungrab_key(globalconf.connection, XCB_GRAB_ANY, s->root, XCB_BUTTON_MASK_ANY);
         xwindow_grabkeys(s->root, &globalconf.keys);
 
         foreach(_c, globalconf.clients)
         {
             client_t *c = *_c;
-            xcb_ungrab_key(globalconf.connection, XCB_GRAB_ANY, c->frame_window, XCB_BUTTON_MASK_ANY);
             xwindow_grabkeys(c->frame_window, &c->keys);
         }
     }
