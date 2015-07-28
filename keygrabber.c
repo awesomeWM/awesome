@@ -89,14 +89,13 @@ keygrabber_handlekpress(lua_State *L, xcb_key_press_event_t *e)
 
     if (is_control(buf))
     {
-        /* use text names for control characters */
-        xkb_keysym_t keysym = xkb_state_key_get_one_sym(globalconf.xkb_state, e->detail);
-        xkb_keysym_get_name(keysym, buf, countof(buf) );
+        /* Use text names for control characters, ignoring all modifiers. */
+        xcb_keysym_t keysym = xcb_key_symbols_get_keysym(globalconf.keysyms,
+                                                         e->detail, 0);
+        xkb_keysym_get_name(keysym, buf, countof(buf));
     }
 
-
     luaA_pushmodifiers(L, e->state);
-
     lua_pushstring(L, buf);
 
     switch(e->response_type)
@@ -108,8 +107,6 @@ keygrabber_handlekpress(lua_State *L, xcb_key_press_event_t *e)
         lua_pushliteral(L, "release");
         break;
     }
-
-
     return true;
 }
 
