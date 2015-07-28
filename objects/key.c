@@ -39,8 +39,6 @@
 #include "common/xutil.h"
 #include "xkb.h"
 
-/* XStringToKeysym() and XKeysymToString */
-#include <X11/Xlib.h>
 #include <xkbcommon/xkbcommon.h>
 
 /** Key object.
@@ -82,7 +80,7 @@ luaA_keystore(lua_State *L, int ud, const char *str, ssize_t len)
     /* Then set up the new state */
     if(*str != '#' || len == 1)
     {
-        key->keysym = XStringToKeysym(str);
+        key->keysym = xkb_keysym_from_name(str, 0);
         if(!key->keysym)
         {
             if(len > 1)
