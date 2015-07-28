@@ -44,6 +44,8 @@
 #include <xcb/xcb_event.h>
 #include <xcb/xkb.h>
 
+#include <xkbcommon/xkbcommon.h>
+
 #define DO_EVENT_HOOK_CALLBACK(type, xcbtype, xcbeventprefix, arraytype, match) \
     static void \
     event_##xcbtype##_callback(xcb_##xcbtype##_press_event_t *ev, \
@@ -87,11 +89,21 @@
 static bool
 event_key_match(xcb_key_press_event_t *ev, keyb_t *k, void *data)
 {
+    char buf[MAX(MB_LEN_MAX, 32)];
+
     assert(data);
     xcb_keysym_t keysym = *(xcb_keysym_t *) data;
-    return (((k->keycode && ev->detail == k->keycode)
-             || (k->keysym && keysym == k->keysym))
-            && (k->modifiers == XCB_BUTTON_MASK_ANY || k->modifiers == ev->state));
+    if((k->modifiers != XCB_BUTTON_MASK_ANY && k->modifiers != ev->state))
+        return false;
+
+    if((k->keycode && ev->detail == k->keycode)
+            || (k->keysym && keysym == k->keysym))
+        return true;
+
+    if(k->utf8 && xkb_state_key_get_utf8(globalconf.xkb_state, ev->detail, buf, sizeof(buf)))
+        return !strcmp(k->utf8, buf);
+
+    return false;
 }
 
 static bool

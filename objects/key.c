@@ -55,6 +55,12 @@
  * @table key
  */
 
+static void
+key_wipe(keyb_t *key)
+{
+    p_delete(&key->utf8);
+}
+
 /** Get the number of instances.
  *
  * @return The number of key objects alive.
@@ -64,28 +70,31 @@
 static void
 luaA_keystore(lua_State *L, int ud, const char *str, ssize_t len)
 {
+    if(!len)
+        return;
     keyb_t *key = luaA_checkudata(L, ud, &key_class);
-    if(len)
+
+    /* First, unset everything */
+    p_delete(&key->utf8);
+    key->keycode = 0;
+    key->keysym = 0;
+
+    /* Then set up the new state */
+    if(*str != '#' || len == 1)
     {
-        if(*str != '#')
+        key->keysym = XStringToKeysym(str);
+        if(!key->keysym)
         {
-            key->keysym = XStringToKeysym(str);
-            if(!key->keysym)
-            {
-                if(len == 1)
-                    key->keysym = *str;
-                else
-                    warn("there's no keysym named \"%s\"", str);
-            }
-            key->keycode = 0;
+            if(len > 1)
+                warn("There is no keysym named \"%s\". Will be handled as utf8 key.", str);
+            key->utf8 = a_strdup(str);
         }
-        else
-        {
-            key->keycode = atoi(str + 1);
-            key->keysym = 0;
-        }
-        luaA_object_emit_signal(L, ud, "property::key", 0);
     }
+    else
+    {
+        key->keycode = atoi(str + 1);
+    }
+    luaA_object_emit_signal(L, ud, "property::key", 0);
 }
 
 /** Create a new key object.
@@ -205,15 +214,17 @@ luaA_key_get_key(lua_State *L, keyb_t *k)
         int slen = snprintf(buf, sizeof(buf), "#%u", k->keycode);
         lua_pushlstring(L, buf, slen);
     }
-    else
+    else if(k->keysym)
     {
         char buf[MAX(MB_LEN_MAX, 32)];
 
-        if (xkb_keysym_get_name(k->keysym, buf, countof(buf)) < 0) {
+        if(xkb_keysym_get_name(k->keysym, buf, countof(buf)) < 0)
             return 0;
-        }
-
         lua_pushstring(L, buf);
+    }
+    else
+    {
+        lua_pushstring(L, k->utf8);
     }
     return 1;
 }
@@ -252,7 +263,9 @@ key_class_setup(lua_State *L)
     };
 
     luaA_class_setup(L, &key_class, "key", NULL,
-                     (lua_class_allocator_t) key_new, NULL, NULL,
+                     (lua_class_allocator_t) key_new,
+                     (lua_class_collector_t) key_wipe,
+                     NULL,
                      luaA_class_index_miss_property, luaA_class_newindex_miss_property,
                      key_methods, key_meta);
     luaA_class_add_property(&key_class, "key",
