@@ -238,7 +238,6 @@ luaA_root_keys(lua_State *L)
             key_array_append(&globalconf.keys, luaA_object_ref_class(L, -1, &key_class));
 
         xcb_screen_t *s = globalconf.screen;
-        xcb_ungrab_key(globalconf.connection, XCB_GRAB_ANY, s->root, XCB_BUTTON_MASK_ANY);
         xwindow_grabkeys(s->root, &globalconf.keys);
 
         return 1;
