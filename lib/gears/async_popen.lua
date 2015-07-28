@@ -13,7 +13,7 @@ async_popen.callbacks = {}
 
 --- Run a command asynchronously.
 -- @param command The command to run
--- @param callback The function to be called when the command exits. A filehandle of the output file will be passed to it.
+-- @param callback The function to be called when the command exits. The output of the command will be passed to it.
 function async_popen.async_popen(command, callback)
     local tmpfname = os.tmpname()
     async_popen.callbacks[tmpfname] = callback
@@ -27,7 +27,9 @@ end
 function async_popen.process_output(tmpfname)
     if async_popen.callbacks[tmpfname] then
         local fh = io.open(tmpfname, "r")
-        async_popen.callbacks[tmpfname](fh)
+        async_popen.callbacks[tmpfname](fh:read("*all"))
+        fh:close()
+        os.remove(tmpfname)
     end
 end
 
