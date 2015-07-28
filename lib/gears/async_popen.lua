@@ -17,11 +17,11 @@ async_popen.callbacks = {}
 function async_popen.async_popen(command, callback)
     local tmpfname = os.tmpname()
     async_popen.callbacks[tmpfname] = callback
-    util.spawn(string.format("bash -c '%s > %s; echo \"async_popen.process_output(\\\"%s\\\")\" | awesome-client' 2> /dev/null",
-                             string.gsub(command, "'", "'\\''"),
-                             tmpfname,
-                             tmpfname),
-               false)
+    util.spawn_with_shell(
+        string.format("%s > %s; echo 'async_popen.process_output(\"%s\")' | awesome-client",
+                      command,
+                      tmpfname,
+                      tmpfname))
 end
 
 function async_popen.process_output(tmpfname)
@@ -30,6 +30,23 @@ function async_popen.process_output(tmpfname)
         async_popen.callbacks[tmpfname](fh:read("*all"))
         fh:close()
         os.remove(tmpfname)
+    end
+end
+
+--- Run a command synchronously and return its output. If the given timeout expires, kill the command and return nil.
+-- @param command The command to run
+-- @param timeout The maximum time the command will be run
+-- @return If the command did not time out, return its output, otherwise return nil.
+function async_popen.sync_popen_with_timeout(command, timeout)
+    local fh =
+        io.popen(string.format("timeout %d sh -c '(%s) || true'",
+                               -- ^without the "|| true" if the given command returns 124 this function will think that it timed out
+                               timeout,
+                               string.gsub(command, "'", "'\\''")))
+    local output = fh:read("*all")
+    local _, _, rc = fh:close() -- exit status of timeout
+    if rc ~= 124 then -- the command didn't time out
+        return output
     end
 end
 
