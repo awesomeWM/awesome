@@ -458,7 +458,7 @@ client_focus_refresh(void)
             xwindow_takefocus(c->window);
     }
 
-    /* If nothing has the focused or the currently focused client doesn't want
+    /* If nothing has the focus or the currently focused client does not want
      * us to focus it, this sets the focus to the root window. This makes sure
      * the previously focused client actually gets unfocused. Alternatively, the
      * new client gets the input focus.

@@ -706,8 +706,8 @@ local function attached_connect_signal_screen(screen, sig, func)
     end)
 end
 
---- Add a signal to all attached tag and all tag that will be attached in the
--- future. When a tag is detach from the screen, its signal is removed.
+--- Add a signal to all attached tags and all tags that will be attached in the
+-- future. When a tag is detached from the screen, its signal is removed.
 -- @param screen The screen concerned, or all if nil.
 function tag.attached_connect_signal(screen, ...)
     if screen then
