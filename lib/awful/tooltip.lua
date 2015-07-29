@@ -135,7 +135,7 @@ tooltip.set_text = function(self, text)
     end
 end
 
---- Change displayed text.
+--- Change displayed markup.
 --
 -- @tparam tooltip self The tooltip object.
 -- @tparam string  text New tooltip markup, passed to
