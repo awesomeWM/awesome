@@ -11,6 +11,7 @@ local error = error
 local type = type
 local abutton = require("awful.button")
 local aclient = require("awful.client")
+local atooltip = require("awful.tooltip")
 local beautiful = require("beautiful")
 local object = require("gears.object")
 local drawable = require("wibox.drawable")
@@ -177,12 +178,17 @@ end
 -- then found in the theme as "titlebar_[name]_button_[normal/focus]_[state]".
 -- If that value does not exist, the focused state is ignored for the next try.
 -- @param c The client for which a button is created.
--- @param name Name of the button, used for accessing the theme.
+-- @tparam string name Name of the button, used for accessing the theme and
+--   in the tooltip.
 -- @param selector A function that selects the image that should be displayed.
 -- @param action Function that is called when the button is clicked.
 -- @return The widget
 function titlebar.widget.button(c, name, selector, action)
     local ret = imagebox()
+
+    ret.tooltip = atooltip({ objects = {ret}, delay_show = 1 })
+    ret.tooltip:set_text(name)
+
     local function update()
         local img = selector(c)
         if type(img) ~= "nil" then
