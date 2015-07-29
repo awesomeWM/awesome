@@ -130,7 +130,9 @@ end
 --   `wibox.widget.textbox.set_text`.
 tooltip.set_text = function(self, text)
     self.textbox:set_text(text)
-    set_geometry(self)
+    if self.visible then
+        set_geometry(self)
+    end
 end
 
 --- Change displayed text.
@@ -140,7 +142,9 @@ end
 --   `wibox.widget.textbox.set_markup`.
 tooltip.set_markup = function(self, text)
     self.textbox:set_markup(text)
-    set_geometry(self)
+    if self.visible then
+        set_geometry(self)
+    end
 end
 
 --- Change the tooltip's update interval.
