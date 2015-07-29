@@ -31,12 +31,12 @@ end
 -- @param data Value to inspect.
 -- @param shift Spaces to indent lines with.
 -- @param tag The name of the value.
--- @tparam[opt] int depth Depth of recursion.
+-- @tparam[opt=10] int depth Depth of recursion.
 -- @return a string which contains tag, value, value type and table key/value
 -- pairs if data is a table.
 local function dump_raw(data, shift, tag, depth)
     local result = ""
-    depth = depth == nil and math.huge or depth or 0
+    depth = depth == nil and 10 or depth or 0
 
     if tag then
         result = result .. tostring(tag) .. " : "
