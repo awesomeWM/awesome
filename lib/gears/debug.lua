@@ -35,22 +35,23 @@ end
 -- @return a string which contains tag, value, value type and table key/value
 -- pairs if data is a table.
 local function dump_raw(data, shift, tag, depth)
-    local result = ""
     depth = depth == nil and 10 or depth or 0
+    local result = ""
 
     if tag then
         result = result .. tostring(tag) .. " : "
     end
 
-    if type(data) ~= "table" then
-        return result .. tostring(data) .. " (" .. type(data) .. ")"
-    end
-
-    shift = (shift or "") .. "  "
-    result = result .. tostring(data)
-    if depth > 0 then
+    if type(data) == "table" and depth > 0 then
+        shift = (shift or "") .. "  "
+        result = result .. tostring(data)
         for k, v in pairs(data) do
             result = result .. "\n" .. shift .. dump_raw(v, shift, k, depth - 1)
+        end
+    else
+        result = result .. tostring(data) .. " (" .. type(data) .. ")"
+        if depth == 0 and type(data) == "table" then
+            result = result .. " […]"
         end
     end
 
