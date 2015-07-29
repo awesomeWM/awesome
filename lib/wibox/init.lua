@@ -127,6 +127,15 @@ local function new(args)
     ret:set_bg(args.bg or beautiful.bg_normal)
     ret:set_fg(args.fg or beautiful.fg_normal)
 
+    -- Add __tostring method to metatable.
+    local mt = {}
+    local orig_string = tostring(ret)
+    mt.__tostring = function(o)
+        return string.format("wibox: %s (%s)",
+                             tostring(ret._drawable), orig_string)
+    end
+    ret = setmetatable(ret, mt)
+
     -- Make sure the wibox is drawn at least once
     ret.draw()
 
