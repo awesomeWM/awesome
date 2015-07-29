@@ -157,6 +157,8 @@ end
 --
 -- This sets the focus only if the client is visible.
 --
+-- It is the default signal handler for `request::activate` on a `client`.
+--
 -- @client c A client to use
 -- @tparam string context The context where this signal was used.
 -- @tparam[opt] table hints A table with additional hints:
