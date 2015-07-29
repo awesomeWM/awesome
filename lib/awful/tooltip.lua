@@ -45,6 +45,7 @@ local screen = screen
 local timer = require("gears.timer")
 local wibox = require("wibox")
 local a_placement = require("awful.placement")
+local abutton = require("awful.button")
 local beautiful = require("beautiful")
 local textbox = require("wibox.widget.textbox")
 local background = require("wibox.widget.background")
@@ -270,8 +271,9 @@ tooltip.new = function(args)
     self.marginbox = wibox.layout.margin(self.background, m_lr, m_lr, m_tb, m_tb)
     self.wibox:set_widget(self.marginbox)
 
-    -- add some signals on both the tooltip and widget
-    self.wibox:connect_signal("mouse::enter", data[self].hide)
+    -- Close the tooltip when clicking it.  This gets done on release, to not
+    -- emit the release event on an underlying object, e.g. the titlebar icon.
+    self.wibox:buttons(abutton({}, 1, nil, function() data[self].hide() end))
 
     -- Add tooltip to objects
     if args.objects then
