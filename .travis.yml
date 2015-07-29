@@ -4,7 +4,7 @@ env:
     # Note: luarocks does not work with Lua 5.0.
     # - LUA=5.0 LUAPKG=50  LUALIB=/usr/lib/liblua50.so
     - LUA=5.1 LUAPKG=5.1 LUALIB=/usr/lib/x86_64-linux-gnu/liblua5.1.so
-    - LUA=5.2 LUAPKG=5.2 LUALIB=/usr/lib/x86_64-linux-gnu/liblua5.2.so
+    - LUA=5.2 LUAPKG=5.2 LUALIB=/usr/lib/x86_64-linux-gnu/liblua5.2.so BUILD_APIDOC=true
   global:
     # Secure token to push to gh-pages.
     - secure: "LZxt9559+V3qJMdVgmKW4RYTt8ZINooex/qsnoEJUtZloj/eFNG4COT2z6a2yeH2tKWzknCsmV9nLPJiNEA2KLcyqDhjFQvJwKmsBuhGUmLyeQgfenjweorRjO8NT18X1SAEUXAMnClPu+OeTDs4BAuVn5foGZ7xpcRg2E+j2mc="
@@ -113,4 +113,4 @@ after_success:
   - export GIT_COMMITTER_NAME="$GIT_AUTHOR_NAME"
   - export GIT_COMMITTER_EMAIL="$GIT_AUTHOR_EMAIL"
   # NOTE: stdout/stderr might/should be discarded to not leak sensitive information.
-  - '[ "$TRAVIS_BRANCH" = "master" ] && [ "$TRAVIS_PULL_REQUEST" = false ] && { echo "Uploading documentation..." && cd build && git clone --quiet --branch gh-pages $REPO_APIDOC apidoc && diff -Nur apidoc doc -I "Last updated" -I "<strong>Release</strong>:" -I "(version master-" -x .git > /tmp/p1; { echo "Patch:"; cat /tmp/p1; } && cd apidoc && patch -p1 < /tmp/p1 && git add --all . && git commit -m "Update docs for $AWESOME_VERSION via Travis" && { mv .git ../doc && cd ../doc && git add --all . && git commit -m "minor: update timestamps/version" && git push --quiet origin gh-pages || echo "Uploading docs failed!"; } || echo "Documentation has not changed."; } || echo "Not uploading docs for $TRAVIS_BRANCH:$TRAVIS_PULL_REQUEST."'
+  - '[ "BUILD_APIDOC" = "true" ] && [ "$TRAVIS_BRANCH" = "master" ] && [ "$TRAVIS_PULL_REQUEST" = false ] && { echo "Uploading documentation..." && cd build && git clone --quiet --branch gh-pages $REPO_APIDOC apidoc && diff -Nur apidoc doc -I "Last updated" -I "<strong>Release</strong>:" -I "(version master-" -x .git > /tmp/p1; { echo "Patch:"; cat /tmp/p1; } && cd apidoc && patch -p1 < /tmp/p1 && git add --all . && git commit -m "Update docs for $AWESOME_VERSION via Travis" && { mv .git ../doc && cd ../doc && git add --all . && git commit -m "minor: update timestamps/version" && git push --quiet origin gh-pages || echo "Uploading docs failed!"; } || echo "Documentation has not changed."; } || echo "Not uploading docs for $TRAVIS_BRANCH:$TRAVIS_PULL_REQUEST."'
