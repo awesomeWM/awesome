@@ -270,9 +270,6 @@ tooltip.new = function(args)
     self.marginbox = wibox.layout.margin(self.background, m_lr, m_lr, m_tb, m_tb)
     self.wibox:set_widget(self.marginbox)
 
-    -- add some signals on both the tooltip and widget
-    self.wibox:connect_signal("mouse::enter", data[self].hide)
-
     -- Add tooltip to objects
     if args.objects then
         for _, object in ipairs(args.objects) do
