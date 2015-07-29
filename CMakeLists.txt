@@ -258,7 +258,7 @@ endforeach()
 macro(a_icon_convert match replacement input)
     string(REPLACE ${match} ${replacement} output ${input})
 
-    if(NOT ${input} STREQUAL ${output})
+    if(NOT ${input} STREQUAL ${output} AND NOT ";${ALL_ICONS};" MATCHES ";${output};")
         set(ALL_ICONS ${ALL_ICONS} ${output})
 
         add_custom_command(
