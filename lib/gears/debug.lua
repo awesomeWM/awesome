@@ -26,15 +26,17 @@ function debug.assert(cond, message)
 end
 
 --- Given a table (or any other data) return a string that contains its
--- tag, value and type. If data is a table then recursively call d_raw
+-- tag, value and type. If data is a table then recursively call `dump_raw`
 -- on each of its values.
 -- @param data Value to inspect.
 -- @param shift Spaces to indent lines with.
 -- @param tag The name of the value.
+-- @tparam[opt] int depth Depth of recursion.
 -- @return a string which contains tag, value, value type and table key/value
 -- pairs if data is a table.
-local function dump_raw(data, shift, tag)
+local function dump_raw(data, shift, tag, depth)
     local result = ""
+    depth = depth == nil and math.huge or depth or 0
 
     if tag then
         result = result .. tostring(tag) .. " : "
@@ -45,8 +47,11 @@ local function dump_raw(data, shift, tag)
     end
 
     shift = (shift or "") .. "  "
-    for k, v in pairs(data) do
-        result = result .. "\n" .. shift .. dump_raw(v, shift, k)
+    result = result .. tostring(data)
+    if depth > 0 then
+        for k, v in pairs(data) do
+            result = result .. "\n" .. shift .. dump_raw(v, shift, k, depth - 1)
+        end
     end
 
     return result
@@ -55,16 +60,18 @@ end
 --- Inspect the value in data.
 -- @param data Value to inspect.
 -- @param tag The name of the value.
--- @return a string that contains the expanded value of data.
-function debug.dump_return(data, tag)
-    return dump_raw(data, nil, tag)
+-- @tparam[opt] int depth Depth of recursion.
+-- @return string A string that contains the expanded value of data.
+function debug.dump_return(data, tag, depth)
+    return dump_raw(data, nil, tag, depth)
 end
 
 --- Print the table (or any other value) to the console.
 -- @param data Table to print.
 -- @param tag The name of the table.
-function debug.dump(data, tag)
-    print(debug.dump_return(data, tag))
+-- @tparam[opt] int depth Depth of recursion.
+function debug.dump(data, tag, depth)
+    print(debug.dump_return(data, tag, depth))
 end
 
 return debug
