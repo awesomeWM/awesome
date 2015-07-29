@@ -324,7 +324,7 @@ end
 -- @tparam[opt=false] boolean stacked Use stacking order?
 function client.focus.global_bydirection(dir, c, stacked)
     local sel = c or capi.client.focus
-    local scr = sel and sel.screen or screen.focused
+    local scr = sel and sel.screen or screen.focused()
 
     -- change focus inside the screen
     client.focus.bydirection(dir, sel)
