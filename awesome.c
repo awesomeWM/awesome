@@ -79,18 +79,15 @@ awesome_atexit(bool restart)
                 (*c)->geometry.x, (*c)->geometry.y);
     }
 
-    if (restart)
-    {
-        /* Save the client order across restarts */
-        xcb_window_t *wins = p_alloca(xcb_window_t, globalconf.clients.len);
-        int n = 0;
-        foreach(client, globalconf.clients)
-            wins[n++] = (*client)->window;
+    /* Save the client order.  This is useful also for "hard" restarts. */
+    xcb_window_t *wins = p_alloca(xcb_window_t, globalconf.clients.len);
+    int n = 0;
+    foreach(client, globalconf.clients)
+        wins[n++] = (*client)->window;
 
-        xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
-                            globalconf.screen->root,
-                            AWESOME_CLIENT_ORDER, XCB_ATOM_WINDOW, 32, n, wins);
-    }
+    xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
+                        globalconf.screen->root,
+                        AWESOME_CLIENT_ORDER, XCB_ATOM_WINDOW, 32, n, wins);
 
     a_dbus_cleanup();
 
