@@ -202,21 +202,34 @@ tooltip.new = function(args)
     }
 
     -- private data
-    local delay_timeout
     if args.delay_show then
+        local delay_timeout
+
         delay_timeout = timer { timeout = args.delay_show }
-        delay_timeout:connect_signal("timeout", function () show(self) end)
+        delay_timeout:connect_signal("timeout", function ()
+            show(self)
+            delay_timeout:stop()
+        end)
+
+        data[self] = {
+            show = function()
+                if not delay_timeout.started then
+                    delay_timeout:start()
+                end
+            end,
+            hide = function()
+                if delay_timeout and delay_timeout.started then
+                    delay_timeout:stop()
+                end
+                hide(self)
+            end,
+        }
+    else
+        data[self] = {
+            show = function() show(self) end,
+            hide = function() hide(self) end,
+        }
     end
-    data[self] = {
-        show = function()
-            if delay_timeout then delay_timeout:start()
-            else show(self) end
-        end,
-        hide = function()
-            if delay_timeout then delay_timeout:stop() end
-            hide(self)
-        end,
-    }
 
     -- export functions
     self.set_text = tooltip.set_text
