@@ -353,6 +353,7 @@ luaA_init(xdgHandle* xdg)
         { "quit", luaA_quit },
         { "exec", luaA_exec },
         { "spawn", luaA_spawn },
+        { "spawn_with_output", luaA_spawn_with_output },
         { "restart", luaA_restart },
         { "connect_signal", luaA_awesome_connect_signal },
         { "disconnect_signal", luaA_awesome_disconnect_signal },

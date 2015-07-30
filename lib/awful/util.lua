@@ -82,6 +82,15 @@ function util.mkdir(dir)
     return os.execute("mkdir -p " .. dir)
 end
 
+--- Spawn a program and call a function when it exits.
+-- The PID, the stdout FD, and the stderr FD of the spawned process will be passed to the function.
+-- @param cmd The command
+-- @param callback The function
+-- @return An error message in case of failure, otherwise nil
+function util.spawn_with_output(cmd, callback)
+    return capi.awesome.spawn_with_output(cmd, callback)
+end
+
 --- Spawn a program.
 -- The program gets started on the default screen.
 -- @tparam string|table cmd The command.
