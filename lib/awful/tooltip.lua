@@ -53,24 +53,24 @@ local setmetatable = setmetatable
 local ipairs = ipairs
 
 --- Tooltip object definition.
--- @table awful.tooltip
--- @field wibox The wibox displaying the tooltip.
--- @field visible True if tooltip is visible.
+-- @table tooltip
+-- @tfield wibox wibox The wibox displaying the tooltip.
+-- @tfield boolean visible True if tooltip is visible.
 local tooltip = { mt = {}  }
 
 --- Tooltip private data.
 -- @local
--- @table awful.tooltip.data
--- @field fg tooltip foreground color.
--- @field font Tooltip font.
--- @field hide The hide() function.
--- @field show The show() function.
--- @field timer The text update timer.
--- @field timer_function The text update timer function.
+-- @table tooltip.data
+-- @tfield string fg tooltip foreground color.
+-- @tfield string font Tooltip font.
+-- @tfield function hide The hide() function.
+-- @tfield function show The show() function.
+-- @tfield gears.timer timer The text update timer.
+-- @tfield function timer_function The text update timer function.
 local data = setmetatable({}, { __mode = 'k' })
 
 -- Place the tooltip on the screen.
--- @param self A tooltip object.
+-- @tparam tooltip self A tooltip object.
 local function place(self)
     a_placement.under_mouse(self.wibox)
     a_placement.no_offscreen(self.wibox)
@@ -78,7 +78,7 @@ end
 
 -- Place the tooltip under the mouse.
 --
--- @param self A tooltip object.
+-- @tparam tooltip self A tooltip object.
 local function set_geometry(self)
     local my_geo = self.wibox:geometry()
     -- calculate width / height
@@ -92,7 +92,7 @@ end
 
 -- Show a tooltip.
 --
--- @param self The tooltip to show.
+-- @tparam tooltip self The tooltip to show.
 local function show(self)
     -- do nothing if the tooltip is already shown
     if self.visible then return end
@@ -110,7 +110,7 @@ end
 
 -- Hide a tooltip.
 --
--- @param self The tooltip to hide.
+-- @tparam tooltip self The tooltip to hide.
 local function hide(self)
     -- do nothing if the tooltip is already hidden
     if not self.visible then return end
@@ -125,8 +125,9 @@ end
 
 --- Change displayed text.
 --
--- @param self The tooltip object.
--- @param text New tooltip text.
+-- @tparam tooltip self The tooltip object.
+-- @tparam string  text New tooltip text, passed to
+--   `wibox.widget.textbox.set_text`.
 tooltip.set_text = function(self, text)
     self.textbox:set_text(text)
     set_geometry(self)
@@ -134,8 +135,9 @@ end
 
 --- Change displayed text.
 --
--- @param self The tooltip object.
--- @param text New tooltip text, including pango markup.
+-- @tparam tooltip self The tooltip object.
+-- @tparam string  text New tooltip markup, passed to
+--   `wibox.widget.textbox.set_markup`.
 tooltip.set_markup = function(self, text)
     self.textbox:set_markup(text)
     set_geometry(self)
@@ -143,9 +145,8 @@ end
 
 --- Change the tooltip's update interval.
 --
--- @param self A tooltip object.
--- @param timeout The timeout value.
--- @function set_timeout
+-- @tparam tooltip self A tooltip object.
+-- @tparam number timeout The timeout value.
 tooltip.set_timeout = function(self, timeout)
     if data[self].timer then
         data[self].timer.timeout = timeout
@@ -154,8 +155,9 @@ end
 
 --- Add tooltip to an object.
 --
--- @param self The tooltip.
--- @param object An object.
+-- @tparam tooltip self The tooltip.
+-- @tparam gears.object object An object with `mouse::enter` and
+--   `mouse::leave` signals.
 tooltip.add_to_object = function(self, object)
     object:connect_signal("mouse::enter", data[self].show)
     object:connect_signal("mouse::leave", data[self].hide)
@@ -163,9 +165,9 @@ end
 
 --- Remove tooltip from an object.
 --
--- @param self The tooltip.
--- @param object An object.
--- @function remove_from_object
+-- @tparam tooltip self The tooltip.
+-- @tparam gears.object object An object with `mouse::enter` and
+--   `mouse::leave` signals.
 tooltip.remove_from_object = function(self, object)
     object:disconnect_signal("mouse::enter", data[self].show)
     object:disconnect_signal("mouse::leave", data[self].hide)
@@ -173,16 +175,17 @@ end
 
 
 --- Create a new tooltip and link it to a widget.
--- @tparam table    args Arguments for tooltip creation.
--- @tparam number   args.timeout The timeout value for update_func.
--- @tparam function args.timer_function A function to dynamically change the
---                                      tooltip text.
--- @tparam table    args.objects A list of objects linked to the tooltip.
--- @tparam number   args.delay_show Delay showing the tooltip by this many
---                                  seconds.
--- @tparam integer  args.margin_leftright The left/right margin for the text.
--- @tparam integer  args.margin_topbottom The top/bottom margin for the text.
--- @return The created tooltip.
+-- @tparam table args Arguments for tooltip creation.
+-- @tparam[opt=1] number args.timeout The timeout value for update_func.
+-- @tparam function args.timer_function A function to dynamically set the
+--   tooltip text.  Its return value will be passed to
+--   `wibox.widget.textbox.set_markup`.
+-- @tparam[opt] table args.objects A list of objects linked to the tooltip.
+-- @tparam[opt] number args.delay_show Delay showing the tooltip by this many
+--   seconds.
+-- @tparam[opt=apply_dpi(5)] integer args.margin_leftright The left/right margin for the text.
+-- @tparam[opt=apply_dpi(3)] integer args.margin_topbottom The top/bottom margin for the text.
+-- @treturn awful.tooltip The created tooltip.
 -- @see add_to_object
 -- @see set_timeout
 -- @see set_text
