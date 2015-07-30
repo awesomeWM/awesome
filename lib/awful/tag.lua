@@ -413,13 +413,14 @@ end
 -- @tparam string policy Can be set to
 -- "expand" (fill all the available workarea) or
 -- "mwfact" (fill only an area inside the master width factor)
--- @tparam tag t The tag to modify, if null tag.selected() is used.
-function tag.setmfpol(enabled, t)
+-- @tparam[opt=tag.selected()] tag t The tag to modify
+function tag.setmfpol(policy, t)
     local t = t or tag.selected()
-    tag.setproperty(t, "master_fill_policy", enabled)
+    tag.setproperty(t, "master_fill_policy", policy)
 end
 
 --- Toggle size fill policy for the master client(s)
+-- between "expand" and "mwfact"
 -- @tparam tag t The tag to modify, if null tag.selected() is used.
 function tag.togglemfpol(t)
     if tag.getmfpol(t) == "expand" then
@@ -430,9 +431,9 @@ function tag.togglemfpol(t)
 end
 
 --- Get size fill policy for the master client(s)
--- @tparam tag t Optional tag.
--- @treturn string Can be set to
--- "expand" (fill all the available workarea) or
+-- @tparam[opt=tag.selected()] tag t The tag
+-- @treturn string Possible values are
+-- "expand" (fill all the available workarea, default one) or
 -- "mwfact" (fill only an area inside the master width factor)
 function tag.getmfpol(t)
     local t = t or tag.selected()
