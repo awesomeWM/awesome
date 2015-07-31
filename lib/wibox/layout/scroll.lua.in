@@ -31,7 +31,7 @@ function scroll:draw(wibox, cr, width, height)
         self._x = self._wg+self._x+self._space_width
         abs_x = math.abs(self._x)
     end
-    -- On dessine que le reste du widget (width-self._x > self._wg and self._wg or width-self._x ) sinon on dessin toute la place aloué width-self._x
+    -- Drawn end of widget => (width-self._x > self._wg and self._wg or width-self._x ) else we draw the widget in the entire width allocated width-self._x
     base.draw_widget(wibox, cr, self.widget, self._x, 0,(self._expanded and width-self._x or (width-self._x > self._wg and self._wg or width-self._x )), height)
     width_busy = self._wg - abs_x
     if self._wg > width and width_busy < width + self._space_width then
@@ -116,6 +116,12 @@ function scroll:set_width(val)
     self:emit_signal("widget::updated")
 end
 
+--- Set timeout to val.
+function scroll:set_timeout(val)
+    self._scrolltimer.timeout = val
+    self:emit_signal("widget::updated")
+end
+
 --- Returns a new scroll layout. This layout will constraint the size of a
 -- widget according according max width and auto-scroll a widget if necessary.
 -- @param[opt] widget A widget to use.
@@ -124,8 +130,9 @@ end
 -- @param[opt] width The maximum width of the widget. nil for no limit.
 -- @param[opt] autoscroll Set auto scrolled.
 -- @param[opt] expanded Set expanded. If a widget has a backgroud-color, the background-color is expanded for between
+-- @param[opt] time Set timeout.
 -- the end and the beginning of the widget.
-local function new(widget, deltax, space, width, autoscroll, expanded)
+local function new(widget, deltax, space, width, autoscroll, expanded, time)
     local ret = widget_base.make_widget()
 
     for k, v in pairs(scroll) do
@@ -145,7 +152,7 @@ local function new(widget, deltax, space, width, autoscroll, expanded)
     ret._x = 0
     ret:deltaX(deltax or 1)
     ret:spaceWidth(space or 0)
-    ret._scrolltimer = gears_timer.timer({ timeout = 1 })
+    ret._scrolltimer = gears_timer.timer({ timeout = time or 1 })
     ret._scrolltimer:connect_signal("timeout", function () ret:scroll()  end)
     ret:auto(autoscroll or false)
     ret:expand(expanded or false)
