@@ -38,8 +38,6 @@ struct drawin_t
     char *cursor;
     /** The drawable for this drawin. */
     drawable_t *drawable;
-    /** The window geometry. */
-    area_t geometry;
     struct
     {
         /** Drawin's opacity needs to be committed. */
