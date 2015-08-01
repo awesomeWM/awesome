@@ -151,10 +151,10 @@ typedef struct
     xcb_colormap_t default_cmap;
     /** Do we have to reban clients? */
     bool need_lazy_banning;
-    /** Do we have to handle changed properties (e.g. geometry) for clients? */
-    bool need_client_properties_refresh;
-    /** List of clients and drawins which need properties to be committed. */
-    window_array_t need_properties_refresh;
+    /** List of windows which need properties to be committed. */
+    window_array_t need_properties_refresh_windows;
+    /** List of clients which need properties to be committed. */
+    client_array_t need_properties_refresh_clients;
     /** Tag list */
     tag_array_t tags;
     /** List of registered xproperties */

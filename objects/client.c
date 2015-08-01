@@ -799,15 +799,13 @@ client_apply_size_hints(client_t *c, area_t geometry)
 void
 client_properties_refresh()
 {
-    if (!globalconf.need_client_properties_refresh)
+    if (!globalconf.need_properties_refresh_clients.len)
         return;
-
-    globalconf.need_client_properties_refresh = false;
 
     /* Ignore all spurious enter/leave notify events */
     client_ignore_enterleave_events();
 
-    foreach(_c, globalconf.clients)
+    foreach(_c, globalconf.need_properties_refresh_clients)
     {
         client_t *c = *_c;
         if (c->property_refresh.geometry)
@@ -869,7 +867,7 @@ client_resize_do(client_t *c, area_t geometry, bool force_notice, bool honor_hin
     c->geometry = geometry;
 
     /* Mark geometry changes to be committed later. */
-    globalconf.need_client_properties_refresh = true;
+    client_array_push(&globalconf.need_properties_refresh_clients, c);
     c->property_refresh.geometry = true;
     c->property_refresh.send_notice = send_notice;
 

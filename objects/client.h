@@ -128,12 +128,11 @@ struct client_t
     } titlebar[CLIENT_TITLEBAR_COUNT];
     struct
     {
-        /** Client's geometry needs to be committed. */
+        WINDOW_OBJECT_PROPERTY_REFRESH
+        /** A client's geometry has to be committed. */
         bool geometry;
         /** A notice has to be send (internally). */
         bool send_notice;
-        /** Client's opacity needs to be committed. */
-        bool opacity;
     } property_refresh;
 };
 
@@ -152,6 +151,7 @@ void client_ban(client_t *);
 void client_ban_unfocus(client_t *);
 void client_unban(client_t *);
 void client_manage(xcb_window_t, xcb_get_geometry_reply_t *, xcb_get_window_attributes_reply_t *);
+void client_properties_refresh(void);
 bool client_resize(client_t *, area_t, bool);
 void client_unmanage(client_t *, bool);
 void client_kill(client_t *);

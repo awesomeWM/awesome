@@ -40,8 +40,7 @@ struct drawin_t
     drawable_t *drawable;
     struct
     {
-        /** Drawin's opacity needs to be committed. */
-        bool opacity;
+        WINDOW_OBJECT_PROPERTY_REFRESH
     } property_refresh;
 };
 

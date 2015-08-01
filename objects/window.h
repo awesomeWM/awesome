@@ -71,16 +71,17 @@ typedef enum
     /** The window geometry. */ \
     area_t geometry;
 
+/** Common properties needed to be committed/refreshed. */ \
+#define WINDOW_OBJECT_PROPERTY_REFRESH \
+    bool border_width;
+
 /** Window structure */
 typedef struct window_t
 {
     WINDOW_OBJECT_HEADER
-    /** Properties needed to be committed/refreshed.
-     * Common to drawin and client. */
     struct
     {
-        /** Window's opacity needs to be committed. */
-        bool opacity;
+        WINDOW_OBJECT_PROPERTY_REFRESH
     } property_refresh;
 } window_t;
 
