@@ -323,6 +323,10 @@ luaA_panic(lua_State *L)
 static int
 luaA_dofunction_on_error(lua_State *L)
 {
+#if LUA_VERSION_NUM >= 502
+    /* Convert error to string, to prevent a follow-up error with lua_concat. */
+    luaL_tolstring(L, -1, NULL);
+#endif
     /* duplicate string error */
     lua_pushvalue(L, -1);
     /* emit error signal */
