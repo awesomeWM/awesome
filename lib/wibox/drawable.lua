@@ -229,7 +229,7 @@ local function setup_signals(_drawable)
     clone_signal("property::y")
 end
 
-function drawable.new(d, widget_arg)
+function drawable.new(d, widget_arg, drawable_name)
     local ret = object()
     ret.drawable = d
     ret.widget_arg = widget_arg or ret
@@ -286,6 +286,15 @@ function drawable.new(d, widget_arg)
 
     d:connect_signal("mouse::move", function(_, x, y) handle_motion(ret, x, y) end)
     d:connect_signal("mouse::leave", function() handle_leave(ret) end)
+
+    -- Add __tostring method to metatable.
+    ret.drawable_name = drawable_name or object.modulename(3)
+    local mt = {}
+    local orig_string = tostring(ret)
+    mt.__tostring = function(o)
+        return string.format("%s (%s)", ret.drawable_name, orig_string)
+    end
+    ret = setmetatable(ret, mt)
 
     -- Make sure the drawable is drawn at least once
     ret.draw()

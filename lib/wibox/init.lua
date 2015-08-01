@@ -108,7 +108,8 @@ local function new(args)
     local ret = object()
     local w = capi.drawin(args)
     ret.drawin = w
-    ret._drawable = wibox.drawable(w.drawable, ret)
+    ret._drawable = wibox.drawable(w.drawable, ret,
+        "wibox drawable (" .. object.modulename(3) .. ")")
 
     for k, v in pairs(wibox) do
         if type(v) == "function" then
@@ -125,6 +126,15 @@ local function new(args)
     -- Set the default background
     ret:set_bg(args.bg or beautiful.bg_normal)
     ret:set_fg(args.fg or beautiful.fg_normal)
+
+    -- Add __tostring method to metatable.
+    local mt = {}
+    local orig_string = tostring(ret)
+    mt.__tostring = function(o)
+        return string.format("wibox: %s (%s)",
+                             tostring(ret._drawable), orig_string)
+    end
+    ret = setmetatable(ret, mt)
 
     -- Make sure the wibox is drawn at least once
     ret.draw()

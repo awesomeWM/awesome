@@ -110,8 +110,9 @@ function base.make_widget(proxy, widget_name)
     -- Add __tostring method to metatable.
     ret.widget_name = widget_name or object.modulename(3)
     local mt = {}
+    local orig_string = tostring(ret)
     mt.__tostring = function(o)
-        return ret.widget_name
+        return string.format("%s (%s)", ret.widget_name, orig_string)
     end
     return setmetatable(ret, mt)
 end
