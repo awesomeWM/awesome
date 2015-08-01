@@ -15,6 +15,7 @@ local util = require("awful.util")
 local tags = require("awful.tag")
 local keygrabber = require("awful.keygrabber")
 local beautiful = require("beautiful")
+local dpi = require("beautiful").xresources.apply_dpi
 local object = require("gears.object")
 local surface = require("gears.surface")
 local cairo = require("lgi").cairo
@@ -546,13 +547,13 @@ function menu.entry(parent, args)
         end
         iconbox = wibox.widget.imagebox()
         if iconbox:set_image(icon) then
-            margin:set_left(2)
+            margin:set_left(dpi(2))
         else
             iconbox = nil
         end
     end
     if not iconbox then
-        margin:set_left(args.theme.height + 2)
+        margin:set_left(args.theme.height + dpi(2))
     end
     -- Create the submenu icon widget
     local submenu
