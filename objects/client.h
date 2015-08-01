@@ -119,7 +119,7 @@ struct client_t
     uint32_t pid;
     /** Window it is transient for */
     client_t *transient_for;
-    /** Titelbar information */
+    /** Titlebar information */
     struct {
         /** The size of this bar. */
         uint16_t size;
