@@ -913,12 +913,15 @@ client_resize(client_t *c, area_t geometry, bool honor_hints)
     if(geometry.width == 0 || geometry.height == 0)
         return false;
 
+    if (honor_hints)
+        geometry = client_apply_size_hints(c, geometry);
+
     if(c->geometry.x != geometry.x
        || c->geometry.y != geometry.y
        || c->geometry.width != geometry.width
        || c->geometry.height != geometry.height)
     {
-        client_resize_do(c, geometry, false, honor_hints);
+        client_resize_do(c, geometry, false, false);
 
         return true;
     }
