@@ -218,7 +218,7 @@ tooltip.new = function(args)
                 end
             end,
             hide = function()
-                if delay_timeout and delay_timeout.started then
+                if delay_timeout.started then
                     delay_timeout:stop()
                 end
                 hide(self)
