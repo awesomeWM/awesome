@@ -51,36 +51,39 @@ theme.menu_width  = dpi(100)
 -- beautiful.variable in your rc.lua
 --theme.bg_widget = "#cc0000"
 
--- Define the image to load
-theme.titlebar_close_button_normal = "@AWESOME_THEMES_PATH@/default/titlebar/close_normal.png"
-theme.titlebar_close_button_focus  = "@AWESOME_THEMES_PATH@/default/titlebar/close_focus.png"
-
-theme.titlebar_ontop_button_normal_inactive = "@AWESOME_THEMES_PATH@/default/titlebar/ontop_normal_inactive.png"
-theme.titlebar_ontop_button_focus_inactive  = "@AWESOME_THEMES_PATH@/default/titlebar/ontop_focus_inactive.png"
-theme.titlebar_ontop_button_normal_active = "@AWESOME_THEMES_PATH@/default/titlebar/ontop_normal_active.png"
-theme.titlebar_ontop_button_focus_active  = "@AWESOME_THEMES_PATH@/default/titlebar/ontop_focus_active.png"
-
-theme.titlebar_sticky_button_normal_inactive = "@AWESOME_THEMES_PATH@/default/titlebar/sticky_normal_inactive.png"
-theme.titlebar_sticky_button_focus_inactive  = "@AWESOME_THEMES_PATH@/default/titlebar/sticky_focus_inactive.png"
-theme.titlebar_sticky_button_normal_active = "@AWESOME_THEMES_PATH@/default/titlebar/sticky_normal_active.png"
-theme.titlebar_sticky_button_focus_active  = "@AWESOME_THEMES_PATH@/default/titlebar/sticky_focus_active.png"
-
-theme.titlebar_floating_button_normal_inactive = "@AWESOME_THEMES_PATH@/default/titlebar/floating_normal_inactive.png"
-theme.titlebar_floating_button_focus_inactive  = "@AWESOME_THEMES_PATH@/default/titlebar/floating_focus_inactive.png"
-theme.titlebar_floating_button_normal_active = "@AWESOME_THEMES_PATH@/default/titlebar/floating_normal_active.png"
-theme.titlebar_floating_button_focus_active  = "@AWESOME_THEMES_PATH@/default/titlebar/floating_focus_active.png"
-
-theme.titlebar_maximized_button_normal_inactive = "@AWESOME_THEMES_PATH@/default/titlebar/maximized_normal_inactive.png"
-theme.titlebar_maximized_button_focus_inactive  = "@AWESOME_THEMES_PATH@/default/titlebar/maximized_focus_inactive.png"
-theme.titlebar_maximized_button_normal_active = "@AWESOME_THEMES_PATH@/default/titlebar/maximized_normal_active.png"
-theme.titlebar_maximized_button_focus_active  = "@AWESOME_THEMES_PATH@/default/titlebar/maximized_focus_active.png"
-
 -- Use 'w' postfix for dark background:
 local bg_numberic_value = 0;
 for s in theme.bg_normal:gmatch("[a-fA-F0-9][a-fA-F0-9]") do
     bg_numberic_value = bg_numberic_value + tonumber("0x"..s);
 end
 local is_dark_bg = (bg_numberic_value < 383)
+local normal = is_dark_bg and 'normal' or 'focus'
+local focus = is_dark_bg and 'focus' or 'normal'
+
+-- Define the image to load
+theme.titlebar_close_button_normal = "@AWESOME_THEMES_PATH@/default/titlebar/close_" .. normal .. ".png"
+theme.titlebar_close_button_focus  = "@AWESOME_THEMES_PATH@/default/titlebar/close_" .. focus .. ".png"
+
+theme.titlebar_ontop_button_normal_inactive = "@AWESOME_THEMES_PATH@/default/titlebar/ontop_" .. normal .. "_inactive.png"
+theme.titlebar_ontop_button_focus_inactive  = "@AWESOME_THEMES_PATH@/default/titlebar/ontop_" .. focus .. "_inactive.png"
+theme.titlebar_ontop_button_normal_active = "@AWESOME_THEMES_PATH@/default/titlebar/ontop_" .. normal .. "_active.png"
+theme.titlebar_ontop_button_focus_active  = "@AWESOME_THEMES_PATH@/default/titlebar/ontop_" .. focus .. "_active.png"
+
+theme.titlebar_sticky_button_normal_inactive = "@AWESOME_THEMES_PATH@/default/titlebar/sticky_" .. normal .. "_inactive.png"
+theme.titlebar_sticky_button_focus_inactive  = "@AWESOME_THEMES_PATH@/default/titlebar/sticky_" .. focus .. "_inactive.png"
+theme.titlebar_sticky_button_normal_active = "@AWESOME_THEMES_PATH@/default/titlebar/sticky_" .. normal .. "_active.png"
+theme.titlebar_sticky_button_focus_active  = "@AWESOME_THEMES_PATH@/default/titlebar/sticky_" .. focus .. "_active.png"
+
+theme.titlebar_floating_button_normal_inactive = "@AWESOME_THEMES_PATH@/default/titlebar/floating_" .. normal .. "_inactive.png"
+theme.titlebar_floating_button_focus_inactive  = "@AWESOME_THEMES_PATH@/default/titlebar/floating_" .. focus .. "_inactive.png"
+theme.titlebar_floating_button_normal_active = "@AWESOME_THEMES_PATH@/default/titlebar/floating_" .. normal .. "_active.png"
+theme.titlebar_floating_button_focus_active  = "@AWESOME_THEMES_PATH@/default/titlebar/floating_" .. focus .. "_active.png"
+
+theme.titlebar_maximized_button_normal_inactive = "@AWESOME_THEMES_PATH@/default/titlebar/maximized_" .. normal .. "_inactive.png"
+theme.titlebar_maximized_button_focus_inactive  = "@AWESOME_THEMES_PATH@/default/titlebar/maximized_" .. focus .. "_inactive.png"
+theme.titlebar_maximized_button_normal_active = "@AWESOME_THEMES_PATH@/default/titlebar/maximized_" .. normal .. "_active.png"
+theme.titlebar_maximized_button_focus_active  = "@AWESOME_THEMES_PATH@/default/titlebar/maximized_" .. focus .. "_active.png"
+
 local pf = is_dark_bg and 'w' or ''
 -- You can use your own layout icons like this:
 theme.layout_fairh = "@AWESOME_THEMES_PATH@/default/layouts/fairh" .. pf .. ".png"
