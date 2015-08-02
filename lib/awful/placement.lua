@@ -21,6 +21,7 @@ local capi =
 local client = require("awful.client")
 local layout = require("awful.layout")
 local a_screen = require("awful.screen")
+local dpi = require("beautiful").xresources.apply_dpi
 
 local placement = {}
 
@@ -190,6 +191,42 @@ function placement.under_mouse(c)
     local m_coords = capi.mouse.coords()
     return c:geometry({ x = m_coords.x - c_geometry.width / 2,
                         y = m_coords.y - c_geometry.height / 2 })
+end
+
+--- Place the client next to the mouse.
+--
+-- It will place `c` next to the mouse pointer, trying the following positions
+-- in this order: right, left, above and below.
+-- @client[opt=focused] c The client.
+-- @tparam[opt=apply_dpi(5)] integer offset The offset from the mouse position.
+-- @return The new client geometry.
+function placement.next_to_mouse(c, offset)
+    c = c or capi.client.focus
+    offset = offset or dpi(5)
+    local c_geometry = c:geometry()
+    local c_width = c_geometry.width + (c.border_width * 2)
+    local c_height = c_geometry.height + (c.border_width * 2)
+    local m_coords = capi.mouse.coords()
+    local screen_geometry = capi.screen[capi.mouse.screen].workarea
+
+    -- Prefer it to be on the right.
+    local x = m_coords.x + offset
+    if x + c_width > screen_geometry.width then
+        -- Then to the left.
+        x = m_coords.x - c_width - offset
+    end
+    if x < screen_geometry.x then
+        -- Then above.
+        x = m_coords.x - math.ceil(c_width / 2)
+        y = m_coords.y - c_height - offset
+        if y < screen_geometry.y then
+            -- Finally below.
+            y = m_coords.y + offset
+        end
+    else
+        y = m_coords.y - math.ceil(c_height / 2)
+    end
+    return c:geometry({ x = x, y = y })
 end
 
 --- Place the client centered with respect to a parent or the clients screen.
