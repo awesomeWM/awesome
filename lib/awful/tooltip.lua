@@ -73,8 +73,7 @@ local data = setmetatable({}, { __mode = 'k' })
 -- Place the tooltip on the screen.
 -- @tparam tooltip self A tooltip object.
 local function place(self)
-    a_placement.under_mouse(self.wibox)
-    a_placement.no_offscreen(self.wibox)
+    a_placement.next_to_mouse(self.wibox)
 end
 
 -- Place the tooltip under the mouse.
