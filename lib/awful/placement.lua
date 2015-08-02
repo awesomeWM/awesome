@@ -192,6 +192,36 @@ function placement.under_mouse(c)
                         y = m_coords.y - c_geometry.height / 2 })
 end
 
+--- Place the client next to the mouse.
+-- @param c The client.
+-- @return The new client geometry.
+function placement.next_to_mouse(c)
+    local c = c or capi.client.focus
+    local c_geometry = c:geometry()
+    local m_coords = capi.mouse.coords()
+    local screen   = c.screen or a_screen.getbycoord(c_geometry.x, c_geometry.y)
+    local screen_geometry = capi.screen[screen].workarea
+
+    -- Prefer to the right.
+    local x = m_coords.x + 5
+    if x + c_geometry.width > screen_geometry.width then
+        -- Then to the left.
+        x = m_coords.x - c_geometry.width - 5
+    end
+    if x < screen_geometry.x then
+        -- Then above.
+        x = m_coords.x - c_geometry.width / 2
+        y = m_coords.y - c_geometry.height - 5
+        if y < screen_geometry.y then
+            -- Finally below.
+            y = m_coords.y + 5
+        end
+    else
+        y = m_coords.y - c_geometry.height / 2
+    end
+    return c:geometry({ x = x, y = y })
+end
+
 --- Place the client centered with respect to a parent or the clients screen.
 -- @param c The client.
 -- @param[opt] p The parent (nil for screen centering).
