@@ -6,7 +6,6 @@
 local xresources = require("beautiful").xresources
 local xrdb = xresources.get_current_theme()
 local dpi = xresources.apply_dpi
-local recolor_image = require("gears").color.recolor_image
 
 -- inherit default theme
 local theme = dofile("@AWESOME_THEMES_PATH@/default/theme.lua")
@@ -56,62 +55,9 @@ theme.menu_width  = dpi(100)
 --theme.bg_widget = "#cc0000"
 
 -- Recolor titlebar icons:
-for _, titlebar_icon in ipairs({
-    'titlebar_close_button_normal',
-
-    'titlebar_ontop_button_normal_inactive',
-    'titlebar_ontop_button_normal_active',
-
-    'titlebar_sticky_button_normal_inactive',
-    'titlebar_sticky_button_normal_active',
-
-    'titlebar_floating_button_normal_inactive',
-    'titlebar_floating_button_normal_active',
-
-    'titlebar_maximized_button_normal_inactive',
-    'titlebar_maximized_button_normal_active',
-}) do
-    theme[titlebar_icon] = recolor_image(theme[titlebar_icon], theme.fg_normal)
-end
-for _, titlebar_icon in ipairs({
-    'titlebar_close_button_focus',
-
-    'titlebar_ontop_button_focus_inactive',
-    'titlebar_ontop_button_focus_active',
-
-    'titlebar_sticky_button_focus_inactive',
-    'titlebar_sticky_button_focus_active',
-
-    'titlebar_floating_button_focus_inactive',
-    'titlebar_floating_button_focus_active',
-
-    'titlebar_maximized_button_focus_inactive',
-    'titlebar_maximized_button_focus_active',
-}) do
-    theme[titlebar_icon] = recolor_image(theme[titlebar_icon], theme.fg_focus)
-end
-
--- Recolor layout icons:
-for _, layout_name in ipairs({
-    'layout_fairh',
-    'layout_fairv',
-    'layout_floating',
-    'layout_magnifier',
-    'layout_max',
-    'layout_fullscreen',
-    'layout_tilebottom',
-    'layout_tileleft',
-    'layout_tile',
-    'layout_tiletop',
-    'layout_spiral',
-    'layout_dwindle',
-    'layout_cornernw',
-    'layout_cornerne',
-    'layout_cornersw',
-    'layout_cornerse',
-}) do
-    theme[layout_name] = recolor_image(theme[layout_name], theme.fg_normal)
-end
+theme = theme_assets.recolor_titlebar_normal(theme, theme.fg_normal)
+theme = theme_assets.recolor_titlebar_focus(theme, theme.fg_focus)
+theme = theme_assets.recolor_layout(theme, theme.fg_normal)
 
 -- Define the icon theme for application icons. If not set then the icons 
 -- from /usr/share/icons and /usr/share/icons/hicolor will be used.
