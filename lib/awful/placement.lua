@@ -21,6 +21,7 @@ local capi =
 local client = require("awful.client")
 local layout = require("awful.layout")
 local a_screen = require("awful.screen")
+local dpi = require("beautiful").xresources.apply_dpi
 
 local placement = {}
 
@@ -193,31 +194,37 @@ function placement.under_mouse(c)
 end
 
 --- Place the client next to the mouse.
--- @param c The client.
+--
+-- It will place `c` next to the mouse pointer, trying the following positions
+-- in this order: right, left, above and below.
+-- @client[opt=focused] c The client.
+-- @tparam[opt=apply_dpi(5)] integer offset The offset from the mouse position.
 -- @return The new client geometry.
-function placement.next_to_mouse(c)
-    local c = c or capi.client.focus
+function placement.next_to_mouse(c, offset)
+    c = c or capi.client.focus
+    offset = offset or dpi(5)
     local c_geometry = c:geometry()
+    local c_width = c_geometry.width + (c.border_width * 2)
+    local c_height = c_geometry.height + (c.border_width * 2)
     local m_coords = capi.mouse.coords()
-    local screen   = c.screen or a_screen.getbycoord(c_geometry.x, c_geometry.y)
-    local screen_geometry = capi.screen[screen].workarea
+    local screen_geometry = capi.screen[capi.mouse.screen].workarea
 
-    -- Prefer to the right.
-    local x = m_coords.x + 5
-    if x + c_geometry.width > screen_geometry.width then
+    -- Prefer it to be on the right.
+    local x = m_coords.x + offset
+    if x + c_width > screen_geometry.width then
         -- Then to the left.
-        x = m_coords.x - c_geometry.width - 5
+        x = m_coords.x - c_width - offset
     end
     if x < screen_geometry.x then
         -- Then above.
-        x = m_coords.x - c_geometry.width / 2
-        y = m_coords.y - c_geometry.height - 5
+        x = m_coords.x - math.ceil(c_width / 2)
+        y = m_coords.y - c_height - offset
         if y < screen_geometry.y then
             -- Finally below.
-            y = m_coords.y + 5
+            y = m_coords.y + offset
         end
     else
-        y = m_coords.y - c_geometry.height / 2
+        y = m_coords.y - math.ceil(c_height / 2)
     end
     return c:geometry({ x = x, y = y })
 end
