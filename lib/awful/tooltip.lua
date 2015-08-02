@@ -45,6 +45,7 @@ local screen = screen
 local timer = require("gears.timer")
 local wibox = require("wibox")
 local a_placement = require("awful.placement")
+local abutton = require("awful.button")
 local beautiful = require("beautiful")
 local textbox = require("wibox.widget.textbox")
 local background = require("wibox.widget.background")
@@ -130,17 +131,21 @@ end
 --   `wibox.widget.textbox.set_text`.
 tooltip.set_text = function(self, text)
     self.textbox:set_text(text)
-    set_geometry(self)
+    if self.visible then
+        set_geometry(self)
+    end
 end
 
---- Change displayed text.
+--- Change displayed markup.
 --
 -- @tparam tooltip self The tooltip object.
 -- @tparam string  text New tooltip markup, passed to
 --   `wibox.widget.textbox.set_markup`.
 tooltip.set_markup = function(self, text)
     self.textbox:set_markup(text)
-    set_geometry(self)
+    if self.visible then
+        set_geometry(self)
+    end
 end
 
 --- Change the tooltip's update interval.
@@ -198,21 +203,34 @@ tooltip.new = function(args)
     }
 
     -- private data
-    local delay_timeout
     if args.delay_show then
+        local delay_timeout
+
         delay_timeout = timer { timeout = args.delay_show }
-        delay_timeout:connect_signal("timeout", function () show(self) end)
+        delay_timeout:connect_signal("timeout", function ()
+            show(self)
+            delay_timeout:stop()
+        end)
+
+        data[self] = {
+            show = function()
+                if not delay_timeout.started then
+                    delay_timeout:start()
+                end
+            end,
+            hide = function()
+                if delay_timeout.started then
+                    delay_timeout:stop()
+                end
+                hide(self)
+            end,
+        }
+    else
+        data[self] = {
+            show = function() show(self) end,
+            hide = function() hide(self) end,
+        }
     end
-    data[self] = {
-        show = function()
-            if delay_timeout then delay_timeout:start()
-            else show(self) end
-        end,
-        hide = function()
-            if delay_timeout then delay_timeout:stop() end
-            hide(self)
-        end,
-    }
 
     -- export functions
     self.set_text = tooltip.set_text
@@ -253,8 +271,9 @@ tooltip.new = function(args)
     self.marginbox = wibox.layout.margin(self.background, m_lr, m_lr, m_tb, m_tb)
     self.wibox:set_widget(self.marginbox)
 
-    -- add some signals on both the tooltip and widget
-    self.wibox:connect_signal("mouse::enter", data[self].hide)
+    -- Close the tooltip when clicking it.  This gets done on release, to not
+    -- emit the release event on an underlying object, e.g. the titlebar icon.
+    self.wibox:buttons(abutton({}, 1, nil, function() data[self].hide() end))
 
     -- Add tooltip to objects
     if args.objects then
