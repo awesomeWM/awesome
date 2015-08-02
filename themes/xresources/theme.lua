@@ -7,6 +7,8 @@ local xresources = require("beautiful").xresources
 local xrdb = xresources.get_current_theme()
 local dpi = xresources.apply_dpi
 
+local theme_assets = dofile("@AWESOME_THEMES_PATH@/xresources/assets.lua")
+
 local theme = {}
 
 theme.font          = "sans 8"
@@ -106,167 +108,28 @@ theme.layout_cornerse = "@AWESOME_THEMES_PATH@/default/layouts/cornerse" .. pf .
 theme.icon_theme = nil
 
 
---------------------------------------------------
--- Generate vector assets using current colors: --
---------------------------------------------------
-local cairo = require("lgi").cairo
-local gears = require("gears")
-
-local function awesome_icon()
-    local size = theme.menu_height
-    local img = cairo.ImageSurface(cairo.Format.ARGB32, size, size)
-    local cr = cairo.Context(img)
-    cr:set_source(gears.color(theme.bg_focus))
-    cr:paint()
-    cr:set_source(gears.color(theme.fg_focus))
-    cr:set_line_width(size/20)
-    cr:move_to(0, size/3)
-    cr:line_to(size*2/3, size/3)
-    cr:move_to(size/3, size*2/3)
-    cr:line_to(size*2/3, size*2/3)
-    cr:line_to(size*2/3, size)
-    cr:stroke()
-    return img
-end
-theme.awesome_icon = awesome_icon()
+theme.awesome_icon = theme_assets.awesome_icon(
+    theme.menu_height, theme.bg_focus, theme.fg_focus
+)
 
 -- Taglist squares:
 local taglist_square_size = dpi(4)
+theme.taglist_squares_sel = theme_assets.taglist_squares_sel(
+    taglist_square_size, theme.fg_normal
+)
+theme.taglist_squares_unsel = theme_assets.taglist_squares_unsel(
+    taglist_square_size, theme.fg_normal
+)
 
-local function taglist_squares_sel()
-    local size = taglist_square_size
-    local img = cairo.ImageSurface(cairo.Format.ARGB32, size, size)
-    local cr = cairo.Context(img)
-    cr:set_source(gears.color(theme.fg_normal))
-    cr:paint()
-    return img
+local wallpaper_bg = xrdb.color8
+local wallpaper_fg = xrdb.color7
+local wallpaper_alt_wallpaper_fg = xrdb.color12
+if not is_dark_bg then
+    wallpaper_bg, wallpaper_fg = wallpaper_fg, wallpaper_bg
 end
-theme.taglist_squares_sel = taglist_squares_sel()
-
-local function taglist_squares_unsel()
-    local size = taglist_square_size
-    local img = cairo.ImageSurface(cairo.Format.ARGB32, size, size)
-    local cr = cairo.Context(img)
-    cr:set_source(gears.color(theme.fg_normal))
-    cr:set_line_width(size/4)
-    cr:rectangle(0, 0, size, size)
-    cr:stroke()
-    return img
-end
-theme.taglist_squares_unsel = taglist_squares_unsel()
-
-
-local function wallpaper()
-    local height = screen[1].workarea.height
-    local width = screen[1].workarea.width
-    local img = cairo.ImageSurface(cairo.Format.ARGB32, width, height)
-    local cr = cairo.Context(img)
-
-    local bg = xrdb.color8
-    local fg = xrdb.color7
-    local alt_fg = xrdb.color12
-    if not is_dark_bg then
-        bg, fg = fg, bg
-    end
-
-    local letter_size = height/10
-    local letter_line = letter_size/18
-    local letter_gap = letter_size/6
-    local letter_start_x = width - width / 10
-    local letter_start_y = height / 10
-
-
-    local function make_letter(n, lines, color)
-
-        local function make_line(coords)
-            for i, coord in ipairs(coords) do
-                if i == 1 then
-                    cr:rel_move_to(coord[1], coord[2])
-                else
-                    cr:rel_line_to(coord[1], coord[2])
-                end
-            end
-            cr:stroke()
-        end
-
-        lines = lines or {}
-        color = color or fg
-        cr:set_source(gears.color(color))
-        cr:rectangle(
-            letter_start_x, letter_start_y+(letter_size+letter_gap)*n,
-            letter_size, letter_size
-        )
-        cr:fill()
-        cr:set_source(gears.color(bg))
-        for _, line in ipairs(lines) do
-            cr:move_to(letter_start_x, letter_start_y+(letter_size+letter_gap)*n)
-            make_line(line)
-        end
-    end
-
-    -- bg
-    cr:set_source(gears.color(bg))
-    cr:paint()
-    cr:set_line_width(letter_line)
-    local ls = letter_size
-    -- a
-    make_letter(0, { {
-        { 0, ls/3 },
-        { ls*2/3, 0 },
-    }, {
-        { ls/3, ls*2/3 },
-        { ls/3, 0 },
-        { 0, ls/3 },
-    } }, alt_fg)
-    -- w
-    make_letter(1, { {
-        { ls/3, 0 },
-        { 0,ls*2/3 },
-    }, {
-        { ls*2/3, 0 },
-        { 0,ls*2/3 },
-    } })
-    -- e
-    make_letter(2, { {
-        { ls/3, ls/3 },
-        { ls*2/3, 0 },
-    }, {
-        { ls/3, ls*2/3 },
-        { ls*2/3, 0 },
-    } })
-    -- s
-    make_letter(3, { {
-        { ls/3, ls/3 },
-        { ls*2/3, 0 },
-    }, {
-        { 0, ls*2/3 },
-        { ls*2/3, 0 },
-    } })
-    -- o
-    make_letter(4, { {
-        { ls/2, ls/3 },
-        { 0, ls/3 },
-    } })
-    -- m
-    make_letter(5, { {
-        { ls/3, ls/3 },
-        { 0,ls*2/3 },
-    }, {
-        { ls*2/3, ls/3 },
-        { 0,ls*2/3 },
-    } })
-    -- e
-    make_letter(6, { {
-        { ls/3, ls/3 },
-        { ls*2/3, 0 },
-    }, {
-        { ls/3, ls*2/3 },
-        { ls*2/3, 0 },
-    } })
-
-    return img
-end
-theme.wallpaper = wallpaper()
+theme.wallpaper = theme_assets.wallpaper(
+    wallpaper_bg, wallpaper_fg, wallpaper_alt_wallpaper_fg
+)
 
 return theme
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
