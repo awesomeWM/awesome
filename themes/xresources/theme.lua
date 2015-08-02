@@ -9,7 +9,7 @@ local dpi = xresources.apply_dpi
 
 local theme_assets = dofile("@AWESOME_THEMES_PATH@/xresources/assets.lua")
 
-local theme = {}
+local theme = dofile("@AWESOME_THEMES_PATH@/default/theme.lua")
 
 theme.font          = "sans 8"
 
@@ -54,53 +54,46 @@ theme.menu_width  = dpi(100)
 --theme.bg_widget = "#cc0000"
 
 -- Define the image to load
-theme.titlebar_close_button_normal = "@AWESOME_THEMES_PATH@/default/titlebar/close_normal.png"
-theme.titlebar_close_button_focus  = "@AWESOME_THEMES_PATH@/default/titlebar/close_focus.png"
+--theme.titlebar_close_button_normal = "@AWESOME_THEMES_PATH@/default/titlebar/close_normal.png"
+--theme.titlebar_close_button_focus  = "@AWESOME_THEMES_PATH@/default/titlebar/close_focus.png"
 
-theme.titlebar_ontop_button_normal_inactive = "@AWESOME_THEMES_PATH@/default/titlebar/ontop_normal_inactive.png"
-theme.titlebar_ontop_button_focus_inactive  = "@AWESOME_THEMES_PATH@/default/titlebar/ontop_focus_inactive.png"
-theme.titlebar_ontop_button_normal_active = "@AWESOME_THEMES_PATH@/default/titlebar/ontop_normal_active.png"
-theme.titlebar_ontop_button_focus_active  = "@AWESOME_THEMES_PATH@/default/titlebar/ontop_focus_active.png"
+--theme.titlebar_ontop_button_normal_inactive = "@AWESOME_THEMES_PATH@/default/titlebar/ontop_normal_inactive.png"
+--theme.titlebar_ontop_button_focus_inactive  = "@AWESOME_THEMES_PATH@/default/titlebar/ontop_focus_inactive.png"
+--theme.titlebar_ontop_button_normal_active = "@AWESOME_THEMES_PATH@/default/titlebar/ontop_normal_active.png"
+--theme.titlebar_ontop_button_focus_active  = "@AWESOME_THEMES_PATH@/default/titlebar/ontop_focus_active.png"
 
-theme.titlebar_sticky_button_normal_inactive = "@AWESOME_THEMES_PATH@/default/titlebar/sticky_normal_inactive.png"
-theme.titlebar_sticky_button_focus_inactive  = "@AWESOME_THEMES_PATH@/default/titlebar/sticky_focus_inactive.png"
-theme.titlebar_sticky_button_normal_active = "@AWESOME_THEMES_PATH@/default/titlebar/sticky_normal_active.png"
-theme.titlebar_sticky_button_focus_active  = "@AWESOME_THEMES_PATH@/default/titlebar/sticky_focus_active.png"
+--theme.titlebar_sticky_button_normal_inactive = "@AWESOME_THEMES_PATH@/default/titlebar/sticky_normal_inactive.png"
+--theme.titlebar_sticky_button_focus_inactive  = "@AWESOME_THEMES_PATH@/default/titlebar/sticky_focus_inactive.png"
+--theme.titlebar_sticky_button_normal_active = "@AWESOME_THEMES_PATH@/default/titlebar/sticky_normal_active.png"
+--theme.titlebar_sticky_button_focus_active  = "@AWESOME_THEMES_PATH@/default/titlebar/sticky_focus_active.png"
 
-theme.titlebar_floating_button_normal_inactive = "@AWESOME_THEMES_PATH@/default/titlebar/floating_normal_inactive.png"
-theme.titlebar_floating_button_focus_inactive  = "@AWESOME_THEMES_PATH@/default/titlebar/floating_focus_inactive.png"
-theme.titlebar_floating_button_normal_active = "@AWESOME_THEMES_PATH@/default/titlebar/floating_normal_active.png"
-theme.titlebar_floating_button_focus_active  = "@AWESOME_THEMES_PATH@/default/titlebar/floating_focus_active.png"
+--theme.titlebar_floating_button_normal_inactive = "@AWESOME_THEMES_PATH@/default/titlebar/floating_normal_inactive.png"
+--theme.titlebar_floating_button_focus_inactive  = "@AWESOME_THEMES_PATH@/default/titlebar/floating_focus_inactive.png"
+--theme.titlebar_floating_button_normal_active = "@AWESOME_THEMES_PATH@/default/titlebar/floating_normal_active.png"
+--theme.titlebar_floating_button_focus_active  = "@AWESOME_THEMES_PATH@/default/titlebar/floating_focus_active.png"
 
-theme.titlebar_maximized_button_normal_inactive = "@AWESOME_THEMES_PATH@/default/titlebar/maximized_normal_inactive.png"
-theme.titlebar_maximized_button_focus_inactive  = "@AWESOME_THEMES_PATH@/default/titlebar/maximized_focus_inactive.png"
-theme.titlebar_maximized_button_normal_active = "@AWESOME_THEMES_PATH@/default/titlebar/maximized_normal_active.png"
-theme.titlebar_maximized_button_focus_active  = "@AWESOME_THEMES_PATH@/default/titlebar/maximized_focus_active.png"
+--theme.titlebar_maximized_button_normal_inactive = "@AWESOME_THEMES_PATH@/default/titlebar/maximized_normal_inactive.png"
+--theme.titlebar_maximized_button_focus_inactive  = "@AWESOME_THEMES_PATH@/default/titlebar/maximized_focus_inactive.png"
+--theme.titlebar_maximized_button_normal_active = "@AWESOME_THEMES_PATH@/default/titlebar/maximized_normal_active.png"
+--theme.titlebar_maximized_button_focus_active  = "@AWESOME_THEMES_PATH@/default/titlebar/maximized_focus_active.png"
 
--- Use 'w' postfix for dark background:
-local bg_numberic_value = 0;
-for s in theme.bg_normal:gmatch("[a-fA-F0-9][a-fA-F0-9]") do
-    bg_numberic_value = bg_numberic_value + tonumber("0x"..s);
-end
-local is_dark_bg = (bg_numberic_value < 383)
-local pf = is_dark_bg and 'w' or ''
 -- You can use your own layout icons like this:
-theme.layout_fairh = "@AWESOME_THEMES_PATH@/default/layouts/fairh" .. pf .. ".png"
-theme.layout_fairv = "@AWESOME_THEMES_PATH@/default/layouts/fairv" .. pf .. ".png"
-theme.layout_floating  = "@AWESOME_THEMES_PATH@/default/layouts/floating" .. pf .. ".png"
-theme.layout_magnifier = "@AWESOME_THEMES_PATH@/default/layouts/magnifier" .. pf .. ".png"
-theme.layout_max = "@AWESOME_THEMES_PATH@/default/layouts/max" .. pf .. ".png"
-theme.layout_fullscreen = "@AWESOME_THEMES_PATH@/default/layouts/fullscreen" .. pf .. ".png"
-theme.layout_tilebottom = "@AWESOME_THEMES_PATH@/default/layouts/tilebottom" .. pf .. ".png"
-theme.layout_tileleft   = "@AWESOME_THEMES_PATH@/default/layouts/tileleft" .. pf .. ".png"
-theme.layout_tile = "@AWESOME_THEMES_PATH@/default/layouts/tile" .. pf .. ".png"
-theme.layout_tiletop = "@AWESOME_THEMES_PATH@/default/layouts/tiletop" .. pf .. ".png"
-theme.layout_spiral  = "@AWESOME_THEMES_PATH@/default/layouts/spiral" .. pf .. ".png"
-theme.layout_dwindle = "@AWESOME_THEMES_PATH@/default/layouts/dwindle" .. pf .. ".png"
-theme.layout_cornernw = "@AWESOME_THEMES_PATH@/default/layouts/cornernw" .. pf .. ".png"
-theme.layout_cornerne = "@AWESOME_THEMES_PATH@/default/layouts/cornerne" .. pf .. ".png"
-theme.layout_cornersw = "@AWESOME_THEMES_PATH@/default/layouts/cornersw" .. pf .. ".png"
-theme.layout_cornerse = "@AWESOME_THEMES_PATH@/default/layouts/cornerse" .. pf .. ".png"
+--theme.layout_fairh = "@AWESOME_THEMES_PATH@/default/layouts/fairh.png"
+--theme.layout_fairv = "@AWESOME_THEMES_PATH@/default/layouts/fairv.png"
+--theme.layout_floating  = "@AWESOME_THEMES_PATH@/default/layouts/floating.png"
+--theme.layout_magnifier = "@AWESOME_THEMES_PATH@/default/layouts/magnifier.png"
+--theme.layout_max = "@AWESOME_THEMES_PATH@/default/layouts/max.png"
+--theme.layout_fullscreen = "@AWESOME_THEMES_PATH@/default/layouts/fullscreen.png"
+--theme.layout_tilebottom = "@AWESOME_THEMES_PATH@/default/layouts/tilebottom.png"
+--theme.layout_tileleft   = "@AWESOME_THEMES_PATH@/default/layouts/tileleft.png"
+--theme.layout_tile = "@AWESOME_THEMES_PATH@/default/layouts/tile.png"
+--theme.layout_tiletop = "@AWESOME_THEMES_PATH@/default/layouts/tiletop.png"
+--theme.layout_spiral  = "@AWESOME_THEMES_PATH@/default/layouts/spiral.png"
+--theme.layout_dwindle = "@AWESOME_THEMES_PATH@/default/layouts/dwindle.png"
+--theme.layout_cornernw = "@AWESOME_THEMES_PATH@/default/layouts/cornernw.png"
+--theme.layout_cornerne = "@AWESOME_THEMES_PATH@/default/layouts/cornerne.png"
+--theme.layout_cornersw = "@AWESOME_THEMES_PATH@/default/layouts/cornersw.png"
+--theme.layout_cornerse = "@AWESOME_THEMES_PATH@/default/layouts/cornerse.png"
 
 
 -- Define the icon theme for application icons. If not set then the icons 
@@ -120,6 +113,12 @@ theme.taglist_squares_sel = theme_assets.taglist_squares_sel(
 theme.taglist_squares_unsel = theme_assets.taglist_squares_unsel(
     taglist_square_size, theme.fg_normal
 )
+
+local bg_numberic_value = 0;
+for s in theme.bg_normal:gmatch("[a-fA-F0-9][a-fA-F0-9]") do
+    bg_numberic_value = bg_numberic_value + tonumber("0x"..s);
+end
+local is_dark_bg = (bg_numberic_value < 383)
 
 local wallpaper_bg = xrdb.color8
 local wallpaper_fg = xrdb.color7
