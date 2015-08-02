@@ -6,10 +6,12 @@
 local xresources = require("beautiful").xresources
 local xrdb = xresources.get_current_theme()
 local dpi = xresources.apply_dpi
+local recolor_image = require("gears").color.recolor_image
 
-local theme_assets = dofile("@AWESOME_THEMES_PATH@/xresources/assets.lua")
-
+-- inherit default theme
 local theme = dofile("@AWESOME_THEMES_PATH@/default/theme.lua")
+-- load vector assets' generators for this theme
+local theme_assets = dofile("@AWESOME_THEMES_PATH@/xresources/assets.lua")
 
 theme.font          = "sans 8"
 
@@ -77,23 +79,28 @@ theme.menu_width  = dpi(100)
 --theme.titlebar_maximized_button_normal_active = "@AWESOME_THEMES_PATH@/default/titlebar/maximized_normal_active.png"
 --theme.titlebar_maximized_button_focus_active  = "@AWESOME_THEMES_PATH@/default/titlebar/maximized_focus_active.png"
 
--- You can use your own layout icons like this:
---theme.layout_fairh = "@AWESOME_THEMES_PATH@/default/layouts/fairh.png"
---theme.layout_fairv = "@AWESOME_THEMES_PATH@/default/layouts/fairv.png"
---theme.layout_floating  = "@AWESOME_THEMES_PATH@/default/layouts/floating.png"
---theme.layout_magnifier = "@AWESOME_THEMES_PATH@/default/layouts/magnifier.png"
---theme.layout_max = "@AWESOME_THEMES_PATH@/default/layouts/max.png"
---theme.layout_fullscreen = "@AWESOME_THEMES_PATH@/default/layouts/fullscreen.png"
---theme.layout_tilebottom = "@AWESOME_THEMES_PATH@/default/layouts/tilebottom.png"
---theme.layout_tileleft   = "@AWESOME_THEMES_PATH@/default/layouts/tileleft.png"
---theme.layout_tile = "@AWESOME_THEMES_PATH@/default/layouts/tile.png"
---theme.layout_tiletop = "@AWESOME_THEMES_PATH@/default/layouts/tiletop.png"
---theme.layout_spiral  = "@AWESOME_THEMES_PATH@/default/layouts/spiral.png"
---theme.layout_dwindle = "@AWESOME_THEMES_PATH@/default/layouts/dwindle.png"
---theme.layout_cornernw = "@AWESOME_THEMES_PATH@/default/layouts/cornernw.png"
---theme.layout_cornerne = "@AWESOME_THEMES_PATH@/default/layouts/cornerne.png"
---theme.layout_cornersw = "@AWESOME_THEMES_PATH@/default/layouts/cornersw.png"
---theme.layout_cornerse = "@AWESOME_THEMES_PATH@/default/layouts/cornerse.png"
+
+-- Recolor layout icons:
+for _, layout_name in ipairs({
+    'layout_fairh',
+    'layout_fairv',
+    'layout_floating ',
+    'layout_magnifier',
+    'layout_max',
+    'layout_fullscreen',
+    'layout_tilebottom',
+    'layout_tileleft  ',
+    'layout_tile',
+    'layout_tiletop',
+    'layout_spiral ',
+    'layout_dwindle',
+    'layout_cornernw',
+    'layout_cornerne',
+    'layout_cornersw',
+    'layout_cornerse',
+}) do
+    theme[layout_name] = recolor_image(theme[layout_name], theme.fg_normal)
+end
 
 
 -- Define the icon theme for application icons. If not set then the icons 
