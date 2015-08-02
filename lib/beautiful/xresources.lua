@@ -10,6 +10,7 @@
 -- Grab environment
 local print = print
 local awesome = awesome
+local floor = math.floor
 
 local xresources = {}
 
@@ -91,9 +92,9 @@ end
 --- Compute resulting size applying current DPI value (optionally per screen).
 -- @tparam number size Size
 -- @tparam[opt] integer s The screen.
--- @treturn integer Resulting size (using `math.ceil`).
+-- @treturn integer Resulting size (rounded to integer).
 function xresources.apply_dpi(size, s)
-    return math.ceil(size/96*xresources.get_dpi(s))
+    return floor(size/96*xresources.get_dpi(s) + 0.5)
 end
 
 return xresources
