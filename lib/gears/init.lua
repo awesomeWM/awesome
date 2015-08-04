@@ -16,6 +16,7 @@ return
     wallpaper = require("gears.wallpaper");
     timer = require("gears.timer");
     cache = require("gears.cache");
+    async_popen = require("gears.async_popen");
 }
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
