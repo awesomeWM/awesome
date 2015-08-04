@@ -46,7 +46,10 @@ local steps = {
   function(count)
     if count == 1 then
       -- Setup: switch to tag.
-      os.execute('xdotool key super+2')
+      root.fake_input("key_press", "Super_L")
+      root.fake_input("key_press", "2")
+      root.fake_input("key_release", "2")
+      root.fake_input("key_release", "Super_L")
 
     elseif awful.tag.selectedlist()[1] == tags[1][2] then
       assert(#client.get() == 1)
