@@ -75,27 +75,33 @@ tmp_files=$(mktemp -d)
 awesome_log=$tmp_files/_awesome_test.log
 echo "awesome_log: $awesome_log"
 
+wait_until_success() {
+    max_wait=60
+    while true; do
+        set +e
+        eval reply="\$($2)"
+        ret=$?
+        set -e
+        if [ $ret = 0 ]; then
+            break
+        fi
+        max_wait=$(expr $max_wait - 1 || true)
+        if [ "$max_wait" -lt 0 ]; then
+            echo "Error: failed to $1!"
+            echo "Last reply: $reply."
+            if [ -f "$awesome_log" ]; then
+                echo "Log:"
+                cat "$awesome_log"
+            fi
+            exit 1
+        fi
+        sleep 0.05
+    done
+}
+
 # Wait for DISPLAY to be available, and setup xrdb,
 # for awesome's xresources backend / queries.
-max_wait=60
-while true; do
-    set +e
-    reply="$(echo "Xft.dpi: 96" | DISPLAY="$D" xrdb 2>&1)"
-    ret=$?
-    set -e
-    if [ $ret = 0 ]; then
-        break
-    fi
-    max_wait=$(expr $max_wait - 1)
-    if [ "$max_wait" -lt 0 ]; then
-        echo "Error: failed to setup xrdb!"
-        echo "Last reply: $reply."
-        echo "Log:"
-        cat "$awesome_log"
-        exit 1
-    fi
-    sleep 0.05
-done
+wait_until_success "setup xrdb" "echo 'Xft.dpi: 96' | DISPLAY='$D' xrdb 2>&1"
 
 # Use a separate D-Bus session; sets $DBUS_SESSION_BUS_PID.
 eval $(DISPLAY="$D" dbus-launch --sh-syntax --exit-with-session)
@@ -120,26 +126,7 @@ start_awesome() {
     cd - >/dev/null
 
     # Wait until the interface for awesome-client is ready (D-Bus interface).
-    client_reply=
-    max_wait=50
-    while true; do
-        set +e
-        client_reply=$(echo 'return 1' | DISPLAY=$D "$AWESOME_CLIENT" 2>&1)
-        ret=$?
-        set -e
-        if [ $ret = 0 ]; then
-            break
-        fi
-        max_wait=$(expr $max_wait - 1 || true)
-        if [ "$max_wait" -lt 0 ] || ! kill -0 $awesome_pid ; then
-            echo "Error: did not receive a successful reply via awesome-client!"
-            echo "Last reply: $client_reply."
-            echo "Log:"
-            cat "$awesome_log"
-            exit 1
-        fi
-        sleep 0.1
-    done
+    wait_until_success "wait for awesome startup via awesome-client" "echo 'return 1' | DISPLAY=$D '$AWESOME_CLIENT' 2>&1"
 }
 
 # Count errors.
