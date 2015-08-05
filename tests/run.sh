@@ -153,7 +153,7 @@ for f in $tests; do
     cat $f | DISPLAY=$D "$AWESOME_CLIENT" 2>&1
 
     # Tail the log and quit, when awesome quits.
-    tail -f --pid $awesome_pid $awesome_log
+    tail -n 100000 -f --pid $awesome_pid $awesome_log
 
     if grep -q -E '^Error|assertion failed' $awesome_log; then
         echo "===> ERROR running $f! <==="
