@@ -100,6 +100,17 @@ done
 # Use a separate D-Bus session; sets $DBUS_SESSION_BUS_PID.
 eval $(DISPLAY="$D" dbus-launch --sh-syntax --exit-with-session)
 
+# Not in Travis?
+if [ "$CI" != true ]; then
+    # Prepare a config file pointing to a working theme
+    RC_FILE=$tmp_files/awesomerc.lua
+    THEME_FILE=$tmp_files/theme.lua
+    sed -e "s:beautiful.init(\"@AWESOME_THEMES_PATH@/default/theme.lua\"):beautiful.init('$THEME_FILE'):" $root_dir/awesomerc.lua > $RC_FILE
+    sed -e "s:@AWESOME_THEMES_PATH@/default/titlebar:$root_dir/build/themes/default/titlebar:"  \
+        -e "s:@AWESOME_THEMES_PATH@:$root_dir/themes/:" \
+        -e "s:@AWESOME_ICON_PATH@:$root_dir/icons:" $root_dir/themes/default/theme.lua > $THEME_FILE
+fi
+
 # Start awesome.
 start_awesome() {
     export DISPLAY="$D"
