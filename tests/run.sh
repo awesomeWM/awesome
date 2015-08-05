@@ -123,8 +123,8 @@ start_awesome() {
         if [ $ret = 0 ]; then
             break
         fi
-        max_wait=$(expr $max_wait - 1)
-        if [ "$max_wait" -lt 0 ]; then
+        max_wait=$(expr $max_wait - 1 || true)
+        if [ "$max_wait" -lt 0 ] || ! kill -0 $awesome_pid ; then
             echo "Error: did not receive a successful reply via awesome-client!"
             echo "Last reply: $client_reply."
             echo "Log:"
