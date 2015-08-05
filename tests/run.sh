@@ -76,6 +76,9 @@ awesome_log=$tmp_files/_awesome_test.log
 echo "awesome_log: $awesome_log"
 
 wait_until_success() {
+    if [ "$CI" = true ]; then
+        set +x
+    fi
     max_wait=60
     while true; do
         set +e
@@ -97,6 +100,9 @@ wait_until_success() {
         fi
         sleep 0.05
     done
+    if [ "$CI" = true ]; then
+        set -x
+    fi
 }
 
 # Wait for DISPLAY to be available, and setup xrdb,
