@@ -36,6 +36,7 @@ XEPHYR=Xephyr
 XVFB=Xvfb
 AWESOME=$root_dir/build/awesome
 RC_FILE=$root_dir/build/awesomerc.lua
+AWESOME_CLIENT="$root_dir/utils/awesome-client"
 D=:5
 SIZE=1024x768
 
@@ -100,9 +101,6 @@ done
 
 # Use a separate D-Bus session; sets $DBUS_SESSION_BUS_PID.
 eval $(DISPLAY="$D" dbus-launch --sh-syntax --exit-with-session)
-
-
-AWESOME_CLIENT="$root_dir/utils/awesome-client"
 
 # Start awesome.
 start_awesome() {
