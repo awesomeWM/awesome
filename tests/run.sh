@@ -60,22 +60,20 @@ XDG_CONFIG_HOME="./"
 export LUA_PATH
 export XDG_CONFIG_HOME
 
-awesome_log=/tmp/_awesome_test.log
-echo "awesome_log: $awesome_log"
-
 cd - >/dev/null
 
-
-kill_childs() {
+# Cleanup on errors / aborting.
+cleanup() {
     for p in $awesome_pid $xserver_pid; do
         kill -TERM $p 2>/dev/null || true
     done
+    rm -rf $tmp_files || true
 }
-# Cleanup on errors / aborting.
-set_trap() {
-    trap "kill_childs" 0 2 3 15
-}
-set_trap
+trap "cleanup" 0 2 3 15
+
+tmp_files=$(mktemp -d)
+awesome_log=$tmp_files/_awesome_test.log
+echo "awesome_log: $awesome_log"
 
 # Wait for DISPLAY to be available, and setup xrdb,
 # for awesome's xresources backend / queries.
