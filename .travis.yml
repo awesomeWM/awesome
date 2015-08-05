@@ -3,8 +3,9 @@ env:
   matrix:
     # Note: luarocks does not work with Lua 5.0.
     # - LUA=5.0 LUAPKG=50  LUALIB=/usr/lib/liblua50.so
-    - LUA=5.1 LUAPKG=5.1 LUALIB=/usr/lib/x86_64-linux-gnu/liblua5.1.so
-    - LUA=5.2 LUAPKG=5.2 LUALIB=/usr/lib/x86_64-linux-gnu/liblua5.2.so BUILD_APIDOC=true
+    - LUA=5.1 LGIVER=      LUAPKG=5.1 LUALIB=/usr/lib/x86_64-linux-gnu/liblua5.1.so
+    - LUA=5.2 LGIVER=      LUAPKG=5.2 LUALIB=/usr/lib/x86_64-linux-gnu/liblua5.2.so BUILD_APIDOC=true
+    - LUA=5.2 LGIVER=0.7.0 LUAPKG=5.2 LUALIB=/usr/lib/x86_64-linux-gnu/liblua5.2.so
   global:
     # Secure token to push to gh-pages.
     - secure: "LZxt9559+V3qJMdVgmKW4RYTt8ZINooex/qsnoEJUtZloj/eFNG4COT2z6a2yeH2tKWzknCsmV9nLPJiNEA2KLcyqDhjFQvJwKmsBuhGUmLyeQgfenjweorRjO8NT18X1SAEUXAMnClPu+OeTDs4BAuVn5foGZ7xpcRg2E+j2mc="
@@ -77,7 +78,7 @@ install:
   - cd ..
 
   - sudo apt-get install -qq libgirepository1.0-dev
-  - sudo luarocks install lgi
+  - sudo luarocks install lgi $LGIVER
 
   # Install busted for "make check".
   - sudo luarocks install busted
