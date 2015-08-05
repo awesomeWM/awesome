@@ -50,9 +50,6 @@ else
     # ( sleep 1; kill -USR1 $xserver_pid ) &
 fi
 
-# Use a separate D-Bus session; sets $DBUS_SESSION_BUS_PID.
-eval $(DISPLAY="$D" dbus-launch --sh-syntax --exit-with-session)
-
 cd $root_dir/build
 
 LUA_PATH="$(lua -e 'print(package.path)');lib/?.lua;lib/?/init.lua"
@@ -100,6 +97,9 @@ while true; do
     fi
     sleep 0.05
 done
+
+# Use a separate D-Bus session; sets $DBUS_SESSION_BUS_PID.
+eval $(DISPLAY="$D" dbus-launch --sh-syntax --exit-with-session)
 
 
 AWESOME_CLIENT="$root_dir/utils/awesome-client"
