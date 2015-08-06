@@ -35,14 +35,6 @@
 /** 20 seconds timeout */
 #define AWESOME_SPAWN_TIMEOUT 20.0
 
-typedef struct
-{
-    lua_State *L;
-    int cb_ref;
-    int stdout_fd;
-    int stderr_fd;
-} Data_for_callback;
-
 /** Wrapper for unrefing startup sequence.
  */
 static inline void
@@ -343,28 +335,12 @@ parse_command(lua_State *L, int idx, GError **error)
     return argv;
 }
 
-static void
-on_exit_callback(GPid pid, gint status, gpointer user_data)
-{
-    Data_for_callback *data = (Data_for_callback *) user_data;
-    lua_State *L = data->L;
-
-    lua_pushnumber(L, pid);
-    lua_pushnumber(L, data->stdout_fd);
-    lua_pushnumber(L, data->stderr_fd);
-    lua_rawgeti(L, LUA_REGISTRYINDEX, data->cb_ref);
-    luaA_dofunction(L, 3, 0);
-
-    luaL_unref(L, LUA_REGISTRYINDEX, data->cb_ref);
-    free(data);
-}
-
 int
 luaA_spawn_with_output(lua_State *L)
 {
     GError *error = NULL;
     gchar **argv = parse_command(L, 1, &error);
-    if (!argv || !argv[0])
+    if (error)
     {
         g_strfreev(argv);
         lua_pushfstring(L, "%s parse error: %s", __func__, error->message);
@@ -372,20 +348,14 @@ luaA_spawn_with_output(lua_State *L)
         g_error_free(error);
         return 1;
     }
-    luaL_checktype(L, 2, LUA_TFUNCTION);
-
-    Data_for_callback *data = xmalloc(sizeof(Data_for_callback));
-    data->L = L;
-
-    data->cb_ref = luaL_ref(L, LUA_REGISTRYINDEX);
 
     gboolean retval;
     GPid pid;
-    retval = g_spawn_async_with_pipes(NULL, argv, NULL,
-                                      G_SPAWN_DO_NOT_REAP_CHILD,
-                                      spawn_callback, NULL, &pid, NULL,
-                                      &(data->stdout_fd),
-                                      &(data->stderr_fd), &error);
+    int stdout_fd;
+    int stderr_fd;
+    retval = g_spawn_async_with_pipes(NULL, argv, NULL, 0, spawn_callback,
+                                      NULL, &pid, NULL, &stdout_fd, &stderr_fd,
+                                      &error);
     g_strfreev(argv);
     if (!retval)
     {
@@ -394,8 +364,10 @@ luaA_spawn_with_output(lua_State *L)
         g_error_free(error);
         return 1;
     }
-    g_child_watch_add(pid, on_exit_callback, data);
-    return 0;
+    lua_pushinteger(L, pid);
+    lua_pushinteger(L, stdout_fd);
+    lua_pushinteger(L, stderr_fd);
+    return 3;
 }
 
 /** Spawn a program.
