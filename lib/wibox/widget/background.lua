@@ -47,12 +47,12 @@ function background:draw(context, cr, width, height)
 end
 
 --- Fit this widget into the given area
-function background:fit(width, height)
+function background:fit(context, width, height)
     if not self.widget then
         return 0, 0
     end
 
-    return self.widget:fit(width, height)
+    return layout_base.fit_widget(context, self.widget, width, height)
 end
 
 --- Set the widget that is drawn on top of the background

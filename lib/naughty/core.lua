@@ -526,7 +526,7 @@ function naughty.notify(args)
             actiontextbox:set_font(font)
             actiontextbox:set_markup(string.format('<b>%s</b>', action))
             -- calculate the height and width
-            local w, h = actiontextbox:fit(-1, -1)
+            local w, h = actiontextbox:fit(nil, -1, -1) -- Hack! :(
             local height = h + 2 * margin
             local width = w + 2 * margin
 
@@ -596,7 +596,7 @@ function naughty.notify(args)
 
     -- calculate the height
     if not height then
-        local w, h = textbox:fit(-1, -1)
+        local w, h = textbox:fit(nil, -1, -1) -- Hack! :-(
         if iconbox and icon_h + 2 * margin > h + 2 * margin then
             height = icon_h + 2 * margin
         else
@@ -608,7 +608,7 @@ function naughty.notify(args)
 
     -- calculate the width
     if not width then
-        local w, h = textbox:fit(-1, -1)
+        local w, h = textbox:fit(nil, -1, -1) -- Hack! :-(
         width = w + (iconbox and icon_w + 2 * margin or 0) + 2 * margin
     end
 

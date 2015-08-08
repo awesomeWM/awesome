@@ -35,7 +35,7 @@ local function widget_fit(state, arguments)
     local widget = arguments[1]
     local given = arguments[2]
     local expected = arguments[3]
-    local w, h = widget:fit(given[1], given[2])
+    local w, h = widget:fit({ "fake context" }, given[1], given[2])
 
     local fits = expected[1] == w and expected[2] == h
     if state.mod == fits then

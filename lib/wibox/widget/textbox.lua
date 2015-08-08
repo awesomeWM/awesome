@@ -42,7 +42,7 @@ function textbox:draw(context, cr, width, height)
 end
 
 --- Fit the given textbox
-function textbox:fit(width, height)
+function textbox:fit(context, width, height)
     setup_layout(self, width, height)
     local ink, logical = self._layout:get_pixel_extents()
 

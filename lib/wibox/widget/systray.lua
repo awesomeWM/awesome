@@ -45,7 +45,7 @@ function systray:draw(context, cr, width, height)
                          base, is_rotated, bg, reverse, spacing)
 end
 
-function systray:fit(width, height)
+function systray:fit(context, width, height)
     local num_entries = capi.awesome.systray()
     local base = base_size
     local spacing = beautiful.systray_icon_spacing or 0

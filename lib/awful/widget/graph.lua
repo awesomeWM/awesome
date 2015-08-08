@@ -158,7 +158,7 @@ function graph.draw(_graph, context, cr, width, height)
     end
 end
 
-function graph.fit(_graph, width, height)
+function graph.fit(_graph)
     return data[_graph].width, data[_graph].height
 end
 

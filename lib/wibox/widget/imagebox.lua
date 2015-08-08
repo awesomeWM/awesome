@@ -39,7 +39,7 @@ function imagebox:draw(context, cr, width, height)
 end
 
 --- Fit the imagebox into the given geometry
-function imagebox:fit(width, height)
+function imagebox:fit(context, width, height)
     if not self._image then
         return 0, 0
     end

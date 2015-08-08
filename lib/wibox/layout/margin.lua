@@ -41,12 +41,12 @@ function margin:draw(context, cr, width, height)
 end
 
 --- Fit a margin layout into the given space
-function margin:fit(width, height)
+function margin:fit(context, width, height)
     local extra_w = self.left + self.right
     local extra_h = self.top + self.bottom
     local w, h = 0, 0
     if self.widget then
-        w, h = base.fit_widget(self.widget, width - extra_w, height - extra_h)
+        w, h = base.fit_widget(context, self.widget, width - extra_w, height - extra_h)
     end
     return w + extra_w, h + extra_h
 end

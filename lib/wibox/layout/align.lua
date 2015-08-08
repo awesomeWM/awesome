@@ -37,7 +37,7 @@ function align:draw(context, cr, width, height)
     --  if the second widget doesn't exist, we will prioritise the first one
     --  instead
     if self._expand ~= "inside" and self.second then
-        local w, h = base.fit_widget(self.second, width, height)
+        local w, h = base.fit_widget(context, self.second, width, height)
         local size_second = self.dir == "y" and h or w
         -- if all the space is taken, skip the rest, and draw just the middle
         -- widget
@@ -57,7 +57,7 @@ function align:draw(context, cr, width, height)
         --  into the remaining space
         if self._expand ~= "outside" then
             if self.dir == "y" then
-                _, h = base.fit_widget(self.first, width, size_remains)
+                _, h = base.fit_widget(context, self.first, width, size_remains)
                 size_first = h
                 -- for "inside", the third widget will get a chance to use the
                 --  remaining space, then the middle widget. For "none" we give
@@ -68,7 +68,7 @@ function align:draw(context, cr, width, height)
                     size_remains = size_remains - h
                 end
             else
-                w, _ = base.fit_widget(self.first, size_remains, height)
+                w, _ = base.fit_widget(context, self.first, size_remains, height)
                 size_first = w
                 if self._expand == "inside" or not self.second then
                     size_remains = size_remains - w
@@ -88,13 +88,13 @@ function align:draw(context, cr, width, height)
         local w, h, _ = width, height, nil
         if self._expand ~= "outside" then
             if self.dir == "y" then
-                _, h = base.fit_widget(self.third, width, size_remains)
+                _, h = base.fit_widget(context, self.third, width, size_remains)
                 -- give the middle widget the rest of the space for "inside" mode
                 if self._expand == "inside" then
                     size_remains = size_remains - h
                 end
             else
-                w, _ = base.fit_widget(self.third, size_remains, height)
+                w, _ = base.fit_widget(context, self.third, size_remains, height)
                 if self._expand == "inside" then
                     size_remains = size_remains - w
                 end
@@ -123,10 +123,10 @@ function align:draw(context, cr, width, height)
             end
         else
             if self.dir == "y" then
-                _, h = base.fit_widget(self.second, width, size_remains)
+                _, h = base.fit_widget(context, self.second, width, size_remains)
                 y = floor( (height - h)/2 )
             else
-                w, _ = base.fit_widget(self.second, width, size_remains)
+                w, _ = base.fit_widget(context, self.second, width, size_remains)
                 x = floor( (width -w)/2 )
             end
         end
@@ -166,14 +166,15 @@ end
 --- Fit the align layout into the given space. The align layout will
 -- ask for the sum of the sizes of its sub-widgets in its direction
 -- and the largest sized sub widget in the other direction.
+-- @param context The context in which we are fit.
 -- @param orig_width The available width.
 -- @param orig_height The available height.
-function align:fit(orig_width, orig_height)
+function align:fit(context, orig_width, orig_height)
     local used_in_dir = 0
     local used_in_other = 0
 
     for k, v in pairs{self.first, self.second, self.third} do
-        local w, h = base.fit_widget(v, orig_width, orig_height)
+        local w, h = base.fit_widget(context, v, orig_width, orig_height)
 
         local max = self.dir == "y" and w or h
         if max > used_in_other then

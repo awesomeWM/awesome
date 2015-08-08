@@ -29,11 +29,12 @@ function base.rect_to_device_geometry(cr, x, y, width, height)
 end
 
 --- Fit a widget for the given available width and height
+-- @param context The context in which we are fit.
 -- @param widget The widget to fit (this uses widget:fit(width, height)).
 -- @param width The available width for the widget
 -- @param height The available height for the widget
 -- @return The width and height that the widget wants to use
-function base.fit_widget(widget, width, height)
+function base.fit_widget(context, widget, width, height)
     if not widget.visible then
         return 0, 0
     end
@@ -41,7 +42,7 @@ function base.fit_widget(widget, width, height)
     local width = math.max(0, width)
     local height = math.max(0, height)
 
-    return widget._fit_geometry_cache:get(width, height)
+    return widget._fit_geometry_cache:get(context, width, height)
 end
 
 --- Draw a widget via a cairo context

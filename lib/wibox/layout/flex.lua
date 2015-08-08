@@ -75,9 +75,10 @@ function flex:set_max_widget_size(val)
 end
 
 --- Fit the flex layout into the given space.
+-- @param context The context in which we are fit.
 -- @param orig_width The available width.
 -- @param orig_height The available height.
-function flex:fit(orig_width, orig_height)
+function flex:fit(context, orig_width, orig_height)
     local used_in_dir = 0
     local used_in_other = 0
 
@@ -86,7 +87,7 @@ function flex:fit(orig_width, orig_height)
     local sub_width  = self.dir == "y" and orig_width  or floor(orig_width / #self.widgets)
 
     for k, v in pairs(self.widgets) do
-        local w, h = base.fit_widget(v, sub_width, sub_height)
+        local w, h = base.fit_widget(context, v, sub_width, sub_height)
 
         local max = self.dir == "y" and w or h
         if max > used_in_other then

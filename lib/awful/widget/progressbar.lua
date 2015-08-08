@@ -154,7 +154,7 @@ function progressbar.draw(pbar, context, cr, width, height)
     end
 end
 
-function progressbar.fit(pbar, width, height)
+function progressbar.fit(pbar)
     return data[pbar].width, data[pbar].height
 end
 

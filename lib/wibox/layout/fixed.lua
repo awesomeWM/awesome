@@ -28,7 +28,7 @@ function fixed:draw(context, cr, width, height)
             x, y = 0, pos
             w, h = width, height - pos
             if k ~= #self.widgets or not self._fill_space then
-                _, h = base.fit_widget(v, w, h);
+                _, h = base.fit_widget(context, v, w, h);
             end
             pos = pos + h + spacing
             in_dir = h
@@ -36,7 +36,7 @@ function fixed:draw(context, cr, width, height)
             x, y = pos, 0
             w, h = width - pos, height
             if k ~= #self.widgets or not self._fill_space then
-                w, _ = base.fit_widget(v, w, h);
+                w, _ = base.fit_widget(context, v, w, h);
             end
             pos = pos + w + spacing
             in_dir = w
@@ -59,14 +59,15 @@ function fixed:add(widget)
 end
 
 --- Fit the fixed layout into the given space
+-- @param context The context in which we are fit.
 -- @param orig_width The available width.
 -- @param orig_height The available height.
-function fixed:fit(orig_width, orig_height)
+function fixed:fit(context, orig_width, orig_height)
     local width, height = orig_width, orig_height
     local used_in_dir, used_max = 0, 0
 
     for k, v in pairs(self.widgets) do
-        local w, h = base.fit_widget(v, width, height)
+        local w, h = base.fit_widget(context, v, width, height)
         local in_dir, max
         if self.dir == "y" then
             max, in_dir = w, h

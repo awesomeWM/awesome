@@ -45,11 +45,11 @@ function mirror:draw(context, cr, width, height)
 end
 
 --- Fit this layout into the given area
-function mirror:fit(...)
+function mirror:fit(context, ...)
     if not self.widget then
         return 0, 0
     end
-    return base.fit_widget(self.widget, ...)
+    return base.fit_widget(context, self.widget, ...)
 end
 
 --- Set the widget that this layout mirrors.
