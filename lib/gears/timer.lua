@@ -109,7 +109,7 @@ capi.awesome.connect_signal("refresh", function()
         local success, message = xpcall(function()
                 callback[1](unpack(callback, 2))
             end, function(err)
-                print(debug.traceback("Error during delayed call: "..tostring(err)))
+                print(debug.traceback("Error during delayed call: "..tostring(err), 2))
             end)
     end
     delayed_calls = {}
