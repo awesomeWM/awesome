@@ -6,7 +6,7 @@
 ---------------------------------------------------------------------------
 
 local pairs = pairs
-local pcall = pcall
+local xpcall = xpcall
 local print = print
 local min = math.min
 local max = math.max
@@ -67,10 +67,11 @@ function base.draw_widget(wibox, cr, widget, x, y, width, height)
     cr:clip()
 
     -- Let the widget draw itself
-    local success, msg = pcall(widget.draw, widget, wibox, cr, width, height)
-    if not success then
-        print("Error while drawing widget: " .. msg)
-    end
+    xpcall(function()
+        widget:draw(wibox, cr, width, height)
+    end, function(err)
+        print(debug.traceback("Error while drawing widget: "..tostring(err), 2))
+    end)
 
     -- Register the widget for input handling
     wibox:widget_at(widget, base.rect_to_device_geometry(cr, 0, 0, width, height))
