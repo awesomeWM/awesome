@@ -76,7 +76,11 @@ local function new(c, args)
 
     local ret
     if not bars[position] then
-        ret = drawable(d, nil, "awful.titlebar")
+        local context = {
+            client = c,
+            position = position
+        }
+        ret = drawable(d, context, "awful.titlebar")
         local function update_colors()
             local args = bars[position].args
             ret:set_bg(get_color("bg", c, args))

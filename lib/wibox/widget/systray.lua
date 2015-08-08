@@ -41,7 +41,7 @@ function systray:draw(wibox, cr, width, height)
     else
         base = in_dir / num_entries
     end
-    capi.awesome.systray(wibox.drawin, math.ceil(x), math.ceil(y),
+    capi.awesome.systray(wibox.wibox.drawin, math.ceil(x), math.ceil(y),
                          base, is_rotated, bg, reverse, spacing)
 end
 
