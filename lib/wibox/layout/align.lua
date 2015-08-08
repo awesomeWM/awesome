@@ -16,11 +16,11 @@ local widget_base = require("wibox.widget.base")
 local align = {}
 
 --- Draw an align layout.
--- @param wibox The wibox that this widget is drawn to.
+-- @param context The context in which we are drawn.
 -- @param cr The cairo context to use.
 -- @param width The available width.
 -- @param height The available height.
-function align:draw(wibox, cr, width, height)
+function align:draw(context, cr, width, height)
     -- Draw will have to deal with all three align modes and should work in a
     -- way that makes sense if one or two of the widgets are missing (if they
     -- are all missing, it won't draw anything.) It should also handle the case
@@ -42,7 +42,7 @@ function align:draw(wibox, cr, width, height)
         -- if all the space is taken, skip the rest, and draw just the middle
         -- widget
         if size_second >= size_remains then
-            base.draw_widget(wibox, cr, self.second, 0, 0, width, height)
+            base.draw_widget(context, cr, self.second, 0, 0, width, height)
             return
         else
             -- the middle widget is sized first, the outside widgets are given
@@ -81,7 +81,7 @@ function align:draw(wibox, cr, width, height)
                 w = size_remains
             end
         end
-        base.draw_widget(wibox, cr, self.first, 0, 0, w, h)
+        base.draw_widget(context, cr, self.first, 0, 0, w, h)
     end
     -- size_remains will be <= 0 if first used all the space
     if self.third and size_remains > 0 then
@@ -107,7 +107,7 @@ function align:draw(wibox, cr, width, height)
             end
         end
         local x, y = width - w, height - h
-        base.draw_widget(wibox, cr, self.third, x, y, w, h)
+        base.draw_widget(context, cr, self.third, x, y, w, h)
     end
     -- here we either draw the second widget in the space set aside for it
     -- in the beginning, or in the remaining space, if it is "inside"
@@ -130,7 +130,7 @@ function align:draw(wibox, cr, width, height)
                 x = floor( (width -w)/2 )
             end
         end
-        base.draw_widget(wibox, cr, self.second, x, y, w, h)
+        base.draw_widget(context, cr, self.second, x, y, w, h)
     end
 end
 

@@ -13,12 +13,12 @@ local pairs = pairs
 local fixed = {}
 
 --- Draw a fixed layout. Each widget gets just the space it asks for.
--- @param wibox The wibox that this widget is drawn to.
+-- @param context The context in which we are drawn.
 -- @param cr The cairo context to use.
 -- @param width The available width.
 -- @param height The available height.
 -- @return The total space needed by the layout.
-function fixed:draw(wibox, cr, width, height)
+function fixed:draw(context, cr, width, height)
     local pos,spacing = 0,self._spacing or 0
 
     for k, v in pairs(self.widgets) do
@@ -46,7 +46,7 @@ function fixed:draw(wibox, cr, width, height)
             (self.dir ~= "y" and pos-spacing > width) then
             break
         end
-        base.draw_widget(wibox, cr, v, x, y, w, h)
+        base.draw_widget(context, cr, v, x, y, w, h)
     end
 end
 

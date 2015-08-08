@@ -18,12 +18,12 @@ local function round(x)
 end
 
 --- Draw a flex layout. Each widget gets an equal share of the available space.
--- @param wibox The wibox that this widget is drawn to.
+-- @param context The context in which we are drawn.
 -- @param cr The cairo context to use.
 -- @param width The available width.
 -- @param height The available height.
 -- @return The total space needed by the layout.
-function flex:draw(wibox, cr, width, height)
+function flex:draw(context, cr, width, height)
     local pos,spacing = 0,self._spacing or 0
     local num = #self.widgets
     local total_spacing = (spacing*(num-1))
@@ -48,7 +48,7 @@ function flex:draw(wibox, cr, width, height)
             x, y = round(pos), 0
             w, h = floor(space_per_item), height
         end
-        base.draw_widget(wibox, cr, v, x, y, w, h)
+        base.draw_widget(context, cr, v, x, y, w, h)
 
         pos = pos + space_per_item + spacing
 

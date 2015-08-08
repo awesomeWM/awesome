@@ -17,7 +17,7 @@ local type = type
 local background = { mt = {} }
 
 --- Draw this widget
-function background:draw(wibox, cr, width, height)
+function background:draw(context, cr, width, height)
     if not self.widget or not self.widget.visible then
         return
     end
@@ -40,7 +40,7 @@ function background:draw(wibox, cr, width, height)
         cr:save()
         cr:set_source(self.foreground)
     end
-    layout_base.draw_widget(wibox, cr, self.widget, 0, 0, width, height)
+    layout_base.draw_widget(context, cr, self.widget, 0, 0, width, height)
     if self.foreground then
         cr:restore()
     end

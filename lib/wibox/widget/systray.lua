@@ -19,7 +19,7 @@ local horizontal = true
 local base_size = nil
 local reverse = false
 
-function systray:draw(wibox, cr, width, height)
+function systray:draw(context, cr, width, height)
     local x, y, _, _ = lbase.rect_to_device_geometry(cr, 0, 0, width, height)
     local num_entries = capi.awesome.systray()
     local bg = beautiful.bg_systray or beautiful.bg_normal or "#000000"
@@ -41,7 +41,7 @@ function systray:draw(wibox, cr, width, height)
     else
         base = in_dir / num_entries
     end
-    capi.awesome.systray(wibox.wibox.drawin, math.ceil(x), math.ceil(y),
+    capi.awesome.systray(context.wibox.drawin, math.ceil(x), math.ceil(y),
                          base, is_rotated, bg, reverse, spacing)
 end
 

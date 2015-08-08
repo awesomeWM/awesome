@@ -27,7 +27,7 @@ local function setup_layout(box, width, height)
 end
 
 --- Draw the given textbox on the given cairo context in the given geometry
-function textbox:draw(wibox, cr, width, height)
+function textbox:draw(context, cr, width, height)
     cr:update_layout(self._layout)
     setup_layout(self, width, height)
     local ink, logical = self._layout:get_pixel_extents()

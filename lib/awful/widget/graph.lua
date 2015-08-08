@@ -69,7 +69,7 @@ local properties = { "width", "height", "border_color", "stack",
                      "stack_colors", "color", "background_color",
                      "max_value", "scale" }
 
-function graph.draw(_graph, wibox, cr, width, height)
+function graph.draw(_graph, context, cr, width, height)
     local max_value = data[_graph].max_value
     local values = data[_graph].values
 

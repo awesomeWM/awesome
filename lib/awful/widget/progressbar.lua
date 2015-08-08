@@ -71,7 +71,7 @@ local properties = { "width", "height", "border_color",
                      "vertical", "value", "max_value",
                      "ticks", "ticks_gap", "ticks_size" }
 
-function progressbar.draw(pbar, wibox, cr, width, height)
+function progressbar.draw(pbar, context, cr, width, height)
     local ticks_gap = data[pbar].ticks_gap or 1
     local ticks_size = data[pbar].ticks_size or 4
 

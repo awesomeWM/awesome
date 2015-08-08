@@ -45,17 +45,18 @@ function base.fit_widget(widget, width, height)
 end
 
 --- Draw a widget via a cairo context
--- @param wibox The wibox on which we are drawing
+-- @param context The context in which we are drawn.
 -- @param cr The cairo context used
 -- @param widget The widget to draw (this uses widget:draw(cr, width, height)).
 -- @param x The position that the widget should get
 -- @param y The position that the widget should get
 -- @param width The widget's width
 -- @param height The widget's height
-function base.draw_widget(wibox, cr, widget, x, y, width, height)
+function base.draw_widget(context, cr, widget, x, y, width, height)
     if not widget.visible then
         return
     end
+
     -- Use save() / restore() so that our modifications aren't permanent
     cr:save()
 
@@ -68,13 +69,13 @@ function base.draw_widget(wibox, cr, widget, x, y, width, height)
 
     -- Let the widget draw itself
     xpcall(function()
-        widget:draw(wibox, cr, width, height)
+        widget:draw(context, cr, width, height)
     end, function(err)
         print(debug.traceback("Error while drawing widget: "..tostring(err), 2))
     end)
 
     -- Register the widget for input handling
-    wibox:widget_at(widget, base.rect_to_device_geometry(cr, 0, 0, width, height))
+    context:widget_at(widget, base.rect_to_device_geometry(cr, 0, 0, width, height))
 
     cr:restore()
 end

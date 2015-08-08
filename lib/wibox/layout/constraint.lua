@@ -15,12 +15,12 @@ local math = math
 local constraint = { mt = {} }
 
 --- Draw a constraint layout
-function constraint:draw(wibox, cr, width, height)
+function constraint:draw(context, cr, width, height)
     if not self.widget then
         return
     end
 
-    base.draw_widget(wibox, cr, self.widget, 0, 0, width, height)
+    base.draw_widget(context, cr, self.widget, 0, 0, width, height)
 end
 
 --- Fit a constraint layout into the given space
