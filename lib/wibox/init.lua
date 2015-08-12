@@ -29,6 +29,7 @@ local wibox = { mt = {} }
 wibox.layout = require("wibox.layout")
 wibox.widget = require("wibox.widget")
 wibox.drawable = require("wibox.drawable")
+wibox.hierarchy = require("wibox.hierarchy")
 
 --- Set the widget that the wibox displays
 function wibox:set_widget(widget)
