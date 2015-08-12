@@ -23,6 +23,7 @@ local table = table
 local error = error
 local wibox = require("wibox")
 local beautiful = require("beautiful")
+local round = require("awful.util").round
 
 local awfulwibox = { mt = {} }
 
@@ -154,7 +155,7 @@ function awfulwibox.align(wibox, align, screen)
         elseif align == "left" then
             wibox.y = area.y + area.height - (wibox.height + 2 * wibox.border_width)
         elseif align == "center" then
-            wibox.y = area.y + (area.height - wibox.height) / 2
+            wibox.y = area.y + round((area.height - wibox.height) / 2)
         end
     elseif position == "left" then
         if align == "right" then
@@ -162,7 +163,7 @@ function awfulwibox.align(wibox, align, screen)
         elseif align == "left" then
             wibox.y = area.y
         elseif align == "center" then
-            wibox.y = area.y + (area.height - wibox.height) / 2
+            wibox.y = area.y + round((area.height - wibox.height) / 2)
         end
     elseif position == "bottom" then
         if align == "right" then
@@ -170,7 +171,7 @@ function awfulwibox.align(wibox, align, screen)
         elseif align == "left" then
             wibox.x = area.x
         elseif align == "center" then
-            wibox.x = area.x + (area.width - wibox.width) / 2
+            wibox.x = area.x + round((area.width - wibox.width) / 2)
         end
     elseif position == "top" then
         if align == "right" then
@@ -178,7 +179,7 @@ function awfulwibox.align(wibox, align, screen)
         elseif align == "left" then
             wibox.x = area.x
         elseif align == "center" then
-            wibox.x = area.x + (area.width - wibox.width) / 2
+            wibox.x = area.x + round((area.width - wibox.width) / 2)
         end
     end
 
@@ -227,24 +228,24 @@ function awfulwibox.new(arg)
 
     -- Set default size
     if position == "left" or position == "right" then
-        arg.width = arg.width or beautiful.get_font_height(arg.font) * 1.5
+        arg.width = arg.width or round(beautiful.get_font_height(arg.font) * 1.5)
         if arg.height then
             has_to_stretch = false
             if arg.screen then
                 local hp = tostring(arg.height):match("(%d+)%%")
                 if hp then
-                    arg.height = capi.screen[arg.screen].geometry.height * hp / 100
+                    arg.height = round(capi.screen[arg.screen].geometry.height * hp / 100)
                 end
             end
         end
     else
-        arg.height = arg.height or beautiful.get_font_height(arg.font) * 1.5
+        arg.height = arg.height or round(beautiful.get_font_height(arg.font) * 1.5)
         if arg.width then
             has_to_stretch = false
             if arg.screen then
                 local wp = tostring(arg.width):match("(%d+)%%")
                 if wp then
-                    arg.width = capi.screen[arg.screen].geometry.width * wp / 100
+                    arg.width = round(capi.screen[arg.screen].geometry.width * wp / 100)
                 end
             end
         end
