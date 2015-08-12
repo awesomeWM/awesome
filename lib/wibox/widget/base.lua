@@ -149,7 +149,7 @@ function base.check_widget(widget)
         debug.assert(type(widget[func]) == "function", func .. " is not a function")
     end
 
-    local width, height = widget:fit(0, 0)
+    local width, height = widget:fit({}, 0, 0)
     debug.assert(type(width) == "number")
     debug.assert(type(height) == "number")
 end

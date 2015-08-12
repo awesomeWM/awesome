@@ -5,18 +5,19 @@
 -- @classmod wibox.layout.base
 ---------------------------------------------------------------------------
 
-local pcall = pcall
+local xpcall = xpcall
 local print = print
 local wbase = require("wibox.widget.base")
 
 local base = {}
 
 --- Fit a widget for the given available width and height
+-- @param context The context in which we are fit.
 -- @param widget The widget to fit (this uses widget:fit(width, height)).
 -- @param width The available width for the widget
 -- @param height The available height for the widget
 -- @return The width and height that the widget wants to use
-function base.fit_widget(widget, width, height)
+function base.fit_widget(context, widget, width, height)
     if not widget.visible then
         return 0, 0
     end
@@ -24,21 +25,22 @@ function base.fit_widget(widget, width, height)
     local width = math.max(0, width)
     local height = math.max(0, height)
 
-    return widget._fit_geometry_cache:get(width, height)
+    return widget._fit_geometry_cache:get(context, width, height)
 end
 
 --- Draw a widget via a cairo context
--- @param wibox The wibox on which we are drawing
+-- @param context The context in which we are drawn.
 -- @param cr The cairo context used
 -- @param widget The widget to draw (this uses widget:draw(cr, width, height)).
 -- @param x The position that the widget should get
 -- @param y The position that the widget should get
 -- @param width The widget's width
 -- @param height The widget's height
-function base.draw_widget(wibox, cr, widget, x, y, width, height)
+function base.draw_widget(context, cr, widget, x, y, width, height)
     if not widget.visible then
         return
     end
+
     -- Use save() / restore() so that our modifications aren't permanent
     cr:save()
 
@@ -50,13 +52,14 @@ function base.draw_widget(wibox, cr, widget, x, y, width, height)
     cr:clip()
 
     -- Let the widget draw itself
-    local success, msg = pcall(widget.draw, widget, wibox, cr, width, height)
-    if not success then
-        print("Error while drawing widget: " .. msg)
-    end
+    xpcall(function()
+        widget:draw(context, cr, width, height)
+    end, function(err)
+        print(debug.traceback("Error while drawing widget: "..tostring(err), 2))
+    end)
 
     -- Register the widget for input handling
-    wibox:widget_at(widget, wbase.rect_to_device_geometry(cr, 0, 0, width, height))
+    context:widget_at(widget, wbase.rect_to_device_geometry(cr, 0, 0, width, height))
 
     cr:restore()
 end

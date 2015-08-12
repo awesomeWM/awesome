@@ -17,7 +17,7 @@ local type = type
 local background = { mt = {} }
 
 --- Draw this widget
-function background:draw(wibox, cr, width, height)
+function background:draw(context, cr, width, height)
     if not self.widget or not self.widget.visible then
         return
     end
@@ -40,19 +40,19 @@ function background:draw(wibox, cr, width, height)
         cr:save()
         cr:set_source(self.foreground)
     end
-    layout_base.draw_widget(wibox, cr, self.widget, 0, 0, width, height)
+    layout_base.draw_widget(context, cr, self.widget, 0, 0, width, height)
     if self.foreground then
         cr:restore()
     end
 end
 
 --- Fit this widget into the given area
-function background:fit(width, height)
+function background:fit(context, width, height)
     if not self.widget then
         return 0, 0
     end
 
-    return self.widget:fit(width, height)
+    return layout_base.fit_widget(context, self.widget, width, height)
 end
 
 --- Set the widget that is drawn on top of the background

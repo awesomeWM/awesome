@@ -24,6 +24,43 @@ local timer = require("gears.timer")
 local drawables = setmetatable({}, { __mode = 'k' })
 local wallpaper = nil
 
+-- This is awful.screen.getbycoord() which we sadly cannot use from here (cyclic
+-- dependencies are bad!)
+function screen_getbycoord(x, y)
+    for i = 1, screen:count() do
+        local geometry = screen[i].geometry
+        if x >= geometry.x and x < geometry.x + geometry.width
+           and y >= geometry.y and y < geometry.y + geometry.height then
+            return i
+        end
+    end
+    return 1
+end
+
+-- Get the widget context. This should always return the same table (if
+-- possible), so that our draw and fit caches can work efficiently.
+local function get_widget_context(self)
+    local geom = self.drawable:geometry()
+    local s = screen_getbycoord(geom.x, geom.y)
+    local context = self._widget_context
+    local dpi = beautiful.xresources.get_dpi(s)
+    if (not context) or context.screen ~= s or context.dpi ~= dpi then
+        context = {
+            screen = s,
+            dpi = dpi,
+            drawable = self,
+            widget_at = function(_, ...)
+                self:widget_at(...)
+            end
+        }
+        for k, v in pairs(self._widget_context_skeleton) do
+            context[k] = v
+        end
+        self._widget_context = context
+    end
+    return context
+end
+
 local function do_redraw(self)
     local surf = surface(self.drawable.surface)
     -- The surface can be nil if the drawable's parent was already finalized
@@ -59,7 +96,7 @@ local function do_redraw(self)
     self._widget_geometries = {}
     if self.widget and self.widget.visible then
         cr:set_source(self.foreground_color)
-        self.widget:draw(self.widget_arg, cr, width, height)
+        self.widget:draw(get_widget_context(self), cr, width, height)
         self:widget_at(self.widget, 0, 0, width, height)
     end
 
@@ -229,10 +266,10 @@ local function setup_signals(_drawable)
     clone_signal("property::y")
 end
 
-function drawable.new(d, widget_arg, drawable_name)
+function drawable.new(d, widget_context_skeleton, drawable_name)
     local ret = object()
     ret.drawable = d
-    ret.widget_arg = widget_arg or ret
+    ret._widget_context_skeleton = widget_context_skeleton
     setup_signals(ret)
 
     for k, v in pairs(drawable) do

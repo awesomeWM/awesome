@@ -18,12 +18,12 @@ local function round(x)
 end
 
 --- Draw a flex layout. Each widget gets an equal share of the available space.
--- @param wibox The wibox that this widget is drawn to.
+-- @param context The context in which we are drawn.
 -- @param cr The cairo context to use.
 -- @param width The available width.
 -- @param height The available height.
 -- @return The total space needed by the layout.
-function flex:draw(wibox, cr, width, height)
+function flex:draw(context, cr, width, height)
     local pos,spacing = 0,self._spacing or 0
     local num = #self.widgets
     local total_spacing = (spacing*(num-1))
@@ -48,7 +48,7 @@ function flex:draw(wibox, cr, width, height)
             x, y = round(pos), 0
             w, h = floor(space_per_item), height
         end
-        base.draw_widget(wibox, cr, v, x, y, w, h)
+        base.draw_widget(context, cr, v, x, y, w, h)
 
         pos = pos + space_per_item + spacing
 
@@ -75,9 +75,10 @@ function flex:set_max_widget_size(val)
 end
 
 --- Fit the flex layout into the given space.
+-- @param context The context in which we are fit.
 -- @param orig_width The available width.
 -- @param orig_height The available height.
-function flex:fit(orig_width, orig_height)
+function flex:fit(context, orig_width, orig_height)
     local used_in_dir = 0
     local used_in_other = 0
 
@@ -86,7 +87,7 @@ function flex:fit(orig_width, orig_height)
     local sub_width  = self.dir == "y" and orig_width  or floor(orig_width / #self.widgets)
 
     for k, v in pairs(self.widgets) do
-        local w, h = base.fit_widget(v, sub_width, sub_height)
+        local w, h = base.fit_widget(context, v, sub_width, sub_height)
 
         local max = self.dir == "y" and w or h
         if max > used_in_other then
