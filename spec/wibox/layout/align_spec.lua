@@ -56,8 +56,7 @@ describe("wibox.layout.flex", function()
 
             describe("without enough height", function()
                 it("fit", function()
-                    -- XXX: Is this really what should happen?
-                    assert.widget_fit(layout, { 5, 100 }, { 15, 35 })
+                    assert.widget_fit(layout, { 5, 100 }, { 5, 35 })
                 end)
 
                 it("draw", function()
@@ -72,8 +71,7 @@ describe("wibox.layout.flex", function()
 
             describe("without enough width", function()
                 it("fit", function()
-                    -- XXX: Is this really what should happen?
-                    assert.widget_fit(layout, { 100, 20 }, { 15, 35 })
+                    assert.widget_fit(layout, { 100, 20 }, { 15, 20 })
                 end)
 
                 it("draw", function()
@@ -135,8 +133,7 @@ describe("wibox.layout.flex", function()
 
             describe("without enough height", function()
                 it("fit", function()
-                    -- XXX: Is this really what should happen?
-                    assert.widget_fit(layout, { 5, 100 }, { 15, 35 })
+                    assert.widget_fit(layout, { 5, 100 }, { 5, 35 })
                 end)
 
                 it("draw", function()
@@ -151,8 +148,7 @@ describe("wibox.layout.flex", function()
 
             describe("without enough width", function()
                 it("fit", function()
-                    -- XXX: Is this really what should happen?
-                    assert.widget_fit(layout, { 100, 20 }, { 15, 35 })
+                    assert.widget_fit(layout, { 100, 20 }, { 15, 20 })
                 end)
 
                 it("draw", function()
@@ -214,7 +210,7 @@ describe("wibox.layout.flex", function()
             describe("without enough height", function()
                 it("fit", function()
                     -- XXX: Is this really what should happen?
-                    assert.widget_fit(layout, { 5, 100 }, { 15, 35 })
+                    assert.widget_fit(layout, { 5, 100 }, { 5, 35 })
                 end)
 
                 it("draw", function()
@@ -229,8 +225,7 @@ describe("wibox.layout.flex", function()
 
             describe("without enough width", function()
                 it("fit", function()
-                    -- XXX: Is this really what should happen?
-                    assert.widget_fit(layout, { 100, 20 }, { 15, 35 })
+                    assert.widget_fit(layout, { 100, 20 }, { 15, 20 })
                 end)
 
                 it("draw", function()

@@ -54,8 +54,7 @@ describe("wibox.layout.fixed", function()
 
         describe("without enough height", function()
             it("fit", function()
-                -- XXX: Is this really what should happen?
-                assert.widget_fit(layout, { 5, 100 }, { 15, 35 })
+                assert.widget_fit(layout, { 5, 100 }, { 5, 35 })
             end)
 
             it("draw", function()
