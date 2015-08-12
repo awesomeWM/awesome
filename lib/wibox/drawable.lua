@@ -59,7 +59,10 @@ local function do_redraw(self)
     self._widget_geometries = {}
     if self.widget and self.widget.visible then
         cr:set_source(self.foreground_color)
+        cr:push_group()
         self.widget:draw(self.widget_arg, cr, width, height)
+        cr:pop_group_to_source()
+        cr:paint_with_alpha(self.widget.opacity)
         self:widget_at(self.widget, 0, 0, width, height)
     end
 

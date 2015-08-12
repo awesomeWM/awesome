@@ -66,11 +66,14 @@ function base.draw_widget(wibox, cr, widget, x, y, width, height)
     cr:rectangle(0, 0, width, height)
     cr:clip()
 
+    cr:push_group()
     -- Let the widget draw itself
     local success, msg = pcall(widget.draw, widget, wibox, cr, width, height)
     if not success then
         print("Error while drawing widget: " .. msg)
     end
+    cr:pop_group_to_source()
+    cr:paint_with_alpha(widget.opacity)
 
     -- Register the widget for input handling
     wibox:widget_at(widget, base.rect_to_device_geometry(cr, 0, 0, width, height))
