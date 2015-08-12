@@ -29,6 +29,7 @@ local wibox = { mt = {} }
 wibox.layout = require("wibox.layout")
 wibox.widget = require("wibox.widget")
 wibox.drawable = require("wibox.drawable")
+wibox.hierarchy = require("wibox.hierarchy")
 
 --- Set the widget that the wibox displays
 function wibox:set_widget(widget)
@@ -108,7 +109,7 @@ local function new(args)
     local ret = object()
     local w = capi.drawin(args)
     ret.drawin = w
-    ret._drawable = wibox.drawable(w.drawable, ret,
+    ret._drawable = wibox.drawable(w.drawable, { wibox = ret },
         "wibox drawable (" .. object.modulename(3) .. ")")
 
     for k, v in pairs(wibox) do

@@ -16,11 +16,9 @@ local print = print
 local imagebox = { mt = {} }
 
 --- Draw an imagebox with the given cairo context in the given geometry.
-function imagebox:draw(wibox, cr, width, height)
+function imagebox:draw(context, cr, width, height)
     if not self._image then return end
     if width == 0 or height == 0 then return end
-
-    cr:save()
 
     if not self.resize_forbidden then
         -- Let's scale the image so that it fits into (width, height)
@@ -34,12 +32,10 @@ function imagebox:draw(wibox, cr, width, height)
     end
     cr:set_source_surface(self._image, 0, 0)
     cr:paint()
-
-    cr:restore()
 end
 
 --- Fit the imagebox into the given geometry
-function imagebox:fit(width, height)
+function imagebox:fit(context, width, height)
     if not self._image then
         return 0, 0
     end
@@ -101,7 +97,8 @@ function imagebox:set_image(image)
 
     self._image = image
 
-    self:emit_signal("widget::updated")
+    self:emit_signal("widget::redraw_needed")
+    self:emit_signal("widget::layout_changed")
     return true
 end
 
@@ -110,7 +107,8 @@ end
 --                to fit into the available space.
 function imagebox:set_resize(allowed)
     self.resize_forbidden = not allowed
-    self:emit_signal("widget::updated")
+    self:emit_signal("widget::redraw_needed")
+    self:emit_signal("widget::layout_changed")
 end
 
 --- Returns a new imagebox

@@ -10,23 +10,20 @@ local error = error
 local pairs = pairs
 local ipairs = ipairs
 local setmetatable = setmetatable
-local base = require("wibox.layout.base")
-local widget_base = require("wibox.widget.base")
+local base = require("wibox.widget.base")
+local Matrix = require("lgi").cairo.Matrix
 
 local mirror = { mt = {} }
 
---- Draw this layout
-function mirror:draw(wibox, cr, width, height)
-    if not self.widget then
-        return { width = 0, height = 0 }
-    end
+--- Layout this layout
+function mirror:layout(context, cr, width, height)
+    if not self.widget then return end
     if not self.horizontal and not self.vertical then
         base.draw_widget(wibox, cr, self.widget, 0, 0, width, height)
-        return -- nothing changed
+        return
     end
 
-    cr:save()
-
+    local m = Matrix.create_identity()
     local t = { x = 0, y = 0 } -- translation
     local s = { x = 1, y = 1 } -- scale
     if self.horizontal then
@@ -37,35 +34,28 @@ function mirror:draw(wibox, cr, width, height)
         t.x = width
         s.x = -1
     end
-    cr:translate(t.x, t.y)
-    cr:scale(s.x, s.y)
+    m:translate(t.x, t.y)
+    m:scale(s.x, s.y)
 
-    self.widget:draw(wibox, cr, width, height)
-
-    -- Undo the scale and translation from above.
-    cr:restore()
+    return base.place_widget_via_matrix(widget, m, width, height)
 end
 
 --- Fit this layout into the given area
-function mirror:fit(...)
+function mirror:fit(context, ...)
     if not self.widget then
         return 0, 0
     end
-    return base.fit_widget(self.widget, ...)
+    return base.fit_widget(context, self.widget, ...)
 end
 
 --- Set the widget that this layout mirrors.
 -- @param widget The widget to mirror
 function mirror:set_widget(widget)
-    if self.widget then
-        self.widget:disconnect_signal("widget::updated", self._emit_updated)
-    end
     if widget then
-        widget_base.check_widget(widget)
-        widget:weak_connect_signal("widget::updated", self._emit_updated)
+        base.check_widget(widget)
     end
     self.widget = widget
-    self._emit_updated()
+    self:emit_signal("widget::layout_changed")
 end
 
 --- Reset this layout. The widget will be removed and the axes reset.
@@ -87,7 +77,7 @@ function mirror:set_reflection(reflection)
             self[ref] = reflection[ref]
         end
     end
-    self._emit_updated()
+    self:emit_signal("widget::layout_changed")
 end
 
 --- Get the reflection of this mirror layout.
@@ -103,7 +93,7 @@ end
 -- @param[opt] widget The widget to display.
 -- @param[opt] reflection A table describing the reflection to apply.
 local function new(widget, reflection)
-    local ret = widget_base.make_widget()
+    local ret = base.make_widget()
     ret.horizontal = false
     ret.vertical = false
 
@@ -111,10 +101,6 @@ local function new(widget, reflection)
         if type(v) == "function" then
             ret[k] = v
         end
-    end
-
-    ret._emit_updated = function()
-        ret:emit_signal("widget::updated")
     end
 
     ret:set_widget(widget)

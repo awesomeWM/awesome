@@ -5,8 +5,7 @@
 -- @classmod wibox.layout.flex
 ---------------------------------------------------------------------------
 
-local base = require("wibox.layout.base")
-local widget_base = require("wibox.widget.base")
+local base = require("wibox.widget.base")
 local table = table
 local pairs = pairs
 local floor = math.floor
@@ -17,14 +16,13 @@ local function round(x)
     return floor(x + 0.5)
 end
 
---- Draw a flex layout. Each widget gets an equal share of the available space.
--- @param wibox The wibox that this widget is drawn to.
--- @param cr The cairo context to use.
+--- Layout a flex layout. Each widget gets an equal share of the available space.
+-- @param context The context in which we are drawn.
 -- @param width The available width.
 -- @param height The available height.
--- @return The total space needed by the layout.
-function flex:draw(wibox, cr, width, height)
-    local pos,spacing = 0,self._spacing or 0
+function flex:layout(context, width, height)
+    local result = {}
+    local pos,spacing = 0, self._spacing
     local num = #self.widgets
     local total_spacing = (spacing*(num-1))
 
@@ -48,7 +46,7 @@ function flex:draw(wibox, cr, width, height)
             x, y = round(pos), 0
             w, h = floor(space_per_item), height
         end
-        base.draw_widget(wibox, cr, v, x, y, w, h)
+        table.insert(result, base.place_widget_at(v, x, y, w, h))
 
         pos = pos + space_per_item + spacing
 
@@ -57,27 +55,15 @@ function flex:draw(wibox, cr, width, height)
             break
         end
     end
-end
 
-function flex:add(widget)
-    widget_base.check_widget(widget)
-    table.insert(self.widgets, widget)
-    widget:weak_connect_signal("widget::updated", self._emit_updated)
-    self._emit_updated()
-end
-
---- Set the maximum size the widgets in this layout will take (that is,
--- maximum width for horizontal and maximum height for vertical).
--- @param val The maximum size of the widget.
-function flex:set_max_widget_size(val)
-    self._max_widget_size = val
-    self:emit_signal("widget::updated")
+    return result
 end
 
 --- Fit the flex layout into the given space.
+-- @param context The context in which we are fit.
 -- @param orig_width The available width.
 -- @param orig_height The available height.
-function flex:fit(orig_width, orig_height)
+function flex:fit(context, orig_width, orig_height)
     local used_in_dir = 0
     local used_in_other = 0
 
@@ -86,7 +72,7 @@ function flex:fit(orig_width, orig_height)
     local sub_width  = self.dir == "y" and orig_width  or floor(orig_width / #self.widgets)
 
     for k, v in pairs(self.widgets) do
-        local w, h = base.fit_widget(v, sub_width, sub_height)
+        local w, h = base.fit_widget(context, v, sub_width, sub_height)
 
         local max = self.dir == "y" and w or h
         if max > used_in_other then
@@ -101,7 +87,7 @@ function flex:fit(orig_width, orig_height)
             #self.widgets * self._max_widget_size)
     end
 
-    local spacing = ((self._spacing or 0)*(#self.widgets-1))
+    local spacing = self._spacing * (#self.widgets-1)
 
     if self.dir == "y" then
         return used_in_other, used_in_dir + spacing
@@ -109,17 +95,39 @@ function flex:fit(orig_width, orig_height)
     return used_in_dir + spacing, used_in_other
 end
 
-function flex:reset()
-    for k, v in pairs(self.widgets) do
-        v:disconnect_signal("widget::updated", self._emit_updated)
+function flex:add(widget)
+    base.check_widget(widget)
+    table.insert(self.widgets, widget)
+    self:emit_signal("widget::layout_changed")
+end
+
+--- Set the maximum size the widgets in this layout will take (that is,
+-- maximum width for horizontal and maximum height for vertical).
+-- @param val The maximum size of the widget.
+function flex:set_max_widget_size(val)
+    if self._max_widget_size ~= val then
+        self._max_widget_size = val
+        self:emit_signal("widget::layout_changed")
     end
+end
+
+--- Add spacing between each layout widgets
+-- @param spacing Spacing between widgets.
+function flex:set_spacing(spacing)
+    if self._spacing ~= spacing then
+        self._spacing = spacing
+        self:emit_signal("widget::layout_changed")
+    end
+end
+
+function flex:reset()
     self.widgets = {}
     self._max_widget_size = nil
-    self:emit_signal("widget::updated")
+    self:emit_signal("widget::layout_changed")
 end
 
 local function get_layout(dir)
-    local ret = widget_base.make_widget()
+    local ret = base.make_widget()
 
     for k, v in pairs(flex) do
         if type(v) == "function" then
@@ -129,9 +137,7 @@ local function get_layout(dir)
 
     ret.dir = dir
     ret.widgets = {}
-    ret._emit_updated = function()
-        ret:emit_signal("widget::updated")
-    end
+    ret:set_spacing(0)
 
     return ret
 end
@@ -146,13 +152,6 @@ end
 -- equally among all widgets. Widgets can be added via :add(widget).
 function flex.vertical()
     return get_layout("y")
-end
-
---- Add spacing between each layout widgets
--- @param spacing Spacing between widgets.
-function flex:set_spacing(spacing)
-    self._spacing = spacing
-    self:emit_signal("widget::updated")
 end
 
 return flex
