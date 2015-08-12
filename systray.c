@@ -45,12 +45,14 @@ systray_init(void)
     xcb_screen_t *xscreen = globalconf.screen;
 
     globalconf.systray.window = xcb_generate_id(globalconf.connection);
+    globalconf.systray.background_pixel = xscreen->black_pixel;
     xcb_create_window(globalconf.connection, xscreen->root_depth,
                       globalconf.systray.window,
                       xscreen->root,
                       -1, -1, 1, 1, 0,
                       XCB_COPY_FROM_PARENT, xscreen->root_visual,
-                      0, NULL);
+                      XCB_CW_BACK_PIXEL, (const uint32_t [])
+                      { xscreen->black_pixel });
 
     atom_name = xcb_atom_name_by_screen("_NET_SYSTEM_TRAY", globalconf.default_screen);
     if(!atom_name)
@@ -255,7 +257,7 @@ luaA_systray_invalidate(void)
 }
 
 static void
-systray_update(int base_size, bool horizontal, bool reverse)
+systray_update(int base_size, bool horizontal, bool reverse, bool force_redraw)
 {
     if(base_size <= 0)
         return;
@@ -287,6 +289,8 @@ systray_update(int base_size, bool horizontal, bool reverse)
                              XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
                              config_vals);
         xcb_map_window(globalconf.connection, em->win);
+        if (force_redraw)
+            xcb_clear_area(globalconf.connection, 1, em->win, 0, 0, 0, 0);
         if(horizontal)
             config_vals[0] += base_size;
         else
@@ -322,13 +326,18 @@ luaA_systray(lua_State *L)
         const char *bg = luaL_checklstring(L, 6, &bg_len);
         bool revers = lua_toboolean(L, 7);
         color_t bg_color;
+        bool force_redraw = false;
 
-        if(color_init_reply(color_init_unchecked(&bg_color, bg, bg_len)))
+        if(color_init_reply(color_init_unchecked(&bg_color, bg, bg_len))
+                && globalconf.systray.background_pixel != bg_color.pixel)
         {
             uint32_t config_back[] = { bg_color.pixel };
+            globalconf.systray.background_pixel = bg_color.pixel;
             xcb_change_window_attributes(globalconf.connection,
                                          globalconf.systray.window,
                                          XCB_CW_BACK_PIXEL, config_back);
+            xcb_clear_area(globalconf.connection, 1, globalconf.systray.window, 0, 0, 0, 0);
+            force_redraw = true;
         }
 
         if(globalconf.systray.parent != w)
@@ -349,7 +358,7 @@ luaA_systray(lua_State *L)
 
         if(globalconf.embedded.len != 0)
         {
-            systray_update(base_size, horiz, revers);
+            systray_update(base_size, horiz, revers, force_redraw);
             xcb_map_window(globalconf.connection,
                            globalconf.systray.window);
         }

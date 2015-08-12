@@ -127,6 +127,8 @@ typedef struct
         bool registered;
         /** Systray window parent */
         drawin_t *parent;
+        /** Background color */
+        uint32_t background_pixel;
     } systray;
     /** The monitor of startup notifications */
     SnMonitorContext *snmonitor;
