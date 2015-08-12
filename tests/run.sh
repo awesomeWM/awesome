@@ -36,6 +36,7 @@ XEPHYR=Xephyr
 XVFB=Xvfb
 AWESOME=$root_dir/build/awesome
 RC_FILE=$root_dir/build/awesomerc.lua
+AWESOME_CLIENT="$root_dir/utils/awesome-client"
 D=:5
 SIZE=1024x768
 
@@ -50,9 +51,6 @@ else
     # ( sleep 1; kill -USR1 $xserver_pid ) &
 fi
 
-# Use a separate D-Bus session; sets $DBUS_SESSION_BUS_PID.
-eval $(DISPLAY="$D" dbus-launch --sh-syntax --exit-with-session)
-
 cd $root_dir/build
 
 LUA_PATH="$(lua -e 'print(package.path)');lib/?.lua;lib/?/init.lua"
@@ -62,47 +60,68 @@ XDG_CONFIG_HOME="./"
 export LUA_PATH
 export XDG_CONFIG_HOME
 
-awesome_log=/tmp/_awesome_test.log
-echo "awesome_log: $awesome_log"
-
 cd - >/dev/null
 
-
-kill_childs() {
+# Cleanup on errors / aborting.
+cleanup() {
     for p in $awesome_pid $xserver_pid; do
         kill -TERM $p 2>/dev/null || true
     done
+    rm -rf $tmp_files || true
 }
-# Cleanup on errors / aborting.
-set_trap() {
-    trap "kill_childs" 0 2 3 15
+trap "cleanup" 0 2 3 15
+
+tmp_files=$(mktemp -d)
+awesome_log=$tmp_files/_awesome_test.log
+echo "awesome_log: $awesome_log"
+
+wait_until_success() {
+    if [ "$CI" = true ]; then
+        set +x
+    fi
+    max_wait=60
+    while true; do
+        set +e
+        eval reply="\$($2)"
+        ret=$?
+        set -e
+        if [ $ret = 0 ]; then
+            break
+        fi
+        max_wait=$(expr $max_wait - 1 || true)
+        if [ "$max_wait" -lt 0 ]; then
+            echo "Error: failed to $1!"
+            echo "Last reply: $reply."
+            if [ -f "$awesome_log" ]; then
+                echo "Log:"
+                cat "$awesome_log"
+            fi
+            exit 1
+        fi
+        sleep 0.05
+    done
+    if [ "$CI" = true ]; then
+        set -x
+    fi
 }
-set_trap
 
 # Wait for DISPLAY to be available, and setup xrdb,
 # for awesome's xresources backend / queries.
-max_wait=60
-while true; do
-    set +e
-    reply="$(echo "Xft.dpi: 96" | DISPLAY="$D" xrdb 2>&1)"
-    ret=$?
-    set -e
-    if [ $ret = 0 ]; then
-        break
-    fi
-    max_wait=$(expr $max_wait - 1)
-    if [ "$max_wait" -lt 0 ]; then
-        echo "Error: failed to setup xrdb!"
-        echo "Last reply: $reply."
-        echo "Log:"
-        cat "$awesome_log"
-        exit 1
-    fi
-    sleep 0.05
-done
+wait_until_success "setup xrdb" "echo 'Xft.dpi: 96' | DISPLAY='$D' xrdb 2>&1"
 
+# Use a separate D-Bus session; sets $DBUS_SESSION_BUS_PID.
+eval $(DISPLAY="$D" dbus-launch --sh-syntax --exit-with-session)
 
-AWESOME_CLIENT="$root_dir/utils/awesome-client"
+# Not in Travis?
+if [ "$CI" != true ]; then
+    # Prepare a config file pointing to a working theme
+    RC_FILE=$tmp_files/awesomerc.lua
+    THEME_FILE=$tmp_files/theme.lua
+    sed -e "s:beautiful.init(\"@AWESOME_THEMES_PATH@/default/theme.lua\"):beautiful.init('$THEME_FILE'):" $root_dir/awesomerc.lua > $RC_FILE
+    sed -e "s:@AWESOME_THEMES_PATH@/default/titlebar:$root_dir/build/themes/default/titlebar:"  \
+        -e "s:@AWESOME_THEMES_PATH@:$root_dir/themes/:" \
+        -e "s:@AWESOME_ICON_PATH@:$root_dir/icons:" $root_dir/themes/default/theme.lua > $THEME_FILE
+fi
 
 # Start awesome.
 start_awesome() {
@@ -113,26 +132,7 @@ start_awesome() {
     cd - >/dev/null
 
     # Wait until the interface for awesome-client is ready (D-Bus interface).
-    client_reply=
-    max_wait=50
-    while true; do
-        set +e
-        client_reply=$(echo 'return 1' | DISPLAY=$D "$AWESOME_CLIENT" 2>&1)
-        ret=$?
-        set -e
-        if [ $ret = 0 ]; then
-            break
-        fi
-        max_wait=$(expr $max_wait - 1 || true)
-        if [ "$max_wait" -lt 0 ] || ! kill -0 $awesome_pid ; then
-            echo "Error: did not receive a successful reply via awesome-client!"
-            echo "Last reply: $client_reply."
-            echo "Log:"
-            cat "$awesome_log"
-            exit 1
-        fi
-        sleep 0.1
-    done
+    wait_until_success "wait for awesome startup via awesome-client" "echo 'return 1' | DISPLAY=$D '$AWESOME_CLIENT' 2>&1"
 }
 
 # Count errors.
@@ -153,7 +153,7 @@ for f in $tests; do
     cat $f | DISPLAY=$D "$AWESOME_CLIENT" 2>&1
 
     # Tail the log and quit, when awesome quits.
-    tail -f --pid $awesome_pid $awesome_log
+    tail -n 100000 -f --pid $awesome_pid $awesome_log
 
     if grep -q -E '^Error|assertion failed' $awesome_log; then
         echo "===> ERROR running $f! <==="
