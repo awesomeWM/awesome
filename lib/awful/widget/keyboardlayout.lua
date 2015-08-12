@@ -19,17 +19,17 @@ local keyboardlayout = { mt = {} }
 
 -- Callback for updaing current layout
 local function update_status (keyboardlayout)
-   keyboardlayout.current = awesome.xkb_get_layout_group();
+   keyboardlayout._current = awesome.xkb_get_layout_group();
    local text = ""
-   if (#keyboardlayout.layout > 0) then
-      text = (" " .. keyboardlayout.layout[keyboardlayout.current] .. " ")
+   if (#keyboardlayout._layout > 0) then
+      text = (" " .. keyboardlayout._layout[keyboardlayout._current] .. " ")
    end
    keyboardlayout.widget:set_text(text)
 end
 
 -- Callback for updating list of layouts
 local function update_layout(keyboardlayout)
-   keyboardlayout.layout = {};
+   keyboardlayout._layout = {};
    local group_names = awesome.xkb_get_group_names();
 
 -- A typical layout string looks like "pc+us+ru:2+de:3+ba:4+inet",
@@ -41,11 +41,11 @@ local function update_layout(keyboardlayout)
       error ("Failed to get list of keyboard groups");
       return;
    end
-   keyboardlayout.layout[0] = first_group;
+   keyboardlayout._layout[0] = first_group;
 
    for name, number_str in string.gmatch(group_names, "+(%a+):(%d)") do
       group = tonumber(number_str);
-      keyboardlayout.layout[group - 1] = name;
+      keyboardlayout._layout[group - 1] = name;
    end
    update_status(keyboardlayout)
 end
@@ -61,14 +61,14 @@ function keyboardlayout.new()
    update_layout(keyboardlayout);
 
    keyboardlayout.next_layout = function()
-      new_layout = (keyboardlayout.current + 1) % (#keyboardlayout.layout + 1)
+      new_layout = (keyboardlayout._current + 1) % (#keyboardlayout._layout + 1)
       keyboardlayout.set_layout(new_layout)
    end
 
    keyboardlayout.set_layout = function(group_number)
-      if (0 > group_number) or (group_number > #keyboardlayout.layout) then
+      if (0 > group_number) or (group_number > #keyboardlayout._layout) then
          error("Invalid group number: " .. group_number ..
-                  "expected number from 0 to " .. #keyboardlayout.layout)
+                  "expected number from 0 to " .. #keyboardlayout._layout)
          return;
       end
       awesome.xkb_set_layout_group(group_number);
