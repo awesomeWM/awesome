@@ -20,7 +20,8 @@ local object = require("gears.object")
 
 --- Timer objects. This type of object is useful when triggering events repeatedly.
 -- The timer will emit the "timeout" signal every N seconds, N being the timeout
--- value.
+-- value. Note that a started timer will not be garbage collected. Call `:stop`
+-- to enable garbage collection.
 -- @tfield number timeout Interval in seconds to emit the timeout signal.
 --                        Can be any value, including floating point ones
 --                        (e.g. 1.5 seconds).
@@ -101,6 +102,46 @@ timer.new = function(args)
     end
 
     return ret
+end
+
+--- Create a timeout for calling some callback function.
+-- When the callback function returns true, it will be called again after the
+-- same timeout. If false is returned, no more calls will be done. If the
+-- callback function causes an error, no more calls are done.
+-- @tparam number timeout Timeout in seconds (e.g. 1.5).
+-- @tparam function callback Function to run.
+-- @see timer.weak_start_new
+function timer.start_new(timeout, callback)
+    local t = timer.new({ timeout = timeout })
+    t:connect_signal("timeout", function()
+        local success, cont = xpcall(callback, function(err)
+            print(debug.traceback("Error during executing timeout handler: "..tostring(err), 2))
+        end)
+        if not success or not cont then
+            t:stop()
+        end
+    end)
+    t:start()
+    return t
+end
+
+--- Create a timeout for calling some callback function.
+-- This function is almost identical to `timer.start_new`. The only difference
+-- is that this does not prevent the callback function from being garbage
+-- collected. After the callback function was collected, the timer returned
+-- will automatically be stopped.
+-- @tparam number timeout Timeout in seconds (e.g. 1.5).
+-- @tparam function callback Function to start.
+-- @see timer.start_new
+function timer.weak_start_new(timeout, callback)
+    local indirection = setmetatable({}, { __mode = "v" })
+    indirection.callback = callback
+    return timer.start_new(timeout, function()
+        local cb = indirection.callback
+        if cb then
+            return cb()
+        end
+    end)
 end
 
 local delayed_calls = {}
