@@ -141,6 +141,31 @@ luaA_getopt_number(lua_State *L, int idx, const char *name, lua_Number def)
     return def;
 }
 
+static inline int
+luaA_checkinteger(lua_State *L, int n)
+{
+    double d = lua_tonumber(L, n);
+    if (d != (int)d)
+        luaA_typerror(L, n, "integer");
+    return d;
+}
+
+static inline lua_Integer
+luaA_optinteger (lua_State *L, int narg, lua_Integer def)
+{
+    return luaL_opt(L, luaA_checkinteger, narg, def);
+}
+
+static inline int
+luaA_getopt_integer(lua_State *L, int idx, const char *name, lua_Integer def)
+{
+    lua_getfield(L, idx, name);
+    if (lua_isnil(L, -1) || lua_isnumber(L, -1))
+        def = luaA_optinteger(L, -1, def);
+    lua_pop(L, 1);
+    return def;
+}
+
 /** Push a area type to a table on stack.
  * \param L The Lua VM state.
  * \param geometry The area geometry to push.

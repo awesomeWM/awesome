@@ -380,10 +380,10 @@ luaA_drawin_geometry(lua_State *L)
         area_t wingeom;
 
         luaA_checktable(L, 2);
-        wingeom.x = luaA_getopt_number(L, 2, "x", drawin->geometry.x);
-        wingeom.y = luaA_getopt_number(L, 2, "y", drawin->geometry.y);
-        wingeom.width = luaA_getopt_number(L, 2, "width", drawin->geometry.width);
-        wingeom.height = luaA_getopt_number(L, 2, "height", drawin->geometry.height);
+        wingeom.x = luaA_getopt_integer(L, 2, "x", drawin->geometry.x);
+        wingeom.y = luaA_getopt_integer(L, 2, "y", drawin->geometry.y);
+        wingeom.width = luaA_getopt_integer(L, 2, "width", drawin->geometry.width);
+        wingeom.height = luaA_getopt_integer(L, 2, "height", drawin->geometry.height);
 
         if(wingeom.width > 0 && wingeom.height > 0)
             drawin_moveresize(L, 1, wingeom);
@@ -400,7 +400,7 @@ LUA_OBJECT_EXPORT_PROPERTY(drawin, drawin_t, visible, lua_pushboolean)
 static int
 luaA_drawin_set_x(lua_State *L, drawin_t *drawin)
 {
-    drawin_moveresize(L, -3, (area_t) { .x = luaL_checknumber(L, -1),
+    drawin_moveresize(L, -3, (area_t) { .x = luaA_checkinteger(L, -1),
                                         .y = drawin->geometry.y,
                                         .width = drawin->geometry.width,
                                         .height = drawin->geometry.height });
@@ -418,7 +418,7 @@ static int
 luaA_drawin_set_y(lua_State *L, drawin_t *drawin)
 {
     drawin_moveresize(L, -3, (area_t) { .x = drawin->geometry.x,
-                                        .y = luaL_checknumber(L, -1),
+                                        .y = luaA_checkinteger(L, -1),
                                         .width = drawin->geometry.width,
                                         .height = drawin->geometry.height });
     return 0;
@@ -434,7 +434,7 @@ luaA_drawin_get_y(lua_State *L, drawin_t *drawin)
 static int
 luaA_drawin_set_width(lua_State *L, drawin_t *drawin)
 {
-    int width = luaL_checknumber(L, -1);
+    int width = luaA_checkinteger(L, -1);
     if(width <= 0)
         luaL_error(L, "invalid width");
     drawin_moveresize(L, -3, (area_t) { .x = drawin->geometry.x,
@@ -454,7 +454,7 @@ luaA_drawin_get_width(lua_State *L, drawin_t *drawin)
 static int
 luaA_drawin_set_height(lua_State *L, drawin_t *drawin)
 {
-    int height = luaL_checknumber(L, -1);
+    int height = luaA_checkinteger(L, -1);
     if(height <= 0)
         luaL_error(L, "invalid height");
     drawin_moveresize(L, -3, (area_t) { .x = drawin->geometry.x,

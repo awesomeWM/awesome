@@ -27,6 +27,7 @@ local capi =
     awesome = awesome,
     mouse = mouse
 }
+local floor = math.floor
 
 local util = {}
 util.table = {}
@@ -524,6 +525,13 @@ function util.query_to_pattern(q)
                                              string.upper(c))
                     end)
     return s
+end
+
+--- Round a number to an integer.
+-- @tparam number x
+-- @treturn integer
+function util.round(x)
+    return floor(x + 0.5)
 end
 
 return util

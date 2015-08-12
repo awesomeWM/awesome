@@ -10,7 +10,7 @@
 -- Grab environment
 local print = print
 local awesome = awesome
-local floor = math.floor
+local round = require("awful.util").round
 
 local xresources = {}
 
@@ -94,7 +94,7 @@ end
 -- @tparam[opt] integer s The screen.
 -- @treturn integer Resulting size (rounded to integer).
 function xresources.apply_dpi(size, s)
-    return floor(size/96*xresources.get_dpi(s) + 0.5)
+    return round(size / 96 * xresources.get_dpi(s))
 end
 
 return xresources
