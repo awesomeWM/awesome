@@ -10,12 +10,9 @@ local widget_base = require("wibox.widget.base")
 local table = table
 local pairs = pairs
 local floor = math.floor
+local round = require("awful.util").round
 
 local flex = {}
-
-local function round(x)
-    return floor(x + 0.5)
-end
 
 --- Draw a flex layout. Each widget gets an equal share of the available space.
 -- @param wibox The wibox that this widget is drawn to.
