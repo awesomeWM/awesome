@@ -80,8 +80,8 @@ function flex:fit(context, orig_width, orig_height)
     local used_in_other = 0
 
     -- Figure out the maximum size we can give out to sub-widgets
-    local sub_height = self.dir == "x" and orig_height or floor(orig_height / #self.widgets)
-    local sub_width  = self.dir == "y" and orig_width  or floor(orig_width / #self.widgets)
+    local sub_height = self.dir == "x" and orig_height or orig_height / #self.widgets
+    local sub_width  = self.dir == "y" and orig_width  or orig_width / #self.widgets
 
     for k, v in pairs(self.widgets) do
         local w, h = base.fit_widget(context, v, sub_width, sub_height)

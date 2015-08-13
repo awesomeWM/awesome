@@ -26,7 +26,12 @@ function base.fit_widget(context, widget, width, height)
     local width = math.max(0, width)
     local height = math.max(0, height)
 
-    return widget._fit_geometry_cache:get(context, width, height)
+    local w, h = widget._fit_geometry_cache:get(context, width, height)
+
+    -- Also sanitize the output.
+    w = math.max(0, math.min(w, width))
+    h = math.max(0, math.min(h, height))
+    return w, h
 end
 
 --- Draw a widget via a cairo context

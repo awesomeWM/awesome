@@ -54,8 +54,7 @@ describe("wibox.layout.fixed", function()
 
         describe("without enough height", function()
             it("fit", function()
-                -- XXX: Is this really what should happen?
-                assert.widget_fit(layout, { 5, 100 }, { 15, 35 })
+                assert.widget_fit(layout, { 5, 100 }, { 5, 35 })
             end)
 
             it("draw", function()
@@ -76,9 +75,10 @@ describe("wibox.layout.fixed", function()
 
             it("draw", function()
                 layout:draw("wibox", "cr", 100, 20)
-                --- XXX: Shouldn't this also draw part of the second widget?
                 utils.check_widgets_drawn({
                     { first,  0,  0, 100, 10 },
+                    { second, 0, 10, 100, 10 },
+                    { third,  0, 20, 100,  0 },
                 })
             end)
         end)
