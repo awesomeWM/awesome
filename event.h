@@ -38,6 +38,9 @@ void client_properties_refresh(void);
 /* objects/drawable.c */
 void drawable_geometry_refresh(void);
 
+/* objects/drawin.c */
+void drawin_geometry_refresh(void);
+
 /* objects/window.c */
 void window_properties_refresh(void);
 
@@ -48,6 +51,7 @@ awesome_refresh(void)
     client_properties_refresh();
     window_properties_refresh();
     drawable_geometry_refresh();
+    drawin_geometry_refresh();
     banning_refresh();
     stack_refresh();
     client_focus_refresh();

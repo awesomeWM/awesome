@@ -158,6 +158,8 @@ typedef struct
     client_array_t need_properties_refresh_clients;
     /** List of drawables which need their geometry to be committed. */
     drawable_array_t need_geometry_refresh_drawable;
+    /** List of drawins which need their geometry to be committed. */
+    drawin_array_t need_geometry_refresh_drawin;
     /** Tag list */
     tag_array_t tags;
     /** List of registered xproperties */
