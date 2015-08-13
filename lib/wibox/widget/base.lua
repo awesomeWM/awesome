@@ -321,6 +321,9 @@ function base.make_widget(proxy, widget_name)
         if b ~= self.visible then
             self.visible = b
             self:emit_signal("widget::layout_changed")
+            -- Something could have ignored fit returning 0,0 and have drawn
+            -- this widget anyway. Redraw the widget in this case.
+            self:emit_signal("widget::redraw_needed")
         end
     end
 
