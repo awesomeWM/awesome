@@ -67,6 +67,10 @@ end
 local draw_hierarchy
 draw_hierarchy = function(arg, cr, hierarchy, dirty_area)
     local widget = hierarchy:get_widget()
+    if not widget.visible then
+        return
+    end
+
     cr:save()
     cr:transform(hierarchy:get_matrix_to_parent())
 
