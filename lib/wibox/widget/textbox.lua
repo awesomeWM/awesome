@@ -53,9 +53,10 @@ function textbox:fit(width, height)
     return logical.width, logical.height
 end
 
---- Set the text of the textbox (with Pango markup).
--- @param text The text to set. This can contain pango markup (e.g.
---   `<b>bold</b>`). You can use awful.util.escape to escape
+--- Set the text of the textbox (with
+-- [Pango markup](https://developer.gnome.org/pango/stable/PangoMarkupFormat.html)).
+-- @tparam string text The text to set. This can contain pango markup (e.g.
+--   `<b>bold</b>`). You can use `awful.util.escape` to escape
 --   parts of it.
 function textbox:set_markup(text)
     if self._markup == text then
