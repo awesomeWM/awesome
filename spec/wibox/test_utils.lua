@@ -6,8 +6,7 @@
 local object = require("gears.object")
 local cache = require("gears.cache")
 local matrix_equals = require("gears.matrix").equals
-local wbase = require("wibox.widget.base")
-local lbase = require("wibox.layout.base")
+local base = require("wibox.widget.base")
 local say = require("say")
 local assert = require("luassert")
 
@@ -20,7 +19,7 @@ local function widget_fit(state, arguments)
     local widget = arguments[1]
     local given = arguments[2]
     local expected = arguments[3]
-    local w, h = lbase.fit_widget({ "fake context" }, widget, given[1], given[2])
+    local w, h = base.fit_widget({ "fake context" }, widget, given[1], given[2])
 
     local fits = expected[1] == w and expected[2] == h
     if state.mod == fits then
