@@ -845,6 +845,9 @@ client_properties_refresh()
         }
     }
     client_restore_enterleave_events();
+
+    client_array_wipe(&globalconf.need_properties_refresh_clients);
+    client_array_init(&globalconf.need_properties_refresh_clients);
 }
 
 static void
