@@ -59,10 +59,17 @@ local function do_redraw(self)
     self._widget_geometries = {}
     if self.widget and self.widget.visible then
         cr:set_source(self.foreground_color)
-        cr:push_group()
+
+        if self.widget.opacity ~= 1 then
+            cr:push_group()
+        end
         self.widget:draw(self.widget_arg, cr, width, height)
-        cr:pop_group_to_source()
-        cr:paint_with_alpha(self.widget.opacity)
+        if self.widget.opacity ~= 1 then
+            cr:pop_group_to_source()
+            cr.operator = cairo.Operator.OVER
+            cr:paint_with_alpha(self.widget.opacity)
+        end
+
         self:widget_at(self.widget, 0, 0, width, height)
     end
 

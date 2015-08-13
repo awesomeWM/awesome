@@ -10,6 +10,7 @@ local pcall = pcall
 local print = print
 local min = math.min
 local max = math.max
+local cairo = require("lgi").cairo
 
 local base = {}
 
@@ -66,14 +67,19 @@ function base.draw_widget(wibox, cr, widget, x, y, width, height)
     cr:rectangle(0, 0, width, height)
     cr:clip()
 
-    cr:push_group()
+    if widget.opacity ~= 1 then
+        cr:push_group()
+    end
     -- Let the widget draw itself
     local success, msg = pcall(widget.draw, widget, wibox, cr, width, height)
+    if widget.opacity ~= 1 then
+        cr:pop_group_to_source()
+        cr.operator = cairo.Operator.OVER
+        cr:paint_with_alpha(widget.opacity)
+    end
     if not success then
         print("Error while drawing widget: " .. msg)
     end
-    cr:pop_group_to_source()
-    cr:paint_with_alpha(widget.opacity)
 
     -- Register the widget for input handling
     wibox:widget_at(widget, base.rect_to_device_geometry(cr, 0, 0, width, height))
