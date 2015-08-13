@@ -32,4 +32,4 @@ lua -e '_, _, major_minor, patch = string.find(require("lgi.version"), "^(%d%.%d
 		                    "0.7.1", require("lgi.version"))) end' || die
 
 # Check for the needed gi files
-lua -e 'l = require("lgi") assert(l.cairo, l.Pango, l.PangoCairo)' || die
+lua -e 'l = require("lgi") assert(l.cairo, l.Pango, l.PangoCairo, l.GLib, l.Gio)' || die
