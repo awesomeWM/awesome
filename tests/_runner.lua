@@ -1,4 +1,5 @@
-timer = require("gears.timer")
+local timer = require("gears.timer")
+local awful = require("awful")
 
 runner = {
   quit_awesome_on_error = os.getenv('TEST_PAUSE_ON_ERRORS') ~= '1',
