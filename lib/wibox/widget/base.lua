@@ -32,6 +32,10 @@ end
 -- @param height The available height for the widget
 -- @return The width and height that the widget wants to use
 function base.fit_widget(context, widget, width, height)
+    if not widget.visible then
+        return 0, 0
+    end
+
     -- Sanitize the input. This also filters out e.g. NaN.
     local width = math.max(0, width)
     local height = math.max(0, height)
@@ -316,7 +320,7 @@ function base.make_widget(proxy, widget_name)
     function ret:set_visible(b)
         if b ~= self.visible then
             self.visible = b
-            self:emit_signal("widget::updated")
+            self:emit_signal("widget::layout_changed")
         end
     end
 
