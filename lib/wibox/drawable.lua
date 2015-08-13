@@ -425,11 +425,6 @@ function drawable.new(d, widget_context_skeleton, drawable_name)
         if hierarchy:get_root() == ret._widget_hierarchy then
             ret._need_relayout = true
             ret:draw()
-            -- Clear caches as appropriate
-            while hierarchy ~= nil do
-                hierarchy:get_widget()._clear_widget_fit_layout_cache()
-                hierarchy = hierarchy:get_parent()
-            end
         end
     end
 
