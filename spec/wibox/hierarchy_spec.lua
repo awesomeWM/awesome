@@ -13,6 +13,7 @@ local function make_widget(children)
     local result = object()
     result:add_signal("widget::redraw_needed")
     result:add_signal("widget::layout_changed")
+    result.visible = true
     result._layout_cache = {
         get = function(self, width, height)
             return children

@@ -53,6 +53,10 @@ end
 -- @param height The available height for the widget
 -- @return The result from the widget's `:layout` callback.
 function base.layout_widget(context, widget, width, height)
+    if not widget.visible then
+        return
+    end
+
     -- Sanitize the input. This also filters out e.g. NaN.
     local width = math.max(0, width)
     local height = math.max(0, height)
