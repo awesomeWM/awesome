@@ -53,6 +53,8 @@ static lua_class_t drawable_class;
 
 LUA_OBJECT_FUNCS(drawable_class, drawable_t, drawable)
 
+ARRAY_FUNCS(drawable_t *, drawable, DO_NOTHING)
+
 drawable_t *
 drawable_allocator(lua_State *L, drawable_refresh_callback *callback, void *data)
 {
@@ -92,26 +94,45 @@ drawable_set_geometry(lua_State *L, int didx, area_t geom)
 
     bool size_changed = (old.width != geom.width) || (old.height != geom.height);
     if (size_changed)
-        drawable_unset_surface(d);
-    if (size_changed && geom.width > 0 && geom.height > 0)
     {
+        lua_pushvalue(L, -1);
+        drawable_array_push(&globalconf.need_geometry_refresh_drawable, luaA_object_ref(L, -1));
+    }
+}
+
+/** Commit pending drawable geometry changes.
+ */
+void
+drawable_geometry_refresh()
+{
+    if (!globalconf.need_geometry_refresh_drawable.len)
+        return;
+
+    foreach(_d, globalconf.need_geometry_refresh_drawable)
+    {
+        drawable_t *d = *_d;
+        area_t geom = d->geometry;
+
+        drawable_unset_surface(d);
+        if (geom.width <= 0 || geom.height <= 0)
+            continue;
+
         d->pixmap = xcb_generate_id(globalconf.connection);
         xcb_create_pixmap(globalconf.connection, globalconf.default_depth, d->pixmap,
                           globalconf.screen->root, geom.width, geom.height);
         d->surface = cairo_xcb_surface_create(globalconf.connection,
                                               d->pixmap, globalconf.visual,
                                               geom.width, geom.height);
-        luaA_object_emit_signal(L, didx, "property::surface", 0);
-    }
 
-    if (old.x != geom.x)
-        luaA_object_emit_signal(L, didx, "property::x", 0);
-    if (old.y != geom.y)
-        luaA_object_emit_signal(L, didx, "property::y", 0);
-    if (old.width != geom.width)
-        luaA_object_emit_signal(L, didx, "property::width", 0);
-    if (old.height != geom.height)
-        luaA_object_emit_signal(L, didx, "property::height", 0);
+        lua_State *L = globalconf_get_lua_State();
+
+        luaA_object_push(L, d);
+        luaA_checkudata(L, -1, &drawable_class);
+        luaA_object_emit_signal(L, -1, "property::surface", 0);
+        lua_pop(L, 1);
+    }
+    drawable_array_wipe(&globalconf.need_geometry_refresh_drawable);
+    drawable_array_init(&globalconf.need_geometry_refresh_drawable);
 }
 
 /** Get a drawable's surface

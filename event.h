@@ -35,6 +35,9 @@ void luaA_emit_refresh(void);
 void client_focus_refresh(void);
 void client_properties_refresh(void);
 
+/* objects/drawable.c */
+void drawable_geometry_refresh(void);
+
 /* objects/window.c */
 void window_properties_refresh(void);
 
@@ -44,6 +47,7 @@ awesome_refresh(void)
     luaA_emit_refresh();
     client_properties_refresh();
     window_properties_refresh();
+    drawable_geometry_refresh();
     banning_refresh();
     stack_refresh();
     client_focus_refresh();
