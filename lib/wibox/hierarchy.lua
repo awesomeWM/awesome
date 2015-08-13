@@ -11,6 +11,7 @@
 
 local matrix = require("gears.matrix")
 local cairo = require("lgi").cairo
+local base = require("wibox.widget.base")
 
 local hierarchy = {}
 
@@ -26,7 +27,7 @@ local hierarchy = {}
 -- @param root The root of the widget hierarchy or nil if this creates the root.
 -- @return A new widget hierarchy
 local function hierarchy_new(context, widget, width, height, redraw_callback, layout_callback, root)
-    local children = widget._layout_cache:get(context, width, height)
+    local children = base.layout_widget(context, widget, width, height)
     local draws_x1, draws_y1, draws_x2, draws_y2 = 0, 0, width, height
     local result = {
         _parent = nil,

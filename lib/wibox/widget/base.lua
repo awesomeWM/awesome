@@ -43,6 +43,23 @@ function base.fit_widget(context, widget, width, height)
     return widget._fit_geometry_cache:get(context, width, height)
 end
 
+--- Lay out a widget for the given available width and height. This calls the
+-- widget's `:layout` callback and caches the result for later use. Never call
+-- `:layout` directly, but always through this function! However, normally there
+-- shouldn't be any reason why you need to use this function.
+-- @param context The context in which we are laid out.
+-- @param widget The widget to layout (this uses widget:layout(context, width, height)).
+-- @param width The available width for the widget
+-- @param height The available height for the widget
+-- @return The result from the widget's `:layout` callback.
+function base.layout_widget(context, widget, width, height)
+    -- Sanitize the input. This also filters out e.g. NaN.
+    local width = math.max(0, width)
+    local height = math.max(0, height)
+
+    return widget._layout_cache:get(context, width, height)
+end
+
 --- Set/get a widget's buttons.
 -- This function is available on widgets created by @{make_widget}.
 function base:buttons(_buttons)
@@ -273,7 +290,9 @@ function base.make_widget(proxy, widget_name)
     end)
 
     if proxy then
-        ret.fit = function(_, ...) return proxy._fit_geometry_cache:get(...) end
+        ret.fit = function(_, context, width, height)
+            return base.fit_widget(context, proxy, width, height)
+        end
         ret.layout = function(_, context, width, height)
             return { base.place_widget_at(proxy, 0, 0, width, height) }
         end
@@ -297,7 +316,7 @@ function base.make_widget(proxy, widget_name)
             w, h = ret:fit(context, width, height)
         else
             -- If it has no fit method, calculate based on the size of children
-            local children = ret._layout_cache:get(context, width, height)
+            local children = base.layout_widget(context, ret, width, height)
             for _, info in ipairs(children or {}) do
                 local x, y, w2, h2 = matrix.transform_rectangle(info._matrix,
                     0, 0, info._width, info._height)
