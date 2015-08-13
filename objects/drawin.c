@@ -208,7 +208,6 @@ drawin_geometry_refresh()
     /* Activate BMA */
     client_ignore_enterleave_events();
 
-    printf("masks: %d, %d, %d, %d\n", XCB_CONFIG_WINDOW_X, XCB_CONFIG_WINDOW_Y, XCB_CONFIG_WINDOW_WIDTH, XCB_CONFIG_WINDOW_HEIGHT);
     foreach(_d, globalconf.need_geometry_refresh_drawin)
     {
         drawin_t *d = *_d;
