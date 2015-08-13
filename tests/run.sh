@@ -41,7 +41,7 @@ D=:5
 SIZE=1024x768
 
 if [ $HEADLESS = 1 ]; then
-    "$XVFB" $D -screen 0 ${SIZE}x24 &
+    "$XVFB" $D -noreset -screen 0 ${SIZE}x24 &
     xserver_pid=$!
 else
     # export XEPHYR_PAUSE=1000
