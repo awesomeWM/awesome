@@ -31,6 +31,9 @@
 /* luaa.c */
 void luaA_emit_refresh(void);
 
+/* objects/drawin.c */
+void drawin_refresh(void);
+
 /* objects/client.c */
 void client_focus_refresh(void);
 
@@ -40,6 +43,7 @@ awesome_refresh(void)
     luaA_emit_refresh();
     banning_refresh();
     stack_refresh();
+    drawin_refresh();
     client_focus_refresh();
     return xcb_flush(globalconf.connection);
 }
