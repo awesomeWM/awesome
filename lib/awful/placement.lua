@@ -103,9 +103,9 @@ local function area_remove(areas, elem)
     return areas
 end
 
---- Place the client so no part of it will be outside the screen.
--- @param c The client.
--- @return The new client geometry.
+--- Place the client so no part of it will be outside the screen (workarea).
+-- @client c The client.
+-- @treturn table The new client geometry.
 function placement.no_offscreen(c)
     local c = c or capi.client.focus
     local geometry = c:geometry()
