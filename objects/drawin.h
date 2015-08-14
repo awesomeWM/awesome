@@ -40,6 +40,8 @@ struct drawin_t
     drawable_t *drawable;
     /** The window geometry. */
     area_t geometry;
+    /** Do we have a pending geometry change that still needs to be applied? */
+    bool geometry_dirty;
 };
 
 ARRAY_FUNCS(drawin_t *, drawin, DO_NOTHING)

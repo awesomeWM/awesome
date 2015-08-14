@@ -34,6 +34,7 @@
 #include "drawin.h"
 #include "common/atoms.h"
 #include "common/xcursor.h"
+#include "event.h"
 #include "ewmh.h"
 #include "objects/client.h"
 #include "objects/screen.h"
@@ -139,6 +140,34 @@ drawin_refresh_pixmap(drawin_t *w)
     drawin_refresh_pixmap_partial(w, 0, 0, w->geometry.width, w->geometry.height);
 }
 
+static void
+drawin_apply_moveresize(drawin_t *w)
+{
+    if (!w->geometry_dirty)
+        return;
+
+    w->geometry_dirty = false;
+    client_ignore_enterleave_events();
+    xcb_configure_window(globalconf.connection, w->window, 
+                         XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y
+                         | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
+                         (const uint32_t [])
+                         {
+                             w->geometry.x,
+                             w->geometry.y,
+                             w->geometry.width,
+                             w->geometry.height
+                         });
+    client_restore_enterleave_events();
+}
+
+void
+drawin_refresh(void)
+{
+    foreach(item, globalconf.drawins)
+        drawin_apply_moveresize(*item);
+}
+
 /** Move and/or resize a drawin
  * \param L The Lua VM state.
  * \param udx The index of the drawin.
@@ -148,51 +177,24 @@ static void
 drawin_moveresize(lua_State *L, int udx, area_t geometry)
 {
     drawin_t *w = luaA_checkudata(L, udx, &drawin_class);
-    int number_of_vals = 0;
-    uint32_t moveresize_win_vals[4], mask_vals = 0;
+    area_t old_geometry = w->geometry;
 
-    if(w->geometry.x != geometry.x)
-    {
-        w->geometry.x = moveresize_win_vals[number_of_vals++] = geometry.x;
-        mask_vals |= XCB_CONFIG_WINDOW_X;
-    }
+    w->geometry = geometry;
+    if(w->geometry.width <= 0)
+        w->geometry.width = old_geometry.width;
+    if(w->geometry.height <= 0)
+        w->geometry.height = old_geometry.height;
 
-    if(w->geometry.y != geometry.y)
-    {
-        w->geometry.y = moveresize_win_vals[number_of_vals++] = geometry.y;
-        mask_vals |= XCB_CONFIG_WINDOW_Y;
-    }
-
-    if(geometry.width > 0 && w->geometry.width != geometry.width)
-    {
-        w->geometry.width = moveresize_win_vals[number_of_vals++] = geometry.width;
-        mask_vals |= XCB_CONFIG_WINDOW_WIDTH;
-    }
-
-    if(geometry.height > 0 && w->geometry.height != geometry.height)
-    {
-        w->geometry.height = moveresize_win_vals[number_of_vals++] = geometry.height;
-        mask_vals |= XCB_CONFIG_WINDOW_HEIGHT;
-    }
-
+    w->geometry_dirty = true;
     drawin_update_drawing(L, udx);
 
-    /* Activate BMA */
-    client_ignore_enterleave_events();
-
-    if(mask_vals)
-        xcb_configure_window(globalconf.connection, w->window, mask_vals, moveresize_win_vals);
-
-    /* Deactivate BMA */
-    client_restore_enterleave_events();
-
-    if(mask_vals & XCB_CONFIG_WINDOW_X)
+    if (old_geometry.x != w->geometry.x)
         luaA_object_emit_signal(L, udx, "property::x", 0);
-    if(mask_vals & XCB_CONFIG_WINDOW_Y)
+    if (old_geometry.y != w->geometry.y)
         luaA_object_emit_signal(L, udx, "property::y", 0);
-    if(mask_vals & XCB_CONFIG_WINDOW_WIDTH)
+    if (old_geometry.width != w->geometry.width)
         luaA_object_emit_signal(L, udx, "property::width", 0);
-    if(mask_vals & XCB_CONFIG_WINDOW_HEIGHT)
+    if (old_geometry.height != w->geometry.height)
         luaA_object_emit_signal(L, udx, "property::height", 0);
 }
 
@@ -211,6 +213,9 @@ drawin_refresh_pixmap_partial(drawin_t *drawin,
     if (!drawin->drawable || !drawin->drawable->pixmap || !drawin->drawable->refreshed)
         return;
 
+    /* Make sure it really has the size it should have */
+    drawin_apply_moveresize(drawin);
+
     /* Make cairo do all pending drawing */
     cairo_surface_flush(drawin->drawable->surface);
     xcb_copy_area(globalconf.connection, drawin->drawable->pixmap,
@@ -224,6 +229,8 @@ drawin_map(lua_State *L, int widx)
     drawin_t *drawin = luaA_checkudata(L, widx, &drawin_class);
     /* Activate BMA */
     client_ignore_enterleave_events();
+    /* Apply any pending changes */
+    drawin_apply_moveresize(drawin);
     /* Map the drawin */
     xcb_map_window(globalconf.connection, drawin->window);
     /* Deactivate BMA */
@@ -317,6 +324,7 @@ drawin_allocator(lua_State *L)
     w->cursor = a_strdup("left_ptr");
     w->geometry.width = 1;
     w->geometry.height = 1;
+    w->geometry_dirty = false;
     w->type = _NET_WM_WINDOW_TYPE_NORMAL;
 
     drawable_allocator(L, (drawable_refresh_callback *) drawin_refresh_pixmap, w);
@@ -564,6 +572,10 @@ luaA_drawin_set_shape_bounding(lua_State *L, drawin_t *drawin)
     cairo_surface_t *surf = NULL;
     if(!lua_isnil(L, -1))
         surf = (cairo_surface_t *)lua_touserdata(L, -1);
+
+    /* The drawin might have been resized to a larger size. Apply that. */
+    drawin_apply_moveresize(drawin);
+
     xwindow_set_shape(drawin->window,
             drawin->geometry.width + 2*drawin->border_width,
             drawin->geometry.height + 2*drawin->border_width,
@@ -599,6 +611,10 @@ luaA_drawin_set_shape_clip(lua_State *L, drawin_t *drawin)
     cairo_surface_t *surf = NULL;
     if(!lua_isnil(L, -1))
         surf = (cairo_surface_t *)lua_touserdata(L, -1);
+
+    /* The drawin might have been resized to a larger size. Apply that. */
+    drawin_apply_moveresize(drawin);
+
     xwindow_set_shape(drawin->window, drawin->geometry.width, drawin->geometry.height,
             XCB_SHAPE_SK_CLIP, surf, 0);
     luaA_object_emit_signal(L, -3, "property::shape_clip", 0);
