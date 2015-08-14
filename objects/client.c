@@ -794,6 +794,62 @@ client_apply_size_hints(client_t *c, area_t geometry)
     return geometry;
 }
 
+/** Commit pending client property changes.
+ */
+void
+client_properties_refresh()
+{
+    if (!globalconf.need_properties_refresh_clients.len)
+        return;
+
+    /* Ignore all spurious enter/leave notify events */
+    client_ignore_enterleave_events();
+
+    foreach(_c, globalconf.need_properties_refresh_clients)
+    {
+        client_t *c = *_c;
+        if (c->property_refresh.geometry)
+        {
+            bool hide_titlebars = c->fullscreen;
+            area_t geometry = c->geometry;
+
+            /* Configure the client for its new size */
+            area_t real_geometry = geometry;
+            if (!hide_titlebars)
+            {
+                real_geometry.x = c->titlebar[CLIENT_TITLEBAR_LEFT].size;
+                real_geometry.y = c->titlebar[CLIENT_TITLEBAR_TOP].size;
+                real_geometry.width -= c->titlebar[CLIENT_TITLEBAR_LEFT].size;
+                real_geometry.width -= c->titlebar[CLIENT_TITLEBAR_RIGHT].size;
+                real_geometry.height -= c->titlebar[CLIENT_TITLEBAR_TOP].size;
+                real_geometry.height -= c->titlebar[CLIENT_TITLEBAR_BOTTOM].size;
+            } else {
+                real_geometry.x = 0;
+                real_geometry.y = 0;
+            }
+
+            xcb_configure_window(globalconf.connection, c->frame_window,
+                    XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
+                    (uint32_t[]) { geometry.x, geometry.y, geometry.width, geometry.height });
+            xcb_configure_window(globalconf.connection, c->window,
+                    XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
+                    (uint32_t[]) { real_geometry.x, real_geometry.y, real_geometry.width, real_geometry.height });
+            c->property_refresh.geometry = false;
+        }
+
+        if (c->property_refresh.send_notice)
+        {
+            /* We are moving without changing the size, see ICCCM 4.2.3 */
+            client_send_configure(c);
+            c->property_refresh.send_notice = false;
+        }
+    }
+    client_restore_enterleave_events();
+
+    client_array_wipe(&globalconf.need_properties_refresh_clients);
+    client_array_init(&globalconf.need_properties_refresh_clients);
+}
+
 static void
 client_resize_do(client_t *c, area_t geometry, bool force_notice)
 {
@@ -810,36 +866,10 @@ client_resize_do(client_t *c, area_t geometry, bool force_notice)
     area_t old_geometry = c->geometry;
     c->geometry = geometry;
 
-    /* Ignore all spurious enter/leave notify events */
-    client_ignore_enterleave_events();
-
-    /* Configure the client for its new size */
-    area_t real_geometry = geometry;
-    if (!hide_titlebars)
-    {
-        real_geometry.x = c->titlebar[CLIENT_TITLEBAR_LEFT].size;
-        real_geometry.y = c->titlebar[CLIENT_TITLEBAR_TOP].size;
-        real_geometry.width -= c->titlebar[CLIENT_TITLEBAR_LEFT].size;
-        real_geometry.width -= c->titlebar[CLIENT_TITLEBAR_RIGHT].size;
-        real_geometry.height -= c->titlebar[CLIENT_TITLEBAR_TOP].size;
-        real_geometry.height -= c->titlebar[CLIENT_TITLEBAR_BOTTOM].size;
-    } else {
-        real_geometry.x = 0;
-        real_geometry.y = 0;
-    }
-
-    xcb_configure_window(globalconf.connection, c->frame_window,
-            XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
-            (uint32_t[]) { geometry.x, geometry.y, geometry.width, geometry.height });
-    xcb_configure_window(globalconf.connection, c->window,
-            XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
-            (uint32_t[]) { real_geometry.x, real_geometry.y, real_geometry.width, real_geometry.height });
-
-    if(send_notice)
-        /* We are moving without changing the size, see ICCCM 4.2.3 */
-        client_send_configure(c);
-
-    client_restore_enterleave_events();
+    /* Mark geometry changes to be committed later. */
+    client_array_push(&globalconf.need_properties_refresh_clients, c);
+    c->property_refresh.geometry = true;
+    c->property_refresh.send_notice = send_notice;
 
     luaA_object_push(L, c);
     luaA_object_emit_signal(L, -1, "property::geometry", 0);

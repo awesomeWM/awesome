@@ -67,18 +67,31 @@ typedef enum
     /** Border width */ \
     uint16_t border_width; \
     /** The window type */ \
-    window_type_t type;
+    window_type_t type; \
+    /** The window geometry. */ \
+    area_t geometry;
+
+/** Common properties needed to be committed/refreshed. */ \
+#define WINDOW_OBJECT_PROPERTY_REFRESH \
+    bool border_width;
 
 /** Window structure */
-typedef struct
+typedef struct window_t
 {
     WINDOW_OBJECT_HEADER
+    struct
+    {
+        WINDOW_OBJECT_PROPERTY_REFRESH
+    } property_refresh;
 } window_t;
 
 lua_class_t window_class;
 
+ARRAY_FUNCS(window_t *, window, DO_NOTHING)
+
 void window_class_setup(lua_State *);
 
+void window_properties_refresh(void);
 void window_set_opacity(lua_State *, int, double);
 void window_set_border_width(lua_State *, int, int);
 int luaA_window_get_type(lua_State *, window_t *);

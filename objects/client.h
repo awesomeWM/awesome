@@ -57,8 +57,6 @@ struct client_t
     char *name, *alt_name, *icon_name, *alt_icon_name;
     /** WM_CLASS stuff */
     char *class, *instance;
-    /** Window geometry */
-    area_t geometry;
     /** Startup ID */
     char *startup_id;
     /** True if the client is sticky */
@@ -121,13 +119,21 @@ struct client_t
     uint32_t pid;
     /** Window it is transient for */
     client_t *transient_for;
-    /** Titelbar information */
+    /** Titlebar information */
     struct {
         /** The size of this bar. */
         uint16_t size;
         /** The drawable for this bar. */
         drawable_t *drawable;
     } titlebar[CLIENT_TITLEBAR_COUNT];
+    struct
+    {
+        WINDOW_OBJECT_PROPERTY_REFRESH
+        /** A client's geometry has to be committed. */
+        bool geometry;
+        /** A notice has to be send (internally). */
+        bool send_notice;
+    } property_refresh;
 };
 
 ARRAY_FUNCS(client_t *, client, DO_NOTHING)
@@ -145,6 +151,7 @@ void client_ban(client_t *);
 void client_ban_unfocus(client_t *);
 void client_unban(client_t *);
 void client_manage(xcb_window_t, xcb_get_geometry_reply_t *, xcb_get_window_attributes_reply_t *);
+void client_properties_refresh(void);
 bool client_resize(client_t *, area_t, bool);
 void client_unmanage(client_t *, bool);
 void client_kill(client_t *);

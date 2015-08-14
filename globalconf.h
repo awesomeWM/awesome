@@ -55,12 +55,15 @@ typedef struct button_t button_t;
 typedef struct client_t client_t;
 typedef struct tag tag_t;
 typedef struct xproperty xproperty_t;
+typedef struct window_t window_t;
 
 ARRAY_TYPE(button_t *, button)
 ARRAY_TYPE(tag_t *, tag)
 ARRAY_TYPE(screen_t *, screen)
 ARRAY_TYPE(client_t *, client)
 ARRAY_TYPE(drawin_t *, drawin)
+ARRAY_TYPE(drawable_t *, drawable)
+ARRAY_TYPE(window_t *, window)
 ARRAY_TYPE(xproperty_t, xproperty)
 
 /** Main configuration structure */
@@ -151,6 +154,14 @@ typedef struct
     xcb_colormap_t default_cmap;
     /** Do we have to reban clients? */
     bool need_lazy_banning;
+    /** List of windows which need properties to be committed. */
+    window_array_t need_properties_refresh_windows;
+    /** List of clients which need properties to be committed. */
+    client_array_t need_properties_refresh_clients;
+    /** List of drawables which need their geometry to be committed. */
+    drawable_array_t need_geometry_refresh_drawable;
+    /** List of drawins which need their geometry to be committed. */
+    drawin_array_t need_geometry_refresh_drawin;
     /** Tag list */
     tag_array_t tags;
     /** List of registered xproperties */

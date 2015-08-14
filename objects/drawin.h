@@ -38,8 +38,12 @@ struct drawin_t
     char *cursor;
     /** The drawable for this drawin. */
     drawable_t *drawable;
-    /** The window geometry. */
-    area_t geometry;
+    struct
+    {
+        WINDOW_OBJECT_PROPERTY_REFRESH
+        uint32_t geom_moveresize_win_vals[4];
+        uint16_t geom_mask_vals;
+    } property_refresh;
 };
 
 ARRAY_FUNCS(drawin_t *, drawin, DO_NOTHING)
@@ -49,6 +53,7 @@ drawin_t * drawin_getbywin(xcb_window_t);
 void drawin_refresh_pixmap_partial(drawin_t *, int16_t, int16_t, uint16_t, uint16_t);
 
 void drawin_class_setup(lua_State *);
+void drawin_geometry_refresh(void);
 
 lua_class_t drawin_class;
 

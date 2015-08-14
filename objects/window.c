@@ -49,6 +49,27 @@ window_wipe(window_t *window)
     button_array_wipe(&window->buttons);
 }
 
+/** Commit pending window property changes (for clients and drawins).
+ */
+void
+window_properties_refresh()
+{
+    foreach(_w, globalconf.need_properties_refresh_windows)
+    {
+        window_t *w = *_w;
+
+        if (w->property_refresh.border_width)
+        {
+            xcb_configure_window(globalconf.connection, window_get(w),
+                    XCB_CONFIG_WINDOW_BORDER_WIDTH,
+                    (uint32_t[]) { w->border_width });
+            w->property_refresh.border_width = false;
+        }
+
+        window_array_remove(&globalconf.need_properties_refresh_windows, _w);
+    }
+}
+
 /** Get or set mouse buttons bindings on a window.
  * \param L The Lua VM state.
  * \return The number of elements pushed on the stack.
@@ -109,6 +130,7 @@ window_set_opacity(lua_State *L, int idx, double opacity)
     {
         window->opacity = opacity;
         xwindow_set_opacity(window_get(window), opacity);
+
         luaA_object_emit_signal(L, idx, "property::opacity", 0);
     }
 }
@@ -183,9 +205,11 @@ window_set_border_width(lua_State *L, int idx, int width)
         return;
 
     if(window->window)
-        xcb_configure_window(globalconf.connection, window_get(window),
-                             XCB_CONFIG_WINDOW_BORDER_WIDTH,
-                             (uint32_t[]) { width });
+    {
+        /* Mark this property change to be committed later */
+        window_array_push(&globalconf.need_properties_refresh_windows, window);
+        window->property_refresh.border_width = true;
+    }
 
     window->border_width = width;
 

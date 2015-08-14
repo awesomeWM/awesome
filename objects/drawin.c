@@ -149,7 +149,8 @@ drawin_moveresize(lua_State *L, int udx, area_t geometry)
 {
     drawin_t *w = luaA_checkudata(L, udx, &drawin_class);
     int number_of_vals = 0;
-    uint32_t moveresize_win_vals[4], mask_vals = 0;
+    uint32_t moveresize_win_vals[4];
+    uint16_t mask_vals = 0;
 
     if(w->geometry.x != geometry.x)
     {
@@ -177,14 +178,14 @@ drawin_moveresize(lua_State *L, int udx, area_t geometry)
 
     drawin_update_drawing(L, udx);
 
-    /* Activate BMA */
-    client_ignore_enterleave_events();
-
     if(mask_vals)
-        xcb_configure_window(globalconf.connection, w->window, mask_vals, moveresize_win_vals);
-
-    /* Deactivate BMA */
-    client_restore_enterleave_events();
+    {
+        w->property_refresh.geom_mask_vals = mask_vals;
+        memcpy(w->property_refresh.geom_moveresize_win_vals,
+               moveresize_win_vals,
+               sizeof moveresize_win_vals);
+        drawin_array_push(&globalconf.need_geometry_refresh_drawin, w);
+    }
 
     if(mask_vals & XCB_CONFIG_WINDOW_X)
         luaA_object_emit_signal(L, udx, "property::x", 0);
@@ -195,6 +196,34 @@ drawin_moveresize(lua_State *L, int udx, area_t geometry)
     if(mask_vals & XCB_CONFIG_WINDOW_HEIGHT)
         luaA_object_emit_signal(L, udx, "property::height", 0);
 }
+
+/** Commit pending drawin geometry changes.
+ */
+void
+drawin_geometry_refresh()
+{
+    if (!globalconf.need_geometry_refresh_drawin.len)
+        return;
+
+    /* Activate BMA */
+    client_ignore_enterleave_events();
+
+    foreach(_d, globalconf.need_geometry_refresh_drawin)
+    {
+        drawin_t *d = *_d;
+        xcb_configure_window(globalconf.connection,
+                             d->window,
+                             d->property_refresh.geom_mask_vals,
+                             d->property_refresh.geom_moveresize_win_vals);
+    }
+
+    /* Deactivate BMA */
+    client_restore_enterleave_events();
+
+    drawin_array_wipe(&globalconf.need_geometry_refresh_drawin);
+    drawin_array_init(&globalconf.need_geometry_refresh_drawin);
+}
+
 
 /** Refresh the window content by copying its pixmap data to its window.
  * \param drawin The drawin to refresh.
