@@ -1085,8 +1085,6 @@ client_set_fullscreen(lua_State *L, int cidx, bool s)
         /* become fullscreen! */
         if(s)
         {
-            /* remove any max state */
-            client_set_maximized(L, cidx, false);
             /* You can only be part of one of the special layers. */
             client_set_below(L, cidx, false);
             client_set_above(L, cidx, false);
@@ -1126,8 +1124,6 @@ client_get_maximized(client_t *c)
         if(c->maximized_##type != s) \
         { \
             int abs_cidx = luaA_absindex(L, cidx); \
-            if(s) \
-                client_set_fullscreen(L, abs_cidx, false); \
             lua_pushboolean(L, s); \
             int max_before = client_get_maximized(c); \
             c->maximized_##type = s; \
