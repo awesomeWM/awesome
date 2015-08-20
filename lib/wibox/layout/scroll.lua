@@ -2,7 +2,7 @@
 -- @author Saleur Geoffrey
 -- @copyright 2015 Saleur Geoffrey
 -- @release @AWESOME_VERSION@
--- @classmod wibox.layout.autoscroll
+-- @classmod wibox.layout.scroll
 ---------------------------------------------------------------------------
 
 local pairs = pairs
