@@ -116,6 +116,15 @@ function base.make_widget(proxy, widget_name)
         end
     end
 
+    -- Add opacity property and setter.
+    ret.opacity = 1
+    function ret:set_opacity(b)
+        if b ~= self.opacity then
+            self.opacity = b
+            self:emit_signal("widget::updated")
+        end
+    end
+
     -- Add __tostring method to metatable.
     ret.widget_name = widget_name or object.modulename(3)
     local mt = {}
