@@ -13,12 +13,12 @@ local pairs = pairs
 local fixed = {}
 
 --- Draw a fixed layout. Each widget gets just the space it asks for.
--- @param wibox The wibox that this widget is drawn to.
+-- @param context The context in which we are drawn.
 -- @param cr The cairo context to use.
 -- @param width The available width.
 -- @param height The available height.
 -- @return The total space needed by the layout.
-function fixed:draw(wibox, cr, width, height)
+function fixed:draw(context, cr, width, height)
     local pos,spacing = 0,self._spacing or 0
 
     for k, v in pairs(self.widgets) do
@@ -28,7 +28,7 @@ function fixed:draw(wibox, cr, width, height)
             x, y = 0, pos
             w, h = width, height - pos
             if k ~= #self.widgets or not self._fill_space then
-                _, h = base.fit_widget(v, w, h);
+                _, h = base.fit_widget(context, v, w, h);
             end
             pos = pos + h + spacing
             in_dir = h
@@ -36,7 +36,7 @@ function fixed:draw(wibox, cr, width, height)
             x, y = pos, 0
             w, h = width - pos, height
             if k ~= #self.widgets or not self._fill_space then
-                w, _ = base.fit_widget(v, w, h);
+                w, _ = base.fit_widget(context, v, w, h);
             end
             pos = pos + w + spacing
             in_dir = w
@@ -46,7 +46,7 @@ function fixed:draw(wibox, cr, width, height)
             (self.dir ~= "y" and pos-spacing > width) then
             break
         end
-        base.draw_widget(wibox, cr, v, x, y, w, h)
+        base.draw_widget(context, cr, v, x, y, w, h)
     end
 end
 
@@ -59,14 +59,15 @@ function fixed:add(widget)
 end
 
 --- Fit the fixed layout into the given space
+-- @param context The context in which we are fit.
 -- @param orig_width The available width.
 -- @param orig_height The available height.
-function fixed:fit(orig_width, orig_height)
+function fixed:fit(context, orig_width, orig_height)
     local width, height = orig_width, orig_height
     local used_in_dir, used_max = 0, 0
 
     for k, v in pairs(self.widgets) do
-        local w, h = base.fit_widget(v, width, height)
+        local w, h = base.fit_widget(context, v, width, height)
         local in_dir, max
         if self.dir == "y" then
             max, in_dir = w, h

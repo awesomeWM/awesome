@@ -16,7 +16,7 @@ local print = print
 local imagebox = { mt = {} }
 
 --- Draw an imagebox with the given cairo context in the given geometry.
-function imagebox:draw(wibox, cr, width, height)
+function imagebox:draw(context, cr, width, height)
     if not self._image then return end
     if width == 0 or height == 0 then return end
 
@@ -39,7 +39,7 @@ function imagebox:draw(wibox, cr, width, height)
 end
 
 --- Fit the imagebox into the given geometry
-function imagebox:fit(width, height)
+function imagebox:fit(context, width, height)
     if not self._image then
         return 0, 0
     end

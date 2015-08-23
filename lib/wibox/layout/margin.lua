@@ -16,7 +16,7 @@ local cairo = require("lgi").cairo
 local margin = { mt = {} }
 
 --- Draw a margin layout
-function margin:draw(wibox, cr, width, height)
+function margin:draw(context, cr, width, height)
     local x = self.left
     local y = self.top
     local w = self.right
@@ -37,16 +37,16 @@ function margin:draw(wibox, cr, width, height)
         cr:restore()
     end
 
-    base.draw_widget(wibox, cr, self.widget, x, y, width - x - w, height - y - h)
+    base.draw_widget(context, cr, self.widget, x, y, width - x - w, height - y - h)
 end
 
 --- Fit a margin layout into the given space
-function margin:fit(width, height)
+function margin:fit(context, width, height)
     local extra_w = self.left + self.right
     local extra_h = self.top + self.bottom
     local w, h = 0, 0
     if self.widget then
-        w, h = base.fit_widget(self.widget, width - extra_w, height - extra_h)
+        w, h = base.fit_widget(context, self.widget, width - extra_w, height - extra_h)
     end
     return w + extra_w, h + extra_h
 end

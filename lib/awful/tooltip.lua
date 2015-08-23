@@ -83,7 +83,7 @@ end
 local function set_geometry(self)
     local my_geo = self.wibox:geometry()
     -- calculate width / height
-    local n_w, n_h = self.textbox:fit(-1, -1)
+    local n_w, n_h = self.textbox:fit(nil, -1, -1) -- Hack! :(
     n_w = n_w + self.marginbox.left + self.marginbox.right
     n_h = n_h + self.marginbox.top + self.marginbox.bottom
     if my_geo.width ~= n_w or my_geo.height ~= n_h then
