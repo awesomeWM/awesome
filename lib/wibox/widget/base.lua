@@ -8,12 +8,19 @@
 local debug = require("gears.debug")
 local object = require("gears.object")
 local cache = require("gears.cache")
+local matrix = require("gears.matrix")
 local setmetatable = setmetatable
 local pairs = pairs
 local type = type
 local table = table
 
 local base = {}
+
+--- Figure out the geometry in device coordinate space. This gives only tight
+-- bounds if no rotations by non-multiples of 90° are used.
+function base.rect_to_device_geometry(cr, x, y, width, height)
+    return matrix.transform_rectangle(cr.matrix, x, y, width, height)
+end
 
 --- Set/get a widget's buttons
 function base:buttons(_buttons)

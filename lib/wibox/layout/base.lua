@@ -5,29 +5,12 @@
 -- @classmod wibox.layout.base
 ---------------------------------------------------------------------------
 
-local pairs = pairs
 local xpcall = xpcall
 local print = print
-local min = math.min
-local max = math.max
 local cairo = require("lgi").cairo
+local wbase = require("wibox.widget.base")
 
 local base = {}
-
---- Figure out the geometry in device coordinate space. This gives only tight
--- bounds if no rotations by non-multiples of 90° are used.
-function base.rect_to_device_geometry(cr, x, y, width, height)
-    local x1, y1 = cr:user_to_device(x, y)
-    local x2, y2 = cr:user_to_device(x, y + height)
-    local x3, y3 = cr:user_to_device(x + width, y + height)
-    local x4, y4 = cr:user_to_device(x + width, y)
-    local x = min(x1, x2, x3, x4)
-    local y = min(y1, y2, y3, y4)
-    local width = max(x1, x2, x3, x4) - x
-    local height = max(y1, y2, y3, y4) - y
-
-    return x, y, width, height
-end
 
 --- Fit a widget for the given available width and height
 -- @param context The context in which we are fit.
@@ -85,7 +68,7 @@ function base.draw_widget(context, cr, widget, x, y, width, height)
     end
 
     -- Register the widget for input handling
-    context:widget_at(widget, base.rect_to_device_geometry(cr, 0, 0, width, height))
+    context:widget_at(widget, wbase.rect_to_device_geometry(cr, 0, 0, width, height))
 
     cr:restore()
 end
