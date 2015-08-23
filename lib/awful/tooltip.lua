@@ -275,6 +275,10 @@ tooltip.new = function(args)
     -- emit the release event on an underlying object, e.g. the titlebar icon.
     self.wibox:buttons(abutton({}, 1, nil, function() data[self].hide() end))
 
+    -- Re-place when the geometry of the wibox changes.
+    self.wibox:connect_signal("property::width",  function() place(self) end)
+    self.wibox:connect_signal("property::height", function() place(self) end)
+
     -- Add tooltip to objects
     if args.objects then
         for _, object in ipairs(args.objects) do
