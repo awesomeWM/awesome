@@ -18,6 +18,9 @@ local capi =
 
 local floating = {}
 
+--- Jump mouse cursor to the client's corner when resizing it.
+floating.resize_jump_to_corner = true
+
 function floating.mouse_resize_handler(c, corner, x, y)
     local g = c:geometry()
 
@@ -25,11 +28,22 @@ function floating.mouse_resize_handler(c, corner, x, y)
     local fixed_x = c.maximized_horizontal
     local fixed_y = c.maximized_vertical
 
-    -- Warp mouse pointer
-    capi.mouse.coords({ x = x, y = y })
-
     local prev_coords = {}
+    local coordinates_delta = {x=0,y=0}
+    if floating.resize_jump_to_corner then
+      -- Warp mouse pointer
+      capi.mouse.coords({ x = x, y = y })
+    else
+      local corner_x, corner_y = x, y
+      local mouse_coords = capi.mouse.coords()
+      x = mouse_coords.x
+      y = mouse_coords.y
+      coordinates_delta = {x=corner_x-x,y=corner_y-y}
+    end
+
     capi.mousegrabber.run(function (_mouse)
+                              _mouse.x = _mouse.x + coordinates_delta.x
+                              _mouse.y = _mouse.y + coordinates_delta.y
                               for k, v in ipairs(_mouse.buttons) do
                                   if v then
                                       local ng

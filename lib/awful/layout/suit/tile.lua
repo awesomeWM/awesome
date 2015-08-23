@@ -23,6 +23,9 @@ local capi =
 
 local tile = {}
 
+--- Jump mouse cursor to the client's corner when resizing it.
+tile.resize_jump_to_corner = true
+
 local function mouse_resize_handler(c, corner, x, y, orientation)
     local orientation = orientation or "tile"
     local wa = capi.screen[c.screen].workarea
@@ -30,7 +33,9 @@ local function mouse_resize_handler(c, corner, x, y, orientation)
     local cursor
     local g = c:geometry()
     local offset = 0
-    local x,y
+    local corner_coords
+    local coordinates_delta = {x=0,y=0}
+
     if orientation == "tile" then
         cursor = "cross"
         if g.height+15 > wa.height then
@@ -39,7 +44,7 @@ local function mouse_resize_handler(c, corner, x, y, orientation)
         elseif not (g.y+g.height+15 > wa.y+wa.height) then
             offset = g.height
         end
-        capi.mouse.coords({ x = wa.x + wa.width * mwfact, y = g.y + offset })
+        corner_coords = { x = wa.x + wa.width * mwfact, y = g.y + offset }
     elseif orientation == "left" then
         cursor = "cross"
         if g.height+15 >= wa.height then
@@ -48,7 +53,7 @@ local function mouse_resize_handler(c, corner, x, y, orientation)
         elseif not (g.y+g.height+15 > wa.y+wa.height) then
             offset = g.height
         end
-        capi.mouse.coords({ x = wa.x + wa.width * (1 - mwfact), y = g.y + offset })
+        corner_coords = { x = wa.x + wa.width * (1 - mwfact), y = g.y + offset }
     elseif orientation == "bottom" then
         cursor = "cross"
         if g.width+15 >= wa.width then
@@ -57,7 +62,7 @@ local function mouse_resize_handler(c, corner, x, y, orientation)
         elseif not (g.x+g.width+15 > wa.x+wa.width) then
             offset = g.width
         end
-        capi.mouse.coords({ y = wa.y + wa.height * mwfact, x = g.x + offset})
+        corner_coords = { y = wa.y + wa.height * mwfact, x = g.x + offset}
     else
         cursor = "cross"
         if g.width+15 >= wa.width then
@@ -66,11 +71,22 @@ local function mouse_resize_handler(c, corner, x, y, orientation)
         elseif not (g.x+g.width+15 > wa.x+wa.width) then
             offset = g.width
         end
-        capi.mouse.coords({ y = wa.y + wa.height * (1 - mwfact), x= g.x + offset })
+        corner_coords = { y = wa.y + wa.height * (1 - mwfact), x= g.x + offset }
+    end
+    if tile.resize_jump_to_corner then
+        capi.mouse.coords(corner_coords)
+    else
+        local mouse_coords = capi.mouse.coords()
+        coordinates_delta = {
+          x = corner_coords.x - mouse_coords.x,
+          y = corner_coords.y - mouse_coords.y,
+        }
     end
 
     local prev_coords = {}
     capi.mousegrabber.run(function (_mouse)
+                              _mouse.x = _mouse.x + coordinates_delta.x
+                              _mouse.y = _mouse.y + coordinates_delta.y
                               for k, v in ipairs(_mouse.buttons) do
                                   if v then
                                       prev_coords = { x =_mouse.x, y = _mouse.y }
