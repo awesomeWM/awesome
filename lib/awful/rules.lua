@@ -148,11 +148,11 @@ end
 
 --- Check if a client matches a given set of rules.
 -- @client c The client.
--- @tab rules The rules to check. List with "rule", "rule_any", "except" and
+-- @tab _rules The rules to check. List with "rule", "rule_any", "except" and
 --            "except_any" keys.
 -- @treturn bool True if at least one rule is matched, false otherwise.
-function rules.does_match(c, rules)
-    local result = rules.matching_rules(c, rules)
+function rules.does_match(c, _rules)
+    local result = rules.matching_rules(c, _rules)
     return #result == 0 and false or result
 end
 
