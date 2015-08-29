@@ -302,7 +302,7 @@ function menubar.show(scr)
     local geometry = menubar.geometry
     instance.geometry = {x = geometry.x or scrgeom.x,
                              y = geometry.y or scrgeom.y,
-                             height = geometry.height or theme.get_font_height() * 1.5,
+                             height = geometry.height or awful.util.round(theme.get_font_height() * 1.5),
                              width = geometry.width or scrgeom.width}
     instance.wibox:geometry(instance.geometry)
 
