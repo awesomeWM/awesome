@@ -130,6 +130,16 @@ function rules.match_any(c, rule)
     return false
 end
 
+--- Does a given rule entry match a client?
+-- @client c The client.
+-- @tab entry Rule entry (with keys `rule`, `rule_any`, `except` and/or
+-- `except_any`).
+-- @treturn bool
+function rules.matches(c, entry)
+    return (rules.match(c, entry.rule) or rules.match_any(c, entry.rule_any)) and
+        (not rules.match(c, entry.except) and not rules.match_any(c, entry.except_any))
+end
+
 --- Get list of matching rules for a client.
 -- @client c The client.
 -- @tab _rules The rules to check. List with "rule", "rule_any", "except" and
@@ -138,8 +148,7 @@ end
 function rules.matching_rules(c, _rules)
     local result = {}
     for _, entry in ipairs(_rules) do
-        if (rules.match(c, entry.rule) or rules.match_any(c, entry.rule_any)) and
-            (not rules.match(c, entry.except) and not rules.match_any(c, entry.except_any)) then
+        if (rules.matches(c, entry)) then
             table.insert(result, entry)
         end
     end
@@ -148,12 +157,16 @@ end
 
 --- Check if a client matches a given set of rules.
 -- @client c The client.
--- @tab _rules The rules to check. List with "rule", "rule_any", "except" and
---            "except_any" keys.
+-- @tab _rules The rules to check. List of tables with `rule`, `rule_any`,
+--   `except` and `except_any` keys.
 -- @treturn bool True if at least one rule is matched, false otherwise.
-function rules.does_match(c, _rules)
-    local result = rules.matching_rules(c, _rules)
-    return #result == 0 and false or result
+function rules.matches_list(c, _rules)
+    for _, entry in ipairs(_rules) do
+        if (rules.matches(c, entry)) then
+            return true
+        end
+    end
+    return false
 end
 
 --- Apply awful.rules.rules to a client.
