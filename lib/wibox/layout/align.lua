@@ -31,6 +31,9 @@ function align:draw(context, cr, width, height)
     local size_first = 0
     -- start with all the space given by the parent, subtract as we go along
     local size_remains = self.dir == "y" and height or width
+    -- This is only set & used if expand ~= "inside" and we have second width.
+    -- It contains the size allocated to the second widget.
+    local size_second
 
     -- we will prioritize the middle widget unless the expand mode is "inside"
     --  if it is, we prioritize the first widget by not doing this block also,
@@ -38,7 +41,7 @@ function align:draw(context, cr, width, height)
     --  instead
     if self._expand ~= "inside" and self.second then
         local w, h = base.fit_widget(context, self.second, width, height)
-        local size_second = self.dir == "y" and h or w
+        size_second = self.dir == "y" and h or w
         -- if all the space is taken, skip the rest, and draw just the middle
         -- widget
         if size_second >= size_remains then
@@ -123,10 +126,10 @@ function align:draw(context, cr, width, height)
             end
         else
             if self.dir == "y" then
-                _, h = base.fit_widget(context, self.second, width, size_remains)
+                _, h = base.fit_widget(context, self.second, width, size_second)
                 y = floor( (height - h)/2 )
             else
-                w, _ = base.fit_widget(context, self.second, width, size_remains)
+                w, _ = base.fit_widget(context, self.second, size_second, height)
                 x = floor( (width -w)/2 )
             end
         end
