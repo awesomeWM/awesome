@@ -340,8 +340,14 @@ parse_command(lua_State *L, int idx, GError **error)
  *
  * @tparam string|table cmd The command to launch.
  * @tparam[opt=true] boolean use_sn Use startup-notification?
+ * @tparam[opt=false] boolean stdin Return a fd for stdin?
+ * @tparam[opt=false] boolean stdout Return a fd for stdout?
+ * @tparam[opt=false] boolean stderr Return a fd for stderr?
  * @treturn[1] integer Process ID if everything is OK.
  * @treturn[1] string Startup-notification ID, if `use_sn` is true.
+ * @treturn[1] integer stdin, if `stdin` is true.
+ * @treturn[1] integer stdout, if `stdout` is true.
+ * @treturn[1] integer stderr, if `stderr` is true.
  * @treturn[2] string An error string if an error occured.
  * @function spawn
  */
@@ -349,12 +355,26 @@ int
 luaA_spawn(lua_State *L)
 {
     gchar **argv = NULL;
-    bool use_sn = true;
+    bool use_sn = true, return_stdin = false, return_stdout = false, return_stderr = false;
+    int stdin_fd = -1, stdout_fd = -1, stderr_fd = -1;
+    int *stdin_ptr = NULL, *stdout_ptr = NULL, *stderr_ptr = NULL;
     gboolean retval;
     GPid pid;
 
     if(lua_gettop(L) >= 2)
         use_sn = luaA_checkboolean(L, 2);
+    if(lua_gettop(L) >= 3)
+        return_stdin = luaA_checkboolean(L, 3);
+    if(lua_gettop(L) >= 4)
+        return_stdout = luaA_checkboolean(L, 4);
+    if(lua_gettop(L) >= 5)
+        return_stderr = luaA_checkboolean(L, 5);
+    if(return_stdin)
+        stdin_ptr = &stdin_fd;
+    if(return_stdout)
+        stdout_ptr = &stdout_fd;
+    if(return_stderr)
+        stderr_ptr = &stderr_fd;
 
     GError *error = NULL;
     argv = parse_command(L, 1, &error);
@@ -383,8 +403,9 @@ luaA_spawn(lua_State *L)
         sn_launcher_context_setup_child_process(context);
     }
 
-    retval = g_spawn_async(NULL, argv, NULL, G_SPAWN_SEARCH_PATH,
-                           spawn_callback, NULL, &pid, &error);
+    retval = g_spawn_async_with_pipes(NULL, argv, NULL, G_SPAWN_SEARCH_PATH,
+                                      spawn_callback, NULL, &pid,
+                                      stdin_ptr, stdout_ptr, stderr_ptr, &error);
     g_strfreev(argv);
     if(!retval)
     {
@@ -402,9 +423,24 @@ luaA_spawn(lua_State *L)
 
     /* push sn on stack */
     if (context)
-        lua_pushstring(L,sn_launcher_context_get_startup_id(context));
+        lua_pushstring(L, sn_launcher_context_get_startup_id(context));
+    else
+        lua_pushnil(L);
 
-    return (context)?2:1;
+    if(return_stdin)
+        lua_pushinteger(L, stdin_fd);
+    else
+        lua_pushnil(L);
+    if(return_stdout)
+        lua_pushinteger(L, stdout_fd);
+    else
+        lua_pushnil(L);
+    if(return_stderr)
+        lua_pushinteger(L, stderr_fd);
+    else
+        lua_pushnil(L);
+
+    return 5;
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
