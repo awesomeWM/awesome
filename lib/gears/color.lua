@@ -286,6 +286,20 @@ function color.create_opaque_pattern(col)
     -- gradients can do weird self-intersections)
 end
 
+--- Fill non-transparent area of an image with a given color.
+-- @param image Image or path to it.
+-- @param new_color New color.
+-- @return Recolored image.
+function color.recolor_image(image, new_color)
+    if type(image) == 'string' then
+        image = surface.duplicate_surface(image)
+    end
+    local cr = cairo.Context.create(image)
+    cr:set_source(color.create_pattern(new_color))
+    cr:mask(cairo.Pattern.create_for_surface(image), 0, 0)
+    return image
+end
+
 function color.mt:__call(...)
     return color.create_pattern(...)
 end
