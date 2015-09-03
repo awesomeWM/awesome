@@ -71,7 +71,9 @@ function surface.get_size(surf)
 end
 
 
---- @TODO
+--- Get the duplicate of a cairo surface
+-- @param s Source surface.
+-- @return The surface's duplicate.
 function surface.duplicate_surface(s)
     s = surface.load(s)
 
