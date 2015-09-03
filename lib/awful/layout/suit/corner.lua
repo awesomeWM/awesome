@@ -89,7 +89,7 @@ local function do_corner(p, orientation)
     row.x_increment = row.win_width
     row.win_idx = 0
 
-    -- Extend master if there is only a few windows
+    -- Extend master if there is only a few windows and "expand" policy is set
     if #cls < 3 then
         if row_privileged then
             master.x = wa.x
@@ -98,8 +98,13 @@ local function do_corner(p, orientation)
             master.y = wa.y
             master.height = wa.height
         end
-        if #cls < 2 then
-            master = wa
+        if #cls < 2  then
+            if tag.getmfpol(t) == "expand" then
+                master = wa
+            else
+                master.x = master.x + (wa.width - master.width)/2
+                master.y = master.y + (wa.height - master.height)/2
+            end
         end
     end
 

@@ -234,12 +234,16 @@ local function do_tile(param, orientation)
         place_master = false
     end
 
+    local grow_master = tag.getmfpol(t) == "expand"
     -- this was easier than writing functions because there is a lot of data we need
     for d = 1,2 do
         if place_master and nmaster > 0 then
             local size = wa[width]
-            if nother > 0 then
+            if nother > 0 or not grow_master then
                 size = math.min(wa[width] * mwfact, wa[width] - (coord - wa[x]))
+            end
+            if nother == 0 and not grow_master then
+              coord = coord + (wa[width] - size)/2
             end
             if not data[0] then
                 data[0] = {}
