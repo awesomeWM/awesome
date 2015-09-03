@@ -148,6 +148,7 @@ function util.spawn_with_line_callback(cmd, stdout_callback, stderr_callback, do
                 stderr_callback, step_done, true)
     end
     assert(stdin == nil)
+    return pid
 end
 
 --- Read lines from a Gio input stream
