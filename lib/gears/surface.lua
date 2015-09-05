@@ -71,7 +71,14 @@ function surface.get_size(surf)
 end
 
 
---- Get the duplicate of a cairo surface
+--- Create a copy of a cairo surface.
+-- The surfaces returned by `surface.load` are cached and must not be
+-- modified to avoid unintended side-effects. This function allows to create
+-- a copy of a cairo surface. This copy can then be freely modified.
+-- The surface returned will be as compatible as possible to the input
+-- surface. For example, it will likely be of the same surface type as the
+-- input. The details are explained in the `create_similar` function on a cairo
+-- surface.
 -- @param s Source surface.
 -- @return The surface's duplicate.
 function surface.duplicate_surface(s)
