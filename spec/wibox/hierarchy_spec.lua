@@ -8,12 +8,10 @@ local hierarchy = require("wibox.hierarchy")
 local cairo = require("lgi").cairo
 local matrix = require("gears.matrix")
 local object = require("gears.object")
+local utils = require("wibox.test_utils")
 
 local function make_widget(children)
-    local result = object()
-    result:add_signal("widget::redraw_needed")
-    result:add_signal("widget::layout_changed")
-    result.visible = true
+    local result = utils.widget_stub()
     result.layout = function()
         return children
     end

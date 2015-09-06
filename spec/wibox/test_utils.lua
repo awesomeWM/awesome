@@ -82,8 +82,10 @@ assert:register("assertion", "widget_layout", widget_layout, "assertion.widget_l
 return {
     widget_stub = function(width, height)
         local w = object()
+        w:add_signal("widget::redraw_needed")
+        w:add_signal("widget::layout_changed")
         w.visible = true
-
+        w.opacity = 1
         w.fit = function()
             return width or 10, height or 10
         end
