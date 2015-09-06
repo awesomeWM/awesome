@@ -15,23 +15,13 @@ local base = require("wibox.widget.base")
 
 local hierarchy = {}
 
---- Create a new widget hierarchy that has no parent.
--- @param context The context in which we are laid out.
--- @param widget The widget that is at the base of the hierarchy.
--- @param width The available width for this hierarchy.
--- @param height The available height for this hierarchy.
--- @param redraw_callback Callback that is called with the corresponding widget
---        hierarchy on widget::redraw_needed on some widget.
--- @param layout_callback Callback that is called with the corresponding widget
---        hierarchy on widget::layout_changed on some widget.
--- @param callback_arg A second argument that is given to the above callbacks.
--- @return A new widget hierarchy
-function hierarchy.new(context, widget, width, height, redraw_callback, layout_callback, callback_arg)
+local function hierarchy_new(context, widget, width, height, redraw_callback, layout_callback, callback_arg,
+            matrix_to_parent, matrix_to_device)
     local children = base.layout_widget(context, widget, width, height)
     local draws_x1, draws_y1, draws_x2, draws_y2 = 0, 0, width, height
     local result = {
-        _parent = nil,
-        _matrix = cairo.Matrix.create_identity(),
+        _matrix = matrix_to_parent,
+        _matrix_to_device = matrix_to_device,
         _widget = widget,
         _size = {
             width = width,
@@ -47,10 +37,11 @@ function hierarchy.new(context, widget, width, height, redraw_callback, layout_c
     widget:weak_connect_signal("widget::layout_changed", result._layout)
 
     for _, w in ipairs(children or {}) do
-        local r = hierarchy.new(context, w._widget, w._width, w._height,
-            redraw_callback, layout_callback, callback_arg)
-        r._matrix = w._matrix
-        r._parent = result
+        local to_dev = cairo.Matrix.create_identity()
+        to_dev:multiply(matrix_to_device, w._matrix)
+
+        local r = hierarchy_new(context, w._widget, w._width, w._height, redraw_callback, layout_callback,
+                callback_arg, matrix.copy(w._matrix), to_dev)
         table.insert(result._children, r)
 
         -- Update our drawing extents
@@ -78,6 +69,22 @@ function hierarchy.new(context, widget, width, height, redraw_callback, layout_c
     return result
 end
 
+--- Create a new widget hierarchy that has no parent.
+-- @param context The context in which we are laid out.
+-- @param widget The widget that is at the base of the hierarchy.
+-- @param width The available width for this hierarchy.
+-- @param height The available height for this hierarchy.
+-- @param redraw_callback Callback that is called with the corresponding widget
+--        hierarchy on widget::redraw_needed on some widget.
+-- @param layout_callback Callback that is called with the corresponding widget
+--        hierarchy on widget::layout_changed on some widget.
+-- @param callback_arg A second argument that is given to the above callbacks.
+-- @return A new widget hierarchy
+function hierarchy.new(context, widget, width, height, redraw_callback, layout_callback, callback_arg)
+    return hierarchy_new(context, widget, width, height, redraw_callback, layout_callback, callback_arg,
+            cairo.Matrix.create_identity(), cairo.Matrix.create_identity())
+end
+
 --- Get the widget that this hierarchy manages.
 function hierarchy:get_widget()
     return self._widget
@@ -95,15 +102,6 @@ end
 -- hierarchy is applied upon) from this hierarchy's coordinate system.
 -- @return A cairo matrix describing the transformation.
 function hierarchy:get_matrix_to_device()
-    if not self._matrix_to_device then
-        local m = cairo.Matrix.create_identity()
-        local state = self
-        while state ~= nil do
-            m:multiply(m, state._matrix)
-            state = state._parent
-        end
-        self._matrix_to_device = m
-    end
     return matrix.copy(self._matrix_to_device)
 end
 
