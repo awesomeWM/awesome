@@ -14,17 +14,6 @@ local pairs = pairs
 
 local debug = {}
 
---- Check that the given condition holds true, else throw an error
---
--- @param cond If this is false, throw a lua error with a backtrace.
--- @param[opt] message Message to print in the error.
-function debug.assert(cond, message)
-    local message = message or cond
-    if not cond then
-        error(traceback("Assertion failed: '" .. tostring(message) .. "'"))
-    end
-end
-
 --- Given a table (or any other data) return a string that contains its
 -- tag, value and type. If data is a table then recursively call `dump_raw`
 -- on each of its values.
