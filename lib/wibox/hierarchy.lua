@@ -18,21 +18,19 @@ local hierarchy = {}
 --- Create a new widget hierarchy that has no parent.
 -- @param context The context in which we are laid out.
 -- @param widget The widget that is at the base of the hierarchy.
--- @param width The available width for this hierarchy
--- @param height The available height for this hierarchy
+-- @param width The available width for this hierarchy.
+-- @param height The available height for this hierarchy.
 -- @param redraw_callback Callback that is called with the corresponding widget
 --        hierarchy on widget::redraw_needed on some widget.
 -- @param layout_callback Callback that is called with the corresponding widget
 --        hierarchy on widget::layout_changed on some widget.
 -- @param callback_arg A second argument that is given to the above callbacks.
--- @param root The root of the widget hierarchy or nil if this creates the root.
 -- @return A new widget hierarchy
-local function hierarchy_new(context, widget, width, height, redraw_callback, layout_callback, callback_arg, root)
+function hierarchy.new(context, widget, width, height, redraw_callback, layout_callback, callback_arg)
     local children = base.layout_widget(context, widget, width, height)
     local draws_x1, draws_y1, draws_x2, draws_y2 = 0, 0, width, height
     local result = {
         _parent = nil,
-        _root = nil,
         _matrix = cairo.Matrix.create_identity(),
         _widget = widget,
         _size = {
@@ -43,15 +41,14 @@ local function hierarchy_new(context, widget, width, height, redraw_callback, la
         _children = {}
     }
 
-    result._root = root or result
     result._redraw = function() redraw_callback(result, callback_arg) end
     result._layout = function() layout_callback(result, callback_arg) end
     widget:weak_connect_signal("widget::redraw_needed", result._redraw)
     widget:weak_connect_signal("widget::layout_changed", result._layout)
 
     for _, w in ipairs(children or {}) do
-        local r = hierarchy_new(context, w._widget, w._width, w._height,
-            redraw_callback, layout_callback, callback_arg, result._root)
+        local r = hierarchy.new(context, w._widget, w._width, w._height,
+            redraw_callback, layout_callback, callback_arg)
         r._matrix = w._matrix
         r._parent = result
         table.insert(result._children, r)
@@ -79,21 +76,6 @@ local function hierarchy_new(context, widget, width, height, redraw_callback, la
         end
     end
     return result
-end
-
---- Create a new widget hierarchy that has no parent.
--- @param context The context in which we are laid out.
--- @param widget The widget that is at the base of the hierarchy.
--- @param width The available width for this hierarchy.
--- @param height The available height for this hierarchy.
--- @param redraw_callback Callback that is called with the corresponding widget
---        hierarchy on widget::redraw_needed on some widget.
--- @param layout_callback Callback that is called with the corresponding widget
---        hierarchy on widget::layout_changed on some widget.
--- @param callback_arg A second argument that is given to the above callbacks.
--- @return A new widget hierarchy
-function hierarchy.new(context, widget, width, height, redraw_callback, layout_callback, callback_arg)
-    return hierarchy_new(context, widget, width, height, redraw_callback, layout_callback, callback_arg, nil)
 end
 
 --- Get the widget that this hierarchy manages.
