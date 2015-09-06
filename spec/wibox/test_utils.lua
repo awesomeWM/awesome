@@ -86,10 +86,12 @@ return {
         w:add_signal("widget::layout_changed")
         w.visible = true
         w.opacity = 1
-        w.fit = function()
-            return width or 10, height or 10
+        if width or height then
+            w.fit = function()
+                return width or 10, height or 10
+            end
         end
-        w._fit_geometry_cache = cache.new(w.fit)
+        w._widget_caches = {}
 
         return w
     end,

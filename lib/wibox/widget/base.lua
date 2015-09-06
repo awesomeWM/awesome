@@ -7,6 +7,7 @@
 
 local debug = require("gears.debug")
 local object = require("gears.object")
+local cache = require("gears.cache")
 local matrix = require("gears.matrix")
 local Matrix = require("lgi").cairo.Matrix
 local setmetatable = setmetatable
@@ -15,6 +16,72 @@ local type = type
 local table = table
 
 local base = {}
+
+-- {{{ Caches
+
+local call_stack = {}
+-- Indexes are widgets, allow them to be garbage-collected
+local widget_dependencies = setmetatable({}, { __mode = "k" })
+
+-- Don't do this in unit tests
+if awesome and awesome.connect_signal then
+    -- Reset the call stack at each refresh. This fixes things up in case there was
+    -- an error in some callback and thus put_cache() wasn't called (if this
+    -- happens, we possibly recorded too many deps, but so what?)
+    awesome.connect_signal("refresh", function()
+        call_stack = {}
+    end)
+end
+
+-- When you call get_cache_and_record_deps(), the widget is recorded in a stack
+-- until the following put_cache(). All other calls to
+-- get_cache_and_record_deps() that happen during this will cause a dependency
+-- between the widgets that are involved to be recorded. This information is
+-- used by clear_caches() to also clear all caches of dependent widgets.
+
+-- Get the caches for a widget and record its dependencies. All following
+-- cache-uses will record this widgets as a dependency. This returns a function
+-- that calls the callback of kind `kind` on the widget.
+local function get_cache_and_record_deps(widget, kind)
+    -- Record dependencies (each entry in the call stack depends on `widget`)
+    local deps = widget_dependencies[widget] or {}
+    for _, w in pairs(call_stack) do
+        deps[w] = true
+    end
+    widget_dependencies[widget] = deps
+
+    -- Add widget to call stack
+    table.insert(call_stack, widget)
+
+    -- Create cache if needed
+    if not widget._widget_caches[kind] then
+        widget._widget_caches[kind] = cache.new(function(...)
+            return widget[kind](widget, ...)
+        end)
+    end
+    return widget._widget_caches[kind]
+end
+
+-- Each call to the above function should be followed by a call to this
+-- function. Everything in-between is recorded as a dependency (it's
+-- complicated...).
+local function put_cache(widget)
+    assert(#call_stack ~= 0)
+    if table.remove(call_stack) ~= widget then
+        put_cache(widget)
+    end
+end
+
+-- Clear the caches for `widget` and all widgets that depend on it.
+local function clear_caches(widget)
+    for w in pairs(widget_dependencies[widget] or {}) do
+        widget_dependencies[w] = {}
+        w._widget_caches = {}
+    end
+    widget_dependencies[widget] = {}
+    widget._widget_caches = {}
+end
+-- }}}
 
 --- Figure out the geometry in device coordinate space. This gives only tight
 -- bounds if no rotations by non-multiples of 90° are used.
@@ -41,7 +108,9 @@ function base.fit_widget(context, widget, width, height)
 
     local w, h = 0, 0
     if widget.fit then
-        w, h = widget:fit(context, width, height)
+        local cache = get_cache_and_record_deps(widget, "fit")
+        w, h = cache:get(context, width, height)
+        put_cache(widget)
     else
         -- If it has no fit method, calculate based on the size of children
         local children = base.layout_widget(context, widget, width, height)
@@ -77,7 +146,10 @@ function base.layout_widget(context, widget, width, height)
     local height = math.max(0, height)
 
     if widget.layout then
-        return widget:layout(context, width, height)
+        local cache = get_cache_and_record_deps(widget, "layout")
+        local result = cache:get(context, width, height)
+        put_cache(widget)
+        return result
     end
 end
 
@@ -323,6 +395,12 @@ function base.make_widget(proxy, widget_name)
             ret:emit_signal("widget::redraw_needed")
         end)
     end
+
+    -- Set up caches
+    clear_caches(ret)
+    ret:connect_signal("widget::layout_changed", function()
+        clear_caches(ret)
+    end)
 
     -- Add visible property and setter.
     ret.visible = true
