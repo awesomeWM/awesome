@@ -95,6 +95,10 @@ function imagebox:set_image(image)
         end
     end
 
+    if self._image == image then
+        return
+    end
+
     self._image = image
 
     self:emit_signal("widget::redraw_needed")
