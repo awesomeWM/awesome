@@ -96,11 +96,6 @@ function hierarchy.new(context, widget, width, height, redraw_callback, layout_c
     return hierarchy_new(context, widget, width, height, redraw_callback, layout_callback, callback_arg, nil)
 end
 
---- Get the parent hierarchy of this widget hierarchy (or nil).
-function hierarchy:get_parent()
-    return self._parent
-end
-
 --- Get the widget that this hierarchy manages.
 function hierarchy:get_widget()
     return self._widget

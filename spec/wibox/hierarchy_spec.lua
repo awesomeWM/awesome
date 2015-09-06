@@ -34,10 +34,6 @@ describe("wibox.hierarchy", function()
             instance = hierarchy.new(context, widget, 10, 20, nop, nop)
         end)
 
-        it("get_parent", function()
-            assert.is_nil(instance:get_parent())
-        end)
-
         it("get_widget", function()
             assert.is.equal(instance:get_widget(), widget)
         end)
@@ -153,12 +149,6 @@ describe("wibox.hierarchy", function()
             local children = hierarchy_intermediate:get_children()
             assert.is.equal(#children, 1)
             hierarchy_child = children[1]
-        end)
-
-        it("get_parent", function()
-            assert.is.equal(hierarchy_child:get_parent(), hierarchy_intermediate)
-            assert.is.equal(hierarchy_intermediate:get_parent(), hierarchy_parent)
-            assert.is_nil(hierarchy_parent:get_parent())
         end)
 
         it("get_widget", function()
