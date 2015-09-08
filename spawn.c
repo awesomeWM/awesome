@@ -335,6 +335,41 @@ parse_command(lua_State *L, int idx, GError **error)
     return argv;
 }
 
+int
+luaA_spawn_with_output(lua_State *L)
+{
+    GError *error = NULL;
+    gchar **argv = parse_command(L, 1, &error);
+    if (error)
+    {
+        g_strfreev(argv);
+        lua_pushfstring(L, "%s parse error: %s", __func__, error->message);
+        warn("%s", lua_tostring(L, -1));
+        g_error_free(error);
+        return 1;
+    }
+
+    gboolean retval;
+    GPid pid;
+    int stdout_fd;
+    int stderr_fd;
+    retval = g_spawn_async_with_pipes(NULL, argv, NULL, 0, spawn_callback,
+                                      NULL, &pid, NULL, &stdout_fd, &stderr_fd,
+                                      &error);
+    g_strfreev(argv);
+    if (!retval)
+    {
+        lua_pushstring(L, error->message);
+        warn("%s", lua_tostring(L, -1));
+        g_error_free(error);
+        return 1;
+    }
+    lua_pushinteger(L, pid);
+    lua_pushinteger(L, stdout_fd);
+    lua_pushinteger(L, stderr_fd);
+    return 3;
+}
+
 /** Spawn a program.
  * The program will be started on the default screen.
  *

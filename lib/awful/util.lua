@@ -85,6 +85,16 @@ function util.mkdir(dir)
     return os.execute("mkdir -p " .. dir)
 end
 
+--- Spawn a program and return its PID and output file descriptors.
+-- @tparam string cmd The command
+-- @treturn[1] integer The PID of the process
+-- @treturn[1] integer The stdout FD of the process
+-- @treturn[1] integer The stderr FD of the process
+-- @treturn[2] string An error message
+function util.spawn_with_output(cmd, callback)
+    return capi.awesome.spawn_with_output(cmd, callback)
+end
+
 --- Spawn a program.
 -- The program gets started on the default screen.
 -- @tparam string|table cmd The command.
