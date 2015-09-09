@@ -500,6 +500,9 @@ function client.movetotag(target, c)
     local sel = c or capi.client.focus
     local s = tag.getscreen(target)
     if sel and s then
+        if sel == capi.client.focus then
+            sel:emit_signal("request::activate", "client.movetotag", {raise=true})
+        end
         -- Set client on the same screen as the tag.
         sel.screen = s
         sel:tags({ target })
