@@ -26,6 +26,9 @@ local capi =
     root = root
 }
 
+-- we use require("awful.client") inside functions to prevent circular dependencies.
+local client
+
 local tag = { mt = {} }
 
 -- Private data
@@ -335,9 +338,10 @@ function tag.setscreen(t, s)
 end
 
 --- Get a tag's screen
--- @param t tag object
+-- @param[opt] t tag object
 -- @return Screen number
 function tag.getscreen(t)
+    local t = t or tag.selected()
     return tag.getproperty(t, "screen")
 end
 
@@ -460,9 +464,27 @@ end
 
 --- Increase the number of master windows.
 -- @param add Value to add to number of master windows.
--- @param t The tag to modify, if null tag.selected() is used.
-function tag.incnmaster(add, t)
-    tag.setnmaster(tag.getnmaster(t) + add, t)
+-- @param[opt] t The tag to modify, if null tag.selected() is used.
+-- @tparam[opt=false] boolean sensible Limit nmaster based on the number of
+--   visible tiled windows?
+function tag.incnmaster(add, t, sensible)
+    if sensible then
+        client = client or require("awful.client")
+        local ntiled = #client.tiled(tag.getscreen(t))
+
+        local nmaster = tag.getnmaster(t)
+        if nmaster > ntiled then
+            nmaster = ntiled
+        end
+
+        local newnmaster = nmaster + add
+        if newnmaster > ntiled then
+            newnmaster = ntiled
+        end
+        tag.setnmaster(newnmaster, t)
+    else
+        tag.setnmaster(tag.getnmaster(t) + add, t)
+    end
 end
 
 
@@ -500,9 +522,29 @@ end
 
 --- Increase number of column windows.
 -- @param add Value to add to number of column windows.
--- @param t The tag to modify, if null tag.selected() is used.
-function tag.incncol(add, t)
-    tag.setncol(tag.getncol(t) + add, t)
+-- @param[opt] t The tag to modify, if null tag.selected() is used.
+-- @tparam[opt=false] boolean sensible Limit ncol based on the number of visible
+-- tiled windows?
+function tag.incncol(add, t, sensible)
+    if sensible then
+        client = client or require("awful.client")
+        local ntiled = #client.tiled(tag.getscreen(t))
+        local nmaster = tag.getnmaster(t)
+        local nsecondary = ntiled - nmaster
+
+        local ncol = tag.getncol(t)
+        if ncol > nsecondary then
+            ncol = nsecondary
+        end
+
+        local newncol = ncol + add
+        if newncol > nsecondary then
+            newncol = nsecondary
+        end
+        tag.setncol(newncol, t)
+    else
+        tag.setncol(tag.getncol(t) + add, t)
+    end
 end
 
 --- View no tag.
