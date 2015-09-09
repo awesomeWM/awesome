@@ -105,11 +105,12 @@ end
 
 --- Place the client so no part of it will be outside the screen (workarea).
 -- @client c The client.
+-- @tparam[opt=client's screen] integer screen The screen.
 -- @treturn table The new client geometry.
-function placement.no_offscreen(c)
+function placement.no_offscreen(c, screen)
     local c = c or capi.client.focus
     local geometry = c:geometry()
-    local screen   = c.screen or a_screen.getbycoord(geometry.x, geometry.y)
+    local screen   = screen or c.screen or a_screen.getbycoord(geometry.x, geometry.y)
     local border   = c.border_width
     local screen_geometry = capi.screen[screen].workarea
 
