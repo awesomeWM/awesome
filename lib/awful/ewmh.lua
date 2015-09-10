@@ -157,11 +157,11 @@ end
 --
 -- @client c A client to use
 -- @tparam string context The context where this signal was used.
--- @tparam table hints A table with additional hints:
--- @tparam boolean hints.raise should the client be raised? (default false)
+-- @tparam[opt] table hints A table with additional hints:
+-- @tparam[opt=false] boolean hints.raise should the client be raised?
 function ewmh.activate(c, context, hints)
     client.focus = c
-    if hints.raise then
+    if hints and hints.raise then
         if awesome.startup or c:isvisible() then
             c:raise()
         else
