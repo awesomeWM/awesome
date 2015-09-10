@@ -35,6 +35,7 @@
  * @classmod key
  */
 
+#include "globalconf.h"
 #include "objects/key.h"
 #include "common/xutil.h"
 #include "xkb.h"
@@ -230,7 +231,9 @@ luaA_key_get_key(lua_State *L, keyb_t *k)
 static int
 luaA_key_get_keysym(lua_State *L, keyb_t *k)
 {
-    lua_pushstring(L, XKeysymToString(k->keysym));
+    char buf[MAX(MB_LEN_MAX, 32)];
+    xkb_state_key_get_utf8(globalconf.xkb_state, k->keysym, buf, countof(buf));
+    lua_pushstring(L, buf);
     return 1;
 }
 
