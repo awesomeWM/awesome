@@ -430,9 +430,9 @@ end
 -- @param clockwise True to cycle clients clockwise.
 -- @param[opt] screen The screen where to cycle clients.
 -- @tparam[opt=false] boolean stacked Use stacking order?
-function client.cycle(clockwise, screen, stacked)
+function client.cycle(clockwise, s, stacked)
     s = s or screen.focused()
-    local cls = client.visible(screen, stacked)
+    local cls = client.visible(s, stacked)
     -- We can't rotate without at least 2 clients, buddy.
     if #cls >= 2 then
         local c = table.remove(cls, 1)
