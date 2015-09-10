@@ -117,18 +117,18 @@ function base.make_widget(proxy, widget_name)
     -- Add visible property and setter.
     ret.visible = true
     function ret:set_visible(b)
-        if b ~= self.visible then
-            self.visible = b
-            self:emit_signal("widget::updated")
+        if b ~= ret.visible then
+            ret.visible = b
+            ret:emit_signal("widget::updated")
         end
     end
 
     -- Add opacity property and setter.
     ret.opacity = 1
     function ret:set_opacity(b)
-        if b ~= self.opacity then
-            self.opacity = b
-            self:emit_signal("widget::updated")
+        if b ~= ret.opacity then
+            ret.opacity = b
+            ret:emit_signal("widget::updated")
         end
     end
 
