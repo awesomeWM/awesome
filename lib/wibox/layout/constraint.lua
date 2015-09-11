@@ -99,7 +99,7 @@ end
 -- @param[opt] width The maximum width of the widget. nil for no limit.
 -- @param[opt] height The maximum height of the widget. nil for no limit.
 local function new(widget, strategy, width, height)
-    local ret = widget_base.make_widget()
+    local ret = base.make_widget()
 
     for k, v in pairs(constraint) do
         if type(v) == "function" then
