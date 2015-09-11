@@ -4,7 +4,9 @@
 ---------------------------------------------------------------------------
 
 local fixed = require("wibox.layout.fixed")
+local base = require("wibox.widget.base")
 local utils = require("wibox.test_utils")
+local p = require("wibox.widget.base").place_widget_at
 
 describe("wibox.layout.fixed", function()
     local layout
@@ -12,16 +14,12 @@ describe("wibox.layout.fixed", function()
         layout = fixed.vertical()
     end)
 
-    before_each(utils.stub_draw_widget)
-    after_each(utils.revert_draw_widget)
-
     it("empty layout fit", function()
         assert.widget_fit(layout, { 10, 10 }, { 0, 0 })
     end)
 
-    it("empty layout draw", function()
-        layout:draw(nil, nil, 0, 0)
-        utils.check_widgets_drawn({})
+    it("empty layout layout", function()
+        assert.widget_layout(layout, { 0, 0 }, {})
     end)
 
     describe("with widgets", function()
@@ -42,12 +40,11 @@ describe("wibox.layout.fixed", function()
                 assert.widget_fit(layout, { 100, 100 }, { 15, 35 })
             end)
 
-            it("draw", function()
-                layout:draw("wibox", "cr", 100, 100)
-                utils.check_widgets_drawn({
-                    { first,  0,  0, 100, 10 },
-                    { second, 0, 10, 100, 15 },
-                    { third,  0, 25, 100, 10 },
+            it("layout", function()
+                assert.widget_layout(layout, { 100, 100 }, {
+                    p(first,  0,  0, 100, 10),
+                    p(second, 0, 10, 100, 15),
+                    p(third,  0, 25, 100, 10),
                 })
             end)
         end)
@@ -57,30 +54,80 @@ describe("wibox.layout.fixed", function()
                 assert.widget_fit(layout, { 5, 100 }, { 5, 35 })
             end)
 
-            it("draw", function()
-                layout:draw("wibox", "cr", 5, 100)
-                utils.check_widgets_drawn({
-                    { first,  0,  0, 5, 10 },
-                    { second, 0, 10, 5, 15 },
-                    { third,  0, 25, 5, 10 },
+            it("layout", function()
+                assert.widget_layout(layout, { 5, 100 }, {
+                    p(first,  0,  0, 5, 10),
+                    p(second, 0, 10, 5, 15),
+                    p(third,  0, 25, 5, 10),
                 })
             end)
         end)
 
         describe("without enough width", function()
             it("fit", function()
-                -- XXX: Is this really what should happen?
                 assert.widget_fit(layout, { 100, 20 }, { 15, 20 })
             end)
 
-            it("draw", function()
-                layout:draw("wibox", "cr", 100, 20)
-                utils.check_widgets_drawn({
-                    { first,  0,  0, 100, 10 },
-                    { second, 0, 10, 100, 10 },
-                    { third,  0, 20, 100,  0 },
+            it("layout", function()
+                assert.widget_layout(layout, { 100, 20 }, {
+                    p(first,  0,  0, 100, 10),
+                    p(second, 0, 10, 100, 10),
+                    p(third,  0, 20, 100,  0),
                 })
             end)
+        end)
+    end)
+
+    describe("emitting signals", function()
+        local layout_changed
+        before_each(function()
+            layout:connect_signal("widget::layout_changed", function()
+                layout_changed = layout_changed + 1
+            end)
+            layout_changed = 0
+        end)
+
+        it("add", function()
+            local w1, w2 = base.empty_widget(), base.empty_widget()
+            assert.is.equal(layout_changed, 0)
+            layout:add(w1)
+            assert.is.equal(layout_changed, 1)
+            layout:add(w2)
+            assert.is.equal(layout_changed, 2)
+            layout:add(w2)
+            assert.is.equal(layout_changed, 3)
+        end)
+
+        it("set_spacing", function()
+            assert.is.equal(layout_changed, 0)
+            layout:set_spacing(0)
+            assert.is.equal(layout_changed, 0)
+            layout:set_spacing(5)
+            assert.is.equal(layout_changed, 1)
+            layout:set_spacing(2)
+            assert.is.equal(layout_changed, 2)
+            layout:set_spacing(2)
+            assert.is.equal(layout_changed, 2)
+        end)
+
+        it("reset", function()
+            assert.is.equal(layout_changed, 0)
+            layout:add(base.make_widget())
+            assert.is.equal(layout_changed, 1)
+            layout:reset()
+            assert.is.equal(layout_changed, 2)
+        end)
+
+        it("fill_space", function()
+            assert.is.equal(layout_changed, 0)
+            layout:fill_space(false)
+            assert.is.equal(layout_changed, 0)
+            layout:fill_space(true)
+            assert.is.equal(layout_changed, 1)
+            layout:fill_space(true)
+            assert.is.equal(layout_changed, 1)
+            layout:fill_space(false)
+            assert.is.equal(layout_changed, 2)
         end)
     end)
 end)

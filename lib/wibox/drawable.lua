@@ -20,6 +20,9 @@ local object = require("gears.object")
 local sort = require("gears.sort")
 local surface = require("gears.surface")
 local timer = require("gears.timer")
+local matrix = require("gears.matrix")
+local hierarchy = require("wibox.hierarchy")
+local base = require("wibox.widget.base")
 
 local drawables = setmetatable({}, { __mode = 'k' })
 local wallpaper = nil
@@ -69,6 +72,36 @@ local function do_redraw(self)
     local geom = self.drawable:geometry();
     local x, y, width, height = geom.x, geom.y, geom.width, geom.height
 
+    -- Relayout
+    if self._need_relayout then
+        self._need_relayout = false
+        local old_hierarchy = self._widget_hierarchy
+        self._widget_hierarchy_callback_arg = {}
+        self._widget_hierarchy = self.widget and
+            hierarchy.new(get_widget_context(self), self.widget, width, height,
+                self._redraw_callback, self._layout_callback, self._widget_hierarchy_callback_arg)
+
+        if old_hierarchy == nil or self._widget_hierarchy == nil or self._need_complete_repaint then
+            self._need_complete_repaint = false
+            self._dirty_area:union_rectangle(cairo.RectangleInt{
+                x = 0, y = 0, width = width, height = height
+            })
+        else
+            self._dirty_area:union(self._widget_hierarchy:find_differences(old_hierarchy))
+        end
+    end
+
+    -- Clip to the dirty area
+    if self._dirty_area:is_empty() then
+        return
+    end
+    for i = 0, self._dirty_area:num_rectangles() - 1 do
+        local rect = self._dirty_area:get_rectangle(i)
+        cr:rectangle(rect.x, rect.y, rect.width, rect.height)
+    end
+    self._dirty_area = cairo.Region.create()
+    cr:clip()
+
     -- Draw the background
     cr:save()
 
@@ -93,21 +126,9 @@ local function do_redraw(self)
     cr:restore()
 
     -- Draw the widget
-    self._widget_geometries = {}
-    if self.widget and self.widget.visible then
+    if self._widget_hierarchy then
         cr:set_source(self.foreground_color)
-
-        if self.widget.opacity ~= 1 then
-            cr:push_group()
-        end
-        self.widget:draw(get_widget_context(self), cr, width, height)
-        if self.widget.opacity ~= 1 then
-            cr:pop_group_to_source()
-            cr.operator = cairo.Operator.OVER
-            cr:paint_with_alpha(self.widget.opacity)
-        end
-
-        self:widget_at(self.widget, 0, 0, width, height)
+        self._widget_hierarchy:draw(get_widget_context(self), cr)
     end
 
     self.drawable:refresh()
@@ -115,16 +136,33 @@ local function do_redraw(self)
     debug.assert(cr.status == "SUCCESS", "Cairo context entered error state: " .. cr.status)
 end
 
---- Register a widget's position.
--- This is internal, don't call it yourself! Only wibox.layout.base.draw_widget
--- is allowed to call this.
-function drawable:widget_at(widget, x, y, width, height)
-    local t = {
-        widget = widget,
-        x = x, y = y,drawable = self,
-        width = width, height = height
-    }
-    table.insert(self._widget_geometries, t)
+local function find_widgets(drawable, result, hierarchy, x, y)
+    local m = hierarchy:get_matrix_from_device()
+
+    -- Is (x,y) inside of this hierarchy or any child (aka the draw extents)
+    local x1, y1 = m:transform_point(x, y)
+    local x2, y2, width, height = hierarchy:get_draw_extents()
+    if x1 < x2 or x1 >= x2 + width then
+        return
+    end
+    if y1 < y2 or y1 >= y2 + height then
+        return
+    end
+
+    -- Is (x,y) inside of this widget?
+    local width, height = hierarchy:get_size()
+    if x1 >= 0 and y1 >= 0 and x1 <= width and y1 <= height then
+        -- Get the extents of this widget in the device space
+        local x2, y2, w2, h2 = matrix.transform_rectangle(hierarchy:get_matrix_to_device(),
+            0, 0, width, height)
+        table.insert(result, {
+            x = x2, y = y2, width = w2, height = h2,
+            drawable = drawable, widget = hierarchy:get_widget()
+        })
+    end
+    for _, child in ipairs(hierarchy:get_children()) do
+        find_widgets(drawable, result, child, x, y)
+    end
 end
 
 --- Find a widget by a point.
@@ -134,43 +172,20 @@ end
 -- @return A sorted table with all widgets that contain the given point. The
 --   widgets are sorted by relevance.
 function drawable:find_widgets(x, y)
-    local matches = {}
-    -- Find all widgets that contain the point
-    for k, v in pairs(self._widget_geometries) do
-        local match = true
-        if v.x > x or v.x + v.width <= x then match = false end
-        if v.y > y or v.y + v.height <= y then match = false end
-        if match then
-            table.insert(matches, v)
-        end
+    local result = {}
+    if self._widget_hierarchy then
+        find_widgets(self, result, self._widget_hierarchy, x, y)
     end
-
-    -- Sort the matches by area, the assumption here is that widgets don't
-    -- overlap and so smaller widgets are "more specific".
-    local function cmp(a, b)
-        local area_a = a.width * a.height
-        local area_b = b.width * b.height
-        return area_a < area_b
-    end
-    sort(matches, cmp)
-
-    return matches
+    return result
 end
 
 
 --- Set the widget that the drawable displays
 function drawable:set_widget(widget)
-    if self.widget then
-        -- Disconnect from the old widget so that we aren't updated due to it
-        self.widget:disconnect_signal("widget::updated", self.draw)
-    end
-
     self.widget = widget
-    if widget then
-        widget:weak_connect_signal("widget::updated", self.draw)
-    end
 
     -- Make sure the widget gets drawn
+    self._need_relayout = true
     self.draw()
 end
 
@@ -192,16 +207,16 @@ function drawable:set_bg(c)
     if self._redraw_on_move ~= redraw_on_move then
         self._redraw_on_move = redraw_on_move
         if redraw_on_move then
-            self.drawable:connect_signal("property::x", self.draw)
-            self.drawable:connect_signal("property::y", self.draw)
+            self.drawable:connect_signal("property::x", self._do_complete_repaint)
+            self.drawable:connect_signal("property::y", self._do_complete_repaint)
         else
-            self.drawable:disconnect_signal("property::x", self.draw)
-            self.drawable:disconnect_signal("property::y", self.draw)
+            self.drawable:disconnect_signal("property::x", self._do_complete_repaint)
+            self.drawable:disconnect_signal("property::y", self._do_complete_repaint)
         end
     end
 
     self.background_color = c
-    self.draw()
+    self._do_complete_repaint()
 end
 
 --- Set the foreground of the drawable
@@ -213,7 +228,7 @@ function drawable:set_fg(c)
         c = color(c)
     end
     self.foreground_color = c
-    self.draw()
+    self._do_complete_repaint()
 end
 
 local function emit_difference(name, list, skip)
@@ -280,6 +295,9 @@ function drawable.new(d, widget_context_skeleton, drawable_name)
     local ret = object()
     ret.drawable = d
     ret._widget_context_skeleton = widget_context_skeleton
+    ret._need_complete_repaint = true
+    ret._need_relayout = true
+    ret._dirty_area = cairo.Region.create()
     setup_signals(ret)
 
     for k, v in pairs(drawable) do
@@ -302,8 +320,12 @@ function drawable.new(d, widget_context_skeleton, drawable_name)
             ret._redraw_pending = true
         end
     end
-    drawables[ret.draw] = true
-    d:connect_signal("property::surface", ret.draw)
+    ret._do_complete_repaint = function()
+        ret._need_complete_repaint = true
+        ret:draw()
+    end
+    drawables[ret._do_complete_repaint] = true
+    d:connect_signal("property::surface", ret._do_complete_repaint)
 
     -- Currently we aren't redrawing on move (signals not connected).
     -- :set_bg() will later recompute this.
@@ -314,7 +336,6 @@ function drawable.new(d, widget_context_skeleton, drawable_name)
     ret:set_fg(beautiful.fg_normal)
 
     -- Initialize internals
-    ret._widget_geometries = {}
     ret._widgets_under_mouse = {}
 
     local function button_signal(name)
@@ -334,6 +355,28 @@ function drawable.new(d, widget_context_skeleton, drawable_name)
     d:connect_signal("mouse::move", function(_, x, y) handle_motion(ret, x, y) end)
     d:connect_signal("mouse::leave", function() handle_leave(ret) end)
 
+    -- Set up our callbacks for repaints
+    ret._redraw_callback = function(hierarchy, arg)
+        if ret._widget_hierarchy_callback_arg ~= arg then
+            return
+        end
+        local m = hierarchy:get_matrix_to_device()
+        local x, y, width, height = matrix.transform_rectangle(m, hierarchy:get_draw_extents())
+        local x1, y1 = math.floor(x), math.floor(y)
+        local x2, y2 = math.ceil(x + width), math.ceil(y + height)
+        ret._dirty_area:union_rectangle(cairo.RectangleInt{
+            x = x1, y = y1, width = x2 - x1, height = y2 - y1
+        })
+        ret:draw()
+    end
+    ret._layout_callback = function(hierarchy, arg)
+        if ret._widget_hierarchy_callback_arg ~= arg then
+            return
+        end
+        ret._need_relayout = true
+        ret:draw()
+    end
+
     -- Add __tostring method to metatable.
     ret.drawable_name = drawable_name or object.modulename(3)
     local mt = {}
@@ -344,7 +387,7 @@ function drawable.new(d, widget_context_skeleton, drawable_name)
     ret = setmetatable(ret, mt)
 
     -- Make sure the drawable is drawn at least once
-    ret.draw()
+    ret._do_complete_repaint()
 
     return ret
 end

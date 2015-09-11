@@ -7,7 +7,6 @@
 
 local base = require("wibox.widget.base")
 local color = require("gears.color")
-local layout_base = require("wibox.layout.base")
 local surface = require("gears.surface")
 local cairo = require("lgi").cairo
 local setmetatable = setmetatable
@@ -22,8 +21,6 @@ function background:draw(context, cr, width, height)
         return
     end
 
-    cr:save()
-
     if self.background then
         cr:set_source(self.background)
         cr:paint()
@@ -33,16 +30,19 @@ function background:draw(context, cr, width, height)
         cr:set_source(pattern)
         cr:paint()
     end
+end
 
-    cr:restore()
-
+--- Prepare drawing the children of this widget
+function background:before_draw_children(wibox, cr, width, height)
     if self.foreground then
-        cr:save()
         cr:set_source(self.foreground)
     end
-    layout_base.draw_widget(context, cr, self.widget, 0, 0, width, height)
-    if self.foreground then
-        cr:restore()
+end
+
+--- Layout this widget
+function background:layout(context, width, height)
+    if self.widget then
+        return { base.place_widget_at(self.widget, 0, 0, width, height) }
     end
 end
 
@@ -52,20 +52,16 @@ function background:fit(context, width, height)
         return 0, 0
     end
 
-    return layout_base.fit_widget(context, self.widget, width, height)
+    return base.fit_widget(context, self.widget, width, height)
 end
 
 --- Set the widget that is drawn on top of the background
 function background:set_widget(widget)
-    if self.widget then
-        self.widget:disconnect_signal("widget::updated", self._emit_updated)
-    end
     if widget then
         base.check_widget(widget)
-        widget:weak_connect_signal("widget::updated", self._emit_updated)
     end
     self.widget = widget
-    self._emit_updated()
+    self:emit_signal("widget::layout_changed")
 end
 
 --- Set the background to use
@@ -75,7 +71,7 @@ function background:set_bg(bg)
     else
         self.background = nil
     end
-    self._emit_updated()
+    self:emit_signal("widget::redraw_needed")
 end
 
 --- Set the foreground to use
@@ -85,13 +81,13 @@ function background:set_fg(fg)
     else
         self.foreground = nil
     end
-    self._emit_updated()
+    self:emit_signal("widget::redraw_needed")
 end
 
 --- Set the background image to use
 function background:set_bgimage(image)
     self.bgimage = surface.load(image)
-    self._emit_updated()
+    self:emit_signal("widget::redraw_needed")
 end
 
 --- Returns a new background layout. A background layout applies a background
@@ -105,10 +101,6 @@ local function new(widget, bg)
         if type(v) == "function" then
             ret[k] = v
         end
-    end
-
-    ret._emit_updated = function()
-        ret:emit_signal("widget::updated")
     end
 
     ret:set_widget(widget)
