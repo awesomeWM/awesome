@@ -214,11 +214,11 @@ function hierarchy:draw(context, cr)
             end
             if not extra_arg2 then
                 xpcall(function()
-                    func(widget, arg, cr, self:get_size())
+                    func(widget, context, cr, self:get_size())
                 end, error_function)
             else
                 xpcall(function()
-                    func(widget, arg, extra_arg1, extra_arg2, cr, self:get_size())
+                    func(widget, context, extra_arg1, extra_arg2, cr, self:get_size())
                 end, error_function)
             end
         end
