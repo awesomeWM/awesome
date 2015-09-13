@@ -73,6 +73,18 @@ awful.layout.layouts = {
 }
 -- }}}
 
+-- {{{ Helper functions
+local client_menu_instance = nil
+local function client_menu_toggle()
+    if client_menu_instance and client_menu_instance.wibox.visible then
+        client_menu_instance:hide()
+        client_menu_instance = nil
+    else
+        client_menu_instance = awful.menu.clients({ theme = { width = 250 } })
+    end
+end
+-- }}}
+
 -- {{{ Wallpaper
 if beautiful.wallpaper then
     for s = 1, screen.count() do
@@ -130,7 +142,8 @@ mytaglist.buttons = awful.util.table.join(
                     awful.button({ modkey }, 3, awful.client.toggletag),
                     awful.button({ }, 4, function(t) awful.tag.viewnext(awful.tag.getscreen(t)) end),
                     awful.button({ }, 5, function(t) awful.tag.viewprev(awful.tag.getscreen(t)) end)
-                    )
+                )
+
 mytasklist = {}
 mytasklist.buttons = awful.util.table.join(
                      awful.button({ }, 1, function (c)
@@ -150,14 +163,7 @@ mytasklist.buttons = awful.util.table.join(
                                               end
                                           end),
                      awful.button({ }, 3, function ()
-                                              if instance then
-                                                  instance:hide()
-                                                  instance = nil
-                                              else
-                                                  instance = awful.menu.clients({
-                                                      theme = { width = 250 }
-                                                  })
-                                              end
+                                              client_menu_toggle()
                                           end),
                      awful.button({ }, 4, function ()
                                               awful.client.focus.byidx(1)
