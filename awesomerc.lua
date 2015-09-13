@@ -74,13 +74,16 @@ awful.layout.layouts = {
 -- }}}
 
 -- {{{ Helper functions
-local client_menu_instance = nil
-local function client_menu_toggle()
-    if client_menu_instance and client_menu_instance.wibox.visible then
-        client_menu_instance:hide()
-        client_menu_instance = nil
-    else
-        client_menu_instance = awful.menu.clients({ theme = { width = 250 } })
+local function client_menu_toggle_fn()
+    local instance = nil
+    
+    return function ()
+        if instance and instance.wibox.visible then
+            instance:hide()
+            instance = nil
+        else
+            instance = awful.menu.clients({ theme = { width = 250 } })
+        end
     end
 end
 -- }}}
@@ -162,9 +165,7 @@ mytasklist.buttons = awful.util.table.join(
                                                   c:raise()
                                               end
                                           end),
-                     awful.button({ }, 3, function ()
-                                              client_menu_toggle()
-                                          end),
+                     awful.button({ }, 3, client_menu_toggle_fn()),
                      awful.button({ }, 4, function ()
                                               awful.client.focus.byidx(1)
                                           end),
