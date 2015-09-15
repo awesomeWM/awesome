@@ -6,21 +6,25 @@
 ---------------------------------------------------------------------------
 
 local pairs = pairs
+local table = table
 local type = type
 local setmetatable = setmetatable
-local base = require("wibox.layout.base")
-local widget_base = require("wibox.widget.base")
+local base = require("wibox.widget.base")
 local gears_timer = require("gears")
 local math = math
 
 local scroll = { mt = {} }
 
+function scroll:before_draw_children(context, cr, width, height)
+    cr:rectangle(0, 0, width, height)
+    cr:clip()
+end
+
 --- Draw a scroll layout
-function scroll:draw(wibox, cr, width, height)
+function scroll:layout(context, width, height)
+    local result = {}
     local abs_x,width_busy
-    if not self.widget then
-        return
-    end
+    if  self.widget then
     if self._wg > width then
         if self._scrolled and not self._scrolltimer.started then
             self._scrolltimer:start()
@@ -32,17 +36,20 @@ function scroll:draw(wibox, cr, width, height)
         abs_x = math.abs(self._x)
     end
     -- Drawn end of widget => (width-self._x > self._wg and self._wg or width-self._x ) else we draw the widget in the entire width allocated width-self._x
-    base.draw_widget(wibox, cr, self.widget, self._x, 0,(self._expanded and width-self._x or (width-self._x > self._wg and self._wg or width-self._x )), height)
+    table.insert(result,base.place_widget_at( self.widget, self._x, 0,(self._expanded and width-self._x or (width-self._x > self._wg and self._wg or width-self._x )), height))
     width_busy = self._wg - abs_x
     if self._wg > width and width_busy < width + self._space_width then
-        base.draw_widget(wibox, cr, self.widget, width_busy+self._space_width, 0,width - self._space_width- width_busy, height)
+        table.insert(result,base.place_widget_at( self.widget, width_busy+self._space_width, 0,width - self._space_width- width_busy, height))
     end
+    return result;
+    end
+
 end
 
 --- Set space width of widget
 function scroll:spaceWidth(space)
     self._space_width = space
-    self:emit_signal("widget::updated")
+    self:emit_signal("widget::layout_changed")
 end
 
 --- Set x move
@@ -53,13 +60,13 @@ end
 --- Move a widget
 function scroll:scroll()
     self._x = self._x - self._deltax
-    self:emit_signal("widget::updated")
+    self:emit_signal("widget::layout_changed")
 end
 
 --- Reset move
 function scroll:resetScroll()
     self._x = 0
-    self:emit_signal("widget::updated")
+    self:emit_signal("widget::layout_changed")
 end
 
 --- Set auto scrolled
@@ -70,21 +77,27 @@ function scroll:auto(enable)
       end
     end
     self._scrolled = enable
-    self:emit_signal("widget::updated")
+    self:emit_signal("widget::layout_changed")
 end
 
 --- Set expanded
 function scroll:expand(enable)
     self._expanded = enable
-    self:emit_signal("widget::updated")
+    self:emit_signal("widget::layout_changed")
 end
 
 --- Fit a scroll layout into the given space
-function scroll:fit(width, height)
+function scroll:fit(context, width, height)
     local w, h,wg,hg
     if self.widget then
         -- grab real size of widget
-        wg,hg = base.fit_widget(self.widget, 2^1024, 2^1024)
+        wg,hg = base.fit_widget(context,self.widget, 2^1024, 2^1024)
+        if self._wg ~= wg  then
+            self._x = 0
+            if self._scrolltimer.started then
+                self._scrolltimer:stop()
+            end
+        end
         self._wg = wg
         self._hg = hg
         w = self._width and math.min(width,self._width) or width
@@ -99,27 +112,20 @@ end
 
 --- Set the widget that this layout adds a constraint on.
 function scroll:set_widget(widget)
-    if self.widget then
-        self.widget:disconnect_signal("widget::updated", self._emit_updated)
-    end
-    if widget then
-        widget_base.check_widget(widget)
-        widget:connect_signal("widget::updated", self._emit_updated)
-    end
     self.widget = widget
-    self:emit_signal("widget::updated")
+    self:emit_signal("widget::layout_changed")
 end
 
 --- Set the maximum width to val.
 function scroll:set_width(val)
     self._width = val
-    self:emit_signal("widget::updated")
+    self:emit_signal("widget::layout_changed")
 end
 
 --- Set timeout to val.
 function scroll:set_timeout(val)
     self._scrolltimer.timeout = val
-    self:emit_signal("widget::updated")
+    self:emit_signal("widget::layout_changed")
 end
 
 --- Returns a new scroll layout. This layout will constraint the size of a
@@ -133,20 +139,12 @@ end
 -- @param[opt] time Set timeout.
 -- the end and the beginning of the widget.
 local function new(widget, deltax, space, width, autoscroll, expanded, time)
-    local ret = widget_base.make_widget()
+    local ret = base.make_widget()
 
     for k, v in pairs(scroll) do
         if type(v) == "function" then
             ret[k] = v
         end
-    end
-
-    ret._emit_updated = function()
-        ret._x = 0
-        if ret._scrolltimer.started then
-            ret._scrolltimer:stop()
-        end
-        ret:emit_signal("widget::updated")
     end
 
     ret._x = 0
