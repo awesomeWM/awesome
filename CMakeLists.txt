@@ -92,6 +92,30 @@ endif()
 add_executable(${PROJECT_AWE_NAME}
     ${AWE_SRCS})
 
+# CFLAGS
+set(AWESOME_C_FLAGS
+    -O1 -std=gnu99 -ggdb3 -fno-strict-aliasing -Wall -Wextra
+    -Wchar-subscripts -Wundef -Wshadow -Wcast-align -Wwrite-strings
+    -Wsign-compare -Wunused -Wno-unused-parameter -Wuninitialized -Winit-self
+    -Wpointer-arith -Wformat-nonliteral
+    -Wno-format-zero-length -Wmissing-format-attribute -Wmissing-prototypes
+    -Wstrict-prototypes
+    CACHE STRING "CFLAGS used to compile ${PROJECT_AWE_NAME}")
+mark_as_advanced(AWESOME_C_FLAGS)
+target_compile_options(${PROJECT_AWE_NAME} PRIVATE ${AWESOME_C_FLAGS})
+
+# Linux w/ GCC requires -rdynamic to get backtrace to fully work.
+#
+# For "historical reasons", CMake adds the option to the linker flags
+# unnoticeably for Linux w/ GCC through its modules Linux-GNU.cmake
+# and Linux-GNU-C.cmake.  Our build system has counted on that.  But
+# just in case CMake should do away with the convention suddenly...
+if(DEFINED CMAKE_SHARED_LIBRARY_LINK_C_FLAGS AND
+        NOT CMAKE_SHARED_LIBRARY_LINK_C_FLAGS MATCHES "-rdynamic")
+    target_link_libraries(${PROJECT_AWE_NAME}
+        $<$<AND:$<PLATFORM_ID:Linux>,$<C_COMPILER_ID:GNU>>:-rdynamic>)
+endif()
+
 # FreeBSD requires dynamic linking
 if(${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD")
     set_target_properties(${PROJECT_AWE_NAME}
