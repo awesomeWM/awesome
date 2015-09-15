@@ -297,9 +297,12 @@ extents of your own widget, for example at a negative position or at twice the
 size of this widget. Use this mechanism if your widget needs to draw outside of
 its own extents. If the result of this callback changes,
 <code>widget::layout_changed</code> has to be emitted. You can use @{fit_widget}
-to call the `:fit` callback of other widgets. Never call `:fit` directly!  For
-example, if you want to place another widget <code>child</code> inside of your
-widget, you can do it like this:
+to call the `:fit` callback of other widgets. Never call `:fit` directly!
+Also, this callback must not modify the returned table later. It is suggested
+not to keep any references to this table at all.
+
+For example, if you want to place another widget <code>child</code> inside of
+your widget, you can do it like this:
 <pre><code>-- For readability
 local base = wibox.widget.base
 function widget:layout(width, height)

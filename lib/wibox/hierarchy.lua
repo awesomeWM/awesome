@@ -15,51 +15,29 @@ local base = require("wibox.widget.base")
 
 local hierarchy = {}
 
-local function hierarchy_new(context, widget, width, height, redraw_callback, layout_callback, callback_arg,
-            matrix_to_parent, matrix_to_device)
-    local children = base.layout_widget(context, widget, width, height)
-    local draws_x1, draws_y1, draws_x2, draws_y2 = 0, 0, width, height
+local function hierarchy_new(widget, redraw_callback, layout_callback, callback_arg)
     local result = {
-        _matrix = matrix_to_parent,
-        _matrix_to_device = matrix_to_device,
-        _widget = widget,
+        _matrix = cairo.Matrix.create_identity(),
+        _matrix_to_device = cairo.Matrix.create_identity(),
+        _widget = nil,
+        _redraw_callback = redraw_callback,
+        _layout_callback = layout_callback,
+        _callback_arg = callback_arg,
         _size = {
-            width = width,
-            height = height
+            width = nil,
+            height = nil
         },
-        _draw_extents = nil,
+        _draw_extents = {
+            x = 0,
+            y = 0,
+            width = 0,
+            height = 0
+        },
+        _layout_result = nil,
         _children = {}
     }
-
-    result._redraw = function() redraw_callback(result, callback_arg) end
-    result._layout = function() layout_callback(result, callback_arg) end
-    widget:weak_connect_signal("widget::redraw_needed", result._redraw)
-    widget:weak_connect_signal("widget::layout_changed", result._layout)
-
-    for _, w in ipairs(children or {}) do
-        local to_dev = cairo.Matrix.create_identity()
-        to_dev:multiply(matrix_to_device, w._matrix)
-
-        local r = hierarchy_new(context, w._widget, w._width, w._height, redraw_callback, layout_callback,
-                callback_arg, matrix.copy(w._matrix), to_dev)
-        table.insert(result._children, r)
-
-        -- Update our drawing extents
-        local s = r._draw_extents
-        local px, py, pwidth, pheight = matrix.transform_rectangle(r._matrix,
-                s.x, s.y, s.width, s.height)
-        local px2, py2 = px + pwidth, py + pheight
-        draws_x1 = math.min(draws_x1, px)
-        draws_y1 = math.min(draws_y1, py)
-        draws_x2 = math.max(draws_x2, px2)
-        draws_y2 = math.max(draws_y2, py2)
-    end
-    result._draw_extents = {
-        x = draws_x1,
-        y = draws_y1,
-        width = draws_x2 - draws_x1,
-        height = draws_y2 - draws_y1
-    }
+    function result._redraw() redraw_callback(result, callback_arg) end
+    function result._layout() layout_callback(result, callback_arg) end
 
     for k, f in pairs(hierarchy) do
         if type(f) == "function" then
@@ -67,6 +45,87 @@ local function hierarchy_new(context, widget, width, height, redraw_callback, la
         end
     end
     return result
+end
+
+local hierarchy_update
+function hierarchy_update(self, context, widget, width, height, region, matrix_to_parent, matrix_to_device)
+    local layout_result = base.layout_widget(context, widget, width, height)
+    if self._layout_result == layout_result and self._widget == widget and
+            self._size.width == width and self._size.height == height and
+            matrix.equals(self._matrix, matrix_to_parent) and
+            matrix.equals(self._matrix_to_device, matrix_to_device) then
+        -- Nothing changed
+        return
+    end
+
+    local old_x, old_y, old_width, old_height
+    if self._size.width and self._size.height then
+        local x, y, w, h = matrix.transform_rectangle(self._matrix_to_device, 0, 0, self._size.width, self._size.height)
+        old_x, old_y = math.floor(x), math.floor(y)
+        old_width, old_height = math.ceil(x + w) - old_x, math.ceil(y + h) - old_y
+    else
+        old_x, old_y, old_width, old_height = 0, 0, 0, 0
+    end
+
+    -- Disconnect old signals
+    if self._widget then
+        self._widget:disconnect_signal("widget::redraw_needed", self._redraw)
+        self._widget:disconnect_signal("widget::layout_changed", self._layout)
+    end
+
+    -- Save the arguments we need to save
+    self._layout_result = layout_result
+    self._widget = widget
+    self._size.width = width
+    self._size.height = height
+    self._matrix = matrix_to_parent
+    self._matrix_to_device = matrix_to_device
+
+    -- Connect signals
+    widget:weak_connect_signal("widget::redraw_needed", self._redraw)
+    widget:weak_connect_signal("widget::layout_changed", self._layout)
+
+    -- Update children
+    local old_children = self._children
+    self._children = {}
+    for idx, w in ipairs(layout_result or {}) do
+        local r = old_children[idx]
+        if not r then
+            r = hierarchy_new(w._widget, self._redraw_callback, self._layout_callback, self._callback_arg)
+        end
+        local to_dev = cairo.Matrix.create_identity()
+        to_dev:multiply(matrix_to_device, w._matrix)
+        hierarchy_update(r, context, w._widget, w._width, w._height, region, matrix.copy(w._matrix), to_dev)
+        table.insert(self._children, r)
+    end
+
+    -- Calculate the draw extents
+    local x1, y1, x2, y2 = 0, 0, width, height
+    for _, h in ipairs(self._children) do
+        local px, py, pwidth, pheight = matrix.transform_rectangle(h._matrix, h:get_draw_extents())
+        x1 = math.min(x1, px)
+        y1 = math.min(y1, py)
+        x2 = math.max(x2, px + pwidth)
+        y2 = math.max(y2, py + pheight)
+    end
+    self._draw_extents = {
+        x = x1, y = y1,
+        width = x2 - x1,
+        height = y2 - y1
+    }
+
+    -- Check which part needs to be redrawn
+    local x, y, w, h = matrix.transform_rectangle(self._matrix_to_device, 0, 0, self._size.width, self._size.height)
+    local new_x, new_y = math.floor(x), math.floor(y)
+    local new_width, new_height = math.ceil(x + w) - new_x, math.ceil(y + h) - new_y
+    if new_x ~= old_x or new_y ~= old_y or new_width ~= old_width or new_height ~= old_height then
+        region:union_rectangle(cairo.RectangleInt{
+            x = old_x, y = old_y, width = old_width, height = old_height
+        })
+        region:union_rectangle(cairo.RectangleInt{
+            x = new_x, y = new_y, width = new_width, height = new_height
+        })
+    end
 end
 
 --- Create a new widget hierarchy that has no parent.
@@ -81,8 +140,23 @@ end
 -- @param callback_arg A second argument that is given to the above callbacks.
 -- @return A new widget hierarchy
 function hierarchy.new(context, widget, width, height, redraw_callback, layout_callback, callback_arg)
-    return hierarchy_new(context, widget, width, height, redraw_callback, layout_callback, callback_arg,
-            cairo.Matrix.create_identity(), cairo.Matrix.create_identity())
+    local result = hierarchy_new(widget, redraw_callback, layout_callback, callback_arg)
+    result:update(context, widget, width, height)
+    return result
+end
+
+--- Update a widget hierarchy with some new state.
+-- @param context The context in which we are laid out.
+-- @param widget The widget that is at the base of the hierarchy.
+-- @param width The available width for this hierarchy.
+-- @param height The available height for this hierarchy.
+-- @param[opt] region A region to use for accumulating changed parts
+-- @return A cairo region describing the changed parts (either the `region`
+--         argument or a new, internally created region).
+function hierarchy:update(context, widget, width, height, region)
+    local region = region or cairo.Region.create()
+    hierarchy_update(self, context, widget, width, height, region, self._matrix, self._matrix_to_device)
+    return region
 end
 
 --- Get the widget that this hierarchy manages.

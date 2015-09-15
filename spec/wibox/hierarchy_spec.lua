@@ -229,6 +229,54 @@ describe("wibox.hierarchy", function()
             assert.is.same({ rect.x, rect.y, rect.width, rect.height }, { 4, 4, 10, 21 })
         end)
     end)
+
+    describe("update", function()
+        local child, intermediate, parent
+        local instance
+        local function nop() end
+        before_each(function()
+            child = make_widget(nil)
+            intermediate = make_widget({
+                make_child(child, 10, 20, cairo.Matrix.create_translate(0, 5))
+            })
+            parent = make_widget({
+                make_child(intermediate, 5, 2, cairo.Matrix.create_translate(4, 0))
+            })
+
+            local context = {}
+            instance = hierarchy.new(context, parent, 15, 16, nop, nop)
+        end)
+
+        it("No difference 1", function()
+            local region = instance:update(context, parent, 15, 16)
+            assert.is.equal(region:num_rectangles(), 0)
+        end)
+
+        it("No difference 2", function()
+            local region1 = cairo.Region.create()
+            local region2 = instance:update(context, parent, 15, 16, region1)
+            assert.is.equal(region1, region2)
+            assert.is.equal(region2:num_rectangles(), 0)
+        end)
+
+        it("child moved", function()
+            -- Clear caches and change result of intermediate
+            parent._widget_caches = {}
+            parent.layout = function()
+                return { make_child(intermediate, 5, 2, cairo.Matrix.create_translate(4, 0)) }
+            end
+            intermediate._widget_caches = {}
+            intermediate.layout = function()
+                return { make_child(child, 10, 20, cairo.Matrix.create_translate(0, 4)) }
+            end
+
+            local region = instance:update(context, parent, 15, 16)
+            assert.is.equal(region:num_rectangles(), 1)
+            local rect = region:get_rectangle(0)
+            -- The widget drew to 4, 5, 10, 20 before and 4, 4, 10, 20 after
+            assert.is.same({ rect.x, rect.y, rect.width, rect.height }, { 4, 4, 10, 21 })
+        end)
+    end)
 end)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
