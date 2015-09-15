@@ -220,40 +220,6 @@ function hierarchy:get_children()
     return self._children
 end
 
---- Compare two widget hierarchies and compute a cairo Region that contains all
--- rectangles that aren't the same between both hierarchies.
--- @param other The hierarchy to compare with
--- @return A cairo Region containing the differences.
-function hierarchy:find_differences(other)
-    local region = cairo.Region.create()
-    local function needs_redraw(h)
-        local m = h:get_matrix_to_device()
-        local p = h._draw_extents
-        local x, y, width, height = matrix.transform_rectangle(m, p.x, p.y, p.width, p.height)
-        local x1, y1 = math.floor(x), math.floor(y)
-        local x2, y2 = math.ceil(x + width), math.ceil(y + height)
-        region:union_rectangle(cairo.RectangleInt({
-            x = x1, y = y1, width = x2 - x1, height = y2 - y1
-        }))
-    end
-    local compare
-    compare = function(self, other)
-        local s_size, o_size = self._size, other._size
-        if s_size.width ~= o_size.width or s_size.height ~= o_size.height or
-                #self._children ~= #other._children or self._widget ~= other._widget or
-                not matrix.equals(self._matrix, other._matrix) then
-            needs_redraw(self)
-            needs_redraw(other)
-        else
-            for i = 1, #self._children do
-                compare(self._children[i], other._children[i])
-            end
-        end
-    end
-    compare(self, other)
-    return region
-end
-
 --- Does the given cairo context have an empty clip (aka "no drawing possible")?
 local function empty_clip(cr)
     local x, y, width, height = cr:clip_extents()

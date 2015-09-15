@@ -192,44 +192,6 @@ describe("wibox.hierarchy", function()
         end)
     end)
 
-    describe("find_differences", function()
-        local child, intermediate, parent
-        local instance
-        local function nop() end
-        before_each(function()
-            child = make_widget(nil)
-            intermediate = make_widget({
-                make_child(child, 10, 20, cairo.Matrix.create_translate(0, 5))
-            })
-            parent = make_widget({
-                make_child(intermediate, 5, 2, cairo.Matrix.create_translate(4, 0))
-            })
-
-            local context = {}
-            instance = hierarchy.new(context, parent, 15, 16, nop, nop)
-        end)
-
-        it("No difference", function()
-            local context = {}
-            local instance2 = hierarchy.new(context, parent, 15, 16, nop, nop)
-            local region = instance:find_differences(instance2)
-            assert.is.equal(region:num_rectangles(), 0)
-        end)
-
-        it("child moved", function()
-            intermediate.layout = function()
-                return { make_child(child, 10, 20, cairo.Matrix.create_translate(0, 4)) }
-            end
-            local context = {}
-            local instance2 = hierarchy.new(context, parent, 15, 16, nop, nop)
-            local region = instance:find_differences(instance2)
-            assert.is.equal(region:num_rectangles(), 1)
-            local rect = region:get_rectangle(0)
-            -- The widget drew to 4, 5, 10, 20 before and 4, 4, 10, 20 after
-            assert.is.same({ rect.x, rect.y, rect.width, rect.height }, { 4, 4, 10, 21 })
-        end)
-    end)
-
     describe("update", function()
         local child, intermediate, parent
         local instance
