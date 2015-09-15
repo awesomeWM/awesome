@@ -73,7 +73,7 @@ local function do_redraw(self)
     local x, y, width, height = geom.x, geom.y, geom.width, geom.height
 
     -- Relayout
-    if self._need_relayout then
+    if self._need_relayout or self._need_complete_repaint then
         self._need_relayout = false
         local old_hierarchy = self._widget_hierarchy
         self._widget_hierarchy_callback_arg = {}
