@@ -11,7 +11,7 @@ local pairs = pairs
 local ipairs = ipairs
 local setmetatable = setmetatable
 local base = require("wibox.widget.base")
-local Matrix = require("lgi").cairo.Matrix
+local matrix = require("gears.matrix")
 
 local mirror = { mt = {} }
 
@@ -23,7 +23,7 @@ function mirror:layout(context, cr, width, height)
         return
     end
 
-    local m = Matrix.create_identity()
+    local m = matrix.identity
     local t = { x = 0, y = 0 } -- translation
     local s = { x = 1, y = 1 } -- scale
     if self.horizontal then
@@ -34,8 +34,8 @@ function mirror:layout(context, cr, width, height)
         t.x = width
         s.x = -1
     end
-    m:translate(t.x, t.y)
-    m:scale(s.x, s.y)
+    m = m:translate(t.x, t.y)
+    m = m:scale(s.x, s.y)
 
     return base.place_widget_via_matrix(widget, m, width, height)
 end

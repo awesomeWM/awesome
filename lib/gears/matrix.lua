@@ -11,16 +11,6 @@ local cairo = require("lgi").cairo
 local debug = require("gears.debug")
 local matrix = {}
 
---- Copy a cairo matrix
--- @param matrix The matrix to copy.
--- @return A copy of the given cairo matrix.
-function matrix.copy(matrix)
-    debug.assert(cairo.Matrix:is_type_of(matrix), "Argument should be a cairo matrix")
-    local ret = cairo.Matrix()
-    ret:init(matrix.xx, matrix.yx, matrix.xy, matrix.yy, matrix.x0, matrix.y0)
-    return ret
-end
-
 -- Metatable for matrix instances. This is set up near the end of the file.
 local matrix_mt = {}
 

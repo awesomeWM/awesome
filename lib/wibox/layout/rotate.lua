@@ -12,7 +12,7 @@ local type = type
 local setmetatable = setmetatable
 local tostring = tostring
 local base = require("wibox.widget.base")
-local Matrix = require("lgi").cairo.Matrix
+local matrix = require("gears.matrix")
 
 local rotate = { mt = {} }
 
@@ -32,16 +32,16 @@ function rotate:layout(context, width, height)
 
     local dir = self:get_direction()
 
-    local m = Matrix.create_identity()
+    local m = matrix.identity
     if dir == "west" then
-        m:rotate(pi / 2)
-        m:translate(0, -width)
+        m = m:rotate(pi / 2)
+        m = m:translate(0, -width)
     elseif dir == "south" then
-        m:rotate(pi)
-        m:translate(-width, -height)
+        m = m:rotate(pi)
+        m = m:translate(-width, -height)
     elseif dir == "east" then
-        m:rotate(3 * pi / 2)
-        m:translate(-height, 0)
+        m = m:rotate(3 * pi / 2)
+        m = m:translate(-height, 0)
     end
 
     -- Since we rotated, we might have to swap width and height.

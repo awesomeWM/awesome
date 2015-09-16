@@ -9,7 +9,6 @@ local debug = require("gears.debug")
 local object = require("gears.object")
 local cache = require("gears.cache")
 local matrix = require("gears.matrix")
-local Matrix = require("lgi").cairo.Matrix
 local setmetatable = setmetatable
 local pairs = pairs
 local type = type
@@ -204,8 +203,8 @@ end
 --- Create widget placement information. This should be used for a widget's
 -- `:layout()` callback.
 -- @param widget The widget that should be placed.
--- @param mat A cairo matrix transforming from the parent widget's coordinate
---        system. For example, use cairo.Matrix.create_translate(1, 2) to draw a
+-- @param mat A matrix transforming from the parent widget's coordinate
+--        system. For example, use matrix.create_translate(1, 2) to draw a
 --        widget at position (1, 2) relative to the parent widget.
 -- @param width The width of the widget in its own coordinate system. That is,
 --        after applying the transformation matrix.
@@ -217,7 +216,7 @@ function base.place_widget_via_matrix(widget, mat, width, height)
         _widget = widget,
         _width = width,
         _height = height,
-        _matrix = matrix.copy(mat)
+        _matrix = mat
     }
 end
 
@@ -232,7 +231,7 @@ end
 --        after applying the transformation matrix.
 -- @return An opaque object that can be returned from :layout()
 function base.place_widget_at(widget, x, y, width, height)
-    return base.place_widget_via_matrix(widget, Matrix.create_translate(x, y), width, height)
+    return base.place_widget_via_matrix(widget, matrix.create_translate(x, y), width, height)
 end
 
 --[[--
