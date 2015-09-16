@@ -159,6 +159,10 @@ typedef struct
     struct xkb_context *xkb_ctx;
     /* xkb state of dead keys on keyboard */
     struct xkb_state *xkb_state;
+    /* X coordinate of last mouse motion event */
+    uint16_t last_motion_x;
+    /* Y coordinate of last mouse motion event */
+    uint16_t last_motion_y;
 } awesome_t;
 
 extern awesome_t globalconf;

@@ -456,6 +456,9 @@ event_handle_motionnotify(xcb_motion_notify_event_t *ev)
         luaA_object_emit_signal(L, -3, "mouse::move", 2);
         lua_pop(L, 2);
     }
+
+    globalconf.last_motion_x = ev->event_x;
+    globalconf.last_motion_y = ev->event_y;
 }
 
 /** The leave notify event handler.
@@ -477,7 +480,7 @@ event_handle_leavenotify(xcb_leave_notify_event_t *ev)
     {
         luaA_object_push(L, c);
         luaA_object_emit_signal(L, -1, "mouse::leave", 0);
-        drawable_t *d = client_get_drawable(c, ev->event_x, ev->event_y);
+        drawable_t *d = client_get_drawable(c, globalconf.last_motion_x, globalconf.last_motion_y);
         if (d)
         {
             luaA_object_push_item(L, -1, d);
