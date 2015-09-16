@@ -59,6 +59,7 @@ function hierarchy_update(self, context, widget, width, height, region, matrix_t
     end
 
     local old_x, old_y, old_width, old_height
+    local old_widget = self._widget
     if self._size.width and self._size.height then
         local x, y, w, h = matrix.transform_rectangle(self._matrix_to_device, 0, 0, self._size.width, self._size.height)
         old_x, old_y = math.floor(x), math.floor(y)
@@ -128,7 +129,8 @@ function hierarchy_update(self, context, widget, width, height, region, matrix_t
     local x, y, w, h = matrix.transform_rectangle(self._matrix_to_device, 0, 0, self._size.width, self._size.height)
     local new_x, new_y = math.floor(x), math.floor(y)
     local new_width, new_height = math.ceil(x + w) - new_x, math.ceil(y + h) - new_y
-    if new_x ~= old_x or new_y ~= old_y or new_width ~= old_width or new_height ~= old_height then
+    if new_x ~= old_x or new_y ~= old_y or new_width ~= old_width or new_height ~= old_height or
+            widget ~= old_widget then
         region:union_rectangle(cairo.RectangleInt{
             x = old_x, y = old_y, width = old_width, height = old_height
         })

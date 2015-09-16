@@ -254,6 +254,23 @@ describe("wibox.hierarchy", function()
             -- The child was drawn to 4, 5, 10, 20
             assert.is.same({ rect.x, rect.y, rect.width, rect.height }, { 4, 5, 10, 20 })
         end)
+
+        it("widget changed", function()
+            -- Clear caches and change result of parent
+            local new_intermediate = make_widget({
+                make_child(child, 10, 20, cairo.Matrix.create_translate(0, 5))
+            })
+            parent._widget_caches = {}
+            parent.layout = function()
+                return { make_child(new_intermediate, 5, 2, cairo.Matrix.create_translate(4, 0)) }
+            end
+
+            local region = instance:update(context, parent, 15, 16)
+            assert.is.equal(region:num_rectangles(), 1)
+            local rect = region:get_rectangle(0)
+            -- Intermediate drew to 4, 0, 5, 2 (and so does new_intermediate)
+            assert.is.same({ rect.x, rect.y, rect.width, rect.height }, { 4, 0, 5, 2 })
+        end)
     end)
 end)
 
