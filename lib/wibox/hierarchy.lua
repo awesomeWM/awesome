@@ -88,8 +88,8 @@ function hierarchy_update(self, context, widget, width, height, region, matrix_t
     -- Update children
     local old_children = self._children
     self._children = {}
-    for idx, w in ipairs(layout_result or {}) do
-        local r = old_children[idx]
+    for _, w in ipairs(layout_result or {}) do
+        local r = table.remove(old_children, 1)
         if not r then
             r = hierarchy_new(w._widget, self._redraw_callback, self._layout_callback, self._callback_arg)
         end
@@ -115,6 +115,16 @@ function hierarchy_update(self, context, widget, width, height, region, matrix_t
     }
 
     -- Check which part needs to be redrawn
+
+    -- Are there any children which were removed? Their area needs a redraw.
+    for _, h in ipairs(old_children) do
+        local x, y, width, height = matrix.transform_rectangle(h._matrix_to_device, h:get_draw_extents())
+        region:union_rectangle(cairo.RectangleInt{
+            x = x, y = y, width = width, height = height
+        })
+    end
+
+    -- Did we change and need to be redrawn?
     local x, y, w, h = matrix.transform_rectangle(self._matrix_to_device, 0, 0, self._size.width, self._size.height)
     local new_x, new_y = math.floor(x), math.floor(y)
     local new_width, new_height = math.ceil(x + w) - new_x, math.ceil(y + h) - new_y
