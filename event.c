@@ -512,7 +512,10 @@ event_handle_leavenotify(xcb_leave_notify_event_t *ev)
     if(ev->mode != XCB_NOTIFY_MODE_NORMAL)
         return;
 
-    if((c = client_getbyframewin(ev->event)))
+    /* Ignore leave with detail inferior (we were left for a window contained in
+     * our window, so technically the pointer is still inside of this window).
+     */
+    if(ev->detail != XCB_NOTIFY_DETAIL_INFERIOR && (c = client_getbyframewin(ev->event)))
     {
         luaA_object_push(L, c);
         luaA_object_emit_signal(L, -1, "mouse::leave", 0);
@@ -549,7 +552,12 @@ event_handle_enternotify(xcb_enter_notify_event_t *ev)
     if((c = client_getbyframewin(ev->event)))
     {
         luaA_object_push(L, c);
-        luaA_object_emit_signal(L, -1, "mouse::enter", 0);
+        /* Ignore enter with detail inferior: The pointer was previously inside
+         * of a child window, so technically this isn't a 'real' enter.
+         */
+        if (ev->detail != XCB_NOTIFY_DETAIL_INFERIOR)
+            luaA_object_emit_signal(L, -1, "mouse::enter", 0);
+
         drawable_t *d = client_get_drawable(c, ev->event_x, ev->event_y);
         if (d)
         {
