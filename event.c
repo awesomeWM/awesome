@@ -392,6 +392,44 @@ event_handle_destroynotify(xcb_destroy_notify_event_t *ev)
             }
 }
 
+/** Record that the given drawable contains the pointer.
+ */
+static void
+event_drawable_under_mouse(lua_State *L, int ud)
+{
+    void *d;
+
+    lua_pushvalue(L, ud);
+    d = luaA_object_ref(L, -1);
+
+    if (d == globalconf.drawable_under_mouse)
+    {
+        /* Nothing to do */
+        luaA_object_unref(L, d);
+        return;
+    }
+
+    if (globalconf.drawable_under_mouse != NULL)
+    {
+        /* Emit leave on previous drawable */
+        luaA_object_push(L, globalconf.drawable_under_mouse);
+        luaA_object_emit_signal(L, -1, "mouse::leave", 0);
+        lua_pop(L, 1);
+
+        /* Unref the previous drawable */
+        luaA_object_unref(L, globalconf.drawable_under_mouse);
+        globalconf.drawable_under_mouse = NULL;
+    }
+    if (d != NULL)
+    {
+        /* Reference the drawable for leave event later */
+        globalconf.drawable_under_mouse = d;
+
+        /* Emit enter */
+        luaA_object_emit_signal(L, ud, "mouse::enter", 0);
+    }
+}
+
 /** The motion notify event handler.
  * \param ev The event.
  */
@@ -419,6 +457,7 @@ event_handle_motionnotify(xcb_motion_notify_event_t *ev)
         if (d)
         {
             luaA_object_push_item(globalconf.L, -1, d);
+            event_drawable_under_mouse(globalconf.L, -1);
             lua_pushnumber(globalconf.L, x);
             lua_pushnumber(globalconf.L, y);
             luaA_object_emit_signal(globalconf.L, -3, "mouse::move", 2);
@@ -431,6 +470,7 @@ event_handle_motionnotify(xcb_motion_notify_event_t *ev)
     {
         luaA_object_push(globalconf.L, w);
         luaA_object_push_item(globalconf.L, -1, w->drawable);
+        event_drawable_under_mouse(globalconf.L, -1);
         lua_pushnumber(globalconf.L, ev->event_x);
         lua_pushnumber(globalconf.L, ev->event_y);
         luaA_object_emit_signal(globalconf.L, -3, "mouse::move", 2);
@@ -444,7 +484,6 @@ event_handle_motionnotify(xcb_motion_notify_event_t *ev)
 static void
 event_handle_leavenotify(xcb_leave_notify_event_t *ev)
 {
-    drawin_t *drawin;
     client_t *c;
 
     globalconf.timestamp = ev->time;
@@ -456,23 +495,11 @@ event_handle_leavenotify(xcb_leave_notify_event_t *ev)
     {
         luaA_object_push(globalconf.L, c);
         luaA_object_emit_signal(globalconf.L, -1, "mouse::leave", 0);
-        drawable_t *d = client_get_drawable(c, ev->event_x, ev->event_y);
-        if (d)
-        {
-            luaA_object_push_item(globalconf.L, -1, d);
-            luaA_object_emit_signal(globalconf.L, -1, "mouse::leave", 0);
-            lua_pop(globalconf.L, 1);
-        }
-        lua_pop(globalconf.L, 1);
     }
 
-    if((drawin = drawin_getbywin(ev->event)))
-    {
-        luaA_object_push(globalconf.L, drawin);
-        luaA_object_push_item(globalconf.L, -1, drawin->drawable);
-        luaA_object_emit_signal(globalconf.L, -1, "mouse::leave", 0);
-        lua_pop(globalconf.L, 2);
-    }
+    lua_pushnil(globalconf.L);
+    event_drawable_under_mouse(globalconf.L, -1);
+    lua_pop(globalconf.L, 1);
 }
 
 /** The enter notify event handler.
@@ -493,7 +520,7 @@ event_handle_enternotify(xcb_enter_notify_event_t *ev)
     {
         luaA_object_push(globalconf.L, drawin);
         luaA_object_push_item(globalconf.L, -1, drawin->drawable);
-        luaA_object_emit_signal(globalconf.L, -1, "mouse::enter", 0);
+        event_drawable_under_mouse(globalconf.L, -1);
         lua_pop(globalconf.L, 2);
     }
 
@@ -505,7 +532,7 @@ event_handle_enternotify(xcb_enter_notify_event_t *ev)
         if (d)
         {
             luaA_object_push_item(globalconf.L, -1, d);
-            luaA_object_emit_signal(globalconf.L, -1, "mouse::enter", 0);
+            event_drawable_under_mouse(globalconf.L, -1);
             lua_pop(globalconf.L, 1);
         }
         lua_pop(globalconf.L, 1);
