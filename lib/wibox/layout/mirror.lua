@@ -45,7 +45,7 @@ function mirror:fit(context, ...)
     if not self.widget then
         return 0, 0
     end
-    return base.fit_widget(context, self.widget, ...)
+    return base.fit_widget(self, context, self.widget, ...)
 end
 
 --- Set the widget that this layout mirrors.

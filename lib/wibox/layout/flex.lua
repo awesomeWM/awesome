@@ -73,7 +73,7 @@ function flex:fit(context, orig_width, orig_height)
     local sub_width  = self.dir == "y" and orig_width  or orig_width / #self.widgets
 
     for k, v in pairs(self.widgets) do
-        local w, h = base.fit_widget(context, v, sub_width, sub_height)
+        local w, h = base.fit_widget(self, context, v, sub_width, sub_height)
 
         local max = self.dir == "y" and w or h
         if max > used_in_other then

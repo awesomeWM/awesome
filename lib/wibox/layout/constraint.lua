@@ -27,7 +27,7 @@ function constraint:fit(context, width, height)
         w = self._strategy(width, self._width)
         h = self._strategy(height, self._height)
 
-        w, h = base.fit_widget(context, self.widget, w, h)
+        w, h = base.fit_widget(self, context, self.widget, w, h)
     else
         w, h = 0, 0
     end

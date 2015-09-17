@@ -9,6 +9,7 @@ local matrix_equals = require("gears.matrix").equals
 local base = require("wibox.widget.base")
 local say = require("say")
 local assert = require("luassert")
+local no_parent = base.no_parent_I_know_what_I_am_doing
 
 -- {{{ Own widget-based assertions
 local function widget_fit(state, arguments)
@@ -19,7 +20,7 @@ local function widget_fit(state, arguments)
     local widget = arguments[1]
     local given = arguments[2]
     local expected = arguments[3]
-    local w, h = base.fit_widget({ "fake context" }, widget, given[1], given[2])
+    local w, h = base.fit_widget(no_parent, { "fake context" }, widget, given[1], given[2])
 
     local fits = expected[1] == w and expected[2] == h
     if state.mod == fits then

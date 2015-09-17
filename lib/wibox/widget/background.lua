@@ -52,7 +52,7 @@ function background:fit(context, width, height)
         return 0, 0
     end
 
-    return base.fit_widget(context, self.widget, width, height)
+    return base.fit_widget(self, context, self.widget, width, height)
 end
 
 --- Set the widget that is drawn on top of the background
