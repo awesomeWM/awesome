@@ -108,6 +108,8 @@ typedef struct
     int keygrabber;
     /** The mouse pointer grabber function */
     int mousegrabber;
+    /** The drawable that currently contains the pointer */
+    drawable_t *drawable_under_mouse;
     /** Input focus information */
     struct
     {
