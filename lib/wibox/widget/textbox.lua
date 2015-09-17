@@ -20,16 +20,21 @@ local error = error
 local textbox = { mt = {} }
 
 --- Setup a pango layout for the given textbox and cairo context
-local function setup_layout(box, width, height)
+local function setup_layout(box, width, height, dpi)
     local layout = box._layout
     layout.width = Pango.units_from_double(width)
     layout.height = Pango.units_from_double(height)
+    if box.dpi ~= dpi then
+        box.dpi = dpi
+        box._ctx:set_resolution(dpi)
+        box._layout:context_changed()
+    end
 end
 
 --- Draw the given textbox on the given cairo context in the given geometry
 function textbox:draw(context, cr, width, height)
+    setup_layout(self, width, height, context.dpi)
     cr:update_layout(self._layout)
-    setup_layout(self, width, height)
     local ink, logical = self._layout:get_pixel_extents()
     local offset = 0
     if self._valign == "center" then
@@ -43,7 +48,7 @@ end
 
 --- Fit the given textbox
 function textbox:fit(context, width, height)
-    setup_layout(self, width, height)
+    setup_layout(self, width, height, context.dpi)
     local ink, logical = self._layout:get_pixel_extents()
 
     if logical.width == 0 or logical.height == 0 then
@@ -161,9 +166,9 @@ local function new(text, ignore_markup)
         end
     end
 
-    local ctx = PangoCairo.font_map_get_default():create_context()
-    ctx:set_resolution(beautiful.xresources.get_dpi())
-    ret._layout = Pango.Layout.new(ctx)
+    ret._dpi = -1
+    ret._ctx = PangoCairo.font_map_get_default():create_context()
+    ret._layout = Pango.Layout.new(ret._ctx)
 
     ret:set_ellipsize("end")
     ret:set_wrap("word_char")
