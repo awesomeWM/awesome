@@ -213,6 +213,8 @@ end
 --        after applying the transformation matrix.
 -- @return An opaque object that can be returned from :layout()
 function base.place_widget_via_matrix(widget, mat, width, height)
+    get_cache_and_record_deps(widget, "fit") -- FIXME: This is just a hack
+    put_cache(widget)
     return {
         _widget = widget,
         _width = width,
