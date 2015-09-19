@@ -74,19 +74,25 @@ local function do_redraw(self)
     -- Relayout
     if self._need_relayout or self._need_complete_repaint then
         self._need_relayout = false
-        local old_hierarchy = self._widget_hierarchy
-        self._widget_hierarchy_callback_arg = {}
-        self._widget_hierarchy = self.widget and
-            hierarchy.new(get_widget_context(self), self.widget, width, height,
-                self._redraw_callback, self._layout_callback, self._widget_hierarchy_callback_arg)
+        if self._widget_hierarchy and self.widget then
+            self._widget_hierarchy:update(get_widget_context(self),
+                self.widget, width, height, self._dirty_area)
+        else
+            self._need_complete_repaint = true
+            if self.widget then
+                self._widget_hierarchy_callback_arg = {}
+                self._widget_hierarchy = hierarchy.new(get_widget_context(self), self.widget, width, height,
+                        self._redraw_callback, self._layout_callback, self._widget_hierarchy_callback_arg)
+            else
+                self._widget_hierarchy = nil
+            end
+        end
 
-        if old_hierarchy == nil or self._widget_hierarchy == nil or self._need_complete_repaint then
+        if self._need_complete_repaint then
             self._need_complete_repaint = false
             self._dirty_area:union_rectangle(cairo.RectangleInt{
                 x = 0, y = 0, width = width, height = height
             })
-        else
-            self._dirty_area:union(self._widget_hierarchy:find_differences(old_hierarchy))
         end
     end
 
