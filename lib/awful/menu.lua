@@ -47,12 +47,6 @@ local table_update = function (t, set)
     return t
 end
 
-local table_merge = function (t, set)
-    for _, v in ipairs(set) do
-        table.insert(t, v)
-    end
-end
-
 
 --- Key bindings for menu navigation.
 -- Keys are: up, down, exec, enter, back, close. Value are table with a list of valid
@@ -484,15 +478,15 @@ function menu.clients(args, item_args)
             c.icon }
         if item_args then
             if type(item_args) == "function" then
-                table_merge(cls_t[#cls_t], item_args(c))
+                util.table.merge(cls_t[#cls_t], item_args(c))
             else
-                table_merge(cls_t[#cls_t], item_args)
+                util.table.merge(cls_t[#cls_t], item_args)
             end
         end
     end
     args = args or {}
     args.items = args.items or {}
-    table_merge(args.items, cls_t)
+    util.table.merge(args.items, cls_t)
 
     local m = menu.new(args)
     m:show(args)

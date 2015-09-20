@@ -385,9 +385,9 @@ end
 -- @param indent Number of spaces added before each wrapped line. Default: 0.
 -- @return The string with lines wrapped to width.
 function util.linewrap(text, width, indent)
-    local text = text or ""
-    local width = width or 72
-    local indent = indent or 0
+    text = text or ""
+    width = width or 72
+    indent = indent or 0
 
     local pos = 1
     return text:gsub("(%s+)()(%S+)()",
@@ -397,6 +397,13 @@ function util.linewrap(text, width, indent)
                 return "\n" .. string.rep(" ", indent) .. word
             end
         end)
+end
+
+--- Count number of lines in a string
+-- @tparam string text Input string.
+-- @treturn int Number of lines.
+function util.linecount(text)
+    return select(2, text:gsub('\n', '\n')) + 1
 end
 
 --- Get a sorted table with all integer keys from a table
@@ -488,6 +495,17 @@ function util.table.iterate(t, filter, start)
         end
     end
 end
+
+
+--- Merge items from the one table to another one
+-- @tparam table t the container table
+-- @tparam table set the mixin table
+function util.table.merge(t, set)
+    for _, v in ipairs(set) do
+        table.insert(t, v)
+    end
+end
+
 
 -- Escape all special pattern-matching characters so that lua interprets them
 -- literally instead of as a character class.
