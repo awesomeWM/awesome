@@ -192,7 +192,7 @@ describe("wibox.hierarchy", function()
         end)
     end)
 
-    describe("find_differences", function()
+    describe("update", function()
         local child, intermediate, parent
         local instance
         local function nop() end
@@ -209,24 +209,67 @@ describe("wibox.hierarchy", function()
             instance = hierarchy.new(context, parent, 15, 16, nop, nop)
         end)
 
-        it("No difference", function()
-            local context = {}
-            local instance2 = hierarchy.new(context, parent, 15, 16, nop, nop)
-            local region = instance:find_differences(instance2)
+        it("No difference 1", function()
+            local region = instance:update(context, parent, 15, 16)
             assert.is.equal(region:num_rectangles(), 0)
         end)
 
+        it("No difference 2", function()
+            local region1 = cairo.Region.create()
+            local region2 = instance:update(context, parent, 15, 16, region1)
+            assert.is.equal(region1, region2)
+            assert.is.equal(region2:num_rectangles(), 0)
+        end)
+
         it("child moved", function()
+            -- Clear caches and change result of intermediate
+            parent._widget_caches = {}
+            parent.layout = function()
+                return { make_child(intermediate, 5, 2, cairo.Matrix.create_translate(4, 0)) }
+            end
+            intermediate._widget_caches = {}
             intermediate.layout = function()
                 return { make_child(child, 10, 20, cairo.Matrix.create_translate(0, 4)) }
             end
-            local context = {}
-            local instance2 = hierarchy.new(context, parent, 15, 16, nop, nop)
-            local region = instance:find_differences(instance2)
+
+            local region = instance:update(context, parent, 15, 16)
             assert.is.equal(region:num_rectangles(), 1)
             local rect = region:get_rectangle(0)
             -- The widget drew to 4, 5, 10, 20 before and 4, 4, 10, 20 after
             assert.is.same({ rect.x, rect.y, rect.width, rect.height }, { 4, 4, 10, 21 })
+        end)
+
+        it("child disappears", function()
+            -- Clear caches and change result of intermediate
+            parent._widget_caches = {}
+            parent.layout = function()
+                return { make_child(intermediate, 5, 2, cairo.Matrix.create_translate(4, 0)) }
+            end
+            intermediate._widget_caches = {}
+            intermediate.layout = function() end
+
+            local region = instance:update(context, parent, 15, 16)
+            assert.is.equal(region:num_rectangles(), 1)
+            local rect = region:get_rectangle(0)
+            -- The child was drawn to 4, 5, 10, 20
+            assert.is.same({ rect.x, rect.y, rect.width, rect.height }, { 4, 5, 10, 20 })
+        end)
+
+        it("widget changed", function()
+            -- Clear caches and change result of parent
+            local new_intermediate = make_widget({
+                make_child(child, 10, 20, cairo.Matrix.create_translate(0, 5))
+            })
+            parent._widget_caches = {}
+            parent.layout = function()
+                return { make_child(new_intermediate, 5, 2, cairo.Matrix.create_translate(4, 0)) }
+            end
+
+            local region = instance:update(context, parent, 15, 16)
+            assert.is.equal(region:num_rectangles(), 1)
+            local rect = region:get_rectangle(0)
+            -- Intermediate drew to 4, 0, 5, 2 (and so does new_intermediate)
+            assert.is.same({ rect.x, rect.y, rect.width, rect.height }, { 4, 0, 5, 2 })
         end)
     end)
 end)

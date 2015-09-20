@@ -98,7 +98,9 @@ end
 -- @param height The available height for the widget
 -- @return The width and height that the widget wants to use
 function base.fit_widget(context, widget, width, height)
+    local cache = get_cache_and_record_deps(widget, "fit")
     if not widget.visible then
+        put_cache(widget)
         return 0, 0
     end
 
@@ -108,9 +110,7 @@ function base.fit_widget(context, widget, width, height)
 
     local w, h = 0, 0
     if widget.fit then
-        local cache = get_cache_and_record_deps(widget, "fit")
         w, h = cache:get(context, width, height)
-        put_cache(widget)
     else
         -- If it has no fit method, calculate based on the size of children
         local children = base.layout_widget(context, widget, width, height)
@@ -120,6 +120,7 @@ function base.fit_widget(context, widget, width, height)
             w, h = math.max(w, x + w2), math.max(h, y + h2)
         end
     end
+    put_cache(widget)
 
     -- Also sanitize the output.
     w = math.max(0, math.min(w, width))
@@ -137,7 +138,9 @@ end
 -- @param height The available height for the widget
 -- @return The result from the widget's `:layout` callback.
 function base.layout_widget(context, widget, width, height)
+    local cache = get_cache_and_record_deps(widget, "layout")
     if not widget.visible then
+        put_cache(widget)
         return
     end
 
@@ -146,11 +149,11 @@ function base.layout_widget(context, widget, width, height)
     local height = math.max(0, height)
 
     if widget.layout then
-        local cache = get_cache_and_record_deps(widget, "layout")
         local result = cache:get(context, width, height)
         put_cache(widget)
         return result
     end
+    put_cache(widget)
 end
 
 --- Set/get a widget's buttons.
@@ -213,6 +216,8 @@ end
 --        after applying the transformation matrix.
 -- @return An opaque object that can be returned from :layout()
 function base.place_widget_via_matrix(widget, mat, width, height)
+    get_cache_and_record_deps(widget, "fit") -- FIXME: This is just a hack
+    put_cache(widget)
     return {
         _widget = widget,
         _width = width,
@@ -297,9 +302,12 @@ extents of your own widget, for example at a negative position or at twice the
 size of this widget. Use this mechanism if your widget needs to draw outside of
 its own extents. If the result of this callback changes,
 <code>widget::layout_changed</code> has to be emitted. You can use @{fit_widget}
-to call the `:fit` callback of other widgets. Never call `:fit` directly!  For
-example, if you want to place another widget <code>child</code> inside of your
-widget, you can do it like this:
+to call the `:fit` callback of other widgets. Never call `:fit` directly!
+Also, this callback must not modify the returned table later. It is suggested
+not to keep any references to this table at all.
+
+For example, if you want to place another widget <code>child</code> inside of
+your widget, you can do it like this:
 <pre><code>-- For readability
 local base = wibox.widget.base
 function widget:layout(width, height)
