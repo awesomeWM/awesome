@@ -254,12 +254,20 @@ function utils.parse_dir(dir)
     return programs
 end
 
+--- Compute textbox width.
+-- @tparam wibox.widget.textbox textbox Textbox instance.
+-- @treturn int Text width.
+function utils.compute_textbox_width(textbox, s)
+    s = s or mouse.screen
+    local w, h = textbox:get_preferred_size(s)
+    return w
+end
+
 --- Compute text width.
 -- @tparam str text Text.
 -- @treturn int Text width.
-function utils.compute_text_width(text)
-    local _, logical = wibox.widget.textbox(awful_util.escape(text))._layout:get_pixel_extents()
-    return logical.width
+function utils.compute_text_width(text, s)
+    return utils.compute_textbox_width(wibox.widget.textbox(awful_util.escape(text)), s)
 end
 
 return utils
