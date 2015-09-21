@@ -54,7 +54,7 @@ function rotate:fit(context, width, height)
     if not self.widget then
         return 0, 0
     end
-    return transform(self, base.fit_widget(context, self.widget, transform(self, width, height)))
+    return transform(self, base.fit_widget(self, context, self.widget, transform(self, width, height)))
 end
 
 --- Set the widget that this layout rotates.

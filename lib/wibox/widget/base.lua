@@ -18,41 +18,12 @@ local base = {}
 
 -- {{{ Caches
 
-local call_stack = {}
 -- Indexes are widgets, allow them to be garbage-collected
 local widget_dependencies = setmetatable({}, { __mode = "k" })
 
--- Don't do this in unit tests
-if awesome and awesome.connect_signal then
-    -- Reset the call stack at each refresh. This fixes things up in case there was
-    -- an error in some callback and thus put_cache() wasn't called (if this
-    -- happens, we possibly recorded too many deps, but so what?)
-    awesome.connect_signal("refresh", function()
-        call_stack = {}
-    end)
-end
-
--- When you call get_cache_and_record_deps(), the widget is recorded in a stack
--- until the following put_cache(). All other calls to
--- get_cache_and_record_deps() that happen during this will cause a dependency
--- between the widgets that are involved to be recorded. This information is
--- used by clear_caches() to also clear all caches of dependent widgets.
-
--- Get the caches for a widget and record its dependencies. All following
--- cache-uses will record this widgets as a dependency. This returns a function
+-- Get the cache of the given kind for this widget. This returns a gears.cache
 -- that calls the callback of kind `kind` on the widget.
-local function get_cache_and_record_deps(widget, kind)
-    -- Record dependencies (each entry in the call stack depends on `widget`)
-    local deps = widget_dependencies[widget] or {}
-    for _, w in pairs(call_stack) do
-        deps[w] = true
-    end
-    widget_dependencies[widget] = deps
-
-    -- Add widget to call stack
-    table.insert(call_stack, widget)
-
-    -- Create cache if needed
+local function get_cache(widget, kind)
     if not widget._widget_caches[kind] then
         widget._widget_caches[kind] = cache.new(function(...)
             return widget[kind](widget, ...)
@@ -61,24 +32,36 @@ local function get_cache_and_record_deps(widget, kind)
     return widget._widget_caches[kind]
 end
 
--- Each call to the above function should be followed by a call to this
--- function. Everything in-between is recorded as a dependency (it's
--- complicated...).
-local function put_cache(widget)
-    assert(#call_stack ~= 0)
-    if table.remove(call_stack) ~= widget then
-        put_cache(widget)
+-- Special value to skip the dependency recording that is normally done by
+-- base.fit_widget() and base.layout_widget(). The caller must ensure that no
+-- caches depend on the result of the call and/or must handle the childs
+-- widget::layout_changed signal correctly when using this.
+base.no_parent_I_know_what_I_am_doing = {}
+
+-- Record a dependency from parent to child: The layout of parent depends on the
+-- layout of child.
+local function record_dependency(parent, child)
+    if parent == base.no_parent_I_know_what_I_am_doing then
+        return
     end
+
+    base.check_widget(parent)
+    base.check_widget(child)
+
+    local deps = widget_dependencies[child] or {}
+    deps[parent] = true
+    widget_dependencies[child] = deps
 end
 
 -- Clear the caches for `widget` and all widgets that depend on it.
-local function clear_caches(widget)
-    for w in pairs(widget_dependencies[widget] or {}) do
-        widget_dependencies[w] = {}
-        w._widget_caches = {}
-    end
+local clear_caches
+function clear_caches(widget)
+    local deps = widget_dependencies[widget] or {}
     widget_dependencies[widget] = {}
     widget._widget_caches = {}
+    for w in pairs(deps) do
+        clear_caches(w)
+    end
 end
 -- }}}
 
@@ -91,12 +74,15 @@ end
 --- Fit a widget for the given available width and height. This calls the
 -- widget's `:fit` callback and caches the result for later use. Never call
 -- `:fit` directly, but always through this function!
+-- @param parent The parent widget which requests this information.
 -- @param context The context in which we are fit.
 -- @param widget The widget to fit (this uses widget:fit(width, height)).
 -- @param width The available width for the widget
 -- @param height The available height for the widget
 -- @return The width and height that the widget wants to use
-function base.fit_widget(context, widget, width, height)
+function base.fit_widget(parent, context, widget, width, height)
+    record_dependency(parent, widget)
+
     if not widget.visible then
         return 0, 0
     end
@@ -107,12 +93,10 @@ function base.fit_widget(context, widget, width, height)
 
     local w, h = 0, 0
     if widget.fit then
-        local cache = get_cache_and_record_deps(widget, "fit")
-        w, h = cache:get(context, width, height)
-        put_cache(widget)
+        w, h = get_cache(widget, "fit"):get(context, width, height)
     else
         -- If it has no fit method, calculate based on the size of children
-        local children = base.layout_widget(context, widget, width, height)
+        local children = base.layout_widget(parent, context, widget, width, height)
         for _, info in ipairs(children or {}) do
             local x, y, w2, h2 = matrix.transform_rectangle(info._matrix,
                 0, 0, info._width, info._height)
@@ -130,12 +114,15 @@ end
 -- widget's `:layout` callback and caches the result for later use. Never call
 -- `:layout` directly, but always through this function! However, normally there
 -- shouldn't be any reason why you need to use this function.
+-- @param parent The parent widget which requests this information.
 -- @param context The context in which we are laid out.
 -- @param widget The widget to layout (this uses widget:layout(context, width, height)).
 -- @param width The available width for the widget
 -- @param height The available height for the widget
 -- @return The result from the widget's `:layout` callback.
-function base.layout_widget(context, widget, width, height)
+function base.layout_widget(parent, context, widget, width, height)
+    record_dependency(parent, widget)
+
     if not widget.visible then
         return
     end
@@ -145,10 +132,7 @@ function base.layout_widget(context, widget, width, height)
     local height = math.max(0, height)
 
     if widget.layout then
-        local cache = get_cache_and_record_deps(widget, "layout")
-        local result = cache:get(context, width, height)
-        put_cache(widget)
-        return result
+        return get_cache(widget, "layout"):get(context, width, height)
     end
 end
 
@@ -382,7 +366,7 @@ function base.make_widget(proxy, widget_name)
 
     if proxy then
         ret.fit = function(_, context, width, height)
-            return base.fit_widget(context, proxy, width, height)
+            return base.fit_widget(ret, context, proxy, width, height)
         end
         ret.layout = function(_, context, width, height)
             return { base.place_widget_at(proxy, 0, 0, width, height) }

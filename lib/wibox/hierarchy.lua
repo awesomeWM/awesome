@@ -12,12 +12,13 @@
 local matrix = require("gears.matrix")
 local cairo = require("lgi").cairo
 local base = require("wibox.widget.base")
+local no_parent = base.no_parent_I_know_what_I_am_doing
 
 local hierarchy = {}
 
 local function hierarchy_new(context, widget, width, height, redraw_callback, layout_callback, callback_arg,
             matrix_to_parent, matrix_to_device)
-    local children = base.layout_widget(context, widget, width, height)
+    local children = base.layout_widget(no_parent, context, widget, width, height)
     local draws_x1, draws_y1, draws_x2, draws_y2 = 0, 0, width, height
     local result = {
         _matrix = matrix_to_parent,
