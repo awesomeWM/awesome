@@ -8,7 +8,6 @@
 ---------------------------------------------------------------------------
 
 local cairo = require("lgi").cairo
-local debug = require("gears.debug")
 local matrix = {}
 
 -- Metatable for matrix instances. This is set up near the end of the file.

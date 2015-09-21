@@ -15,7 +15,6 @@ local capi = {
 local beautiful = require("beautiful")
 local cairo = require("lgi").cairo
 local color = require("gears.color")
-local debug = require("gears.debug")
 local object = require("gears.object")
 local sort = require("gears.sort")
 local surface = require("gears.surface")
@@ -133,7 +132,7 @@ local function do_redraw(self)
 
     self.drawable:refresh()
 
-    debug.assert(cr.status == "SUCCESS", "Cairo context entered error state: " .. cr.status)
+    assert(cr.status == "SUCCESS", "Cairo context entered error state: " .. cr.status)
 end
 
 local function find_widgets(drawable, result, hierarchy, x, y)

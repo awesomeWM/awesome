@@ -5,7 +5,6 @@
 -- @module wibox.widget.base
 ---------------------------------------------------------------------------
 
-local debug = require("gears.debug")
 local object = require("gears.object")
 local cache = require("gears.cache")
 local matrix = require("gears.matrix")
@@ -423,9 +422,9 @@ end
 --- Do some sanity checking on widget. This function raises a lua error if
 -- widget is not a valid widget.
 function base.check_widget(widget)
-    debug.assert(type(widget) == "table")
+    assert(type(widget) == "table")
     for k, func in pairs({ "add_signal", "connect_signal", "disconnect_signal" }) do
-        debug.assert(type(widget[func]) == "function", func .. " is not a function")
+        assert(type(widget[func]) == "function", func .. " is not a function")
     end
 end
 
