@@ -87,9 +87,15 @@ local function update_textclock()
     do_pending_repaint()
 end
 
+local function e2e_tag_switch()
+    awful.tag.viewnext()
+    do_pending_repaint()
+end
+
 benchmark(create_wibox, "create wibox")
 benchmark(update_textclock, "update textclock")
 benchmark(relayout_textclock, "relayout textclock")
 benchmark(redraw_textclock, "redraw textclock")
+benchmark(e2e_tag_switch, "tag switch")
 
 require("_runner").run_steps({ function() return true end })
