@@ -37,11 +37,8 @@ local function hierarchy_new(context, widget, width, height, redraw_callback, la
     widget:weak_connect_signal("widget::layout_changed", result._layout)
 
     for _, w in ipairs(children or {}) do
-        local to_dev = cairo.Matrix.create_identity()
-        to_dev:multiply(matrix_to_device, w._matrix)
-
         local r = hierarchy_new(context, w._widget, w._width, w._height, redraw_callback, layout_callback,
-                callback_arg, matrix.copy(w._matrix), to_dev)
+                callback_arg, w._matrix, matrix_to_device * w._matrix)
         table.insert(result._children, r)
 
         -- Update our drawing extents
@@ -82,7 +79,7 @@ end
 -- @return A new widget hierarchy
 function hierarchy.new(context, widget, width, height, redraw_callback, layout_callback, callback_arg)
     return hierarchy_new(context, widget, width, height, redraw_callback, layout_callback, callback_arg,
-            cairo.Matrix.create_identity(), cairo.Matrix.create_identity())
+            matrix.identity, matrix.identity)
 end
 
 --- Get the widget that this hierarchy manages.
@@ -90,38 +87,36 @@ function hierarchy:get_widget()
     return self._widget
 end
 
---- Get a cairo matrix that transforms to the parent's coordinate space from
--- this hierarchy's coordinate system.
--- @return A cairo matrix describing the transformation.
+--- Get a matrix that transforms to the parent's coordinate space from this
+-- hierarchy's coordinate system.
+-- @return A matrix describing the transformation.
 function hierarchy:get_matrix_to_parent()
-    return matrix.copy(self._matrix)
+    return self._matrix
 end
 
---- Get a cairo matrix that transforms to the base of this hierarchy's
--- coordinate system (aka the coordinate system of the device that this
+--- Get a matrix that transforms to the base of this hierarchy's coordinate
+-- system (aka the coordinate system of the device that this
 -- hierarchy is applied upon) from this hierarchy's coordinate system.
--- @return A cairo matrix describing the transformation.
+-- @return A matrix describing the transformation.
 function hierarchy:get_matrix_to_device()
-    return matrix.copy(self._matrix_to_device)
+    return self._matrix_to_device
 end
 
---- Get a cairo matrix that transforms from the parent's coordinate space into
--- this hierarchy's coordinate system.
--- @return A cairo matrix describing the transformation.
+--- Get a matrix that transforms from the parent's coordinate space into this
+-- hierarchy's coordinate system.
+-- @return A matrix describing the transformation.
 function hierarchy:get_matrix_from_parent()
     local m = self:get_matrix_to_parent()
-    m:invert()
-    return m
+    return m:invert()
 end
 
---- Get a cairo matrix that transforms from the base of this hierarchy's
--- coordinate system (aka the coordinate system of the device that this
+--- Get a matrix that transforms from the base of this hierarchy's coordinate
+-- system (aka the coordinate system of the device that this
 -- hierarchy is applied upon) into this hierarchy's coordinate system.
--- @return A cairo matrix describing the transformation.
+-- @return A matrix describing the transformation.
 function hierarchy:get_matrix_from_device()
     local m = self:get_matrix_to_device()
-    m:invert()
-    return m
+    return m:invert()
 end
 
 --- Get the extents that this hierarchy possibly draws to (in the current coordinate space).
@@ -198,7 +193,7 @@ function hierarchy:draw(context, cr)
     end
 
     cr:save()
-    cr:transform(self:get_matrix_to_parent())
+    cr:transform(self:get_matrix_to_parent():to_cairo_matrix())
 
     -- Clip to the draw extents
     cr:rectangle(self:get_draw_extents())

@@ -5,7 +5,7 @@
 
 local hierarchy = require("wibox.hierarchy")
 
-local cairo = require("lgi").cairo
+local Region = require("lgi").cairo.Region
 local matrix = require("gears.matrix")
 local object = require("gears.object")
 local utils = require("wibox.test_utils")
@@ -37,23 +37,19 @@ describe("wibox.hierarchy", function()
         end)
 
         it("get_matrix_to_parent", function()
-            assert.is_true(matrix.equals(cairo.Matrix.create_identity(),
-                    instance:get_matrix_to_parent()))
+            assert.is.equal(matrix.identity, instance:get_matrix_to_parent())
         end)
 
         it("get_matrix_to_device", function()
-            assert.is_true(matrix.equals(cairo.Matrix.create_identity(),
-                    instance:get_matrix_to_device()))
+            assert.is.equal(matrix.identity, instance:get_matrix_to_device())
         end)
 
         it("get_matrix_from_parent", function()
-            assert.is_true(matrix.equals(cairo.Matrix.create_identity(),
-                    instance:get_matrix_from_parent()))
+            assert.is.equal(matrix.identity, instance:get_matrix_from_parent())
         end)
 
         it("get_matrix_from_device", function()
-            assert.is_true(matrix.equals(cairo.Matrix.create_identity(),
-                    instance:get_matrix_from_device()))
+            assert.is.equal(matrix.identity, instance:get_matrix_from_device())
         end)
 
         it("get_draw_extents", function()
@@ -72,7 +68,7 @@ describe("wibox.hierarchy", function()
     it("disconnect works", function()
         local child = make_widget(nil)
         local parent = make_widget({
-            make_child(child, 2, 5, cairo.Matrix.create_translate(10, 0))
+            make_child(child, 2, 5, matrix.create_translate(10, 0))
         })
 
         local extra_arg = {}
@@ -129,10 +125,10 @@ describe("wibox.hierarchy", function()
         before_each(function()
             child = make_widget(nil)
             intermediate = make_widget({
-                make_child(child, 10, 20, cairo.Matrix.create_translate(0, 5))
+                make_child(child, 10, 20, matrix.create_translate(0, 5))
             })
             parent = make_widget({
-                make_child(intermediate, 5, 2, cairo.Matrix.create_translate(4, 0))
+                make_child(intermediate, 5, 2, matrix.create_translate(4, 0))
             })
 
             local function nop() end
@@ -156,27 +152,27 @@ describe("wibox.hierarchy", function()
         end)
 
         it("get_matrix_to_parent", function()
-            assert.is_true(matrix.equals(hierarchy_child:get_matrix_to_parent(), cairo.Matrix.create_translate(0, 5)))
-            assert.is_true(matrix.equals(hierarchy_intermediate:get_matrix_to_parent(), cairo.Matrix.create_translate(4, 0)))
-            assert.is_true(matrix.equals(hierarchy_parent:get_matrix_to_parent(), cairo.Matrix.create_identity()))
+            assert.is.equal(hierarchy_child:get_matrix_to_parent(), matrix.create_translate(0, 5))
+            assert.is.equal(hierarchy_intermediate:get_matrix_to_parent(), matrix.create_translate(4, 0))
+            assert.is.equal(hierarchy_parent:get_matrix_to_parent(), matrix.identity)
         end)
 
         it("get_matrix_to_device", function()
-            assert.is_true(matrix.equals(hierarchy_child:get_matrix_to_device(), cairo.Matrix.create_translate(4, 5)))
-            assert.is_true(matrix.equals(hierarchy_intermediate:get_matrix_to_device(), cairo.Matrix.create_translate(4, 0)))
-            assert.is_true(matrix.equals(hierarchy_parent:get_matrix_to_device(), cairo.Matrix.create_identity()))
+            assert.is.equal(hierarchy_child:get_matrix_to_device(), matrix.create_translate(4, 5))
+            assert.is.equal(hierarchy_intermediate:get_matrix_to_device(), matrix.create_translate(4, 0))
+            assert.is.equal(hierarchy_parent:get_matrix_to_device(), matrix.identity)
         end)
 
         it("get_matrix_from_parent", function()
-            assert.is_true(matrix.equals(hierarchy_child:get_matrix_from_parent(), cairo.Matrix.create_translate(0, -5)))
-            assert.is_true(matrix.equals(hierarchy_intermediate:get_matrix_from_parent(), cairo.Matrix.create_translate(-4, 0)))
-            assert.is_true(matrix.equals(hierarchy_parent:get_matrix_from_parent(), cairo.Matrix.create_identity()))
+            assert.is.equal(hierarchy_child:get_matrix_from_parent(), matrix.create_translate(0, -5))
+            assert.is.equal(hierarchy_intermediate:get_matrix_from_parent(), matrix.create_translate(-4, 0))
+            assert.is.equal(hierarchy_parent:get_matrix_from_parent(), matrix.identity)
         end)
 
         it("get_matrix_from_device", function()
-            assert.is_true(matrix.equals(hierarchy_child:get_matrix_from_device(), cairo.Matrix.create_translate(-4, -5)))
-            assert.is_true(matrix.equals(hierarchy_intermediate:get_matrix_from_device(), cairo.Matrix.create_translate(-4, 0)))
-            assert.is_true(matrix.equals(hierarchy_parent:get_matrix_from_device(), cairo.Matrix.create_identity()))
+            assert.is.equal(hierarchy_child:get_matrix_from_device(), matrix.create_translate(-4, -5))
+            assert.is.equal(hierarchy_intermediate:get_matrix_from_device(), matrix.create_translate(-4, 0))
+            assert.is.equal(hierarchy_parent:get_matrix_from_device(), matrix.identity)
         end)
 
         it("get_draw_extents", function()
@@ -199,10 +195,10 @@ describe("wibox.hierarchy", function()
         before_each(function()
             child = make_widget(nil)
             intermediate = make_widget({
-                make_child(child, 10, 20, cairo.Matrix.create_translate(0, 5))
+                make_child(child, 10, 20, matrix.create_translate(0, 5))
             })
             parent = make_widget({
-                make_child(intermediate, 5, 2, cairo.Matrix.create_translate(4, 0))
+                make_child(intermediate, 5, 2, matrix.create_translate(4, 0))
             })
 
             local context = {}
@@ -218,7 +214,7 @@ describe("wibox.hierarchy", function()
 
         it("child moved", function()
             intermediate.layout = function()
-                return { make_child(child, 10, 20, cairo.Matrix.create_translate(0, 4)) }
+                return { make_child(child, 10, 20, matrix.create_translate(0, 4)) }
             end
             local context = {}
             local instance2 = hierarchy.new(context, parent, 15, 16, nop, nop)
