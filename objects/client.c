@@ -343,7 +343,7 @@ void
 client_focus_refresh(void)
 {
     client_t *c = globalconf.focus.client;
-    xcb_window_t win = globalconf.screen->root;
+    xcb_window_t win = globalconf.focus.window_no_focus;
 
     if(!globalconf.focus.need_update)
         return;
@@ -357,10 +357,11 @@ client_focus_refresh(void)
         if(!c->nofocus)
             win = c->window;
         else
-            /* Focus the root window to make sure the previously focused client
-             * doesn't get any input in case WM_TAKE_FOCUS gets ignored.
+            /* Move the focus away from whatever has it to make sure the
+             * previously focused client doesn't get any input in case
+             * WM_TAKE_FOCUS gets ignored.
              */
-            win = globalconf.screen->root;
+            win = globalconf.focus.window_no_focus;
 
         if(client_hasproto(c, WM_TAKE_FOCUS))
             xwindow_takefocus(c->window);
