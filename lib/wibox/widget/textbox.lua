@@ -69,8 +69,8 @@ function textbox:set_markup(text)
     end
 
     local attr, parsed = Pango.parse_markup(text, -1, 0)
-    -- In case of error, attr is false and parsed is an error message
-    if not attr then error(parsed) end
+    -- In case of error, attr is false and parsed is a GLib.Error instance.
+    if not attr then error(parsed.message or tostring(parsed)) end
 
     self._markup = text
     self._layout.text = parsed
