@@ -569,23 +569,27 @@ main(int argc, char **argv)
     xkb_init();
 
     /* The default GC is just a newly created associated with a window with
-     * depth globalconf.default_depth */
-    xcb_window_t tmp_win = xcb_generate_id(globalconf.connection);
+     * depth globalconf.default_depth.
+     * The window_no_focus is used for "nothing has the input focus". */
+    globalconf.focus.window_no_focus = xcb_generate_id(globalconf.connection);
     globalconf.gc = xcb_generate_id(globalconf.connection);
     xcb_create_window(globalconf.connection, globalconf.default_depth,
-                      tmp_win, globalconf.screen->root,
+                      globalconf.focus.window_no_focus, globalconf.screen->root,
                       -1, -1, 1, 1, 0,
                       XCB_COPY_FROM_PARENT, globalconf.visual->visual_id,
-                      XCB_CW_BACK_PIXEL | XCB_CW_BORDER_PIXEL | XCB_CW_COLORMAP,
+                      XCB_CW_BACK_PIXEL | XCB_CW_BORDER_PIXEL |
+                      XCB_CW_OVERRIDE_REDIRECT | XCB_CW_COLORMAP,
                       (const uint32_t [])
                       {
                           globalconf.screen->black_pixel,
                           globalconf.screen->black_pixel,
+                          1,
                           globalconf.default_cmap
                       });
-    xcb_create_gc(globalconf.connection, globalconf.gc, tmp_win, XCB_GC_FOREGROUND | XCB_GC_BACKGROUND,
+    xcb_map_window(globalconf.connection, globalconf.focus.window_no_focus);
+    xcb_create_gc(globalconf.connection, globalconf.gc, globalconf.focus.window_no_focus,
+                  XCB_GC_FOREGROUND | XCB_GC_BACKGROUND,
                   (const uint32_t[]) { globalconf.screen->black_pixel, globalconf.screen->white_pixel });
-    xcb_destroy_window(globalconf.connection, tmp_win);
 
     /* Get the window tree associated to this screen */
     tree_c = xcb_query_tree_unchecked(globalconf.connection,
