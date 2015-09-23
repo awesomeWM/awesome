@@ -407,7 +407,11 @@ end
 -- @string[opt=`beautiful.bg_focus` or `'#535d6c'`] args.bg Background color.
 -- @int[opt=1] args.border_width Border width.
 -- @string[opt=`beautiful.border_focus` or `'#535d6c'`] args.border_color Border color.
--- @tparam[opt] func args.run Function to run on left click.
+-- @tparam[opt] func args.run Function to run on left click.  The notification
+--   object will be passed to it as an argument.
+--   You need to call e.g.
+--   `notification.die(naughty.notificationClosedReason.dismissedByUser)` from
+--   there to dismiss the notification yourself.
 -- @tparam[opt] func args.destroy Function to run when notification is destroyed.
 -- @tparam[opt] table args.preset Table with any of the above parameters.
 --   Note: Any parameters specified directly in args will override ones defined
