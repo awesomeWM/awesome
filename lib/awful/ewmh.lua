@@ -160,7 +160,9 @@ end
 -- @tparam[opt] table hints A table with additional hints:
 -- @tparam[opt=false] boolean hints.raise should the client be raised?
 function ewmh.activate(c, context, hints)
-    client.focus = c
+    if c:isvisible() then
+        client.focus = c
+    end
     if hints and hints.raise then
         if awesome.startup or c:isvisible() then
             c:raise()
