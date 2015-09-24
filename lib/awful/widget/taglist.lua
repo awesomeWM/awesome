@@ -55,17 +55,15 @@ function taglist.taglist_label(t, args)
     local is_selected = false
     local cls = t:clients()
 
-    if sel then
-        if taglist_squares_sel then
-            -- Check that the selected client is tagged with 't'.
-            local seltags = sel:tags()
-            for _, v in ipairs(seltags) do
-                if v == t then
-                    bg_image = taglist_squares_sel
-                    bg_resize = taglist_squares_resize == "true"
-                    is_selected = true
-                    break
-                end
+    if sel and taglist_squares_sel then
+        -- Check that the selected client is tagged with 't'.
+        local seltags = sel:tags()
+        for _, v in ipairs(seltags) do
+            if v == t then
+                bg_image = taglist_squares_sel
+                bg_resize = taglist_squares_resize == "true"
+                is_selected = true
+                break
             end
         end
     end
