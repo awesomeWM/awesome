@@ -164,9 +164,8 @@ function ewmh.activate(c, context, hints)
         client.focus = c
     end
     if hints and hints.raise then
-        if awesome.startup or c:isvisible() then
-            c:raise()
-        else
+        c:raise()
+        if not awesome.startup and not c:isvisible() then
             c.urgent = true
         end
     end
