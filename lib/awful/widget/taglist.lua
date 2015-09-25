@@ -54,17 +54,16 @@ function taglist.taglist_label(t, args)
     local bg_resize = false
     local is_selected = false
     local cls = t:clients()
-    if sel then
-        if taglist_squares_sel then
-            -- Check that the selected clients is tagged with 't'.
-            local seltags = sel:tags()
-            for _, v in ipairs(seltags) do
-                if v == t then
-                    bg_image = taglist_squares_sel
-                    bg_resize = taglist_squares_resize == "true"
-                    is_selected = true
-                    break
-                end
+
+    if sel and taglist_squares_sel then
+        -- Check that the selected client is tagged with 't'.
+        local seltags = sel:tags()
+        for _, v in ipairs(seltags) do
+            if v == t then
+                bg_image = taglist_squares_sel
+                bg_resize = taglist_squares_resize == "true"
+                is_selected = true
+                break
             end
         end
     end
@@ -87,14 +86,13 @@ function taglist.taglist_label(t, args)
             if bg_empty then bg_color = bg_empty end
             if fg_empty then fg_color = fg_empty end
         end
-        if tag.getproperty(t, "urgent") then
-            if bg_urgent then bg_color = bg_urgent end
-            if fg_urgent then fg_color = fg_urgent end
-        end
     end
     if t.selected then
         bg_color = bg_focus
         fg_color = fg_focus
+    elseif tag.getproperty(t, "urgent") then
+        if bg_urgent then bg_color = bg_urgent end
+        if fg_urgent then fg_color = fg_urgent end
     end
     if not tag.getproperty(t, "icon_only") then
         text = "<span font_desc='"..font.."'>"
