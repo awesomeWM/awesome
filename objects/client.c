@@ -236,14 +236,12 @@ client_set_class_instance(lua_State *L, int cidx, const char *class, const char 
     luaA_object_emit_signal(L, cidx, "property::instance", 0);
 }
 
-/** Returns true if a client is tagged
- * with one of the tags of the specified screen.
+/** Returns true if a client is tagged with one of the active tags.
  * \param c The client to check.
- * \param screen Virtual screen.
  * \return true if the client is visible, false otherwise.
  */
 bool
-client_maybevisible(client_t *c)
+client_on_selected_tags(client_t *c)
 {
     if(c->sticky)
         return true;
@@ -441,7 +439,7 @@ client_focus_refresh(void)
         return;
     globalconf.focus.need_update = false;
 
-    if(c && client_maybevisible(c))
+    if(c && client_on_selected_tags(c))
     {
         /* Make sure this window is unbanned and e.g. not minimized */
         client_unban(c);

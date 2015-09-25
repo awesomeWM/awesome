@@ -137,7 +137,7 @@ lua_class_t client_class;
 
 LUA_OBJECT_FUNCS(client_class, client_t, client)
 
-bool client_maybevisible(client_t *);
+bool client_on_selected_tags(client_t *);
 client_t * client_getbywin(xcb_window_t);
 client_t * client_getbyframewin(xcb_window_t);
 
@@ -235,7 +235,7 @@ client_isfixed(client_t *c)
 static inline bool
 client_isvisible(client_t *c)
 {
-    return (!c->hidden && !c->minimized && client_maybevisible(c));
+    return (!c->hidden && !c->minimized && client_on_selected_tags(c));
 }
 
 #endif
