@@ -2,10 +2,8 @@
 -- that we notice if they break.
 
 local awful = require("awful")
-local wibox = require("wibox")
-local lgi = require("lgi")
-local GLib = lgi.GLib
-local cairo = lgi.cairo
+local GLib = require("lgi").GLib
+local create_wibox = require("_wibox_helper").create_wibox
 
 local not_under_travis = not os.getenv("CI")
 
@@ -39,35 +37,6 @@ end
 
 local function do_pending_repaint()
     awesome.emit_signal("refresh")
-end
-
-local function create_wibox()
-    local img = cairo.ImageSurface(cairo.Format.ARGB32, 20, 20)
-
-    -- Widgets that are aligned to the left
-    local left_layout = wibox.layout.fixed.horizontal()
-    left_layout:add(awful.widget.launcher({ image = img, command = "bash" }))
-    left_layout:add(awful.widget.taglist(1, awful.widget.taglist.filter.all))
-    left_layout:add(awful.widget.prompt())
-
-    -- Widgets that are aligned to the right
-    local right_layout = wibox.layout.fixed.horizontal()
-    local textclock = awful.widget.textclock()
-    right_layout:add(textclock)
-    right_layout:add(awful.widget.layoutbox(1))
-
-    -- Now bring it all together (with the tasklist in the middle)
-    local layout = wibox.layout.align.horizontal()
-    layout:set_left(left_layout)
-    layout:set_middle(awful.widget.tasklist(1, awful.widget.tasklist.filter.currenttags))
-    layout:set_right(right_layout)
-
-    -- Create wibox
-    local wb = wibox({ width = 1024, height = 20, screen = 1 })
-    wb.visible = true
-    wb:set_widget(layout)
-
-    return wb, textclock
 end
 
 local wb, textclock = create_wibox()
