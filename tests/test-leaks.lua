@@ -10,6 +10,12 @@ local errors = {}
 
 local prepare_for_collect = nil
 
+-- Make the layoutbox in the default config GC'able
+mywibox[1].visible = false
+mywibox = nil
+mylayoutbox = nil
+awesome.emit_signal("refresh")
+
 -- Test if some objects can be garbage collected
 local function collectable(a, b, c, d, e, f, g, h, last)
     assert(last == nil, "got more arguments than supported")

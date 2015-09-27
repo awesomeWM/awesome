@@ -18,7 +18,7 @@ local base = {}
 -- {{{ Caches
 
 -- Indexes are widgets, allow them to be garbage-collected
-local widget_dependencies = setmetatable({}, { __mode = "k" })
+local widget_dependencies = setmetatable({}, { __mode = "kv" })
 
 -- Get the cache of the given kind for this widget. This returns a gears.cache
 -- that calls the callback of kind `kind` on the widget.
