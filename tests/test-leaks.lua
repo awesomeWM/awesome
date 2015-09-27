@@ -9,12 +9,15 @@ local wibox = require("wibox")
 local errors = {}
 
 local prepare_for_collect = nil
+local function emit_refresh()
+    awesome.emit_signal("refresh")
+end
 
 -- Make the layoutbox in the default config GC'able
 mywibox[1].visible = false
 mywibox = nil
 mylayoutbox = nil
-awesome.emit_signal("refresh")
+emit_refresh()
 
 -- Test if some objects can be garbage collected
 local function collectable(a, b, c, d, e, f, g, h, last)
@@ -45,23 +48,14 @@ collectable(awful.widget.prompt())
 collectable(awful.widget.textclock())
 collectable(awful.widget.layoutbox(1))
 
-function prepare_for_collect()
-    -- Only after doing the pending update can a taglist be GC'd.
-    awesome.emit_signal("refresh")
-end
+-- Some widgets do things via timer.delayed_call
+prepare_for_collect = emit_refresh
 collectable(awful.widget.taglist(1, awful.widget.taglist.filter.all))
 
-function prepare_for_collect()
-    -- Only after doing the pending update can a taglist be GC'd.
-    awesome.emit_signal("refresh")
-end
+prepare_for_collect = emit_refresh
 collectable(awful.widget.tasklist(1, awful.widget.tasklist.filter.currenttags))
 
--- And finally a full wibox
-function prepare_for_collect()
-    -- Only after doing the pending repaint can a wibox be GC'd.
-    awesome.emit_signal("refresh")
-end
+prepare_for_collect = emit_refresh
 collectable(create_wibox())
 
 require("_runner").run_steps({ function() return true end })
