@@ -320,13 +320,55 @@ luaA_panic(lua_State *L)
     return 0;
 }
 
+#if LUA_VERSION_NUM >= 502
+static const char *
+luaA_tolstring(lua_State *L, int idx, size_t *len)
+{
+    return luaL_tolstring(L, idx, len);
+}
+#else
+static const char *
+luaA_tolstring(lua_State *L, int idx, size_t *len)
+{
+    /* Try using the metatable. If that fails, push the value itself onto
+     * the stack.
+     */
+    if (!luaL_callmeta(L, idx, "__tostring"))
+        lua_pushvalue(L, idx);
+
+    switch (lua_type(L, -1)) {
+    case LUA_TSTRING:
+        lua_pushvalue(L, -1);
+        break;
+    case LUA_TBOOLEAN:
+        if (lua_toboolean(L, -1))
+            lua_pushliteral(L, "true");
+        else
+            lua_pushliteral(L, "false");
+        break;
+    case LUA_TNUMBER:
+        lua_pushfstring(L, "%f", lua_tonumber(L, -1));
+        break;
+    case LUA_TNIL:
+        lua_pushstring(L, "nil");
+        break;
+    default:
+        lua_pushfstring(L, "%s: %p",
+                lua_typename(L, lua_type(L, -1)),
+                lua_topointer(L, -1));
+        break;
+    }
+    lua_remove(L, -2);
+    return lua_tolstring(L, -1, len);
+}
+#endif
+
 static int
 luaA_dofunction_on_error(lua_State *L)
 {
-#if LUA_VERSION_NUM >= 502
     /* Convert error to string, to prevent a follow-up error with lua_concat. */
-    luaL_tolstring(L, -1, NULL);
-#endif
+    luaA_tolstring(L, -1, NULL);
+
     /* duplicate string error */
     lua_pushvalue(L, -1);
     /* emit error signal */
