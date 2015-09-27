@@ -428,7 +428,7 @@ end
 --- Cycle clients.
 --
 -- @param clockwise True to cycle clients clockwise.
--- @param[opt] screen The screen where to cycle clients.
+-- @param[opt] s The screen where to cycle clients.
 -- @tparam[opt=false] boolean stacked Use stacking order?
 function client.cycle(clockwise, s, stacked)
     s = s or screen.focused()
