@@ -24,13 +24,17 @@ local function run(promptbox)
     return prompt.run({ prompt = promptbox.prompt },
                       promptbox.widget,
                       function (...)
-                          local result = spawn(...)
-                          if type(result) == "string" then
-                              promptbox.widget:set_text(result)
-                          end
+                          promptbox:spawn_and_handle_error(...)
                       end,
                       completion.shell,
                       util.getdir("cache") .. "/history")
+end
+
+local function spawn_and_handle_error(self, ...)
+    local result = spawn(...)
+    if type(result) == "string" then
+        self.widget:set_text(result)
+    end
 end
 
 --- Create a prompt widget which will launch a command.
@@ -45,6 +49,7 @@ function widgetprompt.new(args)
     promptbox.widget = widget
     promptbox.widget:set_ellipsize("start")
     promptbox.run = run
+    promptbox.spawn_and_handle_error = spawn_and_handle_error
     promptbox.prompt = args.prompt or "Run: "
     return promptbox
 end
