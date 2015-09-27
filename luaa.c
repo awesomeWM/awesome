@@ -349,7 +349,7 @@ luaA_dofunction_on_error(lua_State *L)
  * \param xdg An xdg handle to use to get XDG basedir.
  */
 void
-luaA_init(xdgHandle* xdg)
+luaA_init(xdgHandle* xdg, char* extra_include_directory)
 {
     lua_State *L;
     static const struct luaL_Reg awesome_lib[] =
@@ -474,6 +474,28 @@ luaA_init(xdgHandle* xdg)
     lua_pushliteral(L, ";" AWESOME_LUA_LIB_PATH "/?.lua");
     lua_pushliteral(L, ";" AWESOME_LUA_LIB_PATH "/?/init.lua");
     lua_concat(L, 3); /* concatenate with package.path */
+
+    /* Add an extra include directory, useful for quick debugging
+     without have to set/unset ENV variables or simlinking all modules
+     in ~/.config/awesome 
+     */
+    if (extra_include_directory && a_strlen(extra_include_directory))
+    {
+        char pathbuf[256];
+
+        a_strcpy(pathbuf, 256, ";");
+        size_t len = a_strcat(pathbuf, 256, extra_include_directory);
+        len = a_strcat(pathbuf, 256, "/?.lua");
+        lua_pushlstring(L, pathbuf, len);
+
+        a_strcpy(pathbuf, 256, ";");
+        len = a_strcat(pathbuf, 256, extra_include_directory);
+        len = a_strcat(pathbuf, 256, "/?/init.lua");
+        lua_pushlstring(L, pathbuf, len);
+
+        lua_concat(L, 3); /* concatenate with package.path */
+    }
+
     lua_setfield(L, 1, "path"); /* package.path = "concatenated string" */
 
     lua_getfield(L, 1, "loaded");
