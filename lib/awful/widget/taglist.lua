@@ -27,6 +27,8 @@ local timer = require("gears.timer")
 local taglist = { mt = {} }
 taglist.filter = {}
 
+local instances = nil
+
 function taglist.taglist_label(t, args)
     if not args then args = {} end
     local theme = beautiful.get()
@@ -159,39 +161,53 @@ function taglist.new(screen, filter, buttons, style, update_function, base_widge
     local data = setmetatable({}, { __mode = 'k' })
 
     local queued_update = {}
-    local u = function (s)
-        if s ~= screen then return end
-
+    function w._do_taglist_update()
         -- Add a delayed callback for the first update.
-        if not queued_update[s] then
+        if not queued_update[screen] then
             timer.delayed_call(function()
-                taglist_update(s, w, buttons, filter, data, style, uf)
-                queued_update[s] = false
+                taglist_update(screen, w, buttons, filter, data, style, uf)
+                queued_update[screen] = false
             end)
-            queued_update[s] = true
+            queued_update[screen] = true
         end
     end
-    local uc = function (c) return u(c.screen) end
-    local ut = function (t) return u(tag.getscreen(t)) end
-    capi.client.connect_signal("focus", uc)
-    capi.client.connect_signal("unfocus", uc)
-    tag.attached_connect_signal(screen, "property::selected", ut)
-    tag.attached_connect_signal(screen, "property::icon", ut)
-    tag.attached_connect_signal(screen, "property::hide", ut)
-    tag.attached_connect_signal(screen, "property::name", ut)
-    tag.attached_connect_signal(screen, "property::activated", ut)
-    tag.attached_connect_signal(screen, "property::screen", ut)
-    tag.attached_connect_signal(screen, "property::index", ut)
-    tag.attached_connect_signal(screen, "property::urgent", ut)
-    capi.client.connect_signal("property::screen", function(c, old_screen)
-        if screen == c.screen or screen == old_screen then
-            u(screen)
+    if instances == nil then
+        instances = {}
+        local function u(s)
+            local i = instances[s]
+            if i then
+                for _, tlist in pairs(i) do
+                    tlist._do_taglist_update()
+                end
+            end
         end
-    end)
-    capi.client.connect_signal("tagged", uc)
-    capi.client.connect_signal("untagged", uc)
-    capi.client.connect_signal("unmanage", uc)
-    u(screen)
+        local uc = function (c) return u(c.screen) end
+        local ut = function (t) return u(tag.getscreen(t)) end
+        capi.client.connect_signal("focus", uc)
+        capi.client.connect_signal("unfocus", uc)
+        tag.attached_connect_signal(screen, "property::selected", ut)
+        tag.attached_connect_signal(screen, "property::icon", ut)
+        tag.attached_connect_signal(screen, "property::hide", ut)
+        tag.attached_connect_signal(screen, "property::name", ut)
+        tag.attached_connect_signal(screen, "property::activated", ut)
+        tag.attached_connect_signal(screen, "property::screen", ut)
+        tag.attached_connect_signal(screen, "property::index", ut)
+        tag.attached_connect_signal(screen, "property::urgent", ut)
+        capi.client.connect_signal("property::screen", function(c, old_screen)
+            u(c.screen)
+            u(old_screen)
+        end)
+        capi.client.connect_signal("tagged", uc)
+        capi.client.connect_signal("untagged", uc)
+        capi.client.connect_signal("unmanage", uc)
+    end
+    w._do_taglist_update()
+    local list = instances[s]
+    if not list then
+        list = setmetatable({}, { __mode = "v" })
+        instances[screen] = list
+    end
+    table.insert(list, w)
     return w
 end
 

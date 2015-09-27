@@ -37,6 +37,10 @@ collectable(awful.widget.launcher({ image = cairo.ImageSurface(cairo.Format.ARGB
 collectable(awful.widget.prompt())
 collectable(awful.widget.textclock())
 collectable(awful.widget.layoutbox(1))
+function prepare_for_collect()
+    -- Only after doing the pending update can a taglist be GC'd.
+    awesome.emit_signal("refresh")
+end
 collectable(awful.widget.taglist(1, awful.widget.taglist.filter.all))
 
 -- And finally a full wibox
