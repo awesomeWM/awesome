@@ -28,5 +28,5 @@ return { create_wibox = function()
     --wb.visible = true
     wb:set_widget(layout)
 
-    return wb, textclock
+    return wb, textclock, img, left_layout, right_layout, layout
 end }
