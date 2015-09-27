@@ -11,7 +11,7 @@
 --  *  "Home"          select the first item
 --  *  "End"           select the last
 --  *  "Return"        execute the entry
---  *  "C-Return"      execute the command with awful.util.spawn
+--  *  "C-Return"      execute the command with awful.spawn
 --  *  "C-M-Return"    execute the command in a terminal
 --
 -- @author Alexander Yakushev &lt;yakushev.alex@gmail.com&gt;
@@ -112,7 +112,7 @@ local function perform_action(o)
         current_item = 1
         return true, "", new_prompt
     elseif shownitems[current_item].cmdline then
-        awful.util.spawn(shownitems[current_item].cmdline)
+        awful.spawn(shownitems[current_item].cmdline)
         -- Let awful.prompt execute dummy exec_callback and
         -- done_callback to stop the keygrabber properly.
         return false

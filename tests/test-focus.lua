@@ -17,7 +17,7 @@ local steps = {
   -- border_color should get applied via focus signal for first client on tag.
   function(count)
     if count == 1 then
-      awful.util.spawn("xterm")
+      awful.spawn("xterm")
     else
       local c = client.get()[1]
       if c then
@@ -30,7 +30,7 @@ local steps = {
   -- border_color should get applied via focus signal for second client on tag.
   function(count)
     if count == 1 then
-      awful.util.spawn("xterm")
+      awful.spawn("xterm")
     else
       if #client.get() == 2 then
         local c = client.get()[1]

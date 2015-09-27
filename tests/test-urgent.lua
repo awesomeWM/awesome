@@ -33,7 +33,7 @@ local steps = {
       runner.add_to_default_rules({ rule = { class = "XTerm" },
         properties = { tag = tags[1][2], focus = true } })
 
-      awful.util.spawn("xterm")
+      awful.spawn("xterm")
     end
     if urgent_cb_done then
       assert(awful.tag.getproperty(tags[1][2], "urgent") == true)
@@ -73,7 +73,7 @@ local steps = {
       runner.add_to_default_rules({ rule = { class = "XTerm" },
         properties = { tag = tags[1][2], focus = true, switchtotag = true }})
 
-      awful.util.spawn("xterm")
+      awful.spawn("xterm")
 
     elseif awful.tag.selectedlist()[1] == tags[1][2] then
       assert(urgent_cb_done)
@@ -95,7 +95,7 @@ local steps = {
       runner.add_to_default_rules({rule = { class = "XTerm" },
         properties = { tag = tags[1][2], focus = false }})
 
-      awful.util.spawn("xterm")
+      awful.spawn("xterm")
     end
     if manage_cb_done then
       assert(client.get()[1].urgent == false)

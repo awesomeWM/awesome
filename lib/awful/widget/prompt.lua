@@ -9,6 +9,7 @@ local setmetatable = setmetatable
 
 local completion = require("awful.completion")
 local util = require("awful.util")
+local spawn = require("awful.spawn")
 local prompt = require("awful.prompt")
 local widget_base = require("wibox.widget.base")
 local textbox = require("wibox.widget.textbox")
@@ -23,7 +24,7 @@ local function run(promptbox)
     return prompt.run({ prompt = promptbox.prompt },
                       promptbox.widget,
                       function (...)
-                          local result = util.spawn(...)
+                          local result = spawn(...)
                           if type(result) == "string" then
                               promptbox.widget:set_text(result)
                           end
