@@ -29,6 +29,7 @@ local function collectable(a, b, c, d, e, f, g, h, last)
         prepare_for_collect = nil
     end
     collectgarbage("collect")
+    collectgarbage("collect")
     -- Check if the table is now empty
     for k, v in pairs(objs) do
         print("Some object was not garbage collected!")
