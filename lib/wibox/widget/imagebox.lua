@@ -96,6 +96,8 @@ function imagebox:set_image(image)
     end
 
     if self._image == image then
+        -- The image could have been modified, so better redraw
+        self:emit_signal("widget::redraw_needed")
         return
     end
 
