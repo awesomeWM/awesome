@@ -26,6 +26,12 @@ local titlebar = {
     widget = {}
 }
 
+--- Set a declarative widget hierarchy description.
+-- See [The declarative layout system](../documentation/03-declarative-layout.md.html)
+-- @param args An array containing the widgets disposition
+-- @name setup
+-- @class function
+
 --- Show tooltips when hover on titlebar buttons (defaults to 'true')
 titlebar.enable_tooltip = true
 
@@ -107,6 +113,9 @@ local function new(c, args)
 
     -- Make sure the titlebar has the right colors applied
     bars[position].update_colors()
+
+    -- Handle declarative/recursive widget container
+    ret.setup = base.widget.setup
 
     return ret
 end
