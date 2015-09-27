@@ -39,6 +39,11 @@ local function do_pending_repaint()
     awesome.emit_signal("refresh")
 end
 
+local function create_and_draw_wibox()
+    create_wibox()
+    do_pending_repaint()
+end
+
 local wb, textclock = create_wibox()
 
 local function relayout_textclock()
@@ -61,7 +66,7 @@ local function e2e_tag_switch()
     do_pending_repaint()
 end
 
-benchmark(create_wibox, "create wibox")
+benchmark(create_and_draw_wibox, "create&draw wibox")
 benchmark(update_textclock, "update textclock")
 benchmark(relayout_textclock, "relayout textclock")
 benchmark(redraw_textclock, "redraw textclock")
