@@ -8,6 +8,7 @@
 local object = require("gears.object")
 local cache = require("gears.cache")
 local matrix = require("gears.matrix")
+local util = require("awful.util")
 local setmetatable = setmetatable
 local pairs = pairs
 local type = type
@@ -329,6 +330,113 @@ function base.place_widget_at(widget, x, y, width, height)
     return base.place_widget_via_matrix(widget, matrix.create_translate(x, y), width, height)
 end
 
+-- Read the table, separate attributes from widgets
+local function parse_table(t, leave_empty)
+    local keys= {}
+    local max = 0
+    local attributes, widgets = {}, {}
+    for k,v in pairs(t) do
+        if type(k) == "number" then
+            -- As `ipairs` doesn't always work on sparse tables, update the
+            -- maximum
+            if k > max then
+                max = k
+            end
+
+            widgets[k] = v
+        else
+            attributes[k] = v
+        end
+    end
+
+    -- Pack the sparse table if the container doesn't support sparse tables
+    if not leave_empty then
+        widgets = util.table.from_sparse(widgets)
+        max = #widgets
+    end
+
+    return max, attributes, widgets
+end
+
+-- Recursively build a container from a declarative table
+local function drill(ids, content)
+    if not content then return end
+
+    -- Alias `widget` to `layout` as they are handled the same way
+    content.layout = content.layout or content.widget
+
+    -- Make sure the layout is not indexed on a function
+    local layout = type(content.layout) == "function" and  content.layout() or content.layout
+
+    -- Create layouts based on metatable __call
+    local l = layout.is_widget and layout or layout()
+
+    -- Get the number of children widgets (including nil widgets)
+    local max, attributes, widgets = parse_table(content, l.allow_empty_widget)
+
+    -- Get the optional identifier to create a virtual widget tree to place
+    -- in an "access table" to be able to retrieve the widget
+    local id = attributes.id
+
+    -- Clear the internal attributes
+    attributes.id, attributes.layout, attributes.widget = nil, nil, nil
+
+    for k = 1, max do
+        -- ipairs cannot be used on sparse tables
+        local v, id2, e = widgets[k], id, nil
+        if v then
+            -- It is another declarative container, parse it
+            if not v.is_widget then
+                e, id2 = drill(ids, v)
+                widgets[k] = e
+            end
+
+            -- Place the widget in the access table
+            if id2 then
+                l  [id2] = e
+                ids[id2] = ids[id2] or {}
+                table.insert(ids[id2], e)
+            end
+        end
+    end
+
+    -- Replace all children (if any) with the new ones
+    l:set_children(widgets)
+
+    -- Set layouts attributes
+    for attr, val in pairs(attributes) do
+        if l["set_"..attr] then
+            l["set_"..attr](l, val)
+        elseif type(l[attr]) == "function" then
+            l[attr](l, val)
+        else
+            l[attr] = val
+        end
+    end
+
+    return l, id
+end
+
+-- Only available when the declarative system is used
+local function get_children_by_id(self, name)
+    return self._by_id[name] or {}
+end
+
+--- Set a declarative widget hierarchy description.
+-- See [The declarative layout system](../documentation/03-declarative-layout.md.html)
+-- @param args An array containing the widgets disposition
+function base.widget:setup(args)
+    local f,ids = self.set_widget or self.add or self.set_first,{}
+    local w, id = drill(ids, args)
+    f(self,w)
+    if id then
+        -- Avoid being dropped by wibox metatable -> drawin
+        rawset(self, id, w)
+    end
+    rawset(self, "_by_id", ids)
+    rawset(self, "get_children_by_id", get_children_by_id)
+end
+
 --[[--
 Create a new widget. All widgets have to be generated via this function so that
 the needed signals are added and mouse input handling is set up.
@@ -477,6 +585,9 @@ function base.make_widget(proxy, widget_name)
 
     -- Widget is fully opaque
     ret.opacity = 1
+
+    -- Differentiate tables from widgets
+    ret.is_widget = true
 
     -- Size is not restricted/forced
     ret._forced_width = nil
