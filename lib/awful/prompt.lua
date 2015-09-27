@@ -228,6 +228,9 @@ end
 -- @tparam[opt] table args.hooks The "hooks" argument uses a syntax similar to
 --   `awful.key`.  It will call a function for the matching modifiers + key.
 --   It receives the command (widget text/input) as an argument.
+--   If the callback returns a command, this will be passed to the
+--   `exe_callback`, otherwise nothing gets executed by default, and the hook
+--   needs to handle it.
 --     hooks = {
 --       -- Apply startup notification properties with Shift-Return.
 --       {{"Shift"  }, "Return", function(command)
@@ -238,10 +241,8 @@ end
 --       -- with ":" in a terminal.
 --       {{}, "Return", function(command)
 --         if command:sub(1,1) == ":" then
---           command = terminal .. ' -e ' .. command:sub(2)
+--           return terminal .. ' -e ' .. command:sub(2)
 --         end
---         mypromptbox[awful.screen.focused()]:spawn_and_handle_error(
---           command)
 --       end}
 --     }
 -- @param textbox The textbox to use for the prompt.
@@ -365,7 +366,16 @@ function prompt.run(args, textbox, exe_callback, completion_callback, history_pa
                         match = match and mod[v2]
                     end
                     if match or #modifiers == 0 then
-                        exec(v[3])
+                        local cb
+                        local ret = v[3](command)
+                        if ret then
+                            command = ret
+                            cb = exe_callback
+                        else
+                            -- No callback.
+                            cb = function() end
+                        end
+                        exec(cb)
                         return
                     end
                 end
