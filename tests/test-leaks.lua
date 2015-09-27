@@ -36,6 +36,20 @@ local function collectable(a, b, c, d, e, f, g, h, last)
     end
 end
 
+-- Use the layoutbox for testing delayed tooltips
+local function tooltip_delayed()
+    local l = awful.widget.layoutbox(1)
+    local t = l._layoutbox_tooltip
+    assert(t)
+    return l, t
+end
+
+local function tooltip_now()
+    local w = wibox.widget.textbox("some textbox")
+    local t = awful.tooltip({ objects = {w} })
+    return w, t
+end
+
 -- First test some basic widgets
 collectable(wibox.widget.base.make_widget())
 collectable(wibox.widget.textbox("foo"))
@@ -49,6 +63,12 @@ collectable(awful.widget.textclock())
 collectable(awful.widget.layoutbox(1))
 
 -- Some widgets do things via timer.delayed_call
+prepare_for_collect = emit_refresh
+collectable(tooltip_delayed())
+
+prepare_for_collect = emit_refresh
+collectable(tooltip_now())
+
 prepare_for_collect = emit_refresh
 collectable(awful.widget.taglist(1, awful.widget.taglist.filter.all))
 
