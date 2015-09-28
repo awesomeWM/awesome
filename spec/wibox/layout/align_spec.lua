@@ -265,6 +265,19 @@ describe("wibox.layout.align", function()
             layout:set_third(w2)
             assert.is.equal(layout_changed, 2)
         end)
+
+        it("set again", function()
+            local w1, w2, w3 = {}, {}, {}
+            layout = align.vertical(w1, w2, w3)
+            layout:connect_signal("widget::layout_changed", function()
+                layout_changed = layout_changed + 1
+            end)
+            assert.is.equal(layout_changed, 0)
+            layout:set_first(w1)
+            layout:set_second(w2)
+            layout:set_third(w3)
+            assert.is.equal(layout_changed, 0)
+        end)
     end)
 end)
 

@@ -49,10 +49,15 @@ function fixed:layout(context, width, height)
     return result
 end
 
---- Add a widget to the given fixed layout
-function fixed:add(widget)
-    base.check_widget(widget)
-    table.insert(self.widgets, widget)
+--- Add some widgets to the given fixed layout
+function fixed:add(...)
+    -- No table.pack in Lua 5.1 :-(
+    local args = { n=select('#', ...), ... }
+    assert(args.n > 0, "need at least one widget to add")
+    for i=1, args.n do
+        base.check_widget(args[i])
+        table.insert(self.widgets, args[i])
+    end
     self:emit_signal("widget::layout_changed")
 end
 
@@ -113,7 +118,7 @@ function fixed:fill_space(val)
     end
 end
 
-local function get_layout(dir)
+local function get_layout(dir, widget1, ...)
     local ret = base.make_widget()
 
     for k, v in pairs(fixed) do
@@ -127,21 +132,25 @@ local function get_layout(dir)
     ret:set_spacing(0)
     ret:fill_space(false)
 
+    if widget1 then
+        ret:add(widget1, ...)
+    end
+
     return ret
 end
 
 --- Returns a new horizontal fixed layout. Each widget will get as much space as it
 -- asks for and each widget will be drawn next to its neighboring widget.
--- Widgets can be added via :add().
-function fixed.horizontal()
-    return get_layout("x")
+-- Widgets can be added via :add() or as arguments to this function.
+function fixed.horizontal(...)
+    return get_layout("x", ...)
 end
 
 --- Returns a new vertical fixed layout. Each widget will get as much space as it
 -- asks for and each widget will be drawn next to its neighboring widget.
--- Widgets can be added via :add().
-function fixed.vertical()
-    return get_layout("y")
+-- Widgets can be added via :add() or as arguments to this function.
+function fixed.vertical(...)
+    return get_layout("y", ...)
 end
 
 --- Add spacing between each layout widgets
