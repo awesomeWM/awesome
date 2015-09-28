@@ -23,6 +23,8 @@ local timer = require("gears.timer")
 
 local tasklist = { mt = {} }
 
+local instances
+
 -- Public structures
 tasklist.filter = {}
 
@@ -169,7 +171,7 @@ function tasklist.new(screen, filter, buttons, style, update_function, base_widg
     local data = setmetatable({}, { __mode = 'k' })
 
     local queued_update = false
-    local u = function ()
+    function w._do_tasklist_update()
         -- Add a delayed callback for the first update.
         if not queued_update then
             timer.delayed_call(function()
@@ -179,34 +181,56 @@ function tasklist.new(screen, filter, buttons, style, update_function, base_widg
             queued_update = true
         end
     end
-    tag.attached_connect_signal(screen, "property::selected", u)
-    tag.attached_connect_signal(screen, "property::activated", u)
-    capi.client.connect_signal("property::urgent", u)
-    capi.client.connect_signal("property::sticky", u)
-    capi.client.connect_signal("property::ontop", u)
-    capi.client.connect_signal("property::above", u)
-    capi.client.connect_signal("property::below", u)
-    capi.client.connect_signal("property::floating", u)
-    capi.client.connect_signal("property::maximized_horizontal", u)
-    capi.client.connect_signal("property::maximized_vertical", u)
-    capi.client.connect_signal("property::minimized", u)
-    capi.client.connect_signal("property::name", u)
-    capi.client.connect_signal("property::icon_name", u)
-    capi.client.connect_signal("property::icon", u)
-    capi.client.connect_signal("property::skip_taskbar", u)
-    capi.client.connect_signal("property::screen", function(c, old_screen)
-        if screen == c.screen or screen == old_screen then
-            u()
+    if instances == nil then
+        instances = {}
+        local function us(s)
+            local i = instances[s]
+            if i then
+                for _, tlist in pairs(i) do
+                    tlist._do_tasklist_update()
+                end
+            end
         end
-    end)
-    capi.client.connect_signal("property::hidden", u)
-    capi.client.connect_signal("tagged", u)
-    capi.client.connect_signal("untagged", u)
-    capi.client.connect_signal("unmanage", u)
-    capi.client.connect_signal("list", u)
-    capi.client.connect_signal("focus", u)
-    capi.client.connect_signal("unfocus", u)
-    u()
+        local function u()
+            for s in ipairs(instances) do
+                us(s)
+            end
+        end
+
+        tag.attached_connect_signal(nil, "property::selected", u)
+        tag.attached_connect_signal(nil, "property::activated", u)
+        capi.client.connect_signal("property::urgent", u)
+        capi.client.connect_signal("property::sticky", u)
+        capi.client.connect_signal("property::ontop", u)
+        capi.client.connect_signal("property::above", u)
+        capi.client.connect_signal("property::below", u)
+        capi.client.connect_signal("property::floating", u)
+        capi.client.connect_signal("property::maximized_horizontal", u)
+        capi.client.connect_signal("property::maximized_vertical", u)
+        capi.client.connect_signal("property::minimized", u)
+        capi.client.connect_signal("property::name", u)
+        capi.client.connect_signal("property::icon_name", u)
+        capi.client.connect_signal("property::icon", u)
+        capi.client.connect_signal("property::skip_taskbar", u)
+        capi.client.connect_signal("property::screen", function(c, old_screen)
+            us(c.screen)
+            us(old_screen)
+        end)
+        capi.client.connect_signal("property::hidden", u)
+        capi.client.connect_signal("tagged", u)
+        capi.client.connect_signal("untagged", u)
+        capi.client.connect_signal("unmanage", u)
+        capi.client.connect_signal("list", u)
+        capi.client.connect_signal("focus", u)
+        capi.client.connect_signal("unfocus", u)
+    end
+    w._do_tasklist_update()
+    local list = instances[s]
+    if not list then
+        list = setmetatable({}, { __mode = "v" })
+        instances[screen] = list
+    end
+    table.insert(list, w)
     return w
 end
 

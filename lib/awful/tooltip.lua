@@ -59,17 +59,6 @@ local ipairs = ipairs
 -- @tfield boolean visible True if tooltip is visible.
 local tooltip = { mt = {}  }
 
---- Tooltip private data.
--- @local
--- @table tooltip.data
--- @tfield string fg tooltip foreground color.
--- @tfield string font Tooltip font.
--- @tfield function hide The hide() function.
--- @tfield function show The show() function.
--- @tfield gears.timer timer The text update timer.
--- @tfield function timer_function The text update timer function.
-local data = setmetatable({}, { __mode = 'k' })
-
 -- Place the tooltip on the screen.
 -- @tparam tooltip self A tooltip object.
 local function place(self)
@@ -98,10 +87,10 @@ end
 local function show(self)
     -- do nothing if the tooltip is already shown
     if self.visible then return end
-    if data[self].timer then
-        if not data[self].timer.started then
-            data[self].timer_function()
-            data[self].timer:start()
+    if self.timer then
+        if not self.timer.started then
+            self.timer_function()
+            self.timer:start()
         end
     end
     set_geometry(self)
@@ -116,9 +105,9 @@ end
 local function hide(self)
     -- do nothing if the tooltip is already hidden
     if not self.visible then return end
-    if data[self].timer then
-        if data[self].timer.started then
-            data[self].timer:stop()
+    if self.timer then
+        if self.timer.started then
+            self.timer:stop()
         end
     end
     self.visible = false
@@ -154,8 +143,8 @@ end
 -- @tparam tooltip self A tooltip object.
 -- @tparam number timeout The timeout value.
 tooltip.set_timeout = function(self, timeout)
-    if data[self].timer then
-        data[self].timer.timeout = timeout
+    if self.timer then
+        self.timer.timeout = timeout
     end
 end
 
@@ -165,8 +154,8 @@ end
 -- @tparam gears.object object An object with `mouse::enter` and
 --   `mouse::leave` signals.
 tooltip.add_to_object = function(self, object)
-    object:connect_signal("mouse::enter", data[self].show)
-    object:connect_signal("mouse::leave", data[self].hide)
+    object:connect_signal("mouse::enter", self.show)
+    object:connect_signal("mouse::leave", self.hide)
 end
 
 --- Remove tooltip from an object.
@@ -175,8 +164,8 @@ end
 -- @tparam gears.object object An object with `mouse::enter` and
 --   `mouse::leave` signals.
 tooltip.remove_from_object = function(self, object)
-    object:disconnect_signal("mouse::enter", data[self].show)
-    object:disconnect_signal("mouse::leave", data[self].hide)
+    object:disconnect_signal("mouse::enter", self.show)
+    object:disconnect_signal("mouse::leave", self.hide)
 end
 
 
@@ -213,24 +202,24 @@ tooltip.new = function(args)
             delay_timeout:stop()
         end)
 
-        data[self] = {
-            show = function()
-                if not delay_timeout.started then
-                    delay_timeout:start()
-                end
-            end,
-            hide = function()
-                if delay_timeout.started then
-                    delay_timeout:stop()
-                end
-                hide(self)
-            end,
-        }
+        function self.show()
+            if not delay_timeout.started then
+                delay_timeout:start()
+            end
+        end
+        function self.hide()
+            if delay_timeout.started then
+                delay_timeout:stop()
+            end
+            hide(self)
+        end
     else
-        data[self] = {
-            show = function() show(self) end,
-            hide = function() hide(self) end,
-        }
+        function self.show()
+            show(self)
+        end
+        function self.hide()
+            hide(self)
+        end
     end
 
     -- export functions
@@ -242,11 +231,11 @@ tooltip.new = function(args)
 
     -- setup the timer action only if needed
     if args.timer_function then
-        data[self].timer = timer { timeout = args.timeout and args.timeout or 1 }
-        data[self].timer_function = function()
+        self.timer = timer { timeout = args.timeout and args.timeout or 1 }
+        self.timer_function = function()
                 self:set_markup(args.timer_function())
             end
-        data[self].timer:connect_signal("timeout", data[self].timer_function)
+        self.timer:connect_signal("timeout", self.timer_function)
     end
 
     -- Set default properties
@@ -274,7 +263,7 @@ tooltip.new = function(args)
 
     -- Close the tooltip when clicking it.  This gets done on release, to not
     -- emit the release event on an underlying object, e.g. the titlebar icon.
-    self.wibox:buttons(abutton({}, 1, nil, function() data[self].hide() end))
+    self.wibox:buttons(abutton({}, 1, nil, function() self.hide() end))
 
     -- Re-place when the geometry of the wibox changes.
     self.wibox:connect_signal("property::width",  function() place(self) end)

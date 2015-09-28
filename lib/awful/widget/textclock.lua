@@ -31,13 +31,14 @@ function textclock.new(format, timeout)
     local timeout = timeout or 60
 
     local w = textbox()
-    local t = timer { timeout = timeout }
-    t:connect_signal("timeout", function()
+    local t
+    function w._textclock_update_cb()
         w:set_markup(DateTime.new_now_local():format(format))
         t.timeout = calc_timeout(timeout)
         t:again()
-    end)
-    t:start()
+        return true -- Continue the timer
+    end
+    t = timer.weak_start_new(timeout, w._textclock_update_cb)
     t:emit_signal("timeout")
     return w
 end

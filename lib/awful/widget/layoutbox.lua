@@ -18,10 +18,20 @@ local imagebox = require("wibox.widget.imagebox")
 
 local layoutbox = { mt = {} }
 
-local function update(w, screen, tooltip)
+local boxes = nil
+
+local function update(w, screen)
     local layout = layout.getname(layout.get(screen))
-    tooltip:set_text(layout or "[no name]")
+    w._layoutbox_tooltip:set_text(layout or "[no name]")
     w:set_image(layout and beautiful["layout_" .. layout])
+end
+
+local function update_from_tag(t)
+    local screen = tag.getscreen(t)
+    local w = boxes[screen]
+    if w then
+        update(w, screen)
+    end
 end
 
 --- Create a layoutbox widget. It draws a picture with the current layout
@@ -30,17 +40,24 @@ end
 -- @return An imagebox widget configured as a layoutbox.
 function layoutbox.new(screen)
     local screen = screen or 1
-    local w = imagebox()
-    local tooltip = tooltip({ objects = {w}, delay_show = 1 })
 
-    update(w, screen, tooltip)
-
-    local function update_on_tag_selection(t)
-        return update(w, tag.getscreen(t), tooltip)
+    -- Do we already have the update callbacks registered?
+    if boxes == nil then
+        boxes = setmetatable({}, { __mode = "v" })
+        tag.attached_connect_signal(nil, "property::selected", update_from_tag)
+        tag.attached_connect_signal(nil, "property::layout", update_from_tag)
+        layoutbox.boxes = boxes
     end
 
-    tag.attached_connect_signal(screen, "property::selected", update_on_tag_selection)
-    tag.attached_connect_signal(screen, "property::layout", update_on_tag_selection)
+    -- Do we already have a layoutbox for this screen?
+    local w = boxes[screen]
+    if not w then
+        w = imagebox()
+        w._layoutbox_tooltip = tooltip({ objects = {w}, delay_show = 1 })
+
+        update(w, screen)
+        boxes[screen] = w
+    end
 
     return w
 end
