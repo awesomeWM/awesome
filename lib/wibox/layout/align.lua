@@ -221,7 +221,7 @@ function align:reset()
     self:emit_signal("widget::layout_changed")
 end
 
-local function get_layout(dir)
+local function get_layout(dir, first, second, third)
     local ret = base.make_widget()
     ret.dir = dir
 
@@ -232,6 +232,9 @@ local function get_layout(dir)
     end
 
     ret:set_expand("inside")
+    ret:set_first(first)
+    ret:set_second(second)
+    ret:set_third(third)
 
     return ret
 end
@@ -240,8 +243,11 @@ end
 -- three widgets. The widget set via :set_left() is left-aligned. :set_right()
 -- sets a widget which will be right-aligned. The remaining space between those
 -- two will be given to the widget set via :set_middle().
-function align.horizontal()
-    local ret = get_layout("x")
+-- @tparam[opt] widget left Widget to be put to the left.
+-- @tparam[opt] widget middle Widget to be put to the middle.
+-- @tparam[opt] widget right Widget to be put to the right.
+function align.horizontal(left, middle, right)
+    local ret = get_layout("x", left, middle, right)
 
     ret.set_left = ret.set_first
     ret.set_middle = ret.set_second
@@ -254,8 +260,11 @@ end
 -- three widgets. The widget set via :set_top() is top-aligned. :set_bottom()
 -- sets a widget which will be bottom-aligned. The remaining space between those
 -- two will be given to the widget set via :set_middle().
-function align.vertical()
-    local ret = get_layout("y")
+-- @tparam[opt] widget top Widget to be put to the top.
+-- @tparam[opt] widget middle Widget to be put to the middle.
+-- @tparam[opt] widget bottom Widget to be put to the right.
+function align.vertical(top, middle, bottom)
+    local ret = get_layout("y", top, middle, bottom)
 
     ret.set_top = ret.set_first
     ret.set_middle = ret.set_second

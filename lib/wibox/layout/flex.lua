@@ -96,9 +96,16 @@ function flex:fit(context, orig_width, orig_height)
     return used_in_dir + spacing, used_in_other
 end
 
-function flex:add(widget)
-    base.check_widget(widget)
-    table.insert(self.widgets, widget)
+--- Add some widgets to the given flex layout
+-- @tparam widget ... Widgets that should be added (must at least be one)
+function flex:add(...)
+    -- No table.pack in Lua 5.1 :-(
+    local args = { n=select('#', ...), ... }
+    assert(args.n > 0, "need at least one widget to add")
+    for i=1, args.n do
+        base.check_widget(args[i])
+        table.insert(self.widgets, args[i])
+    end
     self:emit_signal("widget::layout_changed")
 end
 
@@ -127,7 +134,7 @@ function flex:reset()
     self:emit_signal("widget::layout_changed")
 end
 
-local function get_layout(dir)
+local function get_layout(dir, widget1, ...)
     local ret = base.make_widget()
 
     for k, v in pairs(flex) do
@@ -140,19 +147,25 @@ local function get_layout(dir)
     ret.widgets = {}
     ret:set_spacing(0)
 
+    if widget1 then
+        ret:add(widget1, ...)
+    end
+
     return ret
 end
 
 --- Returns a new horizontal flex layout. A flex layout shares the available space
 -- equally among all widgets. Widgets can be added via :add(widget).
-function flex.horizontal()
-    return get_layout("x")
+-- @tparam widget ... Widgets that should be added to the layout.
+function flex.horizontal(...)
+    return get_layout("x", ...)
 end
 
 --- Returns a new vertical flex layout. A flex layout shares the available space
 -- equally among all widgets. Widgets can be added via :add(widget).
-function flex.vertical()
-    return get_layout("y")
+-- @tparam widget ... Widgets that should be added to the layout.
+function flex.vertical(...)
+    return get_layout("y", ...)
 end
 
 return flex

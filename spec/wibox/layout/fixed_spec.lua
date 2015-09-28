@@ -22,6 +22,12 @@ describe("wibox.layout.fixed", function()
         assert.widget_layout(layout, { 0, 0 }, {})
     end)
 
+    it("empty add", function()
+        assert.has_error(function()
+            layout:add()
+        end)
+    end)
+
     describe("with widgets", function()
         local first, second, third
 
@@ -30,9 +36,7 @@ describe("wibox.layout.fixed", function()
             second = utils.widget_stub(15, 15)
             third = utils.widget_stub(10, 10)
 
-            layout:add(first)
-            layout:add(second)
-            layout:add(third)
+            layout:add(first, second, third)
         end)
 
         describe("with enough space", function()
