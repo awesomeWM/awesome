@@ -12,6 +12,7 @@
 local wibox = require("wibox")
 local button = require("awful.button")
 local util = require("awful.util")
+local spawn = require("awful.spawn")
 local tags = require("awful.tag")
 local keygrabber = require("awful.keygrabber")
 local beautiful = require("beautiful")
@@ -258,7 +259,7 @@ function menu:exec(num, opts)
         end
     elseif type(cmd) == "string" then
         menu.get_root(self):hide()
-        util.spawn(cmd)
+        spawn(cmd)
     elseif type(cmd) == "function" then
         local visible, action = cmd(item, self)
         if not visible then

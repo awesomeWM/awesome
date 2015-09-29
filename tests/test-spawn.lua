@@ -1,6 +1,6 @@
 --- Tests for spawn
 
-local util = require("awful.util")
+local spawn = require("awful.spawn")
 
 local spawns_done = 0
 
@@ -8,7 +8,7 @@ local steps = {
   function(count)
     if count == 1 then
       local steps_yay = 0
-      util.spawn_with_line_callback("echo yay", function(line)
+      spawn.with_line_callback("echo yay", function(line)
         assert(line == "yay", "line == '" .. tostring(line) .. "'")
         assert(steps_yay == 0)
         steps_yay = steps_yay + 1
@@ -20,7 +20,7 @@ local steps = {
 
       local steps_count = 0
       local err_count = 0
-      util.spawn_with_line_callback({ "sh", "-c", "printf line1\\\\nline2\\\\nline3 ; echo err >&2" },
+      spawn.with_line_callback({ "sh", "-c", "printf line1\\\\nline2\\\\nline3 ; echo err >&2" },
       function(line)
         assert(steps_count < 3)
         steps_count = steps_count + 1
