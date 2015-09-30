@@ -13,7 +13,10 @@ local ipairs = ipairs
 local capi = { key = key }
 local util = require("awful.util")
 
-local key = { mt = {} }
+
+
+local key = { mt = {}, hotkeys = {} }
+
 
 --- Modifiers to ignore.
 -- By default this is initialized as { "Lock", "Mod2" }
@@ -36,9 +39,15 @@ local ignore_modifiers = { "Lock", "Mod2" }
 --   Mod2, Mod3, Mod4, Mod5, Shift, Lock and Control.
 -- @tparam string _key The key to trigger an event.
 -- @tparam function press Callback for when the key is pressed.
--- @tparam function release Callback for when the key is released.
+-- @tparam[opt] function release Callback for when the key is released.
+-- @tparam table data User data for key,
+-- for example {description="select next tag", group="tag"}.
 -- @treturn table A table with one or several key objects.
-function key.new(mod, _key, press, release)
+function key.new(mod, _key, press, release, data)
+    if type(release)=='table' then
+        data=release
+        release=nil
+    end
     local ret = {}
     local subsets = util.subsets(ignore_modifiers)
     for _, set in ipairs(subsets) do
@@ -51,6 +60,13 @@ function key.new(mod, _key, press, release)
             ret[#ret]:connect_signal("release", function(kobj, ...) release(...) end)
         end
     end
+
+    -- append custom userdata (like description) to a hotkey
+    data = data or {}
+    data.mod = mod
+    data.key = _key
+    table.insert(key.hotkeys, data)
+
     return ret
 end
 
