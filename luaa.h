@@ -230,7 +230,7 @@ luaA_registerfct(lua_State *L, int idx, int *fct)
     return luaA_register(L, idx, fct);
 }
 
-void luaA_init(xdgHandle *);
+void luaA_init(xdgHandle *, char *);
 bool luaA_parserc(xdgHandle *, const char *, bool);
 
 /** Global signals */

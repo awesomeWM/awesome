@@ -344,10 +344,11 @@ exit_help(int exit_code)
     FILE *outfile = (exit_code == EXIT_SUCCESS) ? stdout : stderr;
     fprintf(outfile,
 "Usage: awesome [OPTION]\n\
-  -h, --help             show help\n\
-  -v, --version          show version\n\
-  -c, --config FILE      configuration file to use\n\
-  -k, --check            check configuration file syntax\n");
+  -h, --help              show help\n\
+  -v, --version           show version\n\
+  -c, --config FILE       configuration file to use\n\
+  -i, --include DIRECTORY include an extra lua modules directory \n\
+  -k, --check             check configuration file syntax\n");
     exit(exit_code);
 }
 
@@ -360,6 +361,7 @@ int
 main(int argc, char **argv)
 {
     char *confpath = NULL;
+    char* includepath = NULL;
     int xfd, i, opt;
     ssize_t cmdlen = 1;
     xdgHandle xdg;
@@ -371,6 +373,7 @@ main(int argc, char **argv)
         { "help",    0, NULL, 'h' },
         { "version", 0, NULL, 'v' },
         { "config",  1, NULL, 'c' },
+        { "include", 1, NULL, 'i' },
         { "check",   0, NULL, 'k' },
         { "no-argb", 0, NULL, 'a' },
         { NULL,      0, NULL, 0 }
@@ -403,13 +406,9 @@ main(int argc, char **argv)
     setlocale(LC_CTYPE, "");
 
     /* Get XDG basedir data */
-    xdgInitHandle(&xdg);
-
-    /* init lua */
-    luaA_init(&xdg);
 
     /* check args */
-    while((opt = getopt_long(argc, argv, "vhkc:a",
+    while((opt = getopt_long(argc, argv, "vhkc:i:a",
                              long_options, NULL)) != -1)
         switch(opt)
         {
@@ -428,10 +427,20 @@ main(int argc, char **argv)
             else
                 fatal("-c option requires a file name");
             break;
+          case 'i':
+             if(a_strlen(optarg))
+                includepath = a_strdup(optarg);
+            else
+                fatal("-i require a directory path");
+            break;
           case 'a':
             no_argb = true;
             break;
         }
+    xdgInitHandle(&xdg);
+
+    /* init lua */
+    luaA_init(&xdg, includepath);
 
     if (run_test)
     {
