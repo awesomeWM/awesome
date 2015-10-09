@@ -24,7 +24,7 @@ local screen = {}
 local data = {}
 data.padding = {}
 
-mouse_per_screen = {}
+screen.mouse_per_screen = {}
 
 ---
 -- Return Xinerama screen number corresponding to the given (pixel) coordinates.
@@ -57,7 +57,7 @@ function screen.focus(_screen)
     local s = capi.mouse.screen
     local pos
 
-    if not mouse_per_screen[_screen] then
+    if not screen.mouse_per_screen[_screen] then
         -- This is the first time we enter this screen,
         -- keep relative mouse position on the new screen
         local relx = (pos.x - capi.screen[s].geometry.x) / capi.screen[s].geometry.width
@@ -67,11 +67,11 @@ function screen.focus(_screen)
         pos.y = capi.screen[_screen].geometry.y + rely * capi.screen[_screen].geometry.height
     else
         -- restore mouse position
-        pos = mouse_per_screen[_screen]
+        pos = screen.mouse_per_screen[_screen]
     end
 
     -- save pointer position of current screen
-    mouse_per_screen[s] = capi.mouse.coords()
+    screen.mouse_per_screen[s] = capi.mouse.coords()
 
    -- move cursor without triggering signals mouse::enter and mouse::leave
     capi.mouse.coords(pos, true)
