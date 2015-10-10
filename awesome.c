@@ -610,9 +610,12 @@ main(int argc, char **argv)
     g_main_context_set_poll_func(g_main_context_default(), &a_glib_poll);
     gettimeofday(&last_wakeup, NULL);
 
-    /* main event loop */
-    globalconf.loop = g_main_loop_new(NULL, FALSE);
-    g_main_loop_run(globalconf.loop);
+    /* main event loop (if not NULL, awesome.quit() was already called) */
+    if (globalconf.loop == NULL)
+    {
+        globalconf.loop = g_main_loop_new(NULL, FALSE);
+        g_main_loop_run(globalconf.loop);
+    }
     g_main_loop_unref(globalconf.loop);
     globalconf.loop = NULL;
 
