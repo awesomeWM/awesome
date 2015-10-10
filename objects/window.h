@@ -67,7 +67,9 @@ typedef enum
     /** Border width */ \
     uint16_t border_width; \
     /** The window type */ \
-    window_type_t type;
+    window_type_t type; \
+    /** The border width callback */ \
+    void (*border_width_callback)(void *, uint16_t old, uint16_t new);
 
 /** Window structure */
 typedef struct

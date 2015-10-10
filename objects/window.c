@@ -178,6 +178,7 @@ void
 window_set_border_width(lua_State *L, int idx, int width)
 {
     window_t *window = luaA_checkudata(L, idx, &window_class);
+    uint16_t old_width = window->border_width;
 
     if(width == window->border_width || width < 0)
         return;
@@ -188,6 +189,9 @@ window_set_border_width(lua_State *L, int idx, int width)
                              (uint32_t[]) { width });
 
     window->border_width = width;
+
+    if(window->border_width_callback)
+        (*window->border_width_callback)(window, old_width, width);
 
     luaA_object_emit_signal(L, idx, "property::border_width", 0);
 }
