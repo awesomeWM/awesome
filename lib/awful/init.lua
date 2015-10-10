@@ -26,7 +26,7 @@ end
 
 util.spawn_with_shell = function(...)
    util.deprecate("awful.spawn.with_shell")
-   spawn.spawn_with_shell(...)
+   spawn.with_shell(...)
 end
 
 return
