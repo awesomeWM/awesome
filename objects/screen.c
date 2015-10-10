@@ -35,7 +35,6 @@
 #include "objects/client.h"
 #include "objects/drawin.h"
 
-#include <math.h>
 #include <stdio.h>
 
 #include <xcb/xcb.h>
@@ -285,6 +284,38 @@ screen_scan(void)
         screen_scan_x11();
 }
 
+/** Return the squared distance of the given screen to the coordinates.
+ * \param screen The screen
+ * \param x X coordinate
+ * \param y Y coordinate
+ * \return Squared distance of the point to the screen.
+ */
+static unsigned int
+screen_get_distance_squared(screen_t *s, int x, int y)
+{
+    int sx = s->geometry.x, sy = s->geometry.y;
+    int sheight = s->geometry.height, swidth = s->geometry.width;
+    unsigned int dist_x, dist_y;
+
+    /* Calculate distance in X coordinate */
+    if (x < sx)
+        dist_x = sx - x;
+    else if (x < sx + swidth)
+        dist_x = 0;
+    else
+        dist_x = x - sx - swidth;
+
+    /* Calculate distance in Y coordinate */
+    if (y < sy)
+        dist_y = sy - y;
+    else if (y < sy + sheight)
+        dist_y = 0;
+    else
+        dist_y = y - sy - sheight;
+
+    return dist_x * dist_x + dist_y * dist_y;
+}
+
 /** Return the first screen number where the coordinates belong to.
  * \param x X coordinate
  * \param y Y coordinate
@@ -298,15 +329,15 @@ screen_getbycoord(int x, int y)
             return *s;
 
     /* No screen found, find nearest screen. */
-    screen_t * nearest_screen = globalconf.screens.tab[0];
-    int nearest_dist = INT_MAX;
+    screen_t *nearest_screen = globalconf.screens.tab[0];
+    unsigned int nearest_dist = UINT_MAX;
     foreach(s, globalconf.screens)
     {
-        int dist = sqrt(pow((*s)->geometry.x - x, 2) + pow((*s)->geometry.y - y, 2));
-        if( dist < nearest_dist )
+        unsigned int dist_sq = screen_get_distance_squared(*s, x, y);
+        if(dist_sq < nearest_dist)
         {
-            nearest_dist = dist;
-            nearest_screen = (*s);
+            nearest_dist = dist_sq;
+            nearest_screen = *s;
         }
     }
     return nearest_screen;
