@@ -373,6 +373,12 @@ event_handle_configurerequest(xcb_configure_request_event_t *ev)
             /* ICCCM 4.1.5 / 4.2.3, if nothing was changed, send an event saying so */
             client_send_configure(c);
     }
+    else if (xembed_getbywin(&globalconf.embedded, ev->window))
+    {
+        /* Ignore this so that systray icons cannot resize themselves.
+         * We decide their size!
+         */
+    }
     else
         event_handle_configurerequest_configure_window(ev);
 }

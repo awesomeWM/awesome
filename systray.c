@@ -48,8 +48,8 @@ systray_init(void)
                       xscreen->root,
                       -1, -1, 1, 1, 0,
                       XCB_COPY_FROM_PARENT, xscreen->root_visual,
-                      XCB_CW_BACK_PIXEL, (const uint32_t [])
-                      { xscreen->black_pixel });
+                      XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK, (const uint32_t [])
+                      { xscreen->black_pixel, XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT });
 
     atom_name = xcb_atom_name_by_screen("_NET_SYSTEM_TRAY", globalconf.default_screen);
     if(!atom_name)
