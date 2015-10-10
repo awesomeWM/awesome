@@ -24,6 +24,8 @@ local screen = {}
 local data = {}
 data.padding = {}
 
+screen.mouse_per_screen = {}
+
 ---
 -- Return Xinerama screen number corresponding to the given (pixel) coordinates.
 -- The number returned can be used as an index into the global
@@ -44,8 +46,8 @@ function screen.getbycoord(x, y, default)
     return default
 end
 
---- Give the focus to a screen, and move pointer.
--- Keeps relative position of the pointer on the screen.
+--- Give the focus to a screen, and move pointer to last known position on this
+-- screen, or keep position relative to the current focused screen
 -- @param _screen Screen number (defaults / falls back to mouse.screen).
 function screen.focus(_screen)
     client = client or require("awful.client")
@@ -53,14 +55,23 @@ function screen.focus(_screen)
 
     -- screen and pos for current screen
     local s = capi.mouse.screen
-    local pos = capi.mouse.coords()
+    local pos
 
-    -- keep relative mouse position on the new screen
-    local relx = (pos.x - capi.screen[s].geometry.x) / capi.screen[s].geometry.width
-    local rely = (pos.y - capi.screen[s].geometry.y) / capi.screen[s].geometry.height
+    if not screen.mouse_per_screen[_screen] then
+        -- This is the first time we enter this screen,
+        -- keep relative mouse position on the new screen
+        local relx = (pos.x - capi.screen[s].geometry.x) / capi.screen[s].geometry.width
+        local rely = (pos.y - capi.screen[s].geometry.y) / capi.screen[s].geometry.height
 
-    pos.x = capi.screen[_screen].geometry.x + relx * capi.screen[_screen].geometry.width
-    pos.y = capi.screen[_screen].geometry.y + rely * capi.screen[_screen].geometry.height
+        pos.x = capi.screen[_screen].geometry.x + relx * capi.screen[_screen].geometry.width
+        pos.y = capi.screen[_screen].geometry.y + rely * capi.screen[_screen].geometry.height
+    else
+        -- restore mouse position
+        pos = screen.mouse_per_screen[_screen]
+    end
+
+    -- save pointer position of current screen
+    screen.mouse_per_screen[s] = capi.mouse.coords()
 
    -- move cursor without triggering signals mouse::enter and mouse::leave
     capi.mouse.coords(pos, true)
@@ -71,7 +82,8 @@ function screen.focus(_screen)
     end
 end
 
---- Give the focus to a screen, and move pointer, by physical position relative to current screen.
+--- Give the focus to a screen, and move pointer to last known position on this
+-- screen, or keep position relative to the current focused screen
 -- @param dir The direction, can be either "up", "down", "left" or "right".
 -- @param _screen Screen number.
 function screen.focus_bydirection(dir, _screen)
@@ -88,8 +100,8 @@ function screen.focus_bydirection(dir, _screen)
     end
 end
 
---- Give the focus to a screen, and move pointer, but relative to the current
--- focused screen.
+--- Give the focus to a screen, and move pointer to last known position on this
+-- screen, or keep position relative to the current focused screen
 -- @param i Value to add to the current focused screen index. 1 will focus next
 -- screen, -1 would focus the previous one.
 function screen.focus_relative(i)
