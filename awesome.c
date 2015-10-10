@@ -228,6 +228,7 @@ acquire_WM_Sn(void)
     xcb_intern_atom_cookie_t atom_q;
     xcb_intern_atom_reply_t *atom_r;
     char *atom_name;
+    xcb_client_message_event_t ev;
 
     /* Get the WM_Sn atom */
     globalconf.selection_owner_window = xcb_generate_id(globalconf.connection);
@@ -256,6 +257,19 @@ acquire_WM_Sn(void)
     /* Acquire the selection */
     xcb_set_selection_owner(globalconf.connection, globalconf.selection_owner_window,
                             globalconf.selection_atom, XCB_CURRENT_TIME);
+
+    /* Announce that we are the new owner */
+    p_clear(&ev, 1);
+    ev.response_type = XCB_CLIENT_MESSAGE;
+    ev.window = globalconf.screen->root;
+    ev.format = 32;
+    ev.type = MANAGER;
+    ev.data.data32[0] = XCB_CURRENT_TIME;
+    ev.data.data32[1] = globalconf.selection_atom;
+    ev.data.data32[2] = globalconf.selection_owner_window;
+    ev.data.data32[3] = ev.data.data32[4] = 0;
+
+    xcb_send_event(globalconf.connection, false, globalconf.screen->root, 0xFFFFFF, (char *) &ev);
 }
 
 static void
