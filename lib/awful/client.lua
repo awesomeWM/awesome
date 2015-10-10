@@ -9,6 +9,7 @@
 
 -- Grab environment we need
 local util = require("awful.util")
+local spawn = require("awful.spawn")
 local tag = require("awful.tag")
 local pairs = pairs
 local type = type
@@ -1035,7 +1036,7 @@ function client.run_or_raise(cmd, matcher, merge)
     end
 
     -- client not found, spawn it
-    util.spawn(cmd)
+    spawn(cmd)
 end
 
 --- Get a matching transient_for client (if any).

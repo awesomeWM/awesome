@@ -49,7 +49,7 @@ can add:
 
     { rule = { class = "dosbox" },
       callback = function(c)
-         awful.util.spawn('mpc pause')
+         awful.spawn('mpc pause')
       end }
 
 Note that all "rule" entries need to match. If any of the entry does not
@@ -232,6 +232,13 @@ function rules.execute(c, props, callbacks)
         c:emit_signal('request::activate', "rules", {raise=true})
     end
 end
+
+function rules.completed_with_payload_callback(c, props)
+    rules.execute(c, props, type(props.callback) == "function" and
+        {props.callback} or props.callback )
+end
+
+client.connect_signal("spawn::completed_with_payload", rules.completed_with_payload_callback)
 
 client.connect_signal("manage", rules.apply)
 

@@ -15,6 +15,20 @@ function timer(...)
     return gtimer(...)
 end
 
+--TODO: This is a hack for backwards-compatibility with 3.5, remove!
+-- Set awful.util.spawn*
+local spawn = require("awful.spawn")
+
+util.spawn = function(...)
+   util.deprecate("awful.spawn")
+   spawn.spawn(...)
+end
+
+util.spawn_with_shell = function(...)
+   util.deprecate("awful.spawn.with_shell")
+   spawn.spawn_with_shell(...)
+end
+
 return
 {
     client = require("awful.client");
@@ -37,6 +51,7 @@ return
     tooltip = require("awful.tooltip");
     ewmh = require("awful.ewmh");
     titlebar = require("awful.titlebar");
+    spawn = spawn;
 }
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
