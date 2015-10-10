@@ -84,6 +84,8 @@ typedef struct
     key_array_t keys;
     /** Root window mouse bindings */
     button_array_t buttons;
+    /** Atom for WM_Sn */
+    xcb_atom_t selection_atom;
     /** Window owning the WM_Sn selection */
     xcb_window_t selection_owner_window;
     /** Modifiers masks */

@@ -227,7 +227,6 @@ acquire_WM_Sn(void)
 {
     xcb_intern_atom_cookie_t atom_q;
     xcb_intern_atom_reply_t *atom_r;
-    xcb_atom_t atom;
     char *atom_name;
 
     /* Get the WM_Sn atom */
@@ -251,11 +250,12 @@ acquire_WM_Sn(void)
     if(!atom_r)
         fatal("error getting WM_Sn atom");
 
-    atom = atom_r->atom;
+    globalconf.selection_atom = atom_r->atom;
     p_delete(&atom_r);
 
     /* Acquire the selection */
-    xcb_set_selection_owner(globalconf.connection, globalconf.selection_owner_window, atom, XCB_CURRENT_TIME);
+    xcb_set_selection_owner(globalconf.connection, globalconf.selection_owner_window,
+                            globalconf.selection_atom, XCB_CURRENT_TIME);
 }
 
 static void
