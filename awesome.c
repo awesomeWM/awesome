@@ -47,6 +47,7 @@
 
 #include <xcb/bigreq.h>
 #include <xcb/randr.h>
+#include <xcb/xcb_atom.h>
 #include <xcb/xcb_aux.h>
 #include <xcb/xcb_event.h>
 #include <xcb/xinerama.h>
@@ -219,6 +220,42 @@ scan(xcb_query_tree_cookie_t tree_c)
     p_delete(&tree_r);
 
     restore_client_order(prop_cookie);
+}
+
+static void
+acquire_WM_Sn(void)
+{
+    xcb_intern_atom_cookie_t atom_q;
+    xcb_intern_atom_reply_t *atom_r;
+    xcb_atom_t atom;
+    char *atom_name;
+
+    /* Get the WM_Sn atom */
+    globalconf.selection_owner_window = xcb_generate_id(globalconf.connection);
+    xcb_create_window(globalconf.connection, globalconf.screen->root_depth,
+                      globalconf.selection_owner_window, globalconf.screen->root,
+                      -1, -1, 1, 1, 0,
+                      XCB_COPY_FROM_PARENT, globalconf.screen->root_visual,
+                      0, NULL);
+
+    atom_name = xcb_atom_name_by_screen("WM_S", globalconf.default_screen);
+    if(!atom_name)
+        fatal("error getting WM_Sn atom name");
+
+    atom_q = xcb_intern_atom_unchecked(globalconf.connection, false,
+                                               a_strlen(atom_name), atom_name);
+
+    p_delete(&atom_name);
+
+    atom_r = xcb_intern_atom_reply(globalconf.connection, atom_q, NULL);
+    if(!atom_r)
+        fatal("error getting WM_Sn atom");
+
+    atom = atom_r->atom;
+    p_delete(&atom_r);
+
+    /* Acquire the selection */
+    xcb_set_selection_owner(globalconf.connection, globalconf.selection_owner_window, atom, XCB_CURRENT_TIME);
 }
 
 static void
@@ -505,6 +542,9 @@ main(int argc, char **argv)
 
     /* Did we get some usable data from the above X11 setup? */
     draw_test_cairo_xcb();
+
+    /* Acquire the WM_Sn selection */
+    acquire_WM_Sn();
 
     /* initialize dbus */
     a_dbus_init();

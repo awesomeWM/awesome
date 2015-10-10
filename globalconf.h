@@ -84,6 +84,8 @@ typedef struct
     key_array_t keys;
     /** Root window mouse bindings */
     button_array_t buttons;
+    /** Window owning the WM_Sn selection */
+    xcb_window_t selection_owner_window;
     /** Modifiers masks */
     uint16_t numlockmask, shiftlockmask, capslockmask, modeswitchmask;
     /** Check for XTest extension */
