@@ -109,4 +109,4 @@ script:
 
 after_success:
   # Push updated API docs for relevant branches, e.g. non-PRs builds on master.
-  - if [ "BUILD_APIDOC" = "true" ]; then build-utils/travis-apidoc.sh; fi
+  - if [ "$BUILD_APIDOC" = "true" ]; then build-utils/travis-apidoc.sh; fi
