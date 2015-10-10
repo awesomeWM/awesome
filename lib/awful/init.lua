@@ -21,12 +21,12 @@ local spawn = require("awful.spawn")
 
 util.spawn = function(...)
    util.deprecate("awful.spawn")
-   spawn.spawn(...)
+   return spawn.spawn(...)
 end
 
 util.spawn_with_shell = function(...)
    util.deprecate("awful.spawn.with_shell")
-   spawn.spawn_with_shell(...)
+   return spawn.with_shell(...)
 end
 
 util.pread = function(...)
