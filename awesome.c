@@ -223,11 +223,12 @@ scan(xcb_query_tree_cookie_t tree_c)
 }
 
 static void
-acquire_WM_Sn(void)
+acquire_WM_Sn(bool replace)
 {
     xcb_intern_atom_cookie_t atom_q;
     xcb_intern_atom_reply_t *atom_r;
     char *atom_name;
+    xcb_get_selection_owner_reply_t *get_sel_reply;
     xcb_client_message_event_t ev;
 
     /* Get the WM_Sn atom */
@@ -254,9 +255,28 @@ acquire_WM_Sn(void)
     globalconf.selection_atom = atom_r->atom;
     p_delete(&atom_r);
 
+    /* Is the selection already owned? */
+    get_sel_reply = xcb_get_selection_owner_reply(globalconf.connection,
+            xcb_get_selection_owner(globalconf.connection, globalconf.selection_atom),
+            NULL);
+    if (!replace && get_sel_reply->owner != XCB_NONE)
+        fatal("another window manager is already running (selection owned)");
+
     /* Acquire the selection */
     xcb_set_selection_owner(globalconf.connection, globalconf.selection_owner_window,
                             globalconf.selection_atom, XCB_CURRENT_TIME);
+    if (get_sel_reply->owner != XCB_NONE)
+    {
+        /* Wait for the old owner to go away */
+        xcb_get_geometry_reply_t *geom_reply = NULL;
+        do {
+            p_delete(&geom_reply);
+            geom_reply = xcb_get_geometry_reply(globalconf.connection,
+                    xcb_get_geometry(globalconf.connection, get_sel_reply->owner),
+                    NULL);
+        } while (geom_reply != NULL);
+    }
+    p_delete(&get_sel_reply);
 
     /* Announce that we are the new owner */
     p_clear(&ev, 1);
@@ -558,7 +578,7 @@ main(int argc, char **argv)
     draw_test_cairo_xcb();
 
     /* Acquire the WM_Sn selection */
-    acquire_WM_Sn();
+    acquire_WM_Sn(true);
 
     /* initialize dbus */
     a_dbus_init();
@@ -581,7 +601,7 @@ main(int argc, char **argv)
                                                       globalconf.screen->root,
                                                       XCB_CW_EVENT_MASK, &select_input_val);
         if (xcb_request_check(globalconf.connection, cookie))
-            fatal("another window manager is already running");
+            fatal("another window manager is already running (can't select SubstructureRedirect)");
     }
 
     /* Prefetch the maximum request length */
