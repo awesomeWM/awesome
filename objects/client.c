@@ -36,6 +36,7 @@
 
 static area_t titlebar_get_area(client_t *c, client_titlebar_t bar);
 static drawable_t *titlebar_get_drawable(lua_State *L, client_t *c, int cl_idx, client_titlebar_t bar);
+static void client_resize_do(client_t *c, area_t geometry, bool force_notice, bool honor_hints);
 
 /** Collect a client.
  * \param L The Lua VM state.
@@ -377,6 +378,24 @@ client_focus_refresh(void)
 }
 
 static void
+border_width_callback(client_t *c, uint16_t old_width, uint16_t new_width)
+{
+    if(c->size_hints.flags & XCB_ICCCM_SIZE_HINT_P_WIN_GRAVITY)
+    {
+        area_t geometry = c->geometry;
+        int16_t diff = new_width - old_width;
+        int16_t diff_x = 0, diff_y = 0;
+        xwindow_translate_for_gravity(c->size_hints.win_gravity,
+                                      diff, diff, diff, diff,
+                                      &diff_x, &diff_y);
+        geometry.x += diff_x;
+        geometry.y += diff_y;
+        /* force_notice = true -> inform client about changes */
+        client_resize_do(c, geometry, true, false);
+    }
+}
+
+static void
 client_update_properties(client_t *c)
 {
     /* get all hints */
@@ -447,6 +466,7 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, bool startup)
 
     client_t *c = client_new(globalconf.L);
     xcb_screen_t *s = globalconf.screen;
+    c->border_width_callback = (void (*) (void *, uint16_t, uint16_t)) border_width_callback;
 
     /* consider the window banned */
     c->isbanned = true;
