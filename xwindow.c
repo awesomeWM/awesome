@@ -417,7 +417,7 @@ void xwindow_translate_for_gravity(xcb_gravity_t gravity, int16_t change_width_b
         break;
     case XCB_GRAVITY_STATIC:
         x = -change_width_before;
-        x = -change_height_before;
+        y = -change_height_before;
         break;
     }
 
