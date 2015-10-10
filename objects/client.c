@@ -624,7 +624,7 @@ client_apply_size_hints(client_t *c, area_t geometry)
     /* Size hints are applied to the window without any decoration */
     client_remove_titlebar_geometry(c, &geometry);
 
-    if(c->size_hints.flags & XCB_ICCCM_SIZE_HINT_P_SIZE)
+    if(c->size_hints.flags & XCB_ICCCM_SIZE_HINT_BASE_SIZE)
     {
         basew = c->size_hints.base_width;
         baseh = c->size_hints.base_height;
@@ -643,7 +643,7 @@ client_apply_size_hints(client_t *c, area_t geometry)
         minw = c->size_hints.min_width;
         minh = c->size_hints.min_height;
     }
-    else if(c->size_hints.flags & XCB_ICCCM_SIZE_HINT_P_SIZE)
+    else if(c->size_hints.flags & XCB_ICCCM_SIZE_HINT_BASE_SIZE)
     {
         /* min size is substituted with base size if not specified */
         minw = c->size_hints.base_width;
