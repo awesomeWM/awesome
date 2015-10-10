@@ -1,4 +1,14 @@
 #!/bin/sh
+#
+# Test runner.
+#
+# This can also be used to start awesome from the build directory, e.g. for
+# git-bisect:
+# 1. Put the file into a subdirectory, which is ignored by git, e.g.
+#    `tmp/run.sh`.
+# 2. Run it from the source root (after `make`):
+#    env TEST_PAUSE_ON_ERRORS=1 sh tmp/run.sh
+# It should start Xephyr and launch awesome in it, using the default config.
 
 set -e
 
@@ -27,10 +37,10 @@ if [ "$CI" = true ]; then
     TEST_QUIT_ON_TIMEOUT=1
 else
     HEADLESS=0
-    TEST_PAUSE_ON_ERRORS=0
+    TEST_PAUSE_ON_ERRORS=${TEST_PAUSE_ON_ERRORS-0}
     TEST_QUIT_ON_TIMEOUT=1
 fi
-export TEST_PAUSE_ON_ERRORS
+export TEST_PAUSE_ON_ERRORS  # Used in tests/_runner.lua.
 
 XEPHYR=Xephyr
 XVFB=Xvfb
@@ -115,12 +125,16 @@ eval $(DISPLAY="$D" dbus-launch --sh-syntax --exit-with-session)
 # Not in Travis?
 if [ "$CI" != true ]; then
     # Prepare a config file pointing to a working theme
+    # Handle old filename of config files (useful for git-bisect).
+    if [ -f $root_dir/awesomerc.lua.in ]; then
+        SED_IN=.in
+    fi
     RC_FILE=$tmp_files/awesomerc.lua
     THEME_FILE=$tmp_files/theme.lua
-    sed -e "s:beautiful.init(\"@AWESOME_THEMES_PATH@/default/theme.lua\"):beautiful.init('$THEME_FILE'):" $root_dir/awesomerc.lua > $RC_FILE
+    sed -e "s:beautiful.init(\"@AWESOME_THEMES_PATH@/default/theme.lua\"):beautiful.init('$THEME_FILE'):" $root_dir/awesomerc.lua$SED_IN > $RC_FILE
     sed -e "s:@AWESOME_THEMES_PATH@/default/titlebar:$root_dir/build/themes/default/titlebar:"  \
         -e "s:@AWESOME_THEMES_PATH@:$root_dir/themes/:" \
-        -e "s:@AWESOME_ICON_PATH@:$root_dir/icons:" $root_dir/themes/default/theme.lua > $THEME_FILE
+        -e "s:@AWESOME_ICON_PATH@:$root_dir/icons:" $root_dir/themes/default/theme.lua$SED_IN > $THEME_FILE
 fi
 
 # Start awesome.
@@ -141,13 +155,13 @@ errors=0
 for f in $tests; do
     echo "== Running $f =="
 
+    start_awesome
+
     if [ ! -r $f ]; then
         echo "===> ERROR $f is not readable! <==="
         errors=$(expr $errors + 1)
         continue
     fi
-
-    start_awesome
 
     # Send the test file to awesome.
     cat $f | DISPLAY=$D "$AWESOME_CLIENT" 2>&1
@@ -159,12 +173,14 @@ for f in $tests; do
         echo "===> ERROR running $f! <==="
         grep --color -o --binary-files=text -E '^Error.*|.*assertion failed.*' $awesome_log
         errors=$(expr $errors + 1)
-
-        if [ "$TEST_PAUSE_ON_ERRORS" = 1 ]; then
-            echo "Pausing... press Enter to continue."
-            read enter
-        fi
     fi
 done
 
-[ $errors = 0 ] && exit 0 || exit 1
+if ! [ $errors = 0 ]; then
+    if [ "$TEST_PAUSE_ON_ERRORS" = 1 ]; then
+        echo "Pausing... press Enter to continue."
+        read enter
+    fi
+    exit 1
+fi
+exit 0
