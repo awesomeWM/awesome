@@ -52,6 +52,8 @@ OPCIONES
     Verifica la sintaxis del archivo de configuración.
 *-a*, *--no-argb*::
     No utilice colores ARGB.
+*-r*, *--replace*::
+    Replace an existing window manager
 
 ATAJOS DE RAtÓN POR OMISIÓN
 ---------------------------

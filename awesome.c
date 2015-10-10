@@ -260,7 +260,7 @@ acquire_WM_Sn(bool replace)
             xcb_get_selection_owner(globalconf.connection, globalconf.selection_atom),
             NULL);
     if (!replace && get_sel_reply->owner != XCB_NONE)
-        fatal("another window manager is already running (selection owned)");
+        fatal("another window manager is already running (selection owned; use --replace)");
 
     /* Acquire the selection */
     xcb_set_selection_owner(globalconf.connection, globalconf.selection_owner_window,
@@ -436,6 +436,7 @@ main(int argc, char **argv)
     xdgHandle xdg;
     bool no_argb = false;
     bool run_test = false;
+    bool replace_wm = false;
     xcb_query_tree_cookie_t tree_c;
     static struct option long_options[] =
     {
@@ -444,6 +445,7 @@ main(int argc, char **argv)
         { "config",  1, NULL, 'c' },
         { "check",   0, NULL, 'k' },
         { "no-argb", 0, NULL, 'a' },
+        { "replace", 0, NULL, 'r' },
         { NULL,      0, NULL, 0 }
     };
 
@@ -480,7 +482,7 @@ main(int argc, char **argv)
     luaA_init(&xdg);
 
     /* check args */
-    while((opt = getopt_long(argc, argv, "vhkc:a",
+    while((opt = getopt_long(argc, argv, "vhkc:ar",
                              long_options, NULL)) != -1)
         switch(opt)
         {
@@ -501,6 +503,9 @@ main(int argc, char **argv)
             break;
           case 'a':
             no_argb = true;
+            break;
+          case 'r':
+            replace_wm = true;
             break;
         }
 
@@ -578,7 +583,7 @@ main(int argc, char **argv)
     draw_test_cairo_xcb();
 
     /* Acquire the WM_Sn selection */
-    acquire_WM_Sn(true);
+    acquire_WM_Sn(replace_wm);
 
     /* initialize dbus */
     a_dbus_init();

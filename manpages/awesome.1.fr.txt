@@ -45,6 +45,8 @@ OPTIONS
     Vérifie la syntaxe du fichier de configuration.
 *-a*, *--no-argb*::
     N'utilise pas le codage ARGB.
+*-r*, *--replace*::
+    Replace an existing window manager
 
 ASSOCIATIONS AVEC LA SOURIS (PAR DÉFAUT)
 ----------------------------------------

@@ -35,6 +35,8 @@ OPTIONEN
     Überprüft die Konfigurationsdatei auf Syntaxfehler.
 *-a*, *--no-argb*::
     Verwende keine ARGB-Visuals
+*-r*, *--replace*::
+    Existierenden Fenstermanager ersetzen
 
 TASTENBELEGUNG FÜR MAUSZEIGER
 -----------------------------
