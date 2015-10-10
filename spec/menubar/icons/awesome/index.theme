@@ -1,0 +1,16 @@
+[Icon Theme]
+Name=awesome
+
+Directories=16x16/apps,32x32/apps,48x48/apps,64x64/apps,
+
+[16x16/apps]
+Size=16
+
+[32x32/apps]
+Size=32
+
+[48x48/apps]
+Size=48
+
+[64x64/apps]
+Size=64

@@ -9,6 +9,7 @@
 
 -- Grab environment
 local utils = require("menubar.utils")
+local icon_theme = require("menubar.icon_theme")
 local pairs = pairs
 local ipairs = ipairs
 local string = string
@@ -32,31 +33,31 @@ menu_gen.all_menu_dirs = { data_dir .. 'applications/', '/usr/share/applications
 -- the applications that fall only to this category will not be shown.
 menu_gen.all_categories = {
     multimedia = { app_type = "AudioVideo", name = "Multimedia",
-                     icon_name = "applications-multimedia.png", use = true },
+                     icon_name = "applications-multimedia", use = true },
     development = { app_type = "Development", name = "Development",
-                    icon_name = "applications-development.png", use = true },
+                    icon_name = "applications-development", use = true },
     education = { app_type = "Education", name = "Education",
-                  icon_name = "applications-science.png", use = true },
+                  icon_name = "applications-science", use = true },
     games = { app_type = "Game", name = "Games",
-              icon_name = "applications-games.png", use = true },
+              icon_name = "applications-games", use = true },
     graphics = { app_type = "Graphics", name = "Graphics",
-                 icon_name = "applications-graphics.png", use = true },
+                 icon_name = "applications-graphics", use = true },
     office = { app_type = "Office", name = "Office",
-               icon_name = "applications-office.png", use = true },
+               icon_name = "applications-office", use = true },
     internet = { app_type = "Network", name = "Internet",
-                icon_name = "applications-internet.png", use = true },
+                icon_name = "applications-internet", use = true },
     settings = { app_type = "Settings", name = "Settings",
-                 icon_name = "applications-utilities.png", use = true },
+                 icon_name = "applications-utilities", use = true },
     tools = { app_type = "System", name = "System Tools",
-               icon_name = "applications-system.png", use = true },
+               icon_name = "applications-system", use = true },
     utility = { app_type = "Utility", name = "Accessories",
-                icon_name = "applications-accessories.png", use = true }
+                icon_name = "applications-accessories", use = true }
 }
 
 --- Find icons for category entries.
 function menu_gen.lookup_category_icons()
     for _, v in pairs(menu_gen.all_categories) do
-        v.icon = utils.lookup_icon(v.icon_name)
+        v.icon = icon_theme():find_icon_path(v.icon_name)
     end
 end
 
