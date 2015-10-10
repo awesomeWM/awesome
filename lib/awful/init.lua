@@ -16,17 +16,22 @@ function timer(...)
 end
 
 --TODO: This is a hack for backwards-compatibility with 3.5, remove!
--- Set awful.util.spawn*
+-- Set awful.util.spawn* and awful.util.pread.
 local spawn = require("awful.spawn")
 
 util.spawn = function(...)
    util.deprecate("awful.spawn")
-   spawn.spawn(...)
+   return spawn.spawn(...)
 end
 
 util.spawn_with_shell = function(...)
    util.deprecate("awful.spawn.with_shell")
-   spawn.spawn_with_shell(...)
+   return spawn.with_shell(...)
+end
+
+util.pread = function(...)
+   util.deprecate("awful.spawn.pread")
+   return spawn.pread(...)
 end
 
 return
