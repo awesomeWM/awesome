@@ -549,7 +549,7 @@ function client.movetoscreen(c, s)
 
             if sel_is_focused then
                 sel:emit_signal("request::activate", "client.movetoscreen",
-                                {raise=false})
+                                {raise=true})
             end
         end
     end
