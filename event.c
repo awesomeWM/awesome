@@ -341,8 +341,7 @@ event_handle_configurerequest(xcb_configure_request_event_t *ev)
             uint16_t old_w = geometry.width;
             geometry.width = ev->width;
             /* The ConfigureRequest specifies the size of the client window, we want the frame */
-            geometry.width += c->titlebar[CLIENT_TITLEBAR_LEFT].size;
-            geometry.width += c->titlebar[CLIENT_TITLEBAR_RIGHT].size;
+            geometry.width += tb_left + tb_right;
             diff_w = geometry.width - old_w;
         }
         if(ev->value_mask & XCB_CONFIG_WINDOW_HEIGHT)
@@ -350,15 +349,14 @@ event_handle_configurerequest(xcb_configure_request_event_t *ev)
             uint16_t old_h = geometry.height;
             geometry.height = ev->height;
             /* The ConfigureRequest specifies the size of the client window, we want the frame */
-            geometry.height += c->titlebar[CLIENT_TITLEBAR_TOP].size;
-            geometry.height += c->titlebar[CLIENT_TITLEBAR_BOTTOM].size;
+            geometry.height += tb_top + tb_bottom;
             diff_h = geometry.height - old_h;
         }
         if(ev->value_mask & XCB_CONFIG_WINDOW_BORDER_WIDTH)
         {
             lua_State *L = globalconf_get_lua_State();
 
-            diff_border = ev->border_width - c->border_width;
+            diff_border = ev->border_width - bw;
             diff_h += diff_border;
             diff_w += diff_border;
 
