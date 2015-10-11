@@ -51,18 +51,18 @@ end
 local get_pragmatic_base_directories = function()
     local dirs = {}
 
-    local dir = GLib.get_home_dir() .. "/.icons"
+    local dir = GLib.build_filenamev({GLib.get_home_dir(), ".icons"})
     if is_readable_directory(dir) then
         table.insert(dirs, dir)
     end
 
-    dir = GLib.get_user_data_dir() .. "/icons"
+    dir = GLib.build_filenamev({GLib.get_user_data_dir(), "icons"})
     if is_readable_directory(dir) then
         table.insert(dirs, dir)
     end
 
     for _, v in ipairs(GLib.get_system_data_dirs()) do
-        dir = v .. "/icons"
+        dir = GLib.build_filenamev({v, "icons"})
         if is_readable_directory(dir) then
             table.insert(dirs, dir)
         end
@@ -70,7 +70,7 @@ local get_pragmatic_base_directories = function()
 
     local need_usr_share_pixmaps = true
     for _, v in ipairs(GLib.get_system_data_dirs()) do
-        dir = v .. "/pixmaps"
+        dir = GLib.build_filenamev({v, "pixmaps"})
         if is_readable_directory(dir) then
             table.insert(dirs, dir)
         end
