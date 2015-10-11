@@ -47,6 +47,7 @@
 
 #include <xcb/bigreq.h>
 #include <xcb/randr.h>
+#include <xcb/xcb_atom.h>
 #include <xcb/xcb_aux.h>
 #include <xcb/xcb_event.h>
 #include <xcb/xinerama.h>
@@ -222,6 +223,76 @@ scan(xcb_query_tree_cookie_t tree_c)
 }
 
 static void
+acquire_WM_Sn(bool replace)
+{
+    xcb_intern_atom_cookie_t atom_q;
+    xcb_intern_atom_reply_t *atom_r;
+    char *atom_name;
+    xcb_get_selection_owner_reply_t *get_sel_reply;
+    xcb_client_message_event_t ev;
+
+    /* Get the WM_Sn atom */
+    globalconf.selection_owner_window = xcb_generate_id(globalconf.connection);
+    xcb_create_window(globalconf.connection, globalconf.screen->root_depth,
+                      globalconf.selection_owner_window, globalconf.screen->root,
+                      -1, -1, 1, 1, 0,
+                      XCB_COPY_FROM_PARENT, globalconf.screen->root_visual,
+                      0, NULL);
+
+    atom_name = xcb_atom_name_by_screen("WM_S", globalconf.default_screen);
+    if(!atom_name)
+        fatal("error getting WM_Sn atom name");
+
+    atom_q = xcb_intern_atom_unchecked(globalconf.connection, false,
+                                               a_strlen(atom_name), atom_name);
+
+    p_delete(&atom_name);
+
+    atom_r = xcb_intern_atom_reply(globalconf.connection, atom_q, NULL);
+    if(!atom_r)
+        fatal("error getting WM_Sn atom");
+
+    globalconf.selection_atom = atom_r->atom;
+    p_delete(&atom_r);
+
+    /* Is the selection already owned? */
+    get_sel_reply = xcb_get_selection_owner_reply(globalconf.connection,
+            xcb_get_selection_owner(globalconf.connection, globalconf.selection_atom),
+            NULL);
+    if (!replace && get_sel_reply->owner != XCB_NONE)
+        fatal("another window manager is already running (selection owned; use --replace)");
+
+    /* Acquire the selection */
+    xcb_set_selection_owner(globalconf.connection, globalconf.selection_owner_window,
+                            globalconf.selection_atom, XCB_CURRENT_TIME);
+    if (get_sel_reply->owner != XCB_NONE)
+    {
+        /* Wait for the old owner to go away */
+        xcb_get_geometry_reply_t *geom_reply = NULL;
+        do {
+            p_delete(&geom_reply);
+            geom_reply = xcb_get_geometry_reply(globalconf.connection,
+                    xcb_get_geometry(globalconf.connection, get_sel_reply->owner),
+                    NULL);
+        } while (geom_reply != NULL);
+    }
+    p_delete(&get_sel_reply);
+
+    /* Announce that we are the new owner */
+    p_clear(&ev, 1);
+    ev.response_type = XCB_CLIENT_MESSAGE;
+    ev.window = globalconf.screen->root;
+    ev.format = 32;
+    ev.type = MANAGER;
+    ev.data.data32[0] = XCB_CURRENT_TIME;
+    ev.data.data32[1] = globalconf.selection_atom;
+    ev.data.data32[2] = globalconf.selection_owner_window;
+    ev.data.data32[3] = ev.data.data32[4] = 0;
+
+    xcb_send_event(globalconf.connection, false, globalconf.screen->root, 0xFFFFFF, (char *) &ev);
+}
+
+static void
 a_xcb_check(void)
 {
     xcb_generic_event_t *mouse = NULL, *event;
@@ -365,6 +436,7 @@ main(int argc, char **argv)
     xdgHandle xdg;
     bool no_argb = false;
     bool run_test = false;
+    bool replace_wm = false;
     xcb_query_tree_cookie_t tree_c;
     static struct option long_options[] =
     {
@@ -373,6 +445,7 @@ main(int argc, char **argv)
         { "config",  1, NULL, 'c' },
         { "check",   0, NULL, 'k' },
         { "no-argb", 0, NULL, 'a' },
+        { "replace", 0, NULL, 'r' },
         { NULL,      0, NULL, 0 }
     };
 
@@ -409,7 +482,7 @@ main(int argc, char **argv)
     luaA_init(&xdg);
 
     /* check args */
-    while((opt = getopt_long(argc, argv, "vhkc:a",
+    while((opt = getopt_long(argc, argv, "vhkc:ar",
                              long_options, NULL)) != -1)
         switch(opt)
         {
@@ -430,6 +503,9 @@ main(int argc, char **argv)
             break;
           case 'a':
             no_argb = true;
+            break;
+          case 'r':
+            replace_wm = true;
             break;
         }
 
@@ -506,6 +582,9 @@ main(int argc, char **argv)
     /* Did we get some usable data from the above X11 setup? */
     draw_test_cairo_xcb();
 
+    /* Acquire the WM_Sn selection */
+    acquire_WM_Sn(replace_wm);
+
     /* initialize dbus */
     a_dbus_init();
 
@@ -527,7 +606,7 @@ main(int argc, char **argv)
                                                       globalconf.screen->root,
                                                       XCB_CW_EVENT_MASK, &select_input_val);
         if (xcb_request_check(globalconf.connection, cookie))
-            fatal("another window manager is already running");
+            fatal("another window manager is already running (can't select SubstructureRedirect)");
     }
 
     /* Prefetch the maximum request length */

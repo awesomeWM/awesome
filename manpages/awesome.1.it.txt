@@ -52,6 +52,8 @@ OPZIONI
 	Verifica la sintassi del file di configurazione.
 *-a*, *--no-argb*::
 	Non usare visuali ARGB.
+*-r*, *--replace*::
+	Replace an existing window manager.
 
 DEFAULT SCORCIATOIE CON IL MOUSE
 --------------------------------

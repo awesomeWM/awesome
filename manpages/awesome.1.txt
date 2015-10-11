@@ -44,6 +44,8 @@ OPTIONS
     Check configuration file syntax.
 *-a*, *--no-argb*::
     Don't use ARGB visuals.
+*-r*, *--replace*::
+    Replace an existing window manager.
 
 DEFAULT MOUSE BINDINGS
 -----------------------

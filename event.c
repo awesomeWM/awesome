@@ -862,6 +862,16 @@ event_handle_reparentnotify(xcb_reparent_notify_event_t *ev)
     }
 }
 
+static void
+event_handle_selectionclear(xcb_selection_clear_event_t *ev)
+{
+    if(ev->selection == globalconf.selection_atom)
+    {
+        warn("Lost WM_Sn selection, exiting...");
+        g_main_loop_quit(globalconf.loop);
+    }
+}
+
 /** \brief awesome xerror function.
  * There's no way to check accesses to destroyed windows, thus those cases are
  * ignored (especially on UnmapNotify's).
@@ -921,6 +931,7 @@ void event_handle(xcb_generic_event_t *event)
         EVENT(XCB_PROPERTY_NOTIFY, property_handle_propertynotify);
         EVENT(XCB_REPARENT_NOTIFY, event_handle_reparentnotify);
         EVENT(XCB_UNMAP_NOTIFY, event_handle_unmapnotify);
+        EVENT(XCB_SELECTION_CLEAR, event_handle_selectionclear);
 #undef EVENT
     }
 
