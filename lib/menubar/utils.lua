@@ -115,11 +115,11 @@ local function get_icon_lookup_path()
 end
 
 --- Lookup an icon in different folders of the filesystem.
--- @param icon_file Short or full name of the icon.
--- @return full name of the icon.
-function utils.lookup_icon(icon_file)
+-- @tparam string icon_file Short or full name of the icon.
+-- @treturn string|boolean Full name of the icon, or false on failure.
+function utils.lookup_icon_uncached(icon_file)
     if not icon_file or icon_file == "" then
-        return default_icon
+        return false
     end
 
     if icon_file:sub(1, 1) == '/' and is_format_supported(icon_file) then
@@ -143,8 +143,19 @@ function utils.lookup_icon(icon_file)
                 end
             end
         end
-        return default_icon
+        return false
     end
+end
+
+local lookup_icon_cache = {}
+--- Lookup an icon in different folders of the filesystem (cached).
+-- @param icon_file Short or full name of the icon.
+-- @return full name of the icon.
+function utils.lookup_icon(icon)
+    if not lookup_icon_cache[icon] and lookup_icon_cache[icon] ~= false then
+        lookup_icon_cache[icon] = utils.lookup_icon_uncached(icon)
+    end
+    return lookup_icon_cache[icon] or default_icon
 end
 
 --- Parse a .desktop file.
