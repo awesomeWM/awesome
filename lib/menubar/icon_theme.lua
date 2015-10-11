@@ -244,7 +244,7 @@ icon_theme.find_icon_path = function(self, icon_name, icon_size)
     end
 
     if self.icon_theme_name ~= "hicolor" then
-        filaname = find_icon_path_helper(icon_theme("hicolor", self.base_directories), icon_name, icon_size)
+        filename = find_icon_path_helper(icon_theme("hicolor", self.base_directories), icon_name, icon_size)
         if filename then
             return filename
         end
