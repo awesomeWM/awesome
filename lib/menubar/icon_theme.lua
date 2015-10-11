@@ -106,7 +106,7 @@ local icon_theme = { mt = {} }
 -- @tparam string icon_theme_name Internal name of icon theme
 -- @tparam table base_directories Paths used for lookup
 -- @treturn table An instance of the class `icon_theme`
-icon_theme.new = function(cls, icon_theme_name, base_directories)
+icon_theme.new = function(icon_theme_name, base_directories)
     local icon_theme_name = icon_theme_name or beautiful.icon_theme or get_default_icon_theme_name()
     local base_directories = base_directories or get_pragmatic_base_directories()
 
@@ -116,7 +116,7 @@ icon_theme.new = function(cls, icon_theme_name, base_directories)
     self.extensions = { "png", "svg", "xpm" }
     self.index_theme = index_theme(self.icon_theme_name, self.base_directories)
 
-    return setmetatable(self, { __index = cls })
+    return setmetatable(self, { __index = icon_theme })
 end
 
 local directory_matches_size = function(self, subdirectory, icon_size)
@@ -196,8 +196,7 @@ local lookup_icon = function(self, icon_name, icon_size)
     return nil
 end
 
-local find_icon_path_helper
-find_icon_path_helper = function(self, icon_name, icon_size)
+local find_icon_path_helper = function(self, icon_name, icon_size)
     local filename = lookup_icon(self, icon_name, icon_size)
     if filename then
         return filename
@@ -253,8 +252,8 @@ icon_theme.find_icon_path = function(self, icon_name, icon_size)
     return lookup_fallback_icon(self, icon_name)
 end
 
-icon_theme.mt.__call = function(cls, icon_theme_name, base_directories)
-    return icon_theme.new(cls, icon_theme_name, base_directories)
+icon_theme.mt.__call = function(_, ...)
+    return icon_theme.new(...)
 end
 
 return setmetatable(icon_theme, icon_theme.mt)
