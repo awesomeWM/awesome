@@ -196,7 +196,8 @@ local lookup_icon = function(self, icon_name, icon_size)
     return nil
 end
 
-local find_icon_path_helper = function(self, icon_name, icon_size)
+local find_icon_path_helper  -- Gets called recursively.
+find_icon_path_helper = function(self, icon_name, icon_size)
     local filename = lookup_icon(self, icon_name, icon_size)
     if filename then
         return filename
