@@ -14,7 +14,6 @@
 local beautiful = require("beautiful")
 local awful = require("awful")
 local GLib = require("lgi").GLib
-local Gio = require("lgi").Gio
 local index_theme = require("menubar.index_theme")
 
 local ipairs = ipairs
@@ -38,32 +37,22 @@ local get_default_base_directories = function()
     return dirs
 end
 
-local is_readable_directory = function(path)
-    local gfile = Gio.File.new_for_path(path)
-    local gfileinfo = gfile:query_info("standard::type,access::can-read",
-                                       Gio.FileQueryInfoFlags.NONE)
-    if not gfileinfo then return false end -- practically ENOENT
-    local is_dir = (gfileinfo:get_file_type() == "DIRECTORY")
-    local is_readable = gfileinfo:get_attribute_boolean("access::can-read")
-    return is_dir and is_readable
-end
-
 local get_pragmatic_base_directories = function()
     local dirs = {}
 
     local dir = GLib.build_filenamev({GLib.get_home_dir(), ".icons"})
-    if is_readable_directory(dir) then
+    if awful.util.dir_readable(dir) then
         table.insert(dirs, dir)
     end
 
     dir = GLib.build_filenamev({GLib.get_user_data_dir(), "icons"})
-    if is_readable_directory(dir) then
+    if awful.util.dir_readable(dir) then
         table.insert(dirs, dir)
     end
 
     for _, v in ipairs(GLib.get_system_data_dirs()) do
         dir = GLib.build_filenamev({v, "icons"})
-        if is_readable_directory(dir) then
+        if awful.util.dir_readable(dir) then
             table.insert(dirs, dir)
         end
     end
@@ -71,7 +60,7 @@ local get_pragmatic_base_directories = function()
     local need_usr_share_pixmaps = true
     for _, v in ipairs(GLib.get_system_data_dirs()) do
         dir = GLib.build_filenamev({v, "pixmaps"})
-        if is_readable_directory(dir) then
+        if awful.util.dir_readable(dir) then
             table.insert(dirs, dir)
         end
         if dir == "/usr/share/pixmaps" then
@@ -80,7 +69,7 @@ local get_pragmatic_base_directories = function()
     end
 
     dir = "/usr/share/pixmaps"
-    if need_usr_share_pixmaps and is_readable_directory(dir) then
+    if need_usr_share_pixmaps and awful.util.dir_readable(dir) then
         table.insert(dirs, dir)
     end
 

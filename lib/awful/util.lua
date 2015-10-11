@@ -21,6 +21,7 @@ local rtable = table
 local pairs = pairs
 local string = string
 local lgi = require("lgi")
+local Gio = require("lgi").Gio
 local Pango = lgi.Pango
 local capi =
 {
@@ -200,6 +201,17 @@ function util.file_readable(filename)
         return true
     end
     return false
+end
+
+--- Check if a path exists, is readable and is a directory.
+-- @tparam string path The directory path.
+-- @treturn boolean True if dir exists and is readable.
+function util.dir_readable(path)
+    local gfile = Gio.File.new_for_path(path)
+    local gfileinfo = gfile:query_info("standard::type,access::can-read",
+                                       Gio.FileQueryInfoFlags.NONE)
+    return gfileinfo and gfileinfo:get_file_type() == "DIRECTORY" and
+        gfileinfo:get_attribute_boolean("access::can-read")
 end
 
 local function subset_mask_apply(mask, set)
