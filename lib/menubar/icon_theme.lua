@@ -168,16 +168,18 @@ local lookup_icon = function(self, icon_name, icon_size)
     local minimal_size = 0xffffffff -- Any large number will do.
     local closest_filename = nil
     for _, subdir in ipairs(self.index_theme:get_subdirectories()) do
-        for _, basedir in ipairs(self.base_directories) do
-            for _, ext in ipairs(self.extensions) do
-                local filename = string.format("%s/%s/%s/%s.%s",
-                                               basedir, self.icon_theme_name, subdir,
-                                               icon_name, ext)
-                if not checked_already[filename] then
-                    local dist = directory_size_distance(self, subdir, icon_size)
-                    if awful.util.file_readable(filename) and  dist < minimal_size then
-                        closest_filename = filename
-                        minimal_size = dist
+        local dist = directory_size_distance(self, subdir, icon_size)
+        if dist < minimal_size then
+            for _, basedir in ipairs(self.base_directories) do
+                for _, ext in ipairs(self.extensions) do
+                    local filename = string.format("%s/%s/%s/%s.%s",
+                                                   basedir, self.icon_theme_name, subdir,
+                                                   icon_name, ext)
+                    if not checked_already[filename] then
+                        if awful.util.file_readable(filename) then
+                            closest_filename = filename
+                            minimal_size = dist
+                        end
                     end
                 end
             end
