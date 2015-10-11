@@ -53,7 +53,7 @@ OPZIONI
 *-a*, *--no-argb*::
 	Non usare visuali ARGB.
 *-r*, *--replace*::
-	Replace an existing window manager.
+	Sostituisci un gestore di finestre esistente.
 
 DEFAULT SCORCIATOIE CON IL MOUSE
 --------------------------------

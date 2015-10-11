@@ -418,7 +418,8 @@ exit_help(int exit_code)
   -h, --help             show help\n\
   -v, --version          show version\n\
   -c, --config FILE      configuration file to use\n\
-  -k, --check            check configuration file syntax\n");
+  -k, --check            check configuration file syntax\n\
+  -r, --replace          replace an existing window manager\n");
     exit(exit_code);
 }
 
