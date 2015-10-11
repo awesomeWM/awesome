@@ -47,6 +47,7 @@ end
 function spawn.spawn(cmd, sn_rules, callback)
     if cmd and cmd ~= "" then
         local enable_sn = (sn_rules ~= false or callback)
+        enable_sn = not not enable_sn -- Force into a boolean
         if not sn_rules and callback then
             sn_rules = {callback=callback}
         elseif callback then
