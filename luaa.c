@@ -111,6 +111,8 @@ composite_manager_running(void)
 static int
 luaA_quit(lua_State *L)
 {
+    if (globalconf.loop == NULL)
+        globalconf.loop = g_main_loop_new(NULL, FALSE);
     g_main_loop_quit(globalconf.loop);
     return 0;
 }
