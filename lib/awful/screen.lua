@@ -60,6 +60,7 @@ function screen.focus(_screen)
     if not screen.mouse_per_screen[_screen] then
         -- This is the first time we enter this screen,
         -- keep relative mouse position on the new screen
+        pos = capi.mouse.coords()
         local relx = (pos.x - capi.screen[s].geometry.x) / capi.screen[s].geometry.width
         local rely = (pos.y - capi.screen[s].geometry.y) / capi.screen[s].geometry.height
 
