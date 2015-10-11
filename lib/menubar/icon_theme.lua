@@ -196,8 +196,7 @@ local lookup_icon = function(self, icon_name, icon_size)
     return nil
 end
 
-local find_icon_path_helper
-find_icon_path_helper = function(self, icon_name, icon_size)
+local find_icon_path_helper = function(self, icon_name, icon_size)
     local filename = lookup_icon(self, icon_name, icon_size)
     if filename then
         return filename
@@ -253,8 +252,8 @@ icon_theme.find_icon_path = function(self, icon_name, icon_size)
     return lookup_fallback_icon(self, icon_name)
 end
 
-icon_theme.mt.__call = function(cls, icon_theme_name, base_directories)
-    return icon_theme.new(cls, icon_theme_name, base_directories)
+icon_theme.mt.__call = function(...)
+    return icon_theme.new(...)
 end
 
 return setmetatable(icon_theme, icon_theme.mt)
