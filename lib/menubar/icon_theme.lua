@@ -147,6 +147,7 @@ local directory_size_distance = function(self, subdirectory, icon_size)
 end
 
 local lookup_icon = function(self, icon_name, icon_size)
+    local checked_already = {}
     for _, subdir in ipairs(self.index_theme:get_subdirectories()) do
         for _, basedir in ipairs(self.base_directories) do
             for _, ext in ipairs(self.extensions) do
@@ -156,6 +157,8 @@ local lookup_icon = function(self, icon_name, icon_size)
                                                    icon_name, ext)
                     if awful.util.file_readable(filename) then
                         return filename
+                    else
+                        checked_already[filename] = true
                     end
                 end
             end
@@ -170,19 +173,17 @@ local lookup_icon = function(self, icon_name, icon_size)
                 local filename = string.format("%s/%s/%s/%s.%s",
                                                basedir, self.icon_theme_name, subdir,
                                                icon_name, ext)
-                local dist = directory_size_distance(self, subdir, icon_size)
-                if awful.util.file_readable(filename) and  dist < minimal_size then
-                    closest_filename = filename
-                    minimal_size = dist
+                if not checked_already[filename] then
+                    local dist = directory_size_distance(self, subdir, icon_size)
+                    if awful.util.file_readable(filename) and  dist < minimal_size then
+                        closest_filename = filename
+                        minimal_size = dist
+                    end
                 end
             end
         end
     end
-    if closest_filename then
-        return closest_filename
-    end
-
-    return nil
+    return closest_filename
 end
 
 local find_icon_path_helper  -- Gets called recursively.
