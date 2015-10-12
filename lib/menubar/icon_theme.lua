@@ -113,7 +113,7 @@ local directory_matches_size = function(self, subdirectory, icon_size)
 
     if kind == "Fixed" then
         return icon_size == size
-    elseif kind == "Scaled" then
+    elseif kind == "Scalable" then
         return icon_size >= min_size and icon_size <= max_size
     elseif kind == "Threshold" then
         return icon_size >= size - threshold and icon_size <= size + threshold
@@ -127,7 +127,7 @@ local directory_size_distance = function(self, subdirectory, icon_size)
 
     if kind == "Fixed" then
         return math.abs(icon_size - size)
-    elseif kind == "Scaled" then
+    elseif kind == "Scalable" then
         if icon_size < min_size then
             return min_size - icon_size
         elseif icon_size > max_size then
