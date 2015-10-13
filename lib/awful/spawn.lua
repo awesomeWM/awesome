@@ -4,6 +4,7 @@
 -- @copyright 2008 Julien Danjou
 -- @copyright 2014 Emmanuel Lepage Vallee
 -- @release @AWESOME_VERSION@
+-- @module awful.spawn
 ---------------------------------------------------------------------------
 
 local capi =
@@ -30,24 +31,31 @@ function spawn.on_snid_callback(c)
     end
 end
 
-
 function spawn.on_snid_cancel(id)
     if spawn.snid_buffer[id] then
         spawn.snid_buffer[id] = nil
     end
 end
 
---- Spawn a program.
--- See awful.rules.execute for more details
--- @param cmd The command.
--- @param sn_rules a property table, false to disable startup-notification.
--- @param callback A callback function (if the client support startup notifications)
--- @return The forked PID or an error message
--- @return The startup notification UID, if the spawn was successful
+--- Spawn a program, and optionally apply properties and/or run a callback.
+--
+-- Applying properties or running a callback requires the program/client to
+-- support startup notifications.
+--
+-- See `awful.rules.execute` for more details about the format of `sn_rules`.
+--
+-- @tparam string|table cmd The command.
+-- @tparam[opt=true] table|boolean sn_rules A table of properties to be applied
+--   after startup; `false` to disable startup notifications.
+-- @tparam[opt] function callback A callback function to be run after startup.
+-- @treturn[1] integer The forked PID.
+-- @treturn[1] string The startup notification ID, if `sn` is not false, or a
+--   `callback` is provided.
+-- @treturn[2] string Error message.
 function spawn.spawn(cmd, sn_rules, callback)
     if cmd and cmd ~= "" then
         local enable_sn = (sn_rules ~= false or callback)
-        enable_sn = not not enable_sn -- Force into a boolean
+        enable_sn = not not enable_sn -- Force into a boolean.
         if not sn_rules and callback then
             sn_rules = {callback=callback}
         elseif callback then
@@ -162,9 +170,10 @@ function spawn.read_lines(input_stream, line_callback, done_callback, close)
     start_read()
 end
 
---- Read a program output and returns its output as a string.
--- @param cmd The command to run.
--- @return A string with the program output, or the error if one occured.
+--- Read a program output and return its output as a string.
+-- @tparam string cmd The command to run.
+-- @treturn string A string with the program output, or the error if one
+--   occured.
 function spawn.pread(cmd)
     if cmd and cmd ~= "" then
         local f, err = io.popen(cmd, 'r')
