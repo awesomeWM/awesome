@@ -1078,6 +1078,14 @@ capi.client.add_signal("marked")
 capi.client.add_signal("unmarked")
 
 capi.client.connect_signal("focus", client.focus.history.add)
+-- Add clients during startup to focus history.
+-- This used to happen through ewmh.activate, but that only handles visible
+-- clients now.
+capi.client.connect_signal("manage", function (c)
+    if awesome.startup then
+        client.focus.history.add(c)
+    end
+end)
 capi.client.connect_signal("unmanage", client.focus.history.delete)
 
 capi.client.connect_signal("property::urgent", client.urgent.add)
