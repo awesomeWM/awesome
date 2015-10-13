@@ -133,7 +133,7 @@ end
 --- Does a given rule entry match a client?
 -- @client c The client.
 -- @tab entry Rule entry (with keys `rule`, `rule_any`, `except` and/or
--- `except_any`).
+--   `except_any`).
 -- @treturn bool
 function rules.matches(c, entry)
     return (rules.match(c, entry.rule) or rules.match_any(c, entry.rule_any)) and
@@ -143,7 +143,7 @@ end
 --- Get list of matching rules for a client.
 -- @client c The client.
 -- @tab _rules The rules to check. List with "rule", "rule_any", "except" and
---             "except_any" keys.
+--   "except_any" keys.
 -- @treturn table The list of matched rules.
 function rules.matching_rules(c, _rules)
     local result = {}

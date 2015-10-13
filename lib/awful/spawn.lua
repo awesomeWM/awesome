@@ -84,11 +84,11 @@ end
 --- Spawn a program and asynchronously and capture its output line by line.
 -- @tparam string|table cmd The command.
 -- @tparam[opt] function stdout_callback Function that is called with each line of
---              output on stdout, e.g. `stdout_callback(line)`.
+--   output on stdout, e.g. `stdout_callback(line)`.
 -- @tparam[opt] function stderr_callback Function that is called with each line of
---              output on stderr, e.g. `stderr_callback(line)`.
+--   output on stderr, e.g. `stderr_callback(line)`.
 -- @tparam[opt] function done_callback Function to call when no more output is
---              produced.
+--   produced.
 -- @treturn[1] Integer the PID of the forked process.
 -- @treturn[2] string Error message.
 function spawn.with_line_callback(cmd, stdout_callback, stderr_callback, done_callback)
@@ -122,9 +122,9 @@ end
 --- Read lines from a Gio input stream
 -- @tparam Gio.InputStream input_stream The input stream to read from.
 -- @tparam function line_callback Function that is called with each line
---         read, e.g. `line_callback(line_from_stream)`.
+--   read, e.g. `line_callback(line_from_stream)`.
 -- @tparam[opt] function done_callback Function that is called when the
---              operation finishes (e.g. due to end of file).
+--   operation finishes (e.g. due to end of file).
 -- @tparam[opt=false] boolean close Should the stream be closed after end-of-file?
 function spawn.read_lines(input_stream, line_callback, done_callback, close)
     local stream = Gio.DataInputStream.new(input_stream)

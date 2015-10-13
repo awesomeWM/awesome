@@ -189,7 +189,7 @@ end
 --
 -- @param screen Screen to use
 -- @param position top_right | top_left | bottom_right | bottom_left
---             | top_middle | bottom_middle
+--   | top_middle | bottom_middle
 -- @param idx Index of the notification
 -- @param[opt] width Popup width.
 -- @param height Popup height

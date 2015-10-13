@@ -71,7 +71,7 @@ end
 
 --- Set an imagebox' image
 -- @param image Either a string or a cairo image surface. A string is
---              interpreted as the path to a png image file.
+--   interpreted as the path to a png image file.
 function imagebox:set_image(image)
     local image = image
 
@@ -110,7 +110,7 @@ end
 
 --- Should the image be resized to fit into the available space?
 -- @param allowed If false, the image will be clipped, else it will be resized
---                to fit into the available space.
+--   to fit into the available space.
 function imagebox:set_resize(allowed)
     self.resize_forbidden = not allowed
     self:emit_signal("widget::redraw_needed")
@@ -120,7 +120,7 @@ end
 --- Returns a new imagebox
 -- @param image the image to display, may be nil
 -- @param resize_allowed If false, the image will be clipped, else it will be resized
---                       to fit into the available space.
+--   to fit into the available space.
 local function new(image, resize_allowed)
     local ret = base.make_widget()
 

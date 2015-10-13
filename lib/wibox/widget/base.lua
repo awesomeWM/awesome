@@ -187,12 +187,12 @@ end
 -- `:layout()` callback.
 -- @param widget The widget that should be placed.
 -- @param mat A matrix transforming from the parent widget's coordinate
---        system. For example, use matrix.create_translate(1, 2) to draw a
---        widget at position (1, 2) relative to the parent widget.
+--   system. For example, use matrix.create_translate(1, 2) to draw a
+--   widget at position (1, 2) relative to the parent widget.
 -- @param width The width of the widget in its own coordinate system. That is,
---        after applying the transformation matrix.
+--   after applying the transformation matrix.
 -- @param height The height of the widget in its own coordinate system. That is,
---        after applying the transformation matrix.
+--   after applying the transformation matrix.
 -- @return An opaque object that can be returned from :layout()
 function base.place_widget_via_matrix(widget, mat, width, height)
     return {
@@ -209,9 +209,9 @@ end
 -- @param x The x coordinate for the widget.
 -- @param y The y coordinate for the widget.
 -- @param width The width of the widget in its own coordinate system. That is,
---        after applying the transformation matrix.
+--   after applying the transformation matrix.
 -- @param height The height of the widget in its own coordinate system. That is,
---        after applying the transformation matrix.
+--   after applying the transformation matrix.
 -- @return An opaque object that can be returned from :layout()
 function base.place_widget_at(widget, x, y, width, height)
     return base.place_widget_via_matrix(widget, matrix.create_translate(x, y), width, height)

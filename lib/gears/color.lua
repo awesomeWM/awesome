@@ -223,7 +223,7 @@ end
 -- changes could thus have unintended side effects. Use @{create_pattern_uncached}
 -- if you need to modify the returned pattern.
 -- @see create_pattern_uncached, create_solid_pattern, create_png_pattern,
---      create_linear_pattern, create_radial_pattern
+--   create_linear_pattern, create_radial_pattern
 -- @param col The string describing the pattern.
 -- @return a cairo pattern object
 function color.create_pattern(col)

@@ -55,7 +55,7 @@ end
 -- @param x X coordinate of the point
 -- @param y Y coordinate of the point
 -- @return A sorted table with all widgets that contain the given point. The
---         widgets are sorted by relevance.
+--   widgets are sorted by relevance.
 function wibox:find_widgets(x, y)
     return self._drawable:find_widgets(x, y)
 end
