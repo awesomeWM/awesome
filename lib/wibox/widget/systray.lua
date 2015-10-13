@@ -24,6 +24,10 @@ function systray:draw(context, cr, width, height)
     local bg = beautiful.bg_systray or beautiful.bg_normal or "#000000"
     local spacing = beautiful.systray_icon_spacing or 0
 
+    if context and not context.wibox then
+        error("The systray widget can only be placed inside a wibox.")
+    end
+
     -- Figure out if the cairo context is rotated
     local dir_x, dir_y = cr:user_to_device_distance(1, 0)
     local is_rotated = abs(dir_x) < abs(dir_y)
