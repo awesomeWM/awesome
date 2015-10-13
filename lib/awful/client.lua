@@ -181,7 +181,7 @@ end
 function client.focus.history.get(screen, idx, filter)
     -- When this counter is equal to idx, we return the client
     local counter = 0
-    local vc = client.visible(screen)
+    local vc = client.visible(screen, true)
     for k, c in ipairs(client.data.focus) do
         if c.screen == screen then
             if not filter or filter(c) then
