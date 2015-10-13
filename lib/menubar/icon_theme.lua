@@ -91,6 +91,8 @@ end
 
 local icon_theme = { mt = {} }
 
+local index_theme_cache = {}
+
 --- Class constructor of `icon_theme`
 -- @tparam string icon_theme_name Internal name of icon theme
 -- @tparam table base_directories Paths used for lookup
@@ -103,7 +105,18 @@ icon_theme.new = function(icon_theme_name, base_directories)
     self.icon_theme_name = icon_theme_name
     self.base_directories = base_directories
     self.extensions = { "png", "svg", "xpm" }
-    self.index_theme = index_theme(self.icon_theme_name, self.base_directories)
+
+    -- Instantiate index_theme (cached).
+    if not index_theme_cache[self.icon_theme_name] then
+        index_theme_cache[self.icon_theme_name] = {}
+    end
+    local cache_key = table.concat(self.base_directories, ':')
+    if not index_theme_cache[self.icon_theme_name][cache_key] then
+        index_theme_cache[self.icon_theme_name][cache_key] = index_theme(
+            self.icon_theme_name,
+            self.base_directories)
+    end
+    self.index_theme = index_theme_cache[self.icon_theme_name][cache_key]
 
     return setmetatable(self, { __index = icon_theme })
 end
