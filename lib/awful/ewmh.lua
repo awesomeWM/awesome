@@ -155,15 +155,14 @@ end
 
 --- Activate a window.
 --
--- This sets the focus during startup (which adds it to
--- `awful.client.focus.history`), and if the client is visible.
+-- This sets the focus only if the client is visible.
 --
 -- @client c A client to use
 -- @tparam string context The context where this signal was used.
 -- @tparam[opt] table hints A table with additional hints:
 -- @tparam[opt=false] boolean hints.raise should the client be raised?
 function ewmh.activate(c, context, hints)
-    if awesome.startup or c:isvisible() then
+    if c:isvisible() then
         client.focus = c
     end
     if hints and hints.raise then
