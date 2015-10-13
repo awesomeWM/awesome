@@ -153,14 +153,17 @@ local function geometry_change(window)
     geometry_change_lock = false
 end
 
---- Activate a window
+--- Activate a window.
+--
+-- This sets the focus during startup (which adds it to
+-- `awful.client.focus.history`), and if the client is visible.
 --
 -- @client c A client to use
 -- @tparam string context The context where this signal was used.
 -- @tparam[opt] table hints A table with additional hints:
 -- @tparam[opt=false] boolean hints.raise should the client be raised?
 function ewmh.activate(c, context, hints)
-    if c:isvisible() then
+    if awesome.startup or c:isvisible() then
         client.focus = c
     end
     if hints and hints.raise then
