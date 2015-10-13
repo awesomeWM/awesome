@@ -153,7 +153,9 @@ local function geometry_change(window)
     geometry_change_lock = false
 end
 
---- Activate a window
+--- Activate a window.
+--
+-- This sets the focus only if the client is visible.
 --
 -- @client c A client to use
 -- @tparam string context The context where this signal was used.
