@@ -224,7 +224,7 @@ end
 --- Get visible clients from a screen.
 --
 -- @tparam[opt] integer screen The screen number, or nil for all screens.
--- @tparam[opt=false] boolean stacked Use stacking order?
+-- @tparam[opt=false] boolean stacked Use stacking order? (top to bottom)
 -- @treturn table A table with all visible clients.
 function client.visible(screen, stacked)
     local cls = capi.client.get(screen, stacked)
@@ -240,7 +240,7 @@ end
 --- Get visible and tiled clients
 --
 -- @tparam integer screen The screen number, or nil for all screens.
--- @tparam[opt=false] boolean stacked Use stacking order?
+-- @tparam[opt=false] boolean stacked Use stacking order? (top to bottom)
 -- @treturn table A table with all visible and tiled clients.
 function client.tiled(screen, stacked)
     local clients = client.visible(screen, stacked)
@@ -262,7 +262,7 @@ end
 --
 -- @tparam int i The index.  Use 1 to get the next, -1 to get the previous.
 -- @client[opt] c The client.
--- @tparam[opt=false] boolean stacked Use stacking order?
+-- @tparam[opt=false] boolean stacked Use stacking order? (top to bottom)
 -- @return A client, or nil if no client is available.
 --
 -- @usage -- focus the next window in the index
@@ -298,7 +298,7 @@ end
 -- @tparam string dir The direction, can be either
 --   `"up"`, `"down"`, `"left"` or `"right"`.
 -- @client[opt] c The client.
--- @tparam[opt=false] boolean stacked Use stacking order?
+-- @tparam[opt=false] boolean stacked Use stacking order? (top to bottom)
 function client.focus.bydirection(dir, c, stacked)
     local sel = c or capi.client.focus
     if sel then
@@ -322,7 +322,7 @@ end
 --
 -- @param dir The direction, can be either "up", "down", "left" or "right".
 -- @client[opt] c The client.
--- @tparam[opt=false] boolean stacked Use stacking order?
+-- @tparam[opt=false] boolean stacked Use stacking order? (top to bottom)
 function client.focus.global_bydirection(dir, c, stacked)
     local sel = c or capi.client.focus
     local scr = sel and sel.screen or screen.focused()
@@ -365,7 +365,7 @@ end
 --- Swap a client with another client in the given direction.
 -- @tparam string dir The direction, can be either "up", "down", "left" or "right".
 -- @client[opt=focused] c The client.
--- @tparam[opt=false] boolean stacked Use stacking order?
+-- @tparam[opt=false] boolean stacked Use stacking order? (top to bottom)
 function client.swap.bydirection(dir, c, stacked)
     local sel = c or capi.client.focus
     if sel then
@@ -430,7 +430,7 @@ end
 --
 -- @param clockwise True to cycle clients clockwise.
 -- @param[opt] s The screen where to cycle clients.
--- @tparam[opt=false] boolean stacked Use stacking order?
+-- @tparam[opt=false] boolean stacked Use stacking order? (top to bottom)
 function client.cycle(clockwise, s, stacked)
     s = s or screen.focused()
     local cls = client.visible(s, stacked)
