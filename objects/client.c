@@ -128,6 +128,7 @@
 
 static area_t titlebar_get_area(client_t *c, client_titlebar_t bar);
 static drawable_t *titlebar_get_drawable(lua_State *L, client_t *c, int cl_idx, client_titlebar_t bar);
+static void client_resize_do(client_t *c, area_t geometry, bool force_notice);
 
 /** Collect a client.
  * \param L The Lua VM state.
@@ -467,6 +468,24 @@ client_focus_refresh(void)
 }
 
 static void
+border_width_callback(client_t *c, uint16_t old_width, uint16_t new_width)
+{
+    if(c->size_hints.flags & XCB_ICCCM_SIZE_HINT_P_WIN_GRAVITY)
+    {
+        area_t geometry = c->geometry;
+        int16_t diff = new_width - old_width;
+        int16_t diff_x = 0, diff_y = 0;
+        xwindow_translate_for_gravity(c->size_hints.win_gravity,
+                                      diff, diff, diff, diff,
+                                      &diff_x, &diff_y);
+        geometry.x += diff_x;
+        geometry.y += diff_y;
+        /* force_notice = true -> inform client about changes */
+        client_resize_do(c, geometry, true);
+    }
+}
+
+static void
 client_update_properties(lua_State *L, int cidx, client_t *c)
 {
     /* get all hints */
@@ -537,6 +556,7 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, xcb_get_window_at
 
     client_t *c = client_new(L);
     xcb_screen_t *s = globalconf.screen;
+    c->border_width_callback = (void (*) (void *, uint16_t, uint16_t)) border_width_callback;
 
     /* consider the window banned */
     c->isbanned = true;
@@ -1847,25 +1867,41 @@ titlebar_resize(lua_State *L, int cidx, client_t *c, client_titlebar_t bar, int 
      * titlebars should keep its current size!) */
     area_t geometry = c->geometry;
     int change = size - c->titlebar[bar].size;
+    int16_t diff_top = 0, diff_bottom = 0, diff_right = 0, diff_left = 0;
     switch (bar) {
     case CLIENT_TITLEBAR_TOP:
         geometry.height += change;
+        diff_top = change;
         property_name = "property::titlebar_top";
         break;
     case CLIENT_TITLEBAR_BOTTOM:
         geometry.height += change;
+        diff_bottom = change;
         property_name = "property::titlebar_bottom";
         break;
     case CLIENT_TITLEBAR_RIGHT:
         geometry.width += change;
+        diff_right = change;
         property_name = "property::titlebar_right";
         break;
     case CLIENT_TITLEBAR_LEFT:
         geometry.width += change;
+        diff_left = change;
         property_name = "property::titlebar_left";
         break;
     default:
         fatal("Unknown titlebar kind %d\n", (int) bar);
+    }
+
+    if(c->size_hints.flags & XCB_ICCCM_SIZE_HINT_P_WIN_GRAVITY)
+    {
+        int16_t diff_x = 0, diff_y = 0;
+        xwindow_translate_for_gravity(c->size_hints.win_gravity,
+                                      diff_left, diff_top,
+                                      diff_right, diff_bottom,
+                                      &diff_x, &diff_y);
+        geometry.x += diff_x;
+        geometry.y += diff_y;
     }
 
     c->titlebar[bar].size = size;

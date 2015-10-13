@@ -311,29 +311,37 @@ event_handle_configurerequest(xcb_configure_request_event_t *ev)
     if((c = client_getbywin(ev->window)))
     {
         area_t geometry = c->geometry;
+        uint16_t bw = c->border_width;
+        uint16_t tb_left = c->titlebar[CLIENT_TITLEBAR_LEFT].size;
+        uint16_t tb_right = c->titlebar[CLIENT_TITLEBAR_RIGHT].size;
+        uint16_t tb_top = c->titlebar[CLIENT_TITLEBAR_TOP].size;
+        uint16_t tb_bottom = c->titlebar[CLIENT_TITLEBAR_BOTTOM].size;
+        uint16_t deco_left = bw + tb_left;
+        uint16_t deco_right = bw + tb_right;
+        uint16_t deco_top = bw + tb_top;
+        uint16_t deco_bottom = bw + tb_bottom;
         int16_t diff_w = 0, diff_h = 0, diff_border = 0;
 
         if(ev->value_mask & XCB_CONFIG_WINDOW_X)
         {
+            int16_t diff = 0;
             geometry.x = ev->x;
-            /* The ConfigureRequest specifies the position of the outer corner of the client window, we want the frame */
-            geometry.x -= c->titlebar[CLIENT_TITLEBAR_LEFT].size;
-            geometry.x -= c->border_width;
+            xwindow_translate_for_gravity(c->size_hints.win_gravity, deco_left, 0, deco_right, 0, &diff, NULL);
+            geometry.x += diff;
         }
         if(ev->value_mask & XCB_CONFIG_WINDOW_Y)
         {
+            int16_t diff = 0;
             geometry.y = ev->y;
-            /* The ConfigureRequest specifies the position of the outer corner of the client window, we want the frame */
-            geometry.y -= c->titlebar[CLIENT_TITLEBAR_TOP].size;
-            geometry.y -= c->border_width;
+            xwindow_translate_for_gravity(c->size_hints.win_gravity, 0, deco_top, 0, deco_bottom, NULL, &diff);
+            geometry.y += diff;
         }
         if(ev->value_mask & XCB_CONFIG_WINDOW_WIDTH)
         {
             uint16_t old_w = geometry.width;
             geometry.width = ev->width;
             /* The ConfigureRequest specifies the size of the client window, we want the frame */
-            geometry.width += c->titlebar[CLIENT_TITLEBAR_LEFT].size;
-            geometry.width += c->titlebar[CLIENT_TITLEBAR_RIGHT].size;
+            geometry.width += tb_left + tb_right;
             diff_w = geometry.width - old_w;
         }
         if(ev->value_mask & XCB_CONFIG_WINDOW_HEIGHT)
@@ -341,15 +349,14 @@ event_handle_configurerequest(xcb_configure_request_event_t *ev)
             uint16_t old_h = geometry.height;
             geometry.height = ev->height;
             /* The ConfigureRequest specifies the size of the client window, we want the frame */
-            geometry.height += c->titlebar[CLIENT_TITLEBAR_TOP].size;
-            geometry.height += c->titlebar[CLIENT_TITLEBAR_BOTTOM].size;
+            geometry.height += tb_top + tb_bottom;
             diff_h = geometry.height - old_h;
         }
         if(ev->value_mask & XCB_CONFIG_WINDOW_BORDER_WIDTH)
         {
             lua_State *L = globalconf_get_lua_State();
 
-            diff_border = ev->border_width - c->border_width;
+            diff_border = ev->border_width - bw;
             diff_h += diff_border;
             diff_w += diff_border;
 
