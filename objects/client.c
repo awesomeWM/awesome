@@ -2926,7 +2926,7 @@ client_class_setup(lua_State *L)
     signal_add(&client_class.signals, "property::y");
     /** When a client should get activated (focused and/or raised).
      *
-     * Default implementation: `ewmh.activate`.
+     * Default implementation: `awful.ewmh.activate`.
      * @signal request::activate
      * @tparam string context The context where this signal was used.
      * @tparam[opt] table hints A table with additional hints:
