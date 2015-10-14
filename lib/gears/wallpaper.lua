@@ -8,6 +8,7 @@
 local cairo = require("lgi").cairo
 local color = require("gears.color")
 local surface = require("gears.surface")
+local timer = require("gears.timer")
 
 local wallpaper = { mt = {} }
 
@@ -27,29 +28,56 @@ do
     end
 end
 
---- Prepare the needed state for setting a wallpaper
+-- A cairo surface that we still want to set as the wallpaper
+local pending_wallpaper = nil
+
+--- Prepare the needed state for setting a wallpaper.
+-- This function returns a cairo context through which a wallpaper can be drawn.
+-- The context is only valid for a short time and should not be saved in a
+-- global variable.
 -- @param s The screen to set the wallpaper on or nil for all screens
--- @return The available geometry (table with entries width and height), a
---   that should be used for setting the wallpaper and a cairo context for
---   drawing to this surface
-local function prepare_wallpaper(s)
+-- @return[1] The available geometry (table with entries width and height)
+-- @return[1] A cairo context that the wallpaper should be drawn to
+function wallpaper.prepare_context(s)
     local geom = s and screen[s].geometry or root_geom
-    local img = surface(root.wallpaper())
+    local cr
 
-    if not img then
-        -- No wallpaper yet, create an image surface for just the part we need
-        img = cairo.ImageSurface(cairo.Format.RGB24, geom.width, geom.height)
-        img:set_device_offset(-geom.x, -geom.y)
+    if not pending_wallpaper then
+        -- Prepare a pending wallpaper
+        local wp = surface(root.wallpaper())
+
+        if not wp then
+            -- No wallpaper yet
+            wp = cairo.ImageSurface(cairo.Format.RGB24, 0, 0)
+        end
+
+        pending_wallpaper = wp:create_similar(cairo.Content.COLOR, root_geom.width, root_geom.height)
+
+        -- Copy the old wallpaper to the new one
+        cr = cairo.Context(pending_wallpaper)
+        cr:save()
+        cr.operator = cairo.Operator.SOURCE
+        cr:set_source_surface(wp, 0, 0)
+        cr:paint()
+        cr:restore()
+
+        -- Set the wallpaper (delayed)
+        timer.delayed_call(function()
+            local wp = pending_wallpaper
+            pending_wallpaper = nil
+            wallpaper.set(wp)
+        end)
+    else
+        -- Draw to the already-pending wallpaper
+        cr = cairo.Context(pending_wallpaper)
     end
-
-    local cr = cairo.Context(img)
 
     -- Only draw to the selected area
     cr:translate(geom.x, geom.y)
     cr:rectangle(0, 0, geom.width, geom.height)
     cr:clip()
 
-    return geom, img, cr
+    return geom, cr
 end
 
 --- Set the current wallpaper.
@@ -75,7 +103,7 @@ end
 -- @param background The background color that should be used. Gets handled via
 --   gears.color. The default is black.
 function wallpaper.centered(surf, s, background)
-    local geom, img, cr = prepare_wallpaper(s)
+    local geom, cr = wallpaper.prepare_context(s)
     local surf = surface(surf)
     local background = color(background)
 
@@ -91,8 +119,6 @@ function wallpaper.centered(surf, s, background)
     cr:clip()
     cr:set_source_surface(surf, 0, 0)
     cr:paint()
-
-    wallpaper.set(img)
 end
 
 --- Set a tiled wallpaper.
@@ -101,7 +127,7 @@ end
 --   all screens are set.
 -- @param offset This can be set to a table with entries x and y.
 function wallpaper.tiled(surf, s, offset)
-    local geom, img, cr = prepare_wallpaper(s)
+    local geom, cr = wallpaper.prepare_context(s)
 
     if offset then
         cr:translate(offset.x, offset.y)
@@ -112,8 +138,6 @@ function wallpaper.tiled(surf, s, offset)
     cr.source = pattern
     cr.operator = cairo.Operator.SOURCE
     cr:paint()
-
-    wallpaper.set(img)
 end
 
 --- Set a maximized wallpaper.
@@ -124,7 +148,7 @@ end
 --   The default is to honor the aspect ratio.
 -- @param offset This can be set to a table with entries x and y.
 function wallpaper.maximized(surf, s, ignore_aspect, offset)
-    local geom, img, cr = prepare_wallpaper(s)
+    local geom, cr = wallpaper.prepare_context(s)
     local surf = surface(surf)
     local w, h = surface.get_size(surf)
     local aspect_w = geom.width / w
@@ -147,8 +171,6 @@ function wallpaper.maximized(surf, s, ignore_aspect, offset)
     cr:set_source_surface(surf, 0, 0)
     cr.operator = cairo.Operator.SOURCE
     cr:paint()
-
-    wallpaper.set(img)
 end
 
 --- Set a fitting wallpaper.
@@ -158,7 +180,7 @@ end
 -- @param background The background color that should be used. Gets handled via
 --   gears.color. The default is black.
 function wallpaper.fit(surf, s, background)
-    local geom, img, cr = prepare_wallpaper(s)
+    local geom, cr = wallpaper.prepare_context(s)
     local surf = surface(surf)
     local background = color(background)
 
@@ -179,8 +201,6 @@ function wallpaper.fit(surf, s, background)
     cr:scale(scale, scale)
     cr:set_source_surface(surf, 0, 0)
     cr:paint()
-
-    wallpaper.set(img)
 end
 
 return wallpaper
