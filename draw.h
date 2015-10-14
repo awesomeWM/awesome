@@ -42,6 +42,8 @@ struct area_t
 #define AREA_TOP(a)     ((a).y)
 #define AREA_RIGHT(a)   ((a).x + (a).width)
 #define AREA_BOTTOM(a)    ((a).y + (a).height)
+#define AREA_EQUAL(a, b) ((a).x == (b).x && (a).y == (b).y && \
+        (a).width == (b).width && (a).height == (b).height)
 
 bool draw_iso2utf8(const char *, size_t, char **, ssize_t *);
 

@@ -864,7 +864,8 @@ client_resize_do(client_t *c, area_t geometry, bool force_notice)
     client_restore_enterleave_events();
 
     luaA_object_push(L, c);
-    luaA_object_emit_signal(L, -1, "property::geometry", 0);
+    if (!AREA_EQUAL(old_geometry, geometry))
+        luaA_object_emit_signal(L, -1, "property::geometry", 0);
     if (old_geometry.x != geometry.x)
         luaA_object_emit_signal(L, -1, "property::x", 0);
     if (old_geometry.y != geometry.y)

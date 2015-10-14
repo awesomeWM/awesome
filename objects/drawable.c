@@ -104,7 +104,8 @@ drawable_set_geometry(lua_State *L, int didx, area_t geom)
         luaA_object_emit_signal(L, didx, "property::surface", 0);
     }
 
-    luaA_object_emit_signal(L, didx, "property::geometry", 0);
+    if (!AREA_EQUAL(old, geom))
+        luaA_object_emit_signal(L, didx, "property::geometry", 0);
     if (old.x != geom.x)
         luaA_object_emit_signal(L, didx, "property::x", 0);
     if (old.y != geom.y)
