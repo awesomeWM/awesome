@@ -91,8 +91,8 @@
  * @field transient_for The client the window is transient for.
  * @field group_window Window identification unique to a group of windows.
  * @field leader_window Identification unique to windows spawned by the same command.
- * @field size_hints A table with size hints of the client: user_position,
- *   user_size, program_position, program_size, etc.
+ * @field size_hints A table with size hints of the client: `user_position`,
+ *   `user_size`, `program_position`, `program_size`, etc.
  * @field sticky Set the client sticky, i.e. available on all tags.
  * @field modal Indicate if the client is modal.
  * @field focusable True if the client can receive the input focus.
@@ -458,7 +458,7 @@ client_focus_refresh(void)
             xwindow_takefocus(c->window);
     }
 
-    /* If nothing has the focused or the currently focused client doesn't want
+    /* If nothing has the focus or the currently focused client does not want
      * us to focus it, this sets the focus to the root window. This makes sure
      * the previously focused client actually gets unfocused. Alternatively, the
      * new client gets the input focus.
@@ -1935,8 +1935,8 @@ HANDLE_TITLEBAR(left, CLIENT_TITLEBAR_LEFT)
 
 /** Return or set client geometry.
  *
- * @param arg1 A table with new coordinates, or none.
- * @return A table with client coordinates.
+ * @tparam table|nil geo A table with new coordinates, or nil.
+ * @treturn table A table with client geometry and coordinates.
  * @function geometry
  */
 static int
@@ -2924,8 +2924,13 @@ client_class_setup(lua_State *L)
      * @signal property::y
      */
     signal_add(&client_class.signals, "property::y");
-    /**
+    /** When a client should get activated (focused and/or raised).
+     *
+     * Default implementation: `awful.ewmh.activate`.
      * @signal request::activate
+     * @tparam string context The context where this signal was used.
+     * @tparam[opt] table hints A table with additional hints:
+     * @tparam[opt=false] boolean hints.raise should the client be raised?
      */
     signal_add(&client_class.signals, "request::activate");
     /**

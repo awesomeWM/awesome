@@ -144,7 +144,7 @@ luaA_drawable_refresh(lua_State *L)
 
 /** Get drawable geometry. The geometry consists of x, y, width and height.
  *
- * @return A table with drawable coordinates and geometry.
+ * @treturn table A table with drawable coordinates and geometry.
  * @function geometry
  */
 static int
