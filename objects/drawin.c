@@ -188,6 +188,7 @@ drawin_moveresize(lua_State *L, int udx, area_t geometry)
     w->geometry_dirty = true;
     drawin_update_drawing(L, udx);
 
+    luaA_object_emit_signal(L, udx, "property::geometry", 0);
     if (old_geometry.x != w->geometry.x)
         luaA_object_emit_signal(L, udx, "property::x", 0);
     if (old_geometry.y != w->geometry.y)
@@ -690,6 +691,10 @@ drawin_class_setup(lua_State *L)
                             (lua_class_propfunc_t) luaA_drawin_get_shape_clip,
                             (lua_class_propfunc_t) luaA_drawin_set_shape_clip);
 
+    /**
+     * @signal property::geometry
+     */
+    signal_add(&drawin_class.signals, "property::geometry");
     /**
      * @signal property::shape_bounding
      */
