@@ -192,17 +192,19 @@ function align:fit(context, orig_width, orig_height)
 end
 
 --- Set the expand mode which determines how sub widgets expand to take up
--- unused space. Options are:
---  "inside" - Default option. Size of outside widgets is determined using their
---              fit function. Second, middle, or center widget expands to fill
---              remaining space.
--- "outside" - Center widget is sized using its fit function and placed in the
---              center of the allowed space. Outside widgets expand (or contract)
---              to fill remaining space on their side.
---    "none" - All widgets are sized using their fit function, drawn to only the
---              returned space, or remaining space, whichever is smaller. Center
---              widget gets priority.
--- @param mode How to use unused space. "inside" (default) "outside" or "none"
+-- unused space.
+--
+-- @tparam[opt=inside] string mode How to use unused space.
+--
+-- * "inside" - Default option. Size of outside widgets is determined using
+--   their fit function. Second, middle, or center widget expands to fill
+--   remaining space.
+-- * "outside" - Center widget is sized using its fit function and placed in
+--   the center of the allowed space. Outside widgets expand (or contract) to
+--   fill remaining space on their side.
+-- * "none" - All widgets are sized using their fit function, drawn to only the
+--   returned space, or remaining space, whichever is smaller. Center widget
+--   gets priority.
 function align:set_expand(mode)
     if mode == "none" or mode == "outside" then
         self._expand = mode

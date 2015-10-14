@@ -13,7 +13,7 @@ local cache = {}
 
 --- Get an entry from the cache, creating it if it's missing.
 -- @param ... Arguments for the creation callback. These are checked against the
---            cache contents for equality.
+--   cache contents for equality.
 -- @return The entry from the cache
 function cache:get(...)
     local result = self._cache

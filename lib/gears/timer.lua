@@ -23,10 +23,9 @@ local object = require("gears.object")
 -- value. Note that a started timer will not be garbage collected. Call `:stop`
 -- to enable garbage collection.
 -- @tfield number timeout Interval in seconds to emit the timeout signal.
---                        Can be any value, including floating point ones
---                        (e.g. 1.5 seconds).
+--   Can be any value, including floating point ones (e.g. 1.5 seconds).
 -- @tfield boolean started Read-only boolean field indicating if the timer has been
---                         started.
+--   started.
 -- @table timer
 
 local timer = { mt = {} }

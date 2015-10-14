@@ -141,9 +141,9 @@ end
 -- @param buttons A table with buttons binding to set.
 -- @param style The style overrides default theme.
 -- @param[opt] update_function Function to create a tag widget on each
---        update. @see awful.widget.common.
+--   update. @see awful.widget.common.
 -- @param[opt] base_widget Optional container widget for tag widgets. Default
---        is wibox.layout.fixed.horizontal().
+--   is wibox.layout.fixed.horizontal().
 -- @param base_widget.bg_focus The background color for focused client.
 -- @param base_widget.fg_focus The foreground color for focused client.
 -- @param base_widget.bg_urgent The background color for urgent clients.

@@ -467,7 +467,7 @@ end
 --- Build a popup menu with running clients and shows it.
 -- @param args Menu table, see new() function for more informations
 -- @param item_args Table that will be merged into each item, see new() for more
---        informations.
+--   informations.
 -- @return The menu.
 function menu.clients(args, item_args)
     local cls = capi.client.get()

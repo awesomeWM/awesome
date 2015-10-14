@@ -156,8 +156,8 @@ end
 -- @param c The client to move, or the focused one if nil.
 -- @param snap The pixel to snap clients.
 -- @param finished_cb An optional callback function, that will be called
---                 when moving the client has been finished. The client
---                 that has been moved will be passed to that function.
+--   when moving the client has been finished. The client
+--   that has been moved will be passed to that function.
 function mouse.client.move(c, snap, finished_cb)
     local c = c or capi.client.focus
 

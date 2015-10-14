@@ -161,9 +161,9 @@ end
 -- @param width The available width for this hierarchy.
 -- @param height The available height for this hierarchy.
 -- @param redraw_callback Callback that is called with the corresponding widget
---        hierarchy on widget::redraw_needed on some widget.
+--   hierarchy on widget::redraw_needed on some widget.
 -- @param layout_callback Callback that is called with the corresponding widget
---        hierarchy on widget::layout_changed on some widget.
+--   hierarchy on widget::layout_changed on some widget.
 -- @param callback_arg A second argument that is given to the above callbacks.
 -- @return A new widget hierarchy
 function hierarchy.new(context, widget, width, height, redraw_callback, layout_callback, callback_arg)
@@ -179,7 +179,7 @@ end
 -- @param height The available height for this hierarchy.
 -- @param[opt] region A region to use for accumulating changed parts
 -- @return A cairo region describing the changed parts (either the `region`
---         argument or a new, internally created region).
+--   argument or a new, internally created region).
 function hierarchy:update(context, widget, width, height, region)
     local region = region or cairo.Region.create()
     hierarchy_update(self, context, widget, width, height, region, self._matrix, self._matrix_to_device)

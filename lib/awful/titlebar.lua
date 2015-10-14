@@ -110,7 +110,7 @@ end
 --- Show a client's titlebar.
 -- @param c The client whose titlebar is modified
 -- @param[opt] position The position of the titlebar. Must be one of "left",
---        "right", "top", "bottom". Default is "top".
+--   "right", "top", "bottom". Default is "top".
 function titlebar.show(c, position)
     local position = position or "top"
     local bars = all_titlebars[c]
@@ -122,7 +122,7 @@ end
 --- Hide a client's titlebar.
 -- @param c The client whose titlebar is modified
 -- @param[opt] position The position of the titlebar. Must be one of "left",
---        "right", "top", "bottom". Default is "top".
+--   "right", "top", "bottom". Default is "top".
 function titlebar.hide(c, position)
     local position = position or "top"
     get_titlebar_function(c, position)(c, 0)
@@ -131,7 +131,7 @@ end
 --- Toggle a client's titlebar, hiding it if it is visible, otherwise showing it.
 -- @param c The client whose titlebar is modified
 -- @param[opt] position The position of the titlebar. Must be one of "left",
---        "right", "top", "bottom". Default is "top".
+--   "right", "top", "bottom". Default is "top".
 function titlebar.toggle(c, position)
     local position = position or "top"
     local drawable, size = get_titlebar_function(c, position)(c)
