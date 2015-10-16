@@ -1,3 +1,5 @@
+sudo: required
+dist: trusty
 language: c
 env:
   matrix:
@@ -8,12 +10,13 @@ env:
     # luajit: requires --lua-suffix=jit-2.0.0-beta9 in Ubuntu precise.
     # Later versions seem to provide a `luajit` symlink, so `jit` would be enough.
     # See http://packages.ubuntu.com/precise/i386/luajit/filelist.
-    - LUA=5.1 LGIVER=      LUANAME=luajit-5.1 INSTALL_PKGS="luajit" LUAINCLUDE=/usr/include/luajit-2.0 LUAROCKS_ARGS=--lua-suffix=jit-2.0.0-beta9
+    - LUA=5.1 LGIVER=      LUANAME=luajit-5.1 INSTALL_PKGS="luajit" LUAINCLUDE=/usr/include/luajit-2.0 LUAROCKS_ARGS=--lua-suffix=jit-2.0.2
   global:
     # Secure token to push to gh-pages.
     - secure: "LZxt9559+V3qJMdVgmKW4RYTt8ZINooex/qsnoEJUtZloj/eFNG4COT2z6a2yeH2tKWzknCsmV9nLPJiNEA2KLcyqDhjFQvJwKmsBuhGUmLyeQgfenjweorRjO8NT18X1SAEUXAMnClPu+OeTDs4BAuVn5foGZ7xpcRg2E+j2mc="
 
 before_install:
+  - if [ -z $LUAINCLUDE ]; then LUAINCLUDE=/usr/include/${LUANAME}; fi
   - cmake --version
 
 install:
@@ -23,57 +26,18 @@ install:
   # Do not install recommended packages with apt-get.
   - echo 'APT::Install-Recommends "false";' | sudo tee /etc/apt/apt.conf.d/no-recommends
 
-  # Install dependencies according to:
-  # apt-cache showsrc awesome | grep -E '^(Version|Build-Depends)'
-  - sudo apt-get install libcairo2-dev xmlto asciidoc libpango1.0-dev gperf luadoc libxcb-xtest0-dev libxcb-icccm4-dev libxcb-randr0-dev libxcb-keysyms1-dev libxcb-xinerama0-dev libxcb-image0-dev libev-dev libimlib2-dev libdbus-1-dev libxdg-basedir-dev libstartup-notification0-dev imagemagick libxcb1-dev libxcb-shape0-dev libxcb-util0-dev libxcursor-dev libx11-xcb-dev
+  # Install build dependencies.
+  # See also `apt-cache showsrc awesome | grep -E '^(Version|Build-Depends)'`.
+  - sudo apt-get install -y libcairo2-dev xmlto asciidoc libpango1.0-dev gperf luadoc libxcb-xtest0-dev libxcb-icccm4-dev libxcb-randr0-dev libxcb-keysyms1-dev libxcb-xinerama0-dev libxcb-image0-dev libev-dev libimlib2-dev libdbus-1-dev libxdg-basedir-dev libstartup-notification0-dev imagemagick libxcb1-dev libxcb-shape0-dev libxcb-util0-dev libxcursor-dev libx11-xcb-dev libxcb-cursor-dev libxcb-xkb-dev libxkbcommon-dev libxkbcommon-x11-dev
+
+  # Deps for functional tests.
+  - sudo apt-get install -y dbus-x11 xterm xdotool xterm xvfb
 
   # Install Lua (per env).
-  - sudo apt-get install lib${LUANAME}-dev ${LUANAME} ${INSTALL_PKGS}
-
-  # For missing libxcb-cursor-dev.
-  - sudo apt-get install -qq xutils-dev libxcb-render-util0-dev gperf
-  - wget http://xcb.freedesktop.org/dist/xcb-util-cursor-0.1.2.tar.gz
-  - tar xf xcb-util-cursor-0.1.2.tar.gz
-  - cd xcb-util-cursor-0.1.2
-  - ./configure
-  - sudo make install
-  - sudo ldconfig
-  - cd ..
-
-  # For xcb-proto >= 1.11, required by libxcb.
-  - wget http://xcb.freedesktop.org/dist/xcb-proto-1.11.tar.bz2
-  - tar xf xcb-proto-1.11.tar.bz2
-  - cd xcb-proto-1.11
-  - ./configure
-  - sudo make install
-  - cd ..
-
-  # For missing libxcb-xkb-dev.
-  - wget http://xcb.freedesktop.org/dist/libxcb-1.11.tar.bz2
-  - tar xf libxcb-1.11.tar.bz2
-  - cd libxcb-1.11
-  - ./configure
-  - sudo make install
-  - sudo ldconfig
-  - cd ..
-
-  # For missing libxcbcommon-dev/libxcbcommon-x11-dev (PR #227).
-  - wget http://xkbcommon.org/download/libxkbcommon-0.5.0.tar.xz
-  - tar xf libxkbcommon-0.5.0.tar.xz
-  - cd libxkbcommon-0.5.0
-  - ./configure
-  - sudo make install
-  - sudo ldconfig
-  - cd ..
-
-  # lgi: is too old on travis, install it via luarocks.
-  # - sudo apt-get install -qq lua-lgi
-  - sudo apt-get install -qq gir1.2-pango-1.0
-
-  - if [ -z $LUAINCLUDE ]; then LUAINCLUDE=/usr/include/${LUANAME}; fi
+  - sudo apt-get install -y lib${LUANAME}-dev ${LUANAME} ${INSTALL_PKGS}
 
   # Install luarocks (for the selected Lua version).
-  - wget http://keplerproject.github.io/luarocks/releases/luarocks-2.2.2.tar.gz
+  - travis_retry wget http://keplerproject.github.io/luarocks/releases/luarocks-2.2.2.tar.gz
   - tar xf luarocks-2.2.2.tar.gz
   - cd luarocks-2.2.2
   - ./configure --lua-version=$LUA --with-lua-include=${LUAINCLUDE} ${LUAROCKS_ARGS}
@@ -81,23 +45,16 @@ install:
   - sudo make install
   - cd ..
 
-  - sudo apt-get install -qq libgirepository1.0-dev
-  - sudo luarocks install lgi $LGIVER
+  # lgi.
+  - sudo apt-get install -y gir1.2-pango-1.0 libgirepository1.0-dev
+  - travis_retry sudo luarocks install lgi $LGIVER
 
   # Install busted for "make check".
-  - sudo luarocks install busted
+  - travis_retry sudo luarocks install busted
 
   # Install ldoc for building docs.
-  - sudo luarocks install ldoc
-  - sudo luarocks install lua-discount
-
-  # Install CMake 3+, via http://www.cmake.org/download/#latest.
-  - wget http://www.cmake.org/files/v3.2/cmake-3.2.3-Linux-x86_64.tar.Z
-  - tar xf cmake-3.2.3-Linux-x86_64.tar.Z
-  - PATH=$PWD/cmake-3.2.3-Linux-x86_64/bin:$PATH
-
-  # Deps for functional tests.
-  - sudo apt-get install -qq dbus-x11 xterm xdotool xterm xvfb
+  - travis_retry sudo luarocks install ldoc
+  - travis_retry sudo luarocks install lua-discount
 
   # Determine custom version.
   - export AWESOME_VERSION="${TRAVIS_BRANCH}-g$(git rev-parse --short HEAD)"
