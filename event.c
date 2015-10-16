@@ -638,7 +638,7 @@ event_handle_key(xcb_key_press_event_t *ev)
         /* get keysym ignoring all modifiers */
         xcb_keysym_t keysym = keyresolv_get_keysym(ev->detail, 0);
         client_t *c;
-        if((c = client_getbyframewin(ev->event)))
+        if((c = client_getbywin(ev->event)))
         {
             luaA_object_push(globalconf.L, c);
             event_key_callback(ev, &c->keys, -1, 1, &keysym);
