@@ -2474,7 +2474,7 @@ luaA_client_keys(lua_State *L)
     {
         luaA_key_array_set(L, 1, 2, keys);
         luaA_object_emit_signal(L, 1, "property::keys", 0);
-        xwindow_grabkeys(c->frame_window, keys);
+        xwindow_grabkeys(c->window, keys);
     }
 
     return luaA_key_array_get(L, 1, keys);
