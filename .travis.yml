@@ -1,6 +1,6 @@
 sudo: required
 dist: trusty
-language: c
+language: generic
 env:
   matrix:
     # Note: luarocks does not work with Lua 5.0.
