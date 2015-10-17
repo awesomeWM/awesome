@@ -96,6 +96,8 @@ function flex:fit(context, orig_width, orig_height)
     return used_in_dir + spacing, used_in_other
 end
 
+--- Add some widgets to the given flex layout
+-- @tparam widget ... Widgets that should be added (must at least be one)
 function flex:add(...)
     -- No table.pack in Lua 5.1 :-(
     local args = { n=select('#', ...), ... }
@@ -154,12 +156,14 @@ end
 
 --- Returns a new horizontal flex layout. A flex layout shares the available space
 -- equally among all widgets. Widgets can be added via :add(widget).
+-- @tparam widget ... Widgets that should be added to the layout.
 function flex.horizontal(...)
     return get_layout("x", ...)
 end
 
 --- Returns a new vertical flex layout. A flex layout shares the available space
 -- equally among all widgets. Widgets can be added via :add(widget).
+-- @tparam widget ... Widgets that should be added to the layout.
 function flex.vertical(...)
     return get_layout("y", ...)
 end
