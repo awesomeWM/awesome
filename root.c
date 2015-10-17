@@ -33,6 +33,7 @@
 #include "objects/button.h"
 #include "xwindow.h"
 
+#include <xkbcommon/xkbcommon.h>
 #include <xcb/xtest.h>
 #include <xcb/xcb_aux.h>
 #include <cairo-xcb.h>
@@ -129,7 +130,7 @@ _string_to_key_code(const char *s)
     xcb_keysym_t keysym;
     xcb_keycode_t *keycodes;
 
-    keysym   = XStringToKeysym(s);
+    keysym   = xkb_keysym_from_name(s, 0);
     keycodes = xcb_key_symbols_get_keycode(globalconf.keysyms, keysym);
 
     if(keycodes) {

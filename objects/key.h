@@ -33,10 +33,14 @@ typedef struct keyb_t
     xcb_keysym_t keysym;
     /** Keycode */
     xcb_keycode_t keycode;
+    /** Key as UTF8 (fallback) */
+    const char *utf8;
 } keyb_t;
 
 lua_class_t key_class;
 LUA_OBJECT_FUNCS(key_class, keyb_t, key)
+/* NOTE: This does *NOT* free the key instances saved in the array. This is safe
+ * because Lua owns all instances and will call key_wipe() when appropriate. */
 DO_ARRAY(keyb_t *, key, DO_NOTHING)
 
 void key_class_setup(lua_State *);
