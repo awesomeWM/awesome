@@ -598,18 +598,6 @@ function naughty.notify(args)
 
     if hover_timeout then notification.box:connect_signal("mouse::enter", hover_destroy) end
 
-    -- calculate the height
-    if not height then
-        local w, h = textbox:get_preferred_size(s)
-        if iconbox and icon_h + 2 * margin > h + 2 * margin then
-            height = icon_h + 2 * margin
-        else
-            height = h + 2 * margin
-        end
-    end
-
-    height = height + actions_total_height
-
     -- calculate the width
     if not width then
         local w, h = textbox:get_preferred_size(s)
@@ -619,6 +607,19 @@ function naughty.notify(args)
     if width < actions_max_width then
         width = actions_max_width
     end
+
+    -- calculate the height
+    if not height then
+        local w = width - (iconbox and icon_w + 2 * margin or 0) - 2 * margin
+        local h = textbox:get_height_for_width(w, s)
+        if iconbox and icon_h + 2 * margin > h + 2 * margin then
+            height = icon_h + 2 * margin
+        else
+            height = h + 2 * margin
+        end
+    end
+
+    height = height + actions_total_height
 
     -- crop to workarea size if too big
     local workarea = capi.screen[screen].workarea
