@@ -458,8 +458,6 @@ function naughty.notify(args)
     local border_color = args.border_color or preset.border_color or beautiful.bg_focus or '#535d6c'
     local notification = { screen = screen, destroy_cb = destroy_cb, timeout = timeout }
 
-    local textbox_context = {dpi=bt.xresources.get_dpi(s)}
-
     -- replace notification if needed
     if args.replaces_id then
         local obj = naughty.getById(args.replaces_id)
@@ -532,7 +530,7 @@ function naughty.notify(args)
             actiontextbox:set_font(font)
             actiontextbox:set_markup(string.format('<b>%s</b>', action))
             -- calculate the height and width
-            local w, h = actiontextbox:fit(textbox_context, -1, -1) -- Hack! :(
+            local w, h = actiontextbox:get_preferred_size(s)
             local height = h + 2 * margin
             local width = w + 2 * margin
 
@@ -602,7 +600,7 @@ function naughty.notify(args)
 
     -- calculate the height
     if not height then
-        local w, h = textbox:fit(textbox_context, -1, -1) -- Hack! :-(
+        local w, h = textbox:get_preferred_size(s)
         if iconbox and icon_h + 2 * margin > h + 2 * margin then
             height = icon_h + 2 * margin
         else
@@ -614,7 +612,7 @@ function naughty.notify(args)
 
     -- calculate the width
     if not width then
-        local w, h = textbox:fit(textbox_context, -1, -1) -- Hack! :-(
+        local w, h = textbox:get_preferred_size(s)
         width = w + (iconbox and icon_w + 2 * margin or 0) + 2 * margin
     end
 
