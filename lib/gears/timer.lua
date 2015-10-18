@@ -44,6 +44,7 @@ function timer:start()
             end)
         return true
     end)
+    self:emit_signal("start")
 end
 
 --- Stop the timer.
@@ -54,6 +55,7 @@ function timer:stop()
     end
     glib.source_remove(self.data.source_id)
     self.data.source_id = nil
+    self:emit_signal("stop")
 end
 
 --- Restart the timer.
@@ -92,6 +94,8 @@ timer.new = function(args)
 
     ret:add_signal("property::timeout")
     ret:add_signal("timeout")
+    ret:add_signal("start")
+    ret:add_signal("stop")
 
     ret.data = { timeout = 0 }
     setmetatable(ret, timer_instance_mt)
