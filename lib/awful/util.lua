@@ -214,6 +214,22 @@ function util.dir_readable(path)
         gfileinfo:get_attribute_boolean("access::can-read")
 end
 
+--- Check if a path is a directory.
+-- @tparam string path
+-- @treturn bool True if path exists and is a directory.
+function util.is_dir(path)
+    local file = io.open(path)
+    if file then
+        if not file:read(0) -- Not a regular file (might include empty ones).
+            and file:seek("end") ~= 0 then  -- And not a file with size 0.
+            io.close(file)
+            return true
+        end
+        io.close(file)
+    end
+    return false
+end
+
 local function subset_mask_apply(mask, set)
     local ret = {}
     for i = 1, #set do
