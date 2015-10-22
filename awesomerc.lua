@@ -76,7 +76,7 @@ awful.layout.layouts = {
 -- {{{ Helper functions
 local function client_menu_toggle_fn()
     local instance = nil
-    
+
     return function ()
         if instance and instance.wibox.visible then
             instance:hide()
