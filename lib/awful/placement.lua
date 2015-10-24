@@ -128,7 +128,7 @@ function placement.no_offscreen(c, screen)
         geometry.y = screen_geometry.y
     end
 
-    c:geometry(geometry)
+    return c:geometry({ x = geometry.x, y = geometry.y })
 end
 
 --- Place the client where there's place available with minimum overlap.
@@ -180,7 +180,7 @@ function placement.no_overlap(c)
     new.width = geometry.width
     new.height = geometry.height
 
-    return c:geometry(new)
+    return c:geometry({ x = new.x, y = new.y })
 end
 
 --- Place the client under the mouse.
