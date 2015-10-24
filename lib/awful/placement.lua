@@ -103,26 +103,36 @@ local function area_remove(areas, elem)
     return areas
 end
 
+--- Get the area covered by a client.
+-- @client c The client.
+-- @treturn The client's area.
+local function get_area(c)
+    local geometry = c:geometry()
+    local border = c.border_width or 0
+    geometry.width = geometry.width + 2 * border
+    geometry.height = geometry.height + 2 * border
+    return geometry
+end
+
 --- Place the client so no part of it will be outside the screen (workarea).
 -- @client c The client.
 -- @tparam[opt=client's screen] integer screen The screen.
 -- @treturn table The new client geometry.
 function placement.no_offscreen(c, screen)
     local c = c or capi.client.focus
-    local geometry = c:geometry()
+    local geometry = get_area(c)
     local screen   = screen or c.screen or a_screen.getbycoord(geometry.x, geometry.y)
-    local border   = c.border_width
     local screen_geometry = capi.screen[screen].workarea
 
-    if geometry.x + geometry.width + 2*border > screen_geometry.x + screen_geometry.width then
-        geometry.x = screen_geometry.x + screen_geometry.width - geometry.width - 2*border
+    if geometry.x + geometry.width > screen_geometry.x + screen_geometry.width then
+        geometry.x = screen_geometry.x + screen_geometry.width - geometry.width
     end
     if geometry.x < screen_geometry.x then
         geometry.x = screen_geometry.x
     end
 
-    if geometry.y + geometry.height + border > screen_geometry.y + screen_geometry.height then
-        geometry.y = screen_geometry.y + screen_geometry.height - geometry.height - 2*border
+    if geometry.y + geometry.height > screen_geometry.y + screen_geometry.height then
+        geometry.y = screen_geometry.y + screen_geometry.height - geometry.height
     end
     if geometry.y < screen_geometry.y then
         geometry.y = screen_geometry.y
@@ -134,14 +144,14 @@ end
 --- Place the client where there's place available with minimum overlap.
 -- @param c The client.
 function placement.no_overlap(c)
-    local geometry = c:geometry()
+    local geometry = get_area(c)
     local screen   = c.screen or a_screen.getbycoord(geometry.x, geometry.y)
     local cls = client.visible(screen)
     local curlay = layout.get()
     local areas = { capi.screen[screen].workarea }
     for i, cl in pairs(cls) do
         if cl ~= c and cl.type ~= "desktop" and (client.floating.get(cl) or curlay == layout.suit.floating) then
-            areas = area_remove(areas, cl:geometry())
+            areas = area_remove(areas, get_area(cl))
         end
     end
 
@@ -188,7 +198,7 @@ end
 -- @return The new client geometry.
 function placement.under_mouse(c)
     local c = c or capi.client.focus
-    local c_geometry = c:geometry()
+    local c_geometry = get_area(c)
     local m_coords = capi.mouse.coords()
     return c:geometry({ x = m_coords.x - c_geometry.width / 2,
                         y = m_coords.y - c_geometry.height / 2 })
@@ -204,9 +214,9 @@ end
 function placement.next_to_mouse(c, offset)
     c = c or capi.client.focus
     offset = offset or dpi(5)
-    local c_geometry = c:geometry()
-    local c_width = c_geometry.width + (c.border_width * 2)
-    local c_height = c_geometry.height + (c.border_width * 2)
+    local c_geometry = get_area(c)
+    local c_width = c_geometry.width
+    local c_height = c_geometry.height
     local m_coords = capi.mouse.coords()
     local screen_geometry = capi.screen[capi.mouse.screen].workarea
 
@@ -236,11 +246,11 @@ end
 -- @return The new client geometry.
 function placement.centered(c, p)
     local c = c or capi.client.focus
-    local c_geometry = c:geometry()
+    local c_geometry = get_area(c)
     local screen = c.screen or a_screen.getbycoord(c_geometry.x, c_geometry.y)
     local s_geometry
     if p then
-        s_geometry = p:geometry()
+        s_geometry = get_area(p)
     else
         s_geometry = capi.screen[screen].geometry
     end
@@ -254,11 +264,11 @@ end
 -- @return The new client geometry.
 function placement.center_horizontal(c, p)
     local c = c or capi.client.focus
-    local c_geometry = c:geometry()
+    local c_geometry = get_area(c)
     local screen = c.screen or a_screen.getbycoord(c_geometry.x, c_geometry.y)
     local s_geometry
     if p then
-        s_geometry = p:geometry()
+        s_geometry = get_area(p)
     else
         s_geometry = capi.screen[screen].geometry
     end
@@ -271,11 +281,11 @@ end
 -- @return The new client geometry.
 function placement.center_vertical(c, p)
     local c = c or capi.client.focus
-    local c_geometry = c:geometry()
+    local c_geometry = get_area(c)
     local screen = c.screen or a_screen.getbycoord(c_geometry.x, c_geometry.y)
     local s_geometry
     if p then
-        s_geometry = p:geometry()
+        s_geometry = get_area(p)
     else
         s_geometry = capi.screen[screen].geometry
     end
