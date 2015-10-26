@@ -26,24 +26,42 @@ data.padding = {}
 
 screen.mouse_per_screen = {}
 
+-- @param s Screen number
+-- @param x X coordinate of point
+-- @param y Y coordinate of point
+-- @return The squared distance of the screen to the provided point
+function screen.getdistance_sq(s, x, y)
+    local geom = capi.screen[s].geometry
+    local dist_x, dist_y = 0, 0
+    if x < geom.x then
+        dist_x = geom.x - x
+    elseif x >= geom.x + geom.width then
+        dist_x = x - geom.x - geom.width
+    end
+    if y < geom.y then
+        dist_y = geom.y - y
+    elseif y >= geom.y + geom.height then
+        dist_y = y - geom.y - geom.height
+    end
+    return dist_x * dist_x + dist_y * dist_y
+end
+
 ---
 -- Return Xinerama screen number corresponding to the given (pixel) coordinates.
 -- The number returned can be used as an index into the global
 -- `screen` table/object.
 -- @param x The x coordinate
 -- @param y The y coordinate
--- @param[opt] default The default return value. If unspecified, 1 is returned.
-function screen.getbycoord(x, y, default)
-    for i = 1, capi.screen:count() do
-        local geometry = capi.screen[i].geometry
-        if((x < 0 or (x >= geometry.x and x < geometry.x + geometry.width))
-           and (y < 0 or (y >= geometry.y and y < geometry.y + geometry.height))) then
-            return i
+function screen.getbycoord(x, y)
+    local s = 1
+    local dist = screen.getdistance_sq(s, x, y)
+    for i = 2, capi.screen:count() do
+        local d = screen.getdistance_sq(i, x, y)
+        if d < dist then
+            s, dist = i, d
         end
     end
-    -- No caller expects a nil result here, so just make something up
-    if default == nil then return 1 end
-    return default
+    return s
 end
 
 --- Give the focus to a screen, and move pointer to last known position on this
