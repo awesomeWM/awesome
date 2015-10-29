@@ -82,6 +82,13 @@ cd ../doc
 git add --all .
 git commit -m "[boilerplate] $COMMIT_MSG"
 
+# Reorder/swap commits, to have "relevant" after "boilerplate".
+# This makes it show up earlier in the Github interface etc.
+git tag _old
+git reset --hard HEAD~2
+git cherry-pick _old _old~1
+git tag -d _old
+
 git checkout "$BRANCH"
 git merge --no-ff -m "$COMMIT_MSG" merged-update
 
