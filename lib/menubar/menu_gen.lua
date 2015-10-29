@@ -112,7 +112,7 @@ function menu_gen.generate()
                 if target_category then
                     local name = trim(program.Name) or ""
                     local cmdline = trim(program.cmdline) or ""
-                    local icon = utils.lookup_icon(trim(program.icon_path)) or nil
+                    local icon = program.icon_path or nil
                     table.insert(result, { name = name,
                                            cmdline = cmdline,
                                            icon = icon,

@@ -67,40 +67,59 @@ local function is_format_supported(icon_file)
 end
 
 local icon_lookup_path = nil
+--- Get a list of icon lookup paths.
+-- @treturn table A list of directories, without trailing slash.
 local function get_icon_lookup_path()
     if not icon_lookup_path then
+        local add_if_readable = function(t, path)
+            if awful_util.dir_readable(path) then
+                table.insert(t, path)
+            end
+        end
         icon_lookup_path = {}
         local icon_theme_paths = {}
         local icon_theme = theme.icon_theme
         local paths = glib.get_system_data_dirs()
         table.insert(paths, 1, glib.get_user_data_dir())
-        table.insert(paths, 1, glib.get_home_dir() .. '/.icons')
-        for k,dir in ipairs(paths)do
-            if icon_theme then
-                table.insert(icon_theme_paths, dir..'/icons/' .. icon_theme .. '/')
+        table.insert(paths, 1, glib.build_filenamev({glib.get_home_dir(),
+                                                     '.icons'}))
+        for k,dir in ipairs(paths) do
+            local icons_dir = glib.build_filenamev({dir, 'icons'})
+            if awful_util.dir_readable(icons_dir) then
+                if icon_theme then
+                    add_if_readable(icon_theme_paths,
+                                    glib.build_filenamev({icons_dir,
+                                                         icon_theme}))
+                end
+                -- Fallback theme.
+                add_if_readable(icon_theme_paths,
+                                glib.build_filenamev({icons_dir, 'hicolor'}))
             end
-            table.insert(icon_theme_paths, dir..'/icons/hicolor/') -- fallback theme
         end
         for i, icon_theme_directory in ipairs(icon_theme_paths) do
             for j, size in ipairs(all_icon_sizes) do
-                table.insert(icon_lookup_path, icon_theme_directory .. size .. '/apps/')
+                add_if_readable(icon_lookup_path,
+                                glib.build_filenamev({icon_theme_directory,
+                                                      size, 'apps'}))
             end
         end
         for k,dir in ipairs(paths)do
             -- lowest priority fallbacks
-            table.insert(icon_lookup_path, dir..'/pixmaps/')
-            table.insert(icon_lookup_path, dir..'/icons/')
+            add_if_readable(icon_lookup_path,
+                            glib.build_filenamev({dir, 'pixmaps'}))
+            add_if_readable(icon_lookup_path,
+                            glib.build_filenamev({dir, 'icons'}))
         end
     end
     return icon_lookup_path
 end
 
 --- Lookup an icon in different folders of the filesystem.
--- @param icon_file Short or full name of the icon.
--- @return full name of the icon.
-function utils.lookup_icon(icon_file)
+-- @tparam string icon_file Short or full name of the icon.
+-- @treturn string|boolean Full name of the icon, or false on failure.
+function utils.lookup_icon_uncached(icon_file)
     if not icon_file or icon_file == "" then
-        return default_icon
+        return false
     end
 
     if icon_file:sub(1, 1) == '/' and is_format_supported(icon_file) then
@@ -109,22 +128,34 @@ function utils.lookup_icon(icon_file)
         return awful_util.file_readable(icon_file) and icon_file or nil
     else
         for i, directory in ipairs(get_icon_lookup_path()) do
-            if is_format_supported(icon_file) and awful_util.file_readable(directory .. icon_file) then
-                return directory .. icon_file
+            if is_format_supported(icon_file) and
+                    awful_util.file_readable(directory .. "/" .. icon_file) then
+                return directory .. "/" .. icon_file
             else
                 -- Icon is probably specified without path and format,
                 -- like 'firefox'. Try to add supported extensions to
                 -- it and see if such file exists.
                 for _, format in ipairs(icon_formats) do
-                    local possible_file = directory .. icon_file .. "." .. format
+                    local possible_file = directory .. "/" .. icon_file .. "." .. format
                     if awful_util.file_readable(possible_file) then
                         return possible_file
                     end
                 end
             end
         end
-        return default_icon
+        return false
     end
+end
+
+local lookup_icon_cache = {}
+--- Lookup an icon in different folders of the filesystem (cached).
+-- @param icon_file Short or full name of the icon.
+-- @return full name of the icon.
+function utils.lookup_icon(icon)
+    if not lookup_icon_cache[icon] and lookup_icon_cache[icon] ~= false then
+        lookup_icon_cache[icon] = utils.lookup_icon_uncached(icon)
+    end
+    return lookup_icon_cache[icon] or default_icon
 end
 
 --- Parse a .desktop file.

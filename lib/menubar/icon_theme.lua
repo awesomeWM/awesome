@@ -91,6 +91,8 @@ end
 
 local icon_theme = { mt = {} }
 
+local index_theme_cache = {}
+
 --- Class constructor of `icon_theme`
 -- @tparam string icon_theme_name Internal name of icon theme
 -- @tparam table base_directories Paths used for lookup
@@ -103,7 +105,18 @@ icon_theme.new = function(icon_theme_name, base_directories)
     self.icon_theme_name = icon_theme_name
     self.base_directories = base_directories
     self.extensions = { "png", "svg", "xpm" }
-    self.index_theme = index_theme(self.icon_theme_name, self.base_directories)
+
+    -- Instantiate index_theme (cached).
+    if not index_theme_cache[self.icon_theme_name] then
+        index_theme_cache[self.icon_theme_name] = {}
+    end
+    local cache_key = table.concat(self.base_directories, ':')
+    if not index_theme_cache[self.icon_theme_name][cache_key] then
+        index_theme_cache[self.icon_theme_name][cache_key] = index_theme(
+            self.icon_theme_name,
+            self.base_directories)
+    end
+    self.index_theme = index_theme_cache[self.icon_theme_name][cache_key]
 
     return setmetatable(self, { __index = icon_theme })
 end
@@ -147,6 +160,7 @@ local directory_size_distance = function(self, subdirectory, icon_size)
 end
 
 local lookup_icon = function(self, icon_name, icon_size)
+    local checked_already = {}
     for _, subdir in ipairs(self.index_theme:get_subdirectories()) do
         for _, basedir in ipairs(self.base_directories) do
             for _, ext in ipairs(self.extensions) do
@@ -156,6 +170,8 @@ local lookup_icon = function(self, icon_name, icon_size)
                                                    icon_name, ext)
                     if awful.util.file_readable(filename) then
                         return filename
+                    else
+                        checked_already[filename] = true
                     end
                 end
             end
@@ -165,24 +181,24 @@ local lookup_icon = function(self, icon_name, icon_size)
     local minimal_size = 0xffffffff -- Any large number will do.
     local closest_filename = nil
     for _, subdir in ipairs(self.index_theme:get_subdirectories()) do
-        for _, basedir in ipairs(self.base_directories) do
-            for _, ext in ipairs(self.extensions) do
-                local filename = string.format("%s/%s/%s/%s.%s",
-                                               basedir, self.icon_theme_name, subdir,
-                                               icon_name, ext)
-                local dist = directory_size_distance(self, subdir, icon_size)
-                if awful.util.file_readable(filename) and  dist < minimal_size then
-                    closest_filename = filename
-                    minimal_size = dist
+        local dist = directory_size_distance(self, subdir, icon_size)
+        if dist < minimal_size then
+            for _, basedir in ipairs(self.base_directories) do
+                for _, ext in ipairs(self.extensions) do
+                    local filename = string.format("%s/%s/%s/%s.%s",
+                                                   basedir, self.icon_theme_name, subdir,
+                                                   icon_name, ext)
+                    if not checked_already[filename] then
+                        if awful.util.file_readable(filename) then
+                            closest_filename = filename
+                            minimal_size = dist
+                        end
+                    end
                 end
             end
         end
     end
-    if closest_filename then
-        return closest_filename
-    end
-
-    return nil
+    return closest_filename
 end
 
 local find_icon_path_helper  -- Gets called recursively.
