@@ -19,16 +19,20 @@ local error = error
 
 local textbox = { mt = {} }
 
---- Setup a pango layout for the given textbox and cairo context
-local function setup_layout(box, width, height, dpi)
-    local layout = box._layout
-    layout.width = Pango.units_from_double(width)
-    layout.height = Pango.units_from_double(height)
+--- Set the DPI of a Pango layout
+local function setup_dpi(box, dpi)
     if box.dpi ~= dpi then
         box.dpi = dpi
         box._ctx:set_resolution(dpi)
         box._layout:context_changed()
     end
+end
+
+--- Setup a pango layout for the given textbox and dpi
+local function setup_layout(box, width, height, dpi)
+    box._layout.width = Pango.units_from_double(width)
+    box._layout.height = Pango.units_from_double(height)
+    setup_dpi(box, dpi)
 end
 
 --- Draw the given textbox on the given cairo context in the given geometry
@@ -46,16 +50,67 @@ function textbox:draw(context, cr, width, height)
     cr:show_layout(self._layout)
 end
 
---- Fit the given textbox
-function textbox:fit(context, width, height)
-    setup_layout(self, width, height, context.dpi)
+local function do_fit_return(self)
     local ink, logical = self._layout:get_pixel_extents()
-
     if logical.width == 0 or logical.height == 0 then
         return 0, 0
     end
-
     return logical.width, logical.height
+end
+
+--- Fit the given textbox
+function textbox:fit(context, width, height)
+    setup_layout(self, width, height, context.dpi)
+    return do_fit_return(self)
+end
+
+--- Get the preferred size of a textbox.
+-- This returns the size that the textbox would use if infinite space were
+-- available.
+-- @tparam integer s The screen number on which the textbox will be displayed.
+-- @treturn number The preferred width.
+-- @treturn number The preferred height.
+function textbox:get_preferred_size(s)
+    return self:get_preferred_size_at_dpi(beautiful.xresources.get_dpi(s))
+end
+
+--- Get the preferred height of a textbox at a given width.
+-- This returns the height that the textbox would use when it is limited to the
+-- given width.
+-- @tparam number width The available width.
+-- @tparam integer s The screen number on which the textbox will be displayed.
+-- @treturn number The needed height.
+function textbox:get_height_for_width(width, s)
+    return self:get_height_for_width_at_dpi(width, beautiful.xresources.get_dpi(s))
+end
+
+--- Get the preferred size of a textbox.
+-- This returns the size that the textbox would use if infinite space were
+-- available.
+-- @tparam number dpi The DPI value to render at.
+-- @treturn number The preferred width.
+-- @treturn number The preferred height.
+function textbox:get_preferred_size_at_dpi(dpi)
+    local max_lines = 2^20
+    setup_dpi(self, dpi)
+    self._layout.width = -1 -- no width set
+    self._layout.height = -max_lines -- show this many lines per paragraph
+    return do_fit_return(self)
+end
+
+--- Get the preferred height of a textbox at a given width.
+-- This returns the height that the textbox would use when it is limited to the
+-- given width.
+-- @tparam number width The available width.
+-- @tparam number dpi The DPI value to render at.
+-- @treturn number The needed height.
+function textbox:get_height_for_width_at_dpi(width, dpi)
+    local max_lines = 2^20
+    setup_dpi(self, dpi)
+    self._layout.width = Pango.units_from_double(width)
+    self._layout.height = -max_lines -- show this many lines per paragraph
+    local w, h = do_fit_return(self)
+    return h
 end
 
 --- Set the text of the textbox (with

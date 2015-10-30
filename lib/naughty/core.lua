@@ -458,8 +458,6 @@ function naughty.notify(args)
     local border_color = args.border_color or preset.border_color or beautiful.bg_focus or '#535d6c'
     local notification = { screen = screen, destroy_cb = destroy_cb, timeout = timeout }
 
-    local textbox_context = {dpi=bt.xresources.get_dpi(s)}
-
     -- replace notification if needed
     if args.replaces_id then
         local obj = naughty.getById(args.replaces_id)
@@ -532,7 +530,7 @@ function naughty.notify(args)
             actiontextbox:set_font(font)
             actiontextbox:set_markup(string.format('<b>%s</b>', action))
             -- calculate the height and width
-            local w, h = actiontextbox:fit(textbox_context, -1, -1) -- Hack! :(
+            local w, h = actiontextbox:get_preferred_size(s)
             local height = h + 2 * margin
             local width = w + 2 * margin
 
@@ -600,9 +598,20 @@ function naughty.notify(args)
 
     if hover_timeout then notification.box:connect_signal("mouse::enter", hover_destroy) end
 
+    -- calculate the width
+    if not width then
+        local w, h = textbox:get_preferred_size(s)
+        width = w + (iconbox and icon_w + 2 * margin or 0) + 2 * margin
+    end
+
+    if width < actions_max_width then
+        width = actions_max_width
+    end
+
     -- calculate the height
     if not height then
-        local w, h = textbox:fit(textbox_context, -1, -1) -- Hack! :-(
+        local w = width - (iconbox and icon_w + 2 * margin or 0) - 2 * margin
+        local h = textbox:get_height_for_width(w, s)
         if iconbox and icon_h + 2 * margin > h + 2 * margin then
             height = icon_h + 2 * margin
         else
@@ -611,16 +620,6 @@ function naughty.notify(args)
     end
 
     height = height + actions_total_height
-
-    -- calculate the width
-    if not width then
-        local w, h = textbox:fit(textbox_context, -1, -1) -- Hack! :-(
-        width = w + (iconbox and icon_w + 2 * margin or 0) + 2 * margin
-    end
-
-    if width < actions_max_width then
-        width = actions_max_width
-    end
 
     -- crop to workarea size if too big
     local workarea = capi.screen[screen].workarea
