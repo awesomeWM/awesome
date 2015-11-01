@@ -283,7 +283,14 @@ spawn_launchee_timeout(gpointer context)
 static void
 spawn_callback(gpointer user_data)
 {
+    SnLauncherContext *context = (SnLauncherContext *) user_data;
     setsid();
+
+    if (context)
+        sn_launcher_context_setup_child_process(context);
+    else
+        /* Unset in case awesome was already started with this variable set */
+        unsetenv("DESKTOP_STARTUP_ID");
 }
 
 /** Parse a command line.
@@ -400,11 +407,10 @@ luaA_spawn(lua_State *L)
         /* app will have AWESOME_SPAWN_TIMEOUT seconds to complete,
          * or the timeout function will terminate the launch sequence anyway */
         g_timeout_add_seconds(AWESOME_SPAWN_TIMEOUT, spawn_launchee_timeout, context);
-        sn_launcher_context_setup_child_process(context);
     }
 
     retval = g_spawn_async_with_pipes(NULL, argv, NULL, G_SPAWN_SEARCH_PATH,
-                                      spawn_callback, NULL, &pid,
+                                      spawn_callback, context, &pid,
                                       stdin_ptr, stdout_ptr, stderr_ptr, &error);
     g_strfreev(argv);
     if(!retval)
