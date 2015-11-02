@@ -236,11 +236,12 @@ widget. The arguments to this function is the available space and it should
 return its desired size. Note that this function only provides a hint which is
 not necessarily followed. The widget must also be able to draw itself at
 different sizes than the one requested.
-<pre><code>function widget:fit(context, width, height)
-  -- Find the maximum square available
-  local m = math.min(width, height)
-  return m, m
-end</code></pre>
+
+    function widget:fit(context, width, height)
+      -- Find the maximum square available
+      local m = math.min(width, height)
+      return m, m
+    end
 
 The next callback is :draw. As the name suggests, this function is called to
 draw the widget. The arguments to this widget are the context that the widget is
@@ -250,24 +251,24 @@ at (0, 0) and its bottom-right corner at (width, height). In other words, no
 special transformation needs to be done. Note that during this callback a
 suitable clip will already be applied to the cairo context so that this callback
 will not be able to draw outside of the area that was registered for the widget
-by the layout that placed this widget. You should not call
-<code>cr:reset_clip()</code>, as redraws will not be handled correctly in this
-case.
-<pre><code>function widget:draw(wibox, cr, width, height)
-    cr:move_to(0, 0)
-    cr:line_to(width, height)
-    cr:move_to(0, height)
-    cr:line_to(width, 0)
-    cr:stroke()
-end</code></pre>
+by the layout that placed this widget. You should not call `cr:reset_clip()`, as
+redraws will not be handled correctly in this case.
+
+    function widget:draw(wibox, cr, width, height)
+      cr:move_to(0, 0)
+      cr:line_to(width, height)
+      cr:move_to(0, height)
+      cr:line_to(width, 0)
+      cr:stroke()
+    end
 
 There are two signals configured for a widget. When the result that :fit would
-return changes, the <code>widget::layout_changed</code> signal has to be
-emitted. If this actually causes layout changes, the affected areas will be
-redrawn. The other signal is <code>widget::redraw_needed</code>. This signal
-signals that :draw has to be called to redraw the widget, but it is safe to
-assume that :fit does still return the same values as before. If in doubt, you
-can emit both signals to be safe.
+return changes, the `widget::layout_changed` signal has to be emitted. If this
+actually causes layout changes, the affected areas will be redrawn. The other
+signal is `widget::redraw_needed`. This signal signals that :draw has to be
+called to redraw the widget, but it is safe to assume that :fit does still
+return the same values as before. If in doubt, you can emit both signals to be
+safe.
 
 If your widget only needs to draw something to the screen, the above is all that
 is needed. The following callbacks can be used when implementing layouts which
@@ -278,24 +279,26 @@ relative to this widget. Note that it is allowed to place widgets outside of the
 extents of your own widget, for example at a negative position or at twice the
 size of this widget. Use this mechanism if your widget needs to draw outside of
 its own extents. If the result of this callback changes,
-<code>widget::layout_changed</code> has to be emitted. You can use @{fit_widget}
-to call the `:fit` callback of other widgets. Never call `:fit` directly!  For
-example, if you want to place another widget <code>child</code> inside of your
-widget, you can do it like this:
-<pre><code>-- For readability
-local base = wibox.widget.base
-function widget:layout(width, height)
-    local result = {}
-    table.insert(result, base.place_widget_at(child, width/2, 0, width/2, height)
-    return result
-end</code></pre>
+`widget::layout_changed` has to be emitted. You can use @{fit_widget} to call
+the `:fit` callback of other widgets. Never call `:fit` directly!  For example,
+if you want to place another widget `child` inside of your widget, you can do it
+like this:
+
+    -- For readability
+    local base = wibox.widget.base
+    function widget:layout(width, height)
+      local result = {}
+      table.insert(result, base.place_widget_at(child, width/2, 0, width/2, height)
+      return result
+    end
 
 Finally, if you want to influence how children are drawn, there are four
 callbacks available that all get similar arguments:
-<pre><code>function widget:before_draw_children(context, cr, width, height)
-function widget:after_draw_children(context, cr, width, height)
-function widget:before_draw_child(context, index, child, cr, width, height)
-function widget:after_draw_child(context, index, child, cr, width, height)</code></pre>
+
+    function widget:before_draw_children(context, cr, width, height)
+    function widget:after_draw_children(context, cr, width, height)
+    function widget:before_draw_child(context, index, child, cr, width, height)
+    function widget:after_draw_child(context, index, child, cr, width, height)
 
 All of these are called with the same arguments as the :draw() method. Please
 note that a larger clip will be active during these callbacks that also contains
@@ -303,32 +306,35 @@ the area of all children. These callbacks can be used to influence the way in
 which children are drawn, but they should not cause the drawing to cover a
 different area. As an example, these functions can be used to draw children
 translucently:
-<pre><code>function widget:before_draw_children(wibox, cr, width, height)
-    cr:push_group()
-end
-function widget:after_draw_children(wibox, cr, width, height)
-    cr:pop_group_to_source()
-    cr:paint_with_alpha(0.5)
-end</code></pre>
+
+    function widget:before_draw_children(wibox, cr, width, height)
+      cr:push_group()
+    end
+    function widget:after_draw_children(wibox, cr, width, height)
+      cr:pop_group_to_source()
+      cr:paint_with_alpha(0.5)
+    end
 
 In pseudo-code, the call sequence for the drawing callbacks during a redraw
 looks like this:
-<pre><code>widget:draw(wibox, cr, width, height)
-widget:before_draw_children(wibox, cr, width, height)
-for child do
-    widget:before_draw_child(wibox, cr, child_index, child, width, height)
-    cr:save()
-    -- Draw child and all of its children recursively, taking into account the
-    -- position and size given to base.place_widget_at() in :layout().
-    cr:restore()
-    widget:after_draw_child(wibox, cr, child_index, child, width, height)
-end
-widget:after_draw_children(wibox, cr, width, height)</code></pre>
+
+    widget:draw(wibox, cr, width, height)
+    widget:before_draw_children(wibox, cr, width, height)
+    for child do
+        widget:before_draw_child(wibox, cr, child_index, child, width, height)
+        cr:save()
+        -- Draw child and all of its children recursively, taking into account the
+        -- position and size given to base.place_widget_at() in :layout().
+        cr:restore()
+        widget:after_draw_child(wibox, cr, child_index, child, width, height)
+    end
+    widget:after_draw_children(wibox, cr, width, height)
+
 @param proxy If this is set, the returned widget will be a proxy for this
-             widget. It will be equivalent to this widget. This means it
-             looks the same on the screen.
+  widget. It will be equivalent to this widget. This means it
+  looks the same on the screen.
 @tparam[opt] string widget_name Name of the widget.  If not set, it will be
-             set automatically via `gears.object.modulename`.
+  set automatically via `gears.object.modulename`.
 @see fit_widget
 --]]--
 function base.make_widget(proxy, widget_name)
