@@ -15,6 +15,7 @@ env:
 
 before_install:
   - cmake --version
+  - alias wget="travis_retry wget"
 
 install:
   # Travis boilerplate: the apt-get cache might be out of date.
