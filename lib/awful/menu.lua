@@ -15,6 +15,7 @@ local util = require("awful.util")
 local spawn = require("awful.spawn")
 local tags = require("awful.tag")
 local keygrabber = require("awful.keygrabber")
+local client_iterate = require("awful.client").iterate
 local beautiful = require("beautiful")
 local dpi = require("beautiful").xresources.apply_dpi
 local object = require("gears.object")
@@ -465,14 +466,16 @@ end
 --------------------------------------------------------------------------------
 
 --- Build a popup menu with running clients and shows it.
--- @param args Menu table, see new() function for more informations
+-- @param args Menu table, see new() function for more informations.
 -- @param item_args Table that will be merged into each item, see new() for more
 --   informations.
+-- @param filter A function taking a client as an argument and returning true or
+--   false to indicate whether the client should be included in the menu.
 -- @return The menu.
-function menu.clients(args, item_args)
+function menu.clients(args, item_args, filter)
     local cls = capi.client.get()
     local cls_t = {}
-    for k, c in pairs(cls) do
+    for c in client_iterate(filter or function() return true end) do
         cls_t[#cls_t + 1] = {
             c.name or "",
             function ()
