@@ -28,6 +28,12 @@ local object = require("gears.object")
 --   started.
 -- @table timer
 
+--- When the timer is started.
+-- @signal start
+
+--- When the timer is stopped.
+-- @signal stop
+
 local timer = { mt = {} }
 
 --- Start the timer.
@@ -44,6 +50,7 @@ function timer:start()
             end)
         return true
     end)
+    self:emit_signal("start")
 end
 
 --- Stop the timer.
@@ -54,9 +61,12 @@ function timer:stop()
     end
     glib.source_remove(self.data.source_id)
     self.data.source_id = nil
+    self:emit_signal("stop")
 end
 
 --- Restart the timer.
+-- This is equivalent to stopping the timer if it is running and then starting
+-- it.
 function timer:again()
     if self.data.source_id ~= nil then
         self:stop()
@@ -92,6 +102,8 @@ timer.new = function(args)
 
     ret:add_signal("property::timeout")
     ret:add_signal("timeout")
+    ret:add_signal("start")
+    ret:add_signal("stop")
 
     ret.data = { timeout = 0 }
     setmetatable(ret, timer_instance_mt)
@@ -109,6 +121,7 @@ end
 -- callback function causes an error, no more calls are done.
 -- @tparam number timeout Timeout in seconds (e.g. 1.5).
 -- @tparam function callback Function to run.
+-- @treturn timer The timer object that was set up.
 -- @see timer.weak_start_new
 function timer.start_new(timeout, callback)
     local t = timer.new({ timeout = timeout })
@@ -131,6 +144,7 @@ end
 -- will automatically be stopped.
 -- @tparam number timeout Timeout in seconds (e.g. 1.5).
 -- @tparam function callback Function to start.
+-- @treturn timer The timer object that was set up.
 -- @see timer.start_new
 function timer.weak_start_new(timeout, callback)
     local indirection = setmetatable({}, { __mode = "v" })
