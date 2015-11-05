@@ -1,4 +1,11 @@
 ---------------------------------------------------------------------------
+--- Spawning of programs.
+--
+-- This module provides methods to start programs and supports startup
+-- notifications, which allows for callbacks and applying properties to the
+-- program after it has been launched.  This requires currently that the
+-- applicaton supports them.
+--
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @author Emmanuel Lepage Vallee &lt;elv1313@gmail.com&gt;
 -- @copyright 2008 Julien Danjou
@@ -49,8 +56,8 @@ end
 --   after startup; `false` to disable startup notifications.
 -- @tparam[opt] function callback A callback function to be run after startup.
 -- @treturn[1] integer The forked PID.
--- @treturn[1] string The startup notification ID, if `sn` is not false, or a
---   `callback` is provided.
+-- @treturn[1] ?string The startup notification ID, if `sn` is not false, or
+--   a `callback` is provided.
 -- @treturn[2] string Error message.
 function spawn.spawn(cmd, sn_rules, callback)
     if cmd and cmd ~= "" then
@@ -73,7 +80,8 @@ function spawn.spawn(cmd, sn_rules, callback)
 end
 
 --- Spawn a program using the shell.
--- @param cmd The command.
+-- This calls `cmd` with `$SHELL -c` (via `awful.util.shell`).
+-- @tparam string cmd The command.
 function spawn.with_shell(cmd)
     if cmd and cmd ~= "" then
         cmd = { util.shell, "-c", cmd }
