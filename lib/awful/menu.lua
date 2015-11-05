@@ -473,7 +473,6 @@ end
 --   false to indicate whether the client should be included in the menu.
 -- @return The menu.
 function menu.clients(args, item_args, filter)
-    local cls = capi.client.get()
     local cls_t = {}
     for c in client_iterate(filter or function() return true end) do
         cls_t[#cls_t + 1] = {
