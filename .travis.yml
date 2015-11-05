@@ -18,6 +18,7 @@ env:
 before_install:
   - if [ -z $LUAINCLUDE ]; then LUAINCLUDE=/usr/include/${LUANAME}; fi
   - cmake --version
+  - alias wget="travis_retry wget"
 
 install:
   # Travis boilerplate: the apt-get cache might be out of date.
