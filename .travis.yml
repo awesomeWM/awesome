@@ -30,9 +30,6 @@ install:
   # See also `apt-cache showsrc awesome | grep -E '^(Version|Build-Depends)'`.
   - sudo apt-get install -y libcairo2-dev xmlto asciidoc libpango1.0-dev gperf luadoc libxcb-xtest0-dev libxcb-icccm4-dev libxcb-randr0-dev libxcb-keysyms1-dev libxcb-xinerama0-dev libxcb-image0-dev libev-dev libimlib2-dev libdbus-1-dev libxdg-basedir-dev libstartup-notification0-dev imagemagick libxcb1-dev libxcb-shape0-dev libxcb-util0-dev libxcursor-dev libx11-xcb-dev libxcb-cursor-dev libxcb-xkb-dev libxkbcommon-dev libxkbcommon-x11-dev
 
-  # Deps for functional tests.
-  - sudo apt-get install -y dbus-x11 xterm xdotool xterm xvfb rxvt-unicode
-
   # Install Lua (per env).
   - sudo apt-get install -y lib${LUANAME}-dev ${LUANAME} ${INSTALL_PKGS}
 
@@ -62,7 +59,7 @@ install:
 
 script:
   - export CMAKE_ARGS="-DLUA_LIBRARY=/usr/lib/x86_64-linux-gnu/lib${LUANAME}.so -DLUA_INCLUDE_DIR=${LUAINCLUDE} -D OVERRIDE_VERSION=$AWESOME_VERSION"
-  - make && sudo env PATH=$PATH make install && awesome --version && tests/run.sh
+  - make && sudo env PATH=$PATH make install && awesome --version
 
 after_success:
   # Push updated API docs for relevant branches, e.g. non-PRs builds on master.
