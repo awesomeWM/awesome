@@ -137,7 +137,7 @@ restore_client_order(xcb_get_property_cookie_t prop_cookie)
                 client_idx++;
             }
 
-    luaA_class_emit_signal(globalconf_get_lua_State(), &client_class, "list", 0);
+    luaA_class_emit_signal(globalconf.L, &client_class, "list", 0);
     p_delete(&reply);
 }
 
