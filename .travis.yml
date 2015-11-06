@@ -1,0 +1,66 @@
+sudo: required
+dist: trusty
+language: c
+env:
+  matrix:
+    # Note: luarocks does not work with Lua 5.0.
+    - LUA=5.1 LGIVER=      LUANAME=lua5.1
+    - LUA=5.2 LGIVER=      LUANAME=lua5.2 BUILD_APIDOC=true
+    - LUA=5.2 LGIVER=0.7.1 LUANAME=lua5.2
+    # luajit: requires --lua-suffix=jit-2.0.0-beta9 in Ubuntu precise.
+    # Later versions seem to provide a `luajit` symlink, so `jit` would be enough.
+    # See http://packages.ubuntu.com/precise/i386/luajit/filelist.
+    - LUA=5.1 LGIVER=      LUANAME=luajit-5.1 INSTALL_PKGS="luajit" LUAINCLUDE=/usr/include/luajit-2.0 LUAROCKS_ARGS=--lua-suffix=jit-2.0.2
+  global:
+    # Secure token to push to gh-pages.
+    - secure: "LZxt9559+V3qJMdVgmKW4RYTt8ZINooex/qsnoEJUtZloj/eFNG4COT2z6a2yeH2tKWzknCsmV9nLPJiNEA2KLcyqDhjFQvJwKmsBuhGUmLyeQgfenjweorRjO8NT18X1SAEUXAMnClPu+OeTDs4BAuVn5foGZ7xpcRg2E+j2mc="
+
+before_install:
+  - if [ -z $LUAINCLUDE ]; then LUAINCLUDE=/usr/include/${LUANAME}; fi
+  - cmake --version
+
+install:
+  # Travis boilerplate: the apt-get cache might be out of date.
+  - sudo apt-get update -qq
+
+  # Do not install recommended packages with apt-get.
+  - echo 'APT::Install-Recommends "false";' | sudo tee /etc/apt/apt.conf.d/no-recommends
+
+  # Install build dependencies.
+  # See also `apt-cache showsrc awesome | grep -E '^(Version|Build-Depends)'`.
+  - sudo apt-get install -y libcairo2-dev xmlto asciidoc libpango1.0-dev gperf luadoc libxcb-xtest0-dev libxcb-icccm4-dev libxcb-randr0-dev libxcb-keysyms1-dev libxcb-xinerama0-dev libxcb-image0-dev libev-dev libimlib2-dev libdbus-1-dev libxdg-basedir-dev libstartup-notification0-dev imagemagick libxcb1-dev libxcb-shape0-dev libxcb-util0-dev libxcursor-dev libx11-xcb-dev libxcb-cursor-dev libxcb-xkb-dev libxkbcommon-dev libxkbcommon-x11-dev
+
+  # Install Lua (per env).
+  - sudo apt-get install -y lib${LUANAME}-dev ${LUANAME} ${INSTALL_PKGS}
+
+  # Install luarocks (for the selected Lua version).
+  - travis_retry wget http://keplerproject.github.io/luarocks/releases/luarocks-2.2.2.tar.gz
+  - tar xf luarocks-2.2.2.tar.gz
+  - cd luarocks-2.2.2
+  - ./configure --lua-version=$LUA --with-lua-include=${LUAINCLUDE} ${LUAROCKS_ARGS}
+  - make build
+  - sudo make install
+  - cd ..
+
+  # lgi.
+  - sudo apt-get install -y gir1.2-pango-1.0 libgirepository1.0-dev
+  - travis_retry sudo luarocks install lgi $LGIVER
+
+  # Install busted for "make check".
+  - travis_retry sudo luarocks install busted
+
+  # Install ldoc for building docs.
+  - travis_retry sudo luarocks install ldoc
+  - travis_retry sudo luarocks install lua-discount
+
+  # Determine custom version.
+  - export AWESOME_VERSION="${TRAVIS_BRANCH}-g$(git rev-parse --short HEAD)"
+  - 'if [ "$TRAVIS_PULL_REQUEST" != false ]; then AWESOME_VERSION="${AWESOME_VERSION}-PR${TRAVIS_PULL_REQUEST}"; fi'
+
+script:
+  - export CMAKE_ARGS="-DLUA_LIBRARY=/usr/lib/x86_64-linux-gnu/lib${LUANAME}.so -DLUA_INCLUDE_DIR=${LUAINCLUDE} -D OVERRIDE_VERSION=$AWESOME_VERSION"
+  - make && sudo env PATH=$PATH make install && awesome --version
+
+after_success:
+  # Push updated API docs for relevant branches, e.g. non-PRs builds on master.
+  - if [ "$BUILD_APIDOC" = "true" ]; then build-utils/travis-apidoc.sh; fi
