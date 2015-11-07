@@ -275,6 +275,17 @@ xkb_init(void)
                          XCB_XKB_MAP_PART_VIRTUAL_MODS |
                          XCB_XKB_MAP_PART_VIRTUAL_MOD_MAP;
 
+    /* Enable detectable auto-repeat, but ignore failures */
+    xcb_discard_reply(globalconf.connection,
+            xcb_xkb_per_client_flags(globalconf.connection,
+                                     XCB_XKB_ID_USE_CORE_KBD,
+                                     XCB_XKB_PER_CLIENT_FLAG_DETECTABLE_AUTO_REPEAT,
+                                     XCB_XKB_PER_CLIENT_FLAG_DETECTABLE_AUTO_REPEAT,
+                                     0,
+                                     0,
+                                     0)
+            .sequence);
+
     xcb_xkb_select_events(globalconf.connection,
                           XCB_XKB_ID_USE_CORE_KBD,
                           map,
