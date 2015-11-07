@@ -44,5 +44,14 @@ cairo_surface_t *xwindow_get_shape(xcb_window_t, enum xcb_shape_sk_t);
 void xwindow_set_shape(xcb_window_t, int, int, enum xcb_shape_sk_t, cairo_surface_t *, int);
 void xwindow_translate_for_gravity(xcb_gravity_t, int16_t, int16_t, int16_t, int16_t, int16_t *, int16_t *);
 
+#define xwindow_set_name_static(win, name) \
+    xcb_icccm_set_wm_name(globalconf.connection, win, XCB_ATOM_STRING, 8, sizeof(name) - 1, name)
+#define xwindow_set_class_instance(win) \
+    xwindow_set_class_instance_static(win, "awesome", "awesome")
+#define xwindow_set_class_instance_static(win, instance, class) \
+    _xwindow_set_class_instance_static(win, instance "\0" class)
+#define _xwindow_set_class_instance_static(win, instance_class) \
+    xcb_icccm_set_wm_class(globalconf.connection, win, sizeof(instance_class), instance_class)
+
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
