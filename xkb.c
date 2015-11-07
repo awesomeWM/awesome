@@ -275,14 +275,14 @@ xkb_init(void)
                          XCB_XKB_MAP_PART_VIRTUAL_MODS | 
                          XCB_XKB_MAP_PART_VIRTUAL_MOD_MAP;
 
-    xcb_xkb_select_events_checked(globalconf.connection,
-                                  XCB_XKB_ID_USE_CORE_KBD,
-                                  map,
-                                  0,
-                                  map,
-                                  map_parts,
-                                  map_parts,
-                                  0);
+    xcb_xkb_select_events(globalconf.connection,
+                          XCB_XKB_ID_USE_CORE_KBD,
+                          map,
+                          0,
+                          map,
+                          map_parts,
+                          map_parts,
+                          0);
 
     /* load keymap to use when resolving keypresses */
     xkb_init_keymap();
@@ -294,7 +294,7 @@ void
 xkb_free(void)
 {
     // unsubscribe from all events
-    xcb_xkb_select_events_checked(globalconf.connection,
+    xcb_xkb_select_events(globalconf.connection,
                           XCB_XKB_ID_USE_CORE_KBD,
                           0,
                           0,
