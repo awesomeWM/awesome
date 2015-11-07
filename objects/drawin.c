@@ -353,6 +353,8 @@ drawin_allocator(lua_State *L)
                           globalconf.default_cmap,
                           xcursor_new(globalconf.cursor_ctx, xcursor_font_fromstr(w->cursor))
                       });
+    xwindow_set_class_instance(w->window);
+    xwindow_set_name_static(w->window, "Awesome drawin");
 
     /* Set the right properties */
     ewmh_update_window_type(w->window, window_translate_type(w->type));

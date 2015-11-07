@@ -238,6 +238,9 @@ acquire_WM_Sn(bool replace)
                       -1, -1, 1, 1, 0,
                       XCB_COPY_FROM_PARENT, globalconf.screen->root_visual,
                       0, NULL);
+    xwindow_set_class_instance(globalconf.selection_owner_window);
+    xwindow_set_name_static(globalconf.selection_owner_window,
+            "Awesome WM_Sn selection owner window");
 
     atom_name = xcb_atom_name_by_screen("WM_S", globalconf.default_screen);
     if(!atom_name)
@@ -666,6 +669,8 @@ main(int argc, char **argv)
                           1,
                           globalconf.default_cmap
                       });
+    xwindow_set_class_instance(globalconf.focus.window_no_focus);
+    xwindow_set_name_static(globalconf.focus.window_no_focus, "Awesome no input window");
     xcb_map_window(globalconf.connection, globalconf.focus.window_no_focus);
     xcb_create_gc(globalconf.connection, globalconf.gc, globalconf.focus.window_no_focus,
                   XCB_GC_FOREGROUND | XCB_GC_BACKGROUND,

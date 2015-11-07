@@ -23,6 +23,7 @@
 #include "objects/client.h"
 #include "objects/tag.h"
 #include "common/atoms.h"
+#include "xwindow.h"
 
 #include <sys/types.h>
 #include <unistd.h>
@@ -197,6 +198,9 @@ ewmh_init(void)
     /* set the window manager name */
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
                         father, _NET_WM_NAME, UTF8_STRING, 8, 7, "awesome");
+
+    /* Set an instance, just because we can */
+    xwindow_set_class_instance(father);
 
     /* set the window manager PID */
     i = getpid();

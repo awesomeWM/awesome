@@ -31,6 +31,7 @@
 #include "globalconf.h"
 #include "common/atoms.h"
 #include "event.h"
+#include "xwindow.h"
 
 #include <xcb/xcb_atom.h>
 #include <xcb/xcb_event.h>
@@ -63,6 +64,8 @@ luaA_selection_get(lua_State *L)
         xcb_create_window(globalconf.connection, screen->root_depth, selection_window, screen->root,
                           0, 0, 1, 1, 0, XCB_COPY_FROM_PARENT, screen->root_visual,
                           mask, values);
+        xwindow_set_class_instance(selection_window);
+        xwindow_set_name_static(selection_window, "Awesome selection window");
     }
 
     xcb_convert_selection(globalconf.connection, selection_window,

@@ -50,6 +50,8 @@ systray_init(void)
                       XCB_COPY_FROM_PARENT, xscreen->root_visual,
                       XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK, (const uint32_t [])
                       { xscreen->black_pixel, XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT });
+    xwindow_set_class_instance(globalconf.systray.window);
+    xwindow_set_name_static(globalconf.systray.window, "Awesome systray window");
 
     atom_name = xcb_atom_name_by_screen("_NET_SYSTEM_TRAY", globalconf.default_screen);
     if(!atom_name)
