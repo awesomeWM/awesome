@@ -129,7 +129,7 @@ xkb_fill_state(void)
     int32_t device_id = xkb_x11_get_core_keyboard_device_id(conn);
     if (device_id == -1)
         fatal("Failed while getting XKB device id");
-    
+
     struct xkb_keymap *xkb_keymap = xkb_x11_keymap_new_from_device(
                                 globalconf.xkb_ctx,
                                 conn,
@@ -139,7 +139,7 @@ xkb_fill_state(void)
 
     if (!xkb_keymap)
         fatal("Failed while getting XKB keymap from device");
-    
+
     globalconf.xkb_state = xkb_x11_state_new_from_device(xkb_keymap,
                                                          conn,
                                                          device_id);
@@ -160,7 +160,7 @@ xkb_init_keymap(void)
     globalconf.xkb_ctx = xkb_context_new(XKB_CONTEXT_NO_FLAGS);
     if (!globalconf.xkb_ctx)
         fatal("Failed while getting XKB context");
-    
+
     xkb_fill_state();
 }
 
@@ -220,7 +220,7 @@ event_handle_xkb_notify(xcb_generic_event_t* event)
         {
           xcb_xkb_state_notify_event_t *state_notify_event = (void*)event;
 
-          xkb_state_update_mask(globalconf.xkb_state, 
+          xkb_state_update_mask(globalconf.xkb_state,
                                 state_notify_event->baseMods,
                                 state_notify_event->latchedMods,
                                 state_notify_event->lockedMods,
@@ -272,7 +272,7 @@ xkb_init(void)
                          XCB_XKB_MAP_PART_EXPLICIT_COMPONENTS |
                          XCB_XKB_MAP_PART_KEY_ACTIONS |
                          XCB_XKB_MAP_PART_KEY_BEHAVIORS |
-                         XCB_XKB_MAP_PART_VIRTUAL_MODS | 
+                         XCB_XKB_MAP_PART_VIRTUAL_MODS |
                          XCB_XKB_MAP_PART_VIRTUAL_MOD_MAP;
 
     xcb_xkb_select_events(globalconf.connection,
