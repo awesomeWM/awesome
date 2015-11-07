@@ -32,6 +32,7 @@ local THRESHOLD = "Threshold"
 local index_theme = { mt = {} }
 
 --- Class constructor of `index_theme`
+-- @tparam table cls Metatable that will be used. Should always be `index_theme.mt`.
 -- @tparam string icon_theme_name Internal name of icon theme
 -- @tparam table base_directories Paths used for lookup
 -- @treturn table An instance of the class `index_theme`
@@ -150,7 +151,7 @@ end
 -- @treturn[3] number VAlue of the `MinSize` key
 -- @treturn[4] number Value of the `MaxSize` key
 -- @treturn[5] number Value of the `Threshold` key
-index_theme.get_per_directory_keys = function(self, subdirectory)
+function index_theme:get_per_directory_keys(subdirectory)
     local keys = self.per_directory_keys[subdirectory]
     return keys[TYPE], keys[SIZE], keys[MINSIZE], keys[MAXSIZE], keys[THRESHOLD]
 end

@@ -237,7 +237,7 @@ end
 -- @tparam string icon_name Icon name to be looked up
 -- @tparam number icon_size Prefereable icon size
 -- @treturn string Absolute path to the icon file, or nil if not found
-icon_theme.find_icon_path = function(self, icon_name, icon_size)
+function icon_theme:find_icon_path(icon_name, icon_size)
     if not icon_name or icon_name == "" then
         return nil
     end
