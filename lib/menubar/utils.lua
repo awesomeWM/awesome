@@ -149,7 +149,7 @@ end
 
 local lookup_icon_cache = {}
 --- Lookup an icon in different folders of the filesystem (cached).
--- @param icon_file Short or full name of the icon.
+-- @param icon Short or full name of the icon.
 -- @return full name of the icon.
 function utils.lookup_icon(icon)
     if not lookup_icon_cache[icon] and lookup_icon_cache[icon] ~= false then
