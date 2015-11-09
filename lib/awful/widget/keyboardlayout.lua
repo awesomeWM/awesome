@@ -250,6 +250,7 @@ local function update_layout(self)
         -- is greater by one than the real group number.
         self._layout[v.group_idx - 1] = layout_name
     end
+    awesome.xkb_set_layout_group(0);
     update_status(self)
 end
 
