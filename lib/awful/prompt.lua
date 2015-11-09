@@ -243,6 +243,7 @@ end
 --         if command:sub(1,1) == ":" then
 --           return terminal .. ' -e ' .. command:sub(2)
 --         end
+--         return command
 --       end}
 --     }
 -- @param textbox The textbox to use for the prompt.
