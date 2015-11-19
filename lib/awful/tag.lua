@@ -407,10 +407,16 @@ function tag.incgap(add, t)
     tag.setgap(tag.getgap(t) + add, t)
 end
 
---- Get the spacing between clients
--- @param t Optional tag.
-function tag.getgap(t)
+--- Get the spacing between clients.
+-- @tparam[opt=tag.selected()] tag t The tag.
+-- @tparam[opt] int numclients Number of (tiled) clients.  Passing this will
+--   return 0 for a single client.  You can override this function to change
+--   this behavior.
+function tag.getgap(t, numclients)
     local t = t or tag.selected()
+    if numclients == 1 then
+        return 0
+    end
     return tag.getproperty(t, "useless_gap") or beautiful.useless_gap or 0
 end
 
