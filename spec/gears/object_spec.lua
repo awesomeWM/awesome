@@ -131,6 +131,35 @@ describe("gears.object", function()
             obj:weak_connect_signal("signal", cb)
         end)
     end)
+
+    it("weak signal is disconnected before __gc runs", function()
+        local finalized = false
+        do
+            local userdata
+            local function callback()
+                error("Signal should already be disconnected")
+
+                -- This should reference the object...
+                print("userdata:", userdata)
+            end
+            obj:weak_connect_signal("signal", callback)
+
+            -- Now create an object and tie its lifetime to the callback
+            local function gc()
+                finalized = true
+            end
+            if _VERSION <= "Lua 5.1" then
+                local userdata = newproxy(true)
+                getmetatable(userdata).__gc = gc
+                getmetatable(userdata).callback = callback
+            else
+                userdata = setmetatable({callback}, { __gc = gc })
+            end
+        end
+        collectgarbage("collect")
+        assert.is_true(finalized)
+        obj:emit_signal("signal")
+    end)
 end)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
