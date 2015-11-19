@@ -47,7 +47,6 @@ a_find_program(CAT_EXECUTABLE cat TRUE)
 a_find_program(LN_EXECUTABLE ln TRUE)
 a_find_program(GREP_EXECUTABLE grep TRUE)
 a_find_program(GIT_EXECUTABLE git FALSE)
-a_find_program(HOSTNAME_EXECUTABLE hostname FALSE)
 # programs needed for man pages
 a_find_program(ASCIIDOC_EXECUTABLE asciidoc FALSE)
 a_find_program(XMLTO_EXECUTABLE xmlto FALSE)
@@ -111,14 +110,6 @@ elseif( EXISTS ${SOURCE_DIR}/.version_stamp )
     # get version from version stamp
     file(READ ${SOURCE_DIR}/.version_stamp VERSION)
 endif()
-# }}}
-
-# {{{ Get hostname
-execute_process(
-    COMMAND ${HOSTNAME_EXECUTABLE}
-    WORKING_DIRECTORY ${SOURCE_DIR}
-    OUTPUT_VARIABLE BUILDHOSTNAME
-    OUTPUT_STRIP_TRAILING_WHITESPACE)
 # }}}
 
 # {{{ Required libraries
@@ -271,9 +262,6 @@ endif()
 mark_as_advanced(CMAKE_INSTALL_CMAKE_INSTALL_PREFIX)
 
 set(AWESOME_VERSION          ${VERSION})
-set(AWESOME_COMPILE_MACHINE  ${CMAKE_SYSTEM_PROCESSOR})
-set(AWESOME_COMPILE_HOSTNAME ${BUILDHOSTNAME})
-set(AWESOME_COMPILE_BY       $ENV{USER})
 set(AWESOME_RELEASE          ${CODENAME})
 set(AWESOME_SYSCONFDIR       ${XDG_CONFIG_DIR}/${PROJECT_AWE_NAME})
 set(AWESOME_LUA_LIB_PATH     ${AWESOME_DATA_PATH}/lib)

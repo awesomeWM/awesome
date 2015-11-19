@@ -35,34 +35,24 @@
 void
 eprint_version(void)
 {
-    printf("awesome " AWESOME_VERSION
-	   " (" AWESOME_RELEASE ")\n"
-	   " • Build:");
-#if defined(__DATE__) && defined(__TIME__)
-    printf(" " __DATE__ " " __TIME__);
-#endif
-    printf(" for %s", AWESOME_COMPILE_MACHINE);
-#if defined(__GNUC__)				\
-    && defined(__GNUC_MINOR__)			\
-    && defined(__GNUC_PATCHLEVEL__)
-    printf(" by gcc version %d.%d.%d",
-	   __GNUC__, __GNUC_MINOR__, __GNUC_PATCHLEVEL__);
-#endif
-    printf(" (%s@%s)\n", AWESOME_COMPILE_BY, AWESOME_COMPILE_HOSTNAME);
-
     lua_State *L = luaL_newstate();
     luaopen_base(L);
     lua_getglobal(L, "_VERSION");
-    printf(" • Compiled against "  LUA_RELEASE
-           " (running with %s)\n", lua_tostring(L, -1));
+
+#ifdef WITH_DBUS
+    const char *has_dbus = "✔";
+#else
+    const char *has_dbus = "✘";
+#endif
+
+    printf("awesome %s (%s)\n"
+           " • Compiled against %s (running with %s)\n"
+           " • D-Bus support: %s\n",
+           AWESOME_VERSION, AWESOME_RELEASE,
+           LUA_RELEASE, lua_tostring(L, -1),
+           has_dbus);
     lua_close(L);
 
-    printf(" • D-Bus support: ");
-#ifdef WITH_DBUS
-    printf("✔\n");
-#else
-    printf("✘\n");
-#endif
     exit(EXIT_SUCCESS);
 }
 
