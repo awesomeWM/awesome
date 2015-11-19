@@ -192,7 +192,7 @@ function tasklist.new(screen, filter, buttons, style, update_function, base_widg
             end
         end
         local function u()
-            for s in ipairs(instances) do
+            for s in pairs(instances) do
                 us(s)
             end
         end
