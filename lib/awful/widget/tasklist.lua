@@ -225,7 +225,7 @@ function tasklist.new(screen, filter, buttons, style, update_function, base_widg
         capi.client.connect_signal("unfocus", u)
     end
     w._do_tasklist_update()
-    local list = instances[s]
+    local list = instances[screen]
     if not list then
         list = setmetatable({}, { __mode = "v" })
         instances[screen] = list
