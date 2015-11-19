@@ -40,7 +40,7 @@ function object:add_signal(name)
     if not self._signals[name] then
         self._signals[name] = {
             strong = {},
-            weak = setmetatable({}, { __mode = "k" })
+            weak = setmetatable({}, { __mode = "kv" })
         }
     end
 end
@@ -55,6 +55,35 @@ function object:connect_signal(name, func)
     sig.strong[func] = true
 end
 
+local function make_the_gc_obey(func)
+    if _VERSION <= "Lua 5.1" then
+        -- Lua 5.1 only has the behaviour we want if a userdata is used as the
+        -- value in a weak table. Thus, do some magic so that we get a userdata.
+
+        local userdata = newproxy(true)
+        getmetatable(userdata).__gc = function() end
+        -- Now bind the lifetime of userdata to the lifetime of func. For this,
+        -- we mess with the function's environment and add a table for all the
+        -- various userdata that it should keep alive.
+        local key = "_secret_key_used_by_gears_object_in_Lua51"
+        local old_env = getfenv(func)
+        if old_env[key] then
+            -- Assume the code in the else branch added this and the function
+            -- already has its own, private environment
+            table.insert(old_env[key], userdata)
+        else
+            -- No table yet, add it
+            local new_env = { [key] = { userdata } }
+            setmetatable(new_env, { __index = old_env, __newindex = old_env })
+            setfenv(func, new_env)
+        end
+        assert(_G[key] == nil, "Something broke, things escaped to _G")
+        return userdata
+    end
+    -- Lua 5.2+ already behaves the way we want with functions directly, no magic
+    return func
+end
+
 --- Connect to a signal weakly. This allows the callback function to be garbage
 -- collected and automatically disconnects the signal when that happens.
 -- @param name The name of the signal
@@ -63,7 +92,7 @@ function object:weak_connect_signal(name, func)
     assert(type(func) == "function", "callback must be a function, got: " .. type(func))
     local sig = find_signal(self, name, "connect to")
     assert(sig.strong[func] == nil, "Trying to connect a weak callback which is already connected strongly")
-    sig.weak[func] = true
+    sig.weak[func] = make_the_gc_obey(func)
 end
 
 --- Disonnect to a signal
