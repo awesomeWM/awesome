@@ -121,7 +121,7 @@ function layout.arrange(screen)
 
         local p = {}
         p.workarea = capi.screen[screen].workarea
-        local useless_gap = tag.getgap(tag.selected(screen))
+        local useless_gap = tag.getgap(tag.selected(screen), #client.tiled(s))
         -- Handle padding
         local padding = ascreen.padding(capi.screen[screen]) or {}
         p.workarea.x = p.workarea.x + (padding.left or 0) + useless_gap
