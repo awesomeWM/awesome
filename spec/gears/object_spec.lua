@@ -52,6 +52,12 @@ describe("gears.object", function()
             called = true
         end
         obj:weak_connect_signal("signal", cb)
+
+        -- Check that the GC doesn't disconnect the signal
+        for i = 1, 10 do
+            collectgarbage("collect")
+        end
+
         obj:emit_signal("signal")
         assert.is_true(called)
     end)
