@@ -188,6 +188,9 @@ function utils.parse(file)
     -- In case [Desktop Entry] was not found
     if not desktop_entry then return nil end
 
+    -- In case the (required) 'Name' entry was not found
+    if not program.Name or program.Name == '' then return nil end
+
     -- Don't show program if NoDisplay attribute is false
     if program.NoDisplay and string.lower(program.NoDisplay) == "true" then
         program.show = false
