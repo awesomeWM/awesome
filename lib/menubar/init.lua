@@ -315,7 +315,7 @@ function menubar.show(scr)
     awful.prompt.run(prompt_args, instance.prompt.widget,
                 function(s) end,            -- exe_callback function set to do nothing
                 awful.completion.shell,     -- completion_callback
-                awful.util.getdir("cache") .. "/history_menu",
+                awful.util.get_cache_dir() .. "/history_menu",
                 nil,
                 menubar.hide, function(query) menulist_update(query, scr) end,
                 prompt_keypressed_callback

@@ -318,7 +318,7 @@ globalkeys = awful.util.table.join(
                   awful.prompt.run({ prompt = "Run Lua code: " },
                   mypromptbox[awful.screen.focused()].widget,
                   awful.util.eval, nil,
-                  awful.util.getdir("cache") .. "/history_eval")
+                  awful.util.get_cache_dir() .. "/history_eval")
               end,
               {description = "lua execute prompt", group = "awesome"}),
     -- Menubar
