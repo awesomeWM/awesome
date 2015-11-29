@@ -97,11 +97,17 @@ end
 --   output on stderr, e.g. `stderr_callback(line)`.
 -- @tparam[opt] function done_callback Function to call when no more output is
 --   produced.
+-- @tparam[opt] function exit_callback Function to call when the spawned process
+-- exits. This function gets the exit reason and code as its argument. The
+-- reason can be "exit" or "signal". For "exit", the second argument is the exit
+-- code. For "signal", the second argument is the signal causing process
+-- termination.
 -- @treturn[1] Integer the PID of the forked process.
 -- @treturn[2] string Error message.
-function spawn.with_line_callback(cmd, stdout_callback, stderr_callback, done_callback)
+function spawn.with_line_callback(cmd, stdout_callback, stderr_callback, done_callback, exit_callback)
     local have_stdout, have_stderr = stdout_callback ~= nil, stderr_callback ~= nil
-    local pid, sn_id, stdin, stdout, stderr = capi.awesome.spawn(cmd, false, false, have_stdout, have_stderr)
+    local pid, sn_id, stdin, stdout, stderr = capi.awesome.spawn(cmd,
+            false, false, have_stdout, have_stderr, exit_callback)
     if type(pid) == "string" then
         -- Error
         return pid
