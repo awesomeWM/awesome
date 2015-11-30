@@ -543,6 +543,9 @@ main(int argc, char **argv)
     /* We have no clue where the input focus is right now */
     globalconf.focus.need_update = true;
 
+    /* set the default preferred icon size */
+    globalconf.preferred_icon_size = 0;
+
     /* XLib sucks */
     XkbIgnoreExtension(True);
 

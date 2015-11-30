@@ -167,6 +167,8 @@ typedef struct
     struct xkb_context *xkb_ctx;
     /* xkb state of dead keys on keyboard */
     struct xkb_state *xkb_state;
+    /** The preferred size of client icons for this screen */
+    uint32_t preferred_icon_size;
 } awesome_t;
 
 extern awesome_t globalconf;

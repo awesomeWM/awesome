@@ -273,7 +273,7 @@ property_get_net_wm_icon(client_t *c)
 void
 property_update_net_wm_icon(client_t *c, xcb_get_property_cookie_t cookie)
 {
-    cairo_surface_t *surface = ewmh_window_icon_get_reply(cookie);
+    cairo_surface_t *surface = ewmh_window_icon_get_reply(cookie, globalconf.preferred_icon_size);
 
     if(!surface)
         return;
