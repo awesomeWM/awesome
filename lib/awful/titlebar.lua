@@ -64,7 +64,7 @@ end
 local function new(c, args)
     local args = args or {}
     local position = args.position or "top"
-    local size = args.size or beautiful.get_font_height(args.font) * 1.5
+    local size = args.size or math.floor(beautiful.get_font_height(args.font) * 1.5)
     local d = get_titlebar_function(c, position)(c, size)
 
     -- Make sure that there is never more than one titlebar for any given client
