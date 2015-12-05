@@ -51,6 +51,28 @@ function base.widget:set_opacity(o)
     end
 end
 
+--- Set the widget's width
+-- @tparam number|nil s The width that the widget has. `nil` means to apply the
+-- default mechanism of calling the `:fit` method. A number overrides the result
+-- from `:fit`.
+function base.widget:set_width(s)
+    if s ~= self._forced_width then
+        self._forced_width = s
+        self:emit_signal("widget::layout_changed")
+    end
+end
+
+--- Set the widget's height
+-- @tparam number|nil s The height that the widget has. `nil` means to apply the
+-- default mechanism of calling the `:fit` method. A number overrides the result
+-- from `:fit`.
+function base.widget:set_height(s)
+    if s ~= self._forced_height then
+        self._forced_height = s
+        self:emit_signal("widget::layout_changed")
+    end
+end
+
 -- }}}
 
 -- {{{ Caches
@@ -140,6 +162,10 @@ function base.fit_widget(parent, context, widget, width, height)
             w, h = math.max(w, x + w2), math.max(h, y + h2)
         end
     end
+
+    -- Apply forced size
+    w = widget._forced_width or w
+    h = widget._forced_height or h
 
     -- Also sanitize the output.
     w = math.max(0, math.min(w, width))
@@ -393,6 +419,10 @@ function base.make_widget(proxy, widget_name)
 
     -- Widget is fully opaque
     ret.opacity = 1
+
+    -- Size is not restricted/forced
+    ret._forced_width = nil
+    ret._forced_height = nil
 
     -- Make buttons work
     ret:connect_signal("button::press", function(...)
