@@ -9,6 +9,7 @@
 
 local error = error
 local type = type
+local util = require("awful.util")
 local abutton = require("awful.button")
 local aclient = require("awful.client")
 local atooltip = require("awful.tooltip")
@@ -64,7 +65,7 @@ end
 local function new(c, args)
     local args = args or {}
     local position = args.position or "top"
-    local size = args.size or beautiful.get_font_height(args.font) * 1.5
+    local size = args.size or util.round(beautiful.get_font_height(args.font) * 1.5)
     local d = get_titlebar_function(c, position)(c, size)
 
     -- Make sure that there is never more than one titlebar for any given client
