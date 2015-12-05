@@ -15,6 +15,44 @@ local table = table
 
 local base = {}
 
+-- {{{ Functions on widgets
+
+--- Functions available on all widgets
+base.widget = {}
+
+--- Set/get a widget's buttons.
+-- @param _buttons The table of buttons that should bind to the widget.
+function base.widget:buttons(_buttons)
+    if _buttons then
+        self.widget_buttons = _buttons
+    end
+
+    return self.widget_buttons
+end
+
+--- Set a widget's visible property
+-- @tparam boolean b Wether the widget is visible at all
+function base.widget:set_visible(b)
+    if b ~= self.visible then
+        self.visible = b
+        self:emit_signal("widget::layout_changed")
+        -- In case something ignored fit and drew the widget anyway
+        self:emit_signal("widget::redraw_needed")
+    end
+end
+
+--- Set a widget's opacity
+-- @tparam number o The opacity to use (a number from 0 to 1). 0 is fully
+-- transparent while 1 is fully opaque.
+function base.widget:set_opacity(o)
+    if o ~= self.opacity then
+        self.opacity = o
+        self:emit_signal("widget::redraw")
+    end
+end
+
+-- }}}
+
 -- {{{ Caches
 
 -- Indexes are widgets, allow them to be garbage-collected
@@ -133,16 +171,6 @@ function base.layout_widget(parent, context, widget, width, height)
     if widget.layout then
         return get_cache(widget, "layout"):get(context, width, height)
     end
-end
-
---- Set/get a widget's buttons.
--- This function is available on widgets created by @{make_widget}.
-function base:buttons(_buttons)
-    if _buttons then
-        self.widget_buttons = _buttons
-    end
-
-    return self.widget_buttons
 end
 
 -- Handle a button event on a widget. This is used internally and should not be
@@ -359,7 +387,12 @@ function base.make_widget(proxy, widget_name)
 
     -- No buttons yet
     ret.widget_buttons = {}
-    ret.buttons = base.buttons
+
+    -- Widget is visible
+    ret.visible = true
+
+    -- Widget is fully opaque
+    ret.opacity = 1
 
     -- Make buttons work
     ret:connect_signal("button::press", function(...)
@@ -390,24 +423,9 @@ function base.make_widget(proxy, widget_name)
         clear_caches(ret)
     end)
 
-    -- Add visible property and setter.
-    ret.visible = true
-    function ret:set_visible(b)
-        if b ~= self.visible then
-            self.visible = b
-            self:emit_signal("widget::layout_changed")
-            -- In case something ignored fit and drew the widget anyway
-            self:emit_signal("widget::redraw_needed")
-        end
-    end
-
-    -- Add opacity property and setter.
-    ret.opacity = 1
-    function ret:set_opacity(b)
-        if b ~= self.opacity then
-            self.opacity = b
-            self:emit_signal("widget::redraw")
-        end
+    -- Add functions
+    for k, v in pairs(base.widget) do
+        ret[k] = v
     end
 
     -- Add __tostring method to metatable.
