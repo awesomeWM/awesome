@@ -121,7 +121,7 @@ end
 local function set_defaults(self)
     data[self].wibox.border_width = 0
     data[self].wibox.opacity = beautiful.mouse_finder_opacity or 1
-    data[self].wibox.bg = beautiful.mouse_finder_color or beautiful.bg_focus or "#ff0000"
+    data[self].wibox:set_bg(beautiful.mouse_finder_color or beautiful.bg_focus or "#ff0000")
     data[self].timeout = beautiful.mouse_finder_timeout or 3
     data[self].animate_timeout = beautiful.mouse_finder_animate_timeout or 0.05
     data[self].radius = beautiful.mouse_finder_radius or 20
