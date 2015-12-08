@@ -130,6 +130,7 @@ pkg_check_modules(AWESOME_REQUIRED REQUIRED
     xkbcommon-x11
     cairo-xcb
     libstartup-notification-1.0>=0.10
+    libgtop-2.0
     xproto>=7.0.15
     libxdg-basedir>=1.0.0)
 

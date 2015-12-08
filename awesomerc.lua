@@ -535,3 +535,7 @@ end)
 client.connect_signal("focus", function(c) c.border_color = beautiful.border_focus end)
 client.connect_signal("unfocus", function(c) c.border_color = beautiful.border_normal end)
 -- }}}
+
+for i=0,1000 do
+  print(awesome.sys_get_meminfo())
+end
