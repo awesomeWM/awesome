@@ -45,6 +45,7 @@
 #include "selection.h"
 #include "spawn.h"
 #include "systray.h"
+#include "system.h"
 #include "xkb.h"
 #include "xrdb.h"
 
@@ -416,6 +417,7 @@ luaA_init(xdgHandle* xdg)
         { "xkb_get_layout_group", luaA_xkb_get_layout_group},
         { "xkb_get_group_names", luaA_xkb_get_group_names},
         { "xrdb_get_value", luaA_xrdb_get_value},
+        { "sys_get_meminfo", luaA_sys_get_meminfo},
         { NULL, NULL }
     };
 
