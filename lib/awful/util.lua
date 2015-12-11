@@ -158,6 +158,18 @@ function util.get_cache_dir()
     return util.get_xdg_cache_home() .. "awesome/"
 end
 
+--- Get the path to the directory where themes are installed.
+-- @return A string with the requested path with a slash at the end.
+function util.get_themes_dir()
+    return "@AWESOME_THEMES_PATH@" .. "/"
+end
+
+--- Get the path to the directory where our icons are installed.
+-- @return A string with the requested path with a slash at the end.
+function util.get_awesome_icon_dir()
+    return "@AWESOME_ICON_PATH@" .. "/"
+end
+
 --- Get the user's config or cache dir.
 -- It first checks XDG_CONFIG_HOME / XDG_CACHE_HOME, but then goes with the
 -- default paths.
