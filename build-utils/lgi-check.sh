@@ -33,3 +33,5 @@ lua -e '_, _, major_minor, patch = string.find(require("lgi.version"), "^(%d%.%d
 
 # Check for the needed gi files
 lua -e 'l = require("lgi") assert(l.cairo, l.Pango, l.PangoCairo, l.GLib, l.Gio)' || die
+
+# vim: filetype=sh:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

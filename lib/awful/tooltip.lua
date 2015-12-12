@@ -284,4 +284,4 @@ end
 
 return setmetatable(tooltip, tooltip.mt)
 
--- vim: ft=lua:et:sw=4:ts=4:sts=4:tw=78
+-- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

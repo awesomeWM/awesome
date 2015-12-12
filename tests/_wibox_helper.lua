@@ -30,3 +30,5 @@ return { create_wibox = function()
 
     return wb, textclock, img, left_layout, right_layout, layout
 end }
+
+-- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

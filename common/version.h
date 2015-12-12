@@ -27,3 +27,5 @@ const char *awesome_version_string(void);
 const char *awesome_release_string(void);
 
 #endif
+
+// vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

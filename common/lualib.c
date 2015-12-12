@@ -61,3 +61,5 @@ void luaA_dumpstack(lua_State *L)
     }
     fprintf(stderr, "------- Lua stack dump end ------\n");
 }
+
+// vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

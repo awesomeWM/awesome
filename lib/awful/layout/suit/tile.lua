@@ -321,3 +321,5 @@ tile.mouse_resize_handler = tile.right.mouse_resize_handler
 tile.name = tile.right.name
 
 return tile
+
+-- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

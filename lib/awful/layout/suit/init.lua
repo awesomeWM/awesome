@@ -16,3 +16,5 @@ return
     magnifier = require("awful.layout.suit.magnifier");
     spiral = require("awful.layout.suit.spiral");
 }
+
+-- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

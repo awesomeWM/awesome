@@ -33,5 +33,6 @@ int luaA_xkb_set_layout_group(lua_State *L);
 int luaA_xkb_get_layout_group(lua_State *L);
 int luaA_xkb_get_group_names(lua_State *L);
 
-
 #endif
+
+// vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

@@ -184,3 +184,5 @@ if ! [ $errors = 0 ]; then
     exit 1
 fi
 exit 0
+
+# vim: filetype=sh:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

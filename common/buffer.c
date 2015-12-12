@@ -113,3 +113,5 @@ buffer_detach(buffer_t *buf)
     buffer_init(buf);
     return res;
 }
+
+// vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
