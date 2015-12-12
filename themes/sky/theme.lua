@@ -82,4 +82,5 @@ theme.titlebar_maximized_button_normal_active = "@AWESOME_THEMES_PATH@/default/t
 theme.titlebar_maximized_button_focus_active = "@AWESOME_THEMES_PATH@/default/titlebar/maximized_focus_active.png"
 
 return theme
+
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
