@@ -74,3 +74,5 @@ int luaA_xrdb_get_value(lua_State *L) {
     return 0;
   }
 }
+
+// vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

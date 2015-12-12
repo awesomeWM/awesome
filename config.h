@@ -10,3 +10,5 @@
 #cmakedefine HAS___BUILTIN_CLZ
 
 #endif //_CONFIG_H_
+
+// vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

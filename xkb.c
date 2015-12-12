@@ -315,3 +315,5 @@ xkb_free(void)
                           0);
     xkb_free_keymap();
 }
+
+// vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
