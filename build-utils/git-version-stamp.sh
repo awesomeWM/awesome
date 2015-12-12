@@ -29,3 +29,5 @@ then
     mv "$2.new" "$2"
     echo -n "$CURRENT" > "$1"
 fi
+
+# vim: filetype=sh:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

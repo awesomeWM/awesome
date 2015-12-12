@@ -107,3 +107,5 @@ if [ "$TRAVIS_PULL_REQUEST" != false ]; then
     -d "{\"body\": \"Documentation has been updated for this PR:\n$COMPARE_LINKS\"}" \
     https://api.github.com/repos/awesomeWM/awesome/issues/${TRAVIS_PULL_REQUEST}/comments
 fi
+
+# vim: filetype=sh:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
