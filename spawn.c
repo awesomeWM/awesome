@@ -342,6 +342,28 @@ parse_command(lua_State *L, int idx, GError **error)
     return argv;
 }
 
+/** Callback for when a spawned process exits. */
+static void
+child_exit_callback(GPid pid, gint status, gpointer user_data)
+{
+    lua_State *L = globalconf_get_lua_State();
+    int exit_callback = GPOINTER_TO_INT(user_data);
+
+    /* 'Decode' the exit status */
+    if (WIFEXITED(status)) {
+        lua_pushliteral(L, "exit");
+        lua_pushnumber(L, WEXITSTATUS(status));
+    } else {
+        assert(WIFSIGNALED(status));
+        lua_pushliteral(L, "signal");
+        lua_pushnumber(L, WTERMSIG(status));
+    }
+
+    lua_rawgeti(L, LUA_REGISTRYINDEX, exit_callback);
+    luaA_dofunction(L, 2, 0);
+    luaA_unregister(L, &exit_callback);
+}
+
 /** Spawn a program.
  * The program will be started on the default screen.
  *
@@ -350,6 +372,9 @@ parse_command(lua_State *L, int idx, GError **error)
  * @tparam[opt=false] boolean stdin Return a fd for stdin?
  * @tparam[opt=false] boolean stdout Return a fd for stdout?
  * @tparam[opt=false] boolean stderr Return a fd for stderr?
+ * @tparam[opt=nil] function exit_callback Function to call on process exit. The
+ * function arguments will be type of exit ("exit" or "signal") and the exit
+ * code / the signal number causing process termination.
  * @treturn[1] integer Process ID if everything is OK.
  * @treturn[1] string Startup-notification ID, if `use_sn` is true.
  * @treturn[1] integer stdin, if `stdin` is true.
@@ -365,6 +390,7 @@ luaA_spawn(lua_State *L)
     bool use_sn = true, return_stdin = false, return_stdout = false, return_stderr = false;
     int stdin_fd = -1, stdout_fd = -1, stderr_fd = -1;
     int *stdin_ptr = NULL, *stdout_ptr = NULL, *stderr_ptr = NULL;
+    GSpawnFlags flags = 0;
     gboolean retval;
     GPid pid;
 
@@ -376,6 +402,11 @@ luaA_spawn(lua_State *L)
         return_stdout = luaA_checkboolean(L, 4);
     if(lua_gettop(L) >= 5)
         return_stderr = luaA_checkboolean(L, 5);
+    if(lua_gettop(L) >= 6)
+    {
+        luaA_checkfunction(L, 6);
+        flags |= G_SPAWN_DO_NOT_REAP_CHILD;
+    }
     if(return_stdin)
         stdin_ptr = &stdin_fd;
     if(return_stdout)
@@ -409,7 +440,8 @@ luaA_spawn(lua_State *L)
         g_timeout_add_seconds(AWESOME_SPAWN_TIMEOUT, spawn_launchee_timeout, context);
     }
 
-    retval = g_spawn_async_with_pipes(NULL, argv, NULL, G_SPAWN_SEARCH_PATH,
+    flags |= G_SPAWN_SEARCH_PATH;
+    retval = g_spawn_async_with_pipes(NULL, argv, NULL, flags,
                                       spawn_callback, context, &pid,
                                       stdin_ptr, stdout_ptr, stderr_ptr, &error);
     g_strfreev(argv);
@@ -422,6 +454,14 @@ luaA_spawn(lua_State *L)
         if(context)
             sn_launcher_context_complete(context);
         return 1;
+    }
+
+    if(flags & G_SPAWN_DO_NOT_REAP_CHILD)
+    {
+        int exit_callback = LUA_REFNIL;
+        /* Only do this down here to avoid leaks in case of errors */
+        luaA_registerfct(L, 6, &exit_callback);
+        g_child_watch_add(pid, child_exit_callback, GINT_TO_POINTER(exit_callback));
     }
 
     /* push pid on stack */
