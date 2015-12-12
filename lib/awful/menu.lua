@@ -459,12 +459,13 @@ end
 
 --------------------------------------------------------------------------------
 
---- Build a popup menu with running clients and shows it.
--- @param args Menu table, see new() function for more informations.
--- @param item_args Table that will be merged into each item, see new() for more
---   informations.
--- @param filter A function taking a client as an argument and returning true or
---   false to indicate whether the client should be included in the menu.
+--- Build a popup menu with running clients and show it.
+-- @tparam[opt] table args Menu table, see `new()` for more information.
+-- @tparam[opt] table item_args Table that will be merged into each item, see
+--   `new()` for more information.
+-- @tparam[opt] func filter A function taking a client as an argument and
+--   returning `true` or `false` to indicate whether the client should be
+--   included in the menu.
 -- @return The menu.
 function menu.clients(args, item_args, filter)
     local cls_t = {}
