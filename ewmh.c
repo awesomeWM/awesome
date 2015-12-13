@@ -662,27 +662,45 @@ ewmh_window_icon_get_unchecked(xcb_window_t w)
 }
 
 static cairo_surface_t *
-ewmh_window_icon_from_reply(xcb_get_property_reply_t *r)
+ewmh_window_icon_from_reply(xcb_get_property_reply_t *r, uint32_t preferred_size)
 {
-    uint32_t *data;
-    uint64_t len;
+    uint32_t *data, *end, *found_data = 0;
+    uint32_t found_size = 0;
 
     if(!r || r->type != XCB_ATOM_CARDINAL || r->format != 32 || r->length < 2)
         return 0;
 
     data = (uint32_t *) xcb_get_property_value(r);
-    if (!data)
-        return 0;
+    if (!data) return 0;
 
-    /* Check that the property is as long as it should be, handling integer
-     * overflow. <uint32_t> times <another uint32_t casted to uint64_t> always
-     * fits into an uint64_t and thus this multiplication cannot overflow.
+    end = data + r->length;
+
+    /* Goes over the icon data and picks the icon that best matches the size preference.
+     * In case the size match is not exact, picks the closest bigger size if present,
+     * closest smaller size otherwise.
      */
-    len = data[0] * (uint64_t) data[1];
-    if (!data[0] || !data[1] || len > r->length - 2)
-        return 0;
+    while (data + 1 < end) {
+        /* check whether the data size specified by width and height fits into the array we got */
+        uint64_t data_size = (uint64_t) data[0] * data[1];
+        if (data_size > (uint64_t) (end - data - 2)) break;
 
-    return draw_surface_from_data(data[0], data[1], data + 2);
+        /* use the greater of the two dimensions to match against the preferred size */
+        uint32_t size = MAX(data[0], data[1]);
+        /* pick the icon if it's a better match than the one we already have */
+        if (data[0] && data[1] && (
+            (found_size < preferred_size && size > found_size) ||
+            (found_size > preferred_size && size >= preferred_size && size < found_size)))
+        {
+            found_data = data;
+            found_size = size;
+        }
+
+        data += data_size + 2;
+    }
+
+    if (!found_data) return 0;
+
+    return draw_surface_from_data(found_data[0], found_data[1], found_data + 2);
 }
 
 /** Get NET_WM_ICON.
@@ -690,10 +708,10 @@ ewmh_window_icon_from_reply(xcb_get_property_reply_t *r)
  * \return The number of elements on stack.
  */
 cairo_surface_t *
-ewmh_window_icon_get_reply(xcb_get_property_cookie_t cookie)
+ewmh_window_icon_get_reply(xcb_get_property_cookie_t cookie, uint32_t preferred_size)
 {
     xcb_get_property_reply_t *r = xcb_get_property_reply(globalconf.connection, cookie, NULL);
-    cairo_surface_t *surface = ewmh_window_icon_from_reply(r);
+    cairo_surface_t *surface = ewmh_window_icon_from_reply(r, preferred_size);
     p_delete(&r);
     return surface;
 }

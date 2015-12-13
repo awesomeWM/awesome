@@ -162,6 +162,21 @@ luaA_load_image(lua_State *L)
     return 1;
 }
 
+/** Set the preferred size for client icons.
+ *
+ * The closest equal or bigger size is picked if present, otherwise the closest
+ * smaller size is picked. The default is 0 pixels, ie. the smallest icon.
+ *
+ * @param size The size of the icons in pixels.
+ * @function set_preferred_icon_size
+ */
+static int
+luaA_set_preferred_icon_size(lua_State *L)
+{
+    globalconf.preferred_icon_size = luaL_checknumber(L, 1);
+    return 0;
+}
+
 /** UTF-8 aware string length computing.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
@@ -407,6 +422,7 @@ luaA_init(xdgHandle* xdg)
         { "emit_signal", luaA_awesome_emit_signal },
         { "systray", luaA_systray },
         { "load_image", luaA_load_image },
+        { "set_preferred_icon_size", luaA_set_preferred_icon_size },
         { "register_xproperty", luaA_register_xproperty },
         { "set_xproperty", luaA_set_xproperty },
         { "get_xproperty", luaA_get_xproperty },
