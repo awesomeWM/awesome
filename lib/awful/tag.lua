@@ -420,6 +420,23 @@ function tag.getgap(t, numclients)
     return tag.getproperty(t, "useless_gap") or beautiful.useless_gap or 0
 end
 
+--- Set the padding for tag
+-- @param padding The table {left, right, top, bottom}
+-- @param[opt=tag.selected()] t The tag
+function tag.setpadding(padding, t)
+    local t = t or tag.selected()
+    if padding then tag.setproperty(t, "tag_padding", padding) end
+end
+
+--- Get the padding for tag
+-- @param[opt=tag.selected()] tag The tag
+-- @return The table {left, right, top, bottom}, if no padding for tag then try
+--   to search padding in beautiful. other side return null
+function tag.getpadding(t)
+    local t = t or tag.selected()
+    return tag.getproperty(t, "tag_padding") or beautiful.tag_padding or {}
+end
+
 --- Set size fill policy for the master client(s)
 -- @tparam string policy Can be set to
 -- "expand" (fill all the available workarea) or
