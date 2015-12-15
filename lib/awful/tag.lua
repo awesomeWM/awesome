@@ -421,16 +421,16 @@ function tag.getgap(t, numclients)
 end
 
 --- Set the padding for tag
--- @param padding The table {left, right, top, bottom}
--- @param[opt=tag.selected()] t The tag
+-- @tparam padding The table {left, right, top, bottom}
+-- @tparam[opt=tag.selected()] t The tag
 function tag.setpadding(padding, t)
     local t = t or tag.selected()
     if padding then tag.setproperty(t, "tag_padding", padding) end
 end
 
 --- Get the padding for tag
--- @param[opt=tag.selected()] tag The tag
--- @return The table {left, right, top, bottom}, if no padding for tag then try
+-- @tparam[opt=tag.selected()] tag The tag
+-- @treturn The table {left, right, top, bottom}, if no padding for tag then try
 --   to search padding in beautiful. other side return null
 function tag.getpadding(t)
     local t = t or tag.selected()
