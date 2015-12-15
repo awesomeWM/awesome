@@ -123,7 +123,9 @@ function spawn.with_line_callback(cmd, callbacks)
             done_before = true
             return
         end
-        done_callback()
+        if done_callback then
+            done_callback()
+        end
     end
     if have_stdout then
         spawn.read_lines(Gio.UnixInputStream.new(stdout, true),
