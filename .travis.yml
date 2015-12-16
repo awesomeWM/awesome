@@ -21,7 +21,7 @@ before_install:
 
 install:
   # Travis boilerplate: the apt-get cache might be out of date.
-  - sudo apt-get update -qq
+  - travis_retry sudo apt-get update -qq
 
   # Do not install recommended packages with apt-get.
   - echo 'APT::Install-Recommends "false";' | sudo tee /etc/apt/apt.conf.d/no-recommends
