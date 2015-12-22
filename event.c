@@ -856,7 +856,7 @@ event_handle_mappingnotify(xcb_mapping_notify_event_t *ev)
         foreach(_c, globalconf.clients)
         {
             client_t *c = *_c;
-            xwindow_grabkeys(c->frame_window, &c->keys);
+            xwindow_grabkeys(c->window, &c->keys);
         }
     }
 }
