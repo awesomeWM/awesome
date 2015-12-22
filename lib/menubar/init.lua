@@ -122,6 +122,7 @@ end
 --- Cut item list to return only current page.
 -- @tparam table all_items All items list.
 -- @tparam str query Search query.
+-- @tparam number scr Screen number
 -- @return table List of items for current page.
 local function get_current_page(all_items, query, scr)
     if not instance.prompt.width then
@@ -160,6 +161,7 @@ end
 
 --- Update the menubar according to the command entered by user.
 -- @tparam str query Search query.
+-- @tparam number scr Screen number
 local function menulist_update(query, scr)
     query = query or ""
     shownitems = {}
