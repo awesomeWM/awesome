@@ -27,65 +27,6 @@
 #include <xcb/xcb.h>
 #include <xcb/xcb_icccm.h>
 
-/** Get the lock masks (shiftlock, numlock, capslock, modeswitch).
- * \param connection The X connection.
- * \param cookie The cookie of the request.
- * \param keysyms Key symbols.
- * \param numlockmask Numlock mask.
- * \param shiftlockmask Shiftlock mask.
- * \param capslockmask Capslock mask.
- * \todo Split this.
- */
-void
-xutil_lock_mask_get(xcb_connection_t *connection,
-                    xcb_get_modifier_mapping_cookie_t cookie,
-                    xcb_key_symbols_t *keysyms,
-                    uint16_t *numlockmask,
-                    uint16_t *shiftlockmask,
-                    uint16_t *capslockmask,
-                    uint16_t *modeswitchmask)
-{
-    xcb_get_modifier_mapping_reply_t *modmap_r;
-    xcb_keycode_t *modmap, kc;
-    xcb_keycode_t *numlockcodes = xcb_key_symbols_get_keycode(keysyms, XK_Num_Lock);
-    xcb_keycode_t *shiftlockcodes = xcb_key_symbols_get_keycode(keysyms, XK_Shift_Lock);
-    xcb_keycode_t *capslockcodes = xcb_key_symbols_get_keycode(keysyms, XK_Caps_Lock);
-    xcb_keycode_t *modeswitchcodes = xcb_key_symbols_get_keycode(keysyms, XK_Mode_switch);
-
-    modmap_r = xcb_get_modifier_mapping_reply(connection, cookie, NULL);
-    modmap = xcb_get_modifier_mapping_keycodes(modmap_r);
-
-    /* reset */
-    *numlockmask = *shiftlockmask = *capslockmask = *modeswitchmask = 0;
-
-    int i;
-    for(i = 0; i < 8; i++)
-        for(int j = 0; j < modmap_r->keycodes_per_modifier; j++)
-        {
-            kc = modmap[i * modmap_r->keycodes_per_modifier + j];
-
-#define LOOK_FOR(mask, codes) \
-            if(*mask == 0 && codes) \
-                for(xcb_keycode_t *ktest = codes; *ktest; ktest++) \
-                    if(*ktest == kc) \
-                    { \
-                        *mask = (1 << i); \
-                        break; \
-                    }
-
-            LOOK_FOR(numlockmask, numlockcodes)
-            LOOK_FOR(shiftlockmask, shiftlockcodes)
-            LOOK_FOR(capslockmask, capslockcodes)
-            LOOK_FOR(modeswitchmask, modeswitchcodes)
-#undef LOOK_FOR
-        }
-    p_delete(&numlockcodes);
-    p_delete(&shiftlockcodes);
-    p_delete(&capslockcodes);
-    p_delete(&modeswitchcodes);
-    p_delete(&modmap_r);
-}
-
 uint16_t
 xutil_key_mask_fromstr(const char *keyname)
 {

@@ -630,19 +630,12 @@ main(int argc, char **argv)
 
     /* Allocate the key symbols */
     globalconf.keysyms = xcb_key_symbols_alloc(globalconf.connection);
-    xcb_get_modifier_mapping_cookie_t xmapping_cookie =
-        xcb_get_modifier_mapping_unchecked(globalconf.connection);
 
     /* init atom cache */
     atoms_init(globalconf.connection);
 
     /* init screens information */
     screen_scan();
-
-    xutil_lock_mask_get(globalconf.connection, xmapping_cookie,
-                        globalconf.keysyms, &globalconf.numlockmask,
-                        &globalconf.shiftlockmask, &globalconf.capslockmask,
-                        &globalconf.modeswitchmask);
 
     /* do this only for real screen */
     ewmh_init();

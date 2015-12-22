@@ -837,19 +837,11 @@ event_handle_mappingnotify(xcb_mapping_notify_event_t *ev)
     if(ev->request == XCB_MAPPING_MODIFIER
        || ev->request == XCB_MAPPING_KEYBOARD)
     {
-        xcb_get_modifier_mapping_cookie_t xmapping_cookie =
-            xcb_get_modifier_mapping_unchecked(globalconf.connection);
-
         /* Free and then allocate the key symbols */
         xcb_key_symbols_free(globalconf.keysyms);
         globalconf.keysyms = xcb_key_symbols_alloc(globalconf.connection);
 
-        xutil_lock_mask_get(globalconf.connection, xmapping_cookie,
-                            globalconf.keysyms, &globalconf.numlockmask,
-                            &globalconf.shiftlockmask, &globalconf.capslockmask,
-                            &globalconf.modeswitchmask);
-
-        /* regrab everything */
+        /* regrab everything TODO: Move this to xkb.c suitably */
         xcb_screen_t *s = globalconf.screen;
         xwindow_grabkeys(s->root, &globalconf.keys);
 

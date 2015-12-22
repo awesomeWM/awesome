@@ -88,8 +88,6 @@ typedef struct
     xcb_atom_t selection_atom;
     /** Window owning the WM_Sn selection */
     xcb_window_t selection_owner_window;
-    /** Modifiers masks */
-    uint16_t numlockmask, shiftlockmask, capslockmask, modeswitchmask;
     /** Check for XTest extension */
     bool have_xtest;
     /** Check for SHAPE extension */
