@@ -64,6 +64,18 @@ function debug.dump(data, tag, depth)
     print(debug.dump_return(data, tag, depth))
 end
 
+-- Print an warning message
+-- @tparam string message The warning message to print
+function debug.print_warning(message)
+    io.stderr:write(os.date("%Y-%m-%d %T W: ") .. tostring(message) .. "\n")
+end
+
+-- Print an error message
+-- @tparam string message The error message to print
+function debug.print_error(message)
+    io.stderr:write(os.date("%Y-%m-%d %T E: ") .. tostring(message) .. "\n")
+end
+
 return debug
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

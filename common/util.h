@@ -319,6 +319,8 @@ void _fatal(int, const char *, const char *, ...)
 void _warn(int, const char *, const char *, ...)
     __attribute__ ((format(printf, 3, 4)));
 
+const char *a_current_time_str(void);
+
 void a_exec(const char *);
 
 #endif

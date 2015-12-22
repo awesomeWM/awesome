@@ -26,6 +26,7 @@ local capi =
     screen = screen,
     awesome = awesome
 }
+local gears_debug = require("gears.debug")
 
 local xresources = require("beautiful.xresources")
 
@@ -134,7 +135,7 @@ function beautiful.init(config)
         end
 
         if not success then
-            return print("E: beautiful: error loading theme file " .. theme)
+            return gears_debug.print_error("beautiful: error loading theme file " .. theme)
         elseif theme then
             -- expand '~'
             if homedir then
@@ -145,10 +146,10 @@ function beautiful.init(config)
 
             if theme.font then set_font(theme.font) end
         else
-            return print("E: beautiful: error loading theme file " .. config)
+            return gears_debug.print_error("beautiful: error loading theme file " .. config)
         end
     else
-        return print("E: beautiful: error loading theme: no theme specified")
+        return gears_debug.print_error("beautiful: error loading theme: no theme specified")
     end
 end
 

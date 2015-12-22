@@ -28,6 +28,22 @@
 #include <limits.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <time.h>
+
+const char *
+a_current_time_str(void)
+{
+    static char buffer[25];
+    time_t now;
+    struct tm tm;
+
+    time(&now);
+    localtime_r(&now, &tm);
+    if (!strftime(buffer, sizeof(buffer), "%Y-%m-%d %T ", &tm))
+        buffer[0] = '\0';
+
+    return buffer;
+}
 
 /** Print error and exit with EXIT_FAILURE code.
  */
@@ -37,7 +53,7 @@ _fatal(int line, const char *fct, const char *fmt, ...)
     va_list ap;
 
     va_start(ap, fmt);
-    fprintf(stderr, "E: awesome: %s:%d: ", fct, line);
+    fprintf(stderr, "%sE: awesome: %s:%d: ", a_current_time_str(), fct, line);
     vfprintf(stderr, fmt, ap);
     va_end(ap);
     fprintf(stderr, "\n");
@@ -51,7 +67,7 @@ _warn(int line, const char *fct, const char *fmt, ...)
 {
     va_list ap;
     va_start(ap, fmt);
-    fprintf(stderr, "W: awesome: %s:%d: ", fct, line);
+    fprintf(stderr, "%sW: awesome: %s:%d: ", a_current_time_str(), fct, line);
     vfprintf(stderr, fmt, ap);
     va_end(ap);
     fprintf(stderr, "\n");

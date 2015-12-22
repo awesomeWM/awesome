@@ -28,6 +28,7 @@ local capi =
     awesome = awesome,
     mouse = mouse
 }
+local gears_debug = require("gears.debug")
 local floor = math.floor
 
 local util = {}
@@ -48,11 +49,11 @@ function util.deprecate(see)
     -- Get function name/desc from caller.
     local info = debug.getinfo(2, "n")
     local funcname = info.name or "?"
-    io.stderr:write("W: awful: function " .. funcname .. " is deprecated")
+    local msg = "awful: function " .. funcname .. " is deprecated"
     if see then
-        io.stderr:write(", see " .. see)
+        msg = msg .. ", see " .. see
     end
-    io.stderr:write(".\n" .. tb .. "\n")
+    gears_debug.print_warning(msg .. ".\n" .. tb)
 end
 
 --- Get a valid color for Pango markup

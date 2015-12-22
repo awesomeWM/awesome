@@ -50,7 +50,7 @@ luaA_warn(lua_State *L, const char *fmt, ...)
 {
     va_list ap;
     luaL_where(L, 1);
-    fprintf(stderr, "%sW: ", lua_tostring(L, -1));
+    fprintf(stderr, "%s%sW: ", a_current_time_str(), lua_tostring(L, -1));
     lua_pop(L, 1);
     va_start(ap, fmt);
     vfprintf(stderr, fmt, ap);
