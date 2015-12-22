@@ -11,6 +11,7 @@
 local print = print
 local awesome = awesome
 local round = require("awful.util").round
+local gears_debug = require("gears.debug")
 
 local xresources = {}
 
@@ -53,7 +54,7 @@ function xresources.get_current_theme()
     for _, key in ipairs(keys) do
         colors[key] = awesome.xrdb_get_value("", key)
         if not colors[key] then
-            print("W: beautiful: can't get colorscheme from xrdb (using fallback).")
+            gears_debug.print_warning("beautiful: can't get colorscheme from xrdb (using fallback).")
             return fallback
         end
     end
