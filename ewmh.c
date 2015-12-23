@@ -686,10 +686,15 @@ ewmh_window_icon_from_reply(xcb_get_property_reply_t *r, uint32_t preferred_size
 
         /* use the greater of the two dimensions to match against the preferred size */
         uint32_t size = MAX(data[0], data[1]);
+
         /* pick the icon if it's a better match than the one we already have */
-        if (data[0] && data[1] && (
-            (found_size < preferred_size && size > found_size) ||
-            (found_size > preferred_size && size >= preferred_size && size < found_size)))
+        bool found_icon_too_small = found_size < preferred_size;
+        bool found_icon_too_large = found_size > preferred_size;
+        bool icon_empty = data[0] == 0 || data[1] == 0;
+        bool better_because_bigger =  found_icon_too_small && size > found_size;
+        bool better_because_smaller = found_icon_too_large &&
+            size >= preferred_size && size < found_size;
+        if (!icon_empty && (better_because_bigger || better_because_smaller))
         {
             found_data = data;
             found_size = size;
