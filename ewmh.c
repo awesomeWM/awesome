@@ -694,7 +694,7 @@ ewmh_window_icon_from_reply(xcb_get_property_reply_t *r, uint32_t preferred_size
         bool better_because_bigger =  found_icon_too_small && size > found_size;
         bool better_because_smaller = found_icon_too_large &&
             size >= preferred_size && size < found_size;
-        if (!icon_empty && (better_because_bigger || better_because_smaller))
+        if (!icon_empty && (better_because_bigger || better_because_smaller || found_size == 0))
         {
             found_data = data;
             found_size = size;
