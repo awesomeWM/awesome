@@ -295,7 +295,7 @@ luaA_window_set_type(lua_State *L, window_t *w)
         type = WINDOW_TYPE_NORMAL;
     else
     {
-        warn("Unknown window type '%s'", buf);
+        luaA_warn(L, "Unknown window type '%s'", buf);
         return 0;
     }
 

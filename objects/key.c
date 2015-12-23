@@ -91,14 +91,14 @@ luaA_keystore(lua_State *L, int ud, const char *str, ssize_t len)
 
             if(!g_utf8_validate(str, -1, NULL))
             {
-                warn("failed to convert \"%s\" into keysym (invalid UTF-8 string)", str);
+                luaA_warn(L, "failed to convert \"%s\" into keysym (invalid UTF-8 string)", str);
                 return;
             }
 
             length = g_utf8_strlen(str, -1); /* This function counts combining characters. */
             if(length <= 0)
             {
-                warn("failed to convert \"%s\" into keysym (empty UTF-8 string)", str);
+                luaA_warn(L, "failed to convert \"%s\" into keysym (empty UTF-8 string)", str);
                 return;
             }
             else if(length > 1)
@@ -107,7 +107,7 @@ luaA_keystore(lua_State *L, int ud, const char *str, ssize_t len)
                 if(g_utf8_strlen(composed, -1) != 1)
                 {
                     p_delete(&composed);
-                    warn("failed to convert \"%s\" into keysym (failed to compose a single character)", str);
+                    luaA_warn(L, "failed to convert \"%s\" into keysym (failed to compose a single character)", str);
                     return;
                 }
                 unicode = g_utf8_get_char(composed);
@@ -118,7 +118,7 @@ luaA_keystore(lua_State *L, int ud, const char *str, ssize_t len)
 
             if(unicode == (gunichar)-1 || unicode == (gunichar)-2)
             {
-                warn("failed to convert \"%s\" into keysym (neither keysym nor single unicode)", str);
+                luaA_warn(L, "failed to convert \"%s\" into keysym (neither keysym nor single unicode)", str);
                 return;
             }
 
@@ -132,7 +132,7 @@ luaA_keystore(lua_State *L, int ud, const char *str, ssize_t len)
                 key->keysym = unicode | (1 << 24);
             else
             {
-                warn("failed to convert \"%s\" into keysym (unicode out of range): \"%u\"", str, unicode);
+                luaA_warn(L, "failed to convert \"%s\" into keysym (unicode out of range): \"%u\"", str, unicode);
                 return;
             }
         }
