@@ -254,7 +254,7 @@ signal_object_emit(lua_State *L, signal_array_t *arr, const char *name, int narg
             luaA_dofunction(L, nargs, 0);
         }
     } else
-        warn("Trying to emit unknown signal '%s'", name);
+        luaA_warn(L, "Trying to emit unknown signal '%s'", name);
 
     /* remove args */
     lua_pop(L, nargs);
@@ -273,11 +273,11 @@ luaA_object_emit_signal(lua_State *L, int oud,
     lua_class_t *lua_class = luaA_class_get(L, oud);
     lua_object_t *obj = luaA_toudata(L, oud, lua_class);
     if(!obj) {
-        warn("Trying to emit signal '%s' on non-object", name);
+        luaA_warn(L, "Trying to emit signal '%s' on non-object", name);
         return;
     }
     else if(lua_class->checker && !lua_class->checker(obj)) {
-        warn("Trying to emit signal '%s' on invalid object", name);
+        luaA_warn(L, "Trying to emit signal '%s' on invalid object", name);
         return;
     }
     signal_t *sigfound = signal_array_getbyid(&obj->signals,
@@ -304,8 +304,10 @@ luaA_object_emit_signal(lua_State *L, int oud,
             lua_remove(L, - nargs - nbfunc - 2 + i);
             luaA_dofunction(L, nargs + 1, 0);
         }
-    } else
-        warn("Trying to emit unknown signal '%s'", name);
+    } else {
+        luaA_warn(L, "Trying to emit unknown signal '%s'", name);
+        return;
+    }
 
     /* Then emit signal on the class */
     lua_pushvalue(L, oud);
