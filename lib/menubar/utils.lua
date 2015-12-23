@@ -256,6 +256,7 @@ end
 
 --- Compute textbox width.
 -- @tparam wibox.widget.textbox textbox Textbox instance.
+-- @tparam number s Screen number
 -- @treturn int Text width.
 function utils.compute_textbox_width(textbox, s)
     s = s or mouse.screen
@@ -265,6 +266,7 @@ end
 
 --- Compute text width.
 -- @tparam str text Text.
+-- @tparam number s Screen number
 -- @treturn int Text width.
 function utils.compute_text_width(text, s)
     return utils.compute_textbox_width(wibox.widget.textbox(awful_util.escape(text)), s)
