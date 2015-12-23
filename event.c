@@ -580,6 +580,12 @@ event_handle_enternotify(xcb_enter_notify_event_t *ev)
         }
         lua_pop(L, 1);
     }
+    else if (ev->event == globalconf.screen->root) {
+        /* When there are multiple X screens with awesome running separate
+         * instances, reset focus.
+         */
+        globalconf.focus.need_update = true;
+    }
 }
 
 /** The focus in event handler.
