@@ -60,5 +60,6 @@ client.connect_signal("tagged",              check_focus_delayed)
 client.connect_signal("untagged",            check_focus_delayed)
 client.connect_signal("property::hidden",    check_focus_delayed)
 client.connect_signal("property::minimized", check_focus_delayed)
+client.connect_signal("property::sticky",    check_focus_delayed)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
