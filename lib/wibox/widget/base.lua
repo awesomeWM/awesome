@@ -135,7 +135,7 @@ end
 -- `:fit` directly, but always through this function!
 -- @param parent The parent widget which requests this information.
 -- @param context The context in which we are fit.
--- @param widget The widget to fit (this uses widget:fit(width, height)).
+-- @param widget The widget to fit (this uses widget:fit(context, width, height)).
 -- @param width The available width for the widget
 -- @param height The available height for the widget
 -- @return The width and height that the widget wants to use
@@ -308,7 +308,7 @@ will not be able to draw outside of the area that was registered for the widget
 by the layout that placed this widget. You should not call `cr:reset_clip()`, as
 redraws will not be handled correctly in this case.
 
-    function widget:draw(wibox, cr, width, height)
+    function widget:draw(context, cr, width, height)
       cr:move_to(0, 0)
       cr:line_to(width, height)
       cr:move_to(0, height)
@@ -361,10 +361,10 @@ which children are drawn, but they should not cause the drawing to cover a
 different area. As an example, these functions can be used to draw children
 translucently:
 
-    function widget:before_draw_children(wibox, cr, width, height)
+    function widget:before_draw_children(context, cr, width, height)
       cr:push_group()
     end
-    function widget:after_draw_children(wibox, cr, width, height)
+    function widget:after_draw_children(context, cr, width, height)
       cr:pop_group_to_source()
       cr:paint_with_alpha(0.5)
     end
@@ -372,17 +372,17 @@ translucently:
 In pseudo-code, the call sequence for the drawing callbacks during a redraw
 looks like this:
 
-    widget:draw(wibox, cr, width, height)
-    widget:before_draw_children(wibox, cr, width, height)
+    widget:draw(context, cr, width, height)
+    widget:before_draw_children(context, cr, width, height)
     for child do
-        widget:before_draw_child(wibox, cr, child_index, child, width, height)
+        widget:before_draw_child(context, cr, child_index, child, width, height)
         cr:save()
         -- Draw child and all of its children recursively, taking into account the
         -- position and size given to base.place_widget_at() in :layout().
         cr:restore()
-        widget:after_draw_child(wibox, cr, child_index, child, width, height)
+        widget:after_draw_child(context, cr, child_index, child, width, height)
     end
-    widget:after_draw_children(wibox, cr, width, height)
+    widget:after_draw_children(context, cr, width, height)
 
 @param proxy If this is set, the returned widget will be a proxy for this
   widget. It will be equivalent to this widget. This means it

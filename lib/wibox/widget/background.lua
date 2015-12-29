@@ -33,7 +33,7 @@ function background:draw(context, cr, width, height)
 end
 
 --- Prepare drawing the children of this widget
-function background:before_draw_children(wibox, cr, width, height)
+function background:before_draw_children(context, cr, width, height)
     if self.foreground then
         cr:set_source(self.foreground)
     end
