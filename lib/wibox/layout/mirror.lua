@@ -19,7 +19,7 @@ local mirror = { mt = {} }
 function mirror:layout(context, cr, width, height)
     if not self.widget then return end
     if not self.horizontal and not self.vertical then
-        base.draw_widget(wibox, cr, self.widget, 0, 0, width, height)
+        base.draw_widget(context, cr, self.widget, 0, 0, width, height)
         return
     end
 
