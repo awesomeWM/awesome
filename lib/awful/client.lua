@@ -780,6 +780,7 @@ function client.idx(c)
     local c = c or capi.client.focus
     if not c then return end
 
+    -- Only check the tiled clients, the others un irrelevant
     local clients = client.tiled(c.screen)
     local idx = nil
     for k, cl in ipairs(clients) do
@@ -791,6 +792,10 @@ function client.idx(c)
 
     local t = tag.selected(c.screen)
     local nmaster = tag.getnmaster(t)
+
+    -- This will happen for floating or maximized clients
+    if not idx then return nil end
+
     if idx <= nmaster then
         return {idx = idx, col=0, num=nmaster}
     end
@@ -834,8 +839,11 @@ function client.setwfact(wfact, c)
     local c = c or capi.client.focus
     if not c or not c:isvisible() then return end
 
-    local t = tag.selected(c.screen)
     local w = client.idx(c)
+
+    if not w then return end
+
+    local t = tag.selected(c.screen)
 
     local cls = client.tiled(tag.getscreen(t))
     local nmaster = tag.getnmaster(t)
