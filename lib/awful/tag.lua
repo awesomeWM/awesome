@@ -67,7 +67,7 @@ function tag.move(new_index, target_tag)
 
     for i=new_index < rm_index and new_index or rm_index, #tmp_tags do
         local tmp_tag = tmp_tags[i]
-        tag.setscreen(tmp_tag, scr)
+        tag.setscreen(scr, tmp_tag)
         tag.setproperty(tmp_tag, "index", i)
     end
 end
@@ -78,23 +78,23 @@ end
 function tag.swap(tag1, tag2)
     local idx1, idx2 = tag.getidx(tag1), tag.getidx(tag2)
     local src2, src1 = tag.getscreen(tag2), tag.getscreen(tag1)
-    tag.setscreen(tag2, src1)
+    tag.setscreen(src1, tag2)
     tag.move(idx1, tag2)
-    tag.setscreen(tag1, scr2)
+    tag.setscreen(scr2, tag1)
     tag.move(idx2, tag1)
 end
 
 --- Add a tag.
 -- @param name The tag name, a string
--- @param props The tags properties, a table
+-- @param props The tags inital properties, a table
 -- @return The created tag
 function tag.add(name, props)
     local properties = props or {}
 
     -- Be sure to set the screen before the tag is activated to avoid function
     -- connected to property::activated to be called without a valid tag.
-    -- set properies cannot be used as this has to be set before the first signal
-    -- is sent
+    -- set properties cannot be used as this has to be set before the first
+    -- signal is sent
     properties.screen = properties.screen or ascreen.focused()
 
     -- Index is also required
@@ -304,19 +304,26 @@ function tag.gettags(s)
 end
 
 --- Set a tag's screen
--- @param t tag object
 -- @param s Screen number
-function tag.setscreen(t, s)
+-- @param t tag object
+function tag.setscreen(s, t)
+
+    -- For API consistency, the arguments have been swapped for Awesome 3.6
+    if type(t) == "number" then
+        util.deprecate("tag.setscreen arguments are now (s, t) instead of (t, s)")
+        s, t = t, s
+    end
+
     local s = s or ascreen.focused()
     local sel = tag.selected
     local old_screen = tag.getproperty(t, "screen")
     if s == old_screen then return end
 
     -- Keeping the old index make very little sense when changing screen
-    tag.setproperty(t, "index", nil)
+    tag.setproperty(t, "index", nil, true)
 
     -- Change the screen
-    tag.setproperty(t, "screen", s)
+    tag.setproperty(t, "screen", s, true)
 
     -- Make sure the client's screen matches its tags
     for k,c in ipairs(t:clients()) do
@@ -327,7 +334,7 @@ function tag.setscreen(t, s)
     -- Update all indexes
     for _,screen in ipairs {old_screen, s} do
         for i,t in ipairs(tag.gettags(screen)) do
-            tag.setproperty(t, "index", i)
+            tag.setproperty(t, "index", i, true)
         end
     end
 
@@ -372,7 +379,7 @@ end
 function tag.setmwfact(mwfact, t)
     local t = t or tag.selected()
     if mwfact >= 0 and mwfact <= 1 then
-        tag.setproperty(t, "mwfact", mwfact)
+        tag.setproperty(t, "mwfact", mwfact, true)
     end
 end
 
@@ -396,7 +403,7 @@ end
 function tag.setgap(useless_gap, t)
     local t = t or tag.selected()
     if useless_gap >= 0 then
-        tag.setproperty(t, "useless_gap", useless_gap)
+        tag.setproperty(t, "useless_gap", useless_gap, true)
     end
 end
 
@@ -427,7 +434,7 @@ end
 -- @tparam[opt=tag.selected()] tag t The tag to modify
 function tag.setmfpol(policy, t)
     local t = t or tag.selected()
-    tag.setproperty(t, "master_fill_policy", policy)
+    tag.setproperty(t, "master_fill_policy", policy, true)
 end
 
 --- Toggle size fill policy for the master client(s)
@@ -457,7 +464,7 @@ end
 function tag.setnmaster(nmaster, t)
     local t = t or tag.selected()
     if nmaster >= 0 then
-        tag.setproperty(t, "nmaster", nmaster)
+        tag.setproperty(t, "nmaster", nmaster, true)
     end
 end
 
@@ -499,7 +506,7 @@ end
 -- @param _tag the tag
 function tag.seticon(icon, _tag)
     local _tag = _tag or tag.selected()
-    tag.setproperty(_tag, "icon", icon)
+    tag.setproperty(_tag, "icon", icon, true)
 end
 
 --- Get the tag icon
@@ -515,7 +522,7 @@ end
 function tag.setncol(ncol, t)
     local t = t or tag.selected()
     if ncol >= 1 then
-        tag.setproperty(t, "ncol", ncol)
+        tag.setproperty(t, "ncol", ncol, true)
     end
 end
 
@@ -674,13 +681,19 @@ end
 -- @param _tag The tag.
 -- @param prop The property name.
 -- @param value The value.
-function tag.setproperty(_tag, prop, value)
+-- @param ignore_setters Ignore the setter function for "prop" (boolean)
+function tag.setproperty(_tag, prop, value, ignore_setters)
     if not data.tags[_tag] then
         data.tags[_tag] = {}
     end
-    if data.tags[_tag][prop] ~= value then
-        data.tags[_tag][prop] = value
-        _tag:emit_signal("property::" .. prop)
+
+    if (not ignore_setters) and tag["set"..prop] then
+        tag["set"..prop](value, _tag)
+    else
+        if data.tags[_tag][prop] ~= value then
+            data.tags[_tag][prop] = value
+            _tag:emit_signal("property::" .. prop)
+        end
     end
 end
 
