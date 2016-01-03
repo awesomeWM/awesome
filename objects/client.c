@@ -1602,6 +1602,17 @@ luaA_client_swap(lua_State *L)
         *ref_swap = c;
 
         luaA_class_emit_signal(L, &client_class, "list", 0);
+
+        luaA_object_push(L, swap);
+        lua_pushboolean(L, true);
+        luaA_object_emit_signal(L, -4, "swapped", 2);
+        lua_pop(L, 2);
+
+        luaA_object_push(L, swap);
+        luaA_object_push(L, c);
+        lua_pushboolean(L, false);
+        luaA_object_emit_signal(L, -3, "swapped", 2);
+        lua_pop(L, 3);
     }
 
     return 0;
@@ -1688,7 +1699,13 @@ static int
 luaA_client_raise(lua_State *L)
 {
     client_t *c = luaA_checkudata(L, 1, &client_class);
+
+    /* Avoid sending the signal if nothing was done */
+    if (c->transient_for == NULL && globalconf.stack.tab[globalconf.stack.len-1] == c)
+        return 0;
+
     client_raise(c);
+
     return 0;
 }
 
@@ -1701,11 +1718,20 @@ luaA_client_lower(lua_State *L)
 {
     client_t *c = luaA_checkudata(L, 1, &client_class);
 
+    /* Avoid sending the signal if nothing was done */
+    if (globalconf.stack.len && globalconf.stack.tab[0] == c)
+        return 0;
+
     stack_client_push(c);
 
     /* Traverse all transient layers. */
     for(client_t *tc = c->transient_for; tc; tc = tc->transient_for)
         stack_client_push(tc);
+
+    /* Notify the listeners */
+    luaA_object_push(L, c);
+    luaA_object_emit_signal(L, -1, "lowered", 0);
+    lua_pop(L, 1);
 
     return 0;
 }
@@ -2736,6 +2762,12 @@ client_class_setup(lua_State *L)
      * @signal .list
      */
     signal_add(&client_class.signals, "list");
+    /** When 2 clients are swapped
+     * @args client The other client
+     * @args is_source If self is the source or the destination of the swap
+     * @signal .swapped
+     */
+    signal_add(&client_class.signals, "swapped");
     /**
      * @signal .manage
      */
@@ -2979,6 +3011,14 @@ client_class_setup(lua_State *L)
      * @tag t The tag object.
      */
     signal_add(&client_class.signals, "untagged");
+    /**
+     * @signal .raised
+     */
+    signal_add(&client_class.signals, "raised");
+    /**
+     * @signal .lowered
+     */
+    signal_add(&client_class.signals, "lowered");
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
