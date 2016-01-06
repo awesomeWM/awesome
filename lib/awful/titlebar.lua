@@ -26,6 +26,9 @@ local titlebar = {
     widget = {}
 }
 
+--- Show tooltips when hover on titlebar buttons (defaults to 'true')
+titlebar.enable_tooltip = true
+
 local all_titlebars = setmetatable({}, { __mode = 'k' })
 
 -- Get a color for a titlebar, this tests many values from the array and the theme
@@ -191,8 +194,10 @@ end
 function titlebar.widget.button(c, name, selector, action)
     local ret = imagebox()
 
-    ret.tooltip = atooltip({ objects = {ret}, delay_show = 1 })
-    ret.tooltip:set_text(name)
+    if titlebar.enable_tooltip then
+        ret.tooltip = atooltip({ objects = {ret}, delay_show = 1 })
+        ret.tooltip:set_text(name)
+    end
 
     local function update()
         local img = selector(c)
