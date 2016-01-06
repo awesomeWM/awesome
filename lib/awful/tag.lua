@@ -34,6 +34,7 @@ local tag = { mt = {} }
 -- Private data
 local data = {}
 data.history = {}
+data.dynamic_cache = setmetatable({}, { __mode = 'k' })
 data.tags = setmetatable({}, { __mode = 'k' })
 
 -- History functions
@@ -388,6 +389,40 @@ end
 function tag.getmwfact(t)
     local t = t or tag.selected()
     return tag.getproperty(t, "mwfact") or 0.5
+end
+
+--- Set layout
+-- @param layout a layout table or a constructor function
+-- @param t The tag to modify
+-- @return The layout
+function tag.setlayout(layout, t)
+
+    -- Check if the signature match a stateful layout
+    if type(layout) == "function" or (
+        type(layout) == "table"
+        and getmetatable(layout)
+        and getmetatable(layout).__call
+    ) then
+        if not data.dynamic_cache[t] then
+            data.dynamic_cache[t] = {}
+        end
+
+        local instance = data.dynamic_cache[t][layout] or layout(t)
+
+        -- Always make sure the layout is notified it is enabled
+        if tag.selected(tag.getscreen(t)) == t and instance.wake_up then
+            instance:wake_up()
+        end
+
+        -- Avoid creating the same layout twice, use layout:reset() to reset
+        if instance.is_dynamic then
+            data.dynamic_cache[t][layout] = instance
+        end
+    end
+
+    tag.setproperty(t, "layout", layout, true)
+
+    return layout
 end
 
 --- Set the spacing between clients
