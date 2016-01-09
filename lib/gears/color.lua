@@ -28,13 +28,28 @@ local pattern_cache
 -- @usage -- This will return 0, 1, 0, 1
 -- gears.color.parse_color("#00ff00ff")
 function color.parse_color(col)
+    -- Get all hex chars
     local rgb = {}
-    for pair in string.gmatch(col, "[^#].") do
-        local i = tonumber(pair, 16)
-        if i then
-            table.insert(rgb, i / 255)
-        end
+    for char in string.gmatch(col, "[^#]") do
+        table.insert(rgb, tonumber(char, 16) / 0xf)
     end
+    -- Merge consecutive values until we have at most four groups (rgba)
+    local factor = 0xf
+    while #rgb > 4 do
+        local merged = {}
+        local key, value = next(rgb, nil)
+        local next_factor = (factor + 1)*(factor + 1) - 1
+        while key do
+            local key2, value2 = next(rgb, key)
+            local v1, v2 = value * factor, value2 * factor
+            local new = v1 * (factor + 1) + v2
+            table.insert(merged, new / next_factor)
+            key, value = next(rgb, key2)
+        end
+        rgb = merged
+        factor = next_factor
+    end
+    -- Add missing groups (missing alpha)
     while #rgb < 4 do
         table.insert(rgb, 1)
     end
