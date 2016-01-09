@@ -19,6 +19,8 @@ end
 local surface = { mt = {} }
 local surface_cache = setmetatable({}, { __mode = 'v' })
 
+local dummy_surface = nil
+
 --- Try to convert the argument into an lgi cairo surface.
 -- This is usually needed for loading images by file name.
 function surface.load_uncached(_surface)
@@ -37,6 +39,16 @@ function surface.load_uncached(_surface)
     if type(_surface) == "string" then
         file = _surface
         _surface = capi.awesome.load_image(file)
+        if not _surface then
+            io.stderr:write("W: The requested surface failed to load\n", debug.traceback())
+
+            -- Avoid calling cairo.Surface with nil, it will crash Awesome
+            if not dummy_surface then
+                dummy_surface = cairo.ImageSurface(cairo.Format.ARGB32, 1, 1)
+            end
+
+            return dummy_surface
+        end
     end
     -- Everything else gets forced into a surface
     _surface = cairo.Surface(_surface, true)

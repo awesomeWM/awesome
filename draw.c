@@ -239,11 +239,8 @@ draw_load_image(lua_State *L, const char *path)
     GdkPixbuf *buf = gdk_pixbuf_new_from_file(path, &error);
 
     if (!buf) {
-        luaL_where(L, 1);
-        lua_pushstring(L, error->message);
-        lua_concat(L, 2);
+        luaA_warn(L, error->message);
         g_error_free(error);
-        lua_error(L);
         return NULL;
     }
 
