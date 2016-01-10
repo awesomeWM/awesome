@@ -48,7 +48,8 @@ awesome_refresh(void)
     return xcb_flush(globalconf.connection);
 }
 
-void event_handle(xcb_generic_event_t *event);
+void event_handle(xcb_generic_event_t *);
+void event_drawable_under_mouse(lua_State *, int);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

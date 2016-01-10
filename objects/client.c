@@ -1335,6 +1335,13 @@ client_unmanage(client_t *c, bool window_valid)
         if (c->titlebar[bar].drawable == NULL)
             continue;
 
+        if (globalconf.drawable_under_mouse == c->titlebar[bar].drawable) {
+            /* Leave drawable before we invalidate the client */
+            lua_pushnil(L);
+            event_drawable_under_mouse(L, -1);
+            lua_pop(L, 1);
+        }
+
         /* Forget about the drawable */
         luaA_object_push(L, c);
         luaA_object_unref_item(L, -1, c->titlebar[bar].drawable);

@@ -426,7 +426,7 @@ event_handle_destroynotify(xcb_destroy_notify_event_t *ev)
 
 /** Record that the given drawable contains the pointer.
  */
-static void
+void
 event_drawable_under_mouse(lua_State *L, int ud)
 {
     void *d;
