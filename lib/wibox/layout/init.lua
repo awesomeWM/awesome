@@ -17,6 +17,7 @@ return
     mirror = require("wibox.layout.mirror");
     constraint = require("wibox.layout.constraint");
     scroll = require("wibox.layout.scroll");
+    ratio = require("wibox.layout.ratio");
     stack = require("wibox.layout.stack");
 }
 
