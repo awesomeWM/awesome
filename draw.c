@@ -229,23 +229,18 @@ draw_dup_image_surface(cairo_surface_t *surface)
 /** Load the specified path into a cairo surface
  * \param L Lua state
  * \param path file to load
+ * \param error A place to store an error message, if needed
  * \return A cairo image surface or NULL on error.
  */
 cairo_surface_t *
-draw_load_image(lua_State *L, const char *path)
+draw_load_image(lua_State *L, const char *path, GError **error)
 {
-    GError *error = NULL;
     cairo_surface_t *ret;
-    GdkPixbuf *buf = gdk_pixbuf_new_from_file(path, &error);
+    GdkPixbuf *buf = gdk_pixbuf_new_from_file(path, error);
 
-    if (!buf) {
-        luaL_where(L, 1);
-        lua_pushstring(L, error->message);
-        lua_concat(L, 2);
-        g_error_free(error);
-        lua_error(L);
+    if (!buf)
+        /* error was set above */
         return NULL;
-    }
 
     ret = draw_surface_from_pixbuf(buf);
     g_object_unref(buf);
