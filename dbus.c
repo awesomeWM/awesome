@@ -319,8 +319,9 @@ a_dbus_convert_value(lua_State *L, int idx, DBusMessageIter *iter)
       case dbustype: \
         { \
             const char *s = lua_tostring(L, idx + 1); \
-            if(s) \
-                dbus_message_iter_append_basic(iter, dbustype, &s); \
+            if(!s) \
+                s = ""; \
+            dbus_message_iter_append_basic(iter, dbustype, &s); \
         } \
         break;
     DBUS_MSG_RETURN_HANDLE_TYPE_STRING(DBUS_TYPE_STRING)
