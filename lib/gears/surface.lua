@@ -9,6 +9,7 @@ local setmetatable = setmetatable
 local type = type
 local capi = { awesome = awesome }
 local cairo = require("lgi").cairo
+local gdebug = require("gears.debug")
 
 -- Keep this in sync with build-utils/lgi-check.sh!
 local ver_major, ver_minor, ver_patch = string.match(require('lgi.version'), '(%d)%.(%d)%.(%d)')
@@ -19,13 +20,22 @@ end
 local surface = { mt = {} }
 local surface_cache = setmetatable({}, { __mode = 'v' })
 
+local function get_empty_surface()
+    return cairo.ImageSurface(cairo.Format.ARGB32, 0, 0)
+end
+
 --- Try to convert the argument into an lgi cairo surface.
 -- This is usually needed for loading images by file name.
-function surface.load_uncached(_surface)
+-- @param _surface The surface to load or nil
+-- @param default The default value to return on error; when nil, then a surface
+-- in an error state is returned.
+-- @return The loaded surface, or the replacement default
+-- @return An error message, or nil on success
+function surface.load_uncached_silently(_surface, default)
     local file
-    -- Nil is not changed
+    -- On nil, return an empty surface
     if not _surface then
-        return nil
+        return get_empty_surface()
     end
     -- Remove from cache if it was cached
     surface_cache[_surface] = nil
@@ -35,8 +45,15 @@ function surface.load_uncached(_surface)
     end
     -- Strings are assumed to be file names and get loaded
     if type(_surface) == "string" then
+        local err
         file = _surface
-        _surface = capi.awesome.load_image(file)
+        _surface, err = capi.awesome.load_image(file)
+        if not _surface then
+            if type(default) == 'nil' then
+                default = get_empty_surface()
+            end
+            return default, err
+        end
     end
     -- Everything else gets forced into a surface
     _surface = cairo.Surface(_surface, true)
@@ -47,14 +64,53 @@ function surface.load_uncached(_surface)
     return _surface
 end
 
-function surface.load(_surface)
+--- Try to convert the argument into an lgi cairo surface.
+-- This is usually needed for loading images by file name and uses a cache.
+-- In contrast to `load()`, errors are returned to the caller.
+-- @param _surface The surface to load or nil
+-- @param default The default value to return on error; when nil, then a surface
+-- in an error state is returned.
+-- @return The loaded surface, or the replacement default, or nil if called with
+-- nil.
+-- @return An error message, or nil on success
+function surface.load_silently(_surface, default)
     if type(_surface) == "string" then
         local cache = surface_cache[_surface]
         if cache then
             return cache
         end
     end
-    return surface.load_uncached(_surface)
+    return surface.load_uncached_silently(_surface, default)
+end
+
+local function do_load_and_handle_errors(_surface, func)
+    if type(_surface) == 'nil' then
+        return get_empty_surface()
+    end
+    local result, err = func(_surface, false)
+    if result then
+        return result
+    end
+    gdebug.print_error("Failed to load '" .. tostring(_surface) .. "': " .. tostring(err))
+    return get_empty_surface()
+end
+
+--- Try to convert the argument into an lgi cairo surface.
+-- This is usually needed for loading images by file name. Errors are handled
+-- via `gears.debug.print_error`.
+-- @param _surface The surface to load or nil
+-- @return The loaded surface, or nil
+function surface.load_uncached(_surface)
+    return do_load_and_handle_errors(_surface, surface.load_uncached_silently)
+end
+
+--- Try to convert the argument into an lgi cairo surface.
+-- This is usually needed for loading images by file name. Errors are handled
+-- via `gears.debug.print_error`.
+-- @param _surface The surface to load or nil
+-- @return The loaded surface, or nil
+function surface.load(_surface)
+    return do_load_and_handle_errors(_surface, surface.load_silently)
 end
 
 function surface.mt:__call(...)
@@ -69,7 +125,6 @@ function surface.get_size(surf)
     local x, y, w, h = cr:clip_extents()
     return w - x, h - y
 end
-
 
 --- Create a copy of a cairo surface.
 -- The surfaces returned by `surface.load` are cached and must not be
