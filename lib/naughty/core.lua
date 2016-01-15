@@ -562,13 +562,7 @@ function naughty.notify(args)
         end
 
         -- is the icon file readable?
-        local success, res = pcall(function() return surface.load_uncached(icon) end)
-        if success then
-            icon = res
-        else
-            io.stderr:write(string.format("naughty: Couldn't load image '%s': %s\n", tostring(icon), res))
-            icon = nil
-        end
+        local icon = surface.load_uncached(icon)
 
         -- if we have an icon, use it
         if icon then
