@@ -124,8 +124,11 @@ drawable_set_geometry(lua_State *L, int didx, area_t geom)
 static int
 luaA_drawable_get_surface(lua_State *L, drawable_t *drawable)
 {
-    /* Lua gets its own reference which it will have to destroy */
-    lua_pushlightuserdata(L, cairo_surface_reference(drawable->surface));
+    if (drawable->surface)
+        /* Lua gets its own reference which it will have to destroy */
+        lua_pushlightuserdata(L, cairo_surface_reference(drawable->surface));
+    else
+        lua_pushnil(L);
     return 1;
 }
 
