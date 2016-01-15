@@ -107,9 +107,7 @@ function taglist.taglist_label(t, args)
         text = text .. "</span>"
     end
     if not taglist_disable_icon then
-        if tag.geticon(t) and type(tag.geticon(t)) == "image" then
-            icon = tag.geticon(t)
-        elseif tag.geticon(t) then
+        if tag.geticon(t) then
             icon = surface.load(tag.geticon(t))
         end
     end
