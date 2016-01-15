@@ -72,17 +72,16 @@ end
 --- Set an imagebox' image
 -- @param image Either a string or a cairo image surface. A string is
 --   interpreted as the path to a png image file.
+-- @return true on success, false if the image cannot be used
 function imagebox:set_image(image)
     local image = image
 
     if type(image) == "string" then
-        local success, result = pcall(surface.load, image)
-        if not success then
-            print("Error while reading '" .. image .. "': " .. result)
+        image = surface.load(image)
+        if not image then
             print(debug.traceback())
             return false
         end
-        image = result
     end
 
     image = surface.load(image)
