@@ -254,6 +254,10 @@ luaA_systray_invalidate(void)
 {
     lua_State *L = globalconf_get_lua_State();
     signal_object_emit(L, &global_signals, "systray::update", 0);
+
+    /* Unmap now if the systray became empty */
+    if(globalconf.embedded.len == 0)
+        xcb_unmap_window(globalconf.connection, globalconf.systray.window);
 }
 
 static void
@@ -364,9 +368,6 @@ luaA_systray(lua_State *L)
             xcb_map_window(globalconf.connection,
                            globalconf.systray.window);
         }
-        else
-            xcb_unmap_window(globalconf.connection,
-                             globalconf.systray.window);
     }
 
     lua_pushinteger(L, globalconf.embedded.len);
