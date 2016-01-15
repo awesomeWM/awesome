@@ -195,8 +195,8 @@ capi.dbus.connect_signal("org.freedesktop.Notifications", function (data, appnam
            naughty.destroy(obj, naughty.notificationClosedReason.dismissedByCommand)
         end
     elseif data.member == "GetServerInfo" or data.member == "GetServerInformation" then
-        -- name of notification app, name of vender, version
-        return "s", "naughty", "s", "awesome", "s", capi.awesome.version:match("%d.%d"), "s", "1.0"
+        -- name of notification app, name of vender, version, specification version
+        return "s", "naughty", "s", "awesome", "s", capi.awesome.version, "s", "1.0"
     elseif data.member == "GetCapabilities" then
         -- We actually do display the body of the message, we support <b>, <i>
         -- and <u> in the body and we handle static (non-animated) icons.
