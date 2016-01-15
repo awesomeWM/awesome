@@ -90,7 +90,7 @@ local widget = {
 }
 
 
-local cached_wiboxes = {{}}
+local cached_wiboxes = {}
 local cached_awful_keys = nil
 local colors_counter = {}
 local colors = beautiful.xresources.get_current_theme()
@@ -358,6 +358,9 @@ function widget.show_help(c, s)
     end
 
     local joined_groups = join_plus_sort(available_groups)
+    if not cached_wiboxes[s] then
+        cached_wiboxes[s] = {}
+    end
     if not cached_wiboxes[s][joined_groups] then
         cached_wiboxes[s][joined_groups] = create_wibox(s, available_groups)
     end
