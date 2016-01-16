@@ -411,6 +411,33 @@ function util.table.crush(t, set)
     return t
 end
 
+--- Pack all elements with an integer key into a new table
+-- While both lua and luajit implement __len over sparse
+-- table, the standard define it as an implementation
+-- detail.
+--
+-- This function remove any non numeric keys from the value set
+--
+-- @tparam table t A potentially sparse table
+-- @treturn table A packed table with all numeric keys
+function util.table.from_sparse(t)
+    local keys= {}
+    for k,v in pairs(t) do
+        if type(k) == "number" then
+            keys[#keys+1] = k
+        end
+    end
+
+    table.sort(keys)
+
+    local ret = {}
+    for _,v in ipairs(keys) do
+        ret[#ret+1] = t[v]
+    end
+
+    return ret
+end
+
 --- Check if a table has an item and return its key.
 -- @param t The table.
 -- @param item The item to look for in values of the table.
