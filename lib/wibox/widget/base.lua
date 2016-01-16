@@ -73,6 +73,32 @@ function base.widget:set_height(s)
     end
 end
 
+--- Get all direct children widgets
+-- This method should be re-implemented by the relevant widgets
+-- @treturn table The children
+function base.widget:get_children()
+    return {}
+end
+
+-- It could have been merged into `get_all_children`, but it's not necessary
+local function digg_children(ret, tlw)
+    for k, w in ipairs(tlw:get_children()) do
+        table.insert(ret, w)
+        digg_children(ret, w)
+    end
+end
+
+--- Get all direct and indirect children widgets
+-- This will scan all containers recursively to find widgets
+-- Warning: This method it prone to stack overflow id the widget, or any of its
+-- children, contain (directly or indirectly) itself.
+-- @treturn table The children
+function base.widget:get_all_children()
+    local ret = {}
+    digg_children(ret, self)
+    return ret
+end
+
 -- }}}
 
 -- {{{ Caches

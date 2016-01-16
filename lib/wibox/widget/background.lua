@@ -69,6 +69,12 @@ function background:set_widget(widget)
     self:emit_signal("widget::layout_changed")
 end
 
+--- Get the number of children element
+-- @treturn table The children
+function background:get_children()
+    return {self.widget}
+end
+
 --- Set the background to use
 function background:set_bg(bg)
     if bg then
