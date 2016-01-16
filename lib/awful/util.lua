@@ -399,6 +399,18 @@ function util.table.join(...)
     return ret
 end
 
+--- Override elements in the first table by the one in the second
+-- @tparam table t the table to be overriden
+-- @tparam table set the table used to override members of `t`
+-- @treturn table t (for convenience)
+function util.table.crush(t, set)
+    for k, v in pairs(set) do
+        t[k] = v
+    end
+
+    return t
+end
+
 --- Check if a table has an item and return its key.
 -- @param t The table.
 -- @param item The item to look for in values of the table.
