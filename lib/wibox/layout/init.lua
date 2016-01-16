@@ -17,6 +17,7 @@ return
     mirror = require("wibox.layout.mirror");
     constraint = require("wibox.layout.constraint");
     scroll = require("wibox.layout.scroll");
+    stack = require("wibox.layout.stack");
 }
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
