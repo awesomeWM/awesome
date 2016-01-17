@@ -57,6 +57,9 @@ function xresources.get_current_theme()
             gears_debug.print_warning("beautiful: can't get colorscheme from xrdb (using fallback).")
             return fallback
         end
+        if colors[key]:find("rgb:") then
+            colors[key] = "#"..colors[key]:gsub("[a]?rgb:", ""):gsub("/", "")
+        end
     end
     return colors
 end
