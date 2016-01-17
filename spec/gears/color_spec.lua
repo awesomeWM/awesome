@@ -22,6 +22,10 @@ describe("gears.color", function()
             test(0, 0, 0, 0xff, "#000000")
         end)
 
+        it("black", function()
+            test(0, 0, 0, 0xff, "black")
+        end)
+
         it("opaque black", function()
             test(0, 0, 0, 0xff, "#000000ff")
         end)
@@ -32,6 +36,10 @@ describe("gears.color", function()
 
         it("transparent white", function()
             test(0xff, 0xff, 0xff, 0x7f, "#ffffff7f")
+        end)
+
+        it("chartreuse", function()
+            test(0x7f, 0xff, 0x00, 0xff, "chartreuse")
         end)
 
         describe("different lengths", function()
