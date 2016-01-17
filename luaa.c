@@ -147,16 +147,24 @@ luaA_restart(lua_State *L)
 /** Load an image from a given path.
  *
  * @param name The file name.
- * @return A cairo surface as light user datum.
+ * @return[1] A cairo surface as light user datum.
+ * @return[2] nil
+ * @treturn[2] string Error message
  * @function load_image
  */
 static int
 luaA_load_image(lua_State *L)
 {
+    GError *error = NULL;
     const char *filename = luaL_checkstring(L, 1);
-    cairo_surface_t *surface = draw_load_image(L, filename);
-    if (!surface)
-        return 0;
+    cairo_surface_t *surface = draw_load_image(L, filename, &error);
+    if (!surface) {
+        lua_pushnil(L);
+        lua_pushstring(L, error->message);
+        g_error_free(error);
+        return 2;
+    }
+
     /* lua has to make sure to free the ref or we have a leak */
     lua_pushlightuserdata(L, surface);
     return 1;

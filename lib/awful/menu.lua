@@ -558,7 +558,7 @@ function menu.entry(parent, args)
     if type(args.cmd) == "table" then
         if args.theme.submenu_icon then
             submenu = wibox.widget.imagebox()
-            submenu:set_image(surface.load(args.theme.submenu_icon))
+            submenu:set_image(args.theme.submenu_icon)
         else
             submenu = wibox.widget.textbox()
             submenu:set_font(args.theme.font)

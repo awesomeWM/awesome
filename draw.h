@@ -25,6 +25,7 @@
 #include <xcb/xcb.h>
 #include <cairo.h>
 #include <lua.h>
+#include <glib.h> /* for GError */
 
 #include "common/util.h"
 
@@ -70,7 +71,7 @@ a_iso2utf8(const char *str, ssize_t len, char **dest, ssize_t *dlen)
 
 cairo_surface_t *draw_surface_from_data(int width, int height, uint32_t *data);
 cairo_surface_t *draw_dup_image_surface(cairo_surface_t *surface);
-cairo_surface_t *draw_load_image(lua_State *L, const char *path);
+cairo_surface_t *draw_load_image(lua_State *L, const char *path, GError **error);
 
 xcb_visualtype_t *draw_find_visual(const xcb_screen_t *s, xcb_visualid_t visual);
 xcb_visualtype_t *draw_default_visual(const xcb_screen_t *s);
