@@ -402,7 +402,7 @@ luaA_spawn(lua_State *L)
         return_stdout = luaA_checkboolean(L, 4);
     if(lua_gettop(L) >= 5)
         return_stderr = luaA_checkboolean(L, 5);
-    if(lua_gettop(L) >= 6)
+    if (!lua_isnoneornil(L, 6))
     {
         luaA_checkfunction(L, 6);
         flags |= G_SPAWN_DO_NOT_REAP_CHILD;
