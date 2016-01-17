@@ -350,7 +350,7 @@ local function set_text(notification, title, text)
     local textbox = notification.textbox
 
     local function setMarkup(pattern, replacements)
-        textbox:set_markup(string.format('<b>%s</b>%s', title, text:gsub(pattern, replacements)))
+        return textbox:set_markup_silently(string.format('<b>%s</b>%s', title, text:gsub(pattern, replacements)))
     end
     local function setText()
         textbox:set_text(string.format('%s %s', title, text))
@@ -360,10 +360,9 @@ local function set_text(notification, title, text)
     -- it is not interpreted by Pango later.
     title = title:gsub(escape_pattern, escape_subs)
     -- Try to set the text while only interpreting <br>.
-    -- (Setting a textbox' .text to an invalid pattern throws a lua error)
-    if not pcall(setMarkup, "<br.->", "\n") then
+    if not setMarkup("<br.->", "\n") then
         -- That failed, escape everything which might cause an error from pango
-        if not pcall(setMarkup, escape_pattern, escape_subs) then
+        if not setMarkup(escape_pattern, escape_subs) then
             -- Ok, just ignore all pango markup. If this fails, we got some invalid utf8
             if not pcall(setText) then
                 textbox:set_markup("<i>&lt;Invalid markup or UTF8, cannot display message&gt;</i>")
