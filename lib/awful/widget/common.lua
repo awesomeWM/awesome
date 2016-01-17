@@ -96,7 +96,7 @@ function common.list_update(w, buttons, label, data, objects)
         if text == nil or text == "" then
             tbm:set_margins(0)
         else
-            if not pcall(tb.set_markup, tb, text) then
+            if not tb:set_markup_silently(text) then
                 tb:set_markup("<i>&lt;Invalid text&gt;</i>")
             end
         end
