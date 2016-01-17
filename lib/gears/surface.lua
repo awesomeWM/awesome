@@ -20,8 +20,11 @@ end
 local surface = { mt = {} }
 local surface_cache = setmetatable({}, { __mode = 'v' })
 
-local function get_empty_surface()
-    return cairo.ImageSurface(cairo.Format.ARGB32, 0, 0)
+local function get_default(arg)
+    if type(arg) == 'nil' then
+        return cairo.ImageSurface(cairo.Format.ARGB32, 0, 0)
+    end
+    return arg
 end
 
 --- Try to convert the argument into an lgi cairo surface.
@@ -33,9 +36,9 @@ end
 -- @return An error message, or nil on success
 function surface.load_uncached_silently(_surface, default)
     local file
-    -- On nil, return an empty surface
+    -- On nil, return some sane default
     if not _surface then
-        return get_empty_surface()
+        return get_default(default)
     end
     -- Remove from cache if it was cached
     surface_cache[_surface] = nil
@@ -49,10 +52,7 @@ function surface.load_uncached_silently(_surface, default)
         file = _surface
         _surface, err = capi.awesome.load_image(file)
         if not _surface then
-            if type(default) == 'nil' then
-                default = get_empty_surface()
-            end
-            return default, err
+            return get_default(default), err
         end
     end
     -- Everything else gets forced into a surface
@@ -85,14 +85,14 @@ end
 
 local function do_load_and_handle_errors(_surface, func)
     if type(_surface) == 'nil' then
-        return get_empty_surface()
+        return get_default()
     end
     local result, err = func(_surface, false)
     if result then
         return result
     end
     gdebug.print_error("Failed to load '" .. tostring(_surface) .. "': " .. tostring(err))
-    return get_empty_surface()
+    return get_default()
 end
 
 --- Try to convert the argument into an lgi cairo surface.
