@@ -23,7 +23,7 @@ shape.update = {}
 -- @tparam string shape Either "bounding" or "clip"
 function shape.get_transformed(c, shape)
     local border = shape == "bounding" and c.border_width or 0
-    local shape = surface(c["client_shape_" .. shape])
+    local shape = surface.load_silently(c["client_shape_" .. shape], false)
     if not shape then return end
 
     -- Get information about various sizes on the client
