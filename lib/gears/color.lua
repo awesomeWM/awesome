@@ -13,14 +13,16 @@ local tonumber = tonumber
 local ipairs = ipairs
 local pairs = pairs
 local type = type
-local cairo = require("lgi").cairo
+local lgi = require("lgi")
+local cairo = lgi.cairo
+local Pango = lgi.Pango
 local surface = require("gears.surface")
 
 local color = { mt = {} }
 local pattern_cache
 
 --- Parse a HTML-color.
--- This function can parse colors like `#rrggbb` and `#rrggbbaa`.
+-- This function can parse colors like `#rrggbb` and `#rrggbbaa` and also `red`.
 -- Thanks to #lua for this. :)
 --
 -- @param col The color to parse
@@ -29,12 +31,40 @@ local pattern_cache
 -- gears.color.parse_color("#00ff00ff")
 function color.parse_color(col)
     local rgb = {}
-    for pair in string.gmatch(col, "[^#].") do
-        local i = tonumber(pair, 16)
-        if i then
-            table.insert(rgb, i / 255)
+    -- Is it a HTML-style color?
+    if string.match(col, "^#%x+$") then
+        -- Get all hex chars
+        for char in string.gmatch(col, "[^#]") do
+            table.insert(rgb, tonumber(char, 16) / 0xf)
+        end
+        -- Merge consecutive values until we have at most four groups (rgba)
+        local factor = 0xf
+        while #rgb > 4 do
+            local merged = {}
+            local key, value = next(rgb, nil)
+            local next_factor = (factor + 1)*(factor + 1) - 1
+            while key do
+                local key2, value2 = next(rgb, key)
+                local v1, v2 = value * factor, value2 * factor
+                local new = v1 * (factor + 1) + v2
+                table.insert(merged, new / next_factor)
+                key, value = next(rgb, key2)
+            end
+            rgb = merged
+            factor = next_factor
+        end
+    else
+        -- Let's ask Pango for its opinion (but this doesn't support alpha!)
+        local c = Pango.Color()
+        if c:parse(col) then
+            rgb = {
+                c.red / 0xffff,
+                c.green / 0xffff,
+                c.blue / 0xffff,
+            }
         end
     end
+    -- Add missing groups (missing alpha)
     while #rgb < 4 do
         table.insert(rgb, 1)
     end

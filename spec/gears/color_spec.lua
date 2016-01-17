@@ -11,26 +11,70 @@ describe("gears.color", function()
     describe("parse_color", function()
         local function test(e_r, e_g, e_b, e_a, input)
             local o_r, o_g, o_b, o_a, unused = color.parse_color(input)
-            assert.is.same(o_r, e_r / 255)
-            assert.is.same(o_g, e_g / 255)
-            assert.is.same(o_b, e_b / 255)
+            assert.is.same(o_r, e_r / 0xff)
+            assert.is.same(o_g, e_g / 0xff)
+            assert.is.same(o_b, e_b / 0xff)
+            assert.is.same(o_a, e_a / 0xff)
             assert.is_nil(unused)
         end
 
         it("black", function()
-            test(0, 0, 0, 255, "#000000")
+            test(0, 0, 0, 0xff, "#000000")
+        end)
+
+        it("black", function()
+            test(0, 0, 0, 0xff, "black")
         end)
 
         it("opaque black", function()
-            test(0, 0, 0, 255, "#000000ff")
+            test(0, 0, 0, 0xff, "#000000ff")
         end)
 
         it("transparent gray", function()
-            test(128, 128, 128, 128, "#80808080")
+            test(0x80, 0x80, 0x80, 0x80, "#80808080")
         end)
 
         it("transparent white", function()
-            test(255, 255, 255, 127, "#ffffff7f")
+            test(0xff, 0xff, 0xff, 0x7f, "#ffffff7f")
+        end)
+
+        it("chartreuse", function()
+            test(0x7f, 0xff, 0x00, 0xff, "chartreuse")
+        end)
+
+        describe("different lengths", function()
+            local function gray(e, e_a, input)
+                local o_r, o_g, o_b, o_a, unused = color.parse_color(input)
+                assert.is.same(o_r, e)
+                assert.is.same(o_g, e)
+                assert.is.same(o_b, e)
+                assert.is.same(o_a, e_a)
+                assert.is_nil(unused)
+            end
+
+            it("rgb", function()
+                gray(0x8/0xf, 1, "#888")
+            end)
+
+            it("rgba", function()
+                gray(0x8/0xf, 0x8/0xf, "#8888")
+            end)
+
+            it("rrggbb", function()
+                gray(0x80/0xff, 1, "#808080")
+            end)
+
+            it("rrggbbaa", function()
+                gray(0x80/0xff, 0x80/0xff, "#80808080")
+            end)
+
+            it("rrrrggggbbbb", function()
+                gray(0x8000/0xffff, 1, "#800080008000")
+            end)
+
+            it("rrrrggggbbbbaaaa", function()
+                gray(0x8000/0xffff, 0x8000/0xffff, "#8000800080008000")
+            end)
         end)
     end)
 
