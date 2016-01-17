@@ -64,7 +64,7 @@ local function get_widget_context(self)
 end
 
 local function do_redraw(self)
-    local surf = surface(self.drawable.surface)
+    local surf = surface.load_silently(self.drawable.surface, false)
     -- The surface can be nil if the drawable's parent was already finalized
     if not surf then return end
     local cr = cairo.Context(surf)
@@ -113,7 +113,7 @@ local function do_redraw(self)
     if not capi.awesome.composite_manager_running then
         -- This is pseudo-transparency: We draw the wallpaper in the background
         if not wallpaper then
-            wallpaper = surface(capi.root.wallpaper())
+            wallpaper = surface.load_silently(capi.root.wallpaper(), false)
         end
         if wallpaper then
             cr.operator = cairo.Operator.SOURCE
