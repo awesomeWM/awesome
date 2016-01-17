@@ -46,11 +46,6 @@ function wallpaper.prepare_context(s)
         -- Prepare a pending wallpaper
         local wp = surface(root.wallpaper())
 
-        if not wp then
-            -- No wallpaper yet
-            wp = cairo.ImageSurface(cairo.Format.RGB24, 0, 0)
-        end
-
         pending_wallpaper = wp:create_similar(cairo.Content.COLOR, root_geom.width, root_geom.height)
 
         -- Copy the old wallpaper to the new one
