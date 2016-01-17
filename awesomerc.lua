@@ -39,7 +39,7 @@ end
 
 -- {{{ Variable definitions
 -- Themes define colours, icons, font and wallpapers.
-beautiful.init("@AWESOME_THEMES_PATH@/default/theme.lua")
+beautiful.init(awful.util.get_themes_dir() .. "default/theme.lua")
 
 -- This is used later as the default terminal and editor to run.
 terminal = "xterm"
@@ -318,7 +318,7 @@ globalkeys = awful.util.table.join(
                   awful.prompt.run({ prompt = "Run Lua code: " },
                   mypromptbox[awful.screen.focused()].widget,
                   awful.util.eval, nil,
-                  awful.util.getdir("cache") .. "/history_eval")
+                  awful.util.get_cache_dir() .. "/history_eval")
               end,
               {description = "lua execute prompt", group = "awesome"}),
     -- Menubar

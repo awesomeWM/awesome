@@ -27,7 +27,7 @@ local function run(promptbox)
                           promptbox:spawn_and_handle_error(...)
                       end,
                       completion.shell,
-                      util.getdir("cache") .. "/history")
+                      util.get_cache_dir() .. "/history")
 end
 
 local function spawn_and_handle_error(self, ...)

@@ -134,6 +134,43 @@ function util.restart()
     capi.awesome.restart()
 end
 
+--- Get the config home according to the XDG basedir specification.
+-- @return the config home (XDG_CONFIG_HOME) with a slash at the end.
+function util.get_xdg_config_home()
+    return (os.getenv("XDG_CONFIG_HOME") or os.getenv("HOME") .. "/.config") .. "/"
+end
+
+--- Get the cache home according to the XDG basedir specification.
+-- @return the cache home (XDG_CACHE_HOME) with a slash at the end.
+function util.get_xdg_cache_home()
+    return (os.getenv("XDG_CACHE_HOME") or os.getenv("HOME") .. "/.cache") .. "/"
+end
+
+--- Get the path to the user's config dir.
+-- This is the directory containing the configuration file ("rc.lua").
+-- @return A string with the requested path with a slash at the end.
+function util.get_configuration_dir()
+    return capi.awesome.conffile:match(".*/") or "./"
+end
+
+--- Get the path to a directory that should be used for caching data.
+-- @return A string with the requested path with a slash at the end.
+function util.get_cache_dir()
+    return util.get_xdg_cache_home() .. "awesome/"
+end
+
+--- Get the path to the directory where themes are installed.
+-- @return A string with the requested path with a slash at the end.
+function util.get_themes_dir()
+    return "@AWESOME_THEMES_PATH@" .. "/"
+end
+
+--- Get the path to the directory where our icons are installed.
+-- @return A string with the requested path with a slash at the end.
+function util.get_awesome_icon_dir()
+    return "@AWESOME_ICON_PATH@" .. "/"
+end
+
 --- Get the user's config or cache dir.
 -- It first checks XDG_CONFIG_HOME / XDG_CACHE_HOME, but then goes with the
 -- default paths.
@@ -141,17 +178,11 @@ end
 -- @return A string containing the requested path.
 function util.getdir(d)
     if d == "config" then
-        local dir = os.getenv("XDG_CONFIG_HOME")
-        if dir then
-            return dir .. "/awesome"
-        end
-        return os.getenv("HOME") .. "/.config/awesome"
+        -- No idea why this is what is returned, I recommend everyone to use
+        -- get_configuration_dir() instead
+        return util.get_xdg_config_home() .. "awesome/"
     elseif d == "cache" then
-        local dir = os.getenv("XDG_CACHE_HOME")
-        if dir then
-            return dir .. "/awesome"
-        end
-        return os.getenv("HOME").."/.cache/awesome"
+        return util.get_cache_dir()
     end
 end
 
