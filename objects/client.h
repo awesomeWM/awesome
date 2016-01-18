@@ -208,6 +208,12 @@ client_raise(client_t *c)
 
     /* Push c on top of the stack. */
     stack_client_append(c);
+
+    /* Notify the listeners */
+    lua_State *L = globalconf_get_lua_State();
+    luaA_object_push(L, c);
+    luaA_object_emit_signal(L, -1, "raised", 0);
+    lua_pop(L, 1);
 }
 
 /** Check if a client has fixed size.
