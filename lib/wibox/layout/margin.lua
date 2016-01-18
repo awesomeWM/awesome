@@ -55,6 +55,11 @@ function margin:fit(context, width, height)
     if self.widget then
         w, h = base.fit_widget(self, context, self.widget, width - extra_w, height - extra_h)
     end
+
+    if self._draw_empty == false and (w == 0 or h == 0) then
+        return 0, 0
+    end
+
     return w + extra_w, h + extra_h
 end
 
@@ -80,6 +85,13 @@ end
 function margin:set_color(color)
     self.color = color and gcolor(color)
     self:emit_signal("widget::redraw_needed")
+end
+
+--- Draw the margin even if the content size is 0x0 (default: true)
+-- @tparam boolean draw_empty Draw nothing is content is 0x0 or draw the margin anyway
+function margin:set_draw_empty(draw_empty)
+    self._draw_empty = draw_empty
+    self:emit_signal("widget::layout_changed")
 end
 
 --- Reset this layout. The widget will be unreferenced, the margins set to 0
@@ -129,7 +141,8 @@ end
 -- @param[opt] top A margin to use on the top side of the widget.
 -- @param[opt] bottom A margin to use on the bottom side of the widget.
 -- @param[opt] color A color for the margins.
-local function new(widget, left, right, top, bottom, color)
+-- @param[opt] draw_empty whether or not to draw the margin when the content is empty
+local function new(widget, left, right, top, bottom, color, draw_empty)
     local ret = base.make_widget()
 
     for k, v in pairs(margin) do
@@ -142,6 +155,7 @@ local function new(widget, left, right, top, bottom, color)
     ret:set_right(right or 0)
     ret:set_top(top or 0)
     ret:set_bottom(bottom or 0)
+    ret:set_draw_empty(draw_empty)
 
     ret:set_color(color)
 
