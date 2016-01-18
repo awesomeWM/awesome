@@ -99,6 +99,30 @@ function base.widget:get_all_children()
     return ret
 end
 
+--- Get a widex index
+-- @param widget The widget to look for
+-- @param[opt] recursive Also check sub-widgets
+-- @param[opt] ... Aditional widgets to add at the end of the "path"
+-- @return The index
+-- @return The parent layout
+-- @return The path between "self" and "widget"
+function base.widget:index(widget, recursive, ...)
+    local widgets = self:get_children()
+
+    for idx, w in ipairs(widgets) do
+        if w == widget then
+            return idx, self, {...}
+        elseif recursive then
+            local idx, l, path = w:index(widget, true, self, ...)
+            if idx and l then
+                return idx, l, path
+            end
+        end
+    end
+
+    return nil, self, {}
+end
+
 -- }}}
 
 -- {{{ Caches
