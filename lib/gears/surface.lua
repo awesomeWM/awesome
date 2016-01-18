@@ -152,6 +152,32 @@ function surface.duplicate_surface(s)
     return result
 end
 
+--- Apply a shape to a client or a wibox.
+--
+--  If the wibox or client size change, this function need to be called
+--   again.
+-- @param draw A wibox or a client
+-- @param shape or gears.shape function or a custom function with a context,
+--   width and height as parameter.
+-- @param[opt] Any additional parameters will be passed to the shape function
+function surface.apply_shape_bounding(draw, shape, ...)
+  local geo = draw:geometry()
+
+  local img = cairo.ImageSurface(cairo.Format.A1, geo.width, geo.height)
+  local cr = cairo.Context(img)
+
+  cr:set_operator(cairo.Operator.CLEAR)
+  cr:set_source_rgba(0,0,0,1)
+  cr:paint()
+  cr:set_operator(cairo.Operator.SOURCE)
+  cr:set_source_rgba(1,1,1,1)
+
+  shape(cr, geo.width, geo.height, ...)
+
+  cr:fill()
+
+  draw.shape_bounding = img._native
+end
 
 return setmetatable(surface, surface.mt)
 
