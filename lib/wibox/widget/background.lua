@@ -21,6 +21,11 @@ function background:draw(context, cr, width, height)
         return
     end
 
+    if self._shape then
+        self._shape(cr, width, height, unpack(self._shape_args or {}))
+        cr:clip()
+    end
+
     if self.background then
         cr:set_source(self.background)
         cr:paint()
@@ -84,6 +89,15 @@ function background:set_fg(fg)
     self:emit_signal("widget::redraw_needed")
 end
 
+--- Set the background shape
+-- @param shape A function taking a context, width and height as arguments
+-- Any other arguments will be passed to the shape function
+function background:set_shape(shape, ...)
+    ret._shape = shape
+    ret._shape_args = {...}
+    self:emit_signal("widget::redraw_needed")
+end
+
 --- Set the background image to use
 function background:set_bgimage(image)
     self.bgimage = surface.load(image)
@@ -94,7 +108,8 @@ end
 -- and foreground color to another widget.
 -- @param[opt] widget The widget to display.
 -- @param[opt] bg The background to use for that widget.
-local function new(widget, bg)
+-- @param[opt] shape A `gears.shape` compatible shape function
+local function new(widget, bg, shape)
     local ret = base.make_widget()
 
     for k, v in pairs(background) do
@@ -102,6 +117,8 @@ local function new(widget, bg)
             ret[k] = v
         end
     end
+
+    ret._shape = shape
 
     ret:set_widget(widget)
     ret:set_bg(bg)
