@@ -5,9 +5,10 @@
 -- @classmod wibox.layout.fixed
 ---------------------------------------------------------------------------
 
-local base = require("wibox.widget.base")
+local base  = require("wibox.widget.base")
 local table = table
 local pairs = pairs
+local util = require("awful.util")
 
 local fixed = {}
 
@@ -122,11 +123,7 @@ end
 local function get_layout(dir, widget1, ...)
     local ret = base.make_widget()
 
-    for k, v in pairs(fixed) do
-        if type(v) == "function" then
-            ret[k] = v
-        end
-    end
+    util.table.crush(ret, fixed)
 
     ret.dir = dir
     ret.widgets = {}
