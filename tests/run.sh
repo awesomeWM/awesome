@@ -131,7 +131,7 @@ if [ "$CI" != true ]; then
     fi
     RC_FILE=$tmp_files/awesomerc.lua
     THEME_FILE=$tmp_files/theme.lua
-    sed -e "s:beautiful.init(\"@AWESOME_THEMES_PATH@/default/theme.lua\"):beautiful.init('$THEME_FILE'):" $root_dir/awesomerc.lua$SED_IN > $RC_FILE
+    sed -e "s:.*beautiful.init(.*default/theme.lua.*:beautiful.init('$THEME_FILE'):" $root_dir/awesomerc.lua$SED_IN > $RC_FILE
     sed -e "s:@AWESOME_THEMES_PATH@/default/titlebar:$root_dir/build/themes/default/titlebar:"  \
         -e "s:@AWESOME_THEMES_PATH@:$root_dir/themes/:" \
         -e "s:@AWESOME_ICON_PATH@:$root_dir/icons:" $root_dir/themes/default/theme.lua$SED_IN > $THEME_FILE
