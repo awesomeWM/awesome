@@ -14,6 +14,7 @@ local util = require("awful.util")
 local ascreen = require("awful.screen")
 local capi = {
     screen = screen,
+    mouse  = mouse,
     awesome = awesome,
     client = client,
     tag = tag
@@ -79,7 +80,7 @@ function layout.inc(i, s, layouts)
         local curlayout = layout.get(s)
         local curindex
         for k, v in ipairs(layouts) do
-            if v == curlayout then
+            if v == curlayout or curlayout._type == v then
                 curindex = k
                 break
             end
@@ -109,6 +110,54 @@ function layout.set(_layout, t)
     tag.setproperty(t, "layout", _layout)
 end
 
+--- Get the layout parameters used for the screen
+--
+-- This should give the same result as "arrange", but without the "geometries"
+-- parameter, as this is computed during arranging.
+--
+-- If `t` is given, `screen` is ignored, if none are given, the mouse screen is
+-- used.
+--
+-- @tparam[opt] tag t The tag to query
+-- @param[opt] screen The screen
+-- @treturn table A table with the workarea (x, y, width, height), the screen
+--   geometry (x, y, width, height), the clients, the screen and sometime, a
+--   "geometries" table with client as keys and geometry as value
+function layout.parameters(t, screen)
+    t = t or tag.selected(screen)
+
+    if not t then return end
+
+    screen = tag.getscreen(t) or 1
+
+    local p = {}
+
+    p.workarea = capi.screen[screen].workarea
+
+    local useless_gap = tag.getgap(t, #client.tiled(screen))
+
+    -- Handle padding
+    local padding = ascreen.padding(capi.screen[screen]) or {}
+
+    p.workarea.x = p.workarea.x + (padding.left or 0) + useless_gap
+
+    p.workarea.y = p.workarea.y + (padding.top or 0) + useless_gap
+
+    p.workarea.width = p.workarea.width - ((padding.left or 0 ) +
+        (padding.right or 0) + useless_gap * 2)
+
+    p.workarea.height = p.workarea.height - ((padding.top or 0) +
+        (padding.bottom or 0) + useless_gap * 2)
+
+    p.geometry    = capi.screen[screen].geometry
+    p.clients     = client.tiled(screen)
+    p.screen      = screen
+    p.padding     = padding
+    p.useless_gap = useless_gap
+
+    return p
+end
+
 --- Arrange a screen using its current layout.
 -- @param screen The screen to arrange.
 function layout.arrange(screen)
@@ -119,22 +168,10 @@ function layout.arrange(screen)
         if arrange_lock then return end
         arrange_lock = true
 
-        local p = {}
-        p.workarea = capi.screen[screen].workarea
-        local useless_gap = tag.getgap(tag.selected(screen),
-                                       #client.tiled(screen))
-        -- Handle padding
-        local padding = ascreen.padding(capi.screen[screen]) or {}
-        p.workarea.x = p.workarea.x + (padding.left or 0) + useless_gap
-        p.workarea.y = p.workarea.y + (padding.top or 0) + useless_gap
-        p.workarea.width = p.workarea.width - ((padding.left or 0 ) +
-            (padding.right or 0) + useless_gap * 2)
-        p.workarea.height = p.workarea.height - ((padding.top or 0) +
-            (padding.bottom or 0) + useless_gap * 2)
+        local p = layout.parameters(nil, screen)
 
-        p.geometry = capi.screen[screen].geometry
-        p.clients = client.tiled(screen)
-        p.screen = screen
+        local useless_gap = p.useless_gap
+
         p.geometries = setmetatable({}, {__mode = "k"})
         layout.get(screen).arrange(p)
         for c, g in pairs(p.geometries) do
