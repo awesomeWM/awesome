@@ -425,6 +425,8 @@ function tag.setlayout(layout, t)
         if instance.is_dynamic then
             data.dynamic_cache[t][layout] = instance
         end
+
+        layout = instance
     end
 
     tag.setproperty(t, "layout", layout, true)
