@@ -571,10 +571,12 @@ end
 --- Merge items from the one table to another one
 -- @tparam table t the container table
 -- @tparam table set the mixin table
+-- @treturn table Return `t` for convenience
 function util.table.merge(t, set)
     for _, v in ipairs(set) do
         table.insert(t, v)
     end
+    return t
 end
 
 
