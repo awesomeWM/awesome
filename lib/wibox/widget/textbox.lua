@@ -7,6 +7,7 @@
 ---------------------------------------------------------------------------
 
 local base = require("wibox.widget.base")
+local gdebug = require("gears.debug")
 local beautiful = require("beautiful")
 local lgi = require("lgi")
 local cairo = lgi.cairo
@@ -118,20 +119,38 @@ end
 -- @tparam string text The text to set. This can contain pango markup (e.g.
 --   `<b>bold</b>`). You can use `awful.util.escape` to escape
 --   parts of it.
-function textbox:set_markup(text)
+-- @treturn[1] boolean true
+-- @treturn[2] boolean false
+-- @treturn[2] string Error message explaining why the markup was invalid.
+function textbox:set_markup_silently(text)
     if self._markup == text then
-        return
+        return true
     end
 
     local attr, parsed = Pango.parse_markup(text, -1, 0)
     -- In case of error, attr is false and parsed is a GLib.Error instance.
-    if not attr then error(parsed.message or tostring(parsed)) end
+    if not attr then
+        return false, parsed.message or tostring(parsed)
+    end
 
     self._markup = text
     self._layout.text = parsed
     self._layout.attributes = attr
     self:emit_signal("widget::redraw_needed")
     self:emit_signal("widget::layout_changed")
+    return true
+end
+
+--- Set the text of the textbox (with
+-- [Pango markup](https://developer.gnome.org/pango/stable/PangoMarkupFormat.html)).
+-- @tparam string text The text to set. This can contain pango markup (e.g.
+--   `<b>bold</b>`). You can use `awful.util.escape` to escape
+--   parts of it.
+function textbox:set_markup(text)
+    local success, message = self:set_markup_silently(text)
+    if not success then
+        gdebug.print_error(message)
+    end
 end
 
 --- Set a textbox' text.
