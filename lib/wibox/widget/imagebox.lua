@@ -30,6 +30,12 @@ function imagebox:draw(context, cr, width, height)
 
         cr:scale(aspect, aspect)
     end
+
+    -- Set the clip
+    if self._clip_shape then
+        cr:clip(self._clip_shape(cr, width, height ,unpack(self._clip_args)))
+    end
+
     cr:set_source_surface(self._image, 0, 0)
     cr:paint()
 end
@@ -107,6 +113,19 @@ function imagebox:set_image(image)
     return true
 end
 
+--- Set a clip shape for this imagebox
+-- A clip shape define an area where the content is displayed and one where it
+-- is trimmed.
+--
+-- Any other parameters will be passed to the clip shape function
+--
+-- @param clip_shape A `gears_shape` compatible shape function
+function imagebox:set_clip_shape(clip_shape, ...)
+    self._clip_shape = clip_shape
+    self._clip_args = {...}
+    self:emit_signal("widget::redraw_needed")
+end
+
 --- Should the image be resized to fit into the available space?
 -- @param allowed If false, the image will be clipped, else it will be resized
 --   to fit into the available space.
@@ -117,10 +136,12 @@ function imagebox:set_resize(allowed)
 end
 
 --- Returns a new imagebox
+-- Any other arguments will be passed to the clip shape function
 -- @param image the image to display, may be nil
 -- @param resize_allowed If false, the image will be clipped, else it will be resized
 --   to fit into the available space.
-local function new(image, resize_allowed)
+-- @param clip_shape A `gears.shape` compatible function
+local function new(image, resize_allowed, clip_shape, ...)
     local ret = base.make_widget()
 
     for k, v in pairs(imagebox) do
@@ -135,6 +156,9 @@ local function new(image, resize_allowed)
     if resize_allowed ~= nil then
         ret:set_resize(resize_allowed)
     end
+
+    ret._clip_shape = clip_shape
+    ret._clip_args = {...}
 
     return ret
 end
