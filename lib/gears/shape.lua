@@ -21,6 +21,7 @@
 -- @release @AWESOME_VERSION@
 -- @module gears.shape
 ---------------------------------------------------------------------------
+local g_matrix = require( "gears.matrix" )
 
 local module = {}
 
@@ -53,6 +54,32 @@ end
 -- @param height The rectangle height
 function module.rounded_bar(cr, width, height)
     module.rounded_rect(cr, width, height, height / 2)
+end
+
+--- Ajust the shape using a transformation object
+--
+-- Apply various transformations to the shape
+--
+-- @usage gears.shape.transform(gears.shape.rounded_bar)
+--    : rotate(math.pi/2)
+--       : translate(10, 10)
+--
+-- @param shape A shape function
+-- @return A transformation handle, also act as a shape function
+function module.transform(shape)
+
+    -- Apply the transformation matrix and apply the shape, then restore
+    local function apply(self, cr, width, height, ...)
+        cr:save()
+        cr:transform(self:to_cairo_matrix())
+        shape(cr, width, height, ...)
+        cr:restore()
+    end
+
+    local matrix = g_matrix.identity:copy()
+    rawset(matrix, "_call", apply)
+
+    return matrix
 end
 
 return module
