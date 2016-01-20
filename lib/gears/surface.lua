@@ -179,6 +179,26 @@ function surface.load_from_shape(width, height, shape, shape_color, bg_color, ..
     return img
 end
 
+-- Common code for shape bounding and clip
+local function shape_bounding_common(method, draw, shape, ...)
+    local geo = draw:geometry()
+
+    local img = cairo.ImageSurface(cairo.Format.A1, geo.width, geo.height)
+    local cr = cairo.Context(img)
+
+    cr:set_operator(cairo.Operator.CLEAR)
+    cr:set_source_rgba(0,0,0,1)
+    cr:paint()
+    cr:set_operator(cairo.Operator.SOURCE)
+    cr:set_source_rgba(1,1,1,1)
+
+    shape(cr, geo.width, geo.height, ...)
+
+    cr:fill()
+
+    draw[method] = img._native
+end
+
 --- Apply a shape to a client or a wibox.
 --
 --  If the wibox or client size change, this function need to be called
@@ -188,22 +208,21 @@ end
 --   width and height as parameter.
 -- @param[opt] Any additional parameters will be passed to the shape function
 function surface.apply_shape_bounding(draw, shape, ...)
-  local geo = draw:geometry()
+    shape_bounding_common("shape_bounding", draw, shape, ...)
+end
 
-  local img = cairo.ImageSurface(cairo.Format.A1, geo.width, geo.height)
-  local cr = cairo.Context(img)
-
-  cr:set_operator(cairo.Operator.CLEAR)
-  cr:set_source_rgba(0,0,0,1)
-  cr:paint()
-  cr:set_operator(cairo.Operator.SOURCE)
-  cr:set_source_rgba(1,1,1,1)
-
-  shape(cr, geo.width, geo.height, ...)
-
-  cr:fill()
-
-  draw.shape_bounding = img._native
+--- Apply a shape clip to a client or a wibox.
+--
+-- A shape clip is a non-antialiased border around the content of the drawable
+--
+--  If the wibox or client size change, this function need to be called
+--   again.
+-- @param draw A wibox or a client
+-- @param shape or gears.shape function or a custom function with a context,
+--   width and height as parameter.
+-- @param[opt] Any additional parameters will be passed to the shape function
+function surface.apply_shape_clip(draw, shape, ...)
+    shape_bounding_common("shape_clip", draw, shape, ...)
 end
 
 return setmetatable(surface, surface.mt)
