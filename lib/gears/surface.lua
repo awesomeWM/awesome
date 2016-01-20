@@ -9,6 +9,7 @@ local setmetatable = setmetatable
 local type = type
 local capi = { awesome = awesome }
 local cairo = require("lgi").cairo
+local color = nil
 local gdebug = require("gears.debug")
 
 -- Keep this in sync with build-utils/lgi-check.sh!
@@ -150,6 +151,32 @@ function surface.duplicate_surface(s)
     cr.operator = cairo.Operator.SOURCE
     cr:paint()
     return result
+end
+
+--- Create a surface from a `gears.shape`
+-- Any additional parameters will be passed to the shape function
+-- @tparam number width The surface width
+-- @tparam number height The surface height
+-- @param shape A `gears.shape` compatible function
+-- @param[opt=white] shape_color The shape color or pattern
+-- @param[opt=transparent] bg_color The surface background color
+-- @treturn cairo.surface the new surface
+function surface.load_from_shape(width, height, shape, shape_color, bg_color, ...)
+    color = color or require("gears.color")
+
+    local img = cairo.ImageSurface(cairo.Format.ARGB32, width, height)
+    local cr = cairo.Context(img)
+
+    cr:set_source(color(bg_color or "#00000000"))
+    cr:paint()
+
+    cr:set_source(color(shape_color or "#000000"))
+
+    shape(cr, width, height, ...)
+
+    cr:fill()
+
+    return img
 end
 
 --- Apply a shape to a client or a wibox.
