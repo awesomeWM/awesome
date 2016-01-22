@@ -93,8 +93,8 @@ end
 -- @param shape A function taking a context, width and height as arguments
 -- Any other arguments will be passed to the shape function
 function background:set_shape(shape, ...)
-    ret._shape = shape
-    ret._shape_args = {...}
+    self._shape = shape
+    self._shape_args = {...}
     self:emit_signal("widget::redraw_needed")
 end
 
