@@ -25,6 +25,8 @@
 
 #include "xkb.h"
 #include "globalconf.h"
+#include "xwindow.h"
+#include "objects/client.h"
 #include <xcb/xkb.h>
 #include <xkbcommon/xkbcommon.h>
 #include <xkbcommon/xkbcommon-x11.h>
@@ -183,6 +185,21 @@ xkb_reload_keymap(void)
 {
     xkb_state_unref(globalconf.xkb_state);
     xkb_fill_state();
+
+    /* Free and then allocate the key symbols */
+    xcb_key_symbols_free(globalconf.keysyms);
+    globalconf.keysyms = xcb_key_symbols_alloc(globalconf.connection);
+
+    /* Regrab key bindings on the root window */
+    xcb_screen_t *s = globalconf.screen;
+    xwindow_grabkeys(s->root, &globalconf.keys);
+
+    /* Regrab key bindings on clients */
+    foreach(_c, globalconf.clients)
+    {
+        client_t *c = *_c;
+        xwindow_grabkeys(c->window, &c->keys);
+    }
 }
 
 /** The xkb notify event handler.

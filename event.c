@@ -840,23 +840,8 @@ event_handle_clientmessage(xcb_client_message_event_t *ev)
 static void
 event_handle_mappingnotify(xcb_mapping_notify_event_t *ev)
 {
-    if(ev->request == XCB_MAPPING_MODIFIER
-       || ev->request == XCB_MAPPING_KEYBOARD)
-    {
-        /* Free and then allocate the key symbols */
-        xcb_key_symbols_free(globalconf.keysyms);
-        globalconf.keysyms = xcb_key_symbols_alloc(globalconf.connection);
-
-        /* regrab everything TODO: Move this to xkb.c suitably */
-        xcb_screen_t *s = globalconf.screen;
-        xwindow_grabkeys(s->root, &globalconf.keys);
-
-        foreach(_c, globalconf.clients)
-        {
-            client_t *c = *_c;
-            xwindow_grabkeys(c->window, &c->keys);
-        }
-    }
+    /* Since we use XKB, we shouldn't get this event */
+    warn("Unexpected MappingNotify of type %d", ev->request);
 }
 
 static void
