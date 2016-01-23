@@ -833,8 +833,8 @@ event_handle_mappingnotify(xcb_mapping_notify_event_t *ev)
         foreach(_c, globalconf.clients)
         {
             client_t *c = *_c;
-            xcb_ungrab_key(globalconf.connection, XCB_GRAB_ANY, c->frame_window, XCB_BUTTON_MASK_ANY);
-            xwindow_grabkeys(c->frame_window, &c->keys);
+            xcb_ungrab_key(globalconf.connection, XCB_GRAB_ANY, c->window, XCB_BUTTON_MASK_ANY);
+            xwindow_grabkeys(c->window, &c->keys);
         }
     }
 }
