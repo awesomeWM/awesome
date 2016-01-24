@@ -296,6 +296,10 @@ function titlebar.widget.stickybutton(c)
     return widget
 end
 
+client.connect_signal("unmanage", function(c)
+    all_titlebars[c] = nil
+end)
+
 return setmetatable(titlebar, { __call = function(_, ...) return new(...) end})
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
