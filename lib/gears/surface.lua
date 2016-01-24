@@ -9,6 +9,7 @@ local setmetatable = setmetatable
 local type = type
 local capi = { awesome = awesome }
 local cairo = require("lgi").cairo
+local color = nil
 local gdebug = require("gears.debug")
 
 -- Keep this in sync with build-utils/lgi-check.sh!
@@ -152,6 +153,52 @@ function surface.duplicate_surface(s)
     return result
 end
 
+--- Create a surface from a `gears.shape`
+-- Any additional parameters will be passed to the shape function
+-- @tparam number width The surface width
+-- @tparam number height The surface height
+-- @param shape A `gears.shape` compatible function
+-- @param[opt=white] shape_color The shape color or pattern
+-- @param[opt=transparent] bg_color The surface background color
+-- @treturn cairo.surface the new surface
+function surface.load_from_shape(width, height, shape, shape_color, bg_color, ...)
+    color = color or require("gears.color")
+
+    local img = cairo.ImageSurface(cairo.Format.ARGB32, width, height)
+    local cr = cairo.Context(img)
+
+    cr:set_source(color(bg_color or "#00000000"))
+    cr:paint()
+
+    cr:set_source(color(shape_color or "#000000"))
+
+    shape(cr, width, height, ...)
+
+    cr:fill()
+
+    return img
+end
+
+-- Common code for shape bounding and clip
+local function shape_bounding_common(method, draw, shape, ...)
+    local geo = draw:geometry()
+
+    local img = cairo.ImageSurface(cairo.Format.A1, geo.width, geo.height)
+    local cr = cairo.Context(img)
+
+    cr:set_operator(cairo.Operator.CLEAR)
+    cr:set_source_rgba(0,0,0,1)
+    cr:paint()
+    cr:set_operator(cairo.Operator.SOURCE)
+    cr:set_source_rgba(1,1,1,1)
+
+    shape(cr, geo.width, geo.height, ...)
+
+    cr:fill()
+
+    draw[method] = img._native
+end
+
 --- Apply a shape to a client or a wibox.
 --
 --  If the wibox or client size change, this function need to be called
@@ -161,22 +208,21 @@ end
 --   width and height as parameter.
 -- @param[opt] Any additional parameters will be passed to the shape function
 function surface.apply_shape_bounding(draw, shape, ...)
-  local geo = draw:geometry()
+    shape_bounding_common("shape_bounding", draw, shape, ...)
+end
 
-  local img = cairo.ImageSurface(cairo.Format.A1, geo.width, geo.height)
-  local cr = cairo.Context(img)
-
-  cr:set_operator(cairo.Operator.CLEAR)
-  cr:set_source_rgba(0,0,0,1)
-  cr:paint()
-  cr:set_operator(cairo.Operator.SOURCE)
-  cr:set_source_rgba(1,1,1,1)
-
-  shape(cr, geo.width, geo.height, ...)
-
-  cr:fill()
-
-  draw.shape_bounding = img._native
+--- Apply a shape clip to a client or a wibox.
+--
+-- A shape clip is a non-antialiased border around the content of the drawable
+--
+--  If the wibox or client size change, this function need to be called
+--   again.
+-- @param draw A wibox or a client
+-- @param shape or gears.shape function or a custom function with a context,
+--   width and height as parameter.
+-- @param[opt] Any additional parameters will be passed to the shape function
+function surface.apply_shape_clip(draw, shape, ...)
+    shape_bounding_common("shape_clip", draw, shape, ...)
 end
 
 return setmetatable(surface, surface.mt)
