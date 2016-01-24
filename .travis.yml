@@ -11,12 +11,15 @@ env:
     # Later versions seem to provide a `luajit` symlink, so `jit` would be enough.
     # See http://packages.ubuntu.com/precise/i386/luajit/filelist.
     - LUA=5.1 LGIVER=      LUANAME=luajit-5.1 INSTALL_PKGS="luajit" LUAINCLUDE=/usr/include/luajit-2.0 LUAROCKS_ARGS=--lua-suffix=jit-2.0.2
+    # Lua 5.3 isn't available in Ubuntu trusty, so some magic below installs it
+    - LUA=5.3 LGIVER=      LUANAME=lua5.3 LUALIBRARY=/usr/lib/liblua.so
   global:
     # Secure token to push to gh-pages.
     - secure: "LZxt9559+V3qJMdVgmKW4RYTt8ZINooex/qsnoEJUtZloj/eFNG4COT2z6a2yeH2tKWzknCsmV9nLPJiNEA2KLcyqDhjFQvJwKmsBuhGUmLyeQgfenjweorRjO8NT18X1SAEUXAMnClPu+OeTDs4BAuVn5foGZ7xpcRg2E+j2mc="
 
 before_install:
   - if [ -z $LUAINCLUDE ]; then LUAINCLUDE=/usr/include/${LUANAME}; fi
+  - if [ -z $LUALIBRARY ]; then LUALIBRARY=/usr/lib/x86_64-linux-gnu/lib${LUANAME}.so; fi
   - cmake --version
 
 install:
@@ -34,7 +37,18 @@ install:
   - sudo apt-get install -y dbus-x11 xterm xdotool xterm xvfb rxvt-unicode
 
   # Install Lua (per env).
-  - sudo apt-get install -y lib${LUANAME}-dev ${LUANAME} ${INSTALL_PKGS}
+  # Note that Lua 5.3 is installed by hand, because not available in trusty
+  - |
+          if [[ "$LUA" == "5.3" ]]; then
+                  wget http://www.lua.org/ftp/lua-5.3.2.tar.gz -O lua.tar.gz
+                  tar -xvzf lua.tar.gz
+                  cd lua-*
+                  (cd src && make SYSCFLAGS="-DLUA_USE_LINUX" SYSLIBS="-Wl,-E -ldl -lreadline" LUA_A=liblua.so MYCFLAGS="-fPIC" RANLIB=: AR="gcc -shared -ldl -o" liblua.so) || exit 1
+                  sudo make INSTALL_TOP=/usr/ INSTALL_INC=${LUAINCLUDE} TO_LIB=liblua.so linux install || exit 1
+                  cd ..
+          else
+                  sudo apt-get install -y lib${LUANAME}-dev ${LUANAME} ${INSTALL_PKGS}
+          fi
 
   # Install luarocks (for the selected Lua version).
   - travis_retry wget https://keplerproject.github.io/luarocks/releases/luarocks-2.2.2.tar.gz
@@ -61,7 +75,7 @@ install:
   - 'if [ "$TRAVIS_PULL_REQUEST" != false ]; then AWESOME_VERSION="${AWESOME_VERSION}-PR${TRAVIS_PULL_REQUEST}"; fi'
 
 script:
-  - export CMAKE_ARGS="-DLUA_LIBRARY=/usr/lib/x86_64-linux-gnu/lib${LUANAME}.so -DLUA_INCLUDE_DIR=${LUAINCLUDE} -D OVERRIDE_VERSION=$AWESOME_VERSION"
+  - export CMAKE_ARGS="-DLUA_LIBRARY=${LUALIBRARY} -DLUA_INCLUDE_DIR=${LUAINCLUDE} -D OVERRIDE_VERSION=$AWESOME_VERSION"
   - make && sudo env PATH=$PATH make install && awesome --version && tests/run.sh
 
 after_success:
