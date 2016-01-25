@@ -49,6 +49,7 @@ install:
           else
                   sudo apt-get install -y lib${LUANAME}-dev ${LUANAME} ${INSTALL_PKGS}
           fi
+
   # "Create" /usr/bin/lua if needed (Yup, this is a bad hack)
   - [[ -n "$LUAROCKS_ARGS" ]] && sudo ln -s /usr/bin/lua* /usr/bin/lua
 
