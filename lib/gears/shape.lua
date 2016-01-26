@@ -87,6 +87,20 @@ function module.infobubble(cr, width, height, corner_radius, arrow_size, arrow_p
     cr:close_path()
 end
 
+--- A rectangle terminated by an arrow
+-- @param cr A cairo context
+-- @tparam number width The shape with
+-- @tparam number height The shape height
+function module.rectangular_tag(cr, width, height)
+    cr:move_to(0        , height/2)
+    cr:line_to(height/2 , 0       )
+    cr:line_to(width    , 0       )
+    cr:line_to(width    , height  )
+    cr:line_to(height/2 , height  )
+
+    cr:close_path()
+end
+
 --- Ajust the shape using a transformation object
 --
 -- Apply various transformations to the shape
