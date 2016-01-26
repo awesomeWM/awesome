@@ -146,6 +146,12 @@ local function new(args)
         __newindex = w
     })
 
+    -- Set border
+    if args.border_width then
+        ret.border_width = args.border_width
+        ret.border_color = args.border_color
+    end
+
     return ret
 end
 
