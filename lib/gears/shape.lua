@@ -125,6 +125,21 @@ function module.arrow(cr, width, height, head_width, shaft_width, shaft_length)
     cr:close_path()
 end
 
+--- A squeezed hexagon filling the rectangle
+-- @param cr A cairo context
+-- @tparam number width The shape with
+-- @tparam number height The shape height
+function module.hexagon(cr, width, height)
+    cr:move_to(height/2,0)
+    cr:line_to(width-height/2,0)
+    cr:line_to(width,height/2)
+    cr:line_to(width-height/2,height)
+    cr:line_to(height/2,height)
+    cr:line_to(0,height/2)
+    cr:line_to(height/2,0)
+    cr:close_path()
+end
+
 --- Ajust the shape using a transformation object
 --
 -- Apply various transformations to the shape
