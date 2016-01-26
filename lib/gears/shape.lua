@@ -56,6 +56,37 @@ function module.rounded_bar(cr, width, height)
     module.rounded_rect(cr, width, height, height / 2)
 end
 
+--- A rounded rectangle with a triangle at the top
+-- @param cr A cairo context
+-- @tparam number width The shape with
+-- @tparam number height The shape height
+-- @tparam[opt=5] number corner_radius The corner radius
+-- @tparam[opt=10] number arrow_size The width and height of the arrow
+-- @tparam[opt=width/2 - arrow_size/2] number arrow_position The position of the arrow
+function module.infobubble(cr, width, height, corner_radius, arrow_size, arrow_position)
+    local corner_radius  = corner_radius  or 5
+    local arrow_size     = arrow_size     or 10
+    local arrow_position = arrow_position or width/2 - arrow_size/2
+
+    cr:move_to(0 ,corner_radius)
+
+    -- Top left corner
+    cr:arc(corner_radius, corner_radius+arrow_size, (corner_radius), math.pi, 3*(math.pi/2))
+
+    -- The arrow triangle (still at the top)
+    cr:line_to(arrow_position                , arrow_size )
+    cr:line_to(arrow_position + arrow_size   , 0          )
+    cr:line_to(arrow_position + 2*arrow_size , arrow_size )
+
+    -- Complete the rounded rounded rectangle
+    cr:arc(width-corner_radius, corner_radius+arrow_size  , (corner_radius) , 3*(math.pi/2) , math.pi*2 )
+    cr:arc(width-corner_radius, height-(corner_radius)    , (corner_radius) , math.pi*2     , math.pi/2 )
+    cr:arc(corner_radius      , height-(corner_radius)    , (corner_radius) , math.pi/2     , math.pi   )
+
+    -- Close path
+    cr:close_path()
+end
+
 --- Ajust the shape using a transformation object
 --
 -- Apply various transformations to the shape
