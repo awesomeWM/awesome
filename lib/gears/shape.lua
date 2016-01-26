@@ -140,6 +140,23 @@ function module.hexagon(cr, width, height)
     cr:close_path()
 end
 
+--- Double arrow popularized by the vim-powerline module
+-- @param cr A cairo context
+-- @tparam number width The shape with
+-- @tparam number height The shape height
+-- @tparam[opt=height/2] number arrow_depth The width of the arrow part of the shape
+function module.powerline(cr, width, height, arrow_depth)
+    local arrow_depth = arrow_depth or height/2
+    cr:move_to(0                   , 0        )
+    cr:line_to(width - arrow_depth , 0        )
+    cr:line_to(width               , height/2 )
+    cr:line_to(width - arrow_depth , height   )
+    cr:line_to(0                   , height   )
+    cr:line_to(arrow_depth         , height/2 )
+
+    cr:close_path()
+end
+
 --- Ajust the shape using a transformation object
 --
 -- Apply various transformations to the shape
