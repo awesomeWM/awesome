@@ -157,6 +157,17 @@ function module.powerline(cr, width, height, arrow_depth)
     cr:close_path()
 end
 
+--- An isosceles triangle
+-- @param cr A cairo context
+-- @tparam number width The shape with
+-- @tparam number height The shape height
+function module.isosceles_triangle(cr, width, height)
+    cr:move_to( width/2, 0      )
+    cr:line_to( width  , height )
+    cr:line_to( 0      , height )
+    cr:close_path()
+end
+
 --- Ajust the shape using a transformation object
 --
 -- Apply various transformations to the shape
