@@ -592,6 +592,10 @@ luaA_init(xdgHandle* xdg)
      * @signal exit
      */
     signal_add(&global_signals, "exit");
+    /**
+     * @signal screen::change
+     */
+    signal_add(&global_signals, "screen::change");
 }
 
 static void

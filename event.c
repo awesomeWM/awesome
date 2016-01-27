@@ -784,6 +784,52 @@ event_handle_randr_screen_change_notify(xcb_randr_screen_change_notify_event_t *
     awesome_restart();
 }
 
+/** XRandR event handler for RRNotify subtype XRROutputChangeNotifyEvent
+ */
+static void
+event_handle_randr_output_change_notify(xcb_randr_notify_event_t *ev)
+{
+    if(ev->subCode == XCB_RANDR_NOTIFY_OUTPUT_CHANGE) {
+        xcb_randr_output_t output = ev->u.oc.output;
+        uint8_t connection = ev->u.oc.connection;
+        char *output_name = NULL;
+        const char *connection_str = NULL;
+        xcb_randr_get_output_info_reply_t *info = NULL;
+        lua_State *L = globalconf_get_lua_State();
+
+        info = xcb_randr_get_output_info_reply(globalconf.connection,
+            xcb_randr_get_output_info_unchecked(globalconf.connection,
+                output,
+                XCB_CURRENT_TIME),
+            NULL);
+        if(!info)
+            return;
+
+        output_name = p_dup((char *)xcb_randr_get_output_info_name(info),
+                            xcb_randr_get_output_info_name_length(info));
+
+        switch(connection) {
+            case XCB_RANDR_CONNECTION_CONNECTED:
+                connection_str = "Connected";
+                break;
+            case XCB_RANDR_CONNECTION_DISCONNECTED:
+                connection_str = "Disconnected";
+                break;
+            default:
+                connection_str = "Unknown";
+                break;
+        }
+
+        lua_pushstring(L, output_name);
+        lua_pushstring(L, connection_str);
+        signal_object_emit(L, &global_signals, "screen::change", 2);
+
+        p_delete(&output_name);
+        p_delete(&info);
+    }
+}
+
+
 /** The shape notify event handler.
  * \param ev The event.
  */
@@ -932,17 +978,22 @@ void event_handle(xcb_generic_event_t *event)
     }
 
     static uint8_t randr_screen_change_notify = 0;
+    static uint8_t randr_output_change_notify = 0;
     static uint8_t shape_notify = 0;
     static uint8_t xkb_notify = 0;
 
-    if(randr_screen_change_notify == 0)
+    if(randr_screen_change_notify == 0 || randr_output_change_notify == 0)
     {
         /* check for randr extension */
         const xcb_query_extension_reply_t *randr_query;
         randr_query = xcb_get_extension_data(globalconf.connection, &xcb_randr_id);
-        if(randr_query->present)
+        if(randr_query->present) {
+            xcb_randr_select_input(globalconf.connection, globalconf.screen->root, XCB_RANDR_NOTIFY_MASK_OUTPUT_CHANGE);
             randr_screen_change_notify = randr_query->first_event + XCB_RANDR_SCREEN_CHANGE_NOTIFY;
+            randr_output_change_notify = randr_query->first_event + XCB_RANDR_NOTIFY;
+        }
     }
+
     if(shape_notify == 0)
     {
         /* check for shape extension */
@@ -963,6 +1014,8 @@ void event_handle(xcb_generic_event_t *event)
 
     if (response_type == randr_screen_change_notify)
         event_handle_randr_screen_change_notify((void *) event);
+    if (response_type == randr_output_change_notify)
+        event_handle_randr_output_change_notify((void *) event);
     if (response_type == shape_notify)
         event_handle_shape_notify((void *) event);
     if (response_type == xkb_notify)
