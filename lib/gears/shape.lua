@@ -24,8 +24,8 @@
 
 local module = {}
 
---- Add a rounded rectangle to the current path
--- @note If the radius is bigger than either half side, it will be reduced
+--- Add a rounded rectangle to the current path.
+-- Note: If the radius is bigger than either half side, it will be reduced.
 -- @param cr A cairo content
 -- @param width The rectangle width
 -- @param height The rectangle height

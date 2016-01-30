@@ -2763,8 +2763,8 @@ client_class_setup(lua_State *L)
      */
     signal_add(&client_class.signals, "list");
     /** When 2 clients are swapped
-     * @args client The other client
-     * @args is_source If self is the source or the destination of the swap
+     * @tparam client client The other client
+     * @tparam boolean is_source If self is the source or the destination of the swap
      * @signal .swapped
      */
     signal_add(&client_class.signals, "swapped");
