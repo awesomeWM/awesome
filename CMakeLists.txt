@@ -259,8 +259,12 @@ if(GENERATE_DOC)
     file(GLOB_RECURSE AWE_LUA_FILES ${BUILD_DIR}/lib/*.lua)
     file(GLOB_RECURSE AWE_MD_FILES ${AWE_DOC_DIR}/*.md)
 
+    # Run ldoc and make it fail if any warnings are generated. The
+    # redirection-magic swaps stdout and stderr and awk exits with a non-zero
+    # status if it sees at least one line of input.
+    # All together, this fails as soon as ldoc prints on stderr.
     add_custom_target(ldoc ALL
-        COMMAND ${LDOC_EXECUTABLE} .
+        COMMAND ${LDOC_EXECUTABLE} . 3>&1 1>&2 2>&3 | awk "{ fail=1 \; print } END { exit fail }"
         WORKING_DIRECTORY ${AWE_DOC_DIR}
         DEPENDS ${AWE_LUA_FILES} ${AWE_MD_FILES})
 endif()
