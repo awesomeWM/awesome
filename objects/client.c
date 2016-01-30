@@ -2,6 +2,7 @@
  * client.c - client management
  *
  * Copyright © 2007-2009 Julien Danjou <julien@danjou.info>
+ * Copyright © 2016 Google Inc, Peter Junos <junosp@google.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -128,7 +129,7 @@
 
 static area_t titlebar_get_area(client_t *c, client_titlebar_t bar);
 static drawable_t *titlebar_get_drawable(lua_State *L, client_t *c, int cl_idx, client_titlebar_t bar);
-static void client_resize_do(client_t *c, area_t geometry, bool force_notice);
+static void client_resize_do(client_t *c, area_t geometry, bool force_notice, bool honor_hints);
 
 /** Collect a client.
  * \param L The Lua VM state.
@@ -481,7 +482,7 @@ border_width_callback(client_t *c, uint16_t old_width, uint16_t new_width)
         geometry.x += diff_x;
         geometry.y += diff_y;
         /* force_notice = true -> inform client about changes */
-        client_resize_do(c, geometry, true);
+        client_resize_do(c, geometry, true, false);
     }
 }
 
@@ -814,13 +815,18 @@ client_apply_size_hints(client_t *c, area_t geometry)
 }
 
 static void
-client_resize_do(client_t *c, area_t geometry, bool force_notice)
+client_resize_do(client_t *c, area_t geometry, bool force_notice, bool honor_hints)
 {
     lua_State *L = globalconf_get_lua_State();
     bool send_notice = force_notice;
     bool hide_titlebars = c->fullscreen;
 
     screen_t *new_screen = c->screen;
+
+    if (honor_hints) {
+        geometry = client_apply_size_hints(c, geometry);
+    }
+
     if(!screen_coord_in_screen(new_screen, geometry.x, geometry.y))
         new_screen = screen_getbycoord(geometry.x, geometry.y);
 
@@ -933,15 +939,12 @@ client_resize(client_t *c, area_t geometry, bool honor_hints)
     if(geometry.width == 0 || geometry.height == 0)
         return false;
 
-    if (honor_hints)
-        geometry = client_apply_size_hints(c, geometry);
-
     if(c->geometry.x != geometry.x
        || c->geometry.y != geometry.y
        || c->geometry.width != geometry.width
        || c->geometry.height != geometry.height)
     {
-        client_resize_do(c, geometry, false);
+        client_resize_do(c, geometry, true, honor_hints);
 
         return true;
     }
@@ -1119,7 +1122,7 @@ client_set_fullscreen(lua_State *L, int cidx, bool s)
         luaA_object_emit_signal(L, abs_cidx, "request::fullscreen", 1);
         luaA_object_emit_signal(L, abs_cidx, "property::fullscreen", 0);
         /* Force a client resize, so that titlebars get shown/hidden */
-        client_resize_do(c, c->geometry, true);
+        client_resize_do(c, c->geometry, true, false);
         stack_windows();
     }
 }
@@ -1939,7 +1942,7 @@ titlebar_resize(lua_State *L, int cidx, client_t *c, client_titlebar_t bar, int 
     }
 
     c->titlebar[bar].size = size;
-    client_resize_do(c, geometry, true);
+    client_resize_do(c, geometry, true, false);
 
     luaA_object_emit_signal(L, cidx, property_name, 0);
 }
