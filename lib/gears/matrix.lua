@@ -52,6 +52,22 @@ function matrix.create_rotate(angle)
     return matrix.create(c, s, -s, c, 0, 0)
 end
 
+--- Create a matrix copy
+-- @return A new matrix identical to `other`
+function matrix:copy()
+    local m = matrix.create(
+        self.xx, self.yx, self.xy,
+        self.yy, self.x0, self.y0
+    )
+
+    -- Used internally
+    if rawget(self, "_call") then
+        rawset(m, "_call", self._call)
+    end
+
+    return m
+end
+
 --- Translate this matrix
 -- @tparam number x The translation in x direction.
 -- @tparam number y The translation in y direction.
@@ -75,6 +91,17 @@ function matrix:rotate(angle)
     return matrix.create_rotate(angle):multiply(self)
 end
 
+--- Rotate a shape from a custom point
+-- @tparam number x The horizontal rotation point
+-- @tparam number y The vertical rotation point
+-- @tparam number angle The angle (in radiant: -2*math.pi to 2*math.pi)
+-- @return A transformation object
+function matrix:rotate_at(x, y, angle)
+    return self * matrix.create_translate( -x, -y )
+                * matrix.create_rotate   ( angle  )
+                * matrix.create_translate(  x,  y )
+end
+
 --- Invert this matrix
 -- @return A new matrix describing the inverse transformation.
 function matrix:invert()
@@ -94,12 +121,19 @@ end
 -- @tparam gears.matrix|cairo.Matrix other The other matrix to multiply with.
 -- @return The multiplication result.
 function matrix:multiply(other)
-    return matrix.create(self.xx * other.xx + self.yx * other.xy,
-            self.xx * other.yx + self.yx * other.yy,
-            self.xy * other.xx + self.yy * other.xy,
-            self.xy * other.yx + self.yy * other.yy,
-            self.x0 * other.xx + self.y0 * other.xy + other.x0,
-            self.x0 * other.yx + self.y0 * other.yy + other.y0)
+    local ret = matrix.create(self.xx * other.xx + self.yx * other.xy,
+        self.xx * other.yx + self.yx * other.yy,
+        self.xy * other.xx + self.yy * other.xy,
+        self.xy * other.yx + self.yy * other.yy,
+        self.x0 * other.xx + self.y0 * other.xy + other.x0,
+        self.x0 * other.yx + self.y0 * other.yy + other.y0)
+
+    -- Used internally
+    if rawget(self, "_call") or rawget(other, "_call") then
+        rawset(ret, "_call", self._call or other._call)
+    end
+
+    return ret
 end
 
 --- Check if two matrices are equal.
@@ -189,6 +223,7 @@ matrix_mt.__newindex = error
 matrix_mt.__eq = matrix.equals
 matrix_mt.__mul = matrix.multiply
 matrix_mt.__tostring = matrix.tostring
+matrix_mt.__call = function(self, ...) return self._call(self, ...) end
 
 --- A constant for the identity matrix.
 matrix.identity = matrix.create(1, 0, 0, 1, 0, 0)
