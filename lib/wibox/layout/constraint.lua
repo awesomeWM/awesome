@@ -44,6 +44,12 @@ function constraint:set_widget(widget)
     self:emit_signal("widget::layout_changed")
 end
 
+--- Get the number of children element
+-- @treturn table The children
+function constraint:get_children()
+    return {self.widget}
+end
+
 --- Set the strategy to use for the constraining. Valid values are 'max',
 -- 'min' or 'exact'. Throws an error on invalid values.
 function constraint:set_strategy(val)

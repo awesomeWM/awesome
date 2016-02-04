@@ -6,16 +6,101 @@
 ---------------------------------------------------------------------------
 
 local base = require("wibox.widget.base")
+local fixed = require("wibox.layout.fixed")
 local table = table
 local pairs = pairs
 local floor = math.floor
-local round = require("awful.util").round
+local util = require("awful.util")
 
 local flex = {}
 
-local function round(x)
-    return floor(x + 0.5)
-end
+--- Layout a fixed layout. Each widget gets just the space it asks for.
+-- @param layout The layout you are modifying.
+-- @param context The context in which we are drawn.
+-- @param width The available width.
+-- @param height The available height.
+-- @name layout
+-- @class function
+
+--- Get all children of this layout
+-- @param layout The layout you are modifying.
+-- @warning If the widget contain itself and recursive is true, this will cause
+--   a stack overflow
+-- @param[opt] recursive Also add all widgets of childrens
+-- @return a list of all widgets
+-- @name get_children
+-- @class function
+
+--- Add some widgets to the given fixed layout
+-- @param layout The layout you are modifying.
+-- @tparam widget ... Widgets that should be added (must at least be one)
+-- @name add
+-- @class function
+
+--- Set a widget at a specific index, replace the current one
+-- @tparam number index A widget or a widget index
+-- @param widget2 The widget to take the place of the first one
+-- @treturn boolean If the operation is successful
+-- @name set
+-- @class function
+
+--- Remove a widget from the layout
+-- @tparam index The widget index to remove
+-- @treturn boolean index If the operation is successful
+-- @name remove
+-- @class function
+
+--- Remove one or more widgets from the layout
+-- The last parameter can be a boolean, forcing a recursive seach of the
+-- widget(s) to remove.
+-- @param widget ... Widgets that should be removed (must at least be one)
+-- @treturn boolean If the operation is successful
+-- @name remove_widgets
+-- @class function
+
+--- Fit the fixed layout into the given space
+-- @param layout The layout you are modifying.
+-- @param context The context in which we are fit.
+-- @param orig_width The available width.
+-- @param orig_height The available height.
+-- @name fit
+-- @class function
+
+--- Reset a fixed layout. This removes all widgets from the layout.
+-- @param layout The layout you are modifying.
+-- @name reset
+-- @class function
+
+--- Replace the first instance of `widget` in the layout with `widget2`
+-- @param widget The widget to replace
+-- @param widget2 The widget to replace `widget` with
+-- @tparam[opt=false] boolean recursive Digg in all compatible layouts to find the widget.
+-- @treturn boolean If the operation is successful
+-- @name replace_widget
+-- @class function
+
+--- Swap 2 widgets in a layout
+-- @tparam number index1 The first widget index
+-- @tparam number index2 The second widget index
+-- @treturn boolean If the operation is successful
+-- @name swap
+-- @class function
+
+--- Swap 2 widgets in a layout
+-- If widget1 is present multiple time, only the first instance is swapped
+-- @param widget1 The first widget
+-- @param widget2 The second widget
+-- @tparam[opt=false] boolean recursive Digg in all compatible layouts to find the widget.
+-- @treturn boolean If the operation is successful
+-- @name swap_widgets
+-- @class function
+
+--- Insert a new widget in the layout at position `index`
+-- @tparam number index The position
+-- @param widget The widget
+-- @treturn boolean If the operation is successful
+-- @name insert
+-- @class function
 
 --- Layout a flex layout. Each widget gets an equal share of the available space.
 -- @param context The context in which we are drawn.
@@ -41,12 +126,13 @@ function flex:layout(context, width, height)
     for k, v in pairs(self.widgets) do
         local x, y, w, h
         if self.dir == "y" then
-            x, y = 0, round(pos)
+            x, y = 0, util.round(pos)
             w, h = width, floor(space_per_item)
         else
-            x, y = round(pos), 0
+            x, y = util.round(pos), 0
             w, h = floor(space_per_item), height
         end
+
         table.insert(result, base.place_widget_at(v, x, y, w, h))
 
         pos = pos + space_per_item + spacing
@@ -96,19 +182,6 @@ function flex:fit(context, orig_width, orig_height)
     return used_in_dir + spacing, used_in_other
 end
 
---- Add some widgets to the given flex layout
--- @tparam widget ... Widgets that should be added (must at least be one)
-function flex:add(...)
-    -- No table.pack in Lua 5.1 :-(
-    local args = { n=select('#', ...), ... }
-    assert(args.n > 0, "need at least one widget to add")
-    for i=1, args.n do
-        base.check_widget(args[i])
-        table.insert(self.widgets, args[i])
-    end
-    self:emit_signal("widget::layout_changed")
-end
-
 --- Set the maximum size the widgets in this layout will take (that is,
 -- maximum width for horizontal and maximum height for vertical).
 -- @param val The maximum size of the widget.
@@ -119,37 +192,12 @@ function flex:set_max_widget_size(val)
     end
 end
 
---- Add spacing between each layout widgets
--- @param spacing Spacing between widgets.
-function flex:set_spacing(spacing)
-    if self._spacing ~= spacing then
-        self._spacing = spacing
-        self:emit_signal("widget::layout_changed")
-    end
-end
-
-function flex:reset()
-    self.widgets = {}
-    self._max_widget_size = nil
-    self:emit_signal("widget::layout_changed")
-end
-
 local function get_layout(dir, widget1, ...)
-    local ret = base.make_widget()
+    local ret = fixed[dir](widget1, ...)
 
-    for k, v in pairs(flex) do
-        if type(v) == "function" then
-            ret[k] = v
-        end
-    end
+    util.table.crush(ret, flex)
 
-    ret.dir = dir
-    ret.widgets = {}
-    ret:set_spacing(0)
-
-    if widget1 then
-        ret:add(widget1, ...)
-    end
+    ret.fill_space = nil
 
     return ret
 end
@@ -158,14 +206,14 @@ end
 -- equally among all widgets. Widgets can be added via :add(widget).
 -- @tparam widget ... Widgets that should be added to the layout.
 function flex.horizontal(...)
-    return get_layout("x", ...)
+    return get_layout("horizontal", ...)
 end
 
 --- Returns a new vertical flex layout. A flex layout shares the available space
 -- equally among all widgets. Widgets can be added via :add(widget).
 -- @tparam widget ... Widgets that should be added to the layout.
 function flex.vertical(...)
-    return get_layout("y", ...)
+    return get_layout("vertical", ...)
 end
 
 return flex

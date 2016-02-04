@@ -261,6 +261,12 @@ function scroll:set_widget(widget)
     self:emit_signal("widget::redraw_needed")
 end
 
+--- Get the number of children element
+-- @treturn table The children
+function scroll:get_children()
+    return {self.widget}
+end
+
 --- Specify the expand mode that is used for extra space.
 -- @tparam boolean expand If true, the widget is expanded to include the extra
 -- space. If false, the extra space is simply left empty.

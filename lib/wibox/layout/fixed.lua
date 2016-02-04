@@ -5,9 +5,10 @@
 -- @classmod wibox.layout.fixed
 ---------------------------------------------------------------------------
 
-local base = require("wibox.widget.base")
+local base  = require("wibox.widget.base")
 local table = table
 local pairs = pairs
+local util = require("awful.util")
 
 local fixed = {}
 
@@ -50,7 +51,7 @@ function fixed:layout(context, width, height)
 end
 
 --- Add some widgets to the given fixed layout
--- @tparam widget ... Widgets that should be added (must at least be one)
+-- @param ... Widgets that should be added (must at least be one)
 function fixed:add(...)
     -- No table.pack in Lua 5.1 :-(
     local args = { n=select('#', ...), ... }
@@ -60,6 +61,140 @@ function fixed:add(...)
         table.insert(self.widgets, args[i])
     end
     self:emit_signal("widget::layout_changed")
+end
+
+
+--- Remove a widget from the layout
+-- @tparam number index The widget index to remove
+-- @treturn boolean index If the operation is successful
+function fixed:remove(index)
+    if not index or index < 1 or index > #self.widgets then return false end
+
+    table.remove(self.widgets, index)
+
+    self:emit_signal("widget::layout_changed")
+
+    return true
+end
+
+--- Remove one or more widgets from the layout
+-- The last parameter can be a boolean, forcing a recursive seach of the
+-- widget(s) to remove.
+-- @param widget ... Widgets that should be removed (must at least be one)
+-- @treturn boolean If the operation is successful
+function fixed:remove_widgets(...)
+    local args = { ... }
+
+    local recursive = type(args[#args]) == "boolean" and args[#args]
+
+    local ret = true
+    for k, rem_widget in ipairs(args) do
+        if recursive and k == #args then break end
+
+        local idx, l = self:index(rem_widget, recursive)
+
+        if idx and l and l.remove then
+            l:remove(idx, false)
+        else
+            ret = false
+        end
+
+    end
+
+    return #args > (recursive and 1 or 0) and ret
+end
+
+--- Get all children of this layout
+-- @treturn table a list of all widgets
+function fixed:get_children()
+    return self.widgets
+end
+
+--- Replace the first instance of `widget` in the layout with `widget2`
+-- @param widget The widget to replace
+-- @param widget2 The widget to replace `widget` with
+-- @tparam[opt=false] boolean recursive Digg in all compatible layouts to find the widget.
+-- @treturn boolean If the operation is successful
+function fixed:replace_widget(widget, widget2, recursive)
+    local idx, l = self:index(widget, recursive)
+
+    if idx and l then
+        l:set(idx, widget2)
+        return true
+    end
+
+    return false
+end
+
+--- Swap 2 widgets in a layout
+-- @tparam number index1 The first widget index
+-- @tparam number index2 The second widget index
+-- @treturn boolean If the operation is successful
+function fixed:swap(index1, index2)
+    if not index1 or not index2 or index1 > #self.widgets
+        or index2 > #self.widgets then
+        return false
+    end
+
+    local widget1, widget2 = self.widgets[index1], self.widgets[index2]
+
+    self:set(index1, widget2)
+    self:set(index2, widget1)
+
+    return true
+end
+
+--- Swap 2 widgets in a layout
+-- If widget1 is present multiple time, only the first instance is swapped
+-- @param widget1 The first widget
+-- @param widget2 The second widget
+-- @tparam[opt=false] boolean recursive Digg in all compatible layouts to find the widget.
+-- @treturn boolean If the operation is successful
+function fixed:swap_widgets(widget1, widget2, recursive)
+    base.check_widget(widget1)
+    base.check_widget(widget2)
+
+    local idx1, l1 = self:index(widget1, recursive)
+    local idx2, l2 = self:index(widget2, recursive)
+
+    if idx1 and l1 and idx2 and l2 then
+        l1:set(idx1, widget2)
+        l2:set(idx2, widget1)
+
+        return true
+    end
+
+    return false
+end
+
+--- Set a widget at a specific index, replace the current one
+-- @tparam number index A widget or a widget index
+-- @param widget2 The widget to take the place of the first one
+-- @treturn boolean If the operation is successful
+function fixed:set(index, widget2)
+    if (not widget2) or (not self.widgets[index]) then return false end
+
+    base.check_widget(widget2)
+
+    self.widgets[index] = widget2
+
+    self:emit_signal("widget::layout_changed")
+
+    return true
+end
+
+--- Insert a new widget in the layout at position `index`
+-- @tparam number index The position
+-- @param widget The widget
+-- @treturn boolean If the operation is successful
+function fixed:insert(index, widget)
+    if not index or index < 1 or index > #self.widgets + 1 then return false end
+
+    base.check_widget(widget)
+    table.insert(self.widgets, index, widget)
+    self:emit_signal("widget::layout_changed")
+
+    return true
 end
 
 --- Fit the fixed layout into the given space
@@ -122,11 +257,7 @@ end
 local function get_layout(dir, widget1, ...)
     local ret = base.make_widget()
 
-    for k, v in pairs(fixed) do
-        if type(v) == "function" then
-            ret[k] = v
-        end
-    end
+    util.table.crush(ret, fixed)
 
     ret.dir = dir
     ret.widgets = {}

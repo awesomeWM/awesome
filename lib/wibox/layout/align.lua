@@ -10,6 +10,7 @@ local table = table
 local pairs = pairs
 local type = type
 local floor = math.floor
+local util = require("awful.util")
 local base = require("wibox.widget.base")
 
 local align = {}
@@ -162,6 +163,12 @@ function align:set_third(widget)
     end
     self.third = widget
     self:emit_signal("widget::layout_changed")
+end
+
+--- Get all children of this layout
+-- @treturn table a list of all widgets
+function align:get_children()
+    return util.from_sparse {self.first, self.second, self.third}
 end
 
 --- Fit the align layout into the given space. The align layout will

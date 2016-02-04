@@ -399,6 +399,45 @@ function util.table.join(...)
     return ret
 end
 
+--- Override elements in the first table by the one in the second
+-- @tparam table t the table to be overriden
+-- @tparam table set the table used to override members of `t`
+-- @treturn table t (for convenience)
+function util.table.crush(t, set)
+    for k, v in pairs(set) do
+        t[k] = v
+    end
+
+    return t
+end
+
+--- Pack all elements with an integer key into a new table
+-- While both lua and luajit implement __len over sparse
+-- table, the standard define it as an implementation
+-- detail.
+--
+-- This function remove any non numeric keys from the value set
+--
+-- @tparam table t A potentially sparse table
+-- @treturn table A packed table with all numeric keys
+function util.table.from_sparse(t)
+    local keys= {}
+    for k,v in pairs(t) do
+        if type(k) == "number" then
+            keys[#keys+1] = k
+        end
+    end
+
+    table.sort(keys)
+
+    local ret = {}
+    for _,v in ipairs(keys) do
+        ret[#ret+1] = t[v]
+    end
+
+    return ret
+end
+
 --- Check if a table has an item and return its key.
 -- @param t The table.
 -- @param item The item to look for in values of the table.
@@ -532,10 +571,12 @@ end
 --- Merge items from the one table to another one
 -- @tparam table t the container table
 -- @tparam table set the mixin table
+-- @treturn table Return `t` for convenience
 function util.table.merge(t, set)
     for _, v in ipairs(set) do
         table.insert(t, v)
     end
+    return t
 end
 
 
