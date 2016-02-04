@@ -267,6 +267,14 @@ function scroll:get_children()
     return {self.widget}
 end
 
+--- Replace the layout children
+-- This layout only accept one children, all others will be ignored
+-- @tparam table children A table composed of valid widgets
+function scroll:set_children(children)
+    self.widget = children and children[1]
+    self:emit_signal("widget::layout_changed")
+end
+
 --- Specify the expand mode that is used for extra space.
 -- @tparam boolean expand If true, the widget is expanded to include the extra
 -- space. If false, the extra space is simply left empty.

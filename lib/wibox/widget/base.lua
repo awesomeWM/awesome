@@ -80,6 +80,14 @@ function base.widget:get_children()
     return {}
 end
 
+--- Replace the layout children
+-- The default implementation does nothing, this must be re-implemented by
+-- all layout and container widgets.
+-- @tparam table children A table composed of valid widgets
+function base.widget:set_children(children)
+    -- Nothing on purpose
+end
+
 -- It could have been merged into `get_all_children`, but it's not necessary
 local function digg_children(ret, tlw)
     for k, w in ipairs(tlw:get_children()) do

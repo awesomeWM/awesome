@@ -50,6 +50,14 @@ function constraint:get_children()
     return {self.widget}
 end
 
+--- Replace the layout children
+-- This layout only accept one children, all others will be ignored
+-- @tparam table children A table composed of valid widgets
+function constraint:set_children(children)
+    self.widget = children and children[1]
+    self:emit_signal("widget::layout_changed")
+end
+
 --- Set the strategy to use for the constraining. Valid values are 'max',
 -- 'min' or 'exact'. Throws an error on invalid values.
 function constraint:set_strategy(val)

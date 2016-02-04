@@ -110,6 +110,14 @@ function fixed:get_children()
     return self.widgets
 end
 
+--- Replace the layout children
+-- @tparam table children A table composed of valid widgets
+function fixed:set_children(children)
+    if not children then return self:reset() end
+    self.widgets = children
+    self:emit_signal("widget::layout_changed")
+end
+
 --- Replace the first instance of `widget` in the layout with `widget2`
 -- @param widget The widget to replace
 -- @param widget2 The widget to replace `widget` with
