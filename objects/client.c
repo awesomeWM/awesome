@@ -741,12 +741,17 @@ client_resize_do(client_t *c, area_t geometry, bool force_notice, bool honor_hin
     bool send_notice = force_notice;
     bool hide_titlebars = c->fullscreen;
     screen_t *new_screen = screen_getbycoord(geometry.x, geometry.y);
+    bool java_is_broken = true;
 
     if (honor_hints)
         geometry = client_apply_size_hints(c, geometry);
 
     if(c->geometry.width == geometry.width
        && c->geometry.height == geometry.height)
+        /* We are moving without changing the size, see ICCCM 4.2.3 */
+        send_notice = true;
+    if(java_is_broken)
+        /* Java strong. Java Hulk. Java make own rules! */
         send_notice = true;
 
     /* Also store geometry including border */
@@ -779,7 +784,6 @@ client_resize_do(client_t *c, area_t geometry, bool force_notice, bool honor_hin
             (uint32_t[]) { real_geometry.x, real_geometry.y, real_geometry.width, real_geometry.height });
 
     if(send_notice)
-        /* We are moving without changing the size, see ICCCM 4.2.3 */
         client_send_configure(c);
 
     client_restore_enterleave_events();
