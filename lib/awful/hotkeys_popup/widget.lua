@@ -36,7 +36,6 @@ end
 
 
 local widget = {
-    hide_without_description = true,
     title_font = "Monospace Bold 9",
     description_font = "Monospace 8",
     width = dpi(1200),
@@ -89,6 +88,13 @@ local widget = {
     },
 }
 
+--- Don't show hotkeys without descriptions.
+widget.hide_without_description = true
+
+--- Merge hotkey records into one if they have the same modifiers and
+-- description.
+widget.merge_duplicates = true
+
 
 local cached_wiboxes = {}
 local cached_awful_keys = nil
@@ -132,11 +138,24 @@ local function add_hotkey(key, data, target)
     local group = data.group or "none"
     group_list[group] = true
     if not target[group] then target[group] = {} end
-    table.insert(
-        target[group],
-        {hotkey= joined_mods .. (widget.labels[key] or key),
-         description=data.description}
-    )
+    local new_key = {
+        key = (widget.labels[key] or key),
+        mod = joined_mods,
+        description = data.description
+    }
+    local index = data.description or "none"  -- or use its hash?
+    if not target[group][index] then
+        target[group][index] = new_key
+    else
+        if widget.merge_duplicates and joined_mods == target[group][index].mod then
+            target[group][index].key = target[group][index].key .. "/" .. new_key.key
+        else
+            while target[group][index] do
+                index = index .. " "
+            end
+            target[group][index] = new_key
+        end
+    end
 end
 
 
@@ -144,10 +163,15 @@ local function sort_hotkeys(target)
     -- @TODO: add sort by 12345qwertyasdf etc
     for group, _ in pairs(group_list) do
         if target[group] then
+            local sorted_table = {}
+            for index, key in pairs(target[group]) do
+                table.insert(sorted_table, key)
+            end
             table.sort(
-                target[group],
-                function(a,b) return a.hotkey<b.hotkey end
+                sorted_table,
+                function(a,b) return (a.mod or '')..a.key<(b.mod or '')..b.key end
             )
+            target[group] = sorted_table
         end
     end
 end
@@ -238,8 +262,9 @@ local function create_wibox(s, available_groups)
             local max_label_content = ""
             local joined_labels = ""
             for i, key in ipairs(_keys) do
-                local length = string.len(key.hotkey) + string.len(key.description)
-                local rendered_hotkey = markup.font(widget.title_font, key.hotkey.." ") ..
+                local hotkey = (key.mod or '')..(key.key or '')
+                local length = string.len(hotkey) + string.len(key.description)
+                local rendered_hotkey = markup.font(widget.title_font, hotkey.." ") ..
                     (markup.font(widget.description_font, key.description) or "")
                 if length > max_label_width then
                     max_label_width = length
@@ -386,8 +411,7 @@ end
 --- Add hotkey descriptions for third-party applications.
 -- @tparam table hotkeys Table with bindings,
 -- see `awful.hotkeys_popup.key.vim` as an example.
--- @tparam[opt] bool nosort Do not sort hotkeys alphabetically.
-function widget.add_hotkeys(hotkeys, nosort)
+function widget.add_hotkeys(hotkeys)
     for group, bindings in pairs(hotkeys) do
         for _, binding in ipairs(bindings) do
             local modifiers = binding.modifiers
@@ -402,10 +426,9 @@ function widget.add_hotkeys(hotkeys, nosort)
             end
         end
     end
-    if not nosort then
-        sort_hotkeys(widget.additional_hotkeys)
-    end
+    sort_hotkeys(widget.additional_hotkeys)
 end
+
 
 return widget
 
