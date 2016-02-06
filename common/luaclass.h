@@ -150,7 +150,7 @@ luaA_checkudataornil(lua_State *L, int udx, lua_class_t *class)
     static inline int                                                          \
     luaA_##prefix##_class_instances(lua_State *L)                              \
     {                                                                          \
-        lua_pushnumber(L, (lua_class).instances);                              \
+        lua_pushinteger(L, (lua_class).instances);                             \
         return 1;                                                              \
     }
 

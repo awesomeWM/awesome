@@ -31,13 +31,13 @@ int
 luaA_pushstrut(lua_State *L, strut_t strut)
 {
     lua_createtable(L, 4, 0);
-    lua_pushnumber(L, strut.left);
+    lua_pushinteger(L, strut.left);
     lua_setfield(L, -2, "left");
-    lua_pushnumber(L, strut.right);
+    lua_pushinteger(L, strut.right);
     lua_setfield(L, -2, "right");
-    lua_pushnumber(L, strut.top);
+    lua_pushinteger(L, strut.top);
     lua_setfield(L, -2, "top");
-    lua_pushnumber(L, strut.bottom);
+    lua_pushinteger(L, strut.bottom);
     lua_setfield(L, -2, "bottom");
     return 1;
 }

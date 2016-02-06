@@ -247,7 +247,7 @@ event_handle_xkb_notify(xcb_generic_event_t* event)
 
           if (state_notify_event->changed & XCB_XKB_STATE_PART_GROUP_STATE)
           {
-              lua_pushnumber(L, state_notify_event->group);
+              lua_pushinteger(L, state_notify_event->group);
               signal_object_emit(L, &global_signals, "xkb::group_changed", 1);
           }
 

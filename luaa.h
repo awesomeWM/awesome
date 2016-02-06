@@ -175,13 +175,13 @@ static inline int
 luaA_pusharea(lua_State *L, area_t geometry)
 {
     lua_createtable(L, 0, 4);
-    lua_pushnumber(L, geometry.x);
+    lua_pushinteger(L, geometry.x);
     lua_setfield(L, -2, "x");
-    lua_pushnumber(L, geometry.y);
+    lua_pushinteger(L, geometry.y);
     lua_setfield(L, -2, "y");
-    lua_pushnumber(L, geometry.width);
+    lua_pushinteger(L, geometry.width);
     lua_setfield(L, -2, "width");
-    lua_pushnumber(L, geometry.height);
+    lua_pushinteger(L, geometry.height);
     lua_setfield(L, -2, "height");
     return 1;
 }

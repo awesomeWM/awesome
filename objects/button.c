@@ -102,7 +102,7 @@ luaA_button_array_get(lua_State *L, int oidx, button_array_t *buttons)
     return 1;
 }
 
-LUA_OBJECT_EXPORT_PROPERTY(button, button_t, button, lua_pushnumber);
+LUA_OBJECT_EXPORT_PROPERTY(button, button_t, button, lua_pushinteger);
 LUA_OBJECT_EXPORT_PROPERTY(button, button_t, modifiers, luaA_pushmodifiers);
 
 static int
