@@ -5,7 +5,7 @@ env:
   matrix:
     # Note: luarocks does not work with Lua 5.0.
     - LUA=5.1 LGIVER=      LUANAME=lua5.1
-    - LUA=5.2 LGIVER=      LUANAME=lua5.2 BUILD_APIDOC=true
+    - LUA=5.2 LGIVER=      LUANAME=lua5.2 BUILD_APIDOC=true DO_COVERAGE=true
     - LUA=5.2 LGIVER=0.7.1 LUANAME=lua5.2
     # luajit: requires --lua-suffix=jit-2.0.0-beta9 in Ubuntu precise.
     # Later versions seem to provide a `luajit` symlink, so `jit` would be enough.
@@ -73,6 +73,9 @@ install:
   - travis_retry sudo luarocks install ldoc
   - travis_retry sudo luarocks install lua-discount
 
+  # Instal luacov-coveralls for code coverage testing.
+  - if [ "$DO_COVERAGE" = "true" ]; then sudo luarocks install luacov-coveralls; fi
+
   # Determine custom version.
   - export AWESOME_VERSION="${TRAVIS_BRANCH}-g$(git rev-parse --short HEAD)"
   - 'if [ "$TRAVIS_PULL_REQUEST" != false ]; then AWESOME_VERSION="${AWESOME_VERSION}-PR${TRAVIS_PULL_REQUEST}"; fi'
@@ -80,7 +83,10 @@ install:
 script:
   - export CMAKE_ARGS="-DLUA_LIBRARY=${LUALIBRARY} -DLUA_INCLUDE_DIR=${LUAINCLUDE} -D OVERRIDE_VERSION=$AWESOME_VERSION"
   - make && sudo env PATH=$PATH make install && awesome --version && tests/run.sh
+  - if [ "$DO_COVERAGE" = "true" ]; then make check-coverage; fi
 
 after_success:
   # Push updated API docs for relevant branches, e.g. non-PRs builds on master.
   - if [ "$BUILD_APIDOC" = "true" ]; then build-utils/travis-apidoc.sh; fi
+  # Push code coverage information
+  - if [ "$DO_COVERAGE" = "true" ]; then BUILD_DIRECTORY="$(pwd)/$(readlink build)/" luacov-coveralls --verbose; fi
