@@ -8,10 +8,12 @@
 local base = require("wibox.widget.base")
 local color = require("gears.color")
 local surface = require("gears.surface")
+local beautiful = require("beautiful")
 local cairo = require("lgi").cairo
 local setmetatable = setmetatable
 local pairs = pairs
 local type = type
+local unpack = unpack or table.unpack
 
 local background = { mt = {} }
 
@@ -21,8 +23,18 @@ function background:draw(context, cr, width, height)
         return
     end
 
+    -- Keep the shape path in case there is a border
+    self._path = nil
+
     if self._shape then
-        self._shape(cr, width, height, unpack(self._shape_args or {}))
+        -- Only add the offset if there is something to draw
+        local offset = ((self._shape_border_width and self._shape_border_color)
+            and self._shape_border_width or 0) / 2
+
+        cr:translate(offset, offset)
+        self._shape(cr, width - 2*offset, height - 2*offset, unpack(self._shape_args or {}))
+        cr:translate(-offset, -offset)
+        self._path = cr:copy_path()
         cr:clip()
     end
 
@@ -34,6 +46,20 @@ function background:draw(context, cr, width, height)
         local pattern = cairo.Pattern.create_for_surface(self.bgimage)
         cr:set_source(pattern)
         cr:paint()
+    end
+
+end
+
+-- Draw the border
+function background:after_draw_children(context, cr, width, height)
+    -- Draw the border
+    if self._path and self._shape_border_width and self._shape_border_width > 0 then
+        cr:append_path(self._path)
+        cr:set_source(color(self._shape_border_color or self.foreground or beautiful.fg_normal))
+
+        cr:set_line_width(self._shape_border_width)
+        cr:stroke()
+        self._path = nil
     end
 end
 
@@ -101,6 +127,20 @@ end
 function background:set_shape(shape, ...)
     self._shape = shape
     self._shape_args = {...}
+    self:emit_signal("widget::redraw_needed")
+end
+
+--- When a `shape` is set, also draw a border
+-- @tparam number width The border width
+function background:set_shape_border_width(width)
+    self._shape_border_width = width
+    self:emit_signal("widget::redraw_needed")
+end
+
+--- When a `shape` is set, also draw a border
+-- @param[opt=self.foreground] fg The border color, pattern or gradient
+function background:set_shape_border_color(fg)
+    self._shape_border_color = fg
     self:emit_signal("widget::redraw_needed")
 end
 
