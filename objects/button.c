@@ -116,7 +116,7 @@ luaA_button_set_modifiers(lua_State *L, button_t *b)
 static int
 luaA_button_set_button(lua_State *L, button_t *b)
 {
-    b->button = luaL_checknumber(L, -1);
+    b->button = luaL_checkinteger(L, -1);
     luaA_object_emit_signal(L, -3, "property::button", 0);
     return 0;
 }

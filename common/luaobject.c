@@ -84,7 +84,7 @@ luaA_object_incref(lua_State *L, int tud, int oud)
     /* Get the number of references */
     lua_rawget(L, -2);
     /* Get the number of references and increment it */
-    int count = lua_tonumber(L, -1) + 1;
+    int count = lua_tointeger(L, -1) + 1;
     lua_pop(L, 1);
     /* Push the pointer (key) */
     lua_pushlightuserdata(L, pointer);
@@ -121,8 +121,8 @@ luaA_object_decref(lua_State *L, int tud, const void *pointer)
     /* Get the number of references */
     lua_rawget(L, -2);
     /* Get the number of references and decrement it */
-    int count = lua_tonumber(L, -1) - 1;
-    /* Did we find the item in our table? (tonumber(nil)-1) is -1 */
+    int count = lua_tointeger(L, -1) - 1;
+    /* Did we find the item in our table? (tointeger(nil)-1) is -1 */
     if (count < 0)
     {
         buffer_t buf;
