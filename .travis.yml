@@ -83,7 +83,12 @@ install:
 script:
   - export CMAKE_ARGS="-DLUA_LIBRARY=${LUALIBRARY} -DLUA_INCLUDE_DIR=${LUAINCLUDE} -D OVERRIDE_VERSION=$AWESOME_VERSION"
   - make && sudo env PATH=$PATH make install && awesome --version && make check
-  - if [ "$DO_COVERAGE" = "true" ]; then make check-coverage; fi
+  - |
+    if [ "$DO_COVERAGE" = "true" ]; then
+        make check-coverage || exit 1;
+        sed -i "1 i\\require('luacov.runner')('"$PWD"/.luacov')" build/awesomerc.lua || exit 1
+        BUILD_DIRECTORY="" tests/run.sh || exit 1
+    fi
 
 after_success:
   # Push updated API docs for relevant branches, e.g. non-PRs builds on master.

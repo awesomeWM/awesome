@@ -13,6 +13,10 @@ return {
 
     include = {
         escape_pattern(lib_dir) .. ".+",
+
+        -- For things already having the correct path
+        -- (happens with integration tests)
+        "^lib/",
     },
 
     -- configuration for luacov-coveralls reporter
