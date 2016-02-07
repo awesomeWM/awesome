@@ -19,6 +19,7 @@ local tag = require("awful.tag")
 -- @param orientation String indicating in which corner is the master window.
 -- Available values are : NE, NW, SW, SE
 local function do_corner(p, orientation)
+    local t = p.tag or tag.selected(p.screen)
     local wa = p.workarea
     local cls = p.clients
 
