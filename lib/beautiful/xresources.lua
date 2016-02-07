@@ -8,7 +8,6 @@
 ----------------------------------------------------------------------------
 
 -- Grab environment
-local print = print
 local awesome = awesome
 local round = require("awful.util").round
 local gears_debug = require("gears.debug")

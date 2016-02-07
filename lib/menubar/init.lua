@@ -189,7 +189,7 @@ local function menulist_update(query, scr)
     end
 
     -- Add the applications according to their name and cmdline
-    for i, v in ipairs(menubar.menu_entries) do
+    for _, v in ipairs(menubar.menu_entries) do
         v.focused = false
         if not current_category or v.category == current_category then
             if string.match(v.name, pattern)
@@ -205,7 +205,7 @@ local function menulist_update(query, scr)
     end
 
     -- Now add items from match_inside to shownitems
-    for i, v in ipairs(match_inside) do
+    for _, v in ipairs(match_inside) do
         table.insert(shownitems, v)
     end
 
@@ -315,7 +315,7 @@ function menubar.show(scr)
     local prompt_args = menubar.prompt_args or {}
     prompt_args.prompt = "Run: "
     awful.prompt.run(prompt_args, instance.prompt.widget,
-                function(s) end,            -- exe_callback function set to do nothing
+                function() end,            -- exe_callback function set to do nothing
                 awful.completion.shell,     -- completion_callback
                 awful.util.get_cache_dir() .. "/history_menu",
                 nil,
