@@ -37,7 +37,7 @@ function mirror:layout(context, cr, width, height)
     m = m:translate(t.x, t.y)
     m = m:scale(s.x, s.y)
 
-    return base.place_widget_via_matrix(widget, m, width, height)
+    return base.place_widget_via_matrix(self.widget, m, width, height)
 end
 
 --- Fit this layout into the given area
