@@ -1,7 +1,7 @@
 local timer = require("gears.timer")
 local awful = require("awful")
 
-runner = {
+local runner = {
   quit_awesome_on_error = os.getenv('TEST_PAUSE_ON_ERRORS') ~= '1',
   -- quit-on-timeout defaults to false: indicates some problem with the test itself.
   quit_awesome_on_timeout = os.getenv('TEST_QUIT_ON_TIMEOUT') ~= '1',

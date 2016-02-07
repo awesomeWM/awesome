@@ -16,7 +16,6 @@ local steps = {
     if count == 1 then
       ret, snid = spawn('urxvt', true)
     elseif manage_called then
-      local c = client.get()[1]
       assert(ret)
       assert(snid)
       assert(snid == c_snid)

@@ -1,6 +1,10 @@
 --- Tests for urgent property.
 
-awful = require("awful")
+local awful = require("awful")
+local runner = require("_runner")
+
+-- This uses the global "tags" array set in the default config
+-- luacheck: globals tags
 
 -- Some basic assertion that the tag is not marked "urgent" already.
 assert(awful.tag.getproperty(tags[1][2], "urgent") == nil)
@@ -53,7 +57,7 @@ local steps = {
 
     elseif awful.tag.selectedlist()[1] == tags[1][2] then
       assert(#client.get() == 1)
-      c = client.get()[1]
+      local c = client.get()[1]
       assert(not c.urgent, "Client is not urgent anymore.")
       assert(c == client.focus, "Client is focused.")
       assert(awful.tag.getproperty(tags[1][2], "urgent") == false)
@@ -106,6 +110,6 @@ local steps = {
   end,
 }
 
-require("_runner").run_steps(steps)
+runner.run_steps(steps)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

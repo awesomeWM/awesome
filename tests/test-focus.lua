@@ -1,10 +1,9 @@
 --- Tests for focus signals / property.
 -- Test for https://github.com/awesomeWM/awesome/issues/134.
 
-awful = require("awful")
-timer = require("gears.timer")
+local awful = require("awful")
 
-beautiful = require("beautiful")
+local beautiful = require("beautiful")
 beautiful.border_normal = "#0000ff"
 beautiful.border_focus  = "#00ff00"
 

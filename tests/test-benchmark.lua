@@ -15,7 +15,7 @@ do
     local timer_measure = GLib.Timer()
     measure = function(f, iter)
         timer_measure:start()
-        for i = 1, iter do
+        for _ = 1, iter do
             f()
         end
         local elapsed = timer_measure:elapsed()
@@ -47,7 +47,7 @@ local function create_and_draw_wibox()
     do_pending_repaint()
 end
 
-local wb, textclock = create_wibox()
+local _, textclock = create_wibox()
 
 local function relayout_textclock()
     textclock:emit_signal("widget::layout_changed")

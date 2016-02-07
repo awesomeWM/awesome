@@ -3,10 +3,7 @@
 local awful = require("awful")
 local cairo = require("lgi").cairo
 local create_wibox = require("_wibox_helper").create_wibox
-local gears = require("gears")
 local wibox = require("wibox")
-
-local errors = {}
 
 local prepare_for_collect = nil
 local function emit_refresh()
@@ -14,6 +11,7 @@ local function emit_refresh()
 end
 
 -- Make the layoutbox in the default config GC'able
+-- luacheck: globals mywibox mylayoutbox
 mywibox[1].visible = false
 mywibox = nil
 mylayoutbox = nil
@@ -23,7 +21,7 @@ emit_refresh()
 local function collectable(a, b, c, d, e, f, g, h, last)
     assert(last == nil, "got more arguments than supported")
     local objs = setmetatable({ a, b, c, d, e, f, g, h }, { __mode = "v" })
-    a, b, c, d, e, f, g, h = nil, nil, nil, nil, nil, nil, nil, nil
+    a, b, c, d, e, f, g, h = nil, nil, nil, nil, nil, nil, nil, nil -- luacheck: ignore
     if prepare_for_collect then
         prepare_for_collect()
         prepare_for_collect = nil
@@ -31,7 +29,7 @@ local function collectable(a, b, c, d, e, f, g, h, last)
     collectgarbage("collect")
     collectgarbage("collect")
     -- Check if the table is now empty
-    for k, v in pairs(objs) do
+    for _, v in pairs(objs) do
         print("Some object was not garbage collected!")
         error(v)
     end
