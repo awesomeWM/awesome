@@ -114,7 +114,7 @@ function surface.load(_surface)
     return do_load_and_handle_errors(_surface, surface.load_silently)
 end
 
-function surface.mt:__call(...)
+function surface.mt.__call(_, ...)
     return surface.load(...)
 end
 

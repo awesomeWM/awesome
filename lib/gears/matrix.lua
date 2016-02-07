@@ -175,7 +175,7 @@ end
 -- @treturn number The x coordinate of the transformed point.
 -- @treturn number The x coordinate of the transformed point.
 function matrix:transform_point(x, y)
-    local x, y = self:transform_distance(x, y)
+    x, y = self:transform_distance(x, y)
     return self.x0 + x, self.y0 + y
 end
 
@@ -195,10 +195,10 @@ function matrix:transform_rectangle(x, y, width, height)
     local x3, y3 = self:transform_point(x + width, y + height)
     local x4, y4 = self:transform_point(x + width, y)
     -- Find the extremal points of the result
-    local x = math.min(x1, x2, x3, x4)
-    local y = math.min(y1, y2, y3, y4)
-    local width = math.max(x1, x2, x3, x4) - x
-    local height = math.max(y1, y2, y3, y4) - y
+    x = math.min(x1, x2, x3, x4)
+    y = math.min(y1, y2, y3, y4)
+    width = math.max(x1, x2, x3, x4) - x
+    height = math.max(y1, y2, y3, y4) - y
 
     return x, y, width, height
 end

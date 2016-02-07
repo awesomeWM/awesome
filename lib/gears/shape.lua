@@ -64,9 +64,9 @@ end
 -- @tparam[opt=10] number arrow_size The width and height of the arrow
 -- @tparam[opt=width/2 - arrow_size/2] number arrow_position The position of the arrow
 function module.infobubble(cr, width, height, corner_radius, arrow_size, arrow_position)
-    local corner_radius  = corner_radius  or 5
-    local arrow_size     = arrow_size     or 10
-    local arrow_position = arrow_position or width/2 - arrow_size/2
+    corner_radius  = corner_radius  or 5
+    arrow_size     = arrow_size     or 10
+    arrow_position = arrow_position or width/2 - arrow_size/2
 
     cr:move_to(0 ,corner_radius)
 
@@ -109,9 +109,9 @@ end
 -- @tparam[opt=width /2] number shaft_width The width of the shaft of the arrow
 -- @tparam[opt=height/2] number shaft_length The head_length of the shaft (the rest is the head)
 function module.arrow(cr, width, height, head_width, shaft_width, shaft_length)
-    local shaft_length = shaft_length or height / 2
-    local shaft_width  = shaft_width  or width  / 2
-    local head_width   = head_width   or width
+    shaft_length = shaft_length or height / 2
+    shaft_width  = shaft_width  or width  / 2
+    head_width   = head_width   or width
     local head_length  = height - shaft_length
 
     cr:move_to    ( width/2                     , 0            )
@@ -146,7 +146,7 @@ end
 -- @tparam number height The shape height
 -- @tparam[opt=height/2] number arrow_depth The width of the arrow part of the shape
 function module.powerline(cr, width, height, arrow_depth)
-    local arrow_depth = arrow_depth or height/2
+    arrow_depth = arrow_depth or height/2
     cr:move_to(0                   , 0        )
     cr:line_to(width - arrow_depth , 0        )
     cr:line_to(width               , height/2 )

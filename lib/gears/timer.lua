@@ -14,7 +14,7 @@ local setmetatable = setmetatable
 local table = table
 local tonumber = tonumber
 local traceback = debug.traceback
-local unpack = unpack or table.unpack -- v5.1: unpack, v5.2: table.unpack
+local unpack = unpack or table.unpack -- luacheck: globals unpack (compatibility with Lua 5.1)
 local glib = require("lgi").GLib
 local object = require("gears.object")
 
@@ -43,7 +43,7 @@ function timer:start()
         return
     end
     self.data.source_id = glib.timeout_add(glib.PRIORITY_DEFAULT, self.data.timeout * 1000, function()
-        local success, message = xpcall(function()
+        xpcall(function()
                 self:emit_signal("timeout")
             end, function(err)
                 print(debug.traceback("Error during executing timeout handler: "..tostring(err)))
@@ -160,7 +160,7 @@ end
 local delayed_calls = {}
 capi.awesome.connect_signal("refresh", function()
     for _, callback in ipairs(delayed_calls) do
-        local success, message = xpcall(function()
+        xpcall(function()
                 callback[1](unpack(callback, 2))
             end, function(err)
                 print(debug.traceback("Error during delayed call: "..tostring(err), 2))
@@ -177,7 +177,7 @@ function timer.delayed_call(callback, ...)
     table.insert(delayed_calls, { callback, ... })
 end
 
-function timer.mt:__call(...)
+function timer.mt.__call(_, ...)
     return timer.new(...)
 end
 

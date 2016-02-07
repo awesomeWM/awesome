@@ -8,7 +8,7 @@
 local setmetatable = setmetatable
 local string = string
 local table = table
-local unpack = unpack or table.unpack -- v5.1: unpack, v5.2: table.unpack
+local unpack = unpack or table.unpack -- luacheck: globals unpack (compatibility with Lua 5.1)
 local tonumber = tonumber
 local ipairs = ipairs
 local pairs = pairs
@@ -88,7 +88,6 @@ end
 -- @param col The color for the pattern
 -- @return A cairo pattern object
 function color.create_solid_pattern(col)
-    local col = col
     if col == nil then
         col = "#000000"
     elseif type(col) == "table" then
@@ -102,7 +101,6 @@ end
 -- @param file The filename of the file
 -- @return a cairo pattern object
 function color.create_png_pattern(file)
-    local file = file
     if type(file) == "table" then
         file = file.file
     end
@@ -138,7 +136,7 @@ local function string_pattern(creator, arg)
     local args = { parse_numbers(iterator()) }
     local to = { parse_numbers(iterator()) }
     -- Now merge those two tables
-    for k, v in pairs(to) do
+    for _, v in pairs(to) do
         table.insert(args, v)
     end
     -- And call our creator function with the values
@@ -220,7 +218,7 @@ function color.create_pattern_uncached(col)
     if cairo.Pattern:is_type_of(col) then
         return col
     end
-    local col = col or "#000000"
+    col = col or "#000000"
     if type(col) == "string" then
         local t = string.match(col, "[^:]+")
         if color.types[t] then
@@ -271,18 +269,17 @@ end
 -- @return The pattern if it is surely opaque, else nil
 function color.create_opaque_pattern(col)
     local pattern = color.create_pattern(col)
-    local type = pattern:get_type()
-    local extend = pattern:get_extend()
+    local kind = pattern:get_type()
 
-    if type == "SOLID" then
-        local status, r, g, b, a = pattern:get_rgba()
-        if a ~= 1 then
+    if kind == "SOLID" then
+        local _, _, _, _, alpha = pattern:get_rgba()
+        if alpha ~= 1 then
             return
         end
         return pattern
-    elseif type == "SURFACE" then
-        local status, surface = pattern:get_surface()
-        if status ~= "SUCCESS" or surface.content ~= "COLOR" then
+    elseif kind == "SURFACE" then
+        local status, surf = pattern:get_surface()
+        if status ~= "SUCCESS" or surf.content ~= "COLOR" then
             -- The surface has an alpha channel which *might* be non-opaque
             return
         end
@@ -294,8 +291,8 @@ function color.create_opaque_pattern(col)
         end
 
         return pattern
-    elseif type == "LINEAR" then
-        local status, stops = pattern:get_color_stop_count()
+    elseif kind == "LINEAR" then
+        local _, stops = pattern:get_color_stop_count()
 
         -- No color stops or extend NONE -> pattern *might* contain transparency
         if stops == 0 or pattern:get_extend() == "NONE" then
@@ -304,8 +301,8 @@ function color.create_opaque_pattern(col)
 
         -- Now check if any of the color stops contain transparency
         for i = 0, stops - 1 do
-            local status, offset, r, g, b, a = pattern:get_color_stop_rgba(i)
-            if a ~= 1 then
+            local _, _, _, _, _, alpha = pattern:get_color_stop_rgba(i)
+            if alpha ~= 1 then
                 return
             end
         end
@@ -330,7 +327,7 @@ function color.recolor_image(image, new_color)
     return image
 end
 
-function color.mt:__call(...)
+function color.mt.__call(_, ...)
     return color.create_pattern(...)
 end
 

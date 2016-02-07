@@ -7,7 +7,7 @@
 
 local select = select
 local setmetatable = setmetatable
-local unpack = unpack or table.unpack
+local unpack = unpack or table.unpack -- luacheck: globals unpack (compatibility with Lua 5.1)
 
 local cache = {}
 
