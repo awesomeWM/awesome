@@ -7,7 +7,7 @@
 --  * http://awesome.naquadah.org/wiki/Nice_Icons
 
 -- {{{ Main
-theme = {}
+local theme = {}
 theme.wallpaper = "@AWESOME_THEMES_PATH@/zenburn/zenburn-background.png"
 -- }}}
 
