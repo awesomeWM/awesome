@@ -119,9 +119,9 @@ end
 -- @tparam[opt=client's screen] integer screen The screen.
 -- @treturn table The new client geometry.
 function placement.no_offscreen(c, screen)
-    local c = c or capi.client.focus
+    c = c or capi.client.focus
     local geometry = get_area(c)
-    local screen   = screen or c.screen or a_screen.getbycoord(geometry.x, geometry.y)
+    screen = screen or c.screen or a_screen.getbycoord(geometry.x, geometry.y)
     local screen_geometry = capi.screen[screen].workarea
 
     if geometry.x + geometry.width > screen_geometry.x + screen_geometry.width then
@@ -149,7 +149,7 @@ function placement.no_overlap(c)
     local cls = client.visible(screen)
     local curlay = layout.get()
     local areas = { capi.screen[screen].workarea }
-    for i, cl in pairs(cls) do
+    for _, cl in pairs(cls) do
         if cl ~= c and cl.type ~= "desktop" and (client.floating.get(cl) or curlay == layout.suit.floating) then
             areas = area_remove(areas, get_area(cl))
         end
@@ -158,7 +158,7 @@ function placement.no_overlap(c)
     -- Look for available space
     local found = false
     local new = { x = geometry.x, y = geometry.y, width = 0, height = 0 }
-    for i, r in ipairs(areas) do
+    for _, r in ipairs(areas) do
         if r.width >= geometry.width
            and r.height >= geometry.height
            and r.width * r.height > new.width * new.height then
@@ -179,7 +179,7 @@ function placement.no_overlap(c)
     -- We did not find an area with enough space for our size:
     -- just take the biggest available one and go in
     if not found then
-        for i, r in ipairs(areas) do
+        for _, r in ipairs(areas) do
             if r.width * r.height > new.width * new.height then
                 new = r
             end
@@ -197,7 +197,7 @@ end
 -- @param c The client.
 -- @return The new client geometry.
 function placement.under_mouse(c)
-    local c = c or capi.client.focus
+    c = c or capi.client.focus
     local c_geometry = get_area(c)
     local m_coords = capi.mouse.coords()
     return c:geometry({ x = m_coords.x - c_geometry.width / 2,
@@ -220,8 +220,10 @@ function placement.next_to_mouse(c, offset)
     local m_coords = capi.mouse.coords()
     local screen_geometry = capi.screen[capi.mouse.screen].workarea
 
+    local x, y
+
     -- Prefer it to be on the right.
-    local x = m_coords.x + offset
+    x = m_coords.x + offset
     if x + c_width > screen_geometry.width then
         -- Then to the left.
         x = m_coords.x - c_width - offset
@@ -245,7 +247,7 @@ end
 -- @param[opt] p The parent (nil for screen centering).
 -- @return The new client geometry.
 function placement.centered(c, p)
-    local c = c or capi.client.focus
+    c = c or capi.client.focus
     local c_geometry = get_area(c)
     local screen = c.screen or a_screen.getbycoord(c_geometry.x, c_geometry.y)
     local s_geometry
@@ -263,7 +265,7 @@ end
 -- @param[opt] p The parent (nil for screen centering).
 -- @return The new client geometry.
 function placement.center_horizontal(c, p)
-    local c = c or capi.client.focus
+    c = c or capi.client.focus
     local c_geometry = get_area(c)
     local screen = c.screen or a_screen.getbycoord(c_geometry.x, c_geometry.y)
     local s_geometry
@@ -280,7 +282,7 @@ end
 -- @param[opt] p The parent (nil for screen centering).
 -- @return The new client geometry.
 function placement.center_vertical(c, p)
-    local c = c or capi.client.focus
+    c = c or capi.client.focus
     local c_geometry = get_area(c)
     local screen = c.screen or a_screen.getbycoord(c_geometry.x, c_geometry.y)
     local s_geometry

@@ -11,14 +11,13 @@
 local os = os
 local io = io
 local assert = assert
-local load = loadstring or load -- v5.1 - loadstring, v5.2 - load
+local load = loadstring or load -- luacheck: globals loadstring (compatibility with Lua 5.1)
 local loadfile = loadfile
 local debug = debug
 local pairs = pairs
 local ipairs = ipairs
 local type = type
 local rtable = table
-local pairs = pairs
 local string = string
 local lgi = require("lgi")
 local Gio = require("lgi").Gio
@@ -195,8 +194,8 @@ end
 -- @tparam[opt] string size The size. If this is specified, subdirectories `x`
 --   of the dirs are searched first.
 function util.geticonpath(iconname, exts, dirs, size)
-    local exts = exts or { 'png', 'gif' }
-    local dirs = dirs or { '/usr/share/pixmaps/', '/usr/share/icons/hicolor/' }
+    exts = exts or { 'png', 'gif' }
+    dirs = dirs or { '/usr/share/pixmaps/', '/usr/share/icons/hicolor/' }
     local icontypes = { 'apps', 'actions',  'categories',  'emblems',
         'mimetypes',  'status', 'devices', 'extras', 'places', 'stock' }
     for _, d in pairs(dirs) do
@@ -385,7 +384,7 @@ end
 -- @return A new table containing all keys from the arguments.
 function util.table.join(...)
     local ret = {}
-    for i, t in pairs({...}) do
+    for _, t in pairs({...}) do
         if t then
             for k, v in pairs(t) do
                 if type(k) == "number" then
@@ -422,7 +421,7 @@ end
 -- @treturn table A packed table with all numeric keys
 function util.table.from_sparse(t)
     local keys= {}
-    for k,v in pairs(t) do
+    for k in pairs(t) do
         if type(k) == "number" then
             keys[#keys+1] = k
         end
@@ -462,7 +461,7 @@ function util.linewrap(text, width, indent)
 
     local pos = 1
     return text:gsub("(%s+)()(%S+)()",
-        function(sp, st, word, fi)
+        function(_, st, word, fi)
             if fi - pos > width then
                 pos = st
                 return "\n" .. string.rep(" ", indent) .. word
@@ -532,7 +531,7 @@ end
 -- @param deep Create a deep clone? (default: true)
 -- @return a clone of t
 function util.table.clone(t, deep)
-    local deep = deep == nil and true or deep
+    deep = deep == nil and true or deep
     local c = { }
     for k, v in pairs(t) do
         if deep and type(v) == "table" then
@@ -592,7 +591,7 @@ end
 -- Generate a pattern matching expression that ignores case.
 -- @param s Original pattern matching expression.
 function util.query_to_pattern(q)
-    s = util.quote_pattern(q)
+    local s = util.quote_pattern(q)
     -- Poor man's case-insensitive character matching.
     s = string.gsub(s, "%a",
                     function (c)

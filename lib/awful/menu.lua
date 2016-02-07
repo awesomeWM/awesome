@@ -99,7 +99,7 @@ end
 
 
 local function item_position(_menu, child)
-    local in_dir, other, a, b = 0, 0, "height", "width"
+    local a, b = "height", "width"
     local dir = _menu.layout.dir or "y"
     if dir == "x" then  a, b = b, a  end
 
@@ -191,7 +191,7 @@ local function check_access_key(_menu, key)
 end
 
 
-local function grabber(_menu, mod, key, event)
+local function grabber(_menu, _, key, event)
     if event ~= "press" then return end
 
     local sel = _menu.sel or 0
@@ -499,10 +499,10 @@ end
 --------------------------------------------------------------------------------
 
 --- Default awful.menu.entry constructor
--- @param parent The parent menu
+-- @param parent The parent menu (TODO: This is apparently unused)
 -- @param args the item params
 -- @return table with 'widget', 'cmd', 'akey' and all the properties the user wants to change
-function menu.entry(parent, args)
+function menu.entry(parent, args) -- luacheck: no unused args
     args = args or {}
     args.text = args[1] or args.text or ""
     args.cmd = args[2] or args.cmd
@@ -651,9 +651,9 @@ function menu.new(args, parent)
     end
 
     -- Create items
-    for i, v in ipairs(args) do  _menu:add(v)  end
+    for _, v in ipairs(args) do  _menu:add(v)  end
     if args.items then
-        for i, v in pairs(args.items) do  _menu:add(v)  end
+        for _, v in pairs(args.items) do  _menu:add(v)  end
     end
 
     _menu._keygrabber = function (...)

@@ -290,9 +290,9 @@ function prompt.run(args, textbox, exe_callback, completion_callback, history_pa
     end
 
     -- Build the hook map
-    for k,v in ipairs(args.hooks or {}) do
+    for _,v in ipairs(args.hooks or {}) do
         if #v == 3 then
-            local mods,key,callback = unpack(v)
+            local _,key,callback = unpack(v)
             if type(callback) == "function" then
                 hooks[key] = hooks[key] or {}
                 hooks[key][#hooks[key]+1] = v
@@ -332,7 +332,7 @@ function prompt.run(args, textbox, exe_callback, completion_callback, history_pa
         if event ~= "press" then return end
         -- Convert index array to hash table
         local mod = {}
-        for k, v in ipairs(modifiers) do mod[v] = true end
+        for _, v in ipairs(modifiers) do mod[v] = true end
 
         -- Call the user specified callback. If it returns true as
         -- the first result then return from the function. Treat the
@@ -360,10 +360,10 @@ function prompt.run(args, textbox, exe_callback, completion_callback, history_pa
 
         -- User defined cases
         if hooks[key] then
-            for k,v in ipairs(hooks[key]) do
+            for _,v in ipairs(hooks[key]) do
                 if #modifiers == #v[1] then
                     local match = true
-                    for k2,v2 in ipairs(v[1]) do
+                    for _,v2 in ipairs(v[1]) do
                         match = match and mod[v2]
                     end
                     if match or #modifiers == 0 then
@@ -489,19 +489,19 @@ function prompt.run(args, textbox, exe_callback, completion_callback, history_pa
             elseif key == "w" or key == "BackSpace" then
                 local wstart = 1
                 local wend = 1
-                local cword_start = 1
-                local cword_end = 1
+                local cword_start_pos = 1
+                local cword_end_pos = 1
                 while wend < cur_pos do
                     wend = command:find("[{[(,.:;_-+=@/ ]", wstart)
                     if not wend then wend = #command + 1 end
                     if cur_pos >= wstart and cur_pos <= wend + 1 then
-                        cword_start = wstart
-                        cword_end = cur_pos - 1
+                        cword_start_pos = wstart
+                        cword_end_pos = cur_pos - 1
                         break
                     end
                     wstart = wend + 1
                 end
-                command = command:sub(1, cword_start - 1) .. command:sub(cword_end + 1)
+                command = command:sub(1, cword_start_pos - 1) .. command:sub(cword_end_pos + 1)
                 cur_pos = cword_start
             elseif key == "Delete" then
                 -- delete from history only if:
@@ -531,7 +531,7 @@ function prompt.run(args, textbox, exe_callback, completion_callback, history_pa
             elseif key == "d" then
                 command = command:sub(1, cur_pos - 1) .. command:sub(cword_end(command, cur_pos))
             elseif key == "BackSpace" then
-                wstart = cword_start(command, cur_pos)
+                local wstart = cword_start(command, cur_pos)
                 command = command:sub(1, wstart - 1) .. command:sub(cur_pos)
                 cur_pos = wstart
             end

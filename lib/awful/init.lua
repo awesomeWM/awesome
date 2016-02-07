@@ -10,7 +10,7 @@
 -- TODO: This is a hack for backwards-compatibility with 3.5, remove!
 local util = require("awful.util")
 local gtimer = require("gears.timer")
-function timer(...)
+function timer(...) -- luacheck: ignore
     util.deprecate("gears.timer")
     return gtimer(...)
 end

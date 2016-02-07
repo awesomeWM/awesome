@@ -18,7 +18,6 @@ local math = math
 local print = print
 local pairs = pairs
 local string = string
-local util = require("awful.util")
 
 local completion = {}
 
@@ -128,7 +127,6 @@ function completion.shell(command, cur_pos, ncomp, shell)
     end
     local c, err = io.popen(shell_cmd .. " | sort -u")
     local output = {}
-    i = 0
     if c then
         while true do
             local line = c:read("*line")
@@ -168,7 +166,7 @@ end
 -- @param ncomp The number of yet requested completion using current text.
 -- @param keywords The keywords table uised for completion.
 -- @return The new match, the new cursor position, the table of all matches.
-function completion.generic(text, cur_pos, ncomp, keywords)
+function completion.generic(text, cur_pos, ncomp, keywords) -- luacheck: no unused args
     -- The keywords table may be empty
     if #keywords == 0 then
         return text, #text + 1

@@ -41,7 +41,6 @@
 -------------------------------------------------------------------------
 
 local mouse = mouse
-local screen = screen
 local timer = require("gears.timer")
 local wibox = require("wibox")
 local a_placement = require("awful.placement")

@@ -11,7 +11,6 @@
 ---------------------------------------------------------------------------
 
 local client = client
-local screen = screen
 local aclient = require("awful.client")
 local atag = require("awful.tag")
 local timer = require("gears.timer")
