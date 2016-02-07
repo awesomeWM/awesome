@@ -5,7 +5,6 @@
 -- @classmod wibox.layout.align
 ---------------------------------------------------------------------------
 
-local setmetatable = setmetatable
 local table = table
 local pairs = pairs
 local type = type
@@ -125,6 +124,7 @@ function align:layout(context, width, height)
                 x, y = size_first, 0
             end
         else
+            local _
             if self.dir == "y" then
                 _, h = base.fit_widget(self, context, self.second, width, size_second)
                 y = floor( (height - h)/2 )
@@ -192,7 +192,7 @@ function align:fit(context, orig_width, orig_height)
     local used_in_dir = 0
     local used_in_other = 0
 
-    for k, v in pairs{self.first, self.second, self.third} do
+    for _, v in pairs{self.first, self.second, self.third} do
         local w, h = base.fit_widget(self, context, v, orig_width, orig_height)
 
         local max = self.dir == "y" and w or h
@@ -233,7 +233,7 @@ function align:set_expand(mode)
 end
 
 function align:reset()
-    for k, v in pairs({ "first", "second", "third" }) do
+    for _, v in pairs({ "first", "second", "third" }) do
         self[v] = nil
     end
     self:emit_signal("widget::layout_changed")

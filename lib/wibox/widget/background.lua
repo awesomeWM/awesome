@@ -13,7 +13,7 @@ local cairo = require("lgi").cairo
 local setmetatable = setmetatable
 local pairs = pairs
 local type = type
-local unpack = unpack or table.unpack
+local unpack = unpack or table.unpack -- luacheck: globals unpack (compatibility with Lua 5.1)
 
 local background = { mt = {} }
 
@@ -55,7 +55,7 @@ function background:draw(context, cr, width, height)
 end
 
 -- Draw the border
-function background:after_draw_children(context, cr, width, height)
+function background:after_draw_children(_, cr)
     -- Draw the border
     if self._path and self._shape_border_width and self._shape_border_width > 0 then
         cr:append_path(self._path)
@@ -68,14 +68,14 @@ function background:after_draw_children(context, cr, width, height)
 end
 
 --- Prepare drawing the children of this widget
-function background:before_draw_children(context, cr, width, height)
+function background:before_draw_children(_, cr)
     if self.foreground then
         cr:set_source(self.foreground)
     end
 end
 
 --- Layout this widget
-function background:layout(context, width, height)
+function background:layout(_, width, height)
     if self.widget then
         return { base.place_widget_at(self.widget, 0, 0, width, height) }
     end

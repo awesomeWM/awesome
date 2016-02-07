@@ -10,7 +10,6 @@
 
 local base  = require("wibox.widget.base" )
 local flex  = require("wibox.layout.flex" )
-local fixed = require("wibox.layout.fixed")
 local table = table
 local pairs = pairs
 local floor = math.floor
@@ -125,21 +124,12 @@ local function normalize(self)
     assert(new_sum > 0.99 and new_sum < 1.01)
 end
 
---- Layout a ratio layout. Each widget gets a share of the size proportional
--- to its ratio
--- @param context The context in which we are drawn.
--- @tparam number width The available width.
--- @tparam number height The available height.
-function ratio:layout(context, width, height)
+function ratio:layout(_, width, height)
     local result = {}
     local pos,spacing = 0, self._spacing
-    local num = #self.widgets
-    local total_spacing = (spacing*(num-1))
-
-    --normalize(self)
 
     for k, v in ipairs(self.widgets) do
-        local space = nil
+        local space
         local x, y, w, h
 
         if self.dir == "y" then
@@ -179,8 +169,6 @@ function ratio:inc_ratio(index, increment)
         return
     end
 
-    local widget = self.widgets[index]
-
     assert(self._ratios[index])
 
     self:set_ratio(index, self._ratios[index] + increment)
@@ -214,7 +202,7 @@ function ratio:set_ratio(index, percent)
     -- Remove what has to be cleared from all widget
     local delta = ( (percent-old) / (#self.widgets-1) )
 
-    for k, v in pairs(self.widgets) do
+    for k in pairs(self.widgets) do
         self._ratios[k] = self._ratios[k] - delta
     end
 

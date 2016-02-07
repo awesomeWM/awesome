@@ -20,8 +20,7 @@ local surface = require("gears.surface")
 local timer = require("gears.timer")
 local matrix = require("gears.matrix")
 local hierarchy = require("wibox.hierarchy")
-local base = require("wibox.widget.base")
-local unpack = unpack or table.unpack
+local unpack = unpack or table.unpack -- luacheck: globals unpack (compatibility with Lua 5.1)
 
 local drawables = setmetatable({}, { __mode = 'k' })
 local wallpaper = nil
@@ -154,32 +153,32 @@ local function do_redraw(self)
     assert(cr.status == "SUCCESS", "Cairo context entered error state: " .. cr.status)
 end
 
-local function find_widgets(drawable, result, hierarchy, x, y)
-    local m = hierarchy:get_matrix_from_device()
+local function find_widgets(_drawable, result, _hierarchy, x, y)
+    local m = _hierarchy:get_matrix_from_device()
 
     -- Is (x,y) inside of this hierarchy or any child (aka the draw extents)
     local x1, y1 = m:transform_point(x, y)
-    local x2, y2, width, height = hierarchy:get_draw_extents()
-    if x1 < x2 or x1 >= x2 + width then
+    local x2, y2, w2, h2 = _hierarchy:get_draw_extents()
+    if x1 < x2 or x1 >= x2 + w2 then
         return
     end
-    if y1 < y2 or y1 >= y2 + height then
+    if y1 < y2 or y1 >= y2 + h2 then
         return
     end
 
     -- Is (x,y) inside of this widget?
-    local width, height = hierarchy:get_size()
+    local width, height = _hierarchy:get_size()
     if x1 >= 0 and y1 >= 0 and x1 <= width and y1 <= height then
         -- Get the extents of this widget in the device space
-        local x2, y2, w2, h2 = matrix.transform_rectangle(hierarchy:get_matrix_to_device(),
+        local x3, y3, w3, h3 = matrix.transform_rectangle(_hierarchy:get_matrix_to_device(),
             0, 0, width, height)
         table.insert(result, {
-            x = x2, y = y2, width = w2, height = h2,
-            drawable = drawable, widget = hierarchy:get_widget()
+            x = x3, y = y3, width = w3, height = h3,
+            drawable = _drawable, widget = _hierarchy:get_widget()
         })
     end
-    for _, child in ipairs(hierarchy:get_children()) do
-        find_widgets(drawable, result, child, x, y)
+    for _, child in ipairs(_hierarchy:get_children()) do
+        find_widgets(_drawable, result, child, x, y)
     end
 end
 
@@ -211,7 +210,7 @@ end
 -- @param c The background to use. This must either be a cairo pattern object,
 --   nil or a string that gears.color() understands.
 function drawable:set_bg(c)
-    local c = c or "#000000"
+    c = c or "#000000"
     local t = type(c)
 
     if t == "string" or t == "table" then
@@ -255,7 +254,7 @@ end
 -- @param c The foreground to use. This must either be a cairo pattern object,
 --   nil or a string that gears.color() understands.
 function drawable:set_fg(c)
-    local c = c or "#FFFFFF"
+    c = c or "#FFFFFF"
     if type(c) == "string" or type(c) == "table" then
         c = color(c)
     end
@@ -265,7 +264,7 @@ end
 
 local function emit_difference(name, list, skip)
     local function in_table(table, val)
-        for k, v in pairs(table) do
+        for _, v in pairs(table) do
             if v.widget == val.widget then
                 return true
             end
@@ -273,7 +272,7 @@ local function emit_difference(name, list, skip)
         return false
     end
 
-    for k, v in pairs(list) do
+    for _, v in pairs(list) do
         if not in_table(skip, v) then
             v.widget:emit_signal(name,v)
         end
@@ -371,9 +370,9 @@ function drawable.new(d, widget_context_skeleton, drawable_name)
     ret._widgets_under_mouse = {}
 
     local function button_signal(name)
-        d:connect_signal(name, function(d, x, y, button, modifiers)
+        d:connect_signal(name, function(_, x, y, button, modifiers)
             local widgets = ret:find_widgets(x, y)
-            for k, v in pairs(widgets) do
+            for _, v in pairs(widgets) do
                 -- Calculate x/y inside of the widget
                 local lx = x - v.x
                 local ly = y - v.y
@@ -388,12 +387,12 @@ function drawable.new(d, widget_context_skeleton, drawable_name)
     d:connect_signal("mouse::leave", function() handle_leave(ret) end)
 
     -- Set up our callbacks for repaints
-    ret._redraw_callback = function(hierarchy, arg)
+    ret._redraw_callback = function(hierar, arg)
         if ret._widget_hierarchy_callback_arg ~= arg then
             return
         end
-        local m = hierarchy:get_matrix_to_device()
-        local x, y, width, height = matrix.transform_rectangle(m, hierarchy:get_draw_extents())
+        local m = hierar:get_matrix_to_device()
+        local x, y, width, height = matrix.transform_rectangle(m, hierar:get_draw_extents())
         local x1, y1 = math.floor(x), math.floor(y)
         local x2, y2 = math.ceil(x + width), math.ceil(y + height)
         ret._dirty_area:union_rectangle(cairo.RectangleInt{
@@ -401,7 +400,7 @@ function drawable.new(d, widget_context_skeleton, drawable_name)
         })
         ret:draw()
     end
-    ret._layout_callback = function(hierarchy, arg)
+    ret._layout_callback = function(_, arg)
         if ret._widget_hierarchy_callback_arg ~= arg then
             return
         end
@@ -413,7 +412,7 @@ function drawable.new(d, widget_context_skeleton, drawable_name)
     ret.drawable_name = drawable_name or object.modulename(3)
     local mt = {}
     local orig_string = tostring(ret)
-    mt.__tostring = function(o)
+    mt.__tostring = function()
         return string.format("%s (%s)", ret.drawable_name, orig_string)
     end
     ret = setmetatable(ret, mt)
@@ -426,7 +425,6 @@ end
 
 -- Redraw all drawables when the wallpaper changes
 capi.awesome.connect_signal("wallpaper_changed", function()
-    local k
     wallpaper = nil
     for k in pairs(drawables) do
         k()

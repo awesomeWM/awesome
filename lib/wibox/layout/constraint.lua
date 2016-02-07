@@ -14,7 +14,7 @@ local math = math
 local constraint = { mt = {} }
 
 --- Layout a constraint layout
-function constraint:layout(context, width, height)
+function constraint:layout(_, width, height)
     if self.widget then
         return { base.place_widget_at(self.widget, 0, 0, width, height) }
     end
@@ -62,14 +62,14 @@ end
 -- 'min' or 'exact'. Throws an error on invalid values.
 function constraint:set_strategy(val)
     local func = {
-        min = function(real_size, constraint)
-            return constraint and math.max(constraint, real_size) or real_size
+        min = function(real_size, limit)
+            return limit and math.max(limit, real_size) or real_size
         end,
-        max = function(real_size, constraint)
-            return constraint and math.min(constraint, real_size) or real_size
+        max = function(real_size, limit)
+            return limit and math.min(limit, real_size) or real_size
         end,
-        exact = function(real_size, constraint)
-            return constraint or real_size
+        exact = function(real_size, limit)
+            return limit or real_size
         end
     }
 

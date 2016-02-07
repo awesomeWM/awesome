@@ -6,14 +6,11 @@
 ---------------------------------------------------------------------------
 
 local cache = require("gears.cache")
-local color = require("gears.color")
-local matrix = require("gears.matrix")
 local timer = require("gears.timer")
 local hierarchy = require("wibox.hierarchy")
 local base = require("wibox.widget.base")
 local lgi = require("lgi")
 local GLib = lgi.GLib
-local cairo = lgi.cairo
 
 local scroll = {}
 local scroll_mt = { __index = scroll }
@@ -34,8 +31,7 @@ end
 -- Create a hierarchy (and some more stuff) for drawing the given widget. This
 -- allows "some stuff" to be re-used instead of re-created all the time.
 local hierarchy_cache = cache.new(function(context, widget, width, height)
-    local context = cleanup_context(context)
-    local surface = cairo.ImageSurface(cairo.Format.ARGB32, width, height)
+    context = cleanup_context(context)
     local layouts = setmetatable({}, { __mode = "k" })
 
     -- Create a widget hierarchy and update when needed
@@ -50,10 +46,10 @@ local hierarchy_cache = cache.new(function(context, widget, width, height)
             w:emit_signal(signal)
         end
     end
-    local function redraw_callback(h, arg)
+    local function redraw_callback()
         emit("widget::redraw_needed")
     end
-    local function layout_callback(h, arg)
+    local function layout_callback()
         emit("widget::redraw_needed")
         emit("widget::layout_changed")
     end
@@ -122,11 +118,11 @@ local function calculate_info(self, context, width, height)
         end
         result.first_x, result.first_y = x, y
         -- Was the extra space already included elsewhere?
-        local extra = self.expand and 0 or self.extra_space
+        local extra_spacer = self.expand and 0 or self.extra_space
         if self.dir == "h" then
-            x = x + surface_width + extra
+            x = x + surface_width + extra_spacer
         else
-            y = y + surface_height + extra
+            y = y + surface_height + extra_spacer
         end
         result.second_x, result.second_y = x, y
     else
@@ -135,10 +131,10 @@ local function calculate_info(self, context, width, height)
     result.surface_width, result.surface_height = surface_width, surface_height
 
     -- Get the hierarchy and subscribe ourselves to updates
-    local hier, do_pending_updates, context = hierarchy_cache:get(context,
+    local hier, do_pending_updates, ctx = hierarchy_cache:get(context,
             self.widget, surface_width, surface_height)
     result.hierarchy = hier
-    result.context = context
+    result.context = ctx
     do_pending_updates(self)
 
     return result
@@ -429,19 +425,19 @@ scroll.step_functions = {}
 
 --- A step function that scrolls the widget in an increasing direction with
 -- constant speed.
-function scroll.step_functions.linear_increase(elapsed, size, visible_size, speed, extra_space)
+function scroll.step_functions.linear_increase(elapsed, size, _, speed, extra_space)
     return (elapsed * speed) % (size + extra_space)
 end
 
 --- A step function that scrolls the widget in an decreasing direction with
 -- constant speed.
-function scroll.step_functions.linear_decrease(elapsed, size, visible_size, speed, extra_space)
+function scroll.step_functions.linear_decrease(elapsed, size, _, speed, extra_space)
     return (-elapsed * speed) % (size + extra_space)
 end
 
 --- A step function that scrolls the widget to its end and back to its
 -- beginning, then back to its end, etc. The speed is constant.
-function scroll.step_functions.linear_back_and_forth(elapsed, size, visible_size, speed, extra_space)
+function scroll.step_functions.linear_back_and_forth(elapsed, size, visible_size, speed)
     local state = ((elapsed * speed) % (2 * size)) / size
     state = state <= 1 and state or 2 - state
     return (size - visible_size) * state
@@ -450,7 +446,7 @@ end
 --- A step function that scrolls the widget to its end and back to its
 -- beginning, then back to its end, etc. The speed is null at the ends and
 -- maximal in the middle.
-function scroll.step_functions.nonlinear_back_and_forth(elapsed, size, visible_size, speed, extra_space)
+function scroll.step_functions.nonlinear_back_and_forth(elapsed, size, visible_size, speed)
     local state = ((elapsed * speed) % (2 * size)) / size
     local negate = false
     if state > 1 then
@@ -478,7 +474,7 @@ end
 --- A step function that scrolls the widget to its end and back to its
 -- beginning, then back to its end, etc. The speed is null at the ends and
 -- maximal in the middle. At both ends the widget stands still for a moment.
-function scroll.step_functions.waiting_nonlinear_back_and_forth(elapsed, size, visible_size, speed, extra_space)
+function scroll.step_functions.waiting_nonlinear_back_and_forth(elapsed, size, visible_size, speed)
     local state = ((elapsed * speed) % (2 * size)) / size
     local negate = false
     if state > 1 then

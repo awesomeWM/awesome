@@ -15,7 +15,7 @@ local cairo = require("lgi").cairo
 local margin = { mt = {} }
 
 --- Draw a margin layout
-function margin:draw(context, cr, width, height)
+function margin:draw(_, cr, width, height)
     local x = self.left
     local y = self.top
     local w = self.right
@@ -36,7 +36,7 @@ function margin:draw(context, cr, width, height)
 end
 
 --- Layout a margin layout
-function margin:layout(context, width, height)
+function margin:layout(_, width, height)
     if self.widget then
         local x = self.left
         local y = self.top
@@ -141,7 +141,7 @@ end
 -- @class function
 
 -- Create setters for each direction
-for k, v in pairs({ "left", "right", "top", "bottom" }) do
+for _, v in pairs({ "left", "right", "top", "bottom" }) do
     margin["set_" .. v] = function(layout, val)
         layout[v] = val
         layout:emit_signal("widget::layout_changed")

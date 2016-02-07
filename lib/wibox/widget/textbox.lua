@@ -10,13 +10,11 @@ local base = require("wibox.widget.base")
 local gdebug = require("gears.debug")
 local beautiful = require("beautiful")
 local lgi = require("lgi")
-local cairo = lgi.cairo
 local Pango = lgi.Pango
 local PangoCairo = lgi.PangoCairo
 local type = type
 local setmetatable = setmetatable
 local pairs = pairs
-local error = error
 
 local textbox = { mt = {} }
 
@@ -40,7 +38,7 @@ end
 function textbox:draw(context, cr, width, height)
     setup_layout(self, width, height, context.dpi)
     cr:update_layout(self._layout)
-    local ink, logical = self._layout:get_pixel_extents()
+    local _, logical = self._layout:get_pixel_extents()
     local offset = 0
     if self._valign == "center" then
         offset = (height - logical.height) / 2
@@ -52,7 +50,7 @@ function textbox:draw(context, cr, width, height)
 end
 
 local function do_fit_return(self)
-    local ink, logical = self._layout:get_pixel_extents()
+    local _, logical = self._layout:get_pixel_extents()
     if logical.width == 0 or logical.height == 0 then
         return 0, 0
     end
@@ -110,7 +108,7 @@ function textbox:get_height_for_width_at_dpi(width, dpi)
     setup_dpi(self, dpi)
     self._layout.width = Pango.units_from_double(width)
     self._layout.height = -max_lines -- show this many lines per paragraph
-    local w, h = do_fit_return(self)
+    local _, h = do_fit_return(self)
     return h
 end
 
@@ -261,7 +259,7 @@ local function new(text, ignore_markup)
     return ret
 end
 
-function textbox.mt:__call(...)
+function textbox.mt.__call(_, ...)
     return new(...)
 end
 

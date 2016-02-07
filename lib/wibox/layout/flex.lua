@@ -107,11 +107,7 @@ local flex = {}
 -- @name insert
 -- @class function
 
---- Layout a flex layout. Each widget gets an equal share of the available space.
--- @param context The context in which we are drawn.
--- @param width The available width.
--- @param height The available height.
-function flex:layout(context, width, height)
+function flex:layout(_, width, height)
     local result = {}
     local pos,spacing = 0, self._spacing
     local num = #self.widgets
@@ -128,7 +124,7 @@ function flex:layout(context, width, height)
         space_per_item = math.min(space_per_item, self._max_widget_size)
     end
 
-    for k, v in pairs(self.widgets) do
+    for _, v in pairs(self.widgets) do
         local x, y, w, h
         if self.dir == "y" then
             x, y = 0, util.round(pos)
@@ -163,7 +159,7 @@ function flex:fit(context, orig_width, orig_height)
     local sub_height = self.dir == "x" and orig_height or orig_height / #self.widgets
     local sub_width  = self.dir == "y" and orig_width  or orig_width / #self.widgets
 
-    for k, v in pairs(self.widgets) do
+    for _, v in pairs(self.widgets) do
         local w, h = base.fit_widget(self, context, v, sub_width, sub_height)
 
         local max = self.dir == "y" and w or h
