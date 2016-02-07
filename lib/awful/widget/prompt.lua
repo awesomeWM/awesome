@@ -42,7 +42,7 @@ end
 -- @param args Arguments table. "prompt" is the prompt to use.
 -- @return A launcher widget.
 function widgetprompt.new(args)
-    local args = args or {}
+    args = args or {}
     local widget = textbox()
     local promptbox = widget_base.make_widget(widget)
 

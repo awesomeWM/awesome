@@ -6,17 +6,10 @@
 ---------------------------------------------------------------------------
 
 -- Grab environment we need
-local math = math
 local type = type
 local ipairs = ipairs
-local pairs = pairs
-local pcall = pcall
-local setmetatable = setmetatable
 local capi = { button = button }
-local util = require("awful.util")
 local wibox = require("wibox")
-local imagebox = require("wibox.widget.imagebox")
-local textbox = require("wibox.widget.textbox")
 local dpi = require("beautiful").xresources.apply_dpi
 
 --- Common utilities for awful widgets
@@ -29,7 +22,7 @@ local common = {}
 function common.create_buttons(buttons, object)
     if buttons then
         local btns = {}
-        for kb, b in ipairs(buttons) do
+        for _, b in ipairs(buttons) do
             -- Create a proxy button object: it will receive the real
             -- press and release events, and will propagate them the the
             -- button object the user provided, but with the object as

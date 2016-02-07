@@ -8,8 +8,6 @@
 ---------------------------------------------------------------------------
 
 local setmetatable = setmetatable
-local ipairs = ipairs
-local button = require("awful.button")
 local layout = require("awful.layout")
 local tooltip = require("awful.tooltip")
 local tag = require("awful.tag")
@@ -21,9 +19,9 @@ local layoutbox = { mt = {} }
 local boxes = nil
 
 local function update(w, screen)
-    local layout = layout.getname(layout.get(screen))
-    w._layoutbox_tooltip:set_text(layout or "[no name]")
-    w:set_image(layout and beautiful["layout_" .. layout])
+    local name = layout.getname(layout.get(screen))
+    w._layoutbox_tooltip:set_text(name or "[no name]")
+    w:set_image(name and beautiful["layout_" .. name])
 end
 
 local function update_from_tag(t)
@@ -39,7 +37,7 @@ end
 -- @param screen The screen number that the layout will be represented for.
 -- @return An imagebox widget configured as a layoutbox.
 function layoutbox.new(screen)
-    local screen = screen or 1
+    screen = screen or 1
 
     -- Do we already have the update callbacks registered?
     if boxes == nil then

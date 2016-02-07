@@ -48,10 +48,10 @@ local function tasklist_label(c, args, tb)
     local font_focus = args.font_focus or theme.tasklist_font_focus or theme.font_focus or font or ""
     local font_minimized = args.font_minimized or theme.tasklist_font_minimized or theme.font_minimized or font or ""
     local font_urgent = args.font_urgent or theme.tasklist_font_urgent or theme.font_urgent or font or ""
-    local bg = nil
     local text = ""
     local name = ""
-    local bg_image = nil
+    local bg
+    local bg_image
 
     -- symbol to use to indicate certain client properties
     local sticky = args.sticky or theme.tasklist_sticky or "▪"
@@ -89,8 +89,8 @@ local function tasklist_label(c, args, tb)
     -- is considered to be focused, if the real client has skip_taskbar.
     if not focused and capi.client.focus and capi.client.focus.skip_taskbar
         and client.get_transient_for_matching(capi.client.focus,
-                                              function(c)
-                                                  return not c.skip_taskbar
+                                              function(cl)
+                                                  return not cl.skip_taskbar
                                               end) == c then
         focused = true
     end
@@ -120,7 +120,7 @@ end
 
 local function tasklist_update(s, w, buttons, filter, data, style, update_function)
     local clients = {}
-    for k, c in ipairs(capi.client.get()) do
+    for _, c in ipairs(capi.client.get()) do
         if not (c.skip_taskbar or c.hidden
             or c.type == "splash" or c.type == "dock" or c.type == "desktop")
             and filter(c, s) then
@@ -245,10 +245,8 @@ function tasklist.new(screen, filter, buttons, style, update_function, base_widg
 end
 
 --- Filtering function to include all clients.
--- @param c The client.
--- @param screen The screen we are drawing on.
 -- @return true
-function tasklist.filter.allscreen(c, screen)
+function tasklist.filter.allscreen()
     return true
 end
 
@@ -271,7 +269,7 @@ function tasklist.filter.currenttags(c, screen)
     -- Include sticky client too
     if c.sticky then return true end
     local tags = tag.gettags(screen)
-    for k, t in ipairs(tags) do
+    for _, t in ipairs(tags) do
         if t.selected then
             local ctags = c:tags()
             for _, v in ipairs(ctags) do
@@ -296,7 +294,7 @@ function tasklist.filter.minimizedcurrenttags(c, screen)
     -- Include sticky client
     if c.sticky then return true end
     local tags = tag.gettags(screen)
-    for k, t in ipairs(tags) do
+    for _, t in ipairs(tags) do
         -- Select only minimized clients
         if t.selected then
             local ctags = c:tags()

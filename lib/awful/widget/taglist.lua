@@ -11,7 +11,6 @@
 local capi = { screen = screen,
                awesome = awesome,
                client = client }
-local type = type
 local setmetatable = setmetatable
 local pairs = pairs
 local ipairs = ipairs
@@ -53,7 +52,8 @@ function taglist.taglist_label(t, args)
     local fg_color = nil
     local bg_image
     local icon
-    local bg_resize = false
+    -- TODO: Re-implement bg_resize
+    local bg_resize = false -- luacheck: ignore
     local is_selected = false
     local cls = t:clients()
 
@@ -117,7 +117,7 @@ end
 
 local function taglist_update(s, w, buttons, filter, data, style, update_function)
     local tags = {}
-    for k, t in ipairs(tag.gettags(s)) do
+    for _, t in ipairs(tag.gettags(s)) do
         if not tag.getproperty(t, "hide") and filter(t) then
             table.insert(tags, t)
         end
@@ -211,25 +211,21 @@ end
 
 --- Filtering function to include all nonempty tags on the screen.
 -- @param t The tag.
--- @param args unused list of extra arguments.
 -- @return true if t is not empty, else false
-function taglist.filter.noempty(t, args)
+function taglist.filter.noempty(t)
     return #t:clients() > 0 or t.selected
 end
 
 --- Filtering function to include selected tags on the screen.
 -- @param t The tag.
--- @param args unused list of extra arguments.
 -- @return true if t is not empty, else false
-function taglist.filter.selected(t, args)
+function taglist.filter.selected(t)
     return t.selected
 end
 
 --- Filtering function to include all tags on the screen.
--- @param t The tag.
--- @param args unused list of extra arguments.
 -- @return true
-function taglist.filter.all(t, args)
+function taglist.filter.all()
     return true
 end
 
