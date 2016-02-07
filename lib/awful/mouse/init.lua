@@ -11,7 +11,6 @@
 local layout = require("awful.layout")
 local tag = require("awful.tag")
 local aclient = require("awful.client")
-local widget = require("awful.widget")
 local awibox = require("awful.wibox")
 local util = require("awful.util")
 local type = type
@@ -99,14 +98,13 @@ end
 -- @param fixed_x True if the client isn't allowed to move in the x direction.
 -- @param fixed_y True if the client isn't allowed to move in the y direction.
 function mouse.client.snap(c, snap, x, y, fixed_x, fixed_y)
-    local snap = snap or 8
-    local c = c or mouse.client.focus
+    snap = snap or 8
+    c = c or mouse.client.focus
     local cur_geom = c:geometry()
     local geom = c:geometry()
     geom.width = geom.width + (2 * c.border_width)
     geom.height = geom.height + (2 * c.border_width)
-    local edge = "none"
-    local edge2 = "none"
+    local edge
     geom.x = x or geom.x
     geom.y = y or geom.y
 
@@ -134,7 +132,7 @@ function mouse.client.snap(c, snap, x, y, fixed_x, fixed_y)
     geom.x = geom.x - (2 * c.border_width)
     geom.y = geom.y - (2 * c.border_width)
 
-    for k, snapper in ipairs(aclient.visible(c.screen)) do
+    for _, snapper in ipairs(aclient.visible(c.screen)) do
         if snapper ~= c then
             geom = snap_outside(geom, snapper:geometry(), snap)
         end
@@ -159,7 +157,7 @@ end
 --   when moving the client has been finished. The client
 --   that has been moved will be passed to that function.
 function mouse.client.move(c, snap, finished_cb)
-    local c = c or capi.client.focus
+    c = c or capi.client.focus
 
     if not c
         or c.fullscreen
@@ -178,7 +176,7 @@ function mouse.client.move(c, snap, finished_cb)
     local fixed_y = c.maximized_vertical
 
     capi.mousegrabber.run(function (_mouse)
-                              for k, v in ipairs(_mouse.buttons) do
+                              for _, v in ipairs(_mouse.buttons) do
                                   if v then
                                       local lay = layout.get(c.screen)
                                       if lay == layout.suit.floating or aclient.floating.get(c) then
@@ -259,7 +257,7 @@ end
 --- Move the wibox under the cursor
 --@param w The wibox to move, or none to use that under the pointer
 function mouse.wibox.move(w)
-    local w = w or mouse.wibox_under_pointer()
+    w = w or mouse.wibox_under_pointer()
     if not w then return end
 
     local offset = {
@@ -286,7 +284,7 @@ function mouse.wibox.move(w)
             end
             w.screen = capi.mouse.screen
         end
-        for k, v in ipairs(_mouse.buttons) do
+        for _, v in ipairs(_mouse.buttons) do
             if v then button_down = true end
         end
         if not button_down then
@@ -302,7 +300,7 @@ end
 -- bottom_right. Default is auto, and auto find the nearest corner.
 -- @return Actual used corner and x and y coordinates.
 function mouse.client.corner(c, corner)
-    local c = c or capi.client.focus
+    c = c or capi.client.focus
     if not c then return end
 
     local g = c:geometry()
@@ -346,7 +344,7 @@ end
 -- @param c The client to resize, or the focused one by default.
 -- @param corner The corner to grab on resize. Auto detected by default.
 function mouse.client.resize(c, corner)
-    local c = c or capi.client.focus
+    c = c or capi.client.focus
 
     if not c then return end
 
@@ -358,12 +356,12 @@ function mouse.client.resize(c, corner)
     end
 
     local lay = layout.get(c.screen)
-    local corner, x, y = mouse.client.corner(c, corner)
+    local corner2, x, y = mouse.client.corner(c, corner)
 
     if lay == layout.suit.floating or aclient.floating.get(c) then
-        return layout.suit.floating.mouse_resize_handler(c, corner, x, y)
+        return layout.suit.floating.mouse_resize_handler(c, corner2, x, y)
     elseif lay.mouse_resize_handler then
-        return lay.mouse_resize_handler(c, corner, x, y)
+        return lay.mouse_resize_handler(c, corner2, x, y)
     end
 end
 

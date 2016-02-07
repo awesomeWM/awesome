@@ -20,11 +20,11 @@ shape.update = {}
 
 --- Get one of a client's shapes and transform it to include window decorations
 -- @client c The client whose shape should be retrieved
--- @tparam string shape Either "bounding" or "clip"
-function shape.get_transformed(c, shape)
-    local border = shape == "bounding" and c.border_width or 0
-    local shape = surface.load_silently(c["client_shape_" .. shape], false)
-    if not shape then return end
+-- @tparam string shape_name Either "bounding" or "clip"
+function shape.get_transformed(c, shape_name)
+    local border = shape_name == "bounding" and c.border_width or 0
+    local shape_img = surface.load_silently(c["client_shape_" .. shape_name], false)
+    if not shape_img then return end
 
     -- Get information about various sizes on the client
     local geom = c:geometry()
@@ -44,7 +44,7 @@ function shape.get_transformed(c, shape)
 
     -- Draw the client's shape in the middle
     cr:set_operator(cairo.Operator.SOURCE)
-    cr:set_source_surface(shape, border + l, border + t)
+    cr:set_source_surface(shape_img, border + l, border + t)
     cr:rectangle(border + l, border + t, geom.width - l - r, geom.height - t - b)
     cr:fill()
 

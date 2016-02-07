@@ -75,7 +75,7 @@ function layout.inc(i, s, layouts)
         layouts, i, s = i, s, layouts
     end
     local t = tag.selected(s)
-    local layouts = layouts or layout.layouts
+    layouts = layouts or layout.layouts
     if t then
         local curlayout = layout.get(s)
         local curindex
@@ -192,7 +192,7 @@ end
 -- @param _layout The layout.
 -- @return The layout name.
 function layout.getname(_layout)
-    local _layout = _layout or layout.get()
+    _layout = _layout or layout.get()
     return _layout.name
 end
 

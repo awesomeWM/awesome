@@ -38,12 +38,9 @@
 -- @module awful.mouse.finder
 -------------------------------------------------------------------------
 
-local mouse = mouse
-local screen = screen
 local timer = require("gears.timer")
 local wibox = require("wibox")
 local a_placement = require("awful.placement")
-local a_wibox = require("awful.wibox")
 local beautiful = require("beautiful")
 local setmetatable = setmetatable
 

@@ -26,8 +26,8 @@ local tile = {}
 --- Jump mouse cursor to the client's corner when resizing it.
 tile.resize_jump_to_corner = true
 
-local function mouse_resize_handler(c, corner, x, y, orientation)
-    local orientation = orientation or "tile"
+local function mouse_resize_handler(c, _, _, _, orientation)
+    orientation = orientation or "tile"
     local wa = capi.screen[c.screen].workarea
     local mwfact = tag.getmwfact()
     local cursor
@@ -87,47 +87,46 @@ local function mouse_resize_handler(c, corner, x, y, orientation)
     capi.mousegrabber.run(function (_mouse)
                               _mouse.x = _mouse.x + coordinates_delta.x
                               _mouse.y = _mouse.y + coordinates_delta.y
-                              for k, v in ipairs(_mouse.buttons) do
+                              for _, v in ipairs(_mouse.buttons) do
                                   if v then
                                       prev_coords = { x =_mouse.x, y = _mouse.y }
                                       local fact_x = (_mouse.x - wa.x) / wa.width
                                       local fact_y = (_mouse.y - wa.y) / wa.height
-                                      local mwfact
+                                      local new_mwfact
 
-                                      local g = c:geometry()
-
+                                      local geom = c:geometry()
 
                                       -- we have to make sure we're not on the last visible client where we have to use different settings.
                                       local wfact
                                       local wfact_x, wfact_y
-                                      if (g.y+g.height+15) > (wa.y+wa.height) then
-                                          wfact_y = (g.y + g.height - _mouse.y) / wa.height
+                                      if (geom.y+geom.height+15) > (wa.y+wa.height) then
+                                          wfact_y = (geom.y + geom.height - _mouse.y) / wa.height
                                       else
-                                          wfact_y = (_mouse.y - g.y) / wa.height
+                                          wfact_y = (_mouse.y - geom.y) / wa.height
                                       end
 
-                                      if (g.x+g.width+15) > (wa.x+wa.width) then
-                                          wfact_x = (g.x + g.width - _mouse.x) / wa.width
+                                      if (geom.x+geom.width+15) > (wa.x+wa.width) then
+                                          wfact_x = (geom.x + geom.width - _mouse.x) / wa.width
                                       else
-                                          wfact_x = (_mouse.x - g.x) / wa.width
+                                          wfact_x = (_mouse.x - geom.x) / wa.width
                                       end
 
 
                                       if orientation == "tile" then
-                                          mwfact = fact_x
+                                          new_mwfact = fact_x
                                           wfact = wfact_y
                                       elseif orientation == "left" then
-                                          mwfact = 1 - fact_x
+                                          new_mwfact = 1 - fact_x
                                           wfact = wfact_y
                                       elseif orientation == "bottom" then
-                                          mwfact = fact_y
+                                          new_mwfact = fact_y
                                           wfact = wfact_x
                                       else
-                                          mwfact = 1 - fact_y
+                                          new_mwfact = 1 - fact_y
                                           wfact = wfact_x
                                       end
 
-                                      tag.setmwfact(math.min(math.max(mwfact, 0.01), 0.99), tag.selected(c.screen))
+                                      tag.setmwfact(math.min(math.max(new_mwfact, 0.01), 0.99), tag.selected(c.screen))
                                       client.setwfact(math.min(math.max(wfact,0.01), 0.99), c)
                                       return true
                                   end
@@ -200,15 +199,11 @@ local function do_tile(param, orientation)
     orientation = orientation or "right"
 
     -- This handles all different orientations.
-    local height = "height"
     local width = "width"
     local x = "x"
-    local y = "y"
     if orientation == "top" or orientation == "bottom" then
-        height = "width"
         width = "height"
         x = "y"
-        y = "x"
     end
 
     local gs = param.geometries
@@ -236,7 +231,7 @@ local function do_tile(param, orientation)
 
     local grow_master = tag.getmfpol(t) == "expand"
     -- this was easier than writing functions because there is a lot of data we need
-    for d = 1,2 do
+    for _ = 1,2 do
         if place_master and nmaster > 0 then
             local size = wa[width]
             if nother > 0 or not grow_master then

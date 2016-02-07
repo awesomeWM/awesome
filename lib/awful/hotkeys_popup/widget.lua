@@ -159,7 +159,7 @@ local function sort_hotkeys(target)
     for group, _ in pairs(group_list) do
         if target[group] then
             local sorted_table = {}
-            for index, key in pairs(target[group]) do
+            for _, key in pairs(target[group]) do
                 table.insert(sorted_table, key)
             end
             table.sort(
