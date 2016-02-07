@@ -54,7 +54,7 @@ describe("gears.object", function()
         obj:weak_connect_signal("signal", cb)
 
         -- Check that the GC doesn't disconnect the signal
-        for i = 1, 10 do
+        for _ = 1, 10 do
             collectgarbage("collect")
         end
 
@@ -149,7 +149,8 @@ describe("gears.object", function()
                 finalized = true
             end
             if _VERSION <= "Lua 5.1" then
-                local userdata = newproxy(true)
+                -- luacheck: globals newproxy
+                userdata = newproxy(true)
                 getmetatable(userdata).__gc = gc
                 getmetatable(userdata).callback = callback
             else

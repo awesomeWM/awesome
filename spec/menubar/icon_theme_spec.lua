@@ -6,24 +6,24 @@
 -- Hack so that beautiful can be loaded
 _G.awesome = {
     xrdb_get_value = function() end,
-    connect_signal = function(...) end,
-    register_xproperty = function(...) end
+    connect_signal = function() end,
+    register_xproperty = function() end
 }
 -- Additional hacks to load menubar
 _G.screen = {
-    add_signal = function(...) end,
+    add_signal = function() end,
     count = function() return 0 end
 }
 _G.client = {
-    connect_signal = function(...) end,
-    add_signal = function(...) end
+    connect_signal = function() end,
+    add_signal = function() end
 }
 _G.tag = {
-    connect_signal = function(...) end,
-    add_signal = function(...) end
+    connect_signal = function() end,
+    add_signal = function() end
 }
 _G.root = {
-    cursor = function(...) end
+    cursor = function() end
 }
 
 local os = os

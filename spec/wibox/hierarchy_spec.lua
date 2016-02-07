@@ -7,7 +7,6 @@ local hierarchy = require("wibox.hierarchy")
 
 local Region = require("lgi").cairo.Region
 local matrix = require("gears.matrix")
-local object = require("gears.object")
 local utils = require("wibox.test_utils")
 
 local function make_widget(children)
@@ -18,8 +17,8 @@ local function make_widget(children)
     return result
 end
 
-local function make_child(widget, width, height, matrix)
-    return { _widget = widget, _width = width, _height = height, _matrix = matrix }
+local function make_child(widget, width, height, mat)
+    return { _widget = widget, _width = width, _height = height, _matrix = mat }
 end
 
 describe("wibox.hierarchy", function()
@@ -95,7 +94,7 @@ describe("wibox.hierarchy", function()
             end
         end
         local context = {}
-        local instance = hierarchy.new(context, parent, 15, 20, redraw, layout, extra_arg)
+        local instance = hierarchy.new(context, parent, 15, 20, redraw, layout, extra_arg) -- luacheck: no unused
 
         -- There should be a connection
         parent:emit_signal("widget::redraw_needed")
@@ -140,7 +139,7 @@ describe("wibox.hierarchy", function()
             assert.is.equal(#children, 1)
             hierarchy_intermediate = children[1]
 
-            local children = hierarchy_intermediate:get_children()
+            children = hierarchy_intermediate:get_children()
             assert.is.equal(#children, 1)
             hierarchy_child = children[1]
         end)

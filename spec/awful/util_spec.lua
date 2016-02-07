@@ -4,7 +4,6 @@
 ---------------------------------------------------------------------------
 
 local util = require("awful.util")
-local say = require("say")
 
 describe("awful.util", function()
     it("table.keys_filter", function()
