@@ -16,7 +16,6 @@ local beautiful = require("beautiful")
 local cairo = require("lgi").cairo
 local color = require("gears.color")
 local object = require("gears.object")
-local sort = require("gears.sort")
 local surface = require("gears.surface")
 local timer = require("gears.timer")
 local matrix = require("gears.matrix")
