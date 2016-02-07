@@ -79,7 +79,7 @@ install:
 
 script:
   - export CMAKE_ARGS="-DLUA_LIBRARY=${LUALIBRARY} -DLUA_INCLUDE_DIR=${LUAINCLUDE} -D OVERRIDE_VERSION=$AWESOME_VERSION"
-  - make && sudo env PATH=$PATH make install && awesome --version && tests/run.sh
+  - make && sudo env PATH=$PATH make install && awesome --version && make check
 
 after_success:
   # Push updated API docs for relevant branches, e.g. non-PRs builds on master.
