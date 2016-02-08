@@ -89,6 +89,7 @@ local function new(c, args)
             local args = bars[position].args
             ret:set_bg(get_color("bg", c, args))
             ret:set_fg(get_color("fg", c, args))
+            ret:set_bgimage(get_color("bgimage", c, args))
         end
 
         bars[position] = {
