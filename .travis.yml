@@ -74,7 +74,7 @@ install:
   - travis_retry sudo luarocks install lua-discount
 
   # Instal luacov-coveralls for code coverage testing.
-  - if [ "$DO_COVERAGE" = "true" ]; then sudo luarocks install luacov-coveralls; fi
+  - if [ "$DO_COVERAGE" = "true" ]; then sudo luarocks install https://luarocks.org/manifests/moteus/luacov-coveralls-scm-0.rockspec; fi
 
   # Determine custom version.
   - export AWESOME_VERSION="${TRAVIS_BRANCH}-g$(git rev-parse --short HEAD)"
@@ -91,4 +91,4 @@ after_success:
   # Push updated API docs for relevant branches, e.g. non-PRs builds on master.
   - if [ "$BUILD_APIDOC" = "true" ]; then build-utils/travis-apidoc.sh; fi
   # Push code coverage information
-  - if [ "$DO_COVERAGE" = "true" ]; then BUILD_DIRECTORY="$(pwd)/$(readlink build)/" luacov-coveralls --verbose; fi
+  - if [ "$DO_COVERAGE" = "true" ]; then BUILD_DIRECTORY="$(pwd)/$(readlink build)/" luacov-coveralls --verbose --merge; fi
