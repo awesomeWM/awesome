@@ -31,6 +31,11 @@ local flex = {}
 -- @name get_children
 -- @class function
 
+--- Replace the layout children
+-- @tparam table children A table composed of valid widgets
+-- @name set_children
+-- @class function
+
 --- Add some widgets to the given fixed layout
 -- @param layout The layout you are modifying.
 -- @tparam widget ... Widgets that should be added (must at least be one)

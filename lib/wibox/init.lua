@@ -21,6 +21,7 @@ local sort = require("gears.sort")
 local beautiful = require("beautiful")
 local surface = require("gears.surface")
 local cairo = require("lgi").cairo
+local base = require("wibox.widget.base")
 
 --- This provides widget box windows. Every wibox can also be used as if it were
 -- a drawin. All drawin functions and properties are also available on wiboxes!
@@ -35,6 +36,13 @@ wibox.hierarchy = require("wibox.hierarchy")
 function wibox:set_widget(widget)
     self._drawable:set_widget(widget)
 end
+
+--- Set a declarative widget hierarchy description.
+-- See [The declarative layout system](../documentation/03-declarative-layout.md.html)
+-- @param args An array containing the widgets disposition
+-- @name setup
+-- @class function
+wibox.setup = base.widget.setup
 
 --- Set the background of the wibox
 -- @param c The background to use. This must either be a cairo pattern object,

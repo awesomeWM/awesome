@@ -8,6 +8,7 @@
 local object = require("gears.object")
 local cache = require("gears.cache")
 local matrix = require("gears.matrix")
+local util = require("awful.util")
 local setmetatable = setmetatable
 local pairs = pairs
 local type = type
@@ -78,6 +79,14 @@ end
 -- @treturn table The children
 function base.widget:get_children()
     return {}
+end
+
+--- Replace the layout children
+-- The default implementation does nothing, this must be re-implemented by
+-- all layout and container widgets.
+-- @tparam table children A table composed of valid widgets
+function base.widget:set_children(children)
+    -- Nothing on purpose
 end
 
 -- It could have been merged into `get_all_children`, but it's not necessary
@@ -321,126 +330,121 @@ function base.place_widget_at(widget, x, y, width, height)
     return base.place_widget_via_matrix(widget, matrix.create_translate(x, y), width, height)
 end
 
---[[--
-Create a new widget. All widgets have to be generated via this function so that
-the needed signals are added and mouse input handling is set up.
+-- Read the table, separate attributes from widgets
+local function parse_table(t, leave_empty)
+    local keys= {}
+    local max = 0
+    local attributes, widgets = {}, {}
+    for k,v in pairs(t) do
+        if type(k) == "number" then
+            -- As `ipairs` doesn't always work on sparse tables, update the
+            -- maximum
+            if k > max then
+                max = k
+            end
 
-The returned widget will have a :buttons member function that can be used to
-register a set of mouse button events with the widget.
-
-To implement your own widget, you can implement some member functions on a
-freshly-created widget. Note that all of these functions should be deterministic
-in the sense that they will show the same behavior if they are repeatedly called
-with the same arguments (same width and height). If your widget is updated and
-needs to change, suitable signals have to be emitted. This will be explained
-later.
-
-The first callback is :fit. This function is called to select the size of your
-widget. The arguments to this function is the available space and it should
-return its desired size. Note that this function only provides a hint which is
-not necessarily followed. The widget must also be able to draw itself at
-different sizes than the one requested.
-
-    function widget:fit(context, width, height)
-      -- Find the maximum square available
-      local m = math.min(width, height)
-      return m, m
+            widgets[k] = v
+        else
+            attributes[k] = v
+        end
     end
 
-The next callback is :draw. As the name suggests, this function is called to
-draw the widget. The arguments to this widget are the context that the widget is
-drawn in, the cairo context on which it should be drawn and the widget's size.
-The cairo context is set up in such a way that the widget as its top-left corner
-at (0, 0) and its bottom-right corner at (width, height). In other words, no
-special transformation needs to be done. Note that during this callback a
-suitable clip will already be applied to the cairo context so that this callback
-will not be able to draw outside of the area that was registered for the widget
-by the layout that placed this widget. You should not call `cr:reset_clip()`, as
-redraws will not be handled correctly in this case.
-
-    function widget:draw(context, cr, width, height)
-      cr:move_to(0, 0)
-      cr:line_to(width, height)
-      cr:move_to(0, height)
-      cr:line_to(width, 0)
-      cr:stroke()
+    -- Pack the sparse table if the container doesn't support sparse tables
+    if not leave_empty then
+        widgets = util.table.from_sparse(widgets)
+        max = #widgets
     end
 
-There are two signals configured for a widget. When the result that :fit would
-return changes, the `widget::layout_changed` signal has to be emitted. If this
-actually causes layout changes, the affected areas will be redrawn. The other
-signal is `widget::redraw_needed`. This signal signals that :draw has to be
-called to redraw the widget, but it is safe to assume that :fit does still
-return the same values as before. If in doubt, you can emit both signals to be
-safe.
+    return max, attributes, widgets
+end
 
-If your widget only needs to draw something to the screen, the above is all that
-is needed. The following callbacks can be used when implementing layouts which
-place other widgets on the screen.
+-- Recursively build a container from a declarative table
+local function drill(ids, content)
+    if not content then return end
 
-The :layout callback is used to figure out which other widgets should be drawn
-relative to this widget. Note that it is allowed to place widgets outside of the
-extents of your own widget, for example at a negative position or at twice the
-size of this widget. Use this mechanism if your widget needs to draw outside of
-its own extents. If the result of this callback changes,
-`widget::layout_changed` has to be emitted. You can use @{fit_widget} to call
-the `:fit` callback of other widgets. Never call `:fit` directly!  For example,
-if you want to place another widget `child` inside of your widget, you can do it
-like this:
+    -- Alias `widget` to `layout` as they are handled the same way
+    content.layout = content.layout or content.widget
 
-    -- For readability
-    local base = wibox.widget.base
-    function widget:layout(width, height)
-      local result = {}
-      table.insert(result, base.place_widget_at(child, width/2, 0, width/2, height)
-      return result
+    -- Make sure the layout is not indexed on a function
+    local layout = type(content.layout) == "function" and  content.layout() or content.layout
+
+    -- Create layouts based on metatable __call
+    local l = layout.is_widget and layout or layout()
+
+    -- Get the number of children widgets (including nil widgets)
+    local max, attributes, widgets = parse_table(content, l.allow_empty_widget)
+
+    -- Get the optional identifier to create a virtual widget tree to place
+    -- in an "access table" to be able to retrieve the widget
+    local id = attributes.id
+
+    -- Clear the internal attributes
+    attributes.id, attributes.layout, attributes.widget = nil, nil, nil
+
+    for k = 1, max do
+        -- ipairs cannot be used on sparse tables
+        local v, id2, e = widgets[k], id, nil
+        if v then
+            -- It is another declarative container, parse it
+            if not v.is_widget then
+                e, id2 = drill(ids, v)
+                widgets[k] = e
+            end
+
+            -- Place the widget in the access table
+            if id2 then
+                l  [id2] = e
+                ids[id2] = ids[id2] or {}
+                table.insert(ids[id2], e)
+            end
+        end
     end
 
-Finally, if you want to influence how children are drawn, there are four
-callbacks available that all get similar arguments:
+    -- Replace all children (if any) with the new ones
+    l:set_children(widgets)
 
-    function widget:before_draw_children(context, cr, width, height)
-    function widget:after_draw_children(context, cr, width, height)
-    function widget:before_draw_child(context, index, child, cr, width, height)
-    function widget:after_draw_child(context, index, child, cr, width, height)
-
-All of these are called with the same arguments as the :draw() method. Please
-note that a larger clip will be active during these callbacks that also contains
-the area of all children. These callbacks can be used to influence the way in
-which children are drawn, but they should not cause the drawing to cover a
-different area. As an example, these functions can be used to draw children
-translucently:
-
-    function widget:before_draw_children(context, cr, width, height)
-      cr:push_group()
-    end
-    function widget:after_draw_children(context, cr, width, height)
-      cr:pop_group_to_source()
-      cr:paint_with_alpha(0.5)
+    -- Set layouts attributes
+    for attr, val in pairs(attributes) do
+        if l["set_"..attr] then
+            l["set_"..attr](l, val)
+        elseif type(l[attr]) == "function" then
+            l[attr](l, val)
+        else
+            l[attr] = val
+        end
     end
 
-In pseudo-code, the call sequence for the drawing callbacks during a redraw
-looks like this:
+    return l, id
+end
 
-    widget:draw(context, cr, width, height)
-    widget:before_draw_children(context, cr, width, height)
-    for child do
-        widget:before_draw_child(context, cr, child_index, child, width, height)
-        cr:save()
-        -- Draw child and all of its children recursively, taking into account the
-        -- position and size given to base.place_widget_at() in :layout().
-        cr:restore()
-        widget:after_draw_child(context, cr, child_index, child, width, height)
+-- Only available when the declarative system is used
+local function get_children_by_id(self, name)
+    return self._by_id[name] or {}
+end
+
+--- Set a declarative widget hierarchy description.
+-- See [The declarative layout system](../documentation/03-declarative-layout.md.html)
+-- @param args An array containing the widgets disposition
+function base.widget:setup(args)
+    local f,ids = self.set_widget or self.add or self.set_first,{}
+    local w, id = drill(ids, args)
+    f(self,w)
+    if id then
+        -- Avoid being dropped by wibox metatable -> drawin
+        rawset(self, id, w)
     end
-    widget:after_draw_children(context, cr, width, height)
+    rawset(self, "_by_id", ids)
+    rawset(self, "get_children_by_id", get_children_by_id)
+end
 
-@param proxy If this is set, the returned widget will be a proxy for this
-  widget. It will be equivalent to this widget. This means it
-  looks the same on the screen.
-@tparam[opt] string widget_name Name of the widget.  If not set, it will be
-  set automatically via `gears.object.modulename`.
-@see fit_widget
---]]--
+--- Create an empty widget skeleton
+-- See [Creating new widgets](../documentation/04-new-widget.md.html)
+-- @param proxy If this is set, the returned widget will be a proxy for this
+--   widget. It will be equivalent to this widget. This means it
+--   looks the same on the screen.
+-- @tparam[opt] string widget_name Name of the widget.  If not set, it will be
+--   set automatically via `gears.object.modulename`.
+-- @see fit_widget
 function base.make_widget(proxy, widget_name)
     local ret = object()
 
@@ -469,6 +473,9 @@ function base.make_widget(proxy, widget_name)
 
     -- Widget is fully opaque
     ret.opacity = 1
+
+    -- Differentiate tables from widgets
+    ret.is_widget = true
 
     -- Size is not restricted/forced
     ret._forced_width = nil

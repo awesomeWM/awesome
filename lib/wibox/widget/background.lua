@@ -101,6 +101,14 @@ function background:get_children()
     return {self.widget}
 end
 
+--- Replace the layout children
+-- This layout only accept one children, all others will be ignored
+-- @tparam table children A table composed of valid widgets
+function background:set_children(children)
+    self.widget = children and children[1]
+    self:emit_signal("widget::layout_changed")
+end
+
 --- Set the background to use
 function background:set_bg(bg)
     if bg then

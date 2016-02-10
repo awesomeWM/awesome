@@ -64,6 +64,14 @@ function mirror:get_children()
     return {self.widget}
 end
 
+--- Replace the layout children
+-- This layout only accept one children, all others will be ignored
+-- @tparam table children A table composed of valid widgets
+function mirror:set_children(children)
+    self.widget = children and children[1]
+    self:emit_signal("widget::layout_changed")
+end
+
 --- Reset this layout. The widget will be removed and the axes reset.
 function mirror:reset()
     self.horizontal = false

@@ -171,6 +171,17 @@ function align:get_children()
     return util.from_sparse {self.first, self.second, self.third}
 end
 
+--- Replace the layout children
+-- This layout only accept three children, all others will be ignored
+-- @tparam table children A table composed of valid widgets
+function align:set_children(children)
+    if not children then return self:reset() end
+    self.first  = children[1]
+    self.second = children[2]
+    self.third  = children[3]
+    self:emit_signal("widget::layout_changed")
+end
+
 --- Fit the align layout into the given space. The align layout will
 -- ask for the sum of the sizes of its sub-widgets in its direction
 -- and the largest sized sub widget in the other direction.
@@ -242,6 +253,9 @@ local function get_layout(dir, first, second, third)
     ret:set_first(first)
     ret:set_second(second)
     ret:set_third(third)
+
+    -- An align layout allow set_children to have empty entries
+    ret.allow_empty_widget = true
 
     return ret
 end

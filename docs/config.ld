@@ -19,6 +19,8 @@ topics={
     '00-authors.md',
     '01-readme.md',
     '02-contributing.md',
+    '03-declarative-layout.md',
+    '04-new-widgets.md',
 }
 
 -- Setup @client to be an alias for "@tparam client.object"
