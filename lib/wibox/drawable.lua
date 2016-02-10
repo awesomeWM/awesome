@@ -22,6 +22,7 @@ local timer = require("gears.timer")
 local matrix = require("gears.matrix")
 local hierarchy = require("wibox.hierarchy")
 local base = require("wibox.widget.base")
+local unpack = unpack or table.unpack
 
 local drawables = setmetatable({}, { __mode = 'k' })
 local wallpaper = nil
@@ -70,18 +71,19 @@ local function do_redraw(self)
     local cr = cairo.Context(surf)
     local geom = self.drawable:geometry();
     local x, y, width, height = geom.x, geom.y, geom.width, geom.height
+    local context = get_widget_context(self)
 
     -- Relayout
     if self._need_relayout or self._need_complete_repaint then
         self._need_relayout = false
         if self._widget_hierarchy and self.widget then
-            self._widget_hierarchy:update(get_widget_context(self),
+            self._widget_hierarchy:update(context,
                 self.widget, width, height, self._dirty_area)
         else
             self._need_complete_repaint = true
             if self.widget then
                 self._widget_hierarchy_callback_arg = {}
-                self._widget_hierarchy = hierarchy.new(get_widget_context(self), self.widget, width, height,
+                self._widget_hierarchy = hierarchy.new(context, self.widget, width, height,
                         self._redraw_callback, self._layout_callback, self._widget_hierarchy_callback_arg)
             else
                 self._widget_hierarchy = nil
@@ -128,12 +130,24 @@ local function do_redraw(self)
 
     cr:set_source(self.background_color)
     cr:paint()
+
+    -- Paint the background image
+    if self.background_image then
+        if type(self.background_image) == "function" then
+            self.background_image(context, cr, width, height, unpack(self.background_image_args))
+        else
+            local pattern = cairo.Pattern.create_for_surface(self.background_image)
+            cr:set_source(pattern)
+            cr:paint()
+        end
+    end
+
     cr:restore()
 
     -- Draw the widget
     if self._widget_hierarchy then
         cr:set_source(self.foreground_color)
-        self._widget_hierarchy:draw(get_widget_context(self), cr)
+        self._widget_hierarchy:draw(context, cr)
     end
 
     self.drawable:refresh()
@@ -199,7 +213,9 @@ end
 --   nil or a string that gears.color() understands.
 function drawable:set_bg(c)
     local c = c or "#000000"
-    if type(c) == "string" or type(c) == "table" then
+    local t = type(c)
+
+    if t == "string" or t == "table" then
         c = color(c)
     end
 
@@ -221,6 +237,18 @@ function drawable:set_bg(c)
     end
 
     self.background_color = c
+    self._do_complete_repaint()
+end
+
+--- Set the background image of the drawable
+-- If `image` is a function, it will be called with `(context, cr, width, height)`
+-- as arguments. Any other arguments passed to this method will be appended.
+-- @param image A background image or a function
+function drawable:set_bgimage(image, ...)
+
+    self.background_image = image
+    self.background_image_args = {...}
+
     self._do_complete_repaint()
 end
 

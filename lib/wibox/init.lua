@@ -51,6 +51,14 @@ function wibox:set_bg(c)
     self._drawable:set_bg(c)
 end
 
+--- Set the background image of the drawable
+-- If `image` is a function, it will be called with `(context, cr, width, height)`
+-- as arguments. Any other arguments passed to this method will be appended.
+-- @param image A background image or a function
+function wibox:set_bgimage(image, ...)
+    self._drawable:set_bgimage(image, ...)
+end
+
 --- Set the foreground of the wibox
 -- @param c The foreground to use. This must either be a cairo pattern object,
 --   nil or a string that gears.color() understands.

@@ -43,9 +43,13 @@ function background:draw(context, cr, width, height)
         cr:paint()
     end
     if self.bgimage then
-        local pattern = cairo.Pattern.create_for_surface(self.bgimage)
-        cr:set_source(pattern)
-        cr:paint()
+        if type(self.bgimage) == "function" then
+            self.bgimage(context, cr, width, height,unpack(self.bgimage_args))
+        else
+            local pattern = cairo.Pattern.create_for_surface(self.bgimage)
+            cr:set_source(pattern)
+            cr:paint()
+        end
     end
 
 end
@@ -153,8 +157,12 @@ function background:set_shape_border_color(fg)
 end
 
 --- Set the background image to use
-function background:set_bgimage(image)
-    self.bgimage = surface.load(image)
+-- If `image` is a function, it will be called with `(context, cr, width, height)`
+-- as arguments. Any other arguments passed to this method will be appended.
+-- @param image A background image or a function
+function background:set_bgimage(image, ...)
+    self.bgimage = type(image) == "function" and image or surface.load(image)
+    self.bgimage_args = {...}
     self:emit_signal("widget::redraw_needed")
 end
 
