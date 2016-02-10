@@ -129,11 +129,6 @@ local function add_hotkey(key, data, target)
         table.insert(readable_mods, widget.labels[mod] or mod)
     end
     local joined_mods = join_plus_sort(readable_mods)
-    if joined_mods == "none" then
-        joined_mods = ""
-    else
-        joined_mods = markup.fg(widget.modifiers_color, joined_mods.."+")
-    end
 
     local group = data.group or "none"
     group_list[group] = true
@@ -262,7 +257,13 @@ local function create_wibox(s, available_groups)
             local max_label_content = ""
             local joined_labels = ""
             for i, key in ipairs(_keys) do
-                local hotkey = (key.mod or '')..(key.key or '')
+                local modifiers = key.mod
+                if not modifiers or modifiers == "none" then
+                    modifiers = ""
+                else
+                    modifiers = markup.fg(widget.modifiers_color, modifiers.."+")
+                end
+                local hotkey = modifiers .. (key.key or '')
                 local length = string.len(hotkey) + string.len(key.description)
                 local rendered_hotkey = markup.font(widget.title_font, hotkey.." ") ..
                     (markup.font(widget.description_font, key.description) or "")
