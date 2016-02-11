@@ -34,10 +34,12 @@ set(AWE_DOC_FILES
     ${AWE_DOC_DIR}/02-contributing.md
     ${SOURCE_DIR}/LICENSE)
 
-set(AWE_DOC_IMAGES
-    ${AWE_DOC_DIR}/images/widgetlayout1.png
-    ${AWE_DOC_DIR}/images/widgetlayout2.png
-)
+if (GENERATE_DOC)
+   set(AWE_DOC_IMAGES
+        ${AWE_DOC_DIR}/images/widgetlayout1.png
+        ${AWE_DOC_DIR}/images/widgetlayout2.png
+    )
+endif()
 
 set(AWE_SRCS
     ${BUILD_DIR}/awesome.c
