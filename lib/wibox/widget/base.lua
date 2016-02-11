@@ -437,6 +437,31 @@ function base.widget:setup(args)
     rawset(self, "get_children_by_id", get_children_by_id)
 end
 
+--- Create a widget from a declarative description
+-- See [The declarative layout system](../documentation/03-declarative-layout.md.html)
+-- @param args An array containing the widgets disposition
+function base.make_widget_declarative(args)
+    local ids = {}
+
+    if (not args.layout) and (not args.widget) then
+        args.widget = base.make_widget(nil, args.id)
+    end
+
+    local w, id = drill(ids, args)
+
+    local mt = {}
+    local orig_string = tostring(ret)
+
+    rawset(w, "_by_id", ids)
+    rawset(w, "get_children_by_id", get_children_by_id)
+
+    mt.__tostring = function(o)
+        return string.format("%s (%s)", id, orig_string)
+    end
+
+    return setmetatable(w, mt)
+end
+
 --- Create an empty widget skeleton
 -- See [Creating new widgets](../documentation/04-new-widget.md.html)
 -- @param proxy If this is set, the returned widget will be a proxy for this
