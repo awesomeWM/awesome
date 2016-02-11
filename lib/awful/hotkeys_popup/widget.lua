@@ -245,7 +245,7 @@ local function create_wibox(s, available_groups)
                 table.insert(((i<available_height_items) and new_keys or overlap_leftovers), keys[i])
             end
             keys = new_keys
-            table.insert(keys, {hotkey=markup.fg(widget.modifiers_color, "▽"), description=""})
+            table.insert(keys, {key=markup.fg(widget.modifiers_color, "▽"), description=""})
         end
         if not current_column then
             current_column = {layout=wibox.layout.fixed.vertical()}
