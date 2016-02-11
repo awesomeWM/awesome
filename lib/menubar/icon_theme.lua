@@ -21,21 +21,6 @@ local setmetatable = setmetatable
 local string = string
 local table = table
 local math = math
-local io = io
-
--- Returns a table whose element is a path used for icon lookup.
--- The names of the directories and the order of them are based on the spec.
-local get_default_base_directories = function()
-    local dirs = {}
-
-    table.insert(dirs, GLib.get_home_dir() .. "/.icons")
-    for _, dir in ipairs(GLib.get_system_data_dirs()) do
-        table.insert(dirs, dir .. "/icons")
-    end
-    table.insert(dirs, "/usr/share/pixmaps")
-
-    return dirs
-end
 
 local get_pragmatic_base_directories = function()
     local dirs = {}
@@ -98,8 +83,8 @@ local index_theme_cache = {}
 -- @tparam table base_directories Paths used for lookup
 -- @treturn table An instance of the class `icon_theme`
 icon_theme.new = function(icon_theme_name, base_directories)
-    local icon_theme_name = icon_theme_name or beautiful.icon_theme or get_default_icon_theme_name()
-    local base_directories = base_directories or get_pragmatic_base_directories()
+    icon_theme_name = icon_theme_name or beautiful.icon_theme or get_default_icon_theme_name()
+    base_directories = base_directories or get_pragmatic_base_directories()
 
     local self = {}
     self.icon_theme_name = icon_theme_name
@@ -238,10 +223,10 @@ end
 -- @tparam number icon_size Prefereable icon size
 -- @treturn string Absolute path to the icon file, or nil if not found
 function icon_theme:find_icon_path(icon_name, icon_size)
+    icon_size = icon_size or 16
     if not icon_name or icon_name == "" then
         return nil
     end
-    local icon_size = icon_size or 16
 
     local filename = find_icon_path_helper(self, icon_name, icon_size)
     if filename then

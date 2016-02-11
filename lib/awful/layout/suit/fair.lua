@@ -24,7 +24,7 @@ local function do_fair(p, orientation)
     end
 
     if #cls > 0 then
-        local rows, cols = 0, 0
+        local rows, cols
         if #cls == 2 then
             rows, cols = 1, 2
         else
@@ -36,11 +36,11 @@ local function do_fair(p, orientation)
             k = k - 1
             local g = {}
 
-            local row, col = 0, 0
+            local row, col
             row = k % rows
             col = math.floor(k / rows)
 
-            local lrows, lcols = 0, 0
+            local lrows, lcols
             if k >= rows * cols - rows then
                 lrows = #cls - (rows * cols - rows)
                 lcols = cols

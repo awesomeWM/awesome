@@ -4,7 +4,6 @@
 ---------------------------------------------------------------------------
 
 local object = require("gears.object")
-local cache = require("gears.cache")
 local matrix_equals = require("gears.matrix").equals
 local base = require("wibox.widget.base")
 local say = require("say")
@@ -53,11 +52,11 @@ local function widget_layout(state, arguments)
         fits = false
     else
         for i = 1, #children do
-            local child, expected = children[i], expected[i]
-            if child._widget ~= expected._widget or
-                child._width ~= expected._width or
-                child._height ~= expected._height or
-                not matrix_equals(child._matrix, expected._matrix) then
+            local child, exp = children[i], expected[i]
+            if child._widget ~= exp._widget or
+                child._width ~= exp._width or
+                child._height ~= exp._height or
+                not matrix_equals(child._matrix, exp._matrix) then
                 fits = false
                 break
             end

@@ -70,7 +70,6 @@ local function fullscreen(window, set)
     if set then
         store_geometry(window, "fullscreen")
         data[window].fullscreen.border_width = window.border_width
-        local g = screen[window.screen].geometry
         window:geometry(screen[window.screen].geometry)
         window.border_width = 0
     elseif data[window] and data[window].fullscreen then
@@ -163,7 +162,7 @@ end
 -- @tparam string context The context where this signal was used.
 -- @tparam[opt] table hints A table with additional hints:
 -- @tparam[opt=false] boolean hints.raise should the client be raised?
-function ewmh.activate(c, context, hints)
+function ewmh.activate(c, context, hints) -- luacheck: no unused args
     if c:isvisible() then
         client.focus = c
     end

@@ -10,9 +10,7 @@
 -- Grab environment we need
 local util = require("awful.util")
 local ascreen = require("awful.screen")
-local timer = require("gears.timer")
 local beautiful = require("beautiful")
-local tostring = tostring
 local pairs = pairs
 local ipairs = ipairs
 local table = table
@@ -46,7 +44,7 @@ tag.history.limit = 20
 -- @param target_tag The tag that should be moved. If null, the currently
 -- selected tag is used.
 function tag.move(new_index, target_tag)
-    local target_tag = target_tag or tag.selected()
+    target_tag = target_tag or tag.selected()
     local scr = tag.getscreen(target_tag)
     local tmp_tags = tag.gettags(scr)
 
@@ -121,7 +119,7 @@ end
 -- @param layout The layout or layout table to set for this tags by default.
 -- @return A table with all created tags.
 function tag.new(names, screen, layout)
-    local screen = screen or 1
+    screen = screen or 1
     local tags = {}
     for id, name in ipairs(names) do
         table.insert(tags, id, tag.add(name, {screen = screen,
@@ -158,7 +156,7 @@ end
 -- history or select the first tag on the screen.
 function tag.delete(target_tag, fallback_tag)
     -- abort if no tag is passed or currently selected
-    local target_tag = target_tag or tag.selected()
+    target_tag = target_tag or tag.selected()
     if target_tag == nil or target_tag.activated == false then return end
 
     local target_scr = tag.getscreen(target_tag)
@@ -167,7 +165,6 @@ function tag.delete(target_tag, fallback_tag)
     local ntags      = #tags
 
     -- We can't use the target tag as a fallback.
-    local fallback_tag = fallback_tag
     if fallback_tag == target_tag then return end
 
     -- No fallback_tag provided, try and get one.
@@ -292,7 +289,7 @@ end
 -- @return A table with all available tags
 function tag.gettags(s)
     local tags = {}
-    for i, t in ipairs(root.tags()) do
+    for _, t in ipairs(root.tags()) do
         if tag.getscreen(t) == s then
             table.insert(tags, t)
         end
@@ -315,7 +312,7 @@ function tag.setscreen(s, t)
         s, t = t, s
     end
 
-    local s = s or ascreen.focused()
+    s = s or ascreen.focused()
     local sel = tag.selected
     local old_screen = tag.getproperty(t, "screen")
     if s == old_screen then return end
@@ -327,15 +324,15 @@ function tag.setscreen(s, t)
     tag.setproperty(t, "screen", s, true)
 
     -- Make sure the client's screen matches its tags
-    for k,c in ipairs(t:clients()) do
+    for _,c in ipairs(t:clients()) do
         c.screen = s --Move all clients
         c:tags({t})
     end
 
     -- Update all indexes
     for _,screen in ipairs {old_screen, s} do
-        for i,t in ipairs(tag.gettags(screen)) do
-            tag.setproperty(t, "index", i, true)
+        for i,t2 in ipairs(tag.gettags(screen)) do
+            tag.setproperty(t2, "index", i, true)
         end
     end
 
@@ -349,7 +346,7 @@ end
 -- @param[opt] t tag object
 -- @return Screen number
 function tag.getscreen(t)
-    local t = t or tag.selected()
+    t = t or tag.selected()
     return tag.getproperty(t, "screen")
 end
 
@@ -360,7 +357,7 @@ function tag.selectedlist(s)
     local screen = s or ascreen.focused()
     local tags = tag.gettags(screen)
     local vtags = {}
-    for i, t in pairs(tags) do
+    for _, t in pairs(tags) do
         if t.selected then
             vtags[#vtags + 1] = t
         end
@@ -378,7 +375,7 @@ end
 -- @param mwfact Master width factor.
 -- @param t The tag to modify, if null tag.selected() is used.
 function tag.setmwfact(mwfact, t)
-    local t = t or tag.selected()
+    t = t or tag.selected()
     if mwfact >= 0 and mwfact <= 1 then
         tag.setproperty(t, "mwfact", mwfact, true)
     end
@@ -394,7 +391,7 @@ end
 --- Get master width factor.
 -- @param[opt] t The tag.
 function tag.getmwfact(t)
-    local t = t or tag.selected()
+    t = t or tag.selected()
     return tag.getproperty(t, "mwfact") or 0.5
 end
 
@@ -438,7 +435,7 @@ end
 -- @param useless_gap The spacing between clients
 -- @param t The tag to modify, if null tag.selected() is used.
 function tag.setgap(useless_gap, t)
-    local t = t or tag.selected()
+    t = t or tag.selected()
     if useless_gap >= 0 then
         tag.setproperty(t, "useless_gap", useless_gap, true)
     end
@@ -457,7 +454,7 @@ end
 --   return 0 for a single client.  You can override this function to change
 --   this behavior.
 function tag.getgap(t, numclients)
-    local t = t or tag.selected()
+    t = t or tag.selected()
     if numclients == 1 then
         return 0
     end
@@ -470,7 +467,7 @@ end
 -- "mwfact" (fill only an area inside the master width factor)
 -- @tparam[opt=tag.selected()] tag t The tag to modify
 function tag.setmfpol(policy, t)
-    local t = t or tag.selected()
+    t = t or tag.selected()
     tag.setproperty(t, "master_fill_policy", policy, true)
 end
 
@@ -491,7 +488,7 @@ end
 -- "expand" (fill all the available workarea, default one) or
 -- "mwfact" (fill only an area inside the master width factor)
 function tag.getmfpol(t)
-    local t = t or tag.selected()
+    t = t or tag.selected()
     return tag.getproperty(t, "master_fill_policy") or "expand"
 end
 
@@ -499,7 +496,7 @@ end
 -- @param nmaster The number of master windows.
 -- @param[opt] t The tag.
 function tag.setnmaster(nmaster, t)
-    local t = t or tag.selected()
+    t = t or tag.selected()
     if nmaster >= 0 then
         tag.setproperty(t, "nmaster", nmaster, true)
     end
@@ -508,7 +505,7 @@ end
 --- Get the number of master windows.
 -- @param[opt] t The tag.
 function tag.getnmaster(t)
-    local t = t or tag.selected()
+    t = t or tag.selected()
     return tag.getproperty(t, "nmaster") or 1
 end
 
@@ -542,14 +539,14 @@ end
 -- @param icon the icon to set, either path or image object
 -- @param _tag the tag
 function tag.seticon(icon, _tag)
-    local _tag = _tag or tag.selected()
+    _tag = _tag or tag.selected()
     tag.setproperty(_tag, "icon", icon, true)
 end
 
 --- Get the tag icon
 -- @param _tag the tag
 function tag.geticon(_tag)
-    local _tag = _tag or tag.selected()
+    _tag = _tag or tag.selected()
     return tag.getproperty(_tag, "icon")
 end
 
@@ -557,7 +554,7 @@ end
 -- @param ncol The number of column.
 -- @param t The tag to modify, if null tag.selected() is used.
 function tag.setncol(ncol, t)
-    local t = t or tag.selected()
+    t = t or tag.selected()
     if ncol >= 1 then
         tag.setproperty(t, "ncol", ncol, true)
     end
@@ -566,7 +563,7 @@ end
 --- Get number of column windows.
 -- @param[opt] t The tag.
 function tag.getncol(t)
-    local t = t or tag.selected()
+    t = t or tag.selected()
     return tag.getproperty(t, "ncol") or 1
 end
 
@@ -601,7 +598,7 @@ end
 -- @tparam[opt] int screen The screen number.
 function tag.viewnone(screen)
     local tags = tag.gettags(screen or ascreen.focused())
-    for i, t in pairs(tags) do
+    for _, t in pairs(tags) do
         t.selected = false
     end
 end
@@ -610,10 +607,10 @@ end
 -- @param i The relative index to see.
 -- @param[opt] screen The screen number.
 function tag.viewidx(i, screen)
-    local screen = screen or ascreen.focused()
+    screen = screen or ascreen.focused()
     local tags = tag.gettags(screen)
     local showntags = {}
-    for k, t in ipairs(tags) do
+    for _, t in ipairs(tags) do
         if not tag.getproperty(t, "hide") then
             table.insert(showntags, t)
         end
@@ -632,7 +629,7 @@ end
 -- @param query_tag The tag object to find. [selected()]
 -- @return The index of the tag, nil if the tag is not found.
 function tag.getidx(query_tag)
-    local query_tag = query_tag or tag.selected()
+    query_tag = query_tag or tag.selected()
     if query_tag == nil then return end
 
     for i, t in ipairs(tag.gettags(tag.getscreen(query_tag))) do
@@ -675,7 +672,7 @@ end
 -- @param tags A table with tags to view only.
 -- @param[opt] screen The screen number of the tags.
 function tag.viewmore(tags, screen)
-    local screen = screen or ascreen.focused()
+    screen = screen or ascreen.focused()
     local screen_tags = tag.gettags(screen)
     for _, _tag in ipairs(screen_tags) do
         if not util.table.hasitem(tags, _tag) then
@@ -738,7 +735,7 @@ end
 -- @param c The client to tag.
 function tag.withcurrent(c)
     local tags = {}
-    for k, t in ipairs(c:tags()) do
+    for _, t in ipairs(c:tags()) do
         if tag.getscreen(t) == c.screen then
             table.insert(tags, t)
         end
@@ -755,7 +752,7 @@ function tag.withcurrent(c)
 end
 
 local function attached_connect_signal_screen(screen, sig, func)
-    capi.tag.connect_signal(sig, function(_tag, ...)
+    capi.tag.connect_signal(sig, function(_tag)
         if tag.getscreen(_tag) == screen then
             func(_tag)
         end
@@ -792,7 +789,7 @@ capi.client.connect_signal("manage", function(c)
 end)
 
 -- Keep track of the number of urgent clients.
-local function update_urgent(c, t, modif)
+local function update_urgent(t, modif)
     local count = tag.getproperty(t, "urgent_count") or 0
     count = (count + modif) >= 0 and (count + modif) or 0
     tag.setproperty(t, "urgent"      , count > 0)
@@ -802,21 +799,21 @@ end
 -- Update the urgent counter when a client is tagged.
 local function client_tagged(c, t)
     if c.urgent then
-        update_urgent(c, t, 1)
+        update_urgent(t, 1)
     end
 end
 
 -- Update the urgent counter when a client is untagged.
 local function client_untagged(c, t)
     if c.urgent then
-        update_urgent(c, t, -1)
+        update_urgent(t, -1)
     end
 end
 
 -- Count the urgent clients.
 local function urgent_callback(c)
-    for k,t in ipairs(c:tags()) do
-        update_urgent(c, t, c.urgent and 1 or -1)
+    for _,t in ipairs(c:tags()) do
+        update_urgent(t, c.urgent and 1 or -1)
     end
 end
 

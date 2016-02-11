@@ -71,7 +71,7 @@ local properties = { "width", "height", "border_color",
                      "vertical", "value", "max_value",
                      "ticks", "ticks_gap", "ticks_size" }
 
-function progressbar.draw(pbar, context, cr, width, height)
+function progressbar.draw(pbar, _, cr, width, height)
     local ticks_gap = data[pbar].ticks_gap or 1
     local ticks_size = data[pbar].ticks_size or 4
 
@@ -161,7 +161,7 @@ end
 --- Set the progressbar value.
 -- @param value The progress bar value between 0 and 1.
 function progressbar:set_value(value)
-    local value = value or 0
+    value = value or 0
     local max_value = data[self].max_value
     data[self].value = math.min(max_value, math.max(0, value))
     self:emit_signal("widget::redraw_needed")
@@ -200,7 +200,7 @@ end
 -- key to set progressbar geometry.
 -- @return A progressbar widget.
 function progressbar.new(args)
-    local args = args or {}
+    args = args or {}
     local width = args.width or 100
     local height = args.height or 20
 

@@ -10,22 +10,13 @@
 
 -- Grab environment
 local os = os
-local print = print
-local pcall = pcall
 local pairs = pairs
 local type = type
 local dofile = dofile
 local setmetatable = setmetatable
-local util = require("awful.util")
 local lgi = require("lgi")
-local cairo = lgi.cairo
 local Pango = lgi.Pango
 local PangoCairo = lgi.PangoCairo
-local capi =
-{
-    screen = screen,
-    awesome = awesome
-}
 local gears_debug = require("gears.debug")
 
 local xresources = require("beautiful.xresources")
@@ -99,7 +90,7 @@ end
 -- @treturn lgi.Pango.FontDescription
 function beautiful.get_merged_font(name, merge)
     local font = beautiful.get_font(name)
-    local merge = Pango.FontDescription.from_string(merge)
+    merge = Pango.FontDescription.from_string(merge)
     local merged = font:copy_static()
     merged:merge(merge, true)
     return beautiful.get_font(merged:to_string())

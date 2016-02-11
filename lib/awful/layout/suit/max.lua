@@ -9,7 +9,6 @@
 
 -- Grab environment we need
 local pairs = pairs
-local client = require("awful.client")
 
 local max = {}
 
@@ -22,7 +21,7 @@ local function fmax(p, fs)
         area = p.workarea
     end
 
-    for k, c in pairs(p.clients) do
+    for _, c in pairs(p.clients) do
         local g = {
             x = area.x,
             y = area.y,

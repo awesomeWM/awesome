@@ -109,7 +109,7 @@ local function do_corner(p, orientation)
     end
 
     for i, c in ipairs(cls) do
-        local g = nil
+        local g
         -- Handle master window
         if i == 1 then
             g = {

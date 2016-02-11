@@ -5,7 +5,7 @@
 -- If you want SVGs and extras, get them from garoth.com/awesome/sky-theme
 
 -- BASICS
-theme = {}
+local theme = {}
 theme.font          = "sans 8"
 
 theme.bg_focus      = "#e2eeea"

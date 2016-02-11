@@ -7,7 +7,6 @@
 
 local capi = {awesome = awesome}
 local setmetatable = setmetatable
-local os = os
 local textbox = require("wibox.widget.textbox")
 local button = require("awful.button")
 local util = require("awful.util")
@@ -264,8 +263,7 @@ function keyboardlayout.new()
     update_layout(self);
 
     self.next_layout = function()
-        new_layout = (self._current + 1) % (#self._layout + 1)
-        self.set_layout(new_layout)
+        self.set_layout((self._current + 1) % (#self._layout + 1))
     end
 
     self.set_layout = function(group_number)

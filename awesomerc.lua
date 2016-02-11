@@ -297,7 +297,7 @@ globalkeys = awful.util.table.join(
 
     awful.key({ modkey, "Control" }, "n",
               function ()
-                  c = awful.client.restore()
+                  local c = awful.client.restore()
                   -- Focus restored client
                   if c then
                       client.focus = c

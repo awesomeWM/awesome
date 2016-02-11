@@ -213,6 +213,7 @@ function rules.execute(c, props, callbacks)
             c:geometry(geo);
         elseif property == "focus" then
             -- This will be handled below
+            (function() end)() -- I haven't found a nice way to silence luacheck here
         elseif type(c[property]) == "function" then
             c[property](c, value)
         else
@@ -222,7 +223,7 @@ function rules.execute(c, props, callbacks)
 
     -- Apply all callbacks.
     if callbacks then
-        for i, callback in pairs(callbacks) do
+        for _, callback in pairs(callbacks) do
             callback(c)
         end
     end

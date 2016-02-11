@@ -162,7 +162,7 @@ describe("gears.color", function()
 
     describe("create_opaque_pattern", function()
         -- Assertion to check if a pattern is opaque
-        local function opaque(state, arguments)
+        local function opaque(_, arguments)
             assert(arguments.n >= 1, say("assertions.argtolittle", { "opaque", 1, tostring(arguments.n) }))
             local pattern = color.create_opaque_pattern(arguments[1])
             return pattern ~= nil

@@ -32,7 +32,7 @@ function magnifier.mouse_resize_handler(c, corner, x, y)
 
     local prev_coords = {}
     capi.mousegrabber.run(function (_mouse)
-                              for k, v in ipairs(_mouse.buttons) do
+                              for _, v in ipairs(_mouse.buttons) do
                                   if v then
                                       prev_coords = { x =_mouse.x, y = _mouse.y }
                                       local dx = center_x - _mouse.x
@@ -126,13 +126,12 @@ function magnifier.arrange(p)
         -- Then move clients that are after focused client.
         -- So the next focused window will be the one at the top of the screen.
         for k = 1, fidx - 1 do
-            local g = {
+            p.geometries[cls[k]] = {
                 x = geometry.x,
                 y = geometry.y,
                 width = geometry.width,
                 height = geometry.height
             }
-            p.geometries[cls[k]] = g
             geometry.y = geometry.y + geometry.height
         end
     end

@@ -69,7 +69,7 @@ local properties = { "width", "height", "border_color", "stack",
                      "stack_colors", "color", "background_color",
                      "max_value", "scale" }
 
-function graph.draw(_graph, context, cr, width, height)
+function graph.draw(_graph, _, cr, width, height)
     local max_value = data[_graph].max_value
     local values = data[_graph].values
 
@@ -91,7 +91,7 @@ function graph.draw(_graph, context, cr, width, height)
 
         if data[_graph].scale then
             for _, v in ipairs(values) do
-                for __, sv in ipairs(v) do
+                for _, sv in ipairs(v) do
                     if sv > max_value then
                         max_value = sv
                     end
@@ -169,7 +169,7 @@ end
 local function add_value(_graph, value, group)
     if not _graph then return end
 
-    local value = value or 0
+    value = value or 0
     local values = data[_graph].values
     local max_value = data[_graph].max_value
     value = math.max(0, value)
@@ -243,7 +243,7 @@ end
 -- key to set graph geometry.
 -- @return A graph widget.
 function graph.new(args)
-    local args = args or {}
+    args = args or {}
 
     local width = args.width or 100
     local height = args.height or 20

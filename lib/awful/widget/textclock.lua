@@ -27,8 +27,8 @@ end
 -- @param timeout How often update the time. Default is 60.
 -- @return A textbox widget.
 function textclock.new(format, timeout)
-    local format = format or " %a %b %d, %H:%M "
-    local timeout = timeout or 60
+    format = format or " %a %b %d, %H:%M "
+    timeout = timeout or 60
 
     local w = textbox()
     local t

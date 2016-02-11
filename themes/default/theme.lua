@@ -2,7 +2,7 @@
 -- Default awesome theme --
 ---------------------------
 
-theme = {}
+local theme = {}
 
 theme.font          = "sans 8"
 

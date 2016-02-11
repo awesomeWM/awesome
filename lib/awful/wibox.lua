@@ -32,11 +32,11 @@ local awfulwibox = { mt = {} }
 local wiboxes = {}
 
 --- Get a wibox position if it has been set, or return top.
--- @param wibox The wibox
+-- @param wb The wibox
 -- @return The wibox position.
-function awfulwibox.get_position(wibox)
+function awfulwibox.get_position(wb)
     for _, wprop in ipairs(wiboxes) do
-        if wprop.wibox == wibox then
+        if wprop.wibox == wb then
             return wprop.position
         end
     end
@@ -44,28 +44,28 @@ function awfulwibox.get_position(wibox)
 end
 
 --- Put a wibox on a screen at this position.
--- @param wibox The wibox to attach.
+-- @param wb The wibox to attach.
 -- @param position The position: top, bottom left or right.
 -- @param screen If the wibox it not attached to a screen, specified on which
 -- screen the position should be set.
-function awfulwibox.set_position(wibox, position, screen)
+function awfulwibox.set_position(wb, position, screen)
     local area = capi.screen[screen].geometry
 
     -- The "length" of a wibox is always chosen to be the optimal size
     -- (non-floating).
     -- The "width" of a wibox is kept if it exists.
     if position == "right" then
-        wibox.x = area.x + area.width - (wibox.width + 2 * wibox.border_width)
+        wb.x = area.x + area.width - (wb.width + 2 * wb.border_width)
     elseif position == "left" then
-        wibox.x = area.x
+        wb.x = area.x
     elseif position == "bottom" then
-        wibox.y = (area.y + area.height) - (wibox.height + 2 * wibox.border_width)
+        wb.y = (area.y + area.height) - (wb.height + 2 * wb.border_width)
     elseif position == "top" then
-        wibox.y = area.y
+        wb.y = area.y
     end
 
     for _, wprop in ipairs(wiboxes) do
-        if wprop.wibox == wibox then
+        if wprop.wibox == wb then
             wprop.position = position
             break
         end
@@ -79,23 +79,23 @@ local function update_all_wiboxes_position()
     end
 end
 
-local function call_wibox_position_hook_on_prop_update(w)
+local function call_wibox_position_hook_on_prop_update()
     update_all_wiboxes_position()
 end
 
-local function wibox_update_strut(wibox)
+local function wibox_update_strut(wb)
     for _, wprop in ipairs(wiboxes) do
-        if wprop.wibox == wibox then
-            if not wibox.visible then
-                wibox:struts { left = 0, right = 0, bottom = 0, top = 0 }
+        if wprop.wibox == wb then
+            if not wb.visible then
+                wb:struts { left = 0, right = 0, bottom = 0, top = 0 }
             elseif wprop.position == "top" then
-                wibox:struts { left = 0, right = 0, bottom = 0, top = wibox.height + 2 * wibox.border_width }
+                wb:struts { left = 0, right = 0, bottom = 0, top = wb.height + 2 * wb.border_width }
             elseif wprop.position == "bottom" then
-                wibox:struts { left = 0, right = 0, bottom = wibox.height + 2 * wibox.border_width, top = 0 }
+                wb:struts { left = 0, right = 0, bottom = wb.height + 2 * wb.border_width, top = 0 }
             elseif wprop.position == "left" then
-                wibox:struts { left = wibox.width + 2 * wibox.border_width, right = 0, bottom = 0, top = 0 }
+                wb:struts { left = wb.width + 2 * wb.border_width, right = 0, bottom = 0, top = 0 }
             elseif wprop.position == "right" then
-                wibox:struts { left = 0, right = wibox.width + 2 * wibox.border_width, bottom = 0, top = 0 }
+                wb:struts { left = 0, right = wb.width + 2 * wb.border_width, bottom = 0, top = 0 }
             end
             break
         end
@@ -105,10 +105,10 @@ end
 --- Attach a wibox to a screen.
 -- If a wibox is attached, it will be automatically be moved when other wiboxes
 -- will be attached.
--- @param wibox The wibox to attach.
+-- @param wb The wibox to attach.
 -- @param position The position of the wibox: top, bottom, left or right.
 -- @param screen TODO, this seems to be unused
-function awfulwibox.attach(wibox, position, screen)
+function awfulwibox.attach(wb, position, screen)
     -- Store wibox as attached in a weak-valued table
     local wibox_prop_table
     -- Start from end since we sometimes remove items
@@ -117,7 +117,7 @@ function awfulwibox.attach(wibox, position, screen)
         -- If they did, remove their entries
         if wiboxes[i].wibox == nil then
             table.remove(wiboxes, i)
-        elseif wiboxes[i].wibox == wibox then
+        elseif wiboxes[i].wibox == wb then
             wibox_prop_table = wiboxes[i]
             -- We could break here, but well, let's check if there is no other
             -- table with their wiboxes been garbage collected.
@@ -125,81 +125,81 @@ function awfulwibox.attach(wibox, position, screen)
     end
 
     if not wibox_prop_table then
-        table.insert(wiboxes, setmetatable({ wibox = wibox, position = position, screen = screen }, { __mode = 'v' }))
+        table.insert(wiboxes, setmetatable({ wibox = wb, position = position, screen = screen }, { __mode = 'v' }))
     else
         wibox_prop_table.position = position
     end
 
-    wibox:connect_signal("property::width", wibox_update_strut)
-    wibox:connect_signal("property::height", wibox_update_strut)
-    wibox:connect_signal("property::visible", wibox_update_strut)
+    wb:connect_signal("property::width", wibox_update_strut)
+    wb:connect_signal("property::height", wibox_update_strut)
+    wb:connect_signal("property::visible", wibox_update_strut)
 
-    wibox:connect_signal("property::width", call_wibox_position_hook_on_prop_update)
-    wibox:connect_signal("property::height", call_wibox_position_hook_on_prop_update)
-    wibox:connect_signal("property::visible", call_wibox_position_hook_on_prop_update)
-    wibox:connect_signal("property::border_width", call_wibox_position_hook_on_prop_update)
+    wb:connect_signal("property::width", call_wibox_position_hook_on_prop_update)
+    wb:connect_signal("property::height", call_wibox_position_hook_on_prop_update)
+    wb:connect_signal("property::visible", call_wibox_position_hook_on_prop_update)
+    wb:connect_signal("property::border_width", call_wibox_position_hook_on_prop_update)
 end
 
 --- Align a wibox.
--- @param wibox The wibox.
+-- @param wb The wibox.
 -- @param align The alignment: left, right or center.
 -- @param screen If the wibox is not attached to any screen, you can specify the
 -- screen where to align. Otherwise 1 is assumed.
-function awfulwibox.align(wibox, align, screen)
-    local position = awfulwibox.get_position(wibox)
+function awfulwibox.align(wb, align, screen)
+    local position = awfulwibox.get_position(wb)
     local area = capi.screen[screen].workarea
 
     if position == "right" then
         if align == "right" then
-            wibox.y = area.y
+            wb.y = area.y
         elseif align == "left" then
-            wibox.y = area.y + area.height - (wibox.height + 2 * wibox.border_width)
+            wb.y = area.y + area.height - (wb.height + 2 * wb.border_width)
         elseif align == "center" then
-            wibox.y = area.y + round((area.height - wibox.height) / 2)
+            wb.y = area.y + round((area.height - wb.height) / 2)
         end
     elseif position == "left" then
         if align == "right" then
-            wibox.y = (area.y + area.height) - (wibox.height + 2 * wibox.border_width)
+            wb.y = (area.y + area.height) - (wb.height + 2 * wb.border_width)
         elseif align == "left" then
-            wibox.y = area.y
+            wb.y = area.y
         elseif align == "center" then
-            wibox.y = area.y + round((area.height - wibox.height) / 2)
+            wb.y = area.y + round((area.height - wb.height) / 2)
         end
     elseif position == "bottom" then
         if align == "right" then
-            wibox.x = area.x + area.width - (wibox.width + 2 * wibox.border_width)
+            wb.x = area.x + area.width - (wb.width + 2 * wb.border_width)
         elseif align == "left" then
-            wibox.x = area.x
+            wb.x = area.x
         elseif align == "center" then
-            wibox.x = area.x + round((area.width - wibox.width) / 2)
+            wb.x = area.x + round((area.width - wb.width) / 2)
         end
     elseif position == "top" then
         if align == "right" then
-            wibox.x = area.x + area.width - (wibox.width + 2 * wibox.border_width)
+            wb.x = area.x + area.width - (wb.width + 2 * wb.border_width)
         elseif align == "left" then
-            wibox.x = area.x
+            wb.x = area.x
         elseif align == "center" then
-            wibox.x = area.x + round((area.width - wibox.width) / 2)
+            wb.x = area.x + round((area.width - wb.width) / 2)
         end
     end
 
     -- Update struts regardless of changes
-    wibox_update_strut(wibox)
+    wibox_update_strut(wb)
 end
 
 --- Stretch a wibox so it takes all screen width or height.
--- @param wibox The wibox.
+-- @param wb The wibox.
 -- @param screen The screen to stretch on, or the wibox screen.
-function awfulwibox.stretch(wibox, screen)
+function awfulwibox.stretch(wb, screen)
     if screen then
-        local position = awfulwibox.get_position(wibox)
+        local position = awfulwibox.get_position(wb)
         local area = capi.screen[screen].workarea
         if position == "right" or position == "left" then
-            wibox.height = area.height - (2 * wibox.border_width)
-            wibox.y = area.y
+            wb.height = area.height - (2 * wb.border_width)
+            wb.y = area.y
         else
-            wibox.width = area.width - (2 * wibox.border_width)
-            wibox.x = area.x
+            wb.width = area.width - (2 * wb.border_width)
+            wb.x = area.x
         end
     end
 end
@@ -213,7 +213,7 @@ end
 -- If not specified, 1 is assumed.
 -- @return The wibox created.
 function awfulwibox.new(arg)
-    local arg = arg or {}
+    arg = arg or {}
     local position = arg.position or "top"
     local has_to_stretch = true
     local screen = arg.screen or 1

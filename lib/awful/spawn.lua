@@ -110,7 +110,7 @@ function spawn.with_line_callback(cmd, callbacks)
     local stdout_callback, stderr_callback, done_callback, exit_callback =
         callbacks.stdout, callbacks.stderr, callbacks.output_done, callbacks.exit
     local have_stdout, have_stderr = stdout_callback ~= nil, stderr_callback ~= nil
-    local pid, sn_id, stdin, stdout, stderr = capi.awesome.spawn(cmd,
+    local pid, _, stdin, stdout, stderr = capi.awesome.spawn(cmd,
             false, false, have_stdout, have_stderr, exit_callback)
     if type(pid) == "string" then
         -- Error

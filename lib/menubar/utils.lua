@@ -83,7 +83,7 @@ local function get_icon_lookup_path()
         table.insert(paths, 1, glib.get_user_data_dir())
         table.insert(paths, 1, glib.build_filenamev({glib.get_home_dir(),
                                                      '.icons'}))
-        for k,dir in ipairs(paths) do
+        for _,dir in ipairs(paths) do
             local icons_dir = glib.build_filenamev({dir, 'icons'})
             if awful_util.dir_readable(icons_dir) then
                 if icon_theme then
@@ -96,14 +96,14 @@ local function get_icon_lookup_path()
                                 glib.build_filenamev({icons_dir, 'hicolor'}))
             end
         end
-        for i, icon_theme_directory in ipairs(icon_theme_paths) do
-            for j, size in ipairs(all_icon_sizes) do
+        for _, icon_theme_directory in ipairs(icon_theme_paths) do
+            for _, size in ipairs(all_icon_sizes) do
                 add_if_readable(icon_lookup_path,
                                 glib.build_filenamev({icon_theme_directory,
                                                       size, 'apps'}))
             end
         end
-        for k,dir in ipairs(paths)do
+        for _,dir in ipairs(paths)do
             -- lowest priority fallbacks
             add_if_readable(icon_lookup_path,
                             glib.build_filenamev({dir, 'pixmaps'}))
@@ -127,7 +127,7 @@ function utils.lookup_icon_uncached(icon_file)
         -- supported, do not perform a lookup.
         return awful_util.file_readable(icon_file) and icon_file or nil
     else
-        for i, directory in ipairs(get_icon_lookup_path()) do
+        for _, directory in ipairs(get_icon_lookup_path()) do
             if is_format_supported(icon_file) and
                     awful_util.file_readable(directory .. "/" .. icon_file) then
                 return directory .. "/" .. icon_file
@@ -170,6 +170,7 @@ function utils.parse(file)
     for line in io.lines(file) do
         if line:find("^%s*#") then
             -- Skip comments.
+            (function() end)() -- I haven't found a nice way to silence luacheck here
         elseif not desktop_entry and line == "[Desktop Entry]" then
             desktop_entry = true
         else
@@ -260,7 +261,7 @@ end
 -- @treturn int Text width.
 function utils.compute_textbox_width(textbox, s)
     s = s or mouse.screen
-    local w, h = textbox:get_preferred_size(s)
+    local w, _ = textbox:get_preferred_size(s)
     return w
 end
 

@@ -9,11 +9,11 @@
 
 -- Grab environment we need
 require("awful.dbus")
-local load = loadstring or load -- v5.1 - loadstring, v5.2 - load
+local load = loadstring or load -- luacheck: globals loadstring (compatibility with Lua 5.1)
 local tostring = tostring
 local ipairs = ipairs
 local table = table
-local unpack = unpack or table.unpack -- v5.1: unpack, v5.2: table.unpack
+local unpack = unpack or table.unpack -- luacheck: globals unpack (compatibility with Lua 5.1)
 local dbus = dbus
 local type = type
 

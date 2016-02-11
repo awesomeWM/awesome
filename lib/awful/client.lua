@@ -29,7 +29,7 @@ local capi =
 local screen
 do
     screen = setmetatable({}, {
-        __index = function(t, k)
+        __index = function(_, k)
             screen = require("awful.screen")
             return screen[k]
         end,
@@ -91,7 +91,7 @@ function client.urgent.get()
     else
         -- fallback behaviour: iterate through clients and get the first urgent
         local clients = capi.client.get()
-        for k, cl in pairs(clients) do
+        for _, cl in pairs(clients) do
             if cl.urgent then
                 return cl
             end
@@ -171,21 +171,21 @@ end
 
 --- Get the latest focused client for a screen in history.
 --
--- @tparam int screen The screen number to look for.
+-- @tparam int s The screen number to look for.
 -- @tparam int idx The index: 0 will return first candidate,
 --   1 will return second, etc.
 -- @tparam function filter An optional filter.  If no client is found in the
 --   first iteration, client.focus.filter is used by default to get any
 --   client.
 -- @treturn client.object A client.
-function client.focus.history.get(screen, idx, filter)
+function client.focus.history.get(s, idx, filter)
     -- When this counter is equal to idx, we return the client
     local counter = 0
-    local vc = client.visible(screen, true)
-    for k, c in ipairs(client.data.focus) do
-        if c.screen == screen then
+    local vc = client.visible(s, true)
+    for _, c in ipairs(client.data.focus) do
+        if c.screen == s then
             if not filter or filter(c) then
-                for j, vcc in ipairs(vc) do
+                for _, vcc in ipairs(vc) do
                     if vcc == c then
                         if counter == idx then
                             return c
@@ -200,9 +200,9 @@ function client.focus.history.get(screen, idx, filter)
     end
     -- Argh nobody found in history, give the first one visible if there is one
     -- that passes the filter.
-    local filter = filter or client.focus.filter
+    filter = filter or client.focus.filter
     if counter == 0 then
-        for k, v in ipairs(vc) do
+        for _, v in ipairs(vc) do
             if filter(v) then
                 return v
             end
@@ -223,13 +223,13 @@ end
 
 --- Get visible clients from a screen.
 --
--- @tparam[opt] integer screen The screen number, or nil for all screens.
+-- @tparam[opt] integer s The screen number, or nil for all screens.
 -- @tparam[opt=false] boolean stacked Use stacking order? (top to bottom)
 -- @treturn table A table with all visible clients.
-function client.visible(screen, stacked)
-    local cls = capi.client.get(screen, stacked)
+function client.visible(s, stacked)
+    local cls = capi.client.get(s, stacked)
     local vcls = {}
-    for k, c in pairs(cls) do
+    for _, c in pairs(cls) do
         if c:isvisible() then
             table.insert(vcls, c)
         end
@@ -239,14 +239,14 @@ end
 
 --- Get visible and tiled clients
 --
--- @tparam integer screen The screen number, or nil for all screens.
+-- @tparam integer s The screen number, or nil for all screens.
 -- @tparam[opt=false] boolean stacked Use stacking order? (top to bottom)
 -- @treturn table A table with all visible and tiled clients.
-function client.tiled(screen, stacked)
-    local clients = client.visible(screen, stacked)
+function client.tiled(s, stacked)
+    local clients = client.visible(s, stacked)
     local tclients = {}
     -- Remove floating clients
-    for k, c in pairs(clients) do
+    for _, c in pairs(clients) do
         if not client.floating.get(c)
             and not c.fullscreen
             and not c.maximized_vertical
@@ -261,7 +261,7 @@ end
 -- If no client is passed, the focused client will be used.
 --
 -- @tparam int i The index.  Use 1 to get the next, -1 to get the previous.
--- @client[opt] c The client.
+-- @client[opt] sel The client.
 -- @tparam[opt=false] boolean stacked Use stacking order? (top to bottom)
 -- @return A client, or nil if no client is available.
 --
@@ -269,15 +269,15 @@ end
 -- awful.client.next(1)
 -- -- focus the previous
 -- awful.client.next(-1)
-function client.next(i, c, stacked)
+function client.next(i, sel, stacked)
     -- Get currently focused client
-    local sel = c or capi.client.focus
+    sel = sel or capi.client.focus
     if sel then
         -- Get all visible clients
         local cls = client.visible(sel.screen, stacked)
         local fcls = {}
         -- Remove all non-normal clients
-        for idx, c in ipairs(cls) do
+        for _, c in ipairs(cls) do
             if client.focus.filter(c) or c == sel then
                 table.insert(fcls, c)
             end
@@ -385,9 +385,9 @@ end
 
 --- Swap a client with another client in the given direction. Swaps across screens.
 -- @param dir The direction, can be either "up", "down", "left" or "right".
--- @client[opt] c The client.
-function client.swap.global_bydirection(dir, c)
-    local sel = c or capi.client.focus
+-- @client[opt] sel The client.
+function client.swap.global_bydirection(dir, sel)
+    sel = sel or capi.client.focus
     local scr = sel and sel.screen or screen.focused()
 
     if sel then
@@ -463,7 +463,7 @@ end
 -- @client c The window to set as master.
 function client.setmaster(c)
     local cls = util.table.reverse(capi.client.get(c.screen))
-    for k, v in pairs(cls) do
+    for _, v in pairs(cls) do
         c:swap(v)
     end
 end
@@ -472,7 +472,7 @@ end
 -- @client c The window to set as slave.
 function client.setslave(c)
     local cls = capi.client.get(c.screen)
-    for k, v in pairs(cls) do
+    for _, v in pairs(cls) do
         c:swap(v)
     end
 end
@@ -565,7 +565,7 @@ end
 function client.mark(c)
     local cl = c or capi.client.focus
     if cl then
-        for k, v in pairs(client.data.marked) do
+        for _, v in pairs(client.data.marked) do
             if cl == v then
                 return false
             end
@@ -601,7 +601,7 @@ end
 function client.ismarked(c)
     local cl = c or capi.client.focus
     if cl then
-        for k, v in pairs(client.data.marked) do
+        for _, v in pairs(client.data.marked) do
             if cl == v then
                 return true
             end
@@ -613,8 +613,7 @@ end
 --- Toggle a client as marked.
 -- @client c The client to toggle mark.
 function client.togglemarked(c)
-    local cl = c or capi.client.focus
-
+    c = c or capi.client.focus
     if not client.mark(c) then
         client.unmark(c)
     end
@@ -623,11 +622,11 @@ end
 --- Return the marked clients and empty the marked table.
 -- @return A table with all marked clients.
 function client.getmarked()
-    for k, v in pairs(client.data.marked) do
+    for _, v in pairs(client.data.marked) do
         v:emit_signal("unmarked")
     end
 
-    t = client.data.marked
+    local t = client.data.marked
     client.data.marked = {}
     return t
 end
@@ -637,7 +636,7 @@ end
 -- @client c A client.
 -- @param s True or false.
 function client.floating.set(c, s)
-    local c = c or capi.client.focus
+    c = c or capi.client.focus
     if c and client.property.get(c, "floating") ~= s then
         client.property.set(c, "floating", s)
         local scr = c.screen
@@ -655,12 +654,12 @@ local function store_floating_geometry(c)
 end
 
 -- Store the initial client geometry.
-capi.client.connect_signal("new", function(c)
+capi.client.connect_signal("new", function(cl)
     local function store_init_geometry(c)
         client.property.set(c, "floating_geometry", c:geometry())
         c:disconnect_signal("property::border_width", store_init_geometry)
     end
-    c:connect_signal("property::border_width", store_init_geometry)
+    cl:connect_signal("property::border_width", store_init_geometry)
 end)
 
 capi.client.connect_signal("property::geometry", store_floating_geometry)
@@ -668,7 +667,7 @@ capi.client.connect_signal("property::geometry", store_floating_geometry)
 --- Return if a client has a fixe size or not.
 -- @client c The client.
 function client.isfixed(c)
-    local c = c or capi.client.focus
+    c = c or capi.client.focus
     if not c then return end
     local h = c.size_hints
     if h.min_width and h.max_width
@@ -688,7 +687,7 @@ end
 -- did not set them manually. For example, windows with a type different than
 -- normal.
 function client.floating.get(c)
-    local c = c or capi.client.focus
+    c = c or capi.client.focus
     if c then
         local value = client.property.get(c, "floating")
         if value ~= nil then
@@ -708,7 +707,7 @@ end
 --- Toggle the floating state of a client between 'auto' and 'true'.
 -- @client c A client.
 function client.floating.toggle(c)
-    local c = c or capi.client.focus
+    c = c or capi.client.focus
     -- If it has been set to floating
     if client.floating.get(c) then
         client.floating.set(c, false)
@@ -730,11 +729,10 @@ function client.restore(s)
     s = s or screen.focused()
     local cls = capi.client.get(s)
     local tags = tag.selectedlist(s)
-    local mcls = {}
-    for k, c in pairs(cls) do
+    for _, c in pairs(cls) do
         local ctags = c:tags()
         if c.minimized then
-            for k, t in ipairs(tags) do
+            for _, t in ipairs(tags) do
                 if util.table.hasitem(ctags, t) then
                     c.minimized = false
                     return c
@@ -749,7 +747,7 @@ end
 -- @param set the set of numbers to normalize
 -- @param num the number of numbers to normalize
 local function normalize(set, num)
-    local num = num or #set
+    num = num or #set
     local total = 0
     if num then
         for i = 1,num do
@@ -759,7 +757,7 @@ local function normalize(set, num)
             set[i] = set[i] / total
         end
     else
-        for i,v in ipairs(set) do
+        for _,v in ipairs(set) do
             total = total + v
         end
 
@@ -777,7 +775,7 @@ end
 -- @return idx index of the client in the column
 -- @return num the number of visible clients in the column
 function client.idx(c)
-    local c = c or capi.client.focus
+    c = c or capi.client.focus
     if not c then return end
 
     -- Only check the tiled clients, the others un irrelevant
@@ -836,7 +834,7 @@ end
 -- @client c the client
 function client.setwfact(wfact, c)
     -- get the currently selected window
-    local c = c or capi.client.focus
+    c = c or capi.client.focus
     if not c or not c:isvisible() then return end
 
     local w = client.idx(c)
@@ -844,9 +842,6 @@ function client.setwfact(wfact, c)
     if not w then return end
 
     local t = tag.selected(c.screen)
-
-    local cls = client.tiled(tag.getscreen(t))
-    local nmaster = tag.getnmaster(t)
 
     -- n is the number of windows currently visible for which we have to be concerned with the properties
     local data = tag.getproperty(t, "windowfact") or {}
@@ -890,17 +885,16 @@ end
 -- @param add amount to increase the client's window
 -- @client c the client
 function client.incwfact(add, c)
-    local c = c or capi.client.focus
+    c = c or capi.client.focus
     if not c then return end
 
     local t = tag.selected(c.screen)
 
     local w = client.idx(c)
 
-    local nmaster = tag.getnmaster(t)
     local data = tag.getproperty(t, "windowfact") or {}
     local colfact = data[w.col] or {}
-    curr = colfact[w.idx] or 1
+    local curr = colfact[w.idx] or 1
     colfact[w.idx] = curr + add
 
     -- keep our ratios normalized
@@ -982,15 +976,15 @@ end
 --- Set a client property to be persistent across restarts (via X properties).
 --
 -- @param prop The property name.
--- @param type The type (used for register_xproperty).
+-- @param kind The type (used for register_xproperty).
 --   One of "string", "number" or "boolean".
-function client.property.persist(prop, type)
+function client.property.persist(prop, kind)
     local xprop = "awful.client.property." .. prop
-    capi.awesome.register_xproperty(xprop, type)
+    capi.awesome.register_xproperty(xprop, kind)
     client.data.persistent_properties_registered[prop] = true
 
     -- Make already-set properties persistent
-    for c, tab in pairs(client.data.properties) do
+    for c in pairs(client.data.properties) do
         if client.data.properties[c] and client.data.properties[c][prop] ~= nil then
             c:set_xproperty(xprop, client.data.properties[c][prop])
         end
@@ -1017,7 +1011,7 @@ end
 function client.iterate(filter, start, s)
     local clients = capi.client.get(s)
     local focused = capi.client.focus
-    local start   = start or util.table.hasitem(clients, focused)
+    start         = start or util.table.hasitem(clients, focused)
     return util.table.iterate(clients, filter, start)
 end
 
@@ -1041,13 +1035,13 @@ function client.run_or_raise(cmd, matcher, merge)
     local findex  = util.table.hasitem(clients, capi.client.focus) or 1
     local start   = util.cycle(#clients, findex + 1)
 
-    for c in client.iterate(matcher, start) do
+    local c = client.iterate(matcher, start)()
+    if c then
         client.jumpto(c, merge)
-        return
+    else
+        -- client not found, spawn it
+        spawn(cmd)
     end
-
-    -- client not found, spawn it
-    spawn(cmd)
 end
 
 --- Get a matching transient_for client (if any).
