@@ -5,7 +5,10 @@ local awful = require("awful")
 local GLib = require("lgi").GLib
 local create_wibox = require("_wibox_helper").create_wibox
 
-local not_under_travis = not os.getenv("CI")
+local BENCHMARK_EXACT = os.getenv("BENCHMARK_EXACT")
+if not BENCHMARK_EXACT then
+    print("Doing quick and inexact measurements. Set BENCHMARK_EXACT=1 as an environment variable when you actually want to look at the results.")
+end
 
 local measure, benchmark
 do
@@ -26,7 +29,7 @@ do
         local time_per_iter, time_total = measure(f, iters)
         -- To improve precision, we want to loop for this long
         local target_time = 1
-        while time_total < target_time and not_under_travis do
+        while time_total < target_time and BENCHMARK_EXACT do
             iters = math.ceil(target_time / time_per_iter)
             time_per_iter, time_total = measure(f, iters)
         end
