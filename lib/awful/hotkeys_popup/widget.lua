@@ -265,9 +265,11 @@ local function create_wibox(s, available_groups)
                     length = length + string.len(modifiers) + 1 -- +1 for "+" character
                     modifiers = markup.fg(widget.modifiers_color, modifiers.."+")
                 end
-                local hotkey = modifiers .. (key.key or '')
-                local rendered_hotkey = markup.font(widget.title_font, hotkey.." ") ..
-                    (markup.font(widget.description_font, key.description) or "")
+                local rendered_hotkey = markup.font(widget.title_font,
+                    modifiers .. (key.key or "") .. " "
+                ) .. markup.font(widget.description_font,
+                    key.description or ""
+                )
                 if length > max_label_width then
                     max_label_width = length
                     max_label_content = rendered_hotkey
