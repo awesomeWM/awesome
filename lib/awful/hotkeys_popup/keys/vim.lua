@@ -11,12 +11,12 @@ local hotkeys_popup = require("awful.hotkeys_popup.widget")
 
 local vim_rule_any = {name={"vim", "VIM"}}
 for group_name, group_data in pairs({
-    vim_motion=                 { color="#009F00", rule_any=vim_rule_any },
-    vim_command=                { color="#aFaF00", rule_any=vim_rule_any },
-    vim_command_insert=         { color="#cF4F40", rule_any=vim_rule_any },
-    vim_operator=               { color="#aF6F00", rule_any=vim_rule_any },
-    vim_find=                   { color="#65cF9F", rule_any=vim_rule_any },
-    vim_scroll=                 { color="#659FdF", rule_any=vim_rule_any },
+    ["VIM: motion"] =             { color="#009F00", rule_any=vim_rule_any },
+    ["VIM: command"] =            { color="#aFaF00", rule_any=vim_rule_any },
+    ["VIM: command (insert)"] =   { color="#cF4F40", rule_any=vim_rule_any },
+    ["VIM: operator"] =           { color="#aF6F00", rule_any=vim_rule_any },
+    ["VIM: find"] =               { color="#65cF9F", rule_any=vim_rule_any },
+    ["VIM: scroll"] =             { color="#659FdF", rule_any=vim_rule_any },
 }) do
     hotkeys_popup.group_rules[group_name] = group_data
 end
@@ -24,7 +24,7 @@ end
 
 local vim_keys = {
 
-    vim_motion={{
+    ["VIM: motion"] = {{
         modifiers = {},
         keys = {
             ['`']="goto mark",
@@ -65,7 +65,7 @@ local vim_keys = {
         }
     }},
 
-    vim_operator={{
+    ["VIM: operator"] = {{
         modifiers = {},
         keys = {
             ['=']="auto format",
@@ -78,7 +78,7 @@ local vim_keys = {
         }
     }},
 
-    vim_command={{
+    ["VIM: command"] = {{
         modifiers = {},
         keys = {
             ['~']="toggle case",
@@ -123,7 +123,7 @@ local vim_keys = {
         }
     }},
 
-    vim_command_insert={{
+    ["VIM: command (insert)"] = {{
         modifiers = {},
         keys = {
             i="insert mode",
@@ -139,7 +139,7 @@ local vim_keys = {
         }
     }},
 
-    vim_find={{
+    ["VIM: find"] = {{
         modifiers = {},
         keys = {
             [';']="repeat t/T/f/F",
@@ -157,7 +157,7 @@ local vim_keys = {
         }
     }},
 
-    vim_scroll={{
+    ["VIM: scroll"] = {{
         modifiers = {},
         keys = {
             e="scroll line up",
