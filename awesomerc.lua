@@ -10,7 +10,7 @@ local beautiful = require("beautiful")
 -- Notification library
 local naughty = require("naughty")
 local menubar = require("menubar")
-local hotkeys_popup = require("awful.hotkeys_popup.widget")
+local hotkeys_popup = require("awful.hotkeys_popup").widget
 
 -- {{{ Error handling
 -- Check if awesome encountered an error during startup and fell back to
