@@ -248,11 +248,8 @@ function titlebar.widget.button(c, name, selector, action)
 
     -- We do magic based on whether a client is focused above, so we need to
     -- connect to the corresponding signal here.
-    local function focus_func(o)
-        if o == c then update() end
-    end
-    capi.client.connect_signal("focus", focus_func)
-    capi.client.connect_signal("unfocus", focus_func)
+    c:connect_signal("focus", update)
+    c:connect_signal("unfocus", update)
 
     return ret
 end
@@ -308,6 +305,10 @@ function titlebar.widget.stickybutton(c)
     c:connect_signal("property::sticky", widget.update)
     return widget
 end
+
+client.connect_signal("unmanage", function(c)
+    all_titlebars[c] = nil
+end)
 
 return setmetatable(titlebar, { __call = function(_, ...) return new(...) end})
 
