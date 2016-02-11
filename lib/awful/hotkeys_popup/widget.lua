@@ -376,8 +376,15 @@ function widget.show_help(c, s)
     for group, _ in pairs(group_list) do
         local need_match
         for group_name, data in pairs(widget.group_rules) do
-            if group_name==group and data.rule then
-                if not c or not awful.rules.match(c, data.rule) then
+            if group_name==group and (
+                data.rule or data.rule_any or data.except or data.except_any
+            ) then
+                if not c or not awful.rules.matches(c, {
+                    rule=data.rule,
+                    rule_any=data.rule_any,
+                    except=data.except,
+                    except_any=data.except_any
+                }) then
                     need_match = true
                     break
                 end
