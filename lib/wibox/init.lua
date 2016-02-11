@@ -17,7 +17,6 @@ local table = table
 local string_format = string.format
 local color = require("gears.color")
 local object = require("gears.object")
-local sort = require("gears.sort")
 local beautiful = require("beautiful")
 local surface = require("gears.surface")
 local cairo = require("lgi").cairo

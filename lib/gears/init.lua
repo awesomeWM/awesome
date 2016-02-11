@@ -11,7 +11,6 @@ return
     color = require("gears.color");
     debug = require("gears.debug");
     object = require("gears.object");
-    sort = require("gears.sort");
     surface = require("gears.surface");
     wallpaper = require("gears.wallpaper");
     timer = require("gears.timer");
