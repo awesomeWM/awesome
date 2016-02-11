@@ -102,7 +102,7 @@ luaA_button_array_get(lua_State *L, int oidx, button_array_t *buttons)
     return 1;
 }
 
-LUA_OBJECT_EXPORT_PROPERTY(button, button_t, button, lua_pushnumber);
+LUA_OBJECT_EXPORT_PROPERTY(button, button_t, button, lua_pushinteger);
 LUA_OBJECT_EXPORT_PROPERTY(button, button_t, modifiers, luaA_pushmodifiers);
 
 static int
@@ -116,7 +116,7 @@ luaA_button_set_modifiers(lua_State *L, button_t *b)
 static int
 luaA_button_set_button(lua_State *L, button_t *b)
 {
-    b->button = luaL_checknumber(L, -1);
+    b->button = luaL_checkinteger(L, -1);
     luaA_object_emit_signal(L, -3, "property::button", 0);
     return 0;
 }

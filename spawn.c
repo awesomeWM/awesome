@@ -151,7 +151,7 @@ spawn_monitor_event(SnMonitorEvent *event, void *data)
                 lua_setfield(L, -2, "description");
             }
 
-            lua_pushnumber(L, sn_startup_sequence_get_workspace(sequence));
+            lua_pushinteger(L, sn_startup_sequence_get_workspace(sequence));
             lua_setfield(L, -2, "workspace");
 
             if((s = sn_startup_sequence_get_binary_name(sequence)))
@@ -352,11 +352,11 @@ child_exit_callback(GPid pid, gint status, gpointer user_data)
     /* 'Decode' the exit status */
     if (WIFEXITED(status)) {
         lua_pushliteral(L, "exit");
-        lua_pushnumber(L, WEXITSTATUS(status));
+        lua_pushinteger(L, WEXITSTATUS(status));
     } else {
         assert(WIFSIGNALED(status));
         lua_pushliteral(L, "signal");
-        lua_pushnumber(L, WTERMSIG(status));
+        lua_pushinteger(L, WTERMSIG(status));
     }
 
     lua_rawgeti(L, LUA_REGISTRYINDEX, exit_callback);
@@ -461,7 +461,7 @@ luaA_spawn(lua_State *L)
     }
 
     /* push pid on stack */
-    lua_pushnumber(L, pid);
+    lua_pushinteger(L, pid);
 
     /* push sn on stack */
     if (context)

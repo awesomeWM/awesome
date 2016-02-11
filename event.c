@@ -153,9 +153,9 @@ event_emit_button(lua_State *L, xcb_button_press_event_t *ev)
     }
 
     /* Push the event's info */
-    lua_pushnumber(L, ev->event_x);
-    lua_pushnumber(L, ev->event_y);
-    lua_pushnumber(L, ev->detail);
+    lua_pushinteger(L, ev->event_x);
+    lua_pushinteger(L, ev->event_y);
+    lua_pushinteger(L, ev->detail);
     luaA_pushmodifiers(L, ev->state);
     /* And emit the signal */
     luaA_object_emit_signal(L, -5, name, 4);
@@ -480,8 +480,8 @@ event_handle_motionnotify(xcb_motion_notify_event_t *ev)
     if((c = client_getbyframewin(ev->event)))
     {
         luaA_object_push(L, c);
-        lua_pushnumber(L, ev->event_x);
-        lua_pushnumber(L, ev->event_y);
+        lua_pushinteger(L, ev->event_x);
+        lua_pushinteger(L, ev->event_y);
         luaA_object_emit_signal(L, -3, "mouse::move", 2);
 
         /* now check if a titlebar was "hit" */
@@ -491,8 +491,8 @@ event_handle_motionnotify(xcb_motion_notify_event_t *ev)
         {
             luaA_object_push_item(L, -1, d);
             event_drawable_under_mouse(L, -1);
-            lua_pushnumber(L, x);
-            lua_pushnumber(L, y);
+            lua_pushinteger(L, x);
+            lua_pushinteger(L, y);
             luaA_object_emit_signal(L, -3, "mouse::move", 2);
             lua_pop(L, 1);
         }
@@ -504,8 +504,8 @@ event_handle_motionnotify(xcb_motion_notify_event_t *ev)
         luaA_object_push(L, w);
         luaA_object_push_item(L, -1, w->drawable);
         event_drawable_under_mouse(L, -1);
-        lua_pushnumber(L, ev->event_x);
-        lua_pushnumber(L, ev->event_y);
+        lua_pushinteger(L, ev->event_x);
+        lua_pushinteger(L, ev->event_y);
         luaA_object_emit_signal(L, -3, "mouse::move", 2);
         lua_pop(L, 2);
     }

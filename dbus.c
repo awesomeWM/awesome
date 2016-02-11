@@ -136,7 +136,7 @@ a_dbus_message_iter(lua_State *L, DBusMessageIter *iter)
                     switch(array_type)
                     {
                       int datalen = 0;
-#define DBUS_MSG_HANDLE_ARRAY_TYPE_NUMBER(type, dbustype) \
+#define DBUS_MSG_HANDLE_ARRAY_TYPE_NUMBER_OR_INT(type, dbustype, pusher) \
                       case dbustype: \
                         { \
                             const type *data; \
@@ -144,19 +144,19 @@ a_dbus_message_iter(lua_State *L, DBusMessageIter *iter)
                             lua_createtable(L, datalen, 0); \
                             for(int i = 0; i < datalen; i++) \
                             { \
-                                lua_pushnumber(L, data[i]); \
+                                pusher(L, data[i]); \
                                 lua_rawseti(L, -2, i + 1); \
                             } \
                         } \
                         break;
-                      DBUS_MSG_HANDLE_ARRAY_TYPE_NUMBER(int16_t, DBUS_TYPE_INT16)
-                      DBUS_MSG_HANDLE_ARRAY_TYPE_NUMBER(uint16_t, DBUS_TYPE_UINT16)
-                      DBUS_MSG_HANDLE_ARRAY_TYPE_NUMBER(int32_t, DBUS_TYPE_INT32)
-                      DBUS_MSG_HANDLE_ARRAY_TYPE_NUMBER(uint32_t, DBUS_TYPE_UINT32)
-                      DBUS_MSG_HANDLE_ARRAY_TYPE_NUMBER(int64_t, DBUS_TYPE_INT64)
-                      DBUS_MSG_HANDLE_ARRAY_TYPE_NUMBER(uint64_t, DBUS_TYPE_UINT64)
-                      DBUS_MSG_HANDLE_ARRAY_TYPE_NUMBER(double, DBUS_TYPE_DOUBLE)
-#undef DBUS_MSG_HANDLE_ARRAY_TYPE_NUMBER
+                      DBUS_MSG_HANDLE_ARRAY_TYPE_NUMBER_OR_INT(int16_t, DBUS_TYPE_INT16, lua_pushinteger)
+                      DBUS_MSG_HANDLE_ARRAY_TYPE_NUMBER_OR_INT(uint16_t, DBUS_TYPE_UINT16, lua_pushinteger)
+                      DBUS_MSG_HANDLE_ARRAY_TYPE_NUMBER_OR_INT(int32_t, DBUS_TYPE_INT32, lua_pushinteger)
+                      DBUS_MSG_HANDLE_ARRAY_TYPE_NUMBER_OR_INT(uint32_t, DBUS_TYPE_UINT32, lua_pushinteger)
+                      DBUS_MSG_HANDLE_ARRAY_TYPE_NUMBER_OR_INT(int64_t, DBUS_TYPE_INT64, lua_pushinteger)
+                      DBUS_MSG_HANDLE_ARRAY_TYPE_NUMBER_OR_INT(uint64_t, DBUS_TYPE_UINT64, lua_pushinteger)
+                      DBUS_MSG_HANDLE_ARRAY_TYPE_NUMBER_OR_INT(double, DBUS_TYPE_DOUBLE, lua_pushnumber)
+#undef DBUS_MSG_HANDLE_ARRAY_TYPE_NUMBER_OR_INT
                       case DBUS_TYPE_BYTE:
                         {
                             const char *c;
@@ -232,23 +232,23 @@ a_dbus_message_iter(lua_State *L, DBusMessageIter *iter)
             }
             nargs++;
             break;
-#define DBUS_MSG_HANDLE_TYPE_NUMBER(type, dbustype) \
+#define DBUS_MSG_HANDLE_TYPE_NUMBER_OR_INT(type, dbustype, pusher) \
           case dbustype: \
             { \
                 type ui; \
                 dbus_message_iter_get_basic(iter, &ui); \
-                lua_pushnumber(L, ui); \
+                pusher(L, ui); \
             } \
             nargs++; \
             break;
-          DBUS_MSG_HANDLE_TYPE_NUMBER(int16_t, DBUS_TYPE_INT16)
-          DBUS_MSG_HANDLE_TYPE_NUMBER(uint16_t, DBUS_TYPE_UINT16)
-          DBUS_MSG_HANDLE_TYPE_NUMBER(int32_t, DBUS_TYPE_INT32)
-          DBUS_MSG_HANDLE_TYPE_NUMBER(uint32_t, DBUS_TYPE_UINT32)
-          DBUS_MSG_HANDLE_TYPE_NUMBER(int64_t, DBUS_TYPE_INT64)
-          DBUS_MSG_HANDLE_TYPE_NUMBER(uint64_t, DBUS_TYPE_UINT64)
-          DBUS_MSG_HANDLE_TYPE_NUMBER(double, DBUS_TYPE_DOUBLE)
-#undef DBUS_MSG_HANDLE_TYPE_NUMBER
+          DBUS_MSG_HANDLE_TYPE_NUMBER_OR_INT(int16_t, DBUS_TYPE_INT16, lua_pushinteger)
+          DBUS_MSG_HANDLE_TYPE_NUMBER_OR_INT(uint16_t, DBUS_TYPE_UINT16, lua_pushinteger)
+          DBUS_MSG_HANDLE_TYPE_NUMBER_OR_INT(int32_t, DBUS_TYPE_INT32, lua_pushinteger)
+          DBUS_MSG_HANDLE_TYPE_NUMBER_OR_INT(uint32_t, DBUS_TYPE_UINT32, lua_pushinteger)
+          DBUS_MSG_HANDLE_TYPE_NUMBER_OR_INT(int64_t, DBUS_TYPE_INT64, lua_pushinteger)
+          DBUS_MSG_HANDLE_TYPE_NUMBER_OR_INT(uint64_t, DBUS_TYPE_UINT64, lua_pushinteger)
+          DBUS_MSG_HANDLE_TYPE_NUMBER_OR_INT(double, DBUS_TYPE_DOUBLE, lua_pushnumber)
+#undef DBUS_MSG_HANDLE_TYPE_NUMBER_OR_INT
           case DBUS_TYPE_STRING:
             {
                 char *s;

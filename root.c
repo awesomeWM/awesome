@@ -171,7 +171,7 @@ luaA_root_fake_input(lua_State *L)
         if(lua_type(L, 2) == LUA_TSTRING) {
             detail = _string_to_key_code(lua_tostring(L, 2)); /* keysym */
         } else {
-            detail = luaL_checknumber(L, 2); /* keycode */
+            detail = luaL_checkinteger(L, 2); /* keycode */
         }
     }
     else if(A_STREQ(stype, "key_release"))
@@ -180,25 +180,25 @@ luaA_root_fake_input(lua_State *L)
         if(lua_type(L, 2) == LUA_TSTRING) {
             detail = _string_to_key_code(lua_tostring(L, 2)); /* keysym */
         } else {
-            detail = luaL_checknumber(L, 2); /* keycode */
+            detail = luaL_checkinteger(L, 2); /* keycode */
         }
     }
     else if(A_STREQ(stype, "button_press"))
     {
         type = XCB_BUTTON_PRESS;
-        detail = luaL_checknumber(L, 2); /* button number */
+        detail = luaL_checkinteger(L, 2); /* button number */
     }
     else if(A_STREQ(stype, "button_release"))
     {
         type = XCB_BUTTON_RELEASE;
-        detail = luaL_checknumber(L, 2); /* button number */
+        detail = luaL_checkinteger(L, 2); /* button number */
     }
     else if(A_STREQ(stype, "motion_notify"))
     {
         type = XCB_MOTION_NOTIFY;
         detail = luaA_checkboolean(L, 2); /* relative to the current position or not */
-        x = luaL_checknumber(L, 3);
-        y = luaL_checknumber(L, 4);
+        x = luaL_checkinteger(L, 3);
+        y = luaL_checkinteger(L, 4);
     }
     else
         return 0;
