@@ -13,8 +13,10 @@ local vim_rule_any = {name={"vim", "VIM"}}
 for group_name, group_data in pairs({
     vim_motion=                 { color="#009F00", rule_any=vim_rule_any },
     vim_command=                { color="#aFaF00", rule_any=vim_rule_any },
-    vim_command_insert= { color="#cF4F40", rule_any=vim_rule_any },
-    vim_operator=             { color="#aF6F00", rule_any=vim_rule_any },
+    vim_command_insert=         { color="#cF4F40", rule_any=vim_rule_any },
+    vim_operator=               { color="#aF6F00", rule_any=vim_rule_any },
+    vim_find=                   { color="#65cF9F", rule_any=vim_rule_any },
+    vim_scroll=                 { color="#659FdF", rule_any=vim_rule_any },
 }) do
     hotkeys_popup.group_rules[group_name] = group_data
 end
@@ -30,45 +32,31 @@ local vim_keys = {
             ['-']="prev line",
             w="next word",
             e="end word",
-            t=". 'till",
             ['[']=". misc",
             [']']=". misc",
-            f=". find char",
-            [';']="repeat t/T/f/F",
             ["'"]=". goto mk. BOL",
             b="prev word",
-            n="next search match",
-            [',']="reverse t/T/f/F",
-            ['/']=". find",
-            ['~']="toggle case",
-            ["#"]='prev indent',
+            ["|"]='BOL/goto col',
             ["$"]='EOL',
             ["%"]='goto matching bracket',
             ["^"]='"soft" BOL',
-            ["*"]='search word under cursor',
             ["("]='sentence begin',
             [")"]='sentence end',
             ["_"]='"soft" BOL down',
             ["+"]='next line',
             W='next WORD',
             E='end WORD',
-            T=". \"back\" 'till",
             ['{']="paragraph begin",
             ['}']="paragraph end",
-            F='. "back" find char',
             G='EOF/goto line',
             H='move cursor to screen top',
             M='move cursor to screen middle',
             L='move cursor to screen bottom',
             B='prev WORD',
-            N='prev search match',
-            ['?']='. "back" find',
         }
     }, {
         modifiers = {"Ctrl"},
         keys = {
-            e="scroll line up",
-            y="scroll line down",
             u="half page up",
             d="half page down",
             b="page up",
@@ -93,15 +81,13 @@ local vim_keys = {
     vim_command={{
         modifiers = {},
         keys = {
+            ['~']="toggle case",
             q=". record macro",
             r=". replace char",
             u="undo",
             p="paste after",
             gg="go to the top of file",
             gf="open file under cursor",
-            zt="scroll cursor to the top",
-            zz="scroll cursor to the center",
-            zb="scroll cursor to the bottom",
             x="delete char",
             v="visual mode",
             m=". set mark",
@@ -117,7 +103,6 @@ local vim_keys = {
             K='help',
             [':']='ex cmd line',
             ['"']='. register spec',
-            ["|"]='BOL/goto col',
             ZZ='quit and save',
             ZQ='quit discarding changes',
             X='back-delete',
@@ -151,6 +136,35 @@ local vim_keys = {
             A='append at EOL',
             S='subst line',
             C='change to EOL',
+        }
+    }},
+
+    vim_find={{
+        modifiers = {},
+        keys = {
+            [';']="repeat t/T/f/F",
+            [',']="reverse t/T/f/F",
+            ['/']=". find",
+            ['?']='. reverse find',
+            n="next search match",
+            N='prev search match',
+            f=". find char",
+            F='. reverse find char',
+            t=". 'till char",
+            T=". reverse 'till char",
+            ["*"]='find word under cursor',
+            ["#"]='reverse find under cursor',
+        }
+    }},
+
+    vim_scroll={{
+        modifiers = {},
+        keys = {
+            e="scroll line up",
+            y="scroll line down",
+            zt="scroll cursor to the top",
+            zz="scroll cursor to the center",
+            zb="scroll cursor to the bottom",
         }
     }},
 }
