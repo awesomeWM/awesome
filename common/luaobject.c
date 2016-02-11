@@ -337,10 +337,10 @@ luaA_object_emit_signal_simple(lua_State *L)
 }
 
 int
-luaA_object_tostring(lua_State *L)
+luaA_object_tostring_idx(lua_State *L, int oud)
 {
-    lua_class_t *lua_class = luaA_class_get(L, 1);
-    lua_object_t *object = luaA_checkudata(L, 1, lua_class);
+    lua_class_t *lua_class = luaA_class_get(L, oud);
+    lua_object_t *object = luaA_checkudata(L, oud, lua_class);
     int offset = 0;
 
     for(; lua_class; lua_class = lua_class->parent)
@@ -371,6 +371,12 @@ luaA_object_tostring(lua_State *L)
     lua_concat(L, offset + 1);
 
     return 1;
+}
+
+int
+luaA_object_tostring(lua_State *L)
+{
+    return luaA_object_tostring_idx(L, 1);
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
