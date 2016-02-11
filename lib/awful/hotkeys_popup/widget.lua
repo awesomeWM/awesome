@@ -129,11 +129,6 @@ local function add_hotkey(key, data, target)
         table.insert(readable_mods, widget.labels[mod] or mod)
     end
     local joined_mods = join_plus_sort(readable_mods)
-    if joined_mods == "none" then
-        joined_mods = ""
-    else
-        joined_mods = markup.fg(widget.modifiers_color, joined_mods.."+")
-    end
 
     local group = data.group or "none"
     group_list[group] = true
@@ -250,7 +245,7 @@ local function create_wibox(s, available_groups)
                 table.insert(((i<available_height_items) and new_keys or overlap_leftovers), keys[i])
             end
             keys = new_keys
-            table.insert(keys, {hotkey=markup.fg(widget.modifiers_color, "▽"), description=""})
+            table.insert(keys, {key=markup.fg(widget.modifiers_color, "▽"), description=""})
         end
         if not current_column then
             current_column = {layout=wibox.layout.fixed.vertical()}
@@ -262,10 +257,19 @@ local function create_wibox(s, available_groups)
             local max_label_content = ""
             local joined_labels = ""
             for i, key in ipairs(_keys) do
-                local hotkey = (key.mod or '')..(key.key or '')
-                local length = string.len(hotkey) + string.len(key.description)
-                local rendered_hotkey = markup.font(widget.title_font, hotkey.." ") ..
-                    (markup.font(widget.description_font, key.description) or "")
+                local length = string.len(key.key or '') + string.len(key.description or '')
+                local modifiers = key.mod
+                if not modifiers or modifiers == "none" then
+                    modifiers = ""
+                else
+                    length = length + string.len(modifiers) + 1 -- +1 for "+" character
+                    modifiers = markup.fg(widget.modifiers_color, modifiers.."+")
+                end
+                local rendered_hotkey = markup.font(widget.title_font,
+                    modifiers .. (key.key or "") .. " "
+                ) .. markup.font(widget.description_font,
+                    key.description or ""
+                )
                 if length > max_label_width then
                     max_label_width = length
                     max_label_content = rendered_hotkey
