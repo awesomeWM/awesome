@@ -169,9 +169,10 @@ for f in $tests; do
     # Tail the log and quit, when awesome quits.
     tail -n 100000 -f --pid $awesome_pid $awesome_log
 
-    if grep -q -E '^Error|assertion failed' $awesome_log; then
+    if ! grep -q -E '^Test finished successfully$' $awesome_log ||
+            grep -q -E '[Ee]rror|assertion failed' $awesome_log; then
         echo "===> ERROR running $f! <==="
-        grep --color -o --binary-files=text -E '^Error.*|.*assertion failed.*' $awesome_log
+        grep --color -o --binary-files=text -E '.*[Ee]rror.*|.*assertion failed.*' $awesome_log
         errors=$(expr $errors + 1)
     fi
 done

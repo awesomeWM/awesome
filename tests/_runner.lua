@@ -79,6 +79,9 @@ runner.run_steps = function(steps)
     for _,c in ipairs(client.get()) do
       c:kill()
     end
+    if success and result then
+        io.stderr:write("Test finished successfully\n")
+    end
     awesome.quit()
   end) end)
   t:start()
