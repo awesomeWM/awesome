@@ -11,10 +11,12 @@ local hotkeys_popup = require("awful.hotkeys_popup.widget")
 
 local vim_rule_any = {name={"vim", "VIM"}}
 for group_name, group_data in pairs({
-    vim_motion=                 { color="#009F00", rule_any=vim_rule_any },
-    vim_command=                { color="#aFaF00", rule_any=vim_rule_any },
-    vim_command_insert= { color="#cF4F40", rule_any=vim_rule_any },
-    vim_operator=             { color="#aF6F00", rule_any=vim_rule_any },
+    ["VIM: motion"] =             { color="#009F00", rule_any=vim_rule_any },
+    ["VIM: command"] =            { color="#aFaF00", rule_any=vim_rule_any },
+    ["VIM: command (insert)"] =   { color="#cF4F40", rule_any=vim_rule_any },
+    ["VIM: operator"] =           { color="#aF6F00", rule_any=vim_rule_any },
+    ["VIM: find"] =               { color="#65cF9F", rule_any=vim_rule_any },
+    ["VIM: scroll"] =             { color="#659FdF", rule_any=vim_rule_any },
 }) do
     hotkeys_popup.group_rules[group_name] = group_data
 end
@@ -22,7 +24,7 @@ end
 
 local vim_keys = {
 
-    vim_motion={{
+    ["VIM: motion"] = {{
         modifiers = {},
         keys = {
             ['`']="goto mark",
@@ -30,43 +32,40 @@ local vim_keys = {
             ['-']="prev line",
             w="next word",
             e="end word",
-            t=". 'till",
             ['[']=". misc",
             [']']=". misc",
-            f=". find char",
-            [';']="repeat t/T/f/F",
             ["'"]=". goto mk. BOL",
             b="prev word",
-            n="next word",
-            [',']="reverse t/T/f/F",
-            ['/']=". find",
-            ['~']="toggle case",
-            ["#"]='prev indent',
+            ["|"]='BOL/goto col',
             ["$"]='EOL',
-            ["%"]='goto match bracket',
+            ["%"]='goto matching bracket',
             ["^"]='"soft" BOL',
-            ["*"]='next indent',
-            ["("]='begin sentence',
-            [")"]='end sentence',
+            ["("]='sentence begin',
+            [")"]='sentence end',
             ["_"]='"soft" BOL down',
             ["+"]='next line',
             W='next WORD',
             E='end WORD',
-            T=". back 'till",
-            ['{']="begin parag.",
-            ['}']="end parag.",
-            F='. "back" find char',
+            ['{']="paragraph begin",
+            ['}']="paragraph end",
             G='EOF/goto line',
-            H='screen top',
-            L='screen bottom',
+            H='move cursor to screen top',
+            M='move cursor to screen middle',
+            L='move cursor to screen bottom',
             B='prev WORD',
-            N='prev (find)',
-            M='screen middle',
-            ['?']='. find(rev.)',
+        }
+    }, {
+        modifiers = {"Ctrl"},
+        keys = {
+            u="half page up",
+            d="half page down",
+            b="page up",
+            f="page down",
+            o="prev mark",
         }
     }},
 
-    vim_operator={{
+    ["VIM: operator"] = {{
         modifiers = {},
         keys = {
             ['=']="auto format",
@@ -79,15 +78,16 @@ local vim_keys = {
         }
     }},
 
-    vim_command={{
+    ["VIM: command"] = {{
         modifiers = {},
         keys = {
+            ['~']="toggle case",
             q=". record macro",
             r=". replace char",
             u="undo",
             p="paste after",
-            g="gg: top of file, gf: open file here",
-            z="zt: cursor to top, zb: bottom, zz: center",
+            gg="go to the top of file",
+            gf="open file under cursor",
             x="delete char",
             v="visual mode",
             m=". set mark",
@@ -97,20 +97,33 @@ local vim_keys = {
             Q='ex mode',
             Y='yank line',
             U='undo line',
-            P='paste before',
+            P='paste before cursor',
             D='delete to EOL',
             J='join lines',
             K='help',
             [':']='ex cmd line',
             ['"']='. register spec',
-            ["|"]='BOL/goto col',
-            Z='quit and ZZ:save or ZQ:not',
+            ZZ='quit and save',
+            ZQ='quit discarding changes',
             X='back-delete',
-            V='visual lines',
+            V='visual lines selection',
+        }
+    }, {
+        modifiers = {"Ctrl"},
+        keys = {
+            w=". window operations",
+            r="redo",
+            ["["]="normal mode",
+            a="increase number",
+            x="decrease number",
+            g="file/cursor info",
+            z="suspend",
+            c="cancel/normal mode",
+            v="visual block selection",
         }
     }},
 
-    vim_command_insert={{
+    ["VIM: command (insert)"] = {{
         modifiers = {},
         keys = {
             i="insert mode",
@@ -123,6 +136,35 @@ local vim_keys = {
             A='append at EOL',
             S='subst line',
             C='change to EOL',
+        }
+    }},
+
+    ["VIM: find"] = {{
+        modifiers = {},
+        keys = {
+            [';']="repeat t/T/f/F",
+            [',']="reverse t/T/f/F",
+            ['/']=". find",
+            ['?']='. reverse find',
+            n="next search match",
+            N='prev search match',
+            f=". find char",
+            F='. reverse find char',
+            t=". 'till char",
+            T=". reverse 'till char",
+            ["*"]='find word under cursor',
+            ["#"]='reverse find under cursor',
+        }
+    }},
+
+    ["VIM: scroll"] = {{
+        modifiers = {},
+        keys = {
+            e="scroll line up",
+            y="scroll line down",
+            zt="scroll cursor to the top",
+            zz="scroll cursor to the center",
+            zb="scroll cursor to the bottom",
         }
     }},
 }
