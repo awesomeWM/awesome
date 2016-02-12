@@ -25,8 +25,6 @@ local capi =
     mousegrabber = mousegrabber,
 }
 
-local finder = require("awful.mouse.finder")
-
 local mouse = {}
 
 mouse.client = {}
