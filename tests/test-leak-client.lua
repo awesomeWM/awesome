@@ -46,6 +46,7 @@ collectgarbage("stop")
 -- The first iteration starts xterm, the second keeps a weak reference to it and
 -- closes it and the last one checks that the client object is GC'able.
 local objs = nil
+local second_call = false
 local steps = {
     function(count)
         if count == 1 then
@@ -56,6 +57,10 @@ local steps = {
                 objs = setmetatable({ c }, { __mode = "v" })
                 c:kill()
             end
+        elseif not second_call then
+            -- Wait for one iteration so that gears.timer handles other delayed
+            -- calls (= the tasklist updates)
+            second_call = true
         else
             assert(#objs == 1)
 
