@@ -17,6 +17,7 @@ local beautiful = require("beautiful")
 local drawable = require("wibox.drawable")
 local imagebox = require("wibox.widget.imagebox")
 local textbox = require("wibox.widget.textbox")
+local base = require("wibox.widget.base")
 local capi = {
     client = client
 }
