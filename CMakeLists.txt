@@ -34,13 +34,6 @@ set(AWE_DOC_FILES
     ${AWE_DOC_DIR}/02-contributing.md
     ${SOURCE_DIR}/LICENSE)
 
-if (GENERATE_DOC)
-   set(AWE_DOC_IMAGES
-        ${AWE_DOC_DIR}/images/widgetlayout1.png
-        ${AWE_DOC_DIR}/images/widgetlayout2.png
-    )
-endif()
-
 set(AWE_SRCS
     ${BUILD_DIR}/awesome.c
     ${BUILD_DIR}/banning.c
@@ -267,7 +260,7 @@ if(GENERATE_DOC)
     file(GLOB_RECURSE AWE_MD_FILES ${AWE_DOC_DIR}/*.md)
 
     # Copy the images to the build directory
-    file(COPY ${SOURCE_DIR}/docs/images DESTINATION ${AWE_DOC_DIR})
+    file(COPY ${SOURCE_DIR}/docs/images DESTINATION ${BUILD_DIR}/doc)
 
     # Run ldoc and make it fail if any warnings are generated. The
     # redirection-magic swaps stdout and stderr and awk exits with a non-zero
@@ -352,7 +345,6 @@ install(DIRECTORY ${SOURCE_DIR}/themes DESTINATION ${AWESOME_DATA_PATH}
 install(DIRECTORY ${BUILD_DIR}/themes DESTINATION ${AWESOME_DATA_PATH}
     PATTERN "*.lua")
 install(FILES ${AWE_DOC_FILES}  DESTINATION ${AWESOME_DOC_PATH})
-install(FILES ${AWE_DOC_IMAGES} DESTINATION ${AWESOME_DOC_PATH}/images)
 install(FILES "awesome.desktop" DESTINATION ${AWESOME_XSESSION_PATH})
 if(GENERATE_DOC)
     install(DIRECTORY ${BUILD_DIR}/doc DESTINATION ${AWESOME_DOC_PATH})

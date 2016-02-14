@@ -75,7 +75,7 @@ Code:
 
 
 Result:
-![Example2 screenshot](../../docs/images/widgetlayout1.png)
+![Example2 screenshot](../images/widgetlayout1.png)
 
 
 ## Use an `wibox.layout.align` layout
@@ -114,7 +114,7 @@ Code:
     }
 
 Result:
-![Example4 screenshot](../../docs/images/widgetlayout2.png)
+![Example4 screenshot](../images/widgetlayout2.png)
 
 For more information about how to draw widgets, refer to the `Cairo` api:
 
