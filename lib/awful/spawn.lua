@@ -139,6 +139,58 @@ function spawn.with_line_callback(cmd, callbacks)
     return pid
 end
 
+--- Asynchronously spawn a program and capture its output.
+-- (wraps `spawn.with_line_callback`).
+-- @tparam string|table cmd The command.
+-- @tab callback Function with the following arguments
+-- @tparam string callback.stdout Output on stdout.
+-- @tparam string callback.stderr Output on stderr.
+-- @tparam string callback.exitreason Exit Reason.
+-- The reason can be "exit" or "signal".
+-- @tparam integer callback.exitcode Exit code.
+-- For "exit" reason it's the exit code.
+-- For "signal" reason — the signal causing process termination.
+-- @treturn[1] Integer the PID of the forked process.
+-- @treturn[2] string Error message.
+-- @see spawn.with_line_callback
+function spawn.easy_async(cmd, callback)
+    local stdout = ''
+    local stderr = ''
+    local exitcode, exitreason
+    local function parse_stdout(str)
+        stdout = stdout .. str .. "\n"
+    end
+    local function parse_stderr(str)
+        stderr = stderr .. str .. "\n"
+    end
+    local function done_callback()
+        return callback(stdout, stderr, exitreason, exitcode)
+    end
+    local exit_callback_fired = false
+    local output_done_callback_fired = false
+    local function exit_callback(reason, code)
+        exitcode = code
+        exitreason = reason
+        exit_callback_fired = true
+        if output_done_callback_fired then
+            return done_callback()
+        end
+    end
+    local function output_done_callback()
+        output_done_callback_fired = true
+        if exit_callback_fired then
+            return done_callback()
+        end
+    end
+    return spawn.with_line_callback(
+        cmd, {
+        stdout=parse_stdout,
+        stderr=parse_stderr,
+        exit=exit_callback,
+        output_done=output_done_callback
+    })
+end
+
 --- Read lines from a Gio input stream
 -- @tparam Gio.InputStream input_stream The input stream to read from.
 -- @tparam function line_callback Function that is called with each line
