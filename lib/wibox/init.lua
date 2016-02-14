@@ -13,13 +13,8 @@ local capi = {
 local setmetatable = setmetatable
 local pairs = pairs
 local type = type
-local table = table
-local string_format = string.format
-local color = require("gears.color")
 local object = require("gears.object")
 local beautiful = require("beautiful")
-local surface = require("gears.surface")
-local cairo = require("lgi").cairo
 local base = require("wibox.widget.base")
 
 --- This provides widget box windows. Every wibox can also be used as if it were
@@ -82,15 +77,16 @@ for _, k in pairs{ "buttons", "struts", "geometry", "get_xproperty", "set_xprope
 end
 
 local function setup_signals(_wibox)
-    local w = _wibox.drawin
-
+    local obj
     local function clone_signal(name)
         _wibox:add_signal(name)
         -- When "name" is emitted on wibox.drawin, also emit it on wibox
-        w:connect_signal(name, function(_, ...)
+        obj:connect_signal(name, function(_, ...)
             _wibox:emit_signal(name, ...)
         end)
     end
+
+    obj = _wibox.drawin
     clone_signal("property::border_color")
     clone_signal("property::border_width")
     clone_signal("property::buttons")
@@ -104,14 +100,7 @@ local function setup_signals(_wibox)
     clone_signal("property::x")
     clone_signal("property::y")
 
-    local d = _wibox._drawable
-    local function clone_signal(name)
-        _wibox:add_signal(name)
-        -- When "name" is emitted on wibox.drawin, also emit it on wibox
-        d:connect_signal(name, function(_, ...)
-            _wibox:emit_signal(name, ...)
-        end)
-    end
+    obj = _wibox._drawable
     clone_signal("button::press")
     clone_signal("button::release")
     clone_signal("mouse::enter")
@@ -146,7 +135,7 @@ local function new(args)
     -- Add __tostring method to metatable.
     local mt = {}
     local orig_string = tostring(ret)
-    mt.__tostring = function(o)
+    mt.__tostring = function()
         return string.format("wibox: %s (%s)",
                              tostring(ret._drawable), orig_string)
     end

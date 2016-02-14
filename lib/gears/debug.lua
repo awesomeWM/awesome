@@ -5,9 +5,7 @@
 -- @module gears.debug
 ---------------------------------------------------------------------------
 
-local error = error
 local tostring = tostring
-local traceback = debug.traceback
 local print = print
 local type = type
 local pairs = pairs

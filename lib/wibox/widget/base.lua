@@ -85,13 +85,13 @@ end
 -- The default implementation does nothing, this must be re-implemented by
 -- all layout and container widgets.
 -- @tparam table children A table composed of valid widgets
-function base.widget:set_children(children)
+function base.widget:set_children(children) -- luacheck: no unused
     -- Nothing on purpose
 end
 
 -- It could have been merged into `get_all_children`, but it's not necessary
 local function digg_children(ret, tlw)
-    for k, w in ipairs(tlw:get_children()) do
+    for _, w in ipairs(tlw:get_children()) do
         table.insert(ret, w)
         digg_children(ret, w)
     end
@@ -122,9 +122,9 @@ function base.widget:index(widget, recursive, ...)
         if w == widget then
             return idx, self, {...}
         elseif recursive then
-            local idx, l, path = w:index(widget, true, self, ...)
-            if idx and l then
-                return idx, l, path
+            local child_idx, l, path = w:index(widget, true, self, ...)
+            if child_idx and l then
+                return child_idx, l, path
             end
         end
     end
@@ -206,8 +206,8 @@ function base.fit_widget(parent, context, widget, width, height)
     end
 
     -- Sanitize the input. This also filters out e.g. NaN.
-    local width = math.max(0, width)
-    local height = math.max(0, height)
+    width = math.max(0, width)
+    height = math.max(0, height)
 
     local w, h = 0, 0
     if widget.fit then
@@ -250,8 +250,8 @@ function base.layout_widget(parent, context, widget, width, height)
     end
 
     -- Sanitize the input. This also filters out e.g. NaN.
-    local width = math.max(0, width)
-    local height = math.max(0, height)
+    width = math.max(0, width)
+    height = math.max(0, height)
 
     if widget.layout then
         return get_cache(widget, "layout"):get(context, width, height)
@@ -261,6 +261,7 @@ end
 -- Handle a button event on a widget. This is used internally and should not be
 -- called directly.
 function base.handle_button(event, widget, x, y, button, modifiers, geometry)
+    x = x or y -- luacheck: no unused
     local function is_any(mod)
         return #mod == 1 and mod[1] == "Any"
     end
@@ -279,7 +280,7 @@ function base.handle_button(event, widget, x, y, button, modifiers, geometry)
 
     -- Find all matching button objects
     local matches = {}
-    for k, v in pairs(widget.widget_buttons) do
+    for _, v in pairs(widget.widget_buttons) do
         local match = true
         -- Is it the right button?
         if v.button ~= 0 and v.button ~= button then match = false end
@@ -291,7 +292,7 @@ function base.handle_button(event, widget, x, y, button, modifiers, geometry)
     end
 
     -- Emit the signals
-    for k, v in pairs(matches) do
+    for _, v in pairs(matches) do
         v:emit_signal(event,geometry)
     end
 end
@@ -332,7 +333,6 @@ end
 
 -- Read the table, separate attributes from widgets
 local function parse_table(t, leave_empty)
-    local keys= {}
     local max = 0
     local attributes, widgets = {}, {}
     for k,v in pairs(t) do
@@ -450,12 +450,12 @@ function base.make_widget_declarative(args)
     local w, id = drill(ids, args)
 
     local mt = {}
-    local orig_string = tostring(ret)
+    local orig_string = tostring(w)
 
     rawset(w, "_by_id", ids)
     rawset(w, "get_children_by_id", get_children_by_id)
 
-    mt.__tostring = function(o)
+    mt.__tostring = function()
         return string.format("%s (%s)", id, orig_string)
     end
 
@@ -518,7 +518,7 @@ function base.make_widget(proxy, widget_name)
         ret.fit = function(_, context, width, height)
             return base.fit_widget(ret, context, proxy, width, height)
         end
-        ret.layout = function(_, context, width, height)
+        ret.layout = function(_, _, width, height)
             return { base.place_widget_at(proxy, 0, 0, width, height) }
         end
         proxy:connect_signal("widget::layout_changed", function()
@@ -544,7 +544,7 @@ function base.make_widget(proxy, widget_name)
     ret.widget_name = widget_name or object.modulename(3)
     local mt = {}
     local orig_string = tostring(ret)
-    mt.__tostring = function(o)
+    mt.__tostring = function()
         return string.format("%s (%s)", ret.widget_name, orig_string)
     end
     return setmetatable(ret, mt)
@@ -559,7 +559,7 @@ end
 -- widget is not a valid widget.
 function base.check_widget(widget)
     assert(type(widget) == "table")
-    for k, func in pairs({ "add_signal", "connect_signal", "disconnect_signal" }) do
+    for _, func in pairs({ "add_signal", "connect_signal", "disconnect_signal" }) do
         assert(type(widget[func]) == "function", func .. " is not a function")
     end
 end

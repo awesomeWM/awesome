@@ -48,7 +48,7 @@ function systray:draw(context, cr, width, height)
                          base, is_rotated, bg, reverse, spacing)
 end
 
-function systray:fit(context, width, height)
+function systray:fit(_, width, height)
     local num_entries = capi.awesome.systray()
     local base = base_size
     local spacing = beautiful.systray_icon_spacing or 0
@@ -76,7 +76,7 @@ local function new(revers)
     ret.draw = systray.draw
     ret.set_base_size = function(_, size) base_size = size end
     ret.set_horizontal = function(_, horiz) horizontal = horiz end
-    ret.set_reverse = function(revers) reverse = revers end
+    ret.set_reverse = function(arg) reverse = arg end
 
     if revers then
         ret:set_reverse(true)

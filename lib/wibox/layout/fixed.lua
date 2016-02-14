@@ -22,7 +22,6 @@ function fixed:layout(context, width, height)
 
     for k, v in pairs(self.widgets) do
         local x, y, w, h, _
-        local in_dir
         if self.dir == "y" then
             x, y = 0, pos
             w, h = width, height - pos
@@ -30,7 +29,6 @@ function fixed:layout(context, width, height)
                 _, h = base.fit_widget(self, context, v, w, h);
             end
             pos = pos + h + spacing
-            in_dir = h
         else
             x, y = pos, 0
             w, h = width - pos, height
@@ -38,7 +36,6 @@ function fixed:layout(context, width, height)
                 w, _ = base.fit_widget(self, context, v, w, h);
             end
             pos = pos + w + spacing
-            in_dir = w
         end
 
         if (self.dir == "y" and pos-spacing > height) or
@@ -213,7 +210,7 @@ function fixed:fit(context, orig_width, orig_height)
     local width, height = orig_width, orig_height
     local used_in_dir, used_max = 0, 0
 
-    for k, v in pairs(self.widgets) do
+    for _, v in pairs(self.widgets) do
         local w, h = base.fit_widget(self, context, v, width, height)
         local in_dir, max
         if self.dir == "y" then

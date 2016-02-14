@@ -60,6 +60,7 @@ local function make_the_gc_obey(func)
         -- Lua 5.1 only has the behaviour we want if a userdata is used as the
         -- value in a weak table. Thus, do some magic so that we get a userdata.
 
+        -- luacheck: globals newproxy getfenv setfenv
         local userdata = newproxy(true)
         getmetatable(userdata).__gc = function() end
         -- Now bind the lifetime of userdata to the lifetime of func. For this,
@@ -137,7 +138,7 @@ local function new()
     return ret
 end
 
-function object.mt:__call(...)
+function object.mt.__call(_, ...)
     return new(...)
 end
 

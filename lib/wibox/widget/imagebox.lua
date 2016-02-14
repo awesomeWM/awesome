@@ -10,14 +10,13 @@ local surface = require("gears.surface")
 local setmetatable = setmetatable
 local pairs = pairs
 local type = type
-local pcall = pcall
 local print = print
-local unpack = unpack or table.unpack
+local unpack = unpack or table.unpack -- luacheck: globals unpack (compatibility with Lua 5.1)
 
 local imagebox = { mt = {} }
 
 --- Draw an imagebox with the given cairo context in the given geometry.
-function imagebox:draw(context, cr, width, height)
+function imagebox:draw(_, cr, width, height)
     if not self._image then return end
     if width == 0 or height == 0 then return end
 
@@ -42,7 +41,7 @@ function imagebox:draw(context, cr, width, height)
 end
 
 --- Fit the imagebox into the given geometry
-function imagebox:fit(context, width, height)
+function imagebox:fit(_, width, height)
     if not self._image then
         return 0, 0
     end
@@ -81,8 +80,6 @@ end
 --   interpreted as the path to a png image file.
 -- @return true on success, false if the image cannot be used
 function imagebox:set_image(image)
-    local image = image
-
     if type(image) == "string" then
         image = surface.load(image)
         if not image then

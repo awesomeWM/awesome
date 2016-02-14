@@ -58,9 +58,9 @@ function wallpaper.prepare_context(s)
 
         -- Set the wallpaper (delayed)
         timer.delayed_call(function()
-            local wp = pending_wallpaper
+            local paper = pending_wallpaper
             pending_wallpaper = nil
-            wallpaper.set(wp)
+            wallpaper.set(paper)
         end)
     else
         -- Draw to the already-pending wallpaper
@@ -99,8 +99,8 @@ end
 --   gears.color. The default is black.
 function wallpaper.centered(surf, s, background)
     local geom, cr = wallpaper.prepare_context(s)
-    local surf = surface(surf)
-    local background = color(background)
+    surf = surface(surf)
+    background = color(background)
 
     -- Fill the area with the background
     cr.operator = cairo.Operator.SOURCE
@@ -122,7 +122,7 @@ end
 --   all screens are set.
 -- @param offset This can be set to a table with entries x and y.
 function wallpaper.tiled(surf, s, offset)
-    local geom, cr = wallpaper.prepare_context(s)
+    local _, cr = wallpaper.prepare_context(s)
 
     if offset then
         cr:translate(offset.x, offset.y)
@@ -144,7 +144,7 @@ end
 -- @param offset This can be set to a table with entries x and y.
 function wallpaper.maximized(surf, s, ignore_aspect, offset)
     local geom, cr = wallpaper.prepare_context(s)
-    local surf = surface(surf)
+    surf = surface(surf)
     local w, h = surface.get_size(surf)
     local aspect_w = geom.width / w
     local aspect_h = geom.height / h
@@ -176,8 +176,8 @@ end
 --   gears.color. The default is black.
 function wallpaper.fit(surf, s, background)
     local geom, cr = wallpaper.prepare_context(s)
-    local surf = surface(surf)
-    local background = color(background)
+    surf = surface(surf)
+    background = color(background)
 
     -- Fill the area with the background
     cr.operator = cairo.Operator.SOURCE

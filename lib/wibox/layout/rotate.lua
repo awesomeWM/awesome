@@ -25,7 +25,7 @@ local function transform(layout, width, height)
 end
 
 --- Layout this layout
-function rotate:layout(context, width, height)
+function rotate:layout(_, width, height)
     if not self.widget or not self.widget.visible then
         return
     end

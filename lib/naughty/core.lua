@@ -12,7 +12,6 @@ local pairs = pairs
 local table = table
 local type = type
 local string = string
-local tostring = tostring
 local pcall = pcall
 local capi = { screen = screen,
                awesome = awesome }
@@ -25,11 +24,6 @@ local wibox = require("wibox")
 local surface = require("gears.surface")
 local cairo = require("lgi").cairo
 local dpi = require("beautiful").xresources.apply_dpi
-
-local schar = string.char
-local sbyte = string.byte
-local tcat = table.concat
-local tins = table.insert
 
 local naughty = {}
 
@@ -169,7 +163,7 @@ end
 --- Resume notifications
 function naughty.resume()
     suspended = false
-    for i, v in pairs(naughty.notifications.suspended) do
+    for _, v in pairs(naughty.notifications.suspended) do
         v.box.visible = true
         if v.timer then v.timer:start() end
     end
@@ -187,18 +181,18 @@ end
 
 --- Evaluate desired position of the notification by index - internal
 --
--- @param screen Screen to use
+-- @param s Screen to use
 -- @param position top_right | top_left | bottom_right | bottom_left
 --   | top_middle | bottom_middle
 -- @param idx Index of the notification
 -- @param[opt] width Popup width.
 -- @param height Popup height
 -- @return Absolute position and index in { x = X, y = Y, idx = I } table
-local function get_offset(screen, position, idx, width, height)
-    local ws = capi.screen[screen].workarea
+local function get_offset(s, position, idx, width, height)
+    local ws = capi.screen[s].workarea
     local v = {}
-    local idx = idx or #naughty.notifications[screen][position] + 1
-    local width = width or naughty.notifications[screen][position][idx].width
+    idx = idx or #naughty.notifications[s][position] + 1
+    width = width or naughty.notifications[s][position][idx].width
 
     -- calculate x
     if position:match("left") then
@@ -212,7 +206,7 @@ local function get_offset(screen, position, idx, width, height)
     -- calculate existing popups' height
     local existing = 0
     for i = 1, idx-1, 1 do
-        existing = existing + naughty.notifications[screen][position][i].height + naughty.config.spacing
+        existing = existing + naughty.notifications[s][position][i].height + naughty.config.spacing
     end
 
     -- calculate y
@@ -227,20 +221,20 @@ local function get_offset(screen, position, idx, width, height)
     -- e.g. critical ones.
     local find_old_to_replace = function()
         for i = 1, idx-1 do
-            local n = naughty.notifications[screen][position][i]
+            local n = naughty.notifications[s][position][i]
             if n.timeout > 0 then
                 return n
             end
         end
         -- Fallback to first one.
-        return naughty.notifications[screen][position][1]
+        return naughty.notifications[s][position][1]
     end
 
     -- if positioned outside workarea, destroy oldest popup and recalculate
     if v.y + height > ws.y + ws.height or v.y < ws.y then
         naughty.destroy(find_old_to_replace())
         idx = idx - 1
-        v = get_offset(screen, position, idx, width, height)
+        v = get_offset(s, position, idx, width, height)
     end
     if not v.idx then v.idx = idx end
 
@@ -250,10 +244,10 @@ end
 --- Re-arrange notifications according to their position and index - internal
 --
 -- @return None
-local function arrange(screen)
-    for p,pos in pairs(naughty.notifications[screen]) do
-        for i,notification in pairs(naughty.notifications[screen][p]) do
-            local offset = get_offset(screen, p, i, notification.width, notification.height)
+local function arrange(s)
+    for p in pairs(naughty.notifications[s]) do
+        for i,notification in pairs(naughty.notifications[s][p]) do
+            local offset = get_offset(s, p, i, notification.width, notification.height)
             notification.box:geometry({ x = offset.x, y = offset.y })
             notification.idx = offset.idx
         end
@@ -296,8 +290,8 @@ end
 function naughty.getById(id)
     -- iterate the notifications to get the notfications with the correct ID
     for s = 1, capi.screen.count() do
-        for p,pos in pairs(naughty.notifications[s]) do
-            for i,notification in pairs(naughty.notifications[s][p]) do
+        for p in pairs(naughty.notifications[s]) do
+            for _, notification in pairs(naughty.notifications[s][p]) do
                 if notification.id == id then
                     return notification
                  end
@@ -437,7 +431,7 @@ function naughty.notify(args)
     local icon_size = args.icon_size or preset.icon_size
     local text = args.text or preset.text
     local title = args.title or preset.title
-    local screen = args.screen or preset.screen or screen.focused()
+    local s = args.screen or preset.screen or screen.focused()
     local ontop = args.ontop or preset.ontop
     local width = args.width or preset.width
     local height = args.height or preset.height
@@ -455,7 +449,7 @@ function naughty.notify(args)
     local fg = args.fg or preset.fg or beautiful.fg_normal or '#ffffff'
     local bg = args.bg or preset.bg or beautiful.bg_normal or '#535d6c'
     local border_color = args.border_color or preset.border_color or beautiful.bg_focus or '#535d6c'
-    local notification = { screen = screen, destroy_cb = destroy_cb, timeout = timeout }
+    local notification = { screen = s, destroy_cb = destroy_cb, timeout = timeout }
 
     -- replace notification if needed
     if args.replaces_id then
@@ -530,8 +524,8 @@ function naughty.notify(args)
             actiontextbox:set_markup(string.format('<b>%s</b>', action))
             -- calculate the height and width
             local w, h = actiontextbox:get_preferred_size(s)
-            local height = h + 2 * margin
-            local width = w + 2 * margin
+            local action_height = h + 2 * margin
+            local action_width = w + 2 * margin
 
             actionmarginbox:buttons(util.table.join(
                 button({ }, 1, callback),
@@ -539,9 +533,9 @@ function naughty.notify(args)
                 ))
             actionslayout:add(actionmarginbox)
 
-            actions_total_height = actions_total_height + height
-            if actions_max_width < width then
-                actions_max_width = width
+            actions_total_height = actions_total_height + action_height
+            if actions_max_width < action_width then
+                actions_max_width = action_width
             end
         end
     end
@@ -561,7 +555,7 @@ function naughty.notify(args)
         end
 
         -- is the icon file readable?
-        local icon = surface.load_uncached(icon)
+        icon = surface.load_uncached(icon)
 
         -- if we have an icon, use it
         if icon then
@@ -593,7 +587,7 @@ function naughty.notify(args)
 
     -- calculate the width
     if not width then
-        local w, h = textbox:get_preferred_size(s)
+        local w, _ = textbox:get_preferred_size(s)
         width = w + (iconbox and icon_w + 2 * margin or 0) + 2 * margin
     end
 
@@ -615,7 +609,7 @@ function naughty.notify(args)
     height = height + actions_total_height
 
     -- crop to workarea size if too big
-    local workarea = capi.screen[screen].workarea
+    local workarea = capi.screen[s].workarea
     if width > workarea.width - 2 * (border_width or 0) - 2 * (naughty.config.padding or 0) then
         width = workarea.width - 2 * (border_width or 0) - 2 * (naughty.config.padding or 0)
     end
@@ -628,7 +622,7 @@ function naughty.notify(args)
     notification.width = width + 2 * (border_width or 0)
 
     -- position the wibox
-    local offset = get_offset(screen, notification.position, nil, notification.width, notification.height)
+    local offset = get_offset(s, notification.position, nil, notification.width, notification.height)
     notification.box.ontop = ontop
     notification.box:geometry({ width = width,
                                 height = height,
@@ -657,7 +651,7 @@ function naughty.notify(args)
                                     end)))
 
     -- insert the notification to the table
-    table.insert(naughty.notifications[screen][notification.position], notification)
+    table.insert(naughty.notifications[s][notification.position], notification)
 
     if suspended then
         notification.box.visible = false

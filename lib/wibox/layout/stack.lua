@@ -18,7 +18,6 @@ local base  = require("wibox.widget.base" )
 local fixed = require("wibox.layout.fixed")
 local table = table
 local pairs = pairs
-local floor = math.floor
 local util  = require("awful.util")
 
 local stack = {mt={}}
@@ -97,15 +96,11 @@ local stack = {mt={}}
 -- @name set_spacing
 -- @class function
 
---- Layout a stack layout. Each widget get drawn on top of each other
--- @param context The context in which we are drawn.
--- @param width The available width.
--- @param height The available height.
-function stack:layout(context, width, height)
+function stack:layout(_, width, height)
     local result = {}
     local spacing = self._spacing
 
-    for k, v in pairs(self.widgets) do
+    for _, v in pairs(self.widgets) do
         table.insert(result, base.place_widget_at(v, spacing, spacing, width - 2*spacing, height - 2*spacing))
         if self._top_only then break end
     end
@@ -113,15 +108,11 @@ function stack:layout(context, width, height)
     return result
 end
 
---- Fit the stack layout into the given space
--- @param context The context in which we are fit.
--- @param orig_width The available width.
--- @param orig_height The available height.
 function stack:fit(context, orig_width, orig_height)
     local max_w, max_h = 0,0
     local spacing = self._spacing
 
-    for k, v in pairs(self.widgets) do
+    for _, v in pairs(self.widgets) do
         local w, h = base.fit_widget(self, context, v, orig_width, orig_height)
         max_w, max_h = math.max(max_w, w+2*spacing), math.max(max_h, h+2*spacing)
     end
