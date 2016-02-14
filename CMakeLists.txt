@@ -368,6 +368,14 @@ if(BUSTED_EXECUTABLE)
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
         COMMENT "Running unit tests"
         VERBATIM)
+    add_custom_target(check-coverage
+        "BUILD_DIRECTORY=${CMAKE_BINARY_DIR}/"
+        ${BUSTED_EXECUTABLE} "--helper=${CMAKE_SOURCE_DIR}/spec/preload.lua"
+        "--lpath=${CMAKE_BINARY_DIR}/lib/?.lua;${CMAKE_BINARY_DIR}/lib/?/init.lua;spec/?.lua"
+        "--coverage"
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        COMMENT "Running unit tests under LuaCov"
+        VERBATIM)
 endif()
 add_custom_target(check-integration
     "${CMAKE_SOURCE_DIR}/tests/run.sh"

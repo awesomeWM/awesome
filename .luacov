@@ -1,0 +1,30 @@
+-- Configuration file for LuaCov
+
+-- This variable is set externally
+local build = os.getenv("BUILD_DIRECTORY") or error("$BUILD_DIRECTORY not set")
+local lib_dir = build .. "lib/"
+
+local function escape_pattern(str)
+    return string.gsub(str, "%W", "%%%1")
+end
+
+return {
+    statsfile = build .. "luacov.stats.out",
+
+    include = {
+        escape_pattern(lib_dir) .. ".+",
+
+        -- For things already having the correct path
+        -- (happens with integration tests)
+        "^lib/",
+    },
+
+    -- configuration for luacov-coveralls reporter
+    coveralls = {
+        pathcorrect = {
+            { escape_pattern(lib_dir), "lib/"},
+        },
+    },
+}
+
+-- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
