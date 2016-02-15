@@ -69,7 +69,7 @@ local steps = {
   -- Step 3: tag 2 should not be urgent, but switched to.
   function(count)
     if count == 1 then  -- Setup.
-      local urgent_cb_done = false
+      urgent_cb_done = false
 
       -- Select first tag.
       awful.tag.viewonly(tags[1][1])
@@ -80,7 +80,7 @@ local steps = {
       awful.spawn("xterm")
 
     elseif awful.tag.selectedlist()[1] == tags[1][2] then
-      assert(urgent_cb_done)
+      assert(not urgent_cb_done)
       assert(awful.tag.getproperty(tags[1][2], "urgent") == false)
       assert(awful.tag.getproperty(tags[1][2], "urgent_count") == 0)
       assert(awful.tag.selectedlist()[2] == nil)
