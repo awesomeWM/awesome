@@ -502,7 +502,7 @@ function prompt.run(args, textbox, exe_callback, completion_callback, history_pa
                     wstart = wend + 1
                 end
                 command = command:sub(1, cword_start_pos - 1) .. command:sub(cword_end_pos + 1)
-                cur_pos = cword_start
+                cur_pos = cword_start_pos
             elseif key == "Delete" then
                 -- delete from history only if:
                 --  we are not dealing with a new command
