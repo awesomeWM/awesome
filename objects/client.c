@@ -163,21 +163,7 @@ client_set_urgent(lua_State *L, int cidx, bool urgent)
 
     if(c->urgent != urgent)
     {
-        xcb_get_property_cookie_t hints =
-            xcb_icccm_get_wm_hints_unchecked(globalconf.connection, c->window);
-
         c->urgent = urgent;
-
-        /* update ICCCM hints */
-        xcb_icccm_wm_hints_t wmh;
-        xcb_icccm_get_wm_hints_reply(globalconf.connection, hints, &wmh, NULL);
-
-        if(urgent)
-            wmh.flags |= XCB_ICCCM_WM_HINT_X_URGENCY;
-        else
-            wmh.flags &= ~XCB_ICCCM_WM_HINT_X_URGENCY;
-
-        xcb_icccm_set_wm_hints(globalconf.connection, c->window, &wmh);
 
         luaA_object_emit_signal(L, cidx, "property::urgent", 0);
     }
