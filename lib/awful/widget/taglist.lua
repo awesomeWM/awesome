@@ -200,7 +200,7 @@ function taglist.new(screen, filter, buttons, style, update_function, base_widge
         capi.client.connect_signal("unmanage", uc)
     end
     w._do_taglist_update()
-    local list = instances[s]
+    local list = instances[screen]
     if not list then
         list = setmetatable({}, { __mode = "v" })
         instances[screen] = list

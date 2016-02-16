@@ -224,7 +224,7 @@ function tasklist.new(screen, filter, buttons, style, update_function, base_widg
         capi.client.connect_signal("untagged", u)
         capi.client.connect_signal("unmanage", function(c)
             u(c)
-            for s, i in pairs(instances) do
+            for _, i in pairs(instances) do
                 for _, tlist in pairs(i) do
                     tlist._unmanage(c)
                 end

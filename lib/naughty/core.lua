@@ -325,7 +325,7 @@ end
 function naughty.reset_timeout(notification, new_timeout)
     if notification.timer then notification.timer:stop() end
 
-    local timeout = timeout or notification.timeout
+    local timeout = new_timeout or notification.timeout
     set_timeout(notification, timeout)
     notification.timeout = timeout
 

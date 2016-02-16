@@ -79,7 +79,7 @@ function tag.swap(tag1, tag2)
     local src2, src1 = tag.getscreen(tag2), tag.getscreen(tag1)
     tag.setscreen(src1, tag2)
     tag.move(idx1, tag2)
-    tag.setscreen(scr2, tag1)
+    tag.setscreen(src2, tag1)
     tag.move(idx2, tag1)
 end
 
