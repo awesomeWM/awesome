@@ -285,6 +285,13 @@ a_glib_poll(GPollFD *ufds, guint nfsd, gint timeout)
     /* Do all deferred work now */
     awesome_refresh();
 
+    /* Check if the Lua stack is the way it should be */
+    if (lua_gettop(globalconf.L) != 0) {
+        warn("Something was left on the Lua stack, this is a bug!");
+        luaA_dumpstack(globalconf.L);
+        lua_settop(globalconf.L, 0);
+    }
+
     /* Check how long this main loop iteration took */
     gettimeofday(&now, NULL);
     timersub(&now, &last_wakeup, &length_time);
