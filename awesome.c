@@ -352,9 +352,17 @@ a_glib_poll(GPollFD *ufds, guint nfsd, gint timeout)
     guint res;
     struct timeval now, length_time;
     float length;
+    lua_State *L = globalconf_get_lua_State();
 
     /* Do all deferred work now */
     awesome_refresh();
+
+    /* Check if the Lua stack is the way it should be */
+    if (lua_gettop(L) != 0) {
+        warn("Something was left on the Lua stack, this is a bug!");
+        luaA_dumpstack(L);
+        lua_settop(L, 0);
+    }
 
     /* Check how long this main loop iteration took */
     gettimeofday(&now, NULL);
