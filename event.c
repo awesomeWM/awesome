@@ -532,6 +532,7 @@ event_handle_leavenotify(xcb_leave_notify_event_t *ev)
     {
         luaA_object_push(L, c);
         luaA_object_emit_signal(L, -1, "mouse::leave", 0);
+        lua_pop(L, 1);
     }
 
     lua_pushnil(L);
