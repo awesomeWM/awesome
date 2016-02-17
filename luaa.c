@@ -498,39 +498,40 @@ luaA_startup_error(const char *err)
 static bool
 luaA_loadrc(const char *confpath, bool run)
 {
-    if(!luaL_loadfile(globalconf.L, confpath))
-    {
-        if(run)
-        {
-            /* Set the conffile right now so it can be used inside the
-             * configuration file. */
-            conffile = a_strdup(confpath);
-            /* Move error handling function before function */
-            lua_pushcfunction(globalconf.L, luaA_dofunction_on_error);
-            lua_insert(globalconf.L, -2);
-            if(lua_pcall(globalconf.L, 0, LUA_MULTRET, -2))
-            {
-                const char *err = lua_tostring(globalconf.L, -1);
-                luaA_startup_error(err);
-                fprintf(stderr, "%s\n", err);
-                /* An error happened, so reset this. */
-                conffile = NULL;
-            }
-            else
-                return true;
-        }
-        else
-        {
-            lua_pop(globalconf.L, 1);
-            return true;
-        }
-    }
-    else
+    if(luaL_loadfile(globalconf.L, confpath))
     {
         const char *err = lua_tostring(globalconf.L, -1);
         luaA_startup_error(err);
         fprintf(stderr, "%s\n", err);
+        return false;
     }
+
+    if(!run)
+    {
+        lua_pop(globalconf.L, 1);
+        return true;
+    }
+
+    /* Set the conffile right now so it can be used inside the
+     * configuration file. */
+    conffile = a_strdup(confpath);
+    /* Move error handling function before function */
+    lua_pushcfunction(globalconf.L, luaA_dofunction_on_error);
+    lua_insert(globalconf.L, -2);
+    if(!lua_pcall(globalconf.L, 0, 0, -2))
+    {
+        /* Pop luaA_dofunction_on_error */
+        lua_pop(globalconf.L, 1);
+        return true;
+    }
+
+    const char *err = lua_tostring(globalconf.L, -1);
+    luaA_startup_error(err);
+    fprintf(stderr, "%s\n", err);
+    /* An error happened, so reset this. */
+    conffile = NULL;
+    /* Pop luaA_dofunction_on_error() and the error message */
+    lua_pop(globalconf.L, 2);
 
     return false;
 }
