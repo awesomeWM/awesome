@@ -352,14 +352,24 @@ endif()
 # }}}
 
 # {{{ Tests
+set(CHECK_TARGETS check-integration)
+add_custom_target(check-integration
+    "${CMAKE_SOURCE_DIR}/tests/run.sh"
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    COMMENT "Running integration tests"
+    VERBATIM)
 find_program(BUSTED_EXECUTABLE busted)
 if(BUSTED_EXECUTABLE)
+    # Keep the arguments in sync with the version below!
     add_custom_target(check-unit ALL
         ${BUSTED_EXECUTABLE} "--helper=${CMAKE_SOURCE_DIR}/spec/preload.lua"
         "--lpath=${CMAKE_BINARY_DIR}/lib/?.lua;${CMAKE_BINARY_DIR}/lib/?/init.lua;spec/?.lua"
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
         COMMENT "Running unit tests"
         VERBATIM)
+    list(APPEND CHECK_TARGETS check-unit)
+
+    # Same as above, but with --coverage argument
     add_custom_target(check-coverage
         "BUILD_DIRECTORY=${CMAKE_BINARY_DIR}/"
         ${BUSTED_EXECUTABLE} "--helper=${CMAKE_SOURCE_DIR}/spec/preload.lua"
@@ -369,16 +379,16 @@ if(BUSTED_EXECUTABLE)
         COMMENT "Running unit tests under LuaCov"
         VERBATIM)
 endif()
-add_custom_target(check-integration
-    "${CMAKE_SOURCE_DIR}/tests/run.sh"
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-    COMMENT "Running integration tests"
-    VERBATIM)
-if(BUSTED_EXECUTABLE)
-    add_custom_target(check DEPENDS check-integration check-unit)
-else()
-    add_custom_target(check DEPENDS check-integration)
+find_program(LUACHECK_EXECUTABLE luacheck)
+if(LUACHECK_EXECUTABLE)
+    add_custom_target(luacheck
+        ${LUACHECK_EXECUTABLE} lib spec tests themes awesomerc.lua
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        COMMENT "Running Luacheck"
+        VERBATIM)
+    list(APPEND CHECK_TARGETS luacheck)
 endif()
+add_custom_target(check DEPENDS ${CHECK_TARGETS})
 # }}}
 
 # vim: filetype=cmake:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80:foldmethod=marker

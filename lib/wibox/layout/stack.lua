@@ -163,7 +163,7 @@ function stack:raise_widget(widget, recursive)
     end
 end
 
-local function new(dir, widget1, ...)
+local function new(...)
     local ret = fixed.horizontal(...)
 
     util.table.crush(ret, stack)
@@ -171,7 +171,7 @@ local function new(dir, widget1, ...)
     return ret
 end
 
-function stack.mt:__call(...)
+function stack.mt:__call(_, ...)
     return new(...)
 end
 
