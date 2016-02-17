@@ -218,7 +218,7 @@ signal_object_emit(lua_State *L, signal_array_t *arr, const char *name, int narg
     if(sigfound)
     {
         int nbfunc = sigfound->sigfuncs.len;
-        luaL_checkstack(L, lua_gettop(L) + nbfunc + nargs + 1, "too much signal");
+        luaL_checkstack(L, nbfunc + nargs + 1, "too much signal");
         /* Push all functions and then execute, because this list can change
          * while executing funcs. */
         foreach(func, sigfound->sigfuncs)
@@ -263,7 +263,7 @@ luaA_object_emit_signal(lua_State *L, int oud,
     if(sigfound)
     {
         int nbfunc = sigfound->sigfuncs.len;
-        luaL_checkstack(L, lua_gettop(L) + nbfunc + nargs + 2, "too much signal");
+        luaL_checkstack(L, nbfunc + nargs + 2, "too much signal");
         /* Push all functions and then execute, because this list can change
          * while executing funcs. */
         foreach(func, sigfound->sigfuncs)
