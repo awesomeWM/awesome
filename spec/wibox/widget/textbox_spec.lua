@@ -3,15 +3,6 @@
 -- @copyright 2015 Uli Schlachter
 ---------------------------------------------------------------------------
 
--- Grml...
-_G.awesome = {
-    xrdb_get_value = function(a, b)
-        if a ~= "" then error() end
-        if b ~= "Xft.dpi" then error() end
-        return nil
-    end
-}
-
 local textbox = require("wibox.widget.textbox")
 
 describe("wibox.widget.textbox", function()
