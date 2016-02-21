@@ -59,6 +59,7 @@ return
     ewmh = require("awful.ewmh");
     titlebar = require("awful.titlebar");
     rules = require("awful.rules");
+    popup = require("awful.popup");
     spawn = spawn;
 }
 
