@@ -202,6 +202,11 @@ client.connect_signal("request::fullscreen", fullscreen)
 client.connect_signal("property::screen", screen_change)
 client.connect_signal("property::border_width", geometry_change)
 client.connect_signal("property::geometry", geometry_change)
+screen.connect_signal("property::workarea", function(s)
+    for _, c in pairs(client.get(s)) do
+        geometry_change(c)
+    end
+end)
 
 return ewmh
 
