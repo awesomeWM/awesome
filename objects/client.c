@@ -212,6 +212,32 @@ DO_CLIENT_SET_STRING_PROPERTY(machine)
 #undef DO_CLIENT_SET_STRING_PROPERTY
 
 void
+client_find_transient_for(client_t *c, xcb_window_t trans)
+{
+    int counter;
+    client_t *tc, *tmp;
+
+    tmp = tc = client_getbywin(trans);
+
+    /* Verify that there are no loops in the transient_for relation after we are done */
+    for(counter = 0; tmp != NULL && counter <= globalconf.stack.len; counter++)
+    {
+        if (tmp == c)
+            /* We arrived back at the client we started from, so there is a loop */
+            counter = globalconf.stack.len+1;
+        tmp = tmp->transient_for;
+    }
+    if (counter <= globalconf.stack.len)
+    {
+        lua_State *L = globalconf_get_lua_State();
+
+        luaA_object_push(L, c);
+        client_set_transient_for(L, -1, tc);
+        lua_pop(L, 1);
+    }
+}
+
+void
 client_set_class_instance(lua_State *L, int cidx, const char *class, const char *instance)
 {
     client_t *c = luaA_checkudata(L, cidx, &client_class);
