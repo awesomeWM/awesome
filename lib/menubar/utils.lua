@@ -240,12 +240,12 @@ function utils.parse(file)
     return program
 end
 
---- Parse a directory with .desktop files
--- @param dir The directory.
--- @return A table with all .desktop entries.
+--- Parse a directory with .desktop files recursively.
+-- @tparam string dir The directory.
+-- @treturn table Paths of found .desktop files.
 function utils.parse_dir(dir)
     local programs = {}
-    local files = io.popen('find '.. dir ..' -maxdepth 1 -name "*.desktop" 2>/dev/null')
+    local files = io.popen('find '.. dir .." -name '*.desktop' 2>/dev/null")
     for file in files:lines() do
         local program = utils.parse(file)
         if program then
