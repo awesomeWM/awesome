@@ -21,7 +21,7 @@ local timer = require("gears.timer")
 local function check_focus(obj)
     -- When no visible client has the focus...
     if not client.focus or not client.focus:isvisible() then
-        local c = aclient.focus.history.get(obj.screen, 0, aclient.focus.filter)
+        local c = aclient.focus.history.get(screen[obj.screen].index, 0, aclient.focus.filter)
         if c then
             c:emit_signal("request::activate", "autofocus.check_focus",
                           {raise=false})
@@ -41,9 +41,10 @@ end
 local function check_focus_tag(t)
     local s = atag.getscreen(t)
     if not s then return end
+    s = screen[s]
     check_focus({ screen = s })
-    if client.focus and client.focus.screen ~= s then
-        local c = aclient.focus.history.get(s, 0, aclient.focus.filter)
+    if client.focus and client.focus.screen ~= s.index then
+        local c = aclient.focus.history.get(s.index, 0, aclient.focus.filter)
         if c then
             c:emit_signal("request::activate", "autofocus.check_focus_tag",
                           {raise=false})

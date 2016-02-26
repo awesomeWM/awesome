@@ -23,6 +23,10 @@ local tag = require("awful.tag")
 local client = require("awful.client")
 local timer = require("gears.timer")
 
+local function get_screen(s)
+    return s and capi.screen[s]
+end
+
 local layout = {}
 
 --- Default predefined layouts
@@ -57,16 +61,17 @@ local arrange_lock = false
 local delayed_arrange = {}
 
 --- Get the current layout.
--- @param screen The screen number.
+-- @param screen The screen.
 -- @return The layout function.
 function layout.get(screen)
-    local t = tag.selected(screen)
+    screen = get_screen(screen)
+    local t = tag.selected(screen and screen.index)
     return tag.getproperty(t, "layout") or layout.suit.floating
 end
 
 --- Change the layout of the current tag.
 -- @param i Relative index.
--- @param s The screen number.
+-- @param s The screen.
 -- @param[opt] layouts A table of layouts.
 function layout.inc(i, s, layouts)
     if type(i) == "table" then
@@ -74,7 +79,8 @@ function layout.inc(i, s, layouts)
         -- this was changed so that 'layouts' can be an optional parameter
         layouts, i, s = i, s, layouts
     end
-    local t = tag.selected(s)
+    s = get_screen(s)
+    local t = tag.selected(s and s.index)
     layouts = layouts or layout.layouts
     if t then
         local curlayout = layout.get(s)
@@ -124,20 +130,21 @@ end
 --   geometry (x, y, width, height), the clients, the screen and sometime, a
 --   "geometries" table with client as keys and geometry as value
 function layout.parameters(t, screen)
-    t = t or tag.selected(screen)
+    screen = get_screen(screen)
+    t = t or tag.selected(screen and screen.index)
 
     if not t then return end
 
-    screen = tag.getscreen(t) or 1
+    screen = get_screen(tag.getscreen(t) or 1)
 
     local p = {}
 
-    p.workarea = capi.screen[screen].workarea
+    p.workarea = screen.workarea
 
-    local useless_gap = tag.getgap(t, #client.tiled(screen))
+    local useless_gap = tag.getgap(t, #client.tiled(screen.index))
 
     -- Handle padding
-    local padding = ascreen.padding(capi.screen[screen]) or {}
+    local padding = ascreen.padding(screen) or {}
 
     p.workarea.x = p.workarea.x + (padding.left or 0) + useless_gap
 
@@ -149,9 +156,9 @@ function layout.parameters(t, screen)
     p.workarea.height = p.workarea.height - ((padding.top or 0) +
         (padding.bottom or 0) + useless_gap * 2)
 
-    p.geometry    = capi.screen[screen].geometry
+    p.geometry    = screen.geometry
     p.clients     = client.tiled(screen)
-    p.screen      = screen
+    p.screen      = screen.index
     p.padding     = padding
     p.useless_gap = useless_gap
 
@@ -161,6 +168,7 @@ end
 --- Arrange a screen using its current layout.
 -- @param screen The screen to arrange.
 function layout.arrange(screen)
+    screen = get_screen(screen)
     if not screen or delayed_arrange[screen] then return end
     delayed_arrange[screen] = true
 
@@ -181,7 +189,7 @@ function layout.arrange(screen)
             g.y = g.y + useless_gap
             c:geometry(g)
         end
-        capi.screen[screen]:emit_signal("arrange")
+        screen:emit_signal("arrange")
 
         arrange_lock = false
         delayed_arrange[screen] = nil

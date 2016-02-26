@@ -23,6 +23,10 @@ local layout = require("awful.layout")
 local a_screen = require("awful.screen")
 local dpi = require("beautiful").xresources.apply_dpi
 
+local function get_screen(s)
+    return s and capi.screen[s]
+end
+
 local placement = {}
 
 --- Check if an area intersect another area.
@@ -121,8 +125,8 @@ end
 function placement.no_offscreen(c, screen)
     c = c or capi.client.focus
     local geometry = get_area(c)
-    screen = screen or c.screen or a_screen.getbycoord(geometry.x, geometry.y)
-    local screen_geometry = capi.screen[screen].workarea
+    screen = get_screen(screen or c.screen or a_screen.getbycoord(geometry.x, geometry.y))
+    local screen_geometry = screen.workarea
 
     if geometry.x + geometry.width > screen_geometry.x + screen_geometry.width then
         geometry.x = screen_geometry.x + screen_geometry.width - geometry.width
@@ -145,10 +149,10 @@ end
 -- @param c The client.
 function placement.no_overlap(c)
     local geometry = get_area(c)
-    local screen   = c.screen or a_screen.getbycoord(geometry.x, geometry.y)
-    local cls = client.visible(screen)
+    local screen   = get_screen(c.screen or a_screen.getbycoord(geometry.x, geometry.y))
+    local cls = client.visible(screen.index)
     local curlay = layout.get()
-    local areas = { capi.screen[screen].workarea }
+    local areas = { screen.workarea }
     for _, cl in pairs(cls) do
         if cl ~= c and cl.type ~= "desktop" and (client.floating.get(cl) or curlay == layout.suit.floating) then
             areas = area_remove(areas, get_area(cl))
@@ -249,12 +253,12 @@ end
 function placement.centered(c, p)
     c = c or capi.client.focus
     local c_geometry = get_area(c)
-    local screen = c.screen or a_screen.getbycoord(c_geometry.x, c_geometry.y)
+    local screen = get_screen(c.screen or a_screen.getbycoord(c_geometry.x, c_geometry.y))
     local s_geometry
     if p then
         s_geometry = get_area(p)
     else
-        s_geometry = capi.screen[screen].geometry
+        s_geometry = screen.geometry
     end
     return c:geometry({ x = s_geometry.x + (s_geometry.width - c_geometry.width) / 2,
                         y = s_geometry.y + (s_geometry.height - c_geometry.height) / 2 })
@@ -267,12 +271,12 @@ end
 function placement.center_horizontal(c, p)
     c = c or capi.client.focus
     local c_geometry = get_area(c)
-    local screen = c.screen or a_screen.getbycoord(c_geometry.x, c_geometry.y)
+    local screen = get_screen(c.screen or a_screen.getbycoord(c_geometry.x, c_geometry.y))
     local s_geometry
     if p then
         s_geometry = get_area(p)
     else
-        s_geometry = capi.screen[screen].geometry
+        s_geometry = screen.geometry
     end
     return c:geometry({ x = s_geometry.x + (s_geometry.width - c_geometry.width) / 2 })
 end
@@ -284,12 +288,12 @@ end
 function placement.center_vertical(c, p)
     c = c or capi.client.focus
     local c_geometry = get_area(c)
-    local screen = c.screen or a_screen.getbycoord(c_geometry.x, c_geometry.y)
+    local screen = get_screen(c.screen or a_screen.getbycoord(c_geometry.x, c_geometry.y))
     local s_geometry
     if p then
         s_geometry = get_area(p)
     else
-        s_geometry = capi.screen[screen].geometry
+        s_geometry = screen.geometry
     end
     return c:geometry({ y = s_geometry.y + (s_geometry.height - c_geometry.height) / 2 })
 end

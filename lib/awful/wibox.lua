@@ -25,6 +25,10 @@ local wibox = require("wibox")
 local beautiful = require("beautiful")
 local round = require("awful.util").round
 
+local function get_screen(s)
+    return s and screen[s]
+end
+
 local awfulwibox = { mt = {} }
 
 --- Array of table with wiboxes inside.
@@ -49,7 +53,7 @@ end
 -- @param screen If the wibox it not attached to a screen, specified on which
 -- screen the position should be set.
 function awfulwibox.set_position(wb, position, screen)
-    local area = capi.screen[screen].geometry
+    local area = get_screen(screen).geometry
 
     -- The "length" of a wibox is always chosen to be the optimal size
     -- (non-floating).
@@ -107,8 +111,9 @@ end
 -- will be attached.
 -- @param wb The wibox to attach.
 -- @param position The position of the wibox: top, bottom, left or right.
--- @param screen TODO, this seems to be unused
+-- @param screen The screen to attach to
 function awfulwibox.attach(wb, position, screen)
+    screen = get_screen(screen)
     -- Store wibox as attached in a weak-valued table
     local wibox_prop_table
     -- Start from end since we sometimes remove items
@@ -144,10 +149,11 @@ end
 -- @param wb The wibox.
 -- @param align The alignment: left, right or center.
 -- @param screen If the wibox is not attached to any screen, you can specify the
--- screen where to align. Otherwise 1 is assumed.
+-- screen where to align.
 function awfulwibox.align(wb, align, screen)
+    screen = get_screen(screen)
     local position = awfulwibox.get_position(wb)
-    local area = capi.screen[screen].workarea
+    local area = screen.workarea
 
     if position == "right" then
         if align == "right" then
@@ -192,8 +198,9 @@ end
 -- @param screen The screen to stretch on, or the wibox screen.
 function awfulwibox.stretch(wb, screen)
     if screen then
+        screen = get_screen(screen)
         local position = awfulwibox.get_position(wb)
-        local area = capi.screen[screen].workarea
+        local area = screen.workarea
         if position == "right" or position == "left" then
             wb.height = area.height - (2 * wb.border_width)
             wb.y = area.y
@@ -216,7 +223,7 @@ function awfulwibox.new(arg)
     arg = arg or {}
     local position = arg.position or "top"
     local has_to_stretch = true
-    local screen = arg.screen or 1
+    local screen = get_screen(arg.screen or 1)
 
     arg.type = arg.type or "dock"
 
@@ -234,7 +241,7 @@ function awfulwibox.new(arg)
             if arg.screen then
                 local hp = tostring(arg.height):match("(%d+)%%")
                 if hp then
-                    arg.height = round(capi.screen[arg.screen].geometry.height * hp / 100)
+                    arg.height = round(screen.geometry.height * hp / 100)
                 end
             end
         end
@@ -245,7 +252,7 @@ function awfulwibox.new(arg)
             if arg.screen then
                 local wp = tostring(arg.width):match("(%d+)%%")
                 if wp then
-                    arg.width = round(capi.screen[arg.screen].geometry.width * wp / 100)
+                    arg.width = round(screen.geometry.width * wp / 100)
                 end
             end
         end
