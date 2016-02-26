@@ -24,6 +24,10 @@ local capi =
     root = root
 }
 
+local function get_screen(s)
+    return s and capi.screen[s]
+end
+
 -- we use require("awful.client") inside functions to prevent circular dependencies.
 local client
 
@@ -45,8 +49,8 @@ tag.history.limit = 20
 -- selected tag is used.
 function tag.move(new_index, target_tag)
     target_tag = target_tag or tag.selected()
-    local scr = tag.getscreen(target_tag)
-    local tmp_tags = tag.gettags(scr)
+    local scr = get_screen(tag.getscreen(target_tag))
+    local tmp_tags = tag.gettags(scr and scr.index)
 
     if (not new_index) or (new_index < 1) or (new_index > #tmp_tags) then
         return
@@ -94,7 +98,7 @@ function tag.add(name, props)
     -- connected to property::activated to be called without a valid tag.
     -- set properties cannot be used as this has to be set before the first
     -- signal is sent
-    properties.screen = properties.screen or ascreen.focused()
+    properties.screen = get_screen(properties.screen or ascreen.focused())
 
     -- Index is also required
     properties.index = (#tag.gettags(properties.screen))+1
@@ -119,7 +123,7 @@ end
 -- @param layout The layout or layout table to set for this tags by default.
 -- @return A table with all created tags.
 function tag.new(names, screen, layout)
-    screen = screen or 1
+    screen = get_screen(screen or 1)
     local tags = {}
     for id, name in ipairs(names) do
         table.insert(tags, id, tag.add(name, {screen = screen,
@@ -135,7 +139,7 @@ function tag.new(names, screen, layout)
 end
 
 --- Find a suitable fallback tag.
--- @param screen The screen number to look for a tag on. [awful.screen.focused()]
+-- @param screen The screen to look for a tag on. [awful.screen.focused()]
 -- @param invalids A table of tags we consider unacceptable. [selectedlist(scr)]
 function tag.find_fallback(screen, invalids)
     local scr = screen or ascreen.focused()
@@ -159,7 +163,7 @@ function tag.delete(target_tag, fallback_tag)
     target_tag = target_tag or tag.selected()
     if target_tag == nil or target_tag.activated == false then return end
 
-    local target_scr = tag.getscreen(target_tag)
+    local target_scr = get_screen(tag.getscreen(target_tag))
     local tags       = tag.gettags(target_scr)
     local idx        = tag.getidx(target_tag)
     local ntags      = #tags
@@ -214,7 +218,7 @@ end
 --- Update the tag history.
 -- @param obj Screen object.
 function tag.history.update(obj)
-    local s = obj.index
+    local s = get_screen(obj.index)
     local curtags = tag.selectedlist(s)
     -- create history table
     if not data.history[s] then
@@ -252,12 +256,12 @@ function tag.history.update(obj)
 end
 
 --- Revert tag history.
--- @param screen The screen number.
+-- @param screen The screen.
 -- @param idx Index in history. Defaults to "previous" which is a special index
 -- toggling between last two selected sets of tags. Number (eg 1) will go back
 -- to the given index in history.
 function tag.history.restore(screen, idx)
-    local s = screen or ascreen.focused()
+    local s = get_screen(screen or ascreen.focused())
     local i = idx or "previous"
     local sel = tag.selectedlist(s)
     -- do nothing if history empty
@@ -281,16 +285,17 @@ function tag.history.restore(screen, idx)
     -- remove the reverted history entry
     if i ~= "previous" then table.remove(data.history[s], i) end
 
-    capi.screen[s]:emit_signal("tag::history::update")
+    s:emit_signal("tag::history::update")
 end
 
 --- Get a list of all tags on a screen
--- @param s Screen number
+-- @param s Screen
 -- @return A table with all available tags
 function tag.gettags(s)
+    s = get_screen(s)
     local tags = {}
     for _, t in ipairs(root.tags()) do
-        if tag.getscreen(t) == s then
+        if get_screen(tag.getscreen(t)) == s then
             table.insert(tags, t)
         end
     end
@@ -302,7 +307,7 @@ function tag.gettags(s)
 end
 
 --- Set a tag's screen
--- @param s Screen number
+-- @param s Screen
 -- @param t tag object
 function tag.setscreen(s, t)
 
@@ -312,7 +317,7 @@ function tag.setscreen(s, t)
         s, t = t, s
     end
 
-    s = s or ascreen.focused()
+    s = get_screen(s or ascreen.focused())
     local sel = tag.selected
     local old_screen = tag.getproperty(t, "screen")
     if s == old_screen then return end
@@ -347,11 +352,12 @@ end
 -- @return Screen number
 function tag.getscreen(t)
     t = t or tag.selected()
-    return tag.getproperty(t, "screen")
+    local prop = tag.getproperty(t, "screen")
+    return prop and prop.index
 end
 
 --- Return a table with all visible tags
--- @param s Screen number.
+-- @param s Screen.
 -- @return A table with all selected tags.
 function tag.selectedlist(s)
     local screen = s or ascreen.focused()
@@ -366,7 +372,7 @@ function tag.selectedlist(s)
 end
 
 --- Return only the first visible tag.
--- @param s Screen number.
+-- @param s Screen.
 function tag.selected(s)
     return tag.selectedlist(s)[1]
 end
@@ -517,7 +523,8 @@ end
 function tag.incnmaster(add, t, sensible)
     if sensible then
         client = client or require("awful.client")
-        local ntiled = #client.tiled(tag.getscreen(t))
+        local screen = get_screen(tag.getscreen(t))
+        local ntiled = #client.tiled(screen and screen.index)
 
         local nmaster = tag.getnmaster(t)
         if nmaster > ntiled then
@@ -575,7 +582,8 @@ end
 function tag.incncol(add, t, sensible)
     if sensible then
         client = client or require("awful.client")
-        local ntiled = #client.tiled(tag.getscreen(t))
+        local screen = get_screen(tag.getscreen(t))
+        local ntiled = #client.tiled(screen and screen.index)
         local nmaster = tag.getnmaster(t)
         local nsecondary = ntiled - nmaster
 
@@ -595,7 +603,7 @@ function tag.incncol(add, t, sensible)
 end
 
 --- View no tag.
--- @tparam[opt] int screen The screen number.
+-- @tparam[opt] int|screen screen The screen.
 function tag.viewnone(screen)
     local tags = tag.gettags(screen or ascreen.focused())
     for _, t in pairs(tags) do
@@ -605,9 +613,9 @@ end
 
 --- View a tag by its taglist index.
 -- @param i The relative index to see.
--- @param[opt] screen The screen number.
+-- @param[opt] screen The screen.
 function tag.viewidx(i, screen)
-    screen = screen or ascreen.focused()
+    screen = get_screen(screen or ascreen.focused())
     local tags = tag.gettags(screen)
     local showntags = {}
     for _, t in ipairs(tags) do
@@ -622,7 +630,7 @@ function tag.viewidx(i, screen)
             showntags[util.cycle(#showntags, k + i)].selected = true
         end
     end
-    capi.screen[screen]:emit_signal("tag::history::update")
+    screen:emit_signal("tag::history::update")
 end
 
 --- Get a tag's index in the gettags() table.
@@ -640,13 +648,13 @@ function tag.getidx(query_tag)
 end
 
 --- View next tag. This is the same as tag.viewidx(1).
--- @param screen The screen number.
+-- @param screen The screen.
 function tag.viewnext(screen)
     return tag.viewidx(1, screen)
 end
 
 --- View previous tag. This is the same a tag.viewidx(-1).
--- @param screen The screen number.
+-- @param screen The screen.
 function tag.viewprev(screen)
     return tag.viewidx(-1, screen)
 end
@@ -670,9 +678,9 @@ end
 
 --- View only a set of tags.
 -- @param tags A table with tags to view only.
--- @param[opt] screen The screen number of the tags.
+-- @param[opt] screen The screen of the tags.
 function tag.viewmore(tags, screen)
-    screen = screen or ascreen.focused()
+    screen = get_screen(screen or ascreen.focused())
     local screen_tags = tag.gettags(screen)
     for _, _tag in ipairs(screen_tags) do
         if not util.table.hasitem(tags, _tag) then
@@ -682,7 +690,7 @@ function tag.viewmore(tags, screen)
     for _, _tag in ipairs(tags) do
         _tag.selected = true
     end
-    capi.screen[screen]:emit_signal("tag::history::update")
+    screen:emit_signal("tag::history::update")
 end
 
 --- Toggle selection of a tag
@@ -736,7 +744,7 @@ end
 function tag.withcurrent(c)
     local tags = {}
     for _, t in ipairs(c:tags()) do
-        if tag.getscreen(t) == c.screen then
+        if get_screen(tag.getscreen(t)) == get_screen(c.screen) then
             table.insert(tags, t)
         end
     end
@@ -752,8 +760,9 @@ function tag.withcurrent(c)
 end
 
 local function attached_connect_signal_screen(screen, sig, func)
+    screen = get_screen(screen)
     capi.tag.connect_signal(sig, function(_tag)
-        if tag.getscreen(_tag) == screen then
+        if get_screen(tag.getscreen(_tag)) == screen then
             func(_tag)
         end
     end)
