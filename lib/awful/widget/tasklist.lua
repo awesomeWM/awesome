@@ -21,6 +21,10 @@ local tag = require("awful.tag")
 local flex = require("wibox.layout.flex")
 local timer = require("gears.timer")
 
+local function get_screen(s)
+    return s and screen[s]
+end
+
 local tasklist = { mt = {} }
 
 local instances
@@ -165,6 +169,7 @@ end
 -- @param base_widget.maximized_vertical Symbol to use for clients that have been vertically maximized.
 -- @param base_widget.font The font.
 function tasklist.new(screen, filter, buttons, style, update_function, base_widget)
+    screen = get_screen(screen)
     local uf = update_function or common.list_update
     local w = base_widget or flex.horizontal()
 
@@ -187,7 +192,7 @@ function tasklist.new(screen, filter, buttons, style, update_function, base_widg
     if instances == nil then
         instances = {}
         local function us(s)
-            local i = instances[s]
+            local i = instances[get_screen(s)]
             if i then
                 for _, tlist in pairs(i) do
                     tlist._do_tasklist_update()
@@ -256,7 +261,7 @@ end
 -- @return true if c is on screen, false otherwise
 function tasklist.filter.alltags(c, screen)
     -- Only print client on the same screen as this widget
-    return c.screen == screen
+    return get_screen(c.screen) == get_screen(screen)
 end
 
 --- Filtering function to include only the clients from currently selected tags.
@@ -264,11 +269,12 @@ end
 -- @param screen The screen we are drawing on.
 -- @return true if c is in a selected tag on screen, false otherwise
 function tasklist.filter.currenttags(c, screen)
+    screen = get_screen(screen)
     -- Only print client on the same screen as this widget
-    if c.screen ~= screen then return false end
+    if get_screen(c.screen) ~= screen then return false end
     -- Include sticky client too
     if c.sticky then return true end
-    local tags = tag.gettags(screen)
+    local tags = tag.gettags(screen.index)
     for _, t in ipairs(tags) do
         if t.selected then
             local ctags = c:tags()
@@ -287,13 +293,14 @@ end
 -- @param screen The screen we are drawing on.
 -- @return true if c is in a selected tag on screen and is minimized, false otherwise
 function tasklist.filter.minimizedcurrenttags(c, screen)
+    screen = get_screen(screen)
     -- Only print client on the same screen as this widget
-    if c.screen ~= screen then return false end
+    if get_screen(c.screen) ~= screen then return false end
     -- Check client is minimized
     if not c.minimized then return false end
     -- Include sticky client
     if c.sticky then return true end
-    local tags = tag.gettags(screen)
+    local tags = tag.gettags(screen.index)
     for _, t in ipairs(tags) do
         -- Select only minimized clients
         if t.selected then
@@ -314,7 +321,7 @@ end
 -- @return true if c is focused on screen, false otherwise
 function tasklist.filter.focused(c, screen)
     -- Only print client on the same screen as this widget
-    return c.screen == screen and capi.client.focus == c
+    return get_screen(c.screen) == get_screen(screen) and capi.client.focus == c
 end
 
 function tasklist.mt:__call(...)
