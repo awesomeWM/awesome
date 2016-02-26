@@ -25,6 +25,10 @@ local surface = require("gears.surface")
 local cairo = require("lgi").cairo
 local dpi = require("beautiful").xresources.apply_dpi
 
+local function get_screen(s)
+    return s and capi.screen[s]
+end
+
 local naughty = {}
 
 --[[--
@@ -140,7 +144,7 @@ local suspended = false
 -- @table notifications
 naughty.notifications = { suspended = { } }
 for s = 1, capi.screen.count() do
-    naughty.notifications[s] = {
+    naughty.notifications[get_screen(s)] = {
         top_left = {},
         top_middle = {},
         top_right = {},
@@ -189,7 +193,8 @@ end
 -- @param height Popup height
 -- @return Absolute position and index in { x = X, y = Y, idx = I } table
 local function get_offset(s, position, idx, width, height)
-    local ws = capi.screen[s].workarea
+    s = get_screen(s)
+    local ws = s.workarea
     local v = {}
     idx = idx or #naughty.notifications[s][position] + 1
     width = width or naughty.notifications[s][position][idx].width
@@ -290,6 +295,7 @@ end
 function naughty.getById(id)
     -- iterate the notifications to get the notfications with the correct ID
     for s = 1, capi.screen.count() do
+        s = get_screen(s)
         for p in pairs(naughty.notifications[s]) do
             for _, notification in pairs(naughty.notifications[s][p]) do
                 if notification.id == id then
@@ -386,7 +392,7 @@ end
 -- @int[opt=5] args.timeout Time in seconds after which popup expires.
 --   Set 0 for no timeout.
 -- @int[opt] args.hover_timeout Delay in seconds after which hovered popup disappears.
--- @int[opt=focused] args.screen Target screen for the notification.
+-- @tparam[opt=focused] integer|screen args.screen Target screen for the notification.
 -- @string[opt="top_right"] args.position Corner of the workarea displaying the popups.
 --   Values: `"top_right"`, `"top_left"`, `"bottom_left"`,
 --   `"bottom_right"`, `"top_middle"`, `"bottom_middle"`.
@@ -431,7 +437,7 @@ function naughty.notify(args)
     local icon_size = args.icon_size or preset.icon_size
     local text = args.text or preset.text
     local title = args.title or preset.title
-    local s = args.screen or preset.screen or screen.focused()
+    local s = get_screen(args.screen or preset.screen or screen.focused())
     local ontop = args.ontop or preset.ontop
     local width = args.width or preset.width
     local height = args.height or preset.height
@@ -587,7 +593,7 @@ function naughty.notify(args)
 
     -- calculate the width
     if not width then
-        local w, _ = textbox:get_preferred_size(s)
+        local w, _ = textbox:get_preferred_size(s.index)
         width = w + (iconbox and icon_w + 2 * margin or 0) + 2 * margin
     end
 
@@ -598,7 +604,7 @@ function naughty.notify(args)
     -- calculate the height
     if not height then
         local w = width - (iconbox and icon_w + 2 * margin or 0) - 2 * margin
-        local h = textbox:get_height_for_width(w, s)
+        local h = textbox:get_height_for_width(w, s.index)
         if iconbox and icon_h + 2 * margin > h + 2 * margin then
             height = icon_h + 2 * margin
         else
@@ -609,7 +615,7 @@ function naughty.notify(args)
     height = height + actions_total_height
 
     -- crop to workarea size if too big
-    local workarea = capi.screen[s].workarea
+    local workarea = s.workarea
     if width > workarea.width - 2 * (border_width or 0) - 2 * (naughty.config.padding or 0) then
         width = workarea.width - 2 * (border_width or 0) - 2 * (naughty.config.padding or 0)
     end
