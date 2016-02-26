@@ -16,6 +16,10 @@ local capi =
 }
 local util = require("awful.util")
 
+local function get_screen(s)
+    return s and screen[s]
+end
+
 -- we use require("awful.client") inside functions to prevent circular dependencies.
 local client
 
@@ -26,12 +30,13 @@ data.padding = {}
 
 screen.mouse_per_screen = {}
 
--- @param s Screen number
+-- @param s Screen
 -- @param x X coordinate of point
 -- @param y Y coordinate of point
 -- @return The squared distance of the screen to the provided point
 function screen.getdistance_sq(s, x, y)
-    local geom = capi.screen[s].geometry
+    s = get_screen(s)
+    local geom = s.geometry
     local dist_x, dist_y = 0, 0
     if x < geom.x then
         dist_x = geom.x - x
@@ -47,21 +52,21 @@ function screen.getdistance_sq(s, x, y)
 end
 
 ---
--- Return Xinerama screen number corresponding to the given (pixel) coordinates.
+-- Return screen number corresponding to the given (pixel) coordinates.
 -- The number returned can be used as an index into the global
 -- `screen` table/object.
 -- @param x The x coordinate
 -- @param y The y coordinate
 function screen.getbycoord(x, y)
-    local s = 1
+    local s = screen[1]
     local dist = screen.getdistance_sq(s, x, y)
     for i = 2, capi.screen:count() do
         local d = screen.getdistance_sq(i, x, y)
         if d < dist then
-            s, dist = i, d
+            s, dist = screen[i], d
         end
     end
-    return s
+    return s.index
 end
 
 --- Give the focus to a screen, and move pointer to last known position on this
@@ -69,21 +74,22 @@ end
 -- @param _screen Screen number (defaults / falls back to mouse.screen).
 function screen.focus(_screen)
     client = client or require("awful.client")
-    if _screen > capi.screen.count() then _screen = screen.focused() end
+    if type(_screen) == "number" and _screen > capi.screen.count() then _screen = screen.focused() end
+    _screen = get_screen(_screen)
 
     -- screen and pos for current screen
-    local s = capi.mouse.screen
+    local s = get_screen(capi.mouse.screen)
     local pos
 
     if not screen.mouse_per_screen[_screen] then
         -- This is the first time we enter this screen,
         -- keep relative mouse position on the new screen
         pos = capi.mouse.coords()
-        local relx = (pos.x - capi.screen[s].geometry.x) / capi.screen[s].geometry.width
-        local rely = (pos.y - capi.screen[s].geometry.y) / capi.screen[s].geometry.height
+        local relx = (pos.x - s.geometry.x) / s.geometry.width
+        local rely = (pos.y - s.geometry.y) / s.geometry.height
 
-        pos.x = capi.screen[_screen].geometry.x + relx * capi.screen[_screen].geometry.width
-        pos.y = capi.screen[_screen].geometry.y + rely * capi.screen[_screen].geometry.height
+        pos.x = _screen.geometry.x + relx * _screen.geometry.width
+        pos.y = _screen.geometry.y + rely * _screen.geometry.height
     else
         -- restore mouse position
         pos = screen.mouse_per_screen[_screen]
@@ -95,7 +101,7 @@ function screen.focus(_screen)
    -- move cursor without triggering signals mouse::enter and mouse::leave
     capi.mouse.coords(pos, true)
 
-    local c = client.focus.history.get(_screen, 0)
+    local c = client.focus.history.get(_screen.index, 0)
     if c then
         c:emit_signal("request::activate", "screen.focus", {raise=false})
     end
@@ -104,15 +110,15 @@ end
 --- Give the focus to a screen, and move pointer to last known position on this
 -- screen, or keep position relative to the current focused screen
 -- @param dir The direction, can be either "up", "down", "left" or "right".
--- @param _screen Screen number.
+-- @param _screen Screen.
 function screen.focus_bydirection(dir, _screen)
-    local sel = _screen or screen.focused()
+    local sel = get_screen(_screen or screen.focused())
     if sel then
         local geomtbl = {}
         for s = 1, capi.screen.count() do
             geomtbl[s] = capi.screen[s].geometry
         end
-        local target = util.get_rectangle_in_direction(dir, geomtbl, capi.screen[sel].geometry)
+        local target = util.get_rectangle_in_direction(dir, geomtbl, sel.geometry)
         if target then
             return screen.focus(target)
         end
@@ -132,6 +138,7 @@ end
 -- @param padding The padding, an table with 'top', 'left', 'right' and/or
 -- 'bottom'. Can be nil if you only want to retrieve padding
 function screen.padding(_screen, padding)
+    _screen = get_screen(_screen)
     if padding then
         data.padding[_screen] = padding
         _screen:emit_signal("padding")
