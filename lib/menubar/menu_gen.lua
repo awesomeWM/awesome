@@ -25,7 +25,7 @@ if not data_dir then
 end
 
 --- Specifies all directories where menubar should look for .desktop
--- files. The search is not recursive.
+-- files. The search is recursive.
 menu_gen.all_menu_dirs = { data_dir .. 'applications/', '/usr/share/applications/', '/usr/local/share/applications/' }
 
 --- Specify the mapping of .desktop Categories section to the
@@ -83,40 +83,43 @@ local function trim(s)
 end
 
 --- Generate an array of all visible menu entries.
--- @return all menu entries.
+-- @treturn table All menu entries.
 function menu_gen.generate()
     -- Update icons for category entries
     menu_gen.lookup_category_icons()
 
     local result = {}
-
+    local unique_entries = {}
     for _, dir in ipairs(menu_gen.all_menu_dirs) do
-        local entries = utils.parse_dir(dir)
-        for _, program in ipairs(entries) do
+        for _, entry in ipairs(utils.parse_dir(dir)) do
             -- Check whether to include program in the menu
-            if program.show and program.Name and program.cmdline then
-                local target_category = nil
-                -- Check if the program falls at least to one of the
-                -- usable categories. Set target_category to be the id
-                -- of the first category it finds.
-                if program.categories then
-                    for _, category in pairs(program.categories) do
-                        local cat_key, cat_use =
+            if entry.show and entry.Name and entry.cmdline then
+                local unique_key = entry.Name .. '\0' .. entry.cmdline
+                if not unique_entries[unique_key] then
+                    local target_category = nil
+                    -- Check if the program falls into at least one of the
+                    -- usable categories. Set target_category to be the id
+                    -- of the first category it finds.
+                    if entry.categories then
+                        for _, category in pairs(entry.categories) do
+                            local cat_key, cat_use =
                             get_category_name_and_usage_by_type(category)
-                        if cat_key and cat_use then
-                            target_category = cat_key
-                            break
+                            if cat_key and cat_use then
+                                target_category = cat_key
+                                break
+                            end
                         end
                     end
-                end
-                if target_category then
-                    local name = trim(program.Name) or ""
-                    local cmdline = trim(program.cmdline) or ""
-                    local icon = program.icon_path or nil
-                    table.insert(result, { name = name,
-                                           cmdline = cmdline,
-                                           icon = icon,
-                                           category = target_category })
+                    if target_category then
+                        local name = trim(entry.Name) or ""
+                        local cmdline = trim(entry.cmdline) or ""
+                        local icon = entry.icon_path or nil
+                        table.insert(result, { name = name,
+                                     cmdline = cmdline,
+                                     icon = icon,
+                                     category = target_category })
+                        unique_entries[unique_key] = true
+                    end
                 end
             end
         end
