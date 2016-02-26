@@ -31,6 +31,10 @@ local common = require("awful.widget.common")
 local theme = require("beautiful")
 local wibox = require("wibox")
 
+local function get_screen(s)
+    return s and capi.screen[s]
+end
+
 -- menubar
 local menubar = { mt = {}, menu_entries = {} }
 menubar.menu_gen = require("menubar.menu_gen")
@@ -122,9 +126,10 @@ end
 --- Cut item list to return only current page.
 -- @tparam table all_items All items list.
 -- @tparam str query Search query.
--- @tparam number scr Screen number
+-- @tparam number|screen scr Screen
 -- @return table List of items for current page.
 local function get_current_page(all_items, query, scr)
+    scr = get_screen(scr)
     if not instance.prompt.width then
         instance.prompt.width = compute_text_width(instance.prompt.prompt, scr)
     end
@@ -161,7 +166,7 @@ end
 
 --- Update the menubar according to the command entered by user.
 -- @tparam str query Search query.
--- @tparam number scr Screen number
+-- @tparam number|screen scr Screen
 local function menulist_update(query, scr)
     query = query or ""
     shownitems = {}
@@ -288,7 +293,7 @@ local function prompt_keypressed_callback(mod, key, comm)
 end
 
 --- Show the menubar on the given screen.
--- @param scr Screen number.
+-- @param scr Screen.
 function menubar.show(scr)
     if not instance.wibox then
         initialize()
@@ -300,6 +305,7 @@ function menubar.show(scr)
 
     -- Set position and size
     scr = scr or awful.screen.focused() or 1
+    scr = get_screen(scr)
     local scrgeom = capi.screen[scr].workarea
     local geometry = menubar.geometry
     instance.geometry = {x = geometry.x or scrgeom.x,
