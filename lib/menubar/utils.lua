@@ -161,7 +161,7 @@ end
 --- Parse a .desktop file.
 -- @param file The .desktop file.
 -- @return A table with file entries.
-function utils.parse(file)
+function utils.parse_desktop_file(file)
     local program = { show = true, file = file }
     local desktop_entry = false
 
@@ -247,7 +247,7 @@ function utils.parse_dir(dir)
     local programs = {}
     local files = io.popen('find '.. dir .." -name '*.desktop' 2>/dev/null")
     for file in files:lines() do
-        local program = utils.parse(file)
+        local program = utils.parse_desktop_file(file)
         if program then
             table.insert(programs, program)
         end
