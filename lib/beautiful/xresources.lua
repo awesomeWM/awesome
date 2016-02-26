@@ -9,6 +9,7 @@
 
 -- Grab environment
 local awesome = awesome
+local screen = screen
 local round = require("awful.util").round
 local gears_debug = require("gears.debug")
 
@@ -66,10 +67,15 @@ end
 
 local dpi_per_screen = {}
 
+local function get_screen(s)
+    return s and screen[s]
+end
+
 --- Get global or per-screen DPI value falling back to xrdb.
--- @tparam[opt=focused] integer s The screen.
+-- @tparam[opt] integer|screen s The screen.
 -- @treturn number DPI value.
 function xresources.get_dpi(s)
+    s = get_screen(s)
     if dpi_per_screen[s] then
         return dpi_per_screen[s]
     end
@@ -84,6 +90,7 @@ end
 -- @tparam number dpi DPI value.
 -- @tparam[opt] integer s Screen.
 function xresources.set_dpi(dpi, s)
+    s = get_screen(s)
     if not s then
         xresources.dpi = dpi
     else
@@ -94,7 +101,7 @@ end
 
 --- Compute resulting size applying current DPI value (optionally per screen).
 -- @tparam number size Size
--- @tparam[opt] integer s The screen.
+-- @tparam[opt] integer|screen s The screen.
 -- @treturn integer Resulting size (rounded to integer).
 function xresources.apply_dpi(size, s)
     return round(size / 96 * xresources.get_dpi(s))
