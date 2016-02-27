@@ -135,7 +135,7 @@ luaA_mouse_index(lua_State *L)
         if (globalconf.focus.client)
             luaA_pushscreen(L, globalconf.focus.client->screen);
         else
-            luaA_pushscreen(L, globalconf.screens.tab[0]);
+            luaA_pushscreen(L, screen_get_primary());
         return 1;
     }
 

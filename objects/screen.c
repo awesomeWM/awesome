@@ -44,6 +44,7 @@
 /** Screen is a table where indexes are screen numbers. You can use `screen[1]`
  * to get access to the first screen, etc. Alternatively, if RANDR information
  * is available, you can use output names for finding screen objects.
+ * The primary screen can be accessed as `screen.primary`.
  * Each screen has a set of properties.
  *
  * @tfield table geometry The screen coordinates. Immutable.
@@ -536,6 +537,14 @@ screen_get_index(screen_t *s)
     return 0;
 }
 
+screen_t *
+screen_get_primary(void)
+{
+    if (!globalconf.primary_screen && globalconf.screens.len > 0)
+        globalconf.primary_screen = globalconf.screens.tab[0];
+    return globalconf.primary_screen;
+}
+
 /** Screen module.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
@@ -548,10 +557,15 @@ luaA_screen_module_index(lua_State *L)
     const char *name;
 
     if(lua_type(L, 2) == LUA_TSTRING && (name = lua_tostring(L, 2)))
+    {
+        if(A_STREQ(name, "primary"))
+            return luaA_object_push(L, screen_get_primary());
+
         foreach(screen, globalconf.screens)
             foreach(output, (*screen)->outputs)
                 if(A_STREQ(output->name, name))
                     return luaA_object_push(L, screen);
+    }
 
     return luaA_object_push(L, luaA_checkscreen(L, 2));
 }
