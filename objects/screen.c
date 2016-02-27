@@ -80,6 +80,12 @@ screen_wipe(screen_t *s)
     screen_output_array_wipe(&s->outputs);
 }
 
+void
+luaA_pushscreen(lua_State *L, screen_t *s)
+{
+    lua_pushinteger(L, screen_get_index(s));
+}
+
 /** Get a screen argument from the lua stack */
 screen_t *
 luaA_checkscreen(lua_State *L, int sidx)
@@ -450,7 +456,6 @@ screen_client_moveto(client_t *c, screen_t *new_screen, bool doresize)
 {
     lua_State *L = globalconf_get_lua_State();
     screen_t *old_screen = c->screen;
-    int old_screen_idx = screen_get_index(old_screen);
     area_t from, to;
     bool had_focus = false;
 
@@ -465,8 +470,8 @@ screen_client_moveto(client_t *c, screen_t *new_screen, bool doresize)
     if(!doresize)
     {
         luaA_object_push(L, c);
-        if(old_screen_idx != 0)
-            lua_pushinteger(L, old_screen_idx);
+        if(old_screen != NULL)
+            luaA_pushscreen(L, old_screen);
         else
             lua_pushnil(L);
         luaA_object_emit_signal(L, -2, "property::screen", 1);
@@ -504,8 +509,8 @@ screen_client_moveto(client_t *c, screen_t *new_screen, bool doresize)
     if(old_screen != c->screen)
     {
         luaA_object_push(L, c);
-        if(old_screen_idx != 0)
-            lua_pushinteger(L, old_screen_idx);
+        if(old_screen != NULL)
+            luaA_pushscreen(L, old_screen);
         else
             lua_pushnil(L);
         luaA_object_emit_signal(L, -2, "property::screen", 1);

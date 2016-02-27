@@ -122,7 +122,6 @@ luaA_mouse_index(lua_State *L)
 {
     const char *attr = luaL_checkstring(L, 2);
     int16_t mouse_x, mouse_y;
-    screen_t *screen;
 
     /* attr is not "screen"?! */
     if (A_STRNEQ(attr, "screen"))
@@ -134,14 +133,13 @@ luaA_mouse_index(lua_State *L)
          * having lots of lua errors in this case.
          */
         if (globalconf.focus.client)
-            lua_pushinteger(L, screen_get_index(globalconf.focus.client->screen));
+            luaA_pushscreen(L, globalconf.focus.client->screen);
         else
-            lua_pushinteger(L, 1);
+            luaA_pushscreen(L, globalconf.screens.tab[0]);
         return 1;
     }
 
-    screen = screen_getbycoord(mouse_x, mouse_y);
-    lua_pushinteger(L, screen_get_index(screen));
+    luaA_pushscreen(L, screen_getbycoord(mouse_x, mouse_y));
     return 1;
 }
 
