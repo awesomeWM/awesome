@@ -54,8 +54,7 @@ end
 -- This layout only accept one children, all others will be ignored
 -- @tparam table children A table composed of valid widgets
 function constraint:set_children(children)
-    self.widget = children and children[1]
-    self:emit_signal("widget::layout_changed")
+    self:set_widget(children[1])
 end
 
 --- Set the strategy to use for the constraining. Valid values are 'max',
