@@ -827,6 +827,9 @@ event_handle_randr_output_change_notify(xcb_randr_notify_event_t *ev)
 
         p_delete(&output_name);
         p_delete(&info);
+
+        /* The docs for RRSetOutputPrimary say we get this signal */
+        screen_update_primary();
     }
 }
 

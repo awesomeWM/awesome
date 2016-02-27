@@ -61,6 +61,8 @@ struct screen_output_t
     char *name;
     /** The size in millimeters */
     uint32_t mm_width, mm_height;
+    /** The XID */
+    xcb_randr_output_t output;
 };
 
 static void
@@ -151,10 +153,19 @@ screen_scan_randr(void)
     {
         xcb_randr_query_version_reply_t *version_reply =
             xcb_randr_query_version_reply(globalconf.connection,
-                                          xcb_randr_query_version(globalconf.connection, 1, 1), 0);
+                                          xcb_randr_query_version(globalconf.connection, 1, 3), 0);
         if(version_reply)
         {
+            uint32_t major_version = version_reply->major_version;
+            uint32_t minor_version = version_reply->minor_version;
+
             p_delete(&version_reply);
+
+            /* Do we agree on a supported version? */
+            if (major_version != 1 || minor_version < 2)
+                return false;
+
+            globalconf.have_randr_13 = minor_version >= 3;
 
             /* A quick XRandR recall:
              * You have CRTC that manages a part of a SCREEN.
@@ -207,7 +218,8 @@ screen_scan_randr(void)
                     screen_output_array_append(&new_screen->outputs,
                                                (screen_output_t) { .name = name,
                                                                    .mm_width = output_info_r->mm_width,
-                                                                   .mm_height = output_info_r->mm_height });
+                                                                   .mm_height = output_info_r->mm_height,
+                                                                   .output = randr_outputs[j] });
 
                     p_delete(&output_info_r);
                 }
@@ -218,6 +230,7 @@ screen_scan_randr(void)
             }
 
             p_delete(&screen_res_r);
+            screen_update_primary();
 
             return screens_exist();
         }
@@ -537,6 +550,47 @@ screen_get_index(screen_t *s)
     return 0;
 }
 
+void
+screen_update_primary(void)
+{
+    if (!globalconf.have_randr_13)
+        return;
+
+    screen_t *primary_screen = NULL;
+    xcb_randr_get_output_primary_reply_t *primary =
+        xcb_randr_get_output_primary_reply(globalconf.connection,
+                xcb_randr_get_output_primary(globalconf.connection, globalconf.screen->root),
+                NULL);
+
+    if (!primary)
+        return;
+
+    foreach(screen, globalconf.screens)
+    {
+        foreach(output, (*screen)->outputs)
+            if (output->output == primary->output)
+                primary_screen = *screen;
+    }
+    p_delete(&primary);
+
+    if (!primary_screen || primary_screen == globalconf.primary_screen)
+        return;
+
+    lua_State *L = globalconf_get_lua_State();
+    screen_t *old = globalconf.primary_screen;
+    globalconf.primary_screen = primary_screen;
+
+    if (old)
+    {
+        luaA_object_push(L, old);
+        luaA_object_emit_signal(L, -1, "primary_changed", 0);
+        lua_pop(L, 1);
+    }
+    luaA_object_push(L, primary_screen);
+    luaA_object_emit_signal(L, -1, "primary_changed", 0);
+    lua_pop(L, 1);
+}
+
 screen_t *
 screen_get_primary(void)
 {
@@ -662,6 +716,10 @@ screen_class_setup(lua_State *L)
      * @signal property::workarea
      */
     signal_add(&screen_class.signals, "property::workarea");
+    /**
+     * @signal primary_changed
+     */
+    signal_add(&screen_class.signals, "primary_changed");
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
