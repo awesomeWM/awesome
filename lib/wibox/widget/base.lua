@@ -390,6 +390,7 @@ local function drill(ids, content)
                 e, id2 = drill(ids, v)
                 widgets[k] = e
             end
+            base.check_widget(widgets[k])
 
             -- Place the widget in the access table
             if id2 then
