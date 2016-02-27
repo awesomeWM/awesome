@@ -150,7 +150,7 @@ end
 function placement.no_overlap(c)
     local geometry = get_area(c)
     local screen   = get_screen(c.screen or a_screen.getbycoord(geometry.x, geometry.y))
-    local cls = client.visible(screen.index)
+    local cls = client.visible(screen)
     local curlay = layout.get()
     local areas = { screen.workarea }
     for _, cl in pairs(cls) do

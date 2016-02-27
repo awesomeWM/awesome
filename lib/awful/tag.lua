@@ -50,7 +50,7 @@ tag.history.limit = 20
 function tag.move(new_index, target_tag)
     target_tag = target_tag or tag.selected()
     local scr = get_screen(tag.getscreen(target_tag))
-    local tmp_tags = tag.gettags(scr and scr.index)
+    local tmp_tags = tag.gettags(scr)
 
     if (not new_index) or (new_index < 1) or (new_index > #tmp_tags) then
         return
@@ -218,7 +218,7 @@ end
 --- Update the tag history.
 -- @param obj Screen object.
 function tag.history.update(obj)
-    local s = get_screen(obj.index)
+    local s = get_screen(obj)
     local curtags = tag.selectedlist(s)
     -- create history table
     if not data.history[s] then
@@ -524,7 +524,7 @@ function tag.incnmaster(add, t, sensible)
     if sensible then
         client = client or require("awful.client")
         local screen = get_screen(tag.getscreen(t))
-        local ntiled = #client.tiled(screen and screen.index)
+        local ntiled = #client.tiled(screen)
 
         local nmaster = tag.getnmaster(t)
         if nmaster > ntiled then
@@ -583,7 +583,7 @@ function tag.incncol(add, t, sensible)
     if sensible then
         client = client or require("awful.client")
         local screen = get_screen(tag.getscreen(t))
-        local ntiled = #client.tiled(screen and screen.index)
+        local ntiled = #client.tiled(screen)
         local nmaster = tag.getnmaster(t)
         local nsecondary = ntiled - nmaster
 

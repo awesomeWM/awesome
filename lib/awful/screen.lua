@@ -101,7 +101,7 @@ function screen.focus(_screen)
    -- move cursor without triggering signals mouse::enter and mouse::leave
     capi.mouse.coords(pos, true)
 
-    local c = client.focus.history.get(_screen.index, 0)
+    local c = client.focus.history.get(_screen, 0)
     if c then
         c:emit_signal("request::activate", "screen.focus", {raise=false})
     end

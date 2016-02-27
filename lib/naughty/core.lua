@@ -593,7 +593,7 @@ function naughty.notify(args)
 
     -- calculate the width
     if not width then
-        local w, _ = textbox:get_preferred_size(s.index)
+        local w, _ = textbox:get_preferred_size(s)
         width = w + (iconbox and icon_w + 2 * margin or 0) + 2 * margin
     end
 
@@ -604,7 +604,7 @@ function naughty.notify(args)
     -- calculate the height
     if not height then
         local w = width - (iconbox and icon_w + 2 * margin or 0) - 2 * margin
-        local h = textbox:get_height_for_width(w, s.index)
+        local h = textbox:get_height_for_width(w, s)
         if iconbox and icon_h + 2 * margin > h + 2 * margin then
             height = icon_h + 2 * margin
         else

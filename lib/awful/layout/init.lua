@@ -64,8 +64,7 @@ local delayed_arrange = {}
 -- @param screen The screen.
 -- @return The layout function.
 function layout.get(screen)
-    screen = get_screen(screen)
-    local t = tag.selected(screen and screen.index)
+    local t = tag.selected(screen)
     return tag.getproperty(t, "layout") or layout.suit.floating
 end
 
@@ -80,7 +79,7 @@ function layout.inc(i, s, layouts)
         layouts, i, s = i, s, layouts
     end
     s = get_screen(s)
-    local t = tag.selected(s and s.index)
+    local t = tag.selected(s)
     layouts = layouts or layout.layouts
     if t then
         local curlayout = layout.get(s)
@@ -131,7 +130,7 @@ end
 --   "geometries" table with client as keys and geometry as value
 function layout.parameters(t, screen)
     screen = get_screen(screen)
-    t = t or tag.selected(screen and screen.index)
+    t = t or tag.selected(screen)
 
     if not t then return end
 
@@ -141,7 +140,7 @@ function layout.parameters(t, screen)
 
     p.workarea = screen.workarea
 
-    local useless_gap = tag.getgap(t, #client.tiled(screen.index))
+    local useless_gap = tag.getgap(t, #client.tiled(screen))
 
     -- Handle padding
     local padding = ascreen.padding(screen) or {}
@@ -243,10 +242,10 @@ capi.tag.connect_signal("tagged", arrange_tag)
 
 for s = 1, capi.screen.count() do
     capi.screen[s]:connect_signal("property::workarea", function(screen)
-        layout.arrange(screen.index)
+        layout.arrange(screen)
     end)
     capi.screen[s]:connect_signal("padding", function (screen)
-        layout.arrange(screen.index)
+        layout.arrange(screen)
     end)
 end
 

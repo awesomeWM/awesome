@@ -25,7 +25,7 @@ local boxes = nil
 
 local function update(w, screen)
     screen = get_screen(screen)
-    local name = layout.getname(layout.get(screen and screen.index))
+    local name = layout.getname(layout.get(screen))
     w._layoutbox_tooltip:set_text(name or "[no name]")
     w:set_image(name and beautiful["layout_" .. name])
 end
