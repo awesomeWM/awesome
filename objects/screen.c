@@ -618,7 +618,7 @@ luaA_screen_module_index(lua_State *L)
         foreach(screen, globalconf.screens)
             foreach(output, (*screen)->outputs)
                 if(A_STREQ(output->name, name))
-                    return luaA_object_push(L, screen);
+                    return luaA_object_push(L, *screen);
     }
 
     return luaA_object_push(L, luaA_checkscreen(L, 2));
