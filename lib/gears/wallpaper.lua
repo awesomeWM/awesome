@@ -61,6 +61,7 @@ function wallpaper.prepare_context(s)
             local paper = pending_wallpaper
             pending_wallpaper = nil
             wallpaper.set(paper)
+            paper:finish()
         end)
     else
         -- Draw to the already-pending wallpaper
@@ -99,7 +100,7 @@ end
 --   gears.color. The default is black.
 function wallpaper.centered(surf, s, background)
     local geom, cr = wallpaper.prepare_context(s)
-    surf = surface(surf)
+    surf = surface.load_uncached(surf)
     background = color(background)
 
     -- Fill the area with the background
@@ -114,6 +115,7 @@ function wallpaper.centered(surf, s, background)
     cr:clip()
     cr:set_source_surface(surf, 0, 0)
     cr:paint()
+    surf:finish()
 end
 
 --- Set a tiled wallpaper.
@@ -128,11 +130,13 @@ function wallpaper.tiled(surf, s, offset)
         cr:translate(offset.x, offset.y)
     end
 
-    local pattern = cairo.Pattern.create_for_surface(surface(surf))
+    surf = surface.load_uncached(surf)
+    local pattern = cairo.Pattern.create_for_surface(surf)
     pattern.extend = cairo.Extend.REPEAT
     cr.source = pattern
     cr.operator = cairo.Operator.SOURCE
     cr:paint()
+    surf:finish()
 end
 
 --- Set a maximized wallpaper.
@@ -144,7 +148,7 @@ end
 -- @param offset This can be set to a table with entries x and y.
 function wallpaper.maximized(surf, s, ignore_aspect, offset)
     local geom, cr = wallpaper.prepare_context(s)
-    surf = surface(surf)
+    surf = surface.load_uncached(surf)
     local w, h = surface.get_size(surf)
     local aspect_w = geom.width / w
     local aspect_h = geom.height / h
@@ -166,6 +170,7 @@ function wallpaper.maximized(surf, s, ignore_aspect, offset)
     cr:set_source_surface(surf, 0, 0)
     cr.operator = cairo.Operator.SOURCE
     cr:paint()
+    surf:finish()
 end
 
 --- Set a fitting wallpaper.
@@ -176,7 +181,7 @@ end
 --   gears.color. The default is black.
 function wallpaper.fit(surf, s, background)
     local geom, cr = wallpaper.prepare_context(s)
-    surf = surface(surf)
+    surf = surface.load_uncached(surf)
     background = color(background)
 
     -- Fill the area with the background
@@ -196,6 +201,7 @@ function wallpaper.fit(surf, s, background)
     cr:scale(scale, scale)
     cr:set_source_surface(surf, 0, 0)
     cr:paint()
+    surf:finish()
 end
 
 return wallpaper
