@@ -23,6 +23,10 @@ local fixed = require("wibox.layout.fixed")
 local surface = require("gears.surface")
 local timer = require("gears.timer")
 
+local function get_screen(s)
+    return s and capi.screen[s]
+end
+
 local taglist = { mt = {} }
 taglist.filter = {}
 
@@ -153,6 +157,7 @@ end
 -- @param[opt] base_widget.squares_resize True or false to resize squares.
 -- @param base_widget.font The font.
 function taglist.new(screen, filter, buttons, style, update_function, base_widget)
+    screen = get_screen(screen)
     local uf = update_function or common.list_update
     local w = base_widget or fixed.horizontal()
 
@@ -172,7 +177,7 @@ function taglist.new(screen, filter, buttons, style, update_function, base_widge
     if instances == nil then
         instances = {}
         local function u(s)
-            local i = instances[s]
+            local i = instances[get_screen(s)]
             if i then
                 for _, tlist in pairs(i) do
                     tlist._do_taglist_update()

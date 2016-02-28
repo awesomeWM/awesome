@@ -25,6 +25,10 @@ local capi =
     awesome = awesome,
 }
 
+local function get_screen(s)
+    return s and capi.screen[s]
+end
+
 -- We use a metatable to prevent circular dependency loops.
 local screen
 do
@@ -63,9 +67,9 @@ client.shape = require("awful.client.shape")
 -- @client c the client to jump to
 -- @tparam bool merge If true then merge tags when clients are not visible.
 function client.jumpto(c, merge)
-    local s = screen.focused()
+    local s = get_screen(screen.focused())
     -- focus the screen
-    if s ~= c.screen then
+    if s ~= get_screen(c.screen) then
         screen.focus(c.screen)
     end
 
@@ -171,7 +175,7 @@ end
 
 --- Get the latest focused client for a screen in history.
 --
--- @tparam int s The screen number to look for.
+-- @tparam int|screen s The screen to look for.
 -- @tparam int idx The index: 0 will return first candidate,
 --   1 will return second, etc.
 -- @tparam function filter An optional filter.  If no client is found in the
@@ -179,11 +183,12 @@ end
 --   client.
 -- @treturn client.object A client.
 function client.focus.history.get(s, idx, filter)
+    s = get_screen(s)
     -- When this counter is equal to idx, we return the client
     local counter = 0
     local vc = client.visible(s, true)
     for _, c in ipairs(client.data.focus) do
-        if c.screen == s then
+        if get_screen(c.screen) == s then
             if not filter or filter(c) then
                 for _, vcc in ipairs(vc) do
                     if vcc == c then
@@ -223,7 +228,7 @@ end
 
 --- Get visible clients from a screen.
 --
--- @tparam[opt] integer s The screen number, or nil for all screens.
+-- @tparam[opt] integer|screen s The screen, or nil for all screens.
 -- @tparam[opt=false] boolean stacked Use stacking order? (top to bottom)
 -- @treturn table A table with all visible clients.
 function client.visible(s, stacked)
@@ -239,7 +244,7 @@ end
 
 --- Get visible and tiled clients
 --
--- @tparam integer s The screen number, or nil for all screens.
+-- @tparam integer|screen s The screen, or nil for all screens.
 -- @tparam[opt=false] boolean stacked Use stacking order? (top to bottom)
 -- @treturn table A table with all visible and tiled clients.
 function client.tiled(s, stacked)
@@ -325,7 +330,7 @@ end
 -- @tparam[opt=false] boolean stacked Use stacking order? (top to bottom)
 function client.focus.global_bydirection(dir, c, stacked)
     local sel = c or capi.client.focus
-    local scr = sel and sel.screen or screen.focused()
+    local scr = get_screen(sel and sel.screen or screen.focused())
 
     -- change focus inside the screen
     client.focus.bydirection(dir, sel)
@@ -333,13 +338,13 @@ function client.focus.global_bydirection(dir, c, stacked)
     -- if focus not changed, we must change screen
     if sel == capi.client.focus then
         screen.focus_bydirection(dir, scr)
-        if scr ~= screen.focused() then
+        if scr ~= get_screen(screen.focused()) then
             local cltbl = client.visible(screen.focused(), stacked)
             local geomtbl = {}
             for i,cl in ipairs(cltbl) do
                 geomtbl[i] = cl:geometry()
             end
-            local target = util.get_rectangle_in_direction(dir, geomtbl, capi.screen[scr].geometry)
+            local target = util.get_rectangle_in_direction(dir, geomtbl, scr.geometry)
 
             if target then
                 cltbl[target]:emit_signal("request::activate",
@@ -388,7 +393,7 @@ end
 -- @client[opt] sel The client.
 function client.swap.global_bydirection(dir, sel)
     sel = sel or capi.client.focus
-    local scr = sel and sel.screen or screen.focused()
+    local scr = get_screen(sel and sel.screen or screen.focused())
 
     if sel then
         -- move focus
@@ -396,15 +401,15 @@ function client.swap.global_bydirection(dir, sel)
         local c = capi.client.focus
 
         -- swapping inside a screen
-        if sel.screen == c.screen and sel ~= c then
+        if get_screen(sel.screen) == get_screen(c.screen) and sel ~= c then
             c:swap(sel)
 
         -- swapping to an empty screen
-        elseif sel.screen ~= c.screen and sel == c then
+        elseif get_screen(sel.screen) ~= get_screen(c.screen) and sel == c then
             client.movetoscreen(sel, screen.focused())
 
         -- swapping to a nonempty screen
-        elseif sel.screen ~= c.screen and sel ~= c then
+        elseif get_screen(sel.screen) ~= get_screen(c.screen) and sel ~= c then
             client.movetoscreen(sel, c.screen)
             client.movetoscreen(c, scr)
         end
@@ -515,7 +520,7 @@ end
 function client.toggletag(target, c)
     local sel = c or capi.client.focus
     -- Check that tag and client screen are identical
-    if sel and sel.screen == tag.getscreen(target) then
+    if sel and get_screen(sel.screen) == get_screen(tag.getscreen(target)) then
         local tags = sel:tags()
         local index = nil;
         for i, v in ipairs(tags) do
@@ -537,7 +542,7 @@ end
 
 --- Move a client to a screen. Default is next screen, cycling.
 -- @client c The client to move.
--- @param s The screen number, default to current + 1.
+-- @param s The screen, default to current + 1.
 function client.movetoscreen(c, s)
     local sel = c or capi.client.focus
     if sel then
@@ -545,8 +550,9 @@ function client.movetoscreen(c, s)
         if not s then
             s = sel.screen + 1
         end
-        if s > sc then s = 1 elseif s < 1 then s = sc end
-        if sel.screen ~= s then
+        if type(s) == "number" and s > sc then s = 1 elseif s < 1 then s = sc end
+        s = get_screen(s)
+        if get_screen(sel.screen) ~= s then
             local sel_is_focused = sel == capi.client.focus
             sel.screen = s
             screen.focus(s)

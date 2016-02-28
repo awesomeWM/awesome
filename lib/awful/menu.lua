@@ -120,8 +120,8 @@ local function item_position(_menu, child)
 end
 
 
-local function set_coords(_menu, screen_idx, m_coords)
-    local s_geometry = capi.screen[screen_idx].workarea
+local function set_coords(_menu, s, m_coords)
+    local s_geometry = s.workarea
     local screen_w = s_geometry.x + s_geometry.width
     local screen_h = s_geometry.y + s_geometry.height
 
@@ -313,10 +313,10 @@ end
 function menu:show(args)
     args = args or {}
     local coords = args.coords or nil
-    local screen_index = screen.focused()
+    local s = capi.screen[screen.focused()]
 
     if not set_size(self) then return end
-    set_coords(self, screen_index, coords)
+    set_coords(self, s, coords)
 
     keygrabber.run(self._keygrabber)
     self.wibox.visible = true

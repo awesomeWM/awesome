@@ -66,7 +66,7 @@ end
 --- Get the preferred size of a textbox.
 -- This returns the size that the textbox would use if infinite space were
 -- available.
--- @tparam integer s The screen number on which the textbox will be displayed.
+-- @tparam integer|screen s The screen on which the textbox will be displayed.
 -- @treturn number The preferred width.
 -- @treturn number The preferred height.
 function textbox:get_preferred_size(s)
@@ -77,7 +77,7 @@ end
 -- This returns the height that the textbox would use when it is limited to the
 -- given width.
 -- @tparam number width The available width.
--- @tparam integer s The screen number on which the textbox will be displayed.
+-- @tparam integer|screen s The screen on which the textbox will be displayed.
 -- @treturn number The needed height.
 function textbox:get_height_for_width(width, s)
     return self:get_height_for_width_at_dpi(width, beautiful.xresources.get_dpi(s))

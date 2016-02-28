@@ -10,7 +10,8 @@
 local drawable = {}
 local capi = {
     awesome = awesome,
-    root = root
+    root = root,
+    screen = screen
 }
 local beautiful = require("beautiful")
 local cairo = require("lgi").cairo
@@ -32,10 +33,10 @@ local function screen_getbycoord(x, y)
         local geometry = screen[i].geometry
         if x >= geometry.x and x < geometry.x + geometry.width
            and y >= geometry.y and y < geometry.y + geometry.height then
-            return i
+            return capi.screen[i]
         end
     end
-    return 1
+    return capi.screen[1]
 end
 
 -- Get the widget context. This should always return the same table (if
