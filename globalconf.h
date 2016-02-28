@@ -80,6 +80,10 @@ typedef struct
     xcb_key_symbols_t *keysyms;
     /** Logical screens */
     screen_array_t screens;
+    /** The primary screen, access through screen_get_primary() */
+    screen_t *primary_screen;
+    /** Do we have RandR 1.3 or newer? */
+    bool have_randr_13;
     /** Root window key bindings */
     key_array_t keys;
     /** Root window mouse bindings */

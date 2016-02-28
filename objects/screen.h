@@ -47,6 +47,8 @@ bool screen_coord_in_screen(screen_t *, int, int);
 int screen_get_index(screen_t *);
 area_t display_area_get(void);
 void screen_client_moveto(client_t *, screen_t *, bool);
+void screen_update_primary(void);
+screen_t *screen_get_primary(void);
 
 void luaA_pushscreen(lua_State *, screen_t *);
 screen_t *luaA_checkscreen(lua_State *, int);
