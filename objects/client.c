@@ -254,6 +254,16 @@ client_getbywin(xcb_window_t w)
     return NULL;
 }
 
+client_t *
+client_getbynofocuswin(xcb_window_t w)
+{
+    foreach(c, globalconf.clients)
+        if((*c)->nofocus_window == w)
+            return *c;
+
+    return NULL;
+}
+
 /** Get a client by its frame window.
  * \param w The client window to find.
  * \return A client pointer if found, NULL otherwise.
@@ -416,6 +426,20 @@ client_focus(client_t *c)
         globalconf.focus.need_update = true;
 }
 
+static xcb_window_t
+client_get_nofocus_window(client_t *c)
+{
+    if (c->nofocus_window == XCB_NONE) {
+        c->nofocus_window = xcb_generate_id(globalconf.connection);
+        xcb_create_window(globalconf.connection, globalconf.default_depth, c->nofocus_window, c->frame_window,
+                          -2, -2, 1, 1, 0, XCB_COPY_FROM_PARENT, globalconf.visual->visual_id,
+                          0, NULL);
+        xcb_map_window(globalconf.connection, c->nofocus_window);
+        xwindow_grabkeys(c->nofocus_window, &c->keys);
+    }
+    return c->nofocus_window;
+}
+
 void
 client_focus_refresh(void)
 {
@@ -434,11 +458,7 @@ client_focus_refresh(void)
         if(!c->nofocus)
             win = c->window;
         else
-            /* Move the focus away from whatever has it to make sure the
-             * previously focused client doesn't get any input in case
-             * WM_TAKE_FOCUS gets ignored.
-             */
-            win = globalconf.focus.window_no_focus;
+            win = client_get_nofocus_window(c);
 
         if(client_hasproto(c, WM_TAKE_FOCUS))
             xwindow_takefocus(c->window);
@@ -1360,6 +1380,8 @@ client_unmanage(client_t *c, bool window_valid)
 
     /* Ignore all spurious enter/leave notify events */
     client_ignore_enterleave_events();
+    if (c->nofocus_window != XCB_NONE)
+        xcb_destroy_window(globalconf.connection, c->nofocus_window);
     xcb_destroy_window(globalconf.connection, c->frame_window);
     client_restore_enterleave_events();
 
@@ -2499,6 +2521,8 @@ luaA_client_keys(lua_State *L)
         luaA_key_array_set(L, 1, 2, keys);
         luaA_object_emit_signal(L, 1, "property::keys", 0);
         xwindow_grabkeys(c->window, keys);
+        if (c->nofocus_window)
+            xwindow_grabkeys(c->nofocus_window, &c->keys);
     }
 
     return luaA_key_array_get(L, 1, keys);
