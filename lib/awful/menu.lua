@@ -20,13 +20,13 @@ local beautiful = require("beautiful")
 local dpi = require("beautiful").xresources.apply_dpi
 local object = require("gears.object")
 local surface = require("gears.surface")
+local protected_call = require("gears.protected_call")
 local cairo = require("lgi").cairo
 local setmetatable = setmetatable
 local tonumber = tonumber
 local string = string
 local ipairs = ipairs
 local pairs = pairs
-local pcall = pcall
 local print = print
 local table = table
 local type = type
@@ -374,12 +374,8 @@ function menu:add(args, index)
     local theme = load_theme(args.theme or {}, self.theme)
     args.theme = theme
     args.new = args.new or menu.entry
-    local success, item = pcall(args.new, self, args)
-    if not success then
-        print("Error while creating menu entry: " .. item)
-        return
-    end
-    if not item.widget then
+    local item = protected_call(args.new, self, args)
+    if (not item) or (not item.widget) then
         print("Error while checking menu entry: no property widget found.")
         return
     end

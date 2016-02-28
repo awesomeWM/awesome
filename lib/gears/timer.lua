@@ -17,6 +17,7 @@ local traceback = debug.traceback
 local unpack = unpack or table.unpack -- luacheck: globals unpack (compatibility with Lua 5.1)
 local glib = require("lgi").GLib
 local object = require("gears.object")
+local protected_call = require("gears.protected_call")
 
 --- Timer objects. This type of object is useful when triggering events repeatedly.
 -- The timer will emit the "timeout" signal every N seconds, N being the timeout
@@ -43,11 +44,7 @@ function timer:start()
         return
     end
     self.data.source_id = glib.timeout_add(glib.PRIORITY_DEFAULT, self.data.timeout * 1000, function()
-        xpcall(function()
-                self:emit_signal("timeout")
-            end, function(err)
-                print(debug.traceback("Error during executing timeout handler: "..tostring(err)))
-            end)
+        protected_call(self.emit_signal, self, "timeout")
         return true
     end)
     self:emit_signal("start")
@@ -126,10 +123,8 @@ end
 function timer.start_new(timeout, callback)
     local t = timer.new({ timeout = timeout })
     t:connect_signal("timeout", function()
-        local success, cont = xpcall(callback, function(err)
-            print(debug.traceback("Error during executing timeout handler: "..tostring(err), 2))
-        end)
-        if not success or not cont then
+        local cont = protected_call(callback)
+        if not cont then
             t:stop()
         end
     end)
@@ -160,11 +155,7 @@ end
 local delayed_calls = {}
 capi.awesome.connect_signal("refresh", function()
     for _, callback in ipairs(delayed_calls) do
-        xpcall(function()
-                callback[1](unpack(callback, 2))
-            end, function(err)
-                print(debug.traceback("Error during delayed call: "..tostring(err), 2))
-            end)
+        protected_call(unpack(callback))
     end
     delayed_calls = {}
 end)

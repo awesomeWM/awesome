@@ -10,6 +10,7 @@
 ---------------------------------------------------------------------------
 
 local matrix = require("gears.matrix")
+local protected_call = require("gears.protected_call")
 local cairo = require("lgi").cairo
 local base = require("wibox.widget.base")
 local no_parent = base.no_parent_I_know_what_I_am_doing
@@ -274,17 +275,10 @@ function hierarchy:draw(context, cr)
         local opacity = widget.opacity
         local function call(func, extra_arg1, extra_arg2)
             if not func then return end
-            local function error_function(err)
-                print(debug.traceback("Error while drawing widget: " .. tostring(err), 2))
-            end
             if not extra_arg2 then
-                xpcall(function()
-                    func(widget, context, cr, self:get_size())
-                end, error_function)
+                protected_call(func, widget, context, cr, self:get_size())
             else
-                xpcall(function()
-                    func(widget, context, extra_arg1, extra_arg2, cr, self:get_size())
-                end, error_function)
+                protected_call(func, widget, context, extra_arg1, extra_arg2, cr, self:get_size())
             end
         end
 

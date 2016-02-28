@@ -18,6 +18,7 @@ local lgi = require("lgi")
 local Pango = lgi.Pango
 local PangoCairo = lgi.PangoCairo
 local gears_debug = require("gears.debug")
+local protected_call = require("gears.protected_call")
 
 local xresources = require("beautiful.xresources")
 
@@ -109,7 +110,6 @@ end
 --   containing all the theme values.
 function beautiful.init(config)
     if config then
-        local success
         local homedir = os.getenv("HOME")
 
         -- If config is the path to the theme file,
@@ -118,16 +118,12 @@ function beautiful.init(config)
         if type(config) == 'string' then
             -- Expand the '~' $HOME shortcut
             config = config:gsub("^~/", homedir .. "/")
-            success, theme = xpcall(function() return dofile(config) end,
-                                    debug.traceback)
+            theme = protected_call(dofile, config)
         elseif type(config) == 'table' then
-            success = true
             theme = config
         end
 
-        if not success then
-            return gears_debug.print_error("beautiful: error loading theme file " .. theme)
-        elseif theme then
+        if theme then
             -- expand '~'
             if homedir then
                 for k, v in pairs(theme) do
