@@ -58,20 +58,33 @@ local ipairs = ipairs
 -- @tfield boolean visible True if tooltip is visible.
 local tooltip = { mt = {}  }
 
+local function get_wibox(self)
+    if not self.wibox then
+        self.wibox = wibox(self.wibox_properties)
+        self.wibox:set_widget(self.marginbox)
+
+        -- Close the tooltip when clicking it.  This gets done on release, to not
+        -- emit the release event on an underlying object, e.g. the titlebar icon.
+        self.wibox:buttons(abutton({}, 1, nil, function() self.hide() end))
+    end
+    return self.wibox
+end
+
 -- Place the tooltip under the mouse.
 --
 -- @tparam tooltip self A tooltip object.
 local function set_geometry(self)
-    local my_geo = self.wibox:geometry()
+    local wb = get_wibox(self)
+    local my_geo = wb:geometry()
     -- calculate width / height
     local n_w, n_h = self.textbox:get_preferred_size(mouse.screen)
     n_w = n_w + self.marginbox.left + self.marginbox.right
     n_h = n_h + self.marginbox.top + self.marginbox.bottom
     if my_geo.width ~= n_w or my_geo.height ~= n_h then
-        self.wibox:geometry({ width = n_w, height = n_h })
+        wb:geometry({ width = n_w, height = n_h })
     end
-    a_placement.next_to_mouse(self.wibox)
-    a_placement.no_offscreen(self.wibox, mouse.screen)
+    a_placement.next_to_mouse(wb)
+    a_placement.no_offscreen(wb, mouse.screen)
 end
 
 -- Show a tooltip.
@@ -87,7 +100,7 @@ local function show(self)
         end
     end
     set_geometry(self)
-    self.wibox.visible = true
+    get_wibox(self).visible = true
     self.visible = true
 end
 
@@ -102,8 +115,8 @@ local function hide(self)
             self.timer:stop()
         end
     end
+    get_wibox(self).visible = false
     self.visible = false
-    self.wibox.visible = false
 end
 
 --- Change displayed text.
@@ -180,7 +193,6 @@ end
 -- @see set_markup
 tooltip.new = function(args)
     local self = {
-        wibox =  wibox({ }),
         visible = false,
     }
 
@@ -231,17 +243,17 @@ tooltip.new = function(args)
     end
 
     -- Set default properties
-    self.wibox.border_width = beautiful.tooltip_border_width or beautiful.border_width or 1
-    self.wibox.border_color = beautiful.tooltip_border_color or beautiful.border_normal or "#ffcb60"
-    self.wibox.opacity = beautiful.tooltip_opacity or 1
-    self.wibox:set_bg(beautiful.tooltip_bg_color or beautiful.bg_focus or "#ffcb60")
+    self.wibox_properties = {
+        visible = false,
+        ontop = true,
+        border_width = beautiful.tooltip_border_width or beautiful.border_width or 1,
+        border_color = beautiful.tooltip_border_color or beautiful.border_normal or "#ffcb60",
+        opacity = beautiful.tooltip_opacity or 1,
+        bg = beautiful.tooltip_bg_color or beautiful.bg_focus or "#ffcb60"
+    }
     local fg = beautiful.tooltip_fg_color or beautiful.fg_focus or "#000000"
     local font = beautiful.tooltip_font or beautiful.font or "terminus 6"
 
-    -- set tooltip properties
-    self.wibox.visible = false
-    -- Who wants a non ontop tooltip ?
-    self.wibox.ontop = true
     self.textbox = textbox()
     self.textbox:set_font(font)
     self.background = background(self.textbox)
@@ -251,11 +263,6 @@ tooltip.new = function(args)
     local m_lr = args.margin_leftright or dpi(5)
     local m_tb = args.margin_topbottom or dpi(3)
     self.marginbox = wibox.layout.margin(self.background, m_lr, m_lr, m_tb, m_tb)
-    self.wibox:set_widget(self.marginbox)
-
-    -- Close the tooltip when clicking it.  This gets done on release, to not
-    -- emit the release event on an underlying object, e.g. the titlebar icon.
-    self.wibox:buttons(abutton({}, 1, nil, function() self.hide() end))
 
     -- Add tooltip to objects
     if args.objects then
