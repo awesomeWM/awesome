@@ -56,6 +56,8 @@ typedef enum {
 struct client_t
 {
     WINDOW_OBJECT_HEADER
+    /** Window we use for input focus and no-input clients */
+    xcb_window_t nofocus_window;
     /** Client logical screen */
     screen_t *screen;
     /** Client name */
@@ -137,6 +139,7 @@ LUA_OBJECT_FUNCS(client_class, client_t, client)
 
 bool client_maybevisible(client_t *);
 client_t * client_getbywin(xcb_window_t);
+client_t * client_getbynofocuswin(xcb_window_t);
 client_t * client_getbyframewin(xcb_window_t);
 
 void client_ban(client_t *);
