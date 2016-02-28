@@ -499,6 +499,13 @@ client_focus_refresh(void)
                         win, globalconf.timestamp);
 }
 
+void
+client_border_refresh(void)
+{
+    foreach(c, globalconf.clients)
+        window_border_refresh((window_t *) *c);
+}
+
 static void
 border_width_callback(client_t *c, uint16_t old_width, uint16_t new_width)
 {

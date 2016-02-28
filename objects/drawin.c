@@ -165,7 +165,10 @@ void
 drawin_refresh(void)
 {
     foreach(item, globalconf.drawins)
+    {
         drawin_apply_moveresize(*item);
+        window_border_refresh((window_t *) *item);
+    }
 }
 
 /** Move and/or resize a drawin
