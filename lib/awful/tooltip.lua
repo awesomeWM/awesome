@@ -58,13 +58,6 @@ local ipairs = ipairs
 -- @tfield boolean visible True if tooltip is visible.
 local tooltip = { mt = {}  }
 
--- Place the tooltip on the screen.
--- @tparam tooltip self A tooltip object.
-local function place(self)
-    a_placement.next_to_mouse(self.wibox)
-    a_placement.no_offscreen(self.wibox, mouse.screen)
-end
-
 -- Place the tooltip under the mouse.
 --
 -- @tparam tooltip self A tooltip object.
@@ -77,6 +70,8 @@ local function set_geometry(self)
     if my_geo.width ~= n_w or my_geo.height ~= n_h then
         self.wibox:geometry({ width = n_w, height = n_h })
     end
+    a_placement.next_to_mouse(self.wibox)
+    a_placement.no_offscreen(self.wibox, mouse.screen)
 end
 
 -- Show a tooltip.
@@ -92,7 +87,6 @@ local function show(self)
         end
     end
     set_geometry(self)
-    place(self)
     self.wibox.visible = true
     self.visible = true
 end
@@ -262,10 +256,6 @@ tooltip.new = function(args)
     -- Close the tooltip when clicking it.  This gets done on release, to not
     -- emit the release event on an underlying object, e.g. the titlebar icon.
     self.wibox:buttons(abutton({}, 1, nil, function() self.hide() end))
-
-    -- Re-place when the geometry of the wibox changes.
-    self.wibox:connect_signal("property::width",  function() place(self) end)
-    self.wibox:connect_signal("property::height", function() place(self) end)
 
     -- Add tooltip to objects
     if args.objects then
