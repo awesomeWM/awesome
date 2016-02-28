@@ -74,7 +74,13 @@ function xresources.get_dpi(s)
         return dpi_per_screen[s]
     end
     if not xresources.dpi then
-        xresources.dpi = tonumber(awesome.xrdb_get_value("", "Xft.dpi") or 96)
+        -- Might not be present when run under unit tests
+        if awesome and awesome.xrdb_get_value then
+            xresources.dpi = tonumber(awesome.xrdb_get_value("", "Xft.dpi"))
+        end
+        if not xresources.dpi then
+            xresources.dpi = 96
+        end
     end
     return xresources.dpi
 end
