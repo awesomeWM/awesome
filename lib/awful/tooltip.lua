@@ -65,7 +65,7 @@ local function get_wibox(self)
 
         -- Close the tooltip when clicking it.  This gets done on release, to not
         -- emit the release event on an underlying object, e.g. the titlebar icon.
-        self.wibox:buttons(abutton({}, 1, nil, function() self.hide() end))
+        self.wibox:buttons(abutton({}, 1, nil, self.hide))
     end
     return self.wibox
 end
@@ -75,14 +75,11 @@ end
 -- @tparam tooltip self A tooltip object.
 local function set_geometry(self)
     local wb = get_wibox(self)
-    local my_geo = wb:geometry()
     -- calculate width / height
     local n_w, n_h = self.textbox:get_preferred_size(mouse.screen)
     n_w = n_w + self.marginbox.left + self.marginbox.right
     n_h = n_h + self.marginbox.top + self.marginbox.bottom
-    if my_geo.width ~= n_w or my_geo.height ~= n_h then
-        wb:geometry({ width = n_w, height = n_h })
-    end
+    wb:geometry({ width = n_w, height = n_h })
     a_placement.next_to_mouse(wb)
     a_placement.no_offscreen(wb, mouse.screen)
 end
