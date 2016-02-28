@@ -48,6 +48,45 @@ describe("wibox.widget.base", function()
             assert.is.equal(0, #alive)
         end)
     end)
+
+    describe("setup", function()
+        it("Filters out 'false'", function()
+            -- Regression test: There was a bug where "nil"s where correctly
+            -- skipped, but "false" entries survived
+            local layout1, layout2 = base.make_widget(), base.make_widget()
+            local called = false
+            function layout1:set_widget(w)
+                called = true
+                assert.equals(w, layout2)
+            end
+            function layout2:set_children(children)
+                assert.is_same({nil, widget1, nil, widget2}, children)
+            end
+            layout2.allow_empty_widget = true
+            layout1:setup{ layout = layout2, false, widget1, nil, widget2 }
+            assert.is_true(called)
+        end)
+
+        it("Attribute 'false' works", function()
+            -- Regression test: I introduced a bug with the above fix
+            local layout1, layout2 = base.make_widget(), base.make_widget()
+            local called1, called2 = false, false
+            function layout1:set_widget(w)
+                called1 = true
+                assert.equals(w, layout2)
+            end
+            function layout2:set_children(children)
+                assert.is_same({}, children)
+            end
+            function layout2:set_foo(foo)
+                called2 = true
+                assert.is_false(foo)
+            end
+            layout1:setup{ layout = layout2, foo = false }
+            assert.is_true(called1)
+            assert.is_true(called2)
+        end)
+    end)
 end)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
