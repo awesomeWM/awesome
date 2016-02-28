@@ -24,6 +24,7 @@ local lgi = require("lgi")
 local Gio = lgi.Gio
 local GLib = lgi.GLib
 local util   = require("awful.util")
+local protected_call = require("gears.protected_call")
 
 local spawn = {}
 
@@ -205,10 +206,7 @@ function spawn.read_lines(input_stream, line_callback, done_callback, close)
             stream:close()
         end
         if done_callback then
-            xpcall(done_callback, function(err)
-                print(debug.traceback("Error while calling done_callback:"
-                    ..  tostring(err), 2))
-            end)
+            protected_call(done_callback)
         end
     end
     local start_read, finish_read
@@ -226,14 +224,9 @@ function spawn.read_lines(input_stream, line_callback, done_callback, close)
             done()
         else
             -- Read a line
-            xpcall(function()
-                -- This needs tostring() for older lgi versions which returned
-                -- "GLib.Bytes" instead of Lua strings (I guess)
-                line_callback(tostring(line))
-            end, function(err)
-                print(debug.traceback("Error while calling line_callback: "
-                    .. tostring(err), 2))
-            end)
+            -- This needs tostring() for older lgi versions which returned
+            -- "GLib.Bytes" instead of Lua strings (I guess)
+            protected_call(line_callback, tostring(line))
 
             -- Read the next line
             start_read()

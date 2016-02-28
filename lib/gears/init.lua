@@ -17,6 +17,7 @@ return
     cache = require("gears.cache");
     matrix = require("gears.matrix");
     shape = require("gears.shape");
+    protected_call = require("gears.protected_call");
 }
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
