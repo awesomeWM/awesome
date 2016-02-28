@@ -65,7 +65,10 @@ client.shape = require("awful.client.shape")
 -- Takes care of focussing the screen, the right tag, etc.
 --
 -- @client c the client to jump to
--- @tparam bool merge If true then merge tags when clients are not visible.
+-- @tparam bool|function merge If true then merge tags (select the client's
+--   first tag additionally) when the client is not visible.
+--   If it is a function, it will be called with the client and its first
+--   tag as arguments.
 function client.jumpto(c, merge)
     local s = get_screen(screen.focused())
     -- focus the screen
@@ -73,12 +76,16 @@ function client.jumpto(c, merge)
         screen.focus(c.screen)
     end
 
-    -- Try to make client visible, this also covers e.g. sticky
-    local t = c.first_tag
-    if t and not c:isvisible() then
+    -- Try to make client visible, this also covers e.g. sticky.
+    if not c:isvisible() then
+        local t = c.first_tag
         if merge then
-            t.selected = true
-        else
+            if type(merge) == "function" then
+                merge(c, t)
+            elseif t then
+                t.selected = true
+            end
+        elseif t then
             tag.viewonly(t)
         end
     end
@@ -105,7 +112,9 @@ end
 
 --- Jump to the client that received the urgent hint first.
 --
--- @tparam bool merge If true then merge tags when clients are not visible.
+-- @tparam bool|function merge If true then merge tags (select the client's
+--   first tag additionally) when the client is not visible.
+--   If it is a function, it will be called with the client as argument.
 function client.urgent.jumpto(merge)
     local c = client.urgent.get()
     if c then
@@ -1027,7 +1036,9 @@ end
 --
 -- @param cmd the command to execute
 -- @param matcher a function that returns true to indicate a matching client
--- @param merge if true then merge tags when clients are not visible
+-- @tparam bool|function merge If true then merge tags (select the client's
+--   first tag additionally) when the client is not visible.
+--   If it is a function, it will be called with the client as argument.
 --
 -- @usage -- run or raise urxvt (perhaps, with tabs) on modkey + semicolon
 -- awful.key({ modkey, }, 'semicolon', function ()
