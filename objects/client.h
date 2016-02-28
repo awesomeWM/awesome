@@ -121,6 +121,8 @@ struct client_t
     uint32_t pid;
     /** Window it is transient for */
     client_t *transient_for;
+    /** Value of WM_TRANSIENT_FOR */
+    xcb_window_t transient_for_window;
     /** Titelbar information */
     struct {
         /** The size of this bar. */
@@ -181,6 +183,7 @@ void client_restore_enterleave_events(void);
 void client_refresh_partial(client_t *, int16_t, int16_t, uint16_t, uint16_t);
 void client_class_setup(lua_State *);
 void client_send_configure(client_t *);
+void client_find_transient_for(client_t *);
 drawable_t *client_get_drawable(client_t *, int, int);
 drawable_t *client_get_drawable_offset(client_t *, int *, int *);
 
