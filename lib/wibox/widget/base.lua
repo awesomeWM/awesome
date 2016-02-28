@@ -337,13 +337,15 @@ local function parse_table(t, leave_empty)
     local attributes, widgets = {}, {}
     for k,v in pairs(t) do
         if type(k) == "number" then
-            -- As `ipairs` doesn't always work on sparse tables, update the
-            -- maximum
-            if k > max then
-                max = k
-            end
+            if v then
+                -- As `ipairs` doesn't always work on sparse tables, update the
+                -- maximum
+                if k > max then
+                    max = k
+                end
 
-            widgets[k] = v
+                widgets[k] = v
+            end
         else
             attributes[k] = v
         end
