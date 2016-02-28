@@ -8,6 +8,7 @@
 local object = require("gears.object")
 local cache = require("gears.cache")
 local matrix = require("gears.matrix")
+local protected_call = require("gears.protected_call")
 local util = require("awful.util")
 local setmetatable = setmetatable
 local pairs = pairs
@@ -144,7 +145,7 @@ local widget_dependencies = setmetatable({}, { __mode = "kv" })
 local function get_cache(widget, kind)
     if not widget._widget_caches[kind] then
         widget._widget_caches[kind] = cache.new(function(...)
-            return widget[kind](widget, ...)
+            return protected_call(widget[kind], widget, ...)
         end)
     end
     return widget._widget_caches[kind]
@@ -222,9 +223,9 @@ function base.fit_widget(parent, context, widget, width, height)
         end
     end
 
-    -- Apply forced size
-    w = widget._forced_width or w
-    h = widget._forced_height or h
+    -- Apply forced size and handle nil's
+    w = widget._forced_width or w or 0
+    h = widget._forced_height or h or 0
 
     -- Also sanitize the output.
     w = math.max(0, math.min(w, width))
