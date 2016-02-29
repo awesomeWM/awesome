@@ -17,7 +17,7 @@ local capi =
 local util = require("awful.util")
 
 local function get_screen(s)
-    return s and screen[s]
+    return s and capi.screen[s]
 end
 
 -- we use require("awful.client") inside functions to prevent circular dependencies.
@@ -58,12 +58,12 @@ end
 -- @param x The x coordinate
 -- @param y The y coordinate
 function screen.getbycoord(x, y)
-    local s = screen[1]
+    local s = capi.screen[1]
     local dist = screen.getdistance_sq(s, x, y)
     for i = 2, capi.screen:count() do
         local d = screen.getdistance_sq(i, x, y)
         if d < dist then
-            s, dist = screen[i], d
+            s, dist = capi.screen[i], d
         end
     end
     return s.index
