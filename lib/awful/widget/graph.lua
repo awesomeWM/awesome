@@ -14,6 +14,7 @@ local table = table
 local type = type
 local color = require("gears.color")
 local base = require("wibox.widget.base")
+local cairo = require("lgi").cairo
 
 local graph = { mt = {} }
 
@@ -118,11 +119,16 @@ function graph.draw(_graph, _, cr, width, height)
             end
         end
     else
+        local scale = 1
         if data[_graph].scale then
+            local cfg_max_value = max_value
             for _, v in ipairs(values) do
                 if v > max_value then
                     max_value = v
                 end
+            end
+            if max_value ~= cfg_max_value then
+                scale = cfg_max_value / max_value
             end
         end
 
@@ -137,7 +143,14 @@ function graph.draw(_graph, _, cr, width, height)
                     cr:line_to(i + 0.5, height)
                 end
             end
-            cr:set_source(color(data[_graph].color or "#ff0000"))
+            local color_pattern
+            if scale ~= 1 then
+                color_pattern = color.create_pattern_uncached(data[_graph].color or "#ff0000")
+                color_pattern:set_matrix(cairo.Matrix.create_scale(1, scale))
+            else
+                color_pattern = color(data[_graph].color or "#ff0000")
+            end
+            cr:set_source(color_pattern)
             cr:stroke()
         end
 
