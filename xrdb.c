@@ -65,14 +65,14 @@ int luaA_xrdb_get_value(lua_State *L) {
                                  &resource_type, &resource_value);
   if (resource_code && (strcmp(resource_type, "String") == 0)) {
     lua_pushstring(L, (char *)resource_value.addr);
-    return 1;
   } else {
     if (strlen(resource_class))
       luaA_warn(L, "Failed to get xrdb value '%s' (class '%s').", resource_name, resource_class);
     else
       luaA_warn(L, "Failed to get xrdb value '%s'.", resource_name);
-    return 0;
+    lua_pushnil(L);
   }
+  return 1;
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
