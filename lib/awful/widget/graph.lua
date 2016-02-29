@@ -17,8 +17,6 @@ local base = require("wibox.widget.base")
 
 local graph = { mt = {} }
 
-local data = setmetatable({}, { __mode = "k" })
-
 --- Set the graph border color.
 -- If the value is nil, no border will be drawn.
 --
@@ -70,26 +68,26 @@ local properties = { "width", "height", "border_color", "stack",
                      "max_value", "scale" }
 
 function graph.draw(_graph, _, cr, width, height)
-    local max_value = data[_graph].max_value
-    local values = data[_graph].values
+    local max_value = _graph._data.max_value
+    local values = _graph._data.values
 
     cr:set_line_width(1)
 
     -- Draw the background first
-    cr:set_source(color(data[_graph].background_color or "#000000aa"))
+    cr:set_source(color(_graph._data.background_color or "#000000aa"))
     cr:paint()
 
     -- Account for the border width
     cr:save()
-    if data[_graph].border_color then
+    if _graph._data.border_color then
         cr:translate(1, 1)
         width, height = width - 2, height - 2
     end
 
     -- Draw a stacked graph
-    if data[_graph].stack then
+    if _graph._data.stack then
 
-        if data[_graph].scale then
+        if _graph._data.scale then
             for _, v in ipairs(values) do
                 for _, sv in ipairs(v) do
                     if sv > max_value then
@@ -103,8 +101,8 @@ function graph.draw(_graph, _, cr, width, height)
             local rel_i = 0
             local rel_x = i + 0.5
 
-            if data[_graph].stack_colors then
-                for idx, col in ipairs(data[_graph].stack_colors) do
+            if _graph._data.stack_colors then
+                for idx, col in ipairs(_graph._data.stack_colors) do
                     local stack_values = values[idx]
                     if stack_values and i < #stack_values then
                         local value = stack_values[#stack_values - i] + rel_i
@@ -118,7 +116,7 @@ function graph.draw(_graph, _, cr, width, height)
             end
         end
     else
-        if data[_graph].scale then
+        if _graph._data.scale then
             for _, v in ipairs(values) do
                 if v > max_value then
                     max_value = v
@@ -137,7 +135,7 @@ function graph.draw(_graph, _, cr, width, height)
                     cr:line_to(i + 0.5, height)
                 end
             end
-            cr:set_source(color(data[_graph].color or "#ff0000"))
+            cr:set_source(color(_graph._data.color or "#ff0000"))
             cr:stroke()
         end
 
@@ -147,19 +145,19 @@ function graph.draw(_graph, _, cr, width, height)
     cr:restore()
 
     -- Draw the border last so that it overlaps already drawn values
-    if data[_graph].border_color then
+    if _graph._data.border_color then
         -- We decremented these by two above
         width, height = width + 2, height + 2
 
         -- Draw the border
         cr:rectangle(0.5, 0.5, width - 1, height - 1)
-        cr:set_source(color(data[_graph].border_color or "#ffffff"))
+        cr:set_source(color(_graph._data.border_color or "#ffffff"))
         cr:stroke()
     end
 end
 
 function graph.fit(_graph)
-    return data[_graph].width, data[_graph].height
+    return _graph._data.width, _graph._data.height
 end
 
 --- Add a value to the graph
@@ -170,28 +168,28 @@ local function add_value(_graph, value, group)
     if not _graph then return end
 
     value = value or 0
-    local values = data[_graph].values
-    local max_value = data[_graph].max_value
+    local values = _graph._data.values
+    local max_value = _graph._data.max_value
     value = math.max(0, value)
-    if not data[_graph].scale then
+    if not _graph._data.scale then
         value = math.min(max_value, value)
     end
 
-    if data[_graph].stack and group then
-        if not  data[_graph].values[group]
-        or type(data[_graph].values[group]) ~= "table"
+    if _graph._data.stack and group then
+        if not  _graph._data.values[group]
+        or type(_graph._data.values[group]) ~= "table"
         then
-            data[_graph].values[group] = {}
+            _graph._data.values[group] = {}
         end
-        values = data[_graph].values[group]
+        values = _graph._data.values[group]
     end
     table.insert(values, value)
 
     local border_width = 0
-    if data[_graph].border_color then border_width = 2 end
+    if _graph._data.border_color then border_width = 2 end
 
     -- Ensure we never have more data than we can draw
-    while #values > data[_graph].width - border_width do
+    while #values > _graph._data.width - border_width do
         table.remove(values, 1)
     end
 
@@ -204,7 +202,7 @@ end
 -- @param height The height to set.
 function graph:set_height(height)
     if height >= 5 then
-        data[self].height = height
+        self._data.height = height
         self:emit_signal("widget::layout_changed")
     end
     return self
@@ -214,7 +212,7 @@ end
 -- @param width The width to set.
 function graph:set_width(width)
     if width >= 5 then
-        data[self].width = width
+        self._data.width = width
         self:emit_signal("widget::layout_changed")
     end
     return self
@@ -224,8 +222,8 @@ end
 for _, prop in ipairs(properties) do
     if not graph["set_" .. prop] then
         graph["set_" .. prop] = function(_graph, value)
-            if data[_graph][prop] ~= value then
-                data[_graph][prop] = value
+            if _graph._data[prop] ~= value then
+                _graph._data[prop] = value
                 _graph:emit_signal("widget::redraw_needed")
             end
             return _graph
@@ -233,7 +231,7 @@ for _, prop in ipairs(properties) do
     end
     if not graph["get_" .. prop] then
         graph["get_" .. prop] = function(_graph)
-            return data[_graph][prop]
+            return _graph._data[prop]
         end
     end
 end
@@ -252,7 +250,7 @@ function graph.new(args)
 
     local _graph = base.make_widget()
 
-    data[_graph] = { width = width, height = height, values = {}, max_value = 1 }
+    _graph._data = { width = width, height = height, values = {}, max_value = 1 }
 
     -- Set methods
     _graph.add_value = add_value
