@@ -16,28 +16,24 @@ local matrix = require("gears.matrix")
 local mirror = { mt = {} }
 
 --- Layout this layout
-function mirror:layout(context, cr, width, height)
+function mirror:layout(_, width, height)
     if not self.widget then return end
-    if not self.horizontal and not self.vertical then
-        base.draw_widget(context, cr, self.widget, 0, 0, width, height)
-        return
-    end
 
     local m = matrix.identity
     local t = { x = 0, y = 0 } -- translation
     local s = { x = 1, y = 1 } -- scale
     if self.horizontal then
-        t.y = height
-        s.y = -1
-    end
-    if self.vertical then
         t.x = width
         s.x = -1
+    end
+    if self.vertical then
+        t.y = height
+        s.y = -1
     end
     m = m:translate(t.x, t.y)
     m = m:scale(s.x, s.y)
 
-    return base.place_widget_via_matrix(self.widget, m, width, height)
+    return { base.place_widget_via_matrix(self.widget, m, width, height) }
 end
 
 --- Fit this layout into the given area
