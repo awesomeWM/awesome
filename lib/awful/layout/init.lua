@@ -132,15 +132,13 @@ function layout.parameters(t, screen)
     screen = get_screen(screen)
     t = t or tag.selected(screen)
 
-    if not t then return end
-
-    screen = get_screen(tag.getscreen(t) or 1)
+    screen = get_screen(t and tag.getscreen(t) or 1)
 
     local p = {}
 
     p.workarea = screen.workarea
 
-    local useless_gap = tag.getgap(t, #client.tiled(screen))
+    local useless_gap = t and tag.getgap(t, #client.tiled(screen)) or 0
 
     -- Handle padding
     local padding = ascreen.padding(screen) or {}
