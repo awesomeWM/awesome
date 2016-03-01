@@ -76,6 +76,8 @@ function client.jumpto(c, merge)
         screen.focus(c.screen)
     end
 
+    c.minimized = false
+
     -- Try to make client visible, this also covers e.g. sticky.
     if not c:isvisible() then
         local t = c.first_tag
