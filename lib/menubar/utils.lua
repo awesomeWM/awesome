@@ -15,8 +15,11 @@ local string = string
 local screen = screen
 local awful_util = require("awful.util")
 local theme = require("beautiful")
-local glib = require("lgi").GLib
+local lgi = require("lgi")
+local gio = lgi.Gio
+local glib = lgi.GLib
 local wibox = require("wibox")
+local debug = require("gears.debug")
 
 local utils = {}
 
@@ -242,18 +245,51 @@ function utils.parse_desktop_file(file)
 end
 
 --- Parse a directory with .desktop files recursively.
--- @tparam string dir The directory.
--- @treturn table Paths of found .desktop files.
-function utils.parse_dir(dir)
-    local programs = {}
-    local files = io.popen('find '.. dir .." -name '*.desktop' 2>/dev/null")
-    for file in files:lines() do
-        local program = utils.parse_desktop_file(file)
-        if program then
-            table.insert(programs, program)
+-- @tparam string dir_path The directory path.
+-- @tparam function callback Will be fired when all the files were parsed
+-- with the resulting list of menu entries as argument.
+-- @tparam table callback.programs Paths of found .desktop files.
+function utils.parse_dir(dir_path, callback)
+
+    local function parser(dir, programs)
+        local f = gio.File.new_for_path(dir)
+        -- Except for "NONE" there is also NOFOLLOW_SYMLINKS
+        local enum, err = f:async_enumerate_children("standard::name", gio.FileQueryInfoFlags.NONE)
+        if not enum then
+            debug.print_error(err)
+            return
         end
+        local files_per_call = 100 -- Actual value is not that important
+        while true do
+            local list, enum_err = enum:async_next_files(files_per_call)
+            if enum_err then
+                debug.print_error(enum_err)
+                return
+            end
+            for _, info in ipairs(list) do
+                local file_type = info:get_file_type()
+                local file_path = enum:get_child(info):get_path()
+                if file_type == 'REGULAR' then
+                    local program = utils.parse_desktop_file(file_path)
+                    if program then
+                        table.insert(programs, program)
+                    end
+                elseif file_type == 'DIRECTORY' then
+                    parser(file_path, programs)
+                end
+            end
+            if #list == 0 then
+                break
+            end
+        end
+        enum:async_close()
     end
-    return programs
+
+    gio.Async.start(function()
+        local result = {}
+        parser(dir_path, result)
+        callback(result)
+    end)()
 end
 
 --- Compute textbox width.

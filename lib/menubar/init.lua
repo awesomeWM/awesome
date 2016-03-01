@@ -232,9 +232,10 @@ local function menulist_update(query, scr)
 end
 
 --- Create the menubar wibox and widgets.
-local function initialize()
+-- @tparam[opt] screen scr Screen.
+local function initialize(scr)
     instance.wibox = wibox({})
-    instance.widget = menubar.get()
+    instance.widget = menubar.get(scr)
     instance.wibox.ontop = true
     instance.prompt = awful.widget.prompt()
     local layout = wibox.layout.fixed.horizontal()
@@ -244,8 +245,12 @@ local function initialize()
 end
 
 --- Refresh menubar's cache by reloading .desktop files.
-function menubar.refresh()
-    menubar.menu_entries = menubar.menu_gen.generate()
+-- @tparam[opt] screen scr Screen.
+function menubar.refresh(scr)
+    menubar.menu_gen.generate(function(entries)
+        menubar.menu_entries = entries
+        menulist_update(nil, scr)
+    end)
 end
 
 --- Awful.prompt keypressed callback to be used when the user presses a key.
@@ -296,11 +301,11 @@ end
 -- @param scr Screen.
 function menubar.show(scr)
     if not instance.wibox then
-        initialize()
+        initialize(scr)
     elseif instance.wibox.visible then -- Menu already shown, exit
         return
     elseif not menubar.cache_entries then
-        menubar.refresh()
+        menubar.refresh(scr)
     end
 
     -- Set position and size
@@ -337,9 +342,10 @@ function menubar.hide()
 end
 
 --- Get a menubar wibox.
+-- @tparam[opt] screen scr Screen.
 -- @return menubar wibox.
-function menubar.get()
-    menubar.refresh()
+function menubar.get(scr)
+    menubar.refresh(scr)
     -- Add to each category the name of its key in all_categories
     for k, v in pairs(menubar.menu_gen.all_categories) do
         v.key = k
@@ -347,7 +353,7 @@ function menubar.get()
     return common_args.w
 end
 
-function menubar.mt:__call(...)
+function menubar.mt.__call(_, ...)
     return menubar.get(...)
 end
 

@@ -83,48 +83,58 @@ local function trim(s)
 end
 
 --- Generate an array of all visible menu entries.
--- @treturn table All menu entries.
-function menu_gen.generate()
+-- @tparam function callback Will be fired when all menu entries were parsed
+-- with the resulting list of menu entries as argument.
+-- @tparam table callback.entries All menu entries.
+function menu_gen.generate(callback)
     -- Update icons for category entries
     menu_gen.lookup_category_icons()
 
     local result = {}
     local unique_entries = {}
+    local dirs_parsed = 0
+
     for _, dir in ipairs(menu_gen.all_menu_dirs) do
-        for _, entry in ipairs(utils.parse_dir(dir)) do
-            -- Check whether to include program in the menu
-            if entry.show and entry.Name and entry.cmdline then
-                local unique_key = entry.Name .. '\0' .. entry.cmdline
-                if not unique_entries[unique_key] then
-                    local target_category = nil
-                    -- Check if the program falls into at least one of the
-                    -- usable categories. Set target_category to be the id
-                    -- of the first category it finds.
-                    if entry.categories then
-                        for _, category in pairs(entry.categories) do
-                            local cat_key, cat_use =
-                            get_category_name_and_usage_by_type(category)
-                            if cat_key and cat_use then
-                                target_category = cat_key
-                                break
+        utils.parse_dir(dir, function(entries)
+            entries = entries or {}
+            for _, entry in ipairs(entries) do
+                -- Check whether to include program in the menu
+                if entry.show and entry.Name and entry.cmdline then
+                    local unique_key = entry.Name .. '\0' .. entry.cmdline
+                    if not unique_entries[unique_key] then
+                        local target_category = nil
+                        -- Check if the program falls into at least one of the
+                        -- usable categories. Set target_category to be the id
+                        -- of the first category it finds.
+                        if entry.categories then
+                            for _, category in pairs(entry.categories) do
+                                local cat_key, cat_use =
+                                get_category_name_and_usage_by_type(category)
+                                if cat_key and cat_use then
+                                    target_category = cat_key
+                                    break
+                                end
                             end
                         end
-                    end
-                    if target_category then
-                        local name = trim(entry.Name) or ""
-                        local cmdline = trim(entry.cmdline) or ""
-                        local icon = entry.icon_path or nil
-                        table.insert(result, { name = name,
-                                     cmdline = cmdline,
-                                     icon = icon,
-                                     category = target_category })
-                        unique_entries[unique_key] = true
+                        if target_category then
+                            local name = trim(entry.Name) or ""
+                            local cmdline = trim(entry.cmdline) or ""
+                            local icon = entry.icon_path or nil
+                            table.insert(result, { name = name,
+                                         cmdline = cmdline,
+                                         icon = icon,
+                                         category = target_category })
+                            unique_entries[unique_key] = true
+                        end
                     end
                 end
             end
-        end
+            dirs_parsed = dirs_parsed + 1
+            if dirs_parsed == #menu_gen.all_menu_dirs then
+                callback(result)
+            end
+        end)
     end
-    return result
 end
 
 return menu_gen
