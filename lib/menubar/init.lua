@@ -61,13 +61,17 @@ menubar.geometry = { width = nil,
                      y = nil }
 
 --- Width of blank space left in the right side.
-menubar.right_margin = 50
+menubar.right_margin = theme.xresources.apply_dpi(8)
 
 --- Label used for "Next page", default "▶▶".
 menubar.right_label = "▶▶"
 
 --- Label used for "Previous page", default "◀◀".
 menubar.left_label = "◀◀"
+
+-- awful.widget.common.list_update adds three times a margin of dpi(4)
+-- for each item:
+local list_interspace = theme.xresources.apply_dpi(4) * 3
 
 --- Allows user to specify custom parameters for prompt.run function
 -- (like colors).
@@ -147,8 +151,8 @@ local function get_current_page(all_items, query, scr)
     local current_page = {}
     for i, item in ipairs(all_items) do
         item.width = item.width or
-            compute_text_width(" " .. item.name, scr) +
-            (item.icon and instance.geometry.height or 0)
+            compute_text_width(item.name, scr) +
+            (item.icon and instance.geometry.height or 0) + list_interspace
         if width_sum + item.width > available_space then
             if current_item < i then
                 table.insert(current_page, { name = menubar.right_label, icon = nil })
