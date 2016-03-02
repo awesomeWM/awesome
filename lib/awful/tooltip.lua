@@ -42,6 +42,7 @@
 
 local mouse = mouse
 local timer = require("gears.timer")
+local object = require("gears.object")
 local wibox = require("wibox")
 local a_placement = require("awful.placement")
 local abutton = require("awful.button")
@@ -101,6 +102,7 @@ local function show(self)
     set_geometry(self)
     self.wibox.visible = true
     self.visible = true
+    self:emit_signal("property::visible")
 end
 
 -- Hide a tooltip.
@@ -116,6 +118,7 @@ local function hide(self)
     end
     self.wibox.visible = false
     self.visible = false
+    self:emit_signal("property::visible")
 end
 
 --- Change displayed text.
@@ -155,25 +158,26 @@ end
 --- Add tooltip to an object.
 --
 -- @tparam tooltip self The tooltip.
--- @tparam gears.object object An object with `mouse::enter` and
+-- @tparam gears.object obj An object with `mouse::enter` and
 --   `mouse::leave` signals.
-tooltip.add_to_object = function(self, object)
-    object:connect_signal("mouse::enter", self.show)
-    object:connect_signal("mouse::leave", self.hide)
+tooltip.add_to_object = function(self, obj)
+    obj:connect_signal("mouse::enter", self.show)
+    obj:connect_signal("mouse::leave", self.hide)
 end
 
 --- Remove tooltip from an object.
 --
 -- @tparam tooltip self The tooltip.
--- @tparam gears.object object An object with `mouse::enter` and
+-- @tparam gears.object obj An object with `mouse::enter` and
 --   `mouse::leave` signals.
-tooltip.remove_from_object = function(self, object)
-    object:disconnect_signal("mouse::enter", self.show)
-    object:disconnect_signal("mouse::leave", self.hide)
+tooltip.remove_from_object = function(self, obj)
+    obj:disconnect_signal("mouse::enter", self.show)
+    obj:disconnect_signal("mouse::leave", self.hide)
 end
 
 
 --- Create a new tooltip and link it to a widget.
+-- Tooltips emit `property::visible` when their visibility changes.
 -- @tparam table args Arguments for tooltip creation.
 -- @tparam[opt=1] number args.timeout The timeout value for
 --   `timer_function`.
@@ -191,9 +195,9 @@ end
 -- @see set_text
 -- @see set_markup
 tooltip.new = function(args)
-    local self = setmetatable({
-        visible = false,
-    }, instance_mt)
+    local self = setmetatable(object(), instance_mt)
+    self:add_signal("property::visible")
+    self.visible = false
 
     -- private data
     if args.delay_show then
@@ -265,8 +269,8 @@ tooltip.new = function(args)
 
     -- Add tooltip to objects
     if args.objects then
-        for _, object in ipairs(args.objects) do
-            self:add_to_object(object)
+        for _, obj in ipairs(args.objects) do
+            self:add_to_object(obj)
         end
     end
 
