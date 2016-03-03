@@ -338,13 +338,15 @@ local function parse_table(t, leave_empty)
     local attributes, widgets = {}, {}
     for k,v in pairs(t) do
         if type(k) == "number" then
-            -- As `ipairs` doesn't always work on sparse tables, update the
-            -- maximum
-            if k > max then
-                max = k
-            end
+            if v then
+                -- As `ipairs` doesn't always work on sparse tables, update the
+                -- maximum
+                if k > max then
+                    max = k
+                end
 
-            widgets[k] = v
+                widgets[k] = v
+            end
         else
             attributes[k] = v
         end
@@ -391,6 +393,7 @@ local function drill(ids, content)
                 e, id2 = drill(ids, v)
                 widgets[k] = e
             end
+            base.check_widget(widgets[k])
 
             -- Place the widget in the access table
             if id2 then
@@ -559,7 +562,8 @@ end
 --- Do some sanity checking on widget. This function raises a lua error if
 -- widget is not a valid widget.
 function base.check_widget(widget)
-    assert(type(widget) == "table")
+    assert(type(widget) == "table", "Type should be table, but is " .. tostring(type(widget)))
+    assert(widget.is_widget, "Argument is not a widget!")
     for _, func in pairs({ "add_signal", "connect_signal", "disconnect_signal" }) do
         assert(type(widget[func]) == "function", func .. " is not a function")
     end

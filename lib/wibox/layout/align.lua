@@ -175,11 +175,9 @@ end
 -- This layout only accept three children, all others will be ignored
 -- @tparam table children A table composed of valid widgets
 function align:set_children(children)
-    if not children then return self:reset() end
-    self.first  = children[1]
-    self.second = children[2]
-    self.third  = children[3]
-    self:emit_signal("widget::layout_changed")
+    self:set_first(children[1])
+    self:set_second(children[2])
+    self:set_third(children[3])
 end
 
 --- Fit the align layout into the given space. The align layout will

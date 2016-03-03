@@ -84,6 +84,7 @@ return {
         local w = object()
         w:add_signal("widget::redraw_needed")
         w:add_signal("widget::layout_changed")
+        w.is_widget = true
         w.visible = true
         w.opacity = 1
         if width or height then

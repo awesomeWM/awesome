@@ -5,6 +5,7 @@
 -- @classmod wibox.layout.fixed
 ---------------------------------------------------------------------------
 
+local unpack = unpack or table.unpack -- luacheck: globals unpack (compatibility with Lua 5.1)
 local base  = require("wibox.widget.base")
 local table = table
 local pairs = pairs
@@ -110,9 +111,10 @@ end
 --- Replace the layout children
 -- @tparam table children A table composed of valid widgets
 function fixed:set_children(children)
-    if not children then return self:reset() end
-    self.widgets = children
-    self:emit_signal("widget::layout_changed")
+    self:reset()
+    if #children > 0 then
+        self:add(unpack(children))
+    end
 end
 
 --- Replace the first instance of `widget` in the layout with `widget2`

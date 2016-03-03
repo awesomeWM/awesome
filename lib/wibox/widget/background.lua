@@ -109,8 +109,7 @@ end
 -- This layout only accept one children, all others will be ignored
 -- @tparam table children A table composed of valid widgets
 function background:set_children(children)
-    self.widget = children and children[1]
-    self:emit_signal("widget::layout_changed")
+    self:set_widget(children[1])
 end
 
 --- Set the background to use
