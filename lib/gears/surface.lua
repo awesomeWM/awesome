@@ -41,8 +41,6 @@ function surface.load_uncached_silently(_surface, default)
     if not _surface then
         return get_default(default)
     end
-    -- Remove from cache if it was cached
-    surface_cache[_surface] = nil
     -- lgi cairo surfaces don't get changed either
     if cairo.Surface:is_type_of(_surface) then
         return _surface
@@ -57,12 +55,7 @@ function surface.load_uncached_silently(_surface, default)
         end
     end
     -- Everything else gets forced into a surface
-    _surface = cairo.Surface(_surface, true)
-    -- If we loaded a file, cache it
-    if file then
-        surface_cache[file] = _surface
-    end
-    return _surface
+    return cairo.Surface(_surface, true)
 end
 
 --- Try to convert the argument into an lgi cairo surface.
@@ -80,6 +73,12 @@ function surface.load_silently(_surface, default)
         if cache then
             return cache
         end
+        local result, err = surface.load_uncached_silently(_surface, default)
+        if not err then
+            -- Cache the file
+            surface_cache[_surface] = result
+        end
+        return result, err
     end
     return surface.load_uncached_silently(_surface, default)
 end
