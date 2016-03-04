@@ -333,6 +333,9 @@ end
 
 pattern_cache = require("gears.cache").new(color.create_pattern_uncached)
 
+--- No color
+color.transparent = color.create_pattern("#00000000")
+
 return setmetatable(color, color.mt)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
