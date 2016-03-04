@@ -396,10 +396,10 @@ luaA_drawin_geometry(lua_State *L)
         area_t wingeom;
 
         luaA_checktable(L, 2);
-        wingeom.x = luaA_getopt_integer(L, 2, "x", drawin->geometry.x);
-        wingeom.y = luaA_getopt_integer(L, 2, "y", drawin->geometry.y);
-        wingeom.width = luaA_getopt_integer(L, 2, "width", drawin->geometry.width);
-        wingeom.height = luaA_getopt_integer(L, 2, "height", drawin->geometry.height);
+        wingeom.x = luaA_getopt_number(L, 2, "x", drawin->geometry.x);
+        wingeom.y = luaA_getopt_number(L, 2, "y", drawin->geometry.y);
+        wingeom.width = luaA_getopt_number(L, 2, "width", drawin->geometry.width);
+        wingeom.height = luaA_getopt_number(L, 2, "height", drawin->geometry.height);
 
         if(wingeom.width > 0 && wingeom.height > 0)
             drawin_moveresize(L, 1, wingeom);
