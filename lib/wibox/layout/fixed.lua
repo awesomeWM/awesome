@@ -164,9 +164,17 @@ function fixed:swap_widgets(widget1, widget2, recursive)
     local idx1, l1 = self:index(widget1, recursive)
     local idx2, l2 = self:index(widget2, recursive)
 
-    if idx1 and l1 and idx2 and l2 then
-        l1:set(idx1, widget2)
-        l2:set(idx2, widget1)
+    if idx1 and l1 and idx2 and l2 and (l1.set or l1.set_widget) and (l2.set or l2.set_widget) then
+        if l1.set then
+            l1:set(idx1, widget2)
+        elseif l1.set_widget then
+            l1:set_widget(widget2)
+        end
+        if l2.set then
+            l2:set(idx2, widget1)
+        elseif l2.set_widget then
+            l2:set_widget(widget1)
+        end
 
         return true
     end

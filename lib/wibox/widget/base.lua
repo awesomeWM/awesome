@@ -460,7 +460,7 @@ function base.make_widget_declarative(args)
     rawset(w, "get_children_by_id", get_children_by_id)
 
     mt.__tostring = function()
-        return string.format("%s (%s)", id, orig_string)
+        return string.format("%s (%s)", id or w.widget_name or "N/A", orig_string)
     end
 
     return setmetatable(w, mt)
