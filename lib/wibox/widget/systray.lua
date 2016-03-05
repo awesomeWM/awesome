@@ -103,18 +103,27 @@ end
 -- @tparam integer|nil size The base size
 function systray:set_base_size(size)
     base_size = get_args(self, size)
+    if instance then
+        instance:emit_signal("widget::layout_changed")
+    end
 end
 
 --- Decide between horizontal or vertical display.
 -- @tparam boolean horiz Use horizontal mode?
 function systray:set_horizontal(horiz)
     horizontal = get_args(self, horiz)
+    if instance then
+        instance:emit_signal("widget::layout_changed")
+    end
 end
 
 --- Should the systray icons be displayed in reverse order?
 -- @tparam boolean rev Display in reverse order
 function systray:set_reverse(rev)
     reverse = get_args(self, rev)
+    if instance then
+        instance:emit_signal("widget::redraw_needed")
+    end
 end
 
 --- Set the screen that the systray should be displayed on.
@@ -124,6 +133,9 @@ end
 -- @tparam screen|"primary" s The screen to display on.
 function systray:set_screen(s)
     display_on_screen = get_args(self, s)
+    if instance then
+        instance:emit_signal("widget::layout_changed")
+    end
 end
 
 local function new(revers)
