@@ -14,6 +14,7 @@ local abs = math.abs
 
 local systray = { mt = {} }
 
+local instance = nil
 local horizontal = true
 local base_size = nil
 local reverse = false
@@ -69,14 +70,40 @@ function systray:fit(_, width, height)
     return base, base * num_entries - spacing
 end
 
+-- Check if the function was called like :foo() or .foo() and do the right thing
+local function get_args(self, ...)
+    if self == instance then
+        return ...
+    end
+    return self, ...
+end
+
+--- Set the size of a single icon.
+-- If this is set to nil, then the size is picked dynamically based on the
+-- available space. Otherwise, any single icon has a size of `size`x`size`.
+-- @tparam integer|nil size The base size
+function systray:set_base_size(size)
+    base_size = get_args(self, size)
+end
+
+--- Decide between horizontal or vertical display.
+-- @tparam boolean horiz Use horizontal mode?
+function systray:set_horizontal(horiz)
+    horizontal = get_args(self, horiz)
+end
+
+--- Should the systray icons be displayed in reverse order?
+-- @tparam boolean rev Display in reverse order
+function systray:set_reverse(rev)
+    reverse = get_args(self, rev)
+end
+
 local function new(revers)
     local ret = wbase.make_widget()
 
-    ret.fit = systray.fit
-    ret.draw = systray.draw
-    ret.set_base_size = function(_, size) base_size = size end
-    ret.set_horizontal = function(_, horiz) horizontal = horiz end
-    ret.set_reverse = function(arg) reverse = arg end
+    for k, v in pairs(systray) do
+        ret[k] = v
+    end
 
     if revers then
         ret:set_reverse(true)
@@ -90,7 +117,6 @@ local function new(revers)
     return ret
 end
 
-local instance
 function systray.mt:__call(...)
     if not instance then
         instance = new(...)
