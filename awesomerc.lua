@@ -208,7 +208,7 @@ for s = 1, screen.count() do
         { -- Right widgets
             layout = wibox.layout.fixed.horizontal,
             mykeyboardlayout,
-            s == 1 and wibox.widget.systray(),
+            wibox.widget.systray(),
             mytextclock,
             mylayoutbox[s],
         },
