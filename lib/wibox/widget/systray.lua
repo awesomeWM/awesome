@@ -90,8 +90,12 @@ local function new(revers)
     return ret
 end
 
+local instance
 function systray.mt:__call(...)
-    return new(...)
+    if not instance then
+        instance = new(...)
+    end
+    return instance
 end
 
 return setmetatable(systray, systray.mt)
