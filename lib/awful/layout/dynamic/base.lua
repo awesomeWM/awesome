@@ -447,8 +447,6 @@ local function register(name, bl, ...)
         l_obj.honor_gap = generator.honor_gap == nil
             and true or generator.honor_gap
 
-        l_obj.mouse_resize_handler = l.mouse_resize_handler
-
         --TODO implement :reset() here
 
         return l_obj
