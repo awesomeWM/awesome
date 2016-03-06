@@ -325,7 +325,6 @@ a_dbus_convert_value(lua_State *L, int idx, DBusMessageIter *iter)
         } \
         break;
     DBUS_MSG_RETURN_HANDLE_TYPE_STRING(DBUS_TYPE_STRING)
-    DBUS_MSG_RETURN_HANDLE_TYPE_STRING(DBUS_TYPE_BYTE)
 #undef DBUS_MSG_RETURN_HANDLE_TYPE_STRING
 #define DBUS_MSG_RETURN_HANDLE_TYPE_NUMBER(type, dbustype) \
       case dbustype: \
@@ -334,6 +333,7 @@ a_dbus_convert_value(lua_State *L, int idx, DBusMessageIter *iter)
            dbus_message_iter_append_basic(iter, dbustype, &num); \
         } \
         break;
+    DBUS_MSG_RETURN_HANDLE_TYPE_NUMBER(uint8_t, DBUS_TYPE_BYTE)
     DBUS_MSG_RETURN_HANDLE_TYPE_NUMBER(int16_t, DBUS_TYPE_INT16)
     DBUS_MSG_RETURN_HANDLE_TYPE_NUMBER(uint16_t, DBUS_TYPE_UINT16)
     DBUS_MSG_RETURN_HANDLE_TYPE_NUMBER(int32_t, DBUS_TYPE_INT32)
