@@ -315,17 +315,14 @@ a_dbus_convert_value(lua_State *L, int idx, DBusMessageIter *iter)
             dbus_message_iter_append_basic(iter, DBUS_TYPE_BOOLEAN, &b);
         }
         break;
-#define DBUS_MSG_RETURN_HANDLE_TYPE_STRING(dbustype) \
-      case dbustype: \
-        { \
-            const char *s = lua_tostring(L, idx + 1); \
-            if(!s) \
-                s = ""; \
-            dbus_message_iter_append_basic(iter, dbustype, &s); \
-        } \
+      case DBUS_TYPE_STRING:
+        {
+            const char *s = lua_tostring(L, idx + 1);
+            if(!s)
+                s = "";
+            dbus_message_iter_append_basic(iter, DBUS_TYPE_STRING, &s);
+        }
         break;
-    DBUS_MSG_RETURN_HANDLE_TYPE_STRING(DBUS_TYPE_STRING)
-#undef DBUS_MSG_RETURN_HANDLE_TYPE_STRING
 #define DBUS_MSG_RETURN_HANDLE_TYPE_NUMBER(type, dbustype) \
       case dbustype: \
         { \
