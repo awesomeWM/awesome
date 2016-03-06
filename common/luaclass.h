@@ -74,6 +74,10 @@ struct lua_class_t
     unsigned int instances;
     /** Class tostring method */
     lua_class_propfunc_t tostring;
+    /** Function to call on index misses */
+    int index_miss_handler;
+    /** Function to call on newindex misses */
+    int newindex_miss_handler;
 };
 
 const char * luaA_typename(lua_State *, int);
@@ -152,6 +156,18 @@ luaA_checkudataornil(lua_State *L, int udx, lua_class_t *class)
     {                                                                          \
         lua_pushinteger(L, (lua_class).instances);                             \
         return 1;                                                              \
+    }                                                                          \
+                                                                               \
+    static inline int                                                          \
+    luaA_##prefix##_set_index_miss_handler(lua_State *L)                       \
+    {                                                                          \
+        return luaA_registerfct(L, 1, &(lua_class).index_miss_handler);        \
+    }                                                                          \
+                                                                               \
+    static inline int                                                          \
+    luaA_##prefix##_set_newindex_miss_handler(lua_State *L)                    \
+    {                                                                          \
+        return luaA_registerfct(L, 1, &(lua_class).newindex_miss_handler);     \
     }
 
 #define LUA_CLASS_METHODS(class) \
@@ -160,6 +176,8 @@ luaA_checkudataornil(lua_State *L, int udx, lua_class_t *class)
     { "disconnect_signal", luaA_##class##_class_disconnect_signal }, \
     { "emit_signal", luaA_##class##_class_emit_signal }, \
     { "instances", luaA_##class##_class_instances }, \
+    { "set_index_miss_handler", luaA_##class##_set_index_miss_handler }, \
+    { "set_newindex_miss_handler", luaA_##class##_set_newindex_miss_handler }, \
 
 #define LUA_CLASS_META \
     { "__index", luaA_class_index }, \
