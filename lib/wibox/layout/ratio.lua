@@ -215,7 +215,7 @@ function ratio:set_ratio(index, percent)
     self:emit_signal("widget::layout_changed")
 end
 
---- The the ratio at `index`
+--- Get the ratio at `index`.
 -- @tparam number index The widget index to query
 -- @treturn number The index (between 0 and 1)
 function ratio:get_ratio(index)
@@ -223,9 +223,9 @@ function ratio:get_ratio(index)
     return self._ratios[index]
 end
 
---- Set the ratio of "widget"
--- @param widget The widget to ajust
--- @tparam number percent An floating point value between 0 and 1
+--- Set the ratio of `widget` to `percent`.
+-- @tparam widget widget The widget to ajust.
+-- @tparam number percent A floating point value between 0 and 1.
 function ratio:set_widget_ratio(widget, percent)
     local index = self:index(widget)
 
