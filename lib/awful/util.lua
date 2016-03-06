@@ -362,7 +362,7 @@ function util.get_rectangle_in_direction(dir, recttbl, cur)
     local target = nil
 
     -- We check each object
-    for i, rect in ipairs(recttbl) do
+    for i, rect in pairs(recttbl) do
         -- Check geometry to see if object is located in the right direction.
         if is_in_direction(dir, cur, rect) then
             -- Calculate distance between current and checked object.
