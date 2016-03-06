@@ -1,6 +1,7 @@
 -- Some benchmarks that aren't really tests, but are included here anyway so
 -- that we notice if they break.
 
+local runner = require("_runner")
 local awful = require("awful")
 local GLib = require("lgi").GLib
 local create_wibox = require("_wibox_helper").create_wibox
@@ -75,6 +76,6 @@ benchmark(relayout_textclock, "relayout textclock")
 benchmark(redraw_textclock, "redraw textclock")
 benchmark(e2e_tag_switch, "tag switch")
 
-require("_runner").run_steps({ function() return true end })
+runner.run_steps({ function() return true end })
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

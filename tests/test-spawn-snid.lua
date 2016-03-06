@@ -1,5 +1,6 @@
 --- Tests for spawn's startup notifications.
 
+local runner = require("_runner")
 local spawn = require("awful.spawn")
 
 local manage_called, c_snid
@@ -38,6 +39,6 @@ local steps = {
   end
 }
 
-require("_runner").run_steps(steps)
+runner.run_steps(steps)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

@@ -16,6 +16,20 @@ runner.add_to_default_rules = function(r)
   table.insert(awful.rules.rules, r)
 end
 
+-- Was the runner started already?
+local running = false
+
+-- This is used if a test causes errors before starting the runner
+timer.start_new(1, function()
+    if not running then
+        io.stderr:write("Error: run_steps() was never called\n")
+        if not runner.quit_awesome_on_error then
+            io.stderr:write("Keeping awesome open...\n")
+            return  -- keep awesome open on error.
+        end
+        awesome.quit()
+    end
+end)
 
 runner.run_steps = function(steps)
   -- Setup timer/timeout to limit waiting for signal and quitting awesome.
@@ -24,6 +38,8 @@ runner.run_steps = function(steps)
   local wait=20
   local step=1
   local step_count=0
+  assert(not running, "run_steps() was called twice")
+  running = true
   t:connect_signal("timeout", function() timer.delayed_call(function()
     io.flush()  -- for "tail -f".
     step_count = step_count + 1
