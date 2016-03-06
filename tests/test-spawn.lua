@@ -1,5 +1,6 @@
 --- Tests for spawn
 
+local runner = require("_runner")
 local spawn = require("awful.spawn")
 
 local spawns_done = 0
@@ -63,6 +64,6 @@ local steps = {
   end,
 }
 
-require("_runner").run_steps(steps)
+runner.run_steps(steps)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

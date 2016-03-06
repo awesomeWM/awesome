@@ -1,5 +1,6 @@
 -- Some memory leak checks as integration tests.
 
+local runner = require("_runner")
 local awful = require("awful")
 local cairo = require("lgi").cairo
 local create_wibox = require("_wibox_helper").create_wibox
@@ -77,6 +78,6 @@ collectable(awful.widget.tasklist(1, awful.widget.tasklist.filter.currenttags))
 prepare_for_collect = emit_refresh
 collectable(create_wibox())
 
-require("_runner").run_steps({ function() return true end })
+runner.run_steps({ function() return true end })
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

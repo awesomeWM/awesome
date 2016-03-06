@@ -1,6 +1,7 @@
 --- Tests for focus signals / property.
 -- Test for https://github.com/awesomeWM/awesome/issues/134.
 
+local runner = require("_runner")
 local awful = require("awful")
 
 local beautiful = require("beautiful")
@@ -44,6 +45,6 @@ local steps = {
   end
 }
 
-require("_runner").run_steps(steps)
+runner.run_steps(steps)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
