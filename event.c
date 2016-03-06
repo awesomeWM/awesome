@@ -122,10 +122,11 @@ event_handle_mousegrabber(int x, int y, uint16_t mask)
         {
             warn("Stopping mousegrabber.");
             luaA_mousegrabber_stop(L);
+        } else {
+            if(!lua_isboolean(L, -1) || !lua_toboolean(L, -1))
+                luaA_mousegrabber_stop(L);
+            lua_pop(L, 1);  /* pop returned value */
         }
-        else if(!lua_isboolean(L, -1) || !lua_toboolean(L, -1))
-            luaA_mousegrabber_stop(L);
-        lua_pop(L, 1);  /* pop returned value */
         return true;
     }
     return false;
