@@ -63,7 +63,6 @@ file = {
         '../lib/gears/init.lua',
         '../lib/wibox/layout/init.lua',
         '../lib/wibox/widget/init.lua',
-        '../lib/wibox/widget/systray.lua',
 
         -- Ignore some parts of the widget library
         '../lib/awful/widget/init.lua',

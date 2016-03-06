@@ -7,18 +7,34 @@
 
 local wbase = require("wibox.widget.base")
 local beautiful = require("beautiful")
-local capi = { awesome = awesome }
+local capi = {
+    awesome = awesome,
+    screen = screen
+}
 local setmetatable = setmetatable
 local error = error
 local abs = math.abs
 
 local systray = { mt = {} }
 
+local instance = nil
 local horizontal = true
 local base_size = nil
 local reverse = false
+local display_on_screen = "primary"
+
+local function should_display_on(s)
+    if display_on_screen == "primary" then
+        return s == capi.screen.primary
+    end
+    return s == display_on_screen
+end
 
 function systray:draw(context, cr, width, height)
+    if not should_display_on(context.screen) then
+        return
+    end
+
     local x, y, _, _ = wbase.rect_to_device_geometry(cr, 0, 0, width, height)
     local num_entries = capi.awesome.systray()
     local bg = beautiful.bg_systray or beautiful.bg_normal or "#000000"
@@ -48,7 +64,11 @@ function systray:draw(context, cr, width, height)
                          base, is_rotated, bg, reverse, spacing)
 end
 
-function systray:fit(_, width, height)
+function systray:fit(context, width, height)
+    if not should_display_on(context.screen) then
+        return 0, 0
+    end
+
     local num_entries = capi.awesome.systray()
     local base = base_size
     local spacing = beautiful.systray_icon_spacing or 0
@@ -69,14 +89,61 @@ function systray:fit(_, width, height)
     return base, base * num_entries - spacing
 end
 
+-- Check if the function was called like :foo() or .foo() and do the right thing
+local function get_args(self, ...)
+    if self == instance then
+        return ...
+    end
+    return self, ...
+end
+
+--- Set the size of a single icon.
+-- If this is set to nil, then the size is picked dynamically based on the
+-- available space. Otherwise, any single icon has a size of `size`x`size`.
+-- @tparam integer|nil size The base size
+function systray:set_base_size(size)
+    base_size = get_args(self, size)
+    if instance then
+        instance:emit_signal("widget::layout_changed")
+    end
+end
+
+--- Decide between horizontal or vertical display.
+-- @tparam boolean horiz Use horizontal mode?
+function systray:set_horizontal(horiz)
+    horizontal = get_args(self, horiz)
+    if instance then
+        instance:emit_signal("widget::layout_changed")
+    end
+end
+
+--- Should the systray icons be displayed in reverse order?
+-- @tparam boolean rev Display in reverse order
+function systray:set_reverse(rev)
+    reverse = get_args(self, rev)
+    if instance then
+        instance:emit_signal("widget::redraw_needed")
+    end
+end
+
+--- Set the screen that the systray should be displayed on.
+-- This can either be a screen, in which case the systray will be displayed on
+-- exactly that screen, or the string `"primary"`, in which case it will be
+-- visible on the primary screen. The default value is "primary".
+-- @tparam screen|"primary" s The screen to display on.
+function systray:set_screen(s)
+    display_on_screen = get_args(self, s)
+    if instance then
+        instance:emit_signal("widget::layout_changed")
+    end
+end
+
 local function new(revers)
     local ret = wbase.make_widget()
 
-    ret.fit = systray.fit
-    ret.draw = systray.draw
-    ret.set_base_size = function(_, size) base_size = size end
-    ret.set_horizontal = function(_, horiz) horizontal = horiz end
-    ret.set_reverse = function(arg) reverse = arg end
+    for k, v in pairs(systray) do
+        ret[k] = v
+    end
 
     if revers then
         ret:set_reverse(true)
@@ -86,12 +153,20 @@ local function new(revers)
         ret:emit_signal("widget::layout_changed")
         ret:emit_signal("widget::redraw_needed")
     end)
+    capi.screen.connect_signal("primary_changed", function()
+        if display_on_screen == "primary" then
+            ret:emit_signal("widget::layout_changed")
+        end
+    end)
 
     return ret
 end
 
 function systray.mt:__call(...)
-    return new(...)
+    if not instance then
+        instance = new(...)
+    end
+    return instance
 end
 
 return setmetatable(systray, systray.mt)
