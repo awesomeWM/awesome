@@ -112,9 +112,8 @@ function beautiful.init(config)
     if config then
         local homedir = os.getenv("HOME")
 
-        -- If config is the path to the theme file,
-        -- run this file,
-        -- else if it is the theme table, save it
+        -- If `config` is the path to a theme file, run this file,
+        -- otherwise if it is a theme table, save it.
         if type(config) == 'string' then
             -- Expand the '~' $HOME shortcut
             config = config:gsub("^~/", homedir .. "/")

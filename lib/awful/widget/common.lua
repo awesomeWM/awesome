@@ -24,7 +24,7 @@ function common.create_buttons(buttons, object)
         local btns = {}
         for _, b in ipairs(buttons) do
             -- Create a proxy button object: it will receive the real
-            -- press and release events, and will propagate them the the
+            -- press and release events, and will propagate them to the
             -- button object the user provided, but with the object as
             -- argument.
             local btn = capi.button { modifiers = b.modifiers, button = b.button }

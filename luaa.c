@@ -399,7 +399,7 @@ luaA_dofunction_on_error(lua_State *L)
     /* emit error signal */
     signal_object_emit(L, &global_signals, "debug::error", 1);
 
-    if(!luaL_dostring(L, "return debug.traceback(\"error while running function\", 3)"))
+    if(!luaL_dostring(L, "return debug.traceback(\"error while running function!\", 3)"))
     {
         /* Move traceback before error */
         lua_insert(L, -2);
