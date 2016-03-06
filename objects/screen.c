@@ -640,6 +640,30 @@ luaA_screen_module_index(lua_State *L)
     return luaA_object_push(L, luaA_checkscreen(L, 2));
 }
 
+/** Iterate over screens.
+ * @usage
+ * for s in screen do
+ *     print("Oh, wow, we have screen " .. tostring(s))
+ * end
+ * @function screen
+ */
+static int
+luaA_screen_module_call(lua_State *L)
+{
+    int idx;
+
+    if (lua_isnoneornil(L, 3))
+        idx = 0;
+    else
+        idx = screen_get_index(luaA_checkscreen(L, 3));
+    if (idx >= 0 && idx < globalconf.screens.len)
+        /* No +1 needed, index starts at 1, C array at 0 */
+        luaA_pushscreen(L, globalconf.screens.tab[idx]);
+    else
+        lua_pushnil(L);
+    return 1;
+}
+
 LUA_OBJECT_EXPORT_PROPERTY(screen, screen_t, geometry, luaA_pusharea)
 
 static int
@@ -696,6 +720,7 @@ screen_class_setup(lua_State *L)
         { "count", luaA_screen_count },
         { "__index", luaA_screen_module_index },
         { "__newindex", luaA_default_newindex },
+        { "__call", luaA_screen_module_call },
         { NULL, NULL }
     };
 

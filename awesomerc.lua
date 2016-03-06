@@ -91,7 +91,7 @@ end
 
 -- {{{ Wallpaper
 if beautiful.wallpaper then
-    for s = 1, screen.count() do
+    for s in screen do
         gears.wallpaper.maximized(beautiful.wallpaper, s, true)
     end
 end
@@ -100,7 +100,7 @@ end
 -- {{{ Tags
 -- Define a tag table which hold all screen tags.
 tags = {}
-for s = 1, screen.count() do
+for s in screen do
     -- Each screen has its own tag table.
     tags[s] = awful.tag({ 1, 2, 3, 4, 5, 6, 7, 8, 9 }, s, awful.layout.layouts[1])
 end
@@ -175,7 +175,7 @@ mytasklist.buttons = awful.util.table.join(
                                               awful.client.focus.byidx(-1)
                                           end))
 
-for s = 1, screen.count() do
+for s in screen do
     -- Create a promptbox for each screen
     mypromptbox[s] = awful.widget.prompt()
     -- Create an imagebox widget which will contains an icon indicating which layout we're using.

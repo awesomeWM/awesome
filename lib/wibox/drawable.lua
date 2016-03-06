@@ -29,7 +29,7 @@ local wallpaper = nil
 -- This is awful.screen.getbycoord() which we sadly cannot use from here (cyclic
 -- dependencies are bad!)
 local function screen_getbycoord(x, y)
-    for i = 1, screen:count() do
+    for i in screen do
         local geometry = screen[i].geometry
         if x >= geometry.x and x < geometry.x + geometry.width
            and y >= geometry.y and y < geometry.y + geometry.height then

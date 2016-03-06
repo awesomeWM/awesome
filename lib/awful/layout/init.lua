@@ -244,7 +244,7 @@ capi.screen.connect_signal("padding", layout.arrange)
 capi.client.connect_signal("raised", function(c) layout.arrange(c.screen) end)
 capi.client.connect_signal("lowered", function(c) layout.arrange(c.screen) end)
 capi.client.connect_signal("list", function()
-                                   for screen = 1, capi.screen.count() do
+                                   for screen in capi.screen do
                                        layout.arrange(screen)
                                    end
                                end)
