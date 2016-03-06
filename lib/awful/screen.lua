@@ -60,7 +60,7 @@ end
 function screen.getbycoord(x, y)
     local s = capi.screen[1]
     local dist = screen.getdistance_sq(s, x, y)
-    for i = 2, capi.screen:count() do
+    for i in capi.screen do
         local d = screen.getdistance_sq(i, x, y)
         if d < dist then
             s, dist = capi.screen[i], d
@@ -115,7 +115,7 @@ function screen.focus_bydirection(dir, _screen)
     local sel = get_screen(_screen or screen.focused())
     if sel then
         local geomtbl = {}
-        for s = 1, capi.screen.count() do
+        for s in capi.screen do
             geomtbl[s] = capi.screen[s].geometry
         end
         local target = util.get_rectangle_in_direction(dir, geomtbl, sel.geometry)

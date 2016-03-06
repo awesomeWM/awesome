@@ -143,7 +143,7 @@ local suspended = false
 -- @field id Unique notification id based on a counter
 -- @table notifications
 naughty.notifications = { suspended = { } }
-for s = 1, capi.screen.count() do
+for s in capi.screen do
     naughty.notifications[get_screen(s)] = {
         top_left = {},
         top_middle = {},
@@ -294,8 +294,7 @@ end
 -- @return notification object if it was found, nil otherwise
 function naughty.getById(id)
     -- iterate the notifications to get the notfications with the correct ID
-    for s = 1, capi.screen.count() do
-        s = get_screen(s)
+    for s in pairs(naughty.notifications) do
         for p in pairs(naughty.notifications[s]) do
             for _, notification in pairs(naughty.notifications[s][p]) do
                 if notification.id == id then
