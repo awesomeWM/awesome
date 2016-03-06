@@ -660,12 +660,11 @@ event_handle_key(xcb_key_press_event_t *ev)
         {
             lua_rawgeti(L, LUA_REGISTRYINDEX, globalconf.keygrabber);
 
-            if(!luaA_dofunction(L, 3, 1))
+            if(!luaA_dofunction(L, 3, 0))
             {
                 warn("Stopping keygrabber.");
                 luaA_keygrabber_stop(L);
             }
-            lua_pop(L, 1);
         }
     }
     else
