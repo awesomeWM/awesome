@@ -318,8 +318,10 @@ a_dbus_convert_value(lua_State *L, int idx, DBusMessageIter *iter)
       case DBUS_TYPE_STRING:
         {
             const char *s = lua_tostring(L, idx + 1);
-            if(!s)
-                s = "";
+            if(!s || !dbus_validate_utf8(s, NULL)) {
+                luaA_warn(L, "Your D-Bus signal handling method returned an invalid string");
+                return false;
+            }
             dbus_message_iter_append_basic(iter, DBUS_TYPE_STRING, &s);
         }
         break;
