@@ -8,8 +8,8 @@
 -- parameter followed by the widget and height and additional parameters.
 --
 -- The functions provided by this module only create a path in the content.
--- to actually draw the content, use cr:fill(), cr:mask(), cr:slip() or
--- cr:stroke()
+-- to actually draw the content, use `cr:fill()`, `cr:mask()`, `cr:clip()` or
+-- `cr:stroke()`
 --
 -- In many case, it is necessary to apply the shape using a transformation
 -- such as a rotation. The preferred way to do this is to wrap the function
@@ -58,17 +58,18 @@ end
 
 --- A rounded rectangle with a triangle at the top
 -- @param cr A cairo context
--- @tparam number width The shape with
+-- @tparam number width The shape width
 -- @tparam number height The shape height
 -- @tparam[opt=5] number corner_radius The corner radius
 -- @tparam[opt=10] number arrow_size The width and height of the arrow
 -- @tparam[opt=width/2 - arrow_size/2] number arrow_position The position of the arrow
 function module.infobubble(cr, width, height, corner_radius, arrow_size, arrow_position)
-    corner_radius  = corner_radius  or 5
     arrow_size     = arrow_size     or 10
+    corner_radius  = math.min((height-arrow_size)/2, corner_radius or 5)
     arrow_position = arrow_position or width/2 - arrow_size/2
 
-    cr:move_to(0 ,corner_radius)
+
+    cr:move_to(0 ,corner_radius+arrow_size)
 
     -- Top left corner
     cr:arc(corner_radius, corner_radius+arrow_size, (corner_radius), math.pi, 3*(math.pi/2))
@@ -89,21 +90,31 @@ end
 
 --- A rectangle terminated by an arrow
 -- @param cr A cairo context
--- @tparam number width The shape with
+-- @tparam number width The shape width
 -- @tparam number height The shape height
-function module.rectangular_tag(cr, width, height)
-    cr:move_to(0        , height/2)
-    cr:line_to(height/2 , 0       )
-    cr:line_to(width    , 0       )
-    cr:line_to(width    , height  )
-    cr:line_to(height/2 , height  )
+-- @tparam[opt=height/2] number arrow_length The length of the arrow part
+function module.rectangular_tag(cr, width, height, arrow_length)
+    arrow_length = arrow_length or height/2
+    if arrow_length > 0 then
+        cr:move_to(0            , height/2 )
+        cr:line_to(arrow_length , 0        )
+        cr:line_to(width        , 0        )
+        cr:line_to(width        , height   )
+        cr:line_to(arrow_length , height   )
+    else
+        cr:move_to(0            , 0        )
+        cr:line_to(-arrow_length, height/2 )
+        cr:line_to(0            , height   )
+        cr:line_to(width        , height   )
+        cr:line_to(width        , 0        )
+    end
 
     cr:close_path()
 end
 
 --- A simple arrow shape
 -- @param cr A cairo context
--- @tparam number width The shape with
+-- @tparam number width The shape width
 -- @tparam number height The shape height
 -- @tparam[opt=head_width] number head_width The width of the head (/\) of the arrow
 -- @tparam[opt=width /2] number shaft_width The width of the shaft of the arrow
@@ -127,7 +138,7 @@ end
 
 --- A squeezed hexagon filling the rectangle
 -- @param cr A cairo context
--- @tparam number width The shape with
+-- @tparam number width The shape width
 -- @tparam number height The shape height
 function module.hexagon(cr, width, height)
     cr:move_to(height/2,0)
@@ -142,24 +153,32 @@ end
 
 --- Double arrow popularized by the vim-powerline module
 -- @param cr A cairo context
--- @tparam number width The shape with
+-- @tparam number width The shape width
 -- @tparam number height The shape height
 -- @tparam[opt=height/2] number arrow_depth The width of the arrow part of the shape
 function module.powerline(cr, width, height, arrow_depth)
     arrow_depth = arrow_depth or height/2
-    cr:move_to(0                   , 0        )
-    cr:line_to(width - arrow_depth , 0        )
-    cr:line_to(width               , height/2 )
-    cr:line_to(width - arrow_depth , height   )
-    cr:line_to(0                   , height   )
-    cr:line_to(arrow_depth         , height/2 )
+    local offset = 0
+
+    -- Avoid going out of the (potential) clip area
+    if arrow_depth < 0 then
+        width  =  width + 2*arrow_depth
+        offset = -arrow_depth
+    end
+
+    cr:move_to(offset                       , 0        )
+    cr:line_to(offset + width - arrow_depth , 0        )
+    cr:line_to(offset + width               , height/2 )
+    cr:line_to(offset + width - arrow_depth , height   )
+    cr:line_to(offset                       , height   )
+    cr:line_to(offset + arrow_depth         , height/2 )
 
     cr:close_path()
 end
 
 --- An isosceles triangle
 -- @param cr A cairo context
--- @tparam number width The shape with
+-- @tparam number width The shape width
 -- @tparam number height The shape height
 function module.isosceles_triangle(cr, width, height)
     cr:move_to( width/2, 0      )
