@@ -264,6 +264,18 @@ function module.parallelogram(cr, width, height, base_width)
     cr:close_path()
 end
 
+-- A losange
+-- @param cr A cairo context
+-- @tparam number width The shape width
+-- @tparam number height The shape height
+function module.losange(cr, width, height)
+    cr:move_to(width/2 , 0        )
+    cr:line_to(width   , height/2 )
+    cr:line_to(width/2 , height   )
+    cr:line_to(0       , height/2 )
+    cr:close_path()
+end
+
 --- Ajust the shape using a transformation object
 --
 -- Apply various transformations to the shape
