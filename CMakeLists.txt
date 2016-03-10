@@ -12,6 +12,8 @@ if(NOT EXISTS ${SOURCE_DIR}/awesomeConfig.cmake)
     message(FATAL_ERROR "Please provide awesomeConfig.cmake")
 endif()
 
+# Define many variables
+
 include(awesomeConfig.cmake)
 
 include_directories(
@@ -252,8 +254,10 @@ endif()
 
 # {{{ Lua API Documentation
 if(GENERATE_DOC)
+
     if(NOT BUILD_DIR STREQUAL SOURCE_DIR)
         file(MAKE_DIRECTORY ${BUILD_DIR}/lib)
+        file(MAKE_DIRECTORY ${BUILD_DIR}/doc)
     endif()
 
     file(GLOB_RECURSE AWE_LUA_FILES ${BUILD_DIR}/lib/*.lua)

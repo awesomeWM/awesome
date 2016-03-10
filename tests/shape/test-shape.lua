@@ -5,11 +5,6 @@ local cairo = require( "lgi"         ).cairo
 local shape = require( "gears.shape" )
 local filepath, svgpath = ...
 
--- This is normal when running test, it will run twice
-if (not filepath) or (not svgpath) or key then
-    os.exit(0)
-end
-
 local function get_surface(p)
     local img = cairo.SvgSurface.create(p, 288, 76)
     return cairo.Context(img)
