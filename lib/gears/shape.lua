@@ -241,6 +241,14 @@ function module.circle(cr, width, height)
     cr:close_path()
 end
 
+-- A simple rectangle
+-- @param cr A cairo context
+-- @tparam number width The shape width
+-- @tparam number height The shape height
+function module.rectangle(cr, width, height)
+    cr:rectangle(0, 0, width, height)
+end
+
 --- Ajust the shape using a transformation object
 --
 -- Apply various transformations to the shape
