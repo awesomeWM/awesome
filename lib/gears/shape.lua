@@ -249,6 +249,21 @@ function module.rectangle(cr, width, height)
     cr:rectangle(0, 0, width, height)
 end
 
+--- A diagonal parallelogram with the bottom left corner at x=0 and top right
+-- at x=width.
+-- @param cr A cairo context
+-- @tparam number width The shape width
+-- @tparam number height The shape height
+-- @tparam[opt=width/3] number base_width The parallelogram base width
+function module.parallelogram(cr, width, height, base_width)
+    base_width = base_width or width/3
+    cr:move_to(width-base_width, 0      )
+    cr:line_to(width           , 0      )
+    cr:line_to(base_width      , height )
+    cr:line_to(0               , height )
+    cr:close_path()
+end
+
 --- Ajust the shape using a transformation object
 --
 -- Apply various transformations to the shape
