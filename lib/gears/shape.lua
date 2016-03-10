@@ -211,6 +211,26 @@ function module.cross(cr, width, height, thickness)
     cr:close_path()
 end
 
+--- A similar shape to the `rounded_rect`, but with sharp corners
+-- @param cr A cairo context
+-- @tparam number width The shape width
+-- @tparam number height The shape height
+-- @tparam number corner_radius 
+function module.octogon(cr, width, height, corner_radius)
+    corner_radius = corner_radius or math.min(10, math.min(width, height)/4)
+    local offset = math.sqrt( (corner_radius*corner_radius) / 2 )
+
+    cr:move_to(offset, 0)
+    cr:line_to(width-offset, 0)
+    cr:line_to(width, offset)
+    cr:line_to(width, height-offset)
+    cr:line_to(width-offset, height)
+    cr:line_to(offset, height)
+    cr:line_to(0, height-offset)
+    cr:line_to(0, offset)
+    cr:close_path()
+end
+
 --- Ajust the shape using a transformation object
 --
 -- Apply various transformations to the shape
