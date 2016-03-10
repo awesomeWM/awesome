@@ -187,6 +187,30 @@ function module.isosceles_triangle(cr, width, height)
     cr:close_path()
 end
 
+--- A cross (**+**) symbol
+-- @param cr A cairo context
+-- @tparam number width The shape width
+-- @tparam number height The shape height
+-- @tparam[opt=width/3] number thickness The cross section thickness
+function module.cross(cr, width, height, thickness)
+    thickness = thickness or width/3
+    local xpadding   = (width  - thickness) / 2
+    local ypadding   = (height - thickness) / 2
+    cr:move_to(xpadding, 0)
+    cr:line_to(width - xpadding, 0)
+    cr:line_to(width - xpadding, ypadding)
+    cr:line_to(width           , ypadding)
+    cr:line_to(width           , height-ypadding)
+    cr:line_to(width - xpadding, height-ypadding)
+    cr:line_to(width - xpadding, height         )
+    cr:line_to(xpadding        , height         )
+    cr:line_to(xpadding        , height-ypadding)
+    cr:line_to(0               , height-ypadding)
+    cr:line_to(0               , ypadding       )
+    cr:line_to(xpadding        , ypadding       )
+    cr:close_path()
+end
+
 --- Ajust the shape using a transformation object
 --
 -- Apply various transformations to the shape
