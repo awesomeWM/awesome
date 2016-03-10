@@ -231,6 +231,16 @@ function module.octogon(cr, width, height, corner_radius)
     cr:close_path()
 end
 
+--- A circle shape
+-- @param cr A cairo context
+-- @tparam number width The shape width
+-- @tparam number height The shape height
+function module.circle(cr, width, height)
+    local size = math.min(width, height) / 2
+    cr:arc(width / 2, height / 2, size, 0, 2*math.pi)
+    cr:close_path()
+end
+
 --- Ajust the shape using a transformation object
 --
 -- Apply various transformations to the shape
