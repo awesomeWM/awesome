@@ -437,6 +437,20 @@ function tag.setlayout(layout, t)
     return layout
 end
 
+--- Set if the tag must be deleted when the last client is untagged
+-- @tparam boolean volatile If the tag must be deleted when the last client is untagged
+-- @param t The tag to modify, if null tag.selected() is used.
+function tag.setvolatile(volatile, t)
+    tag.setproperty(t, "volatile", volatile, true)
+end
+
+--- Get if the tag must be deleted when the last client closes
+-- @param t The tag to modify, if null tag.selected() is used.
+-- @treturn boolean If the tag will be deleted when the last client is untagged
+function tag.getvolatile(t)
+    return tag.getproperty(t, "volatile") or false
+end
+
 --- Set the spacing between clients
 -- @param useless_gap The spacing between clients
 -- @param t The tag to modify, if null tag.selected() is used.
@@ -817,6 +831,10 @@ local function client_untagged(c, t)
     if c.urgent then
         update_urgent(t, -1)
     end
+
+    if #t:clients() == 0 and tag.getproperty(t, "volatile") then
+        tag.delete(t)
+    end
 end
 
 -- Count the urgent clients.
@@ -846,6 +864,7 @@ capi.tag.add_signal("property::screen")
 capi.tag.add_signal("property::index")
 capi.tag.add_signal("property::urgent")
 capi.tag.add_signal("property::urgent_count")
+capi.tag.add_signal("property::volatile")
 
 capi.screen.add_signal("tag::history::update")
 capi.screen.connect_signal("tag::history::update", tag.history.update)
