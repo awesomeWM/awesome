@@ -16,14 +16,14 @@ Imitate the existing code style. For concrete rules:
  - Place braces alone on new lines, and do not place braces for single
    line statement where it is not needed, i.e.:
 
-    if(foo)
-        x = 1;
+        if(foo)
+            x = 1;
 
-    if(foo)
-    {
-        x = 1;
-        bar();
-    }
+        if(foo)
+        {
+            x = 1;
+            bar();
+        }
 
  - Do not put a space after if, for, while or function call statements;
 
