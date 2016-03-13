@@ -15,6 +15,7 @@ local capi =
     client = client
 }
 local util = require("awful.util")
+local object = require("gears.object")
 
 local function get_screen(s)
     return s and capi.screen[s]
@@ -244,6 +245,9 @@ function screen.get_bounding_geometry(s, args)
 end
 
 capi.screen.add_signal("padding")
+
+-- Extend the luaobject
+object.properties(capi.screen, {auto_emit=true})
 
 return screen
 
