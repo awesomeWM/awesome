@@ -99,6 +99,9 @@ local function setup_signals(_wibox)
     clone_signal("property::width")
     clone_signal("property::x")
     clone_signal("property::y")
+    clone_signal("property::geometry")
+    clone_signal("property::shape_bounding")
+    clone_signal("property::shape_clip")
 
     obj = _wibox._drawable
     clone_signal("button::press")
