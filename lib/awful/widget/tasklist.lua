@@ -79,7 +79,7 @@ local function tasklist_label(c, args, tb)
         else
             if c.maximized_horizontal then name = name .. maximized_horizontal end
             if c.maximized_vertical then name = name .. maximized_vertical end
-            if client.floating.get(c) then name = name .. floating end
+            if c.floating then name = name .. floating end
         end
     end
 
@@ -88,6 +88,7 @@ local function tasklist_label(c, args, tb)
     else
         name = name .. (util.escape(c.name) or util.escape("<untitled>"))
     end
+
     local focused = capi.client.focus == c
     -- Handle transient_for: the first parent that does not skip the taskbar
     -- is considered to be focused, if the real client has skip_taskbar.
@@ -98,6 +99,7 @@ local function tasklist_label(c, args, tb)
                                               end) == c then
         focused = true
     end
+
     if focused then
         bg = bg_focus
         text = text .. "<span color='"..fg_focus.."'>"..name.."</span>"

@@ -453,7 +453,7 @@ function placement.no_overlap(c)
     local curlay = layout.get()
     local areas = { screen.workarea }
     for _, cl in pairs(cls) do
-        if cl ~= c and cl.type ~= "desktop" and (client.floating.get(cl) or curlay == layout.suit.floating) then
+        if cl ~= c and cl.type ~= "desktop" and (cl.floating or curlay == layout.suit.floating) then
             areas = area_remove(areas, area_common(cl))
         end
     end

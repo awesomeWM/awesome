@@ -256,7 +256,7 @@ end
 --- Create a new float button for a client.
 -- @param c The client for which the button is wanted.
 function titlebar.widget.floatingbutton(c)
-    local widget = titlebar.widget.button(c, "floating", aclient.floating.get, aclient.floating.toggle)
+    local widget = titlebar.widget.button(c, "floating", aclient.object.get_floating, aclient.floating.toggle)
     c:connect_signal("property::floating", widget.update)
     return widget
 end

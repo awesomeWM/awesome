@@ -117,7 +117,7 @@ function mouse.client.snap(c, snap, x, y, fixed_x, fixed_y)
         struts['right'] = 0
         struts['top'] = 0
         struts['bottom'] = 0
-        if edge ~= "none" and aclient.floating.get(c) then
+        if edge ~= "none" and c.floating then
             if edge == "left" or edge == "right" then
                 struts[edge] = cur_geom.width
             elseif edge == "top" or edge == "bottom" then
@@ -177,7 +177,7 @@ function mouse.client.move(c, snap, finished_cb)
                               for _, v in ipairs(_mouse.buttons) do
                                   if v then
                                       local lay = layout.get(c.screen)
-                                      if lay == layout.suit.floating or aclient.floating.get(c) then
+                                      if lay == layout.suit.floating or c.floating then
                                           local x = _mouse.x - dist_x
                                           local y = _mouse.y - dist_y
                                           c:geometry(mouse.client.snap(c, snap, x, y, fixed_x, fixed_y))
@@ -195,7 +195,7 @@ function mouse.client.move(c, snap, finished_cb)
                                           end
                                           if layout.get(c.screen) ~= layout.suit.floating then
                                               local c_u_m = mouse.client_under_pointer()
-                                              if c_u_m and not aclient.floating.get(c_u_m) then
+                                              if c_u_m and not c_u_m.floating then
                                                   if c_u_m ~= c then
                                                       c:swap(c_u_m)
                                                   end
@@ -356,7 +356,7 @@ function mouse.client.resize(c, corner)
     local lay = layout.get(c.screen)
     local corner2, x, y = mouse.client.corner(c, corner)
 
-    if lay == layout.suit.floating or aclient.floating.get(c) then
+    if lay == layout.suit.floating or c.floating then
         return layout.suit.floating.mouse_resize_handler(c, corner2, x, y)
     elseif lay.mouse_resize_handler then
         return lay.mouse_resize_handler(c, corner2, x, y)

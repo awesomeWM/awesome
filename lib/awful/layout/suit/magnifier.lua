@@ -18,7 +18,6 @@ local capi =
     mouse = mouse,
     mousegrabber = mousegrabber
 }
-local client = require("awful.client")
 
 local magnifier = {}
 
@@ -67,7 +66,7 @@ function magnifier.arrange(p)
     end
 
     -- If focused window is not tiled, take the first one which is tiled.
-    if client.floating.get(focus) then
+    if focus.floating then
         focus = cls[1]
         fidx = 1
     end

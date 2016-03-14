@@ -41,7 +41,7 @@ do
         __newindex = error -- Just to be sure in case anything ever does this
     })
 end
-local client = {}
+local client = {object={}}
 
 -- Private data
 client.data = {}
@@ -264,7 +264,7 @@ function client.tiled(s, stacked)
     local tclients = {}
     -- Remove floating clients
     for _, c in pairs(clients) do
-        if not client.floating.get(c)
+        if not client.object.get_floating(c)
             and not c.fullscreen
             and not c.maximized_vertical
             and not c.maximized_horizontal then
@@ -599,6 +599,8 @@ function client.mark(c)
     end
 end
 
+
+
 --- Unmark a client and then call 'unmarked' hook.
 -- @client c The client to unmark, or the focused one if not specified.
 -- @return True if the client has been unmarked. False if the client was not marked.
@@ -653,9 +655,19 @@ end
 
 --- Set a client floating state, overriding auto-detection.
 -- Floating client are not handled by tiling layouts.
+-- @deprecated awful.client.floating.set
 -- @client c A client.
 -- @param s True or false.
 function client.floating.set(c, s)
+    util.deprecate "Use c.floating = true instead of awful.client.floating.set"
+    client.object.set_floating(c, s)
+end
+
+-- Set a client floating state, overriding auto-detection.
+-- Floating client are not handled by tiling layouts.
+-- @client c A client.
+-- @param s True or false.
+function client.object.set_floating(c, s)
     c = c or capi.client.focus
     if c and client.property.get(c, "floating") ~= s then
         client.property.set(c, "floating", s)
@@ -668,7 +680,7 @@ function client.floating.set(c, s)
 end
 
 local function store_floating_geometry(c)
-    if client.floating.get(c) then
+    if client.object.get_floating(c) then
         client.property.set(c, "floating_geometry", c:geometry())
     end
 end
@@ -703,10 +715,31 @@ end
 
 --- Get a client floating state.
 -- @client c A client.
+-- @see floating
+-- @deprecated awful.client.floating.get
 -- @return True or false. Note that some windows might be floating even if you
 -- did not set them manually. For example, windows with a type different than
 -- normal.
 function client.floating.get(c)
+    util.deprecate "Use c.floating instead of awful.client.floating.get"
+    return client.object.get_floating(c)
+end
+
+--- The client floating state.
+-- If the client is part of the tiled layout or free floating.
+--
+-- Note that some windows might be floating even if you
+-- did not set them manually. For example, windows with a type different than
+-- normal.
+--
+-- **Signal:**
+--
+--  * *property::floating*
+--
+-- @property floating
+-- @param boolean The floating state
+
+function client.object.get_floating(c)
     c = c or capi.client.focus
     if c then
         local value = client.property.get(c, "floating")
@@ -725,21 +758,20 @@ function client.floating.get(c)
 end
 
 --- Toggle the floating state of a client between 'auto' and 'true'.
+-- Use `c.floating = not c.floating`
+-- @deprecated awful.client.floating.toggle
 -- @client c A client.
+-- @see floating
 function client.floating.toggle(c)
     c = c or capi.client.focus
     -- If it has been set to floating
-    if client.floating.get(c) then
-        client.floating.set(c, false)
-    else
-        client.floating.set(c, true)
-    end
+    client.object.set_floating(c, not client.object.get_floating(c))
 end
 
---- Remove the floating information on a client.
+-- Remove the floating information on a client.
 -- @client c The client.
 function client.floating.delete(c)
-    client.floating.set(c, nil)
+    client.object.set_floating(c, nil)
 end
 
 --- Restore (=unminimize) a random client.
@@ -1127,8 +1159,8 @@ client.property.persist("floating", "boolean")
 
 -- Extend the luaobject
 object.properties(capi.client, {
-    getter_class    = client,
-    setter_class    = client,
+    getter_class    = client.object,
+    setter_class    = client.object,
     getter_fallback = client.property.get,
     setter_fallback = client.property.set,
 })
