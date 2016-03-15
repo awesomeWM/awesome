@@ -575,6 +575,58 @@ end
 
 ---@DOC_awful_placement_center_horizontal_EXAMPLE@
 
+--- Stretch a drawable in a specific direction.
+-- Valid args:
+--
+-- * **direction**: The stretch direction (*left*, *right*, *up*, *down*) or
+--  a table with multiple directions.
+--
+--@DOC_awful_placement_stretch_EXAMPLE@
+-- @tparam[opt=client.focus] drawable d A drawable (like `client` or `wibox`)
+-- @tparam[opt={}] table args The arguments
+function placement.stretch(d, args)
+    args = args or {}
+
+    d    = d or capi.client.focus
+    if not d or not args.direction then return end
+
+    -- In case there is multiple directions, call `stretch` for each of them
+    if type(args.direction) == "table" then
+        for _, dir in ipairs(args.direction) do
+            local new_args = setmetatable({direction = dir}, {__index=args})
+            placement.stretch(dir, new_args)
+        end
+        return
+    end
+
+    local sgeo = get_parent_geometry(d, args)
+    local dgeo = geometry_common(d, args)
+    local ngeo = geometry_common(d, args, nil, true)
+    local bw   = d.border_width or 0
+
+    if args.direction == "left" then
+        ngeo.x      = sgeo.x + bw
+        ngeo.width  = dgeo.width + (dgeo.x - ngeo.x)
+    elseif args.direction == "right" then
+        ngeo.width  = sgeo.width - ngeo.x - bw
+    elseif args.direction == "up" then
+        ngeo.y      = sgeo.y + bw
+        ngeo.height = dgeo.height + (dgeo.y - ngeo.y)
+    elseif args.direction == "down" then
+        ngeo.height = sgeo.height - dgeo.y - bw
+    else
+        assert(false)
+    end
+
+    -- Avoid negative sizes if args.parent isn't compatible
+    ngeo.width  = math.max(args.minimim_width  or 1, ngeo.width )
+    ngeo.height = math.max(args.minimim_height or 1, ngeo.height)
+
+    geometry_common(d, args, ngeo)
+
+    attach(d, placement["stretch_"..args.direction], args)
+end
+
 return placement
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
