@@ -627,6 +627,22 @@ function placement.stretch(d, args)
     attach(d, placement["stretch_"..args.direction], args)
 end
 
+-- Add the alias functions
+for _,v in ipairs {"left", "right", "up", "down"} do
+    placement["stretch_"..v] =  function(d, args)
+        local new_args = setmetatable({direction = v}, {__index=args})
+        placement.stretch(d, new_args)
+    end
+end
+
+---@DOC_awful_placement_stretch_left_EXAMPLE@
+
+---@DOC_awful_placement_stretch_right_EXAMPLE@
+
+---@DOC_awful_placement_stretch_up_EXAMPLE@
+
+---@DOC_awful_placement_stretch_down_EXAMPLE@
+
 return placement
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
