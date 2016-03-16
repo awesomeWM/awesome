@@ -27,10 +27,13 @@ local module = {}
 
 --- Add a rounded rectangle to the current path.
 -- Note: If the radius is bigger than either half side, it will be reduced.
+--
+-- @SHAPE_rounded_rect_EXAMPLE@
+--
 -- @param cr A cairo content
--- @param width The rectangle width
--- @param height The rectangle height
--- @param radius the corner radius
+-- @tparam number width The rectangle width
+-- @tparam number height The rectangle height
+-- @tparam number radius the corner radius
 function module.rounded_rect(cr, width, height, radius)
     if width / 2 < radius then
         radius = width / 2
@@ -48,7 +51,10 @@ function module.rounded_rect(cr, width, height, radius)
     cr:close_path()
 end
 
---- Add a rectangle delimited by 2 180 degree arcs to the path
+--- Add a rectangle delimited by 2 180 degree arcs to the path.
+--
+-- @SHAPE_rounded_bar_EXAMPLE@
+--
 -- @param cr A cairo content
 -- @param width The rectangle width
 -- @param height The rectangle height
@@ -56,7 +62,10 @@ function module.rounded_bar(cr, width, height)
     module.rounded_rect(cr, width, height, height / 2)
 end
 
---- A rounded rect with only some of the corners rounded
+--- A rounded rect with only some of the corners rounded.
+--
+-- @SHAPE_partially_rounded_rect_EXAMPLE@
+--
 -- @param cr A cairo context
 -- @tparam number width The shape width
 -- @tparam number height The shape height
@@ -106,7 +115,10 @@ function module.partially_rounded_rect(cr, width, height, tl, tr, br, bl, rad)
     cr:close_path()
 end
 
---- A rounded rectangle with a triangle at the top
+--- A rounded rectangle with a triangle at the top.
+--
+-- @SHAPE_infobubble_EXAMPLE@
+--
 -- @param cr A cairo context
 -- @tparam number width The shape width
 -- @tparam number height The shape height
@@ -138,7 +150,10 @@ function module.infobubble(cr, width, height, corner_radius, arrow_size, arrow_p
     cr:close_path()
 end
 
---- A rectangle terminated by an arrow
+--- A rectangle terminated by an arrow.
+--
+-- @SHAPE_rectangular_tag_EXAMPLE@
+--
 -- @param cr A cairo context
 -- @tparam number width The shape width
 -- @tparam number height The shape height
@@ -162,7 +177,10 @@ function module.rectangular_tag(cr, width, height, arrow_length)
     cr:close_path()
 end
 
---- A simple arrow shape
+--- A simple arrow shape.
+--
+-- @SHAPE_arrow_EXAMPLE@
+--
 -- @param cr A cairo context
 -- @tparam number width The shape width
 -- @tparam number height The shape height
@@ -186,7 +204,10 @@ function module.arrow(cr, width, height, head_width, shaft_width, shaft_length)
     cr:close_path()
 end
 
---- A squeezed hexagon filling the rectangle
+--- A squeezed hexagon filling the rectangle.
+--
+-- @SHAPE_hexagon_EXAMPLE@
+--
 -- @param cr A cairo context
 -- @tparam number width The shape width
 -- @tparam number height The shape height
@@ -201,7 +222,10 @@ function module.hexagon(cr, width, height)
     cr:close_path()
 end
 
---- Double arrow popularized by the vim-powerline module
+--- Double arrow popularized by the vim-powerline module.
+--
+-- @SHAPE_powerline_EXAMPLE@
+--
 -- @param cr A cairo context
 -- @tparam number width The shape width
 -- @tparam number height The shape height
@@ -226,7 +250,10 @@ function module.powerline(cr, width, height, arrow_depth)
     cr:close_path()
 end
 
---- An isosceles triangle
+--- An isosceles triangle.
+--
+-- @SHAPE_isosceles_triangle_EXAMPLE@
+--
 -- @param cr A cairo context
 -- @tparam number width The shape width
 -- @tparam number height The shape height
@@ -237,7 +264,10 @@ function module.isosceles_triangle(cr, width, height)
     cr:close_path()
 end
 
---- A cross (**+**) symbol
+--- A cross (**+**) symbol.
+--
+-- @SHAPE_cross_EXAMPLE@
+--
 -- @param cr A cairo context
 -- @tparam number width The shape width
 -- @tparam number height The shape height
@@ -261,7 +291,10 @@ function module.cross(cr, width, height, thickness)
     cr:close_path()
 end
 
---- A similar shape to the `rounded_rect`, but with sharp corners
+--- A similar shape to the `rounded_rect`, but with sharp corners.
+--
+-- @SHAPE_octogon_EXAMPLE@
+--
 -- @param cr A cairo context
 -- @tparam number width The shape width
 -- @tparam number height The shape height
@@ -281,7 +314,10 @@ function module.octogon(cr, width, height, corner_radius)
     cr:close_path()
 end
 
---- A circle shape
+--- A circle shape.
+--
+-- @SHAPE_circle_EXAMPLE@
+--
 -- @param cr A cairo context
 -- @tparam number width The shape width
 -- @tparam number height The shape height
@@ -291,7 +327,10 @@ function module.circle(cr, width, height)
     cr:close_path()
 end
 
--- A simple rectangle
+--- A simple rectangle.
+--
+-- @SHAPE_rectangle_EXAMPLE@
+--
 -- @param cr A cairo context
 -- @tparam number width The shape width
 -- @tparam number height The shape height
@@ -301,6 +340,9 @@ end
 
 --- A diagonal parallelogram with the bottom left corner at x=0 and top right
 -- at x=width.
+--
+-- @SHAPE_parallelogram_EXAMPLE@
+--
 -- @param cr A cairo context
 -- @tparam number width The shape width
 -- @tparam number height The shape height
@@ -314,7 +356,10 @@ function module.parallelogram(cr, width, height, base_width)
     cr:close_path()
 end
 
--- A losange
+--- A losange.
+--
+-- @SHAPE_losange_EXAMPLE@
+--
 -- @param cr A cairo context
 -- @tparam number width The shape width
 -- @tparam number height The shape height
@@ -344,7 +389,6 @@ function module.radial_progress(cr, w, h, percent, hide_left)
     local total_length = (2*(w-h))+2*((h/2)*math.pi)
     local bar_percent  = (w-h)/total_length
     local arc_percent  = ((h/2)*math.pi)/total_length
-    --TODO ajust the percent (with - arc_percent) is hide_left
 
     -- Bottom line
     if percent > bar_percent then
