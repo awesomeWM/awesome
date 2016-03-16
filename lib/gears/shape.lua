@@ -326,6 +326,76 @@ function module.losange(cr, width, height)
     cr:close_path()
 end
 
+--- A partial rounded bar. How much of the rounded bar is visible depends on
+-- the given percentage value.
+--
+-- Note that this shape is not closed and thus filling it doesn't make much
+-- sense.
+--
+-- @SHAPE_radial_progress_EXAMPLE@
+--
+-- @param cr A cairo context
+-- @tparam number w The shape width
+-- @tparam number h The shape height
+-- @tparam number percent The progressbar percent
+-- @tparam boolean hide_left Do not draw the left side of the shape
+function module.radial_progress(cr, w, h, percent, hide_left)
+    percent = percent or 1
+    local total_length = (2*(w-h))+2*((h/2)*math.pi)
+    local bar_percent  = (w-h)/total_length
+    local arc_percent  = ((h/2)*math.pi)/total_length
+    --TODO ajust the percent (with - arc_percent) is hide_left
+
+    -- Bottom line
+    if percent > bar_percent then
+        cr:move_to(h/2,h)
+        cr:line_to((h/2) + (w-h),h)
+        cr:stroke()
+    elseif percent < bar_percent then
+        cr:move_to(h/2,h)
+        cr:line_to(h/2+(total_length*percent),h)
+        cr:stroke()
+    end
+
+    -- Right arc
+    if percent >= bar_percent+arc_percent then
+        cr:arc(w-h/2 , h/2, h/2,3*(math.pi/2),math.pi/2)
+        cr:stroke()
+    elseif percent > bar_percent and percent < bar_percent+(arc_percent/2) then
+        cr:arc(w-h/2 , h/2, h/2,(math.pi/2)-((math.pi/2)*((percent-bar_percent)/(arc_percent/2))),math.pi/2)
+        cr:stroke()
+    elseif percent >= bar_percent+arc_percent/2 and percent < bar_percent+arc_percent then
+        cr:arc(w-h/2 , h/2, h/2,0,math.pi/2)
+        cr:stroke()
+        local add = (math.pi/2)*((percent-bar_percent-arc_percent/2)/(arc_percent/2))
+        cr:arc(w-h/2 , h/2, h/2,2*math.pi-add,0)
+        cr:stroke()
+    end
+
+    -- Top line
+    if percent > 2*bar_percent+arc_percent then
+        cr:move_to((h/2) + (w-h),0)
+        cr:line_to(h/2,0)
+        cr:stroke()
+    elseif percent > bar_percent+arc_percent and percent < 2*bar_percent+arc_percent then
+        cr:move_to((h/2) + (w-h),0)
+        cr:line_to(((h/2) + (w-h))-total_length*(percent-bar_percent-arc_percent),0)
+        cr:stroke()
+    end
+
+    -- Left arc
+    if not hide_left then
+        if percent > 0.985 then
+            cr:arc(h/2, h/2, h/2,math.pi/2,3*(math.pi/2))
+            cr:stroke()
+        elseif percent  > 2*bar_percent+arc_percent then
+            local relpercent = (percent - 2*bar_percent - arc_percent)/arc_percent
+            cr:arc(h/2, h/2, h/2,3*(math.pi/2)-(math.pi)*relpercent,3*(math.pi/2))
+            cr:stroke()
+        end
+    end
+end
+
 --- Ajust the shape using a transformation object
 --
 -- Apply various transformations to the shape
