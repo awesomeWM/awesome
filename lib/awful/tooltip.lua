@@ -42,6 +42,7 @@
 
 local mouse = mouse
 local timer = require("gears.timer")
+local object = require("gears.object")
 local wibox = require("wibox")
 local a_placement = require("awful.placement")
 local abutton = require("awful.button")
@@ -58,30 +59,32 @@ local ipairs = ipairs
 -- @tfield boolean visible True if tooltip is visible.
 local tooltip = { mt = {}  }
 
-local function get_wibox(self)
-    if not self.wibox then
-        self.wibox = wibox(self.wibox_properties)
-        self.wibox:set_widget(self.marginbox)
+local instance_mt = {}
+
+function instance_mt:__index(key)
+    if key == "wibox" then
+        local wb = wibox(self.wibox_properties)
+        wb:set_widget(self.marginbox)
 
         -- Close the tooltip when clicking it.  This gets done on release, to not
         -- emit the release event on an underlying object, e.g. the titlebar icon.
-        self.wibox:buttons(abutton({}, 1, nil, self.hide))
+        wb:buttons(abutton({}, 1, nil, self.hide))
+        rawset(self, "wibox", wb)
+        return wb
     end
-    return self.wibox
 end
 
 -- Place the tooltip under the mouse.
 --
 -- @tparam tooltip self A tooltip object.
 local function set_geometry(self)
-    local wb = get_wibox(self)
     -- calculate width / height
     local n_w, n_h = self.textbox:get_preferred_size(mouse.screen)
     n_w = n_w + self.marginbox.left + self.marginbox.right
     n_h = n_h + self.marginbox.top + self.marginbox.bottom
-    wb:geometry({ width = n_w, height = n_h })
-    a_placement.next_to_mouse(wb)
-    a_placement.no_offscreen(wb, mouse.screen)
+    self.wibox:geometry({ width = n_w, height = n_h })
+    a_placement.next_to_mouse(self.wibox)
+    a_placement.no_offscreen(self.wibox, mouse.screen)
 end
 
 -- Show a tooltip.
@@ -97,8 +100,9 @@ local function show(self)
         end
     end
     set_geometry(self)
-    get_wibox(self).visible = true
+    self.wibox.visible = true
     self.visible = true
+    self:emit_signal("property::visible")
 end
 
 -- Hide a tooltip.
@@ -112,8 +116,9 @@ local function hide(self)
             self.timer:stop()
         end
     end
-    get_wibox(self).visible = false
+    self.wibox.visible = false
     self.visible = false
+    self:emit_signal("property::visible")
 end
 
 --- Change displayed text.
@@ -153,25 +158,26 @@ end
 --- Add tooltip to an object.
 --
 -- @tparam tooltip self The tooltip.
--- @tparam gears.object object An object with `mouse::enter` and
+-- @tparam gears.object obj An object with `mouse::enter` and
 --   `mouse::leave` signals.
-tooltip.add_to_object = function(self, object)
-    object:connect_signal("mouse::enter", self.show)
-    object:connect_signal("mouse::leave", self.hide)
+tooltip.add_to_object = function(self, obj)
+    obj:connect_signal("mouse::enter", self.show)
+    obj:connect_signal("mouse::leave", self.hide)
 end
 
 --- Remove tooltip from an object.
 --
 -- @tparam tooltip self The tooltip.
--- @tparam gears.object object An object with `mouse::enter` and
+-- @tparam gears.object obj An object with `mouse::enter` and
 --   `mouse::leave` signals.
-tooltip.remove_from_object = function(self, object)
-    object:disconnect_signal("mouse::enter", self.show)
-    object:disconnect_signal("mouse::leave", self.hide)
+tooltip.remove_from_object = function(self, obj)
+    obj:disconnect_signal("mouse::enter", self.show)
+    obj:disconnect_signal("mouse::leave", self.hide)
 end
 
 
 --- Create a new tooltip and link it to a widget.
+-- Tooltips emit `property::visible` when their visibility changes.
 -- @tparam table args Arguments for tooltip creation.
 -- @tparam[opt=1] number args.timeout The timeout value for
 --   `timer_function`.
@@ -189,9 +195,9 @@ end
 -- @see set_text
 -- @see set_markup
 tooltip.new = function(args)
-    local self = {
-        visible = false,
-    }
+    local self = setmetatable(object(), instance_mt)
+    self:add_signal("property::visible")
+    self.visible = false
 
     -- private data
     if args.delay_show then
@@ -263,8 +269,8 @@ tooltip.new = function(args)
 
     -- Add tooltip to objects
     if args.objects then
-        for _, object in ipairs(args.objects) do
-            self:add_to_object(object)
+        for _, obj in ipairs(args.objects) do
+            self:add_to_object(obj)
         end
     end
 
