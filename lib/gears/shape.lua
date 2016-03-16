@@ -56,6 +56,56 @@ function module.rounded_bar(cr, width, height)
     module.rounded_rect(cr, width, height, height / 2)
 end
 
+--- A rounded rect with only some of the corners rounded
+-- @param cr A cairo context
+-- @tparam number width The shape width
+-- @tparam number height The shape height
+-- @tparam boolean tl If the top left corner is rounded
+-- @tparam boolean tr If the top right corner is rounded
+-- @tparam boolean br If the bottom right corner is rounded
+-- @tparam boolean bl If the bottom left corner is rounded
+-- @tparam number rad The corner radius
+function module.partially_rounded_rect(cr, width, height, tl, tr, br, bl, rad)
+    rad = rad or 10
+    if width / 2 < rad then
+        rad = width / 2
+    end
+
+    if height / 2 < rad then
+        rad = height / 2
+    end
+
+    -- Top left
+    if tl then
+        cr:arc( rad, rad, rad, math.pi, 3*(math.pi/2))
+    else
+        cr:move_to(0,0)
+    end
+
+    -- Top right
+    if tr then
+        cr:arc( width-rad, rad, rad, 3*(math.pi/2), math.pi*2)
+    else
+        cr:line_to(width, 0)
+    end
+
+    -- Bottom right
+    if br then
+        cr:arc( width-rad, height-rad, rad, math.pi*2 , math.pi/2)
+    else
+        cr:line_to(width, height)
+    end
+
+    -- Bottom left
+    if bl then
+        cr:arc( rad, height-rad, rad, math.pi/2, math.pi)
+    else
+        cr:line_to(0, height)
+    end
+
+    cr:close_path()
+end
+
 --- A rounded rectangle with a triangle at the top
 -- @param cr A cairo context
 -- @tparam number width The shape width
