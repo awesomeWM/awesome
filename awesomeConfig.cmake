@@ -295,6 +295,12 @@ set(AWESOME_ICON_PATH        ${AWESOME_DATA_PATH}/icons)
 set(AWESOME_THEMES_PATH      ${AWESOME_DATA_PATH}/themes)
 # }}}
 
+
+if(GENERATE_DOC)
+    # Generate some images and examples
+    include(docs/generate_examples.cmake)
+endif()
+
 # {{{ Configure files
 file(GLOB awesome_c_configure_files RELATIVE ${SOURCE_DIR}
     ${SOURCE_DIR}/*.c
