@@ -1,8 +1,54 @@
 ---------------------------------------------------------------------------
---- Places client according to special criteria.
+--- Algorithms used to place various drawables.
 --
+-- The functions provided by this module all follow the same arguments
+-- conventions. This allow:
+--
+-- * To use them in various other module as
+--   [visitor objects](https://en.wikipedia.org/wiki/Visitor_pattern)
+-- * Turn each function into an API with various common customization parameters.
+-- * Re-use the same functions for the `mouse`, `client`s, `screen`s and `wibox`es
+-- 
+-- 
+-- 
+-- ### Common arguments
+--
+-- **honor_workarea** (*boolean*):
+--
+--  Take workarea into account when placing the drawable (default: false)
+--
+-- **honor_padding** (*boolean*):
+--
+--  Take the screen padding into account (see `awful.screen.padding`)
+--
+-- **tag** (*tag*):
+--
+--  Use a tag geometry
+--
+-- **margins** (*number* or *table*):
+--
+--  A table with left, right, top, bottom keys or a number
+--
+-- **parent** (client, wibox, mouse or screen):
+--
+--  A parent drawable to use a base geometry
+--
+-- **bounding_rect** (table):
+--
+-- A bounding rectangle
+--
+-- **attach** (*boolean*):
+--
+-- When either the parent or the screen geometry change, call the placement
+-- function again.
+--
+-- **update_workarea** (*boolean*):
+--
+-- If *attach* is true, also update the screen workarea.
+--
+-- @author Emmanuel Lepage Vallee &lt;elv1313@gmail.com&gt;
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
--- @copyright 2008 Julien Danjou
+-- @copyright 2008 Julien Danjou, Emmanuel Lepage Vallee 2016
 -- @release @AWESOME_VERSION@
 -- @module awful.placement
 ---------------------------------------------------------------------------
@@ -369,6 +415,7 @@ function placement.closest_corner(d, args)
 end
 
 --- Place the client so no part of it will be outside the screen (workarea).
+--@DOC_awful_placement_no_offscreen_EXAMPLE@
 -- @client c The client.
 -- @tparam[opt=client's screen] integer screen The screen.
 -- @treturn table The new client geometry.
@@ -396,8 +443,10 @@ function placement.no_offscreen(c, screen)
 end
 
 --- Place the client where there's place available with minimum overlap.
+--@DOC_awful_placement_no_overlap_EXAMPLE@
 -- @param c The client.
 function placement.no_overlap(c)
+    c = c or capi.client.focus
     local geometry = area_common(c)
     local screen   = get_screen(c.screen or a_screen.getbycoord(geometry.x, geometry.y))
     local cls = client.visible(screen)
@@ -448,6 +497,7 @@ function placement.no_overlap(c)
 end
 
 --- Place the client under the mouse.
+--@DOC_awful_placement_under_mouse_EXAMPLE@
 -- @param c The client.
 -- @return The new client geometry.
 function placement.under_mouse(c)
@@ -462,6 +512,7 @@ end
 --
 -- It will place `c` next to the mouse pointer, trying the following positions
 -- in this order: right, left, above and below.
+--@DOC_awful_placement_next_to_mouse_EXAMPLE@
 -- @client[opt=focused] c The client.
 -- @tparam[opt=apply_dpi(5)] integer offset The offset from the mouse position.
 -- @return The new client geometry.
