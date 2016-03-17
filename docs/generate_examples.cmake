@@ -16,9 +16,9 @@ foreach (SHAPE_NAME "circle" "arrow" "rounded_rect" "hexagon" "infobubble"
     set(SHAPE_SVG  "${BUILD_DIR}/doc/images/shape_${SHAPE_NAME}.svg")
 
     # Generate some SVG for the documentation and load the examples for the doc
+    set(ENV{BUILD_DIRECTORY} ${SOURCE_DIR}/)
     execute_process(
         COMMAND lua ${SOURCE_DIR}/tests/shape/test-shape.lua ${SHAPE_FILE} ${SHAPE_SVG}
-        OUTPUT_VARIABLE SHAPE_OUTPUT
         ERROR_VARIABLE  SHAPE_ERROR
     )
 
@@ -45,3 +45,5 @@ foreach (SHAPE_NAME "circle" "arrow" "rounded_rect" "hexagon" "infobubble"
     set(SHAPE_${SHAPE_NAME}_EXAMPLE ${SHAPE_COMMENTED})
 
 endforeach()
+
+# vim: filetype=cmake:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80:foldmethod=marker

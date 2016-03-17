@@ -5,6 +5,11 @@ local cairo = require( "lgi"         ).cairo
 local shape = require( "gears.shape" )
 local filepath, svgpath = ...
 
+-- If luacov is available, use it. Else, do nothing.
+pcall(function()
+    require("luacov.runner")(os.getenv("BUILD_DIRECTORY") .. ".luacov")
+end)
+
 local function get_surface(p)
     local img = cairo.SvgSurface.create(p, 288, 76)
     return cairo.Context(img)
@@ -29,3 +34,5 @@ local cr = get_surface(svgpath)
 cr:translate(3,3)
 
 loadfile(filepath)(shape, cr, show)
+
+-- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
