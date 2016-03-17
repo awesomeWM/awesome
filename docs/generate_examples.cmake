@@ -5,6 +5,9 @@ set(ENV{LUA_PATH} "${SOURCE_DIR}/lib/?;${SOURCE_DIR}/lib/?.lua;${LUA_PATH_}")
 
 file(MAKE_DIRECTORY "${BUILD_DIR}/doc/images")
 
+set(ENV{BUILD_DIRECTORY} "${BUILD_DIR}/")
+set(ENV{AWESOME_LIB_DIR} "${SOURCE_DIR}/lib/")
+
 #
 # Shape API
 #
@@ -17,8 +20,7 @@ foreach (SHAPE_NAME "circle" "arrow" "rounded_rect" "hexagon" "infobubble"
 
     # Generate some SVG for the documentation and load the examples for the doc
     execute_process(
-        COMMAND lua ${SOURCE_DIR}/tests/shape/test-shape.lua ${SHAPE_FILE} ${SHAPE_SVG}
-        OUTPUT_VARIABLE SHAPE_OUTPUT
+        COMMAND lua ${SOURCE_DIR}/tests/shape/test-shape.lua ${SHAPE_FILE} ${SHAPE_SVG} ${SOURCE_DIR}/.luacov
         ERROR_VARIABLE  SHAPE_ERROR
     )
 
@@ -45,3 +47,5 @@ foreach (SHAPE_NAME "circle" "arrow" "rounded_rect" "hexagon" "infobubble"
     set(SHAPE_${SHAPE_NAME}_EXAMPLE ${SHAPE_COMMENTED})
 
 endforeach()
+
+# vim: filetype=cmake:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80:foldmethod=marker
