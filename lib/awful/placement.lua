@@ -542,57 +542,38 @@ function placement.align(d, args)
     attach(d, placement[args.position], args)
 end
 
---- Place the client centered with respect to a parent or the clients screen.
--- @param c The client.
--- @param[opt] p The parent (nil for screen centering).
--- @return The new client geometry.
-function placement.centered(c, p)
-    c = c or capi.client.focus
-    local c_geometry = area_common(c)
-    local screen = get_screen(c.screen or a_screen.getbycoord(c_geometry.x, c_geometry.y))
-    local s_geometry
-    if p then
-        s_geometry = area_common(p)
-    else
-        s_geometry = screen.geometry
+-- Add the alias functions
+for k in pairs(align_map) do
+    placement[k] = function(d, args)
+        local new_args = setmetatable({position = k}, {__index=args})
+        placement.align(d, new_args)
     end
-    return c:geometry({ x = s_geometry.x + (s_geometry.width - c_geometry.width) / 2,
-                        y = s_geometry.y + (s_geometry.height - c_geometry.height) / 2 })
+    reverse_align_map[placement[k]] = k
 end
 
---- Place the client centered on the horizontal axis with respect to a parent or the clients screen.
--- @param c The client.
--- @param[opt] p The parent (nil for screen centering).
--- @return The new client geometry.
-function placement.center_horizontal(c, p)
-    c = c or capi.client.focus
-    local c_geometry = area_common(c)
-    local screen = get_screen(c.screen or a_screen.getbycoord(c_geometry.x, c_geometry.y))
-    local s_geometry
-    if p then
-        s_geometry = area_common(p)
-    else
-        s_geometry = screen.geometry
-    end
-    return c:geometry({ x = s_geometry.x + (s_geometry.width - c_geometry.width) / 2 })
-end
+-- Add the documentation for align alias
 
---- Place the client centered on the vertical axis with respect to a parent or the clients screen.
--- @param c The client.
--- @param[opt] p The parent (nil for screen centering).
--- @return The new client geometry.
-function placement.center_vertical(c, p)
-    c = c or capi.client.focus
-    local c_geometry = area_common(c)
-    local screen = get_screen(c.screen or a_screen.getbycoord(c_geometry.x, c_geometry.y))
-    local s_geometry
-    if p then
-        s_geometry = area_common(p)
-    else
-        s_geometry = screen.geometry
-    end
-    return c:geometry({ y = s_geometry.y + (s_geometry.height - c_geometry.height) / 2 })
-end
+---@DOC_awful_placement_top_left_EXAMPLE@
+
+---@DOC_awful_placement_top_right_EXAMPLE@
+
+---@DOC_awful_placement_bottom_left_EXAMPLE@
+
+---@DOC_awful_placement_bottom_right_EXAMPLE@
+
+---@DOC_awful_placement_left_EXAMPLE@
+
+---@DOC_awful_placement_right_EXAMPLE@
+
+---@DOC_awful_placement_top_EXAMPLE@
+
+---@DOC_awful_placement_bottom_EXAMPLE@
+
+---@DOC_awful_placement_centered_EXAMPLE@
+
+---@DOC_awful_placement_center_vertical_EXAMPLE@
+
+---@DOC_awful_placement_center_horizontal_EXAMPLE@
 
 return placement
 
