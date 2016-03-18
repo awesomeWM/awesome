@@ -38,6 +38,25 @@ local corners3x3 = {{"top_left"   ,   "top"   , "top_right"   },
 local corners2x2 = {{"top_left"   ,            "top_right"   },
                     {"bottom_left",            "bottom_right"}}
 
+-- Compute the new `x` and `y`.
+-- The workarea position need to be applied by the caller
+local align_map = {
+    top_left          = function(_ , _ , _ , _ ) return {x=0        , y=0        } end,
+    top_right         = function(sw, _ , dw, _ ) return {x=sw-dw    , y=0        } end,
+    bottom_left       = function(_ , sh, _ , dh) return {x=0        , y=sh-dh    } end,
+    bottom_right      = function(sw, sh, dw, dh) return {x=sw-dw    , y=sh-dh    } end,
+    left              = function(_ , sh, _ , dh) return {x=0        , y=sh/2-dh/2} end,
+    right             = function(sw, sh, dw, dh) return {x=sw-dw    , y=sh/2-dh/2} end,
+    top               = function(sw, _ , dw, _ ) return {x=sw/2-dw/2, y=0        } end,
+    bottom            = function(sw, sh, dw, dh) return {x=sw/2-dw/2, y=sh-dh    } end,
+    centered          = function(sw, sh, dw, dh) return {x=sw/2-dw/2, y=sh/2-dh/2} end,
+    center_vertical   = function(_ , sh, _ , dh) return {x= nil     , y=sh-dh    } end,
+    center_horizontal = function(sw, _ , dw, _ ) return {x=sw/2-dw/2, y= nil     } end,
+}
+
+-- Store function -> keys
+local reverse_align_map = {}
+
 --- Get the area covered by a drawin.
 -- @param d The drawin
 -- @tparam[opt=nil] table new_geo A new geometry
@@ -116,21 +135,6 @@ local function get_parent_geometry(obj, args)
     end
 end
 
---- Convert a rectangle and matrix coordinates info into a point.
--- This is useful along with matrixes like `corners3x3` to convert
--- indices into a geometry point.
--- @tparam table geo a geometry table
--- @tparam number corner_i The horizontal matrix index
--- @tparam number corner_j The vertical matrix index
--- @tparam number n The (square) matrix dimension
--- @treturn table A table with *x* and *y* keys
-local function rect_to_point(geo, corner_i, corner_j, n)
-    return {
-        x = geo.x + corner_i * math.floor(geo.width  / (n-1)),
-        y = geo.y + corner_j * math.floor(geo.height / (n-1)),
-    }
-end
-
 --- Move a point into an area.
 -- This doesn't change the *width* and *height* values, allowing the target
 -- area to be smaller than the source one.
@@ -155,6 +159,89 @@ local function move_into_geometry(source, target)
     end
 
     return ret
+end
+
+-- Update the workarea
+local function wibox_update_strut(d, position)
+    -- If the drawable isn't visible, remove the struts
+    if not d.visible then
+        d:struts { left = 0, right = 0, bottom = 0, top = 0 }
+        return
+    end
+
+    -- Detect horizontal or vertical drawables
+    local geo      = area_common(d)
+    local vertical = geo.width < geo.height
+
+    -- Look into the `position` string to find the relevants sides to crop from
+    -- the workarea
+    local struts = { left = 0, right = 0, bottom = 0, top = 0 }
+
+    if vertical then
+        for _, v in ipairs {"right", "left"} do
+            if (not position) or position:match(v) then
+                struts[v] = geo.width
+            end
+        end
+    else
+        for _, v in ipairs {"top", "bottom"} do
+            if (not position) or position:match(v) then
+                struts[v] = geo.height
+            end
+        end
+    end
+
+    -- Update the workarea
+    d:struts(struts)
+end
+
+--- Pin a drawable to a placement function.
+-- Automatically update the position when the size change.
+-- All other arguments will be passed to the `position` function (if any)
+-- @tparam[opt=client.focus] drawable d A drawable (like `client`, `mouse`
+--   or `wibox`)
+-- @param position_f A position name (see `align`) or a position function
+-- @tparam[opt={}] table args Other arguments
+local function attach(d, position_f, args)
+    args = args or {}
+
+    if not args.attach then return end
+
+    d = d or capi.client.focus
+    if not d then return end
+
+    if type(position_f) == "string" then
+        position_f = placement[position_f]
+    end
+
+    if not position_f then return end
+
+    local function tracker()
+        position_f(d, args)
+    end
+
+    d:connect_signal("property::width" , tracker)
+    d:connect_signal("property::height", tracker)
+
+    tracker()
+
+    if args.update_workarea then
+        local function tracker_struts()
+            --TODO this is too fragile and doesn't work with all methods.
+            wibox_update_strut(d, reverse_align_map[position_f])
+        end
+
+        d:connect_signal("property::geometry" , tracker_struts)
+        d:connect_signal("property::visible"  , tracker_struts)
+
+        tracker_struts()
+    end
+
+    -- If there is a parent drawable, screen or mouse, also track it
+    local parent = args.parent or d.screen
+    if parent then
+        args.parent:connect_signal("property::geometry" , tracker)
+    end
 end
 
 --- Check if an area intersect another area.
@@ -276,7 +363,7 @@ function placement.closest_corner(d, args)
 
     -- Transpose the corner back to the original size
     local new_args = setmetatable({position = corner}, {__index=args})
-    geometry_common(d, new_args, rect_to_point(dgeo, corner_i, corner_j , n))
+    placement.align(d, new_args)
 
     return corner
 end
@@ -407,6 +494,52 @@ function placement.next_to_mouse(c, offset)
         y = m_coords.y - math.ceil(c_height / 2)
     end
     return c:geometry({ x = x, y = y })
+end
+
+--- Move the drawable (client or wibox) `d` to a screen position or side.
+--
+-- Supported args.positions are:
+--
+-- * top_left
+-- * top_right
+-- * bottom_left
+-- * bottom_right
+-- * left
+-- * right
+-- * top
+-- * bottom
+-- * centered
+-- * center_vertical
+-- * center_horizontal
+--
+--@DOC_awful_placement_align_EXAMPLE@
+-- @tparam drawable d A drawable (like `client`, `mouse` or `wibox`)
+-- @tparam[opt={}] table args Other arguments
+function placement.align(d, args)
+    args = args or {}
+    d    = d or capi.client.focus
+
+    if not d or not args.position then return end
+
+    local sgeo = get_parent_geometry(d, args)
+    local dgeo = geometry_common(d, args)
+    local bw   = d.border_width or 0
+
+    local pos  = align_map[args.position](
+        sgeo.width ,
+        sgeo.height,
+        dgeo.width ,
+        dgeo.height
+    )
+
+    geometry_common(d, args, {
+        x      = (pos.x and math.ceil(sgeo.x + pos.x) or dgeo.x) + bw  ,
+        y      = (pos.y and math.ceil(sgeo.y + pos.y) or dgeo.y) + bw  ,
+        width  =            math.ceil(dgeo.width    )            - 2*bw,
+        height =            math.ceil(dgeo.height   )            - 2*bw,
+    })
+
+    attach(d, placement[args.position], args)
 end
 
 --- Place the client centered with respect to a parent or the clients screen.
