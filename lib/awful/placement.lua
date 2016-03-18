@@ -29,6 +29,134 @@ end
 
 local placement = {}
 
+-- 3x3 matrix of the valid sides and corners
+local corners3x3 = {{"top_left"   ,   "top"   , "top_right"   },
+                    {"left"       ,    nil    , "right"       },
+                    {"bottom_left",  "bottom" , "bottom_right"}}
+
+-- 2x2 matrix of the valid sides and corners
+local corners2x2 = {{"top_left"   ,            "top_right"   },
+                    {"bottom_left",            "bottom_right"}}
+
+--- Get the area covered by a drawin.
+-- @param d The drawin
+-- @tparam[opt=nil] table new_geo A new geometry
+-- @tparam[opt=false] boolean ignore_border_width Ignore the border
+-- @treturn The drawin's area.
+local function area_common(d, new_geo, ignore_border_width)
+    -- The C side expect no arguments, nil isn't valid
+    local geometry = new_geo and d:geometry(new_geo) or d:geometry()
+    local border = ignore_border_width and 0 or d.border_width or 0
+    geometry.x = geometry.x - border
+    geometry.y = geometry.y - border
+    geometry.width = geometry.width + 2 * border
+    geometry.height = geometry.height + 2 * border
+    return geometry
+end
+
+--- Get (and optionally set) an object geometry.
+-- Some elements, such as `mouse` and `screen` don't have a `:geometry()`
+-- methods.
+-- @param obj An object
+-- @tparam table args the method arguments
+-- @tparam[opt=nil] table new_geo A new geometry to replace the existing one
+-- @tparam[opt=false] boolean ignore_border_width Ignore the border
+-- @treturn table A table with *x*, *y*, *width* and *height*.
+local function geometry_common(obj, args, new_geo, ignore_border_width)
+    -- It's a mouse
+    if obj.coords then
+        local coords = new_geo and obj.coords(new_geo) or obj.coords()
+        return {x=coords.x, y=coords.y, width=0, height=0}
+    elseif obj.geometry then
+        local geo = obj.geometry
+
+        -- It is either a drawable or something that implement its API
+        if type(geo) == "function" then
+            local dgeo = area_common(obj, new_geo, ignore_border_width)
+
+            -- Apply the margins
+            if args.margins then
+                local delta = type(args.margins) == "table" and args.margins or {
+                    left = args.margins , right  = args.margins,
+                    top  = args.margins , bottom = args.margins
+                }
+
+                return {
+                    x      = dgeo.x      + (delta.left or 0),
+                    y      = dgeo.y      + (delta.top  or 0),
+                    width  = dgeo.width  - (delta.left or 0) - (delta.right  or 0),
+                    height = dgeo.height - (delta.top  or 0) - (delta.bottom or 0),
+                }
+            end
+
+            return dgeo
+        end
+
+        -- It is a screen, it doesn't support setting new sizes.
+        return a_screen.get_bounding_geometry(obj, args)
+    else
+        assert(false, "Invalid object")
+    end
+end
+
+--- Get the parent geometry from the standardized arguments API shared by all
+-- `awful.placement` methods.
+-- @param obj A screen or a drawable
+-- @tparam table args the method arguments
+-- @treturn table A table with *x*, *y*, *width* and *height*.
+local function get_parent_geometry(obj, args)
+    if args.bounding_rect then
+        return args.bounding_rect
+    elseif args.parent then
+        return geometry_common(args.parent, args)
+    elseif obj.screen then
+        return geometry_common(obj.screen, args)
+    else
+        return geometry_common(capi.screen[capi.mouse.screen], args)
+    end
+end
+
+--- Convert a rectangle and matrix coordinates info into a point.
+-- This is useful along with matrixes like `corners3x3` to convert
+-- indices into a geometry point.
+-- @tparam table geo a geometry table
+-- @tparam number corner_i The horizontal matrix index
+-- @tparam number corner_j The vertical matrix index
+-- @tparam number n The (square) matrix dimension
+-- @treturn table A table with *x* and *y* keys
+local function rect_to_point(geo, corner_i, corner_j, n)
+    return {
+        x = geo.x + corner_i * math.floor(geo.width  / (n-1)),
+        y = geo.y + corner_j * math.floor(geo.height / (n-1)),
+    }
+end
+
+--- Move a point into an area.
+-- This doesn't change the *width* and *height* values, allowing the target
+-- area to be smaller than the source one.
+-- @tparam table source The (larger) geometry to move `target` into
+-- @tparam table target The area to move into `source`
+-- @treturn table A table with *x* and *y* keys
+local function move_into_geometry(source, target)
+    local ret = {x = target.x, y = target.y}
+
+    -- Horizontally
+    if ret.x < source.x then
+        ret.x = source.x
+    elseif ret.x > source.x + source.width then
+        ret.x = source.x + source.width - 1
+    end
+
+    -- Vertically
+    if ret.y < source.y then
+        ret.y = source.y
+    elseif ret.y > source.y + source.height then
+        ret.y = source.y + source.height - 1
+    end
+
+    return ret
+end
+
 --- Check if an area intersect another area.
 -- @param a The area.
 -- @param b The other area.
@@ -107,15 +235,50 @@ local function area_remove(areas, elem)
     return areas
 end
 
---- Get the area covered by a client.
--- @client c The client.
--- @treturn The client's area.
-local function get_area(c)
-    local geometry = c:geometry()
-    local border = c.border_width or 0
-    geometry.width = geometry.width + 2 * border
-    geometry.height = geometry.height + 2 * border
-    return geometry
+--- Move a drawable to the closest corner of the parent geometry (such as the
+-- screen).
+--
+-- Valid arguments include the common ones and:
+--
+-- * **include_sides**: Also include the left, right, top and bottom positions
+--
+--@DOC_awful_placement_closest_mouse_EXAMPLE@
+-- @tparam[opt=client.focus] drawable d A drawable (like `client`, `mouse`
+--   or `wibox`)
+-- @tparam[opt={}] table args The arguments
+-- @treturn string The corner name
+function placement.closest_corner(d, args)
+    d = d or capi.client.focus
+
+    local sgeo = get_parent_geometry(d, args)
+    local dgeo = geometry_common(d, args)
+
+    local pos  = move_into_geometry(sgeo, dgeo)
+
+    local corner_i, corner_j, n
+
+    -- Use the product of 3 to get the closest point in a NxN matrix
+    local function f(_n, mat)
+        n        = _n
+        corner_i = -math.ceil( ( (sgeo.x - pos.x) * n) / sgeo.width  )
+        corner_j = -math.ceil( ( (sgeo.y - pos.y) * n) / sgeo.height )
+        return mat[corner_j + 1][corner_i + 1]
+    end
+
+    -- Turn the area into a grid and snap to the cloest point. This size of the
+    -- grid will increase the accuracy. A 2x2 matrix only include the corners,
+    -- at 3x3, this include the sides too technically, a random size would work,
+    -- but without corner names.
+    local grid_size = args.include_sides and 3 or 2
+
+    -- If the point is in the center, use the closest corner
+    local corner = f(grid_size, corners3x3) or f(2, corners2x2)
+
+    -- Transpose the corner back to the original size
+    local new_args = setmetatable({position = corner}, {__index=args})
+    geometry_common(d, new_args, rect_to_point(dgeo, corner_i, corner_j , n))
+
+    return corner
 end
 
 --- Place the client so no part of it will be outside the screen (workarea).
@@ -124,7 +287,7 @@ end
 -- @treturn table The new client geometry.
 function placement.no_offscreen(c, screen)
     c = c or capi.client.focus
-    local geometry = get_area(c)
+    local geometry = area_common(c)
     screen = get_screen(screen or c.screen or a_screen.getbycoord(geometry.x, geometry.y))
     local screen_geometry = screen.workarea
 
@@ -148,14 +311,14 @@ end
 --- Place the client where there's place available with minimum overlap.
 -- @param c The client.
 function placement.no_overlap(c)
-    local geometry = get_area(c)
+    local geometry = area_common(c)
     local screen   = get_screen(c.screen or a_screen.getbycoord(geometry.x, geometry.y))
     local cls = client.visible(screen)
     local curlay = layout.get()
     local areas = { screen.workarea }
     for _, cl in pairs(cls) do
         if cl ~= c and cl.type ~= "desktop" and (client.floating.get(cl) or curlay == layout.suit.floating) then
-            areas = area_remove(areas, get_area(cl))
+            areas = area_remove(areas, area_common(cl))
         end
     end
 
@@ -202,7 +365,7 @@ end
 -- @return The new client geometry.
 function placement.under_mouse(c)
     c = c or capi.client.focus
-    local c_geometry = get_area(c)
+    local c_geometry = area_common(c)
     local m_coords = capi.mouse.coords()
     return c:geometry({ x = m_coords.x - c_geometry.width / 2,
                         y = m_coords.y - c_geometry.height / 2 })
@@ -218,7 +381,7 @@ end
 function placement.next_to_mouse(c, offset)
     c = c or capi.client.focus
     offset = offset or dpi(5)
-    local c_geometry = get_area(c)
+    local c_geometry = area_common(c)
     local c_width = c_geometry.width
     local c_height = c_geometry.height
     local m_coords = capi.mouse.coords()
@@ -252,11 +415,11 @@ end
 -- @return The new client geometry.
 function placement.centered(c, p)
     c = c or capi.client.focus
-    local c_geometry = get_area(c)
+    local c_geometry = area_common(c)
     local screen = get_screen(c.screen or a_screen.getbycoord(c_geometry.x, c_geometry.y))
     local s_geometry
     if p then
-        s_geometry = get_area(p)
+        s_geometry = area_common(p)
     else
         s_geometry = screen.geometry
     end
@@ -270,11 +433,11 @@ end
 -- @return The new client geometry.
 function placement.center_horizontal(c, p)
     c = c or capi.client.focus
-    local c_geometry = get_area(c)
+    local c_geometry = area_common(c)
     local screen = get_screen(c.screen or a_screen.getbycoord(c_geometry.x, c_geometry.y))
     local s_geometry
     if p then
-        s_geometry = get_area(p)
+        s_geometry = area_common(p)
     else
         s_geometry = screen.geometry
     end
@@ -287,11 +450,11 @@ end
 -- @return The new client geometry.
 function placement.center_vertical(c, p)
     c = c or capi.client.focus
-    local c_geometry = get_area(c)
+    local c_geometry = area_common(c)
     local screen = get_screen(c.screen or a_screen.getbycoord(c_geometry.x, c_geometry.y))
     local s_geometry
     if p then
-        s_geometry = get_area(p)
+        s_geometry = area_common(p)
     else
         s_geometry = screen.geometry
     end
