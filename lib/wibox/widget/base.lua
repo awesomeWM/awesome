@@ -182,6 +182,7 @@ function clear_caches(widget)
         clear_caches(w)
     end
 end
+
 -- }}}
 
 --- Figure out the geometry in device coordinate space. This gives only tight
