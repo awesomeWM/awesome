@@ -297,7 +297,7 @@ macro(a_icon_convert match replacement input)
         set(ALL_ICONS ${ALL_ICONS} ${output})
 
         add_custom_command(
-            COMMAND ${CONVERT_EXECUTABLE} ${input} ${ARGN} ${output}
+            COMMAND ${CONVERT_EXECUTABLE} ${input} -strip ${ARGN} ${output}
             OUTPUT  ${output}
             DEPENDS ${input}
             VERBATIM)
