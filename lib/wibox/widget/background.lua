@@ -72,6 +72,12 @@ function background:before_draw_children(_, cr)
     if self.foreground then
         cr:set_source(self.foreground)
     end
+
+    -- Clip the shape
+    if self._path and self._shape_clip then
+        cr:append_path(self._path)
+        cr:clip()
+    end
 end
 
 --- Layout this widget
@@ -152,6 +158,13 @@ end
 -- @param[opt=self.foreground] fg The border color, pattern or gradient
 function background:set_shape_border_color(fg)
     self._shape_border_color = fg
+    self:emit_signal("widget::redraw_needed")
+end
+
+--- When a `shape` is set, make sure nothing is drawn outside of it.
+-- @tparam boolean value If the shape clip is enable
+function background:set_shape_clip(value)
+    self._shape_clip = value
     self:emit_signal("widget::redraw_needed")
 end
 
