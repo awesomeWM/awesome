@@ -430,6 +430,7 @@ exit_help(int exit_code)
   -v, --version          show version\n\
   -c, --config FILE      configuration file to use\n\
   -k, --check            check configuration file syntax\n\
+  -a, --no-argb          disable client transparency support\n\
   -r, --replace          replace an existing window manager\n");
     exit(exit_code);
 }
