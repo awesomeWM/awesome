@@ -33,8 +33,23 @@ function markup.bg(color, text)
     return '<span background="' .. tostring(color) .. '">' .. tostring(text) .. '</span>'
 end
 
+local widget_module = {
+    group_rules = {},
+}
 
+--- Don't show hotkeys without descriptions.
+widget_module.hide_without_description = true
+
+--- Merge hotkey records into one if they have the same modifiers and
+-- description.
+widget_module.merge_duplicates = true
+
+
+function widget_module.new()
 local widget = {
+    hide_without_description = widget_module.hide_without_description,
+    merge_duplicates = widget_module.merge_duplicates,
+    group_rules = awful.util.table.clone(widget_module.group_rules),
     title_font = "Monospace Bold 9",
     description_font = "Monospace 8",
     width = dpi(1200),
@@ -42,7 +57,6 @@ local widget = {
     border_width = beautiful.border_width or dpi(2),
     modifiers_color = beautiful.bg_minimize or "#555555",
     group_margin = dpi(6),
-    group_rules = {},
     additional_hotkeys = {},
     labels = {
         Mod4="Super",
@@ -86,14 +100,6 @@ local widget = {
         Control="Ctrl"
     },
 }
-
---- Don't show hotkeys without descriptions.
-widget.hide_without_description = true
-
---- Merge hotkey records into one if they have the same modifiers and
--- description.
-widget.merge_duplicates = true
-
 
 local cached_wiboxes = {}
 local cached_awful_keys = nil
@@ -447,5 +453,30 @@ end
 
 
 return widget
+end
+
+local function get_default_widget()
+    if not widget_module.default_widget then
+        widget_module.default_widget = widget_module.new()
+    end
+    return widget_module.default_widget
+end
+
+--- Show popup with hotkeys help (default widget instance will be used).
+-- @tparam[opt] client c Client.
+-- @tparam[opt] screen s Screen.
+function widget_module.show_help(...)
+    return get_default_widget().show_help(...)
+end
+
+--- Add hotkey descriptions for third-party applications
+-- (default widget instance will be used).
+-- @tparam table hotkeys Table with bindings,
+-- see `awful.hotkeys_popup.key.vim` as an example.
+function widget_module.add_hotkeys(...)
+    return get_default_widget().add_hotkeys(...)
+end
+
+return widget_module
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
