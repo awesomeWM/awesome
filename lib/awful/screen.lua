@@ -135,7 +135,7 @@ end
 
 --- Get or set the screen padding.
 -- @param _screen The screen object to change the padding on
--- @param padding The padding, an table with 'top', 'left', 'right' and/or
+-- @param padding The padding, a table with 'top', 'left', 'right' and/or
 -- 'bottom'. Can be nil if you only want to retrieve padding
 function screen.padding(_screen, padding)
     _screen = get_screen(_screen)
