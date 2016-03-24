@@ -677,6 +677,19 @@ function placement.maximize(d, args)
     attach(d, placement.maximize, args)
 end
 
+-- Add the alias functions
+for _, v in ipairs {"vertically", "horizontally"} do
+    placement["maximize_"..v] = function(d2, args)
+        args = args or {}
+        local new_args = setmetatable({axis = v}, {__index=args})
+        placement.maximize(d2, new_args)
+    end
+end
+
+---@DOC_awful_placement_maximize_vertically_EXAMPLE@
+
+---@DOC_awful_placement_maximize_horizontally_EXAMPLE@
+
 return placement
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
