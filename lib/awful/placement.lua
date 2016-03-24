@@ -643,6 +643,46 @@ end
 
 ---@DOC_awful_placement_stretch_down_EXAMPLE@
 
+--- Maximize a drawable horizontally, vertically or both.
+-- Valid args:
+--
+-- * *margins*: A margin value or table
+-- * *honor_workarea*:
+-- * *honor_padding*:
+-- * *tag*: Use a tag geometry, this honor the workarea, padding and gaps
+-- * *parent*: A parent drawable to use a base geometry
+-- * *bounding_rect*: A bounding rectangle
+-- * *axis*:The axis (vertical or horizontal). If none is
+--    specified, then the drawable will be maximized on both axis.
+--
+--@DOC_awful_placement_maximize_EXAMPLE@
+-- @tparam[opt=client.focus] drawable d A drawable (like `client` or `wibox`)
+-- @tparam[opt={}] table args The arguments
+function placement.maximize(d, args)
+    args = args or {}
+    d    = d or capi.client.focus
+
+    if not d then return end
+
+    local sgeo = get_parent_geometry(d, args)
+    local ngeo = geometry_common(d, args, nil, true)
+    local bw   = d.border_width or 0
+
+    if (not args.axis) or args.axis :match "vertical" then
+        ngeo.y      = sgeo.y + bw
+        ngeo.height = sgeo.height - 2*bw
+    end
+
+    if (not args.axis) or args.axis :match "horizontal" then
+        ngeo.x      = sgeo.x + bw
+        ngeo.width  = sgeo.width - 2*bw
+    end
+
+    geometry_common(d, args, ngeo)
+
+    attach(d, placement.maximize, args)
+end
+
 return placement
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
