@@ -13,7 +13,9 @@ end
 
 -- Make the layoutbox in the default config GC'able
 -- luacheck: globals mywibox mylayoutbox
-mywibox[1].visible = false
+for s in screen do
+    mywibox[s].visible = false
+end
 mywibox = nil
 mylayoutbox = nil
 emit_refresh()

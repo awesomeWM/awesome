@@ -102,7 +102,7 @@ screen_wipe(screen_t *s)
 void
 luaA_pushscreen(lua_State *L, screen_t *s)
 {
-    lua_pushinteger(L, screen_get_index(s));
+    luaA_object_push(L, s);
 }
 
 /** Get a screen argument from the lua stack */
