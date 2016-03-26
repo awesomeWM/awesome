@@ -50,7 +50,6 @@ void screen_client_moveto(client_t *, screen_t *, bool);
 void screen_update_primary(void);
 screen_t *screen_get_primary(void);
 
-void luaA_pushscreen(lua_State *, screen_t *);
 screen_t *luaA_checkscreen(lua_State *, int);
 
 #endif

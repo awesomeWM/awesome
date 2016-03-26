@@ -133,13 +133,13 @@ luaA_mouse_index(lua_State *L)
          * having lots of lua errors in this case.
          */
         if (globalconf.focus.client)
-            luaA_pushscreen(L, globalconf.focus.client->screen);
+            luaA_object_push(L, globalconf.focus.client->screen);
         else
-            luaA_pushscreen(L, screen_get_primary());
+            luaA_object_push(L, screen_get_primary());
         return 1;
     }
 
-    luaA_pushscreen(L, screen_getbycoord(mouse_x, mouse_y));
+    luaA_object_push(L, screen_getbycoord(mouse_x, mouse_y));
     return 1;
 }
 
