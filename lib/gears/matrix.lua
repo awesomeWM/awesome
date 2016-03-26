@@ -52,22 +52,6 @@ function matrix.create_rotate(angle)
     return matrix.create(c, s, -s, c, 0, 0)
 end
 
---- Create a matrix copy
--- @return A new matrix identical to `other`
-function matrix:copy()
-    local m = matrix.create(
-        self.xx, self.yx, self.xy,
-        self.yy, self.x0, self.y0
-    )
-
-    -- Used internally
-    if rawget(self, "_call") then
-        rawset(m, "_call", self._call)
-    end
-
-    return m
-end
-
 --- Translate this matrix
 -- @tparam number x The translation in x direction.
 -- @tparam number y The translation in y direction.
@@ -127,11 +111,6 @@ function matrix:multiply(other)
         self.xy * other.yx + self.yy * other.yy,
         self.x0 * other.xx + self.y0 * other.xy + other.x0,
         self.x0 * other.yx + self.y0 * other.yy + other.y0)
-
-    -- Used internally
-    if rawget(self, "_call") or rawget(other, "_call") then
-        rawset(ret, "_call", self._call or other._call)
-    end
 
     return ret
 end
@@ -223,7 +202,6 @@ matrix_mt.__newindex = error
 matrix_mt.__eq = matrix.equals
 matrix_mt.__mul = matrix.multiply
 matrix_mt.__tostring = matrix.tostring
-matrix_mt.__call = function(self, ...) return self._call(self, ...) end
 
 --- A constant for the identity matrix.
 matrix.identity = matrix.create(1, 0, 0, 1, 0, 0)
