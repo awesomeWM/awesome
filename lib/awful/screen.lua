@@ -30,6 +30,19 @@ data.padding = {}
 
 screen.mouse_per_screen = {}
 
+--- Take an input geometry and substract/add a delta
+-- @tparam table geo A geometry (width, height, x, y) table
+-- @tparam table delta A delata table (top, bottom, x, y)
+-- @treturn table A geometry (width, height, x, y) table
+local function apply_geometry_ajustments(geo, delta)
+    return {
+        x      = geo.x      + (delta.left or 0),
+        y      = geo.y      + (delta.top  or 0),
+        width  = geo.width  - (delta.left or 0) - (delta.right  or 0),
+        height = geo.height - (delta.top  or 0) - (delta.bottom or 0),
+    }
+end
+
 -- @param s Screen
 -- @param x X coordinate of point
 -- @param y Y coordinate of point
@@ -135,22 +148,99 @@ end
 
 --- Get or set the screen padding.
 -- @param _screen The screen object to change the padding on
--- @param padding The padding, a table with 'top', 'left', 'right' and/or
--- 'bottom'. Can be nil if you only want to retrieve padding
+-- @param[opt=nil] padding The padding, a table with 'top', 'left', 'right' and/or
+-- 'bottom' or a number value to apply set the same padding on all sides. Can be
+--  nil if you only want to retrieve padding
+-- @treturn table A table with left, right, top and bottom number values.
 function screen.padding(_screen, padding)
+    if type(padding) == "number" then
+        padding = {
+            left   = padding,
+            right  = padding,
+            top    = padding,
+            bottom = padding,
+        }
+    end
+
     _screen = get_screen(_screen)
     if padding then
         data.padding[_screen] = padding
         _screen:emit_signal("padding")
     end
-    return data.padding[_screen]
+
+    local p = data.padding[_screen] or {}
+
+    -- Create a copy to avoid accidental mutation and nil values
+    return {
+        left   = p.left   or 0,
+        right  = p.right  or 0,
+        top    = p.top    or 0,
+        bottom = p.bottom or 0,
+    }
 end
 
 --- Get the focused screen.
--- This can be replaced in a user's config.
--- @treturn integer
-function screen.focused()
-    return capi.mouse.screen
+--
+-- Valid arguments are:
+--
+-- * **client**: Use the client screen instead of the mouse screen.
+-- * **mouse**: Use the mouse screen (default).
+--
+-- It is possible to set `awful.screen.default_focused_args` to override the
+-- default settings.
+--
+-- @tparam[opt={}] table args Some arguments.
+-- @treturn screen The focused screen object
+function screen.focused(args)
+    args = args or screen.default_focused_args or {}
+    return get_screen(args.client and capi.client.screen or capi.mouse.screen)
+end
+
+--- Get a placement bounding geometry.
+-- This method compute different variants of the "usable" screen geometry.
+--
+-- Valid arguments are:
+--
+-- * **honor_padding**: Honor the screen padding.
+-- * **honor_workarea**: Honor the screen workarea
+-- * **margins**: Apply some margins on the output. This can wither be a number
+--    or a table with *left*, *right*, *top* and *bottom* keys.
+-- * **tag**: Use the tag screen instead of `s`
+-- * **parent**: A parent drawable to use a base geometry
+-- * **bounding_rect**: A bounding rectangle. This parameter is incompatible with
+--    `honor_workarea`.
+--
+-- @tparam[opt=mouse.screen] screen s A screen
+-- @tparam[opt={}] table args The arguments
+-- @treturn table A table with *x*, *y*, *width* and *height*.
+function screen.get_bounding_geometry(s, args)
+    args = args or {}
+
+    -- If the tag has a geometry, assume it is right
+    if args.tag then
+        s = args.tag.screen
+    end
+
+    s = get_screen(s or capi.mouse.screen)
+
+    local geo = args.bounding_rect or (args.parent and args.parent:geometry()) or
+        s[args.honor_workarea and "workarea" or "geometry"]
+
+    if (not args.parent) and (not args.bounding_rect) and args.honor_padding then
+        local padding = screen.padding(s)
+        geo = apply_geometry_ajustments(geo, padding)
+    end
+
+    if args.margins then
+        geo = apply_geometry_ajustments(geo,
+            type(args.margins) == "table" and args.margins or {
+                left = args.margins, right  = args.margins,
+                top  = args.margins, bottom = args.margins,
+            }
+        )
+    end
+
+    return geo
 end
 
 capi.screen.add_signal("padding")
