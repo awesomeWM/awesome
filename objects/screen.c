@@ -145,8 +145,12 @@ screen_add(lua_State *L, int sidx)
                 return;
             }
 
+    sidx = luaA_absindex(L, sidx);
+    lua_pushvalue(L, sidx);
     luaA_object_ref(L, sidx);
     screen_array_append(&globalconf.screens, new_screen);
+    luaA_object_emit_signal(L, -1, "added", 0);
+    lua_pop(L, 1);
 }
 
 static bool
@@ -755,6 +759,11 @@ screen_class_setup(lua_State *L)
      * @signal primary_changed
      */
     signal_add(&screen_class.signals, "primary_changed");
+    /**
+     * This signal is emitted when a new screen is added to the current setup.
+     * @signal added
+     */
+    signal_add(&screen_class.signals, "added");
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
