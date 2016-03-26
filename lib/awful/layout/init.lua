@@ -136,27 +136,18 @@ function layout.parameters(t, screen)
 
     local p = {}
 
-    p.workarea = screen.workarea
-
     local useless_gap = t and tag.getgap(t, #client.tiled(screen)) or 0
 
-    -- Handle padding
-    local padding = ascreen.padding(screen) or {}
-
-    p.workarea.x = p.workarea.x + (padding.left or 0) + useless_gap
-
-    p.workarea.y = p.workarea.y + (padding.top or 0) + useless_gap
-
-    p.workarea.width = p.workarea.width - ((padding.left or 0 ) +
-        (padding.right or 0) + useless_gap * 2)
-
-    p.workarea.height = p.workarea.height - ((padding.top or 0) +
-        (padding.bottom or 0) + useless_gap * 2)
+    p.workarea = ascreen.get_bounding_geometry(screen, {
+        honor_padding  = true,
+        honor_workarea = true,
+        margins        = useless_gap,
+    })
 
     p.geometry    = screen.geometry
     p.clients     = client.tiled(screen)
     p.screen      = screen.index
-    p.padding     = padding
+    p.padding     = ascreen.padding(screen)
     p.useless_gap = useless_gap
 
     return p
