@@ -138,6 +138,7 @@ end
 -- @param[opt=nil] padding The padding, a table with 'top', 'left', 'right' and/or
 -- 'bottom' or a number value to apply set the same padding on all sides. Can be
 --  nil if you only want to retrieve padding
+-- @treturn table A table with left, right, top and bottom number values.
 function screen.padding(_screen, padding)
     if type(padding) == "number" then
         padding = {
@@ -154,7 +155,15 @@ function screen.padding(_screen, padding)
         _screen:emit_signal("padding")
     end
 
-    return data.padding[_screen]
+    local p = data.padding[_screen] or {}
+
+    -- Create a copy to avoid accidental mutation and nil values
+    return {
+        left   = p.left   or 0,
+        right  = p.right  or 0,
+        top    = p.top    or 0,
+        bottom = p.bottom or 0,
+    }
 end
 
 --- Get the focused screen.
