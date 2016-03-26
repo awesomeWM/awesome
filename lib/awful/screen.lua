@@ -135,14 +135,25 @@ end
 
 --- Get or set the screen padding.
 -- @param _screen The screen object to change the padding on
--- @param padding The padding, a table with 'top', 'left', 'right' and/or
--- 'bottom'. Can be nil if you only want to retrieve padding
+-- @param[opt=nil] padding The padding, a table with 'top', 'left', 'right' and/or
+-- 'bottom' or a number value to apply set the same padding on all sides. Can be
+--  nil if you only want to retrieve padding
 function screen.padding(_screen, padding)
+    if type(padding) == "number" then
+        padding = {
+            left   = padding,
+            right  = padding,
+            top    = padding,
+            bottom = padding,
+        }
+    end
+
     _screen = get_screen(_screen)
     if padding then
         data.padding[_screen] = padding
         _screen:emit_signal("padding")
     end
+
     return data.padding[_screen]
 end
 
