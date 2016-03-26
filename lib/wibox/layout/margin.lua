@@ -14,7 +14,7 @@ local cairo = require("lgi").cairo
 
 local margin = { mt = {} }
 
---- Draw a margin layout
+-- Draw a margin layout
 function margin:draw(_, cr, width, height)
     local x = self.left
     local y = self.top
@@ -35,7 +35,7 @@ function margin:draw(_, cr, width, height)
     end
 end
 
---- Layout a margin layout
+-- Layout a margin layout
 function margin:layout(_, width, height)
     if self.widget then
         local x = self.left
@@ -47,7 +47,7 @@ function margin:layout(_, width, height)
     end
 end
 
---- Fit a margin layout into the given space
+-- Fit a margin layout into the given space
 function margin:fit(context, width, height)
     local extra_w = self.left + self.right
     local extra_h = self.top + self.bottom
@@ -72,13 +72,13 @@ function margin:set_widget(widget)
     self:emit_signal("widget::layout_changed")
 end
 
---- Get the number of children element
+-- Get the number of children element
 -- @treturn table The children
 function margin:get_children()
     return {self.widget}
 end
 
---- Replace the layout children
+-- Replace the layout children
 -- This layout only accept one children, all others will be ignored
 -- @tparam table children A table composed of valid widgets
 function margin:set_children(children)
@@ -86,7 +86,15 @@ function margin:set_children(children)
 end
 
 --- Set all the margins to val.
+-- @tparam number val The margin value
 function margin:set_margins(val)
+    if self.left   == val and
+       self.right  == val and
+       self.top    == val and
+       self.bottom == val then
+        return
+    end
+
     self.left = val
     self.right = val
     self.top = val
@@ -94,7 +102,8 @@ function margin:set_margins(val)
     self:emit_signal("widget::layout_changed")
 end
 
---- Set the margins color to color
+--- Set the margins color to create a border.
+-- @param color A color used to fill the margin.
 function margin:set_color(color)
     self.color = color and gcolor(color)
     self:emit_signal("widget::redraw_needed")
@@ -142,6 +151,7 @@ end
 -- Create setters for each direction
 for _, v in pairs({ "left", "right", "top", "bottom" }) do
     margin["set_" .. v] = function(layout, val)
+        if layout[v] == val then return end
         layout[v] = val
         layout:emit_signal("widget::layout_changed")
     end
