@@ -87,6 +87,13 @@ end
 
 --- Set all the margins to val.
 function margin:set_margins(val)
+    if self.left   == val and
+       self.right  == val and
+       self.top    == val and
+       self.bottom == val then
+        return
+    end
+
     self.left = val
     self.right = val
     self.top = val
@@ -142,6 +149,7 @@ end
 -- Create setters for each direction
 for _, v in pairs({ "left", "right", "top", "bottom" }) do
     margin["set_" .. v] = function(layout, val)
+        if layout[v] == val then return end
         layout[v] = val
         layout:emit_signal("widget::layout_changed")
     end
