@@ -455,15 +455,26 @@ function module.transform(shape)
     -- Apply the transformation matrix and apply the shape, then restore
     local function apply(self, cr, width, height, ...)
         cr:save()
-        cr:transform(self:to_cairo_matrix())
+        cr:transform(self.matrix:to_cairo_matrix())
         shape(cr, width, height, ...)
         cr:restore()
     end
+    -- Redirect function calls like :rotate() to the underlying matrix
+    local function index(_, key)
+        return function(self, ...)
+            self.matrix = self.matrix[key](self.matrix, ...)
+            return self
+        end
+    end
 
-    local matrix = g_matrix.identity:copy()
-    rawset(matrix, "_call", apply)
+    local result = setmetatable({
+        matrix = g_matrix.identity
+    }, {
+        __call = apply,
+        __index = index
+    })
 
-    return matrix
+    return result
 end
 
 return module
