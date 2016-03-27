@@ -35,7 +35,7 @@
 
 /** Mouse library.
  *
- * @field screen Mouse screen number.
+ * @field screen Mouse screen.
  * @table mouse
  */
 
@@ -115,7 +115,7 @@ mouse_warp_pointer(xcb_window_t window, int x, int y)
  * \return The number of elements pushed on stack.
  * \luastack
  * \lfield coords Mouse coordinates.
- * \lfield screen Mouse screen number.
+ * \lfield screen Mouse screen.
  */
 static int
 luaA_mouse_index(lua_State *L)
