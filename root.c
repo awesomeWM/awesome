@@ -123,6 +123,58 @@ disconnect:
     return result;
 }
 
+void
+root_update_wallpaper(void)
+{
+    xcb_get_property_cookie_t prop_c;
+    xcb_get_property_reply_t *prop_r;
+    xcb_get_geometry_cookie_t geom_c;
+    xcb_get_geometry_reply_t *geom_r;
+    xcb_pixmap_t *rootpix;
+
+    cairo_surface_destroy(globalconf.wallpaper);
+    globalconf.wallpaper = NULL;
+
+    prop_c = xcb_get_property_unchecked(globalconf.connection, false,
+            globalconf.screen->root, _XROOTPMAP_ID, XCB_ATOM_PIXMAP, 0, 1);
+    prop_r = xcb_get_property_reply(globalconf.connection, prop_c, NULL);
+
+    if (!prop_r || !prop_r->value_len)
+    {
+        p_delete(&prop_r);
+        return;
+    }
+
+    rootpix = xcb_get_property_value(prop_r);
+    if (!rootpix)
+    {
+        p_delete(&prop_r);
+        return;
+    }
+
+    geom_c = xcb_get_geometry_unchecked(globalconf.connection, *rootpix);
+    geom_r = xcb_get_geometry_reply(globalconf.connection, geom_c, NULL);
+    if (!geom_r)
+    {
+        p_delete(&prop_r);
+        return;
+    }
+
+    /* Only the default visual makes sense, so just the default depth */
+    if (geom_r->depth != draw_visual_depth(globalconf.screen, globalconf.default_visual->visual_id))
+        warn("Got a pixmap with depth %d, but the default depth is %d, continuing anyway",
+                geom_r->depth, draw_visual_depth(globalconf.screen, globalconf.default_visual->visual_id));
+
+    globalconf.wallpaper = cairo_xcb_surface_create(globalconf.connection,
+                                                    *rootpix,
+                                                    globalconf.default_visual,
+                                                    geom_r->width,
+                                                    geom_r->height);
+
+    p_delete(&prop_r);
+    p_delete(&geom_r);
+}
+
 static xcb_keycode_t
 _string_to_key_code(const char *s)
 {
@@ -344,13 +396,6 @@ luaA_root_drawins(lua_State *L)
 static int
 luaA_root_wallpaper(lua_State *L)
 {
-    xcb_get_property_cookie_t prop_c;
-    xcb_get_property_reply_t *prop_r;
-    xcb_get_geometry_cookie_t geom_c;
-    xcb_get_geometry_reply_t *geom_r;
-    xcb_pixmap_t *rootpix;
-    cairo_surface_t *surface;
-
     if(lua_gettop(L) == 1)
     {
         cairo_pattern_t *pattern = (cairo_pattern_t *)lua_touserdata(L, -1);
@@ -359,43 +404,11 @@ luaA_root_wallpaper(lua_State *L)
         return 1;
     }
 
-    prop_c = xcb_get_property_unchecked(globalconf.connection, false,
-            globalconf.screen->root, _XROOTPMAP_ID, XCB_ATOM_PIXMAP, 0, 1);
-    prop_r = xcb_get_property_reply(globalconf.connection, prop_c, NULL);
-
-    if (!prop_r || !prop_r->value_len)
-    {
-        p_delete(&prop_r);
+    if(globalconf.wallpaper == NULL)
         return 0;
-    }
-
-    rootpix = xcb_get_property_value(prop_r);
-    if (!rootpix)
-    {
-        p_delete(&prop_r);
-        return 0;
-    }
-
-    geom_c = xcb_get_geometry_unchecked(globalconf.connection, *rootpix);
-    geom_r = xcb_get_geometry_reply(globalconf.connection, geom_c, NULL);
-    if (!geom_r)
-    {
-        p_delete(&prop_r);
-        return 0;
-    }
-
-    /* Only the default visual makes sense, so just the default depth */
-    if (geom_r->depth != draw_visual_depth(globalconf.screen, globalconf.default_visual->visual_id))
-        warn("Got a pixmap with depth %d, but the default depth is %d, continuing anyway",
-                geom_r->depth, draw_visual_depth(globalconf.screen, globalconf.default_visual->visual_id));
-
-    surface = cairo_xcb_surface_create(globalconf.connection, *rootpix, globalconf.default_visual,
-                                       geom_r->width, geom_r->height);
 
     /* lua has to make sure this surface gets destroyed */
-    lua_pushlightuserdata(L, surface);
-    p_delete(&prop_r);
-    p_delete(&geom_r);
+    lua_pushlightuserdata(L, cairo_surface_reference(globalconf.wallpaper));
     return 1;
 }
 
