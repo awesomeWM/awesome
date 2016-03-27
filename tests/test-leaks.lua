@@ -31,6 +31,7 @@ local function collectable(a, b, c, d, e, f, g, h, last)
     end
     collectgarbage("collect")
     collectgarbage("collect")
+    collectgarbage("collect")
     -- Check if the table is now empty
     for _, v in pairs(objs) do
         print("Some object was not garbage collected!")
