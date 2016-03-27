@@ -35,7 +35,7 @@
 
 /** Mouse library.
  *
- * @field screen Mouse screen number.
+ * @field screen Mouse screen.
  * @table mouse
  */
 
@@ -115,7 +115,7 @@ mouse_warp_pointer(xcb_window_t window, int x, int y)
  * \return The number of elements pushed on stack.
  * \luastack
  * \lfield coords Mouse coordinates.
- * \lfield screen Mouse screen number.
+ * \lfield screen Mouse screen.
  */
 static int
 luaA_mouse_index(lua_State *L)
@@ -133,13 +133,13 @@ luaA_mouse_index(lua_State *L)
          * having lots of lua errors in this case.
          */
         if (globalconf.focus.client)
-            luaA_pushscreen(L, globalconf.focus.client->screen);
+            luaA_object_push(L, globalconf.focus.client->screen);
         else
-            luaA_pushscreen(L, screen_get_primary());
+            luaA_object_push(L, screen_get_primary());
         return 1;
     }
 
-    luaA_pushscreen(L, screen_getbycoord(mouse_x, mouse_y));
+    luaA_object_push(L, screen_getbycoord(mouse_x, mouse_y));
     return 1;
 }
 

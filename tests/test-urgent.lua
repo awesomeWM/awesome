@@ -7,7 +7,7 @@ local runner = require("_runner")
 -- luacheck: globals tags
 
 -- Some basic assertion that the tag is not marked "urgent" already.
-assert(awful.tag.getproperty(tags[1][2], "urgent") == nil)
+assert(awful.tag.getproperty(tags[awful.screen.focused()][2], "urgent") == nil)
 
 
 -- Setup signal handler which should be called.
@@ -32,16 +32,16 @@ local steps = {
     if count == 1 then  -- Setup.
       urgent_cb_done = false
       -- Select first tag.
-      awful.tag.viewonly(tags[1][1])
+      awful.tag.viewonly(tags[awful.screen.focused()][1])
 
       runner.add_to_default_rules({ rule = { class = "XTerm" },
-        properties = { tag = tags[1][2], focus = true } })
+        properties = { tag = tags[awful.screen.focused()][2], focus = true } })
 
       awful.spawn("xterm")
     end
     if urgent_cb_done then
-      assert(awful.tag.getproperty(tags[1][2], "urgent") == true)
-      assert(awful.tag.getproperty(tags[1][2], "urgent_count") == 1)
+      assert(awful.tag.getproperty(tags[awful.screen.focused()][2], "urgent") == true)
+      assert(awful.tag.getproperty(tags[awful.screen.focused()][2], "urgent_count") == 1)
       return true
     end
   end,
@@ -55,13 +55,13 @@ local steps = {
       root.fake_input("key_release", "2")
       root.fake_input("key_release", "Super_L")
 
-    elseif awful.tag.selectedlist()[1] == tags[1][2] then
+    elseif awful.tag.selectedlist()[1] == tags[awful.screen.focused()][2] then
       assert(#client.get() == 1)
       local c = client.get()[1]
       assert(not c.urgent, "Client is not urgent anymore.")
       assert(c == client.focus, "Client is focused.")
-      assert(awful.tag.getproperty(tags[1][2], "urgent") == false)
-      assert(awful.tag.getproperty(tags[1][2], "urgent_count") == 0)
+      assert(awful.tag.getproperty(tags[awful.screen.focused()][2], "urgent") == false)
+      assert(awful.tag.getproperty(tags[awful.screen.focused()][2], "urgent_count") == 0)
       return true
     end
   end,
@@ -72,17 +72,17 @@ local steps = {
       urgent_cb_done = false
 
       -- Select first tag.
-      awful.tag.viewonly(tags[1][1])
+      awful.tag.viewonly(tags[awful.screen.focused()][1])
 
       runner.add_to_default_rules({ rule = { class = "XTerm" },
-        properties = { tag = tags[1][2], focus = true, switchtotag = true }})
+        properties = { tag = tags[awful.screen.focused()][2], focus = true, switchtotag = true }})
 
       awful.spawn("xterm")
 
-    elseif awful.tag.selectedlist()[1] == tags[1][2] then
+    elseif awful.tag.selectedlist()[1] == tags[awful.screen.focused()][2] then
       assert(not urgent_cb_done)
-      assert(awful.tag.getproperty(tags[1][2], "urgent") == false)
-      assert(awful.tag.getproperty(tags[1][2], "urgent_count") == 0)
+      assert(awful.tag.getproperty(tags[awful.screen.focused()][2], "urgent") == false)
+      assert(awful.tag.getproperty(tags[awful.screen.focused()][2], "urgent_count") == 0)
       assert(awful.tag.selectedlist()[2] == nil)
       return true
     end
@@ -97,14 +97,14 @@ local steps = {
       manage_cb_done = false
 
       runner.add_to_default_rules({rule = { class = "XTerm" },
-        properties = { tag = tags[1][2], focus = false }})
+        properties = { tag = tags[awful.screen.focused()][2], focus = false }})
 
       awful.spawn("xterm")
     end
     if manage_cb_done then
       assert(client.get()[1].urgent == false)
-      assert(awful.tag.getproperty(tags[1][2], "urgent") == false)
-      assert(awful.tag.getproperty(tags[1][2], "urgent_count") == 0)
+      assert(awful.tag.getproperty(tags[awful.screen.focused()][2], "urgent") == false)
+      assert(awful.tag.getproperty(tags[awful.screen.focused()][2], "urgent_count") == 0)
       return true
     end
   end,

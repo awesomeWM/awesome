@@ -99,12 +99,6 @@ screen_wipe(screen_t *s)
     screen_output_array_wipe(&s->outputs);
 }
 
-void
-luaA_pushscreen(lua_State *L, screen_t *s)
-{
-    lua_pushinteger(L, screen_get_index(s));
-}
-
 /** Get a screen argument from the lua stack */
 screen_t *
 luaA_checkscreen(lua_State *L, int sidx)
@@ -501,7 +495,7 @@ screen_client_moveto(client_t *c, screen_t *new_screen, bool doresize)
     {
         luaA_object_push(L, c);
         if(old_screen != NULL)
-            luaA_pushscreen(L, old_screen);
+            luaA_object_push(L, old_screen);
         else
             lua_pushnil(L);
         luaA_object_emit_signal(L, -2, "property::screen", 1);
@@ -540,7 +534,7 @@ screen_client_moveto(client_t *c, screen_t *new_screen, bool doresize)
     {
         luaA_object_push(L, c);
         if(old_screen != NULL)
-            luaA_pushscreen(L, old_screen);
+            luaA_object_push(L, old_screen);
         else
             lua_pushnil(L);
         luaA_object_emit_signal(L, -2, "property::screen", 1);
@@ -658,7 +652,7 @@ luaA_screen_module_call(lua_State *L)
         idx = screen_get_index(luaA_checkscreen(L, 3));
     if (idx >= 0 && idx < globalconf.screens.len)
         /* No +1 needed, index starts at 1, C array at 0 */
-        luaA_pushscreen(L, globalconf.screens.tab[idx]);
+        luaA_object_push(L, globalconf.screens.tab[idx]);
     else
         lua_pushnil(L);
     return 1;

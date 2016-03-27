@@ -2296,7 +2296,7 @@ luaA_client_get_screen(lua_State *L, client_t *c)
 {
     if(!c->screen)
         return 0;
-    luaA_pushscreen(L, c->screen);
+    luaA_object_push(L, c->screen);
     return 1;
 }
 
