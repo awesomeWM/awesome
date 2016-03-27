@@ -24,7 +24,6 @@ local hierarchy = require("wibox.hierarchy")
 local unpack = unpack or table.unpack -- luacheck: globals unpack (compatibility with Lua 5.1)
 
 local drawables = setmetatable({}, { __mode = 'k' })
-local wallpaper = nil
 
 -- This is awful.screen.getbycoord() which we sadly cannot use from here (cyclic
 -- dependencies are bad!)
@@ -113,9 +112,7 @@ local function do_redraw(self)
 
     if not capi.awesome.composite_manager_running then
         -- This is pseudo-transparency: We draw the wallpaper in the background
-        if not wallpaper then
-            wallpaper = surface.load_silently(capi.root.wallpaper(), false)
-        end
+        local wallpaper = surface.load_silently(capi.root.wallpaper(), false)
         if wallpaper then
             cr.operator = cairo.Operator.SOURCE
             cr:set_source_surface(wallpaper, -x, -y)
@@ -426,7 +423,6 @@ end
 
 -- Redraw all drawables when the wallpaper changes
 capi.awesome.connect_signal("wallpaper_changed", function()
-    wallpaper = nil
     for k in pairs(drawables) do
         k()
     end
