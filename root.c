@@ -74,6 +74,7 @@ root_set_wallpaper_pixmap(xcb_connection_t *c, xcb_pixmap_t p)
 static bool
 root_set_wallpaper(cairo_pattern_t *pattern)
 {
+    lua_State *L = globalconf_get_lua_State();
     xcb_connection_t *c = xcb_connect(NULL, NULL);
     xcb_pixmap_t p = xcb_generate_id(c);
     /* globalconf.connection should be connected to the same X11 server, so we
@@ -107,14 +108,29 @@ root_set_wallpaper(cairo_pattern_t *pattern)
     cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
     cairo_paint(cr);
     cairo_destroy(cr);
-    cairo_surface_finish(surface);
-    cairo_surface_destroy(surface);
+    cairo_surface_flush(surface);
     xcb_aux_sync(globalconf.connection);
 
+    /* Change the wallpaper, without sending us a PropertyNotify event */
+    xcb_grab_server(globalconf.connection);
+    xcb_change_window_attributes(globalconf.connection,
+                                 globalconf.screen->root,
+                                 XCB_CW_EVENT_MASK,
+                                 (uint32_t[]) { 0 });
     root_set_wallpaper_pixmap(c, p);
+    xcb_change_window_attributes(globalconf.connection,
+                                 globalconf.screen->root,
+                                 XCB_CW_EVENT_MASK,
+                                 ROOT_WINDOW_EVENT_MASK);
+    xcb_ungrab_server(globalconf.connection);
 
     /* Make sure our pixmap is not destroyed when we disconnect. */
     xcb_set_close_down_mode(c, XCB_CLOSE_DOWN_RETAIN_PERMANENT);
+
+    /* Tell Lua that the wallpaper changed */
+    cairo_surface_destroy(globalconf.wallpaper);
+    globalconf.wallpaper = surface;
+    signal_object_emit(L, &global_signals, "wallpaper_changed", 0);
 
     result = true;
 disconnect:
