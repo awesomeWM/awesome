@@ -143,7 +143,7 @@ end
 -- @param i Value to add to the current focused screen index. 1 will focus next
 -- screen, -1 would focus the previous one.
 function screen.focus_relative(i)
-    return screen.focus(util.cycle(capi.screen.count(), screen.focused() + i))
+    return screen.focus(util.cycle(capi.screen.count(), screen.focused().index + i))
 end
 
 --- Get or set the screen padding.

@@ -559,7 +559,7 @@ function client.movetoscreen(c, s)
     if sel then
         local sc = capi.screen.count()
         if not s then
-            s = sel.screen + 1
+            s = sel.screen.index + 1
         end
         if type(s) == "number" and s > sc then s = 1 elseif s < 1 then s = sc end
         s = get_screen(s)
