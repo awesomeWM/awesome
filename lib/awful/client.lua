@@ -561,7 +561,9 @@ function client.movetoscreen(c, s)
         if not s then
             s = sel.screen.index + 1
         end
-        if type(s) == "number" and s > sc then s = 1 elseif s < 1 then s = sc end
+        if type(s) == "number" then
+            if s > sc then s = 1 elseif s < 1 then s = sc end
+        end
         s = get_screen(s)
         if get_screen(sel.screen) ~= s then
             local sel_is_focused = sel == capi.client.focus
