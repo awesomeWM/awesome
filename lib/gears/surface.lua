@@ -11,6 +11,7 @@ local capi = { awesome = awesome }
 local cairo = require("lgi").cairo
 local color = nil
 local gdebug = require("gears.debug")
+local hierarchy = require("wibox.hierarchy")
 
 -- Keep this in sync with build-utils/lgi-check.sh!
 local ver_major, ver_minor, ver_patch = string.match(require('lgi.version'), '(%d)%.(%d)%.(%d)')
@@ -203,6 +204,53 @@ function surface.apply_shape_bounding(draw, shape, ...)
   cr:fill()
 
   draw.shape_bounding = img._native
+end
+
+local function no_op() end
+
+local function run_in_hierarchy(self, cr, width, height)
+
+    local function redraw(h)
+        h:draw({dpi=96}, cr)
+    end
+
+    local h = hierarchy.new({dpi=96}, self, width, height, redraw, no_op, {})
+
+    redraw(h)
+
+    return h
+end
+
+--- Create an SVG file with this widget content.
+-- This is dynamic, so the SVG will be updated along with the widget content.
+-- because of this, the painting may happen hover multiple event loop cycles.
+-- @tparam widget widget A widget
+-- @tparam string path The output file path
+-- @tparam number width The surface width
+-- @tparam number height The surface height
+-- @return The cairo surface
+-- @return The hierarchy
+function surface.widget_to_svg(widget, path, width, height)
+    local img = cairo.SvgSurface.create(path, width, height)
+    local cr = cairo.Context(img)
+
+    return img, run_in_hierarchy(widget, cr, width, height)
+end
+
+--- Create a cairo surface with this widget content.
+-- This is dynamic, so the SVG will be updated along with the widget content.
+-- because of this, the painting may happen hover multiple event loop cycles.
+-- @tparam widget widget A widget
+-- @tparam number width The surface width
+-- @tparam number height The surface height
+-- @param[opt=cairo.Format.ARGB32] format The surface format
+-- @return The cairo surface
+-- @return The hierarchy
+function surface.widget_to_surface(widget, width, height, format)
+    local img = cairo.ImageSurface(format or cairo.Format.ARGB32, width, height)
+    local cr = cairo.Context(img)
+
+    return img, run_in_hierarchy(widget, cr, width, height)
 end
 
 return setmetatable(surface, surface.mt)
