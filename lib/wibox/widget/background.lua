@@ -1,4 +1,6 @@
 ---------------------------------------------------------------------------
+-- A container capable of changing the background color, foreground color
+-- widget shape.
 -- @author Uli Schlachter
 -- @copyright 2010 Uli Schlachter
 -- @release @AWESOME_VERSION@
@@ -17,7 +19,7 @@ local unpack = unpack or table.unpack -- luacheck: globals unpack (compatibility
 
 local background = { mt = {} }
 
---- Draw this widget
+-- Draw this widget
 function background:draw(context, cr, width, height)
     if not self.widget or not self.widget.visible then
         return
@@ -67,7 +69,7 @@ function background:after_draw_children(_, cr)
     end
 end
 
---- Prepare drawing the children of this widget
+-- Prepare drawing the children of this widget
 function background:before_draw_children(_, cr)
     if self.foreground then
         cr:set_source(self.foreground)
@@ -80,14 +82,14 @@ function background:before_draw_children(_, cr)
     end
 end
 
---- Layout this widget
+-- Layout this widget
 function background:layout(_, width, height)
     if self.widget then
         return { base.place_widget_at(self.widget, 0, 0, width, height) }
     end
 end
 
---- Fit this widget into the given area
+-- Fit this widget into the given area
 function background:fit(context, width, height)
     if not self.widget then
         return 0, 0
@@ -97,6 +99,8 @@ function background:fit(context, width, height)
 end
 
 --- Set the widget that is drawn on top of the background
+-- @tparam widget widget The widget to be disaplayed inside of the background
+--  area
 function background:set_widget(widget)
     if widget then
         base.check_widget(widget)
@@ -105,20 +109,22 @@ function background:set_widget(widget)
     self:emit_signal("widget::layout_changed")
 end
 
---- Get the number of children element
+-- Get children element
 -- @treturn table The children
 function background:get_children()
     return {self.widget}
 end
 
---- Replace the layout children
+-- Replace the layout children
 -- This layout only accept one children, all others will be ignored
 -- @tparam table children A table composed of valid widgets
 function background:set_children(children)
     self:set_widget(children[1])
 end
 
---- Set the background to use
+--- Set the background to use.
+--@DOC_wibox_widget_background_bg_EXAMPLE@
+-- @param bg A color string, pattern or gradient (see `gears.color`)
 function background:set_bg(bg)
     if bg then
         self.background = color(bg)
@@ -128,7 +134,9 @@ function background:set_bg(bg)
     self:emit_signal("widget::redraw_needed")
 end
 
---- Set the foreground to use
+--- Set the foreground to use.
+--@DOC_wibox_widget_background_fg_EXAMPLE@
+-- @param fg A color string, pattern or gradient (see `gears.color`)
 function background:set_fg(fg)
     if fg then
         self.foreground = color(fg)
@@ -138,23 +146,29 @@ function background:set_fg(fg)
     self:emit_signal("widget::redraw_needed")
 end
 
---- Set the background shape
--- @param shape A function taking a context, width and height as arguments
+--- Set the background shape.
+--
 -- Any other arguments will be passed to the shape function
+--@DOC_wibox_widget_background_shape_EXAMPLE@
+-- @param shape A function taking a context, width and height as arguments
 function background:set_shape(shape, ...)
     self._shape = shape
     self._shape_args = {...}
     self:emit_signal("widget::redraw_needed")
 end
 
---- When a `shape` is set, also draw a border
+--- When a `shape` is set, also draw a border.
+--
+-- See `wibox.widget.background.set_shape` for an usage example.
 -- @tparam number width The border width
 function background:set_shape_border_width(width)
     self._shape_border_width = width
     self:emit_signal("widget::redraw_needed")
 end
 
---- When a `shape` is set, also draw a border
+--- When a `shape` is set, also draw a border.
+--
+-- See `wibox.widget.background.set_shape` for an usage example.
 -- @param[opt=self.foreground] fg The border color, pattern or gradient
 function background:set_shape_border_color(fg)
     self._shape_border_color = fg
@@ -162,6 +176,7 @@ function background:set_shape_border_color(fg)
 end
 
 --- When a `shape` is set, make sure nothing is drawn outside of it.
+--@DOC_wibox_widget_background_clip_EXAMPLE@
 -- @tparam boolean value If the shape clip is enable
 function background:set_shape_clip(value)
     self._shape_clip = value
