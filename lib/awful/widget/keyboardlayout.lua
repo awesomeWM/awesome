@@ -241,10 +241,7 @@ local function update_layout(self)
         layouts[1].group_idx = 0
     end
     for _, v in ipairs(layouts) do
-        local layout_name = v.file
-        if v.section ~= nil then
-            layout_name = layout_name .. "(" .. v.section .. ")"
-        end
+        local layout_name = self.layout_name(v)
         -- Please note that numbers of groups reported by xkb_get_group_names
         -- is greater by one than the real group number.
         self._layout[v.group_idx - 1] = layout_name
@@ -260,7 +257,13 @@ function keyboardlayout.new()
 
     self.widget = widget
 
-    update_layout(self);
+    self.layout_name = function(v)
+        local name = v.file
+        if v.section ~= nil then
+            name = name .. "(" .. v.section .. ")"
+        end
+        return name
+    end
 
     self.next_layout = function()
         self.set_layout((self._current + 1) % (#self._layout + 1))
@@ -274,6 +277,8 @@ function keyboardlayout.new()
         end
         awesome.xkb_set_layout_group(group_number);
     end
+
+    update_layout(self);
 
     -- callback for processing layout changes
     capi.awesome.connect_signal("xkb::map_changed",
