@@ -214,7 +214,7 @@ function keyboardlayout.get_groups_from_group_names(group_names)
                 end
 
                 if section then
-                    section = string.gsub(section, "%(([%w_]+)%)", "%1")
+                    section = string.gsub(section, "%(([%w-_]+)%)", "%1")
                 end
 
                 table.insert(layout_groups, { vendor = vendor,
