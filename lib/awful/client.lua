@@ -45,7 +45,6 @@ local client = {object={}}
 
 -- Private data
 client.data = {}
-client.data.focus = {}
 client.data.urgent = {}
 client.data.marked = {}
 client.data.properties = setmetatable({}, { __mode = 'k' })
@@ -54,13 +53,12 @@ client.data.persistent_properties_loaded = setmetatable({}, { __mode = 'k' }) --
 
 -- Functions
 client.urgent = {}
-client.focus = {}
-client.focus.history = {}
 client.swap = {}
 client.floating = {}
 client.dockable = {}
 client.property = {}
 client.shape = require("awful.client.shape")
+client.focus = require("awful.client.focus")
 
 --- Jump to the given client.
 -- Takes care of focussing the screen, the right tag, etc.
@@ -147,96 +145,8 @@ function client.urgent.delete(c)
     end
 end
 
---- Remove a client from the focus history
---
--- @client c The client that must be removed.
-function client.focus.history.delete(c)
-    for k, v in ipairs(client.data.focus) do
-        if v == c then
-            table.remove(client.data.focus, k)
-            break
-        end
-    end
-end
 
---- Filter out window that we do not want handled by focus.
--- This usually means that desktop, dock and splash windows are
--- not registered and cannot get focus.
---
--- @client c A client.
--- @return The same client if it's ok, nil otherwise.
-function client.focus.filter(c)
-    if c.type == "desktop"
-        or c.type == "dock"
-        or c.type == "splash"
-        or not c.focusable then
-        return nil
-    end
-    return c
-end
-
---- Update client focus history.
---
--- @client c The client that has been focused.
-function client.focus.history.add(c)
-    -- Remove the client if its in stack
-    client.focus.history.delete(c)
-    -- Record the client has latest focused
-    table.insert(client.data.focus, 1, c)
-end
-
---- Get the latest focused client for a screen in history.
---
--- @tparam int|screen s The screen to look for.
--- @tparam int idx The index: 0 will return first candidate,
---   1 will return second, etc.
--- @tparam function filter An optional filter.  If no client is found in the
---   first iteration, client.focus.filter is used by default to get any
---   client.
--- @treturn client.object A client.
-function client.focus.history.get(s, idx, filter)
-    s = get_screen(s)
-    -- When this counter is equal to idx, we return the client
-    local counter = 0
-    local vc = client.visible(s, true)
-    for _, c in ipairs(client.data.focus) do
-        if get_screen(c.screen) == s then
-            if not filter or filter(c) then
-                for _, vcc in ipairs(vc) do
-                    if vcc == c then
-                        if counter == idx then
-                            return c
-                        end
-                        -- We found one, increment the counter only.
-                        counter = counter + 1
-                        break
-                    end
-                end
-            end
-        end
-    end
-    -- Argh nobody found in history, give the first one visible if there is one
-    -- that passes the filter.
-    filter = filter or client.focus.filter
-    if counter == 0 then
-        for _, v in ipairs(vc) do
-            if filter(v) then
-                return v
-            end
-        end
-    end
-end
-
---- Focus the previous client in history.
-function client.focus.history.previous()
-    local sel = capi.client.focus
-    local s = sel and sel.screen or screen.focused()
-    local c = client.focus.history.get(s, 1)
-    if c then
-        c:emit_signal("request::activate", "client.focus.history.previous",
-                      {raise=false})
-    end
-end
+--TODO move this to `awful.screen`
 
 --- Get visible clients from a screen.
 --
@@ -253,6 +163,8 @@ function client.visible(s, stacked)
     end
     return vcls
 end
+
+--TODO move this to `awful.screen`
 
 --- Get visible and tiled clients
 --
@@ -307,75 +219,6 @@ function client.next(i, sel, stacked)
                 return cls[util.cycle(#cls, idx + i)]
             end
         end
-    end
-end
-
---- Focus a client by the given direction.
---
--- @tparam string dir The direction, can be either
---   `"up"`, `"down"`, `"left"` or `"right"`.
--- @client[opt] c The client.
--- @tparam[opt=false] boolean stacked Use stacking order? (top to bottom)
-function client.focus.bydirection(dir, c, stacked)
-    local sel = c or capi.client.focus
-    if sel then
-        local cltbl = client.visible(sel.screen, stacked)
-        local geomtbl = {}
-        for i,cl in ipairs(cltbl) do
-            geomtbl[i] = cl:geometry()
-        end
-
-        local target = util.get_rectangle_in_direction(dir, geomtbl, sel:geometry())
-
-        -- If we found a client to focus, then do it.
-        if target then
-            cltbl[target]:emit_signal("request::activate",
-                                      "client.focus.bydirection", {raise=false})
-        end
-    end
-end
-
---- Focus a client by the given direction. Moves across screens.
---
--- @param dir The direction, can be either "up", "down", "left" or "right".
--- @client[opt] c The client.
--- @tparam[opt=false] boolean stacked Use stacking order? (top to bottom)
-function client.focus.global_bydirection(dir, c, stacked)
-    local sel = c or capi.client.focus
-    local scr = get_screen(sel and sel.screen or screen.focused())
-
-    -- change focus inside the screen
-    client.focus.bydirection(dir, sel)
-
-    -- if focus not changed, we must change screen
-    if sel == capi.client.focus then
-        screen.focus_bydirection(dir, scr)
-        if scr ~= get_screen(screen.focused()) then
-            local cltbl = client.visible(screen.focused(), stacked)
-            local geomtbl = {}
-            for i,cl in ipairs(cltbl) do
-                geomtbl[i] = cl:geometry()
-            end
-            local target = util.get_rectangle_in_direction(dir, geomtbl, scr.geometry)
-
-            if target then
-                cltbl[target]:emit_signal("request::activate",
-                                          "client.focus.global_bydirection",
-                                          {raise=false})
-            end
-        end
-    end
-end
-
---- Focus a client by its relative index.
---
--- @param i The index.
--- @client[opt] c The client.
-function client.focus.byidx(i, c)
-    local target = client.next(i, c)
-    if target then
-        target:emit_signal("request::activate", "client.focus.byidx",
-                           {raise=true})
     end
 end
 
