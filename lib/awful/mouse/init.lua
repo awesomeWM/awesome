@@ -111,7 +111,7 @@ function mouse.client.snap(c, snap, x, y, fixed_x, fixed_y)
 
     -- Allow certain windows to snap to the edge of the workarea.
     -- Only allow docking to workarea for consistency/to avoid problems.
-    if aclient.dockable.get(c) then
+    if c.dockable then
         local struts = c:struts()
         struts['left'] = 0
         struts['right'] = 0

@@ -804,7 +804,25 @@ end
 -- @return True or false. Note that some windows might be dockable even if you
 --   did not set them manually. For example, windows with a type "utility",
 --   "toolbar" or "dock"
+-- @deprecated awful.client.dockable.get
 function client.dockable.get(c)
+    util.deprecate "Use c.dockable instead of awful.client.dockable.get"
+
+    return client.object.get_dockable(c)
+end
+
+--- If the client is dockable.
+-- A dockable client is an application confined to the edge of the screen. The
+-- space it occupy is substracted from the `screen.workarea`.
+--
+-- **Signal:**
+--
+-- * *property::dockable*
+--
+-- @property dockable
+-- @param boolean The dockable state
+
+function client.object.get_dockable(c)
     local value = client.property.get(c, "dockable")
 
     -- Some sane defaults
@@ -825,15 +843,20 @@ end
 --
 -- @client c A client.
 -- @param value True or false.
+-- @deprecated awful.client.dockable.set
 function client.dockable.set(c, value)
+    util.deprecate "Use c.dockable = value instead of awful.client.dockable.set"
     client.property.set(c, "dockable", value)
 end
 
 --- Get a client property.
 --
+-- This method is deprecated. It is now possible to use `c.value` directly.
+--
 -- @client c The client.
 -- @param prop The property name.
 -- @return The property.
+-- @deprecated awful.client.property.get
 function client.property.get(c, prop)
     if not client.data.persistent_properties_loaded[c] then
         client.data.persistent_properties_loaded[c] = true
@@ -850,11 +873,14 @@ function client.property.get(c, prop)
 end
 
 --- Set a client property.
--- These properties are internal to awful. Some are used to move clients, etc.
+--
+-- This method is deprecated. It is now possible to use `c.value = value`
+-- directly.
 --
 -- @client c The client.
 -- @param prop The property name.
 -- @param value The value.
+-- @deprecated awful.client.property.set
 function client.property.set(c, prop, value)
     if not client.data.properties[c] then
         client.data.properties[c] = {}
