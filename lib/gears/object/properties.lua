@@ -53,6 +53,8 @@ function object.capi_index_fallback(class, args)
         -- Look for a getter method
         if args.getter_class and args.getter_class[getter_prefix..prop] then
             return args.getter_class[getter_prefix..prop](cobj)
+        elseif args.getter_class and args.getter_class["is_"..prop] then
+            return args.getter_class["is_"..prop](cobj)
         end
 
         -- Make sure something like c:a_mutator() works
