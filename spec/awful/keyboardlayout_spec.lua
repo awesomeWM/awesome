@@ -23,6 +23,9 @@ describe("awful.widget.keyboardlayout get_groups_from_group_names", function()
             { file = "de", group_idx = 1 },
             { file = "jp", group_idx = 1 }
         },
+        ["us(altgr-intl)"] = {
+            { file = "us", group_idx = 1, section = "altgr-intl" }
+        },
         -- possible eight variations of a single term
         ["de"] = {
             { file = "de", group_idx = 1 }
