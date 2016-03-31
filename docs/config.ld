@@ -63,6 +63,8 @@ file = {
     '../objects/',
     -- LUA libraries
     '../lib/',
+    -- Old APIs the user should not longer use directly
+    '../../docs/aliases/awful_client.lua',
     exclude = {
         -- exclude these modules, as they do not contain any written
         -- documentation

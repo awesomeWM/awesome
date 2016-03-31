@@ -4,7 +4,7 @@
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2008 Julien Danjou
 -- @release @AWESOME_VERSION@
--- @module awful.client
+-- @module client
 ---------------------------------------------------------------------------
 
 -- Grab environment we need
