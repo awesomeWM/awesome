@@ -999,10 +999,21 @@ function client.is_transient_for(c, c2)
 end
 
 -- Register standards signals
+
+--- The last geometry when client was floating.
+-- @signal property::floating_geometry
 capi.client.add_signal("property::floating_geometry")
+
 capi.client.add_signal("property::floating")
+
 capi.client.add_signal("property::dockable")
+
+--- The client marked signal (deprecated).
+-- @signal .marked
 capi.client.add_signal("marked")
+
+--- The client unmarked signal (deprecated).
+-- @signal unmarked
 capi.client.add_signal("unmarked")
 
 capi.client.connect_signal("focus", client.focus.history.add)
