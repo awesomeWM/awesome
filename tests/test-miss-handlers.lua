@@ -2,6 +2,7 @@
 
 local class = tag
 local obj = class({})
+local handler = require("gears.object.properties")
 
 awesome.connect_signal("debug::index::miss", error)
 awesome.connect_signal("debug::newindex::miss", error)
@@ -22,5 +23,11 @@ class.set_newindex_miss_handler(function(o, k, v)
 end)
 obj.key = 42
 assert(called)
+
+handler(class, {auto_emit=true})
+
+assert(not obj.key)
+obj.key = 1337
+assert(obj.key == 1337)
 
 require("_runner").run_steps({ function() return true end })

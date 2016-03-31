@@ -11,6 +11,7 @@
 local util = require("awful.util")
 local ascreen = require("awful.screen")
 local beautiful = require("beautiful")
+local object = require("gears.object")
 local pairs = pairs
 local ipairs = ipairs
 local table = table
@@ -872,6 +873,16 @@ capi.screen.connect_signal("tag::history::update", tag.history.update)
 function tag.mt:__call(...)
     return tag.new(...)
 end
+
+-- Extend the luaobject
+-- `awful.tag.setproperty` currently handle calling the setter method itself
+-- while `awful.tag.getproperty`.
+object.properties(capi.tag, {
+    getter_class    = tag,
+    setter_class    = tag,
+    getter_fallback = tag.getproperty,
+    setter          = tag.setproperty,
+})
 
 return setmetatable(tag, tag.mt)
 

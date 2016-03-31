@@ -10,6 +10,7 @@
 -- Grab environment we need
 local util = require("awful.util")
 local spawn = require("awful.spawn")
+local object = require("gears.object")
 local tag = require("awful.tag")
 local pairs = pairs
 local type = type
@@ -1104,6 +1105,7 @@ capi.client.add_signal("marked")
 capi.client.add_signal("unmarked")
 
 capi.client.connect_signal("focus", client.focus.history.add)
+
 -- Add clients during startup to focus history.
 -- This used to happen through ewmh.activate, but that only handles visible
 -- clients now.
@@ -1122,6 +1124,14 @@ capi.client.connect_signal("unmanage", client.floating.delete)
 
 -- Register persistent properties
 client.property.persist("floating", "boolean")
+
+-- Extend the luaobject
+object.properties(capi.client, {
+    getter_class    = client,
+    setter_class    = client,
+    getter_fallback = client.property.get,
+    setter_fallback = client.property.set,
+})
 
 return client
 
