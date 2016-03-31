@@ -299,6 +299,11 @@ set(AWESOME_THEMES_PATH      ${AWESOME_DATA_PATH}/themes)
 if(GENERATE_DOC)
     # Generate some images and examples
     include(docs/generate_examples.cmake)
+
+    # Use `include`, rather than `add_subdirectory`, to keep the variables
+    # The file is a valid CMakeLists.txt and can be executed directly if only
+    # the image artefacts are needed.
+    include(tests/examples/CMakeLists.txt)
 endif()
 
 # {{{ Configure files
