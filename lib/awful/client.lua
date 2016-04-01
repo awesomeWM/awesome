@@ -45,14 +45,13 @@ local client = {object={}}
 
 -- Private data
 client.data = {}
-client.data.urgent = {}
 client.data.marked = {}
 client.data.properties = setmetatable({}, { __mode = 'k' })
 client.data.persistent_properties_registered = {} -- keys are names of persistent properties, value always true
 client.data.persistent_properties_loaded = setmetatable({}, { __mode = 'k' }) -- keys are clients, value always true
 
 -- Functions
-client.urgent = {}
+client.urgent = require("awful.client.urgent")
 client.swap = {}
 client.floating = {}
 client.dockable = {}
@@ -93,58 +92,6 @@ function client.jumpto(c, merge)
 
     c:emit_signal("request::activate", "client.jumpto", {raise=true})
 end
-
---- Get the first client that got the urgent hint.
---
--- @treturn client.object The first urgent client.
-function client.urgent.get()
-    if #client.data.urgent > 0 then
-        return client.data.urgent[1]
-    else
-        -- fallback behaviour: iterate through clients and get the first urgent
-        local clients = capi.client.get()
-        for _, cl in pairs(clients) do
-            if cl.urgent then
-                return cl
-            end
-        end
-    end
-end
-
---- Jump to the client that received the urgent hint first.
---
--- @tparam bool|function merge If true then merge tags (select the client's
---   first tag additionally) when the client is not visible.
---   If it is a function, it will be called with the client as argument.
-function client.urgent.jumpto(merge)
-    local c = client.urgent.get()
-    if c then
-        client.jumpto(c, merge)
-    end
-end
-
---- Adds client to urgent stack.
---
--- @client c The client object.
--- @param prop The property which is updated.
-function client.urgent.add(c, prop)
-    if type(c) == "client" and prop == "urgent" and c.urgent then
-        table.insert(client.data.urgent, c)
-    end
-end
-
---- Remove client from urgent stack.
---
--- @client c The client object.
-function client.urgent.delete(c)
-    for k, cl in ipairs(client.data.urgent) do
-        if c == cl then
-            table.remove(client.data.urgent, k)
-            break
-        end
-    end
-end
-
 
 --TODO move this to `awful.screen`
 
@@ -1049,9 +996,6 @@ capi.client.connect_signal("manage", function (c)
 end)
 capi.client.connect_signal("unmanage", client.focus.history.delete)
 
-capi.client.connect_signal("property::urgent", client.urgent.add)
-capi.client.connect_signal("focus", client.urgent.delete)
-capi.client.connect_signal("unmanage", client.urgent.delete)
 
 capi.client.connect_signal("unmanage", client.floating.delete)
 
