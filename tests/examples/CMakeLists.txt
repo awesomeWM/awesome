@@ -117,7 +117,7 @@ function(run_test test_path namespace template escaped_content)
 
     # Get the file name without the extension
     get_filename_component(${test_path} TEST_FILE_NAME NAME)
-    set(IMAGE_PATH "${IMAGE_DIR}/${namespace}_${TEST_FILE_NAME}")
+    set(IMAGE_PATH "${IMAGE_DIR}/AUTOGEN${namespace}_${TEST_FILE_NAME}")
 
     # Execute the script, leave the image extension decision to the test
     # SVG is preferred, but PNG is better suited for some tests, like bitmap
@@ -144,12 +144,12 @@ function(run_test test_path namespace template escaped_content)
     # If the image has been created, then add it.
     if(EXISTS "${IMAGE_PATH}.svg")
         escape_string(
-            "![Usage example](../images/${namespace}_${TEST_FILE_NAME}.svg)\n"
+            "![Usage example](../images/AUTOGEN${namespace}_${TEST_FILE_NAME}.svg)\n"
             "${TEST_DOC_CONTENT}" TEST_DOC_CONTENT ""
         )
     elseif(EXISTS "${IMAGE_PATH}.png")
         escape_string(
-            "![Usage example](../images/${namespace}_${TEST_FILE_NAME}.png)\n"
+            "![Usage example](../images/AUTOGEN${namespace}_${TEST_FILE_NAME}.png)\n"
             "${TEST_DOC_CONTENT}" TEST_DOC_CONTENT ""
         )
     endif()
