@@ -539,10 +539,31 @@ end)
 
 capi.client.connect_signal("property::geometry", store_floating_geometry)
 
---- Return if a client has a fixe size or not.
+--- Return if a client has a fixed size or not.
+-- This function is deprecated, use `c.is_fixed`
 -- @client c The client.
+-- @deprecated awful.client.isfixed
+-- @see is_fixed
+-- @see size_hints_honor
 function client.isfixed(c)
+    util.deprecate "Use c.is_fixed instead of awful.client.isfixed"
     c = c or capi.client.focus
+    return client.object.is_fixed(c)
+end
+
+--- Return if a client has a fixed size or not.
+--
+-- **Signal:**
+--
+--  * *property::is_fixed*
+--
+-- This property is read only.
+-- @property is_fixed
+-- @param boolean The floating state
+-- @see size_hints
+-- @see size_hints_honor
+
+function client.object.is_fixed(c)
     if not c then return end
     local h = c.size_hints
     if h.min_width and h.max_width
@@ -593,7 +614,7 @@ function client.object.get_floating(c)
             or c.fullscreen
             or c.maximized_vertical
             or c.maximized_horizontal
-            or client.isfixed(c) then
+            or client.object.is_fixed(c) then
             return true
         end
         return false
