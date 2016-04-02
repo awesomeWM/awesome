@@ -281,7 +281,7 @@ end
 
 --- Get the master window.
 --
--- @function awful.client.getmaster
+-- @legacylayout awful.client.getmaster
 -- @param[opt] s The screen number, defaults to focused screen.
 -- @return The master window.
 function client.getmaster(s)
@@ -291,7 +291,7 @@ end
 
 --- Set the client as master: put it at the beginning of other windows.
 --
--- @function awful.client.setmaster
+-- @legacylayout awful.client.setmaster
 -- @client c The window to set as master.
 function client.setmaster(c)
     local cls = util.table.reverse(capi.client.get(c.screen))
@@ -301,7 +301,7 @@ function client.setmaster(c)
 end
 
 --- Set the client as slave: put it at the end of other windows.
--- @function awful.client.setslave
+-- @legacylayout awful.client.setslave
 -- @client c The window to set as slave.
 function client.setslave(c)
     local cls = capi.client.get(c.screen)
@@ -724,6 +724,7 @@ end
 --- Calculate a client's column number, index in that column, and
 -- number of visible clients in this column.
 --
+-- @legacylayout awful.client.idx
 -- @client c the client
 -- @return col the column number
 -- @return idx index of the client in the column
@@ -784,6 +785,7 @@ end
 
 --- Set the window factor of a client
 --
+-- @legacylayout awful.client.setwfact
 -- @param wfact the window factor value
 -- @client c the client
 function client.setwfact(wfact, c)
@@ -836,6 +838,7 @@ end
 
 --- Increment a client's window factor
 --
+-- @legacylayout awful.client.incwfact
 -- @param add amount to increase the client's window
 -- @client c the client
 function client.incwfact(add, c)
