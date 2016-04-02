@@ -1636,7 +1636,7 @@ luaA_client_kill(lua_State *L)
 }
 
 /** Swap a client with another one in global client list.
- * @client A client to swap with.
+ * @client c A client to swap with.
  * @function swap
  */
 static int
