@@ -62,26 +62,42 @@ client.focus = require("awful.client.focus")
 --- Jump to the given client.
 -- Takes care of focussing the screen, the right tag, etc.
 --
+-- @deprecated awful.client.jumpto
+-- @see client.jump_to
 -- @client c the client to jump to
 -- @tparam bool|function merge If true then merge tags (select the client's
 --   first tag additionally) when the client is not visible.
 --   If it is a function, it will be called with the client and its first
 --   tag as arguments.
 function client.jumpto(c, merge)
+    util.deprecate "Use c:jump_to(merge) instead of awful.client.jumpto"
+
+    client.object.jump_to(c, merge)
+end
+
+--- Jump to the given client.
+-- Takes care of focussing the screen, the right tag, etc.
+--
+-- @function client.jump_to
+-- @tparam bool|function merge If true then merge tags (select the client's
+--   first tag additionally) when the client is not visible.
+--   If it is a function, it will be called with the client and its first
+--   tag as arguments.
+function client.object.jump_to(self, merge)
     local s = get_screen(screen.focused())
     -- focus the screen
-    if s ~= get_screen(c.screen) then
-        screen.focus(c.screen)
+    if s ~= get_screen(self.screen) then
+        screen.focus(self.screen)
     end
 
-    c.minimized = false
+    self.minimized = false
 
     -- Try to make client visible, this also covers e.g. sticky.
-    if not c:isvisible() then
-        local t = c.first_tag
+    if not self:isvisible() then
+        local t = self.first_tag
         if merge then
             if type(merge) == "function" then
-                merge(c, t)
+                merge(self, t)
             elseif t then
                 t.selected = true
             end
@@ -90,7 +106,7 @@ function client.jumpto(c, merge)
         end
     end
 
-    c:emit_signal("request::activate", "client.jumpto", {raise=true})
+    self:emit_signal("request::activate", "client.jumpto", {raise=true})
 end
 
 --TODO move this to `awful.screen`
@@ -213,12 +229,12 @@ function client.swap.global_bydirection(dir, sel)
 
         -- swapping to an empty screen
         elseif get_screen(sel.screen) ~= get_screen(c.screen) and sel == c then
-            client.movetoscreen(sel, screen.focused())
+            sel:move_to_screen(screen.focused())
 
         -- swapping to a nonempty screen
         elseif get_screen(sel.screen) ~= get_screen(c.screen) and sel ~= c then
-            client.movetoscreen(sel, c.screen)
-            client.movetoscreen(c, scr)
+            sel:move_to_screen(c.screen)
+            sel:move_to_screen(scr)
         end
 
         screen.focus(sel.screen)
@@ -295,45 +311,76 @@ function client.setslave(c)
 end
 
 --- Move/resize a client relative to current coordinates.
+-- @deprecated awful.client.moveresize
 -- @param x The relative x coordinate.
 -- @param y The relative y coordinate.
 -- @param w The relative width.
 -- @param h The relative height.
 -- @client[opt] c The client, otherwise focused one is used.
+-- @see client.move_resize
 function client.moveresize(x, y, w, h, c)
-    local sel = c or capi.client.focus
-    local geometry = sel:geometry()
+    util.deprecate "Use c:move_resize(x, y, w, h) instead of awful.client.moveresize"
+    client.object.move_resize(c or capi.client.focus, x, y, w, h)
+end
+
+--- Move/resize a client relative to current coordinates.
+-- @function client.move_resize
+-- @see geometry
+-- @tparam[opt=c.x] number x The relative x coordinate.
+-- @tparam[opt=c.y] number y The relative y coordinate.
+-- @tparam[opt=c.width] number w The relative width.
+-- @tparam[opt=c.height] number h The relative height.
+function client.object.move_resize(self, x, y, w, h)
+    local geometry = self:geometry()
     geometry['x'] = geometry['x'] + x
     geometry['y'] = geometry['y'] + y
     geometry['width'] = geometry['width'] + w
     geometry['height'] = geometry['height'] + h
-    sel:geometry(geometry)
+    self:geometry(geometry)
 end
 
 --- Move a client to a tag.
+-- @deprecated awful.client.movetotag
 -- @param target The tag to move the client to.
 -- @client[opt] c The client to move, otherwise the focused one is used.
+-- @see client.move_to_tag
 function client.movetotag(target, c)
-    local sel = c or capi.client.focus
+    util.deprecate "Use c:move_to_tag(target) instead of awful.client.movetotag"
+    client.object.move_to_tag(c or capi.client.focus, target)
+end
+
+--- Move a client to a tag.
+-- @function client.move_to_tag
+-- @tparam tag target The tag to move the client to.
+function client.object.move_to_tag(self, target)
     local s = tag.getscreen(target)
-    if sel and s then
-        if sel == capi.client.focus then
-            sel:emit_signal("request::activate", "client.movetotag", {raise=true})
+    if self and s then
+        if self == capi.client.focus then
+            self:emit_signal("request::activate", "client.movetotag", {raise=true})
         end
         -- Set client on the same screen as the tag.
-        sel.screen = s
-        sel:tags({ target })
+        self.screen = s
+        self:tags({ target })
     end
 end
 
 --- Toggle a tag on a client.
+-- @deprecated awful.client.toggletag
 -- @param target The tag to toggle.
 -- @client[opt] c The client to toggle, otherwise the focused one is used.
+-- @see client.toggle_tag
 function client.toggletag(target, c)
-    local sel = c or capi.client.focus
+    util.deprecate "Use c:toggle_tag(target) instead of awful.client.toggletag"
+    client.object.toggle_tag(c or capi.client.focus, target)
+end
+
+--- Toggle a tag on a client.
+-- @function client.toggle_tag
+-- @tparam tag target The tag to move the client to.
+function client.object.toggle_tag(self, target)
     -- Check that tag and client screen are identical
-    if sel and get_screen(sel.screen) == get_screen(tag.getscreen(target)) then
-        local tags = sel:tags()
+    if self and get_screen(self.screen) == get_screen(tag.getscreen(target)) then
+        local tags = self:tags()
         local index = nil;
         for i, v in ipairs(tags) do
             if v == target then
@@ -348,32 +395,44 @@ function client.toggletag(target, c)
         else
             tags[#tags + 1] = target
         end
-        sel:tags(tags)
+        self:tags(tags)
     end
 end
 
 --- Move a client to a screen. Default is next screen, cycling.
+-- @deprecated awful.client.movetoscreen
 -- @client c The client to move.
 -- @param s The screen, default to current + 1.
 -- @see screen
+-- @see client.move_to_screen
 function client.movetoscreen(c, s)
-    local sel = c or capi.client.focus
-    if sel then
+    util.deprecate "Use c:move_to_screen(s) instead of awful.client.movetoscreen"
+
+    client.object.move_to_screen(c or capi.client.focus, s)
+end
+
+--- Move a client to a screen. Default is next screen, cycling.
+-- @function client.move_to_screen
+-- @tparam[opt=c.screen.index+1] screen s The screen, default to current + 1.
+-- @see screen
+-- @see request::activate
+function client.object.move_to_screen(self, s)
+    if self then
         local sc = capi.screen.count()
         if not s then
-            s = sel.screen.index + 1
+            s = self.screen.index + 1
         end
         if type(s) == "number" then
             if s > sc then s = 1 elseif s < 1 then s = sc end
         end
         s = get_screen(s)
-        if get_screen(sel.screen) ~= s then
-            local sel_is_focused = sel == capi.client.focus
-            sel.screen = s
+        if get_screen(self.screen) ~= s then
+            local sel_is_focused = self == capi.client.focus
+            self.screen = s
             screen.focus(s)
 
             if sel_is_focused then
-                sel:emit_signal("request::activate", "client.movetoscreen",
+                self:emit_signal("request::activate", "client.movetoscreen",
                                 {raise=true})
             end
         end
@@ -951,12 +1010,26 @@ function client.run_or_raise(cmd, matcher, merge)
 end
 
 --- Get a matching transient_for client (if any).
+-- @deprecated awful.client.get_transient_for_matching
+-- @see client.get_transient_for_matching
 -- @client c The client.
 -- @tparam function matcher A function that should return true, if
 --   a matching parent client is found.
 -- @treturn client.client|nil The matching parent client or nil.
 function client.get_transient_for_matching(c, matcher)
-    local tc = c.transient_for
+    util.deprecate ("Use c:get_transient_for_matching(matcher) instead of"..
+        "awful.client.get_transient_for_matching")
+
+    return client.object.get_transient_for_matching(c, matcher)
+end
+
+--- Get a matching transient_for client (if any).
+-- @function client.get_transient_for_matching
+-- @tparam function matcher A function that should return true, if
+--   a matching parent client is found.
+-- @treturn client.client|nil The matching parent client or nil.
+function client.object.get_transient_for_matching(self, matcher)
+    local tc = self.transient_for
     while tc do
         if matcher(tc) then
             return tc
@@ -967,11 +1040,24 @@ function client.get_transient_for_matching(c, matcher)
 end
 
 --- Is a client transient for another one?
+-- @deprecated awful.client.is_transient_for
+-- @see client.is_transient_for
 -- @client c The child client (having transient_for).
 -- @client c2 The parent client to check.
 -- @treturn client.client|nil The parent client or nil.
 function client.is_transient_for(c, c2)
-    local tc = c
+    util.deprecate ("Use c:is_transient_for(c2) instead of"..
+        "awful.client.is_transient_for")
+
+    return client.object.is_transient_for(c, c2)
+end
+
+--- Is a client transient for another one?
+-- @function client.is_transient_for
+-- @client c2 The parent client to check.
+-- @treturn client.client|nil The parent client or nil.
+function client.object.is_transient_for(self, c2)
+    local tc = self
     while tc.transient_for do
         if tc.transient_for == c2 then
             return tc

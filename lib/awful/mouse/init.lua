@@ -239,11 +239,11 @@ function mouse.client.dragtotag.border(c)
                                     end
                                     if _mouse.x > wa.x + wa.width - 10 then
                                         local newtag = tags[util.cycle(#tags, idx + 1)]
-                                        aclient.movetotag(newtag, c)
+                                        c:move_to_tag(newtag)
                                         tag.viewnext()
                                     elseif _mouse.x < wa.x + 10 then
                                         local newtag = tags[util.cycle(#tags, idx - 1)]
-                                        aclient.movetotag(newtag, c)
+                                        c:move_to_tag(newtag)
                                         tag.viewprev()
                                     end
                                     return false
