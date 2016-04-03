@@ -95,6 +95,8 @@ end
 
 screen._add_screen {width=320, height=240}
 
+screen.add_signal("property::workarea")
+
 return screen
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
