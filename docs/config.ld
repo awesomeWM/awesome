@@ -28,8 +28,19 @@ tparam_alias('client', 'client.object')
 tparam_alias('tag', 'tag')
 -- Should be default, but is not.  Sets up "@tab" => "@tparam table".
 tparam_alias('tab', 'table')
+
+-- Hack to get the functions and method on top of the signals and properties
+new_type("function", "Functions")
+-- Documentation for objects properties
+new_type("property", "Object properties", false, "Type")
 -- New type for signals
 new_type("signal", "Signals", false, "Arguments")
+-- Allow objects to define a set of beautiful properties affecting them
+new_type("beautiful", "Theme variables", false, "Type")
+-- Put deprecated methods in their own section
+new_type("deprecated", "Deprecated functions", false, "param")
+-- For the legacy stateless layout related functions
+new_type("legacylayout", "Layout related functions", false, "param")
 
 -- More fitting section names
 kind_names={topic='Documentation', module='Libraries'}
