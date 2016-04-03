@@ -439,78 +439,98 @@ function client.object.move_to_screen(self, s)
     end
 end
 
---- Mark a client, and then call 'marked' hook.
--- @client c The client to mark, the focused one if not specified.
--- @return True if the client has been marked. False if the client was already marked.
-function client.mark(c)
-    local cl = c or capi.client.focus
-    if cl then
-        for _, v in pairs(client.data.marked) do
-            if cl == v then
-                return false
+--- If a client is marked or not.
+--
+-- **Signal:**
+--
+-- * *marked* (for legacy reasons, use `property::marked`)
+-- * *unmarked* (for legacy reasons, use `property::marked`)
+-- * *property::marked*
+--
+-- @property marked
+-- @param boolean
+
+--- The border color when the client is focused.
+--
+-- @beautiful beautiful.border_marked
+-- @param string
+--
+
+function client.object.set_marked(self, value)
+    local is_marked = self.marked
+
+    if value == false and is_marked then
+        for k, v in pairs(client.data.marked) do
+            if self == v then
+                table.remove(client.data.marked, k)
             end
         end
-
-        table.insert(client.data.marked, cl)
-
-        -- Call callback
-        cl:emit_signal("marked")
-        return true
+        self:emit_signal("unmarked")
+    elseif not is_marked and value then
+        self:emit_signal("marked")
+        table.insert(client.data.marked, self)
     end
+
+    client.property.set(self, "marked", value)
 end
 
+function client.object.get_marked(self)
+    return client.property.get(self, "marked")
+end
 
+--- Mark a client, and then call 'marked' hook.
+-- @deprecated awful.client.mark
+-- @client c The client to mark, the focused one if not specified.
+function client.mark(c)
+    util.deprecate "Use c.marked = true instead of awful.client.mark"
+
+    client.object.set_marked(c or capi.client.focus, true)
+end
 
 --- Unmark a client and then call 'unmarked' hook.
+-- @deprecated awful.client.unmark
 -- @client c The client to unmark, or the focused one if not specified.
--- @return True if the client has been unmarked. False if the client was not marked.
 function client.unmark(c)
-    local cl = c or capi.client.focus
+    util.deprecate "Use c.marked = false instead of awful.client.unmark"
 
-    for k, v in pairs(client.data.marked) do
-        if cl == v then
-            table.remove(client.data.marked, k)
-            cl:emit_signal("unmarked")
-            return true
-        end
-    end
-
-    return false
+    client.object.set_marked(c or capi.client.focus, false)
 end
 
 --- Check if a client is marked.
+-- @deprecated awful.client.ismarked
 -- @client c The client to check, or the focused one otherwise.
 function client.ismarked(c)
-    local cl = c or capi.client.focus
-    if cl then
-        for _, v in pairs(client.data.marked) do
-            if cl == v then
-                return true
-            end
-        end
-    end
-    return false
+    util.deprecate "Use c.marked instead of awful.client.ismarked"
+
+    return client.object.get_marked(c or capi.client.focus)
 end
 
 --- Toggle a client as marked.
+-- @deprecated awful.client.togglemarked
 -- @client c The client to toggle mark.
 function client.togglemarked(c)
+    util.deprecate "Use c.marked = not c.marked instead of awful.client.togglemarked"
+
     c = c or capi.client.focus
-    if not client.mark(c) then
-        client.unmark(c)
+    if c then
+        c.marked = not c.marked
     end
 end
 
 --- Return the marked clients and empty the marked table.
+-- @function awful.client.getmarked
 -- @return A table with all marked clients.
 function client.getmarked()
-    for _, v in pairs(client.data.marked) do
+    local copy = util.table.clone(client.data.marked, false)
+
+    for _, v in pairs(copy) do
+        client.property.set(v, "marked", false)
         v:emit_signal("unmarked")
     end
 
-    local t = client.data.marked
     client.data.marked = {}
-    return t
+
+    return copy
 end
 
 --- Set a client floating state, overriding auto-detection.
