@@ -143,8 +143,8 @@ local suspended = false
 -- @field id Unique notification id based on a counter
 -- @table notifications
 naughty.notifications = { suspended = { } }
-for s in capi.screen do
-    naughty.notifications[get_screen(s)] = {
+require("gears.screen").connect_for_each_screen(function(s)
+    naughty.notifications[s] = {
         top_left = {},
         top_middle = {},
         top_right = {},
@@ -152,7 +152,7 @@ for s in capi.screen do
         bottom_middle = {},
         bottom_right = {},
     }
-end
+end)
 
 --- Notification state
 function naughty.is_suspended()

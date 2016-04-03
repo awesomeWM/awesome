@@ -13,20 +13,12 @@ local timer = require("gears.timer")
 local wallpaper = { mt = {} }
 
 -- The size of the root window
-local root_geom
-do
-    local geom = screen[1].geometry
-    root_geom = {
-        x = 0, y = 0,
-        width = geom.x + geom.width,
-        height = geom.y + geom.height
-    }
-    for s in screen do
-        local g = screen[s].geometry
-        root_geom.width = math.max(root_geom.width, g.x + g.width)
-        root_geom.height = math.max(root_geom.height, g.y + g.height)
-    end
-end
+local root_geom = { x = 0, y = 0, width = 0, height = 0 }
+require("gears.screen").connect_for_each_screen(function(s)
+    local g = s.geometry
+    root_geom.width = math.max(root_geom.width, g.x + g.width)
+    root_geom.height = math.max(root_geom.height, g.y + g.height)
+end)
 
 -- A cairo surface that we still want to set as the wallpaper
 local pending_wallpaper = nil
