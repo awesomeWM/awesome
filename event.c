@@ -793,7 +793,6 @@ event_handle_randr_output_change_notify(xcb_randr_notify_event_t *ev)
     if(ev->subCode == XCB_RANDR_NOTIFY_OUTPUT_CHANGE) {
         xcb_randr_output_t output = ev->u.oc.output;
         uint8_t connection = ev->u.oc.connection;
-        char *output_name = NULL;
         const char *connection_str = NULL;
         xcb_randr_get_output_info_reply_t *info = NULL;
         lua_State *L = globalconf_get_lua_State();
@@ -805,9 +804,6 @@ event_handle_randr_output_change_notify(xcb_randr_notify_event_t *ev)
             NULL);
         if(!info)
             return;
-
-        output_name = p_dup((char *)xcb_randr_get_output_info_name(info),
-                            xcb_randr_get_output_info_name_length(info));
 
         switch(connection) {
             case XCB_RANDR_CONNECTION_CONNECTED:
@@ -821,11 +817,10 @@ event_handle_randr_output_change_notify(xcb_randr_notify_event_t *ev)
                 break;
         }
 
-        lua_pushstring(L, output_name);
+        lua_pushlstring(L, (char *)xcb_randr_get_output_info_name(info), xcb_randr_get_output_info_name_length(info));
         lua_pushstring(L, connection_str);
         signal_object_emit(L, &global_signals, "screen::change", 2);
 
-        p_delete(&output_name);
         p_delete(&info);
 
         /* The docs for RRSetOutputPrimary say we get this signal */

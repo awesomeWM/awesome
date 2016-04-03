@@ -691,6 +691,9 @@ main(int argc, char **argv)
     xcb_ungrab_server(globalconf.connection);
     xcb_flush(globalconf.connection);
 
+    /* get the current wallpaper, from now on we are informed when it changes */
+    root_update_wallpaper();
+
     /* Parse and run configuration file */
     if (!luaA_parserc(&xdg, confpath, true))
         fatal("couldn't find any rc file");

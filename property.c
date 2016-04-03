@@ -381,6 +381,7 @@ property_handle_xrootpmap_id(uint8_t state,
                              xcb_window_t window)
 {
     lua_State *L = globalconf_get_lua_State();
+    root_update_wallpaper();
     signal_object_emit(L, &global_signals, "wallpaper_changed", 0);
     return 0;
 }

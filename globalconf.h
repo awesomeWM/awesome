@@ -171,6 +171,8 @@ typedef struct
     struct xkb_state *xkb_state;
     /** The preferred size of client icons for this screen */
     uint32_t preferred_icon_size;
+    /** Cached wallpaper information */
+    cairo_surface_t *wallpaper;
 } awesome_t;
 
 extern awesome_t globalconf;
@@ -181,6 +183,9 @@ extern awesome_t globalconf;
 static inline lua_State *globalconf_get_lua_State(void) {
     return globalconf.L.real_L_dont_use_directly;
 }
+
+/* Defined in root.c */
+void root_update_wallpaper(void);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
