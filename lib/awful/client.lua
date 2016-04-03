@@ -97,6 +97,7 @@ end
 
 --- Get visible clients from a screen.
 --
+-- @function awful.client.visible
 -- @tparam[opt] integer|screen s The screen, or nil for all screens.
 -- @tparam[opt=false] boolean stacked Use stacking order? (top to bottom)
 -- @treturn table A table with all visible clients.
@@ -115,6 +116,7 @@ end
 
 --- Get visible and tiled clients
 --
+-- @function awful.client.tiled
 -- @tparam integer|screen s The screen, or nil for all screens.
 -- @tparam[opt=false] boolean stacked Use stacking order? (top to bottom)
 -- @treturn table A table with all visible and tiled clients.
@@ -136,6 +138,7 @@ end
 --- Get a client by its relative index to another client.
 -- If no client is passed, the focused client will be used.
 --
+-- @function awful.client.next
 -- @tparam int i The index.  Use 1 to get the next, -1 to get the previous.
 -- @client[opt] sel The client.
 -- @tparam[opt=false] boolean stacked Use stacking order? (top to bottom)
@@ -170,6 +173,7 @@ function client.next(i, sel, stacked)
 end
 
 --- Swap a client with another client in the given direction.
+-- @function awful.client.swap.bydirection
 -- @tparam string dir The direction, can be either "up", "down", "left" or "right".
 -- @client[opt=focused] c The client.
 -- @tparam[opt=false] boolean stacked Use stacking order? (top to bottom)
@@ -191,6 +195,7 @@ function client.swap.bydirection(dir, c, stacked)
 end
 
 --- Swap a client with another client in the given direction. Swaps across screens.
+-- @function awful.client.swap.global_bydirection
 -- @param dir The direction, can be either "up", "down", "left" or "right".
 -- @client[opt] sel The client.
 function client.swap.global_bydirection(dir, sel)
@@ -223,6 +228,7 @@ function client.swap.global_bydirection(dir, sel)
 end
 
 --- Swap a client by its relative index.
+-- @function awful.client.swap.byidx
 -- @param i The index.
 -- @client[opt] c The client, otherwise focused one is used.
 function client.swap.byidx(i, c)
@@ -235,6 +241,7 @@ end
 
 --- Cycle clients.
 --
+-- @function awful.client.cycle
 -- @param clockwise True to cycle clients clockwise.
 -- @param[opt] s The screen where to cycle clients.
 -- @tparam[opt=false] boolean stacked Use stacking order? (top to bottom)
@@ -258,6 +265,7 @@ end
 
 --- Get the master window.
 --
+-- @function awful.client.getmaster
 -- @param[opt] s The screen number, defaults to focused screen.
 -- @return The master window.
 function client.getmaster(s)
@@ -267,6 +275,7 @@ end
 
 --- Set the client as master: put it at the beginning of other windows.
 --
+-- @function awful.client.setmaster
 -- @client c The window to set as master.
 function client.setmaster(c)
     local cls = util.table.reverse(capi.client.get(c.screen))
@@ -276,6 +285,7 @@ function client.setmaster(c)
 end
 
 --- Set the client as slave: put it at the end of other windows.
+-- @function awful.client.setslave
 -- @client c The window to set as slave.
 function client.setslave(c)
     local cls = capi.client.get(c.screen)
@@ -345,6 +355,7 @@ end
 --- Move a client to a screen. Default is next screen, cycling.
 -- @client c The client to move.
 -- @param s The screen, default to current + 1.
+-- @see screen
 function client.movetoscreen(c, s)
     local sel = c or capi.client.focus
     if sel then
@@ -586,6 +597,7 @@ function client.floating.delete(c)
 end
 
 --- Restore (=unminimize) a random client.
+-- @function awful.client.restore
 -- @param s The screen to use.
 -- @return The restored client if some client was restored, otherwise nil.
 function client.restore(s)
@@ -864,6 +876,7 @@ end
 
 --- Set a client property to be persistent across restarts (via X properties).
 --
+-- @function awful.client.property.persist
 -- @param prop The property name.
 -- @param kind The type (used for register_xproperty).
 --   One of "string", "number" or "boolean".
@@ -889,6 +902,7 @@ end
 --   index of the currently focused client.
 -- @param s which screen to use.  nil means all screens.
 --
+-- @function awful.client.iterate
 -- @usage -- un-minimize all urxvt instances
 -- local urxvt = function (c)
 --   return awful.rules.match(c, {class = "URxvt"})
@@ -914,6 +928,7 @@ end
 --   first tag additionally) when the client is not visible.
 --   If it is a function, it will be called with the client as argument.
 --
+-- @function awful.client.run_or_raise
 -- @usage -- run or raise urxvt (perhaps, with tabs) on modkey + semicolon
 -- awful.key({ modkey, }, 'semicolon', function ()
 --     local matcher = function (c)
