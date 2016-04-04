@@ -421,7 +421,8 @@ end
 -- @tparam[opt] table args.actions Mapping that maps a string to a callback when this
 --   action is selected.
 -- @usage naughty.notify({ title = "Achtung!", text = "You're idling", timeout = 0 })
--- @return The notification object
+-- @treturn ?table The notification object, or nil in case a notification was
+--   not displayed.
 function naughty.notify(args)
     if naughty.config.notify_callback then
         args = naughty.config.notify_callback(args)
@@ -437,6 +438,11 @@ function naughty.notify(args)
     local text = args.text or preset.text
     local title = args.title or preset.title
     local s = get_screen(args.screen or preset.screen or screen.focused())
+    if not s then
+        require("gears.debug").print_warning(
+            "naughty.notify: there is no screen available to display the notification.")
+        return
+    end
     local ontop = args.ontop or preset.ontop
     local width = args.width or preset.width
     local height = args.height or preset.height
