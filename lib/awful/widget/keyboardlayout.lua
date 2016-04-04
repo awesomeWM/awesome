@@ -113,7 +113,7 @@ keyboardlayout.xkeyboard_country_code = {
     ["za"] = true,    -- South Africa
 }
 
--- Callback for updaing current layout
+-- Callback for updating current layout.
 local function update_status (self)
     self._current = awesome.xkb_get_layout_group();
     local text = ""
