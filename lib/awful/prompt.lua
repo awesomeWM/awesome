@@ -261,8 +261,9 @@ end
 -- with command as argument when a command was changed.
 -- @param[opt] keypressed_callback The callback function to call
 --   with mod table, key and command as arguments when a key was pressed.
-
-function prompt.run(args, textbox, exe_callback, completion_callback, history_path, history_max, done_callback, changed_callback, keypressed_callback)
+function prompt.run(args, textbox, exe_callback, completion_callback,
+                    history_path, history_max, done_callback,
+                    changed_callback, keypressed_callback)
     local grabber
     local theme = beautiful.get()
     if not args then args = {} end
