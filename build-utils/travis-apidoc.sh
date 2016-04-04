@@ -14,7 +14,7 @@ echo "TRAVIS_BRANCH: $TRAVIS_BRANCH"
 
 # GH_TOKEN won't be available for PRs from forks.
 # (http://docs.travis-ci.com/user/pull-requests/#Security-Restrictions-when-testing-Pull-Requests).
-if [ -z "GH_TOKEN" ]; then
+if [ -z "$GH_TOKEN" ]; then
   echo "No GH_TOKEN available. Skipping."
   exit
 fi
@@ -32,7 +32,7 @@ export GIT_AUTHOR_EMAIL="awesome-robot@users.noreply.github.com"
 export GIT_COMMITTER_NAME="$GIT_AUTHOR_NAME"
 export GIT_COMMITTER_EMAIL="$GIT_AUTHOR_EMAIL"
 
-git clone --quiet --branch gh-pages $REPO_APIDOC build/apidoc
+git clone --quiet --branch gh-pages "$REPO_APIDOC" build/apidoc
 cd build/apidoc
 
 # This will re-use already existing branches (updated PR).
@@ -41,9 +41,10 @@ if [ "$TRAVIS_PULL_REQUEST" != false ]; then
 elif [ "$TRAVIS_BRANCH" != master ]; then
   # Use merge-base of master in branch name, to keep different branches with
   # the same name apart.
-  BRANCH=$TRAVIS_BRANCH-$(cd ${REPO_DIR} \
+  # shellcheck disable=SC2015
+  BRANCH="$TRAVIS_BRANCH-$(cd "$REPO_DIR" \
     && git fetch --unshallow origin master \
-    && git rev-parse --short $(git merge-base HEAD FETCH_HEAD || true) || true)
+    && git rev-parse --short "$(git merge-base HEAD FETCH_HEAD || true)" || true)"
 else
   BRANCH="gh-pages"
 fi
@@ -69,7 +70,7 @@ fi
 COMMIT_MSG="Update docs for $AWESOME_VERSION via Travis
 
 Last commit message:
-$(cd $REPO_DIR && git log -1 --pretty=format:%s)
+$(cd "$REPO_DIR" && git log -1 --pretty=format:%s)
 
 Build URL: https://travis-ci.org/awesomeWM/awesome/builds/${TRAVIS_BUILD_ID}"
 git commit -m "[relevant] $COMMIT_MSG"
@@ -107,13 +108,14 @@ COMPARE_LINKS="$COMPARE_LINKS\nRelevant changes: https://github.com/awesomeWM/ap
 if [ "$BRANCH" != "gh-pages" ]; then
   COMPARE_LINKS="$COMPARE_LINKS\nComparison against master (gh-pages): https://github.com/awesomeWM/apidoc/compare/gh-pages...${NEW_REV}"
 fi
+# shellcheck disable=SC2028
 echo "Compare links:\n$COMPARE_LINKS"
 
 # Post a comment to the PR.
 if [ "$TRAVIS_PULL_REQUEST" != false ]; then
   curl -H "Authorization: token $GH_TOKEN" \
     -d "{\"body\": \"Documentation has been updated for this PR:\n$COMPARE_LINKS\"}" \
-    https://api.github.com/repos/awesomeWM/awesome/issues/${TRAVIS_PULL_REQUEST}/comments
+    "https://api.github.com/repos/awesomeWM/awesome/issues/${TRAVIS_PULL_REQUEST}/comments"
 fi
 
 # vim: filetype=sh:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
