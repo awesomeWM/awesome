@@ -364,7 +364,7 @@ screen_getbycoord(int x, int y)
             return *s;
 
     /* No screen found, find nearest screen. */
-    screen_t *nearest_screen = globalconf.screens.tab[0];
+    screen_t *nearest_screen = NULL;
     unsigned int nearest_dist = UINT_MAX;
     foreach(s, globalconf.screens)
     {
