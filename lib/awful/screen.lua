@@ -182,16 +182,14 @@ end
 
 --- Get the focused screen.
 --
--- Valid arguments are:
---
--- * **client**: Use the client screen instead of the mouse screen.
--- * **mouse**: Use the mouse screen (default).
---
 -- It is possible to set `awful.screen.default_focused_args` to override the
 -- default settings.
 --
--- @tparam[opt={}] table args Some arguments.
--- @treturn screen The focused screen object
+-- @tparam[opt] table args
+-- @tparam[opt=false] table args.client Use the client screen instead of the
+--   mouse screen.
+-- @treturn ?screen The focused screen object, or `nil` in case no screen is
+--   present currently.
 function screen.focused(args)
     args = args or screen.default_focused_args or {}
     return get_screen(args.client and capi.client.screen or capi.mouse.screen)
