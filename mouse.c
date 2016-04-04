@@ -20,6 +20,9 @@
  */
 
 /** awesome mouse API
+ *
+ * See also `mousegrabber`
+ *
  * @author Julien Danjou &lt;julien@danjou.info&gt;
  * @copyright 2008-2009 Julien Danjou
  * @release @AWESOME_VERSION@
@@ -35,8 +38,12 @@
 
 /** Mouse library.
  *
- * @field screen Mouse screen.
  * @table mouse
+ */
+
+/**
+ * The `screen` under the cursor
+ * @field screen
  */
 
 /** A table with X and Y coordinates.
