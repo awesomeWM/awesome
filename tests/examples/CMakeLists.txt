@@ -107,6 +107,32 @@ function(escape_code path escaped_content pre_header post_header)
     set(${post_header} ${example_post_header} PARENT_SCOPE)
 endfunction()
 
+# Only gears.debug.print_warning are allowed on stderr, everything else will
+# trigger a build failure to catch regressions and problem early.
+function(check_for_problems stderr result)
+
+    # If there is nothing to check, return
+    if (TEST_ERROR STREQUAL "")
+        set(${result} 0 PARENT_SCOPE)
+        return()
+    endif()
+
+    string(REGEX REPLACE "\n" ";" error_lines "${stderr}")
+
+    foreach (LINE ${error_lines})
+
+        # gears.debug.print_warning lines look like:
+        # yyyy-mm-dd hh:mm:ss W: message content
+        if (NOT ${LINE} MATCHES "^[0-9 :-]+ W:")
+            set(${result} 1 PARENT_SCOPE)
+            return()
+        endif()
+
+    endforeach()
+
+    set(${result} 0 PARENT_SCOPE)
+endfunction()
+
 # Execute a lua file.
 function(run_test test_path namespace template escaped_content)
 
@@ -129,7 +155,8 @@ function(run_test test_path namespace template escaped_content)
     )
 
     # If there is something on stderr, exit
-    if (NOT TEST_ERROR STREQUAL "")
+    check_for_problems("${TEST_ERROR}" problems_found)
+    if (${problems_found})
         message("${TEST_OUTPUT}")
         message("${TEST_ERROR}")
         message(FATAL_ERROR ${test_path} " A test failed, bye")
