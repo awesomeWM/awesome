@@ -206,6 +206,7 @@ if ! [ $errors = 0 ]; then
         echo "Pausing... press Enter to continue."
         read enter
     fi
+    echo "There were $errors errors!"
     exit 1
 fi
 exit 0
