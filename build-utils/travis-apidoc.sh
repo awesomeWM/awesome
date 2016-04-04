@@ -72,6 +72,10 @@ Last commit message:
 $(cd $REPO_DIR && git log -1 --pretty=format:%s)
 
 Build URL: https://travis-ci.org/awesomeWM/awesome/builds/${TRAVIS_BUILD_ID}"
+if [ "$TRAVIS_PULL_REQUEST" != false ]; then
+    COMMIT_MSG="$COMMIT_MSG
+Pull request: https://github.com/awesomeWM/awesome/pull/${TRAVIS_PULL_REQUEST}"
+fi
 git commit -m "[relevant] $COMMIT_MSG"
 
 # Commit the irrelevant changes.
