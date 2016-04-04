@@ -66,7 +66,6 @@ if git diff --cached --exit-code --quiet; then
 fi
 
 # Commit the relevant changes.
-OLD_REV="$(git rev-parse --short HEAD)"
 COMMIT_MSG="Update docs for $AWESOME_VERSION via Travis
 
 Last commit message:
@@ -74,7 +73,6 @@ $(cd $REPO_DIR && git log -1 --pretty=format:%s)
 
 Build URL: https://travis-ci.org/awesomeWM/awesome/builds/${TRAVIS_BUILD_ID}"
 git commit -m "[relevant] $COMMIT_MSG"
-NEW_REV="$(git rev-parse --short HEAD)"
 
 # Commit the irrelevant changes.
 mv .git ../doc
@@ -87,15 +85,25 @@ git commit -m "[boilerplate] $COMMIT_MSG"
 git tag _old
 git reset --hard HEAD~2
 git cherry-pick _old _old~1
+RELEVANT_REV="$(git rev-parse --short HEAD)"
 git tag -d _old
 
 git checkout "$BRANCH"
-git merge --no-ff -m "$COMMIT_MSG" merged-update
+OLD_REV="$(git rev-parse --short HEAD)"
+MERGE_COMMIT_MSG="$COMMIT_MSG"
+if [ "$TRAVIS_PULL_REQUEST" != false ]; then
+    COMMIT_MSG="$COMMIT_MSG
+Pull request: https://github.com/awesomeWM/awesome/pull/${TRAVIS_PULL_REQUEST}"
+fi
+git merge --no-ff -m "$MERGE_COMMIT_MSG" merged-update
+NEW_REV="$(git rev-parse --short HEAD)"
 
 git push --quiet origin "$BRANCH"
 
 # Generate compare view links.
+# NOTE: use "\n" for line endings, not real ones for valid json!
 COMPARE_LINKS="Compare view: https://github.com/awesomeWM/apidoc/compare/${OLD_REV}...${NEW_REV}"
+COMPARE_LINKS="$COMPARE_LINKS\nRelevant changes: https://github.com/awesomeWM/apidoc/commit/${RELEVANT_REV}"
 if [ "$BRANCH" != "gh-pages" ]; then
   COMPARE_LINKS="$COMPARE_LINKS\nComparison against master (gh-pages): https://github.com/awesomeWM/apidoc/compare/gh-pages...${NEW_REV}"
 fi
