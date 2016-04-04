@@ -55,6 +55,21 @@ If awesome does not start or the configuration file is not producing the
 desired results the user should examine this file to gain insight into the
 problem.
 
+### Debugging tips
+
+You can call `awesome` with `gdb` like this:
+
+    DISPLAY=:2 gdb awesome
+
+Then in gdb set any args and run it:
+
+    (gdb) set arg --replace
+    (gdb) run
+
+Inside gdb you can use the following to print the current Lua stack traceback:
+
+    (gdb) print luaL_dostring(globalconf.L.real_L_dont_use_directly, "print(debug.traceback())")
+
 ## Reporting issues
 
 Please report any issues you may find on [our bugtracker](https://github.com/awesomeWM/awesome/issues).
