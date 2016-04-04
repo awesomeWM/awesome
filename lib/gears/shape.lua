@@ -440,7 +440,7 @@ function module.radial_progress(cr, w, h, percent, hide_left)
     end
 end
 
---- Ajust the shape using a transformation object
+--- Adjust the shape using a transformation object
 --
 -- Apply various transformations to the shape
 --
