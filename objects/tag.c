@@ -40,12 +40,37 @@
 #include "ewmh.h"
 #include "luaa.h"
 
-/** Tag object.
+/**
+ * Tag name.
  *
- * @field name Tag name.
- * @field selected True if the tag is selected to be viewed.
- * @field activated True if the tag is active and can be used.
- * @table tag
+ * **Signal:**
+ *
+ *  * *property::name*
+ *
+ * @property name
+ * @param string
+ */
+
+/**
+ * True if the tag is selected to be viewed
+ *
+ * **Signal:**
+ *
+ *  * *property::selected*
+ *
+ * @property selected
+ * @param boolean
+ */
+
+/**
+ * True if the tag is active and can be used.
+ *
+ * **Signal:**
+ *
+ *  * *property::activated*
+ *
+ * @property activated
+ * @param boolean
  */
 
 /** Get the number of instances.
@@ -389,17 +414,8 @@ tag_class_setup(lua_State *L)
                             (lua_class_propfunc_t) luaA_tag_get_activated,
                             (lua_class_propfunc_t) luaA_tag_set_activated);
 
-    /**
-     * @signal property::name
-     */
     signal_add(&tag_class.signals, "property::name");
-    /**
-     * @signal property::selected
-     */
     signal_add(&tag_class.signals, "property::selected");
-    /**
-     * @signal property::activated
-     */
     signal_add(&tag_class.signals, "property::activated");
     /**
      * @signal request::select
