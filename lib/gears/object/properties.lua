@@ -61,7 +61,6 @@ function object.capi_index_fallback(class, args)
         if args.getter_class and args.getter_class[prop] then
             return args.getter_class[prop]
         end
-
         -- In case there is already a "dumb" getter like `awful.tag.getproperty'
         if args.getter_fallback then
             return args.getter_fallback(cobj, prop)

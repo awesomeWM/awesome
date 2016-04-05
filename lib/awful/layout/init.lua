@@ -11,7 +11,6 @@
 local ipairs = ipairs
 local type = type
 local util = require("awful.util")
-local ascreen = require("awful.screen")
 local capi = {
     screen = screen,
     mouse  = mouse,
@@ -138,16 +137,16 @@ function layout.parameters(t, screen)
 
     local useless_gap = t and tag.getgap(t, #client.tiled(screen)) or 0
 
-    p.workarea = ascreen.get_bounding_geometry(screen, {
+    p.workarea = screen:get_bounding_geometry {
         honor_padding  = true,
         honor_workarea = true,
         margins        = useless_gap,
-    })
+    }
 
     p.geometry    = screen.geometry
     p.clients     = client.tiled(screen)
     p.screen      = screen.index
-    p.padding     = ascreen.padding(screen)
+    p.padding     = screen.padding
     p.useless_gap = useless_gap
 
     return p

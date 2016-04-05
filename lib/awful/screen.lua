@@ -45,13 +45,25 @@ local function apply_geometry_ajustments(geo, delta)
 end
 
 --- Get the square distance between a `screen` and a point
+-- @deprecated awful.screen.getdistance_sq
 -- @param s Screen
 -- @param x X coordinate of point
 -- @param y Y coordinate of point
 -- @return The squared distance of the screen to the provided point
 function screen.getdistance_sq(s, x, y)
-    s = get_screen(s)
-    local geom = s.geometry
+    util.deprecate "Use s:get_square_distance(x, y) instead of awful.screen.getdistance_sq"
+
+    return screen.object.get_square_distance(s, x, y)
+end
+
+--- Get the square distance between a `screen` and a point
+-- @function screen.get_square_distance
+-- @tparam number x X coordinate of point
+-- @tparam number y Y coordinate of point
+-- @treturn number The squared distance of the screen to the provided point
+function screen.object.get_square_distance(self, x, y)
+    self = get_screen(self)
+    local geom = self.geometry
     local dist_x, dist_y = 0, 0
     if x < geom.x then
         dist_x = geom.x - x
@@ -75,9 +87,9 @@ end
 -- @param y The y coordinate
 function screen.getbycoord(x, y)
     local s = capi.screen[1]
-    local dist = screen.getdistance_sq(s, x, y)
+    local dist = screen.object.get_square_distance(s, x, y)
     for i in capi.screen do
-        local d = screen.getdistance_sq(i, x, y)
+        local d = screen.object.get_square_distance(i, x, y)
         if d < dist then
             s, dist = capi.screen[i], d
         end
@@ -153,12 +165,51 @@ function screen.focus_relative(i)
 end
 
 --- Get or set the screen padding.
+-- @deprecated awful.screen.padding
 -- @param _screen The screen object to change the padding on
 -- @param[opt=nil] padding The padding, a table with 'top', 'left', 'right' and/or
 -- 'bottom' or a number value to apply set the same padding on all sides. Can be
 --  nil if you only want to retrieve padding
 -- @treturn table A table with left, right, top and bottom number values.
+-- @see padding
 function screen.padding(_screen, padding)
+    util.deprecate "Use _screen.padding = value instead of awful.screen.padding"
+
+    if padding then
+        screen.object.set_padding(_screen, padding)
+    end
+
+    return screen.object.get_padding(_screen)
+end
+
+--- The screen padding.
+-- Add a "buffer" section on each side of the screen where the tiled client
+-- wont be.
+--
+-- **Signal:**
+--
+-- * *property::padding*
+--
+-- @property padding
+-- @param table
+-- @tfield integer table.x The horizontal position
+-- @tfield integer table.y The vertical position
+-- @tfield integer table.width The width
+-- @tfield integer table.height The height
+
+function screen.object.get_padding(self)
+    local p = data.padding[self] or {}
+
+    -- Create a copy to avoid accidental mutation and nil values
+    return {
+        left   = p.left   or 0,
+        right  = p.right  or 0,
+        top    = p.top    or 0,
+        bottom = p.bottom or 0,
+    }
+end
+
+function screen.object.set_padding(self, padding)
     if type(padding) == "number" then
         padding = {
             left   = padding,
@@ -168,21 +219,11 @@ function screen.padding(_screen, padding)
         }
     end
 
-    _screen = get_screen(_screen)
+    self = get_screen(self)
     if padding then
-        data.padding[_screen] = padding
-        _screen:emit_signal("padding")
+        data.padding[self] = padding
+        self:emit_signal("padding")
     end
-
-    local p = data.padding[_screen] or {}
-
-    -- Create a copy to avoid accidental mutation and nil values
-    return {
-        left   = p.left   or 0,
-        right  = p.right  or 0,
-        top    = p.top    or 0,
-        bottom = p.bottom or 0,
-    }
 end
 
 --- The defaults arguments for `awful.screen.focused`
@@ -197,7 +238,7 @@ end
 -- @tparam[opt] table args
 -- @tparam[opt=false] boolean args.client Use the client screen instead of the
 --   mouse screen.
--- @tparam[opt=true] boolean args.screen Use the mouse screen
+-- @tparam[opt=true] boolean args.mouse Use the mouse screen
 -- @treturn ?screen The focused screen object, or `nil` in case no screen is
 --   present currently.
 function screen.focused(args)
@@ -219,24 +260,31 @@ end
 -- * **bounding_rect**: A bounding rectangle. This parameter is incompatible with
 --    `honor_workarea`.
 --
--- @tparam[opt=mouse.screen] screen s A screen
+-- @function screen.get_bounding_geometry
 -- @tparam[opt={}] table args The arguments
 -- @treturn table A table with *x*, *y*, *width* and *height*.
-function screen.get_bounding_geometry(s, args)
+-- @usage local geo = screen:get_bounding_geometry {
+--     honor_padding  = true,
+--     honor_workarea = true,
+--     margins        = {
+--          left = 20,
+--     },
+-- }
+function screen.object.get_bounding_geometry(self, args)
     args = args or {}
 
     -- If the tag has a geometry, assume it is right
     if args.tag then
-        s = args.tag.screen
+        self = args.tag.screen
     end
 
-    s = get_screen(s or capi.mouse.screen)
+    self = get_screen(self or capi.mouse.screen)
 
     local geo = args.bounding_rect or (args.parent and args.parent:geometry()) or
-        s[args.honor_workarea and "workarea" or "geometry"]
+        self[args.honor_workarea and "workarea" or "geometry"]
 
     if (not args.parent) and (not args.bounding_rect) and args.honor_padding then
-        local padding = screen.padding(s)
+        local padding = self.padding
         geo = apply_geometry_ajustments(geo, padding)
     end
 
@@ -271,7 +319,11 @@ end
 capi.screen.add_signal("padding")
 
 -- Extend the luaobject
-object.properties(capi.screen, {auto_emit=true})
+object.properties(capi.screen, {
+    getter_class = screen.object,
+    setter_class = screen.object,
+    auto_emit    = true,
+})
 
 return screen
 
