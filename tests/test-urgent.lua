@@ -32,7 +32,7 @@ local steps = {
     if count == 1 then  -- Setup.
       urgent_cb_done = false
       -- Select first tag.
-      awful.tag.viewonly(tags[awful.screen.focused()][1])
+      tags[awful.screen.focused()][1]:view_only()
 
       runner.add_to_default_rules({ rule = { class = "XTerm" },
         properties = { tag = tags[awful.screen.focused()][2], focus = true } })
@@ -72,7 +72,7 @@ local steps = {
       urgent_cb_done = false
 
       -- Select first tag.
-      awful.tag.viewonly(tags[awful.screen.focused()][1])
+      tags[awful.screen.focused()][1]:view_only()
 
       runner.add_to_default_rules({ rule = { class = "XTerm" },
         properties = { tag = tags[awful.screen.focused()][2], focus = true, switchtotag = true }})

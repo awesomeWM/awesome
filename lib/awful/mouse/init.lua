@@ -229,8 +229,8 @@ function mouse.client.dragtotag.border(c)
                                     capi.mouse.coords({ x = wa.x + 1 })
                                 end
                                 if not button_down then
-                                    local tags = tag.gettags(c.screen)
-                                    local t = tag.selected()
+                                    local tags = c.screen.tags
+                                    local t = c.screen.selected_tag
                                     local idx
                                     for i, v in ipairs(tags) do
                                         if v == t then

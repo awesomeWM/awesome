@@ -35,7 +35,7 @@ local function new_tag(_, args)
 
     return setmetatable(ret, {
         __index     = function(...) return meta.__index(...) end,
-        __new_index = function(...) return meta.__new_index(...) end
+        __newindex = function(...) return meta.__newindex(...) end
     })
 end
 

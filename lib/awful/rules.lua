@@ -13,7 +13,6 @@ local table = table
 local type = type
 local ipairs = ipairs
 local pairs = pairs
-local atag = require("awful.tag")
 
 local rules = {}
 
@@ -199,10 +198,10 @@ function rules.execute(c, props, callbacks)
             value = value(c)
         end
         if property == "tag" then
-            c.screen = atag.getscreen(value)
+            c.screen = value.screen
             c:tags({ value })
         elseif property == "switchtotag" and value and props.tag then
-            atag.viewonly(props.tag)
+            props.tag:view_only()
         elseif property == "height" or property == "width" or
                 property == "x" or property == "y" then
             local geo = c:geometry();

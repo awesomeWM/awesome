@@ -8,6 +8,7 @@ local function create_screen(args)
     local s = gears_obj()
 
     s:add_signal("property::workarea")
+    s:add_signal("property::index")
     s:add_signal("padding")
 
     -- Copy the geo in case the args are mutated
@@ -46,7 +47,7 @@ local function create_screen(args)
                 return meta.__index(_, key)
             end
         end,
-        __new_index = function(...) return meta.__new_index(...) end
+        __newindex = function(...) return meta.__newindex(...) end
     })
 end
 

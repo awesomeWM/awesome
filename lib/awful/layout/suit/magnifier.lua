@@ -10,7 +10,6 @@
 -- Grab environment we need
 local ipairs = ipairs
 local math = math
-local tag = require("awful.tag")
 local capi =
 {
     client = client,
@@ -40,7 +39,7 @@ function magnifier.mouse_resize_handler(c, corner, x, y)
 
                                       -- New master width factor
                                       local mwfact = dist / maxdist_pow
-                                      tag.setmwfact(math.min(math.max(0.01, mwfact), 0.99), tag.selected(c.screen))
+                                      c.screen.selected_tag.mwfact = math.min(math.max(0.01, mwfact), 0.99)
                                       return true
                                   end
                               end
@@ -53,8 +52,8 @@ function magnifier.arrange(p)
     local area = p.workarea
     local cls = p.clients
     local focus = p.focus or capi.client.focus
-    local t = p.tag or tag.selected(p.screen)
-    local mwfact = tag.getmwfact(t)
+    local t = p.tag or capi.screen[p.screen].selected_tag
+    local mwfact = t.mwfact
     local fidx
 
     -- Check that the focused window is on the right screen

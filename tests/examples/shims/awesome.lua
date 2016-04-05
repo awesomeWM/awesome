@@ -8,7 +8,7 @@ local function _shim_fake_class()
 
     local meta = {
         __index     = function()end,
-        __new_index = function()end,
+        __newindex = function()end,
     }
 
     obj._connect_signal = obj.connect_signal
@@ -28,7 +28,7 @@ local function _shim_fake_class()
     end
 
     function obj.set_newindex_miss_handler(handler)
-        meta.__new_index = handler
+        meta.__newindex = handler
     end
 
     function obj.emit_signal(name, c, ...)

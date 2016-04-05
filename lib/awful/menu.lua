@@ -609,7 +609,7 @@ end
 --       terms[i] =
 --         {c.name,
 --          function()
---            awful.tag.viewonly(c.first_tag)
+--            c.first_tag:view_only()
 --            client.focus = c
 --          end,
 --          c.icon

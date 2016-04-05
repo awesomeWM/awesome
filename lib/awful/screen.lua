@@ -306,8 +306,13 @@ end
 -- Minimized and unmanaged clients are not included in this list as they are
 -- technically not on the screen.
 --
+-- The clients on tags currently not visible are not part of this list.
+--
 -- @property clients
 -- @param table The clients list, ordered top to bottom
+-- @see all_clients
+-- @see hidden_clients
+-- @see client.get
 
 function screen.object.get_clients(s)
     local cls = capi.client.get(s, true)
@@ -321,6 +326,44 @@ function screen.object.get_clients(s)
 end
 
 function screen.object.set_clients() end
+
+--- Get the list of the clients assigned to the screen but not currently
+-- visible.
+--
+-- This include minimized clients and clients on hidden tags.
+--
+-- @property hidden_clients
+-- @param table The clients list, ordered top to bottom
+-- @see clients
+-- @see all_clients
+-- @see client.get
+
+function screen.object.get_hidden_clients(s)
+    local cls = capi.client.get(s, true)
+    local vcls = {}
+    for _, c in pairs(cls) do
+        if not c:isvisible() then
+            table.insert(vcls, c)
+        end
+    end
+    return vcls
+end
+
+function screen.object.set_hidden_clients() end
+
+--- Get all clients assigned to the screen.
+--
+-- @property all_clients
+-- @param table The clients list, ordered top to bottom
+-- @see clients
+-- @see hidden_clients
+-- @see client.get
+
+function screen.object.get_all_clients(s)
+    return capi.client.get(s, true)
+end
+
+function screen.object.set_all_clients() end
 
 --- Get the list of the screen tiled clients.
 --
@@ -367,6 +410,71 @@ end
 function screen.disconnect_for_each_screen(func)
     capi.screen.disconnect_signal("added", func)
 end
+
+--- A list of all tags on the screen.
+--
+-- This property is read only, use `tag.screen`, `awful.tag.add`, `awful.tag.new`
+-- or `t:delete()` to alter this list.
+--
+-- @property tags
+-- @param table
+-- @treturn table A table with all available tags
+
+function screen.object.get_tags(s, unordered)
+    local tags = {}
+
+    for _, t in ipairs(root.tags()) do
+        if get_screen(t.screen) == s then
+            table.insert(tags, t)
+        end
+    end
+
+    -- Avoid infinite loop, + save some time
+    if not unordered then
+        table.sort(tags, function(a, b)
+            return (a.index or 9999) < (b.index or 9999)
+        end)
+    end
+
+    return tags
+end
+
+function screen.object.set_tags() end
+
+--- A list of all selected tags on the screen.
+-- @property selected_tags
+-- @param table
+-- @treturn table A table with all selected tags.
+-- @see tag.selected
+-- @see client.to_selected_tags
+
+function screen.object.get_selected_tags(s)
+    local tags = screen.object.get_tags(s, true)
+
+    local vtags = {}
+    for _, t in pairs(tags) do
+        if t.selected then
+            vtags[#vtags + 1] = t
+        end
+    end
+    return vtags
+end
+
+function screen.object.set_selected_tags() end
+
+--- The first selected tag.
+-- @property selected_tag
+-- @param table
+-- @treturn ?tag The first selected tag or nil
+-- @see tag.selected
+-- @see selected_tags
+
+function screen.object.get_selected_tag(s)
+    return screen.object.get_selected_tags(s)[1]
+end
+
+function screen.object.set_selected_tag() end
+
 
 --- When the tag history changed.
 -- @signal tag::history::update

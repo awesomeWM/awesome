@@ -31,7 +31,7 @@ local function update(w, screen)
 end
 
 local function update_from_tag(t)
-    local screen = get_screen(tag.getscreen(t))
+    local screen = get_screen(t.screen)
     local w = boxes[screen]
     if w then
         update(w, screen)

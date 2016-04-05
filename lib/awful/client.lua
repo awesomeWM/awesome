@@ -11,7 +11,6 @@
 local util = require("awful.util")
 local spawn = require("awful.spawn")
 local object = require("gears.object")
-local tag = require("awful.tag")
 local pairs = pairs
 local type = type
 local ipairs = ipairs
@@ -102,7 +101,7 @@ function client.object.jump_to(self, merge)
                 t.selected = true
             end
         elseif t then
-            tag.viewonly(t)
+            t:view_only()
         end
     end
 
@@ -111,7 +110,8 @@ end
 
 --- Get visible clients from a screen.
 --
--- @function awful.client.visible
+-- @deprecated awful.client.visible
+-- @see screen.clients
 -- @tparam[opt] integer|screen s The screen, or nil for all screens.
 -- @tparam[opt=false] boolean stacked Use stacking order? (top to bottom)
 -- @treturn table A table with all visible clients.
@@ -128,7 +128,8 @@ end
 
 --- Get visible and tiled clients
 --
--- @function awful.client.tiled
+-- @deprecated awful.client.tiled
+-- @see screen.tiled_clients
 -- @tparam integer|screen s The screen, or nil for all screens.
 -- @tparam[opt=false] boolean stacked Use stacking order? (top to bottom)
 -- @treturn table A table with all visible and tiled clients.
@@ -230,7 +231,7 @@ function client.swap.global_bydirection(dir, sel)
         -- swapping to a nonempty screen
         elseif get_screen(sel.screen) ~= get_screen(c.screen) and sel ~= c then
             sel:move_to_screen(c.screen)
-            sel:move_to_screen(scr)
+            c:move_to_screen(scr)
         end
 
         screen.focus(sel.screen)
@@ -313,20 +314,20 @@ end
 -- @param w The relative width.
 -- @param h The relative height.
 -- @client[opt] c The client, otherwise focused one is used.
--- @see client.move_resize
+-- @see client.relative_move
 function client.moveresize(x, y, w, h, c)
-    util.deprecate "Use c:move_resize(x, y, w, h) instead of awful.client.moveresize"
-    client.object.move_resize(c or capi.client.focus, x, y, w, h)
+    util.deprecate "Use c:relative_move(x, y, w, h) instead of awful.client.moveresize"
+    client.object.relative_move(c or capi.client.focus, x, y, w, h)
 end
 
 --- Move/resize a client relative to current coordinates.
--- @function client.move_resize
+-- @function client.relative_move
 -- @see geometry
 -- @tparam[opt=c.x] number x The relative x coordinate.
 -- @tparam[opt=c.y] number y The relative y coordinate.
 -- @tparam[opt=c.width] number w The relative width.
 -- @tparam[opt=c.height] number h The relative height.
-function client.object.move_resize(self, x, y, w, h)
+function client.object.relative_move(self, x, y, w, h)
     local geometry = self:geometry()
     geometry['x'] = geometry['x'] + x
     geometry['y'] = geometry['y'] + y
@@ -349,7 +350,7 @@ end
 -- @function client.move_to_tag
 -- @tparam tag target The tag to move the client to.
 function client.object.move_to_tag(self, target)
-    local s = tag.getscreen(target)
+    local s = target.screen
     if self and s then
         if self == capi.client.focus then
             self:emit_signal("request::activate", "client.movetotag", {raise=true})
@@ -375,7 +376,7 @@ end
 -- @tparam tag target The tag to move the client to.
 function client.object.toggle_tag(self, target)
     -- Check that tag and client screen are identical
-    if self and get_screen(self.screen) == get_screen(tag.getscreen(target)) then
+    if self and get_screen(self.screen) == get_screen(target.screen) then
         local tags = self:tags()
         local index = nil;
         for i, v in ipairs(tags) do
@@ -432,6 +433,31 @@ function client.object.move_to_screen(self, s)
                                 {raise=true})
             end
         end
+    end
+end
+
+--- Tag a client with the set of current tags.
+-- @function client.to_selected_tags
+-- @see screen.selected_tags
+function client.object.to_selected_tags(self)
+    local tags = {}
+
+    for _, t in ipairs(self:tags()) do
+        if get_screen(t.screen) == get_screen(self.screen) then
+            table.insert(tags, t)
+        end
+    end
+
+    if #tags == 0 then
+        tags = self.screen.selected_tags
+    end
+
+    if #tags == 0 then
+        tags = self.screen.tags
+    end
+
+    if #tags ~= 0 then
+        self:tags(tags)
     end
 end
 
@@ -678,7 +704,7 @@ end
 function client.restore(s)
     s = s or screen.focused()
     local cls = capi.client.get(s)
-    local tags = tag.selectedlist(s)
+    local tags = s.selected_tags
     for _, c in pairs(cls) do
         local ctags = c:tags()
         if c.minimized then
@@ -739,8 +765,8 @@ function client.idx(c)
         end
     end
 
-    local t = tag.selected(c.screen)
-    local nmaster = tag.getnmaster(t)
+    local t = c.screen.selected_tag
+    local nmaster = t.nmaster
 
     -- This will happen for floating or maximized clients
     if not idx then return nil end
@@ -755,7 +781,7 @@ function client.idx(c)
     -- based on the how the tiling algorithm places clients we calculate
     -- the column, we could easily use the for loop in the program but we can
     -- calculate it.
-    local ncol = tag.getncol(t)
+    local ncol = t.ncol
     -- minimum number of clients per column
     local percol = math.floor(nother / ncol)
     -- number of columns with an extra client
@@ -793,10 +819,10 @@ function client.setwfact(wfact, c)
 
     if not w then return end
 
-    local t = tag.selected(c.screen)
+    local t = c.screen.selected_tag
 
     -- n is the number of windows currently visible for which we have to be concerned with the properties
-    local data = tag.getproperty(t, "windowfact") or {}
+    local data = t.windowfact or {}
     local colfact = data[w.col]
 
     local need_normalize = colfact ~= nil
@@ -841,11 +867,11 @@ function client.incwfact(add, c)
     c = c or capi.client.focus
     if not c then return end
 
-    local t = tag.selected(c.screen)
+    local t = c.screen.selected_tag
 
     local w = client.idx(c)
 
-    local data = tag.getproperty(t, "windowfact") or {}
+    local data = t.windowfact or {}
     local colfact = data[w.col] or {}
     local curr = colfact[w.idx] or 1
     colfact[w.idx] = curr + add
