@@ -14,7 +14,9 @@ local wallpaper = { mt = {} }
 
 -- The size of the root window
 local root_geom = { x = 0, y = 0, width = 0, height = 0 }
-require("gears.screen").connect_for_each_screen(function(s)
+
+-- Gears should not depend on awful or C-API, this should be fixed eventually
+require("awful.screen").connect_for_each_screen(function(s)
     local g = s.geometry
     root_geom.width = math.max(root_geom.width, g.x + g.width)
     root_geom.height = math.max(root_geom.height, g.y + g.height)

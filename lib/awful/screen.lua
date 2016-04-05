@@ -242,6 +242,22 @@ function screen.get_bounding_geometry(s, args)
     return geo
 end
 
+--- Call a function for each existing and created-in-the-future screen.
+-- @tparam function func The function to call.
+-- @tparam screen func.screen The screen
+function screen.connect_for_each_screen(func)
+    for s in capi.screen do
+        func(s)
+    end
+    capi.screen.connect_signal("added", func)
+end
+
+--- Undo the effect of connect_for_each_screen.
+-- @tparam function func The function that should no longer be called.
+function screen.disconnect_for_each_screen(func)
+    capi.screen.disconnect_signal("added", func)
+end
+
 capi.screen.add_signal("padding")
 
 -- Extend the luaobject
