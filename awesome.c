@@ -643,6 +643,9 @@ main(int argc, char **argv)
     /* init atom cache */
     atoms_init(globalconf.connection);
 
+    /* init screens information */
+    screen_scan();
+
     /* do this only for real screen */
     ewmh_init();
     systray_init();
@@ -701,9 +704,6 @@ main(int argc, char **argv)
     p_delete(&confpath);
 
     xdgWipeHandle(&xdg);
-
-    /* init screens information */
-    screen_scan();
 
     /* scan existing windows */
     scan(tree_c);
