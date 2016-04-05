@@ -5,12 +5,10 @@ env:
   matrix:
     # Note: luarocks does not work with Lua 5.0.
     - LUA=5.1 LGIVER=      LUANAME=lua5.1
+    # luajit: installed from source.
+    - LUA=5.1 LGIVER=      LUANAME=luajit-2.0 LUALIBRARY=/usr/lib/libluajit-5.1.so LUAROCKS_ARGS=--lua-suffix=jit-2.0.4
     - LUA=5.2 LGIVER=      LUANAME=lua5.2 BUILD_APIDOC=true DO_COVERAGE=true
     - LUA=5.2 LGIVER=0.7.1 LUANAME=lua5.2
-    # luajit: requires --lua-suffix=jit-2.0.0-beta9 in Ubuntu precise.
-    # Later versions seem to provide a `luajit` symlink, so `jit` would be enough.
-    # See http://packages.ubuntu.com/precise/i386/luajit/filelist.
-    - LUA=5.1 LGIVER=      LUANAME=luajit-5.1 INSTALL_PKGS="luajit" LUAINCLUDE=/usr/include/luajit-2.0 LUAROCKS_ARGS=--lua-suffix=jit-2.0.2
     # Lua 5.3 isn't available in Ubuntu trusty, so some magic below installs it
     - LUA=5.3 LGIVER=      LUANAME=lua5.3 LUALIBRARY=/usr/lib/liblua.so
   global:
@@ -46,12 +44,17 @@ install:
       (cd src && make SYSCFLAGS="-DLUA_USE_LINUX -ULUA_COMPAT_5_2" SYSLIBS="-Wl,-E -ldl -lreadline" LUA_A=liblua.so MYCFLAGS="-fPIC" RANLIB=: AR="gcc -shared -ldl -o" liblua.so) || exit 1
       sudo make INSTALL_TOP=/usr/ INSTALL_INC=${LUAINCLUDE} TO_LIB=liblua.so linux install || exit 1
       cd ..
+    elif [[ "$LUANAME" == "luajit-2.0" ]]; then
+      git clone http://luajit.org/git/luajit-2.0.git
+      cd luajit-2.0
+      sudo make install PREFIX=/usr
+      cd ..
+
+      # "Create" /usr/bin/lua if needed (Yup, this is a bad hack)
+      if [ ! -e "/usr/bin/lua" ]; then sudo ln -s /usr/bin/luajit /usr/bin/lua; fi
     else
       sudo apt-get install -y lib${LUANAME}-dev ${LUANAME} ${INSTALL_PKGS}
     fi
-
-  # "Create" /usr/bin/lua if needed (Yup, this is a bad hack)
-  - if [ ! -e "/usr/bin/lua" ]; then sudo ln -s /usr/bin/luajit /usr/bin/lua; fi
 
   # Install luarocks (for the selected Lua version).
   - travis_retry wget https://keplerproject.github.io/luarocks/releases/luarocks-2.3.0.tar.gz
