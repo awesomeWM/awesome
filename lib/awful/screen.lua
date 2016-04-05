@@ -4,7 +4,7 @@
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2008 Julien Danjou
 -- @release @AWESOME_VERSION@
--- @module awful.screen
+-- @module screen
 ---------------------------------------------------------------------------
 
 -- Grab environment we need
@@ -24,7 +24,7 @@ end
 -- we use require("awful.client") inside functions to prevent circular dependencies.
 local client
 
-local screen = {}
+local screen = {object={}}
 
 local data = {}
 data.padding = {}
@@ -44,6 +44,7 @@ local function apply_geometry_ajustments(geo, delta)
     }
 end
 
+--- Get the square distance between a `screen` and a point
 -- @param s Screen
 -- @param x X coordinate of point
 -- @param y Y coordinate of point
@@ -69,6 +70,7 @@ end
 -- Return screen number corresponding to the given (pixel) coordinates.
 -- The number returned can be used as an index into the global
 -- `screen` table/object.
+-- @function awful.screen.getbycoord
 -- @param x The x coordinate
 -- @param y The y coordinate
 function screen.getbycoord(x, y)
@@ -85,6 +87,7 @@ end
 
 --- Give the focus to a screen, and move pointer to last known position on this
 -- screen, or keep position relative to the current focused screen
+-- @function awful.screen.focus
 -- @param _screen Screen number (defaults / falls back to mouse.screen).
 function screen.focus(_screen)
     client = client or require("awful.client")
@@ -123,6 +126,7 @@ end
 
 --- Give the focus to a screen, and move pointer to last known position on this
 -- screen, or keep position relative to the current focused screen
+-- @function awful.screen.focus_bydirection
 -- @param dir The direction, can be either "up", "down", "left" or "right".
 -- @param _screen Screen.
 function screen.focus_bydirection(dir, _screen)
@@ -141,6 +145,7 @@ end
 
 --- Give the focus to a screen, and move pointer to last known position on this
 -- screen, or keep position relative to the current focused screen
+-- @function awful.screen.focus_relative
 -- @param i Value to add to the current focused screen index. 1 will focus next
 -- screen, -1 would focus the previous one.
 function screen.focus_relative(i)
@@ -180,14 +185,19 @@ function screen.padding(_screen, padding)
     }
 end
 
+--- The defaults arguments for `awful.screen.focused`
+-- @tfield[opt=nil] table awful.screen.default_focused_args
+
 --- Get the focused screen.
 --
 -- It is possible to set `awful.screen.default_focused_args` to override the
 -- default settings.
 --
+-- @function awful.screen.focused
 -- @tparam[opt] table args
--- @tparam[opt=false] table args.client Use the client screen instead of the
+-- @tparam[opt=false] boolean args.client Use the client screen instead of the
 --   mouse screen.
+-- @tparam[opt=true] boolean args.screen Use the mouse screen
 -- @treturn ?screen The focused screen object, or `nil` in case no screen is
 --   present currently.
 function screen.focused(args)
