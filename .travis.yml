@@ -3,11 +3,11 @@ dist: trusty
 language: c
 env:
   matrix:
+    - LUA=5.2 LUANAME=lua5.2 BUILD_APIDOC=true DO_COVERAGE=true
     # Note: luarocks does not work with Lua 5.0.
     - LUA=5.1 LUANAME=lua5.1
     # luajit: installed from source.
     - LUA=5.1 LUANAME=luajit-2.0 LUALIBRARY=/usr/lib/libluajit-5.1.so LUAROCKS_ARGS=--lua-suffix=jit-2.0.4
-    - LUA=5.2 LUANAME=lua5.2 BUILD_APIDOC=true DO_COVERAGE=true
     - LUA=5.2 LUANAME=lua5.2 LGIVER=0.7.1
     # Lua 5.3 isn't available in Ubuntu trusty, so some magic below installs it
     - LUA=5.3 LUANAME=lua5.3 LUALIBRARY=/usr/lib/liblua.so
