@@ -649,12 +649,12 @@
  * @function instances
  */
 
-/** Set a __index metamethod for all client instances.
+/* Set a __index metamethod for all client instances.
  * @tparam function cb The meta-method
  * @function set_index_miss_handler
  */
 
-/** Set a __newindex metamethod for all client instances.
+/* Set a __newindex metamethod for all client instances.
  * @tparam function cb The meta-method
  * @function set_newindex_miss_handler
  */
