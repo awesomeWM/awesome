@@ -24,6 +24,8 @@
  * Furthermore to the classes described here, one can also use signals as
  * described in @{signals}.
  *
+ * ![Client geometry](../images/tag_props.svg)
+ *
  * Some signal names are starting with a dot. These dots are artefacts from
  * the documentation generation, you get the real signal name by
  * removing the starting dot.
