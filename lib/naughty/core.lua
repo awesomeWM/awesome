@@ -143,7 +143,7 @@ local suspended = false
 -- @field id Unique notification id based on a counter
 -- @table notifications
 naughty.notifications = { suspended = { } }
-require("gears.screen").connect_for_each_screen(function(s)
+screen.connect_for_each_screen(function(s)
     naughty.notifications[s] = {
         top_left = {},
         top_middle = {},

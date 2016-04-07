@@ -5,23 +5,23 @@
 -- @classmod gears.screen
 ---------------------------------------------------------------------------
 
-local screen = screen
+local ascreen =  require("awful.screen")
+local util = require("awful.util")
 
 local module = {}
 
 --- Call a function for each existing and created-in-the-future screen.
 -- @tparam function func The function to call.
 function module.connect_for_each_screen(func)
-    for s in screen do
-        func(s)
-    end
-    screen.connect_signal("added", func)
+    util.deprecate("Use awful.screen.connect_for_each_screen")
+    ascreen.connect_for_each_screen(func)
 end
 
 --- Undo the effect of connect_for_each_screen.
 -- @tparam function func The function that should no longer be called.
 function module.disconnect_for_each_screen(func)
-    screen.disconnect_signal("added", func)
+    util.deprecate("Use awful.screen.disconnect_for_each_screen")
+    ascreen.disconnect_for_each_screen(func)
 end
 
 return module
