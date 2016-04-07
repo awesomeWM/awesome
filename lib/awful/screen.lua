@@ -50,6 +50,7 @@ end
 -- @param x X coordinate of point
 -- @param y Y coordinate of point
 -- @return The squared distance of the screen to the provided point
+-- @see screen.get_square_distance
 function screen.getdistance_sq(s, x, y)
     util.deprecate "Use s:get_square_distance(x, y) instead of awful.screen.getdistance_sq"
 
@@ -300,7 +301,57 @@ function screen.object.get_bounding_geometry(self, args)
     return geo
 end
 
+--- Get the list of the screen visible clients.
+--
+-- Minimized and unmanaged clients are not included in this list as they are
+-- technically not on the screen.
+--
+-- @property clients
+-- @param table The clients list, ordered top to bottom
+
+function screen.object.get_clients(s)
+    local cls = capi.client.get(s, true)
+    local vcls = {}
+    for _, c in pairs(cls) do
+        if c:isvisible() then
+            table.insert(vcls, c)
+        end
+    end
+    return vcls
+end
+
+function screen.object.set_clients() end
+
+--- Get the list of the screen tiled clients.
+--
+-- Same as s.clients, but excluding:
+--
+-- * fullscreen clients
+-- * maximized clients
+-- * floating clients
+--
+-- @property tiled_clients
+-- @param table The clients list, ordered top to bottom
+
+function screen.object.get_tiled_clients(s)
+    local clients = s.clients
+    local tclients = {}
+    -- Remove floating clients
+    for _, c in pairs(clients) do
+        if not c.floating
+            and not c.fullscreen
+            and not c.maximized_vertical
+            and not c.maximized_horizontal then
+            table.insert(tclients, c)
+        end
+    end
+    return tclients
+end
+
+function screen.object.set_tiled_clients() end
+
 --- Call a function for each existing and created-in-the-future screen.
+-- @function awful.screen.connect_for_each_screen
 -- @tparam function func The function to call.
 -- @tparam screen func.screen The screen
 function screen.connect_for_each_screen(func)
@@ -311,6 +362,7 @@ function screen.connect_for_each_screen(func)
 end
 
 --- Undo the effect of connect_for_each_screen.
+-- @function awful.screen.disconnect_for_each_screen
 -- @tparam function func The function that should no longer be called.
 function screen.disconnect_for_each_screen(func)
     capi.screen.disconnect_signal("added", func)

@@ -76,6 +76,9 @@
  *        -- do something
  *    end
  *
+ * To get all the clients for a screen, use either `screen.clients` or
+ * `screen.tiled_clients`
+ *
  * @author Julien Danjou &lt;julien@danjou.info&gt;
  * @copyright 2008-2009 Julien Danjou
  * @release @AWESOME_VERSION@

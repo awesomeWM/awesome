@@ -109,8 +109,6 @@ function client.object.jump_to(self, merge)
     self:emit_signal("request::activate", "client.jumpto", {raise=true})
 end
 
---TODO move this to `awful.screen`
-
 --- Get visible clients from a screen.
 --
 -- @function awful.client.visible
@@ -127,8 +125,6 @@ function client.visible(s, stacked)
     end
     return vcls
 end
-
---TODO move this to `awful.screen`
 
 --- Get visible and tiled clients
 --
