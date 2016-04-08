@@ -10,7 +10,7 @@
 -- Grab environment we need
 local setmetatable = setmetatable
 local ipairs = ipairs
-local capi = { key = key }
+local capi = { key = key, root = root }
 local util = require("awful.util")
 
 
@@ -25,6 +25,40 @@ local key = { mt = {}, hotkeys = {} }
 -- @name ignore_modifiers
 -- @class table
 local ignore_modifiers = { "Lock", "Mod2" }
+
+--- Convert the modifiers into pc105 key names
+local conversion = {
+    mod4    = "Super_L",
+    control = "Control_L",
+    shift   = "Shift_L",
+    mod1    = "Alt_L",
+}
+
+--- Execute a key combination.
+-- If an awesome keybinding is assigned to the combination, it should be
+-- executed.
+-- @see root.fake_input
+-- @tparam table mod A modified table. Valid modifiers are: Any, Mod1,
+--   Mod2, Mod3, Mod4, Mod5, Shift, Lock and Control.
+-- @tparam string k The key
+function key.execute(mod, k)
+    for _, v in ipairs(mod) do
+        local m = conversion[v:lower()]
+        if m then
+            root.fake_input("key_press", m)
+        end
+    end
+
+    root.fake_input("key_press"  , k)
+    root.fake_input("key_release", k)
+
+    for _, v in ipairs(mod) do
+        local m = conversion[v:lower()]
+        if m then
+            root.fake_input("key_release", m)
+        end
+    end
+end
 
 --- Create a new key to use as binding.
 -- This function is useful to create several keys from one, because it will use
@@ -66,6 +100,7 @@ function key.new(mod, _key, press, release, data)
     data.mod = mod
     data.key = _key
     table.insert(key.hotkeys, data)
+    data.execute = function(_) key.execute(mod, _key) end
 
     return ret
 end
