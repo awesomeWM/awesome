@@ -397,13 +397,19 @@ event_handle_configurerequest(xcb_configure_request_event_t *ev)
 static void
 event_handle_configurenotify(xcb_configure_notify_event_t *ev)
 {
-    const xcb_screen_t *screen = globalconf.screen;
+    xcb_screen_t *screen = globalconf.screen;
 
     if(ev->window == screen->root
        && (ev->width != screen->width_in_pixels
            || ev->height != screen->height_in_pixels))
         /* it's not that we panic, but restart */
         awesome_restart();
+
+    /* Copy what XRRUpdateConfiguration() would do: Update the configuration */
+    if(ev->window == screen->root) {
+        screen->width_in_pixels = ev->width;
+        screen->height_in_pixels = ev->height;
+    }
 }
 
 /** The destroy notify event handler.
