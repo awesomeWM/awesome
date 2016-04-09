@@ -771,22 +771,18 @@ event_handle_unmapnotify(xcb_unmap_notify_event_t *ev)
 static void
 event_handle_randr_screen_change_notify(xcb_randr_screen_change_notify_event_t *ev)
 {
-    /* Code  of  XRRUpdateConfiguration Xlib  function  ported to  XCB
-     * (only the code relevant  to RRScreenChangeNotify) as the latter
-     * doesn't provide this kind of function */
-    if(ev->rotation & (XCB_RANDR_ROTATION_ROTATE_90 | XCB_RANDR_ROTATION_ROTATE_270))
-        xcb_randr_set_screen_size(globalconf.connection, ev->root, ev->height, ev->width,
-                                  ev->mheight, ev->mwidth);
-    else
-        xcb_randr_set_screen_size(globalconf.connection, ev->root, ev->width, ev->height,
-                                  ev->mwidth, ev->mheight);
+    /* Ignore events for other roots (do we get them at all?) */
+    if (ev->root != globalconf.screen->root)
+        return;
 
-    /* XRRUpdateConfiguration also executes the following instruction
-     * but it's not useful because SubpixelOrder is not used at all at
-     * the moment
-     *
-     * XRenderSetSubpixelOrder(dpy, snum, scevent->subpixel_order);
-     */
+    /* Do (part of) what XRRUpdateConfiguration() would do (update our state) */
+    if (ev->rotation & (XCB_RANDR_ROTATION_ROTATE_90 | XCB_RANDR_ROTATION_ROTATE_270)) {
+        globalconf.screen->width_in_pixels = ev->height;
+        globalconf.screen->height_in_pixels = ev->width;
+    } else {
+        globalconf.screen->width_in_pixels = ev->width;
+        globalconf.screen->height_in_pixels = ev->height;
+    }
 
     awesome_restart();
 }
