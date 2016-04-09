@@ -9,18 +9,14 @@ local cairo = require("lgi").cairo
 local color = require("gears.color")
 local surface = require("gears.surface")
 local timer = require("gears.timer")
+local root = root
 
 local wallpaper = { mt = {} }
 
--- The size of the root window
-local root_geom = { x = 0, y = 0, width = 0, height = 0 }
-
--- Gears should not depend on awful or C-API, this should be fixed eventually
-require("awful.screen").connect_for_each_screen(function(s)
-    local g = s.geometry
-    root_geom.width = math.max(root_geom.width, g.x + g.width)
-    root_geom.height = math.max(root_geom.height, g.y + g.height)
-end)
+local function root_geometry()
+    local width, height = root.size()
+    return { x = 0, y = 0, width = width, height = height }
+end
 
 -- A cairo surface that we still want to set as the wallpaper
 local pending_wallpaper = nil
@@ -33,14 +29,14 @@ local pending_wallpaper = nil
 -- @return[1] The available geometry (table with entries width and height)
 -- @return[1] A cairo context that the wallpaper should be drawn to
 function wallpaper.prepare_context(s)
-    local geom = s and screen[s].geometry or root_geom
+    local geom = s and screen[s].geometry or root_geometry()
     local cr
 
     if not pending_wallpaper then
         -- Prepare a pending wallpaper
         local wp = surface(root.wallpaper())
 
-        pending_wallpaper = wp:create_similar(cairo.Content.COLOR, root_geom.width, root_geom.height)
+        pending_wallpaper = wp:create_similar(cairo.Content.COLOR, root.size())
 
         -- Copy the old wallpaper to the new one
         cr = cairo.Context(pending_wallpaper)
