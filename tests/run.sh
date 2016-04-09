@@ -169,6 +169,9 @@ start_awesome() {
     awesome_pid=$!
     cd - >/dev/null
 
+    # Do not put too much load on this, it will deadlock
+    sleep 0.5
+
     # Wait until the interface for awesome-client is ready (D-Bus interface).
     wait_until_success "wait for awesome startup via awesome-client" "echo 'return 1' | DISPLAY=$D '$AWESOME_CLIENT' 2>&1"
 }
