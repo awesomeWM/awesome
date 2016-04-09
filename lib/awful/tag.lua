@@ -96,7 +96,7 @@ function tag.object.set_index(self, idx)
     for i = idx < rm_index and idx or rm_index, #tmp_tags do
         local tmp_tag = tmp_tags[i]
         tag.object.set_screen(tmp_tag, scr)
-        tag.setproperty(tmp_tag, "index", i, true)
+        tag.setproperty(tmp_tag, "index", i)
     end
 end
 
@@ -111,7 +111,7 @@ function tag.object.get_index(query_tag)
     -- Too bad, lets compute it
     for i, t in ipairs(tags) do
         if t == query_tag then
-            tag.setproperty(t, "index", i, true)
+            tag.setproperty(t, "index", i)
             return i
         end
     end
@@ -142,8 +142,8 @@ function tag.object.swap(self, tag2)
     -- If they are on the same screen, avoid recomputing the whole table
     -- for nothing.
     if scr1 == scr2 then
-        tag.setproperty(self, "index", idx2, true)
-        tag.setproperty(tag2, "index", idx1, true)
+        tag.setproperty(self, "index", idx2)
+        tag.setproperty(tag2, "index", idx1)
     else
         tag.object.set_screen(tag2, scr1)
         tag.object.set_index (tag2, idx1)
@@ -439,10 +439,10 @@ function tag.object.set_screen(t, s)
     if s == old_screen then return end
 
     -- Keeping the old index make very little sense when changing screen
-    tag.setproperty(t, "index", nil, true)
+    tag.setproperty(t, "index", nil)
 
     -- Change the screen
-    tag.setproperty(t, "screen", s, true)
+    tag.setproperty(t, "screen", s)
 
     -- Make sure the client's screen matches its tags
     for _,c in ipairs(t:clients()) do
@@ -453,7 +453,7 @@ function tag.object.set_screen(t, s)
     -- Update all indexes
     for _,screen in ipairs {old_screen, s} do
         for i,t2 in ipairs(screen.tags) do
-            tag.setproperty(t2, "index", i, true)
+            tag.setproperty(t2, "index", i)
         end
     end
 
@@ -541,7 +541,7 @@ end
 
 function tag.object.set_mwfact(t, mwfact)
     if mwfact >= 0 and mwfact <= 1 then
-        tag.setproperty(t, "mwfact", mwfact, true)
+        tag.setproperty(t, "mwfact", mwfact)
     end
 end
 
@@ -670,7 +670,7 @@ function tag.object.set_layout(t, layout)
         layout = instance
     end
 
-    tag.setproperty(t, "layout", layout, true)
+    tag.setproperty(t, "layout", layout)
 
     return layout
 end
@@ -718,7 +718,7 @@ end
 function tag.setvolatile(volatile, t)
     util.deprecate("Use t.volatile = volatile instead of awful.tag.setvolatile")
 
-    tag.setproperty(t, "volatile", volatile, true)
+    tag.setproperty(t, "volatile", volatile)
 end
 
 --- Get if the tag must be deleted when the last client closes
@@ -752,7 +752,7 @@ end
 
 function tag.object.set_gap(t, useless_gap)
     if useless_gap >= 0 then
-        tag.setproperty(t, "useless_gap", useless_gap, true)
+        tag.setproperty(t, "useless_gap", useless_gap)
     end
 end
 
@@ -822,7 +822,7 @@ function tag.setmfpol(policy, t)
     util.deprecate("Use t.master_fill_policy = policy instead of awful.tag.setmfpol")
 
     t = t or ascreen.focused().selected_tag
-    tag.setproperty(t, "master_fill_policy", policy, true)
+    tag.setproperty(t, "master_fill_policy", policy)
 end
 
 --- Toggle size fill policy for the master client(s)
@@ -834,9 +834,9 @@ function tag.togglemfpol(t)
     t = t or ascreen.focused().selected_tag
 
     if tag.getmfpol(t) == "expand" then
-        tag.setproperty(t, "master_fill_policy", "mwfact", true)
+        tag.setproperty(t, "master_fill_policy", "mwfact")
     else
-        tag.setproperty(t, "master_fill_policy", "expand", true)
+        tag.setproperty(t, "master_fill_policy", "expand")
     end
 end
 
@@ -865,7 +865,7 @@ end
 
 function tag.object.set_nmaster(t, nmaster)
     if nmaster >= 0 then
-        tag.setproperty(t, "nmaster", nmaster, true)
+        tag.setproperty(t, "nmaster", nmaster)
     end
 end
 
@@ -943,7 +943,7 @@ function tag.seticon(icon, _tag)
     util.deprecate("Use t.icon = icon instead of awful.tag.seticon")
 
     _tag = _tag or ascreen.focused().selected_tag
-    tag.setproperty(_tag, "icon", icon, true)
+    tag.setproperty(_tag, "icon", icon)
 end
 
 --- Get the tag icon
@@ -968,7 +968,7 @@ end
 
 function tag.object.set_ncol(t, ncol)
     if ncol >= 1 then
-        tag.setproperty(t, "ncol", ncol, true)
+        tag.setproperty(t, "ncol", ncol)
     end
 end
 
@@ -986,7 +986,7 @@ function tag.setncol(ncol, t)
 
     t = t or ascreen.focused().selected_tag
     if ncol >= 1 then
-        tag.setproperty(t, "ncol", ncol, true)
+        tag.setproperty(t, "ncol", ncol)
     end
 end
 
@@ -1184,19 +1184,14 @@ end
 -- @param _tag The tag.
 -- @param prop The property name.
 -- @param value The value.
--- @param ignore_setters Ignore the setter function for "prop" (boolean)
-function tag.setproperty(_tag, prop, value, ignore_setters)
+function tag.setproperty(_tag, prop, value)
     if not data.tags[_tag] then
         data.tags[_tag] = {}
     end
 
-    if (not ignore_setters) and tag["set"..prop] then
-        tag["set"..prop](value, _tag)
-    else
-        if data.tags[_tag][prop] ~= value then
-            data.tags[_tag][prop] = value
-            _tag:emit_signal("property::" .. prop)
-        end
+    if data.tags[_tag][prop] ~= value then
+        data.tags[_tag][prop] = value
+        _tag:emit_signal("property::" .. prop)
     end
 end
 
