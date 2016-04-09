@@ -428,6 +428,20 @@ luaA_root_wallpaper(lua_State *L)
     return 1;
 }
 
+/** Get the size of the root window.
+ *
+ * @return Width of the root window.
+ * @return height of the root window.
+ * @function size
+ */
+static int
+luaA_root_size(lua_State *L)
+{
+    lua_pushinteger(L, globalconf.screen->width_in_pixels);
+    lua_pushinteger(L, globalconf.screen->height_in_pixels);
+    return 2;
+}
+
 /** Get the attached tags.
  * @return A table with all tags.
  * @function tags
@@ -453,6 +467,7 @@ const struct luaL_Reg awesome_root_lib[] =
     { "fake_input", luaA_root_fake_input },
     { "drawins", luaA_root_drawins },
     { "wallpaper", luaA_root_wallpaper },
+    { "size", luaA_root_size },
     { "tags", luaA_root_tags },
     { "__index", luaA_default_index },
     { "__newindex", luaA_default_newindex },
