@@ -420,6 +420,19 @@ function tag.gettags(s)
     return s and s.tags or {}
 end
 
+--- Find a tag by name
+-- @tparam[opt] screen s The screen of the tag
+-- @tparam string name The name of the tag
+-- @return The tag found, or `nil`
+function tag.find_by_name(s, name)
+    local tags = s and s.tags or root.tags()
+    for _, t in ipairs(tags) do
+        if name == t.name then
+            return t
+        end
+    end
+end
+
 --- The tag screen.
 --
 -- **Signal:**
