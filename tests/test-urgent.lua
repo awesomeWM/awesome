@@ -35,7 +35,7 @@ local steps = {
       tags[awful.screen.focused()][1]:view_only()
 
       runner.add_to_default_rules({ rule = { class = "XTerm" },
-        properties = { tag = tags[awful.screen.focused()][2], focus = true } })
+        properties = { tag = "2", focus = true } })
 
       awful.spawn("xterm")
     end
@@ -75,7 +75,7 @@ local steps = {
       tags[awful.screen.focused()][1]:view_only()
 
       runner.add_to_default_rules({ rule = { class = "XTerm" },
-        properties = { tag = tags[awful.screen.focused()][2], focus = true, switchtotag = true }})
+        properties = { tag = "2", focus = true, switchtotag = true }})
 
       awful.spawn("xterm")
 
@@ -97,7 +97,7 @@ local steps = {
       manage_cb_done = false
 
       runner.add_to_default_rules({rule = { class = "XTerm" },
-        properties = { tag = tags[awful.screen.focused()][2], focus = false }})
+        properties = { tag = "2", focus = false }})
 
       awful.spawn("xterm")
     end
