@@ -211,6 +211,7 @@ end
 -- @tab props Properties to apply.
 -- @tab[opt] callbacks Callbacks to apply.
 function rules.execute(c, props, callbacks)
+    local switchtotag = props.switchtotag
     for property, value in pairs(props) do
         if property ~= "focus" and type(value) == "function" then
             value = value(c)
@@ -225,14 +226,12 @@ function rules.execute(c, props, callbacks)
             end
             c.screen = t.screen
             c:tags({ t })
-        elseif property == "switchtotag" and value and props.tag then
-            props.tag:view_only()
         elseif property == "height" or property == "width" or
                 property == "x" or property == "y" then
             local geo = c:geometry();
             geo[property] = value
             c:geometry(geo);
-        elseif property == "focus" then
+        elseif property == "focus" or property == "switchtotag" then
             -- This will be handled below
             (function() end)() -- I haven't found a nice way to silence luacheck here
         elseif type(c[property]) == "function" then
@@ -240,6 +239,11 @@ function rules.execute(c, props, callbacks)
         else
             c[property] = value
         end
+    end
+
+    -- Only do this after the tag has been (possibly) set
+    if switchtotag and c.first_tag then
+        c.first_tag:view_only()
     end
 
     -- Apply all callbacks.
