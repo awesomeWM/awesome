@@ -405,7 +405,7 @@ function placement.closest_corner(d, args)
     local grid_size = args.include_sides and 3 or 2
 
     -- If the point is in the center, use the closest corner
-    local corner = f(grid_size, corners3x3) or f(2, corners2x2)
+    local corner = grid_size == 3 and f(3, corners3x3) or f(2, corners2x2)
 
     -- Transpose the corner back to the original size
     local new_args = setmetatable({position = corner}, {__index=args})
