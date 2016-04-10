@@ -9,6 +9,7 @@
 
 -- Grab environment we need
 local client = client
+local screen = screen
 local table = table
 local type = type
 local ipairs = ipairs
@@ -34,6 +35,17 @@ If you want to put Firefox on a specific tag at startup, you can add:
 
     { rule = { instance = "firefox" },
       properties = { tag = mytagobject } }
+
+If you want to put Thunderbird on a specific screen at startup, use:
+
+    { rule = { instance = "Thunderbird" },
+      properties = { screen = 1 } }
+
+Assuming that your X11 server supports the RandR extension, you can also specify
+the screen by name:
+
+    { rule = { instance = "Thunderbird" },
+      properties = { screen = "VGA1" } }
 
 If you want to put Emacs on a specific tag at startup, and immediately switch
 to that tag you can add:
@@ -197,7 +209,10 @@ function rules.execute(c, props, callbacks)
         if property ~= "focus" and type(value) == "function" then
             value = value(c)
         end
-        if property == "tag" then
+        if property == "screen" then
+            -- Support specifying screens by name ("VGA1")
+            c.screen = screen[value]
+        elseif property == "tag" then
             c.screen = value.screen
             c:tags({ value })
         elseif property == "switchtotag" and value and props.tag then
