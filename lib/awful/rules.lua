@@ -14,6 +14,7 @@ local table = table
 local type = type
 local ipairs = ipairs
 local pairs = pairs
+local atag = require("awful.tag")
 
 local rules = {}
 
@@ -35,6 +36,11 @@ If you want to put Firefox on a specific tag at startup, you can add:
 
     { rule = { instance = "firefox" },
       properties = { tag = mytagobject } }
+
+Alternatively, you can specify the tag by name:
+
+    { rule = { instance = "firefox" },
+      properties = { tag = "3" } }
 
 If you want to put Thunderbird on a specific screen at startup, use:
 
@@ -213,8 +219,12 @@ function rules.execute(c, props, callbacks)
             -- Support specifying screens by name ("VGA1")
             c.screen = screen[value]
         elseif property == "tag" then
-            c.screen = value.screen
-            c:tags({ value })
+            local t = value
+            if type(t) == "string" then
+                t = atag.find_by_name(props.screen, t)
+            end
+            c.screen = t.screen
+            c:tags({ t })
         elseif property == "switchtotag" and value and props.tag then
             props.tag:view_only()
         elseif property == "height" or property == "width" or
