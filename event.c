@@ -992,10 +992,8 @@ void event_init(void)
     const xcb_query_extension_reply_t *reply;
 
     reply = xcb_get_extension_data(globalconf.connection, &xcb_randr_id);
-    if (reply && reply->present) {
-        xcb_randr_select_input(globalconf.connection, globalconf.screen->root, XCB_RANDR_NOTIFY_MASK_OUTPUT_CHANGE);
+    if (reply && reply->present)
         globalconf.event_base_randr = reply->first_event;
-    }
 
     reply = xcb_get_extension_data(globalconf.connection, &xcb_shape_id);
     if (reply && reply->present)

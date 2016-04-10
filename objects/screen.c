@@ -371,6 +371,11 @@ screen_scan_randr(lua_State *L, screen_array_t *screens)
 
     globalconf.have_randr_13 = minor_version >= 3;
 
+    /* We want to know when something changes */
+    xcb_randr_select_input(globalconf.connection,
+                           globalconf.screen->root,
+                           XCB_RANDR_NOTIFY_MASK_OUTPUT_CHANGE);
+
     if (minor_version >= 5)
         screen_scan_randr_monitors(L, screens);
     else
