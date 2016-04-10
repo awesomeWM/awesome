@@ -94,7 +94,7 @@ To match multiple clients with an exception one can couple `rules.except` or
 
     { rule_any = { class = { "Pidgin", "Xchat" } },
       except_any = { role = { "conversation" } },
-      properties = { tag = tags[1][1] }
+      properties = { tag = "1" }
     }
 
     { rule = {},
