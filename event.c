@@ -397,13 +397,19 @@ event_handle_configurerequest(xcb_configure_request_event_t *ev)
 static void
 event_handle_configurenotify(xcb_configure_notify_event_t *ev)
 {
-    const xcb_screen_t *screen = globalconf.screen;
+    xcb_screen_t *screen = globalconf.screen;
 
     if(ev->window == screen->root
        && (ev->width != screen->width_in_pixels
            || ev->height != screen->height_in_pixels))
         /* it's not that we panic, but restart */
         awesome_restart();
+
+    /* Copy what XRRUpdateConfiguration() would do: Update the configuration */
+    if(ev->window == screen->root) {
+        screen->width_in_pixels = ev->width;
+        screen->height_in_pixels = ev->height;
+    }
 }
 
 /** The destroy notify event handler.
@@ -765,22 +771,18 @@ event_handle_unmapnotify(xcb_unmap_notify_event_t *ev)
 static void
 event_handle_randr_screen_change_notify(xcb_randr_screen_change_notify_event_t *ev)
 {
-    /* Code  of  XRRUpdateConfiguration Xlib  function  ported to  XCB
-     * (only the code relevant  to RRScreenChangeNotify) as the latter
-     * doesn't provide this kind of function */
-    if(ev->rotation & (XCB_RANDR_ROTATION_ROTATE_90 | XCB_RANDR_ROTATION_ROTATE_270))
-        xcb_randr_set_screen_size(globalconf.connection, ev->root, ev->height, ev->width,
-                                  ev->mheight, ev->mwidth);
-    else
-        xcb_randr_set_screen_size(globalconf.connection, ev->root, ev->width, ev->height,
-                                  ev->mwidth, ev->mheight);
+    /* Ignore events for other roots (do we get them at all?) */
+    if (ev->root != globalconf.screen->root)
+        return;
 
-    /* XRRUpdateConfiguration also executes the following instruction
-     * but it's not useful because SubpixelOrder is not used at all at
-     * the moment
-     *
-     * XRenderSetSubpixelOrder(dpy, snum, scevent->subpixel_order);
-     */
+    /* Do (part of) what XRRUpdateConfiguration() would do (update our state) */
+    if (ev->rotation & (XCB_RANDR_ROTATION_ROTATE_90 | XCB_RANDR_ROTATION_ROTATE_270)) {
+        globalconf.screen->width_in_pixels = ev->height;
+        globalconf.screen->height_in_pixels = ev->width;
+    } else {
+        globalconf.screen->width_in_pixels = ev->width;
+        globalconf.screen->height_in_pixels = ev->height;
+    }
 
     awesome_restart();
 }
@@ -976,49 +978,34 @@ void event_handle(xcb_generic_event_t *event)
 #undef EVENT
     }
 
-    static uint8_t randr_screen_change_notify = 0;
-    static uint8_t randr_output_change_notify = 0;
-    static uint8_t shape_notify = 0;
-    static uint8_t xkb_notify = 0;
+#define EXTENSION_EVENT(base, offset, callback) \
+    if (globalconf.event_base_ ## base != 0 \
+            && response_type == globalconf.event_base_ ## base + (offset)) \
+        callback((void *) event)
+    EXTENSION_EVENT(randr, XCB_RANDR_SCREEN_CHANGE_NOTIFY, event_handle_randr_screen_change_notify);
+    EXTENSION_EVENT(randr, XCB_RANDR_NOTIFY, event_handle_randr_output_change_notify);
+    EXTENSION_EVENT(shape, XCB_SHAPE_NOTIFY, event_handle_shape_notify);
+    EXTENSION_EVENT(xkb, 0, event_handle_xkb_notify);
+#undef EXTENSION_EVENT
+}
 
-    if(randr_screen_change_notify == 0 || randr_output_change_notify == 0)
-    {
-        /* check for randr extension */
-        const xcb_query_extension_reply_t *randr_query;
-        randr_query = xcb_get_extension_data(globalconf.connection, &xcb_randr_id);
-        if(randr_query->present) {
-            xcb_randr_select_input(globalconf.connection, globalconf.screen->root, XCB_RANDR_NOTIFY_MASK_OUTPUT_CHANGE);
-            randr_screen_change_notify = randr_query->first_event + XCB_RANDR_SCREEN_CHANGE_NOTIFY;
-            randr_output_change_notify = randr_query->first_event + XCB_RANDR_NOTIFY;
-        }
+void event_init(void)
+{
+    const xcb_query_extension_reply_t *reply;
+
+    reply = xcb_get_extension_data(globalconf.connection, &xcb_randr_id);
+    if (reply && reply->present) {
+        xcb_randr_select_input(globalconf.connection, globalconf.screen->root, XCB_RANDR_NOTIFY_MASK_OUTPUT_CHANGE);
+        globalconf.event_base_randr = reply->first_event;
     }
 
-    if(shape_notify == 0)
-    {
-        /* check for shape extension */
-        const xcb_query_extension_reply_t *shape_query;
-        shape_query = xcb_get_extension_data(globalconf.connection, &xcb_shape_id);
-        if(shape_query->present)
-            shape_notify = shape_query->first_event + XCB_SHAPE_NOTIFY;
-    }
+    reply = xcb_get_extension_data(globalconf.connection, &xcb_shape_id);
+    if (reply && reply->present)
+        globalconf.event_base_shape = reply->first_event;
 
-    if(xkb_notify == 0)
-    {
-        /* check for xkb extension */
-        const xcb_query_extension_reply_t *xkb_query;
-        xkb_query = xcb_get_extension_data(globalconf.connection, &xcb_xkb_id);
-        if(xkb_query->present)
-            xkb_notify = xkb_query->first_event;
-    }
-
-    if (response_type == randr_screen_change_notify)
-        event_handle_randr_screen_change_notify((void *) event);
-    if (response_type == randr_output_change_notify)
-        event_handle_randr_output_change_notify((void *) event);
-    if (response_type == shape_notify)
-        event_handle_shape_notify((void *) event);
-    if (response_type == xkb_notify)
-        event_handle_xkb_notify((void *) event);
+    reply = xcb_get_extension_data(globalconf.connection, &xcb_xkb_id);
+    if (reply && reply->present)
+        globalconf.event_base_xkb = reply->first_event;
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

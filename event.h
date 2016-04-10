@@ -50,6 +50,7 @@ awesome_refresh(void)
     return xcb_flush(globalconf.connection);
 }
 
+void event_init(void);
 void event_handle(xcb_generic_event_t *);
 void event_drawable_under_mouse(lua_State *, int);
 

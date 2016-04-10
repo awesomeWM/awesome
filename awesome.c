@@ -637,6 +637,8 @@ main(int argc, char **argv)
     query = xcb_get_extension_data(globalconf.connection, &xcb_shape_id);
     globalconf.have_shape = query->present;
 
+    event_init();
+
     /* Allocate the key symbols */
     globalconf.keysyms = xcb_key_symbols_alloc(globalconf.connection);
 
