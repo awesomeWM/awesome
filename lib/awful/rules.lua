@@ -53,7 +53,7 @@ can add:
 Note that all "rule" entries need to match. If any of the entry does not
 match, the rule won't be applied.
 
-If a client matches multiple rules, their applied in the order they are
+If a client matches multiple rules, they are applied in the order they are
 put in this global rules table. If the value of a rule is a string, then the
 match function is used to determine if the client matches the rule.
 
