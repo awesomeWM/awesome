@@ -93,8 +93,8 @@ function()
 
     assert(t.master_width_factor == 0.55)
 
-    -- Now, test the nmaster
-    assert(t.nmaster == 1)
+    -- Now, test the master_count
+    assert(t.master_count == 1)
 
     get_callback({modkey, "Shift"}, "h")()
 
@@ -105,7 +105,7 @@ end,
 function()
     local _, t = get_c_and_t()
 
-    assert(t.nmaster == 2)
+    assert(t.master_count == 2)
 
     -- Now, test the column_count
     assert(t.column_count == 1)

@@ -766,7 +766,7 @@ function client.idx(c)
     end
 
     local t = c.screen.selected_tag
-    local nmaster = t.nmaster
+    local nmaster = t.master_count
 
     -- This will happen for floating or maximized clients
     if not idx then return nil end

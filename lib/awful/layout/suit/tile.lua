@@ -209,7 +209,7 @@ local function do_tile(param, orientation)
 
     local gs = param.geometries
     local cls = param.clients
-    local nmaster = math.min(t.nmaster, #cls)
+    local nmaster = math.min(t.master_count, #cls)
     local nother = math.max(#cls - nmaster,0)
 
     local mwfact = t.master_width_factor

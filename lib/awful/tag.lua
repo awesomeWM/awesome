@@ -535,7 +535,7 @@ end
 --
 -- @property master_width_factor
 -- @param number Between 0 and 1
--- @see nmaster
+-- @see master_count
 -- @see column_count
 -- @see master_fill_policy
 -- @see gap
@@ -750,7 +750,7 @@ end
 --
 -- **Signal:**
 --
--- * *property::gap*
+-- * *property::useless_gap*
 --
 -- @property gap
 -- @param number The value has to be greater than zero.
@@ -863,45 +863,48 @@ end
 --
 -- **Signal:**
 --
--- * *property::nmaster*
+-- * *property::nmaster* (deprecated)
+-- * *property::master_count* (deprecated)
 --
--- @property nmaster
+-- @property master_count
 -- @param integer nmaster Only positive values are accepted
 
-function tag.object.set_nmaster(t, nmaster)
+function tag.object.set_master_count(t, nmaster)
     if nmaster >= 0 then
         tag.setproperty(t, "nmaster", nmaster)
+        tag.setproperty(t, "master_count", nmaster)
     end
 end
 
-function tag.object.get_nmaster(t)
-    return tag.getproperty(t, "nmaster") or 1
+function tag.object.get_master_count(t)
+    return tag.getproperty(t, "master_count") or 1
 end
 
 --- 
 -- @deprecated awful.tag.setnmaster
--- @see nmaster
+-- @see master_count
 -- @param nmaster The number of master windows.
 -- @param[opt] t The tag.
 function tag.setnmaster(nmaster, t)
-    util.deprecate("Use t.nmaster = nmaster instead of awful.tag.setnmaster")
+    util.deprecate("Use t.master_count = nmaster instead of awful.tag.setnmaster")
 
-    tag.object.set_nmaster(t or ascreen.focused().selected_tag, nmaster)
+    tag.object.set_master_count(t or ascreen.focused().selected_tag, nmaster)
 end
 
 --- Get the number of master windows.
 -- @deprecated awful.tag.getnmaster
--- @see nmaster
+-- @see master_count
 -- @param[opt] t The tag.
 function tag.getnmaster(t)
-    util.deprecate("Use t.nmaster instead of awful.tag.setnmaster")
+    util.deprecate("Use t.master_count instead of awful.tag.setnmaster")
 
     t = t or ascreen.focused().selected_tag
-    return tag.getproperty(t, "nmaster") or 1
+    return tag.getproperty(t, "master_count") or 1
 end
 
 --- Increase the number of master windows.
 -- @function awful.tag.incnmaster
+-- @see master_count
 -- @param add Value to add to number of master windows.
 -- @param[opt] t The tag to modify, if null tag.selected() is used.
 -- @tparam[opt=false] boolean sensible Limit nmaster based on the number of
@@ -913,7 +916,7 @@ function tag.incnmaster(add, t, sensible)
         local screen = get_screen(tag.getproperty(t, "screen"))
         local ntiled = #screen.tiled_clients
 
-        local nmaster = tag.object.get_nmaster(t)
+        local nmaster = tag.object.get_master_count(t)
         if nmaster > ntiled then
             nmaster = ntiled
         end
@@ -922,9 +925,9 @@ function tag.incnmaster(add, t, sensible)
         if newnmaster > ntiled then
             newnmaster = ntiled
         end
-        tag.object.set_nmaster(t, newnmaster)
+        tag.object.set_master_count(t, newnmaster)
     else
-        tag.object.set_nmaster(t, tag.object.get_nmaster(t) + add)
+        tag.object.set_master_count(t, tag.object.get_master_count(t) + add)
     end
 end
 
@@ -1021,7 +1024,7 @@ function tag.incncol(add, t, sensible)
     if sensible then
         local screen = get_screen(tag.getproperty(t, "screen"))
         local ntiled = #screen.tiled_clients
-        local nmaster = tag.object.get_nmaster(t)
+        local nmaster = tag.object.get_master_count(t)
         local nsecondary = ntiled - nmaster
 
         local ncol = tag.object.get_column_count(t)
@@ -1318,6 +1321,7 @@ capi.tag.add_signal("property::master_fill_policy")
 capi.tag.add_signal("property::ncol")
 capi.tag.add_signal("property::column_count")
 capi.tag.add_signal("property::nmaster")
+capi.tag.add_signal("property::master_count")
 capi.tag.add_signal("property::windowfact")
 capi.tag.add_signal("property::screen")
 capi.tag.add_signal("property::index")
