@@ -204,18 +204,26 @@ end
 function tag.add(name, props)
     local properties = props or {}
 
+    local screen = get_screen(properties.screen or ascreen.focused())
+
+    -- This cause setscreen to be called twice, but this "fix" a race condition
+    -- between the screen property and `activated` signal
+    properties.screen = screen
+
+    local newtag = capi.tag{ name = name }
+
+    -- Index is also required
+    properties.index = properties.index or #raw_tags(properties.screen)+1
+
+
+    -- Start with a fresh property table to avoid collisions with unsupported data
+    newtag.data.awful_tag_properties = {screen=properties.screen, index=properties.index}
+
     -- Be sure to set the screen before the tag is activated to avoid function
     -- connected to property::activated to be called without a valid tag.
     -- set properties cannot be used as this has to be set before the first
     -- signal is sent
-    properties.screen = get_screen(properties.screen or ascreen.focused())
-    -- Index is also required
-    properties.index = properties.index or #raw_tags(properties.screen)+1
-
-    local newtag = capi.tag{ name = name }
-
-    -- Start with a fresh property table to avoid collisions with unsupported data
-    newtag.data.awful_tag_properties = {screen=properties.screen, index=properties.index}
+    tag.object.set_screen(newtag, screen)
 
     newtag.activated = true
 
@@ -489,6 +497,11 @@ end
 
 function tag.object.set_screen(t, s)
 
+    -- For API backward-compatibility, convert numbers to screen objects
+    if type(s) == "number" then
+        s = capi.screen[s]
+    end
+
     s = get_screen(s or ascreen.focused())
     local sel = t.selected
     local old_screen = get_screen(tag.getproperty(t, "screen"))
@@ -521,6 +534,38 @@ function tag.object.set_screen(t, s)
             tag.history.restore(old_screen, 1)
         end
     end
+
+    -- Track the source screen workarea change
+    local prev_tracker = tag.getproperty(t, "_wa_tracker")
+    if prev_tracker then
+        prev_tracker()
+    end
+
+    --TODO make global, then foreach the screen tags
+    --TODO set the "real" tag geometry, with padding and gaps
+    --TODO add getter
+    local function workarea_tracker() --FIXME called too often, see #756
+        local old_geo = tag.getproperty(t, "geometry")
+        local new_geo = s.workarea
+
+        -- Drop useless signals --FIXME remove once #756 is fixed
+        if old_geo and (
+            old_geo.width == new_geo.width and
+            old_geo.height == new_geo.height
+        ) then
+            return
+        end
+
+        tag.setproperty(t, "geometry", new_geo)
+    end
+
+    tag.setproperty(t, "_wa_tracker", function()
+        s:disconnect_signal("property::workarea", workarea_tracker)
+    end)
+
+    s:connect_signal("property::workarea", workarea_tracker)
+
+    workarea_tracker()
 end
 
 --- Set a tag's screen
