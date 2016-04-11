@@ -46,7 +46,6 @@ function(escape_string variable content escaped_content line_prefix)
     if(variable MATCHES "--DOC_HIDE_ALL")
         return()
     endif()
-
     string(REGEX REPLACE "\n" ";" var_lines "${variable}")
 
     set(tmp_output ${content})
@@ -201,10 +200,17 @@ function(run_test test_path namespace template escaped_content)
 
     # Only add it if there is something to display.
     if(NOT ${TEST_CODE} STREQUAL "\n--")
+        # Do not use the @usage tag, use 4 spaces
+        file(READ ${test_path} tmp_content)
+        if(NOT tmp_content MATCHES "--DOC_NO_USAGE")
+            set(DOC_PREFIX "@usage")
+        endif()
+
         escape_string(
-            " @usage"
+            " ${DOC_PREFIX}"
             "${TEST_DOC_CONTENT}" TEST_DOC_CONTENT ""
         )
+
         set(TEST_DOC_CONTENT "${TEST_DOC_CONTENT}${TEST_CODE}")
     endif()
 
