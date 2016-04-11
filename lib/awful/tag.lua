@@ -762,6 +762,10 @@ end
 -- instance everytime the layout is set. If they do, the instance will be
 -- cached and re-used.
 --
+-- Here is a simple stateful layout example:
+--
+--@DOC_awful_tag_simple_layout_EXAMPLE@
+--
 -- **Signal:**
 --
 -- * *property::layout*
