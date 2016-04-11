@@ -32,7 +32,7 @@ local function do_corner(p, orientation)
     -- Use the nmaster field of the tag in a cheaty way
     local row_privileged = ((cls[1].screen.selected_tag.nmaster % 2) == 0)
 
-    local master_factor = cls[1].screen.selected_tag.mwfact
+    local master_factor = cls[1].screen.selected_tag.master_width_factor
     master.width = master_factor * wa.width
     master.height = master_factor * wa.height
 

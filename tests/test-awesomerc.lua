@@ -79,8 +79,8 @@ function()
 
     assert(old_c.ontop)
 
-    -- Now, test the mwfact
-    assert(t.mwfact == 0.5)
+    -- Now, test the master_width_factor
+    assert(t.master_width_factor == 0.5)
 
     get_callback({modkey}, "l")()
 
@@ -91,7 +91,7 @@ end,
 function()
     local _, t = get_c_and_t()
 
-    assert(t.mwfact == 0.55)
+    assert(t.master_width_factor == 0.55)
 
     -- Now, test the nmaster
     assert(t.nmaster == 1)
@@ -107,8 +107,8 @@ function()
 
     assert(t.nmaster == 2)
 
-    -- Now, test the ncol
-    assert(t.ncol == 1)
+    -- Now, test the column_count
+    assert(t.column_count == 1)
 
     get_callback({modkey, "Control"}, "h")()
     get_callback({modkey, "Shift"  }, "l")()
@@ -120,7 +120,7 @@ end,
 function()
     local _, t = get_c_and_t()
 
-    assert(t.ncol == 2)
+    assert(t.column_count == 2)
 
     -- Now, test the switching tag
     assert(t.index == 1)

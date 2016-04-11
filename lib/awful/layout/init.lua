@@ -219,9 +219,9 @@ end
 
 capi.screen.add_signal("arrange")
 
-capi.tag.connect_signal("property::mwfact", arrange_tag)
+capi.tag.connect_signal("property::master_width_factor", arrange_tag)
 capi.tag.connect_signal("property::nmaster", arrange_tag)
-capi.tag.connect_signal("property::ncol", arrange_tag)
+capi.tag.connect_signal("property::column_count", arrange_tag)
 capi.tag.connect_signal("property::layout", arrange_tag)
 capi.tag.connect_signal("property::windowfact", arrange_tag)
 capi.tag.connect_signal("property::selected", arrange_tag)

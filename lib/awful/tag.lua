@@ -530,53 +530,58 @@ end
 --
 -- **Signal:**
 --
--- * *property::mwfact*
+-- * *property::mwfact* (deprecated)
+-- * *property::master_width_factor*
 --
--- @property mwfact
+-- @property master_width_factor
 -- @param number Between 0 and 1
 -- @see nmaster
--- @see ncol
+-- @see column_count
 -- @see master_fill_policy
 -- @see gap
 
-function tag.object.set_mwfact(t, mwfact)
+function tag.object.set_master_width_factor(t, mwfact)
     if mwfact >= 0 and mwfact <= 1 then
         tag.setproperty(t, "mwfact", mwfact)
+        tag.setproperty(t, "master_width_factor", mwfact)
     end
 end
 
-function tag.object.get_mwfact(t)
-    return tag.getproperty(t, "mwfact") or 0.5
+function tag.object.get_master_width_factor(t)
+    return tag.getproperty(t, "master_width_factor") or 0.5
 end
 
 --- Set master width factor.
 -- @deprecated awful.tag.setmwfact
 -- @see master_fill_policy
+-- @see master_width_factor
 -- @param mwfact Master width factor.
 -- @param t The tag to modify, if null tag.selected() is used.
 function tag.setmwfact(mwfact, t)
-    util.deprecate("Use t.mwfact = mwfact instead of awful.tag.setmwfact")
+    util.deprecate("Use t.master_width_factor = mwfact instead of awful.tag.setmwfact")
 
-    tag.object.get_mwfact(t or ascreen.focused().selected_tag, mwfact)
+    tag.object.get_master_width_factor(t or ascreen.focused().selected_tag, mwfact)
 end
 
 --- Increase master width factor.
 -- @function awful.tag.incmwfact
+-- @see master_width_factor
 -- @param add Value to add to master width factor.
 -- @param t The tag to modify, if null tag.selected() is used.
 function tag.incmwfact(add, t)
     t = t or t or ascreen.focused().selected_tag
-    tag.object.set_mwfact(t, tag.object.get_mwfact(t) + add)
+    tag.object.set_master_width_factor(t, tag.object.get_master_width_factor(t) + add)
 end
 
 --- Get master width factor.
 -- @deprecated awful.tag.getmwfact
--- @see mwfact
+-- @see master_width_factor
+-- @see master_fill_policy
 -- @param[opt] t The tag.
 function tag.getmwfact(t)
-    util.deprecate("Use t.mwfact instead of awful.tag.getmwfact")
+    util.deprecate("Use t.master_width_factor instead of awful.tag.getmwfact")
 
-    return tag.object.get_mwfact(t or ascreen.focused().selected_tag)
+    return tag.object.get_master_width_factor(t or ascreen.focused().selected_tag)
 end
 
 --- An ordered list of layouts.
@@ -805,7 +810,7 @@ end
 -- * *property::master_fill_policy*
 --
 -- @property master_fill_policy
--- @param string "expand" or "mwfact"
+-- @param string "expand" or "master_width_factor"
 
 function tag.object.get_master_fill_policy(t)
     return tag.getproperty(t, "master_fill_policy") or "expand"
@@ -816,7 +821,7 @@ end
 -- @see master_fill_policy
 -- @tparam string policy Can be set to
 -- "expand" (fill all the available workarea) or
--- "mwfact" (fill only an area inside the master width factor)
+-- "master_width_factor" (fill only an area inside the master width factor)
 -- @tparam[opt=tag.selected()] tag t The tag to modify
 function tag.setmfpol(policy, t)
     util.deprecate("Use t.master_fill_policy = policy instead of awful.tag.setmfpol")
@@ -826,7 +831,7 @@ function tag.setmfpol(policy, t)
 end
 
 --- Toggle size fill policy for the master client(s)
--- between "expand" and "mwfact".
+-- between "expand" and "master_width_factor".
 -- @function awful.tag.togglemfpol
 -- @see master_fill_policy
 -- @tparam tag t The tag to modify, if null tag.selected() is used.
@@ -834,7 +839,7 @@ function tag.togglemfpol(t)
     t = t or ascreen.focused().selected_tag
 
     if tag.getmfpol(t) == "expand" then
-        tag.setproperty(t, "master_fill_policy", "mwfact")
+        tag.setproperty(t, "master_fill_policy", "master_width_factor")
     else
         tag.setproperty(t, "master_fill_policy", "expand")
     end
@@ -846,7 +851,7 @@ end
 -- @tparam[opt=tag.selected()] tag t The tag
 -- @treturn string Possible values are
 -- "expand" (fill all the available workarea, default one) or
--- "mwfact" (fill only an area inside the master width factor)
+-- "master_width_factor" (fill only an area inside the master width factor)
 function tag.getmfpol(t)
     util.deprecate("Use t.master_fill_policy instead of awful.tag.getmfpol")
 
@@ -961,51 +966,54 @@ end
 --
 -- **Signal:**
 --
--- * *property::ncol*
+-- * *property::ncol* (deprecated)
+-- * *property::column_count*
 --
--- @property ncol
--- @param integer ncol Has to be greater than 1
+-- @property column_count
+-- @tparam integer ncol Has to be greater than 1
 
-function tag.object.set_ncol(t, ncol)
+function tag.object.set_column_count(t, ncol)
     if ncol >= 1 then
         tag.setproperty(t, "ncol", ncol)
+        tag.setproperty(t, "column_count", ncol)
     end
 end
 
-function tag.object.get_ncol(t)
-    return tag.getproperty(t, "ncol") or 1
+function tag.object.get_column_count(t)
+    return tag.getproperty(t, "column_count") or 1
 end
 
 --- Set number of column windows.
 -- @deprecated awful.tag.setncol
--- @see ncol
+-- @see column_count
 -- @param ncol The number of column.
 -- @param t The tag to modify, if null tag.selected() is used.
 function tag.setncol(ncol, t)
-    util.deprecate("Use t.ncol = new_index instead of awful.tag.setncol")
+    util.deprecate("Use t.column_count = new_index instead of awful.tag.setncol")
 
     t = t or ascreen.focused().selected_tag
     if ncol >= 1 then
         tag.setproperty(t, "ncol", ncol)
+        tag.setproperty(t, "column_count", ncol)
     end
 end
 
 --- Get number of column windows.
 -- @deprecated awful.tag.getncol
--- @see ncol
+-- @see column_count
 -- @param[opt] t The tag.
 function tag.getncol(t)
-    util.deprecate("Use t.ncol instead of awful.tag.getncol")
+    util.deprecate("Use t.column_count instead of awful.tag.getncol")
 
     t = t or ascreen.focused().selected_tag
-    return tag.getproperty(t, "ncol") or 1
+    return tag.getproperty(t, "column_count") or 1
 end
 
 --- Increase number of column windows.
 -- @function awful.tag.incncol
 -- @param add Value to add to number of column windows.
 -- @param[opt] t The tag to modify, if null tag.selected() is used.
--- @tparam[opt=false] boolean sensible Limit ncol based on the number of visible
+-- @tparam[opt=false] boolean sensible Limit column_count based on the number of visible
 -- tiled windows?
 function tag.incncol(add, t, sensible)
     t = t or ascreen.focused().selected_tag
@@ -1016,7 +1024,7 @@ function tag.incncol(add, t, sensible)
         local nmaster = tag.object.get_nmaster(t)
         local nsecondary = ntiled - nmaster
 
-        local ncol = tag.object.get_ncol(t)
+        local ncol = tag.object.get_column_count(t)
         if ncol > nsecondary then
             ncol = nsecondary
         end
@@ -1026,9 +1034,9 @@ function tag.incncol(add, t, sensible)
             newncol = nsecondary
         end
 
-        tag.object.set_ncol(t, newncol)
+        tag.object.set_column_count(t, newncol)
     else
-        tag.object.set_ncol(t, tag.object.get_ncol(t) + add)
+        tag.object.set_column_count(t, tag.object.get_column_count(t) + add)
     end
 end
 
@@ -1304,9 +1312,11 @@ capi.tag.add_signal("property::icon")
 capi.tag.add_signal("property::icon_only")
 capi.tag.add_signal("property::layout")
 capi.tag.add_signal("property::mwfact")
+capi.tag.add_signal("property::master_width_factor")
 capi.tag.add_signal("property::useless_gap")
 capi.tag.add_signal("property::master_fill_policy")
 capi.tag.add_signal("property::ncol")
+capi.tag.add_signal("property::column_count")
 capi.tag.add_signal("property::nmaster")
 capi.tag.add_signal("property::windowfact")
 capi.tag.add_signal("property::screen")

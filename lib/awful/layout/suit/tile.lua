@@ -29,7 +29,7 @@ tile.resize_jump_to_corner = true
 local function mouse_resize_handler(c, _, _, _, orientation)
     orientation = orientation or "tile"
     local wa = capi.screen[c.screen].workarea
-    local mwfact = c.screen.selected_tag.mwfact
+    local mwfact = c.screen.selected_tag.master_width_factor
     local cursor
     local g = c:geometry()
     local offset = 0
@@ -126,7 +126,8 @@ local function mouse_resize_handler(c, _, _, _, orientation)
                                           wfact = wfact_x
                                       end
 
-                                      c.screen.selected_tag.mwfact = math.min(math.max(new_mwfact, 0.01), 0.99)
+                                      c.screen.selected_tag.master_width_factor
+                                        = math.min(math.max(new_mwfact, 0.01), 0.99)
                                       client.setwfact(math.min(math.max(wfact,0.01), 0.99), c)
                                       return true
                                   end
@@ -211,9 +212,9 @@ local function do_tile(param, orientation)
     local nmaster = math.min(t.nmaster, #cls)
     local nother = math.max(#cls - nmaster,0)
 
-    local mwfact = t.mwfact
+    local mwfact = t.master_width_factor
     local wa = param.workarea
-    local ncol = t.ncol
+    local ncol = t.column_count
 
     local data = tag.getdata(t).windowfact
 

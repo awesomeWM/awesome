@@ -781,7 +781,7 @@ function client.idx(c)
     -- based on the how the tiling algorithm places clients we calculate
     -- the column, we could easily use the for loop in the program but we can
     -- calculate it.
-    local ncol = t.ncol
+    local ncol = t.column_count
     -- minimum number of clients per column
     local percol = math.floor(nother / ncol)
     -- number of columns with an extra client
