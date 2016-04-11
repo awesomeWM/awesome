@@ -4,7 +4,7 @@
 -- @author Uli Schlachter &lt;psychon@znc.in&gt;
 -- @copyright 2014 Uli Schlachter
 -- @release @AWESOME_VERSION@
--- @module awful.client.shape
+-- @submodule client
 ---------------------------------------------------------------------------
 
 -- Grab environment we need
@@ -18,7 +18,8 @@ local capi =
 local shape = {}
 shape.update = {}
 
---- Get one of a client's shapes and transform it to include window decorations
+--- Get one of a client's shapes and transform it to include window decorations.
+-- @function awful.shape.get_transformed
 -- @client c The client whose shape should be retrieved
 -- @tparam string shape_name Either "bounding" or "clip"
 function shape.get_transformed(c, shape_name)
@@ -51,7 +52,8 @@ function shape.get_transformed(c, shape_name)
     return result
 end
 
---- Update a client's bounding shape from the shape the client set itself
+--- Update a client's bounding shape from the shape the client set itself.
+-- @function awful.shape.update.bounding
 -- @client c The client to act on
 function shape.update.bounding(c)
     local res = shape.get_transformed(c, "bounding")
@@ -62,7 +64,8 @@ function shape.update.bounding(c)
     end
 end
 
---- Update a client's clip shape from the shape the client set itself
+--- Update a client's clip shape from the shape the client set itself.
+-- @function awful.shape.update.clip
 -- @client c The client to act on
 function shape.update.clip(c)
     local res = shape.get_transformed(c, "clip")
@@ -73,7 +76,8 @@ function shape.update.clip(c)
     end
 end
 
---- Update all of a client's shapes from the shapes the client set itself
+--- Update all of a client's shapes from the shapes the client set itself.
+-- @function awful.shape.update.all
 -- @client c The client to act on
 function shape.update.all(c)
     shape.update.bounding(c)
