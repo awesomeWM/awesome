@@ -211,7 +211,9 @@ end
 -- @tab props Properties to apply.
 -- @tab[opt] callbacks Callbacks to apply.
 function rules.execute(c, props, callbacks)
+    local handle_later = { focus = true, switchtotag = true }
     local switchtotag = props.switchtotag
+
     for property, value in pairs(props) do
         if property ~= "focus" and type(value) == "function" then
             value = value(c)
@@ -231,13 +233,12 @@ function rules.execute(c, props, callbacks)
             local geo = c:geometry();
             geo[property] = value
             c:geometry(geo);
-        elseif property == "focus" or property == "switchtotag" then
-            -- This will be handled below
-            (function() end)() -- I haven't found a nice way to silence luacheck here
-        elseif type(c[property]) == "function" then
-            c[property](c, value)
-        else
-            c[property] = value
+        elseif not handle_later[property] then
+            if type(c[property]) == "function" then
+                c[property](c, value)
+            else
+                c[property] = value
+            end
         end
     end
 
