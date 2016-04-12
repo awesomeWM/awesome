@@ -11,6 +11,7 @@
 -- Grab environment we need
 local ipairs = ipairs
 local math = math
+local capi = {screen = screen}
 local tag = require("awful.tag")
 
 --- Actually arrange clients of p.clients for corner layout
@@ -19,7 +20,7 @@ local tag = require("awful.tag")
 -- @param orientation String indicating in which corner is the master window.
 -- Available values are : NE, NW, SW, SE
 local function do_corner(p, orientation)
-    local t = p.tag or tag.selected(p.screen)
+    local t = p.tag or capi.screen[p.screen].selected_tag
     local wa = p.workarea
     local cls = p.clients
 
@@ -29,9 +30,9 @@ local function do_corner(p, orientation)
     local column = {}
     local row = {}
     -- Use the nmaster field of the tag in a cheaty way
-    local row_privileged = ((tag.getnmaster(tag.selected(cls[1].screen)) % 2) == 0)
+    local row_privileged = ((cls[1].screen.selected_tag.master_count % 2) == 0)
 
-    local master_factor = tag.getmwfact(tag.selected(cls[1].screen))
+    local master_factor = cls[1].screen.selected_tag.master_width_factor
     master.width = master_factor * wa.width
     master.height = master_factor * wa.height
 

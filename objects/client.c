@@ -1,4 +1,4 @@
-/*
+/* 
  * client.c - client management
  *
  * Copyright © 2007-2009 Julien Danjou <julien@danjou.info>
@@ -19,7 +19,21 @@
  *
  */
 
-/** awesome client API
+/** A process window.
+ *
+ * Clients are the name used by Awesome (and X11) to refer to a window. An
+ * application can have multiple clients (like for dialogs) or none at all
+ * (like command line applications). Clients are usually grouped by classes. A
+ * class is the name used by X11 to help window manager distinguish between
+ * window and write rules for them. See the `xprop` command line application. A
+ * client also have a `type` and `size_hints` used to define its behavior.
+ *
+ * ![Client geometry](../images/client_geo.svg)
+ *
+ * The client `:geometry()` return a table with *x*, *y*, *width* and *height*.
+ * The area returned **exclude the border width**. All clients also have a
+ * `shape_bounding` and `shape_clip` used to "crop" the client content. Finally,
+ * each clients can have titlebars (see `awful.titlebar`).
  *
  * Furthermore to the classes described here, one can also use signals as
  * described in @{signals} and X properties as described in @{xproperties}.
@@ -27,6 +41,43 @@
  * Some signal names are starting with a dot. These dots are artefacts from
  * the documentation generation, you get the real signal name by
  * removing the starting dot.
+ *
+ * Accessing client objects can be done in multiple ways depending on the
+ * context. To get the current focused client, use:
+ *
+ *    local c = client.focus
+ *    
+ *    if c then
+ *        -- do something
+ *    end
+ *
+ * To get a list of all clients, use `client:get`
+ *
+ *    for _, c in ipairs(client.get()) do
+ *        -- do something
+ *    end
+ *
+ * To get a callback when a new client is added, use the `manage` signal:
+ *
+ *    client.connect_signal("manage", function(c)
+ *        -- do something
+ *    end
+ *
+ * To be notified a property changed in a client, use:
+ *
+ *    client.connect_signal("property::name", function(c)
+ *        -- do something
+ *    end
+ *
+ * To be notified when a property change for a specific client (assuming it is
+ * stored in the variable `c`), use:
+ *
+ *    c:connect_signal("property::name", function()
+ *        -- do something
+ *    end
+ *
+ * To get all the clients for a screen, use either `screen.clients` or
+ * `screen.tiled_clients`
  *
  * @author Julien Danjou &lt;julien@danjou.info&gt;
  * @copyright 2008-2009 Julien Danjou
@@ -53,57 +104,529 @@
 
 /** Client class.
  *
- * @table class
- * @field focus The focused `client.object`.
+ * @table object
  */
 
-/** Client object.
+/**
+ * The focused `client` or nil (in case there is none).
  *
- * @field window The X window id.
- * @field name The client title.
- * @field skip_taskbar True if the client does not want to be in taskbar.
- * @field type The window type (desktop, normal, dock, …).
- * @field class The client class.
- * @field instance The client instance.
- * @field pid The client PID, if available.
- * @field role The window role, if available.
- * @field machine The machine client is running on.
- * @field icon_name The client name when iconified.
- * @field icon The client icon.
- * @field screen Client screen.
- * @field hidden Define if the client must be hidden, i.e. never mapped,
+ * @tfield client focus
+ */
+
+/**
+ * The X window id.
+ *
+ * **Signal:**
+ *
+ *  * *property::window*
+ *
+ * @property window
+ * @param string
+ */
+
+/**
+ * The client title.
+ *
+ * **Signal:**
+ *
+ *  * *property::name*
+ *
+ * @property name
+ * @param string
+ */
+
+/**
+ * True if the client does not want to be in taskbar.
+ *
+ * **Signal:**
+ *
+ *  * *property::skip\_taskbar*
+ *
+ * @property skip_taskbar
+ * @param boolean
+ */
+
+/**
+ * The window type.
+ *
+ * Valid types are:
+ *
+ * * **desktop**: The root client, it cannot be moved or resized.
+ * * **dock**: A client attached to the side of the screen.
+ * * **splash**: A client, usually without titlebar shown when an application starts.
+ * * **dialog**: A dialog, see `transient_for`.
+ * * **menu**: A context menu.
+ * * **toolbar**: A floating toolbar.
+ * * **utility**:
+ * * **dropdown_menu**: A context menu attached to a parent position.
+ * * **popup_menu**: A context menu.
+ * * **notification**: A notification popup.
+ * * **combo**: A combobox list menu.
+ * * **dnd**: A drag and drop indicator.
+ * * **normal**: A normal application main window.
+ *
+ * More information can be found [here](https://specifications.freedesktop.org/wm-spec/wm-spec-latest.html#idm140200472629520)
+ *
+ * **Signal:**
+ *
+ *  * *property::type*
+ *
+ * @property type
+ * @param string
+ */
+
+/**
+ * The client class.
+ *
+ * If the client has multiple classes, the first one is used.
+ *
+ * To get a client class from the command line, use te `xprop` command.
+ *
+ * **Signal:**
+ *
+ *  * *property::class*
+ *
+ * @property class
+ * @param string
+ */
+
+/**
+ * The client instance.
+ *
+ * **Signal:**
+ *
+ *  * *property::instance*
+ *
+ * @property instance
+ * @param string
+ */
+
+/**
+ * The client PID, if available.
+ *
+ * **Signal:**
+ *
+ *  * *property::pid*
+ *
+ * @property pid
+ * @param number
+ */
+
+/**
+ * The window role, if available.
+ *
+ * **Signal:**
+ *
+ *  * *property::role*
+ *
+ * @property role
+ * @param string
+ */
+
+/**
+ * The machine client is running on.
+ *
+ * **Signal:**
+ *
+ *  * *property::machine*
+ *
+ * @property machine
+ * @param string
+ */
+
+/**
+ * The client name when iconified.
+ *
+ * **Signal:**
+ *
+ *  * *property::icon\_name*
+ *
+ * @property icon_name
+ * @param string
+ */
+
+/**
+ * The client icon.
+ *
+ * **Signal:**
+ *
+ *  * *property::icon*
+ *
+ * @property icon
+ * @param surface
+ */
+
+/**
+ * Client screen.
+ *
+ * **Signal:**
+ *
+ *  * *property::screen*
+ *
+ * @property screen
+ * @param screen
+ */
+
+/**
+ * Define if the client must be hidden, i.e. never mapped,
  *   invisible in taskbar.
- * @field minimized Define it the client must be iconify, i.e. only visible in
+ *
+ * **Signal:**
+ *
+ *  * *property::hidden*
+ *
+ * @property hidden
+ * @param boolean
+ */
+
+/**
+ * Define it the client must be iconify, i.e. only visible in
  *   taskbar.
- * @field size_hints_honor Honor size hints, i.e. respect size ratio.
- * @field border_width The client border width.
- * @field border_color The client border color.
- * @field urgent The client urgent state.
- * @field content An image representing the client window content (screenshot).
- * @field opacity The client opacity between 0 and 1.
- * @field ontop The client is on top of every other windows.
- * @field above The client is above normal windows.
- * @field below The client is below normal windows.
- * @field fullscreen The client is fullscreen or not.
- * @field maximized The client is maximized (horizontally and vertically) or not.
- * @field maximized_horizontal The client is maximized horizontally or not.
- * @field maximized_vertical The client is maximized vertically or not.
- * @field transient_for The client the window is transient for.
- * @field group_window Window identification unique to a group of windows.
- * @field leader_window Identification unique to windows spawned by the same command.
- * @field size_hints A table with size hints of the client: `user_position`,
- *   `user_size`, `program_position`, `program_size`, etc.
- * @field sticky Set the client sticky, i.e. available on all tags.
- * @field modal Indicate if the client is modal.
- * @field focusable True if the client can receive the input focus.
- * @field shape_bounding The client's bounding shape as set by awesome as a (native) cairo surface.
- * @field shape_clip The client's clip shape as set by awesome as a (native) cairo surface.
- * @field shape_client_bounding The client's bounding shape as set by the program as a (native) cairo surface.
- * @field shape_client_clip The client's clip shape as set by the program as a (native) cairo surface.
- * @field startup_id The FreeDesktop StartId.
- * @field valid If the client that this object refers to is still managed by awesome.
- * @field first_tag The first tag of the client.  Optimized form of `c:tags()[1]`.
- * @table object
+ *
+ * **Signal:**
+ *
+ *  * *property::minimized*
+ *
+ * @property minimized
+ * @param boolean
+ */
+
+/**
+ * Honor size hints, e.g. respect size ratio.
+ *
+ * For example, a terminal such as `xterm` require the client size to be a
+ * multiple of the character size. Honoring size hints will cause the terminal
+ * window to have a small gap at the bottom.
+ *
+ * This is enabled by default. To disable it by default, see `awful.rules`.
+ *
+ * **Signal:**
+ *
+ *  * *property::size\_hints\_honor*
+ *
+ * @property size_hints_honor
+ * @param boolean
+ * @see size_hints
+ */
+
+/**
+ * The client border width.
+ * @property border_width
+ * @param integer
+ */
+
+/**
+ * The client border color.
+ *
+ * **Signal:**
+ *
+ *  * *property::border\_color*
+ *
+ * @see gears.color
+ *
+ * @property border_color
+ * @param pattern Any string, gradients and patterns will be converted to a
+ *  cairo pattern.
+ */
+
+/**
+ * The client urgent state.
+ *
+ * **Signal:**
+ *
+ *  * *property::urgent*
+ *
+ * @property urgent
+ * @param boolean
+ */
+
+/**
+ * A cairo surface for the client window content.
+ *
+ * To get the screenshot, use:
+ *
+ *    gears.surface(c.content)
+ *
+ * To save it, use:
+ *
+ *    gears.surface(c.content):write_to_png(path)
+ *
+ * @property content
+ * @param surface
+ */
+
+/**
+ * The client opacity.
+ *
+ * **Signal:**
+ *
+ *  * *property::opacity*
+ *
+ * @property opacity
+ * @param number Between 0 (transparent) to 1 (opaque)
+ */
+
+/**
+ * The client is on top of every other windows.
+ * @property ontop
+ * @param boolean
+ */
+
+/**
+ * The client is above normal windows.
+ *
+ * **Signal:**
+ *
+ *  * *property::above*
+ *
+ * @property above
+ * @param boolean
+ */
+
+/**
+ * The client is below normal windows.
+ *
+ * **Signal:**
+ *
+ *  * *property::below*
+ *
+ * @property below
+ * @param boolean
+ */
+
+/**
+ * The client is fullscreen or not.
+ *
+ * **Signal:**
+ *
+ *  * *property::fullscreen*
+ *
+ * @property fullscreen
+ * @param boolean
+ */
+
+/**
+ * The client is maximized (horizontally and vertically) or not.
+ *
+ * **Signal:**
+ *
+ *  * *property::maximized*
+ *
+ * @property maximized
+ * @param boolean
+ */
+
+/**
+ * The client is maximized horizontally or not.
+ *
+ * **Signal:**
+ *
+ *  * *property::maximized\_horizontal*
+ *
+ * @property maximized_horizontal
+ * @param boolean
+ */
+
+/**
+ * The client is maximized vertically or not.
+ *
+ * **Signal:**
+ *
+ *  * *property::maximized\_vertical*
+ *
+ * @property maximized_vertical
+ * @param boolean
+ */
+
+/**
+ * The client the window is transient for.
+ *
+ * **Signal:**
+ *
+ *  * *property::transient\_for*
+ *
+ * @property transient_for
+ * @param client
+ */
+
+/**
+ * Window identification unique to a group of windows.
+ *
+ * **Signal:**
+ *
+ *  * *property::group\_window*
+ *
+ * @property group_window
+ * @param client
+ */
+
+/**
+ * Identification unique to windows spawned by the same command.
+ * @property leader_window
+ * @param client
+ */
+
+/**
+ * A table with size hints of the client.
+ *
+ * **Signal:**
+ *
+ *  * *property::size\_hints*
+ *
+ * @property size_hints
+ * @param table
+ * @tfield integer table.user_position
+ * @tfield integer table.user_size
+ * @tfield integer table.program_position
+ * @tfield integer table.program_size
+ * @tfield integer table.max_width
+ * @tfield integer table.max_height
+ * @tfield integer table.min_width
+ * @tfield integer table.min_height
+ * @tfield integer table.width_inc
+ * @tfield integer table.height_inc
+ * @see size_hints_honor
+ */
+
+/**
+ * Set the client sticky, i.e. available on all tags.
+ *
+ * **Signal:**
+ *
+ *  * *property::sticky*
+ *
+ * @property sticky
+ * @param boolean
+ */
+
+/**
+ * Indicate if the client is modal.
+ *
+ * **Signal:**
+ *
+ *  * *property::modal*
+ *
+ * @property modal
+ * @param boolean
+ */
+
+/**
+ * True if the client can receive the input focus.
+ *
+ * **Signal:**
+ *
+ *  * *property::focusable*
+ *
+ * @property focusable
+ * @param boolean
+ */
+
+/**
+ * The client's bounding shape as set by awesome as a (native) cairo surface.
+ *
+ * **Signal:**
+ *
+ *  * *property::shape\_bounding*
+ *
+ * @see gears.surface.apply_shape_bounding
+ * @property shape_bounding
+ * @param surface
+ */
+
+/**
+ * The client's clip shape as set by awesome as a (native) cairo surface.
+ *
+ * **Signal:**
+ *
+ *  * *property::shape\_clip*
+ *
+ * @property shape_clip
+ * @param surface
+ */
+
+/**
+ * The client's bounding shape as set by the program as a (native) cairo surface.
+ *
+ * **Signal:**
+ *
+ *  * *property::shape\_client\_bounding*
+ *
+ * @property shape_client_bounding
+ * @param surface
+ */
+
+/**
+ * The client's clip shape as set by the program as a (native) cairo surface.
+ *
+ * **Signal:**
+ *
+ *  * *property::shape\_client\_clip*
+ *
+ * @property shape_client_clip
+ * @param surface
+ */
+
+/**
+ * The FreeDesktop StartId.
+ *
+ * When a client is spawned (like using a terminal or `awful.spawn`, a startup
+ * notification identifier is created. When the client is created, this
+ * identifier remain the same. This allow to match a spawn event to an actual
+ * client.
+ *
+ * **Signal:**
+ *
+ *  * *property::startup\_id*
+ *
+ * @property startup_id
+ * @param string
+ */
+
+/**
+ * If the client that this object refers to is still managed by awesome.
+ *
+ * To avoid errors, use:
+ *
+ *    local is_valid = pcall(function() return c.valid end) and c.valid
+ *
+ * **Signal:**
+ *
+ *  * *property::valid*
+ *
+ * @property valid
+ * @param boolean
+ */
+
+/**
+ * The first tag of the client.  Optimized form of `c:tags()[1]`.
+ *
+ * **Signal:**
+ *
+ *  * *property::first\_tag*
+ *
+ * @property first_tag
+ * @param tag
+ */
+
+/**
+ * The border color when the client is focused.
+ *
+ * @beautiful beautiful.border_focus
+ * @param string
+ */
+
+/**
+ * The border color when the client is not focused.
+ *
+ * @beautiful beautiful.border_normal
+ * @param string
+ */
+
+/**
+ * The client border width.
+ *
+ * @beautiful beautiful.border_width
+ * @param integer
  */
 
 /** Return client struts (reserved space at the edge of the screen).
@@ -126,12 +649,12 @@
  * @function instances
  */
 
-/** Set a __index metamethod for all client instances.
+/* Set a __index metamethod for all client instances.
  * @tparam function cb The meta-method
  * @function set_index_miss_handler
  */
 
-/** Set a __newindex metamethod for all client instances.
+/* Set a __newindex metamethod for all client instances.
  * @tparam function cb The meta-method
  * @function set_newindex_miss_handler
  */
@@ -2854,161 +3377,46 @@ client_class_setup(lua_State *L)
      * @signal mouse::move
      */
     signal_add(&client_class.signals, "mouse::move");
-    /**
-     * @signal property::above
-     */
+
+    /* Those signals are documented elsewhere */
     signal_add(&client_class.signals, "property::above");
-    /**
-     * @signal property::below
-     */
     signal_add(&client_class.signals, "property::below");
-    /**
-     * @signal property::class
-     */
     signal_add(&client_class.signals, "property::class");
-    /**
-     * @signal property::focusable
-     */
     signal_add(&client_class.signals, "property::focusable");
-    /**
-     * @signal property::fullscreen
-     */
     signal_add(&client_class.signals, "property::fullscreen");
-    /**
-     * @signal property::geometry
-     */
     signal_add(&client_class.signals, "property::geometry");
-    /**
-     * @signal property::group_window
-     */
     signal_add(&client_class.signals, "property::group_window");
-    /**
-     * @signal property::height
-     */
     signal_add(&client_class.signals, "property::height");
-    /**
-     * @signal property::hidden
-     */
     signal_add(&client_class.signals, "property::hidden");
-    /**
-     * @signal property::icon
-     */
     signal_add(&client_class.signals, "property::icon");
-    /**
-     * @signal property::icon_name
-     */
     signal_add(&client_class.signals, "property::icon_name");
-    /**
-     * @signal property::instance
-     */
     signal_add(&client_class.signals, "property::instance");
-    /**
-     * @signal property::keys
-     */
     signal_add(&client_class.signals, "property::keys");
-    /**
-     * @signal property::machine
-     */
     signal_add(&client_class.signals, "property::machine");
-    /**
-     * @signal property::maximized
-     */
     signal_add(&client_class.signals, "property::maximized");
-    /**
-     * @signal property::maximized_horizontal
-     */
     signal_add(&client_class.signals, "property::maximized_horizontal");
-    /**
-     * @signal property::maximized_vertical
-     */
     signal_add(&client_class.signals, "property::maximized_vertical");
-    /**
-     * @signal property::minimized
-     */
     signal_add(&client_class.signals, "property::minimized");
-    /**
-     * @signal property::modal
-     */
     signal_add(&client_class.signals, "property::modal");
-    /**
-     * @signal property::name
-     */
     signal_add(&client_class.signals, "property::name");
-    /**
-     * @signal property::ontop
-     */
     signal_add(&client_class.signals, "property::ontop");
-    /**
-     * @signal property::pid
-     */
     signal_add(&client_class.signals, "property::pid");
-    /**
-     * @signal property::role
-     */
     signal_add(&client_class.signals, "property::role");
-    /**
-     * @signal property::screen
-     */
     signal_add(&client_class.signals, "property::screen");
-    /**
-     * @signal property::shape_bounding
-     */
     signal_add(&client_class.signals, "property::shape_bounding");
-    /**
-     * @signal property::shape_client_bounding
-     */
     signal_add(&client_class.signals, "property::shape_client_bounding");
-    /**
-     * @signal property::shape_client_clip
-     */
     signal_add(&client_class.signals, "property::shape_client_clip");
-    /**
-     * @signal property::shape_clip
-     */
     signal_add(&client_class.signals, "property::shape_clip");
-    /**
-     * @signal property::size_hints_honor
-     */
     signal_add(&client_class.signals, "property::size_hints_honor");
-    /**
-     * @signal property::skip_taskbar
-     */
     signal_add(&client_class.signals, "property::skip_taskbar");
-    /**
-     * @signal property::sticky
-     */
     signal_add(&client_class.signals, "property::sticky");
-    /**
-     * @signal property::struts
-     */
     signal_add(&client_class.signals, "property::struts");
-    /**
-     * @signal property::titlebar_bottom
-     */
     signal_add(&client_class.signals, "property::titlebar_bottom");
-    /**
-     * @signal property::titlebar_left
-     */
     signal_add(&client_class.signals, "property::titlebar_left");
-    /**
-     * @signal property::titlebar_right
-     */
     signal_add(&client_class.signals, "property::titlebar_right");
-    /**
-     * @signal property::titlebar_top
-     */
     signal_add(&client_class.signals, "property::titlebar_top");
-    /**
-     * @signal property::transient_for
-     */
     signal_add(&client_class.signals, "property::transient_for");
-    /**
-     * @signal property::type
-     */
     signal_add(&client_class.signals, "property::type");
-    /**
-     * @signal property::urgent
-     */
     signal_add(&client_class.signals, "property::urgent");
     /**
      * @signal property::width

@@ -13,8 +13,6 @@ local table = table
 local type = type
 local ipairs = ipairs
 local pairs = pairs
-local aclient = require("awful.client")
-local atag = require("awful.tag")
 
 local rules = {}
 
@@ -199,13 +197,11 @@ function rules.execute(c, props, callbacks)
         if property ~= "focus" and type(value) == "function" then
             value = value(c)
         end
-        if property == "floating" then
-            aclient.floating.set(c, value)
-        elseif property == "tag" then
-            c.screen = atag.getscreen(value)
+        if property == "tag" then
+            c.screen = value.screen
             c:tags({ value })
         elseif property == "switchtotag" and value and props.tag then
-            atag.viewonly(props.tag)
+            props.tag:view_only()
         elseif property == "height" or property == "width" or
                 property == "x" or property == "y" then
             local geo = c:geometry();

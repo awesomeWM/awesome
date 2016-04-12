@@ -12,7 +12,6 @@ local client = client
 local screen = screen
 local ipairs = ipairs
 local math = math
-local atag = require("awful.tag")
 local aclient = require("awful.client")
 
 local ewmh = {}
@@ -182,7 +181,7 @@ function ewmh.tag(c, t)
     if not t then
         c.sticky = true
     else
-        c.screen = atag.getscreen(t)
+        c.screen = t.screen
         c:tags({ t })
     end
 end

@@ -9,8 +9,11 @@ local function new_tag(_, args)
     ret:add_signal("property::name")
     ret:add_signal("property::geometry")
     ret:add_signal("property::screen")
+    ret:add_signal("property::master_width_factor")
     ret:add_signal("property::mwfact")
     ret:add_signal("property::ncol")
+    ret:add_signal("property::column_count")
+    ret:add_signal("property::master_count")
     ret:add_signal("property::nmaster")
     ret:add_signal("property::index")
     ret:add_signal("property::useless_gap")
@@ -35,7 +38,7 @@ local function new_tag(_, args)
 
     return setmetatable(ret, {
         __index     = function(...) return meta.__index(...) end,
-        __new_index = function(...) return meta.__new_index(...) end
+        __newindex = function(...) return meta.__newindex(...) end
     })
 end
 

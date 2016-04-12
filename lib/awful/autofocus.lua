@@ -12,7 +12,6 @@
 
 local client = client
 local aclient = require("awful.client")
-local atag = require("awful.tag")
 local timer = require("gears.timer")
 
 --- Give focus when clients appear/disappear.
@@ -39,7 +38,7 @@ end
 --
 -- @param tag A tag object
 local function check_focus_tag(t)
-    local s = atag.getscreen(t)
+    local s = t.screen
     if not s then return end
     s = screen[s]
     check_focus({ screen = s })

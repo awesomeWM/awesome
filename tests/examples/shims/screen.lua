@@ -1,6 +1,6 @@
 local gears_obj = require("gears.object")
 
-local screen = awesome._shim_fake_class()
+local screen, meta = awesome._shim_fake_class()
 
 screen.count = 1
 
@@ -8,6 +8,7 @@ local function create_screen(args)
     local s = gears_obj()
 
     s:add_signal("property::workarea")
+    s:add_signal("property::index")
     s:add_signal("padding")
 
     -- Copy the geo in case the args are mutated
@@ -42,8 +43,11 @@ local function create_screen(args)
                     width  = geo.width    - 2*wa,
                     height = geo.height   - 2*wa,
                 }
+            else
+                return meta.__index(_, key)
             end
         end,
+        __newindex = function(...) return meta.__newindex(...) end
     })
 end
 

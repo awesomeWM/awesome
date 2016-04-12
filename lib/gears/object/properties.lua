@@ -53,13 +53,14 @@ function object.capi_index_fallback(class, args)
         -- Look for a getter method
         if args.getter_class and args.getter_class[getter_prefix..prop] then
             return args.getter_class[getter_prefix..prop](cobj)
+        elseif args.getter_class and args.getter_class["is_"..prop] then
+            return args.getter_class["is_"..prop](cobj)
         end
 
         -- Make sure something like c:a_mutator() works
         if args.getter_class and args.getter_class[prop] then
             return args.getter_class[prop]
         end
-
         -- In case there is already a "dumb" getter like `awful.tag.getproperty'
         if args.getter_fallback then
             return args.getter_fallback(cobj, prop)

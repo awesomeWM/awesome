@@ -29,7 +29,7 @@ tile.resize_jump_to_corner = true
 local function mouse_resize_handler(c, _, _, _, orientation)
     orientation = orientation or "tile"
     local wa = capi.screen[c.screen].workarea
-    local mwfact = tag.getmwfact()
+    local mwfact = c.screen.selected_tag.master_width_factor
     local cursor
     local g = c:geometry()
     local offset = 0
@@ -126,7 +126,8 @@ local function mouse_resize_handler(c, _, _, _, orientation)
                                           wfact = wfact_x
                                       end
 
-                                      tag.setmwfact(math.min(math.max(new_mwfact, 0.01), 0.99), tag.selected(c.screen))
+                                      c.screen.selected_tag.master_width_factor
+                                        = math.min(math.max(new_mwfact, 0.01), 0.99)
                                       client.setwfact(math.min(math.max(wfact,0.01), 0.99), c)
                                       return true
                                   end
@@ -195,7 +196,7 @@ local function tile_group(gs, cls, wa, orientation, fact, group)
 end
 
 local function do_tile(param, orientation)
-    local t = param.tag or tag.selected(param.screen)
+    local t = param.tag or capi.screen[param.screen].selected_tag
     orientation = orientation or "right"
 
     -- This handles all different orientations.
@@ -208,12 +209,12 @@ local function do_tile(param, orientation)
 
     local gs = param.geometries
     local cls = param.clients
-    local nmaster = math.min(tag.getnmaster(t), #cls)
+    local nmaster = math.min(t.master_count, #cls)
     local nother = math.max(#cls - nmaster,0)
 
-    local mwfact = tag.getmwfact(t)
+    local mwfact = t.master_width_factor
     local wa = param.workarea
-    local ncol = tag.getncol(t)
+    local ncol = t.column_count
 
     local data = tag.getdata(t).windowfact
 
@@ -229,7 +230,7 @@ local function do_tile(param, orientation)
         place_master = false
     end
 
-    local grow_master = tag.getmfpol(t) == "expand"
+    local grow_master = t.master_fill_policy == "expand"
     -- this was easier than writing functions because there is a lot of data we need
     for _ = 1,2 do
         if place_master and nmaster > 0 then

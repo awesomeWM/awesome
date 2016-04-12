@@ -19,7 +19,7 @@
 --
 -- **honor_padding** (*boolean*):
 --
---  Take the screen padding into account (see `awful.screen.padding`)
+--  Take the screen padding into account (see `screen.padding`)
 --
 -- **tag** (*tag*):
 --
@@ -158,7 +158,7 @@ local function geometry_common(obj, args, new_geo, ignore_border_width)
         end
 
         -- It is a screen, it doesn't support setting new sizes.
-        return a_screen.get_bounding_geometry(obj, args)
+        return obj:get_bounding_geometry(args)
     else
         assert(false, "Invalid object")
     end
@@ -453,7 +453,7 @@ function placement.no_overlap(c)
     local curlay = layout.get()
     local areas = { screen.workarea }
     for _, cl in pairs(cls) do
-        if cl ~= c and cl.type ~= "desktop" and (client.floating.get(cl) or curlay == layout.suit.floating) then
+        if cl ~= c and cl.type ~= "desktop" and (cl.floating or curlay == layout.suit.floating) then
             areas = area_remove(areas, area_common(cl))
         end
     end

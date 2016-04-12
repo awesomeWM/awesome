@@ -21,6 +21,22 @@
 
 /** awesome screen API
  *
+ * Screen objects can be added and removed over time. To get a callback for all
+ * current and future screens, use `awful.screen.connect_for_each_screen`:
+ *
+ *    awful.screen.connect_for_each_screen(function(s)
+ *        -- do something
+ *    end)
+ *
+ * It is also possible loop over all current screens using:
+ *
+ *    for s, screen do
+ *        -- do something
+ *    end
+ *
+ * Most basic Awesome objects also have a screen property, see `mouse.screen`
+ * `client.screen`, `wibox.screen` and `tag.screen`.
+ *
  * Furthermore to the classes described here, one can also use signals as
  * described in @{signals}.
  *
@@ -47,13 +63,78 @@
  * The primary screen can be accessed as `screen.primary`.
  * Each screen has a set of properties.
  *
- * @tfield table geometry The screen coordinates. Immutable.
- * @tfield table workarea The screen workarea.
- * @tfield int index The screen number.
- * @tfield table outputs If RANDR information is available, a list of outputs
- *   for this screen and their size in mm.
- * @table screen
  */
+
+ /**
+  * The primary screen.
+  *
+  * @tfield screen primary
+  */
+
+/**
+ * The screen coordinates.
+ *
+ * **Immutable:** true
+ * @property geometry
+ * @param table
+ * @tfield integer table.x The horizontal position
+ * @tfield integer table.y The vertical position
+ * @tfield integer table.width The width
+ * @tfield integer table.height The height
+ */
+
+/**
+ * The screen number.
+ *
+ * An integer greater than 1 and smaller than `screen.count()`. Please note that
+ * the screen order isn't always mirroring the screen logical position.
+ *
+ * **Immutable:** true
+ * @property index
+ * @param integer
+ */
+
+/**
+ * If RANDR information is available, a list of outputs
+ *   for this screen and their size in mm.
+ *
+ * Please note that the table content may vary.
+ *
+ * **Signal:**
+ *
+ *  * *property::outputs*
+ *
+ * **Immutable:** true
+ * @property outputs
+ * @param table
+ * @tfield table table.name A table with the screen name as key (like `eDP1` on a laptop)
+ * @tfield integer table.name.mm_width The screen physical width
+ * @tfield integer table.name.mm_height The screen physical height
+ */
+
+/**
+ * The screen workarea.
+ *
+ * The workarea is a subsection of the screen where clients can be placed. It
+ * usually excludes the toolbars (see `awful.wibox`) and dockable clients
+ * (see `client.dockable`) like WindowMaker DockAPP.
+ *
+ * It can be modified be altering the `wibox` or `client` struts.
+ *
+ * **Signal:**
+ *
+ *  * *property::workarea*
+ *
+ * @property workarea
+ * @see client.struts
+ * @see drawin.struts
+ * @param table
+ * @tfield integer table.x The horizontal position
+ * @tfield integer table.y The vertical position
+ * @tfield integer table.width The width
+ * @tfield integer table.height The height
+ */
+
 
 /** Get the number of instances.
  *
@@ -61,12 +142,12 @@
  * @function instances
  */
 
-/** Set a __index metamethod for all screen instances.
+/* Set a __index metamethod for all screen instances.
  * @tparam function cb The meta-method
  * @function set_index_miss_handler
  */
 
-/** Set a __newindex metamethod for all screen instances.
+/* Set a __newindex metamethod for all screen instances.
  * @tparam function cb The meta-method
  * @function set_newindex_miss_handler
  */
@@ -752,17 +833,15 @@ screen_class_setup(lua_State *L)
                             NULL,
                             (lua_class_propfunc_t) luaA_screen_get_workarea,
                             NULL);
-    /**
-     * @signal property::workarea
-     */
+
     signal_add(&screen_class.signals, "property::workarea");
     /**
-     * @signal primary_changed
+     * @signal .primary_changed
      */
     signal_add(&screen_class.signals, "primary_changed");
     /**
      * This signal is emitted when a new screen is added to the current setup.
-     * @signal added
+     * @signal .added
      */
     signal_add(&screen_class.signals, "added");
 }

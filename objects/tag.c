@@ -24,6 +24,8 @@
  * Furthermore to the classes described here, one can also use signals as
  * described in @{signals}.
  *
+ * ![Client geometry](../images/tag_props.svg)
+ *
  * Some signal names are starting with a dot. These dots are artefacts from
  * the documentation generation, you get the real signal name by
  * removing the starting dot.
@@ -40,12 +42,37 @@
 #include "ewmh.h"
 #include "luaa.h"
 
-/** Tag object.
+/**
+ * Tag name.
  *
- * @field name Tag name.
- * @field selected True if the tag is selected to be viewed.
- * @field activated True if the tag is active and can be used.
- * @table tag
+ * **Signal:**
+ *
+ *  * *property::name*
+ *
+ * @property name
+ * @param string
+ */
+
+/**
+ * True if the tag is selected to be viewed
+ *
+ * **Signal:**
+ *
+ *  * *property::selected*
+ *
+ * @property selected
+ * @param boolean
+ */
+
+/**
+ * True if the tag is active and can be used.
+ *
+ * **Signal:**
+ *
+ *  * *property::activated*
+ *
+ * @property activated
+ * @param boolean
  */
 
 /** Get the number of instances.
@@ -54,12 +81,12 @@
  * @function instances
  */
 
-/** Set a __index metamethod for all tag instances.
+/* Set a __index metamethod for all tag instances.
  * @tparam function cb The meta-method
  * @function set_index_miss_handler
  */
 
-/** Set a __newindex metamethod for all tag instances.
+/* Set a __newindex metamethod for all tag instances.
  * @tparam function cb The meta-method
  * @function set_newindex_miss_handler
  */
@@ -389,17 +416,8 @@ tag_class_setup(lua_State *L)
                             (lua_class_propfunc_t) luaA_tag_get_activated,
                             (lua_class_propfunc_t) luaA_tag_set_activated);
 
-    /**
-     * @signal property::name
-     */
     signal_add(&tag_class.signals, "property::name");
-    /**
-     * @signal property::selected
-     */
     signal_add(&tag_class.signals, "property::selected");
-    /**
-     * @signal property::activated
-     */
     signal_add(&tag_class.signals, "property::activated");
     /**
      * @signal request::select

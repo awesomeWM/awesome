@@ -2,7 +2,7 @@ local gears_obj = require("gears.object")
 
 local clients = {}
 
-local client = awesome._shim_fake_class()
+local client, meta = awesome._shim_fake_class()
 
 local function add_signals(c)
     c:add_signal("property::width")
@@ -119,7 +119,10 @@ function client.gen_fake(args)
     client.emit_signal("manage", ret)
     assert(not args.screen or (args.screen == ret.screen))
 
-    return ret
+    return setmetatable(ret, {
+        __index     = function(...) return meta.__index(...) end,
+        __newindex = function(...) return meta.__newindex(...) end
+    })
 end
 
 function client.get(s)
