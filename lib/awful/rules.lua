@@ -16,6 +16,7 @@ local type = type
 local ipairs = ipairs
 local pairs = pairs
 local atag = require("awful.tag")
+local util = require("awful.util")
 local a_place = require("awful.placement")
 
 local rules = {}
@@ -354,6 +355,11 @@ function rules.extra_properties.placement(c, value)
     elseif ty == "string" and a_place[value] then
         a_place[value](c, args)
     end
+end
+
+function rules.extra_properties.tags(c, value)
+    local current = c:tags()
+    c:tags(util.table.merge(current, value))
 end
 
 --- Apply properties and callbacks to a client.
