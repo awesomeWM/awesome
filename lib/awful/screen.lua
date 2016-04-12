@@ -368,6 +368,9 @@ function screen.disconnect_for_each_screen(func)
     capi.screen.disconnect_signal("added", func)
 end
 
+--- When the tag history changed.
+-- @signal tag::history::update
+
 capi.screen.add_signal("padding")
 
 -- Extend the luaobject
