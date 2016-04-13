@@ -31,8 +31,8 @@ local steps = {
     function()
         local c = client.get()[1]
 
-        local new_geo = c:geometry()
-        local sgeo = c.screen.workarea
+        --local new_geo = c:geometry()
+        --local sgeo = c.screen.workarea
 
         --assert(new_geo.x-c.border_width==sgeo.x) --FIXME c:geometry({x=1}).x ~= 1
 
