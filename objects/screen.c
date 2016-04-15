@@ -277,14 +277,6 @@ screen_scan_randr_crtcs(lua_State *L, screen_array_t *screens)
     xcb_randr_get_screen_resources_cookie_t screen_res_c = xcb_randr_get_screen_resources(globalconf.connection, globalconf.screen->root);
     xcb_randr_get_screen_resources_reply_t *screen_res_r = xcb_randr_get_screen_resources_reply(globalconf.connection, screen_res_c, NULL);
 
-    /* Only use the data from XRandR if there is more than one screen
-     * defined. This should work around the broken nvidia driver.  */
-    if (screen_res_r->num_crtcs <= 1)
-    {
-        p_delete(&screen_res_r);
-        return;
-    }
-
     /* We go through CRTC, and build a screen for each one. */
     xcb_randr_crtc_t *randr_crtcs = xcb_randr_get_screen_resources_crtcs(screen_res_r);
 
@@ -328,6 +320,22 @@ screen_scan_randr_crtcs(lua_State *L, screen_array_t *screens)
 
 
             p_delete(&output_info_r);
+
+            if (A_STREQ(name, "default"))
+            {
+                /* non RandR 1.2+ X driver don't return any usable multihead
+                 * data. I'm looking at you, nvidia binary blob!
+                 */
+                warn("Ignoring RandR, only a compatibility layer is present.");
+
+                /* Get rid of the screens that we already created */
+                foreach(screen, *screens)
+                    luaA_object_unref(L, *screen);
+                screen_array_wipe(screens);
+                screen_array_init(screens);
+
+                return;
+            }
         }
 
         p_delete(&crtc_info_r);
