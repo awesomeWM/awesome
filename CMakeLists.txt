@@ -266,6 +266,9 @@ if(GENERATE_DOC)
     # Copy the images to the build directory
     file(COPY ${SOURCE_DIR}/docs/images DESTINATION ${BUILD_DIR}/doc)
 
+    # Copy the aliases to the build directory
+    file(COPY ${SOURCE_DIR}/docs/aliases DESTINATION ${BUILD_DIR}/docs)
+
     # Run ldoc and make it fail if any warnings are generated. The
     # redirection-magic swaps stdout and stderr and awk exits with a non-zero
     # status if it sees at least one line of input.
