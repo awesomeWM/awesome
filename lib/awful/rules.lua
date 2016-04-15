@@ -253,8 +253,11 @@ rules.extra_properties = {}
 -- @tfield table awful.rules.high_priority_properties
 rules.high_priority_properties = {}
 
-rules.delayed_properties = {
-    focus = function() end,
+rules.delayed_properties = {}
+
+local force_ignore = {
+    titlebars_enabled=true, focus=true, screen=true, x=true,
+    y=true, width=true, height=true, geometry=true
 }
 
 function rules.high_priority_properties.tag(c, value)
@@ -349,7 +352,10 @@ function rules.execute(c, props, callbacks)
             value = value(c, props)
         end
 
-        if not rules.high_priority_properties[property] and not rules.delayed_properties[property] then
+        local ignore = rules.high_priority_properties[property] or
+            rules.delayed_properties[property] or force_ignore[property]
+
+        if not ignore then
             if rules.extra_properties[property] then
                 rules.extra_properties[property](c, value)
             elseif type(c[property]) == "function" then
@@ -369,14 +375,16 @@ function rules.execute(c, props, callbacks)
 
     -- Apply the delayed properties
     for prop, handler in pairs(rules.delayed_properties) do
-        local value = props[prop]
+        if not force_ignore[prop] then
+            local value = props[prop]
 
-        if value ~= nil then
-            if type(value) == "function" then
-                value = value(c, props)
+            if value ~= nil then
+                if type(value) == "function" then
+                    value = value(c, props)
+                end
+
+                handler(c, value, props)
             end
-
-            handler(c, value, props)
         end
     end
 
