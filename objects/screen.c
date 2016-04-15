@@ -197,56 +197,19 @@ luaA_checkscreen(lua_State *L, int sidx)
         return luaA_checkudata(L, sidx, &screen_class);
 }
 
-static inline area_t
-screen_xsitoarea(xcb_xinerama_screen_info_t si)
+static screen_t *
+screen_add(lua_State *L, screen_array_t *screens)
 {
-    area_t a =
-    {
-        .x = si.x_org,
-        .y = si.y_org,
-        .width = si.width,
-        .height = si.height
-    };
-    return a;
-}
-
-static void
-screen_add(lua_State *L, int sidx)
-{
-    screen_t *new_screen = luaA_checkudata(L, sidx, &screen_class);
-
-    foreach(screen_to_test, globalconf.screens)
-        if(new_screen->geometry.x == (*screen_to_test)->geometry.x
-           && new_screen->geometry.y == (*screen_to_test)->geometry.y)
-            {
-                /* we already have a screen for this area, just check if
-                 * it's not bigger and drop it */
-                (*screen_to_test)->geometry.width =
-                    MAX(new_screen->geometry.width, (*screen_to_test)->geometry.width);
-                (*screen_to_test)->geometry.height =
-                    MAX(new_screen->geometry.height, (*screen_to_test)->geometry.height);
-                lua_remove(L, sidx);
-                return;
-            }
-
-    sidx = luaA_absindex(L, sidx);
-    lua_pushvalue(L, sidx);
-    luaA_object_ref(L, sidx);
-    screen_array_append(&globalconf.screens, new_screen);
-    luaA_object_emit_signal(L, -1, "added", 0);
-    lua_pop(L, 1);
-}
-
-static bool
-screens_exist(void)
-{
-    return globalconf.screens.len > 0;
+    screen_t *new_screen = screen_new(L);
+    luaA_object_ref(L, -1);
+    screen_array_append(screens, new_screen);
+    return new_screen;
 }
 
 /* Monitors were introduced in RandR 1.5 */
 #ifdef XCB_RANDR_GET_MONITORS
-static bool
-screen_scan_randr_monitors(void)
+static void
+screen_scan_randr_monitors(lua_State *L, screen_array_t *screens)
 {
     xcb_randr_get_monitors_cookie_t monitors_c = xcb_randr_get_monitors(globalconf.connection, globalconf.screen->root, 1);
     xcb_randr_get_monitors_reply_t *monitors_r = xcb_randr_get_monitors_reply(globalconf.connection, monitors_c, NULL);
@@ -256,7 +219,6 @@ screen_scan_randr_monitors(void)
     for(monitor_iter = xcb_randr_get_monitors_monitors_iterator(monitors_r);
             monitor_iter.rem; xcb_randr_monitor_info_next(&monitor_iter))
     {
-        lua_State *L = globalconf_get_lua_State();
         screen_t *new_screen;
         screen_output_t output;
         xcb_randr_output_t *randr_outputs;
@@ -266,7 +228,7 @@ screen_scan_randr_monitors(void)
         if(!xcb_randr_monitor_info_outputs_length(monitor_iter.data))
             continue;
 
-        new_screen = screen_new(L);
+        new_screen = screen_add(L, screens);
         new_screen->geometry.x = monitor_iter.data->x;
         new_screen->geometry.y = monitor_iter.data->y;
         new_screen->geometry.width= monitor_iter.data->width;
@@ -285,7 +247,7 @@ screen_scan_randr_monitors(void)
             output.name[len] = '\0';
             p_delete(&name_r);
         } else {
-            output.name = strdup("unknown");
+            output.name = a_strdup("unknown");
         }
         randr_output_array_init(&output.outputs);
 
@@ -295,24 +257,19 @@ screen_scan_randr_monitors(void)
         }
 
         screen_output_array_append(&new_screen->outputs, output);
-        found = true;
-
-        screen_add(L, -1);
     }
 
     p_delete(&monitors_r);
-    return found;
 }
 #else
-static bool
-screen_scan_randr_monitors(void)
+static void
+screen_scan_randr_monitors(lua_State *L, screen_array_t *screens)
 {
-    return false;
 }
 #endif
 
-static bool
-screen_scan_randr_crtcs(void)
+static void
+screen_scan_randr_crtcs(lua_State *L, screen_array_t *screens)
 {
     /* A quick XRandR recall:
      * You have CRTC that manages a part of a SCREEN.
@@ -325,7 +282,7 @@ screen_scan_randr_crtcs(void)
     if (screen_res_r->num_crtcs <= 1)
     {
         p_delete(&screen_res_r);
-        return false;
+        return;
     }
 
     /* We go through CRTC, and build a screen for each one. */
@@ -333,8 +290,6 @@ screen_scan_randr_crtcs(void)
 
     for(int i = 0; i < screen_res_r->num_crtcs; i++)
     {
-        lua_State *L = globalconf_get_lua_State();
-
         /* Get info on the output crtc */
         xcb_randr_get_crtc_info_cookie_t crtc_info_c = xcb_randr_get_crtc_info(globalconf.connection, randr_crtcs[i], XCB_CURRENT_TIME);
         xcb_randr_get_crtc_info_reply_t *crtc_info_r = xcb_randr_get_crtc_info_reply(globalconf.connection, crtc_info_c, NULL);
@@ -344,7 +299,7 @@ screen_scan_randr_crtcs(void)
             continue;
 
         /* Prepare the new screen */
-        screen_t *new_screen = screen_new(L);
+        screen_t *new_screen = screen_add(L, screens);
         new_screen->geometry.x = crtc_info_r->x;
         new_screen->geometry.y = crtc_info_r->y;
         new_screen->geometry.width= crtc_info_r->width;
@@ -375,109 +330,91 @@ screen_scan_randr_crtcs(void)
             p_delete(&output_info_r);
         }
 
-        screen_add(L, -1);
-
         p_delete(&crtc_info_r);
     }
 
     p_delete(&screen_res_r);
-
-    return true;
 }
 
-static bool
-screen_scan_randr(void)
+static void
+screen_scan_randr(lua_State *L, screen_array_t *screens)
 {
+    xcb_randr_query_version_reply_t *version_reply;
+    uint32_t major_version;
+    uint32_t minor_version;
+
     /* Check for extension before checking for XRandR */
-    if(xcb_get_extension_data(globalconf.connection, &xcb_randr_id)->present)
-    {
-        xcb_randr_query_version_reply_t *version_reply =
-            xcb_randr_query_version_reply(globalconf.connection,
-                                          xcb_randr_query_version(globalconf.connection, 1, 5), 0);
-        if(version_reply)
-        {
-            uint32_t major_version = version_reply->major_version;
-            uint32_t minor_version = version_reply->minor_version;
-            bool found;
+    if(!xcb_get_extension_data(globalconf.connection, &xcb_randr_id)->present)
+        return;
 
-            p_delete(&version_reply);
+    version_reply =
+        xcb_randr_query_version_reply(globalconf.connection,
+                                      xcb_randr_query_version(globalconf.connection, 1, 5), 0);
+    if(!version_reply)
+        return;
 
-            /* Do we agree on a supported version? */
-            if (major_version != 1 || minor_version < 2)
-                return false;
+    major_version = version_reply->major_version;
+    minor_version = version_reply->minor_version;
+    p_delete(&version_reply);
 
-            globalconf.have_randr_13 = minor_version >= 3;
+    /* Do we agree on a supported version? */
+    if (major_version != 1 || minor_version < 2)
+        return;
 
-            if (minor_version >= 5)
-                found = screen_scan_randr_monitors();
-            else
-                found = screen_scan_randr_crtcs();
+    globalconf.have_randr_13 = minor_version >= 3;
 
-            if (found)
-                screen_update_primary();
-            else
-                return false;
-            return screens_exist();
-        }
-    }
-
-    return false;
+    if (minor_version >= 5)
+        screen_scan_randr_monitors(L, screens);
+    else
+        screen_scan_randr_crtcs(L, screens);
 }
 
-static bool
-screen_scan_xinerama(void)
+static void
+screen_scan_xinerama(lua_State *L, screen_array_t *screens)
 {
-    bool xinerama_is_active = false;
+    bool xinerama_is_active;
+    xcb_xinerama_is_active_reply_t *xia;
+    xcb_xinerama_query_screens_reply_t *xsq;
+    xcb_xinerama_screen_info_t *xsi;
+    int xinerama_screen_number;
 
     /* Check for extension before checking for Xinerama */
-    if(xcb_get_extension_data(globalconf.connection, &xcb_xinerama_id)->present)
+    if(!xcb_get_extension_data(globalconf.connection, &xcb_xinerama_id)->present)
+        return;
+
+    xia = xcb_xinerama_is_active_reply(globalconf.connection, xcb_xinerama_is_active(globalconf.connection), NULL);
+    xinerama_is_active = xia->state;
+    p_delete(&xia);
+    if(!xinerama_is_active)
+        return;
+
+    xsq = xcb_xinerama_query_screens_reply(globalconf.connection,
+                                           xcb_xinerama_query_screens_unchecked(globalconf.connection),
+                                           NULL);
+
+    xsi = xcb_xinerama_query_screens_screen_info(xsq);
+    xinerama_screen_number = xcb_xinerama_query_screens_screen_info_length(xsq);
+
+    for(int screen = 0; screen < xinerama_screen_number; screen++)
     {
-        xcb_xinerama_is_active_reply_t *xia;
-        xia = xcb_xinerama_is_active_reply(globalconf.connection, xcb_xinerama_is_active(globalconf.connection), NULL);
-        xinerama_is_active = xia->state;
-        p_delete(&xia);
+        screen_t *s = screen_add(L, screens);
+        s->geometry.x = xsi[screen].x_org;
+        s->geometry.y = xsi[screen].y_org;
+        s->geometry.width = xsi[screen].width;
+        s->geometry.height = xsi[screen].height;
     }
 
-    if(xinerama_is_active)
-    {
-        xcb_xinerama_query_screens_reply_t *xsq;
-        xcb_xinerama_screen_info_t *xsi;
-        int xinerama_screen_number;
-
-        xsq = xcb_xinerama_query_screens_reply(globalconf.connection,
-                                               xcb_xinerama_query_screens_unchecked(globalconf.connection),
-                                               NULL);
-
-        xsi = xcb_xinerama_query_screens_screen_info(xsq);
-        xinerama_screen_number = xcb_xinerama_query_screens_screen_info_length(xsq);
-
-        /* now check if screens overlaps (same x,y): if so, we take only the biggest one */
-        for(int screen = 0; screen < xinerama_screen_number; screen++)
-        {
-            lua_State *L = globalconf_get_lua_State();
-            screen_t *s = screen_new(L);
-            s->geometry = screen_xsitoarea(xsi[screen]);
-            screen_add(L, -1);
-        }
-
-        p_delete(&xsq);
-
-        return screens_exist();
-    }
-
-    return false;
+    p_delete(&xsq);
 }
 
-static void screen_scan_x11(void)
+static void screen_scan_x11(lua_State *L, screen_array_t *screens)
 {
-    lua_State *L = globalconf_get_lua_State();
     xcb_screen_t *xcb_screen = globalconf.screen;
-    screen_t *s = screen_new(L);
+    screen_t *s = screen_add(L, screens);
     s->geometry.x = 0;
     s->geometry.y = 0;
     s->geometry.width = xcb_screen->width_in_pixels;
     s->geometry.height = xcb_screen->height_in_pixels;
-    screen_add(L, -1);
 }
 
 /** Get screens informations and fill global configuration.
@@ -485,8 +422,24 @@ static void screen_scan_x11(void)
 void
 screen_scan(void)
 {
-    if(!screen_scan_randr() && !screen_scan_xinerama())
-        screen_scan_x11();
+    lua_State *L;
+
+    L = globalconf_get_lua_State();
+
+    screen_scan_randr(L, &globalconf.screens);
+    if (globalconf.screens.len == 0)
+        screen_scan_xinerama(L, &globalconf.screens);
+    if (globalconf.screens.len == 0)
+        screen_scan_x11(L, &globalconf.screens);
+    assert(globalconf.screens.len > 0);
+
+    foreach(screen, globalconf.screens) {
+        luaA_object_push(L, *screen);
+        luaA_object_emit_signal(L, -1, "added", 0);
+        lua_pop(L, 1);
+    }
+
+    screen_update_primary();
 }
 
 /** Return the squared distance of the given screen to the coordinates.
