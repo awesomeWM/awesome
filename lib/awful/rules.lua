@@ -9,10 +9,12 @@
 
 -- Grab environment we need
 local client = client
+local screen = screen
 local table = table
 local type = type
 local ipairs = ipairs
 local pairs = pairs
+local atag = require("awful.tag")
 
 local rules = {}
 
@@ -35,6 +37,22 @@ If you want to put Firefox on a specific tag at startup, you can add:
     { rule = { instance = "firefox" },
       properties = { tag = mytagobject } }
 
+Alternatively, you can specify the tag by name:
+
+    { rule = { instance = "firefox" },
+      properties = { tag = "3" } }
+
+If you want to put Thunderbird on a specific screen at startup, use:
+
+    { rule = { instance = "Thunderbird" },
+      properties = { screen = 1 } }
+
+Assuming that your X11 server supports the RandR extension, you can also specify
+the screen by name:
+
+    { rule = { instance = "Thunderbird" },
+      properties = { screen = "VGA1" } }
+
 If you want to put Emacs on a specific tag at startup, and immediately switch
 to that tag you can add:
 
@@ -53,7 +71,7 @@ can add:
 Note that all "rule" entries need to match. If any of the entry does not
 match, the rule won't be applied.
 
-If a client matches multiple rules, their applied in the order they are
+If a client matches multiple rules, they are applied in the order they are
 put in this global rules table. If the value of a rule is a string, then the
 match function is used to determine if the client matches the rule.
 
@@ -76,7 +94,7 @@ To match multiple clients with an exception one can couple `rules.except` or
 
     { rule_any = { class = { "Pidgin", "Xchat" } },
       except_any = { role = { "conversation" } },
-      properties = { tag = tags[1][1] }
+      properties = { tag = "1" }
     }
 
     { rule = {},
@@ -193,28 +211,40 @@ end
 -- @tab props Properties to apply.
 -- @tab[opt] callbacks Callbacks to apply.
 function rules.execute(c, props, callbacks)
+    local handle_later = { focus = true, switchtotag = true }
+    local switchtotag = props.switchtotag
+
     for property, value in pairs(props) do
         if property ~= "focus" and type(value) == "function" then
             value = value(c)
         end
-        if property == "tag" then
-            c.screen = value.screen
-            c:tags({ value })
-        elseif property == "switchtotag" and value and props.tag then
-            props.tag:view_only()
+        if property == "screen" then
+            -- Support specifying screens by name ("VGA1")
+            c.screen = screen[value]
+        elseif property == "tag" then
+            local t = value
+            if type(t) == "string" then
+                t = atag.find_by_name(props.screen, t)
+            end
+            c.screen = t.screen
+            c:tags({ t })
         elseif property == "height" or property == "width" or
                 property == "x" or property == "y" then
             local geo = c:geometry();
             geo[property] = value
             c:geometry(geo);
-        elseif property == "focus" then
-            -- This will be handled below
-            (function() end)() -- I haven't found a nice way to silence luacheck here
-        elseif type(c[property]) == "function" then
-            c[property](c, value)
-        else
-            c[property] = value
+        elseif not handle_later[property] then
+            if type(c[property]) == "function" then
+                c[property](c, value)
+            else
+                c[property] = value
+            end
         end
+    end
+
+    -- Only do this after the tag has been (possibly) set
+    if switchtotag and c.first_tag then
+        c.first_tag:view_only()
     end
 
     -- Apply all callbacks.
