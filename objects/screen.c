@@ -304,6 +304,7 @@ screen_scan_randr_monitors(void)
     return found;
 }
 #else
+static bool
 screen_scan_randr_monitors(void)
 {
     return false;
