@@ -12,70 +12,13 @@ local client = client
 local screen = screen
 local ipairs = ipairs
 local math = math
+local util = require("awful.util")
 local aclient = require("awful.client")
+local aplace = require("awful.placement")
 
 local ewmh = {}
 
 local data = setmetatable({}, { __mode = 'k' })
-
-local function store_geometry(window, reqtype)
-    if not data[window] then data[window] = {} end
-    if not data[window][reqtype] then data[window][reqtype] = {} end
-    data[window][reqtype] = window:geometry()
-    data[window][reqtype].screen = window.screen
-end
-
---- Maximize a window horizontally.
---
--- @param window The window.
--- @param set Set or unset the maximized values.
-local function maximized_horizontal(window, set)
-    if set then
-        store_geometry(window, "maximized_horizontal")
-        local g = screen[window.screen].workarea
-        local bw = window.border_width or 0
-        window:geometry { width = g.width - 2*bw, x = g.x }
-    elseif data[window] and data[window].maximized_horizontal
-        and data[window].maximized_horizontal.x
-        and data[window].maximized_horizontal.width then
-        local g = data[window].maximized_horizontal
-        window:geometry { width = g.width, x = g.x }
-    end
-end
-
---- Maximize a window vertically.
---
--- @param window The window.
--- @param set Set or unset the maximized values.
-local function maximized_vertical(window, set)
-    if set then
-        store_geometry(window, "maximized_vertical")
-        local g = screen[window.screen].workarea
-        local bw = window.border_width or 0
-        window:geometry { height = g.height - 2*bw, y = g.y }
-    elseif data[window] and data[window].maximized_vertical
-        and data[window].maximized_vertical.y
-        and data[window].maximized_vertical.height then
-        local g = data[window].maximized_vertical
-        window:geometry { height = g.height, y = g.y }
-    end
-end
-
---- Fullscreen a window.
---
--- @param window The window.
--- @param set Set or unset the fullscreen values.
-local function fullscreen(window, set)
-    if set then
-        store_geometry(window, "fullscreen")
-        data[window].fullscreen.border_width = window.border_width
-        window.border_width = 0
-        window:geometry(screen[window.screen].geometry)
-    elseif data[window] and data[window].fullscreen then
-        window.border_width = data[window].fullscreen.border_width
-        window:geometry(data[window].fullscreen)
-    end
-end
 
 local function screen_change(window)
     if data[window] then
@@ -202,12 +145,60 @@ function ewmh.urgent(c, urgent)
     end
 end
 
+-- Map the state to the action name
+local context_mapper = {
+    maximized_vertical   = "maximize_vertically",
+    maximized_horizontal = "maximize_horizontally",
+    fullscreen           = "maximize"
+}
+
+--- Move and resize the client.
+--
+-- This is the default geometry request handler.
+--
+-- @tparam client c The client
+-- @tparam string context The context
+-- @tparam[opt={}] table hints The hints to pass to the handler
+function ewmh.geometry(c, context, hints)
+    context = context or ""
+
+    local original_context = context
+
+    -- Now, map it to something useful
+    context = context_mapper[context] or context
+
+    local props = util.table.clone(hints or {}, false)
+    props.store_geometry = props.store_geometry==nil and true or props.store_geometry
+
+    -- If it is a known placement function, then apply it, otherwise let
+    -- other potential handler resize the client (like in-layout resize or
+    -- floating client resize)
+    if aplace[context] then
+
+        -- Check if it correspond to a boolean property
+        local state = c[original_context]
+
+        -- If the property is boolean and it correspond to the undo operation,
+        -- restore the stored geometry.
+        if state == false then
+            aplace.restore(c,{context=context})
+            return
+        end
+
+        local honor_default = original_context ~= "fullscreen"
+
+        if props.honor_workarea == nil then
+            props.honor_workarea = honor_default
+        end
+
+        aplace[context](c, props)
+    end
+end
+
 client.connect_signal("request::activate", ewmh.activate)
 client.connect_signal("request::tag", ewmh.tag)
 client.connect_signal("request::urgent", ewmh.urgent)
-client.connect_signal("request::maximized_horizontal", maximized_horizontal)
-client.connect_signal("request::maximized_vertical", maximized_vertical)
-client.connect_signal("request::fullscreen", fullscreen)
+client.connect_signal("request::geometry", ewmh.geometry)
 client.connect_signal("property::screen", screen_change)
 client.connect_signal("property::border_width", geometry_change)
 client.connect_signal("property::geometry", geometry_change)
