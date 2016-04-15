@@ -39,6 +39,11 @@
 --
 -- **attach** (*boolean*):
 --
+-- **store_geometry** (*boolean*):
+--
+-- Keep a single history of each type of placement. It can be restored using
+-- `awful.placement.restore` by setting the right `context` argument.
+--
 -- When either the parent or the screen geometry change, call the placement
 -- function again.
 --
@@ -103,6 +108,26 @@ local align_map = {
 -- Store function -> keys
 local reverse_align_map = {}
 
+--- Add a context to the arguments.
+-- This function extend the argument table. The context is used by some
+-- internal helper methods. If there already is a context, it has priority and
+-- is kept.
+local function add_context(args, context)
+    return setmetatable({context = (args or {}).context or context }, {__index=args})
+end
+
+local data = setmetatable({}, { __mode = 'k' })
+
+--- Store a drawable geometry (per context) in a weak table.
+-- @param d The drawin
+-- @tparam string reqtype The context.
+local function store_geometry(d, reqtype)
+    if not data[d] then data[d] = {} end
+    if not data[d][reqtype] then data[d][reqtype] = {} end
+    data[d][reqtype] = d:geometry()
+    data[d][reqtype].screen = d.screen
+end
+
 --- Get the area covered by a drawin.
 -- @param d The drawin
 -- @tparam[opt=nil] table new_geo A new geometry
@@ -128,6 +153,12 @@ end
 -- @tparam[opt=false] boolean ignore_border_width Ignore the border
 -- @treturn table A table with *x*, *y*, *width* and *height*.
 local function geometry_common(obj, args, new_geo, ignore_border_width)
+
+    -- Store the current geometry in a singleton-memento
+    if args.store_geometry and new_geo and args.context then
+        store_geometry(obj, args.context)
+    end
+
     -- It's a mouse
     if obj.coords then
         local coords = new_geo and obj.coords(new_geo) or obj.coords()
@@ -381,6 +412,7 @@ end
 -- @tparam[opt={}] table args The arguments
 -- @treturn string The corner name
 function placement.closest_corner(d, args)
+    args = add_context(args, "closest_corner")
     d = d or capi.client.focus
 
     local sgeo = get_parent_geometry(d, args)
@@ -567,7 +599,7 @@ end
 -- @tparam drawable d A drawable (like `client`, `mouse` or `wibox`)
 -- @tparam[opt={}] table args Other arguments
 function placement.align(d, args)
-    args = args or {}
+    args = add_context(args, "align")
     d    = d or capi.client.focus
 
     if not d or not args.position then return end
@@ -596,8 +628,9 @@ end
 -- Add the alias functions
 for k in pairs(align_map) do
     placement[k] = function(d, args)
-        local new_args = setmetatable({position = k}, {__index=args})
-        placement.align(d, new_args)
+        args = add_context(args, k)
+        args.position = k
+        placement.align(d, args)
     end
     reverse_align_map[placement[k]] = k
 end
@@ -636,7 +669,7 @@ end
 -- @tparam[opt=client.focus] drawable d A drawable (like `client` or `wibox`)
 -- @tparam[opt={}] table args The arguments
 function placement.stretch(d, args)
-    args = args or {}
+    args = add_context(args, "stretch")
 
     d    = d or capi.client.focus
     if not d or not args.direction then return end
@@ -644,8 +677,8 @@ function placement.stretch(d, args)
     -- In case there is multiple directions, call `stretch` for each of them
     if type(args.direction) == "table" then
         for _, dir in ipairs(args.direction) do
-            local new_args = setmetatable({direction = dir}, {__index=args})
-            placement.stretch(dir, new_args)
+            args.direction = dir
+            placement.stretch(dir, args)
         end
         return
     end
@@ -681,8 +714,9 @@ end
 -- Add the alias functions
 for _,v in ipairs {"left", "right", "up", "down"} do
     placement["stretch_"..v] =  function(d, args)
-        local new_args = setmetatable({direction = v}, {__index=args})
-        placement.stretch(d, new_args)
+        args = add_context(args, "stretch_"..v)
+        args.direction = v
+        placement.stretch(d, args)
     end
 end
 
@@ -704,7 +738,7 @@ end
 -- @tparam[opt=client.focus] drawable d A drawable (like `client` or `wibox`)
 -- @tparam[opt={}] table args The arguments
 function placement.maximize(d, args)
-    args = args or {}
+    args = add_context(args, "maximize")
     d    = d or capi.client.focus
 
     if not d then return end
@@ -731,15 +765,34 @@ end
 -- Add the alias functions
 for _, v in ipairs {"vertically", "horizontally"} do
     placement["maximize_"..v] = function(d2, args)
-        args = args or {}
-        local new_args = setmetatable({axis = v}, {__index=args})
-        placement.maximize(d2, new_args)
+        args = add_context(args, "maximize_"..v)
+        args.axis = v
+        placement.maximize(d2, args)
     end
 end
 
 ---@DOC_awful_placement_maximize_vertically_EXAMPLE@
 
 ---@DOC_awful_placement_maximize_horizontally_EXAMPLE@
+
+--- Restore the geometry.
+-- @tparam[opt=client.focus] drawable d A drawable (like `client` or `wibox`)
+-- @tparam[opt={}] table args The arguments
+-- @treturn boolean If the geometry was restored
+function placement.restore(d, args)
+    if not args or not args.context then return false end
+    d = d or capi.client.focus
+
+    if not data[d] then return false end
+
+    local memento = data[d][args.context]
+
+    if not memento then return false end
+
+    memento.screen = nil --TODO use it
+    d:geometry(memento)
+    return true
+end
 
 return placement
 
