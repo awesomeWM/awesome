@@ -152,6 +152,8 @@
  * @function set_newindex_miss_handler
  */
 
+DO_ARRAY(xcb_randr_output_t, randr_output, DO_NOTHING);
+
 struct screen_output_t
 {
     /** The XRandR names of the output */
@@ -159,7 +161,7 @@ struct screen_output_t
     /** The size in millimeters */
     uint32_t mm_width, mm_height;
     /** The XID */
-    xcb_randr_output_t output;
+    randr_output_array_t outputs;
 };
 
 static void
@@ -241,6 +243,147 @@ screens_exist(void)
     return globalconf.screens.len > 0;
 }
 
+/* Monitors were introduced in RandR 1.5 */
+#ifdef XCB_RANDR_GET_MONITORS
+static bool
+screen_scan_randr_monitors(void)
+{
+    xcb_randr_get_monitors_cookie_t monitors_c = xcb_randr_get_monitors(globalconf.connection, globalconf.screen->root, 1);
+    xcb_randr_get_monitors_reply_t *monitors_r = xcb_randr_get_monitors_reply(globalconf.connection, monitors_c, NULL);
+    xcb_randr_monitor_info_iterator_t monitor_iter;
+    bool found = false;
+
+    for(monitor_iter = xcb_randr_get_monitors_monitors_iterator(monitors_r);
+            monitor_iter.rem; xcb_randr_monitor_info_next(&monitor_iter))
+    {
+        lua_State *L = globalconf_get_lua_State();
+        screen_t *new_screen;
+        screen_output_t output;
+        xcb_randr_output_t *randr_outputs;
+        xcb_get_atom_name_cookie_t name_c;
+        xcb_get_atom_name_reply_t *name_r;
+
+        if(!xcb_randr_monitor_info_outputs_length(monitor_iter.data))
+            continue;
+
+        new_screen = screen_new(L);
+        new_screen->geometry.x = monitor_iter.data->x;
+        new_screen->geometry.y = monitor_iter.data->y;
+        new_screen->geometry.width= monitor_iter.data->width;
+        new_screen->geometry.height= monitor_iter.data->height;
+
+        output.mm_width = monitor_iter.data->width_in_millimeters;
+        output.mm_height = monitor_iter.data->height_in_millimeters;
+
+        name_c = xcb_get_atom_name_unchecked(globalconf.connection, monitor_iter.data->name);
+        name_r = xcb_get_atom_name_reply(globalconf.connection, name_c, NULL);
+        if (name_r) {
+            const char *name = xcb_get_atom_name_name(name_r);
+            size_t len = xcb_get_atom_name_name_length(name_r);
+
+            output.name = memcpy(p_new(char *, len + 1), name, len);
+            output.name[len] = '\0';
+            p_delete(&name_r);
+        } else {
+            output.name = strdup("unknown");
+        }
+        randr_output_array_init(&output.outputs);
+
+        randr_outputs = xcb_randr_monitor_info_outputs(monitor_iter.data);
+        for(int i = 0; i < xcb_randr_monitor_info_outputs_length(monitor_iter.data); i++) {
+            randr_output_array_append(&output.outputs, randr_outputs[i]);
+        }
+
+        screen_output_array_append(&new_screen->outputs, output);
+        found = true;
+
+        screen_add(L, -1);
+    }
+
+    p_delete(&monitors_r);
+    return found;
+}
+#else
+screen_scan_randr_monitors(void)
+{
+    return false;
+}
+#endif
+
+static bool
+screen_scan_randr_crtcs(void)
+{
+    /* A quick XRandR recall:
+     * You have CRTC that manages a part of a SCREEN.
+     * Each CRTC can draw stuff on one or more OUTPUT. */
+    xcb_randr_get_screen_resources_cookie_t screen_res_c = xcb_randr_get_screen_resources(globalconf.connection, globalconf.screen->root);
+    xcb_randr_get_screen_resources_reply_t *screen_res_r = xcb_randr_get_screen_resources_reply(globalconf.connection, screen_res_c, NULL);
+
+    /* Only use the data from XRandR if there is more than one screen
+     * defined. This should work around the broken nvidia driver.  */
+    if (screen_res_r->num_crtcs <= 1)
+    {
+        p_delete(&screen_res_r);
+        return false;
+    }
+
+    /* We go through CRTC, and build a screen for each one. */
+    xcb_randr_crtc_t *randr_crtcs = xcb_randr_get_screen_resources_crtcs(screen_res_r);
+
+    for(int i = 0; i < screen_res_r->num_crtcs; i++)
+    {
+        lua_State *L = globalconf_get_lua_State();
+
+        /* Get info on the output crtc */
+        xcb_randr_get_crtc_info_cookie_t crtc_info_c = xcb_randr_get_crtc_info(globalconf.connection, randr_crtcs[i], XCB_CURRENT_TIME);
+        xcb_randr_get_crtc_info_reply_t *crtc_info_r = xcb_randr_get_crtc_info_reply(globalconf.connection, crtc_info_c, NULL);
+
+        /* If CRTC has no OUTPUT, ignore it */
+        if(!xcb_randr_get_crtc_info_outputs_length(crtc_info_r))
+            continue;
+
+        /* Prepare the new screen */
+        screen_t *new_screen = screen_new(L);
+        new_screen->geometry.x = crtc_info_r->x;
+        new_screen->geometry.y = crtc_info_r->y;
+        new_screen->geometry.width= crtc_info_r->width;
+        new_screen->geometry.height= crtc_info_r->height;
+
+        xcb_randr_output_t *randr_outputs = xcb_randr_get_crtc_info_outputs(crtc_info_r);
+
+        for(int j = 0; j < xcb_randr_get_crtc_info_outputs_length(crtc_info_r); j++)
+        {
+            xcb_randr_get_output_info_cookie_t output_info_c = xcb_randr_get_output_info(globalconf.connection, randr_outputs[j], XCB_CURRENT_TIME);
+            xcb_randr_get_output_info_reply_t *output_info_r = xcb_randr_get_output_info_reply(globalconf.connection, output_info_c, NULL);
+            screen_output_t output;
+
+            int len = xcb_randr_get_output_info_name_length(output_info_r);
+            /* name is not NULL terminated */
+            char *name = memcpy(p_new(char *, len + 1), xcb_randr_get_output_info_name(output_info_r), len);
+            name[len] = '\0';
+
+            output.name = name;
+            output.mm_width = output_info_r->mm_width;
+            output.mm_height = output_info_r->mm_height;
+            randr_output_array_init(&output.outputs);
+            randr_output_array_append(&output.outputs, randr_outputs[j]);
+
+            screen_output_array_append(&new_screen->outputs, output);
+
+
+            p_delete(&output_info_r);
+        }
+
+        screen_add(L, -1);
+
+        p_delete(&crtc_info_r);
+    }
+
+    p_delete(&screen_res_r);
+
+    return true;
+}
+
 static bool
 screen_scan_randr(void)
 {
@@ -249,11 +392,12 @@ screen_scan_randr(void)
     {
         xcb_randr_query_version_reply_t *version_reply =
             xcb_randr_query_version_reply(globalconf.connection,
-                                          xcb_randr_query_version(globalconf.connection, 1, 3), 0);
+                                          xcb_randr_query_version(globalconf.connection, 1, 5), 0);
         if(version_reply)
         {
             uint32_t major_version = version_reply->major_version;
             uint32_t minor_version = version_reply->minor_version;
+            bool found;
 
             p_delete(&version_reply);
 
@@ -263,71 +407,15 @@ screen_scan_randr(void)
 
             globalconf.have_randr_13 = minor_version >= 3;
 
-            /* A quick XRandR recall:
-             * You have CRTC that manages a part of a SCREEN.
-             * Each CRTC can draw stuff on one or more OUTPUT. */
-            xcb_randr_get_screen_resources_cookie_t screen_res_c = xcb_randr_get_screen_resources(globalconf.connection, globalconf.screen->root);
-            xcb_randr_get_screen_resources_reply_t *screen_res_r = xcb_randr_get_screen_resources_reply(globalconf.connection, screen_res_c, NULL);
+            if (minor_version >= 5)
+                found = screen_scan_randr_monitors();
+            else
+                found = screen_scan_randr_crtcs();
 
-            /* Only use the data from XRandR if there is more than one screen
-             * defined. This should work around the broken nvidia driver.  */
-            if (screen_res_r->num_crtcs <= 1)
-            {
-                p_delete(&screen_res_r);
+            if (found)
+                screen_update_primary();
+            else
                 return false;
-            }
-
-            /* We go through CRTC, and build a screen for each one. */
-            xcb_randr_crtc_t *randr_crtcs = xcb_randr_get_screen_resources_crtcs(screen_res_r);
-
-            for(int i = 0; i < screen_res_r->num_crtcs; i++)
-            {
-                lua_State *L = globalconf_get_lua_State();
-
-                /* Get info on the output crtc */
-                xcb_randr_get_crtc_info_cookie_t crtc_info_c = xcb_randr_get_crtc_info(globalconf.connection, randr_crtcs[i], XCB_CURRENT_TIME);
-                xcb_randr_get_crtc_info_reply_t *crtc_info_r = xcb_randr_get_crtc_info_reply(globalconf.connection, crtc_info_c, NULL);
-
-                /* If CRTC has no OUTPUT, ignore it */
-                if(!xcb_randr_get_crtc_info_outputs_length(crtc_info_r))
-                    continue;
-
-                /* Prepare the new screen */
-                screen_t *new_screen = screen_new(L);
-                new_screen->geometry.x = crtc_info_r->x;
-                new_screen->geometry.y = crtc_info_r->y;
-                new_screen->geometry.width= crtc_info_r->width;
-                new_screen->geometry.height= crtc_info_r->height;
-
-                xcb_randr_output_t *randr_outputs = xcb_randr_get_crtc_info_outputs(crtc_info_r);
-
-                for(int j = 0; j < xcb_randr_get_crtc_info_outputs_length(crtc_info_r); j++)
-                {
-                    xcb_randr_get_output_info_cookie_t output_info_c = xcb_randr_get_output_info(globalconf.connection, randr_outputs[j], XCB_CURRENT_TIME);
-                    xcb_randr_get_output_info_reply_t *output_info_r = xcb_randr_get_output_info_reply(globalconf.connection, output_info_c, NULL);
-
-                    int len = xcb_randr_get_output_info_name_length(output_info_r);
-                    /* name is not NULL terminated */
-                    char *name = memcpy(p_new(char *, len + 1), xcb_randr_get_output_info_name(output_info_r), len);
-                    name[len] = '\0';
-
-                    screen_output_array_append(&new_screen->outputs,
-                                               (screen_output_t) { .name = name,
-                                                                   .mm_width = output_info_r->mm_width,
-                                                                   .mm_height = output_info_r->mm_height,
-                                                                   .output = randr_outputs[j] });
-
-                    p_delete(&output_info_r);
-                }
-
-                screen_add(L, -1);
-
-                p_delete(&crtc_info_r);
-            }
-
-            p_delete(&screen_res_r);
-            screen_update_primary();
-
             return screens_exist();
         }
     }
@@ -664,8 +752,9 @@ screen_update_primary(void)
     foreach(screen, globalconf.screens)
     {
         foreach(output, (*screen)->outputs)
-            if (output->output == primary->output)
-                primary_screen = *screen;
+            foreach (randr_output, output->outputs)
+                if (*randr_output == primary->output)
+                    primary_screen = *screen;
     }
     p_delete(&primary);
 
