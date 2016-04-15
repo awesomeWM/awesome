@@ -249,6 +249,7 @@ rules.extra_properties = {}
 -- By default, the table has the following functions:
 --
 -- * tag
+-- * new_tag
 --
 -- @tfield table awful.rules.high_priority_properties
 rules.high_priority_properties = {}
@@ -303,6 +304,32 @@ function rules.extra_properties.geometry(c, _, props)
     end
 
     c:geometry(new_geo) --TODO use request::geometry
+end
+
+--- Create a new tag based on a rule.
+-- @tparam client c The client
+-- @tparam boolean|function|string value The value.
+-- @treturn tag The new tag
+function rules.high_priority_properties.new_tag(c, value)
+    local ty = type(value)
+    local t = nil
+
+    if ty == "boolean" then
+        -- Create a new tag named after the client class
+        t = atag.add(c.class or "N/A", {screen=c.screen, volatile=true})
+    elseif ty == "string" then
+        -- Create a tag named after "value"
+        t = atag.add(value, {screen=c.screen, volatile=true})
+    elseif ty == "table" then
+        -- Assume a table of tags properties
+        t = atag.add(value.name or c.class or "N/A", value)
+    else
+        assert(false)
+    end
+
+    add_to_tag(c, t)
+
+    return t
 end
 
 --- Apply properties and callbacks to a client.
