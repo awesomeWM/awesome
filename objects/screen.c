@@ -50,6 +50,7 @@
 #include "banning.h"
 #include "objects/client.h"
 #include "objects/drawin.h"
+#include "event.h"
 
 #include <stdio.h>
 
@@ -231,8 +232,9 @@ screen_scan_randr_monitors(lua_State *L, screen_array_t *screens)
         new_screen = screen_add(L, screens);
         new_screen->geometry.x = monitor_iter.data->x;
         new_screen->geometry.y = monitor_iter.data->y;
-        new_screen->geometry.width= monitor_iter.data->width;
-        new_screen->geometry.height= monitor_iter.data->height;
+        new_screen->geometry.width = monitor_iter.data->width;
+        new_screen->geometry.height = monitor_iter.data->height;
+        new_screen->xid = monitor_iter.data->name;
 
         output.mm_width = monitor_iter.data->width_in_millimeters;
         output.mm_height = monitor_iter.data->height_in_millimeters;
@@ -296,6 +298,7 @@ screen_scan_randr_crtcs(lua_State *L, screen_array_t *screens)
         new_screen->geometry.y = crtc_info_r->y;
         new_screen->geometry.width= crtc_info_r->width;
         new_screen->geometry.height= crtc_info_r->height;
+        new_screen->xid = randr_crtcs[i];
 
         xcb_randr_output_t *randr_outputs = xcb_randr_get_crtc_info_outputs(crtc_info_r);
 
@@ -370,13 +373,18 @@ screen_scan_randr(lua_State *L, screen_array_t *screens)
         return;
 
     globalconf.have_randr_13 = minor_version >= 3;
+#if XCB_RANDR_MAJOR_VERSION > 1 || XCB_RANDR_MINOR_VERSION >= 5
+    globalconf.have_randr_15 = minor_version >= 5;
+#else
+    globalconf.have_randr_15 = false;
+#endif
 
     /* We want to know when something changes */
     xcb_randr_select_input(globalconf.connection,
                            globalconf.screen->root,
                            XCB_RANDR_NOTIFY_MASK_OUTPUT_CHANGE);
 
-    if (minor_version >= 5)
+    if (globalconf.have_randr_15)
         screen_scan_randr_monitors(L, screens);
     else
         screen_scan_randr_crtcs(L, screens);
@@ -451,6 +459,61 @@ screen_scan(void)
         luaA_object_emit_signal(L, -1, "added", 0);
         lua_pop(L, 1);
     }
+
+    screen_update_primary();
+}
+
+void
+screen_refresh(void)
+{
+    if(!globalconf.screen_need_refresh)
+        return;
+    globalconf.screen_need_refresh = false;
+
+    screen_array_t new_screens;
+    lua_State *L = globalconf_get_lua_State();
+
+    screen_array_init(&new_screens);
+    if (globalconf.have_randr_15)
+        screen_scan_randr_monitors(L, &new_screens);
+    else
+        screen_scan_randr_crtcs(L, &new_screens);
+
+    /* Add new screens */
+    foreach(new_screen, new_screens) {
+        bool found = false;
+        foreach(old_screen, globalconf.screens)
+            found |= (*new_screen)->xid == (*old_screen)->xid;
+        if(!found) {
+            screen_array_append(&globalconf.screens, *new_screen);
+            luaA_object_push(L, *new_screen);
+            luaA_object_emit_signal(L, -1, "added", 0);
+            /* Get an extra reference since both new_screens and
+             * globalconf.screens reference this screen now */
+            luaA_object_ref(L, -1);
+        }
+    }
+
+    /* Remove screens which are gone */
+    for(int i = 0; i < globalconf.screens.len; i++) {
+        screen_t *old_screen = globalconf.screens.tab[i];
+        bool found = false;
+        foreach(new_screen, new_screens)
+            found |= (*new_screen)->xid == old_screen->xid;
+        if(!found) {
+            luaA_object_push(L, old_screen);
+            luaA_object_emit_signal(L, -1, "removed", 0);
+            lua_pop(L, 1);
+            screen_array_take(&globalconf.screens, i);
+            luaA_object_unref(L, old_screen);
+
+            i--;
+        }
+    }
+
+    foreach(screen, new_screens)
+        luaA_object_unref(L, *screen);
+    screen_array_wipe(&new_screens);
 
     screen_update_primary();
 }
@@ -900,6 +963,11 @@ screen_class_setup(lua_State *L)
      * @signal .added
      */
     signal_add(&screen_class.signals, "added");
+    /**
+     * This signal is emitted when a screen is removed from the setup.
+     * @signal removed
+     */
+    signal_add(&screen_class.signals, "removed");
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

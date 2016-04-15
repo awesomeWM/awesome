@@ -400,8 +400,7 @@ event_handle_configurenotify(xcb_configure_notify_event_t *ev)
     xcb_screen_t *screen = globalconf.screen;
 
     if(ev->window == screen->root)
-        /* it's not that we panic, but restart */
-        awesome_restart();
+        globalconf.screen_need_refresh = true;
 
     /* Copy what XRRUpdateConfiguration() would do: Update the configuration */
     if(ev->window == screen->root) {
@@ -782,7 +781,7 @@ event_handle_randr_screen_change_notify(xcb_randr_screen_change_notify_event_t *
         globalconf.screen->height_in_pixels = ev->height;
     }
 
-    awesome_restart();
+    globalconf.screen_need_refresh = true;
 }
 
 /** XRandR event handler for RRNotify subtype XRROutputChangeNotifyEvent

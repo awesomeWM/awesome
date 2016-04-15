@@ -37,6 +37,8 @@ struct a_screen
     area_t geometry;
     /** The screen outputs informations */
     screen_output_array_t outputs;
+    /** Some XID identifying this screen */
+    uint32_t xid;
 };
 ARRAY_FUNCS(screen_t *, screen, DO_NOTHING)
 
