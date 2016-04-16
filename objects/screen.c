@@ -205,6 +205,39 @@ luaA_checkscreen(lua_State *L, int sidx)
         return luaA_checkudata(L, sidx, &screen_class);
 }
 
+static void
+screen_deduplicate(lua_State *L, screen_array_t *screens)
+{
+    /* Remove duplicate screens */
+    for(int first = 0; first < screens->len; first++) {
+        screen_t *first_screen = screens->tab[first];
+        for(int second = 0; second < screens->len; second++) {
+            screen_t *second_screen = screens->tab[second];
+            if (first == second)
+                continue;
+
+            if (first_screen->geometry.width < second_screen->geometry.width
+                    && first_screen->geometry.height < second_screen->geometry.height)
+                /* Don't drop a smaller screen */
+                continue;
+
+            if (first_screen->geometry.x == second_screen->geometry.x
+                    && first_screen->geometry.y == second_screen->geometry.y) {
+                /* Found a duplicate */
+                first_screen->geometry.width = MAX(first_screen->geometry.width, second_screen->geometry.width);
+                first_screen->geometry.height = MAX(first_screen->geometry.height, second_screen->geometry.height);
+
+                screen_array_take(screens, second);
+                luaA_object_unref(L, second_screen);
+
+                /* Restart the search */
+                screen_deduplicate(L, screens);
+                return;
+            }
+        }
+    }
+}
+
 static screen_t *
 screen_add(lua_State *L, screen_array_t *screens)
 {
@@ -461,6 +494,8 @@ screen_scan(void)
         screen_scan_x11(L, &globalconf.screens);
     assert(globalconf.screens.len > 0);
 
+    screen_deduplicate(L, &globalconf.screens);
+
     foreach(screen, globalconf.screens) {
         (*screen)->valid = true;
         luaA_object_push(L, *screen);
@@ -486,6 +521,8 @@ screen_refresh(void)
         screen_scan_randr_monitors(L, &new_screens);
     else
         screen_scan_randr_crtcs(L, &new_screens);
+
+    screen_deduplicate(L, &new_screens);
 
     /* Add new screens */
     foreach(new_screen, new_screens) {
