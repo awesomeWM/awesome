@@ -524,6 +524,41 @@ screen_removed(lua_State *L, int sidx)
     }
 }
 
+static void
+screen_modified(screen_t *existing_screen, screen_t *other_screen)
+{
+    lua_State *L = globalconf_get_lua_State();
+
+    if(!AREA_EQUAL(existing_screen->geometry, other_screen->geometry)) {
+        existing_screen->geometry = other_screen->geometry;
+        luaA_object_push(L, existing_screen);
+        luaA_object_emit_signal(L, -1, "property::geometry", 0);
+        luaA_object_emit_signal(L, -1, "property::workarea", 0);
+        lua_pop(L, 1);
+    }
+
+    bool outputs_changed = existing_screen->outputs.len != other_screen->outputs.len;
+    if(!outputs_changed)
+        for(int i = 0; i < existing_screen->outputs.len; i++) {
+            screen_output_t *existing_output = &existing_screen->outputs.tab[i];
+            screen_output_t *other_output = &other_screen->outputs.tab[i];
+            outputs_changed |= existing_output->mm_width != other_output->mm_width;
+            outputs_changed |= existing_output->mm_height != other_output->mm_height;
+            outputs_changed |= A_STRNEQ(existing_output->name, other_output->name);
+        }
+
+    /* Brute-force update the outputs by swapping */
+    screen_output_array_t tmp = other_screen->outputs;
+    other_screen->outputs = existing_screen->outputs;
+    existing_screen->outputs = tmp;
+
+    if(outputs_changed) {
+        luaA_object_push(L, existing_screen);
+        luaA_object_emit_signal(L, -1, "property::outputs", 0);
+        lua_pop(L, 1);
+    }
+}
+
 void
 screen_refresh(void)
 {
@@ -575,6 +610,12 @@ screen_refresh(void)
             old_screen->valid = false;
         }
     }
+
+    /* Update changed screens */
+    foreach(existing_screen, globalconf.screens)
+        foreach(new_screen, new_screens)
+            if((*existing_screen)->xid == (*new_screen)->xid)
+                screen_modified(*existing_screen, *new_screen);
 
     foreach(screen, new_screens)
         luaA_object_unref(L, *screen);
@@ -1019,6 +1060,8 @@ screen_class_setup(lua_State *L)
                             NULL);
 
     signal_add(&screen_class.signals, "property::workarea");
+    signal_add(&screen_class.signals, "property::geometry");
+    signal_add(&screen_class.signals, "property::outputs");
     /**
      * @signal .primary_changed
      */
