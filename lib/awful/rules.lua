@@ -188,6 +188,7 @@ end
 --- Apply awful.rules.rules to a client.
 -- @client c The client.
 function rules.apply(c)
+
     local props = {}
     local callbacks = {}
 
@@ -205,36 +206,98 @@ function rules.apply(c)
     rules.execute(c, props, callbacks)
 end
 
+local function add_to_tag(c, t)
+    if not t then return end
+
+    local tags = c:tags()
+    table.insert(tags, t)
+    c:tags(tags)
+end
+
+--- Extra rules properties.
+--
+-- These properties are used in the rules only and are not sent to the client
+-- afterward.
+--
+-- To add a new properties, just do:
+--
+--    function awful.rules.extra_properties.my_new_property(c, value)
+--        -- do something
+--    end
+--
+-- @tfield table awful.rules.extra_properties
+rules.extra_properties = {}
+
+--- Extra high priority properties.
+--
+-- Some properties, such as anything related to tags, geometry or focus, will
+-- cause a race condition if set in the main property section. This is why
+-- they have a section for them.
+--
+-- To add a new properties, just do:
+--
+--    function awful.rules.high_priority_properties.my_new_property(c, value)
+--        -- do something
+--    end
+--
+-- @tfield table awful.rules.high_priority_properties
+rules.high_priority_properties = {}
+
+rules.delayed_properties = {
+    focus = true,
+    switchtotag = true,
+}
 
 --- Apply properties and callbacks to a client.
 -- @client c The client.
 -- @tab props Properties to apply.
 -- @tab[opt] callbacks Callbacks to apply.
 function rules.execute(c, props, callbacks)
-    local handle_later = { focus = true, switchtotag = true }
-    local switchtotag = props.switchtotag
+
+    -- Some properties need to be handled first. For example, many properties
+    -- depend that the client is tagged, this isn't yet the case.
+    for prop, handler in pairs(rules.high_priority_properties) do
+        local value = props[prop]
+
+        if value ~= nil then
+            if type(value) == "function" then
+                value = value(c, props)
+            end
+
+            handler(c, props[prop])
+        end
+
+    end
 
     for property, value in pairs(props) do
+
+
         if property ~= "focus" and type(value) == "function" then
             value = value(c)
         end
-        if property == "screen" then
-            -- Support specifying screens by name ("VGA1")
-            c.screen = screen[value]
-        elseif property == "tag" then
-            local t = value
-            if type(t) == "string" then
-                t = atag.find_by_name(props.screen, t)
-            end
-            c.screen = t.screen
-            c:tags({ t })
-        elseif property == "height" or property == "width" or
-                property == "x" or property == "y" then
-            local geo = c:geometry();
-            geo[property] = value
-            c:geometry(geo);
-        elseif not handle_later[property] then
-            if type(c[property]) == "function" then
+
+        -- Some properties are handled elsewhere
+        if not rules.high_priority_properties[property] and not rules.delayed_properties[property] then
+            if property == "tag" then
+                local t = value
+                if type(t) == "string" then
+                    t = atag.find_by_name(props.screen, t)
+                elseif type(t) == "function" then
+                    t = value(c, props)
+                end
+
+                if t then
+                    c.screen = t.screen
+                    c:tags{ t }
+                end
+            elseif property == "height" or property == "width" or
+                    property == "x" or property == "y" then
+                local geo = c:geometry();
+                geo[property] = value
+                c:geometry(geo);
+            elseif rules.extra_properties[property] then
+                rules.extra_properties[property](c, value)
+            elseif type(c[property]) == "function" then
                 c[property](c, value)
             else
                 c[property] = value
@@ -243,7 +306,7 @@ function rules.execute(c, props, callbacks)
     end
 
     -- Only do this after the tag has been (possibly) set
-    if switchtotag and c.first_tag then
+    if props.switchtotag and c.first_tag then
         c.first_tag:view_only()
     end
 
