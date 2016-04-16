@@ -10,7 +10,12 @@
 -- * Re-use the same functions for the `mouse`, `client`s, `screen`s and `wibox`es
 -- 
 -- 
--- 
+--
+-- It is possible to compose placement function using the `+` or `*` operator:
+--
+--    local f = (awful.placement.right + awful.placement.left)
+--    f(client.focus)
+--
 -- ### Common arguments
 --
 -- **honor_workarea** (*boolean*):
@@ -78,7 +83,37 @@ local function get_screen(s)
     return s and capi.screen[s]
 end
 
-local placement = {}
+local wrap_client = nil
+
+local function compose(w1, w2)
+    return wrap_client(function(...)
+        w1(...)
+        w2(...)
+        return --It make no sense to keep a return value
+    end)
+end
+
+wrap_client = function(f)
+    return setmetatable({is_placement=true}, {
+        __call = function(_,...) return f(...) end,
+        __add  = compose, -- Composition is usually defined as +
+        __mul  = compose  -- Make sense if you think of the functions as matrices
+    })
+end
+
+local placement_private = {}
+
+-- The module is a proxy in front of the "real" functions.
+-- This allow syntax like:
+--
+--    (awful.placement.no_overlap + awful.placement.no_offscreen)(c)
+--
+local placement = setmetatable({}, {
+    __index = placement_private,
+    __newindex = function(_, k, f)
+        placement_private[k] = wrap_client(f)
+    end
+})
 
 -- 3x3 matrix of the valid sides and corners
 local corners3x3 = {{"top_left"   ,   "top"   , "top_right"   },
@@ -441,7 +476,7 @@ function placement.closest_corner(d, args)
 
     -- Transpose the corner back to the original size
     local new_args = setmetatable({position = corner}, {__index=args})
-    placement.align(d, new_args)
+    placement_private.align(d, new_args)
 
     return corner
 end
@@ -452,6 +487,11 @@ end
 -- @tparam[opt=client's screen] integer screen The screen.
 -- @treturn table The new client geometry.
 function placement.no_offscreen(c, screen)
+    --HACK necessary for composition to work. The API will be changed soon
+    if type(screen) == "table" then
+        screen = nil
+    end
+
     c = c or capi.client.focus
     local geometry = area_common(c)
     screen = get_screen(screen or c.screen or a_screen.getbycoord(geometry.x, geometry.y))
@@ -630,7 +670,7 @@ for k in pairs(align_map) do
     placement[k] = function(d, args)
         args = add_context(args, k)
         args.position = k
-        placement.align(d, args)
+        placement_private.align(d, args)
     end
     reverse_align_map[placement[k]] = k
 end
@@ -678,7 +718,7 @@ function placement.stretch(d, args)
     if type(args.direction) == "table" then
         for _, dir in ipairs(args.direction) do
             args.direction = dir
-            placement.stretch(dir, args)
+            placement_private.stretch(dir, args)
         end
         return
     end
@@ -716,7 +756,7 @@ for _,v in ipairs {"left", "right", "up", "down"} do
     placement["stretch_"..v] =  function(d, args)
         args = add_context(args, "stretch_"..v)
         args.direction = v
-        placement.stretch(d, args)
+        placement_private.stretch(d, args)
     end
 end
 
@@ -767,7 +807,7 @@ for _, v in ipairs {"vertically", "horizontally"} do
     placement["maximize_"..v] = function(d2, args)
         args = add_context(args, "maximize_"..v)
         args.axis = v
-        placement.maximize(d2, args)
+        placement_private.maximize(d2, args)
     end
 end
 
