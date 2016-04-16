@@ -506,6 +506,24 @@ screen_scan(void)
     screen_update_primary();
 }
 
+/* Called when a screen is removed, removes references to the old screen */
+static void
+screen_removed(lua_State *L, int sidx)
+{
+    screen_t *screen = luaA_checkudata(L, sidx, &screen_class);
+
+    luaA_object_emit_signal(L, sidx, "removed", 0);
+
+    if (globalconf.primary_screen == screen)
+        globalconf.primary_screen = NULL;
+
+    foreach(c, globalconf.clients) {
+        if((*c)->screen == screen)
+            screen_client_moveto(*c, screen_getbycoord(
+                        (*c)->geometry.x, (*c)->geometry.y), false);
+    }
+}
+
 void
 screen_refresh(void)
 {
@@ -547,14 +565,14 @@ screen_refresh(void)
         foreach(new_screen, new_screens)
             found |= (*new_screen)->xid == old_screen->xid;
         if(!found) {
-            luaA_object_push(L, old_screen);
-            luaA_object_emit_signal(L, -1, "removed", 0);
-            lua_pop(L, 1);
             screen_array_take(&globalconf.screens, i);
+            i--;
+
+            luaA_object_push(L, old_screen);
+            screen_removed(L, -1);
+            lua_pop(L, 1);
             luaA_object_unref(L, old_screen);
             old_screen->valid = false;
-
-            i--;
         }
     }
 
