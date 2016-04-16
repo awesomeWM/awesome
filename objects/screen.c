@@ -183,6 +183,13 @@ screen_wipe(screen_t *s)
     screen_output_array_wipe(&s->outputs);
 }
 
+/** Check if a screen is valid */
+static bool
+screen_checker(screen_t *s)
+{
+    return s->valid;
+}
+
 /** Get a screen argument from the lua stack */
 screen_t *
 luaA_checkscreen(lua_State *L, int sidx)
@@ -455,6 +462,7 @@ screen_scan(void)
     assert(globalconf.screens.len > 0);
 
     foreach(screen, globalconf.screens) {
+        (*screen)->valid = true;
         luaA_object_push(L, *screen);
         luaA_object_emit_signal(L, -1, "added", 0);
         lua_pop(L, 1);
@@ -486,6 +494,7 @@ screen_refresh(void)
             found |= (*new_screen)->xid == (*old_screen)->xid;
         if(!found) {
             screen_array_append(&globalconf.screens, *new_screen);
+            (*new_screen)->valid = true;
             luaA_object_push(L, *new_screen);
             luaA_object_emit_signal(L, -1, "added", 0);
             /* Get an extra reference since both new_screens and
@@ -506,6 +515,7 @@ screen_refresh(void)
             lua_pop(L, 1);
             screen_array_take(&globalconf.screens, i);
             luaA_object_unref(L, old_screen);
+            old_screen->valid = false;
 
             i--;
         }
@@ -933,7 +943,7 @@ screen_class_setup(lua_State *L)
     luaA_class_setup(L, &screen_class, "screen", NULL,
                      (lua_class_allocator_t) screen_new,
                      (lua_class_collector_t) screen_wipe,
-                     NULL,
+                     (lua_class_checker_t) screen_checker,
                      luaA_class_index_miss_property, luaA_class_newindex_miss_property,
                      screen_methods, screen_meta);
     luaA_class_add_property(&screen_class, "geometry",
