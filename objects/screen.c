@@ -1016,6 +1016,57 @@ luaA_screen_count(lua_State *L)
     return 1;
 }
 
+/** Add a fake screen.
+ * @tparam integer x X-coordinate for screen.
+ * @tparam integer y Y-coordinate for screen.
+ * @tparam integer width width for screen.
+ * @tparam integer height height for screen.
+ * @return The new screen.
+ * @function fake_add
+ */
+static int
+luaA_screen_fake_add(lua_State *L)
+{
+    int x = luaL_checkinteger(L, 1);
+    int y = luaL_checkinteger(L, 2);
+    int width = luaL_checkinteger(L, 3);
+    int height = luaL_checkinteger(L, 4);
+    screen_t *s;
+
+    s = screen_add(L, &globalconf.screens);
+    s->geometry.x = x;
+    s->geometry.y = y;
+    s->geometry.width = width;
+    s->geometry.height = height;
+    s->valid = true;
+    luaA_object_push(L, s);
+    luaA_object_emit_signal(L, -1, "added", 0);
+
+    return 1;
+}
+
+/** Remove a screen.
+ * @function fake_remove.
+ */
+static int
+luaA_screen_fake_remove(lua_State *L)
+{
+    screen_t *s = luaA_checkudata(L, 1, &screen_class);
+    int idx = screen_get_index(s) - 1;
+    if (idx < 0)
+        /* WTF? */
+        return 0;
+
+    screen_array_take(&globalconf.screens, idx);
+    luaA_object_push(L, s);
+    screen_removed(L, -1);
+    lua_pop(L, 1);
+    luaA_object_unref(L, s);
+    s->valid = false;
+
+    return 0;
+}
+
 void
 screen_class_setup(lua_State *L)
 {
@@ -1026,6 +1077,7 @@ screen_class_setup(lua_State *L)
         { "__index", luaA_screen_module_index },
         { "__newindex", luaA_default_newindex },
         { "__call", luaA_screen_module_call },
+        { "fake_add", luaA_screen_fake_add },
         { NULL, NULL }
     };
 
@@ -1033,6 +1085,7 @@ screen_class_setup(lua_State *L)
     {
         LUA_OBJECT_META(screen)
         LUA_CLASS_META
+        { "fake_remove", luaA_screen_fake_remove },
         { NULL, NULL },
     };
 
