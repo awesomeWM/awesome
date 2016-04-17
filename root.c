@@ -30,6 +30,7 @@
 
 #include "common/atoms.h"
 #include "common/xcursor.h"
+#include "common/xutil.h"
 #include "objects/button.h"
 #include "xwindow.h"
 
@@ -265,8 +266,8 @@ luaA_root_fake_input(lua_State *L)
     {
         type = XCB_MOTION_NOTIFY;
         detail = luaA_checkboolean(L, 2); /* relative to the current position or not */
-        x = luaL_checkinteger(L, 3);
-        y = luaL_checkinteger(L, 4);
+        x = luaA_checkinteger_range(L, 3, MIN_X11_COORDINATE, MAX_X11_COORDINATE);
+        y = luaA_checkinteger_range(L, 4, MIN_X11_COORDINATE, MAX_X11_COORDINATE);
     }
     else
         return 0;

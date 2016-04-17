@@ -28,6 +28,11 @@
 #include "common/atoms.h"
 #include "common/util.h"
 
+#define MAX_X11_COORDINATE INT16_MAX
+#define MIN_X11_COORDINATE INT16_MIN
+#define MAX_X11_SIZE UINT16_MAX
+#define MIN_X11_SIZE 1
+
 static inline char *
 xutil_get_text_property_from_reply(xcb_get_property_reply_t *reply)
 {

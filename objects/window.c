@@ -29,6 +29,7 @@
 
 #include "objects/window.h"
 #include "common/atoms.h"
+#include "common/xutil.h"
 #include "ewmh.h"
 #include "property.h"
 #include "xwindow.h"
@@ -352,7 +353,7 @@ window_set_xproperty(lua_State *L, xcb_window_t window, int prop_idx, int value_
         } else if(prop->type == PROP_NUMBER || prop->type == PROP_BOOLEAN)
         {
             if (prop->type == PROP_NUMBER)
-                number = luaL_checkinteger(L, value_idx);
+                number = luaA_checkinteger_range(L, value_idx, 0, UINT32_MAX);
             else
                 number = luaA_checkboolean(L, value_idx);
             data = &number;
@@ -475,7 +476,7 @@ window_translate_type(window_type_t type)
 static int
 luaA_window_set_border_width(lua_State *L, window_t *c)
 {
-    window_set_border_width(L, -3, luaL_checknumber(L, -1));
+    window_set_border_width(L, -3, luaA_checkinteger_range(L, -1, 0, MAX_X11_SIZE));
     return 0;
 }
 

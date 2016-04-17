@@ -181,7 +181,7 @@ luaA_load_image(lua_State *L)
 static int
 luaA_set_preferred_icon_size(lua_State *L)
 {
-    globalconf.preferred_icon_size = luaL_checknumber(L, 1);
+    globalconf.preferred_icon_size = luaA_checkinteger_range(L, 1, 0, UINT32_MAX);
     return 0;
 }
 
