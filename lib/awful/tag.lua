@@ -305,7 +305,10 @@ function tag.object.delete(self, fallback_tag)
     if target_scr.selected_tag == nil and ntags > 0 then
         tag.history.restore(nil, 1)
         if target_scr.selected_tag == nil then
-            tags[tags[1] == self and 2 or 1].selected = true
+            local other_tag = tags[tags[1] == self and 2 or 1]
+            if other_tag then
+                other_tag.selected = true
+            end
         end
     end
 
