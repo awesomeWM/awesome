@@ -21,6 +21,7 @@
 
 #include "systray.h"
 #include "common/atoms.h"
+#include "common/xutil.h"
 #include "objects/drawin.h"
 #include "xwindow.h"
 #include "globalconf.h"
@@ -324,13 +325,13 @@ luaA_systray(lua_State *L)
     {
         size_t bg_len;
         drawin_t *w = luaA_checkudata(L, 1, &drawin_class);
-        int x = luaL_checkinteger(L, 2);
-        int y = luaL_checkinteger(L, 3);
-        int base_size = luaL_checkinteger(L, 4);
+        int x = luaA_checkinteger_range(L, 2, MIN_X11_COORDINATE, MAX_X11_COORDINATE);
+        int y = luaA_checkinteger_range(L, 3, MIN_X11_COORDINATE, MAX_X11_COORDINATE);
+        int base_size = luaA_checkinteger_range(L, 4, MIN_X11_SIZE, MAX_X11_SIZE);
         bool horiz = lua_toboolean(L, 5);
         const char *bg = luaL_checklstring(L, 6, &bg_len);
         bool revers = lua_toboolean(L, 7);
-        int spacing = luaL_checkinteger(L, 8);
+        int spacing = luaA_checkinteger_range(L, 8, 0, MAX_X11_COORDINATE);
         color_t bg_color;
         bool force_redraw = false;
 
