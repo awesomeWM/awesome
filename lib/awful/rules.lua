@@ -16,6 +16,7 @@ local type = type
 local ipairs = ipairs
 local pairs = pairs
 local atag = require("awful.tag")
+local a_place = require("awful.placement")
 
 local rules = {}
 
@@ -258,7 +259,7 @@ rules.delayed_properties = {}
 
 local force_ignore = {
     titlebars_enabled=true, focus=true, screen=true, x=true,
-    y=true, width=true, height=true, geometry=true
+    y=true, width=true, height=true, geometry=true,placement=true,
 }
 
 function rules.high_priority_properties.tag(c, value)
@@ -332,6 +333,29 @@ function rules.high_priority_properties.new_tag(c, value)
     return t
 end
 
+function rules.extra_properties.placement(c, value)
+    -- Avoid problems
+    if awesome.startup and
+      (c.size_hints.user_position or c.size_hints.program_position) then
+        return
+    end
+
+    local ty = type(value)
+
+    local args = {
+        honor_workarea = true,
+        honor_padding  = true
+    }
+
+    if ty == "function" or (ty == "table" and
+        getmetatable(value) and getmetatable(value).__call
+    ) then
+        value(c, args)
+    elseif ty == "string" and a_place[value] then
+        a_place[value](c, args)
+    end
+end
+
 --- Apply properties and callbacks to a client.
 -- @client c The client.
 -- @tab props Properties to apply.
@@ -358,6 +382,21 @@ function rules.execute(c, props, callbacks)
         end
 
     end
+
+    -- By default, rc.lua use no_overlap+no_offscreen placement. This has to
+    -- be executed before x/y/width/height/geometry as it would otherwise
+    -- always override the user specified position with the default rule.
+    if props.placement then
+        -- It may be a function, so this one doesn't execute it like others
+        rules.extra_properties.placement(c, props.placement, props)
+    end
+
+    -- Make sure the tag is selected before the main rules are called.
+    -- Otherwise properties like "urgent" or "focus" may fail because they
+    -- will be overiden by various callbacks.
+    -- Previously, this was done in a second client.manage callback, but caused
+    -- a race condition where the order the require() would change the output.
+    c:emit_signal("request::tag", nil, {reason="rules"})
 
     -- By default, rc.lua use no_overlap+no_offscreen placement. This has to
     -- be executed before x/y/width/height/geometry as it would otherwise
