@@ -177,8 +177,14 @@ end
 --
 -- @client c A client to tag
 -- @tag[opt] t A tag to use. If omitted, then the client is made sticky.
-function ewmh.tag(c, t)
+-- @tparam[opt={}] table hints Extra information
+function ewmh.tag(c, t, hints) --luacheck: no unused
+    -- There is nothing to do
+    if not t and #c:tags() > 0 then return end
+
     if not t then
+        c:to_selected_tags()
+    elseif type(t) == "boolean" and t then
         c.sticky = true
     else
         c.screen = t.screen

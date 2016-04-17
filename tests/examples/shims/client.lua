@@ -12,6 +12,7 @@ local function add_signals(c)
     c:add_signal("property::screen")
     c:add_signal("property::geometry")
     c:add_signal("request::geometry")
+    c:add_signal("request::tag")
     c:add_signal("swapped")
     c:add_signal("raised")
     c:add_signal("property::_label") --Used internally

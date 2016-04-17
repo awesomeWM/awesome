@@ -399,7 +399,7 @@ ewmh_process_desktop(client_t *c, uint32_t desktop)
     if(desktop == 0xffffffff)
     {
         luaA_object_push(L, c);
-        lua_pushnil(L);
+        lua_pushboolean(L, true);
         luaA_object_emit_signal(L, -2, "request::tag", 1);
         /* Pop the client, arguments are already popped */
         lua_pop(L, 1);
