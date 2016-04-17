@@ -15,7 +15,6 @@ local setmetatable = setmetatable
 local table = table
 local common = require("awful.widget.common")
 local beautiful = require("beautiful")
-local client = require("awful.client")
 local util = require("awful.util")
 local tag = require("awful.tag")
 local flex = require("wibox.layout.flex")
@@ -93,10 +92,9 @@ local function tasklist_label(c, args, tb)
     -- Handle transient_for: the first parent that does not skip the taskbar
     -- is considered to be focused, if the real client has skip_taskbar.
     if not focused and capi.client.focus and capi.client.focus.skip_taskbar
-        and client.get_transient_for_matching(capi.client.focus,
-                                              function(cl)
-                                                  return not cl.skip_taskbar
-                                              end) == c then
+        and capi.client.focus:get_transient_for_matching(function(cl)
+                                                             return not cl.skip_taskbar
+                                                         end) == c then
         focused = true
     end
 
