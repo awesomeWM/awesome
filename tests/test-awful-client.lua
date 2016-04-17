@@ -47,8 +47,8 @@ end
 
 -- Test movetotag
 
-local t  = tags[mouse.screen][1]
-local t2 = tags[mouse.screen][2]
+local t  = mouse.screen.tags[1]
+local t2 = mouse.screen.tags[2]
 
 c:tags{t}
 assert(c:tags()[1] == t)
