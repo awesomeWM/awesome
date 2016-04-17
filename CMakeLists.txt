@@ -365,7 +365,7 @@ add_custom_target(check-integration
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     COMMENT "Running integration tests"
     VERBATIM)
-find_program(BUSTED_EXECUTABLE busted)
+a_find_program(BUSTED_EXECUTABLE busted FALSE)
 if(BUSTED_EXECUTABLE)
     # Keep the arguments in sync with the version below!
     add_custom_target(check-unit ALL
@@ -386,7 +386,7 @@ if(BUSTED_EXECUTABLE)
         COMMENT "Running unit tests under LuaCov"
         VERBATIM)
 endif()
-find_program(LUACHECK_EXECUTABLE luacheck)
+a_find_program(LUACHECK_EXECUTABLE luacheck FALSE)
 if(LUACHECK_EXECUTABLE)
     add_custom_target(luacheck
         ${LUACHECK_EXECUTABLE} lib spec tests themes awesomerc.lua

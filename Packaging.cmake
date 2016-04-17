@@ -40,13 +40,13 @@ message(STATUS "Package version will be set to ${version_num}${version_gitsuffix
 set(CPACK_PACKAGE_VERSION "${version_num}${version_gitsuffix}")
 
 if(NOT CPACK_GENERATOR)
-	find_program(rpmbuild_path "rpmbuild")
+	a_find_program(rpmbuild_path "rpmbuild" FALSE)
 	if(rpmbuild_path)
 		message(STATUS "rpmbuild found, enabling RPM for the 'package' target")
 		list(APPEND CPACK_GENERATOR RPM)
 	endif(rpmbuild_path)
 
-	find_program(dpkg_path "dpkg")
+	a_find_program(dpkg_path "dpkg" FALSE)
 	if (dpkg_path)
 		message(STATUS "dpkg found, enabling DEB for the 'package' target")
 		list(APPEND CPACK_GENERATOR DEB)
