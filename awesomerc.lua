@@ -88,22 +88,9 @@ local function client_menu_toggle_fn()
 end
 -- }}}
 
--- {{{ Wallpaper
-if beautiful.wallpaper then
-    awful.screen.connect_for_each_screen(function(s)
-        gears.wallpaper.maximized(beautiful.wallpaper, s, true)
-    end)
-end
--- }}}
-
--- {{{ Tags
 -- Define a tag table which hold all screen tags.
+-- This table is filled later
 tags = {}
-awful.screen.connect_for_each_screen(function(s)
-    -- Each screen has its own tag table.
-    tags[s] = awful.tag({ "1", "2", "3", "4", "5", "6", "7", "8", "9" }, s, awful.layout.layouts[1])
-end)
--- }}}
 
 -- {{{ Menu
 -- Create a launcher widget and a main menu
@@ -183,6 +170,14 @@ mytasklist.buttons = awful.util.table.join(
                                           end))
 
 awful.screen.connect_for_each_screen(function(s)
+    -- Wallpaper
+    if beautiful.wallpaper then
+        gears.wallpaper.maximized(beautiful.wallpaper, s, true)
+    end
+
+    -- Each screen has its own tag table.
+    tags[s] = awful.tag({ "1", "2", "3", "4", "5", "6", "7", "8", "9" }, s, awful.layout.layouts[1])
+
     -- Create a promptbox for each screen
     mypromptbox[s] = awful.widget.prompt()
     -- Create an imagebox widget which will contains an icon indicating which layout we're using.
