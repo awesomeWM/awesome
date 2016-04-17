@@ -55,7 +55,7 @@ local steps = {
       root.fake_input("key_release", "2")
       root.fake_input("key_release", "Super_L")
 
-    elseif awful.tag.selectedlist()[1] == tags[awful.screen.focused()][2] then
+    elseif awful.screen.focused().selected_tags[1] == tags[awful.screen.focused()][2] then
       assert(#client.get() == 1)
       local c = client.get()[1]
       assert(not c.urgent, "Client is not urgent anymore.")
@@ -79,11 +79,11 @@ local steps = {
 
       awful.spawn("xterm")
 
-    elseif awful.tag.selectedlist()[1] == tags[awful.screen.focused()][2] then
+    elseif awful.screen.focused().selected_tags[1] == tags[awful.screen.focused()][2] then
       assert(not urgent_cb_done)
       assert(awful.tag.getproperty(tags[awful.screen.focused()][2], "urgent") == false)
       assert(awful.tag.getproperty(tags[awful.screen.focused()][2], "urgent_count") == 0)
-      assert(awful.tag.selectedlist()[2] == nil)
+      assert(awful.screen.focused().selected_tags[2] == nil)
       return true
     end
   end,
