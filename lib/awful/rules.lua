@@ -261,7 +261,7 @@ rules.delayed_properties = {}
 local force_ignore = {
     titlebars_enabled=true, focus=true, screen=true, x=true,
     y=true, width=true, height=true, geometry=true,placement=true,
-    border_width=true,floating=true
+    border_width=true,floating=true,size_hints_honor=true
 }
 
 function rules.high_priority_properties.tag(c, value)
@@ -377,6 +377,13 @@ function rules.execute(c, props, callbacks)
     if props.border_width then
         c.border_width = type(props.border_width) == "function" and
             props.border_width(c, props) or props.border_width
+    end
+
+    -- Size hints will be re-applied when setting width/height unless it is
+    -- disabled first
+    if props.size_hints_honor ~= nil then
+        c.size_hints_honor = type(props.size_hints_honor) == "function" and props.size_hints_honor(c,props)
+            or props.size_hints_honor
     end
 
     -- Geometry will only work if floating is true, otherwise the "saved"
