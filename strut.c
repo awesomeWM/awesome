@@ -51,10 +51,10 @@ void
 luaA_tostrut(lua_State *L, int idx, strut_t *strut)
 {
     luaA_checktable(L, idx);
-    strut->left = luaA_getopt_integer(L, idx, "left", strut->left);
-    strut->right = luaA_getopt_integer(L, idx, "right", strut->right);
-    strut->top = luaA_getopt_integer(L, idx, "top", strut->top);
-    strut->bottom = luaA_getopt_integer(L, idx, "bottom", strut->bottom);
+    strut->left = luaA_getopt_integer_range(L, idx, "left", strut->left, 0, UINT16_MAX);
+    strut->right = luaA_getopt_integer_range(L, idx, "right", strut->right, 0, UINT16_MAX);
+    strut->top = luaA_getopt_integer_range(L, idx, "top", strut->top, 0, UINT16_MAX);
+    strut->bottom = luaA_getopt_integer_range(L, idx, "bottom", strut->bottom, 0, UINT16_MAX);
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

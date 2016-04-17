@@ -31,6 +31,7 @@
 
 #include "mouse.h"
 #include "common/util.h"
+#include "common/xutil.h"
 #include "globalconf.h"
 #include "objects/client.h"
 #include "objects/drawin.h"
@@ -111,7 +112,7 @@ mouse_query_pointer_root(int16_t *x, int16_t *y, xcb_window_t *child, uint16_t *
  * \param y Y-coordinate inside window.
  */
 static inline void
-mouse_warp_pointer(xcb_window_t window, int x, int y)
+mouse_warp_pointer(xcb_window_t window, int16_t x, int16_t y)
 {
     xcb_warp_pointer(globalconf.connection, XCB_NONE, window,
                      0, 0, 0, 0, x, y);
@@ -223,8 +224,8 @@ luaA_mouse_coords(lua_State *L)
         if(!mouse_query_pointer_root(&mouse_x, &mouse_y, NULL, &mask))
             return 0;
 
-        x = luaA_getopt_number(L, 1, "x", mouse_x);
-        y = luaA_getopt_number(L, 1, "y", mouse_y);
+        x = luaA_getopt_integer_range(L, 1, "x", mouse_x, MIN_X11_COORDINATE, MAX_X11_COORDINATE);
+        y = luaA_getopt_integer_range(L, 1, "y", mouse_y, MIN_X11_COORDINATE, MAX_X11_COORDINATE);
 
         if(ignore_enter_notify)
             client_ignore_enterleave_events();
