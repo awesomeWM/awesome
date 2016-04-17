@@ -12,7 +12,6 @@
 -- Grab environment we need
 local capi =
 {
-    awesome = awesome,
     screen = screen,
     client = client
 }
@@ -26,7 +25,7 @@ local beautiful = require("beautiful")
 local round = require("awful.util").round
 
 local function get_screen(s)
-    return s and screen[s]
+    return s and capi.screen[s]
 end
 
 local awfulwibox = { mt = {} }
