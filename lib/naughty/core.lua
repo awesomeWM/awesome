@@ -439,8 +439,9 @@ function naughty.notify(args)
     local title = args.title or preset.title
     local s = get_screen(args.screen or preset.screen or screen.focused())
     if not s then
-        require("gears.debug").print_warning(
-            "naughty.notify: there is no screen available to display the notification.")
+        local err = "naughty.notify: there is no screen available to display the following notification:"
+        err = string.format("%s title='%s' text='%s'", err, tostring(title or ""), tostring(text or ""))
+        require("gears.debug").print_warning(err)
         return
     end
     local ontop = args.ontop or preset.ontop
