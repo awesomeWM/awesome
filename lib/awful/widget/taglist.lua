@@ -175,7 +175,7 @@ function taglist.new(screen, filter, buttons, style, update_function, base_widge
         end
     end
     if instances == nil then
-        instances = {}
+        instances = setmetatable({}, { __mode = "k" })
         local function u(s)
             local i = instances[get_screen(s)]
             if i then
