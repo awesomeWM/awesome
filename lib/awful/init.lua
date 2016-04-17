@@ -56,6 +56,7 @@ return
     tooltip = require("awful.tooltip");
     ewmh = require("awful.ewmh");
     titlebar = require("awful.titlebar");
+    rules = require("awful.rules");
     spawn = spawn;
 }
 
