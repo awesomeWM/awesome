@@ -98,6 +98,8 @@
 #include "systray.h"
 #include "xwindow.h"
 
+#include "math.h"
+
 #include <xcb/xcb_atom.h>
 #include <xcb/shape.h>
 #include <cairo-xcb.h>
@@ -2538,7 +2540,7 @@ luaA_client_titlebar_ ## name(lua_State *L)                       \
         if (lua_isnil(L, 2))                                      \
             titlebar_resize(L, 1, c, index, 0);                   \
         else                                                      \
-            titlebar_resize(L, 1, c, index, luaA_checkinteger_range(L, 2, 0, MAX_X11_SIZE)); \
+            titlebar_resize(L, 1, c, index, ceil(luaA_checknumber_range(L, 2, 0, MAX_X11_SIZE))); \
     }                                                             \
                                                                   \
     luaA_object_push_item(L, 1, titlebar_get_drawable(L, c, 1, index)); \
@@ -2566,8 +2568,8 @@ luaA_client_geometry(lua_State *L)
         area_t geometry;
 
         luaA_checktable(L, 2);
-        geometry.x = luaA_getopt_integer_range(L, 2, "x", c->geometry.x, MIN_X11_COORDINATE, MAX_X11_COORDINATE);
-        geometry.y = luaA_getopt_integer_range(L, 2, "y", c->geometry.y, MIN_X11_COORDINATE, MAX_X11_COORDINATE);
+        geometry.x = round(luaA_getopt_number_range(L, 2, "x", c->geometry.x, MIN_X11_COORDINATE, MAX_X11_COORDINATE));
+        geometry.y = round(luaA_getopt_number_range(L, 2, "y", c->geometry.y, MIN_X11_COORDINATE, MAX_X11_COORDINATE));
         if(client_isfixed(c))
         {
             geometry.width = c->geometry.width;
@@ -2575,8 +2577,8 @@ luaA_client_geometry(lua_State *L)
         }
         else
         {
-            geometry.width = luaA_getopt_integer_range(L, 2, "width", c->geometry.width, MIN_X11_SIZE, MAX_X11_SIZE);
-            geometry.height = luaA_getopt_integer_range(L, 2, "height", c->geometry.height, MIN_X11_SIZE, MAX_X11_SIZE);
+            geometry.width = ceil(luaA_getopt_number_range(L, 2, "width", c->geometry.width, MIN_X11_SIZE, MAX_X11_SIZE));
+            geometry.height = ceil(luaA_getopt_number_range(L, 2, "height", c->geometry.height, MIN_X11_SIZE, MAX_X11_SIZE));
         }
 
         client_resize(c, geometry, c->size_hints_honor);
@@ -2600,8 +2602,8 @@ luaA_client_apply_size_hints(lua_State *L)
     area_t geometry = c->geometry;
     if(!client_isfixed(c))
     {
-        geometry.width = luaA_checkinteger_range(L, 2, MIN_X11_SIZE, MAX_X11_SIZE);
-        geometry.height = luaA_checkinteger_range(L, 3, MIN_X11_SIZE, MAX_X11_SIZE);
+        geometry.width = ceil(luaA_checknumber_range(L, 2, MIN_X11_SIZE, MAX_X11_SIZE));
+        geometry.height = ceil(luaA_checknumber_range(L, 3, MIN_X11_SIZE, MAX_X11_SIZE));
     }
 
     if (c->size_hints_honor)

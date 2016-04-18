@@ -42,6 +42,8 @@
 #include "systray.h"
 #include "xwindow.h"
 
+#include "math.h"
+
 #include <cairo-xcb.h>
 #include <xcb/shape.h>
 
@@ -407,10 +409,10 @@ luaA_drawin_geometry(lua_State *L)
         area_t wingeom;
 
         luaA_checktable(L, 2);
-        wingeom.x = luaA_getopt_integer_range(L, 2, "x", drawin->geometry.x, MIN_X11_COORDINATE, MAX_X11_COORDINATE);
-        wingeom.y = luaA_getopt_integer_range(L, 2, "y", drawin->geometry.y, MIN_X11_COORDINATE, MAX_X11_COORDINATE);
-        wingeom.width = luaA_getopt_integer_range(L, 2, "width", drawin->geometry.width, MIN_X11_SIZE, MAX_X11_SIZE);
-        wingeom.height = luaA_getopt_integer_range(L, 2, "height", drawin->geometry.height, MIN_X11_SIZE, MAX_X11_SIZE);
+        wingeom.x = round(luaA_getopt_number_range(L, 2, "x", drawin->geometry.x, MIN_X11_COORDINATE, MAX_X11_COORDINATE));
+        wingeom.y = round(luaA_getopt_number_range(L, 2, "y", drawin->geometry.y, MIN_X11_COORDINATE, MAX_X11_COORDINATE));
+        wingeom.width = ceil(luaA_getopt_number_range(L, 2, "width", drawin->geometry.width, MIN_X11_SIZE, MAX_X11_SIZE));
+        wingeom.height = ceil(luaA_getopt_number_range(L, 2, "height", drawin->geometry.height, MIN_X11_SIZE, MAX_X11_SIZE));
 
         if(wingeom.width > 0 && wingeom.height > 0)
             drawin_moveresize(L, 1, wingeom);
@@ -427,7 +429,7 @@ LUA_OBJECT_EXPORT_PROPERTY(drawin, drawin_t, visible, lua_pushboolean)
 static int
 luaA_drawin_set_x(lua_State *L, drawin_t *drawin)
 {
-    int x = luaA_checkinteger_range(L, -1, MIN_X11_COORDINATE, MAX_X11_COORDINATE);
+    int x = round(luaA_checknumber_range(L, -1, MIN_X11_COORDINATE, MAX_X11_COORDINATE));
     drawin_moveresize(L, -3, (area_t) { .x = x,
                                         .y = drawin->geometry.y,
                                         .width = drawin->geometry.width,
@@ -445,7 +447,7 @@ luaA_drawin_get_x(lua_State *L, drawin_t *drawin)
 static int
 luaA_drawin_set_y(lua_State *L, drawin_t *drawin)
 {
-    int y = luaA_checkinteger_range(L, -1, MIN_X11_COORDINATE, MAX_X11_COORDINATE);
+    int y = round(luaA_checknumber_range(L, -1, MIN_X11_COORDINATE, MAX_X11_COORDINATE));
     drawin_moveresize(L, -3, (area_t) { .x = drawin->geometry.x,
                                         .y = y,
                                         .width = drawin->geometry.width,
@@ -463,7 +465,7 @@ luaA_drawin_get_y(lua_State *L, drawin_t *drawin)
 static int
 luaA_drawin_set_width(lua_State *L, drawin_t *drawin)
 {
-    int width = luaA_checkinteger_range(L, -1, MIN_X11_SIZE, MAX_X11_SIZE);
+    int width = ceil(luaA_checknumber_range(L, -1, MIN_X11_SIZE, MAX_X11_SIZE));
     drawin_moveresize(L, -3, (area_t) { .x = drawin->geometry.x,
                                         .y = drawin->geometry.y,
                                         .width = width,
@@ -481,7 +483,7 @@ luaA_drawin_get_width(lua_State *L, drawin_t *drawin)
 static int
 luaA_drawin_set_height(lua_State *L, drawin_t *drawin)
 {
-    int height = luaA_checkinteger_range(L, -1, MIN_X11_SIZE, MAX_X11_SIZE);
+    int height = ceil(luaA_checknumber_range(L, -1, MIN_X11_SIZE, MAX_X11_SIZE));
     drawin_moveresize(L, -3, (area_t) { .x = drawin->geometry.x,
                                        .y = drawin->geometry.y,
                                        .width = drawin->geometry.width,
