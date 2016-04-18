@@ -9,7 +9,7 @@ env:
     # luajit: installed from source.
     - LUA=5.1 LUANAME=luajit-2.0 LUALIBRARY=/usr/lib/libluajit-5.1.so LUAROCKS_ARGS=--lua-suffix=jit-2.0.4
     - LUA=5.2 LUANAME=lua5.2 LGIVER=0.7.1
-    # Lua 5.3 isn't available in Ubuntu trusty, so some magic below installs it
+    # Lua 5.3 isn't available in Ubuntu Trusty, so some magic below installs it.
     - LUA=5.3 LUANAME=lua5.3 LUALIBRARY=/usr/lib/liblua.so
   global:
     # Secure token to push to gh-pages.
@@ -35,7 +35,7 @@ install:
   - sudo apt-get install -y dbus-x11 xterm xdotool xterm xvfb rxvt-unicode
 
   # Install Lua (per env).
-  # Note that Lua 5.3 is installed by hand, because not available in trusty
+  # Note that Lua 5.3 is installed manually, because it is not available in Ubuntu Trusty.
   - |
     if [[ "$LUA" == "5.3" ]]; then
       wget http://www.lua.org/ftp/lua-5.3.2.tar.gz -O lua.tar.gz
