@@ -261,7 +261,7 @@ rules.delayed_properties = {}
 local force_ignore = {
     titlebars_enabled=true, focus=true, screen=true, x=true,
     y=true, width=true, height=true, geometry=true,placement=true,
-    border_width=true,
+    border_width=true,floating=true
 }
 
 function rules.high_priority_properties.tag(c, value)
@@ -377,6 +377,13 @@ function rules.execute(c, props, callbacks)
     if props.border_width then
         c.border_width = type(props.border_width) == "function" and
             props.border_width(c, props) or props.border_width
+    end
+
+    -- Geometry will only work if floating is true, otherwise the "saved"
+    -- geometry will be restored.
+    if props.floating then
+        c.floating = type(props.floating) == "function" and props.floating(c,props)
+            or props.floating
     end
 
     -- Before requesting a tag, make sure the screen is right
