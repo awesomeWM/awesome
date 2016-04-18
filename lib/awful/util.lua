@@ -50,7 +50,11 @@ function util.deprecate(see)
     local funcname = info.name or "?"
     local msg = "awful: function " .. funcname .. " is deprecated"
     if see then
-        msg = msg .. ", see " .. see
+        if string.sub(see, 1, 3) == 'Use' then
+            msg = msg .. ". " .. see
+        else
+            msg = msg .. ", see " .. see
+        end
     end
     gears_debug.print_warning(msg .. ".\n" .. tb)
 end
