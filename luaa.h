@@ -153,10 +153,37 @@ luaA_getopt_number(lua_State *L, int idx, const char *name, lua_Number def)
     return def;
 }
 
+static inline lua_Number
+luaA_checknumber_range(lua_State *L, int n, lua_Number min, lua_Number max)
+{
+    lua_Number result = lua_tonumber(L, n);
+    if (result < min || result > max)
+        luaA_rangerror(L, n, min, max);
+    return result;
+}
+
+static inline lua_Number
+luaA_optnumber_range(lua_State *L, int narg, lua_Number def, lua_Number min, lua_Number max)
+{
+    if (lua_isnoneornil(L, narg))
+        return def;
+    return luaA_checknumber_range(L, narg, min, max);
+}
+
+static inline lua_Number
+luaA_getopt_number_range(lua_State *L, int idx, const char *name, lua_Number def, lua_Number min, lua_Number max)
+{
+    lua_getfield(L, idx, name);
+    if (lua_isnil(L, -1) || lua_isnumber(L, -1))
+        def = luaA_optnumber_range(L, -1, def, min, max);
+    lua_pop(L, 1);
+    return def;
+}
+
 static inline int
 luaA_checkinteger(lua_State *L, int n)
 {
-    double d = lua_tonumber(L, n);
+    lua_Number d = lua_tonumber(L, n);
     if (d != (int)d)
         luaA_typerror(L, n, "integer");
     return d;
