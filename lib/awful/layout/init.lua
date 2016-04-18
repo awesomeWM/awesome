@@ -172,8 +172,8 @@ function layout.arrange(screen)
         p.geometries = setmetatable({}, {__mode = "k"})
         layout.get(screen).arrange(p)
         for c, g in pairs(p.geometries) do
-            g.width = g.width - c.border_width * 2 - useless_gap * 2
-            g.height = g.height - c.border_width * 2 - useless_gap * 2
+            g.width = math.max(1, g.width - c.border_width * 2 - useless_gap * 2)
+            g.height = math.max(1, g.height - c.border_width * 2 - useless_gap * 2)
             g.x = g.x + useless_gap
             g.y = g.y + useless_gap
             c:geometry(g)
