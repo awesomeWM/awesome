@@ -26,6 +26,7 @@
 #include "common/luaclass.h"
 #include "objects/button.h"
 #include "strut.h"
+#include "math.h"
 
 /** Windows type */
 typedef enum

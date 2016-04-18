@@ -171,7 +171,7 @@ local function tile_group(gs, cls, wa, orientation, fact, group)
         end
         total_fact = total_fact + fact[i]
     end
-    size = math.min(size, available)
+    size = math.max(1, math.min(size, available))
 
     local coord = wa[y]
     local used_size = 0
@@ -181,7 +181,7 @@ local function tile_group(gs, cls, wa, orientation, fact, group)
         local hints = {}
         local i = c - group.first +1
         geom[width] = size
-        geom[height] = math.floor(unused * fact[i] / total_fact)
+        geom[height] = math.max(1, math.floor(unused * fact[i] / total_fact))
         geom[x] = group.coord
         geom[y] = coord
         gs[cls[c]] = geom
