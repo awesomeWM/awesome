@@ -18,6 +18,7 @@ local pairs = pairs
 local atag = require("awful.tag")
 local util = require("awful.util")
 local a_place = require("awful.placement")
+local protected_call = require("gears.protected_call")
 
 local rules = {}
 
@@ -466,7 +467,7 @@ function rules.execute(c, props, callbacks)
     -- Apply all callbacks.
     if callbacks then
         for _, callback in pairs(callbacks) do
-            callback(c)
+            protected_call(callback, c)
         end
     end
 
