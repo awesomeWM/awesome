@@ -37,9 +37,7 @@ do
     })
 end
 
-local focus = {history = {}}
-
-local internal = {}
+local focus = {history = {list = {}}}
 
 local function get_screen(s)
     return s and capi.screen[s]
@@ -50,9 +48,9 @@ end
 -- @client c The client that must be removed.
 -- @function awful.client.focus.history.delete
 function focus.history.delete(c)
-    for k, v in ipairs(internal) do
+    for k, v in ipairs(focus.history.list) do
         if v == c then
-            table.remove(internal, k)
+            table.remove(focus.history.list, k)
             break
         end
     end
@@ -96,7 +94,7 @@ function focus.history.add(c)
     -- Remove the client if its in stack
     focus.history.delete(c)
     -- Record the client has latest focused
-    table.insert(internal, 1, c)
+    table.insert(focus.history.list, 1, c)
 end
 
 --- Get the latest focused client for a screen in history.
@@ -114,7 +112,7 @@ function focus.history.get(s, idx, filter)
     -- When this counter is equal to idx, we return the client
     local counter = 0
     local vc = client.visible(s, true)
-    for _, c in ipairs(internal) do
+    for _, c in ipairs(focus.history.list) do
         if get_screen(c.screen) == s then
             if not filter or filter(c) then
                 for _, vcc in ipairs(vc) do
