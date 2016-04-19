@@ -172,8 +172,8 @@ local function area_common(d, new_geo, ignore_border_width)
     -- The C side expect no arguments, nil isn't valid
     local geometry = new_geo and d:geometry(new_geo) or d:geometry()
     local border = ignore_border_width and 0 or d.border_width or 0
-    geometry.x = geometry.x - border
-    geometry.y = geometry.y - border
+    geometry.x = geometry.x
+    geometry.y = geometry.y
     geometry.width = geometry.width + 2 * border
     geometry.height = geometry.height + 2 * border
     return geometry
@@ -511,7 +511,10 @@ function placement.no_offscreen(c, screen)
         geometry.y = screen_geometry.y
     end
 
-    return c:geometry({ x = geometry.x, y = geometry.y })
+    return c:geometry {
+        x = geometry.x,
+        y = geometry.y
+    }
 end
 
 --- Place the client where there's place available with minimum overlap.
@@ -656,8 +659,8 @@ function placement.align(d, args)
     )
 
     geometry_common(d, args, {
-        x      = (pos.x and math.ceil(sgeo.x + pos.x) or dgeo.x) + bw  ,
-        y      = (pos.y and math.ceil(sgeo.y + pos.y) or dgeo.y) + bw  ,
+        x      = (pos.x and math.ceil(sgeo.x + pos.x) or dgeo.x)       ,
+        y      = (pos.y and math.ceil(sgeo.y + pos.y) or dgeo.y)       ,
         width  =            math.ceil(dgeo.width    )            - 2*bw,
         height =            math.ceil(dgeo.height   )            - 2*bw,
     })
@@ -729,15 +732,15 @@ function placement.stretch(d, args)
     local bw   = d.border_width or 0
 
     if args.direction == "left" then
-        ngeo.x      = sgeo.x + bw
+        ngeo.x      = sgeo.x
         ngeo.width  = dgeo.width + (dgeo.x - ngeo.x)
     elseif args.direction == "right" then
-        ngeo.width  = sgeo.width - ngeo.x - bw
+        ngeo.width  = sgeo.width - ngeo.x - 2*bw
     elseif args.direction == "up" then
-        ngeo.y      = sgeo.y + bw
+        ngeo.y      = sgeo.y
         ngeo.height = dgeo.height + (dgeo.y - ngeo.y)
     elseif args.direction == "down" then
-        ngeo.height = sgeo.height - dgeo.y - bw
+        ngeo.height = sgeo.height - dgeo.y - 2*bw
     else
         assert(false)
     end
@@ -788,12 +791,12 @@ function placement.maximize(d, args)
     local bw   = d.border_width or 0
 
     if (not args.axis) or args.axis :match "vertical" then
-        ngeo.y      = sgeo.y + bw
+        ngeo.y      = sgeo.y
         ngeo.height = sgeo.height - 2*bw
     end
 
     if (not args.axis) or args.axis :match "horizontal" then
-        ngeo.x      = sgeo.x + bw
+        ngeo.x      = sgeo.x
         ngeo.width  = sgeo.width - 2*bw
     end
 

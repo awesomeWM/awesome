@@ -10,8 +10,8 @@ local placement = require("awful.placement") --DOC_HIDE
 local c = client.gen_fake {x = 45, y = 35, width=40, height=30} --DOC_HIDE
 placement.stretch_up(client.focus)
 
-assert(c.y==c.border_width) --DOC_HIDE
+assert(c.y==0) --DOC_HIDE
 assert(c.x==45) --DOC_HIDE
 assert(c.width == 40) --DOC_HIDE
-print(c.height)
-assert(c.height == 35+30) --DOC_HIDE
+print(c.height-2*c.border_width,35+30)
+assert(c.height-2*c.border_width == 35+30) --DOC_HIDE
