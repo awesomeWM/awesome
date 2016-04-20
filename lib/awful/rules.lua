@@ -273,7 +273,7 @@ function rules.execute(c, props, callbacks)
 
 
         if property ~= "focus" and type(value) == "function" then
-            value = value(c)
+            value = value(c, props)
         end
 
         -- Some properties are handled elsewhere
