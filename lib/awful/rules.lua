@@ -9,12 +9,15 @@
 
 -- Grab environment we need
 local client = client
+local awesome = awesome
 local screen = screen
 local table = table
 local type = type
 local ipairs = ipairs
 local pairs = pairs
 local atag = require("awful.tag")
+local util = require("awful.util")
+local a_place = require("awful.placement")
 
 local rules = {}
 
@@ -188,6 +191,7 @@ end
 --- Apply awful.rules.rules to a client.
 -- @client c The client.
 function rules.apply(c)
+
     local props = {}
     local callbacks = {}
 
@@ -205,36 +209,253 @@ function rules.apply(c)
     rules.execute(c, props, callbacks)
 end
 
+local function add_to_tag(c, t)
+    if not t then return end
+
+    local tags = c:tags()
+    table.insert(tags, t)
+    c:tags(tags)
+end
+
+--- Extra rules properties.
+--
+-- These properties are used in the rules only and are not sent to the client
+-- afterward.
+--
+-- To add a new properties, just do:
+--
+--    function awful.rules.extra_properties.my_new_property(c, value, props)
+--        -- do something
+--    end
+--
+-- By default, the table has the following functions:
+--
+-- * geometry
+-- * switchtotag
+--
+-- @tfield table awful.rules.extra_properties
+rules.extra_properties = {}
+
+--- Extra high priority properties.
+--
+-- Some properties, such as anything related to tags, geometry or focus, will
+-- cause a race condition if set in the main property section. This is why
+-- they have a section for them.
+--
+-- To add a new properties, just do:
+--
+--    function awful.rules.high_priority_properties.my_new_property(c, value, props)
+--        -- do something
+--    end
+--
+-- By default, the table has the following functions:
+--
+-- * tag
+-- * new_tag
+--
+-- @tfield table awful.rules.high_priority_properties
+rules.high_priority_properties = {}
+
+rules.delayed_properties = {}
+
+local force_ignore = {
+    titlebars_enabled=true, focus=true, screen=true, x=true,
+    y=true, width=true, height=true, geometry=true,placement=true,
+    border_width=true,floating=true,size_hints_honor=true
+}
+
+function rules.high_priority_properties.tag(c, value)
+    if value then
+        if type(value) == "string" then
+            value = atag.find_by_name(nil, value)
+        end
+
+        c:tags{ value }
+    end
+end
+
+function rules.delayed_properties.switchtotag(c, value)
+    if not value then return end
+
+    local selected_tags = {}
+
+    for _,v in ipairs(c.screen.selected_tags) do
+        selected_tags[v] = true
+    end
+
+    local tags = c:tags()
+
+    for _, t in ipairs(tags) do
+        t.selected = true
+        selected_tags[t] = nil
+    end
+
+    for t in pairs(selected_tags) do
+        t.selected = false
+    end
+end
+
+function rules.extra_properties.geometry(c, _, props)
+    local cur_geo = c:geometry()
+
+    local new_geo = type(props.geometry) == "function"
+        and props.geometry(c, props) or props.geometry or {}
+
+    for _, v in ipairs {"x", "y", "width", "height"} do
+        new_geo[v] = type(props[v]) == "function" and props[v](c, props)
+            or props[v] or new_geo[v] or cur_geo[v]
+    end
+
+    c:geometry(new_geo) --TODO use request::geometry
+end
+
+--- Create a new tag based on a rule.
+-- @tparam client c The client
+-- @tparam boolean|function|string value The value.
+-- @treturn tag The new tag
+function rules.high_priority_properties.new_tag(c, value)
+    local ty = type(value)
+    local t = nil
+
+    if ty == "boolean" then
+        -- Create a new tag named after the client class
+        t = atag.add(c.class or "N/A", {screen=c.screen, volatile=true})
+    elseif ty == "string" then
+        -- Create a tag named after "value"
+        t = atag.add(value, {screen=c.screen, volatile=true})
+    elseif ty == "table" then
+        -- Assume a table of tags properties
+        t = atag.add(value.name or c.class or "N/A", value)
+    else
+        assert(false)
+    end
+
+    add_to_tag(c, t)
+
+    return t
+end
+
+function rules.extra_properties.placement(c, value)
+    -- Avoid problems
+    if awesome.startup and
+      (c.size_hints.user_position or c.size_hints.program_position) then
+        return
+    end
+
+    local ty = type(value)
+
+    local args = {
+        honor_workarea = true,
+        honor_padding  = true
+    }
+
+    if ty == "function" or (ty == "table" and
+        getmetatable(value) and getmetatable(value).__call
+    ) then
+        value(c, args)
+    elseif ty == "string" and a_place[value] then
+        a_place[value](c, args)
+    end
+end
+
+function rules.extra_properties.tags(c, value)
+    local current = c:tags()
+    c:tags(util.table.merge(current, value))
+end
 
 --- Apply properties and callbacks to a client.
 -- @client c The client.
 -- @tab props Properties to apply.
 -- @tab[opt] callbacks Callbacks to apply.
 function rules.execute(c, props, callbacks)
-    local handle_later = { focus = true, switchtotag = true }
-    local switchtotag = props.switchtotag
+    -- This has to be done first, as it will impact geometry related props.
+    if props.titlebars_enabled then
+        c:emit_signal("request::titlebars", "rules", {properties=props})
+    end
 
+    -- Border width will also cause geometry related properties to fail
+    if props.border_width then
+        c.border_width = type(props.border_width) == "function" and
+            props.border_width(c, props) or props.border_width
+    end
+
+    -- Size hints will be re-applied when setting width/height unless it is
+    -- disabled first
+    if props.size_hints_honor ~= nil then
+        c.size_hints_honor = type(props.size_hints_honor) == "function" and props.size_hints_honor(c,props)
+            or props.size_hints_honor
+    end
+
+    -- Geometry will only work if floating is true, otherwise the "saved"
+    -- geometry will be restored.
+    if props.floating then
+        c.floating = type(props.floating) == "function" and props.floating(c,props)
+            or props.floating
+    end
+
+    -- Before requesting a tag, make sure the screen is right
+    if props.screen then
+        c.screen = type(props.screen) == "function" and screen[props.screen(c,props)]
+            or screen[props.screen]
+    end
+
+    -- Some properties need to be handled first. For example, many properties
+    -- depend that the client is tagged, this isn't yet the case.
+    for prop, handler in pairs(rules.high_priority_properties) do
+        local value = props[prop]
+
+        if value ~= nil then
+            if type(value) == "function" then
+                value = value(c, props)
+            end
+
+            handler(c, value)
+        end
+
+    end
+
+    -- By default, rc.lua use no_overlap+no_offscreen placement. This has to
+    -- be executed before x/y/width/height/geometry as it would otherwise
+    -- always override the user specified position with the default rule.
+    if props.placement then
+        -- It may be a function, so this one doesn't execute it like others
+        rules.extra_properties.placement(c, props.placement, props)
+    end
+
+    -- Make sure the tag is selected before the main rules are called.
+    -- Otherwise properties like "urgent" or "focus" may fail because they
+    -- will be overiden by various callbacks.
+    -- Previously, this was done in a second client.manage callback, but caused
+    -- a race condition where the order the require() would change the output.
+    c:emit_signal("request::tag", nil, {reason="rules"})
+
+    -- By default, rc.lua use no_overlap+no_offscreen placement. This has to
+    -- be executed before x/y/width/height/geometry as it would otherwise
+    -- always override the user specified position with the default rule.
+    if props.placement then
+        -- It may be a function, so this one doesn't execute it like others
+        rules.extra_properties.placement(c, props.placement, props)
+    end
+
+    -- Now that the tags and screen are set, handle the geometry
+    if props.height or props.width or props.x or props.y or props.geometry then
+        rules.extra_properties.geometry(c, nil, props)
+    end
+
+    -- As most race conditions should now have been avoided, apply the remaining
+    -- properties.
     for property, value in pairs(props) do
         if property ~= "focus" and type(value) == "function" then
-            value = value(c)
+            value = value(c, props)
         end
-        if property == "screen" then
-            -- Support specifying screens by name ("VGA1")
-            c.screen = screen[value]
-        elseif property == "tag" then
-            local t = value
-            if type(t) == "string" then
-                t = atag.find_by_name(props.screen, t)
-            end
-            c.screen = t.screen
-            c:tags({ t })
-        elseif property == "height" or property == "width" or
-                property == "x" or property == "y" then
-            local geo = c:geometry();
-            geo[property] = value
-            c:geometry(geo);
-        elseif not handle_later[property] then
-            if type(c[property]) == "function" then
+
+        local ignore = rules.high_priority_properties[property] or
+            rules.delayed_properties[property] or force_ignore[property]
+
+        if not ignore then
+            if rules.extra_properties[property] then
+                rules.extra_properties[property](c, value)
+            elseif type(c[property]) == "function" then
                 c[property](c, value)
             else
                 c[property] = value
@@ -242,15 +463,25 @@ function rules.execute(c, props, callbacks)
         end
     end
 
-    -- Only do this after the tag has been (possibly) set
-    if switchtotag and c.first_tag then
-        c.first_tag:view_only()
-    end
-
     -- Apply all callbacks.
     if callbacks then
         for _, callback in pairs(callbacks) do
             callback(c)
+        end
+    end
+
+    -- Apply the delayed properties
+    for prop, handler in pairs(rules.delayed_properties) do
+        if not force_ignore[prop] then
+            local value = props[prop]
+
+            if value ~= nil then
+                if type(value) == "function" then
+                    value = value(c, props)
+                end
+
+                handler(c, value, props)
+            end
         end
     end
 

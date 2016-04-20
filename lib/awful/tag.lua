@@ -29,10 +29,6 @@ local function get_screen(s)
     return s and capi.screen[s]
 end
 
--- awful.client is required() at the end of this file so the miss_handler is set
--- before it is being required.
-local client
-
 local tag = {object = {},  mt = {} }
 
 -- Private data
@@ -1369,11 +1365,6 @@ object.properties(capi.tag, {
     getter_fallback = tag.getproperty,
     setter_fallback = tag.setproperty,
 })
-
--- fix a load loop
-client = require("awful.client")
-capi.client.connect_signal("manage", function(c) client.object.to_selected_tags(c) end)
-
 
 return setmetatable(tag, tag.mt)
 

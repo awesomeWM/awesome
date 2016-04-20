@@ -10,5 +10,5 @@ local placement = require("awful.placement") --DOC_HIDE
 local c = client.gen_fake {x = 45, y = 35, width=40, height=30} --DOC_HIDE
 placement.stretch_left(client.focus)
 
-assert(c.x == c.border_width and c.y == 35 and c.height == 30 --DOC_HIDE
-    and c.width == 45+40) --DOC_HIDE
+assert(c.x == 0 and c.y == 35 and c.height == 30) --DOC_HIDE
+print(c.width-2*c.border_width  == 45+40) --DOC_HIDE

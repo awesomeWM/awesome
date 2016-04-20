@@ -1697,9 +1697,9 @@ client_set_fullscreen(lua_State *L, int cidx, bool s)
             client_set_ontop(L, cidx, false);
         }
         int abs_cidx = luaA_absindex(L, cidx); \
-        lua_pushboolean(L, s);
+        lua_pushstring(L, "fullscreen");
         c->fullscreen = s;
-        luaA_object_emit_signal(L, abs_cidx, "request::fullscreen", 1);
+        luaA_object_emit_signal(L, abs_cidx, "request::geometry", 1);
         luaA_object_emit_signal(L, abs_cidx, "property::fullscreen", 0);
         /* Force a client resize, so that titlebars get shown/hidden */
         client_resize_do(c, c->geometry, true);
@@ -1730,10 +1730,10 @@ client_get_maximized(client_t *c)
         if(c->maximized_##type != s) \
         { \
             int abs_cidx = luaA_absindex(L, cidx); \
-            lua_pushboolean(L, s); \
             int max_before = client_get_maximized(c); \
             c->maximized_##type = s; \
-            luaA_object_emit_signal(L, abs_cidx, "request::maximized_" #type, 1); \
+            lua_pushstring(L, "maximized_"#type);\
+            luaA_object_emit_signal(L, abs_cidx, "request::geometry", 1); \
             luaA_object_emit_signal(L, abs_cidx, "property::maximized_" #type, 0); \
             if(max_before != client_get_maximized(c)) \
                 luaA_object_emit_signal(L, abs_cidx, "property::maximized", 0); \
@@ -3446,17 +3446,14 @@ client_class_setup(lua_State *L)
      */
     signal_add(&client_class.signals, "request::activate");
     /**
-     * @signal request::fullscreen
+     * @signal request::geometry
+     * @tparam client c The client
+     * @tparam string context Why and what to resize. This is used for the
+     * handlers to know if they are capable of applying the new geometry.
+     * @tparam[opt={}] table Additional arguments. Each context handler may
+     * interpret this differently.
      */
-    signal_add(&client_class.signals, "request::fullscreen");
-    /**
-     * @signal request::maximized_horizontal
-     */
-    signal_add(&client_class.signals, "request::maximized_horizontal");
-    /**
-     * @signal request::maximized_vertical
-     */
-    signal_add(&client_class.signals, "request::maximized_vertical");
+    signal_add(&client_class.signals, "request::geometry");
     /**
      * @signal request::tag
      */

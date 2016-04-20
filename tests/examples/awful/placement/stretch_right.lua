@@ -11,4 +11,4 @@ local c = client.gen_fake {x = 45, y = 35, width=40, height=30} --DOC_HIDE
 placement.stretch_right(client.focus)
 
 local right = screen[1].geometry.x + screen[1].geometry.width --DOC_HIDE
-assert(c.height == 30 and c.x == 45 and c.x+c.width+c.border_width == right) --DOC_HIDE
+assert(c.height == 30 and c.x == 45 and c.x+c.width+2*c.border_width == right) --DOC_HIDE
