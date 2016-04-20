@@ -9,6 +9,7 @@
 
 -- Grab environment we need
 local client = client
+local awesome = awesome
 local screen = screen
 local table = table
 local type = type
@@ -221,9 +222,14 @@ end
 --
 -- To add a new properties, just do:
 --
---    function awful.rules.extra_properties.my_new_property(c, value)
+--    function awful.rules.extra_properties.my_new_property(c, value, props)
 --        -- do something
 --    end
+--
+-- By default, the table has the following functions:
+--
+-- * geometry
+-- * switchtotag
 --
 -- @tfield table awful.rules.extra_properties
 rules.extra_properties = {}
@@ -236,23 +242,77 @@ rules.extra_properties = {}
 --
 -- To add a new properties, just do:
 --
---    function awful.rules.high_priority_properties.my_new_property(c, value)
+--    function awful.rules.high_priority_properties.my_new_property(c, value, props)
 --        -- do something
 --    end
+--
+-- By default, the table has the following functions:
+--
+-- * tag
 --
 -- @tfield table awful.rules.high_priority_properties
 rules.high_priority_properties = {}
 
 rules.delayed_properties = {
-    focus = true,
-    switchtotag = true,
+    focus = function() end,
 }
+
+function rules.high_priority_properties.tag(c, value)
+    if value then
+        if type(value) == "string" then
+            value = atag.find_by_name(nil, value)
+        end
+
+        c:tags{ value }
+    end
+end
+
+function rules.delayed_properties.switchtotag(c, value)
+    if not value then return end
+
+    local selected_tags = {}
+
+    for _,v in ipairs(c.screen.selected_tags) do
+        selected_tags[v] = true
+    end
+
+    local tags = c:tags()
+
+    for _, t in ipairs(tags) do
+        t.selected = true
+        selected_tags[t] = nil
+    end
+
+    for t in pairs(selected_tags) do
+        t.selected = false
+    end
+end
+
+function rules.extra_properties.geometry(c, _, props)
+    local cur_geo = c:geometry()
+
+    local new_geo = type(props.geometry) == "function"
+        and props.geometry(c, props) or props.geometry or {}
+
+    for _, v in ipairs {"x", "y", "width", "height"} do
+        new_geo[v] = type(props[v]) == "function" and props[v](c, props)
+            or props[v] or new_geo[v] or cur_geo[v]
+    end
+
+    c:geometry(new_geo) --TODO use request::geometry
+end
 
 --- Apply properties and callbacks to a client.
 -- @client c The client.
 -- @tab props Properties to apply.
 -- @tab[opt] callbacks Callbacks to apply.
 function rules.execute(c, props, callbacks)
+
+    -- Before requesting a tag, make sure the screen is right
+    if props.screen then
+        c.screen = type(props.screen) == "function" and screen[props.screen(c,props)]
+            or screen[props.screen]
+    end
 
     -- Some properties need to be handled first. For example, many properties
     -- depend that the client is tagged, this isn't yet the case.
@@ -264,38 +324,33 @@ function rules.execute(c, props, callbacks)
                 value = value(c, props)
             end
 
-            handler(c, props[prop])
+            handler(c, value)
         end
 
     end
 
+    -- By default, rc.lua use no_overlap+no_offscreen placement. This has to
+    -- be executed before x/y/width/height/geometry as it would otherwise
+    -- always override the user specified position with the default rule.
+    if props.placement then
+        -- It may be a function, so this one doesn't execute it like others
+        rules.extra_properties.placement(c, props.placement, props)
+    end
+
+    -- Now that the tags and screen are set, handle the geometry
+    if props.height or props.width or props.x or props.y or props.geometry then
+        rules.extra_properties.geometry(c, nil, props)
+    end
+
+    -- As most race conditions should now have been avoided, apply the remaining
+    -- properties.
     for property, value in pairs(props) do
-
-
         if property ~= "focus" and type(value) == "function" then
             value = value(c, props)
         end
 
-        -- Some properties are handled elsewhere
         if not rules.high_priority_properties[property] and not rules.delayed_properties[property] then
-            if property == "tag" then
-                local t = value
-                if type(t) == "string" then
-                    t = atag.find_by_name(props.screen, t)
-                elseif type(t) == "function" then
-                    t = value(c, props)
-                end
-
-                if t then
-                    c.screen = t.screen
-                    c:tags{ t }
-                end
-            elseif property == "height" or property == "width" or
-                    property == "x" or property == "y" then
-                local geo = c:geometry();
-                geo[property] = value
-                c:geometry(geo);
-            elseif rules.extra_properties[property] then
+            if rules.extra_properties[property] then
                 rules.extra_properties[property](c, value)
             elseif type(c[property]) == "function" then
                 c[property](c, value)
@@ -305,15 +360,23 @@ function rules.execute(c, props, callbacks)
         end
     end
 
-    -- Only do this after the tag has been (possibly) set
-    if props.switchtotag and c.first_tag then
-        c.first_tag:view_only()
-    end
-
     -- Apply all callbacks.
     if callbacks then
         for _, callback in pairs(callbacks) do
             callback(c)
+        end
+    end
+
+    -- Apply the delayed properties
+    for prop, handler in pairs(rules.delayed_properties) do
+        local value = props[prop]
+
+        if value ~= nil then
+            if type(value) == "function" then
+                value = value(c, props)
+            end
+
+            handler(c, value, props)
         end
     end
 
