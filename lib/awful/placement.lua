@@ -143,6 +143,21 @@ local align_map = {
 -- Store function -> keys
 local reverse_align_map = {}
 
+-- Some parameters to correctly compute the final size
+local resize_to_point_map = {
+    -- Corners
+    top_left     = {p1= nil  , p2={1,1}, x_only=false, y_only=false},
+    top_right    = {p1={0,1} , p2= nil , x_only=false, y_only=false},
+    bottom_left  = {p1= nil  , p2={1,0}, x_only=false, y_only=false},
+    bottom_right = {p1={0,0} , p2= nil , x_only=false, y_only=false},
+
+    -- Sides
+    left         = {p1= nil  , p2={1,1}, x_only=true , y_only=false},
+    right        = {p1={0,0} , p2= nil , x_only=true , y_only=false},
+    top          = {p1= nil  , p2={1,1}, x_only=false, y_only=true },
+    bottom       = {p1={0,0} , p2= nil , x_only=false, y_only=true },
+}
+
 --- Add a context to the arguments.
 -- This function extend the argument table. The context is used by some
 -- internal helper methods. If there already is a context, it has priority and
@@ -172,8 +187,6 @@ local function area_common(d, new_geo, ignore_border_width)
     -- The C side expect no arguments, nil isn't valid
     local geometry = new_geo and d:geometry(new_geo) or d:geometry()
     local border = ignore_border_width and 0 or d.border_width or 0
-    geometry.x = geometry.x
-    geometry.y = geometry.y
     geometry.width = geometry.width + 2 * border
     geometry.height = geometry.height + 2 * border
     return geometry
@@ -434,6 +447,24 @@ local function area_remove(areas, elem)
     return areas
 end
 
+-- Convert 2 points into a rectangle
+local function rect_from_points(p1x, p1y, p2x, p2y)
+    return {
+        x      = p1x,
+        y      = p1y,
+        width  = p2x - p1x,
+        height = p2y - p1y,
+    }
+end
+
+-- Convert a rectangle and matrix info into a point
+local function rect_to_point(rect, corner_i, corner_j)
+    return {
+        x = rect.x + corner_i * math.floor(rect.width ),
+        y = rect.y + corner_j * math.floor(rect.height),
+    }
+end
+
 --- Move a drawable to the closest corner of the parent geometry (such as the
 -- screen).
 --
@@ -620,6 +651,62 @@ function placement.next_to_mouse(c, offset)
         y = m_coords.y - math.ceil(c_height / 2)
     end
     return c:geometry({ x = x, y = y })
+end
+
+--- Resize the drawable to the cursor.
+--
+-- Valid args:
+--
+-- * *axis*: The axis (vertical or horizontal). If none is
+--    specified, then the drawable will be resized on both axis.
+--
+-- @tparam drawable d A drawable (like `client`, `mouse` or `wibox`)
+-- @tparam[opt={}] table args Other arguments
+function placement.resize_to_mouse(d, args)
+    d    = d or capi.client.focus
+    args = add_context(args, "resize_to_mouse")
+
+    local coords = capi.mouse.coords()
+    local ngeo   = geometry_common(d, args)
+    local h_only = args.axis == "horizontal"
+    local v_only = args.axis == "vertical"
+
+    -- To support both growing and shrinking the drawable, it is necessary
+    -- to decide to use either "north or south" and "east or west" directions.
+    -- Otherwise, the result will always be 1x1
+    local closest_corner = placement.closest_corner(capi.mouse, {
+        parent        = d,
+        include_sides = args.include_sides or false,
+    })
+
+    -- Given "include_sides" wasn't set, it will always return a name
+    -- with the 2 axis. If only one axis is needed, adjust the result
+    if h_only then
+        closest_corner = closest_corner:match("left") or closest_corner:match("right")
+    elseif v_only then
+        closest_corner = closest_corner:match("top")  or closest_corner:match("bottom")
+    end
+
+    -- Use p0 (mouse), p1 and p2 to create a rectangle
+    local pts = resize_to_point_map[closest_corner]
+    local p1  = pts.p1 and rect_to_point(ngeo, pts.p1[1], pts.p1[2]) or coords
+    local p2  = pts.p2 and rect_to_point(ngeo, pts.p2[1], pts.p2[2]) or coords
+
+    -- Create top_left and bottom_right points, convert to rectangle
+    ngeo = rect_from_points(
+        pts.y_only and ngeo.x               or math.min(p1.x, p2.x),
+        pts.x_only and ngeo.y               or math.min(p1.y, p2.y),
+        pts.y_only and ngeo.x + ngeo.width  or math.max(p2.x, p1.x),
+        pts.x_only and ngeo.y + ngeo.height or math.max(p2.y, p1.y)
+    )
+
+    local bw = d.border_width or 0
+
+    for _, a in ipairs {"width", "height"} do
+        ngeo[a] = ngeo[a] - 2*bw
+    end
+
+    geometry_common(d, args, ngeo)
 end
 
 --- Move the drawable (client or wibox) `d` to a screen position or side.
