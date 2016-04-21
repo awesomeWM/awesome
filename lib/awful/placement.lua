@@ -18,6 +18,11 @@
 --
 -- ### Common arguments
 --
+-- **pretend** (*boolean*):
+--
+-- Do not apply the new geometry. This is useful if only the return values is
+-- necessary.
+--
 -- **honor_workarea** (*boolean*):
 --
 --  Take workarea into account when placing the drawable (default: false)
@@ -209,14 +214,17 @@ local function geometry_common(obj, args, new_geo, ignore_border_width)
 
     -- It's a mouse
     if obj.coords then
-        local coords = new_geo and obj.coords(new_geo) or obj.coords()
+        local coords = (not args.pretend and new_geo)
+            and obj.coords(new_geo) or obj.coords()
         return {x=coords.x, y=coords.y, width=0, height=0}
     elseif obj.geometry then
         local geo = obj.geometry
 
         -- It is either a drawable or something that implement its API
         if type(geo) == "function" then
-            local dgeo = area_common(obj, new_geo, ignore_border_width)
+            local dgeo = area_common(
+                obj, (not args.pretend) and new_geo or nil, ignore_border_width
+            )
 
             -- Apply the margins
             if args.margins then
@@ -680,6 +688,7 @@ function placement.resize_to_mouse(d, args)
     -- Otherwise, the result will always be 1x1
     local _, closest_corner = placement.closest_corner(capi.mouse, {
         parent        = d,
+        pretend       = true,
         include_sides = args.include_sides or false,
     })
 
