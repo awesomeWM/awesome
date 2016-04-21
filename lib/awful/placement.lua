@@ -476,6 +476,7 @@ end
 -- @tparam[opt=client.focus] drawable d A drawable (like `client`, `mouse`
 --   or `wibox`)
 -- @tparam[opt={}] table args The arguments
+-- @treturn table The new geometry
 -- @treturn string The corner name
 function placement.closest_corner(d, args)
     args = add_context(args, "closest_corner")
@@ -507,9 +508,9 @@ function placement.closest_corner(d, args)
 
     -- Transpose the corner back to the original size
     local new_args = setmetatable({position = corner}, {__index=args})
-    placement_private.align(d, new_args)
+    local ngeo = placement_private.align(d, new_args)
 
-    return corner
+    return ngeo, corner
 end
 
 --- Place the client so no part of it will be outside the screen (workarea).
@@ -551,6 +552,7 @@ end
 --- Place the client where there's place available with minimum overlap.
 --@DOC_awful_placement_no_overlap_EXAMPLE@
 -- @param c The client.
+-- @treturn table The new geometry
 function placement.no_overlap(c)
     c = c or capi.client.focus
     local geometry = area_common(c)
@@ -605,7 +607,7 @@ end
 --- Place the client under the mouse.
 --@DOC_awful_placement_under_mouse_EXAMPLE@
 -- @param c The client.
--- @return The new client geometry.
+-- @treturn table The new geometry
 function placement.under_mouse(c)
     c = c or capi.client.focus
     local c_geometry = area_common(c)
@@ -621,7 +623,7 @@ end
 --@DOC_awful_placement_next_to_mouse_EXAMPLE@
 -- @client[opt=focused] c The client.
 -- @tparam[opt=apply_dpi(5)] integer offset The offset from the mouse position.
--- @return The new client geometry.
+-- @treturn table The new geometry
 function placement.next_to_mouse(c, offset)
     c = c or capi.client.focus
     offset = offset or dpi(5)
@@ -663,6 +665,7 @@ end
 --@DOC_awful_placement_resize_to_mouse_EXAMPLE@
 -- @tparam drawable d A drawable (like `client`, `mouse` or `wibox`)
 -- @tparam[opt={}] table args Other arguments
+-- @treturn table The new geometry
 function placement.resize_to_mouse(d, args)
     d    = d or capi.client.focus
     args = add_context(args, "resize_to_mouse")
@@ -675,7 +678,7 @@ function placement.resize_to_mouse(d, args)
     -- To support both growing and shrinking the drawable, it is necessary
     -- to decide to use either "north or south" and "east or west" directions.
     -- Otherwise, the result will always be 1x1
-    local closest_corner = placement.closest_corner(capi.mouse, {
+    local _, closest_corner = placement.closest_corner(capi.mouse, {
         parent        = d,
         include_sides = args.include_sides or false,
     })
@@ -719,6 +722,8 @@ function placement.resize_to_mouse(d, args)
     end
 
     geometry_common(d, args, ngeo)
+
+    return ngeo
 end
 
 --- Move the drawable (client or wibox) `d` to a screen position or side.
@@ -740,6 +745,7 @@ end
 --@DOC_awful_placement_align_EXAMPLE@
 -- @tparam drawable d A drawable (like `client`, `mouse` or `wibox`)
 -- @tparam[opt={}] table args Other arguments
+-- @treturn table The new geometry
 function placement.align(d, args)
     args = add_context(args, "align")
     d    = d or capi.client.focus
@@ -757,14 +763,18 @@ function placement.align(d, args)
         dgeo.height
     )
 
-    geometry_common(d, args, {
+    local ngeo = {
         x      = (pos.x and math.ceil(sgeo.x + pos.x) or dgeo.x)       ,
         y      = (pos.y and math.ceil(sgeo.y + pos.y) or dgeo.y)       ,
         width  =            math.ceil(dgeo.width    )            - 2*bw,
         height =            math.ceil(dgeo.height   )            - 2*bw,
-    })
+    }
+
+    geometry_common(d, args, ngeo)
 
     attach(d, placement[args.position], args)
+
+    return ngeo
 end
 
 -- Add the alias functions
@@ -772,7 +782,7 @@ for k in pairs(align_map) do
     placement[k] = function(d, args)
         args = add_context(args, k)
         args.position = k
-        placement_private.align(d, args)
+        return placement_private.align(d, args)
     end
     reverse_align_map[placement[k]] = k
 end
@@ -810,6 +820,7 @@ end
 --@DOC_awful_placement_stretch_EXAMPLE@
 -- @tparam[opt=client.focus] drawable d A drawable (like `client` or `wibox`)
 -- @tparam[opt={}] table args The arguments
+-- @treturn table The new geometry
 function placement.stretch(d, args)
     args = add_context(args, "stretch")
 
@@ -851,6 +862,8 @@ function placement.stretch(d, args)
     geometry_common(d, args, ngeo)
 
     attach(d, placement["stretch_"..args.direction], args)
+
+    return ngeo
 end
 
 -- Add the alias functions
@@ -858,7 +871,7 @@ for _,v in ipairs {"left", "right", "up", "down"} do
     placement["stretch_"..v] =  function(d, args)
         args = add_context(args, "stretch_"..v)
         args.direction = v
-        placement_private.stretch(d, args)
+        return placement_private.stretch(d, args)
     end
 end
 
@@ -879,6 +892,7 @@ end
 --@DOC_awful_placement_maximize_EXAMPLE@
 -- @tparam[opt=client.focus] drawable d A drawable (like `client` or `wibox`)
 -- @tparam[opt={}] table args The arguments
+-- @treturn table The new geometry
 function placement.maximize(d, args)
     args = add_context(args, "maximize")
     d    = d or capi.client.focus
@@ -902,6 +916,8 @@ function placement.maximize(d, args)
     geometry_common(d, args, ngeo)
 
     attach(d, placement.maximize, args)
+
+    return ngeo
 end
 
 -- Add the alias functions
@@ -909,7 +925,7 @@ for _, v in ipairs {"vertically", "horizontally"} do
     placement["maximize_"..v] = function(d2, args)
         args = add_context(args, "maximize_"..v)
         args.axis = v
-        placement_private.maximize(d2, args)
+        return placement_private.maximize(d2, args)
     end
 end
 
