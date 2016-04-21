@@ -500,8 +500,10 @@ function placement.closest_corner(d, args)
     -- Use the product of 3 to get the closest point in a NxN matrix
     local function f(_n, mat)
         n        = _n
-        corner_i = -math.ceil( ( (sgeo.x - pos.x) * n) / sgeo.width  )
-        corner_j = -math.ceil( ( (sgeo.y - pos.y) * n) / sgeo.height )
+        -- The +1 is required to avoid a rounding error when
+        --    pos.x == sgeo.x+sgeo.width
+        corner_i = -math.ceil( ( (sgeo.x - pos.x) * n) / (sgeo.width  + 1))
+        corner_j = -math.ceil( ( (sgeo.y - pos.y) * n) / (sgeo.height + 1))
         return mat[corner_j + 1][corner_i + 1]
     end
 
