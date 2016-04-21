@@ -329,8 +329,9 @@ end
 
 --- Resize a client.
 -- @param c The client to resize, or the focused one by default.
--- @param corner The corner to grab on resize. Auto detected by default.
-function mouse.client.resize(c, corner)
+-- @tparam string corner The corner to grab on resize. Auto detected by default.
+-- @tparam[opt={}] table args A set of `awful.placement` arguments
+function mouse.client.resize(c, corner, args)
     c = c or capi.client.focus
 
     if not c then return end
@@ -342,15 +343,38 @@ function mouse.client.resize(c, corner)
         return
     end
 
-    local lay = layout.get(c.screen)
-    local corner2, x, y = mouse.client.corner(c, corner)
+    -- Move the mouse to the corner
+    if corner and aplace[corner] then
+        aplace[corner](capi.mouse, {parent=c})
+    end
 
-    if lay == layout.suit.floating or c.floating then
-        return layout.suit.floating.mouse_resize_handler(c, corner2, x, y)
-    elseif lay.mouse_resize_handler then
-        return lay.mouse_resize_handler(c, corner2, x, y)
+    mouse.resize(c, "mouse.resize", args or {include_sides=true})
+end
+
+--- Default handler for `request::geometry` signals with `mouse.resize` context.
+-- @tparam client c The client
+-- @tparam string context The context
+-- @tparam[opt={}] table hints The hints to pass to the handler
+function mouse.resize_handler(c, context, hints)
+    if hints and context and context:find("mouse.*") then
+        -- This handler only handle the floating clients. If the client is tiled,
+        -- then it let the layouts handle it.
+        local lay = c.screen.selected_tag.layout
+
+        if lay == layout.suit.floating or c.floating then
+            c:geometry {
+                x      = hints.x,
+                y      = hints.y,
+                width  = hints.width,
+                height = hints.height,
+            }
+        elseif lay.resize_handler then
+            lay.resize_handler(c, context, hints)
+        end
     end
 end
+
+capi.client.connect_signal("request::geometry", mouse.resize_handler)
 
 -- Set the cursor at startup
 capi.root.cursor("left_ptr")
