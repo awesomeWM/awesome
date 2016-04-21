@@ -90,20 +90,89 @@ end
 
 local wrap_client = nil
 
-local function compose(w1, w2)
-    return wrap_client(function(...)
-        w1(...)
-        w2(...)
-        return --It make no sense to keep a return value
-    end)
+--- Allow multiple placement functions to be daisy chained.
+-- This also allow the functions to be aware they are being chained and act
+-- upon the previous nodes results to avoid unnecessary processing or deduce
+-- extra paramaters/arguments.
+local function compose(...)
+    local queue = {}
+
+    local nodes = {...}
+
+    -- Allow placement.foo + (var == 42 and placement.bar)
+    if not nodes[2] then
+        return nodes[1]
+    end
+
+    -- nodes[1] == self, nodes[2] == other
+    for _, w in ipairs(nodes) do
+        -- Build an execution queue
+        if w.context and w.context == "compose" then
+            for _, elem in ipairs(w.queue or {}) do
+                table.insert(queue, elem)
+            end
+        else
+            table.insert(queue, w)
+        end
+    end
+
+    local ret = wrap_client(function(d, args, ...)
+        local rets = {}
+        local last_geo = nil
+
+        -- As some functions may have to take into account results from
+        -- previously execued ones, add the `composition_results` hint.
+        args = setmetatable({composition_results=rets}, {__index=args})
+
+        -- Only apply the geometry once, not once per chain node, to do this,
+        -- Force the "pretend" argument and restore the original value for
+        -- the last node.
+        local pretend_real = args.pretend
+
+        args.pretend = true
+
+        for k, f in ipairs(queue) do
+            if k == #queue then
+                args.pretent = pretend_real
+            end
+
+            local r = {f(d, args, ...)}
+            last_geo = r[1] or last_geo
+            args.override_geometry = last_geo
+
+            -- Keep the return value, store one per context
+            if f.context then
+                -- When 2 composition queue are executed, merge the return values
+                if f.context == "compose" then
+                    for k2,v in pairs(r) do
+                        rets[k2] = v
+                    end
+                else
+                    rets[f.context] = r
+                end
+            end
+        end
+
+        return last_geo, rets
+    end, "compose")
+
+    ret.queue = queue
+
+    return ret
 end
 
-wrap_client = function(f)
-    return setmetatable({is_placement=true}, {
-        __call = function(_,...) return f(...) end,
-        __add  = compose, -- Composition is usually defined as +
-        __mul  = compose  -- Make sense if you think of the functions as matrices
-    })
+wrap_client = function(f, context)
+    return setmetatable(
+        {
+            is_placement= true,
+            context     = context,
+        },
+        {
+            __call = function(_,...) return f(...) end,
+            __add  = compose, -- Composition is usually defined as +
+            __mul  = compose  -- Make sense if you think of the functions as matrices
+        }
+    )
 end
 
 local placement_private = {}
@@ -116,7 +185,7 @@ local placement_private = {}
 local placement = setmetatable({}, {
     __index = placement_private,
     __newindex = function(_, k, f)
-        placement_private[k] = wrap_client(f)
+        placement_private[k] = wrap_client(f, k)
     end
 })
 
@@ -225,6 +294,12 @@ local function geometry_common(obj, args, new_geo, ignore_border_width)
             local dgeo = area_common(
                 obj, (not args.pretend) and new_geo or nil, ignore_border_width
             )
+
+            -- When using the placement composition along with the "pretend"
+            -- option, it is necessary to keep a "virtual" geometry.
+            if args.override_geometry then
+                dgeo = args.override_geometry
+            end
 
             -- Apply the margins
             if args.margins then
