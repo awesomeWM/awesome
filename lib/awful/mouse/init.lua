@@ -11,6 +11,7 @@
 local layout = require("awful.layout")
 local tag = require("awful.tag")
 local aclient = require("awful.client")
+local aplace = require("awful.placement")
 local awibox = require("awful.wibox")
 local util = require("awful.util")
 local type = type
@@ -297,49 +298,31 @@ function mouse.wibox.move(w)
 end
 
 --- Get a client corner coordinates.
--- @param c The client to get corner from, focused one by default.
--- @param corner The corner to use: auto, top_left, top_right, bottom_left,
--- bottom_right. Default is auto, and auto find the nearest corner.
--- @return Actual used corner and x and y coordinates.
+-- @tparam[opt=client.focus] client c The client to get corner from, focused one by default.
+-- @tparam string corner The corner to use: auto, top_left, top_right, bottom_left,
+-- bottom_right, left, right, top bottom. Default is auto, and auto find the
+-- nearest corner.
+-- @treturn string The corner name
+-- @treturn number x The horizontal position
+-- @treturn number y The vertical position
 function mouse.client.corner(c, corner)
+    util.deprecated(
+        "Use awful.placement.closest_corner(mouse) or awful.placement[corner](mouse)"..
+        " instead of awful.mouse.client.corner"
+    )
+
     c = c or capi.client.focus
     if not c then return end
 
-    local g = c:geometry()
+    local ngeo = nil
 
-    if not corner or corner == "auto" then
-        local m_c = capi.mouse.coords()
-        if math.abs(g.y - m_c.y) < math.abs(g.y + g.height - m_c.y) then
-            if math.abs(g.x - m_c.x) < math.abs(g.x + g.width - m_c.x) then
-                corner = "top_left"
-            else
-                corner = "top_right"
-            end
-        else
-            if math.abs(g.x - m_c.x) < math.abs(g.x + g.width - m_c.x) then
-                corner = "bottom_left"
-            else
-                corner = "bottom_right"
-            end
-        end
+    if (not corner) or corner == "auto" then
+        ngeo, corner = aplace.closest_corner(mouse, {parent = c})
+    elseif corner and aplace[corner] then
+        ngeo = aplace[corner](mouse, {parent = c})
     end
 
-    local x, y
-    if corner == "top_right" then
-        x = g.x + g.width
-        y = g.y
-    elseif corner == "top_left" then
-        x = g.x
-        y = g.y
-    elseif corner == "bottom_left" then
-        x = g.x
-        y = g.y + g.height
-    else
-        x = g.x + g.width
-        y = g.y + g.height
-    end
-
-    return corner, x, y
+    return corner, ngeo and ngeo.x or nil, ngeo and ngeo.y or nil
 end
 
 --- Resize a client.
