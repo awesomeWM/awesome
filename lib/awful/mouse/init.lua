@@ -26,7 +26,9 @@ local capi =
     mousegrabber = mousegrabber,
 }
 
-local mouse = {}
+local mouse = {
+    resize = require("awful.mouse.resize")
+}
 
 mouse.client = {}
 mouse.wibox = {}
