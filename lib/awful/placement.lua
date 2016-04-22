@@ -49,6 +49,10 @@
 --
 -- **attach** (*boolean*):
 --
+-- **offset** (*table or number*):
+--
+-- The offset(s) to apply to the new geometry.
+--
 -- **store_geometry** (*boolean*):
 --
 -- Keep a single history of each type of placement. It can be restored using
@@ -252,6 +256,32 @@ local function store_geometry(d, reqtype)
     data[d][reqtype].screen = d.screen
 end
 
+--- Apply some modifications before applying the new geometry.
+-- @tparam table new_geo The new geometry
+-- @tparam table args The common arguments
+-- @treturn table|nil The new geometry
+local function fix_new_geometry(new_geo, args)
+    if args.pretend or not new_geo then return nil end
+
+    local offset = args.offset or {}
+
+    if type(offset) == "number" then
+        offset = {
+            x      = offset,
+            y      = offset,
+            width  = offset,
+            height = offset,
+        }
+    end
+
+    return {
+        x      = new_geo.x      and (new_geo.x      + (offset.x      or 0)),
+        y      = new_geo.y      and (new_geo.y      + (offset.y      or 0)),
+        width  = new_geo.width  and (new_geo.width  + (offset.width  or 0)),
+        height = new_geo.height and (new_geo.height + (offset.height or 0)),
+    }
+end
+
 --- Get the area covered by a drawin.
 -- @param d The drawin
 -- @tparam[opt=nil] table new_geo A new geometry
@@ -283,7 +313,7 @@ local function geometry_common(obj, args, new_geo, ignore_border_width)
 
     -- It's a mouse
     if obj.coords then
-        local coords = (not args.pretend and new_geo)
+        local coords = fix_new_geometry(new_geo, args)
             and obj.coords(new_geo) or obj.coords()
         return {x=coords.x, y=coords.y, width=0, height=0}
     elseif obj.geometry then
@@ -292,7 +322,7 @@ local function geometry_common(obj, args, new_geo, ignore_border_width)
         -- It is either a drawable or something that implement its API
         if type(geo) == "function" then
             local dgeo = area_common(
-                obj, (not args.pretend) and new_geo or nil, ignore_border_width
+                obj, fix_new_geometry(new_geo, args), ignore_border_width
             )
 
             -- When using the placement composition along with the "pretend"
