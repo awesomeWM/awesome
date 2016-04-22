@@ -10,12 +10,10 @@
 -- Grab environment we need
 local layout = require("awful.layout")
 local tag = require("awful.tag")
-local aclient = require("awful.client")
 local aplace = require("awful.placement")
 local awibox = require("awful.wibox")
 local util = require("awful.util")
 local type = type
-local math = math
 local ipairs = ipairs
 local capi =
 {
@@ -154,10 +152,13 @@ end
 --- Move a client.
 -- @param c The client to move, or the focused one if nil.
 -- @param snap The pixel to snap clients.
--- @param finished_cb An optional callback function, that will be called
---   when moving the client has been finished. The client
---   that has been moved will be passed to that function.
-function mouse.client.move(c, snap, finished_cb)
+-- @param finished_cb Deprecated, do not use
+function mouse.client.move(c, snap, finished_cb) --luacheck: no unused args
+    if finished_cb then
+        util.deprecated("The mouse.client.move `finished_cb` argument is no longer"..
+            " used, please use awful.mouse.resize.add_leave_callback(f, 'mouse.move')")
+    end
+
     c = c or capi.client.focus
 
     if not c
@@ -168,53 +169,16 @@ function mouse.client.move(c, snap, finished_cb)
         return
     end
 
-    local orig = c:geometry()
-    local m_c = capi.mouse.coords()
-    local dist_x = m_c.x - orig.x
-    local dist_y = m_c.y - orig.y
-    -- Only allow moving in the non-maximized directions
-    local fixed_x = c.maximized_horizontal
-    local fixed_y = c.maximized_vertical
+    -- Compute the offset
+    local coords = capi.mouse.coords()
+    local geo    = aplace.centered(capi.mouse,{parent=c, pretend=true})
 
-    capi.mousegrabber.run(function (_mouse)
-                              if not c.valid then return false end
+    local offset = {
+        x = geo.x - coords.x,
+        y = geo.y - coords.y,
+    }
 
-                              for _, v in ipairs(_mouse.buttons) do
-                                  if v then
-                                      local lay = layout.get(c.screen)
-                                      if lay == layout.suit.floating or c.floating then
-                                          local x = _mouse.x - dist_x
-                                          local y = _mouse.y - dist_y
-                                          c:geometry(mouse.client.snap(c, snap, x, y, fixed_x, fixed_y))
-                                      elseif lay ~= layout.suit.magnifier then
-                                          -- Only move the client to the mouse
-                                          -- screen if the target screen is not
-                                          -- floating.
-                                          -- Otherwise, we move if via geometry.
-                                          if layout.get(capi.mouse.screen) == layout.suit.floating then
-                                              local x = _mouse.x - dist_x
-                                              local y = _mouse.y - dist_y
-                                              c:geometry(mouse.client.snap(c, snap, x, y, fixed_x, fixed_y))
-                                          else
-                                              c.screen = capi.mouse.screen
-                                          end
-                                          if layout.get(c.screen) ~= layout.suit.floating then
-                                              local c_u_m = mouse.client_under_pointer()
-                                              if c_u_m and not c_u_m.floating then
-                                                  if c_u_m ~= c then
-                                                      c:swap(c_u_m)
-                                                  end
-                                              end
-                                          end
-                                      end
-                                      return true
-                                  end
-                              end
-                              if finished_cb then
-                                  finished_cb(c)
-                              end
-                              return false
-                          end, "fleur")
+    mouse.resize(c, "mouse.move", {placement=aplace.under_mouse, offset=offset})
 end
 
 mouse.client.dragtotag = { }
@@ -362,11 +326,22 @@ function mouse.resize_handler(c, context, hints)
         local lay = c.screen.selected_tag.layout
 
         if lay == layout.suit.floating or c.floating then
+            local offset = hints and hints.offset or {}
+
+            if type(offset) == "number" then
+                offset = {
+                    x      = offset,
+                    y      = offset,
+                    width  = offset,
+                    height = offset,
+                }
+            end
+
             c:geometry {
-                x      = hints.x,
-                y      = hints.y,
-                width  = hints.width,
-                height = hints.height,
+                x      = hints.x      + (offset.x      or 0 ),
+                y      = hints.y      + (offset.y      or 0 ),
+                width  = hints.width  + (offset.width  or 0 ),
+                height = hints.height + (offset.height or 0 ),
             }
         elseif lay.resize_handler then
             lay.resize_handler(c, context, hints)
