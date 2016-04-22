@@ -8,6 +8,7 @@
 ---------------------------------------------------------------------------
 
 local aclient = require("awful.client")
+local resize  = require("awful.mouse.resize")
 
 local capi = {
     root = root,
@@ -120,6 +121,16 @@ function module.snap(c, snap, x, y, fixed_x, fixed_y)
 
     return geom
 end
+
+-- Enable edge snapping
+resize.add_move_callback(function(c, geo, args)
+    if args and (args.snap == nil or args.snap) then
+        local ngeo = module.snap(c, args.snap, geo.x, geo.y)
+        ngeo.x = ngeo.x + (2 * c.border_width)
+        ngeo.y = ngeo.y + (2 * c.border_width)
+        return ngeo
+    end
+end, "mouse.move")
 
 return setmetatable(module, {__call = function(_, ...) return module.snap(...) end})
 

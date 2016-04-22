@@ -84,7 +84,11 @@ function mouse.client.move(c, snap, finished_cb) --luacheck: no unused args
         y = geo.y - coords.y,
     }
 
-    mouse.resize(c, "mouse.move", {placement=aplace.under_mouse, offset=offset})
+    mouse.resize(c, "mouse.move", {
+        placement = aplace.under_mouse,
+        offset    = offset,
+        snap      = snap
+    })
 end
 
 mouse.client.dragtotag = { }
