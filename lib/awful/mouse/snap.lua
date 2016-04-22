@@ -9,6 +9,7 @@
 
 local aclient = require("awful.client")
 local resize  = require("awful.mouse.resize")
+local aplace = require("awful.placement")
 
 local capi = {
     root = root,
@@ -21,6 +22,54 @@ local capi = {
 local module = {
     default_distance = 8
 }
+
+local function detect_screen_edges(c, snap)
+    local coords = capi.mouse.coords()
+
+    local sg = c.screen.geometry
+
+    local v, h = nil
+
+    if math.abs(coords.x) <= snap + sg.x and coords.x >= sg.x then
+        h = "left"
+    end
+
+    if math.abs((sg.x + sg.width) - coords.x) <= snap then
+        h = "right"
+    end
+
+    if math.abs(coords.y) <= snap + sg.y and coords.y >= sg.y then
+        v = "top"
+    end
+
+    if math.abs((sg.y + sg.height) - coords.y) <= snap then
+        v = "bottom"
+    end
+
+    return v, h
+end
+
+local current_snap = nil
+
+local function detect_areasnap(c, distance)
+    local v, h = detect_screen_edges(c, distance)
+
+    if v and h then
+        current_snap = v.."_"..h
+    else
+        current_snap = v or h or nil
+    end
+
+end
+
+local function apply_areasnap(c, args)
+    if not current_snap then return end
+
+    -- Remove the move offset
+    args.offset = {}
+
+    return aplace[current_snap](c,{honor_workarea=true})
+end
 
 local function snap_outside(g, sg, snap)
     if g.x < snap + sg.x + sg.width and g.x > sg.x + sg.width then
@@ -124,6 +173,12 @@ end
 
 -- Enable edge snapping
 resize.add_move_callback(function(c, geo, args)
+    -- Screen edge snapping (areosnap)
+    if args and (args.snap == nil or args.snap) then--TODO add a config option
+        detect_areasnap(c, 16)
+    end
+
+    -- Snapping between clients
     if args and (args.snap == nil or args.snap) then
         local ngeo = module.snap(c, args.snap, geo.x, geo.y)
         ngeo.x = ngeo.x + (2 * c.border_width)
@@ -132,5 +187,9 @@ resize.add_move_callback(function(c, geo, args)
     end
 end, "mouse.move")
 
-return setmetatable(module, {__call = function(_, ...) return module.snap(...) end})
+-- Apply the aerosnap
+resize.add_leave_callback(function(c, _, args)
+    return apply_areasnap(c, args)
+end, "mouse.move")
 
+return setmetatable(module, {__call = function(_, ...) return module.snap(...) end})
