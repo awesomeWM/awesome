@@ -32,6 +32,11 @@ local mouse = {
 mouse.client = {}
 mouse.wibox = {}
 
+--- The default snap distance.
+-- @tfield integer awful.mouse.snap.default_distance
+-- @tparam[opt=8] integer default_distance
+-- @see awful.mouse.snap
+
 --- Get the client object under the pointer.
 -- @return The client object under the pointer, if one can be found.
 function mouse.client_under_pointer()

@@ -4,7 +4,7 @@
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2008 Julien Danjou
 -- @release @AWESOME_VERSION@
--- @submodule awful.mouse.snap
+-- @submodule awful.mouse
 ---------------------------------------------------------------------------
 
 local aclient = require("awful.client")
@@ -17,7 +17,9 @@ local capi = {
     mousegrabber = mousegrabber,
 }
 
-local module = {}
+local module = {
+    default_distance = 8
+}
 
 local function snap_outside(g, sg, snap)
     if g.x < snap + sg.x + sg.width and g.x > sg.x + sg.width then
@@ -67,7 +69,7 @@ end
 -- @param fixed_x True if the client isn't allowed to move in the x direction.
 -- @param fixed_y True if the client isn't allowed to move in the y direction.
 function module.snap(c, snap, x, y, fixed_x, fixed_y)
-    snap = snap or 8
+    snap = snap or module.default_distance
     c = c or capi.client.focus
     local cur_geom = c:geometry()
     local geom = c:geometry()
