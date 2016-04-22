@@ -721,14 +721,24 @@ end
 
 --- Place the client under the mouse.
 --@DOC_awful_placement_under_mouse_EXAMPLE@
--- @param c The client.
+-- @tparam drawable d A drawable (like `client`, `mouse` or `wibox`)
+-- @tparam[opt={}] table args Other arguments
 -- @treturn table The new geometry
-function placement.under_mouse(c)
-    c = c or capi.client.focus
-    local c_geometry = area_common(c)
+function placement.under_mouse(d, args)
+    args = add_context(args, "under_mouse")
+    d = d or capi.client.focus
+
     local m_coords = capi.mouse.coords()
-    return c:geometry({ x = m_coords.x - c_geometry.width / 2,
-                        y = m_coords.y - c_geometry.height / 2 })
+
+    local ngeo = geometry_common(d, args)
+    ngeo.x = m_coords.x - ngeo.width  / 2
+    ngeo.y = m_coords.y - ngeo.height / 2
+
+    local bw = d.border_width or 0
+    ngeo.width  = ngeo.width  - 2*bw
+    ngeo.height = ngeo.height - 2*bw
+
+    return ngeo
 end
 
 --- Place the client next to the mouse.
