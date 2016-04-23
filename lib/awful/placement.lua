@@ -1055,6 +1055,58 @@ for _, v in ipairs {"vertically", "horizontally"} do
     end
 end
 
+--- Scale the drawable by either a relative or absolute percent.
+--
+-- Valid args:
+--
+-- **to_percent** : A number between 0 and 1. It represent a percent related to
+--  the parent geometry.
+-- **by_percent** : A number between 0 and 1. It represent a percent related to
+--  the current size.
+-- **direction**: Nothing or "left", "right", "up", "down".
+--
+-- @tparam[opt=client.focus] drawable d A drawable (like `client` or `wibox`)
+-- @tparam[opt={}] table args The arguments
+-- @treturn table The new geometry
+function placement.scale(d, args)
+    args = add_context(args, "scale_to_percent")
+    d    = d or capi.client.focus
+
+    local to_percent = args.to_percent
+    local by_percent = args.by_percent
+
+    local percent = to_percent or by_percent
+
+    local direction = args.direction
+
+    local sgeo = get_parent_geometry(d, args)
+    local ngeo = geometry_common(d, args, nil)
+
+    local old_area = {width = ngeo.width, height = ngeo.height}
+
+    if (not direction) or direction == "left" or direction == "right" then
+        ngeo.width = (to_percent and sgeo or ngeo).width*percent
+
+        if direction == "left" then
+            ngeo.x = ngeo.x - (ngeo.width - old_area.width)
+        end
+    end
+
+    if (not direction) or direction == "up" or direction == "down" then
+        ngeo.height = (to_percent and sgeo or ngeo).height*percent
+
+        if direction == "up" then
+            ngeo.y = ngeo.y - (ngeo.height - old_area.height)
+        end
+    end
+
+    geometry_common(d, args, ngeo)
+
+    attach(d, placement.maximize, args)
+
+    return ngeo
+end
+
 ---@DOC_awful_placement_maximize_vertically_EXAMPLE@
 
 ---@DOC_awful_placement_maximize_horizontally_EXAMPLE@
