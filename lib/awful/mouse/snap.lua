@@ -7,9 +7,14 @@
 -- @submodule awful.mouse
 ---------------------------------------------------------------------------
 
-local aclient = require("awful.client")
-local resize  = require("awful.mouse.resize")
-local aplace = require("awful.placement")
+local aclient   = require("awful.client")
+local resize    = require("awful.mouse.resize")
+local aplace    = require("awful.placement")
+local wibox     = require("wibox")
+local beautiful = require("beautiful")
+local color     = require("gears.color")
+local shape     = require("gears.shape")
+local cairo     = require("lgi").cairo
 
 local capi = {
     root = root,
@@ -23,6 +28,49 @@ local module = {
     default_distance = 8
 }
 
+local placeholder_w = nil
+
+local function show_placeholder(geo)
+    if not geo then
+        if placeholder_w then
+            placeholder_w.visible = false
+        end
+        return
+    end
+
+    placeholder_w = placeholder_w or wibox {
+        ontop = true,
+        bg    = color(beautiful.snap_bg or beautiful.bg_urgent or "#ff0000"),
+    }
+
+    placeholder_w:geometry(geo)
+
+    local img = cairo.ImageSurface(cairo.Format.A1, geo.width, geo.height)
+    local cr = cairo.Context(img)
+
+    cr:set_operator(cairo.Operator.CLEAR)
+    cr:set_source_rgba(0,0,0,1)
+    cr:paint()
+    cr:set_operator(cairo.Operator.SOURCE)
+    cr:set_source_rgba(1,1,1,1)
+
+    local line_width = beautiful.snap_border_width or 5
+    cr:set_line_width(beautiful.xresources.apply_dpi(line_width))
+
+    local f = beautiful.snap_shape or function()
+        cr:translate(line_width,line_width)
+        shape.rounded_rect(cr,geo.width-2*line_width,geo.height-2*line_width, 10)
+    end
+
+    f(cr, geo.width, geo.height)
+
+    cr:stroke()
+
+    placeholder_w.shape_bounding = img._native
+
+    placeholder_w.visible = true
+end
+
 local function detect_screen_edges(c, snap)
     local coords = capi.mouse.coords()
 
@@ -32,17 +80,13 @@ local function detect_screen_edges(c, snap)
 
     if math.abs(coords.x) <= snap + sg.x and coords.x >= sg.x then
         h = "left"
-    end
-
-    if math.abs((sg.x + sg.width) - coords.x) <= snap then
+    elseif math.abs((sg.x + sg.width) - coords.x) <= snap then
         h = "right"
     end
 
     if math.abs(coords.y) <= snap + sg.y and coords.y >= sg.y then
         v = "top"
-    end
-
-    if math.abs((sg.y + sg.height) - coords.y) <= snap then
+    elseif math.abs((sg.y + sg.height) - coords.y) <= snap then
         v = "bottom"
     end
 
@@ -52,12 +96,23 @@ end
 local current_snap = nil
 
 local function detect_areasnap(c, distance)
+    local old_snap = current_snap
     local v, h = detect_screen_edges(c, distance)
 
     if v and h then
         current_snap = v.."_"..h
     else
         current_snap = v or h or nil
+    end
+
+    -- Show the expected geometry outline
+    if current_snap ~= old_snap then
+        show_placeholder(
+            current_snap and aplace[current_snap](c, {
+                honor_workarea = true,
+                pretend        = true
+            }) or nil
+        )
     end
 
 end
@@ -67,6 +122,8 @@ local function apply_areasnap(c, args)
 
     -- Remove the move offset
     args.offset = {}
+
+    placeholder_w.visible = false
 
     return aplace[current_snap](c,{honor_workarea=true})
 end

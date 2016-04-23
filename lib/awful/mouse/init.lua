@@ -37,6 +37,18 @@ mouse.wibox = {}
 -- @tparam[opt=8] integer default_distance
 -- @see awful.mouse.snap
 
+--- The snap outline background color.
+-- @beautiful beautiful.snap_bg
+-- @tparam color|string|gradient|pattern color
+
+--- The snap outline width.
+-- @beautiful beautiful.snap_border_width
+-- @param integer
+
+--- The snap outline width.
+-- @beautiful beautiful.snap_shape
+-- @tparam function shape A `gears.shape` compatible function
+
 --- Get the client object under the pointer.
 -- @return The client object under the pointer, if one can be found.
 function mouse.client_under_pointer()
