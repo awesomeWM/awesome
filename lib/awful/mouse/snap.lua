@@ -71,6 +71,14 @@ local function show_placeholder(geo)
     placeholder_w.visible = true
 end
 
+local function build_placement(snap, axis)
+    return aplace.scale
+        + aplace[snap]
+        + (
+            axis and aplace["maximize_"..axis] or nil
+          )
+end
+
 local function detect_screen_edges(c, snap)
     local coords = capi.mouse.coords()
 
@@ -93,7 +101,7 @@ local function detect_screen_edges(c, snap)
     return v, h
 end
 
-local current_snap = nil
+local current_snap, current_axis = nil
 
 local function detect_areasnap(c, distance)
     local old_snap = current_snap
@@ -105,15 +113,20 @@ local function detect_areasnap(c, distance)
         current_snap = v or h or nil
     end
 
+    if old_snap == current_snap then return end
+
+    current_axis = ((v and not h) and "horizontally")
+        or ((h and not v) and "vertically")
+        or nil
+
     -- Show the expected geometry outline
-    if current_snap ~= old_snap then
-        show_placeholder(
-            current_snap and aplace[current_snap](c, {
-                honor_workarea = true,
-                pretend        = true
-            }) or nil
-        )
-    end
+    show_placeholder(
+        current_snap and build_placement(current_snap, current_axis)(c, {
+            to_percent     = 0.5,
+            honor_workarea = true,
+            pretend        = true
+        }) or nil
+    )
 
 end
 
@@ -125,7 +138,10 @@ local function apply_areasnap(c, args)
 
     placeholder_w.visible = false
 
-    return aplace[current_snap](c,{honor_workarea=true})
+    return build_placement(current_snap, current_axis)(c,{
+        to_percent     = 0.5,
+        honor_workarea = true,
+    })
 end
 
 local function snap_outside(g, sg, snap)
