@@ -97,7 +97,7 @@ end
 -- @param fixed_y True if the client isn't allowed to move in the y direction.
 function mouse.client.snap(c, snap, x, y, fixed_x, fixed_y)
     snap = snap or 8
-    c = c or mouse.client.focus
+    c = c or capi.client.focus
     local cur_geom = c:geometry()
     local geom = c:geometry()
     geom.width = geom.width + (2 * c.border_width)
