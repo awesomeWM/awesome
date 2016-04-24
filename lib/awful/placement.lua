@@ -9,14 +9,16 @@
 -- * Turn each function into an API with various common customization parameters.
 -- * Re-use the same functions for the `mouse`, `client`s, `screen`s and `wibox`es
 -- 
--- 
+--
+-- <h3>Compositing</h3>
 --
 -- It is possible to compose placement function using the `+` or `*` operator:
 --
---    local f = (awful.placement.right + awful.placement.left)
---    f(client.focus)
+--@DOC_awful_placement_compose_EXAMPLE@
 --
--- ### Common arguments
+--@DOC_awful_placement_compose2_EXAMPLE@
+--
+-- <h3>Common arguments</h3>
 --
 -- **pretend** (*boolean*):
 --
@@ -86,6 +88,7 @@ local capi =
 local client = require("awful.client")
 local layout = require("awful.layout")
 local a_screen = require("awful.screen")
+local util = require("awful.util")
 local dpi = require("beautiful").xresources.apply_dpi
 
 local function get_screen(s)
@@ -137,7 +140,7 @@ local function compose(...)
 
         for k, f in ipairs(queue) do
             if k == #queue then
-                args.pretent = pretend_real
+                args.pretend = pretend_real or false
             end
 
             local r = {f(d, args, ...)}
@@ -286,11 +289,19 @@ end
 -- @param d The drawin
 -- @tparam[opt=nil] table new_geo A new geometry
 -- @tparam[opt=false] boolean ignore_border_width Ignore the border
+-- @tparam table args the method arguments
 -- @treturn The drawin's area.
-local function area_common(d, new_geo, ignore_border_width)
+local function area_common(d, new_geo, ignore_border_width, args)
     -- The C side expect no arguments, nil isn't valid
     local geometry = new_geo and d:geometry(new_geo) or d:geometry()
     local border = ignore_border_width and 0 or d.border_width or 0
+
+    -- When using the placement composition along with the "pretend"
+    -- option, it is necessary to keep a "virtual" geometry.
+    if args and args.override_geometry then
+        geometry = util.table.clone(args.override_geometry)
+    end
+
     geometry.width = geometry.width + 2 * border
     geometry.height = geometry.height + 2 * border
     return geometry
@@ -322,14 +333,8 @@ local function geometry_common(obj, args, new_geo, ignore_border_width)
         -- It is either a drawable or something that implement its API
         if type(geo) == "function" then
             local dgeo = area_common(
-                obj, fix_new_geometry(new_geo, args), ignore_border_width
+                obj, fix_new_geometry(new_geo, args), ignore_border_width, args
             )
-
-            -- When using the placement composition along with the "pretend"
-            -- option, it is necessary to keep a "virtual" geometry.
-            if args.override_geometry then
-                dgeo = args.override_geometry
-            end
 
             -- Apply the margins
             if args.margins then
@@ -1099,6 +1104,10 @@ function placement.scale(d, args)
             ngeo.y = ngeo.y - (ngeo.height - old_area.height)
         end
     end
+
+    local bw = d.border_width or 0
+    ngeo.width  = ngeo.width  - 2*bw
+    ngeo.height = ngeo.height - 2*bw
 
     geometry_common(d, args, ngeo)
 
