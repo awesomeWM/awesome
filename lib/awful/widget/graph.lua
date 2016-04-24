@@ -161,8 +161,9 @@ function graph.fit(_graph)
 end
 
 --- Add a value to the graph
--- @param _graph The graph.
--- @param value The value between 0 and 1.
+--
+-- @function add_value
+-- @param value The value to be added to the graph
 -- @param group The stack color group index.
 local function add_value(_graph, value, group)
     if not _graph then return end
