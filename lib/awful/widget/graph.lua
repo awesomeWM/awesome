@@ -162,51 +162,44 @@ end
 
 --- Add a value to the graph
 --
--- @function add_value
 -- @param value The value to be added to the graph
 -- @param group The stack color group index.
-local function add_value(_graph, value, group)
-    if not _graph then return end
-
+function graph:add_value(value, group)
     value = value or 0
-    local values = _graph._data.values
-    local max_value = _graph._data.max_value
+    local values = self._data.values
+    local max_value = self._data.max_value
     value = math.max(0, value)
-    if not _graph._data.scale then
+    if not self._data.scale then
         value = math.min(max_value, value)
     end
 
-    if _graph._data.stack and group then
-        if not  _graph._data.values[group]
-        or type(_graph._data.values[group]) ~= "table"
+    if self._data.stack and group then
+        if not  self._data.values[group]
+        or type(self._data.values[group]) ~= "table"
         then
-            _graph._data.values[group] = {}
+            self._data.values[group] = {}
         end
-        values = _graph._data.values[group]
+        values = self._data.values[group]
     end
     table.insert(values, value)
 
     local border_width = 0
-    if _graph._data.border_color then border_width = 2 end
+    if self._data.border_color then border_width = 2 end
 
     -- Ensure we never have more data than we can draw
-    while #values > _graph._data.width - border_width do
+    while #values > self._data.width - border_width do
         table.remove(values, 1)
     end
 
-    _graph:emit_signal("widget::redraw_needed")
-    return _graph
+    self:emit_signal("widget::redraw_needed")
+    return self
 end
 
 --- Clear the graph.
---
--- @function clear
-local function clear(_graph)
-    if not _graph then return end
-
-    _graph._data.values = {}
-    _graph:emit_signal("widget::redraw_needed")
-    return _graph
+function graph:clear()
+    self._data.values = {}
+    self:emit_signal("widget::redraw_needed")
+    return self
 end
 
 --- Set the graph height.
@@ -264,8 +257,8 @@ function graph.new(args)
     _graph._data = { width = width, height = height, values = {}, max_value = 1 }
 
     -- Set methods
-    _graph.add_value = add_value
-    _graph.clear = clear
+    _graph.add_value = graph["add_value"]
+    _graph.clear = graph["clear"]
     _graph.draw = graph.draw
     _graph.fit = graph.fit
 
