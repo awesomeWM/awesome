@@ -127,8 +127,8 @@ luaA_mousegrabber_stop(lua_State *L)
 
 /** Check if mousegrabber is running.
  *
- * @return A boolean value, true if running, false otherwise.
- * function isrunning
+ * @treturn boolean True if running, false otherwise.
+ * @function isrunning
  */
 static int
 luaA_mousegrabber_isrunning(lua_State *L)
