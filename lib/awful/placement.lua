@@ -660,6 +660,7 @@ end
 -- * *axis*: The axis (vertical or horizontal). If none is
 --    specified, then the drawable will be resized on both axis.
 --
+--@DOC_awful_placement_resize_to_mouse_EXAMPLE@
 -- @tparam drawable d A drawable (like `client`, `mouse` or `wibox`)
 -- @tparam[opt={}] table args Other arguments
 function placement.resize_to_mouse(d, args)
