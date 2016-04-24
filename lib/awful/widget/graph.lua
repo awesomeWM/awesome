@@ -197,6 +197,16 @@ local function add_value(_graph, value, group)
     return _graph
 end
 
+--- Clear the graph.
+--
+-- @function clear
+local function clear(_graph)
+    if not _graph then return end
+
+    _graph._data.values = {}
+    _graph:emit_signal("widget::redraw_needed")
+    return _graph
+end
 
 --- Set the graph height.
 -- @param height The height to set.
@@ -254,6 +264,7 @@ function graph.new(args)
 
     -- Set methods
     _graph.add_value = add_value
+    _graph.clear = clear
     _graph.draw = graph.draw
     _graph.fit = graph.fit
 
