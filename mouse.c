@@ -19,7 +19,39 @@
  *
  */
 
-/** awesome mouse API
+/** awesome mouse API.
+ *
+ * The mouse buttons are represented as index. The common ones are:
+ *
+ * ![Client geometry](../images/mouse.svg)
+ *
+ * It is possible to be notified of mouse events by connecting to various
+ * `client`, `widget`s and `wibox` signals:
+ *
+ *  * `mouse::enter`
+ *  * `mouse::leave`
+ *  * `mouse::press`
+ *  * `mouse::release`
+ *  * `mouse::move`
+ *
+ * It is also possible to add generic mouse button callbacks for `client`s,
+ * `wiboxe`s and the `root` window. Those are set in the default `rc.lua` as such:
+ *
+ * **root**:
+ *
+ *    root.buttons(awful.util.table.join(
+ *        awful.button({ }, 3, function () mymainmenu:toggle() end),
+ *        awful.button({ }, 4, awful.tag.viewnext),
+ *        awful.button({ }, 5, awful.tag.viewprev)
+ *    ))
+ *
+ * **client**:
+ *
+ *    clientbuttons = awful.util.table.join(
+ *        awful.button({ }, 1, function (c) client.focus = c; c:raise() end),
+ *        awful.button({ modkey }, 1, awful.mouse.client.move),
+ *        awful.button({ modkey }, 3, awful.mouse.client.resize)
+ *    )
  *
  * See also `mousegrabber`
  *
