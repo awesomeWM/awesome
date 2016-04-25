@@ -53,21 +53,11 @@ mouse.wibox = {}
 --- Get the client object under the pointer.
 -- @deprecated awful.mouse.client_under_pointer
 -- @return The client object under the pointer, if one can be found.
+-- @see current_client
 function mouse.client_under_pointer()
-    local obj = capi.mouse.object_under_pointer()
-    if type(obj) == "client" then
-        return obj
-    end
-end
+    util.deprecated("Use mouse.current_client instead of awful.mouse.client_under_pointer()")
 
---- Get the drawin object under the pointer.
--- @deprecated awful.mouse.drawin_under_pointer
--- @return The drawin object under the pointer, if one can be found.
-function mouse.drawin_under_pointer()
-    local obj = capi.mouse.object_under_pointer()
-    if type(obj) == "drawin" then
-        return obj
-    end
+    return mouse.object.get_current_client()
 end
 
 --- Move a client.
@@ -279,6 +269,32 @@ function mouse.resize_handler(c, context, hints)
         end
     end
 end
+
+--- Get the client currently under the mouse cursor.
+-- @property current_client
+-- @tparam client|nil The client
+
+function mouse.object.get_current_client()
+    local obj = capi.mouse.object_under_pointer()
+    if type(obj) == "client" then
+        return obj
+    end
+end
+
+function mouse.object.set_current_client() end
+
+--- Get the wibox currently under the mouse cursor.
+-- @property current_wibox
+-- @tparam wibox|nil The wibox
+
+function mouse.object.get_current_wibox()
+    local obj = capi.mouse.object_under_pointer()
+    if type(obj) == "drawin" then
+        return obj
+    end
+end
+
+function mouse.object.set_current_wibox() end
 
 capi.client.connect_signal("request::geometry", mouse.resize_handler)
 
