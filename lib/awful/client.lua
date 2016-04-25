@@ -446,12 +446,14 @@ function client.object.to_selected_tags(self)
         end
     end
 
-    if #tags == 0 then
-        tags = self.screen.selected_tags
-    end
+    if self.screen then
+        if #tags == 0 then
+            tags = self.screen.selected_tags
+        end
 
-    if #tags == 0 then
-        tags = self.screen.tags
+        if #tags == 0 then
+            tags = self.screen.tags
+        end
     end
 
     if #tags ~= 0 then
