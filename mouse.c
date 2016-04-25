@@ -237,20 +237,7 @@ luaA_mouse_pushstatus(lua_State *L, int x, int y, uint16_t mask)
     return 1;
 }
 
-/** Get or set the mouse coords.
- *
- * @tparam[opt=nil] table coords_table None or a table with x and y keys as mouse
- *  coordinates.
- * @tparam[opt=nil] integer coords_table.x The mouse horizontal position
- * @tparam[opt=nil] integer coords_table.y The mouse vertical position
- * @tparam[opt=false] boolean silent Disable mouse::enter or mouse::leave events that
- *  could be triggered by the pointer when moving.
- * @treturn integer table.x The horizontal position
- * @treturn integer table.y The vertical position
- * @treturn table table.buttons Table containing the status of buttons, e.g. field [1] is true
- *  when button 1 is pressed.
- * @function coords
- */
+/* documented in lib/awful/mouse/init.lua */
 static int
 luaA_mouse_coords(lua_State *L)
 {

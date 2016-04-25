@@ -304,6 +304,23 @@ capi.mouse.set_index_miss_handler(function(_,key)
     end
 end)
 
+--- Get or set the mouse coords.
+--
+--@DOC_awful_mouse_coords_EXAMPLE@
+--
+-- @tparam[opt=nil] table coords_table None or a table with x and y keys as mouse
+--  coordinates.
+-- @tparam[opt=nil] integer coords_table.x The mouse horizontal position
+-- @tparam[opt=nil] integer coords_table.y The mouse vertical position
+-- @tparam[opt=false] boolean silent Disable mouse::enter or mouse::leave events that
+--  could be triggered by the pointer when moving.
+-- @treturn integer table.x The horizontal position
+-- @treturn integer table.y The vertical position
+-- @treturn table table.buttons Table containing the status of buttons, e.g. field [1] is true
+--  when button 1 is pressed.
+-- @function mouse.coords
+
+
 return mouse
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
