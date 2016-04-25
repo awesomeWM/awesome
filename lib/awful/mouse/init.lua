@@ -296,6 +296,26 @@ end
 
 function mouse.object.set_current_wibox() end
 
+--- True if the left mouse button is pressed.
+-- @property is_left_mouse_button_pressed
+-- @param boolean
+
+--- True if the right mouse button is pressed.
+-- @property is_right_mouse_button_pressed
+-- @param boolean
+
+--- True if the middle mouse button is pressed.
+-- @property is_middle_mouse_button_pressed
+-- @param boolean
+
+for _, b in ipairs {"left", "right", "middle"} do
+    mouse.object["is_".. b .."_mouse_button_pressed"] = function()
+        return capi.mouse.coords().buttons[1]
+    end
+
+    mouse.object["set_is_".. b .."_mouse_button_pressed"] = function() end
+end
+
 capi.client.connect_signal("request::geometry", mouse.resize_handler)
 
 -- Set the cursor at startup
