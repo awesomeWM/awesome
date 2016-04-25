@@ -29,6 +29,7 @@ local mouse = {
     snap   = require("awful.mouse.snap"),
 }
 
+mouse.object = {}
 mouse.client = {}
 mouse.wibox = {}
 
@@ -275,6 +276,25 @@ capi.client.connect_signal("request::geometry", mouse.resize_handler)
 
 -- Set the cursor at startup
 capi.root.cursor("left_ptr")
+
+-- Implement the custom property handler
+local props = {}
+
+capi.mouse.set_newindex_miss_handler(function(_,key,value)
+    if mouse.object["set_"..key] then
+        mouse.object["set_"..key](value)
+    else
+        props[key] = value
+    end
+end)
+
+capi.mouse.set_index_miss_handler(function(_,key)
+    if mouse.object["get_"..key] then
+        return mouse.object["get_"..key]()
+    else
+        return props[key]
+    end
+end)
 
 return mouse
 
