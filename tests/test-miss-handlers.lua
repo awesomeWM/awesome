@@ -1,5 +1,6 @@
 -- Test set_{,new}index_miss_handler
 
+local mouse = mouse
 local class = tag
 local obj = class({})
 local handler = require("gears.object.properties")
@@ -29,5 +30,9 @@ handler(class, {auto_emit=true})
 assert(not obj.key)
 obj.key = 1337
 assert(obj.key == 1337)
+
+-- The the custom mouse handler
+mouse.foo = "bar"
+assert(mouse.foo == "bar")
 
 require("_runner").run_steps({ function() return true end })
