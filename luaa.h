@@ -206,7 +206,7 @@ luaA_getopt_integer(lua_State *L, int idx, const char *name, lua_Integer def)
 }
 
 static inline int
-luaA_checkinteger_range(lua_State *L, int n, int min, int max)
+luaA_checkinteger_range(lua_State *L, int n, lua_Number min, lua_Number max)
 {
     int result = luaA_checkinteger(L, n);
     if (result < min || result > max)
@@ -215,7 +215,7 @@ luaA_checkinteger_range(lua_State *L, int n, int min, int max)
 }
 
 static inline lua_Integer
-luaA_optinteger_range(lua_State *L, int narg, lua_Integer def, int min, int max)
+luaA_optinteger_range(lua_State *L, int narg, lua_Integer def, lua_Number min, lua_Number max)
 {
     if (lua_isnoneornil(L, narg))
         return def;
@@ -223,7 +223,7 @@ luaA_optinteger_range(lua_State *L, int narg, lua_Integer def, int min, int max)
 }
 
 static inline int
-luaA_getopt_integer_range(lua_State *L, int idx, const char *name, lua_Integer def, int min, int max)
+luaA_getopt_integer_range(lua_State *L, int idx, const char *name, lua_Integer def, lua_Number min, lua_Number max)
 {
     lua_getfield(L, idx, name);
     if (lua_isnil(L, -1) || lua_isnumber(L, -1))
