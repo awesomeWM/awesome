@@ -389,7 +389,7 @@ function rules.execute(c, props, callbacks)
 
     -- Geometry will only work if floating is true, otherwise the "saved"
     -- geometry will be restored.
-    if props.floating then
+    if props.floating ~= nil then
         c.floating = type(props.floating) == "function" and props.floating(c,props)
             or props.floating
     end
