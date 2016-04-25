@@ -42,22 +42,10 @@
 static int miss_index_handler    = LUA_REFNIL;
 static int miss_newindex_handler = LUA_REFNIL;
 
-/** Mouse library.
- *
- * @table mouse
- */
-
 /**
  * The `screen` under the cursor
- * @field screen
- */
-
-/** A table with X and Y coordinates.
- * @field x X coordinate.
- * @field y Y coordinate.
- * @field buttons Table containing the status of buttons, e.g. field [1] is true
- *        when button 1 is pressed.
- * @table coords_table
+ * @property screen
+ * @param screen
  */
 
 /** Get the pointer position.
@@ -251,11 +239,16 @@ luaA_mouse_pushstatus(lua_State *L, int x, int y, uint16_t mask)
 
 /** Get or set the mouse coords.
  *
- * @tparam coords_table coords_table None or a table with x and y keys as mouse
+ * @tparam[opt=nil] table coords_table None or a table with x and y keys as mouse
  *  coordinates.
- * @tparam boolean silent Disable mouse::enter or mouse::leave events that
+ * @tparam[opt=nil] integer coords_table.x The mouse horizontal position
+ * @tparam[opt=nil] integer coords_table.y The mouse vertical position
+ * @tparam[opt=false] boolean silent Disable mouse::enter or mouse::leave events that
  *  could be triggered by the pointer when moving.
- * @treturn coords_table A table with mouse coordinates.
+ * @treturn integer table.x The horizontal position
+ * @treturn integer table.y The vertical position
+ * @treturn table table.buttons Table containing the status of buttons, e.g. field [1] is true
+ *  when button 1 is pressed.
  * @function coords
  */
 static int

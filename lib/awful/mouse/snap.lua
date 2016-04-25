@@ -4,7 +4,7 @@
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2008 Julien Danjou
 -- @release @AWESOME_VERSION@
--- @submodule awful.mouse
+-- @submodule mouse
 ---------------------------------------------------------------------------
 
 local aclient   = require("awful.client")
@@ -185,6 +185,7 @@ local function snap_inside(g, sg, snap)
 end
 
 --- Snap a client to the closest client or screen edge.
+-- @function awful.mouse.snap
 -- @param c The client to snap.
 -- @param snap The pixel to snap clients.
 -- @param x The client x coordinate.

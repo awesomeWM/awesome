@@ -67,6 +67,7 @@ file = {
     '../docs/aliases/awful_client.lua',
     '../docs/aliases/awful_screen.lua',
     '../docs/aliases/awful_tag.lua',
+    '../docs/aliases/awful_mouse.lua',
     exclude = {
         -- exclude these modules, as they do not contain any written
         -- documentation

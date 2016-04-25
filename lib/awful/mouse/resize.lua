@@ -7,7 +7,7 @@
 -- @author Emmanuel Lepage Vallee &lt;elv1313@gmail.com&gt;
 -- @copyright 2016 Emmanuel Lepage Vallee
 -- @release @AWESOME_VERSION@
--- @submodule awful.mouse
+-- @submodule mouse
 ---------------------------------------------------------------------------
 
 local aplace = require("awful.placement")
@@ -27,6 +27,7 @@ local callbacks = {enter={}, move={}, leave={}}
 --
 -- Some clients, such as XTerm, may lose information if resized too often.
 --
+-- @function awful.mouse.resize.set_mode
 -- @tparam string m The mode
 function module.set_mode(m)
     assert(m == "live" or m == "after")
@@ -35,6 +36,7 @@ end
 
 --- Add a initialization callback.
 -- This callback will be executed before the mouse grabbing start
+-- @function awful.mouse.resize.add_enter_callback
 -- @tparam function cb The callback (or nil)
 -- @tparam[default=other] string context The callback context
 function module.add_enter_callback(cb, context)
@@ -46,6 +48,7 @@ end
 --- Add a "move" callback.
 -- This callback is executed in "after" mode (see `set_mode`) instead of
 -- applying the operation.
+-- @function awful.mouse.resize.add_move_callback
 -- @tparam function cb The callback (or nil)
 -- @tparam[default=other] string context The callback context
 function module.add_move_callback(cb, context)
@@ -56,6 +59,7 @@ end
 
 --- Add a "leave" callback
 -- This callback is executed just before the `mousegrabber` stop
+-- @function awful.mouse.resize.add_leave_callback
 -- @tparam function cb The callback (or nil)
 -- @tparam[default=other] string context The callback context
 function module.add_leave_callback(cb, context)
@@ -64,7 +68,7 @@ function module.add_leave_callback(cb, context)
     table.insert(callbacks.leave[context], cb)
 end
 
--- Resize, the drawable
+-- Resize, the drawable.
 --
 -- Valid `args` are:
 --
@@ -73,9 +77,11 @@ end
 -- * *leave_callback*: A function called before the `mousegrabber` is released
 -- * *mode*: The resize mode
 --
+-- @function awful.mouse.resize
 -- @tparam client client A client
 -- @tparam[default=mouse.resize] string context The resizing context
 -- @tparam[opt={}] table args A set of `awful.placement` arguments
+
 local function handler(_, client, context, args) --luacheck: no unused_args
     args = args or {}
     context = context or "mouse.resize"

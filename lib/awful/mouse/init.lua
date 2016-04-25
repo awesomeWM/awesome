@@ -4,7 +4,7 @@
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2008 Julien Danjou
 -- @release @AWESOME_VERSION@
--- @module awful.mouse
+-- @module mouse
 ---------------------------------------------------------------------------
 
 -- Grab environment we need
@@ -51,6 +51,7 @@ mouse.wibox = {}
 -- @tparam function shape A `gears.shape` compatible function
 
 --- Get the client object under the pointer.
+-- @deprecated awful.mouse.client_under_pointer
 -- @return The client object under the pointer, if one can be found.
 function mouse.client_under_pointer()
     local obj = capi.mouse.object_under_pointer()
@@ -60,6 +61,7 @@ function mouse.client_under_pointer()
 end
 
 --- Get the drawin object under the pointer.
+-- @deprecated awful.mouse.drawin_under_pointer
 -- @return The drawin object under the pointer, if one can be found.
 function mouse.drawin_under_pointer()
     local obj = capi.mouse.object_under_pointer()
@@ -69,6 +71,7 @@ function mouse.drawin_under_pointer()
 end
 
 --- Move a client.
+-- @function awful.mouse.client.move
 -- @param c The client to move, or the focused one if nil.
 -- @param snap The pixel to snap clients.
 -- @param finished_cb Deprecated, do not use
@@ -106,7 +109,8 @@ end
 
 mouse.client.dragtotag = { }
 
---- Move a client to a tag by dragging it onto the left / right side of the screen
+--- Move a client to a tag by dragging it onto the left / right side of the screen.
+-- @function awful.mouse.client.dragtotag.border
 -- @param c The client to move
 function mouse.client.dragtotag.border(c)
     capi.mousegrabber.run(function (_mouse)
@@ -146,7 +150,8 @@ function mouse.client.dragtotag.border(c)
                             end, "fleur")
 end
 
---- Move the wibox under the cursor
+--- Move the wibox under the cursor.
+-- @function awful.mouse.wibox.move
 --@param w The wibox to move, or none to use that under the pointer
 function mouse.wibox.move(w)
     w = w or mouse.wibox_under_pointer()
@@ -187,6 +192,7 @@ function mouse.wibox.move(w)
 end
 
 --- Get a client corner coordinates.
+-- @deprecated awful.mouse.client.corner
 -- @tparam[opt=client.focus] client c The client to get corner from, focused one by default.
 -- @tparam string corner The corner to use: auto, top_left, top_right, bottom_left,
 -- bottom_right, left, right, top bottom. Default is auto, and auto find the
@@ -215,6 +221,7 @@ function mouse.client.corner(c, corner)
 end
 
 --- Resize a client.
+-- @function awful.mouse.client.resize
 -- @param c The client to resize, or the focused one by default.
 -- @tparam string corner The corner to grab on resize. Auto detected by default.
 -- @tparam[opt={}] table args A set of `awful.placement` arguments
@@ -239,6 +246,7 @@ function mouse.client.resize(c, corner, args)
 end
 
 --- Default handler for `request::geometry` signals with `mouse.resize` context.
+-- @function awful.mouse.resize_handler
 -- @tparam client c The client
 -- @tparam string context The context
 -- @tparam[opt={}] table hints The hints to pass to the handler
