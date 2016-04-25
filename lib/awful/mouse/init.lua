@@ -236,7 +236,7 @@ function mouse.client.resize(c, corner, args)
 end
 
 --- Default handler for `request::geometry` signals with `mouse.resize` context.
--- @function awful.mouse.resize_handler
+-- @signalhandler awful.mouse.resize_handler
 -- @tparam client c The client
 -- @tparam string context The context
 -- @tparam[opt={}] table hints The hints to pass to the handler
