@@ -41,6 +41,8 @@ function floating.mouse_resize_handler(c, corner, x, y)
     end
 
     capi.mousegrabber.run(function (_mouse)
+                              if not c.valid then return false end
+
                               _mouse.x = _mouse.x + coordinates_delta.x
                               _mouse.y = _mouse.y + coordinates_delta.y
                               for _, v in ipairs(_mouse.buttons) do

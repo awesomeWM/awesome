@@ -30,6 +30,8 @@ function magnifier.mouse_resize_handler(c, corner, x, y)
 
     local prev_coords = {}
     capi.mousegrabber.run(function (_mouse)
+                              if not c.valid then return false end
+
                               for _, v in ipairs(_mouse.buttons) do
                                   if v then
                                       prev_coords = { x =_mouse.x, y = _mouse.y }

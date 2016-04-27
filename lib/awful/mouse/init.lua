@@ -174,6 +174,8 @@ function mouse.client.move(c, snap, finished_cb)
     local fixed_y = c.maximized_vertical
 
     capi.mousegrabber.run(function (_mouse)
+                              if not c.valid then return false end
+
                               for _, v in ipairs(_mouse.buttons) do
                                   if v then
                                       local lay = layout.get(c.screen)
@@ -218,6 +220,8 @@ mouse.client.dragtotag = { }
 -- @param c The client to move
 function mouse.client.dragtotag.border(c)
     capi.mousegrabber.run(function (_mouse)
+                                if not c.valid then return false end
+
                                 local button_down = false
                                 for _, v in ipairs(_mouse.buttons) do
                                     if v then button_down = true end
