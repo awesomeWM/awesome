@@ -51,7 +51,8 @@ function theme_assets.wallpaper(bg, fg, alt_fg, s)
     s = s or screen.primary
     local height = s.workarea.height
     local width = s.workarea.width
-    local img = cairo.ImageSurface(cairo.Format.ARGB32, width, height)
+    local img = cairo.RecordingSurface(cairo.Content.COLOR,
+        cairo.Rectangle { x = 0, y = 0, width = width, height = height })
     local cr = cairo.Context(img)
 
     local letter_size = height/10
