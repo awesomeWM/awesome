@@ -86,7 +86,7 @@ end
 -- @param x The x coordinate
 -- @param y The y coordinate
 function screen.getbycoord(x, y)
-    local s = capi.screen[1]
+    local s = capi.screen.primary
     local dist = screen.object.get_square_distance(s, x, y)
     for i in capi.screen do
         local d = screen.object.get_square_distance(i, x, y)

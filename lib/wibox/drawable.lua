@@ -35,7 +35,7 @@ local function screen_getbycoord(x, y)
             return capi.screen[i]
         end
     end
-    return capi.screen[1]
+    return capi.screen.primary
 end
 
 -- Get the widget context. This should always return the same table (if
