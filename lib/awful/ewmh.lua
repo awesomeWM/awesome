@@ -15,6 +15,7 @@ local math = math
 local util = require("awful.util")
 local aclient = require("awful.client")
 local aplace = require("awful.placement")
+local asuit = require("awful.layout.suit")
 
 local ewmh = {}
 
@@ -160,6 +161,13 @@ local context_mapper = {
 -- @tparam string context The context
 -- @tparam[opt={}] table hints The hints to pass to the handler
 function ewmh.geometry(c, context, hints)
+    local layout = c.screen.selected_tag and c.screen.selected_tag.layout or nil
+
+    -- Setting the geometry wont work unless the client is floating.
+    if (not c.floating) and (not layout == asuit.floating) then
+        return
+    end
+
     context = context or ""
 
     local original_context = context
