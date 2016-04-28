@@ -38,6 +38,15 @@ mouse.wibox = {}
 -- @tparam[opt=8] integer default_distance
 -- @see awful.mouse.snap
 
+--- Enable screen edges snapping.
+-- @tfield[opt=true] boolean awful.mouse.snap.edge_enabled
+
+--- Enable client to client snapping.
+-- @tfield[opt=true] boolean awful.mouse.snap.client_enabled
+
+--- Enable changing tag when a client is dragged to the edge of the screen.
+-- @tfield[opt=false] integer awful.mouse.snap.drag_to_tag_enabled
+
 --- The snap outline background color.
 -- @beautiful beautiful.snap_bg
 -- @tparam color|string|gradient|pattern color
@@ -46,7 +55,7 @@ mouse.wibox = {}
 -- @beautiful beautiful.snap_border_width
 -- @param integer
 
---- The snap outline width.
+--- The snap outline shape.
 -- @beautiful beautiful.snap_shape
 -- @tparam function shape A `gears.shape` compatible function
 

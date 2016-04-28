@@ -248,21 +248,21 @@ end
 -- Enable edge snapping
 resize.add_move_callback(function(c, geo, args)
     -- Screen edge snapping (areosnap)
-    if args and (args.snap == nil or args.snap) then--TODO add a config option
+    if (module.edge_enabled ~= false)
+      and args and (args.snap == nil or args.snap) then
         detect_areasnap(c, 16)
     end
 
     -- Snapping between clients
-    if args and (args.snap == nil or args.snap) then
-        local ngeo = module.snap(c, args.snap, geo.x, geo.y)
-        ngeo.x = ngeo.x + (2 * c.border_width)
-        ngeo.y = ngeo.y + (2 * c.border_width)
-        return ngeo
+    if (module.client_enabled ~= false)
+      and args and (args.snap == nil or args.snap) then
+        return module.snap(c, args.snap, geo.x, geo.y)
     end
 end, "mouse.move")
 
 -- Apply the aerosnap
 resize.add_leave_callback(function(c, _, args)
+    if module.edge_enabled == false then return end
     return apply_areasnap(c, args)
 end, "mouse.move")
 
