@@ -253,16 +253,7 @@ end
 -- @tparam string path
 -- @treturn bool True if path exists and is a directory.
 function util.is_dir(path)
-    local file = io.open(path)
-    if file then
-        if not file:read(0) -- Not a regular file (might include empty ones).
-            and file:seek("end") ~= 0 then  -- And not a file with size 0.
-            io.close(file)
-            return true
-        end
-        io.close(file)
-    end
-    return false
+    return Gio.File.new_for_path(path):query_file_type({}) == "DIRECTORY"
 end
 
 local function subset_mask_apply(mask, set)
