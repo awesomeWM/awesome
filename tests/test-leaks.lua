@@ -31,7 +31,6 @@ local function collectable(a, b, c, d, e, f, g, h, last)
     end
     collectgarbage("collect")
     collectgarbage("collect")
-    collectgarbage("collect")
     -- Check if the table is now empty
     for _, v in pairs(objs) do
         print("Some object was not garbage collected!")
@@ -63,6 +62,12 @@ collectable(wibox.layout.align.horizontal())
 collectable(awful.widget.launcher({ image = cairo.ImageSurface(cairo.Format.ARGB32, 20, 20), command = "bash" }))
 collectable(awful.widget.prompt())
 collectable(awful.widget.textclock())
+
+-- Test the layout box. As its widgets are a singleton (per screen), clear them
+-- first.
+awful.widget.layoutbox.clear()
+collectgarbage("collect")
+collectgarbage("collect")
 collectable(awful.widget.layoutbox(1))
 
 -- Some widgets do things via timer.delayed_call
