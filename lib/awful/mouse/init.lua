@@ -9,7 +9,6 @@
 
 -- Grab environment we need
 local layout = require("awful.layout")
-local tag = require("awful.tag")
 local aplace = require("awful.placement")
 local awibox = require("awful.wibox")
 local util = require("awful.util")
@@ -27,6 +26,7 @@ local capi =
 local mouse = {
     resize = require("awful.mouse.resize"),
     snap   = require("awful.mouse.snap"),
+    drag_to_tag = require("awful.mouse.drag_to_tag")
 }
 
 mouse.object = {}
@@ -45,7 +45,7 @@ mouse.wibox = {}
 -- @tfield[opt=true] boolean awful.mouse.snap.client_enabled
 
 --- Enable changing tag when a client is dragged to the edge of the screen.
--- @tfield[opt=false] integer awful.mouse.snap.drag_to_tag_enabled
+-- @tfield[opt=false] integer awful.mouse.drag_to_tag.enabled
 
 --- The snap outline background color.
 -- @beautiful beautiful.snap_bg
@@ -109,44 +109,16 @@ end
 mouse.client.dragtotag = { }
 
 --- Move a client to a tag by dragging it onto the left / right side of the screen.
--- @function awful.mouse.client.dragtotag.border
+-- @deprecated awful.mouse.client.dragtotag.border
 -- @param c The client to move
 function mouse.client.dragtotag.border(c)
-    capi.mousegrabber.run(function (_mouse)
-                                if not c.valid then return false end
+    util.deprecated("Use awful.mouse.snap.drag_to_tag_enabled = true instead "..
+        "of awful.mouse.client.dragtotag.border(c). It will now be enabled.")
 
-                                local button_down = false
-                                for _, v in ipairs(_mouse.buttons) do
-                                    if v then button_down = true end
-                                end
-                                local wa = capi.screen[c.screen].workarea
-                                if _mouse.x >= wa.x + wa.width then
-                                    capi.mouse.coords({ x = wa.x + wa.width - 1 })
-                                elseif _mouse.x <= wa.x then
-                                    capi.mouse.coords({ x = wa.x + 1 })
-                                end
-                                if not button_down then
-                                    local tags = c.screen.tags
-                                    local t = c.screen.selected_tag
-                                    local idx
-                                    for i, v in ipairs(tags) do
-                                        if v == t then
-                                            idx = i
-                                        end
-                                    end
-                                    if _mouse.x > wa.x + wa.width - 10 then
-                                        local newtag = tags[util.cycle(#tags, idx + 1)]
-                                        c:move_to_tag(newtag)
-                                        tag.viewnext()
-                                    elseif _mouse.x < wa.x + 10 then
-                                        local newtag = tags[util.cycle(#tags, idx - 1)]
-                                        c:move_to_tag(newtag)
-                                        tag.viewprev()
-                                    end
-                                    return false
-                                end
-                                return true
-                            end, "fleur")
+    -- Enable drag to border
+    mouse.snap.drag_to_tag_enabled = true
+
+    return mouse.client.move(c)
 end
 
 --- Move the wibox under the cursor.
