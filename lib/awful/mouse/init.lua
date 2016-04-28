@@ -215,6 +215,7 @@ end
 -- @param c The client to resize, or the focused one by default.
 -- @tparam string corner The corner to grab on resize. Auto detected by default.
 -- @tparam[opt={}] table args A set of `awful.placement` arguments
+-- @treturn string The corner (or side) name
 function mouse.client.resize(c, corner, args)
     c = c or capi.client.focus
 
@@ -230,9 +231,14 @@ function mouse.client.resize(c, corner, args)
     -- Move the mouse to the corner
     if corner and aplace[corner] then
         aplace[corner](capi.mouse, {parent=c})
+    else
+        local _
+        _, corner = aplace.closest_corner(capi.mouse, {parent=c})
     end
 
     mouse.resize(c, "mouse.resize", args or {include_sides=true})
+
+    return corner
 end
 
 --- Default handler for `request::geometry` signals with `mouse.resize` context.
