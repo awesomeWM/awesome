@@ -40,6 +40,14 @@ local function prepare_wallpaper(s)
         -- No wallpaper yet, create an image surface for just the part we need
         img = cairo.ImageSurface(cairo.Format.RGB24, geom.width, geom.height)
         img:set_device_offset(-geom.x, -geom.y)
+    else
+        -- Some wallpaper yet, copy it to a new surface
+        local new_img = img:create_similar(cairo.Content.COLOR, root_geom.width, root_geom.height)
+        local cr = cairo.Context(new_img)
+        cr.operator = cairo.Operator.SOURCE
+        cr:set_source_surface(img, 0, 0)
+        cr:paint()
+        img = new_img
     end
 
     local cr = cairo.Context(img)
