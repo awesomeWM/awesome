@@ -168,7 +168,12 @@ mytasklist.buttons = awful.util.table.join(
 awful.screen.connect_for_each_screen(function(s)
     -- Wallpaper
     if beautiful.wallpaper then
-        gears.wallpaper.maximized(beautiful.wallpaper, s, true)
+        local wallpaper = beautiful.wallpaper
+        -- If wallpaper is a function, call it with the screen
+        if type(wallpaper) == "function" then
+            wallpaper = wallpaper(s)
+        end
+        gears.wallpaper.maximized(wallpaper, s, true)
     end
 
     -- Each screen has its own tag table.
