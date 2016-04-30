@@ -257,6 +257,27 @@ function mouse.resize_handler(c, context, hints)
     end
 end
 
+-- Older layouts implement their own mousegrabber.
+-- @tparam client c The client
+-- @tparam table args Additional arguments
+-- @treturn boolean This return false when the resize need to be aborted
+mouse.resize.add_enter_callback(function(c, args) --luacheck: no unused args
+    if c.floating then return end
+
+    local l = c.screen.selected_tag and c.screen.selected_tag.layout or nil
+    if l == layout.suit.floating then return end
+
+    if l ~= layout.suit.floating and l.mouse_resize_handler then
+        capi.mousegrabber.stop()
+
+        local geo, corner = aplace.closest_corner(capi.mouse, {parent=c})
+
+        l.mouse_resize_handler(c, corner, geo.x, geo.y)
+
+        return false
+    end
+end, "mouse.resize")
+
 --- Get the client currently under the mouse cursor.
 -- @property current_client
 -- @tparam client|nil The client
