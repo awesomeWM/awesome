@@ -146,16 +146,16 @@ local reverse_align_map = {}
 -- Some parameters to correctly compute the final size
 local resize_to_point_map = {
     -- Corners
-    top_left     = {p1= nil  , p2={1,1}, x_only=false, y_only=false},
-    top_right    = {p1={0,1} , p2= nil , x_only=false, y_only=false},
-    bottom_left  = {p1= nil  , p2={1,0}, x_only=false, y_only=false},
-    bottom_right = {p1={0,0} , p2= nil , x_only=false, y_only=false},
+    top_left     = {p1= nil  , p2={1,1}, x_only=false, y_only=false, align="bottom_right"},
+    top_right    = {p1={0,1} , p2= nil , x_only=false, y_only=false, align="bottom_left" },
+    bottom_left  = {p1= nil  , p2={1,0}, x_only=false, y_only=false, align="top_right"   },
+    bottom_right = {p1={0,0} , p2= nil , x_only=false, y_only=false, align="top_left"    },
 
     -- Sides
-    left         = {p1= nil  , p2={1,1}, x_only=true , y_only=false},
-    right        = {p1={0,0} , p2= nil , x_only=true , y_only=false},
-    top          = {p1= nil  , p2={1,1}, x_only=false, y_only=true },
-    bottom       = {p1={0,0} , p2= nil , x_only=false, y_only=true },
+    left         = {p1= nil  , p2={1,1}, x_only=true , y_only=false, align="top_right"   },
+    right        = {p1={0,0} , p2= nil , x_only=true , y_only=false, align="top_left"    },
+    top          = {p1= nil  , p2={1,1}, x_only=false, y_only=true , align="bottom_left" },
+    bottom       = {p1={0,0} , p2= nil , x_only=false, y_only=true , align="top_left"    },
 }
 
 --- Add a context to the arguments.
@@ -704,6 +704,17 @@ function placement.resize_to_mouse(d, args)
 
     for _, a in ipairs {"width", "height"} do
         ngeo[a] = ngeo[a] - 2*bw
+    end
+
+    -- Now, correct the geometry by the given size_hints offset
+    if d.apply_size_hints then
+        local w, h = d:apply_size_hints(
+            ngeo.width,
+            ngeo.height
+        )
+        local offset = align_map[pts.align](w, h, ngeo.width, ngeo.height)
+        ngeo.x = ngeo.x - offset.x
+        ngeo.y = ngeo.y - offset.y
     end
 
     geometry_common(d, args, ngeo)
