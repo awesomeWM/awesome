@@ -555,8 +555,13 @@ function placement.no_overlap(c)
     end
 
     -- We did not find an area with enough space for our size:
-    -- just take the biggest available one and go in
+    -- just take the biggest available one and go in.
+    -- This makes sure to have the whole screen's area in case it has been
+    -- removed.
     if not found then
+        if #areas == 0 then
+            areas = { screen.workarea }
+        end
         for _, r in ipairs(areas) do
             if r.width * r.height > new.width * new.height then
                 new = r
