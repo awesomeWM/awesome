@@ -137,7 +137,9 @@ function layout.parameters(t, screen)
 
     local p = {}
 
-    local useless_gap = t and t.gap or 0
+    local clients     = client.tiled(screen)
+    local gap_count   = t and t.gap_count or 0
+    local useless_gap = t and (#clients > gap_count and t.gap or 0) or 0
 
     p.workarea = screen:get_bounding_geometry {
         honor_padding  = true,
@@ -146,7 +148,7 @@ function layout.parameters(t, screen)
     }
 
     p.geometry    = screen.geometry
-    p.clients     = client.tiled(screen)
+    p.clients     = clients
     p.screen      = screen.index
     p.padding     = screen.padding
     p.useless_gap = useless_gap

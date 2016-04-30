@@ -751,6 +751,7 @@ end
 -- @beautiful beautiful.useless_gap
 -- @param number (default: 0)
 -- @see gap
+-- @see gap_count
 
 --- The gap (spacing, also called `useless_gap`) between clients.
 --
@@ -763,6 +764,7 @@ end
 --
 -- @property gap
 -- @param number The value has to be greater than zero.
+-- @see gap_count
 
 function tag.object.set_gap(t, useless_gap)
     if useless_gap >= 0 then
@@ -793,6 +795,32 @@ end
 function tag.incgap(add, t)
     t = t or t or ascreen.focused().selected_tag
     tag.object.set_gap(t, tag.object.get_gap(t) + add)
+end
+
+--- The minimum number of client at which to enable gaps.
+--
+-- @beautiful beautiful.useless_gap_count
+-- @param integer (default: 0)
+-- @see gap
+-- @see gap_count
+
+--- The minimum number of client at which to enable gaps.
+--
+-- **Signal:**
+--
+-- * *property::gap\_count*
+--
+-- @property gap_count
+-- @param integer The minimum number of client at which to enable gaps
+
+function tag.object.set_gap_count(t, useless_gap_count)
+    if useless_gap_count >= 0 then
+        tag.setproperty(t, "useless_gap_count", useless_gap_count)
+    end
+end
+
+function tag.object.get_gap_count(t)
+    return tag.getproperty(t, "useless_gap_count") or beautiful.useless_gap_count or 0
 end
 
 --- Get the spacing between clients.
