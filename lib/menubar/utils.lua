@@ -254,7 +254,8 @@ function utils.parse_dir(dir_path, callback)
     local function parser(dir, programs)
         local f = gio.File.new_for_path(dir)
         -- Except for "NONE" there is also NOFOLLOW_SYMLINKS
-        local enum, err = f:async_enumerate_children("standard::name", gio.FileQueryInfoFlags.NONE)
+        local query = gio.FILE_ATTRIBUTE_STANDARD_NAME .. "," .. gio.FILE_ATTRIBUTE_STANDARD_TYPE
+        local enum, err = f:async_enumerate_children(query, gio.FileQueryInfoFlags.NONE)
         if not enum then
             debug.print_error(err)
             return
