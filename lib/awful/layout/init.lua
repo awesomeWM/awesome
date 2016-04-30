@@ -162,6 +162,11 @@ function layout.arrange(screen)
     delayed_arrange[screen] = true
 
     timer.delayed_call(function()
+        if not screen.valid then
+            -- Screen was removed
+            delayed_arrange[screen] = nil
+            return
+        end
         if arrange_lock then return end
         arrange_lock = true
 

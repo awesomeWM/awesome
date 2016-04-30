@@ -47,7 +47,7 @@ function layoutbox.new(screen)
 
     -- Do we already have the update callbacks registered?
     if boxes == nil then
-        boxes = setmetatable({}, { __mode = "v" })
+        boxes = setmetatable({}, { __mode = "kv" })
         tag.attached_connect_signal(nil, "property::selected", update_from_tag)
         tag.attached_connect_signal(nil, "property::layout", update_from_tag)
         layoutbox.boxes = boxes
