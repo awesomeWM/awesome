@@ -19,7 +19,7 @@ After building is finished, you can either install via `make install`:
 or by auto-generating a .deb or .rpm package, for easy removal later on:
 
     make package
-    
+
     sudo dpkg -i awesome-x.y.z.deb
     # or
     sudo rpm -Uvh awesome-x.y.z.rpm
