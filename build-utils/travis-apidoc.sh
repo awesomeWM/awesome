@@ -12,18 +12,16 @@ echo "Post-processing (API) documentation."
 echo "TRAVIS_PULL_REQUEST: $TRAVIS_PULL_REQUEST"
 echo "TRAVIS_BRANCH: $TRAVIS_BRANCH"
 
-# GH_TOKEN won't be available for PRs from forks.
-# (http://docs.travis-ci.com/user/pull-requests/#Security-Restrictions-when-testing-Pull-Requests).
-if [ -z "$GH_TOKEN" ]; then
-  echo "No GH_TOKEN available. Skipping."
+if [ -z "$GH_APIDOC_TOKEN" ]; then
+  echo "No GH_APIDOC_TOKEN available. Skipping."
   exit
 fi
 
-# NOTE: DO NOT USE "set -x", or anything else that would reveal GH_TOKEN!
+# NOTE: DO NOT USE "set -x", or anything else that would reveal GH_APIDOC_TOKEN!
 set -e
 set +x
 
-REPO_APIDOC="https://${GH_TOKEN}@github.com/awesomeWM/apidoc"
+REPO_APIDOC="https://${GH_APIDOC_TOKEN}@github.com/awesomeWM/apidoc"
 REPO_DIR="$PWD"
 
 # Export these to not add "git config" calls to the long command.
@@ -113,7 +111,7 @@ echo "Compare links:\n$COMPARE_LINKS"
 
 # Post a comment to the PR.
 if [ "$TRAVIS_PULL_REQUEST" != false ]; then
-  curl -H "Authorization: token $GH_TOKEN" \
+  curl -H "Authorization: token $GH_APIDOC_TOKEN" \
     -d "{\"body\": \"Documentation has been updated for this PR:\n$COMPARE_LINKS\"}" \
     "https://api.github.com/repos/awesomeWM/awesome/issues/${TRAVIS_PULL_REQUEST}/comments"
 fi

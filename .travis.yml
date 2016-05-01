@@ -12,8 +12,8 @@ env:
     # Lua 5.3 isn't available in Ubuntu Trusty, so some magic below installs it.
     - LUA=5.3 LUANAME=lua5.3 LUALIBRARY=/usr/lib/liblua.so
   global:
-    # Secure token to push to gh-pages.
-    - secure: "LZxt9559+V3qJMdVgmKW4RYTt8ZINooex/qsnoEJUtZloj/eFNG4COT2z6a2yeH2tKWzknCsmV9nLPJiNEA2KLcyqDhjFQvJwKmsBuhGUmLyeQgfenjweorRjO8NT18X1SAEUXAMnClPu+OeTDs4BAuVn5foGZ7xpcRg2E+j2mc="
+    # Secure GH_APIDOC_TOKEN to push to awesomeWM/apidoc.
+    - secure: "R/HYDclnws1I1+v9Yjt+RKa4CsFhbBT9tiwE3EfPhEj2KCYX4sFRMxuZvLf5sq0XWdrQaPhQ54fgAZGr3f054JKRXcTB0g9J6nhSHz9kIjPh446gafUhEeDQcZRwM/MeCWiwFIkiZm6smYoDFE9JTWu6quNV+lQ4kcVDOp2ibEc="
 
 before_install:
   - if [ -z $LUAINCLUDE ]; then LUAINCLUDE=/usr/include/${LUANAME}; fi
