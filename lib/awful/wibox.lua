@@ -285,6 +285,14 @@ end
 capi.client.connect_signal("property::struts", update_wiboxes_on_struts)
 capi.client.connect_signal("unmanage", update_wiboxes_on_struts)
 
+capi.screen.connect_signal("removed", function(s)
+    for _, wprop in ipairs(wiboxes) do
+        if wprop.screen == s then
+            wprop.wibox.visible = false
+        end
+    end
+end)
+
 function awfulwibox.mt:__call(...)
     return awfulwibox.new(...)
 end
