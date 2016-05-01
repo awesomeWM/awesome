@@ -168,7 +168,9 @@ function taglist.new(screen, filter, buttons, style, update_function, base_widge
         -- Add a delayed callback for the first update.
         if not queued_update[screen] then
             timer.delayed_call(function()
-                taglist_update(screen, w, buttons, filter, data, style, uf)
+                if screen.valid then
+                    taglist_update(screen, w, buttons, filter, data, style, uf)
+                end
                 queued_update[screen] = false
             end)
             queued_update[screen] = true
@@ -203,6 +205,9 @@ function taglist.new(screen, filter, buttons, style, update_function, base_widge
         capi.client.connect_signal("tagged", uc)
         capi.client.connect_signal("untagged", uc)
         capi.client.connect_signal("unmanage", uc)
+        capi.screen.connect_signal("removed", function(s)
+            instances[get_screen(s)] = nil
+        end)
     end
     w._do_taglist_update()
     local list = instances[screen]
