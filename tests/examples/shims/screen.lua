@@ -100,6 +100,8 @@ end
 screen._add_screen {width=320, height=240}
 
 screen.add_signal("property::workarea")
+screen.add_signal("added")
+screen.add_signal("removed")
 
 return screen
 

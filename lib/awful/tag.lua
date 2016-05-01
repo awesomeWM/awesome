@@ -1352,10 +1352,34 @@ capi.tag.add_signal("property::urgent")
 
 capi.tag.add_signal("property::urgent_count")
 capi.tag.add_signal("property::volatile")
+capi.tag.add_signal("removal-pending")
 
 capi.screen.add_signal("tag::history::update")
 
 capi.screen.connect_signal("tag::history::update", tag.history.update)
+
+capi.screen.connect_signal("removed", function(s)
+    -- First give other code a chance to clean up
+    for _, t in pairs(s.tags) do
+        t:emit_signal("removal-pending")
+    end
+    -- Then force all clients left to go somewhere random
+    local fallback = nil
+    for other_screen in capi.screen do
+        if #other_screen.tags > 0 then
+            fallback = other_screen.tags[1]
+            break
+        end
+    end
+    for _, t in pairs(s.tags) do
+        t:delete(fallback, true)
+    end
+    -- If any tag survived until now, forcefully get rid of it
+    for _, t in pairs(s.tags) do
+        t.activated = false
+        data.tags[t] = nil
+    end
+end)
 
 function tag.mt:__call(...)
     return tag.new(...)
