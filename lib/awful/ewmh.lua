@@ -15,6 +15,7 @@ local math = math
 local util = require("awful.util")
 local aclient = require("awful.client")
 local aplace = require("awful.placement")
+local asuit = require("awful.layout.suit")
 
 local ewmh = {}
 
@@ -100,6 +101,7 @@ end
 --
 -- It is the default signal handler for `request::activate` on a `client`.
 --
+-- @signalhandler awful.ewmh.activate
 -- @client c A client to use
 -- @tparam string context The context where this signal was used.
 -- @tparam[opt] table hints A table with additional hints:
@@ -120,8 +122,11 @@ function ewmh.activate(c, context, hints) -- luacheck: no unused args
     end
 end
 
---- Tag a window with its requested tag
+--- Tag a window with its requested tag.
 --
+-- It is the default signal handler for `request::tag` on a `client`.
+--
+-- @signalhandler awful.ewmh.tag
 -- @client c A client to tag
 -- @tag[opt] t A tag to use. If omitted, then the client is made sticky.
 -- @tparam[opt={}] table hints Extra information
@@ -156,10 +161,18 @@ local context_mapper = {
 --
 -- This is the default geometry request handler.
 --
+-- @signalhandler awful.ewmh.geometry
 -- @tparam client c The client
 -- @tparam string context The context
 -- @tparam[opt={}] table hints The hints to pass to the handler
 function ewmh.geometry(c, context, hints)
+    local layout = c.screen.selected_tag and c.screen.selected_tag.layout or nil
+
+    -- Setting the geometry wont work unless the client is floating.
+    if (not c.floating) and (not layout == asuit.floating) then
+        return
+    end
+
     context = context or ""
 
     local original_context = context

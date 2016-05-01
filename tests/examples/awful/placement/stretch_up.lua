@@ -1,6 +1,7 @@
 -- Stretch the drawable to the top of the parent area. --DOC_HEADER
 -- @tparam drawable d A drawable (like `client` or `wibox`) --DOC_HEADER
 -- @tparam[opt={}] table args Other arguments --DOC_HEADER
+-- @treturn table The new geometry --DOC_HEADER
 -- @name stretch_up --DOC_HEADER
 -- @class function --DOC_HEADER
 

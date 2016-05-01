@@ -4,17 +4,15 @@
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2008 Julien Danjou
 -- @release @AWESOME_VERSION@
--- @module awful.mouse
+-- @module mouse
 ---------------------------------------------------------------------------
 
 -- Grab environment we need
 local layout = require("awful.layout")
-local tag = require("awful.tag")
-local aclient = require("awful.client")
+local aplace = require("awful.placement")
 local awibox = require("awful.wibox")
 local util = require("awful.util")
 local type = type
-local math = math
 local ipairs = ipairs
 local capi =
 {
@@ -25,136 +23,63 @@ local capi =
     mousegrabber = mousegrabber,
 }
 
-local mouse = {}
+local mouse = {
+    resize = require("awful.mouse.resize"),
+    snap   = require("awful.mouse.snap"),
+    drag_to_tag = require("awful.mouse.drag_to_tag")
+}
 
+mouse.object = {}
 mouse.client = {}
 mouse.wibox = {}
 
+--- The default snap distance.
+-- @tfield integer awful.mouse.snap.default_distance
+-- @tparam[opt=8] integer default_distance
+-- @see awful.mouse.snap
+
+--- Enable screen edges snapping.
+-- @tfield[opt=true] boolean awful.mouse.snap.edge_enabled
+
+--- Enable client to client snapping.
+-- @tfield[opt=true] boolean awful.mouse.snap.client_enabled
+
+--- Enable changing tag when a client is dragged to the edge of the screen.
+-- @tfield[opt=false] integer awful.mouse.drag_to_tag.enabled
+
+--- The snap outline background color.
+-- @beautiful beautiful.snap_bg
+-- @tparam color|string|gradient|pattern color
+
+--- The snap outline width.
+-- @beautiful beautiful.snap_border_width
+-- @param integer
+
+--- The snap outline shape.
+-- @beautiful beautiful.snap_shape
+-- @tparam function shape A `gears.shape` compatible function
+
 --- Get the client object under the pointer.
+-- @deprecated awful.mouse.client_under_pointer
 -- @return The client object under the pointer, if one can be found.
+-- @see current_client
 function mouse.client_under_pointer()
-    local obj = capi.mouse.object_under_pointer()
-    if type(obj) == "client" then
-        return obj
-    end
-end
+    util.deprecated("Use mouse.current_client instead of awful.mouse.client_under_pointer()")
 
---- Get the drawin object under the pointer.
--- @return The drawin object under the pointer, if one can be found.
-function mouse.drawin_under_pointer()
-    local obj = capi.mouse.object_under_pointer()
-    if type(obj) == "drawin" then
-        return obj
-    end
-end
-
-local function snap_outside(g, sg, snap)
-    if g.x < snap + sg.x + sg.width and g.x > sg.x + sg.width then
-        g.x = sg.x + sg.width
-    elseif g.x + g.width < sg.x and g.x + g.width > sg.x - snap then
-        g.x = sg.x - g.width
-    end
-    if g.y < snap + sg.y + sg.height and g.y > sg.y + sg.height then
-        g.y = sg.y + sg.height
-    elseif g.y + g.height < sg.y and g.y + g.height > sg.y - snap then
-        g.y = sg.y - g.height
-    end
-    return g
-end
-
-local function snap_inside(g, sg, snap)
-    local edgev = 'none'
-    local edgeh = 'none'
-    if math.abs(g.x) < snap + sg.x and g.x > sg.x then
-        edgev = 'left'
-        g.x = sg.x
-    elseif math.abs((sg.x + sg.width) - (g.x + g.width)) < snap then
-        edgev = 'right'
-        g.x = sg.x + sg.width - g.width
-    end
-    if math.abs(g.y) < snap + sg.y and g.y > sg.y then
-        edgeh = 'top'
-        g.y = sg.y
-    elseif math.abs((sg.y + sg.height) - (g.y + g.height)) < snap then
-        edgeh = 'bottom'
-        g.y = sg.y + sg.height - g.height
-    end
-
-    -- What is the dominant dimension?
-    if g.width > g.height then
-        return g, edgeh
-    else
-        return g, edgev
-    end
-end
-
---- Snap a client to the closest client or screen edge.
--- @param c The client to snap.
--- @param snap The pixel to snap clients.
--- @param x The client x coordinate.
--- @param y The client y coordinate.
--- @param fixed_x True if the client isn't allowed to move in the x direction.
--- @param fixed_y True if the client isn't allowed to move in the y direction.
-function mouse.client.snap(c, snap, x, y, fixed_x, fixed_y)
-    snap = snap or 8
-    c = c or capi.client.focus
-    local cur_geom = c:geometry()
-    local geom = c:geometry()
-    geom.width = geom.width + (2 * c.border_width)
-    geom.height = geom.height + (2 * c.border_width)
-    local edge
-    geom.x = x or geom.x
-    geom.y = y or geom.y
-
-    geom, edge = snap_inside(geom, capi.screen[c.screen].geometry, snap)
-    geom = snap_inside(geom, capi.screen[c.screen].workarea, snap)
-
-    -- Allow certain windows to snap to the edge of the workarea.
-    -- Only allow docking to workarea for consistency/to avoid problems.
-    if c.dockable then
-        local struts = c:struts()
-        struts['left'] = 0
-        struts['right'] = 0
-        struts['top'] = 0
-        struts['bottom'] = 0
-        if edge ~= "none" and c.floating then
-            if edge == "left" or edge == "right" then
-                struts[edge] = cur_geom.width
-            elseif edge == "top" or edge == "bottom" then
-                struts[edge] = cur_geom.height
-            end
-        end
-        c:struts(struts)
-    end
-
-    geom.x = geom.x - (2 * c.border_width)
-    geom.y = geom.y - (2 * c.border_width)
-
-    for _, snapper in ipairs(aclient.visible(c.screen)) do
-        if snapper ~= c then
-            geom = snap_outside(geom, snapper:geometry(), snap)
-        end
-    end
-
-    geom.width = geom.width - (2 * c.border_width)
-    geom.height = geom.height - (2 * c.border_width)
-    geom.x = geom.x + (2 * c.border_width)
-    geom.y = geom.y + (2 * c.border_width)
-
-    -- It's easiest to undo changes afterwards if they're not allowed
-    if fixed_x then geom.x = cur_geom.x end
-    if fixed_y then geom.y = cur_geom.y end
-
-    return geom
+    return mouse.object.get_current_client()
 end
 
 --- Move a client.
+-- @function awful.mouse.client.move
 -- @param c The client to move, or the focused one if nil.
 -- @param snap The pixel to snap clients.
--- @param finished_cb An optional callback function, that will be called
---   when moving the client has been finished. The client
---   that has been moved will be passed to that function.
-function mouse.client.move(c, snap, finished_cb)
+-- @param finished_cb Deprecated, do not use
+function mouse.client.move(c, snap, finished_cb) --luacheck: no unused args
+    if finished_cb then
+        util.deprecated("The mouse.client.move `finished_cb` argument is no longer"..
+            " used, please use awful.mouse.resize.add_leave_callback(f, 'mouse.move')")
+    end
+
     c = c or capi.client.focus
 
     if not c
@@ -165,98 +90,39 @@ function mouse.client.move(c, snap, finished_cb)
         return
     end
 
-    local orig = c:geometry()
-    local m_c = capi.mouse.coords()
-    local dist_x = m_c.x - orig.x
-    local dist_y = m_c.y - orig.y
-    -- Only allow moving in the non-maximized directions
-    local fixed_x = c.maximized_horizontal
-    local fixed_y = c.maximized_vertical
+    -- Compute the offset
+    local coords = capi.mouse.coords()
+    local geo    = aplace.centered(capi.mouse,{parent=c, pretend=true})
 
-    capi.mousegrabber.run(function (_mouse)
-                              if not c.valid then return false end
+    local offset = {
+        x = geo.x - coords.x,
+        y = geo.y - coords.y,
+    }
 
-                              for _, v in ipairs(_mouse.buttons) do
-                                  if v then
-                                      local lay = layout.get(c.screen)
-                                      if lay == layout.suit.floating or c.floating then
-                                          local x = _mouse.x - dist_x
-                                          local y = _mouse.y - dist_y
-                                          c:geometry(mouse.client.snap(c, snap, x, y, fixed_x, fixed_y))
-                                      elseif lay ~= layout.suit.magnifier then
-                                          -- Only move the client to the mouse
-                                          -- screen if the target screen is not
-                                          -- floating.
-                                          -- Otherwise, we move if via geometry.
-                                          if layout.get(capi.mouse.screen) == layout.suit.floating then
-                                              local x = _mouse.x - dist_x
-                                              local y = _mouse.y - dist_y
-                                              c:geometry(mouse.client.snap(c, snap, x, y, fixed_x, fixed_y))
-                                          else
-                                              c.screen = capi.mouse.screen
-                                          end
-                                          if layout.get(c.screen) ~= layout.suit.floating then
-                                              local c_u_m = mouse.client_under_pointer()
-                                              if c_u_m and not c_u_m.floating then
-                                                  if c_u_m ~= c then
-                                                      c:swap(c_u_m)
-                                                  end
-                                              end
-                                          end
-                                      end
-                                      return true
-                                  end
-                              end
-                              if finished_cb then
-                                  finished_cb(c)
-                              end
-                              return false
-                          end, "fleur")
+    mouse.resize(c, "mouse.move", {
+        placement = aplace.under_mouse,
+        offset    = offset,
+        snap      = snap
+    })
 end
 
 mouse.client.dragtotag = { }
 
---- Move a client to a tag by dragging it onto the left / right side of the screen
+--- Move a client to a tag by dragging it onto the left / right side of the screen.
+-- @deprecated awful.mouse.client.dragtotag.border
 -- @param c The client to move
 function mouse.client.dragtotag.border(c)
-    capi.mousegrabber.run(function (_mouse)
-                                if not c.valid then return false end
+    util.deprecated("Use awful.mouse.snap.drag_to_tag_enabled = true instead "..
+        "of awful.mouse.client.dragtotag.border(c). It will now be enabled.")
 
-                                local button_down = false
-                                for _, v in ipairs(_mouse.buttons) do
-                                    if v then button_down = true end
-                                end
-                                local wa = capi.screen[c.screen].workarea
-                                if _mouse.x >= wa.x + wa.width then
-                                    capi.mouse.coords({ x = wa.x + wa.width - 1 })
-                                elseif _mouse.x <= wa.x then
-                                    capi.mouse.coords({ x = wa.x + 1 })
-                                end
-                                if not button_down then
-                                    local tags = c.screen.tags
-                                    local t = c.screen.selected_tag
-                                    local idx
-                                    for i, v in ipairs(tags) do
-                                        if v == t then
-                                            idx = i
-                                        end
-                                    end
-                                    if _mouse.x > wa.x + wa.width - 10 then
-                                        local newtag = tags[util.cycle(#tags, idx + 1)]
-                                        c:move_to_tag(newtag)
-                                        tag.viewnext()
-                                    elseif _mouse.x < wa.x + 10 then
-                                        local newtag = tags[util.cycle(#tags, idx - 1)]
-                                        c:move_to_tag(newtag)
-                                        tag.viewprev()
-                                    end
-                                    return false
-                                end
-                                return true
-                            end, "fleur")
+    -- Enable drag to border
+    mouse.snap.drag_to_tag_enabled = true
+
+    return mouse.client.move(c)
 end
 
---- Move the wibox under the cursor
+--- Move the wibox under the cursor.
+-- @function awful.mouse.wibox.move
 --@param w The wibox to move, or none to use that under the pointer
 function mouse.wibox.move(w)
     w = w or mouse.wibox_under_pointer()
@@ -297,55 +163,41 @@ function mouse.wibox.move(w)
 end
 
 --- Get a client corner coordinates.
--- @param c The client to get corner from, focused one by default.
--- @param corner The corner to use: auto, top_left, top_right, bottom_left,
--- bottom_right. Default is auto, and auto find the nearest corner.
--- @return Actual used corner and x and y coordinates.
+-- @deprecated awful.mouse.client.corner
+-- @tparam[opt=client.focus] client c The client to get corner from, focused one by default.
+-- @tparam string corner The corner to use: auto, top_left, top_right, bottom_left,
+-- bottom_right, left, right, top bottom. Default is auto, and auto find the
+-- nearest corner.
+-- @treturn string The corner name
+-- @treturn number x The horizontal position
+-- @treturn number y The vertical position
 function mouse.client.corner(c, corner)
+    util.deprecated(
+        "Use awful.placement.closest_corner(mouse) or awful.placement[corner](mouse)"..
+        " instead of awful.mouse.client.corner"
+    )
+
     c = c or capi.client.focus
     if not c then return end
 
-    local g = c:geometry()
+    local ngeo = nil
 
-    if not corner or corner == "auto" then
-        local m_c = capi.mouse.coords()
-        if math.abs(g.y - m_c.y) < math.abs(g.y + g.height - m_c.y) then
-            if math.abs(g.x - m_c.x) < math.abs(g.x + g.width - m_c.x) then
-                corner = "top_left"
-            else
-                corner = "top_right"
-            end
-        else
-            if math.abs(g.x - m_c.x) < math.abs(g.x + g.width - m_c.x) then
-                corner = "bottom_left"
-            else
-                corner = "bottom_right"
-            end
-        end
+    if (not corner) or corner == "auto" then
+        ngeo, corner = aplace.closest_corner(mouse, {parent = c})
+    elseif corner and aplace[corner] then
+        ngeo = aplace[corner](mouse, {parent = c})
     end
 
-    local x, y
-    if corner == "top_right" then
-        x = g.x + g.width
-        y = g.y
-    elseif corner == "top_left" then
-        x = g.x
-        y = g.y
-    elseif corner == "bottom_left" then
-        x = g.x
-        y = g.y + g.height
-    else
-        x = g.x + g.width
-        y = g.y + g.height
-    end
-
-    return corner, x, y
+    return corner, ngeo and ngeo.x or nil, ngeo and ngeo.y or nil
 end
 
 --- Resize a client.
+-- @function awful.mouse.client.resize
 -- @param c The client to resize, or the focused one by default.
--- @param corner The corner to grab on resize. Auto detected by default.
-function mouse.client.resize(c, corner)
+-- @tparam string corner The corner to grab on resize. Auto detected by default.
+-- @tparam[opt={}] table args A set of `awful.placement` arguments
+-- @treturn string The corner (or side) name
+function mouse.client.resize(c, corner, args)
     c = c or capi.client.focus
 
     if not c then return end
@@ -357,18 +209,161 @@ function mouse.client.resize(c, corner)
         return
     end
 
-    local lay = layout.get(c.screen)
-    local corner2, x, y = mouse.client.corner(c, corner)
+    -- Move the mouse to the corner
+    if corner and aplace[corner] then
+        aplace[corner](capi.mouse, {parent=c})
+    else
+        local _
+        _, corner = aplace.closest_corner(capi.mouse, {parent=c})
+    end
 
-    if lay == layout.suit.floating or c.floating then
-        return layout.suit.floating.mouse_resize_handler(c, corner2, x, y)
-    elseif lay.mouse_resize_handler then
-        return lay.mouse_resize_handler(c, corner2, x, y)
+    mouse.resize(c, "mouse.resize", args or {include_sides=true})
+
+    return corner
+end
+
+--- Default handler for `request::geometry` signals with `mouse.resize` context.
+-- @signalhandler awful.mouse.resize_handler
+-- @tparam client c The client
+-- @tparam string context The context
+-- @tparam[opt={}] table hints The hints to pass to the handler
+function mouse.resize_handler(c, context, hints)
+    if hints and context and context:find("mouse.*") then
+        -- This handler only handle the floating clients. If the client is tiled,
+        -- then it let the layouts handle it.
+        local lay = c.screen.selected_tag.layout
+
+        if lay == layout.suit.floating or c.floating then
+            local offset = hints and hints.offset or {}
+
+            if type(offset) == "number" then
+                offset = {
+                    x      = offset,
+                    y      = offset,
+                    width  = offset,
+                    height = offset,
+                }
+            end
+
+            c:geometry {
+                x      = hints.x      + (offset.x      or 0 ),
+                y      = hints.y      + (offset.y      or 0 ),
+                width  = hints.width  + (offset.width  or 0 ),
+                height = hints.height + (offset.height or 0 ),
+            }
+        elseif lay.resize_handler then
+            lay.resize_handler(c, context, hints)
+        end
     end
 end
 
+-- Older layouts implement their own mousegrabber.
+-- @tparam client c The client
+-- @tparam table args Additional arguments
+-- @treturn boolean This return false when the resize need to be aborted
+mouse.resize.add_enter_callback(function(c, args) --luacheck: no unused args
+    if c.floating then return end
+
+    local l = c.screen.selected_tag and c.screen.selected_tag.layout or nil
+    if l == layout.suit.floating then return end
+
+    if l ~= layout.suit.floating and l.mouse_resize_handler then
+        capi.mousegrabber.stop()
+
+        local geo, corner = aplace.closest_corner(capi.mouse, {parent=c})
+
+        l.mouse_resize_handler(c, corner, geo.x, geo.y)
+
+        return false
+    end
+end, "mouse.resize")
+
+--- Get the client currently under the mouse cursor.
+-- @property current_client
+-- @tparam client|nil The client
+
+function mouse.object.get_current_client()
+    local obj = capi.mouse.object_under_pointer()
+    if type(obj) == "client" then
+        return obj
+    end
+end
+
+function mouse.object.set_current_client() end
+
+--- Get the wibox currently under the mouse cursor.
+-- @property current_wibox
+-- @tparam wibox|nil The wibox
+
+function mouse.object.get_current_wibox()
+    local obj = capi.mouse.object_under_pointer()
+    if type(obj) == "drawin" then
+        return obj
+    end
+end
+
+function mouse.object.set_current_wibox() end
+
+--- True if the left mouse button is pressed.
+-- @property is_left_mouse_button_pressed
+-- @param boolean
+
+--- True if the right mouse button is pressed.
+-- @property is_right_mouse_button_pressed
+-- @param boolean
+
+--- True if the middle mouse button is pressed.
+-- @property is_middle_mouse_button_pressed
+-- @param boolean
+
+for _, b in ipairs {"left", "right", "middle"} do
+    mouse.object["is_".. b .."_mouse_button_pressed"] = function()
+        return capi.mouse.coords().buttons[1]
+    end
+
+    mouse.object["set_is_".. b .."_mouse_button_pressed"] = function() end
+end
+
+capi.client.connect_signal("request::geometry", mouse.resize_handler)
+
 -- Set the cursor at startup
 capi.root.cursor("left_ptr")
+
+-- Implement the custom property handler
+local props = {}
+
+capi.mouse.set_newindex_miss_handler(function(_,key,value)
+    if mouse.object["set_"..key] then
+        mouse.object["set_"..key](value)
+    else
+        props[key] = value
+    end
+end)
+
+capi.mouse.set_index_miss_handler(function(_,key)
+    if mouse.object["get_"..key] then
+        return mouse.object["get_"..key]()
+    else
+        return props[key]
+    end
+end)
+
+--- Get or set the mouse coords.
+--
+--@DOC_awful_mouse_coords_EXAMPLE@
+--
+-- @tparam[opt=nil] table coords_table None or a table with x and y keys as mouse
+--  coordinates.
+-- @tparam[opt=nil] integer coords_table.x The mouse horizontal position
+-- @tparam[opt=nil] integer coords_table.y The mouse vertical position
+-- @tparam[opt=false] boolean silent Disable mouse::enter or mouse::leave events that
+--  could be triggered by the pointer when moving.
+-- @treturn integer table.x The horizontal position
+-- @treturn integer table.y The vertical position
+-- @treturn table table.buttons Table containing the status of buttons, e.g. field [1] is true
+--  when button 1 is pressed.
+-- @function mouse.coords
+
 
 return mouse
 

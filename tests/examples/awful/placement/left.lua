@@ -1,6 +1,7 @@
 -- Align a client to the left of the parent area. --DOC_HEADER
 -- @tparam drawable d A drawable (like `client`, `mouse` or `wibox`) --DOC_HEADER
 -- @tparam[opt={}] table args Other arguments") --DOC_HEADER
+-- @treturn table The new geometry --DOC_HEADER
 -- @name left --DOC_HEADER
 -- @class function --DOC_HEADER
 

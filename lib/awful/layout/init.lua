@@ -246,6 +246,28 @@ capi.client.connect_signal("list", function()
                                    end
                                end)
 
+--- Default handler for tiled clients request::geometry with the `mouse.move`
+-- context.
+-- @tparam client c The client
+-- @tparam string context The context
+-- @tparam table hints Additional hints
+function layout.move_handler(c, context, hints) --luacheck: no unused args
+    -- Quit if it isn't a mouse.move on a tiled layout, that's handled elsewhere
+    if c.floating then return end
+    if context ~= "mouse.move" then return end
+    local l = c.screen.selected_tag and c.screen.selected_tag.layout or nil
+    if l == layout.suit.floating then return end
+
+    local c_u_m = capi.mouse.current_client
+    if c_u_m and not c_u_m.floating then
+        if c_u_m ~= c then
+            c:swap(c_u_m)
+        end
+    end
+end
+
+capi.client.connect_signal("request::geometry", layout.move_handler)
+
 return layout
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

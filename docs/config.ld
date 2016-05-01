@@ -35,6 +35,8 @@ new_type("function", "Functions")
 new_type("property", "Object properties", false, "Type")
 -- New type for signals
 new_type("signal", "Signals", false, "Arguments")
+-- New type for signals connections
+new_type("signalhandler", "Request handlers", false, "Arguments")
 -- Allow objects to define a set of beautiful properties affecting them
 new_type("beautiful", "Theme variables", false, "Type")
 -- Put deprecated methods in their own section
@@ -67,6 +69,7 @@ file = {
     '../docs/aliases/awful_client.lua',
     '../docs/aliases/awful_screen.lua',
     '../docs/aliases/awful_tag.lua',
+    '../docs/aliases/awful_mouse.lua',
     exclude = {
         -- exclude these modules, as they do not contain any written
         -- documentation
