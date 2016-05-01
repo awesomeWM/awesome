@@ -4,14 +4,14 @@ local spawn = require("awful.spawn")
 -- It is used to test the `awful.rules`
 
 return function(class, title, use_sn)
+    class = class or 'test_app'
     title = title or 'Awesome test client'
 
     local cmd = {"lua" , "-e", table.concat {
         "local lgi = require 'lgi';",
         "local Gtk = lgi.require('Gtk');",
         "Gtk.init();",
-        "local class = '",
-        class or 'test_app',"';",
+        "local class = '",class,"';",
         "local window = Gtk.Window {",
         "    default_width  = 100,",
         "    default_height = 100,",
