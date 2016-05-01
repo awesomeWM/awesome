@@ -38,9 +38,13 @@ void drawin_refresh(void);
 void client_focus_refresh(void);
 void client_border_refresh(void);
 
+/* objects/screen.c */
+void screen_refresh(void);
+
 static inline int
 awesome_refresh(void)
 {
+    screen_refresh();
     luaA_emit_refresh();
     banning_refresh();
     stack_refresh();

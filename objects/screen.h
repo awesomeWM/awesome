@@ -33,10 +33,14 @@ ARRAY_TYPE(screen_output_t, screen_output)
 struct a_screen
 {
     LUA_OBJECT_HEADER
+    /** Is this screen still valid and may be used? */
+    bool valid;
     /** Screen geometry */
     area_t geometry;
     /** The screen outputs informations */
     screen_output_array_t outputs;
+    /** Some XID identifying this screen */
+    uint32_t xid;
 };
 ARRAY_FUNCS(screen_t *, screen, DO_NOTHING)
 

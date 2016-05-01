@@ -400,8 +400,7 @@ event_handle_configurenotify(xcb_configure_notify_event_t *ev)
     xcb_screen_t *screen = globalconf.screen;
 
     if(ev->window == screen->root)
-        /* it's not that we panic, but restart */
-        awesome_restart();
+        globalconf.screen_need_refresh = true;
 
     /* Copy what XRRUpdateConfiguration() would do: Update the configuration */
     if(ev->window == screen->root) {
@@ -782,7 +781,7 @@ event_handle_randr_screen_change_notify(xcb_randr_screen_change_notify_event_t *
         globalconf.screen->height_in_pixels = ev->height;
     }
 
-    awesome_restart();
+    globalconf.screen_need_refresh = true;
 }
 
 /** XRandR event handler for RRNotify subtype XRROutputChangeNotifyEvent
@@ -992,10 +991,8 @@ void event_init(void)
     const xcb_query_extension_reply_t *reply;
 
     reply = xcb_get_extension_data(globalconf.connection, &xcb_randr_id);
-    if (reply && reply->present) {
-        xcb_randr_select_input(globalconf.connection, globalconf.screen->root, XCB_RANDR_NOTIFY_MASK_OUTPUT_CHANGE);
+    if (reply && reply->present)
         globalconf.event_base_randr = reply->first_event;
-    }
 
     reply = xcb_get_extension_data(globalconf.connection, &xcb_shape_id);
     if (reply && reply->present)
