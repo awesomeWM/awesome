@@ -15,17 +15,12 @@ return function(class, title, use_sn)
         "local window = Gtk.Window {",
         "    default_width  = 100,",
         "    default_height = 100,",
+        "    on_destroy     = Gtk.main_quit,",
         "    title          = '",title,
         "'};",
         "window:set_wmclass(class, class);",
-        "local app = Gtk.Application {",
-        "    application_id = 'org.awesomewm.tests.",class,
-        "'};",
-        "function app:on_activate()",
-        "    window.application = self;",
-        "    window:show_all();",
-        "end;",
-        "app:run {''}"
+        "window:show_all();",
+        "Gtk:main{...}"
     }}
 
     return spawn(cmd, use_sn)
