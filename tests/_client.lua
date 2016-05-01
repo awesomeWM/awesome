@@ -30,3 +30,5 @@ return function(class, title, use_sn)
 
     return spawn(cmd, use_sn)
 end
+
+-- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
