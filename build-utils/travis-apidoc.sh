@@ -64,12 +64,16 @@ if git diff --cached --exit-code --quiet; then
   exit
 fi
 
+LAST_COMMIT_MSG="$(cd "$REPO_DIR" && git log -1 --pretty=format:%s)"
+LAST_COMMIT="$(cd "$REPO_DIR" && git rev-parse --short HEAD)"
+
 # Commit the relevant changes.
 COMMIT_MSG="Update docs for $AWESOME_VERSION via Travis
 
 Last commit message:
-$(cd "$REPO_DIR" && git log -1 --pretty=format:%s)
+$LAST_COMMIT_MSG
 
+Commits: https://github.com/awesomeWM/awesome/compare/${TRAVIS_COMMIT_RANGE}
 Build URL: https://travis-ci.org/awesomeWM/awesome/builds/${TRAVIS_BUILD_ID}"
 git commit -m "[relevant] $COMMIT_MSG"
 
@@ -89,10 +93,26 @@ git tag -d _old
 
 git checkout "$BRANCH"
 OLD_REV="$(git rev-parse --short HEAD)"
-MERGE_COMMIT_MSG="$COMMIT_MSG"
 if [ "$TRAVIS_PULL_REQUEST" != false ]; then
-    COMMIT_MSG="$COMMIT_MSG
+    MERGE_COMMIT_MSG="$COMMIT_MSG
 Pull request: https://github.com/awesomeWM/awesome/pull/${TRAVIS_PULL_REQUEST}"
+else
+    PR_OR_ISSUE="$(echo "$COMMIT_MSG" | head -n 1 | grep -o '#[0-9]\+')"
+    if [ -n "$PR_OR_ISSUE" ]; then
+        MERGE_COMMIT_MSG="$COMMIT_MSG
+Ref: https://github.com/awesomeWM/awesome/pull/${PR_OR_ISSUE}"
+    else
+        PR_OR_ISSUE_URL="$(echo "$COMMIT_MSG" \
+            |  grep -Eo 'https://github.com/awesomeWM/awesome/(issues|pull)/[0-9]+')"
+        if [ -n "$PR_OR_ISSUE_URL" ]; then
+            MERGE_COMMIT_MSG="$COMMIT_MSG
+Ref: $PR_OR_ISSUE_URL"
+        else
+            MERGE_COMMIT_MSG="$COMMIT_MSG
+Commit: https://github.com/awesomeWM/awesome/commit/${LAST_COMMIT}
+Tree:   https://github.com/awesomeWM/awesome/commits/${LAST_COMMIT}"
+        fi
+    fi
 fi
 git merge --no-ff -m "$MERGE_COMMIT_MSG" merged-update
 NEW_REV="$(git rev-parse --short HEAD)"
