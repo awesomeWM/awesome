@@ -297,8 +297,8 @@ function mouse.object.set_current_client() end
 
 function mouse.object.get_current_wibox()
     local obj = capi.mouse.object_under_pointer()
-    if type(obj) == "drawin" then
-        return obj
+    if type(obj) == "drawin" and obj.get_wibox then
+        return obj:get_wibox()
     end
 end
 
