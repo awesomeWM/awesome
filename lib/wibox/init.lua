@@ -20,7 +20,7 @@ local base = require("wibox.widget.base")
 --- This provides widget box windows. Every wibox can also be used as if it were
 -- a drawin. All drawin functions and properties are also available on wiboxes!
 -- wibox
-local wibox = { mt = {} }
+local wibox = { mt = {}, object = {} }
 wibox.layout = require("wibox.layout")
 wibox.widget = require("wibox.widget")
 wibox.drawable = require("wibox.drawable")
@@ -298,6 +298,7 @@ end
 local function new(args)
     local ret = object()
     local w = capi.drawin(args)
+
     ret.drawin = w
     ret._drawable = wibox.drawable(w.drawable, { wibox = ret },
         "wibox drawable (" .. object.modulename(3) .. ")")
@@ -347,6 +348,13 @@ end
 function wibox.mt:__call(...)
     return new(...)
 end
+
+-- Extend the luaobject
+object.properties(capi.drawin, {
+    getter_class = wibox.object,
+    setter_class = wibox.object,
+    auto_emit    = true,
+})
 
 return setmetatable(wibox, wibox.mt)
 
