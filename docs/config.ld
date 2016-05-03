@@ -85,6 +85,9 @@ file = {
         -- Ignore some parts of the widget library
         '../lib/awful/widget/init.lua',
 
+        -- Ignore the drawing window, users should only care about wiboxes
+        '../objects/drawin.c',
+
         -- exclude layout, but we need an extra bit of documentation elsewhere.
         '../lib/awful/layout/suit/'
     }
