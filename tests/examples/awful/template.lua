@@ -5,13 +5,14 @@ local pango      = require("lgi").Pango
 local pangocairo = require("lgi").PangoCairo
 
 -- Set the global shims
--- luacheck: globals awesome root tag screen client mouse
+-- luacheck: globals awesome root tag screen client mouse drawin
 awesome = require( "awesome" )
 root    = require( "root"    )
 tag     = require( "tag"     )
 screen  = require( "screen"  )
 client  = require( "client"  )
 mouse   = require( "mouse"   )
+drawin  = require( "drawin"  )
 
 -- Force luacheck to be silent about setting those as unused globals
 assert(awesome and root and tag and screen and client and mouse)

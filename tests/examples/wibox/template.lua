@@ -1,10 +1,11 @@
 local file_path, image_path, luacovpath = ...   
 
 -- Set the global shims
--- luacheck: globals awesome client tag
+-- luacheck: globals awesome client tag drawin
 awesome = require( "awesome" )
 client  = require( "client"  )
 tag     = require( "tag"     )
+drawin  = require( "drawin"  )
 
 -- Force luacheck to be silent about setting those as unused globals
 assert(awesome and client and tag)
