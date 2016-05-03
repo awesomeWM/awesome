@@ -304,6 +304,35 @@ end
 
 function mouse.object.set_current_wibox() end
 
+--- Get the widgets currently under the mouse cursor.
+--
+-- @property current_widgets
+-- @tparam nil|table list The widget list
+-- @treturn table The list of widgets.The first element is the biggest
+-- container while the last is the topmost widget. The table contains *x*, *y*,
+-- *width*, *height* and *widget*.
+-- @treturn table The list of geometries.
+-- @see wibox.find_widgets
+
+function mouse.object.get_current_widgets()
+    local w = mouse.object.get_current_wibox()
+    if w then
+        local geo, coords = w:geometry(), capi.mouse:coords()
+
+        local list = w:find_widgets(coords.x - geo.x, coords.y - geo.y)
+
+        local ret = {}
+
+        for k, v in ipairs(list) do
+            ret[k] = v.widget
+        end
+
+        return ret, list
+    end
+end
+
+function mouse.object.set_current_widgets() end
+
 --- True if the left mouse button is pressed.
 -- @property is_left_mouse_button_pressed
 -- @param boolean
