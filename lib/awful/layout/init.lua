@@ -246,8 +246,8 @@ capi.client.connect_signal("list", function()
                                    end
                                end)
 
---- Default handler for tiled clients request::geometry with the `mouse.move`
--- context.
+--- Default handler for `request::geometry` signals for tiled clients with
+-- the "mouse.move" context.
 -- @tparam client c The client
 -- @tparam string context The context
 -- @tparam table hints Additional hints
