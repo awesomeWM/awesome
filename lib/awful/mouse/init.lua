@@ -333,6 +333,23 @@ end
 
 function mouse.object.set_current_widgets() end
 
+--- Get the topmost widget currently under the mouse cursor.
+-- @property current_widget
+-- @tparam widget|nil widget The widget
+-- @treturn ?widget The widget
+-- @treturn ?table The geometry.
+-- @see wibox.find_widgets
+
+function mouse.object.get_current_widget()
+    local wdgs, geos = mouse.object.get_current_widgets()
+
+    if wdgs then
+        return wdgs[#wdgs], geos[#geos]
+    end
+end
+
+function mouse.object.set_current_widget() end
+
 --- True if the left mouse button is pressed.
 -- @property is_left_mouse_button_pressed
 -- @param boolean
