@@ -299,6 +299,13 @@ local function new(args)
     local ret = object()
     local w = capi.drawin(args)
 
+    -- lua 5.1 and luajit have issues with self referencing loops
+    local avoid_leak = setmetatable({ret},{__mode="v"})
+
+    function w.get_wibox()
+        return avoid_leak[1]
+    end
+
     ret.drawin = w
     ret._drawable = wibox.drawable(w.drawable, { wibox = ret },
         "wibox drawable (" .. object.modulename(3) .. ")")
@@ -339,6 +346,8 @@ local function new(args)
 
     return ret
 end
+
+capi.drawin.add_signal("property::get_wibox")
 
 --- Redraw a wibox. You should never have to call this explicitely because it is
 -- automatically called when needed.
