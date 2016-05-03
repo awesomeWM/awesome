@@ -245,10 +245,11 @@ end
 
 --- Find a widget by a point.
 -- The wibox must have drawn itself at least once for this to work.
--- @param x X coordinate of the point
--- @param y Y coordinate of the point
--- @return A sorted table with all widgets that contain the given point. The
---   widgets are sorted by relevance.
+-- @tparam number x X coordinate of the point
+-- @tparam number y Y coordinate of the point
+-- @treturn table A sorted table of widgets positions. The first element is the biggest
+-- container while the last is the topmost widget. The table contains *x*, *y*,
+-- *width*, *height* and *widget*.
 function wibox:find_widgets(x, y)
     return self._drawable:find_widgets(x, y)
 end
