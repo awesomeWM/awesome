@@ -295,6 +295,7 @@ function tag.object.delete(self, fallback_tag, force)
 
     -- delete the tag
     data.tags[self].screen = nil
+    data.tags[self] = nil
     self.activated = false
 
     -- Update all indexes
