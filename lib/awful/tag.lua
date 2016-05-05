@@ -283,8 +283,7 @@ function tag.object.delete(self, fallback_tag)
 
         -- If a client has only this tag, or stickied clients with
         -- nowhere to go, abort.
-        if (not c.sticky and nb_tags == 1) or
-                                    (c.sticky and fallback_tag == nil) then
+        if (not c.sticky and nb_tags == 1) then
             return
         -- If a client has multiple tags, then do not move it to fallback
         elseif nb_tags < 2 then
