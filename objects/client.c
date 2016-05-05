@@ -1241,8 +1241,19 @@ HANDLE_GEOM(height)
         xcb_get_property_reply(globalconf.connection, startup_id_q, NULL);
     /* Say spawn that a client has been started, with startup id as argument */
     char *startup_id = xutil_get_text_property_from_reply(reply);
-    c->startup_id = startup_id;
     p_delete(&reply);
+
+    if (startup_id == NULL && c->leader_window != XCB_NONE) {
+        /* GTK hides this property elsewhere. No idea why. */
+        startup_id_q = xcb_get_property(globalconf.connection, false,
+                                        c->leader_window, _NET_STARTUP_ID,
+                                        XCB_GET_PROPERTY_TYPE_ANY, 0, UINT_MAX);
+        reply = xcb_get_property_reply(globalconf.connection, startup_id_q, NULL);
+        startup_id = xutil_get_text_property_from_reply(reply);
+        p_delete(&reply);
+    }
+    c->startup_id = startup_id;
+
     spawn_start_notify(c, startup_id);
 
     luaA_class_emit_signal(L, &client_class, "list", 0);
