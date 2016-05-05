@@ -297,12 +297,58 @@ function mouse.object.set_current_client() end
 
 function mouse.object.get_current_wibox()
     local obj = capi.mouse.object_under_pointer()
-    if type(obj) == "drawin" then
-        return obj
+    if type(obj) == "drawin" and obj.get_wibox then
+        return obj:get_wibox()
     end
 end
 
 function mouse.object.set_current_wibox() end
+
+--- Get the widgets currently under the mouse cursor.
+--
+-- @property current_widgets
+-- @tparam nil|table list The widget list
+-- @treturn table The list of widgets.The first element is the biggest
+-- container while the last is the topmost widget. The table contains *x*, *y*,
+-- *width*, *height* and *widget*.
+-- @treturn table The list of geometries.
+-- @see wibox.find_widgets
+
+function mouse.object.get_current_widgets()
+    local w = mouse.object.get_current_wibox()
+    if w then
+        local geo, coords = w:geometry(), capi.mouse:coords()
+
+        local list = w:find_widgets(coords.x - geo.x, coords.y - geo.y)
+
+        local ret = {}
+
+        for k, v in ipairs(list) do
+            ret[k] = v.widget
+        end
+
+        return ret, list
+    end
+end
+
+function mouse.object.set_current_widgets() end
+
+--- Get the topmost widget currently under the mouse cursor.
+-- @property current_widget
+-- @tparam widget|nil widget The widget
+-- @treturn ?widget The widget
+-- @treturn ?table The geometry.
+-- @see wibox.find_widgets
+
+function mouse.object.get_current_widget()
+    local wdgs, geos = mouse.object.get_current_widgets()
+
+    if wdgs then
+        return wdgs[#wdgs], geos[#geos]
+    end
+end
+
+function mouse.object.set_current_widget() end
 
 --- True if the left mouse button is pressed.
 -- @property is_left_mouse_button_pressed

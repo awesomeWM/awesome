@@ -20,7 +20,7 @@ local base = require("wibox.widget.base")
 --- This provides widget box windows. Every wibox can also be used as if it were
 -- a drawin. All drawin functions and properties are also available on wiboxes!
 -- wibox
-local wibox = { mt = {} }
+local wibox = { mt = {}, object = {} }
 wibox.layout = require("wibox.layout")
 wibox.widget = require("wibox.widget")
 wibox.drawable = require("wibox.drawable")
@@ -30,6 +30,189 @@ wibox.hierarchy = require("wibox.hierarchy")
 function wibox:set_widget(widget)
     self._drawable:set_widget(widget)
 end
+
+-- Import some drawin documentation
+
+--- Border width.
+--
+-- **Signal:**
+--
+--  * *property::border_width*
+--
+-- @property border_width
+-- @param integer
+
+--- Border color.
+--
+-- Please note that this property only support string based 24 bit or 32 bit
+-- colors:
+--
+--    Red Blue
+--     _|  _|
+--    #FF00FF
+--       T‾
+--     Green
+--
+--
+--    Red Blue
+--     _|  _|
+--    #FF00FF00
+--       T‾  ‾T
+--    Green   Alpha
+--
+-- **Signal:**
+--
+--  * *property::border_color*
+--
+-- @property border_color
+-- @param string
+
+--- On top of other windows.
+--
+-- **Signal:**
+--
+--  * *property::ontop*
+--
+-- @property ontop
+-- @param boolean
+
+--- The mouse cursor.
+--
+-- **Signal:**
+--
+--  * *property::cursor*
+--
+-- @property cursor
+-- @param string
+-- @see mouse
+
+--- Visibility.
+--
+-- **Signal:**
+--
+--  * *property::visible*
+--
+-- @property visible
+-- @param boolean
+
+--- The opacity of the wibox, between 0 and 1.
+--
+-- **Signal:**
+--
+--  * *property::opacity*
+--
+-- @property opacity
+-- @tparam number opacity (between 0 and 1)
+
+--- The window type (desktop, normal, dock, ...).
+--
+-- **Signal:**
+--
+--  * *property::type*
+--
+-- @property type
+-- @param string
+-- @see client.type
+
+--- The x coordinates.
+--
+-- **Signal:**
+--
+--  * *property::x*
+--
+-- @property x
+-- @param integer
+
+--- The y coordinates.
+--
+-- **Signal:**
+--
+--  * *property::y*
+--
+-- @property y
+-- @param integer
+
+--- The width of the wibox.
+--
+-- **Signal:**
+--
+--  * *property::width*
+--
+-- @property width
+-- @param width
+
+--- The height of the wibox.
+--
+-- **Signal:**
+--
+--  * *property::height*
+--
+-- @property height
+-- @param height
+
+---  The wibox's `drawable`.
+--
+-- **Signal:**
+--
+--  * *property::drawable*
+--
+-- @property drawable
+-- @tparam drawable drawable
+
+--- The X window id.
+--
+-- **Signal:**
+--
+--  * *property::window*
+--
+-- @property window
+-- @param string
+-- @see client.window
+
+--- The wibox's bounding shape as a (native) cairo surface.
+--
+-- **Signal:**
+--
+--  * *property::shape_bounding*
+--
+-- @property shape_bounding
+-- @param surface._native
+
+--- The wibox's clip shape as a (native) cairo surface.
+--
+-- **Signal:**
+--
+--  * *property::shape_clip*
+--
+-- @property shape_clip
+-- @param surface._native
+
+--- Get or set mouse buttons bindings to a wibox.
+--
+-- @param buttons_table A table of buttons objects, or nothing.
+-- @function wibox.buttons
+
+--- Get or set wibox geometry. That's the same as accessing or setting the x,
+-- y, width or height properties of a wibox.
+--
+-- @param A table with coordinates to modify.
+-- @return A table with wibox coordinates and geometry.
+-- @function wibox.geometry
+
+--- Get or set wibox struts.
+--
+-- @param strut A table with new strut, or nothing
+-- @return The wibox strut in a table.
+-- @function wibox.struts
+-- @see client.struts
+
+--- The default background color.
+-- @beautiful beautiful.bg_normal
+-- @see set_bg
+
+--- The default foreground (text) color.
+-- @beautiful beautiful.fg_normal
+-- @see set_fg
 
 --- Set a declarative widget hierarchy description.
 -- See [The declarative layout system](../documentation/03-declarative-layout.md.html)
@@ -62,10 +245,11 @@ end
 
 --- Find a widget by a point.
 -- The wibox must have drawn itself at least once for this to work.
--- @param x X coordinate of the point
--- @param y Y coordinate of the point
--- @return A sorted table with all widgets that contain the given point. The
---   widgets are sorted by relevance.
+-- @tparam number x X coordinate of the point
+-- @tparam number y Y coordinate of the point
+-- @treturn table A sorted table of widgets positions. The first element is the biggest
+-- container while the last is the topmost widget. The table contains *x*, *y*,
+-- *width*, *height* and *widget*.
 function wibox:find_widgets(x, y)
     return self._drawable:find_widgets(x, y)
 end
@@ -115,6 +299,14 @@ end
 local function new(args)
     local ret = object()
     local w = capi.drawin(args)
+
+    -- lua 5.1 and luajit have issues with self referencing loops
+    local avoid_leak = setmetatable({ret},{__mode="v"})
+
+    function w.get_wibox()
+        return avoid_leak[1]
+    end
+
     ret.drawin = w
     ret._drawable = wibox.drawable(w.drawable, { wibox = ret },
         "wibox drawable (" .. object.modulename(3) .. ")")
@@ -156,21 +348,23 @@ local function new(args)
     return ret
 end
 
+capi.drawin.add_signal("property::get_wibox")
+
 --- Redraw a wibox. You should never have to call this explicitely because it is
 -- automatically called when needed.
 -- @param wibox
 -- @function draw
 
---- Widget box object.
--- Every wibox "inherits" from a drawin and you can use all of drawin's
--- functions directly on this as well. When creating a wibox, you can specify a
--- "fg" and a "bg" color as keys in the table that is passed to the constructor.
--- All other arguments will be passed to drawin's constructor.
--- @table drawin
-
 function wibox.mt:__call(...)
     return new(...)
 end
+
+-- Extend the luaobject
+object.properties(capi.drawin, {
+    getter_class = wibox.object,
+    setter_class = wibox.object,
+    auto_emit    = true,
+})
 
 return setmetatable(wibox, wibox.mt)
 

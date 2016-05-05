@@ -128,7 +128,7 @@
  *
  * @property workarea
  * @see client.struts
- * @see drawin.struts
+ * @see wibox.struts
  * @param table
  * @tfield integer table.x The horizontal position
  * @tfield integer table.y The vertical position
