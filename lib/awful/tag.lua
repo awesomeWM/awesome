@@ -250,12 +250,14 @@ end
 -- @see awful.tag.find_fallback
 -- @tparam[opt=awful.tag.find_fallback()] tag fallback_tag Tag to assign
 --  stickied tags to.
+-- @tparam[opt=false] boolean force Move even non-sticky clients to the fallback
+-- tag.
 -- @return Returns true if the tag is successfully deleted, nil otherwise.
 -- If there are no clients exclusively on this tag then delete it. Any
 -- stickied clients are assigned to the optional 'fallback_tag'.
 -- If after deleting the tag there is no selected tag, try and restore from
 -- history or select the first tag on the screen.
-function tag.object.delete(self, fallback_tag)
+function tag.object.delete(self, fallback_tag, force)
 
     -- abort if the taf isn't currently activated
     if not self.activated then return end
@@ -283,7 +285,7 @@ function tag.object.delete(self, fallback_tag)
 
         -- If a client has only this tag, or stickied clients with
         -- nowhere to go, abort.
-        if (not c.sticky and nb_tags == 1) then
+        if (not c.sticky and nb_tags == 1 and not force) then
             return
         -- If a client has multiple tags, then do not move it to fallback
         elseif nb_tags < 2 then
