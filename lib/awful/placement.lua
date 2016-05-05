@@ -450,6 +450,9 @@ local function attach(d, position_f, args)
 
     if not args.attach then return end
 
+    -- Avoid a connection loop
+    args = setmetatable({attach=false}, {__index=args})
+
     d = d or capi.client.focus
     if not d then return end
 
