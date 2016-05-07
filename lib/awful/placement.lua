@@ -96,6 +96,15 @@ local function get_screen(s)
 end
 
 local wrap_client = nil
+local placement
+
+-- Store function -> keys
+local reverse_align_map = {}
+
+-- Forward declarations
+local area_common
+local wibox_update_strut
+local attach
 
 --- Allow multiple placement functions to be daisy chained.
 -- This also allow the functions to be aware they are being chained and act
@@ -123,7 +132,8 @@ local function compose(...)
         end
     end
 
-    local ret = wrap_client(function(d, args, ...)
+    local ret
+    ret = wrap_client(function(d, args, ...)
         local rets = {}
         local last_geo = nil
 
@@ -135,6 +145,7 @@ local function compose(...)
         -- Force the "pretend" argument and restore the original value for
         -- the last node.
         local pretend_real = args.pretend
+        local attach_real  = args.attach
 
         args.pretend = true
         args.attach  = false
@@ -159,6 +170,11 @@ local function compose(...)
                     rets[f.context] = r
                 end
             end
+        end
+
+        if attach_real then
+            args.attach = true
+            attach(d, ret, args)
         end
 
         return last_geo, rets
@@ -190,7 +206,7 @@ local placement_private = {}
 --
 --    (awful.placement.no_overlap + awful.placement.no_offscreen)(c)
 --
-local placement = setmetatable({}, {
+placement = setmetatable({}, {
     __index = placement_private,
     __newindex = function(_, k, f)
         placement_private[k] = wrap_client(f, k)
@@ -221,9 +237,6 @@ local align_map = {
     center_vertical   = function(_ , sh, _ , dh) return {x= nil     , y=sh-dh    } end,
     center_horizontal = function(sw, _ , dw, _ ) return {x=sw/2-dw/2, y= nil     } end,
 }
-
--- Store function -> keys
-local reverse_align_map = {}
 
 -- Some parameters to correctly compute the final size
 local resize_to_point_map = {
@@ -308,13 +321,13 @@ local function fix_new_geometry(new_geo, args, force)
     }
 end
 
---- Get the area covered by a drawin.
+-- Get the area covered by a drawin.
 -- @param d The drawin
 -- @tparam[opt=nil] table new_geo A new geometry
 -- @tparam[opt=false] boolean ignore_border_width Ignore the border
 -- @tparam table args the method arguments
 -- @treturn The drawin's area.
-local function area_common(d, new_geo, ignore_border_width, args)
+area_common = function(d, new_geo, ignore_border_width, args)
     -- The C side expect no arguments, nil isn't valid
     local geometry = new_geo and d:geometry(new_geo) or d:geometry()
     local border = ignore_border_width and 0 or d.border_width or 0
@@ -339,7 +352,6 @@ end
 -- @tparam[opt=false] boolean ignore_border_width Ignore the border
 -- @treturn table A table with *x*, *y*, *width* and *height*.
 local function geometry_common(obj, args, new_geo, ignore_border_width)
-
     -- Store the current geometry in a singleton-memento
     if args.store_geometry and new_geo and args.context then
         store_geometry(obj, args.context)
@@ -431,7 +443,7 @@ local function move_into_geometry(source, target)
 end
 
 -- Update the workarea
-local function wibox_update_strut(d, position)
+wibox_update_strut = function(d, position, args)
     -- If the drawable isn't visible, remove the struts
     if not d.visible then
         d:struts { left = 0, right = 0, bottom = 0, top = 0 }
@@ -446,16 +458,18 @@ local function wibox_update_strut(d, position)
     -- the workarea
     local struts = { left = 0, right = 0, bottom = 0, top = 0 }
 
+    local m = get_decoration(args)
+
     if vertical then
         for _, v in ipairs {"right", "left"} do
             if (not position) or position:match(v) then
-                struts[v] = geo.width
+                struts[v] = geo.width + m[v]
             end
         end
     else
         for _, v in ipairs {"top", "bottom"} do
             if (not position) or position:match(v) then
-                struts[v] = geo.height
+                struts[v] = geo.height + m[v]
             end
         end
     end
@@ -464,15 +478,17 @@ local function wibox_update_strut(d, position)
     d:struts(struts)
 end
 
---- Pin a drawable to a placement function.
+-- Pin a drawable to a placement function.
 -- Automatically update the position when the size change.
 -- All other arguments will be passed to the `position` function (if any)
 -- @tparam[opt=client.focus] drawable d A drawable (like `client`, `mouse`
 --   or `wibox`)
 -- @param position_f A position name (see `align`) or a position function
 -- @tparam[opt={}] table args Other arguments
-local function attach(d, position_f, args)
+attach = function(d, position_f, args)
     args = args or {}
+
+    if args.pretend then return end
 
     if not args.attach then return end
 
@@ -492,27 +508,36 @@ local function attach(d, position_f, args)
         position_f(d, args)
     end
 
-    d:connect_signal("property::width" , tracker)
-    d:connect_signal("property::height", tracker)
+    d:connect_signal("property::width"       , tracker)
+    d:connect_signal("property::height"      , tracker)
+    d:connect_signal("property::border_width", tracker)
 
-    tracker()
+    local function tracker_struts()
+        --TODO this is too fragile and doesn't work with all methods.
+        wibox_update_strut(d, d.position or reverse_align_map[position_f], args)
+    end
+
+    local parent = args.parent or d.screen
 
     if args.update_workarea then
-        local function tracker_struts()
-            --TODO this is too fragile and doesn't work with all methods.
-            wibox_update_strut(d, reverse_align_map[position_f])
-        end
-
         d:connect_signal("property::geometry" , tracker_struts)
         d:connect_signal("property::visible"  , tracker_struts)
+        capi.client.connect_signal("property::struts", tracker_struts)
 
         tracker_struts()
+    elseif parent == d.screen then
+        if args.honor_workarea then
+            parent:connect_signal("property::workarea", tracker)
+        end
+
+        if args.honor_padding then
+            parent:connect_signal("property::padding", tracker)
+        end
     end
 
     -- If there is a parent drawable, screen or mouse, also track it
-    local parent = args.parent or d.screen
     if parent then
-        args.parent:connect_signal("property::geometry" , tracker)
+        parent:connect_signal("property::geometry" , tracker)
     end
 end
 
