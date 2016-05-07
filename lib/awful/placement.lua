@@ -51,6 +51,11 @@
 --
 -- **attach** (*boolean*):
 --
+-- When the parent geometry (like the screen) changes, re-apply the placement
+-- function. This will add a `detach_callback` function to the drawable. Call
+-- this to detach the function. This will be called automatically when a new
+-- attached function is set.
+--
 -- **offset** (*table or number*):
 --
 -- The offset(s) to apply to the new geometry.
@@ -505,6 +510,16 @@ attach = function(d, position_f, args)
 
     if not position_f then return end
 
+    -- If there is multiple attached function, there is an high risk of infinite
+    -- loop. While some combinaisons are harmless, other are very hard to debug.
+    --
+    -- Use the placement composition to build explicit multi step attached
+    -- placement functions.
+    if d.detach_callback then
+        d.detach_callback()
+        d.detach_callback = nil
+    end
+
     local function tracker()
         position_f(d, args)
     end
@@ -539,6 +554,33 @@ attach = function(d, position_f, args)
     -- If there is a parent drawable, screen or mouse, also track it
     if parent then
         parent:connect_signal("property::geometry" , tracker)
+    end
+
+    -- Create a way to detach a placement function
+    d:add_signal("property::detach_callback")
+    function d.detach_callback()
+        d:disconnect_signal("property::width"       , tracker)
+        d:disconnect_signal("property::height"      , tracker)
+        d:disconnect_signal("property::border_width", tracker)
+        if parent then
+            parent:disconnect_signal("property::geometry" , tracker)
+
+            if parent == d.screen then
+                if args.honor_workarea then
+                    parent:disconnect_signal("property::workarea", tracker)
+                end
+
+                if args.honor_padding then
+                    parent:disconnect_signal("property::padding", tracker)
+                end
+            end
+        end
+
+        if args.update_workarea then
+            d:disconnect_signal("property::geometry" , tracker_struts)
+            d:disconnect_signal("property::visible"  , tracker_struts)
+            capi.client.disconnect_signal("property::struts", tracker_struts)
+        end
     end
 end
 
