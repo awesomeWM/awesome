@@ -387,12 +387,18 @@ end
 -- @tparam table args the method arguments
 -- @treturn table A table with *x*, *y*, *width* and *height*.
 local function get_parent_geometry(obj, args)
+    -- Didable override_geometry, context and other to avoid mutating the state
+    -- or using the wrong geo.
+
     if args.bounding_rect then
         return args.bounding_rect
     elseif args.parent then
-        return geometry_common(args.parent, args)
+        return geometry_common(args.parent, {})
     elseif obj.screen then
-        return geometry_common(obj.screen, args)
+        return geometry_common(obj.screen, {
+            honor_padding  = args.honor_padding,
+            honor_workarea = args.honor_workarea
+        })
     else
         return geometry_common(capi.screen[capi.mouse.screen], args)
     end
