@@ -3,8 +3,8 @@
 -- This module allows you to easily create wibox and attach them to the edge of
 -- a screen.
 --
--- @author Julien Danjou &lt;julien@danjou.info&gt;
--- @copyright 2009 Julien Danjou
+-- @author Emmanuel Lepage Vallee &lt;elv1313@gmail.com&gt;
+-- @copyright 2016 Emmanuel Lepage Vallee
 -- @release @AWESOME_VERSION@
 -- @module awful.wibox
 ---------------------------------------------------------------------------
@@ -18,11 +18,11 @@ local capi =
 local setmetatable = setmetatable
 local tostring = tostring
 local ipairs = ipairs
-local table = table
 local error = error
 local wibox = require("wibox")
 local beautiful = require("beautiful")
-local round = require("awful.util").round
+local util = require("awful.util")
+local placement = require("awful.placement")
 
 local function get_screen(s)
     return s and capi.screen[s]
@@ -32,77 +32,157 @@ local awfulwibox = { mt = {} }
 
 --- Array of table with wiboxes inside.
 -- It's an array so it is ordered.
-local wiboxes = {}
+local wiboxes = setmetatable({}, {__mode = "v"})
+
+-- Compute the margin on one side
+local function get_margin(w, position, auto_stop)
+    local h_or_w = (position == "top" or position == "bottom") and "height" or "width"
+    local ret = 0
+
+    for _, v in ipairs(wiboxes) do
+        -- Ignore the wiboxes placed after this one
+        if auto_stop and v == w then break end
+
+        if v.position == position and v.screen == w.screen and v.visible then
+            ret = ret + v[h_or_w]
+        end
+    end
+
+    return ret
+end
+
+-- `honor_workarea` cannot be used as it does modify the workarea itself.
+-- a manual padding has to be generated.
+local function get_margins(w)
+    local position = w.position
+    assert(position)
+
+    local margins = {left=0, right=0, top=0, bottom=0}
+
+    margins[position] = get_margin(w, position, true)
+
+    -- Avoid overlapping wiboxes
+    if position == "left" or position == "right" then
+        margins.top    = get_margin(w, "top"   )
+        margins.bottom = get_margin(w, "bottom")
+    end
+
+    return margins
+end
+
+-- Create the placement function
+local function gen_placement(position, stretch)
+    local maximize = (position == "right" or position == "left") and
+        "maximize_vertically" or "maximize_horizontally"
+
+    return placement[position] + (stretch and placement[maximize] or nil)
+end
+
+-- Attach the placement function.
+local function attach(wb, align)
+    gen_placement(align, wb._stretch)(wb, {
+        attach          = true,
+        update_workarea = true,
+        margins         = get_margins(wb)
+    })
+end
+
+-- Re-attach all wiboxes on a given wibox screen
+local function reattach(wb)
+    local s = wb.screen
+    for k, w in ipairs(wiboxes) do
+        if w ~= wb and w.screen == s then
+            if w.detach_callback then
+                w.detach_callback()
+                w.detach_callback = nil
+            end
+            attach(w, w.position)
+        end
+    end
+end
+
+--- The wibox position.
+-- @property position
+-- @param string Either "left", right", "top" or "bottom"
+
+local function get_position(wb)
+    return wb._position or "top"
+end
+
+local function set_position(wb, position)
+    -- Detach first to avoid any uneeded callbacks
+    if wb.detach_callback then
+        wb.detach_callback()
+
+        -- Avoid disconnecting twice, this produces a lot of warnings
+        wb.detach_callback = nil
+    end
+
+    -- Move the wibox to the end of the list to avoid messing up the others in
+    -- case there is stacked wiboxes on one side.
+    if wb._position then
+        for k, w in ipairs(wiboxes) do
+            if w == wb then
+                table.remove(wiboxes, k)
+            end
+        end
+        table.insert(wiboxes, wb)
+    end
+
+    -- In case the position changed, it may be necessary to reset the size
+    if (wb._position == "left" or wb._position == "right")
+      and (position == "top" or position == "bottom") then
+        wb.height = math.ceil(beautiful.get_font_height(wb.font) * 1.5)
+    elseif (wb._position == "top" or wb._position == "bottom")
+      and (position == "left" or position == "right") then
+        wb.width = math.ceil(beautiful.get_font_height(wb.font) * 1.5)
+    end
+
+    -- Changing the position will also cause the other margins to be invalidated.
+    -- For example, adding a wibox to the top will change the margins of any left
+    -- or right wiboxes. To solve, this, they need to be re-attached.
+    reattach(wb)
+
+    -- Set the new position
+    wb._position = position
+
+    -- Attach to the new position
+    attach(wb, position)
+end
+
+--- Stretch the wibox.
+--
+-- @property stretch
+-- @param[opt=true] boolean
+
+local function get_stretch(w)
+    return w._stretch
+end
+
+local function set_stretch(w, value)
+    w._stretch = value
+
+    attach(w, w.position)
+end
 
 --- Get a wibox position if it has been set, or return top.
 -- @param wb The wibox
+-- @deprecated awful.wibox.get_position
 -- @return The wibox position.
 function awfulwibox.get_position(wb)
-    for _, wprop in ipairs(wiboxes) do
-        if wprop.wibox == wb then
-            return wprop.position
-        end
-    end
-    return "top"
+    util.deprecate("Use wb:get_position() instead of awful.wibox.get_position")
+    return get_position(wb)
 end
 
 --- Put a wibox on a screen at this position.
 -- @param wb The wibox to attach.
 -- @param position The position: top, bottom left or right.
--- @param screen If the wibox it not attached to a screen, specified on which
--- screen the position should be set.
-function awfulwibox.set_position(wb, position, screen)
-    local area = get_screen(screen).geometry
+-- @param screen This argument is deprecated, use wb.screen directly.
+-- @deprecated awful.wibox.set_position
+function awfulwibox.set_position(wb, position, screen) --luacheck: no unused args
+    util.deprecate("Use wb:set_position(position) instead of awful.wibox.set_position")
 
-    -- The "length" of a wibox is always chosen to be the optimal size
-    -- (non-floating).
-    -- The "width" of a wibox is kept if it exists.
-    if position == "right" then
-        wb.x = area.x + area.width - (wb.width + 2 * wb.border_width)
-    elseif position == "left" then
-        wb.x = area.x
-    elseif position == "bottom" then
-        wb.y = (area.y + area.height) - (wb.height + 2 * wb.border_width)
-    elseif position == "top" then
-        wb.y = area.y
-    end
-
-    for _, wprop in ipairs(wiboxes) do
-        if wprop.wibox == wb then
-            wprop.position = position
-            break
-        end
-    end
-end
-
---- Reset all wiboxes positions.
-local function update_all_wiboxes_position()
-    for _, wprop in ipairs(wiboxes) do
-        awfulwibox.set_position(wprop.wibox, wprop.position, wprop.screen)
-    end
-end
-
-local function call_wibox_position_hook_on_prop_update()
-    update_all_wiboxes_position()
-end
-
-local function wibox_update_strut(wb)
-    for _, wprop in ipairs(wiboxes) do
-        if wprop.wibox == wb then
-            if not wb.visible then
-                wb:struts { left = 0, right = 0, bottom = 0, top = 0 }
-            elseif wprop.position == "top" then
-                wb:struts { left = 0, right = 0, bottom = 0, top = wb.height + 2 * wb.border_width }
-            elseif wprop.position == "bottom" then
-                wb:struts { left = 0, right = 0, bottom = wb.height + 2 * wb.border_width, top = 0 }
-            elseif wprop.position == "left" then
-                wb:struts { left = wb.width + 2 * wb.border_width, right = 0, bottom = 0, top = 0 }
-            elseif wprop.position == "right" then
-                wb:struts { left = 0, right = wb.width + 2 * wb.border_width, bottom = 0, top = 0 }
-            end
-            break
-        end
-    end
+    set_position(wb, position)
 end
 
 --- Attach a wibox to a screen.
@@ -111,104 +191,55 @@ end
 -- @param wb The wibox to attach.
 -- @param position The position of the wibox: top, bottom, left or right.
 -- @param screen The screen to attach to
-function awfulwibox.attach(wb, position, screen)
-    screen = get_screen(screen)
-    -- Store wibox as attached in a weak-valued table
-    local wibox_prop_table
-    -- Start from end since we sometimes remove items
-    for i = #wiboxes, 1, -1 do
-        -- Since wiboxes are stored as weak value, they can disappear.
-        -- If they did, remove their entries
-        if wiboxes[i].wibox == nil then
-            table.remove(wiboxes, i)
-        elseif wiboxes[i].wibox == wb then
-            wibox_prop_table = wiboxes[i]
-            -- We could break here, but well, let's check if there is no other
-            -- table with their wiboxes been garbage collected.
-        end
-    end
-
-    if not wibox_prop_table then
-        table.insert(wiboxes, setmetatable({ wibox = wb, position = position, screen = screen }, { __mode = 'v' }))
-    else
-        wibox_prop_table.position = position
-    end
-
-    wb:connect_signal("property::width", wibox_update_strut)
-    wb:connect_signal("property::height", wibox_update_strut)
-    wb:connect_signal("property::visible", wibox_update_strut)
-
-    wb:connect_signal("property::width", call_wibox_position_hook_on_prop_update)
-    wb:connect_signal("property::height", call_wibox_position_hook_on_prop_update)
-    wb:connect_signal("property::visible", call_wibox_position_hook_on_prop_update)
-    wb:connect_signal("property::border_width", call_wibox_position_hook_on_prop_update)
+-- @deprecated awful.wibox.attach
+function awfulwibox.attach(wb, position, screen) --luacheck: no unused args
+    util.deprecate("awful.wibox.attach is deprecated, use the 'attach' property"..
+        " of awful.placement. This method doesn't do anything anymore"
+    )
 end
 
 --- Align a wibox.
+--
+-- Supported alignment are:
+--
+-- * top_left
+-- * top_right
+-- * bottom_left
+-- * bottom_right
+-- * left
+-- * right
+-- * top
+-- * bottom
+-- * centered
+-- * center_vertical
+-- * center_horizontal
+--
 -- @param wb The wibox.
--- @param align The alignment: left, right or center.
--- @param screen If the wibox is not attached to any screen, you can specify the
--- screen where to align.
-function awfulwibox.align(wb, align, screen)
-    screen = get_screen(screen)
-    local position = awfulwibox.get_position(wb)
-    local area = screen.workarea
-
-    if position == "right" then
-        if align == "right" then
-            wb.y = area.y
-        elseif align == "left" then
-            wb.y = area.y + area.height - (wb.height + 2 * wb.border_width)
-        elseif align == "center" then
-            wb.y = area.y + round((area.height - wb.height) / 2)
-        end
-    elseif position == "left" then
-        if align == "right" then
-            wb.y = (area.y + area.height) - (wb.height + 2 * wb.border_width)
-        elseif align == "left" then
-            wb.y = area.y
-        elseif align == "center" then
-            wb.y = area.y + round((area.height - wb.height) / 2)
-        end
-    elseif position == "bottom" then
-        if align == "right" then
-            wb.x = area.x + area.width - (wb.width + 2 * wb.border_width)
-        elseif align == "left" then
-            wb.x = area.x
-        elseif align == "center" then
-            wb.x = area.x + round((area.width - wb.width) / 2)
-        end
-    elseif position == "top" then
-        if align == "right" then
-            wb.x = area.x + area.width - (wb.width + 2 * wb.border_width)
-        elseif align == "left" then
-            wb.x = area.x
-        elseif align == "center" then
-            wb.x = area.x + round((area.width - wb.width) / 2)
-        end
+-- @param align The alignment
+-- @param screen This argument is deprecated. It is not used. Use wb.screen
+--  directly.
+-- @deprecated awful.wibox.align
+-- @see awful.placement.align
+function awfulwibox.align(wb, align, screen) --luacheck: no unused args
+    if align == "center" then
+        util.deprecate("awful.wibox.align(wb, 'center' is deprecated, use 'centered'")
+        align = "centered"
     end
 
-    -- Update struts regardless of changes
-    wibox_update_strut(wb)
+    if screen then
+        util.deprecate("awful.wibox.align 'screen' argument is deprecated")
+    end
+
+    attach(wb, align)
 end
 
 --- Stretch a wibox so it takes all screen width or height.
--- @param wb The wibox.
--- @param screen The screen to stretch on, or the wibox screen.
-function awfulwibox.stretch(wb, screen)
-    if screen then
-        screen = get_screen(screen)
-        local position = awfulwibox.get_position(wb)
-        local area = screen.workarea
-        if position == "right" or position == "left" then
-            wb.height = area.height - (2 * wb.border_width)
-            wb.y = area.y
-        else
-            wb.width = area.width - (2 * wb.border_width)
-            wb.x = area.x
-        end
-    end
-end
+--
+-- **This function has been removed.**
+--
+-- @deprecated awful.wibox.stretch
+-- @see awful.placement
+-- @see stretch
 
 --- Create a new wibox and attach it to a screen edge.
 -- @see wibox
@@ -234,24 +265,24 @@ function awfulwibox.new(arg)
 
     -- Set default size
     if position == "left" or position == "right" then
-        arg.width = arg.width or round(beautiful.get_font_height(arg.font) * 1.5)
+        arg.width = arg.width or math.ceil(beautiful.get_font_height(arg.font) * 1.5)
         if arg.height then
             has_to_stretch = false
             if arg.screen then
                 local hp = tostring(arg.height):match("(%d+)%%")
                 if hp then
-                    arg.height = round(screen.geometry.height * hp / 100)
+                    arg.height = math.ceil(screen.geometry.height * hp / 100)
                 end
             end
         end
     else
-        arg.height = arg.height or round(beautiful.get_font_height(arg.font) * 1.5)
+        arg.height = arg.height or math.ceil(beautiful.get_font_height(arg.font) * 1.5)
         if arg.width then
             has_to_stretch = false
             if arg.screen then
                 local wp = tostring(arg.width):match("(%d+)%%")
                 if wp then
-                    arg.width = round(screen.geometry.width * wp / 100)
+                    arg.width = math.ceil(screen.geometry.width * wp / 100)
                 end
             end
         end
@@ -259,36 +290,36 @@ function awfulwibox.new(arg)
 
     local w = wibox(arg)
 
+    w.screen   = screen
+    w._stretch = arg.stretch == nil and has_to_stretch or arg.stretch
+
+    w:add_signal("property::position")
+    w.get_position = get_position
+    w.set_position = set_position
+
+    w:add_signal("property::stretch")
+    w.get_stretch = get_stretch
+    w.set_stretch = set_stretch
+
     w.visible = true
 
-    awfulwibox.attach(w, position, screen)
-    if has_to_stretch then
-        awfulwibox.stretch(w, screen)
-    else
-        awfulwibox.align(w, arg.align, screen)
-    end
+    w:set_position(position)
 
-    awfulwibox.set_position(w, position, screen)
+    table.insert(wiboxes, w)
+
+    w:connect_signal("property::visible", function() reattach(w) end)
 
     return w
 end
 
-local function update_wiboxes_on_struts(c)
-    local struts = c:struts()
-    if struts.left ~= 0 or struts.right ~= 0
-       or struts.top ~= 0 or struts.bottom ~= 0 then
-        update_all_wiboxes_position()
-    end
-end
-
--- Hook registered to reset all wiboxes position.
-capi.client.connect_signal("property::struts", update_wiboxes_on_struts)
-capi.client.connect_signal("unmanage", update_wiboxes_on_struts)
-
 capi.screen.connect_signal("removed", function(s)
-    for _, wprop in ipairs(wiboxes) do
-        if wprop.screen == s then
-            wprop.wibox.visible = false
+    for _, wibox in ipairs(wiboxes) do
+        if wibox.screen == s then
+            if wibox.detach_callback then
+                wibox.detach_callback()
+            end
+
+            wibox.visible = false
         end
     end
 end)
@@ -296,6 +327,8 @@ end)
 function awfulwibox.mt:__call(...)
     return awfulwibox.new(...)
 end
+
+--@DOC_wibox_COMMON@
 
 return setmetatable(awfulwibox, awfulwibox.mt)
 
