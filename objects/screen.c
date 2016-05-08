@@ -117,7 +117,7 @@
  * The screen workarea.
  *
  * The workarea is a subsection of the screen where clients can be placed. It
- * usually excludes the toolbars (see `awful.wibox`) and dockable clients
+ * usually excludes the toolbars (see `awful.wibar`) and dockable clients
  * (see `client.dockable`) like WindowMaker DockAPP.
  *
  * It can be modified be altering the `wibox` or `client` struts.

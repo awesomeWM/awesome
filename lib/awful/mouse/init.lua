@@ -10,7 +10,7 @@
 -- Grab environment we need
 local layout = require("awful.layout")
 local aplace = require("awful.placement")
-local awibox = require("awful.wibox")
+local awibar = require("awful.wibar")
 local util = require("awful.util")
 local type = type
 local ipairs = ipairs
@@ -135,20 +135,20 @@ function mouse.wibox.move(w)
 
     capi.mousegrabber.run(function (_mouse)
         local button_down = false
-        if awibox.get_position(w) == "floating" then
+        if awibar.get_position(w) == "floating" then
             w.x = capi.mouse.coords().x + offset.x
             w.y = capi.mouse.coords().y + offset.y
         else
             local wa = capi.screen[capi.mouse.screen].workarea
 
             if capi.mouse.coords()["y"] > wa.y + wa.height - 10 then
-                awibox.set_position(w, "bottom", w.screen)
+                awibar.set_position(w, "bottom", w.screen)
             elseif capi.mouse.coords()["y"] < wa.y + 10 then
-                awibox.set_position(w, "top", w.screen)
+                awibar.set_position(w, "top", w.screen)
             elseif capi.mouse.coords()["x"] > wa.x + wa.width - 10 then
-                awibox.set_position(w, "right", w.screen)
+                awibar.set_position(w, "right", w.screen)
             elseif capi.mouse.coords()["x"] < wa.x + 10 then
-                awibox.set_position(w, "left", w.screen)
+                awibar.set_position(w, "left", w.screen)
             end
             w.screen = capi.mouse.screen
         end
