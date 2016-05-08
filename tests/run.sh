@@ -17,6 +17,12 @@ if [ "$CI" = true ]; then
     set -x
 fi
 
+source_dir="$PWD"
+build_dir="$CMAKE_BINARY_DIR"
+if [ -z "$build_dir" ]; then
+    build_dir="$PWD/build"
+fi
+
 # Change to file's dir (POSIXly).
 cd -P -- "$(dirname -- "$0")"
 this_dir=$PWD
@@ -27,8 +33,6 @@ if [ $# != 0 ]; then
 else
     tests=$this_dir/test*.lua
 fi
-
-root_dir=$PWD/..
 
 # Travis.
 if [ "$CI" = true ]; then
@@ -44,13 +48,13 @@ export TEST_PAUSE_ON_ERRORS  # Used in tests/_runner.lua.
 
 XEPHYR=Xephyr
 XVFB=Xvfb
-AWESOME=$root_dir/build/awesome
+AWESOME=$build_dir/awesome
 if ! [ -x "$AWESOME" ]; then
     echo "$AWESOME is not executable." >&2
     exit 1
 fi
-RC_FILE=$root_dir/build/awesomerc.lua
-AWESOME_CLIENT="$root_dir/utils/awesome-client"
+RC_FILE=$build_dir/awesomerc.lua
+AWESOME_CLIENT="$source_dir/utils/awesome-client"
 D=:5
 SIZE=1024x768
 
@@ -65,7 +69,7 @@ else
     # ( sleep 1; kill -USR1 $xserver_pid ) &
 fi
 
-cd $root_dir/build
+cd $build_dir
 
 LUA_PATH="$(lua -e 'print(package.path)');lib/?.lua;lib/?/init.lua"
 # Add test dir (for _runner.lua).
@@ -154,21 +158,21 @@ eval $(DISPLAY="$D" dbus-launch --sh-syntax --exit-with-session)
 if [ "$CI" != true ]; then
     # Prepare a config file pointing to a working theme
     # Handle old filename of config files (useful for git-bisect).
-    if [ -f $root_dir/awesomerc.lua.in ]; then
+    if [ -f $source_dir/awesomerc.lua.in ]; then
         SED_IN=.in
     fi
     RC_FILE=$tmp_files/awesomerc.lua
     THEME_FILE=$tmp_files/theme.lua
-    sed -e "s:.*beautiful.init(.*default/theme.lua.*:beautiful.init('$THEME_FILE'):" $root_dir/awesomerc.lua$SED_IN > $RC_FILE
-    sed -e "s:@AWESOME_THEMES_PATH@/default/titlebar:$root_dir/build/themes/default/titlebar:"  \
-        -e "s:@AWESOME_THEMES_PATH@:$root_dir/themes/:" \
-        -e "s:@AWESOME_ICON_PATH@:$root_dir/icons:" $root_dir/themes/default/theme.lua$SED_IN > $THEME_FILE
+    sed -e "s:.*beautiful.init(.*default/theme.lua.*:beautiful.init('$THEME_FILE'):" $source_dir/awesomerc.lua$SED_IN > $RC_FILE
+    sed -e "s:@AWESOME_THEMES_PATH@/default/titlebar:$build_dir/themes/default/titlebar:"  \
+        -e "s:@AWESOME_THEMES_PATH@:$source_dir/themes/:" \
+        -e "s:@AWESOME_ICON_PATH@:$source_dir/icons:" $source_dir/themes/default/theme.lua$SED_IN > $THEME_FILE
 fi
 
 # Start awesome.
 start_awesome() {
     export DISPLAY="$D"
-    cd $root_dir/build
+    cd $build_dir
     DISPLAY="$D" "$AWESOME" -c "$RC_FILE" $AWESOME_OPTIONS > $awesome_log 2>&1 &
     awesome_pid=$!
     cd - >/dev/null
