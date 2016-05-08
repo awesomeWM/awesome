@@ -26,6 +26,11 @@ wibox.widget = require("wibox.widget")
 wibox.drawable = require("wibox.drawable")
 wibox.hierarchy = require("wibox.hierarchy")
 
+local force_forward = {
+    shape_bounding = true,
+    shape_clip = true,
+}
+
 --- Set the widget that the wibox displays
 function wibox:set_widget(widget)
     self._drawable:set_widget(widget)
@@ -340,10 +345,18 @@ local function new(args)
     -- Make sure the wibox is drawn at least once
     ret.draw()
 
-    -- Redirect all non-existing indexes to the "real" drawin
+    -- If a value is not found, look in the drawin
     setmetatable(ret, {
         __index = w,
-        __newindex = w
+        __newindex = function(self, k,v)
+            if wibox["set_"..k] then
+                wibox["set_"..k](v)
+            elseif w[k] ~= nil or force_forward[k] then
+                w[k] = v
+            else
+                rawset(self, k, v)
+            end
+        end
     })
 
     return ret
