@@ -52,7 +52,7 @@ fi
 RC_FILE=$root_dir/build/awesomerc.lua
 AWESOME_CLIENT="$root_dir/utils/awesome-client"
 D=:5
-SIZE=1024x768
+SIZE="${TESTS_SCREEN_SIZE:-1024x768}"
 
 if [ $HEADLESS = 1 ]; then
     "$XVFB" $D -noreset -screen 0 ${SIZE}x24 &
