@@ -21,6 +21,9 @@ fi
 set -e
 set +x
 
+# Display exit code in term of failure (probably due to 'set -x').
+trap '[ "$?" = 0 ] || echo "EXIT CODE: $?"' EXIT
+
 REPO_APIDOC="https://${GH_APIDOC_TOKEN}@github.com/awesomeWM/apidoc"
 REPO_DIR="$PWD"
 
@@ -97,13 +100,13 @@ if [ "$TRAVIS_PULL_REQUEST" != false ]; then
     MERGE_COMMIT_MSG="$COMMIT_MSG
 Pull request: https://github.com/awesomeWM/awesome/pull/${TRAVIS_PULL_REQUEST}"
 else
-    PR_OR_ISSUE="$(echo "$COMMIT_MSG" | head -n 1 | grep -o '#[0-9]\+')"
+    PR_OR_ISSUE="$(echo "$COMMIT_MSG" | head -n 1 | grep -o '#[0-9]\+' || true)"
     if [ -n "$PR_OR_ISSUE" ]; then
         MERGE_COMMIT_MSG="$COMMIT_MSG
 Ref: https://github.com/awesomeWM/awesome/pull/${PR_OR_ISSUE}"
     else
         PR_OR_ISSUE_URL="$(echo "$COMMIT_MSG" \
-            |  grep -Eo 'https://github.com/awesomeWM/awesome/(issues|pull)/[0-9]+')"
+            | grep -Eo 'https://github.com/awesomeWM/awesome/(issues|pull)/[0-9]+' || true)"
         if [ -n "$PR_OR_ISSUE_URL" ]; then
             MERGE_COMMIT_MSG="$COMMIT_MSG
 Ref: $PR_OR_ISSUE_URL"
