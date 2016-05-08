@@ -24,6 +24,8 @@ local beautiful = require("beautiful")
 local util = require("awful.util")
 local placement = require("awful.placement")
 
+--@DOC_wibox_COMMON@
+
 local function get_screen(s)
     return s and capi.screen[s]
 end
