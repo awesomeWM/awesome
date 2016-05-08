@@ -35,8 +35,6 @@ local function get_screen(s)
     return s and capi.screen[s]
 end
 
-local command_heap = require("Heap")
-
 -- menubar
 local menubar = { mt = {}, menu_entries = {} }
 menubar.menu_gen = require("menubar.menu_gen")
@@ -98,15 +96,6 @@ local function colortext(s, c)
     return "<span color='" .. awful.util.ensure_pango_color(c) .. "'>" .. s .. "</span>"
 end
 
--- Generate a pattern matching expression that ignores case.
--- @param s Original pattern matching expresion.
-local function nocase (s)
-    s = string.gsub(s, "%a", function (c)
-        return string.format("[%s%s]", string.lower(c), string.upper(c))
-    end)
-    return s
-end
-
 --- Get how the menu item should be displayed.
 -- @param o The menu item.
 -- @return item name, item background color, background image, item icon.
@@ -115,6 +104,42 @@ local function label(o)
         return colortext(o.name, theme.fg_focus), theme.bg_focus, nil, o.icon
     else
         return o.name, theme.bg_normal, nil, o.icon
+    end
+end
+
+local function load_count_table()
+    local count_file_name = awful.util.getdir("cache") .. "/menu_count_file"
+
+    local count_file = io.open (count_file_name, "r")
+    local count_table = {}
+
+    -- read count file
+    if count_file then
+        io.input (count_file)
+        for line in io.lines() do
+            name, count = string.match(line, "([^;]+);([^;]+)")
+            if name ~= nil and count ~= nil then
+                count_table[name] = count
+            end
+        end
+    end
+
+    return count_table
+end
+
+local function write_count_table(count_table)
+    local count_file_name = awful.util.getdir("cache") .. "/menu_count_file"
+
+    local count_file = io.open (count_file_name, "w")
+
+    if count_file then
+        io.output (count_file)
+
+        for name,count in pairs(count_table) do
+            str = string.format("%s;%d\n", name, count)
+            io.write(str)
+        end
+        io.flush()
     end
 end
 
@@ -130,22 +155,10 @@ local function perform_action(o)
         current_item = 1
         return true, "", new_prompt
     elseif shownitems[current_item].cmdline then
-        awful.util.spawn(shownitems[current_item].cmdline)
+        awful.spawn(shownitems[current_item].cmdline)
 
-        local count_file_name = awful.util.getdir("cache") .. "/menu_count_file"
-        local count_file = io.open (count_file_name, "r")
-        count_table = {}
-
-        -- read count file
-        if count_file then
-            io.input (count_file)
-            for line in io.lines() do
-                name, count = string.match(line, "([^;]+);([^;]+)")
-                if name ~= nil and count ~= nil then
-                    count_table[name] = count
-                end
-            end
-        end
+        -- load count_table from cache file
+        local count_table = load_count_table()
 
         -- increase count
         curname = shownitems[current_item].name
@@ -155,18 +168,8 @@ local function perform_action(o)
             count_table[curname] = 1
         end
 
-        -- write new count file
-        local count_file = io.open (count_file_name, "w")
-
-        if count_file then
-            io.output (count_file)
-
-            for k,v in pairs(count_table) do
-                str = string.format("%s;%d\n", k, v)
-                io.write(str)
-            end
-            io.flush()
-        end
+        -- write updated count table to cache file
+        write_count_table(count_table)
 
         -- Let awful.prompt execute dummy exec_callback and
         -- done_callback to stop the keygrabber properly.
@@ -174,7 +177,7 @@ local function perform_action(o)
     end
 end
 
---- Cut item list to return only current page.
+-- Cut item list to return only current page.
 -- @tparam table all_items All items list.
 -- @tparam str query Search query.
 -- @tparam number|screen scr Screen
@@ -233,8 +236,8 @@ local function menulist_update(query, scr)
         for _, v in pairs(menubar.menu_gen.all_categories) do
             v.focused = false
             if not current_category and v.use then
-                if string.match(v.name, nocase(query)) then
-                    if string.match(v.name, "^" .. nocase(query)) then
+                if string.match(v.name, pattern) then
+                    if string.match(v.name, "^" .. pattern) then
                         table.insert(shownitems, v)
                     else
                         table.insert(match_inside, v)
@@ -244,20 +247,8 @@ local function menulist_update(query, scr)
         end
     end
 
-    local count_file_name = awful.util.getdir("cache") .. "/menu_count_file"
-    local count_file = io.open (count_file_name, "r")
-
-    count_table = {}
-
-    if count_file then
-        io.input(count_file)
-        for line in io.lines() do
-            name, count = string.match(line, "([^;]+);([^;]+)")
-            if name ~= nil and count ~= nil then
-                count_table[name] = count
-            end
-        end
-    end
+    local count_table = load_count_table()
+    local command_list = {}
 
     -- Add the applications according to their name and cmdline
     for _, v in ipairs(menubar.menu_entries) do
@@ -268,29 +259,26 @@ local function menulist_update(query, scr)
                 if string.match(v.name, "^" .. pattern)
                     or string.match(v.cmdline, "^" .. pattern) then
 
-                    count = 0
-                    -- set count if we have a query and the current item has a name
-                    if string.len(query) > 0 and count_table[v.name] ~= nil then
-                        count = tonumber(count_table[v.name])
+                    v.count = 0
+                    -- use count from count_table if present
+                    if string.len(pattern) > 0 and count_table[v.name] ~= nil then
+                        v.count = tonumber(count_table[v.name])
                     end
 
-                    if string.match(v.name, "^" .. nocase(query))
-                        or string.match(v.cmdline, "^" .. nocase(query)) then
-                        command_heap.push(v, count)
-                    else
-                        command_heap.push(v, count)
-                    end
+                    table.insert (command_list, v)
                 end
             end
         end
     end
 
-    while not command_heap.isempty() do
-        item = command_heap.pop()
-        if item ~= nil and item.name ~= nil then
-            table.insert(shownitems, item)
-        end
+    local function compare_counts(a,b)
+        return a.count > b.count
     end
+
+    -- sort command_list by count (highest first)
+    table.sort(command_list, compare_counts)
+    -- copy into showitems
+    shownitems = command_list
 
     if #shownitems > 0 then
         -- Insert a run item value as the last choice
