@@ -223,7 +223,7 @@ event_handle_button(xcb_button_press_event_t *ev)
                              XCB_ALLOW_ASYNC_POINTER,
                              XCB_CURRENT_TIME);
     }
-    else if((c = client_getbyframewin(ev->event)))
+    else if((c = client_getbywin(ev->event)))
     {
         luaA_object_push(L, c);
         /* And handle the button raw button event */
