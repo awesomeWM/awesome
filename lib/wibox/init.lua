@@ -213,11 +213,11 @@ end
 
 --- The default background color.
 -- @beautiful beautiful.bg_normal
--- @see set_bg
+-- @see bg
 
 --- The default foreground (text) color.
 -- @beautiful beautiful.fg_normal
--- @see set_fg
+-- @see fg
 
 --- Set a declarative widget hierarchy description.
 -- See [The declarative layout system](../documentation/03-declarative-layout.md.html)
@@ -226,24 +226,33 @@ end
 -- @class function
 wibox.setup = base.widget.setup
 
---- Set the background of the wibox
+--- The background of the wibox.
 -- @param c The background to use. This must either be a cairo pattern object,
 --   nil or a string that gears.color() understands.
+-- @property bg
+-- @see gears.color
+
 function wibox:set_bg(c)
     self._drawable:set_bg(c)
 end
 
---- Set the background image of the drawable
+--- The background image of the drawable.
 -- If `image` is a function, it will be called with `(context, cr, width, height)`
 -- as arguments. Any other arguments passed to this method will be appended.
 -- @param image A background image or a function
+-- @property bgimage
+-- @see gears.surface
+
 function wibox:set_bgimage(image, ...)
     self._drawable:set_bgimage(image, ...)
 end
 
---- Set the foreground of the wibox
+--- The foreground (text) of the wibox.
 -- @param c The foreground to use. This must either be a cairo pattern object,
 --   nil or a string that gears.color() understands.
+-- @property fg
+-- @see gears.color
+
 function wibox:set_fg(c)
     self._drawable:set_fg(c)
 end
@@ -347,10 +356,16 @@ local function new(args)
 
     -- If a value is not found, look in the drawin
     setmetatable(ret, {
-        __index = w,
+        __index = function(self, k)
+            if rawget(self, "get_"..k) then
+                return self["get_"..k](self)
+            else
+                return w[k]
+            end
+        end,
         __newindex = function(self, k,v)
-            if wibox["set_"..k] then
-                wibox["set_"..k](v)
+            if rawget(self, "set_"..k) then
+                self["set_"..k](self, v)
             elseif w[k] ~= nil or force_forward[k] then
                 w[k] = v
             else
