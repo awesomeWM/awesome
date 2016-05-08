@@ -117,7 +117,7 @@ local function load_count_table()
     if count_file then
         io.input (count_file)
         for line in io.lines() do
-            name, count = string.match(line, "([^;]+);([^;]+)")
+            local name, count = string.match(line, "([^;]+);([^;]+)")
             if name ~= nil and count ~= nil then
                 count_table[name] = count
             end
@@ -136,7 +136,7 @@ local function write_count_table(count_table)
         io.output (count_file)
 
         for name,count in pairs(count_table) do
-            str = string.format("%s;%d\n", name, count)
+            local str = string.format("%s;%d\n", name, count)
             io.write(str)
         end
         io.flush()
@@ -161,7 +161,7 @@ local function perform_action(o)
         local count_table = load_count_table()
 
         -- increase count
-        curname = shownitems[current_item].name
+        local curname = shownitems[current_item].name
         if count_table[curname] ~= nil then
             count_table[curname] = count_table[curname] + 1
         else
