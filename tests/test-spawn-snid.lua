@@ -1,7 +1,7 @@
 --- Tests for spawn's startup notifications.
 
 local runner = require("_runner")
-local spawn = require("awful.spawn")
+local test_client = require("_client")
 
 local manage_called, c_snid
 
@@ -15,7 +15,7 @@ local ret, snid
 local steps = {
   function(count)
     if count == 1 then
-      ret, snid = spawn('urxvt', true)
+      ret, snid = test_client("foo", "bar", true)
     elseif manage_called then
       assert(ret)
       assert(snid)
@@ -29,7 +29,7 @@ local steps = {
   function(count)
     if count == 1 then
       manage_called = false
-      ret, snid = spawn('urxvt', false)
+      ret, snid = test_client("bar", "foo", false)
     elseif manage_called then
       assert(ret)
       assert(snid == nil)

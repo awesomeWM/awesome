@@ -3,7 +3,7 @@ local spawn = require("awful.spawn")
 -- This file provide a simple, yet flexible, test client.
 -- It is used to test the `awful.rules`
 
-return function(class, title)
+return function(class, title, use_sn)
     title = title or 'Awesome test client'
 
     local cmd = {"lua" , "-e", table.concat {
@@ -28,5 +28,5 @@ return function(class, title)
         "app:run {''}"
     }}
 
-    spawn(cmd)
+    return spawn(cmd, use_sn)
 end
