@@ -239,7 +239,7 @@ end)
 table.insert(steps, function()
     local c = client.get()[1]
 
-    assert(c:geometry().x       == c.screen.workarea.x+c.screen.workarea.width/2           )
+    assert(c:geometry().x       == math.ceil(c.screen.workarea.x+c.screen.workarea.width/2))
     assert(c:geometry().y       == c.screen.workarea.y                                     )
     assert(c:geometry().width   == math.ceil(c.screen.workarea.width/2 - 2*c.border_width) )
     assert(c:geometry().height  == math.ceil(c.screen.workarea.height/2 - 2*c.border_width))
@@ -257,7 +257,7 @@ end)
 table.insert(steps, function()
     local c = client.get()[1]
 
-    assert(c:geometry().x       == c.screen.workarea.x+c.screen.workarea.width/2          )
+    assert(c:geometry().x       == math.ceil(c.screen.workarea.x+c.screen.workarea.width/2))
     assert(c:geometry().y       == c.screen.workarea.y                                    )
     assert(c:geometry().width   == math.ceil(c.screen.workarea.width/2 - 2*c.border_width))
     assert(c:geometry().height  == c.screen.workarea.height - 2*c.border_width            )
