@@ -1352,6 +1352,7 @@ capi.tag.add_signal("property::urgent")
 
 capi.tag.add_signal("property::urgent_count")
 capi.tag.add_signal("property::volatile")
+capi.tag.add_signal("request::screen")
 capi.tag.add_signal("removal-pending")
 
 capi.screen.add_signal("tag::history::update")
@@ -1359,9 +1360,18 @@ capi.screen.add_signal("tag::history::update")
 capi.screen.connect_signal("tag::history::update", tag.history.update)
 
 capi.screen.connect_signal("removed", function(s)
-    -- First give other code a chance to clean up
+    -- First give other code a chance to move the tag to another screen
+    for _, t in pairs(s.tags) do
+        t:emit_signal("request::screen")
+    end
+    -- Everything that's left: Tell everyone that these tags go away (other code
+    -- could e.g. save clients)
     for _, t in pairs(s.tags) do
         t:emit_signal("removal-pending")
+    end
+    -- Give other code yet another change to save clients
+    for _, c in pairs(capi.client.get(s)) do
+        c:emit_signal("request::tag", nil, { reason = "screen-removed" })
     end
     -- Then force all clients left to go somewhere random
     local fallback = nil
