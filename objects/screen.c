@@ -478,6 +478,16 @@ static void screen_scan_x11(lua_State *L, screen_array_t *screens)
     s->geometry.height = xcb_screen->height_in_pixels;
 }
 
+static void
+screen_added(lua_State *L, screen_t *screen)
+{
+    screen->workarea = screen->geometry;
+    screen->valid = true;
+    luaA_object_push(L, screen);
+    luaA_object_emit_signal(L, -1, "added", 0);
+    lua_pop(L, 1);
+}
+
 /** Get screens informations and fill global configuration.
  */
 void
@@ -497,10 +507,7 @@ screen_scan(void)
     screen_deduplicate(L, &globalconf.screens);
 
     foreach(screen, globalconf.screens) {
-        (*screen)->valid = true;
-        luaA_object_push(L, *screen);
-        luaA_object_emit_signal(L, -1, "added", 0);
-        lua_pop(L, 1);
+        screen_added(L, *screen);
     }
 
     screen_update_primary();
@@ -533,8 +540,8 @@ screen_modified(screen_t *existing_screen, screen_t *other_screen)
         existing_screen->geometry = other_screen->geometry;
         luaA_object_push(L, existing_screen);
         luaA_object_emit_signal(L, -1, "property::geometry", 0);
-        luaA_object_emit_signal(L, -1, "property::workarea", 0);
         lua_pop(L, 1);
+        screen_update_workarea(existing_screen);
     }
 
     bool outputs_changed = existing_screen->outputs.len != other_screen->outputs.len;
@@ -584,11 +591,10 @@ screen_refresh(void)
             found |= (*new_screen)->xid == (*old_screen)->xid;
         if(!found) {
             screen_array_append(&globalconf.screens, *new_screen);
-            (*new_screen)->valid = true;
-            luaA_object_push(L, *new_screen);
-            luaA_object_emit_signal(L, -1, "added", 0);
+            screen_added(L, *new_screen);
             /* Get an extra reference since both new_screens and
              * globalconf.screens reference this screen now */
+            luaA_object_push(L, *new_screen);
             luaA_object_ref(L, -1);
         }
     }
@@ -696,17 +702,8 @@ screen_coord_in_screen(screen_t *s, int x, int y)
            && (y >= s->geometry.y && y < s->geometry.y + s->geometry.height);
 }
 
-/** Get screens info.
- * \param screen Screen.
- * \param strut Honor windows strut.
- * \return The screen area.
- */
-static area_t
-screen_area_get(screen_t *screen, bool strut)
+void screen_update_workarea(screen_t *screen)
 {
-    if(!strut)
-        return screen->geometry;
-
     area_t area = screen->geometry;
     uint16_t top = 0, bottom = 0, left = 0, right = 0;
 
@@ -762,7 +759,14 @@ screen_area_get(screen_t *screen, bool strut)
     area.width -= left + right;
     area.height -= top + bottom;
 
-    return area;
+    if (AREA_EQUAL(area, screen->workarea))
+        return;
+
+    screen->workarea = area;
+    lua_State *L = globalconf_get_lua_State();
+    luaA_object_push(L, screen);
+    luaA_object_emit_signal(L, -1, "property::workarea", 0);
+    lua_pop(L, 1);
 }
 
 /** Get display info.
@@ -815,8 +819,8 @@ screen_client_moveto(client_t *c, screen_t *new_screen, bool doresize)
         return;
     }
 
-    from = screen_area_get(old_screen, false);
-    to = screen_area_get(c->screen, false);
+    from = old_screen->geometry;
+    to = c->screen->geometry;
 
     area_t new_geometry = c->geometry;
 
@@ -1000,7 +1004,7 @@ luaA_screen_get_outputs(lua_State *L, screen_t *s)
 static int
 luaA_screen_get_workarea(lua_State *L, screen_t *s)
 {
-    luaA_pusharea(L, screen_area_get(s, true));
+    luaA_pusharea(L, s->workarea);
     return 1;
 }
 
