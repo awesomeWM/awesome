@@ -1070,6 +1070,34 @@ luaA_screen_fake_remove(lua_State *L)
     return 0;
 }
 
+/** Fake-resize a screen
+ * @tparam integer x The new X-coordinate for screen.
+ * @tparam integer y The new Y-coordinate for screen.
+ * @tparam integer width The new width for screen.
+ * @tparam integer height The new height for screen.
+ * @function fake_resize
+ */
+static int
+luaA_screen_fake_resize(lua_State *L)
+{
+    screen_t *screen = luaA_checkudata(L, 1, &screen_class);
+    int x = luaL_checkinteger(L, 2);
+    int y = luaL_checkinteger(L, 3);
+    int width = luaL_checkinteger(L, 4);
+    int height = luaL_checkinteger(L, 5);
+
+    screen->geometry.x = x;
+    screen->geometry.y = y;
+    screen->geometry.width = width;
+    screen->geometry.height = height;
+
+    screen_update_workarea(screen);
+
+    luaA_object_emit_signal(L, 1, "property::geometry", 0);
+
+    return 0;
+}
+
 void
 screen_class_setup(lua_State *L)
 {
@@ -1089,6 +1117,7 @@ screen_class_setup(lua_State *L)
         LUA_OBJECT_META(screen)
         LUA_CLASS_META
         { "fake_remove", luaA_screen_fake_remove },
+        { "fake_resize", luaA_screen_fake_resize },
         { NULL, NULL },
     };
 
