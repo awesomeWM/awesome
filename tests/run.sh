@@ -54,6 +54,12 @@ AWESOME_CLIENT="$root_dir/utils/awesome-client"
 D=:5
 SIZE=1024x768
 
+# Set up some env vars
+# Disable GDK's screen scaling support
+export GDK_SCALE=1
+# No idea what this does, but it silences a warning that GTK init might print
+export NO_AT_BRIDGE=1
+
 if [ $HEADLESS = 1 ]; then
     "$XVFB" $D -noreset -screen 0 ${SIZE}x24 &
     xserver_pid=$!
