@@ -31,6 +31,7 @@
 #include "common/atoms.h"
 #include "common/xutil.h"
 #include "ewmh.h"
+#include "objects/screen.h"
 #include "property.h"
 #include "xwindow.h"
 
@@ -83,14 +84,9 @@ luaA_window_struts(lua_State *L)
         luaA_tostrut(L, 2, &window->strut);
         ewmh_update_strut(window->window, &window->strut);
         luaA_object_emit_signal(L, 1, "property::struts", 0);
-        /* FIXME: Only emit if the workarea actually changed
-         * (= window is visible, only on the right screen)? */
+        /* We don't know the correct screen, update them all */
         foreach(s, globalconf.screens)
-        {
-            luaA_object_push(L, *s);
-            luaA_object_emit_signal(L, -1, "property::workarea", 0);
-            lua_pop(L, 1);
-        }
+            screen_update_workarea(*s);
     }
 
     return luaA_pushstrut(L, window->strut);

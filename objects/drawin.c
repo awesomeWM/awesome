@@ -323,9 +323,8 @@ drawin_set_visible(lua_State *L, int udx, bool v)
         luaA_object_emit_signal(L, udx, "property::visible", 0);
         if(strut_has_value(&drawin->strut))
         {
-            luaA_object_push(L, screen_getbycoord(drawin->geometry.x, drawin->geometry.y));
-            luaA_object_emit_signal(L, -1, "property::workarea", 0);
-            lua_pop(L, 1);
+            screen_update_workarea(
+                    screen_getbycoord(drawin->geometry.x, drawin->geometry.y));
         }
     }
 }

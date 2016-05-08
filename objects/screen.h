@@ -37,6 +37,8 @@ struct a_screen
     bool valid;
     /** Screen geometry */
     area_t geometry;
+    /** Screen workarea */
+    area_t workarea;
     /** The screen outputs informations */
     screen_output_array_t outputs;
     /** Some XID identifying this screen */
@@ -52,6 +54,7 @@ int screen_get_index(screen_t *);
 area_t display_area_get(void);
 void screen_client_moveto(client_t *, screen_t *, bool);
 void screen_update_primary(void);
+void screen_update_workarea(screen_t *);
 screen_t *screen_get_primary(void);
 
 screen_t *luaA_checkscreen(lua_State *, int);

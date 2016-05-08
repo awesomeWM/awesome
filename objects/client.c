@@ -1543,14 +1543,6 @@ client_resize(client_t *c, area_t geometry, bool honor_hints)
     return false;
 }
 
-static void
-client_emit_property_workarea_on_screen(lua_State *L, client_t *c)
-{
-    luaA_object_push(L, c->screen);
-    luaA_object_emit_signal(L, -1, "property::workarea", 0);
-    lua_pop(L, 1);
-}
-
 /** Set a client minimized, or not.
  * \param L The Lua VM state.
  * \param cidx The client index.
@@ -1610,7 +1602,7 @@ client_set_minimized(lua_State *L, int cidx, bool s)
             xcb_map_window(globalconf.connection, c->window);
         }
         if(strut_has_value(&c->strut))
-            client_emit_property_workarea_on_screen(L, c);
+            screen_update_workarea(c->screen);
         luaA_object_emit_signal(L, cidx, "property::minimized", 0);
     }
 }
@@ -1630,7 +1622,7 @@ client_set_hidden(lua_State *L, int cidx, bool s)
         c->hidden = s;
         banning_need_update();
         if(strut_has_value(&c->strut))
-            client_emit_property_workarea_on_screen(L, c);
+            screen_update_workarea(c->screen);
         luaA_object_emit_signal(L, cidx, "property::hidden", 0);
     }
 }
@@ -1922,7 +1914,7 @@ client_unmanage(client_t *c, bool window_valid)
     luaA_class_emit_signal(L, &client_class, "list", 0);
 
     if(strut_has_value(&c->strut))
-        client_emit_property_workarea_on_screen(L, c);
+        screen_update_workarea(c->screen);
 
     /* Get rid of all titlebars */
     for (client_titlebar_t bar = CLIENT_TITLEBAR_TOP; bar < CLIENT_TITLEBAR_COUNT; bar++) {
