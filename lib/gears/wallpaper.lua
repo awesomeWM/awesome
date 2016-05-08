@@ -18,7 +18,7 @@ local function root_geometry()
     return { x = 0, y = 0, width = width, height = height }
 end
 
--- A cairo surface that we still want to set as the wallpaper
+-- Information about a pending wallpaper change, see prepare_context()
 local pending_wallpaper = nil
 
 --- Prepare the needed state for setting a wallpaper.
@@ -29,34 +29,48 @@ local pending_wallpaper = nil
 -- @return[1] The available geometry (table with entries width and height)
 -- @return[1] A cairo context that the wallpaper should be drawn to
 function wallpaper.prepare_context(s)
+    local root_width, root_height = root.size()
     local geom = s and screen[s].geometry or root_geometry()
-    local cr
+    local source, target, cr
 
     if not pending_wallpaper then
         -- Prepare a pending wallpaper
-        local wp = surface(root.wallpaper())
-
-        pending_wallpaper = wp:create_similar(cairo.Content.COLOR, root.size())
-
-        -- Copy the old wallpaper to the new one
-        cr = cairo.Context(pending_wallpaper)
-        cr:save()
-        cr.operator = cairo.Operator.SOURCE
-        cr:set_source_surface(wp, 0, 0)
-        cr:paint()
-        cr:restore()
+        source = surface(root.wallpaper())
+        target = source:create_similar(cairo.Content.COLOR, root_width, root_height)
 
         -- Set the wallpaper (delayed)
         timer.delayed_call(function()
             local paper = pending_wallpaper
             pending_wallpaper = nil
-            wallpaper.set(paper)
-            paper:finish()
+            wallpaper.set(paper.surface)
+            paper.surface:finish()
         end)
+    elseif root_width > pending_wallpaper.width or root_height > pending_wallpaper.height then
+        -- The root window was resized while a wallpaper is pending
+        source = pending_wallpaper.surface
+        target = source:create_similar(cairo.Content.COLOR, root_width, root_height)
     else
         -- Draw to the already-pending wallpaper
-        cr = cairo.Context(pending_wallpaper)
+        source = nil
+        target = pending_wallpaper.surface
     end
+
+    cr = cairo.Context(target)
+
+    if source then
+        -- Copy the old wallpaper to the new one
+        cr:save()
+        cr.operator = cairo.Operator.SOURCE
+        cr:set_source_surface(source, 0, 0)
+        cr:paint()
+        cr:restore()
+    end
+
+    pending_wallpaper = {
+        surface = target,
+        width = root_width,
+        height = root_height
+    }
 
     -- Only draw to the selected area
     cr:translate(geom.x, geom.y)
