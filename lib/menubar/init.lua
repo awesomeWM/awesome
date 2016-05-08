@@ -35,6 +35,8 @@ local function get_screen(s)
     return s and capi.screen[s]
 end
 
+local command_heap = require("Heap")
+
 -- menubar
 local menubar = { mt = {}, menu_entries = {} }
 menubar.menu_gen = require("menubar.menu_gen")
@@ -59,7 +61,6 @@ menubar.geometry = { width = nil,
                      height = nil,
                      x = nil,
                      y = nil }
-
 --- Width of blank space left in the right side.
 menubar.right_margin = theme.xresources.apply_dpi(8)
 
@@ -97,6 +98,15 @@ local function colortext(s, c)
     return "<span color='" .. awful.util.ensure_pango_color(c) .. "'>" .. s .. "</span>"
 end
 
+-- Generate a pattern matching expression that ignores case.
+-- @param s Original pattern matching expresion.
+local function nocase (s)
+    s = string.gsub(s, "%a", function (c)
+        return string.format("[%s%s]", string.lower(c), string.upper(c))
+    end)
+    return s
+end
+
 --- Get how the menu item should be displayed.
 -- @param o The menu item.
 -- @return item name, item background color, background image, item icon.
@@ -120,7 +130,44 @@ local function perform_action(o)
         current_item = 1
         return true, "", new_prompt
     elseif shownitems[current_item].cmdline then
-        awful.spawn(shownitems[current_item].cmdline)
+        awful.util.spawn(shownitems[current_item].cmdline)
+
+        local count_file_name = awful.util.getdir("cache") .. "/menu_count_file"
+        local count_file = io.open (count_file_name, "r")
+        count_table = {}
+
+        -- read count file
+        if count_file then
+            io.input (count_file)
+            for line in io.lines() do
+                name, count = string.match(line, "([^;]+);([^;]+)")
+                if name ~= nil and count ~= nil then
+                    count_table[name] = count
+                end
+            end
+        end
+
+        -- increase count
+        curname = shownitems[current_item].name
+        if count_table[curname] ~= nil then
+            count_table[curname] = count_table[curname] + 1
+        else
+            count_table[curname] = 1
+        end
+
+        -- write new count file
+        local count_file = io.open (count_file_name, "w")
+
+        if count_file then
+            io.output (count_file)
+
+            for k,v in pairs(count_table) do
+                str = string.format("%s;%d\n", k, v)
+                io.write(str)
+            end
+            io.flush()
+        end
+
         -- Let awful.prompt execute dummy exec_callback and
         -- done_callback to stop the keygrabber properly.
         return false
@@ -186,13 +233,28 @@ local function menulist_update(query, scr)
         for _, v in pairs(menubar.menu_gen.all_categories) do
             v.focused = false
             if not current_category and v.use then
-                if string.match(v.name, pattern) then
-                    if string.match(v.name, "^" .. pattern) then
+                if string.match(v.name, nocase(query)) then
+                    if string.match(v.name, "^" .. nocase(query)) then
                         table.insert(shownitems, v)
                     else
                         table.insert(match_inside, v)
                     end
                 end
+            end
+        end
+    end
+
+    local count_file_name = awful.util.getdir("cache") .. "/menu_count_file"
+    local count_file = io.open (count_file_name, "r")
+
+    count_table = {}
+
+    if count_file then
+        io.input(count_file)
+        for line in io.lines() do
+            name, count = string.match(line, "([^;]+);([^;]+)")
+            if name ~= nil and count ~= nil then
+                count_table[name] = count
             end
         end
     end
@@ -205,17 +267,29 @@ local function menulist_update(query, scr)
                 or string.match(v.cmdline, pattern) then
                 if string.match(v.name, "^" .. pattern)
                     or string.match(v.cmdline, "^" .. pattern) then
-                    table.insert(shownitems, v)
-                else
-                    table.insert(match_inside, v)
+
+                    count = 0
+                    -- set count if we have a query and the current item has a name
+                    if string.len(query) > 0 and count_table[v.name] ~= nil then
+                        count = tonumber(count_table[v.name])
+                    end
+
+                    if string.match(v.name, "^" .. nocase(query))
+                        or string.match(v.cmdline, "^" .. nocase(query)) then
+                        command_heap.push(v, count)
+                    else
+                        command_heap.push(v, count)
+                    end
                 end
             end
         end
     end
 
-    -- Now add items from match_inside to shownitems
-    for _, v in ipairs(match_inside) do
-        table.insert(shownitems, v)
+    while not command_heap.isempty() do
+        item = command_heap.pop()
+        if item ~= nil and item.name ~= nil then
+            table.insert(shownitems, item)
+        end
     end
 
     if #shownitems > 0 then
