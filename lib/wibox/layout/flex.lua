@@ -14,22 +14,7 @@ local util = require("awful.util")
 
 local flex = {}
 
---- Layout a fixed layout. Each widget gets just the space it asks for.
--- @param layout The layout you are modifying.
--- @param context The context in which we are drawn.
--- @param width The available width.
--- @param height The available height.
--- @name layout
--- @class function
-
---- Get all children of this layout
--- @param layout The layout you are modifying.
--- @warning If the widget contain itself and recursive is true, this will cause
---   a stack overflow
--- @param[opt] recursive Also add all widgets of childrens
--- @return a list of all widgets
--- @name get_children
--- @class function
+--@DOC_fixed_COMMON@
 
 --- Replace the layout children
 -- @tparam table children A table composed of valid widgets
@@ -40,13 +25,6 @@ local flex = {}
 -- @param layout The layout you are modifying.
 -- @tparam widget ... Widgets that should be added (must at least be one)
 -- @name add
--- @class function
-
---- Set a widget at a specific index, replace the current one
--- @tparam number index A widget or a widget index
--- @param widget2 The widget to take the place of the first one
--- @treturn boolean If the operation is successful
--- @name set
 -- @class function
 
 --- Remove a widget from the layout
@@ -61,43 +39,6 @@ local flex = {}
 -- @param widget ... Widgets that should be removed (must at least be one)
 -- @treturn boolean If the operation is successful
 -- @name remove_widgets
--- @class function
-
---- Fit the fixed layout into the given space
--- @param layout The layout you are modifying.
--- @param context The context in which we are fit.
--- @param orig_width The available width.
--- @param orig_height The available height.
--- @name fit
--- @class function
-
---- Reset a fixed layout. This removes all widgets from the layout.
--- @param layout The layout you are modifying.
--- @name reset
--- @class function
-
---- Replace the first instance of `widget` in the layout with `widget2`
--- @param widget The widget to replace
--- @param widget2 The widget to replace `widget` with
--- @tparam[opt=false] boolean recursive Digg in all compatible layouts to find the widget.
--- @treturn boolean If the operation is successful
--- @name replace_widget
--- @class function
-
---- Swap 2 widgets in a layout
--- @tparam number index1 The first widget index
--- @tparam number index2 The second widget index
--- @treturn boolean If the operation is successful
--- @name swap
--- @class function
-
---- Swap 2 widgets in a layout
--- If widget1 is present multiple time, only the first instance is swapped
--- @param widget1 The first widget
--- @param widget2 The second widget
--- @tparam[opt=false] boolean recursive Digg in all compatible layouts to find the widget.
--- @treturn boolean If the operation is successful
--- @name swap_widgets
 -- @class function
 
 --- Insert a new widget in the layout at position `index`
@@ -147,7 +88,7 @@ function flex:layout(_, width, height)
     return result
 end
 
---- Fit the flex layout into the given space.
+-- Fit the flex layout into the given space.
 -- @param context The context in which we are fit.
 -- @param orig_width The available width.
 -- @param orig_height The available height.
@@ -206,6 +147,7 @@ end
 --- Returns a new horizontal flex layout. A flex layout shares the available space
 -- equally among all widgets. Widgets can be added via :add(widget).
 -- @tparam widget ... Widgets that should be added to the layout.
+-- @function wibox.layout.flex.horizontal
 function flex.horizontal(...)
     return get_layout("horizontal", ...)
 end
@@ -213,6 +155,7 @@ end
 --- Returns a new vertical flex layout. A flex layout shares the available space
 -- equally among all widgets. Widgets can be added via :add(widget).
 -- @tparam widget ... Widgets that should be added to the layout.
+-- @function wibox.layout.flex.vertical
 function flex.vertical(...)
     return get_layout("vertical", ...)
 end
