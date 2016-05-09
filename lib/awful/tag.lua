@@ -250,12 +250,14 @@ end
 -- @see awful.tag.find_fallback
 -- @tparam[opt=awful.tag.find_fallback()] tag fallback_tag Tag to assign
 --  stickied tags to.
+-- @tparam[opt=false] boolean force Move even non-sticky clients to the fallback
+-- tag.
 -- @return Returns true if the tag is successfully deleted, nil otherwise.
 -- If there are no clients exclusively on this tag then delete it. Any
 -- stickied clients are assigned to the optional 'fallback_tag'.
 -- If after deleting the tag there is no selected tag, try and restore from
 -- history or select the first tag on the screen.
-function tag.object.delete(self, fallback_tag)
+function tag.object.delete(self, fallback_tag, force)
 
     -- abort if the taf isn't currently activated
     if not self.activated then return end
@@ -283,8 +285,7 @@ function tag.object.delete(self, fallback_tag)
 
         -- If a client has only this tag, or stickied clients with
         -- nowhere to go, abort.
-        if (not c.sticky and nb_tags == 1) or
-                                    (c.sticky and fallback_tag == nil) then
+        if (not c.sticky and nb_tags == 1 and not force) then
             return
         -- If a client has multiple tags, then do not move it to fallback
         elseif nb_tags < 2 then
@@ -294,6 +295,7 @@ function tag.object.delete(self, fallback_tag)
 
     -- delete the tag
     data.tags[self].screen = nil
+    data.tags[self] = nil
     self.activated = false
 
     -- Update all indexes
@@ -1350,10 +1352,44 @@ capi.tag.add_signal("property::urgent")
 
 capi.tag.add_signal("property::urgent_count")
 capi.tag.add_signal("property::volatile")
+capi.tag.add_signal("request::screen")
+capi.tag.add_signal("removal-pending")
 
 capi.screen.add_signal("tag::history::update")
 
 capi.screen.connect_signal("tag::history::update", tag.history.update)
+
+capi.screen.connect_signal("removed", function(s)
+    -- First give other code a chance to move the tag to another screen
+    for _, t in pairs(s.tags) do
+        t:emit_signal("request::screen")
+    end
+    -- Everything that's left: Tell everyone that these tags go away (other code
+    -- could e.g. save clients)
+    for _, t in pairs(s.tags) do
+        t:emit_signal("removal-pending")
+    end
+    -- Give other code yet another change to save clients
+    for _, c in pairs(capi.client.get(s)) do
+        c:emit_signal("request::tag", nil, { reason = "screen-removed" })
+    end
+    -- Then force all clients left to go somewhere random
+    local fallback = nil
+    for other_screen in capi.screen do
+        if #other_screen.tags > 0 then
+            fallback = other_screen.tags[1]
+            break
+        end
+    end
+    for _, t in pairs(s.tags) do
+        t:delete(fallback, true)
+    end
+    -- If any tag survived until now, forcefully get rid of it
+    for _, t in pairs(s.tags) do
+        t.activated = false
+        data.tags[t] = nil
+    end
+end)
 
 function tag.mt:__call(...)
     return tag.new(...)

@@ -154,6 +154,16 @@ screen.connect_for_each_screen(function(s)
     }
 end)
 
+capi.screen.connect_signal("removed", function(scr)
+    -- Destroy all notifications on this screen
+    for _, list in pairs(naughty.notifications[scr]) do
+        while #list > 0 do
+            naughty.destroy(list[1])
+        end
+    end
+    naughty.notifications[scr] = nil
+end)
+
 --- Notification state
 function naughty.is_suspended()
     return suspended

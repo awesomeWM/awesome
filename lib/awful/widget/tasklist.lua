@@ -181,7 +181,9 @@ function tasklist.new(screen, filter, buttons, style, update_function, base_widg
         if not queued_update then
             timer.delayed_call(function()
                 queued_update = false
-                tasklist_update(screen, w, buttons, filter, data, style, uf)
+                if screen.valid then
+                    tasklist_update(screen, w, buttons, filter, data, style, uf)
+                end
             end)
             queued_update = true
         end
@@ -201,7 +203,9 @@ function tasklist.new(screen, filter, buttons, style, update_function, base_widg
         end
         local function u()
             for s in pairs(instances) do
-                us(s)
+                if s.valid then
+                    us(s)
+                end
             end
         end
 
@@ -238,6 +242,9 @@ function tasklist.new(screen, filter, buttons, style, update_function, base_widg
         capi.client.connect_signal("list", u)
         capi.client.connect_signal("focus", u)
         capi.client.connect_signal("unfocus", u)
+        capi.screen.connect_signal("removed", function(s)
+            instances[get_screen(s)] = nil
+        end)
     end
     w._do_tasklist_update()
     local list = instances[screen]
