@@ -361,7 +361,7 @@ endif()
 # {{{ Tests
 set(CHECK_TARGETS check-integration)
 add_custom_target(check-integration
-    "${CMAKE_SOURCE_DIR}/tests/run.sh"
+    sh -c "CMAKE_BINARY_DIR='${CMAKE_BINARY_DIR}' ${CMAKE_SOURCE_DIR}/tests/run.sh"
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     COMMENT "Running integration tests"
     VERBATIM)
