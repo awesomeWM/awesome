@@ -17,55 +17,7 @@ local util  = require("awful.util")
 
 local ratio = {}
 
---- Set a widget at a specific index, replace the current one
--- @tparam number index A widget or a widget index
--- @param widget2 The widget to take the place of the first one
--- @treturn boolean If the operation is successful
--- @name set
--- @class function
-
---- Replace the first instance of `widget` in the layout with `widget2`
--- @param widget The widget to replace
--- @param widget2 The widget to replace `widget` with
--- @tparam[opt=false] boolean recursive Digg in all compatible layouts to find the widget.
--- @treturn boolean If the operation is successful
--- @name replace_widget
--- @class function
-
---- Swap 2 widgets in a layout
--- @tparam number index1 The first widget index
--- @tparam number index2 The second widget index
--- @treturn boolean If the operation is successful
--- @name swap
--- @class function
-
---- Swap 2 widgets in a layout
--- If widget1 is present multiple time, only the first instance is swapped
--- @param widget1 The first widget
--- @param widget2 The second widget
--- @tparam[opt=false] boolean recursive Digg in all compatible layouts to find the widget.
--- @treturn boolean If the operation is successful
--- @name swap_widgets
--- @class function
-
---- Get all children of this layout.
--- @param layout The layout you are modifying.
--- @return a list of all widgets
--- @name get_children
--- @class function
-
---- Fit the ratio layout into the given space
--- @param layout The layout you are modifying.
--- @param context The context in which we are fit.
--- @tparam number orig_width The available width.
--- @tparam number orig_height The available height.
--- @name fit
--- @class function
-
---- Reset a ratio layout. This removes all widgets from the layout.
--- @param layout The layout you are modifying.
--- @name reset
--- @class function
+--@DOC_fixed_COMMON@
 
 -- Compute the sum of all ratio (ideally, it should be 1)
 local function gen_sum(self, i_s, i_e)

@@ -297,6 +297,9 @@ set(AWESOME_THEMES_PATH      ${AWESOME_DATA_PATH}/themes)
 
 
 if(GENERATE_DOC)
+    # Load the common documentation
+    include(docs/load_ldoc.cmake)
+
     # Generate some images and examples
     include(docs/generate_examples.cmake)
 

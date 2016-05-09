@@ -22,11 +22,7 @@ local util  = require("awful.util")
 
 local stack = {mt={}}
 
---- Get all direct children widgets
--- @param layout The layout you are modifying.
--- @return a list of all widgets
--- @name get_children
--- @class function
+--@DOC_fixed_COMMON@
 
 --- Add some widgets to the given stack layout
 -- @param layout The layout you are modifying.
@@ -34,46 +30,10 @@ local stack = {mt={}}
 -- @name add
 -- @class function
 
---- Set a widget at a specific index, replace the current one
--- @tparam number index A widget or a widget index
--- @param widget2 The widget to take the place of the first one
--- @treturn boolean If the operation is successful
--- @name set
--- @class function
-
 --- Remove a widget from the layout
 -- @tparam index The widget index to remove
 -- @treturn boolean index If the operation is successful
 -- @name remove
--- @class function
-
---- Reset a stack layout. This removes all widgets from the layout.
--- @param layout The layout you are modifying.
--- @name reset
--- @class function
-
---- Replace the first instance of `widget` in the layout with `widget2`
--- @param widget The widget to replace
--- @param widget2 The widget to replace `widget` with
--- @tparam[opt=false] boolean recursive Digg in all compatible layouts to find the widget.
--- @treturn boolean If the operation is successful
--- @name replace_widget
--- @class function
-
---- Swap 2 widgets in a layout
--- @tparam number index1 The first widget index
--- @tparam number index2 The second widget index
--- @treturn boolean If the operation is successful
--- @name swap
--- @class function
-
---- Swap 2 widgets in a layout
--- If widget1 is present multiple time, only the first instance is swapped
--- @param widget1 The first widget
--- @param widget2 The second widget
--- @tparam[opt=false] boolean recursive Digg in all compatible layouts to find the widget.
--- @treturn boolean If the operation is successful
--- @name swap_widgets
 -- @class function
 
 --- Insert a new widget in the layout at position `index`
@@ -162,6 +122,10 @@ function stack:raise_widget(widget, recursive)
         self:raise(idx)
     end
 end
+
+--- Create a new stack layout.
+-- @function wibox.layout.stack
+-- @treturn widget A new stack layout
 
 local function new(...)
     local ret = fixed.horizontal(...)
