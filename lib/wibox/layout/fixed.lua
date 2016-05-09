@@ -13,7 +13,9 @@ local util = require("awful.util")
 
 local fixed = {}
 
---- Layout a fixed layout. Each widget gets just the space it asks for.
+--@DOC_fixed_COMMON@
+
+-- Layout a fixed layout. Each widget gets just the space it asks for.
 -- @param context The context in which we are drawn.
 -- @param width The available width.
 -- @param height The available height.
@@ -133,10 +135,6 @@ function fixed:replace_widget(widget, widget2, recursive)
     return false
 end
 
---- Swap 2 widgets in a layout
--- @tparam number index1 The first widget index
--- @tparam number index2 The second widget index
--- @treturn boolean If the operation is successful
 function fixed:swap(index1, index2)
     if not index1 or not index2 or index1 > #self.widgets
         or index2 > #self.widgets then
@@ -151,12 +149,6 @@ function fixed:swap(index1, index2)
     return true
 end
 
---- Swap 2 widgets in a layout
--- If widget1 is present multiple time, only the first instance is swapped
--- @param widget1 The first widget
--- @param widget2 The second widget
--- @tparam[opt=false] boolean recursive Digg in all compatible layouts to find the widget.
--- @treturn boolean If the operation is successful
 function fixed:swap_widgets(widget1, widget2, recursive)
     base.check_widget(widget1)
     base.check_widget(widget2)
@@ -182,10 +174,6 @@ function fixed:swap_widgets(widget1, widget2, recursive)
     return false
 end
 
---- Set a widget at a specific index, replace the current one
--- @tparam number index A widget or a widget index
--- @param widget2 The widget to take the place of the first one
--- @treturn boolean If the operation is successful
 function fixed:set(index, widget2)
     if (not widget2) or (not self.widgets[index]) then return false end
 
@@ -212,7 +200,7 @@ function fixed:insert(index, widget)
     return true
 end
 
---- Fit the fixed layout into the given space
+-- Fit the fixed layout into the given space
 -- @param context The context in which we are fit.
 -- @param orig_width The available width.
 -- @param orig_height The available height.
@@ -253,7 +241,6 @@ function fixed:fit(context, orig_width, orig_height)
     return used_in_dir + spacing, used_max
 end
 
---- Reset a fixed layout. This removes all widgets from the layout.
 function fixed:reset()
     self.widgets = {}
     self:emit_signal("widget::layout_changed")
@@ -290,6 +277,7 @@ end
 -- asks for and each widget will be drawn next to its neighboring widget.
 -- Widgets can be added via :add() or as arguments to this function.
 -- @tparam widget ... Widgets that should be added to the layout.
+-- @function wibox.layout.fixed.horizontal
 function fixed.horizontal(...)
     return get_layout("x", ...)
 end
@@ -298,6 +286,7 @@ end
 -- asks for and each widget will be drawn next to its neighboring widget.
 -- Widgets can be added via :add() or as arguments to this function.
 -- @tparam widget ... Widgets that should be added to the layout.
+-- @function wibox.layout.fixed.vertical
 function fixed.vertical(...)
     return get_layout("y", ...)
 end
