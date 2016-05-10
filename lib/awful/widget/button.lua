@@ -39,6 +39,9 @@ function button.new(args)
     end
     w:set_image(args.image)
     w:buttons(abutton({}, 1, function () orig_set_image(w, img_press) end, function () orig_set_image(w, img_release) end))
+
+    w:connect_signal("mouse::leave", function(self) orig_set_image(self, img_release) end)
+
     return w
 end
 
