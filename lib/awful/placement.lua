@@ -137,6 +137,7 @@ local function compose(...)
         local pretend_real = args.pretend
 
         args.pretend = true
+        args.attach  = false
 
         for k, f in ipairs(queue) do
             if k == #queue then
@@ -259,29 +260,51 @@ local function store_geometry(d, reqtype)
     data[d][reqtype].screen = d.screen
 end
 
+--- Get the margins and offset
+-- @tparam table args The arguments
+-- @treturn table The margins
+-- @treturn table The offsets
+local function get_decoration(args)
+    local offset = args.offset
+
+    -- Offset are "blind" values added to the output
+    offset = type(offset) == "number" and {
+        x      = offset,
+        y      = offset,
+        width  = offset,
+        height = offset,
+    } or args.offset or {}
+
+    -- Margins are distances on each side to substract from the area`
+    local m = type(args.margins) == "table" and args.margins or {
+        left = args.margins or 0 , right  = args.margins or 0,
+        top  = args.margins or 0 , bottom = args.margins or 0
+    }
+
+    return m, offset
+end
+
 --- Apply some modifications before applying the new geometry.
 -- @tparam table new_geo The new geometry
 -- @tparam table args The common arguments
+-- @tparam boolean force Always ajust the geometry, even in pretent mode. This
+--  should only be used when returning the final geometry as it would otherwise
+--  mess the pipeline.
 -- @treturn table|nil The new geometry
-local function fix_new_geometry(new_geo, args)
-    if args.pretend or not new_geo then return nil end
+local function fix_new_geometry(new_geo, args, force)
+    if (args.pretend and not force) or not new_geo then return nil end
 
-    local offset = args.offset or {}
-
-    if type(offset) == "number" then
-        offset = {
-            x      = offset,
-            y      = offset,
-            width  = offset,
-            height = offset,
-        }
-    end
+    local m, offset = get_decoration(args)
 
     return {
-        x      = new_geo.x      and (new_geo.x      + (offset.x      or 0)),
-        y      = new_geo.y      and (new_geo.y      + (offset.y      or 0)),
-        width  = new_geo.width  and (new_geo.width  + (offset.width  or 0)),
-        height = new_geo.height and (new_geo.height + (offset.height or 0)),
+        x      = new_geo.x      and (new_geo.x + (offset.x or 0) + (m.left or 0) ),
+        y      = new_geo.y      and (new_geo.y + (offset.y or 0) + (m.top  or 0) ),
+        width  = new_geo.width  and math.max(
+            1, (new_geo.width  + (offset.width  or 0) - (m.left or 0) - (m.right or 0)  )
+        ),
+        height = new_geo.height and math.max(
+            1, (new_geo.height + (offset.height or 0) - (m.top  or 0) - (m.bottom or 0) )
+        ),
     }
 end
 
@@ -338,16 +361,13 @@ local function geometry_common(obj, args, new_geo, ignore_border_width)
 
             -- Apply the margins
             if args.margins then
-                local delta = type(args.margins) == "table" and args.margins or {
-                    left = args.margins , right  = args.margins,
-                    top  = args.margins , bottom = args.margins
-                }
+                local delta = get_decoration(args)
 
                 return {
-                    x      = dgeo.x      + (delta.left or 0),
-                    y      = dgeo.y      + (delta.top  or 0),
-                    width  = dgeo.width  - (delta.left or 0) - (delta.right  or 0),
-                    height = dgeo.height - (delta.top  or 0) - (delta.bottom or 0),
+                    x      = dgeo.x      - (delta.left or 0),
+                    y      = dgeo.y      - (delta.top  or 0),
+                    width  = dgeo.width  + (delta.left or 0) + (delta.right  or 0),
+                    height = dgeo.height + (delta.top  or 0) + (delta.bottom or 0),
                 }
             end
 
@@ -633,7 +653,7 @@ function placement.closest_corner(d, args)
     local new_args = setmetatable({position = corner}, {__index=args})
     local ngeo = placement_private.align(d, new_args)
 
-    return ngeo, corner
+    return fix_new_geometry(ngeo, args, true), corner
 end
 
 --- Place the client so no part of it will be outside the screen (workarea).
@@ -751,7 +771,7 @@ function placement.under_mouse(d, args)
     ngeo.width  = ngeo.width  - 2*bw
     ngeo.height = ngeo.height - 2*bw
 
-    return ngeo
+    return fix_new_geometry(ngeo, args, true)
 end
 
 --- Place the client next to the mouse.
@@ -862,7 +882,7 @@ function placement.resize_to_mouse(d, args)
 
     geometry_common(d, args, ngeo)
 
-    return ngeo
+    return fix_new_geometry(ngeo, args, true)
 end
 
 --- Move the drawable (client or wibox) `d` to a screen position or side.
@@ -913,7 +933,7 @@ function placement.align(d, args)
 
     attach(d, placement[args.position], args)
 
-    return ngeo
+    return fix_new_geometry(ngeo, args, true)
 end
 
 -- Add the alias functions
@@ -1002,7 +1022,7 @@ function placement.stretch(d, args)
 
     attach(d, placement["stretch_"..args.direction], args)
 
-    return ngeo
+    return fix_new_geometry(ngeo, args, true)
 end
 
 -- Add the alias functions
@@ -1056,7 +1076,7 @@ function placement.maximize(d, args)
 
     attach(d, placement.maximize, args)
 
-    return ngeo
+    return fix_new_geometry(ngeo, args, true)
 end
 
 -- Add the alias functions
@@ -1121,7 +1141,7 @@ function placement.scale(d, args)
 
     attach(d, placement.maximize, args)
 
-    return ngeo
+    return fix_new_geometry(ngeo, args, true)
 end
 
 ---@DOC_awful_placement_maximize_vertically_EXAMPLE@
