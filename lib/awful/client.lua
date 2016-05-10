@@ -693,6 +693,54 @@ function client.floating.delete(c)
     client.object.set_floating(c, nil)
 end
 
+--- The x coordinates.
+--
+-- **Signal:**
+--
+--  * *property::x*
+--
+-- @property x
+-- @param integer
+
+--- The y coordinates.
+--
+-- **Signal:**
+--
+--  * *property::y*
+--
+-- @property y
+-- @param integer
+
+--- The width of the wibox.
+--
+-- **Signal:**
+--
+--  * *property::width*
+--
+-- @property width
+-- @param width
+
+--- The height of the wibox.
+--
+-- **Signal:**
+--
+--  * *property::height*
+--
+-- @property height
+-- @param height
+
+-- Add the geometry helpers to match the wibox API
+for _, v in ipairs {"x", "y", "width", "height"} do
+    client.object["get_"..v] = function(c)
+        return c:geometry()[v]
+    end
+
+    client.object["set_"..v] = function(c, value)
+        return c:geometry({[v] = value})
+    end
+end
+
+
 --- Restore (=unminimize) a random client.
 -- @function awful.client.restore
 -- @param s The screen to use.

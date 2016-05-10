@@ -3423,21 +3423,12 @@ client_class_setup(lua_State *L)
     signal_add(&client_class.signals, "property::transient_for");
     signal_add(&client_class.signals, "property::type");
     signal_add(&client_class.signals, "property::urgent");
-    /**
-     * @signal property::width
-     */
     signal_add(&client_class.signals, "property::width");
     /**
      * @signal property::window
      */
     signal_add(&client_class.signals, "property::window");
-    /**
-     * @signal property::x
-     */
     signal_add(&client_class.signals, "property::x");
-    /**
-     * @signal property::y
-     */
     signal_add(&client_class.signals, "property::y");
     /** When a client should get activated (focused and/or raised).
      *
