@@ -8,7 +8,8 @@
 local capi = {
     drawin = drawin,
     root = root,
-    awesome = awesome
+    awesome = awesome,
+    screen = screen
 }
 local setmetatable = setmetatable
 local pairs = pairs
@@ -16,6 +17,7 @@ local type = type
 local object = require("gears.object")
 local beautiful = require("beautiful")
 local base = require("wibox.widget.base")
+local ascreen = require("awful.screen")
 
 --- This provides widget box windows. Every wibox can also be used as if it were
 -- a drawin. All drawin functions and properties are also available on wiboxes!
@@ -266,6 +268,18 @@ end
 -- *width*, *height* and *widget*.
 function wibox:find_widgets(x, y)
     return self._drawable:find_widgets(x, y)
+end
+
+function wibox:get_screen()
+    return capi.screen[ascreen.getbycoord(self.x, self.y)]
+end
+
+function wibox:set_screen(s)
+    s = capi.screen[s or 1]
+    if s ~= self:get_screen() then
+        self.x = s.geometry.x
+        self.y = s.geometry.y
+    end
 end
 
 for _, k in pairs{ "buttons", "struts", "geometry", "get_xproperty", "set_xproperty" } do
