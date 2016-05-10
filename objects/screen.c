@@ -1042,9 +1042,9 @@ luaA_screen_fake_add(lua_State *L)
     s->geometry.y = y;
     s->geometry.width = width;
     s->geometry.height = height;
-    s->valid = true;
+
+    screen_added(L, s);
     luaA_object_push(L, s);
-    luaA_object_emit_signal(L, -1, "added", 0);
 
     return 1;
 }
