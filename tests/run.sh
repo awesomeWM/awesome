@@ -17,15 +17,20 @@ if [ "$CI" = true ]; then
     set -x
 fi
 
-source_dir="$PWD"
+# Either the build dir is passed in $CMAKE_BINARY_DIR or we guess based on $PWD
 build_dir="$CMAKE_BINARY_DIR"
 if [ -z "$build_dir" ]; then
-    build_dir="$PWD/build"
+    if [ -d "$PWD/build" ]; then
+        build_dir="$PWD/build"
+    else
+        build_dir="$PWD"
+    fi
 fi
 
 # Change to file's dir (POSIXly).
 cd -P -- "$(dirname -- "$0")"
 this_dir=$PWD
+source_dir="$PWD/.."
 
 # Get test files: test*, or the ones provided as args (relative to tests/).
 if [ $# != 0 ]; then
