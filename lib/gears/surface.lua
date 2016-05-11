@@ -92,7 +92,8 @@ local function do_load_and_handle_errors(_surface, func)
     if result then
         return result
     end
-    gdebug.print_error("Failed to load '" .. tostring(_surface) .. "': " .. tostring(err))
+    gdebug.print_error(debug.traceback(
+        "Failed to load '" .. tostring(_surface) .. "': " .. tostring(err)))
     return get_default()
 end
 
