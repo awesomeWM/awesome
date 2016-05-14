@@ -247,6 +247,16 @@ xembed_process_client_message(xcb_client_message_event_t *ev)
     return 0;
 }
 
+static int
+systray_num_visible_entries(void)
+{
+    int result = 0;
+    foreach(em, globalconf.embedded)
+        if (em->info.flags & XEMBED_MAPPED)
+            result++;
+    return result;
+}
+
 /** Inform lua that the systray needs to be updated.
  */
 void
@@ -256,7 +266,7 @@ luaA_systray_invalidate(void)
     signal_object_emit(L, &global_signals, "systray::update", 0);
 
     /* Unmap now if the systray became empty */
-    if(globalconf.embedded.len == 0)
+    if(systray_num_visible_entries() == 0)
         xcb_unmap_window(globalconf.connection, globalconf.systray.window);
 }
 
@@ -267,11 +277,12 @@ systray_update(int base_size, bool horizontal, bool reverse, int spacing, bool f
         return;
 
     /* Give the systray window the correct size */
+    int num_entries = systray_num_visible_entries();
     uint32_t config_vals[4] = { base_size, base_size, 0, 0 };
     if(horizontal)
-        config_vals[0] = base_size * globalconf.embedded.len + spacing * (globalconf.embedded.len - 1);
+        config_vals[0] = base_size * num_entries + spacing * (num_entries - 1);
     else
-        config_vals[1] = base_size * globalconf.embedded.len + spacing * (globalconf.embedded.len - 1);
+        config_vals[1] = base_size * num_entries + spacing * (num_entries - 1);
     xcb_configure_window(globalconf.connection,
                          globalconf.systray.window,
                          XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
@@ -288,6 +299,12 @@ systray_update(int base_size, bool horizontal, bool reverse, int spacing, bool f
             em = &globalconf.embedded.tab[(globalconf.embedded.len - i - 1)];
         else
             em = &globalconf.embedded.tab[i];
+
+        if (!(em->info.flags & XEMBED_MAPPED))
+        {
+            xcb_unmap_window(globalconf.connection, em->win);
+            continue;
+        }
 
         xcb_configure_window(globalconf.connection, em->win,
                              XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
@@ -362,7 +379,7 @@ luaA_systray(lua_State *L)
 
         globalconf.systray.parent = w;
 
-        if(globalconf.embedded.len != 0)
+        if(systray_num_visible_entries() != 0)
         {
             systray_update(base_size, horiz, revers, spacing, force_redraw);
             xcb_map_window(globalconf.connection,
@@ -370,7 +387,7 @@ luaA_systray(lua_State *L)
         }
     }
 
-    lua_pushinteger(L, globalconf.embedded.len);
+    lua_pushinteger(L, systray_num_visible_entries());
     luaA_object_push(L, globalconf.systray.parent);
     return 2;
 }

@@ -711,6 +711,7 @@ static void
 event_handle_maprequest(xcb_map_request_event_t *ev)
 {
     client_t *c;
+    xembed_window_t *em;
     xcb_get_window_attributes_cookie_t wa_c;
     xcb_get_window_attributes_reply_t *wa_r;
     xcb_get_geometry_cookie_t geom_c;
@@ -724,10 +725,17 @@ event_handle_maprequest(xcb_map_request_event_t *ev)
     if(wa_r->override_redirect)
         goto bailout;
 
-    if(xembed_getbywin(&globalconf.embedded, ev->window))
+    if((em = xembed_getbywin(&globalconf.embedded, ev->window)))
     {
         xcb_map_window(globalconf.connection, ev->window);
         xembed_window_activate(globalconf.connection, ev->window);
+        /* The correct way to set this is via the _XEMBED_INFO property. Neither
+         * of the XEMBED not the systray spec talk about mapping windows.
+         * Apparently, Qt doesn't care and does not set an _XEMBED_INFO
+         * property. Let's simulate the XEMBED_MAPPED bit.
+         */
+        em->info.flags |= XEMBED_MAPPED;
+        luaA_systray_invalidate();
     }
     else if((c = client_getbywin(ev->window)))
     {

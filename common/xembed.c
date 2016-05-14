@@ -24,6 +24,9 @@
 #include "common/util.h"
 #include "common/atoms.h"
 
+/* I should really include the correct header instead... */
+void luaA_systray_invalidate(void);
+
 /** Send an XEMBED message to a window.
  * \param connection Connection to the X server.
  * \param towin Destination window
@@ -141,6 +144,7 @@ xembed_property_update(xcb_connection_t *connection, xembed_window_t *emwin,
             xembed_window_deactivate(connection, emwin->win);
             xembed_focus_out(connection, emwin->win);
         }
+        luaA_systray_invalidate();
     }
 }
 
