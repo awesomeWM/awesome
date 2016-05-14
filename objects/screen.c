@@ -756,8 +756,8 @@ void screen_update_workarea(screen_t *screen)
 
     area.x += left;
     area.y += top;
-    area.width -= left + right;
-    area.height -= top + bottom;
+    area.width -= MIN(area.width, left + right);
+    area.height -= MIN(area.height, top + bottom);
 
     if (AREA_EQUAL(area, screen->workarea))
         return;
