@@ -42,7 +42,7 @@ install:
       wget http://www.lua.org/ftp/lua-5.3.2.tar.gz -O lua.tar.gz
       tar -xvzf lua.tar.gz
       cd lua-*
-      (cd src && make SYSCFLAGS="-DLUA_USE_LINUX -ULUA_COMPAT_5_2" SYSLIBS="-Wl,-E -ldl -lreadline" LUA_A=liblua.so MYCFLAGS="-fPIC" RANLIB=: AR="gcc -shared -ldl -o" liblua.so) || exit 1
+      (cd src && make SYSCFLAGS="-DLUA_USE_LINUX -ULUA_COMPAT_5_2 -DLUA_USE_APICHECK" SYSLIBS="-Wl,-E -ldl -lreadline" LUA_A=liblua.so MYCFLAGS="-fPIC" RANLIB=: AR="gcc -shared -ldl -o" liblua.so) || exit 1
       sudo make INSTALL_TOP=/usr/ INSTALL_INC=${LUAINCLUDE} TO_LIB=liblua.so linux install || exit 1
       cd ..
     elif [[ "$LUANAME" == "luajit-2.0" ]]; then
