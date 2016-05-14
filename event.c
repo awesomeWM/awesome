@@ -223,26 +223,44 @@ event_handle_button(xcb_button_press_event_t *ev)
                              XCB_ALLOW_ASYNC_POINTER,
                              XCB_CURRENT_TIME);
     }
-    else if((c = client_getbywin(ev->event)))
+    else if((c = client_getbyframewin(ev->event)) || (c = client_getbywin(ev->event)))
     {
-        luaA_object_push(L, c);
-        /* And handle the button raw button event */
-        event_emit_button(L, ev);
-        /* then check if a titlebar was "hit" */
-        int x = ev->event_x, y = ev->event_y;
-        drawable_t *d = client_get_drawable_offset(c, &x, &y);
-        if (d)
+        /* For clicks inside of c->window, we get two events. Once because of a
+         * passive grab on c->window and then again for c->frame_window.
+         * Ignore the second event (identifiable by ev->child != XCB_NONE).
+         */
+        if (ev->event != c->frame_window || ev->child == XCB_NONE)
         {
-            /* Copy the event so that we can fake x/y */
-            xcb_button_press_event_t event = *ev;
-            event.event_x = x;
-            event.event_y = y;
-            luaA_object_push_item(L, -1, d);
-            event_emit_button(L, &event);
-            lua_pop(L, 1);
+            luaA_object_push(L, c);
+            if (c->window == ev->event)
+            {
+                /* Button event into the client itself (not titlebar), translate
+                 * into the frame window.
+                 */
+                ev->event_x += c->titlebar[CLIENT_TITLEBAR_LEFT].size;
+                ev->event_y += c->titlebar[CLIENT_TITLEBAR_TOP].size;
+            }
+            /* And handle the button raw button event */
+            event_emit_button(L, ev);
+            /* then check if a titlebar was "hit" */
+            if (c->frame_window == ev->event)
+            {
+                int x = ev->event_x, y = ev->event_y;
+                drawable_t *d = client_get_drawable_offset(c, &x, &y);
+                if (d)
+                {
+                    /* Copy the event so that we can fake x/y */
+                    xcb_button_press_event_t event = *ev;
+                    event.event_x = x;
+                    event.event_y = y;
+                    luaA_object_push_item(L, -1, d);
+                    event_emit_button(L, &event);
+                    lua_pop(L, 1);
+                }
+            }
+            /* then check if any button objects match */
+            event_button_callback(ev, &c->buttons, L, -1, 1, NULL);
         }
-        /* then check if any button objects match */
-        event_button_callback(ev, &c->buttons, L, -1, 1, NULL);
         xcb_allow_events(globalconf.connection,
                          XCB_ALLOW_REPLAY_POINTER,
                          XCB_CURRENT_TIME);
