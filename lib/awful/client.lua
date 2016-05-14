@@ -1130,8 +1130,6 @@ capi.client.add_signal("marked")
 -- @signal unmarked
 capi.client.add_signal("unmarked")
 
-capi.client.connect_signal("focus", client.focus.history.add)
-
 -- Add clients during startup to focus history.
 -- This used to happen through ewmh.activate, but that only handles visible
 -- clients now.
@@ -1142,8 +1140,49 @@ capi.client.connect_signal("manage", function (c)
 end)
 capi.client.connect_signal("unmanage", client.focus.history.delete)
 
-
 capi.client.connect_signal("unmanage", client.floating.delete)
+
+-- Connect to "focus" signal, and allow to disable tracking.
+do
+    local disabled_count = 1
+    --- Disable history tracking.
+    --
+    -- See `awful.client.focus.history.enable_tracking` to enable it again.
+    -- @treturn int The internal value of `disabled_count` (calls to this
+    --   function without calling `awful.client.focus.history.enable_tracking`).
+    -- @function awful.client.focus.history.disable_tracking
+    function client.focus.history.disable_tracking()
+        disabled_count = disabled_count + 1
+        if disabled_count == 1 then
+            capi.client.disconnect_signal("focus", client.focus.history.add)
+        end
+        return disabled_count
+    end
+
+    --- Enable history tracking.
+    --
+    -- This is the default, but can be disabled
+    -- through `awful.client.focus.history.disable_tracking`.
+    -- @treturn boolean True if history tracking has been enabled.
+    -- @function awful.client.focus.history.enable_tracking
+    function client.focus.history.enable_tracking()
+        assert(disabled_count > 0)
+        disabled_count = disabled_count - 1
+        if disabled_count == 0 then
+            capi.client.connect_signal("focus", client.focus.history.add)
+        end
+        return disabled_count == 0
+    end
+
+    --- Is history tracking enabled?
+    -- @treturn bool True if history tracking is enabled.
+    -- @treturn int The number of times that tracking has been disabled.
+    -- @function awful.client.focus.history.is_enabled
+    function client.focus.history.is_enabled()
+        return disabled_count == 0, disabled_count
+    end
+end
+client.focus.history.enable_tracking()
 
 -- Register persistent properties
 client.property.persist("floating", "boolean")
