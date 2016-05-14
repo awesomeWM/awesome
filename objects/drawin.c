@@ -214,6 +214,14 @@ drawin_moveresize(lua_State *L, int udx, area_t geometry)
         luaA_object_emit_signal(L, udx, "property::width", 0);
     if (old_geometry.height != w->geometry.height)
         luaA_object_emit_signal(L, udx, "property::height", 0);
+
+    screen_t *old_screen = screen_getbycoord(old_geometry.x, old_geometry.y);
+    screen_t *new_screen = screen_getbycoord(w->geometry.x, w->geometry.y);
+    if (old_screen != new_screen && strut_has_value(&w->strut))
+    {
+        screen_update_workarea(old_screen);
+        screen_update_workarea(new_screen);
+    }
 }
 
 /** Refresh the window content by copying its pixmap data to its window.
