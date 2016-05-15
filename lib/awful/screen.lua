@@ -68,12 +68,12 @@ function screen.object.get_square_distance(self, x, y)
     if x < geom.x then
         dist_x = geom.x - x
     elseif x >= geom.x + geom.width then
-        dist_x = x - geom.x - geom.width
+        dist_x = x - geom.x - geom.width + 1
     end
     if y < geom.y then
         dist_y = geom.y - y
     elseif y >= geom.y + geom.height then
-        dist_y = y - geom.y - geom.height
+        dist_y = y - geom.y - geom.height + 1
     end
     return dist_x * dist_x + dist_y * dist_y
 end
