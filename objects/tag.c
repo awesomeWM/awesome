@@ -91,23 +91,6 @@
  * @function set_newindex_miss_handler
  */
 
-/** Tag type */
-struct tag
-{
-    LUA_OBJECT_HEADER
-    /** Tag name */
-    char *name;
-    /** true if activated */
-    bool activated;
-    /** true if selected */
-    bool selected;
-    /** clients in this tag */
-    client_array_t clients;
-};
-
-static lua_class_t tag_class;
-LUA_OBJECT_FUNCS(tag_class, tag_t, tag)
-
 
 void
 tag_unref_simplified(tag_t **tag)
@@ -139,7 +122,6 @@ tag_view(lua_State *L, int udx, bool view)
     {
         tag->selected = view;
         banning_need_update();
-        ewmh_update_net_current_desktop();
 
         luaA_object_emit_signal(L, udx, "property::selected", 0);
     }
@@ -220,15 +202,29 @@ is_client_tagged(client_t *c, tag_t *t)
     return false;
 }
 
-/** Get the index of the first selected tag.
- * \return Its index.
+/** Get the index of the tag with focused client or first selected 
+ * \return Its index
  */
 int
-tags_get_first_selected_index(void)
+tags_get_current_or_first_selected_index(void)
 {
+    /* Consider "current desktop" a tag, that has focused window,
+     * basically a tag user actively interacts with.
+     * If no focused windows are present, fallback to first selected.
+     */
+    if(globalconf.focus.client)
+    {
+        foreach(tag, globalconf.tags)
+        {
+            if((*tag)->selected && is_client_tagged(globalconf.focus.client, *tag))
+                return tag_array_indexof(&globalconf.tags, tag);
+        }
+    }
     foreach(tag, globalconf.tags)
+    {
         if((*tag)->selected)
             return tag_array_indexof(&globalconf.tags, tag);
+    }
     return 0;
 }
 
