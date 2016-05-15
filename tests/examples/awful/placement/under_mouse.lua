@@ -6,3 +6,6 @@ mouse.coords {x= 50, y=50} --DOC_HIDE
 mouse.push_history() --DOC_HIDE
 
 awful.placement.under_mouse(client.focus)
+
+assert(client.focus.x + client.focus.width /2 - mouse.coords().x <= 1) --DOC_HIDE
+assert(client.focus.y + client.focus.height/2 - mouse.coords().y <= 1) --DOC_HIDE
