@@ -144,15 +144,16 @@ local function compose(...)
         -- Only apply the geometry once, not once per chain node, to do this,
         -- Force the "pretend" argument and restore the original value for
         -- the last node.
-        local pretend_real = args.pretend
-        local attach_real  = args.attach
-
-        args.pretend = true
-        args.attach  = false
+        local attach_real = args.attach
+        args.pretend      = true
+        args.attach       = false
+        args.offset       = {}
 
         for k, f in ipairs(queue) do
             if k == #queue then
-                args.pretend = pretend_real or false
+                -- Let them fallback to the parent table
+                args.pretend = nil
+                args.offset  = nil
             end
 
             local r = {f(d, args, ...)}
@@ -801,6 +802,8 @@ function placement.under_mouse(d, args)
     local bw = d.border_width or 0
     ngeo.width  = ngeo.width  - 2*bw
     ngeo.height = ngeo.height - 2*bw
+
+    geometry_common(d, args, ngeo)
 
     return fix_new_geometry(ngeo, args, true)
 end

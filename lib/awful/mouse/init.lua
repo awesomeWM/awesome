@@ -234,22 +234,11 @@ function mouse.resize_handler(c, context, hints)
         local lay = c.screen.selected_tag.layout
 
         if lay == layout.suit.floating or c.floating then
-            local offset = hints and hints.offset or {}
-
-            if type(offset) == "number" then
-                offset = {
-                    x      = offset,
-                    y      = offset,
-                    width  = offset,
-                    height = offset,
-                }
-            end
-
             c:geometry {
-                x      = hints.x      + (offset.x      or 0 ),
-                y      = hints.y      + (offset.y      or 0 ),
-                width  = hints.width  + (offset.width  or 0 ),
-                height = hints.height + (offset.height or 0 ),
+                x      = hints.x,
+                y      = hints.y,
+                width  = hints.width,
+                height = hints.height,
             }
         elseif lay.resize_handler then
             lay.resize_handler(c, context, hints)
