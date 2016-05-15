@@ -76,6 +76,16 @@ describe("awful.screen", function()
             assert.is.equal(2, ascreen.getbycoord(1, 1))
         end)
     end)
+
+    describe("no screens", function()
+        before_each(function()
+            fake_screens = {}
+        end)
+
+        it("getbycoord", function()
+            assert.is_nil(ascreen.getbycoord(0, 0))
+        end)
+    end)
 end)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
