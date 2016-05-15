@@ -6,7 +6,7 @@
 -- @author Emmanuel Lepage Vallee &lt;elv1313@gmail.com&gt;
 -- @copyright 2016 Emmanuel Lepage Vallee
 -- @release @AWESOME_VERSION@
--- @module awful.wibar
+-- @classmod awful.wibar
 ---------------------------------------------------------------------------
 
 -- Grab environment we need
@@ -165,6 +165,25 @@ local function set_stretch(w, value)
     attach(w, w.position)
 end
 
+--- Remove a wibar.
+-- @function remove
+local function remove(self)
+    self.visible = false
+
+    if self.detach_callback then
+        self.detach_callback()
+        self.detach_callback = nil
+    end
+
+    for k, w in ipairs(wiboxes) do
+        if w == self then
+            table.remove(wiboxes, k)
+        end
+    end
+
+    self._screen = nil
+end
+
 --- Get a wibox position if it has been set, or return top.
 -- @param wb The wibox
 -- @deprecated awful.wibar.get_position
@@ -291,6 +310,7 @@ function awfulwibar.new(arg)
     local w = wibox(arg)
 
     w.screen   = screen
+    w._screen  = screen --HACK When a screen is removed, then getbycoords wont work
     w._stretch = arg.stretch == nil and has_to_stretch or arg.stretch
 
     w:add_signal("property::position")
@@ -300,6 +320,7 @@ function awfulwibar.new(arg)
     w:add_signal("property::stretch")
     w.get_stretch = get_stretch
     w.set_stretch = set_stretch
+    w.remove      = remove
 
     w.visible = true
 
@@ -314,12 +335,8 @@ end
 
 capi.screen.connect_signal("removed", function(s)
     for _, wibar in ipairs(wiboxes) do
-        if wibar.screen == s then
-            if wibar.detach_callback then
-                wibar.detach_callback()
-            end
-
-            wibar.visible = false
+        if wibar._screen == s then
+            wibar:remove()
         end
     end
 end)
