@@ -297,6 +297,7 @@ local function setup_signals(_wibox)
 end
 
 local function new(args)
+    args = args or {}
     local ret = object()
     local w = capi.drawin(args)
 
