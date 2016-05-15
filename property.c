@@ -114,7 +114,8 @@ property_update_wm_transient_for(client_t *c, xcb_get_property_cookie_t cookie)
     c->transient_for_window = trans;
 
     luaA_object_push(L, c);
-    client_set_type(L, -1, WINDOW_TYPE_DIALOG);
+    if (!c->has_NET_WM_WINDOW_TYPE)
+        client_set_type(L, -1, trans == XCB_NONE ? WINDOW_TYPE_NORMAL : WINDOW_TYPE_DIALOG);
     client_set_above(L, -1, false);
     lua_pop(L, 1);
 

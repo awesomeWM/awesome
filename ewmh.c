@@ -574,6 +574,7 @@ ewmh_client_check_hints(client_t *c)
     reply = xcb_get_property_reply(globalconf.connection, c2, NULL);
     if(reply && (data = xcb_get_property_value(reply)))
     {
+        c->has_NET_WM_WINDOW_TYPE = true;
         state = (xcb_atom_t *) data;
         for(int i = 0; i < xcb_get_property_value_length(reply) / ssizeof(xcb_atom_t); i++)
             if(state[i] == _NET_WM_WINDOW_TYPE_DESKTOP)
@@ -590,7 +591,8 @@ ewmh_client_check_hints(client_t *c)
                 c->type = MAX(c->type, WINDOW_TYPE_TOOLBAR);
             else if(state[i] == _NET_WM_WINDOW_TYPE_UTILITY)
                 c->type = MAX(c->type, WINDOW_TYPE_UTILITY);
-    }
+    } else
+        c->has_NET_WM_WINDOW_TYPE = false;
 
     p_delete(&reply);
 }

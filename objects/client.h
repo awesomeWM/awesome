@@ -97,6 +97,8 @@ struct client_t
      * from Lua. */
     bool focusable;
     bool focusable_set;
+    /** True if the client window has a _NET_WM_WINDOW_TYPE proeprty */
+    bool has_NET_WM_WINDOW_TYPE;
     /** Window of the group leader */
     xcb_window_t group_window;
     /** Window holding command needed to start it (session management related) */
