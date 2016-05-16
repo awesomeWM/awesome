@@ -148,4 +148,94 @@ function gears.geometry.rectangle.get_in_direction(dir, recttbl, cur)
     return target
 end
 
+--- Check if an area intersect another area.
+-- @param a The area.
+-- @param b The other area.
+-- @return True if they intersect, false otherwise.
+local function area_intersect_area(a, b)
+    return (b.x < a.x + a.width
+            and b.x + b.width > a.x
+            and b.y < a.y + a.height
+            and b.y + b.height > a.y)
+end
+
+--- Get the intersect area between a and b.
+-- @tparam table a The area.
+-- @tparam number a.x The horizontal coordinate
+-- @tparam number a.y The vertical coordinate
+-- @tparam number a.width The rectangle width
+-- @tparam number a.height The rectangle height
+-- @tparam table b The other area.
+-- @tparam number b.x The horizontal coordinate
+-- @tparam number b.y The vertical coordinate
+-- @tparam number b.width The rectangle width
+-- @tparam number b.height The rectangle height
+-- @treturn table The intersect area.
+function gears.geometry.rectangle.get_intersection(a, b)
+    local g = {}
+    g.x = math.max(a.x, b.x)
+    g.y = math.max(a.y, b.y)
+    g.width = math.min(a.x + a.width, b.x + b.width) - g.x
+    g.height = math.min(a.y + a.height, b.y + b.height) - g.y
+    return g
+end
+
+--- Remove an area from a list, splitting the space between several area that
+-- can overlap.
+-- @tparam table areas Table of areas.
+-- @tparam table elem Area to remove.
+-- @tparam number elem.x The horizontal coordinate
+-- @tparam number elem.y The vertical coordinate
+-- @tparam number elem.width The rectangle width
+-- @tparam number elem.height The rectangle height
+-- @return The new area list.
+function gears.geometry.rectangle.area_remove(areas, elem)
+    for i = #areas, 1, -1 do
+        -- Check if the 'elem' intersect
+        if area_intersect_area(areas[i], elem) then
+            -- It does? remove it
+            local r = table.remove(areas, i)
+            local inter = gears.geometry.rectangle.get_intersection(r, elem)
+
+            if inter.x > r.x then
+                table.insert(areas, {
+                    x = r.x,
+                    y = r.y,
+                    width = inter.x - r.x,
+                    height = r.height
+                })
+            end
+
+            if inter.y > r.y then
+                table.insert(areas, {
+                    x = r.x,
+                    y = r.y,
+                    width = r.width,
+                    height = inter.y - r.y
+                })
+            end
+
+            if inter.x + inter.width < r.x + r.width then
+                table.insert(areas, {
+                    x = inter.x + inter.width,
+                    y = r.y,
+                    width = (r.x + r.width) - (inter.x + inter.width),
+                    height = r.height
+                })
+            end
+
+            if inter.y + inter.height < r.y + r.height then
+                table.insert(areas, {
+                    x = r.x,
+                    y = inter.y + inter.height,
+                    width = r.width,
+                    height = (r.y + r.height) - (inter.y + inter.height)
+                })
+            end
+        end
+    end
+
+    return areas
+end
+
 return gears.geometry

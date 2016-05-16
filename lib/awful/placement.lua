@@ -93,6 +93,7 @@ local capi =
 local client = require("awful.client")
 local layout = require("awful.layout")
 local a_screen = require("awful.screen")
+local grect = require("gears.geometry").rectangle
 local util = require("awful.util")
 local dpi = require("beautiful").xresources.apply_dpi
 
@@ -584,84 +585,6 @@ attach = function(d, position_f, args)
     end
 end
 
---- Check if an area intersect another area.
--- @param a The area.
--- @param b The other area.
--- @return True if they intersect, false otherwise.
-local function area_intersect_area(a, b)
-    return (b.x < a.x + a.width
-            and b.x + b.width > a.x
-            and b.y < a.y + a.height
-            and b.y + b.height > a.y)
-end
-
---- Get the intersect area between a and b.
--- @param a The area.
--- @param b The other area.
--- @return The intersect area.
-local function area_intersect_area_get(a, b)
-    local g = {}
-    g.x = math.max(a.x, b.x)
-    g.y = math.max(a.y, b.y)
-    g.width = math.min(a.x + a.width, b.x + b.width) - g.x
-    g.height = math.min(a.y + a.height, b.y + b.height) - g.y
-    return g
-end
-
---- Remove an area from a list, splitting the space between several area that
--- can overlap.
--- @param areas Table of areas.
--- @param elem Area to remove.
--- @return The new area list.
-local function area_remove(areas, elem)
-    for i = #areas, 1, -1 do
-        -- Check if the 'elem' intersect
-        if area_intersect_area(areas[i], elem) then
-            -- It does? remove it
-            local r = table.remove(areas, i)
-            local inter = area_intersect_area_get(r, elem)
-
-            if inter.x > r.x then
-                table.insert(areas, {
-                    x = r.x,
-                    y = r.y,
-                    width = inter.x - r.x,
-                    height = r.height
-                })
-            end
-
-            if inter.y > r.y then
-                table.insert(areas, {
-                    x = r.x,
-                    y = r.y,
-                    width = r.width,
-                    height = inter.y - r.y
-                })
-            end
-
-            if inter.x + inter.width < r.x + r.width then
-                table.insert(areas, {
-                    x = inter.x + inter.width,
-                    y = r.y,
-                    width = (r.x + r.width) - (inter.x + inter.width),
-                    height = r.height
-                })
-            end
-
-            if inter.y + inter.height < r.y + r.height then
-                table.insert(areas, {
-                    x = r.x,
-                    y = inter.y + inter.height,
-                    width = r.width,
-                    height = (r.y + r.height) - (inter.y + inter.height)
-                })
-            end
-        end
-    end
-
-    return areas
-end
-
 -- Convert 2 points into a rectangle
 local function rect_from_points(p1x, p1y, p2x, p2y)
     return {
@@ -779,7 +702,7 @@ function placement.no_overlap(c)
     local areas = { screen.workarea }
     for _, cl in pairs(cls) do
         if cl ~= c and cl.type ~= "desktop" and (cl.floating or curlay == layout.suit.floating) then
-            areas = area_remove(areas, area_common(cl))
+            areas = grect.area_remove(areas, area_common(cl))
         end
     end
 
