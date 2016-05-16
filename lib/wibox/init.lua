@@ -15,9 +15,9 @@ local setmetatable = setmetatable
 local pairs = pairs
 local type = type
 local object = require("gears.object")
+local grect =  require("gears.geometry").rectangle
 local beautiful = require("beautiful")
 local base = require("wibox.widget.base")
-local ascreen = require("awful.screen")
 
 --- This provides widget box windows. Every wibox can also be used as if it were
 -- a drawin. All drawin functions and properties are also available on wiboxes!
@@ -62,7 +62,13 @@ function wibox:find_widgets(x, y)
 end
 
 function wibox:get_screen()
-    return capi.screen[ascreen.getbycoord(self.x, self.y)]
+    local sgeos = {}
+
+    for s in capi.screen do
+        sgeos[s] = s.geometry
+    end
+
+    return grect.get_closest_by_coord(sgeos, self.x, self.y)
 end
 
 function wibox:set_screen(s)
