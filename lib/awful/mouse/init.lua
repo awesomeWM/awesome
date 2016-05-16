@@ -10,7 +10,6 @@
 -- Grab environment we need
 local layout = require("awful.layout")
 local aplace = require("awful.placement")
-local awibox = require("awful.wibox")
 local util = require("awful.util")
 local type = type
 local ipairs = ipairs
@@ -123,43 +122,31 @@ end
 
 --- Move the wibox under the cursor.
 -- @function awful.mouse.wibox.move
---@param w The wibox to move, or none to use that under the pointer
+--@tparam wibox w The wibox to move, or none to use that under the pointer
 function mouse.wibox.move(w)
     w = w or mouse.wibox_under_pointer()
     if not w then return end
 
+    if not w
+        or w.type == "desktop"
+        or w.type == "splash"
+        or w.type == "dock" then
+        return
+    end
+
+    -- Compute the offset
+    local coords = capi.mouse.coords()
+    local geo    = aplace.centered(capi.mouse,{parent=w, pretend=true})
+
     local offset = {
-        x = w.x - capi.mouse.coords().x,
-        y = w.y - capi.mouse.coords().y
+        x = geo.x - coords.x,
+        y = geo.y - coords.y,
     }
 
-    capi.mousegrabber.run(function (_mouse)
-        local button_down = false
-        if awibox.get_position(w) == "floating" then
-            w.x = capi.mouse.coords().x + offset.x
-            w.y = capi.mouse.coords().y + offset.y
-        else
-            local wa = capi.screen[capi.mouse.screen].workarea
-
-            if capi.mouse.coords()["y"] > wa.y + wa.height - 10 then
-                awibox.set_position(w, "bottom", w.screen)
-            elseif capi.mouse.coords()["y"] < wa.y + 10 then
-                awibox.set_position(w, "top", w.screen)
-            elseif capi.mouse.coords()["x"] > wa.x + wa.width - 10 then
-                awibox.set_position(w, "right", w.screen)
-            elseif capi.mouse.coords()["x"] < wa.x + 10 then
-                awibox.set_position(w, "left", w.screen)
-            end
-            w.screen = capi.mouse.screen
-        end
-        for _, v in ipairs(_mouse.buttons) do
-            if v then button_down = true end
-        end
-        if not button_down then
-            return false
-        end
-        return true
-    end, "fleur")
+    mouse.resize(w, "mouse.move", {
+        placement = aplace.under_mouse,
+        offset    = offset
+    })
 end
 
 --- Get a client corner coordinates.
@@ -234,22 +221,11 @@ function mouse.resize_handler(c, context, hints)
         local lay = c.screen.selected_tag.layout
 
         if lay == layout.suit.floating or c.floating then
-            local offset = hints and hints.offset or {}
-
-            if type(offset) == "number" then
-                offset = {
-                    x      = offset,
-                    y      = offset,
-                    width  = offset,
-                    height = offset,
-                }
-            end
-
             c:geometry {
-                x      = hints.x      + (offset.x      or 0 ),
-                y      = hints.y      + (offset.y      or 0 ),
-                width  = hints.width  + (offset.width  or 0 ),
-                height = hints.height + (offset.height or 0 ),
+                x      = hints.x,
+                y      = hints.y,
+                width  = hints.width,
+                height = hints.height,
             }
         elseif lay.resize_handler then
             lay.resize_handler(c, context, hints)

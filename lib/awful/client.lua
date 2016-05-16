@@ -11,6 +11,7 @@
 local util = require("awful.util")
 local spawn = require("awful.spawn")
 local object = require("gears.object")
+local grect = require("gears.geometry").rectangle
 local pairs = pairs
 local type = type
 local ipairs = ipairs
@@ -197,7 +198,7 @@ function client.swap.bydirection(dir, c, stacked)
         for i,cl in ipairs(cltbl) do
             geomtbl[i] = cl:geometry()
         end
-        local target = util.get_rectangle_in_direction(dir, geomtbl, sel:geometry())
+        local target = grect.get_in_direction(dir, geomtbl, sel:geometry())
 
         -- If we found a client to swap with, then go for it
         if target then
@@ -692,6 +693,54 @@ end
 function client.floating.delete(c)
     client.object.set_floating(c, nil)
 end
+
+--- The x coordinates.
+--
+-- **Signal:**
+--
+--  * *property::x*
+--
+-- @property x
+-- @param integer
+
+--- The y coordinates.
+--
+-- **Signal:**
+--
+--  * *property::y*
+--
+-- @property y
+-- @param integer
+
+--- The width of the wibox.
+--
+-- **Signal:**
+--
+--  * *property::width*
+--
+-- @property width
+-- @param width
+
+--- The height of the wibox.
+--
+-- **Signal:**
+--
+--  * *property::height*
+--
+-- @property height
+-- @param height
+
+-- Add the geometry helpers to match the wibox API
+for _, v in ipairs {"x", "y", "width", "height"} do
+    client.object["get_"..v] = function(c)
+        return c:geometry()[v]
+    end
+
+    client.object["set_"..v] = function(c, value)
+        return c:geometry({[v] = value})
+    end
+end
+
 
 --- Restore (=unminimize) a random client.
 -- @function awful.client.restore

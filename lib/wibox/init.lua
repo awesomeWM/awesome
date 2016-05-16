@@ -8,12 +8,14 @@
 local capi = {
     drawin = drawin,
     root = root,
-    awesome = awesome
+    awesome = awesome,
+    screen = screen
 }
 local setmetatable = setmetatable
 local pairs = pairs
 local type = type
 local object = require("gears.object")
+local grect =  require("gears.geometry").rectangle
 local beautiful = require("beautiful")
 local base = require("wibox.widget.base")
 
@@ -26,232 +28,55 @@ wibox.widget = require("wibox.widget")
 wibox.drawable = require("wibox.drawable")
 wibox.hierarchy = require("wibox.hierarchy")
 
---- Set the widget that the wibox displays
+local force_forward = {
+    shape_bounding = true,
+    shape_clip = true,
+}
+
+--@DOC_wibox_COMMON@
+
 function wibox:set_widget(widget)
     self._drawable:set_widget(widget)
 end
 
--- Import some drawin documentation
+function wibox:get_widget()
+    return self._drawable.widget
+end
 
---- Border width.
---
--- **Signal:**
---
---  * *property::border_width*
---
--- @property border_width
--- @param integer
-
---- Border color.
---
--- Please note that this property only support string based 24 bit or 32 bit
--- colors:
---
---    Red Blue
---     _|  _|
---    #FF00FF
---       T‾
---     Green
---
---
---    Red Blue
---     _|  _|
---    #FF00FF00
---       T‾  ‾T
---    Green   Alpha
---
--- **Signal:**
---
---  * *property::border_color*
---
--- @property border_color
--- @param string
-
---- On top of other windows.
---
--- **Signal:**
---
---  * *property::ontop*
---
--- @property ontop
--- @param boolean
-
---- The mouse cursor.
---
--- **Signal:**
---
---  * *property::cursor*
---
--- @property cursor
--- @param string
--- @see mouse
-
---- Visibility.
---
--- **Signal:**
---
---  * *property::visible*
---
--- @property visible
--- @param boolean
-
---- The opacity of the wibox, between 0 and 1.
---
--- **Signal:**
---
---  * *property::opacity*
---
--- @property opacity
--- @tparam number opacity (between 0 and 1)
-
---- The window type (desktop, normal, dock, ...).
---
--- **Signal:**
---
---  * *property::type*
---
--- @property type
--- @param string
--- @see client.type
-
---- The x coordinates.
---
--- **Signal:**
---
---  * *property::x*
---
--- @property x
--- @param integer
-
---- The y coordinates.
---
--- **Signal:**
---
---  * *property::y*
---
--- @property y
--- @param integer
-
---- The width of the wibox.
---
--- **Signal:**
---
---  * *property::width*
---
--- @property width
--- @param width
-
---- The height of the wibox.
---
--- **Signal:**
---
---  * *property::height*
---
--- @property height
--- @param height
-
----  The wibox's `drawable`.
---
--- **Signal:**
---
---  * *property::drawable*
---
--- @property drawable
--- @tparam drawable drawable
-
---- The X window id.
---
--- **Signal:**
---
---  * *property::window*
---
--- @property window
--- @param string
--- @see client.window
-
---- The wibox's bounding shape as a (native) cairo surface.
---
--- **Signal:**
---
---  * *property::shape_bounding*
---
--- @property shape_bounding
--- @param surface._native
-
---- The wibox's clip shape as a (native) cairo surface.
---
--- **Signal:**
---
---  * *property::shape_clip*
---
--- @property shape_clip
--- @param surface._native
-
---- Get or set mouse buttons bindings to a wibox.
---
--- @param buttons_table A table of buttons objects, or nothing.
--- @function wibox.buttons
-
---- Get or set wibox geometry. That's the same as accessing or setting the x,
--- y, width or height properties of a wibox.
---
--- @param A table with coordinates to modify.
--- @return A table with wibox coordinates and geometry.
--- @function wibox.geometry
-
---- Get or set wibox struts.
---
--- @param strut A table with new strut, or nothing
--- @return The wibox strut in a table.
--- @function wibox.struts
--- @see client.struts
-
---- The default background color.
--- @beautiful beautiful.bg_normal
--- @see set_bg
-
---- The default foreground (text) color.
--- @beautiful beautiful.fg_normal
--- @see set_fg
-
---- Set a declarative widget hierarchy description.
--- See [The declarative layout system](../documentation/03-declarative-layout.md.html)
--- @param args An array containing the widgets disposition
--- @name setup
--- @class function
 wibox.setup = base.widget.setup
 
---- Set the background of the wibox
--- @param c The background to use. This must either be a cairo pattern object,
---   nil or a string that gears.color() understands.
 function wibox:set_bg(c)
     self._drawable:set_bg(c)
 end
 
---- Set the background image of the drawable
--- If `image` is a function, it will be called with `(context, cr, width, height)`
--- as arguments. Any other arguments passed to this method will be appended.
--- @param image A background image or a function
 function wibox:set_bgimage(image, ...)
     self._drawable:set_bgimage(image, ...)
 end
 
---- Set the foreground of the wibox
--- @param c The foreground to use. This must either be a cairo pattern object,
---   nil or a string that gears.color() understands.
 function wibox:set_fg(c)
     self._drawable:set_fg(c)
 end
 
---- Find a widget by a point.
--- The wibox must have drawn itself at least once for this to work.
--- @tparam number x X coordinate of the point
--- @tparam number y Y coordinate of the point
--- @treturn table A sorted table of widgets positions. The first element is the biggest
--- container while the last is the topmost widget. The table contains *x*, *y*,
--- *width*, *height* and *widget*.
 function wibox:find_widgets(x, y)
     return self._drawable:find_widgets(x, y)
+end
+
+function wibox:get_screen()
+    local sgeos = {}
+
+    for s in capi.screen do
+        sgeos[s] = s.geometry
+    end
+
+    return grect.get_closest_by_coord(sgeos, self.x, self.y)
+end
+
+function wibox:set_screen(s)
+    s = capi.screen[s or 1]
+    if s ~= self:get_screen() then
+        self.x = s.geometry.x
+        self.y = s.geometry.y
+    end
 end
 
 for _, k in pairs{ "buttons", "struts", "geometry", "get_xproperty", "set_xproperty" } do
@@ -297,6 +122,7 @@ local function setup_signals(_wibox)
 end
 
 local function new(args)
+    args = args or {}
     local ret = object()
     local w = capi.drawin(args)
 
@@ -339,10 +165,24 @@ local function new(args)
     -- Make sure the wibox is drawn at least once
     ret.draw()
 
-    -- Redirect all non-existing indexes to the "real" drawin
+    -- If a value is not found, look in the drawin
     setmetatable(ret, {
-        __index = w,
-        __newindex = w
+        __index = function(self, k)
+            if rawget(self, "get_"..k) then
+                return self["get_"..k](self)
+            else
+                return w[k]
+            end
+        end,
+        __newindex = function(self, k,v)
+            if rawget(self, "set_"..k) then
+                self["set_"..k](self, v)
+            elseif w[k] ~= nil or force_forward[k] then
+                w[k] = v
+            else
+                rawset(self, k, v)
+            end
+        end
     })
 
     return ret

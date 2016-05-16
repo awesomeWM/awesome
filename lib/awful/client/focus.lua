@@ -6,7 +6,7 @@
 -- @release @AWESOME_VERSION@
 -- @submodule client
 ---------------------------------------------------------------------------
-local util = require("awful.util")
+local grect = require("gears.geometry").rectangle
 
 local capi =
 {
@@ -168,7 +168,7 @@ function focus.bydirection(dir, c, stacked)
             geomtbl[i] = cl:geometry()
         end
 
-        local target = util.get_rectangle_in_direction(dir, geomtbl, sel:geometry())
+        local target = grect.get_in_direction(dir, geomtbl, sel:geometry())
 
         -- If we found a client to focus, then do it.
         if target then
@@ -200,7 +200,7 @@ function focus.global_bydirection(dir, c, stacked)
             for i,cl in ipairs(cltbl) do
                 geomtbl[i] = cl:geometry()
             end
-            local target = util.get_rectangle_in_direction(dir, geomtbl, scr.geometry)
+            local target = grect.get_in_direction(dir, geomtbl, scr.geometry)
 
             if target then
                 cltbl[target]:emit_signal("request::activate",

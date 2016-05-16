@@ -4,6 +4,7 @@ local mouse = mouse
 local class = tag
 local obj = class({})
 local handler = require("gears.object.properties")
+local wibox = require("wibox")
 
 awesome.connect_signal("debug::index::miss", error)
 awesome.connect_signal("debug::newindex::miss", error)
@@ -34,5 +35,9 @@ assert(obj.key == 1337)
 -- The the custom mouse handler
 mouse.foo = "bar"
 assert(mouse.foo == "bar")
+
+local w = wibox()
+w.foo = "bar"
+assert(w.foo == "bar")
 
 require("_runner").run_steps({ function() return true end })

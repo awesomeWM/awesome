@@ -51,6 +51,11 @@
 --
 -- **attach** (*boolean*):
 --
+-- When the parent geometry (like the screen) changes, re-apply the placement
+-- function. This will add a `detach_callback` function to the drawable. Call
+-- this to detach the function. This will be called automatically when a new
+-- attached function is set.
+--
 -- **offset** (*table or number*):
 --
 -- The offset(s) to apply to the new geometry.
@@ -88,6 +93,7 @@ local capi =
 local client = require("awful.client")
 local layout = require("awful.layout")
 local a_screen = require("awful.screen")
+local grect = require("gears.geometry").rectangle
 local util = require("awful.util")
 local dpi = require("beautiful").xresources.apply_dpi
 
@@ -96,6 +102,15 @@ local function get_screen(s)
 end
 
 local wrap_client = nil
+local placement
+
+-- Store function -> keys
+local reverse_align_map = {}
+
+-- Forward declarations
+local area_common
+local wibox_update_strut
+local attach
 
 --- Allow multiple placement functions to be daisy chained.
 -- This also allow the functions to be aware they are being chained and act
@@ -123,7 +138,8 @@ local function compose(...)
         end
     end
 
-    local ret = wrap_client(function(d, args, ...)
+    local ret
+    ret = wrap_client(function(d, args, ...)
         local rets = {}
         local last_geo = nil
 
@@ -134,13 +150,16 @@ local function compose(...)
         -- Only apply the geometry once, not once per chain node, to do this,
         -- Force the "pretend" argument and restore the original value for
         -- the last node.
-        local pretend_real = args.pretend
-
-        args.pretend = true
+        local attach_real = args.attach
+        args.pretend      = true
+        args.attach       = false
+        args.offset       = {}
 
         for k, f in ipairs(queue) do
             if k == #queue then
-                args.pretend = pretend_real or false
+                -- Let them fallback to the parent table
+                args.pretend = nil
+                args.offset  = nil
             end
 
             local r = {f(d, args, ...)}
@@ -158,6 +177,11 @@ local function compose(...)
                     rets[f.context] = r
                 end
             end
+        end
+
+        if attach_real then
+            args.attach = true
+            attach(d, ret, args)
         end
 
         return last_geo, rets
@@ -189,7 +213,7 @@ local placement_private = {}
 --
 --    (awful.placement.no_overlap + awful.placement.no_offscreen)(c)
 --
-local placement = setmetatable({}, {
+placement = setmetatable({}, {
     __index = placement_private,
     __newindex = function(_, k, f)
         placement_private[k] = wrap_client(f, k)
@@ -220,9 +244,6 @@ local align_map = {
     center_vertical   = function(_ , sh, _ , dh) return {x= nil     , y=sh-dh    } end,
     center_horizontal = function(sw, _ , dw, _ ) return {x=sw/2-dw/2, y= nil     } end,
 }
-
--- Store function -> keys
-local reverse_align_map = {}
 
 -- Some parameters to correctly compute the final size
 local resize_to_point_map = {
@@ -259,39 +280,61 @@ local function store_geometry(d, reqtype)
     data[d][reqtype].screen = d.screen
 end
 
+--- Get the margins and offset
+-- @tparam table args The arguments
+-- @treturn table The margins
+-- @treturn table The offsets
+local function get_decoration(args)
+    local offset = args.offset
+
+    -- Offset are "blind" values added to the output
+    offset = type(offset) == "number" and {
+        x      = offset,
+        y      = offset,
+        width  = offset,
+        height = offset,
+    } or args.offset or {}
+
+    -- Margins are distances on each side to substract from the area`
+    local m = type(args.margins) == "table" and args.margins or {
+        left = args.margins or 0 , right  = args.margins or 0,
+        top  = args.margins or 0 , bottom = args.margins or 0
+    }
+
+    return m, offset
+end
+
 --- Apply some modifications before applying the new geometry.
 -- @tparam table new_geo The new geometry
 -- @tparam table args The common arguments
+-- @tparam boolean force Always ajust the geometry, even in pretent mode. This
+--  should only be used when returning the final geometry as it would otherwise
+--  mess the pipeline.
 -- @treturn table|nil The new geometry
-local function fix_new_geometry(new_geo, args)
-    if args.pretend or not new_geo then return nil end
+local function fix_new_geometry(new_geo, args, force)
+    if (args.pretend and not force) or not new_geo then return nil end
 
-    local offset = args.offset or {}
-
-    if type(offset) == "number" then
-        offset = {
-            x      = offset,
-            y      = offset,
-            width  = offset,
-            height = offset,
-        }
-    end
+    local m, offset = get_decoration(args)
 
     return {
-        x      = new_geo.x      and (new_geo.x      + (offset.x      or 0)),
-        y      = new_geo.y      and (new_geo.y      + (offset.y      or 0)),
-        width  = new_geo.width  and (new_geo.width  + (offset.width  or 0)),
-        height = new_geo.height and (new_geo.height + (offset.height or 0)),
+        x      = new_geo.x      and (new_geo.x + (offset.x or 0) + (m.left or 0) ),
+        y      = new_geo.y      and (new_geo.y + (offset.y or 0) + (m.top  or 0) ),
+        width  = new_geo.width  and math.max(
+            1, (new_geo.width  + (offset.width  or 0) - (m.left or 0) - (m.right or 0)  )
+        ),
+        height = new_geo.height and math.max(
+            1, (new_geo.height + (offset.height or 0) - (m.top  or 0) - (m.bottom or 0) )
+        ),
     }
 end
 
---- Get the area covered by a drawin.
+-- Get the area covered by a drawin.
 -- @param d The drawin
 -- @tparam[opt=nil] table new_geo A new geometry
 -- @tparam[opt=false] boolean ignore_border_width Ignore the border
 -- @tparam table args the method arguments
 -- @treturn The drawin's area.
-local function area_common(d, new_geo, ignore_border_width, args)
+area_common = function(d, new_geo, ignore_border_width, args)
     -- The C side expect no arguments, nil isn't valid
     local geometry = new_geo and d:geometry(new_geo) or d:geometry()
     local border = ignore_border_width and 0 or d.border_width or 0
@@ -316,7 +359,6 @@ end
 -- @tparam[opt=false] boolean ignore_border_width Ignore the border
 -- @treturn table A table with *x*, *y*, *width* and *height*.
 local function geometry_common(obj, args, new_geo, ignore_border_width)
-
     -- Store the current geometry in a singleton-memento
     if args.store_geometry and new_geo and args.context then
         store_geometry(obj, args.context)
@@ -338,16 +380,13 @@ local function geometry_common(obj, args, new_geo, ignore_border_width)
 
             -- Apply the margins
             if args.margins then
-                local delta = type(args.margins) == "table" and args.margins or {
-                    left = args.margins , right  = args.margins,
-                    top  = args.margins , bottom = args.margins
-                }
+                local delta = get_decoration(args)
 
                 return {
-                    x      = dgeo.x      + (delta.left or 0),
-                    y      = dgeo.y      + (delta.top  or 0),
-                    width  = dgeo.width  - (delta.left or 0) - (delta.right  or 0),
-                    height = dgeo.height - (delta.top  or 0) - (delta.bottom or 0),
+                    x      = dgeo.x      - (delta.left or 0),
+                    y      = dgeo.y      - (delta.top  or 0),
+                    width  = dgeo.width  + (delta.left or 0) + (delta.right  or 0),
+                    height = dgeo.height + (delta.top  or 0) + (delta.bottom or 0),
                 }
             end
 
@@ -367,12 +406,18 @@ end
 -- @tparam table args the method arguments
 -- @treturn table A table with *x*, *y*, *width* and *height*.
 local function get_parent_geometry(obj, args)
+    -- Didable override_geometry, context and other to avoid mutating the state
+    -- or using the wrong geo.
+
     if args.bounding_rect then
         return args.bounding_rect
     elseif args.parent then
-        return geometry_common(args.parent, args)
+        return geometry_common(args.parent, {})
     elseif obj.screen then
-        return geometry_common(obj.screen, args)
+        return geometry_common(obj.screen, {
+            honor_padding  = args.honor_padding,
+            honor_workarea = args.honor_workarea
+        })
     else
         return geometry_common(capi.screen[capi.mouse.screen], args)
     end
@@ -405,7 +450,7 @@ local function move_into_geometry(source, target)
 end
 
 -- Update the workarea
-local function wibox_update_strut(d, position)
+wibox_update_strut = function(d, position, args)
     -- If the drawable isn't visible, remove the struts
     if not d.visible then
         d:struts { left = 0, right = 0, bottom = 0, top = 0 }
@@ -420,16 +465,18 @@ local function wibox_update_strut(d, position)
     -- the workarea
     local struts = { left = 0, right = 0, bottom = 0, top = 0 }
 
+    local m = get_decoration(args)
+
     if vertical then
         for _, v in ipairs {"right", "left"} do
             if (not position) or position:match(v) then
-                struts[v] = geo.width
+                struts[v] = geo.width + m[v]
             end
         end
     else
         for _, v in ipairs {"top", "bottom"} do
             if (not position) or position:match(v) then
-                struts[v] = geo.height
+                struts[v] = geo.height + m[v]
             end
         end
     end
@@ -438,15 +485,17 @@ local function wibox_update_strut(d, position)
     d:struts(struts)
 end
 
---- Pin a drawable to a placement function.
+-- Pin a drawable to a placement function.
 -- Automatically update the position when the size change.
 -- All other arguments will be passed to the `position` function (if any)
 -- @tparam[opt=client.focus] drawable d A drawable (like `client`, `mouse`
 --   or `wibox`)
 -- @param position_f A position name (see `align`) or a position function
 -- @tparam[opt={}] table args Other arguments
-local function attach(d, position_f, args)
+attach = function(d, position_f, args)
     args = args or {}
+
+    if args.pretend then return end
 
     if not args.attach then return end
 
@@ -462,110 +511,78 @@ local function attach(d, position_f, args)
 
     if not position_f then return end
 
+    -- If there is multiple attached function, there is an high risk of infinite
+    -- loop. While some combinaisons are harmless, other are very hard to debug.
+    --
+    -- Use the placement composition to build explicit multi step attached
+    -- placement functions.
+    if d.detach_callback then
+        d.detach_callback()
+        d.detach_callback = nil
+    end
+
     local function tracker()
         position_f(d, args)
     end
 
-    d:connect_signal("property::width" , tracker)
-    d:connect_signal("property::height", tracker)
+    d:connect_signal("property::width"       , tracker)
+    d:connect_signal("property::height"      , tracker)
+    d:connect_signal("property::border_width", tracker)
 
-    tracker()
+    local function tracker_struts()
+        --TODO this is too fragile and doesn't work with all methods.
+        wibox_update_strut(d, d.position or reverse_align_map[position_f], args)
+    end
+
+    local parent = args.parent or d.screen
 
     if args.update_workarea then
-        local function tracker_struts()
-            --TODO this is too fragile and doesn't work with all methods.
-            wibox_update_strut(d, reverse_align_map[position_f])
-        end
-
         d:connect_signal("property::geometry" , tracker_struts)
         d:connect_signal("property::visible"  , tracker_struts)
+        capi.client.connect_signal("property::struts", tracker_struts)
 
         tracker_struts()
+    elseif parent == d.screen then
+        if args.honor_workarea then
+            parent:connect_signal("property::workarea", tracker)
+        end
+
+        if args.honor_padding then
+            parent:connect_signal("property::padding", tracker)
+        end
     end
 
     -- If there is a parent drawable, screen or mouse, also track it
-    local parent = args.parent or d.screen
     if parent then
-        args.parent:connect_signal("property::geometry" , tracker)
+        parent:connect_signal("property::geometry" , tracker)
     end
-end
 
---- Check if an area intersect another area.
--- @param a The area.
--- @param b The other area.
--- @return True if they intersect, false otherwise.
-local function area_intersect_area(a, b)
-    return (b.x < a.x + a.width
-            and b.x + b.width > a.x
-            and b.y < a.y + a.height
-            and b.y + b.height > a.y)
-end
+    -- Create a way to detach a placement function
+    d:add_signal("property::detach_callback")
+    function d.detach_callback()
+        d:disconnect_signal("property::width"       , tracker)
+        d:disconnect_signal("property::height"      , tracker)
+        d:disconnect_signal("property::border_width", tracker)
+        if parent then
+            parent:disconnect_signal("property::geometry" , tracker)
 
---- Get the intersect area between a and b.
--- @param a The area.
--- @param b The other area.
--- @return The intersect area.
-local function area_intersect_area_get(a, b)
-    local g = {}
-    g.x = math.max(a.x, b.x)
-    g.y = math.max(a.y, b.y)
-    g.width = math.min(a.x + a.width, b.x + b.width) - g.x
-    g.height = math.min(a.y + a.height, b.y + b.height) - g.y
-    return g
-end
+            if parent == d.screen then
+                if args.honor_workarea then
+                    parent:disconnect_signal("property::workarea", tracker)
+                end
 
---- Remove an area from a list, splitting the space between several area that
--- can overlap.
--- @param areas Table of areas.
--- @param elem Area to remove.
--- @return The new area list.
-local function area_remove(areas, elem)
-    for i = #areas, 1, -1 do
-        -- Check if the 'elem' intersect
-        if area_intersect_area(areas[i], elem) then
-            -- It does? remove it
-            local r = table.remove(areas, i)
-            local inter = area_intersect_area_get(r, elem)
-
-            if inter.x > r.x then
-                table.insert(areas, {
-                    x = r.x,
-                    y = r.y,
-                    width = inter.x - r.x,
-                    height = r.height
-                })
-            end
-
-            if inter.y > r.y then
-                table.insert(areas, {
-                    x = r.x,
-                    y = r.y,
-                    width = r.width,
-                    height = inter.y - r.y
-                })
-            end
-
-            if inter.x + inter.width < r.x + r.width then
-                table.insert(areas, {
-                    x = inter.x + inter.width,
-                    y = r.y,
-                    width = (r.x + r.width) - (inter.x + inter.width),
-                    height = r.height
-                })
-            end
-
-            if inter.y + inter.height < r.y + r.height then
-                table.insert(areas, {
-                    x = r.x,
-                    y = inter.y + inter.height,
-                    width = r.width,
-                    height = (r.y + r.height) - (inter.y + inter.height)
-                })
+                if args.honor_padding then
+                    parent:disconnect_signal("property::padding", tracker)
+                end
             end
         end
-    end
 
-    return areas
+        if args.update_workarea then
+            d:disconnect_signal("property::geometry" , tracker_struts)
+            d:disconnect_signal("property::visible"  , tracker_struts)
+            capi.client.disconnect_signal("property::struts", tracker_struts)
+        end
+    end
 end
 
 -- Convert 2 points into a rectangle
@@ -633,7 +650,7 @@ function placement.closest_corner(d, args)
     local new_args = setmetatable({position = corner}, {__index=args})
     local ngeo = placement_private.align(d, new_args)
 
-    return ngeo, corner
+    return fix_new_geometry(ngeo, args, true), corner
 end
 
 --- Place the client so no part of it will be outside the screen (workarea).
@@ -685,7 +702,7 @@ function placement.no_overlap(c)
     local areas = { screen.workarea }
     for _, cl in pairs(cls) do
         if cl ~= c and cl.type ~= "desktop" and (cl.floating or curlay == layout.suit.floating) then
-            areas = area_remove(areas, area_common(cl))
+            areas = grect.area_remove(areas, area_common(cl))
         end
     end
 
@@ -751,7 +768,9 @@ function placement.under_mouse(d, args)
     ngeo.width  = ngeo.width  - 2*bw
     ngeo.height = ngeo.height - 2*bw
 
-    return ngeo
+    geometry_common(d, args, ngeo)
+
+    return fix_new_geometry(ngeo, args, true)
 end
 
 --- Place the client next to the mouse.
@@ -862,7 +881,7 @@ function placement.resize_to_mouse(d, args)
 
     geometry_common(d, args, ngeo)
 
-    return ngeo
+    return fix_new_geometry(ngeo, args, true)
 end
 
 --- Move the drawable (client or wibox) `d` to a screen position or side.
@@ -913,7 +932,7 @@ function placement.align(d, args)
 
     attach(d, placement[args.position], args)
 
-    return ngeo
+    return fix_new_geometry(ngeo, args, true)
 end
 
 -- Add the alias functions
@@ -1002,7 +1021,7 @@ function placement.stretch(d, args)
 
     attach(d, placement["stretch_"..args.direction], args)
 
-    return ngeo
+    return fix_new_geometry(ngeo, args, true)
 end
 
 -- Add the alias functions
@@ -1056,7 +1075,7 @@ function placement.maximize(d, args)
 
     attach(d, placement.maximize, args)
 
-    return ngeo
+    return fix_new_geometry(ngeo, args, true)
 end
 
 -- Add the alias functions
@@ -1121,7 +1140,7 @@ function placement.scale(d, args)
 
     attach(d, placement.maximize, args)
 
-    return ngeo
+    return fix_new_geometry(ngeo, args, true)
 end
 
 ---@DOC_awful_placement_maximize_vertically_EXAMPLE@

@@ -30,7 +30,7 @@
  *
  * It is also possible loop over all current screens using:
  *
- *    for s, screen do
+ *    for s in screen do
  *        -- do something
  *    end
  *
@@ -117,7 +117,7 @@
  * The screen workarea.
  *
  * The workarea is a subsection of the screen where clients can be placed. It
- * usually excludes the toolbars (see `awful.wibox`) and dockable clients
+ * usually excludes the toolbars (see `awful.wibar`) and dockable clients
  * (see `client.dockable`) like WindowMaker DockAPP.
  *
  * It can be modified be altering the `wibox` or `client` struts.
@@ -756,8 +756,8 @@ void screen_update_workarea(screen_t *screen)
 
     area.x += left;
     area.y += top;
-    area.width -= left + right;
-    area.height -= top + bottom;
+    area.width -= MIN(area.width, left + right);
+    area.height -= MIN(area.height, top + bottom);
 
     if (AREA_EQUAL(area, screen->workarea))
         return;
