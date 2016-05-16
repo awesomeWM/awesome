@@ -33,7 +33,8 @@ export GIT_AUTHOR_EMAIL="awesome-robot@users.noreply.github.com"
 export GIT_COMMITTER_NAME="$GIT_AUTHOR_NAME"
 export GIT_COMMITTER_EMAIL="$GIT_AUTHOR_EMAIL"
 
-git clone --quiet --branch gh-pages "$REPO_APIDOC" build/apidoc
+git clone --branch gh-pages "$REPO_APIDOC" build/apidoc \
+    2>&1 | sed "s/$GH_APIDOC_TOKEN/GH_APIDOC_TOKEN/g"
 cd build/apidoc
 
 # This will re-use already existing branches (updated PR).
@@ -120,7 +121,7 @@ fi
 git merge --no-ff -m "$MERGE_COMMIT_MSG" merged-update
 NEW_REV="$(git rev-parse --short HEAD)"
 
-git push --quiet origin "$BRANCH"
+git push origin "$BRANCH" 2>&1 | sed "s/$GH_APIDOC_TOKEN/GH_APIDOC_TOKEN/g"
 
 # Generate compare view links.
 # NOTE: use "\n" for line endings, not real ones for valid json!
@@ -136,7 +137,8 @@ echo "Compare links:\n$COMPARE_LINKS"
 if [ "$TRAVIS_PULL_REQUEST" != false ]; then
   curl -H "Authorization: token $GH_APIDOC_TOKEN" \
     -d "{\"body\": \"Documentation has been updated for this PR.\n\n$COMPARE_LINKS\"}" \
-    "https://api.github.com/repos/awesomeWM/awesome/issues/${TRAVIS_PULL_REQUEST}/comments"
+    "https://api.github.com/repos/awesomeWM/awesome/issues/${TRAVIS_PULL_REQUEST}/comments" \
+    2>&1 | sed "s/$GH_APIDOC_TOKEN/GH_APIDOC_TOKEN/g"
 fi
 
 # vim: filetype=sh:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
