@@ -137,7 +137,7 @@ function screen.focus_bydirection(dir, _screen)
         for s in capi.screen do
             geomtbl[s] = capi.screen[s].geometry
         end
-        local target = util.get_rectangle_in_direction(dir, geomtbl, sel.geometry)
+        local target = grect.get_in_direction(dir, geomtbl, sel.geometry)
         if target then
             return screen.focus(target)
         end

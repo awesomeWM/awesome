@@ -11,6 +11,7 @@
 local util = require("awful.util")
 local spawn = require("awful.spawn")
 local object = require("gears.object")
+local grect = require("gears.geometry").rectangle
 local pairs = pairs
 local type = type
 local ipairs = ipairs
@@ -197,7 +198,7 @@ function client.swap.bydirection(dir, c, stacked)
         for i,cl in ipairs(cltbl) do
             geomtbl[i] = cl:geometry()
         end
-        local target = util.get_rectangle_in_direction(dir, geomtbl, sel:geometry())
+        local target = grect.get_in_direction(dir, geomtbl, sel:geometry())
 
         -- If we found a client to swap with, then go for it
         if target then
