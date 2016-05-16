@@ -30,7 +30,7 @@
  *
  * It is also possible loop over all current screens using:
  *
- *    for s, screen do
+ *    for s in screen do
  *        -- do something
  *    end
  *
