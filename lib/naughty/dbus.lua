@@ -137,24 +137,20 @@ capi.dbus.connect_signal("org.freedesktop.Notifications", function (data, appnam
         if actions then
             args.actions = {}
 
-            local actionid
-            -- create actions callbacks
-            for i , v in ipairs(actions) do
-                if i % 2 == 1 then
-                    actionid = v
-                elseif actionid == "default" then
+            for i = 1,#actions,2 do
+                local action_id = actions[i]
+                local action_text = actions[i + 1]
+
+                if action_id == "default" then
                     args.run = function()
                         sendActionInvoked(notification.id, "default")
                         naughty.destroy(notification, naughty.notificationClosedReason.dismissedByUser)
                     end
-                    actionid = nil
-                elseif actionid ~= nil then
-                    local action = actionid
-                    args.actions[actionid] = function()
-                        sendActionInvoked(notification.id, action)
+                elseif action_id ~= nil and action_text ~= nil then
+                    args.actions[action_text] = function()
+                        sendActionInvoked(notification.id, action_id)
                         naughty.destroy(notification, naughty.notificationClosedReason.dismissedByUser)
                     end
-                    actionid = nil
                 end
             end
         end

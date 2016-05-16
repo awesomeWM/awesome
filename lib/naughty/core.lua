@@ -543,7 +543,7 @@ function naughty.notify(args)
             actionmarginbox:set_widget(actiontextbox)
             actiontextbox:set_valign("middle")
             actiontextbox:set_font(font)
-            actiontextbox:set_markup(string.format('<b>%s</b>', action))
+            actiontextbox:set_markup(string.format('☛ <u>%s</u>', action))
             -- calculate the height and width
             local w, h = actiontextbox:get_preferred_size(s)
             local action_height = h + 2 * margin
