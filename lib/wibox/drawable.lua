@@ -19,30 +19,26 @@ local color = require("gears.color")
 local object = require("gears.object")
 local surface = require("gears.surface")
 local timer = require("gears.timer")
+local grect =  require("gears.geometry").rectangle
 local matrix = require("gears.matrix")
 local hierarchy = require("wibox.hierarchy")
 local unpack = unpack or table.unpack -- luacheck: globals unpack (compatibility with Lua 5.1)
 
 local drawables = setmetatable({}, { __mode = 'k' })
 
--- This is awful.screen.getbycoord() which we sadly cannot use from here (cyclic
--- dependencies are bad!)
-local function screen_getbycoord(x, y)
-    for i in screen do
-        local geometry = screen[i].geometry
-        if x >= geometry.x and x < geometry.x + geometry.width
-           and y >= geometry.y and y < geometry.y + geometry.height then
-            return capi.screen[i]
-        end
-    end
-    return capi.screen.primary
-end
-
 -- Get the widget context. This should always return the same table (if
 -- possible), so that our draw and fit caches can work efficiently.
 local function get_widget_context(self)
     local geom = self.drawable:geometry()
-    local s = screen_getbycoord(geom.x, geom.y)
+
+    local sgeos = {}
+
+    for s in capi.screen do
+        sgeos[s] = s.geometry
+    end
+
+    local s = grect.get_by_coord(sgeos, geom.x, geom.y) or capi.screen.primary
+
     local context = self._widget_context
     local dpi = beautiful.xresources.get_dpi(s)
     if (not context) or context.screen ~= s or context.dpi ~= dpi then

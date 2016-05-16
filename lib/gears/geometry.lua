@@ -57,4 +57,23 @@ function gears.geometry.rectangle.get_closest_by_coord(list, x, y)
     return ret
 end
 
+--- Return the rectangle containing the [x, y] point.
+--
+-- Note that if multiple element from the geometry list contains the point, the
+-- returned result is nondeterministic.
+--
+-- @tparam table list A list of geometry tables.
+-- @tparam number x The x coordinate
+-- @tparam number y The y coordinate
+-- @return The key from the closest geometry. In case no result is found, *nil*
+--  is returned.
+function gears.geometry.rectangle.get_by_coord(list, x, y)
+    for k, geometry in pairs(list) do
+        if x >= geometry.x and x < geometry.x + geometry.width
+           and y >= geometry.y and y < geometry.y + geometry.height then
+            return k
+        end
+    end
+end
+
 return gears.geometry
