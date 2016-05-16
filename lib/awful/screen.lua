@@ -16,6 +16,7 @@ local capi =
 }
 local util = require("awful.util")
 local object = require("gears.object")
+local grect =  require("gears.geometry").rectangle
 
 local function get_screen(s)
     return s and capi.screen[s]
@@ -62,20 +63,7 @@ end
 -- @tparam number y Y coordinate of point
 -- @treturn number The squared distance of the screen to the provided point
 function screen.object.get_square_distance(self, x, y)
-    self = get_screen(self)
-    local geom = self.geometry
-    local dist_x, dist_y = 0, 0
-    if x < geom.x then
-        dist_x = geom.x - x
-    elseif x >= geom.x + geom.width then
-        dist_x = x - geom.x - geom.width + 1
-    end
-    if y < geom.y then
-        dist_y = geom.y - y
-    elseif y >= geom.y + geom.height then
-        dist_y = y - geom.y - geom.height + 1
-    end
-    return dist_x * dist_x + dist_y * dist_y
+    return grect.get_square_distance(get_screen(self).geometry, x, y)
 end
 
 ---
@@ -83,20 +71,18 @@ end
 -- The number returned can be used as an index into the global
 -- `screen` table/object.
 -- @function awful.screen.getbycoord
--- @param x The x coordinate
--- @param y The y coordinate
+-- @tparam number x The x coordinate
+-- @tparam number y The y coordinate
+-- @treturn ?number The screen index
 function screen.getbycoord(x, y)
-    local dist = math.huge
-    local s = capi.screen.primary
-    if s then
-        dist = screen.object.get_square_distance(s, x, y)
+    local s, sgeos = capi.screen.primary, {}
+
+    for scr in capi.screen do
+        sgeos[scr] = scr.geometry
     end
-    for i in capi.screen do
-        local d = screen.object.get_square_distance(i, x, y)
-        if d < dist then
-            s, dist = capi.screen[i], d
-        end
-    end
+
+    s = grect.get_closest_by_coord(sgeos, x, y) or s
+
     return s and s.index
 end
 
