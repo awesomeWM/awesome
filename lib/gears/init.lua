@@ -18,7 +18,6 @@ return
     matrix = require("gears.matrix");
     shape = require("gears.shape");
     protected_call = require("gears.protected_call");
-    screen = require("gears.screen");
     geometry = require("gears.geometry");
 }
 
