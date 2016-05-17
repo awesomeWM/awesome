@@ -39,6 +39,8 @@ local function find_signal(obj, name, error_msg)
 end
 
 --- Add a signal to an object. All signals must be added before they can be used.
+--
+--@DOC_text_gears_object_signal_EXAMPLE@
 -- @tparam string name The name of the new signal.
 function object:add_signal(name)
     check(self)
@@ -54,6 +56,7 @@ end
 --- Connect to a signal.
 -- @tparam string name The name of the signal
 -- @tparam function func The callback to call when the signal is emitted
+-- @see add_signal 
 function object:connect_signal(name, func)
     assert(type(func) == "function", "callback must be a function, got: " .. type(func))
     local sig = find_signal(self, name, "connect to")
@@ -105,6 +108,7 @@ end
 --- Disonnect to a signal.
 -- @tparam string name The name of the signal
 -- @tparam function func The callback that should be disconnected
+-- @see add_signal
 function object:disconnect_signal(name, func)
     local sig = find_signal(self, name, "disconnect from")
     sig.weak[func] = nil
