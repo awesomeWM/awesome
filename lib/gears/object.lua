@@ -122,10 +122,57 @@ function object:emit_signal(name, ...)
     end
 end
 
---- Returns a new object. You can call :emit_signal(), :disconnect_signal,
--- :connect_signal() and :add_signal() on the resulting object.
-local function new()
+local function get_miss(self, key)
+    local class = rawget(self, "_class")
+
+    if rawget(self, "get_"..key) then
+        return rawget(self, "get_"..key)(self)
+    elseif class and class["get_"..key] then
+        return class["get_"..key](self)
+    elseif class then
+        return class[key]
+    end
+
+end
+
+local function set_miss(self, key, value)
+    local class = rawget(self, "_class")
+
+    if rawget(self, "set_"..key) then
+        return rawget(self, "set_"..key)(self, value)
+    elseif class and class["set_"..key] then
+        return class["set_"..key](self, value)
+    elseif rawget(self, "_enable_auto_signals") then
+        local changed = class[key] ~= value
+        class[key] = value
+
+        if changed then
+            self:emit_signal("property::"..key, value)
+        end
+    else
+        return rawset(self, key, value)
+    end
+end
+
+--- Returns a new object. You can call `:emit_signal()`, `:disconnect_signal()`,
+-- `:connect_signal()` and `:add_signal()` on the resulting object.
+--
+-- Note that `args.enable_auto_signals` is only supported when
+-- `args.enable_properties` is true.
+--
+-- @tparam[opt={}] table args The arguments
+-- @tparam[opt=false] boolean args.enable_properties Automatically call getters and setters
+-- @tparam[opt=false] boolean args.enable_auto_signals Generate "property::xxxx" signals
+--   when an unknown property is set.
+-- @tparam[opt=nil] table args.class
+-- @treturn table A new object
+-- @function gears.object
+local function new(args)
+    args = args or {}
     local ret = {}
+
+    -- Automatic signals cannot work without both miss handlers.
+    assert(not (args.enable_auto_signals and args.enable_properties ~= true))
 
     -- Copy all our global functions to our new object
     for k, v in pairs(object) do
@@ -136,7 +183,27 @@ local function new()
 
     ret._signals = {}
 
-    return ret
+    local mt = {}
+
+    -- Look for methods in another table
+    ret._class               = args.class
+    ret._enable_auto_signals = args.enable_auto_signals
+
+    -- To catch all changes, a proxy is required
+    if args.enable_auto_signals then
+        ret._class = ret._class and setmetatable({}, {__index = args.class}) or {}
+    end
+
+    if args.enable_properties then
+        -- Check got existing get_xxxx and set_xxxx
+        mt.__index    = get_miss
+        mt.__newindex = set_miss
+    elseif args.class then
+        -- Use the class table a miss handler
+        mt.__index = ret._class
+    end
+
+    return setmetatable(ret, mt)
 end
 
 function object.mt.__call(_, ...)
