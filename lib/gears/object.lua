@@ -1,4 +1,9 @@
 ---------------------------------------------------------------------------
+-- The object oriented programming base class used by various Awesome
+-- widgets and components.
+--
+-- It provide basic observer pattern, signaling and dynamic properties.
+--
 -- @author Uli Schlachter
 -- @copyright 2010 Uli Schlachter
 -- @release @AWESOME_VERSION@
