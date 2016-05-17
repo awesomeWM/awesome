@@ -169,6 +169,7 @@ end
 -- Note that `args.enable_auto_signals` is only supported when
 -- `args.enable_properties` is true.
 --
+--@DOC_text_gears_object_properties_EXAMPLE@
 -- @tparam[opt={}] table args The arguments
 -- @tparam[opt=false] boolean args.enable_properties Automatically call getters and setters
 -- @tparam[opt=false] boolean args.enable_auto_signals Generate "property::xxxx" signals
