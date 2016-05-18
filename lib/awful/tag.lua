@@ -295,7 +295,6 @@ function tag.object.delete(self, fallback_tag, force)
 
     -- delete the tag
     data.tags[self].screen = nil
-    data.tags[self] = nil
     self.activated = false
 
     -- Update all indexes
@@ -1387,7 +1386,10 @@ capi.screen.connect_signal("removed", function(s)
     -- If any tag survived until now, forcefully get rid of it
     for _, t in pairs(s.tags) do
         t.activated = false
-        data.tags[t] = nil
+
+        if data.tags[t] then
+            data.tags[t].screen = nil
+        end
     end
 end)
 
