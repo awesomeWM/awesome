@@ -161,6 +161,64 @@ describe("gears.object", function()
         assert.is_true(finalized)
         obj:emit_signal("signal")
     end)
+
+    it("dynamic property disabled", function()
+        local class = {}
+        function class:get_foo() return "bar" end
+        function class:set_foo() end
+
+        local obj2 = object{class=class}
+
+        obj2.foo = 42
+
+        assert.is_true(obj2.foo == 42)
+    end)
+
+    it("dynamic property disabled", function()
+        local class = {}
+        function class:get_foo() return "bar" end
+        function class:set_foo() end
+
+        local obj2 = object{class=class, enable_properties = true}
+
+        obj2.foo = 42
+
+        assert.is_true(obj2.foo == "bar")
+    end)
+
+    it("auto emit disabled", function()
+        local got_it = false
+        obj:add_signal("property::foo")
+        obj:connect_signal("property::foo", function() got_it=true end)
+
+        obj.foo = 42
+
+        assert.is_false(got_it)
+    end)
+
+    it("auto emit enabled", function()
+        local got_it = false
+        local obj2 = object{enable_auto_signals=true, enable_properties=true}
+        obj2:add_signal("property::foo")
+        obj2:connect_signal("property::foo", function() got_it=true end)
+
+        obj2.foo = 42
+
+        assert.is_true(got_it)
+    end)
+
+    it("auto emit enabled", function()
+        assert.has.errors(function()
+            local obj2 = object{enable_auto_signals=true, enable_properties=true}
+            obj2.foo = "bar"
+        end)
+    end)
+
+    it("auto emit without dynamic properties", function()
+        assert.has.errors(function()
+            object{enable_auto_signals=true, enable_properties=false}
+        end)
+    end)
 end)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
