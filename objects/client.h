@@ -23,6 +23,7 @@
 #define AWESOME_OBJECTS_CLIENT_H
 
 #include "stack.h"
+#include <signal.h>
 #include "objects/window.h"
 
 #define CLIENT_SELECT_INPUT_EVENT_MASK (XCB_EVENT_MASK_STRUCTURE_NOTIFY \
@@ -122,7 +123,7 @@ struct client_t
     /** Role of the client */
     char *role;
     /** Client pid */
-    uint32_t pid;
+    pid_t pid;
     /** Window it is transient for */
     client_t *transient_for;
     /** Value of WM_TRANSIENT_FOR */
@@ -154,7 +155,7 @@ void client_unban(client_t *);
 void client_manage(xcb_window_t, xcb_get_geometry_reply_t *, xcb_get_window_attributes_reply_t *);
 bool client_resize(client_t *, area_t, bool);
 void client_unmanage(client_t *, bool);
-void client_kill(client_t *);
+void client_kill(client_t *, int);
 void client_set_sticky(lua_State *, int, bool);
 void client_set_above(lua_State *, int, bool);
 void client_set_below(lua_State *, int, bool);
@@ -166,7 +167,7 @@ void client_set_maximized_horizontal(lua_State *, int, bool);
 void client_set_maximized_vertical(lua_State *, int, bool);
 void client_set_minimized(lua_State *, int, bool);
 void client_set_urgent(lua_State *, int, bool);
-void client_set_pid(lua_State *, int, uint32_t);
+void client_set_pid(lua_State *, int, pid_t);
 void client_set_role(lua_State *, int, char *);
 void client_set_machine(lua_State *, int, char *);
 void client_set_icon_name(lua_State *, int, char *);

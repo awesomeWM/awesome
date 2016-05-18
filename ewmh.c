@@ -433,7 +433,7 @@ ewmh_process_client_message(xcb_client_message_event_t *ev)
     else if(ev->type == _NET_CLOSE_WINDOW)
     {
         if((c = client_getbywin(ev->window)))
-           client_kill(c);
+           client_kill(c, -1);
     }
     else if(ev->type == _NET_WM_DESKTOP)
     {
