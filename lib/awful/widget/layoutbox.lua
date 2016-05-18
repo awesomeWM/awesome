@@ -56,10 +56,10 @@ function layoutbox.new(screen)
     local w = boxes[screen]
     if not w then
         w = imagebox()
-        w._layoutbox_tooltip = tooltip({ objects = {w}, delay_show = 1 })
+        w._layoutbox_tooltip = tooltip {objects = {w}, delay_show = 1}
 
         update(w, screen)
-        boxes[screen] = setmetatable({}, {__index = w, __newindex = w})
+        boxes[screen] = w
     end
 
     return w
