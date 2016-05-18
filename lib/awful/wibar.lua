@@ -322,7 +322,7 @@ function awfulwibar.new(arg)
     w.set_stretch = set_stretch
     w.remove      = remove
 
-    w.visible = true
+    if arg.visible == nil then w.visible = true end
 
     w:set_position(position)
 
