@@ -261,13 +261,34 @@ end
 -- @see stretch
 
 --- Create a new wibox and attach it to a screen edge.
--- @see wibox
--- @param arg A table with standard arguments to wibox() creator.
 -- You can add also position key with value top, bottom, left or right.
 -- You can also use width or height in % and set align to center, right or left.
 -- You can also set the screen key with a screen number to attach the wibox.
--- If not specified, 1 is assumed.
--- @return The wibox created.
+-- If not specified, the primary screen is assumed.
+-- @see wibox
+-- @tparam[opt=nil] table arg
+-- @tparam string arg.position The position.
+-- @tparam string arg.stretch If the wibar need to be stretched to fill the screen.
+-- @tparam integer arg.border_width Border width.
+-- @tparam string arg.border_color Border color.
+-- @tparam boolean arg.ontop On top of other windows.
+-- @tparam string arg.cursor The mouse cursor.
+-- @tparam boolean arg.visible Visibility.
+-- @tparam number arg.opacity The opacity of the wibox, between 0 and 1.
+-- @tparam string arg.type The window type (desktop, normal, dock, …).
+-- @tparam integer arg.x The x coordinates.
+-- @tparam integer arg.y The y coordinates.
+-- @tparam integer arg.width The width of the wibox.
+-- @tparam integer arg.height The height of the wibox.
+-- @tparam screen arg.screen The wibox screen.
+-- @tparam wibox.widget arg.widget The widget that the wibox displays.
+-- @param arg.shape_bounding The wibox’s bounding shape as a (native) cairo surface.
+-- @param arg.shape_clip The wibox’s clip shape as a (native) cairo surface.
+-- @tparam color arg.bg The background of the wibox.
+-- @tparam surface arg.bgimage The background image of the drawable.
+-- @tparam color arg.fg The foreground (text) of the wibox.
+-- @return The new wibar
+-- @function awful.wibar
 function awfulwibar.new(arg)
     arg = arg or {}
     local position = arg.position or "top"
