@@ -205,11 +205,14 @@ function awfulwibar.set_position(wb, position, screen) --luacheck: no unused arg
 end
 
 --- Attach a wibox to a screen.
--- If a wibox is attached, it will be automatically be moved when other wiboxes
--- will be attached.
+--
+-- This function has been moved to the `awful.placement` module. Calling this
+-- no longer does anything.
+--
 -- @param wb The wibox to attach.
 -- @param position The position of the wibox: top, bottom, left or right.
 -- @param screen The screen to attach to
+-- @see awful.placement
 -- @deprecated awful.wibar.attach
 function awfulwibar.attach(wb, position, screen) --luacheck: no unused args
     util.deprecate("awful.wibar.attach is deprecated, use the 'attach' property"..
@@ -249,7 +252,9 @@ function awfulwibar.align(wb, align, screen) --luacheck: no unused args
         util.deprecate("awful.wibar.align 'screen' argument is deprecated")
     end
 
-    attach(wb, align)
+    if placement[align] then
+        return placement[align](wb)
+    end
 end
 
 --- Stretch a wibox so it takes all screen width or height.
