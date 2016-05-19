@@ -185,6 +185,19 @@ local function new(args)
         end
     })
 
+    -- Set other wibox specific arguments
+    if args.bgimage then
+        ret:set_bgimage( args.bgimage )
+    end
+
+    if args.widget then
+        ret:set_widget ( args.widget  )
+    end
+
+    if args.screen then
+        ret:set_screen ( args.screen  )
+    end
+
     return ret
 end
 

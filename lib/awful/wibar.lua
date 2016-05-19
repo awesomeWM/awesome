@@ -307,6 +307,8 @@ function awfulwibar.new(arg)
         end
     end
 
+    arg.screen = nil
+
     local w = wibox(arg)
 
     w.screen   = screen
