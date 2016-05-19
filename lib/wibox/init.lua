@@ -121,6 +121,29 @@ local function setup_signals(_wibox)
     clone_signal("property::surface")
 end
 
+--- Create a wibox.
+-- @tparam[opt=nil] table args
+-- @tparam integer args.border_width Border width.
+-- @tparam string args.border_color Border color.
+-- @tparam boolean args.ontop On top of other windows.
+-- @tparam string args.cursor The mouse cursor.
+-- @tparam boolean args.visible Visibility.
+-- @tparam number args.opacity The opacity of the wibox, between 0 and 1.
+-- @tparam string args.type The window type (desktop, normal, dock, …).
+-- @tparam integer args.x The x coordinates.
+-- @tparam integer args.y The y coordinates.
+-- @tparam integer args.width The width of the wibox.
+-- @tparam integer args.height The height of the wibox.
+-- @tparam screen args.screen The wibox screen.
+-- @tparam wibox.widget args.widget The widget that the wibox displays.
+-- @param args.shape_bounding The wibox’s bounding shape as a (native) cairo surface.
+-- @param args.shape_clip The wibox’s clip shape as a (native) cairo surface.
+-- @tparam color args.bg The background of the wibox.
+-- @tparam surface args.bgimage The background image of the drawable.
+-- @tparam color args.fg The foreground (text) of the wibox.
+-- @treturn wibox The new wibox
+-- @function .wibox
+
 local function new(args)
     args = args or {}
     local ret = object()
@@ -184,6 +207,19 @@ local function new(args)
             end
         end
     })
+
+    -- Set other wibox specific arguments
+    if args.bgimage then
+        ret:set_bgimage( args.bgimage )
+    end
+
+    if args.widget then
+        ret:set_widget ( args.widget  )
+    end
+
+    if args.screen then
+        ret:set_screen ( args.screen  )
+    end
 
     return ret
 end
