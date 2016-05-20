@@ -2166,8 +2166,19 @@ out:
  *
  * This can be used to pause or wakeup some clients or to save energy.
  *
+ * @usage -- Close the focused client normally
+ * if client.focus then
+ *     client.focus:kill()
+ * end
+ *
+ * -- Force kill the focused client
+ * if client.focus then
+ *     client.focus:kill(awful.client.posix_signal.SIGKILL)
+ * end
+ *
  * @tparam[opt=nil] integer signal The POSIX signal number.
  * @function kill
+ * @see posix_signal
  */
 static int
 luaA_client_kill(lua_State *L)

@@ -59,6 +59,56 @@ client.property = {}
 client.shape = require("awful.client.shape")
 client.focus = require("awful.client.focus")
 
+--- The POSIX signal table.
+--
+-- This table was extracted from
+--
+--    man 7 signal
+--
+-- @table awful.client.posix_signal
+-- @field SIGHUP Hangup detected on controlling terminal or death of controlling process
+-- @field SIGINT Interrupt from keyboard
+-- @field SIGQUIT Quit from keyboard
+-- @field SIGILL Illegal Instruction
+-- @field SIGABRT Abort signal from abort(3)
+-- @field SIGKILL Kill signal
+-- @field SIGSEGV Invalid memory reference
+-- @field SIGALRM Timer signal from alarm(2)
+-- @field SIGTERM Termination signal
+-- @field SIGUSR1 User-defined signal 1
+-- @field SIGUSR2 User-defined signal 2
+-- @field SIGCONT Continue if stopped
+-- @field SIGSTOP Stop process
+-- @field SIGTSTP Stop typed at terminal
+-- @field SIGURG Urgent condition on socket (4.2BSD)
+-- @field SIGXCPU CPU time limit exceeded (4.2BSD)
+-- @field SIGXFSZ File size limit exceeded (4.2BSD)
+-- @field SIGIO I/O now possible (4.2BSD)
+-- @field SIGWINCH Window resize signal (4.3BSD, Sun)
+-- @see kill
+client.posix_signal = {
+    SIGHUP   = 1,
+    SIGINT   = 2,
+    SIGQUIT  = 3,
+    SIGILL   = 4,
+    SIGABRT  = 6,
+    SIGKILL  = 9,
+    SIGSEGV  = 11,
+    SIGALRM  = 14,
+    SIGTERM  = 15,
+    SIGUSR1  = 10,
+    SIGUSR2  = 12,
+    SIGCONT  = 18,
+    SIGSTOP  = 19,
+    SIGTSTP  = 20,
+    SIGURG   = 16,
+    SIGXCPU  = 24,
+    SIGXFSZ  = 25,
+    SIGIO    = 23,
+    SIGWINCH = 28,
+}
+
+
 --- Jump to the given client.
 -- Takes care of focussing the screen, the right tag, etc.
 --
