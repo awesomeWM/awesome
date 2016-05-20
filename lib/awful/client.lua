@@ -1208,6 +1208,14 @@ end
 --- Pause a client.
 -- This force the client to stop using power. This is the equivalent of `CTRL+Z`
 -- in a terminal.
+--
+-- To add this to your `rc.lua`, add to the `clientkeys` section:
+--
+--    awful.key({ modkey,           }, "z", function (c) c:pause() end,
+--              {description = "pause", group = "client"}),
+--    awful.key({ modkey, "Shift"   }, "z", function (c) c:continue() end,
+--              {description = "continue", group = "client"}),
+--
 -- @function client.pause
 -- @see client.continue
 function client.object.pause(self)
