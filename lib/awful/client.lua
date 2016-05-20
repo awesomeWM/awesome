@@ -1205,6 +1205,22 @@ function client.object.is_transient_for(self, c2)
     return nil
 end
 
+--- Pause a client.
+-- This force the client to stop using power. This is the equivalent of `CTRL+Z`
+-- in a terminal.
+-- @function client.pause
+-- @see client.continue
+function client.object.pause(self)
+    self:kill(client.posix_signal.SIGSTOP)
+end
+
+--- Restore a paused client.
+-- @function client.continue
+-- @see client.pause
+function client.object.continue(self)
+    self:kill(client.posix_signal.SIGCONT)
+end
+
 -- Register standards signals
 
 --- The last geometry when client was floating.
