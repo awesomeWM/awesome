@@ -14,6 +14,7 @@ return setmetatable({
     systray = require("wibox.widget.systray");
     textclock = require("wibox.widget.textclock");
     progressbar = require("wibox.widget.progressbar");
+    graph = require("wibox.widget.graph");
 }, {__call = function(_, args) return base.make_widget_declarative(args) end})
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
