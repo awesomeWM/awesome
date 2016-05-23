@@ -133,12 +133,14 @@ function imagebox:set_resize(allowed)
     self:emit_signal("widget::layout_changed")
 end
 
---- Returns a new imagebox
+--- Returns a new imagebox.
 -- Any other arguments will be passed to the clip shape function
 -- @param image the image to display, may be nil
 -- @param resize_allowed If false, the image will be clipped, else it will be resized
 --   to fit into the available space.
 -- @param clip_shape A `gears.shape` compatible function
+-- @treturn table A new `imagebox`
+-- @function wibox.widget.imagebox
 local function new(image, resize_allowed, clip_shape)
     local ret = base.make_widget()
 

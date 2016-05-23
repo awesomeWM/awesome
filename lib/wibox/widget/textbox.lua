@@ -228,7 +228,11 @@ function textbox:set_font(font)
     self:emit_signal("widget::layout_changed")
 end
 
--- Returns a new textbox
+--- Create a new textbox.
+-- @tparam[opt=""] string text The textbox content
+-- @tparam[opt=false] boolean ignore_markup Ignore the pango/HTML markup
+-- @treturn table A new textbox widget
+-- @function wibox.widget.textbox
 local function new(text, ignore_markup)
     local ret = base.make_widget()
 

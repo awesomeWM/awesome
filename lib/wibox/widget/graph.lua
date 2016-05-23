@@ -243,7 +243,8 @@ end
 --- Create a graph widget.
 -- @param args Standard widget() arguments. You should add width and height
 -- key to set graph geometry.
--- @return A graph widget.
+-- @return A new graph widget.
+-- @function wibox.widget.graph
 function graph.new(args)
     args = args or {}
 

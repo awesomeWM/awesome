@@ -199,6 +199,7 @@ end
 -- @param args Standard widget() arguments. You should add width and height
 -- key to set progressbar geometry.
 -- @return A progressbar widget.
+-- @function wibox.widget.progressbar
 function progressbar.new(args)
     args = args or {}
     local width = args.width or 100
