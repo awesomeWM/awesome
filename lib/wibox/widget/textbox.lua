@@ -18,6 +18,9 @@ local pairs = pairs
 
 local textbox = { mt = {} }
 
+--- The textbox font.
+-- @beautiful beautiful.font
+
 --- Set the DPI of a Pango layout
 local function setup_dpi(box, dpi)
     if box.dpi ~= dpi then

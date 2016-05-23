@@ -23,6 +23,14 @@ local base_size = nil
 local reverse = false
 local display_on_screen = "primary"
 
+--- The systray background color.
+-- @beautiful beautiful.bg_systray
+-- @param string The color (string like "#ff0000" only)
+
+--- The systray icon spacing.
+-- @beautiful beautiful.systray_icon_spacing
+-- @tparam[opt=0] integer The icon spacing
+
 local function should_display_on(s)
     if display_on_screen == "primary" then
         return s == capi.screen.primary
