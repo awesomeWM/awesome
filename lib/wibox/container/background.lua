@@ -123,7 +123,7 @@ function background:set_children(children)
 end
 
 --- Set the background to use.
---@DOC_wibox_widget_background_bg_EXAMPLE@
+--@DOC_wibox_container_background_bg_EXAMPLE@
 -- @param bg A color string, pattern or gradient (see `gears.color`)
 function background:set_bg(bg)
     if bg then
@@ -135,7 +135,7 @@ function background:set_bg(bg)
 end
 
 --- Set the foreground to use.
---@DOC_wibox_widget_background_fg_EXAMPLE@
+--@DOC_wibox_container_background_fg_EXAMPLE@
 -- @param fg A color string, pattern or gradient (see `gears.color`)
 function background:set_fg(fg)
     if fg then
@@ -149,7 +149,7 @@ end
 --- Set the background shape.
 --
 -- Any other arguments will be passed to the shape function
---@DOC_wibox_widget_background_shape_EXAMPLE@
+--@DOC_wibox_container_background_shape_EXAMPLE@
 -- @param shape A function taking a context, width and height as arguments
 function background:set_shape(shape, ...)
     self._shape = shape
@@ -176,7 +176,7 @@ function background:set_shape_border_color(fg)
 end
 
 --- When a `shape` is set, make sure nothing is drawn outside of it.
---@DOC_wibox_widget_background_clip_EXAMPLE@
+--@DOC_wibox_container_background_clip_EXAMPLE@
 -- @tparam boolean value If the shape clip is enable
 function background:set_shape_clip(value)
     self._shape_clip = value
