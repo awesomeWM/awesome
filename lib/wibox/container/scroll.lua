@@ -390,7 +390,7 @@ local function get_layout(dir, widget, fps, speed, extra_space, expand, max_size
     return ret
 end
 
---- Get a new horizontal scrolling layout.
+--- Get a new horizontal scrolling container.
 -- @param[opt] widget The widget that should be scrolled
 -- @param[opt=20] fps The number of frames per second
 -- @param[opt=10] speed The speed of the animation
@@ -404,7 +404,7 @@ function scroll.horizontal(widget, fps, speed, extra_space, expand, max_size, st
     return get_layout("h", widget, fps, speed, extra_space, expand, max_size, step_function, space_for_scrolling)
 end
 
---- Get a new vertical scrolling layout.
+--- Get a new vertical scrolling container.
 -- @param[opt] widget The widget that should be scrolled
 -- @param[opt=20] fps The number of frames per second
 -- @param[opt=10] speed The speed of the animation

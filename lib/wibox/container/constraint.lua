@@ -101,7 +101,8 @@ function constraint:reset()
     self:set_widget(nil)
 end
 
---- Returns a new constraint layout. This layout will constraint the size of a
+--- Returns a new constraint container.
+-- This container will constraint the size of a
 -- widget according to the strategy. Note that this will only work for layouts
 -- that respect the widget's size, eg. fixed layout. In layouts that don't
 -- (fully) respect widget's requested size, the inner widget still might get
@@ -111,6 +112,8 @@ end
 -- 'exact'.
 -- @param[opt] width The maximum width of the widget. nil for no limit.
 -- @param[opt] height The maximum height of the widget. nil for no limit.
+-- @treturn table A new constraint container
+-- @function wibox.container.constraint
 local function new(widget, strategy, width, height)
     local ret = base.make_widget()
 

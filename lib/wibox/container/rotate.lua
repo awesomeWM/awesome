@@ -108,11 +108,14 @@ function rotate:get_direction()
     return self.direction or "north"
 end
 
---- Returns a new rotate layout. A rotate layout rotates a given widget. Use
+--- Returns a new rotate container.
+-- A rotate container rotates a given widget. Use
 -- :set_widget() to set the widget and :set_direction() for the direction.
 -- The default direction is "north" which doesn't change anything.
 -- @param[opt] widget The widget to display.
 -- @param[opt] dir The direction to rotate to.
+-- @treturn table A new rotate container.
+-- @function wibox.container.rotate
 local function new(widget, dir)
     local ret = base.make_widget()
 

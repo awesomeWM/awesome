@@ -157,7 +157,7 @@ for _, v in pairs({ "left", "right", "top", "bottom" }) do
     end
 end
 
---- Returns a new margin layout.
+--- Returns a new margin container.
 -- @param[opt] widget A widget to use.
 -- @param[opt] left A margin to use on the left side of the widget.
 -- @param[opt] right A margin to use on the right side of the widget.
@@ -165,6 +165,8 @@ end
 -- @param[opt] bottom A margin to use on the bottom side of the widget.
 -- @param[opt] color A color for the margins.
 -- @param[opt] draw_empty whether or not to draw the margin when the content is empty
+-- @treturn table A new margin container
+-- @function wibox.container.margin
 local function new(widget, left, right, top, bottom, color, draw_empty)
     local ret = base.make_widget()
 

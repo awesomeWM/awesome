@@ -95,12 +95,15 @@ function mirror:get_reflection()
     return { horizontal = self.horizontal, vertical = self.vertical }
 end
 
---- Returns a new mirror layout. A mirror layout mirrors a given widget. Use
--- :set_widget() to set the widget and
--- :set_horizontal() and :set_vertical() for the direction.
+--- Returns a new mirror container.
+-- A mirror container mirrors a given widget. Use
+-- `:set_widget()` to set the widget and
+-- `:set_horizontal()` and `:set_vertical()` for the direction.
 -- horizontal and vertical are by default false which doesn't change anything.
 -- @param[opt] widget The widget to display.
 -- @param[opt] reflection A table describing the reflection to apply.
+-- @treturn table A new mirror container
+-- @function wibox.container.mirror
 local function new(widget, reflection)
     local ret = base.make_widget()
     ret.horizontal = false
