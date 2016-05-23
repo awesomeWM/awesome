@@ -13,7 +13,7 @@ return { create_wibox = function()
 
     -- Widgets that are aligned to the right
     local right_layout = wibox.layout.fixed.horizontal()
-    local textclock = awful.widget.textclock()
+    local textclock = wibox.widget.textclock()
     right_layout:add(textclock)
     right_layout:add(awful.widget.layoutbox(1))
 

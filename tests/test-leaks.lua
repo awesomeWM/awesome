@@ -63,7 +63,7 @@ collectable(wibox.layout.align.horizontal())
 -- Then some random widgets from awful
 collectable(awful.widget.launcher({ image = cairo.ImageSurface(cairo.Format.ARGB32, 20, 20), command = "bash" }))
 collectable(awful.widget.prompt())
-collectable(awful.widget.textclock())
+collectable(wibox.widget.textclock())
 collectable(awful.widget.layoutbox(1))
 
 -- Some widgets do things via timer.delayed_call
