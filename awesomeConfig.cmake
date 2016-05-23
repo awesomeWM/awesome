@@ -346,4 +346,14 @@ foreach(file ${AWESOME_ADDITIONAL_FILES})
 endforeach()
 #}}}
 
+# The examples coverage need to be done again after the configure_file has
+# inserted the additional code. Otherwise, the result will be off, rendering
+# the coverage useless as a tool to track untested code.
+if(GENERATE_DOC AND DO_COVERAGE)
+    message(STATUS "Running tests again with coverage")
+    set(USE_LCOV 1)
+
+    include(tests/examples/CMakeLists.txt)
+endif()
+
 # vim: filetype=cmake:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80:foldmethod=marker
