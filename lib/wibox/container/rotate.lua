@@ -1,4 +1,6 @@
 ---------------------------------------------------------------------------
+-- A container rotating the conained widget by 90 degrees.
+--
 -- @author Uli Schlachter
 -- @copyright 2010 Uli Schlachter
 -- @release @AWESOME_VERSION@
@@ -85,8 +87,16 @@ function rotate:reset()
     self:set_widget(nil)
 end
 
---- Set the direction of this rotating layout. Valid values are "north", "east",
--- "south" and "west". On an invalid value, this function will throw an error.
+--- Set the direction of this rotating container.
+-- Valid values are:
+--
+-- * *north*
+-- * *east*
+-- * *south*
+-- * *north*
+--
+--@DOC_wibox_container_rotate_angle_EXAMPLE@
+-- @tparam string dir The direction
 function rotate:set_direction(dir)
     local allowed = {
         north = true,
