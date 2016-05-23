@@ -230,7 +230,7 @@ end
 --
 -- @tparam[opt=2] integer level Level for `debug.getinfo(level, "S")`.
 --   Typically 2 or 3.
--- @treturn string The module name, e.g. "wibox.widget.background".
+-- @treturn string The module name, e.g. "wibox.container.background".
 function object.modulename(level)
     return debug.getinfo(level, "S").source:gsub(".*/lib/", ""):gsub("/", "."):gsub("%.lua", "")
 end

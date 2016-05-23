@@ -17,7 +17,7 @@ Code:
         { -- Add a background color/pattern for my_third_widget
               my_third_widget,
               bg     = beautiful.bg_focus,
-              widget = wibox.widget.background,
+              widget = wibox.container.background,
         },
         layout = wibox.layout.fixed.horizontal,
     }
@@ -34,7 +34,7 @@ declarative layout, or `nil`.
 * Create a `wibox.widget.textbox` with various properties
 * Force the textbox size using `wibox.layout.constraint`
 * Add a margin around another textbox
-* Add a `wibox.widget.background` (for visualization)
+* Add a `wibox.container.background` (for visualization)
 
 Code:
 
@@ -48,7 +48,7 @@ Code:
                     widget = wibox.widget.textbox
                 },
                 bg     = "#ff0000",
-                widget = wibox.widget.background,
+                widget = wibox.container.background,
             },
             width    = 300,
             strategy = "min",
@@ -62,13 +62,13 @@ Code:
                     widget = wibox.widget.textbox
                 },
                 bg     = "#0000ff",
-                widget = wibox.widget.background
+                widget = wibox.container.background
             },
             left   = 10,
             right  = 10,
             top    = 1,
             bottom = 2,
-            layout = wibox.layout.margin
+            layout = wibox.container.margin
         },
         layout = wibox.layout.fixed.horizontal,
     }

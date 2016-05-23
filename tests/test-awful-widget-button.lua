@@ -30,14 +30,14 @@ table.insert(steps, function()
                 widget = wibox.widget.textbox,
             },
             bg     = "#ff0000",
-            widget = wibox.widget.background
+            widget = wibox.container.background
         },
         {
             {
                 widget = button,
             },
             bg     = "#ff00ff",
-            widget = wibox.widget.background
+            widget = wibox.container.background
         },
         {
             {
@@ -45,7 +45,7 @@ table.insert(steps, function()
                 widget = wibox.widget.textbox,
             },
             bg     = "#0000ff",
-            widget = wibox.widget.background
+            widget = wibox.container.background
         },
         layout = wibox.layout.flex.vertical
     }

@@ -60,9 +60,9 @@ function common.list_update(w, buttons, label, data, objects)
         else
             ib = wibox.widget.imagebox()
             tb = wibox.widget.textbox()
-            bgb = wibox.widget.background()
-            tbm = wibox.layout.margin(tb, dpi(4), dpi(4))
-            ibm = wibox.layout.margin(ib, dpi(4))
+            bgb = wibox.container.background()
+            tbm = wibox.container.margin(tb, dpi(4), dpi(4))
+            ibm = wibox.container.margin(ib, dpi(4))
             l = wibox.layout.fixed.horizontal()
 
             -- All of this is added in a fixed widget
