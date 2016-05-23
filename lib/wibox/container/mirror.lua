@@ -15,7 +15,7 @@ local matrix = require("gears.matrix")
 
 local mirror = { mt = {} }
 
---- Layout this layout
+-- Layout this layout
 function mirror:layout(_, width, height)
     if not self.widget then return end
 
@@ -36,7 +36,7 @@ function mirror:layout(_, width, height)
     return { base.place_widget_via_matrix(self.widget, m, width, height) }
 end
 
---- Fit this layout into the given area
+-- Fit this layout into the given area
 function mirror:fit(context, ...)
     if not self.widget then
         return 0, 0

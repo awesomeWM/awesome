@@ -34,7 +34,7 @@ local function setup_layout(box, width, height, dpi)
     setup_dpi(box, dpi)
 end
 
---- Draw the given textbox on the given cairo context in the given geometry
+-- Draw the given textbox on the given cairo context in the given geometry
 function textbox:draw(context, cr, width, height)
     setup_layout(self, width, height, context.dpi)
     cr:update_layout(self._layout)
@@ -57,7 +57,7 @@ local function do_fit_return(self)
     return logical.width, logical.height
 end
 
---- Fit the given textbox
+-- Fit the given textbox
 function textbox:fit(context, width, height)
     setup_layout(self, width, height, context.dpi)
     return do_fit_return(self)

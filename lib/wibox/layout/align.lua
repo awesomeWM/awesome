@@ -14,7 +14,7 @@ local base = require("wibox.widget.base")
 
 local align = {}
 
---- Calculate the layout of an align layout.
+-- Calculate the layout of an align layout.
 -- @param context The context in which we are drawn.
 -- @param width The available width.
 -- @param height The available height.
@@ -180,7 +180,7 @@ function align:set_children(children)
     self:set_third(children[3])
 end
 
---- Fit the align layout into the given space. The align layout will
+-- Fit the align layout into the given space. The align layout will
 -- ask for the sum of the sizes of its sub-widgets in its direction
 -- and the largest sized sub widget in the other direction.
 -- @param context The context in which we are fit.

@@ -15,7 +15,7 @@ local unpack = unpack or table.unpack -- luacheck: globals unpack (compatibility
 
 local imagebox = { mt = {} }
 
---- Draw an imagebox with the given cairo context in the given geometry.
+-- Draw an imagebox with the given cairo context in the given geometry.
 function imagebox:draw(_, cr, width, height)
     if not self._image then return end
     if width == 0 or height == 0 then return end
@@ -40,7 +40,7 @@ function imagebox:draw(_, cr, width, height)
     cr:paint()
 end
 
---- Fit the imagebox into the given geometry
+-- Fit the imagebox into the given geometry
 function imagebox:fit(_, width, height)
     if not self._image then
         return 0, 0

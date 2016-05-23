@@ -24,7 +24,7 @@ local function transform(layout, width, height)
     return width, height
 end
 
---- Layout this layout
+-- Layout this layout
 function rotate:layout(_, width, height)
     if not self.widget or not self.widget.visible then
         return
@@ -49,7 +49,7 @@ function rotate:layout(_, width, height)
     return { base.place_widget_via_matrix(self.widget, m, transform(self, width, height)) }
 end
 
---- Fit this layout into the given area
+-- Fit this layout into the given area
 function rotate:fit(context, width, height)
     if not self.widget then
         return 0, 0

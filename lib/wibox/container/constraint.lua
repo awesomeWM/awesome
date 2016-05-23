@@ -13,14 +13,14 @@ local math = math
 
 local constraint = { mt = {} }
 
---- Layout a constraint layout
+-- Layout a constraint layout
 function constraint:layout(_, width, height)
     if self.widget then
         return { base.place_widget_at(self.widget, 0, 0, width, height) }
     end
 end
 
---- Fit a constraint layout into the given space
+-- Fit a constraint layout into the given space
 function constraint:fit(context, width, height)
     local w, h
     if self.widget then

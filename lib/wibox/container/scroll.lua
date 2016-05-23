@@ -140,7 +140,7 @@ local function calculate_info(self, context, width, height)
     return result
 end
 
---- Draw this scrolling layout.
+-- Draw this scrolling layout.
 -- @param context The context in which we are drawn.
 -- @param cr The cairo context to draw to.
 -- @param width The available width.
@@ -170,7 +170,7 @@ function scroll:draw(context, cr, width, height)
     end
 end
 
---- Fit the scroll layout into the given space.
+-- Fit the scroll layout into the given space.
 -- @param context The context in which we are fit.
 -- @param width The available width.
 -- @param height The available height.
