@@ -1,4 +1,6 @@
 ---------------------------------------------------------------------------
+--
+--@DOC_wibox_container_defaults_mirror_EXAMPLE@
 -- @author dodo
 -- @copyright 2012 dodo
 -- @release @AWESOME_VERSION@
