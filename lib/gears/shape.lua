@@ -35,6 +35,8 @@ local module = {}
 -- @tparam number height The rectangle height
 -- @tparam number radius the corner radius
 function module.rounded_rect(cr, width, height, radius)
+    radius = radius or 10
+
     if width / 2 < radius then
         radius = width / 2
     end
