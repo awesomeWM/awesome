@@ -304,6 +304,9 @@ if(GENERATE_DOC)
     # The file is a valid CMakeLists.txt and can be executed directly if only
     # the image artefacts are needed.
     include(tests/examples/CMakeLists.txt)
+
+    # Generate the widget lists
+    include(docs/widget_lists.cmake)
 endif()
 
 # {{{ Configure files
@@ -342,7 +345,7 @@ set(AWESOME_ADDITIONAL_FILES
 foreach(file ${AWESOME_ADDITIONAL_FILES})
     configure_file(${SOURCE_DIR}/${file}
                    ${BUILD_DIR}/${file}
-                   COPYONLY)
+                   @ONLY)
 endforeach()
 #}}}
 

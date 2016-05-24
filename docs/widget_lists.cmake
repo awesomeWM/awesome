@@ -1,0 +1,48 @@
+# This file gather the different default example screenshots and create an HTML
+# table. Those tables are re-used in the official documentation.
+
+# Ldoc wont parse the HTML content and discount tables are disabled, so here is
+# some raw HTML
+function(add_to_table name namespace group current_table new_table)
+
+    set(${new_table} "${current_table}\n\
+<tr>\n\
+ <td>
+  <a href='../classes/${namespace}${name}.html'>${namespace}${name}</a>
+ </td>\n\
+ <td><img src='../images/AUTOGEN_wibox_${group}_defaults_${name}.svg' /></td>\n\
+</tr>\n\
+" PARENT_SCOPE)
+endfunction()
+
+# Use the generated "defaults" images to build a list
+function(generate_widget_list name)
+    file(GLOB ex_files RELATIVE "${SOURCE_DIR}/tests/examples/wibox/${name}/defaults"
+    "${SOURCE_DIR}/tests/examples/wibox/${name}/defaults/*")
+
+    # Add the table header
+    set(MY_LIST "<table class='widget_list' border=1>\n\
+ <tr style='font-weight: bold;'>\n\
+  <th align='center'>Name</th>\n\
+  <th align='center'>Example</th>\n\
+ </tr>"
+    )
+
+    # Loop all examples (and assume an image exist for them)
+    foreach(ex_file_name ${ex_files})
+        string(REGEX REPLACE "\\.lua" "" ex_file_name ${ex_file_name})
+
+        if(NOT ${ex_file_name} STREQUAL "template")
+            add_to_table(${ex_file_name} "wibox.${name}." "${name}" "${MY_LIST}" MY_LIST)
+        endif()
+    endforeach()
+
+    # Add the table footer
+    set(MY_LIST "${MY_LIST}</table>\n\n")
+
+    set(DOC_${name}_WIDGET_LIST ${MY_LIST} PARENT_SCOPE)
+endfunction()
+
+generate_widget_list( "container" )
+generate_widget_list( "layout"    )
+generate_widget_list( "widget"    )

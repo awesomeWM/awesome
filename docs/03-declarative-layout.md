@@ -3,7 +3,35 @@
 This system provide an alternative to the system used in Awesome 3.5 and is
 inspired by the one once used by Awesome 3.2-3.4 and Qt QML system.
 
-## A simple layout
+## The default widgets
+
+### Widgets
+
+Awesome provide 2 collections of widgets:
+
+ * `wibox.widget`: Generic widgets, containers and layouts
+ * `awful.widget`: The Awesome specific widgets
+
+
+@DOC_widget_WIDGET_LIST@
+
+### Containers
+
+Containers are widget wrapping another widget. It can be used to add decorations
+or to modify the content of the child widget.
+
+@DOC_container_WIDGET_LIST@
+
+### Layouts
+
+Layouts are collection of children widgets. They place them according to rules
+and usually provide some options.
+
+@DOC_layout_WIDGET_LIST@
+
+## Placing widgets
+
+### A simple layout
 
 * Display `my_first_widget` only on screen one
 * Add a background color to `my_third_widget`
@@ -29,7 +57,7 @@ logic expression can be used as long as it return a valid widget, or a
 declarative layout, or `nil`.
 
 
-## Define widgets inline and place them
+### Define widgets inline and place them
 
 * Create a `wibox.widget.textbox` with various properties
 * Force the textbox size using `wibox.layout.constraint`
@@ -78,7 +106,7 @@ Result:
 ![Example2 screenshot](../images/widgetlayout1.png)
 
 
-## Use an `wibox.layout.align` layout
+### Use an `wibox.layout.align` layout
 The `wibox.layout.align` is a little different. While most layouts will
 ignore any `nil` lines, the `align` layout rely on them so `left`, `middle`
 and `right` can be defined
@@ -94,7 +122,7 @@ Code:
 
 
 
-## Define new widgets
+### Define new widgets
 
 New trivial widgets can be created directly in the layout declaration. Here
 is a simple circle widget:
@@ -126,7 +154,7 @@ For more information about how to draw widgets, refer to the `Cairo` api:
 * [Pango text](https://developer.gnome.org/pango/stable/)
 
 
-## Externally defined widgets and layouts
+### Externally defined widgets and layouts
 
 This is useful when the widget is provided by an external module or when it
 requires complex manipulations which would make the declaration unreadable.
@@ -146,7 +174,7 @@ Code:
 
 
 
-## Accessing widgets
+### Accessing widgets
 
 For each widget or container, it is possible to add an `identifier` attribute
 so the widget can be accessed later.
@@ -188,7 +216,7 @@ Code:
 
 
 
-## Extending the system
+### Extending the system
 
 This system is very flexible. Each section attribute (the entries with string
 keys) is directly linked to the layout or widget API. When setting the
@@ -221,7 +249,7 @@ used directly in the layout declaration. This example will update the textbox
 every 3 seconds to show the CPU usage.
 
 
-## Handling sections
+### Handling sections
 
 The system allows sections to be defined externally, then composed into
 the final layout declaration. Here is an example re-using one of the above
