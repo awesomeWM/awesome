@@ -1,6 +1,7 @@
 ---------------------------------------------------------------------------
 -- A container rotating the conained widget by 90 degrees.
 --
+--@DOC_wibox_container_defaults_rotate_EXAMPLE@
 -- @author Uli Schlachter
 -- @copyright 2010 Uli Schlachter
 -- @release @AWESOME_VERSION@
