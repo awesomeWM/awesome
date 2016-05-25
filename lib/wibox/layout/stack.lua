@@ -8,6 +8,7 @@
 -- The indices are going from 1 (the bottom of the stack) up to the top of
 -- the stack. The order can be changed either using `:swap` or `:raise`.
 --
+--@DOC_wibox_layout_defaults_stack_EXAMPLE@
 -- @author Emmanuel Lepage Vallee
 -- @copyright 2016 Emmanuel Lepage Vallee
 -- @release @AWESOME_VERSION@
