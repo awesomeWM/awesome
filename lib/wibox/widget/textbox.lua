@@ -1,4 +1,6 @@
 ---------------------------------------------------------------------------
+--
+--@DOC_wibox_widget_defaults_textbox_EXAMPLE@
 -- @author Uli Schlachter
 -- @author dodo
 -- @copyright 2010, 2011 Uli Schlachter, dodo
