@@ -2,6 +2,8 @@
 --- A layout filling all the available space. Each widget is assigned a
 -- ratio (percentage) of the total space. Multiple methods are available to
 -- ajust this ratio.
+--
+--@DOC_wibox_layout_defaults_ratio_EXAMPLE@
 -- @author Emmanuel Lepage Vallee
 -- @copyright 2016 Emmanuel Lepage Vallee
 -- @release @AWESOME_VERSION@
