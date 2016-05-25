@@ -1,6 +1,7 @@
 ---------------------------------------------------------------------------
 --- A graph widget.
 --
+--@DOC_wibox_widget_defaults_graph_EXAMPLE@
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2009 Julien Danjou
 -- @release @AWESOME_VERSION@
