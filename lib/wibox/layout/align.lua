@@ -1,4 +1,6 @@
 ---------------------------------------------------------------------------
+--
+--@DOC_wibox_layout_defaults_align_EXAMPLE@
 -- @author Uli Schlachter
 -- @copyright 2010 Uli Schlachter
 -- @release @AWESOME_VERSION@
