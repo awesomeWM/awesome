@@ -494,7 +494,13 @@ function base.widget:setup(args)
         -- Avoid being dropped by wibox metatable -> drawin
         rawset(self, id, w)
     end
-    rawset(self, "_by_id", ids)
+
+    if rawget(self, "_private") then
+        self._private.by_id = ids
+    else
+        rawset(self, "_by_id", ids)
+    end
+
     rawset(self, "get_children_by_id", get_children_by_id)
 end
 
@@ -514,7 +520,13 @@ function base.make_widget_declarative(args)
     local mt = getmetatable(w) or {}
     local orig_string = tostring(w)
 
-    rawset(w, "_by_id", ids)
+
+    if rawget(w, "_private") then
+        w._private.by_id = ids
+    else
+        rawset(w, "_by_id", ids)
+    end
+
     rawset(w, "get_children_by_id", get_children_by_id)
 
     mt.__tostring = function()
