@@ -143,12 +143,12 @@ local widget_dependencies = setmetatable({}, { __mode = "kv" })
 -- Get the cache of the given kind for this widget. This returns a gears.cache
 -- that calls the callback of kind `kind` on the widget.
 local function get_cache(widget, kind)
-    if not widget._widget_caches[kind] then
-        widget._widget_caches[kind] = cache.new(function(...)
+    if not widget._private.widget_caches[kind] then
+        widget._private.widget_caches[kind] = cache.new(function(...)
             return protected_call(widget[kind], widget, ...)
         end)
     end
-    return widget._widget_caches[kind]
+    return widget._private.widget_caches[kind]
 end
 
 -- Special value to skip the dependency recording that is normally done by
@@ -177,7 +177,7 @@ local clear_caches
 function clear_caches(widget)
     local deps = widget_dependencies[widget] or {}
     widget_dependencies[widget] = {}
-    widget._widget_caches = {}
+    widget._private.widget_caches = {}
     for w in pairs(deps) do
         clear_caches(w)
     end
@@ -424,7 +424,11 @@ end
 
 -- Only available when the declarative system is used
 local function get_children_by_id(self, name)
-    return self._by_id[name] or {}
+    if rawget(self, "_private") then
+        return self._private.by_id[name] or {}
+    else
+        return rawget(self, "_by_id")[name] or {}
+    end
 end
 
 --- Set a declarative widget hierarchy description.
@@ -503,6 +507,9 @@ function base.make_widget(proxy, widget_name, args)
         ret:emit_signal("widget::redraw_needed")
     end)
 
+    -- Create a table used to store the widgets internal data
+    rawset(ret, "_private", {})
+
     -- No buttons yet
     ret.widget_buttons = {}
 
@@ -513,7 +520,7 @@ function base.make_widget(proxy, widget_name, args)
     ret.opacity = 1
 
     -- Differentiate tables from widgets
-    ret.is_widget = true
+    rawset(ret, "is_widget", true)
 
     -- Size is not restricted/forced
     ret._forced_width = nil
@@ -528,12 +535,12 @@ function base.make_widget(proxy, widget_name, args)
     end)
 
     if proxy then
-        ret.fit = function(_, context, width, height)
+        rawset(ret, "fit", function(_, context, width, height)
             return base.fit_widget(ret, context, proxy, width, height)
-        end
-        ret.layout = function(_, _, width, height)
+        end)
+        rawset(ret, "layout", function(_, _, width, height)
             return { base.place_widget_at(proxy, 0, 0, width, height) }
-        end
+        end)
         proxy:connect_signal("widget::layout_changed", function()
             ret:emit_signal("widget::layout_changed")
         end)
@@ -550,11 +557,11 @@ function base.make_widget(proxy, widget_name, args)
 
     -- Add functions
     for k, v in pairs(base.widget) do
-        ret[k] = v
+        rawset(ret, k, v)
     end
 
     -- Add __tostring method to metatable.
-    ret.widget_name = widget_name or object.modulename(3)
+    rawset(ret, "widget_name", widget_name or object.modulename(3))
     local mt = getmetatable(ret) or {}
     local orig_string = tostring(ret)
     mt.__tostring = function()
