@@ -249,7 +249,7 @@ function menu:exec(num, opts)
             self.active_child:hide()
         end
         self.active_child = self.child[num]
-        if not self.active_child.visible then
+        if not self.active_child:get_visible() then
             self.active_child:show()
         end
     elseif type(cmd) == "string" then
@@ -431,7 +431,7 @@ function menu:delete(num)
     local item = self.items[num]
     if not item then return end
     item.widget:disconnect_signal("mouse::enter", item._mouse)
-    item.widget.visible = false
+    item.widget:set_visible(false)
     table.remove(self.items, num)
     if self.sel == num then
         self:item_leave(self.sel)

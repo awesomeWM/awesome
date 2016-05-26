@@ -37,12 +37,19 @@ end
 -- @tparam boolean b Wether the widget is visible at all
 -- @function set_visible
 function base.widget:set_visible(b)
-    if b ~= self.visible then
-        self.visible = b
+    if b ~= self._private.visible then
+        self._private.visible = b
         self:emit_signal("widget::layout_changed")
         -- In case something ignored fit and drew the widget anyway
         self:emit_signal("widget::redraw_needed")
     end
+end
+
+--- Get if the widget is visible.
+-- @treturn boolean If the widget is visible
+-- @function get_visible
+function base.widget:get_visible()
+    return self._private.visible or false
 end
 
 --- Set a widget's opacity
@@ -221,7 +228,7 @@ end
 function base.fit_widget(parent, context, widget, width, height)
     record_dependency(parent, widget)
 
-    if not widget.visible then
+    if not widget._private.visible then
         return 0, 0
     end
 
@@ -266,7 +273,7 @@ end
 function base.layout_widget(parent, context, widget, width, height)
     record_dependency(parent, widget)
 
-    if not widget.visible then
+    if not widget._private.visible then
         return
     end
 
@@ -539,7 +546,7 @@ function base.make_widget(proxy, widget_name, args)
     ret._private.widget_buttons = {}
 
     -- Widget is visible
-    ret.visible = true
+    ret._private.visible = true
 
     -- Widget is fully opaque
     ret._private.opacity = 1

@@ -29,7 +29,7 @@ end
 
 -- Layout this layout
 function rotate:layout(_, width, height)
-    if not self.widget or not self.widget.visible then
+    if not self.widget or not self.widget._private.visible then
         return
     end
 

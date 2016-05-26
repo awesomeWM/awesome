@@ -22,7 +22,7 @@ local background = { mt = {} }
 
 -- Draw this widget
 function background:draw(context, cr, width, height)
-    if not self._private.widget or not self._private.widget.visible then
+    if not self._private.widget or not self._private.widget:get_visible() then
         return
     end
 
@@ -167,7 +167,7 @@ function background:get_fg()
     return self._private.foreground
 end
 
---- The background shape.
+--- The background shap     e.
 --
 -- Use `set_shape` to set additional shape paramaters.
 --

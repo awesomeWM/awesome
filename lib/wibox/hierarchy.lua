@@ -259,7 +259,7 @@ end
 -- @param cr The cairo context that is used for drawing.
 function hierarchy:draw(context, cr)
     local widget = self:get_widget()
-    if not widget.visible then
+    if not widget._private.visible then
         return
     end
 
