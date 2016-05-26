@@ -14,6 +14,7 @@ local color = require("gears.color")
 local surface = require("gears.surface")
 local beautiful = require("beautiful")
 local cairo = require("lgi").cairo
+local util = require("awful.util")
 local setmetatable = setmetatable
 local type = type
 local unpack = unpack or table.unpack -- luacheck: globals unpack (compatibility with Lua 5.1)
@@ -268,11 +269,7 @@ local function new(widget, bg, shape)
         enable_properties = true,
     })
 
-    for k, v in pairs(background) do
-        if type(v) == "function" then
-            ret[k] = v
-        end
-    end
+    util.table.crush(ret, background, true)
 
     ret._private.shape = shape
 
@@ -287,6 +284,8 @@ function background.mt:__call(...)
 end
 
 --@DOC_widget_COMMON@
+
+--@DOC_object_COMMON@
 
 return setmetatable(background, background.mt)
 
