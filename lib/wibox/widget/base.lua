@@ -112,7 +112,7 @@ local function digg_children(ret, tlw)
     end
 end
 
---- Get all direct and indirect children widgets
+--- Get all direct and indirect children widgets.
 -- This will scan all containers recursively to find widgets
 -- Warning: This method it prone to stack overflow id the widget, or any of its
 -- children, contain (directly or indirectly) itself.
@@ -124,7 +124,7 @@ function base.widget:get_all_children()
     return ret
 end
 
---- Get a widex index
+--- Get a widex index.
 -- @param widget The widget to look for
 -- @param[opt] recursive Also check sub-widgets
 -- @param[opt] ... Aditional widgets to add at the end of the "path"
