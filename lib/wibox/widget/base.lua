@@ -50,10 +50,17 @@ end
 -- transparent while 1 is fully opaque.
 -- @function set_opacity
 function base.widget:set_opacity(o)
-    if o ~= self.opacity then
-        self.opacity = o
+    if o ~= self._private.opacity then
+        self._private.opacity = o
         self:emit_signal("widget::redraw")
     end
+end
+
+--- Get the widget opacity.
+-- @treturn number The opacity (between 0 and 1)
+-- @function get_opacity
+function base.widget:get_opacity()
+    return self._private.opacity
 end
 
 --- Set the widget's width
@@ -535,7 +542,7 @@ function base.make_widget(proxy, widget_name, args)
     ret.visible = true
 
     -- Widget is fully opaque
-    ret.opacity = 1
+    ret._private.opacity = 1
 
     -- Differentiate tables from widgets
     rawset(ret, "is_widget", true)

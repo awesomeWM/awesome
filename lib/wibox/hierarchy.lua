@@ -272,7 +272,7 @@ function hierarchy:draw(context, cr)
 
     -- Draw if needed
     if not empty_clip(cr) then
-        local opacity = widget.opacity
+        local opacity = widget:get_opacity()
         local function call(func, extra_arg1, extra_arg2)
             if not func then return end
             if not extra_arg2 then
