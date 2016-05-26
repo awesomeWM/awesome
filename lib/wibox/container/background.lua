@@ -23,34 +23,34 @@ local background = { mt = {} }
 
 -- Draw this widget
 function background:draw(context, cr, width, height)
-    if not self.widget or not self.widget.visible then
+    if not self._private.widget or not self._private.widget.visible then
         return
     end
 
     -- Keep the shape path in case there is a border
-    self._path = nil
+    self._private.path = nil
 
-    if self._shape then
+    if self._private.shape then
         -- Only add the offset if there is something to draw
-        local offset = ((self._shape_border_width and self._shape_border_color)
-            and self._shape_border_width or 0) / 2
+        local offset = ((self._private.shape_border_width and self._private.shape_border_color)
+            and self._private.shape_border_width or 0) / 2
 
         cr:translate(offset, offset)
-        self._shape(cr, width - 2*offset, height - 2*offset, unpack(self._shape_args or {}))
+        self._private.shape(cr, width - 2*offset, height - 2*offset, unpack(self._private.shape_args or {}))
         cr:translate(-offset, -offset)
-        self._path = cr:copy_path()
+        self._private.path = cr:copy_path()
         cr:clip()
     end
 
-    if self.background then
-        cr:set_source(self.background)
+    if self._private.background then
+        cr:set_source(self._private.background)
         cr:paint()
     end
-    if self.bgimage then
-        if type(self.bgimage) == "function" then
-            self.bgimage(context, cr, width, height,unpack(self.bgimage_args))
+    if self._private.bgimage then
+        if type(self._private.bgimage) == "function" then
+            self._private.bgimage(context, cr, width, height,unpack(self._private.bgimage_args))
         else
-            local pattern = cairo.Pattern.create_for_surface(self.bgimage)
+            local pattern = cairo.Pattern.create_for_surface(self._private.bgimage)
             cr:set_source(pattern)
             cr:paint()
         end
@@ -61,43 +61,43 @@ end
 -- Draw the border
 function background:after_draw_children(_, cr)
     -- Draw the border
-    if self._path and self._shape_border_width and self._shape_border_width > 0 then
-        cr:append_path(self._path)
-        cr:set_source(color(self._shape_border_color or self.foreground or beautiful.fg_normal))
+    if self._private.path and self._private.shape_border_width and self._private.shape_border_width > 0 then
+        cr:append_path(self._private.path)
+        cr:set_source(color(self._private.shape_border_color or self._private.foreground or beautiful.fg_normal))
 
-        cr:set_line_width(self._shape_border_width)
+        cr:set_line_width(self._private.shape_border_width)
         cr:stroke()
-        self._path = nil
+        self._private.path = nil
     end
 end
 
 -- Prepare drawing the children of this widget
 function background:before_draw_children(_, cr)
-    if self.foreground then
-        cr:set_source(self.foreground)
+    if self._private.foreground then
+        cr:set_source(self._private.foreground)
     end
 
     -- Clip the shape
-    if self._path and self._shape_clip then
-        cr:append_path(self._path)
+    if self._private.path and self._private.shape_clip then
+        cr:append_path(self._private.path)
         cr:clip()
     end
 end
 
 -- Layout this widget
 function background:layout(_, width, height)
-    if self.widget then
-        return { base.place_widget_at(self.widget, 0, 0, width, height) }
+    if self._private.widget then
+        return { base.place_widget_at(self._private.widget, 0, 0, width, height) }
     end
 end
 
 -- Fit this widget into the given area
 function background:fit(context, width, height)
-    if not self.widget then
+    if not self._private.widget then
         return 0, 0
     end
 
-    return base.fit_widget(self, context, self.widget, width, height)
+    return base.fit_widget(self, context, self._private.widget, width, height)
 end
 
 --- Set the widget that is drawn on top of the background
@@ -107,14 +107,14 @@ function background:set_widget(widget)
     if widget then
         base.check_widget(widget)
     end
-    self.widget = widget
+    self._private.widget = widget
     self:emit_signal("widget::layout_changed")
 end
 
 -- Get children element
 -- @treturn table The children
 function background:get_children()
-    return {self.widget}
+    return {self._private.widget}
 end
 
 -- Replace the layout children
@@ -129,9 +129,9 @@ end
 -- @param bg A color string, pattern or gradient (see `gears.color`)
 function background:set_bg(bg)
     if bg then
-        self.background = color(bg)
+        self._private.background = color(bg)
     else
-        self.background = nil
+        self._private.background = nil
     end
     self:emit_signal("widget::redraw_needed")
 end
@@ -141,9 +141,9 @@ end
 -- @param fg A color string, pattern or gradient (see `gears.color`)
 function background:set_fg(fg)
     if fg then
-        self.foreground = color(fg)
+        self._private.foreground = color(fg)
     else
-        self.foreground = nil
+        self._private.foreground = nil
     end
     self:emit_signal("widget::redraw_needed")
 end
@@ -154,8 +154,8 @@ end
 --@DOC_wibox_container_background_shape_EXAMPLE@
 -- @param shape A function taking a context, width and height as arguments
 function background:set_shape(shape, ...)
-    self._shape = shape
-    self._shape_args = {...}
+    self._private.shape = shape
+    self._private.shape_args = {...}
     self:emit_signal("widget::redraw_needed")
 end
 
@@ -164,16 +164,16 @@ end
 -- See `wibox.container.background.set_shape` for an usage example.
 -- @tparam number width The border width
 function background:set_shape_border_width(width)
-    self._shape_border_width = width
+    self._private.shape_border_width = width
     self:emit_signal("widget::redraw_needed")
 end
 
 --- When a `shape` is set, also draw a border.
 --
 -- See `wibox.container.background.set_shape` for an usage example.
--- @param[opt=self.foreground] fg The border color, pattern or gradient
+-- @param[opt=self._private.foreground] fg The border color, pattern or gradient
 function background:set_shape_border_color(fg)
-    self._shape_border_color = fg
+    self._private.shape_border_color = fg
     self:emit_signal("widget::redraw_needed")
 end
 
@@ -181,7 +181,7 @@ end
 --@DOC_wibox_container_background_clip_EXAMPLE@
 -- @tparam boolean value If the shape clip is enable
 function background:set_shape_clip(value)
-    self._shape_clip = value
+    self._private.shape_clip = value
     self:emit_signal("widget::redraw_needed")
 end
 
@@ -190,8 +190,8 @@ end
 -- as arguments. Any other arguments passed to this method will be appended.
 -- @param image A background image or a function
 function background:set_bgimage(image, ...)
-    self.bgimage = type(image) == "function" and image or surface.load(image)
-    self.bgimage_args = {...}
+    self._private.bgimage = type(image) == "function" and image or surface.load(image)
+    self._private.bgimage_args = {...}
     self:emit_signal("widget::redraw_needed")
 end
 
@@ -212,7 +212,7 @@ local function new(widget, bg, shape)
         end
     end
 
-    ret._shape = shape
+    ret._private.shape = shape
 
     ret:set_widget(widget)
     ret:set_bg(bg)
