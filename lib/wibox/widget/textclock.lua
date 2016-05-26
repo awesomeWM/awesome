@@ -33,13 +33,13 @@ function textclock.new(format, timeout)
 
     local w = textbox()
     local t
-    function w._textclock_update_cb()
+    function w._private.textclock_update_cb()
         w:set_markup(DateTime.new_now_local():format(format))
         t.timeout = calc_timeout(timeout)
         t:again()
         return true -- Continue the timer
     end
-    t = timer.weak_start_new(timeout, w._textclock_update_cb)
+    t = timer.weak_start_new(timeout, w._private.textclock_update_cb)
     t:emit_signal("timeout")
     return w
 end
@@ -47,6 +47,10 @@ end
 function textclock.mt:__call(...)
     return textclock.new(...)
 end
+
+--@DOC_widget_COMMON@
+
+--@DOC_object_COMMON@
 
 return setmetatable(textclock, textclock.mt)
 
