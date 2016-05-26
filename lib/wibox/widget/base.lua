@@ -75,11 +75,22 @@ end
 -- default mechanism of calling the `:fit` method. A number overrides the result
 -- from `:fit`.
 -- @function set_width
-function base.widget:set_width(s)
-    if s ~= self._forced_width then
-        self._forced_width = s
+function base.widget:set_forced_width(s)
+    if s ~= self._private.forced_width then
+        self._private.forced_width = s
         self:emit_signal("widget::layout_changed")
     end
+end
+
+--- Get the widget forced width.
+-- Note that widgets instances can be placed at different places simultaneously,
+-- therefore, they can have multiple width and width simultaneously. If there
+-- is no forced size, then the only way to get the widget actual size is when
+-- there is a `mouse::enter`, `mouse::leave` or button events.
+-- @treturn nil|number The forced width (nil if automatic)
+-- @function get_forced_widget
+function base.widget:get_forced_width()
+    return self._private.forced_width
 end
 
 --- Set the widget's height
@@ -87,11 +98,22 @@ end
 -- default mechanism of calling the `:fit` method. A number overrides the result
 -- from `:fit`.
 -- @function set_height
-function base.widget:set_height(s)
-    if s ~= self._forced_height then
-        self._forced_height = s
+function base.widget:set_forced_height(s)
+    if s ~= self._private.forced_height then
+        self._private.forced_height = s
         self:emit_signal("widget::layout_changed")
     end
+end
+
+--- Get the widget forced height.
+-- Note that widgets instances can be placed at different places simultaneously,
+-- therefore, they can have multiple width and height simultaneously. If there
+-- is no forced size, then the only way to get the widget actual size is when
+-- there is a `mouse::enter`, `mouse::leave` or button events.
+-- @treturn nil|number The forced height (nil if automatic)
+-- @function get_forced_height
+function base.widget:get_forced_height()
+    return self._private.forced_height
 end
 
 --- Get all direct children widgets
@@ -250,8 +272,8 @@ function base.fit_widget(parent, context, widget, width, height)
     end
 
     -- Apply forced size and handle nil's
-    w = widget._forced_width or w or 0
-    h = widget._forced_height or h or 0
+    w = widget._private.forced_width or w or 0
+    h = widget._private.forced_height or h or 0
 
     -- Also sanitize the output.
     w = math.max(0, math.min(w, width))
@@ -555,8 +577,8 @@ function base.make_widget(proxy, widget_name, args)
     rawset(ret, "is_widget", true)
 
     -- Size is not restricted/forced
-    ret._forced_width = nil
-    ret._forced_height = nil
+    ret._private.forced_width = nil
+    ret._private.forced_height = nil
 
     -- Make buttons work
     ret:connect_signal("button::press", function(...)
