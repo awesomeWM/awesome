@@ -29,11 +29,9 @@
 -- @name swap_widgets
 -- @class function
 
---- Get all children of this layout.
+--- Get all direct children of this layout.
 -- @param layout The layout you are modifying.
--- @return a list of all widgets
--- @name get_children
--- @class function
+-- @property children
 
 --- Reset a ratio layout. This removes all widgets from the layout.
 -- @param layout The layout you are modifying.
