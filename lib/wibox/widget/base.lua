@@ -27,10 +27,10 @@ base.widget = {}
 -- @function buttons
 function base.widget:buttons(_buttons)
     if _buttons then
-        self.widget_buttons = _buttons
+        self._private.widget_buttons = _buttons
     end
 
-    return self.widget_buttons
+    return self._private.widget_buttons
 end
 
 --- Set a widget's visible property
@@ -302,7 +302,7 @@ function base.handle_button(event, widget, x, y, button, modifiers, geometry)
 
     -- Find all matching button objects
     local matches = {}
-    for _, v in pairs(widget.widget_buttons) do
+    for _, v in pairs(widget._private.widget_buttons) do
         local match = true
         -- Is it the right button?
         if v.button ~= 0 and v.button ~= button then match = false end
@@ -536,7 +536,7 @@ function base.make_widget(proxy, widget_name, args)
     rawset(ret, "_private", {})
 
     -- No buttons yet
-    ret.widget_buttons = {}
+    ret._private.widget_buttons = {}
 
     -- Widget is visible
     ret.visible = true
