@@ -32,7 +32,7 @@ function align:layout(context, width, height)
     -- allowed.
     local size_first = 0
     -- start with all the space given by the parent, subtract as we go along
-    local size_remains = self.dir == "y" and height or width
+    local size_remains = self._private.dir == "y" and height or width
     -- This is only set & used if expand ~= "inside" and we have second width.
     -- It contains the size allocated to the second widget.
     local size_second
@@ -41,84 +41,84 @@ function align:layout(context, width, height)
     --  if it is, we prioritize the first widget by not doing this block also,
     --  if the second widget doesn't exist, we will prioritise the first one
     --  instead
-    if self._expand ~= "inside" and self.second then
-        local w, h = base.fit_widget(self, context, self.second, width, height)
-        size_second = self.dir == "y" and h or w
+    if self._private.expand ~= "inside" and self._private.second then
+        local w, h = base.fit_widget(self, context, self._private.second, width, height)
+        size_second = self._private.dir == "y" and h or w
         -- if all the space is taken, skip the rest, and draw just the middle
         -- widget
         if size_second >= size_remains then
-            return { base.place_widget_at(self.second, 0, 0, width, height) }
+            return { base.place_widget_at(self._private.second, 0, 0, width, height) }
         else
             -- the middle widget is sized first, the outside widgets are given
             --  the remaining space if available we will draw later
             size_remains = floor((size_remains - size_second) / 2)
         end
     end
-    if self.first then
+    if self._private.first then
         local w, h, _ = width, height, nil
         -- we use the fit function for the "inside" and "none" modes, but
         --  ignore it for the "outside" mode, which will force it to expand
         --  into the remaining space
-        if self._expand ~= "outside" then
-            if self.dir == "y" then
-                _, h = base.fit_widget(self, context, self.first, width, size_remains)
+        if self._private.expand ~= "outside" then
+            if self._private.dir == "y" then
+                _, h = base.fit_widget(self, context, self._private.first, width, size_remains)
                 size_first = h
                 -- for "inside", the third widget will get a chance to use the
                 --  remaining space, then the middle widget. For "none" we give
                 --  the third widget the remaining space if there was no second
                 --  widget to take up any space (as the first if block is skipped
                 --  if this is the case)
-                if self._expand == "inside" or not self.second then
+                if self._private.expand == "inside" or not self._private.second then
                     size_remains = size_remains - h
                 end
             else
-                w, _ = base.fit_widget(self, context, self.first, size_remains, height)
+                w, _ = base.fit_widget(self, context, self._private.first, size_remains, height)
                 size_first = w
-                if self._expand == "inside" or not self.second then
+                if self._private.expand == "inside" or not self._private.second then
                     size_remains = size_remains - w
                 end
             end
         else
-            if self.dir == "y" then
+            if self._private.dir == "y" then
                 h = size_remains
             else
                 w = size_remains
             end
         end
-        table.insert(result, base.place_widget_at(self.first, 0, 0, w, h))
+        table.insert(result, base.place_widget_at(self._private.first, 0, 0, w, h))
     end
     -- size_remains will be <= 0 if first used all the space
-    if self.third and size_remains > 0 then
+    if self._private.third and size_remains > 0 then
         local w, h, _ = width, height, nil
-        if self._expand ~= "outside" then
-            if self.dir == "y" then
-                _, h = base.fit_widget(self, context, self.third, width, size_remains)
+        if self._private.expand ~= "outside" then
+            if self._private.dir == "y" then
+                _, h = base.fit_widget(self, context, self._private.third, width, size_remains)
                 -- give the middle widget the rest of the space for "inside" mode
-                if self._expand == "inside" then
+                if self._private.expand == "inside" then
                     size_remains = size_remains - h
                 end
             else
-                w, _ = base.fit_widget(self, context, self.third, size_remains, height)
-                if self._expand == "inside" then
+                w, _ = base.fit_widget(self, context, self._private.third, size_remains, height)
+                if self._private.expand == "inside" then
                     size_remains = size_remains - w
                 end
             end
         else
-            if self.dir == "y" then
+            if self._private.dir == "y" then
                 h = size_remains
             else
                 w = size_remains
             end
         end
         local x, y = width - w, height - h
-        table.insert(result, base.place_widget_at(self.third, x, y, w, h))
+        table.insert(result, base.place_widget_at(self._private.third, x, y, w, h))
     end
     -- here we either draw the second widget in the space set aside for it
     -- in the beginning, or in the remaining space, if it is "inside"
-    if self.second and size_remains > 0 then
+    if self._private.second and size_remains > 0 then
         local x, y, w, h = 0, 0, width, height
-        if self._expand == "inside" then
-            if self.dir == "y" then
+        if self._private.expand == "inside" then
+            if self._private.dir == "y" then
                 h = size_remains
                 x, y = 0, size_first
             else
@@ -127,55 +127,69 @@ function align:layout(context, width, height)
             end
         else
             local _
-            if self.dir == "y" then
-                _, h = base.fit_widget(self, context, self.second, width, size_second)
+            if self._private.dir == "y" then
+                _, h = base.fit_widget(self, context, self._private.second, width, size_second)
                 y = floor( (height - h)/2 )
             else
-                w, _ = base.fit_widget(self, context, self.second, size_second, height)
+                w, _ = base.fit_widget(self, context, self._private.second, size_second, height)
                 x = floor( (width -w)/2 )
             end
         end
-        table.insert(result, base.place_widget_at(self.second, x, y, w, h))
+        table.insert(result, base.place_widget_at(self._private.second, x, y, w, h))
     end
     return result
 end
 
---- Set the layout's first widget. This is the widget that is at the left/top
+--- Set the layout's first widget.
+-- This is the widget that is at the left/top
+-- @property first
+
 function align:set_first(widget)
-    if self.first == widget then
+    if self._private.first == widget then
         return
     end
-    self.first = widget
+    self._private.first = widget
     self:emit_signal("widget::layout_changed")
 end
 
 --- Set the layout's second widget. This is the centered one.
+-- @property second
+
 function align:set_second(widget)
-    if self.second == widget then
+    if self._private.second == widget then
         return
     end
-    self.second = widget
+    self._private.second = widget
     self:emit_signal("widget::layout_changed")
 end
 
---- Set the layout's third widget. This is the widget that is at the right/bottom
+--- Set the layout's third widget.
+-- This is the widget that is at the right/bottom
+-- @property third
+
 function align:set_third(widget)
-    if self.third == widget then
+    if self._private.third == widget then
         return
     end
-    self.third = widget
+    self._private.third = widget
     self:emit_signal("widget::layout_changed")
 end
 
---- Get all children of this layout
--- @treturn table a list of all widgets
-function align:get_children()
-    return util.from_sparse {self.first, self.second, self.third}
+for _, prop in ipairs {"first", "second", "third", "expand" } do
+    align["get_"..prop] = function(self)
+        return self._private[prop]
+    end
 end
 
---- Replace the layout children
--- This layout only accept three children, all others will be ignored
--- @tparam table children A table composed of valid widgets
+--- All direct children of this layout.
+-- This can be used to replace all 3 widgets at once.
+-- @treturn table a list of all widgets
+-- @property children
+
+function align:get_children()
+    return util.from_sparse {self._private.first, self._private.second, self._private.third}
+end
+
 function align:set_children(children)
     self:set_first(children[1])
     self:set_second(children[2])
@@ -192,18 +206,18 @@ function align:fit(context, orig_width, orig_height)
     local used_in_dir = 0
     local used_in_other = 0
 
-    for _, v in pairs{self.first, self.second, self.third} do
+    for _, v in pairs{self._private.first, self._private.second, self._private.third} do
         local w, h = base.fit_widget(self, context, v, orig_width, orig_height)
 
-        local max = self.dir == "y" and w or h
+        local max = self._private.dir == "y" and w or h
         if max > used_in_other then
             used_in_other = max
         end
 
-        used_in_dir = used_in_dir + (self.dir == "y" and h or w)
+        used_in_dir = used_in_dir + (self._private.dir == "y" and h or w)
     end
 
-    if self.dir == "y" then
+    if self._private.dir == "y" then
         return used_in_other, used_in_dir
     end
     return used_in_dir, used_in_other
@@ -223,11 +237,13 @@ end
 -- * "none" - All widgets are sized using their fit function, drawn to only the
 --   returned space, or remaining space, whichever is smaller. Center widget
 --   gets priority.
+-- @property expand
+
 function align:set_expand(mode)
     if mode == "none" or mode == "outside" then
-        self._expand = mode
+        self._private.expand = mode
     else
-        self._expand = "inside"
+        self._private.expand = "inside"
     end
     self:emit_signal("widget::layout_changed")
 end
@@ -240,12 +256,12 @@ function align:reset()
 end
 
 local function get_layout(dir, first, second, third)
-    local ret = base.make_widget()
-    ret.dir = dir
+    local ret = base.make_widget(nil, nil, {enable_properties = true})
+    ret._private.dir = dir
 
     for k, v in pairs(align) do
         if type(v) == "function" then
-            ret[k] = v
+            rawset(ret, k, v)
         end
     end
 
@@ -270,9 +286,9 @@ end
 function align.horizontal(left, middle, right)
     local ret = get_layout("x", left, middle, right)
 
-    ret.set_left = ret.set_first
-    ret.set_middle = ret.set_second
-    ret.set_right = ret.set_third
+    rawset(ret, "set_left"  , ret.set_first  )
+    rawset(ret, "set_middle", ret.set_second )
+    rawset(ret, "set_right" , ret.set_third  )
 
     return ret
 end
@@ -287,12 +303,16 @@ end
 function align.vertical(top, middle, bottom)
     local ret = get_layout("y", top, middle, bottom)
 
-    ret.set_top = ret.set_first
-    ret.set_middle = ret.set_second
-    ret.set_bottom = ret.set_third
+    rawset(ret, "set_top"   , ret.set_first  )
+    rawset(ret, "set_middle", ret.set_second )
+    rawset(ret, "set_bottom", ret.set_third  )
 
     return ret
 end
+
+--@DOC_widget_COMMON@
+
+--@DOC_object_COMMON@
 
 return align
 
