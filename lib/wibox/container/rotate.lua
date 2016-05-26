@@ -9,13 +9,12 @@
 ---------------------------------------------------------------------------
 
 local error = error
-local pairs = pairs
 local pi = math.pi
-local type = type
 local setmetatable = setmetatable
 local tostring = tostring
 local base = require("wibox.widget.base")
 local matrix = require("gears.matrix")
+local util = require("awful.util")
 
 local rotate = { mt = {} }
 
@@ -29,7 +28,7 @@ end
 
 -- Layout this layout
 function rotate:layout(_, width, height)
-    if not self.widget or not self.widget._private.visible then
+    if not self._private.widget or not self._private.widget._private.visible then
         return
     end
 
@@ -49,30 +48,37 @@ function rotate:layout(_, width, height)
 
     -- Since we rotated, we might have to swap width and height.
     -- transform() does that for us.
-    return { base.place_widget_via_matrix(self.widget, m, transform(self, width, height)) }
+    return { base.place_widget_via_matrix(self._private.widget, m, transform(self, width, height)) }
 end
 
 -- Fit this layout into the given area
 function rotate:fit(context, width, height)
-    if not self.widget then
+    if not self._private.widget then
         return 0, 0
     end
-    return transform(self, base.fit_widget(self, context, self.widget, transform(self, width, height)))
+    return transform(self, base.fit_widget(self, context, self._private.widget, transform(self, width, height)))
 end
 
---- Set the widget that this layout rotates.
+--- The widget to be rotated.
+-- @property widget
+-- @tparam widget widget The widget
+
 function rotate:set_widget(widget)
     if widget then
         base.check_widget(widget)
     end
-    self.widget = widget
+    self._private.widget = widget
     self:emit_signal("widget::layout_changed")
+end
+
+function rotate:get_widget()
+    return self._private.widget
 end
 
 --- Get the number of children element
 -- @treturn table The children
 function rotate:get_children()
-    return {self.widget}
+    return {self._private.widget}
 end
 
 --- Replace the layout children
@@ -84,11 +90,15 @@ end
 
 --- Reset this layout. The widget will be removed and the rotation reset.
 function rotate:reset()
-    self.direction = nil
+    self._private.direction = nil
     self:set_widget(nil)
 end
 
---- Set the direction of this rotating container.
+--@DOC_widget_COMMON@
+
+--@DOC_object_COMMON@
+
+--- The direction of this rotating container.
 -- Valid values are:
 --
 -- * *north*
@@ -97,7 +107,9 @@ end
 -- * *north*
 --
 --@DOC_wibox_container_rotate_angle_EXAMPLE@
+-- @property direction
 -- @tparam string dir The direction
+
 function rotate:set_direction(dir)
     local allowed = {
         north = true,
@@ -110,13 +122,13 @@ function rotate:set_direction(dir)
         error("Invalid direction for rotate layout: " .. tostring(dir))
     end
 
-    self.direction = dir
+    self._private.direction = dir
     self:emit_signal("widget::layout_changed")
 end
 
 --- Get the direction of this rotating layout
 function rotate:get_direction()
-    return self.direction or "north"
+    return self._private.direction or "north"
 end
 
 --- Returns a new rotate container.
@@ -128,13 +140,9 @@ end
 -- @treturn table A new rotate container.
 -- @function wibox.container.rotate
 local function new(widget, dir)
-    local ret = base.make_widget()
+    local ret = base.make_widget(nil, nil, {enable_properties = true})
 
-    for k, v in pairs(rotate) do
-        if type(v) == "function" then
-            ret[k] = v
-        end
-    end
+    util.table.crush(ret, rotate, true)
 
     ret:set_widget(widget)
     ret:set_direction(dir or "north")
