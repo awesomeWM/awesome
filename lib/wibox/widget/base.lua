@@ -454,7 +454,7 @@ function base.make_widget_declarative(args)
 
     local w, id = drill(ids, args)
 
-    local mt = {}
+    local mt = getmetatable(w) or {}
     local orig_string = tostring(w)
 
     rawset(w, "_by_id", ids)
@@ -474,9 +474,17 @@ end
 --   looks the same on the screen.
 -- @tparam[opt] string widget_name Name of the widget.  If not set, it will be
 --   set automatically via `gears.object.modulename`.
+-- @tparam[opt={}] table args Widget settings
+-- @tparam[opt=false] boolean args.enable_properties Enable automatic getters and
+--  setters calls.
+-- @tparam[opt=nil] table args.class The widget class
 -- @see fit_widget
-function base.make_widget(proxy, widget_name)
-    local ret = object()
+function base.make_widget(proxy, widget_name, args)
+    args = args or {}
+    local ret = object {
+        enable_properties = args.enable_properties,
+        class             = args.class,
+    }
 
     -- This signal is used by layouts to find out when they have to update.
     ret:add_signal("widget::layout_changed")
@@ -547,7 +555,7 @@ function base.make_widget(proxy, widget_name)
 
     -- Add __tostring method to metatable.
     ret.widget_name = widget_name or object.modulename(3)
-    local mt = {}
+    local mt = getmetatable(ret) or {}
     local orig_string = tostring(ret)
     mt.__tostring = function()
         return string.format("%s (%s)", ret.widget_name, orig_string)
