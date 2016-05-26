@@ -76,29 +76,29 @@ end)
 -- @field context The widget context for drawing the hierarchy
 local function calculate_info(self, context, width, height)
     local result = {}
-    assert(self.widget)
+    assert(self._private.widget)
 
     -- First, get the size of the widget (and the size of extra space)
     local surface_width, surface_height = width, height
-    local extra_width, extra_height, extra = 0, 0, self.expand and self.extra_space or 0
+    local extra_width, extra_height, extra = 0, 0, self._private.expand and self._private.extra_space or 0
     local w, h
-    if self.dir == "h" then
-        w, h = base.fit_widget(self, context, self.widget, self.space_for_scrolling, height)
+    if self._private.dir == "h" then
+        w, h = base.fit_widget(self, context, self._private.widget, self._private.space_for_scrolling, height)
         surface_width = w
         extra_width = extra
     else
-        w, h = base.fit_widget(self, context, self.widget, width, self.space_for_scrolling)
+        w, h = base.fit_widget(self, context, self._private.widget, width, self._private.space_for_scrolling)
         surface_height = h
         extra_height = extra
     end
     result.fit_width, result.fit_height = w, h
-    if self.dir == "h" then
-        if self.max_size then
-            result.fit_width = math.min(w, self.max_size)
+    if self._private.dir == "h" then
+        if self._private.max_size then
+            result.fit_width = math.min(w, self._private.max_size)
         end
     else
-        if self.max_size then
-            result.fit_height = math.min(h, self.max_size)
+        if self._private.max_size then
+            result.fit_height = math.min(h, self._private.max_size)
         end
     end
     if w > width or h > height then
@@ -109,17 +109,17 @@ local function calculate_info(self, context, width, height)
 
         local x, y = 0, 0
         local function get_scroll_offset(size, visible_size)
-            return self.step_function(self.timer:elapsed(), size, visible_size, self.speed, self.extra_space)
+            return self._private.step_function(self._private.timer:elapsed(), size, visible_size, self._private.speed, self._private.extra_space)
         end
-        if self.dir == "h" then
+        if self._private.dir == "h" then
             x = -get_scroll_offset(surface_width - extra, width)
         else
             y = -get_scroll_offset(surface_height - extra, height)
         end
         result.first_x, result.first_y = x, y
         -- Was the extra space already included elsewhere?
-        local extra_spacer = self.expand and 0 or self.extra_space
-        if self.dir == "h" then
+        local extra_spacer = self._private.expand and 0 or self._private.extra_space
+        if self._private.dir == "h" then
             x = x + surface_width + extra_spacer
         else
             y = y + surface_height + extra_spacer
@@ -132,7 +132,7 @@ local function calculate_info(self, context, width, height)
 
     -- Get the hierarchy and subscribe ourselves to updates
     local hier, do_pending_updates, ctx = hierarchy_cache:get(context,
-            self.widget, surface_width, surface_height)
+            self._private.widget, surface_width, surface_height)
     result.hierarchy = hier
     result.context = ctx
     do_pending_updates(self)
@@ -146,7 +146,7 @@ end
 -- @param width The available width.
 -- @param height The available height.
 function scroll:draw(context, cr, width, height)
-    if not self.widget then
+    if not self._private.widget then
         return
     end
 
@@ -175,7 +175,7 @@ end
 -- @param width The available width.
 -- @param height The available height.
 function scroll:fit(context, width, height)
-    if not self.widget then
+    if not self._private.widget then
         return 0, 0
     end
     local info = calculate_info(self, context, width, height)
@@ -189,9 +189,9 @@ end
 -- This function must be idempotent (calling it multiple times right after
 -- another does not make a difference).
 _need_scroll_redraw = function(self)
-    if not self.paused and not self.scroll_timer then
-        self.scroll_timer = timer.start_new(1 / self.fps, function()
-            self.scroll_timer = nil
+    if not self._private.paused and not self._private.scroll_timer then
+        self._private.scroll_timer = timer.start_new(1 / self._private.fps, function()
+            self._private.scroll_timer = nil
             self:emit_signal("widget::redraw_needed")
         end)
     end
@@ -200,21 +200,21 @@ end
 --- Pause the scrolling animation.
 -- @see continue
 function scroll:pause()
-    if self.paused then
+    if self._private.paused then
         return
     end
-    self.paused = true
-    self.timer:stop()
+    self._private.paused = true
+    self._private.timer:stop()
 end
 
 --- Continue the scrolling animation.
 -- @see pause
 function scroll:continue()
-    if not self.paused then
+    if not self._private.paused then
         return
     end
-    self.paused = false
-    self.timer:continue()
+    self._private.paused = false
+    self._private.timer:continue()
     self:emit_signal("widget::redraw_needed")
 end
 
@@ -223,44 +223,50 @@ end
 -- display the widget without any scrolling applied.
 -- This function does not undo the effect of @{pause}.
 function scroll:reset_scrolling()
-    self.timer:start()
-    if self.paused then
-        self.timer:stop()
+    self._private.timer:start()
+    if self._private.paused then
+        self._private.timer:stop()
     end
 end
 
 --- Set the direction in which this widget scroll.
 -- @param dir Either "h" for horizontal scrolling or "v" for vertical scrolling
 function scroll:set_direction(dir)
-    if dir == self.dir then
+    if dir == self._private.dir then
         return
     end
     if dir ~= "h" and dir ~= "v" then
         error("Invalid direction, can only be 'h' or 'v'")
     end
-    self.dir = dir
+    self._private.dir = dir
     self:emit_signal("widget::layout_changed")
     self:emit_signal("widget::redraw_needed")
 end
 
---- Set the widget which we scroll.
--- @tparam widget widget The widget that we should display
+--- The widget to be scrolled.
+-- @property widget
+-- @tparam widget widget The widget
+
 function scroll:set_widget(widget)
-    if widget == self.widget then
+    if widget == self._private.widget then
         return
     end
     if widget then
         base.check_widget(widget)
     end
-    self.widget = widget
+    self._private.widget = widget
     self:emit_signal("widget::layout_changed")
     self:emit_signal("widget::redraw_needed")
+end
+
+function scroll:get_widget()
+    return self._private.widget
 end
 
 --- Get the number of children element
 -- @treturn table The children
 function scroll:get_children()
-    return {self.widget}
+    return {self._private.widget}
 end
 
 --- Replace the layout children
@@ -275,20 +281,20 @@ end
 -- space. If false, the extra space is simply left empty.
 -- @see set_extra_space
 function scroll:set_expand(expand)
-    if expand == self.expand then
+    if expand == self._private.expand then
         return
     end
-    self.expand = expand
+    self._private.expand = expand
     self:emit_signal("widget::redraw_needed")
 end
 
 --- Set the number of frames per second that this widget should draw.
 -- @tparam number fps The number of frames per second
 function scroll:set_fps(fps)
-    if fps == self.fps then
+    if fps == self._private.fps then
         return
     end
-    self.fps = fps
+    self._private.fps = fps
     -- No signal needed: If we are scrolling, the next redraw will apply the new
     -- FPS, else it obviously doesn't make a difference.
 end
@@ -298,10 +304,10 @@ end
 -- @tparam number extra_space The amount of extra space
 -- @see set_expand
 function scroll:set_extra_space(extra_space)
-    if extra_space == self.extra_space then
+    if extra_space == self._private.extra_space then
         return
     end
-    self.extra_space = extra_space
+    self._private.extra_space = extra_space
     self:emit_signal("widget::redraw_needed")
 end
 
@@ -310,10 +316,10 @@ end
 -- in pixels per second.
 -- @tparam number speed The speed for the animation
 function scroll:set_speed(speed)
-    if speed == self.speed then
+    if speed == self._private.speed then
         return
     end
-    self.speed = speed
+    self._private.speed = speed
     self:emit_signal("widget::redraw_needed")
 end
 
@@ -323,10 +329,10 @@ end
 -- and the rest is made visible via scrolling.
 -- @tparam number max_size The maximum size of this widget or nil for unlimited.
 function scroll:set_max_size(max_size)
-    if max_size == self.max_size then
+    if max_size == self._private.max_size then
         return
     end
-    self.max_size = max_size
+    self._private.max_size = max_size
     self:emit_signal("widget::layout_changed")
 end
 
@@ -350,10 +356,10 @@ end
 function scroll:set_step_function(step_function)
     -- Call the step functions once to see if it works
     step_function(0, 42, 10, 10, 5)
-    if step_function == self.step_function then
+    if step_function == self._private.step_function then
         return
     end
-    self.step_function = step_function
+    self._private.step_function = step_function
     self:emit_signal("widget::redraw_needed")
 end
 
@@ -361,19 +367,19 @@ end
 -- This restricts the child widget's maximal size.
 -- @tparam number space_for_scrolling The space for scrolling
 function scroll:set_space_for_scrolling(space_for_scrolling)
-    if space_for_scrolling == self.space_for_scrolling then
+    if space_for_scrolling == self._private.space_for_scrolling then
         return
     end
-    self.space_for_scrolling = space_for_scrolling
+    self._private.space_for_scrolling = space_for_scrolling
     self:emit_signal("widget::layout_changed")
 end
 
 local function get_layout(dir, widget, fps, speed, extra_space, expand, max_size, step_function, space_for_scrolling)
-    local ret = base.make_widget()
+    local ret = base.make_widget(nil, nil, {enable_properties = true})
 
-    ret.paused = false
-    ret.timer = GLib.Timer()
-    ret.scroll_timer = nil
+    ret._priavte.paused = false
+    ret._private.timer = GLib.Timer()
+    ret._private.scroll_timer = nil
 
     setmetatable(ret, scroll_mt)
 
@@ -503,6 +509,10 @@ function scroll.step_functions.waiting_nonlinear_back_and_forth(elapsed, size, v
     end
     return (size - visible_size) * state
 end
+
+--@DOC_widget_COMMON@
+
+--@DOC_object_COMMON@
 
 return scroll
 
