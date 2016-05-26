@@ -15,7 +15,6 @@ local surface = require("gears.surface")
 local beautiful = require("beautiful")
 local cairo = require("lgi").cairo
 local setmetatable = setmetatable
-local pairs = pairs
 local type = type
 local unpack = unpack or table.unpack -- luacheck: globals unpack (compatibility with Lua 5.1)
 
@@ -100,15 +99,21 @@ function background:fit(context, width, height)
     return base.fit_widget(self, context, self._private.widget, width, height)
 end
 
---- Set the widget that is drawn on top of the background
+--- The widget displayed in the background widget.
+-- @property widget
 -- @tparam widget widget The widget to be disaplayed inside of the background
 --  area
+
 function background:set_widget(widget)
     if widget then
         base.check_widget(widget)
     end
     self._private.widget = widget
     self:emit_signal("widget::layout_changed")
+end
+
+function background:get_widget()
+    return self._private.widget
 end
 
 -- Get children element
@@ -124,9 +129,12 @@ function background:set_children(children)
     self:set_widget(children[1])
 end
 
---- Set the background to use.
+--- The background color/pattern/gradient to use.
 --@DOC_wibox_container_background_bg_EXAMPLE@
--- @param bg A color string, pattern or gradient (see `gears.color`)
+-- @property bg
+-- @param bg A color string, pattern or gradient
+-- @see gears.color
+
 function background:set_bg(bg)
     if bg then
         self._private.background = color(bg)
@@ -136,9 +144,16 @@ function background:set_bg(bg)
     self:emit_signal("widget::redraw_needed")
 end
 
---- Set the foreground to use.
+function background:get_bg()
+    return self._private.background
+end
+
+--- The foreground (text) color/pattern/gradient to use.
 --@DOC_wibox_container_background_fg_EXAMPLE@
--- @param fg A color string, pattern or gradient (see `gears.color`)
+-- @property fg
+-- @param fg A color string, pattern or gradient
+-- @see gears.color
+
 function background:set_fg(fg)
     if fg then
         self._private.foreground = color(fg)
@@ -148,51 +163,96 @@ function background:set_fg(fg)
     self:emit_signal("widget::redraw_needed")
 end
 
+function background:get_fg()
+    return self._private.foreground
+end
+
+--- The background shape.
+--
+-- Use `set_shape` to set additional shape paramaters.
+--
+--@DOC_wibox_container_background_shape_EXAMPLE@
+-- @property shape
+-- @param shape A function taking a context, width and height as arguments
+-- @see gears.shape
+-- @see set_shape
+
 --- Set the background shape.
 --
 -- Any other arguments will be passed to the shape function
---@DOC_wibox_container_background_shape_EXAMPLE@
 -- @param shape A function taking a context, width and height as arguments
+-- @see gears.shape
+-- @see shape
 function background:set_shape(shape, ...)
     self._private.shape = shape
     self._private.shape_args = {...}
     self:emit_signal("widget::redraw_needed")
 end
 
+function background:get_shape()
+    return self._private.shape
+end
+
 --- When a `shape` is set, also draw a border.
 --
--- See `wibox.container.background.set_shape` for an usage example.
+-- See `wibox.container.background.shape` for an usage example.
+-- @property shape_border_width
 -- @tparam number width The border width
+
 function background:set_shape_border_width(width)
     self._private.shape_border_width = width
     self:emit_signal("widget::redraw_needed")
 end
 
+function background:get_shape_border_width()
+    return self._private.shape_border_width
+end
+
 --- When a `shape` is set, also draw a border.
 --
--- See `wibox.container.background.set_shape` for an usage example.
+-- See `wibox.container.background.shape` for an usage example.
+-- @property shape_border_color
 -- @param[opt=self._private.foreground] fg The border color, pattern or gradient
+-- @see gears.color
+
 function background:set_shape_border_color(fg)
     self._private.shape_border_color = fg
     self:emit_signal("widget::redraw_needed")
 end
 
+function background:get_shape_border_color()
+    return self._private.shape_border_color
+end
+
 --- When a `shape` is set, make sure nothing is drawn outside of it.
 --@DOC_wibox_container_background_clip_EXAMPLE@
+-- @property shape_clip
 -- @tparam boolean value If the shape clip is enable
+
 function background:set_shape_clip(value)
     self._private.shape_clip = value
     self:emit_signal("widget::redraw_needed")
 end
 
---- Set the background image to use
+function background:get_shape_clip()
+    return self._private.shape_clip or false
+end
+
+--- The background image to use
 -- If `image` is a function, it will be called with `(context, cr, width, height)`
 -- as arguments. Any other arguments passed to this method will be appended.
+-- @property bgimage
 -- @param image A background image or a function
+-- @see gears.surface
+
 function background:set_bgimage(image, ...)
     self._private.bgimage = type(image) == "function" and image or surface.load(image)
     self._private.bgimage_args = {...}
     self:emit_signal("widget::redraw_needed")
+end
+
+function background:get_bgimage()
+    return self._private.bgimage
 end
 
 --- Returns a new background container.
@@ -204,7 +264,9 @@ end
 -- @param[opt] shape A `gears.shape` compatible shape function
 -- @function wibox.container.background
 local function new(widget, bg, shape)
-    local ret = base.make_widget()
+    local ret = base.make_widget(nil, nil, {
+        enable_properties = true,
+    })
 
     for k, v in pairs(background) do
         if type(v) == "function" then
@@ -223,6 +285,8 @@ end
 function background.mt:__call(...)
     return new(...)
 end
+
+--@DOC_widget_COMMON@
 
 return setmetatable(background, background.mt)
 
