@@ -39,3 +39,72 @@
 --- Set/get a widget's buttons.
 -- @param _buttons The table of buttons that should bind to the widget.
 -- @function buttons
+
+
+--- When the layout (size) change.
+-- This signal is emited when the previous results of `:layout()` and `:fit()`
+-- are no longer valid.
+-- @signal widget::layout_changed
+-- @see widget::redraw_needed
+
+--- When the widget content changed.
+-- Unless this signal is emitted, `:layout()` and `:fit()` must return the same
+-- result when called with the same arguments. In case this isn't the case,
+-- use `widget::layout_changed`.
+-- @signal widget::redraw_needed
+
+--- When a mouse button is pressed over the widget.
+-- The position of the mouse press relative to the widget while geometry
+-- contains the geometry of the widget relative to the wibox.
+-- @signal button::press
+-- @tparam table widget The widget
+-- @tparam number lx The relative horizontal position.
+-- @tparam number ly The relative vertical position.
+-- @tparam number button The button number.
+-- @tparam table mods The modifiers (mod4, mod1 (alt), Control, Shift)
+-- @tparam table geometry
+-- @tparam number geometry.x The vertical position
+-- @tparam number geometry.y The horizontal position
+-- @tparam number geometry.width The widget
+-- @tparam number geometry.height The height
+-- @tparam drawable geometry.drawable The `drawable`
+-- @see mouse
+
+--- When a mouse button is released over the widget.
+-- The position of the mouse press relative to the widget while geometry
+-- contains the geometry of the widget relative to the wibox.
+-- @signal button::release
+-- @tparam table widget The widget
+-- @tparam number lx The relative horizontal position.
+-- @tparam number ly The relative vertical position.
+-- @tparam number button The button number.
+-- @tparam table mods The modifiers (mod4, mod1 (alt), Control, Shift)
+-- @tparam table geometry
+-- @tparam number geometry.x The vertical position
+-- @tparam number geometry.y The horizontal position
+-- @tparam number geometry.width The widget
+-- @tparam number geometry.height The height
+-- @tparam drawable geometry.drawable The `drawable`
+-- @see mouse
+
+--- When the mouse enter a widget.
+-- @signal mouse::enter
+-- @tparam table widget The widget
+-- @tparam table geometry
+-- @tparam number geometry.x The vertical position
+-- @tparam number geometry.y The horizontal position
+-- @tparam number geometry.width The widget
+-- @tparam number geometry.height The height
+-- @tparam drawable geometry.drawable The `drawable`
+-- @see mouse
+
+--- When the mouse leave a widget.
+-- @signal mouse::leave
+-- @tparam table widget The widget
+-- @tparam table geometry
+-- @tparam number geometry.x The vertical position
+-- @tparam number geometry.y The horizontal position
+-- @tparam number geometry.width The widget
+-- @tparam number geometry.height The height
+-- @tparam drawable geometry.drawable The `drawable`
+-- @see mouse
