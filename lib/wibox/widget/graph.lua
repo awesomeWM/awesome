@@ -21,47 +21,40 @@ local graph = { mt = {} }
 --- Set the graph border color.
 -- If the value is nil, no border will be drawn.
 --
--- @function set_border_color
--- @param graph The graph.
--- @param color The border color to set.
+-- @property border_color
+-- @tparam geats.color border_color The border color to set.
 
 --- Set the graph foreground color.
 --
--- @function set_color
--- @param graph The graph.
--- @param color The graph color.
+-- @property color
+-- @tparam color color The graph color.
 -- @see gears.color.create_pattern
 
 --- Set the graph background color.
 --
--- @function set_background_color
--- @param graph The graph.
--- @param color The graph background color.
+-- @property background_color
+-- @tparam gears.color background_color The graph background color.
 
 --- Set the maximum value the graph should handle.
 -- If "scale" is also set, the graph never scales up below this value, but it
 -- automatically scales down to make all data fit.
 --
--- @function set_max_value
--- @param graph The graph.
--- @param value The value.
+-- @property max_value
+-- @param number
 
 --- Set the graph to automatically scale its values. Default is false.
 --
--- @function set_scale
--- @param graph The graph.
--- @param scale A boolean value
+-- @property scale
+-- @param boolean
 
 --- Set the graph to draw stacks. Default is false.
 --
--- @function set_stack
--- @param graph The graph.
--- @param stack A boolean value.
+-- @property stack
+-- @param boolean
 
 --- Set the graph stacking colors. Order matters.
 --
--- @function set_stack_colors
--- @param graph The graph.
+-- @property stack_colors
 -- @param stack_colors A table with stacking colors.
 
 local properties = { "width", "height", "border_color", "stack",
@@ -69,26 +62,26 @@ local properties = { "width", "height", "border_color", "stack",
                      "max_value", "scale" }
 
 function graph.draw(_graph, _, cr, width, height)
-    local max_value = _graph._data.max_value
-    local values = _graph._data.values
+    local max_value = _graph._private.max_value
+    local values = _graph._private.values
 
     cr:set_line_width(1)
 
     -- Draw the background first
-    cr:set_source(color(_graph._data.background_color or "#000000aa"))
+    cr:set_source(color(_graph._private.background_color or "#000000aa"))
     cr:paint()
 
     -- Account for the border width
     cr:save()
-    if _graph._data.border_color then
+    if _graph._private.border_color then
         cr:translate(1, 1)
         width, height = width - 2, height - 2
     end
 
     -- Draw a stacked graph
-    if _graph._data.stack then
+    if _graph._private.stack then
 
-        if _graph._data.scale then
+        if _graph._private.scale then
             for _, v in ipairs(values) do
                 for _, sv in ipairs(v) do
                     if sv > max_value then
@@ -102,8 +95,8 @@ function graph.draw(_graph, _, cr, width, height)
             local rel_i = 0
             local rel_x = i + 0.5
 
-            if _graph._data.stack_colors then
-                for idx, col in ipairs(_graph._data.stack_colors) do
+            if _graph._private.stack_colors then
+                for idx, col in ipairs(_graph._private.stack_colors) do
                     local stack_values = values[idx]
                     if stack_values and i < #stack_values then
                         local value = stack_values[#stack_values - i] + rel_i
@@ -117,7 +110,7 @@ function graph.draw(_graph, _, cr, width, height)
             end
         end
     else
-        if _graph._data.scale then
+        if _graph._private.scale then
             for _, v in ipairs(values) do
                 if v > max_value then
                     max_value = v
@@ -136,7 +129,7 @@ function graph.draw(_graph, _, cr, width, height)
                     cr:line_to(i + 0.5, height)
                 end
             end
-            cr:set_source(color(_graph._data.color or "#ff0000"))
+            cr:set_source(color(_graph._private.color or "#ff0000"))
             cr:stroke()
         end
 
@@ -146,19 +139,19 @@ function graph.draw(_graph, _, cr, width, height)
     cr:restore()
 
     -- Draw the border last so that it overlaps already drawn values
-    if _graph._data.border_color then
+    if _graph._private.border_color then
         -- We decremented these by two above
         width, height = width + 2, height + 2
 
         -- Draw the border
         cr:rectangle(0.5, 0.5, width - 1, height - 1)
-        cr:set_source(color(_graph._data.border_color or "#ffffff"))
+        cr:set_source(color(_graph._private.border_color or "#ffffff"))
         cr:stroke()
     end
 end
 
 function graph.fit(_graph)
-    return _graph._data.width, _graph._data.height
+    return _graph._private.width, _graph._private.height
 end
 
 --- Add a value to the graph
@@ -167,28 +160,28 @@ end
 -- @param group The stack color group index.
 function graph:add_value(value, group)
     value = value or 0
-    local values = self._data.values
-    local max_value = self._data.max_value
+    local values = self._private.values
+    local max_value = self._private.max_value
     value = math.max(0, value)
-    if not self._data.scale then
+    if not self._private.scale then
         value = math.min(max_value, value)
     end
 
-    if self._data.stack and group then
-        if not  self._data.values[group]
-        or type(self._data.values[group]) ~= "table"
+    if self._private.stack and group then
+        if not  self._private.values[group]
+        or type(self._private.values[group]) ~= "table"
         then
-            self._data.values[group] = {}
+            self._private.values[group] = {}
         end
-        values = self._data.values[group]
+        values = self._private.values[group]
     end
     table.insert(values, value)
 
     local border_width = 0
-    if self._data.border_color then border_width = 2 end
+    if self._private.border_color then border_width = 2 end
 
     -- Ensure we never have more data than we can draw
-    while #values > self._data.width - border_width do
+    while #values > self._private.width - border_width do
         table.remove(values, 1)
     end
 
@@ -198,7 +191,7 @@ end
 
 --- Clear the graph.
 function graph:clear()
-    self._data.values = {}
+    self._private.values = {}
     self:emit_signal("widget::redraw_needed")
     return self
 end
@@ -207,7 +200,7 @@ end
 -- @param height The height to set.
 function graph:set_height(height)
     if height >= 5 then
-        self._data.height = height
+        self._private.height = height
         self:emit_signal("widget::layout_changed")
     end
     return self
@@ -217,7 +210,7 @@ end
 -- @param width The width to set.
 function graph:set_width(width)
     if width >= 5 then
-        self._data.width = width
+        self._private.width = width
         self:emit_signal("widget::layout_changed")
     end
     return self
@@ -227,8 +220,8 @@ end
 for _, prop in ipairs(properties) do
     if not graph["set_" .. prop] then
         graph["set_" .. prop] = function(_graph, value)
-            if _graph._data[prop] ~= value then
-                _graph._data[prop] = value
+            if _graph._private[prop] ~= value then
+                _graph._private[prop] = value
                 _graph:emit_signal("widget::redraw_needed")
             end
             return _graph
@@ -236,7 +229,7 @@ for _, prop in ipairs(properties) do
     end
     if not graph["get_" .. prop] then
         graph["get_" .. prop] = function(_graph)
-            return _graph._data[prop]
+            return _graph._private[prop]
         end
     end
 end
@@ -254,9 +247,12 @@ function graph.new(args)
 
     if width < 5 or height < 5 then return end
 
-    local _graph = base.make_widget()
+    local _graph = base.make_widget(nil, nil, {enable_properties = true})
 
-    _graph._data = { width = width, height = height, values = {}, max_value = 1 }
+    _graph._private.width     = width
+    _graph._private.height    = height
+    _graph._private.values    = {}
+    _graph._private.max_value = 1
 
     -- Set methods
     _graph.add_value = graph["add_value"]
@@ -275,6 +271,10 @@ end
 function graph.mt:__call(...)
     return graph.new(...)
 end
+
+--@DOC_widget_COMMON@
+
+--@DOC_object_COMMON@
 
 return setmetatable(graph, graph.mt)
 
