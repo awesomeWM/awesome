@@ -52,7 +52,7 @@ table.insert(steps, function()
 
     awful.placement.centered(w)
 
-    img = button._image
+    img = button._private.image
     assert(img)
 
     return true
@@ -68,7 +68,7 @@ table.insert(steps, function()
 end)
 
 table.insert(steps, function()
-    assert(button._image ~= img)
+    assert(button._private.image ~= img)
 
     return true
 end)
@@ -77,14 +77,14 @@ end)
 table.insert(steps, function()
     root.fake_input("button_release", 1)
 
-    assert(button._image ~= img)
+    assert(button._private.image ~= img)
 
     return true
 end)
 
 -- Test a button press/release outside of the widget
 table.insert(steps, function()
-    assert(button._image == img)
+    assert(button._private.image == img)
 
     root.fake_input("button_press", 1)
 
@@ -92,14 +92,14 @@ table.insert(steps, function()
 end)
 
 table.insert(steps, function()
-    assert(button._image ~= img)
+    assert(button._private.image ~= img)
 
     return true
 end)
 
 table.insert(steps, function()
     -- just make sure the button is not released for nothing
-    assert(button._image ~= img)
+    assert(button._private.image ~= img)
 
     -- test if the button is released when the mouse move out
     awful.placement.right(mouse--[[, {parent = w}]])
@@ -109,7 +109,7 @@ table.insert(steps, function()
 end)
 
 table.insert(steps, function()
-    assert(button._image == img)
+    assert(button._private.image == img)
 
     return true
 end)
