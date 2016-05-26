@@ -2,7 +2,7 @@
 -- @author Uli Schlachter
 -- @copyright 2010 Uli Schlachter
 -- @release @AWESOME_VERSION@
--- @module wibox.widget.base
+-- @classmod wibox.widget.base
 ---------------------------------------------------------------------------
 
 local object = require("gears.object")
@@ -24,6 +24,7 @@ base.widget = {}
 
 --- Set/get a widget's buttons.
 -- @param _buttons The table of buttons that should bind to the widget.
+-- @function buttons
 function base.widget:buttons(_buttons)
     if _buttons then
         self.widget_buttons = _buttons
@@ -34,6 +35,7 @@ end
 
 --- Set a widget's visible property
 -- @tparam boolean b Wether the widget is visible at all
+-- @function set_visible
 function base.widget:set_visible(b)
     if b ~= self.visible then
         self.visible = b
@@ -46,6 +48,7 @@ end
 --- Set a widget's opacity
 -- @tparam number o The opacity to use (a number from 0 to 1). 0 is fully
 -- transparent while 1 is fully opaque.
+-- @function set_opacity
 function base.widget:set_opacity(o)
     if o ~= self.opacity then
         self.opacity = o
@@ -57,6 +60,7 @@ end
 -- @tparam number|nil s The width that the widget has. `nil` means to apply the
 -- default mechanism of calling the `:fit` method. A number overrides the result
 -- from `:fit`.
+-- @function set_width
 function base.widget:set_width(s)
     if s ~= self._forced_width then
         self._forced_width = s
@@ -68,6 +72,7 @@ end
 -- @tparam number|nil s The height that the widget has. `nil` means to apply the
 -- default mechanism of calling the `:fit` method. A number overrides the result
 -- from `:fit`.
+-- @function set_height
 function base.widget:set_height(s)
     if s ~= self._forced_height then
         self._forced_height = s
@@ -78,6 +83,7 @@ end
 --- Get all direct children widgets
 -- This method should be re-implemented by the relevant widgets
 -- @treturn table The children
+-- @function get_children
 function base.widget:get_children()
     return {}
 end
@@ -86,6 +92,7 @@ end
 -- The default implementation does nothing, this must be re-implemented by
 -- all layout and container widgets.
 -- @tparam table children A table composed of valid widgets
+-- @function set_children
 function base.widget:set_children(children) -- luacheck: no unused
     -- Nothing on purpose
 end
@@ -103,6 +110,7 @@ end
 -- Warning: This method it prone to stack overflow id the widget, or any of its
 -- children, contain (directly or indirectly) itself.
 -- @treturn table The children
+-- @function get_all_children
 function base.widget:get_all_children()
     local ret = {}
     digg_children(ret, self)
@@ -116,6 +124,7 @@ end
 -- @return The index
 -- @return The parent layout
 -- @return The path between "self" and "widget"
+-- @function index
 function base.widget:index(widget, recursive, ...)
     local widgets = self:get_children()
 
@@ -187,6 +196,7 @@ end
 
 --- Figure out the geometry in device coordinate space. This gives only tight
 -- bounds if no rotations by non-multiples of 90° are used.
+-- @function wibox.widget.base.rect_to_device_geometry
 function base.rect_to_device_geometry(cr, x, y, width, height)
     return matrix.transform_rectangle(cr.matrix, x, y, width, height)
 end
@@ -200,6 +210,7 @@ end
 -- @param width The available width for the widget
 -- @param height The available height for the widget
 -- @return The width and height that the widget wants to use
+-- @function wibox.widget.base.fit_widget
 function base.fit_widget(parent, context, widget, width, height)
     record_dependency(parent, widget)
 
@@ -244,6 +255,7 @@ end
 -- @param width The available width for the widget
 -- @param height The available height for the widget
 -- @return The result from the widget's `:layout` callback.
+-- @function wibox.widget.base.layout_widget
 function base.layout_widget(parent, context, widget, width, height)
     record_dependency(parent, widget)
 
@@ -262,6 +274,7 @@ end
 
 -- Handle a button event on a widget. This is used internally and should not be
 -- called directly.
+-- @function wibox.widget.base.handle_button
 function base.handle_button(event, widget, x, y, button, modifiers, geometry)
     x = x or y -- luacheck: no unused
     local function is_any(mod)
@@ -310,6 +323,7 @@ end
 -- @param height The height of the widget in its own coordinate system. That is,
 --   after applying the transformation matrix.
 -- @return An opaque object that can be returned from :layout()
+-- @function wibox.widget.base.place_widget_via_matrix
 function base.place_widget_via_matrix(widget, mat, width, height)
     return {
         _widget = widget,
@@ -329,6 +343,7 @@ end
 -- @param height The height of the widget in its own coordinate system. That is,
 --   after applying the transformation matrix.
 -- @return An opaque object that can be returned from :layout()
+-- @function wibox.widget.base.place_widget_at
 function base.place_widget_at(widget, x, y, width, height)
     return base.place_widget_via_matrix(widget, matrix.create_translate(x, y), width, height)
 end
@@ -434,6 +449,7 @@ end
 --- Set a declarative widget hierarchy description.
 -- See [The declarative layout system](../documentation/03-declarative-layout.md.html)
 -- @param args An array containing the widgets disposition
+-- @function setup
 function base.widget:setup(args)
     local f,ids = self.set_widget or self.add or self.set_first,{}
     local w, id = drill(ids, args)
@@ -449,6 +465,7 @@ end
 --- Create a widget from a declarative description
 -- See [The declarative layout system](../documentation/03-declarative-layout.md.html)
 -- @param args An array containing the widgets disposition
+-- @function wibox.widget.base.make_widget_declarative
 function base.make_widget_declarative(args)
     local ids = {}
 
@@ -483,6 +500,7 @@ end
 --  setters calls.
 -- @tparam[opt=nil] table args.class The widget class
 -- @see fit_widget
+-- @function wibox.widget.base.make_widget
 function base.make_widget(proxy, widget_name, args)
     args = args or {}
     local ret = object {
@@ -571,12 +589,14 @@ function base.make_widget(proxy, widget_name, args)
 end
 
 --- Generate an empty widget which takes no space and displays nothing
+-- @function wibox.widget.base.empty_widget
 function base.empty_widget()
     return base.make_widget()
 end
 
 --- Do some sanity checking on widget. This function raises a lua error if
 -- widget is not a valid widget.
+-- @function wibox.widget.base.check_widget
 function base.check_widget(widget)
     assert(type(widget) == "table", "Type should be table, but is " .. tostring(type(widget)))
     assert(widget.is_widget, "Argument is not a widget!")
