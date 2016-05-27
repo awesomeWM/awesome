@@ -15,6 +15,7 @@ local table = table
 local type = type
 local color = require("gears.color")
 local base = require("wibox.widget.base")
+local beautiful = require("beautiful")
 
 local graph = { mt = {} }
 
@@ -57,6 +58,15 @@ local graph = { mt = {} }
 -- @property stack_colors
 -- @param stack_colors A table with stacking colors.
 
+--- The graph background color.
+-- @beautiful beautiful.graph_bg
+
+--- The graph foreground color.
+-- @beautiful beautiful.graph_fg
+
+--- The graph border color.
+-- @beautiful beautiful.graph_border_color
+
 local properties = { "width", "height", "border_color", "stack",
                      "stack_colors", "color", "background_color",
                      "max_value", "scale" }
@@ -68,7 +78,7 @@ function graph.draw(_graph, _, cr, width, height)
     cr:set_line_width(1)
 
     -- Draw the background first
-    cr:set_source(color(_graph._private.background_color or "#000000aa"))
+    cr:set_source(color(_graph._private.background_color or beautiful.graph_bg or "#000000aa"))
     cr:paint()
 
     -- Account for the border width
@@ -102,7 +112,7 @@ function graph.draw(_graph, _, cr, width, height)
                         local value = stack_values[#stack_values - i] + rel_i
                         cr:move_to(rel_x, height * (1 - (rel_i / max_value)))
                         cr:line_to(rel_x, height * (1 - (value / max_value)))
-                        cr:set_source(color(col or "#ff0000"))
+                        cr:set_source(color(col or beautiful.graph_fg or "#ff0000"))
                         cr:stroke()
                         rel_i = value
                     end
@@ -129,7 +139,7 @@ function graph.draw(_graph, _, cr, width, height)
                     cr:line_to(i + 0.5, height)
                 end
             end
-            cr:set_source(color(_graph._private.color or "#ff0000"))
+            cr:set_source(color(_graph._private.color or beautiful.graph_fg or "#ff0000"))
             cr:stroke()
         end
 
@@ -145,7 +155,7 @@ function graph.draw(_graph, _, cr, width, height)
 
         -- Draw the border
         cr:rectangle(0.5, 0.5, width - 1, height - 1)
-        cr:set_source(color(_graph._private.border_color or "#ffffff"))
+        cr:set_source(color(_graph._private.border_color or beautiful.graph_border_color or "#ffffff"))
         cr:stroke()
     end
 end
