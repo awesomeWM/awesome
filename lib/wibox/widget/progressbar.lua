@@ -13,6 +13,7 @@ local ipairs = ipairs
 local math = math
 local base = require("wibox.widget.base")
 local color = require("gears.color")
+local beautiful = require("beautiful")
 
 local progressbar = { mt = {} }
 
@@ -67,6 +68,15 @@ local data = setmetatable({}, { __mode = "k" })
 -- @param progressbar The progressbar.
 -- @param value The value.
 
+--- The progressbar background color.
+-- @beautiful beautiful.graph_bg
+
+--- The progressbar foreground color.
+-- @beautiful beautiful.graph_fg
+
+--- The progressbar border color.
+-- @beautiful beautiful.graph_border_color
+
 local properties = { "width", "height", "border_color",
                      "color", "background_color",
                      "vertical", "value", "max_value",
@@ -88,10 +98,11 @@ function progressbar.draw(pbar, _, cr, width, height)
     local over_drawn_width = width
     local over_drawn_height = height
     local border_width = 0
-    if data[pbar].border_color then
+    local col = data[pbar].border_color or beautiful.progressbar_border_color
+    if col then
         -- Draw border
         cr:rectangle(0.5, 0.5, width - 1, height - 1)
-        cr:set_source(color(data[pbar].border_color))
+        cr:set_source(color(col))
         cr:stroke()
 
         over_drawn_width = width - 2 -- remove 2 for borders
@@ -101,7 +112,7 @@ function progressbar.draw(pbar, _, cr, width, height)
 
     cr:rectangle(border_width, border_width,
                  over_drawn_width, over_drawn_height)
-    cr:set_source(color(data[pbar].color or "#ff0000"))
+    cr:set_source(color(data[pbar].color or beautiful.progressbar_fg or "#ff0000"))
     cr:fill()
 
     -- Cover the part that is not set with a rectangle
@@ -111,7 +122,7 @@ function progressbar.draw(pbar, _, cr, width, height)
                      border_width,
                      over_drawn_width,
                      rel_height)
-        cr:set_source(color(data[pbar].background_color or "#000000aa"))
+        cr:set_source(color(data[pbar].background_color or beautiful.progressbar_bg or "#000000aa"))
         cr:fill()
 
         -- Place smaller pieces over the gradient if ticks are enabled
@@ -126,7 +137,7 @@ function progressbar.draw(pbar, _, cr, width, height)
                                  ticks_gap)
                 end
             end
-            cr:set_source(color(data[pbar].background_color or "#000000aa"))
+            cr:set_source(color(data[pbar].background_color or beautiful.progressbar_bg or "#000000aa"))
             cr:fill()
         end
     else
