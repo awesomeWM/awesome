@@ -8,6 +8,8 @@ local manage_called, c_snid
 client.connect_signal("manage", function(c)
   manage_called = true
   c_snid = c.startup_id
+  assert(c.machine == awesome.hostname,
+      tostring(c.machine) .. " ~= " .. tostring(awesome.hostname))
 end)
 
 

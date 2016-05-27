@@ -56,6 +56,8 @@
 
 #include <xcb/xcb_atom.h>
 
+#include <unistd.h> /* for gethostname() */
+
 #ifdef WITH_DBUS
 extern const struct luaL_Reg awesome_dbus_lib[];
 #endif
@@ -255,6 +257,7 @@ luaA_fixups(lua_State *L)
  *  startup.
  * @field composite_manager_running True if a composite manager is running.
  * @field unix_signal Table mapping between signal numbers and signal identifiers.
+ * @field hostname The hostname of the computer on which we are running.
  * @table awesome
  */
 static int
@@ -300,6 +303,17 @@ luaA_awesome_index(lua_State *L)
     if(A_STREQ(buf, "composite_manager_running"))
     {
         lua_pushboolean(L, composite_manager_running());
+        return 1;
+    }
+
+    if(A_STREQ(buf, "hostname"))
+    {
+        /* No good way to handle failures... */
+        char hostname[256] = "";
+        gethostname(&hostname[0], countof(hostname));
+        hostname[countof(hostname) - 1] = '\0';
+
+        lua_pushstring(L, hostname);
         return 1;
     }
 
