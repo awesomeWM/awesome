@@ -39,6 +39,12 @@ local module = {
     awesome_icon = logo()
 }
 
+module.graph_bg = module.bg_normal
+module.graph_fg = module.bg_highlight
+
+module.progressbar_bg = module.bg_normal
+module.progressbar_fg = module.bg_highlight
+
 local f = Pango.FontDescription.from_string("sans 8")
 
 function module.get_font()
