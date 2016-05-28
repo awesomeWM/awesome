@@ -7,6 +7,7 @@
 
 local wbase = require("wibox.widget.base")
 local beautiful = require("beautiful")
+local util = require("awful.util")
 local capi = {
     awesome = awesome,
     screen = screen
@@ -155,9 +156,7 @@ end
 local function new(revers)
     local ret = wbase.make_widget()
 
-    for k, v in pairs(systray) do
-        ret[k] = v
-    end
+    util.table.crush(ret, systray, true)
 
     if revers then
         ret:set_reverse(true)
