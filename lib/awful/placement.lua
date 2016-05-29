@@ -96,6 +96,8 @@ local a_screen = require("awful.screen")
 local grect = require("gears.geometry").rectangle
 local util = require("awful.util")
 local dpi = require("beautiful").xresources.apply_dpi
+local cairo = require( "lgi" ).cairo
+local unpack = unpack or table.unpack -- luacheck: globals unpack (compatibility with Lua 5.1)
 
 local function get_screen(s)
     return s and capi.screen[s]
@@ -258,6 +260,19 @@ local resize_to_point_map = {
     right        = {p1={0,0} , p2= nil , x_only=true , y_only=false, align="top_left"    },
     top          = {p1= nil  , p2={1,1}, x_only=false, y_only=true , align="bottom_left" },
     bottom       = {p1={0,0} , p2= nil , x_only=false, y_only=true , align="top_left"    },
+}
+
+-- Outer position matrix
+-- 1=best case, 2=fallback
+local outer_positions = {
+    left1   = function(r, w, _) return {x=r.x-w        , y=r.y            }, "down"  end,
+    left2   = function(r, w, h) return {x=r.x-w        , y=r.y-h+r.height }, "up"    end,
+    right1  = function(r, _, _) return {x=r.x          , y=r.y            }, "down"  end,
+    right2  = function(r, _, h) return {x=r.x          , y=r.y-h+r.height }, "up"    end,
+    top1    = function(r, _, h) return {x=r.x          , y=r.y-h          }, "right" end,
+    top2    = function(r, w, h) return {x=r.x-w+r.width, y=r.y-h          }, "left"  end,
+    bottom1 = function(r, _, _) return {x=r.x          , y=r.y            }, "right" end,
+    bottom2 = function(r, w, _) return {x=r.x-w+r.width, y=r.y            }, "left"  end,
 }
 
 --- Add a context to the arguments.
@@ -553,8 +568,9 @@ attach = function(d, position_f, args)
         end
     end
 
-    -- If there is a parent drawable, screen or mouse, also track it
-    if parent then
+    -- If there is a parent drawable, screen, also track it.
+    -- Note that tracking the mouse is not supported
+    if parent and parent.connect_signal then
         parent:connect_signal("property::geometry" , tracker)
     end
 
@@ -601,6 +617,158 @@ local function rect_to_point(rect, corner_i, corner_j)
         x = rect.x + corner_i * math.floor(rect.width ),
         y = rect.y + corner_j * math.floor(rect.height),
     }
+end
+
+-- Create a pair of rectangles used to set the relative areas.
+-- v=vertical, h=horizontal
+local function get_cross_sections(abs_geo, mode)
+    if not mode or mode == "cursor" then
+        -- A 1px cross section centered around the mouse position
+        local coords = capi.mouse.coords()
+        return {
+            h = {
+                x      = abs_geo.drawable_geo.x     ,
+                y      = coords.y                   ,
+                width  = abs_geo.drawable_geo.width ,
+                height = 1                          ,
+            },
+            v = {
+                x      = coords.x                   ,
+                y      = abs_geo.drawable_geo.y     ,
+                width  = 1                          ,
+                height = abs_geo.drawable_geo.height,
+            }
+        }
+    elseif mode == "geometry" then
+        -- The widget geometry extended to reach the end of the drawable
+
+        return {
+            h = {
+                x      = abs_geo.drawable_geo.x     ,
+                y      = abs_geo.y                  ,
+                width  = abs_geo.drawable_geo.width ,
+                height = abs_geo.height             ,
+            },
+            v = {
+                x      = abs_geo.x                  ,
+                y      = abs_geo.drawable_geo.y     ,
+                width  = abs_geo.width              ,
+                height = abs_geo.drawable_geo.height,
+            }
+        }
+    elseif mode == "cursor_inside" then
+        -- A 1x1 rectangle  centered around the mouse position
+
+        local coords = capi.mouse.coords()
+        coords.width,coords.height = 1,1
+        return {h=coords, v=coords}
+    elseif mode == "geometry_inside" then
+        -- The widget absolute geometry, unchanged
+
+        return {h=abs_geo, v=abs_geo}
+    end
+end
+
+-- When a rectangle is embedded into a bigger one, get the regions around
+-- the outline of the bigger rectangle closest to the smaller one (on each side)
+local function get_relative_regions(geo, mode, is_absolute)
+
+    -- Use the mouse position and the wibox/client under it
+    if not geo then
+        local draw   = capi.mouse.current_wibox
+        geo          = draw and draw:geometry() or capi.mouse.coords()
+        geo.drawable = draw
+    elseif is_absolute then
+        -- Some signals are a bit inconsistent in their arguments convention.
+        -- This little hack tries to mitigate the issue.
+
+        geo.drawable = geo -- is a wibox or client, geometry and object are one
+                           -- and the same.
+    elseif (not geo.drawable) and geo.x and geo.width then
+        local coords = capi.mouse.coords()
+
+        -- Check if the mouse is in the rect
+        if coords.x > geo.x and coords.x < geo.x+geo.width and
+          coords.y > geo.y and coords.y < geo.y+geo.height then
+            geo.drawable = capi.mouse.current_wibox
+        end
+
+        -- Maybe there is a client
+        if (not geo.drawable) and capi.mouse.current_client then
+            geo.drawable = capi.mouse.current_client
+        end
+    end
+
+    -- Get the drawable geometry
+    local dpos = geo.drawable and (
+        geo.drawable.drawable and
+            geo.drawable.drawable:geometry()
+            or geo.drawable:geometry()
+    ) or {x=0, y=0}
+
+    -- Compute the absolute widget geometry
+    local abs_widget_geo = is_absolute and geo or {
+        x            = dpos.x + geo.x              ,
+        y            = dpos.y + geo.y              ,
+        width        = geo.width                   ,
+        height       = geo.height                  ,
+        drawable     = geo.drawable                ,
+    }
+
+    abs_widget_geo.drawable_geo = geo.drawable and dpos or geo
+
+    -- Get the point for comparison.
+    local center_point = mode:match("cursor") and capi.mouse.coords() or {
+        x = abs_widget_geo.x + abs_widget_geo.width  / 2,
+        y = abs_widget_geo.y + abs_widget_geo.height / 2,
+    }
+
+    -- Get widget regions for both axis
+    local cs = get_cross_sections(abs_widget_geo, mode)
+
+    -- Get the 4 closest points from `center_point` around the wibox
+    local regions = {
+        left   = {x = cs.h.x           , y = cs.h.y            },
+        right  = {x = cs.h.x+cs.h.width, y = cs.h.y            },
+        top    = {x = cs.v.x           , y = cs.v.y            },
+        bottom = {x = cs.v.x           , y = cs.v.y+cs.v.height},
+    }
+
+    -- Assume the section is part of a single screen until someone complains.
+    -- It is much faster to compute and getting it wrong probably has no side
+    -- effects.
+    local s = geo.drawable and geo.drawable.screen or a_screen.getbycoord(
+                                                        center_point.x,
+                                                        center_point.y
+                                                      )
+
+    -- Compute the distance (dp) between the `center_point` and the sides.
+    -- This is only relevant for "cursor" and "cursor_inside" modes.
+    for _, v in pairs(regions) do
+        local dx, dy = v.x - center_point.x, v.y - center_point.y
+
+        v.distance = math.sqrt(dx*dx + dy*dy)
+        v.width    = cs.v.width
+        v.height   = cs.h.height
+        v.screen   = capi.screen[s]
+    end
+
+    return regions
+end
+
+-- Check if the proposed geometry fits the screen
+local function fit_in_bounding(obj, geo, args)
+    local sgeo   = get_parent_geometry(obj, args)
+    local region = cairo.Region.create_rectangle(cairo.RectangleInt(sgeo))
+
+    region:intersect(cairo.Region.create_rectangle(
+        cairo.RectangleInt(geo)
+    ))
+
+    local geo2 = region:get_rectangle(0)
+
+    -- If the geometry is the same then it fits, otherwise it will be cropped.
+    return geo2.width == geo.width and geo2.height == geo.height
 end
 
 --- Move a drawable to the closest corner of the parent geometry (such as the
@@ -1087,6 +1255,10 @@ for _, v in ipairs {"vertically", "horizontally"} do
     end
 end
 
+---@DOC_awful_placement_maximize_vertically_EXAMPLE@
+
+---@DOC_awful_placement_maximize_horizontally_EXAMPLE@
+
 --- Scale the drawable by either a relative or absolute percent.
 --
 -- Valid args:
@@ -1143,9 +1315,94 @@ function placement.scale(d, args)
     return fix_new_geometry(ngeo, args, true)
 end
 
----@DOC_awful_placement_maximize_vertically_EXAMPLE@
+--- Move a drawable to a relative position next to another one.
+--
+-- The `args.preferred_positions` look like this:
+--
+--    {"top", "right", "left", "bottom"}
+--
+-- In that case, if there is room on the top of the geomtry, then it will have
+-- priority, followed by all the others, in order.
+--
+-- @tparam drawable d A wibox or client
+-- @tparam table args
+-- @tparam string args.mode The mode
+-- @tparam string args.preferred_positions The preferred positions (in order)
+-- @tparam string args.geometry A geometry inside the other drawable
+-- @treturn table The new geometry
+-- @treturn string The choosen position
+-- @treturn string The choosen direction
+function placement.next_to(d, args)
+    args = add_context(args, "next_to")
+    d    = d or capi.client.focus
 
----@DOC_awful_placement_maximize_horizontally_EXAMPLE@
+    local preferred_positions = {}
+
+    if #(args.preferred_positions or {}) then
+        for k, v in ipairs(args.preferred_positions) do
+            preferred_positions[v] = k
+        end
+    end
+
+    local dgeo = geometry_common(d, args)
+    local pref_idx, pref_name = 99, nil
+    local mode,wgeo = args.mode
+
+    if args.geometry then
+        mode = "geometry"
+        wgeo = args.geometry
+    else
+        local pos = capi.mouse.current_widget_geometry
+
+        if pos then
+            wgeo, mode = pos, "cursor"
+        elseif capi.mouse.current_client then
+            wgeo, mode = capi.mouse.current_client:geometry(), "cursor"
+        end
+    end
+
+    if not wgeo then return end
+
+    -- See get_relative_regions comments
+    local is_absolute = wgeo.ontop ~= nil
+
+    local regions = get_relative_regions(wgeo, mode, is_absolute)
+
+    -- Check each possible slot around the drawable (8 total), see what fits
+    -- and order them by preferred_positions
+    local does_fit = {}
+    for k,v in pairs(regions) do
+        local geo, dir = outer_positions[k.."1"](v, dgeo.width, dgeo.height)
+        geo.width, geo.height = dgeo.width, dgeo.height
+        local fit = fit_in_bounding(v.screen, geo, args)
+
+        -- Try the other compatible geometry
+        if not fit then
+            geo, dir = outer_positions[k.."2"](v, dgeo.width, dgeo.height)
+            geo.width, geo.height = dgeo.width, dgeo.height
+            fit = fit_in_bounding(v.screen, geo, args)
+        end
+
+        does_fit[k] = fit and {geo, dir} or nil
+
+        if fit and preferred_positions[k] and preferred_positions[k] < pref_idx then
+            pref_idx  = preferred_positions[k]
+            pref_name = k
+        end
+
+        -- No need to continue
+        if fit and preferred_positions[k] == 1 then break end
+    end
+
+    local pos_name = pref_name or next(does_fit)
+    local ngeo, dir = unpack(does_fit[pos_name] or {}) --FIXME why does this happen
+
+    geometry_common(d, args, ngeo)
+
+    attach(d, placement.next_to, args)
+
+    return fix_new_geometry(ngeo, args, true), pos_name, dir
+end
 
 --- Restore the geometry.
 -- @tparam[opt=client.focus] drawable d A drawable (like `client` or `wibox`)
