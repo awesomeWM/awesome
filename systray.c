@@ -124,11 +124,10 @@ systray_cleanup(void)
 
 /** Handle a systray request.
  * \param embed_win The window to embed.
- * \param info The embedding info
  * \return 0 on no error.
  */
 int
-systray_request_handle(xcb_window_t embed_win, xembed_info_t *info)
+systray_request_handle(xcb_window_t embed_win)
 {
     xembed_window_t em;
     xcb_get_property_cookie_t em_cookie;
@@ -145,8 +144,7 @@ systray_request_handle(xcb_window_t embed_win, xembed_info_t *info)
 
     p_clear(&em_cookie, 1);
 
-    if(!info)
-        em_cookie = xembed_info_get_unchecked(globalconf.connection, embed_win);
+    em_cookie = xembed_info_get_unchecked(globalconf.connection, embed_win);
 
     xcb_change_window_attributes(globalconf.connection, embed_win, XCB_CW_EVENT_MASK,
                                  select_input_val);
@@ -161,10 +159,7 @@ systray_request_handle(xcb_window_t embed_win, xembed_info_t *info)
 
     em.win = embed_win;
 
-    if(info)
-        em.info = *info;
-    else
-        xembed_info_get_reply(globalconf.connection, em_cookie, &em.info);
+    xembed_info_get_reply(globalconf.connection, em_cookie, &em.info);
 
     xembed_embedded_notify(globalconf.connection, em.win,
                            globalconf.systray.window,
@@ -196,7 +191,7 @@ systray_process_client_message(xcb_client_message_event_t *ev)
             return -1;
 
         if(globalconf.screen->root == geom_r->root)
-            ret = systray_request_handle(ev->data.data32[2], NULL);
+            ret = systray_request_handle(ev->data.data32[2]);
 
         p_delete(&geom_r);
         break;
