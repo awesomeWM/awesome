@@ -75,7 +75,7 @@ end
 -- @tparam tooltip self The tooltip to show.
 local function show(self)
     -- do nothing if the tooltip is already shown
-    if self.visible then return end
+    if self._private.visible then return end
     if self.timer then
         if not self.timer.started then
             self:timer_function()
@@ -84,7 +84,7 @@ local function show(self)
     end
     set_geometry(self)
     self.wibox.visible = true
-    self.visible = true
+    self._private.visible = true
     self:emit_signal("property::visible")
 end
 
@@ -93,14 +93,14 @@ end
 -- @tparam tooltip self The tooltip to hide.
 local function hide(self)
     -- do nothing if the tooltip is already hidden
-    if not self.visible then return end
+    if not self._private.visible then return end
     if self.timer then
         if self.timer.started then
             self.timer:stop()
         end
     end
     self.wibox.visible = false
-    self.visible = false
+    self._private.visible = false
     self:emit_signal("property::visible")
 end
 
@@ -129,6 +129,20 @@ end
 -- @property visible
 -- @param boolean
 
+function tooltip:get_visible()
+    return self._private.visible
+end
+
+function tooltip:set_visible(value)
+    if self._private.visible == value then return end
+
+    if value then
+        show(self)
+    else
+        hide(self)
+    end
+end
+
 --- Change displayed text.
 --
 -- @property text
@@ -138,7 +152,7 @@ end
 
 function tooltip:set_text(text)
     self.textbox:set_text(text)
-    if self.visible then
+    if self._private.visible then
         set_geometry(self)
     end
 end
@@ -152,7 +166,7 @@ end
 
 function tooltip:set_markup(text)
     self.textbox:set_markup(text)
-    if self.visible then
+    if self._private.visible then
         set_geometry(self)
     end
 end
@@ -218,7 +232,7 @@ function tooltip.new(args)
 
     rawset(self,"_private", {})
 
-    self.visible = false
+    self._private.visible = false
 
     -- private data
     if args.delay_show then
