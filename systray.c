@@ -159,7 +159,11 @@ systray_request_handle(xcb_window_t embed_win)
 
     em.win = embed_win;
 
-    xembed_info_get_reply(globalconf.connection, em_cookie, &em.info);
+    if (!xembed_info_get_reply(globalconf.connection, em_cookie, &em.info)) {
+        /* Set some sane defaults */
+        em.info.version = XEMBED_VERSION;
+        em.info.flags = XEMBED_MAPPED;
+    }
 
     xembed_embedded_notify(globalconf.connection, em.win,
                            globalconf.systray.window,
