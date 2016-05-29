@@ -284,7 +284,6 @@ end
 -- @treturn table The list of widgets.The first element is the biggest
 -- container while the last is the topmost widget. The table contains *x*, *y*,
 -- *width*, *height* and *widget*.
--- @treturn table The list of geometries.
 -- @see wibox.find_widgets
 
 function mouse.object.get_current_widgets()
@@ -308,8 +307,8 @@ end
 -- @property current_widget
 -- @tparam widget|nil widget The widget
 -- @treturn ?widget The widget
--- @treturn ?table The geometry.
 -- @see wibox.find_widgets
+-- @see current_widget_geometry
 
 function mouse.object.get_current_widget()
     local wdgs, geos = mouse.object.get_current_widgets()
@@ -317,6 +316,28 @@ function mouse.object.get_current_widget()
     if wdgs then
         return wdgs[#wdgs], geos[#geos]
     end
+end
+
+--- Get the current widget geometry.
+-- @property current_widget_geometry
+-- @tparam ?table The geometry.
+-- @see current_widget
+
+function mouse.object.get_current_widget_geometry()
+    local _, ret = mouse.object.get_current_widget()
+
+    return ret
+end
+
+--- Get the current widget geometries.
+-- @property current_widget_geometries
+-- @tparam ?table A list of geometry tables.
+-- @see current_widgets
+
+function mouse.object.get_current_widget_geometries()
+    local _, ret = mouse.object.get_current_widgets()
+
+    return ret
 end
 
 --- True if the left mouse button is pressed.
