@@ -95,7 +95,6 @@ local layout = require("awful.layout")
 local a_screen = require("awful.screen")
 local grect = require("gears.geometry").rectangle
 local util = require("awful.util")
-local dpi = require("beautiful").xresources.apply_dpi
 local cairo = require( "lgi" ).cairo
 local unpack = unpack or table.unpack -- luacheck: globals unpack (compatibility with Lua 5.1)
 
@@ -946,38 +945,44 @@ end
 -- It will place `c` next to the mouse pointer, trying the following positions
 -- in this order: right, left, above and below.
 --@DOC_awful_placement_next_to_mouse_EXAMPLE@
--- @client[opt=focused] c The client.
--- @tparam[opt=apply_dpi(5)] integer offset The offset from the mouse position.
+-- @tparam drawable d A drawable (like `client`, `mouse` or `wibox`)
+-- @tparam[opt={}] table args Other arguments
 -- @treturn table The new geometry
-function placement.next_to_mouse(c, offset)
-    c = c or capi.client.focus
-    offset = offset or dpi(5)
-    local c_geometry = area_common(c)
-    local c_width = c_geometry.width
-    local c_height = c_geometry.height
-    local m_coords = capi.mouse.coords()
-    local screen_geometry = capi.screen[capi.mouse.screen].workarea
-
-    local x, y
-
-    -- Prefer it to be on the right.
-    x = m_coords.x + offset
-    if x + c_width > screen_geometry.width then
-        -- Then to the left.
-        x = m_coords.x - c_width - offset
+function placement.next_to_mouse(d, args)
+    if type(args) == "number" then
+        util.deprecate(
+            "awful.placement.next_to_mouse offset argument is deprecated"..
+            " use awful.placement.next_to_mouse(c, {offset={x=...}})"
+        )
+        args = nil
     end
-    if x < screen_geometry.x then
-        -- Then above.
-        x = m_coords.x - math.ceil(c_width / 2)
-        y = m_coords.y - c_height - offset
-        if y < screen_geometry.y then
-            -- Finally below.
-            y = m_coords.y + offset
-        end
+
+    local old_args = args or {}
+
+    args = add_context(args, "next_to_mouse")
+    d = d or capi.client.focus
+
+    local sgeo = get_parent_geometry(d, args)
+
+    args.pretend = true
+    args.parent  = capi.mouse
+
+    local ngeo = placement.left(d, args)
+
+    if ngeo.x + ngeo.width > sgeo.x+sgeo.width then
+        ngeo = placement.right(d, args)
     else
-        y = m_coords.y - math.ceil(c_height / 2)
+        -- It is _next_ to mouse, not under_mouse
+        ngeo.x = ngeo.x+1
     end
-    return c:geometry({ x = x, y = y })
+
+    args.pretend = old_args.pretend
+
+    geometry_common(d, args, ngeo)
+
+    attach(d, placement.next_to_mouse, old_args)
+
+    return fix_new_geometry(ngeo, args, true)
 end
 
 --- Resize the drawable to the cursor.
