@@ -37,11 +37,12 @@
 -- @author Sébastien Gross &lt;seb•ɱɩɲʋʃ•awesome•ɑƬ•chezwam•ɖɵʈ•org&gt;
 -- @copyright 2009 Sébastien Gross
 -- @release @AWESOME_VERSION@
--- @module awful.tooltip
+-- @classmod awful.tooltip
 -------------------------------------------------------------------------
 
 local mouse = mouse
 local timer = require("gears.timer")
+local util = require("awful.util")
 local object = require("gears.object")
 local wibox = require("wibox")
 local a_placement = require("awful.placement")
@@ -53,26 +54,7 @@ local dpi = require("beautiful").xresources.apply_dpi
 local setmetatable = setmetatable
 local ipairs = ipairs
 
---- Tooltip object definition.
--- @table tooltip
--- @tfield wibox wibox The wibox displaying the tooltip.
--- @tfield boolean visible True if tooltip is visible.
 local tooltip = { mt = {}  }
-
-local instance_mt = {}
-
-function instance_mt:__index(key)
-    if key == "wibox" then
-        local wb = wibox(self.wibox_properties)
-        wb:set_widget(self.marginbox)
-
-        -- Close the tooltip when clicking it.  This gets done on release, to not
-        -- emit the release event on an underlying object, e.g. the titlebar icon.
-        wb:buttons(abutton({}, 1, nil, self.hide))
-        rawset(self, "wibox", wb)
-        return wb
-    end
-end
 
 -- Place the tooltip under the mouse.
 --
@@ -82,9 +64,10 @@ local function set_geometry(self)
     local n_w, n_h = self.textbox:get_preferred_size(mouse.screen)
     n_w = n_w + self.marginbox.left + self.marginbox.right
     n_h = n_h + self.marginbox.top + self.marginbox.bottom
-    self.wibox:geometry({ width = n_w, height = n_h })
-    a_placement.next_to_mouse(self.wibox)
-    a_placement.no_offscreen(self.wibox, mouse.screen)
+
+    self:get_wibox():geometry({ width = n_w, height = n_h })
+    a_placement.next_to_mouse(self:get_wibox())
+    a_placement.no_offscreen(self:get_wibox(), mouse.screen)
 end
 
 -- Show a tooltip.
@@ -121,12 +104,39 @@ local function hide(self)
     self:emit_signal("property::visible")
 end
 
+--- The wibox.
+-- @property wibox
+-- @param `wibox`
+
+function tooltip:get_wibox()
+    if self._private.wibox then
+        return self._private.wibox
+    end
+
+    local wb = wibox(self.wibox_properties)
+    wb:set_widget(self.marginbox)
+
+    -- Close the tooltip when clicking it.  This gets done on release, to not
+    -- emit the release event on an underlying object, e.g. the titlebar icon.
+    wb:buttons(abutton({}, 1, nil, self.hide))
+
+    self._private.wibox = wb
+
+    return wb
+end
+
+--- Is the tooltip visible?
+-- @property visible
+-- @param boolean
+
 --- Change displayed text.
 --
+-- @property text
 -- @tparam tooltip self The tooltip object.
 -- @tparam string  text New tooltip text, passed to
 --   `wibox.widget.textbox.set_text`.
-tooltip.set_text = function(self, text)
+
+function tooltip:set_text(text)
     self.textbox:set_text(text)
     if self.visible then
         set_geometry(self)
@@ -135,10 +145,12 @@ end
 
 --- Change displayed markup.
 --
+-- @property markup
 -- @tparam tooltip self The tooltip object.
 -- @tparam string  text New tooltip markup, passed to
 --   `wibox.widget.textbox.set_markup`.
-tooltip.set_markup = function(self, text)
+
+function tooltip:set_markup(text)
     self.textbox:set_markup(text)
     if self.visible then
         set_geometry(self)
@@ -147,9 +159,11 @@ end
 
 --- Change the tooltip's update interval.
 --
+-- @property timeout
 -- @tparam tooltip self A tooltip object.
 -- @tparam number timeout The timeout value.
-tooltip.set_timeout = function(self, timeout)
+
+function tooltip:set_timeout(timeout)
     if self.timer then
         self.timer.timeout = timeout
     end
@@ -160,7 +174,8 @@ end
 -- @tparam tooltip self The tooltip.
 -- @tparam gears.object obj An object with `mouse::enter` and
 --   `mouse::leave` signals.
-tooltip.add_to_object = function(self, obj)
+-- @function add_to_object
+function tooltip:add_to_object(obj)
     obj:connect_signal("mouse::enter", self.show)
     obj:connect_signal("mouse::leave", self.hide)
 end
@@ -170,7 +185,8 @@ end
 -- @tparam tooltip self The tooltip.
 -- @tparam gears.object obj An object with `mouse::enter` and
 --   `mouse::leave` signals.
-tooltip.remove_from_object = function(self, obj)
+-- @function remove_from_object
+function tooltip:remove_from_object(obj)
     obj:disconnect_signal("mouse::enter", self.show)
     obj:disconnect_signal("mouse::leave", self.hide)
 end
@@ -191,11 +207,17 @@ end
 -- @tparam[opt=apply_dpi(3)] integer args.margin_topbottom The top/bottom margin for the text.
 -- @treturn awful.tooltip The created tooltip.
 -- @see add_to_object
--- @see set_timeout
--- @see set_text
--- @see set_markup
-tooltip.new = function(args)
-    local self = setmetatable(object(), instance_mt)
+-- @see timeout
+-- @see text
+-- @see markup
+-- @function awful.tooltip
+function tooltip.new(args)
+    local self = object {
+        enable_properties = true,
+    }
+
+    rawset(self,"_private", {})
+
     self.visible = false
 
     -- private data
@@ -229,11 +251,7 @@ tooltip.new = function(args)
     end
 
     -- export functions
-    self.set_text = tooltip.set_text
-    self.set_markup = tooltip.set_markup
-    self.set_timeout = tooltip.set_timeout
-    self.add_to_object = tooltip.add_to_object
-    self.remove_from_object = tooltip.remove_from_object
+    util.table.crush(self, tooltip, true)
 
     -- setup the timer action only if needed
     if args.timer_function then
