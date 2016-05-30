@@ -14,5 +14,4 @@ placement.stretch_up(client.focus)
 assert(c.y==0) --DOC_HIDE
 assert(c.x==45) --DOC_HIDE
 assert(c.width == 40) --DOC_HIDE
-print(c.height-2*c.border_width,35+30)
 assert(c.height-2*c.border_width == 35+30) --DOC_HIDE
