@@ -189,6 +189,8 @@ start_awesome() {
 
 # Count errors.
 errors=0
+# Seconds after when awesome gets killed.
+timeout_stale=60
 
 for f in $tests; do
     echo "== Running $f =="
@@ -203,6 +205,13 @@ for f in $tests; do
 
     # Send the test file to awesome.
     cat $f | DISPLAY=$D "$AWESOME_CLIENT" 2>&1
+
+    # Kill awesome after 1 minute (e.g. with errors during test setup).
+    (sleep $timeout_stale
+      if [ "$(ps -o comm= $awesome_pid)" = "${AWESOME##*/}" ]; then
+        echo "Killing (stale?!) awesome (PID $awesome_pid) after $timeout_stale seconds."
+        kill $awesome_pid
+      fi) &
 
     # Tail the log and quit, when awesome quits.
     tail -n 100000 -f --pid $awesome_pid $awesome_log
