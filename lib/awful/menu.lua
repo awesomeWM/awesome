@@ -249,7 +249,7 @@ function menu:exec(num, opts)
             self.active_child:hide()
         end
         self.active_child = self.child[num]
-        if not self.active_child.visible then
+        if not self.active_child:get_visible() then
             self.active_child:show()
         end
     elseif type(cmd) == "string" then
@@ -384,7 +384,7 @@ function menu:add(args, index)
     item.width = item.width or theme.width
     item.height = item.height or theme.height
     wibox.widget.base.check_widget(item.widget)
-    item._background = wibox.widget.background()
+    item._background = wibox.container.background()
     item._background:set_widget(item.widget)
     item._background:set_fg(item.theme.fg_normal)
     item._background:set_bg(item.theme.bg_normal)
@@ -431,7 +431,7 @@ function menu:delete(num)
     local item = self.items[num]
     if not item then return end
     item.widget:disconnect_signal("mouse::enter", item._mouse)
-    item.widget.visible = false
+    item.widget:set_visible(false)
     table.remove(self.items, num)
     if self.sel == num then
         self:item_leave(self.sel)
@@ -516,7 +516,7 @@ function menu.entry(parent, args) -- luacheck: no unused args
         end, 1))
     -- Set icon if needed
     local icon, iconbox
-    local margin = wibox.layout.margin()
+    local margin = wibox.container.margin()
     margin:set_widget(label)
     if args.icon then
         icon = surface.load(args.icon)

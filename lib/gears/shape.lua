@@ -28,13 +28,15 @@ local module = {}
 --- Add a rounded rectangle to the current path.
 -- Note: If the radius is bigger than either half side, it will be reduced.
 --
--- @SHAPE_rounded_rect_EXAMPLE@
+-- @DOC_gears_shape_rounded_rect_EXAMPLE@
 --
 -- @param cr A cairo content
 -- @tparam number width The rectangle width
 -- @tparam number height The rectangle height
 -- @tparam number radius the corner radius
 function module.rounded_rect(cr, width, height, radius)
+    radius = radius or 10
+
     if width / 2 < radius then
         radius = width / 2
     end
@@ -53,7 +55,7 @@ end
 
 --- Add a rectangle delimited by 2 180 degree arcs to the path.
 --
--- @SHAPE_rounded_bar_EXAMPLE@
+-- @DOC_gears_shape_rounded_bar_EXAMPLE@
 --
 -- @param cr A cairo content
 -- @param width The rectangle width
@@ -64,7 +66,7 @@ end
 
 --- A rounded rect with only some of the corners rounded.
 --
--- @SHAPE_partially_rounded_rect_EXAMPLE@
+-- @DOC_gears_shape_partially_rounded_rect_EXAMPLE@
 --
 -- @param cr A cairo context
 -- @tparam number width The shape width
@@ -117,7 +119,7 @@ end
 
 --- A rounded rectangle with a triangle at the top.
 --
--- @SHAPE_infobubble_EXAMPLE@
+-- @DOC_gears_shape_infobubble_EXAMPLE@
 --
 -- @param cr A cairo context
 -- @tparam number width The shape width
@@ -152,7 +154,7 @@ end
 
 --- A rectangle terminated by an arrow.
 --
--- @SHAPE_rectangular_tag_EXAMPLE@
+-- @DOC_gears_shape_rectangular_tag_EXAMPLE@
 --
 -- @param cr A cairo context
 -- @tparam number width The shape width
@@ -179,7 +181,7 @@ end
 
 --- A simple arrow shape.
 --
--- @SHAPE_arrow_EXAMPLE@
+-- @DOC_gears_shape_arrow_EXAMPLE@
 --
 -- @param cr A cairo context
 -- @tparam number width The shape width
@@ -206,7 +208,7 @@ end
 
 --- A squeezed hexagon filling the rectangle.
 --
--- @SHAPE_hexagon_EXAMPLE@
+-- @DOC_gears_shape_hexagon_EXAMPLE@
 --
 -- @param cr A cairo context
 -- @tparam number width The shape width
@@ -224,7 +226,7 @@ end
 
 --- Double arrow popularized by the vim-powerline module.
 --
--- @SHAPE_powerline_EXAMPLE@
+-- @DOC_gears_shape_powerline_EXAMPLE@
 --
 -- @param cr A cairo context
 -- @tparam number width The shape width
@@ -252,7 +254,7 @@ end
 
 --- An isosceles triangle.
 --
--- @SHAPE_isosceles_triangle_EXAMPLE@
+-- @DOC_gears_shape_isosceles_triangle_EXAMPLE@
 --
 -- @param cr A cairo context
 -- @tparam number width The shape width
@@ -266,7 +268,7 @@ end
 
 --- A cross (**+**) symbol.
 --
--- @SHAPE_cross_EXAMPLE@
+-- @DOC_gears_shape_cross_EXAMPLE@
 --
 -- @param cr A cairo context
 -- @tparam number width The shape width
@@ -293,7 +295,7 @@ end
 
 --- A similar shape to the `rounded_rect`, but with sharp corners.
 --
--- @SHAPE_octogon_EXAMPLE@
+-- @DOC_gears_shape_octogon_EXAMPLE@
 --
 -- @param cr A cairo context
 -- @tparam number width The shape width
@@ -316,7 +318,7 @@ end
 
 --- A circle shape.
 --
--- @SHAPE_circle_EXAMPLE@
+-- @DOC_gears_shape_circle_EXAMPLE@
 --
 -- @param cr A cairo context
 -- @tparam number width The shape width
@@ -329,7 +331,7 @@ end
 
 --- A simple rectangle.
 --
--- @SHAPE_rectangle_EXAMPLE@
+-- @DOC_gears_shape_rectangle_EXAMPLE@
 --
 -- @param cr A cairo context
 -- @tparam number width The shape width
@@ -341,7 +343,7 @@ end
 --- A diagonal parallelogram with the bottom left corner at x=0 and top right
 -- at x=width.
 --
--- @SHAPE_parallelogram_EXAMPLE@
+-- @DOC_gears_shape_parallelogram_EXAMPLE@
 --
 -- @param cr A cairo context
 -- @tparam number width The shape width
@@ -358,7 +360,7 @@ end
 
 --- A losange.
 --
--- @SHAPE_losange_EXAMPLE@
+-- @DOC_gears_shape_losange_EXAMPLE@
 --
 -- @param cr A cairo context
 -- @tparam number width The shape width
@@ -377,7 +379,7 @@ end
 -- Note that this shape is not closed and thus filling it doesn't make much
 -- sense.
 --
--- @SHAPE_radial_progress_EXAMPLE@
+-- @DOC_gears_shape_radial_progress_EXAMPLE@
 --
 -- @param cr A cairo context
 -- @tparam number w The shape width

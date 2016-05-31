@@ -522,7 +522,7 @@ function naughty.notify(args)
 
     -- create textbox
     local textbox = wibox.widget.textbox()
-    local marginbox = wibox.layout.margin()
+    local marginbox = wibox.container.margin()
     marginbox:set_margins(margin)
     marginbox:set_widget(textbox)
     textbox:set_valign("middle")
@@ -538,7 +538,7 @@ function naughty.notify(args)
     if actions then
         for action, callback in pairs(actions) do
             local actiontextbox = wibox.widget.textbox()
-            local actionmarginbox = wibox.layout.margin()
+            local actionmarginbox = wibox.container.margin()
             actionmarginbox:set_margins(margin)
             actionmarginbox:set_widget(actiontextbox)
             actiontextbox:set_valign("middle")
@@ -582,7 +582,7 @@ function naughty.notify(args)
         -- if we have an icon, use it
         if icon then
             iconbox = wibox.widget.imagebox()
-            iconmargin = wibox.layout.margin(iconbox, margin, margin, margin, margin)
+            iconmargin = wibox.container.margin(iconbox, margin, margin, margin, margin)
             if icon_size then
                 local scaled = cairo.ImageSurface(cairo.Format.ARGB32, icon_size, icon_size)
                 local cr = cairo.Context(scaled)

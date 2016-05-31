@@ -24,6 +24,7 @@ local base = require("wibox.widget.base")
 -- wibox
 local wibox = { mt = {}, object = {} }
 wibox.layout = require("wibox.layout")
+wibox.container = require("wibox.container")
 wibox.widget = require("wibox.widget")
 wibox.drawable = require("wibox.drawable")
 wibox.hierarchy = require("wibox.hierarchy")

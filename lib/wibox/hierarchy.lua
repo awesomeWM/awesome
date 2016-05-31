@@ -259,7 +259,7 @@ end
 -- @param cr The cairo context that is used for drawing.
 function hierarchy:draw(context, cr)
     local widget = self:get_widget()
-    if not widget.visible then
+    if not widget._private.visible then
         return
     end
 
@@ -272,7 +272,7 @@ function hierarchy:draw(context, cr)
 
     -- Draw if needed
     if not empty_clip(cr) then
-        local opacity = widget.opacity
+        local opacity = widget:get_opacity()
         local function call(func, extra_arg1, extra_arg2)
             if not func then return end
             if not extra_arg2 then

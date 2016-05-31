@@ -8,6 +8,7 @@
 -- The indices are going from 1 (the bottom of the stack) up to the top of
 -- the stack. The order can be changed either using `:swap` or `:raise`.
 --
+--@DOC_wibox_layout_defaults_stack_EXAMPLE@
 -- @author Emmanuel Lepage Vallee
 -- @copyright 2016 Emmanuel Lepage Vallee
 -- @release @AWESOME_VERSION@
@@ -52,17 +53,16 @@ local stack = {mt={}}
 -- @class function
 
 --- Add spacing between each layout widgets
--- @param spacing Spacing between widgets.
--- @name set_spacing
--- @class function
+-- @property spacing
+-- @tparam number spacing Spacing between widgets.
 
 function stack:layout(_, width, height)
     local result = {}
-    local spacing = self._spacing
+    local spacing = self._private.spacing
 
-    for _, v in pairs(self.widgets) do
+    for _, v in pairs(self._private.widgets) do
         table.insert(result, base.place_widget_at(v, spacing, spacing, width - 2*spacing, height - 2*spacing))
-        if self._top_only then break end
+        if self._private.top_only then break end
     end
 
     return result
@@ -70,9 +70,9 @@ end
 
 function stack:fit(context, orig_width, orig_height)
     local max_w, max_h = 0,0
-    local spacing = self._spacing
+    local spacing = self._private.spacing
 
-    for _, v in pairs(self.widgets) do
+    for _, v in pairs(self._private.widgets) do
         local w, h = base.fit_widget(self, context, v, orig_width, orig_height)
         max_w, max_h = math.max(max_w, w+2*spacing), math.max(max_h, h+2*spacing)
     end
@@ -80,26 +80,25 @@ function stack:fit(context, orig_width, orig_height)
     return math.min(max_w, orig_width), math.min(max_h, orig_height)
 end
 
---- Get if only the first stack widget is drawn
--- @return If the only the first stack widget is drawn
-function stack:get_display_top_only()
-    return self._top_only
+--- If only the first stack widget is drawn
+-- @property top_only
+
+function stack:get_top_only()
+    return self._private.top_only
 end
 
---- Only draw the first widget of the stack, ignore others
--- @tparam boolean top_only Only draw the top stack widget
-function stack:set_display_top_only(top_only)
-    self._top_only = top_only
+function stack:set_top_only(top_only)
+    self._private.top_only = top_only
 end
 
 --- Raise a widget at `index` to the top of the stack
 -- @tparam number index the widget index to raise
 function stack:raise(index)
-    if (not index) or self.widgets[index] then return end
+    if (not index) or self._private.widgets[index] then return end
 
-    local w = self.widgets[index]
-    table.remove(self.widgets, index)
-    table.insert(self.widgets, w)
+    local w = self._private.widgets[index]
+    table.remove(self._private.widgets, index)
+    table.insert(self._private.widgets, w)
 
     self:emit_signal("widget::layout_changed")
 end
@@ -130,7 +129,7 @@ end
 local function new(...)
     local ret = fixed.horizontal(...)
 
-    util.table.crush(ret, stack)
+    util.table.crush(ret, stack, true)
 
     return ret
 end
@@ -138,6 +137,10 @@ end
 function stack.mt:__call(_, ...)
     return new(...)
 end
+
+--@DOC_widget_COMMON@
+
+--@DOC_object_COMMON@
 
 return setmetatable(stack, stack.mt)
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

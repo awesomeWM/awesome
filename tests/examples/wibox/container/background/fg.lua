@@ -10,17 +10,17 @@ parent : setup {
     {
         text_widget,
         fg     = '#ff0000',
-        widget = wibox.widget.background
+        widget = wibox.container.background
     },
     {
         text_widget,
         fg     = '#00ff00',
-        widget = wibox.widget.background
+        widget = wibox.container.background
     },
     {
         text_widget,
         fg     = '#0000ff',
-        widget = wibox.widget.background
+        widget = wibox.container.background
     },
     spacing = 10,
     layout  = wibox.layout.fixed.vertical

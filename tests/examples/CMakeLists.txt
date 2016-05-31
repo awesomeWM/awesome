@@ -144,11 +144,16 @@ function(run_test test_path namespace template escaped_content)
     get_filename_component(${test_path} TEST_FILE_NAME NAME)
     set(IMAGE_PATH "${IMAGE_DIR}/AUTOGEN${namespace}_${TEST_FILE_NAME}")
 
+    # Use the example testing as coverage source
+    if (USE_LCOV)
+        set(LCOV_PATH ${SOURCE_DIR}/.luacov)
+    endif()
+
     # Execute the script, leave the image extension decision to the test
     # SVG is preferred, but PNG is better suited for some tests, like bitmap
     # patterns.
     execute_process(
-        COMMAND lua ${template} ${test_path} ${IMAGE_PATH} ${SOURCE_DIR}/.luacov
+        COMMAND lua ${template} ${test_path} ${IMAGE_PATH} ${LCOV_PATH}
         OUTPUT_VARIABLE TEST_OUTPUT
         ERROR_VARIABLE  TEST_ERROR
     )

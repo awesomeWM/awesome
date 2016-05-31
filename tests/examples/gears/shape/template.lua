@@ -30,7 +30,7 @@ local function show(cr, skip_fill)
     cr:clip()
 end
 
-local cr = get_surface(svgpath)
+local cr = get_surface(svgpath..".svg")
 cr:translate(3,3)
 
 loadfile(filepath)(shape, cr, show)

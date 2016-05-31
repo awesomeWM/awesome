@@ -60,6 +60,36 @@ function util.deprecate(see)
     gears_debug.print_warning(msg .. ".\n" .. tb)
 end
 
+--- Create a class proxy with deprecation messages.
+-- This is useful when a class has moved somewhere else.
+-- @tparam table fallback The new class
+-- @tparam string old_name The old class name
+-- @tparam string new_name The new class name
+-- @treturn table A proxy class.
+function util.deprecate_class(fallback, old_name, new_name)
+    local message = old_name.." has been renamed to "..new_name
+
+    local function call(_,...)
+        util.deprecate(message)
+
+        return fallback(...)
+    end
+
+    local function index(_, k)
+        util.deprecate(message)
+
+        return fallback[k]
+    end
+
+    local function newindex(_, k, v)
+        util.deprecate(message)
+
+        fallback[k] = v
+    end
+
+    return setmetatable({}, {__call = call, __index = index, __newindex  = newindex})
+end
+
 --- Get a valid color for Pango markup
 -- @param color The color.
 -- @tparam string fallback The color to return if the first is invalid. (default: black)
@@ -336,13 +366,22 @@ function util.table.join(...)
     return ret
 end
 
---- Override elements in the first table by the one in the second
+--- Override elements in the first table by the one in the second.
+--
+-- Note that this method doesn't copy entries found in `__index`.
 -- @tparam table t the table to be overriden
 -- @tparam table set the table used to override members of `t`
+-- @tparam[opt=false] boolean raw Use rawset (avoid the metatable)
 -- @treturn table t (for convenience)
-function util.table.crush(t, set)
-    for k, v in pairs(set) do
-        t[k] = v
+function util.table.crush(t, set, raw)
+    if raw then
+        for k, v in pairs(set) do
+            rawset(t, k, v)
+        end
+    else
+        for k, v in pairs(set) do
+            t[k] = v
+        end
     end
 
     return t

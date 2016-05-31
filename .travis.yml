@@ -84,14 +84,14 @@ install:
   - travis_retry sudo luarocks install lua-discount
 
   # Instal luacov-coveralls for code coverage testing.
-  - if [ "$DO_COVERAGE" = "true" ]; then sudo luarocks install luacov-coveralls; fi
+  - if [ "$DO_COVERAGE" = "true" ]; then sudo luarocks install luacov-coveralls; else export DO_COVERAGE=0; fi
 
   # Determine custom version.
   - export AWESOME_VERSION="${TRAVIS_BRANCH}-g$(git rev-parse --short HEAD)"
   - 'if [ "$TRAVIS_PULL_REQUEST" != false ]; then AWESOME_VERSION="${AWESOME_VERSION}-PR${TRAVIS_PULL_REQUEST}"; fi'
 
 script:
-  - export CMAKE_ARGS="-DLUA_LIBRARY=${LUALIBRARY} -DLUA_INCLUDE_DIR=${LUAINCLUDE} -D OVERRIDE_VERSION=$AWESOME_VERSION"
+  - export CMAKE_ARGS="-DLUA_LIBRARY=${LUALIBRARY} -DLUA_INCLUDE_DIR=${LUAINCLUDE} -D OVERRIDE_VERSION=$AWESOME_VERSION -D DO_COVERAGE=${DO_COVERAGE}"
   - |
     if [ -n "$BUILD_IN_DIR" ]; then
         SOURCE_DIRECTORY="$PWD"

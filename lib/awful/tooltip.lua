@@ -10,7 +10,7 @@
 -- How to create a tooltip?
 -- ---
 --
---     myclock = awful.widget.textclock({}, "%T", 1)
+--     myclock = wibox.widget.textclock({}, "%T", 1)
 --     myclock_t = awful.tooltip({
 --         objects = { myclock },
 --         timer_function = function()
@@ -48,7 +48,7 @@ local a_placement = require("awful.placement")
 local abutton = require("awful.button")
 local beautiful = require("beautiful")
 local textbox = require("wibox.widget.textbox")
-local background = require("wibox.widget.background")
+local background = require("wibox.container.background")
 local dpi = require("beautiful").xresources.apply_dpi
 local setmetatable = setmetatable
 local ipairs = ipairs
@@ -265,7 +265,7 @@ tooltip.new = function(args)
     -- Add margin.
     local m_lr = args.margin_leftright or dpi(5)
     local m_tb = args.margin_topbottom or dpi(3)
-    self.marginbox = wibox.layout.margin(self.background, m_lr, m_lr, m_tb, m_tb)
+    self.marginbox = wibox.container.margin(self.background, m_lr, m_lr, m_tb, m_tb)
 
     -- Add tooltip to objects
     if args.objects then

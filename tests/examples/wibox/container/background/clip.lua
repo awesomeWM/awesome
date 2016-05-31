@@ -13,7 +13,7 @@ parent : setup {
         shape              = gears.shape.circle,
         bg                 = beautiful.bg_normal,
         shape_border_color = beautiful.border_color,
-        widget             = wibox.widget.background
+        widget             = wibox.container.background
     },
     {
         -- To solve this, clip the content
@@ -25,7 +25,7 @@ parent : setup {
         shape              = gears.shape.circle,
         bg                 = beautiful.bg_normal,
         shape_border_color = beautiful.border_color,
-        widget             = wibox.widget.background
+        widget             = wibox.container.background
     },
     spacing = 10,
     layout  = wibox.layout.fixed.vertical

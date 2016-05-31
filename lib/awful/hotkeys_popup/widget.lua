@@ -195,7 +195,7 @@ local function group_label(group, color)
             )
         )
     )
-    local margin = wibox.layout.margin()
+    local margin = wibox.container.margin()
     margin:set_widget(textbox)
     margin:set_top(widget.group_margin)
     return margin
@@ -315,7 +315,7 @@ local function create_wibox(s, available_groups)
         else
             available_width_px = available_width_px - item.max_width
         end
-        local column_margin = wibox.layout.margin()
+        local column_margin = wibox.container.margin()
         column_margin:set_widget(item.layout)
         column_margin:set_left(widget.group_margin)
         columns:add(column_margin)

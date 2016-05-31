@@ -7,6 +7,7 @@
 
 local wbase = require("wibox.widget.base")
 local beautiful = require("beautiful")
+local util = require("awful.util")
 local capi = {
     awesome = awesome,
     screen = screen
@@ -22,6 +23,14 @@ local horizontal = true
 local base_size = nil
 local reverse = false
 local display_on_screen = "primary"
+
+--- The systray background color.
+-- @beautiful beautiful.bg_systray
+-- @param string The color (string like "#ff0000" only)
+
+--- The systray icon spacing.
+-- @beautiful beautiful.systray_icon_spacing
+-- @tparam[opt=0] integer The icon spacing
 
 local function should_display_on(s)
     if display_on_screen == "primary" then
@@ -138,12 +147,16 @@ function systray:set_screen(s)
     end
 end
 
+--- Create the systray widget.
+-- Note that this widget can only exist once.
+-- @tparam boolean revers Show in the opposite direction
+-- @treturn table The new `systray` widget
+-- @function wibox.widget.systray
+
 local function new(revers)
     local ret = wbase.make_widget()
 
-    for k, v in pairs(systray) do
-        ret[k] = v
-    end
+    util.table.crush(ret, systray, true)
 
     if revers then
         ret:set_reverse(true)
