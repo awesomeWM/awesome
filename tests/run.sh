@@ -103,7 +103,7 @@ wait_until_success() {
     if [ "$CI" = true ]; then
         set +x
     fi
-    max_wait=60
+    wait_count=60  # 60*0.05s => 3s.
     while true; do
         set +e
         eval reply="\$($2)"
@@ -112,8 +112,8 @@ wait_until_success() {
         if [ $ret = 0 ]; then
             break
         fi
-        max_wait=$(expr $max_wait - 1 || true)
-        if [ "$max_wait" -lt 0 ]; then
+        wait_count=$(expr $wait_count - 1 || true)
+        if [ "$wait_count" -lt 0 ]; then
             echo "Error: failed to $1!"
             echo "Last reply: $reply."
             if [ -f "$awesome_log" ]; then
