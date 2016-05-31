@@ -711,6 +711,7 @@ static void
 event_handle_maprequest(xcb_map_request_event_t *ev)
 {
     client_t *c;
+    xembed_window_t *em;
     xcb_get_window_attributes_cookie_t wa_c;
     xcb_get_window_attributes_reply_t *wa_r;
     xcb_get_geometry_cookie_t geom_c;
@@ -724,10 +725,17 @@ event_handle_maprequest(xcb_map_request_event_t *ev)
     if(wa_r->override_redirect)
         goto bailout;
 
-    if(xembed_getbywin(&globalconf.embedded, ev->window))
+    if((em = xembed_getbywin(&globalconf.embedded, ev->window)))
     {
         xcb_map_window(globalconf.connection, ev->window);
         xembed_window_activate(globalconf.connection, ev->window);
+        /* The correct way to set this is via the _XEMBED_INFO property. Neither
+         * of the XEMBED not the systray spec talk about mapping windows.
+         * Apparently, Qt doesn't care and does not set an _XEMBED_INFO
+         * property. Let's simulate the XEMBED_MAPPED bit.
+         */
+        em->info.flags |= XEMBED_MAPPED;
+        luaA_systray_invalidate();
     }
     else if((c = client_getbywin(ev->window)))
     {
@@ -770,14 +778,6 @@ event_handle_unmapnotify(xcb_unmap_notify_event_t *ev)
 
     if((c = client_getbywin(ev->window)))
         client_unmanage(c, true);
-    else
-        for(int i = 0; i < globalconf.embedded.len; i++)
-            if(globalconf.embedded.tab[i].win == ev->window)
-            {
-                xembed_window_array_take(&globalconf.embedded, i);
-                xcb_change_save_set(globalconf.connection, XCB_SET_MODE_DELETE, ev->window);
-                luaA_systray_invalidate();
-            }
 }
 
 /** The randr screen change notify event handler.
@@ -917,6 +917,16 @@ event_handle_reparentnotify(xcb_reparent_notify_event_t *ev)
          * ourselves if a client quickly unmaps and maps itself again. */
         if (ev->parent != globalconf.screen->root)
             client_unmanage(c, true);
+    }
+    else if (ev->parent != globalconf.systray.window) {
+        /* Embedded window moved elsewhere, end of embedding */
+        for(int i = 0; i < globalconf.embedded.len; i++)
+            if(globalconf.embedded.tab[i].win == ev->window)
+            {
+                xembed_window_array_take(&globalconf.embedded, i);
+                xcb_change_save_set(globalconf.connection, XCB_SET_MODE_DELETE, ev->window);
+                luaA_systray_invalidate();
+            }
     }
 }
 
