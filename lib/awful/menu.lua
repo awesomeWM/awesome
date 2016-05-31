@@ -249,7 +249,7 @@ function menu:exec(num, opts)
             self.active_child:hide()
         end
         self.active_child = self.child[num]
-        if not self.active_child:get_visible() then
+        if not self.active_child.wibox.visible then
             self.active_child:show()
         end
     elseif type(cmd) == "string" then
