@@ -331,7 +331,8 @@ clientkeys = awful.util.table.join(
         function (c)
             c.fullscreen = not c.fullscreen
             c:raise()
-        end),
+        end,
+        {description = "toggle fullscreen", group = "client"}),
     awful.key({ modkey, "Shift"   }, "c",      function (c) c:kill()                         end,
               {description = "close", group = "client"}),
     awful.key({ modkey, "Control" }, "space",  awful.client.floating.toggle                     ,
