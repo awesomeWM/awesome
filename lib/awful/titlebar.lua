@@ -204,8 +204,8 @@ function titlebar.widget.button(c, name, selector, action)
     local ret = imagebox()
 
     if titlebar.enable_tooltip then
-        ret.tooltip = atooltip({ objects = {ret}, delay_show = 1 })
-        ret.tooltip:set_text(name)
+        ret._private.tooltip = atooltip({ objects = {ret}, delay_show = 1 })
+        ret._private.tooltip:set_text(name)
     end
 
     local function update()
