@@ -2770,15 +2770,16 @@ luaA_client_get_icon_name(lua_State *L, client_t *c)
     return 1;
 }
 
+LUA_OBJECT_EXPORT_OPTIONAL_PROPERTY(client, client_t, screen, luaA_object_push, NULL)
 LUA_OBJECT_EXPORT_PROPERTY(client, client_t, class, lua_pushstring)
 LUA_OBJECT_EXPORT_PROPERTY(client, client_t, instance, lua_pushstring)
-LUA_OBJECT_EXPORT_PROPERTY(client, client_t, machine, lua_pushstring)
+LUA_OBJECT_EXPORT_OPTIONAL_PROPERTY(client, client_t, machine, lua_pushstring, NULL)
 LUA_OBJECT_EXPORT_PROPERTY(client, client_t, role, lua_pushstring)
 LUA_OBJECT_EXPORT_PROPERTY(client, client_t, transient_for, luaA_object_push)
 LUA_OBJECT_EXPORT_PROPERTY(client, client_t, skip_taskbar, lua_pushboolean)
 LUA_OBJECT_EXPORT_PROPERTY(client, client_t, leader_window, lua_pushinteger)
 LUA_OBJECT_EXPORT_PROPERTY(client, client_t, group_window, lua_pushinteger)
-LUA_OBJECT_EXPORT_PROPERTY(client, client_t, pid, lua_pushinteger)
+LUA_OBJECT_EXPORT_OPTIONAL_PROPERTY(client, client_t, pid, lua_pushinteger, 0)
 LUA_OBJECT_EXPORT_PROPERTY(client, client_t, hidden, lua_pushboolean)
 LUA_OBJECT_EXPORT_PROPERTY(client, client_t, minimized, lua_pushboolean)
 LUA_OBJECT_EXPORT_PROPERTY(client, client_t, fullscreen, lua_pushboolean)
@@ -2816,15 +2817,6 @@ luaA_client_get_content(lua_State *L, client_t *c)
 
     /* lua has to make sure to free the ref or we have a leak */
     lua_pushlightuserdata(L, surface);
-    return 1;
-}
-
-static int
-luaA_client_get_screen(lua_State *L, client_t *c)
-{
-    if(!c->screen)
-        return 0;
-    luaA_object_push(L, c->screen);
     return 1;
 }
 

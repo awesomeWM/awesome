@@ -195,6 +195,16 @@ int luaA_object_emit_signal_simple(lua_State *);
         return 1; \
     }
 
+#define LUA_OBJECT_EXPORT_OPTIONAL_PROPERTY(pfx, type, field, pusher, empty_value) \
+    static int \
+    luaA_##pfx##_get_##field(lua_State *L, type *object) \
+    { \
+        if (object->field == empty_value) \
+            return 0; \
+        pusher(L, object->field); \
+        return 1; \
+    }
+
 int luaA_object_tostring(lua_State *);
 
 #define LUA_OBJECT_META(prefix) \
