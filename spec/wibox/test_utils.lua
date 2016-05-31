@@ -93,7 +93,7 @@ return {
                 return width or 10, height or 10
             end
         end
-        w._widget_caches = {}
+        w._private.widget_caches = {}
 
         return w
     end,
