@@ -598,6 +598,13 @@ function tooltip.new(args)
         end
     end
 
+    -- Apply the properties
+    for k, v in pairs(args) do
+        if tooltip["set_"..k] then
+            self[k] = v
+        end
+    end
+
     return self
 end
 
