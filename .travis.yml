@@ -99,12 +99,16 @@ script:
         cd "$BUILD_IN_DIR"
         cmake $CMAKE_ARGS "$SOURCE_DIRECTORY"
     fi
-  - make && sudo env PATH=$PATH make install && awesome --version && make check
+  - make && sudo env PATH=$PATH make install && awesome --version
   - |
-    if [ "$DO_COVERAGE" = "true" ]; then
-        make check-coverage || exit 1;
+    if [ "$TRAVIS_TEST_RESULT" = 0 ]; then
+      if [ "$DO_COVERAGE" = "true" ]; then
+        make check-coverage || exit 1
         sed -i "1 i\\require('luacov.runner')('"$PWD"/.luacov')" build/awesomerc.lua || exit 1
         BUILD_DIRECTORY="" tests/run.sh || exit 1
+      else
+        make check
+      fi
     fi
 
 after_success:
