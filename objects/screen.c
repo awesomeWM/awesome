@@ -255,7 +255,6 @@ screen_scan_randr_monitors(lua_State *L, screen_array_t *screens)
     xcb_randr_get_monitors_cookie_t monitors_c = xcb_randr_get_monitors(globalconf.connection, globalconf.screen->root, 1);
     xcb_randr_get_monitors_reply_t *monitors_r = xcb_randr_get_monitors_reply(globalconf.connection, monitors_c, NULL);
     xcb_randr_monitor_info_iterator_t monitor_iter;
-    bool found = false;
 
     for(monitor_iter = xcb_randr_get_monitors_monitors_iterator(monitors_r);
             monitor_iter.rem; xcb_randr_monitor_info_next(&monitor_iter))
