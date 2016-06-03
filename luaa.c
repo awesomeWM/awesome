@@ -56,6 +56,8 @@
 
 #include <xcb/xcb_atom.h>
 
+#include <unistd.h> /* for gethostname() */
+
 #ifdef WITH_DBUS
 extern const struct luaL_Reg awesome_dbus_lib[];
 #endif
@@ -142,6 +144,24 @@ luaA_restart(lua_State *L)
 {
     awesome_restart();
     return 0;
+}
+
+/** Send a signal to a process identified by its process id. See
+ * `awesome.unix_signal` for a list of signals.
+ * @tparam integer pid Process identifier
+ * @tparam integer sig Signal number
+ * @treturn boolean true if the signal was successfully sent, else false
+ * @function kill
+ */
+static int
+luaA_kill(lua_State *L)
+{
+    int pid = luaA_checknumber_range(L, 1, 1, INT_MAX);
+    int sig = luaA_checknumber_range(L, 2, 0, INT_MAX);
+
+    int result = kill(pid, sig);
+    lua_pushboolean(L, result == 0);
+    return 1;
 }
 
 /** Load an image from a given path.
@@ -236,6 +256,8 @@ luaA_fixups(lua_State *L)
  * @field startup_errors Error message for errors that occured during
  *  startup.
  * @field composite_manager_running True if a composite manager is running.
+ * @field unix_signal Table mapping between signal numbers and signal identifiers.
+ * @field hostname The hostname of the computer on which we are running.
  * @table awesome
  */
 static int
@@ -281,6 +303,17 @@ luaA_awesome_index(lua_State *L)
     if(A_STREQ(buf, "composite_manager_running"))
     {
         lua_pushboolean(L, composite_manager_running());
+        return 1;
+    }
+
+    if(A_STREQ(buf, "hostname"))
+    {
+        /* No good way to handle failures... */
+        char hostname[256] = "";
+        gethostname(&hostname[0], countof(hostname));
+        hostname[countof(hostname) - 1] = '\0';
+
+        lua_pushstring(L, hostname);
         return 1;
     }
 
@@ -412,6 +445,99 @@ luaA_dofunction_on_error(lua_State *L)
     return 1;
 }
 
+static void
+setup_awesome_signals(lua_State *L)
+{
+    lua_getglobal(L, "awesome");
+    lua_pushstring(L, "unix_signal");
+    lua_newtable(L);
+
+#define SETUP_SIGNAL(sig)                         \
+    do {                                          \
+        /* Set awesome.signals["SIGSTOP"] = 42 */ \
+        lua_pushinteger(L, sig);                  \
+        lua_setfield(L, -2, #sig);                \
+        /* Set awesome.signals[42] = "SIGSTOP" */ \
+        lua_pushinteger(L, sig);                  \
+        lua_pushstring(L, #sig);                  \
+        lua_settable(L, -3);                      \
+    } while (0)
+
+    /* Non-standard signals. These are first so that e.g. (on my system)
+     * signals[29] is SIGPOLL and not SIGIO (the value gets overwritten).
+     */
+#ifdef SIGIOT
+    SETUP_SIGNAL(SIGIOT);
+#endif
+#ifdef SIGEMT
+    SETUP_SIGNAL(SIGEMT);
+#endif
+#ifdef SIGSTKFLT
+    SETUP_SIGNAL(SIGSTKFLT);
+#endif
+#ifdef SIGIO
+    SETUP_SIGNAL(SIGIO);
+#endif
+#ifdef SIGCLD
+    SETUP_SIGNAL(SIGCLD);
+#endif
+#ifdef SIGPWR
+    SETUP_SIGNAL(SIGPWR);
+#endif
+#ifdef SIGINFO
+    SETUP_SIGNAL(SIGINFO);
+#endif
+#ifdef SIGLOST
+    SETUP_SIGNAL(SIGLOST);
+#endif
+#ifdef SIGWINCH
+    SETUP_SIGNAL(SIGWINCH);
+#endif
+#ifdef SIGUNUSED
+    SETUP_SIGNAL(SIGUNUSED);
+#endif
+
+    /* POSIX.1-1990, according to man 7 signal */
+    SETUP_SIGNAL(SIGHUP);
+    SETUP_SIGNAL(SIGINT);
+    SETUP_SIGNAL(SIGQUIT);
+    SETUP_SIGNAL(SIGILL);
+    SETUP_SIGNAL(SIGABRT);
+    SETUP_SIGNAL(SIGFPE);
+    SETUP_SIGNAL(SIGKILL);
+    SETUP_SIGNAL(SIGSEGV);
+    SETUP_SIGNAL(SIGPIPE);
+    SETUP_SIGNAL(SIGALRM);
+    SETUP_SIGNAL(SIGTERM);
+    SETUP_SIGNAL(SIGUSR1);
+    SETUP_SIGNAL(SIGUSR2);
+    SETUP_SIGNAL(SIGCHLD);
+    SETUP_SIGNAL(SIGCONT);
+    SETUP_SIGNAL(SIGSTOP);
+    SETUP_SIGNAL(SIGTSTP);
+    SETUP_SIGNAL(SIGTTIN);
+    SETUP_SIGNAL(SIGTTOU);
+
+    /* POSIX.1-2001, according to man 7 signal */
+    SETUP_SIGNAL(SIGBUS);
+    SETUP_SIGNAL(SIGPOLL);
+    SETUP_SIGNAL(SIGPROF);
+    SETUP_SIGNAL(SIGSYS);
+    SETUP_SIGNAL(SIGTRAP);
+    SETUP_SIGNAL(SIGURG);
+    SETUP_SIGNAL(SIGVTALRM);
+    SETUP_SIGNAL(SIGXCPU);
+    SETUP_SIGNAL(SIGXFSZ);
+
+#undef SETUP_SIGNAL
+
+    /* Set awesome.signal to the table we just created, key was already pushed */
+    lua_rawset(L, -3);
+
+    /* Pop "awesome" */
+    lua_pop(L, 1);
+}
+
 /** Initialize the Lua VM
  * \param xdg An xdg handle to use to get XDG basedir.
  */
@@ -440,6 +566,7 @@ luaA_init(xdgHandle* xdg)
         { "xkb_get_layout_group", luaA_xkb_get_layout_group},
         { "xkb_get_group_names", luaA_xkb_get_group_names},
         { "xrdb_get_value", luaA_xrdb_get_value},
+        { "kill", luaA_kill},
         { NULL, NULL }
     };
 
@@ -459,6 +586,7 @@ luaA_init(xdgHandle* xdg)
 
     /* Export awesome lib */
     luaA_openlib(L, "awesome", awesome_lib, awesome_lib);
+    setup_awesome_signals(L);
 
     /* Export root lib */
     luaA_registerlib(L, "root", awesome_root_lib);
