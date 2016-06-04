@@ -106,13 +106,26 @@ function(escape_code path escaped_content pre_header post_header)
     set(${post_header} ${example_post_header} PARENT_SCOPE)
 endfunction()
 
-# Execute a lua file.
-function(run_test test_path namespace template escaped_content)
+# Find the template.lua that is closest to the given file. For example, if a
+# template.lua is present in the same directory, its path will be returned. If
+# one is present in the parent directory, that path is returned etc.
+function(find_template result_variable file)
+    get_filename_component(path "${file}" DIRECTORY)
 
-    # A template is required to know how to handle the output.
-    if (template STREQUAL " ")
-        message(FATAL_ERROR "No template found for " ${test_path} ", bye")
-    endif()
+    while(NOT EXISTS "${path}/template.lua")
+        set(last_path "${path}")
+        get_filename_component(path "${path}" DIRECTORY)
+        if(last_path STREQUAL path)
+            message(FATAL_ERROR "Failed to find template.lua for ${file}")
+        endif()
+    endwhile()
+
+    set(${result_variable} "${path}/template.lua" PARENT_SCOPE)
+endfunction()
+
+# Execute a lua file.
+function(run_test test_path namespace escaped_content)
+    find_template(template "${test_path}")
 
     # Get the file name without the extension
     get_filename_component(${test_path} TEST_FILE_NAME NAME)
@@ -199,14 +212,7 @@ endfunction()
 
 # Recursive helper function to avoid adding CMakeLists.txt and add_subdirectory
 # in every sub-directories.
-function(digg path namespace template)
-
-    # Check if there is a template for this directory, else use the
-    # last known one.
-    if(EXISTS ${path}/template.lua)
-        message(STATUS "Testing code based on ${namespace}")
-        set(template ${path}/template.lua)
-    endif()
+function(digg path namespace)
 
     # Get the directory content
     file(GLOB ex_files RELATIVE "${path}"
@@ -216,7 +222,7 @@ function(digg path namespace template)
         if(IS_DIRECTORY ${path}/${ex_file_name}
             AND (NOT ${ex_file_name} STREQUAL "shims"))
 
-            digg("${path}/${ex_file_name}" "${namespace}_${ex_file_name}" ${template})
+            digg("${path}/${ex_file_name}" "${namespace}_${ex_file_name}")
 
         elseif(${ex_file_name} MATCHES ".lua"
             AND NOT ${ex_file_name} MATCHES "template.lua")
@@ -224,7 +230,7 @@ function(digg path namespace template)
             # Get the file name without the extension
             string(REGEX REPLACE "\\.lua" "" TEST_FILE_NAME ${ex_file_name})
 
-            run_test("${path}/${ex_file_name}" "${namespace}" ${template} ESCAPED_CODE_EXAMPLE)
+            run_test("${path}/${ex_file_name}" "${namespace}" ESCAPED_CODE_EXAMPLE)
 
             # Set the test name
             set(TEST_NAME DOC${namespace}_${TEST_FILE_NAME}_EXAMPLE)
@@ -245,7 +251,7 @@ endfunction()
 # the test. In parallel, build a namespace for the global variables. Those
 # variables will be inserted into the lua source code itself once the examples
 # are validated.
-digg("${SOURCE_DIR}/tests/examples" "" " ")
+digg("${SOURCE_DIR}/tests/examples" "")
 
 # This is ugly, but CMake variable scope system totally ignore 50 years of
 # computer science evolution and only support function local variables.
