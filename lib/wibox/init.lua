@@ -63,6 +63,11 @@ function wibox:find_widgets(x, y)
 end
 
 function wibox:get_screen()
+    if self.screen_assigned and self.screen_assigned.valid then
+        return self.screen_assigned
+    else
+        self.screen_assigned = nil
+    end
     local sgeos = {}
 
     for s in capi.screen do
@@ -78,6 +83,10 @@ function wibox:set_screen(s)
         self.x = s.geometry.x
         self.y = s.geometry.y
     end
+
+    -- Remember this screen so things work correctly if screens overlap and
+    -- (x,y) is not enough to figure out the correct screen.
+    self.screen_assigned = s
 end
 
 for _, k in pairs{ "buttons", "struts", "geometry", "get_xproperty", "set_xproperty" } do
