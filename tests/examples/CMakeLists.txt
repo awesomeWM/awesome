@@ -123,6 +123,16 @@ function(find_template result_variable file)
     set(${result_variable} "${path}/template.lua" PARENT_SCOPE)
 endfunction()
 
+# Get the namespace of a file
+function(get_namespace result_variable file)
+    get_filename_component(path "${file}" DIRECTORY)
+    string(LENGTH "${SOURCE_DIR}/tests/examples" prefix_length)
+    string(REPLACE "/" "_" namespace "${path}")
+    string(SUBSTRING "${namespace}" "${prefix_length}" -1 namespace)
+
+    set(${result_variable} "${namespace}" PARENT_SCOPE)
+endfunction()
+
 # Execute a lua file.
 function(run_test test_path namespace escaped_content)
     find_template(template "${test_path}")
@@ -212,7 +222,7 @@ endfunction()
 
 # Recursive helper function to avoid adding CMakeLists.txt and add_subdirectory
 # in every sub-directories.
-function(digg path namespace)
+function(digg path)
 
     # Get the directory content
     file(GLOB ex_files RELATIVE "${path}"
@@ -222,13 +232,15 @@ function(digg path namespace)
         if(IS_DIRECTORY ${path}/${ex_file_name}
             AND (NOT ${ex_file_name} STREQUAL "shims"))
 
-            digg("${path}/${ex_file_name}" "${namespace}_${ex_file_name}")
+            digg("${path}/${ex_file_name}")
 
         elseif(${ex_file_name} MATCHES ".lua"
             AND NOT ${ex_file_name} MATCHES "template.lua")
 
             # Get the file name without the extension
             string(REGEX REPLACE "\\.lua" "" TEST_FILE_NAME ${ex_file_name})
+
+            get_namespace(namespace "${path}/${ex_file_name}")
 
             run_test("${path}/${ex_file_name}" "${namespace}" ESCAPED_CODE_EXAMPLE)
 
@@ -251,7 +263,7 @@ endfunction()
 # the test. In parallel, build a namespace for the global variables. Those
 # variables will be inserted into the lua source code itself once the examples
 # are validated.
-digg("${SOURCE_DIR}/tests/examples" "")
+digg("${SOURCE_DIR}/tests/examples")
 
 # This is ugly, but CMake variable scope system totally ignore 50 years of
 # computer science evolution and only support function local variables.
