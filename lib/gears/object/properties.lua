@@ -83,6 +83,11 @@ function object.capi_index_fallback(class, args)
             return args.setter_fallback(cobj, prop, value)
         end
 
+        -- If a getter exists but not a setter, then the property is read-only
+        if args.getter_class and args.getter_class[getter_prefix..prop] then
+            return
+        end
+
         local fallback = properties[cobj] or cobj_register(cobj)
 
         -- Use the fallback property table

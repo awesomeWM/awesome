@@ -40,4 +40,8 @@ local w = wibox()
 w.foo = "bar"
 assert(w.foo == "bar")
 
+-- Test if read-only properties really are read-only
+screen[1].clients = 42
+assert(screen[1].clients ~= 42)
+
 require("_runner").run_steps({ function() return true end })

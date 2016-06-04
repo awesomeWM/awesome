@@ -311,8 +311,6 @@ function screen.object.get_clients(s)
     return vcls
 end
 
-function screen.object.set_clients() end
-
 --- Get the list of the clients assigned to the screen but not currently
 -- visible.
 --
@@ -335,8 +333,6 @@ function screen.object.get_hidden_clients(s)
     return vcls
 end
 
-function screen.object.set_hidden_clients() end
-
 --- Get all clients assigned to the screen.
 --
 -- @property all_clients
@@ -348,8 +344,6 @@ function screen.object.set_hidden_clients() end
 function screen.object.get_all_clients(s)
     return capi.client.get(s, true)
 end
-
-function screen.object.set_all_clients() end
 
 --- Get the list of the screen tiled clients.
 --
@@ -376,8 +370,6 @@ function screen.object.get_tiled_clients(s)
     end
     return tclients
 end
-
-function screen.object.set_tiled_clients() end
 
 --- Call a function for each existing and created-in-the-future screen.
 -- @function awful.screen.connect_for_each_screen
@@ -425,8 +417,6 @@ function screen.object.get_tags(s, unordered)
     return tags
 end
 
-function screen.object.set_tags() end
-
 --- A list of all selected tags on the screen.
 -- @property selected_tags
 -- @param table
@@ -446,8 +436,6 @@ function screen.object.get_selected_tags(s)
     return vtags
 end
 
-function screen.object.set_selected_tags() end
-
 --- The first selected tag.
 -- @property selected_tag
 -- @param table
@@ -458,8 +446,6 @@ function screen.object.set_selected_tags() end
 function screen.object.get_selected_tag(s)
     return screen.object.get_selected_tags(s)[1]
 end
-
-function screen.object.set_selected_tag() end
 
 
 --- When the tag history changed.
