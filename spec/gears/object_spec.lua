@@ -146,7 +146,7 @@ describe("gears.object", function()
 
         obj2.foo = 42
 
-        assert.is_true(obj2.foo == 42)
+        assert.is.equal(obj2.foo, 42)
     end)
 
     it("dynamic property disabled", function()
@@ -158,7 +158,7 @@ describe("gears.object", function()
 
         obj2.foo = 42
 
-        assert.is_true(obj2.foo == "bar")
+        assert.is.equal(obj2.foo, "bar")
     end)
 
     it("auto emit disabled", function()
