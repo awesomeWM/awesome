@@ -220,50 +220,33 @@ function(run_test test_path namespace escaped_content)
 
 endfunction()
 
-# Recursive helper function to avoid adding CMakeLists.txt and add_subdirectory
-# in every sub-directories.
-function(digg path)
+# Find and run all test files
+file(GLOB_RECURSE test_files LIST_DIRECTORIES false
+    "${SOURCE_DIR}/tests/examples/*.lua")
+foreach(file ${test_files})
+    if ((NOT "${file}" MATCHES ".*/shims/.*")
+        AND (NOT "${file}" MATCHES ".*/template.lua"))
 
-    # Get the directory content
-    file(GLOB ex_files RELATIVE "${path}"
-        "${path}/*")
+        # Get the file name without the extension
+        get_filename_component(TEST_FILE_NAME ${file} NAME_WE)
 
-    foreach(ex_file_name ${ex_files})
-        if(IS_DIRECTORY ${path}/${ex_file_name}
-            AND (NOT ${ex_file_name} STREQUAL "shims"))
+        get_namespace(namespace "${file}")
 
-            digg("${path}/${ex_file_name}")
+        run_test("${file}" "${namespace}" ESCAPED_CODE_EXAMPLE)
 
-        elseif(${ex_file_name} MATCHES ".lua"
-            AND NOT ${ex_file_name} MATCHES "template.lua")
+        # Set the test name
+        set(TEST_NAME DOC${namespace}_${TEST_FILE_NAME}_EXAMPLE)
 
-            # Get the file name without the extension
-            string(REGEX REPLACE "\\.lua" "" TEST_FILE_NAME ${ex_file_name})
+        # Anything called @DOC_`namespace`_EXAMPLE@
+        # in the Lua or C sources will be replaced by the content if that
+        # variable during the pre-processing
+        set(ENV{${TEST_NAME}} "${ESCAPED_CODE_EXAMPLE}" CACHE INTERNAL FORCE)
 
-            get_namespace(namespace "${path}/${ex_file_name}")
+        # Update the test list
+        set(ENV{EXAMPLE_LIST} "$ENV{EXAMPLE_LIST};${TEST_NAME}")
 
-            run_test("${path}/${ex_file_name}" "${namespace}" ESCAPED_CODE_EXAMPLE)
-
-            # Set the test name
-            set(TEST_NAME DOC${namespace}_${TEST_FILE_NAME}_EXAMPLE)
-
-            # Anything called @DOC_`namespace`_EXAMPLE@
-            # in the Lua or C sources will be replaced by the content if that
-            # variable during the pre-processing
-            set(ENV{${TEST_NAME}} "${ESCAPED_CODE_EXAMPLE}" CACHE INTERNAL FORCE)
-
-            # Update the test list
-            set(ENV{EXAMPLE_LIST} "$ENV{EXAMPLE_LIST};${TEST_NAME}")
-
-        endif()
-    endforeach()
-endfunction()
-
-# Start at the top level then recursively explore the sub-directories to locate
-# the test. In parallel, build a namespace for the global variables. Those
-# variables will be inserted into the lua source code itself once the examples
-# are validated.
-digg("${SOURCE_DIR}/tests/examples")
+    endif()
+endforeach()
 
 # This is ugly, but CMake variable scope system totally ignore 50 years of
 # computer science evolution and only support function local variables.
