@@ -256,9 +256,6 @@ luaA_class_setup(lua_State *L, lua_class_t *class,
 
     signal_add(&class->signals, "new");
 
-    if (parent)
-        class->signals.inherits_from = &parent->signals;
-
     lua_class_array_append(&luaA_classes, class);
 }
 

@@ -123,7 +123,7 @@ luaA_checkudataornil(lua_State *L, int udx, lua_class_t *class)
     static inline int                                                          \
     luaA_##prefix##_class_add_signal(lua_State *L)                             \
     {                                                                          \
-        signal_add(&(lua_class).signals, luaL_checkstring(L, 1));              \
+        luaA_deprecate(L, "signal usage without add_signal()");                \
         return 0;                                                              \
     }                                                                          \
                                                                                \

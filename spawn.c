@@ -112,8 +112,6 @@ spawn_monitor_timeout(gpointer sequence)
              }
              lua_pop(L, 1);
          }
-         else
-             warn("spawn::timeout signal is missing");
     }
     sn_startup_sequence_unref(sequence);
     return FALSE;
@@ -218,8 +216,6 @@ spawn_monitor_event(SnMonitorEvent *event, void *data)
         }
         lua_pop(L, 1);
     }
-    else
-        warn("%s signal is missing", event_type_str);
 }
 
 /** Tell the spawn module that an app has been started.
