@@ -66,10 +66,16 @@ local steps = {
             c:move_to_tag(tags[4])
             return
         end
+        client.focus = c
+        return true
+    end,
+    wait_for_current_desktop(tags[4]),
 
-        -- Undo autofocus
+    -- Killing the client means the first selected tag counts
+    function()
         assert(client.focus == c)
-        client.focus = nil
+        c:kill()
+        c = nil
         return true
     end,
     wait_for_current_desktop(tags[3]),
