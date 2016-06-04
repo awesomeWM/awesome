@@ -227,6 +227,9 @@ foreach(file ${test_files})
     if ((NOT "${file}" MATCHES ".*/shims/.*")
         AND (NOT "${file}" MATCHES ".*/template.lua"))
 
+        file(RELATIVE_PATH relative_file "${SOURCE_DIR}" "${file}")
+        message(STATUS "Running ${relative_file}...")
+
         # Get the file name without the extension
         get_filename_component(TEST_FILE_NAME ${file} NAME_WE)
 
