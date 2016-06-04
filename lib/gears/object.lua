@@ -148,8 +148,12 @@ local function set_miss(self, key, value)
         if changed then
             self:emit_signal("property::"..key, value)
         end
-    else
+    elseif (not rawget(self, "get_"..key))
+        and not (class and class["get_"..key]) then
         return rawset(self, key, value)
+    else
+        error("Cannot set '" .. tostring(key) .. "' on " .. tostring(self)
+                .. " because it is read-only")
     end
 end
 

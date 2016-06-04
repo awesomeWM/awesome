@@ -140,7 +140,6 @@ describe("gears.object", function()
     it("dynamic property disabled", function()
         local class = {}
         function class:get_foo() return "bar" end
-        function class:set_foo() end
 
         local obj2 = object{class=class}
 
@@ -152,11 +151,12 @@ describe("gears.object", function()
     it("dynamic property disabled", function()
         local class = {}
         function class:get_foo() return "bar" end
-        function class:set_foo() end
 
         local obj2 = object{class=class, enable_properties = true}
 
-        obj2.foo = 42
+        assert.has_error(function()
+            obj2.foo = 42
+        end)
 
         assert.is.equal(obj2.foo, "bar")
     end)
