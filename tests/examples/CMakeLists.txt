@@ -240,24 +240,10 @@ foreach(file ${test_files})
         # Anything called @DOC_`namespace`_EXAMPLE@
         # in the Lua or C sources will be replaced by the content if that
         # variable during the pre-processing
-        set(ENV{${TEST_NAME}} "${ESCAPED_CODE_EXAMPLE}" CACHE INTERNAL FORCE)
-
-        # Update the test list
-        set(ENV{EXAMPLE_LIST} "$ENV{EXAMPLE_LIST};${TEST_NAME}")
+        # While at it, replace \" created by CMake by ', &quot; wont work in <code>
+        string(REPLACE "\"" "'" ${TEST_NAME} ${ESCAPED_CODE_EXAMPLE})
 
     endif()
-endforeach()
-
-# This is ugly, but CMake variable scope system totally ignore 50 years of
-# computer science evolution and only support function local variables.
-# PARENT_SCOPE is useless in recursive methods and the CMake pre-processor
-# can't access ENV variables. So the only (insane) way is to set tons of ENV
-# variables, keep track of them in yet another one and set them in the global
-# scope once in the "top level" CMakeLists section (it cannot be done from
-# functions).
-foreach(vari $ENV{EXAMPLE_LIST})
-    # While at it, replace \" created by CMake by ', &quot; wont work in <code>
-    string(REGEX REPLACE "\\\"" "'" ${vari} $ENV{${vari}})
 endforeach()
 
 message(STATUS "All test passed!")
