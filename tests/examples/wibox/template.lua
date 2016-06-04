@@ -19,6 +19,9 @@ pcall(function()
     require("luacov.runner")(luacovpath)
 end)
 
+-- Silence debug warnings
+require("gears.debug").print_warning = function() end
+
 -- This is the main widget the tests will use as top level
 local container = wibox.layout.fixed.vertical()
 

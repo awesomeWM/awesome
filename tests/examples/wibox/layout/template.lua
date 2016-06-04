@@ -21,6 +21,9 @@ pcall(function()
     require("luacov.runner")(luacovpath)
 end)
 
+-- Silence debug warnings
+require("gears.debug").print_warning = function() end
+
 -- Create a generic rectangle widget to show layout disposition
 local function generic_widget(text)
     return {
