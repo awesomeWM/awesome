@@ -265,8 +265,6 @@ function mouse.object.get_current_client()
     end
 end
 
-function mouse.object.set_current_client() end
-
 --- Get the wibox currently under the mouse cursor.
 -- @property current_wibox
 -- @tparam wibox|nil The wibox
@@ -277,8 +275,6 @@ function mouse.object.get_current_wibox()
         return obj:get_wibox()
     end
 end
-
-function mouse.object.set_current_wibox() end
 
 --- Get the widgets currently under the mouse cursor.
 --
@@ -307,8 +303,6 @@ function mouse.object.get_current_widgets()
     end
 end
 
-function mouse.object.set_current_widgets() end
-
 --- Get the topmost widget currently under the mouse cursor.
 -- @property current_widget
 -- @tparam widget|nil widget The widget
@@ -323,8 +317,6 @@ function mouse.object.get_current_widget()
         return wdgs[#wdgs], geos[#geos]
     end
 end
-
-function mouse.object.set_current_widget() end
 
 --- True if the left mouse button is pressed.
 -- @property is_left_mouse_button_pressed
@@ -342,8 +334,6 @@ for _, b in ipairs {"left", "right", "middle"} do
     mouse.object["is_".. b .."_mouse_button_pressed"] = function()
         return capi.mouse.coords().buttons[1]
     end
-
-    mouse.object["set_is_".. b .."_mouse_button_pressed"] = function() end
 end
 
 capi.client.connect_signal("request::geometry", mouse.resize_handler)
@@ -357,8 +347,11 @@ local props = {}
 capi.mouse.set_newindex_miss_handler(function(_,key,value)
     if mouse.object["set_"..key] then
         mouse.object["set_"..key](value)
-    else
+    elseif not mouse.object["get_"..key] then
         props[key] = value
+    else
+        -- If there is a getter, but no setter, then the property is read-only
+        error("Cannot set '" .. tostring(key) .. " because it is read-only")
     end
 end)
 
