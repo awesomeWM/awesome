@@ -24,13 +24,30 @@
 
 #include "client.h"
 
-int tags_get_first_selected_index(void);
+int tags_get_current_or_first_selected_index(void);
 void tag_client(lua_State *, client_t *);
 void untag_client(client_t *, tag_t *);
 bool is_client_tagged(client_t *, tag_t *);
 void tag_unref_simplified(tag_t **);
 
 ARRAY_FUNCS(tag_t *, tag, tag_unref_simplified)
+
+/** Tag type */
+struct tag
+{
+    LUA_OBJECT_HEADER
+    /** Tag name */
+    char *name;
+    /** true if activated */
+    bool activated;
+    /** true if selected */
+    bool selected;
+    /** clients in this tag */
+    client_array_t clients;
+};
+
+lua_class_t tag_class;
+LUA_OBJECT_FUNCS(tag_class, tag_t, tag)
 
 void tag_class_setup(lua_State *);
 
