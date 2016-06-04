@@ -240,18 +240,6 @@ drawable_class_setup(lua_State *L)
                             NULL,
                             (lua_class_propfunc_t) luaA_drawable_get_surface,
                             NULL);
-
-    signal_add(&drawable_class.signals, "button::press");
-    signal_add(&drawable_class.signals, "button::release");
-    signal_add(&drawable_class.signals, "mouse::enter");
-    signal_add(&drawable_class.signals, "mouse::leave");
-    signal_add(&drawable_class.signals, "mouse::move");
-    signal_add(&drawable_class.signals, "property::geometry");
-    signal_add(&drawable_class.signals, "property::height");
-    signal_add(&drawable_class.signals, "property::width");
-    signal_add(&drawable_class.signals, "property::x");
-    signal_add(&drawable_class.signals, "property::y");
-    signal_add(&drawable_class.signals, "property::surface");
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

@@ -265,12 +265,6 @@ spawn_init(void)
                                                   globalconf.default_screen,
                                                   spawn_monitor_event,
                                                   NULL, NULL);
-
-    signal_add(&global_signals, "spawn::canceled");
-    signal_add(&global_signals, "spawn::change");
-    signal_add(&global_signals, "spawn::completed");
-    signal_add(&global_signals, "spawn::initiated");
-    signal_add(&global_signals, "spawn::timeout");
 }
 
 static gboolean

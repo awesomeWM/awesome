@@ -543,13 +543,6 @@ window_class_setup(lua_State *L)
                             (lua_class_propfunc_t) luaA_window_set_border_width,
                             (lua_class_propfunc_t) luaA_window_get_border_width,
                             (lua_class_propfunc_t) luaA_window_set_border_width);
-
-    signal_add(&window_class.signals, "property::border_color");
-    signal_add(&window_class.signals, "property::border_width");
-    signal_add(&window_class.signals, "property::buttons");
-    signal_add(&window_class.signals, "property::opacity");
-    signal_add(&window_class.signals, "property::struts");
-    signal_add(&window_class.signals, "property::type");
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

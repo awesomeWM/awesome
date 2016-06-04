@@ -3429,69 +3429,6 @@ client_class_setup(lua_State *L)
                             NULL,
                             (lua_class_propfunc_t) luaA_client_get_first_tag,
                             NULL);
-
-    signal_add(&client_class.signals, "focus");
-    signal_add(&client_class.signals, "list");
-    signal_add(&client_class.signals, "swapped");
-    signal_add(&client_class.signals, "manage");
-    signal_add(&client_class.signals, "button::press");
-    signal_add(&client_class.signals, "button::release");
-    signal_add(&client_class.signals, "mouse::enter");
-    signal_add(&client_class.signals, "mouse::leave");
-    signal_add(&client_class.signals, "mouse::move");
-    signal_add(&client_class.signals, "property::above");
-    signal_add(&client_class.signals, "property::below");
-    signal_add(&client_class.signals, "property::class");
-    signal_add(&client_class.signals, "property::focusable");
-    signal_add(&client_class.signals, "property::fullscreen");
-    signal_add(&client_class.signals, "property::geometry");
-    signal_add(&client_class.signals, "property::group_window");
-    signal_add(&client_class.signals, "property::height");
-    signal_add(&client_class.signals, "property::hidden");
-    signal_add(&client_class.signals, "property::icon");
-    signal_add(&client_class.signals, "property::icon_name");
-    signal_add(&client_class.signals, "property::instance");
-    signal_add(&client_class.signals, "property::keys");
-    signal_add(&client_class.signals, "property::machine");
-    signal_add(&client_class.signals, "property::maximized");
-    signal_add(&client_class.signals, "property::maximized_horizontal");
-    signal_add(&client_class.signals, "property::maximized_vertical");
-    signal_add(&client_class.signals, "property::minimized");
-    signal_add(&client_class.signals, "property::modal");
-    signal_add(&client_class.signals, "property::name");
-    signal_add(&client_class.signals, "property::ontop");
-    signal_add(&client_class.signals, "property::pid");
-    signal_add(&client_class.signals, "property::role");
-    signal_add(&client_class.signals, "property::screen");
-    signal_add(&client_class.signals, "property::shape_bounding");
-    signal_add(&client_class.signals, "property::shape_client_bounding");
-    signal_add(&client_class.signals, "property::shape_client_clip");
-    signal_add(&client_class.signals, "property::shape_clip");
-    signal_add(&client_class.signals, "property::size_hints_honor");
-    signal_add(&client_class.signals, "property::skip_taskbar");
-    signal_add(&client_class.signals, "property::sticky");
-    signal_add(&client_class.signals, "property::struts");
-    signal_add(&client_class.signals, "property::titlebar_bottom");
-    signal_add(&client_class.signals, "property::titlebar_left");
-    signal_add(&client_class.signals, "property::titlebar_right");
-    signal_add(&client_class.signals, "property::titlebar_top");
-    signal_add(&client_class.signals, "property::transient_for");
-    signal_add(&client_class.signals, "property::type");
-    signal_add(&client_class.signals, "property::urgent");
-    signal_add(&client_class.signals, "property::width");
-    signal_add(&client_class.signals, "property::window");
-    signal_add(&client_class.signals, "property::x");
-    signal_add(&client_class.signals, "property::y");
-    signal_add(&client_class.signals, "request::activate");
-    signal_add(&client_class.signals, "request::geometry");
-    signal_add(&client_class.signals, "request::tag");
-    signal_add(&client_class.signals, "request::urgent");
-    signal_add(&client_class.signals, "tagged");
-    signal_add(&client_class.signals, "unfocus");
-    signal_add(&client_class.signals, "unmanage");
-    signal_add(&client_class.signals, "untagged");
-    signal_add(&client_class.signals, "raised");
-    signal_add(&client_class.signals, "lowered");
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

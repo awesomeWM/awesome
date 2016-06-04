@@ -723,19 +723,6 @@ luaA_init(xdgHandle* xdg)
     lua_getfield(L, 1, "loaded");
 
     lua_pop(L, 2); /* pop "package" and "package.loaded" */
-
-    signal_add(&global_signals, "debug::error");
-    signal_add(&global_signals, "debug::deprecation");
-    signal_add(&global_signals, "debug::index::miss");
-    signal_add(&global_signals, "debug::newindex::miss");
-    signal_add(&global_signals, "systray::update");
-    signal_add(&global_signals, "wallpaper_changed");
-    signal_add(&global_signals, "xkb::map_changed");
-    signal_add(&global_signals, "xkb::group_changed");
-    signal_add(&global_signals, "refresh");
-    signal_add(&global_signals, "startup");
-    signal_add(&global_signals, "exit");
-    signal_add(&global_signals, "screen::change");
 }
 
 static void

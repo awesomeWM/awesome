@@ -425,13 +425,6 @@ tag_class_setup(lua_State *L)
                             (lua_class_propfunc_t) luaA_tag_set_activated,
                             (lua_class_propfunc_t) luaA_tag_get_activated,
                             (lua_class_propfunc_t) luaA_tag_set_activated);
-
-    signal_add(&tag_class.signals, "property::name");
-    signal_add(&tag_class.signals, "property::selected");
-    signal_add(&tag_class.signals, "property::activated");
-    signal_add(&tag_class.signals, "request::select");
-    signal_add(&tag_class.signals, "tagged");
-    signal_add(&tag_class.signals, "untagged");
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

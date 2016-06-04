@@ -1128,13 +1128,6 @@ screen_class_setup(lua_State *L)
                             NULL,
                             (lua_class_propfunc_t) luaA_screen_get_workarea,
                             NULL);
-
-    signal_add(&screen_class.signals, "property::workarea");
-    signal_add(&screen_class.signals, "property::geometry");
-    signal_add(&screen_class.signals, "property::outputs");
-    signal_add(&screen_class.signals, "primary_changed");
-    signal_add(&screen_class.signals, "added");
-    signal_add(&screen_class.signals, "removed");
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

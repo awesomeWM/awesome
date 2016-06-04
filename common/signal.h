@@ -54,11 +54,6 @@ signal_array_getbyid(signal_array_t *arr, unsigned long id)
     return signal_array_lookup(arr, &sig);
 }
 
-static inline void
-signal_add(signal_array_t *arr, const char *name)
-{
-}
-
 /** Connect a signal inside a signal array.
  * You are in charge of reference counting.
  * \param arr The signal array.
