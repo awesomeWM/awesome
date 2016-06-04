@@ -27,6 +27,31 @@
  * @module awesome
  */
 
+/** For some reason the application aborted startup
+ * @param arg Table which only got the "id" key set
+ * @signal spawn::canceled
+ */
+
+/** When one of the fields from the @{spawn::initiated} table changes
+ * @param arg Table which describes the spawn event
+ * @signal spawn::change
+ */
+
+/** An application finished starting
+ * @param arg Table which only got the "id" key set
+ * @signal spawn::completed
+ */
+
+/** When a new client is beginning to start
+ * @param arg Table which describes the spawn event
+ * @signal spawn::initiated
+ */
+
+/** An application started a spawn event but didn't start in time.
+ * @param arg Table which only got the "id" key set
+ * @signal spawn::timeout
+ */
+
 #include "spawn.h"
 
 #include <unistd.h>
@@ -245,30 +270,10 @@ spawn_init(void)
                                                   spawn_monitor_event,
                                                   NULL, NULL);
 
-    /** For some reason the application aborted startup
-     * @param arg Table which only got the "id" key set
-     * @signal spawn::canceled
-     */
     signal_add(&global_signals, "spawn::canceled");
-    /** When one of the fields from the @{spawn::initiated} table changes
-     * @param arg Table which describes the spawn event
-     * @signal spawn::change
-     */
     signal_add(&global_signals, "spawn::change");
-    /** An application finished starting
-     * @param arg Table which only got the "id" key set
-     * @signal spawn::completed
-     */
     signal_add(&global_signals, "spawn::completed");
-    /** When a new client is beginning to start
-     * @param arg Table which describes the spawn event
-     * @signal spawn::initiated
-     */
     signal_add(&global_signals, "spawn::initiated");
-    /** An application started a spawn event but didn't start in time.
-     * @param arg Table which only got the "id" key set
-     * @signal spawn::timeout
-     */
     signal_add(&global_signals, "spawn::timeout");
 }
 

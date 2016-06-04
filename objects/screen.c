@@ -66,6 +66,20 @@
  *
  */
 
+/**
+ * @signal .primary_changed
+ */
+
+/**
+ * This signal is emitted when a new screen is added to the current setup.
+ * @signal .added
+ */
+
+/**
+ * This signal is emitted when a screen is removed from the setup.
+ * @signal removed
+ */
+
  /**
   * The primary screen.
   *
@@ -1118,19 +1132,8 @@ screen_class_setup(lua_State *L)
     signal_add(&screen_class.signals, "property::workarea");
     signal_add(&screen_class.signals, "property::geometry");
     signal_add(&screen_class.signals, "property::outputs");
-    /**
-     * @signal .primary_changed
-     */
     signal_add(&screen_class.signals, "primary_changed");
-    /**
-     * This signal is emitted when a new screen is added to the current setup.
-     * @signal .added
-     */
     signal_add(&screen_class.signals, "added");
-    /**
-     * This signal is emitted when a screen is removed from the setup.
-     * @signal removed
-     */
     signal_add(&screen_class.signals, "removed");
 }
 

@@ -67,6 +67,54 @@ extern const struct luaL_Reg awesome_root_lib[];
 extern const struct luaL_Reg awesome_mouse_methods[];
 extern const struct luaL_Reg awesome_mouse_meta[];
 
+/** A call into the lua code aborted with an error
+ * @signal debug::error
+ */
+
+/** A deprecated lua function was called
+ * @signal debug::deprecation
+ */
+
+/** An invalid key was read from an object (e.g. c.foo)
+ * @signal debug::index::miss
+ */
+
+/** An invalid key was written to an object (e.g. c.foo = "bar")
+ * @signal debug::newindex::miss
+ */
+
+/**
+ * @signal systray::update
+ */
+
+/**
+ * @signal wallpaper_changed
+ */
+
+/**
+ * @signal xkb::map_changed
+ */
+
+/**
+ * @signal xkb::group_changed
+ */
+
+/**
+ * @signal refresh
+ */
+
+/**
+ * @signal startup
+ */
+
+/**
+ * @signal exit
+ */
+
+/**
+ * @signal screen::change
+ */
+
 /** Path to config file */
 static char *conffile;
 
@@ -676,53 +724,17 @@ luaA_init(xdgHandle* xdg)
 
     lua_pop(L, 2); /* pop "package" and "package.loaded" */
 
-    /** A call into the lua code aborted with an error
-     * @signal debug::error
-     */
     signal_add(&global_signals, "debug::error");
-    /** A deprecated lua function was called
-     * @signal debug::deprecation
-     */
     signal_add(&global_signals, "debug::deprecation");
-    /** An invalid key was read from an object (e.g. c.foo)
-     * @signal debug::index::miss
-     */
     signal_add(&global_signals, "debug::index::miss");
-    /** An invalid key was written to an object (e.g. c.foo = "bar")
-     * @signal debug::newindex::miss
-     */
     signal_add(&global_signals, "debug::newindex::miss");
-    /**
-     * @signal systray::update
-     */
     signal_add(&global_signals, "systray::update");
-    /**
-     * @signal wallpaper_changed
-     */
     signal_add(&global_signals, "wallpaper_changed");
-    /**
-     * @signal xkb::map_changed
-     */
     signal_add(&global_signals, "xkb::map_changed");
-    /**
-     * @signal xkb::group_changed
-     */
     signal_add(&global_signals, "xkb::group_changed");
-    /**
-     * @signal refresh
-     */
     signal_add(&global_signals, "refresh");
-    /**
-     * @signal startup
-     */
     signal_add(&global_signals, "startup");
-    /**
-     * @signal exit
-     */
     signal_add(&global_signals, "exit");
-    /**
-     * @signal screen::change
-     */
     signal_add(&global_signals, "screen::change");
 }
 
