@@ -31,8 +31,6 @@ local o = gears.object {
     enable_auto_signals = true,
 }
 
-o:add_signal "property::foo"
-
 print(o.foo)
  
 o.foo = 42
@@ -42,7 +40,6 @@ print(o.foo)
 o:method(1, 2, 3)
 
  -- Random properties can also be added, the signal will be emited automatically.
-o:add_signal "property::something"
 
 o:connect_signal("property::something", function(obj, value)
     print("In the connection handler!", obj, value)

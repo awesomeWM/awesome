@@ -196,7 +196,6 @@ end
 -- @see set_markup
 tooltip.new = function(args)
     local self = setmetatable(object(), instance_mt)
-    self:add_signal("property::visible")
     self.visible = false
 
     -- private data

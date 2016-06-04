@@ -9,31 +9,6 @@ describe("gears.object", function()
     local obj
     before_each(function()
         obj = object()
-        obj:add_signal("signal")
-    end)
-
-    it("strong connect non-existent signal", function()
-        assert.has.errors(function()
-            obj:connect_signal("foo", function() end)
-        end)
-    end)
-
-    it("weak connect non-existent signal", function()
-        assert.has.errors(function()
-            obj:weak_connect_signal("foo", function() end)
-        end)
-    end)
-
-    it("strong disconnect non-existent signal", function()
-        assert.has.errors(function()
-            obj:disconnect_signal("foo", function() end)
-        end)
-    end)
-
-    it("emitting non-existent signal", function()
-        assert.has.errors(function()
-            obj:emit_signal("foo")
-        end)
     end)
 
     it("strong connecting and emitting signal", function()
@@ -188,7 +163,6 @@ describe("gears.object", function()
 
     it("auto emit disabled", function()
         local got_it = false
-        obj:add_signal("property::foo")
         obj:connect_signal("property::foo", function() got_it=true end)
 
         obj.foo = 42
@@ -199,19 +173,11 @@ describe("gears.object", function()
     it("auto emit enabled", function()
         local got_it = false
         local obj2 = object{enable_auto_signals=true, enable_properties=true}
-        obj2:add_signal("property::foo")
         obj2:connect_signal("property::foo", function() got_it=true end)
 
         obj2.foo = 42
 
         assert.is_true(got_it)
-    end)
-
-    it("auto emit enabled", function()
-        assert.has.errors(function()
-            local obj2 = object{enable_auto_signals=true, enable_properties=true}
-            obj2.foo = "bar"
-        end)
     end)
 
     it("auto emit without dynamic properties", function()

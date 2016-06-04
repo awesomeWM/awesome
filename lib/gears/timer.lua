@@ -97,11 +97,6 @@ local timer_instance_mt = {
 timer.new = function(args)
     local ret = object()
 
-    ret:add_signal("property::timeout")
-    ret:add_signal("timeout")
-    ret:add_signal("start")
-    ret:add_signal("stop")
-
     ret.data = { timeout = 0 }
     setmetatable(ret, timer_instance_mt)
 

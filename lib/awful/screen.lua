@@ -465,8 +465,6 @@ function screen.object.set_selected_tag() end
 --- When the tag history changed.
 -- @signal tag::history::update
 
-capi.screen.add_signal("padding")
-
 -- Extend the luaobject
 object.properties(capi.screen, {
     getter_class = screen.object,

@@ -83,8 +83,6 @@ return {
     widget_stub = function(width, height)
         local w = object()
         w._private = {}
-        w:add_signal("widget::redraw_needed")
-        w:add_signal("widget::layout_changed")
         w.is_widget = true
         w._private.visible = true
         w._private.opacity = 1

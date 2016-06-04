@@ -341,11 +341,9 @@ function awfulwibar.new(arg)
     w._screen  = screen --HACK When a screen is removed, then getbycoords wont work
     w._stretch = arg.stretch == nil and has_to_stretch or arg.stretch
 
-    w:add_signal("property::position")
     w.get_position = get_position
     w.set_position = set_position
 
-    w:add_signal("property::stretch")
     w.get_stretch = get_stretch
     w.set_stretch = set_stretch
     w.remove      = remove

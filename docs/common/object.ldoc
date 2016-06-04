@@ -2,7 +2,6 @@
 --- Disonnect to a signal.
 -- @tparam string name The name of the signal
 -- @tparam function func The callback that should be disconnected
--- @see add_signal
 -- @function disconnect_signal
 
 --- Emit a signal.
@@ -13,15 +12,9 @@
 --   that are given to emit_signal()
 -- @function emit_signal
 
---- Add a signal to an object. All signals must be added before they can be used.
---
--- @tparam string name The name of the new signal.
--- @function add_signal
-
 --- Connect to a signal.
 -- @tparam string name The name of the signal
 -- @tparam function func The callback to call when the signal is emitted
--- @see add_signal 
 -- @function connect_signal
 
 --- Connect to a signal weakly. This allows the callback function to be garbage

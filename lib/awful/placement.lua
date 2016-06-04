@@ -558,7 +558,6 @@ attach = function(d, position_f, args)
     end
 
     -- Create a way to detach a placement function
-    d:add_signal("property::detach_callback")
     function d.detach_callback()
         d:disconnect_signal("property::width"       , tracker)
         d:disconnect_signal("property::height"      , tracker)
