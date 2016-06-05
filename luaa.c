@@ -395,8 +395,8 @@ luaA_awesome_disconnect_signal(lua_State *L)
     const char *name = luaL_checkstring(L, 1);
     luaA_checkfunction(L, 2);
     const void *func = lua_topointer(L, 2);
-    signal_disconnect(&global_signals, name, func);
-    luaA_object_unref(L, (void *) func);
+    if (signal_disconnect(&global_signals, name, func))
+        luaA_object_unref(L, (void *) func);
     return 0;
 }
 
