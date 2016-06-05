@@ -224,19 +224,17 @@ function module.snap(c, snap, x, y, fixed_x, fixed_y)
         c:struts(struts)
     end
 
-    geom.x = geom.x - (2 * c.border_width)
-    geom.y = geom.y - (2 * c.border_width)
-
     for _, snapper in ipairs(aclient.visible(c.screen)) do
         if snapper ~= c then
-            geom = snap_outside(geom, snapper:geometry(), snap)
+            local snapper_geom = snapper:geometry()
+            snapper_geom.width = snapper_geom.width + (2 * snapper.border_width)
+            snapper_geom.height = snapper_geom.height + (2 * snapper.border_width)
+            geom = snap_outside(geom, snapper_geom, snap)
         end
     end
 
     geom.width = geom.width - (2 * c.border_width)
     geom.height = geom.height - (2 * c.border_width)
-    geom.x = geom.x + (2 * c.border_width)
-    geom.y = geom.y + (2 * c.border_width)
 
     -- It's easiest to undo changes afterwards if they're not allowed
     if fixed_x then geom.x = cur_geom.x end
