@@ -255,6 +255,11 @@ function layout.move_handler(c, context, hints) --luacheck: no unused args
     -- Quit if it isn't a mouse.move on a tiled layout, that's handled elsewhere
     if c.floating then return end
     if context ~= "mouse.move" then return end
+
+    if capi.mouse.screen ~= c.screen then
+        c.screen = capi.mouse.screen
+    end
+
     local l = c.screen.selected_tag and c.screen.selected_tag.layout or nil
     if l == layout.suit.floating then return end
 
