@@ -15,5 +15,8 @@ pcall(function()
     require("luacov.runner")(luacovpath)
 end)
 
+-- Silence debug warnings
+require("gears.debug").print_warning = function() end
+
 -- Execute the test
 loadfile(file_path)()

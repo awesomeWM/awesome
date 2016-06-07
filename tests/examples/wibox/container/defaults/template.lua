@@ -21,6 +21,9 @@ pcall(function()
     require("luacov.runner")(luacovpath)
 end)
 
+-- Silence debug warnings
+require("gears.debug").print_warning = function() end
+
 -- Let the test request a size and file format
 local before, after = loadfile(file_path)()
 

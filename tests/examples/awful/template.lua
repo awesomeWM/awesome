@@ -22,6 +22,9 @@ pcall(function()
     require("luacov.runner")(luacovpath)
 end)
 
+-- Silence debug warnings
+require("gears.debug").print_warning = function() end
+
 local color     = require( "gears.color" )
 local shape     = require( "gears.shape" )
 local beautiful = require( "beautiful"   )
