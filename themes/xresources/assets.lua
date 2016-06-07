@@ -60,6 +60,7 @@ function theme_assets.wallpaper(bg, fg, alt_fg, s)
             width = math.max(_s.workarea.width, width)
         end
     end
+    print("theme_assets.wallpaper: using width/height: ", width, height)
     local img = cairo.RecordingSurface(cairo.Content.COLOR,
         cairo.Rectangle { x = 0, y = 0, width = width, height = height })
     local cr = cairo.Context(img)
