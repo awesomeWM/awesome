@@ -109,6 +109,100 @@
  * @table object
  */
 
+/** When a client gains focus.
+ * @signal .focus
+ */
+
+/** Before manage, after unmanage, and when clients swap.
+ * @signal .list
+ */
+
+/** When 2 clients are swapped
+ * @tparam client client The other client
+ * @tparam boolean is_source If self is the source or the destination of the swap
+ * @signal .swapped
+ */
+
+/**
+ * @signal .manage
+ */
+
+/**
+ * @signal button::press
+ */
+
+/**
+ * @signal button::release
+ */
+
+/**
+ * @signal mouse::enter
+ */
+
+/**
+ * @signal mouse::leave
+ */
+
+/**
+ * @signal mouse::move
+ */
+
+/**
+ * @signal property::window
+ */
+
+/** When a client should get activated (focused and/or raised).
+ *
+ * Default implementation: `awful.ewmh.activate`.
+ * @signal request::activate
+ * @tparam string context The context where this signal was used.
+ * @tparam[opt] table hints A table with additional hints:
+ * @tparam[opt=false] boolean hints.raise should the client be raised?
+ */
+
+/**
+ * @signal request::geometry
+ * @tparam client c The client
+ * @tparam string context Why and what to resize. This is used for the
+ * handlers to know if they are capable of applying the new geometry.
+ * @tparam[opt={}] table Additional arguments. Each context handler may
+ * interpret this differently.
+ */
+
+/**
+ * @signal request::tag
+ */
+
+/**
+ * @signal request::urgent
+ */
+
+/** When a client gets tagged.
+ * @signal .tagged
+ * @tag t The tag object.
+ */
+
+/** When a client gets unfocused.
+ * @signal .unfocus
+ */
+
+/**
+ * @signal .unmanage
+ */
+
+/** When a client gets untagged.
+ * @signal .untagged
+ * @tag t The tag object.
+ */
+
+/**
+ * @signal .raised
+ */
+
+/**
+ * @signal .lowered
+ */
+
 /**
  * The focused `client` or nil (in case there is none).
  *
@@ -3335,145 +3429,6 @@ client_class_setup(lua_State *L)
                             NULL,
                             (lua_class_propfunc_t) luaA_client_get_first_tag,
                             NULL);
-
-    /** When a client gains focus.
-     * @signal .focus
-     */
-    signal_add(&client_class.signals, "focus");
-    /** Before manage, after unmanage, and when clients swap.
-     * @signal .list
-     */
-    signal_add(&client_class.signals, "list");
-    /** When 2 clients are swapped
-     * @tparam client client The other client
-     * @tparam boolean is_source If self is the source or the destination of the swap
-     * @signal .swapped
-     */
-    signal_add(&client_class.signals, "swapped");
-    /**
-     * @signal .manage
-     */
-    signal_add(&client_class.signals, "manage");
-    /**
-     * @signal button::press
-     */
-    signal_add(&client_class.signals, "button::press");
-    /**
-     * @signal button::release
-     */
-    signal_add(&client_class.signals, "button::release");
-    /**
-     * @signal mouse::enter
-     */
-    signal_add(&client_class.signals, "mouse::enter");
-    /**
-     * @signal mouse::leave
-     */
-    signal_add(&client_class.signals, "mouse::leave");
-    /**
-     * @signal mouse::move
-     */
-    signal_add(&client_class.signals, "mouse::move");
-
-    /* Those signals are documented elsewhere */
-    signal_add(&client_class.signals, "property::above");
-    signal_add(&client_class.signals, "property::below");
-    signal_add(&client_class.signals, "property::class");
-    signal_add(&client_class.signals, "property::focusable");
-    signal_add(&client_class.signals, "property::fullscreen");
-    signal_add(&client_class.signals, "property::geometry");
-    signal_add(&client_class.signals, "property::group_window");
-    signal_add(&client_class.signals, "property::height");
-    signal_add(&client_class.signals, "property::hidden");
-    signal_add(&client_class.signals, "property::icon");
-    signal_add(&client_class.signals, "property::icon_name");
-    signal_add(&client_class.signals, "property::instance");
-    signal_add(&client_class.signals, "property::keys");
-    signal_add(&client_class.signals, "property::machine");
-    signal_add(&client_class.signals, "property::maximized");
-    signal_add(&client_class.signals, "property::maximized_horizontal");
-    signal_add(&client_class.signals, "property::maximized_vertical");
-    signal_add(&client_class.signals, "property::minimized");
-    signal_add(&client_class.signals, "property::modal");
-    signal_add(&client_class.signals, "property::name");
-    signal_add(&client_class.signals, "property::ontop");
-    signal_add(&client_class.signals, "property::pid");
-    signal_add(&client_class.signals, "property::role");
-    signal_add(&client_class.signals, "property::screen");
-    signal_add(&client_class.signals, "property::shape_bounding");
-    signal_add(&client_class.signals, "property::shape_client_bounding");
-    signal_add(&client_class.signals, "property::shape_client_clip");
-    signal_add(&client_class.signals, "property::shape_clip");
-    signal_add(&client_class.signals, "property::size_hints_honor");
-    signal_add(&client_class.signals, "property::skip_taskbar");
-    signal_add(&client_class.signals, "property::sticky");
-    signal_add(&client_class.signals, "property::struts");
-    signal_add(&client_class.signals, "property::titlebar_bottom");
-    signal_add(&client_class.signals, "property::titlebar_left");
-    signal_add(&client_class.signals, "property::titlebar_right");
-    signal_add(&client_class.signals, "property::titlebar_top");
-    signal_add(&client_class.signals, "property::transient_for");
-    signal_add(&client_class.signals, "property::type");
-    signal_add(&client_class.signals, "property::urgent");
-    signal_add(&client_class.signals, "property::width");
-    /**
-     * @signal property::window
-     */
-    signal_add(&client_class.signals, "property::window");
-    signal_add(&client_class.signals, "property::x");
-    signal_add(&client_class.signals, "property::y");
-    /** When a client should get activated (focused and/or raised).
-     *
-     * Default implementation: `awful.ewmh.activate`.
-     * @signal request::activate
-     * @tparam string context The context where this signal was used.
-     * @tparam[opt] table hints A table with additional hints:
-     * @tparam[opt=false] boolean hints.raise should the client be raised?
-     */
-    signal_add(&client_class.signals, "request::activate");
-    /**
-     * @signal request::geometry
-     * @tparam client c The client
-     * @tparam string context Why and what to resize. This is used for the
-     * handlers to know if they are capable of applying the new geometry.
-     * @tparam[opt={}] table Additional arguments. Each context handler may
-     * interpret this differently.
-     */
-    signal_add(&client_class.signals, "request::geometry");
-    /**
-     * @signal request::tag
-     */
-    signal_add(&client_class.signals, "request::tag");
-    /**
-     * @signal request::urgent
-     */
-    signal_add(&client_class.signals, "request::urgent");
-    /** When a client gets tagged.
-     * @signal .tagged
-     * @tag t The tag object.
-     */
-    signal_add(&client_class.signals, "tagged");
-    /** When a client gets unfocused.
-     * @signal .unfocus
-     */
-    signal_add(&client_class.signals, "unfocus");
-    /**
-     * @signal .unmanage
-     */
-    signal_add(&client_class.signals, "unmanage");
-    /** When a client gets untagged.
-     * @signal .untagged
-     * @tag t The tag object.
-     */
-    signal_add(&client_class.signals, "untagged");
-    /**
-     * @signal .raised
-     */
-    signal_add(&client_class.signals, "raised");
-    /**
-     * @signal .lowered
-     */
-    signal_add(&client_class.signals, "lowered");
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

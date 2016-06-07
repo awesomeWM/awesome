@@ -254,11 +254,6 @@ luaA_class_setup(lua_State *L, lua_class_t *class,
     class->index_miss_handler = LUA_REFNIL;
     class->newindex_miss_handler = LUA_REFNIL;
 
-    signal_add(&class->signals, "new");
-
-    if (parent)
-        class->signals.inherits_from = &parent->signals;
-
     lua_class_array_append(&luaA_classes, class);
 }
 

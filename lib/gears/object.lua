@@ -21,45 +21,36 @@ local object = { properties = properties, mt = {} }
 --- Verify that obj is indeed a valid object as returned by new()
 local function check(obj)
     if type(obj) ~= "table" or type(obj._signals) ~= "table" then
-        error("add_signal() called on non-object")
+        error("called on non-object")
     end
 end
 
 --- Find a given signal
 -- @tparam table obj The object to search in
 -- @tparam string name The signal to find
--- @tparam string error_msg Error message for if the signal is not found
 -- @treturn table The signal table
-local function find_signal(obj, name, error_msg)
+local function find_signal(obj, name)
     check(obj)
     if not obj._signals[name] then
-        error("Trying to " .. error_msg .. " non-existent signal '" .. name .. "'")
-    end
-    return obj._signals[name]
-end
-
---- Add a signal to an object. All signals must be added before they can be used.
---
---@DOC_text_gears_object_signal_EXAMPLE@
--- @tparam string name The name of the new signal.
-function object:add_signal(name)
-    check(self)
-    assert(type(name) == "string", "name must be a string, got: " .. type(name))
-    if not self._signals[name] then
-        self._signals[name] = {
+        assert(type(name) == "string", "name must be a string, got: " .. type(name))
+        obj._signals[name] = {
             strong = {},
             weak = setmetatable({}, { __mode = "kv" })
         }
     end
+    return obj._signals[name]
+end
+
+function object.add_signal()
+    require("awful.util").deprecate("Use signals without explicitly adding them. This is now done implicitly.")
 end
 
 --- Connect to a signal.
 -- @tparam string name The name of the signal
 -- @tparam function func The callback to call when the signal is emitted
--- @see add_signal 
 function object:connect_signal(name, func)
     assert(type(func) == "function", "callback must be a function, got: " .. type(func))
-    local sig = find_signal(self, name, "connect to")
+    local sig = find_signal(self, name)
     assert(sig.weak[func] == nil, "Trying to connect a strong callback which is already connected weakly")
     sig.strong[func] = true
 end
@@ -100,7 +91,7 @@ end
 -- @tparam function func The callback to call when the signal is emitted
 function object:weak_connect_signal(name, func)
     assert(type(func) == "function", "callback must be a function, got: " .. type(func))
-    local sig = find_signal(self, name, "connect to")
+    local sig = find_signal(self, name)
     assert(sig.strong[func] == nil, "Trying to connect a weak callback which is already connected strongly")
     sig.weak[func] = make_the_gc_obey(func)
 end
@@ -108,9 +99,8 @@ end
 --- Disonnect to a signal.
 -- @tparam string name The name of the signal
 -- @tparam function func The callback that should be disconnected
--- @see add_signal
 function object:disconnect_signal(name, func)
-    local sig = find_signal(self, name, "disconnect from")
+    local sig = find_signal(self, name)
     sig.weak[func] = nil
     sig.strong[func] = nil
 end
@@ -122,7 +112,7 @@ end
 --   function receives the object as first argument and then any extra arguments
 --   that are given to emit_signal()
 function object:emit_signal(name, ...)
-    local sig = find_signal(self, name, "emit")
+    local sig = find_signal(self, name)
     for func in pairs(sig.strong) do
         func(self, ...)
     end
@@ -163,8 +153,8 @@ local function set_miss(self, key, value)
     end
 end
 
---- Returns a new object. You can call `:emit_signal()`, `:disconnect_signal()`,
--- `:connect_signal()` and `:add_signal()` on the resulting object.
+--- Returns a new object. You can call `:emit_signal()`, `:disconnect_signal()`
+--  and `:connect_signal()` on the resulting object.
 --
 -- Note that `args.enable_auto_signals` is only supported when
 -- `args.enable_properties` is true.

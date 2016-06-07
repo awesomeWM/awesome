@@ -7,10 +7,6 @@ screen.count = 1
 local function create_screen(args)
     local s = gears_obj()
 
-    s:add_signal("property::workarea")
-    s:add_signal("property::index")
-    s:add_signal("padding")
-
     -- Copy the geo in case the args are mutated
     local geo = {
         x      = args.x     ,
@@ -98,10 +94,6 @@ function screen._setup_grid(w, h, rows, args)
 end
 
 screen._add_screen {width=320, height=240}
-
-screen.add_signal("property::workarea")
-screen.add_signal("added")
-screen.add_signal("removed")
 
 return screen
 

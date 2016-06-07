@@ -17,12 +17,6 @@ local function _shim_fake_class()
         return obj._connect_signal(obj, name, func)
     end
 
-    obj._add_signal = obj.add_signal
-
-    function obj.add_signal(name)
-        return obj._add_signal(obj, name)
-    end
-
     function obj.set_index_miss_handler(handler)
         meta.__index = handler
     end
@@ -49,11 +43,6 @@ awesome.startup = true
 
 function awesome.register_xproperty()
 end
-
-awesome.add_signal("refresh")
-awesome.add_signal("wallpaper_changed")
-awesome.add_signal("spawn::canceled")
-awesome.add_signal("spawn::timeout")
 
 return awesome
 

@@ -2,9 +2,6 @@ local gears = require("gears") --DOC_HIDE
 
 local o = gears.object{}
  
- -- Add a new signals to the object. This is used to catch typos
-o:add_signal "my_signal"
- 
  -- Function can be attached to signals
 local function slot(obj, a, b, c)
     print("In slot", obj, a, b, c)

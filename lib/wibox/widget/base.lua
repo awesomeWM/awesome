@@ -556,18 +556,8 @@ function base.make_widget(proxy, widget_name, args)
         class             = args.class,
     }
 
-    -- This signal is used by layouts to find out when they have to update.
-    ret:add_signal("widget::layout_changed")
-    ret:add_signal("widget::redraw_needed")
-    -- Mouse input, oh noes!
-    ret:add_signal("button::press")
-    ret:add_signal("button::release")
-    ret:add_signal("mouse::enter")
-    ret:add_signal("mouse::leave")
-
     -- Backwards compatibility
     -- TODO: Remove this
-    ret:add_signal("widget::updated")
     ret:connect_signal("widget::updated", function()
         ret:emit_signal("widget::layout_changed")
         ret:emit_signal("widget::redraw_needed")
@@ -648,7 +638,7 @@ end
 function base.check_widget(widget)
     assert(type(widget) == "table", "Type should be table, but is " .. tostring(type(widget)))
     assert(widget.is_widget, "Argument is not a widget!")
-    for _, func in pairs({ "add_signal", "connect_signal", "disconnect_signal" }) do
+    for _, func in pairs({ "connect_signal", "disconnect_signal" }) do
         assert(type(widget[func]) == "function", func .. " is not a function")
     end
 end

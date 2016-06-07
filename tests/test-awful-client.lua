@@ -18,7 +18,6 @@ client.focus = client.get()[1]
 local c  = client.focus
 -- local c2 = client.get()[2]
 
-client.add_signal("property::foo")
 c.foo = "bar"
 
 -- Check if the property system works

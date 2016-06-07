@@ -45,54 +45,13 @@ signal_wipe(signal_t *sig)
     cptr_array_wipe(&sig->sigfuncs);
 }
 
-ARRAY_TYPE_EXTRA(signal_t, signal, struct signal_array_t *inherits_from)
-BARRAY_FUNCS(signal_t, signal, signal_wipe, signal_cmp)
+DO_BARRAY(signal_t, signal, signal_wipe, signal_cmp)
 
 static inline signal_t *
 signal_array_getbyid(signal_array_t *arr, unsigned long id)
 {
     signal_t sig = { .id = id };
-    signal_t *result;
-
-    result = signal_array_lookup(arr, &sig);
-    if(result)
-        return result;
-
-    /* The signal doesn't exist yet. Check if some of our inherits_from have the
-     * signal and if yes, add it.
-     */
-    signal_array_t *inherit = arr->inherits_from;
-    while(inherit != NULL)
-    {
-        if(signal_array_lookup(inherit, &sig))
-            break;
-        inherit = inherit->inherits_from;
-    }
-    if(inherit)
-    {
-        /* Add the signal to this array to pretend it always existed */
-        signal_array_insert(arr, sig);
-        result = signal_array_lookup(arr, &sig);
-        assert(result != NULL);
-    }
-    return result;
-}
-
-/** Add a signal to a signal array.
- * Signals have to be added before they can be added or emitted.
- * \param arr The signal array.
- * \param name The signal name.
- */
-static inline void
-signal_add(signal_array_t *arr, const char *name)
-{
-    unsigned long tok = a_strhash((const unsigned char *) name);
-    signal_t *sigfound = signal_array_getbyid(arr, tok);
-    if(!sigfound)
-    {
-        signal_t sig = { .id = tok };
-        signal_array_insert(arr, sig);
-    }
+    return signal_array_lookup(arr, &sig);
 }
 
 /** Connect a signal inside a signal array.
@@ -109,7 +68,11 @@ signal_connect(signal_array_t *arr, const char *name, const void *ref)
     if(sigfound)
         cptr_array_append(&sigfound->sigfuncs, ref);
     else
-        warn("Trying to connect to unknown signal '%s'", name);
+    {
+        signal_t sig = { .id = tok };
+        cptr_array_append(&sig.sigfuncs, ref);
+        signal_array_insert(arr, sig);
+    }
 }
 
 /** Disconnect a signal inside a signal array.
@@ -131,8 +94,7 @@ signal_disconnect(signal_array_t *arr, const char *name, const void *ref)
                 cptr_array_remove(&sigfound->sigfuncs, func);
                 break;
             }
-    } else
-        warn("Trying to disconnect from unknown signal '%s'", name);
+    }
 }
 
 #endif

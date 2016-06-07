@@ -1159,25 +1159,17 @@ end
 
 --- The last geometry when client was floating.
 -- @signal property::floating_geometry
-capi.client.add_signal("property::floating_geometry")
-
-capi.client.add_signal("property::floating")
-
-capi.client.add_signal("property::dockable")
 
 --- Emited when a client need to get a titlebar.
 -- @signal request::titlebars
 -- @tparam[opt=nil] string content The context (like "rules")
 -- @tparam[opt=nil] table hints Some hints.
-capi.client.add_signal("request::titlebars")
 
 --- The client marked signal (deprecated).
 -- @signal .marked
-capi.client.add_signal("marked")
 
 --- The client unmarked signal (deprecated).
 -- @signal unmarked
-capi.client.add_signal("unmarked")
 
 -- Add clients during startup to focus history.
 -- This used to happen through ewmh.activate, but that only handles visible

@@ -298,7 +298,6 @@ local function setup_signals(_drawable)
     local d = _drawable.drawable
 
     local function clone_signal(name)
-        _drawable:add_signal(name)
         -- When "name" is emitted on wibox.drawin, also emit it on wibox
         d:connect_signal(name, function(_, ...)
             _drawable:emit_signal(name, ...)

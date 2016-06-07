@@ -43,6 +43,50 @@
  * @function drawable
  */
 
+/**
+ * @signal button::press
+ */
+
+/**
+ * @signal button::release
+ */
+
+/**
+ * @signal mouse::enter
+ */
+
+/**
+ * @signal mouse::leave
+ */
+
+/**
+ * @signal mouse::move
+ */
+
+/**
+ * @signal property::geometry
+ */
+
+/**
+ * @signal property::height
+ */
+
+/**
+ * @signal property::width
+ */
+
+/**
+ * @signal property::x
+ */
+
+/**
+ * @signal property::y
+ */
+
+/**
+ * @signal property::surface
+ */
+
 /** Get the number of instances.
  *
  * @return The number of drawable objects alive.
@@ -196,51 +240,6 @@ drawable_class_setup(lua_State *L)
                             NULL,
                             (lua_class_propfunc_t) luaA_drawable_get_surface,
                             NULL);
-
-    /**
-     * @signal button::press
-     */
-    signal_add(&drawable_class.signals, "button::press");
-    /**
-     * @signal button::release
-     */
-    signal_add(&drawable_class.signals, "button::release");
-    /**
-     * @signal mouse::enter
-     */
-    signal_add(&drawable_class.signals, "mouse::enter");
-    /**
-     * @signal mouse::leave
-     */
-    signal_add(&drawable_class.signals, "mouse::leave");
-    /**
-     * @signal mouse::move
-     */
-    signal_add(&drawable_class.signals, "mouse::move");
-    /**
-     * @signal property::geometry
-     */
-    signal_add(&drawable_class.signals, "property::geometry");
-    /**
-     * @signal property::height
-     */
-    signal_add(&drawable_class.signals, "property::height");
-    /**
-     * @signal property::width
-     */
-    signal_add(&drawable_class.signals, "property::width");
-    /**
-     * @signal property::x
-     */
-    signal_add(&drawable_class.signals, "property::x");
-    /**
-     * @signal property::y
-     */
-    signal_add(&drawable_class.signals, "property::y");
-    /**
-     * @signal property::surface
-     */
-    signal_add(&drawable_class.signals, "property::surface");
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

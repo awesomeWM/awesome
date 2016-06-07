@@ -1323,22 +1323,6 @@ capi.client.connect_signal("untagged", client_untagged)
 capi.client.connect_signal("tagged", client_tagged)
 capi.tag.connect_signal("request::select", tag.object.view_only)
 
-capi.tag.add_signal("property::hide")
-capi.tag.add_signal("property::icon")
-capi.tag.add_signal("property::icon_only")
-capi.tag.add_signal("property::layout")
-capi.tag.add_signal("property::mwfact")
-capi.tag.add_signal("property::master_width_factor")
-capi.tag.add_signal("property::useless_gap")
-capi.tag.add_signal("property::master_fill_policy")
-capi.tag.add_signal("property::ncol")
-capi.tag.add_signal("property::column_count")
-capi.tag.add_signal("property::nmaster")
-capi.tag.add_signal("property::master_count")
-capi.tag.add_signal("property::windowfact")
-capi.tag.add_signal("property::screen")
-capi.tag.add_signal("property::index")
-
 --- True when a tagged client is urgent
 -- @signal property::urgent
 -- @see client.urgent
@@ -1346,15 +1330,6 @@ capi.tag.add_signal("property::index")
 --- The number of urgent tagged clients
 -- @signal property::urgent_count
 -- @see client.urgent
-
-capi.tag.add_signal("property::urgent")
-
-capi.tag.add_signal("property::urgent_count")
-capi.tag.add_signal("property::volatile")
-capi.tag.add_signal("request::screen")
-capi.tag.add_signal("removal-pending")
-
-capi.screen.add_signal("tag::history::update")
 
 capi.screen.connect_signal("tag::history::update", tag.history.update)
 

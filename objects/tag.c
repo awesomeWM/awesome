@@ -43,6 +43,20 @@
 #include "luaa.h"
 
 /**
+ * @signal request::select
+ */
+
+/** When a client gets tagged with this tag.
+ * @signal tagged
+ * @client c The tagged client.
+ */
+
+/** When a client gets untagged with this tag.
+ * @signal untagged
+ * @client c The untagged client.
+ */
+
+/**
  * Tag name.
  *
  * **Signal:**
@@ -411,24 +425,6 @@ tag_class_setup(lua_State *L)
                             (lua_class_propfunc_t) luaA_tag_set_activated,
                             (lua_class_propfunc_t) luaA_tag_get_activated,
                             (lua_class_propfunc_t) luaA_tag_set_activated);
-
-    signal_add(&tag_class.signals, "property::name");
-    signal_add(&tag_class.signals, "property::selected");
-    signal_add(&tag_class.signals, "property::activated");
-    /**
-     * @signal request::select
-     */
-    signal_add(&tag_class.signals, "request::select");
-    /** When a client gets tagged with this tag.
-     * @signal tagged
-     * @client c The tagged client.
-     */
-    signal_add(&tag_class.signals, "tagged");
-    /** When a client gets untagged with this tag.
-     * @signal untagged
-     * @client c The untagged client.
-     */
-    signal_add(&tag_class.signals, "untagged");
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

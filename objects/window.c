@@ -27,6 +27,30 @@
  * @classmod xproperties
  */
 
+/**
+ * @signal property::border_color
+ */
+
+/**
+ * @signal property::border_width
+ */
+
+/**
+ * @signal property::buttons
+ */
+
+/**
+ * @signal property::opacity
+ */
+
+/**
+ * @signal property::struts
+ */
+
+/**
+ * @signal property::type
+ */
+
 #include "objects/window.h"
 #include "common/atoms.h"
 #include "common/xutil.h"
@@ -519,31 +543,6 @@ window_class_setup(lua_State *L)
                             (lua_class_propfunc_t) luaA_window_set_border_width,
                             (lua_class_propfunc_t) luaA_window_get_border_width,
                             (lua_class_propfunc_t) luaA_window_set_border_width);
-
-    /**
-     * @signal property::border_color
-     */
-    signal_add(&window_class.signals, "property::border_color");
-    /**
-     * @signal property::border_width
-     */
-    signal_add(&window_class.signals, "property::border_width");
-    /**
-     * @signal property::buttons
-     */
-    signal_add(&window_class.signals, "property::buttons");
-    /**
-     * @signal property::opacity
-     */
-    signal_add(&window_class.signals, "property::opacity");
-    /**
-     * @signal property::struts
-     */
-    signal_add(&window_class.signals, "property::struts");
-    /**
-     * @signal property::type
-     */
-    signal_add(&window_class.signals, "property::type");
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

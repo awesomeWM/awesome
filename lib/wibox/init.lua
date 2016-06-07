@@ -98,7 +98,6 @@ end
 local function setup_signals(_wibox)
     local obj
     local function clone_signal(name)
-        _wibox:add_signal(name)
         -- When "name" is emitted on wibox.drawin, also emit it on wibox
         obj:connect_signal(name, function(_, ...)
             _wibox:emit_signal(name, ...)
@@ -233,8 +232,6 @@ local function new(args)
 
     return ret
 end
-
-capi.drawin.add_signal("property::get_wibox")
 
 --- Redraw a wibox. You should never have to call this explicitely because it is
 -- automatically called when needed.

@@ -175,7 +175,6 @@ int luaA_object_emit_signal_simple(lua_State *);
         lua_setmetatable(L, -2);                                               \
         luaA_setuservalue(L, -2);                                              \
         lua_pushvalue(L, -1);                                                  \
-        p->signals.inherits_from = &(lua_class).signals;                       \
         luaA_class_emit_signal(L, &(lua_class), "new", 1);                     \
         return p;                                                              \
     }

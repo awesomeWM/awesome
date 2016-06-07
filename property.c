@@ -530,15 +530,8 @@ luaA_register_xproperty(lua_State *L)
     }
     else
     {
-        buffer_t buf;
-        buffer_inita(&buf, a_strlen(name) + a_strlen("xproperty::") + 1);
-        buffer_addf(&buf, "xproperty::%s", name);
-
         property.name = a_strdup(name);
         xproperty_array_insert(&globalconf.xproperties, property);
-        signal_add(&window_class.signals, buf.s);
-        signal_add(&global_signals, buf.s);
-        buffer_wipe(&buf);
     }
 
     return 0;

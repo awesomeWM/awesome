@@ -6,7 +6,6 @@
 local fake_screens = {}
 
 _G.screen = setmetatable({
-    add_signal = function() end,
     set_index_miss_handler = function() end,
     set_newindex_miss_handler = function() end,
 }, {
