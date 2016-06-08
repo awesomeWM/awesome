@@ -81,7 +81,7 @@ signal_connect(signal_array_t *arr, const char *name, const void *ref)
  * \param name The signal name.
  * \param ref The reference to remove.
  */
-static inline void
+static inline bool
 signal_disconnect(signal_array_t *arr, const char *name, const void *ref)
 {
     signal_t *sigfound = signal_array_getbyid(arr,
@@ -92,9 +92,10 @@ signal_disconnect(signal_array_t *arr, const char *name, const void *ref)
             if(ref == *func)
             {
                 cptr_array_remove(&sigfound->sigfuncs, func);
-                break;
+                return true;
             }
     }
+    return false;
 }
 
 #endif

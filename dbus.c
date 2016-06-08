@@ -789,8 +789,8 @@ luaA_dbus_disconnect_signal(lua_State *L)
     const char *name = luaL_checkstring(L, 1);
     luaA_checkfunction(L, 2);
     const void *func = lua_topointer(L, 2);
-    signal_disconnect(&dbus_signals, name, func);
-    luaA_object_unref(L, func);
+    if (signal_disconnect(&dbus_signals, name, func))
+        luaA_object_unref(L, func);
     return 0;
 }
 
