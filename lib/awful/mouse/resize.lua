@@ -12,12 +12,26 @@
 
 local aplace = require("awful.placement")
 local capi = {mousegrabber = mousegrabber}
+local beautiful = require("beautiful")
 
 local module = {}
 
 local mode      = "live"
 local req       = "request::geometry"
 local callbacks = {enter={}, move={}, leave={}}
+
+local cursors = {
+    ["mouse.resize"] = "fleur",
+    ["mouse.move"  ] = "cross"
+}
+
+--- The resize cursor name.
+-- @beautiful beautiful.cursor_mouse_resize
+-- @tparam[opt=fleur] string cursor
+
+--- The move cursor name.
+-- @beautiful beautiful.cursor_mouse_move
+-- @tparam[opt=cross] string cursor
 
 --- Set the resize mode.
 -- The available modes are:
@@ -122,6 +136,11 @@ local function handler(_, client, context, args) --luacheck: no unused_args
 
     geo = nil
 
+    -- Select the cursor
+    local tcontext = context:gsub('[.]', '_')
+
+    local cursor = beautiful["cursor_"..tcontext] or cursors[context] or "cross"
+
     -- Execute the placement function and use request::geometry
     capi.mousegrabber.run(function (_mouse)
         if not client.valid then return end
@@ -193,7 +212,7 @@ local function handler(_, client, context, args) --luacheck: no unused_args
         client:emit_signal( req, context, geo)
 
         return false
-    end, "cross")
+    end, cursor)
 end
 
 return setmetatable(module, {__call=handler})
