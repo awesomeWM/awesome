@@ -21,6 +21,7 @@ topics={
     '02-contributing.md',
     '03-declarative-layout.md',
     '04-new-widgets.md',
+    '16-using-cairo.md',
     '90-FAQ.md',
 }
 
