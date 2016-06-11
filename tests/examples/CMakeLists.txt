@@ -106,13 +106,36 @@ function(escape_code path escaped_content pre_header post_header)
     set(${post_header} ${example_post_header} PARENT_SCOPE)
 endfunction()
 
-# Execute a lua file.
-function(run_test test_path namespace template escaped_content)
+# Find the template.lua that is closest to the given file. For example, if a
+# template.lua is present in the same directory, its path will be returned. If
+# one is present in the parent directory, that path is returned etc.
+function(find_template result_variable file)
+    get_filename_component(path "${file}" DIRECTORY)
 
-    # A template is required to know how to handle the output.
-    if (template STREQUAL " ")
-        message(FATAL_ERROR "No template found for " ${test_path} ", bye")
-    endif()
+    while(NOT EXISTS "${path}/template.lua")
+        set(last_path "${path}")
+        get_filename_component(path "${path}" DIRECTORY)
+        if(last_path STREQUAL path)
+            message(FATAL_ERROR "Failed to find template.lua for ${file}")
+        endif()
+    endwhile()
+
+    set(${result_variable} "${path}/template.lua" PARENT_SCOPE)
+endfunction()
+
+# Get the namespace of a file
+function(get_namespace result_variable file)
+    get_filename_component(path "${file}" DIRECTORY)
+    string(LENGTH "${SOURCE_DIR}/tests/examples" prefix_length)
+    string(REPLACE "/" "_" namespace "${path}")
+    string(SUBSTRING "${namespace}" "${prefix_length}" -1 namespace)
+
+    set(${result_variable} "${namespace}" PARENT_SCOPE)
+endfunction()
+
+# Execute a lua file.
+function(run_test test_path namespace escaped_content)
+    find_template(template "${test_path}")
 
     # Get the file name without the extension
     get_filename_component(${test_path} TEST_FILE_NAME NAME)
@@ -197,66 +220,33 @@ function(run_test test_path namespace template escaped_content)
 
 endfunction()
 
-# Recursive helper function to avoid adding CMakeLists.txt and add_subdirectory
-# in every sub-directories.
-function(digg path namespace template)
+# Find and run all test files
+file(GLOB_RECURSE test_files LIST_DIRECTORIES false
+    "${SOURCE_DIR}/tests/examples/*.lua")
+foreach(file ${test_files})
+    if ((NOT "${file}" MATCHES ".*/shims/.*")
+        AND (NOT "${file}" MATCHES ".*/template.lua"))
 
-    # Check if there is a template for this directory, else use the
-    # last known one.
-    if(EXISTS ${path}/template.lua)
-        message(STATUS "Testing code based on ${namespace}")
-        set(template ${path}/template.lua)
+        file(RELATIVE_PATH relative_file "${SOURCE_DIR}" "${file}")
+        message(STATUS "Running ${relative_file}...")
+
+        # Get the file name without the extension
+        get_filename_component(TEST_FILE_NAME ${file} NAME_WE)
+
+        get_namespace(namespace "${file}")
+
+        run_test("${file}" "${namespace}" ESCAPED_CODE_EXAMPLE)
+
+        # Set the test name
+        set(TEST_NAME DOC${namespace}_${TEST_FILE_NAME}_EXAMPLE)
+
+        # Anything called @DOC_`namespace`_EXAMPLE@
+        # in the Lua or C sources will be replaced by the content if that
+        # variable during the pre-processing
+        # While at it, replace \" created by CMake by ', &quot; wont work in <code>
+        string(REPLACE "\"" "'" ${TEST_NAME} ${ESCAPED_CODE_EXAMPLE})
+
     endif()
-
-    # Get the directory content
-    file(GLOB ex_files RELATIVE "${path}"
-        "${path}/*")
-
-    foreach(ex_file_name ${ex_files})
-        if(IS_DIRECTORY ${path}/${ex_file_name}
-            AND (NOT ${ex_file_name} STREQUAL "shims"))
-
-            digg("${path}/${ex_file_name}" "${namespace}_${ex_file_name}" ${template})
-
-        elseif(${ex_file_name} MATCHES ".lua"
-            AND NOT ${ex_file_name} MATCHES "template.lua")
-
-            # Get the file name without the extension
-            string(REGEX REPLACE "\\.lua" "" TEST_FILE_NAME ${ex_file_name})
-
-            run_test("${path}/${ex_file_name}" "${namespace}" ${template} ESCAPED_CODE_EXAMPLE)
-
-            # Set the test name
-            set(TEST_NAME DOC${namespace}_${TEST_FILE_NAME}_EXAMPLE)
-
-            # Anything called @DOC_`namespace`_EXAMPLE@
-            # in the Lua or C sources will be replaced by the content if that
-            # variable during the pre-processing
-            set(ENV{${TEST_NAME}} "${ESCAPED_CODE_EXAMPLE}" CACHE INTERNAL FORCE)
-
-            # Update the test list
-            set(ENV{EXAMPLE_LIST} "$ENV{EXAMPLE_LIST};${TEST_NAME}")
-
-        endif()
-    endforeach()
-endfunction()
-
-# Start at the top level then recursively explore the sub-directories to locate
-# the test. In parallel, build a namespace for the global variables. Those
-# variables will be inserted into the lua source code itself once the examples
-# are validated.
-digg("${SOURCE_DIR}/tests/examples" "" " ")
-
-# This is ugly, but CMake variable scope system totally ignore 50 years of
-# computer science evolution and only support function local variables.
-# PARENT_SCOPE is useless in recursive methods and the CMake pre-processor
-# can't access ENV variables. So the only (insane) way is to set tons of ENV
-# variables, keep track of them in yet another one and set them in the global
-# scope once in the "top level" CMakeLists section (it cannot be done from
-# functions).
-foreach(vari $ENV{EXAMPLE_LIST})
-    # While at it, replace \" created by CMake by ', &quot; wont work in <code>
-    string(REGEX REPLACE "\\\"" "'" ${vari} $ENV{${vari}})
 endforeach()
 
 message(STATUS "All test passed!")
