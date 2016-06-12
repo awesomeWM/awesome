@@ -13,10 +13,10 @@ return function(_, _, luacovpath)
     -- Force luacheck to be silent about setting those as unused globals
     assert(awesome and root and tag and screen and client and mouse)
 
-    -- If luacov is available, use it. Else, do nothing.
-    pcall(function()
+    -- Use luacov if we should do so
+    if luacovpath then
         require("luacov.runner")(luacovpath)
-    end)
+    end
 
     -- Silence debug warnings
     require("gears.debug").print_warning = function() end
