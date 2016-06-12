@@ -395,7 +395,9 @@ function tag.history.restore(screen, idx)
     tag.viewnone(s)
     -- select tags from the history entry
     for _, t in ipairs(data.history[s][i]) do
-        t.selected = true
+        if t.activated and t.screen then
+            t.selected = true
+        end
     end
     -- update currently selected tags table
     data.history[s].current = data.history[s][i]
