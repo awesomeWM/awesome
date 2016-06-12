@@ -1,28 +1,10 @@
-local file_path, image_path, luacovpath = ...   
-
--- Set the global shims
--- luacheck: globals awesome client tag drawin screen
-awesome = require( "awesome" )
-client  = require( "client"  )
-tag     = require( "tag"     )
-drawin  = require( "drawin"  )
-screen  = require( "screen"  )
-
--- Force luacheck to be silent about setting those as unused globals
-assert(awesome and client and tag)
+local file_path, image_path = ...
+require("_common_template")(...)
 
 local wibox     = require( "wibox"         )
 local surface   = require( "gears.surface" )
 local color     = require( "gears.color"   )
 local beautiful = require( "beautiful"     )
-
--- If luacov is available, use it. Else, do nothing.
-pcall(function()
-    require("luacov.runner")(luacovpath)
-end)
-
--- Silence debug warnings
-require("gears.debug").print_warning = function() end
 
 -- Create a generic rectangle widget to show layout disposition
 local function generic_widget(text)
