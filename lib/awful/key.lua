@@ -22,9 +22,9 @@ local key = { mt = {}, hotkeys = {} }
 -- By default this is initialized as { "Lock", "Mod2" }
 -- so the Caps Lock or Num Lock modifier are not taking into account by awesome
 -- when pressing keys.
--- @name ignore_modifiers
+-- @name awful.key.ignore_modifiers
 -- @class table
-local ignore_modifiers = { "Lock", "Mod2" }
+key.ignore_modifiers = { "Lock", "Mod2" }
 
 --- Convert the modifiers into pc105 key names
 local conversion = {
@@ -83,7 +83,7 @@ function key.new(mod, _key, press, release, data)
         release=nil
     end
     local ret = {}
-    local subsets = util.subsets(ignore_modifiers)
+    local subsets = util.subsets(key.ignore_modifiers)
     for _, set in ipairs(subsets) do
         ret[#ret + 1] = capi.key({ modifiers = util.table.join(mod, set),
                                    key = _key })
