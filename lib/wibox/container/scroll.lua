@@ -377,7 +377,7 @@ end
 local function get_layout(dir, widget, fps, speed, extra_space, expand, max_size, step_function, space_for_scrolling)
     local ret = base.make_widget(nil, nil, {enable_properties = true})
 
-    ret._priavte.paused = false
+    ret._private.paused = false
     ret._private.timer = GLib.Timer()
     ret._private.scroll_timer = nil
 
