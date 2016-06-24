@@ -238,6 +238,10 @@ function progressbar.mt:__call(...)
     return progressbar.new(...)
 end
 
+--@DOC_widget_COMMON@
+
+--@DOC_object_COMMON@
+
 return setmetatable(progressbar, progressbar.mt)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
