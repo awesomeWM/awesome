@@ -218,16 +218,17 @@ function mouse.resize_handler(c, context, hints)
     if hints and context and context:find("mouse.*") then
         -- This handler only handle the floating clients. If the client is tiled,
         -- then it let the layouts handle it.
-        local lay = c.screen.selected_tag.layout
+        local t = c.screen.selected_tag
+        local lay = t and t.layout or nil
 
-        if lay == layout.suit.floating or c.floating then
+        if (lay and lay == layout.suit.floating) or c.floating then
             c:geometry {
                 x      = hints.x,
                 y      = hints.y,
                 width  = hints.width,
                 height = hints.height,
             }
-        elseif lay.resize_handler then
+        elseif lay and lay.resize_handler then
             lay.resize_handler(c, context, hints)
         end
     end
