@@ -198,19 +198,25 @@ function layout.getname(_layout)
     return _layout.name
 end
 
+local function arrange_prop_nf(obj)
+    if not client.object.get_floating(obj) then
+        layout.arrange(obj.screen)
+    end
+end
+
 local function arrange_prop(obj) layout.arrange(obj.screen) end
 
-capi.client.connect_signal("property::size_hints_honor", arrange_prop)
+capi.client.connect_signal("property::size_hints_honor", arrange_prop_nf)
 capi.client.connect_signal("property::struts", arrange_prop)
-capi.client.connect_signal("property::minimized", arrange_prop)
-capi.client.connect_signal("property::sticky", arrange_prop)
-capi.client.connect_signal("property::fullscreen", arrange_prop)
-capi.client.connect_signal("property::maximized_horizontal", arrange_prop)
-capi.client.connect_signal("property::maximized_vertical", arrange_prop)
-capi.client.connect_signal("property::border_width", arrange_prop)
-capi.client.connect_signal("property::hidden", arrange_prop)
+capi.client.connect_signal("property::minimized", arrange_prop_nf)
+capi.client.connect_signal("property::sticky", arrange_prop_nf)
+capi.client.connect_signal("property::fullscreen", arrange_prop_nf)
+capi.client.connect_signal("property::maximized_horizontal", arrange_prop_nf)
+capi.client.connect_signal("property::maximized_vertical", arrange_prop_nf)
+capi.client.connect_signal("property::border_width", arrange_prop_nf)
+capi.client.connect_signal("property::hidden", arrange_prop_nf)
 capi.client.connect_signal("property::floating", arrange_prop)
-capi.client.connect_signal("property::geometry", arrange_prop)
+capi.client.connect_signal("property::geometry", arrange_prop_nf)
 capi.client.connect_signal("property::screen", function(c, old_screen)
     if old_screen then
         layout.arrange(old_screen)
