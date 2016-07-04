@@ -35,6 +35,7 @@ local module = {}
 -- @tparam number height The rectangle height
 -- @tparam number radius the corner radius
 function module.rounded_rect(cr, width, height, radius)
+
     radius = radius or 10
 
     if width / 2 < radius then
@@ -44,6 +45,8 @@ function module.rounded_rect(cr, width, height, radius)
     if height / 2 < radius then
         radius = height / 2
     end
+
+    cr:move_to(0, radius)
 
     cr:arc( radius      , radius       , radius,    math.pi   , 3*(math.pi/2) )
     cr:arc( width-radius, radius       , radius, 3*(math.pi/2),    math.pi*2  )
