@@ -199,16 +199,6 @@ else()
     message(STATUS "checking for execinfo -- not found")
 endif()
 
-# __builtin_clz is available since gcc 3.4
-try_compile(HAS___BUILTIN_CLZ
-    ${CMAKE_BINARY_DIR}
-    ${CMAKE_SOURCE_DIR}/build-tests/__builtin_clz.c)
-if(HAS___BUILTIN_CLZ)
-    message(STATUS "checking for __builtin_clz -- yes")
-else()
-    message(STATUS "checking for __builtin_clz -- no")
-endif()
-
 set(AWESOME_REQUIRED_LDFLAGS
     ${AWESOME_COMMON_REQUIRED_LDFLAGS}
     ${AWESOME_REQUIRED_LDFLAGS}
