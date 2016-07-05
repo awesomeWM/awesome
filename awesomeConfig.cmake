@@ -352,7 +352,7 @@ endforeach()
 # The examples coverage need to be done again after the configure_file has
 # inserted the additional code. Otherwise, the result will be off, rendering
 # the coverage useless as a tool to track untested code.
-if(GENERATE_DOC AND DO_COVERAGE)
+if(GENERATE_DOC AND DO_COVERAGE AND FALSE) # FIXME: This is broken and causes build failures on travis
     message(STATUS "Running tests again with coverage")
     set(USE_LCOV 1)
 
