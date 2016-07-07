@@ -403,7 +403,31 @@ event_handle_configurerequest(xcb_configure_request_event_t *ev)
     {
         /* Ignore this so that systray icons cannot resize themselves.
          * We decide their size!
+         * However, Xembed says that we act like a WM to the embedded window and
+         * thus we have to send a synthetic configure notify informing the
+         * window that its configure request was denied.
          */
+        xcb_get_geometry_cookie_t geom_cookie =
+            xcb_get_geometry_unchecked(globalconf.connection, ev->window);
+        xcb_translate_coordinates_cookie_t coords_cookie =
+            xcb_translate_coordinates_unchecked(globalconf.connection,
+                    ev->window, globalconf.screen->root, 0, 0);
+        xcb_get_geometry_reply_t *geom =
+            xcb_get_geometry_reply(globalconf.connection, geom_cookie, NULL);
+        xcb_translate_coordinates_reply_t *coords =
+            xcb_translate_coordinates_reply(globalconf.connection, coords_cookie, NULL);
+
+        if (geom && coords)
+        {
+            xwindow_configure(ev->window,
+                    (area_t) { .x = coords->dst_x,
+                               .y = coords->dst_y,
+                               .width = geom->width,
+                               .height = geom->height },
+                    0);
+        }
+        p_delete(&geom);
+        p_delete(&coords);
     }
     else
         event_handle_configurerequest_configure_window(ev);
