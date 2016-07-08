@@ -84,9 +84,9 @@ install:
   - travis_retry sudo luarocks install lua-discount
 
   # Install dependencies for code coverage testing.
-  - if [ "$DO_COVERAGE" = "coveralls" ]; then sudo luarocks install luacov-coveralls; fi
-  - if [ "$DO_COVERAGE" = "codecov" ]; then sudo luarocks install luacov-coveralls; fi
   - if [ "$DO_COVERAGE" = "" ]; then export DO_COVERAGE=0; fi
+  - if [ "$DO_COVERAGE" != "0" ]; then sudo luarocks install luacov 0.11.0-1; fi
+  - if [ "$DO_COVERAGE" = "coveralls" ]; then sudo luarocks install luacov-coveralls; fi
 
   # Determine custom version.
   - export AWESOME_VERSION="${TRAVIS_BRANCH}-g$(git rev-parse --short HEAD)"
