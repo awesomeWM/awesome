@@ -144,6 +144,7 @@ function(run_test test_path namespace escaped_content)
     # Use the example testing as coverage source
     if (USE_LCOV)
         set(LCOV_PATH ${SOURCE_DIR}/.luacov)
+        set(ENV{BUILD_DIRECTORY} "${CMAKE_BINARY_DIR}/")
     endif()
 
     # Execute the script, leave the image extension decision to the test
