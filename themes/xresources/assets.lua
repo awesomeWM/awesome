@@ -158,6 +158,7 @@ end
 function theme_assets.recolor_titlebar_normal(theme, color)
     for _, titlebar_icon in ipairs({
         'titlebar_close_button_normal',
+        'titlebar_minimize_button_normal',
         'titlebar_ontop_button_normal_inactive',
         'titlebar_ontop_button_normal_active',
         'titlebar_sticky_button_normal_inactive',
@@ -166,7 +167,6 @@ function theme_assets.recolor_titlebar_normal(theme, color)
         'titlebar_floating_button_normal_active',
         'titlebar_maximized_button_normal_inactive',
         'titlebar_maximized_button_normal_active',
-        'titlebar_minimize_button_normal_inactive',
     }) do
         theme[titlebar_icon] = recolor_image(theme[titlebar_icon], color)
     end
@@ -176,6 +176,7 @@ end
 function theme_assets.recolor_titlebar_focus(theme, color)
     for _, titlebar_icon in ipairs({
         'titlebar_close_button_focus',
+        'titlebar_minimize_button_normal',
         'titlebar_ontop_button_focus_inactive',
         'titlebar_ontop_button_focus_active',
         'titlebar_sticky_button_focus_inactive',
@@ -184,7 +185,6 @@ function theme_assets.recolor_titlebar_focus(theme, color)
         'titlebar_floating_button_focus_active',
         'titlebar_maximized_button_focus_inactive',
         'titlebar_maximized_button_focus_active',
-        'titlebar_minimize_button_focus_inactive',
     }) do
         theme[titlebar_icon] = recolor_image(theme[titlebar_icon], color)
     end

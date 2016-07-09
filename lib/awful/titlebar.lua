@@ -278,7 +278,7 @@ end
 --- Create a new minimize button for a client.
 -- @param c The client for which the button is wanted.
 function titlebar.widget.minimizebutton(c)
-    local widget = titlebar.widget.button(c, "minimize", function(cl) return cl.minimized end, function(cl) cl.minimized = not cl.minimized end)
+    local widget = titlebar.widget.button(c, "minimize", function() return "" end, function(cl) cl.minimized = not cl.minimized end)
     c:connect_signal("property::minimized", widget.update)
     return widget
 end

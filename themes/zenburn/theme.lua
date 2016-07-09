@@ -106,6 +106,9 @@ theme.layout_cornerse   = "@AWESOME_THEMES_PATH@/zenburn/layouts/cornerse.png"
 theme.titlebar_close_button_focus  = "@AWESOME_THEMES_PATH@/zenburn/titlebar/close_focus.png"
 theme.titlebar_close_button_normal = "@AWESOME_THEMES_PATH@/zenburn/titlebar/close_normal.png"
 
+theme.titlebar_minimize_button_normal = "@AWESOME_THEMES_PATH@/default/titlebar/minimize_normal.png"
+theme.titlebar_minimize_button_focus  = "@AWESOME_THEMES_PATH@/default/titlebar/minimize_focus.png"
+
 theme.titlebar_ontop_button_focus_active  = "@AWESOME_THEMES_PATH@/zenburn/titlebar/ontop_focus_active.png"
 theme.titlebar_ontop_button_normal_active = "@AWESOME_THEMES_PATH@/zenburn/titlebar/ontop_normal_active.png"
 theme.titlebar_ontop_button_focus_inactive  = "@AWESOME_THEMES_PATH@/zenburn/titlebar/ontop_focus_inactive.png"
