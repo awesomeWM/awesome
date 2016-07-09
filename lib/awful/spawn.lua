@@ -276,23 +276,6 @@ function spawn.read_lines(input_stream, line_callback, done_callback, close)
     start_read()
 end
 
---- Read a program output and return its output as a string.
--- @tparam string cmd The command to run.
--- @treturn string A string with the program output, or the error if one
---   occured.
-function spawn.pread(cmd)
-    if cmd and cmd ~= "" then
-        local f, err = io.popen(cmd, 'r')
-        if f then
-            local s = f:read("*all")
-            f:close()
-            return s
-        else
-            return err
-        end
-    end
-end
-
 capi.awesome.connect_signal("spawn::canceled" , spawn.on_snid_cancel   )
 capi.awesome.connect_signal("spawn::timeout"  , spawn.on_snid_cancel   )
 capi.client.connect_signal ("manage"          , spawn.on_snid_callback )

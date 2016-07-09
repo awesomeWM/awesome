@@ -29,9 +29,9 @@ util.spawn_with_shell = function(...)
    return spawn.with_shell(...)
 end
 
-util.pread = function(...)
-   util.deprecate("awful.spawn.pread")
-   return spawn.pread(...)
+util.pread = function()
+    util.deprecate("Use io.popen() directly or look at awful.spawn.easy_async() "
+            .. "for an asynchronous alternative")
 end
 
 return
