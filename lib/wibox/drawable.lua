@@ -237,6 +237,9 @@ end
 -- as arguments. Any other arguments passed to this method will be appended.
 -- @param image A background image or a function
 function drawable:set_bgimage(image, ...)
+    if type(image) ~= "function" then
+        image = surface(image)
+    end
 
     self.background_image = image
     self.background_image_args = {...}
