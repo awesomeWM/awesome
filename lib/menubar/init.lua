@@ -59,7 +59,6 @@ menubar.geometry = { width = nil,
                      height = nil,
                      x = nil,
                      y = nil }
-
 --- Width of blank space left in the right side.
 menubar.right_margin = theme.xresources.apply_dpi(8)
 
@@ -108,6 +107,42 @@ local function label(o)
     end
 end
 
+local function load_count_table()
+    local count_file_name = awful.util.getdir("cache") .. "/menu_count_file"
+
+    local count_file = io.open (count_file_name, "r")
+    local count_table = {}
+
+    -- read count file
+    if count_file then
+        io.input (count_file)
+        for line in io.lines() do
+            local name, count = string.match(line, "([^;]+);([^;]+)")
+            if name ~= nil and count ~= nil then
+                count_table[name] = count
+            end
+        end
+    end
+
+    return count_table
+end
+
+local function write_count_table(count_table)
+    local count_file_name = awful.util.getdir("cache") .. "/menu_count_file"
+
+    local count_file = io.open (count_file_name, "w")
+
+    if count_file then
+        io.output (count_file)
+
+        for name,count in pairs(count_table) do
+            local str = string.format("%s;%d\n", name, count)
+            io.write(str)
+        end
+        io.flush()
+    end
+end
+
 --- Perform an action for the given menu item.
 -- @param o The menu item.
 -- @return if the function processed the callback, new awful.prompt command, new awful.prompt prompt text.
@@ -121,13 +156,28 @@ local function perform_action(o)
         return true, "", new_prompt
     elseif shownitems[current_item].cmdline then
         awful.spawn(shownitems[current_item].cmdline)
+
+        -- load count_table from cache file
+        local count_table = load_count_table()
+
+        -- increase count
+        local curname = shownitems[current_item].name
+        if count_table[curname] ~= nil then
+            count_table[curname] = count_table[curname] + 1
+        else
+            count_table[curname] = 1
+        end
+
+        -- write updated count table to cache file
+        write_count_table(count_table)
+
         -- Let awful.prompt execute dummy exec_callback and
         -- done_callback to stop the keygrabber properly.
         return false
     end
 end
 
---- Cut item list to return only current page.
+-- Cut item list to return only current page.
 -- @tparam table all_items All items list.
 -- @tparam str query Search query.
 -- @tparam number|screen scr Screen
@@ -197,6 +247,9 @@ local function menulist_update(query, scr)
         end
     end
 
+    local count_table = load_count_table()
+    local command_list = {}
+
     -- Add the applications according to their name and cmdline
     for _, v in ipairs(menubar.menu_entries) do
         v.focused = false
@@ -205,18 +258,27 @@ local function menulist_update(query, scr)
                 or string.match(v.cmdline, pattern) then
                 if string.match(v.name, "^" .. pattern)
                     or string.match(v.cmdline, "^" .. pattern) then
-                    table.insert(shownitems, v)
-                else
-                    table.insert(match_inside, v)
+
+                    v.count = 0
+                    -- use count from count_table if present
+                    if string.len(pattern) > 0 and count_table[v.name] ~= nil then
+                        v.count = tonumber(count_table[v.name])
+                    end
+
+                    table.insert (command_list, v)
                 end
             end
         end
     end
 
-    -- Now add items from match_inside to shownitems
-    for _, v in ipairs(match_inside) do
-        table.insert(shownitems, v)
+    local function compare_counts(a,b)
+        return a.count > b.count
     end
+
+    -- sort command_list by count (highest first)
+    table.sort(command_list, compare_counts)
+    -- copy into showitems
+    shownitems = command_list
 
     if #shownitems > 0 then
         -- Insert a run item value as the last choice
