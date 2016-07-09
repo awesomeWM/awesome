@@ -123,8 +123,11 @@ local function do_redraw(self)
     cr:set_source(self.background_color)
     cr:paint()
 
+    cr:restore()
+
     -- Paint the background image
     if self.background_image then
+        cr:save()
         if type(self.background_image) == "function" then
             self.background_image(context, cr, width, height, unpack(self.background_image_args))
         else
@@ -132,9 +135,8 @@ local function do_redraw(self)
             cr:set_source(pattern)
             cr:paint()
         end
+        cr:restore()
     end
-
-    cr:restore()
 
     -- Draw the widget
     if self._widget_hierarchy then
