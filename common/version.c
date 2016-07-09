@@ -36,8 +36,14 @@ void
 eprint_version(void)
 {
     lua_State *L = luaL_newstate();
-    luaopen_base(L);
+    luaL_openlibs(L);
     lua_getglobal(L, "_VERSION");
+    lua_getglobal(L, "jit");
+
+    if (lua_istable(L, 2))
+        lua_getfield(L, 2, "version");
+    else
+        lua_pop(L, 1);
 
 #ifdef WITH_DBUS
     const char *has_dbus = "✔";
