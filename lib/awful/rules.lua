@@ -268,7 +268,7 @@ local force_ignore = {
 function rules.high_priority_properties.tag(c, value)
     if value then
         if type(value) == "string" then
-            value = atag.find_by_name(nil, value)
+            value = atag.find_by_name(c.screen, value)
         end
 
         c:tags{ value }
