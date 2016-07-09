@@ -1,17 +1,11 @@
+local filepath, svgpath = ...
+require("_common_template")(...)
+
 -- Test if shape crash when called
 -- Also generate some SVG to be used by the documentation
 -- it also "prove" that the code examples are all working
 local cairo = require( "lgi"         ).cairo
 local shape = require( "gears.shape" )
-local filepath, svgpath, luacovpath = ...
-
--- If luacov is available, use it. Else, do nothing.
-pcall(function()
-    require("luacov.runner")(luacovpath)
-end)
-
--- Silence debug warnings
-require("gears.debug").print_warning = function() end
 
 local function get_surface(p)
     local img = cairo.SvgSurface.create(p, 288, 76)

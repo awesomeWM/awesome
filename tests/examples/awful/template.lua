@@ -1,29 +1,9 @@
-local file_path, image_path, luacovpath = ...
+local file_path, image_path = ...
+require("_common_template")(...)
 
 local cairo      = require("lgi").cairo
 local pango      = require("lgi").Pango
 local pangocairo = require("lgi").PangoCairo
-
--- Set the global shims
--- luacheck: globals awesome root tag screen client mouse drawin
-awesome = require( "awesome" )
-root    = require( "root"    )
-tag     = require( "tag"     )
-screen  = require( "screen"  )
-client  = require( "client"  )
-mouse   = require( "mouse"   )
-drawin  = require( "drawin"  )
-
--- Force luacheck to be silent about setting those as unused globals
-assert(awesome and root and tag and screen and client and mouse)
-
--- If luacov is available, use it. Else, do nothing.
-pcall(function()
-    require("luacov.runner")(luacovpath)
-end)
-
--- Silence debug warnings
-require("gears.debug").print_warning = function() end
 
 local color     = require( "gears.color" )
 local shape     = require( "gears.shape" )
