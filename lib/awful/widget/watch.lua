@@ -37,21 +37,20 @@ local spawn = require("awful.spawn")
 
 local watch = { mt = {} }
 
---- Create a textbox that shows the output of a command
--- and updates it at a given time interval.
+--- Create a textbox that shows the output of a command and updates it at a
+-- given time interval.
 --
 -- @tparam string|table command The command.
 --
--- @tparam[opt=5] integer timeout The time interval at which the textbox
+-- @tparam[opt=5] integer interval The time interval at which the textbox
 -- will be updated.
 --
 -- @tparam[opt] function callback The function that will be called after
--- the command output will be received. it is shown in the textbox.
--- Defaults to:
+-- the command exited successfully.  The default is to update the textbox:
 --     function(widget, stdout, stderr, exitreason, exitcode)
 --         widget:set_text(stdout)
 --     end
--- @param callback.widget Base widget instance.
+-- @tparam widget callback.widget Base widget instance.
 -- @tparam string callback.stdout Output on stdout.
 -- @tparam string callback.stderr Output on stderr.
 -- @tparam string callback.exitreason Exit Reason.
@@ -60,16 +59,19 @@ local watch = { mt = {} }
 -- For "exit" reason it's the exit code.
 -- For "signal" reason — the signal causing process termination.
 --
--- @param[opt=wibox.widget.textbox()] base_widget Base widget.
+-- @tparam[opt=wibox.widget.textbox()] widget base_widget Base widget.
 --
 -- @return The widget used by this watch
-function watch.new(command, timeout, callback, base_widget)
-    timeout = timeout or 5
+function watch.new(command, interval, callback, base_widget)
+    interval = interval or 5
     base_widget = base_widget or textbox()
-    callback = callback or function(widget, stdout, stderr, exitreason, exitcode) -- luacheck: no unused args
+    callback = callback or function(widget, stdout, stderr)
         widget:set_text(stdout)
     end
-    local t = timer { timeout = timeout }
+    callback_error = callback_error or function(widget, stdout, stderr, exitcode)
+        widget:set_text(stdout)
+    end
+    local t = timer { timeout = interval }
     t:connect_signal("timeout", function()
         t:stop()
         spawn.easy_async(command, function(stdout, stderr, exitreason, exitcode)
