@@ -583,6 +583,25 @@ function util.round(x)
     return floor(x + 0.5)
 end
 
+--- Format a table as a string, concatenating key/value pairs using `delim`,
+-- for values that are not empty.
+-- @tab t Table to format, with key/value pairs as strings.
+-- @tparam string[opt=', '] delim Delimiter.
+-- @tparam string[opt='<none>'] none_str String to use in case all values are
+--   empty.
+function util.concat_table(t, delim, none_str)
+    local r = {}
+    for k,v in ipairs(t) do
+        if #v > 0 then
+            table.insert(r, string.format('%s: %s', k, v))
+        end
+    end
+    if #r == 0 then
+        return none_str or '<none>'
+    end
+    return table.concat(r, delim or ', ')
+end
+
 return util
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

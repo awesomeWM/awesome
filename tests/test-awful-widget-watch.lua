@@ -9,22 +9,20 @@ local steps = {
     function(count)
         if count == 1 then
             watch(
-                "echo hi", 0.1,
-                function(widget, stdout, stderr, exitreason, exitcode)
+                "sh -c 'echo hi; printf stderr >&2'", 0.1,
+                function(widget, stdout, stderr)
                     assert(widget == "i_am_widget_mock", widget)
-                    assert(stdout == "hi\n", stdout)
-                    assert(stderr == "", stderr)
-                    assert(exitreason == "exit", exitreason)
-                    assert(exitcode == 0, exitcode)
+                    assert(stdout == "hi\n", tostring(stdout))
+                    assert(stderr == "stderr\n", tostring(stderr))
                     callbacks_done = callbacks_done + 1
                 end,
                 "i_am_widget_mock"
             )
         end
-        if callbacks_done > 1 then  -- timer fired at least twice
+        if callbacks_done >= 2 then
             return true
         end
-    end
+    end,
 }
 runner.run_steps(steps)
 

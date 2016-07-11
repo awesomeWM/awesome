@@ -318,21 +318,58 @@ function spawn.with_line_callback(cmd, callbacks)
     return pid
 end
 
---- Asynchronously spawn a program and capture its output.
--- (wraps `spawn.with_line_callback`).
+--- Asynchronously spawn a program and (optionally) execute callbacks.
+-- `cmd` is being run and in case `cb`, `cb_error` or `cb_signal` are provided
+-- they will be run, according to the exit code of `cmd`.
+--
+-- This wraps `spawn.with_line_callback`.
 -- @tparam string|table cmd The command.
--- @tab callback Function with the following arguments
--- @tparam string callback.stdout Output on stdout.
--- @tparam string callback.stderr Output on stderr.
--- @tparam string callback.exitreason Exit Reason.
--- The reason can be "exit" or "signal".
--- @tparam integer callback.exitcode Exit code.
--- For "exit" reason it's the exit code.
--- For "signal" reason — the signal causing process termination.
--- @treturn[1] Integer the PID of the forked process.
+-- @tparam[opt] function cb Function to be called on success.  It will receive
+--   `stdout` and `stderr` as arguments.
+-- @tparam[opt] function cb_error Callback on errors. It will receive
+--   `stdout`, `stderr` and `exitcode` as arguments.
+-- @tparam[opt] function cb_signal Callback on signals. It will receive
+--   `stdout`, `stderr` and `signal` as arguments.
+-- @treturn[1] integer The PID of the forked process.
 -- @treturn[2] string Error message.
 -- @see spawn.with_line_callback
-function spawn.easy_async(cmd, callback)
+function spawn.easy_async(cmd, cb, cb_error, cb_signal)
+    if not cb_error or not cb_signal then
+        local function get_cmd_string(cmd)
+            return type(cmd) == 'table' and table.concat(cmd, ' ') or cmd
+        end
+        if not cb_error then
+            cb_error = function(stdout, stderr, exitcode)
+                require("gears.debug").print_error(string.format(
+                    '"%s" exited with %d. output: %s',
+                    get_cmd_string(cmd), exitcode,
+                    util.concat_table({stdout=stdout, stderr=stderr})))
+            end
+        end
+        if not cb_signal then
+            cb_signal = function(stdout, stderr, exitcode)
+                require("gears.debug").print_error(string.format(
+                    '"%s" exited due to signal %d. output: %s',
+                    get_cmd_string(cmd), exitcode,
+                    util.concat_table({stdout=stdout, stderr=stderr})))
+            end
+        end
+    end
+
+    local function callback(stdout, stderr, exitreason, exitcode)
+        if exitreason == 'exit' then
+            if exitcode == 0 then
+                if cb then
+                    cb(stdout, stderr)
+                end
+            else
+                cb_error(stdout, stderr, exitcode)
+            end
+        else
+            cb_signal(stdout, stderr, exitcode)
+        end
+    end
+
     local stdout = ''
     local stderr = ''
     local exitcode, exitreason
