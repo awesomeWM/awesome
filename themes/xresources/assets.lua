@@ -176,7 +176,7 @@ end
 function theme_assets.recolor_titlebar_focus(theme, color)
     for _, titlebar_icon in ipairs({
         'titlebar_close_button_focus',
-        'titlebar_minimize_button_normal',
+        'titlebar_minimize_button_focus',
         'titlebar_ontop_button_focus_inactive',
         'titlebar_ontop_button_focus_active',
         'titlebar_sticky_button_focus_inactive',
