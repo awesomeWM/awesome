@@ -32,6 +32,7 @@ end
 util.pread = function()
     util.deprecate("Use io.popen() directly or look at awful.spawn.easy_async() "
             .. "for an asynchronous alternative")
+    return ""
 end
 
 return
