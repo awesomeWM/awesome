@@ -113,12 +113,12 @@ local function load_count_table()
     local count_file = io.open (count_file_name, "r")
     local count_table = {}
 
-    -- read count file
+    -- read weight file
     if count_file then
         io.input (count_file)
         for line in io.lines() do
             local name, count = string.match(line, "([^;]+);([^;]+)")
-            if name ~= nil and count ~= nil then
+            if name ~= nil and weight ~= nil then
                 count_table[name] = count
             end
         end
@@ -135,7 +135,7 @@ local function write_count_table(count_table)
     if count_file then
         io.output (count_file)
 
-        for name,count in pairs(count_table) do
+        for name, count in pairs(count_table) do
             local str = string.format("%s;%d\n", name, count)
             io.write(str)
         end
@@ -235,34 +235,35 @@ local function menulist_update(query, scr)
     local command_list = {}
 
     local PRIO_NONE = 0
-    local PRIO_HIG = 3
-    local PRIO_LOW = 1
-    local PRIO_NORMAL = 2
+    local PRIO_CATEGORY_MATCH = 2
 
     -- Add the categories
     if menubar.show_categories then
         for _, v in pairs(menubar.menu_gen.all_categories) do
             v.focused = false
             if not current_category and v.use then
+
+                -- check if current query matches a category
                 if string.match(v.name, pattern) then
-                    if string.match(v.name, "^" .. pattern) then
-                        v.count = PRIO_NONE
-                        v.prio = PRIO_NORMAL
 
-                        -- use count from count_table if present
-                        if string.len(pattern) > 0 and count_table[v.name] ~= nil then
-                            v.count = tonumber(count_table[v.name])
-                        end
+                    v.weight = 0
+                    v.prio = PRIO_CATEGORY_MATCH
 
-                        if string.match(v.name, "^" .. pattern)
-                            or string.match(v.cmdline, "^" .. pattern) then
-                            v.prio = PRIO_HIGH
-                        else
-                            v.prio = PRIO_NORMAL
-                        end
-
-                        table.insert (command_list, v)
+                    -- get use count from count_table if present
+                    -- and use it as weight
+                    if string.len(pattern) > 0 and count_table[v.name] ~= nil then
+                        v.weight = tonumber(count_table[v.name])
                     end
+
+                    -- check for prefix match
+                    if string.match(v.name, "^" .. pattern) then
+                        -- increase default priority
+                        v.prio = PRIO_CATEGORY_MATCH + 1
+                    else
+                        v.prio = PRIO_CATEGORY_MATCH
+                    end
+
+                    table.insert (command_list, v)
                 end
             end
         end
@@ -272,20 +273,26 @@ local function menulist_update(query, scr)
     for _, v in ipairs(menubar.menu_entries) do
         v.focused = false
         if not current_category or v.category == current_category then
+
+            -- check if the query matches either the name or the commandline
+            -- of some entry
             if string.match(v.name, pattern)
                 or string.match(v.cmdline, pattern) then
 
-                v.count = 0
+                v.weight = 0
                 v.prio = PRIO_NONE
 
-                -- use count from count_table if present
+                -- get use count from count_table if present
+                -- and use it as weight
                 if string.len(pattern) > 0 and count_table[v.name] ~= nil then
-                    v.count = tonumber(count_table[v.name])
+                    v.weight = tonumber(count_table[v.name])
                 end
 
+                -- check for prefix match
                 if string.match(v.name, "^" .. pattern)
                     or string.match(v.cmdline, "^" .. pattern) then
-                    v.prio = PRIO_LOW
+                    -- increase default priority
+                    v.prio = PRIO_NONE + 1
                 else
                     v.prio = PRIO_NONE
                 end
@@ -295,14 +302,14 @@ local function menulist_update(query, scr)
         end
     end
 
-    local function compare_counts(a,b)
-        if a.count == b.count then
-            return a.prio > b.prio
+    local function compare_counts(a, b)
+        if a.prio == b.prio then
+            return a.weight > b.weight
         end
-        return a.count > b.count
+        return a.prio > b.prio
     end
 
-    -- sort command_list by count (highest first)
+    -- sort command_list by weight (highest first)
     table.sort(command_list, compare_counts)
     -- copy into showitems
     shownitems = command_list
