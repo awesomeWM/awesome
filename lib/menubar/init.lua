@@ -231,6 +231,14 @@ local function menulist_update(query, scr)
     -- beginning to the table shownitems, and the ones that contain
     -- command in the middle to the table match_inside.
 
+    local count_table = load_count_table()
+    local command_list = {}
+
+    local PRIO_NONE = 0
+    local PRIO_HIG = 3
+    local PRIO_LOW = 1
+    local PRIO_NORMAL = 2
+
     -- Add the categories
     if menubar.show_categories then
         for _, v in pairs(menubar.menu_gen.all_categories) do
@@ -238,17 +246,27 @@ local function menulist_update(query, scr)
             if not current_category and v.use then
                 if string.match(v.name, pattern) then
                     if string.match(v.name, "^" .. pattern) then
-                        table.insert(shownitems, v)
-                    else
-                        table.insert(match_inside, v)
+                        v.count = PRIO_NONE
+                        v.prio = PRIO_NORMAL
+
+                        -- use count from count_table if present
+                        if string.len(pattern) > 0 and count_table[v.name] ~= nil then
+                            v.count = tonumber(count_table[v.name])
+                        end
+
+                        if string.match(v.name, "^" .. pattern)
+                            or string.match(v.cmdline, "^" .. pattern) then
+                            v.prio = PRIO_HIGH
+                        else
+                            v.prio = PRIO_NORMAL
+                        end
+
+                        table.insert (command_list, v)
                     end
                 end
             end
         end
     end
-
-    local count_table = load_count_table()
-    local command_list = {}
 
     -- Add the applications according to their name and cmdline
     for _, v in ipairs(menubar.menu_entries) do
@@ -256,22 +274,31 @@ local function menulist_update(query, scr)
         if not current_category or v.category == current_category then
             if string.match(v.name, pattern)
                 or string.match(v.cmdline, pattern) then
+
+                v.count = 0
+                v.prio = PRIO_NONE
+
+                -- use count from count_table if present
+                if string.len(pattern) > 0 and count_table[v.name] ~= nil then
+                    v.count = tonumber(count_table[v.name])
+                end
+
                 if string.match(v.name, "^" .. pattern)
                     or string.match(v.cmdline, "^" .. pattern) then
-
-                    v.count = 0
-                    -- use count from count_table if present
-                    if string.len(pattern) > 0 and count_table[v.name] ~= nil then
-                        v.count = tonumber(count_table[v.name])
-                    end
-
-                    table.insert (command_list, v)
+                    v.prio = PRIO_LOW
+                else
+                    v.prio = PRIO_NONE
                 end
+
+                table.insert (command_list, v)
             end
         end
     end
 
     local function compare_counts(a,b)
+        if a.count == b.count then
+            return a.prio > b.prio
+        end
         return a.count > b.count
     end
 
