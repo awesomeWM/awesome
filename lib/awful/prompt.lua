@@ -22,6 +22,7 @@ local unpack = unpack or table.unpack -- luacheck: globals unpack (compatibility
 local keygrabber = require("awful.keygrabber")
 local util = require("awful.util")
 local beautiful = require("beautiful")
+local akey = require("awful.key")
 
 local prompt = {}
 
@@ -360,15 +361,24 @@ function prompt.run(args, textbox, exe_callback, completion_callback,
             end
         end
 
+        local filtered_modifiers = {}
+
         -- User defined cases
         if hooks[key] then
+            -- Remove caps and num lock
+            for _, m in ipairs(modifiers) do
+                if not util.table.hasitem(akey.ignore_modifiers, m) then
+                    table.insert(filtered_modifiers, m)
+                end
+            end
+
             for _,v in ipairs(hooks[key]) do
-                if #modifiers == #v[1] then
+                if #filtered_modifiers == #v[1] then
                     local match = true
                     for _,v2 in ipairs(v[1]) do
                         match = match and mod[v2]
                     end
-                    if match or #modifiers == 0 then
+                    if match or #filtered_modifiers == 0 then
                         local cb
                         local ret = v[3](command)
                         if ret then
