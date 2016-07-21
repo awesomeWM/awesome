@@ -69,7 +69,7 @@ function watch.new(command, interval, callback, base_widget)
         widget:set_text(stdout)
     end
     callback_error = callback_error or function(widget, stdout, stderr, exitcode)
-        widget:set_text(stdout)
+        widget:set_text(stderr)
     end
     local t = timer { timeout = interval }
     t:connect_signal("timeout", function()
