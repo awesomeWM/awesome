@@ -436,6 +436,19 @@ local function drill(ids, content)
     -- Clear the internal attributes
     attributes.id, attributes.layout, attributes.widget = nil, nil, nil
 
+    -- Set layouts attributes, this has to be done before the widgets are added
+    -- because it might affect the output.
+    for attr, val in pairs(attributes) do
+        if l["set_"..attr] then
+            l["set_"..attr](l, val)
+        elseif type(l[attr]) == "function" then
+            l[attr](l, val)
+        else
+            l[attr] = val
+        end
+    end
+
+    -- Add all widgets
     for k = 1, max do
         -- ipairs cannot be used on sparse tables
         local v, id2, e = widgets[k], id, nil
@@ -458,17 +471,6 @@ local function drill(ids, content)
 
     -- Replace all children (if any) with the new ones
     l:set_children(widgets)
-
-    -- Set layouts attributes
-    for attr, val in pairs(attributes) do
-        if l["set_"..attr] then
-            l["set_"..attr](l, val)
-        elseif type(l[attr]) == "function" then
-            l[attr](l, val)
-        else
-            l[attr] = val
-        end
-    end
 
     return l, id
 end
