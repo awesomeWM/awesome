@@ -233,8 +233,6 @@ function progressbar.new(args)
     local width = args.width or 100
     local height = args.height or 20
 
-    args.type = "imagebox"
-
     local pbar = base.make_widget()
 
     data[pbar] = { width = width, height = height, value = 0, max_value = 1 }
