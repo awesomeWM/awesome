@@ -170,7 +170,9 @@ local function find_widgets(_drawable, result, _hierarchy, x, y)
             0, 0, width, height)
         table.insert(result, {
             x = x3, y = y3, width = w3, height = h3,
-            drawable = _drawable, widget = _hierarchy:get_widget()
+            drawable = _drawable, widget = _hierarchy:get_widget(),
+            matrix_to_device = _hierarchy:get_matrix_to_device(),
+            matrix_to_parent = _hierarchy:get_matrix_to_parent(),
         })
     end
     for _, child in ipairs(_hierarchy:get_children()) do
