@@ -11,6 +11,7 @@
 local setmetatable = setmetatable
 local ipairs = ipairs
 local math = math
+local util =  require("awful.util")
 local base = require("wibox.widget.base")
 local color = require("gears.color")
 local beautiful = require("beautiful")
@@ -40,7 +41,7 @@ local data = setmetatable({}, { __mode = "k" })
 
 --- Set the progressbar to draw vertically. Default is false.
 --
--- @function set_vertical
+-- @deprecated set_vertical
 -- @param progressbar The progressbar.
 -- @param vertical A boolean value.
 
@@ -181,16 +182,24 @@ function progressbar:set_value(value)
 end
 
 --- Set the progressbar height.
+-- This method is deprecated.
+-- Use a `wibox.container.constraint` widget or `forced_height`.
 -- @param height The height to set.
-function progressbar:set_height(height)
+-- @deprecated set_height
+function progressbar:set_height(height) --luacheck: no unused_args
+    util.deprecate("Use a `wibox.container.constraint` widget or forced_height")
     data[self].height = height
     self:emit_signal("widget::layout_changed")
     return self
 end
 
 --- Set the progressbar width.
+-- This method is deprecated.
+-- Use a `wibox.container.constraint` widget or `forced_width`.
 -- @param width The width to set.
-function progressbar:set_width(width)
+-- @deprecated set_width
+function progressbar:set_width(width) --luacheck: no unused_args
+    util.deprecate("Use a `wibox.container.constraint` widget or forced_width")
     data[self].width = width
     self:emit_signal("widget::layout_changed")
     return self
@@ -206,6 +215,13 @@ for _, prop in ipairs(properties) do
         end
     end
 end
+
+local set_vertical = progressbar.set_vertical
+function progressbar:set_vertical(value) --luacheck: no unused_args
+    util.deprecate("Use a `wibox.container.rotate` widget")
+    set_vertical(self, value)
+end
+
 
 --- Create a progressbar widget.
 -- @param args Standard widget() arguments. You should add width and height
