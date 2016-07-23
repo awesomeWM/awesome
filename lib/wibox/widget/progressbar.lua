@@ -18,54 +18,46 @@ local beautiful = require("beautiful")
 
 local progressbar = { mt = {} }
 
---- Set the progressbar border color.
+--- The progressbar border color.
 -- If the value is nil, no border will be drawn.
 --
--- @function set_border_color
--- @param progressbar The progressbar.
--- @param color The border color to set.
+-- @property border_color
+-- @tparam gears.color color The border color to set.
 
---- Set the progressbar foreground color.
+--- The progressbar foreground color.
 --
--- @function set_color
--- @param progressbar The progressbar.
--- @param color The progressbar color.
+-- @property color
+-- @tparam gears.color color The progressbar color.
 
---- Set the progressbar background color.
+--- The progressbar background color.
 --
--- @function set_background_color
--- @param progressbar The progressbar.
--- @param color The progressbar background color.
+-- @property background_color
+-- @tparam gears.color color The progressbar background color.
 
 --- Set the progressbar to draw vertically. Default is false.
 --
 -- @deprecated set_vertical
--- @param progressbar The progressbar.
--- @param vertical A boolean value.
+-- @tparam boolean vertical
 
---- Set the progressbar to draw ticks. Default is false.
+--- The progressbar to draw ticks. Default is false.
 --
--- @function set_ticks
--- @param progressbar The progressbar.
--- @param ticks A boolean value.
+-- @property ticks
+-- @param boolean
 
---- Set the progressbar ticks gap.
+--- The progressbar ticks gap.
 --
--- @function set_ticks_gap
--- @param progressbar The progressbar.
--- @param value The value.
+-- @property ticks_gap
+-- @param number
 
---- Set the progressbar ticks size.
+--- The progressbar ticks size.
 --
--- @function set_ticks_size
--- @param progressbar The progressbar.
--- @param value The value.
+-- @property ticks_size
+-- @param number
 
---- Set the maximum value the progressbar should handle.
+--- The maximum value the progressbar should handle.
 --
--- @function set_max_value
--- @param progressbar The progressbar.
--- @param value The value.
+-- @property max_value
+-- @param number
 
 --- The progressbar background color.
 -- @beautiful beautiful.progressbar_bg
