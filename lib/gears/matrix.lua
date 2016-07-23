@@ -152,7 +152,7 @@ end
 -- @tparam number x The x coordinate of the point.
 -- @tparam number y The y coordinate of the point.
 -- @treturn number The x coordinate of the transformed point.
--- @treturn number The x coordinate of the transformed point.
+-- @treturn number The y coordinate of the transformed point.
 function matrix:transform_point(x, y)
     x, y = self:transform_distance(x, y)
     return self.x0 + x, self.y0 + y
