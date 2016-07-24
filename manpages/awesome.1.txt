@@ -9,7 +9,7 @@ awesome - awesome window manager
 SYNOPSIS
 --------
 
-*awesome* [*-v* | *--version*] [*-h* | *--help*] [*-c* | *--config* 'FILE'] [*-k* | *--check*] [*-a* | *--no-argb*] [*-r* | *--replace]
+*awesome* [*-v* | *--version*] [*-h* | *--help*] [*-c* | *--config* 'FILE'] [*-k* | *--check*] [*--search* 'DIRECTORY'] [*-a* | *--no-argb*] [*-r* | *--replace]
 
 DESCRIPTION
 -----------
@@ -42,6 +42,8 @@ OPTIONS
     Use an alternate configuration file instead of '$XDG_CONFIG_HOME/awesome/rc.lua'.
 *-k*, *--check*::
     Check configuration file syntax.
+*--search*::
+    Add a directory to the library search path.
 *-a*, *--no-argb*::
     Don't use ARGB visuals.
 *-r*, *--replace*::

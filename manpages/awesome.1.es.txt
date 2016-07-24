@@ -9,7 +9,7 @@ awesome - gestor de ventanas awesome
 SINOPSIS
 --------
 
-*awesome* [*-v* | *--version*] [*-h* | *--help*] [*-c* | *--config* 'FICHERO'] [*-k* | *--check*] [*-a* | *--no-argb*] [*-r* | *--replace]
+*awesome* [*-v* | *--version*] [*-h* | *--help*] [*-c* | *--config* 'FICHERO'] [*-k* | *--check*] [*--search* 'DIRECTORIO'] [*-a* | *--no-argb*] [*-r* | *--replace]
 
 DESCRIPCIÓN
 -----------
@@ -50,6 +50,8 @@ OPCIONES
 '$XDG_CONFIG_HOME/awesome/rc.lua'.
 *-k*, *--check*::
     Verifica la sintaxis del archivo de configuración.
+*--search*::
+    Añadir un directorio a la ruta de búsqueda de biblioteca.
 *-a*, *--no-argb*::
     No utilice colores ARGB.
 *-r*, *--replace*::

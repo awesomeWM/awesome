@@ -9,7 +9,7 @@ awesome - awesome Fenstermanager
 SYNTAX
 --------
 
-*awesome* [*-v* | *--version*] [*-h* | *--help*] [*-c* | *--config* 'Datei'] [*-k* | *--check*] [*-a* | *--no-argb*] [*-r* | *--replace]
+*awesome* [*-v* | *--version*] [*-h* | *--help*] [*-c* | *--config* 'Datei'] [*-k* | *--check*] [*--search* 'Verzeichnis'] [*-a* | *--no-argb*] [*-r* | *--replace]
 
 BESCHREIBUNG
 -----------
@@ -33,6 +33,8 @@ OPTIONEN
     Nutzung einer alternativen Konfigurationsdatei, statt '$XDG_CONFIG_HOME/awesome/rc.lua'.
 *-k*, *--check*::
     Überprüft die Konfigurationsdatei auf Syntaxfehler.
+*--search*::
+    Füge ein Verzeichnis zum Bibliothekssuchpfad hinzu.
 *-a*, *--no-argb*::
     Verwende keine ARGB-Visuals
 *-r*, *--replace*::
