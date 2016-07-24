@@ -550,9 +550,11 @@ screen_modified(screen_t *existing_screen, screen_t *other_screen)
     lua_State *L = globalconf_get_lua_State();
 
     if(!AREA_EQUAL(existing_screen->geometry, other_screen->geometry)) {
+        area_t old_geometry = existing_screen->geometry;
         existing_screen->geometry = other_screen->geometry;
         luaA_object_push(L, existing_screen);
-        luaA_object_emit_signal(L, -1, "property::geometry", 0);
+        luaA_pusharea(L, old_geometry);
+        luaA_object_emit_signal(L, -2, "property::geometry", 1);
         lua_pop(L, 1);
         screen_update_workarea(existing_screen);
     }
@@ -1101,6 +1103,7 @@ luaA_screen_fake_resize(lua_State *L)
     int y = luaL_checkinteger(L, 3);
     int width = luaL_checkinteger(L, 4);
     int height = luaL_checkinteger(L, 5);
+    area_t old_geometry = screen->geometry;
 
     screen->geometry.x = x;
     screen->geometry.y = y;
@@ -1109,7 +1112,8 @@ luaA_screen_fake_resize(lua_State *L)
 
     screen_update_workarea(screen);
 
-    luaA_object_emit_signal(L, 1, "property::geometry", 0);
+    luaA_pusharea(L, old_geometry);
+    luaA_object_emit_signal(L, 1, "property::geometry", 1);
 
     return 0;
 }
