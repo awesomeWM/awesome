@@ -441,6 +441,16 @@ screen_scan_randr(lua_State *L, screen_array_t *screens)
         screen_scan_randr_monitors(L, screens);
     else
         screen_scan_randr_crtcs(L, screens);
+
+    if (screens->len == 0)
+    {
+        /* Scanning failed, disable randr again */
+        xcb_randr_select_input(globalconf.connection,
+                               globalconf.screen->root,
+                               0);
+        globalconf.have_randr_13 = false;
+        globalconf.have_randr_15 = false;
+    }
 }
 
 static void
@@ -582,7 +592,7 @@ screen_modified(screen_t *existing_screen, screen_t *other_screen)
 void
 screen_refresh(void)
 {
-    if(!globalconf.screen_need_refresh)
+    if(!globalconf.screen_need_refresh || !globalconf.have_randr_13)
         return;
     globalconf.screen_need_refresh = false;
 
