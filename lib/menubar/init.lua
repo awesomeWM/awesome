@@ -118,7 +118,7 @@ local function load_count_table()
         io.input (count_file)
         for line in io.lines() do
             local name, count = string.match(line, "([^;]+);([^;]+)")
-            if name ~= nil and weight ~= nil then
+            if name ~= nil and count ~= nil then
                 count_table[name] = count
             end
         end
@@ -225,11 +225,15 @@ local function menulist_update(query, scr)
     query = query or ""
     shownitems = {}
     local pattern = awful.util.query_to_pattern(query)
-    local match_inside = {}
 
-    -- First we add entries which names match the command from the
-    -- beginning to the table shownitems, and the ones that contain
-    -- command in the middle to the table match_inside.
+    -- All entries are added to a list that will be sorted
+    -- according to the priority (first) and weight (second) of its
+    -- entries.
+    -- If categories are used in the menu, we add the entries matching
+    -- the current query with high priority as to ensure they are
+    -- displayed first. Afterwards the non-category entries are added.
+    -- All entries are weighted according to the number of times they
+    -- have been executed previously (stored in count_table).
 
     local count_table = load_count_table()
     local command_list = {}
