@@ -9,7 +9,7 @@ awesome - gestionnaire de fenêtres awesome
 SYNOPSIS
 --------
 
-*awesome* [*-v* | *--version*] [*-h* | *--help*] [*-c* | *--config* 'FILE'] [*-k* | *--check*]
+*awesome* [*-v* | *--version*] [*-h* | *--help*] [*-c* | *--config* 'FILE'] [*-k* | *--check*] [*-a* | *--no-argb*] [*-r* | *--replace]
 
 DESCRIPTION
 -----------

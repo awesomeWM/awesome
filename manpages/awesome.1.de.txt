@@ -9,7 +9,7 @@ awesome - awesome Fenstermanager
 SYNTAX
 --------
 
-*awesome* [*-v* | *--version*] [*-h* | *--help*] [*-c* | *--config* 'Datei'] [*-k* | *--check*]
+*awesome* [*-v* | *--version*] [*-h* | *--help*] [*-c* | *--config* 'Datei'] [*-k* | *--check*] [*-a* | *--no-argb*] [*-r* | *--replace]
 
 BESCHREIBUNG
 -----------

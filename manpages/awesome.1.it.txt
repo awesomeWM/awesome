@@ -10,7 +10,7 @@ awesome - gestore di finestre awesome
 SINOSSI
 --------
 
-*awesome* [*-v* | *--version*] [*-h* | *--help*] [*-c* | *--config* 'FILE'] [*-k* | *--check*]
+*awesome* [*-v* | *--version*] [*-h* | *--help*] [*-c* | *--config* 'FILE'] [*-k* | *--check*] [*-a* | *--no-argb*] [*-r* | *--replace]
 
 DESCRIZIONE
 -----------
