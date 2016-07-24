@@ -775,10 +775,12 @@ void screen_update_workarea(screen_t *screen)
     if (AREA_EQUAL(area, screen->workarea))
         return;
 
+    area_t old_workarea = screen->workarea;
     screen->workarea = area;
     lua_State *L = globalconf_get_lua_State();
     luaA_object_push(L, screen);
-    luaA_object_emit_signal(L, -1, "property::workarea", 0);
+    luaA_pusharea(L, old_workarea);
+    luaA_object_emit_signal(L, -2, "property::workarea", 1);
     lua_pop(L, 1);
 }
 
