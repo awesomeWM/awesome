@@ -89,6 +89,10 @@
 /**
  * The screen coordinates.
  *
+ * **Signal:**
+ *
+ *  * *property::geometry*
+ *
  * **Immutable:** true
  * @property geometry
  * @param table
