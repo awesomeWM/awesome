@@ -68,6 +68,8 @@
 -- @tparam number geometry.width The widget
 -- @tparam number geometry.height The height
 -- @tparam drawable geometry.drawable The `drawable`
+-- @tparam table geometry.matrix_to_parent The relative `gears.matrix`
+-- @tparam table geometry.matrix_to_device The absolute `gears.matrix`
 -- @see mouse
 
 --- When a mouse button is released over the widget.
@@ -85,6 +87,8 @@
 -- @tparam number geometry.width The widget
 -- @tparam number geometry.height The height
 -- @tparam drawable geometry.drawable The `drawable`
+-- @tparam table geometry.matrix_to_parent The relative `gears.matrix`
+-- @tparam table geometry.matrix_to_device The absolute `gears.matrix`
 -- @see mouse
 
 --- When the mouse enter a widget.
@@ -96,6 +100,8 @@
 -- @tparam number geometry.width The widget
 -- @tparam number geometry.height The height
 -- @tparam drawable geometry.drawable The `drawable`
+-- @tparam table geometry.matrix_to_parent The relative `gears.matrix`
+-- @tparam table geometry.matrix_to_device The absolute `gears.matrix`
 -- @see mouse
 
 --- When the mouse leave a widget.
@@ -107,4 +113,6 @@
 -- @tparam number geometry.width The widget
 -- @tparam number geometry.height The height
 -- @tparam drawable geometry.drawable The `drawable`
+-- @tparam table geometry.matrix_to_parent The relative `gears.matrix`
+-- @tparam table geometry.matrix_to_device The absolute `gears.matrix`
 -- @see mouse
