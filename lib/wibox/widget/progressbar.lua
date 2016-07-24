@@ -83,8 +83,10 @@ function progressbar.draw(pbar, _, cr, width, height)
     -- We want one pixel wide lines
     cr:set_line_width(1)
 
-    local value = pbar._private.value
     local max_value = pbar._private.max_value
+
+    local value = math.min(max_value, math.max(0, pbar._private.value))
+
     if value >= 0 then
         value = value / max_value
     end
@@ -142,10 +144,18 @@ end
 -- @param value The progress bar value between 0 and 1.
 function progressbar:set_value(value)
     value = value or 0
-    local max_value = self._private.max_value
-    self._private.value = math.min(max_value, math.max(0, value))
+
+    self._private.value = value
+
     self:emit_signal("widget::redraw_needed")
     return self
+end
+
+function progressbar:set_max_value(max_value)
+
+    self._private.max_value = max_value
+
+    self:emit_signal("widget::redraw_needed")
 end
 
 --- Set the progressbar height.
