@@ -82,11 +82,10 @@ fi
 
 cd $build_dir
 
-LUA_PATH="$(lua -e 'print(package.path)');lib/?.lua;lib/?/init.lua"
+AWESOME_OPTIONS="$AWESOME_OPTIONS --search lib/"
 # Add test dir (for _runner.lua).
-LUA_PATH="$LUA_PATH;$this_dir/?.lua"
+AWESOME_OPTIONS="$AWESOME_OPTIONS --search $this_dir"
 XDG_CONFIG_HOME="./"
-export LUA_PATH
 export XDG_CONFIG_HOME
 
 cd - >/dev/null
