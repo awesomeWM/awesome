@@ -1,11 +1,20 @@
 ---------------------------------------------------------------------------
 --- A progressbar widget.
 --
+-- To add text on top of the progressbar, a `wibox.layout.stack` can be used:
+--
+--@DOC_wibox_widget_progressbar_text_EXAMPLE@
+--
+-- To display the progressbar vertically, use a `wibox.container.rotate` widget:
+--
+--@DOC_wibox_widget_progressbar_vertical_EXAMPLE@
+--
 -- By default, this widget will take all the available size. To prevent this,
 -- a `wibox.container.constraint` widget or the `forced_width`/`forced_height`
 -- properties have to be used.
 --
 --@DOC_wibox_widget_defaults_progressbar_EXAMPLE@
+--
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2009 Julien Danjou
 -- @release @AWESOME_VERSION@
