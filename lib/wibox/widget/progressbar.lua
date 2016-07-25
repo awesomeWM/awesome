@@ -61,11 +61,17 @@ local progressbar = { mt = {} }
 -- @tparam gears.color color The progressbar background color.
 
 --- The progressbar inner shape.
+--
+--@DOC_wibox_widget_progressbar_bar_shape_EXAMPLE@
+--
 -- @property bar_shape
 -- @tparam[opt=gears.shape.rectangle] gears.shape shape
 -- @see gears.shape
 
 --- The progressbar shape.
+--
+--@DOC_wibox_widget_progressbar_shape_EXAMPLE@
+--
 -- @property shape
 -- @tparam[opt=gears.shape.rectangle] gears.shape shape
 -- @see gears.shape
