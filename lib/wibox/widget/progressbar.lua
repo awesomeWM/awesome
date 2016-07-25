@@ -117,11 +117,56 @@ local progressbar = { mt = {} }
 --- The progressbar bar border color.
 -- @beautiful beautiful.progressbar_bar_border_color
 
+--- The progressbar margins.
+-- Note that if the `clip` is disabled, this allows the background to be smaller
+-- than the bar.
+-- @tparam[opt=0] (table|number|nil) margins A table for each side or a number
+-- @tparam[opt=0] number margins.top
+-- @tparam[opt=0] number margins.bottom
+-- @tparam[opt=0] number margins.left
+-- @tparam[opt=0] number margins.right
+-- @property margins
+-- @see clip
+
+--- The progressbar padding.
+-- Note that if the `clip` is disabled, this allows the bar to be taller
+-- than the background.
+-- @tparam[opt=0] (table|number|nil) padding A table for each side or a number
+-- @tparam[opt=0] number padding.top
+-- @tparam[opt=0] number padding.bottom
+-- @tparam[opt=0] number padding.left
+-- @tparam[opt=0] number padding.right
+-- @property paddings
+-- @see clip
+
+--- The progressbar margins.
+-- Note that if the `clip` is disabled, this allows the background to be smaller
+-- than the bar.
+-- @tparam[opt=0] (table|number|nil) margins A table for each side or a number
+-- @tparam[opt=0] number margins.top
+-- @tparam[opt=0] number margins.bottom
+-- @tparam[opt=0] number margins.left
+-- @tparam[opt=0] number margins.right
+-- @beautiful beautiful.progressbar_margins
+-- @see clip
+
+--- The progressbar padding.
+-- Note that if the `clip` is disabled, this allows the bar to be taller
+-- than the background.
+-- @tparam[opt=0] (table|number|nil) padding A table for each side or a number
+-- @tparam[opt=0] number padding.top
+-- @tparam[opt=0] number padding.bottom
+-- @tparam[opt=0] number padding.left
+-- @tparam[opt=0] number padding.right
+-- @beautiful beautiful.progressbar_paddings
+-- @see clip
+
 local properties = { "border_color", "color"     , "background_color",
                      "value"       , "max_value" , "ticks",
                      "ticks_gap"   , "ticks_size", "border_width",
                      "shape"       , "bar_shape" , "bar_border_width",
-                     "clip"        , "bar_border_color"
+                     "clip"        , "margins"   , "bar_border_color",
+                     "paddings",
                    }
 
 function progressbar.draw(pbar, _, cr, width, height)
@@ -138,9 +183,6 @@ function progressbar.draw(pbar, _, cr, width, height)
     if value >= 0 then
         value = value / max_value
     end
-
-    local over_drawn_width = width
-    local over_drawn_height = height
     local border_width = pbar._private.border_width
         or beautiful.progressbar_border_width or 0
 
@@ -152,6 +194,24 @@ function progressbar.draw(pbar, _, cr, width, height)
         beautiful.progressbar_bg or "#ff0000aa"
 
     local bg_width, bg_height = width, height
+
+    local clip = pbar._private.clip ~= false and beautiful.progressbar_clip ~= false
+
+    -- Apply the margins
+    local margin = pbar._private.margins or beautiful.progressbar_margins
+
+    if margin then
+        if type(margin) == "number" then
+            cr:translate(margin, margin)
+            bg_width, bg_height = bg_width - 2*margin, bg_height - 2*margin
+        else
+            cr:translate(margin.left or 0, margin.top or 0)
+            bg_height = bg_height -
+                (margin.top  or 0) - (margin.bottom or 0)
+            bg_width = bg_width   -
+                (margin.left or 0) - (margin.right  or 0)
+        end
+    end
 
     -- Draw the background shape
     if border_width > 0 then
@@ -168,6 +228,9 @@ function progressbar.draw(pbar, _, cr, width, height)
 
     cr:set_source(color(bg))
 
+    local over_drawn_width  = bg_width  + border_width
+    local over_drawn_height = bg_height + border_width
+
     if border_width > 0 then
         cr:fill_preserve()
 
@@ -176,26 +239,55 @@ function progressbar.draw(pbar, _, cr, width, height)
 
         cr:stroke()
 
-        over_drawn_width  = width  - 2*border_width
-        over_drawn_height = height - 2*border_width
+        over_drawn_width  = over_drawn_width  - 2*border_width
+        over_drawn_height = over_drawn_height - 2*border_width
     else
         cr:fill()
     end
 
     -- Undo the translation
-    if border_width > 0 then
-        cr:translate(-border_width/2, -border_width/2)
+    cr:translate(-border_width/2, -border_width/2)
+
+    -- Make sure the bar stay in the shape
+    if clip then
+        background_shape(cr, bg_width, bg_height)
+        cr:clip()
+        cr:translate(border_width, border_width)
+    else
+        -- Assume the background size is irrelevant to the bar itself
+        if type(margin) == "number" then
+            cr:translate(-margin, -margin)
+        else
+            cr:translate(-(margin.left or 0), -(margin.top or 0))
+        end
+
+        over_drawn_height = height
+        over_drawn_width  = width
     end
+
+    -- Apply the padding
+    local padding = pbar._private.paddings or beautiful.progressbar_paddings
+
+    if padding then
+        if type(padding) == "number" then
+            cr:translate(padding, padding)
+            over_drawn_height = over_drawn_height - 2*padding
+            over_drawn_width  = over_drawn_width  - 2*padding
+        else
+            cr:translate(padding.left or 0, padding.top or 0)
+
+            over_drawn_height = over_drawn_height -
+                (padding.top  or 0) - (padding.bottom or 0)
+            over_drawn_width = over_drawn_width   -
+                (padding.left or 0) - (padding.right  or 0)
+        end
+    end
+
+    over_drawn_width  = math.max(over_drawn_width , 0)
+    over_drawn_height = math.max(over_drawn_height, 0)
 
     local rel_x = over_drawn_width * value
 
-    cr:translate(border_width, border_width)
-
-    -- Make sure the bar stay in the shape
-    if pbar._private.clip ~= false and beautiful.progressbar_clip ~= false then
-        background_shape(cr, over_drawn_width, over_drawn_height)
-        cr:clip()
-    end
 
     -- Draw the progressbar shape
 
