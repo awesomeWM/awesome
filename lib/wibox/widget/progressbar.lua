@@ -77,6 +77,8 @@ local progressbar = { mt = {} }
 
 --- Force the inner part (the bar) to fit in the background shape.
 --
+--@DOC_wibox_widget_progressbar_clip_EXAMPLE@
+--
 -- @property clip
 -- @tparam[opt=true] boolean clip
 
@@ -129,6 +131,9 @@ local progressbar = { mt = {} }
 --- The progressbar margins.
 -- Note that if the `clip` is disabled, this allows the background to be smaller
 -- than the bar.
+--
+-- See the `clip` example.
+--
 -- @tparam[opt=0] (table|number|nil) margins A table for each side or a number
 -- @tparam[opt=0] number margins.top
 -- @tparam[opt=0] number margins.bottom
@@ -140,6 +145,9 @@ local progressbar = { mt = {} }
 --- The progressbar padding.
 -- Note that if the `clip` is disabled, this allows the bar to be taller
 -- than the background.
+--
+-- See the `clip` example.
+--
 -- @tparam[opt=0] (table|number|nil) padding A table for each side or a number
 -- @tparam[opt=0] number padding.top
 -- @tparam[opt=0] number padding.bottom
