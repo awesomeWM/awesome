@@ -278,6 +278,7 @@ local function store_geometry(d, reqtype)
     if not data[d][reqtype] then data[d][reqtype] = {} end
     data[d][reqtype] = d:geometry()
     data[d][reqtype].screen = d.screen
+    data[d][reqtype].border_width = d.border_width
 end
 
 --- Get the margins and offset
@@ -1161,6 +1162,9 @@ function placement.restore(d, args)
     if not memento then return false end
 
     memento.screen = nil --TODO use it
+
+    d.border_width = memento.border_width
+
     d:geometry(memento)
     return true
 end
