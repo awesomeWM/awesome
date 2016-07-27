@@ -45,7 +45,9 @@ local steps = {
     -- Test restoring client.border_width
     function()
         local c = client.get()[1]
-        local test_width = 2
+
+        -- pick an arbitrary border_width distinct from the default one
+        local test_width = c.border_width + 1
 
         c.border_width = test_width
 
