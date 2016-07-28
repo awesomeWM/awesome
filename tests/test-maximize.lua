@@ -41,6 +41,24 @@ local steps = {
         c.maximized_horizontal = false
         return true
     end,
+
+    -- Test restoring client.border_width
+    function()
+        local c = client.get()[1]
+
+        -- pick an arbitrary border_width distinct from the default one
+        local test_width = c.border_width + 1
+
+        c.border_width = test_width
+
+        c.fullscreen = true
+        c.fullscreen = false
+
+        assert(c.border_width == test_width)
+
+        return true
+    end,
+
     -- Test restoring a geometry
     function()
         local c = client.get()[1]
