@@ -277,6 +277,20 @@ end
 
 capi.client.connect_signal("request::geometry", layout.move_handler)
 
+-- When a screen is moved, make (floating) clients follow it
+capi.screen.connect_signal("property::geometry", function(s, old_geom)
+    local geom = s.geometry
+    local xshift = geom.x - old_geom.x
+    local yshift = geom.y - old_geom.y
+    for _, c in ipairs(capi.client.get(s)) do
+        local cgeom = c:geometry()
+        c:geometry({
+            x = cgeom.x + xshift,
+            y = cgeom.y + yshift
+        })
+    end
+end)
+
 return layout
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
