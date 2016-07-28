@@ -376,6 +376,37 @@ function module.losange(cr, width, height)
     cr:close_path()
 end
 
+--- A pie.
+--
+-- The pie center is the center of the area.
+--
+-- @DOC_gears_shape_pie_EXAMPLE@
+--
+-- @param cr A cairo context
+-- @tparam number width The shape width
+-- @tparam number height The shape height
+-- @tparam[opt=0] number start_angle The start angle (in radian)
+-- @tparam[opt=math.pi/2] number end_angle The end angle (in radian)
+-- @tparam[opt=math.min(width height)/2] number radius The shape height
+function module.pie(cr, width, height, start_angle, end_angle, radius)
+    radius = radius or math.floor(math.min(width, height)/2)
+    start_angle, end_angle = start_angle or 0, end_angle or math.pi/2
+
+    -- If the shape is a circle, then avoid the lines
+    if math.abs(start_angle + end_angle - 2*math.pi) <= 0.01  then
+        cr:arc(width/2, height/2, radius, 0, 2*math.pi)
+    else
+        cr:move_to(width/2, height/2)
+        cr:line_to(
+            width/2 + math.cos(start_angle)*radius,
+            height/2 + math.sin(start_angle)*radius
+        )
+        cr:arc(width/2, height/2, radius, start_angle, end_angle)
+    end
+
+    cr:close_path()
+end
+
 --- A partial rounded bar. How much of the rounded bar is visible depends on
 -- the given percentage value.
 --
