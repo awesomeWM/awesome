@@ -63,7 +63,7 @@ mouse.wibox = {}
 -- @return The client object under the pointer, if one can be found.
 -- @see current_client
 function mouse.client_under_pointer()
-    util.deprecated("Use mouse.current_client instead of awful.mouse.client_under_pointer()")
+    util.deprecate("Use mouse.current_client instead of awful.mouse.client_under_pointer()")
 
     return mouse.object.get_current_client()
 end
@@ -75,7 +75,7 @@ end
 -- @param finished_cb Deprecated, do not use
 function mouse.client.move(c, snap, finished_cb) --luacheck: no unused args
     if finished_cb then
-        util.deprecated("The mouse.client.move `finished_cb` argument is no longer"..
+        util.deprecate("The mouse.client.move `finished_cb` argument is no longer"..
             " used, please use awful.mouse.resize.add_leave_callback(f, 'mouse.move')")
     end
 
@@ -111,7 +111,7 @@ mouse.client.dragtotag = { }
 -- @deprecated awful.mouse.client.dragtotag.border
 -- @param c The client to move
 function mouse.client.dragtotag.border(c)
-    util.deprecated("Use awful.mouse.snap.drag_to_tag_enabled = true instead "..
+    util.deprecate("Use awful.mouse.snap.drag_to_tag_enabled = true instead "..
         "of awful.mouse.client.dragtotag.border(c). It will now be enabled.")
 
     -- Enable drag to border
@@ -159,7 +159,7 @@ end
 -- @treturn number x The horizontal position
 -- @treturn number y The vertical position
 function mouse.client.corner(c, corner)
-    util.deprecated(
+    util.deprecate(
         "Use awful.placement.closest_corner(mouse) or awful.placement[corner](mouse)"..
         " instead of awful.mouse.client.corner"
     )
