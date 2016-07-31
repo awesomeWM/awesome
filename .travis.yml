@@ -15,6 +15,11 @@ env:
   global:
     # Secure GH_APIDOC_TOKEN to push to awesomeWM/apidoc.
     - secure: "R/HYDclnws1I1+v9Yjt+RKa4CsFhbBT9tiwE3EfPhEj2KCYX4sFRMxuZvLf5sq0XWdrQaPhQ54fgAZGr3f054JKRXcTB0g9J6nhSHz9kIjPh446gafUhEeDQcZRwM/MeCWiwFIkiZm6smYoDFE9JTWu6quNV+lQ4kcVDOp2ibEc="
+matrix:
+  allow_failures:
+    # This fails too often for reasons to be investigated.
+    # See https://github.com/awesomeWM/awesome/issues/982#issuecomment-231522318.
+    - env: LUA=5.1 LUANAME=luajit-2.0 LUALIBRARY=/usr/lib/libluajit-5.1.so LUAROCKS_ARGS=--lua-suffix=jit-2.0.4 TEST_PREV_COMMITS=1
 
 before_install:
   - if [ -z $LUAINCLUDE ]; then LUAINCLUDE=/usr/include/${LUANAME}; fi
