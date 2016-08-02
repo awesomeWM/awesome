@@ -495,6 +495,8 @@ function base.widget:setup(args)
     if id then
         -- Avoid being dropped by wibox metatable -> drawin
         rawset(self, id, w)
+        ids[id] = ids[id] or {}
+        table.insert(ids[id], 1, w)
     end
 
     if rawget(self, "_private") then
@@ -522,6 +524,11 @@ function base.make_widget_declarative(args)
     local mt = getmetatable(w) or {}
     local orig_string = tostring(w)
 
+    -- Add the main id (if any)
+    if id then
+        ids[id] = ids[id] or {}
+        table.insert(ids[id], 1, w)
+    end
 
     if rawget(w, "_private") then
         w._private.by_id = ids

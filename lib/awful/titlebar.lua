@@ -64,11 +64,18 @@ end
 
 --- Get a client's titlebar
 -- @class function
--- @param c The client for which a titlebar is wanted.
--- @param[opt] args A table with extra arguments for the titlebar. The
--- "size" is the height of the titlebar. Available "position" values are top,
--- left, right and bottom. Additionally, the foreground and background colors
--- can be configured via e.g. "bg_normal" and "bg_focus".
+-- @tparam client c The client for which a titlebar is wanted.
+-- @tparam[opt={}] table args A table with extra arguments for the titlebar. 
+-- @tparam[opt=font.height*1.5] number args.size The height of the titlebar. 
+-- @tparam[opt=top] string args.position" values are `top`,
+-- `left`, `right` and `bottom`.
+-- @tparam[opt=top] string args.bg_normal
+-- @tparam[opt=top] string args.bg_focus
+-- @tparam[opt=top] string args.bgimage_normal
+-- @tparam[opt=top] string args.bgimage_focus
+-- @tparam[opt=top] string args.fg_normal
+-- @tparam[opt=top] string args.fg_focus
+-- @tparam[opt=top] string args.font
 -- @name titlebar
 local function new(c, args)
     args = args or {}

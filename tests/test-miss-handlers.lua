@@ -44,4 +44,28 @@ assert(w.foo == "bar")
 screen[1].clients = 42
 assert(screen[1].clients ~= 42)
 
+-- Test the wibox declarative widget system (drawin proxy)
+
+local w2 = wibox {
+    visible = true,
+    wisth = 100,
+    height = 100
+}
+
+w2:setup{
+    {
+        text   = "Awesomeness!",
+        id     = "main_textbox",
+        widget = wibox.widget.textbox,
+    },
+    id     = "main_background",
+    widget = wibox.container.background
+}
+
+assert(w2.main_background)
+assert(w2:get_children_by_id("main_background")[1])
+assert(w2:get_children_by_id("main_textbox")[1])
+assert(w2.main_background.main_textbox)
+assert(w2.main_background == w2:get_children_by_id("main_background")[1])
+
 require("_runner").run_steps({ function() return true end })
