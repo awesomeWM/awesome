@@ -22,6 +22,8 @@
 -- @module gears.shape
 ---------------------------------------------------------------------------
 local g_matrix = require( "gears.matrix" )
+local unpack   = unpack or table.unpack -- luacheck: globals unpack (compatibility with Lua 5.1)
+local atan2    = math.atan2 or math.atan -- lua 5.3 compat
 
 local module = {}
 
@@ -403,6 +405,122 @@ function module.pie(cr, width, height, start_angle, end_angle, radius)
         )
         cr:arc(width/2, height/2, radius, start_angle, end_angle)
     end
+
+    cr:close_path()
+end
+
+--- A rounded arc.
+--
+-- The pie center is the center of the area.
+--
+-- @DOC_gears_shape_arc_EXAMPLE@
+--
+-- @param cr A cairo context
+-- @tparam number width The shape width
+-- @tparam number height The shape height
+-- @tparam[opt=math.min(width height)/2] number thickness The arc thickness
+-- @tparam[opt=0] number start_angle The start angle (in radian)
+-- @tparam[opt=math.pi/2] number end_angle The end angle (in radian)
+-- @tparam[opt=false] boolean start_rounded if the arc start rounded
+-- @tparam[opt=false] boolean end_rounded if the arc end rounded
+function module.arc(cr, width, height, thickness, start_angle, end_angle, start_rounded, end_rounded)
+    start_angle = start_angle or 0
+    end_angle   = end_angle   or math.pi/2
+
+    -- This shape is a partial circle
+    local radius = math.min(width, height)/2
+
+    thickness = thickness or radius/2
+
+    local inner_radius = radius - thickness
+
+    -- As the edge of the small arc need to touch the [start_p1, start_p2]
+    -- line, a small subset of the arc circumference has to be substracted
+    -- that's (less or more) equal to the thickness/2 (a little longer given
+    -- it is an arc and not a line, but it wont show)
+    local arc_percent = math.abs(end_angle-start_angle)/(2*math.pi)
+    local arc_length  = ((radius-thickness/2)*2*math.pi)*arc_percent
+
+    if start_rounded then
+        arc_length = arc_length - thickness/2
+
+        -- And back to angles
+        start_angle = end_angle - (arc_length/(radius - thickness/2))
+    end
+
+    if end_rounded then
+        arc_length = arc_length - thickness/2
+
+        -- And back to angles
+        end_angle = start_angle + (arc_length/(radius - thickness/2))
+    end
+
+    -- The path is a curcular arc joining 4 points
+
+    -- Outer first corner
+    local start_p1 = {
+        width /2 + math.cos(start_angle)*radius,
+        height/2 + math.sin(start_angle)*radius
+    }
+
+    if start_rounded then
+
+        -- Inner first corner
+        local start_p2 = {
+            width /2 + math.cos(start_angle)*inner_radius,
+            height/2 + math.sin(start_angle)*inner_radius
+        }
+
+        local median_angle = atan2(
+              start_p2[1] - start_p1[1],
+            -(start_p2[2] - start_p1[2])
+        )
+
+        local arc_center = {
+            (start_p1[1] + start_p2[1])/2,
+            (start_p1[2] + start_p2[2])/2,
+        }
+
+        cr:arc(arc_center[1], arc_center[2], thickness/2,
+            median_angle-math.pi/2, median_angle+math.pi/2
+        )
+
+    else
+        cr:move_to(unpack(start_p1))
+    end
+
+    cr:arc(width/2, height/2, radius, start_angle, end_angle)
+
+    if end_rounded then
+
+        -- Outer second corner
+        local end_p1 = {
+            width /2 + math.cos(end_angle)*radius,
+            height/2 + math.sin(end_angle)*radius
+        }
+
+        -- Inner first corner
+        local end_p2 = {
+            width /2 + math.cos(end_angle)*inner_radius,
+            height/2 + math.sin(end_angle)*inner_radius
+        }
+        local median_angle = atan2(
+              end_p2[1] - end_p1[1],
+            -(end_p2[2] - end_p1[2])
+        ) - math.pi
+
+        local arc_center = {
+            (end_p1[1] + end_p2[1])/2,
+            (end_p1[2] + end_p2[2])/2,
+        }
+
+        cr:arc(arc_center[1], arc_center[2], thickness/2,
+            median_angle-math.pi/2, median_angle+math.pi/2
+        )
+
+    end
+
+    cr:arc_negative(width/2, height/2, inner_radius, end_angle, start_angle)
 
     cr:close_path()
 end
