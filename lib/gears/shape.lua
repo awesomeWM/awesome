@@ -331,6 +331,7 @@ end
 -- @tparam[opt=math.min(width  height) / 2)] number radius The radius
 function module.circle(cr, width, height, radius)
     radius = radius or math.min(width, height) / 2
+    cr:move_to(width/2+radius, height/2)
     cr:arc(width / 2, height / 2, radius, 0, 2*math.pi)
     cr:close_path()
 end
