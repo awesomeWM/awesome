@@ -177,6 +177,10 @@ function taglist.new(screen, filter, buttons, style, update_function, base_widge
     local uf = update_function or common.list_update
     local w = base_widget or fixed.horizontal()
 
+    if w.set_spacing and (style and style.spacing or beautiful.taglist_spacing) then
+        w:set_spacing(style and style.spacing or beautiful.taglist_spacing)
+    end
+
     local data = setmetatable({}, { __mode = 'k' })
 
     local queued_update = {}
