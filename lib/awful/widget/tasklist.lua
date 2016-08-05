@@ -56,6 +56,9 @@ local function tasklist_label(c, args, tb)
     local name = ""
     local bg
     local bg_image
+    local shape              = args.shape or theme.tasklist_shape
+    local shape_border_width = args.shape_border_width or theme.tasklist_shape_border_width
+    local shape_border_color = args.shape_border_color or theme.tasklist_shape_border_color
 
     -- symbol to use to indicate certain client properties
     local sticky = args.sticky or theme.tasklist_sticky or "▪"
@@ -106,23 +109,66 @@ local function tasklist_label(c, args, tb)
         text = text .. "<span color='"..fg_focus.."'>"..name.."</span>"
         bg_image = bg_image_focus
         font = font_focus
+
+        if args.shape_focus or theme.tasklist_shape_focus then
+            shape = args.shape_focus or theme.tasklist_shape_focus
+        end
+
+        if args.shape_border_width_focus or theme.tasklist_shape_border_width_focus then
+            shape_border_width = args.shape_border_width_focus or theme.tasklist_shape_border_width_focus
+        end
+
+        if args.shape_border_color_focus or theme.tasklist_shape_border_color_focus then
+            shape_border_color = args.shape_border_color_focus or theme.tasklist_shape_border_color_focus
+        end
     elseif c.urgent then
         bg = bg_urgent
         text = text .. "<span color='"..fg_urgent.."'>"..name.."</span>"
         bg_image = bg_image_urgent
         font = font_urgent
+
+        if args.shape_urgent or theme.tasklist_shape_urgent then
+            shape = args.shape_urgent or theme.tasklist_shape_urgent
+        end
+
+        if args.shape_border_width_urgent or theme.tasklist_shape_border_width_urgent then
+            shape_border_width = args.shape_border_width_urgent or theme.tasklist_shape_border_width_urgent
+        end
+
+        if args.shape_border_color_urgent or theme.tasklist_shape_border_color_urgent then
+            shape_border_color = args.shape_border_color_urgent or theme.tasklist_shape_border_color_urgent
+        end
     elseif c.minimized then
         bg = bg_minimize
         text = text .. "<span color='"..fg_minimize.."'>"..name.."</span>"
         bg_image = bg_image_minimize
         font = font_minimized
+
+        if args.shape_minimized or theme.tasklist_shape_minimized then
+            shape = args.shape_minimized or theme.tasklist_shape_minimized
+        end
+
+        if args.shape_border_width_minimized or theme.tasklist_shape_border_width_minimized then
+            shape_border_width = args.shape_border_width_minimized or theme.tasklist_shape_border_width_minimized
+        end
+
+        if args.shape_border_color_minimized or theme.tasklist_shape_border_color_minimized then
+            shape_border_color = args.shape_border_color_minimized or theme.tasklist_shape_border_color_minimized
+        end
     else
         bg = bg_normal
         text = text .. "<span color='"..fg_normal.."'>"..name.."</span>"
         bg_image = bg_image_normal
     end
     tb:set_font(font)
-    return text, bg, bg_image, not tasklist_disable_icon and c.icon or nil
+
+    local other_args = {
+        shape              = shape,
+        shape_border_width = shape_border_width,
+        shape_border_color = shape_border_color,
+    }
+
+    return text, bg, bg_image, not tasklist_disable_icon and c.icon or nil, other_args
 end
 
 local function tasklist_update(s, w, buttons, filter, data, style, update_function)
@@ -168,6 +214,18 @@ end
 -- @tparam[opt=nil] string style.font_minimized
 -- @tparam[opt=nil] string style.font_urgent
 -- @tparam[opt=nil] number style.spacing The spacing between tags.
+-- @tparam[opt=nil] gears.shape style.shape
+-- @tparam[opt=nil] number style.shape_border_width
+-- @tparam[opt=nil] string|color style.shape_border_color
+-- @tparam[opt=nil] gears.shape style.shape_focus
+-- @tparam[opt=nil] number style.shape_border_width_focus
+-- @tparam[opt=nil] string|color style.shape_border_color_focus
+-- @tparam[opt=nil] gears.shape style.shape_minimized
+-- @tparam[opt=nil] number style.shape_border_width_minimized
+-- @tparam[opt=nil] string|color style.shape_border_color_minimized
+-- @tparam[opt=nil] gears.shape style.shape_urgent
+-- @tparam[opt=nil] number style.shape_border_width_urgent
+-- @tparam[opt=nil] string|color style.shape_border_color_urgent
 -- @param[opt] update_function Function to create a tag widget on each
 --   update. See `awful.widget.common.list_update`.
 -- @tparam[opt] table base_widget Container widget for tag widgets. Default
