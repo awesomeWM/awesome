@@ -149,7 +149,24 @@ end
 -- @param screen The screen to draw tasklist for.
 -- @param filter Filter function to define what clients will be listed.
 -- @param buttons A table with buttons binding to set.
--- @param style The style overrides default theme.
+-- @tparam[opt={}] table style The style overrides default theme.
+-- @tparam[opt=nil] string|pattern style.fg_normal
+-- @tparam[opt=nil] string|pattern style.bg_normal
+-- @tparam[opt=nil] string|pattern style.fg_focus
+-- @tparam[opt=nil] string|pattern style.bg_focus
+-- @tparam[opt=nil] string|pattern style.fg_urgent
+-- @tparam[opt=nil] string|pattern style.bg_urgent
+-- @tparam[opt=nil] string|pattern style.fg_minimize
+-- @tparam[opt=nil] string|pattern style.bg_minimize
+-- @tparam[opt=nil] string style.bg_image_normal
+-- @tparam[opt=nil] string style.bg_image_focus
+-- @tparam[opt=nil] string style.bg_image_urgent
+-- @tparam[opt=nil] string style.bg_image_minimize
+-- @tparam[opt=nil] boolean style.tasklist_disable_icon
+-- @tparam[opt=nil] string style.font
+-- @tparam[opt=nil] string style.font_focus
+-- @tparam[opt=nil] string style.font_minimized
+-- @tparam[opt=nil] string style.font_urgent
 -- @param[opt] update_function Function to create a tag widget on each
 --   update. See `awful.widget.common.list_update`.
 -- @tparam[opt] table base_widget Container widget for tag widgets. Default
