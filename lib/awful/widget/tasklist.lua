@@ -167,6 +167,7 @@ end
 -- @tparam[opt=nil] string style.font_focus
 -- @tparam[opt=nil] string style.font_minimized
 -- @tparam[opt=nil] string style.font_urgent
+-- @tparam[opt=nil] number style.spacing The spacing between tags.
 -- @param[opt] update_function Function to create a tag widget on each
 --   update. See `awful.widget.common.list_update`.
 -- @tparam[opt] table base_widget Container widget for tag widgets. Default
@@ -195,6 +196,10 @@ function tasklist.new(screen, filter, buttons, style, update_function, base_widg
     local w = base_widget or flex.horizontal()
 
     local data = setmetatable({}, { __mode = 'k' })
+
+    if w.set_spacing and (style and style.spacing or beautiful.taglist_spacing) then
+        w:set_spacing(style and style.spacing or beautiful.taglist_spacing)
+    end
 
     local queued_update = false
     function w._do_tasklist_update()
