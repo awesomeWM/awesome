@@ -56,6 +56,9 @@ function taglist.taglist_label(t, args)
     local fg_color = nil
     local bg_image
     local icon
+    local shape              = args.shape or theme.taglist_shape
+    local shape_border_width = args.shape_border_width or theme.taglist_shape_border_width
+    local shape_border_color = args.shape_border_color or theme.taglist_shape_border_color
     -- TODO: Re-implement bg_resize
     local bg_resize = false -- luacheck: ignore
     local is_selected = false
@@ -91,15 +94,53 @@ function taglist.taglist_label(t, args)
             end
             if bg_empty then bg_color = bg_empty end
             if fg_empty then fg_color = fg_empty end
+
+            if args.shape_empty or theme.taglist_shape_empty then
+                shape = args.shape_empty or theme.taglist_shape_empty
+            end
+
+            if args.shape_border_width_empty or theme.taglist_shape_border_width_empty then
+                shape_border_width = args.shape_border_width_empty or theme.taglist_shape_border_width_empty
+            end
+
+            if args.shape_border_color_empty or theme.taglist_shape_border_color_empty then
+                shape_border_color = args.shape_border_color_empty or theme.taglist_shape_border_color_empty
+            end
         end
     end
     if t.selected then
         bg_color = bg_focus
         fg_color = fg_focus
+
+        if args.shape_focus or theme.taglist_shape_focus then
+            shape = args.shape_focus or theme.taglist_shape_focus
+        end
+
+        if args.shape_border_width_focus or theme.taglist_shape_border_width_focus then
+            shape = args.shape_border_width_focus or theme.taglist_shape_border_width_focus
+        end
+
+        if args.shape_border_color_focus or theme.taglist_shape_border_color_focus then
+            shape = args.shape_border_color_focus or theme.taglist_shape_border_color_focus
+        end
+
     elseif tag.getproperty(t, "urgent") then
         if bg_urgent then bg_color = bg_urgent end
         if fg_urgent then fg_color = fg_urgent end
+
+        if args.shape_urgent or theme.taglist_shape_urgent then
+            shape = args.shape_urgent or theme.taglist_shape_urgent
+        end
+
+        if args.shape_border_width_urgent or theme.taglist_shape_border_width_urgent then
+            shape_border_width = args.shape_border_width_urgent or theme.taglist_shape_border_width_urgent
+        end
+
+        if args.shape_border_color_urgent or theme.taglist_shape_border_color_urgent then
+            shape_border_color = args.shape_border_color_urgent or theme.taglist_shape_border_color_urgent
+        end
     end
+
     if not tag.getproperty(t, "icon_only") then
         text = "<span font_desc='"..font.."'>"
         if fg_color then
@@ -116,7 +157,13 @@ function taglist.taglist_label(t, args)
         end
     end
 
-    return text, bg_color, bg_image, not taglist_disable_icon and icon or nil
+    local other_args = {
+        shape              = shape,
+        shape_border_width = shape_border_width,
+        shape_border_color = shape_border_color,
+    }
+
+    return text, bg_color, bg_image, not taglist_disable_icon and icon or nil, other_args
 end
 
 local function taglist_update(s, w, buttons, filter, data, style, update_function)
