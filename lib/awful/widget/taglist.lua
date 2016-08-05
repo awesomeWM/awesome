@@ -141,9 +141,25 @@ end
 -- @param screen The screen to draw taglist for.
 -- @param filter Filter function to define what clients will be listed.
 -- @param buttons A table with buttons binding to set.
--- @param style The style overrides default theme.
+-- @tparam[opt={}] table style The style overrides default theme.
+-- @tparam[opt=nil] string|pattern style.fg_focus
+-- @tparam[opt=nil] string|pattern style.bg_focus
+-- @tparam[opt=nil] string|pattern style.fg_urgent
+-- @tparam[opt=nil] string|pattern style.bg_urgent
+-- @tparam[opt=nil] string|pattern style.bg_occupied
+-- @tparam[opt=nil] string|pattern style.fg_occupied
+-- @tparam[opt=nil] string|pattern style.bg_empty
+-- @tparam[opt=nil] string|pattern style.fg_empty
+-- @tparam[opt=nil] string style.taglist_squares_sel
+-- @tparam[opt=nil] string style.taglist_squares_unsel
+-- @tparam[opt=nil] string style.taglist_squares_sel_empty
+-- @tparam[opt=nil] string style.taglist_squares_unsel_empty
+-- @tparam[opt=nil] string style.taglist_squares_resize
+-- @tparam[opt=nil] string style.taglist_disable_icon
+-- @tparam[opt=nil] string style.font
+-- @tparam[opt=nil] number style.spacing The spacing between tags.
 -- @param[opt] update_function Function to create a tag widget on each
---   update. @see awful.widget.common.
+--   update. See `awful.widget.common`.
 -- @param[opt] base_widget Optional container widget for tag widgets. Default
 --   is wibox.layout.fixed.horizontal().
 -- @param base_widget.bg_focus The background color for focused client.
