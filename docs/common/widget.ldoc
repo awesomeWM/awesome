@@ -40,7 +40,6 @@
 -- @param _buttons The table of buttons that should bind to the widget.
 -- @function buttons
 
-
 --- When the layout (size) change.
 -- This signal is emited when the previous results of `:layout()` and `:fit()`
 -- are no longer valid.

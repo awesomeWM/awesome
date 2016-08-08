@@ -238,6 +238,7 @@ function ratio:ajust_widget_ratio(widget, before, itself, after)
 end
 
 --- Add some widgets to the given fixed layout
+-- **Signal:** widget::added The argument are the widgets
 -- @tparam widget ... Widgets that should be added (must at least be one)
 function ratio:add(...)
     -- No table.pack in Lua 5.1 :-(
@@ -250,13 +251,17 @@ function ratio:add(...)
 
     normalize(self)
     self:emit_signal("widget::layout_changed")
+    self:emit_signal("widget::added", ...)
 end
 
 --- Remove a widget from the layout
+-- **Signal:** widget::removed The arguments are the widget and the index
 -- @tparam number index The widget index to remove
 -- @treturn boolean index If the operation is successful
 function ratio:remove(index)
     if not index or not self._private.widgets[index] then return false end
+
+    local w = self._private.widgets[index]
 
     table.remove(self._private.ratios, index)
     table.remove(self._private.widgets, index)
@@ -264,11 +269,13 @@ function ratio:remove(index)
     normalize(self)
 
     self:emit_signal("widget::layout_changed")
+    self:emit_signal("widget::removed", w, index)
 
     return true
 end
 
 --- Insert a new widget in the layout at position `index`
+-- **Signal:** widget::inserted The arguments are the widget and the index
 -- @tparam number index The position
 -- @param widget The widget
 function ratio:insert(index, widget)
@@ -281,6 +288,7 @@ function ratio:insert(index, widget)
     normalize(self)
 
     self:emit_signal("widget::layout_changed")
+    self:emit_signal("widget::inserted", widget, #self._private.widgets)
 end
 
 local function get_layout(dir, widget1, ...)
