@@ -414,8 +414,12 @@ luaA_spawn(lua_State *L)
     if(!argv || !argv[0])
     {
         g_strfreev(argv);
-        luaA_warn(L, "spawn: parse error: %s", error->message);
-        g_error_free(error);
+        if (error) {
+            luaA_warn(L, "spawn: parse error: %s", error->message);
+            g_error_free(error);
+        }
+        else
+            luaA_warn(L, "spawn: There is nothing to execute");
         return 1;
     }
 
