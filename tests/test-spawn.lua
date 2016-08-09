@@ -6,6 +6,9 @@ local spawn = require("awful.spawn")
 local spawns_done = 0
 local exit_yay, exit_snd = nil, nil
 
+-- * Using spawn with array is already covered by the test client.
+-- * spawn with startup notification is covered by test-spawn-snid.lua
+
 local steps = {
   function(count)
     if count == 1 then
@@ -61,6 +64,17 @@ local steps = {
       assert(exit_snd == 42)
       return true
     end
+  end,
+  function()
+    -- Test empty command table
+    spawn{}
+    return true
+  end,
+  function()
+    -- Test empty command string
+    spawn("")
+    assert(#client.get() == 0)
+    return true
   end,
 }
 
