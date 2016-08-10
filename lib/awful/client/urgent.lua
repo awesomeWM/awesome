@@ -54,7 +54,7 @@ end
 function urgent.jumpto(merge)
     local c = client.urgent.get()
     if c then
-        client.jumpto(c, merge)
+        c:jump_to(merge)
     end
 end
 

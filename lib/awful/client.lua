@@ -1091,7 +1091,7 @@ function client.run_or_raise(cmd, matcher, merge)
 
     local c = client.iterate(matcher, start)()
     if c then
-        client.jumpto(c, merge)
+        c:jump_to(merge)
     else
         -- client not found, spawn it
         spawn(cmd)
