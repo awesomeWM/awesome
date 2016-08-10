@@ -231,9 +231,7 @@ end
 function screen.focused(args)
     args = args or screen.default_focused_args or {}
     return get_screen(
-        (args.client and args.client.screen) or
-        (capi.client.focus and capi.client.focus.screen) or
-        capi.mouse.screen
+        args.client and capi.client.focus and capi.client.focus.screen or capi.mouse.screen
     )
 end
 
