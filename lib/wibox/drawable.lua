@@ -145,6 +145,48 @@ local function do_redraw(self)
         self._widget_hierarchy:draw(context, cr)
     end
 
+    -- If a `gears.shape` is set and the border_width is greater than 2,
+    -- re-apply the border to fix anti-aliasing.
+    if self._widget_context_skeleton.wibox then
+        local wb = self._widget_context_skeleton.wibox
+
+        local shape = wb._shape
+        local bw = wb.border_width
+
+        -- The "real" size is width+2*bw and height+2*bw. This code only exist
+        -- to draw the inner anti-aliased border just 1px inside of the clip.
+        if shape then
+            local bc = wb.border_color or beautiful.border_normal or beautiful.fg_normal
+
+            cr:save()
+
+            -- First, draw the actual border. This will also include an
+            -- anti-aliased inner border that the clip shape could not provide.
+            cr:move_to(0, 0)
+            cr:translate(-bw, -bw)
+            cr:set_source(color(bc))
+            shape(cr, width+2*bw, height+2*bw)
+
+            -- Add 1px when the border_width is 1 to compensate for the
+            -- outer border anti-alising. Yes, this does steal half a pixel
+            -- that should allow visible content.
+            cr:set_line_width(bw*2 + (bw == 1 and 1 or 0))
+            cr:stroke_preserve()
+
+            -- Finally, clear the outer pixel to create an anti-alised effect
+
+            -- Odd numbers are odds, but this is mostly due to the A1 shape
+            -- bounding own anti-alising.
+            cr:set_line_width(1 + (bw % 2)/2)
+
+            cr:set_operator(cairo.Operator.CLEAR)
+            cr:set_source_rgba(0,0,0,1)
+            cr:stroke()
+
+            cr:restore()
+        end
+    end
+
     self.drawable:refresh()
 
     assert(cr.status == "SUCCESS", "Cairo context entered error state: " .. cr.status)
