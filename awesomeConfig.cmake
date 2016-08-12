@@ -329,7 +329,6 @@ set(AWESOME_CONFIGURE_FILES
     ${awesome_lua_configure_files}
     config.h
     docs/config.ld
-    awesomerc.lua
     awesome-version-internal.h)
 
 foreach(file ${AWESOME_CONFIGURE_FILES})
@@ -346,6 +345,15 @@ add_custom_command(
         COMMAND lua ${SOURCE_DIR}/docs/06-appearance.md.lua
         ${BUILD_DIR}/docs/06-appearance.md
 )
+
+add_custom_command(
+        OUTPUT ${BUILD_DIR}/awesomerc.lua ${BUILD_DIR}/docs/05-awesomerc.md
+        COMMAND lua ${SOURCE_DIR}/docs/05-awesomerc.md.lua
+        ${BUILD_DIR}/docs/05-awesomerc.md ${SOURCE_DIR}/awesomerc.lua
+        ${BUILD_DIR}/awesomerc.lua
+)
+
+#}}}
 
 # {{{ Copy additional files
 file(GLOB awesome_md_docs RELATIVE ${SOURCE_DIR}

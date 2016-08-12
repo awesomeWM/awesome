@@ -277,6 +277,7 @@ if(GENERATE_DOC)
         COMMAND ${LDOC_EXECUTABLE} . 3>&1 1>&2 2>&3 | awk "{ fail=1 \; print } END { exit fail }"
         WORKING_DIRECTORY ${AWE_DOC_DIR}
         DEPENDS ${AWE_LUA_FILES} ${AWE_MD_FILES} ${BUILD_DIR}/docs/06-appearance.md
+        ${BUILD_DIR}/docs/05-awesomerc.md
     )
 
 endif()
