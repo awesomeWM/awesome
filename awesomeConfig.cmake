@@ -340,6 +340,18 @@ foreach(file ${AWESOME_CONFIGURE_FILES})
 endforeach()
 #}}}
 
+# {{{ Generate some aggregated documentation from lua script
+execute_process(
+        COMMAND lua ${SOURCE_DIR}/docs/06-appearance.md.lua
+        ${BUILD_DIR}/docs/06-appearance.md
+        ERROR_VARIABLE  BEAUTIFUL_ERROR
+)
+
+if(BEAUTIFUL_ERROR)
+    message("${BEAUTIFUL_ERROR}")
+    message(FATAL_ERROR "Count not generate the theme index")
+endif()
+
 # {{{ Copy additional files
 file(GLOB awesome_md_docs RELATIVE ${SOURCE_DIR}
     ${SOURCE_DIR}/docs/*.md)
