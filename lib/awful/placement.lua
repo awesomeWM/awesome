@@ -761,8 +761,8 @@ function placement.under_mouse(d, args)
     local m_coords = capi.mouse.coords()
 
     local ngeo = geometry_common(d, args)
-    ngeo.x = m_coords.x - ngeo.width  / 2
-    ngeo.y = m_coords.y - ngeo.height / 2
+    ngeo.x = math.floor(m_coords.x - ngeo.width  / 2)
+    ngeo.y = math.floor(m_coords.y - ngeo.height / 2)
 
     local bw = d.border_width or 0
     ngeo.width  = ngeo.width  - 2*bw
