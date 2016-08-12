@@ -30,6 +30,66 @@ local descs = setmetatable({}, { __mode = 'k' })
 local fonts = setmetatable({}, { __mode = 'v' })
 local active_font
 
+--- The default font.
+-- @beautiful beautiful.font
+
+-- The default background color.
+-- @beautiful beautiful.bg_normal
+
+-- The default focused element background color.
+-- @beautiful beautiful.bg_focus
+
+-- The default urgent element background color.
+-- @beautiful beautiful.bg_urgent
+
+-- The default minimized element background color.
+-- @beautiful beautiful.bg_minimize
+
+-- The system tray background color.
+-- Please note that only solid colors are currently supported.
+-- @beautiful beautiful.bg_systray
+
+-- The default focused element foreground (text) color.
+-- @beautiful beautiful.fg_normal
+
+-- The default focused element foreground (text) color.
+-- @beautiful beautiful.fg_focus
+
+-- The default urgent element foreground (text) color.
+-- @beautiful beautiful.fg_urgent
+
+-- The default minimized element foreground (text) color.
+-- @beautiful beautiful.fg_minimize
+
+--- The gap between clients.
+-- @beautiful beautiful.useless_gap
+-- @param[opt=0] number
+
+--- The client border width.
+-- @beautiful beautiful.border_width
+
+--- The default clients border width.
+-- Note that only solid colors are supported.
+-- @beautiful beautiful.border_normal
+
+--- The focused client border width.
+-- Note that only solid colors are supported.
+-- @beautiful beautiful.border_focus
+
+--- The marked clients border width.
+-- Note that only solid colors are supported.
+-- @beautiful beautiful.border_marked
+
+--- The wallpaper path.
+-- @beautiful beautiful.wallpaper
+
+-- The icon theme name.
+-- It has to be a directory in `/usr/share/icons` or an XDG icon folder.
+-- @beautiful beautiful.icon_theme
+
+--- The Awesome icon path.
+-- @beautiful beautiful.awesome_icon
+
 --- Load a font from a string or a font description.
 --
 -- @see https://developer.gnome.org/pango/stable/pango-Fonts.html#pango-font-description-from-string
