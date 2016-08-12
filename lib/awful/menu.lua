@@ -48,6 +48,49 @@ local table_update = function (t, set)
     return t
 end
 
+--- The icon used for sub-menus.
+-- @beautiful beautiful.menu_submenu_icon
+
+--- The item height.
+-- @beautiful beautiful.menu_height
+-- @tparam[opt=16] number menu_height
+
+--- The default menu width.
+-- @beautiful beautiful.menu_width
+-- @tparam[opt=100] number menu_width
+
+--- The menu item border color.
+-- @beautiful beautiful.menu_border_color
+-- @tparam[opt=0] number menu_border_color
+
+--- The menu item border width.
+-- @beautiful beautiful.menu_border_width
+-- @tparam[opt=0] number menu_border_width
+
+--- The default focused item foreground (text) color.
+-- @beautiful beautiful.menu_fg_focus
+-- @param color
+-- @see gears.color
+
+--- The default focused item background color.
+-- @beautiful beautiful.menu_bg_focus
+-- @param color
+-- @see gears.color
+
+--- The default foreground (text) color.
+-- @beautiful beautiful.menu_fg_normal
+-- @param color
+-- @see gears.color
+
+--- The default background color.
+-- @beautiful beautiful.menu_bg_normal
+-- @param color
+-- @see gears.color
+
+--- The default sub-menu indicator if no menu_submenu_icon is provided.
+-- @beautiful beautiful.menu_submenu
+-- @tparam[opt="▶"] string menu_submenu The sub-menu text.
+-- @see beautiful.menu_submenu_icon
 
 --- Key bindings for menu navigation.
 -- Keys are: up, down, exec, enter, back, close. Value are table with a list of valid
