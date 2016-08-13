@@ -27,7 +27,7 @@ local function cobj_register(cobj)
     return fallback
 end
 
---- Add the missing properties handler to a CAPI object such as client/tag/screen
+--- Add the missing properties handler to a CAPI object such as client/tag/screen.
 -- Valid args:
 --
 -- * **getter**: A smart getter (handle property getter itself)
