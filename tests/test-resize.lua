@@ -403,6 +403,39 @@ table.insert(steps, function()
 
     assert(c.first_tag == cur_tag)
 
+    c:geometry {
+        x      = 99,
+        y      = 99,
+        width  = 99,
+        height = 99,
+    }
+
+    return true
+end)
+
+-- Test that odd number sized clients don't move by accident
+for _=1, 15 do
+    table.insert(steps, function()
+        local c = client.get()[1]
+
+        root.fake_input("button_press",1)
+        amouse.client.move(c)
+        root.fake_input("button_release",1)
+
+
+        return true
+    end)
+end
+
+table.insert(steps, function()
+    local c = client.get()[1]
+    root.fake_input("button_release",1)
+
+    assert(c.x      == 99)
+    assert(c.y      == 99)
+    assert(c.width  == 99)
+    assert(c.height == 99)
+
     return true
 end)
 
