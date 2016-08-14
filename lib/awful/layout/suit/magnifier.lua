@@ -18,6 +18,11 @@ local capi =
     mousegrabber = mousegrabber
 }
 
+--- The magnifier layout layoutbox icon.
+-- @beautiful beautiful.layout_magnifier
+-- @param surface
+-- @see gears.surface
+
 local magnifier = {}
 
 function magnifier.mouse_resize_handler(c, corner, x, y)
