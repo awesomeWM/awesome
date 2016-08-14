@@ -107,6 +107,9 @@ naughty.config.presets = {
 -- @tfield[opt=apply_dpi(5)] int margin
 -- @tfield[opt=apply_dpi(1)] int border_width
 -- @tfield[opt="top_right"] string position
+-- @tfield[opt] gears.color border_color
+-- @tparam[opt] gears.shape shape Widget shape.
+-- @tparam[opt] table shape_args Arguments passed to widget shape function.
 naughty.config.defaults = {
     timeout = 5,
     text = "",
@@ -114,7 +117,10 @@ naughty.config.defaults = {
     ontop = true,
     margin = dpi(5),
     border_width = dpi(1),
-    position = "top_right"
+    position = "top_right",
+    border_color = nil,
+    shape = nil,
+    shape_args = nil,
 }
 
 naughty.notificationClosedReason = {
@@ -415,6 +421,8 @@ end
 -- @string[opt=`beautiful.bg_focus` or `'#535d6c'`] args.bg Background color.
 -- @int[opt=1] args.border_width Border width.
 -- @string[opt=`beautiful.border_focus` or `'#535d6c'`] args.border_color Border color.
+-- @tparam[opt] gears.shape args.shape Widget shape.
+-- @tparam[opt] table args.shape_args Arguments passed to widget shape function.
 -- @tparam[opt] func args.run Function to run on left click.  The notification
 --   object will be passed to it as an argument.
 --   You need to call e.g.
@@ -461,6 +469,8 @@ function naughty.notify(args)
     local opacity = args.opacity or preset.opacity
     local margin = args.margin or preset.margin
     local border_width = args.border_width or preset.border_width
+    local shape = args.shape or preset.shape
+    local shape_args = args.shape_args or preset.shape_args
     local position = args.position or preset.position
     local actions = args.actions
     local destroy_cb = args.destroy
@@ -603,6 +613,10 @@ function naughty.notify(args)
                                bg = bg,
                                border_color = border_color,
                                border_width = border_width,
+                               shape_border_color = shape and border_color,
+                               shape_border_width = shape and border_width,
+                               shape = shape,
+                               shape_args = shape_args,
                                type = "notification" })
 
     if hover_timeout then notification.box:connect_signal("mouse::enter", hover_destroy) end
