@@ -1,5 +1,5 @@
 ---------------------------------------------------------------------------
---- Tasklist widget module for awful
+--- Tasklist widget module for awful.
 --
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2008-2009 Julien Danjou
@@ -27,6 +27,142 @@ end
 local tasklist = { mt = {} }
 
 local instances
+
+--- The default foreground (text) color.
+-- @beautiful beautiful.tasklist_fg_normal
+-- @tparam[opt=nil] string|pattern fg_normal
+-- @see gears.color
+
+--- The default background color.
+-- @beautiful beautiful.tasklist_bg_normal
+-- @tparam[opt=nil] string|pattern bg_normal
+-- @see gears.color
+
+--- The focused client foreground (text) color.
+-- @beautiful beautiful.tasklist_fg_focus
+-- @tparam[opt=nil] string|pattern fg_focus
+-- @see gears.color
+
+--- The focused client background color.
+-- @beautiful beautiful.tasklist_bg_focus
+-- @tparam[opt=nil] string|pattern bg_focus
+-- @see gears.color
+
+--- The urgent clients foreground (text) color.
+-- @beautiful beautiful.tasklist_fg_urgent
+-- @tparam[opt=nil] string|pattern fg_urgent
+-- @see gears.color
+
+--- The urgent clients background color.
+-- @beautiful beautiful.tasklist_bg_urgent
+-- @tparam[opt=nil] string|pattern bg_urgent
+-- @see gears.color
+
+--- The minimized clients foreground (text) color.
+-- @beautiful beautiful.tasklist_fg_minimize
+-- @tparam[opt=nil] string|pattern fg_minimize
+-- @see gears.color
+
+--- The minimized clients background color.
+-- @beautiful beautiful.tasklist_bg_minimize
+-- @tparam[opt=nil] string|pattern bg_minimize
+-- @see gears.color
+
+--- The elements default background image.
+-- @beautiful beautiful.tasklist_bg_image_normal
+-- @tparam[opt=nil] string bg_image_normal
+
+--- The focused client background image.
+-- @beautiful beautiful.tasklist_bg_image_focus
+-- @tparam[opt=nil] string bg_image_focus
+
+--- The urgent clients background image.
+-- @beautiful beautiful.tasklist_bg_image_urgent
+-- @tparam[opt=nil] string bg_image_urgent
+
+--- The minimized clients background image.
+-- @beautiful beautiful.tasklist_bg_image_minimize
+-- @tparam[opt=nil] string bg_image_minimize
+
+-- Disable the tasklist clients icons.
+-- @beautiful beautiful.tasklist_tasklist_disable_icon
+-- @tparam[opt=false] boolean tasklist_disable_icon
+
+--- The tasklist font.
+-- @beautiful beautiful.tasklist_font
+-- @tparam[opt=nil] string font
+
+--- The focused client alignment.
+-- @beautiful beautiful.tasklist_align
+-- @tparam[opt=left] string align *left*, *right* or *center*
+
+--- The focused client title alignment.
+-- @beautiful beautiful.tasklist_font_focus
+-- @tparam[opt=nil] string font_focus
+
+--- The minimized clients font.
+-- @beautiful beautiful.tasklist_font_minimized
+-- @tparam[opt=nil] string font_minimized
+
+--- The urgent clients font.
+-- @beautiful beautiful.tasklist_font_urgent
+-- @tparam[opt=nil] string font_urgent
+
+--- The space between the tasklist elements.
+-- @beautiful beautiful.tasklist_spacing
+-- @tparam[opt=0] number spacing The spacing between tags.
+
+--- The default tasklist elements shape.
+-- @beautiful beautiful.tasklist_shape
+-- @tparam[opt=nil] gears.shape shape
+
+--- The default tasklist elements border width.
+-- @beautiful beautiful.tasklist_shape_border_width
+-- @tparam[opt=0] number shape_border_width
+
+--- The default tasklist elements border color.
+-- @beautiful beautiful.tasklist_shape_border_color
+-- @tparam[opt=nil] string|color shape_border_color
+-- @see gears.color
+
+--- The focused client shape.
+-- @beautiful beautiful.tasklist_shape_focus
+-- @tparam[opt=nil] gears.shape shape_focus
+
+--- The focused client border width.
+-- @beautiful beautiful.tasklist_shape_border_width_focus
+-- @tparam[opt=0] number shape_border_width_focus
+
+--- The focused client border color.
+-- @beautiful beautiful.tasklist_shape_border_color_focus
+-- @tparam[opt=nil] string|color shape_border_color_focus
+-- @see gears.color
+
+--- The minimized clients shape.
+-- @beautiful beautiful.tasklist_shape_minimized
+-- @tparam[opt=nil] gears.shape shape_minimized
+
+--- The minimized clients border width.
+-- @beautiful beautiful.tasklist_shape_border_width_minimized
+-- @tparam[opt=0] number shape_border_width_minimized
+
+--- The minimized clients border color.
+-- @beautiful beautiful.tasklist_shape_border_color_minimized
+-- @tparam[opt=nil] string|color shape_border_color_minimized
+-- @see gears.color
+
+--- The urgent clients shape.
+-- @beautiful beautiful.tasklist_shape_urgent
+-- @tparam[opt=nil] gears.shape shape_urgent
+
+--- The urgent clients border width.
+-- @beautiful beautiful.tasklist_shape_border_width_urgent
+-- @tparam[opt=0] number shape_border_width_urgent
+
+--- The urgent clients border color.
+-- @beautiful beautiful.tasklist_shape_border_color_urgent
+-- @tparam[opt=nil] string|color shape_border_color_urgent
+-- @see gears.color
 
 -- Public structures
 tasklist.filter = {}
@@ -210,6 +346,7 @@ end
 -- @tparam[opt=nil] string style.bg_image_minimize
 -- @tparam[opt=nil] boolean style.tasklist_disable_icon
 -- @tparam[opt=nil] string style.font
+-- @tparam[opt=left] string style.align *left*, *right* or *center*
 -- @tparam[opt=nil] string style.font_focus
 -- @tparam[opt=nil] string style.font_minimized
 -- @tparam[opt=nil] string style.font_urgent
