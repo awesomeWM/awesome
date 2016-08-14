@@ -11,6 +11,16 @@
 local ipairs = ipairs
 local math = math
 
+--- The fairh layout layoutbox icon.
+-- @beautiful beautiful.layout_fairh
+-- @param surface
+-- @see gears.surface
+
+--- The fairv layout layoutbox icon.
+-- @beautiful beautiful.layout_fairv
+-- @param surface
+-- @see gears.surface
+
 local fair = {}
 
 local function do_fair(p, orientation)
