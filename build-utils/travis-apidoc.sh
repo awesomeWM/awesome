@@ -27,7 +27,6 @@ trap '[ "$?" = 0 ] || echo "EXIT CODE: $?"' EXIT
 REPO_APIDOC="https://${GH_APIDOC_TOKEN}@github.com/awesomeWM/apidoc"
 REPO_DIR="$PWD"
 
-# Export these to not add "git config" calls to the long command.
 export GIT_AUTHOR_NAME="awesome-robot on Travis CI"
 export GIT_AUTHOR_EMAIL="awesome-robot@users.noreply.github.com"
 export GIT_COMMITTER_NAME="$GIT_AUTHOR_NAME"
