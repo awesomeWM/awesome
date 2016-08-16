@@ -54,6 +54,27 @@ local graph = { mt = {} }
 -- @property scale
 -- @param boolean
 
+--- Set the width or the individual steps.
+--
+-- Note that it isn't supported when used along with stacked graphs.
+--
+--@DOC_wibox_widget_graph_step_EXAMPLE@
+--
+-- @property step_width
+-- @param[opt=1] number
+
+--- Set the spacing between the steps.
+--
+-- Note that it isn't supported when used along with stacked graphs.
+--
+-- @property step_spacing
+-- @param[opt=0] number
+
+--- The step shape.
+-- @property step_shape
+-- @param[opt=rectangle] shape
+-- @see gears.shape
+
 --- Set the graph to draw stacks. Default is false.
 --
 -- @property stack
@@ -75,13 +96,18 @@ local graph = { mt = {} }
 
 local properties = { "width", "height", "border_color", "stack",
                      "stack_colors", "color", "background_color",
-                     "max_value", "scale", "min_value" }
+                     "max_value", "scale", "min_value", "step_shape",
+                     "step_spacing", "step_width" }
 
 function graph.draw(_graph, _, cr, width, height)
     local max_value = _graph._private.max_value
     local min_value = _graph._private.min_value or (
         _graph._private.scale and math.huge or 0)
     local values = _graph._private.values
+
+    local step_shape = _graph._private.step_shape
+    local step_spacing = _graph._private.step_spacing or 0
+    local step_width = _graph._private.step_width or 1
 
     cr:set_line_width(1)
 
@@ -136,7 +162,7 @@ function graph.draw(_graph, _, cr, width, height)
                 if v > max_value then
                     max_value = v
                 end
-                if min_value > sv then
+                if min_value > v then
                     min_value = v
                 end
             end
@@ -148,18 +174,33 @@ function graph.draw(_graph, _, cr, width, height)
             for i = 0, #values - 1 do
                 local value = values[#values - i]
                 if value >= 0 then
+                    local x = i*step_width + ((i-1)*step_spacing) + 0.5
                     value = (value - min_value) / max_value
-                    cr:move_to(i + 0.5, height * (1 - value))
-                    cr:line_to(i + 0.5, height)
+                    cr:move_to(x, height * (1 - value))
+
+                    if step_shape then
+                        cr:translate(step_width + (i>1 and step_spacing or 0), height * (1 - value))
+                        step_shape(cr, step_width, height)
+                        cr:translate(0, -(height * (1 - value)))
+                    elseif step_width > 1 then
+                        cr:rectangle(x, height * (1 - value), step_width, height)
+                    else
+                        cr:line_to(x, height)
+                    end
                 end
             end
             cr:set_source(color(_graph._private.color or beautiful.graph_fg or "#ff0000"))
-            cr:stroke()
+
+            if step_shape or step_width > 1 then
+                cr:fill()
+            else
+                cr:stroke()
+            end
         end
 
     end
 
-    -- Undo the cr:translate() for the border
+    -- Undo the cr:translate() for the border and step shapes
     cr:restore()
 
     -- Draw the border last so that it overlaps already drawn values
