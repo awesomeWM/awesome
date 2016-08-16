@@ -43,6 +43,12 @@ local graph = { mt = {} }
 -- @property max_value
 -- @param number
 
+--- The minimum value.
+-- Note that the min_value is not supported when used along with the stack
+-- property.
+-- @property min_value
+-- @param number
+
 --- Set the graph to automatically scale its values. Default is false.
 --
 -- @property scale
@@ -69,10 +75,12 @@ local graph = { mt = {} }
 
 local properties = { "width", "height", "border_color", "stack",
                      "stack_colors", "color", "background_color",
-                     "max_value", "scale" }
+                     "max_value", "scale", "min_value" }
 
 function graph.draw(_graph, _, cr, width, height)
     local max_value = _graph._private.max_value
+    local min_value = _graph._private.min_value or (
+        _graph._private.scale and math.huge or 0)
     local values = _graph._private.values
 
     cr:set_line_width(1)
@@ -96,6 +104,9 @@ function graph.draw(_graph, _, cr, width, height)
                 for _, sv in ipairs(v) do
                     if sv > max_value then
                         max_value = sv
+                    end
+                    if min_value > sv then
+                        min_value = sv
                     end
                 end
             end
@@ -125,6 +136,9 @@ function graph.draw(_graph, _, cr, width, height)
                 if v > max_value then
                     max_value = v
                 end
+                if min_value > sv then
+                    min_value = v
+                end
             end
         end
 
@@ -134,7 +148,7 @@ function graph.draw(_graph, _, cr, width, height)
             for i = 0, #values - 1 do
                 local value = values[#values - i]
                 if value >= 0 then
-                    value = value / max_value
+                    value = (value - min_value) / max_value
                     cr:move_to(i + 0.5, height * (1 - value))
                     cr:line_to(i + 0.5, height)
                 end
