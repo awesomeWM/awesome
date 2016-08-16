@@ -14,7 +14,28 @@
 -- In many case, it is necessary to apply the shape using a transformation
 -- such as a rotation. The preferred way to do this is to wrap the function
 -- in another function calling `cr:rotate()` (or any other transformation
--- matrix)
+-- matrix).
+--
+-- To specialize a shape where the API doesn't allows extra arguments to be
+-- passed, it is possible to wrap the shape function like:
+--
+--    local new_shape = function(cr, width, height)
+--        gears.shape.rounded_rect(cr, width, height, 2)
+--    end
+--
+-- Many elements can be shaped. This include:
+--
+-- * `client`s (see `gears.surface.apply_shape_bounding`)
+-- * `wibox`es (see `wibox.shape`)
+-- * All widgets (see `wibox.container.background`)
+-- * The progressbar (see `wibox.widget.progressbar.bar_shape`)
+-- * The graph (see `wibox.widget.graph.step_shape`)
+-- * The checkboxes (see `wibox.widget.checkbox.check_shape`)
+-- * Images (see `wibox.widget.imagebox.clip_shape`)
+-- * Sliders (see `wibox.widget.slider.handle_shape`)
+-- * The taglist tags (see `awful.widget.taglist`)
+-- * The tasklist clients (see `awful.widget.tasklist`)
+-- * The tooltips (see `awful.tooltip`)
 --
 -- @author Emmanuel Lepage Vallee
 -- @copyright 2011-2016 Emmanuel Lepage Vallee
