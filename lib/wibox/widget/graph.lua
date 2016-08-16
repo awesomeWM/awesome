@@ -1,6 +1,15 @@
 ---------------------------------------------------------------------------
 --- A graph widget.
 --
+-- The graph goes from left to right. To change this to right to left, use
+-- a `wibox.container.mirror` widget. This can also be used to have data
+-- shown from top to bottom.
+--
+-- To add text on top of the graph, use a `wibox.layout.stack` and a
+-- `wibox.container.align` widgets.
+--
+-- To display the graph vertically, use a `wibox.container.rotate` widget.
+--
 --@DOC_wibox_widget_defaults_graph_EXAMPLE@
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2009 Julien Danjou
