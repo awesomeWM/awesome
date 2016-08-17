@@ -1,4 +1,12 @@
 ---------------------------------------------------------------------------
+-- A simple button widget.
+-- @usage local button = awful.widget.button()
+-- button:buttons(awful.util.table.join(
+--     button:buttons(),
+--     awful.button({}, 1, nil, function ()
+--         print("Mouse was clicked")
+--     end)
+-- ))
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2008-2009 Julien Danjou
 -- @release @AWESOME_VERSION@
@@ -48,6 +56,10 @@ end
 function button.mt:__call(...)
     return button.new(...)
 end
+
+--@DOC_widget_COMMON@
+
+--@DOC_object_COMMON@
 
 return setmetatable(button, button.mt)
 
