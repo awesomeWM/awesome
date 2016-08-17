@@ -9,6 +9,10 @@ local w
 local img
 local button
 
+-- Also check recursive signals from events
+local layout
+local got_called = false
+
 -- create a wibox.
 table.insert(steps, function()
 
@@ -54,6 +58,21 @@ table.insert(steps, function()
 
     img = button._private.image
     assert(img)
+
+    -- Test the click
+    layout = w.widget
+    assert(layout)
+
+    button:buttons(awful.util.table.join(
+        button:buttons(),
+        awful.button({}, 1, nil, function ()
+            button:emit_signal_recursive("test::recursive")
+        end)
+    ))
+
+    layout:connect_signal("test::recursive", function()
+        got_called = true
+    end)
 
     return true
 end)
@@ -110,6 +129,9 @@ end)
 
 table.insert(steps, function()
     assert(button._private.image == img)
+
+    -- The button had plenty of clicks by now. Make sure everything worked
+    assert(got_called)
 
     return true
 end)
