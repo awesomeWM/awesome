@@ -144,6 +144,8 @@ function fixed:swap(index1, index2)
     self:set(index1, widget2)
     self:set(index2, widget1)
 
+    self:emit_signal("widget::swapped", widget1, widget2, index2, index1)
+
     return true
 end
 
@@ -157,11 +159,17 @@ function fixed:swap_widgets(widget1, widget2, recursive)
     if idx1 and l1 and idx2 and l2 and (l1.set or l1.set_widget) and (l2.set or l2.set_widget) then
         if l1.set then
             l1:set(idx1, widget2)
+            if l1 == self then
+                self:emit_signal("widget::swapped", widget1, widget2, idx2, idx1)
+            end
         elseif l1.set_widget then
             l1:set_widget(widget2)
         end
         if l2.set then
             l2:set(idx2, widget1)
+            if l2 == self then
+                self:emit_signal("widget::swapped", widget1, widget2, idx2, idx1)
+            end
         elseif l2.set_widget then
             l2:set_widget(widget1)
         end
@@ -177,14 +185,18 @@ function fixed:set(index, widget2)
 
     base.check_widget(widget2)
 
+    local w = self._private.widgets[index]
+
     self._private.widgets[index] = widget2
 
     self:emit_signal("widget::layout_changed")
+    self:emit_signal("widget::replaced", widget2, w, index)
 
     return true
 end
 
 --- Insert a new widget in the layout at position `index`
+-- **Signal:** widget::inserted The arguments are the widget and the index
 -- @tparam number index The position
 -- @param widget The widget
 -- @treturn boolean If the operation is successful
@@ -194,6 +206,7 @@ function fixed:insert(index, widget)
     base.check_widget(widget)
     table.insert(self._private.widgets, index, widget)
     self:emit_signal("widget::layout_changed")
+    self:emit_signal("widget::inserted", widget, #self._private.widgets)
 
     return true
 end
@@ -242,6 +255,7 @@ end
 function fixed:reset()
     self._private.widgets = {}
     self:emit_signal("widget::layout_changed")
+    self:emit_signal("widget::reseted")
 end
 
 --- Set the layout's fill_space property. If this property is true, the last

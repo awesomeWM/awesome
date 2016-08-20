@@ -51,6 +51,16 @@ local function hierarchy_new(redraw_callback, layout_callback, callback_arg)
         end
         layout_callback(result, callback_arg)
     end
+    function result._emit_recursive(widget, name, ...)
+        local cur = result
+        assert(widget == cur._widget)
+        while cur do
+            if cur._widget then
+                cur._widget:emit_signal(name, ...)
+            end
+            cur = cur._parent
+        end
+    end
 
     for k, f in pairs(hierarchy) do
         if type(f) == "function" then
@@ -86,6 +96,7 @@ function hierarchy_update(self, context, widget, width, height, region, matrix_t
     if old_widget and old_widget ~= widget then
         self._widget:disconnect_signal("widget::redraw_needed", self._redraw)
         self._widget:disconnect_signal("widget::layout_changed", self._layout)
+        self._widget:disconnect_signal("widget::emit_recursive", self._emit_recursive)
     end
 
     -- Save the arguments we need to save
@@ -99,6 +110,7 @@ function hierarchy_update(self, context, widget, width, height, region, matrix_t
     if old_widget ~= widget then
         widget:weak_connect_signal("widget::redraw_needed", self._redraw)
         widget:weak_connect_signal("widget::layout_changed", self._layout)
+        widget:weak_connect_signal("widget::emit_recursive", self._emit_recursive)
     end
 
     -- Update children
