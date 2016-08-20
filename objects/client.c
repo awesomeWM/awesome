@@ -1,4 +1,4 @@
-/* 
+/*
  * client.c - client management
  *
  * Copyright © 2007-2009 Julien Danjou <julien@danjou.info>
@@ -46,7 +46,7 @@
  * context. To get the current focused client, use:
  *
  *    local c = client.focus
- *    
+ *
  *    if c then
  *        -- do something
  *    end
@@ -61,20 +61,20 @@
  *
  *    client.connect_signal("manage", function(c)
  *        -- do something
- *    end
+ *    end)
  *
  * To be notified a property changed in a client, use:
  *
  *    client.connect_signal("property::name", function(c)
  *        -- do something
- *    end
+ *    end)
  *
  * To be notified when a property change for a specific client (assuming it is
  * stored in the variable `c`), use:
  *
  *    c:connect_signal("property::name", function()
  *        -- do something
- *    end
+ *    end)
  *
  * To get all the clients for a screen, use either `screen.clients` or
  * `screen.tiled_clients`
