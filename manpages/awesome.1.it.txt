@@ -10,7 +10,7 @@ awesome - gestore di finestre awesome
 SINOSSI
 --------
 
-*awesome* [*-v* | *--version*] [*-h* | *--help*] [*-c* | *--config* 'FILE'] [*-k* | *--check*]
+*awesome* [*-v* | *--version*] [*-h* | *--help*] [*-c* | *--config* 'FILE'] [*-k* | *--check*] [*--search* 'DIRECTORY'] [*-a* | *--no-argb*] [*-r* | *--replace]
 
 DESCRIZIONE
 -----------
@@ -50,6 +50,8 @@ OPZIONI
 	'$XDG_CONFIG_HOME/awesome/rc.lua'.
 *-k*, *--check*::
 	Verifica la sintassi del file di configurazione.
+*--search*::
+	Aggiungere una directory al percorso di ricerca della libreria.
 *-a*, *--no-argb*::
 	Non usare visuali ARGB.
 *-r*, *--replace*::

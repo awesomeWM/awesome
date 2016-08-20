@@ -39,6 +39,13 @@
         signal_object_emit(L, &global_signals, "debug::deprecation", 1); \
     } while(0)
 
+static inline void free_string(char **c)
+{
+    p_delete(c);
+}
+
+DO_ARRAY(char*, string, free_string)
+
 /** Print a warning about some Lua code.
  * This is less mean than luaL_error() which setjmp via lua_error() and kills
  * everything. This only warn, it's up to you to then do what's should be done.
@@ -296,7 +303,7 @@ luaA_registerfct(lua_State *L, int idx, int *fct)
     return luaA_register(L, idx, fct);
 }
 
-void luaA_init(xdgHandle *);
+void luaA_init(xdgHandle *, string_array_t *);
 bool luaA_parserc(xdgHandle *, const char *, bool);
 
 /** Global signals */

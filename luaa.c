@@ -590,7 +590,7 @@ setup_awesome_signals(lua_State *L)
  * \param xdg An xdg handle to use to get XDG basedir.
  */
 void
-luaA_init(xdgHandle* xdg)
+luaA_init(xdgHandle* xdg, string_array_t *searchpath)
 {
     lua_State *L;
     static const struct luaL_Reg awesome_lib[] =
@@ -681,6 +681,19 @@ luaA_init(xdgHandle* xdg)
     /* Export keys */
     key_class_setup(L);
 
+    /* add XDG_CONFIG_DIR as include path */
+    const char * const *xdgconfigdirs = xdgSearchableConfigDirectories(xdg);
+    for(; *xdgconfigdirs; xdgconfigdirs++)
+    {
+        /* Append /awesome to *xdgconfigdirs */
+        const char *suffix = "/awesome";
+        size_t len = a_strlen(*xdgconfigdirs) + a_strlen(suffix) + 1;
+        char *entry = p_new(char, len);
+        a_strcat(entry, len, *xdgconfigdirs);
+        a_strcat(entry, len, suffix);
+        string_array_append(searchpath, entry);
+    }
+
     /* add Lua search paths */
     lua_getglobal(L, "package");
     if (LUA_TTABLE != lua_type(L, 1))
@@ -696,19 +709,17 @@ luaA_init(xdgHandle* xdg)
         return;
     }
 
-    /* add XDG_CONFIG_DIR as include path */
-    const char * const *xdgconfigdirs = xdgSearchableConfigDirectories(xdg);
-    for(; *xdgconfigdirs; xdgconfigdirs++)
+    foreach(entry, *searchpath)
     {
-        size_t len = a_strlen(*xdgconfigdirs);
+        size_t len = a_strlen(*entry);
         lua_pushliteral(L, ";");
-        lua_pushlstring(L, *xdgconfigdirs, len);
-        lua_pushliteral(L, "/awesome/?.lua");
+        lua_pushlstring(L, *entry, len);
+        lua_pushliteral(L, "/?.lua");
         lua_concat(L, 3);
 
         lua_pushliteral(L, ";");
-        lua_pushlstring(L, *xdgconfigdirs, len);
-        lua_pushliteral(L, "/awesome/?/init.lua");
+        lua_pushlstring(L, *entry, len);
+        lua_pushliteral(L, "/?/init.lua");
         lua_concat(L, 3);
 
         lua_concat(L, 3); /* concatenate with package.path */

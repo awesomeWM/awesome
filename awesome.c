@@ -429,6 +429,7 @@ exit_help(int exit_code)
   -h, --help             show help\n\
   -v, --version          show version\n\
   -c, --config FILE      configuration file to use\n\
+      --search DIR       add a directory to the library search path\n\
   -k, --check            check configuration file syntax\n\
   -a, --no-argb          disable client transparency support\n\
   -r, --replace          replace an existing window manager\n");
@@ -444,6 +445,7 @@ int
 main(int argc, char **argv)
 {
     char *confpath = NULL;
+    string_array_t searchpath;
     int xfd, i, opt;
     ssize_t cmdlen = 1;
     xdgHandle xdg;
@@ -457,6 +459,7 @@ main(int argc, char **argv)
         { "version", 0, NULL, 'v' },
         { "config",  1, NULL, 'c' },
         { "check",   0, NULL, 'k' },
+        { "search",  1, NULL, 's' },
         { "no-argb", 0, NULL, 'a' },
         { "replace", 0, NULL, 'r' },
         { NULL,      0, NULL, 0 }
@@ -471,6 +474,7 @@ main(int argc, char **argv)
     globalconf.keygrabber = LUA_REFNIL;
     globalconf.mousegrabber = LUA_REFNIL;
     buffer_init(&globalconf.startup_errors);
+    string_array_init(&searchpath);
 
     /* save argv */
     for(i = 0; i < argc; i++)
@@ -487,12 +491,6 @@ main(int argc, char **argv)
 
     /* Text won't be printed correctly otherwise */
     setlocale(LC_CTYPE, "");
-
-    /* Get XDG basedir data */
-    xdgInitHandle(&xdg);
-
-    /* init lua */
-    luaA_init(&xdg);
 
     /* check args */
     while((opt = getopt_long(argc, argv, "vhkc:ar",
@@ -514,6 +512,12 @@ main(int argc, char **argv)
             else
                 fatal("-c option requires a file name");
             break;
+          case 's':
+            if(a_strlen(optarg))
+                string_array_append(&searchpath, a_strdup(optarg));
+            else
+                fatal("-s option requires a directory name");
+            break;
           case 'a':
             no_argb = true;
             break;
@@ -521,6 +525,13 @@ main(int argc, char **argv)
             replace_wm = true;
             break;
         }
+
+    /* Get XDG basedir data */
+    xdgInitHandle(&xdg);
+
+    /* init lua */
+    luaA_init(&xdg, &searchpath);
+    string_array_wipe(&searchpath);
 
     if (run_test)
     {
