@@ -159,7 +159,9 @@ function(run_test test_path namespace escaped_content)
     if (NOT TEST_ERROR STREQUAL "")
         message("${TEST_OUTPUT}")
         message("${TEST_ERROR}")
-        message(FATAL_ERROR ${test_path} " A test failed, bye")
+        if (STRICT_TESTS)
+            message(FATAL_ERROR ${test_path} " A test failed, bye")
+        endif()
     endif()
 
     # Read the code and turn it into an usage example.
