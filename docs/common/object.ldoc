@@ -1,5 +1,5 @@
 
---- Disonnect to a signal.
+--- Disconnect to a signal.
 -- @tparam string name The name of the signal
 -- @tparam function func The callback that should be disconnected
 -- @function disconnect_signal
