@@ -296,18 +296,48 @@ luaA_fixups(lua_State *L)
     lua_setglobal(L, "selection");
 }
 
-/** awesome global table.
- * @field version The version of awesome.
- * @field release The release name of awesome.
- * @field conffile The configuration file which has been loaded.
- * @field startup True if we are still in startup, false otherwise.
- * @field startup_errors Error message for errors that occured during
- *  startup.
- * @field composite_manager_running True if a composite manager is running.
- * @field unix_signal Table mapping between signal numbers and signal identifiers.
- * @field hostname The hostname of the computer on which we are running.
- * @table awesome
+
+/**
+ * The version of awesome.
+ * @tfield string version
  */
+
+/**
+ * The release name of awesome.
+ * @tfield string release
+ */
+
+/**
+ * The configuration file which has been loaded.
+ * @tfield string conffile
+ */
+
+/**
+ * True if we are still in startup, false otherwise.
+ * @tfield boolean startup
+ */
+
+/**
+ * Error message for errors that occured during
+ *  startup.
+ * @tfield string startup_errors
+ */
+
+/**
+ * True if a composite manager is running.
+ * @tfield boolean composite_manager_running
+ */
+
+/**
+ * Table mapping between signal numbers and signal identifiers.
+ * @tfield table unix_signal
+ */
+
+/**
+ * The hostname of the computer on which we are running.
+ * @tfield string hostname
+ */
+
 static int
 luaA_awesome_index(lua_State *L)
 {
