@@ -412,7 +412,7 @@ function screen.object.get_tags(s, unordered)
     -- Avoid infinite loop, + save some time
     if not unordered then
         table.sort(tags, function(a, b)
-            return (a.index or 9999) < (b.index or 9999)
+            return (a.index or math.huge) < (b.index or math.huge)
         end)
     end
 
