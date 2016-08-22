@@ -74,6 +74,12 @@ function tag.object.set_index(self, idx)
     -- screen.tags cannot be used as it depend on index
     local tmp_tags = raw_tags(scr)
 
+    -- sort the tags by index
+    table.sort(tmp_tags, function(a, b)
+        local ia, ib = tag.getproperty(a, "index"), tag.getproperty(b, "index")
+        return (ia or math.huge) < (ib or math.huge)
+    end)
+
     if (not idx) or (idx < 1) or (idx > #tmp_tags) then
         return
     end
@@ -97,12 +103,13 @@ function tag.object.set_index(self, idx)
 end
 
 function tag.object.get_index(query_tag)
-    -- Get an unordered list of tags
-    local tags = raw_tags(query_tag.screen)
 
     local idx = tag.getproperty(query_tag, "index")
 
     if idx then return idx end
+
+    -- Get an unordered list of tags
+    local tags = raw_tags(query_tag.screen)
 
     -- Too bad, lets compute it
     for i, t in ipairs(tags) do
