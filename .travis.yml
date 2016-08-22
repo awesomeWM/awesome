@@ -83,7 +83,7 @@ install:
   - travis_retry sudo luarocks install luacheck
 
   # Install ldoc for building docs.
-  - travis_retry sudo luarocks install ldoc
+  - travis_retry sudo luarocks install ldoc 1.4.4
   - travis_retry sudo luarocks install lua-discount
 
   # Install dependencies for code coverage testing.
