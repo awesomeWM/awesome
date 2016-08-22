@@ -3,6 +3,14 @@ local beautiful = require("beautiful")
 
 awful.util.deprecate = function() end
 
+local function check_order()
+    local tags = mouse.screen.tags
+
+    for k, v in ipairs(tags) do
+        assert(k == v.index)
+    end
+end
+
 local has_spawned = false
 local steps = {
 
@@ -20,28 +28,38 @@ local tags = mouse.screen.tags
 
 assert(#mouse.screen.tags == 9)
 
-for k, v in ipairs(tags) do
-    assert(k == v.index)
-end
+check_order()
 
 tags[7].index = 9
 assert(tags[7].index == 9)
 
+check_order()
+
 tags[7].index = 4
 assert(tags[7].index == 4)
+
+check_order()
 
 awful.tag.move(5, tags[7])
 assert(tags[7].index == 5)
 
+check_order()
+
 tags[1]:swap(tags[3])
+
+check_order()
 
 assert(tags[1].index == 3)
 assert(tags[3].index == 1)
+
+check_order()
 
 awful.tag.swap(tags[1], tags[3])
 
 assert(tags[3].index == 3)
 assert(tags[1].index == 1)
+
+check_order()
 
 -- Test add, icon and delete
 
@@ -51,6 +69,8 @@ assert(c and client.focus == c)
 assert(beautiful.awesome_icon)
 
 local t = awful.tag.add("Test", {clients={c}, icon = beautiful.awesome_icon})
+
+check_order()
 
 local found = false
 
