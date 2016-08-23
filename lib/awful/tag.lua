@@ -12,6 +12,7 @@ local util = require("awful.util")
 local ascreen = require("awful.screen")
 local beautiful = require("beautiful")
 local object = require("gears.object")
+local timer = require("gears.timer")
 local pairs = pairs
 local ipairs = ipairs
 local table = table
@@ -1277,21 +1278,25 @@ function tag.attached_connect_signal(screen, ...)
 end
 
 -- Register standard signals.
-capi.client.connect_signal("manage", function(c)
-    -- If we are not managing this application at startup,
-    -- move it to the screen where the mouse is.
-    -- We only do it for "normal" windows (i.e. no dock, etc).
-    if not awesome.startup and c.type ~= "desktop" and c.type ~= "dock" then
-        if c.transient_for then
-            c.screen = c.transient_for.screen
-            if not c.sticky then
-                c:tags(c.transient_for:tags())
+capi.client.connect_signal("property::screen", function(c)
+    -- First, the delayed timer is necessary to avoid a race condition with
+    -- awful.rules. It is also messing up the tags before the user have a chance
+    -- to set them manually.
+    timer.delayed_call(function()
+        local tags, new_tags = c:tags(), {}
+
+        for _, t in ipairs(tags) do
+            if t.screen == c.screen then
+                table.insert(new_tags, t)
             end
-        else
-            c.screen = ascreen.focused()
         end
-    end
-    c:connect_signal("property::screen", function() c:to_selected_tags() end)
+
+        if #new_tags == 0 then
+            c:emit_signal("request::tag", nil, {reason="screen"})
+        elseif #new_tags < #tags then
+            c:tags(new_tags)
+        end
+    end)
 end)
 
 -- Keep track of the number of urgent clients.

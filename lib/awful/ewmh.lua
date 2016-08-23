@@ -122,20 +122,41 @@ function ewmh.activate(c, context, hints) -- luacheck: no unused args
     end
 end
 
+-- Get tags that are on the same screen as the client. This should _almost_
+-- always return the same content as c:tags().
+local function get_valid_tags(c, s)
+    local tags, new_tags = c:tags(), {}
+
+    for _, t in ipairs(tags) do
+        if screen[s] == t.screen then
+            table.insert(new_tags, t)
+        end
+    end
+
+    return new_tags
+end
+
 --- Tag a window with its requested tag.
 --
 -- It is the default signal handler for `request::tag` on a `client`.
 --
 -- @signalhandler awful.ewmh.tag
 -- @client c A client to tag
--- @tag[opt] t A tag to use. If omitted, then the client is made sticky.
+-- @tparam[opt] tag|boolean t A tag to use. If true, then the client is made sticky.
 -- @tparam[opt={}] table hints Extra information
 function ewmh.tag(c, t, hints) --luacheck: no unused
     -- There is nothing to do
-    if not t and #c:tags() > 0 then return end
+    if not t and #get_valid_tags(c, c.screen) > 0 then return end
 
     if not t then
-        c:to_selected_tags()
+        if c.transient_for then
+            c.screen = c.transient_for.screen
+            if not c.sticky then
+                c:tags(c.transient_for:tags())
+            end
+        else
+            c:to_selected_tags()
+        end
     elseif type(t) == "boolean" and t then
         c.sticky = true
     else
