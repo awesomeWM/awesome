@@ -308,8 +308,10 @@ function tag.object.delete(self, fallback_tag, force)
         tag.setproperty(tags[i], "index", i-1)
     end
 
-    -- If no tags are visible, try and view one.
-    if target_scr.selected_tag == nil and ntags > 0 then
+    -- If no tags are visible (and we did not delete the lasttag), try and
+    -- view one. The > 1 is because ntags is no longer synchronized with the
+    -- current count.
+    if target_scr.selected_tag == nil and ntags > 1 then
         tag.history.restore(nil, 1)
         if target_scr.selected_tag == nil then
             local other_tag = tags[tags[1] == self and 2 or 1]
