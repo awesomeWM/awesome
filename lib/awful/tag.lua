@@ -259,15 +259,14 @@ end
 --  stickied tags to.
 -- @tparam[opt=false] boolean force Move even non-sticky clients to the fallback
 -- tag.
--- @return Returns true if the tag is successfully deleted, nil otherwise.
+-- @return Returns true if the tag is successfully deleted.
 -- If there are no clients exclusively on this tag then delete it. Any
 -- stickied clients are assigned to the optional 'fallback_tag'.
 -- If after deleting the tag there is no selected tag, try and restore from
 -- history or select the first tag on the screen.
 function tag.object.delete(self, fallback_tag, force)
-
     -- abort if the taf isn't currently activated
-    if not self.activated then return end
+    if not self.activated then return false end
 
     local target_scr = get_screen(tag.getproperty(self, "screen"))
     local tags       = target_scr.tags
@@ -275,7 +274,7 @@ function tag.object.delete(self, fallback_tag, force)
     local ntags      = #tags
 
     -- We can't use the target tag as a fallback.
-    if fallback_tag == self then return end
+    if fallback_tag == self then return false end
 
     -- No fallback_tag provided, try and get one.
     if fallback_tag == nil then
@@ -284,7 +283,7 @@ function tag.object.delete(self, fallback_tag, force)
 
     -- Abort if we would have un-tagged clients.
     local clients = self:clients()
-    if ( #clients > 0 and ntags <= 1 ) or fallback_tag == nil then return end
+    if #clients > 0 and fallback_tag == nil then return false end
 
     -- Move the clients we can off of this tag.
     for _, c in pairs(clients) do
