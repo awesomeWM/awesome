@@ -312,7 +312,7 @@ function tag.object.delete(self, fallback_tag, force)
     -- view one. The > 1 is because ntags is no longer synchronized with the
     -- current count.
     if target_scr.selected_tag == nil and ntags > 1 then
-        tag.history.restore(nil, 1)
+        tag.history.restore(target_scr, 1)
         if target_scr.selected_tag == nil then
             local other_tag = tags[tags[1] == self and 2 or 1]
             if other_tag then
