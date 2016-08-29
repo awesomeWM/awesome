@@ -17,7 +17,7 @@ then
     then
         if [ "$A_RERUN" = "" ]
         then
-            A_RERUN="no" exec $RLWRAP $0
+            A_RERUN="no" exec $RLWRAP $0 "$@"
         fi
         READ_CMD="read"
     else
@@ -50,7 +50,12 @@ a_dbus_send()
     fi
 }
 
-if [ "$ISATTY" = 0 ]
+if [ $# -ne 0 ]
+then
+    for arg in "$@" ; do
+        a_dbus_send "$arg"
+    done
+elif [ "$ISATTY" = 0 ]
 then
     while $READ_CMD -p "awesome# " -r line
     do
