@@ -11,6 +11,13 @@ local tests = {}
 local tb_height = awful.util.round(beautiful.get_font_height() * 1.5)
 -- local border_width = beautiful.border_width
 
+-- Detect "manage" race conditions
+local real_apply = awful.rules.apply
+function awful.rules.apply(c)
+    assert(#c:tags() == 0)
+    return real_apply(c)
+end
+
 local function test_rule(rule)
     rule.rule = rule.rule or {}
 
