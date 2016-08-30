@@ -571,7 +571,7 @@ function tooltip.new(args)
     end
 
     local fg = beautiful.tooltip_fg or beautiful.fg_focus or "#000000"
-    local font = beautiful.tooltip_font or beautiful.font or "terminus 6"
+    local font = beautiful.tooltip_font or beautiful.font
 
     -- Set default properties
     self.wibox_properties = {
