@@ -2383,7 +2383,10 @@ luaA_client_raise(lua_State *L)
     client_t *c = luaA_checkudata(L, 1, &client_class);
 
     /* Avoid sending the signal if nothing was done */
-    if (c->transient_for == NULL && globalconf.stack.tab[globalconf.stack.len-1] == c)
+    if (c->transient_for == NULL &&
+        globalconf.stack.len &&
+        globalconf.stack.tab[globalconf.stack.len-1] == c
+    )
         return 0;
 
     client_raise(c);
