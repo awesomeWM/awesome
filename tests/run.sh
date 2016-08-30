@@ -188,7 +188,7 @@ start_awesome() {
     cd - >/dev/null
 
     # Wait until the interface for awesome-client is ready (D-Bus interface).
-    wait_until_success "wait for awesome startup via awesome-client" "echo 'return 1' | DISPLAY=$D '$AWESOME_CLIENT' 2>&1"
+    wait_until_success "wait for awesome startup via awesome-client" "DISPLAY=$D '$AWESOME_CLIENT' 'return 1' 2>&1"
 }
 
 # Count errors.
