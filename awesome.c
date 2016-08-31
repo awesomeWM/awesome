@@ -507,16 +507,10 @@ main(int argc, char **argv)
             run_test = true;
             break;
           case 'c':
-            if(a_strlen(optarg))
-                confpath = a_strdup(optarg);
-            else
-                fatal("-c option requires a file name");
+            confpath = a_strdup(optarg);
             break;
           case 's':
-            if(a_strlen(optarg))
-                string_array_append(&searchpath, a_strdup(optarg));
-            else
-                fatal("-s option requires a directory name");
+            string_array_append(&searchpath, a_strdup(optarg));
             break;
           case 'a':
             no_argb = true;
