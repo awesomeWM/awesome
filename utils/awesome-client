@@ -44,14 +44,16 @@ a_dbus_send()
     $DBUS_SEND --dest=$DBUS_DEST --type=method_call --print-reply \
         $DBUS_PATH $DBUS_METHOD string:"$1" | tail -n +2
     ret=$?
-    if [ "$ret" != 0 ] && [ "$ISATTY" != 0 ]; then
+    if [ "$ret" != 0 ] && [ "$FATAL_ERRORS" != 0 ]; then
         echo "E: $DBUS_SEND failed." >&2
         exit $ret
     fi
 }
 
+FATAL_ERRORS="$ISATTY"
 if [ $# -ne 0 ]
 then
+    FATAL_ERRORS="1"
     for arg in "$@" ; do
         a_dbus_send "$arg"
     done
