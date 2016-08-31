@@ -524,6 +524,9 @@ main(int argc, char **argv)
           case 'r':
             replace_wm = true;
             break;
+          default:
+            exit_help(EXIT_FAILURE);
+            break;
         }
 
     /* Get XDG basedir data */
