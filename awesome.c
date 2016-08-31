@@ -507,6 +507,8 @@ main(int argc, char **argv)
             run_test = true;
             break;
           case 'c':
+            if (confpath != NULL)
+                fatal("--config may only be specified once");
             confpath = a_strdup(optarg);
             break;
           case 's':
