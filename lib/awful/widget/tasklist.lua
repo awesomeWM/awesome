@@ -34,6 +34,7 @@ tasklist.filter = {}
 local function tasklist_label(c, args, tb)
     if not args then args = {} end
     local theme = beautiful.get()
+    local align = args.align or theme.tasklist_align or "left"
     local fg_normal = util.ensure_pango_color(args.fg_normal or theme.tasklist_fg_normal or theme.fg_normal, "white")
     local bg_normal = args.bg_normal or theme.tasklist_bg_normal or theme.bg_normal or "#000000"
     local fg_focus = util.ensure_pango_color(args.fg_focus or theme.tasklist_fg_focus or theme.fg_focus, fg_normal)
@@ -65,6 +66,8 @@ local function tasklist_label(c, args, tb)
     local maximized = args.maximized or theme.tasklist_maximized or '<b>+</b>'
     local maximized_horizontal = args.maximized_horizontal or theme.tasklist_maximized_horizontal or '⬌'
     local maximized_vertical = args.maximized_vertical or theme.tasklist_maximized_vertical or '⬍'
+
+    tb:set_align(align)
 
     if not theme.tasklist_plain_task_name then
         if c.sticky then name = name .. sticky end
@@ -151,6 +154,7 @@ end
 --   update. See `awful.widget.common.list_update`.
 -- @tparam[opt] table base_widget Container widget for tag widgets. Default
 --   is `wibox.layout.flex.horizontal`.
+-- @param base_widget.align The alignment ("left", "center" or "right").
 -- @param base_widget.bg_normal The background color for unfocused client.
 -- @param base_widget.bg_normal The background color for unfocused client.
 -- @param base_widget.fg_normal The foreground color for unfocused client.
