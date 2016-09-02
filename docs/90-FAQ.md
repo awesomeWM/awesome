@@ -304,10 +304,10 @@ the upper right corner of the screen.
 ### How to restart or quit awesome?
 
 You can use the keybinding "Mod4+Ctrl+r" or by selecting restart in the menu.
-You could call `awesome.restart` either from the Lua prompt widget, or by
-passing it to `awesome-client`:
+You could call `awesome.restart` either from the Lua prompt widget, or via
+`awesome-client`:
 
-    $ echo 'awesome.restart()' | awesome-client
+    $ awesome-client 'awesome.restart()'
 
 You can also send the `SIGHUP` signal to the awesome process. Find the PID using
 `ps`, `pgrep` or use `pkill`:
