@@ -194,7 +194,7 @@ start_awesome() {
 # Count errors.
 errors=0
 # Seconds after when awesome gets killed.
-timeout_stale=60
+timeout_stale=90
 
 for f in $tests; do
     echo "== Running $f =="
