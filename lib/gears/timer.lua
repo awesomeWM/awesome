@@ -150,7 +150,9 @@ end
 local delayed_calls = {}
 capi.awesome.connect_signal("refresh", function()
     for _, callback in ipairs(delayed_calls) do
-        protected_call(unpack(callback))
+        if #callback > 0 then
+            protected_call(unpack(callback))
+        end
     end
     delayed_calls = {}
 end)
@@ -158,9 +160,14 @@ end)
 --- Call the given function at the end of the current main loop iteration
 -- @tparam function callback The function that should be called
 -- @param ... Arguments to the callback function
+-- @treturn table All callbacks. This table can be modified during the current
+--  event loop. If all callbacks are removed, then it is cancelled.
 function timer.delayed_call(callback, ...)
     assert(type(callback) == "function", "callback must be a function, got: " .. type(callback))
-    table.insert(delayed_calls, { callback, ... })
+    local cbs = { callback, ... }
+    table.insert(delayed_calls, cbs)
+
+    return cbs
 end
 
 function timer.mt.__call(_, ...)
