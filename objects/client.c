@@ -1988,7 +1988,15 @@ client_unmanage(client_t *c, bool window_valid)
     }
 
     if(globalconf.focus.client == c)
+    {
         client_unfocus(c);
+
+        /* Avoid unmanage and unfocus to be in the same lua iteration. This
+         causes a race condition where delayed redraw are registered for an
+         already unmanaged client
+         */
+        awesome_refresh();
+    }
 
     /* remove client from global list and everywhere else */
     foreach(elem, globalconf.clients)

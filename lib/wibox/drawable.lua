@@ -338,17 +338,16 @@ function drawable.new(d, widget_context_skeleton, drawable_name)
     end
 
     -- Only redraw a drawable once, even when we get told to do so multiple times.
-    ret._redraw_pending = false
+    ret._redraw_pending = nil
     ret._do_redraw = function()
-        ret._redraw_pending = false
+        ret._redraw_pending = nil
         do_redraw(ret)
     end
 
     -- Connect our signal when we need a redraw
     ret.draw = function()
         if not ret._redraw_pending then
-            timer.delayed_call(ret._do_redraw)
-            ret._redraw_pending = true
+            ret._redraw_pending = timer.delayed_call(ret._do_redraw)
         end
     end
     ret._do_complete_repaint = function()
@@ -407,6 +406,15 @@ function drawable.new(d, widget_context_skeleton, drawable_name)
         ret._need_relayout = true
         ret:draw()
     end
+
+    -- Prevent redraw from being called again.
+    d:connect_signal("collect", function()
+        if ret._redraw_pending then
+            while #ret._redraw_pending > 0 do
+                table.remove(ret._redraw_pending, 1)
+            end
+        end
+    end)
 
     -- Add __tostring method to metatable.
     ret.drawable_name = drawable_name or object.modulename(3)

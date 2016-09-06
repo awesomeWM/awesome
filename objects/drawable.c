@@ -201,6 +201,18 @@ luaA_drawable_refresh(lua_State *L)
     return 0;
 }
 
+static int
+luaA_collect(lua_State *L)
+{
+    luaA_object_emit_signal(L, 1, "collect", 0);
+
+    drawable_t *d = luaA_checkudata(L, 1, &drawable_class);
+
+    drawable_unset_surface(d);
+
+    return 0;
+}
+
 /** Get drawable geometry. The geometry consists of x, y, width and height.
  *
  * @treturn table A table with drawable coordinates and geometry.
@@ -225,6 +237,7 @@ drawable_class_setup(lua_State *L)
     static const struct luaL_Reg drawable_meta[] =
     {
         LUA_OBJECT_META(drawable)
+        { "__gc", luaA_collect },
         LUA_CLASS_META
         { "refresh", luaA_drawable_refresh },
         { "geometry", luaA_drawable_geometry },

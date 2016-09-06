@@ -216,6 +216,10 @@ function titlebar.widget.button(c, name, selector, action)
     end
 
     local function update()
+        -- This is necessary as this callback can be triggerred from a delayed
+        -- call anywhere in the code.
+        if c.valid then return end
+
         local img = selector(c)
         if type(img) ~= "nil" then
             -- Convert booleans automatically
@@ -256,6 +260,9 @@ function titlebar.widget.button(c, name, selector, action)
     -- connect to the corresponding signal here.
     c:connect_signal("focus", update)
     c:connect_signal("unfocus", update)
+    c:connect_signal("unmanage", function()
+        c:disconnect_signal("unfocus", update)
+    end)
 
     return ret
 end
