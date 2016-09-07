@@ -2304,6 +2304,10 @@ luaA_client_swap(lua_State *L)
  *
  * Use the `first_tag` field to access the first tag of a client directly.
  *
+ * **Signal:**
+ *
+ *  * *property::tags*
+ *
  * @tparam table tags_table A table with tags to set, or `nil` to get the
  *   current tags.
  * @treturn table A table with all tags.
@@ -2342,7 +2346,10 @@ luaA_client_tags(lua_State *L)
         lua_pushnil(L);
         while(lua_next(L, 2))
             tag_client(L, c);
+
         lua_pop(L, 1);
+
+        luaA_object_emit_signal(L, -1, "property::tags", 0);
     }
 
     lua_newtable(L);

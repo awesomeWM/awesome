@@ -12,6 +12,7 @@ local util = require("awful.util")
 local ascreen = require("awful.screen")
 local beautiful = require("beautiful")
 local object = require("gears.object")
+local timer = require("gears.timer")
 local pairs = pairs
 local ipairs = ipairs
 local table = table
@@ -259,15 +260,14 @@ end
 --  stickied tags to.
 -- @tparam[opt=false] boolean force Move even non-sticky clients to the fallback
 -- tag.
--- @return Returns true if the tag is successfully deleted, nil otherwise.
+-- @return Returns true if the tag is successfully deleted.
 -- If there are no clients exclusively on this tag then delete it. Any
 -- stickied clients are assigned to the optional 'fallback_tag'.
 -- If after deleting the tag there is no selected tag, try and restore from
 -- history or select the first tag on the screen.
 function tag.object.delete(self, fallback_tag, force)
-
     -- abort if the taf isn't currently activated
-    if not self.activated then return end
+    if not self.activated then return false end
 
     local target_scr = get_screen(tag.getproperty(self, "screen"))
     local tags       = target_scr.tags
@@ -275,7 +275,7 @@ function tag.object.delete(self, fallback_tag, force)
     local ntags      = #tags
 
     -- We can't use the target tag as a fallback.
-    if fallback_tag == self then return end
+    if fallback_tag == self then return false end
 
     -- No fallback_tag provided, try and get one.
     if fallback_tag == nil then
@@ -284,7 +284,7 @@ function tag.object.delete(self, fallback_tag, force)
 
     -- Abort if we would have un-tagged clients.
     local clients = self:clients()
-    if ( #clients > 0 and ntags <= 1 ) or fallback_tag == nil then return end
+    if #clients > 0 and fallback_tag == nil then return false end
 
     -- Move the clients we can off of this tag.
     for _, c in pairs(clients) do
@@ -309,9 +309,11 @@ function tag.object.delete(self, fallback_tag, force)
         tag.setproperty(tags[i], "index", i-1)
     end
 
-    -- If no tags are visible, try and view one.
-    if target_scr.selected_tag == nil and ntags > 0 then
-        tag.history.restore(nil, 1)
+    -- If no tags are visible (and we did not delete the lasttag), try and
+    -- view one. The > 1 is because ntags is no longer synchronized with the
+    -- current count.
+    if target_scr.selected_tag == nil and ntags > 1 then
+        tag.history.restore(target_scr, 1)
         if target_scr.selected_tag == nil then
             local other_tag = tags[tags[1] == self and 2 or 1]
             if other_tag then
@@ -465,6 +467,7 @@ function tag.object.set_screen(t, s)
 
     -- Change the screen
     tag.setproperty(t, "screen", s)
+    tag.setproperty(t, "index", #s:get_tags(true))
 
     -- Make sure the client's screen matches its tags
     for _,c in ipairs(t:clients()) do
@@ -473,10 +476,8 @@ function tag.object.set_screen(t, s)
     end
 
     -- Update all indexes
-    for _,screen in ipairs {old_screen, s} do
-        for i,t2 in ipairs(screen.tags) do
-            tag.setproperty(t2, "index", i)
-        end
+    for i,t2 in ipairs(old_screen.tags) do
+        tag.setproperty(t2, "index", i)
     end
 
     -- Restore the old screen history if the tag was selected
@@ -1277,21 +1278,25 @@ function tag.attached_connect_signal(screen, ...)
 end
 
 -- Register standard signals.
-capi.client.connect_signal("manage", function(c)
-    -- If we are not managing this application at startup,
-    -- move it to the screen where the mouse is.
-    -- We only do it for "normal" windows (i.e. no dock, etc).
-    if not awesome.startup and c.type ~= "desktop" and c.type ~= "dock" then
-        if c.transient_for then
-            c.screen = c.transient_for.screen
-            if not c.sticky then
-                c:tags(c.transient_for:tags())
+capi.client.connect_signal("property::screen", function(c)
+    -- First, the delayed timer is necessary to avoid a race condition with
+    -- awful.rules. It is also messing up the tags before the user have a chance
+    -- to set them manually.
+    timer.delayed_call(function()
+        local tags, new_tags = c:tags(), {}
+
+        for _, t in ipairs(tags) do
+            if t.screen == c.screen then
+                table.insert(new_tags, t)
             end
-        else
-            c.screen = ascreen.focused()
         end
-    end
-    c:connect_signal("property::screen", function() c:to_selected_tags() end)
+
+        if #new_tags == 0 then
+            c:emit_signal("request::tag", nil, {reason="screen"})
+        elseif #new_tags < #tags then
+            c:tags(new_tags)
+        end
+    end)
 end)
 
 -- Keep track of the number of urgent clients.
