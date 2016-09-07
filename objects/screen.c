@@ -731,6 +731,20 @@ screen_coord_in_screen(screen_t *s, int x, int y)
            && (y >= s->geometry.y && y < s->geometry.y + s->geometry.height);
 }
 
+/** Is there any overlap between the given geometry and a given screen?
+ * \param screen The logical screen number.
+ * \param geom The geometry
+ * \return True if there is any overlap between the geometry and a given screen.
+ */
+bool
+screen_area_in_screen(screen_t *s, area_t geom)
+{
+        return (geom.x < s->geometry.x + s->geometry.width)
+               && (geom.x + geom.width > s->geometry.x )
+               && (geom.y < s->geometry.y + s->geometry.height)
+               && (geom.y + geom.height > s->geometry.y);
+}
+
 void screen_update_workarea(screen_t *screen)
 {
     area_t area = screen->geometry;

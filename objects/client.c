@@ -1506,7 +1506,7 @@ client_resize_do(client_t *c, area_t geometry, bool force_notice)
     bool java_is_broken = true;
 
     screen_t *new_screen = c->screen;
-    if(!screen_coord_in_screen(new_screen, geometry.x, geometry.y))
+    if(!screen_area_in_screen(new_screen, geometry))
         new_screen = screen_getbycoord(geometry.x, geometry.y);
 
     if(c->geometry.width == geometry.width
