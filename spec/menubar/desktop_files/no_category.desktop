@@ -1,0 +1,10 @@
+#!/usr/bin/env xdg-open
+[Desktop Entry]
+Version=1.0
+Terminal=false
+Type=Application
+Name=Signal Private Messenger
+Exec=/usr/bin/chromium --profile-directory=Default --app-id=bikioccmkafdpakkkcpdbppfkghcmihk
+Icon=chrome-bikioccmkafdpakkkcpdbppfkghcmihk-Default
+StartupWMClass=crx_bikioccmkafdpakkkcpdbppfkghcmihk
+# Borrowed from blueyed's issue #1070
