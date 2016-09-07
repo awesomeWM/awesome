@@ -59,6 +59,8 @@ local function get_widget_context(self)
 end
 
 local function do_redraw(self)
+    if type(self.drawable) ~= "drawable" then return end --FIXME See #1070
+
     local surf = surface.load_silently(self.drawable.surface, false)
     -- The surface can be nil if the drawable's parent was already finalized
     if not surf then return end
