@@ -761,6 +761,8 @@ luaA_dbus_remove_match(lua_State *L)
  *
  * @param interface A string with the interface name.
  * @param func The function to call.
+ * @return true on success, nil + error if the signal could not be connected
+ * because another function is already connected.
  * @function connect_signal
  */
 static int
@@ -770,11 +772,16 @@ luaA_dbus_connect_signal(lua_State *L)
     luaA_checkfunction(L, 2);
     signal_t *sig = signal_array_getbyid(&dbus_signals,
                                          a_strhash((const unsigned char *) name));
-    if(sig)
+    if(sig) {
         luaA_warn(L, "cannot add signal %s on D-Bus, already existing", name);
-    else
+        lua_pushnil(L);
+        lua_pushfstring(L, "cannot add signal %s on D-Bus, already existing", name);
+        return 2;
+    } else {
         signal_connect(&dbus_signals, name, luaA_object_ref(L, 2));
-    return 0;
+        lua_pushboolean(L, 1);
+        return 1;
+    }
 }
 
 /** Remove a signal receiver on the D-Bus.
