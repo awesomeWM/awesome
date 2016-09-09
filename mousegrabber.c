@@ -83,6 +83,11 @@ mousegrabber_handleevent(lua_State *L, int x, int y, uint16_t mask)
  * The function is called with one argument:
  * a table containing modifiers pointer coordinates.
  *
+ * The list of valid cusrors are:
+ *
+ *@DOC_cursor_c_COMMON@
+ *
+ *
  * @param func A callback function as described above.
  * @param cursor The name of a X cursor to use while grabbing.
  * @function run

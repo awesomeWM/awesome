@@ -361,7 +361,11 @@ luaA_root_buttons(lua_State *L)
     return 1;
 }
 
-/** Set the root cursor.
+/** Set the root cursor
+ *
+ * The possible values are:
+ *
+ *@DOC_cursor_c_COMMON@
  *
  * @param cursor_name A X cursor name.
  * @function cursor
