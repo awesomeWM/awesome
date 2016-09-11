@@ -22,7 +22,7 @@ function module.drag_to_tag(c)
 
     local dir = nil
 
-    local wa = capi.screen[c.screen].workarea
+    local wa = c.screen.workarea
 
     if coords.x >= wa.x + wa.width - 1 then
         capi.mouse.coords({ x = wa.x + 2 }, true)
