@@ -24,6 +24,53 @@ or by auto-generating a .deb or .rpm package, for easy removal later on:
     # or
     sudo rpm -Uvh awesome-x.y.z.rpm
 
+### Build dependencies
+
+Awesome has the following dependencies (besides a more-or-less standard POSIX
+environment):
+
+- [CMake >= 3.0.0](https://cmake.org)
+- [Lua >= 5.1.0](https://www.lua.org) or [LuaJIT](http://luajit.org)
+- [LGI >= 0.7.1](https://github.com/pavouk/lgi)
+- [xproto >= 7.0.15](https://www.x.org/archive//individual/proto/)
+- [libxcb >= 1.6](https://xcb.freedesktop.org/) with support for the RandR, XTest, Xinerama, SHAPE and
+  XKB extensions
+- [libxcb-cursor](https://xcb.freedesktop.org/)
+- [libxcb-util >= 0.3.8](https://xcb.freedesktop.org/)
+- [libxcb-keysyms >= 0.3.4](https://xcb.freedesktop.org/)
+- [libxcb-icccm >= 0.3.8](https://xcb.freedesktop.org/)
+- [libxkbcommon](http://xkbcommon.org/) with X11 support enabled
+- [libstartup-notification >=
+  0.10](https://www.freedesktop.org/wiki/Software/startup-notification/)
+- [cairo](https://www.cairographics.org/) with support for XCB and GObject
+  introspection
+- [Pango](http://www.pango.org/) with support for Cairo and GObject
+  introspection
+- [GLib](https://wiki.gnome.org/Projects/GLib) with support for GObject
+  introspection
+- [GIO](https://developer.gnome.org/gio/stable/) with support for GObject
+  introspection
+- [GdkPixbuf](https://wiki.gnome.org/Projects/GdkPixbuf)
+- libX11 with xcb support
+- [Imagemagick's convert utility](http://www.imagemagick.org/script/index.php)
+- [libxdg-basedir >= 1.0.0](https://github.com/devnev/libxdg-basedir)
+
+Additionally, the following optional dependencies exist:
+
+- [DBus](https://www.freedesktop.org/wiki/Software/dbus/) for DBus integration
+  and the `awesome-client` utility
+- [asciidoc](http://www.methods.co.nz/asciidoc/) and
+  [xmlto](https://fedorahosted.org/xmlto/) for generating man pages
+- [gzip](http://www.gzip.org/) for compressing man pages
+- [ldoc](https://stevedonovan.github.io/ldoc/) for generating the documentation
+- [busted](https://olivinelabs.com/busted/) for running unit tests
+- [luacheck](https://github.com/mpeterv/luacheck) for static code analysis
+- [LuaCov](https://keplerproject.github.io/luacov/) for collecting code coverage
+  information
+- libexecinfo on systems where libc does not provide `backtrace_symbols()` to
+  generate slightly better backtraces on crashes
+- `Xephyr` or `Xvfb` for running integration tests
+
 ## Running awesome
 
 You can directly select awesome from your display manager. If not, you can
