@@ -21,8 +21,16 @@ local req       = "request::geometry"
 local callbacks = {enter={}, move={}, leave={}}
 
 local cursors = {
-    ["mouse.resize"] = "cross",
-    ["mouse.move"  ] = "fleur"
+    ["mouse.move"               ] = "fleur",
+    ["mouse.resize"             ] = "cross",
+    ["mouse.resize_left"        ] = "sb_h_double_arrow",
+    ["mouse.resize_right"       ] = "sb_h_double_arrow",
+    ["mouse.resize_top"         ] = "sb_v_double_arrow",
+    ["mouse.resize_bottom"      ] = "sb_v_double_arrow",
+    ["mouse.resize_top_left"    ] = "top_left_corner",
+    ["mouse.resize_top_right"   ] = "top_right_corner",
+    ["mouse.resize_bottom_left" ] = "bottom_left_corner",
+    ["mouse.resize_bottom_right"] = "bottom_right_corner",
 }
 
 --- The resize cursor name.
@@ -138,8 +146,12 @@ local function handler(_, client, context, args) --luacheck: no unused_args
 
     -- Select the cursor
     local tcontext = context:gsub('[.]', '_')
+    local corner = args.corner and ("_".. args.corner) or ""
 
-    local cursor = beautiful["cursor_"..tcontext] or cursors[context] or "fleur"
+    local cursor = beautiful["cursor_"..tcontext]
+        or cursors[context..corner]
+        or cursors[context]
+        or "fleur"
 
     -- Execute the placement function and use request::geometry
     capi.mousegrabber.run(function (_mouse)
