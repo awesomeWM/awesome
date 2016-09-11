@@ -21,6 +21,10 @@ end
 -- Information about a pending wallpaper change, see prepare_context()
 local pending_wallpaper = nil
 
+local function get_screen(s)
+    return s and screen[s]
+end
+
 --- Prepare the needed state for setting a wallpaper.
 -- This function returns a cairo context through which a wallpaper can be drawn.
 -- The context is only valid for a short time and should not be saved in a
@@ -29,8 +33,10 @@ local pending_wallpaper = nil
 -- @return[1] The available geometry (table with entries width and height)
 -- @return[1] A cairo context that the wallpaper should be drawn to
 function wallpaper.prepare_context(s)
+    s = get_screen(s)
+
     local root_width, root_height = root.size()
-    local geom = s and screen[s].geometry or root_geometry()
+    local geom = s and s.geometry or root_geometry()
     local source, target, cr
 
     if not pending_wallpaper then
