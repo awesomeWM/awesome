@@ -201,8 +201,14 @@ local function group_label(group, color)
     return margin
 end
 
+local function get_screen(s)
+    return s and capi.screen[s]
+end
+
 local function create_wibox(s, available_groups)
-    local wa = capi.screen[s].workarea
+    s = get_screen(s)
+
+    local wa = s.workarea
     local height = (widget.height < wa.height) and widget.height or
         (wa.height - widget.border_width * 2)
     local width = (widget.width < wa.width) and widget.width or
