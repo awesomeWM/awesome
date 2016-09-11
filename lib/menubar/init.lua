@@ -46,34 +46,47 @@ local compute_text_width = menubar.utils.compute_text_width
 --- When true the .desktop files will be reparsed only when the
 -- extension is initialized. Use this if menubar takes much time to
 -- open.
+-- @tfield[opt=true] boolean cache_entries
 menubar.cache_entries = true
 
 --- When true the categories will be shown alongside application
 -- entries.
+-- @tfield[opt=true] boolean show_categories
 menubar.show_categories = true
 
 --- Specifies the geometry of the menubar. This is a table with the keys
 -- x, y, width and height. Missing values are replaced via the screen's
 -- geometry. However, missing height is replaced by the font size.
+-- @table geometry
+-- @tfield number geometry.x A forced horizontal position
+-- @tfield number geometry.y A forced vertical position
+-- @tfield number geometry.width A forced width
+-- @tfield number geometry.height A forced height
 menubar.geometry = { width = nil,
                      height = nil,
                      x = nil,
                      y = nil }
+
 --- Width of blank space left in the right side.
+-- @tfield number right_margin
 menubar.right_margin = theme.xresources.apply_dpi(8)
 
 --- Label used for "Next page", default "▶▶".
+-- @tfield[opt="▶▶"] string right_label
 menubar.right_label = "▶▶"
 
 --- Label used for "Previous page", default "◀◀".
+-- @tfield[opt="◀◀"] string left_label
 menubar.left_label = "◀◀"
 
 -- awful.widget.common.list_update adds three times a margin of dpi(4)
 -- for each item:
+-- @tfield number list_interspace
 local list_interspace = theme.xresources.apply_dpi(4) * 3
 
 --- Allows user to specify custom parameters for prompt.run function
 -- (like colors).
+-- @see awful.prompt
 menubar.prompt_args = {}
 
 -- Private section
