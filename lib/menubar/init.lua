@@ -113,7 +113,7 @@ local function load_count_table()
     local count_file = io.open (count_file_name, "r")
     local count_table = {}
 
-    -- read count file
+    -- read weight file
     if count_file then
         io.input (count_file)
         for line in io.lines() do
@@ -135,7 +135,7 @@ local function write_count_table(count_table)
     if count_file then
         io.output (count_file)
 
-        for name,count in pairs(count_table) do
+        for name, count in pairs(count_table) do
             local str = string.format("%s;%d\n", name, count)
             io.write(str)
         end
@@ -225,44 +225,46 @@ local function menulist_update(query, scr)
     query = query or ""
     shownitems = {}
     local pattern = awful.util.query_to_pattern(query)
-    local match_inside = {}
 
-    -- First we add entries which names match the command from the
-    -- beginning to the table shownitems, and the ones that contain
-    -- command in the middle to the table match_inside.
+    -- All entries are added to a list that will be sorted
+    -- according to the priority (first) and weight (second) of its
+    -- entries.
+    -- If categories are used in the menu, we add the entries matching
+    -- the current query with high priority as to ensure they are
+    -- displayed first. Afterwards the non-category entries are added.
+    -- All entries are weighted according to the number of times they
+    -- have been executed previously (stored in count_table).
+
+    local count_table = load_count_table()
+    local command_list = {}
+
+    local PRIO_NONE = 0
+    local PRIO_CATEGORY_MATCH = 2
 
     -- Add the categories
     if menubar.show_categories then
         for _, v in pairs(menubar.menu_gen.all_categories) do
             v.focused = false
             if not current_category and v.use then
+
+                -- check if current query matches a category
                 if string.match(v.name, pattern) then
-                    if string.match(v.name, "^" .. pattern) then
-                        table.insert(shownitems, v)
-                    else
-                        table.insert(match_inside, v)
-                    end
-                end
-            end
-        end
-    end
 
-    local count_table = load_count_table()
-    local command_list = {}
+                    v.weight = 0
+                    v.prio = PRIO_CATEGORY_MATCH
 
-    -- Add the applications according to their name and cmdline
-    for _, v in ipairs(menubar.menu_entries) do
-        v.focused = false
-        if not current_category or v.category == current_category then
-            if string.match(v.name, pattern)
-                or string.match(v.cmdline, pattern) then
-                if string.match(v.name, "^" .. pattern)
-                    or string.match(v.cmdline, "^" .. pattern) then
-
-                    v.count = 0
-                    -- use count from count_table if present
+                    -- get use count from count_table if present
+                    -- and use it as weight
                     if string.len(pattern) > 0 and count_table[v.name] ~= nil then
-                        v.count = tonumber(count_table[v.name])
+                        v.weight = tonumber(count_table[v.name])
+                    end
+
+                    -- check for prefix match
+                    if string.match(v.name, "^" .. pattern) then
+                        -- increase default priority
+                        v.prio = PRIO_CATEGORY_MATCH + 1
+                    else
+                        v.prio = PRIO_CATEGORY_MATCH
                     end
 
                     table.insert (command_list, v)
@@ -271,11 +273,47 @@ local function menulist_update(query, scr)
         end
     end
 
-    local function compare_counts(a,b)
-        return a.count > b.count
+    -- Add the applications according to their name and cmdline
+    for _, v in ipairs(menubar.menu_entries) do
+        v.focused = false
+        if not current_category or v.category == current_category then
+
+            -- check if the query matches either the name or the commandline
+            -- of some entry
+            if string.match(v.name, pattern)
+                or string.match(v.cmdline, pattern) then
+
+                v.weight = 0
+                v.prio = PRIO_NONE
+
+                -- get use count from count_table if present
+                -- and use it as weight
+                if string.len(pattern) > 0 and count_table[v.name] ~= nil then
+                    v.weight = tonumber(count_table[v.name])
+                end
+
+                -- check for prefix match
+                if string.match(v.name, "^" .. pattern)
+                    or string.match(v.cmdline, "^" .. pattern) then
+                    -- increase default priority
+                    v.prio = PRIO_NONE + 1
+                else
+                    v.prio = PRIO_NONE
+                end
+
+                table.insert (command_list, v)
+            end
+        end
     end
 
-    -- sort command_list by count (highest first)
+    local function compare_counts(a, b)
+        if a.prio == b.prio then
+            return a.weight > b.weight
+        end
+        return a.prio > b.prio
+    end
+
+    -- sort command_list by weight (highest first)
     table.sort(command_list, compare_counts)
     -- copy into showitems
     shownitems = command_list
