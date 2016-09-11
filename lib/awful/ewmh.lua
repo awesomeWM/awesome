@@ -27,7 +27,7 @@ local function screen_change(window)
             if data[window][reqtype] then
                 if data[window][reqtype].width then
                     data[window][reqtype].width = math.min(data[window][reqtype].width,
-                                                           screen[window.screen].workarea.width)
+                                                           window.screen.workarea.width)
                     if reqtype == "maximized_horizontal" then
                         local bw = window.border_width or 0
                         data[window][reqtype].width = data[window][reqtype].width - 2*bw
@@ -35,7 +35,7 @@ local function screen_change(window)
                 end
                 if data[window][reqtype].height then
                     data[window][reqtype].height = math.min(data[window][reqtype].height,
-                                                             screen[window.screen].workarea.height)
+                                                             window.screen.workarea.height)
                     if reqtype == "maximized_vertical" then
                         local bw = window.border_width or 0
                         data[window][reqtype].height = data[window][reqtype].height - 2*bw
@@ -43,7 +43,7 @@ local function screen_change(window)
                 end
                 if data[window][reqtype].screen then
                     local from = screen[data[window][reqtype].screen].workarea
-                    local to = screen[window.screen].workarea
+                    local to = window.screen.workarea
                     local new_x, new_y
                     if data[window][reqtype].x then
                         new_x = to.x + data[window][reqtype].x - from.x
@@ -80,7 +80,7 @@ local function geometry_change(window)
 
     -- Fix up the geometry in case this window needs to cover the whole screen.
     local bw = window.border_width or 0
-    local g = screen[window.screen].workarea
+    local g = window.screen.workarea
     if window.maximized_vertical then
         window:geometry { height = g.height - 2*bw, y = g.y }
     end
@@ -89,7 +89,7 @@ local function geometry_change(window)
     end
     if window.fullscreen then
         window.border_width = 0
-        window:geometry(screen[window.screen].geometry)
+        window:geometry(window.screen.geometry)
     end
 
     geometry_change_lock = false
@@ -128,7 +128,7 @@ local function get_valid_tags(c, s)
     local tags, new_tags = c:tags(), {}
 
     for _, t in ipairs(tags) do
-        if screen[s] == t.screen then
+        if s == t.screen then
             table.insert(new_tags, t)
         end
     end
