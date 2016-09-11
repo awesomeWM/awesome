@@ -42,6 +42,16 @@ data.tags = setmetatable({}, { __mode = 'k' })
 tag.history = {}
 tag.history.limit = 20
 
+-- Default values
+tag.defaults = {}
+
+tag.defaults.gap                 = 0
+tag.defaults.gap_count           = 0
+tag.defaults.master_fill_policy  = "expand"
+tag.defaults.master_width_factor = 0.5
+tag.defaults.column_count        = 1
+tag.defaults.master_count        = 1
+
 -- screen.tags depend on index, it cannot be used by awful.tag
 local function raw_tags(scr)
     local tmp_tags = {}
@@ -56,6 +66,39 @@ end
 
 --- The number of elements kept in the history.
 -- @tfield integer awful.tag.history.limit
+-- @tparam[opt=20] integer limit
+
+--- The gap between clients (in points).
+-- @tfield[opt=0] integer awful.tag.defaults.gap
+-- @tparam[opt=0] integer gap
+-- @see gap
+-- @see gap_count
+
+--- The default gap_count.
+-- @tfield[opt=0] integer awful.tag.defaults.gap_count
+-- @tparam[opt=0] integer gap_count
+-- @see gap
+-- @see gap_count
+
+--- The default master fill policy.
+-- @tfield[opt="expand"] string awful.tag.defaults.master_fill_policy
+-- @tparam[opt="expand"] string master_fill_policy
+-- @see master_fill_policy
+
+--- The default master width factor.
+-- @tfield[opt=0.5] number awful.tag.defaults.master_width_factor
+-- @tparam[opt=0.5] number master_width_factor
+-- @see master_width_factor
+
+--- The default column count.
+-- @tfield[opt=1] integer awful.tag.defaults.column_count
+-- @tparam[opt=1] integer column_count
+-- @see column_count
+
+--- The default master count.
+-- @tfield[opt=1] integer awful.tag.defaults.master_count
+-- @tparam[opt=1] integer master_count
+-- @see master_count
 
 --- The tag index.
 --
@@ -562,6 +605,7 @@ end
 -- @see column_count
 -- @see master_fill_policy
 -- @see gap
+-- @see awful.tag.defaults.master_width_factor
 
 function tag.object.set_master_width_factor(t, mwfact)
     if mwfact >= 0 and mwfact <= 1 then
@@ -571,7 +615,7 @@ function tag.object.set_master_width_factor(t, mwfact)
 end
 
 function tag.object.get_master_width_factor(t)
-    return tag.getproperty(t, "master_width_factor") or 0.5
+    return tag.getproperty(t, "master_width_factor") or tag.defaults.master_width_factor
 end
 
 --- Set master width factor.
@@ -765,6 +809,7 @@ end
 -- @beautiful beautiful.useless_gap
 -- @param number (default: 0)
 -- @see gap
+-- @see gap_count
 
 --- The gap (spacing, also called `useless_gap`) between clients.
 --
@@ -777,6 +822,8 @@ end
 --
 -- @property gap
 -- @param number The value has to be greater than zero.
+-- @see gap_count
+-- @see awful.tag.defaults.gap
 
 function tag.object.set_gap(t, useless_gap)
     if useless_gap >= 0 then
@@ -785,7 +832,7 @@ function tag.object.set_gap(t, useless_gap)
 end
 
 function tag.object.get_gap(t)
-    return tag.getproperty(t, "useless_gap") or beautiful.useless_gap or 0
+    return tag.getproperty(t, "useless_gap") or beautiful.useless_gap or tag.defaults.gap
 end
 
 --- Set the spacing between clients
@@ -807,6 +854,35 @@ end
 function tag.incgap(add, t)
     t = t or t or ascreen.focused().selected_tag
     tag.object.set_gap(t, tag.object.get_gap(t) + add)
+end
+
+--- The minimum number of client at which to enable gaps.
+--
+-- @beautiful beautiful.useless_gap_count
+-- @param integer (default: 0)
+-- @see gap
+-- @see gap_count
+
+--- The minimum number of client at which to enable gaps.
+--
+-- **Signal:**
+--
+-- * *property::gap\_count*
+--
+-- @property gap_count
+-- @param integer The minimum number of client at which to enable gaps
+-- @see awful.tag.defaults.gap_count
+
+function tag.object.set_gap_count(t, useless_gap_count)
+    if useless_gap_count >= 0 then
+        tag.setproperty(t, "useless_gap_count", useless_gap_count)
+    end
+end
+
+function tag.object.get_gap_count(t)
+    return tag.getproperty(t, "useless_gap_count")
+        or beautiful.useless_gap_count
+        or tag.defaults.gap_count
 end
 
 --- Get the spacing between clients.
@@ -834,9 +910,10 @@ end
 --
 -- @property master_fill_policy
 -- @param string "expand" or "master_width_factor"
+-- @see awful.tag.defaults.master_fill_policy
 
 function tag.object.get_master_fill_policy(t)
-    return tag.getproperty(t, "master_fill_policy") or "expand"
+    return tag.getproperty(t, "master_fill_policy") or tag.defaults.master_fill_policy
 end
 
 --- Set size fill policy for the master client(s)
@@ -879,7 +956,7 @@ function tag.getmfpol(t)
     util.deprecate("Use t.master_fill_policy instead of awful.tag.getmfpol")
 
     t = t or ascreen.focused().selected_tag
-    return tag.getproperty(t, "master_fill_policy") or "expand"
+    return tag.getproperty(t, "master_fill_policy") or tag.defaults.master_fill_policy
 end
 
 --- Set the number of master windows.
@@ -891,6 +968,7 @@ end
 --
 -- @property master_count
 -- @param integer nmaster Only positive values are accepted
+-- @see awful.tag.defaults.master_count
 
 function tag.object.set_master_count(t, nmaster)
     if nmaster >= 0 then
@@ -900,7 +978,7 @@ function tag.object.set_master_count(t, nmaster)
 end
 
 function tag.object.get_master_count(t)
-    return tag.getproperty(t, "master_count") or 1
+    return tag.getproperty(t, "master_count") or tag.defaults.master_count
 end
 
 --- 
@@ -997,6 +1075,7 @@ end
 --
 -- @property column_count
 -- @tparam integer ncol Has to be greater than 1
+-- @see awful.tag.defaults.column_count
 
 function tag.object.set_column_count(t, ncol)
     if ncol >= 1 then
@@ -1006,7 +1085,7 @@ function tag.object.set_column_count(t, ncol)
 end
 
 function tag.object.get_column_count(t)
-    return tag.getproperty(t, "column_count") or 1
+    return tag.getproperty(t, "column_count") or tag.defaults.column_count
 end
 
 --- Set number of column windows.
