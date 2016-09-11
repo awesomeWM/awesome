@@ -196,15 +196,30 @@ function mouse.client.resize(c, corner, args)
         return
     end
 
+    -- Set some default arguments
+    local new_args = setmetatable(
+        {
+            include_sides = (not args) or args.include_sides ~= false
+        },
+        {
+            __index = args or {}
+        }
+    )
+
     -- Move the mouse to the corner
     if corner and aplace[corner] then
         aplace[corner](capi.mouse, {parent=c})
     else
         local _
-        _, corner = aplace.closest_corner(capi.mouse, {parent=c})
+        _, corner = aplace.closest_corner(capi.mouse, {
+            parent        = c,
+            include_sides = new_args.include_sides ~= false,
+        })
     end
 
-    mouse.resize(c, "mouse.resize", args or {include_sides=true})
+    new_args.corner = corner
+
+    mouse.resize(c, "mouse.resize", new_args)
 
     return corner
 end
