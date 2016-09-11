@@ -133,11 +133,11 @@ function beautiful.init(config)
                             theme[k] = v:gsub("^%./", configdir .. "/")
                         end
                     end
-                end
-            -- expand '~'
-            elseif type(config) == 'table' then
-                for k, v in pairs(theme) do
-                    if type(v) == "string" then theme[k] = v:gsub("^~/", homedir .. "/") end
+                -- expand '~'
+                elseif type(config) == 'table' then
+                    for k, v in pairs(theme) do
+                        if type(v) == "string" then theme[k] = v:gsub("^~/", homedir .. "/") end
+                    end
                 end
             end
 
