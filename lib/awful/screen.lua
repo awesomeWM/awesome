@@ -135,7 +135,7 @@ function screen.focus_bydirection(dir, _screen)
     if sel then
         local geomtbl = {}
         for s in capi.screen do
-            geomtbl[s] = capi.screen[s].geometry
+            geomtbl[s] = s.geometry
         end
         local target = grect.get_in_direction(dir, geomtbl, sel.geometry)
         if target then

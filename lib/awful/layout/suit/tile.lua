@@ -28,7 +28,7 @@ tile.resize_jump_to_corner = true
 
 local function mouse_resize_handler(c, _, _, _, orientation)
     orientation = orientation or "tile"
-    local wa = capi.screen[c.screen].workarea
+    local wa = c.screen.workarea
     local mwfact = c.screen.selected_tag.master_width_factor
     local cursor
     local g = c:geometry()

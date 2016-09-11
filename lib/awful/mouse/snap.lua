@@ -203,8 +203,8 @@ function module.snap(c, snap, x, y, fixed_x, fixed_y)
     geom.x = x or geom.x
     geom.y = y or geom.y
 
-    geom, edge = snap_inside(geom, capi.screen[c.screen].geometry, snap)
-    geom = snap_inside(geom, capi.screen[c.screen].workarea, snap)
+    geom, edge = snap_inside(geom, c.screen.geometry, snap)
+    geom = snap_inside(geom, c.screen.workarea, snap)
 
     -- Allow certain windows to snap to the edge of the workarea.
     -- Only allow docking to workarea for consistency/to avoid problems.
