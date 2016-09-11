@@ -23,7 +23,7 @@ local magnifier = {}
 function magnifier.mouse_resize_handler(c, corner, x, y)
     capi.mouse.coords({ x = x, y = y })
 
-    local wa = capi.screen[c.screen].workarea
+    local wa = c.screen.workarea
     local center_x = wa.x + wa.width / 2
     local center_y = wa.y + wa.height / 2
     local maxdist_pow = (wa.width^2 + wa.height^2) / 4
