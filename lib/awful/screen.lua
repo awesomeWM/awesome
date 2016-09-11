@@ -30,7 +30,7 @@ local screen = {object={}}
 local data = {}
 data.padding = {}
 
-screen.mouse_per_screen = {}
+screen.mouse_per_screen = setmetatable({}, {__mode="k"})
 
 --- Take an input geometry and substract/add a delta
 -- @tparam table geo A geometry (width, height, x, y) table
