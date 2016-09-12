@@ -111,26 +111,27 @@ end
 function beautiful.init(config)
     if config then
         local homedir = os.getenv("HOME")
+        local theme_path = ""
 
         -- If `config` is the path to a theme file, run this file,
         -- otherwise if it is a theme table, save it.
         if type(config) == 'string' then
             -- Expand the '~' $HOME shortcut
             config = config:gsub("^~/", homedir .. "/")
-            configdir = config:gsub("/[^/]+$", "")
             theme = protected_call(dofile, config)
+            theme_path = config:gsub("/[^/]+$", "")
         elseif type(config) == 'table' then
             theme = config
         end
 
         if theme then
-            -- expand '~' and './'
             if homedir then
+                -- expand '~' and './'
                 if type(config) == "string" then
                     for k, v in pairs(theme) do
                         if type(v) == "string" then
                             theme[k] = v:gsub("^~/", homedir .. "/")
-                            theme[k] = v:gsub("^%./", configdir .. "/")
+                            theme[k] = v:gsub("^%./", theme_path .. "/")
                         end
                     end
                 -- expand '~'
