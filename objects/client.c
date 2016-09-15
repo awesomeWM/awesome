@@ -1128,11 +1128,18 @@ client_focus_refresh(void)
                         win, globalconf.timestamp);
 }
 
-void
+static void
 client_border_refresh(void)
 {
     foreach(c, globalconf.clients)
         window_border_refresh((window_t *) *c);
+}
+
+void
+client_refresh(void)
+{
+    client_border_refresh();
+    client_focus_refresh();
 }
 
 static void
