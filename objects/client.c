@@ -1501,7 +1501,6 @@ static void
 client_resize_do(client_t *c, area_t geometry)
 {
     lua_State *L = globalconf_get_lua_State();
-    bool hide_titlebars = c->fullscreen;
 
     screen_t *new_screen = c->screen;
     if(!screen_area_in_screen(new_screen, geometry))
@@ -1516,7 +1515,7 @@ client_resize_do(client_t *c, area_t geometry)
 
     /* Configure the client for its new size */
     area_t real_geometry = geometry;
-    if (!hide_titlebars)
+    if (!c->fullscreen)
     {
         real_geometry.x = c->titlebar[CLIENT_TITLEBAR_LEFT].size;
         real_geometry.y = c->titlebar[CLIENT_TITLEBAR_TOP].size;
@@ -1570,7 +1569,7 @@ client_resize_do(client_t *c, area_t geometry)
         /* Convert to global coordinates */
         area.x += geometry.x;
         area.y += geometry.y;
-        if (hide_titlebars)
+        if (c->fullscreen)
             area.width = area.height = 0;
         drawable_set_geometry(L, -1, area);
 
