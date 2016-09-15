@@ -214,10 +214,12 @@ function screen.object.set_padding(self, padding)
     end
 end
 
---- Return the currently screen for new clients.
--- This is exactly the same as `awful.screen.focused` exept it avoids clients
--- being moved when Awesome is restarted. This is used by the default `rc.lua`.
--- @tparam client c A client
+--- Get the preferred screen in the context of a client.
+-- This is exactly the same as `awful.screen.focused` except that it avoids
+-- clients being moved when Awesome is restarted.
+-- This is used in the default `rc.lua` to ensure clients get assigned to the
+-- focused screen by default.
+-- @tparam client c A client.
 -- @treturn screen The preferred screen.
 function screen.preferred(c)
     return capi.awesome.startup and c.screen or screen.focused()
