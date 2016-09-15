@@ -7,69 +7,15 @@
 -- @module awful.ewmh
 ---------------------------------------------------------------------------
 
-local setmetatable = setmetatable
 local client = client
 local screen = screen
 local ipairs = ipairs
-local math = math
 local util = require("awful.util")
 local aclient = require("awful.client")
 local aplace = require("awful.placement")
 local asuit = require("awful.layout.suit")
 
 local ewmh = {}
-
-local data = setmetatable({}, { __mode = 'k' })
-
-local function screen_change(window)
-    if data[window] then
-        for _, reqtype in ipairs({ "maximized_vertical", "maximized_horizontal", "fullscreen" }) do
-            if data[window][reqtype] then
-                if data[window][reqtype].width then
-                    data[window][reqtype].width = math.min(data[window][reqtype].width,
-                                                           window.screen.workarea.width)
-                    if reqtype == "maximized_horizontal" then
-                        local bw = window.border_width or 0
-                        data[window][reqtype].width = data[window][reqtype].width - 2*bw
-                    end
-                end
-                if data[window][reqtype].height then
-                    data[window][reqtype].height = math.min(data[window][reqtype].height,
-                                                             window.screen.workarea.height)
-                    if reqtype == "maximized_vertical" then
-                        local bw = window.border_width or 0
-                        data[window][reqtype].height = data[window][reqtype].height - 2*bw
-                    end
-                end
-                if data[window][reqtype].screen then
-                    local from = screen[data[window][reqtype].screen].workarea
-                    local to = window.screen.workarea
-                    local new_x, new_y
-                    if data[window][reqtype].x then
-                        new_x = to.x + data[window][reqtype].x - from.x
-                        if new_x > to.x + to.width then new_x = to.x end
-                        -- Move window if it overlaps the new area to the right.
-                        if new_x + data[window][reqtype].width > to.x + to.width then
-                            new_x = to.x + to.width - data[window][reqtype].width
-                        end
-                        if new_x < to.x then new_x = to.x end
-                        data[window][reqtype].x = new_x
-                    end
-                    if data[window][reqtype].y then
-                        new_y = to.y + data[window][reqtype].y - from.y
-                        if new_y > to.y + to.width then new_y = to.y end
-                        -- Move window if it overlaps the new area to the bottom.
-                        if new_y + data[window][reqtype].height > to.y + to.height then
-                            new_y = to.y + to.height - data[window][reqtype].height
-                        end
-                        if new_y < to.y then new_y = to.y end
-                        data[window][reqtype].y = new_y
-                    end
-                end
-            end
-        end
-    end
-end
 
 --- Update a client's settings when its geometry changes, skipping signals
 -- resulting from calls within.
@@ -233,7 +179,6 @@ client.connect_signal("request::activate", ewmh.activate)
 client.connect_signal("request::tag", ewmh.tag)
 client.connect_signal("request::urgent", ewmh.urgent)
 client.connect_signal("request::geometry", ewmh.geometry)
-client.connect_signal("property::screen", screen_change)
 client.connect_signal("property::border_width", geometry_change)
 client.connect_signal("property::geometry", geometry_change)
 screen.connect_signal("property::workarea", function(s)
