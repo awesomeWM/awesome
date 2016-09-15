@@ -1620,10 +1620,7 @@ client_resize(client_t *c, area_t geometry, bool honor_hints)
     if (honor_hints)
         geometry = client_apply_size_hints(c, geometry);
 
-    if(c->geometry.x != geometry.x
-       || c->geometry.y != geometry.y
-       || c->geometry.width != geometry.width
-       || c->geometry.height != geometry.height)
+    if(!AREA_EQUAL(c->geometry, geometry))
     {
         client_resize_do(c, geometry);
 
