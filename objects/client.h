@@ -61,6 +61,9 @@ struct client_t
     char *class, *instance;
     /** Window geometry */
     area_t geometry;
+    /** Old window geometry currently configured in X11 */
+    area_t x11_client_geometry;
+    area_t x11_frame_geometry;
     /** Startup ID */
     char *startup_id;
     /** True if the client is sticky */

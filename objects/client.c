@@ -1135,9 +1135,55 @@ client_border_refresh(void)
         window_border_refresh((window_t *) *c);
 }
 
+static void
+client_geometry_refresh(void)
+{
+    client_ignore_enterleave_events();
+    foreach(_c, globalconf.clients)
+    {
+        client_t *c = *_c;
+
+        /* Compute the client window's and frame window's geometry */
+        area_t geometry = c->geometry;
+        area_t real_geometry = c->geometry;
+        if (!c->fullscreen)
+        {
+            real_geometry.x = c->titlebar[CLIENT_TITLEBAR_LEFT].size;
+            real_geometry.y = c->titlebar[CLIENT_TITLEBAR_TOP].size;
+            real_geometry.width -= c->titlebar[CLIENT_TITLEBAR_LEFT].size;
+            real_geometry.width -= c->titlebar[CLIENT_TITLEBAR_RIGHT].size;
+            real_geometry.height -= c->titlebar[CLIENT_TITLEBAR_TOP].size;
+            real_geometry.height -= c->titlebar[CLIENT_TITLEBAR_BOTTOM].size;
+        } else {
+            real_geometry.x = 0;
+            real_geometry.y = 0;
+        }
+
+        /* Is there anything to do? */
+        if (AREA_EQUAL(geometry, c->x11_frame_geometry)
+                && AREA_EQUAL(real_geometry, c->x11_client_geometry))
+            continue;
+
+        xcb_configure_window(globalconf.connection, c->frame_window,
+                XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
+                (uint32_t[]) { geometry.x, geometry.y, geometry.width, geometry.height });
+        xcb_configure_window(globalconf.connection, c->window,
+                XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
+                (uint32_t[]) { real_geometry.x, real_geometry.y, real_geometry.width, real_geometry.height });
+
+        c->x11_frame_geometry = geometry;
+        c->x11_client_geometry = real_geometry;
+
+        /* ICCCM 4.2.3 says something else, but Java always needs this... */
+        client_send_configure(c);
+    }
+    client_restore_enterleave_events();
+}
+
 void
 client_refresh(void)
 {
+    client_geometry_refresh();
     client_border_refresh();
     client_focus_refresh();
 }
@@ -1516,36 +1562,6 @@ client_resize_do(client_t *c, area_t geometry)
     /* Also store geometry including border */
     area_t old_geometry = c->geometry;
     c->geometry = geometry;
-
-    /* Ignore all spurious enter/leave notify events */
-    client_ignore_enterleave_events();
-
-    /* Configure the client for its new size */
-    area_t real_geometry = geometry;
-    if (!c->fullscreen)
-    {
-        real_geometry.x = c->titlebar[CLIENT_TITLEBAR_LEFT].size;
-        real_geometry.y = c->titlebar[CLIENT_TITLEBAR_TOP].size;
-        real_geometry.width -= c->titlebar[CLIENT_TITLEBAR_LEFT].size;
-        real_geometry.width -= c->titlebar[CLIENT_TITLEBAR_RIGHT].size;
-        real_geometry.height -= c->titlebar[CLIENT_TITLEBAR_TOP].size;
-        real_geometry.height -= c->titlebar[CLIENT_TITLEBAR_BOTTOM].size;
-    } else {
-        real_geometry.x = 0;
-        real_geometry.y = 0;
-    }
-
-    xcb_configure_window(globalconf.connection, c->frame_window,
-            XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
-            (uint32_t[]) { geometry.x, geometry.y, geometry.width, geometry.height });
-    xcb_configure_window(globalconf.connection, c->window,
-            XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
-            (uint32_t[]) { real_geometry.x, real_geometry.y, real_geometry.width, real_geometry.height });
-
-    /* ICCCM 4.2.3 says something else, but Java always needs this... */
-    client_send_configure(c);
-
-    client_restore_enterleave_events();
 
     luaA_object_push(L, c);
     if (!AREA_EQUAL(old_geometry, geometry))
