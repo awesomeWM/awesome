@@ -42,6 +42,27 @@ data.tags = setmetatable({}, { __mode = 'k' })
 tag.history = {}
 tag.history.limit = 20
 
+-- Default values
+local defaults = {}
+
+-- The gap between clients (in points).
+defaults.gap                 = 0
+
+-- The default gap_count.
+defaults.gap_single_client   = true
+
+-- The default master fill policy.
+defaults.master_fill_policy  = "expand"
+
+-- The default master width factor.
+defaults.master_width_factor = 0.5
+
+-- The default master count.
+defaults.master_count        = 1
+
+-- The default column count.
+defaults.column_count        = 1
+
 -- screen.tags depend on index, it cannot be used by awful.tag
 local function raw_tags(scr)
     local tmp_tags = {}
@@ -56,6 +77,7 @@ end
 
 --- The number of elements kept in the history.
 -- @tfield integer awful.tag.history.limit
+-- @tparam[opt=20] integer limit
 
 --- The tag index.
 --
@@ -543,6 +565,13 @@ function tag.selected(s)
     return s.selected_tag
 end
 
+--- The default master width factor
+--
+-- @beautiful beautiful.master_width_factor
+-- @param number (default: 0.5)
+-- @see master_width_factor
+-- @see gap
+
 --- The tag master width factor.
 --
 -- The master width factor is one of the 5 main properties used to configure
@@ -571,7 +600,9 @@ function tag.object.set_master_width_factor(t, mwfact)
 end
 
 function tag.object.get_master_width_factor(t)
-    return tag.getproperty(t, "master_width_factor") or 0.5
+    return tag.getproperty(t, "master_width_factor")
+        or beautiful.master_width_factor
+        or defaults.master_width_factor
 end
 
 --- Set master width factor.
@@ -765,6 +796,7 @@ end
 -- @beautiful beautiful.useless_gap
 -- @param number (default: 0)
 -- @see gap
+-- @see gap_single_client
 
 --- The gap (spacing, also called `useless_gap`) between clients.
 --
@@ -777,6 +809,7 @@ end
 --
 -- @property gap
 -- @param number The value has to be greater than zero.
+-- @see gap_single_client
 
 function tag.object.set_gap(t, useless_gap)
     if useless_gap >= 0 then
@@ -785,7 +818,9 @@ function tag.object.set_gap(t, useless_gap)
 end
 
 function tag.object.get_gap(t)
-    return tag.getproperty(t, "useless_gap") or beautiful.useless_gap or 0
+    return tag.getproperty(t, "useless_gap")
+        or beautiful.useless_gap
+        or defaults.gap
 end
 
 --- Set the spacing between clients
@@ -809,6 +844,32 @@ function tag.incgap(add, t)
     tag.object.set_gap(t, tag.object.get_gap(t) + add)
 end
 
+--- Enable gaps for a single client.
+--
+-- @beautiful beautiful.gap_single_client
+-- @param boolean (default: true)
+-- @see gap
+-- @see gap_single_client
+
+--- Enable gaps for a single client.
+--
+-- **Signal:**
+--
+-- * *property::gap\_single\_client*
+--
+-- @property gap_single_client
+-- @param boolean Enable gaps for a single client
+
+function tag.object.set_gap_single_client(t, gap_single_client)
+    tag.setproperty(t, "gap_single_client", gap_single_client == true)
+end
+
+function tag.object.get_gap_single_client(t)
+    return tag.getproperty(t, "gap_single_client")
+        or beautiful.gap_single_client
+        or defaults.gap_single_client
+end
+
 --- Get the spacing between clients.
 -- @deprecated awful.tag.getgap
 -- @see gap
@@ -826,6 +887,12 @@ function tag.getgap(t, numclients)
     return tag.object.get_gap(t or ascreen.focused().selected_tag)
 end
 
+--- The default fill policy
+--
+-- @beautiful beautiful.master_fill_policy
+-- @param string (default: "expand")
+-- @see master_fill_policy
+
 --- Set size fill policy for the master client(s).
 --
 -- **Signal:**
@@ -836,7 +903,9 @@ end
 -- @param string "expand" or "master_width_factor"
 
 function tag.object.get_master_fill_policy(t)
-    return tag.getproperty(t, "master_fill_policy") or "expand"
+    return tag.getproperty(t, "master_fill_policy")
+        or beautiful.master_fill_policy
+        or defaults.master_fill_policy
 end
 
 --- Set size fill policy for the master client(s)
@@ -879,8 +948,16 @@ function tag.getmfpol(t)
     util.deprecate("Use t.master_fill_policy instead of awful.tag.getmfpol")
 
     t = t or ascreen.focused().selected_tag
-    return tag.getproperty(t, "master_fill_policy") or "expand"
+    return tag.getproperty(t, "master_fill_policy")
+        or beautiful.master_fill_policy
+        or defaults.master_fill_policy
 end
+
+--- The default number of master windows.
+--
+-- @beautiful beautiful.master_count
+-- @param integer (default: 1)
+-- @see master_count
 
 --- Set the number of master windows.
 --
@@ -900,7 +977,9 @@ function tag.object.set_master_count(t, nmaster)
 end
 
 function tag.object.get_master_count(t)
-    return tag.getproperty(t, "master_count") or 1
+    return tag.getproperty(t, "master_count")
+        or beautiful.master_count
+        or defaults.master_count
 end
 
 --- 
@@ -988,6 +1067,12 @@ function tag.geticon(_tag)
     return tag.getproperty(_tag, "icon")
 end
 
+--- The default number of columns.
+--
+-- @beautiful beautiful.column_count
+-- @param integer (default: 1)
+-- @see column_count
+
 --- Set the number of columns.
 --
 -- **Signal:**
@@ -1006,7 +1091,9 @@ function tag.object.set_column_count(t, ncol)
 end
 
 function tag.object.get_column_count(t)
-    return tag.getproperty(t, "column_count") or 1
+    return tag.getproperty(t, "column_count")
+        or beautiful.column_count
+        or defaults.column_count
 end
 
 --- Set number of column windows.
