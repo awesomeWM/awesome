@@ -226,7 +226,6 @@ function titlebar.widget.button(c, name, selector, action)
                     img = "inactive"
                 end
             end
-            -- First try with a prefix based on the client's focus state
             local prefix = "normal"
             if capi.client.focus == c then
                 prefix = "focus"
@@ -234,11 +233,12 @@ function titlebar.widget.button(c, name, selector, action)
             if img ~= "" then
                 prefix = prefix .. "_"
             end
+            -- First try with a prefix based on the client's focus state,
+            -- then try again without that prefix if nothing was found,
+            -- and finally, try a fallback for compatibility with Awesome 3.5 themes
             local theme = beautiful["titlebar_" .. name .. "_button_" .. prefix .. img]
-            if not theme then
-                -- Then try again without that prefix if nothing was found
-                theme = beautiful["titlebar_" .. name .. "_button_" .. img]
-            end
+                       or beautiful["titlebar_" .. name .. "_button_" .. img]
+                       or beautiful["titlebar_" .. name .. "_button_" .. prefix .. "_inactive"]
             if theme then
                 img = theme
             end
