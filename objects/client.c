@@ -757,7 +757,7 @@
 
 static area_t titlebar_get_area(client_t *c, client_titlebar_t bar);
 static drawable_t *titlebar_get_drawable(lua_State *L, client_t *c, int cl_idx, client_titlebar_t bar);
-static void client_resize_do(client_t *c, area_t geometry, bool force_notice);
+static void client_resize_do(client_t *c, area_t geometry);
 
 /** Collect a client.
  * \param L The Lua VM state.
@@ -1128,11 +1128,64 @@ client_focus_refresh(void)
                         win, globalconf.timestamp);
 }
 
-void
+static void
 client_border_refresh(void)
 {
     foreach(c, globalconf.clients)
         window_border_refresh((window_t *) *c);
+}
+
+static void
+client_geometry_refresh(void)
+{
+    client_ignore_enterleave_events();
+    foreach(_c, globalconf.clients)
+    {
+        client_t *c = *_c;
+
+        /* Compute the client window's and frame window's geometry */
+        area_t geometry = c->geometry;
+        area_t real_geometry = c->geometry;
+        if (!c->fullscreen)
+        {
+            real_geometry.x = c->titlebar[CLIENT_TITLEBAR_LEFT].size;
+            real_geometry.y = c->titlebar[CLIENT_TITLEBAR_TOP].size;
+            real_geometry.width -= c->titlebar[CLIENT_TITLEBAR_LEFT].size;
+            real_geometry.width -= c->titlebar[CLIENT_TITLEBAR_RIGHT].size;
+            real_geometry.height -= c->titlebar[CLIENT_TITLEBAR_TOP].size;
+            real_geometry.height -= c->titlebar[CLIENT_TITLEBAR_BOTTOM].size;
+        } else {
+            real_geometry.x = 0;
+            real_geometry.y = 0;
+        }
+
+        /* Is there anything to do? */
+        if (AREA_EQUAL(geometry, c->x11_frame_geometry)
+                && AREA_EQUAL(real_geometry, c->x11_client_geometry))
+            continue;
+
+        xcb_configure_window(globalconf.connection, c->frame_window,
+                XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
+                (uint32_t[]) { geometry.x, geometry.y, geometry.width, geometry.height });
+        xcb_configure_window(globalconf.connection, c->window,
+                XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
+                (uint32_t[]) { real_geometry.x, real_geometry.y, real_geometry.width, real_geometry.height });
+
+        c->x11_frame_geometry = geometry;
+        c->x11_client_geometry = real_geometry;
+
+        /* ICCCM 4.2.3 says something else, but Java always needs this... */
+        client_send_configure(c);
+    }
+    client_restore_enterleave_events();
+}
+
+void
+client_refresh(void)
+{
+    client_geometry_refresh();
+    client_border_refresh();
+    client_focus_refresh();
 }
 
 static void
@@ -1148,8 +1201,8 @@ border_width_callback(client_t *c, uint16_t old_width, uint16_t new_width)
                                       &diff_x, &diff_y);
         geometry.x += diff_x;
         geometry.y += diff_y;
-        /* force_notice = true -> inform client about changes */
-        client_resize_do(c, geometry, true);
+        /* inform client about changes */
+        client_resize_do(c, geometry);
     }
 }
 
@@ -1498,58 +1551,17 @@ client_apply_size_hints(client_t *c, area_t geometry)
 }
 
 static void
-client_resize_do(client_t *c, area_t geometry, bool force_notice)
+client_resize_do(client_t *c, area_t geometry)
 {
     lua_State *L = globalconf_get_lua_State();
-    bool send_notice = force_notice;
-    bool hide_titlebars = c->fullscreen;
-    bool java_is_broken = true;
 
     screen_t *new_screen = c->screen;
     if(!screen_area_in_screen(new_screen, geometry))
         new_screen = screen_getbycoord(geometry.x, geometry.y);
 
-    if(c->geometry.width == geometry.width
-       && c->geometry.height == geometry.height)
-        /* We are moving without changing the size, see ICCCM 4.2.3 */
-        send_notice = true;
-    if(java_is_broken)
-        /* Java strong. Java Hulk. Java make own rules! */
-        send_notice = true;
-
     /* Also store geometry including border */
     area_t old_geometry = c->geometry;
     c->geometry = geometry;
-
-    /* Ignore all spurious enter/leave notify events */
-    client_ignore_enterleave_events();
-
-    /* Configure the client for its new size */
-    area_t real_geometry = geometry;
-    if (!hide_titlebars)
-    {
-        real_geometry.x = c->titlebar[CLIENT_TITLEBAR_LEFT].size;
-        real_geometry.y = c->titlebar[CLIENT_TITLEBAR_TOP].size;
-        real_geometry.width -= c->titlebar[CLIENT_TITLEBAR_LEFT].size;
-        real_geometry.width -= c->titlebar[CLIENT_TITLEBAR_RIGHT].size;
-        real_geometry.height -= c->titlebar[CLIENT_TITLEBAR_TOP].size;
-        real_geometry.height -= c->titlebar[CLIENT_TITLEBAR_BOTTOM].size;
-    } else {
-        real_geometry.x = 0;
-        real_geometry.y = 0;
-    }
-
-    xcb_configure_window(globalconf.connection, c->frame_window,
-            XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
-            (uint32_t[]) { geometry.x, geometry.y, geometry.width, geometry.height });
-    xcb_configure_window(globalconf.connection, c->window,
-            XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
-            (uint32_t[]) { real_geometry.x, real_geometry.y, real_geometry.width, real_geometry.height });
-
-    if(send_notice)
-        client_send_configure(c);
-
-    client_restore_enterleave_events();
 
     luaA_object_push(L, c);
     if (!AREA_EQUAL(old_geometry, geometry))
@@ -1580,7 +1592,7 @@ client_resize_do(client_t *c, area_t geometry, bool force_notice)
         /* Convert to global coordinates */
         area.x += geometry.x;
         area.y += geometry.y;
-        if (hide_titlebars)
+        if (c->fullscreen)
             area.width = area.height = 0;
         drawable_set_geometry(L, -1, area);
 
@@ -1624,12 +1636,9 @@ client_resize(client_t *c, area_t geometry, bool honor_hints)
     if (honor_hints)
         geometry = client_apply_size_hints(c, geometry);
 
-    if(c->geometry.x != geometry.x
-       || c->geometry.y != geometry.y
-       || c->geometry.width != geometry.width
-       || c->geometry.height != geometry.height)
+    if(!AREA_EQUAL(c->geometry, geometry))
     {
-        client_resize_do(c, geometry, false);
+        client_resize_do(c, geometry);
 
         return true;
     }
@@ -1799,7 +1808,7 @@ client_set_fullscreen(lua_State *L, int cidx, bool s)
         luaA_object_emit_signal(L, abs_cidx, "request::geometry", 1);
         luaA_object_emit_signal(L, abs_cidx, "property::fullscreen", 0);
         /* Force a client resize, so that titlebars get shown/hidden */
-        client_resize_do(c, c->geometry, true);
+        client_resize_do(c, c->geometry);
         stack_windows();
     }
 }
@@ -2631,7 +2640,7 @@ titlebar_resize(lua_State *L, int cidx, client_t *c, client_titlebar_t bar, int 
     }
 
     c->titlebar[bar].size = size;
-    client_resize_do(c, geometry, true);
+    client_resize_do(c, geometry);
 
     luaA_object_emit_signal(L, cidx, property_name, 0);
 }
