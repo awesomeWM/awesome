@@ -82,11 +82,10 @@ fi
 
 cd $build_dir
 
-AWESOME_OPTIONS="$AWESOME_OPTIONS --search lib/"
+AWESOME_OPTIONS="$AWESOME_OPTIONS --search lib"
 # Add test dir (for _runner.lua).
 AWESOME_OPTIONS="$AWESOME_OPTIONS --search $this_dir"
-XDG_CONFIG_HOME="./"
-export XDG_CONFIG_HOME
+export XDG_CONFIG_HOME="./"
 
 cd - >/dev/null
 
