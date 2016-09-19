@@ -31,6 +31,11 @@ ${CMAKE_SOURCE_DIR}/tests/examples/shims/?;"
 # Done in 3 variables to avoid CMake from implicitly converting into a list.
 set(ENV{LUA_PATH} "${LUA_PATH3_}${LUA_PATH2_}${LUA_PATH_}")
 
+# Unset environment variables that would get in the way of evaluating LUA_PATH
+unset(ENV{LUA_PATH_5_1})
+unset(ENV{LUA_PATH_5_2})
+unset(ENV{LUA_PATH_5_3})
+
 # The documentation images directory
 set(IMAGE_DIR "${CMAKE_BINARY_DIR}/doc/images")
 file(MAKE_DIRECTORY "${IMAGE_DIR}")
