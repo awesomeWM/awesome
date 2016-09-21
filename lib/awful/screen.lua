@@ -12,7 +12,8 @@ local capi =
 {
     mouse = mouse,
     screen = screen,
-    client = client
+    client = client,
+    awesome = awesome,
 }
 local util = require("awful.util")
 local object = require("gears.object")
@@ -211,6 +212,17 @@ function screen.object.set_padding(self, padding)
         data.padding[self] = padding
         self:emit_signal("padding")
     end
+end
+
+--- Get the preferred screen in the context of a client.
+-- This is exactly the same as `awful.screen.focused` except that it avoids
+-- clients being moved when Awesome is restarted.
+-- This is used in the default `rc.lua` to ensure clients get assigned to the
+-- focused screen by default.
+-- @tparam client c A client.
+-- @treturn screen The preferred screen.
+function screen.preferred(c)
+    return capi.awesome.startup and c.screen or screen.focused()
 end
 
 --- The defaults arguments for `awful.screen.focused`
