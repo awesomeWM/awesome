@@ -60,7 +60,7 @@ local function get_widget_context(self)
 end
 
 local function do_redraw(self)
-    if type(self.drawable) ~= "drawable" then return end --FIXME See #1070
+    if not self.drawable.valid then return end
 
     local surf = surface.load_silently(self.drawable.surface, false)
     -- The surface can be nil if the drawable's parent was already finalized
@@ -400,6 +400,15 @@ function drawable.new(d, widget_context_skeleton, drawable_name)
 
     -- Set up our callbacks for repaints
     ret._redraw_callback = function(hierar, arg)
+        -- XXX: lgi will lead us into memory-corruption-land when we use an
+        -- object after it was GC'd. Try to detect this situation by checking if
+        -- the drawable is still valid. This is only a weak indication, but it
+        -- seems to be the best that we can do. The problem is that the drawable
+        -- could not yet be GC'd, but is pending finalisation, while the
+        -- cairo.Region below was already GC'd. This would still lead to corruption.
+        if not ret.drawable.valid then
+            return
+        end
         if ret._widget_hierarchy_callback_arg ~= arg then
             return
         end
