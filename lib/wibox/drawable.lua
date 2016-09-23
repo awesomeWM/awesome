@@ -51,6 +51,9 @@ local function get_widget_context(self)
             context[k] = v
         end
         self._widget_context = context
+
+        -- Give widgets a chance to react to the new context
+        self._need_complete_repaint = true
     end
     return context
 end
