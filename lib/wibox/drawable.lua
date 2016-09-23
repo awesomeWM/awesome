@@ -46,9 +46,6 @@ local function get_widget_context(self)
             screen = s,
             dpi = dpi,
             drawable = self,
-            widget_at = function(_, ...)
-                self:widget_at(...)
-            end
         }
         for k, v in pairs(self._widget_context_skeleton) do
             context[k] = v
