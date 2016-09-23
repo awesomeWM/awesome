@@ -163,6 +163,32 @@ luaA_class_add_property(lua_class_t *lua_class,
                                     });
 }
 
+/** Newindex meta function for objects after they were GC'd.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ */
+static int
+luaA_class_newindex_invalid(lua_State *L)
+{
+    return luaL_error(L, "attempt to index an object that was already garbage collected");
+}
+
+/** Index meta function for objects after they were GC'd.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ */
+static int
+luaA_class_index_invalid(lua_State *L)
+{
+    const char *attr = luaL_checkstring(L, 2);
+    if (A_STREQ(attr, "valid"))
+    {
+        lua_pushboolean(L, false);
+        return 1;
+    }
+    return luaA_class_newindex_invalid(L);
+}
+
 /** Garbage collect a Lua object.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
@@ -181,8 +207,13 @@ luaA_class_gc(lua_State *L)
             class->collector(item);
     /* Unset its metatable so that e.g. luaA_toudata() will no longer accept
      * this object. This is needed since other __gc methods can still use this.
+     * We also make sure that `item.valid == false`.
      */
     lua_newtable(L);
+    lua_pushcfunction(L, luaA_class_index_invalid);
+    lua_setfield(L, -2, "__index");
+    lua_pushcfunction(L, luaA_class_newindex_invalid);
+    lua_setfield(L, -2, "__newindex");
     lua_setmetatable(L, 1);
     return 0;
 }
