@@ -185,6 +185,10 @@ end
 -- @see gears.shape
 -- @see shape
 function background:set_shape(shape, ...)
+    local args = {...}
+
+    if shape == self._private.shape and #args == 0 then return end
+
     self._private.shape = shape
     self._private.shape_args = {...}
     self:emit_signal("widget::redraw_needed")
@@ -201,6 +205,8 @@ end
 -- @tparam number width The border width
 
 function background:set_shape_border_width(width)
+    if self._private.shape_border_width == width then return end
+
     self._private.shape_border_width = width
     self:emit_signal("widget::redraw_needed")
 end
@@ -217,6 +223,8 @@ end
 -- @see gears.color
 
 function background:set_shape_border_color(fg)
+    if self._private.shape_border_color == fg then return end
+
     self._private.shape_border_color = fg
     self:emit_signal("widget::redraw_needed")
 end
@@ -231,6 +239,8 @@ end
 -- @tparam boolean value If the shape clip is enable
 
 function background:set_shape_clip(value)
+    if self._private.shape_clip == value then return end
+
     self._private.shape_clip = value
     self:emit_signal("widget::redraw_needed")
 end

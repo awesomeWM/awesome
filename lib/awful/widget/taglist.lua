@@ -30,6 +30,143 @@ end
 local taglist = { mt = {} }
 taglist.filter = {}
 
+--- The tag list main foreground (text) color.
+-- @beautiful beautiful.taglist_fg_focus
+-- @param[opt=fg_focus] color
+-- @see gears.color
+
+--- The tag list main background color.
+-- @beautiful beautiful.taglist_bg_focus
+-- @param[opt=bg_focus] color
+-- @see gears.color
+
+--- The tag list urgent elements foreground (text) color.
+-- @beautiful beautiful.taglist_fg_urgent
+-- @param[opt=fg_urgent] color
+-- @see gears.color
+
+--- The tag list urgent elements background color.
+-- @beautiful beautiful.taglist_bg_urgent
+-- @param[opt=bg_urgent] color
+-- @see gears.color
+
+--- The tag list occupied elements background color.
+-- @beautiful beautiful.taglist_bg_occupied
+-- @param color
+-- @see gears.color
+
+--- The tag list occupied elements foreground (text) color.
+-- @beautiful beautiful.taglist_fg_occupied
+-- @param color
+-- @see gears.color
+
+--- The tag list empty elements background color.
+-- @beautiful beautiful.taglist_bg_empty
+-- @param color
+-- @see gears.color
+
+--- The tag list empty elements foreground (text) color.
+-- @beautiful beautiful.taglist_fg_empty
+-- @param color
+-- @see gears.color
+
+--- The selected elements background image.
+-- @beautiful beautiful.taglist_squares_sel
+-- @param surface
+-- @see gears.surface
+
+--- The unselected elements background image.
+-- @beautiful beautiful.taglist_squares_unsel
+-- @param surface
+-- @see gears.surface
+
+--- The selected empty elements background image.
+-- @beautiful beautiful.taglist_squares_sel_empty
+-- @param surface
+-- @see gears.surface
+
+--- The unselected empty elements background image.
+-- @beautiful beautiful.taglist_squares_unsel_empty
+-- @param surface
+-- @see gears.surface
+
+--- If the background images can be resized.
+-- @beautiful beautiful.taglist_squares_resize
+-- @param boolean
+
+--- Do not display the tag icons, even if they are set.
+-- @beautiful beautiful.taglist_disable_icon
+-- @param boolean
+
+--- The taglist font.
+-- @beautiful beautiful.taglist_font
+-- @param string
+
+--- The main shape used for the elements.
+-- This will be the fallback for state specific shapes.
+-- To get a shape for the whole taglist, use `wibox.container.background`.
+-- @beautiful beautiful.taglist_shape
+-- @param[opt=rectangle] gears.shape
+-- @see gears.shape
+-- @see beautiful.taglist_shape_empty
+-- @see beautiful.taglist_shape_focus
+-- @see beautiful.taglist_shape_urgent
+
+--- The shape elements border width.
+-- @beautiful beautiful.taglist_shape_border_width
+-- @param[opt=0] number
+-- @see wibox.container.background
+
+--- The elements shape border color.
+-- @beautiful beautiful.taglist_shape_border_color
+-- @param color
+-- @see gears.color
+
+--- The shape used for the empty elements.
+-- @beautiful beautiful.taglist_shape_empty
+-- @param[opt=rectangle] gears.shape
+-- @see gears.shape
+
+--- The shape used for the empty elements border width.
+-- @beautiful beautiful.taglist_shape_border_width_empty
+-- @param[opt=0] number
+-- @see wibox.container.background
+
+--- The empty elements shape border color.
+-- @beautiful beautiful.taglist_shape_border_color_empty
+-- @param color
+-- @see gears.color
+
+--- The shape used for the selected elements.
+-- @beautiful beautiful.taglist_shape_focus
+-- @param[opt=rectangle] gears.shape
+-- @see gears.shape
+
+--- The shape used for the selected elements border width.
+-- @beautiful beautiful.taglist_shape_border_width_focus
+-- @param[opt=0] number
+-- @see wibox.container.background
+
+--- The selected elements shape border color.
+-- @beautiful beautiful.taglist_shape_border_color_focus
+-- @param color
+-- @see gears.color
+
+--- The shape used for the urgent elements.
+-- @beautiful beautiful.taglist_shape_urgent
+-- @param[opt=rectangle] gears.shape
+-- @see gears.shape
+
+--- The shape used for the urgent elements border width.
+-- @beautiful beautiful.taglist_shape_border_width_urgent
+-- @param[opt=0] number
+-- @see wibox.container.background
+
+--- The urgents elements shape border color.
+-- @beautiful beautiful.taglist_shape_border_color_urgent
+-- @param color
+-- @see gears.color
+
 local instances = nil
 
 function taglist.taglist_label(t, args)
@@ -56,6 +193,9 @@ function taglist.taglist_label(t, args)
     local fg_color = nil
     local bg_image
     local icon
+    local shape              = args.shape or theme.taglist_shape
+    local shape_border_width = args.shape_border_width or theme.taglist_shape_border_width
+    local shape_border_color = args.shape_border_color or theme.taglist_shape_border_color
     -- TODO: Re-implement bg_resize
     local bg_resize = false -- luacheck: ignore
     local is_selected = false
@@ -91,15 +231,53 @@ function taglist.taglist_label(t, args)
             end
             if bg_empty then bg_color = bg_empty end
             if fg_empty then fg_color = fg_empty end
+
+            if args.shape_empty or theme.taglist_shape_empty then
+                shape = args.shape_empty or theme.taglist_shape_empty
+            end
+
+            if args.shape_border_width_empty or theme.taglist_shape_border_width_empty then
+                shape_border_width = args.shape_border_width_empty or theme.taglist_shape_border_width_empty
+            end
+
+            if args.shape_border_color_empty or theme.taglist_shape_border_color_empty then
+                shape_border_color = args.shape_border_color_empty or theme.taglist_shape_border_color_empty
+            end
         end
     end
     if t.selected then
         bg_color = bg_focus
         fg_color = fg_focus
+
+        if args.shape_focus or theme.taglist_shape_focus then
+            shape = args.shape_focus or theme.taglist_shape_focus
+        end
+
+        if args.shape_border_width_focus or theme.taglist_shape_border_width_focus then
+            shape = args.shape_border_width_focus or theme.taglist_shape_border_width_focus
+        end
+
+        if args.shape_border_color_focus or theme.taglist_shape_border_color_focus then
+            shape = args.shape_border_color_focus or theme.taglist_shape_border_color_focus
+        end
+
     elseif tag.getproperty(t, "urgent") then
         if bg_urgent then bg_color = bg_urgent end
         if fg_urgent then fg_color = fg_urgent end
+
+        if args.shape_urgent or theme.taglist_shape_urgent then
+            shape = args.shape_urgent or theme.taglist_shape_urgent
+        end
+
+        if args.shape_border_width_urgent or theme.taglist_shape_border_width_urgent then
+            shape_border_width = args.shape_border_width_urgent or theme.taglist_shape_border_width_urgent
+        end
+
+        if args.shape_border_color_urgent or theme.taglist_shape_border_color_urgent then
+            shape_border_color = args.shape_border_color_urgent or theme.taglist_shape_border_color_urgent
+        end
     end
+
     if not tag.getproperty(t, "icon_only") then
         text = "<span font_desc='"..font.."'>"
         if fg_color then
@@ -116,7 +294,13 @@ function taglist.taglist_label(t, args)
         end
     end
 
-    return text, bg_color, bg_image, not taglist_disable_icon and icon or nil
+    local other_args = {
+        shape              = shape,
+        shape_border_width = shape_border_width,
+        shape_border_color = shape_border_color,
+    }
+
+    return text, bg_color, bg_image, not taglist_disable_icon and icon or nil, other_args
 end
 
 local function taglist_update(s, w, buttons, filter, data, style, update_function)
@@ -141,9 +325,25 @@ end
 -- @param screen The screen to draw taglist for.
 -- @param filter Filter function to define what clients will be listed.
 -- @param buttons A table with buttons binding to set.
--- @param style The style overrides default theme.
+-- @tparam[opt={}] table style The style overrides default theme.
+-- @tparam[opt=nil] string|pattern style.fg_focus
+-- @tparam[opt=nil] string|pattern style.bg_focus
+-- @tparam[opt=nil] string|pattern style.fg_urgent
+-- @tparam[opt=nil] string|pattern style.bg_urgent
+-- @tparam[opt=nil] string|pattern style.bg_occupied
+-- @tparam[opt=nil] string|pattern style.fg_occupied
+-- @tparam[opt=nil] string|pattern style.bg_empty
+-- @tparam[opt=nil] string|pattern style.fg_empty
+-- @tparam[opt=nil] string style.taglist_squares_sel
+-- @tparam[opt=nil] string style.taglist_squares_unsel
+-- @tparam[opt=nil] string style.taglist_squares_sel_empty
+-- @tparam[opt=nil] string style.taglist_squares_unsel_empty
+-- @tparam[opt=nil] string style.taglist_squares_resize
+-- @tparam[opt=nil] string style.taglist_disable_icon
+-- @tparam[opt=nil] string style.font
+-- @tparam[opt=nil] number style.spacing The spacing between tags.
 -- @param[opt] update_function Function to create a tag widget on each
---   update. @see awful.widget.common.
+--   update. See `awful.widget.common`.
 -- @param[opt] base_widget Optional container widget for tag widgets. Default
 --   is wibox.layout.fixed.horizontal().
 -- @param base_widget.bg_focus The background color for focused client.
@@ -156,10 +356,15 @@ end
 -- @param[opt] base_widget.squares_unsel_empty A user provided image for unselected squares for empty tags.
 -- @param[opt] base_widget.squares_resize True or false to resize squares.
 -- @param base_widget.font The font.
+-- @function awful.taglist
 function taglist.new(screen, filter, buttons, style, update_function, base_widget)
     screen = get_screen(screen)
     local uf = update_function or common.list_update
     local w = base_widget or fixed.horizontal()
+
+    if w.set_spacing and (style and style.spacing or beautiful.taglist_spacing) then
+        w:set_spacing(style and style.spacing or beautiful.taglist_spacing)
+    end
 
     local data = setmetatable({}, { __mode = 'k' })
 

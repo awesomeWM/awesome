@@ -16,8 +16,10 @@ local pairs = pairs
 local type = type
 local object = require("gears.object")
 local grect =  require("gears.geometry").rectangle
+local gshape =  require("gears.shape")
 local beautiful = require("beautiful")
 local base = require("wibox.widget.base")
+local cairo = require("lgi").cairo
 
 --- This provides widget box windows. Every wibox can also be used as if it were
 -- a drawin. All drawin functions and properties are also available on wiboxes!
@@ -60,6 +62,106 @@ end
 
 function wibox:find_widgets(x, y)
     return self._drawable:find_widgets(x, y)
+end
+
+-- Smarted version of the function found in surface.lua.
+-- As wiboxes are more flexible than clients, this allows proper clipping.
+local function apply_shape(self)
+    local shape = self._shape
+
+    if not shape then return end
+
+    local geo = self:geometry()
+    local bw = self.border_width
+
+    local img = cairo.ImageSurface(
+        cairo.Format.A1,
+        geo.width  + 2*bw,
+        geo.height + 2*bw
+    )
+    local cr = cairo.Context(img)
+
+    cr:set_operator(cairo.Operator.CLEAR)
+    cr:set_source_rgba(0,0,0,1)
+    cr:paint()
+
+    cr:set_operator(cairo.Operator.SOURCE)
+    cr:set_source_rgba(1,1,1,1)
+
+    shape(cr, geo.width+2*bw, geo.height+2*bw)
+
+    cr:fill()
+
+    self.shape_bounding = img._native
+
+    -- Now, set an empty clip. The wibox clip is drawn using cairo in
+    -- drawable.lua so anti-alising work.
+    img = cairo.ImageSurface(
+        cairo.Format.A1,
+        geo.width,
+        geo.height
+    )
+    cr = cairo.Context(img)
+
+
+    -- When there is a compositing manager, clip all the available area and
+    -- let the drawable.lua implementation do its job. However, this will leave
+    -- a 1px "black" border if there isn't any compositing.
+    -- Note that this code doesn't handle compositing manager being turned on
+    -- and off.
+    if not capi.awesome.composite_manager_running then
+        cr:translate(-bw, -bw)
+        shape(cr, geo.width+2*bw, geo.height+2*bw)
+
+        -- As shapes don't all grow radially, use this little trick to get the
+        -- 1 pixel outline of the shape (as applied above)
+        cr:set_source_rgba(1,1,1,1)
+        cr:paint()
+
+        cr:set_operator(cairo.Operator.CLEAR)
+        cr:set_line_width(2)
+        cr:stroke()
+    else
+        -- Fill the whole clip
+        cr:set_operator(cairo.Operator.SOURCE)
+        cr:set_source_rgba(1,1,1,1)
+        cr:paint()
+    end
+
+
+    self.shape_clip = img._native
+
+    -- Force the drawable to redraw the inner border
+    self:draw()
+end
+
+--- Set the wibox shape.
+-- Note that this feature work best with a compositing manager such as compton
+-- to enable anti-aliasing.
+-- @property shape
+-- @tparam gears.shape shape A gears.shape compatible function.
+-- @see gears.shape
+
+function wibox:set_shape(shape)
+    local prev = self._shape
+
+    if not prev and shape then
+        self:connect_signal("property::geometry", apply_shape)
+        self:connect_signal("property::border_width", apply_shape)
+        self:connect_signal("property::border_color", apply_shape)
+    elseif not shape and prev then
+        self:disconnect_signal("property::geometry", apply_shape)
+        self:disconnect_signal("property::border_width", apply_shape)
+        self:disconnect_signal("property::border_color", apply_shape)
+    end
+
+    self._shape = shape
+
+    apply_shape(self)
+end
+
+function wibox:get_shape()
+    return self._shape or gshape.rectangle
 end
 
 function wibox:get_screen()
@@ -229,6 +331,8 @@ local function new(args)
     if args.screen then
         ret:set_screen ( args.screen  )
     end
+
+    ret.shape = args.shape
 
     return ret
 end

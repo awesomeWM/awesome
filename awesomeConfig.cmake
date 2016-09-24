@@ -329,7 +329,6 @@ set(AWESOME_CONFIGURE_FILES
     ${awesome_lua_configure_files}
     config.h
     docs/config.ld
-    awesomerc.lua
     awesome-version-internal.h)
 
 foreach(file ${AWESOME_CONFIGURE_FILES})
@@ -338,6 +337,32 @@ foreach(file ${AWESOME_CONFIGURE_FILES})
                    ESCAPE_QUOTES
                    @ONLY)
 endforeach()
+#}}}
+
+# {{{ Generate some aggregated documentation from lua script
+execute_process(
+        COMMAND lua ${SOURCE_DIR}/docs/06-appearance.md.lua
+        ${BUILD_DIR}/docs/06-appearance.md
+        ERROR_VARIABLE  BEAUTIFUL_ERROR
+)
+
+if(BEAUTIFUL_ERROR)
+    message("${BEAUTIFUL_ERROR}")
+    message(FATAL_ERROR "Count not generate the theme index")
+endif()
+
+execute_process(
+        COMMAND lua ${SOURCE_DIR}/docs/05-awesomerc.md.lua
+        ${BUILD_DIR}/docs/05-awesomerc.md ${SOURCE_DIR}/awesomerc.lua
+        ${BUILD_DIR}/awesomerc.lua
+        ERROR_VARIABLE  RC_ERROR
+)
+
+if(RC_ERROR)
+    message("${RC_ERROR}")
+    message(FATAL_ERROR "Count not generate rc.lua")
+endif()
+
 #}}}
 
 # {{{ Copy additional files

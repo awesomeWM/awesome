@@ -84,7 +84,9 @@ function common.list_update(w, buttons, label, data, objects)
             }
         end
 
-        local text, bg, bg_image, icon = label(o, tb)
+        local text, bg, bg_image, icon, args = label(o, tb)
+        args = args or {}
+
         -- The text might be invalid, so use pcall.
         if text == nil or text == "" then
             tbm:set_margins(0)
@@ -104,6 +106,11 @@ function common.list_update(w, buttons, label, data, objects)
         else
             ibm:set_margins(0)
         end
+
+        bgb.shape              = args.shape
+        bgb.shape_border_width = args.shape_border_width
+        bgb.shape_border_color = args.shape_border_color
+
         w:add(bgb)
    end
 end

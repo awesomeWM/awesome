@@ -15,6 +15,11 @@ local capi =
     mousegrabber = mousegrabber
 }
 
+--- The floating layout layoutbox icon.
+-- @beautiful beautiful.layout_floating
+-- @param surface
+-- @see gears.surface
+
 local floating = {}
 
 --- Jump mouse cursor to the client's corner when resizing it.

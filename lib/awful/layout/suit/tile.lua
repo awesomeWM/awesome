@@ -23,6 +23,26 @@ local capi =
 
 local tile = {}
 
+--- The tile layout layoutbox icon.
+-- @beautiful beautiful.layout_tile
+-- @param surface
+-- @see gears.surface
+
+--- The tile top layout layoutbox icon.
+-- @beautiful beautiful.layout_tiletop
+-- @param surface
+-- @see gears.surface
+
+--- The tile bottom layout layoutbox icon.
+-- @beautiful beautiful.layout_tilebottom
+-- @param surface
+-- @see gears.surface
+
+--- The tile left layout layoutbox icon.
+-- @beautiful beautiful.layout_tileleft
+-- @param surface
+-- @see gears.surface
+
 --- Jump mouse cursor to the client's corner when resizing it.
 tile.resize_jump_to_corner = true
 
