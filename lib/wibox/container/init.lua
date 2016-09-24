@@ -15,6 +15,8 @@ return setmetatable({
     constraint = require("wibox.container.constraint");
     scroll = require("wibox.container.scroll");
     background = require("wibox.container.background");
+    radialprogressbar = require("wibox.container.radialprogressbar");
+    arcchart = require("wibox.container.arcchart");
 }, {__call = function(_, args) return base.make_widget_declarative(args) end})
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
