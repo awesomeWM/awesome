@@ -24,7 +24,8 @@ local matrix = require("gears.matrix")
 local hierarchy = require("wibox.hierarchy")
 local unpack = unpack or table.unpack -- luacheck: globals unpack (compatibility with Lua 5.1)
 
-local drawables = setmetatable({}, { __mode = 'k' })
+local drawables_draw = setmetatable({}, { __mode = 'k' })
+local drawables_force_complete_repaint = setmetatable({}, { __mode = 'k' })
 
 -- Get the widget context. This should always return the same table (if
 -- possible), so that our draw and fit caches can work efficiently.
@@ -46,20 +47,20 @@ local function get_widget_context(self)
             screen = s,
             dpi = dpi,
             drawable = self,
-            widget_at = function(_, ...)
-                self:widget_at(...)
-            end
         }
         for k, v in pairs(self._widget_context_skeleton) do
             context[k] = v
         end
         self._widget_context = context
+
+        -- Give widgets a chance to react to the new context
+        self._need_complete_repaint = true
     end
     return context
 end
 
 local function do_redraw(self)
-    if type(self.drawable) ~= "drawable" then return end --FIXME See #1070
+    if not self.drawable.valid then return end
 
     local surf = surface.load_silently(self.drawable.surface, false)
     -- The surface can be nil if the drawable's parent was already finalized
@@ -357,8 +358,17 @@ function drawable.new(d, widget_context_skeleton, drawable_name)
         ret._need_complete_repaint = true
         ret:draw()
     end
-    drawables[ret._do_complete_repaint] = true
+    drawables_draw[ret.draw] = true
+    drawables_force_complete_repaint[ret._do_complete_repaint] = true
+
+    -- Do a full redraw if the surface changes (the new surface has no content yet)
     d:connect_signal("property::surface", ret._do_complete_repaint)
+
+    -- Do a normal redraw when the drawable moves. This will likely do nothing
+    -- in most cases, but it makes us do a complete repaint when we are moved to
+    -- a different screen.
+    d:connect_signal("property::x", ret.draw)
+    d:connect_signal("property::y", ret.draw)
 
     -- Currently we aren't redrawing on move (signals not connected).
     -- :set_bg() will later recompute this.
@@ -390,6 +400,15 @@ function drawable.new(d, widget_context_skeleton, drawable_name)
 
     -- Set up our callbacks for repaints
     ret._redraw_callback = function(hierar, arg)
+        -- XXX: lgi will lead us into memory-corruption-land when we use an
+        -- object after it was GC'd. Try to detect this situation by checking if
+        -- the drawable is still valid. This is only a weak indication, but it
+        -- seems to be the best that we can do. The problem is that the drawable
+        -- could not yet be GC'd, but is pending finalisation, while the
+        -- cairo.Region below was already GC'd. This would still lead to corruption.
+        if not ret.drawable.valid then
+            return
+        end
         if ret._widget_hierarchy_callback_arg ~= arg then
             return
         end
@@ -427,10 +446,20 @@ end
 
 -- Redraw all drawables when the wallpaper changes
 capi.awesome.connect_signal("wallpaper_changed", function()
-    for k in pairs(drawables) do
+    for k in pairs(drawables_force_complete_repaint) do
         k()
     end
 end)
+
+-- Give drawables a chance to react to screen changes
+local function draw_all()
+    for k in pairs(drawables_draw) do
+        k()
+    end
+end
+screen.connect_signal("property::geometry", draw_all)
+screen.connect_signal("added", draw_all)
+screen.connect_signal("removed", draw_all)
 
 return setmetatable(drawable, { __call = function(_, ...) return drawable.new(...) end })
 

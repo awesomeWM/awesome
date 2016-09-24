@@ -177,9 +177,6 @@ local function new(args)
 
     setup_signals(ret)
     ret.draw = ret._drawable.draw
-    ret.widget_at = function(_, widget, x, y, width, height)
-        return ret._drawable:widget_at(widget, x, y, width, height)
-    end
 
     -- Set the default background
     ret:set_bg(args.bg or beautiful.bg_normal)

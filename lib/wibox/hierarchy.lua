@@ -23,6 +23,7 @@ local function hierarchy_new(redraw_callback, layout_callback, callback_arg)
         _matrix_to_device = matrix.identity,
         _need_update = true,
         _widget = nil,
+        _context = nil,
         _redraw_callback = redraw_callback,
         _layout_callback = layout_callback,
         _callback_arg = callback_arg,
@@ -73,6 +74,7 @@ end
 local hierarchy_update
 function hierarchy_update(self, context, widget, width, height, region, matrix_to_parent, matrix_to_device)
     if (not self._need_update) and self._widget == widget and
+            self._context == context and
             self._size.width == width and self._size.height == height and
             matrix.equals(self._matrix, matrix_to_parent) and
             matrix.equals(self._matrix_to_device, matrix_to_device) then
@@ -101,6 +103,7 @@ function hierarchy_update(self, context, widget, width, height, region, matrix_t
 
     -- Save the arguments we need to save
     self._widget = widget
+    self._context = context
     self._size.width = width
     self._size.height = height
     self._matrix = matrix_to_parent

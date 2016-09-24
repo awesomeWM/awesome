@@ -1138,7 +1138,7 @@ client_border_refresh(void)
 static void
 client_geometry_refresh(void)
 {
-    client_ignore_enterleave_events();
+    bool ignored_enterleave = false;
     foreach(_c, globalconf.clients)
     {
         client_t *c = *_c;
@@ -1164,6 +1164,11 @@ client_geometry_refresh(void)
                 && AREA_EQUAL(real_geometry, c->x11_client_geometry))
             continue;
 
+        if (!ignored_enterleave) {
+            client_ignore_enterleave_events();
+            ignored_enterleave = true;
+        }
+
         xcb_configure_window(globalconf.connection, c->frame_window,
                 XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
                 (uint32_t[]) { geometry.x, geometry.y, geometry.width, geometry.height });
@@ -1177,7 +1182,8 @@ client_geometry_refresh(void)
         /* ICCCM 4.2.3 says something else, but Java always needs this... */
         client_send_configure(c);
     }
-    client_restore_enterleave_events();
+    if (ignored_enterleave)
+        client_restore_enterleave_events();
 }
 
 void
