@@ -219,6 +219,12 @@ for f in $tests; do
     # Tail the log and quit, when awesome quits.
     tail -n 100000 -f --pid $awesome_pid $awesome_log
 
+    set +e
+    wait $awesome_pid
+    code=$?
+    set -e
+    [ "$code" != 0 ] && echo "Awesome exited with status code $code"
+
     if ! grep -q -E '^Test finished successfully$' $awesome_log ||
             grep -q -E '[Ee]rror|assertion failed' $awesome_log; then
         echo "===> ERROR running $f! <==="
