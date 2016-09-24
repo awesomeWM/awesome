@@ -79,6 +79,9 @@ end
 
 local has_error
 
+-- Disable awful.screen.preferred(c)
+awful.rules.rules[1].properties.screen = nil
+
 table.insert(steps, function()
     -- Make sure there is no extra callbacks that causes double screen changes
     -- (regress #1028 #1052)
