@@ -991,9 +991,42 @@ xerror(xcb_generic_error_t *e)
     return;
 }
 
+static bool
+should_ignore(xcb_generic_event_t *event)
+{
+    uint8_t response_type = XCB_EVENT_RESPONSE_TYPE(event);
+
+    /* Remove completed sequences */
+    uint32_t sequence = event->full_sequence;
+    while (globalconf.ignore_enter_leave_events.len > 0) {
+        uint32_t end = globalconf.ignore_enter_leave_events.tab[0].end.sequence;
+        /* Do if (end >= sequence) break;, but handle wrap-around: The above is
+         * equivalent to end-sequence > 0 (assuming unlimited precision). With
+         * int32_t, this would mean that the sign bit is cleared, which means:
+         */
+        if (end - sequence < UINT32_MAX / 2)
+            break;
+        sequence_pair_array_take(&globalconf.ignore_enter_leave_events, 0);
+    }
+
+    /* Check if this event should be ignored */
+    if ((response_type == XCB_ENTER_NOTIFY || response_type == XCB_LEAVE_NOTIFY)
+            && globalconf.ignore_enter_leave_events.len > 0) {
+        uint32_t begin = globalconf.ignore_enter_leave_events.tab[0].begin.sequence;
+        uint32_t end   = globalconf.ignore_enter_leave_events.tab[0].end.sequence;
+        if (sequence >= begin && sequence <= end)
+            return true;
+    }
+
+    return false;
+}
+
 void event_handle(xcb_generic_event_t *event)
 {
     uint8_t response_type = XCB_EVENT_RESPONSE_TYPE(event);
+
+    if (should_ignore(event))
+        return;
 
     if(response_type == 0)
     {
