@@ -217,7 +217,11 @@ for f in $tests; do
     wait $awesome_pid
     code=$?
     set -e
-    [ "$code" != 0 ] && echo "Awesome exited with status code $code"
+    case $code in
+        0) ;;
+        124) echo "Awesome was killed due to timeout after $timeout_stale seconds" ;;
+        *) echo "Awesome exited with status code $code" ;;
+    esac
 
     if ! grep -q -E '^Test finished successfully$' $awesome_log ||
             grep -q -E '[Ee]rror|assertion failed' $awesome_log; then
