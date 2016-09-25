@@ -182,7 +182,8 @@ fi
 start_awesome() {
     export DISPLAY="$D"
     cd $build_dir
-    DISPLAY="$D" "$AWESOME" -c "$RC_FILE" $AWESOME_OPTIONS > $awesome_log 2>&1 &
+    # Kill awesome after $timeout_stale seconds (e.g. for errors during test setup).
+    DISPLAY="$D" timeout $timeout_stale "$AWESOME" -c "$RC_FILE" $AWESOME_OPTIONS > $awesome_log 2>&1 &
     awesome_pid=$!
     cd - >/dev/null
 
@@ -209,20 +210,23 @@ for f in $tests; do
     # Send the test file to awesome.
     cat $f | DISPLAY=$D "$AWESOME_CLIENT" 2>&1
 
-    # Kill awesome after 1 minute (e.g. with errors during test setup).
-    (sleep $timeout_stale
-      if [ "$(ps -o comm= $awesome_pid)" = "${AWESOME##*/}" ]; then
-        echo "Killing (stale?!) awesome (PID $awesome_pid) after $timeout_stale seconds."
-        kill $awesome_pid
-      fi) &
-
     # Tail the log and quit, when awesome quits.
     tail -n 100000 -f --pid $awesome_pid $awesome_log
+
+    set +e
+    wait $awesome_pid
+    code=$?
+    set -e
+    case $code in
+        0) ;;
+        124) echo "Awesome was killed due to timeout after $timeout_stale seconds" ;;
+        *) echo "Awesome exited with status code $code" ;;
+    esac
 
     if ! grep -q -E '^Test finished successfully$' $awesome_log ||
             grep -q -E '[Ee]rror|assertion failed' $awesome_log; then
         echo "===> ERROR running $f! <==="
-        grep --color -o --binary-files=text -E '.*[Ee]rror.*|.*assertion failed.*' $awesome_log
+        grep --color -o --binary-files=text -E '.*[Ee]rror.*|.*assertion failed.*' $awesome_log || true
         errors=$(expr $errors + 1)
     fi
 done
