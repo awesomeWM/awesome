@@ -93,8 +93,12 @@ table.insert(steps, function()
         x = w.x + w.width - 20 - 12.5,
         y = w.y + 125 + 12.5,
     }
+    return true
+end)
 
-    assert(tt.current_position == "top")
+-- Test that the above move had the intended effect
+table.insert(steps, function()
+    assert(tt.current_position == "top", tt.current_position)
 
     return true
 end)
