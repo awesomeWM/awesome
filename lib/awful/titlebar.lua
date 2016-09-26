@@ -25,6 +25,191 @@ local titlebar = {
     widget = {}
 }
 
+--- The titlebar foreground (text) color.
+-- @beautiful beautiful.titlebar_fg_normal
+-- @param color
+-- @see gears.color
+
+--- The titlebar background color.
+-- @beautiful beautiful.titlebar_bg_normal
+-- @param color
+-- @see gears.color
+
+--- The titlebar background image image.
+-- @beautiful beautiful.titlebar_bgimage_normal
+-- @param surface
+-- @see gears.surface
+
+--- The titlebar foreground (text) color.
+-- @beautiful beautiful.titlebar_fg
+-- @param color
+-- @see gears.color
+
+--- The titlebar background color.
+-- @beautiful beautiful.titlebar_bg
+-- @param color
+-- @see gears.color
+
+--- The titlebar background image image.
+-- @beautiful beautiful.titlebar_bgimage
+-- @param surface
+-- @see gears.surface
+
+--- The focused titlebar foreground (text) color.
+-- @beautiful beautiful.titlebar_fg_focus
+-- @param color
+-- @see gears.color
+
+--- The focused titlebar background color.
+-- @beautiful beautiful.titlebar_bg_focus
+-- @param color
+-- @see gears.color
+
+--- The focused titlebar background image image.
+-- @beautiful beautiful.titlebar_bgimage_focus
+-- @param surface
+-- @see gears.surface
+
+--- floating_button_normal.
+-- @beautiful beautiful.titlebar_floating_button_normal
+-- @param surface
+-- @see gears.surface
+
+--- maximized_button_normal.
+-- @beautiful beautiful.titlebar_maximized_button_normal
+-- @param surface
+-- @see gears.surface
+
+--- minimize_button_normal
+-- @beautiful beautiful.titlebar_minimize_button_normal
+-- @param surface
+-- @see gears.surface
+
+--- close_button_normal.
+-- @beautiful beautiful.titlebar_close_button_normal
+-- @param surface
+-- @see gears.surface
+
+--- ontop_button_normal.
+-- @beautiful beautiful.titlebar_ontop_button_normal
+-- @param surface
+-- @see gears.surface
+
+--- sticky_button_normal.
+-- @beautiful beautiful.titlebar_sticky_button_normal
+-- @param surface
+-- @see gears.surface
+
+--- floating_button_focus.
+-- @beautiful beautiful.titlebar_floating_button_focus
+-- @param surface
+-- @see gears.surface
+
+--- maximized_button_focus.
+-- @beautiful beautiful.titlebar_maximized_button_focus
+-- @param surface
+-- @see gears.surface
+
+--- minimize_button_focus.
+-- @beautiful beautiful.titlebar_minimize_button_focus
+-- @param surface
+-- @see gears.surface
+
+--- close_button_focus.
+-- @beautiful beautiful.titlebar_close_button_focus
+-- @param surface
+-- @see gears.surface
+
+--- ontop_button_focus.
+-- @beautiful beautiful.titlebar_ontop_button_focus
+-- @param surface
+-- @see gears.surface
+
+--- sticky_button_focus.
+-- @beautiful beautiful.titlebar_sticky_button_focus
+-- @param surface
+-- @see gears.surface
+
+--- floating_button_normal_active.
+-- @beautiful beautiful.titlebar_floating_button_normal_active
+-- @param surface
+-- @see gears.surface
+
+--- maximized_button_normal_active.
+-- @beautiful beautiful.titlebar_maximized_button_normal_active
+-- @param surface
+-- @see gears.surface
+
+--- ontop_button_normal_active.
+-- @beautiful beautiful.titlebar_ontop_button_normal_active
+-- @param surface
+-- @see gears.surface
+
+--- sticky_button_normal_active.
+-- @beautiful beautiful.titlebar_sticky_button_normal_active
+-- @param surface
+-- @see gears.surface
+
+--- floating_button_focus_active.
+-- @beautiful beautiful.titlebar_floating_button_focus_active
+-- @param surface
+-- @see gears.surface
+
+--- maximized_button_focus_active.
+-- @beautiful beautiful.titlebar_maximized_button_focus_active
+-- @param surface
+-- @see gears.surface
+
+--- ontop_button_focus_active.
+-- @beautiful beautiful.titlebar_ontop_button_focus_active
+-- @param surface
+-- @see gears.surface
+
+--- sticky_button_focus_active.
+-- @beautiful beautiful.titlebar_sticky_button_focus_active
+-- @param surface
+-- @see gears.surface
+
+--- floating_button_normal_inactive.
+-- @beautiful beautiful.titlebar_floating_button_normal_inactive
+-- @param surface
+-- @see gears.surface
+
+--- maximized_button_normal_inactive.
+-- @beautiful beautiful.titlebar_maximized_button_normal_inactive
+-- @param surface
+-- @see gears.surface
+
+--- ontop_button_normal_inactive.
+-- @beautiful beautiful.titlebar_ontop_button_normal_inactive
+-- @param surface
+-- @see gears.surface
+
+--- sticky_button_normal_inactive.
+-- @beautiful beautiful.titlebar_sticky_button_normal_inactive
+-- @param surface
+-- @see gears.surface
+
+--- floating_button_focus_inactive.
+-- @beautiful beautiful.titlebar_floating_button_focus_inactive
+-- @param surface
+-- @see gears.surface
+
+--- maximized_button_focus_inactive.
+-- @beautiful beautiful.titlebar_maximized_button_focus_inactive
+-- @param surface
+-- @see gears.surface
+
+--- ontop_button_focus_inactive.
+-- @beautiful beautiful.titlebar_ontop_button_focus_inactive
+-- @param surface
+-- @see gears.surface
+
+--- sticky_button_focus_inactive.
+-- @beautiful beautiful.titlebar_sticky_button_focus_inactive
+-- @param surface
+-- @see gears.surface
+
 --- Set a declarative widget hierarchy description.
 -- See [The declarative layout system](../documentation/03-declarative-layout.md.html)
 -- @param args An array containing the widgets disposition

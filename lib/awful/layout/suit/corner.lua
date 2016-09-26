@@ -14,6 +14,26 @@ local math = math
 local capi = {screen = screen}
 local tag = require("awful.tag")
 
+--- The cornernw layout layoutbox icon.
+-- @beautiful beautiful.layout_cornernw
+-- @param surface
+-- @see gears.surface
+
+--- The cornerne layout layoutbox icon.
+-- @beautiful beautiful.layout_cornerne
+-- @param surface
+-- @see gears.surface
+
+--- The cornersw layout layoutbox icon.
+-- @beautiful beautiful.layout_cornersw
+-- @param surface
+-- @see gears.surface
+
+--- The cornerse layout layoutbox icon.
+-- @beautiful beautiful.layout_cornerse
+-- @param surface
+-- @see gears.surface
+
 --- Actually arrange clients of p.clients for corner layout
 -- @param p Mandatory table containing required informations for layouts
 -- (clients to arrange, workarea geometry, etc.)

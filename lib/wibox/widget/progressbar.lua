@@ -69,13 +69,13 @@ local data = setmetatable({}, { __mode = "k" })
 -- @param value The value.
 
 --- The progressbar background color.
--- @beautiful beautiful.graph_bg
+-- @beautiful beautiful.progressbar_bg
 
 --- The progressbar foreground color.
--- @beautiful beautiful.graph_fg
+-- @beautiful beautiful.progressbar_fg
 
 --- The progressbar border color.
--- @beautiful beautiful.graph_border_color
+-- @beautiful beautiful.progressbar_border_color
 
 local properties = { "width", "height", "border_color",
                      "color", "background_color",

@@ -4,7 +4,7 @@
 -- @author Uli Schlachter
 -- @copyright 2014 Uli Schlachter
 -- @release @AWESOME_VERSION@
--- @module gears.timer
+-- @classmod gears.timer
 ---------------------------------------------------------------------------
 
 local capi = { awesome = awesome }
@@ -30,10 +30,13 @@ local protected_call = require("gears.protected_call")
 -- @table timer
 
 --- When the timer is started.
--- @signal start
+-- @signal .start
 
 --- When the timer is stopped.
--- @signal stop
+-- @signal .stop
+
+--- When the timer had a timeout event.
+-- @signal .timeout
 
 local timer = { mt = {} }
 
@@ -71,6 +74,15 @@ function timer:again()
     self:start()
 end
 
+--- The timer is started.
+-- @property started
+-- @param boolean
+
+--- The timer timeout value.
+-- **Signal:** property::timeout
+-- @property timeout
+-- @param number
+
 local timer_instance_mt = {
     __index = function(self, property)
         if property == "timeout" then
@@ -94,6 +106,7 @@ local timer_instance_mt = {
 -- @tparam table args Arguments.
 -- @tparam number args.timeout Timeout in seconds (e.g. 1.5).
 -- @treturn timer
+-- @function gears.timer
 timer.new = function(args)
     local ret = object()
 
@@ -115,6 +128,7 @@ end
 -- @tparam function callback Function to run.
 -- @treturn timer The timer object that was set up.
 -- @see timer.weak_start_new
+-- @function gears.timer.start_new
 function timer.start_new(timeout, callback)
     local t = timer.new({ timeout = timeout })
     t:connect_signal("timeout", function()
@@ -136,6 +150,7 @@ end
 -- @tparam function callback Function to start.
 -- @treturn timer The timer object that was set up.
 -- @see timer.start_new
+-- @function gears.timer.weak_start_new
 function timer.weak_start_new(timeout, callback)
     local indirection = setmetatable({}, { __mode = "v" })
     indirection.callback = callback
@@ -158,6 +173,7 @@ end)
 --- Call the given function at the end of the current main loop iteration
 -- @tparam function callback The function that should be called
 -- @param ... Arguments to the callback function
+-- @function gears.timer.delayed_call
 function timer.delayed_call(callback, ...)
     assert(type(callback) == "function", "callback must be a function, got: " .. type(callback))
     table.insert(delayed_calls, { callback, ... })

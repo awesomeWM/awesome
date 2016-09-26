@@ -149,29 +149,29 @@ end
 -- @param screen The screen to draw tasklist for.
 -- @param filter Filter function to define what clients will be listed.
 -- @param buttons A table with buttons binding to set.
--- @param style The style overrides default theme.
+-- @tparam[opt={}] table style The style overrides default theme.
+-- @tparam[opt=nil] string|pattern style.fg_normal
+-- @tparam[opt=nil] string|pattern style.bg_normal
+-- @tparam[opt=nil] string|pattern style.fg_focus
+-- @tparam[opt=nil] string|pattern style.bg_focus
+-- @tparam[opt=nil] string|pattern style.fg_urgent
+-- @tparam[opt=nil] string|pattern style.bg_urgent
+-- @tparam[opt=nil] string|pattern style.fg_minimize
+-- @tparam[opt=nil] string|pattern style.bg_minimize
+-- @tparam[opt=nil] string style.bg_image_normal
+-- @tparam[opt=nil] string style.bg_image_focus
+-- @tparam[opt=nil] string style.bg_image_urgent
+-- @tparam[opt=nil] string style.bg_image_minimize
+-- @tparam[opt=nil] boolean style.tasklist_disable_icon
+-- @tparam[opt=nil] string style.font
+-- @tparam[opt=nil] string style.font_focus
+-- @tparam[opt=nil] string style.font_minimized
+-- @tparam[opt=nil] string style.font_urgent
 -- @param[opt] update_function Function to create a tag widget on each
 --   update. See `awful.widget.common.list_update`.
 -- @tparam[opt] table base_widget Container widget for tag widgets. Default
 --   is `wibox.layout.flex.horizontal`.
--- @param base_widget.align The alignment ("left", "center" or "right").
--- @param base_widget.bg_normal The background color for unfocused client.
--- @param base_widget.bg_normal The background color for unfocused client.
--- @param base_widget.fg_normal The foreground color for unfocused client.
--- @param base_widget.bg_focus The background color for focused client.
--- @param base_widget.fg_focus The foreground color for focused client.
--- @param base_widget.bg_urgent The background color for urgent clients.
--- @param base_widget.fg_urgent The foreground color for urgent clients.
--- @param base_widget.bg_minimize The background color for minimized clients.
--- @param base_widget.fg_minimize The foreground color for minimized clients.
--- @param base_widget.floating Symbol to use for floating clients.
--- @param base_widget.ontop Symbol to use for ontop clients.
--- @param base_widget.above Symbol to use for clients kept above others.
--- @param base_widget.below Symbol to use for clients kept below others.
--- @param base_widget.maximized Symbol to use for clients that have been maximized (vertically and horizontally).
--- @param base_widget.maximized_horizontal Symbol to use for clients that have been horizontally maximized.
--- @param base_widget.maximized_vertical Symbol to use for clients that have been vertically maximized.
--- @param base_widget.font The font.
+-- @function awful.tasklist
 function tasklist.new(screen, filter, buttons, style, update_function, base_widget)
     screen = get_screen(screen)
     local uf = update_function or common.list_update

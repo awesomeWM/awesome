@@ -12,6 +12,16 @@ local pairs = pairs
 
 local max = {}
 
+--- The max layout layoutbox icon.
+-- @beautiful beautiful.layout_max
+-- @param surface
+-- @see gears.surface
+
+--- The fullscreen layout layoutbox icon.
+-- @beautiful beautiful.layout_fullscreen
+-- @param surface
+-- @see gears.surface
+
 local function fmax(p, fs)
     -- Fullscreen?
     local area

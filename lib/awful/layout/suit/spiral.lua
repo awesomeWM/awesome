@@ -13,6 +13,16 @@
 local ipairs = ipairs
 local math = math
 
+--- The spiral layout layoutbox icon.
+-- @beautiful beautiful.layout_spiral
+-- @param surface
+-- @see gears.surface
+
+--- The dwindle layout layoutbox icon.
+-- @beautiful beautiful.layout_dwindle
+-- @param surface
+-- @see gears.surface
+
 local spiral = {}
 
 local function do_spiral(p, _spiral)
