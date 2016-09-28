@@ -23,13 +23,16 @@ read_globals = {
     "mouse",
     "mousegrabber",
     "root",
-    "screen",
     "selection",
     "tag",
     "window",
 }
--- May not be read-only due to client.focus
+
+-- screen may not be read-only, because newer luacheck versions complain about
+-- screen[1].tags[1].selected = true.
+-- client may not be read-only due to client.focus.
 globals = {
+    "screen",
     "client"
 }
 
