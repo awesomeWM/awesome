@@ -15,7 +15,26 @@ local aclient = require("awful.client")
 local aplace = require("awful.placement")
 local asuit = require("awful.layout.suit")
 
-local ewmh = {}
+local ewmh = {
+    generic_activate_filters    = {},
+    contextual_activate_filters = {},
+}
+
+--- The list of all registered generic request::activate (focus stealing)
+-- filters. If a filter is added to only one context, it will be in
+-- `ewmh.contextual_activate_filters`["context_name"].
+-- @table[opt={}] generic_activate_filters
+-- @see ewmh.activate
+-- @see ewmh.add_activate_filter
+-- @see ewmh.remove_activate_filter
+
+--- The list of all registered contextual request::activate (focus stealing)
+-- filters. If a filter is added to only one context, it will be in
+-- `ewmh.generic_activate_filters`.
+-- @table[opt={}] contextual_activate_filters
+-- @see ewmh.activate
+-- @see ewmh.add_activate_filter
+-- @see ewmh.remove_activate_filter
 
 --- Update a client's settings when its geometry changes, skipping signals
 -- resulting from calls within.
@@ -57,15 +76,96 @@ function ewmh.activate(c, context, hints) -- luacheck: no unused args
 
     if c.focusable == false and not hints.force then return end
 
-    if c:isvisible() then
-        client.focus = c
+    local found, ret = false
+
+    -- Execute the filters until something handle the request
+    for _, tab in ipairs {
+        ewmh.contextual_activate_filters[context] or {},
+        ewmh.generic_activate_filters
+    } do
+        for i=#tab, 1, -1 do
+            ret = tab[i](c, context, hints)
+            if ret ~= nil then found=true; break end
+        end
+
+        if found then break end
     end
+
+    if ret ~= false and c:isvisible() then
+        client.focus = c
+    elseif ret == false and not hints.force then
+        return
+    end
+
     if hints and hints.raise then
         c:raise()
         if not awesome.startup and not c:isvisible() then
             c.urgent = true
         end
     end
+end
+
+--- Add an activate (focus stealing) filter function.
+--
+-- The callback takes the following parameters:
+--
+-- * **c** (*client*) The client requesting the activation
+-- * **context** (*string*) The activation context.
+-- * **hints** (*table*) Some additional hints (depending on the context)
+--
+-- If the callback returns `true`, the client will be activated unless the `force`
+-- hint is set. If the callback returns `false`, the activation request is
+-- cancelled. If the callback returns `nil`, the previous callback will be
+-- executed. This will continue until either a callback handles the request or
+-- when it runs out of callbacks. In that case, the request will be granted if
+-- the client is visible.
+--
+-- For example, to block Firefox from stealing the focus, use:
+--
+--    awful.ewmh.add_activate_filter(function(c, "ewmh")
+--        if c.class == "Firefox" then return false end
+--    end)
+--
+-- @tparam function f The callback
+-- @tparam[opt] string context The `request::activate` context
+-- @see generic_activate_filters
+-- @see contextual_activate_filters
+-- @see remove_activate_filter
+function ewmh.add_activate_filter(f, context)
+    if not context then
+        table.insert(ewmh.generic_activate_filters, f)
+    else
+        ewmh.contextual_activate_filters[context] =
+            ewmh.contextual_activate_filters[context] or {}
+
+        table.insert(ewmh.contextual_activate_filters[context], f)
+    end
+end
+
+--- Remove an activate (focus stealing) filter function.
+-- This is an helper to avoid dealing with `ewmh.add_activate_filter` directly.
+-- @tparam function f The callback
+-- @tparam[opt] string context The `request::activate` context
+-- @treturn boolean If the callback existed
+-- @see generic_activate_filters
+-- @see contextual_activate_filters
+-- @see add_activate_filter
+function ewmh.remove_activate_filter(f, context)
+    local tab = context and (ewmh.contextual_activate_filters[context] or {})
+        or ewmh.generic_activate_filters
+
+    for k, v in ipairs(tab) do
+        if v == f then
+            table.remove(tab, k)
+
+            -- In case the callback is there multiple time.
+            ewmh.remove_activate_filter(f, context)
+
+            return true
+        end
+    end
+
+    return false
 end
 
 -- Get tags that are on the same screen as the client. This should _almost_
