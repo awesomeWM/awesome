@@ -280,6 +280,17 @@ function prompt.run(args, textbox, exe_callback, completion_callback,
     local selectall = args.selectall
     local hooks = {}
 
+    -- This function has already an absurd number of parameters, allow them
+    -- to be set using the args to avoid a "nil, nil, nil, nil, foo" scenario
+    keypressed_callback = keypressed_callback or args.keypressed_callback
+    changed_callback    = changed_callback    or args.changed_callback
+    done_callback       = done_callback       or args.done_callback
+    history_max         = history_max         or args.history_max
+    history_path        = history_path        or args.history_path
+    completion_callback = completion_callback or args.completion_callback
+    exe_callback        = exe_callback        or args.exe_callback
+    textbox             = textbox             or args.textbox
+
     search_term=nil
 
     history_check_load(history_path, history_max)
