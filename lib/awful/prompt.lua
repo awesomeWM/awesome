@@ -248,6 +248,8 @@ end
 -- with command as argument when a command was changed.
 -- @tparam[opt] function args.keypressed_callback The callback function to call
 --   with mod table, key and command as arguments when a key was pressed.
+-- @tparam[opt] function args.keyreleased_callback The callback function to call
+--   with mod table, key and command as arguments when a key was pressed.
 -- @tparam[opt] table args.hooks The "hooks" argument uses a syntax similar to
 --   `awful.key`.  It will call a function for the matching modifiers + key.
 --   It receives the command (widget text/input) as an argument.
@@ -407,10 +409,17 @@ function prompt.run(args, textbox, exe_callback, completion_callback,
 
     grabber = keygrabber.run(
     function (modifiers, key, event)
-        if event ~= "press" then return end
         -- Convert index array to hash table
         local mod = {}
         for _, v in ipairs(modifiers) do mod[v] = true end
+
+        if event ~= "press" then
+            if args.keyreleased_callback then
+                args.keyreleased_callback(mod, key, command)
+            end
+
+            return
+        end
 
         -- Call the user specified callback. If it returns true as
         -- the first result then return from the function. Treat the
