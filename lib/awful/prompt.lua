@@ -225,8 +225,29 @@ end
 -- history file. This does not delete new commands or history entries under
 -- user editing.
 --
--- @tparam table args A table with optional arguments: `fg_cursor`, `bg_cursor`,
---   `ul_cursor`, `prompt`, `text`, `selectall`, `font`, `autoexec`, `hooks`.
+-- @tparam[opt={}] table args A table with optional arguments
+-- @tparam[opt] gears.color args.fg_cursor
+-- @tparam[opt] gears.color args.bg_cursor
+-- @tparam[opt] gears.color args.ul_cursor
+-- @tparam[opt] widget args.prompt
+-- @tparam[opt] string args.text
+-- @tparam[opt] boolean args.selectall
+-- @tparam[opt] string args.font
+-- @tparam[opt] boolean args.autoexec
+-- @tparam widget args.textbox The textbox to use for the prompt.
+-- @tparam function args.exe_callback The callback function to call with command as argument
+-- when finished.
+-- @tparam function args.completion_callback The callback function to call to get completion.
+-- @tparam[opt] string args.history_path File path where the history should be
+-- saved, set nil to disable history
+-- @tparam[opt] function args.history_max Set the maximum entries in history
+-- file, 50 by default
+-- @tparam[opt] function args.done_callback The callback function to always call
+-- without arguments, regardless of whether the prompt was cancelled.
+-- @tparam[opt] function args.changed_callback The callback function to call
+-- with command as argument when a command was changed.
+-- @tparam[opt] function args.keypressed_callback The callback function to call
+--   with mod table, key and command as arguments when a key was pressed.
 -- @tparam[opt] table args.hooks The "hooks" argument uses a syntax similar to
 --   `awful.key`.  It will call a function for the matching modifiers + key.
 --   It receives the command (widget text/input) as an argument.
