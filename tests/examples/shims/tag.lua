@@ -5,6 +5,7 @@ local tag, meta = awesome._shim_fake_class()
 local function new_tag(_, args)
     local ret = gears_obj()
 
+    ret.data = {}
     ret.name = args.name or "test"
     ret.activated = true
     ret.selected = true

@@ -6,6 +6,7 @@ screen.count = 1
 
 local function create_screen(args)
     local s = gears_obj()
+    s.data = {}
 
     -- Copy the geo in case the args are mutated
     local geo = {

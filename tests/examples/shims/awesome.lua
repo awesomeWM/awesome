@@ -5,6 +5,7 @@ local gears_obj = require("gears.object")
 -- handlers.
 local function _shim_fake_class()
     local obj = gears_obj()
+    obj.data = {}
 
     local meta = {
         __index     = function()end,
