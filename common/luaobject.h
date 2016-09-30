@@ -173,6 +173,8 @@ int luaA_object_emit_signal_simple(lua_State *);
         lua_newtable(L);                                                       \
         lua_newtable(L);                                                       \
         lua_setmetatable(L, -2);                                               \
+        lua_newtable(L);                                                       \
+        lua_setfield(L, -2, "data");                                           \
         luaA_setuservalue(L, -2);                                              \
         lua_pushvalue(L, -1);                                                  \
         luaA_class_emit_signal(L, &(lua_class), "new", 1);                     \
