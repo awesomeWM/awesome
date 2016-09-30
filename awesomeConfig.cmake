@@ -8,8 +8,6 @@ set(CODENAME "The Fox")
 
 project(${PROJECT_AWE_NAME} C)
 
-set(CMAKE_BUILD_TYPE RELEASE)
-
 option(WITH_DBUS "build with D-BUS" ON)
 option(GENERATE_MANPAGES "generate manpages" ON)
 option(COMPRESS_MANPAGES "compress manpages" ON)

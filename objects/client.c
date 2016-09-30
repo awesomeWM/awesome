@@ -999,37 +999,36 @@ client_ban(client_t *c)
 
 /** This is part of The Bob Marley Algorithm: we ignore enter and leave window
  * in certain cases, like map/unmap or move, so we don't get spurious events.
+ * The implementation works by noting the range of sequence numbers for which we
+ * should ignore events. We grab the server to make sure that only we could
+ * generate events in this range.
  */
 void
 client_ignore_enterleave_events(void)
 {
-    foreach(c, globalconf.clients)
-    {
-        xcb_change_window_attributes(globalconf.connection,
-                                     (*c)->window,
-                                     XCB_CW_EVENT_MASK,
-                                     (const uint32_t []) { CLIENT_SELECT_INPUT_EVENT_MASK & ~(XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW) });
-        xcb_change_window_attributes(globalconf.connection,
-                                     (*c)->frame_window,
-                                     XCB_CW_EVENT_MASK,
-                                     (const uint32_t []) { FRAME_SELECT_INPUT_EVENT_MASK & ~(XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW) });
-    }
+    assert(globalconf.pending_enter_leave_begin.sequence == 0);
+    globalconf.pending_enter_leave_begin = xcb_grab_server(globalconf.connection);
+    /* If the connection is broken, we get a request with sequence number 0
+     * which would then trigger an assertion in
+     * client_restore_enterleave_events(). Handle this nicely.
+     */
+    if(xcb_connection_has_error(globalconf.connection))
+        fatal("X server connection broke (error %d)",
+                xcb_connection_has_error(globalconf.connection));
+    assert(globalconf.pending_enter_leave_begin.sequence != 0);
 }
 
 void
 client_restore_enterleave_events(void)
 {
-    foreach(c, globalconf.clients)
-    {
-        xcb_change_window_attributes(globalconf.connection,
-                                     (*c)->window,
-                                     XCB_CW_EVENT_MASK,
-                                     (const uint32_t []) { CLIENT_SELECT_INPUT_EVENT_MASK });
-        xcb_change_window_attributes(globalconf.connection,
-                                     (*c)->frame_window,
-                                     XCB_CW_EVENT_MASK,
-                                     (const uint32_t []) { FRAME_SELECT_INPUT_EVENT_MASK });
-    }
+    sequence_pair_t pair;
+
+    assert(globalconf.pending_enter_leave_begin.sequence != 0);
+    pair.begin = globalconf.pending_enter_leave_begin;
+    pair.end = xcb_no_operation(globalconf.connection);
+    xcb_ungrab_server(globalconf.connection);
+    globalconf.pending_enter_leave_begin.sequence = 0;
+    sequence_pair_array_append(&globalconf.ignore_enter_leave_events, pair);
 }
 
 /** Record that a client got focus.

@@ -55,6 +55,11 @@ typedef struct button_t button_t;
 typedef struct client_t client_t;
 typedef struct tag tag_t;
 typedef struct xproperty xproperty_t;
+struct sequence_pair {
+    xcb_void_cookie_t begin;
+    xcb_void_cookie_t end;
+};
+typedef struct sequence_pair sequence_pair_t;
 
 ARRAY_TYPE(button_t *, button)
 ARRAY_TYPE(tag_t *, tag)
@@ -62,6 +67,7 @@ ARRAY_TYPE(screen_t *, screen)
 ARRAY_TYPE(client_t *, client)
 ARRAY_TYPE(drawin_t *, drawin)
 ARRAY_TYPE(xproperty_t, xproperty)
+DO_ARRAY(sequence_pair_t, sequence_pair, DO_NOTHING)
 
 /** Main configuration structure */
 typedef struct
@@ -180,6 +186,9 @@ typedef struct
     uint32_t preferred_icon_size;
     /** Cached wallpaper information */
     cairo_surface_t *wallpaper;
+    /** List of enter/leave events to ignore */
+    sequence_pair_array_t ignore_enter_leave_events;
+    xcb_void_cookie_t pending_enter_leave_begin;
 } awesome_t;
 
 extern awesome_t globalconf;

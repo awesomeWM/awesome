@@ -297,10 +297,10 @@ static void
 drawin_map(lua_State *L, int widx)
 {
     drawin_t *drawin = luaA_checkudata(L, widx, &drawin_class);
-    /* Activate BMA */
-    client_ignore_enterleave_events();
     /* Apply any pending changes */
     drawin_apply_moveresize(drawin);
+    /* Activate BMA */
+    client_ignore_enterleave_events();
     /* Map the drawin */
     xcb_map_window(globalconf.connection, drawin->window);
     /* Deactivate BMA */
