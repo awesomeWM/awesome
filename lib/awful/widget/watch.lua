@@ -20,7 +20,7 @@
 --     221                 end
 --     222               end
 --     223             end),
---     224             mylayoutbox[s],
+--     224             s.mylayoutbox,
 -- 
 -- ![Example screenshot](../images/awful_widget_watch.png)
 --

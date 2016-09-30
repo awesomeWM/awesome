@@ -12,13 +12,12 @@ local function emit_refresh()
 end
 
 -- Make the layoutbox in the default config GC'able
--- luacheck: globals mywibox mylayoutbox
 for s in screen do
-    mywibox[s]:set_widget(wibox.widget.textbox())
-    mywibox[s].visible = false
+    s.mywibox:set_widget(wibox.widget.textbox())
+    s.mywibox.visible = false
+    s.mywibox = nil
+    s.mylayoutbox = nil
 end
-mywibox = nil
-mylayoutbox = nil
 emit_refresh()
 
 -- Test if some objects can be garbage collected

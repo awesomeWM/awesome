@@ -145,7 +145,7 @@ You can use a `clientkeys` binding.:
 Add the following key binding to your `globalkeys`:
 
     awful.key({ modkey }, "b", function ()
-        mywibox[mouse.screen].visible = not mywibox[mouse.screen].visible
+        mouse.screen.mywibox.visible = not mouse.screen.mywibox.visible
     end),
 
 ### How to toggle clients floating state?

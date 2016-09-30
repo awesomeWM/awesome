@@ -236,7 +236,7 @@ end
 --     hooks = {
 --       -- Apply startup notification properties with Shift-Return.
 --       {{"Shift"  }, "Return", function(command)
---         mypromptbox[awful.screen.focused()]:spawn_and_handle_error(
+--         awful.screen.focused().mypromptbox:spawn_and_handle_error(
 --           command, {floating=true})
 --       end},
 --       -- Override default behavior of "Return": launch commands prefixed

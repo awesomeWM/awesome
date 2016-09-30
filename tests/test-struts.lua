@@ -2,12 +2,11 @@ local placement   = require("awful.placement")
 local wibox       = require("wibox")
 local wibar       = require("awful.wibar")
 
--- luacheck: globals mywibox
 local steps = {}
 
 local parent, small
 
-local twibar, bwibar, lwibar, rwibar = mywibox[screen.primary]
+local twibar, bwibar, lwibar, rwibar = screen.primary.mywibox
 
 -- Test the struts without using wibars
 table.insert(steps, function()

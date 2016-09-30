@@ -39,7 +39,7 @@ and usually provide some options.
 
 Code:
 
-    mywibox[s] : setup {
+    s.mywibox : setup {
         s == 1 and my_first_widget, -- Only display on screen 1
         my_second_widget,
         { -- Add a background color/pattern for my_third_widget
@@ -66,7 +66,7 @@ declarative layout, or `nil`.
 
 Code:
 
-    mywibox[s] : setup {
+    s.mywibox : setup {
         {
             -- Force the textbox to always be 300 pixel long
             {
@@ -113,7 +113,7 @@ and `right` can be defined
 
 Code:
 
-    mywibox[s] : setup {
+    s.mywibox : setup {
         my_textbox1, -- Left
         nil,         -- Nothing in the middle
         my_textbox2, -- Right
@@ -129,7 +129,7 @@ is a simple circle widget:
 
 Code:
 
-    mywibox[s] : setup {
+    s.mywibox : setup {
         fit    = function(self, context, width, height)
             return height, height -- A square taking the full height
         end,
@@ -165,7 +165,7 @@ Code:
     tb:set_markup("Hello world! ")
     
     -- Repeat "tb" 3 times
-    mywibox[s] : setup {
+    s.mywibox : setup {
         tb,
         tb,
         tb,
@@ -198,7 +198,7 @@ underscore characters and non-numeric first character)
 
 Code:
 
-    mywibox[s] : setup {
+    s.mywibox : setup {
         {
             id     = "second",
             widget = wibox.widget.textbox
@@ -211,8 +211,8 @@ Code:
         layout = wibox.layout.fixed.horizontal,
     }
     
-    mywibox[s].first.second:set_markup("changed!")
-    mywibox[s]:get_children_by_id("third")[1]:set_markup("Also changed!")
+    s.mywibox.first.second:set_markup("changed!")
+    s.mywibox:get_children_by_id("third")[1]:set_markup("Also changed!")
 
 
 
@@ -234,7 +234,7 @@ Code:
         vicious.register(w, f(args))
     end
 
-    mywibox[s] : setup {
+    s.mywibox : setup {
         {
             vicious = {vicious.widgets.cpu, "CPU: $1%", 3},
             widget  = wibox.widget.textbox
@@ -273,7 +273,7 @@ Code:
     local l = wibox.widget.align()
     
     -- 3 circle
-    mywibox[s] : setup {
+    s.mywibox : setup {
         circle,
         circle,
         circle,
@@ -287,5 +287,5 @@ Code:
         table.insert(three_circle, circle)
     end
     
-    mywibox[s] : setup (three_circle)
+    s.mywibox : setup (three_circle)
 

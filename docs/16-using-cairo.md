@@ -160,4 +160,4 @@ some examples. Here is the most simple example you can get:
 This can then be used as `bgimage` for a `wibox`, `awful.wibar` or
 `wibox.container.background`:
 
-    mywibox[screen.primary].bgimage = img
+    screen.primary.mywibox.bgimage = img

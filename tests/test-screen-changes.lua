@@ -47,7 +47,7 @@ local steps = {
         assert(geom.width + 2*bw == 600, geom.width + 2*bw)
         assert(geom.height + 2*bw == 610, geom.height + 2*bw)
 
-        local wb = mywibox[fake_screen]
+        local wb = fake_screen.mywibox
         assert(wb.screen == fake_screen, tostring(wb.screen) .. " ~= " .. tostring(fake_screen))
         assert(wb.x == 100, wb.x)
         assert(wb.y == 110, wb.y)
@@ -58,19 +58,12 @@ local steps = {
 
     -- Step 3: Say goodbye to the screen
     function()
+        local wb = fake_screen.mywibox
         fake_screen:fake_remove()
 
         -- Now that the screen is invalid, the wibox shouldn't refer to it any
         -- more
-        assert(mywibox[fake_screen].screen ~= fake_screen)
-
-        -- TODO: This is a hack to make the test work, how to do this so that it
-        -- also works "in the wild"?
-        mypromptbox[fake_screen] = nil
-        mylayoutbox[fake_screen] = nil
-        mytaglist[fake_screen] = nil
-        mytasklist[fake_screen] = nil
-        mywibox[fake_screen] = nil
+        assert(wb.screen ~= fake_screen)
 
         -- Wrap in a weak table to allow garbage collection
         fake_screen = setmetatable({ fake_screen }, { __mode = "v" })
