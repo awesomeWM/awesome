@@ -101,26 +101,12 @@
 
 --- When the mouse enter a widget.
 -- @signal mouse::enter
--- @tparam table widget The widget
--- @tparam table geometry
--- @tparam number geometry.x The vertical position
--- @tparam number geometry.y The horizontal position
--- @tparam number geometry.width The widget
--- @tparam number geometry.height The height
--- @tparam drawable geometry.drawable The `drawable`
--- @tparam table geometry.matrix_to_parent The relative `gears.matrix`
--- @tparam table geometry.matrix_to_device The absolute `gears.matrix`
+-- @tparam table find_widgets_result The entry from the result of
+-- `wibox.drawable:find_widgets()` for the position that the mouse hit.
 -- @see mouse
 
 --- When the mouse leave a widget.
 -- @signal mouse::leave
--- @tparam table widget The widget
--- @tparam table geometry
--- @tparam number geometry.x The vertical position
--- @tparam number geometry.y The horizontal position
--- @tparam number geometry.width The widget
--- @tparam number geometry.height The height
--- @tparam drawable geometry.drawable The `drawable`
--- @tparam table geometry.matrix_to_parent The relative `gears.matrix`
--- @tparam table geometry.matrix_to_device The absolute `gears.matrix`
+-- @tparam table find_widgets_result The entry from the result of
+-- `wibox.drawable:find_widgets()` for the position that the mouse hit.
 -- @see mouse
