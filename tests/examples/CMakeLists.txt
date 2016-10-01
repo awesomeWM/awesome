@@ -5,10 +5,10 @@
 # actual X server or running Awesome process. These tests are not genuine
 # integration tests, but they are the next best thing.
 #
-# # As secondary goals, this module also generates images of the test result where
-# relevant. Those images are used by the documentation and help the developers
-# track user interface regressions and glitches. Finally, it also helps to find
-# broken code.
+# As secondary goals, this module also generates images of the test result
+# where relevant. Those images are used by the documentation and help the
+# developers track user interface regressions and glitches. Finally, it also
+# helps to find broken code.
 cmake_minimum_required(VERSION 3.0.0)
 
 # Get and update the LUA_PATH so the scripts can be executed without Awesome.
@@ -31,12 +31,12 @@ ${CMAKE_SOURCE_DIR}/tests/examples/shims/?;"
 # Done in 3 variables to avoid CMake from implicitly converting into a list.
 set(ENV{LUA_PATH} "${LUA_PATH3_}${LUA_PATH2_}${LUA_PATH_}")
 
-# Unset environment variables that would get in the way of evaluating LUA_PATH
+# Unset environment variables that would get in the way of evaluating LUA_PATH.
 unset(ENV{LUA_PATH_5_1})
 unset(ENV{LUA_PATH_5_2})
 unset(ENV{LUA_PATH_5_3})
 
-# The documentation images directory
+# The documentation images directory.
 set(IMAGE_DIR "${CMAKE_BINARY_DIR}/doc/images")
 file(MAKE_DIRECTORY "${IMAGE_DIR}")
 
@@ -47,7 +47,7 @@ file(MAKE_DIRECTORY "${IMAGE_DIR}")
 #  * convert " " lines into empty lines
 #  * drop lines ending with "--DOC_SOMETHING", they are handled elsewhere
 function(escape_string variable content escaped_content line_prefix)
-    # If DOC_HIDE_ALL is present, do nothing
+    # If DOC_HIDE_ALL is present, do nothing.
     if(variable MATCHES "--DOC_HIDE_ALL")
         return()
     endif()
@@ -63,7 +63,7 @@ function(escape_string variable content escaped_content line_prefix)
     set(${escaped_content} ${tmp_output} PARENT_SCOPE)
 endfunction()
 
-# Extract lines with the --DOC_HEADER marker
+# Extract lines with the --DOC_HEADER marker.
 function(extract_header variable pre_output post_output)
     string(REGEX REPLACE "\n" ";" var_lines "${variable}")
 
@@ -76,8 +76,8 @@ function(extract_header variable pre_output post_output)
             # Remove the header tag
             string(REGEX REPLACE "[ ]*--DOC_HEADER" "" LINE "${LINE}")
 
-            # ldoc is picky about what happen after the first --@, so split
-            # the output between all that come before and all that come after.
+            # ldoc is picky about what happens after the first --@, so split
+            # the output on that.
             if (NOT IS_POST AND LINE MATCHES "^--[ ]*@")
                 set(IS_POST 1)
             endif()
@@ -128,7 +128,7 @@ function(find_template result_variable file)
     set(${result_variable} "${path}/template.lua" PARENT_SCOPE)
 endfunction()
 
-# Get the namespace of a file
+# Get the namespace of a file.
 function(get_namespace result_variable file)
     get_filename_component(path "${file}" DIRECTORY)
     string(LENGTH "${SOURCE_DIR}/tests/examples" prefix_length)
@@ -138,20 +138,20 @@ function(get_namespace result_variable file)
     set(${result_variable} "${namespace}" PARENT_SCOPE)
 endfunction()
 
-# Execute a lua file.
+# Execute a Lua file.
 function(run_test test_path namespace escaped_content)
     find_template(template "${test_path}")
 
-    # Get the file name without the extension
+    # Get the file name without the extension.
     get_filename_component(${test_path} TEST_FILE_NAME NAME)
     set(IMAGE_PATH "${IMAGE_DIR}/AUTOGEN${namespace}_${TEST_FILE_NAME}")
 
-    # Use the example testing as coverage source
+    # Use the example testing as coverage source.
     if (USE_LCOV)
         set(LCOV_PATH ${SOURCE_DIR}/.luacov)
     endif()
 
-    # Execute the script, leave the image extension decision to the test
+    # Execute the script, leave the image extension decision to the test.
     # SVG is preferred, but PNG is better suited for some tests, like bitmap
     # patterns.
     execute_process(
@@ -160,7 +160,7 @@ function(run_test test_path namespace escaped_content)
         ERROR_VARIABLE  TEST_ERROR
     )
 
-    # If there is something on stderr, exit
+    # If there is something on stderr, exit.
     if (NOT TEST_ERROR STREQUAL "")
         message("${TEST_OUTPUT}")
         message("${TEST_ERROR}")
@@ -195,7 +195,7 @@ function(run_test test_path namespace escaped_content)
             "${TEST_DOC_CONTENT}\n--\n--**Usage example output**:\n--"
         )
 
-        # Markdown require an empty line before and after + 4 spaces.
+        # Markdown requires an empty line before and after, and 4 spaces.
         escape_string(
             "\n${TEST_OUTPUT}"
             "${TEST_DOC_CONTENT}" TEST_DOC_CONTENT "    "
@@ -208,7 +208,7 @@ function(run_test test_path namespace escaped_content)
 
     # Only add it if there is something to display.
     if(NOT ${TEST_CODE} STREQUAL "\n--")
-        # Do not use the @usage tag, use 4 spaces
+        # Do not use the @usage tag, but 4 spaces.
         file(READ ${test_path} tmp_content)
         if(NOT tmp_content MATCHES "--DOC_NO_USAGE")
             set(DOC_PREFIX "@usage")
@@ -222,12 +222,12 @@ function(run_test test_path namespace escaped_content)
         set(TEST_DOC_CONTENT "${TEST_DOC_CONTENT}${TEST_CODE}")
     endif()
 
-    # Export the outout to the parent scope
+    # Export the outout to the parent scope.
     set(${escaped_content} "${TEST_DOC_CONTENT}" PARENT_SCOPE)
 
 endfunction()
 
-# Find and run all test files
+# Find and run all test files.
 file(GLOB_RECURSE test_files LIST_DIRECTORIES false
     "${SOURCE_DIR}/tests/examples/*.lua")
 foreach(file ${test_files})
@@ -237,22 +237,22 @@ foreach(file ${test_files})
         file(RELATIVE_PATH relative_file "${SOURCE_DIR}" "${file}")
         message(STATUS "Running ${relative_file}...")
 
-        # Get the file name without the extension
+        # Get the file name without the extension.
         get_filename_component(TEST_FILE_NAME ${file} NAME_WE)
 
         get_namespace(namespace "${file}")
 
         run_test("${file}" "${namespace}" ESCAPED_CODE_EXAMPLE)
 
-        # Set the test name
+        # Set the test name.
         set(TEST_NAME DOC${namespace}_${TEST_FILE_NAME}_EXAMPLE)
 
         # Anything called @DOC_`namespace`_EXAMPLE@
-        # in the Lua or C sources will be replaced by the content if that
-        # variable during the pre-processing
-        # While at it, replace \" created by CMake by ', &quot; wont work in <code>
+        # in the Lua or C sources will be replaced by the content of that
+        # variable during the pre-processing.
+        # While at it, replace \" created by CMake by ',
+        # &quot; wont work in <code>.
         string(REPLACE "\"" "'" ${TEST_NAME} ${ESCAPED_CODE_EXAMPLE})
-
     endif()
 endforeach()
 
