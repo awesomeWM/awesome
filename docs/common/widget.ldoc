@@ -48,16 +48,18 @@
 -- @function emit_signal_recursive
 
 --- When the layout (size) change.
--- This signal is emited when the previous results of `:layout()` and `:fit()`
--- are no longer valid.
+-- This signal is emitted when the previous results of `:layout()` and `:fit()`
+-- are no longer valid.  Unless this signal is emitted, `:layout()` and `:fit()`
+-- must return the same result when called with the same arguments.
 -- @signal widget::layout_changed
 -- @see widget::redraw_needed
 
 --- When the widget content changed.
--- Unless this signal is emitted, `:layout()` and `:fit()` must return the same
--- result when called with the same arguments. In case this isn't the case,
--- use `widget::layout_changed`.
+-- This signal is emitted when the content of the widget changes. The widget will
+-- be redrawn, it is not re-layouted. Put differently, it is assumed that
+-- `:layout()` and `:fit()` would still return the same results as before.
 -- @signal widget::redraw_needed
+-- @see widget::layout_changed
 
 --- When a mouse button is pressed over the widget.
 -- The position of the mouse press relative to the widget while geometry
