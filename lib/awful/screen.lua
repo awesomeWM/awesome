@@ -33,10 +33,10 @@ data.padding = {}
 
 screen.mouse_per_screen = setmetatable({}, {__mode="k"})
 
---- Take an input geometry and substract/add a delta
--- @tparam table geo A geometry (width, height, x, y) table
--- @tparam table delta A delata table (top, bottom, x, y)
--- @treturn table A geometry (width, height, x, y) table
+--- Take an input geometry and substract/add a delta.
+-- @tparam table geo A geometry (width, height, x, y) table.
+-- @tparam table delta A delta table (top, bottom, x, y).
+-- @treturn table A geometry (width, height, x, y) table.
 local function apply_geometry_ajustments(geo, delta)
     return {
         x      = geo.x      + (delta.left or 0),
@@ -46,29 +46,29 @@ local function apply_geometry_ajustments(geo, delta)
     }
 end
 
---- Get the square distance between a `screen` and a point
+--- Get the square distance between a `screen` and a point.
 -- @deprecated awful.screen.getdistance_sq
 -- @param s Screen
 -- @param x X coordinate of point
 -- @param y Y coordinate of point
--- @return The squared distance of the screen to the provided point
+-- @return The squared distance of the screen to the provided point.
 -- @see screen.get_square_distance
 function screen.getdistance_sq(s, x, y)
     util.deprecate("Use s:get_square_distance(x, y) instead of awful.screen.getdistance_sq")
     return screen.object.get_square_distance(s, x, y)
 end
 
---- Get the square distance between a `screen` and a point
+--- Get the square distance between a `screen` and a point.
 -- @function screen.get_square_distance
 -- @tparam number x X coordinate of point
 -- @tparam number y Y coordinate of point
--- @treturn number The squared distance of the screen to the provided point
+-- @treturn number The squared distance of the screen to the provided point.
 function screen.object.get_square_distance(self, x, y)
     return grect.get_square_distance(get_screen(self).geometry, x, y)
 end
 
----
--- Return screen number corresponding to the given (pixel) coordinates.
+--- Return the screen index corresponding to the given (pixel) coordinates.
+--
 -- The number returned can be used as an index into the global
 -- `screen` table/object.
 -- @function awful.screen.getbycoord
@@ -77,20 +77,19 @@ end
 -- @treturn ?number The screen index
 function screen.getbycoord(x, y)
     local s, sgeos = capi.screen.primary, {}
-
     for scr in capi.screen do
         sgeos[scr] = scr.geometry
     end
-
     s = grect.get_closest_by_coord(sgeos, x, y) or s
-
     return s and s.index
 end
 
---- Give the focus to a screen, and move pointer to last known position on this
--- screen, or keep position relative to the current focused screen
+--- Move the focus to a screen.
+--
+-- This moves the mouse pointer to the last known position on the new screen,
+-- or keeps its position relative to the current focused screen.
 -- @function awful.screen.focus
--- @param _screen Screen number (defaults / falls back to mouse.screen).
+-- @screen _screen Screen number (defaults / falls back to mouse.screen).
 function screen.focus(_screen)
     client = client or require("awful.client")
     if type(_screen) == "number" and _screen > capi.screen.count() then _screen = screen.focused() end
@@ -102,7 +101,7 @@ function screen.focus(_screen)
 
     if not screen.mouse_per_screen[_screen] then
         -- This is the first time we enter this screen,
-        -- keep relative mouse position on the new screen
+        -- keep relative mouse position on the new screen.
         pos = capi.mouse.coords()
         local relx = (pos.x - s.geometry.x) / s.geometry.width
         local rely = (pos.y - s.geometry.y) / s.geometry.height
@@ -126,8 +125,10 @@ function screen.focus(_screen)
     end
 end
 
---- Give the focus to a screen, and move pointer to last known position on this
--- screen, or keep position relative to the current focused screen
+--- Move the focus to a screen in a specific direction.
+--
+-- This moves the mouse pointer to the last known position on the new screen,
+-- or keeps its position relative to the current focused screen.
 -- @function awful.screen.focus_bydirection
 -- @param dir The direction, can be either "up", "down", "left" or "right".
 -- @param _screen Screen.
@@ -145,16 +146,21 @@ function screen.focus_bydirection(dir, _screen)
     end
 end
 
---- Give the focus to a screen, and move pointer to last known position on this
--- screen, or keep position relative to the current focused screen
+--- Move the focus to a screen relative to the current one,
+--
+-- This moves the mouse pointer to the last known position on the new screen,
+-- or keeps its position relative to the current focused screen.
+--
 -- @function awful.screen.focus_relative
--- @param i Value to add to the current focused screen index. 1 will focus next
--- screen, -1 would focus the previous one.
-function screen.focus_relative(i)
-    return screen.focus(util.cycle(capi.screen.count(), screen.focused().index + i))
+-- @tparam int offset Value to add to the current focused screen index. 1 to
+--   focus the next one, -1 to focus the previous one.
+function screen.focus_relative(offset)
+    return screen.focus(util.cycle(capi.screen.count(),
+                                   screen.focused().index + offset))
 end
 
 --- Get or set the screen padding.
+--
 -- @deprecated awful.screen.padding
 -- @param _screen The screen object to change the padding on
 -- @param[opt=nil] padding The padding, a table with 'top', 'left', 'right' and/or
@@ -171,8 +177,8 @@ function screen.padding(_screen, padding)
 end
 
 --- The screen padding.
--- Add a "buffer" section on each side of the screen where the tiled client
--- wont be.
+--
+-- This adds a "buffer" section on each side of the screen.
 --
 -- **Signal:**
 --
@@ -180,15 +186,14 @@ end
 --
 -- @property padding
 -- @param table
--- @tfield integer table.x The horizontal position
--- @tfield integer table.y The vertical position
--- @tfield integer table.width The width
--- @tfield integer table.height The height
+-- @tfield integer table.left The padding on the left.
+-- @tfield integer table.right The padding on the right.
+-- @tfield integer table.top The padding on the top.
+-- @tfield integer table.bottom The padding on the bottom.
 
 function screen.object.get_padding(self)
     local p = data.padding[self] or {}
-
-    -- Create a copy to avoid accidental mutation and nil values
+    -- Create a copy to avoid accidental mutation and nil values.
     return {
         left   = p.left   or 0,
         right  = p.right  or 0,
@@ -215,6 +220,7 @@ function screen.object.set_padding(self, padding)
 end
 
 --- Get the preferred screen in the context of a client.
+--
 -- This is exactly the same as `awful.screen.focused` except that it avoids
 -- clients being moved when Awesome is restarted.
 -- This is used in the default `rc.lua` to ensure clients get assigned to the
@@ -225,7 +231,7 @@ function screen.preferred(c)
     return capi.awesome.startup and c.screen or screen.focused()
 end
 
---- The defaults arguments for `awful.screen.focused`
+--- The defaults arguments for `awful.screen.focused`.
 -- @tfield[opt=nil] table awful.screen.default_focused_args
 
 --- Get the focused screen.
@@ -248,21 +254,20 @@ function screen.focused(args)
 end
 
 --- Get a placement bounding geometry.
--- This method compute different variants of the "usable" screen geometry.
 --
--- Valid arguments are:
---
--- * **honor_padding**: Honor the screen padding.
--- * **honor_workarea**: Honor the screen workarea
--- * **margins**: Apply some margins on the output. This can wither be a number
---    or a table with *left*, *right*, *top* and *bottom* keys.
--- * **tag**: Use the tag screen instead of `s`
--- * **parent**: A parent drawable to use a base geometry
--- * **bounding_rect**: A bounding rectangle. This parameter is incompatible with
---    `honor_workarea`.
+-- This method computes the different variants of the "usable" screen geometry.
 --
 -- @function screen.get_bounding_geometry
 -- @tparam[opt={}] table args The arguments
+-- @tparam[opt=false] boolean args.honor_padding Wether to honor the screen's padding.
+-- @tparam[opt=false] boolean args.honor_workarea Wether to honor the screen's workarea.
+-- @tparam[opt] int|table args.margins Apply some margins on the output.
+--   This can either be a number or a table with *left*, *right*, *top*
+--   and *bottom* keys.
+-- @tag[opt] args.tag Use this tag's screen.
+-- @tparam[opt] drawable args.parent A parent drawable to use as base geometry.
+-- @tab[opt] args.bounding_rect A bounding rectangle. This parameter is
+--   incompatible with `honor_workarea`.
 -- @treturn table A table with *x*, *y*, *width* and *height*.
 -- @usage local geo = screen:get_bounding_geometry {
 --     honor_padding  = true,
@@ -297,19 +302,18 @@ function screen.object.get_bounding_geometry(self, args)
             }
         )
     end
-
     return geo
 end
 
---- Get the list of the screen visible clients.
+--- Get the list of visible clients for the screen.
 --
 -- Minimized and unmanaged clients are not included in this list as they are
 -- technically not on the screen.
 --
--- The clients on tags currently not visible are not part of this list.
+-- The clients on tags that are currently not visible are not part of this list.
 --
 -- @property clients
--- @param table The clients list, ordered top to bottom
+-- @param table The clients list, ordered from top to bottom.
 -- @see all_clients
 -- @see hidden_clients
 -- @see client.get
@@ -325,13 +329,12 @@ function screen.object.get_clients(s)
     return vcls
 end
 
---- Get the list of the clients assigned to the screen but not currently
--- visible.
+--- Get the list of clients assigned to the screen but not currently visible.
 --
--- This include minimized clients and clients on hidden tags.
+-- This includes minimized clients and clients on hidden tags.
 --
 -- @property hidden_clients
--- @param table The clients list, ordered top to bottom
+-- @param table The clients list, ordered from top to bottom.
 -- @see clients
 -- @see all_clients
 -- @see client.get
@@ -350,7 +353,7 @@ end
 --- Get all clients assigned to the screen.
 --
 -- @property all_clients
--- @param table The clients list, ordered top to bottom
+-- @param table The clients list, ordered from top to bottom.
 -- @see clients
 -- @see hidden_clients
 -- @see client.get
@@ -359,16 +362,16 @@ function screen.object.get_all_clients(s)
     return capi.client.get(s, true)
 end
 
---- Get the list of the screen tiled clients.
+--- Get the list of tiled clients for the screen.
 --
--- Same as s.clients, but excluding:
+-- Same as `clients`, but excluding:
 --
 -- * fullscreen clients
 -- * maximized clients
 -- * floating clients
 --
 -- @property tiled_clients
--- @param table The clients list, ordered top to bottom
+-- @param table The clients list, ordered from top to bottom.
 
 function screen.object.get_tiled_clients(s)
     local clients = s.clients
@@ -386,9 +389,10 @@ function screen.object.get_tiled_clients(s)
 end
 
 --- Call a function for each existing and created-in-the-future screen.
+--
 -- @function awful.screen.connect_for_each_screen
 -- @tparam function func The function to call.
--- @tparam screen func.screen The screen
+-- @screen func.screen The screen.
 function screen.connect_for_each_screen(func)
     for s in capi.screen do
         func(s)
@@ -405,12 +409,12 @@ end
 
 --- A list of all tags on the screen.
 --
--- This property is read only, use `tag.screen`, `awful.tag.add`, `awful.tag.new`
--- or `t:delete()` to alter this list.
+-- This property is read only, use `tag.screen`, `awful.tag.add`,
+-- `awful.tag.new` or `t:delete()` to alter this list.
 --
 -- @property tags
 -- @param table
--- @treturn table A table with all available tags
+-- @treturn table A table with all available tags.
 
 function screen.object.get_tags(s, unordered)
     local tags = {}
@@ -421,13 +425,12 @@ function screen.object.get_tags(s, unordered)
         end
     end
 
-    -- Avoid infinite loop, + save some time
+    -- Avoid infinite loop and save some time.
     if not unordered then
         table.sort(tags, function(a, b)
             return (a.index or math.huge) < (b.index or math.huge)
         end)
     end
-
     return tags
 end
 
@@ -453,7 +456,7 @@ end
 --- The first selected tag.
 -- @property selected_tag
 -- @param table
--- @treturn ?tag The first selected tag or nil
+-- @treturn ?tag The first selected tag or nil.
 -- @see tag.selected
 -- @see selected_tags
 

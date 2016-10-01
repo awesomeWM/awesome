@@ -279,7 +279,7 @@ end
 --- Get the master window.
 --
 -- @legacylayout awful.client.getmaster
--- @param[opt] s The screen number, defaults to focused screen.
+-- @screen_or_idx[opt=awful.screen.focused()] s The screen.
 -- @return The master window.
 function client.getmaster(s)
     s = s or screen.focused()

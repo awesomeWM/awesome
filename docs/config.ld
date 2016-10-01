@@ -32,6 +32,8 @@ tparam_alias('client', 'client.object')
 tparam_alias('tag', 'tag')
 -- Should be default, but is not.  Sets up "@tab" => "@tparam table".
 tparam_alias('tab', 'table')
+tparam_alias('screen', 'screen')
+tparam_alias('screen_or_idx', 'screen|int')
 
 -- Hack to get the functions and method on top of the signals and properties
 new_type("function", "Functions")
