@@ -62,51 +62,37 @@
 -- @see widget::layout_changed
 
 --- When a mouse button is pressed over the widget.
--- The position of the mouse press relative to the widget while geometry
--- contains the geometry of the widget relative to the wibox.
 -- @signal button::press
--- @tparam table widget The widget
--- @tparam number lx The relative horizontal position.
--- @tparam number ly The relative vertical position.
+-- @tparam number lx The horizontal position relative to the (0,0) position in
+-- the widget.
+-- @tparam number ly The vertical position relative to the (0,0) position in the
+-- widget.
 -- @tparam number button The button number.
 -- @tparam table mods The modifiers (mod4, mod1 (alt), Control, Shift)
--- @tparam table geometry
--- @tparam number geometry.x The vertical position
--- @tparam number geometry.y The horizontal position
--- @tparam number geometry.width The widget
--- @tparam number geometry.height The height
--- @tparam drawable geometry.drawable The `drawable`
--- @tparam table geometry.matrix_to_parent The relative `gears.matrix`
--- @tparam table geometry.matrix_to_device The absolute `gears.matrix`
+-- @tparam table find_widgets_result The entry from the result of
+-- @{wibox.drawable:find_widgets} for the position that the mouse hit.
 -- @see mouse
 
 --- When a mouse button is released over the widget.
--- The position of the mouse press relative to the widget while geometry
--- contains the geometry of the widget relative to the wibox.
 -- @signal button::release
--- @tparam table widget The widget
--- @tparam number lx The relative horizontal position.
--- @tparam number ly The relative vertical position.
+-- @tparam number lx The horizontal position relative to the (0,0) position in
+-- the widget.
+-- @tparam number ly The vertical position relative to the (0,0) position in the
+-- widget.
 -- @tparam number button The button number.
 -- @tparam table mods The modifiers (mod4, mod1 (alt), Control, Shift)
--- @tparam table geometry
--- @tparam number geometry.x The vertical position
--- @tparam number geometry.y The horizontal position
--- @tparam number geometry.width The widget
--- @tparam number geometry.height The height
--- @tparam drawable geometry.drawable The `drawable`
--- @tparam table geometry.matrix_to_parent The relative `gears.matrix`
--- @tparam table geometry.matrix_to_device The absolute `gears.matrix`
+-- @tparam table find_widgets_result The entry from the result of
+-- @{wibox.drawable:find_widgets} for the position that the mouse hit.
 -- @see mouse
 
 --- When the mouse enter a widget.
 -- @signal mouse::enter
 -- @tparam table find_widgets_result The entry from the result of
--- `wibox.drawable:find_widgets()` for the position that the mouse hit.
+-- @{wibox.drawable:find_widgets} for the position that the mouse hit.
 -- @see mouse
 
 --- When the mouse leave a widget.
 -- @signal mouse::leave
 -- @tparam table find_widgets_result The entry from the result of
--- `wibox.drawable:find_widgets()` for the position that the mouse hit.
+-- @{wibox.drawable:find_widgets} for the position that the mouse hit.
 -- @see mouse
