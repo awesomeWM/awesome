@@ -386,8 +386,7 @@ function drawable.new(d, widget_context_skeleton, drawable_name)
             local widgets = ret:find_widgets(x, y)
             for _, v in pairs(widgets) do
                 -- Calculate x/y inside of the widget
-                local lx = x - v.x
-                local ly = y - v.y
+                local lx, ly = v.hierarchy:get_matrix_from_device():transform_point(x, y)
                 v.widget:emit_signal(name, lx, ly, button, modifiers,v)
             end
         end)
