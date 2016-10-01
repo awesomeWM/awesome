@@ -173,9 +173,11 @@ local function find_widgets(_drawable, result, _hierarchy, x, y)
             0, 0, width, height)
         table.insert(result, {
             x = x3, y = y3, width = w3, height = h3,
-            drawable = _drawable, widget = _hierarchy:get_widget(),
-            matrix_to_device = _hierarchy:get_matrix_to_device(),
-            matrix_to_parent = _hierarchy:get_matrix_to_parent(),
+            widget_width = width,
+            widget_height = height,
+            drawable = _drawable,
+            widget = _hierarchy:get_widget(),
+            hierarchy = _hierarchy
         })
     end
     for _, child in ipairs(_hierarchy:get_children()) do
@@ -187,8 +189,14 @@ end
 -- The drawable must have drawn itself at least once for this to work.
 -- @param x X coordinate of the point
 -- @param y Y coordinate of the point
--- @return A sorted table with all widgets that contain the given point. The
---   widgets are sorted by relevance.
+-- @treturn table A table containing a description of all the widgets that
+-- contain the given point. Each entry is a table containing this drawable as
+-- its `.drawable` entry, the widget under `.widget` and the instance of
+-- `wibox.hierarchy` describing the size and position of the widget under
+-- `.hierarchy`. For convenience, `.x`, `.y`, `.width` and `.height` contain an
+-- approximation of the widget's extents on the surface. `widget_width` and
+-- `widget_height` contain the exact size of the widget in its own, local
+-- coordinate system (which may e.g. be rotated and scaled).
 function drawable:find_widgets(x, y)
     local result = {}
     if self._widget_hierarchy then
