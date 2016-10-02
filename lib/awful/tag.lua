@@ -1126,8 +1126,8 @@ end
 -- @function awful.tag.incncol
 -- @param add Value to add to number of column windows.
 -- @param[opt] t The tag to modify, if null tag.selected() is used.
--- @tparam[opt=false] boolean sensible Limit column_count based on the number of visible
--- tiled windows?
+-- @tparam[opt=false] boolean sensible Limit column_count based on the number
+--   of visible tiled windows?
 function tag.incncol(add, t, sensible)
     t = t or ascreen.focused().selected_tag
 

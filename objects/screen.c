@@ -1095,7 +1095,7 @@ luaA_screen_fake_add(lua_State *L)
 }
 
 /** Remove a screen.
- * @function fake_remove.
+ * @function fake_remove
  */
 static int
 luaA_screen_fake_remove(lua_State *L)
