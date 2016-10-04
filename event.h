@@ -46,10 +46,10 @@ awesome_refresh(void)
 {
     screen_refresh();
     luaA_emit_refresh();
-    banning_refresh();
-    stack_refresh();
     drawin_refresh();
     client_refresh();
+    banning_refresh();
+    stack_refresh();
     return xcb_flush(globalconf.connection);
 }
 
