@@ -106,6 +106,9 @@ set(AWESOME_C_FLAGS
 mark_as_advanced(AWESOME_C_FLAGS)
 target_compile_options(${PROJECT_AWE_NAME} PRIVATE ${AWESOME_C_FLAGS})
 
+# Make sure awesomerc.lua is generated
+add_dependencies(${PROJECT_AWE_NAME} generate_awesomerc)
+
 # Linux w/ GCC requires -rdynamic to get backtrace to fully work.
 #
 # For "historical reasons", CMake adds the option to the linker flags

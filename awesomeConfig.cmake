@@ -351,6 +351,10 @@ add_custom_command(
         ${BUILD_DIR}/awesomerc.lua
 )
 
+# Create a target for the auto-generated awesomerc.lua
+add_custom_target(generate_awesomerc DEPENDS ${BUILD_DIR}/awesomerc.lua)
+
+
 #}}}
 
 # {{{ Copy additional files
