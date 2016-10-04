@@ -24,8 +24,7 @@ local matrix = require("gears.matrix")
 local hierarchy = require("wibox.hierarchy")
 local unpack = unpack or table.unpack -- luacheck: globals unpack (compatibility with Lua 5.1)
 
-local drawables_draw = setmetatable({}, { __mode = 'k' })
-local drawables_force_complete_repaint = setmetatable({}, { __mode = 'k' })
+local visible_drawables = {}
 
 -- Get the widget context. This should always return the same table (if
 -- possible), so that our draw and fit caches can work efficiently.
@@ -267,6 +266,13 @@ function drawable:set_fg(c)
 end
 
 function drawable:_inform_visible(visible)
+    if visible then
+        visible_drawables[self] = true
+        -- The wallpaper or widgets might have changed
+        self:_do_complete_repaint()
+    else
+        visible_drawables[self] = nil
+    end
 end
 
 local function emit_difference(name, list, skip)
@@ -361,8 +367,6 @@ function drawable.new(d, widget_context_skeleton, drawable_name)
         ret._need_complete_repaint = true
         ret:draw()
     end
-    drawables_draw[ret.draw] = true
-    drawables_force_complete_repaint[ret._do_complete_repaint] = true
 
     -- Do a full redraw if the surface changes (the new surface has no content yet)
     d:connect_signal("property::surface", ret._do_complete_repaint)
@@ -449,15 +453,15 @@ end
 
 -- Redraw all drawables when the wallpaper changes
 capi.awesome.connect_signal("wallpaper_changed", function()
-    for k in pairs(drawables_force_complete_repaint) do
-        k()
+    for d in pairs(visible_drawables) do
+        d:_do_complete_repaint()
     end
 end)
 
 -- Give drawables a chance to react to screen changes
 local function draw_all()
-    for k in pairs(drawables_draw) do
-        k()
+    for d in pairs(visible_drawables) do
+        d:draw()
     end
 end
 screen.connect_signal("property::geometry", draw_all)
