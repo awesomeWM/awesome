@@ -1,6 +1,13 @@
 sudo: required
 dist: trusty
 language: c
+
+# Build only master and stable branches.  Other branches go through PRs.
+branches:
+  only:
+    - master
+    - 3.5
+
 env:
   matrix:
     - LUA=5.2 LUANAME=lua5.2 BUILD_APIDOC=true DO_COVERAGE=coveralls
