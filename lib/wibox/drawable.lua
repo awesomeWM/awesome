@@ -266,6 +266,7 @@ function drawable:set_fg(c)
 end
 
 function drawable:_inform_visible(visible)
+    self._visible = visible
     if visible then
         visible_drawables[self] = true
         -- The wallpaper or widgets might have changed
@@ -407,13 +408,8 @@ function drawable.new(d, widget_context_skeleton, drawable_name)
 
     -- Set up our callbacks for repaints
     ret._redraw_callback = function(hierar, arg)
-        -- XXX: lgi will lead us into memory-corruption-land when we use an
-        -- object after it was GC'd. Try to detect this situation by checking if
-        -- the drawable is still valid. This is only a weak indication, but it
-        -- seems to be the best that we can do. The problem is that the drawable
-        -- could not yet be GC'd, but is pending finalisation, while the
-        -- cairo.Region below was already GC'd. This would still lead to corruption.
-        if not ret.drawable.valid then
+        -- Avoid crashes when a drawable was partly finalized and dirty_area is broken.
+        if not ret._visible then
             return
         end
         if ret._widget_hierarchy_callback_arg ~= arg then
