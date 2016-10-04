@@ -382,21 +382,23 @@ function progressbar:set_max_value(max_value)
 end
 
 --- Set the progressbar height.
--- This method is deprecated, it no longer do anything.
--- Use a `wibox.container.constraint` widget or `forced_height`.
+-- This method is deprecated.  Use a `wibox.container.constraint` widget or
+-- `forced_height`.
 -- @param height The height to set.
 -- @deprecated set_height
-function progressbar:set_height(height) --luacheck: no unused_args
-    util.deprecate("Use a `wibox.container.constraint` widget or forced_height")
+function progressbar:set_height(height)
+    util.deprecate("Use a `wibox.container.constraint` widget or `forced_height`")
+    self:set_forced_height(height)
 end
 
 --- Set the progressbar width.
--- This method is deprecated, it no longer do anything.
--- Use a `wibox.container.constraint` widget or `forced_width`.
+-- This method is deprecated.  Use a `wibox.container.constraint` widget or
+-- `forced_width`.
 -- @param width The width to set.
 -- @deprecated set_width
-function progressbar:set_width(width) --luacheck: no unused_args
-    util.deprecate("Use a `wibox.container.constraint` widget or forced_width")
+function progressbar:set_width(width)
+    util.deprecate("Use a `wibox.container.constraint` widget or `forced_width`")
+    self:set_forced_width(width)
 end
 
 -- Build properties function
