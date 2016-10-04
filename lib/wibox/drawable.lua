@@ -266,6 +266,9 @@ function drawable:set_fg(c)
     self._do_complete_repaint()
 end
 
+function drawable:_inform_visible(visible)
+end
+
 local function emit_difference(name, list, skip)
     local function in_table(table, val)
         for _, v in pairs(table) do
