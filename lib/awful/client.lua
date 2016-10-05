@@ -48,7 +48,6 @@ client.data = {}
 client.data.marked = {}
 client.data.properties = setmetatable({}, { __mode = 'k' })
 client.data.persistent_properties_registered = {} -- keys are names of persistent properties, value always true
-client.data.persistent_properties_loaded = setmetatable({}, { __mode = 'k' }) -- keys are clients, value always true
 
 -- Functions
 client.urgent = require("awful.client.urgent")
@@ -986,8 +985,8 @@ end
 -- @return The property.
 -- @deprecated awful.client.property.get
 function client.property.get(c, prop)
-    if not client.data.persistent_properties_loaded[c] then
-        client.data.persistent_properties_loaded[c] = true
+    if not c.data._persistent_properties_loaded then
+        c.data._persistent_properties_loaded = true
         for p in pairs(client.data.persistent_properties_registered) do
             local value = c:get_xproperty("awful.client.property." .. p)
             if value ~= nil then
