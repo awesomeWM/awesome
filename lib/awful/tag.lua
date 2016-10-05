@@ -35,7 +35,6 @@ local tag = {object = {},  mt = {} }
 -- Private data
 local data = {}
 data.history = {}
-data.dynamic_cache = setmetatable({}, { __mode = 'k' })
 data.tags = setmetatable({}, { __mode = 'k' })
 
 -- History functions
@@ -710,11 +709,11 @@ function tag.object.set_layout(t, layout)
         and getmetatable(layout)
         and getmetatable(layout).__call
     ) then
-        if not data.dynamic_cache[t] then
-            data.dynamic_cache[t] = {}
+        if not t.dynamic_layout_cache then
+            t.dynamic_layout_cache = {}
         end
 
-        local instance = data.dynamic_cache[t][layout] or layout(t)
+        local instance = t.dynamic_layout_cache[layout] or layout(t)
 
         -- Always make sure the layout is notified it is enabled
         if tag.getproperty(t, "screen").selected_tag == t and instance.wake_up then
@@ -723,7 +722,7 @@ function tag.object.set_layout(t, layout)
 
         -- Avoid creating the same layout twice, use layout:reset() to reset
         if instance.is_dynamic then
-            data.dynamic_cache[t][layout] = instance
+            t.dynamic_layout_cache[layout] = instance
         end
 
         layout = instance
