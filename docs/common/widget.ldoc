@@ -71,6 +71,23 @@
 -- @tparam table mods The modifiers (mod4, mod1 (alt), Control, Shift)
 -- @tparam table find_widgets_result The entry from the result of
 -- @{wibox.drawable:find_widgets} for the position that the mouse hit.
+-- @tparam wibox.drawable find_widgets_result.drawable The drawable containing
+-- the widget.
+-- @tparam widget find_widgets_result.widget The widget being displayed.
+-- @tparam wibox.hierarchy find_widgets_result.hierarchy The hierarchy
+-- managing the widget's geometry.
+-- @tparam number find_widgets_result.x An approximation of the X position that
+-- the widget is visible at on the surface.
+-- @tparam number find_widgets_result.y An approximation of the Y position that
+-- the widget is visible at on the surface.
+-- @tparam number find_widgets_result.width An approximation of the width that
+-- the widget is visible at on the surface.
+-- @tparam number find_widgets_result.height An approximation of the height that
+-- the widget is visible at on the surface.
+-- @tparam number find_widgets_result.widget_width The exact width of the widget
+-- in its local coordinate system.
+-- @tparam number find_widgets_result.widget_height The exact height of the widget
+-- in its local coordinate system.
 -- @see mouse
 
 --- When a mouse button is released over the widget.
@@ -83,16 +100,67 @@
 -- @tparam table mods The modifiers (mod4, mod1 (alt), Control, Shift)
 -- @tparam table find_widgets_result The entry from the result of
 -- @{wibox.drawable:find_widgets} for the position that the mouse hit.
+-- @tparam wibox.drawable find_widgets_result.drawable The drawable containing
+-- the widget.
+-- @tparam widget find_widgets_result.widget The widget being displayed.
+-- @tparam wibox.hierarchy find_widgets_result.hierarchy The hierarchy
+-- managing the widget's geometry.
+-- @tparam number find_widgets_result.x An approximation of the X position that
+-- the widget is visible at on the surface.
+-- @tparam number find_widgets_result.y An approximation of the Y position that
+-- the widget is visible at on the surface.
+-- @tparam number find_widgets_result.width An approximation of the width that
+-- the widget is visible at on the surface.
+-- @tparam number find_widgets_result.height An approximation of the height that
+-- the widget is visible at on the surface.
+-- @tparam number find_widgets_result.widget_width The exact width of the widget
+-- in its local coordinate system.
+-- @tparam number find_widgets_result.widget_height The exact height of the widget
+-- in its local coordinate system.
 -- @see mouse
 
 --- When the mouse enter a widget.
 -- @signal mouse::enter
 -- @tparam table find_widgets_result The entry from the result of
 -- @{wibox.drawable:find_widgets} for the position that the mouse hit.
+-- @tparam wibox.drawable find_widgets_result.drawable The drawable containing
+-- the widget.
+-- @tparam widget find_widgets_result.widget The widget being displayed.
+-- @tparam wibox.hierarchy find_widgets_result.hierarchy The hierarchy
+-- managing the widget's geometry.
+-- @tparam number find_widgets_result.x An approximation of the X position that
+-- the widget is visible at on the surface.
+-- @tparam number find_widgets_result.y An approximation of the Y position that
+-- the widget is visible at on the surface.
+-- @tparam number find_widgets_result.width An approximation of the width that
+-- the widget is visible at on the surface.
+-- @tparam number find_widgets_result.height An approximation of the height that
+-- the widget is visible at on the surface.
+-- @tparam number find_widgets_result.widget_width The exact width of the widget
+-- in its local coordinate system.
+-- @tparam number find_widgets_result.widget_height The exact height of the widget
+-- in its local coordinate system.
 -- @see mouse
 
 --- When the mouse leave a widget.
 -- @signal mouse::leave
 -- @tparam table find_widgets_result The entry from the result of
 -- @{wibox.drawable:find_widgets} for the position that the mouse hit.
+-- @tparam wibox.drawable find_widgets_result.drawable The drawable containing
+-- the widget.
+-- @tparam widget find_widgets_result.widget The widget being displayed.
+-- @tparam wibox.hierarchy find_widgets_result.hierarchy The hierarchy
+-- managing the widget's geometry.
+-- @tparam number find_widgets_result.x An approximation of the X position that
+-- the widget is visible at on the surface.
+-- @tparam number find_widgets_result.y An approximation of the Y position that
+-- the widget is visible at on the surface.
+-- @tparam number find_widgets_result.width An approximation of the width that
+-- the widget is visible at on the surface.
+-- @tparam number find_widgets_result.height An approximation of the height that
+-- the widget is visible at on the surface.
+-- @tparam number find_widgets_result.widget_width The exact width of the widget
+-- in its local coordinate system.
+-- @tparam number find_widgets_result.widget_height The exact height of the widget
+-- in its local coordinate system.
 -- @see mouse
