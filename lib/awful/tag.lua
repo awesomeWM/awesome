@@ -35,7 +35,6 @@ local tag = {object = {},  mt = {} }
 -- Private data
 local data = {}
 data.history = {}
-data.tags = setmetatable({}, { __mode = 'k' })
 
 -- History functions
 tag.history = {}
@@ -216,7 +215,7 @@ function tag.add(name, props)
     local newtag = capi.tag{ name = name }
 
     -- Start with a fresh property table to avoid collisions with unsupported data
-    data.tags[newtag] = {screen=properties.screen, index=properties.index}
+    newtag.data.awful_tag_properties = {screen=properties.screen, index=properties.index}
 
     newtag.activated = true
 
@@ -322,7 +321,7 @@ function tag.object.delete(self, fallback_tag, force)
     end
 
     -- delete the tag
-    data.tags[self].screen = nil
+    self.data.awful_tag_properties.screen = nil
     self.activated = false
 
     -- Update all indexes
@@ -1277,7 +1276,7 @@ end
 -- @tparam tag _tag The tag.
 -- @return The data table.
 function tag.getdata(_tag)
-    return data.tags[_tag]
+    return _tag.data.awful_tag_properties
 end
 
 --- Get a tag property.
@@ -1289,8 +1288,9 @@ end
 -- @tparam string prop The property name.
 -- @return The property.
 function tag.getproperty(_tag, prop)
-    if data.tags[_tag] then
-        return data.tags[_tag][prop]
+    if not _tag then return end -- FIXME: Turn this into an error?
+    if _tag.data.awful_tag_properties then
+       return _tag.data.awful_tag_properties[prop]
     end
 end
 
@@ -1305,12 +1305,12 @@ end
 -- @param prop The property name.
 -- @param value The value.
 function tag.setproperty(_tag, prop, value)
-    if not data.tags[_tag] then
-        data.tags[_tag] = {}
+    if not _tag.data.awful_tag_properties then
+        _tag.data.awful_tag_properties = {}
     end
 
-    if data.tags[_tag][prop] ~= value then
-        data.tags[_tag][prop] = value
+    if _tag.data.awful_tag_properties[prop] ~= value then
+        _tag.data.awful_tag_properties[prop] = value
         _tag:emit_signal("property::" .. prop)
     end
 end
@@ -1462,8 +1462,8 @@ capi.screen.connect_signal("removed", function(s)
     for _, t in pairs(s.tags) do
         t.activated = false
 
-        if data.tags[t] then
-            data.tags[t].screen = nil
+        if t.data.awful_tag_properties then
+            t.data.awful_tag_properties.screen = nil
         end
     end
 end)
