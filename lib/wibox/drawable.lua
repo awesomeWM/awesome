@@ -429,7 +429,11 @@ function drawable.new(d, widget_context_skeleton, drawable_name)
             return
         end
         ret._need_relayout = true
-        ret:draw()
+        -- When not visible, we will be redrawn when we become visible. In the
+        -- mean-time, the layout does not matter much.
+        if ret._visible then
+            ret:draw()
+        end
     end
 
     -- Add __tostring method to metatable.
