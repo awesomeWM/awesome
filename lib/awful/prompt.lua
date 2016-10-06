@@ -225,8 +225,31 @@ end
 -- history file. This does not delete new commands or history entries under
 -- user editing.
 --
--- @tparam table args A table with optional arguments: `fg_cursor`, `bg_cursor`,
---   `ul_cursor`, `prompt`, `text`, `selectall`, `font`, `autoexec`, `hooks`.
+-- @tparam[opt={}] table args A table with optional arguments
+-- @tparam[opt] gears.color args.fg_cursor
+-- @tparam[opt] gears.color args.bg_cursor
+-- @tparam[opt] gears.color args.ul_cursor
+-- @tparam[opt] widget args.prompt
+-- @tparam[opt] string args.text
+-- @tparam[opt] boolean args.selectall
+-- @tparam[opt] string args.font
+-- @tparam[opt] boolean args.autoexec
+-- @tparam widget args.textbox The textbox to use for the prompt.
+-- @tparam function args.exe_callback The callback function to call with command as argument
+-- when finished.
+-- @tparam function args.completion_callback The callback function to call to get completion.
+-- @tparam[opt] string args.history_path File path where the history should be
+-- saved, set nil to disable history
+-- @tparam[opt] function args.history_max Set the maximum entries in history
+-- file, 50 by default
+-- @tparam[opt] function args.done_callback The callback function to always call
+-- without arguments, regardless of whether the prompt was cancelled.
+-- @tparam[opt] function args.changed_callback The callback function to call
+-- with command as argument when a command was changed.
+-- @tparam[opt] function args.keypressed_callback The callback function to call
+--   with mod table, key and command as arguments when a key was pressed.
+-- @tparam[opt] function args.keyreleased_callback The callback function to call
+--   with mod table, key and command as arguments when a key was pressed.
 -- @tparam[opt] table args.hooks The "hooks" argument uses a syntax similar to
 --   `awful.key`.  It will call a function for the matching modifiers + key.
 --   It receives the command (widget text/input) as an argument.
@@ -248,20 +271,23 @@ end
 --         return command
 --       end}
 --     }
--- @param textbox The textbox to use for the prompt.
+-- @param textbox The textbox to use for the prompt. [**DEPRECATED**]
 -- @param exe_callback The callback function to call with command as argument
--- when finished.
+-- when finished. [**DEPRECATED**]
 -- @param completion_callback The callback function to call to get completion.
+--   [**DEPRECATED**]
 -- @param[opt] history_path File path where the history should be
--- saved, set nil to disable history
+-- saved, set nil to disable history [**DEPRECATED**]
 -- @param[opt] history_max Set the maximum entries in history
--- file, 50 by default
+-- file, 50 by default [**DEPRECATED**]
 -- @param[opt] done_callback The callback function to always call
 -- without arguments, regardless of whether the prompt was cancelled.
+--  [**DEPRECATED**]
 -- @param[opt] changed_callback The callback function to call
--- with command as argument when a command was changed.
+-- with command as argument when a command was changed. [**DEPRECATED**]
 -- @param[opt] keypressed_callback The callback function to call
 --   with mod table, key and command as arguments when a key was pressed.
+--   [**DEPRECATED**]
 function prompt.run(args, textbox, exe_callback, completion_callback,
                     history_path, history_max, done_callback,
                     changed_callback, keypressed_callback)
@@ -279,6 +305,57 @@ function prompt.run(args, textbox, exe_callback, completion_callback,
     local font = args.font or theme.font
     local selectall = args.selectall
     local hooks = {}
+
+    -- A function with 9 parameters deserve to die
+    if textbox then
+        util.deprecate("Use args.textbox instead of the textbox parameter")
+    end
+    if exe_callback then
+        util.deprecate(
+            "Use args.exe_callback instead of the exe_callback parameter"
+        )
+    end
+    if completion_callback then
+        util.deprecate(
+            "Use args.completion_callback instead of the completion_callback parameter"
+        )
+    end
+    if history_path then
+        util.deprecate(
+            "Use args.history_path instead of the history_path parameter"
+        )
+    end
+    if history_max then
+        util.deprecate(
+            "Use args.history_max instead of the history_max parameter"
+        )
+    end
+    if done_callback then
+        util.deprecate(
+            "Use args.done_callback instead of the done_callback parameter"
+        )
+    end
+    if changed_callback then
+        util.deprecate(
+            "Use args.changed_callback instead of the changed_callback parameter"
+        )
+    end
+    if keypressed_callback then
+        util.deprecate(
+            "Use args.keypressed_callback instead of the keypressed_callback parameter"
+        )
+    end
+
+    -- This function has already an absurd number of parameters, allow them
+    -- to be set using the args to avoid a "nil, nil, nil, nil, foo" scenario
+    keypressed_callback = keypressed_callback or args.keypressed_callback
+    changed_callback    = changed_callback    or args.changed_callback
+    done_callback       = done_callback       or args.done_callback
+    history_max         = history_max         or args.history_max
+    history_path        = history_path        or args.history_path
+    completion_callback = completion_callback or args.completion_callback
+    exe_callback        = exe_callback        or args.exe_callback
+    textbox             = textbox             or args.textbox
 
     search_term=nil
 
@@ -332,10 +409,17 @@ function prompt.run(args, textbox, exe_callback, completion_callback,
 
     grabber = keygrabber.run(
     function (modifiers, key, event)
-        if event ~= "press" then return end
         -- Convert index array to hash table
         local mod = {}
         for _, v in ipairs(modifiers) do mod[v] = true end
+
+        if event ~= "press" then
+            if args.keyreleased_callback then
+                args.keyreleased_callback(mod, key, command)
+            end
+
+            return
+        end
 
         -- Call the user specified callback. If it returns true as
         -- the first result then return from the function. Treat the
