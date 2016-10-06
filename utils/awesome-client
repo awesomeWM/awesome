@@ -5,10 +5,7 @@
 # when used with "|tail".
 set -o pipefail
 
-tty 2>&1 > /dev/null
-ISATTY=$?
-
-if [ "$ISATTY" = 0 ]
+if [ -t 0 ]  # is a tty.
 then
     # rlwrap provides readline functionality for "read", which is more enhanced
     # than bash's "read" itself.
@@ -42,6 +39,7 @@ DBUS_PATH=/
 DBUS_DEST=org.naquadah.awesome.awful
 DBUS_METHOD=${DBUS_DEST}.Remote.Eval
 
+FATAL_ERRORS=1
 a_dbus_send()
 {
     $DBUS_SEND --dest=$DBUS_DEST --type=method_call --print-reply \
@@ -53,15 +51,14 @@ a_dbus_send()
     fi
 }
 
-FATAL_ERRORS="$ISATTY"
 if [ $# -ne 0 ]
 then
-    FATAL_ERRORS="1"
     for arg in "$@" ; do
         a_dbus_send "$arg"
     done
-elif [ "$ISATTY" = 0 ]
+elif [ -t 0 ]
 then
+    FATAL_ERRORS=0
     while $READ_CMD -p "awesome# " -r line
     do
         if [ "$line" = "" ]; then
