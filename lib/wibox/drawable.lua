@@ -24,8 +24,7 @@ local matrix = require("gears.matrix")
 local hierarchy = require("wibox.hierarchy")
 local unpack = unpack or table.unpack -- luacheck: globals unpack (compatibility with Lua 5.1)
 
-local drawables_draw = setmetatable({}, { __mode = 'k' })
-local drawables_force_complete_repaint = setmetatable({}, { __mode = 'k' })
+local visible_drawables = {}
 
 -- Get the widget context. This should always return the same table (if
 -- possible), so that our draw and fit caches can work efficiently.
@@ -274,6 +273,17 @@ function drawable:set_fg(c)
     self._do_complete_repaint()
 end
 
+function drawable:_inform_visible(visible)
+    self._visible = visible
+    if visible then
+        visible_drawables[self] = true
+        -- The wallpaper or widgets might have changed
+        self:_do_complete_repaint()
+    else
+        visible_drawables[self] = nil
+    end
+end
+
 local function emit_difference(name, list, skip)
     local function in_table(table, val)
         for _, v in pairs(table) do
@@ -366,8 +376,6 @@ function drawable.new(d, widget_context_skeleton, drawable_name)
         ret._need_complete_repaint = true
         ret:draw()
     end
-    drawables_draw[ret.draw] = true
-    drawables_force_complete_repaint[ret._do_complete_repaint] = true
 
     -- Do a full redraw if the surface changes (the new surface has no content yet)
     d:connect_signal("property::surface", ret._do_complete_repaint)
@@ -407,13 +415,8 @@ function drawable.new(d, widget_context_skeleton, drawable_name)
 
     -- Set up our callbacks for repaints
     ret._redraw_callback = function(hierar, arg)
-        -- XXX: lgi will lead us into memory-corruption-land when we use an
-        -- object after it was GC'd. Try to detect this situation by checking if
-        -- the drawable is still valid. This is only a weak indication, but it
-        -- seems to be the best that we can do. The problem is that the drawable
-        -- could not yet be GC'd, but is pending finalisation, while the
-        -- cairo.Region below was already GC'd. This would still lead to corruption.
-        if not ret.drawable.valid then
+        -- Avoid crashes when a drawable was partly finalized and dirty_area is broken.
+        if not ret._visible then
             return
         end
         if ret._widget_hierarchy_callback_arg ~= arg then
@@ -433,7 +436,11 @@ function drawable.new(d, widget_context_skeleton, drawable_name)
             return
         end
         ret._need_relayout = true
-        ret:draw()
+        -- When not visible, we will be redrawn when we become visible. In the
+        -- mean-time, the layout does not matter much.
+        if ret._visible then
+            ret:draw()
+        end
     end
 
     -- Add __tostring method to metatable.
@@ -453,15 +460,15 @@ end
 
 -- Redraw all drawables when the wallpaper changes
 capi.awesome.connect_signal("wallpaper_changed", function()
-    for k in pairs(drawables_force_complete_repaint) do
-        k()
+    for d in pairs(visible_drawables) do
+        d:_do_complete_repaint()
     end
 end)
 
 -- Give drawables a chance to react to screen changes
 local function draw_all()
-    for k in pairs(drawables_draw) do
-        k()
+    for d in pairs(visible_drawables) do
+        d:draw()
     end
 end
 screen.connect_signal("property::geometry", draw_all)

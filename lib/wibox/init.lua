@@ -169,6 +169,11 @@ local function new(args)
     ret._drawable = wibox.drawable(w.drawable, { wibox = ret },
         "wibox drawable (" .. object.modulename(3) .. ")")
 
+    ret._drawable:_inform_visible(w.visible)
+    w:connect_signal("property::visible", function()
+        ret._drawable:_inform_visible(w.visible)
+    end)
+
     for k, v in pairs(wibox) do
         if type(v) == "function" then
             ret[k] = v
