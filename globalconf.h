@@ -68,6 +68,7 @@ ARRAY_TYPE(client_t *, client)
 ARRAY_TYPE(drawin_t *, drawin)
 ARRAY_TYPE(xproperty_t, xproperty)
 DO_ARRAY(sequence_pair_t, sequence_pair, DO_NOTHING)
+DO_ARRAY(xcb_window_t, window, DO_NOTHING)
 
 /** Main configuration structure */
 typedef struct
@@ -189,6 +190,8 @@ typedef struct
     /** List of enter/leave events to ignore */
     sequence_pair_array_t ignore_enter_leave_events;
     xcb_void_cookie_t pending_enter_leave_begin;
+    /** List of windows to be destroyed later */
+    window_array_t destroy_later_windows;
 } awesome_t;
 
 extern awesome_t globalconf;
