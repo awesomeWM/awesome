@@ -48,77 +48,119 @@
 -- @function emit_signal_recursive
 
 --- When the layout (size) change.
--- This signal is emited when the previous results of `:layout()` and `:fit()`
--- are no longer valid.
+-- This signal is emitted when the previous results of `:layout()` and `:fit()`
+-- are no longer valid.  Unless this signal is emitted, `:layout()` and `:fit()`
+-- must return the same result when called with the same arguments.
 -- @signal widget::layout_changed
 -- @see widget::redraw_needed
 
 --- When the widget content changed.
--- Unless this signal is emitted, `:layout()` and `:fit()` must return the same
--- result when called with the same arguments. In case this isn't the case,
--- use `widget::layout_changed`.
+-- This signal is emitted when the content of the widget changes. The widget will
+-- be redrawn, it is not re-layouted. Put differently, it is assumed that
+-- `:layout()` and `:fit()` would still return the same results as before.
 -- @signal widget::redraw_needed
+-- @see widget::layout_changed
 
 --- When a mouse button is pressed over the widget.
--- The position of the mouse press relative to the widget while geometry
--- contains the geometry of the widget relative to the wibox.
 -- @signal button::press
--- @tparam table widget The widget
--- @tparam number lx The relative horizontal position.
--- @tparam number ly The relative vertical position.
+-- @tparam number lx The horizontal position relative to the (0,0) position in
+-- the widget.
+-- @tparam number ly The vertical position relative to the (0,0) position in the
+-- widget.
 -- @tparam number button The button number.
 -- @tparam table mods The modifiers (mod4, mod1 (alt), Control, Shift)
--- @tparam table geometry
--- @tparam number geometry.x The vertical position
--- @tparam number geometry.y The horizontal position
--- @tparam number geometry.width The widget
--- @tparam number geometry.height The height
--- @tparam drawable geometry.drawable The `drawable`
--- @tparam table geometry.matrix_to_parent The relative `gears.matrix`
--- @tparam table geometry.matrix_to_device The absolute `gears.matrix`
+-- @tparam table find_widgets_result The entry from the result of
+-- @{wibox.drawable:find_widgets} for the position that the mouse hit.
+-- @tparam wibox.drawable find_widgets_result.drawable The drawable containing
+-- the widget.
+-- @tparam widget find_widgets_result.widget The widget being displayed.
+-- @tparam wibox.hierarchy find_widgets_result.hierarchy The hierarchy
+-- managing the widget's geometry.
+-- @tparam number find_widgets_result.x An approximation of the X position that
+-- the widget is visible at on the surface.
+-- @tparam number find_widgets_result.y An approximation of the Y position that
+-- the widget is visible at on the surface.
+-- @tparam number find_widgets_result.width An approximation of the width that
+-- the widget is visible at on the surface.
+-- @tparam number find_widgets_result.height An approximation of the height that
+-- the widget is visible at on the surface.
+-- @tparam number find_widgets_result.widget_width The exact width of the widget
+-- in its local coordinate system.
+-- @tparam number find_widgets_result.widget_height The exact height of the widget
+-- in its local coordinate system.
 -- @see mouse
 
 --- When a mouse button is released over the widget.
--- The position of the mouse press relative to the widget while geometry
--- contains the geometry of the widget relative to the wibox.
 -- @signal button::release
--- @tparam table widget The widget
--- @tparam number lx The relative horizontal position.
--- @tparam number ly The relative vertical position.
+-- @tparam number lx The horizontal position relative to the (0,0) position in
+-- the widget.
+-- @tparam number ly The vertical position relative to the (0,0) position in the
+-- widget.
 -- @tparam number button The button number.
 -- @tparam table mods The modifiers (mod4, mod1 (alt), Control, Shift)
--- @tparam table geometry
--- @tparam number geometry.x The vertical position
--- @tparam number geometry.y The horizontal position
--- @tparam number geometry.width The widget
--- @tparam number geometry.height The height
--- @tparam drawable geometry.drawable The `drawable`
--- @tparam table geometry.matrix_to_parent The relative `gears.matrix`
--- @tparam table geometry.matrix_to_device The absolute `gears.matrix`
+-- @tparam table find_widgets_result The entry from the result of
+-- @{wibox.drawable:find_widgets} for the position that the mouse hit.
+-- @tparam wibox.drawable find_widgets_result.drawable The drawable containing
+-- the widget.
+-- @tparam widget find_widgets_result.widget The widget being displayed.
+-- @tparam wibox.hierarchy find_widgets_result.hierarchy The hierarchy
+-- managing the widget's geometry.
+-- @tparam number find_widgets_result.x An approximation of the X position that
+-- the widget is visible at on the surface.
+-- @tparam number find_widgets_result.y An approximation of the Y position that
+-- the widget is visible at on the surface.
+-- @tparam number find_widgets_result.width An approximation of the width that
+-- the widget is visible at on the surface.
+-- @tparam number find_widgets_result.height An approximation of the height that
+-- the widget is visible at on the surface.
+-- @tparam number find_widgets_result.widget_width The exact width of the widget
+-- in its local coordinate system.
+-- @tparam number find_widgets_result.widget_height The exact height of the widget
+-- in its local coordinate system.
 -- @see mouse
 
 --- When the mouse enter a widget.
 -- @signal mouse::enter
--- @tparam table widget The widget
--- @tparam table geometry
--- @tparam number geometry.x The vertical position
--- @tparam number geometry.y The horizontal position
--- @tparam number geometry.width The widget
--- @tparam number geometry.height The height
--- @tparam drawable geometry.drawable The `drawable`
--- @tparam table geometry.matrix_to_parent The relative `gears.matrix`
--- @tparam table geometry.matrix_to_device The absolute `gears.matrix`
+-- @tparam table find_widgets_result The entry from the result of
+-- @{wibox.drawable:find_widgets} for the position that the mouse hit.
+-- @tparam wibox.drawable find_widgets_result.drawable The drawable containing
+-- the widget.
+-- @tparam widget find_widgets_result.widget The widget being displayed.
+-- @tparam wibox.hierarchy find_widgets_result.hierarchy The hierarchy
+-- managing the widget's geometry.
+-- @tparam number find_widgets_result.x An approximation of the X position that
+-- the widget is visible at on the surface.
+-- @tparam number find_widgets_result.y An approximation of the Y position that
+-- the widget is visible at on the surface.
+-- @tparam number find_widgets_result.width An approximation of the width that
+-- the widget is visible at on the surface.
+-- @tparam number find_widgets_result.height An approximation of the height that
+-- the widget is visible at on the surface.
+-- @tparam number find_widgets_result.widget_width The exact width of the widget
+-- in its local coordinate system.
+-- @tparam number find_widgets_result.widget_height The exact height of the widget
+-- in its local coordinate system.
 -- @see mouse
 
 --- When the mouse leave a widget.
 -- @signal mouse::leave
--- @tparam table widget The widget
--- @tparam table geometry
--- @tparam number geometry.x The vertical position
--- @tparam number geometry.y The horizontal position
--- @tparam number geometry.width The widget
--- @tparam number geometry.height The height
--- @tparam drawable geometry.drawable The `drawable`
--- @tparam table geometry.matrix_to_parent The relative `gears.matrix`
--- @tparam table geometry.matrix_to_device The absolute `gears.matrix`
+-- @tparam table find_widgets_result The entry from the result of
+-- @{wibox.drawable:find_widgets} for the position that the mouse hit.
+-- @tparam wibox.drawable find_widgets_result.drawable The drawable containing
+-- the widget.
+-- @tparam widget find_widgets_result.widget The widget being displayed.
+-- @tparam wibox.hierarchy find_widgets_result.hierarchy The hierarchy
+-- managing the widget's geometry.
+-- @tparam number find_widgets_result.x An approximation of the X position that
+-- the widget is visible at on the surface.
+-- @tparam number find_widgets_result.y An approximation of the Y position that
+-- the widget is visible at on the surface.
+-- @tparam number find_widgets_result.width An approximation of the width that
+-- the widget is visible at on the surface.
+-- @tparam number find_widgets_result.height An approximation of the height that
+-- the widget is visible at on the surface.
+-- @tparam number find_widgets_result.widget_width The exact width of the widget
+-- in its local coordinate system.
+-- @tparam number find_widgets_result.widget_height The exact height of the widget
+-- in its local coordinate system.
 -- @see mouse

@@ -126,7 +126,7 @@ function hierarchy_update(self, context, widget, width, height, region, matrix_t
             r = hierarchy_new(self._redraw_callback, self._layout_callback, self._callback_arg)
             r._parent = self
         end
-        hierarchy_update(r, context, w._widget, w._width, w._height, region, w._matrix, matrix_to_device * w._matrix)
+        hierarchy_update(r, context, w._widget, w._width, w._height, region, w._matrix, w._matrix * matrix_to_device)
         table.insert(self._children, r)
     end
 
