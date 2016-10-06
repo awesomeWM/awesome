@@ -22,7 +22,7 @@ local bt = require("beautiful")
 local wibox = require("wibox")
 local surface = require("gears.surface")
 local cairo = require("lgi").cairo
-local dpi = require("beautiful").xresources.apply_dpi
+local dpi = bt.xresources.apply_dpi
 
 local function get_screen(s)
     return s and capi.screen[s]
@@ -123,6 +123,49 @@ naughty.notificationClosedReason = {
     dismissedByCommand = 3,
     undefined = 4
 }
+
+
+--- Notifications font.
+-- @beautiful beautiful.notification_font
+-- @tparam string|lgi.Pango.FontDescription notification_font
+
+--- Notifications background color.
+-- @beautiful beautiful.notification_bg
+-- @tparam color notification_bg
+
+--- Notifications foreground color.
+-- @beautiful beautiful.notification_fg
+-- @tparam color notification_fg
+
+--- Notifications border width.
+-- @beautiful beautiful.notification_border_width
+-- @tparam int notification_border_width
+
+--- Notifications border color.
+-- @beautiful beautiful.notification_border_color
+-- @tparam color notification_border_color
+
+--- Notifications shape.
+-- @beautiful beautiful.notification_shape
+-- @tparam[opt] gears.shape notification_shape
+-- @see gears.shape
+
+--- Notifications opacity.
+-- @beautiful beautiful.notification_opacity
+-- @tparam[opt] int notification_opacity
+
+--- Notifications margin.
+-- @beautiful beautiful.notification_margin
+-- @tparam int notification_margin
+
+--- Notifications width.
+-- @beautiful beautiful.notification_width
+-- @tparam int notification_width
+
+--- Notifications height.
+-- @beautiful beautiful.notification_height
+-- @tparam int notification_height
+
 
 -- Counter for the notifications
 -- Required for later access via DBUS
@@ -405,15 +448,18 @@ end
 --   Values: `"top_right"`, `"top_left"`, `"bottom_left"`,
 --   `"bottom_right"`, `"top_middle"`, `"bottom_middle"`.
 -- @bool[opt=true] args.ontop Boolean forcing popups to display on top.
--- @int[opt=auto] args.height Popup height.
--- @int[opt=auto] args.width Popup width.
--- @string[opt=beautiful.font or awesome.font] args.font Notification font.
+-- @int[opt=`beautiful.notification_height` or auto] args.height Popup height.
+-- @int[opt=`beautiful.notification_width` or auto] args.width Popup width.
+-- @string[opt=`beautiful.notification_font` or `beautiful.font` or `awesome.font`] args.font Notification font.
 -- @string[opt] args.icon Path to icon.
 -- @int[opt] args.icon_size Desired icon size in px.
--- @string[opt=`beautiful.fg_focus` or `'#ffffff'`] args.fg Foreground color.
--- @string[opt=`beautiful.bg_focus` or `'#535d6c'`] args.bg Background color.
--- @int[opt=1] args.border_width Border width.
--- @string[opt=`beautiful.border_focus` or `'#535d6c'`] args.border_color Border color.
+-- @string[opt=`beautiful.notification_fg` or `beautiful.fg_focus` or `'#ffffff'`] args.fg Foreground color.
+-- @string[opt=`beautiful.notification_fg` or `beautiful.bg_focus` or `'#535d6c'`] args.bg Background color.
+-- @int[opt=`beautiful.notification_border_width` or 1] args.border_width Border width.
+-- @string[opt=`beautiful.notification_border_color` or `beautiful.border_focus` or `'#535d6c'`] args.border_color Border color.
+-- @tparam[opt=`beautiful.notification_shape`] gears.shape args.shape Widget shape.
+-- @tparam[opt=`beautiful.notification_opacity`] gears.opacity args.opacity Widget opacity.
+-- @tparam[opt=`beautiful.notification_margin`] gears.margin args.margin Widget margin.
 -- @tparam[opt] func args.run Function to run on left click.  The notification
 --   object will be passed to it as an argument.
 --   You need to call e.g.
@@ -454,22 +500,33 @@ function naughty.notify(args)
         return
     end
     local ontop = args.ontop or preset.ontop
-    local width = args.width or preset.width
-    local height = args.height or preset.height
     local hover_timeout = args.hover_timeout or preset.hover_timeout
-    local opacity = args.opacity or preset.opacity
-    local margin = args.margin or preset.margin
-    local border_width = args.border_width or preset.border_width
     local position = args.position or preset.position
     local actions = args.actions
     local destroy_cb = args.destroy
 
     -- beautiful
     local beautiful = bt.get()
-    local font = args.font or preset.font or beautiful.font or capi.awesome.font
-    local fg = args.fg or preset.fg or beautiful.fg_normal or '#ffffff'
-    local bg = args.bg or preset.bg or beautiful.bg_normal or '#535d6c'
-    local border_color = args.border_color or preset.border_color or beautiful.bg_focus or '#535d6c'
+    local font = args.font or preset.font or
+        beautiful.font or capi.awesome.font
+    local fg = args.fg or preset.fg or
+        beautiful.notification_fg or beautiful.fg_normal or '#ffffff'
+    local bg = args.bg or preset.bg or
+        beautiful.notification_bg or beautiful.bg_normal or '#535d6c'
+    local border_color = args.border_color or preset.border_color or
+        beautiful.notification_border_color or beautiful.bg_focus or '#535d6c'
+    local border_width = args.border_width or preset.border_width or
+        beautiful.notification_border_width
+    local shape = args.shape or preset.shape or
+        beautiful.notification_shape
+    local width = args.width or preset.width or
+        beautiful.notification_width
+    local height = args.height or preset.height or
+        beautiful.notification_height
+    local margin = args.margin or preset.margin or
+        beautiful.notification_margin
+    local opacity = args.opacity or preset.opacity or
+        beautiful.notification_opacity
     local notification = { screen = s, destroy_cb = destroy_cb, timeout = timeout }
 
     -- replace notification if needed
@@ -602,6 +659,9 @@ function naughty.notify(args)
                                bg = bg,
                                border_color = border_color,
                                border_width = border_width,
+                               shape_border_color = shape and border_color,
+                               shape_border_width = shape and border_width,
+                               shape = shape,
                                type = "notification" })
 
     if hover_timeout then notification.box:connect_signal("mouse::enter", hover_destroy) end
