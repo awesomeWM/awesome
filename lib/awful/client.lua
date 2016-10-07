@@ -46,9 +46,7 @@ local client = {object={}}
 -- Private data
 client.data = {}
 client.data.marked = {}
-client.data.properties = setmetatable({}, { __mode = 'k' })
 client.data.persistent_properties_registered = {} -- keys are names of persistent properties, value always true
-client.data.persistent_properties_loaded = setmetatable({}, { __mode = 'k' }) -- keys are clients, value always true
 
 -- Functions
 client.urgent = require("awful.client.urgent")
@@ -986,8 +984,8 @@ end
 -- @return The property.
 -- @deprecated awful.client.property.get
 function client.property.get(c, prop)
-    if not client.data.persistent_properties_loaded[c] then
-        client.data.persistent_properties_loaded[c] = true
+    if not c.data._persistent_properties_loaded then
+        c.data._persistent_properties_loaded = true
         for p in pairs(client.data.persistent_properties_registered) do
             local value = c:get_xproperty("awful.client.property." .. p)
             if value ~= nil then
@@ -995,8 +993,8 @@ function client.property.get(c, prop)
             end
         end
     end
-    if client.data.properties[c] then
-        return client.data.properties[c][prop]
+    if c.data.awful_client_properties then
+        return c.data.awful_client_properties[prop]
     end
 end
 
@@ -1010,14 +1008,14 @@ end
 -- @param value The value.
 -- @deprecated awful.client.property.set
 function client.property.set(c, prop, value)
-    if not client.data.properties[c] then
-        client.data.properties[c] = {}
+    if not c.data.awful_client_properties then
+        c.data.awful_client_properties = {}
     end
-    if client.data.properties[c][prop] ~= value then
+    if c.data.awful_client_properties[prop] ~= value then
         if client.data.persistent_properties_registered[prop] then
             c:set_xproperty("awful.client.property." .. prop, value)
         end
-        client.data.properties[c][prop] = value
+        c.data.awful_client_properties[prop] = value
         c:emit_signal("property::" .. prop)
     end
 end
@@ -1034,9 +1032,9 @@ function client.property.persist(prop, kind)
     client.data.persistent_properties_registered[prop] = true
 
     -- Make already-set properties persistent
-    for c in pairs(client.data.properties) do
-        if client.data.properties[c] and client.data.properties[c][prop] ~= nil then
-            c:set_xproperty(xprop, client.data.properties[c][prop])
+    for c in pairs(capi.client.get()) do
+        if c.data.awful_client_properties and c.data.awful_client_properties[prop] ~= nil then
+            c:set_xproperty(xprop, c.data.awful_client_properties[prop])
         end
     end
 end
