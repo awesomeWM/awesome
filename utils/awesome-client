@@ -12,12 +12,15 @@ if [ "$ISATTY" = 0 ]
 then
     # rlwrap provides readline functionality for "read", which is more enhanced
     # than bash's "read" itself.
-    RLWRAP=$(which rlwrap 2>/dev/null)
-    if [ "$RLWRAP" != "" ]
+    # It can be disabled/overridden using 'AWESOME_RLWRAP= awesome-client'.
+    if [ -z "${AWESOME_RLWRAP+x}" ]; then
+        AWESOME_RLWRAP="$(which rlwrap 2>/dev/null)"
+    fi
+    if [ -n "$AWESOME_RLWRAP" ]
     then
         if [ "$A_RERUN" = "" ]
         then
-            A_RERUN="no" exec $RLWRAP $0 "$@"
+            A_RERUN="no" exec $AWESOME_RLWRAP $0 "$@"
         fi
         READ_CMD="read"
     else
