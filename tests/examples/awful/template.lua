@@ -94,7 +94,7 @@ local function client_widget(c, col, label)
     local l = wibox.layout.align.vertical()
     l.fill_space = true
 
-    local tbs = c.titlebars or {}
+    local tbs = c._private and c._private.titlebars or {}
 
     local map = {
         top    = "set_first",

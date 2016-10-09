@@ -513,6 +513,9 @@ local function new(c, args)
     -- Handle declarative/recursive widget container
     ret.setup = base.widget.setup
 
+    c._private = c._private or {}
+    c._private.titlebars = bars
+
     return ret
 end
 
