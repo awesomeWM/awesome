@@ -150,6 +150,30 @@ describe("gears.matrix", function()
         assert.is.equal(0, m.x0)
         assert.is.equal(0, m.y0)
     end)
+
+    describe("rotate_at", function()
+        it("create", function()
+            local m = matrix.create_rotate_at(5, 5, math.pi)
+            assert.is.equal(-1, m.xx)
+            -- Stupid rounding issues...
+            assert.is_true(math.abs(round(m.xy) - m.xy) < 0.00000001)
+            assert.is_true(math.abs(round(m.yx) - m.yx) < 0.00000001)
+            assert.is.equal(-1, m.yy)
+            assert.is.equal(10, m.x0)
+            assert.is.equal(10, m.y0)
+        end)
+
+        it("multiply", function()
+            local m = matrix.create_translate(-5, 0):rotate_at(5, 5, math.pi)
+            assert.is.equal(-1, m.xx)
+            -- Stupid rounding issues...
+            assert.is_true(math.abs(round(m.xy) - m.xy) < 0.00000001)
+            assert.is_true(math.abs(round(m.yx) - m.yx) < 0.00000001)
+            assert.is.equal(-1, m.yy)
+            assert.is.equal(15, m.x0)
+            assert.is.equal(10, m.y0)
+        end)
+    end)
 end)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
