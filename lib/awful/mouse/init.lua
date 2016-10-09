@@ -124,7 +124,7 @@ end
 -- @function awful.mouse.wibox.move
 --@tparam wibox w The wibox to move, or none to use that under the pointer
 function mouse.wibox.move(w)
-    w = w or mouse.wibox_under_pointer()
+    w = w or mouse.current_wibox
     if not w then return end
 
     if not w
