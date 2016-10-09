@@ -3,7 +3,6 @@
 --
 -- @author Gregor Best
 -- @copyright 2008 Gregor Best
--- @release @AWESOME_VERSION@
 -- @module awful.layout.suit.floating
 ---------------------------------------------------------------------------
 

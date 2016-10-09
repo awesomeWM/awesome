@@ -6,7 +6,6 @@
 -- @module awful.layout.suit.corner
 -- @author Alexis Brenon &lt;brenon.alexis+awesomewm@gmail.com&gt;
 -- @copyright 2015 Alexis Brenon
--- @release @AWESOME_VERSION@
 
 -- Grab environment we need
 local ipairs = ipairs

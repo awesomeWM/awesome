@@ -4,7 +4,6 @@
 -- @author Uli Schlachter
 -- @author dodo
 -- @copyright 2010, 2011 Uli Schlachter, dodo
--- @release @AWESOME_VERSION@
 -- @classmod wibox.widget.textbox
 ---------------------------------------------------------------------------
 

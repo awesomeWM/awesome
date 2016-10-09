@@ -8,7 +8,6 @@
 --@DOC_wibox_widget_defaults_checkbox_EXAMPLE@
 -- @author Emmanuel Lepage Valle
 -- @copyright 2010 Emmanuel Lepage Vallee
--- @release @AWESOME_VERSION@
 -- @classmod wibox.widget.checkbox
 ---------------------------------------------------------------------------
 

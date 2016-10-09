@@ -3,7 +3,6 @@
 --
 -- @author Kazunobu Kuriyama
 -- @copyright 2015 Kazunobu Kuriyama
--- @release @AWESOME_VERSION@
 -- @classmod menubar.icon_theme
 ---------------------------------------------------------------------------
 

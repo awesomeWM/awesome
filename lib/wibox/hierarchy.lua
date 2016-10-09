@@ -5,7 +5,6 @@
 --
 -- @author Uli Schlachter
 -- @copyright 2015 Uli Schlachter
--- @release @AWESOME_VERSION@
 -- @module wibox.hierarchy
 ---------------------------------------------------------------------------
 

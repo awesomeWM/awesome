@@ -6,7 +6,6 @@
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @author Sébastien Gross &lt;seb-awesome@chezwam.org&gt;
 -- @copyright 2008 Julien Danjou, Sébastien Gross
--- @release @AWESOME_VERSION@
 -- @module awful.completion
 ---------------------------------------------------------------------------
 

@@ -75,7 +75,6 @@
 -- @author Emmanuel Lepage Vallee &lt;elv1313@gmail.com&gt;
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2008 Julien Danjou, Emmanuel Lepage Vallee 2016
--- @release @AWESOME_VERSION@
 -- @module awful.placement
 ---------------------------------------------------------------------------
 

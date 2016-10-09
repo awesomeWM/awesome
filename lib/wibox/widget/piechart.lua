@@ -7,7 +7,6 @@
 --@DOC_wibox_widget_defaults_piechart_EXAMPLE@
 -- @author Emmanuel Lepage Valle
 -- @copyright 2012 Emmanuel Lepage Vallee
--- @release @AWESOME_VERSION@
 -- @classmod wibox.widget.piechart
 ---------------------------------------------------------------------------
 

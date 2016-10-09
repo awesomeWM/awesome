@@ -5,7 +5,6 @@
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @author dodo
 -- @copyright 2008, 2011 Damien Leone, Julien Danjou, dodo
--- @release @AWESOME_VERSION@
 -- @module awful.menu
 --------------------------------------------------------------------------------
 

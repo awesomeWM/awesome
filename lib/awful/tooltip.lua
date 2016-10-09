@@ -36,7 +36,6 @@
 --
 -- @author Sébastien Gross &lt;seb•ɱɩɲʋʃ•awesome•ɑƬ•chezwam•ɖɵʈ•org&gt;
 -- @copyright 2009 Sébastien Gross
--- @release @AWESOME_VERSION@
 -- @classmod awful.tooltip
 -------------------------------------------------------------------------
 

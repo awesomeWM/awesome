@@ -5,7 +5,6 @@
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2009 Donald Ephraim Curtis
 -- @copyright 2008 Julien Danjou
--- @release @AWESOME_VERSION@
 -- @module awful.layout.suit.tile
 ---------------------------------------------------------------------------
 

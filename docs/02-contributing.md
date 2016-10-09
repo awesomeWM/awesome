@@ -69,8 +69,8 @@ You can use the full power of
 the comments.
 
 Every module and class should have a short description at its beginning which
-should include `@author author`, `@copyright year author`,
-`@release @AWESOME_VERSION@` and `@module module-name` or `@classmod class-name`.
+should include `@author author`, `@copyright year author` and
+`@module module-name` or `@classmod class-name`.
 
 Parameters of functions should be documented using
 `@tparam <type> <parmname> <description>`, and return values via

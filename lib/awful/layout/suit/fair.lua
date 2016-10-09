@@ -3,7 +3,6 @@
 --
 -- @author Josh Komoroske
 -- @copyright 2012 Josh Komoroske
--- @release @AWESOME_VERSION@
 -- @module awful.layout.suit.fair
 ---------------------------------------------------------------------------
 

@@ -4,7 +4,6 @@
 -- @author Uli Schlachter &lt;psychon@znc.in&gt;
 -- @copyright 2009 Uli Schlachter
 -- @copyright 2008 Julien Danjou
--- @release @AWESOME_VERSION@
 --
 -- @module awful.layout.suit.spiral
 ---------------------------------------------------------------------------
