@@ -10,6 +10,7 @@ local base = require("wibox.widget.base")
 
 return setmetatable({
     fixed = require("wibox.layout.fixed");
+    shaped = require("wibox.layout.shaped");
     align = require("wibox.layout.align");
     flex = require("wibox.layout.flex");
     rotate = require("wibox.layout.rotate");
