@@ -445,7 +445,7 @@ function rules.execute(c, props, callbacks)
     -- As most race conditions should now have been avoided, apply the remaining
     -- properties.
     for property, value in pairs(props) do
-        if property ~= "focus" and type(value) == "function" then
+        if property ~= "focus" and property ~= "callback" and type(value) == "function" then -- focus and callbacks are handeled below
             value = value(c, props)
         end
 
@@ -492,8 +492,12 @@ function rules.execute(c, props, callbacks)
 end
 
 function rules.completed_with_payload_callback(c, props)
-    rules.execute(c, props, type(props.callback) == "function" and
-        {props.callback} or props.callback )
+    -- remove callback from properties table since rules.execute expects
+    -- them to be passed as a separate parameter
+    cb = props.callback
+    props.callback = nil
+    rules.execute(c, props, type(cb) == "function" and
+        {cb} or cb )
 end
 
 client.connect_signal("spawn::completed_with_payload", rules.completed_with_payload_callback)
