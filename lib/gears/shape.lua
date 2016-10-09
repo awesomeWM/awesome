@@ -652,6 +652,54 @@ function module.transform(shape)
     return result
 end
 
+--- Rotate the shape right by 90 degree
+--
+-- @DOC_gears_shape_rotate_right_EXAMPLE@
+--
+-- @param shape A shape function
+-- @return A rotated version of the shape; this is also a shape function
+function module.rotate_right(shape)
+    return function(cr, width, height)
+        cr:save()
+        local matrix = g_matrix.create_rotate_at(width/2, height/2, math.pi/2)
+        cr:transform(matrix:to_cairo_matrix())
+        shape(cr, height, width)
+        cr:restore()
+    end
+end
+
+--- Rotate the shape left by 90 degree
+--
+-- @DOC_gears_shape_rotate_left_EXAMPLE@
+--
+-- @param shape A shape function
+-- @return A rotated version of the shape; this is also a shape function
+function module.rotate_left(shape)
+    return function(cr, width, height)
+        cr:save()
+        local matrix = g_matrix.create_rotate_at(width/2, height/2, -math.pi/2)
+        cr:transform(matrix:to_cairo_matrix())
+        shape(cr, height, width)
+        cr:restore()
+    end
+end
+
+--- Rotate the shape by 180 degree
+--
+-- @DOC_gears_shape_rotate_180_EXAMPLE@
+--
+-- @param shape A shape function
+-- @return A rotated version of the shape; this is also a shape function
+function module.rotate_180(shape)
+    return function(cr, width, height)
+        cr:save()
+        local matrix = g_matrix.create_rotate_at(width/2, height/2, math.pi)
+        cr:transform(matrix:to_cairo_matrix())
+        shape(cr, width, height)
+        cr:restore()
+    end
+end
+
 return module
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
