@@ -13,8 +13,8 @@ local w = wibox.widget {
     homogeneous     = true,
     layout          = wibox.layout.grid,
 }
-w:add_widget_at(wibox.widget(
+w:add_widget_at(
     generic_widget("fifth",beautiful.bg_highlight)
-    ), 1, 1, 1, 2)
+    , 1, 1, 1, 2)
 
 return w, w:fit({dpi=96}, 9999, 9999)

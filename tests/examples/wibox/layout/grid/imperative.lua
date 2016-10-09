@@ -1,13 +1,13 @@
 local generic_widget = ... --DOC_NO_USAGE --DOC_HIDE
 local wibox     = require("wibox") --DOC_HIDE
 
-local first  = wibox.widget(generic_widget( "first"  )) --DOC_HIDE
-local second = wibox.widget(generic_widget( "second" )) --DOC_HIDE
-local third  = wibox.widget(generic_widget( "t\nh\ni\nr\nd"  )) --DOC_HIDE
-local fourth = wibox.widget(generic_widget( "fourth" )) --DOC_HIDE
-local fifth  = wibox.widget(generic_widget( "fifth"  )) --DOC_HIDE
-local lorem  = wibox.widget(generic_widget("Lorem ipsum dolor sit amet, consectetur " ..   --DOC_HIDE
-    "adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."))  --DOC_HIDE
+local first  = generic_widget( "first"  ) --DOC_HIDE
+local second = generic_widget( "second" ) --DOC_HIDE
+local third  = generic_widget( "t\nh\ni\nr\nd"  ) --DOC_HIDE
+local fourth = generic_widget( "fourth" ) --DOC_HIDE
+local fifth  = generic_widget( "fifth"  ) --DOC_HIDE
+local lorem  = generic_widget("Lorem ipsum dolor sit amet, consectetur " ..   --DOC_HIDE
+    "adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.")  --DOC_HIDE
 
     local l = wibox.widget {
         homogeneous   = true,
