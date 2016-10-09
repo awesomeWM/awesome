@@ -3,7 +3,6 @@
 --
 -- @author Uli Schlachter
 -- @copyright 2010 Uli Schlachter
--- @release @AWESOME_VERSION@
 -- @classmod wibox.container
 ---------------------------------------------------------------------------
 local base = require("wibox.widget.base")

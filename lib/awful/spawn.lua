@@ -10,7 +10,6 @@
 -- @author Emmanuel Lepage Vallee &lt;elv1313@gmail.com&gt;
 -- @copyright 2008 Julien Danjou
 -- @copyright 2014 Emmanuel Lepage Vallee
--- @release @AWESOME_VERSION@
 -- @module awful.spawn
 ---------------------------------------------------------------------------
 

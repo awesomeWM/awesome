@@ -1,7 +1,6 @@
 ---------------------------------------------------------------------------
 -- @author Aleksey Fedotov &lt;lexa@cfotr.com&gt;
 -- @copyright 2015 Aleksey Fedotov
--- @release @AWESOME_VERSION@
 -- @classmod wibox.widget.keyboardlayout
 ---------------------------------------------------------------------------
 

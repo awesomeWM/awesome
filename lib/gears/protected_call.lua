@@ -1,7 +1,6 @@
 ---------------------------------------------------------------------------
 -- @author Uli Schlachter
 -- @copyright 2016 Uli Schlachter
--- @release @AWESOME_VERSION@
 -- @module gears.protected_call
 ---------------------------------------------------------------------------
 

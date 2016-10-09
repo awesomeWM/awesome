@@ -27,7 +27,6 @@
  *
  * @author Uli Schlachter &lt;psychon@znc.in&gt;
  * @copyright 2012 Uli Schlachter
- * @release @AWESOME_VERSION@
  * @classmod drawable
  */
 

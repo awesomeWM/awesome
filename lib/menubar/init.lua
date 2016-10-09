@@ -16,7 +16,6 @@
 --
 -- @author Alexander Yakushev &lt;yakushev.alex@gmail.com&gt;
 -- @copyright 2011-2012 Alexander Yakushev
--- @release @AWESOME_VERSION@
 -- @module menubar
 ---------------------------------------------------------------------------
 

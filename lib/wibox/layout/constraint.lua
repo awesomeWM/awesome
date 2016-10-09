@@ -3,7 +3,6 @@
 --
 -- @author Lukáš Hrázký
 -- @copyright 2012 Lukáš Hrázký
--- @release @AWESOME_VERSION@
 -- @classmod wibox.layout.constraint
 ---------------------------------------------------------------------------
 

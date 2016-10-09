@@ -3,7 +3,6 @@
 --
 -- @author Uli Schlachter (based on ideas from Saleur Geoffrey)
 -- @copyright 2015 Uli Schlachter
--- @release @AWESOME_VERSION@
 -- @classmod wibox.layout.scroll
 ---------------------------------------------------------------------------
 local util = require("awful.util")

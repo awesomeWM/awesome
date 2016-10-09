@@ -3,7 +3,6 @@
 --
 -- @author Yauhen Kirylau &lt;yawghen@gmail.com&gt;
 -- @copyright 2015 Yauhen Kirylau
--- @release @AWESOME_VERSION@
 -- @module beautiful.xresources
 ----------------------------------------------------------------------------
 

@@ -38,7 +38,6 @@
 --
 -- @author Emmanuel Lepage Vallee
 -- @copyright 2011-2016 Emmanuel Lepage Vallee
--- @release @AWESOME_VERSION@
 -- @module gears.shape
 ---------------------------------------------------------------------------
 local g_matrix = require( "gears.matrix" )

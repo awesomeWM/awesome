@@ -3,7 +3,6 @@
 --
 -- @author koniu &lt;gkusnierz@gmail.com&gt;
 -- @copyright 2008 koniu
--- @release @AWESOME_VERSION@
 -- @module naughty
 ----------------------------------------------------------------------------
 

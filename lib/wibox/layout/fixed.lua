@@ -3,7 +3,6 @@
 --@DOC_wibox_layout_defaults_fixed_EXAMPLE@
 -- @author Uli Schlachter
 -- @copyright 2010 Uli Schlachter
--- @release @AWESOME_VERSION@
 -- @classmod wibox.layout.fixed
 ---------------------------------------------------------------------------
 

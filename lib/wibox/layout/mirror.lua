@@ -3,7 +3,6 @@
 --
 -- @author dodo
 -- @copyright 2012 dodo
--- @release @AWESOME_VERSION@
 -- @classmod wibox.layout.mirror
 ---------------------------------------------------------------------------
 

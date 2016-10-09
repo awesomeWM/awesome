@@ -1,7 +1,6 @@
 ---------------------------------------------------------------------------
 -- @author Uli Schlachter
 -- @copyright 2015 Uli Schlachter
--- @release @AWESOME_VERSION@
 -- @classmod gears.cache
 ---------------------------------------------------------------------------
 

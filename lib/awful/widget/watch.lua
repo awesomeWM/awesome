@@ -27,7 +27,6 @@
 -- @author Benjamin Petrenko
 -- @author Yauheni Kirylau
 -- @copyright 2015, 2016 Benjamin Petrenko, Yauheni Kirylau
--- @release @AWESOME_VERSION@
 -- @classmod awful.widget.watch
 ---------------------------------------------------------------------------
 

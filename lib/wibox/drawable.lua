@@ -3,7 +3,6 @@
 --
 -- @author Uli Schlachter
 -- @copyright 2012 Uli Schlachter
--- @release @AWESOME_VERSION@
 -- @classmod wibox.drawable
 ---------------------------------------------------------------------------
 

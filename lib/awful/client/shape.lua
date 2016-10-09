@@ -3,7 +3,6 @@
 --
 -- @author Uli Schlachter &lt;psychon@znc.in&gt;
 -- @copyright 2014 Uli Schlachter
--- @release @AWESOME_VERSION@
 -- @submodule client
 ---------------------------------------------------------------------------
 

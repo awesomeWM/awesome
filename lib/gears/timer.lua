@@ -3,7 +3,6 @@
 --
 -- @author Uli Schlachter
 -- @copyright 2014 Uli Schlachter
--- @release @AWESOME_VERSION@
 -- @classmod gears.timer
 ---------------------------------------------------------------------------
 

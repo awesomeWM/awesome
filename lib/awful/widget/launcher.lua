@@ -1,7 +1,6 @@
 ---------------------------------------------------------------------------
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2008-2009 Julien Danjou
--- @release @AWESOME_VERSION@
 -- @classmod awful.widget.launcher
 ---------------------------------------------------------------------------
 

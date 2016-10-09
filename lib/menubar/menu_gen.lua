@@ -3,7 +3,6 @@
 --
 -- @author Antonio Terceiro
 -- @copyright 2009, 2011-2012 Antonio Terceiro, Alexander Yakushev
--- @release @AWESOME_VERSION@
 -- @module menubar.menu_gen
 ---------------------------------------------------------------------------
 

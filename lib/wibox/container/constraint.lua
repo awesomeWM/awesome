@@ -3,7 +3,6 @@
 --@DOC_wibox_container_defaults_constraint_EXAMPLE@
 -- @author Lukáš Hrázký
 -- @copyright 2012 Lukáš Hrázký
--- @release @AWESOME_VERSION@
 -- @classmod wibox.container.constraint
 ---------------------------------------------------------------------------
 

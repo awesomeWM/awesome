@@ -3,7 +3,6 @@
 --@DOC_wibox_widget_defaults_imagebox_EXAMPLE@
 -- @author Uli Schlachter
 -- @copyright 2010 Uli Schlachter
--- @release @AWESOME_VERSION@
 -- @classmod wibox.widget.imagebox
 ---------------------------------------------------------------------------
 
