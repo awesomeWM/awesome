@@ -528,7 +528,7 @@ end
 -- @param[opt] t tag object
 -- @return Screen number
 function tag.getscreen(t)
-    util.deprecate("Use t.screen instead of awful.tag.setscreen(t, s)")
+    util.deprecate("Use t.screen instead of awful.tag.getscreen(t)")
 
     -- A new getter is not required
 
