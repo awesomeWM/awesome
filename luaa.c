@@ -783,6 +783,7 @@ luaA_loadrc(const char *confpath, bool run)
         const char *err = lua_tostring(L, -1);
         luaA_startup_error(err);
         fprintf(stderr, "%s\n", err);
+        lua_pop(L, 1);
         return false;
     }
 
