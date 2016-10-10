@@ -295,12 +295,23 @@ acquire_WM_Sn(bool replace)
     xcb_send_event(globalconf.connection, false, globalconf.screen->root, 0xFFFFFF, (char *) &ev);
 }
 
+static xcb_generic_event_t *poll_for_event(void)
+{
+    if (globalconf.pending_event) {
+        xcb_generic_event_t *event = globalconf.pending_event;
+        globalconf.pending_event = NULL;
+        return event;
+    }
+
+    return xcb_poll_for_event(globalconf.connection);
+}
+
 static void
 a_xcb_check(void)
 {
     xcb_generic_event_t *mouse = NULL, *event;
 
-    while((event = xcb_poll_for_event(globalconf.connection)))
+    while((event = poll_for_event()))
     {
         /* We will treat mouse events later.
          * We cannot afford to treat all mouse motion events,
@@ -363,6 +374,12 @@ a_glib_poll(GPollFD *ufds, guint nfsd, gint timeout)
         luaA_dumpstack(L);
         lua_settop(L, 0);
     }
+
+    /* Don't sleep if there is a pending event */
+    assert(globalconf.pending_event == NULL);
+    globalconf.pending_event = xcb_poll_for_event(globalconf.connection);
+    if (globalconf.pending_event != NULL)
+        timeout = 0;
 
     /* Check how long this main loop iteration took */
     gettimeofday(&now, NULL);
