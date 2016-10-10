@@ -494,7 +494,7 @@ end
 function rules.completed_with_payload_callback(c, props)
     -- remove callback from properties table since rules.execute expects
     -- them to be passed as a separate parameter
-    cb = props.callback
+    local cb = props.callback
     props.callback = nil
     rules.execute(c, props, type(cb) == "function" and
         {cb} or cb )
