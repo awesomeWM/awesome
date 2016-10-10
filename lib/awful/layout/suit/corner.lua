@@ -11,7 +11,6 @@
 local ipairs = ipairs
 local math = math
 local capi = {screen = screen}
-local tag = require("awful.tag")
 
 --- The cornernw layout layoutbox icon.
 -- @beautiful beautiful.layout_cornernw
@@ -120,7 +119,7 @@ local function do_corner(p, orientation)
             master.height = wa.height
         end
         if #cls < 2  then
-            if tag.getmfpol(t) == "expand" then
+            if t.master_fill_policy == "expand" then
                 master = wa
             else
                 master.x = master.x + (wa.width - master.width)/2
