@@ -19,6 +19,7 @@ local gio = lgi.Gio
 local glib = lgi.GLib
 local wibox = require("wibox")
 local debug = require("gears.debug")
+local protected_call = require("gears.protected_call")
 
 local utils = {}
 
@@ -288,7 +289,7 @@ function utils.parse_dir(dir_path, callback)
     gio.Async.start(function()
         local result = {}
         parser(dir_path, result)
-        callback(result)
+        protected_call.call(callback, result)
     end)()
 end
 
