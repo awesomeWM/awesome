@@ -192,6 +192,8 @@ typedef struct
     xcb_void_cookie_t pending_enter_leave_begin;
     /** List of windows to be destroyed later */
     window_array_t destroy_later_windows;
+    /** Pending event that still needs to be handled */
+    xcb_generic_event_t *pending_event;
 } awesome_t;
 
 extern awesome_t globalconf;
