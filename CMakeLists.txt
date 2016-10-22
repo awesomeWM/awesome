@@ -22,6 +22,8 @@ include_directories(
     ${AWESOME_REQUIRED_INCLUDE_DIRS}
     ${AWESOME_OPTIONAL_INCLUDE_DIRS})
 
+set(CHECK_TARGETS check-integration)
+
 set(AWE_CONF_FILE_DEFAULT ${BUILD_DIR}/awesomerc.lua)
 set(AWE_CONF_FILE rc.lua)
 
@@ -265,6 +267,12 @@ if(GENERATE_DOC)
 
     file(GLOB_RECURSE AWE_LUA_FILES ${BUILD_DIR}/lib/*.lua)
     file(GLOB_RECURSE AWE_MD_FILES ${AWE_DOC_DIR}/*.md)
+    file(GLOB_RECURSE AWE_MD_LUA_FILES RELATIVE "${SOURCE_DIR}/docs" docs/*.md.lua)
+    foreach(file ${AWE_MD_LUA_FILES})
+        # Remove .lua file extensions
+        string(REPLACE ".lua" "" file ${file})
+        list(APPEND AWE_MD_FILES "${AWE_DOC_DIR}/${file}")
+    endforeach()
 
     # Copy the images to the build directory
     file(COPY ${SOURCE_DIR}/docs/images DESTINATION ${BUILD_DIR}/doc)
@@ -272,17 +280,22 @@ if(GENERATE_DOC)
     # Copy the aliases to the build directory
     file(COPY ${SOURCE_DIR}/docs/aliases DESTINATION ${BUILD_DIR}/docs)
 
+    add_custom_target(ldoc ALL
+        COMMAND ${LDOC_EXECUTABLE} .
+        WORKING_DIRECTORY ${AWE_DOC_DIR}
+        DEPENDS ${AWE_LUA_FILES} ${AWE_MD_FILES}
+    )
+
     # Run ldoc and make it fail if any warnings are generated. The
     # redirection-magic swaps stdout and stderr and awk exits with a non-zero
     # status if it sees at least one line of input.
     # All together, this fails as soon as ldoc prints on stderr.
-    add_custom_target(ldoc ALL
+    add_custom_target(check-ldoc-warnings
         COMMAND ${LDOC_EXECUTABLE} . 3>&1 1>&2 2>&3 | awk "{ fail=1 \; print } END { exit fail }"
         WORKING_DIRECTORY ${AWE_DOC_DIR}
-        DEPENDS ${AWE_LUA_FILES} ${AWE_MD_FILES} ${BUILD_DIR}/docs/06-appearance.md
-        ${BUILD_DIR}/docs/05-awesomerc.md
+        DEPENDS ${AWE_LUA_FILES} ${AWE_MD_FILES}
     )
-
+    list(APPEND CHECK_TARGETS check-ldoc-warnings)
 endif()
 # }}}
 
@@ -365,7 +378,6 @@ endif()
 # }}}
 
 # {{{ Tests
-set(CHECK_TARGETS check-integration)
 add_custom_target(check-integration
     sh -c "CMAKE_BINARY_DIR='${CMAKE_BINARY_DIR}' ${CMAKE_SOURCE_DIR}/tests/run.sh"
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
