@@ -267,6 +267,12 @@ if(GENERATE_DOC)
 
     file(GLOB_RECURSE AWE_LUA_FILES ${BUILD_DIR}/lib/*.lua)
     file(GLOB_RECURSE AWE_MD_FILES ${AWE_DOC_DIR}/*.md)
+    file(GLOB_RECURSE AWE_MD_LUA_FILES RELATIVE "${SOURCE_DIR}/docs" docs/*.md.lua)
+    foreach(file ${AWE_MD_LUA_FILES})
+        # Remove .lua file extensions
+        string(REPLACE ".lua" "" file ${file})
+        list(APPEND AWE_MD_FILES "${AWE_DOC_DIR}/${file}")
+    endforeach()
 
     # Copy the images to the build directory
     file(COPY ${SOURCE_DIR}/docs/images DESTINATION ${BUILD_DIR}/doc)
@@ -277,8 +283,7 @@ if(GENERATE_DOC)
     add_custom_target(ldoc ALL
         COMMAND ${LDOC_EXECUTABLE} .
         WORKING_DIRECTORY ${AWE_DOC_DIR}
-        DEPENDS ${AWE_LUA_FILES} ${AWE_MD_FILES} ${BUILD_DIR}/docs/06-appearance.md
-        ${BUILD_DIR}/docs/05-awesomerc.md
+        DEPENDS ${AWE_LUA_FILES} ${AWE_MD_FILES}
     )
 
     # Run ldoc and make it fail if any warnings are generated. The
@@ -288,8 +293,7 @@ if(GENERATE_DOC)
     add_custom_target(check-ldoc-warnings
         COMMAND ${LDOC_EXECUTABLE} . 3>&1 1>&2 2>&3 | awk "{ fail=1 \; print } END { exit fail }"
         WORKING_DIRECTORY ${AWE_DOC_DIR}
-        DEPENDS ${AWE_LUA_FILES} ${AWE_MD_FILES} ${BUILD_DIR}/docs/06-appearance.md
-        ${BUILD_DIR}/docs/05-awesomerc.md
+        DEPENDS ${AWE_LUA_FILES} ${AWE_MD_FILES}
     )
     list(APPEND CHECK_TARGETS check-ldoc-warnings)
 endif()
