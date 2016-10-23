@@ -83,6 +83,12 @@
  * @signal .list
  */
 
+/** When 2 screens are swapped
+ * @tparam screen screen The other screen
+ * @tparam boolean is_source If self is the source or the destination of the swap
+ * @signal .swapped
+ */
+
  /**
   * The primary screen.
   *
@@ -1159,6 +1165,47 @@ luaA_screen_fake_resize(lua_State *L)
     return 0;
 }
 
+/** Swap a screen with another one in global screen list.
+ * @client s A screen to swap with.
+ * @function swap
+ */
+static int
+luaA_screen_swap(lua_State *L)
+{
+    screen_t *s = luaA_checkudata(L, 1, &screen_class);
+    screen_t *swap = luaA_checkudata(L, 2, &screen_class);
+
+    if(s != swap)
+    {
+        screen_t **ref_s = NULL, **ref_swap = NULL;
+        foreach(item, globalconf.screens)
+        {
+            if(*item == s)
+                ref_s = item;
+            else if(*item == swap)
+                ref_swap = item;
+            if(ref_s && ref_swap)
+                break;
+        }
+        /* swap ! */
+        *ref_s = swap;
+        *ref_swap = s;
+
+        luaA_class_emit_signal(L, &screen_class, "list", 0);
+
+        luaA_object_push(L, swap);
+        lua_pushboolean(L, true);
+        luaA_object_emit_signal(L, -4, "swapped", 2);
+
+        luaA_object_push(L, swap);
+        luaA_object_push(L, s);
+        lua_pushboolean(L, false);
+        luaA_object_emit_signal(L, -3, "swapped", 2);
+    }
+
+    return 0;
+}
+
 void
 screen_class_setup(lua_State *L)
 {
@@ -1179,6 +1226,7 @@ screen_class_setup(lua_State *L)
         LUA_CLASS_META
         { "fake_remove", luaA_screen_fake_remove },
         { "fake_resize", luaA_screen_fake_resize },
+        { "swap", luaA_screen_swap },
         { NULL, NULL },
     };
 
