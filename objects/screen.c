@@ -79,6 +79,10 @@
  * @signal removed
  */
 
+/** This signal is emitted when the list of available screens changes.
+ * @signal .list
+ */
+
  /**
   * The primary screen.
   *
@@ -603,6 +607,7 @@ screen_refresh(void)
 
     screen_array_t new_screens;
     lua_State *L = globalconf_get_lua_State();
+    bool list_changed = false;
 
     screen_array_init(&new_screens);
     if (globalconf.have_randr_15)
@@ -624,6 +629,8 @@ screen_refresh(void)
              * globalconf.screens reference this screen now */
             luaA_object_push(L, *new_screen);
             luaA_object_ref(L, -1);
+
+            list_changed = true;
         }
     }
 
@@ -642,6 +649,8 @@ screen_refresh(void)
             lua_pop(L, 1);
             luaA_object_unref(L, old_screen);
             old_screen->valid = false;
+
+            list_changed = true;
         }
     }
 
@@ -656,6 +665,9 @@ screen_refresh(void)
     screen_array_wipe(&new_screens);
 
     screen_update_primary();
+
+    if (list_changed)
+        luaA_class_emit_signal(L, &screen_class, "list", 0);
 }
 
 /** Return the squared distance of the given screen to the coordinates.
@@ -1088,6 +1100,7 @@ luaA_screen_fake_add(lua_State *L)
     s->geometry.height = height;
 
     screen_added(L, s);
+    luaA_class_emit_signal(L, &screen_class, "list", 0);
     luaA_object_push(L, s);
 
     return 1;
@@ -1109,6 +1122,7 @@ luaA_screen_fake_remove(lua_State *L)
     luaA_object_push(L, s);
     screen_removed(L, -1);
     lua_pop(L, 1);
+    luaA_class_emit_signal(L, &screen_class, "list", 0);
     luaA_object_unref(L, s);
     s->valid = false;
 
