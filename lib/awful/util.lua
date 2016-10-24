@@ -252,18 +252,17 @@ function util.geticonpath(iconname, exts, dirs, size)
 end
 
 --- Check if a file exists, is not readable and not a directory.
--- @param filename The file path.
--- @return True if file exists and is readable.
+-- @tparam string filename The file path.
+-- @treturn bool True if file exists and is readable.
 function util.file_readable(filename)
     local file = io.open(filename)
     if file then
-        local _, _, code = file:read(1)
-        io.close(file)
-        if code == 21 then
-            -- "Is a directory".
-            return false
+        if file:read(0) -- Regular file (fails for empty ones).
+            or file:seek("end") == 0 then  -- File with size 0.
+            io.close(file)
+            return true
         end
-        return true
+        io.close(file)
     end
     return false
 end

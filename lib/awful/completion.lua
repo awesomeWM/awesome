@@ -70,15 +70,21 @@ function completion.shell(command, cur_pos, ncomp, shell)
     local i = 1
     local comptype = "file"
 
-    -- do nothing if we are on a letter, i.e. not at len + 1 or on a space
-    if cur_pos ~= #command + 1 and command:sub(cur_pos, cur_pos) ~= " " then
+    -- Do nothing if we are on a letter, i.e. not at len + 1 or on a space,
+    -- which might be escaped.
+    if cur_pos ~= #command + 1 and (command:sub(cur_pos, cur_pos) ~= " "
+        or command:sub(cur_pos-1, cur_pos-1) == "\\") then
         return command, cur_pos
     elseif #command == 0 then
         return command, cur_pos
     end
 
     while wend <= #command do
-        wend = command:find(" ", wstart)
+        wend, nextw = command:find(" +", wstart)
+        -- Skip escaped spaces.
+        while wend and command:sub(wend-1, wend-1) == "\\" do
+            wend, nextw = command:find(" +", wend + 1)
+        end
         if not wend then wend = #command + 1 end
         table.insert(words, command:sub(wstart, wend - 1))
         if cur_pos >= wstart and cur_pos <= wend + 1 then
@@ -86,8 +92,10 @@ function completion.shell(command, cur_pos, ncomp, shell)
             cword_end = wend
             cword_index = i
         end
-        wstart = wend + 1
-        i = i + 1
+        if nextw then
+            wstart = nextw + 1
+            i = i + 1
+        end
     end
 
     if cword_index == 1 and not string.find(words[cword_index], "/") then
@@ -130,7 +138,7 @@ function completion.shell(command, cur_pos, ncomp, shell)
         while true do
             local line = c:read("*line")
             if not line then break end
-            if os.execute("test -d " .. string.format('%q', line)) == 0 then
+            if util.is_dir(line) then
                 line = line .. "/"
             end
             table.insert(output, bash_escape(line))
@@ -152,7 +160,7 @@ function completion.shell(command, cur_pos, ncomp, shell)
     end
 
     local str = command:sub(1, cword_start - 1) .. output[ncomp] .. command:sub(cword_end)
-    cur_pos = cword_end + #output[ncomp] + 1
+    cur_pos = cword_start + #output[ncomp]
 
     return str, cur_pos, output
 end
