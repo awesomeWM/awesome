@@ -491,9 +491,8 @@ function rules.execute(c, props, callbacks)
     end
 end
 
-function rules.completed_with_payload_callback(c, props)
-    rules.execute(c, props, type(props.callback) == "function" and
-        {props.callback} or props.callback )
+function rules.completed_with_payload_callback(c, props, callbacks)
+    rules.execute(c, props, callbacks)
 end
 
 client.connect_signal("spawn::completed_with_payload", rules.completed_with_payload_callback)

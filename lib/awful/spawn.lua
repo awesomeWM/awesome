@@ -70,9 +70,11 @@ end
 spawn.snid_buffer = {}
 
 function spawn.on_snid_callback(c)
-    local props = spawn.snid_buffer[c.startup_id]
-    if props then
-        c:emit_signal("spawn::completed_with_payload", props)
+    local entry = spawn.snid_buffer[c.startup_id]
+    if entry then
+        local props = entry[1]
+        local callback = entry[2]
+        c:emit_signal("spawn::completed_with_payload", props, callback)
         spawn.snid_buffer[c.startup_id] = nil
     end
 end
@@ -102,15 +104,11 @@ function spawn.spawn(cmd, sn_rules, callback)
     if cmd and cmd ~= "" then
         local enable_sn = (sn_rules ~= false or callback)
         enable_sn = not not enable_sn -- Force into a boolean.
-        if not sn_rules and callback then
-            sn_rules = {callback=callback}
-        elseif callback then
-            sn_rules.callback = callback
-        end
         local pid, snid = capi.awesome.spawn(cmd, enable_sn)
         -- The snid will be nil in case of failure
         if snid and type(sn_rules) == "table" then
-            spawn.snid_buffer[snid] = sn_rules
+            sn_rules = sn_rules or {}
+            spawn.snid_buffer[snid] = { sn_rules, { callback } }
         end
         return pid, snid
     end
