@@ -51,6 +51,17 @@ function matrix.create_rotate(angle)
     return matrix.create(c, s, -s, c, 0, 0)
 end
 
+--- Create a new rotation matrix rotating around a custom point
+-- @tparam number x The horizontal rotation point
+-- @tparam number y The vertical rotation point
+-- @tparam number angle The angle of the rotation in radians.
+-- @return A new matrix describing the given transformation.
+function matrix.create_rotate_at(x, y, angle)
+    return   matrix.create_translate( -x, -y )
+           * matrix.create_rotate   ( angle  )
+           * matrix.create_translate(  x,  y )
+end
+
 --- Translate this matrix
 -- @tparam number x The translation in x direction.
 -- @tparam number y The translation in y direction.
@@ -80,9 +91,7 @@ end
 -- @tparam number angle The angle (in radiant: -2*math.pi to 2*math.pi)
 -- @return A transformation object
 function matrix:rotate_at(x, y, angle)
-    return self * matrix.create_translate( -x, -y )
-                * matrix.create_rotate   ( angle  )
-                * matrix.create_translate(  x,  y )
+    return self * matrix.create_rotate_at(x, y, angle)
 end
 
 --- Invert this matrix
