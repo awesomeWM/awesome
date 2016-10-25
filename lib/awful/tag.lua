@@ -862,9 +862,15 @@ function tag.object.set_gap_single_client(t, gap_single_client)
 end
 
 function tag.object.get_gap_single_client(t)
-    return tag.getproperty(t, "gap_single_client")
-        or beautiful.gap_single_client
-        or defaults.gap_single_client
+    local val = tag.getproperty(t, "gap_single_client")
+    if val ~= nil then
+        return val
+    end
+    val = beautiful.gap_single_client
+    if val ~= nil then
+        return val
+    end
+    return defaults.gap_single_client
 end
 
 --- Get the spacing between clients.
