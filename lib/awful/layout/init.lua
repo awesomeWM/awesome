@@ -190,10 +190,10 @@ function layout.arrange(screen)
             g.y = g.y + useless_gap
             c:geometry(g)
         end
-        screen:emit_signal("arrange")
-
         arrange_lock = false
         delayed_arrange[screen] = nil
+
+        screen:emit_signal("arrange")
     end)
 end
 
