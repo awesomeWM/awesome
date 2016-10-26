@@ -155,11 +155,14 @@ composite_manager_running(void)
 }
 
 /** Quit awesome.
+ * @tparam[opt=0] integer code The exit code to use when exiting.
  * @function quit
  */
 static int
 luaA_quit(lua_State *L)
 {
+    if (!lua_isnoneornil(L, 1))
+        globalconf.exit_code = luaL_checkinteger(L, 1);
     if (globalconf.loop == NULL)
         globalconf.loop = g_main_loop_new(NULL, FALSE);
     g_main_loop_quit(globalconf.loop);
