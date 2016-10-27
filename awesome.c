@@ -490,6 +490,7 @@ main(int argc, char **argv)
     p_clear(&globalconf, 1);
     globalconf.keygrabber = LUA_REFNIL;
     globalconf.mousegrabber = LUA_REFNIL;
+    globalconf.exit_code = EXIT_SUCCESS;
     buffer_init(&globalconf.startup_errors);
     string_array_init(&searchpath);
 
@@ -754,7 +755,7 @@ main(int argc, char **argv)
 
     awesome_atexit(false);
 
-    return EXIT_SUCCESS;
+    return globalconf.exit_code;
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

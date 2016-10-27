@@ -194,6 +194,8 @@ typedef struct
     window_array_t destroy_later_windows;
     /** Pending event that still needs to be handled */
     xcb_generic_event_t *pending_event;
+    /** The exit code that main() will return with */
+    int exit_code;
 } awesome_t;
 
 extern awesome_t globalconf;
