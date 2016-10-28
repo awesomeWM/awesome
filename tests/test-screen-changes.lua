@@ -9,6 +9,11 @@ local real_screen = screen[1]
 local fake_screen = screen.fake_add(50, 50, 500, 500)
 local test_client1, test_client2
 
+local list_count = 0
+screen.connect_signal("list", function()
+    list_count = list_count + 1
+end)
+
 local steps = {
     -- Step 1: Set up some clients to experiment with and assign them as needed
     function(count)
@@ -52,6 +57,15 @@ local steps = {
         assert(wb.x == 100, wb.x)
         assert(wb.y == 110, wb.y)
         assert(wb.width == 600, wb.width)
+
+        -- Test screen order changes
+        assert(list_count == 0)
+        assert(screen[1] == real_screen)
+        assert(screen[2] == fake_screen)
+        real_screen:swap(fake_screen)
+        assert(list_count == 1)
+        assert(screen[2] == real_screen)
+        assert(screen[1] == fake_screen)
 
         return true
     end,
