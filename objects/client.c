@@ -2343,13 +2343,11 @@ luaA_client_swap(lua_State *L)
         luaA_object_push(L, swap);
         lua_pushboolean(L, true);
         luaA_object_emit_signal(L, -4, "swapped", 2);
-        lua_pop(L, 2);
 
         luaA_object_push(L, swap);
         luaA_object_push(L, c);
         lua_pushboolean(L, false);
         luaA_object_emit_signal(L, -3, "swapped", 2);
-        lua_pop(L, 3);
     }
 
     return 0;
