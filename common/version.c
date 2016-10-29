@@ -46,6 +46,9 @@ eprint_version(void)
     else
         lua_pop(L, 1);
 
+    /* Either push version number or error message onto stack */
+    (void) luaL_dostring(L, "return require('lgi.version')");
+
 #ifdef WITH_DBUS
     const char *has_dbus = "✔";
 #else
@@ -66,10 +69,12 @@ eprint_version(void)
            " • Compiled against %s (running with %s)\n"
            " • D-Bus support: %s\n"
            " • execinfo support: %s\n"
-           " • RandR 1.5 support: %s\n",
+           " • RandR 1.5 support: %s\n"
+           " • LGI version: %s\n",
            AWESOME_VERSION, AWESOME_RELEASE,
-           LUA_RELEASE, lua_tostring(L, -1),
-           has_dbus, has_execinfo, has_RandR15);
+           LUA_RELEASE, lua_tostring(L, -2),
+           has_dbus, has_execinfo, has_RandR15,
+           lua_tostring(L, -1));
     lua_close(L);
 
     exit(EXIT_SUCCESS);
