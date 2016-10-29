@@ -28,6 +28,7 @@
 
 #include <lualib.h>
 #include <lauxlib.h>
+#include <xcb/randr.h> /* for XCB_RANDR_GET_MONITORS */
 
 /** \brief Print version message and quit program.
  * \param executable program name
@@ -50,13 +51,25 @@ eprint_version(void)
 #else
     const char *has_dbus = "✘";
 #endif
+#ifdef XCB_RANDR_GET_MONITORS
+    const char *has_RandR15 = "✔";
+#else
+    const char *has_RandR15 = "✘";
+#endif
+#ifdef HAS_EXECINFO
+    const char *has_execinfo = "✔";
+#else
+    const char *has_execinfo = "✘";
+#endif
 
     printf("awesome %s (%s)\n"
            " • Compiled against %s (running with %s)\n"
-           " • D-Bus support: %s\n",
+           " • D-Bus support: %s\n"
+           " • execinfo support: %s\n"
+           " • RandR 1.5 support: %s\n",
            AWESOME_VERSION, AWESOME_RELEASE,
            LUA_RELEASE, lua_tostring(L, -1),
-           has_dbus);
+           has_dbus, has_execinfo, has_RandR15);
     lua_close(L);
 
     exit(EXIT_SUCCESS);
