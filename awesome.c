@@ -587,12 +587,7 @@ main(int argc, char **argv)
     XkbIgnoreExtension(True);
 
     /* X stuff */
-    globalconf.display = XOpenDisplay(NULL);
-    if (globalconf.display == NULL)
-        fatal("Cannot open display");
-    XSetEventQueueOwner(globalconf.display, XCBOwnsEventQueue);
-    globalconf.default_screen = XDefaultScreen(globalconf.display);
-    globalconf.connection = XGetXCBConnection(globalconf.display);;
+    globalconf.connection = xcb_connect(NULL, &globalconf.default_screen);
     if(xcb_connection_has_error(globalconf.connection))
         fatal("cannot open display (error %d)", xcb_connection_has_error(globalconf.connection));
 
@@ -622,6 +617,11 @@ main(int argc, char **argv)
 
     if (xcb_cursor_context_new(globalconf.connection, globalconf.screen, &globalconf.cursor_ctx) < 0)
         fatal("Failed to initialize xcb-cursor");
+    globalconf.xrmdb = xcb_xrm_database_from_default(globalconf.connection);
+    if (globalconf.xrmdb == NULL)
+        globalconf.xrmdb = xcb_xrm_database_from_string("");
+    if (globalconf.xrmdb == NULL)
+        fatal("Failed to initialize xcb-xrm");
 
     /* Did we get some usable data from the above X11 setup? */
     draw_test_cairo_xcb();
