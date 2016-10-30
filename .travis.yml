@@ -40,6 +40,10 @@ install:
   # Deps for functional tests.
   - sudo apt-get install -y dbus-x11 xterm xdotool xterm xvfb
 
+  # Need xorg-macros
+  - sudo apt-get install -y xutils-dev
+  - git clone --recursive https://github.com/Airblader/xcb-util-xrm.git && cd xcb-util-xrm && ./autogen.sh --prefix=/usr && make && sudo make install && cd -
+
   # Install Lua (per env).
   # Note that Lua 5.3 is installed manually, because it is not available in Ubuntu Trusty.
   - |

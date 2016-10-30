@@ -112,7 +112,6 @@ pkg_check_modules(AWESOME_REQUIRED REQUIRED
     gdk-pixbuf-2.0
     cairo
     x11
-    x11-xcb
     xcb-cursor
     xcb-randr
     xcb-xtest
@@ -129,7 +128,8 @@ pkg_check_modules(AWESOME_REQUIRED REQUIRED
     cairo-xcb
     libstartup-notification-1.0>=0.10
     xproto>=7.0.15
-    libxdg-basedir>=1.0.0)
+    libxdg-basedir>=1.0.0
+    xcb-xrm)
 
 if(NOT AWESOME_REQUIRED_FOUND OR NOT AWESOME_COMMON_REQUIRED_FOUND)
     message(FATAL_ERROR)

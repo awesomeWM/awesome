@@ -30,6 +30,7 @@
 #include <xcb/xcb_icccm.h>
 #include <xcb/xcb_keysyms.h>
 #include <xcb/xcb_cursor.h>
+#include <xcb/xcb_xrm.h>
 #include <X11/Xresource.h>
 
 #include "objects/key.h"
@@ -73,12 +74,10 @@ DO_ARRAY(xcb_window_t, window, DO_NOTHING)
 /** Main configuration structure */
 typedef struct
 {
-    /** Xlib Display */
-    Display *display;
-    /** X Resources DB */
-    XrmDatabase xrmdb;
     /** Connection ref */
     xcb_connection_t *connection;
+    /** X Resources DB */
+    xcb_xrm_database_t *xrmdb;
     /** Default screen number */
     int default_screen;
     /** xcb-cursor context */

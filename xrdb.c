@@ -26,23 +26,6 @@
 
 #include <string.h>
 
-/* \brief open X display and X Resources DB
- */
-static void xrdb_init(void) {
-  XrmInitialize(); // @TODO: it works without it but in docs it's said what it's
-                   // needed
-  if (!(globalconf.xrmdb = XrmGetDatabase(globalconf.display))) {
-
-    /* taken from xpbiff: */
-    /* >> what a hack; need to initialize dpy->db */
-    (void)XGetDefault(globalconf.display, "", "");
-    /**/
-
-    if (!(globalconf.xrmdb = XrmGetDatabase(globalconf.display)))
-      warn("Cannot open xrdb.");
-  }
-}
-
 /* \brief get value from X Resources DataBase
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
@@ -52,27 +35,22 @@ static void xrdb_init(void) {
  * \lreturn string xrdb value or nil if not exists. \
  */
 int luaA_xrdb_get_value(lua_State *L) {
-  if (!globalconf.xrmdb)
-    xrdb_init();
+    const char *resource_class = luaL_checkstring(L, 1);
+    const char *resource_name = luaL_checkstring(L, 2);
+    char *result = NULL;
 
-  char *resource_type;
-  int resource_code;
-  XrmValue resource_value;
-  const char *resource_class = luaL_checkstring(L, 1);
-  const char *resource_name = luaL_checkstring(L, 2);
+    if (xcb_xrm_resource_get_string(globalconf.xrmdb, resource_name, resource_class, &result) < 0 ) {
+        if (strlen(resource_class))
+            luaA_warn(L, "Failed to get xrdb value '%s' (class '%s').", resource_name, resource_class);
+        else
+            luaA_warn(L, "Failed to get xrdb value '%s'.", resource_name);
+        lua_pushnil(L);
+    } else {
+        lua_pushstring(L, result);
+        p_delete(&result);
+    }
 
-  resource_code = XrmGetResource(globalconf.xrmdb, resource_name, resource_class,
-                                 &resource_type, &resource_value);
-  if (resource_code && (strcmp(resource_type, "String") == 0)) {
-    lua_pushstring(L, (char *)resource_value.addr);
-  } else {
-    if (strlen(resource_class))
-      luaA_warn(L, "Failed to get xrdb value '%s' (class '%s').", resource_name, resource_class);
-    else
-      luaA_warn(L, "Failed to get xrdb value '%s'.", resource_name);
-    lua_pushnil(L);
-  }
-  return 1;
+    return 1;
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
