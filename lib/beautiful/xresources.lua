@@ -70,13 +70,21 @@ local function get_screen(s)
     return s and screen[s]
 end
 
---- Get global or per-screen DPI value falling back to xrdb.
--- @tparam[opt] integer|screen s The screen.
+--- Get global or per-screen DPI value, falling back to xrdb.
+-- @screen[opt] s The screen.
 -- @treturn number DPI value.
 function xresources.get_dpi(s)
-    s = get_screen(s)
-    if dpi_per_screen[s] then
-        return dpi_per_screen[s]
+    if s then
+        s = get_screen(s)
+        if dpi_per_screen[s] then
+            return dpi_per_screen[s]
+        end
+        local width = 0
+        for _,v in pairs(s.outputs) do
+            width = width + v.mm_width
+        end
+        local inch = width / 25.4
+        return math.floor(s.workarea.width / inch)
     end
     if not xresources.dpi then
         -- Might not be present when run under unit tests
