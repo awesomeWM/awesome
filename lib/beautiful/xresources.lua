@@ -101,13 +101,15 @@ end
 
 --- Set DPI for a given screen (defaults to global).
 -- @tparam number dpi DPI value.
--- @tparam[opt] integer s Screen.
+-- @screen[opt] s The screen.
 function xresources.set_dpi(dpi, s)
-    s = get_screen(s)
     if not s then
         xresources.dpi = dpi
     else
-        dpi_per_screen[s] = dpi
+        s = get_screen(s)
+        if s then
+            dpi_per_screen[s] = dpi
+        end
     end
 end
 
