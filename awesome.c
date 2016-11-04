@@ -54,9 +54,6 @@
 #include <xcb/xtest.h>
 #include <xcb/shape.h>
 
-#include <X11/Xlib-xcb.h>
-#include <X11/XKBlib.h>
-
 #include <glib-unix.h>
 
 awesome_t globalconf;
@@ -582,9 +579,6 @@ main(int argc, char **argv)
 
     /* set the default preferred icon size */
     globalconf.preferred_icon_size = 0;
-
-    /* XLib sucks */
-    XkbIgnoreExtension(True);
 
     /* X stuff */
     globalconf.connection = xcb_connect(NULL, &globalconf.default_screen);
