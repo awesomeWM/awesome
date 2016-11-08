@@ -27,6 +27,8 @@
 #include "globalconf.h"
 #include "xwindow.h"
 #include "objects/client.h"
+#include "common/atoms.h"
+
 #include <xcb/xkb.h>
 #include <xkbcommon/xkbcommon.h>
 #include <xkbcommon/xkbcommon-x11.h>
@@ -41,6 +43,11 @@ int
 luaA_xkb_set_layout_group(lua_State *L)
 {
     unsigned group = luaL_checkinteger(L, 1);
+    if (!globalconf.have_xkb)
+    {
+        luaA_warn(L, "XKB not supported");
+        return 0;
+    }
     xcb_xkb_latch_lock_state (globalconf.connection, XCB_XKB_ID_USE_CORE_KBD,
                               0, 0, true, group, 0, 0, 0);
     return 0;
@@ -55,6 +62,12 @@ luaA_xkb_set_layout_group(lua_State *L)
 int
 luaA_xkb_get_layout_group(lua_State *L)
 {
+    if (!globalconf.have_xkb)
+    {
+        luaA_warn(L, "XKB not supported");
+        return 0;
+    }
+
     xcb_xkb_get_state_cookie_t state_c;
     state_c = xcb_xkb_get_state_unchecked (globalconf.connection,
                                            XCB_XKB_ID_USE_CORE_KBD);
@@ -81,6 +94,12 @@ luaA_xkb_get_layout_group(lua_State *L)
 int
 luaA_xkb_get_group_names(lua_State *L)
 {
+    if (!globalconf.have_xkb)
+    {
+        luaA_warn(L, "XKB not supported");
+        return 0;
+    }
+
     xcb_xkb_get_names_cookie_t name_c;
     name_c = xcb_xkb_get_names_unchecked (globalconf.connection,
                                           XCB_XKB_ID_USE_CORE_KBD,
@@ -121,6 +140,51 @@ luaA_xkb_get_group_names(lua_State *L)
     return 1;
 }
 
+static bool
+fill_rmlvo_from_root(struct xkb_rule_names *xkb_names)
+{
+    xcb_get_property_reply_t *prop_reply = xcb_get_property_reply(globalconf.connection,
+            xcb_get_property_unchecked(globalconf.connection, false, globalconf.screen->root, _XKB_RULES_NAMES, XCB_GET_PROPERTY_TYPE_ANY, 0, UINT_MAX),
+            NULL);
+    if (!prop_reply)
+        return false;
+
+    if (prop_reply->value_len == 0)
+    {
+        p_delete(&prop_reply);
+        return false;
+    }
+
+    const char *walk = (const char *) xcb_get_property_value(prop_reply);
+    unsigned int remaining = xcb_get_property_value_length(prop_reply);
+    for (int i = 0; i < 5 && remaining > 0; i++)
+    {
+        const int len = strnlen(walk, remaining);
+        switch (i) {
+        case 0:
+            xkb_names->rules = strndup(walk, len);
+            break;
+        case 1:
+            xkb_names->model = strndup(walk, len);
+            break;
+        case 2:
+            xkb_names->layout = strndup(walk, len);
+            break;
+        case 3:
+            xkb_names->variant = strndup(walk, len);
+            break;
+        case 4:
+            xkb_names->options = strndup(walk, len);
+            break;
+        }
+        remaining -= len + 1;
+        walk = &walk[len + 1];
+    }
+
+    p_delete(&prop_reply);
+    return true;
+}
+
 /** Fill globalconf.xkb_state based on connection and context
 */
 static void
@@ -128,28 +192,55 @@ xkb_fill_state(void)
 {
     xcb_connection_t *conn = globalconf.connection;
 
-    int32_t device_id = xkb_x11_get_core_keyboard_device_id(conn);
-    if (device_id == -1)
-        fatal("Failed while getting XKB device id");
+    int32_t device_id = -1;
+    if (globalconf.have_xkb)
+    {
+        device_id = xkb_x11_get_core_keyboard_device_id(conn);
+        if (device_id == -1)
+            warn("Failed while getting XKB device id");
+    }
 
-    struct xkb_keymap *xkb_keymap = xkb_x11_keymap_new_from_device(
-                                globalconf.xkb_ctx,
-                                conn,
-                                device_id,
-                                XKB_KEYMAP_COMPILE_NO_FLAGS);
+    if (device_id != -1)
+    {
+        struct xkb_keymap *xkb_keymap = xkb_x11_keymap_new_from_device(
+                                    globalconf.xkb_ctx,
+                                    conn,
+                                    device_id,
+                                    XKB_KEYMAP_COMPILE_NO_FLAGS);
 
 
-    if (!xkb_keymap)
-        fatal("Failed while getting XKB keymap from device");
+        if (!xkb_keymap)
+            fatal("Failed while getting XKB keymap from device");
 
-    globalconf.xkb_state = xkb_x11_state_new_from_device(xkb_keymap,
-                                                         conn,
-                                                         device_id);
-    if (!globalconf.xkb_state)
-        fatal("Failed while getting XKB state from device");
+        globalconf.xkb_state = xkb_x11_state_new_from_device(xkb_keymap,
+                                                             conn,
+                                                             device_id);
+        if (!globalconf.xkb_state)
+            fatal("Failed while getting XKB state from device");
 
-    /* xkb_keymap is no longer referenced directly; decreasing refcount */
-    xkb_keymap_unref(xkb_keymap);
+        /* xkb_keymap is no longer referenced directly; decreasing refcount */
+        xkb_keymap_unref(xkb_keymap);
+    }
+    else
+    {
+        struct xkb_rule_names names = { NULL, NULL, NULL, NULL, NULL };
+        if (!fill_rmlvo_from_root(&names))
+            warn("Could not get _XKB_RULES_NAMES from root window, falling back to defaults.");
+
+        struct xkb_keymap *xkb_keymap = xkb_keymap_new_from_names(globalconf.xkb_ctx, &names, 0);
+
+        globalconf.xkb_state = xkb_state_new(xkb_keymap);
+        if (!globalconf.xkb_state)
+            fatal("Failed while creating XKB state");
+
+        /* xkb_keymap is no longer referenced directly; decreasing refcount */
+        xkb_keymap_unref(xkb_keymap);
+        p_delete(&names.rules);
+        p_delete(&names.model);
+        p_delete(&names.layout);
+        p_delete(&names.variant);
+        p_delete(&names.options);
+    }
 }
 
 
@@ -183,6 +274,8 @@ xkb_free_keymap(void)
 static void
 xkb_reload_keymap(void)
 {
+    assert(globalconf.have_xkb);
+
     xkb_state_unref(globalconf.xkb_state);
     xkb_fill_state();
 
@@ -211,6 +304,7 @@ void
 event_handle_xkb_notify(xcb_generic_event_t* event)
 {
     lua_State *L = globalconf_get_lua_State();
+    assert(globalconf.have_xkb);
 
     /* The pad0 field of xcb_generic_event_t contains the event sub-type,
      * unfortunately xkb doesn't provide a usable struct for getting this in a
@@ -274,9 +368,12 @@ xkb_init(void)
                                               NULL,
                                               NULL);
 
+    globalconf.have_xkb = success_xkb;
 
     if (!success_xkb) {
-        fatal("XKB not found or not supported");
+        warn("XKB not found or not supported");
+        xkb_init_keymap();
+        return;
     }
 
     uint16_t map = XCB_XKB_EVENT_TYPE_STATE_NOTIFY | XCB_XKB_EVENT_TYPE_MAP_NOTIFY | XCB_XKB_EVENT_TYPE_NEW_KEYBOARD_NOTIFY;
@@ -323,15 +420,16 @@ xkb_init(void)
 void
 xkb_free(void)
 {
-    // unsubscribe from all events
-    xcb_xkb_select_events(globalconf.connection,
-                          XCB_XKB_ID_USE_CORE_KBD,
-                          0,
-                          0,
-                          0,
-                          0,
-                          0,
-                          0);
+    if (globalconf.have_xkb)
+        // unsubscribe from all events
+        xcb_xkb_select_events(globalconf.connection,
+                              XCB_XKB_ID_USE_CORE_KBD,
+                              0,
+                              0,
+                              0,
+                              0,
+                              0,
+                              0);
     xkb_free_keymap();
 }
 
