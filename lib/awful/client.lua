@@ -900,19 +900,19 @@ function client.setwfact(wfact, c)
     t:emit_signal("property::windowfact")
 end
 
---- Increment a client's window factor
+--- Change window factor of a client.
 --
 -- @legacylayout awful.client.incwfact
--- @param add amount to increase the client's window
+-- @tparam number add Amount to increase/decrease the client's window factor.
+--   Should be between `-current_window_factor` and something close to
+--   infinite.  The normalisation then ensures that the sum of all factors is 1.
 -- @client c the client
 function client.incwfact(add, c)
     c = c or capi.client.focus
     if not c then return end
 
     local t = c.screen.selected_tag
-
     local w = client.idx(c)
-
     local data = t.windowfact or {}
     local colfact = data[w.col] or {}
     local curr = colfact[w.idx] or 1

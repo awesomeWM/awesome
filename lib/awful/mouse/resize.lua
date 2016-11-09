@@ -55,14 +55,14 @@ function module.set_mode(m)
     mode = m
 end
 
---- Add a initialization callback.
--- This callback will be executed before the mouse grabbing start
+--- Add an initialization callback.
+-- This callback will be executed before the mouse grabbing starts.
 -- @function awful.mouse.resize.add_enter_callback
 -- @tparam function cb The callback (or nil)
 -- @tparam[default=other] string context The callback context
 function module.add_enter_callback(cb, context)
-    context = context or  "other"
-    callbacks.enter[context] =  callbacks.enter[context] or {}
+    context = context or "other"
+    callbacks.enter[context] = callbacks.enter[context] or {}
     table.insert(callbacks.enter[context], cb)
 end
 
@@ -196,7 +196,7 @@ local function handler(_, client, context, args) --luacheck: no unused_args
 
         -- Only resize after the mouse is released, this avoid losing content
         -- in resize sensitive apps such as XTerm or allow external modules
-        -- to implement custom resizing
+        -- to implement custom resizing.
         if args.mode == "after" then
             -- Get the new geometry
             geo = args.placement(client, args)
