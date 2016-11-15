@@ -1,6 +1,29 @@
 ---------------------------------------------------------------------------
 --- Tasklist widget module for awful.
 --
+-- <a name="status_icons"></a>
+-- **Status icons:**
+--
+-- By default, the tasklist prepends some symbols in front of the client name.
+-- This is used to notify that the client has some specific properties that are
+-- currently enabled. This can be disabled using
+-- `beautiful.tasklist_plain_task_name`=true in the theme.
+--
+-- <table class='widget_list' border=1>
+-- <tr style='font-weight: bold;'>
+--  <th align='center'>Icon</th>
+--  <th align='center'>Client property</th>
+-- </tr>
+-- <tr><td>▪</td><td><a href="./client.html#client.sticky">sticky</a></td></tr>
+-- <tr><td>⌃</td><td><a href="./client.html#client.ontop">ontop</a></td></tr>
+-- <tr><td>▴</td><td><a href="./client.html#client.above">above</a></td></tr>
+-- <tr><td>▾</td><td><a href="./client.html#client.below">below</a></td></tr>
+-- <tr><td>✈</td><td><a href="./client.html#client.floating">floating</a></td></tr>
+-- <tr><td>+</td><td><a href="./client.html#client.maximized">maximized</a></td></tr>
+-- <tr><td>⬌</td><td><a href="./client.html#client.maximized_horizontal">maximized_horizontal</a></td></tr>
+-- <tr><td>⬍</td><td><a href="./client.html#client.maximized_vertical">maximized_vertical</a></td></tr>
+-- </table>
+--
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2008-2009 Julien Danjou
 -- @classmod awful.widget.tasklist
@@ -83,9 +106,16 @@ local instances
 -- @beautiful beautiful.tasklist_bg_image_minimize
 -- @tparam[opt=nil] string bg_image_minimize
 
--- Disable the tasklist clients icons.
+--- Disable the tasklist client icons.
 -- @beautiful beautiful.tasklist_tasklist_disable_icon
 -- @tparam[opt=false] boolean tasklist_disable_icon
+
+--- Disable the extra tasklist client property notification icons.
+--
+-- See the <a href="status_icons">Status icons</a> section for more details.
+--
+-- @beautiful beautiful.tasklist_plain_task_name
+-- @tparam[opt=false] boolean tasklist_plain_task_name
 
 --- The tasklist font.
 -- @beautiful beautiful.tasklist_font
