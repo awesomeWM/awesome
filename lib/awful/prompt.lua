@@ -389,9 +389,9 @@ function prompt.run(args, textbox, exe_callback, completion_callback,
         cursor_pos = cur_pos, cursor_ul = cur_ul, selectall = selectall,
         prompt = prettyprompt })
 
-    local function exec(cb)
+    local function exec(cb, command_to_history)
         textbox:set_markup("")
-        history_add(history_path, command)
+        history_add(history_path, command_to_history)
         keygrabber.stop(grabber)
         cb(command)
         if done_callback then done_callback() end
@@ -461,9 +461,10 @@ function prompt.run(args, textbox, exe_callback, completion_callback,
                     for _,v2 in ipairs(v[1]) do
                         match = match and mod[v2]
                     end
-                    if match or #filtered_modifiers == 0 then
+                    if match then
                         local cb
                         local ret = v[3](command)
+                        local original_command = command
                         if ret then
                             command = ret
                             cb = exe_callback
@@ -471,7 +472,7 @@ function prompt.run(args, textbox, exe_callback, completion_callback,
                             -- No callback.
                             cb = function() end
                         end
-                        exec(cb)
+                        exec(cb, original_command)
                         return
                     end
                 end
@@ -489,7 +490,7 @@ function prompt.run(args, textbox, exe_callback, completion_callback,
         elseif (mod.Control and (key == "j" or key == "m"))
             or (not mod.Control and key == "Return")
             or (not mod.Control and key == "KP_Enter") then
-            exec(exe_callback)
+            exec(exe_callback, command)
             -- We already unregistered ourselves so we don't want to return
             -- true, otherwise we may unregister someone else.
             return
