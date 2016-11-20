@@ -903,8 +903,9 @@ end
 --- Change window factor of a client.
 --
 -- @legacylayout awful.client.incwfact
--- @tparam number add Amount to increase/decrease the client's window.
---   Should be between -1.0 and 1.0 (all window factors get normalized to 1).
+-- @tparam number add Amount to increase/decrease the client's window factor.
+--   Should be between `-current_window_factor` and something close to
+--   infinite.  The normalisation then ensures that the sum of all factors is 1.
 -- @client c the client
 function client.incwfact(add, c)
     c = c or capi.client.focus
