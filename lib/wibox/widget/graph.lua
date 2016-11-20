@@ -31,18 +31,20 @@ local graph = { mt = {} }
 -- If the value is nil, no border will be drawn.
 --
 -- @property border_color
--- @tparam geats.color border_color The border color to set.
+-- @tparam gears.color border_color The border color to set.
+-- @see gears.color
 
 --- Set the graph foreground color.
 --
 -- @property color
 -- @tparam color color The graph color.
--- @see gears.color.create_pattern
+-- @see gears.color
 
 --- Set the graph background color.
 --
 -- @property background_color
 -- @tparam gears.color background_color The graph background color.
+-- @see gears.color
 
 --- Set the maximum value the graph should handle.
 -- If "scale" is also set, the graph never scales up below this value, but it

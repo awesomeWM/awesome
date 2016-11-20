@@ -287,6 +287,7 @@ end
 -- @param[opt] keypressed_callback The callback function to call
 --   with mod table, key and command as arguments when a key was pressed.
 --   [**DEPRECATED**]
+-- @see gears.color
 function prompt.run(args, textbox, exe_callback, completion_callback,
                     history_path, history_max, done_callback,
                     changed_callback, keypressed_callback)

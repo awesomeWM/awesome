@@ -36,6 +36,7 @@ local progressbar = { mt = {} }
 --
 -- @property border_color
 -- @tparam gears.color color The border color to set.
+-- @see gears.color
 
 --- The progressbar border width.
 -- @property border_width
@@ -45,6 +46,7 @@ local progressbar = { mt = {} }
 --
 -- @property bar_border_color
 -- @tparam gears.color color The border color to set.
+-- @see gears.color
 
 --- The progressbar inner border width.
 -- @property bar_border_width
@@ -53,11 +55,13 @@ local progressbar = { mt = {} }
 --
 -- @property color
 -- @tparam gears.color color The progressbar color.
+-- @see gears.color
 
 --- The progressbar background color.
 --
 -- @property background_color
 -- @tparam gears.color color The progressbar background color.
+-- @see gears.color
 
 --- The progressbar inner shape.
 --
