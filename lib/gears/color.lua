@@ -25,32 +25,21 @@ local pattern_cache
 -- Thanks to #lua for this. :)
 --
 -- @param col The color to parse
--- @return 4 values which each are in the range [0, 1].
+-- @return 4 values representing color in RGBA format (each of them in [0, 1]
+-- range) or nil if input is incorrect.
 -- @usage -- This will return 0, 1, 0, 1
 -- gears.color.parse_color("#00ff00ff")
 function color.parse_color(col)
     local rgb = {}
     -- Is it a HTML-style color?
     if string.match(col, "^#%x+$") then
-        -- Get all hex chars
-        for char in string.gmatch(col, "[^#]") do
-            table.insert(rgb, tonumber(char, 16) / 0xf)
-        end
-        -- Merge consecutive values until we have at most four groups (rgba)
-        local factor = 0xf
-        while #rgb > 4 do
-            local merged = {}
-            local key, value = next(rgb, nil)
-            local next_factor = (factor + 1)*(factor + 1) - 1
-            while key do
-                local key2, value2 = next(rgb, key)
-                local v1, v2 = value * factor, value2 * factor
-                local new = v1 * (factor + 1) + v2
-                table.insert(merged, new / next_factor)
-                key, value = next(rgb, key2)
+        if #col == 7 or #col == 9 then
+            for idx=2,#col,2 do
+                table.insert(rgb, tonumber(col:sub(idx, idx+1), 16) / 255)
             end
-            rgb = merged
-            factor = next_factor
+            if #rgb == 3 then -- add alpha channel
+                table.insert(rgb, 1.0)
+            end
         end
     else
         -- Let's ask Pango for its opinion (but this doesn't support alpha!)
@@ -60,14 +49,15 @@ function color.parse_color(col)
                 c.red / 0xffff,
                 c.green / 0xffff,
                 c.blue / 0xffff,
+                1.0
             }
         end
     end
-    -- Add missing groups (missing alpha)
-    while #rgb < 4 do
-        table.insert(rgb, 1)
+    if #rgb >= 3 then
+        return unpack(rgb)
+    else
+        return nil
     end
-    return unpack(rgb)
 end
 
 --- Find all numbers in a string
