@@ -22,51 +22,50 @@ local pattern_cache
 
 --- Parse a HTML-color.
 -- This function can parse colors like `#rrggbb` and `#rrggbbaa` and also `red`.
--- Thanks to #lua for this. :)
+-- Max 4 chars per channel. Thanks to #lua for this. :)
 --
 -- @param col The color to parse
--- @return 4 values which each are in the range [0, 1].
+-- @return 4 values representing color in RGBA format (each of them in [0, 1]
+-- range) or nil if input is incorrect.
 -- @usage -- This will return 0, 1, 0, 1
 -- gears.color.parse_color("#00ff00ff")
 function color.parse_color(col)
     local rgb = {}
-    -- Is it a HTML-style color?
     if string.match(col, "^#%x+$") then
-        -- Get all hex chars
-        for char in string.gmatch(col, "[^#]") do
-            table.insert(rgb, tonumber(char, 16) / 0xf)
+        local hex_str = col:sub(2, #col)
+        local channels
+        if #hex_str % 3 == 0 then
+            channels = 3
+        elseif #hex_str % 4 == 0 then
+            channels = 4
+        else
+            return nil
         end
-        -- Merge consecutive values until we have at most four groups (rgba)
-        local factor = 0xf
-        while #rgb > 4 do
-            local merged = {}
-            local key, value = next(rgb, nil)
-            local next_factor = (factor + 1)*(factor + 1) - 1
-            while key do
-                local key2, value2 = next(rgb, key)
-                local v1, v2 = value * factor, value2 * factor
-                local new = v1 * (factor + 1) + v2
-                table.insert(merged, new / next_factor)
-                key, value = next(rgb, key2)
-            end
-            rgb = merged
-            factor = next_factor
+        local chars_per_channel = #hex_str / channels
+        if chars_per_channel > 4 then
+            return nil
+        end
+        local dividor = 0x10^chars_per_channel - 1
+        for idx=1,#hex_str,chars_per_channel do
+            local channel_val = tonumber(hex_str:sub(idx,idx+chars_per_channel-1), 16)
+            table.insert(rgb, channel_val / dividor)
+        end
+        if channels == 3 then
+            table.insert(rgb, 1)
         end
     else
-        -- Let's ask Pango for its opinion (but this doesn't support alpha!)
         local c = Pango.Color()
-        if c:parse(col) then
-            rgb = {
-                c.red / 0xffff,
-                c.green / 0xffff,
-                c.blue / 0xffff,
-            }
+        if not c:parse(col) then
+            return nil
         end
+        rgb = {
+            c.red / 0xffff,
+            c.green / 0xffff,
+            c.blue / 0xffff,
+            1.0
+        }
     end
-    -- Add missing groups (missing alpha)
-    while #rgb < 4 do
-        table.insert(rgb, 1)
-    end
+    assert(#rgb == 4, col)
     return unpack(rgb)
 end
 
