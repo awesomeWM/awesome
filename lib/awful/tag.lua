@@ -985,7 +985,7 @@ function tag.object.get_master_count(t)
         or defaults.master_count
 end
 
---- 
+---
 -- @deprecated awful.tag.setnmaster
 -- @see master_count
 -- @param nmaster The number of master windows.

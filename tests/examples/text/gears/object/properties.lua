@@ -4,12 +4,12 @@ local gears = require("gears") --DOC_HIDE
  -- methods and accessors. It is also possible to set them directly on the
  -- object.
 local class = {}
- 
+
 function class:get_foo()
     print("In get foo", self._foo or "bar")
     return self._foo or "bar"
 end
- 
+
 function class:set_foo(value)
     print("In set foo", value)
 
@@ -32,11 +32,11 @@ local o = gears.object {
 }
 
 print(o.foo)
- 
+
 o.foo = 42
- 
+
 print(o.foo)
- 
+
 o:method(1, 2, 3)
 
  -- Random properties can also be added, the signal will be emitted automatically.
@@ -46,7 +46,7 @@ o:connect_signal("property::something", function(obj, value)
 end)
 
 print(o.something)
- 
+
 o.something = "a cow"
- 
+
 print(o.something)

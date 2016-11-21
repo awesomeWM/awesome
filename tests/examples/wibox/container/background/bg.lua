@@ -5,7 +5,7 @@ local text_widget = {
     text   = "Hello world!",
     widget = wibox.widget.textbox
 }
- 
+
 parent : setup {
     {
         text_widget,

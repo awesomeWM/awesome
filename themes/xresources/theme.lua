@@ -62,7 +62,7 @@ theme = theme_assets.recolor_titlebar_normal(theme, theme.fg_normal)
 theme = theme_assets.recolor_titlebar_focus(theme, theme.fg_focus)
 theme = theme_assets.recolor_layout(theme, theme.fg_normal)
 
--- Define the icon theme for application icons. If not set then the icons 
+-- Define the icon theme for application icons. If not set then the icons
 -- from /usr/share/icons and /usr/share/icons/hicolor will be used.
 theme.icon_theme = nil
 
