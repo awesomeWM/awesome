@@ -138,11 +138,11 @@ function layout.parameters(t, screen)
 
     local clients           = client.tiled(screen)
     local gap_single_client = true
-    
+
     if(t and t.gap_single_client ~= nil) then
         gap_single_client = t.gap_single_client
     end
-    
+
     local min_clients       = gap_single_client and 1 or 2
     local useless_gap       = t and (#clients >= min_clients and t.gap or 0) or 0
 

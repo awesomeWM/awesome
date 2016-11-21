@@ -26,31 +26,27 @@ local function create_arrow(text)                           --DOC_HIDE
 end                                                         --DOC_HIDE
 
 local normal = create_arrow("Normal")
- 
+
 local north  = wibox.container {
     create_arrow("North"),
- 
     direction = "north",
     widget    = wibox.container.rotate
 }
- 
+
 local south  = wibox.container {
     create_arrow("South"),
- 
     direction = "south",
     widget    = wibox.container.rotate
 }
- 
+
 local east  = wibox.container {
     create_arrow("East"),
- 
     direction = "east",
     widget    = wibox.container.rotate
 }
- 
+
 local west  = wibox.container {
     create_arrow("West"),
- 
     direction = "west",
     widget    = wibox.container.rotate
 }

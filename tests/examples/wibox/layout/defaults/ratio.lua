@@ -7,7 +7,7 @@ local w = wibox.widget {
     generic_widget( "third"  ),
     layout  = wibox.layout.ratio.horizontal
 }
- 
+
 w:ajust_ratio(2, 0.44, 0.33, 0.22)
 
 return w --DOC_HIDE

@@ -249,8 +249,8 @@ end
 --- Get a client's titlebar
 -- @class function
 -- @tparam client c The client for which a titlebar is wanted.
--- @tparam[opt={}] table args A table with extra arguments for the titlebar. 
--- @tparam[opt=font.height*1.5] number args.size The height of the titlebar. 
+-- @tparam[opt={}] table args A table with extra arguments for the titlebar.
+-- @tparam[opt=font.height*1.5] number args.size The height of the titlebar.
 -- @tparam[opt=top] string args.position" values are `top`,
 -- `left`, `right` and `bottom`.
 -- @tparam[opt=top] string args.bg_normal

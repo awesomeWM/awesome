@@ -52,7 +52,7 @@ mouse.coords {x=0,y=230} --DOC_HIDE
 awful.placement.closest_corner(mouse, {include_sides=true, parent=c}) --DOC_HIDE
 mouse.push_history() --DOC_HIDE
 assert(mouse.coords().x == c.x and mouse.coords().y == c.y+c.height+2*bw) --DOC_HIDE
- 
+
  -- It is possible to emulate the mouse API to get the closest corner of
  -- random area
 local _, corner = awful.placement.closest_corner(

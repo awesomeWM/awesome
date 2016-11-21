@@ -3,7 +3,7 @@ mouse.coords {x=175+60,y=60} --DOC_HIDE
 
  -- Get the position
 print(mouse.coords().x)
- 
+
  -- Change the position
 mouse.coords {
     x = 185,

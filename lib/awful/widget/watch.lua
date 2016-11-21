@@ -21,7 +21,7 @@
 --     222               end
 --     223             end),
 --     224             s.mylayoutbox,
--- 
+--
 -- ![Example screenshot](../images/awful_widget_watch.png)
 --
 -- @author Benjamin Petrenko

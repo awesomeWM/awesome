@@ -324,7 +324,7 @@ end
 -- @param cr A cairo context
 -- @tparam number width The shape width
 -- @tparam number height The shape height
--- @tparam number corner_radius 
+-- @tparam number corner_radius
 function module.octogon(cr, width, height, corner_radius)
     corner_radius = corner_radius or math.min(10, math.min(width, height)/4)
     local offset = math.sqrt( (corner_radius*corner_radius) / 2 )

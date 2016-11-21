@@ -8,7 +8,7 @@
 --   [visitor objects](https://en.wikipedia.org/wiki/Visitor_pattern)
 -- * Turn each function into an API with various common customization parameters.
 -- * Re-use the same functions for the `mouse`, `client`s, `screen`s and `wibox`es
--- 
+--
 --
 -- <h3>Compositing</h3>
 --
