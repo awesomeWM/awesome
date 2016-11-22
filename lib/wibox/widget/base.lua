@@ -18,42 +18,41 @@ local base = {}
 
 -- {{{ Functions on widgets
 
---- Functions available on all widgets
+--- Functions available on all widgets.
 base.widget = {}
 
 --- Set/get a widget's buttons.
--- @param _buttons The table of buttons that should bind to the widget.
+-- @tab _buttons The table of buttons that is bound to the widget.
 -- @function buttons
 function base.widget:buttons(_buttons)
     if _buttons then
         self._private.widget_buttons = _buttons
     end
-
     return self._private.widget_buttons
 end
 
---- Set a widget's visible property
--- @tparam boolean b Wether the widget is visible at all
+--- Set a widget's visibility.
+-- @tparam boolean b Whether the widget is visible.
 -- @function set_visible
 function base.widget:set_visible(b)
     if b ~= self._private.visible then
         self._private.visible = b
         self:emit_signal("widget::layout_changed")
-        -- In case something ignored fit and drew the widget anyway
+        -- In case something ignored fit and drew the widget anyway.
         self:emit_signal("widget::redraw_needed")
     end
 end
 
---- Get if the widget is visible.
--- @treturn boolean If the widget is visible
+--- Is the widget visible?
+-- @treturn boolean
 -- @function get_visible
 function base.widget:get_visible()
     return self._private.visible or false
 end
 
---- Set a widget's opacity
--- @tparam number o The opacity to use (a number from 0 to 1). 0 is fully
--- transparent while 1 is fully opaque.
+--- Set a widget's opacity.
+-- @tparam number o The opacity to use (a number from 0 (transparent) to 1
+-- (opaque)).
 -- @function set_opacity
 function base.widget:set_opacity(o)
     if o ~= self._private.opacity then
@@ -62,77 +61,82 @@ function base.widget:set_opacity(o)
     end
 end
 
---- Get the widget opacity.
--- @treturn number The opacity (between 0 and 1)
+--- Get the widget's opacity.
+-- @treturn number The opacity (between 0 (transparent) and 1 (opaque)).
 -- @function get_opacity
 function base.widget:get_opacity()
     return self._private.opacity
 end
 
---- Set the widget's width
--- @tparam number|nil s The width that the widget has. `nil` means to apply the
--- default mechanism of calling the `:fit` method. A number overrides the result
--- from `:fit`.
--- @function set_width
-function base.widget:set_forced_width(s)
-    if s ~= self._private.forced_width then
-        self._private.forced_width = s
+--- Set the widget's forced width.
+-- @tparam[opt] number width With `nil` the default mechanism of calling the
+--   `:fit` method is used.
+-- @see fit_widget
+-- @function set_forced_width
+function base.widget:set_forced_width(width)
+    if width ~= self._private.forced_width then
+        self._private.forced_width = width
         self:emit_signal("widget::layout_changed")
     end
 end
 
---- Get the widget forced width.
--- Note that widgets instances can be placed at different places simultaneously,
--- therefore, they can have multiple width and width simultaneously. If there
--- is no forced size, then the only way to get the widget actual size is when
--- there is a `mouse::enter`, `mouse::leave` or button events.
--- @treturn nil|number The forced width (nil if automatic)
--- @function get_forced_widget
+--- Get the widget's forced width.
+--
+-- Note that widget instances can be used in different places simultaneously,
+-- and therefore can have multiple dimensions.
+-- If there is no forced width/height, then the only way to get the widget's
+-- actual size is during a `mouse::enter`, `mouse::leave` or button event.
+-- @treturn[opt] number The forced width (nil if automatic).
+-- @see fit_widget
+-- @function get_forced_width
 function base.widget:get_forced_width()
     return self._private.forced_width
 end
 
---- Set the widget's height
--- @tparam number|nil s The height that the widget has. `nil` means to apply the
--- default mechanism of calling the `:fit` method. A number overrides the result
--- from `:fit`.
+--- Set the widget's forced height.
+-- @tparam[opt] number height With `nil` the default mechanism of calling the
+--   `:fit` method is used.
+-- @see fit_widget
 -- @function set_height
-function base.widget:set_forced_height(s)
-    if s ~= self._private.forced_height then
-        self._private.forced_height = s
+function base.widget:set_forced_height(height)
+    if height ~= self._private.forced_height then
+        self._private.forced_height = height
         self:emit_signal("widget::layout_changed")
     end
 end
 
---- Get the widget forced height.
--- Note that widgets instances can be placed at different places simultaneously,
--- therefore, they can have multiple width and height simultaneously. If there
--- is no forced size, then the only way to get the widget actual size is when
--- there is a `mouse::enter`, `mouse::leave` or button events.
--- @treturn nil|number The forced height (nil if automatic)
+--- Get the widget's forced height.
+--
+-- Note that widget instances can be used in different places simultaneously,
+-- and therefore can have multiple dimensions.
+-- If there is no forced width/height, then the only way to get the widget's
+-- actual size is during a `mouse::enter`, `mouse::leave` or button event.
+-- @treturn[opt] number The forced height (nil if automatic).
 -- @function get_forced_height
 function base.widget:get_forced_height()
     return self._private.forced_height
 end
 
---- Get all direct children widgets
--- This method should be re-implemented by the relevant widgets
+--- Get the widget's direct children widgets.
+--
+-- This method should be re-implemented by the relevant widgets.
 -- @treturn table The children
 -- @function get_children
 function base.widget:get_children()
     return {}
 end
 
---- Replace the layout children
+--- Replace the layout children.
+--
 -- The default implementation does nothing, this must be re-implemented by
 -- all layout and container widgets.
--- @tparam table children A table composed of valid widgets
+-- @tab children A table composed of valid widgets.
 -- @function set_children
 function base.widget:set_children(children) -- luacheck: no unused
     -- Nothing on purpose
 end
 
--- It could have been merged into `get_all_children`, but it's not necessary
+-- It could have been merged into `get_all_children`, but it's not necessary.
 local function digg_children(ret, tlw)
     for _, w in ipairs(tlw:get_children()) do
         table.insert(ret, w)
@@ -141,9 +145,11 @@ local function digg_children(ret, tlw)
 end
 
 --- Get all direct and indirect children widgets.
--- This will scan all containers recursively to find widgets
--- Warning: This method it prone to stack overflow id the widget, or any of its
--- children, contain (directly or indirectly) itself.
+--
+-- This will scan all containers recursively to find widgets.
+--
+-- *Warning*: This method it prone to stack overflow if the widget, or any of
+-- its children, contains (directly or indirectly) itself.
 -- @treturn table The children
 -- @function get_all_children
 function base.widget:get_all_children()
@@ -156,12 +162,14 @@ end
 -- forward the signal. This is useful to track signals when there is a dynamic
 -- set of containers and layouts wrapping the widget.
 --
--- Note that this function has two flaws. First of all, the signal are only
--- forwarded once the widget tree has been built. This happens after all
--- currently scheduled functions have been executed. Therefor, it wont start
--- to work right away. In case the widget is present multiple time in a single
--- widget tree, this function will also forward the signal multiple time (one
--- per upward tree path).
+-- Note that this function has two flaws:
+--
+-- 1. The signal is only forwarded once the widget tree has been built. This
+--    happens after all currently scheduled functions have been executed.
+--    Therefore, it will not start to work right away.
+-- 2. In case the widget is present multiple times in a single widget tree,
+--    this function will also forward the signal multiple time (one per upward
+--    tree path).
 --
 -- @tparam string signal_name
 -- @param ... Other arguments
@@ -173,17 +181,16 @@ function base.widget:emit_signal_recursive(signal_name, ...)
     self:emit_signal("widget::emit_recursive", signal_name, ...)
 end
 
---- Get a widex index.
--- @param widget The widget to look for
--- @param[opt] recursive Also check sub-widgets
--- @param[opt] ... Aditional widgets to add at the end of the "path"
--- @return The index
--- @return The parent layout
--- @return The path between "self" and "widget"
+--- Get the index of a widget.
+-- @tparam widget widget The widget to look for.
+-- @tparam[opt] boolean recursive Also check sub-widgets?
+-- @tparam[opt] widget ... Additional widgets to add at the end of the "path"
+-- @treturn number The index.
+-- @treturn widget The parent widget.
+-- @treturn table The path between "self" and "widget".
 -- @function index
 function base.widget:index(widget, recursive, ...)
     local widgets = self:get_children()
-
     for idx, w in ipairs(widgets) do
         if w == widget then
             return idx, self, {...}
@@ -194,15 +201,13 @@ function base.widget:index(widget, recursive, ...)
             end
         end
     end
-
     return nil, self, {}
 end
-
 -- }}}
 
 -- {{{ Caches
 
--- Indexes are widgets, allow them to be garbage-collected
+-- Indexes are widgets, allow them to be garbage-collected.
 local widget_dependencies = setmetatable({}, { __mode = "kv" })
 
 -- Get the cache of the given kind for this widget. This returns a gears.cache
@@ -218,12 +223,12 @@ end
 
 -- Special value to skip the dependency recording that is normally done by
 -- base.fit_widget() and base.layout_widget(). The caller must ensure that no
--- caches depend on the result of the call and/or must handle the childs
+-- caches depend on the result of the call and/or must handle the children's
 -- widget::layout_changed signal correctly when using this.
 base.no_parent_I_know_what_I_am_doing = {}
 
--- Record a dependency from parent to child: The layout of parent depends on the
--- layout of child.
+-- Record a dependency from parent to child: The layout of `parent` depends on
+-- the layout of `child`.
 local function record_dependency(parent, child)
     if parent == base.no_parent_I_know_what_I_am_doing then
         return
@@ -250,22 +255,27 @@ end
 
 -- }}}
 
---- Figure out the geometry in device coordinate space. This gives only tight
--- bounds if no rotations by non-multiples of 90° are used.
+--- Figure out the geometry in the device coordinate space.
+--
+-- This gives only tight bounds if no rotations by non-multiples of 90° are
+-- used.
 -- @function wibox.widget.base.rect_to_device_geometry
 function base.rect_to_device_geometry(cr, x, y, width, height)
     return matrix.transform_rectangle(cr.matrix, x, y, width, height)
 end
 
---- Fit a widget for the given available width and height. This calls the
--- widget's `:fit` callback and caches the result for later use. Never call
--- `:fit` directly, but always through this function!
--- @param parent The parent widget which requests this information.
--- @param context The context in which we are fit.
--- @param widget The widget to fit (this uses widget:fit(context, width, height)).
--- @param width The available width for the widget
--- @param height The available height for the widget
--- @return The width and height that the widget wants to use
+--- Fit a widget for the given available width and height.
+--
+-- This calls the widget's `:fit` callback and caches the result for later use.
+-- Never call `:fit` directly, but always through this function!
+-- @tparam widget parent The parent widget which requests this information.
+-- @tab context The context in which we are fit.
+-- @tparam widget widget The widget to fit (this uses
+--   `widget:fit(context, width, height)`).
+-- @tparam number width The available width for the widget.
+-- @tparam number height The available height for the widget.
+-- @treturn number The width that the widget wants to use.
+-- @treturn number The height that the widget wants to use.
 -- @function wibox.widget.base.fit_widget
 function base.fit_widget(parent, context, widget, width, height)
     record_dependency(parent, widget)
@@ -301,16 +311,19 @@ function base.fit_widget(parent, context, widget, width, height)
     return w, h
 end
 
---- Lay out a widget for the given available width and height. This calls the
--- widget's `:layout` callback and caches the result for later use. Never call
--- `:layout` directly, but always through this function! However, normally there
--- shouldn't be any reason why you need to use this function.
--- @param parent The parent widget which requests this information.
--- @param context The context in which we are laid out.
--- @param widget The widget to layout (this uses widget:layout(context, width, height)).
--- @param width The available width for the widget
--- @param height The available height for the widget
--- @return The result from the widget's `:layout` callback.
+--- Lay out a widget for the given available width and height.
+--
+-- This calls the widget's `:layout` callback and caches the result for later
+-- use.  Never call `:layout` directly, but always through this function!
+-- However, normally there shouldn't be any reason why you need to use this
+-- function.
+-- @tparam widget parent The parent widget which requests this information.
+-- @tab context The context in which we are laid out.
+-- @tparam widget widget The widget to layout (this uses
+--   `widget:layout(context, width, height)`).
+-- @tparam number width The available width for the widget.
+-- @tparam number height The available height for the widget.
+-- @treturn[opt] table The result from the widget's `:layout` callback.
 -- @function wibox.widget.base.layout_widget
 function base.layout_widget(parent, context, widget, width, height)
     record_dependency(parent, widget)
@@ -328,8 +341,9 @@ function base.layout_widget(parent, context, widget, width, height)
     end
 end
 
--- Handle a button event on a widget. This is used internally and should not be
--- called directly.
+--- Handle a button event on a widget.
+--
+-- This is used internally and should not be called directly.
 -- @function wibox.widget.base.handle_button
 function base.handle_button(event, widget, x, y, button, modifiers, geometry)
     x = x or y -- luacheck: no unused
@@ -349,7 +363,7 @@ function base.handle_button(event, widget, x, y, button, modifiers, geometry)
         return true
     end
 
-    -- Find all matching button objects
+    -- Find all matching button objects.
     local matches = {}
     for _, v in pairs(widget._private.widget_buttons) do
         local match = true
@@ -362,23 +376,23 @@ function base.handle_button(event, widget, x, y, button, modifiers, geometry)
         end
     end
 
-    -- Emit the signals
+    -- Emit the signals.
     for _, v in pairs(matches) do
         v:emit_signal(event,geometry)
     end
 end
 
---- Create widget placement information. This should be used for a widget's
+--- Create widget placement information. This should be used in a widget's
 -- `:layout()` callback.
--- @param widget The widget that should be placed.
+-- @tparam widget widget The widget that should be placed.
 -- @param mat A matrix transforming from the parent widget's coordinate
 --   system. For example, use matrix.create_translate(1, 2) to draw a
 --   widget at position (1, 2) relative to the parent widget.
--- @param width The width of the widget in its own coordinate system. That is,
---   after applying the transformation matrix.
--- @param height The height of the widget in its own coordinate system. That is,
---   after applying the transformation matrix.
--- @return An opaque object that can be returned from :layout()
+-- @tparam number width The width of the widget in its own coordinate system.
+--   That is, after applying the transformation matrix.
+-- @tparam number height The height of the widget in its own coordinate system.
+--   That is, after applying the transformation matrix.
+-- @treturn table An opaque object that can be returned from `:layout()`.
 -- @function wibox.widget.base.place_widget_via_matrix
 function base.place_widget_via_matrix(widget, mat, width, height)
     return {
@@ -391,28 +405,28 @@ end
 
 --- Create widget placement information. This should be used for a widget's
 -- `:layout()` callback.
--- @param widget The widget that should be placed.
--- @param x The x coordinate for the widget.
--- @param y The y coordinate for the widget.
--- @param width The width of the widget in its own coordinate system. That is,
---   after applying the transformation matrix.
--- @param height The height of the widget in its own coordinate system. That is,
---   after applying the transformation matrix.
--- @return An opaque object that can be returned from :layout()
+-- @tparam widget widget The widget that should be placed.
+-- @tparam number x The x coordinate for the widget.
+-- @tparam number y The y coordinate for the widget.
+-- @tparam number width The width of the widget in its own coordinate system.
+--   That is, after applying the transformation matrix.
+-- @tparam number height The height of the widget in its own coordinate system.
+--   That is, after applying the transformation matrix.
+-- @treturn table An opaque object that can be returned from `:layout()`.
 -- @function wibox.widget.base.place_widget_at
 function base.place_widget_at(widget, x, y, width, height)
     return base.place_widget_via_matrix(widget, matrix.create_translate(x, y), width, height)
 end
 
--- Read the table, separate attributes from widgets
+-- Read the table, separate attributes from widgets.
 local function parse_table(t, leave_empty)
     local max = 0
     local attributes, widgets = {}, {}
     for k,v in pairs(t) do
         if type(k) == "number" then
             if v then
-                -- As `ipairs` doesn't always work on sparse tables, update the
-                -- maximum
+                -- Since `ipairs` doesn't always work on sparse tables, update
+                -- the maximum.
                 if k > max then
                     max = k
                 end
@@ -424,7 +438,7 @@ local function parse_table(t, leave_empty)
         end
     end
 
-    -- Pack the sparse table if the container doesn't support sparse tables
+    -- Pack the sparse table, if the container doesn't support sparse tables.
     if not leave_empty then
         widgets = util.table.from_sparse(widgets)
         max = #widgets
@@ -433,31 +447,32 @@ local function parse_table(t, leave_empty)
     return max, attributes, widgets
 end
 
--- Recursively build a container from a declarative table
+-- Recursively build a container from a declarative table.
 local function drill(ids, content)
     if not content then return end
 
-    -- Alias `widget` to `layout` as they are handled the same way
+    -- Alias `widget` to `layout` as they are handled the same way.
     content.layout = content.layout or content.widget
 
-    -- Make sure the layout is not indexed on a function
+    -- Make sure the layout is not indexed on a function.
     local layout = type(content.layout) == "function" and  content.layout() or content.layout
 
-    -- Create layouts based on metatable __call
+    -- Create layouts based on metatable's __call.
     local l = layout.is_widget and layout or layout()
 
-    -- Get the number of children widgets (including nil widgets)
+    -- Get the number of children widgets (including nil widgets).
     local max, attributes, widgets = parse_table(content, l.allow_empty_widget)
 
     -- Get the optional identifier to create a virtual widget tree to place
-    -- in an "access table" to be able to retrieve the widget
+    -- in an "access table" to be able to retrieve the widget.
     local id = attributes.id
 
-    -- Clear the internal attributes
+    -- Clear the internal attributes.
     attributes.id, attributes.layout, attributes.widget = nil, nil, nil
 
-    -- Set layouts attributes, this has to be done before the widgets are added
-    -- because it might affect the output.
+    -- Set layout attributes.
+    -- This has to be done before the widgets are added because it might affect
+    -- the output.
     for attr, val in pairs(attributes) do
         if l["set_"..attr] then
             l["set_"..attr](l, val)
@@ -468,19 +483,19 @@ local function drill(ids, content)
         end
     end
 
-    -- Add all widgets
+    -- Add all widgets.
     for k = 1, max do
-        -- ipairs cannot be used on sparse tables
+        -- ipairs cannot be used on sparse tables.
         local v, id2, e = widgets[k], id, nil
         if v then
-            -- It is another declarative container, parse it
+            -- It is another declarative container, parse it.
             if not v.is_widget then
                 e, id2 = drill(ids, v)
                 widgets[k] = e
             end
             base.check_widget(widgets[k])
 
-            -- Place the widget in the access table
+            -- Place the widget in the access table.
             if id2 then
                 l  [id2] = e
                 ids[id2] = ids[id2] or {}
@@ -488,14 +503,12 @@ local function drill(ids, content)
             end
         end
     end
-
-    -- Replace all children (if any) with the new ones
+    -- Replace all children (if any) with the new ones.
     l:set_children(widgets)
-
     return l, id
 end
 
--- Only available when the declarative system is used
+-- Only available when the declarative system is used.
 local function get_children_by_id(self, name)
     if rawget(self, "_private") then
         return self._private.by_id[name] or {}
@@ -505,8 +518,9 @@ local function get_children_by_id(self, name)
 end
 
 --- Set a declarative widget hierarchy description.
--- See [The declarative layout system](../documentation/03-declarative-layout.md.html)
--- @param args An array containing the widgets disposition
+--
+-- See [The declarative layout system](../documentation/03-declarative-layout.md.html).
+-- @tab args A table containing the widget's disposition.
 -- @function setup
 function base.widget:setup(args)
     local f,ids = self.set_widget or self.add or self.set_first,{}
@@ -528,9 +542,10 @@ function base.widget:setup(args)
     rawset(self, "get_children_by_id", get_children_by_id)
 end
 
---- Create a widget from a declarative description
--- See [The declarative layout system](../documentation/03-declarative-layout.md.html)
--- @param args An array containing the widgets disposition
+--- Create a widget from a declarative description.
+--
+-- See [The declarative layout system](../documentation/03-declarative-layout.md.html).
+-- @tab args A table containing the widgets disposition.
 -- @function wibox.widget.base.make_widget_declarative
 function base.make_widget_declarative(args)
     local ids = {}
@@ -565,16 +580,17 @@ function base.make_widget_declarative(args)
     return setmetatable(w, mt)
 end
 
---- Create an empty widget skeleton
--- See [Creating new widgets](../documentation/04-new-widget.md.html)
--- @param proxy If this is set, the returned widget will be a proxy for this
---   widget. It will be equivalent to this widget. This means it
---   looks the same on the screen.
+--- Create an empty widget skeleton.
+--
+-- See [Creating new widgets](../documentation/04-new-widget.md.html).
+-- @tparam[opt] widget proxy If this is set, the returned widget will be a
+--   proxy for this widget. It will be equivalent to this widget.
+--   This means it looks the same on the screen.
 -- @tparam[opt] string widget_name Name of the widget.  If not set, it will be
---   set automatically via `gears.object.modulename`.
+--   set automatically via @{gears.object.modulename}.
 -- @tparam[opt={}] table args Widget settings
--- @tparam[opt=false] boolean args.enable_properties Enable automatic getters and
---  setters calls.
+-- @tparam[opt=false] boolean args.enable_properties Enable automatic getter
+--   and setter methods.
 -- @tparam[opt=nil] table args.class The widget class
 -- @see fit_widget
 -- @function wibox.widget.base.make_widget
@@ -585,33 +601,33 @@ function base.make_widget(proxy, widget_name, args)
         class             = args.class,
     }
 
-    -- Backwards compatibility
+    -- Backwards compatibility.
     -- TODO: Remove this
     ret:connect_signal("widget::updated", function()
         ret:emit_signal("widget::layout_changed")
         ret:emit_signal("widget::redraw_needed")
     end)
 
-    -- Create a table used to store the widgets internal data
+    -- Create a table used to store the widgets internal data.
     rawset(ret, "_private", {})
 
-    -- No buttons yet
+    -- No buttons yet.
     ret._private.widget_buttons = {}
 
-    -- Widget is visible
+    -- Widget is visible.
     ret._private.visible = true
 
-    -- Widget is fully opaque
+    -- Widget is fully opaque.
     ret._private.opacity = 1
 
-    -- Differentiate tables from widgets
+    -- Differentiate tables from widgets.
     rawset(ret, "is_widget", true)
 
-    -- Size is not restricted/forced
+    -- Size is not restricted/forced.
     ret._private.forced_width = nil
     ret._private.forced_height = nil
 
-    -- Make buttons work
+    -- Make buttons work.
     ret:connect_signal("button::press", function(...)
         return base.handle_button("press", ...)
     end)
@@ -634,13 +650,13 @@ function base.make_widget(proxy, widget_name, args)
         end)
     end
 
-    -- Set up caches
+    -- Set up caches.
     clear_caches(ret)
     ret:connect_signal("widget::layout_changed", function()
         clear_caches(ret)
     end)
 
-    -- Add functions
+    -- Add functions.
     for k, v in pairs(base.widget) do
         rawset(ret, k, v)
     end
@@ -655,14 +671,15 @@ function base.make_widget(proxy, widget_name, args)
     return setmetatable(ret, mt)
 end
 
---- Generate an empty widget which takes no space and displays nothing
+--- Generate an empty widget which takes no space and displays nothing.
 -- @function wibox.widget.base.empty_widget
 function base.empty_widget()
     return base.make_widget()
 end
 
---- Do some sanity checking on widget. This function raises a lua error if
--- widget is not a valid widget.
+--- Do some sanity checking on a widget.
+--
+-- This function raises an error if the widget is not valid.
 -- @function wibox.widget.base.check_widget
 function base.check_widget(widget)
     assert(type(widget) == "table", "Type should be table, but is " .. tostring(type(widget)))

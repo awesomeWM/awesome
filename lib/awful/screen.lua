@@ -256,8 +256,8 @@ end
 --
 -- @function screen.get_bounding_geometry
 -- @tparam[opt={}] table args The arguments
--- @tparam[opt=false] boolean args.honor_padding Wether to honor the screen's padding.
--- @tparam[opt=false] boolean args.honor_workarea Wether to honor the screen's workarea.
+-- @tparam[opt=false] boolean args.honor_padding Whether to honor the screen's padding.
+-- @tparam[opt=false] boolean args.honor_workarea Whether to honor the screen's workarea.
 -- @tparam[opt] int|table args.margins Apply some margins on the output.
 --   This can either be a number or a table with *left*, *right*, *top*
 --   and *bottom* keys.
