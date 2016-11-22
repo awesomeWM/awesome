@@ -32,7 +32,7 @@ function base.widget:buttons(_buttons)
 end
 
 --- Set a widget's visibility.
--- @tparam boolean b Wether the widget is visible.
+-- @tparam boolean b Whether the widget is visible.
 -- @function set_visible
 function base.widget:set_visible(b)
     if b ~= self._private.visible then
