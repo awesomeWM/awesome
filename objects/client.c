@@ -157,26 +157,27 @@
  *
  * **Contexts are:**
  *
- * * *ewmh*: When a client ask for focus (from `X11` events)
- * * *autofocus.check_focus*: When autofocus is enabled(from `awful.autofocus`)
+ * * *ewmh*: When a client asks for focus (from `X11` events).
+ * * *autofocus.check_focus*: When autofocus is enabled (from
+ *   `awful.autofocus`).
  * * *autofocus.check_focus_tag*: When autofocus is enabled
- *   (from `awful.autofocus`)
- * * *client.jumpto*: When a custom lua extension ask a client to be focused
- *   (from `client.jump_to`)
- * * *client.swap.global_bydirection*: When client swapping require a focus
- *   change (from `awful.client.swap.bydirection`)
+ *   (from `awful.autofocus`).
+ * * *client.jumpto*: When a custom lua extension asks a client to be focused
+ *   (from `client.jump_to`).
+ * * *client.swap.global_bydirection*: When client swapping requires a focus
+ *   change (from `awful.client.swap.bydirection`).
  * * *client.movetotag*: When a client is moved to a new tag
- *   (from `client.move_to_tag`)
+ *   (from `client.move_to_tag`).
  * * *client.movetoscreen*: When the client is moved to a new screen
- *   (from `client.move_to_screen`)
+ *   (from `client.move_to_screen`).
  * * *client.focus.byidx*: When selecting a client using its index
- *   (from `awful.client.focus.byidx`)
+ *   (from `awful.client.focus.byidx`).
  * * *client.focus.history.previous*: When cycling through history
- *   (from `awful.client.focus.history.previous`)
- * * *menu.clients*: When using the build in client menu
- *   (from `awful.menu.clients`)
- * * *rules*: When a new client is focused from a rule (from `awful.rules`)
- * * *screen.focus*: When a screen is focused (from `awful.screen.focus`)
+ *   (from `awful.client.focus.history.previous`).
+ * * *menu.clients*: When using the builtin client menu
+ *   (from `awful.menu.clients`).
+ * * *rules*: When a new client is focused from a rule (from `awful.rules`).
+ * * *screen.focus*: When a screen is focused (from `awful.screen.focus`).
  *
  * Default implementation: `awful.ewmh.activate`.
  *
