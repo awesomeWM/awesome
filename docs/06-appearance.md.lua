@@ -8,6 +8,27 @@ local glib = require("lgi").GLib
 local name_attr = gio.FILE_ATTRIBUTE_STANDARD_NAME
 local type_attr = gio.FILE_ATTRIBUTE_STANDARD_TYPE
 
+-- Like pairs(), but iterate over keys in a sorted manner. Does not support
+-- modifying the table while iterating.
+local function sorted_pairs(t)
+    -- Collect all keys
+    local keys = {}
+    for k in pairs(t) do
+        table.insert(keys, k)
+    end
+
+    table.sort(keys)
+
+    -- return iterator function
+    local i = 0
+    return function()
+        i = i + 1
+        if keys[i] then
+            return keys[i], t[keys[i]]
+        end
+    end
+end
+
 -- Recursive file scanner
 local function get_all_files(path, ext, ret)
     ret = ret or {}
@@ -179,7 +200,7 @@ local function create_sample(entries)
         "    local theme = {}"
     }
 
-    for name, cat in pairs(categorize(entries)) do
+    for name, cat in sorted_pairs(categorize(entries)) do
         table.insert(ret, "\n    -- "..name)
         for _, v in ipairs(cat) do
             table.insert(ret, "    -- theme."..v.name.." = nil")
