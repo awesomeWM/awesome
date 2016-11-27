@@ -86,6 +86,7 @@ function wibox:set_screen(s)
     -- Remember this screen so things work correctly if screens overlap and
     -- (x,y) is not enough to figure out the correct screen.
     self.screen_assigned = s
+    self._drawable:_force_screen(s)
 end
 
 for _, k in pairs{ "buttons", "struts", "geometry", "get_xproperty", "set_xproperty" } do

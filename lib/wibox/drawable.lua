@@ -30,13 +30,16 @@ local visible_drawables = {}
 local function get_widget_context(self)
     local geom = self.drawable:geometry()
 
-    local sgeos = {}
+    local s = self._forced_screen
+    if not s then
+        local sgeos = {}
 
-    for s in capi.screen do
-        sgeos[s] = s.geometry
+        for s in capi.screen do
+            sgeos[s] = s.geometry
+        end
+
+        s = grect.get_by_coord(sgeos, geom.x, geom.y) or capi.screen.primary
     end
-
-    local s = grect.get_by_coord(sgeos, geom.x, geom.y) or capi.screen.primary
 
     local context = self._widget_context
     local dpi = beautiful.xresources.get_dpi(s)
@@ -59,6 +62,7 @@ end
 
 local function do_redraw(self)
     if not self.drawable.valid then return end
+    if self._forced_screen and not self._forced_screen.valid then return end
 
     local surf = surface.load_silently(self.drawable.surface, false)
     -- The surface can be nil if the drawable's parent was already finalized
@@ -272,6 +276,10 @@ function drawable:set_fg(c)
     end
     self.foreground_color = c
     self._do_complete_repaint()
+end
+
+function drawable:_force_screen(s)
+    self._forced_screen = s
 end
 
 function drawable:_inform_visible(visible)
