@@ -10,7 +10,7 @@ branches:
 
 env:
   matrix:
-    - LUA=5.2 LUANAME=lua5.2 BUILD_APIDOC=true DO_COVERAGE=coveralls
+    - LUA=5.2 DO_CHECKQA=1 LUANAME=lua5.2 BUILD_APIDOC=true DO_COVERAGE=coveralls
     # luajit: installed from source.
     - LUA=5.1 LUANAME=luajit-2.0 LUALIBRARY=/usr/lib/libluajit-5.1.so LUAROCKS_ARGS=--lua-suffix=jit-2.0.4 TEST_PREV_COMMITS=1
     # Note: luarocks does not work with Lua 5.0.
@@ -85,8 +85,8 @@ install:
 
   # Install busted for "make check-unit".
   - travis_retry sudo luarocks install busted
-  # Install luacheck for "make luacheck".
-  - travis_retry sudo luarocks install luacheck
+  # Install luacheck for "make check-qa".
+  - if [ "$DO_QUECKQA" = 1 ]; then travis_retry sudo luarocks install luacheck; fi
 
   # Install ldoc for building docs.
   - travis_retry sudo luarocks install ldoc 1.4.4
@@ -153,12 +153,13 @@ script:
     if [ "$TRAVIS_TEST_RESULT" = 0 ]; then
       do_codecov samples
     fi
+  # Run check-unit{,-coverage} and check-integration.
   - |
     set -ev
     if [ "$TRAVIS_TEST_RESULT" = 0 ]; then
       if [ "$DO_COVERAGE" != "0" ]; then
         travis_fold_start "DO_COVERAGE"
-        (make check-coverage \
+        (make check-unit-coverage \
          && do_codecov unittests \
          && sed -i "1 i\\require('luacov.runner')('"$PWD"/.luacov')" build/awesomerc.lua \
          && BUILD_DIRECTORY="" tests/run.sh \
@@ -167,8 +168,14 @@ script:
         travis_fold_end
         [ "$ret" = 0 ]
       else
-        travis_run_in_fold "make.check" make check
+        travis_run_in_fold "make.check-unit" make check-unit
+        travis_run_in_fold "make.check-integration" make check-integration
       fi
+    fi
+  # Run check-qa.
+  - |
+    if [ "$DO_CHECKQA" = 1 ]; then
+      travis_run_in_fold "make.check-qa" make check-qa
     fi
   - |
     set -ev
