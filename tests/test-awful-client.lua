@@ -209,6 +209,36 @@ table.insert(multi_screen_steps, function()
     return true
 end)
 
+-- Test the `new_tag` rule
+table.insert(multi_screen_steps, function()
+    for _, c in ipairs(client.get()) do
+        c:kill()
+    end
+
+    for i=1, screen.count() do
+        local s = screen[i]
+        test_client("screen"..i, nil, {
+            new_tag = {
+                name = "NEW_AT_"..i,
+                screen = s,
+            }
+        })
+    end
+
+    return true
+end)
+
+table.insert(multi_screen_steps, function()
+    if #client.get() ~= screen.count() then return end
+
+    for _, c in ipairs(client.get()) do
+        assert(#c:tags() == 1)
+        assert(c.first_tag.name == "NEW_AT_"..c.screen.index)
+    end
+
+    return true
+end)
+
 require("_multi_screen")(steps, multi_screen_steps)
 
 require("_runner").run_steps(steps)
