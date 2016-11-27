@@ -42,7 +42,7 @@ a_find_program(LDOC_EXECUTABLE ldoc FALSE)
 if(NOT LDOC_EXECUTABLE)
     a_find_program(LDOC_EXECUTABLE ldoc.lua FALSE)
 endif()
-if(LDOC_EXECUTABLE)
+if(LDOC_EXECUTABLE AND NOT DO_COVERAGE)
     execute_process(COMMAND sh -c "${LDOC_EXECUTABLE} --sadly-ldoc-has-no-version-option 2>&1  | grep ' vs 1.4.5'"
                     OUTPUT_VARIABLE LDOC_VERSION_RESULT)
     if(NOT LDOC_VERSION_RESULT STREQUAL "")
@@ -77,7 +77,7 @@ if(GENERATE_MANPAGES)
 endif()
 
 if(GENERATE_DOC)
-    if(NOT LDOC_EXECUTABLE)
+    if(NOT LDOC_EXECUTABLE OR DO_COVERAGE)
         message(STATUS "Not generating API documentation. Missing: ldoc")
         set(GENERATE_DOC OFF)
     endif()
@@ -314,7 +314,6 @@ set(AWESOME_ICON_PATH        ${AWESOME_DATA_PATH}/icons)
 set(AWESOME_THEMES_PATH      ${AWESOME_DATA_PATH}/themes)
 # }}}
 
-
 if(GENERATE_DOC)
     # Load the common documentation
     include(docs/load_ldoc.cmake)
@@ -329,19 +328,25 @@ if(GENERATE_DOC)
 endif()
 
 # {{{ Configure files
-file(GLOB awesome_c_configure_files RELATIVE ${SOURCE_DIR}
+file(GLOB awesome_base_c_configure_files RELATIVE ${SOURCE_DIR}
     ${SOURCE_DIR}/*.c
-    ${SOURCE_DIR}/*.h
+    ${SOURCE_DIR}/*.h)
+
+file(GLOB awesome_c_configure_files RELATIVE ${SOURCE_DIR}
     ${SOURCE_DIR}/common/*.c
     ${SOURCE_DIR}/common/*.h
     ${SOURCE_DIR}/objects/*.c
     ${SOURCE_DIR}/objects/*.h)
+
 file(GLOB_RECURSE awesome_lua_configure_files RELATIVE ${SOURCE_DIR}
-    ${SOURCE_DIR}/lib/*.lua
+    ${SOURCE_DIR}/lib/*.lua)
+
+file(GLOB_RECURSE awesome_theme_configure_files RELATIVE ${SOURCE_DIR}
     ${SOURCE_DIR}/themes/*/*.lua)
+
 set(AWESOME_CONFIGURE_FILES
-    ${awesome_c_configure_files}
-    ${awesome_lua_configure_files}
+    ${awesome_base_c_configure_files}
+    ${awesome_theme_configure_files}
     config.h
     docs/config.ld
     awesome-version-internal.h)
@@ -352,6 +357,27 @@ foreach(file ${AWESOME_CONFIGURE_FILES})
                    ESCAPE_QUOTES
                    @ONLY)
 endforeach()
+
+set(AWESOME_CONFIGURE_NO_COV_FILES
+    ${awesome_c_configure_files}
+    ${awesome_lua_configure_files}
+)
+
+if(NOT DO_COVERAGE)
+    foreach(file ${AWESOME_CONFIGURE_NO_COV_FILES})
+        configure_file(${SOURCE_DIR}/${file}
+                    ${BUILD_DIR}/${file}
+                    ESCAPE_QUOTES
+                    @ONLY)
+    endforeach()
+else()
+    foreach(file ${AWESOME_CONFIGURE_NO_COV_FILES})
+        configure_file(${SOURCE_DIR}/${file}
+                    ${BUILD_DIR}/${file}
+                    COPYONLY)
+    endforeach()
+endif()
+
 #}}}
 
 # {{{ Generate some aggregated documentation from lua script
@@ -386,15 +412,5 @@ foreach(file ${AWESOME_ADDITIONAL_FILES})
                    @ONLY)
 endforeach()
 #}}}
-
-# The examples coverage need to be done again after the configure_file has
-# inserted the additional code. Otherwise, the result will be off, rendering
-# the coverage useless as a tool to track untested code.
-if(GENERATE_DOC AND DO_COVERAGE)
-    message(STATUS "Running tests again with coverage")
-    set(USE_LCOV 1)
-
-    include(tests/examples/CMakeLists.txt)
-endif()
 
 # vim: filetype=cmake:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80:foldmethod=marker
