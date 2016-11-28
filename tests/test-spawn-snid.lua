@@ -12,7 +12,7 @@ client.connect_signal("manage", function(c)
       tostring(c.machine) .. " ~= " .. tostring(awesome.hostname))
 end)
 
-local ret, snid
+local snid
 local num_callbacks = 0
 local function callback(c)
     assert(c.startup_id == snid)
@@ -22,9 +22,8 @@ end
 local steps = {
   function(count)
     if count == 1 then
-      ret, snid = test_client("foo", "bar", true)
+      snid = test_client("foo", "bar", true)
     elseif manage_called then
-      assert(ret)
       assert(snid)
       assert(snid == c_snid)
       return true
@@ -36,10 +35,8 @@ local steps = {
   function(count)
     if count == 1 then
       manage_called = false
-      ret, snid = test_client("bar", "foo", false)
+      test_client("bar", "foo", false)
     elseif manage_called then
-      assert(ret)
-      assert(snid == nil)
       assert(c_snid == nil, "c.startup_snid should be nil!")
       return true
     end
@@ -48,9 +45,8 @@ local steps = {
   function(count)
       if count == 1 then
           manage_called = false
-          ret, snid = test_client("baz", "barz", false, callback)
+          snid = test_client("baz", "barz", false, callback)
       elseif manage_called then
-          assert(ret)
           assert(snid)
           assert(snid == c_snid)
           assert(num_callbacks == 1, num_callbacks)

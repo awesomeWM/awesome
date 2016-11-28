@@ -96,8 +96,7 @@ return function(class, title, sn_rules, callback)
     local success, msg = pipe:write_all(data)
     assert(success, msg)
 
-    -- TODO: Fix the API of this function
-     return true, (sn_rules or callback) and snid or nil
+    return snid
 end
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
