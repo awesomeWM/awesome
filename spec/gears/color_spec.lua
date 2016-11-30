@@ -42,6 +42,26 @@ describe("gears.color", function()
             test(0x7f, 0xff, 0x00, 0xff, "chartreuse")
         end)
 
+        describe("invalid input", function()
+            local function test_nil(input)
+                local output = color.parse_color(input)
+                assert.is_nil(output)
+            end
+
+            it("nonexisting color", function()
+                test_nil("elephant")
+            end)
+
+            it("invalid format", function()
+                test_nil('#f0f0f')
+            end)
+
+            it("too long", function()
+                test_nil("#00000fffff00000fffff")
+            end)
+        end)
+
+
         describe("different lengths", function()
             local function gray(e, e_a, input)
                 local o_r, o_g, o_b, o_a, unused = color.parse_color(input)

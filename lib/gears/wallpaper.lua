@@ -88,6 +88,7 @@ end
 --- Set the current wallpaper.
 -- @param pattern The wallpaper that should be set. This can be a cairo surface,
 --   a description for gears.color or a cairo pattern.
+-- @see gears.color
 function wallpaper.set(pattern)
     if cairo.Surface:is_type_of(pattern) then
         pattern = cairo.Pattern.create_for_surface(pattern)
@@ -107,6 +108,7 @@ end
 --   all screens are set.
 -- @param background The background color that should be used. Gets handled via
 --   gears.color. The default is black.
+-- @see gears.color
 function wallpaper.centered(surf, s, background)
     local geom, cr = wallpaper.prepare_context(s)
     surf = surface.load_uncached(surf)
@@ -188,6 +190,7 @@ end
 --   all screens are set.
 -- @param background The background color that should be used. Gets handled via
 --   gears.color. The default is black.
+-- @see gears.color
 function wallpaper.fit(surf, s, background)
     local geom, cr = wallpaper.prepare_context(s)
     surf = surface.load_uncached(surf)

@@ -216,6 +216,7 @@ end
 --- Set the background of the drawable
 -- @param c The background to use. This must either be a cairo pattern object,
 --   nil or a string that gears.color() understands.
+-- @see gears.color
 function drawable:set_bg(c)
     c = c or "#000000"
     local t = type(c)
@@ -263,6 +264,7 @@ end
 --- Set the foreground of the drawable
 -- @param c The foreground to use. This must either be a cairo pattern object,
 --   nil or a string that gears.color() understands.
+-- @see gears.color
 function drawable:set_fg(c)
     c = c or "#FFFFFF"
     if type(c) == "string" or type(c) == "table" then

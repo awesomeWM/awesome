@@ -20,53 +20,77 @@ local surface = require("gears.surface")
 local color = { mt = {} }
 local pattern_cache
 
+--- Create a pattern from a given string.
+-- This function can create solid, linear, radial and png patterns. In general,
+-- patterns are specified as strings formatted as "type:arguments". "arguments"
+-- is specific to the pattern being used. For example, one can use
+-- "radial:50,50,10:55,55,30:0,#ff0000:0.5,#00ff00:1,#0000ff".
+-- Alternatively, patterns can be specified via tables. In this case, the
+-- table's 'type' member specifies the type. For example:
+-- {
+--   type = "radial",
+--   from = { 50, 50, 10 },
+--   to = { 55, 55, 30 },
+--   stops = { { 0, "#ff0000" }, { 0.5, "#00ff00" }, { 1, "#0000ff" } }
+-- }
+-- Any argument that cannot be understood is passed to @{create_solid_pattern}.
+--
+-- Please note that you MUST NOT modify the returned pattern, for example by
+-- calling :set_matrix() on it, because this function uses a cache and your
+-- changes could thus have unintended side effects. Use @{create_pattern_uncached}
+-- if you need to modify the returned pattern.
+-- @see create_pattern_uncached, create_solid_pattern, create_png_pattern,
+--   create_linear_pattern, create_radial_pattern
+-- @tparam string col The string describing the pattern.
+-- @return a cairo pattern object
+-- @function gears.color
+
 --- Parse a HTML-color.
 -- This function can parse colors like `#rrggbb` and `#rrggbbaa` and also `red`.
--- Thanks to #lua for this. :)
+-- Max 4 chars per channel.
 --
 -- @param col The color to parse
--- @return 4 values which each are in the range [0, 1].
+-- @treturn table 4 values representing color in RGBA format (each of them in
+-- [0, 1] range) or nil if input is incorrect.
 -- @usage -- This will return 0, 1, 0, 1
 -- gears.color.parse_color("#00ff00ff")
 function color.parse_color(col)
     local rgb = {}
-    -- Is it a HTML-style color?
     if string.match(col, "^#%x+$") then
-        -- Get all hex chars
-        for char in string.gmatch(col, "[^#]") do
-            table.insert(rgb, tonumber(char, 16) / 0xf)
+        local hex_str = col:sub(2, #col)
+        local channels
+        if #hex_str % 3 == 0 then
+            channels = 3
+        elseif #hex_str % 4 == 0 then
+            channels = 4
+        else
+            return nil
         end
-        -- Merge consecutive values until we have at most four groups (rgba)
-        local factor = 0xf
-        while #rgb > 4 do
-            local merged = {}
-            local key, value = next(rgb, nil)
-            local next_factor = (factor + 1)*(factor + 1) - 1
-            while key do
-                local key2, value2 = next(rgb, key)
-                local v1, v2 = value * factor, value2 * factor
-                local new = v1 * (factor + 1) + v2
-                table.insert(merged, new / next_factor)
-                key, value = next(rgb, key2)
-            end
-            rgb = merged
-            factor = next_factor
+        local chars_per_channel = #hex_str / channels
+        if chars_per_channel > 4 then
+            return nil
+        end
+        local dividor = (0x10 ^ chars_per_channel) - 1
+        for idx=1,#hex_str,chars_per_channel do
+            local channel_val = tonumber(hex_str:sub(idx,idx+chars_per_channel-1), 16)
+            table.insert(rgb, channel_val / dividor)
+        end
+        if channels == 3 then
+            table.insert(rgb, 1)
         end
     else
-        -- Let's ask Pango for its opinion (but this doesn't support alpha!)
         local c = Pango.Color()
-        if c:parse(col) then
-            rgb = {
-                c.red / 0xffff,
-                c.green / 0xffff,
-                c.blue / 0xffff,
-            }
+        if not c:parse(col) then
+            return nil
         end
+        rgb = {
+            c.red / 0xffff,
+            c.green / 0xffff,
+            c.blue / 0xffff,
+            1.0
+        }
     end
-    -- Add missing groups (missing alpha)
-    while #rgb < 4 do
-        table.insert(rgb, 1)
-    end
+    assert(#rgb == 4, col)
     return unpack(rgb)
 end
 
@@ -234,27 +258,9 @@ function color.create_pattern_uncached(col)
     return color.create_solid_pattern(col)
 end
 
---- Create a pattern from a given string.
--- This function can create solid, linear, radial and png patterns. In general,
--- patterns are specified as strings formatted as"type:arguments". "arguments"
--- is specific to the pattern used. For example, one can use
--- "radial:50,50,10:55,55,30:0,#ff0000:0.5,#00ff00:1,#0000ff"
--- Alternatively, patterns can be specified via tables. In this case, the
--- table's 'type' member specifies the type. For example:
--- { type = "radial", from = { 50, 50, 10 }, to = { 55, 55, 30 },
---   stops = { { 0, "#ff0000" }, { 0.5, "#00ff00" }, { 1, "#0000ff" } } }
--- Any argument that cannot be understood is passed to @{create_solid_pattern}.
---
--- Please note that you MUST NOT modify the returned pattern, for example by
--- calling :set_matrix() on it, because this function uses a cache and your
--- changes could thus have unintended side effects. Use @{create_pattern_uncached}
--- if you need to modify the returned pattern.
--- @see create_pattern_uncached, create_solid_pattern, create_png_pattern,
---   create_linear_pattern, create_radial_pattern
--- @param col The string describing the pattern.
--- @return a cairo pattern object
+--- Create a pattern from a given string, same as `gears.color`.
+-- @see gears.color
 function color.create_pattern(col)
-    -- If it already is a cairo pattern, just leave it as that
     if cairo.Pattern:is_type_of(col) then
         return col
     end
