@@ -79,25 +79,24 @@ local function init()
 end
 
 -- Hack needed for awesome's Startup Notification machinery
-local function get_snid(sn_rules)
-    local success, snid = spawn({ "/bin/true" }, sn_rules)
+local function get_snid(sn_rules, callback)
+    local success, snid = spawn({ "/bin/true" }, sn_rules, callback)
     assert(success)
     assert(snid)
     return snid
 end
 
-return function(class, title, sn_rules)
+return function(class, title, sn_rules, callback)
     class = class or "test_app"
     title = title or "Awesome test client"
 
     init()
-    local snid = sn_rules and get_snid(sn_rules) or ""
+    local snid = (sn_rules or callback) and get_snid(sn_rules, callback) or ""
     local data = class .. "\n" .. title .. "\n" .. snid .. "\n"
     local success, msg = pipe:write_all(data)
     assert(success, msg)
 
-    -- TODO: Fix the API of this function
-     return true, sn_rules and snid or nil
+    return snid
 end
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

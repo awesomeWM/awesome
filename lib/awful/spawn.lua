@@ -106,8 +106,8 @@ function spawn.spawn(cmd, sn_rules, callback)
         enable_sn = not not enable_sn -- Force into a boolean.
         local pid, snid = capi.awesome.spawn(cmd, enable_sn)
         -- The snid will be nil in case of failure
-        if snid and type(sn_rules) == "table" then
-            sn_rules = sn_rules or {}
+        if snid then
+            sn_rules = type(sn_rules) ~= "boolean" and sn_rules or {}
             spawn.snid_buffer[snid] = { sn_rules, { callback } }
         end
         return pid, snid
