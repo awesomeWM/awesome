@@ -51,9 +51,9 @@ install:
   - |
     set -ev
     if [[ "$LUA" == "5.3" ]]; then
-      wget https://github.com/lua/lua/releases/download/5.3.3/lua-5.3.3.tar.gz -O lua.tar.gz
+      wget https://github.com/lua/lua/archive/v5-3-3.tar.gz -O lua.tar.gz
       tar -xvzf lua.tar.gz
-      (cd lua-5.3.3/src \
+      (cd lua-*/src \
         && make SYSCFLAGS="-DLUA_USE_LINUX -ULUA_COMPAT_5_2 -DLUA_USE_APICHECK" SYSLIBS="-Wl,-E -ldl -lreadline" LUA_A=liblua.so MYCFLAGS="-fPIC" RANLIB=: AR="gcc -shared -ldl -o" liblua.so \
         && cd .. \
         && sudo make INSTALL_TOP=/usr/ INSTALL_INC=${LUAINCLUDE} TO_LIB=liblua.so linux install)
