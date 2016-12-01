@@ -209,7 +209,7 @@ function tag.add(name, props)
     -- signal is sent
     properties.screen = get_screen(properties.screen or ascreen.focused())
     -- Index is also required
-    properties.index = #raw_tags(properties.screen)+1
+    properties.index = properties.index or #raw_tags(properties.screen)+1
 
     local newtag = capi.tag{ name = name }
 
