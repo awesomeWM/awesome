@@ -115,7 +115,7 @@ endif()
 pkg_check_modules(AWESOME_COMMON_REQUIRED REQUIRED
     xcb>=1.6)
 
-pkg_check_modules(AWESOME_REQUIRED REQUIRED
+set(AWESOME_DEPENDENCIES
     glib-2.0
     gdk-pixbuf-2.0
     cairo
@@ -137,11 +137,20 @@ pkg_check_modules(AWESOME_REQUIRED REQUIRED
     libstartup-notification-1.0>=0.10
     xproto>=7.0.15
     libxdg-basedir>=1.0.0
-    xcb-xrm)
+    xcb-xrm
+)
 
-if(NOT AWESOME_REQUIRED_FOUND OR NOT AWESOME_COMMON_REQUIRED_FOUND)
-    message(FATAL_ERROR)
-endif()
+# Check the deps one by one
+foreach(dependency ${AWESOME_DEPENDENCIES})
+    pkg_check_modules(TMP_DEP REQUIRED ${dependency})
+
+    if(NOT TMP_DEP_FOUND)
+        message(FATAL_ERROR)
+    endif()
+endforeach()
+
+# Do it again, but this time with the CFLAGS/LDFLAGS
+pkg_check_modules(AWESOME_REQUIRED REQUIRED ${AWESOME_DEPENDENCIES})
 
 # On Mac OS X, the executable of Awesome has to be linked against libiconv
 # explicitly.  Unfortunately, libiconv doesn't have its pkg-config file,
