@@ -5,7 +5,7 @@
 -- @copyright 2009 Uli Schlachter
 -- @copyright 2008 Julien Danjou
 --
--- @module awful.layout.suit.spiral
+-- @module awful.layout
 ---------------------------------------------------------------------------
 
 -- Grab environment we need
@@ -69,14 +69,16 @@ local function do_spiral(p, _spiral)
     end
 end
 
---- Dwindle layout
+--- Dwindle layout.
+-- @clientlayout awful.layout.suit.spiral.dwindle
 spiral.dwindle = {}
 spiral.dwindle.name = "dwindle"
 function spiral.dwindle.arrange(p)
     return do_spiral(p, false)
 end
 
---- Spiral layout
+--- Spiral layout.
+-- @clientlayout awful.layout.suit.spiral.name
 spiral.name = "spiral"
 function spiral.arrange(p)
     return do_spiral(p, true)

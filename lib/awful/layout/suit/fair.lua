@@ -1,9 +1,9 @@
 ---------------------------------------------------------------------------
---- Fair layouts module for awful
+--- Fair layouts module for awful.
 --
 -- @author Josh Komoroske
 -- @copyright 2012 Josh Komoroske
--- @module awful.layout.suit.fair
+-- @module awful.layout
 ---------------------------------------------------------------------------
 
 -- Grab environment we need

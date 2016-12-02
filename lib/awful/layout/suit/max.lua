@@ -3,7 +3,7 @@
 --
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2008 Julien Danjou
--- @module awful.layout.suit.max
+-- @module awful.layout
 ---------------------------------------------------------------------------
 
 -- Grab environment we need
@@ -42,14 +42,14 @@ local function fmax(p, fs)
 end
 
 --- Maximized layout.
--- @param screen The screen to arrange.
+-- @clientlayout awful.layout.suit.max.name
 max.name = "max"
 function max.arrange(p)
     return fmax(p, false)
 end
 
 --- Fullscreen layout.
--- @param screen The screen to arrange.
+-- @clientlayout awful.layout.suit.max.fullscreen
 max.fullscreen = {}
 max.fullscreen.name = "fullscreen"
 function max.fullscreen.arrange(p)

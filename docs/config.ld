@@ -49,6 +49,8 @@ new_type("beautiful", "Theme variables", false, "Type")
 new_type("deprecated", "Deprecated functions", false, "param")
 -- For the legacy stateless layout related functions
 new_type("legacylayout", "Layout related functions", false, "param")
+-- Have a category for the client layouts
+new_type("clientlayout", "Client layouts", false, "param")
 
 -- More fitting section names
 kind_names={topic='Documentation', module='Libraries'}
@@ -94,9 +96,6 @@ file = {
 
         -- Ignore the drawing window, users should only care about wiboxes
         '../objects/drawin.c',
-
-        -- exclude layout, but we need an extra bit of documentation elsewhere.
-        '../lib/awful/layout/suit/'
     }
 }
 
