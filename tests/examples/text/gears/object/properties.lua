@@ -42,7 +42,8 @@ o:method(1, 2, 3)
  -- Random properties can also be added, the signal will be emitted automatically.
 
 o:connect_signal("property::something", function(obj, value)
-    print("In the connection handler!", obj, value)
+    assert(obj == o)
+    print("In the connection handler!", value)
 end)
 
 print(o.something)
