@@ -32,43 +32,43 @@ local function move_corsor(s, x, y)
 end
 
 local all_coords_out = {
-    top_left     = {10, 10},
-    top          = {32, 10},
-    top_right    = {60, 10},
-    right        = {60, 20},
-    bottom_right = {60, 40},
-    bottom       = {32, 40},
-    bottom_left  = {10, 40},
-    left         = {10, 29},
+    { "top_left",     {10, 10}},
+    { "top",          {32, 10}},
+    { "top_right",    {60, 10}},
+    { "right",        {60, 20}},
+    { "bottom_right", {60, 40}},
+    { "bottom",       {32, 40}},
+    { "bottom_left",  {10, 40}},
+    { "left",         {10, 29}},
 }
 
 local all_coords_in = {
-    top_left     = {20, 18},
-    top          = {32, 18},
-    top_right    = {44, 18},
-    right        = {44, 24},
-    bottom_right = {44, 34},
-    bottom       = {32, 34},
-    bottom_left  = {20, 34},
-    left         = {32, 24},
+    { "top_left",     {20, 18}},
+    { "top",          {32, 18}},
+    { "top_right",    {44, 18}},
+    { "right",        {44, 24}},
+    { "bottom_right", {44, 34}},
+    { "bottom",       {32, 34}},
+    { "bottom_left",  {20, 34}},
+    { "left",         {32, 24}},
 }
 
 -- Top left
 local s = 1
-for k, v in pairs(all_coords_out) do
-    move_corsor(s, unpack(v))
+for _, v in ipairs(all_coords_out) do
+    move_corsor(s, unpack(v[2]))
     assert(client.get()[s].screen == screen[s])
     awful.placement.resize_to_mouse(client.get()[s], {include_sides=true})
     mouse.push_history()
-    assert(test_touch_mouse(client.get()[s]), k)
+    assert(test_touch_mouse(client.get()[s]), v[1])
     s = s + 1
 end
 
-for k, v in pairs(all_coords_in) do
-    move_corsor(s, unpack(v))
+for _, v in ipairs(all_coords_in) do
+    move_corsor(s, unpack(v[2]))
     assert(client.get()[s].screen == screen[s])
     awful.placement.resize_to_mouse(client.get()[s], {include_sides=true})
     mouse.push_history()
-    assert(test_touch_mouse(client.get()[s]), k)
+    assert(test_touch_mouse(client.get()[s]), v[1])
     s = s + 1
 end
