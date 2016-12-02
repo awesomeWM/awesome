@@ -312,8 +312,9 @@ end
 --- Create a new tag based on a rule.
 -- @tparam client c The client
 -- @tparam boolean|function|string value The value.
+-- @tparam table props The properties.
 -- @treturn tag The new tag
-function rules.high_priority_properties.new_tag(c, value)
+function rules.high_priority_properties.new_tag(c, value, props)
     local ty = type(value)
     local t = nil
 
@@ -324,8 +325,16 @@ function rules.high_priority_properties.new_tag(c, value)
         -- Create a tag named after "value"
         t = atag.add(value, {screen=c.screen, volatile=true})
     elseif ty == "table" then
-        -- Assume a table of tags properties
-        t = atag.add(value.name or c.class or "N/A", value)
+        -- Assume a table of tags properties. Set the right screen, but
+        -- avoid editing the original table
+        local values = value.screen and value or util.table.clone(value)
+        values.screen = values.screen or c.screen
+
+        t = atag.add(value.name or c.class or "N/A", values)
+
+        -- In case the tag has been forced to another screen, move the client
+        c.screen = t.screen
+        props.screen = t.screen -- In case another rule query it
     else
         assert(false)
     end
@@ -409,7 +418,7 @@ function rules.execute(c, props, callbacks)
                 value = value(c, props)
             end
 
-            handler(c, value)
+            handler(c, value, props)
         end
 
     end
