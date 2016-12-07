@@ -8,10 +8,10 @@ parent:add(l)
 
 for _, v in ipairs {"#ff0000", "#00ff00", "#0000ff"} do
     l:add(wibox.widget {
-        data = {
-            ['L1'] = 100,
-            ['L2'] = 200,
-            ['L3'] = 300,
+        data_list = {
+            { 'L1', 100 },
+            { 'L2', 200 },
+            { 'L3', 300 },
         },
         border_width = 1,
         border_color = v,
