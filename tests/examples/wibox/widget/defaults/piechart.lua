@@ -5,10 +5,10 @@ local beautiful = require( "beautiful" ) --DOC_HIDE
 parent:add( --DOC_HIDE
 
 wibox.widget {
-    data = {
-        ['L1'] = 100,
-        ['L2'] = 200,
-        ['L3'] = 300,
+    data_list = {
+        { 'L1', 100 },
+        { 'L2', 200 },
+        { 'L3', 300 },
     },
     border_width = 1,
     forced_height = 50, --DOC_HIDE

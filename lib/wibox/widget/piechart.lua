@@ -51,18 +51,18 @@ end
 
 local function compute_sum(data)
     local ret = 0
-    for _,v in pairs(data) do
-        ret = ret + v
+    for _, entry in ipairs(data) do
+        ret = ret + entry[2]
     end
 
     return ret
 end
 
 local function draw(self, _, cr, width, height)
-    if not self._private.data then return end
+    if not self._private.data_list then return end
 
     local radius = (height > width and width or height) / 4
-    local sum, start, count = compute_sum(self._private.data),0,0
+    local sum, start, count = compute_sum(self._private.data_list),0,0
     local has_label = self._private.display_labels ~= false
 
     -- Labels need to be drawn later so the original source is kept
@@ -81,7 +81,8 @@ local function draw(self, _, cr, width, height)
     local colors = self:get_colors()
     local col_count = colors and #colors or 0
 
-    for k,v in pairs(self._private.data) do
+    for _, entry in ipairs(self._private.data_list) do
+        local k, v = entry[1], entry[2]
         local end_angle = start + 2*math.pi*(v/sum)
 
         local col = colors and color(colors[math.fmod(count,col_count)+1]) or nil
@@ -135,6 +136,11 @@ local function fit(_, _, width, height)
     return width, height
 end
 
+--- The pie chart data list.
+-- @property data_list
+-- @tparam table data_list Sorted table where each entry has a label as its
+-- first value and a number as its second value.
+
 --- The pie chart data.
 -- @property data
 -- @tparam table data Labels as keys and number as value.
@@ -180,12 +186,15 @@ end
 -- @tparam table colors A table of colors, one for each elements
 -- @see gears.color
 
-for _, prop in ipairs {"data", "border_color", "border_width", "colors",
+for _, prop in ipairs {"data_list", "border_color", "border_width", "colors",
     "display_labels"
   } do
     piechart["set_"..prop] = function(self, value)
         self._private[prop] = value
         self:emit_signal("property::"..prop)
+        if prop == "data_list" then
+            self:emit_signal("property::data")
+        end
         self:emit_signal("widget::redraw_needed")
     end
     piechart["get_"..prop] = function(self)
@@ -193,7 +202,23 @@ for _, prop in ipairs {"data", "border_color", "border_width", "colors",
     end
 end
 
-local function new(data)
+function piechart:set_data(value)
+    local list = {}
+    for k, v in pairs(value) do
+        table.insert(list, { k, v })
+    end
+    self:set_data_list(list)
+end
+
+function piechart:get_data()
+    local list = {}
+    for _, entry in ipairs(self:get_data_list()) do
+        list[entry[1]] = entry[2]
+    end
+    return list
+end
+
+local function new(data_list)
 
     local ret = base.make_widget(nil, nil, {
         enable_properties = true,
@@ -204,7 +229,7 @@ local function new(data)
     rawset(ret, "fit" , fit )
     rawset(ret, "draw", draw)
 
-    ret:set_data(data)
+    ret:set_data_list(data_list)
 
     return ret
 end
