@@ -155,7 +155,6 @@ end
 
 --- Swap 2 tags
 -- @function tag.swap
--- @see tag.swap
 -- @param tag2 The second tag
 -- @see client.swap
 function tag.object.swap(self, tag2)
