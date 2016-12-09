@@ -262,7 +262,7 @@ end
 --
 -- @deprecated awful.wibox.stretch
 -- @see awful.placement
--- @see stretch
+-- @see awful.wibar.stretch
 
 --- Create a new wibox and attach it to a screen edge.
 -- You can add also position key with value top, bottom, left or right.
