@@ -199,7 +199,7 @@ scan(xcb_query_tree_cookie_t tree_c)
 
         state = xwindow_get_state_reply(state_wins[i]);
 
-        if(!attr_r || attr_r->override_redirect
+        if(!geom_r || !attr_r || attr_r->override_redirect
            || attr_r->map_state == XCB_MAP_STATE_UNMAPPED
            || state == XCB_ICCCM_WM_STATE_WITHDRAWN)
         {
@@ -259,6 +259,8 @@ acquire_WM_Sn(bool replace)
     get_sel_reply = xcb_get_selection_owner_reply(globalconf.connection,
             xcb_get_selection_owner(globalconf.connection, globalconf.selection_atom),
             NULL);
+    if (!get_sel_reply)
+        fatal("GetSelectionOwner for WM_Sn failed");
     if (!replace && get_sel_reply->owner != XCB_NONE)
         fatal("another window manager is already running (selection owned; use --replace)");
 
@@ -653,11 +655,11 @@ main(int argc, char **argv)
     /* check for xtest extension */
     const xcb_query_extension_reply_t *query;
     query = xcb_get_extension_data(globalconf.connection, &xcb_test_id);
-    globalconf.have_xtest = query->present;
+    globalconf.have_xtest = query && query->present;
 
     /* check for shape extension */
     query = xcb_get_extension_data(globalconf.connection, &xcb_shape_id);
-    globalconf.have_shape = query->present;
+    globalconf.have_shape = query && query->present;
 
     event_init();
 

@@ -283,6 +283,11 @@ screen_scan_randr_monitors(lua_State *L, screen_array_t *screens)
     xcb_randr_get_monitors_reply_t *monitors_r = xcb_randr_get_monitors_reply(globalconf.connection, monitors_c, NULL);
     xcb_randr_monitor_info_iterator_t monitor_iter;
 
+    if (monitors_r == NULL) {
+        warn("RANDR GetMonitors failed; this should not be possible");
+        return;
+    }
+
     for(monitor_iter = xcb_randr_get_monitors_monitors_iterator(monitors_r);
             monitor_iter.rem; xcb_randr_monitor_info_next(&monitor_iter))
     {
@@ -345,6 +350,11 @@ screen_scan_randr_crtcs(lua_State *L, screen_array_t *screens)
     xcb_randr_get_screen_resources_cookie_t screen_res_c = xcb_randr_get_screen_resources(globalconf.connection, globalconf.screen->root);
     xcb_randr_get_screen_resources_reply_t *screen_res_r = xcb_randr_get_screen_resources_reply(globalconf.connection, screen_res_c, NULL);
 
+    if (screen_res_r == NULL) {
+        warn("RANDR GetScreenResources failed; this should not be possible");
+        return;
+    }
+
     /* We go through CRTC, and build a screen for each one. */
     xcb_randr_crtc_t *randr_crtcs = xcb_randr_get_screen_resources_crtcs(screen_res_r);
 
@@ -353,6 +363,11 @@ screen_scan_randr_crtcs(lua_State *L, screen_array_t *screens)
         /* Get info on the output crtc */
         xcb_randr_get_crtc_info_cookie_t crtc_info_c = xcb_randr_get_crtc_info(globalconf.connection, randr_crtcs[i], XCB_CURRENT_TIME);
         xcb_randr_get_crtc_info_reply_t *crtc_info_r = xcb_randr_get_crtc_info_reply(globalconf.connection, crtc_info_c, NULL);
+
+        if(!crtc_info_r) {
+            warn("RANDR GetCRTCInfo failed; this should not be possible");
+            continue;
+        }
 
         /* If CRTC has no OUTPUT, ignore it */
         if(!xcb_randr_get_crtc_info_outputs_length(crtc_info_r))
@@ -373,6 +388,11 @@ screen_scan_randr_crtcs(lua_State *L, screen_array_t *screens)
             xcb_randr_get_output_info_cookie_t output_info_c = xcb_randr_get_output_info(globalconf.connection, randr_outputs[j], XCB_CURRENT_TIME);
             xcb_randr_get_output_info_reply_t *output_info_r = xcb_randr_get_output_info_reply(globalconf.connection, output_info_c, NULL);
             screen_output_t output;
+
+            if (!output_info_r) {
+                warn("RANDR GetOutputInfo failed; this should not be possible");
+                continue;
+            }
 
             int len = xcb_randr_get_output_info_name_length(output_info_r);
             /* name is not NULL terminated */
@@ -416,12 +436,14 @@ screen_scan_randr_crtcs(lua_State *L, screen_array_t *screens)
 static void
 screen_scan_randr(lua_State *L, screen_array_t *screens)
 {
+    const xcb_query_extension_reply_t *extension_reply;
     xcb_randr_query_version_reply_t *version_reply;
     uint32_t major_version;
     uint32_t minor_version;
 
     /* Check for extension before checking for XRandR */
-    if(!xcb_get_extension_data(globalconf.connection, &xcb_randr_id)->present)
+    extension_reply = xcb_get_extension_data(globalconf.connection, &xcb_randr_id);
+    if(!extension_reply || !extension_reply->present)
         return;
 
     version_reply =
@@ -470,17 +492,19 @@ static void
 screen_scan_xinerama(lua_State *L, screen_array_t *screens)
 {
     bool xinerama_is_active;
+    const xcb_query_extension_reply_t *extension_reply;
     xcb_xinerama_is_active_reply_t *xia;
     xcb_xinerama_query_screens_reply_t *xsq;
     xcb_xinerama_screen_info_t *xsi;
     int xinerama_screen_number;
 
     /* Check for extension before checking for Xinerama */
-    if(!xcb_get_extension_data(globalconf.connection, &xcb_xinerama_id)->present)
+    extension_reply = xcb_get_extension_data(globalconf.connection, &xcb_xinerama_id);
+    if(!extension_reply || !extension_reply->present)
         return;
 
     xia = xcb_xinerama_is_active_reply(globalconf.connection, xcb_xinerama_is_active(globalconf.connection), NULL);
-    xinerama_is_active = xia->state;
+    xinerama_is_active = xia && xia->state;
     p_delete(&xia);
     if(!xinerama_is_active)
         return;
@@ -488,6 +512,11 @@ screen_scan_xinerama(lua_State *L, screen_array_t *screens)
     xsq = xcb_xinerama_query_screens_reply(globalconf.connection,
                                            xcb_xinerama_query_screens_unchecked(globalconf.connection),
                                            NULL);
+
+    if(!xsq) {
+        warn("Xinerama QueryScreens failed; this should not be possible");
+        return;
+    }
 
     xsi = xcb_xinerama_query_screens_screen_info(xsq);
     xinerama_screen_number = xcb_xinerama_query_screens_screen_info_length(xsq);
