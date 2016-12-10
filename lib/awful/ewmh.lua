@@ -210,6 +210,10 @@ function ewmh.tag(c, t, hints) --luacheck: no unused
     end
 end
 
+--- Handle client urgent request
+-- @signalhandler awful.ewmh.urgent
+-- @client c A client
+-- @tparam boolean urgent If the client should be urgent
 function ewmh.urgent(c, urgent)
     if c ~= client.focus and not aclient.property.get(c,"ignore_urgent") then
         c.urgent = urgent
