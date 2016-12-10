@@ -3,7 +3,7 @@
 --
 -- @author Gregor Best
 -- @copyright 2008 Gregor Best
--- @module awful.layout.suit.floating
+-- @module awful.layout
 ---------------------------------------------------------------------------
 
 -- Grab environment we need
@@ -101,6 +101,9 @@ end
 
 function floating.arrange()
 end
+
+--- The floating layout.
+-- @clientlayout awful.layout.suit.
 
 floating.name = "floating"
 

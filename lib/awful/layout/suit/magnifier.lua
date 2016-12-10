@@ -3,7 +3,7 @@
 --
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2008 Julien Danjou
--- @module awful.layout.suit.magnifier
+-- @module awful.layout
 ---------------------------------------------------------------------------
 
 -- Grab environment we need
@@ -136,6 +136,9 @@ function magnifier.arrange(p)
         end
     end
 end
+
+--- The magnifier layout.
+-- @clientlayout awful.layout.suit.magnifier
 
 magnifier.name = "magnifier"
 
