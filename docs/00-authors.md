@@ -3,29 +3,38 @@
 
 ## awesome - awesome window manager
 
-**Author**:
+**Maintainer**:
+
+ * © 2009- Uli Schlachter &lt;psychon@znc.in>
+
+**Main contributors**:
+
+ * © 2013- Emmanuel Lepage-Vallee &lt;elv1313@gmail.com>
+ * © 2014- Daniel Hahler &lt;https://daniel.hahler.de>
+ * © 2014- Yauhen Kirylau &lt;actionless.loveless@gmail.com>
+
+**Original author**:
 
  * © 2007-2009 Julien Danjou &lt;julien@danjou.info>
-
-**Contributors**:
-
- * © 2007-2009 Nikos Ntarmos &lt;ntarmos@ceid.upatras.gr>
- * © 2007-2009 Arnaud Fontaine &lt;arnau@debian.org>
- * © 2008-2009 Damien Leone &lt;damien.leone@gmail.com>
- * © 2008-2009 Gregor Best &lt;farhaven@googlemail.com>
- * © 2008-2009 Maarten Maathuis &lt;madman2003@gmail.com>
- * © 2008-2009 koniu &lt;gkusnierz@gmail.com>
- * © 2009 Uli Schlachter &lt;psychon@znc.in>
 
 **Past contributors**:
 
  * © 2007-2008 Marco Candrian &lt;mac@calmar.ws>
+ * © 2007 Aldo Cortesi &lt;aldo@nullcube.com>
  * © 2008 Lucas de Vries &lt;lucasdevries@gmail.com>
  * © 2008 Pierre Habouzit &lt;madcoder@debian.org>
  * © 2008 Félix C. Morency &lt;felix.morency@gmail.com>
  * © 2008 Michael Gehring &lt;mg@ebfe.org>
  * © 2008 Hans Ulrich Niedermann &lt;hun@n-dimensional.de>
- * © 2007 Aldo Cortesi &lt;aldo@nullcube.com>
+ * © 2007-2009 Nikos Ntarmos &lt;ntarmos@ceid.upatras.gr>
+ * © 2008-2009 Damien Leone &lt;damien.leone@gmail.com>
+ * © 2008-2009 Maarten Maathuis &lt;madman2003@gmail.com>
+ * © 2008-2010 koniu &lt;gkusnierz@gmail.com>
+ * © 2007-2011 Arnaud Fontaine &lt;arnau@debian.org>
+ * © 2008-2012 Gregor Best &lt;farhaven@googlemail.com>
+
+For a more complete list of contributors, see our
+[GitHub page](https://github.com/awesomeWM/awesome/graphs/contributors).
 
 ## License:
 
