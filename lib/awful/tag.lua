@@ -634,33 +634,6 @@ function tag.getmwfact(t)
     return tag.object.get_master_width_factor(t or ascreen.focused().selected_tag)
 end
 
---- An ordered list of layouts.
--- `awful.tag.layout` Is usually defined in `rc.lua`. It store the list of
--- layouts used when selecting the previous and next layouts. This is the
--- default:
---
---     -- Table of layouts to cover with awful.layout.inc, order matters.
---     awful.layout.layouts = {
---         awful.layout.suit.floating,
---         awful.layout.suit.tile,
---         awful.layout.suit.tile.left,
---         awful.layout.suit.tile.bottom,
---         awful.layout.suit.tile.top,
---         awful.layout.suit.fair,
---         awful.layout.suit.fair.horizontal,
---         awful.layout.suit.spiral,
---         awful.layout.suit.spiral.dwindle,
---         awful.layout.suit.max,
---         awful.layout.suit.max.fullscreen,
---         awful.layout.suit.magnifier,
---         awful.layout.suit.corner.nw,
---         -- awful.layout.suit.corner.ne,
---         -- awful.layout.suit.corner.sw,
---         -- awful.layout.suit.corner.se,
---     }
---
--- @field awful.tag.layouts
-
 --- The tag client layout.
 --
 -- This property hold the layout. A layout can be either stateless or stateful.
@@ -695,10 +668,9 @@ end
 -- * *property::layout*
 --
 -- @property layout
--- @see awful.tag.layouts
+-- @see awful.layout.layouts
 -- @tparam layout|function layout A layout table or a constructor function
 -- @return The layout
-
 function tag.object.set_layout(t, layout)
     -- Check if the signature match a stateful layout
     if type(layout) == "function" or (

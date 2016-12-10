@@ -33,7 +33,33 @@ local layout = {}
 -- @fixme Add documentation on available layouts as all of them are hidden
 layout.suit = require("awful.layout.suit")
 
--- The default list of layouts
+--- The default list of layouts.  Order matters.
+--
+-- `awful.layout.layouts` is usually defined in `rc.lua`.
+-- It contains the list of layouts used when selecting the previous and next
+-- layouts.  This is the default:
+--
+--     -- Table of layouts to cover with awful.layout.inc, order matters.
+--     awful.layout.layouts = {
+--         awful.layout.suit.floating,
+--         awful.layout.suit.tile,
+--         awful.layout.suit.tile.left,
+--         awful.layout.suit.tile.bottom,
+--         awful.layout.suit.tile.top,
+--         awful.layout.suit.fair,
+--         awful.layout.suit.fair.horizontal,
+--         awful.layout.suit.spiral,
+--         awful.layout.suit.spiral.dwindle,
+--         awful.layout.suit.max,
+--         awful.layout.suit.max.fullscreen,
+--         awful.layout.suit.magnifier,
+--         awful.layout.suit.corner.nw,
+--         -- awful.layout.suit.corner.ne,
+--         -- awful.layout.suit.corner.sw,
+--         -- awful.layout.suit.corner.se,
+--     }
+-- @field layout.layouts
+-- @table layouts
 layout.layouts = {
     layout.suit.floating,
     layout.suit.tile,
