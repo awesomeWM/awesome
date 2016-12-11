@@ -1,5 +1,28 @@
 ---------------------------------------------------------------------------
---- Prompt module for awful
+--- Prompt module for awful.
+--
+-- By default, `rc.lua` will create one `awful.widget.prompt` per screen called
+-- `mypromptbox`. It is used for both the command execution (`mod4+r`) and
+-- Lua prompt (`mod4+x`). It can be re-used for random inputs using:
+--
+--    -- Create a shortcut function
+--    local function echo_test()
+--        awful.prompt.run {
+--            prompt       = "Echo: ",
+--            textbox      = mouse.screen.mypromptbox.widget,
+--            exe_callback = function(input)
+--                if not input or #input == 0 then return end
+--                naughty.notify{ text = "The input was: "..input }
+--            end
+--        }
+--    end
+--
+--    -- Then **IN THE globalkeys TABLE** add a new shortcut
+--    awful.key({ modkey }, "e", echo_test,
+--        {description = "Echo a string", group = "custom"}),
+--
+-- Note that this assumes an `rc.lua` file based on the default one. The way
+-- to access the screen prompt may vary.
 --
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2008 Julien Danjou
@@ -31,37 +54,35 @@ data.history = {}
 
 local search_term = nil
 local function itera (inc,a, i)
-	i = i + inc
-	local v = a[i]
-	if v then return i,v end
+    i = i + inc
+    local v = a[i]
+    if v then return i,v end
 end
 
 --- Load history file in history table
 -- @param id The data.history identifier which is the path to the filename.
 -- @param[opt] max The maximum number of entries in file.
 local function history_check_load(id, max)
-    if id and id ~= ""
-        and not data.history[id] then
-	data.history[id] = { max = 50, table = {} }
+    if id and id ~= "" and not data.history[id] then
+        data.history[id] = { max = 50, table = {} }
 
-	if max then
+        if max then
             data.history[id].max = max
-	end
+        end
 
-	local f = io.open(id, "r")
+        local f = io.open(id, "r")
+        if not f then return end
 
-	-- Read history file
-	if f then
-            for line in f:lines() do
-                if util.table.hasitem(data.history[id].table, line) == nil then
-                        table.insert(data.history[id].table, line)
-                        if #data.history[id].table >= data.history[id].max then
-                           break
-                        end
+        -- Read history file
+        for line in f:lines() do
+            if util.table.hasitem(data.history[id].table, line) == nil then
+                table.insert(data.history[id].table, line)
+                if #data.history[id].table >= data.history[id].max then
+                    break
                 end
             end
-            f:close()
-	end
+        end
+        f:close()
     end
 end
 
@@ -114,7 +135,7 @@ local function history_save(id)
             util.mkdir(id:sub(1, i - 1))
             f = assert(io.open(id, "w"))
         end
-	for i = 1, math.min(#data.history[id].table, data.history[id].max) do
+        for i = 1, math.min(#data.history[id].table, data.history[id].max) do
             f:write(data.history[id].table[i] .. "\n")
         end
        f:close()
@@ -365,7 +386,7 @@ function prompt.run(args, textbox, exe_callback, completion_callback,
     local cur_pos = (selectall and 1) or text:wlen() + 1
     -- The completion element to use on completion request.
     local ncomp = 1
-    if not textbox or not (exe_callback or args.hooks) then
+    if not textbox then
         return
     end
 
@@ -394,7 +415,7 @@ function prompt.run(args, textbox, exe_callback, completion_callback,
         textbox:set_markup("")
         history_add(history_path, command_to_history)
         keygrabber.stop(grabber)
-        cb(command)
+        if cb then cb(command) end
         if done_callback then done_callback() end
     end
 
