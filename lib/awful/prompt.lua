@@ -365,7 +365,7 @@ function prompt.run(args, textbox, exe_callback, completion_callback,
     local cur_pos = (selectall and 1) or text:wlen() + 1
     -- The completion element to use on completion request.
     local ncomp = 1
-    if not textbox or not (exe_callback or args.hooks) then
+    if not textbox then
         return
     end
 
@@ -394,7 +394,7 @@ function prompt.run(args, textbox, exe_callback, completion_callback,
         textbox:set_markup("")
         history_add(history_path, command_to_history)
         keygrabber.stop(grabber)
-        cb(command)
+        if cb then cb(command) end
         if done_callback then done_callback() end
     end
 

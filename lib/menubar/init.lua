@@ -444,7 +444,6 @@ function menubar.show(scr)
     awful.prompt.run(setmetatable({
         prompt              = "Run: ",
         textbox             = instance.prompt.widget,
-        exe_callback        = function() end,
         completion_callback = awful.completion.shell,
         history_path        = awful.util.get_cache_dir() .. "/history_menu",
         done_callback       = menubar.hide,
