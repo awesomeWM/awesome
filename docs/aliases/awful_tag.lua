@@ -1,6 +1,5 @@
 ---------------------------------------------------------------------------
---- This module is deprecated, use `tag`
---  ===============================
+--- This module documentation has been merged with the `tag` module.
 --
 -- @module awful.tag
 ---------------------------------------------------------------------------

@@ -1,6 +1,5 @@
 ---------------------------------------------------------------------------
---- This module is deprecated, use `mouse`
---  ===============================
+--- This module documentation has been merged with the `mouse` module.
 --
 -- @module awful.mouse
 ---------------------------------------------------------------------------
