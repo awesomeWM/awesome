@@ -18,7 +18,9 @@ execute_process(COMMAND lua -e print\(package.path\) OUTPUT_VARIABLE "LUA_PATH_"
 set(LUA_PATH2_ "\
 ${CMAKE_SOURCE_DIR}/lib/?.lua;\
 ${CMAKE_SOURCE_DIR}/lib/?/init.lua;\
-${CMAKE_SOURCE_DIR}/lib/?;"
+${CMAKE_SOURCE_DIR}/lib/?;\
+${CMAKE_SOURCE_DIR}/themes/?.lua;\
+${CMAKE_SOURCE_DIR}/themes/?;"
 )
 
 # Add the C API shims.
