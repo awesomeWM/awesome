@@ -85,7 +85,7 @@ function util.deprecate_class(fallback, old_name, new_name)
     end
 
     local function newindex(_, k, v)
-        util.deprecate(message)
+        util.deprecate(message, {raw = true})
 
         fallback[k] = v
     end
