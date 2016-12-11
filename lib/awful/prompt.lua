@@ -1,5 +1,28 @@
 ---------------------------------------------------------------------------
---- Prompt module for awful
+--- Prompt module for awful.
+--
+-- By default, `rc.lua` will create one `awful.widget.prompt` per screen called
+-- `mypromptbox`. It is used for both the command execution (`mod4+r`) and
+-- Lua prompt (`mod4+x`). It can be re-used for random inputs using:
+--
+--    -- Create a shortcut function
+--    local function echo_test()
+--        awful.prompt.run {
+--            prompt       = "Echo: ",
+--            textbox      = mouse.screen.mypromptbox.widget,
+--            exe_callback = function(input)
+--                if not input or #input == 0 then return end
+--                naughty.notify{ text = "The input was: "..input }
+--            end
+--        }
+--    end
+--
+--    -- Then **IN THE globalkeys TABLE** add a new shortcut
+--    awful.key({ modkey }, "e", echo_test,
+--        {description = "Echo a string", group = "custom"}),
+--
+-- Note that this assumes an `rc.lua` file based on the default one. The way
+-- to access the screen prompt may vary.
 --
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2008 Julien Danjou
