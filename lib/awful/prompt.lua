@@ -54,37 +54,35 @@ data.history = {}
 
 local search_term = nil
 local function itera (inc,a, i)
-	i = i + inc
-	local v = a[i]
-	if v then return i,v end
+    i = i + inc
+    local v = a[i]
+    if v then return i,v end
 end
 
 --- Load history file in history table
 -- @param id The data.history identifier which is the path to the filename.
 -- @param[opt] max The maximum number of entries in file.
 local function history_check_load(id, max)
-    if id and id ~= ""
-        and not data.history[id] then
-	data.history[id] = { max = 50, table = {} }
+    if id and id ~= "" and not data.history[id] then
+        data.history[id] = { max = 50, table = {} }
 
-	if max then
+        if max then
             data.history[id].max = max
-	end
+        end
 
-	local f = io.open(id, "r")
+        local f = io.open(id, "r")
+        if not f then return end
 
-	-- Read history file
-	if f then
-            for line in f:lines() do
-                if util.table.hasitem(data.history[id].table, line) == nil then
-                        table.insert(data.history[id].table, line)
-                        if #data.history[id].table >= data.history[id].max then
-                           break
-                        end
+        -- Read history file
+        for line in f:lines() do
+            if util.table.hasitem(data.history[id].table, line) == nil then
+                table.insert(data.history[id].table, line)
+                if #data.history[id].table >= data.history[id].max then
+                    break
                 end
             end
-            f:close()
-	end
+        end
+        f:close()
     end
 end
 
@@ -137,7 +135,7 @@ local function history_save(id)
             util.mkdir(id:sub(1, i - 1))
             f = assert(io.open(id, "w"))
         end
-	for i = 1, math.min(#data.history[id].table, data.history[id].max) do
+        for i = 1, math.min(#data.history[id].table, data.history[id].max) do
             f:write(data.history[id].table[i] .. "\n")
         end
        f:close()
