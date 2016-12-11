@@ -46,6 +46,121 @@ function theme_assets.taglist_squares_unsel(size, fg)
     return img
 end
 
+local function make_letter(cr, n, lines, size, bg, fg, alt_fg)
+    local letter_gap  = size/6
+
+    local function make_line(coords)
+        for i, coord in ipairs(coords) do
+            if i == 1 then
+                cr:rel_move_to(coord[1], coord[2])
+            else
+                cr:rel_line_to(coord[1], coord[2])
+            end
+        end
+        cr:stroke()
+    end
+
+    lines = lines or {}
+    color = alt_fg or fg
+    cr:set_source(gears.color(color))
+    cr:rectangle(
+        0, (size+letter_gap)*n,
+        size, size
+    )
+    cr:fill()
+
+    if bg then
+        cr:set_source(gears.color(bg))
+    else
+        cr:set_operator(cairo.Operator.CLEAR)
+    end
+
+    for _, line in ipairs(lines) do
+        cr:move_to(0, (size+letter_gap)*n)
+        make_line(line)
+    end
+
+    cr:set_operator(cairo.Operator.OVER)
+end
+
+function theme_assets.gen_awesome_name(cr, width, height, bg, fg, alt_fg, vertical)
+    local ls = height/10 -- letter_size
+    local letter_line = ls/18
+
+    cr:set_line_width(letter_line)
+
+    -- a
+    make_letter(cr, 0, { {
+        { 0, ls/3 },
+        { ls*2/3, 0 },
+    }, {
+        { ls/3, ls*2/3 },
+        { ls/3, 0 },
+        { 0, ls/3 },
+    } }, ls, bg, fg, alt_fg)
+    -- w
+    make_letter(cr, 1, { {
+        { ls/3, 0 },
+        { 0,ls*2/3 },
+    }, {
+        { ls*2/3, 0 },
+        { 0,ls*2/3 },
+    } }, ls, bg, fg)
+    -- e
+    make_letter(cr, 2, { {
+        { ls/3, ls/3 },
+        { ls*2/3, 0 },
+    }, {
+        { ls/3, ls*2/3 },
+        { ls*2/3, 0 },
+    } }, ls, bg, fg)
+    -- s
+    make_letter(cr, 3, { {
+        { ls/3, ls/3 },
+        { ls*2/3, 0 },
+    }, {
+        { 0, ls*2/3 },
+        { ls*2/3, 0 },
+    } }, ls, bg, fg)
+    -- o
+    make_letter(cr, 4, { {
+        { ls/2, ls/3 },
+        { 0, ls/3 },
+    } }, ls, bg, fg)
+    -- m
+    make_letter(cr, 5, { {
+        { ls/3, ls/3 },
+        { 0,ls*2/3 },
+    }, {
+        { ls*2/3, ls/3 },
+        { 0,ls*2/3 },
+    } }, ls, bg, fg)
+    -- e
+    make_letter(cr, 6, { {
+        { ls/3, ls/3 },
+        { ls*2/3, 0 },
+    }, {
+        { ls/3, ls*2/3 },
+        { ls*2/3, 0 },
+    } }, ls, bg, fg)
+end
+
+function theme_assets.gen_logo(cr, width, height, bg, fg)
+    local ls = math.min(width, height)
+
+    local letter_line = ls/18
+
+    cr:set_line_width(letter_line)
+
+    make_letter(cr, 0, { {
+        { 0, ls/3 },
+        { ls*2/3, 0 },
+    }, {
+        { ls/3, ls*2/3 },
+        { ls/3, 0 },
+        { 0, ls/3 },
+    } }, ls, bg, fg)
+end
 
 function theme_assets.wallpaper(bg, fg, alt_fg, s)
     s = s or screen.primary
@@ -55,100 +170,15 @@ function theme_assets.wallpaper(bg, fg, alt_fg, s)
         cairo.Rectangle { x = 0, y = 0, width = width, height = height })
     local cr = cairo.Context(img)
 
-    local letter_size = height/10
-    local letter_line = letter_size/18
-    local letter_gap = letter_size/6
     local letter_start_x = width - width / 10
     local letter_start_y = height / 10
+    cr:translate(letter_start_x, letter_start_y)
 
-
-    local function make_letter(n, lines, color)
-
-        local function make_line(coords)
-            for i, coord in ipairs(coords) do
-                if i == 1 then
-                    cr:rel_move_to(coord[1], coord[2])
-                else
-                    cr:rel_line_to(coord[1], coord[2])
-                end
-            end
-            cr:stroke()
-        end
-
-        lines = lines or {}
-        color = color or fg
-        cr:set_source(gears.color(color))
-        cr:rectangle(
-            letter_start_x, letter_start_y+(letter_size+letter_gap)*n,
-            letter_size, letter_size
-        )
-        cr:fill()
-        cr:set_source(gears.color(bg))
-        for _, line in ipairs(lines) do
-            cr:move_to(letter_start_x, letter_start_y+(letter_size+letter_gap)*n)
-            make_line(line)
-        end
-    end
-
-    -- bg
+    -- background
     cr:set_source(gears.color(bg))
     cr:paint()
-    cr:set_line_width(letter_line)
-    local ls = letter_size
-    -- a
-    make_letter(0, { {
-        { 0, ls/3 },
-        { ls*2/3, 0 },
-    }, {
-        { ls/3, ls*2/3 },
-        { ls/3, 0 },
-        { 0, ls/3 },
-    } }, alt_fg)
-    -- w
-    make_letter(1, { {
-        { ls/3, 0 },
-        { 0,ls*2/3 },
-    }, {
-        { ls*2/3, 0 },
-        { 0,ls*2/3 },
-    } })
-    -- e
-    make_letter(2, { {
-        { ls/3, ls/3 },
-        { ls*2/3, 0 },
-    }, {
-        { ls/3, ls*2/3 },
-        { ls*2/3, 0 },
-    } })
-    -- s
-    make_letter(3, { {
-        { ls/3, ls/3 },
-        { ls*2/3, 0 },
-    }, {
-        { 0, ls*2/3 },
-        { ls*2/3, 0 },
-    } })
-    -- o
-    make_letter(4, { {
-        { ls/2, ls/3 },
-        { 0, ls/3 },
-    } })
-    -- m
-    make_letter(5, { {
-        { ls/3, ls/3 },
-        { 0,ls*2/3 },
-    }, {
-        { ls*2/3, ls/3 },
-        { 0,ls*2/3 },
-    } })
-    -- e
-    make_letter(6, { {
-        { ls/3, ls/3 },
-        { ls*2/3, 0 },
-    }, {
-        { ls/3, ls*2/3 },
-        { ls*2/3, 0 },
-    } })
+
+    theme_assets.gen_awesome_name(cr, width, height, bg, fg, alt_fg, true)
 
     return img
 end

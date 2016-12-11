@@ -25,6 +25,7 @@ topics={
     '06-appearance.md',
     '16-using-cairo.md',
     '90-FAQ.md',
+    '89-NEWS.md',
 }
 
 -- Setup @client to be an alias for "@tparam client.object"

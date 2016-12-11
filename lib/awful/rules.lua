@@ -256,6 +256,9 @@ rules.extra_properties = {}
 -- @tfield table awful.rules.high_priority_properties
 rules.high_priority_properties = {}
 
+--- Delayed properties.
+-- Properties applied after all other categories.
+-- @tfield table awful.rules.delayed_properties
 rules.delayed_properties = {}
 
 local force_ignore = {
