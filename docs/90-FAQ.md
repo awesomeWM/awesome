@@ -371,6 +371,16 @@ xkb keyboard description xkb_symbols line.
     };
     EOF
 
+### I upgraded from Awesome 3 to Awesome 4 and multiscreen broke. Why is that?
+
+Awesome 4.0+ support dynamic screen plugging and unplugging without restarting.
+
+This avoids losing your tags, layout and focus history. Olders `rc.lua` were not
+designed to support such changes and assumed Awesome would restart. To add
+multi-screen support to existing configs, see how
+`awful.screen.connect_for_each_screen` is used in the new `rc.lua` or rebuild
+your config on a newer revision of `rc.lua`.
+
 ## Development
 
 ### How to report bugs?

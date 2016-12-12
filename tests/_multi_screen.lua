@@ -348,53 +348,58 @@ local colors = {
 
 -- Paint it black
 local function clear_screen()
-    for s in screen do
-        local sur = surface.widget_to_surface(
-            wibox.widget {
-                bg     = "#000000",
-                widget = wibox.container.background
-            },
-            s.geometry.width,
-            s.geometry.height
-        )
-        wallpaper.fit(sur, s, "#000000")
-    end
+--     for s in screen do --FIXME very, very slow on Travis
+--         local sur = surface.widget_to_surface(
+--             wibox.widget {
+--                 bg     = "#000000",
+--                 widget = wibox.container.background
+--             },
+--             s.geometry.width,
+--             s.geometry.height
+--         )
+--         wallpaper.fit(sur, s, "#000000")
+--     end
 end
 
 -- Make it easier to debug the tests by showing the screen geometry when the
 -- tests are executed.
 local function show_screens()
-    wallpaper.set(color("#000000")) -- Should this clear the wallpaper? It doesn't
+    --FIXME very, very slow on Travis
+--     wallpaper.set(color("#000000")) -- Should this clear the wallpaper? It doesn't
+-- 
+--     -- Add a wallpaper on each screen
+--     for i=1, screen.count() do
+--         local s = screen[i]
+-- 
+--         local w = wibox.widget {
+--             {
+--                 text   = table.concat{
+--                     "Screen: ",i,"\n",
+--                     s.geometry.width,"x",s.geometry.height,
+--                     "+",s.geometry.x,",",s.geometry.y
+--                 },
+--                 valign = "center",
+--                 align  = "center",
+--                 widget = wibox.widget.textbox,
+--             },
+--             bg                 = colors[i],
+--             fg                 = "#ffffff",
+--             shape_border_color = "#ff0000",
+--             shape_border_width = 1,
+--             shape              = shape.rectangle,
+--             widget             = wibox.container.background
+--         }
+--         local sur = surface.widget_to_surface(
+--             w,
+--             s.geometry.width,
+--             s.geometry.height
+--         )
+--         wallpaper.fit(sur, s)
+--     end
 
-    -- Add a wallpaper on each screen
-    for i=1, screen.count() do
-        local s = screen[i]
-
-        local w = wibox.widget {
-            {
-                text   = table.concat{
-                    "Screen: ",i,"\n",
-                    s.geometry.width,"x",s.geometry.height,
-                    "+",s.geometry.x,",",s.geometry.y
-                },
-                valign = "center",
-                align  = "center",
-                widget = wibox.widget.textbox,
-            },
-            bg                 = colors[i],
-            fg                 = "#ffffff",
-            shape_border_color = "#ff0000",
-            shape_border_width = 1,
-            shape              = shape.rectangle,
-            widget             = wibox.container.background
-        }
-        local sur = surface.widget_to_surface(
-            w,
-            s.geometry.width,
-            s.geometry.height
-        )
-        wallpaper.fit(sur, s)
-    end
+    --TODO remove this line, all it does it saving some time in the tests until
+    -- the bug is fixed.
+    wallpaper.maximized = function() end
 end
 
 local function add_steps(real_steps, new_steps)

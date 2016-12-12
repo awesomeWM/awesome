@@ -236,6 +236,73 @@ table.insert(multi_screen_steps, function()
         assert(c.first_tag.name == "NEW_AT_"..c.screen.index)
     end
 
+    -- Kill the client
+    for _, c in ipairs(client.get()) do
+        c:kill()
+    end
+
+    if screen.count() < 2 then return true end
+
+    -- Now, add client where the target tag and screen don't match
+    test_client("test_tag1", nil, {
+        tag    = screen[2].tags[2],
+        screen = screen[1],
+    })
+
+    -- Add a client with multiple tags on the same screen, but not c.screen
+    test_client("test_tags1", nil, {
+        tags   = { screen[1].tags[3], screen[1].tags[4] },
+        screen = screen[2],
+    })
+
+    -- Identical, but using the tag names
+    test_client("test_tags2", nil, {
+        tags   = { "3", "4" },
+        screen = screen[2],
+    })
+
+    -- Also test tags, but with an invalid screen array
+    test_client("test_tags3", nil, {
+        tags   = { screen[2].tags[3], screen[1].tags[4] },
+        screen = screen[1],
+    })
+
+    -- Another test for tags, but with no matching names
+    test_client("test_tags4", nil, {
+        tags   = { "foobar", "bobcat" },
+        screen = screen[1],
+    })
+
+    return true
+end)
+
+
+table.insert(multi_screen_steps, function()
+    if screen.count() < 2 then return true end
+    if #client.get() ~= 5 then return end
+
+    local c_by_class = {}
+
+    for _, c in ipairs(client.get()) do
+        c_by_class[c.class] = c
+    end
+
+    assert(c_by_class["test_tag1"].screen == screen[2])
+    assert(#c_by_class["test_tag1"]:tags() == 1)
+
+    assert(c_by_class["test_tags1"].screen == screen[1])
+    assert(#c_by_class["test_tags1"]:tags() == 2)
+
+    assert(c_by_class["test_tags2"].screen == screen[2])
+    assert(#c_by_class["test_tags2"]:tags() == 2)
+
+    assert(c_by_class["test_tags3"].screen == screen[2])
+    assert(#c_by_class["test_tags3"]:tags() == 1)
+
+    assert(c_by_class["test_tags4"].screen == screen[1])
+    assert(#c_by_class["test_tags4"]:tags() == 1)
+    assert(c_by_class["test_tags4"]:tags()[1] == screen[1].selected_tag)
+
     return true
 end)
 

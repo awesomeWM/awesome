@@ -267,10 +267,16 @@ local force_ignore = {
     border_width=true,floating=true,size_hints_honor=true
 }
 
-function rules.high_priority_properties.tag(c, value)
+function rules.high_priority_properties.tag(c, value, props)
     if value then
         if type(value) == "string" then
             value = atag.find_by_name(c.screen, value)
+        end
+
+        -- In case the tag has been forced to another screen, move the client
+        if c.screen ~= value.screen then
+            c.screen = value.screen
+            props.screen = value.screen -- In case another rule query it
         end
 
         c:tags{ value }
@@ -370,9 +376,32 @@ function rules.extra_properties.placement(c, value)
     end
 end
 
-function rules.extra_properties.tags(c, value)
+function rules.extra_properties.tags(c, value, props)
     local current = c:tags()
-    c:tags(util.table.merge(current, value))
+
+    local tags, s = {}, nil
+
+    for _, t in ipairs(value) do
+        if type(t) == "string" then
+            t = atag.find_by_name(c.screen, t)
+        end
+
+        if t and ((not s) or t.screen == s) then
+            table.insert(tags, t)
+            s = s or t.screen
+        end
+    end
+
+    if s and s ~= c.screen then
+        c.screen = s
+        props.screen = s -- In case another rule query it
+    end
+
+    if #current == 0 or (value[1] and value[1].screen ~= current[1].screen) then
+        c:tags(tags)
+    else
+        c:tags(util.table.merge(current, tags))
+    end
 end
 
 --- Apply properties and callbacks to a client.
@@ -466,7 +495,7 @@ function rules.execute(c, props, callbacks)
 
         if not ignore then
             if rules.extra_properties[property] then
-                rules.extra_properties[property](c, value)
+                rules.extra_properties[property](c, value, props)
             elseif type(c[property]) == "function" then
                 c[property](c, value)
             else
