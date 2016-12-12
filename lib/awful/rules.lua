@@ -267,10 +267,16 @@ local force_ignore = {
     border_width=true,floating=true,size_hints_honor=true
 }
 
-function rules.high_priority_properties.tag(c, value)
+function rules.high_priority_properties.tag(c, value, props)
     if value then
         if type(value) == "string" then
             value = atag.find_by_name(c.screen, value)
+        end
+
+        -- In case the tag has been forced to another screen, move the client
+        if c.screen ~= value.screen then
+            c.screen = value.screen
+            props.screen = value.screen -- In case another rule query it
         end
 
         c:tags{ value }
@@ -372,7 +378,12 @@ end
 
 function rules.extra_properties.tags(c, value)
     local current = c:tags()
-    c:tags(util.table.merge(current, value))
+
+    if #current == 0 or (value[1] and value[1].screen ~= current[1].screen) then
+        c:tags(value)
+    else
+        c:tags(util.table.merge(current, value))
+    end
 end
 
 --- Apply properties and callbacks to a client.
