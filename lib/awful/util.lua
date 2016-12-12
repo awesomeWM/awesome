@@ -37,7 +37,10 @@ util.shell = os.getenv("SHELL") or "/bin/sh"
 local displayed_deprecations = {}
 --- Display a deprecation notice, but only once per traceback.
 -- @param[opt] see The message to a new method / function to use.
-function util.deprecate(see)
+-- @tparam table args Extra arguments
+-- @tparam boolean args.raw Print the message as-is without the automatic context
+function util.deprecate(see, args)
+    args = args or {}
     local tb = debug.traceback()
     if displayed_deprecations[tb] then
         return
@@ -49,7 +52,9 @@ function util.deprecate(see)
     local funcname = info.name or "?"
     local msg = "awful: function " .. funcname .. " is deprecated"
     if see then
-        if string.sub(see, 1, 3) == 'Use' then
+        if args.raw then
+            msg = see
+        elseif string.sub(see, 1, 3) == 'Use' then
             msg = msg .. ". " .. see
         else
             msg = msg .. ", see " .. see
@@ -80,7 +85,7 @@ function util.deprecate_class(fallback, old_name, new_name)
     end
 
     local function newindex(_, k, v)
-        util.deprecate(message)
+        util.deprecate(message, {raw = true})
 
         fallback[k] = v
     end
