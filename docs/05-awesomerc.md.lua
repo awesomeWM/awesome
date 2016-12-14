@@ -31,7 +31,7 @@ Here are the modules that we import:
 sections.DOC_ERROR_HANDLING = [[
 Awesome is a window managing framework. It allows its users great (ultimate?)
 flexibility. However, it also allows the user to write invalid code. Here's a
-non-extensive list of possible errors:
+non-exhaustive list of possible errors:
 
  * Syntax: There is an `awesome -k` option available in the command line to
    check the configuration file. Awesome cannot start with an invalid `rc.lua`
