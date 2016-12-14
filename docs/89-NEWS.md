@@ -5,15 +5,15 @@
 <center> <img src="../images/AUTOGEN_wibox_logo_logo_and_name.svg" /> </center>
 
 Awesome 4.0 is the first release of the v4 API level, breaking the proven
-v3.5 API level after 4 years.  This requires to port existing user
+v3.5 API level after 4 years. This requires to port the existing user
 configuration and extensions to the new API.
 
-This document offer an overview of the new features and required changes for
+This document offers an overview of the new features and required changes for
 existing users.
 
 ## New features
 
-### Inputs related
+### Input
 
 #### Mouse move and resize handlers
 
@@ -823,7 +823,7 @@ website, repository and continuous integration system.
 This move increased our development velocity, number of contributor,
 visibility count and reduced our infrastructure maintenance cost.
 
-### Test driven development
+### Test-driven development
 
 Awesome went from 0% to 75% unit test coverage. We now have 4 testing systems:
 
