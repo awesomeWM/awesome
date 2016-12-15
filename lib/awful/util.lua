@@ -32,6 +32,7 @@ local floor = math.floor
 local util = {}
 util.table = {}
 
+--- The default shell used when spawing processes.
 util.shell = os.getenv("SHELL") or "/bin/sh"
 
 local displayed_deprecations = {}

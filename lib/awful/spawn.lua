@@ -6,6 +6,26 @@
 -- program after it has been launched.  This requires currently that the
 -- applicaton supports them.
 --
+-- **Rules of thumb when a shell is needed**:
+--
+-- * A shell is required when the commands contains `&&`, `;`, `||`, `&` or
+--  any other unix shell language syntax
+-- * When shell variables are defined as part of the command
+-- * When the command is a shell alias
+--
+-- Note that a shell is **not** a terminal emulator. A terminal emulator is
+-- something like XTerm, Gnome-terminal or Konsole. A shell is something like
+-- `bash`, `ZSH`, `busybox sh` or `Debian ash`.
+--
+-- If you wish to open a process in a terminal window, check that your terminal
+-- emulator supports the common `-e` option. If it does, then something like
+-- this should work:
+--
+--    awful.spawn(terminal.." -e my_command")
+--
+-- Note that some terminals, such as rxvt-unicode (urxvt) support full commands
+-- suing quotes while other terminals emulators wont.
+--
 -- **Understanding clients versus PID versus commands versus class**:
 --
 -- A *process* has *PID* (process identifier). It can have no, one or many *window*s.
