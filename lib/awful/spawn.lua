@@ -81,6 +81,52 @@
 --        placement = awful.placement.bottom_right,
 --    })'
 --
+-- **Getting a command's output**:
+--
+-- First, do **not** use `io.popen` **ever**. It is synchronous. Synchronous
+-- function **stop everything** until they are done. All visual applications
+-- lock (as Awesome no longer responds), you will probably lose some keyboard
+-- and mouse events and will have higher latency when playing games. This is
+-- also true when reading files synchronously, but this is another topic.
+--
+-- Awesome provides a few ways of getting command outputs. One is to use the
+-- `Gio` libraries directly. This is usually very complicated, but gives a lot
+-- of control on the command execution.
+--
+-- This modules provides `with_line_callback` and `easy_async` for convenience.
+-- First, lets add this bash command to `rc.lua`:
+--
+--    local noisy = [[bash -c '
+--      for I in $(seq 1 5); do
+--        date
+--        echo err >&2
+--        sleep 2
+--      done
+--    ']]
+--
+-- It prints a bunch of junk on the standard output (*STDOUT*) and error
+-- (*STDERR*) streams. This command would block Awesome for 10 seconds if it
+-- were executed synchronously, but wont block it at all using the asynchronous
+-- functions.
+--
+-- `with_line_callback` will execute the callbacks every time a new line is
+-- printed by the command:
+--
+--    awful.spawn.with_line_callback(noisy, {
+--        stdout = function(line)
+--            naughty.notify { text = "LINE:"..line }
+--        end,
+--        stderr = function(line)
+--            naughty.notify { text = "ERR:"..line}
+--        end,
+--    })
+--
+-- If only the full output is needed, then `easy_async` is the right choice:
+--
+--    awful.spawn.easy_async(noisy, function(stdout, stderr, reason, exit_code)
+--        naughty.notify { text = stdout }
+--    end)
+--
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @author Emmanuel Lepage Vallee &lt;elv1313@gmail.com&gt;
 -- @copyright 2008 Julien Danjou
