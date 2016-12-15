@@ -8,14 +8,14 @@
 --
 -- **Rules of thumb when a shell is needed**:
 --
--- * A shell is required when the commands contains `&&`, `;`, `||`, `&` or
+-- * A shell is required when the commands contain `&&`, `;`, `||`, `&` or
 --  any other unix shell language syntax
 -- * When shell variables are defined as part of the command
 -- * When the command is a shell alias
 --
 -- Note that a shell is **not** a terminal emulator. A terminal emulator is
 -- something like XTerm, Gnome-terminal or Konsole. A shell is something like
--- `bash`, `ZSH`, `busybox sh` or `Debian ash`.
+-- `bash`, `zsh`, `busybox sh` or `Debian ash`.
 --
 -- If you wish to open a process in a terminal window, check that your terminal
 -- emulator supports the common `-e` option. If it does, then something like
@@ -24,20 +24,21 @@
 --    awful.spawn(terminal.." -e my_command")
 --
 -- Note that some terminals, such as rxvt-unicode (urxvt) support full commands
--- suing quotes while other terminals emulators wont.
+-- using quotes, while other terminal emulators require to use quoting.
 --
 -- **Understanding clients versus PID versus commands versus class**:
 --
--- A *process* has *PID* (process identifier). It can have no, one or many *window*s.
+-- A *process* has a *PID* (process identifier). It can have 0, 1 or many
+-- *window*s.
 --
 -- A *command* if what is used to start *process*(es). It has no direct relation
 -- with *process*, *client* or *window*. When a command is executed, it will
--- usually start a *process* which keeps running until it exits. This, however,
--- isn't always true as some applications use scripts as command and some other
--- use various single instance mechanism (usually client/server) and merge with
--- an existing process.
+-- usually start a *process* which keeps running until it exits. This however is
+-- not always the case as some applications use scripts as command and others
+-- use various single-instance mechanisms (usually client/server) and merge
+-- with an existing process.
 --
--- A *client* correspond to a *window*. It is owned by a process. It can have
+-- A *client* corresponds to a *window*. It is owned by a process. It can have
 -- both a parent and one or many children. A *client* has a *class*, an
 -- *instance*, a *role*, and a *type*. See `client.class`, `client.instance`,
 -- `client.role` and `client.type` for more information about these properties.
@@ -59,7 +60,7 @@
 --
 --    DESKTOP_STARTUP_ID="something_TIME$(date '+%s')" my_command
 --
--- This should (if the program correctly implements the protocol) results in
+-- This should (if the program correctly implements the protocol) result in
 -- `c.startup_id` to at least match `something`.
 -- This identifier can then be used in `awful.rules` to configure the client.
 --
@@ -75,21 +76,21 @@
 -- This can also be used from the command line:
 --
 --    awesome-client 'awful=require("awful");
---    awful.spawn("urxvt -e maxima -name CALCULATOR", {
+--      awful.spawn("urxvt -e maxima -name CALCULATOR", {
 --        floating  = true,
 --        tag       = mouse.screen.selected_tag,
 --        placement = awful.placement.bottom_right,
---    })'
+--      })'
 --
 -- **Getting a command's output**:
 --
 -- First, do **not** use `io.popen` **ever**. It is synchronous. Synchronous
--- function **stop everything** until they are done. All visual applications
+-- functions **block everything** until they are done. All visual applications
 -- lock (as Awesome no longer responds), you will probably lose some keyboard
 -- and mouse events and will have higher latency when playing games. This is
 -- also true when reading files synchronously, but this is another topic.
 --
--- Awesome provides a few ways of getting command outputs. One is to use the
+-- Awesome provides a few ways to get output from commands. One is to use the
 -- `Gio` libraries directly. This is usually very complicated, but gives a lot
 -- of control on the command execution.
 --
@@ -104,10 +105,10 @@
 --      done
 --    ']]
 --
--- It prints a bunch of junk on the standard output (*STDOUT*) and error
--- (*STDERR*) streams. This command would block Awesome for 10 seconds if it
--- were executed synchronously, but wont block it at all using the asynchronous
--- functions.
+-- It prints a bunch of junk on the standard output (*stdout*) and error
+-- (*stderr*) streams. This command would block Awesome for 10 seconds if it
+-- were executed synchronously, but will not block it at all using the
+-- asynchronous functions.
 --
 -- `with_line_callback` will execute the callbacks every time a new line is
 -- printed by the command:
@@ -126,6 +127,24 @@
 --    awful.spawn.easy_async(noisy, function(stdout, stderr, reason, exit_code)
 --        naughty.notify { text = stdout }
 --    end)
+--
+-- **Default applications**:
+--
+-- If the intent is to open a file/document, then it is recommended to use the
+-- following standard command. The default application will be selected
+-- according to the [Shared MIME-info Database](https://specifications.freedesktop.org/shared-mime-info-spec/shared-mime-info-spec-latest.html)
+-- specification. The `xdg-utils` package provided by most distributions
+-- includes the `xdg-open` command:
+--
+--    awful.spawn({"xdg-open", "/path/to/file"})
+--
+-- Awesome **does not** manage, modify or otherwise influence the database
+-- for default applications. For information about how to do this, consult the
+-- [ARCH Linux Wiki](https://wiki.archlinux.org/index.php/default_applications).
+--
+-- If you wish to change how the default applications behave, then consult the
+-- [Desktop Entry](https://specifications.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html)
+-- specification.
 --
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @author Emmanuel Lepage Vallee &lt;elv1313@gmail.com&gt;
