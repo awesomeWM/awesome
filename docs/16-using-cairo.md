@@ -1,7 +1,7 @@
 # Using Cairo and LGI
 
-These days, Awesome interface is mostly based on a library called LGI. It provides
-access C libraries such as GTK, GLib, Cairo, Pango, PangoCairo and RSVG using
+These days, Awesome's interface is mostly based on a library called LGI. It provides
+access to C libraries such as GTK, GLib, Cairo, Pango, PangoCairo and RSVG using
 Lua code without having to write actual "glue" C code.
 
 This is done using the GObject-introspection framework. The main advantage is

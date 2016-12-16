@@ -17,7 +17,7 @@ Awesome provides 2 collections of widgets:
 
 ### Containers
 
-A container is a widgets that wraps another widget. It can be used to add
+A container is a widget that wraps another widget. It can be used to add
 decorations or to modify the content of the child widget.
 
 @DOC_container_WIDGET_LIST@
@@ -109,7 +109,7 @@ Result:
 ### Use a `wibox.layout.align` layout
 The `wibox.layout.align` is a little different. While most layouts will
 ignore any `nil` lines, the `align` layout relies on them so `left`, `middle`
-and `right` can be defined
+and `right` can be defined.
 
 Code:
 
@@ -177,7 +177,7 @@ Code:
 ### Accessing widgets
 
 For each widget or container, it is possible to add an `identifier` attribute
-so that it accessed later.
+so that it can be accessed later.
 
 Widgets defined using `setup` can be accessed using these methods:
 
@@ -191,10 +191,10 @@ the chain has a valid identifier. The last one doesn't require long paths,
 but it is not easy to get a specific instance if multiple widgets have the
 same identifier.
 
-WARNING: The widget identifier must not use reserved name. This includes all
+WARNING: The widget identifier must not use a reserved name. This includes all
 method names, existing widget attributes, `layout` and `widget`. Names should
 also respect the Lua variable conventions (case-sensitive, alphanumeric,
-underscore characters and non-numeric first character)
+underscore characters and non-numeric first character).
 
 Code:
 

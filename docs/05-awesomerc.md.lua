@@ -46,7 +46,7 @@ non-exhaustive list of possible errors:
    the best way to debug this is either using `print()` or using `gdb`. For
    this, see the [Debugging tips Readme section](../documentation/01-readme.md.html)
  * Deprecated APIs: The Awesome API is not frozen for eternity. After a decade
-   of development and recent changes to enforce consistency, it doesn't hasn't
+   of development and recent changes to enforce consistency, it hasn't
    changed much. This doesn't mean it won't change in the future. Whenever
    possible, changes won't cause errors but will instead print a deprecation
    message in the Awesome logs. These logs are placed in various places
