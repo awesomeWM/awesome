@@ -4,7 +4,7 @@ local f = io.open(filename, "w")
 
 f:write[[# Default configuration file documentation
 
-This document explain the default `rc.lua` file provided by Awesome.
+This document explains the default `rc.lua` file provided by Awesome.
 
 ]]
 
@@ -13,9 +13,9 @@ This document explain the default `rc.lua` file provided by Awesome.
 local sections = {}
 
 sections.DOC_REQUIRE_SECTION = [[
-Awesome API is distributed across many libraries (also called modules).
+The Awesome API is distributed across many libraries (also called modules).
 
-Here is the modules being imported:
+Here are the modules that we import:
 
 <table class='widget_list' border=1>
   <tr><td>`gears`</td><td>Utilities such as color parsing and objects</td></tr>
@@ -30,27 +30,28 @@ Here is the modules being imported:
 
 sections.DOC_ERROR_HANDLING = [[
 Awesome is a window managing framework. It allows its users great (ultimate?)
-flexibility. However, it also allows the user to write invalid code. There is
-multiple "levels" of problems:
+flexibility. However, it also allows the user to write invalid code. Here's a
+non-exhaustive list of possible errors:
 
  * Syntax: There is an `awesome -k` option available in the command line to
-   check this. Awesome cannot start with an invalid `rc.lua`
+   check the configuration file. Awesome cannot start with an invalid `rc.lua`
  * Invalid APIs and type errors: Lua is a dynamic language. It doesn't have much
    support for static/compile time checks. There is the `luacheck` utility to
    help find some categories of errors. Those errors will cause Awesome to
-   "drop" the current call stack and start over. Note that if the config cannot
-   reach the end of the `rc.lua` without errors, it will fallback to the
+   "drop" the current call stack and start over. Note that if it cannot
+   reach the end of the `rc.lua` without errors, it will fall back to the
    original file.
- * Invalid logic: It is possible to write fully valid code that will leave
+ * Invalid logic: It is possible to write fully valid code that will render
    Awesome unusable (like an infinite loop or blocking commands). In that case,
    the best way to debug this is either using `print()` or using `gdb`. For
    this, see the [Debugging tips Readme section](../documentation/01-readme.md.html)
- * Deprecated APIs: Awesome API is not frozen for eternity. While after a
-   decade and recent changes to enforce consistency, it doesn't change as much,
-   it will likely be changed in the future. When possible, changes wont cause
-   errors but will instead print a deprecation message in Awesome logs. Those
-   logs are placed in various places depending on the distribution. By default,
-   Awesome will print this on stderr and stdout.
+ * Deprecated APIs: The Awesome API is not frozen for eternity. After a decade
+   of development and recent changes to enforce consistency, it hasn't
+   changed much. This doesn't mean it won't change in the future. Whenever
+   possible, changes won't cause errors but will instead print a deprecation
+   message in the Awesome logs. These logs are placed in various places
+   depending on the distribution. By default, Awesome will print errors on
+  `stderr` and `stdout`.
 
 
 ]]
