@@ -89,8 +89,11 @@ install:
   - if [ "$DO_QUECKQA" = 1 ]; then travis_retry sudo luarocks install luacheck; fi
 
   # Install ldoc for building docs.
-  - travis_retry sudo luarocks install ldoc 1.4.4
-  - travis_retry sudo luarocks install lua-discount
+  - |
+    if [ "$DO_COVERAGE" == "0" || "$DO_COVERAGE" == "" ]; then
+      travis_retry sudo luarocks install ldoc 1.4.4
+      travis_retry sudo luarocks install lua-discount
+    fi
 
   # Install dependencies for code coverage testing.
   - if [ "$DO_COVERAGE" = "" ]; then export DO_COVERAGE=0; fi
