@@ -20,8 +20,13 @@ local gears_debug = require("gears.debug")
 local protected_call = require("gears.protected_call")
 
 local xresources = require("beautiful.xresources")
+local theme_assets = require("beautiful.theme_assets")
 
-local beautiful = { xresources = xresources, mt = {} }
+local beautiful = {
+    xresources = xresources,
+    theme_assets = theme_assets,
+    mt = {}
+}
 
 -- Local data
 local theme = {}

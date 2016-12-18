@@ -3,14 +3,16 @@
 --   by Yauhen Kirylau                    --
 ---------------------------------------------
 
-local xresources = require("beautiful").xresources
-local xrdb = xresources.get_current_theme()
+local theme_assets = require("beautiful.theme_assets")
+local xresources = require("beautiful.xresources")
 local dpi = xresources.apply_dpi
+local xrdb = xresources.get_current_theme()
+local util = require('awful.util')
+local themes_path = util.get_themes_dir()
 
 -- inherit default theme
-local theme = dofile("@AWESOME_THEMES_PATH@/default/theme.lua")
+local theme = dofile(themes_path.."default/theme.lua")
 -- load vector assets' generators for this theme
-local theme_assets = dofile("@AWESOME_THEMES_PATH@/xresources/assets.lua")
 
 theme.font          = "sans 8"
 
@@ -48,7 +50,7 @@ theme.tooltip_bg = theme.bg_normal
 -- Variables set for theming the menu:
 -- menu_[bg|fg]_[normal|focus]
 -- menu_[border_color|border_width]
-theme.menu_submenu_icon = "@AWESOME_THEMES_PATH@/default/submenu.png"
+theme.menu_submenu_icon = themes_path.."default/submenu.png"
 theme.menu_height = dpi(16)
 theme.menu_width  = dpi(100)
 
