@@ -13,7 +13,7 @@ wibox.widget {
     draw   = function(_, _, cr)
         assets.gen_logo(cr, 128, 128, nil, "#535d6c")
         cr:translate(128 + 128/16, 0)
-        assets.gen_awesome_name(cr, 0, 158, nil, "#535d6c", alt_fg, true)
+        assets.gen_awesome_name(cr, 158, nil, "#535d6c", alt_fg)
     end,
     widget = wibox.widget.base.make_widget
 }

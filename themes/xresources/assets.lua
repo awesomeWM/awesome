@@ -61,7 +61,7 @@ local function make_letter(cr, n, lines, size, bg, fg, alt_fg)
     end
 
     lines = lines or {}
-    color = alt_fg or fg
+    local color = alt_fg or fg
     cr:set_source(gears.color(color))
     cr:rectangle(
         0, (size+letter_gap)*n,
@@ -83,7 +83,7 @@ local function make_letter(cr, n, lines, size, bg, fg, alt_fg)
     cr:set_operator(cairo.Operator.OVER)
 end
 
-function theme_assets.gen_awesome_name(cr, width, height, bg, fg, alt_fg, vertical)
+function theme_assets.gen_awesome_name(cr, height, bg, fg, alt_fg)
     local ls = height/10 -- letter_size
     local letter_line = ls/18
 
@@ -178,7 +178,7 @@ function theme_assets.wallpaper(bg, fg, alt_fg, s)
     cr:set_source(gears.color(bg))
     cr:paint()
 
-    theme_assets.gen_awesome_name(cr, width, height, bg, fg, alt_fg, true)
+    theme_assets.gen_awesome_name(cr, height, bg, fg, alt_fg)
 
     return img
 end
