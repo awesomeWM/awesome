@@ -136,7 +136,7 @@ root_set_wallpaper(cairo_pattern_t *pattern)
 
     result = true;
 disconnect:
-    xcb_flush(c);
+    xcb_aux_sync(c);
     xcb_disconnect(c);
     return result;
 }
