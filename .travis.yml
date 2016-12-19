@@ -86,7 +86,7 @@ install:
   # Install busted for "make check-unit".
   - travis_retry sudo luarocks install busted
   # Install luacheck for "make check-qa".
-  - if [ "$DO_QUECKQA" = 1 ]; then travis_retry sudo luarocks install luacheck; fi
+  - if [ "$DO_CHECKQA" = 1 ]; then travis_retry sudo luarocks install luacheck; fi
 
   # Install ldoc for building docs.
   - travis_retry sudo luarocks install ldoc 1.4.4

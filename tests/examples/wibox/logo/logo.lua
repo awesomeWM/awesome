@@ -1,10 +1,6 @@
 local parent    = ... --DOC_HIDE
 local wibox     = require( "wibox" ) --DOC_HIDE
-local beautiful = require( "beautiful" ) --DOC_HIDE
 local assets    = require( "xresources.assets" ) --DOC_HIDE
-local color     = require( "gears.color" ) --DOC_HIDE
-
-local size = 128 --DOC_HIDE
 
 parent:add( --DOC_HIDE
 
