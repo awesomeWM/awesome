@@ -54,6 +54,43 @@
  *        screen = s,
  *    }
  *
+ * **Accessing tags**:
+ *
+ * To access the "current tags", use
+ *
+ *    local tags = awful.screen.focused().selected_tags
+ *
+ * See: `awful.screen.focused`
+ *
+ * See: `screen.selected_tags`
+ *
+ * To ignore the corner case where multiple tags are selected:
+ *
+ *    local t = awful.screen.focused().selected_tag
+ *
+ * See: `screen.selected_tag`
+ *
+ * To get all tags for the focused screen:
+ *
+ *    local tags = awful.screen.focused().tags
+ *
+ * See: `screen.tags`
+ *
+ * To get all tags:
+ *
+ *    local tags = root.tags()
+ *
+ * To get the current tag of the focused client:
+ *
+ *    local t = client.focus and client.focus.first_tag or nil
+ *
+ * See: `client.focus`
+ * See: `client.first_tag`
+ *
+ * To get a tag from its name:
+ *
+ *    local t = awful.tag.find_by_name(awful.screen.focused(), "name")
+ *
  * Some signal names are starting with a dot. These dots are artefacts from
  * the documentation generation, you get the real signal name by
  * removing the starting dot.
