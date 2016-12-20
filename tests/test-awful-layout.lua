@@ -76,8 +76,8 @@ local common_steps = {
         return true
     end,
     function()
-        t.master_fill_policy = t.master_fill_policy == "mwfact" and
-            "expand" or "mwfact"
+        t.master_fill_policy = t.master_fill_policy == "master_width_factor" and
+            "expand" or "master_width_factor"
 
         return true
     end,
