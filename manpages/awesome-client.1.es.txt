@@ -38,7 +38,7 @@ Julien Danjou <julien@danjou.info>
 
 WWW
 ---
-http://awesome.naquadah.org
+https://awesomewm.org
 
 TRADUCCIÓN
 ----------

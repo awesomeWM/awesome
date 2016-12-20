@@ -36,7 +36,7 @@ then
 fi
 
 DBUS_PATH=/
-DBUS_DEST=org.naquadah.awesome.awful
+DBUS_DEST=org.awesomewm.awful
 DBUS_METHOD=${DBUS_DEST}.Remote.Eval
 
 FATAL_ERRORS=1
