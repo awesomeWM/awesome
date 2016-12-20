@@ -91,6 +91,83 @@
  *
  *    local t = awful.tag.find_by_name(awful.screen.focused(), "name")
  *
+ * **Common shortcuts**:
+ *
+ * Here is a few useful shortcuts not part of the default `rc.lua`. Add these
+ * functions above `-- {{{ Key bindings`:
+ *
+ * Delete the current tag
+ *
+ *    local function delete_tag()
+ *        local t = awful.screen.focused().selected_tag
+ *        if not t then return end
+ *        t:delete()
+ *    end
+ *
+ * Create a new tag at the end of the list
+ *
+ *    local function add_tag()
+ *        awful.tag.add("NewTag",{screen= awful.screen.focused() }):view_only()
+ *    end
+ *
+ * Rename the current tag
+ *
+ *    local function rename_tag()
+ *        awful.prompt.run {
+ *            prompt       = "New tag name: ",
+ *            textbox      = awful.screen.focused().mypromptbox.widget,
+ *            exe_callback = function(new_name)
+ *                if not new_name or #new_name == 0 then return end
+ *
+ *                local t = awful.screen.focused().selected_tag
+ *                if t then
+ *                    t.name = new_name
+ *                end
+ *            end
+ *        }
+ *    end
+ *
+ * Move the focused client to a new tag
+ *
+ *    local function move_to_new_tag()
+ *        local c = client.focus
+ *        if not c then return end
+ *
+ *        local t = awful.tag.add(c.class,{screen= c.screen })
+ *        c:tags({t})
+ *        t:view_only()
+ *    end
+ *
+ * Copy the current tag at the end of the list
+ *
+ *    local function copy_tag()
+ *        local t = awful.screen.focused().selected_tag
+ *        if not t then return end
+ *
+ *        local clients = t:clients()
+ *        local t2 = awful.tag.add(t.name, awful.tag.getdata(t))
+ *        t2:clients(clients)
+ *        t2:view_only()
+ *    end
+ *
+ * And, in the `globalkeys` table:
+ *
+ *    awful.key({ modkey,           }, "a", add_tag,
+ *              {description = "add a tag", group = "tag"}),
+ *    awful.key({ modkey, "Shift"   }, "a", delete_tag,
+ *              {description = "delete the current tag", group = "tag"}),
+ *    awful.key({ modkey, "Control"   }, "a", move_to_new_tag,
+ *              {description = "add a tag with the focused client", group = "tag"}),
+ *    awful.key({ modkey, "Mod1"   }, "a", copy_tag,
+ *              {description = "create a copy of the current tag", group = "tag"}),
+ *    awful.key({ modkey, "Shift"   }, "r", rename_tag,
+ *              {description = "rename the current tag", group = "tag"}),
+ *
+ * See the
+ * <a href="../documentation/05-awesomerc.md.html#global_keybindings">
+ *   global keybindings
+ * </a> for more information about the keybindings.
+ *
  * Some signal names are starting with a dot. These dots are artefacts from
  * the documentation generation, you get the real signal name by
  * removing the starting dot.
