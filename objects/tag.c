@@ -26,6 +26,34 @@
  *
  * ![Client geometry](../images/tag_props.svg)
  *
+ * **Creating tags**:
+ *
+ * The default config initializes tags like this:
+ *
+ *    awful.tag(
+ *      { "1", "2", "3", "4", "5", "6", "7", "8", "9" },
+ *      s,
+ *      awful.layout.layouts[1]
+ *    )
+ *
+ * If you wish to have tags with different properties, then `awful.tag.add` is
+ * a better choice:
+ *
+ *    awful.tag.add("First tag", {
+ *        icon               = "/path/to/icon1.png",
+ *        layout             = awful.layout.suit.tile,
+ *        master_fill_policy = "master_width_factor",
+ *        gap_single_client  = true,
+ *        gap                = 15,
+ *        screen             = s,
+ *    }
+ *
+ *    awful.tag.add("Second tag", {
+ *        icon = "/path/to/icon2.png",
+ *        layout = awful.layout.suit.max,
+ *        screen = s,
+ *    }
+ *
  * Some signal names are starting with a dot. These dots are artefacts from
  * the documentation generation, you get the real signal name by
  * removing the starting dot.
