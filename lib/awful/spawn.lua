@@ -337,6 +337,7 @@ end
 -- @tparam string cb_error.stdout The output on stdout.
 -- @tparam string cb_error.stderr The output on stderr.
 -- @tparam string cb_error.exitcode The exit code (will be != 0).
+-- @tparam[opt='error'] string cb_signal.type 'error' always
 --
 -- @tparam[opt] function cb_signal Callback on signals.
 --   By default a message will be printed to awesome's stderr using
@@ -344,6 +345,7 @@ end
 -- @tparam string cb_signal.stdout The output on stdout.
 -- @tparam string cb_signal.stderr The output on stderr.
 -- @tparam string cb_signal.signal The signal.
+-- @tparam[opt='signal'] string cb_signal.type 'signal' always
 --
 -- @treturn[1] integer The PID of the forked process.
 -- @treturn[2] string Error message.
@@ -378,10 +380,10 @@ function spawn.easy_async(cmd, cb, cb_error, cb_signal)
                     cb(stdout, stderr)
                 end
             else
-                cb_error(stdout, stderr, exitcode)
+                cb_error(stdout, stderr, exitcode, 'error')
             end
         else
-            cb_signal(stdout, stderr, exitcode)
+            cb_signal(stdout, stderr, exitcode, 'signal')
         end
     end
 
