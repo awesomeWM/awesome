@@ -319,24 +319,39 @@ function spawn.with_line_callback(cmd, callbacks)
 end
 
 --- Asynchronously spawn a program and (optionally) execute callbacks.
+--
 -- `cmd` is being run and in case `cb`, `cb_error` or `cb_signal` are provided
 -- they will be run, according to the exit code of `cmd`.
 --
 -- This wraps `spawn.with_line_callback`.
+--
 -- @tparam string|table cmd The command.
--- @tparam[opt] function cb Function to be called on success.  It will receive
---   `stdout` and `stderr` as arguments.
--- @tparam[opt] function cb_error Callback on errors. It will receive
---   `stdout`, `stderr` and `exitcode` as arguments.
--- @tparam[opt] function cb_signal Callback on signals. It will receive
---   `stdout`, `stderr` and `signal` as arguments.
+--
+-- @tparam[opt] function cb Function to be called on success.
+-- @tparam string cb.stdout The output on stdout.
+-- @tparam string cb.stderr The output on stderr.
+--
+-- @tparam[opt] function cb_error Callback on errors.
+--   By default a message will be printed to awesome's stderr using
+--   `gears.debug.print_error`.
+-- @tparam string cb_error.stdout The output on stdout.
+-- @tparam string cb_error.stderr The output on stderr.
+-- @tparam string cb_error.exitcode The exit code (will be != 0).
+--
+-- @tparam[opt] function cb_signal Callback on signals.
+--   By default a message will be printed to awesome's stderr using
+--   `gears.debug.print_error`.
+-- @tparam string cb_signal.stdout The output on stdout.
+-- @tparam string cb_signal.stderr The output on stderr.
+-- @tparam string cb_signal.signal The signal.
+--
 -- @treturn[1] integer The PID of the forked process.
 -- @treturn[2] string Error message.
 -- @see spawn.with_line_callback
 function spawn.easy_async(cmd, cb, cb_error, cb_signal)
     if not cb_error or not cb_signal then
-        local function get_cmd_string(cmd)
-            return type(cmd) == 'table' and table.concat(cmd, ' ') or cmd
+        local function get_cmd_string(command)
+            return type(command) == 'table' and table.concat(command, ' ') or command
         end
         if not cb_error then
             cb_error = function(stdout, stderr, exitcode)
