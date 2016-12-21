@@ -113,12 +113,68 @@ sections.DOC_ROOT_BUTTONS = [[
 
 
 sections.DOC_GLOBAL_KEYBINDINGS = [[
- &nbsp;
+ <a id="global_keybindings" />
+ This section stores the global keybindings. A global keybinding is a shortcut
+ that will be executed when the key is pressed. It is different from
+ <a href="#client_keybindings">client keybindings</a>. A client keybinding
+ only works when a client is focused while a global one works all the time.
+
+ Each keybinding is stored in an `awful.key` object. When creating such an
+ object, you need to provide a list of modifiers, a key or keycode, a callback
+ function and extra metadata used for the `awful.hotkeys_popup` widget.
+
+ Common modifiers are:
+
+ <table class='widget_list' border=1>
+  <tr style='font-weight: bold;'>
+   <th align='center'>Name</th>
+   <th align='center'>Description</th>
+  </tr>
+  <tr><td>Mod4</td><td>Also called Super, Windows and Command ⌘</td></tr>
+  <tr><td>Mod1</td><td>Usually called Alt on PCs and Option on Macs</td></tr>
+  <tr><td>Shift</td><td>Both left and right shift keys</td></tr>
+  <tr><td>Control</td><td>Also called CTRL on some keyboards</td></tr>
+ </table>
+
+ Note that both `Mod2` and `Lock` are ignored by default. If you wish to
+ use them, add `awful.key.ignore_modifiers = {}` to your `rc.lua`. `Mod3`,
+ `Mod5` are usually not bound in most leyboard layouts. There is an X11 utility
+ called `xmodmap` to bind them. See
+ [the ARCH Linux Wiki](https://wiki.archlinux.org/index.php/xmodmap) for more
+ information.
+
+ The key or keycode is usually the same as the keyboard key, for example:
+
+ * "a"
+ * "Return"
+ * "Shift_R"
+
+ Each key also has a code. This code depends on the exact keyboard layout. It
+ can be obtained by reading the terminal output of the `xev` command. A keycode
+ based keybinding will look like `#123` where 123 is the keycode.
+
+ The callback has to be a function. Note that a function isn't the same as a
+ function call. If you use, for example, `awful.tag.viewtoggle()` as the
+ callback, you store the **result** of the function. If you wish to use that
+ function as a callback, just use `awful.tag.viewtoggle`. The same applies to
+ methods. If you have to add parameters to the callback, wrap them in another
+ function. For the toggle example, this would be
+ `function() awful.tag.viewtoggle(mouse.screen.tags[1]) end`.
+
+ Note that global keybinding callbacks have no argument. If you wish to act on
+ the current `client`, use the <a href="#client_keybindings">client keybindings</a>
+ table.
 ]]
 
 
 sections.DOC_CLIENT_KEYBINDINGS = [[
- &nbsp;
+ <a id="client_keybindings" />
+
+ A client keybinding is a shortcut that will get the currently focused client
+ as its first callback argument. For example, to toggle a property, the callback
+ will look like `function(c) c.sticky = not c.sticky end`. For more information
+ about the keybinding syntax, see the
+ <a href="#global_keybindings">global keybindings</a> section.
 ]]
 
 
