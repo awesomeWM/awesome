@@ -583,23 +583,22 @@ function util.round(x)
     return floor(x + 0.5)
 end
 
---- Format a table as a string, concatenating key/value pairs using `delim`,
--- for values that are not empty.
+--- Format a table as a string, concatenating key/value pairs using `delim`.
+--
+-- It includes only values that are not empty (after being converted to string
+-- and trimmed on the right).
 -- @tab t Table to format, with key/value pairs as strings.
 -- @tparam string[opt=', '] delim Delimiter.
--- @tparam string[opt='<none>'] none_str String to use in case all values are
---   empty.
-function util.concat_table(t, delim, none_str)
+-- @treturn[opt] string The concatenated string, or nil.
+function util.concat_table(t, delim)
     local r = {}
-    for k,v in ipairs(t) do
+    for k,v in pairs(t) do
+        v = tostring(v):gsub('%s*$', '')
         if #v > 0 then
-            table.insert(r, string.format('%s: %s', k, v))
+            table.insert(r, string.format('<b>%s:</b> %s', k, v))
         end
     end
-    if #r == 0 then
-        return none_str or '<none>'
-    end
-    return table.concat(r, delim or ', ')
+    return #r > 0 and table.concat(r, delim or ', ')
 end
 
 return util
