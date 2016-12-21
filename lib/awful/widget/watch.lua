@@ -65,14 +65,21 @@ local watch = { mt = {} }
 -- @tparam[opt=wibox.widget.textbox()] widget base_widget Base widget.
 --
 -- @return The widget used by this watch
-function watch.new(command, interval, callback, base_widget)
+function watch.new(command, interval, callbacks, base_widget)
     interval = interval or 5
     base_widget = base_widget or textbox()
-    callback = callback or function(widget, stdout, _)
-        widget:set_text(stdout)
+
+    if type(callbacks) == 'function' then
+        callbacks = {success=callbacks}
+    elseif not callbacks then
+        callbacks = {
+            success = function(widget, stdout, _)
+                widget:set_text(stdout)
+            end
+        }
     end
 
-    local cb_error = function(stdout, stderr, _)
+    callbacks.error = callbacks.error or function(stdout, stderr, exitcode, type)
         -- widget:set_text(stderr)
         local output = util.concat_table({stdout=stdout, stderr=stderr})
         naughty.notify({preset = naughty.config.presets.critical,
@@ -80,13 +87,14 @@ function watch.new(command, interval, callback, base_widget)
                         text = tostring(output) })
         base_widget:set_text(stdout)
     end
+    callbacks.signal = callbacks.signal or callbacks.error
     local t = timer { timeout = interval }
     t:connect_signal("timeout", function()
         t:stop()
         spawn.easy_async(command, function(stdout, stderr, exitreason, exitcode)
-          callback(base_widget, stdout, stderr, exitreason, exitcode)
+          callbacks.success(base_widget, stdout, stderr, exitreason, exitcode)
           t:again()
-      end, cb_error)
+      end, callbacks.error, callbacks.signal)
     end)
     t:start()
     t:emit_signal("timeout")
