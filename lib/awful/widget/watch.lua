@@ -31,7 +31,7 @@
 ---------------------------------------------------------------------------
 
 local setmetatable = setmetatable
-local naughty = require("naughty")
+local naughty = require("naughty.core")
 local textbox = require("wibox.widget.textbox")
 local timer = require("gears.timer")
 local spawn = require("awful.spawn")
