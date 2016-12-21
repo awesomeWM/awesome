@@ -3,9 +3,6 @@
 --    By Adrian C. (anrxc)   --
 -------------------------------
 
--- Alternative icon sets and widget icons:
---  * http://awesome.naquadah.org/wiki/Nice_Icons
-
 -- {{{ Main
 local theme = {}
 theme.wallpaper = "@AWESOME_THEMES_PATH@/zenburn/zenburn-background.png"

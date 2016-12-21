@@ -810,7 +810,7 @@ and tips were no longer working properly.
 
 ### New website address
 
-The official website is now `http://awesomewm.org/` and is now hosted by
+The official website is now `https://awesomewm.org/` and is now hosted by
 GitHub. This will allow to retire the former server.
 
 ### Awesome is now developed on GitHub

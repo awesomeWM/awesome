@@ -64,7 +64,7 @@ AUTEURS
 WWW
 ---
 
-http://awesome.naquadah.org
+https://awesomewm.org
 
 TRADUCTION
 ----------
