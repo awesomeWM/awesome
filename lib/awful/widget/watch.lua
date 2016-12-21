@@ -1,26 +1,26 @@
 ---------------------------------------------------------------------------
 --- Watch widget.
--- Here is an example of simple temperature widget which will update each 15
--- seconds implemented in two different ways.
--- The first, simpler one, will just display the return command output
+-- Here is an example of simple temperature widget which will update every
+-- 15 seconds, implemented in two different ways.
+-- The first, simpler one, will just display the returned command output
 -- (so output is stripped by shell commands).
--- In the other example `sensors` returns to the widget its full output
--- and it's trimmed in the widget callback function:
+-- In the second example `sensors` returns its full output to the widget
+-- and it is trimmed in the widget's callback function:
 --
---     211             mytextclock,
---     212             wibox.widget.textbox('  |  '),
---     213             -- one way to do that:
---     214             awful.widget.watch('bash -c "sensors | grep temp1"', 15),
---     215             -- another way:
---     216             awful.widget.watch('sensors', 15, function(widget, stdout)
---     217               for line in stdout:gmatch("[^\r\n]+") do
---     218                 if line:match("temp1") then
---     219                   widget:set_text(line)
---     220                   return
---     221                 end
---     222               end
---     223             end),
---     224             s.mylayoutbox,
+--     mytextclock,
+--     wibox.widget.textbox('  |  '),
+--     -- one way to do that:
+--     awful.widget.watch('bash -c "sensors | grep temp1"', 15),
+--     -- another way:
+--     awful.widget.watch('sensors', 15, function(widget, stdout)
+--       for line in stdout:gmatch("[^\r\n]+") do
+--         if line:match("temp1") then
+--           widget:set_text(line)
+--           return
+--         end
+--       end
+--     end),
+--     s.mylayoutbox,
 --
 -- ![Example screenshot](../images/awful_widget_watch.png)
 --
@@ -31,9 +31,11 @@
 ---------------------------------------------------------------------------
 
 local setmetatable = setmetatable
+local naughty = require("naughty")
 local textbox = require("wibox.widget.textbox")
 local timer = require("gears.timer")
 local spawn = require("awful.spawn")
+local util = require("awful.util")
 
 local watch = { mt = {} }
 
@@ -43,10 +45,11 @@ local watch = { mt = {} }
 -- @tparam string|table command The command.
 --
 -- @tparam[opt=5] integer interval The time interval at which the textbox
--- will be updated.
+-- will be updated (in seconds).
 --
 -- @tparam[opt] function callback The function that will be called after
--- the command exited successfully.  The default is to update the textbox:
+--   the command exited successfully.
+--   The default is to update the textbox:
 --     function(widget, stdout, stderr, exitreason, exitcode)
 --         widget:set_text(stdout)
 --     end
@@ -65,11 +68,17 @@ local watch = { mt = {} }
 function watch.new(command, interval, callback, base_widget)
     interval = interval or 5
     base_widget = base_widget or textbox()
-    callback = callback or function(widget, stdout, stderr)
+    callback = callback or function(widget, stdout, _)
         widget:set_text(stdout)
     end
-    callback_error = callback_error or function(widget, stdout, stderr, exitcode)
-        widget:set_text(stderr)
+
+    local cb_error = function(stdout, stderr, _)
+        -- widget:set_text(stderr)
+        local output = util.concat_table({stdout=stdout, stderr=stderr})
+        naughty.notify({preset = naughty.config.presets.critical,
+                        title = "An error occurred with a watch widget.",
+                        text = tostring(output) })
+        base_widget:set_text(stdout)
     end
     local t = timer { timeout = interval }
     t:connect_signal("timeout", function()
@@ -77,7 +86,7 @@ function watch.new(command, interval, callback, base_widget)
         spawn.easy_async(command, function(stdout, stderr, exitreason, exitcode)
           callback(base_widget, stdout, stderr, exitreason, exitcode)
           t:again()
-        end)
+      end, cb_error)
     end)
     t:start()
     t:emit_signal("timeout")
