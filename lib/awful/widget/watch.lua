@@ -79,12 +79,21 @@ function watch.new(command, interval, callbacks, base_widget)
         }
     end
 
+    local notification_id
     callbacks.error = callbacks.error or function(stdout, stderr, exitcode, type)
         -- widget:set_text(stderr)
-        local output = util.concat_table({stdout=stdout, stderr=stderr})
-        naughty.notify({preset = naughty.config.presets.critical,
-                        title = "An error occurred with a watch widget.",
-                        text = tostring(output) })
+        local output = util.concat_table({stdout=stdout, stderr=stderr}, "\n") or "No output"
+        local title = (type == 'error'
+            and "An error occurred with a watch widget. Stopping it."
+            or  "A signal was received for a watch widget. Stopping it.")
+        local text = string.format(
+            "%s\n<b>%s:</b> %s",
+            output, (type == 'error' and "Exit code" or "Signal"), exitcode)
+        notification_id = naughty.notify({preset = naughty.config.presets.critical,
+                        title = title,
+                        text = text,
+                        replaces_id = notification_id,
+                    }).id
         base_widget:set_text(stdout)
     end
     callbacks.signal = callbacks.signal or callbacks.error
