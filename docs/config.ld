@@ -24,6 +24,7 @@ topics={
     '05-awesomerc.md',
     '06-appearance.md',
     '16-using-cairo.md',
+    '17-porting-tips.md',
     '90-FAQ.md',
     '89-NEWS.md',
 }

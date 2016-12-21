@@ -532,6 +532,8 @@ Many changes now cause a deprecation warning instead of breaking hard.
 However, it is important to take note of these changes in order to avoid new
 bugs.
 
+Also see the <a href="./17-porting-tips.md.html">porting tips</a>
+
 ### There can be off-screen clients unless rc.lua is adapted
 
 
