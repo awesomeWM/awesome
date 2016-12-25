@@ -24,14 +24,11 @@ end
 -- display deprecated warnings
 --awful.util.deprecate = function() end
 
-local has_spawned = false
-
 local steps = {
 
 function(count)
-    if count <= 1 and not has_spawned and #client.get() < 2 then
-        for _=1, 5 do awful.spawn("xterm") end
-        has_spawned = true
+    if count <= 5 then
+      awful.spawn("xterm")
     elseif #client.get() >= 5 then
         local c, _ = get_c_and_t()
         old_c = c
@@ -42,11 +39,6 @@ end,
 
 -- Wait for the focus to change
 function()
-    if has_spawned then
-        has_spawned = false
-        return nil
-    end
-
     assert(old_c)
 
     -- Test layout
