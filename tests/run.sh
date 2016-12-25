@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 #
 # Test runner.
 #
@@ -34,9 +34,9 @@ fi
 
 # Get test files: test*, or the ones provided as args (relative to tests/).
 if [ $# != 0 ]; then
-    tests="$@"
+    tests="$*"
 else
-    tests=$this_dir/test*.lua
+    tests="$this_dir/test*.lua"
 fi
 
 # Travis.
@@ -68,31 +68,26 @@ export GDK_SCALE=1
 export NO_AT_BRIDGE=1
 
 if [ $HEADLESS = 1 ]; then
-    "$XVFB" $D -noreset -screen 0 ${SIZE}x24 &
+    "$XVFB" $D -noreset -screen 0 "${SIZE}x24" &
     xserver_pid=$!
 else
     # export XEPHYR_PAUSE=1000
-    "$XEPHYR" $D -ac -name xephyr_$D -noreset -screen "$SIZE" $XEPHYR_OPTIONS &
+    "$XEPHYR" $D -ac -name xephyr_$D -noreset -screen "$SIZE" &
     xserver_pid=$!
     # Toggles debugging mode, using XEPHYR_PAUSE.
     # ( sleep 1; kill -USR1 $xserver_pid ) &
 fi
 
-cd $build_dir
-
-AWESOME_OPTIONS="$AWESOME_OPTIONS --search lib"
 # Add test dir (for _runner.lua).
-AWESOME_OPTIONS="$AWESOME_OPTIONS --search $this_dir"
-export XDG_CONFIG_HOME="./"
-
-cd - >/dev/null
+awesome_options=($AWESOME_OPTIONS --search lib --search $this_dir)
+export XDG_CONFIG_HOME="$build_dir"
 
 # Cleanup on errors / aborting.
 cleanup() {
     for p in $awesome_pid $xserver_pid; do
-        kill -TERM $p 2>/dev/null || true
+        kill -TERM "$p" 2>/dev/null || true
     done
-    rm -rf $tmp_files || true
+    rm -rf "$tmp_files" || true
 }
 trap "cleanup" 0 2 3 15
 
@@ -113,13 +108,14 @@ wait_until_success() {
         if [ $ret = 0 ]; then
             break
         fi
-        wait_count=$(expr $wait_count - 1 || true)
+        wait_count=$((wait_count - 1))
         if [ "$wait_count" -lt 0 ]; then
-            echo "Error: failed to $1!"
-            echo "Last reply: $reply."
+            echo "Error: failed to $1!" >&2
+            # shellcheck disable=SC2154
+            echo "Last reply: $reply." >&2
             if [ -f "$awesome_log" ]; then
-                echo "Log:"
-                cat "$awesome_log"
+                echo "Log:" >&2
+                cat "$awesome_log" >&2
             fi
             exit 1
         fi
@@ -159,29 +155,28 @@ wait_until_success "setup xrdb" "printf 'Xft.dpi: 96
     *.color9:     #dc322f' | DISPLAY='$D' xrdb 2>&1"
 
 # Use a separate D-Bus session; sets $DBUS_SESSION_BUS_PID.
-eval $(DISPLAY="$D" dbus-launch --sh-syntax --exit-with-session)
+eval "$(DISPLAY="$D" dbus-launch --sh-syntax --exit-with-session)"
 
 # Not in Travis?
 if [ "$CI" != true ]; then
     # Prepare a config file pointing to a working theme
     # Handle old filename of config files (useful for git-bisect).
-    if [ -f $source_dir/awesomerc.lua.in ]; then
+    if [ -f "$source_dir/awesomerc.lua.in" ]; then
         SED_IN=.in
     fi
     RC_FILE=$tmp_files/awesomerc.lua
     THEME_FILE=$tmp_files/theme.lua
-    sed -e "s:.*beautiful.init(.*default/theme.lua.*:beautiful.init('$THEME_FILE'):" $source_dir/awesomerc.lua$SED_IN > $RC_FILE
+    sed -e "s:.*beautiful.init(.*default/theme.lua.*:beautiful.init('$THEME_FILE'):" "$source_dir/awesomerc.lua$SED_IN" > "$RC_FILE"
     sed -e "s:@AWESOME_THEMES_PATH@/default/titlebar:$build_dir/themes/default/titlebar:"  \
         -e "s:@AWESOME_THEMES_PATH@:$source_dir/themes/:" \
-        -e "s:@AWESOME_ICON_PATH@:$source_dir/icons:" $source_dir/themes/default/theme.lua$SED_IN > $THEME_FILE
+        -e "s:@AWESOME_ICON_PATH@:$source_dir/icons:" "$source_dir/themes/default/theme.lua$SED_IN" > "$THEME_FILE"
 fi
 
 # Start awesome.
 start_awesome() {
-    export DISPLAY="$D"
-    cd $build_dir
+    cd "$build_dir"
     # Kill awesome after $timeout_stale seconds (e.g. for errors during test setup).
-    DISPLAY="$D" timeout $timeout_stale "$AWESOME" -c "$RC_FILE" $AWESOME_OPTIONS > $awesome_log 2>&1 &
+    DISPLAY="$D" timeout "$timeout_stale" "$AWESOME" -c "$RC_FILE" "${awesome_options[@]}" > "$awesome_log" 2>&1 &
     awesome_pid=$!
     cd - >/dev/null
 
@@ -200,17 +195,17 @@ for f in $tests; do
 
     start_awesome
 
-    if [ ! -r $f ]; then
+    if [ ! -r "$f" ]; then
         echo "===> ERROR $f is not readable! <==="
-        errors=$(expr $errors + 1)
+        ((errors + 1))
         continue
     fi
 
     # Send the test file to awesome.
-    cat $f | DISPLAY=$D "$AWESOME_CLIENT" 2>&1
+    DISPLAY=$D "$AWESOME_CLIENT" 2>&1 < "$f"
 
     # Tail the log and quit, when awesome quits.
-    tail -n 100000 -f --pid $awesome_pid $awesome_log
+    tail -n 100000 -f --pid "$awesome_pid" "$awesome_log"
 
     set +e
     wait $awesome_pid
@@ -222,18 +217,18 @@ for f in $tests; do
         *) echo "Awesome exited with status code $code" ;;
     esac
 
-    if ! grep -q -E '^Test finished successfully$' $awesome_log ||
-            grep -q -E '[Ee]rror|assertion failed' $awesome_log; then
+    if ! grep -q -E '^Test finished successfully$' "$awesome_log" ||
+            grep -q -E '[Ee]rror|assertion failed' "$awesome_log"; then
         echo "===> ERROR running $f! <==="
-        grep --color -o --binary-files=text -E '.*[Ee]rror.*|.*assertion failed.*' $awesome_log || true
-        errors=$(expr $errors + 1)
+        grep --color -o --binary-files=text -E '.*[Ee]rror.*|.*assertion failed.*' "$awesome_log" || true
+        ((errors + 1))
     fi
 done
 
 if ! [ $errors = 0 ]; then
     if [ "$TEST_PAUSE_ON_ERRORS" = 1 ]; then
         echo "Pausing... press Enter to continue."
-        read enter
+        read -r
     fi
     echo "There were $errors errors!"
     exit 1
