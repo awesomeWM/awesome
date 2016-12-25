@@ -12,6 +12,9 @@
 
 set -e
 
+export SHELL=/bin/sh
+export HOME=/dev/null
+
 # Be verbose on Travis.
 if [ "$CI" = true ]; then
     set -x
