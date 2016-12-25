@@ -43,11 +43,9 @@ fi
 if [ "$CI" = true ]; then
     HEADLESS=1
     TEST_PAUSE_ON_ERRORS=0
-    TEST_QUIT_ON_TIMEOUT=1
 else
     HEADLESS=${HEADLESS-0}
     TEST_PAUSE_ON_ERRORS=${TEST_PAUSE_ON_ERRORS-0}
-    TEST_QUIT_ON_TIMEOUT=1
 fi
 export TEST_PAUSE_ON_ERRORS  # Used in tests/_runner.lua.
 
