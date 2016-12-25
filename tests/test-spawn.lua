@@ -29,6 +29,9 @@ local steps = {
     error_message = spawn(" ")
     assert(string.find(error_message, 'Text was empty'), error_message)
 
+    error_message = spawn("")
+    assert(string.find(error_message, 'Text was empty'), error_message)
+
     error_message = spawn{}
     assert(string.find(error_message, 'There is nothing to execute'), error_message)
 
@@ -89,17 +92,6 @@ local steps = {
       assert(exit_snd == 42)
       return true
     end
-  end,
-  function()
-    -- Test empty command table
-    spawn{}
-    return true
-  end,
-  function()
-    -- Test empty command string
-    spawn("")
-    assert(#client.get() == 0)
-    return true
   end,
 }
 
