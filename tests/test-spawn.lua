@@ -10,6 +10,31 @@ local exit_yay, exit_snd = nil, nil
 -- * spawn with startup notification is covered by test-spawn-snid.lua
 
 local steps = {
+  function()
+    -- Test various error conditions. There are quite a number of them...
+    local error_message
+
+    error_message = spawn("this_does_not_exist_and_should_fail")
+    assert(string.find(error_message, 'No such file or directory'), error_message)
+
+    error_message = spawn({"this_does_not_exist_and_should_fail"})
+    assert(string.find(error_message, 'No such file or directory'), error_message)
+
+    error_message = spawn("foo '")
+    assert(string.find(error_message, 'parse error: Text ended before matching quote was found'), error_message)
+
+    error_message = spawn()
+    assert(string.find(error_message, 'No command to execute'), error_message)
+
+    error_message = spawn(" ")
+    assert(string.find(error_message, 'Text was empty'), error_message)
+
+    error_message = spawn{}
+    assert(string.find(error_message, 'There is nothing to execute'), error_message)
+
+    return true
+  end,
+
   function(count)
     if count == 1 then
       local steps_yay = 0

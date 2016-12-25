@@ -414,11 +414,11 @@ luaA_spawn(lua_State *L)
     {
         g_strfreev(argv);
         if (error) {
-            luaA_warn(L, "spawn: parse error: %s", error->message);
+            lua_pushfstring(L, "spawn: parse error: %s", error->message);
             g_error_free(error);
         }
         else
-            luaA_warn(L, "spawn: There is nothing to execute");
+            lua_pushliteral(L, "spawn: There is nothing to execute");
         return 1;
     }
 
@@ -443,7 +443,7 @@ luaA_spawn(lua_State *L)
     g_strfreev(argv);
     if(!retval)
     {
-        luaA_warn(L, "%s", error->message);
+        lua_pushstring(L, error->message);
         g_error_free(error);
         if(context)
             sn_launcher_context_complete(context);
