@@ -115,13 +115,11 @@ install:
   # Functions for custom Travis folds.
   - |
     travis_fold_start() {
-      echo -n "travis_"
-      echo "fold:start:$1"
+      travis_fold start "$1"
       travis_fold_current="$1"
     }
     travis_fold_end() {
-      echo -n "travis_"
-      echo "fold:end:$travis_fold_current"
+      travis_fold end "$travis_fold_current"
     }
     travis_run_in_fold() {
       travis_fold_start "$1"
@@ -181,12 +179,14 @@ script:
     set -ev
     if [ "$TEST_PREV_COMMITS" = 1 ] && ! [ "$TRAVIS_PULL_REQUEST" = false ]; then
       # Check each commit separately (to make git-bisect less annoying).
-      echo "Testing previous commits based on TRAVIS_COMMIT_RANGE=$TRAVIS_COMMIT_RANGE"
-      rev_list="$(git rev-list --bisect-all $TRAVIS_COMMIT_RANGE)"
+      # Fix Travis' commit range (https://github.com/travis-ci/travis-ci/issues/4596).
+      commit_range="${TRAVIS_COMMIT_RANGE/.../..}"
+      echo "Testing previous commits ($commit_range)"
+      rev_list="$(git rev-list --bisect-all $commit_range)"
       echo "rev-list: $rev_list"
-      commits="$(echo $rev_list | grep -v 'dist=0' | cut -d\  -f 1)"
-      echo "Testing commits: $commits"
-      n="$(echo commits | wc -l)"
+      commits="$(echo "$rev_list" | grep -v 'dist=0' | cut -d\  -f 1)"
+      n="$(echo "$commits" | wc -l)"
+      echo "Testing $n commits: $commits"
       i=0
       failed=
       for commit in $commits; do
