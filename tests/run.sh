@@ -176,7 +176,6 @@ fi
 
 # Start awesome.
 start_awesome() {
-    export DISPLAY="$D"
     cd "$build_dir"
     # Kill awesome after $timeout_stale seconds (e.g. for errors during test setup).
     DISPLAY="$D" timeout "$timeout_stale" "$AWESOME" -c "$RC_FILE" "${awesome_options[@]}" > "$awesome_log" 2>&1 &
