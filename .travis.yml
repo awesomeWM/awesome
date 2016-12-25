@@ -115,13 +115,11 @@ install:
   # Functions for custom Travis folds.
   - |
     travis_fold_start() {
-      echo -n "travis_"
-      echo "fold:start:$1"
+      travis_fold start "$1"
       travis_fold_current="$1"
     }
     travis_fold_end() {
-      echo -n "travis_"
-      echo "fold:end:$travis_fold_current"
+      travis_fold end "$travis_fold_current"
     }
     travis_run_in_fold() {
       travis_fold_start "$1"
