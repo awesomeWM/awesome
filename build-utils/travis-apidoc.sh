@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 #
 # Process (API) docs after a successful build on Travis (via ../.travis.yml).
 #
@@ -76,7 +76,7 @@ COMMIT_MSG="Update docs for $AWESOME_VERSION via Travis
 Last commit message:
 $LAST_COMMIT_MSG
 
-Commits: https://github.com/awesomeWM/awesome/compare/${TRAVIS_COMMIT_RANGE}
+Commits: https://github.com/awesomeWM/awesome/compare/${TRAVIS_COMMIT_RANGE/.../..}
 Build URL: https://travis-ci.org/awesomeWM/awesome/builds/${TRAVIS_BUILD_ID}"
 git commit -m "[relevant] $COMMIT_MSG"
 
