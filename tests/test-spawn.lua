@@ -30,7 +30,7 @@ local steps = {
     assert(string.find(error_message, 'Text was empty'), error_message)
 
     error_message = spawn("")
-    assert(string.find(error_message, 'Text was empty'), error_message)
+    assert(string.find(error_message, 'No command to execute'), error_message)
 
     error_message = spawn{}
     assert(string.find(error_message, 'There is nothing to execute'), error_message)
