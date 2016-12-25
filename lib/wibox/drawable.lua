@@ -34,8 +34,8 @@ local function get_widget_context(self)
     if not s then
         local sgeos = {}
 
-        for s in capi.screen do
-            sgeos[s] = s.geometry
+        for scr in capi.screen do
+            sgeos[scr] = scr.geometry
         end
 
         s = grect.get_by_coord(sgeos, geom.x, geom.y) or capi.screen.primary
