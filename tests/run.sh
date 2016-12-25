@@ -224,6 +224,7 @@ for f in $tests; do
             grep -q -E '[Ee]rror|assertion failed' "$awesome_log"; then
         echo "===> ERROR running $f <==="
         grep --color -o --binary-files=text -E '.*[Ee]rror.*|.*assertion failed.*' "$awesome_log" || true
+        ((errors + 1))
     fi
 done
 
