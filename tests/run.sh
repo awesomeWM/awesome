@@ -200,7 +200,7 @@ for f in $tests; do
 
     if [ ! -r "$f" ]; then
         echo "===> ERROR $f is not readable! <==="
-        ((errors + 1))
+        ((errors++))
         continue
     fi
 
@@ -224,11 +224,11 @@ for f in $tests; do
             grep -q -E '[Ee]rror|assertion failed' "$awesome_log"; then
         echo "===> ERROR running $f! <==="
         grep --color -o --binary-files=text -E '.*[Ee]rror.*|.*assertion failed.*' "$awesome_log" || true
-        ((errors + 1))
+        ((errors++))
     fi
 done
 
-if ! [ $errors = 0 ]; then
+if ((errors)); then
     if [ "$TEST_PAUSE_ON_ERRORS" = 1 ]; then
         echo "Pausing... press Enter to continue."
         read -r
