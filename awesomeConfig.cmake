@@ -88,7 +88,7 @@ endif()
 if(OVERRIDE_VERSION)
     set(VERSION ${OVERRIDE_VERSION})
     message(STATUS "Using version from OVERRIDE_VERSION: ${VERSION}")
-elseif(EXISTS ${SOURCE_DIR}/.git/HEAD AND GIT_EXECUTABLE)
+elseif(EXISTS ${SOURCE_DIR}/.git AND GIT_EXECUTABLE)
     # get current version
     execute_process(
         COMMAND ${GIT_EXECUTABLE} describe --dirty
