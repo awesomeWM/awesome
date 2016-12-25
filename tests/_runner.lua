@@ -3,8 +3,6 @@ local awful = require("awful")
 
 local runner = {
   quit_awesome_on_error = os.getenv('TEST_PAUSE_ON_ERRORS') ~= '1',
-  -- quit-on-timeout defaults to false: indicates some problem with the test itself.
-  quit_awesome_on_timeout = os.getenv('TEST_QUIT_ON_TIMEOUT') ~= '1',
 }
 
 -- Helpers.
@@ -81,15 +79,12 @@ runner.run_steps = function(steps)
       wait = wait-1
       if wait > 0 then
         t:again()
-        return
       else
         io.stderr:write("Error: timeout waiting for signal in step "
           ..step_as_string..".\n")
         t:stop()
-        if not runner.quit_awesome_on_timeout then
-          return
-        end
       end
+      return
     end
     -- Remove any clients.
     for _,c in ipairs(client.get()) do
