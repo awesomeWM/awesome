@@ -361,13 +361,13 @@ foreach(file ${AWESOME_CONFIGURE_FILES})
                    @ONLY)
 endforeach()
 
-set(AWESOME_CONFIGURE_NO_COV_FILES
+set(AWESOME_CONFIGURE_COPYONLY_WITHCOV_FILES
     ${awesome_c_configure_files}
     ${awesome_lua_configure_files}
 )
 
 if(DO_COVERAGE)
-    foreach(file ${AWESOME_CONFIGURE_NO_COV_FILES})
+    foreach(file ${AWESOME_CONFIGURE_COPYONLY_WITHCOV_FILES})
         configure_file(${SOURCE_DIR}/${file}
                     ${BUILD_DIR}/${file}
                     COPYONLY)
@@ -379,7 +379,7 @@ if(DO_COVERAGE)
                     ESCAPE_QUOTES
                     @ONLY)
 else()
-    foreach(file ${AWESOME_CONFIGURE_NO_COV_FILES})
+    foreach(file ${AWESOME_CONFIGURE_COPYONLY_WITHCOV_FILES})
         configure_file(${SOURCE_DIR}/${file}
                     ${BUILD_DIR}/${file}
                     ESCAPE_QUOTES
