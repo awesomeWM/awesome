@@ -90,7 +90,7 @@ install:
 
   # Install ldoc for building docs.
   - |
-    if [ "$DO_COVERAGE" == "0" || "$DO_COVERAGE" == "" ]; then
+    if [ "$BUILD_APIDOC" == "true" ]; then
       travis_retry sudo luarocks install ldoc 1.4.4
       travis_retry sudo luarocks install lua-discount
     fi
