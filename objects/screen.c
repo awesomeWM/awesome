@@ -1112,6 +1112,17 @@ luaA_screen_count(lua_State *L)
 }
 
 /** Add a fake screen.
+ *
+ * To vertically split the first screen in 2 equal parts, use:
+ *
+ *    local geo = screen[1].geometry
+ *    local new_width = math.ceil(geo.width/2)
+ *    local new_width2 = geo.width - new_width
+ *    screen[1]:fake_resize(geo.x, geo.y, new_width, geo.height)
+ *    screen.fake_add(geo.x + new_width, geo.y, new_width2, geo.height)
+ *
+ * Both virtual screens will have their own taglist and wibars.
+ *
  * @tparam integer x X-coordinate for screen.
  * @tparam integer y Y-coordinate for screen.
  * @tparam integer width width for screen.

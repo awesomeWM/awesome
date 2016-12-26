@@ -130,9 +130,7 @@ for any coding, documentation or patch guidelines.
 
 ## Documentation
 
-Online documentation is available at http://awesome.naquadah.org/doc/ for the
-stable branch and at http://awesomewm.github.io/apidoc/ for the master branch.
-It can be built using `make ldoc`.
+Online documentation is available at https://awesomewm.org/apidoc/.
 
 ## License
 

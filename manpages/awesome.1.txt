@@ -186,4 +186,4 @@ Julien Danjou <julien@danjou.info> and others.
 
 WWW
 ---
-http://awesome.naquadah.org
+https://awesomewm.org

@@ -4,7 +4,7 @@ set(PROJECT_AWE_NAME awesome)
 # `git describe` later.
 set(VERSION devel)
 
-set(CODENAME "The Fox")
+set(CODENAME "Harder, Better, Faster, Stronger")
 
 project(${PROJECT_AWE_NAME} C)
 
@@ -87,7 +87,8 @@ endif()
 # {{{ Version stamp
 if(OVERRIDE_VERSION)
     set(VERSION ${OVERRIDE_VERSION})
-elseif(EXISTS ${SOURCE_DIR}/.git/HEAD AND GIT_EXECUTABLE)
+    message(STATUS "Using version from OVERRIDE_VERSION: ${VERSION}")
+elseif(EXISTS ${SOURCE_DIR}/.git AND GIT_EXECUTABLE)
     # get current version
     execute_process(
         COMMAND ${GIT_EXECUTABLE} describe --dirty
@@ -99,9 +100,11 @@ elseif(EXISTS ${SOURCE_DIR}/.git/HEAD AND GIT_EXECUTABLE)
     file(WRITE ${VERSION_STAMP_FILE} ${VERSION})
     # create a version_stamp target later
     set(BUILD_FROM_GIT TRUE)
+    message(STATUS "Using version from git: ${VERSION}")
 elseif( EXISTS ${SOURCE_DIR}/.version_stamp )
     # get version from version stamp
     file(READ ${SOURCE_DIR}/.version_stamp VERSION)
+    message(STATUS "Using version from ${SOURCE_DIR}/.version_stamp: ${VERSION}")
 endif()
 # }}}
 

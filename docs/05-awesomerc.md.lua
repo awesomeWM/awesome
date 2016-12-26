@@ -4,7 +4,7 @@ local f = io.open(filename, "w")
 
 f:write[[# Default configuration file documentation
 
-This document explain the default `rc.lua` file provided by Awesome.
+This document explains the default `rc.lua` file provided by Awesome.
 
 ]]
 
@@ -13,9 +13,9 @@ This document explain the default `rc.lua` file provided by Awesome.
 local sections = {}
 
 sections.DOC_REQUIRE_SECTION = [[
-Awesome API is distributed across many libraries (also called modules).
+The Awesome API is distributed across many libraries (also called modules).
 
-Here is the modules being imported:
+Here are the modules that we import:
 
 <table class='widget_list' border=1>
   <tr><td>`gears`</td><td>Utilities such as color parsing and objects</td></tr>
@@ -30,27 +30,28 @@ Here is the modules being imported:
 
 sections.DOC_ERROR_HANDLING = [[
 Awesome is a window managing framework. It allows its users great (ultimate?)
-flexibility. However, it also allows the user to write invalid code. There is
-multiple "levels" of problems:
+flexibility. However, it also allows the user to write invalid code. Here's a
+non-exhaustive list of possible errors:
 
  * Syntax: There is an `awesome -k` option available in the command line to
-   check this. Awesome cannot start with an invalid `rc.lua`
+   check the configuration file. Awesome cannot start with an invalid `rc.lua`
  * Invalid APIs and type errors: Lua is a dynamic language. It doesn't have much
    support for static/compile time checks. There is the `luacheck` utility to
    help find some categories of errors. Those errors will cause Awesome to
-   "drop" the current call stack and start over. Note that if the config cannot
-   reach the end of the `rc.lua` without errors, it will fallback to the
+   "drop" the current call stack and start over. Note that if it cannot
+   reach the end of the `rc.lua` without errors, it will fall back to the
    original file.
- * Invalid logic: It is possible to write fully valid code that will leave
+ * Invalid logic: It is possible to write fully valid code that will render
    Awesome unusable (like an infinite loop or blocking commands). In that case,
    the best way to debug this is either using `print()` or using `gdb`. For
    this, see the [Debugging tips Readme section](../documentation/01-readme.md.html)
- * Deprecated APIs: Awesome API is not frozen for eternity. While after a
-   decade and recent changes to enforce consistency, it doesn't change as much,
-   it will likely be changed in the future. When possible, changes wont cause
-   errors but will instead print a deprecation message in Awesome logs. Those
-   logs are placed in various places depending on the distribution. By default,
-   Awesome will print this on stderr and stdout.
+ * Deprecated APIs: The Awesome API is not frozen for eternity. After a decade
+   of development and recent changes to enforce consistency, it hasn't
+   changed much. This doesn't mean it won't change in the future. Whenever
+   possible, changes won't cause errors but will instead print a deprecation
+   message in the Awesome logs. These logs are placed in various places
+   depending on the distribution. By default, Awesome will print errors on
+  `stderr` and `stdout`.
 
 
 ]]
@@ -112,12 +113,68 @@ sections.DOC_ROOT_BUTTONS = [[
 
 
 sections.DOC_GLOBAL_KEYBINDINGS = [[
- &nbsp;
+ <a id="global_keybindings" />
+ This section stores the global keybindings. A global keybinding is a shortcut
+ that will be executed when the key is pressed. It is different from
+ <a href="#client_keybindings">client keybindings</a>. A client keybinding
+ only works when a client is focused while a global one works all the time.
+
+ Each keybinding is stored in an `awful.key` object. When creating such an
+ object, you need to provide a list of modifiers, a key or keycode, a callback
+ function and extra metadata used for the `awful.hotkeys_popup` widget.
+
+ Common modifiers are:
+
+ <table class='widget_list' border=1>
+  <tr style='font-weight: bold;'>
+   <th align='center'>Name</th>
+   <th align='center'>Description</th>
+  </tr>
+  <tr><td>Mod4</td><td>Also called Super, Windows and Command ⌘</td></tr>
+  <tr><td>Mod1</td><td>Usually called Alt on PCs and Option on Macs</td></tr>
+  <tr><td>Shift</td><td>Both left and right shift keys</td></tr>
+  <tr><td>Control</td><td>Also called CTRL on some keyboards</td></tr>
+ </table>
+
+ Note that both `Mod2` and `Lock` are ignored by default. If you wish to
+ use them, add `awful.key.ignore_modifiers = {}` to your `rc.lua`. `Mod3`,
+ `Mod5` are usually not bound in most leyboard layouts. There is an X11 utility
+ called `xmodmap` to bind them. See
+ [the ARCH Linux Wiki](https://wiki.archlinux.org/index.php/xmodmap) for more
+ information.
+
+ The key or keycode is usually the same as the keyboard key, for example:
+
+ * "a"
+ * "Return"
+ * "Shift_R"
+
+ Each key also has a code. This code depends on the exact keyboard layout. It
+ can be obtained by reading the terminal output of the `xev` command. A keycode
+ based keybinding will look like `#123` where 123 is the keycode.
+
+ The callback has to be a function. Note that a function isn't the same as a
+ function call. If you use, for example, `awful.tag.viewtoggle()` as the
+ callback, you store the **result** of the function. If you wish to use that
+ function as a callback, just use `awful.tag.viewtoggle`. The same applies to
+ methods. If you have to add parameters to the callback, wrap them in another
+ function. For the toggle example, this would be
+ `function() awful.tag.viewtoggle(mouse.screen.tags[1]) end`.
+
+ Note that global keybinding callbacks have no argument. If you wish to act on
+ the current `client`, use the <a href="#client_keybindings">client keybindings</a>
+ table.
 ]]
 
 
 sections.DOC_CLIENT_KEYBINDINGS = [[
- &nbsp;
+ <a id="client_keybindings" />
+
+ A client keybinding is a shortcut that will get the currently focused client
+ as its first callback argument. For example, to toggle a property, the callback
+ will look like `function(c) c.sticky = not c.sticky end`. For more information
+ about the keybinding syntax, see the
+ <a href="#global_keybindings">global keybindings</a> section.
 ]]
 
 

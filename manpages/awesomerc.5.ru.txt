@@ -55,7 +55,7 @@ awesome(1) awesome-client(1)
 
 WWW
 ---
-http://awesome.naquadah.org
+https://awesomewm.org
 
 ПЕРЕВОД
 -------

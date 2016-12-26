@@ -889,13 +889,25 @@ function tag.getgap(t, numclients)
     return tag.object.get_gap(t or ascreen.focused().selected_tag)
 end
 
---- The default fill policy
+--- The default fill policy.
+--
+-- ** Possible values**:
+--
+-- * *expand*: Take all the space
+-- * *master_width_factor*: Only take the ratio defined by the
+--   `master_width_factor`
 --
 -- @beautiful beautiful.master_fill_policy
 -- @param string (default: "expand")
 -- @see master_fill_policy
 
 --- Set size fill policy for the master client(s).
+--
+-- ** Possible values**:
+--
+-- * *expand*: Take all the space
+-- * *master_width_factor*: Only take the ratio defined by the
+--   `master_width_factor`
 --
 -- **Signal:**
 --

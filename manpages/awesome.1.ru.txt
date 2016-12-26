@@ -189,7 +189,7 @@ Julien Danjou <julien@danjou.info> и другие.
 
 WWW
 ---
-http://awesome.naquadah.org
+https://awesomewm.org
 
 ПЕРЕВОД
 -------
