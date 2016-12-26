@@ -199,9 +199,13 @@ for f in $tests; do
     start_awesome
 
     if [ ! -r "$f" ]; then
-        echo "===> ERROR $f is not readable! <==="
-        ((errors++))
-        continue
+        if [ -r "${f#tests/}" ]; then
+            f=${f#tests/}
+        else
+            echo "===> ERROR $f is not readable! <==="
+            ((errors++))
+            continue
+        fi
     fi
 
     # Send the test file to awesome.
