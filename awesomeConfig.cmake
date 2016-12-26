@@ -366,14 +366,7 @@ set(AWESOME_CONFIGURE_NO_COV_FILES
     ${awesome_lua_configure_files}
 )
 
-if(NOT DO_COVERAGE)
-    foreach(file ${AWESOME_CONFIGURE_NO_COV_FILES})
-        configure_file(${SOURCE_DIR}/${file}
-                    ${BUILD_DIR}/${file}
-                    ESCAPE_QUOTES
-                    @ONLY)
-    endforeach()
-else()
+if(DO_COVERAGE)
     foreach(file ${AWESOME_CONFIGURE_NO_COV_FILES})
         configure_file(${SOURCE_DIR}/${file}
                     ${BUILD_DIR}/${file}
@@ -385,6 +378,13 @@ else()
                     ${BUILD_DIR}/lib/awful/util.lua
                     ESCAPE_QUOTES
                     @ONLY)
+else()
+    foreach(file ${AWESOME_CONFIGURE_NO_COV_FILES})
+        configure_file(${SOURCE_DIR}/${file}
+                    ${BUILD_DIR}/${file}
+                    ESCAPE_QUOTES
+                    @ONLY)
+    endforeach()
 endif()
 
 #}}}
