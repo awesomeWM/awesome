@@ -78,6 +78,7 @@ function wibox:_apply_shape()
     local img = cairo.ImageSurface(cairo.Format.A1, geo.width + 2*bw, geo.height + 2*bw)
     local cr = cairo.Context(img)
 
+    -- We just draw the shape in its full size
     shape(cr, geo.width + 2*bw, geo.height + 2*bw)
     cr:set_operator(cairo.Operator.SOURCE)
     cr:fill()
@@ -88,9 +89,18 @@ function wibox:_apply_shape()
     img = cairo.ImageSurface(cairo.Format.A1, geo.width, geo.height)
     cr = cairo.Context(img)
 
-    shape(cr, geo.width, geo.height)
+    -- We give the shape the same arguments as for the bounding shape and draw
+    -- it in its full size (the translate is to compensate for the smaller
+    -- surface)
+    cr:translate(-bw, -bw)
+    shape(cr, geo.width + 2*bw, geo.height + 2*bw)
     cr:set_operator(cairo.Operator.SOURCE)
-    cr:fill()
+    cr:fill_preserve()
+    -- Now we remove an area of width 'bw' again around the shape (We use 2*bw
+    -- since half of that is on the outside and only half on the inside)
+    cr:set_source_rgba(0, 0, 0, 0)
+    cr:set_line_width(2*bw)
+    cr:stroke()
     self.shape_clip = img._native
     img:finish()
 end
