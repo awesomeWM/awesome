@@ -355,16 +355,16 @@ local function clear_screen()
         return
     end
     for s in screen do
-         local sur = surface.widget_to_surface(
-             wibox.widget {
-                 bg     = "#000000",
-                 widget = wibox.container.background
-             },
-             s.geometry.width,
-             s.geometry.height
-         )
-         wallpaper.fit(sur, s, "#000000")
-     end
+        local sur = surface.widget_to_surface(
+            wibox.widget {
+                bg     = "#000000",
+                widget = wibox.container.background
+            },
+            s.geometry.width,
+            s.geometry.height
+        )
+        wallpaper.fit(sur, s, "#000000")
+    end
 end
 
 -- Make it easier to debug the tests by showing the screen geometry when the
@@ -419,97 +419,97 @@ local function add_steps(real_steps, new_steps)
         end)
 
         table.insert(real_steps, function()
-            clear_screen()
-            local keep = dispo.keep or false
-            local old = {}
-            local geos = {}
+        clear_screen()
+        local keep = dispo.keep or false
+        local old = {}
+        local geos = {}
+
+        check_tag_indexes()
+
+        if keep then
+            for _, sf in ipairs(dispo) do
+                local geo = sf and sf() or nil
+
+                -- If the function return nothing, assume the screen need to
+                -- be destroyed.
+                table.insert(geos, geo or false)
+            end
+
+            -- Removed screens need to be explicit.
+            assert(#geos >= screen.count())
+
+            -- Keep a cache to avoid working with invalid data
+            local old_screens = {}
+            for s in screen do
+                table.insert(old_screens, s)
+            end
+
+            for i, s in ipairs(old_screens) do
+                -- Remove the screen (if no new geometry is given
+                if not geos[i] then
+                    s:fake_remove()
+                else
+                    local cur_geo = s.geometry
+                    for _, v in ipairs {"x", "y", "width", "height" } do
+                        cur_geo[v] = geos[i][v] or cur_geo[v]
+                    end
+                    s:fake_resize(
+                        cur_geo.x,
+                        cur_geo.y,
+                        cur_geo.width,
+                        cur_geo.height
+                    )
+                end
+            end
+
+            -- Add the remaining screens
+            for i=#old_screens + 1, #geos do
+                local geo = geos[i]
+                screen.fake_add(geo.x, geo.y, geo.width, geo.height)
+            end
 
             check_tag_indexes()
-
-            if keep then
-                for _, sf in ipairs(dispo) do
-                    local geo = sf and sf() or nil
-
-                    -- If the function return nothing, assume the screen need to
-                    -- be destroyed.
-                    table.insert(geos, geo or false)
-                end
-
-                -- Removed screens need to be explicit.
-                assert(#geos >= screen.count())
-
-                -- Keep a cache to avoid working with invalid data
-                local old_screens = {}
-                for s in screen do
-                    table.insert(old_screens, s)
-                end
-
-                for i, s in ipairs(old_screens) do
-                    -- Remove the screen (if no new geometry is given
-                    if not geos[i] then
-                        s:fake_remove()
-                    else
-                        local cur_geo = s.geometry
-                        for _, v in ipairs {"x", "y", "width", "height" } do
-                            cur_geo[v] = geos[i][v] or cur_geo[v]
-                        end
-                        s:fake_resize(
-                            cur_geo.x,
-                            cur_geo.y,
-                            cur_geo.width,
-                            cur_geo.height
-                        )
-                    end
-                end
-
-                -- Add the remaining screens
-                for i=#old_screens + 1, #geos do
-                    local geo = geos[i]
-                    screen.fake_add(geo.x, geo.y, geo.width, geo.height)
-                end
-
-                check_tag_indexes()
-            else
-                -- Move all existing screens out of the way (to avoid temporary overlapping)
-                for s in screen do
-                    s:fake_resize(canvas_w, canvas_h, 1, 1)
-                    table.insert(old, s)
-                end
-
-                -- Add the new screens
-                for _, sf in ipairs(dispo) do
-                    local geo = sf()
-                    screen.fake_add(geo.x, geo.y, geo.width, geo.height)
-                    table.insert(geos, geo)
-                end
-
-                -- Remove old screens
-                for _, s in ipairs(old) do
-                    s:fake_remove()
-                end
+        else
+            -- Move all existing screens out of the way (to avoid temporary overlapping)
+            for s in screen do
+                s:fake_resize(canvas_w, canvas_h, 1, 1)
+                table.insert(old, s)
             end
 
-            show_screens()
-
-            -- Check the result is correct
-            local expected_count = 0
-            for _,v in ipairs(geos) do
-                expected_count = expected_count + (v and 1 or 0)
+            -- Add the new screens
+            for _, sf in ipairs(dispo) do
+                local geo = sf()
+                screen.fake_add(geo.x, geo.y, geo.width, geo.height)
+                table.insert(geos, geo)
             end
 
-            assert(expected_count == screen.count())
-            for k, geo in ipairs(geos) do
-                if geo then
-                    local sgeo = screen[k].geometry
-                    assert(geo.x == sgeo.x)
-                    assert(geo.y == sgeo.y)
-                    assert(geo.width  == sgeo.width )
-                    assert(geo.height == sgeo.height)
-                end
+            -- Remove old screens
+            for _, s in ipairs(old) do
+                s:fake_remove()
             end
+        end
 
-            return true
-        end)
+        show_screens()
+
+        -- Check the result is correct
+        local expected_count = 0
+        for _,v in ipairs(geos) do
+            expected_count = expected_count + (v and 1 or 0)
+        end
+
+        assert(expected_count == screen.count())
+        for k, geo in ipairs(geos) do
+            if geo then
+                local sgeo = screen[k].geometry
+                assert(geo.x == sgeo.x)
+                assert(geo.y == sgeo.y)
+                assert(geo.width  == sgeo.width )
+                assert(geo.height == sgeo.height)
+            end
+        end
+
+        return true
+    end)
 
         for _, step in ipairs(new_steps) do
             table.insert(real_steps, step)
@@ -518,5 +518,5 @@ local function add_steps(real_steps, new_steps)
 end
 
 return setmetatable(module, {
-    __call = function(_,...) return add_steps(...) end
-})
+                    __call = function(_,...) return add_steps(...) end
+                })

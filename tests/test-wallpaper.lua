@@ -54,83 +54,83 @@ table.insert(steps, function()
 end)
 
 table.insert(steps, function()
-    wp.fit(img, screen[1], "#00ff00")
+wp.fit(img, screen[1], "#00ff00")
 
-    -- There is a delayed call for the last call, let it be processed before
-    -- adding more
-    return true
+-- There is a delayed call for the last call, let it be processed before
+-- adding more
+return true
 end)
 
 table.insert(steps, function()
-    wp.centered(img, nil, nil)
-    wp.centered(img, screen[1], nil)
+wp.centered(img, nil, nil)
+wp.centered(img, screen[1], nil)
 
-    -- There is a delayed call for the last call, let it be processed before
-    -- adding more
-    return true
+-- There is a delayed call for the last call, let it be processed before
+-- adding more
+return true
 end)
 
 table.insert(steps, function()
-    wp.centered(img, screen[1], "#00ff00")
+wp.centered(img, screen[1], "#00ff00")
 
-    return true
+return true
 end)
 
 table.insert(steps, function()
-    wp.maximized(img, nil, nil, nil)
+wp.maximized(img, nil, nil, nil)
 
-    -- There is a delayed call for the last call, let it be processed before
-    -- adding more
-    return true
+-- There is a delayed call for the last call, let it be processed before
+-- adding more
+return true
 end)
 
 table.insert(steps, function()
-    wp.maximized(img, screen[1], nil, nil)
+wp.maximized(img, screen[1], nil, nil)
 
-    -- There is a delayed call for the last call, let it be processed before
-    -- adding more
-    return true
-end)
-
-table.insert(steps, function()
-
-    wp.maximized(img, screen[1], false, nil)
-    wp.maximized(img, screen[1], true, nil)
-
-    -- There is a delayed call for the last call, let it be processed before
-    -- adding more
-    return true
+-- There is a delayed call for the last call, let it be processed before
+-- adding more
+return true
 end)
 
 table.insert(steps, function()
 
-    wp.maximized(img, screen[1], false, {x=10, y= 10})
-    wp.maximized(img, screen[1], true, {x=10, y= 10})
+wp.maximized(img, screen[1], false, nil)
+wp.maximized(img, screen[1], true, nil)
 
-    return true
+-- There is a delayed call for the last call, let it be processed before
+-- adding more
+return true
 end)
 
 table.insert(steps, function()
-    wp.tiled(img, nil, nil)
-    wp.tiled(img, screen[1], nil)
 
-    -- There is a delayed call for the last call, let it be processed before
-    -- adding more
-    return true
+wp.maximized(img, screen[1], false, {x=10, y= 10})
+wp.maximized(img, screen[1], true, {x=10, y= 10})
+
+return true
 end)
 
 table.insert(steps, function()
-    wp.tiled(img, screen[1], {x=10, y= 10})
+wp.tiled(img, nil, nil)
+wp.tiled(img, screen[1], nil)
 
-    return true
+-- There is a delayed call for the last call, let it be processed before
+-- adding more
+return true
 end)
 
 table.insert(steps, function()
-    for _, c in ipairs(colors) do
-        wp.set(c)
-    end
+wp.tiled(img, screen[1], {x=10, y= 10})
 
-    return true
+return true
+end)
+
+table.insert(steps, function()
+for _, c in ipairs(colors) do
+    wp.set(c)
+end
+
+return true
 end)
 
 

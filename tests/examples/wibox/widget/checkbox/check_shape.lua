@@ -10,17 +10,17 @@ local l = wibox.widget { --DOC_HIDE
 
 for _, s in ipairs {"rectangle", "circle", "losange", "octogon"} do
 
-l:add( --DOC_HIDE
-    wibox.widget {
-        checked       = true,
-        color         = beautiful.bg_normal,
-        paddings      = 2,
-        forced_width  = 20, --DOC_HIDE
-        forced_height = 20, --DOC_HIDE
-        check_shape   = gears.shape[s],
-        widget        = wibox.widget.checkbox
-    }
-) --DOC_HIDE
+    l:add( --DOC_HIDE
+          wibox.widget {
+              checked       = true,
+              color         = beautiful.bg_normal,
+              paddings      = 2,
+              forced_width  = 20, --DOC_HIDE
+              forced_height = 20, --DOC_HIDE
+              check_shape   = gears.shape[s],
+              widget        = wibox.widget.checkbox
+          }
+          ) --DOC_HIDE
 
 end
 

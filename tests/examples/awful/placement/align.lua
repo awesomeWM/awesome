@@ -2,13 +2,13 @@
 local placement = require("awful.placement")
 screen[1]._resize {x= 50}
 for _, pos in ipairs{
-                        "top_left", "top_right", "bottom_left", "bottom_right",
-                        "left", "right", "top", "bottom", "centered",
-                    } do
-    local c1 = client.gen_fake {x = 80, y = 55, width=75, height=50}
-    c1:_hide()
-    placement.align(client.focus, {position = pos, honor_workarea=true})
-    c1:set_label(pos)
+    "top_left", "top_right", "bottom_left", "bottom_right",
+    "left", "right", "top", "bottom", "centered",
+} do
+local c1 = client.gen_fake {x = 80, y = 55, width=75, height=50}
+c1:_hide()
+placement.align(client.focus, {position = pos, honor_workarea=true})
+c1:set_label(pos)
 end
 
 screen._add_screen {x = 70, y = 260  , width = 128, height = 96}

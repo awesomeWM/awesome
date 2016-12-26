@@ -25,32 +25,32 @@ local function callback(context, cr, width, height, arg)
 end
 
 runner.run_steps({
-    -- Set some bg image
-    function()
-        local img = assert(beautiful.titlebar_close_button_normal)
-        w:set_bgimage(img)
-        return true
-    end,
+                 -- Set some bg image
+                 function()
+                     local img = assert(beautiful.titlebar_close_button_normal)
+                     w:set_bgimage(img)
+                     return true
+                 end,
 
-    -- Do nothing for a while iteration to give the repaint some time to happen
-    function(arg)
-        if arg == 3 then
-            return true
-        end
-    end,
+                 -- Do nothing for a while iteration to give the repaint some time to happen
+                 function(arg)
+                     if arg == 3 then
+                         return true
+                     end
+                 end,
 
-    -- Set some bg image function
-    function()
-        w:set_bgimage(callback, "argument: 42")
-        return true
-    end,
+                 -- Set some bg image function
+                 function()
+                     w:set_bgimage(callback, "argument: 42")
+                     return true
+                 end,
 
-    -- Wait for the function to be done
-    function()
-        if callback_called then
-            return true
-        end
-    end,
-})
+                 -- Wait for the function to be done
+                 function()
+                     if callback_called then
+                         return true
+                     end
+                 end,
+             })
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

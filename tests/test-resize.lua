@@ -21,23 +21,23 @@ table.insert(steps, function(count)
 end)
 
 table.insert(steps, function()
-    -- The mousegrabber expect a button to be pressed.
-    root.fake_input("button_press",1)
-    local c = client.get()[1]
+-- The mousegrabber expect a button to be pressed.
+root.fake_input("button_press",1)
+local c = client.get()[1]
 
-    -- Just in case there is an accidental delayed geometry callback
-    assert(c:geometry().x      == 200)
-    assert(c:geometry().y      == 200)
-    assert(c:geometry().width  == 300)
-    assert(c:geometry().height == 300)
+-- Just in case there is an accidental delayed geometry callback
+assert(c:geometry().x      == 200)
+assert(c:geometry().y      == 200)
+assert(c:geometry().width  == 300)
+assert(c:geometry().height == 300)
 
-    mouse.coords {x = 500+2*c.border_width, y= 500+2*c.border_width}
+mouse.coords {x = 500+2*c.border_width, y= 500+2*c.border_width}
 
-    local corner = amouse.client.resize(c)
+local corner = amouse.client.resize(c)
 
-    assert(corner == "bottom_right")
+assert(corner == "bottom_right")
 
-    return true
+return true
 end)
 
 -- The geometry should remain the same, as the cursor is placed at the end of
@@ -108,8 +108,8 @@ table.insert(steps, function()
 
     assert(c:geometry().x == 100)
     assert(c:geometry().y == 200)
---     assert(c:geometry().width == 200-2*c.border_width) --FIXME off by border width...
---     assert(c:geometry().height == 200-2*c.border_width) --FIXME off by border width...
+    --     assert(c:geometry().width == 200-2*c.border_width) --FIXME off by border width...
+    --     assert(c:geometry().height == 200-2*c.border_width) --FIXME off by border width...
 
     mouse.coords {x = 300, y= 200}
 
@@ -120,9 +120,9 @@ end)
 table.insert(steps, function()
     root.fake_input("button_release",1)
 
---     if not mousegrabber.isrunning then --FIXME it should work, but doesn't
---         return true
---     end
+    --     if not mousegrabber.isrunning then --FIXME it should work, but doesn't
+    --         return true
+    --     end
 
     mousegrabber.stop()
 
@@ -143,7 +143,7 @@ table.insert(steps, function()
     placement.bottom_right(c)
 
     mouse.coords {x = c.screen.geometry.width -150,
-                  y = c.screen.geometry.height-150}
+    y = c.screen.geometry.height-150}
 
 
     return true

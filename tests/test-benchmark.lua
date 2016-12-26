@@ -35,7 +35,7 @@ do
             time_per_iter, time_total = measure(f, iters)
         end
         print(string.format("%20s: %-10.6g sec/iter (%3d iters, %.4g sec for benchmark)",
-                msg, time_per_iter, iters, timer_benchmark:elapsed()))
+                            msg, time_per_iter, iters, timer_benchmark:elapsed()))
     end
 end
 

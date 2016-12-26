@@ -6,75 +6,75 @@ awful.util.deprecate = function() end
 local has_spawned = false
 local steps = {
 
-function(count)
+    function(count)
 
-if count <= 1 and not has_spawned and #client.get() < 2 then
-    awful.spawn("xterm")
-    awful.spawn("xterm")
-    has_spawned = true
-elseif #client.get() >= 2 then
+        if count <= 1 and not has_spawned and #client.get() < 2 then
+            awful.spawn("xterm")
+            awful.spawn("xterm")
+            has_spawned = true
+        elseif #client.get() >= 2 then
 
--- Test properties
-client.focus = client.get()[1]
-local c  = client.focus
--- local c2 = client.get()[2]
+            -- Test properties
+            client.focus = client.get()[1]
+            local c  = client.focus
+            -- local c2 = client.get()[2]
 
-c.foo = "bar"
+            c.foo = "bar"
 
--- Check if the property system works
-assert(c.foo == "bar")
-assert(c.foo == awful.client.property.get(c, "foo"))
+            -- Check if the property system works
+            assert(c.foo == "bar")
+            assert(c.foo == awful.client.property.get(c, "foo"))
 
--- Test jumpto
+            -- Test jumpto
 
---FIXME doesn't work
--- c2:jump_to()
--- assert(client.focus == c2)
--- awful.client.jumpto(c)
--- assert(client.focus == c)
+            --FIXME doesn't work
+            -- c2:jump_to()
+            -- assert(client.focus == c2)
+            -- awful.client.jumpto(c)
+            -- assert(client.focus == c)
 
--- Test moveresize
-c.size_hints_honor = false
-c:geometry {x=0,y=0,width=50,height=50}
-c:relative_move( 100, 100, 50, 50 )
-for _,v in pairs(c:geometry()) do
-    assert(v == 100)
-end
-awful.client.moveresize(-25, -25, -25, -25, c )
-for _,v in pairs(c:geometry()) do
-    assert(v == 75)
-end
+            -- Test moveresize
+            c.size_hints_honor = false
+            c:geometry {x=0,y=0,width=50,height=50}
+            c:relative_move( 100, 100, 50, 50 )
+            for _,v in pairs(c:geometry()) do
+                assert(v == 100)
+            end
+            awful.client.moveresize(-25, -25, -25, -25, c )
+            for _,v in pairs(c:geometry()) do
+                assert(v == 75)
+            end
 
--- Test movetotag
+            -- Test movetotag
 
-local t  = mouse.screen.tags[1]
-local t2 = mouse.screen.tags[2]
+            local t  = mouse.screen.tags[1]
+            local t2 = mouse.screen.tags[2]
 
-c:tags{t}
-assert(c:tags()[1] == t)
-c:move_to_tag(t2)
-assert(c:tags()[1] == t2)
-awful.client.movetotag(t, c)
-assert(c:tags()[1] == t)
+            c:tags{t}
+            assert(c:tags()[1] == t)
+            c:move_to_tag(t2)
+            assert(c:tags()[1] == t2)
+            awful.client.movetotag(t, c)
+            assert(c:tags()[1] == t)
 
--- Test toggletag
+            -- Test toggletag
 
-c:tags{t}
-c:toggle_tag(t2)
-assert(c:tags()[1] == t2 or c:tags()[2] == t2)
-awful.client.toggletag(t2, c)
-assert(c:tags()[1] == t and c:tags()[1] ~= t2 and c:tags()[2] == nil)
+            c:tags{t}
+            c:toggle_tag(t2)
+            assert(c:tags()[1] == t2 or c:tags()[2] == t2)
+            awful.client.toggletag(t2, c)
+            assert(c:tags()[1] == t and c:tags()[1] ~= t2 and c:tags()[2] == nil)
 
--- Test floating
-assert(c.floating ~= nil and type(c.floating) == "boolean")
-c.floating = true
-assert(awful.client.floating.get(c))
-awful.client.floating.set(c, false)
-assert(not c.floating)
+            -- Test floating
+            assert(c.floating ~= nil and type(c.floating) == "boolean")
+            c.floating = true
+            assert(awful.client.floating.get(c))
+            awful.client.floating.set(c, false)
+            assert(not c.floating)
 
-return true
-end
-end
+            return true
+        end
+    end
 }
 
 local original_count, c1, c2 = 0
@@ -108,21 +108,21 @@ table.insert(steps, function()
 end)
 
 table.insert(steps, function()
-    -- The request should have been denied
-    assert(client.focus == c2)
+-- The request should have been denied
+assert(client.focus == c2)
 
-    -- Test the remove function
-    awful.ewmh.remove_activate_filter(function() end)
+-- Test the remove function
+awful.ewmh.remove_activate_filter(function() end)
 
-    awful.ewmh.add_activate_filter(awful.ewmh.generic_activate_filters[1])
+awful.ewmh.add_activate_filter(awful.ewmh.generic_activate_filters[1])
 
-    awful.ewmh.remove_activate_filter(awful.ewmh.generic_activate_filters[1])
+awful.ewmh.remove_activate_filter(awful.ewmh.generic_activate_filters[1])
 
-    assert(original_count == #awful.ewmh.generic_activate_filters)
+assert(original_count == #awful.ewmh.generic_activate_filters)
 
-    c1:emit_signal("request::activate", "i_said_so")
+c1:emit_signal("request::activate", "i_said_so")
 
-    return client.focus == c1
+return client.focus == c1
 end)
 
 local has_error
@@ -154,8 +154,8 @@ table.insert(multi_screen_steps, function()
     for i=1, screen.count() do
         local s = screen[i]
         test_client("screen"..i, nil, {
-            screen = s,
-        })
+                    screen = s,
+                })
     end
 
     return true
@@ -218,92 +218,92 @@ table.insert(multi_screen_steps, function()
     for i=1, screen.count() do
         local s = screen[i]
         test_client("screen"..i, nil, {
-            new_tag = {
-                name = "NEW_AT_"..i,
-                screen = s,
-            }
+                    new_tag = {
+                        name = "NEW_AT_"..i,
+                        screen = s,
+                    }
+                })
+    end
+
+    return true
+end)
+
+table.insert(multi_screen_steps, function()
+if #client.get() ~= screen.count() then return end
+
+for _, c in ipairs(client.get()) do
+    assert(#c:tags() == 1)
+    assert(c.first_tag.name == "NEW_AT_"..c.screen.index)
+end
+
+-- Kill the client
+for _, c in ipairs(client.get()) do
+    c:kill()
+end
+
+if screen.count() < 2 then return true end
+
+-- Now, add client where the target tag and screen don't match
+test_client("test_tag1", nil, {
+            tag    = screen[2].tags[2],
+            screen = screen[1],
         })
-    end
 
-    return true
-end)
+-- Add a client with multiple tags on the same screen, but not c.screen
+test_client("test_tags1", nil, {
+            tags   = { screen[1].tags[3], screen[1].tags[4] },
+            screen = screen[2],
+        })
 
-table.insert(multi_screen_steps, function()
-    if #client.get() ~= screen.count() then return end
+-- Identical, but using the tag names
+test_client("test_tags2", nil, {
+            tags   = { "3", "4" },
+            screen = screen[2],
+        })
 
-    for _, c in ipairs(client.get()) do
-        assert(#c:tags() == 1)
-        assert(c.first_tag.name == "NEW_AT_"..c.screen.index)
-    end
+-- Also test tags, but with an invalid screen array
+test_client("test_tags3", nil, {
+            tags   = { screen[2].tags[3], screen[1].tags[4] },
+            screen = screen[1],
+        })
 
-    -- Kill the client
-    for _, c in ipairs(client.get()) do
-        c:kill()
-    end
+-- Another test for tags, but with no matching names
+test_client("test_tags4", nil, {
+            tags   = { "foobar", "bobcat" },
+            screen = screen[1],
+        })
 
-    if screen.count() < 2 then return true end
-
-    -- Now, add client where the target tag and screen don't match
-    test_client("test_tag1", nil, {
-        tag    = screen[2].tags[2],
-        screen = screen[1],
-    })
-
-    -- Add a client with multiple tags on the same screen, but not c.screen
-    test_client("test_tags1", nil, {
-        tags   = { screen[1].tags[3], screen[1].tags[4] },
-        screen = screen[2],
-    })
-
-    -- Identical, but using the tag names
-    test_client("test_tags2", nil, {
-        tags   = { "3", "4" },
-        screen = screen[2],
-    })
-
-    -- Also test tags, but with an invalid screen array
-    test_client("test_tags3", nil, {
-        tags   = { screen[2].tags[3], screen[1].tags[4] },
-        screen = screen[1],
-    })
-
-    -- Another test for tags, but with no matching names
-    test_client("test_tags4", nil, {
-        tags   = { "foobar", "bobcat" },
-        screen = screen[1],
-    })
-
-    return true
+return true
 end)
 
 
 table.insert(multi_screen_steps, function()
-    if screen.count() < 2 then return true end
-    if #client.get() ~= 5 then return end
+if screen.count() < 2 then return true end
+if #client.get() ~= 5 then return end
 
-    local c_by_class = {}
+local c_by_class = {}
 
-    for _, c in ipairs(client.get()) do
-        c_by_class[c.class] = c
-    end
+for _, c in ipairs(client.get()) do
+    c_by_class[c.class] = c
+end
 
-    assert(c_by_class["test_tag1"].screen == screen[2])
-    assert(#c_by_class["test_tag1"]:tags() == 1)
+assert(c_by_class["test_tag1"].screen == screen[2])
+assert(#c_by_class["test_tag1"]:tags() == 1)
 
-    assert(c_by_class["test_tags1"].screen == screen[1])
-    assert(#c_by_class["test_tags1"]:tags() == 2)
+assert(c_by_class["test_tags1"].screen == screen[1])
+assert(#c_by_class["test_tags1"]:tags() == 2)
 
-    assert(c_by_class["test_tags2"].screen == screen[2])
-    assert(#c_by_class["test_tags2"]:tags() == 2)
+assert(c_by_class["test_tags2"].screen == screen[2])
+assert(#c_by_class["test_tags2"]:tags() == 2)
 
-    assert(c_by_class["test_tags3"].screen == screen[2])
-    assert(#c_by_class["test_tags3"]:tags() == 1)
+assert(c_by_class["test_tags3"].screen == screen[2])
+assert(#c_by_class["test_tags3"]:tags() == 1)
 
-    assert(c_by_class["test_tags4"].screen == screen[1])
-    assert(#c_by_class["test_tags4"]:tags() == 1)
-    assert(c_by_class["test_tags4"]:tags()[1] == screen[1].selected_tag)
+assert(c_by_class["test_tags4"].screen == screen[1])
+assert(#c_by_class["test_tags4"]:tags() == 1)
+assert(c_by_class["test_tags4"]:tags()[1] == screen[1].selected_tag)
 
-    return true
+return true
 end)
 
 require("_multi_screen")(steps, multi_screen_steps)

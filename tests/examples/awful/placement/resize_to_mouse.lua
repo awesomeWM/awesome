@@ -8,8 +8,8 @@ local function test_touch_mouse(c)
     local coords = mouse.coords()
 
     return c:geometry().x == coords.x or c:geometry().y == coords.y
-        or c:geometry().x+c:geometry().width+2*c.border_width == coords.x
-        or c:geometry().y+c:geometry().height+2*c.border_width == coords.y
+    or c:geometry().x+c:geometry().width+2*c.border_width == coords.x
+    or c:geometry().y+c:geometry().height+2*c.border_width == coords.y
 end
 
 for s=1, 8 do
