@@ -19,6 +19,7 @@ env:
     - LUA=5.2 LUANAME=lua5.2 LGIVER=0.7.1 TESTS_SCREEN_SIZE=1921x1079
     # Lua 5.3 isn't available in Ubuntu Trusty, so some magic below installs it.
     - LUA=5.3 LUANAME=lua5.3 LUALIBRARY=/usr/lib/liblua.so DO_COVERAGE=codecov
+    - LUA=5.3 LUANAME=lua5.3 LUALIBRARY=/usr/lib/liblua.so DO_COVERAGE=codecov BUILD_APIDOC=true
   global:
     # Secure GH_APIDOC_TOKEN to push to awesomeWM/apidoc.
     - secure: "R/HYDclnws1I1+v9Yjt+RKa4CsFhbBT9tiwE3EfPhEj2KCYX4sFRMxuZvLf5sq0XWdrQaPhQ54fgAZGr3f054JKRXcTB0g9J6nhSHz9kIjPh446gafUhEeDQcZRwM/MeCWiwFIkiZm6smYoDFE9JTWu6quNV+lQ4kcVDOp2ibEc="
