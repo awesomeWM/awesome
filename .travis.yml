@@ -24,6 +24,7 @@ env:
     - secure: "R/HYDclnws1I1+v9Yjt+RKa4CsFhbBT9tiwE3EfPhEj2KCYX4sFRMxuZvLf5sq0XWdrQaPhQ54fgAZGr3f054JKRXcTB0g9J6nhSHz9kIjPh446gafUhEeDQcZRwM/MeCWiwFIkiZm6smYoDFE9JTWu6quNV+lQ4kcVDOp2ibEc="
 
 before_install:
+  - if [ "$BUILD_APIDOC" == true ] && [ -n "$DO_COVERAGE" ]; then echo "BUILD_APIDOC and DO_COVERAGE are not meant to be used together." >&2; exit 1; fi
   - if [ -z $LUAINCLUDE ]; then LUAINCLUDE=/usr/include/${LUANAME}; fi
   - if [ -z $LUALIBRARY ]; then LUALIBRARY=/usr/lib/x86_64-linux-gnu/lib${LUANAME}.so; fi
   - cmake --version
