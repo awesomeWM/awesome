@@ -12,7 +12,7 @@ awesomerc - конфигурационный файл для потрясающ�
 
 * $XDG_CONFIG_HOME/awesome/rc.lua
 * $HOME/.config/awesome/rc.lua
-* XDG_CONFIG_DIRS/awesome/rc.lua
+* $XDG_CONFIG_DIRS/awesome/rc.lua
 
 ОПИСАНИЕ
 --------
