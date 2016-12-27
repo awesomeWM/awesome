@@ -15,6 +15,16 @@ backtick_references=true
 merge=true
 use_markdown_titles=true
 wrap=true
+full_description = [[
+Welcome to the documentation for the awesome window manager. Below you find an
+overview of the individual parts which links to the full documentation.
+
+If you are a new user, you may want to read @{07-my-first-awesome.md} to get
+started. In @{05-awesomerc.md}, the default configuration is explained.
+
+If you already used awesome in the past, @{89-NEWS.md} and @{17-porting-tips.md}
+should be useful for you.
+]]
 topics={
     '00-authors.md',
     '01-readme.md',
