@@ -7,21 +7,15 @@ local first_layout = nil
 
 local t = nil
 
-local has_spawned = false
-
 local steps = {
 
 -- Add enough clients
 function(count)
-    if count <= 1 and not has_spawned then
-        for _=1, 5 do awful.spawn("xterm") end
-        has_spawned = true
+    if count <= 5 then
+      awful.spawn("xterm")
     elseif #client.get() >= 5 then
-
         first_layout = client.focus:tags()[1].layout
-
         t = client.focus:tags()[1]
-
         return true
     end
 end,
