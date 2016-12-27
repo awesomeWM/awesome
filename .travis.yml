@@ -89,7 +89,7 @@ install:
   - if [ "$DO_CHECKQA" = 1 ]; then travis_retry sudo luarocks install luacheck; fi
 
   # Install ldoc for building docs.
-  - travis_retry sudo luarocks install ldoc 1.4.4
+  - travis_retry sudo luarocks install ldoc
   - travis_retry sudo luarocks install lua-discount
 
   # Install dependencies for code coverage testing.
