@@ -24,14 +24,14 @@ local function new_tag(_, args)
     table.insert(root._tags, ret)
 
     return setmetatable(ret, {
-        __index     = function(...) return meta.__index(...) end,
-        __newindex = function(...) return meta.__newindex(...) end
-    })
+                        __index     = function(...) return meta.__index(...) end,
+                        __newindex = function(...) return meta.__newindex(...) end
+                    })
 end
 
 return setmetatable(tag, {
-    __call      = new_tag,
-})
+                    __call      = new_tag,
+                })
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
 

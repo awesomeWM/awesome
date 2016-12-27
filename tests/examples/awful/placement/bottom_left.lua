@@ -12,8 +12,8 @@ local c = client.gen_fake {x = 45, y = 35, width=40, height=30} --DOC_HIDE
 awful.placement.bottom_left(client.focus)
 
 assert( --DOC_HIDE
-    c.x == 0 --DOC_HIDE
-    and c.y+2*c.border_width == screen[1].geometry.height-30 --DOC_HIDE
-    and c.width == 40--DOC_HIDE
-    and c.height == 30--DOC_HIDE
-) --DOC_HIDE
+       c.x == 0 --DOC_HIDE
+       and c.y+2*c.border_width == screen[1].geometry.height-30 --DOC_HIDE
+       and c.width == 40--DOC_HIDE
+       and c.height == 30--DOC_HIDE
+       ) --DOC_HIDE

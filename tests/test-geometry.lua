@@ -11,14 +11,14 @@ local w1_draw, w2_draw
 -- Disable automatic placement
 awful.rules.rules = {
     { rule = { }, properties = {
-            border_width     = 0,
-            size_hints_honor = false,
-            x                = 0,
-            y                = 0,
-            width            = 100,
-            height           = 100,
-            border_color     = beautiful.border_normal
-        }
+    border_width     = 0,
+    size_hints_honor = false,
+    x                = 0,
+    y                = 0,
+    width            = 100,
+    height           = 100,
+    border_color     = beautiful.border_normal
+}
     }
 }
 
@@ -55,22 +55,22 @@ local steps = {
         awful.rules.rules = {
             -- All clients will match this rule.
             { rule = { },properties = {
-                    titlebars_enabled = true,
-                    border_width      = 10,
-                    border_color      = "#00ff00",
-                    size_hints_honor  = false,
-                    x                 = 0,
-                    y                 = 0,
-                    width             = 100,
-                    height            = 100
-                }
-            }
+            titlebars_enabled = true,
+            border_width      = 10,
+            border_color      = "#00ff00",
+            size_hints_honor  = false,
+            x                 = 0,
+            y                 = 0,
+            width             = 100,
+            height            = 100
         }
-        return true
+    }
+}
+return true
     end,
     function(count)
         if count == 1 then
-        awful.spawn("xterm")
+            awful.spawn("xterm")
         else
             local c = client.get()[1]
             if c then

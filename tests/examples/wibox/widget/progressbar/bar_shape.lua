@@ -12,16 +12,16 @@ local l = wibox.layout { --DOC_HIDE
 
 for _, shape in ipairs {"rounded_bar", "octogon", "hexagon", "powerline" } do
     l:add(wibox.widget {
-        value            = 0.33,
-        bar_shape        = gears.shape[shape],
-        bar_border_color = beautiful.border_color,
-        bar_border_width = 1,
-        border_width     = 2,
-        border_color     = beautiful.border_color,
-        margins          = 5, --DOC_HIDE
-        paddings         = 1,
-        widget           = wibox.widget.progressbar,
-    })
+          value            = 0.33,
+          bar_shape        = gears.shape[shape],
+          bar_border_color = beautiful.border_color,
+          bar_border_width = 1,
+          border_width     = 2,
+          border_color     = beautiful.border_color,
+          margins          = 5, --DOC_HIDE
+          paddings         = 1,
+          widget           = wibox.widget.progressbar,
+      })
 end
 
 parent:add(l) --DOC_HIDE

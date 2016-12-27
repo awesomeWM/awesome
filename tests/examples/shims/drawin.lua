@@ -11,14 +11,14 @@ local function new_drawin(_, args)
     end
 
     return setmetatable(ret, {
-        __index     = function(...) return meta.__index(...) end,
-        __newindex = function(...) return meta.__newindex(...) end
-    })
+                        __index     = function(...) return meta.__index(...) end,
+                        __newindex = function(...) return meta.__newindex(...) end
+                    })
 end
 
 return setmetatable(drawin, {
-    __call      = new_drawin,
-})
+                    __call      = new_drawin,
+                })
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
 

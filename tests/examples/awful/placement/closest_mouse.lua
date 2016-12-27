@@ -5,7 +5,7 @@ local bw = c.border_width --DOC_HIDE
 
 -- Left  --DOC_HIDE
 mouse.coords {x=100,y=100} --DOC_HIDE
- -- Move the mouse to the closest corner of the focused client
+-- Move the mouse to the closest corner of the focused client
 awful.placement.closest_corner(mouse, {include_sides=true, parent=c})
 mouse.push_history() --DOC_HIDE
 assert(mouse.coords().x == c.x) --DOC_HIDE
@@ -53,8 +53,8 @@ awful.placement.closest_corner(mouse, {include_sides=true, parent=c}) --DOC_HIDE
 mouse.push_history() --DOC_HIDE
 assert(mouse.coords().x == c.x and mouse.coords().y == c.y+c.height+2*bw) --DOC_HIDE
 
- -- It is possible to emulate the mouse API to get the closest corner of
- -- random area
+-- It is possible to emulate the mouse API to get the closest corner of
+-- random area
 local _, corner = awful.placement.closest_corner(
     {coords=function() return {x = 100, y=100} end},
     {include_sides = true, bounding_rect = {x=0, y=0, width=200, height=200}}

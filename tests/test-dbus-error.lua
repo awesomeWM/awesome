@@ -17,13 +17,13 @@ dbus.connect_signal("org.awesomewm.test", dbus_callback)
 
 for _=1, 2 do
     awful.spawn({
-        "dbus-send",
-        "--dest=org.awesomewm.test",
-        "--type=method_call",
-        "/",
-        "org.awesomewm.test.Ping",
-        "string:foo"
-    })
+                "dbus-send",
+                "--dest=org.awesomewm.test",
+                "--type=method_call",
+                "/",
+                "org.awesomewm.test.Ping",
+                "string:foo"
+            })
 end
 
 runner.run_steps({ function()

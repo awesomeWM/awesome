@@ -1,8 +1,8 @@
 local gears = require("gears") --DOC_HIDE
 
- -- Create a class for this object. It will be used as a backup source for
- -- methods and accessors. It is also possible to set them directly on the
- -- object.
+-- Create a class for this object. It will be used as a backup source for
+-- methods and accessors. It is also possible to set them directly on the
+-- object.
 local class = {}
 
 function class:get_foo()
@@ -39,7 +39,7 @@ print(o.foo)
 
 o:method(1, 2, 3)
 
- -- Random properties can also be added, the signal will be emitted automatically.
+-- Random properties can also be added, the signal will be emitted automatically.
 
 o:connect_signal("property::something", function(obj, value)
     assert(obj == o)

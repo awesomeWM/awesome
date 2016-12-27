@@ -35,9 +35,9 @@ local container = wibox.widget {
                 shape_border_width = beautiful.border_width,
                 widget             = wibox.container.background,
                 shape              = shape.transform(shape.arrow)
-                                        : rotate_at(15,15,math.pi/2)
-                                        : translate(0,-8)
-                                        : scale(0.9, 0.9),
+                : rotate_at(15,15,math.pi/2)
+                : translate(0,-8)
+                : scale(0.9, 0.9),
             },
             strategy = 'exact',
             width    = 42,
