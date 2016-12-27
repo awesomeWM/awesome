@@ -19,6 +19,7 @@ endfunction()
 function(generate_widget_list name)
     file(GLOB ex_files RELATIVE "${SOURCE_DIR}/tests/examples/wibox/${name}/defaults"
     "${SOURCE_DIR}/tests/examples/wibox/${name}/defaults/*")
+    list(SORT ex_files)
 
     # Add the table header
     set(MY_LIST "<table class='widget_list' border=1>\n\
