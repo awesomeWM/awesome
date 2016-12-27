@@ -23,6 +23,7 @@ topics={
     '04-new-widgets.md',
     '05-awesomerc.md',
     '06-appearance.md',
+    '07-my-first-awesome.md',
     '16-using-cairo.md',
     '17-porting-tips.md',
     '90-FAQ.md',
