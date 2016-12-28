@@ -107,7 +107,7 @@ local instances
 -- @tparam[opt=nil] string bg_image_minimize
 
 --- Disable the tasklist client icons.
--- @beautiful beautiful.tasklist_tasklist_disable_icon
+-- @beautiful beautiful.tasklist_disable_icon
 -- @tparam[opt=false] boolean tasklist_disable_icon
 
 --- Disable the extra tasklist client property notification icons.
