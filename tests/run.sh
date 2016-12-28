@@ -15,8 +15,8 @@ set -e
 export SHELL=/bin/sh
 export HOME=/dev/null
 
-# Be verbose on Travis.
-if [ "$CI" = true ]; then
+VERBOSE=${VERBOSE-0}
+if [ "$VERBOSE" = 1 ]; then
     set -x
 fi
 
@@ -99,7 +99,7 @@ awesome_log=$tmp_files/_awesome_test.log
 echo "awesome_log: $awesome_log"
 
 wait_until_success() {
-    if [ "$CI" = true ]; then
+    if [ "$VERBOSE" = 1 ]; then
         set +x
     fi
     wait_count=60  # 60*0.05s => 3s.
@@ -124,7 +124,7 @@ wait_until_success() {
         fi
         sleep 0.05
     done
-    if [ "$CI" = true ]; then
+    if [ "$VERBOSE" = 1 ]; then
         set -x
     fi
 }
