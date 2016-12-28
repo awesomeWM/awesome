@@ -201,13 +201,18 @@ script:
         echo "Testing commit $commit"
         git checkout "$commit"
         git --no-pager show --stat
-        if ! make all check; then
+        if ! DO_COVERAGE=0 make all check; then
           failed="$failed $commit"
         fi
         travis_fold_end
       done
+
+      git checkout -qf FETCH_HEAD
       if [ -n "$failed" ]; then
-        echo "Checks failed for these commits:$failed"
+        echo "Checks failed for these commits:"
+        for c in $commits; do
+          git log -1 --pretty="%h %s (%an, %ad)" "$c"
+        done
         false
       fi
     fi
