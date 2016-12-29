@@ -107,6 +107,7 @@ local timer_instance_mt = {
 -- @tparam[opt=false] boolean args.autostart Automatically start the timer.
 -- @tparam[opt=nil] function args.callback Callback function to connect to the
 --  "timeout" signal.
+-- @tparam[opt=false] boolean args.single_shot Run only once then stop.
 -- @treturn timer
 -- @function gears.timer
 function timer.new(args)
@@ -126,6 +127,10 @@ function timer.new(args)
 
     if args.callback then
         ret:connect_signal("timeout", args.callback)
+    end
+
+    if args.single_shot then
+        ret:connect_signal("timeout", function() ret:stop() end)
     end
 
     return ret
