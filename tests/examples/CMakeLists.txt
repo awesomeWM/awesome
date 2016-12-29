@@ -14,21 +14,43 @@ cmake_minimum_required(VERSION 3.0.0)
 # Get and update the LUA_PATH so the scripts can be executed without Awesome.
 execute_process(COMMAND lua -e print\(package.path\) OUTPUT_VARIABLE "LUA_PATH_")
 
+# Make sure the system can be called from the test directory
+if(NOT SOURCE_DIR AND ${CMAKE_CURRENT_SOURCE_DIR} MATCHES "/tests/examples")
+    set(SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../")
+
+    # .luacov use these variables
+    set(ENV{BUILD_DIRECTORY} ${CMAKE_CURRENT_BINARY_DIR}/)
+    set(ENV{AWESOME_LIB_DIR} ${SOURCE_DIR}/lib/)
+    set(ENV{SOURCE_DIRECTORY} ${SOURCE_DIR})
+else()
+    set(SOURCE_DIR ${CMAKE_SOURCE_DIR})
+endif()
+
 # Add the main awesome lua libraries.
 set(LUA_PATH2_ "\
-${CMAKE_SOURCE_DIR}/lib/?.lua;\
-${CMAKE_SOURCE_DIR}/lib/?/init.lua;\
-${CMAKE_SOURCE_DIR}/lib/?;\
-${CMAKE_SOURCE_DIR}/themes/?.lua;\
-${CMAKE_SOURCE_DIR}/themes/?;"
+${SOURCE_DIR}/lib/?.lua;\
+${SOURCE_DIR}/lib/?/init.lua;\
+${SOURCE_DIR}/lib/?;\
+${SOURCE_DIR}/themes/?.lua;\
+${SOURCE_DIR}/themes/?;"
 )
 
 # Add the C API shims.
 set(LUA_PATH3_ "\
-${CMAKE_SOURCE_DIR}/tests/examples/shims/?.lua;\
-${CMAKE_SOURCE_DIR}/tests/examples/shims/?/init.lua;\
-${CMAKE_SOURCE_DIR}/tests/examples/shims/?;"
+${SOURCE_DIR}/tests/examples/shims/?.lua;\
+${SOURCE_DIR}/tests/examples/shims/?/init.lua;\
+${SOURCE_DIR}/tests/examples/shims/?;"
 )
+
+# Use the example testing as coverage source.
+if (USE_LCOV)
+    set(LCOV_PATH ${SOURCE_DIR}/.luacov)
+
+    if (NOT EXISTS "${LCOV_PATH}")
+        message(WARNING "The luacov configuration file was not found")
+        unset(LCOV_PATH)
+    endif()
+endif()
 
 # Done in 3 variables to avoid CMake from implicitly converting into a list.
 set(ENV{LUA_PATH} "${LUA_PATH3_}${LUA_PATH2_}${LUA_PATH_}")
@@ -147,11 +169,6 @@ function(run_test test_path namespace escaped_content)
     # Get the file name without the extension.
     get_filename_component(${test_path} TEST_FILE_NAME NAME)
     set(IMAGE_PATH "${IMAGE_DIR}/AUTOGEN${namespace}_${TEST_FILE_NAME}")
-
-    # Use the example testing as coverage source.
-    if (USE_LCOV)
-        set(LCOV_PATH ${SOURCE_DIR}/.luacov)
-    endif()
 
     # Execute the script, leave the image extension decision to the test.
     # SVG is preferred, but PNG is better suited for some tests, like bitmap
