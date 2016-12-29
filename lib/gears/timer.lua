@@ -104,9 +104,11 @@ local timer_instance_mt = {
 --- Create a new timer object.
 -- @tparam table args Arguments.
 -- @tparam number args.timeout Timeout in seconds (e.g. 1.5).
+-- @tparam[opt=false] boolean args.autostart Automatically start the timer.
 -- @treturn timer
 -- @function gears.timer
-timer.new = function(args)
+function timer.new(args)
+    args = args or {}
     local ret = object()
 
     ret.data = { timeout = 0 }
@@ -114,6 +116,10 @@ timer.new = function(args)
 
     for k, v in pairs(args) do
         ret[k] = v
+    end
+
+    if args.autostart then
+        ret:start()
     end
 
     return ret
