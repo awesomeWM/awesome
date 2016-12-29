@@ -10,20 +10,13 @@ branches:
 
 env:
   matrix:
-    - LUA=5.2 DO_CHECKQA=1 LUANAME=lua5.2 BUILD_APIDOC=true DO_COVERAGE=coveralls
-    # luajit: installed from source.
-    - LUA=5.1 LUANAME=luajit-2.0 LUALIBRARY=/usr/lib/libluajit-5.1.so LUAROCKS_ARGS=--lua-suffix=jit-2.0.4 TEST_PREV_COMMITS=1
-    # Note: luarocks does not work with Lua 5.0.
-    - LUA=5.1 LUANAME=lua5.1 BUILD_IN_DIR=/tmp/awesome-build
-    # Lua 5.2 with older lgi and screen size not divisible by 2.
-    - LUA=5.2 LUANAME=lua5.2 LGIVER=0.7.1 TESTS_SCREEN_SIZE=1921x1079
-    # Lua 5.3 isn't available in Ubuntu Trusty, so some magic below installs it.
-    - LUA=5.3 LUANAME=lua5.3 LUALIBRARY=/usr/lib/liblua.so DO_COVERAGE=codecov
+    - LUA=5.2 DO_CHECKQA=1 LUANAME=lua5.2 DO_COVERAGE=coveralls
   global:
     # Secure GH_APIDOC_TOKEN to push to awesomeWM/apidoc.
     - secure: "R/HYDclnws1I1+v9Yjt+RKa4CsFhbBT9tiwE3EfPhEj2KCYX4sFRMxuZvLf5sq0XWdrQaPhQ54fgAZGr3f054JKRXcTB0g9J6nhSHz9kIjPh446gafUhEeDQcZRwM/MeCWiwFIkiZm6smYoDFE9JTWu6quNV+lQ4kcVDOp2ibEc="
 
 before_install:
+  - if [ "$BUILD_APIDOC" == true ] && [ -n "$DO_COVERAGE" ]; then echo "BUILD_APIDOC and DO_COVERAGE are not meant to be used together." >&2; exit 1; fi
   - if [ -z $LUAINCLUDE ]; then LUAINCLUDE=/usr/include/${LUANAME}; fi
   - if [ -z $LUALIBRARY ]; then LUALIBRARY=/usr/lib/x86_64-linux-gnu/lib${LUANAME}.so; fi
   - cmake --version
@@ -89,8 +82,11 @@ install:
   - if [ "$DO_CHECKQA" = 1 ]; then travis_retry sudo luarocks install luacheck; fi
 
   # Install ldoc for building docs.
-  - travis_retry sudo luarocks install ldoc 1.4.4
-  - travis_retry sudo luarocks install lua-discount
+  - |
+    if [ "$BUILD_APIDOC" == "true" ]; then
+      travis_retry sudo luarocks install ldoc 1.4.4
+      travis_retry sudo luarocks install lua-discount
+    fi
 
   # Install dependencies for code coverage testing.
   - if [ "$DO_COVERAGE" = "" ]; then export DO_COVERAGE=0; fi
@@ -104,6 +100,10 @@ install:
   - travis_retry wget -O /tmp/codecov-bash https://codecov.io/bash
   - |
     do_codecov() {
+      if [ -d "$2" ]; then
+        cp $2/luacov.stats.out build/
+      fi
+
       if [ "$DO_COVERAGE" = "codecov" ]; then
         (cd build && luacov) || return 1
         travis_retry bash /tmp/codecov-bash -X coveragepy -c -F "$1" || return 1
@@ -147,16 +147,16 @@ script:
       travis_run_in_fold "make.install" sudo env PATH=$PATH make install
       awesome --version
     fi
-  - |
-    if [ "$TRAVIS_TEST_RESULT" = 0 ]; then
-      do_codecov samples
-    fi
   # Run check-unit{,-coverage} and check-integration.
   - |
     set -ev
     if [ "$TRAVIS_TEST_RESULT" = 0 ]; then
       if [ "$DO_COVERAGE" != "0" ]; then
         travis_fold_start "DO_COVERAGE"
+
+        (mkdir -p tests/examples/build && cd tests/examples/build && cmake $CMAKE_ARGS -DUSE_LCOV=1 "..")
+        do_codecov samples tests/examples/build
+
         (make check-unit-coverage \
          && do_codecov unittests \
          && sed -i "1 i\\require('luacov.runner')('"$PWD"/.luacov')" build/awesomerc.lua \
