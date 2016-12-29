@@ -1,3 +1,8 @@
+-- luacheck: globals string
+function string.wlen(self)
+    return #self
+end
+
 return function(_, _)
 
     -- Set the global shims
