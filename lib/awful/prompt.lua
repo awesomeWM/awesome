@@ -273,6 +273,10 @@ local function prompt_text_with_cursor(args)
     local cursor_color = util.ensure_pango_color(args.cursor_color)
     local text_color = util.ensure_pango_color(args.text_color)
 
+    if args.highlighter then
+        text_start, text_end = args.highlighter(text_start, text_end)
+    end
+
     ret = _prompt .. text_start .. "<span background=\"" .. cursor_color ..
         "\" foreground=\"" .. text_color .. "\" underline=\"" .. underline ..
         "\">" .. char .. "</span>" .. text_end .. spacer
@@ -334,6 +338,15 @@ end
 -- @tparam string key The key name.
 -- @tparam string command The current command.
 
+--- A function to add syntax highlighting to the command.
+-- @usage local function my_highlighter(before_cursor, after_cursor)
+--    -- do something
+--    return before_cursor, after_cursor
+-- end
+-- @callback highlighter
+-- @tparam string before_cursor
+-- @tparam string after_cursor
+
 --- Run a prompt in a box.
 --
 -- @tparam[opt={}] table args A table with optional arguments
@@ -346,6 +359,8 @@ end
 -- @tparam[opt] string args.font
 -- @tparam[opt] boolean args.autoexec
 -- @tparam widget args.textbox The textbox to use for the prompt.
+-- @tparam[opt] function args.highlighter A function to add syntax highlighting to
+--  the command.
 -- @tparam function args.exe_callback The callback function to call with command as argument
 -- when finished.
 -- @tparam function args.completion_callback The callback function to call to get completion.
@@ -416,6 +431,7 @@ function prompt.run(args, textbox, exe_callback, completion_callback,
     local text = args.text or ""
     local font = args.font or theme.font
     local selectall = args.selectall
+    local highlighter = args.highlighter
     local hooks = {}
 
     -- A function with 9 parameters deserve to die
@@ -500,7 +516,7 @@ function prompt.run(args, textbox, exe_callback, completion_callback,
     textbox:set_markup(prompt_text_with_cursor{
         text = text, text_color = inv_col, cursor_color = cur_col,
         cursor_pos = cur_pos, cursor_ul = cur_ul, selectall = selectall,
-        prompt = prettyprompt })
+        prompt = prettyprompt, highlighter =  highlighter})
 
     local function exec(cb, command_to_history)
         textbox:set_markup("")
@@ -516,7 +532,7 @@ function prompt.run(args, textbox, exe_callback, completion_callback,
         textbox:set_markup(prompt_text_with_cursor{
                                text = command, text_color = inv_col, cursor_color = cur_col,
                                cursor_pos = cur_pos, cursor_ul = cur_ul, selectall = selectall,
-                               prompt = prettyprompt })
+                               prompt = prettyprompt, highlighter =  highlighter })
     end
 
     grabber = keygrabber.run(
