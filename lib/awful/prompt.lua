@@ -353,6 +353,24 @@ end
 -- @tparam string before_cursor
 -- @tparam string after_cursor
 
+--- A callback when a key combination is triggered.
+-- This callback can return many things:
+--
+-- * a modified command
+-- * `true` If the command is successful (then it won't exit)
+-- * nothing or `nil` to execute the `exe_callback` and `done_callback` and exit
+--
+-- An optional second return value controls if the prompt should exit or simply
+-- update the command (from the first return value) and keep going. The default
+-- is to execute the `exe_callback` and `done_callback` before exiting.
+--
+-- @usage local function my_hook(command)
+--    return command.."foo", false
+-- end
+--
+-- @callback hook
+-- @tparam string command The current command.
+
 --- Run a prompt in a box.
 --
 -- @tparam[opt={}] table args A table with optional arguments
