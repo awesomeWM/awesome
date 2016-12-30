@@ -1,6 +1,6 @@
 local filename, rcfile, new_rcfile = ...
 
-local f = io.open(filename, "w")
+local f = assert(io.open(filename, "w"))
 
 f:write[[# Default configuration file documentation
 
@@ -238,7 +238,7 @@ end
 
 -- Parse the default awesomerc.lua
 
-local rc = io.open(rcfile)
+local rc = assert(io.open(rcfile))
 
 local doc_block = false
 
@@ -293,6 +293,6 @@ f:write("\n")
 
 f:close()
 
-local rc_lua = io.open(new_rcfile, "w")
+local rc_lua = assert(io.open(new_rcfile, "w"))
 rc_lua:write(table.concat(output, "\n"))
 rc_lua:close()
