@@ -65,6 +65,13 @@
 --
 -- @DOC_wibox_awidget_prompt_hooks_EXAMPLE@
 --
+-- *[Example two] Modifying the command (+ vi like input)*:
+--
+-- The hook system also allows to modify the command before interpreting it in
+-- the `exe_callback`.
+--
+-- @DOC_wibox_awidget_prompt_vilike_EXAMPLE@
+--
 --
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2008 Julien Danjou
