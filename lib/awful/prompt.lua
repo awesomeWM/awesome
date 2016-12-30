@@ -279,6 +279,61 @@ local function prompt_text_with_cursor(args)
     return ret
 end
 
+--- The callback function to call with command as argument when finished.
+-- @usage local function my_exe_cb(command)
+--    -- do something
+-- end
+-- @callback exe_callback
+-- @tparam string command The command (as entered).
+
+--- The callback function to call to get completion.
+-- @usage local function my_completion_cb(command_before_comp, cur_pos_before_comp, ncomp)
+--    return command_before_comp.."foo", cur_pos_before_comp+3, 1
+-- end
+--
+-- @callback completion_callback
+-- @tparam string command_before_comp The current command.
+-- @tparam number cur_pos_before_comp The current cursor position.
+-- @tparam number ncomp The number of completion elements.
+-- @treturn string command
+-- @treturn number cur_pos
+-- @treturn number matches
+
+--- The callback function to always call without arguments, regardless of
+-- whether the prompt was cancelled.
+-- @usage local function my_done_cb()
+--    -- do something
+-- end
+-- @callback done_callback
+
+---  The callback function to call with command as argument when a command was
+-- changed.
+-- @usage local function my_changed_cb(command)
+--    -- do something
+-- end
+-- @callback changed_callback
+-- @tparam string command The current command.
+
+--- The callback function to call with mod table, key and command as arguments
+-- when a key was pressed.
+-- @usage local function my_keypressed_cb(mod, key, command)
+--    -- do something
+-- end
+-- @callback keypressed_callback
+-- @tparam table mod The current modifiers (like "Control" or "Shift").
+-- @tparam string key The key name.
+-- @tparam string command The current command.
+
+--- The callback function to call with mod table, key and command as arguments
+-- when a key was released.
+-- @usage local function my_keyreleased_cb(mod, key, command)
+--    -- do something
+-- end
+-- @callback keyreleased_callback
+-- @tparam table mod The current modifiers (like "Control" or "Shift").
+-- @tparam string key The key name.
+-- @tparam string command The current command.
+
 --- Run a prompt in a box.
 --
 -- @tparam[opt={}] table args A table with optional arguments
