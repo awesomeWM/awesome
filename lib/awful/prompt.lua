@@ -1,6 +1,45 @@
 ---------------------------------------------------------------------------
 --- Prompt module for awful.
 --
+-- **Keyboard navigation**:
+--
+-- The following readline keyboard shortcuts are implemented as expected:
+-- <table class='widget_list' border=1>
+--   <tr><th>Name</th><th>Usage</th></tr>
+--   <tr><td><kbd>CTRL+A</kbd></td><td>beginning-of-line</td></tr>
+--   <tr><td><kbd>CTRL+B</kbd></td><td>backward-char</td></tr>
+--   <tr><td><kbd>CTRL+C</kbd></td><td>cancel</td></tr>
+--   <tr><td><kbd>CTRL+D</kbd></td><td>delete-char</td></tr>
+--   <tr><td><kbd>CTRL+E</kbd></td><td>end-of-line</td></tr>
+--   <tr><td><kbd>CTRL+J</kbd></td><td>accept-line</td></tr>
+--   <tr><td><kbd>CTRL+M</kbd></td><td>accept-line</td></tr>
+--   <tr><td><kbd>CTRL+F</kbd></td><td>move-cursor-right</td></tr>
+--   <tr><td><kbd>CTRL+H</kbd></td><td>backward-delete-char</td></tr>
+--   <tr><td><kbd>CTRL+K</kbd></td><td>kill-line</td></tr>
+--   <tr><td><kbd>CTRL+U</kbd></td><td>unix-line-discard</td></tr>
+--   <tr><td><kbd>CTRL+W</kbd></td><td>unix-word-rubout</td></tr>
+--   <tr><td><kbd>CTRL+BACKSPACE</kbd></td><td>unix-word-rubout</td></tr>
+--   <tr><td><kbd>SHIFT+INSERT</kbd></td><td>paste</td></tr>
+--   <tr><td><kbd>HOME</kbd></td><td>beginning-of-line</td></tr>
+--   <tr><td><kbd>END</kbd></td><td>end-of-line</td></tr>
+-- </table>
+--
+-- The following shortcuts implement additional history manipulation commands
+-- where the search term is defined as the substring of the command from first
+-- character to cursor position.
+--
+-- * <kbd>CTRL+R</kbd>: reverse history search, matches any history entry
+-- containing search term.
+-- * <kbd>CTRL+S</kbd>: forward history search, matches any history entry
+-- containing search term.
+-- * <kbd>CTRL+UP</kbd>: ZSH up line or search, matches any history entry
+-- starting with search term.
+-- * <kbd>CTRL+DOWN</kbd>: ZSH down line or search, matches any history
+-- entry starting with search term.
+-- * <kbd>CTRL+DELETE</kbd>: delete the currently visible history entry from
+-- history file. This does not delete new commands or history entries under
+-- user editing.
+--
 -- **Basic usage**:
 --
 -- By default, `rc.lua` will create one `awful.widget.prompt` per screen called
@@ -213,29 +252,6 @@ local function prompt_text_with_cursor(args)
 end
 
 --- Run a prompt in a box.
---
--- The following readline keyboard shortcuts are implemented as expected:
--- <kbd>CTRL+A</kbd>, <kbd>CTRL+B</kbd>, <kbd>CTRL+C</kbd>, <kbd>CTRL+D</kbd>,
--- <kbd>CTRL+E</kbd>, <kbd>CTRL+J</kbd>, <kbd>CTRL+M</kbd>, <kbd>CTRL+F</kbd>,
--- <kbd>CTRL+H</kbd>, <kbd>CTRL+K</kbd>, <kbd>CTRL+U</kbd>, <kbd>CTRL+W</kbd>,
--- <kbd>CTRL+BACKSPACE</kbd>, <kbd>SHIFT+INSERT</kbd>, <kbd>HOME</kbd>,
--- <kbd>END</kbd> and arrow keys.
---
--- The following shortcuts implement additional history manipulation commands
--- where the search term is defined as the substring of the command from first
--- character to cursor position.
---
--- * <kbd>CTRL+R</kbd>: reverse history search, matches any history entry
--- containing search term.
--- * <kbd>CTRL+S</kbd>: forward history search, matches any history entry
--- containing search term.
--- * <kbd>CTRL+UP</kbd>: ZSH up line or search, matches any history entry
--- starting with search term.
--- * <kbd>CTRL+DOWN</kbd>: ZSH down line or search, matches any history
--- entry starting with search term.
--- * <kbd>CTRL+DELETE</kbd>: delete the currently visible history entry from
--- history file. This does not delete new commands or history entries under
--- user editing.
 --
 -- @tparam[opt={}] table args A table with optional arguments
 -- @tparam[opt] gears.color args.fg_cursor
