@@ -72,6 +72,16 @@
 --
 -- @DOC_wibox_awidget_prompt_vilike_EXAMPLE@
 --
+-- *[Example three] Key listener*:
+--
+-- The 2 previous examples were focused on changing the prompt behavior. This
+-- one explains how to "spy" on the prompt events. This can be used for
+--
+-- * Implementing more complex mutator
+-- * Synchronising other widgets
+-- * Showing extra tips to the user
+--
+-- @DOC_wibox_awidget_prompt_keypress_EXAMPLE@
 --
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2008 Julien Danjou
