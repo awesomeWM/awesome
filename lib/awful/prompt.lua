@@ -55,6 +55,17 @@
 -- Note that this assumes an `rc.lua` file based on the default one. The way
 -- to access the screen prompt may vary.
 --
+-- **Extra key hooks**:
+--
+-- The Awesome prompt also supports adding custom extensions to specific
+-- keyboard keybindings. Those keybindings have precedence over the built-in
+-- ones. Therefor, they can be used to override the default ones.
+--
+-- *[Example one] Adding pre-configured `awful.spawn` commands:*
+--
+-- @DOC_wibox_awidget_prompt_hooks_EXAMPLE@
+--
+--
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2008 Julien Danjou
 -- @module awful.prompt
