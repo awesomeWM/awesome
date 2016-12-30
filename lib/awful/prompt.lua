@@ -83,6 +83,12 @@
 --
 -- @DOC_wibox_awidget_prompt_keypress_EXAMPLE@
 --
+-- **highlighting**:
+--
+-- The prompt also support custom highlighters:
+--
+-- @DOC_wibox_awidget_prompt_highlight_EXAMPLE@
+--
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2008 Julien Danjou
 -- @module awful.prompt
