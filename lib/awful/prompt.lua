@@ -485,16 +485,33 @@ function prompt.run(args, textbox, exe_callback, completion_callback,
                     end
                     if match then
                         local cb
-                        local ret = v[3](command)
+                        local ret, quit = v[3](command)
                         local original_command = command
-                        if ret then
-                            command = ret
+
+                        -- Support both a "simple" and a "complex" way to
+                        -- control if the prompt should quit.
+                        quit = quit == nil and (ret ~= true) or (quit~=false)
+
+                        -- Allow the callback to change the command
+                        command = (ret ~= true) and ret or command
+
+                        -- Quit by default, but allow it to be disabled
+                        if ret and type(ret) ~= "boolean" then
                             cb = exe_callback
-                        else
+                            if not quit then
+                                cur_pos = ret:wlen() + 1
+                                update()
+                            end
+                        elseif quit then
                             -- No callback.
                             cb = function() end
                         end
-                        exec(cb, original_command)
+
+                        -- Execute the callback
+                        if cb then
+                            exec(cb, original_command)
+                        end
+
                         return
                     end
                 end
