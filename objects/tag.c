@@ -339,6 +339,7 @@ untag_client(client_t *c, tag_t *t)
             client_array_take(&t->clients, i);
             banning_need_update();
             ewmh_client_update_desktop(c);
+            screen_update_workarea(c->screen);
             tag_client_emit_signal(t, c, "untagged");
             luaA_object_unref(L, t);
             return;
