@@ -1797,6 +1797,8 @@ client_set_sticky(lua_State *L, int cidx, bool s)
     {
         c->sticky = s;
         banning_need_update();
+        if(strut_has_value(&c->strut))
+            screen_update_workarea(c->screen);
         luaA_object_emit_signal(L, cidx, "property::sticky", 0);
     }
 }
