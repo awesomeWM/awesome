@@ -38,7 +38,8 @@ runner.run_steps = function(steps)
     local step_count=0
     assert(not running, "run_steps() was called twice")
     running = true
-    t:connect_signal("timeout", function() timer.delayed_call(function()
+
+    local function run_step()
         io.flush()  -- for "tail -f".
         step_count = step_count + 1
         local step_as_string = step..'/'..#steps..' (@'..step_count..')'
@@ -94,7 +95,11 @@ runner.run_steps = function(steps)
             io.stderr:write("Test finished successfully\n")
         end
         awesome.quit()
-    end) end)
+    end
+
+    t:connect_signal("timeout", function()
+        timer.delayed_call(run_step)
+    end)
     t:start()
 end
 
