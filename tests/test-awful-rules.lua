@@ -296,3 +296,5 @@ local function spawn_clients()
 end
 
 require("_runner").run_steps{spawn_clients, unpack(tests)}
+
+-- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
