@@ -57,7 +57,7 @@ function(escape_string variable content escaped_content line_prefix)
 
     set(tmp_output ${content})
     foreach (LINE ${var_lines})
-        if(NOT LINE MATCHES "^.+--DOC_[A-Z]+$")
+        if(NOT LINE MATCHES "^.*--DOC_[A-Z]+")
             set(tmp_output ${tmp_output}\n--${line_prefix}${LINE})
         endif()
     endforeach()
