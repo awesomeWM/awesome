@@ -321,6 +321,7 @@ tag_client(lua_State *L, client_t *c)
     client_array_append(&t->clients, c);
     ewmh_client_update_desktop(c);
     banning_need_update();
+    screen_update_workarea(c->screen);
 
     tag_client_emit_signal(t, c, "tagged");
 }
