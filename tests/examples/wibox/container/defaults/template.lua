@@ -75,3 +75,4 @@ local f_w, f_h = container:fit({dpi=96}, 9999, 9999)
 local img = surface.widget_to_svg(container, image_path..".svg", f_w, f_h)
 img:finish()
 
+-- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

@@ -7,3 +7,5 @@ print("Before:", "x="..c.x..", y="..c.y..", width="..c.width..", height="..c.hei
 awful.placement.no_offscreen(c)--, {honor_workarea=true, margins=40})
 
 print("After:", "x="..c.x..", y="..c.y..", width="..c.width..", height="..c.height) --DOC_HIDE
+
+--DOC_HIDE vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

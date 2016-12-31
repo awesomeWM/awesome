@@ -60,3 +60,5 @@ local _, corner = awful.placement.closest_corner(
     {include_sides = true, bounding_rect = {x=0, y=0, width=200, height=200}}
 )
 print("Closest corner:", corner)
+
+--DOC_HIDE vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

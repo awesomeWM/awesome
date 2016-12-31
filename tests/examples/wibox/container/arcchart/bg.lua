@@ -36,3 +36,5 @@ for _, v in ipairs {"", "#00ff00", "#0000ff"} do
 end
 
 return nil, 60
+
+--DOC_HIDE vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

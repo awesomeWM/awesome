@@ -24,3 +24,5 @@ for _, v in ipairs {0,1,3,5} do
           widget = wibox.widget.piechart
       })
 end
+
+--DOC_HIDE vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

@@ -23,3 +23,5 @@ c = client.gen_fake {x = screen[3].geometry.x+10, y = screen[3].geometry.y+10, w
 placement.align(c, {position = "center_horizontal", honor_workarea=true})
 
 return {hide_lines=true}
+
+--DOC_HIDE vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

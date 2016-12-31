@@ -11,3 +11,5 @@ local w = wibox.widget {
 w:ajust_ratio(2, 0.44, 0.33, 0.22)
 
 return w --DOC_HIDE
+
+--DOC_HIDE vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

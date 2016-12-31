@@ -11,3 +11,5 @@ show(cr) --DOC_HIDE
 
 shape.transform(shape.rectangular_tag) : translate(0, 30) (cr, 70, 10, -10)
 show(cr) --DOC_HIDE
+
+--DOC_HIDE vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

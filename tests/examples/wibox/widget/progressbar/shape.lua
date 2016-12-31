@@ -22,3 +22,5 @@ for _, shape in ipairs {"rounded_bar", "octogon", "hexagon", "powerline" } do
 end
 
 parent:add(l) --DOC_HIDE
+
+--DOC_HIDE vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

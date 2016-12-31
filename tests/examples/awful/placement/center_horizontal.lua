@@ -13,3 +13,5 @@ awful.placement.center_horizontal(client.focus)
 assert(c.x == screen[1].geometry.width/2-40/2-c.border_width)--DOC_HIDE
 assert(c.y==35)--DOC_HIDE
 assert(c.width==40 and c.height==30)--DOC_HIDE
+
+--DOC_HIDE vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

@@ -8,3 +8,5 @@ show(cr) --DOC_HIDE
 
 shape.partially_rounded_rect(cr, 70, 70, true, true, false, true, 30)
 show(cr) --DOC_HIDE
+
+--DOC_HIDE vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

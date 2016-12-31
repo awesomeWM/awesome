@@ -9,3 +9,5 @@ awful.placement.under_mouse(client.focus)
 
 assert(client.focus.x + client.focus.width /2 - mouse.coords().x <= 1) --DOC_HIDE
 assert(client.focus.y + client.focus.height/2 - mouse.coords().y <= 1) --DOC_HIDE
+
+--DOC_HIDE vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

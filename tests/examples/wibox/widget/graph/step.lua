@@ -26,3 +26,5 @@ parent:add( w ) --DOC_HIDE
 for _, v in ipairs(data) do --DOC_HIDE
     w:add_value(v) --DOC_HIDE
 end --DOC_HIDE
+
+--DOC_HIDE vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
