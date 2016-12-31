@@ -56,3 +56,5 @@ resize.add_move_callback(function(c, _, _)
 end, "mouse.move")
 
 return setmetatable(module, {__call = function(_, ...) return module.drag_to_tag(...) end})
+
+-- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
