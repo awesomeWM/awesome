@@ -1,6 +1,7 @@
 local placement   = require("awful.placement")
 local wibox       = require("wibox")
 local wibar       = require("awful.wibar")
+local test_client = require("_client")
 
 local steps = {}
 
@@ -313,6 +314,79 @@ end)
 
 table.insert(steps, function()
     check_maximize()
+
+    return true
+end)
+
+-- Now test again with a real client
+
+local c
+table.insert(steps, function()
+    -- I'm lazy, so get rid of all the wiboxes that have struts
+    parent.visible = false
+    small.visible = false
+    bwibar.visible = false
+    lwibar.visible = false
+    rwibar.visible = false
+    screen.primary.mywibox.visible = false
+
+    -- Spawn a client to test things with
+    assert(#client.get() == 0)
+    test_client()
+
+    return true
+end)
+
+-- Given a geometry and a workarea, test that the given struts are applied
+local function test_workarea(geo, wa, left, right, top, bottom)
+    -- Get the line number from where we were called (helps debugging)
+    local line = debug.getinfo(2).currentline
+
+    assert(geo.x + left == wa.x,
+        string.format("%d + %d == %d called from line %d", geo.x, left, wa.x, line))
+    assert(geo.y + top  == wa.y,
+        string.format("%d + %d == %d called from line %d", geo.y, top, wa.y, line))
+    assert(geo.width - left - right == wa.width,
+        string.format("%d - %d - %d == %d called from line %d", geo.width, left, right, wa.width, line))
+    assert(geo.height - top - bottom == wa.height,
+        string.format("%d - %d - %d == %d called from line %d", geo.height, top, bottom, wa.height, line))
+end
+
+table.insert(steps, function()
+    if #client.get() ~= 1 then
+        return
+    end
+
+    c = client.get()[1]
+    assert(c)
+    assert(c:isvisible())
+
+    -- Test some simple struts
+    c:struts { left = 50 }
+    test_workarea(c.screen.geometry, c.screen.workarea, 50, 0, 0, 0)
+
+    -- A tag switch should make the client no longer apply
+    screen.primary.tags[2]:view_only()
+    test_workarea(c.screen.geometry, c.screen.workarea, 0, 0, 0, 0)
+
+    -- But sticky clients always 'count'
+    c.sticky = true
+    test_workarea(c.screen.geometry, c.screen.workarea, 50, 0, 0, 0)
+
+    c.sticky = false
+    test_workarea(c.screen.geometry, c.screen.workarea, 0, 0, 0, 0)
+
+    -- And switch back to the right tag
+    c.first_tag:view_only()
+    test_workarea(c.screen.geometry, c.screen.workarea, 50, 0, 0, 0)
+
+    -- What if we move the client to another tag?
+    c:tags{ screen.primary.tags[2] }
+    test_workarea(c.screen.geometry, c.screen.workarea, 0, 0, 0, 0)
+
+    -- Move it back to the selected tag
+    c:tags{ screen.primary.tags[1] }
+    test_workarea(c.screen.geometry, c.screen.workarea, 50, 0, 0, 0)
 
     return true
 end)
