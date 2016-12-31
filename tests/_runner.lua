@@ -1,5 +1,7 @@
 local timer = require("gears.timer")
 local awful = require("awful")
+local glib = require("lgi").GLib
+local protected_call = require("gears.protected_call")
 
 local runner = {
     quit_awesome_on_error = os.getenv('TEST_PAUSE_ON_ERRORS') ~= '1',
@@ -39,6 +41,9 @@ runner.run_steps = function(steps)
     assert(not running, "run_steps() was called twice")
     running = true
 
+    local continue = true
+    local idle_mode = true
+
     local function run_step()
         io.flush()  -- for "tail -f".
         step_count = step_count + 1
@@ -52,21 +57,21 @@ runner.run_steps = function(steps)
         if not success then
             io.stderr:write('Error: running function for step '
                             ..step_as_string..': '..tostring(result)..'!\n')
-            t:stop()
+            continue = false
             if not runner.quit_awesome_on_error then
                 io.stderr:write("Keeping awesome open...\n")
                 return  -- keep awesome open on error.
             end
 
         elseif result then
+            idle_mode = true
             -- true: test succeeded.
             if step < #steps then
                 -- Next step.
                 step = step+1
                 step_count = 0
                 wait = 5
-                t:again()
-                return
+                return true
             end
 
         elseif result == false then
@@ -79,13 +84,14 @@ runner.run_steps = function(steps)
         else
             wait = wait-1
             if wait > 0 then
-                t:again()
+                idle_mode = false
+                -- Nothing
             else
                 io.stderr:write("Error: timeout waiting for signal in step "
                                 ..step_as_string..".\n")
-                t:stop()
+                continue = false
             end
-            return
+            return true
         end
         -- Remove any clients.
         for _,c in ipairs(client.get()) do
@@ -97,10 +103,32 @@ runner.run_steps = function(steps)
         awesome.quit()
     end
 
+    local function idle_runner()
+        if not protected_call(run_step) then
+            continue = false
+        end
+        if continue then
+            if idle_mode then
+                return true
+            else
+                t:start()
+            end
+        end
+        return false
+    end
+
     t:connect_signal("timeout", function()
-        timer.delayed_call(run_step)
+        run_step()
+        if continue then
+            if idle_mode then
+                t:stop()
+                glib.idle_add(glib.PRIORITY_DEFAULT_IDLE, idle_runner)
+            end
+        else
+            t:stop()
+        end
     end)
-    t:start()
+    glib.idle_add(glib.PRIORITY_DEFAULT_IDLE, idle_runner)
 end
 
 return runner
