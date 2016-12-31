@@ -259,3 +259,5 @@ foreach(file ${test_files})
 endforeach()
 
 message(STATUS "Example tests passed.")
+
+# vim: filetype=cmake:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80:foldmethod=marker

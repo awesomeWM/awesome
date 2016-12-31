@@ -64,3 +64,5 @@ set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "A tiling window manager")
 if(CPACK_GENERATOR)
 	include(CPack)
 endif()
+
+# vim: filetype=cmake:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80:foldmethod=marker

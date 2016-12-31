@@ -16,3 +16,5 @@ foreach(doc_file_name ${doc_files})
     # Create a new variable usable from lua files
     set(DOC_${DOC_FILE_NAME}_COMMON "Imported documentation\n\n${doc_file_content}")
 endforeach()
+
+# vim: filetype=cmake:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80:foldmethod=marker
