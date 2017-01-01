@@ -62,7 +62,7 @@ local steps = {
             -- Wait for one iteration so that gears.timer handles other delayed
             -- calls (= the tasklist updates)
             second_call = true
-        else
+        elseif #client.get() == 0 then
             assert(#objs == 1)
 
             -- Test that we have a client and that it's invalid (tostring()
