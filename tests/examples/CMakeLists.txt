@@ -104,7 +104,7 @@ endfunction()
 function(escape_code path escaped_content pre_header post_header)
     file(READ ${path} path)
 
-    escape_string("${path}\n" "" escaped_code "")
+    escape_string("${path}\n" "" escaped_code " ")
 
     extract_header("${path}" example_pre_header example_post_header)
 
