@@ -178,6 +178,7 @@
  */
 
 #include "tag.h"
+#include "screen.h"
 #include "banning.h"
 #include "client.h"
 #include "ewmh.h"
@@ -277,6 +278,8 @@ tag_view(lua_State *L, int udx, bool view)
     {
         tag->selected = view;
         banning_need_update();
+        foreach(screen, globalconf.screens)
+            screen_update_workarea(*screen);
 
         luaA_object_emit_signal(L, udx, "property::selected", 0);
     }
@@ -318,6 +321,7 @@ tag_client(lua_State *L, client_t *c)
     client_array_append(&t->clients, c);
     ewmh_client_update_desktop(c);
     banning_need_update();
+    screen_update_workarea(c->screen);
 
     tag_client_emit_signal(t, c, "tagged");
 }
@@ -336,6 +340,7 @@ untag_client(client_t *c, tag_t *t)
             client_array_take(&t->clients, i);
             banning_need_update();
             ewmh_client_update_desktop(c);
+            screen_update_workarea(c->screen);
             tag_client_emit_signal(t, c, "untagged");
             luaA_object_unref(L, t);
             return;

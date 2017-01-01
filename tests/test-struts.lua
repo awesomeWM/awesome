@@ -1,6 +1,7 @@
 local placement   = require("awful.placement")
 local wibox       = require("wibox")
 local wibar       = require("awful.wibar")
+local test_client = require("_client")
 
 local steps = {}
 
@@ -78,40 +79,40 @@ table.insert(steps, function()
 end)
 
 table.insert(steps, function()
-assert(parent:geometry().width  == 500)
-assert(parent:geometry().height == 500)
+    assert(parent:geometry().width  == 500)
+    assert(parent:geometry().height == 500)
 
-assert(parent:geometry().y == small:geometry().y)
-assert(parent:geometry().x == small:geometry().x)
-assert(parent:geometry().width == small:geometry().width )
-assert(small:geometry().height == 24)
+    assert(parent:geometry().y == small:geometry().y)
+    assert(parent:geometry().x == small:geometry().x)
+    assert(parent:geometry().width == small:geometry().width )
+    assert(small:geometry().height == 24)
 
--- Now, move the parent and see of the attached one is correctly updated
-placement.stretch_left(parent)
+    -- Now, move the parent and see of the attached one is correctly updated
+    placement.stretch_left(parent)
 
-return true
+    return true
 end)
 
 table.insert(steps, function()
-assert(parent:geometry().y == small:geometry().y)
-assert(parent:geometry().x == small:geometry().x)
-assert(parent:geometry().width == small:geometry().width )
-assert(small:geometry().height == 24)
+    assert(parent:geometry().y == small:geometry().y)
+    assert(parent:geometry().x == small:geometry().x)
+    assert(parent:geometry().width == small:geometry().width )
+    assert(small:geometry().height == 24)
 
--- Do the same, but with placement compositing
-small = wibox {
-    bg      = "#ff0000",
-    height  = 50,
-    width   = 50,
-    ontop   = true,
-    visible = true,
-}
+    -- Do the same, but with placement compositing
+    small = wibox {
+        bg      = "#ff0000",
+        height  = 50,
+        width   = 50,
+        ontop   = true,
+        visible = true,
+    }
 
-local p = placement.bottom_right + placement.scale
+    local p = placement.bottom_right + placement.scale
 
-p(small, {parent=parent, attach=true, direction="left", to_percent=0.5})
+    p(small, {parent=parent, attach=true, direction="left", to_percent=0.5})
 
-return true
+    return true
 end)
 
 local function check_ratio()
@@ -153,27 +154,27 @@ table.insert(steps, function()
 end)
 
 table.insert(steps, function()
-local wa   = screen.primary.workarea
-local sgeo = screen.primary.geometry
-local wgeo = twibar:geometry()
+    local wa   = screen.primary.workarea
+    local sgeo = screen.primary.geometry
+    local wgeo = twibar:geometry()
 
-assert(wa.width    == sgeo.width               )
-assert(wa.x        == sgeo.x                   )
-assert(wa.y        == sgeo.y + wgeo.height     )
---     assert(wa.height   == sgeo.height - wgeo.height)
---     assert(wgeo.height == sgeo.height - wa.height  )
+    assert(wa.width    == sgeo.width               )
+    assert(wa.x        == sgeo.x                   )
+    assert(wa.y        == sgeo.y + wgeo.height     )
+    --     assert(wa.height   == sgeo.height - wgeo.height)
+    --     assert(wgeo.height == sgeo.height - wa.height  )
 
-assert(parent.y      == wa.y                   )
-assert(parent.x      == wa.x                   )
-assert(parent.width  == wa.width               )
-assert(parent.height == wa.height              )
+    assert(parent.y      == wa.y                   )
+    assert(parent.x      == wa.x                   )
+    assert(parent.width  == wa.width               )
+    assert(parent.height == wa.height              )
 
--- Add more wibars
-bwibar = wibar {position = "bottom", bg = "#00ff00"}
-lwibar = wibar {position = "left"  , bg = "#0000ff"}
-rwibar = wibar {position = "right" , bg = "#ff00ff"}
+    -- Add more wibars
+    bwibar = wibar {position = "bottom", bg = "#00ff00"}
+    lwibar = wibar {position = "left"  , bg = "#0000ff"}
+    rwibar = wibar {position = "right" , bg = "#ff00ff"}
 
-return true
+    return true
 end)
 
 -- Make sure the maximized client has the right size and position
@@ -243,54 +244,54 @@ table.insert(steps, function()
 end)
 
 table.insert(steps, function()
-check_maximize()
+    check_maximize()
 
--- There should be a detach callback
-assert(lwibar.detach_callback)
+    -- There should be a detach callback
+    assert(lwibar.detach_callback)
 
--- Begin to move wibars around
-lwibar.position = "top"
-assert(lwibar.position == "top")
-assert(lwibar.y == twibar.height)
+    -- Begin to move wibars around
+    lwibar.position = "top"
+    assert(lwibar.position == "top")
+    assert(lwibar.y == twibar.height)
 
-return true
+    return true
 end)
 
 table.insert(steps, function()
-check_maximize()
+    check_maximize()
 
-bwibar.position = "right"
-bwibar.ontop = true
-rwibar.ontop = true
-assert(bwibar.position == "right")
+    bwibar.position = "right"
+    bwibar.ontop = true
+    rwibar.ontop = true
+    assert(bwibar.position == "right")
 
-return true
+    return true
 end)
 
 table.insert(steps, function()
-check_maximize()
+    check_maximize()
 
-rwibar.position = "top"
+    rwibar.position = "top"
 
-return true
+    return true
 end)
 
 table.insert(steps, function()
-check_maximize()
+    check_maximize()
 
-bwibar.position = "top"
+    bwibar.position = "top"
 
-return true
+    return true
 end)
 
 table.insert(steps, function()
-check_maximize()
+    check_maximize()
 
-for _, w in ipairs {twibar, lwibar, rwibar, bwibar} do
-    w.position = "right"
-end
+    for _, w in ipairs {twibar, lwibar, rwibar, bwibar} do
+        w.position = "right"
+    end
 
-return true
+    return true
 end)
 
 -- Test visibility
@@ -304,17 +305,90 @@ table.insert(steps, function()
 end)
 
 table.insert(steps, function()
-check_maximize()
+    check_maximize()
 
-twibar.visible = true
+    twibar.visible = true
 
-return true
+    return true
 end)
 
 table.insert(steps, function()
-check_maximize()
+    check_maximize()
 
-return true
+    return true
+end)
+
+-- Now test again with a real client
+
+local c
+table.insert(steps, function()
+    -- I'm lazy, so get rid of all the wiboxes that have struts
+    parent.visible = false
+    small.visible = false
+    bwibar.visible = false
+    lwibar.visible = false
+    rwibar.visible = false
+    screen.primary.mywibox.visible = false
+
+    -- Spawn a client to test things with
+    assert(#client.get() == 0)
+    test_client()
+
+    return true
+end)
+
+-- Given a geometry and a workarea, test that the given struts are applied
+local function test_workarea(geo, wa, left, right, top, bottom)
+    -- Get the line number from where we were called (helps debugging)
+    local line = debug.getinfo(2).currentline
+
+    assert(geo.x + left == wa.x,
+        string.format("%d + %d == %d called from line %d", geo.x, left, wa.x, line))
+    assert(geo.y + top  == wa.y,
+        string.format("%d + %d == %d called from line %d", geo.y, top, wa.y, line))
+    assert(geo.width - left - right == wa.width,
+        string.format("%d - %d - %d == %d called from line %d", geo.width, left, right, wa.width, line))
+    assert(geo.height - top - bottom == wa.height,
+        string.format("%d - %d - %d == %d called from line %d", geo.height, top, bottom, wa.height, line))
+end
+
+table.insert(steps, function()
+    if #client.get() ~= 1 then
+        return
+    end
+
+    c = client.get()[1]
+    assert(c)
+    assert(c:isvisible())
+
+    -- Test some simple struts
+    c:struts { left = 50 }
+    test_workarea(c.screen.geometry, c.screen.workarea, 50, 0, 0, 0)
+
+    -- A tag switch should make the client no longer apply
+    screen.primary.tags[2]:view_only()
+    test_workarea(c.screen.geometry, c.screen.workarea, 0, 0, 0, 0)
+
+    -- But sticky clients always 'count'
+    c.sticky = true
+    test_workarea(c.screen.geometry, c.screen.workarea, 50, 0, 0, 0)
+
+    c.sticky = false
+    test_workarea(c.screen.geometry, c.screen.workarea, 0, 0, 0, 0)
+
+    -- And switch back to the right tag
+    c.first_tag:view_only()
+    test_workarea(c.screen.geometry, c.screen.workarea, 50, 0, 0, 0)
+
+    -- What if we move the client to another tag?
+    c:tags{ screen.primary.tags[2] }
+    test_workarea(c.screen.geometry, c.screen.workarea, 0, 0, 0, 0)
+
+    -- Move it back to the selected tag
+    c:tags{ screen.primary.tags[1] }
+    test_workarea(c.screen.geometry, c.screen.workarea, 50, 0, 0, 0)
+
+    return true
 end)
 
 
