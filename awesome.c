@@ -374,6 +374,8 @@ a_glib_poll(GPollFD *ufds, guint nfsd, gint timeout)
         lua_settop(L, 0);
     }
 
+    xcb_aux_sync(globalconf.connection);
+
     /* Don't sleep if there is a pending event */
     assert(globalconf.pending_event == NULL);
     globalconf.pending_event = xcb_poll_for_event(globalconf.connection);
