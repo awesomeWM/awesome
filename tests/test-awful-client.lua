@@ -214,7 +214,12 @@ table.insert(multi_screen_steps, function()
     for _, c in ipairs(client.get()) do
         c:kill()
     end
+    if #client.get() == 0 then
+        return true
+    end
+end)
 
+table.insert(multi_screen_steps, function()
     for i=1, screen.count() do
         local s = screen[i]
         test_client("screen"..i, nil, {
@@ -240,6 +245,16 @@ end
 for _, c in ipairs(client.get()) do
     c:kill()
 end
+return true
+end)
+
+table.insert(multi_screen_steps, function()
+if #client.get() == 0 then
+    return true
+end
+end)
+
+table.insert(multi_screen_steps, function()
 
 if screen.count() < 2 then return true end
 
