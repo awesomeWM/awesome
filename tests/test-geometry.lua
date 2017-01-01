@@ -65,7 +65,10 @@ local steps = {
                 height            = 100
             }}
         }
-        return true
+        -- Wait for the previous c:kill() to be done
+        if #client.get() == 0 then
+            return true
+        end
     end,
     function(count)
         if count == 1 then
