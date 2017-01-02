@@ -94,7 +94,7 @@ return function(class, title, sn_rules, callback)
     local snid = (sn_rules or callback) and get_snid(sn_rules, callback) or ""
     local data = class .. "\n" .. title .. "\n" .. snid .. "\n"
     local success, msg = pipe:write_all(data)
-    assert(success, msg)
+    assert(success, tostring(msg))
 
     return snid
 end
