@@ -37,7 +37,7 @@ environment):
 
 - [CMake >= 3.0.0](https://cmake.org)
 - [Lua >= 5.1.0](https://www.lua.org) or [LuaJIT](http://luajit.org)
-- [LGI >= 0.7.1](https://github.com/pavouk/lgi)
+- [LGI >= 0.8.0](https://github.com/pavouk/lgi)
 - [xproto >= 7.0.15](https://www.x.org/archive//individual/proto/)
 - [libxcb >= 1.6](https://xcb.freedesktop.org/) with support for the RandR, XTest, Xinerama, SHAPE and
   XKB extensions
