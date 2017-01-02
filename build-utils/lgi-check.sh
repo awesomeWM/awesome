@@ -27,9 +27,9 @@ lua -e 'require("lgi")' || die
 # Check the version number.
 # Keep this in sync with lib/gears/surface.lua.in and .travis.yml (LGIVER)!
 lua -e '_, _, major_minor, patch = string.find(require("lgi.version"), "^(%d%.%d)%.(%d)");
-	if tonumber(major_minor) < 0.7 or (tonumber(major_minor) == 0.7 and tonumber(patch) < 1) then
+	if tonumber(major_minor) < 0.8 or (tonumber(major_minor) == 0.8 and tonumber(patch) < 0) then
 		error(string.format("lgi is too old, need at least version %s, got %s.",
-		                    "0.7.1", require("lgi.version"))) end' || die
+		                    "0.8.0", require("lgi.version"))) end' || die
 
 # Check for the needed gi files
 lua -e 'l = require("lgi") assert(l.cairo, l.Pango, l.PangoCairo, l.GLib, l.Gio)' || die
