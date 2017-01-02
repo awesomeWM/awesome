@@ -93,9 +93,7 @@ local current_item = 1
 local previous_item = nil
 local current_category = nil
 local shownitems = nil
-local instance = { prompt = nil,
-                   widget = nil,
-                   wibox = nil }
+local instance = nil
 
 local common_args = { w = wibox.layout.fixed.horizontal(),
                       data = setmetatable({}, { __mode = 'kv' }) }
@@ -347,19 +345,6 @@ local function menulist_update(query, scr)
                        get_current_page(shownitems, query, scr))
 end
 
---- Create the menubar wibox and widgets.
--- @tparam[opt] screen scr Screen.
-local function initialize(scr)
-    instance.wibox = wibox({})
-    instance.widget = menubar.get(scr)
-    instance.wibox.ontop = true
-    instance.prompt = awful.widget.prompt()
-    local layout = wibox.layout.fixed.horizontal()
-    layout:add(instance.prompt)
-    layout:add(instance.widget)
-    instance.wibox:set_widget(layout)
-end
-
 --- Refresh menubar's cache by reloading .desktop files.
 -- @tparam[opt] screen scr Screen.
 function menubar.refresh(scr)
@@ -416,9 +401,19 @@ end
 --- Show the menubar on the given screen.
 -- @param scr Screen.
 function menubar.show(scr)
-    if not instance.wibox then
-        initialize(scr)
-    elseif instance.wibox.visible then -- Menu already shown, exit
+    if not instance then
+        instance = {
+            wibox = wibox({ ontop = true }),
+            widget = menubar.get(scr),
+            prompt = awful.widget.prompt(),
+        }
+        local layout = wibox.layout.fixed.horizontal()
+        layout:add(instance.prompt)
+        layout:add(instance.widget)
+        instance.wibox:set_widget(layout)
+    end
+
+    if instance.wibox.visible then -- Menu already shown, exit
         return
     elseif not menubar.cache_entries then
         menubar.refresh(scr)
