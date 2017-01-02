@@ -350,7 +350,9 @@ end
 function menubar.refresh(scr)
     menubar.menu_gen.generate(function(entries)
         menubar.menu_entries = entries
-        menulist_update(nil, scr)
+        if instance then
+            menulist_update(nil, scr)
+        end
     end)
 end
 
