@@ -451,7 +451,9 @@ end
 
 --- Hide the menubar.
 function menubar.hide()
-    instance.wibox.visible = false
+    if instance then
+        instance.wibox.visible = false
+    end
 end
 
 --- Get a menubar wibox.
