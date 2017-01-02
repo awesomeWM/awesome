@@ -41,6 +41,10 @@ local function read_input(stream)
         open_window(class, title, snid)
     end
 end
+local r = read_input
+local function read_input(stream)
+    print(pcall(function() r(stream) end))
+end
 
 -- Read lines from stdin and handle them
 local stdin = Gio.UnixInputStream.new(0, false)

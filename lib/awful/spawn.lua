@@ -396,6 +396,11 @@ local function read_stream(stream, line_callback, done_callback, close)
     end
 end
 
+local r = read_stream
+local function read_stream(...)
+    protected_call(r, ...)
+end
+
 --- Read lines from a Gio input stream
 -- @tparam Gio.InputStream input_stream The input stream to read from.
 -- @tparam function line_callback Function that is called with each line
