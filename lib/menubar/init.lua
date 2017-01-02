@@ -35,7 +35,7 @@ local function get_screen(s)
 end
 
 -- menubar
-local menubar = { mt = {}, menu_entries = {} }
+local menubar = { menu_entries = {} }
 menubar.menu_gen = require("menubar.menu_gen")
 menubar.utils = require("menubar.utils")
 local compute_text_width = menubar.utils.compute_text_width
@@ -350,8 +350,14 @@ end
 --- Create the menubar wibox and widgets.
 -- @tparam[opt] screen scr Screen.
 local function initialize(scr)
+    menubar.refresh(scr)
+    -- Add to each category the name of its key in all_categories
+    for k, v in pairs(menubar.menu_gen.all_categories) do
+        v.key = k
+    end
+
     instance.wibox = wibox({})
-    instance.widget = menubar.get(scr)
+    instance.widget = common_args.w
     instance.wibox.ontop = true
     instance.prompt = awful.widget.prompt()
     local layout = wibox.layout.fixed.horizontal()
@@ -459,22 +465,6 @@ function menubar.hide()
     instance.wibox.visible = false
 end
 
---- Get a menubar wibox.
--- @tparam[opt] screen scr Screen.
--- @return menubar wibox.
-function menubar.get(scr)
-    menubar.refresh(scr)
-    -- Add to each category the name of its key in all_categories
-    for k, v in pairs(menubar.menu_gen.all_categories) do
-        v.key = k
-    end
-    return common_args.w
-end
-
-function menubar.mt.__call(_, ...)
-    return menubar.get(...)
-end
-
-return setmetatable(menubar, menubar.mt)
+return menubar
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
