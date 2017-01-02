@@ -575,6 +575,7 @@ main(int argc, char **argv)
     sigaction(SIGFPE, &sa, 0);
     sigaction(SIGILL, &sa, 0);
     sigaction(SIGSEGV, &sa, 0);
+    signal(SIGPIPE, SIG_IGN);
 
     /* We have no clue where the input focus is right now */
     globalconf.focus.need_update = true;
