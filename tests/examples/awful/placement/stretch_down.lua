@@ -16,3 +16,5 @@ assert(c.y==35) --DOC_HIDE
 assert(c.width == 40) --DOC_HIDE
 assert(c.y+c.height+2*c.border_width == --DOC_HIDE
        screen[1].geometry.y + screen[1].geometry.height) --DOC_HIDE
+
+--DOC_HIDE vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

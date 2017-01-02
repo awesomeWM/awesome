@@ -13,3 +13,5 @@ placement.maximize_horizontally(c)
 assert(c.width + 2*c.border_width == screen[1].geometry.width) --DOC_HIDE
 assert(c.y == 35) --DOC_HIDE
 assert(c.height == 30) --DOC_HIDE
+
+--DOC_HIDE vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

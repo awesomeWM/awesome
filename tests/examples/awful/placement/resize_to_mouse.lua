@@ -72,3 +72,5 @@ for _, v in ipairs(all_coords_in) do
     assert(test_touch_mouse(client.get()[s]), v[1])
     s = s + 1
 end
+
+--DOC_HIDE vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

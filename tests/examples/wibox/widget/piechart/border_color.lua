@@ -25,3 +25,5 @@ for _, v in ipairs {"#ff0000", "#00ff00", "#0000ff"} do
           widget = wibox.widget.piechart
       })
 end
+
+--DOC_HIDE vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

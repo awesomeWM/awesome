@@ -16,3 +16,5 @@ local c1 = client.gen_fake {--DOC_HIDE
                c1.height+2*c1.border_width == screen[1].geometry.height) --DOC_HIDE
     end --DOC_HIDE
 end --DOC_HIDE
+
+--DOC_HIDE vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

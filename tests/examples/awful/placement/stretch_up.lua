@@ -15,3 +15,5 @@ assert(c.y==0) --DOC_HIDE
 assert(c.x==45) --DOC_HIDE
 assert(c.width == 40) --DOC_HIDE
 assert(c.height-2*c.border_width == 35+30) --DOC_HIDE
+
+--DOC_HIDE vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

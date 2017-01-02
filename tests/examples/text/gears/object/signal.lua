@@ -22,3 +22,5 @@ o:disconnect_signal("my_signal", slot)
 
 -- This time, the `slot` wont be called as it is no longer connected.
 o:emit_signal "my_signal"
+
+--DOC_HIDE vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

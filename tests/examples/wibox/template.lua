@@ -27,3 +27,4 @@ f_w, f_h = f_w+10, f_h+10
 local img = surface["widget_to_"..image_type](container, image_path.."."..image_type, w or f_w, h or f_h)
 img:finish()
 
+-- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

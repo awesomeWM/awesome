@@ -6,3 +6,5 @@ mouse.coords {x= 50, y=50} --DOC_HIDE
 mouse.push_history() --DOC_HIDE
 
 awful.placement.next_to_mouse(client.focus)
+
+--DOC_HIDE vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

@@ -26,3 +26,5 @@ for _, v in ipairs {0,1,7,99} do
 end
 
 return nil, 60
+
+--DOC_HIDE vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

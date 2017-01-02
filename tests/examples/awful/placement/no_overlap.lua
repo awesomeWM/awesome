@@ -24,3 +24,5 @@ awful.placement.no_overlap(client.focus) --FIXME --DOC_HIDE
 
 --TODO maximized + no_overlap --DOC_HIDE
 --TODO add 9 clients with no_overlap on all of them --DOC_HIDE
+
+--DOC_HIDE vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

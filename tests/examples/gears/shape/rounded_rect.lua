@@ -8,3 +8,5 @@ show(cr) --DOC_HIDE
 
 shape.transform(shape.rounded_rect) : translate(0,25) (cr,70,20, 5)
 show(cr) --DOC_HIDE
+
+--DOC_HIDE vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

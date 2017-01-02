@@ -16,3 +16,5 @@ assert(c.x == wa.x and geo.x == wa.x)--DOC_HIDE
 assert(c.y == wa.y) --DOC_HIDE
 assert(c.width  == wa.width/2 - 2*c.border_width)--DOC_HIDE
 assert(c.height == wa.height  - 2*c.border_width)--DOC_HIDE
+
+--DOC_HIDE vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
