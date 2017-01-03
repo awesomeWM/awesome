@@ -22,8 +22,8 @@ fi
 
 # Change to file's dir (POSIXly).
 cd -P -- "$(dirname -- "$0")"
-this_dir=$PWD
-source_dir="$PWD/.."
+this_dir="$PWD"
+source_dir="${this_dir%/*}"
 
 # Either the build dir is passed in $CMAKE_BINARY_DIR or we guess based on $PWD
 build_dir="$CMAKE_BINARY_DIR"
@@ -179,7 +179,8 @@ fi
 start_awesome() {
     cd "$build_dir"
     # Kill awesome after $timeout_stale seconds (e.g. for errors during test setup).
-    DISPLAY="$D" timeout "$timeout_stale" "$AWESOME" -c "$RC_FILE" "${awesome_options[@]}" > "$awesome_log" 2>&1 &
+    # SOURCE_DIRECTORY is used by .luacov.
+    DISPLAY="$D" SOURCE_DIRECTORY="$source_dir" timeout "$timeout_stale" "$AWESOME" -c "$RC_FILE" "${awesome_options[@]}" > "$awesome_log" 2>&1 &
     awesome_pid=$!
     cd - >/dev/null
 

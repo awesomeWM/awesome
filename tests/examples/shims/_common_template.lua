@@ -1,4 +1,4 @@
-return function(_, _, luacovpath)
+return function(_, _)
 
     -- Set the global shims
     -- luacheck: globals awesome root tag screen client mouse drawin button
@@ -15,9 +15,9 @@ return function(_, _, luacovpath)
     assert(awesome and root and tag and screen and client and mouse)
 
     -- If luacov is available, use it. Else, do nothing.
-    pcall(function()
-        require("luacov.runner")(luacovpath)
-    end)
+    if (os.getenv('DO_COVERAGE') or '0') ~= '0' then
+        require('luacov.runner')(os.getenv('SOURCE_DIRECTORY')..'/.luacov')
+    end
 
     -- Silence debug warnings
     require("gears.debug").print_warning = function() end
