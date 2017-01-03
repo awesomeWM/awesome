@@ -142,6 +142,7 @@ set(AWESOME_DEPENDENCIES
 
 # Check the deps one by one
 foreach(dependency ${AWESOME_DEPENDENCIES})
+    unset(TMP_DEP_FOUND CACHE)
     pkg_check_modules(TMP_DEP REQUIRED ${dependency})
 
     if(NOT TMP_DEP_FOUND)
