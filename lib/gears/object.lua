@@ -45,6 +45,7 @@ function object.add_signal()
 end
 
 --- Connect to a signal.
+--@DOC_text_gears_object_signal_EXAMPLE@
 -- @tparam string name The name of the signal
 -- @tparam function func The callback to call when the signal is emitted
 function object:connect_signal(name, func)
