@@ -55,18 +55,20 @@ local steps = {
         awful.rules.rules = {
             -- All clients will match this rule.
             { rule = { },properties = {
-            titlebars_enabled = true,
-            border_width      = 10,
-            border_color      = "#00ff00",
-            size_hints_honor  = false,
-            x                 = 0,
-            y                 = 0,
-            width             = 100,
-            height            = 100
+                titlebars_enabled = true,
+                border_width      = 10,
+                border_color      = "#00ff00",
+                size_hints_honor  = false,
+                x                 = 0,
+                y                 = 0,
+                width             = 100,
+                height            = 100
+            }}
         }
-    }
-}
-return true
+        -- Wait for the previous c:kill() to be done
+        if #client.get() == 0 then
+            return true
+        end
     end,
     function(count)
         if count == 1 then

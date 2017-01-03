@@ -32,7 +32,7 @@ end)
 runner.run_steps = function(steps)
     -- Setup timer/timeout to limit waiting for signal and quitting awesome.
     -- This would be common for all tests.
-    local t = timer({timeout=0.1})
+    local t = timer({timeout=0})
     local wait=20
     local step=1
     local step_count=0
@@ -64,6 +64,7 @@ runner.run_steps = function(steps)
                 step = step+1
                 step_count = 0
                 wait = 5
+                t.timeout = 0
                 t:again()
                 return
             end
@@ -78,6 +79,7 @@ runner.run_steps = function(steps)
         else
             wait = wait-1
             if wait > 0 then
+                t.timeout = 0.1
                 t:again()
             else
                 io.stderr:write("Error: timeout waiting for signal in step "

@@ -58,6 +58,7 @@ local steps = {
 
         assert(not old_c.ontop)
         get_callback({modkey}, "t")()
+        awesome.sync()
 
         return true
     end,
@@ -75,6 +76,7 @@ local steps = {
         assert(t.master_width_factor == 0.5)
 
         get_callback({modkey}, "l")()
+        awesome.sync()
 
         return true
     end,
@@ -89,6 +91,7 @@ local steps = {
         assert(t.master_count == 1)
 
         get_callback({modkey, "Shift"}, "h")()
+        awesome.sync()
 
         return true
     end,
@@ -104,6 +107,7 @@ local steps = {
 
         get_callback({modkey, "Control"}, "h")()
         get_callback({modkey, "Shift"  }, "l")()
+        awesome.sync()
 
         return true
     end,
@@ -118,6 +122,7 @@ local steps = {
         assert(t.index == 1)
 
         get_callback({modkey, }, "Right")()
+        awesome.sync()
 
         return true
     end,
