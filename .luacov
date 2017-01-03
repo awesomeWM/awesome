@@ -3,7 +3,6 @@
 -- This variable is set externally
 local source = os.getenv("SOURCE_DIRECTORY") or os.getenv('PWD')
 local build = os.getenv("BUILD_DIRECTORY") or (source .. "/build")
-local lib_dir = os.getenv("AWESOME_LIB_DIR") or (source .. "/lib")
 
 local function escape_pattern(str)
     return string.gsub(str, "%W", "%%%1")
@@ -13,17 +12,15 @@ return {
     statsfile = build .. "/luacov.stats.out",
 
     include = {
-        escape_pattern(lib_dir) .. "/.+",
-
-        -- For things already having the correct path
-        -- (happens with integration tests)
-        "^lib/",
+        escape_pattern(source) .. "/.+",
+        -- Relative paths (to source/build dir).
+        '^[^/].+',
     },
 
     -- configuration for luacov-coveralls reporter
     coveralls = {
         pathcorrect = {
-            { escape_pattern(lib_dir..'/'), "lib/"},
+            { escape_pattern(source .. '/'), ''},
         },
     },
 }
