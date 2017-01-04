@@ -24,7 +24,7 @@ else()
     set(TOP_SOURCE_DIR ${CMAKE_SOURCE_DIR})
 endif()
 
-if ($ENV{DO_COVERAGE})
+if (DEFINED ENV{DO_COVERAGE} AND NOT $ENV{DO_COVERAGE} STREQUAL "0")
   execute_process(
     COMMAND lua -e "require('luacov.runner')('${TOP_SOURCE_DIR}/.luacov')"
     RESULT_VARIABLE TEST_RESULT
@@ -34,6 +34,9 @@ if ($ENV{DO_COVERAGE})
     message(${TEST_ERROR})
     message(FATAL_ERROR "Failed to run luacov.runner.")
   endif()
+  set(LUA_COV_RUNNER lua "-erequire('luacov.runner')('${TOP_SOURCE_DIR}/.luacov')")
+else()
+  set(LUA_COV_RUNNER lua)
 endif()
 
 # Add the main awesome lua libraries.
@@ -174,15 +177,19 @@ function(run_test test_path namespace escaped_content)
     # SVG is preferred, but PNG is better suited for some tests, like bitmap
     # patterns.
     execute_process(
-        COMMAND lua ${template} ${test_path} ${IMAGE_PATH}
+        COMMAND ${LUA_COV_RUNNER} ${template} ${test_path} ${IMAGE_PATH}
+        RESULT_VARIABLE TEST_RESULT
         OUTPUT_VARIABLE TEST_OUTPUT
         ERROR_VARIABLE  TEST_ERROR
     )
-
-    # If there is something on stderr, exit.
-    if (NOT TEST_ERROR STREQUAL "")
-        message("${TEST_OUTPUT}")
-        message("${TEST_ERROR}")
+    if (TEST_RESULT OR NOT TEST_ERROR STREQUAL "")
+        message("Result: ${TEST_RESULT}")
+        if (NOT TEST_OUTPUT STREQUAL "")
+            message("Output: ${TEST_OUTPUT}")
+        endif()
+        if (NOT TEST_ERROR STREQUAL "")
+            message("Error:  ${TEST_ERROR}")
+        endif()
         if (STRICT_TESTS)
             message(FATAL_ERROR ${test_path} " An example test failed, aborting.")
         endif()
