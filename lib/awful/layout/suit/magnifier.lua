@@ -54,6 +54,10 @@ function magnifier.mouse_resize_handler(c, corner, x, y)
                           end, corner .. "_corner")
 end
 
+local function get_screen(s)
+    return s and capi.screen[s]
+end
+
 function magnifier.arrange(p)
     -- Fullscreen?
     local area = p.workarea
@@ -64,7 +68,7 @@ function magnifier.arrange(p)
     local fidx
 
     -- Check that the focused window is on the right screen
-    if focus and focus.screen ~= p.screen then focus = nil end
+    if focus and focus.screen ~= get_screen(p.screen) then focus = nil end
 
     -- If no window is focused or focused window is not tiled, take the first tiled one.
     if (not focus or focus.floating) and #cls > 0 then
