@@ -46,13 +46,13 @@
  *        gap_single_client  = true,
  *        gap                = 15,
  *        screen             = s,
- *    }
+ *    })
  *
  *    awful.tag.add("Second tag", {
  *        icon = "/path/to/icon2.png",
  *        layout = awful.layout.suit.max,
  *        screen = s,
- *    }
+ *    })
  *
  * **Accessing tags**:
  *
