@@ -168,7 +168,6 @@ script:
 
         (make check-unit-coverage \
          && do_codecov unittests \
-         && sed -i "1 s~^~require('luacov.runner')('$PWD/.luacov'); \0~" build/awesomerc.lua \
          && tests/run.sh \
          && do_codecov functionaltests)
         ret=$?
