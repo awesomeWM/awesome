@@ -22,8 +22,6 @@
 #include "xrdb.h"
 #include "globalconf.h"
 
-#include <X11/Xresource.h>
-
 #include <string.h>
 
 /* \brief get value from X Resources DataBase
