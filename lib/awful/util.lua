@@ -200,13 +200,13 @@ end
 --- Get the path to the directory where themes are installed.
 -- @return A string with the requested path with a slash at the end.
 function util.get_themes_dir()
-    return "@AWESOME_THEMES_PATH@" .. "/"
+    return (os.getenv('AWESOME_THEMES_PATH') or "@AWESOME_THEMES_PATH@") .. "/"
 end
 
 --- Get the path to the directory where our icons are installed.
 -- @return A string with the requested path with a slash at the end.
 function util.get_awesome_icon_dir()
-    return "@AWESOME_ICON_PATH@" .. "/"
+    return (os.getenv('AWESOME_ICON_PATH') or "@AWESOME_ICON_PATH@") .. "/"
 end
 
 --- Get the user's config or cache dir.
