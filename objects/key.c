@@ -38,7 +38,7 @@
 #include "common/xutil.h"
 #include "xkb.h"
 
-/* XStringToKeysym() and XKeysymToString */
+/* XStringToKeysym() */
 #include <X11/Xlib.h>
 #include <xkbcommon/xkbcommon.h>
 #include <glib.h>
