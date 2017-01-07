@@ -53,6 +53,8 @@ theme.menu_width  = 100
 -- Define the image to load
 theme.titlebar_close_button_normal = "@AWESOME_THEMES_PATH@/default/titlebar/close_normal.png"
 theme.titlebar_close_button_focus  = "@AWESOME_THEMES_PATH@/default/titlebar/close_focus.png"
+theme.titlebar_minimize_button_normal_inactive = "@AWESOME_THEMES_PATH@/default/titlebar/minimize_normal.png"
+theme.titlebar_minimize_button_focus_inactive  = "@AWESOME_THEMES_PATH@/default/titlebar/minimize_focus.png"
 
 theme.titlebar_minimize_button_normal = "@AWESOME_THEMES_PATH@/default/titlebar/minimize_normal.png"
 theme.titlebar_minimize_button_focus  = "@AWESOME_THEMES_PATH@/default/titlebar/minimize_focus.png"
