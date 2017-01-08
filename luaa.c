@@ -630,6 +630,38 @@ setup_awesome_signals(lua_State *L)
     lua_pop(L, 1);
 }
 
+/* Add things to the string on top of the stack */
+static void
+add_to_search_path(lua_State *L, string_array_t *searchpath)
+{
+    if (LUA_TSTRING != lua_type(L, -1))
+    {
+        warn("package.path is not a string");
+        return;
+    }
+
+    foreach(entry, *searchpath)
+    {
+        size_t len = a_strlen(*entry);
+        lua_pushliteral(L, ";");
+        lua_pushlstring(L, *entry, len);
+        lua_pushliteral(L, "/?.lua");
+        lua_concat(L, 3);
+
+        lua_pushliteral(L, ";");
+        lua_pushlstring(L, *entry, len);
+        lua_pushliteral(L, "/?/init.lua");
+        lua_concat(L, 3);
+
+        lua_concat(L, 3); /* concatenate with string on top of the stack */
+    }
+
+    /* add Lua lib path (/usr/share/awesome/lib by default) */
+    lua_pushliteral(L, ";" AWESOME_LUA_LIB_PATH "/?.lua");
+    lua_pushliteral(L, ";" AWESOME_LUA_LIB_PATH "/?/init.lua");
+    lua_concat(L, 3); /* concatenate with thing on top of the stack when we were called */
+}
+
 /** Initialize the Lua VM
  * \param xdg An xdg handle to use to get XDG basedir.
  */
@@ -747,33 +779,7 @@ luaA_init(xdgHandle* xdg, string_array_t *searchpath)
         return;
     }
     lua_getfield(L, 1, "path");
-    if (LUA_TSTRING != lua_type(L, 2))
-    {
-        warn("package.path is not a string");
-        lua_pop(L, 1);
-        return;
-    }
-
-    foreach(entry, *searchpath)
-    {
-        size_t len = a_strlen(*entry);
-        lua_pushliteral(L, ";");
-        lua_pushlstring(L, *entry, len);
-        lua_pushliteral(L, "/?.lua");
-        lua_concat(L, 3);
-
-        lua_pushliteral(L, ";");
-        lua_pushlstring(L, *entry, len);
-        lua_pushliteral(L, "/?/init.lua");
-        lua_concat(L, 3);
-
-        lua_concat(L, 3); /* concatenate with package.path */
-    }
-
-    /* add Lua lib path (/usr/share/awesome/lib by default) */
-    lua_pushliteral(L, ";" AWESOME_LUA_LIB_PATH "/?.lua");
-    lua_pushliteral(L, ";" AWESOME_LUA_LIB_PATH "/?/init.lua");
-    lua_concat(L, 3); /* concatenate with package.path */
+    add_to_search_path(L, searchpath);
     lua_setfield(L, 1, "path"); /* package.path = "concatenated string" */
 
     lua_pop(L, 1); /* pop "package" */
