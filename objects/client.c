@@ -1176,12 +1176,33 @@ client_geometry_refresh(void)
         area_t real_geometry = c->geometry;
         if (!c->fullscreen)
         {
+            if ((real_geometry.width < c->titlebar[CLIENT_TITLEBAR_LEFT].size
+                    + c->titlebar[CLIENT_TITLEBAR_RIGHT].size) ||
+                    (real_geometry.height < c->titlebar[CLIENT_TITLEBAR_TOP].size
+                    + c->titlebar[CLIENT_TITLEBAR_BOTTOM].size))
+                warn("Resizing a window to a negative size!? Have width %d-%d-%d=%d"
+                        " and height %d-%d-%d=%d", real_geometry.width,
+                        c->titlebar[CLIENT_TITLEBAR_LEFT].size,
+                        c->titlebar[CLIENT_TITLEBAR_RIGHT].size,
+                        real_geometry.width -
+                            c->titlebar[CLIENT_TITLEBAR_LEFT].size -
+                            c->titlebar[CLIENT_TITLEBAR_RIGHT].size,
+                        real_geometry.height,
+                        c->titlebar[CLIENT_TITLEBAR_TOP].size,
+                        c->titlebar[CLIENT_TITLEBAR_BOTTOM].size,
+                        real_geometry.height -
+                            c->titlebar[CLIENT_TITLEBAR_TOP].size -
+                            c->titlebar[CLIENT_TITLEBAR_BOTTOM].size);
+
             real_geometry.x = c->titlebar[CLIENT_TITLEBAR_LEFT].size;
             real_geometry.y = c->titlebar[CLIENT_TITLEBAR_TOP].size;
             real_geometry.width -= c->titlebar[CLIENT_TITLEBAR_LEFT].size;
             real_geometry.width -= c->titlebar[CLIENT_TITLEBAR_RIGHT].size;
             real_geometry.height -= c->titlebar[CLIENT_TITLEBAR_TOP].size;
             real_geometry.height -= c->titlebar[CLIENT_TITLEBAR_BOTTOM].size;
+
+            if (real_geometry.width == 0 || real_geometry.height == 0)
+                warn("Resizing a window to size zero!?");
         } else {
             real_geometry.x = 0;
             real_geometry.y = 0;
