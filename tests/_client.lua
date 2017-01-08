@@ -22,42 +22,35 @@ local function open_window(class, title, snid)
     window:show_all()
 end
 
--- Start a coroutine for nicer input handling
-local coro = coroutine.wrap(function()
-    while true do
-        local class = coroutine.yield()
-        local title = coroutine.yield()
-        local snid = coroutine.yield()
-        open_window(class, title, snid)
-    end
-end)
-coro()
-
--- Read lines from stdin and feed them to the coroutine
-local stdin = Gio.UnixInputStream.new(0, false)
-stdin = Gio.DataInputStream.new(stdin)
-
-local read_start, read_finish
-read_start = function()
-    stdin:read_line_async(0, nil, read_finish)
-end
-read_finish = function(...)
-    local line, length = stdin.read_line_finish(...)
-    if type(length) ~= "number" then
-        error("Error reading line: " .. tostring(length))
-    end
-
+local function read_line(stream)
+    local line, length = stream:async_read_line()
     local eof = not line -- Behaviour of up-to-date LGI
             or (tostring(line) == "" and #line ~= length) -- (Ab)use uninitialized variable
     if eof then
         Gtk.main_quit()
     else
-        coro(tostring(line)) -- tostring() needed for older LGI versions
-        read_start()
+        return tostring(line) -- tostring() needed for older LGI versions
     end
 end
 
-read_start()
+local function read_input(stream)
+    while true do
+        local class = read_line(stream)
+        local title = read_line(stream)
+        local snid = read_line(stream)
+        open_window(class, title, snid)
+    end
+end
+local r = read_input
+local function read_input(stream)
+    print(pcall(function() r(stream) end))
+end
+
+-- Read lines from stdin and handle them
+local stdin = Gio.UnixInputStream.new(0, false)
+stdin = Gio.DataInputStream.new(stdin)
+Gio.Async.start(read_input)(stdin)
+
 Gtk:main{...}
 ]]
 

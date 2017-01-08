@@ -161,7 +161,6 @@ local capi =
 }
 local lgi = require("lgi")
 local Gio = lgi.Gio
-local GLib = lgi.GLib
 local util   = require("awful.util")
 local protected_call = require("gears.protected_call")
 
@@ -370,6 +369,38 @@ function spawn.easy_async(cmd, callback)
     })
 end
 
+local function read_stream(stream, line_callback, done_callback, close)
+    while true do
+        local line, length = stream:async_read_line()
+
+        if type(length) ~= "number" then
+            -- Error
+            print("Error in awful.spawn.read_lines:", tostring(length))
+            break
+        elseif end_of_file(line, length) then
+            -- End of file
+            break
+        else
+            -- Read a line
+            -- This needs tostring() for older lgi versions which returned
+            -- "GLib.Bytes" instead of Lua strings (I guess)
+            protected_call(line_callback, tostring(line))
+        end
+    end
+
+    if close then
+        stream:async_close()
+    end
+    if done_callback then
+        protected_call(done_callback)
+    end
+end
+
+local r = read_stream
+local function read_stream(...)
+    protected_call(r, ...)
+end
+
 --- Read lines from a Gio input stream
 -- @tparam Gio.InputStream input_stream The input stream to read from.
 -- @tparam function line_callback Function that is called with each line
@@ -379,38 +410,7 @@ end
 -- @tparam[opt=false] boolean close Should the stream be closed after end-of-file?
 function spawn.read_lines(input_stream, line_callback, done_callback, close)
     local stream = Gio.DataInputStream.new(input_stream)
-    local function done()
-        if close then
-            stream:close()
-        end
-        if done_callback then
-            protected_call(done_callback)
-        end
-    end
-    local start_read, finish_read
-    start_read = function()
-        stream:read_line_async(GLib.PRIORITY_DEFAULT, nil, finish_read)
-    end
-    finish_read = function(obj, res)
-        local line, length = obj:read_line_finish(res)
-        if type(length) ~= "number" then
-            -- Error
-            print("Error in awful.spawn.read_lines:", tostring(length))
-            done()
-        elseif end_of_file(line, length) then
-            -- End of file
-            done()
-        else
-            -- Read a line
-            -- This needs tostring() for older lgi versions which returned
-            -- "GLib.Bytes" instead of Lua strings (I guess)
-            protected_call(line_callback, tostring(line))
-
-            -- Read the next line
-            start_read()
-        end
-    end
-    start_read()
+    Gio.Async.start(read_stream)(stream, line_callback, done_callback, close)
 end
 
 capi.awesome.connect_signal("spawn::canceled" , spawn.on_snid_cancel   )
