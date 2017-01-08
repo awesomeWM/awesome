@@ -69,6 +69,16 @@ taglist.filter = {}
 -- @param color
 -- @see gears.color
 
+--- The tag list volatile elements background color.
+-- @beautiful beautiful.taglist_bg_volatile
+-- @param color
+-- @see gears.color
+
+--- The tag list volatile elements foreground (text) color.
+-- @beautiful beautiful.taglist_fg_volatile
+-- @param color
+-- @see gears.color
+
 --- The selected elements background image.
 -- @beautiful beautiful.taglist_squares_sel
 -- @param surface
@@ -110,6 +120,7 @@ taglist.filter = {}
 -- @see beautiful.taglist_shape_empty
 -- @see beautiful.taglist_shape_focus
 -- @see beautiful.taglist_shape_urgent
+-- @see beautiful.taglist_shape_volatile
 
 --- The shape elements border width.
 -- @beautiful beautiful.taglist_shape_border_width
@@ -166,6 +177,21 @@ taglist.filter = {}
 -- @param color
 -- @see gears.color
 
+--- The shape used for the volatile elements.
+-- @beautiful beautiful.taglist_shape_volatile
+-- @param[opt=rectangle] gears.shape
+-- @see gears.shape
+
+--- The shape used for the volatile elements border width.
+-- @beautiful beautiful.taglist_shape_border_width_volatile
+-- @param[opt=0] number
+-- @see wibox.container.background
+
+--- The volatile elements shape border color.
+-- @beautiful beautiful.taglist_shape_border_color_volatile
+-- @param color
+-- @see gears.color
+
 local instances = nil
 
 function taglist.taglist_label(t, args)
@@ -179,6 +205,8 @@ function taglist.taglist_label(t, args)
     local fg_occupied = args.fg_occupied or theme.taglist_fg_occupied
     local bg_empty = args.bg_empty or theme.taglist_bg_empty
     local fg_empty = args.fg_empty or theme.taglist_fg_empty
+    local bg_volatile = args.bg_volatile or theme.taglist_bg_volatile
+    local fg_volatile = args.fg_volatile or theme.taglist_fg_volatile
     local taglist_squares_sel = args.squares_sel or theme.taglist_squares_sel
     local taglist_squares_unsel = args.squares_unsel or theme.taglist_squares_unsel
     local taglist_squares_sel_empty = args.squares_sel_empty or theme.taglist_squares_sel_empty
@@ -275,6 +303,22 @@ function taglist.taglist_label(t, args)
         if args.shape_border_color_urgent or theme.taglist_shape_border_color_urgent then
             shape_border_color = args.shape_border_color_urgent or theme.taglist_shape_border_color_urgent
         end
+
+    elseif t.volatile then
+        if bg_volatile then bg_color = bg_volatile end
+        if fg_volatile then fg_color = fg_volatile end
+
+        if args.shape_volatile or theme.taglist_shape_volatile then
+            shape = args.shape_volatile or theme.taglist_shape_volatile
+        end
+
+        if args.shape_border_width_volatile or theme.taglist_shape_border_width_volatile then
+            shape_border_width = args.shape_border_width_volatile or theme.taglist_shape_border_width_volatile
+        end
+
+        if args.shape_border_color_volatile or theme.taglist_shape_border_color_volatile then
+            shape_border_color = args.shape_border_color_volatile or theme.taglist_shape_border_color_volatile
+        end
     end
 
     if not tag.getproperty(t, "icon_only") then
@@ -333,6 +377,8 @@ end
 -- @tparam[opt=nil] string|pattern style.fg_occupied
 -- @tparam[opt=nil] string|pattern style.bg_empty
 -- @tparam[opt=nil] string|pattern style.fg_empty
+-- @tparam[opt=nil] string|pattern style.bg_volatile
+-- @tparam[opt=nil] string|pattern style.fg_volatile
 -- @tparam[opt=nil] string style.taglist_squares_sel
 -- @tparam[opt=nil] string style.taglist_squares_unsel
 -- @tparam[opt=nil] string style.taglist_squares_sel_empty
