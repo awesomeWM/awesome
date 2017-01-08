@@ -1678,6 +1678,17 @@ client_resize(client_t *c, area_t geometry, bool honor_hints)
     if(geometry.y + geometry.height < 0)
         geometry.y = 0;
 
+    if (honor_hints) {
+        /* We could get integer underflows in client_remove_titlebar_geometry()
+         * without these checks here.
+         */
+        if(geometry.width < c->titlebar[CLIENT_TITLEBAR_LEFT].size + c->titlebar[CLIENT_TITLEBAR_RIGHT].size)
+            return false;
+        if(geometry.height < c->titlebar[CLIENT_TITLEBAR_TOP].size + c->titlebar[CLIENT_TITLEBAR_BOTTOM].size)
+            return false;
+        geometry = client_apply_size_hints(c, geometry);
+    }
+
     if(geometry.width < c->titlebar[CLIENT_TITLEBAR_LEFT].size + c->titlebar[CLIENT_TITLEBAR_RIGHT].size)
         return false;
     if(geometry.height < c->titlebar[CLIENT_TITLEBAR_TOP].size + c->titlebar[CLIENT_TITLEBAR_BOTTOM].size)
@@ -1685,9 +1696,6 @@ client_resize(client_t *c, area_t geometry, bool honor_hints)
 
     if(geometry.width == 0 || geometry.height == 0)
         return false;
-
-    if (honor_hints)
-        geometry = client_apply_size_hints(c, geometry);
 
     if(!AREA_EQUAL(c->geometry, geometry))
     {

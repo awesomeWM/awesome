@@ -439,6 +439,37 @@ table.insert(steps, function()
     return true
 end)
 
+table.insert(steps, function()
+    for _, c in pairs(client.get()) do
+        c:kill()
+    end
+    if #client.get() == 0 then
+        test_client(nil, nil, nil, nil, true)
+        return true
+    end
+end)
+
+table.insert(steps, function()
+    if #client.get() ~= 1 then
+        return
+    end
+
+    local c = client.get()[1]
+    local geo = c:geometry()
+    local hints = c.size_hints
+    assert(hints.height_inc == 200)
+    assert(hints.width_inc == 200)
+    assert(c:apply_size_hints(1, 1) == 0)
+
+    c:geometry { width = 1, height = 50 }
+
+    -- The above should be rejected, because it would make us resize the
+    -- window size 0x0.
+    assert(c:geometry().width == geo.width)
+    assert(c:geometry().height == geo.height)
+    return true
+end)
+
 require("_runner").run_steps(steps)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
