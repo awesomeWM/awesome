@@ -776,9 +776,7 @@ luaA_init(xdgHandle* xdg, string_array_t *searchpath)
     lua_concat(L, 3); /* concatenate with package.path */
     lua_setfield(L, 1, "path"); /* package.path = "concatenated string" */
 
-    lua_getfield(L, 1, "loaded");
-
-    lua_pop(L, 2); /* pop "package" and "package.loaded" */
+    lua_pop(L, 1); /* pop "package" */
 }
 
 static void
