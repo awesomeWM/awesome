@@ -60,6 +60,7 @@ endif(NOT CPACK_GENERATOR)
 set(CPACK_PACKAGE_NAME "awesome")
 set(CPACK_DEBIAN_PACKAGE_MAINTAINER "devnull@example.com")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "A tiling window manager")
+set(CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION "/etc/xdg;/usr/share/xsessions")
 
 if(CPACK_GENERATOR)
     include(CPack)
