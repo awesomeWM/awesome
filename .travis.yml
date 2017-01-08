@@ -110,7 +110,7 @@ install:
     do_codecov() {
       echo "== do_codecov in $PWD: $*: build/luacov.stats.out: =="
       if [ "$DO_COVERAGE" = "codecov" ]; then
-        cat build/luacov.stats.out
+        test -f build/luacov.stats.out || { echo 'build/luacov.stats.out does not exist.'; return 1; }
         luacov || return 1
         travis_retry bash /tmp/codecov-bash -X coveragepy -c -F "$1" || return 1
         rm build/luacov.stats.out
@@ -226,6 +226,6 @@ after_success:
   - |
     set -e
     if [ "$DO_COVERAGE" = "coveralls" ]; then
-      cat build/luacov.stats.out
+      test -f build/luacov.stats.out || { echo 'build/luacov.stats.out does not exist.'; return 1; }
       luacov-coveralls --verbose --merge
     fi
