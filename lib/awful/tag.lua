@@ -1387,6 +1387,9 @@ capi.client.connect_signal("property::screen", function(c)
     -- awful.rules. It is also messing up the tags before the user have a chance
     -- to set them manually.
     timer.delayed_call(function()
+        if not c.valid then
+            return
+        end
         local tags, new_tags = c:tags(), {}
 
         for _, t in ipairs(tags) do
