@@ -5,21 +5,38 @@ local spawn = require("awful.spawn")
 
 local test_client_source = [[
 local lgi = require 'lgi'
+local Gdk = lgi.require('Gdk')
 local Gtk = lgi.require('Gtk')
 local Gio = lgi.require('Gio')
 Gtk.init()
 
-local function open_window(class, title, snid)
+local function open_window(class, title, options)
     local window = Gtk.Window {
         default_width  = 100,
         default_height = 100,
         title          = title
     }
-    if snid ~= "" then
-        window:set_startup_id(snid)
+    if options.snid and options.snid ~= "" then
+        window:set_startup_id(options.snid)
+    end
+    if options.resize_increment then
+        local geom = Gdk.Geometry {
+            width_inc = 200,
+            height_inc = 200,
+        }
+        window:set_geometry_hints(nil, geom, Gdk.WindowHints.RESIZE_INC)
     end
     window:set_wmclass(class, class)
     window:show_all()
+end
+
+local function parse_options(options)
+    local result = {}
+    for word in string.gmatch(options, "([^,]+)") do
+        local key, value = string.match(word, "([^=]+)=?(.*)")
+        result[key] = value
+    end
+    return result
 end
 
 -- Start a coroutine for nicer input handling
@@ -27,8 +44,8 @@ local coro = coroutine.wrap(function()
     while true do
         local class = coroutine.yield()
         local title = coroutine.yield()
-        local snid = coroutine.yield()
-        open_window(class, title, snid)
+        local options = coroutine.yield()
+        open_window(class, title, parse_options(options))
     end
 end)
 coro()
@@ -86,13 +103,21 @@ local function get_snid(sn_rules, callback)
     return snid
 end
 
-return function(class, title, sn_rules, callback)
+return function(class, title, sn_rules, callback, resize_increment)
     class = class or "test_app"
     title = title or "Awesome test client"
 
     init()
-    local snid = (sn_rules or callback) and get_snid(sn_rules, callback) or ""
-    local data = class .. "\n" .. title .. "\n" .. snid .. "\n"
+    local options = ""
+    local snid
+    if sn_rules or callback then
+        snid = get_snid(sn_rules, callback)
+        options = options .. "snid=" .. snid .. ","
+    end
+    if resize_increment then
+        options = options .. "resize_increment,"
+    end
+    local data = class .. "\n" .. title .. "\n" .. options .. "\n"
     local success, msg = pipe:write_all(data)
     assert(success, tostring(msg))
 
