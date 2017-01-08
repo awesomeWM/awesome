@@ -37,7 +37,7 @@ theme.titlebar_bg_normal = "#3F3F3F"
 -- There are other variable sets
 -- overriding the default one when
 -- defined, the sets are:
--- [taglist|tasklist]_[bg|fg]_[focus|urgent]
+-- [taglist|tasklist]_[bg|fg]_[focus|urgent|occupied|empty|volatile]
 -- titlebar_[normal|focus]
 -- tooltip_[font|opacity|fg_color|bg_color|border_width|border_color]
 -- Example:
