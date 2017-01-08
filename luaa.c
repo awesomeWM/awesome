@@ -632,7 +632,7 @@ setup_awesome_signals(lua_State *L)
 
 /* Add things to the string on top of the stack */
 static void
-add_to_search_path(lua_State *L, string_array_t *searchpath)
+add_to_search_path(lua_State *L, string_array_t *searchpath, bool for_lua)
 {
     if (LUA_TSTRING != lua_type(L, -1))
     {
@@ -642,24 +642,40 @@ add_to_search_path(lua_State *L, string_array_t *searchpath)
 
     foreach(entry, *searchpath)
     {
+        int components;
         size_t len = a_strlen(*entry);
         lua_pushliteral(L, ";");
         lua_pushlstring(L, *entry, len);
-        lua_pushliteral(L, "/?.lua");
+        if (for_lua)
+            lua_pushliteral(L, "/?.lua");
+        else
+            lua_pushliteral(L, "/?.so");
         lua_concat(L, 3);
 
-        lua_pushliteral(L, ";");
-        lua_pushlstring(L, *entry, len);
-        lua_pushliteral(L, "/?/init.lua");
-        lua_concat(L, 3);
+        if (for_lua)
+        {
+            lua_pushliteral(L, ";");
+            lua_pushlstring(L, *entry, len);
+            lua_pushliteral(L, "/?/init.lua");
+            lua_concat(L, 3);
 
-        lua_concat(L, 3); /* concatenate with string on top of the stack */
+            components = 2;
+        } else {
+            components = 1;
+        }
+        lua_concat(L, components + 1); /* concatenate with string on top of the stack */
     }
 
     /* add Lua lib path (/usr/share/awesome/lib by default) */
-    lua_pushliteral(L, ";" AWESOME_LUA_LIB_PATH "/?.lua");
-    lua_pushliteral(L, ";" AWESOME_LUA_LIB_PATH "/?/init.lua");
-    lua_concat(L, 3); /* concatenate with thing on top of the stack when we were called */
+    if (for_lua)
+    {
+        lua_pushliteral(L, ";" AWESOME_LUA_LIB_PATH "/?.lua");
+        lua_pushliteral(L, ";" AWESOME_LUA_LIB_PATH "/?/init.lua");
+        lua_concat(L, 3); /* concatenate with thing on top of the stack when we were called */
+    } else {
+        lua_pushliteral(L, ";" AWESOME_LUA_LIB_PATH "/?.so");
+        lua_concat(L, 2); /* concatenate with thing on top of the stack when we were called */
+    }
 }
 
 /** Initialize the Lua VM
@@ -779,8 +795,12 @@ luaA_init(xdgHandle* xdg, string_array_t *searchpath)
         return;
     }
     lua_getfield(L, 1, "path");
-    add_to_search_path(L, searchpath);
+    add_to_search_path(L, searchpath, true);
     lua_setfield(L, 1, "path"); /* package.path = "concatenated string" */
+
+    lua_getfield(L, 1, "cpath");
+    add_to_search_path(L, searchpath, false);
+    lua_setfield(L, 1, "cpath"); /* package.cpath = "concatenated string" */
 
     lua_pop(L, 1); /* pop "package" */
 }
