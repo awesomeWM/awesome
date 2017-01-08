@@ -1,33 +1,26 @@
 -- Configuration file for LuaCov
 
 -- This variable is set externally
-local build = os.getenv("BUILD_DIRECTORY") or error("$BUILD_DIRECTORY not set")
-local lib_dir = os.getenv("AWESOME_LIB_DIR") or build .. "lib/"
-local source = os.getenv("SOURCE_DIRECTORY")
+local source = os.getenv("SOURCE_DIRECTORY") or os.getenv('PWD')
+local build = os.getenv("BUILD_DIRECTORY") or (source .. "/build")
 
 local function escape_pattern(str)
     return string.gsub(str, "%W", "%%%1")
 end
 
 return {
-    statsfile = build .. "luacov.stats.out",
+    statsfile = build .. "/luacov.stats.out",
 
     include = {
-        escape_pattern(lib_dir) .. ".+",
-
-        -- For things already having the correct path
-        -- (happens with integration tests)
-        "^lib/",
-
-        -- For the shape-API auto-generated images
-        source and escape_pattern(source .. "lib/"),
+        escape_pattern(source) .. "/.+",
+        -- Relative paths (to source/build dir).
+        '^[^/].+',
     },
 
     -- configuration for luacov-coveralls reporter
     coveralls = {
         pathcorrect = {
-            { escape_pattern(lib_dir), "lib/"},
-            source and { escape_pattern(source .. "lib/"), "lib/" },
+            { escape_pattern(source .. '/'), ''},
         },
     },
 }

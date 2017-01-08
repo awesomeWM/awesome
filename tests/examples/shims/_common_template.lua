@@ -1,4 +1,4 @@
-return function(_, _, luacovpath)
+return function(_, _)
 
     -- Set the global shims
     -- luacheck: globals awesome root tag screen client mouse drawin button
@@ -13,11 +13,6 @@ return function(_, _, luacovpath)
 
     -- Force luacheck to be silent about setting those as unused globals
     assert(awesome and root and tag and screen and client and mouse)
-
-    -- If luacov is available, use it. Else, do nothing.
-    pcall(function()
-        require("luacov.runner")(luacovpath)
-    end)
 
     -- Silence debug warnings
     require("gears.debug").print_warning = function() end

@@ -389,7 +389,7 @@ if(BUSTED_EXECUTABLE)
     # Keep the arguments in sync with the version below!
     add_custom_target(check-unit ALL
         ${BUSTED_EXECUTABLE} "--helper=${CMAKE_SOURCE_DIR}/spec/preload.lua"
-        "--lpath=${CMAKE_BINARY_DIR}/lib/?.lua;${CMAKE_BINARY_DIR}/lib/?/init.lua;spec/?.lua"
+        "--lpath=lib/?.lua;lib/?/init.lua;spec/?.lua"
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
         COMMENT "Running unit tests"
         VERBATIM)
@@ -397,9 +397,8 @@ if(BUSTED_EXECUTABLE)
 
     # Same as above, but with --coverage argument
     add_custom_target(check-unit-coverage
-        "BUILD_DIRECTORY=${CMAKE_BINARY_DIR}/"
         ${BUSTED_EXECUTABLE} "--helper=${CMAKE_SOURCE_DIR}/spec/preload.lua"
-        "--lpath=${CMAKE_BINARY_DIR}/lib/?.lua;${CMAKE_BINARY_DIR}/lib/?/init.lua;spec/?.lua"
+        "--lpath=lib/?.lua;lib/?/init.lua;spec/?.lua"
         "--coverage"
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
         COMMENT "Running unit tests under LuaCov"

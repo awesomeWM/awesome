@@ -22,8 +22,8 @@ fi
 
 # Change to file's dir (POSIXly).
 cd -P -- "$(dirname -- "$0")"
-this_dir=$PWD
-source_dir="$PWD/.."
+this_dir="$PWD"
+source_dir="${this_dir%/*}"
 
 # Either the build dir is passed in $CMAKE_BINARY_DIR or we guess based on $PWD
 build_dir="$CMAKE_BINARY_DIR"
@@ -59,7 +59,6 @@ if ! [ -x "$AWESOME" ]; then
     echo "$AWESOME is not executable." >&2
     exit 1
 fi
-RC_FILE=$build_dir/awesomerc.lua
 AWESOME_CLIENT="$source_dir/utils/awesome-client"
 D=:5
 SIZE="${TESTS_SCREEN_SIZE:-1024x768}"
@@ -90,6 +89,9 @@ cleanup() {
     for p in $awesome_pid $xserver_pid; do
         kill -TERM "$p" 2>/dev/null || true
     done
+    if [ -n "$DO_COVERAGE" ] && [ "$DO_COVERAGE" != 0 ]; then
+        mv "$RC_FILE.coverage.bak" "$RC_FILE"
+    fi
     rm -rf "$tmp_files" || true
 }
 trap "cleanup" 0 2 3 15
@@ -160,26 +162,22 @@ wait_until_success "setup xrdb" "printf 'Xft.dpi: 96
 # Use a separate D-Bus session; sets $DBUS_SESSION_BUS_PID.
 eval "$(DISPLAY="$D" dbus-launch --sh-syntax --exit-with-session)"
 
-# Not in Travis?
-if [ "$CI" != true ]; then
-    # Prepare a config file pointing to a working theme
-    # Handle old filename of config files (useful for git-bisect).
-    if [ -f "$source_dir/awesomerc.lua.in" ]; then
-        SED_IN=.in
-    fi
-    RC_FILE=$tmp_files/awesomerc.lua
-    THEME_FILE=$tmp_files/theme.lua
-    sed -e "s:.*beautiful.init(.*default/theme.lua.*:beautiful.init('$THEME_FILE'):" "$source_dir/awesomerc.lua$SED_IN" > "$RC_FILE"
-    sed -e "s:@AWESOME_THEMES_PATH@/default/titlebar:$build_dir/themes/default/titlebar:"  \
-        -e "s:@AWESOME_THEMES_PATH@:$source_dir/themes/:" \
-        -e "s:@AWESOME_ICON_PATH@:$source_dir/icons:" "$source_dir/themes/default/theme.lua$SED_IN" > "$THEME_FILE"
+RC_FILE=${source_dir}/awesomerc.lua
+export AWESOME_THEMES_PATH="$source_dir/themes"
+export AWESOME_ICON_PATH="$source_dir/icons"
+
+# Inject coverage runner to RC file, which will be restored on exit/cleanup.
+if [ -n "$DO_COVERAGE" ] && [ "$DO_COVERAGE" != 0 ]; then
+    cp -a "$RC_FILE" "$RC_FILE.coverage.bak"
+    sed -i "1 s~^~require('luacov.runner')('$source_dir/.luacov'); \0~" "$RC_FILE"
 fi
 
 # Start awesome.
 start_awesome() {
     cd "$build_dir"
     # Kill awesome after $timeout_stale seconds (e.g. for errors during test setup).
-    DISPLAY="$D" timeout "$timeout_stale" "$AWESOME" -c "$RC_FILE" "${awesome_options[@]}" > "$awesome_log" 2>&1 &
+    # SOURCE_DIRECTORY is used by .luacov.
+    DISPLAY="$D" SOURCE_DIRECTORY="$source_dir" timeout "$timeout_stale" "$AWESOME" -c "$RC_FILE" "${awesome_options[@]}" > "$awesome_log" 2>&1 &
     awesome_pid=$!
     cd - >/dev/null
 

@@ -14,20 +14,45 @@ cmake_minimum_required(VERSION 3.0.0)
 # Get and update the LUA_PATH so the scripts can be executed without Awesome.
 execute_process(COMMAND lua -e print\(package.path\) OUTPUT_VARIABLE "LUA_PATH_")
 
+# Make sure the system can be called from the test directory
+if(NOT SOURCE_DIR AND ${CMAKE_CURRENT_SOURCE_DIR} MATCHES "/tests/examples")
+    get_filename_component(TOP_SOURCE_DIR
+                           "${CMAKE_CURRENT_SOURCE_DIR}/../.." ABSOLUTE)
+    # Used by .luacov.
+    set(ENV{SOURCE_DIRECTORY} ${TOP_SOURCE_DIR})
+else()
+    set(TOP_SOURCE_DIR ${CMAKE_SOURCE_DIR})
+endif()
+
+if (DEFINED ENV{DO_COVERAGE} AND NOT $ENV{DO_COVERAGE} STREQUAL "0")
+  execute_process(
+    COMMAND lua -e "require('luacov.runner')('${TOP_SOURCE_DIR}/.luacov')"
+    RESULT_VARIABLE TEST_RESULT
+    ERROR_VARIABLE  TEST_ERROR
+    ERROR_STRIP_TRAILING_WHITESPACE)
+  if (TEST_RESULT OR NOT TEST_ERROR STREQUAL "")
+    message(${TEST_ERROR})
+    message(FATAL_ERROR "Failed to run luacov.runner.")
+  endif()
+  set(LUA_COV_RUNNER lua "-erequire('luacov.runner')('${TOP_SOURCE_DIR}/.luacov')")
+else()
+  set(LUA_COV_RUNNER lua)
+endif()
+
 # Add the main awesome lua libraries.
 set(LUA_PATH2_ "\
-${CMAKE_SOURCE_DIR}/lib/?.lua;\
-${CMAKE_SOURCE_DIR}/lib/?/init.lua;\
-${CMAKE_SOURCE_DIR}/lib/?;\
-${CMAKE_SOURCE_DIR}/themes/?.lua;\
-${CMAKE_SOURCE_DIR}/themes/?;"
+${TOP_SOURCE_DIR}/lib/?.lua;\
+${TOP_SOURCE_DIR}/lib/?/init.lua;\
+${TOP_SOURCE_DIR}/lib/?;\
+${TOP_SOURCE_DIR}/themes/?.lua;\
+${TOP_SOURCE_DIR}/themes/?;"
 )
 
 # Add the C API shims.
 set(LUA_PATH3_ "\
-${CMAKE_SOURCE_DIR}/tests/examples/shims/?.lua;\
-${CMAKE_SOURCE_DIR}/tests/examples/shims/?/init.lua;\
-${CMAKE_SOURCE_DIR}/tests/examples/shims/?;"
+${TOP_SOURCE_DIR}/tests/examples/shims/?.lua;\
+${TOP_SOURCE_DIR}/tests/examples/shims/?/init.lua;\
+${TOP_SOURCE_DIR}/tests/examples/shims/?;"
 )
 
 # Done in 3 variables to avoid CMake from implicitly converting into a list.
@@ -133,7 +158,7 @@ endfunction()
 # Get the namespace of a file.
 function(get_namespace result_variable file)
     get_filename_component(path "${file}" DIRECTORY)
-    string(LENGTH "${SOURCE_DIR}/tests/examples" prefix_length)
+    string(LENGTH "${TOP_SOURCE_DIR}/tests/examples" prefix_length)
     string(REPLACE "/" "_" namespace "${path}")
     string(SUBSTRING "${namespace}" "${prefix_length}" -1 namespace)
 
@@ -148,24 +173,23 @@ function(run_test test_path namespace escaped_content)
     get_filename_component(${test_path} TEST_FILE_NAME NAME)
     set(IMAGE_PATH "${IMAGE_DIR}/AUTOGEN${namespace}_${TEST_FILE_NAME}")
 
-    # Use the example testing as coverage source.
-    if (USE_LCOV)
-        set(LCOV_PATH ${SOURCE_DIR}/.luacov)
-    endif()
-
     # Execute the script, leave the image extension decision to the test.
     # SVG is preferred, but PNG is better suited for some tests, like bitmap
     # patterns.
     execute_process(
-        COMMAND lua ${template} ${test_path} ${IMAGE_PATH} ${LCOV_PATH}
+        COMMAND ${LUA_COV_RUNNER} ${template} ${test_path} ${IMAGE_PATH}
+        RESULT_VARIABLE TEST_RESULT
         OUTPUT_VARIABLE TEST_OUTPUT
         ERROR_VARIABLE  TEST_ERROR
     )
-
-    # If there is something on stderr, exit.
-    if (NOT TEST_ERROR STREQUAL "")
-        message("${TEST_OUTPUT}")
-        message("${TEST_ERROR}")
+    if (TEST_RESULT OR NOT TEST_ERROR STREQUAL "")
+        message("Result: ${TEST_RESULT}")
+        if (NOT TEST_OUTPUT STREQUAL "")
+            message("Output: ${TEST_OUTPUT}")
+        endif()
+        if (NOT TEST_ERROR STREQUAL "")
+            message("Error:  ${TEST_ERROR}")
+        endif()
         if (STRICT_TESTS)
             message(FATAL_ERROR ${test_path} " An example test failed, aborting.")
         endif()
@@ -231,12 +255,12 @@ endfunction()
 
 # Find and run all test files.
 file(GLOB_RECURSE test_files LIST_DIRECTORIES false
-    "${SOURCE_DIR}/tests/examples/*.lua")
+    "${TOP_SOURCE_DIR}/tests/examples/*.lua")
 foreach(file ${test_files})
     if ((NOT "${file}" MATCHES ".*/shims/.*")
         AND (NOT "${file}" MATCHES ".*/template.lua"))
 
-        file(RELATIVE_PATH relative_file "${SOURCE_DIR}" "${file}")
+        file(RELATIVE_PATH relative_file "${TOP_SOURCE_DIR}" "${file}")
         message(STATUS "Running ${relative_file}...")
 
         # Get the file name without the extension.

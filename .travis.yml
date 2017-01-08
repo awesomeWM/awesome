@@ -10,13 +10,13 @@ branches:
 
 env:
   matrix:
-    - LUA=5.2 DO_CHECKQA=1 LUANAME=lua5.2 BUILD_APIDOC=true DO_COVERAGE=coveralls
+    - LUA=5.2 DO_CHECKQA=1 LUANAME=lua5.2 DO_COVERAGE=coveralls
     # luajit: installed from source.
     - LUA=5.1 LUANAME=luajit-2.0 LUALIBRARY=/usr/lib/libluajit-5.1.so LUAROCKS_ARGS=--lua-suffix=jit-2.0.4 TEST_PREV_COMMITS=1
     # Note: luarocks does not work with Lua 5.0.
     - LUA=5.1 LUANAME=lua5.1 BUILD_IN_DIR=/tmp/awesome-build
     # Lua 5.2 with older lgi and screen size not divisible by 2.
-    - LUA=5.2 LUANAME=lua5.2 LGIVER=0.8.0 TESTS_SCREEN_SIZE=1921x1079
+    - LUA=5.2 LUANAME=lua5.2 LGIVER=0.8.0 TESTS_SCREEN_SIZE=1921x1079 BUILD_APIDOC=true
     # Lua 5.3 isn't available in Ubuntu Trusty, so some magic below installs it.
     - LUA=5.3 LUANAME=lua5.3 LUALIBRARY=/usr/lib/liblua.so DO_COVERAGE=codecov
   global:
@@ -24,6 +24,7 @@ env:
     - secure: "R/HYDclnws1I1+v9Yjt+RKa4CsFhbBT9tiwE3EfPhEj2KCYX4sFRMxuZvLf5sq0XWdrQaPhQ54fgAZGr3f054JKRXcTB0g9J6nhSHz9kIjPh446gafUhEeDQcZRwM/MeCWiwFIkiZm6smYoDFE9JTWu6quNV+lQ4kcVDOp2ibEc="
 
 before_install:
+  - if [ "$BUILD_APIDOC" = true ] && [ -n "$DO_COVERAGE" ]; then echo "BUILD_APIDOC and DO_COVERAGE are not meant to be used together." >&2; exit 1; fi
   - if [ -z $LUAINCLUDE ]; then LUAINCLUDE=/usr/include/${LUANAME}; fi
   - if [ -z $LUALIBRARY ]; then LUALIBRARY=/usr/lib/x86_64-linux-gnu/lib${LUANAME}.so; fi
   - cmake --version
@@ -49,7 +50,7 @@ install:
   # Install Lua (per env).
   # Note that Lua 5.3 is installed manually, because it is not available in Ubuntu Trusty.
   - |
-    set -ev
+    set -e
     if [[ "$LUA" == "5.3" ]]; then
       wget http://www.lua.org/ftp/lua-5.3.3.tar.gz -O lua.tar.gz
       tar -xvzf lua.tar.gz
@@ -89,23 +90,28 @@ install:
   - if [ "$DO_CHECKQA" = 1 ]; then travis_retry sudo luarocks install luacheck; fi
 
   # Install ldoc for building docs.
-  - travis_retry sudo luarocks install ldoc
-  - travis_retry sudo luarocks install lua-discount
+  - |
+    if [ "$BUILD_APIDOC" = "true" ]; then
+      travis_retry sudo luarocks install ldoc
+      travis_retry sudo luarocks install lua-discount
+    fi
 
   # Install dependencies for code coverage testing.
   - if [ "$DO_COVERAGE" = "" ]; then export DO_COVERAGE=0; fi
-  - if [ "$DO_COVERAGE" != "0" ]; then sudo luarocks install luacov 0.11.0-1; fi
+  - if [ "$DO_COVERAGE" != "0" ]; then sudo luarocks install luacov 0.12.0-1; fi
   - if [ "$DO_COVERAGE" = "coveralls" ]; then sudo luarocks install luacov-coveralls; fi
 
   # Determine custom version.
   - export AWESOME_VERSION="${TRAVIS_BRANCH}-g$(git rev-parse --short HEAD)"
   - 'if [ "$TRAVIS_PULL_REQUEST" != false ]; then AWESOME_VERSION="${AWESOME_VERSION}-PR${TRAVIS_PULL_REQUEST}"; fi'
   # function for codecov support
-  - travis_retry wget -O /tmp/codecov-bash https://codecov.io/bash
+  - if [ "$DO_COVERAGE" = "codecov" ]; then travis_retry wget -O /tmp/codecov-bash https://codecov.io/bash; fi
   - |
     do_codecov() {
+      echo "== do_codecov in $PWD: $*: build/luacov.stats.out: =="
       if [ "$DO_COVERAGE" = "codecov" ]; then
-        (cd build && luacov) || return 1
+        test -f build/luacov.stats.out || { echo 'build/luacov.stats.out does not exist.'; return 1; }
+        luacov || return 1
         travis_retry bash /tmp/codecov-bash -X coveragepy -c -F "$1" || return 1
         rm build/luacov.stats.out
       fi
@@ -130,9 +136,9 @@ install:
       return $result
     }
 script:
-  - export CMAKE_ARGS="-DLUA_LIBRARY=${LUALIBRARY} -DLUA_INCLUDE_DIR=${LUAINCLUDE} -D OVERRIDE_VERSION=$AWESOME_VERSION -D DO_COVERAGE=${DO_COVERAGE} -DSTRICT_TESTS=true"
+  - export CMAKE_ARGS="-DLUA_LIBRARY=${LUALIBRARY} -DLUA_INCLUDE_DIR=${LUAINCLUDE} -D OVERRIDE_VERSION=$AWESOME_VERSION -DSTRICT_TESTS=true"
   - |
-    set -ev
+    set -e
     if [ -n "$BUILD_IN_DIR" ]; then
       # Explicitly remove the Makefile to not build from the src dir accidentally.
       rm Makefile
@@ -147,20 +153,22 @@ script:
       travis_run_in_fold "make.install" sudo env PATH=$PATH make install
       awesome --version
     fi
-  - |
-    if [ "$TRAVIS_TEST_RESULT" = 0 ]; then
-      do_codecov samples
-    fi
   # Run check-unit{,-coverage} and check-integration.
   - |
-    set -ev
+    set -ex
     if [ "$TRAVIS_TEST_RESULT" = 0 ]; then
       if [ "$DO_COVERAGE" != "0" ]; then
         travis_fold_start "DO_COVERAGE"
+
+        # Run tests/examples explicitly.
+        (mkdir -p tests/examples/build \
+         && cd tests/examples/build \
+         && cmake $CMAKE_ARGS ..)
+        do_codecov samples
+
         (make check-unit-coverage \
          && do_codecov unittests \
-         && sed -i "1 i\\require('luacov.runner')('"$PWD"/.luacov')" build/awesomerc.lua \
-         && BUILD_DIRECTORY="" tests/run.sh \
+         && tests/run.sh \
          && do_codecov functionaltests)
         ret=$?
         travis_fold_end
@@ -176,7 +184,7 @@ script:
       travis_run_in_fold "make.check-qa" make check-qa
     fi
   - |
-    set -ev
+    set -e
     if [ "$TEST_PREV_COMMITS" = 1 ] && ! [ "$TRAVIS_PULL_REQUEST" = false ]; then
       # Check each commit separately (to make git-bisect less annoying).
       # Fix Travis' commit range (https://github.com/travis-ci/travis-ci/issues/4596).
@@ -195,13 +203,18 @@ script:
         echo "Testing commit $commit"
         git checkout "$commit"
         git --no-pager show --stat
-        if ! make all check; then
+        if ! DO_COVERAGE=0 make all check; then
           failed="$failed $commit"
         fi
         travis_fold_end
       done
+
+      git checkout -qf FETCH_HEAD
       if [ -n "$failed" ]; then
-        echo "Checks failed for these commits:$failed"
+        echo "Checks failed for these commits:"
+        for c in $commits; do
+          git log -1 --pretty="%h %s (%an, %ad)" "$c"
+        done
         false
       fi
     fi
@@ -210,4 +223,9 @@ after_success:
   # Push updated API docs for relevant branches, e.g. non-PRs builds on master.
   - if [ "$BUILD_APIDOC" = "true" ]; then build-utils/travis-apidoc.sh; fi
   # Push code coverage information
-  - if [ "$DO_COVERAGE" = "coveralls" ]; then BUILD_DIRECTORY="$(pwd)/$(readlink build)/" SOURCE_DIRECTORY="$(pwd)/" luacov-coveralls --verbose --merge; fi
+  - |
+    set -e
+    if [ "$DO_COVERAGE" = "coveralls" ]; then
+      test -f build/luacov.stats.out || { echo 'build/luacov.stats.out does not exist.'; return 1; }
+      luacov-coveralls --verbose --merge
+    fi
