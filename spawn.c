@@ -53,10 +53,8 @@
 
 #include "spawn.h"
 
-#include <sys/param.h>
-#ifdef __FreeBSD__
-# include <sys/wait.h>
-#endif
+#include <sys/types.h>
+#include <sys/wait.h>
 
 #include <unistd.h>
 #include <glib.h>
