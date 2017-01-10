@@ -61,20 +61,6 @@ diff -Nur . ../doc -I "Last updated" -I "<strong>Release</strong>:" \
   -I "<h2>API documentation for awesome, a highly configurable X window manager (version .*)\.</h2>" \
   -x .git | patch -p1
 
-# Create the readme
-cat > README.md <<END
-# Awesome API documentation
-
-This repository contains the built API documentation for the
-[awesome](https://github.com/awesomeWM/awesome) window manager. It is
-automatically updated via Travis when the master branch changes. Hence:
-
-## Do NOT send pull requests here
-
-Instead, please update the source code of
-[awesome](https://github.com/awesomeWM/awesome) instead.
-END
-
 git add --all .
 if git diff --cached --exit-code --quiet; then
   echo "Documentation has not changed."
