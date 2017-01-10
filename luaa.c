@@ -57,7 +57,6 @@
 #include <xcb/xcb_aux.h>
 
 #include <unistd.h> /* for gethostname() */
-#include <sys/param.h>
 
 #ifdef WITH_DBUS
 extern const struct luaL_Reg awesome_dbus_lib[];
@@ -613,7 +612,8 @@ setup_awesome_signals(lua_State *L)
 
     /* POSIX.1-2001, according to man 7 signal */
     SETUP_SIGNAL(SIGBUS);
-#ifndef __FreeBSD__
+    /* Some Operating Systems doesn't have SIGPOLL (e.g. FreeBSD) */
+#ifdef SIGPOLL
     SETUP_SIGNAL(SIGPOLL);
 #endif
     SETUP_SIGNAL(SIGPROF);
