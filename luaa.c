@@ -612,7 +612,10 @@ setup_awesome_signals(lua_State *L)
 
     /* POSIX.1-2001, according to man 7 signal */
     SETUP_SIGNAL(SIGBUS);
+    /* Some Operating Systems doesn't have SIGPOLL (e.g. FreeBSD) */
+#ifdef SIGPOLL
     SETUP_SIGNAL(SIGPOLL);
+#endif
     SETUP_SIGNAL(SIGPROF);
     SETUP_SIGNAL(SIGSYS);
     SETUP_SIGNAL(SIGTRAP);
