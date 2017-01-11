@@ -312,17 +312,18 @@ local function create_wibox(s, available_groups)
     local available_width_px = width
     local pages = {}
     local columns = wibox.layout.fixed.horizontal()
+    local previous_page_last_layout
     for _, item in ipairs(column_layouts) do
         if item.max_width > available_width_px then
-            columns.widgets[#columns.widgets]['widget']:add(
+            previous_page_last_layout:add(
                 group_label("PgDn - Next Page", beautiful.fg_normal)
             )
             table.insert(pages, columns)
             columns = wibox.layout.fixed.horizontal()
             available_width_px = width - item.max_width
-            local old_widgets = item.layout.widgets
-            item.layout.widgets = {group_label("PgUp - Prev Page", beautiful.fg_normal)}
-            awful.util.table.merge(item.layout.widgets, old_widgets)
+            item.layout:insert(
+                1, group_label("PgUp - Prev Page", beautiful.fg_normal)
+            )
         else
             available_width_px = available_width_px - item.max_width
         end
@@ -330,6 +331,7 @@ local function create_wibox(s, available_groups)
         column_margin:set_widget(item.layout)
         column_margin:set_left(widget.group_margin)
         columns:add(column_margin)
+        previous_page_last_layout = item.layout
     end
     table.insert(pages, columns)
 
