@@ -64,6 +64,8 @@ struct client_t
     /** Old window geometry currently configured in X11 */
     area_t x11_client_geometry;
     area_t x11_frame_geometry;
+    /** Got a configure request and have to call client_send_configure() if its ignored? */
+    bool got_configure_request;
     /** Startup ID */
     char *startup_id;
     /** True if the client is sticky */

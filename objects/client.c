@@ -1210,8 +1210,14 @@ client_geometry_refresh(void)
 
         /* Is there anything to do? */
         if (AREA_EQUAL(geometry, c->x11_frame_geometry)
-                && AREA_EQUAL(real_geometry, c->x11_client_geometry))
+                && AREA_EQUAL(real_geometry, c->x11_client_geometry)) {
+            if (c->got_configure_request) {
+                /* ICCCM 4.1.5 / 4.2.3, if nothing was changed, send an event saying so */
+                client_send_configure(c);
+                c->got_configure_request = false;
+            }
             continue;
+        }
 
         if (!ignored_enterleave) {
             client_ignore_enterleave_events();
@@ -1230,6 +1236,7 @@ client_geometry_refresh(void)
 
         /* ICCCM 4.2.3 says something else, but Java always needs this... */
         client_send_configure(c);
+        c->got_configure_request = false;
     }
     if (ignored_enterleave)
         client_restore_enterleave_events();
