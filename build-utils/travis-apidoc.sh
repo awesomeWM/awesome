@@ -59,7 +59,7 @@ git checkout -b merged-update
 # Create a patch without irrelevant changes (version / timestamp).
 diff -Nur . ../doc -I "Last updated" -I "<strong>Release</strong>:" \
   -I "<h2>API documentation for awesome, a highly configurable X window manager (version .*)\.</h2>" \
-  -x .git | patch -p1
+  -x .git -x README.md | patch -p1
 
 git add --all .
 if git diff --cached --exit-code --quiet; then
