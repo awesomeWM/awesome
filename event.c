@@ -395,9 +395,8 @@ event_handle_configurerequest(xcb_configure_request_event_t *ev)
                 geometry.y += diff_y;
         }
 
-        if(!client_resize(c, geometry, false))
-            /* ICCCM 4.1.5 / 4.2.3, if nothing was changed, send an event saying so */
-            client_send_configure(c);
+        c->got_configure_request = true;
+        client_resize(c, geometry, false);
     }
     else if (xembed_getbywin(&globalconf.embedded, ev->window))
     {
