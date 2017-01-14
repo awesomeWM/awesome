@@ -1,13 +1,15 @@
 local parent    = ... --DOC_HIDE
 local wibox     = require( "wibox" ) --DOC_HIDE
-local assets    = require( "xresources.assets" ) --DOC_HIDE
+local assets    = require( "beautiful.theme_assets" ) --DOC_HIDE
+
+local size = 128 --DOC_HIDE
 
 parent:add( --DOC_HIDE
 
            wibox.widget {
-               fit    = function() return 128, 128 end,
+               fit    = function() return size, size end,
                draw   = function(_, _, cr)
-                   assets.gen_logo(cr, 128, 128, nil, "#535d6c")
+                   assets.gen_logo(cr, size, size, nil, "#535d6c")
                end,
                widget = wibox.widget.base.make_widget
            }

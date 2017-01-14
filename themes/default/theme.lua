@@ -2,11 +2,14 @@
 -- Default awesome theme --
 ---------------------------
 
-local theme = {}
+local theme_assets = require("beautiful.theme_assets")
+local xresources = require("beautiful.xresources")
+local dpi = xresources.apply_dpi
 
 local util = require('awful.util')
 local themes_path = util.get_themes_dir()
-local icon_path = util.get_awesome_icon_dir()
+
+local theme = {}
 
 theme.font          = "sans 8"
 
@@ -22,7 +25,7 @@ theme.fg_urgent     = "#ffffff"
 theme.fg_minimize   = "#ffffff"
 
 theme.useless_gap   = 0
-theme.border_width  = 1
+theme.border_width  = dpi(1)
 theme.border_normal = "#000000"
 theme.border_focus  = "#535d6c"
 theme.border_marked = "#91231c"
@@ -38,16 +41,21 @@ theme.border_marked = "#91231c"
 -- Example:
 --theme.taglist_bg_focus = "#ff0000"
 
--- Display the taglist squares
-theme.taglist_squares_sel   = themes_path.."default/taglist/squarefw.png"
-theme.taglist_squares_unsel = themes_path.."default/taglist/squarew.png"
+-- Generate taglist squares:
+local taglist_square_size = dpi(4)
+theme.taglist_squares_sel = theme_assets.taglist_squares_sel(
+    taglist_square_size, theme.fg_normal
+)
+theme.taglist_squares_unsel = theme_assets.taglist_squares_unsel(
+    taglist_square_size, theme.fg_normal
+)
 
 -- Variables set for theming the menu:
 -- menu_[bg|fg]_[normal|focus]
 -- menu_[border_color|border_width]
 theme.menu_submenu_icon = themes_path.."default/submenu.png"
-theme.menu_height = 15
-theme.menu_width  = 100
+theme.menu_height = dpi(15)
+theme.menu_width  = dpi(100)
 
 -- You can add as many variables as
 -- you wish and access them by using
@@ -101,7 +109,10 @@ theme.layout_cornerne = themes_path.."default/layouts/cornernew.png"
 theme.layout_cornersw = themes_path.."default/layouts/cornersww.png"
 theme.layout_cornerse = themes_path.."default/layouts/cornersew.png"
 
-theme.awesome_icon = icon_path.."awesome16.png"
+-- Generate Awesome icon:
+theme.awesome_icon = theme_assets.awesome_icon(
+    theme.menu_height, theme.bg_focus, theme.fg_focus
+)
 
 -- Define the icon theme for application icons. If not set then the icons
 -- from /usr/share/icons and /usr/share/icons/hicolor will be used.

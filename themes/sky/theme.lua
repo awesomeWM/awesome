@@ -4,6 +4,11 @@
 -------------------------------
 -- If you want SVGs and extras, get them from garoth.com/awesome/sky-theme
 
+local theme_assets = require("beautiful.theme_assets")
+local xresources = require("beautiful.xresources")
+local dpi = xresources.apply_dpi
+
+
 -- BASICS
 local theme = {}
 theme.font          = "sans 8"
@@ -20,7 +25,7 @@ theme.fg_urgent     = "#2e3436"
 theme.fg_minimize   = "#2e3436"
 
 theme.useless_gap   = 0
-theme.border_width  = 2
+theme.border_width  = dpi(2)
 theme.border_normal = "#dae3e0"
 theme.border_focus  = "#729fcf"
 theme.border_marked = "#eeeeec"
@@ -47,15 +52,22 @@ theme.awesome_icon           = "@AWESOME_THEMES_PATH@/sky/awesome-icon.png"
 
 -- from default for now...
 theme.menu_submenu_icon     = "@AWESOME_THEMES_PATH@/default/submenu.png"
-theme.taglist_squares_sel   = "@AWESOME_THEMES_PATH@/default/taglist/squarefw.png"
-theme.taglist_squares_unsel = "@AWESOME_THEMES_PATH@/default/taglist/squarew.png"
+
+-- Generate taglist squares:
+local taglist_square_size = dpi(4)
+theme.taglist_squares_sel = theme_assets.taglist_squares_sel(
+    taglist_square_size, theme.fg_normal
+)
+theme.taglist_squares_unsel = theme_assets.taglist_squares_unsel(
+    taglist_square_size, theme.fg_normal
+)
 
 -- MISC
 theme.wallpaper             = "@AWESOME_THEMES_PATH@/sky/sky-background.png"
 theme.taglist_squares       = "true"
 theme.titlebar_close_button = "true"
-theme.menu_height           = 15
-theme.menu_width            = 100
+theme.menu_height = dpi(15)
+theme.menu_width  = dpi(100)
 
 -- Define the image to load
 theme.titlebar_close_button_normal = "@AWESOME_THEMES_PATH@/default/titlebar/close_normal.png"
