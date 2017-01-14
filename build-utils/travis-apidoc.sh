@@ -32,7 +32,7 @@ export GIT_AUTHOR_EMAIL="awesome-robot@users.noreply.github.com"
 export GIT_COMMITTER_NAME="$GIT_AUTHOR_NAME"
 export GIT_COMMITTER_EMAIL="$GIT_AUTHOR_EMAIL"
 
-git clone --branch gh-pages "$REPO_APIDOC" build/apidoc \
+git clone --depth 1 --branch gh-pages "$REPO_APIDOC" build/apidoc \
     2>&1 | sed "s/$GH_APIDOC_TOKEN/GH_APIDOC_TOKEN/g"
 cd build/apidoc
 
@@ -50,7 +50,7 @@ else
   BRANCH="gh-pages"
 fi
 if [ "$BRANCH" != "gh-pages" ]; then
-  git checkout -b "$BRANCH" "origin/${BRANCH}" || git checkout -b "$BRANCH"
+  git checkout -B "$BRANCH" "origin/${BRANCH}"
 fi
 
 # Use a temporary branch for the two commits, which allows for a better UI.
