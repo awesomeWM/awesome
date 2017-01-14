@@ -56,10 +56,24 @@ fi
 # Use a temporary branch for the two commits, which allows for a better UI.
 git checkout -b merged-update
 
+# Create the README for the Git repo (https://github.com/awesomeWM/apidoc).
+cat > ../doc/README.md <<END
+# Awesome API documentation
+
+This repository contains the built API documentation for the
+[awesome](https://github.com/awesomeWM/awesome) window manager. It is
+automatically updated via Travis when the master branch changes. Hence:
+
+## Do NOT send pull requests here
+
+Instead, please update the source code of
+[awesome](https://github.com/awesomeWM/awesome) instead.
+END
+
 # Create a patch without irrelevant changes (version / timestamp).
 diff -Nur . ../doc -I "Last updated" -I "<strong>Release</strong>:" \
   -I "<h2>API documentation for awesome, a highly configurable X window manager (version .*)\.</h2>" \
-  -x .git -x README.md | patch -p1
+  -x .git | patch -p1
 
 git add --all .
 if git diff --cached --exit-code --quiet; then
