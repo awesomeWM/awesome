@@ -281,11 +281,11 @@ function taglist.taglist_label(t, args)
         end
 
         if args.shape_border_width_focus or theme.taglist_shape_border_width_focus then
-            shape = args.shape_border_width_focus or theme.taglist_shape_border_width_focus
+            shape_border_width = args.shape_border_width_focus or theme.taglist_shape_border_width_focus
         end
 
         if args.shape_border_color_focus or theme.taglist_shape_border_color_focus then
-            shape = args.shape_border_color_focus or theme.taglist_shape_border_color_focus
+            shape_border_color = args.shape_border_color_focus or theme.taglist_shape_border_color_focus
         end
 
     elseif tag.getproperty(t, "urgent") then
