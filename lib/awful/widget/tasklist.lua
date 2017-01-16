@@ -208,10 +208,11 @@ local function tasklist_label(c, args, tb)
     local bg_urgent = args.bg_urgent or theme.tasklist_bg_urgent or theme.bg_urgent or bg_normal
     local fg_minimize = util.ensure_pango_color(args.fg_minimize or theme.tasklist_fg_minimize or theme.fg_minimize, fg_normal)
     local bg_minimize = args.bg_minimize or theme.tasklist_bg_minimize or theme.bg_minimize or bg_normal
-    local bg_image_normal = args.bg_image_normal or theme.bg_image_normal
-    local bg_image_focus = args.bg_image_focus or theme.bg_image_focus
-    local bg_image_urgent = args.bg_image_urgent or theme.bg_image_urgent
-    local bg_image_minimize = args.bg_image_minimize or theme.bg_image_minimize
+    -- FIXME v5, remove the fallback theme.bg_image_* variables, see GH#1403
+    local bg_image_normal = args.bg_image_normal or theme.tasklist_bg_image_normal or theme.bg_image_normal
+    local bg_image_focus = args.bg_image_focus or theme.tasklist_bg_image_focus or theme.bg_image_focus
+    local bg_image_urgent = args.bg_image_urgent or theme.tasklist_bg_image_urgent or theme.bg_image_urgent
+    local bg_image_minimize = args.bg_image_minimize or theme.tasklist_bg_image_minimize or theme.bg_image_minimize
     local tasklist_disable_icon = args.tasklist_disable_icon or theme.tasklist_disable_icon or false
     local font = args.font or theme.tasklist_font or theme.font or ""
     local font_focus = args.font_focus or theme.tasklist_font_focus or theme.font_focus or font or ""
