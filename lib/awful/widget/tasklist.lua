@@ -139,7 +139,7 @@ local instances
 
 --- The space between the tasklist elements.
 -- @beautiful beautiful.tasklist_spacing
--- @tparam[opt=0] number spacing The spacing between tags.
+-- @tparam[opt=0] number spacing The spacing between tasks.
 
 --- The default tasklist elements shape.
 -- @beautiful beautiful.tasklist_shape
@@ -404,8 +404,8 @@ function tasklist.new(screen, filter, buttons, style, update_function, base_widg
 
     local data = setmetatable({}, { __mode = 'k' })
 
-    if w.set_spacing and (style and style.spacing or beautiful.taglist_spacing) then
-        w:set_spacing(style and style.spacing or beautiful.taglist_spacing)
+    if w.set_spacing and (style and style.spacing or beautiful.tasklist_spacing) then
+        w:set_spacing(style and style.spacing or beautiful.tasklist_spacing)
     end
 
     local queued_update = false
