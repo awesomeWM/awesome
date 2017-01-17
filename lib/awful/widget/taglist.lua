@@ -111,6 +111,10 @@ taglist.filter = {}
 -- @beautiful beautiful.taglist_font
 -- @param string
 
+--- The space between the taglist elements.
+-- @beautiful beautiful.taglist_spacing
+-- @tparam[opt=0] number spacing The spacing between tags.
+
 --- The main shape used for the elements.
 -- This will be the fallback for state specific shapes.
 -- To get a shape for the whole taglist, use `wibox.container.background`.
