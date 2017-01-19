@@ -68,10 +68,8 @@ Requires:	cairo-gobject%{?_isa}
 Requires:	startup-notification >= 0.10
 # terminal used in the default configuration
 Requires:	xterm
-# optional but useful
-Requires:	rlwrap
-# default editor
-Requires:	vi
+# editor used in the default configuration
+Requires:	nano
 
 
 %description
