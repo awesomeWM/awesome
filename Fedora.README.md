@@ -101,7 +101,7 @@ mock -r fedora-24-x86_64 --clean
 
 ## Notes
 
-The rpms generated follow the naming convention of `[package name][-component]-[version]-[release][dist][git string]`. `[git string]` is in the format `YYYYMMDDgitHASH` where `YYYYMMDD` is the date of the latest commit and `HASH` is the short hash id for the latest commit. This allows future rpm builds of different dates to be recognized as newer without problem.
+The rpms generated follow the naming convention of `[package name][-component]-[version]-[release].[git string][dist]`. `[git string]` is in the format `YYYYMMDDgitHASH` where `YYYYMMDD` is the date of the latest commit and `HASH` is the short hash id for the latest commit. This allows future rpm builds of different dates to be recognized as newer without problem.
 
 One problem with this is if your distro updates to a higher `[release]` than `1`, it will be recognized as newer and overrule all rpms created from the repo.
 

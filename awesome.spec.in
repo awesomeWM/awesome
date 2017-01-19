@@ -1,6 +1,6 @@
 Name:		@CPACK_PACKAGE_NAME@
 Version:	@version_num@
-Release:	1%{?dist}.@GIT_RELEASE_STRING@
+Release:	1.@GIT_RELEASE_STRING@%{?dist}
 Summary:	Highly configurable, framework window manager for X. Fast, light and extensible
 Group:		User Interface/Desktops
 # common/buffer.[ch]: BSD
