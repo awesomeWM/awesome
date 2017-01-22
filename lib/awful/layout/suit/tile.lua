@@ -295,7 +295,7 @@ end
 
 --- The main tile algo, on the right.
 -- @param screen The screen number to tile.
--- @clientlayout awful.layout.suit.tile.top
+-- @clientlayout awful.layout.suit.tile.right
 tile.right = {}
 tile.right.name = "tile"
 tile.right.arrange = do_tile
