@@ -94,6 +94,21 @@
 -- @module awful.prompt
 ---------------------------------------------------------------------------
 
+--- The prompt cursor foreground color.
+-- @beautiful beautiful.prompt_fg_cursor
+-- @param color
+-- @see gears.color
+
+--- The prompt cursor background color.
+-- @beautiful beautiful.prompt_bg_cursor
+-- @param color
+-- @see gears.color
+
+--- The prompt text font.
+-- @beautiful beautiful.prompt_font
+-- @param string
+-- @see string
+
 -- Grab environment we need
 local assert = assert
 local io = io
@@ -449,11 +464,11 @@ function prompt.run(args, textbox, exe_callback, completion_callback,
     local command_before_comp
     local cur_pos_before_comp
     local prettyprompt = args.prompt or ""
-    local inv_col = args.fg_cursor or theme.fg_focus or "black"
-    local cur_col = args.bg_cursor or theme.bg_focus or "white"
+    local inv_col = args.fg_cursor or theme.prompt_fg_cursor or theme.fg_focus or "black"
+    local cur_col = args.bg_cursor or theme.prompt_bg_cursor or theme.bg_focus or "white"
     local cur_ul = args.ul_cursor
     local text = args.text or ""
-    local font = args.font or theme.font
+    local font = args.font or theme.prompt_font or theme.font
     local selectall = args.selectall
     local highlighter = args.highlighter
     local hooks = {}
