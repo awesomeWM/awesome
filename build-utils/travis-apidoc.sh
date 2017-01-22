@@ -50,7 +50,7 @@ else
   BRANCH="gh-pages"
 fi
 if [ "$BRANCH" != "gh-pages" ]; then
-  git checkout -B "$BRANCH" "origin/${BRANCH}"
+  git checkout -b "$BRANCH" "origin/${BRANCH}" || git checkout -b "$BRANCH"
 fi
 
 # Use a temporary branch for the two commits, which allows for a better UI.
