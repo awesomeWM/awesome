@@ -978,7 +978,7 @@ end
 -- **Signal:**
 --
 -- * *property::nmaster* (deprecated)
--- * *property::master_count* (deprecated)
+-- * *property::master_count*
 --
 -- @property master_count
 -- @param integer nmaster Only positive values are accepted
