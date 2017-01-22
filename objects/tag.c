@@ -210,7 +210,7 @@
  */
 
 /**
- * True if the tag is selected to be viewed
+ * True if the tag is selected to be viewed.
  *
  * **Signal:**
  *
