@@ -1,28 +1,93 @@
 ---------------------------------------------------------------------------
 --- Prompt module for awful.
 --
+-- **Keyboard navigation**:
+--
+-- The following readline keyboard shortcuts are implemented as expected:
+-- <table class='widget_list' border=1>
+--   <tr><th>Name</th><th>Usage</th></tr>
+--   <tr><td><kbd>CTRL+A</kbd></td><td>beginning-of-line</td></tr>
+--   <tr><td><kbd>CTRL+B</kbd></td><td>backward-char</td></tr>
+--   <tr><td><kbd>CTRL+C</kbd></td><td>cancel</td></tr>
+--   <tr><td><kbd>CTRL+D</kbd></td><td>delete-char</td></tr>
+--   <tr><td><kbd>CTRL+E</kbd></td><td>end-of-line</td></tr>
+--   <tr><td><kbd>CTRL+J</kbd></td><td>accept-line</td></tr>
+--   <tr><td><kbd>CTRL+M</kbd></td><td>accept-line</td></tr>
+--   <tr><td><kbd>CTRL+F</kbd></td><td>move-cursor-right</td></tr>
+--   <tr><td><kbd>CTRL+H</kbd></td><td>backward-delete-char</td></tr>
+--   <tr><td><kbd>CTRL+K</kbd></td><td>kill-line</td></tr>
+--   <tr><td><kbd>CTRL+U</kbd></td><td>unix-line-discard</td></tr>
+--   <tr><td><kbd>CTRL+W</kbd></td><td>unix-word-rubout</td></tr>
+--   <tr><td><kbd>CTRL+BACKSPACE</kbd></td><td>unix-word-rubout</td></tr>
+--   <tr><td><kbd>SHIFT+INSERT</kbd></td><td>paste</td></tr>
+--   <tr><td><kbd>HOME</kbd></td><td>beginning-of-line</td></tr>
+--   <tr><td><kbd>END</kbd></td><td>end-of-line</td></tr>
+-- </table>
+--
+-- The following shortcuts implement additional history manipulation commands
+-- where the search term is defined as the substring of the command from first
+-- character to cursor position.
+--
+-- * <kbd>CTRL+R</kbd>: reverse history search, matches any history entry
+-- containing search term.
+-- * <kbd>CTRL+S</kbd>: forward history search, matches any history entry
+-- containing search term.
+-- * <kbd>CTRL+UP</kbd>: ZSH up line or search, matches any history entry
+-- starting with search term.
+-- * <kbd>CTRL+DOWN</kbd>: ZSH down line or search, matches any history
+-- entry starting with search term.
+-- * <kbd>CTRL+DELETE</kbd>: delete the currently visible history entry from
+-- history file. This does not delete new commands or history entries under
+-- user editing.
+--
+-- **Basic usage**:
+--
 -- By default, `rc.lua` will create one `awful.widget.prompt` per screen called
 -- `mypromptbox`. It is used for both the command execution (`mod4+r`) and
 -- Lua prompt (`mod4+x`). It can be re-used for random inputs using:
 --
---    -- Create a shortcut function
---    local function echo_test()
---        awful.prompt.run {
---            prompt       = "Echo: ",
---            textbox      = mouse.screen.mypromptbox.widget,
---            exe_callback = function(input)
---                if not input or #input == 0 then return end
---                naughty.notify{ text = "The input was: "..input }
---            end
---        }
---    end
+-- @DOC_wibox_awidget_prompt_simple_EXAMPLE@
 --
---    -- Then **IN THE globalkeys TABLE** add a new shortcut
---    awful.key({ modkey }, "e", echo_test,
---        {description = "Echo a string", group = "custom"}),
+--     -- Then **IN THE globalkeys TABLE** add a new shortcut
+--     awful.key({ modkey }, "e", echo_test,
+--         {description = "Echo a string", group = "custom"}),
 --
 -- Note that this assumes an `rc.lua` file based on the default one. The way
 -- to access the screen prompt may vary.
+--
+-- **Extra key hooks**:
+--
+-- The Awesome prompt also supports adding custom extensions to specific
+-- keyboard keybindings. Those keybindings have precedence over the built-in
+-- ones. Therefor, they can be used to override the default ones.
+--
+-- *[Example one] Adding pre-configured `awful.spawn` commands:*
+--
+-- @DOC_wibox_awidget_prompt_hooks_EXAMPLE@
+--
+-- *[Example two] Modifying the command (+ vi like input)*:
+--
+-- The hook system also allows to modify the command before interpreting it in
+-- the `exe_callback`.
+--
+-- @DOC_wibox_awidget_prompt_vilike_EXAMPLE@
+--
+-- *[Example three] Key listener*:
+--
+-- The 2 previous examples were focused on changing the prompt behavior. This
+-- one explains how to "spy" on the prompt events. This can be used for
+--
+-- * Implementing more complex mutator
+-- * Synchronising other widgets
+-- * Showing extra tips to the user
+--
+-- @DOC_wibox_awidget_prompt_keypress_EXAMPLE@
+--
+-- **highlighting**:
+--
+-- The prompt also support custom highlighters:
+--
+-- @DOC_wibox_awidget_prompt_highlight_EXAMPLE@
 --
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2008 Julien Danjou
@@ -214,36 +279,99 @@ local function prompt_text_with_cursor(args)
     local cursor_color = util.ensure_pango_color(args.cursor_color)
     local text_color = util.ensure_pango_color(args.text_color)
 
+    if args.highlighter then
+        text_start, text_end = args.highlighter(text_start, text_end)
+    end
+
     ret = _prompt .. text_start .. "<span background=\"" .. cursor_color ..
         "\" foreground=\"" .. text_color .. "\" underline=\"" .. underline ..
         "\">" .. char .. "</span>" .. text_end .. spacer
     return ret
 end
 
+--- The callback function to call with command as argument when finished.
+-- @usage local function my_exe_cb(command)
+--    -- do something
+-- end
+-- @callback exe_callback
+-- @tparam string command The command (as entered).
+
+--- The callback function to call to get completion.
+-- @usage local function my_completion_cb(command_before_comp, cur_pos_before_comp, ncomp)
+--    return command_before_comp.."foo", cur_pos_before_comp+3, 1
+-- end
+--
+-- @callback completion_callback
+-- @tparam string command_before_comp The current command.
+-- @tparam number cur_pos_before_comp The current cursor position.
+-- @tparam number ncomp The number of completion elements.
+-- @treturn string command
+-- @treturn number cur_pos
+-- @treturn number matches
+
+--- The callback function to always call without arguments, regardless of
+-- whether the prompt was cancelled.
+-- @usage local function my_done_cb()
+--    -- do something
+-- end
+-- @callback done_callback
+
+---  The callback function to call with command as argument when a command was
+-- changed.
+-- @usage local function my_changed_cb(command)
+--    -- do something
+-- end
+-- @callback changed_callback
+-- @tparam string command The current command.
+
+--- The callback function to call with mod table, key and command as arguments
+-- when a key was pressed.
+-- @usage local function my_keypressed_cb(mod, key, command)
+--    -- do something
+-- end
+-- @callback keypressed_callback
+-- @tparam table mod The current modifiers (like "Control" or "Shift").
+-- @tparam string key The key name.
+-- @tparam string command The current command.
+
+--- The callback function to call with mod table, key and command as arguments
+-- when a key was released.
+-- @usage local function my_keyreleased_cb(mod, key, command)
+--    -- do something
+-- end
+-- @callback keyreleased_callback
+-- @tparam table mod The current modifiers (like "Control" or "Shift").
+-- @tparam string key The key name.
+-- @tparam string command The current command.
+
+--- A function to add syntax highlighting to the command.
+-- @usage local function my_highlighter(before_cursor, after_cursor)
+--    -- do something
+--    return before_cursor, after_cursor
+-- end
+-- @callback highlighter
+-- @tparam string before_cursor
+-- @tparam string after_cursor
+
+--- A callback when a key combination is triggered.
+-- This callback can return many things:
+--
+-- * a modified command
+-- * `true` If the command is successful (then it won't exit)
+-- * nothing or `nil` to execute the `exe_callback` and `done_callback` and exit
+--
+-- An optional second return value controls if the prompt should exit or simply
+-- update the command (from the first return value) and keep going. The default
+-- is to execute the `exe_callback` and `done_callback` before exiting.
+--
+-- @usage local function my_hook(command)
+--    return command.."foo", false
+-- end
+--
+-- @callback hook
+-- @tparam string command The current command.
+
 --- Run a prompt in a box.
---
--- The following readline keyboard shortcuts are implemented as expected:
--- <kbd>CTRL+A</kbd>, <kbd>CTRL+B</kbd>, <kbd>CTRL+C</kbd>, <kbd>CTRL+D</kbd>,
--- <kbd>CTRL+E</kbd>, <kbd>CTRL+J</kbd>, <kbd>CTRL+M</kbd>, <kbd>CTRL+F</kbd>,
--- <kbd>CTRL+H</kbd>, <kbd>CTRL+K</kbd>, <kbd>CTRL+U</kbd>, <kbd>CTRL+W</kbd>,
--- <kbd>CTRL+BACKSPACE</kbd>, <kbd>SHIFT+INSERT</kbd>, <kbd>HOME</kbd>,
--- <kbd>END</kbd> and arrow keys.
---
--- The following shortcuts implement additional history manipulation commands
--- where the search term is defined as the substring of the command from first
--- character to cursor position.
---
--- * <kbd>CTRL+R</kbd>: reverse history search, matches any history entry
--- containing search term.
--- * <kbd>CTRL+S</kbd>: forward history search, matches any history entry
--- containing search term.
--- * <kbd>CTRL+UP</kbd>: ZSH up line or search, matches any history entry
--- starting with search term.
--- * <kbd>CTRL+DOWN</kbd>: ZSH down line or search, matches any history
--- entry starting with search term.
--- * <kbd>CTRL+DELETE</kbd>: delete the currently visible history entry from
--- history file. This does not delete new commands or history entries under
--- user editing.
 --
 -- @tparam[opt={}] table args A table with optional arguments
 -- @tparam[opt] gears.color args.fg_cursor
@@ -255,6 +383,8 @@ end
 -- @tparam[opt] string args.font
 -- @tparam[opt] boolean args.autoexec
 -- @tparam widget args.textbox The textbox to use for the prompt.
+-- @tparam[opt] function args.highlighter A function to add syntax highlighting to
+--  the command.
 -- @tparam function args.exe_callback The callback function to call with command as argument
 -- when finished.
 -- @tparam function args.completion_callback The callback function to call to get completion.
@@ -325,6 +455,7 @@ function prompt.run(args, textbox, exe_callback, completion_callback,
     local text = args.text or ""
     local font = args.font or theme.font
     local selectall = args.selectall
+    local highlighter = args.highlighter
     local hooks = {}
 
     -- A function with 9 parameters deserve to die
@@ -409,7 +540,7 @@ function prompt.run(args, textbox, exe_callback, completion_callback,
     textbox:set_markup(prompt_text_with_cursor{
         text = text, text_color = inv_col, cursor_color = cur_col,
         cursor_pos = cur_pos, cursor_ul = cur_ul, selectall = selectall,
-        prompt = prettyprompt })
+        prompt = prettyprompt, highlighter =  highlighter})
 
     local function exec(cb, command_to_history)
         textbox:set_markup("")
@@ -425,7 +556,7 @@ function prompt.run(args, textbox, exe_callback, completion_callback,
         textbox:set_markup(prompt_text_with_cursor{
                                text = command, text_color = inv_col, cursor_color = cur_col,
                                cursor_pos = cur_pos, cursor_ul = cur_ul, selectall = selectall,
-                               prompt = prettyprompt })
+                               prompt = prettyprompt, highlighter =  highlighter })
     end
 
     grabber = keygrabber.run(
@@ -485,16 +616,33 @@ function prompt.run(args, textbox, exe_callback, completion_callback,
                     end
                     if match then
                         local cb
-                        local ret = v[3](command)
+                        local ret, quit = v[3](command)
                         local original_command = command
-                        if ret then
-                            command = ret
+
+                        -- Support both a "simple" and a "complex" way to
+                        -- control if the prompt should quit.
+                        quit = quit == nil and (ret ~= true) or (quit~=false)
+
+                        -- Allow the callback to change the command
+                        command = (ret ~= true) and ret or command
+
+                        -- Quit by default, but allow it to be disabled
+                        if ret and type(ret) ~= "boolean" then
                             cb = exe_callback
-                        else
+                            if not quit then
+                                cur_pos = ret:wlen() + 1
+                                update()
+                            end
+                        elseif quit then
                             -- No callback.
                             cb = function() end
                         end
-                        exec(cb, original_command)
+
+                        -- Execute the callback
+                        if cb then
+                            exec(cb, original_command)
+                        end
+
                         return
                     end
                 end

@@ -51,6 +51,10 @@ function module.get_font()
     return f
 end
 
+function module.get()
+    return module
+end
+
 return module
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

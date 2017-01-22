@@ -64,6 +64,8 @@ new_type("deprecated", "Deprecated functions", false, "param")
 new_type("legacylayout", "Layout related functions", false, "param")
 -- Have a category for the client layouts
 new_type("clientlayout", "Client layouts", false, "param")
+-- Document some callback prototypes
+new_type("callback", "Callback functions prototype", false, "Parameters")
 
 -- More fitting section names
 kind_names={topic='Documentation', module='Libraries'}
