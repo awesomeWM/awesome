@@ -1,5 +1,6 @@
-# Porting tips
+# Tips for upgrading your configuration
 
+<a name="v4"></a>
 ## From 3.5 to 4.0
 
 The
@@ -8,7 +9,7 @@ you might have added to your `rc.lua`.
 This avoids most of the possible errors due to missing important changes.
 
 If you still wish to ignore this advice, first read the
-<a href="./89-NEWS.md.html">NEWS</a> section about the breaking changes. This
+<a href="89-NEWS.md.html#v4">NEWS</a> section about the breaking changes. This
 document assumes you did.
 
 Be warned, even if it looks like it's working after changing some lines, **it wont

@@ -1,5 +1,6 @@
 # NEWS
 
+<a name="v4"></a>
 # Awesome window manager framework version 4.0 changes
 
 <center> <img src="../images/AUTOGEN_wibox_logo_logo_and_name.svg" /> </center>
@@ -532,7 +533,8 @@ Many changes now cause a deprecation warning instead of breaking hard.
 However, it is important to take note of these changes in order to avoid new
 bugs.
 
-Also see the <a href="./17-porting-tips.md.html">porting tips</a>
+Also see the <a href="17-porting-tips.md.html#v4">tips for porting your
+configuration</a>.
 
 ### There can be off-screen clients unless rc.lua is adapted
 
