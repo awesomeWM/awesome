@@ -1370,8 +1370,8 @@ end
 -- future. When a tag is detached from the screen, its signal is removed.
 --
 -- @function awful.tag.attached_connect_signal
--- @screen The screen concerned, or all if nil.
--- @tparam[opt] string Signal
+-- @screen screen The screen concerned, or all if nil.
+-- @tparam[opt] string signal The signal name.
 -- @tparam[opt] function Callback
 function tag.attached_connect_signal(screen, ...)
     if screen then
