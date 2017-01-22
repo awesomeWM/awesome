@@ -231,14 +231,14 @@ previously removed are replaced by custom screens attributes.
 
 Another dynamic screen related changes.
 
-     -- Prompt
+    ⠀-- Prompt
     -    awful.key({ modkey },            "r",     function () mypromptbox[mouse.screen]:run() end),
     +    awful.key({ modkey },            "r",     function () `awful.screen.focused`().mypromptbox:run() end),
 
 `awful.prompt` now uses a more future proof arguments table instead of many
 optional arguments.
 
-         awful.key({ modkey }, "x",
+    ⠀    awful.key({ modkey }, "x",
                    function ()
     -                  `awful.prompt.run`({ prompt = "Run Lua code: " },
     -                  mypromptbox[mouse.screen].widget,
