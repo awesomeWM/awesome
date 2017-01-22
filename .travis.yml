@@ -86,7 +86,7 @@ install:
     if [ "$BUILD_APIDOC" = "true" ]; then
       travis_retry sudo luarocks install ldoc
       travis_retry sudo luarocks install lua-discount
-      sudo luarocks remove markdown
+      sudo luarocks remove --force markdown
     fi
 
   # Install dependencies for code coverage testing.
