@@ -399,8 +399,8 @@ This allows for interactive widgets such as a slider.
 
 **See:**
 
-* `gears.hierarchy`
-* * <a href="./04-new-widgets.md.html">Creating new widget</a>
+* `wibox.hierarchy`
+* <a href="./04-new-widgets.md.html">Creating new widget</a>
 
 ### New themes
 
