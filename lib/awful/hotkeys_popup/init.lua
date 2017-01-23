@@ -9,7 +9,6 @@
 
 local hotkeys_popup = {
   widget = require("awful.hotkeys_popup.widget"),
-  keys = require("awful.hotkeys_popup.keys")
 }
 hotkeys_popup.show_help = hotkeys_popup.widget.show_help
 return hotkeys_popup
