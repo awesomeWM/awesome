@@ -1,5 +1,5 @@
 ---------------------------------------------------------------------------
---- This module documentation has been merged with the `screen` module.
+--- This module documentation has been merged with the `screen` class.
 --
 -- @module awful.screen
 ---------------------------------------------------------------------------
