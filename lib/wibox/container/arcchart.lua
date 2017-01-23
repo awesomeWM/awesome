@@ -38,7 +38,7 @@ local arcchart = { mt = {} }
 -- @tparam[opt=0] number paddings.right
 
 --- The arc thickness.
--- @beautiful beautiful.thickness
+-- @beautiful beautiful.arcchart_thickness
 -- @param number
 
 local function outline_workarea(width, height)
