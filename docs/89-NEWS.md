@@ -591,7 +591,7 @@ It allows to preserve the tag and layout state across changes. Old `rc.lua` can
 either be ported to handle this by taking clues from the new `rc.lua` or
 restore the old behavior by adding the following at the end:
 
-    screen.connect("list", awesome.restart)
+    screen.connect_signal("list", awesome.restart)
 
 **See:**
 
