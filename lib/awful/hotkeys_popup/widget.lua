@@ -15,7 +15,6 @@ local awful = require("awful")
 local wibox = require("wibox")
 local beautiful = require("beautiful")
 local dpi = beautiful.xresources.apply_dpi
-local compute_textbox_width = require("menubar").utils.compute_textbox_width
 
 
 -- Stripped copy of this module https://github.com/copycat-killer/lain/blob/master/util/markup.lua:
@@ -290,8 +289,8 @@ function widget.new()
                     joined_labels = joined_labels .. rendered_hotkey .. (i~=#_keys and "\n" or "")
                     end
                 current_column.layout:add(wibox.widget.textbox(joined_labels))
-                local max_width = compute_textbox_width(wibox.widget.textbox(max_label_content), s) +
-                                                    widget_instance.group_margin
+                local max_width, _ = wibox.widget.textbox(max_label_content):get_preferred_size(s)
+                max_width = max_width + widget_instance.group_margin
                 if not current_column.max_width or max_width > current_column.max_width then
                     current_column.max_width = max_width
                 end
