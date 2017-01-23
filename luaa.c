@@ -75,11 +75,11 @@ extern const struct luaL_Reg awesome_mouse_meta[];
  * @signal debug::deprecation
  */
 
-/** An invalid key was read from an object (e.g. c.foo)
+/** An invalid key was read from an object, for example `c.foo`
  * @signal debug::index::miss
  */
 
-/** An invalid key was written to an object (e.g. c.foo = "bar")
+/** An invalid key was written to an object, for example `c.foo = "bar"`
  * @signal debug::newindex::miss
  */
 
