@@ -1,5 +1,5 @@
 ---------------------------------------------------------------------------
---- This module documentation has been merged with the `tag` module.
+--- This module documentation has been merged with the `tag` class.
 --
 -- @module awful.tag
 ---------------------------------------------------------------------------

@@ -1,5 +1,5 @@
 ---------------------------------------------------------------------------
---- This module documentation has been merged with the `client` module.
+--- This module documentation has been merged with the `client` class.
 --
 -- @module awful.client
 ---------------------------------------------------------------------------
