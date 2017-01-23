@@ -666,8 +666,8 @@ function naughty.notify(args)
     notification.box:set_widget(completelayout)
 
     -- Setup the mouse events
-    layout:buttons(util.table.join(button({ }, 1, run),
-                                   button({ }, 3, function()
+    layout:buttons(util.table.join(button({}, 1, nil, run),
+                                   button({}, 3, nil, function()
                                         die(naughty.notificationClosedReason.dismissedByUser)
                                     end)))
 
