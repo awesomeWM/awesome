@@ -293,11 +293,8 @@ function utils.parse_dir(dir_path, callback)
     end)()
 end
 
---- Compute textbox width.
--- @tparam wibox.widget.textbox textbox Textbox instance.
--- @tparam number|screen s Screen
--- @treturn int Text width.
 function utils.compute_textbox_width(textbox, s)
+    awful_util.deprecate("Use 'width, _ = textbox:get_preferred_size(s)' directly.")
     s = screen[s or mouse.screen]
     local w, _ = textbox:get_preferred_size(s)
     return w
