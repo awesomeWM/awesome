@@ -264,7 +264,8 @@ rules.delayed_properties = {}
 local force_ignore = {
     titlebars_enabled=true, focus=true, screen=true, x=true,
     y=true, width=true, height=true, geometry=true,placement=true,
-    border_width=true,floating=true,size_hints_honor=true
+    border_width=true,floating=true,size_hints_honor=true,
+    dockable = true
 }
 
 function rules.high_priority_properties.tag(c, value, props)
@@ -455,6 +456,18 @@ function rules.execute(c, props, callbacks)
 
     end
 
+    -- placement.no_offscreen and geometry are affected by the struts. Those
+    -- struts are often inherited from awesome.restart, causing a "tick tock"
+    -- toggle of the docked state when Awesome is restarted.
+    local is_dockable = c.dockable or props.dockable ~= nil and
+        type(props.dockable) == "function" and props.dockable(c,props)
+        or props.dockable
+
+    -- Clear the struts so geometry rules are not affected by its own state
+    if is_dockable then
+        c:struts { left = 0, right = 0, bottom = 0, top = 0 }
+    end
+
     -- By default, rc.lua use no_overlap+no_offscreen placement. This has to
     -- be executed before x/y/width/height/geometry as it would otherwise
     -- always override the user specified position with the default rule.
@@ -524,6 +537,11 @@ function rules.execute(c, props, callbacks)
                 handler(c, value, props)
             end
         end
+    end
+
+    -- Will update the workarea
+    if is_dockable then
+        c.dockable = true
     end
 
     -- Do this at last so we do not erase things done by the focus signal.
