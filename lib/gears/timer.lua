@@ -185,7 +185,6 @@ end
 -- @tparam number timeout Timeout in seconds (e.g. 1.5).
 -- @tparam function callback Function to run.
 -- @treturn timer The timer object that was set up.
--- @see timer.weak_start_new
 -- @function gears.timer.start_new
 function timer.start_new(timeout, callback)
     local t = timer.new({ timeout = timeout })
@@ -207,7 +206,6 @@ end
 -- @tparam number timeout Timeout in seconds (e.g. 1.5).
 -- @tparam function callback Function to start.
 -- @treturn timer The timer object that was set up.
--- @see timer.start_new
 -- @function gears.timer.weak_start_new
 function timer.weak_start_new(timeout, callback)
     local indirection = setmetatable({}, { __mode = "v" })
