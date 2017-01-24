@@ -1,4 +1,5 @@
 local awful = require("awful")
+local hotkeys_widget = require("awful.hotkeys_popup").widget
 
 -- luacheck: globals modkey
 
@@ -14,6 +15,15 @@ local function get_c_and_t()
 
     return c, t
 end
+
+local function num_pairs(container_table)
+  local number_of_items = 0
+  for _, _ in pairs(container_table) do
+    number_of_items = number_of_items + 1
+  end
+  return number_of_items
+end
+
 
 -- display deprecated warnings
 --awful.util.deprecate = function() end
@@ -219,7 +229,41 @@ local steps = {
         assert(#tags[1]:clients() == 4)
 
         return true
-    end
+    end,
+
+    -- Hotkeys popup should be displayed and hidden
+    function(count)
+        local s = awful.screen.focused()
+        local cached_wiboxes = hotkeys_widget.default_widget._cached_wiboxes
+
+        if count == 1 then
+            assert(num_pairs(cached_wiboxes) == 0)
+            awful.key.execute({modkey}, "s")
+            return nil
+
+        elseif count == 2 then
+            assert(num_pairs(cached_wiboxes) > 0)
+            assert(num_pairs(cached_wiboxes[s]) == 1)
+        end
+
+        local hotkeys_wibox
+        for _, widget in pairs(cached_wiboxes[s]) do
+            hotkeys_wibox = widget.wibox
+        end
+
+        if count == 2 then
+            assert(hotkeys_wibox ~= nil)
+            assert(hotkeys_wibox.visible)
+            -- Should disappear on anykey
+            root.fake_input("key_press", "Super_L")
+
+        elseif count == 3 then
+            assert(not hotkeys_wibox.visible)
+            root.fake_input("key_release", "Super_L")
+            return true
+        end
+    end,
+
 }
 
 require("_runner").run_steps(steps)

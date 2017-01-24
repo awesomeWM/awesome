@@ -100,9 +100,9 @@ function widget.new()
             ['#21']="=",
             Control="Ctrl"
         },
+        _cached_wiboxes = {}
     }
 
-    local cached_wiboxes = {}
     local cached_awful_keys = nil
     local colors_counter = {}
     local colors = beautiful.xresources.get_current_theme()
@@ -408,13 +408,13 @@ function widget.new()
         end
 
         local joined_groups = join_plus_sort(available_groups)
-        if not cached_wiboxes[s] then
-            cached_wiboxes[s] = {}
+        if not widget_instance._cached_wiboxes[s] then
+            widget_instance._cached_wiboxes[s] = {}
         end
-        if not cached_wiboxes[s][joined_groups] then
-            cached_wiboxes[s][joined_groups] = create_wibox(s, available_groups)
+        if not widget_instance._cached_wiboxes[s][joined_groups] then
+            widget_instance._cached_wiboxes[s][joined_groups] = create_wibox(s, available_groups)
         end
-        local help_wibox = cached_wiboxes[s][joined_groups]
+        local help_wibox = widget_instance._cached_wiboxes[s][joined_groups]
         help_wibox:show()
 
         return capi.keygrabber.run(function(_, key, event)
