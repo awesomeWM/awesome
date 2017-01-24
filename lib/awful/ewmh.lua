@@ -45,10 +45,10 @@ local function geometry_change(window)
     -- Fix up the geometry in case this window needs to cover the whole screen.
     local bw = window.border_width or 0
     local g = window.screen.workarea
-    if window.maximized_vertical then
+    if window.maximized_vertical or window.maximized then
         window:geometry { height = g.height - 2*bw, y = g.y }
     end
-    if window.maximized_horizontal then
+    if window.maximized_horizontal or window.maximized then
         window:geometry { width = g.width - 2*bw, x = g.x }
     end
     if window.fullscreen then
