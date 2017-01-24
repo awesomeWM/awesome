@@ -809,6 +809,7 @@ typedef enum {
     CLIENT_MAXIMIZED_NONE = 0 << 0,
     CLIENT_MAXIMIZED_V    = 1 << 0,
     CLIENT_MAXIMIZED_H    = 1 << 1,
+    CLIENT_MAXIMIZED_BOTH = 1 << 2, /* V|H == BOTH, but ~(V|H) != ~(BOTH)... */
 } client_maximized_t;
 
 static area_t titlebar_get_area(client_t *c, client_titlebar_t bar);
@@ -1940,16 +1941,6 @@ client_set_fullscreen(lua_State *L, int cidx, bool s)
     }
 }
 
-/** Get a clients maximized state (horizontally and vertically).
- * \param c The client.
- * \return The maximized state.
- */
-static int
-client_get_maximized(client_t *c)
-{
-    return c->maximized_horizontal && c->maximized_vertical;
-}
-
 /** Set a client horizontally|vertically maximized.
  * \param L The Lua VM state.
  * \param cidx The client index.
@@ -1962,21 +1953,28 @@ client_set_maximized_common(lua_State *L, int cidx, bool s, const char* type, co
 
     /* Store the current and next state on 2 bit */
     const client_maximized_t current = (
-        (c->maximized_vertical   ? CLIENT_MAXIMIZED_V : CLIENT_MAXIMIZED_NONE)|
-        (c->maximized_horizontal ? CLIENT_MAXIMIZED_H : CLIENT_MAXIMIZED_NONE)
+        (c->maximized_vertical   ? CLIENT_MAXIMIZED_V    : CLIENT_MAXIMIZED_NONE)|
+        (c->maximized_horizontal ? CLIENT_MAXIMIZED_H    : CLIENT_MAXIMIZED_NONE)|
+        (c->maximized            ? CLIENT_MAXIMIZED_BOTH : CLIENT_MAXIMIZED_NONE)
     );
-    const client_maximized_t next = s ? val : CLIENT_MAXIMIZED_NONE;
+    client_maximized_t next = s ? (val | current) : (current & (~val));
+
+    /* When both are already set during startup, assume `maximized` is true*/
+    if (next == (CLIENT_MAXIMIZED_H|CLIENT_MAXIMIZED_V) && !globalconf.loop)
+        next = CLIENT_MAXIMIZED_BOTH;
 
     if(current != next)
     {
         int abs_cidx   = luaA_absindex(L, cidx);
-        int max_before = client_get_maximized(c);
+        int max_before = c->maximized;
         int h_before   = c->maximized_horizontal;
         int v_before   = c->maximized_vertical;
 
         /*Update the client properties */
-        c->maximized_horizontal = !!(next & CLIENT_MAXIMIZED_H);
-        c->maximized_vertical   = !!(next & CLIENT_MAXIMIZED_V);
+        c->maximized_horizontal = !!(next & CLIENT_MAXIMIZED_H   );
+        c->maximized_vertical   = !!(next & CLIENT_MAXIMIZED_V   );
+        c->maximized            = !!(next & CLIENT_MAXIMIZED_BOTH);
+
 
         /* Request the changes to be applied */
         lua_pushstring(L, type);
@@ -1987,7 +1985,7 @@ client_set_maximized_common(lua_State *L, int cidx, bool s, const char* type, co
             luaA_object_emit_signal(L, abs_cidx, "property::maximized_horizontal", 0);
         if (v_before != c->maximized_vertical)
             luaA_object_emit_signal(L, abs_cidx, "property::maximized_vertical", 0);
-        if(max_before != client_get_maximized(c))
+        if(max_before != c->maximized)
             luaA_object_emit_signal(L, abs_cidx, "property::maximized", 0);
 
         stack_windows();
@@ -1998,8 +1996,7 @@ void
 client_set_maximized(lua_State *L, int cidx, bool s)
 {
     return client_set_maximized_common(
-        L, cidx, s, "maximized",
-        CLIENT_MAXIMIZED_H | CLIENT_MAXIMIZED_V
+        L, cidx, s, "maximized", CLIENT_MAXIMIZED_BOTH
     );
 }
 
@@ -3057,14 +3054,8 @@ LUA_OBJECT_EXPORT_PROPERTY(client, client_t, sticky, lua_pushboolean)
 LUA_OBJECT_EXPORT_PROPERTY(client, client_t, size_hints_honor, lua_pushboolean)
 LUA_OBJECT_EXPORT_PROPERTY(client, client_t, maximized_horizontal, lua_pushboolean)
 LUA_OBJECT_EXPORT_PROPERTY(client, client_t, maximized_vertical, lua_pushboolean)
+LUA_OBJECT_EXPORT_PROPERTY(client, client_t, maximized, lua_pushboolean)
 LUA_OBJECT_EXPORT_PROPERTY(client, client_t, startup_id, lua_pushstring)
-
-static int
-luaA_client_get_maximized(lua_State *L, client_t *c)
-{
-    lua_pushboolean(L, client_get_maximized(c));
-    return 1;
-}
 
 static int
 luaA_client_get_content(lua_State *L, client_t *c)

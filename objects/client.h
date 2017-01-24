@@ -82,6 +82,10 @@ struct client_t
     bool maximized_horizontal;
     /** True if the client is maximized vertically */
     bool maximized_vertical;
+    /** True if the client is maximized both horizontally and vertically by the
+      * the user
+      */
+    bool maximized;
     /** True if the client is above others */
     bool above;
     /** True if the client is below others */

@@ -138,6 +138,7 @@ function client.tiled(s, stacked)
     for _, c in pairs(clients) do
         if not client.object.get_floating(c)
             and not c.fullscreen
+            and not c.maximized
             and not c.maximized_vertical
             and not c.maximized_horizontal then
             table.insert(tclients, c)
@@ -668,6 +669,7 @@ function client.object.get_floating(c)
             or c.fullscreen
             or c.maximized_vertical
             or c.maximized_horizontal
+            or c.maximized
             or client.object.is_fixed(c) then
             return true
         end
