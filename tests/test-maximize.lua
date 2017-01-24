@@ -23,6 +23,7 @@ local steps = {
         local c = client.get()[1]
         assert(not c.maximized_horizontal)
         assert(not c.maximized_vertical  )
+        assert(not c.maximized           )
         assert(not c.fullscreen          )
 
         c.maximized_horizontal = true
@@ -92,6 +93,43 @@ local steps = {
     end,
     function()
         local c = client.get()[1]
+
+        local new_geo = c:geometry()
+
+        for k,v in pairs(original_geo) do
+            assert(new_geo[k] == v)
+        end
+
+        c.floating  = true
+
+        awful.placement.centered(c)
+        original_geo = c:geometry()
+
+        c.maximized = true
+
+
+        return true
+    end,
+    function()
+        local c = client.get()[1]
+
+        local new_geo = c:geometry()
+        local sgeo    = c.screen.workarea
+
+        assert(c.maximized)
+        assert(c.floating)
+        assert(new_geo.x==sgeo.x)
+        assert(new_geo.y==sgeo.y)
+
+        c.maximized = false
+
+        return true
+    end,
+    function()
+        local c = client.get()[1]
+
+        assert(not c.maximized)
+        assert(c.floating)
 
         local new_geo = c:geometry()
 
