@@ -144,10 +144,6 @@ following ones have been added:
 * The `focus` is now going through the focus filters instead of being applied
   as-is (see the focus filter section).
 
-Rules execution has been re-ordered to minimize the race conditions (one rule
-affecting the outcome of another). This may create a slightly different
-behavior for some users, but is usually considered to be an improvement.
-
 #### User rules
 
 It is now possible to register new rules by adding them to some `awful.rules`
