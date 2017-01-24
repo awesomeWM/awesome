@@ -224,6 +224,7 @@ end
 local context_mapper = {
     maximized_vertical   = "maximize_vertically",
     maximized_horizontal = "maximize_horizontally",
+    maximized            = "maximize",
     fullscreen           = "maximize"
 }
 
