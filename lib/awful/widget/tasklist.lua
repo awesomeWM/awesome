@@ -453,6 +453,7 @@ function tasklist.new(screen, filter, buttons, style, update_function, base_widg
         capi.client.connect_signal("property::floating", u)
         capi.client.connect_signal("property::maximized_horizontal", u)
         capi.client.connect_signal("property::maximized_vertical", u)
+        capi.client.connect_signal("property::maximized", u)
         capi.client.connect_signal("property::minimized", u)
         capi.client.connect_signal("property::name", u)
         capi.client.connect_signal("property::icon_name", u)

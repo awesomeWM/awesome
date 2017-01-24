@@ -805,9 +805,16 @@
  * @function set_newindex_miss_handler
  */
 
+typedef enum {
+    CLIENT_MAXIMIZED_NONE = 0 << 0,
+    CLIENT_MAXIMIZED_V    = 1 << 0,
+    CLIENT_MAXIMIZED_H    = 1 << 1,
+} client_maximized_t;
+
 static area_t titlebar_get_area(client_t *c, client_titlebar_t bar);
 static drawable_t *titlebar_get_drawable(lua_State *L, client_t *c, int cl_idx, client_titlebar_t bar);
 static void client_resize_do(client_t *c, area_t geometry);
+static void client_set_maximized_common(lua_State *L, int cidx, bool s, const char* type, const int val);
 
 /** Collect a client.
  * \param L The Lua VM state.
@@ -1948,38 +1955,68 @@ client_get_maximized(client_t *c)
  * \param cidx The client index.
  * \param s The maximized status.
  */
-#define DO_FUNCTION_CLIENT_MAXIMIZED(type) \
-    void \
-    client_set_maximized_##type(lua_State *L, int cidx, bool s) \
-    { \
-        client_t *c = luaA_checkudata(L, cidx, &client_class); \
-        if(c->maximized_##type != s) \
-        { \
-            int abs_cidx = luaA_absindex(L, cidx); \
-            int max_before = client_get_maximized(c); \
-            c->maximized_##type = s; \
-            lua_pushstring(L, "maximized_"#type);\
-            luaA_object_emit_signal(L, abs_cidx, "request::geometry", 1); \
-            luaA_object_emit_signal(L, abs_cidx, "property::maximized_" #type, 0); \
-            if(max_before != client_get_maximized(c)) \
-                luaA_object_emit_signal(L, abs_cidx, "property::maximized", 0); \
-            stack_windows(); \
-        } \
-    }
-DO_FUNCTION_CLIENT_MAXIMIZED(vertical)
-DO_FUNCTION_CLIENT_MAXIMIZED(horizontal)
-#undef DO_FUNCTION_CLIENT_MAXIMIZED
+void
+client_set_maximized_common(lua_State *L, int cidx, bool s, const char* type, const int val)
+{
+    client_t *c = luaA_checkudata(L, cidx, &client_class);
 
-/** Set a client maximized (horizontally and vertically).
- * \param L The Lua VM state.
- * \param cidx The client index.
- * \param s Set or not the client maximized attribute.
- */
+    /* Store the current and next state on 2 bit */
+    const client_maximized_t current = (
+        (c->maximized_vertical   ? CLIENT_MAXIMIZED_V : CLIENT_MAXIMIZED_NONE)|
+        (c->maximized_horizontal ? CLIENT_MAXIMIZED_H : CLIENT_MAXIMIZED_NONE)
+    );
+    const client_maximized_t next = s ? val : CLIENT_MAXIMIZED_NONE;
+
+    if(current != next)
+    {
+        int abs_cidx   = luaA_absindex(L, cidx);
+        int max_before = client_get_maximized(c);
+        int h_before   = c->maximized_horizontal;
+        int v_before   = c->maximized_vertical;
+
+        /*Update the client properties */
+        c->maximized_horizontal = !!(next & CLIENT_MAXIMIZED_H);
+        c->maximized_vertical   = !!(next & CLIENT_MAXIMIZED_V);
+
+        /* Request the changes to be applied */
+        lua_pushstring(L, type);
+        luaA_object_emit_signal(L, abs_cidx, "request::geometry", 1);
+
+        /* Notify changes in the relevant properties */
+        if (h_before != c->maximized_horizontal)
+            luaA_object_emit_signal(L, abs_cidx, "property::maximized_horizontal", 0);
+        if (v_before != c->maximized_vertical)
+            luaA_object_emit_signal(L, abs_cidx, "property::maximized_vertical", 0);
+        if(max_before != client_get_maximized(c))
+            luaA_object_emit_signal(L, abs_cidx, "property::maximized", 0);
+
+        stack_windows();
+    }
+}
+
 void
 client_set_maximized(lua_State *L, int cidx, bool s)
 {
-    client_set_maximized_horizontal(L, cidx, s);
-    client_set_maximized_vertical(L, cidx, s);
+    return client_set_maximized_common(
+        L, cidx, s, "maximized",
+        CLIENT_MAXIMIZED_H | CLIENT_MAXIMIZED_V
+    );
+}
+
+void
+client_set_maximized_horizontal(lua_State *L, int cidx, bool s)
+{
+    return client_set_maximized_common(
+        L, cidx, s, "maximized_horizontal", CLIENT_MAXIMIZED_H
+    );
+}
+
+void
+client_set_maximized_vertical(lua_State *L, int cidx, bool s)
+{
+    return client_set_maximized_common(
+        L, cidx, s, "maximized_vertical", CLIENT_MAXIMIZED_V
+    );
 }
 
 /** Set a client above, or not.
