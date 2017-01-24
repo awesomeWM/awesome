@@ -466,7 +466,7 @@ end
 -- Update the workarea
 wibox_update_strut = function(d, position, args)
     -- If the drawable isn't visible, remove the struts
-    if not d.visible then
+    if d.visible == false then
         d:struts { left = 0, right = 0, bottom = 0, top = 0 }
         return
     end
@@ -480,7 +480,6 @@ wibox_update_strut = function(d, position, args)
     local struts = { left = 0, right = 0, bottom = 0, top = 0 }
 
     local m = get_decoration(args)
-
     if vertical then
         for _, v in ipairs {"right", "left"} do
             if (not position) or position:match(v) then
@@ -498,6 +497,37 @@ wibox_update_strut = function(d, position, args)
     -- Update the workarea
     d:struts(struts)
 end
+
+--- Return true if a **client** is on its screen edge.
+-- The `mouse.snap` code already handle the case it is moved with the mouse,
+-- but it stills need to be docked when placed programatically.
+-- @treturn boolean If the client touches the edge
+local function is_on_edge(d)
+    local geo  = geometry_common(d, {})
+
+    -- No need to call `get_parent_geometry`, this is always used on clients.
+    local sgeo = d.screen.geometry
+
+    return (geo.x == sgeo.x and "left")
+        or (geo.y == sgeo.y and "top")
+        or ((geo.x+geo.width ) == (sgeo.x+sgeo.width ) and "right")
+        or ((geo.y+geo.height) == (sgeo.y+sgeo.height) and "bottom") or nil
+end
+
+local function detect_and_update_struts(c)
+    if c.dockable then
+        local edge = is_on_edge(c)
+        if edge then
+            wibox_update_strut(c, edge, {})
+        else
+            c:struts { left = 0, right = 0, bottom = 0, top = 0 }
+        end
+    end
+end
+
+-- Listen to dockable clients geometry change and update the workarea.
+capi.client.connect_signal("property::geometry", detect_and_update_struts)
+capi.client.connect_signal("property::dockable", detect_and_update_struts)
 
 -- Pin a drawable to a placement function.
 -- Automatically update the position when the size change.
@@ -833,7 +863,10 @@ function placement.no_offscreen(c, screen)
     c = c or capi.client.focus
     local geometry = area_common(c)
     screen = get_screen(screen or c.screen or a_screen.getbycoord(geometry.x, geometry.y))
-    local screen_geometry = screen.workarea
+
+    -- Dockable clients change the workarea, so they will be moved "off" the
+    -- docked area as it is considered "offscreen" from the workarea PoV
+    local screen_geometry = c.dockable and screen.geometry or screen.workarea
 
     if geometry.x + geometry.width > screen_geometry.x + screen_geometry.width then
         geometry.x = screen_geometry.x + screen_geometry.width - geometry.width
