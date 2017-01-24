@@ -88,9 +88,9 @@ table.insert(steps, function()
 end)
 
 table.insert(steps, function()
-assert(button._private.image ~= img)
+    assert(button._private.image ~= img)
 
-return true
+    return true
 end)
 
 -- Test a button release
