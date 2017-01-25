@@ -67,7 +67,8 @@ extern const struct luaL_Reg awesome_root_lib[];
 extern const struct luaL_Reg awesome_mouse_methods[];
 extern const struct luaL_Reg awesome_mouse_meta[];
 
-/** A call into the lua code aborted with an error.
+/** A call into the Lua code aborted with an error.
+ *
  * This signal is used in the example configuration, @{05-awesomerc.md},
  * to let a notification box pop up.
  * @param err Table with the error object, can be converted to a string with
@@ -75,20 +76,23 @@ extern const struct luaL_Reg awesome_mouse_meta[];
  * @signal debug::error
  */
 
-/** A deprecated lua function was called.
+/** A deprecated Lua function was called.
+ *
  * @param hint String with a hint on what to use instead of the
  * deprecated functionality.
  * @signal debug::deprecation
  */
 
 /** An invalid key was read from an object.
- * This can happen if `foo` in an `c.foo` access doesn't exist.
+ *
+ * This can happen if `foo` in an `c.foo` access does not exist.
  * @param unknown1 Class?
  * @param unknown2 Key?
  * @signal debug::index::miss
  */
 
 /** An invalid key was written to an object.
+ *
  * This can happen if `foo` in an `c.foo = "bar"` assignment doesn't exist.
  * @param unknown1 Class?
  * @param unknown2 Key?
@@ -97,48 +101,56 @@ extern const struct luaL_Reg awesome_mouse_meta[];
  */
 
 /** The systray should be updated.
+ *
  * This signal is used in `wibox.widget.systray`.
  * @signal systray::update
  */
 
 /** The wallpaper has just been changed. This signal is used for
+ *
  * pseudo-transparency in `wibox.drawable` if no composite manager is
  * running.
  * @signal wallpaper_changed
  */
 
 /** Keyboard map has changed.
- * This signal is sent after the new keymap has been loaded. It's used in
+ *
+ * This signal is sent after the new keymap has been loaded. It is used in
  * `awful.widget.keyboardlayout` to redraw the layout.
  * @signal xkb::map_changed
  */
 
 /** Keyboard group has changed.
+ *
  * It's used in `awful.widget.keyboardlayout` to redraw the layout.
  * @param group Integer containing the changed group
  * @signal xkb::group_changed.
  */
 
 /** Refresh.
+ *
  * This signal is emitted as a kind of idle signal in the event loop.
  * One example usage is in `gears.timer` to executed delayed calls.
  * @signal refresh
  */
 
 /** Awesome is about to enter the event loop.
+ *
  * This means all initialization has been done.
  * @signal startup
  */
 
-/** Awesome is exiting / about to restart
+/** Awesome is exiting / about to restart.
+ *
  * This signal is emitted in the `atexit` handler as well when awesome
- * restarts anew.
+ * restarts.
  * @param reason_restart Boolean value is true if the signal was sent
  * because of a restart.
  * @signal exit
  */
 
 /** The output status of a screen has changed.
+ *
  * @param output String containing which output has changed.
  * @param connection_state String containing the connection status of
  * the output: It will be either "Connected", "Disconnected" or
