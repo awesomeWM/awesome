@@ -194,7 +194,7 @@ function ewmh.tag(c, t, hints) --luacheck: no unused
     if not t and #get_valid_tags(c, c.screen) > 0 then return end
 
     if not t then
-        if c.transient_for then
+        if c.transient_for and not (hints and hints.reason == "screen") then
             c.screen = c.transient_for.screen
             if not c.sticky then
                 c:tags(c.transient_for:tags())
