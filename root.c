@@ -448,6 +448,20 @@ luaA_root_size(lua_State *L)
     return 2;
 }
 
+/** Get the physical size of the root window, in millimeter.
+ *
+ * @return Width of the root window, in millimeters.
+ * @return height of the root window, in millimeters.
+ * @function size_mm
+ */
+static int
+luaA_root_size_mm(lua_State *L)
+{
+    lua_pushinteger(L, globalconf.screen->width_in_millimeters);
+    lua_pushinteger(L, globalconf.screen->height_in_millimeters);
+    return 2;
+}
+
 /** Get the attached tags.
  * @return A table with all tags.
  * @function tags
@@ -474,6 +488,7 @@ const struct luaL_Reg awesome_root_lib[] =
     { "drawins", luaA_root_drawins },
     { "wallpaper", luaA_root_wallpaper },
     { "size", luaA_root_size },
+    { "size_mm", luaA_root_size_mm },
     { "tags", luaA_root_tags },
     { "__index", luaA_default_index },
     { "__newindex", luaA_default_newindex },
