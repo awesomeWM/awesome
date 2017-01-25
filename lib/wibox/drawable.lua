@@ -114,11 +114,13 @@ local function do_redraw(self)
     if not capi.awesome.composite_manager_running then
         -- This is pseudo-transparency: We draw the wallpaper in the background
         local wallpaper = surface.load_silently(capi.root.wallpaper(), false)
+        cr.operator = cairo.Operator.SOURCE
         if wallpaper then
-            cr.operator = cairo.Operator.SOURCE
             cr:set_source_surface(wallpaper, -x, -y)
-            cr:paint()
+        else
+            cr:set_source_rgb(0, 0, 0)
         end
+        cr:paint()
         cr.operator = cairo.Operator.OVER
     else
         -- This is true transparency: We draw a translucent background
