@@ -777,19 +777,6 @@ luaA_init(xdgHandle* xdg, string_array_t *searchpath)
     /* Export keys */
     key_class_setup(L);
 
-    /* add XDG_CONFIG_DIR as include path */
-    const char * const *xdgconfigdirs = xdgSearchableConfigDirectories(xdg);
-    for(; *xdgconfigdirs; xdgconfigdirs++)
-    {
-        /* Append /awesome to *xdgconfigdirs */
-        const char *suffix = "/awesome";
-        size_t len = a_strlen(*xdgconfigdirs) + a_strlen(suffix) + 1;
-        char *entry = p_new(char, len);
-        a_strcat(entry, len, *xdgconfigdirs);
-        a_strcat(entry, len, suffix);
-        string_array_append(searchpath, entry);
-    }
-
     /* add Lua search paths */
     lua_getglobal(L, "package");
     if (LUA_TTABLE != lua_type(L, 1))

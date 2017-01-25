@@ -545,6 +545,19 @@ main(int argc, char **argv)
     /* Get XDG basedir data */
     xdgInitHandle(&xdg);
 
+    /* add XDG_CONFIG_DIR as include path */
+    const char * const *xdgconfigdirs = xdgSearchableConfigDirectories(&xdg);
+    for(; *xdgconfigdirs; xdgconfigdirs++)
+    {
+        /* Append /awesome to *xdgconfigdirs */
+        const char *suffix = "/awesome";
+        size_t len = a_strlen(*xdgconfigdirs) + a_strlen(suffix) + 1;
+        char *entry = p_new(char, len);
+        a_strcat(entry, len, *xdgconfigdirs);
+        a_strcat(entry, len, suffix);
+        string_array_append(&searchpath, entry);
+    }
+
     /* init lua */
     luaA_init(&xdg, &searchpath);
     string_array_wipe(&searchpath);
