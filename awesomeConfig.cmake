@@ -377,12 +377,6 @@ if(DO_COVERAGE)
                     ${BUILD_DIR}/${file}
                     COPYONLY)
     endforeach()
-
-    # There is no way to avoid that one
-    configure_file(${SOURCE_DIR}/lib/awful/util.lua
-                    ${BUILD_DIR}/lib/awful/util.lua
-                    ESCAPE_QUOTES
-                    @ONLY)
 else()
     foreach(file ${AWESOME_CONFIGURE_COPYONLY_WITHCOV_FILES})
         configure_file(${SOURCE_DIR}/${file}
