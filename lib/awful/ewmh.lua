@@ -13,11 +13,16 @@ local util = require("awful.util")
 local aclient = require("awful.client")
 local aplace = require("awful.placement")
 local asuit = require("awful.layout.suit")
+local beautiful = require("beautiful")
 
 local ewmh = {
     generic_activate_filters    = {},
     contextual_activate_filters = {},
 }
+
+--- Honor the screen padding when maximizing.
+-- @beautiful beautiful.maximized_honor_padding
+-- @tparam[opt=true] boolean maximized_honor_padding
 
 --- The list of all registered generic request::activate (focus stealing)
 -- filters. If a filter is added to only one context, it will be in
@@ -274,6 +279,10 @@ function ewmh.geometry(c, context, hints)
 
         if props.honor_workarea == nil then
             props.honor_workarea = honor_default
+        end
+
+        if props.honor_padding == nil and props.honor_workarea and context:match("maximize") then
+            props.honor_padding = beautiful.maximized_honor_padding ~= false
         end
 
         aplace[context](c, props)
