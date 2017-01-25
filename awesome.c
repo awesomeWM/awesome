@@ -433,6 +433,12 @@ restart_on_signal(gpointer data)
     return TRUE;
 }
 
+static bool
+true_config_callback(const char *unused)
+{
+    return true;
+}
+
 /** Print help and exit(2) with given exit_code.
  * \param exit_code The exit code.
  */
@@ -564,7 +570,22 @@ main(int argc, char **argv)
 
     if (run_test)
     {
-        if(!luaA_parserc(&xdg, confpath, false))
+        bool success = true;
+        /* Get the first config that will be tried */
+        const char *config = luaA_find_config(&xdg, confpath, true_config_callback);
+
+        /* Try to parse it */
+        lua_State *L = luaL_newstate();
+        if(luaL_loadfile(L, config))
+        {
+            const char *err = lua_tostring(L, -1);
+            fprintf(stderr, "%s\n", err);
+            success = false;
+        }
+        p_delete(&config);
+        lua_close(L);
+
+        if(!success)
         {
             fprintf(stderr, "✘ Configuration file syntax error.\n");
             return EXIT_FAILURE;
@@ -738,7 +759,7 @@ main(int argc, char **argv)
     root_update_wallpaper();
 
     /* Parse and run configuration file */
-    if (!luaA_parserc(&xdg, confpath, true))
+    if (!luaA_parserc(&xdg, confpath))
         fatal("couldn't find any rc file");
 
     p_delete(&confpath);

@@ -804,7 +804,7 @@ luaA_startup_error(const char *err)
 }
 
 static bool
-luaA_loadrc(const char *confpath, bool run)
+luaA_loadrc(const char *confpath)
 {
     lua_State *L = globalconf_get_lua_State();
     if(luaL_loadfile(L, confpath))
@@ -814,12 +814,6 @@ luaA_loadrc(const char *confpath, bool run)
         fprintf(stderr, "%s\n", err);
         lua_pop(L, 1);
         return false;
-    }
-
-    if(!run)
-    {
-        lua_pop(L, 1);
-        return true;
     }
 
     /* Set the conffile right now so it can be used inside the
@@ -852,21 +846,28 @@ luaA_loadrc(const char *confpath, bool run)
  * \param run Run the configuration file.
  */
 bool
-luaA_parserc(xdgHandle* xdg, const char *confpatharg, bool run)
+luaA_parserc(xdgHandle* xdg, const char *confpatharg)
+{
+    const char *confpath = luaA_find_config(xdg, confpatharg, luaA_loadrc);
+    bool ret = confpath != NULL;
+    p_delete(&confpath);
+
+    return ret;
+}
+
+/** Find a config file for which the given callback returns true.
+ * \param xdg An xdg handle to use to get XDG basedir.
+ * \param confpatharg The configuration file to load.
+ * \param callback The callback to call.
+ */
+const char *
+luaA_find_config(xdgHandle* xdg, const char *confpatharg, luaA_config_callback *callback)
 {
     char *confpath = NULL;
-    bool ret = false;
 
-    /* try to load, return if it's ok */
-    if(confpatharg)
+    if(confpatharg && callback(confpatharg))
     {
-        if(luaA_loadrc(confpatharg, run))
-        {
-            ret = true;
-            goto bailout;
-        }
-        else if(!run)
-            goto bailout;
+        return a_strdup(confpatharg);
     }
 
     confpath = xdgConfigFind("awesome/rc.lua", xdg);
@@ -876,21 +877,17 @@ luaA_parserc(xdgHandle* xdg, const char *confpatharg, bool run)
     /* confpath is "string1\0string2\0string3\0\0" */
     while(*tmp)
     {
-        if(luaA_loadrc(tmp, run))
+        if(callback(tmp))
         {
-            ret = true;
-            goto bailout;
+            const char *ret = a_strdup(tmp);
+            p_delete(&confpath);
+            return ret;
         }
-        else if(!run)
-            goto bailout;
         tmp += a_strlen(tmp) + 1;
     }
 
-bailout:
-
     p_delete(&confpath);
-
-    return ret;
+    return NULL;
 }
 
 int
