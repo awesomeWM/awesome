@@ -564,10 +564,6 @@ main(int argc, char **argv)
         string_array_append(&searchpath, entry);
     }
 
-    /* init lua */
-    luaA_init(&xdg, &searchpath);
-    string_array_wipe(&searchpath);
-
     if (run_test)
     {
         bool success = true;
@@ -704,10 +700,6 @@ main(int argc, char **argv)
     /* init atom cache */
     atoms_init(globalconf.connection);
 
-    /* init screens information */
-    screen_scan();
-
-    /* do this only for real screen */
     ewmh_init();
     systray_init();
 
@@ -757,6 +749,15 @@ main(int argc, char **argv)
 
     /* get the current wallpaper, from now on we are informed when it changes */
     root_update_wallpaper();
+
+    /* init lua */
+    luaA_init(&xdg, &searchpath);
+    string_array_wipe(&searchpath);
+
+    ewmh_init_lua();
+
+    /* init screens information */
+    screen_scan();
 
     /* Parse and run configuration file */
     if (!luaA_parserc(&xdg, confpath))
