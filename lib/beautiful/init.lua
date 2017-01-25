@@ -196,6 +196,7 @@ function beautiful.init(config)
 
             if theme.font then set_font(theme.font) end
         else
+            theme = {}
             return gears_debug.print_error("beautiful: error loading theme file " .. config)
         end
     else
