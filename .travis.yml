@@ -12,7 +12,7 @@ env:
   matrix:
     - LUA=5.2 DO_CHECKQA=1 LUANAME=lua5.2 DO_COVERAGE=coveralls
     # luajit: installed from source.
-    - LUA=5.1 LUANAME=luajit-2.0 LUALIBRARY=/usr/lib/libluajit-5.1.so LUAROCKS_ARGS=--lua-suffix=jit-2.0.4 TEST_PREV_COMMITS=1
+    - LUA=5.1 LUANAME=luajit-2.0 LUALIBRARY=/usr/lib/libluajit-5.1.so LUAROCKS_ARGS=--lua-suffix=jit-2.0.4 TEST_PREV_COMMITS=1 EMPTY_THEME_WHILE_LOADING=1
     # Note: luarocks does not work with Lua 5.0.
     - LUA=5.1 LUANAME=lua5.1 BUILD_IN_DIR=/tmp/awesome-build
     # Lua 5.2 with older lgi and screen size not divisible by 2.
@@ -138,6 +138,12 @@ install:
     }
 script:
   - export CMAKE_ARGS="-DLUA_LIBRARY=${LUALIBRARY} -DLUA_INCLUDE_DIR=${LUAINCLUDE} -D OVERRIDE_VERSION=$AWESOME_VERSION -DSTRICT_TESTS=true"
+  - |
+    if [ "$EMPTY_THEME_WHILE_LOADING" = 1 ]; then
+      # Break beautiful so that trying to access the theme before beautiful.init() causes an error
+      sed -i -e 's/theme = {}/theme = setmetatable({}, { __index = function() error("May not access theme before beautiful.init()") end })/' lib/beautiful/init.lua \
+        && grep -q 'May not access' lib/beautiful/init.lua
+    fi
   - |
     set -e
     if [ -n "$BUILD_IN_DIR" ]; then
