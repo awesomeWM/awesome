@@ -188,8 +188,8 @@ end
 -- @return Wallpaper image.
 function theme_assets.wallpaper(bg, fg, alt_fg, s)
     s = s or screen.primary
-    local height = s.workarea.height
-    local width = s.workarea.width
+    local height = s.geometry.height
+    local width = s.geometry.width
     local img = cairo.RecordingSurface(cairo.Content.COLOR,
         cairo.Rectangle { x = 0, y = 0, width = width, height = height })
     local cr = cairo.Context(img)
