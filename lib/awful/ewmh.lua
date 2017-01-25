@@ -37,26 +37,24 @@ local ewmh = {
 
 --- Update a client's settings when its geometry changes, skipping signals
 -- resulting from calls within.
-local geometry_change_lock = false
-local function geometry_change(window)
-    if geometry_change_lock then return end
-    geometry_change_lock = true
+local repair_geometry_lock = false
+local function repair_geometry(window)
+    if repair_geometry_lock then return end
+    repair_geometry_lock = true
 
-    -- Fix up the geometry in case this window needs to cover the whole screen.
-    local bw = window.border_width or 0
-    local g = window.screen.workarea
-    if window.maximized_vertical or window.maximized then
-        window:geometry { height = g.height - 2*bw, y = g.y }
-    end
-    if window.maximized_horizontal or window.maximized then
-        window:geometry { width = g.width - 2*bw, x = g.x }
-    end
-    if window.fullscreen then
-        window.border_width = 0
-        window:geometry(window.screen.geometry)
+    -- Re-apply the geometry locking properties to what they should be.
+    for _, prop in ipairs {
+        "fullscreen", "maximized", "maximized_vertical", "maximized_horizontal"
+    } do
+        if window[prop] then
+            window:emit_signal("request::geometry", prop, {
+                store_geometry = false
+            })
+            break
+        end
     end
 
-    geometry_change_lock = false
+    repair_geometry_lock = false
 end
 
 --- Activate a window.
@@ -265,7 +263,10 @@ function ewmh.geometry(c, context, hints)
         -- If the property is boolean and it correspond to the undo operation,
         -- restore the stored geometry.
         if state == false then
+            local original = repair_geometry_lock
+            repair_geometry_lock = true
             aplace.restore(c,{context=context})
+            repair_geometry_lock = original
             return
         end
 
@@ -283,11 +284,11 @@ client.connect_signal("request::activate", ewmh.activate)
 client.connect_signal("request::tag", ewmh.tag)
 client.connect_signal("request::urgent", ewmh.urgent)
 client.connect_signal("request::geometry", ewmh.geometry)
-client.connect_signal("property::border_width", geometry_change)
-client.connect_signal("property::geometry", geometry_change)
+client.connect_signal("property::border_width", repair_geometry)
+client.connect_signal("property::screen", repair_geometry)
 screen.connect_signal("property::workarea", function(s)
     for _, c in pairs(client.get(s)) do
-        geometry_change(c)
+        repair_geometry(c)
     end
 end)
 
