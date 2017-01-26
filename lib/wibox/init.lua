@@ -17,6 +17,7 @@ local object = require("gears.object")
 local grect =  require("gears.geometry").rectangle
 local beautiful = require("beautiful")
 local base = require("wibox.widget.base")
+local cairo = require("lgi").cairo
 
 --- This provides widget box windows. Every wibox can also be used as if it were
 -- a drawin. All drawin functions and properties are also available on wiboxes!
@@ -59,6 +60,63 @@ end
 
 function wibox:find_widgets(x, y)
     return self._drawable:find_widgets(x, y)
+end
+
+function wibox:_apply_shape()
+    local shape = self._shape
+
+    if not shape then
+        self.shape_bounding = nil
+        self.shape_clip = nil
+        return
+    end
+
+    local geo = self:geometry()
+    local bw = self.border_width
+
+    -- First handle the bounding shape (things including the border)
+    local img = cairo.ImageSurface(cairo.Format.A1, geo.width + 2*bw, geo.height + 2*bw)
+    local cr = cairo.Context(img)
+
+    -- We just draw the shape in its full size
+    shape(cr, geo.width + 2*bw, geo.height + 2*bw)
+    cr:set_operator(cairo.Operator.SOURCE)
+    cr:fill()
+    self.shape_bounding = img._native
+    img:finish()
+
+    -- Now handle the clip shape (things excluding the border)
+    img = cairo.ImageSurface(cairo.Format.A1, geo.width, geo.height)
+    cr = cairo.Context(img)
+
+    -- We give the shape the same arguments as for the bounding shape and draw
+    -- it in its full size (the translate is to compensate for the smaller
+    -- surface)
+    cr:translate(-bw, -bw)
+    shape(cr, geo.width + 2*bw, geo.height + 2*bw)
+    cr:set_operator(cairo.Operator.SOURCE)
+    cr:fill_preserve()
+    -- Now we remove an area of width 'bw' again around the shape (We use 2*bw
+    -- since half of that is on the outside and only half on the inside)
+    cr:set_source_rgba(0, 0, 0, 0)
+    cr:set_line_width(2*bw)
+    cr:stroke()
+    self.shape_clip = img._native
+    img:finish()
+end
+
+--- Set the wibox shape.
+-- @property shape
+-- @tparam gears.shape A gears.shape compatible function.
+-- @see gears.shape
+
+function wibox:set_shape(shape)
+    self._shape = shape
+    self:_apply_shape()
+end
+
+function wibox:get_shape()
+    return self._shape
 end
 
 function wibox:get_screen()
@@ -196,6 +254,9 @@ local function new(args)
     -- Make sure the wibox is drawn at least once
     ret.draw()
 
+    ret:connect_signal("property::geometry", ret._apply_shape)
+    ret:connect_signal("property::border_width", ret._apply_shape)
+
     -- If a value is not found, look in the drawin
     setmetatable(ret, {
         __index = function(self, k)
@@ -228,6 +289,8 @@ local function new(args)
     if args.screen then
         ret:set_screen ( args.screen  )
     end
+
+    ret.shape = args.shape
 
     return ret
 end
