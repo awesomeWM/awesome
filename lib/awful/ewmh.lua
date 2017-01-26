@@ -24,6 +24,10 @@ local ewmh = {
 -- @beautiful beautiful.maximized_honor_padding
 -- @tparam[opt=true] boolean maximized_honor_padding
 
+--- Hide the border on fullscreen clients.
+-- @beautiful beautiful.fullscreen_hide_border
+-- @tparam[opt=true] boolean fullscreen_hide_border
+
 --- The list of all registered generic request::activate (focus stealing)
 -- filters. If a filter is added to only one context, it will be in
 -- `ewmh.contextual_activate_filters`["context_name"].
@@ -285,7 +289,19 @@ function ewmh.geometry(c, context, hints)
             props.honor_padding = beautiful.maximized_honor_padding ~= false
         end
 
+        if original_context == "fullscreen" and beautiful.fullscreen_hide_border ~= false then
+            props.ignore_border_width = true
+        end
+
         aplace[context](c, props)
+
+        -- Remove the border to get a "real" fullscreen.
+        if original_context == "fullscreen" and beautiful.fullscreen_hide_border ~= false then
+            local original = repair_geometry_lock
+            repair_geometry_lock = true
+            c.border_width = 0
+            repair_geometry_lock = original
+        end
     end
 end
 
