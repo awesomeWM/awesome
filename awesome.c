@@ -691,6 +691,16 @@ main(int argc, char **argv)
     /* check for shape extension */
     query = xcb_get_extension_data(globalconf.connection, &xcb_shape_id);
     globalconf.have_shape = query && query->present;
+    if (globalconf.have_shape)
+    {
+        xcb_shape_query_version_reply_t *reply =
+            xcb_shape_query_version_reply(globalconf.connection,
+                    xcb_shape_query_version_unchecked(globalconf.connection),
+                    NULL);
+        globalconf.have_input_shape = reply && (reply->major_version > 1 ||
+                (reply->major_version == 1 && reply->minor_version >= 1));
+        p_delete(&reply);
+    }
 
     event_init();
 

@@ -106,6 +106,8 @@ typedef struct
     bool have_xtest;
     /** Check for SHAPE extension */
     bool have_shape;
+    /** Check for SHAPE extension with input shape support */
+    bool have_input_shape;
     /** Check for XKB extension */
     bool have_xkb;
     uint8_t event_base_shape;
