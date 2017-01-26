@@ -930,7 +930,7 @@ function placement.under_mouse(d, args)
     ngeo.x = math.floor(m_coords.x - ngeo.width  / 2)
     ngeo.y = math.floor(m_coords.y - ngeo.height / 2)
 
-    local bw = d.border_width or 0
+    local bw    = (not args.ignore_border_width) and d.border_width or 0
     ngeo.width  = ngeo.width  - 2*bw
     ngeo.height = ngeo.height - 2*bw
 
@@ -1034,7 +1034,7 @@ function placement.resize_to_mouse(d, args)
         pts.x_only and ngeo.y + ngeo.height or math.max(p2.y, p1.y)
     )
 
-    local bw = d.border_width or 0
+    local bw = (not args.ignore_border_width) and d.border_width or 0
 
     for _, a in ipairs {"width", "height"} do
         ngeo[a] = ngeo[a] - 2*bw
@@ -1084,7 +1084,7 @@ function placement.align(d, args)
 
     local sgeo = get_parent_geometry(d, args)
     local dgeo = geometry_common(d, args)
-    local bw   = d.border_width or 0
+    local bw   = (not args.ignore_border_width) and d.border_width or 0
 
     local pos  = align_map[args.position](
         sgeo.width ,
@@ -1169,7 +1169,7 @@ function placement.stretch(d, args)
     local sgeo = get_parent_geometry(d, args)
     local dgeo = geometry_common(d, args)
     local ngeo = geometry_common(d, args, nil, true)
-    local bw   = d.border_width or 0
+    local bw   = (not args.ignore_border_width) and d.border_width or 0
 
     if args.direction == "left" then
         ngeo.x      = sgeo.x
@@ -1231,7 +1231,7 @@ function placement.maximize(d, args)
 
     local sgeo = get_parent_geometry(d, args)
     local ngeo = geometry_common(d, args, nil, true)
-    local bw   = d.border_width or 0
+    local bw   = (not args.ignore_border_width) and d.border_width or 0
 
     if (not args.axis) or args.axis :match "vertical" then
         ngeo.y      = sgeo.y
@@ -1308,7 +1308,7 @@ function placement.scale(d, args)
         end
     end
 
-    local bw = d.border_width or 0
+    local bw = (not args.ignore_border_width) and d.border_width or 0
     ngeo.width  = ngeo.width  - 2*bw
     ngeo.height = ngeo.height - 2*bw
 
