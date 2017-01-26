@@ -125,7 +125,6 @@ ewmh_client_update_frame_extents(lua_State *L)
 void
 ewmh_init(void)
 {
-    lua_State *L = globalconf_get_lua_State();
     xcb_window_t father;
     xcb_screen_t *xscreen = globalconf.screen;
     xcb_atom_t atom[] =
@@ -206,7 +205,12 @@ ewmh_init(void)
     i = getpid();
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
                         father, _NET_WM_PID, XCB_ATOM_CARDINAL, 32, 1, &i);
+}
 
+void
+ewmh_init_lua(void)
+{
+    lua_State *L = globalconf_get_lua_State();
 
     luaA_class_connect_signal(L, &client_class, "focus", ewmh_update_net_active_window);
     luaA_class_connect_signal(L, &client_class, "unfocus", ewmh_update_net_active_window);

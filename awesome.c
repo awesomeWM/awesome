@@ -433,6 +433,12 @@ restart_on_signal(gpointer data)
     return TRUE;
 }
 
+static bool
+true_config_callback(const char *unused)
+{
+    return true;
+}
+
 /** Print help and exit(2) with given exit_code.
  * \param exit_code The exit code.
  */
@@ -545,13 +551,37 @@ main(int argc, char **argv)
     /* Get XDG basedir data */
     xdgInitHandle(&xdg);
 
-    /* init lua */
-    luaA_init(&xdg, &searchpath);
-    string_array_wipe(&searchpath);
+    /* add XDG_CONFIG_DIR as include path */
+    const char * const *xdgconfigdirs = xdgSearchableConfigDirectories(&xdg);
+    for(; *xdgconfigdirs; xdgconfigdirs++)
+    {
+        /* Append /awesome to *xdgconfigdirs */
+        const char *suffix = "/awesome";
+        size_t len = a_strlen(*xdgconfigdirs) + a_strlen(suffix) + 1;
+        char *entry = p_new(char, len);
+        a_strcat(entry, len, *xdgconfigdirs);
+        a_strcat(entry, len, suffix);
+        string_array_append(&searchpath, entry);
+    }
 
     if (run_test)
     {
-        if(!luaA_parserc(&xdg, confpath, false))
+        bool success = true;
+        /* Get the first config that will be tried */
+        const char *config = luaA_find_config(&xdg, confpath, true_config_callback);
+
+        /* Try to parse it */
+        lua_State *L = luaL_newstate();
+        if(luaL_loadfile(L, config))
+        {
+            const char *err = lua_tostring(L, -1);
+            fprintf(stderr, "%s\n", err);
+            success = false;
+        }
+        p_delete(&config);
+        lua_close(L);
+
+        if(!success)
         {
             fprintf(stderr, "✘ Configuration file syntax error.\n");
             return EXIT_FAILURE;
@@ -670,10 +700,6 @@ main(int argc, char **argv)
     /* init atom cache */
     atoms_init(globalconf.connection);
 
-    /* init screens information */
-    screen_scan();
-
-    /* do this only for real screen */
     ewmh_init();
     systray_init();
 
@@ -724,8 +750,17 @@ main(int argc, char **argv)
     /* get the current wallpaper, from now on we are informed when it changes */
     root_update_wallpaper();
 
+    /* init lua */
+    luaA_init(&xdg, &searchpath);
+    string_array_wipe(&searchpath);
+
+    ewmh_init_lua();
+
+    /* init screens information */
+    screen_scan();
+
     /* Parse and run configuration file */
-    if (!luaA_parserc(&xdg, confpath, true))
+    if (!luaA_parserc(&xdg, confpath))
         fatal("couldn't find any rc file");
 
     p_delete(&confpath);

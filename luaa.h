@@ -303,8 +303,11 @@ luaA_registerfct(lua_State *L, int idx, int *fct)
     return luaA_register(L, idx, fct);
 }
 
+typedef bool luaA_config_callback(const char *);
+
 void luaA_init(xdgHandle *, string_array_t *);
-bool luaA_parserc(xdgHandle *, const char *, bool);
+const char *luaA_find_config(xdgHandle *, const char *, luaA_config_callback *);
+bool luaA_parserc(xdgHandle *, const char *);
 
 /** Global signals */
 signal_array_t global_signals;

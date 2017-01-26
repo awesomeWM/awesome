@@ -777,19 +777,6 @@ luaA_init(xdgHandle* xdg, string_array_t *searchpath)
     /* Export keys */
     key_class_setup(L);
 
-    /* add XDG_CONFIG_DIR as include path */
-    const char * const *xdgconfigdirs = xdgSearchableConfigDirectories(xdg);
-    for(; *xdgconfigdirs; xdgconfigdirs++)
-    {
-        /* Append /awesome to *xdgconfigdirs */
-        const char *suffix = "/awesome";
-        size_t len = a_strlen(*xdgconfigdirs) + a_strlen(suffix) + 1;
-        char *entry = p_new(char, len);
-        a_strcat(entry, len, *xdgconfigdirs);
-        a_strcat(entry, len, suffix);
-        string_array_append(searchpath, entry);
-    }
-
     /* add Lua search paths */
     lua_getglobal(L, "package");
     if (LUA_TTABLE != lua_type(L, 1))
@@ -817,7 +804,7 @@ luaA_startup_error(const char *err)
 }
 
 static bool
-luaA_loadrc(const char *confpath, bool run)
+luaA_loadrc(const char *confpath)
 {
     lua_State *L = globalconf_get_lua_State();
     if(luaL_loadfile(L, confpath))
@@ -827,12 +814,6 @@ luaA_loadrc(const char *confpath, bool run)
         fprintf(stderr, "%s\n", err);
         lua_pop(L, 1);
         return false;
-    }
-
-    if(!run)
-    {
-        lua_pop(L, 1);
-        return true;
     }
 
     /* Set the conffile right now so it can be used inside the
@@ -865,21 +846,28 @@ luaA_loadrc(const char *confpath, bool run)
  * \param run Run the configuration file.
  */
 bool
-luaA_parserc(xdgHandle* xdg, const char *confpatharg, bool run)
+luaA_parserc(xdgHandle* xdg, const char *confpatharg)
+{
+    const char *confpath = luaA_find_config(xdg, confpatharg, luaA_loadrc);
+    bool ret = confpath != NULL;
+    p_delete(&confpath);
+
+    return ret;
+}
+
+/** Find a config file for which the given callback returns true.
+ * \param xdg An xdg handle to use to get XDG basedir.
+ * \param confpatharg The configuration file to load.
+ * \param callback The callback to call.
+ */
+const char *
+luaA_find_config(xdgHandle* xdg, const char *confpatharg, luaA_config_callback *callback)
 {
     char *confpath = NULL;
-    bool ret = false;
 
-    /* try to load, return if it's ok */
-    if(confpatharg)
+    if(confpatharg && callback(confpatharg))
     {
-        if(luaA_loadrc(confpatharg, run))
-        {
-            ret = true;
-            goto bailout;
-        }
-        else if(!run)
-            goto bailout;
+        return a_strdup(confpatharg);
     }
 
     confpath = xdgConfigFind("awesome/rc.lua", xdg);
@@ -889,21 +877,17 @@ luaA_parserc(xdgHandle* xdg, const char *confpatharg, bool run)
     /* confpath is "string1\0string2\0string3\0\0" */
     while(*tmp)
     {
-        if(luaA_loadrc(tmp, run))
+        if(callback(tmp))
         {
-            ret = true;
-            goto bailout;
+            const char *ret = a_strdup(tmp);
+            p_delete(&confpath);
+            return ret;
         }
-        else if(!run)
-            goto bailout;
         tmp += a_strlen(tmp) + 1;
     }
 
-bailout:
-
     p_delete(&confpath);
-
-    return ret;
+    return NULL;
 }
 
 int
