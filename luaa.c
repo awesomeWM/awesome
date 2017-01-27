@@ -352,6 +352,16 @@ luaA_fixups(lua_State *L)
  * @tfield string hostname
  */
 
+/**
+ * The path where themes were installed to.
+ * @tfield string themes_path
+ */
+
+/**
+ * The path where icons were installed to.
+ * @tfield string icon_path
+ */
+
 static int
 luaA_awesome_index(lua_State *L)
 {
@@ -406,6 +416,18 @@ luaA_awesome_index(lua_State *L)
         hostname[countof(hostname) - 1] = '\0';
 
         lua_pushstring(L, hostname);
+        return 1;
+    }
+
+    if(A_STREQ(buf, "themes_path"))
+    {
+        lua_pushliteral(L, AWESOME_THEMES_PATH);
+        return 1;
+    }
+
+    if(A_STREQ(buf, "icon_path"))
+    {
+        lua_pushliteral(L, AWESOME_ICON_PATH);
         return 1;
     }
 
