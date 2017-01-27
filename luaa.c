@@ -907,8 +907,13 @@ luaA_find_config(xdgHandle* xdg, const char *confpatharg, luaA_config_callback *
         }
         tmp += a_strlen(tmp) + 1;
     }
-
     p_delete(&confpath);
+
+    if(callback(AWESOME_DEFAULT_CONF))
+    {
+        return a_strdup(AWESOME_DEFAULT_CONF);
+    }
+
     return NULL;
 }
 
