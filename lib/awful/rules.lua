@@ -376,7 +376,7 @@ function rules.extra_properties.placement(c, value)
     end
 end
 
-function rules.extra_properties.tags(c, value, props)
+function rules.high_priority_properties.tags(c, value, props)
     local current = c:tags()
 
     local tags, s = {}, nil
