@@ -455,14 +455,6 @@ function rules.execute(c, props, callbacks)
 
     end
 
-    -- By default, rc.lua use no_overlap+no_offscreen placement. This has to
-    -- be executed before x/y/width/height/geometry as it would otherwise
-    -- always override the user specified position with the default rule.
-    if props.placement then
-        -- It may be a function, so this one doesn't execute it like others
-        rules.extra_properties.placement(c, props.placement, props)
-    end
-
     -- Make sure the tag is selected before the main rules are called.
     -- Otherwise properties like "urgent" or "focus" may fail because they
     -- will be overiden by various callbacks.
