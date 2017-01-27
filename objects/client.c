@@ -100,8 +100,9 @@
 #include "systray.h"
 #include "xwindow.h"
 
-#include "math.h"
+#include <math.h>
 
+#include <signal.h>
 #include <xcb/xcb_atom.h>
 #include <xcb/shape.h>
 #include <cairo-xcb.h>
@@ -2176,27 +2177,34 @@ client_unmanage(client_t *c, bool window_valid)
  * \param c The client to kill.
  */
 void
-client_kill(client_t *c)
+client_kill(client_t *c, int sig)
 {
-    if(client_hasproto(c, WM_DELETE_WINDOW))
+    if (sig == -1)
     {
-        xcb_client_message_event_t ev;
+        if(client_hasproto(c, WM_DELETE_WINDOW))
+        {
+            xcb_client_message_event_t ev;
 
-        /* Initialize all of event's fields first */
-        p_clear(&ev, 1);
+            /* Initialize all of event's fields first */
+            p_clear(&ev, 1);
 
-        ev.response_type = XCB_CLIENT_MESSAGE;
-        ev.window = c->window;
-        ev.format = 32;
-        ev.data.data32[1] = globalconf.timestamp;
-        ev.type = WM_PROTOCOLS;
-        ev.data.data32[0] = WM_DELETE_WINDOW;
+            ev.response_type = XCB_CLIENT_MESSAGE;
+            ev.window = c->window;
+            ev.format = 32;
+            ev.data.data32[1] = globalconf.timestamp;
+            ev.type = WM_PROTOCOLS;
+            ev.data.data32[0] = WM_DELETE_WINDOW;
 
-        xcb_send_event(globalconf.connection, false, c->window,
-                       XCB_EVENT_MASK_NO_EVENT, (char *) &ev);
+            xcb_send_event(globalconf.connection, false, c->window,
+                        XCB_EVENT_MASK_NO_EVENT, (char *) &ev);
+        }
+        else
+            xcb_kill_client(globalconf.connection, c->window);
     }
     else
-        xcb_kill_client(globalconf.connection, c->window);
+    {
+        kill(c->pid, sig);
+    }
 }
 
 /** Get all clients into a table.
@@ -2344,13 +2352,40 @@ out:
 
 /** Kill a client.
  *
+ * By default, this will use the normal X11 way of closing a client (the `X`
+ * button). If a signal number is provided, it will be used instead.
+ *
+ * This can be used to pause or wakeup some clients or to save energy.
+ *
+ * @usage -- Close the focused client normally
+ * if client.focus then
+ *     client.focus:kill()
+ * end
+ *
+ * -- Force kill the focused client
+ * if client.focus then
+ *     client.focus:kill(awful.client.posix_signal.SIGKILL)
+ * end
+ *
+ * @tparam[opt=nil] integer signal The POSIX signal number.
  * @function kill
+ * @see posix_signal
  */
 static int
 luaA_client_kill(lua_State *L)
 {
     client_t *c = luaA_checkudata(L, 1, &client_class);
-    client_kill(c);
+    int sig = -1;
+
+    /* Allow a signal number */
+    if(lua_gettop(L) == 2)
+    {
+        luaA_checkinteger(L, 2);
+
+        sig = lua_tointeger(L, 2);
+    }
+
+    client_kill(c, sig);
     return 0;
 }
 
