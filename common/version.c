@@ -54,11 +54,6 @@ eprint_version(void)
 #else
     const char *has_dbus = "✘";
 #endif
-#ifdef XCB_RANDR_GET_MONITORS
-    const char *has_RandR15 = "✔";
-#else
-    const char *has_RandR15 = "✘";
-#endif
 #ifdef HAS_EXECINFO
     const char *has_execinfo = "✔";
 #else
@@ -69,11 +64,12 @@ eprint_version(void)
            " • Compiled against %s (running with %s)\n"
            " • D-Bus support: %s\n"
            " • execinfo support: %s\n"
-           " • RandR 1.5 support: %s\n"
+           " • xcb-randr version: %d.%d\n"
            " • LGI version: %s\n",
            AWESOME_VERSION, AWESOME_RELEASE,
            LUA_RELEASE, lua_tostring(L, -2),
-           has_dbus, has_execinfo, has_RandR15,
+           has_dbus, has_execinfo,
+           XCB_RANDR_MAJOR_VERSION, XCB_RANDR_MINOR_VERSION,
            lua_tostring(L, -1));
     lua_close(L);
 
