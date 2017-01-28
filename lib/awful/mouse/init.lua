@@ -298,7 +298,6 @@ end
 -- @treturn table The list of widgets.The first element is the biggest
 -- container while the last is the topmost widget. The table contains *x*, *y*,
 -- *width*, *height* and *widget*.
--- @see wibox.find_widgets
 
 function mouse.object.get_current_widgets()
     local w = mouse.object.get_current_wibox()
@@ -321,7 +320,6 @@ end
 -- @property current_widget
 -- @tparam widget|nil widget The widget
 -- @treturn ?widget The widget
--- @see wibox.find_widgets
 -- @see current_widget_geometry
 
 function mouse.object.get_current_widget()

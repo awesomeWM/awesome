@@ -57,7 +57,7 @@ end
 --
 -- @param args Arguments table. "prompt" is the prompt to use.
 -- @return A launcher widget.
--- @name awful.widget.prompt
+-- @function awful.widget.prompt
 function widgetprompt.new(args)
     args = args or {}
     local widget = textbox()

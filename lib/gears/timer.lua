@@ -185,8 +185,8 @@ end
 -- @tparam number timeout Timeout in seconds (e.g. 1.5).
 -- @tparam function callback Function to run.
 -- @treturn timer The timer object that was set up.
--- @see timer.weak_start_new
 -- @function gears.timer.start_new
+-- @see gears.timer.weak_start_new
 function timer.start_new(timeout, callback)
     local t = timer.new({ timeout = timeout })
     t:connect_signal("timeout", function()
@@ -200,15 +200,15 @@ function timer.start_new(timeout, callback)
 end
 
 --- Create a timeout for calling some callback function.
--- This function is almost identical to `timer.start_new`. The only difference
+-- This function is almost identical to `gears.timer.start_new`. The only difference
 -- is that this does not prevent the callback function from being garbage
 -- collected. After the callback function was collected, the timer returned
 -- will automatically be stopped.
 -- @tparam number timeout Timeout in seconds (e.g. 1.5).
 -- @tparam function callback Function to start.
 -- @treturn timer The timer object that was set up.
--- @see timer.start_new
 -- @function gears.timer.weak_start_new
+-- @see gears.timer.start_new
 function timer.weak_start_new(timeout, callback)
     local indirection = setmetatable({}, { __mode = "v" })
     indirection.callback = callback
