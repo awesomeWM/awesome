@@ -94,9 +94,22 @@ work. Remove this section.
     - end
     --- }}}
 
+The `quit` menu command must be wrapped in a function, otherwise an error
+occurs due to mismatched argument types from the v4.0 `awful.menu` library.
+
+     -- {{{ Menu
+     -- Create a laucher widget and a main menu
+     myawesomemenu = {
+       { "manual", terminal .. " -e man awesome" },
+       { "edit config", editor_cmd .. " " .. awesome.conffile },
+       { "restart", awesome.restart },
+    -  { "quit", awesome.quit }
+    +  { "quit", function() awesome.quit() end}
+     }
+
 The textclock is now part of the `wibox` library, rename it.
 
-    -- {{{ Wibar
+     -- {{{ Wibar
      -- Create a textclock widget
     -mytextclock = `awful.widget.textclock`()
     +mytextclock = `wibox.widget.textclock`()
@@ -105,7 +118,7 @@ The textclock is now part of the `wibox` library, rename it.
 Widgets were previously added to static global tables. This isn't going to
 behave correctly when screen are added and removed. Remove this section.
 
-      -- Create a wibox for each screen and add it
+     --- Create a wibox for each screen and add it
      -mywibox = {}
      -mypromptbox = {}
      -mylayoutbox = {}
@@ -143,6 +156,7 @@ they are still supported, but will be removed in the next release.
                           awful.button({ }, 1, function (c)
                                                    if c == `client.focus` then
                                                        c.minimized = true
+                                                   else
                                                        -- Without this, the following
                                                        -- :isvisible() makes no sense
                                                        c.minimized = false
@@ -153,6 +167,7 @@ they are still supported, but will be removed in the next release.
                                                        end
                                                        -- This will also un-minimize
                                                        -- the client, if needed
+                                                       `client.focus` = c
                                                        c:raise()
                                                    end
                                                end),
