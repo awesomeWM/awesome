@@ -66,6 +66,8 @@ new_type("legacylayout", "Layout related functions", false, "param")
 new_type("clientlayout", "Client layouts", false, "param")
 -- Document some callback prototypes
 new_type("callback", "Callback functions prototype", false, "Parameters")
+-- awful.rules sources
+new_type("rulesources", "Rule sources", false, "param")
 
 -- More fitting section names
 kind_names={topic='Documentation', module='Libraries', script='Sample files'}
