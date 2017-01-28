@@ -353,7 +353,7 @@ function rules.high_priority_properties.new_tag(c, value, props)
     return t
 end
 
-function rules.extra_properties.placement(c, value)
+function rules.extra_properties.placement(c, value, props)
     -- Avoid problems
     if awesome.startup and
       (c.size_hints.user_position or c.size_hints.program_position) then
@@ -363,8 +363,8 @@ function rules.extra_properties.placement(c, value)
     local ty = type(value)
 
     local args = {
-        honor_workarea = true,
-        honor_padding  = true
+        honor_workarea = props.honor_workarea ~= false,
+        honor_padding  = props.honor_padding ~= false
     }
 
     if ty == "function" or (ty == "table" and
