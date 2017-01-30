@@ -85,8 +85,8 @@ end
 
 capi.client.connect_signal("property::shape_client_bounding", shape.update.bounding)
 capi.client.connect_signal("property::shape_client_clip", shape.update.clip)
-capi.client.connect_signal("property::width", shape.update.all)
-capi.client.connect_signal("property::height", shape.update.all)
+capi.client.connect_signal("property::size", shape.update.all)
+capi.client.connect_signal("property::border_width", shape.update.all)
 
 return shape
 
