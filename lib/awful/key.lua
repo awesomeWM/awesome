@@ -95,7 +95,7 @@ function key.new(mod, _key, press, release, data)
     end
 
     -- append custom userdata (like description) to a hotkey
-    data = data or {}
+    data = data and util.table.clone(data) or {}
     data.mod = mod
     data.key = _key
     table.insert(key.hotkeys, data)

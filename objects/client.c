@@ -1647,14 +1647,22 @@ client_resize_do(client_t *c, area_t geometry)
     luaA_object_push(L, c);
     if (!AREA_EQUAL(old_geometry, geometry))
         luaA_object_emit_signal(L, -1, "property::geometry", 0);
-    if (old_geometry.x != geometry.x)
-        luaA_object_emit_signal(L, -1, "property::x", 0);
-    if (old_geometry.y != geometry.y)
-        luaA_object_emit_signal(L, -1, "property::y", 0);
-    if (old_geometry.width != geometry.width)
-        luaA_object_emit_signal(L, -1, "property::width", 0);
-    if (old_geometry.height != geometry.height)
-        luaA_object_emit_signal(L, -1, "property::height", 0);
+    if (old_geometry.x != geometry.x || old_geometry.y != geometry.y)
+    {
+        luaA_object_emit_signal(L, -1, "property::position", 0);
+        if (old_geometry.x != geometry.x)
+            luaA_object_emit_signal(L, -1, "property::x", 0);
+        else
+            luaA_object_emit_signal(L, -1, "property::y", 0);
+    }
+    if (old_geometry.width != geometry.width || old_geometry.height != geometry.height)
+    {
+        luaA_object_emit_signal(L, -1, "property::size", 0);
+        if (old_geometry.width != geometry.width)
+            luaA_object_emit_signal(L, -1, "property::width", 0);
+        else
+            luaA_object_emit_signal(L, -1, "property::height", 0);
+    }
     lua_pop(L, 1);
 
     screen_client_moveto(c, new_screen, false);
