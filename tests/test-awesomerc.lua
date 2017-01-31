@@ -4,12 +4,6 @@ local awful = require("awful")
 
 local old_c = nil
 
-local function get_callback(mod, key)
-    local inf = {}
-    awful.key(mod, key, nil, nil, inf)
-
-    return inf.execute
-end
 
 -- Get a tag and a client
 local function get_c_and_t()
@@ -42,14 +36,12 @@ local steps = {
         assert(old_c)
 
         -- Test layout
-        -- local cb = get_callback({modkey}, " ")
-        -- assert(cb)
 
         --TODO use the key once the bug is fixed
         local l = old_c.screen.selected_tag.layout
         assert(l)
 
-        -- cb()
+        --awful.key.execute({modkey}, " ")
         awful.layout.inc(1)
 
         assert(old_c.screen.selected_tag.layout ~= l)
@@ -57,7 +49,7 @@ local steps = {
         -- Test ontop
 
         assert(not old_c.ontop)
-        get_callback({modkey}, "t")()
+        awful.key.execute({modkey}, "t")
         awesome.sync()
 
         return true
@@ -75,7 +67,7 @@ local steps = {
         -- Now, test the master_width_factor
         assert(t.master_width_factor == 0.5)
 
-        get_callback({modkey}, "l")()
+        awful.key.execute({modkey}, "l")
         awesome.sync()
 
         return true
@@ -90,7 +82,7 @@ local steps = {
         -- Now, test the master_count
         assert(t.master_count == 1)
 
-        get_callback({modkey, "Shift"}, "h")()
+        awful.key.execute({modkey, "Shift"}, "h")
         awesome.sync()
 
         return true
@@ -105,8 +97,8 @@ local steps = {
         -- Now, test the column_count
         assert(t.column_count == 1)
 
-        get_callback({modkey, "Control"}, "h")()
-        get_callback({modkey, "Shift"  }, "l")()
+        awful.key.execute({modkey, "Control"}, "h")
+        awful.key.execute({modkey, "Shift"  }, "l")
         awesome.sync()
 
         return true
@@ -121,7 +113,7 @@ local steps = {
         -- Now, test the switching tag
         assert(t.index == 1)
 
-        get_callback({modkey, }, "Right")()
+        awful.key.execute({modkey, }, "Right")
         awesome.sync()
 
         return true
@@ -201,7 +193,7 @@ local steps = {
         -- tags[1] and the client history should be kept
         assert(client.focus == old_c)
 
-        --get_callback({modkey, "Shift"  }, "#"..(9+i))() --FIXME
+        --awful.key.execute({modkey, "Shift"  }, "#"..(9+i)) --FIXME
         client.focus:move_to_tag(tags[2])
 
         assert(not client.focus)
