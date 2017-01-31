@@ -97,7 +97,7 @@ work. Remove this section.
 The `quit` menu command must be wrapped in a function, otherwise an error
 occurs due to mismatched argument types from the v4.0 `awful.menu` library.
 
-     -- {{{ Menu
+     -- {{{ Menu
      -- Create a laucher widget and a main menu
      myawesomemenu = {
        { "manual", terminal .. " -e man awesome" },
@@ -109,7 +109,7 @@ occurs due to mismatched argument types from the v4.0 `awful.menu` library.
 
 The textclock is now part of the `wibox` library, rename it.
 
-     -- {{{ Wibar
+     -- {{{ Wibar
      -- Create a textclock widget
     -mytextclock = `awful.widget.textclock`()
     +mytextclock = `wibox.widget.textclock`()
