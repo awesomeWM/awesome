@@ -48,6 +48,13 @@ function layoutbox.new(screen)
         boxes = setmetatable({}, { __mode = "kv" })
         capi.tag.connect_signal("property::selected", update_from_tag)
         capi.tag.connect_signal("property::layout", update_from_tag)
+        capi.tag.connect_signal("property::screen", function()
+            for s, w in pairs(boxes) do
+                if s.valid then
+                    update(w, s)
+                end
+            end
+        end)
         layoutbox.boxes = boxes
     end
 
