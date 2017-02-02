@@ -72,10 +72,13 @@ local steps = {
     wait_for_current_desktop(tags[4]),
 
     -- Killing the client means the first selected tag counts
-    function()
-        assert(client.focus == c)
-        c:kill()
-        c = nil
+    function(count)
+        if count == 1 then
+            assert(client.focus == c)
+            c:kill()
+            c = nil
+            return
+        end
         return true
     end,
     wait_for_current_desktop(tags[3]),
