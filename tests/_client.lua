@@ -20,6 +20,9 @@ local function open_window(class, title, options)
         window:set_startup_id(options.snid)
     end
     if options.resize_increment then
+        -- This requires Gtk3, but fails with an obscure message with Gtk2.
+        -- Produce a better error message instead.
+        assert(tonumber(require("lgi").Gtk._version) >= 3, "Gtk 3 required, but not found")
         local geom = Gdk.Geometry {
             width_inc = 200,
             height_inc = 200,
