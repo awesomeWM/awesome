@@ -359,10 +359,14 @@ function awfulwibar.new(arg)
 end
 
 capi.screen.connect_signal("removed", function(s)
+    local wibars = {}
     for _, wibar in ipairs(wiboxes) do
         if wibar._screen == s then
-            wibar:remove()
+            table.insert(wibars, wibar)
         end
+    end
+    for _, wibar in ipairs(wibars) do
+        wibar:remove()
     end
 end)
 
