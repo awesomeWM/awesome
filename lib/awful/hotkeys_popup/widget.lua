@@ -227,7 +227,7 @@ function widget.new()
         local max_height_px = height - group_label_height
         local column_layouts = {}
         for _, group in ipairs(available_groups) do
-            local keys = cached_awful_keys[group] or widget_instance.additional_hotkeys[group]
+            local keys = awful.util.table.join(cached_awful_keys[group], widget_instance.additional_hotkeys[group])
             local joined_descriptions = ""
             for i, key in ipairs(keys) do
                 joined_descriptions = joined_descriptions .. key.description .. (i~=#keys and "\n" or "")
