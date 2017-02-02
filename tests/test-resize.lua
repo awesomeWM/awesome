@@ -1,6 +1,7 @@
 local test_client = require("_client")
 local placement = require("awful.placement")
 local amouse = require("awful.mouse")
+local rounded_rect = require("gears.shape").rounded_rect
 
 local steps = {}
 
@@ -8,13 +9,14 @@ table.insert(steps, function(count)
     if count == 1 then  -- Setup.
         test_client("foobar", "foobar")
     elseif #client.get() > 0 then
-
         client.get()[1] : geometry {
             x      = 200,
             y      = 200,
             width  = 300,
             height = 300,
         }
+
+        client.get()[1].shape = rounded_rect
 
         return true
     end

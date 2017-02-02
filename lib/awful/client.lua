@@ -9,6 +9,7 @@
 -- Grab environment we need
 local util = require("awful.util")
 local spawn = require("awful.spawn")
+local set_shape = require("awful.client.shape").update.all
 local object = require("gears.object")
 local grect = require("gears.geometry").rectangle
 local pairs = pairs
@@ -1153,6 +1154,15 @@ function client.object.is_transient_for(self, c2)
         tc = tc.transient_for
     end
     return nil
+end
+
+--- Set the client shape.
+-- @property shape
+-- @tparam gears.shape A gears.shape compatible function.
+-- @see gears.shape
+function client.object.set_shape(self, shape)
+    client.property.set(self, "_shape", shape)
+    set_shape(self)
 end
 
 -- Register standards signals
