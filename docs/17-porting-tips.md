@@ -354,4 +354,11 @@ now access tags by name.
     -    --   properties = { tag = tags[1][2] } },
     +    --   properties = { screen = 1, tag = "2" } },
 
+If you need to get the current client object in global context, currently you can use
+`client.focus` for it. E.g., to mark/unmark the client:
 
+    -    awful.client.mark()
+    +    client.focus.marked = true
+
+    -    awful.client.unmark()
+    +    client.focus.marked = false
