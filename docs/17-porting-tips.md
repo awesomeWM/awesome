@@ -9,7 +9,7 @@ you might have added to your `rc.lua`.
 This avoids most of the possible errors due to missing important changes.
 
 If you still wish to ignore this advice, first read the
-[NEWS](89-NEWS.md) section about the breaking changes. This
+<a href="89-NEWS.md.html#v4">NEWS</a> section about the breaking changes. This
 document assumes you did.
 
 Be warned, even if it looks like it's working after changing some lines, **it wont
