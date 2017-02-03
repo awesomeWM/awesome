@@ -291,6 +291,7 @@ local function store_geometry(d, reqtype)
     if not data[d][reqtype] then data[d][reqtype] = {} end
     data[d][reqtype] = d:geometry()
     data[d][reqtype].screen = d.screen
+    data[d][reqtype].sgeo = d.screen and d.screen.geometry or nil
     data[d][reqtype].border_width = d.border_width
 end
 
@@ -1422,11 +1423,32 @@ function placement.restore(d, args)
 
     if not memento then return false end
 
-    memento.screen = nil --TODO use it
+    local x, y = memento.x, memento.y
+
+    -- Some people consider that once moved to another screen, then
+    -- the memento needs to be upgraded. For now this is only true for
+    -- maximization until someone complains.
+    if memento.sgeo and memento.screen and args.context == "maximize"
+      and d.screen and get_screen(memento.screen) ~= get_screen(d.screen) then
+        -- Use the absolute geometry as the memento also does
+        local sgeo = get_screen(d.screen).geometry
+
+        x = sgeo.x + (memento.x - memento.sgeo.x)
+        y = sgeo.y + (memento.y - memento.sgeo.y)
+
+    end
 
     d.border_width = memento.border_width
 
-    d:geometry(memento)
+    -- Don't use the memento as it would be "destructive", since `x`, `y`
+    -- and `screen` have to be modified.
+    d:geometry {
+        x      = x,
+        y      = y,
+        width  = memento.width,
+        height = memento.height,
+    }
+
     return true
 end
 
