@@ -670,6 +670,17 @@
  */
 
 /**
+ * The client's input shape as set by awesome as a (native) cairo surface.
+ *
+ * **Signal:**
+ *
+ *  * *property::shape\_input*
+ *
+ * @property shape_input
+ * @param surface
+ */
+
+/**
  * The client's bounding shape as set by the program as a (native) cairo surface.
  *
  * **Signal:**
@@ -3289,6 +3300,41 @@ luaA_client_set_shape_clip(lua_State *L, client_t *c)
     return 0;
 }
 
+/** Get the client's frame window input shape.
+ * \param L The Lua VM state.
+ * \param client The client object.
+ * \return The number of elements pushed on stack.
+ */
+static int
+luaA_client_get_shape_input(lua_State *L, client_t *c)
+{
+    cairo_surface_t *surf = xwindow_get_shape(c->frame_window, XCB_SHAPE_SK_INPUT);
+    if (!surf)
+        return 0;
+    /* lua has to make sure to free the ref or we have a leak */
+    lua_pushlightuserdata(L, surf);
+    return 1;
+}
+
+/** Set the client's frame window input shape.
+ * \param L The Lua VM state.
+ * \param client The client object.
+ * \return The number of elements pushed on stack.
+ */
+static int
+luaA_client_set_shape_input(lua_State *L, client_t *c)
+{
+    cairo_surface_t *surf = NULL;
+    if(!lua_isnil(L, -1))
+        surf = (cairo_surface_t *)lua_touserdata(L, -1);
+    xwindow_set_shape(c->frame_window,
+            c->geometry.width + (c->border_width * 2),
+            c->geometry.height + (c->border_width * 2),
+            XCB_SHAPE_SK_INPUT, surf, -c->border_width);
+    luaA_object_emit_signal(L, -3, "property::shape_input", 0);
+    return 0;
+}
+
 /** Get or set keys bindings for a client.
  *
  * @param keys_table An array of key bindings objects, or nothing.
@@ -3536,6 +3582,10 @@ client_class_setup(lua_State *L)
                             (lua_class_propfunc_t) luaA_client_set_shape_clip,
                             (lua_class_propfunc_t) luaA_client_get_shape_clip,
                             (lua_class_propfunc_t) luaA_client_set_shape_clip);
+    luaA_class_add_property(&client_class, "shape_input",
+                            (lua_class_propfunc_t) luaA_client_set_shape_input,
+                            (lua_class_propfunc_t) luaA_client_get_shape_input,
+                            (lua_class_propfunc_t) luaA_client_set_shape_input);
     luaA_class_add_property(&client_class, "startup_id",
                             NULL,
                             (lua_class_propfunc_t) luaA_client_get_startup_id,

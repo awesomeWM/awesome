@@ -265,44 +265,70 @@ xwindow_get_shape(xcb_window_t win, enum xcb_shape_sk_t kind)
 {
     if (!globalconf.have_shape)
         return NULL;
-
-    xcb_shape_query_extents_cookie_t ecookie = xcb_shape_query_extents(globalconf.connection, win);
-    xcb_shape_get_rectangles_cookie_t rcookie = xcb_shape_get_rectangles(globalconf.connection, win, kind);
-    xcb_shape_query_extents_reply_t *extents = xcb_shape_query_extents_reply(globalconf.connection, ecookie, NULL);
-    xcb_shape_get_rectangles_reply_t *rects_reply = xcb_shape_get_rectangles_reply(globalconf.connection, rcookie, NULL);
-
-    if (!extents || !rects_reply)
-    {
-        free(extents);
-        free(rects_reply);
-        /* Create a cairo surface in an error state */
-        return cairo_image_surface_create(CAIRO_FORMAT_INVALID, -1, -1);
-    }
+    if (kind == XCB_SHAPE_SK_INPUT && !globalconf.have_input_shape)
+        return NULL;
 
     int16_t x, y;
     uint16_t width, height;
-    bool shaped;
-    if (kind == XCB_SHAPE_SK_BOUNDING)
+    xcb_shape_get_rectangles_cookie_t rcookie = xcb_shape_get_rectangles(globalconf.connection, win, kind);
+    if (kind == XCB_SHAPE_SK_INPUT)
     {
-        x = extents->bounding_shape_extents_x;
-        y = extents->bounding_shape_extents_y;
-        width = extents->bounding_shape_extents_width;
-        height = extents->bounding_shape_extents_height;
-        shaped = extents->bounding_shaped;
-    } else {
-        assert(kind == XCB_SHAPE_SK_CLIP);
-        x = extents->clip_shape_extents_x;
-        y = extents->clip_shape_extents_y;
-        width = extents->clip_shape_extents_width;
-        height = extents->clip_shape_extents_height;
-        shaped = extents->clip_shaped;
+        /* We cannot query the size/existence of an input shape... */
+        xcb_get_geometry_reply_t *geom = xcb_get_geometry_reply(globalconf.connection,
+                xcb_get_geometry(globalconf.connection, win), NULL);
+        if (!geom)
+        {
+            xcb_discard_reply(globalconf.connection, rcookie.sequence);
+            /* Create a cairo surface in an error state */
+            return cairo_image_surface_create(CAIRO_FORMAT_INVALID, -1, -1);
+        }
+        x = 0;
+        y = 0;
+        width = geom->width;
+        height = geom->height;
+    }
+    else
+    {
+        xcb_shape_query_extents_cookie_t ecookie = xcb_shape_query_extents(globalconf.connection, win);
+        xcb_shape_query_extents_reply_t *extents = xcb_shape_query_extents_reply(globalconf.connection, ecookie, NULL);
+        bool shaped;
+
+        if (!extents)
+        {
+            xcb_discard_reply(globalconf.connection, rcookie.sequence);
+            /* Create a cairo surface in an error state */
+            return cairo_image_surface_create(CAIRO_FORMAT_INVALID, -1, -1);
+        }
+
+        if (kind == XCB_SHAPE_SK_BOUNDING)
+        {
+            x = extents->bounding_shape_extents_x;
+            y = extents->bounding_shape_extents_y;
+            width = extents->bounding_shape_extents_width;
+            height = extents->bounding_shape_extents_height;
+            shaped = extents->bounding_shaped;
+        } else {
+            assert(kind == XCB_SHAPE_SK_CLIP);
+            x = extents->clip_shape_extents_x;
+            y = extents->clip_shape_extents_y;
+            width = extents->clip_shape_extents_width;
+            height = extents->clip_shape_extents_height;
+            shaped = extents->clip_shaped;
+        }
+        p_delete(&extents);
+
+        if (!shaped)
+        {
+            xcb_discard_reply(globalconf.connection, rcookie.sequence);
+            return NULL;
+        }
     }
 
-    if (!shaped)
+    xcb_shape_get_rectangles_reply_t *rects_reply = xcb_shape_get_rectangles_reply(globalconf.connection, rcookie, NULL);
+    if (!rects_reply)
     {
-        free(extents);
-        free(rects_reply);
-        return NULL;
+        /* Create a cairo surface in an error state */
+        return cairo_image_surface_create(CAIRO_FORMAT_INVALID, -1, -1);
     }
 
     cairo_surface_t *surface = cairo_image_surface_create(CAIRO_FORMAT_A1, width, height);
@@ -318,7 +344,6 @@ xwindow_get_shape(xcb_window_t win, enum xcb_shape_sk_t kind)
     cairo_fill(cr);
 
     cairo_destroy(cr);
-    free(extents);
     free(rects_reply);
     return surface;
 }
@@ -355,6 +380,8 @@ void
 xwindow_set_shape(xcb_window_t win, int width, int height, enum xcb_shape_sk_t kind, cairo_surface_t *surf, int offset)
 {
     if (!globalconf.have_shape)
+        return;
+    if (kind == XCB_SHAPE_SK_INPUT && !globalconf.have_input_shape)
         return;
 
     xcb_pixmap_t pixmap = XCB_NONE;

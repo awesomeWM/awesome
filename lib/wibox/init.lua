@@ -32,6 +32,7 @@ wibox.hierarchy = require("wibox.hierarchy")
 local force_forward = {
     shape_bounding = true,
     shape_clip = true,
+    shape_input = true,
 }
 
 --@DOC_wibox_COMMON@
@@ -178,6 +179,7 @@ local function setup_signals(_wibox)
     clone_signal("property::geometry")
     clone_signal("property::shape_bounding")
     clone_signal("property::shape_clip")
+    clone_signal("property::shape_input")
 
     obj = _wibox._drawable
     clone_signal("button::press")
@@ -205,6 +207,7 @@ end
 -- @tparam wibox.widget args.widget The widget that the wibox displays.
 -- @param args.shape_bounding The wibox’s bounding shape as a (native) cairo surface.
 -- @param args.shape_clip The wibox’s clip shape as a (native) cairo surface.
+-- @param args.shape_input The wibox’s input shape as a (native) cairo surface.
 -- @tparam color args.bg The background of the wibox.
 -- @tparam surface args.bgimage The background image of the drawable.
 -- @tparam color args.fg The foreground (text) of the wibox.
