@@ -1426,8 +1426,6 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, xcb_get_window_at
      * (Else, reparent could cause an UnmapNotify) */
     xcb_change_window_attributes(globalconf.connection, w, XCB_CW_EVENT_MASK, select_input_val);
 
-    luaA_object_emit_signal(L, -1, "property::window", 0);
-
     /* The frame window gets the border, not the real client window */
     xcb_configure_window(globalconf.connection, w,
                          XCB_CONFIG_WINDOW_BORDER_WIDTH,
@@ -1450,15 +1448,17 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, xcb_get_window_at
 
     /* Store initial geometry and emits signals so we inform that geometry have
      * been set. */
-#define HANDLE_GEOM(attr) \
-    c->geometry.attr = wgeom->attr; \
-    luaA_object_emit_signal(L, -1, "property::" #attr, 0);
-HANDLE_GEOM(x)
-HANDLE_GEOM(y)
-HANDLE_GEOM(width)
-HANDLE_GEOM(height)
-#undef HANDLE_GEOM
 
+    c->geometry.x = wgeom->x;
+    c->geometry.y = wgeom->y;
+    c->geometry.width = wgeom->width;
+    c->geometry.height = wgeom->height;
+
+    luaA_object_emit_signal(L, -1, "property::x", 0);
+    luaA_object_emit_signal(L, -1, "property::y", 0);
+    luaA_object_emit_signal(L, -1, "property::width", 0);
+    luaA_object_emit_signal(L, -1, "property::height", 0);
+    luaA_object_emit_signal(L, -1, "property::window", 0);
     luaA_object_emit_signal(L, -1, "property::geometry", 0);
 
     /* Set border width */
