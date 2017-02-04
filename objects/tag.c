@@ -46,6 +46,7 @@
  *        gap_single_client  = true,
  *        gap                = 15,
  *        screen             = s,
+ *        selected           = true,
  *    })
  *
  *    awful.tag.add("Second tag", {
@@ -53,6 +54,9 @@
  *        layout = awful.layout.suit.max,
  *        screen = s,
  *    })
+ *
+ * Note: the example above sets "First tag" to be selected explicitly,
+ * because otherwise you will find yourself without any selected tag.
  *
  * **Accessing tags**:
  *
