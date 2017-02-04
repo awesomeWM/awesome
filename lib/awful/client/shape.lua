@@ -87,48 +87,8 @@ end
 -- @function awful.client.shape.update.all
 -- @client c The client to act on
 function shape.update.all(c)
-    local shape_fun = c._shape
-
-    if not shape_fun then
-        c.shape_bounding = nil
-        c.shape_clip = nil
-        shape.update.bounding(c)
-        shape.update.clip(c)
-        return
-    end
-
-    local geo = c:geometry()
-    local bw = c.border_width
-
-    -- First handle the bounding shape (things including the border)
-    local img = cairo.ImageSurface(cairo.Format.A1, geo.width + 2*bw, geo.height + 2*bw)
-    local cr = cairo.Context(img)
-
-    -- We just draw the shape in its full size
-    shape_fun(cr, geo.width + 2*bw, geo.height + 2*bw)
-    cr:set_operator(cairo.Operator.SOURCE)
-    cr:fill()
-    c.shape_bounding = img._native
-    img:finish()
-
-    -- Now handle the clip shape (things excluding the border)
-    img = cairo.ImageSurface(cairo.Format.A1, geo.width, geo.height)
-    cr = cairo.Context(img)
-
-    -- We give the shape the same arguments as for the bounding shape and draw
-    -- it in its full size (the translate is to compensate for the smaller
-    -- surface)
-    cr:translate(-bw, -bw)
-    shape_fun(cr, geo.width + 2*bw, geo.height + 2*bw)
-    cr:set_operator(cairo.Operator.SOURCE)
-    cr:fill_preserve()
-    -- Now we remove an area of width 'bw' again around the shape (We use 2*bw
-    -- since half of that is on the outside and only half on the inside)
-    cr:set_source_rgba(0, 0, 0, 0)
-    cr:set_line_width(2*bw)
-    cr:stroke()
-    c.shape_clip = img._native
-    img:finish()
+    shape.update.bounding(c)
+    shape.update.clip(c)
 end
 
 --- Update a client's bounding shape from the shape the client set itself.
