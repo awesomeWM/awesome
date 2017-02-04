@@ -130,10 +130,9 @@ install:
     travis_run_in_fold() {
       travis_fold_start "$1"
       shift
-      "$@"
-      local result="$?"
+      "$@" || return
       travis_fold_end
-      return $result
+      return 0
     }
 script:
   - export CMAKE_ARGS="-DLUA_LIBRARY=${LUALIBRARY} -DLUA_INCLUDE_DIR=${LUAINCLUDE} -D OVERRIDE_VERSION=$AWESOME_VERSION -DSTRICT_TESTS=true"
