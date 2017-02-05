@@ -351,7 +351,7 @@ function menubar.refresh(scr)
     menubar.menu_gen.generate(function(entries)
         menubar.menu_entries = entries
         if instance then
-            menulist_update(nil, scr)
+            menulist_update(instance.query, scr)
         end
     end)
 end
@@ -408,6 +408,7 @@ function menubar.show(scr)
             wibox = wibox({ ontop = true }),
             widget = menubar.get(scr),
             prompt = awful.widget.prompt(),
+            query = nil,
         }
         local layout = wibox.layout.fixed.horizontal()
         layout:add(instance.prompt)
@@ -434,7 +435,7 @@ function menubar.show(scr)
 
     current_item = 1
     current_category = nil
-    menulist_update(nil, scr)
+    menulist_update(instance.query, scr)
 
     local prompt_args = menubar.prompt_args or {}
 
@@ -444,7 +445,10 @@ function menubar.show(scr)
         completion_callback = awful.completion.shell,
         history_path        = awful.util.get_cache_dir() .. "/history_menu",
         done_callback       = menubar.hide,
-        changed_callback    = function(query) menulist_update(query, scr) end,
+        changed_callback    = function(query)
+            instance.query = query
+            menulist_update(query, scr)
+        end,
         keypressed_callback = prompt_keypressed_callback
     }, {__index=prompt_args}))
 
