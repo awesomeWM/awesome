@@ -98,7 +98,7 @@ the `DISPLAY` environment variable is set correctly, e.g.:
 The configuration of awesome is done by creating a
 `$XDG_CONFIG_HOME/awesome/rc.lua` file, typically `~/.config/awesome/rc.lua`.
 
-An example configuration named `awesomerc.lua.in` is provided in the source.
+An example configuration named `awesomerc.lua` is provided in the source.
 
 ## Troubleshooting
 
