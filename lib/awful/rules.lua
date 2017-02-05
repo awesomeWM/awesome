@@ -1,6 +1,22 @@
 ---------------------------------------------------------------------------
 --- Apply rules to clients at startup.
 --
+-- All existing `client` properties can be used in rules. It is also possible
+-- to add random properties that will be later accessible as `c.property_name`
+-- (where `c` is a valid client object)
+--
+-- In addition to the existing properties, the following are supported:
+--
+-- * placement
+-- * honor_padding
+-- * honor_workarea
+-- * tag
+-- * new_tag
+-- * switchtotag
+-- * focus
+-- * titlebars_enabled
+-- * callback
+--
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2009 Julien Danjou
 -- @module awful.rules
