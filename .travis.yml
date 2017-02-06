@@ -88,6 +88,8 @@ install:
   - travis_retry sudo luarocks install busted
   # Install luacheck for "make check-qa".
   - if [ "$DO_CHECKQA" = 1 ]; then travis_retry sudo luarocks install luacheck; fi
+  # Install depgraph for "make check-qa".
+  - if [ "$DO_CHECKQA" = 1 ]; then travis_retry sudo luarocks install depgraph; fi
 
   # Install ldoc for building docs.
   - |

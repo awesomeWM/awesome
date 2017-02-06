@@ -381,6 +381,13 @@ add_custom_target(check-integration
     COMMENT "Running integration tests"
     USES_TERMINAL
     VERBATIM)
+add_custom_target(check-requires
+    lua "${CMAKE_SOURCE_DIR}/build-utils/check_for_invalid_requires.lua"
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    COMMENT "Checking use of require()"
+    USES_TERMINAL
+    VERBATIM)
+list(APPEND CHECK_QA_TARGETS check-requires)
 a_find_program(BUSTED_EXECUTABLE busted FALSE)
 if(BUSTED_EXECUTABLE)
     # Keep the arguments in sync with the version below!
