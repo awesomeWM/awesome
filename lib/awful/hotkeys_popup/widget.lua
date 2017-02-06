@@ -55,6 +55,38 @@ widget.hide_without_description = true
 widget.merge_duplicates = true
 
 
+--- Widget background color.
+-- @beautiful beautiful.hotkeys_bg
+
+--- Widget foreground color.
+-- @beautiful beautiful.hotkeys_fg
+
+--- Border width.
+-- @beautiful beautiful.hotkeys_border_width
+
+--- Border color.
+-- @beautiful beautiful.hotkeys_border_color
+
+--- Widget shape.
+-- @beautiful beautiful.hotkeys_shape
+-- @see gears.shape
+
+--- Foreground color used for hotkey modifiers (Ctrl, Alt, Super, etc).
+-- @beautiful beautiful.hotkeys_modifiers_fg
+
+--- Foreground color used for group and other labels.
+-- @beautiful beautiful.hotkeys_label_fg
+
+--- Main widget font.
+-- @beautiful beautiful.hotkeys_font
+
+--- Font used for hotkeys' descriptions.
+-- @beautiful beautiful.hotkeys_description_font
+
+--- Margin between hotkeys groups.
+-- @beautiful beautiful.hotkeys_group_margin
+
+
 --- Create an instance of widget with hotkeys help.
 -- @tparam[opt] table args Configuration options for the widget.
 -- @tparam[opt] boolean args.hide_without_description Don't show hotkeys without descriptions.
@@ -69,7 +101,7 @@ widget.merge_duplicates = true
 -- @tparam[opt] gears.shape args.shape Widget shape.
 -- @tparam[opt] string|lgi.Pango.FontDescription args.font Main widget font.
 -- @tparam[opt] string|lgi.Pango.FontDescription args.description_font Font used for hotkeys' descriptions.
--- @tparam[opt] color args.modifiers_fg Foreground color used for hotkey.
+-- @tparam[opt] color args.modifiers_fg Foreground color used for hotkey
 -- modifiers (Ctrl, Alt, Super, etc).
 -- @tparam[opt] color args.label_fg Foreground color used for group and other
 -- labels.
