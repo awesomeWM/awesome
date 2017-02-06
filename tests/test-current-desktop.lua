@@ -23,6 +23,7 @@ local function wait_for_current_desktop(tag)
             return true
         end
         print(string.format("Got _NET_CURRENT_DESKTOP = '%s', expected %d", value, idx))
+        return false
     end
 end
 
