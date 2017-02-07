@@ -55,36 +55,50 @@ widget.hide_without_description = true
 widget.merge_duplicates = true
 
 
---- Widget background color.
+--- Hotkeys widget background color.
 -- @beautiful beautiful.hotkeys_bg
+-- @tparam color hotkeys_bg
 
---- Widget foreground color.
+--- Hotkeys widget foreground color.
 -- @beautiful beautiful.hotkeys_fg
+-- @tparam color hotkeys_fg
 
---- Border width.
+--- Hotkeys widget border width.
 -- @beautiful beautiful.hotkeys_border_width
+-- @tparam int hotkeys_border_width
 
---- Border color.
+--- Hotkeys widget border color.
 -- @beautiful beautiful.hotkeys_border_color
+-- @tparam color hotkeys_border_color
 
---- Widget shape.
+--- Hotkeys widget shape.
 -- @beautiful beautiful.hotkeys_shape
+-- @tparam[opt] gears.shape hotkeys_shape
 -- @see gears.shape
 
 --- Foreground color used for hotkey modifiers (Ctrl, Alt, Super, etc).
 -- @beautiful beautiful.hotkeys_modifiers_fg
+-- @tparam color hotkeys_modifiers_fg
 
---- Foreground color used for group and other labels.
+--- Background color used for miscellaneous labels of hotkeys widget.
+-- @beautiful beautiful.hotkeys_label_bg
+-- @tparam color hotkeys_label_bg
+
+--- Foreground color used for hotkey groups and other labels.
 -- @beautiful beautiful.hotkeys_label_fg
+-- @tparam color hotkeys_label_fg
 
---- Main widget font.
+--- Main hotkeys widget font.
 -- @beautiful beautiful.hotkeys_font
+-- @tparam string|lgi.Pango.FontDescription hotkeys_font
 
 --- Font used for hotkeys' descriptions.
 -- @beautiful beautiful.hotkeys_description_font
+-- @tparam string|lgi.Pango.FontDescription hotkeys_description_font
 
 --- Margin between hotkeys groups.
 -- @beautiful beautiful.hotkeys_group_margin
+-- @tparam int hotkeys_group_margin
 
 
 --- Create an instance of widget with hotkeys help.
@@ -103,6 +117,7 @@ widget.merge_duplicates = true
 -- @tparam[opt] string|lgi.Pango.FontDescription args.description_font Font used for hotkeys' descriptions.
 -- @tparam[opt] color args.modifiers_fg Foreground color used for hotkey
 -- modifiers (Ctrl, Alt, Super, etc).
+-- @tparam[opt] color args.label_bg Background color used for miscellaneous labels.
 -- @tparam[opt] color args.label_fg Foreground color used for group and other
 -- labels.
 -- @tparam[opt] int args.group_margin Margin between hotkeys groups.
@@ -184,9 +199,12 @@ function widget.new(args)
         self.shape = args.shape or beautiful.hotkeys_shape
         self.modifiers_fg = args.modifiers_fg or
             beautiful.hotkeys_modifiers_fg or beautiful.bg_minimize or "#555555"
+        self.label_bg = args.label_bg or
+            beautiful.hotkeys_label_bg or self.fg
         self.label_fg = args.label_fg or
             beautiful.hotkeys_label_fg or self.bg
-        self.opacity = beautiful.notification_opacity or 1
+        self.opacity = args.opacity or
+            beautiful.hotkeys_opacity or 1
         self.font = args.font or
             beautiful.hotkeys_font or "Monospace Bold 9"
         self.description_font = args.description_font or
@@ -394,13 +412,13 @@ function widget.new(args)
         for _, item in ipairs(column_layouts) do
             if item.max_width > available_width_px then
                 previous_page_last_layout:add(
-                    self:_group_label("PgDn - Next Page", self.label_fg)
+                    self:_group_label("PgDn - Next Page", self.label_bg)
                 )
                 table.insert(pages, columns)
                 columns = wibox.layout.fixed.horizontal()
                 available_width_px = width - item.max_width
                 item.layout:insert(
-                    1, self:_group_label("PgUp - Prev Page", self.label_fg)
+                    1, self:_group_label("PgUp - Prev Page", self.label_bg)
                 )
             else
                 available_width_px = available_width_px - item.max_width
