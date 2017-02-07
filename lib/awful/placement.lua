@@ -291,6 +291,7 @@ local function store_geometry(d, reqtype)
     if not data[d][reqtype] then data[d][reqtype] = {} end
     data[d][reqtype] = d:geometry()
     data[d][reqtype].screen = d.screen
+    data[d][reqtype].sgeo = d.screen and d.screen.geometry or nil
     data[d][reqtype].border_width = d.border_width
 end
 
@@ -930,7 +931,7 @@ function placement.under_mouse(d, args)
     ngeo.x = math.floor(m_coords.x - ngeo.width  / 2)
     ngeo.y = math.floor(m_coords.y - ngeo.height / 2)
 
-    local bw = d.border_width or 0
+    local bw    = (not args.ignore_border_width) and d.border_width or 0
     ngeo.width  = ngeo.width  - 2*bw
     ngeo.height = ngeo.height - 2*bw
 
@@ -1034,7 +1035,7 @@ function placement.resize_to_mouse(d, args)
         pts.x_only and ngeo.y + ngeo.height or math.max(p2.y, p1.y)
     )
 
-    local bw = d.border_width or 0
+    local bw = (not args.ignore_border_width) and d.border_width or 0
 
     for _, a in ipairs {"width", "height"} do
         ngeo[a] = ngeo[a] - 2*bw
@@ -1084,7 +1085,7 @@ function placement.align(d, args)
 
     local sgeo = get_parent_geometry(d, args)
     local dgeo = geometry_common(d, args)
-    local bw   = d.border_width or 0
+    local bw   = (not args.ignore_border_width) and d.border_width or 0
 
     local pos  = align_map[args.position](
         sgeo.width ,
@@ -1169,7 +1170,7 @@ function placement.stretch(d, args)
     local sgeo = get_parent_geometry(d, args)
     local dgeo = geometry_common(d, args)
     local ngeo = geometry_common(d, args, nil, true)
-    local bw   = d.border_width or 0
+    local bw   = (not args.ignore_border_width) and d.border_width or 0
 
     if args.direction == "left" then
         ngeo.x      = sgeo.x
@@ -1231,7 +1232,7 @@ function placement.maximize(d, args)
 
     local sgeo = get_parent_geometry(d, args)
     local ngeo = geometry_common(d, args, nil, true)
-    local bw   = d.border_width or 0
+    local bw   = (not args.ignore_border_width) and d.border_width or 0
 
     if (not args.axis) or args.axis :match "vertical" then
         ngeo.y      = sgeo.y
@@ -1308,7 +1309,7 @@ function placement.scale(d, args)
         end
     end
 
-    local bw = d.border_width or 0
+    local bw = (not args.ignore_border_width) and d.border_width or 0
     ngeo.width  = ngeo.width  - 2*bw
     ngeo.height = ngeo.height - 2*bw
 
@@ -1422,11 +1423,32 @@ function placement.restore(d, args)
 
     if not memento then return false end
 
-    memento.screen = nil --TODO use it
+    local x, y = memento.x, memento.y
+
+    -- Some people consider that once moved to another screen, then
+    -- the memento needs to be upgraded. For now this is only true for
+    -- maximization until someone complains.
+    if memento.sgeo and memento.screen and args.context == "maximize"
+      and d.screen and get_screen(memento.screen) ~= get_screen(d.screen) then
+        -- Use the absolute geometry as the memento also does
+        local sgeo = get_screen(d.screen).geometry
+
+        x = sgeo.x + (memento.x - memento.sgeo.x)
+        y = sgeo.y + (memento.y - memento.sgeo.y)
+
+    end
 
     d.border_width = memento.border_width
 
-    d:geometry(memento)
+    -- Don't use the memento as it would be "destructive", since `x`, `y`
+    -- and `screen` have to be modified.
+    d:geometry {
+        x      = x,
+        y      = y,
+        width  = memento.width,
+        height = memento.height,
+    }
+
     return true
 end
 

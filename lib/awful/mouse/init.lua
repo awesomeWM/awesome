@@ -82,6 +82,7 @@ function mouse.client.move(c, snap, finished_cb) --luacheck: no unused args
 
     if not c
         or c.fullscreen
+        or c.maximized
         or c.type == "desktop"
         or c.type == "splash"
         or c.type == "dock" then
@@ -189,6 +190,7 @@ function mouse.client.resize(c, corner, args)
     if not c then return end
 
     if c.fullscreen
+        or c.maximized
         or c.type == "desktop"
         or c.type == "splash"
         or c.type == "dock" then

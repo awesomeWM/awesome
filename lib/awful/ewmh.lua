@@ -13,11 +13,20 @@ local util = require("awful.util")
 local aclient = require("awful.client")
 local aplace = require("awful.placement")
 local asuit = require("awful.layout.suit")
+local beautiful = require("beautiful")
 
 local ewmh = {
     generic_activate_filters    = {},
     contextual_activate_filters = {},
 }
+
+--- Honor the screen padding when maximizing.
+-- @beautiful beautiful.maximized_honor_padding
+-- @tparam[opt=true] boolean maximized_honor_padding
+
+--- Hide the border on fullscreen clients.
+-- @beautiful beautiful.fullscreen_hide_border
+-- @tparam[opt=true] boolean fullscreen_hide_border
 
 --- The list of all registered generic request::activate (focus stealing)
 -- filters. If a filter is added to only one context, it will be in
@@ -37,26 +46,24 @@ local ewmh = {
 
 --- Update a client's settings when its geometry changes, skipping signals
 -- resulting from calls within.
-local geometry_change_lock = false
-local function geometry_change(window)
-    if geometry_change_lock then return end
-    geometry_change_lock = true
+local repair_geometry_lock = false
+local function repair_geometry(window)
+    if repair_geometry_lock then return end
+    repair_geometry_lock = true
 
-    -- Fix up the geometry in case this window needs to cover the whole screen.
-    local bw = window.border_width or 0
-    local g = window.screen.workarea
-    if window.maximized_vertical then
-        window:geometry { height = g.height - 2*bw, y = g.y }
-    end
-    if window.maximized_horizontal then
-        window:geometry { width = g.width - 2*bw, x = g.x }
-    end
-    if window.fullscreen then
-        window.border_width = 0
-        window:geometry(window.screen.geometry)
+    -- Re-apply the geometry locking properties to what they should be.
+    for _, prop in ipairs {
+        "fullscreen", "maximized", "maximized_vertical", "maximized_horizontal"
+    } do
+        if window[prop] then
+            window:emit_signal("request::geometry", prop, {
+                store_geometry = false
+            })
+            break
+        end
     end
 
-    geometry_change_lock = false
+    repair_geometry_lock = false
 end
 
 --- Activate a window.
@@ -224,6 +231,7 @@ end
 local context_mapper = {
     maximized_vertical   = "maximize_vertically",
     maximized_horizontal = "maximize_horizontally",
+    maximized            = "maximize",
     fullscreen           = "maximize"
 }
 
@@ -264,7 +272,10 @@ function ewmh.geometry(c, context, hints)
         -- If the property is boolean and it correspond to the undo operation,
         -- restore the stored geometry.
         if state == false then
+            local original = repair_geometry_lock
+            repair_geometry_lock = true
             aplace.restore(c,{context=context})
+            repair_geometry_lock = original
             return
         end
 
@@ -274,7 +285,23 @@ function ewmh.geometry(c, context, hints)
             props.honor_workarea = honor_default
         end
 
+        if props.honor_padding == nil and props.honor_workarea and context:match("maximize") then
+            props.honor_padding = beautiful.maximized_honor_padding ~= false
+        end
+
+        if original_context == "fullscreen" and beautiful.fullscreen_hide_border ~= false then
+            props.ignore_border_width = true
+        end
+
         aplace[context](c, props)
+
+        -- Remove the border to get a "real" fullscreen.
+        if original_context == "fullscreen" and beautiful.fullscreen_hide_border ~= false then
+            local original = repair_geometry_lock
+            repair_geometry_lock = true
+            c.border_width = 0
+            repair_geometry_lock = original
+        end
     end
 end
 
@@ -282,11 +309,11 @@ client.connect_signal("request::activate", ewmh.activate)
 client.connect_signal("request::tag", ewmh.tag)
 client.connect_signal("request::urgent", ewmh.urgent)
 client.connect_signal("request::geometry", ewmh.geometry)
-client.connect_signal("property::border_width", geometry_change)
-client.connect_signal("property::geometry", geometry_change)
+client.connect_signal("property::border_width", repair_geometry)
+client.connect_signal("property::screen", repair_geometry)
 screen.connect_signal("property::workarea", function(s)
     for _, c in pairs(client.get(s)) do
-        geometry_change(c)
+        repair_geometry(c)
     end
 end)
 

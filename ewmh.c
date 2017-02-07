@@ -49,9 +49,9 @@ ewmh_client_update_hints(lua_State *L)
         state[i++] = _NET_WM_STATE_MODAL;
     if(c->fullscreen)
         state[i++] = _NET_WM_STATE_FULLSCREEN;
-    if(c->maximized_vertical)
+    if(c->maximized_vertical || c->maximized)
         state[i++] = _NET_WM_STATE_MAXIMIZED_VERT;
-    if(c->maximized_horizontal)
+    if(c->maximized_horizontal || c->maximized)
         state[i++] = _NET_WM_STATE_MAXIMIZED_HORZ;
     if(c->sticky)
         state[i++] = _NET_WM_STATE_STICKY;
@@ -220,6 +220,7 @@ ewmh_init_lua(void)
     luaA_class_connect_signal(L, &client_class, "property::fullscreen" , ewmh_client_update_hints);
     luaA_class_connect_signal(L, &client_class, "property::maximized_horizontal" , ewmh_client_update_hints);
     luaA_class_connect_signal(L, &client_class, "property::maximized_vertical" , ewmh_client_update_hints);
+    luaA_class_connect_signal(L, &client_class, "property::maximized" , ewmh_client_update_hints);
     luaA_class_connect_signal(L, &client_class, "property::sticky" , ewmh_client_update_hints);
     luaA_class_connect_signal(L, &client_class, "property::skip_taskbar" , ewmh_client_update_hints);
     luaA_class_connect_signal(L, &client_class, "property::above" , ewmh_client_update_hints);

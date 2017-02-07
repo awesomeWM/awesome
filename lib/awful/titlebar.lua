@@ -460,13 +460,11 @@ end
 -- @param c The client for which the button is wanted.
 function titlebar.widget.maximizedbutton(c)
     local widget = titlebar.widget.button(c, "maximized", function(cl)
-        return cl.maximized_horizontal or cl.maximized_vertical
+        return cl.maximized
     end, function(cl, state)
-        cl.maximized_horizontal = not state
-        cl.maximized_vertical = not state
+        cl.maximized = not state
     end)
-    c:connect_signal("property::maximized_vertical", widget.update)
-    c:connect_signal("property::maximized_horizontal", widget.update)
+    c:connect_signal("property::maximized", widget.update)
     return widget
 end
 
