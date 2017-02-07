@@ -146,6 +146,8 @@ table.insert(steps, function()
     return true
 end)
 
+
+
 local multi_screen_steps = {}
 
 -- Add a test client on each screen.
@@ -321,7 +323,9 @@ table.insert(multi_screen_steps, function()
     return true
 end)
 
-require("_multi_screen")(steps, multi_screen_steps)
+local ms = require("_multi_screen")
+ms.disable_wibox()
+ms(steps, multi_screen_steps)
 
 require("_runner").run_steps(steps)
 

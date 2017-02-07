@@ -517,6 +517,29 @@ local function add_steps(real_steps, new_steps)
     end
 end
 
+-- This is a very ugly hack to speed up the test. Luacov get exponentially
+-- slower / more memory hungry when it has more work to do in a single test.
+-- A lot of that work is building wibars and widgets for those screen. This
+-- has value when tried once (already covered by the test-screen-changes suit),
+-- but not done 180 times in a row. This code monkey-patch `wibox` with the
+-- intent of breaking it without causing errors. This way it stops doing too
+-- many things (resulting in a faster luacov execution)
+function module.disable_wibox()
+    local awful = require("awful")
+
+    setmetatable(wibox, {
+        __call = function() return {
+            geometry = function()
+                return{x=0, y=0, width=0, height=0}
+            end,
+            set_widget = function() end,
+            setup = function() return {} end
+        }
+    end })
+
+    awful.wibar = wibox
+end
+
 return setmetatable(module, {
                     __call = function(_,...) return add_steps(...) end
                 })
