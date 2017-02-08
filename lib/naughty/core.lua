@@ -569,6 +569,8 @@ function naughty.notify(args)
         -- Is this really an URI instead of a path?
         if type(icon) == "string" and string.sub(icon, 1, 7) == "file://" then
             icon = string.sub(icon, 8)
+            -- urldecode URI path
+            icon = string.gsub(icon, "%%(%x%x)", function(x) return string.char(tonumber(x, 16)) end )
         end
         -- try to guess icon if the provided one is non-existent/readable
         if type(icon) == "string" and not util.file_readable(icon) then
