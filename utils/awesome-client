@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Use bash's pipefail option to get errors during failure in a command
 # pipeline.  This is useful to get notified about an error from dbus-send
