@@ -4,6 +4,7 @@ local runner = require("_runner")
 local spawn = require("awful.spawn")
 
 local spawns_done = 0
+local async_spawns_done = 0
 local exit_yay, exit_snd = nil, nil
 
 -- * Using spawn with array is already covered by the test client.
@@ -40,6 +41,16 @@ local steps = {
 
     function(count)
         if count == 1 then
+            spawn.easy_async("echo yay", function(stdout)
+                if stdout:match("yay") then
+                    async_spawns_done = async_spawns_done + 1
+                end
+            end)
+            spawn.easy_async_with_shell("true && echo yay", function(stdout)
+                if stdout:match("yay") then
+                    async_spawns_done = async_spawns_done + 1
+                end
+            end)
             local steps_yay = 0
             spawn.with_line_callback("echo yay", {
                                      stdout = function(line)
@@ -90,9 +101,10 @@ local steps = {
         if spawns_done == 2 then
             assert(exit_yay == 0)
             assert(exit_snd == 42)
+            assert(async_spawns_done == 2)
             return true
         end
-    end,
+    end
 }
 
 runner.run_steps(steps)

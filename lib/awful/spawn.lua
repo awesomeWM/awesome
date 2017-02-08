@@ -321,14 +321,14 @@ end
 --- Asynchronously spawn a program and capture its output.
 -- (wraps `spawn.with_line_callback`).
 -- @tparam string|table cmd The command.
--- @tab callback Function with the following arguments
--- @tparam string callback.stdout Output on stdout.
--- @tparam string callback.stderr Output on stderr.
--- @tparam string callback.exitreason Exit Reason.
--- The reason can be "exit" or "signal".
--- @tparam integer callback.exitcode Exit code.
--- For "exit" reason it's the exit code.
--- For "signal" reason — the signal causing process termination.
+-- @function callback Function with the following arguments:
+--   @tparam string callback.stdout Output on stdout.
+--   @tparam string callback.stderr Output on stderr.
+--   @tparam string callback.exitreason Exit Reason.
+--   @tparam integer callback.exitcode Exit code.
+--   The exitreason argument can either be "exit" or "signal".
+--   For "exit" reason it's the exit code.
+--   For "signal" reason it's the signal causing process termination.
 -- @treturn[1] Integer the PID of the forked process.
 -- @treturn[2] string Error message.
 -- @see spawn.with_line_callback
@@ -368,6 +368,24 @@ function spawn.easy_async(cmd, callback)
         exit=exit_callback,
         output_done=output_done_callback
     })
+end
+
+--- Call spawn.easy_async with a shell.
+-- This calls `cmd` with `$SHELL -c` (via `awful.util.shell`).
+-- @tparam string|table cmd The command.
+-- @function callback Function with the following arguments:
+--   @tparam string callback.stdout Output on stdout.
+--   @tparam string callback.stderr Output on stderr.
+--   @tparam string callback.exitreason Exit Reason.
+--   @tparam integer callback.exitcode Exit code.
+--   The exitreason argument can either be "exit" or "signal".
+--   For "exit" reason it's the exit code.
+--   For "signal" reason it's the signal causing process termination.
+-- @treturn[1] Integer the PID of the forked process.
+-- @treturn[2] string Error message.
+-- @see spawn.with_line_callback
+function spawn.easy_async_with_shell(cmd, callback)
+    return spawn.easy_async({ util.shell, "-c", cmd or "" }, callback)
 end
 
 --- Read lines from a Gio input stream
