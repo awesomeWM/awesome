@@ -62,7 +62,8 @@ local watch = { mt = {} }
 --
 -- @param[opt=wibox.widget.textbox()] base_widget Base widget.
 --
--- @return The widget used by this watch
+-- @return The widget used by this watch.
+-- @return Its gears.timer.
 function watch.new(command, timeout, callback, base_widget)
     timeout = timeout or 5
     base_widget = base_widget or textbox()
@@ -79,7 +80,7 @@ function watch.new(command, timeout, callback, base_widget)
     end)
     t:start()
     t:emit_signal("timeout")
-    return base_widget
+    return base_widget, t
 end
 
 function watch.mt.__call(_, ...)
