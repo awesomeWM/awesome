@@ -583,6 +583,24 @@ function util.round(x)
     return floor(x + 0.5)
 end
 
+--- Format a table as a string, concatenating key/value pairs using `delim`.
+--
+-- It includes only values that are not empty (after being converted to string
+-- and trimmed on the right).
+-- @tab t Table to format, with key/value pairs as strings.
+-- @tparam string[opt=', '] delim Delimiter.
+-- @treturn[opt] string The concatenated string, or nil.
+function util.concat_table(t, delim)
+    local r = {}
+    for k,v in pairs(t) do
+        v = tostring(v):gsub('%s*$', '')
+        if #v > 0 then
+            table.insert(r, string.format('<b>%s:</b> %s', k, v))
+        end
+    end
+    return #r > 0 and table.concat(r, delim or ', ')
+end
+
 return util
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
