@@ -132,6 +132,7 @@ local function load_count_table()
                 count_table[name] = count
             end
         end
+        count_file:close()
     end
 
     return count_table
@@ -150,6 +151,7 @@ local function write_count_table(count_table)
             io.write(str)
         end
         io.flush()
+        count_file:close()
     end
 end
 
