@@ -118,22 +118,26 @@ local function label(o)
 end
 
 local function load_count_table()
+    if instance.count_table then
+        return instance.count_table
+    end
+    instance.count_table = {}
     local count_file_name = awful.util.getdir("cache") .. "/menu_count_file"
-    local count_table = {}
     local count_file = io.open (count_file_name, "r")
     if count_file then
         for line in count_file:lines() do
             local name, count = string.match(line, "([^;]+);([^;]+)")
             if name ~= nil and count ~= nil then
-                count_table[name] = count
+                instance.count_table[name] = count
             end
         end
         count_file:close()
     end
-    return count_table
+    return instance.count_table
 end
 
 local function write_count_table(count_table)
+    count_table = count_table or instance.count_table
     local count_file_name = awful.util.getdir("cache") .. "/menu_count_file"
     local count_file = io.open (count_file_name, "w")
     for name, count in pairs(count_table) do
@@ -156,21 +160,13 @@ local function perform_action(o)
         return true, "", new_prompt
     elseif shownitems[current_item].cmdline then
         awful.spawn(shownitems[current_item].cmdline)
-
         -- load count_table from cache file
         local count_table = load_count_table()
-
         -- increase count
         local curname = shownitems[current_item].name
-        if count_table[curname] ~= nil then
-            count_table[curname] = count_table[curname] + 1
-        else
-            count_table[curname] = 1
-        end
-
+        count_table[curname] = (count_table[curname] or 0) + 1
         -- write updated count table to cache file
         write_count_table(count_table)
-
         -- Let awful.prompt execute dummy exec_callback and
         -- done_callback to stop the keygrabber properly.
         return false
@@ -234,7 +230,6 @@ local function menulist_update(scr)
     -- displayed first. Afterwards the non-category entries are added.
     -- All entries are weighted according to the number of times they
     -- have been executed previously (stored in count_table).
-
     local count_table = load_count_table()
     local command_list = {}
 
@@ -399,6 +394,7 @@ function menubar.show(scr)
             widget = menubar.get(scr),
             prompt = awful.widget.prompt(),
             query = nil,
+            count_table = nil,
         }
         local layout = wibox.layout.fixed.horizontal()
         layout:add(instance.prompt)
