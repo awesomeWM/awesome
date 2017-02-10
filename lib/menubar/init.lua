@@ -119,14 +119,10 @@ end
 
 local function load_count_table()
     local count_file_name = awful.util.getdir("cache") .. "/menu_count_file"
-
-    local count_file = io.open (count_file_name, "r")
     local count_table = {}
-
-    -- read weight file
+    local count_file = io.open (count_file_name, "r")
     if count_file then
-        io.input (count_file)
-        for line in io.lines() do
+        for line in count_file:lines() do
             local name, count = string.match(line, "([^;]+);([^;]+)")
             if name ~= nil and count ~= nil then
                 count_table[name] = count
@@ -134,25 +130,17 @@ local function load_count_table()
         end
         count_file:close()
     end
-
     return count_table
 end
 
 local function write_count_table(count_table)
     local count_file_name = awful.util.getdir("cache") .. "/menu_count_file"
-
     local count_file = io.open (count_file_name, "w")
-
-    if count_file then
-        io.output (count_file)
-
-        for name, count in pairs(count_table) do
-            local str = string.format("%s;%d\n", name, count)
-            io.write(str)
-        end
-        io.flush()
-        count_file:close()
+    for name, count in pairs(count_table) do
+        local str = string.format("%s;%d\n", name, count)
+        count_file:write(str)
     end
+    count_file:close()
 end
 
 --- Perform an action for the given menu item.
