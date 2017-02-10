@@ -459,6 +459,7 @@ end
 function menubar.hide()
     if instance then
         instance.wibox.visible = false
+        instance.query = nil
     end
 end
 
