@@ -55,21 +55,22 @@ end
 
 --- Create a prompt widget which will launch a command.
 --
--- @param args Arguments table. "prompt" is the prompt to use.
--- @return A launcher widget.
+-- @tparam table args Prompt arguments.
+-- @tparam[opt="Run: "] string args.prompt Prompt text.
+-- @tparam[opt=`beautiful.prompt_bg` or `beautiful.bg_normal`] color args.bg Prompt background color.
+-- @tparam[opt=`beautiful.prompt_fg` or `beautiful.fg_normal`] color args.fg Prompt foreground color.
+-- @return An instance of prompt widget, inherits from `wibox.container.background`.
 -- @function awful.widget.prompt
 function widgetprompt.new(args)
     args = args or {}
-    local widget = textbox()
     local promptbox = background()
-
-    promptbox.widget = widget
+    promptbox.widget = textbox()
     promptbox.widget:set_ellipsize("start")
     promptbox.run = run
     promptbox.spawn_and_handle_error = spawn_and_handle_error
     promptbox.prompt = args.prompt or "Run: "
-    promptbox.fg = beautiful.prompt_fg or beautiful.fg_normal
-    promptbox.bg = beautiful.prompt_bg or beautiful.bg_normal
+    promptbox.fg = args.fg or beautiful.prompt_fg or beautiful.fg_normal
+    promptbox.bg = args.bg or beautiful.prompt_bg or beautiful.bg_normal
     return promptbox
 end
 
