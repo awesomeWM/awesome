@@ -83,7 +83,7 @@ function(escape_string variable content escaped_content line_prefix)
     set(tmp_output ${content})
     foreach (LINE ${var_lines})
         if(NOT LINE MATCHES "^.*--DOC_[A-Z]+")
-            set(tmp_output ${tmp_output}\n--${line_prefix}${LINE})
+            set(tmp_output ${tmp_output}\n${DOC_LINE_PREFIX}${line_prefix}${LINE})
         endif()
     endforeach()
 
@@ -117,8 +117,8 @@ function(extract_header variable pre_output post_output)
         endif()
     endforeach()
 
-    set(${post_output} "${tmp_post_output}\n--" PARENT_SCOPE)
-    set(${pre_output} "${tmp_pre_output}\n--" PARENT_SCOPE)
+    set(${post_output} "${tmp_post_output}\n${DOC_LINE_PREFIX}" PARENT_SCOPE)
+    set(${pre_output} "${tmp_pre_output}\n${DOC_LINE_PREFIX}" PARENT_SCOPE)
 endfunction()
 
 # Read a code file and convert it to ldoc usage example.
@@ -169,6 +169,19 @@ endfunction()
 function(run_test test_path namespace escaped_content)
     find_template(template "${test_path}")
 
+    file(READ ${test_path} tmp_content)
+
+    # Add "--" in front of each line. This is required for method doc, but not
+    # for documentation pages
+    if(NOT tmp_content MATCHES "--DOC_NO_DASH")
+        set(DOC_LINE_PREFIX "--")
+    endif()
+
+    # Do not use the @usage tag, but 4 spaces.
+    if(NOT tmp_content MATCHES "--DOC_NO_USAGE")
+        set(DOC_BLOCK_PREFIX "@usage")
+    endif()
+
     # Get the file name without the extension.
     get_filename_component(${test_path} TEST_FILE_NAME NAME)
     set(IMAGE_PATH "${IMAGE_DIR}/AUTOGEN${namespace}_${TEST_FILE_NAME}")
@@ -218,7 +231,7 @@ function(run_test test_path namespace escaped_content)
     # documentation under the image.
     if(NOT ${TEST_OUTPUT} STREQUAL "")
         set(TEST_DOC_CONTENT
-            "${TEST_DOC_CONTENT}\n--\n--**Usage example output**:\n--"
+            "${TEST_DOC_CONTENT}\n${DOC_LINE_PREFIX}\n${DOC_LINE_PREFIX}**Usage example output**:\n${DOC_LINE_PREFIX}"
         )
 
         # Markdown requires an empty line before and after, and 4 spaces.
@@ -226,22 +239,16 @@ function(run_test test_path namespace escaped_content)
             "\n${TEST_OUTPUT}"
             "${TEST_DOC_CONTENT}" TEST_DOC_CONTENT "    "
         )
-        set(TEST_DOC_CONTENT "${TEST_DOC_CONTENT}\n--")
+        set(TEST_DOC_CONTENT "${TEST_DOC_CONTENT}\n${DOC_LINE_PREFIX}")
     endif()
 
     # If there is some @* content, append it.
     set(TEST_DOC_CONTENT "${TEST_DOC_CONTENT}${TEST_POST_HEADER}")
 
     # Only add it if there is something to display.
-    if(NOT ${TEST_CODE} STREQUAL "\n--")
-        # Do not use the @usage tag, but 4 spaces.
-        file(READ ${test_path} tmp_content)
-        if(NOT tmp_content MATCHES "--DOC_NO_USAGE")
-            set(DOC_PREFIX "@usage")
-        endif()
-
+    if(NOT ${TEST_CODE} STREQUAL "\n${DOC_LINE_PREFIX}")
         escape_string(
-            " ${DOC_PREFIX}"
+            " ${DOC_BLOCK_PREFIX}"
             "${TEST_DOC_CONTENT}" TEST_DOC_CONTENT ""
         )
 
