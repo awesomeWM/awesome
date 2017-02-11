@@ -231,8 +231,8 @@ end
 --- Update the menubar according to the command entered by user.
 -- @tparam str query Search query.
 -- @tparam number|screen scr Screen
-local function menulist_update(query, scr)
-    query = query or ""
+local function menulist_update(scr)
+    local query = instance.query or ""
     shownitems = {}
     local pattern = awful.util.query_to_pattern(query)
 
@@ -351,7 +351,7 @@ function menubar.refresh(scr)
     menubar.menu_gen.generate(function(entries)
         menubar.menu_entries = entries
         if instance then
-            menulist_update(instance.query, scr)
+            menulist_update(scr)
         end
     end)
 end
@@ -435,7 +435,7 @@ function menubar.show(scr)
 
     current_item = 1
     current_category = nil
-    menulist_update(instance.query, scr)
+    menulist_update(scr)
 
     local prompt_args = menubar.prompt_args or {}
 
@@ -447,7 +447,7 @@ function menubar.show(scr)
         done_callback       = menubar.hide,
         changed_callback    = function(query)
             instance.query = query
-            menulist_update(query, scr)
+            menulist_update(scr)
         end,
         keypressed_callback = prompt_keypressed_callback
     }, {__index=prompt_args}))
@@ -459,6 +459,7 @@ end
 function menubar.hide()
     if instance then
         instance.wibox.visible = false
+        instance.query = nil
     end
 end
 
