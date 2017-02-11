@@ -56,6 +56,10 @@ there is an `s` variable represent to define the current screen. Any Lua
 logic expression can be used as long as it returns a valid widget or a
 declarative layout, or `nil`.
 
+### Composite widgets
+
+@DOC_wibox_widget_progressbar_encapsulation_EXAMPLE@
+
 
 ### Define widgets inline and place them
 
