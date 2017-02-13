@@ -129,6 +129,7 @@ local debug = require('gears.debug')
 local gtable = require("gears.table")
 local gcolor = require("gears.color")
 local gstring = require("gears.string")
+local gfs = require("gears.filesystem")
 
 local prompt = {}
 
@@ -216,7 +217,7 @@ local function history_save(id)
             for d in id:gmatch(".-/") do
                 i = i + #d
             end
-            util.mkdir(id:sub(1, i - 1))
+            gfs.mkdir(id:sub(1, i - 1))
             f = assert(io.open(id, "w"))
         end
         for i = 1, math.min(#data.history[id].table, data.history[id].max) do

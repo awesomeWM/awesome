@@ -21,6 +21,7 @@ local button = require("awful.button")
 local screen = require("awful.screen")
 local util = require("awful.util")
 local gtable = require("gears.table")
+local gfs = require("gears.filesystem")
 local bt = require("beautiful")
 local wibox = require("wibox")
 local surface = require("gears.surface")
@@ -648,7 +649,7 @@ function naughty.notify(args)
             icon = string.gsub(icon, "%%(%x%x)", function(x) return string.char(tonumber(x, 16)) end )
         end
         -- try to guess icon if the provided one is non-existent/readable
-        if type(icon) == "string" and not util.file_readable(icon) then
+        if type(icon) == "string" and not gfs.file_readable(icon) then
             icon = util.geticonpath(icon, naughty.config.icon_formats, naughty.config.icon_dirs, icon_size) or icon
         end
 

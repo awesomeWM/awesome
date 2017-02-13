@@ -18,8 +18,8 @@ local gtable = require("gears.table")
 local string = string
 local gstring = require("gears.string")
 local grect = require("gears.geometry").rectangle
-local Gio = require("lgi").Gio
 local gcolor = require("gears.color")
+local gfs = require("gears.filesystem")
 local capi =
 {
     awesome = awesome,
@@ -126,10 +126,14 @@ function util.cycle(t, i)
 end
 
 --- Create a directory
+-- @deprecated mkdir
 -- @param dir The directory.
 -- @return mkdir return code
+-- @see gears.filesystem
 function util.mkdir(dir)
-    return os.execute("mkdir -p " .. dir)
+    util.deprecate("gears.filesystem.mkdir", {deprecated_in=5})
+
+    return gfs.mkdir(dir)
 end
 
 --- Eval Lua code.
@@ -188,55 +192,77 @@ function util.restart()
 end
 
 --- Get the config home according to the XDG basedir specification.
+-- @deprecated get_xdg_config_home
 -- @return the config home (XDG_CONFIG_HOME) with a slash at the end.
+-- @see gears.filesystem
 function util.get_xdg_config_home()
-    return (os.getenv("XDG_CONFIG_HOME") or os.getenv("HOME") .. "/.config") .. "/"
+    util.deprecate("gears.filesystem.get_xdg_config_home", {deprecated_in=5})
+
+    return gfs.get_xdg_config_home()
 end
 
 --- Get the cache home according to the XDG basedir specification.
+-- @deprecated get_xdg_cache_home
 -- @return the cache home (XDG_CACHE_HOME) with a slash at the end.
+-- @see gears.filesystem
 function util.get_xdg_cache_home()
-    return (os.getenv("XDG_CACHE_HOME") or os.getenv("HOME") .. "/.cache") .. "/"
+    util.deprecate("gears.filesystem.get_xdg_cache_home", {deprecated_in=5})
+
+    return gfs.get_xdg_cache_home()
 end
 
 --- Get the path to the user's config dir.
 -- This is the directory containing the configuration file ("rc.lua").
+-- @deprecated get_configuration_dir
 -- @return A string with the requested path with a slash at the end.
+-- @see gears.filesystem
 function util.get_configuration_dir()
-    return capi.awesome.conffile:match(".*/") or "./"
+    util.deprecate("gears.filesystem.get_configuration_dir", {deprecated_in=5})
+
+    return gfs.get_configuration_dir()
 end
 
 --- Get the path to a directory that should be used for caching data.
+-- @deprecated get_cache_dir
 -- @return A string with the requested path with a slash at the end.
+-- @see gears.filesystem
 function util.get_cache_dir()
-    return util.get_xdg_cache_home() .. "awesome/"
+    util.deprecate("gears.filesystem.get_cache_dir", {deprecated_in=5})
+
+    return gfs.get_cache_dir()
 end
 
 --- Get the path to the directory where themes are installed.
+-- @deprecated get_themes_dir
 -- @return A string with the requested path with a slash at the end.
+-- @see gears.filesystem
 function util.get_themes_dir()
-    return (os.getenv('AWESOME_THEMES_PATH') or awesome.themes_path) .. "/"
+    util.deprecate("gears.filesystem.get_themes_dir", {deprecated_in=5})
+
+    return gfs.get_themes_dir()
 end
 
 --- Get the path to the directory where our icons are installed.
+-- @deprecated get_awesome_icon_dir
 -- @return A string with the requested path with a slash at the end.
+-- @see gears.filesystem
 function util.get_awesome_icon_dir()
-    return (os.getenv('AWESOME_ICON_PATH') or awesome.icon_path) .. "/"
+    util.deprecate("gears.filesystem.get_awesome_icon_dir", {deprecated_in=5})
+
+    return gfs.get_awesome_icon_dir()
 end
 
 --- Get the user's config or cache dir.
 -- It first checks XDG_CONFIG_HOME / XDG_CACHE_HOME, but then goes with the
 -- default paths.
+-- @deprecated getdir
 -- @param d The directory to get (either "config" or "cache").
 -- @return A string containing the requested path.
+-- @see gears.filesystem
 function util.getdir(d)
-    if d == "config" then
-        -- No idea why this is what is returned, I recommend everyone to use
-        -- get_configuration_dir() instead
-        return util.get_xdg_config_home() .. "awesome/"
-    elseif d == "cache" then
-        return util.get_cache_dir()
-    end
+    util.deprecate("gears.filesystem.get_dir", {deprecated_in=5})
+
+    return gfs.get_dir(d)
 end
 
 --- Search for an icon and return the full path.
@@ -256,13 +282,13 @@ function util.geticonpath(iconname, exts, dirs, size)
         local icon
         for _, e in pairs(exts) do
             icon = d .. iconname .. '.' .. e
-            if util.file_readable(icon) then
+            if gfs.file_readable(icon) then
                 return icon
             end
             if size then
                 for _, t in pairs(icontypes) do
                     icon = string.format("%s%ux%u/%s/%s.%s", d, size, size, t, iconname, e)
-                    if util.file_readable(icon) then
+                    if gfs.file_readable(icon) then
                         return icon
                     end
                 end
@@ -271,33 +297,37 @@ function util.geticonpath(iconname, exts, dirs, size)
     end
 end
 
---- Check if a file exists, is not readable and not a directory.
+--- Check if a file exists, is readable and not a directory.
+-- @deprecated file_readable
 -- @param filename The file path.
 -- @return True if file exists and is readable.
+-- @see gears.filesystem
 function util.file_readable(filename)
-    local gfile = Gio.File.new_for_path(filename)
-    local gfileinfo = gfile:query_info("standard::type,access::can-read",
-                                       Gio.FileQueryInfoFlags.NONE)
-    return gfileinfo and gfileinfo:get_file_type() ~= "DIRECTORY" and
-        gfileinfo:get_attribute_boolean("access::can-read")
+    util.deprecate("gears.filesystem.file_readable", {deprecated_in=5})
+
+    return gfs.file_readable(filename)
 end
 
 --- Check if a path exists, is readable and is a directory.
+-- @deprecated dir_readable
 -- @tparam string path The directory path.
 -- @treturn boolean True if dir exists and is readable.
+-- @see gears.filesystem
 function util.dir_readable(path)
-    local gfile = Gio.File.new_for_path(path)
-    local gfileinfo = gfile:query_info("standard::type,access::can-read",
-                                       Gio.FileQueryInfoFlags.NONE)
-    return gfileinfo and gfileinfo:get_file_type() == "DIRECTORY" and
-        gfileinfo:get_attribute_boolean("access::can-read")
+    util.deprecate("gears.filesystem.dir_readable", {deprecated_in=5})
+
+    return gfs.dir_readable(path)
 end
 
 --- Check if a path is a directory.
+-- @deprecated is_dir
 -- @tparam string path
 -- @treturn bool True if path exists and is a directory.
+-- @see gears.filesystem
 function util.is_dir(path)
-    return Gio.File.new_for_path(path):query_file_type({}) == "DIRECTORY"
+    util.deprecate("gears.filesystem.is_dir", {deprecated_in=5})
+
+    return gfs.is_dir(path)
 end
 
 --- Return all subsets of a specific set.

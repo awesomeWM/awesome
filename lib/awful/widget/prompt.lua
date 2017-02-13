@@ -21,7 +21,7 @@
 local setmetatable = setmetatable
 
 local completion = require("awful.completion")
-local util = require("awful.util")
+local gfs = require("gears.filesystem")
 local spawn = require("awful.spawn")
 local prompt = require("awful.prompt")
 local beautiful = require("beautiful")
@@ -39,7 +39,7 @@ local function run(promptbox)
         prompt              = promptbox.prompt,
         textbox             = promptbox.widget,
         completion_callback = completion.shell,
-        history_path        = util.get_cache_dir() .. "/history",
+        history_path        = gfs.get_cache_dir() .. "/history",
         exe_callback        = function (...)
             promptbox:spawn_and_handle_error(...)
         end,
