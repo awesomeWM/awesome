@@ -108,7 +108,7 @@ local function get_position(wb)
     return wb._position or "top"
 end
 
-local function set_position(wb, position)
+local function set_position(wb, position, skip_reattach)
     -- Detach first to avoid any uneeded callbacks
     if wb.detach_callback then
         wb.detach_callback()
@@ -137,16 +137,20 @@ local function set_position(wb, position)
         wb.width = math.ceil(beautiful.get_font_height(wb.font) * 1.5)
     end
 
-    -- Changing the position will also cause the other margins to be invalidated.
-    -- For example, adding a wibar to the top will change the margins of any left
-    -- or right wibars. To solve, this, they need to be re-attached.
-    reattach(wb)
-
     -- Set the new position
     wb._position = position
 
     -- Attach to the new position
     attach(wb, position)
+
+    -- A way to skip reattach is required when first adding a wibar as it's not
+    -- in the `wiboxes` table yet and can't be added until it's attached.
+    if not skip_reattach then
+        -- Changing the position will also cause the other margins to be invalidated.
+        -- For example, adding a wibar to the top will change the margins of any left
+        -- or right wibars. To solve, this, they need to be re-attached.
+        reattach(wb)
+    end
 end
 
 --- Stretch the wibar.
@@ -350,9 +354,15 @@ function awfulwibar.new(arg)
 
     if arg.visible == nil then w.visible = true end
 
-    w:set_position(position)
+    -- `w` needs to be inserted in `wiboxes` before reattach or its own offset
+    -- will not be taken into account by the "older" wibars when `reattach` is
+    -- called. `skip_reattach` is required.
+    w:set_position(position, true)
 
     table.insert(wiboxes, w)
+
+    -- Force all the wibars to be moved
+    reattach(w)
 
     w:connect_signal("property::visible", function() reattach(w) end)
 
