@@ -74,13 +74,13 @@ function util.deprecate_class(fallback, old_name, new_name)
     local message = old_name.." has been renamed to "..new_name
 
     local function call(_,...)
-        util.deprecate(message)
+        util.deprecate(message, {raw = true})
 
         return fallback(...)
     end
 
     local function index(_, k)
-        util.deprecate(message)
+        util.deprecate(message, {raw = true})
 
         return fallback[k]
     end
