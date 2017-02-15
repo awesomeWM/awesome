@@ -238,6 +238,17 @@ function mouse.resize_handler(c, context, hints)
         local lay = t and t.layout or nil
 
         if (lay and lay == layout.suit.floating) or c.floating then
+            if c.maximized then
+                return
+            end
+            if c.maximized_vertical then
+                hints.y = nil
+                hints.height = nil
+            end
+            if c.maximized_horizontal then
+                hints.x = nil
+                hints.width = nil
+            end
             c:geometry {
                 x      = hints.x,
                 y      = hints.y,
