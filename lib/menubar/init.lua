@@ -215,7 +215,6 @@ local function get_current_page(all_items, query, scr)
 end
 
 --- Update the menubar according to the command entered by user.
--- @tparam str query Search query.
 -- @tparam number|screen scr Screen
 local function menulist_update(scr)
     local query = instance.query or ""
