@@ -231,30 +231,16 @@ end
 -- @tparam string context The context
 -- @tparam[opt={}] table hints The hints to pass to the handler
 function mouse.resize_handler(c, context, hints)
-    if hints and context and context:find("mouse.*") then
+    if hints and context and context:find("mouse.*")
+            and not hints.from_mouse_resize_handler then
         -- This handler only handle the floating clients. If the client is tiled,
         -- then it let the layouts handle it.
         local t = c.screen.selected_tag
         local lay = t and t.layout or nil
 
         if (lay and lay == layout.suit.floating) or c.floating then
-            if c.maximized then
-                return
-            end
-            if c.maximized_vertical then
-                hints.y = nil
-                hints.height = nil
-            end
-            if c.maximized_horizontal then
-                hints.x = nil
-                hints.width = nil
-            end
-            c:geometry {
-                x      = hints.x,
-                y      = hints.y,
-                width  = hints.width,
-                height = hints.height,
-            }
+            hints.from_mouse_resize_handler = true
+            c:emit_signal("request::geometry", context, hints)
         elseif lay and lay.resize_handler then
             lay.resize_handler(c, context, hints)
         end

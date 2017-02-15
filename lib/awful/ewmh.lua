@@ -232,7 +232,10 @@ local context_mapper = {
     maximized_vertical   = "maximize_vertically",
     maximized_horizontal = "maximize_horizontally",
     maximized            = "maximize",
-    fullscreen           = "maximize"
+    fullscreen           = "maximize",
+    -- TODO: more?!
+    ["mouse.move"]       = "apply_geometry",
+    ["mouse.resize"]     = "apply_geometry"
 }
 
 --- Move and resize the client.
@@ -251,15 +254,32 @@ function ewmh.geometry(c, context, hints)
         return
     end
 
+    local props = util.table.clone(hints or {}, false)
+    props.store_geometry = props.store_geometry==nil and true or props.store_geometry
+
+    -- Handle maximize modes that can affect the geometry.
+    -- TODO: fullscreen, too?!
+    if c.maximized and context ~= "maximized" then
+        return
+    end
+    if c.maximized_horizontal and context ~= "maximized_horizontal" then
+        props.width = nil
+        props.x = nil
+    end
+    if c.maximized_vertical and context ~= "maximized_vertical" then
+        props.height = nil
+        props.y = nil
+    end
+    if not props.height and not props.width and not props.x and not props.y then
+        return
+    end
+
     context = context or ""
 
     local original_context = context
 
     -- Now, map it to something useful
     context = context_mapper[context] or context
-
-    local props = util.table.clone(hints or {}, false)
-    props.store_geometry = props.store_geometry==nil and true or props.store_geometry
 
     -- If it is a known placement function, then apply it, otherwise let
     -- other potential handler resize the client (like in-layout resize or
