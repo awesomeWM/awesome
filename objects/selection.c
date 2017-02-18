@@ -169,21 +169,12 @@ selection_push_string(lua_State *L, xcb_get_property_reply_t *property)
 }
 
 static int
-selection_push_unknown(lua_State *L, xcb_selection_notify_event_t *notify, xcb_get_property_reply_t *property)
-{
-    lua_pushstring(L, "Unknown/unimplemented property type");
-    return 1;
-}
-
-static int
 selection_push_notify(lua_State *L, xcb_selection_notify_event_t *notify, xcb_get_property_reply_t *property)
 {
     if(property->type == XCB_ATOM_ATOM && property->format == 32)
         return selection_push_atom(L, property);
-    if((property->type == UTF8_STRING || property->type == XCB_ATOM_STRING ||
-                property->type == COMPOUND_TEXT) && property->format == 8)
-        return selection_push_string(L, property);
-    return selection_push_unknown(L, notify, property);
+    /* TODO: Handle INCR */
+    return selection_push_string(L, property);
 }
 
 bool
