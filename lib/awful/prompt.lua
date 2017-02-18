@@ -473,45 +473,19 @@ function prompt.run(args, textbox, exe_callback, completion_callback,
     local highlighter = args.highlighter
     local hooks = {}
 
-    -- A function with 9 parameters deserve to die
-    if textbox then
-        util.deprecate("Use args.textbox instead of the textbox parameter")
+    local deprecated = function(name)
+        util.deprecate(string.format(
+            'awful.prompt.run: the argument %s is deprecated, please use args.%s instead',
+            name, name), {raw=true})
     end
-    if exe_callback then
-        util.deprecate(
-            "Use args.exe_callback instead of the exe_callback parameter"
-        )
-    end
-    if completion_callback then
-        util.deprecate(
-            "Use args.completion_callback instead of the completion_callback parameter"
-        )
-    end
-    if history_path then
-        util.deprecate(
-            "Use args.history_path instead of the history_path parameter"
-        )
-    end
-    if history_max then
-        util.deprecate(
-            "Use args.history_max instead of the history_max parameter"
-        )
-    end
-    if done_callback then
-        util.deprecate(
-            "Use args.done_callback instead of the done_callback parameter"
-        )
-    end
-    if changed_callback then
-        util.deprecate(
-            "Use args.changed_callback instead of the changed_callback parameter"
-        )
-    end
-    if keypressed_callback then
-        util.deprecate(
-            "Use args.keypressed_callback instead of the keypressed_callback parameter"
-        )
-    end
+    if textbox             then deprecated('textbox') end
+    if exe_callback        then deprecated('exe_callback') end
+    if completion_callback then deprecated('completion_callback') end
+    if history_path        then deprecated('history_path') end
+    if history_max         then deprecated('history_max') end
+    if done_callback       then deprecated('done_callback') end
+    if changed_callback    then deprecated('changed_callback') end
+    if keypressed_callback then deprecated('keypressed_callback') end
 
     -- This function has already an absurd number of parameters, allow them
     -- to be set using the args to avoid a "nil, nil, nil, nil, foo" scenario
