@@ -19,6 +19,7 @@ return
     textclock = require("awful.widget.textclock");
     keyboardlayout = require("awful.widget.keyboardlayout");
     watch = require("awful.widget.watch");
+    only_on_screen = require("awful.widget.only_on_screen");
 }
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
