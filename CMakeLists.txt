@@ -74,6 +74,7 @@ set(AWE_SRCS
     ${BUILD_DIR}/objects/drawin.c
     ${BUILD_DIR}/objects/key.c
     ${BUILD_DIR}/objects/screen.c
+    ${BUILD_DIR}/objects/selection.c
     ${BUILD_DIR}/objects/tag.c
     ${BUILD_DIR}/objects/window.c)
 

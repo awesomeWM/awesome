@@ -24,6 +24,7 @@
 #include "property.h"
 #include "objects/tag.h"
 #include "objects/drawin.h"
+#include "objects/selection.h"
 #include "xwindow.h"
 #include "ewmh.h"
 #include "objects/client.h"
@@ -963,6 +964,30 @@ event_handle_selectionclear(xcb_selection_clear_event_t *ev)
     }
 }
 
+static void
+event_handle_selectionnotify(xcb_selection_notify_event_t *ev)
+{
+    lua_State *L = globalconf_get_lua_State();
+    foreach(reference, globalconf.active_selections)
+    {
+        lua_rawgeti(L, LUA_REGISTRYINDEX, *reference);
+        selection_t *selection = (void *) lua_topointer(L, -1);
+
+        if(ev->requestor == selection->window)
+        {
+            if (selection_handle_notify(L, -1, ev))
+            {
+                luaL_unref(L, LUA_REGISTRYINDEX, *reference);
+                int_array_remove(&globalconf.active_selections, reference);
+            }
+
+            lua_pop(L, 1);
+            break;
+        }
+        lua_pop(L, 1);
+    }
+}
+
 /** \brief awesome xerror function.
  * There's no way to check accesses to destroyed windows, thus those cases are
  * ignored (especially on UnmapNotify's).
@@ -1056,6 +1081,7 @@ void event_handle(xcb_generic_event_t *event)
         EVENT(XCB_REPARENT_NOTIFY, event_handle_reparentnotify);
         EVENT(XCB_UNMAP_NOTIFY, event_handle_unmapnotify);
         EVENT(XCB_SELECTION_CLEAR, event_handle_selectionclear);
+        EVENT(XCB_SELECTION_NOTIFY, event_handle_selectionnotify);
 #undef EVENT
     }
 

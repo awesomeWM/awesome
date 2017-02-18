@@ -70,6 +70,7 @@ ARRAY_TYPE(drawin_t *, drawin)
 ARRAY_TYPE(xproperty_t, xproperty)
 DO_ARRAY(sequence_pair_t, sequence_pair, DO_NOTHING)
 DO_ARRAY(xcb_window_t, window, DO_NOTHING)
+DO_ARRAY(int, int, DO_NOTHING)
 
 /** Main configuration structure */
 typedef struct
@@ -199,6 +200,8 @@ typedef struct
     xcb_generic_event_t *pending_event;
     /** The exit code that main() will return with */
     int exit_code;
+    /** Lua reference to active selections */
+    int_array_t active_selections;
 } awesome_t;
 
 extern awesome_t globalconf;

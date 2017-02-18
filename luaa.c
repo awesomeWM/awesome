@@ -842,6 +842,9 @@ luaA_init(xdgHandle* xdg, string_array_t *searchpath)
     /* Export keys */
     key_class_setup(L);
 
+    /* Export selection interface */
+    selection_class_setup(L);
+
     /* add Lua search paths */
     lua_getglobal(L, "package");
     if (LUA_TTABLE != lua_type(L, 1))
