@@ -130,6 +130,7 @@ function wallpaper.centered(surf, s, background)
     if surf ~= original_surf then
         surf:finish()
     end
+    assert(cr.status == "SUCCESS", "Cairo context entered error state: " .. cr.status)
 end
 
 --- Set a tiled wallpaper.
@@ -154,6 +155,7 @@ function wallpaper.tiled(surf, s, offset)
     if surf ~= original_surf then
         surf:finish()
     end
+    assert(cr.status == "SUCCESS", "Cairo context entered error state: " .. cr.status)
 end
 
 --- Set a maximized wallpaper.
@@ -191,6 +193,7 @@ function wallpaper.maximized(surf, s, ignore_aspect, offset)
     if surf ~= original_surf then
         surf:finish()
     end
+    assert(cr.status == "SUCCESS", "Cairo context entered error state: " .. cr.status)
 end
 
 --- Set a fitting wallpaper.
@@ -226,6 +229,7 @@ function wallpaper.fit(surf, s, background)
     if surf ~= original_surf then
         surf:finish()
     end
+    assert(cr.status == "SUCCESS", "Cairo context entered error state: " .. cr.status)
 end
 
 return wallpaper
