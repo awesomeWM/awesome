@@ -19,6 +19,7 @@ return
     protected_call = require("gears.protected_call");
     geometry = require("gears.geometry");
     math = require("gears.math");
+    table = require("gears.table");
 }
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
