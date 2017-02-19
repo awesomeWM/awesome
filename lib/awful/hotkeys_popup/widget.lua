@@ -13,6 +13,7 @@ local capi = {
 }
 local awful = require("awful")
 local gtable = require("gears.table")
+local gstring = require("gears.string")
 local wibox = require("wibox")
 local beautiful = require("beautiful")
 local dpi = beautiful.xresources.apply_dpi
@@ -329,7 +330,7 @@ function widget.new(args)
                 joined_descriptions = joined_descriptions .. key.description .. (i~=#keys and "\n" or "")
             end
             -- +1 for group label:
-            local items_height = awful.util.linecount(joined_descriptions) * line_height + group_label_height
+            local items_height = gstring.linecount(joined_descriptions) * line_height + group_label_height
             local current_column
             local available_height_px = max_height_px
             local add_new_column = true
@@ -392,7 +393,7 @@ function widget.new(args)
                 end
                 -- +1 for group label:
                 current_column.height_px = (current_column.height_px or 0) +
-                    awful.util.linecount(joined_labels)*line_height + group_label_height
+                    gstring.linecount(joined_labels)*line_height + group_label_height
                 if _add_new_column then
                     table.insert(column_layouts, current_column)
                 end

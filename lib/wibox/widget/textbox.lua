@@ -118,7 +118,7 @@ end
 --- Set the text of the textbox (with
 -- [Pango markup](https://developer.gnome.org/pango/stable/PangoMarkupFormat.html)).
 -- @tparam string text The text to set. This can contain pango markup (e.g.
---   `<b>bold</b>`). You can use `awful.util.escape` to escape
+--   `<b>bold</b>`). You can use `gears.string.escape` to escape
 --   parts of it.
 -- @treturn[1] boolean true
 -- @treturn[2] boolean false
@@ -146,7 +146,7 @@ end
 -- [Pango markup](https://developer.gnome.org/pango/stable/PangoMarkupFormat.html)).
 -- @property markup
 -- @tparam string text The text to set. This can contain pango markup (e.g.
---   `<b>bold</b>`). You can use `awful.util.escape` to escape
+--   `<b>bold</b>`). You can use `gears.string.escape` to escape
 --   parts of it.
 -- @see text
 

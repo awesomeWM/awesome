@@ -16,6 +16,7 @@ local pairs = pairs
 local type = type
 local gtable = require("gears.table")
 local string = string
+local gstring = require("gears.string")
 local grect = require("gears.geometry").rectangle
 local Gio = require("lgi").Gio
 local gcolor = require("gears.color")
@@ -137,22 +138,27 @@ function util.eval(s)
     return assert(load(s))()
 end
 
-local xml_entity_names = { ["'"] = "&apos;", ["\""] = "&quot;", ["<"] = "&lt;", [">"] = "&gt;", ["&"] = "&amp;" };
 --- Escape a string from XML char.
 -- Useful to set raw text in textbox.
+-- @deprecated util.escape
 -- @param text Text to escape.
 -- @return Escape text.
+-- @see gears.string
 function util.escape(text)
-    return text and text:gsub("['&<>\"]", xml_entity_names) or nil
+    util.deprecate("gears.string.xml_escape", {deprecated_in=5})
+
+    return gstring.xml_escape(text)
 end
 
-local xml_entity_chars = { lt = "<", gt = ">", nbsp = " ", quot = "\"", apos = "'", ndash = "-", mdash = "-",
-    amp = "&" };
 --- Unescape a string from entities.
+-- @deprecated util.unescape
 -- @param text Text to unescape.
 -- @return Unescaped text.
+-- @see gears.string
 function util.unescape(text)
-    return text and text:gsub("&(%a+);", xml_entity_chars) or nil
+    util.deprecate("gears.string.xml_unescape", {deprecated_in=5})
+
+    return gstring.xml_unescape(text)
 end
 
 --- Check if a file is a Lua valid file.
@@ -380,30 +386,27 @@ function util.table.hasitem(t, item)
 end
 
 --- Split a string into multiple lines
+-- @deprecated util.linewrap
 -- @param text String to wrap.
 -- @param width Maximum length of each line. Default: 72.
 -- @param indent Number of spaces added before each wrapped line. Default: 0.
 -- @return The string with lines wrapped to width.
+-- @see gears.string
 function util.linewrap(text, width, indent)
-    text = text or ""
-    width = width or 72
-    indent = indent or 0
+    util.deprecate("gears.string.linewrap", {deprecated_in=5})
 
-    local pos = 1
-    return text:gsub("(%s+)()(%S+)()",
-        function(_, st, word, fi)
-            if fi - pos > width then
-                pos = st
-                return "\n" .. string.rep(" ", indent) .. word
-            end
-        end)
+    return gstring.linewrap(text, width, indent)
 end
 
 --- Count number of lines in a string
+-- @deprecated util.linecount
 -- @tparam string text Input string.
 -- @treturn int Number of lines.
+-- @see gears.string
 function util.linecount(text)
-    return select(2, text:gsub('\n', '\n')) + 1
+    util.deprecate("gears.string.linecount", {deprecated_in=5})
+
+    return gstring.linecount(text)
 end
 
 --- Get a sorted table with all integer keys from a table
@@ -485,23 +488,22 @@ end
 -- Escape all special pattern-matching characters so that lua interprets them
 -- literally instead of as a character class.
 -- Source: http://stackoverflow.com/a/20778724/15690
+-- @deprecated util.quote_pattern
+-- @see gears.string
 function util.quote_pattern(s)
-    -- All special characters escaped in a string: %%, %^, %$, ...
-    local patternchars = '['..("%^$().[]*+-?"):gsub("(.)", "%%%1")..']'
-    return string.gsub(s, patternchars, "%%%1")
+    util.deprecate("gears.string.quote_pattern", {deprecated_in=5})
+
+    return gstring.quote_pattern(s)
 end
 
 -- Generate a pattern matching expression that ignores case.
 -- @param s Original pattern matching expression.
+-- @deprecated util.query_to_pattern
+-- @see gears.string
 function util.query_to_pattern(q)
-    local s = util.quote_pattern(q)
-    -- Poor man's case-insensitive character matching.
-    s = string.gsub(s, "%a",
-                    function (c)
-                        return string.format("[%s%s]", string.lower(c),
-                                             string.upper(c))
-                    end)
-    return s
+    util.deprecate("gears.string.query_to_pattern", {deprecated_in=5})
+
+    return gstring.query_to_pattern(q)
 end
 
 --- Round a number to an integer.

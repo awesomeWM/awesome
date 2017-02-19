@@ -37,11 +37,11 @@ local setmetatable = setmetatable
 local table = table
 local common = require("awful.widget.common")
 local beautiful = require("beautiful")
-local util = require("awful.util")
 local tag = require("awful.tag")
 local flex = require("wibox.layout.flex")
 local timer = require("gears.timer")
 local gcolor = require("gears.color")
+local gstring = require("gears.string")
 
 local function get_screen(s)
     return s and screen[s]
@@ -264,9 +264,10 @@ local function tasklist_label(c, args, tb)
 
     if not disable_task_name then
         if c.minimized then
-            name = name .. (util.escape(c.icon_name) or util.escape(c.name) or util.escape("<untitled>"))
+            name = name .. (gstring.xml_escape(c.icon_name) or gstring.xml_escape(c.name) or
+                            gstring.xml_escape("<untitled>"))
         else
-            name = name .. (util.escape(c.name) or util.escape("<untitled>"))
+            name = name .. (gstring.xml_escape(c.name) or gstring.xml_escape("<untitled>"))
         end
     end
 

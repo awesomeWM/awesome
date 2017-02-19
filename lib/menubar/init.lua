@@ -31,6 +31,7 @@ local common = require("awful.widget.common")
 local theme = require("beautiful")
 local wibox = require("wibox")
 local gcolor = require("gears.color")
+local gstring = require("gears.string")
 
 local function get_screen(s)
     return s and capi.screen[s]
@@ -224,7 +225,7 @@ end
 local function menulist_update(scr)
     local query = instance.query or ""
     shownitems = {}
-    local pattern = awful.util.query_to_pattern(query)
+    local pattern = gstring.query_to_pattern(query)
 
     -- All entries are added to a list that will be sorted
     -- according to the priority (first) and weight (second) of its

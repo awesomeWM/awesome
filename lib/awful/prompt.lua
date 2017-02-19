@@ -128,6 +128,7 @@ local akey = require("awful.key")
 local debug = require('gears.debug')
 local gtable = require("gears.table")
 local gcolor = require("gears.color")
+local gstring = require("gears.string")
 
 local prompt = {}
 
@@ -278,20 +279,20 @@ local function prompt_text_with_cursor(args)
     local underline = args.cursor_ul or "none"
 
     if args.selectall then
-        if #text == 0 then char = " " else char = util.escape(text) end
+        if #text == 0 then char = " " else char = gstring.xml_escape(text) end
         spacer = " "
         text_start = ""
         text_end = ""
     elseif #text < args.cursor_pos then
         char = " "
         spacer = ""
-        text_start = util.escape(text)
+        text_start = gstring.xml_escape(text)
         text_end = ""
     else
-        char = util.escape(text:sub(args.cursor_pos, args.cursor_pos))
+        char = gstring.xml_escape(text:sub(args.cursor_pos, args.cursor_pos))
         spacer = " "
-        text_start = util.escape(text:sub(1, args.cursor_pos - 1))
-        text_end = util.escape(text:sub(args.cursor_pos + 1))
+        text_start = gstring.xml_escape(text:sub(1, args.cursor_pos - 1))
+        text_end = gstring.xml_escape(text:sub(args.cursor_pos + 1))
     end
 
     local cursor_color = gcolor.ensure_pango_color(args.cursor_color)
