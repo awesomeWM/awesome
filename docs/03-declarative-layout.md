@@ -33,17 +33,19 @@ configurable rules.
 
 ### A simple layout
 
-* Display `my_first_widget` only on screen one
-* Add a background color to `my_third_widget`
+* Display `my_first_widget` only on primary screen
+* Display `my_second_widget` only on screen two
+* Add a background color to `my_fourth_widget`
 * Dispose in a `wibox.layout.fixed.horizontal` layout
 
 Code:
 
     s.mywibox : setup {
-        s == 1 and my_first_widget, -- Only display on screen 1
-        my_second_widget,
-        { -- Add a background color/pattern for my_third_widget
-              my_third_widget,
+        s == screen.primary and my_first_widget, -- Only display on primary screen
+        s.index == 2 and my_second_widget, -- Only display on screen 2
+        my_third_widget, -- Displayed on all screens
+        { -- Add a background color/pattern for my_fourth_widget
+              my_fourth_widget,
               bg     = beautiful.bg_focus,
               widget = wibox.container.background,
         },
@@ -51,9 +53,9 @@ Code:
     }
 
 
-In this example `s == 1` is an inline expression. In the default `rc.lua`,
-there is an `s` variable represent to define the current screen. Any Lua
-logic expression can be used as long as it returns a valid widget or a
+In this example `s == screen.primary` is an inline expression. In the default
+`rc.lua`, there is an `s` variable represent to define the current screen. Any
+Lua logic expression can be used as long as it returns a valid widget or a
 declarative layout, or `nil`.
 
 ### Composite widgets
