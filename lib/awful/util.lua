@@ -40,8 +40,16 @@ local displayed_deprecations = {}
 -- @param[opt] see The message to a new method / function to use.
 -- @tparam table args Extra arguments
 -- @tparam boolean args.raw Print the message as-is without the automatic context
+-- @tparam integer args.deprecated_in Print the message only when Awesome's major version is equal to or greater than deprecated_in
 function util.deprecate(see, args)
     args = args or {}
+    -- If args.deprecated_in is defined, only print deprecation warning after the given major version
+    if args.deprecated_in then
+        local dep_ver = "v" .. tostring(args.deprecated_in) .. ".0"
+        if awesome.version < dep_ver then
+            return
+        end
+    end
     local tb = debug.traceback()
     if displayed_deprecations[tb] then
         return
