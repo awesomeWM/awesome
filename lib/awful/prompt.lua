@@ -125,6 +125,7 @@ local keygrabber = require("awful.keygrabber")
 local util = require("awful.util")
 local beautiful = require("beautiful")
 local akey = require("awful.key")
+local debug = require('gears.debug')
 
 local prompt = {}
 
@@ -518,10 +519,10 @@ function prompt.run(args, textbox, exe_callback, completion_callback,
                 hooks[key] = hooks[key] or {}
                 hooks[key][#hooks[key]+1] = v
             else
-                assert("The hook's 3rd parameter has to be a function.")
+                debug.print_warning("The hook's 3rd parameter has to be a function.")
             end
         else
-            assert("The hook has to have 3 parameters.")
+            debug.print_warning("The hook has to have 3 parameters.")
         end
     end
 
