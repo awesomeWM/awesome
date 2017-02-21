@@ -111,6 +111,7 @@ end
 -- @see gears.color
 function wallpaper.centered(surf, s, background)
     local geom, cr = wallpaper.prepare_context(s)
+    local original_surf = surf
     surf = surface.load_uncached(surf)
     background = color(background)
 
@@ -126,7 +127,10 @@ function wallpaper.centered(surf, s, background)
     cr:clip()
     cr:set_source_surface(surf, 0, 0)
     cr:paint()
-    surf:finish()
+    if surf ~= original_surf then
+        surf:finish()
+    end
+    assert(cr.status == "SUCCESS", "Cairo context entered error state: " .. cr.status)
 end
 
 --- Set a tiled wallpaper.
@@ -141,13 +145,17 @@ function wallpaper.tiled(surf, s, offset)
         cr:translate(offset.x, offset.y)
     end
 
+    local original_surf = surf
     surf = surface.load_uncached(surf)
     local pattern = cairo.Pattern.create_for_surface(surf)
     pattern.extend = cairo.Extend.REPEAT
     cr.source = pattern
     cr.operator = cairo.Operator.SOURCE
     cr:paint()
-    surf:finish()
+    if surf ~= original_surf then
+        surf:finish()
+    end
+    assert(cr.status == "SUCCESS", "Cairo context entered error state: " .. cr.status)
 end
 
 --- Set a maximized wallpaper.
@@ -159,6 +167,7 @@ end
 -- @param offset This can be set to a table with entries x and y.
 function wallpaper.maximized(surf, s, ignore_aspect, offset)
     local geom, cr = wallpaper.prepare_context(s)
+    local original_surf = surf
     surf = surface.load_uncached(surf)
     local w, h = surface.get_size(surf)
     local aspect_w = geom.width / w
@@ -181,7 +190,10 @@ function wallpaper.maximized(surf, s, ignore_aspect, offset)
     cr:set_source_surface(surf, 0, 0)
     cr.operator = cairo.Operator.SOURCE
     cr:paint()
-    surf:finish()
+    if surf ~= original_surf then
+        surf:finish()
+    end
+    assert(cr.status == "SUCCESS", "Cairo context entered error state: " .. cr.status)
 end
 
 --- Set a fitting wallpaper.
@@ -193,6 +205,7 @@ end
 -- @see gears.color
 function wallpaper.fit(surf, s, background)
     local geom, cr = wallpaper.prepare_context(s)
+    local original_surf = surf
     surf = surface.load_uncached(surf)
     background = color(background)
 
@@ -213,7 +226,10 @@ function wallpaper.fit(surf, s, background)
     cr:scale(scale, scale)
     cr:set_source_surface(surf, 0, 0)
     cr:paint()
-    surf:finish()
+    if surf ~= original_surf then
+        surf:finish()
+    end
+    assert(cr.status == "SUCCESS", "Cairo context entered error state: " .. cr.status)
 end
 
 return wallpaper
