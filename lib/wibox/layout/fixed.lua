@@ -289,7 +289,8 @@ end
 --- Returns a new horizontal fixed layout. Each widget will get as much space as it
 -- asks for and each widget will be drawn next to its neighboring widget.
 -- Widgets can be added via :add() or as arguments to this function.
--- Note that widgets ignore forced_height.
+-- Note that widgets ignore `forced_height`. They will use the preferred/minimum width
+-- on the horizontal axis, and a stretched height on the vertical axis.
 -- @tparam widget ... Widgets that should be added to the layout.
 -- @function wibox.layout.fixed.horizontal
 function fixed.horizontal(...)
@@ -299,7 +300,8 @@ end
 --- Returns a new vertical fixed layout. Each widget will get as much space as it
 -- asks for and each widget will be drawn next to its neighboring widget.
 -- Widgets can be added via :add() or as arguments to this function.
--- Note that widgets ignore forced_width.
+-- Note that widgets ignore `forced_width`. They will use the preferred/minimum height
+-- on the vertical axis, and a stretched width on the horizontal axis.
 -- @tparam widget ... Widgets that should be added to the layout.
 -- @function wibox.layout.fixed.vertical
 function fixed.vertical(...)
