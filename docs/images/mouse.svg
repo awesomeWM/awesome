@@ -14,7 +14,7 @@
    viewBox="0 0 546.85725 295.98017"
    id="svg2"
    version="1.1"
-   inkscape:version="0.91 r13725"
+   inkscape:version="0.92.1 r"
    sodipodi:docname="mouse.svg">
   <defs
      id="defs4" />
@@ -25,18 +25,18 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="1.4"
-     inkscape:cx="360.06759"
-     inkscape:cy="366.74179"
+     inkscape:zoom="2.8"
+     inkscape:cx="318.68239"
+     inkscape:cy="185.12888"
      inkscape:document-units="pt"
      inkscape:current-layer="g5476"
      showgrid="false"
      showguides="false"
      inkscape:guide-bbox="true"
-     inkscape:window-width="1916"
-     inkscape:window-height="1021"
+     inkscape:window-width="1918"
+     inkscape:window-height="1060"
      inkscape:window-x="0"
-     inkscape:window-y="16"
+     inkscape:window-y="18"
      inkscape:window-maximized="1"
      fit-margin-top="0"
      fit-margin-left="0"
@@ -50,7 +50,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -106,8 +106,7 @@
          style="font-style:normal;font-weight:normal;font-size:14.765769px;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
          x="-703.82648"
          y="718.50195"
-         id="text8466"
-         sodipodi:linespacing="125%"><tspan
+         id="text8466"><tspan
            sodipodi:role="line"
            id="tspan8468"
            x="-703.82648"
@@ -117,7 +116,6 @@
            x="-703.82648"
            y="736.95917">(LMB)</tspan></text>
       <text
-         sodipodi:linespacing="125%"
          id="text5405"
          y="717.49182"
          x="-582.11389"
@@ -126,7 +124,7 @@
            y="717.49182"
            x="-582.11389"
            id="tspan5407"
-           sodipodi:role="line">Button 2</tspan><tspan
+           sodipodi:role="line">Button 3</tspan><tspan
            id="tspan5411"
            y="735.94904"
            x="-582.11389"
@@ -146,35 +144,32 @@
       <text
          xml:space="preserve"
          style="font-style:normal;font-weight:normal;font-size:14.765769px;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-         x="-594.89044"
-         y="785.26086"
-         id="text5417"
-         sodipodi:linespacing="125%"><tspan
+         x="-588.33746"
+         y="785.02411"
+         id="text5417"><tspan
            sodipodi:role="line"
-           x="-594.89044"
-           y="785.26086"
-           id="tspan5421">Click: Button 3</tspan></text>
+           x="-588.33746"
+           y="785.02411"
+           id="tspan5421">Click: Button 2</tspan></text>
       <text
-         sodipodi:linespacing="125%"
          id="text5425"
          y="803.3548"
-         x="-592.46796"
+         x="-584.96796"
          style="font-style:normal;font-weight:normal;font-size:14.765769px;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
          xml:space="preserve"><tspan
            id="tspan5427"
            y="803.3548"
-           x="-592.46796"
+           x="-584.96796"
            sodipodi:role="line">Down: Button 5</tspan></text>
       <text
-         sodipodi:linespacing="125%"
          id="text5429"
          y="763.70624"
-         x="-601.84076"
+         x="-596.21576"
          style="font-style:normal;font-weight:normal;font-size:14.765769px;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
          xml:space="preserve"><tspan
            id="tspan5431"
            y="763.70624"
-           x="-601.84076"
+           x="-596.21576"
            sodipodi:role="line">Up: Button 4</tspan></text>
       <path
          sodipodi:nodetypes="cc"
