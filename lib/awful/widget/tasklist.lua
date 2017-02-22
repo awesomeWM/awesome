@@ -256,6 +256,9 @@ local function tasklist_label(c, args, tb)
 
     if c.minimized then
         name = name .. (util.escape(c.icon_name) or util.escape(c.name) or util.escape("<untitled>"))
+        if not theme.tasklist_plain_task_name then
+            name = '<i>' .. name .. '</i>'
+        end
     else
         name = name .. (util.escape(c.name) or util.escape("<untitled>"))
     end
