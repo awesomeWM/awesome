@@ -127,7 +127,7 @@ end
 -- This gets the next screen relative to this one in
 -- the specified direction.
 --
--- @function client:get_next_in_direction
+-- @function screen:get_next_in_direction
 -- @param self Screen.
 -- @param dir The direction, can be either "up", "down", "left" or "right".
 function screen.object.get_next_in_direction(self, dir)
