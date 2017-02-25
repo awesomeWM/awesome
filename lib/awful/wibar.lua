@@ -33,7 +33,7 @@ local awfulwibar = { mt = {} }
 -- It's an array so it is ordered.
 local wiboxes = setmetatable({}, {__mode = "v"})
 
---- If the wibar need to be stretched to fill the screen.
+--- If the wibar needs to be stretched to fill the screen.
 -- @property stretch
 -- @tparam string stretch
 
@@ -49,7 +49,7 @@ local wiboxes = setmetatable({}, {__mode = "v"})
 -- @property ontop
 -- @tparam boolean ontop
 
---- The wibar  mouse cursor.
+--- The wibar's mouse cursor.
 -- @property cursor
 -- @tparam string cursor
 
@@ -61,27 +61,27 @@ local wiboxes = setmetatable({}, {__mode = "v"})
 -- @property type
 -- @tparam string type
 
---- The wibar width.
+--- The wibar's width.
 -- @property width
 -- @tparam integer width
 
---- The wibar height.
+--- The wibar's height.
 -- @property height
 -- @tparam integer height
 
---- The wibar background color.
+--- The wibar's background color.
 -- @property bg
 -- @tparam color bg
 
---- The wibar background image.
+--- The wibar's background image.
 -- @property bgimage
 -- @tparam surface bgimage
 
---- The wibar foreground (text) color.
+--- The wibar's foreground (text) color.
 -- @property fg
 -- @tparam color fg
 
---- The wibar shape.
+--- The wibar's shape.
 -- @property shape
 -- @tparam gears.shape shape
 
@@ -334,20 +334,20 @@ end
 -- @tparam boolean arg.ontop On top of other windows.
 -- @tparam string arg.cursor The mouse cursor.
 -- @tparam boolean arg.visible Visibility.
--- @tparam number arg.opacity The wibar opacity, between 0 and 1.
+-- @tparam number arg.opacity The wibar's opacity, between 0 and 1.
 -- @tparam string arg.type The window type (desktop, normal, dock, …).
 -- @tparam integer arg.x The x coordinates.
 -- @tparam integer arg.y The y coordinates.
--- @tparam integer arg.width The wibar width.
--- @tparam integer arg.height The wibar height.
+-- @tparam integer arg.width The wibar's width.
+-- @tparam integer arg.height The wibar's height.
 -- @tparam screen arg.screen The wibox screen.
 -- @tparam wibox.widget arg.widget The widget that the wibox displays.
 -- @param arg.shape_bounding The wibox’s bounding shape as a (native) cairo surface.
 -- @param arg.shape_clip The wibox’s clip shape as a (native) cairo surface.
 -- @param arg.shape_input The wibox’s input shape as a (native) cairo surface.
--- @tparam color arg.bg The wibar background.
+-- @tparam color arg.bg The wibar's background.
 -- @tparam surface arg.bgimage The background image of the drawable.
--- @tparam color arg.fg The wibar foreground (text) color.
+-- @tparam color arg.fg The wibar's foreground (text) color.
 -- @return The new wibar
 -- @function awful.wibar
 function awfulwibar.new(arg)
@@ -391,7 +391,7 @@ function awfulwibar.new(arg)
 
     arg.screen = nil
 
-    -- The C code scan the table directly, so metatable magic can't be used
+    -- The C code scans the table directly, so metatable magic cannot be used.
     for _, prop in ipairs {
         "border_width", "border_color", "arg.font", "opacity", "ontop", "cursor",
         "height", "width", "bgimage", "bg", "fg", "type", "stretch", "shape"
