@@ -8,11 +8,11 @@ local cache = require("gears.cache")
 local timer = require("gears.timer")
 local hierarchy = require("wibox.hierarchy")
 local base = require("wibox.widget.base")
+local util = require("awful.util")
 local lgi = require("lgi")
 local GLib = lgi.GLib
 
 local scroll = {}
-local scroll_mt = { __index = scroll }
 local _need_scroll_redraw
 
 -- "Strip" a context so that we can use it for our own drawing
@@ -380,7 +380,7 @@ local function get_layout(dir, widget, fps, speed, extra_space, expand, max_size
     ret._private.timer = GLib.Timer()
     ret._private.scroll_timer = nil
 
-    setmetatable(ret, scroll_mt)
+    util.table.crush(ret, scroll, true)
 
     ret:set_direction(dir)
     ret:set_widget(widget)
