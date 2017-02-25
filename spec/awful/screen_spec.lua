@@ -76,6 +76,40 @@ describe("awful.screen", function()
         end)
     end)
 
+    describe("get_next_in_direction", function()
+        before_each(function()
+            fake_screens = {
+                { geometry = { x = 0, y = 0, width = 1, height = 1 }, index = 1 },
+                { geometry = { x = 1, y = 0, width = 1, height = 1 }, index = 2 },
+                { geometry = { x = 0, y = 1, width = 1, height = 1 }, index = 3 },
+                { geometry = { x = 1, y = 1, width = 1, height = 1 }, index = 4 },
+            }
+        end)
+
+        it("gets screens to the left", function()
+            assert.is.equal(fake_screens[1], ascreen.object.get_next_in_direction(fake_screens[2], "left"))
+        end)
+
+        it("gets screens to the right", function()
+            assert.is.equal(fake_screens[2], ascreen.object.get_next_in_direction(fake_screens[1], "right"))
+        end)
+
+        it("gets screens to the top", function()
+            assert.is.equal(fake_screens[2], ascreen.object.get_next_in_direction(fake_screens[4], "up"))
+        end)
+
+        it("gets screens to the bottom", function()
+            assert.is.equal(fake_screens[4], ascreen.object.get_next_in_direction(fake_screens[2], "down"))
+        end)
+
+        it("gets no screens if none exist in the direction", function()
+            assert.is_nil(ascreen.object.get_next_in_direction(fake_screens[2], "up"))
+            assert.is_nil(ascreen.object.get_next_in_direction(fake_screens[4], "down"))
+            assert.is_nil(ascreen.object.get_next_in_direction(fake_screens[2], "right"))
+            assert.is_nil(ascreen.object.get_next_in_direction(fake_screens[1], "left"))
+        end)
+    end)
+
     describe("no screens", function()
         before_each(function()
             fake_screens = {}
