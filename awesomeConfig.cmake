@@ -408,8 +408,23 @@ add_custom_command(
         ${BUILD_DIR}/script_files/rc.lua
 )
 
-# Create a target for the auto-generated awesomerc.lua
-add_custom_target(generate_awesomerc DEPENDS ${BUILD_DIR}/awesomerc.lua)
+add_custom_command(
+        OUTPUT ${BUILD_DIR}/script_files/theme.lua
+        COMMAND lua ${SOURCE_DIR}/docs/sample_theme.lua ${BUILD_DIR}/script_files/
+)
+
+# Create a target for the auto-generated awesomerc.lua and other files
+add_custom_target(generate_awesomerc DEPENDS
+    ${BUILD_DIR}/awesomerc.lua
+    ${BUILD_DIR}/script_files/theme.lua
+    ${BUILD_DIR}/script_files/rc.lua
+    ${SOURCE_DIR}/awesomerc.lua
+    ${BUILD_DIR}/docs/06-appearance.md
+    ${SOURCE_DIR}/docs/05-awesomerc.md.lua
+    ${SOURCE_DIR}/docs/sample_theme.lua
+    ${SOURCE_DIR}/docs/sample_files.lua
+    ${SOURCE_DIR}/awesomerc.lua
+)
 
 
 #}}}
