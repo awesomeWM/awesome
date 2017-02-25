@@ -122,12 +122,12 @@ function screen.focus(_screen)
     end
 end
 
---- Get the next screen in a specific direction
+--- Get the next screen in a specific direction.
 --
 -- This gets the next screen relative to this one in
 -- the specified direction.
 --
--- @function awful.screen.get_next_in_direction
+-- @function client:get_next_in_direction
 -- @param self Screen.
 -- @param dir The direction, can be either "up", "down", "left" or "right".
 function screen.object.get_next_in_direction(self, dir)
@@ -155,11 +155,9 @@ function screen.focus_bydirection(dir, _screen)
     local sel = get_screen(_screen or screen.focused())
     local target = sel:get_next_in_direction(dir)
 
-    if not target then
-        return
+    if target then
+        return target:focus()
     end
-
-    return target:focus()
 end
 
 --- Move the focus to a screen relative to the current one,
