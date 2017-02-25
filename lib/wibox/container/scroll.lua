@@ -2,6 +2,10 @@
 -- This container scrolls its inner widget inside of the available space. An
 -- example usage would be a text widget that displays information about the
 -- currently playing song without using too much space for long song titles.
+--
+-- Please note that mouse events do not propagate to widgets inside of the
+-- scroll container. Also, if this widget is causing too high CPU usage, you can
+-- use @{set_fps} to make it update less often.
 -- @usage
 -- wibox.widget {
 --    layout = wibox.container.scroll.horizontal,
