@@ -1,4 +1,4 @@
-local filename, rcfile, new_rcfile = ...
+local filename, rcfile, new_rcfile, rc_script = ...
 
 local f = assert(io.open(filename, "w"))
 
@@ -242,7 +242,16 @@ local rc = assert(io.open(rcfile))
 
 local doc_block = false
 
-local output = {}
+local output, output_script = {}, {[[
+---------------------------------------------------------------------------
+--- The default rc.lua file.
+--
+-- A copy of this file is usually installed in `/etc/xdg/awesome/`.
+--
+-- See [The declarative layout system](../documentation/05-awesomerc.md.html)
+-- for a version with additional comments.
+--
+--]]}
 
 for line in rc:lines() do
     local tag = line:match("@([^@]+)@")
@@ -274,6 +283,7 @@ for line in rc:lines() do
             f:write(add_links(line))
         end
         table.insert(output, line)
+        table.insert(output_script, "--    "..line)
     else
         -- Take the documentation found in this file and append it
         if doc_block then
@@ -296,3 +306,10 @@ f:close()
 local rc_lua = assert(io.open(new_rcfile, "w"))
 rc_lua:write(table.concat(output, "\n"))
 rc_lua:close()
+
+
+table.insert(output_script, "-- @script rc.lua")
+
+rc_script = assert(io.open(rc_script, "w"))
+rc_script:write(table.concat(output_script, "\n"))
+rc_script:close()

@@ -389,6 +389,9 @@ endif()
 #}}}
 
 # {{{ Generate some aggregated documentation from lua script
+
+file(MAKE_DIRECTORY ${BUILD_DIR}/script_files/)
+
 add_custom_command(
         OUTPUT ${BUILD_DIR}/docs/06-appearance.md
         COMMAND lua ${SOURCE_DIR}/docs/06-appearance.md.lua
@@ -398,9 +401,11 @@ add_custom_command(
 
 add_custom_command(
         OUTPUT ${BUILD_DIR}/awesomerc.lua ${BUILD_DIR}/docs/05-awesomerc.md
+            ${BUILD_DIR}/script_files/rc.lua
         COMMAND lua ${SOURCE_DIR}/docs/05-awesomerc.md.lua
         ${BUILD_DIR}/docs/05-awesomerc.md ${SOURCE_DIR}/awesomerc.lua
         ${BUILD_DIR}/awesomerc.lua
+        ${BUILD_DIR}/script_files/rc.lua
 )
 
 # Create a target for the auto-generated awesomerc.lua
