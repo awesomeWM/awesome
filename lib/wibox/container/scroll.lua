@@ -1,4 +1,7 @@
 ---------------------------------------------------------------------------
+-- This container scrolls its inner widget inside of the available space. An
+-- example usage would be a text widget that displays information about the
+-- currently playing song without using too much space for long song titles.
 -- @usage
 -- wibox.widget {
 --    layout = wibox.container.scroll.horizontal,
