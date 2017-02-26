@@ -1276,13 +1276,13 @@ function placement.maximize(d, args)
     local bw   = (not args.ignore_border_width) and d.border_width or 0
 
     if (not args.axis) or args.axis :match "vertical" then
-        ngeo.y      = sgeo.y
-        ngeo.height = sgeo.height - 2*bw
+        ngeo.y      = apply_border_width(sgeo, 'y'     , bw, d.size_hints, -1)
+        ngeo.height = apply_border_width(sgeo, 'height', bw, d.size_hints, -1)
     end
 
     if (not args.axis) or args.axis :match "horizontal" then
-        ngeo.x      = sgeo.x
-        ngeo.width  = sgeo.width - 2*bw
+        ngeo.x      = apply_border_width(sgeo, 'x'    , bw, d.size_hints, -1)
+        ngeo.width  = apply_border_width(sgeo, 'width', bw, d.size_hints, -1)
     end
 
     geometry_common(d, args, ngeo)
