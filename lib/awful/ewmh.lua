@@ -364,11 +364,27 @@ function ewmh.merge_maximization(c, context, hints)
     end
 end
 
+--- Allow the client to move itself.
+--
+-- This is the default geometry request handler when the context is `ewmh`.
+--
+-- @signalhandler awful.ewmh.client_geometry_requests
+-- @tparam client c The client
+-- @tparam string context The context
+-- @tparam[opt={}] table hints The hints to pass to the handler
+function ewmh.client_geometry_requests(c, context, hints)
+    if context == "ewmh" and hints then
+        c:geometry(hints)
+    end
+end
+
+
 client.connect_signal("request::activate", ewmh.activate)
 client.connect_signal("request::tag", ewmh.tag)
 client.connect_signal("request::urgent", ewmh.urgent)
 client.connect_signal("request::geometry", ewmh.geometry)
 client.connect_signal("request::geometry", ewmh.merge_maximization)
+client.connect_signal("request::geometry", ewmh.client_geometry_requests)
 client.connect_signal("property::border_width", repair_geometry)
 client.connect_signal("property::screen", repair_geometry)
 screen.connect_signal("property::workarea", function(s)
