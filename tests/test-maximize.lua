@@ -2,13 +2,15 @@
 
 local runner = require("_runner")
 local awful = require("awful")
+local test_client = require("_client")
+local lgi = require("lgi")
 
 local original_geo = nil
 
 local steps = {
     function(count)
         if count == 1 then
-            awful.spawn("xterm")
+            test_client(nil,nil,nil,nil,nil,{gravity=lgi.Gdk.Gravity.NORTH_WEST})
         else
             local c = client.get()[1]
             if c then
