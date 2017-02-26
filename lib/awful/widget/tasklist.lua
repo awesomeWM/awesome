@@ -110,6 +110,10 @@ local instances
 -- @beautiful beautiful.tasklist_disable_icon
 -- @tparam[opt=false] boolean tasklist_disable_icon
 
+--- Disable the tasklist client titles.
+-- @beautiful beautiful.tasklist_disable_task_name
+-- @tparam[opt=false] boolean tasklist_disable_task_name
+
 --- Disable the extra tasklist client property notification icons.
 --
 -- See the <a href="status_icons">Status icons</a> section for more details.
@@ -214,6 +218,7 @@ local function tasklist_label(c, args, tb)
     local bg_image_urgent = args.bg_image_urgent or theme.tasklist_bg_image_urgent or theme.bg_image_urgent
     local bg_image_minimize = args.bg_image_minimize or theme.tasklist_bg_image_minimize or theme.bg_image_minimize
     local tasklist_disable_icon = args.tasklist_disable_icon or theme.tasklist_disable_icon or false
+    local disable_task_name = args.disable_task_name or theme.tasklist_disable_task_name or false
     local font = args.font or theme.tasklist_font or theme.font or ""
     local font_focus = args.font_focus or theme.tasklist_font_focus or theme.font_focus or font or ""
     local font_minimized = args.font_minimized or theme.tasklist_font_minimized or theme.font_minimized or font or ""
@@ -254,10 +259,12 @@ local function tasklist_label(c, args, tb)
         end
     end
 
-    if c.minimized then
-        name = name .. (util.escape(c.icon_name) or util.escape(c.name) or util.escape("<untitled>"))
-    else
-        name = name .. (util.escape(c.name) or util.escape("<untitled>"))
+    if not disable_task_name then
+        if c.minimized then
+            name = name .. (util.escape(c.icon_name) or util.escape(c.name) or util.escape("<untitled>"))
+        else
+            name = name .. (util.escape(c.name) or util.escape("<untitled>"))
+        end
     end
 
     local focused = capi.client.focus == c
@@ -375,6 +382,7 @@ end
 -- @tparam[opt=nil] string style.bg_image_urgent
 -- @tparam[opt=nil] string style.bg_image_minimize
 -- @tparam[opt=nil] boolean style.tasklist_disable_icon
+-- @tparam[opt=false] boolean style.disable_task_name
 -- @tparam[opt=nil] string style.font
 -- @tparam[opt=left] string style.align *left*, *right* or *center*
 -- @tparam[opt=nil] string style.font_focus
