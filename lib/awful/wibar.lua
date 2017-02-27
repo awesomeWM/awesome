@@ -35,31 +35,7 @@ local wiboxes = setmetatable({}, {__mode = "v"})
 
 --- If the wibar needs to be stretched to fill the screen.
 -- @property stretch
--- @tparam string stretch
-
---- The wibar border width.
--- @property border_width
--- @tparam integer border_width
-
---- The wibar border color.
--- @property border_color
--- @tparam string border_color
-
---- If the wibar is to be on top of other windows.
--- @property ontop
--- @tparam boolean ontop
-
---- The wibar's mouse cursor.
--- @property cursor
--- @tparam string cursor
-
---- The wibar opacity, between 0 and 1.
--- @property opacity
--- @tparam number opacity
-
---- The window type (desktop, normal, dock, …).
--- @property type
--- @tparam string type
+-- @tparam boolean stretch
 
 --- The wibar's width.
 -- @property width
@@ -69,20 +45,56 @@ local wiboxes = setmetatable({}, {__mode = "v"})
 -- @property height
 -- @tparam integer height
 
+--- If the wibar needs to be stretched to fill the screen.
+-- @beautiful beautiful.stretch
+-- @tparam boolean stretch
+
+--- The wibar border width.
+-- @beautiful beautiful.border_width
+-- @tparam integer border_width
+
+--- The wibar border color.
+-- @beautiful beautiful.border_color
+-- @tparam string border_color
+
+--- If the wibar is to be on top of other windows.
+-- @beautiful beautiful.ontop
+-- @tparam boolean ontop
+
+--- The wibar's mouse cursor.
+-- @beautiful beautiful.cursor
+-- @tparam string cursor
+
+--- The wibar opacity, between 0 and 1.
+-- @beautiful beautiful.opacity
+-- @tparam number opacity
+
+--- The window type (desktop, normal, dock, …).
+-- @beautiful beautiful.type
+-- @tparam string type
+
+--- The wibar's width.
+-- @beautiful beautiful.width
+-- @tparam integer width
+
+--- The wibar's height.
+-- @beautiful beautiful.height
+-- @tparam integer height
+
 --- The wibar's background color.
--- @property bg
+-- @beautiful beautiful.bg
 -- @tparam color bg
 
 --- The wibar's background image.
--- @property bgimage
+-- @beautiful beautiful.bgimage
 -- @tparam surface bgimage
 
 --- The wibar's foreground (text) color.
--- @property fg
+-- @beautiful beautiful.fg
 -- @tparam color fg
 
 --- The wibar's shape.
--- @property shape
+-- @beautiful beautiful.shape
 -- @tparam gears.shape shape
 
 -- Compute the margin on one side
@@ -393,7 +405,7 @@ function awfulwibar.new(arg)
 
     -- The C code scans the table directly, so metatable magic cannot be used.
     for _, prop in ipairs {
-        "border_width", "border_color", "arg.font", "opacity", "ontop", "cursor",
+        "border_width", "border_color", "font", "opacity", "ontop", "cursor",
         "height", "width", "bgimage", "bg", "fg", "type", "stretch", "shape"
     } do
         if (arg[prop] == nil) and beautiful["wibar_"..prop] ~= nil then

@@ -170,6 +170,16 @@
 -- @property shape_input
 -- @param surface._native
 
+
+--- The wibar's shape.
+--
+-- **Signal:**
+--
+--  * *property::shape*
+--
+-- @property shape
+-- @tparam gears.shape shape
+
 --- Get or set mouse buttons bindings to a wibox.
 --
 -- @param buttons_table A table of buttons objects, or nothing.
