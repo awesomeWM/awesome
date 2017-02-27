@@ -11,6 +11,10 @@
 ---------------------------------------------------------------------------
 local math = math
 
+local pow = math.pow or function(a,b) -- lua 5.3 compat
+    return a^b
+end
+
 local gears = {geometry = {rectangle = {} } }
 
 --- Get the square distance between a rectangle and a point.
@@ -117,7 +121,7 @@ local function calculate_distance(dir, _gA, _gB)
         gAx = _gA.x + _gA.width
     end
 
-    return math.sqrt(math.pow(gBx - gAx, 2) + math.pow(gBy - gAy, 2))
+    return math.sqrt(pow(gBx - gAx, 2) + pow(gBy - gAy, 2))
 end
 
 --- Get the nearest rectangle in the given direction. Every rectangle is specified as a table
