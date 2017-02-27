@@ -46,55 +46,55 @@ local wiboxes = setmetatable({}, {__mode = "v"})
 -- @tparam integer height
 
 --- If the wibar needs to be stretched to fill the screen.
--- @beautiful beautiful.stretch
+-- @beautiful beautiful.wibar_stretch
 -- @tparam boolean stretch
 
 --- The wibar border width.
--- @beautiful beautiful.border_width
+-- @beautiful beautiful.wibar_border_width
 -- @tparam integer border_width
 
 --- The wibar border color.
--- @beautiful beautiful.border_color
+-- @beautiful beautiful.wibar_border_color
 -- @tparam string border_color
 
 --- If the wibar is to be on top of other windows.
--- @beautiful beautiful.ontop
+-- @beautiful beautiful.wibar_ontop
 -- @tparam boolean ontop
 
 --- The wibar's mouse cursor.
--- @beautiful beautiful.cursor
+-- @beautiful beautiful.wibar_cursor
 -- @tparam string cursor
 
 --- The wibar opacity, between 0 and 1.
--- @beautiful beautiful.opacity
+-- @beautiful beautiful.wibar_opacity
 -- @tparam number opacity
 
 --- The window type (desktop, normal, dock, …).
--- @beautiful beautiful.type
+-- @beautiful beautiful.wibar_type
 -- @tparam string type
 
 --- The wibar's width.
--- @beautiful beautiful.width
+-- @beautiful beautiful.wibar_width
 -- @tparam integer width
 
 --- The wibar's height.
--- @beautiful beautiful.height
+-- @beautiful beautiful.wibar_height
 -- @tparam integer height
 
 --- The wibar's background color.
--- @beautiful beautiful.bg
+-- @beautiful beautiful.wibar_bg
 -- @tparam color bg
 
 --- The wibar's background image.
--- @beautiful beautiful.bgimage
+-- @beautiful beautiful.wibar_bgimage
 -- @tparam surface bgimage
 
 --- The wibar's foreground (text) color.
--- @beautiful beautiful.fg
+-- @beautiful beautiful.wibar_fg
 -- @tparam color fg
 
 --- The wibar's shape.
--- @beautiful beautiful.shape
+-- @beautiful beautiful.wibar_shape
 -- @tparam gears.shape shape
 
 -- Compute the margin on one side
