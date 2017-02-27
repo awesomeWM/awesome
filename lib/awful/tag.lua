@@ -475,7 +475,7 @@ end
 function tag.object.set_screen(t, s)
 
     s = get_screen(s or ascreen.focused())
-    local sel = tag.selected
+    local sel = t.selected
     local old_screen = get_screen(tag.getproperty(t, "screen"))
 
     if s == old_screen then return end
