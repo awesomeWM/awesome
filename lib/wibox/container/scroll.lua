@@ -1,4 +1,23 @@
 ---------------------------------------------------------------------------
+-- This container scrolls its inner widget inside of the available space. An
+-- example usage would be a text widget that displays information about the
+-- currently playing song without using too much space for long song titles.
+--
+-- Please note that mouse events do not propagate to widgets inside of the
+-- scroll container. Also, if this widget is causing too high CPU usage, you can
+-- use @{set_fps} to make it update less often.
+-- @usage
+-- wibox.widget {
+--    layout = wibox.container.scroll.horizontal,
+--    max_size = 100,
+--    step_function = wibox.container.scroll.step_functions
+--                    .waiting_nonlinear_back_and_forth,
+--    speed = 100,
+--    {
+--        widget = wibox.widget.textbox,
+--        text = "This is a " .. string.rep("very, ", 10) ..  " very long text",
+--    },
+-- }
 -- @author Uli Schlachter (based on ideas from Saleur Geoffrey)
 -- @copyright 2015 Uli Schlachter
 -- @classmod wibox.container.scroll
@@ -8,11 +27,11 @@ local cache = require("gears.cache")
 local timer = require("gears.timer")
 local hierarchy = require("wibox.hierarchy")
 local base = require("wibox.widget.base")
+local util = require("awful.util")
 local lgi = require("lgi")
 local GLib = lgi.GLib
 
 local scroll = {}
-local scroll_mt = { __index = scroll }
 local _need_scroll_redraw
 
 -- "Strip" a context so that we can use it for our own drawing
@@ -380,7 +399,7 @@ local function get_layout(dir, widget, fps, speed, extra_space, expand, max_size
     ret._private.timer = GLib.Timer()
     ret._private.scroll_timer = nil
 
-    setmetatable(ret, scroll_mt)
+    util.table.crush(ret, scroll, true)
 
     ret:set_direction(dir)
     ret:set_widget(widget)
