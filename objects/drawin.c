@@ -115,6 +115,16 @@
  * @signal property::y
  */
 
+/** When the client height or width changed.
+ * @signal property::size
+ * @see client.geometry
+ */
+
+/** When the client x or y coordinate changed.
+ * @signal property::position
+ * @see client.geometry
+ */
+
 /** Get or set mouse buttons bindings to a drawin.
  *
  * @param buttons_table A table of buttons objects, or nothing.

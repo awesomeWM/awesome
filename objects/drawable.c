@@ -82,6 +82,16 @@
  * @signal property::y
  */
 
+/** When the client height or width changed.
+ * @signal property::size
+ * @see client.geometry
+ */
+
+/** When the client x or y coordinate changed.
+ * @signal property::position
+ * @see client.geometry
+ */
+
 /**
  * @signal property::surface
  */
