@@ -41,6 +41,7 @@ local util = require("awful.util")
 local tag = require("awful.tag")
 local flex = require("wibox.layout.flex")
 local timer = require("gears.timer")
+local gcolor = require("gears.color")
 
 local function get_screen(s)
     return s and screen[s]
@@ -204,14 +205,15 @@ local function tasklist_label(c, args, tb)
     if not args then args = {} end
     local theme = beautiful.get()
     local align = args.align or theme.tasklist_align or "left"
-    local fg_normal = util.ensure_pango_color(args.fg_normal or theme.tasklist_fg_normal or theme.fg_normal, "white")
+    local fg_normal = gcolor.ensure_pango_color(args.fg_normal or theme.tasklist_fg_normal or theme.fg_normal, "white")
     local bg_normal = args.bg_normal or theme.tasklist_bg_normal or theme.bg_normal or "#000000"
-    local fg_focus = util.ensure_pango_color(args.fg_focus or theme.tasklist_fg_focus or theme.fg_focus, fg_normal)
+    local fg_focus = gcolor.ensure_pango_color(args.fg_focus or theme.tasklist_fg_focus or theme.fg_focus, fg_normal)
     local bg_focus = args.bg_focus or theme.tasklist_bg_focus or theme.bg_focus or bg_normal
-    local fg_urgent = util.ensure_pango_color(args.fg_urgent or theme.tasklist_fg_urgent or theme.fg_urgent, fg_normal)
-    local bg_urgent = args.bg_urgent or theme.tasklist_bg_urgent or theme.bg_urgent or bg_normal
-    local fg_minimize = util.ensure_pango_color(args.fg_minimize or theme.tasklist_fg_minimize or theme.fg_minimize,
+    local fg_urgent = gcolor.ensure_pango_color(args.fg_urgent or theme.tasklist_fg_urgent or theme.fg_urgent,
                                                 fg_normal)
+    local bg_urgent = args.bg_urgent or theme.tasklist_bg_urgent or theme.bg_urgent or bg_normal
+    local fg_minimize = gcolor.ensure_pango_color(args.fg_minimize or theme.tasklist_fg_minimize or theme.fg_minimize,
+                                                  fg_normal)
     local bg_minimize = args.bg_minimize or theme.tasklist_bg_minimize or theme.bg_minimize or bg_normal
     -- FIXME v5, remove the fallback theme.bg_image_* variables, see GH#1403
     local bg_image_normal = args.bg_image_normal or theme.tasklist_bg_image_normal or theme.bg_image_normal

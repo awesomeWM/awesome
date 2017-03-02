@@ -16,10 +16,9 @@ local pairs = pairs
 local type = type
 local gtable = require("gears.table")
 local string = string
-local lgi = require("lgi")
 local grect = require("gears.geometry").rectangle
 local Gio = require("lgi").Gio
-local Pango = lgi.Pango
+local gcolor = require("gears.color")
 local capi =
 {
     awesome = awesome,
@@ -102,12 +101,15 @@ function util.deprecate_class(fallback, old_name, new_name)
 end
 
 --- Get a valid color for Pango markup
+-- @deprecated ensure_pango_color
 -- @param color The color.
 -- @tparam string fallback The color to return if the first is invalid. (default: black)
 -- @treturn string color if it is valid, else fallback.
+-- @see gears.color
 function util.ensure_pango_color(color, fallback)
-    color = tostring(color)
-    return Pango.Color.parse(Pango.Color(), color) and color or fallback or "black"
+    util.deprecate("gears.color.ensure_pango_color")
+
+    return gcolor.ensure_pango_color(color, fallback)
 end
 
 --- Make i cycle.
