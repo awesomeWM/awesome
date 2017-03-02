@@ -1193,6 +1193,12 @@ client_focus_refresh(void)
                         win, globalconf.timestamp);
 }
 
+static uint16_t
+client_get_border_width(client_t *c)
+{
+    return c->fullscreen ? 0 : c->border_width;
+}
+
 static void
 client_border_refresh(void)
 {
@@ -1204,9 +1210,12 @@ client_border_refresh(void)
             c->border_need_update = false;
             xwindow_set_border_color(c->frame_window, &c->border_color);
             if(c->frame_window)
+            {
+                int width = client_get_border_width(c);
                 xcb_configure_window(globalconf.connection, c->frame_window,
                                      XCB_CONFIG_WINDOW_BORDER_WIDTH,
-                                     (uint32_t[]) { c->border_width });
+                                     (uint32_t[]) { width });
+            }
         }
     }
 }
@@ -1552,7 +1561,7 @@ client_send_configure(client_t *c)
 
     if (!c->fullscreen)
         client_remove_titlebar_geometry(c, &geometry);
-    xwindow_configure(c->window, geometry, c->border_width);
+    xwindow_configure(c->window, geometry, client_get_border_width(c));
 }
 
 /** Apply size hints to the client's new geometry.
@@ -1935,6 +1944,12 @@ client_set_fullscreen(lua_State *L, int cidx, bool s)
         c->fullscreen = s;
         luaA_object_emit_signal(L, abs_cidx, "request::geometry", 1);
         luaA_object_emit_signal(L, abs_cidx, "property::fullscreen", 0);
+        if (c->border_width != 0)
+        {
+            /* We force border_width = 0 while fullscreen */
+            c->border_need_update = true;
+            luaA_object_emit_signal(L, abs_cidx, "property::border_width", 0);
+        }
         /* Force a client resize, so that titlebars get shown/hidden */
         client_resize_do(c, c->geometry);
         stack_windows();
@@ -3118,8 +3133,14 @@ LUA_OBJECT_EXPORT_PROPERTY(client, client_t, maximized_horizontal, lua_pushboole
 LUA_OBJECT_EXPORT_PROPERTY(client, client_t, maximized_vertical, lua_pushboolean)
 LUA_OBJECT_EXPORT_PROPERTY(client, client_t, maximized, lua_pushboolean)
 LUA_OBJECT_EXPORT_PROPERTY(client, client_t, startup_id, lua_pushstring)
-LUA_OBJECT_EXPORT_PROPERTY(client, client_t, border_width, lua_pushinteger)
 LUA_OBJECT_EXPORT_PROPERTY(client, client_t, border_color, luaA_pushcolor)
+
+static int
+luaA_client_get_border_width(lua_State *L, client_t *c)
+{
+    lua_pushinteger(L, client_get_border_width(c));
+    return 1;
+}
 
 static int
 luaA_client_get_content(lua_State *L, client_t *c)
@@ -3336,9 +3357,9 @@ luaA_client_set_shape_bounding(lua_State *L, client_t *c)
     if(!lua_isnil(L, -1))
         surf = (cairo_surface_t *)lua_touserdata(L, -1);
     xwindow_set_shape(c->frame_window,
-            c->geometry.width + (c->border_width * 2),
-            c->geometry.height + (c->border_width * 2),
-            XCB_SHAPE_SK_BOUNDING, surf, -c->border_width);
+            c->geometry.width + (client_get_border_width(c) * 2),
+            c->geometry.height + (client_get_border_width(c) * 2),
+            XCB_SHAPE_SK_BOUNDING, surf, -client_get_border_width(c));
     luaA_object_emit_signal(L, -3, "property::shape_bounding", 0);
     return 0;
 }
@@ -3420,9 +3441,9 @@ luaA_client_set_shape_input(lua_State *L, client_t *c)
     if(!lua_isnil(L, -1))
         surf = (cairo_surface_t *)lua_touserdata(L, -1);
     xwindow_set_shape(c->frame_window,
-            c->geometry.width + (c->border_width * 2),
-            c->geometry.height + (c->border_width * 2),
-            XCB_SHAPE_SK_INPUT, surf, -c->border_width);
+            c->geometry.width + (client_get_border_width(c) * 2),
+            c->geometry.height + (client_get_border_width(c) * 2),
+            XCB_SHAPE_SK_INPUT, surf, -client_get_border_width(c));
     luaA_object_emit_signal(L, -3, "property::shape_input", 0);
     return 0;
 }
