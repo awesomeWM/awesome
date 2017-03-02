@@ -42,6 +42,12 @@ struct drawin_t
     area_t geometry;
     /** Do we have a pending geometry change that still needs to be applied? */
     bool geometry_dirty;
+    /** Border color */
+    color_t border_color;
+    /** Border width */
+    uint16_t border_width;
+    /** Do we have pending border changes? */
+    bool border_need_update;
 };
 
 ARRAY_FUNCS(drawin_t *, drawin, DO_NOTHING)

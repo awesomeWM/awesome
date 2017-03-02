@@ -68,6 +68,14 @@
  */
 
 /**
+ * @signal property::border_color
+ */
+
+/**
+ * @signal property::border_width
+ */
+
+/**
  * @signal property::geometry
  */
 
@@ -222,13 +230,26 @@ drawin_apply_moveresize(drawin_t *w)
     client_restore_enterleave_events();
 }
 
+static void
+drawin_border_refresh(drawin_t *w)
+{
+    if(!w->border_need_update)
+        return;
+    w->border_need_update = false;
+    xwindow_set_border_color(w->window, &w->border_color);
+    if(w->window)
+        xcb_configure_window(globalconf.connection, w->window,
+                             XCB_CONFIG_WINDOW_BORDER_WIDTH,
+                             (uint32_t[]) { w->border_width });
+}
+
 void
 drawin_refresh(void)
 {
     foreach(item, globalconf.drawins)
     {
         drawin_apply_moveresize(*item);
-        window_border_refresh((window_t *) *item);
+        drawin_border_refresh(*item);
     }
 }
 
@@ -476,10 +497,58 @@ luaA_drawin_geometry(lua_State *L)
     return luaA_pusharea(L, drawin->geometry);
 }
 
+/** Set the drawin border color.
+ * \param L The Lua VM state.
+ * \param window The drawin object.
+ * \return The number of elements pushed on stack.
+ */
+static int
+luaA_drawin_set_border_color(lua_State *L, drawin_t *d)
+{
+    size_t len;
+    const char *color_name = luaL_checklstring(L, -1, &len);
+
+    if(color_name &&
+       color_init_reply(color_init_unchecked(&d->border_color, color_name, len)))
+    {
+        d->border_need_update = true;
+        luaA_object_emit_signal(L, -3, "property::border_color", 0);
+    }
+
+    return 0;
+}
+
+/** Set a drawin border width.
+ * \param L The Lua VM state.
+ * \param idx The drawin index.
+ * \param width The border width.
+ */
+static void
+drawin_set_border_width(lua_State *L, int idx, int width)
+{
+    drawin_t *d = luaA_checkudata(L, idx, &drawin_class);
+
+    if(width == d->border_width || width < 0)
+        return;
+
+    d->border_need_update = true;
+    d->border_width = width;
+
+    luaA_object_emit_signal(L, idx, "property::border_width", 0);
+}
+
+static int
+luaA_drawin_set_border_width(lua_State *L, drawin_t *d)
+{
+    drawin_set_border_width(L, -3, round(luaA_checknumber_range(L, -1, 0, MAX_X11_SIZE)));
+    return 0;
+}
 
 LUA_OBJECT_EXPORT_PROPERTY(drawin, drawin_t, ontop, lua_pushboolean)
 LUA_OBJECT_EXPORT_PROPERTY(drawin, drawin_t, cursor, lua_pushstring)
 LUA_OBJECT_EXPORT_PROPERTY(drawin, drawin_t, visible, lua_pushboolean)
+LUA_OBJECT_EXPORT_PROPERTY(drawin, drawin_t, border_width, lua_pushinteger)
+LUA_OBJECT_EXPORT_PROPERTY(drawin, drawin_t, border_color, luaA_pushcolor)
 
 static int
 luaA_drawin_set_x(lua_State *L, drawin_t *drawin)
@@ -806,6 +875,14 @@ drawin_class_setup(lua_State *L)
                             (lua_class_propfunc_t) luaA_drawin_set_shape_input,
                             (lua_class_propfunc_t) luaA_drawin_get_shape_input,
                             (lua_class_propfunc_t) luaA_drawin_set_shape_input);
+    luaA_class_add_property(&drawin_class, "border_width",
+                            (lua_class_propfunc_t) luaA_drawin_set_border_width,
+                            (lua_class_propfunc_t) luaA_drawin_get_border_width,
+                            (lua_class_propfunc_t) luaA_drawin_set_border_width);
+    luaA_class_add_property(&drawin_class, "border_color",
+                            (lua_class_propfunc_t) luaA_drawin_set_border_color,
+                            (lua_class_propfunc_t) luaA_drawin_get_border_color,
+                            (lua_class_propfunc_t) luaA_drawin_set_border_color);
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

@@ -143,6 +143,12 @@ struct client_t
         /** The drawable for this bar. */
         drawable_t *drawable;
     } titlebar[CLIENT_TITLEBAR_COUNT];
+    /** Border color */
+    color_t border_color;
+    /** Border width */
+    uint16_t border_width;
+    /** Do we have pending border changes? */
+    bool border_need_update;
 };
 
 ARRAY_FUNCS(client_t *, client, DO_NOTHING)
@@ -189,6 +195,7 @@ void client_set_group_window(lua_State *, int, xcb_window_t);
 void client_set_icon(client_t *, cairo_surface_t *);
 void client_set_icon_from_pixmaps(client_t *, xcb_pixmap_t, xcb_pixmap_t);
 void client_set_skip_taskbar(lua_State *, int, bool);
+void client_set_border_width(lua_State *, int, int);
 void client_focus(client_t *);
 bool client_focus_update(client_t *);
 bool client_hasproto(client_t *, xcb_atom_t);
