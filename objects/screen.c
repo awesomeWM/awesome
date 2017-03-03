@@ -1010,7 +1010,14 @@ screen_t *
 screen_get_primary(void)
 {
     if (!globalconf.primary_screen && globalconf.screens.len > 0)
+    {
         globalconf.primary_screen = globalconf.screens.tab[0];
+
+        lua_State *L = globalconf_get_lua_State();
+        luaA_object_push(L, globalconf.primary_screen);
+        luaA_object_emit_signal(L, -1, "primary_changed", 0);
+        lua_pop(L, 1);
+    }
     return globalconf.primary_screen;
 }
 
