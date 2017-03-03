@@ -27,7 +27,7 @@ local capi =
     mouse = mouse
 }
 local gears_debug = require("gears.debug")
-local floor = math.floor
+local gmath = require("gears.math")
 
 local util = {}
 util.table = {}
@@ -112,16 +112,15 @@ function util.ensure_pango_color(color, fallback)
 end
 
 --- Make i cycle.
+-- @deprecated util.cycle
 -- @param t A length. Must be greater than zero.
 -- @param i An absolute index to fit into #t.
 -- @return An integer in (1, t) or nil if t is less than or equal to zero.
+-- @see gears.math
 function util.cycle(t, i)
-    if t < 1 then return end
-    i = i % t
-    if i == 0 then
-        i = t
-    end
-    return i
+    util.deprecate("gears.math.cycle", {deprecated_in=5})
+
+    return gmath.cycle(t, i)
 end
 
 --- Create a directory
@@ -293,49 +292,19 @@ function util.is_dir(path)
     return Gio.File.new_for_path(path):query_file_type({}) == "DIRECTORY"
 end
 
-local function subset_mask_apply(mask, set)
-    local ret = {}
-    for i = 1, #set do
-        if mask[i] then
-            rtable.insert(ret, set[i])
-        end
-    end
-    return ret
-end
-
-local function subset_next(mask)
-    local i = 1
-    while i <= #mask and mask[i] do
-        mask[i] = false
-        i = i + 1
-    end
-
-    if i <= #mask then
-        mask[i] = 1
-        return true
-    end
-    return false
-end
-
 --- Return all subsets of a specific set.
 -- This function, giving a set, will return all subset it.
 -- For example, if we consider a set with value { 10, 15, 34 },
 -- it will return a table containing 2^n set:
 -- { }, { 10 }, { 15 }, { 34 }, { 10, 15 }, { 10, 34 }, etc.
+-- @deprecated util.subsets
 -- @param set A set.
 -- @return A table with all subset.
+-- @see gears.math
 function util.subsets(set)
-    local mask = {}
-    local ret = {}
-    for i = 1, #set do mask[i] = false end
+    util.deprecate("gears.math.subsets", {deprecated_in=5})
 
-    -- Insert the empty one
-    rtable.insert(ret, {})
-
-    while subset_next(mask) do
-        rtable.insert(ret, subset_mask_apply(mask, set))
-    end
-    return ret
+    return gmath.subsets(set)
 end
 
 --- Get the nearest rectangle in the given direction. Every rectangle is specified as a table
@@ -585,10 +554,14 @@ function util.query_to_pattern(q)
 end
 
 --- Round a number to an integer.
+-- @deprecated util.round
 -- @tparam number x
 -- @treturn integer
+-- @see gears.math
 function util.round(x)
-    return floor(x + 0.5)
+    util.deprecate("gears.math.round", {deprecated_in=5})
+
+    return gmath.round(x)
 end
 
 return util

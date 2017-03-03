@@ -3,6 +3,9 @@
 -- is not safe to reload and yet Busted manages to do this.
 require("lgi")
 
+-- Always show deprecated messages
+_G.awesome = {version = "v9999"}
+
 -- "fix" some intentional beautiful breakage done by .travis.yml
 require("beautiful").init{}
 
