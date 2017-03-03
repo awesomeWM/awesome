@@ -388,10 +388,13 @@ end
 -- @param scr Screen.
 function menubar.show(scr)
     if not instance then
-        menubar.refresh(scr)
         -- Add to each category the name of its key in all_categories
         for k, v in pairs(menubar.menu_gen.all_categories) do
             v.key = k
+        end
+
+        if menubar.cache_entries then
+            menubar.refresh(scr)
         end
 
         instance = {
