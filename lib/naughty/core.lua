@@ -6,6 +6,8 @@
 -- @module naughty
 ----------------------------------------------------------------------------
 
+--luacheck: no max line length
+
 -- Package environment
 local pairs = pairs
 local table = table

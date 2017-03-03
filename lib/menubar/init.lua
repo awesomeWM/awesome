@@ -111,7 +111,10 @@ end
 -- @return item name, item background color, background image, item icon.
 local function label(o)
     if o.focused then
-        return colortext(o.name, (theme.menu_fg_focus or theme.fg_focus)), (theme.menu_bg_focus or theme.bg_focus), nil, o.icon
+        return colortext(o.name, (theme.menu_fg_focus or theme.fg_focus)),
+               (theme.menu_bg_focus or theme.bg_focus),
+               nil,
+               o.icon
     else
         return o.name, (theme.menu_bg_normal or theme.bg_normal), nil, o.icon
     end

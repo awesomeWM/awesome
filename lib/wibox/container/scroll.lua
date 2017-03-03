@@ -127,7 +127,11 @@ local function calculate_info(self, context, width, height)
 
         local x, y = 0, 0
         local function get_scroll_offset(size, visible_size)
-            return self._private.step_function(self._private.timer:elapsed(), size, visible_size, self._private.speed, self._private.extra_space)
+            return self._private.step_function(self._private.timer:elapsed(),
+                                               size,
+                                               visible_size,
+                                               self._private.speed,
+                                               self._private.extra_space)
         end
         if self._private.dir == "h" then
             x = -get_scroll_offset(surface_width - extra, width)

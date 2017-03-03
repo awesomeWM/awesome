@@ -13,11 +13,13 @@ files["awesomerc.lua"].allow_defined_top = true
 -- This file itself
 files[".luacheckrc"].ignore = {"111", "112", "131"}
 
+-- Theme files, ignore max line length
+files["themes/*"].ignore = {"631"}
+
 -- Global objects defined by the C code
 read_globals = {
     "awesome",
     "button",
-    "client",
     "dbus",
     "drawable",
     "drawin",
@@ -28,6 +30,8 @@ read_globals = {
     "selection",
     "tag",
     "window",
+    "table.unpack",
+    "math.atan2",
 }
 
 -- screen may not be read-only, because newer luacheck versions complain about

@@ -145,7 +145,8 @@ function util.escape(text)
     return text and text:gsub("['&<>\"]", xml_entity_names) or nil
 end
 
-local xml_entity_chars = { lt = "<", gt = ">", nbsp = " ", quot = "\"", apos = "'", ndash = "-", mdash = "-", amp = "&" };
+local xml_entity_chars = { lt = "<", gt = ">", nbsp = " ", quot = "\"", apos = "'", ndash = "-", mdash = "-",
+    amp = "&" };
 --- Unescape a string from entities.
 -- @param text Text to unescape.
 -- @return Unescaped text.
