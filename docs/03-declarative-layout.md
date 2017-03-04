@@ -41,8 +41,16 @@ configurable rules.
 Code:
 
     s.mywibox : setup {
-        s == screen.primary and my_first_widget, -- Only display on primary screen
-        s.index == 2 and my_second_widget, -- Only display on screen 2
+        {
+            layout = awful.widget.only_on_screen,
+            screen = "primary", -- Only display on primary screen
+            my_first_widget,
+        },
+        {
+            layout = awful.widget.only_on_screen,
+            screen = 2, -- Only display on screen 2
+            my_second_widget,
+        },
         my_third_widget, -- Displayed on all screens
         { -- Add a background color/pattern for my_fourth_widget
               my_fourth_widget,
@@ -53,10 +61,8 @@ Code:
     }
 
 
-In this example `s == screen.primary` is an inline expression. In the default
-`rc.lua`, there is an `s` variable represent to define the current screen. Any
-Lua logic expression can be used as long as it returns a valid widget or a
-declarative layout, or `nil`.
+This examples uses the `awful.widget.only_on_screen` container to display
+widgets only on some screens.
 
 ### Composite widgets
 
