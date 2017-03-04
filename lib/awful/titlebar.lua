@@ -471,7 +471,9 @@ end
 --- Create a new minimize button for a client.
 -- @param c The client for which the button is wanted.
 function titlebar.widget.minimizebutton(c)
-    local widget = titlebar.widget.button(c, "minimize", function() return "" end, function(cl) cl.minimized = not cl.minimized end)
+    local widget = titlebar.widget.button(c, "minimize",
+                                          function() return "" end,
+                                          function(cl) cl.minimized = not cl.minimized end)
     c:connect_signal("property::minimized", widget.update)
     return widget
 end
@@ -485,7 +487,9 @@ end
 --- Create a new ontop button for a client.
 -- @param c The client for which the button is wanted.
 function titlebar.widget.ontopbutton(c)
-    local widget = titlebar.widget.button(c, "ontop", function(cl) return cl.ontop end, function(cl, state) cl.ontop = not state end)
+    local widget = titlebar.widget.button(c, "ontop",
+                                          function(cl) return cl.ontop end,
+                                          function(cl, state) cl.ontop = not state end)
     c:connect_signal("property::ontop", widget.update)
     return widget
 end
@@ -493,7 +497,9 @@ end
 --- Create a new sticky button for a client.
 -- @param c The client for which the button is wanted.
 function titlebar.widget.stickybutton(c)
-    local widget = titlebar.widget.button(c, "sticky", function(cl) return cl.sticky end, function(cl, state) cl.sticky = not state end)
+    local widget = titlebar.widget.button(c, "sticky",
+                                          function(cl) return cl.sticky end,
+                                          function(cl, state) cl.sticky = not state end)
     c:connect_signal("property::sticky", widget.update)
     return widget
 end

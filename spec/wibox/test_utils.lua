@@ -76,7 +76,11 @@ local function widget_layout(state, arguments)
     return false
 end
 say:set("assertion.widget_layout.positive", "Expected:\n%s\nbut got:\n%s\nwhen offering (%s, %s) to widget")
-assert:register("assertion", "widget_layout", widget_layout, "assertion.widget_layout.positive", "assertion.widget_layout.positive")
+assert:register("assertion",
+                "widget_layout",
+                widget_layout,
+                "assertion.widget_layout.positive",
+                "assertion.widget_layout.positive")
 -- }}}
 
 return {

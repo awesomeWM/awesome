@@ -117,7 +117,8 @@ local function mouse_resize_handler(c, _, _, _, orientation)
 
                                       local geom = c:geometry()
 
-                                      -- we have to make sure we're not on the last visible client where we have to use different settings.
+                                      -- we have to make sure we're not on the last visible
+                                      -- client where we have to use different settings.
                                       local wfact
                                       local wfact_x, wfact_y
                                       if (geom.y+geom.height+15) > (wa.y+wa.height) then
@@ -265,7 +266,8 @@ local function do_tile(param, orientation)
             if not data[0] then
                 data[0] = {}
             end
-            coord = coord + tile_group(gs, cls, wa, orientation, data[0], {first=1, last=nmaster, coord = coord, size = size})
+            coord = coord + tile_group(gs, cls, wa, orientation, data[0],
+                                       {first=1, last=nmaster, coord = coord, size = size})
         end
 
         if not place_master and nother > 0 then
@@ -285,7 +287,8 @@ local function do_tile(param, orientation)
                 if not data[i] then
                     data[i] = {}
                 end
-                coord = coord + tile_group(gs, cls, wa, orientation, data[i], { first = first, last = last, coord = coord, size = size })
+                coord = coord + tile_group(gs, cls, wa, orientation, data[i],
+                                           { first = first, last = last, coord = coord, size = size })
             end
         end
         place_master = not place_master

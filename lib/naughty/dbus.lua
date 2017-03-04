@@ -105,98 +105,99 @@ local function convert_icon(w, h, rowstride, channels, data)
     return cairo.ImageSurface.create_for_data(tcat(rows), format, w, h, stride)
 end
 
-capi.dbus.connect_signal("org.freedesktop.Notifications", function (data, appname, replaces_id, icon, title, text, actions, hints, expire)
-    local args = { }
-    if data.member == "Notify" then
-        if text ~= "" then
-            args.text = text
-            if title ~= "" then
-                args.title = title
-            end
-        else
-            if title ~= "" then
-                args.text = title
+capi.dbus.connect_signal("org.freedesktop.Notifications",
+    function (data, appname, replaces_id, icon, title, text, actions, hints, expire)
+        local args = { }
+        if data.member == "Notify" then
+            if text ~= "" then
+                args.text = text
+                if title ~= "" then
+                    args.title = title
+                end
             else
-                return
+                if title ~= "" then
+                    args.text = title
+                else
+                    return
+                end
             end
-        end
-        if appname ~= "" then
-            args.appname = appname
-        end
-        for _, obj in pairs(dbus.config.mapping) do
-            local filter, preset = obj[1], obj[2]
-            if (not filter.urgency or filter.urgency == hints.urgency) and
-               (not filter.category or filter.category == hints.category) and
-               (not filter.appname or filter.appname == appname) then
-                   args.preset = util.table.join(args.preset, preset)
+            if appname ~= "" then
+                args.appname = appname
             end
-        end
-        local preset = args.preset or naughty.config.defaults
-        local notification
-        if actions then
-            args.actions = {}
+            for _, obj in pairs(dbus.config.mapping) do
+                local filter, preset = obj[1], obj[2]
+                if (not filter.urgency or filter.urgency == hints.urgency) and
+                (not filter.category or filter.category == hints.category) and
+                (not filter.appname or filter.appname == appname) then
+                    args.preset = util.table.join(args.preset, preset)
+                end
+            end
+            local preset = args.preset or naughty.config.defaults
+            local notification
+            if actions then
+                args.actions = {}
 
-            for i = 1,#actions,2 do
-                local action_id = actions[i]
-                local action_text = actions[i + 1]
+                for i = 1,#actions,2 do
+                    local action_id = actions[i]
+                    local action_text = actions[i + 1]
 
-                if action_id == "default" then
-                    args.run = function()
-                        sendActionInvoked(notification.id, "default")
-                        naughty.destroy(notification, naughty.notificationClosedReason.dismissedByUser)
-                    end
-                elseif action_id ~= nil and action_text ~= nil then
-                    args.actions[action_text] = function()
-                        sendActionInvoked(notification.id, action_id)
-                        naughty.destroy(notification, naughty.notificationClosedReason.dismissedByUser)
+                    if action_id == "default" then
+                        args.run = function()
+                            sendActionInvoked(notification.id, "default")
+                            naughty.destroy(notification, naughty.notificationClosedReason.dismissedByUser)
+                        end
+                    elseif action_id ~= nil and action_text ~= nil then
+                        args.actions[action_text] = function()
+                            sendActionInvoked(notification.id, action_id)
+                            naughty.destroy(notification, naughty.notificationClosedReason.dismissedByUser)
+                        end
                     end
                 end
             end
-        end
-        args.destroy = function(reason)
-            sendNotificationClosed(notification.id, reason)
-        end
-        if not preset.callback or (type(preset.callback) == "function" and
-            preset.callback(data, appname, replaces_id, icon, title, text, actions, hints, expire)) then
-            if icon ~= "" then
-                args.icon = icon
-            elseif hints.icon_data or hints.image_data then
-                if hints.icon_data == nil then hints.icon_data = hints.image_data end
+            args.destroy = function(reason)
+                sendNotificationClosed(notification.id, reason)
+            end
+            if not preset.callback or (type(preset.callback) == "function" and
+                preset.callback(data, appname, replaces_id, icon, title, text, actions, hints, expire)) then
+                if icon ~= "" then
+                    args.icon = icon
+                elseif hints.icon_data or hints.image_data then
+                    if hints.icon_data == nil then hints.icon_data = hints.image_data end
 
-                -- icon_data is an array:
-                -- 1 -> width
-                -- 2 -> height
-                -- 3 -> rowstride
-                -- 4 -> has alpha
-                -- 5 -> bits per sample
-                -- 6 -> channels
-                -- 7 -> data
-                local w, h, rowstride, _, _, channels, icon_data = unpack(hints.icon_data)
-                args.icon = convert_icon(w, h, rowstride, channels, icon_data)
+                    -- icon_data is an array:
+                    -- 1 -> width
+                    -- 2 -> height
+                    -- 3 -> rowstride
+                    -- 4 -> has alpha
+                    -- 5 -> bits per sample
+                    -- 6 -> channels
+                    -- 7 -> data
+                    local w, h, rowstride, _, _, channels, icon_data = unpack(hints.icon_data)
+                    args.icon = convert_icon(w, h, rowstride, channels, icon_data)
+                end
+                if replaces_id and replaces_id ~= "" and replaces_id ~= 0 then
+                    args.replaces_id = replaces_id
+                end
+                if expire and expire > -1 then
+                    args.timeout = expire / 1000
+                end
+                notification = naughty.notify(args)
+                return "u", notification.id
             end
-            if replaces_id and replaces_id ~= "" and replaces_id ~= 0 then
-                args.replaces_id = replaces_id
+            return "u", "0"
+        elseif data.member == "CloseNotification" then
+            local obj = naughty.getById(appname)
+            if obj then
+            naughty.destroy(obj, naughty.notificationClosedReason.dismissedByCommand)
             end
-            if expire and expire > -1 then
-                args.timeout = expire / 1000
-            end
-            notification = naughty.notify(args)
-            return "u", notification.id
+        elseif data.member == "GetServerInfo" or data.member == "GetServerInformation" then
+            -- name of notification app, name of vender, version, specification version
+            return "s", "naughty", "s", "awesome", "s", capi.awesome.version, "s", "1.0"
+        elseif data.member == "GetCapabilities" then
+            -- We actually do display the body of the message, we support <b>, <i>
+            -- and <u> in the body and we handle static (non-animated) icons.
+            return "as", { "s", "body", "s", "body-markup", "s", "icon-static", "s", "actions" }
         end
-        return "u", "0"
-    elseif data.member == "CloseNotification" then
-        local obj = naughty.getById(appname)
-        if obj then
-           naughty.destroy(obj, naughty.notificationClosedReason.dismissedByCommand)
-        end
-    elseif data.member == "GetServerInfo" or data.member == "GetServerInformation" then
-        -- name of notification app, name of vender, version, specification version
-        return "s", "naughty", "s", "awesome", "s", capi.awesome.version, "s", "1.0"
-    elseif data.member == "GetCapabilities" then
-        -- We actually do display the body of the message, we support <b>, <i>
-        -- and <u> in the body and we handle static (non-animated) icons.
-        return "as", { "s", "body", "s", "body-markup", "s", "icon-static", "s", "actions" }
-    end
 end)
 
 capi.dbus.connect_signal("org.freedesktop.DBus.Introspectable", function (data)
