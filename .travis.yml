@@ -105,7 +105,12 @@ install:
 
   # Determine custom version.
   - export AWESOME_VERSION="${TRAVIS_BRANCH}-g$(git rev-parse --short HEAD)"
-  - 'if [ "$TRAVIS_PULL_REQUEST" != false ]; then AWESOME_VERSION="v9999-PR${TRAVIS_PULL_REQUEST}"; fi'
+  - |
+    if [ "$TRAVIS_PULL_REQUEST" != false ] && [ "$TEST_PREV_COMMITS" = 1 ]; then
+      AWESOME_VERSION="${AWESOME_VERSION}-PR${TRAVIS_PULL_REQUEST}"
+    elif [ "$TRAVIS_PULL_REQUEST" != false ]; then
+      AWESOME_VERSION="v9999-PR${TRAVIS_PULL_REQUEST}";
+    fi
   # function for codecov support
   - if [ "$DO_COVERAGE" = "codecov" ]; then travis_retry wget -O /tmp/codecov-bash https://codecov.io/bash; fi
   - |
