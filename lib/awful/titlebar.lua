@@ -79,13 +79,33 @@ local titlebar = {
 -- @param surface
 -- @see gears.surface
 
---- minimize_button_normal
+--- minimize_button_normal.
 -- @beautiful beautiful.titlebar_minimize_button_normal
+-- @param surface
+-- @see gears.surface
+
+--- minimize_button_normal_hover.
+-- @beautiful beautiful.titlebar_minimize_button_normal_hover
+-- @param surface
+-- @see gears.surface
+
+--- minimize_button_normal_press.
+-- @beautiful beautiful.titlebar_minimize_button_normal_press
 -- @param surface
 -- @see gears.surface
 
 --- close_button_normal.
 -- @beautiful beautiful.titlebar_close_button_normal
+-- @param surface
+-- @see gears.surface
+
+--- close_button_normal_hover.
+-- @beautiful beautiful.titlebar_close_button_normal_hover
+-- @param surface
+-- @see gears.surface
+
+--- close_button_normal_press.
+-- @beautiful beautiful.titlebar_close_button_normal_press
 -- @param surface
 -- @see gears.surface
 
@@ -114,8 +134,28 @@ local titlebar = {
 -- @param surface
 -- @see gears.surface
 
+--- minimize_button_focus_hover.
+-- @beautiful beautiful.titlebar_minimize_button_focus_hover
+-- @param surface
+-- @see gears.surface
+
+--- minimize_button_focus_press.
+-- @beautiful beautiful.titlebar_minimize_button_focus_press
+-- @param surface
+-- @see gears.surface
+
 --- close_button_focus.
 -- @beautiful beautiful.titlebar_close_button_focus
+-- @param surface
+-- @see gears.surface
+
+--- close_button_focus_hover.
+-- @beautiful beautiful.titlebar_close_button_focus_hover
+-- @param surface
+-- @see gears.surface
+
+--- close_button_focus_press.
+-- @beautiful beautiful.titlebar_close_button_focus_press
 -- @param surface
 -- @see gears.surface
 
@@ -134,8 +174,28 @@ local titlebar = {
 -- @param surface
 -- @see gears.surface
 
+--- floating_button_normal_active_hover.
+-- @beautiful beautiful.titlebar_floating_button_normal_active_hover
+-- @param surface
+-- @see gears.surface
+
+--- floating_button_normal_active_press.
+-- @beautiful beautiful.titlebar_floating_button_normal_active_press
+-- @param surface
+-- @see gears.surface
+
 --- maximized_button_normal_active.
 -- @beautiful beautiful.titlebar_maximized_button_normal_active
+-- @param surface
+-- @see gears.surface
+
+--- maximized_button_normal_active_hover.
+-- @beautiful beautiful.titlebar_maximized_button_normal_active_hover
+-- @param surface
+-- @see gears.surface
+
+--- maximized_button_normal_active_press.
+-- @beautiful beautiful.titlebar_maximized_button_normal_active_press
 -- @param surface
 -- @see gears.surface
 
@@ -144,8 +204,28 @@ local titlebar = {
 -- @param surface
 -- @see gears.surface
 
+--- ontop_button_normal_active_hover.
+-- @beautiful beautiful.titlebar_ontop_button_normal_active_hover
+-- @param surface
+-- @see gears.surface
+
+--- ontop_button_normal_active_press.
+-- @beautiful beautiful.titlebar_ontop_button_normal_active_press
+-- @param surface
+-- @see gears.surface
+
 --- sticky_button_normal_active.
 -- @beautiful beautiful.titlebar_sticky_button_normal_active
+-- @param surface
+-- @see gears.surface
+
+--- sticky_button_normal_active_hover.
+-- @beautiful beautiful.titlebar_sticky_button_normal_active_hover
+-- @param surface
+-- @see gears.surface
+
+--- sticky_button_normal_active_press.
+-- @beautiful beautiful.titlebar_sticky_button_normal_active_press
 -- @param surface
 -- @see gears.surface
 
@@ -154,8 +234,28 @@ local titlebar = {
 -- @param surface
 -- @see gears.surface
 
+--- floating_button_focus_active_hover.
+-- @beautiful beautiful.titlebar_floating_button_focus_active_hover
+-- @param surface
+-- @see gears.surface
+
+--- floating_button_focus_active_press.
+-- @beautiful beautiful.titlebar_floating_button_focus_active_press
+-- @param surface
+-- @see gears.surface
+
 --- maximized_button_focus_active.
 -- @beautiful beautiful.titlebar_maximized_button_focus_active
+-- @param surface
+-- @see gears.surface
+
+--- maximized_button_focus_active_hover.
+-- @beautiful beautiful.titlebar_maximized_button_focus_active_hover
+-- @param surface
+-- @see gears.surface
+
+--- maximized_button_focus_active_press.
+-- @beautiful beautiful.titlebar_maximized_button_focus_active_press
 -- @param surface
 -- @see gears.surface
 
@@ -164,8 +264,28 @@ local titlebar = {
 -- @param surface
 -- @see gears.surface
 
+--- ontop_button_focus_active_hover.
+-- @beautiful beautiful.titlebar_ontop_button_focus_active_hover
+-- @param surface
+-- @see gears.surface
+
+--- ontop_button_focus_active_press.
+-- @beautiful beautiful.titlebar_ontop_button_focus_active_press
+-- @param surface
+-- @see gears.surface
+
 --- sticky_button_focus_active.
 -- @beautiful beautiful.titlebar_sticky_button_focus_active
+-- @param surface
+-- @see gears.surface
+
+--- sticky_button_focus_active_hover.
+-- @beautiful beautiful.titlebar_sticky_button_focus_active_hover
+-- @param surface
+-- @see gears.surface
+
+--- sticky_button_focus_active_press.
+-- @beautiful beautiful.titlebar_sticky_button_focus_active_press
 -- @param surface
 -- @see gears.surface
 
@@ -174,8 +294,28 @@ local titlebar = {
 -- @param surface
 -- @see gears.surface
 
+--- floating_button_normal_inactive_hover.
+-- @beautiful beautiful.titlebar_floating_button_normal_inactive_hover
+-- @param surface
+-- @see gears.surface
+
+--- floating_button_normal_inactive_press.
+-- @beautiful beautiful.titlebar_floating_button_normal_inactive_press
+-- @param surface
+-- @see gears.surface
+
 --- maximized_button_normal_inactive.
 -- @beautiful beautiful.titlebar_maximized_button_normal_inactive
+-- @param surface
+-- @see gears.surface
+
+--- maximized_button_normal_inactive_hover.
+-- @beautiful beautiful.titlebar_maximized_button_normal_inactive_hover
+-- @param surface
+-- @see gears.surface
+
+--- maximized_button_normal_inactive_press.
+-- @beautiful beautiful.titlebar_maximized_button_normal_inactive_press
 -- @param surface
 -- @see gears.surface
 
@@ -184,8 +324,28 @@ local titlebar = {
 -- @param surface
 -- @see gears.surface
 
+--- ontop_button_normal_inactive_hover.
+-- @beautiful beautiful.titlebar_ontop_button_normal_inactive_hover
+-- @param surface
+-- @see gears.surface
+
+--- ontop_button_normal_inactive_press.
+-- @beautiful beautiful.titlebar_ontop_button_normal_inactive_press
+-- @param surface
+-- @see gears.surface
+
 --- sticky_button_normal_inactive.
 -- @beautiful beautiful.titlebar_sticky_button_normal_inactive
+-- @param surface
+-- @see gears.surface
+
+--- sticky_button_normal_inactive_hover.
+-- @beautiful beautiful.titlebar_sticky_button_normal_inactive_hover
+-- @param surface
+-- @see gears.surface
+
+--- sticky_button_normal_inactive_press.
+-- @beautiful beautiful.titlebar_sticky_button_normal_inactive_press
 -- @param surface
 -- @see gears.surface
 
@@ -194,8 +354,28 @@ local titlebar = {
 -- @param surface
 -- @see gears.surface
 
+--- floating_button_focus_inactive_hover.
+-- @beautiful beautiful.titlebar_floating_button_focus_inactive_hover
+-- @param surface
+-- @see gears.surface
+
+--- floating_button_focus_inactive_press.
+-- @beautiful beautiful.titlebar_floating_button_focus_inactive_press
+-- @param surface
+-- @see gears.surface
+
 --- maximized_button_focus_inactive.
 -- @beautiful beautiful.titlebar_maximized_button_focus_inactive
+-- @param surface
+-- @see gears.surface
+
+--- maximized_button_focus_inactive_hover.
+-- @beautiful beautiful.titlebar_maximized_button_focus_inactive_hover
+-- @param surface
+-- @see gears.surface
+
+--- maximized_button_focus_inactive_press.
+-- @beautiful beautiful.titlebar_maximized_button_focus_inactive_press
 -- @param surface
 -- @see gears.surface
 
@@ -204,8 +384,28 @@ local titlebar = {
 -- @param surface
 -- @see gears.surface
 
+--- ontop_button_focus_inactive_hover.
+-- @beautiful beautiful.titlebar_ontop_button_focus_inactive_hover
+-- @param surface
+-- @see gears.surface
+
+--- ontop_button_focus_inactive_press.
+-- @beautiful beautiful.titlebar_ontop_button_focus_inactive_press
+-- @param surface
+-- @see gears.surface
+
 --- sticky_button_focus_inactive.
 -- @beautiful beautiful.titlebar_sticky_button_focus_inactive
+-- @param surface
+-- @see gears.surface
+
+--- sticky_button_focus_inactive_hover.
+-- @beautiful beautiful.titlebar_sticky_button_focus_inactive_hover
+-- @param surface
+-- @see gears.surface
+
+--- sticky_button_focus_inactive_press.
+-- @beautiful beautiful.titlebar_sticky_button_focus_inactive_press
 -- @param surface
 -- @see gears.surface
 
@@ -421,10 +621,14 @@ function titlebar.widget.button(c, name, selector, action)
             if img ~= "" then
                 prefix = prefix .. "_"
             end
+            if ret.state ~= "" then
+                img = img .. "_"
+            end
             -- First try with a prefix based on the client's focus state,
             -- then try again without that prefix if nothing was found,
             -- and finally, try a fallback for compatibility with Awesome 3.5 themes
-            local theme = beautiful["titlebar_" .. name .. "_button_" .. prefix .. img]
+            local theme = beautiful["titlebar_" .. name .. "_button_" .. prefix .. img .. ret.state]
+                       or beautiful["titlebar_" .. name .. "_button_" .. prefix .. img]
                        or beautiful["titlebar_" .. name .. "_button_" .. img]
                        or beautiful["titlebar_" .. name .. "_button_" .. prefix .. "_inactive"]
             if theme then
@@ -433,10 +637,33 @@ function titlebar.widget.button(c, name, selector, action)
         end
         ret:set_image(img)
     end
+    ret.state = ""
     if action then
-        ret:buttons(abutton({ }, 1, nil, function() action(c, selector(c)) end))
+        ret:buttons(abutton({ }, 1, nil, function()
+            ret.state = ""
+            update()
+            action(c, selector(c))
+        end))
+    else
+        ret:buttons(abutton({ }, 1, nil, function()
+            ret.state = ""
+            update()
+        end))
     end
-
+    ret:connect_signal("mouse::enter", function()
+        ret.state = "hover"
+        update()
+    end)
+    ret:connect_signal("mouse::leave", function()
+        ret.state = ""
+        update()
+    end)
+    ret:connect_signal("button::press", function(_, _, _, b)
+        if b == 1 then
+            ret.state = "press"
+            update()
+        end
+    end)
     ret.update = update
     update()
 
