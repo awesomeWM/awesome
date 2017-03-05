@@ -95,7 +95,22 @@ naughty.config.presets = {
         bg = "#ff0000",
         fg = "#ffffff",
         timeout = 0,
-    }
+    },
+    ok = {
+        bg = "#00bb00",
+        fg = "#ffffff",
+        timeout = 5,
+    },
+    info = {
+        bg = "#0000ff",
+        fg = "#ffffff",
+        timeout = 5,
+    },
+    warn = {
+        bg = "#ffaa00",
+        fg = "#000000",
+        timeout = 10,
+    },
 }
 
 --- Defaults for `naughty.notify`.
