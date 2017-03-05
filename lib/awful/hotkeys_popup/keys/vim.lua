@@ -159,11 +159,15 @@ local vim_keys = {
     ["VIM: scroll"] = {{
         modifiers = {},
         keys = {
-            e="scroll line up",
-            y="scroll line down",
             zt="scroll cursor to the top",
             zz="scroll cursor to the center",
             zb="scroll cursor to the bottom",
+        }
+    },{
+        modifiers = {"Ctrl"},
+        keys = {
+            e="scroll line up",
+            y="scroll line down",
         }
     }},
 }
