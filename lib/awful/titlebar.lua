@@ -9,7 +9,6 @@
 local error = error
 local type = type
 local gmath = require("gears.math")
-local util = require("awful.util")
 local abutton = require("awful.button")
 local aclient = require("awful.client")
 local atooltip = require("awful.tooltip")
