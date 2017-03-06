@@ -27,6 +27,7 @@
 #include <lua.h>
 #include <glib.h> /* for GError */
 
+#include "common/array.h"
 #include "common/util.h"
 
 typedef struct area_t area_t;
@@ -68,6 +69,13 @@ a_iso2utf8(const char *str, ssize_t len, char **dest, ssize_t *dlen)
 
     return false;
 }
+
+static inline void
+cairo_surface_array_destroy_surface(cairo_surface_t **s)
+{
+    cairo_surface_destroy(*s);
+}
+DO_ARRAY(cairo_surface_t *, cairo_surface, cairo_surface_array_destroy_surface)
 
 cairo_surface_t *draw_surface_from_data(int width, int height, uint32_t *data);
 cairo_surface_t *draw_dup_image_surface(cairo_surface_t *surface);

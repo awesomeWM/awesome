@@ -676,63 +676,62 @@ ewmh_window_icon_get_unchecked(xcb_window_t w)
 }
 
 static cairo_surface_t *
-ewmh_window_icon_from_reply(xcb_get_property_reply_t *r, uint32_t preferred_size)
+ewmh_window_icon_from_reply_next(uint32_t **data, uint32_t *data_end)
 {
-    uint32_t *data, *end, *found_data = 0;
-    uint32_t found_size = 0;
+    uint32_t width, height;
+    uint64_t data_len;
+    uint32_t *icon_data;
 
-    if(!r || r->type != XCB_ATOM_CARDINAL || r->format != 32 || r->length < 2)
-        return 0;
+    if(data_end - *data <= 2)
+        return NULL;
 
-    data = (uint32_t *) xcb_get_property_value(r);
-    if (!data) return 0;
+    width = (*data)[0];
+    height = (*data)[1];
 
-    end = data + r->length;
+    /* Check that we have enough data, handling overflow */
+    data_len = width * (uint64_t) height;
+    if (width < 1 || height < 1 || data_len > (uint64_t) (data_end - *data) - 2)
+        return NULL;
 
-    /* Goes over the icon data and picks the icon that best matches the size preference.
-     * In case the size match is not exact, picks the closest bigger size if present,
-     * closest smaller size otherwise.
-     */
-    while (data + 1 < end) {
-        /* check whether the data size specified by width and height fits into the array we got */
-        uint64_t data_size = (uint64_t) data[0] * data[1];
-        if (data_size > (uint64_t) (end - data - 2)) break;
+    icon_data = *data + 2;
+    *data += 2 + data_len;
+    return draw_surface_from_data(width, height, icon_data);
+}
 
-        /* use the greater of the two dimensions to match against the preferred size */
-        uint32_t size = MAX(data[0], data[1]);
+static cairo_surface_array_t
+ewmh_window_icon_from_reply(xcb_get_property_reply_t *r)
+{
+    uint32_t *data, *data_end;
+    cairo_surface_array_t result;
+    cairo_surface_t *s;
 
-        /* pick the icon if it's a better match than the one we already have */
-        bool found_icon_too_small = found_size < preferred_size;
-        bool found_icon_too_large = found_size > preferred_size;
-        bool icon_empty = data[0] == 0 || data[1] == 0;
-        bool better_because_bigger =  found_icon_too_small && size > found_size;
-        bool better_because_smaller = found_icon_too_large &&
-            size >= preferred_size && size < found_size;
-        if (!icon_empty && (better_because_bigger || better_because_smaller || found_size == 0))
-        {
-            found_data = data;
-            found_size = size;
-        }
+    cairo_surface_array_init(&result);
+    if(!r || r->type != XCB_ATOM_CARDINAL || r->format != 32)
+        return result;
 
-        data += data_size + 2;
+    data = (uint32_t*) xcb_get_property_value(r);
+    data_end = &data[r->length];
+    if(!data)
+        return result;
+
+    while ((s = ewmh_window_icon_from_reply_next(&data, data_end)) != NULL) {
+        cairo_surface_array_push(&result, s);
     }
 
-    if (!found_data) return 0;
-
-    return draw_surface_from_data(found_data[0], found_data[1], found_data + 2);
+    return result;
 }
 
 /** Get NET_WM_ICON.
  * \param cookie The cookie.
- * \return The number of elements on stack.
+ * \return An array of icons.
  */
-cairo_surface_t *
-ewmh_window_icon_get_reply(xcb_get_property_cookie_t cookie, uint32_t preferred_size)
+cairo_surface_array_t
+ewmh_window_icon_get_reply(xcb_get_property_cookie_t cookie)
 {
     xcb_get_property_reply_t *r = xcb_get_property_reply(globalconf.connection, cookie, NULL);
-    cairo_surface_t *surface = ewmh_window_icon_from_reply(r, preferred_size);
+    cairo_surface_array_t result = ewmh_window_icon_from_reply(r);
     p_delete(&r);
-    return surface;
+    return result;
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
