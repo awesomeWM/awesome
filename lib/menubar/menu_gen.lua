@@ -20,12 +20,12 @@ local menu_gen = {}
 
 local data_dir = os.getenv("XDG_DATA_HOME")
 if not data_dir then
-    data_dir = os.getenv("HOME") .. '/.local/share/'
+    data_dir = os.getenv("HOME") .. '/.local/share'
 end
 
 --- Specifies all directories where menubar should look for .desktop
 -- files. The search is recursive.
-menu_gen.all_menu_dirs = { data_dir .. 'applications/', '/usr/share/applications/', '/usr/local/share/applications/' }
+menu_gen.all_menu_dirs = { data_dir .. '/applications/', '/usr/share/applications/', '/usr/local/share/applications/' }
 
 --- Specify the mapping of .desktop Categories section to the
 -- categories in the menubar. If "use" flag is set to false then any of
