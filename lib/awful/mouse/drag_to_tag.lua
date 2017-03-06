@@ -8,7 +8,7 @@
 ---------------------------------------------------------------------------
 
 local capi = {screen = screen, mouse = mouse}
-local util = require("awful.util")
+local gmath = require("gears.math")
 local tag = require("awful.tag")
 local resize = require("awful.mouse.resize")
 
@@ -38,11 +38,11 @@ function module.drag_to_tag(c)
     if dir then
 
         if dir == "right" then
-            local newtag = tags[util.cycle(#tags, idx + 1)]
+            local newtag = tags[gmath.cycle(#tags, idx + 1)]
             c:move_to_tag(newtag)
             tag.viewnext()
         elseif dir == "left" then
-            local newtag = tags[util.cycle(#tags, idx - 1)]
+            local newtag = tags[gmath.cycle(#tags, idx - 1)]
             c:move_to_tag(newtag)
             tag.viewprev()
         end

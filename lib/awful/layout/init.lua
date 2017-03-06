@@ -21,6 +21,7 @@ local tag = require("awful.tag")
 local client = require("awful.client")
 local ascreen = require("awful.screen")
 local timer = require("gears.timer")
+local gmath = require("gears.math")
 
 local function get_screen(s)
     return s and capi.screen[s]
@@ -121,7 +122,7 @@ function layout.inc(i, s, layouts)
             end
         end
         if curindex then
-            local newindex = util.cycle(#layouts, curindex + i)
+            local newindex = gmath.cycle(#layouts, curindex + i)
             layout.set(layouts[newindex], t)
         end
     end

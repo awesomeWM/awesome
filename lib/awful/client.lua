@@ -12,6 +12,7 @@ local spawn = require("awful.spawn")
 local set_shape = require("awful.client.shape").update.all
 local object = require("gears.object")
 local grect = require("gears.geometry").rectangle
+local gmath = require("gears.math")
 local pairs = pairs
 local type = type
 local ipairs = ipairs
@@ -178,7 +179,7 @@ function client.next(i, sel, stacked)
         for idx, c in ipairs(cls) do
             if c == sel then
                 -- Cycle
-                return cls[util.cycle(#cls, idx + i)]
+                return cls[gmath.cycle(#cls, idx + i)]
             end
         end
     end
@@ -1090,7 +1091,7 @@ end
 function client.run_or_raise(cmd, matcher, merge)
     local clients = capi.client.get()
     local findex  = util.table.hasitem(clients, capi.client.focus) or 1
-    local start   = util.cycle(#clients, findex + 1)
+    local start   = gmath.cycle(#clients, findex + 1)
 
     local c = client.iterate(matcher, start)()
     if c then
