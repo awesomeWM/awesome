@@ -9,7 +9,6 @@
 -- Grab environment we need
 local ipairs = ipairs
 local type = type
-local util = require("awful.util")
 local capi = {
     screen = screen,
     mouse  = mouse,
