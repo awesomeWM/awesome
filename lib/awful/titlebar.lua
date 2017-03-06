@@ -12,6 +12,7 @@ local util = require("awful.util")
 local abutton = require("awful.button")
 local aclient = require("awful.client")
 local atooltip = require("awful.tooltip")
+local clienticon = require("awful.widget.clienticon")
 local beautiful = require("beautiful")
 local drawable = require("wibox.drawable")
 local imagebox = require("wibox.widget.imagebox")
@@ -572,14 +573,7 @@ end
 -- @param c The client for which an icon widget should be created.
 -- @return The icon widget.
 function titlebar.widget.iconwidget(c)
-    local ret = imagebox()
-    local function update()
-        ret:set_image(c.icon)
-    end
-    c:connect_signal("property::icon", update)
-    update()
-
-    return ret
+    return clienticon(c)
 end
 
 --- Create a new button widget. A button widget displays an image and reacts to
