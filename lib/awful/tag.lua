@@ -610,7 +610,7 @@ end
 function tag.setmwfact(mwfact, t)
     util.deprecate("Use t.master_width_factor = mwfact instead of awful.tag.setmwfact")
 
-    tag.object.get_master_width_factor(t or ascreen.focused().selected_tag, mwfact)
+    tag.object.set_master_width_factor(t or ascreen.focused().selected_tag, mwfact)
 end
 
 --- Increase master width factor.
