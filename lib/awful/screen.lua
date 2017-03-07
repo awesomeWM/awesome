@@ -15,6 +15,7 @@ local capi =
     awesome = awesome,
 }
 local util = require("awful.util")
+local gmath = require("gears.math")
 local object = require("gears.object")
 local grect =  require("gears.geometry").rectangle
 
@@ -169,7 +170,7 @@ end
 -- @tparam int offset Value to add to the current focused screen index. 1 to
 --   focus the next one, -1 to focus the previous one.
 function screen.focus_relative(offset)
-    return screen.focus(util.cycle(capi.screen.count(),
+    return screen.focus(gmath.cycle(capi.screen.count(),
                                    screen.focused().index + offset))
 end
 

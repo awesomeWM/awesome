@@ -1,4 +1,5 @@
 local awful = require("awful")
+local gears = require("gears")
 local beautiful = require("beautiful")
 local test_client = require("_client")
 local unpack = unpack or table.unpack -- luacheck: globals unpack (compatibility with Lua 5.1)
@@ -8,7 +9,7 @@ local callback_called = false
 -- Magic table to store tests
 local tests = {}
 
-local tb_height = awful.util.round(beautiful.get_font_height() * 1.5)
+local tb_height = gears.math.round(beautiful.get_font_height() * 1.5)
 -- local border_width = beautiful.border_width
 
 -- Detect "manage" race conditions

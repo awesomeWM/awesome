@@ -512,7 +512,7 @@ function util.table.iterate(t, filter, start)
     return function ()
         while count < length do
             local item = t[index]
-            index = util.cycle(#t, index + 1)
+            index = gmath.cycle(#t, index + 1)
             count = count + 1
             if filter(item) then return item end
         end

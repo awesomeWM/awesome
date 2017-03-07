@@ -10,6 +10,7 @@
 local util = require("awful.util")
 local ascreen = require("awful.screen")
 local beautiful = require("beautiful")
+local gmath = require("gears.math")
 local object = require("gears.object")
 local timer = require("gears.timer")
 local pairs = pairs
@@ -1198,7 +1199,7 @@ function tag.viewidx(i, screen)
     tag.viewnone(screen)
     for k, t in ipairs(showntags) do
         if t == sel then
-            showntags[util.cycle(#showntags, k + i)].selected = true
+            showntags[gmath.cycle(#showntags, k + i)].selected = true
         end
     end
     screen:emit_signal("tag::history::update")
