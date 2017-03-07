@@ -12,7 +12,7 @@ local table = table
 local pairs = pairs
 local floor = math.floor
 local gmath = require("gears.math")
-local util = require("awful.util")
+local gtable = require("gears.table")
 
 local flex = {}
 
@@ -141,7 +141,7 @@ end
 local function get_layout(dir, widget1, ...)
     local ret = fixed[dir](widget1, ...)
 
-    util.table.crush(ret, flex, true)
+    gtable.crush(ret, flex, true)
 
     ret._private.fill_space = nil
 

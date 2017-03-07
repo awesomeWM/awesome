@@ -94,6 +94,7 @@ local layout = require("awful.layout")
 local a_screen = require("awful.screen")
 local grect = require("gears.geometry").rectangle
 local util = require("awful.util")
+local gtable = require("gears.table")
 local cairo = require( "lgi" ).cairo
 local unpack = unpack or table.unpack -- luacheck: globals unpack (compatibility with Lua 5.1)
 
@@ -357,7 +358,7 @@ area_common = function(d, new_geo, ignore_border_width, args)
     -- When using the placement composition along with the "pretend"
     -- option, it is necessary to keep a "virtual" geometry.
     if args and args.override_geometry then
-        geometry = util.table.clone(args.override_geometry)
+        geometry = gtable.clone(args.override_geometry)
     end
 
     geometry.width = geometry.width + 2 * border

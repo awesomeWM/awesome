@@ -22,7 +22,7 @@ local table = table
 local pairs = pairs
 local ipairs = ipairs
 local math = math
-local util = require("awful.util")
+local gtable = require("gears.table")
 local base = require("wibox.widget.base")
 
 local grid = { mt = {} }
@@ -868,7 +868,7 @@ local function new(orientation)
 
     local ret = base.make_widget(nil, nil, {enable_properties = true})
 
-    util.table.crush(ret, grid, true)
+    gtable.crush(ret, grid, true)
 
     ret._private.orientation = dir
     ret._private.widgets = {}

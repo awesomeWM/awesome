@@ -15,7 +15,7 @@ local color     = require( "gears.color"       )
 local base      = require( "wibox.widget.base" )
 local beautiful = require( "beautiful"         )
 local shape     = require( "gears.shape"       )
-local util      = require( "awful.util"        )
+local gtable    = require( "gears.table"       )
 
 local checkbox = {}
 
@@ -231,7 +231,7 @@ local function new(checked, args)
         enable_properties = true,
     })
 
-    util.table.crush(ret, checkbox)
+    gtable.crush(ret, checkbox)
 
     ret._private.checked = checked
     ret._private.color = args.color and color(args.color) or nil

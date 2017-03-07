@@ -20,6 +20,7 @@ local timer = require("gears.timer")
 local button = require("awful.button")
 local screen = require("awful.screen")
 local util = require("awful.util")
+local gtable = require("gears.table")
 local bt = require("beautiful")
 local wibox = require("wibox")
 local surface = require("gears.surface")
@@ -502,7 +503,7 @@ function naughty.notify(args)
     end
 
     -- gather variables together
-    local preset = util.table.join(naughty.config.defaults or {},
+    local preset = gtable.join(naughty.config.defaults or {},
         args.preset or naughty.config.presets.normal or {})
     local timeout = args.timeout or preset.timeout
     local icon = args.icon or preset.icon
@@ -622,7 +623,7 @@ function naughty.notify(args)
             local action_height = h + 2 * margin
             local action_width = w + 2 * margin
 
-            actionmarginbox:buttons(util.table.join(
+            actionmarginbox:buttons(gtable.join(
                 button({ }, 1, callback),
                 button({ }, 3, callback)
                 ))
@@ -745,7 +746,7 @@ function naughty.notify(args)
     notification.box:set_widget(completelayout)
 
     -- Setup the mouse events
-    layout:buttons(util.table.join(button({}, 1, nil, run),
+    layout:buttons(gtable.join(button({}, 1, nil, run),
                                    button({}, 3, nil, function()
                                         die(naughty.notificationClosedReason.dismissedByUser)
                                     end)))

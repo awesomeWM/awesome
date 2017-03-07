@@ -12,6 +12,7 @@ local capi = {
     keygrabber = keygrabber,
 }
 local awful = require("awful")
+local gtable = require("gears.table")
 local wibox = require("wibox")
 local beautiful = require("beautiful")
 local dpi = beautiful.xresources.apply_dpi
@@ -133,7 +134,7 @@ function widget.new(args)
         merge_duplicates = (
             args.merge_duplicates == nil
         ) and widget.merge_duplicates or args.merge_duplicates,
-        group_rules = args.group_rules or awful.util.table.clone(widget.group_rules),
+        group_rules = args.group_rules or gtable.clone(widget.group_rules),
         labels = args.labels or {
             Mod4="Super",
             Mod1="Alt",
@@ -322,7 +323,7 @@ function widget.new(args)
         local max_height_px = height - group_label_height
         local column_layouts = {}
         for _, group in ipairs(available_groups) do
-            local keys = awful.util.table.join(self._cached_awful_keys[group], self._additional_hotkeys[group])
+            local keys = gtable.join(self._cached_awful_keys[group], self._additional_hotkeys[group])
             local joined_descriptions = ""
             for i, key in ipairs(keys) do
                 joined_descriptions = joined_descriptions .. key.description .. (i~=#keys and "\n" or "")
@@ -447,7 +448,7 @@ function widget.new(args)
             height = height,
         })
         mywibox:set_widget(pages[1])
-        mywibox:buttons(awful.util.table.join(
+        mywibox:buttons(gtable.join(
                 awful.button({ }, 1, function () mywibox.visible=false end),
                 awful.button({ }, 3, function () mywibox.visible=false end)
         ))

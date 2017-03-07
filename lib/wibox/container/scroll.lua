@@ -27,7 +27,7 @@ local cache = require("gears.cache")
 local timer = require("gears.timer")
 local hierarchy = require("wibox.hierarchy")
 local base = require("wibox.widget.base")
-local util = require("awful.util")
+local gtable = require("gears.table")
 local lgi = require("lgi")
 local GLib = lgi.GLib
 
@@ -403,7 +403,7 @@ local function get_layout(dir, widget, fps, speed, extra_space, expand, max_size
     ret._private.timer = GLib.Timer()
     ret._private.scroll_timer = nil
 
-    util.table.crush(ret, scroll, true)
+    gtable.crush(ret, scroll, true)
 
     ret:set_direction(dir)
     ret:set_widget(widget)

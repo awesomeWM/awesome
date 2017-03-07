@@ -11,6 +11,7 @@
 local wibox = require("wibox")
 local button = require("awful.button")
 local util = require("awful.util")
+local gtable = require("gears.table")
 local spawn = require("awful.spawn")
 local tags = require("awful.tag")
 local keygrabber = require("awful.keygrabber")
@@ -146,7 +147,7 @@ local function item_position(_menu, child)
     if dir == "x" then  a, b = b, a  end
 
     local in_dir, other = 0, _menu[b]
-    local num = util.table.hasitem(_menu.child, child)
+    local num = gtable.hasitem(_menu.child, child)
     if num then
         for i = 0, num - 1 do
             local item = _menu.items[i]
@@ -237,19 +238,19 @@ local function grabber(_menu, _, key, event)
     if event ~= "press" then return end
 
     local sel = _menu.sel or 0
-    if util.table.hasitem(menu.menu_keys.up, key) then
+    if gtable.hasitem(menu.menu_keys.up, key) then
         local sel_new = sel-1 < 1 and #_menu.items or sel-1
         _menu:item_enter(sel_new)
-    elseif util.table.hasitem(menu.menu_keys.down, key) then
+    elseif gtable.hasitem(menu.menu_keys.down, key) then
         local sel_new = sel+1 > #_menu.items and 1 or sel+1
         _menu:item_enter(sel_new)
-    elseif sel > 0 and util.table.hasitem(menu.menu_keys.enter, key) then
+    elseif sel > 0 and gtable.hasitem(menu.menu_keys.enter, key) then
         _menu:exec(sel)
-    elseif sel > 0 and util.table.hasitem(menu.menu_keys.exec, key) then
+    elseif sel > 0 and gtable.hasitem(menu.menu_keys.exec, key) then
         _menu:exec(sel, { exec = true })
-    elseif util.table.hasitem(menu.menu_keys.back, key) then
+    elseif gtable.hasitem(menu.menu_keys.back, key) then
         _menu:hide()
-    elseif util.table.hasitem(menu.menu_keys.close, key) then
+    elseif gtable.hasitem(menu.menu_keys.close, key) then
         menu.get_root(_menu):hide()
     else
         check_access_key(_menu, key)
@@ -433,17 +434,17 @@ function menu:add(args, index)
 
 
     -- Create bindings
-    item._background:buttons(util.table.join(
+    item._background:buttons(gtable.join(
         button({}, 3, function () self:hide() end),
         button({}, 1, function ()
-            local num = util.table.hasitem(self.items, item)
+            local num = gtable.hasitem(self.items, item)
             self:item_enter(num, { mouse = true })
             self:exec(num, { exec = true, mouse = true })
         end )))
 
 
     item._mouse = function ()
-        local num = util.table.hasitem(self.items, item)
+        local num = gtable.hasitem(self.items, item)
         self:item_enter(num, { hover = true, moue = true })
     end
     item.widget:connect_signal("mouse::enter", item._mouse)
@@ -468,7 +469,7 @@ end
 -- @param num The position in the table of the menu entry to be deleted; can be also the menu entry itself
 function menu:delete(num)
     if type(num) == "table" then
-        num = util.table.hasitem(self.items, num)
+        num = gtable.hasitem(self.items, num)
     end
     local item = self.items[num]
     if not item then return end
@@ -519,15 +520,15 @@ function menu.clients(args, item_args, filter)
             c.icon }
         if item_args then
             if type(item_args) == "function" then
-                util.table.merge(cls_t[#cls_t], item_args(c))
+                gtable.merge(cls_t[#cls_t], item_args(c))
             else
-                util.table.merge(cls_t[#cls_t], item_args)
+                gtable.merge(cls_t[#cls_t], item_args)
             end
         end
     end
     args = args or {}
     args.items = args.items or {}
-    util.table.merge(args.items, cls_t)
+    gtable.merge(args.items, cls_t)
 
     local m = menu.new(args)
     m:show(args)

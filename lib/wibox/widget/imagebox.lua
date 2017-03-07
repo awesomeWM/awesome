@@ -8,7 +8,7 @@
 
 local base = require("wibox.widget.base")
 local surface = require("gears.surface")
-local util = require("awful.util")
+local gtable = require("gears.table")
 local setmetatable = setmetatable
 local type = type
 local print = print
@@ -160,7 +160,7 @@ end
 local function new(image, resize_allowed, clip_shape)
     local ret = base.make_widget(nil, nil, {enable_properties = true})
 
-    util.table.crush(ret, imagebox, true)
+    gtable.crush(ret, imagebox, true)
 
     if image then
         ret:set_image(image)

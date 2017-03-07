@@ -15,7 +15,7 @@ local table = table
 local pairs = pairs
 local floor = math.floor
 local gmath = require("gears.math")
-local util  = require("awful.util")
+local gtable = require("gears.table")
 
 local ratio = {}
 
@@ -294,7 +294,7 @@ end
 local function get_layout(dir, widget1, ...)
     local ret = flex[dir](widget1, ...)
 
-    util.table.crush(ret, ratio, true)
+    gtable.crush(ret, ratio, true)
 
     ret._private.fill_space = nil
 

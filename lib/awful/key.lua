@@ -10,7 +10,8 @@
 local setmetatable = setmetatable
 local ipairs = ipairs
 local capi = { key = key, root = root }
-local util = require("awful.util")
+local gmath = require("gears.math")
+local gtable = require("gears.table")
 
 
 
@@ -82,9 +83,9 @@ function key.new(mod, _key, press, release, data)
         release=nil
     end
     local ret = {}
-    local subsets = util.subsets(key.ignore_modifiers)
+    local subsets = gmath.subsets(key.ignore_modifiers)
     for _, set in ipairs(subsets) do
-        ret[#ret + 1] = capi.key({ modifiers = util.table.join(mod, set),
+        ret[#ret + 1] = capi.key({ modifiers = gtable.join(mod, set),
                                    key = _key })
         if press then
             ret[#ret]:connect_signal("press", function(_, ...) press(...) end)
@@ -95,7 +96,7 @@ function key.new(mod, _key, press, release, data)
     end
 
     -- append custom userdata (like description) to a hotkey
-    data = data and util.table.clone(data) or {}
+    data = data and gtable.clone(data) or {}
     data.mod = mod
     data.key = _key
     table.insert(key.hotkeys, data)
@@ -117,7 +118,7 @@ function key.match(_key, pressed_mod, pressed_key)
     -- pressed.
     for _, m in ipairs(mod) do
         -- Has it been pressed?
-        if not util.table.hasitem(pressed_mod, m) then
+        if not gtable.hasitem(pressed_mod, m) then
             -- No, so this is failure!
             return false
         end

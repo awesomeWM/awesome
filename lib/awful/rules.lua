@@ -31,7 +31,7 @@ local type = type
 local ipairs = ipairs
 local pairs = pairs
 local atag = require("awful.tag")
-local util = require("awful.util")
+local gtable = require("gears.table")
 local a_place = require("awful.placement")
 local protected_call = require("gears.protected_call")
 
@@ -352,7 +352,7 @@ function rules.high_priority_properties.new_tag(c, value, props)
     elseif ty == "table" then
         -- Assume a table of tags properties. Set the right screen, but
         -- avoid editing the original table
-        local values = value.screen and value or util.table.clone(value)
+        local values = value.screen and value or gtable.clone(value)
         values.screen = values.screen or c.screen
 
         t = atag.add(value.name or c.class or "N/A", values)
@@ -416,7 +416,7 @@ function rules.high_priority_properties.tags(c, value, props)
     if #current == 0 or (value[1] and value[1].screen ~= current[1].screen) then
         c:tags(tags)
     else
-        c:tags(util.table.merge(current, tags))
+        c:tags(gtable.merge(current, tags))
     end
 end
 

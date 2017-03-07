@@ -10,7 +10,7 @@ local unpack = unpack or table.unpack -- luacheck: globals unpack (compatibility
 local base  = require("wibox.widget.base")
 local table = table
 local pairs = pairs
-local util = require("awful.util")
+local gtable = require("gears.table")
 
 local fixed = {}
 
@@ -272,7 +272,7 @@ end
 local function get_layout(dir, widget1, ...)
     local ret = base.make_widget(nil, nil, {enable_properties = true})
 
-    util.table.crush(ret, fixed, true)
+    gtable.crush(ret, fixed, true)
 
     ret._private.dir = dir
     ret._private.widgets = {}

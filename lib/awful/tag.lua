@@ -13,6 +13,7 @@ local beautiful = require("beautiful")
 local gmath = require("gears.math")
 local object = require("gears.object")
 local timer = require("gears.timer")
+local gtable = require("gears.table")
 local pairs = pairs
 local ipairs = ipairs
 local table = table
@@ -262,7 +263,7 @@ function tag.find_fallback(screen, invalids)
     local t = invalids or scr.selected_tags
 
     for _, v in pairs(scr.tags) do
-        if not util.table.hasitem(t, v) then return v end
+        if not gtable.hasitem(t, v) then return v end
     end
 end
 
@@ -1266,7 +1267,7 @@ function tag.viewmore(tags, screen)
     screen = get_screen(screen or ascreen.focused())
     local screen_tags = screen.tags
     for _, _tag in ipairs(screen_tags) do
-        if not util.table.hasitem(tags, _tag) then
+        if not gtable.hasitem(tags, _tag) then
             _tag.selected = false
         end
     end

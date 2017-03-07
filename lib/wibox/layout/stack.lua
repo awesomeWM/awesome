@@ -18,7 +18,7 @@ local base  = require("wibox.widget.base" )
 local fixed = require("wibox.layout.fixed")
 local table = table
 local pairs = pairs
-local util  = require("awful.util")
+local gtable  = require("gears.table")
 
 local stack = {mt={}}
 
@@ -128,7 +128,7 @@ end
 local function new(...)
     local ret = fixed.horizontal(...)
 
-    util.table.crush(ret, stack, true)
+    gtable.crush(ret, stack, true)
 
     return ret
 end

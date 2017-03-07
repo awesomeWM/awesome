@@ -28,6 +28,7 @@ local base = require("wibox.widget.base")
 local color = require("gears.color")
 local beautiful = require("beautiful")
 local shape = require("gears.shape")
+local gtable = require("gears.table")
 
 local progressbar = { mt = {} }
 
@@ -437,7 +438,7 @@ function progressbar.new(args)
     pbar._private.value     = 0
     pbar._private.max_value = 1
 
-    util.table.crush(pbar, progressbar, true)
+    gtable.crush(pbar, progressbar, true)
 
     return pbar
 end

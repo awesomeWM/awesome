@@ -9,7 +9,7 @@
 local client = client
 local screen = screen
 local ipairs = ipairs
-local util = require("awful.util")
+local gtable = require("gears.table")
 local aclient = require("awful.client")
 local aplace = require("awful.placement")
 local asuit = require("awful.layout.suit")
@@ -259,7 +259,7 @@ function ewmh.geometry(c, context, hints)
     -- Now, map it to something useful
     context = context_mapper[context] or context
 
-    local props = util.table.clone(hints or {}, false)
+    local props = gtable.clone(hints or {}, false)
     props.store_geometry = props.store_geometry==nil and true or props.store_geometry
 
     -- If it is a known placement function, then apply it, otherwise let

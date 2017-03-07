@@ -8,7 +8,7 @@ local capi = {awesome = awesome}
 local setmetatable = setmetatable
 local textbox = require("wibox.widget.textbox")
 local button = require("awful.button")
-local util = require("awful.util")
+local gtable = require("gears.table")
 local widget_base = require("wibox.widget.base")
 local gdebug = require("gears.debug")
 
@@ -288,7 +288,7 @@ function keyboardlayout.new()
 
     -- Mouse bindings
     self:buttons(
-        util.table.join(button({ }, 1, self.next_layout))
+        gtable.join(button({ }, 1, self.next_layout))
     )
 
     return self

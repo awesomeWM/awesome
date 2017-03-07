@@ -8,7 +8,7 @@
 
 local setmetatable = setmetatable
 local base = require("wibox.widget.base")
-local util = require("awful.util")
+local gtable = require("gears.table")
 local math = math
 
 local constraint = { mt = {} }
@@ -144,7 +144,7 @@ end
 local function new(widget, strategy, width, height)
     local ret = base.make_widget(nil, nil, {enable_properties = true})
 
-    util.table.crush(ret, constraint, true)
+    gtable.crush(ret, constraint, true)
 
     ret:set_strategy(strategy or "max")
     ret:set_width(width)
