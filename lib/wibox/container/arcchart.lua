@@ -237,9 +237,10 @@ end
 --@DOC_wibox_container_arcchart_border_color_EXAMPLE@
 -- @property border_color
 
---- The border foreground color.
+--- The arcchart values foreground colors.
 --@DOC_wibox_container_arcchart_color_EXAMPLE@
--- @property color
+-- @property colors
+-- @tparam table values An ordered set of colors for each value in arcchart.
 
 --- The border width.
 --@DOC_wibox_container_arcchart_border_width_EXAMPLE@
@@ -269,7 +270,7 @@ end
 -- shown in table order.
 --@DOC_wibox_container_arcchart_values_EXAMPLE@
 -- @property values
--- @tparam table values An ordered set if values.
+-- @tparam table values An ordered set of values.
 -- @see value
 
 --- If the chart has rounded edges.
