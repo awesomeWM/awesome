@@ -13,7 +13,7 @@ local color = require("gears.color")
 local surface = require("gears.surface")
 local beautiful = require("beautiful")
 local cairo = require("lgi").cairo
-local util = require("awful.util")
+local gtable = require("gears.table")
 local setmetatable = setmetatable
 local type = type
 local unpack = unpack or table.unpack -- luacheck: globals unpack (compatibility with Lua 5.1)
@@ -278,7 +278,7 @@ local function new(widget, bg, shape)
         enable_properties = true,
     })
 
-    util.table.crush(ret, background, true)
+    gtable.crush(ret, background, true)
 
     ret._private.shape = shape
 

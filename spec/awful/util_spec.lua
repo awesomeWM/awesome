@@ -6,46 +6,6 @@
 local util = require("awful.util")
 
 describe("awful.util", function()
-    it("table.keys_filter", function()
-        local t = { "a", 1, function() end, false}
-        assert.is.same(util.table.keys_filter(t, "number", "function"), { 2, 3 })
-    end)
-
-    it("table.reverse", function()
-        local t = { "a", "b", c = "c", "d" }
-        assert.is.same(util.table.reverse(t), { "d", "b", "a", c = "c" })
-    end)
-
-    describe("table.iterate", function()
-        it("no filter", function()
-            local t = { "a", "b", c = "c", "d" }
-            local f = util.table.iterate(t, function() return true end)
-            assert.is.equal(f(), "a")
-            assert.is.equal(f(), "b")
-            assert.is.equal(f(), "d")
-            assert.is.equal(f(), nil)
-            assert.is.equal(f(), nil)
-        end)
-
-        it("b filter", function()
-            local t = { "a", "b", c = "c", "d" }
-            local f = util.table.iterate(t, function(i) return i == "b" end)
-            assert.is.equal(f(), "b")
-            assert.is.equal(f(), nil)
-            assert.is.equal(f(), nil)
-        end)
-
-        it("with offset", function()
-            local t = { "a", "b", c = "c", "d" }
-            local f = util.table.iterate(t, function() return true end, 2)
-            assert.is.equal(f(), "b")
-            assert.is.equal(f(), "d")
-            assert.is.equal(f(), "a")
-            assert.is.equal(f(), nil)
-            assert.is.equal(f(), nil)
-        end)
-    end)
-
     describe("quote_pattern", function()
         it("text", function()
             assert.is.equal(util.quote_pattern("text"), "text")

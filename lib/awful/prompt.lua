@@ -126,6 +126,7 @@ local util = require("awful.util")
 local beautiful = require("beautiful")
 local akey = require("awful.key")
 local debug = require('gears.debug')
+local gtable = require("gears.table")
 
 local prompt = {}
 
@@ -156,7 +157,7 @@ local function history_check_load(id, max)
 
         -- Read history file
         for line in f:lines() do
-            if util.table.hasitem(data.history[id].table, line) == nil then
+            if gtable.hasitem(data.history[id].table, line) == nil then
                 table.insert(data.history[id].table, line)
                 if #data.history[id].table >= data.history[id].max then
                     break
@@ -239,7 +240,7 @@ end
 -- @param command The command to add
 local function history_add(id, command)
     if data.history[id] and command ~= "" then
-        local index = util.table.hasitem(data.history[id].table, command)
+        local index = gtable.hasitem(data.history[id].table, command)
         if index == nil then
             table.insert(data.history[id].table, command)
 
@@ -593,7 +594,7 @@ function prompt.run(args, textbox, exe_callback, completion_callback,
         if hooks[key] then
             -- Remove caps and num lock
             for _, m in ipairs(modifiers) do
-                if not util.table.hasitem(akey.ignore_modifiers, m) then
+                if not gtable.hasitem(akey.ignore_modifiers, m) then
                     table.insert(filtered_modifiers, m)
                 end
             end

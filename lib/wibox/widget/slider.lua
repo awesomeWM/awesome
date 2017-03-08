@@ -12,7 +12,7 @@
 local setmetatable = setmetatable
 local type = type
 local color = require("gears.color")
-local util = require("awful.util")
+local gtable = require("gears.table")
 local beautiful = require("beautiful")
 local base = require("wibox.widget.base")
 local shape = require("gears.shape")
@@ -441,9 +441,9 @@ local function new(args)
         enable_properties = true,
     })
 
-    util.table.crush(ret._private, args or {})
+    gtable.crush(ret._private, args or {})
 
-    util.table.crush(ret, slider, true)
+    gtable.crush(ret, slider, true)
 
     ret:connect_signal("button::press", mouse_press)
 

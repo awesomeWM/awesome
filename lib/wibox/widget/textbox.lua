@@ -11,7 +11,7 @@ local base = require("wibox.widget.base")
 local gdebug = require("gears.debug")
 local beautiful = require("beautiful")
 local lgi = require("lgi")
-local util = require("awful.util")
+local gtable = require("gears.table")
 local Pango = lgi.Pango
 local PangoCairo = lgi.PangoCairo
 local setmetatable = setmetatable
@@ -263,7 +263,7 @@ end
 local function new(text, ignore_markup)
     local ret = base.make_widget(nil, nil, {enable_properties = true})
 
-    util.table.crush(ret, textbox, true)
+    gtable.crush(ret, textbox, true)
 
     ret._private.dpi = -1
     ret._private.ctx = PangoCairo.font_map_get_default():create_context()

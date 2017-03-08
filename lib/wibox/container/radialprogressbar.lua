@@ -14,7 +14,7 @@
 local setmetatable = setmetatable
 local base      = require("wibox.widget.base")
 local shape     = require("gears.shape"      )
-local util      = require( "awful.util"      )
+local gtable    = require( "gears.table"     )
 local color     = require( "gears.color"     )
 local beautiful = require("beautiful"        )
 
@@ -243,7 +243,7 @@ local function new(widget)
         enable_properties = true,
     })
 
-    util.table.crush(ret, radialprogressbar)
+    gtable.crush(ret, radialprogressbar)
     ret._private.max_value = 1
     ret._private.min_value = 0
 

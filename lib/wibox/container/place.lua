@@ -10,7 +10,7 @@
 
 local setmetatable = setmetatable
 local base = require("wibox.widget.base")
-local util = require("awful.util")
+local gtable = require("gears.table")
 
 local place = { mt = {} }
 
@@ -181,7 +181,7 @@ end
 local function new(widget, halign, valign)
     local ret = base.make_widget(nil, nil, {enable_properties = true})
 
-    util.table.crush(ret, place, true)
+    gtable.crush(ret, place, true)
 
     ret:set_widget(widget)
     ret:set_halign(halign)

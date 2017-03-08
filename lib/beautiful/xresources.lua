@@ -9,7 +9,7 @@
 -- Grab environment
 local awesome = awesome
 local screen = screen
-local round = require("awful.util").round
+local round = require("gears.math").round
 local gears_debug = require("gears.debug")
 
 local xresources = {}

@@ -2,10 +2,11 @@
 local runner = require("_runner")
 local awful = require("awful")
 local wibox = require("wibox")
+local gtable = require("gears.table")
 
 -- "Enable" titlebars (so that the titlebar can prevent garbage collection)
 client.connect_signal("manage", function (c)
-    local buttons = awful.util.table.join(
+    local buttons = gtable.join(
         awful.button({ }, 1, function()
             client.focus = c
             c:raise()

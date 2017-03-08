@@ -15,7 +15,7 @@ local type = type
 local string = string
 local capi = { awesome = awesome,
                dbus = dbus }
-local util = require("awful.util")
+local gtable = require("gears.table")
 local cairo = require("lgi").cairo
 
 local schar = string.char
@@ -129,7 +129,7 @@ capi.dbus.connect_signal("org.freedesktop.Notifications",
                 if (not filter.urgency or filter.urgency == hints.urgency) and
                 (not filter.category or filter.category == hints.category) and
                 (not filter.appname or filter.appname == appname) then
-                    args.preset = util.table.join(args.preset, preset)
+                    args.preset = gtable.join(args.preset, preset)
                 end
             end
             local preset = args.preset or naughty.config.defaults

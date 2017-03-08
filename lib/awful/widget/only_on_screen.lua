@@ -11,7 +11,7 @@ local type = type
 local pairs = pairs
 local setmetatable = setmetatable
 local base = require("wibox.widget.base")
-local util = require("awful.util")
+local gtable = require("gears.table")
 local capi = {
     screen = screen,
     awesome = awesome
@@ -98,7 +98,7 @@ end
 local function new(widget, s)
     local ret = base.make_widget(nil, nil, {enable_properties = true})
 
-    util.table.crush(ret, only_on_screen, true)
+    gtable.crush(ret, only_on_screen, true)
 
     ret:set_widget(widget)
     ret:set_screen(s or "primary")

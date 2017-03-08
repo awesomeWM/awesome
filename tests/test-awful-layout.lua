@@ -2,6 +2,7 @@
 -- it doesn't check if the layout are correct.
 
 local awful = require("awful")
+local gtable = require("gears.table")
 
 local first_layout = nil
 
@@ -113,10 +114,10 @@ for _ in ipairs(awful.layout.layouts) do
     if not first then
         first = true
     else
-        awful.util.table.merge(steps, {next_layout})
+        gtable.merge(steps, {next_layout})
     end
 
-    awful.util.table.merge(steps, common_steps)
+    gtable.merge(steps, common_steps)
 end
 
 require("_runner").run_steps(steps)

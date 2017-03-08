@@ -13,6 +13,7 @@ local set_shape = require("awful.client.shape").update.all
 local object = require("gears.object")
 local grect = require("gears.geometry").rectangle
 local gmath = require("gears.math")
+local gtable = require("gears.table")
 local pairs = pairs
 local type = type
 local ipairs = ipairs
@@ -291,7 +292,7 @@ end
 -- @legacylayout awful.client.setmaster
 -- @client c The window to set as master.
 function client.setmaster(c)
-    local cls = util.table.reverse(capi.client.get(c.screen))
+    local cls = gtable.reverse(capi.client.get(c.screen))
     for _, v in pairs(cls) do
         c:swap(v)
     end
@@ -540,7 +541,7 @@ end
 -- @function awful.client.getmarked
 -- @return A table with all marked clients.
 function client.getmarked()
-    local copy = util.table.clone(client.data.marked, false)
+    local copy = gtable.clone(client.data.marked, false)
 
     for _, v in pairs(copy) do
         client.property.set(v, "marked", false)
@@ -755,7 +756,7 @@ function client.restore(s)
         local ctags = c:tags()
         if c.minimized then
             for _, t in ipairs(tags) do
-                if util.table.hasitem(ctags, t) then
+                if gtable.hasitem(ctags, t) then
                     c.minimized = false
                     return c
                 end
@@ -1066,8 +1067,8 @@ end
 function client.iterate(filter, start, s)
     local clients = capi.client.get(s)
     local focused = capi.client.focus
-    start         = start or util.table.hasitem(clients, focused)
-    return util.table.iterate(clients, filter, start)
+    start         = start or gtable.hasitem(clients, focused)
+    return gtable.iterate(clients, filter, start)
 end
 
 --- Switch to a client matching the given condition if running, else spawn it.
@@ -1090,7 +1091,7 @@ end
 -- end);
 function client.run_or_raise(cmd, matcher, merge)
     local clients = capi.client.get()
-    local findex  = util.table.hasitem(clients, capi.client.focus) or 1
+    local findex  = gtable.hasitem(clients, capi.client.focus) or 1
     local start   = gmath.cycle(#clients, findex + 1)
 
     local c = client.iterate(matcher, start)()

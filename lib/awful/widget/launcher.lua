@@ -5,7 +5,7 @@
 ---------------------------------------------------------------------------
 
 local setmetatable = setmetatable
-local util = require("awful.util")
+local gtable = require("gears.table")
 local spawn = require("awful.spawn")
 local wbutton = require("awful.widget.button")
 local button = require("awful.button")
@@ -23,9 +23,9 @@ function launcher.new(args)
 
     local b
     if args.command then
-       b = util.table.join(w:buttons(), button({}, 1, nil, function () spawn(args.command) end))
+       b = gtable.join(w:buttons(), button({}, 1, nil, function () spawn(args.command) end))
     elseif args.menu then
-       b = util.table.join(w:buttons(), button({}, 1, nil, function () args.menu:toggle() end))
+       b = gtable.join(w:buttons(), button({}, 1, nil, function () args.menu:toggle() end))
     end
 
     w:buttons(b)

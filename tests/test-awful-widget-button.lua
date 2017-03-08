@@ -2,6 +2,7 @@ local runner    = require( "_runner"   )
 local wibox     = require( "wibox"     )
 local awful     = require( "awful"     )
 local beautiful = require( "beautiful" )
+local gtable    = require("gears.table")
 
 local steps = {}
 
@@ -63,7 +64,7 @@ table.insert(steps, function()
     layout = w.widget
     assert(layout)
 
-    button:buttons(awful.util.table.join(
+    button:buttons(gtable.join(
         button:buttons(),
         awful.button({}, 1, nil, function ()
             button:emit_signal_recursive("test::recursive")
