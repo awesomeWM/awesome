@@ -21,6 +21,7 @@ local beautiful = require("beautiful")
 local fixed = require("wibox.layout.fixed")
 local surface = require("gears.surface")
 local timer = require("gears.timer")
+local gcolor = require("gears.color")
 
 local function get_screen(s)
     return s and capi.screen[s]
@@ -328,7 +329,7 @@ function taglist.taglist_label(t, args)
     if not tag.getproperty(t, "icon_only") then
         text = "<span font_desc='"..font.."'>"
         if fg_color then
-            text = text .. "<span color='" .. util.ensure_pango_color(fg_color) ..
+            text = text .. "<span color='" .. gcolor.ensure_pango_color(fg_color) ..
                 "'>" .. (util.escape(t.name) or "") .. "</span>"
         else
             text = text .. (util.escape(t.name) or "")

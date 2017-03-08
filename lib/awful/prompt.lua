@@ -127,6 +127,7 @@ local beautiful = require("beautiful")
 local akey = require("awful.key")
 local debug = require('gears.debug')
 local gtable = require("gears.table")
+local gcolor = require("gears.color")
 
 local prompt = {}
 
@@ -293,8 +294,8 @@ local function prompt_text_with_cursor(args)
         text_end = util.escape(text:sub(args.cursor_pos + 1))
     end
 
-    local cursor_color = util.ensure_pango_color(args.cursor_color)
-    local text_color = util.ensure_pango_color(args.text_color)
+    local cursor_color = gcolor.ensure_pango_color(args.cursor_color)
+    local text_color = gcolor.ensure_pango_color(args.text_color)
 
     if args.highlighter then
         text_start, text_end = args.highlighter(text_start, text_end)
