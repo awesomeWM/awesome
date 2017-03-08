@@ -1452,6 +1452,16 @@ function placement.restore(d, args)
     return true
 end
 
+--- A handler to just apply the given geometry.
+--
+-- This is used in `ewmh.geometry` for the "mouse.resize" and "mouse.move"
+-- contexts.
+-- @tparam drawable d A drawable (like `client` or `wibox`)
+-- @tparam[opt={}] table args The arguments
+function placement.apply_geometry(d, args)
+    return d:geometry(args)
+end
+
 return placement
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
