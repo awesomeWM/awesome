@@ -157,7 +157,7 @@ function screen.focus_bydirection(dir, _screen)
     local target = sel:get_next_in_direction(dir)
 
     if target then
-        return target:focus()
+        return screen.focus(target)
     end
 end
 
