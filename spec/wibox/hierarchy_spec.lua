@@ -272,7 +272,8 @@ describe("wibox.hierarchy", function()
                 make_child(child, 10, 20, matrix.identity)
             })
             parent = make_widget({
-                make_child(intermediate, 10, 20, matrix.identity)
+                make_child(intermediate, 10, 20, matrix.identity),
+                make_child(child, 0, 20, matrix.identity)
             })
             unrelated = make_widget(nil)
 

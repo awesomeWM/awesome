@@ -157,8 +157,8 @@ function hierarchy_update(self, context, widget, width, height, region, matrix_t
 
     -- Update widget counts
     self._widget_counts = {}
-    if widgets_to_count[self._widget] then
-        self._widget_counts[self._widget] = 1
+    if widgets_to_count[widget] and width > 0 and height > 0 then
+        self._widget_counts[widget] = 1
     end
     for _, h in ipairs(self._children) do
         for w, count in pairs(h._widget_counts) do
