@@ -161,7 +161,7 @@ end
 -- @function wibox.widget.systray
 
 local function new(revers)
-    local ret = wbase.make_widget()
+    local ret = wbase.make_widget(nil, nil, {enable_properties = true})
 
     gtable.crush(ret, systray, true)
 
@@ -190,6 +190,10 @@ function systray.mt:__call(...)
     end
     return instance
 end
+
+--@DOC_widget_COMMON@
+
+--@DOC_object_COMMON@
 
 return setmetatable(systray, systray.mt)
 
