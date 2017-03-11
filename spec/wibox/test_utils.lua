@@ -96,6 +96,12 @@ return {
             end
         end
         w._private.widget_caches = {}
+        w:connect_signal("widget::layout_changed", function()
+            -- TODO: This is not completely correct, since our parent's caches
+            -- are not cleared. For the time being, tests just have to handle
+            -- this clearing-part themselves.
+            w._private.widget_caches = {}
+        end)
 
         return w
     end,
