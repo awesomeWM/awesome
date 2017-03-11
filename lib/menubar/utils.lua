@@ -20,6 +20,7 @@ local glib = lgi.GLib
 local wibox = require("wibox")
 local debug = require("gears.debug")
 local protected_call = require("gears.protected_call")
+local gstring = require("gears.string")
 
 local utils = {}
 
@@ -305,7 +306,7 @@ end
 -- @tparam number|screen s Screen
 -- @treturn int Text width.
 function utils.compute_text_width(text, s)
-    return utils.compute_textbox_width(wibox.widget.textbox(awful_util.escape(text)), s)
+    return utils.compute_textbox_width(wibox.widget.textbox(gstring.escape(text)), s)
 end
 
 return utils

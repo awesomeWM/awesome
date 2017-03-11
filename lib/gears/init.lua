@@ -20,6 +20,7 @@ return
     geometry = require("gears.geometry");
     math = require("gears.math");
     table = require("gears.table");
+    string = require("gears.string");
 }
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

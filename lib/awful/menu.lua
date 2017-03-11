@@ -10,7 +10,7 @@
 
 local wibox = require("wibox")
 local button = require("awful.button")
-local util = require("awful.util")
+local gstring = require("gears.string")
 local gtable = require("gears.table")
 local spawn = require("awful.spawn")
 local tags = require("awful.tag")
@@ -552,7 +552,7 @@ function menu.entry(parent, args) -- luacheck: no unused args
     local key = ''
     label:set_font(args.theme.font)
     label:set_markup(string.gsub(
-        util.escape(args.text), "&amp;(%w)",
+        gstring.xml_escape(args.text), "&amp;(%w)",
         function (l)
             key = string.lower(l)
             return "<u>" .. l .. "</u>"
