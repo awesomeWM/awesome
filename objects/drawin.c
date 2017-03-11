@@ -166,6 +166,12 @@ drawin_systray_kickout(drawin_t *w)
     }
 }
 
+void
+luaA_drawin_systray_kickout(lua_State *L)
+{
+    drawin_systray_kickout(luaA_checkudata(L, 1, &drawin_class));
+}
+
 static void
 drawin_wipe(drawin_t *w)
 {

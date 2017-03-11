@@ -5,6 +5,7 @@
 ---------------------------------------------------------------------------
 
 local wbase = require("wibox.widget.base")
+local drawable = require("wibox.drawable")
 local beautiful = require("beautiful")
 local gtable = require("gears.table")
 local capi = {
@@ -70,6 +71,13 @@ function systray:draw(context, cr, width, height)
     end
     capi.awesome.systray(context.wibox.drawin, math.ceil(x), math.ceil(y),
                          base, is_rotated, bg, reverse, spacing)
+end
+
+-- Private API. Does not appear in LDoc on purpose. This function is called
+-- some time after the systray is removed from some drawable. It's purpose is to
+-- really remove the systray.
+function systray:_kickout(context)
+    capi.awesome.systray(context.wibox.drawin)
 end
 
 function systray:fit(context, width, height)
@@ -170,6 +178,8 @@ local function new(revers)
             ret:emit_signal("widget::layout_changed")
         end
     end)
+
+    drawable._set_systray_widget(ret)
 
     return ret
 end
