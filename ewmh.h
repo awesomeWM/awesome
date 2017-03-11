@@ -28,6 +28,7 @@
 #include "strut.h"
 
 typedef struct client_t client_t;
+typedef struct cairo_surface_array_t cairo_surface_array_t;
 
 void ewmh_init(void);
 void ewmh_init_lua(void);
@@ -42,7 +43,7 @@ void ewmh_process_client_strut(client_t *);
 void ewmh_update_strut(xcb_window_t, strut_t *);
 void ewmh_update_window_type(xcb_window_t window, uint32_t type);
 xcb_get_property_cookie_t ewmh_window_icon_get_unchecked(xcb_window_t);
-cairo_surface_t *ewmh_window_icon_get_reply(xcb_get_property_cookie_t, uint32_t preferred_size);
+cairo_surface_array_t ewmh_window_icon_get_reply(xcb_get_property_cookie_t);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

@@ -382,6 +382,19 @@
  */
 
 /**
+ * The available sizes of client icons. This is a table where each entry
+ * contains the width and height of an icon.
+ *
+ * **Signal:**
+ *
+ *  * *property::icon*
+ *
+ * @property icon_sizes
+ * @tparam table sizes
+ * @see `get_icon`
+ */
+
+/**
  * Client screen.
  *
  * **Signal:**
@@ -826,6 +839,7 @@ client_wipe(client_t *c)
 {
     key_array_wipe(&c->keys);
     xcb_icccm_get_wm_protocols_reply_wipe(&c->protocols);
+    cairo_surface_array_wipe(&c->icons);
     p_delete(&c->machine);
     p_delete(&c->class);
     p_delete(&c->instance);
@@ -834,8 +848,6 @@ client_wipe(client_t *c)
     p_delete(&c->name);
     p_delete(&c->alt_name);
     p_delete(&c->startup_id);
-    if(c->icon)
-        cairo_surface_destroy(c->icon);
 }
 
 /** Change the clients urgency flag.
@@ -2319,26 +2331,37 @@ luaA_client_isvisible(lua_State *L)
     return 1;
 }
 
+/** Set client icons.
+ * \param L The Lua VM state.
+ * \param array Array of icons to set.
+ */
+void
+client_set_icons(client_t *c, cairo_surface_array_t array)
+{
+    cairo_surface_array_wipe(&c->icons);
+    c->icons = array;
+
+    lua_State *L = globalconf_get_lua_State();
+    luaA_object_push(L, c);
+    luaA_object_emit_signal(L, -1, "property::icon", 0);
+    lua_pop(L, 1);
+}
+
 /** Set a client icon.
  * \param L The Lua VM state.
  * \param cidx The client index on the stack.
  * \param iidx The image index on the stack.
  */
-void
+static void
 client_set_icon(client_t *c, cairo_surface_t *s)
 {
-    lua_State *L = globalconf_get_lua_State();
-
-    if (s)
-        s = draw_dup_image_surface(s);
-    if(c->icon)
-        cairo_surface_destroy(c->icon);
-    c->icon = s;
-
-    luaA_object_push(L, c);
-    luaA_object_emit_signal(L, -1, "property::icon", 0);
-    lua_pop(L, 1);
+    cairo_surface_array_t array;
+    cairo_surface_array_init(&array);
+    if (s && cairo_surface_status(s) == CAIRO_STATUS_SUCCESS)
+        cairo_surface_array_push(&array, draw_dup_image_surface(s));
+    client_set_icons(c, array);
 }
+
 
 /** Set a client icon.
  * \param c The client to change.
@@ -3079,10 +3102,38 @@ luaA_client_get_content(lua_State *L, client_t *c)
 static int
 luaA_client_get_icon(lua_State *L, client_t *c)
 {
-    if(!c->icon)
+    if(c->icons.len == 0)
         return 0;
+
+    /* Pick the closest available size, only picking a smaller icon if no bigger
+     * one is available.
+     */
+    cairo_surface_t *found = NULL;
+    int found_size = 0;
+    int preferred_size = globalconf.preferred_icon_size;
+
+    foreach(surf, c->icons)
+    {
+        int width = cairo_image_surface_get_width(*surf);
+        int height = cairo_image_surface_get_height(*surf);
+        int size = MAX(width, height);
+
+        /* pick the icon if it's a better match than the one we already have */
+        bool found_icon_too_small = found_size < preferred_size;
+        bool found_icon_too_large = found_size > preferred_size;
+        bool icon_empty = width == 0 || height == 0;
+        bool better_because_bigger =  found_icon_too_small && size > found_size;
+        bool better_because_smaller = found_icon_too_large &&
+            size >= preferred_size && size < found_size;
+        if (!icon_empty && (better_because_bigger || better_because_smaller || found_size == 0))
+        {
+            found = *surf;
+            found_size = size;
+        }
+    }
+
     /* lua gets its own reference which it will have to destroy */
-    lua_pushlightuserdata(L, cairo_surface_reference(c->icon));
+    lua_pushlightuserdata(L, cairo_surface_reference(found));
     return 1;
 }
 
@@ -3388,6 +3439,50 @@ luaA_client_keys(lua_State *L)
 }
 
 static int
+luaA_client_get_icon_sizes(lua_State *L)
+{
+    int index = 1;
+    client_t *c = luaA_checkudata(L, 1, &client_class);
+
+    lua_newtable(L);
+    foreach (s, c->icons) {
+        /* Create a table { width, height } and append it to the table */
+        lua_createtable(L, 2, 0);
+
+        lua_pushinteger(L, cairo_image_surface_get_width(*s));
+        lua_rawseti(L, -2, 1);
+
+        lua_pushinteger(L, cairo_image_surface_get_height(*s));
+        lua_rawseti(L, -2, 2);
+
+        lua_rawseti(L, -2, index++);
+    }
+    return 1;
+}
+
+/** Get the client's n-th icon.
+ *
+ * **Signal:**
+ *
+ *  * *property::icon*
+ *
+ * @tparam interger index The index in the list of icons to get.
+ * @treturn surface A lightuserdata for a cairo surface. This reference must be
+ * destroyed!
+ * @function get_icon
+ */
+static int
+luaA_client_get_some_icon(lua_State *L)
+{
+    client_t *c = luaA_checkudata(L, 1, &client_class);
+    int index = luaL_checkinteger(L, 2);
+    luaL_argcheck(L, (index >= 1 && index <= c->icons.len), 2,
+            "invalid icon index");
+    lua_pushlightuserdata(L, cairo_surface_reference(c->icons.tab[index-1]));
+    return 1;
+}
+
+static int
 client_tostring(lua_State *L, client_t *c)
 {
     char *name = c->name ? c->name : c->alt_name;
@@ -3472,6 +3567,7 @@ client_class_setup(lua_State *L)
         { "titlebar_right", luaA_client_titlebar_right },
         { "titlebar_bottom", luaA_client_titlebar_bottom },
         { "titlebar_left", luaA_client_titlebar_left },
+        { "get_icon", luaA_client_get_some_icon },
         { NULL, NULL }
     };
 
@@ -3570,6 +3666,10 @@ client_class_setup(lua_State *L)
                             (lua_class_propfunc_t) luaA_client_set_icon,
                             (lua_class_propfunc_t) luaA_client_get_icon,
                             (lua_class_propfunc_t) luaA_client_set_icon);
+    luaA_class_add_property(&client_class, "icon_sizes",
+                            NULL,
+                            (lua_class_propfunc_t) luaA_client_get_icon_sizes,
+                            NULL);
     luaA_class_add_property(&client_class, "ontop",
                             (lua_class_propfunc_t) luaA_client_set_ontop,
                             (lua_class_propfunc_t) luaA_client_get_ontop,

@@ -206,8 +206,6 @@ property_update_wm_hints(client_t *c, xcb_get_property_cookie_t cookie)
             else
                 client_set_icon_from_pixmaps(c, wmh.icon_pixmap, XCB_NONE);
         }
-        else
-            client_set_icon(c, NULL);
     }
 
     lua_pop(L, 1);
@@ -262,14 +260,14 @@ property_get_net_wm_icon(client_t *c)
 void
 property_update_net_wm_icon(client_t *c, xcb_get_property_cookie_t cookie)
 {
-    cairo_surface_t *surface = ewmh_window_icon_get_reply(cookie, globalconf.preferred_icon_size);
-
-    if(!surface)
+    cairo_surface_array_t array = ewmh_window_icon_get_reply(cookie);
+    if (array.len == 0)
+    {
+        cairo_surface_array_wipe(&array);
         return;
-
+    }
     c->have_ewmh_icon = true;
-    client_set_icon(c, surface);
-    cairo_surface_destroy(surface);
+    client_set_icons(c, array);
 }
 
 xcb_get_property_cookie_t
