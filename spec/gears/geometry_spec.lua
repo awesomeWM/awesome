@@ -64,8 +64,36 @@ describe("gears.geometry", function()
         assert.is.equal(3, geo.rectangle.get_by_coord(rects, 4000, 1050))
     end)
 
-    it("rectangle.get_in_direction", function()
-        pending("Write tests for gears.geometry.rectangle.get_in_direction")
+    describe("rectangle.get_in_direction", function()
+        local dir_rects = {
+            { x = 0, y = 0, width = 1, height = 1 },
+            { x = 1, y = 0, width = 1, height = 1 },
+            { x = 0, y = 1, width = 1, height = 1 },
+            { x = 1, y = 1, width = 1, height = 1 },
+        }
+
+        it("left", function()
+            assert.is.equal(1, geo.rectangle.get_in_direction("left", dir_rects, dir_rects[2]))
+        end)
+
+        it("right", function()
+            assert.is.equal(2, geo.rectangle.get_in_direction("right", dir_rects, dir_rects[1]))
+        end)
+
+        it("top", function()
+            assert.is.equal(2, geo.rectangle.get_in_direction("up", dir_rects, dir_rects[4]))
+        end)
+
+        it("bottom", function()
+            assert.is.equal(4, geo.rectangle.get_in_direction("down", dir_rects, dir_rects[2]))
+        end)
+
+        it("gets no screens if none exist in the direction", function()
+            assert.is_nil(geo.rectangle.get_in_direction("up", dir_rects, dir_rects[2]))
+            assert.is_nil(geo.rectangle.get_in_direction("down", dir_rects, dir_rects[4]))
+            assert.is_nil(geo.rectangle.get_in_direction("right", dir_rects, dir_rects[2]))
+            assert.is_nil(geo.rectangle.get_in_direction("left", dir_rects, dir_rects[1]))
+        end)
     end)
 
     describe("rectangle.get_intersection", function()
