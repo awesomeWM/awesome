@@ -121,8 +121,78 @@ describe("gears.geometry", function()
         end)
     end)
 
-    it("rectangle.area_remove", function()
-        pending("Write tests for gears.geometry.rectangle.area_remove")
+    describe("rectangle.area_remove", function()
+        -- TODO perhaps it would be better to compare against a cairo.region
+        -- than to have this overly specific tests?
+
+        local function test(expected, areas, elem)
+            local result = geo.rectangle.area_remove(areas, elem)
+            assert.is.equal(result, areas)
+            assert.is.same(expected, areas)
+        end
+
+        it("non-intersecting", function()
+            local areas = {{ x = 0, y = 0, width = 100, height = 100 }}
+            local elem = { x = -50, y = -50, width = 25, height = 25}
+            local expected = {{ x = 0, y = 0, width = 100, height = 100 }}
+            test(expected, areas, elem)
+        end)
+
+        it("center", function()
+            local areas = {{ x = 0, y = 0, width = 100, height = 100 }}
+            local elem = { x = 25, y = 25, width = 50, height = 50}
+            local expected = {
+                { x = 0, y = 0, width = 25, height = 100 },
+                { x = 0, y = 0, width = 100, height = 25 },
+                { x = 75, y = 0, width = 25, height = 100 },
+                { x = 0, y = 75, width = 100, height = 25 },
+            }
+            test(expected, areas, elem)
+        end)
+
+        it("top", function()
+            local areas = {{ x = 0, y = 0, width = 100, height = 100 }}
+            local elem = { x = 25, y = 0, width = 50, height = 50}
+            local expected = {
+                { x = 0, y = 0, width = 25, height = 100 },
+                { x = 75, y = 0, width = 25, height = 100 },
+                { x = 0, y = 50, width = 100, height = 50 },
+            }
+            test(expected, areas, elem)
+        end)
+
+        it("bottom", function()
+            local areas = {{ x = 0, y = 0, width = 100, height = 100 }}
+            local elem = { x = 25, y = 50, width = 50, height = 50}
+            local expected = {
+                { x = 0, y = 0, width = 25, height = 100 },
+                { x = 0, y = 0, width = 100, height = 50 },
+                { x = 75, y = 0, width = 25, height = 100 },
+            }
+            test(expected, areas, elem)
+        end)
+
+        it("left", function()
+            local areas = {{ x = 0, y = 0, width = 100, height = 100 }}
+            local elem = { x = 0, y = 25, width = 50, height = 50}
+            local expected = {
+                { x = 0, y = 0, width = 100, height = 25 },
+                { x = 50, y = 0, width = 50, height = 100 },
+                { x = 0, y = 75, width = 100, height = 25 },
+            }
+            test(expected, areas, elem)
+        end)
+
+        it("right", function()
+            local areas = {{ x = 0, y = 0, width = 100, height = 100 }}
+            local elem = { x = 50, y = 25, width = 50, height = 50}
+            local expected = {
+                { x = 0, y = 0, width = 50, height = 100 },
+                { x = 0, y = 0, width = 100, height = 25 },
+                { x = 0, y = 75, width = 100, height = 25 },
+            }
+            test(expected, areas, elem)
+        end)
     end)
 end)
 
