@@ -47,8 +47,8 @@ struct drawin_t
 ARRAY_FUNCS(drawin_t *, drawin, DO_NOTHING)
 
 drawin_t * drawin_getbywin(xcb_window_t);
-
 void drawin_refresh_pixmap_partial(drawin_t *, int16_t, int16_t, uint16_t, uint16_t);
+void luaA_drawin_systray_kickout(lua_State *);
 
 void drawin_class_setup(lua_State *);
 

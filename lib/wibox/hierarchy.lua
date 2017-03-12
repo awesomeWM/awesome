@@ -16,6 +16,16 @@ local no_parent = base.no_parent_I_know_what_I_am_doing
 
 local hierarchy = {}
 
+local widgets_to_count = setmetatable({}, { __mode = "k" })
+
+--- Add a widget to the list of widgets for which hierarchies should count their
+-- occurrences. Note that for correct operations, the widget must not yet be
+-- visible in any hierarchy.
+-- @param widget The widget that should be counted.
+function hierarchy.count_widget(widget)
+    widgets_to_count[widget] = true
+end
+
 local function hierarchy_new(redraw_callback, layout_callback, callback_arg)
     local result = {
         _matrix = matrix.identity,
@@ -37,7 +47,8 @@ local function hierarchy_new(redraw_callback, layout_callback, callback_arg)
             height = 0
         },
         _parent = nil,
-        _children = {}
+        _children = {},
+        _widget_counts = {},
     }
 
     function result._redraw()
@@ -143,6 +154,17 @@ function hierarchy_update(self, context, widget, width, height, region, matrix_t
         width = x2 - x1,
         height = y2 - y1
     }
+
+    -- Update widget counts
+    self._widget_counts = {}
+    if widgets_to_count[widget] and width > 0 and height > 0 then
+        self._widget_counts[widget] = 1
+    end
+    for _, h in ipairs(self._children) do
+        for w, count in pairs(h._widget_counts) do
+            self._widget_counts[w] = (self._widget_counts[w] or 0) + count
+        end
+    end
 
     -- Check which part needs to be redrawn
 
@@ -258,6 +280,14 @@ end
 -- @return List of all children hierarchies.
 function hierarchy:get_children()
     return self._children
+end
+
+--- Count how often this widget is visible inside this hierarchy. This function
+-- only works with widgets registered via `count_widget`.
+-- @param widget The widget that should be counted
+-- @return The number of times that this widget is contained in this hierarchy.
+function hierarchy:get_count(widget)
+    return self._widget_counts[widget] or 0
 end
 
 --- Does the given cairo context have an empty clip (aka "no drawing possible")?

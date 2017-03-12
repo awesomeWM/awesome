@@ -337,7 +337,10 @@ luaA_systray(lua_State *L)
 {
     systray_register();
 
-    if(lua_gettop(L) != 0)
+    if(lua_gettop(L) == 1)
+        luaA_drawin_systray_kickout(L);
+
+    if(lua_gettop(L) > 1)
     {
         size_t bg_len;
         drawin_t *w = luaA_checkudata(L, 1, &drawin_class);
