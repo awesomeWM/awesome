@@ -387,11 +387,11 @@
  *
  * **Signal:**
  *
- *  * *property::icon*
+ *  * *property::icon\_sizes*
  *
  * @property icon_sizes
  * @tparam table sizes
- * @see `get_icon`
+ * @see get_icon
  */
 
 /**

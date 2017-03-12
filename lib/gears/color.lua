@@ -333,7 +333,7 @@ function color.recolor_image(image, new_color)
 end
 
 --- Get a valid color for Pango markup
--- @param color The color.
+-- @param check_color The color to check.
 -- @tparam string fallback The color to return if the first is invalid. (default: black)
 -- @treturn string color if it is valid, else fallback.
 function color.ensure_pango_color(check_color, fallback)
