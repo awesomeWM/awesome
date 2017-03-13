@@ -108,12 +108,18 @@ end
 --   all screens are set.
 -- @param background The background color that should be used. Gets handled via
 --   gears.color. The default is black.
+-- @param scale The scale factor for the wallpaper. Default is 1 (original size).
 -- @see gears.color
-function wallpaper.centered(surf, s, background)
+function wallpaper.centered(surf, s, background, scale)
     local geom, cr = wallpaper.prepare_context(s)
     local original_surf = surf
     surf = surface.load_uncached(surf)
     background = color(background)
+
+    -- Set default scale if unset
+    if not scale then
+        scale = 1
+    end
 
     -- Fill the area with the background
     cr.operator = cairo.Operator.SOURCE
@@ -122,9 +128,12 @@ function wallpaper.centered(surf, s, background)
 
     -- Now center the surface
     local w, h = surface.get_size(surf)
-    cr:translate((geom.width - w) / 2, (geom.height - h) / 2)
-    cr:rectangle(0, 0, w, h)
+    cr:translate((geom.width - (w * scale)) / 2, (geom.height - (h * scale)) / 2)
+    cr:rectangle(0, 0, (w * scale), (h * scale))
+
     cr:clip()
+    cr:scale(scale, scale)
+
     cr:set_source_surface(surf, 0, 0)
     cr:paint()
     if surf ~= original_surf then
