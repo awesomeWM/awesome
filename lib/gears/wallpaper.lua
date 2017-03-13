@@ -117,7 +117,7 @@ function wallpaper.centered(surf, s, background, scale)
     background = color(background)
 
     -- Set default scale if unset
-    if not scale then
+    if not scale or scale <= 0 then
         scale = 1
     end
 
