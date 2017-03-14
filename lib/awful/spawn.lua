@@ -217,6 +217,7 @@ function spawn.on_snid_callback(c)
     if entry then
         local props = entry[1]
         local callback = entry[2]
+        --TODO v5: Remove this signal
         c:emit_signal("spawn::completed_with_payload", props, callback)
 
         timer.delayed_call(function()
