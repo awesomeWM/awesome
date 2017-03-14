@@ -2344,6 +2344,7 @@ client_set_icons(client_t *c, cairo_surface_array_t array)
     lua_State *L = globalconf_get_lua_State();
     luaA_object_push(L, c);
     luaA_object_emit_signal(L, -1, "property::icon", 0);
+    luaA_object_emit_signal(L, -1, "property::icon_sizes", 0);
     lua_pop(L, 1);
 }
 
