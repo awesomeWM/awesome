@@ -615,13 +615,14 @@ function titlebar.widget.button(c, name, selector, action)
             if img ~= "" then
                 prefix = prefix .. "_"
             end
-            if ret.state ~= "" then
-                img = img .. "_"
+            local state = ret.state
+            if state ~= "" then
+                state = "_" .. state
             end
             -- First try with a prefix based on the client's focus state,
             -- then try again without that prefix if nothing was found,
             -- and finally, try a fallback for compatibility with Awesome 3.5 themes
-            local theme = beautiful["titlebar_" .. name .. "_button_" .. prefix .. img .. ret.state]
+            local theme = beautiful["titlebar_" .. name .. "_button_" .. prefix .. img .. state]
                        or beautiful["titlebar_" .. name .. "_button_" .. prefix .. img]
                        or beautiful["titlebar_" .. name .. "_button_" .. img]
                        or beautiful["titlebar_" .. name .. "_button_" .. prefix .. "_inactive"]
