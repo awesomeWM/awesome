@@ -17,7 +17,8 @@ if [ -z "$STAMP" ]; then
     die "Missing STAMP: $1"
 fi
 
-CURRENT=`git describe --dirty 2>/dev/null`
+CURRENT=`git describe 2>/dev/null | awk -F- '{print(($2=="")?($1".0"):($1"."$2))}'`
+
 if [ -z "$CURRENT" ]; then
     die "git describe failed: $(git describe --dirty)."
 fi
