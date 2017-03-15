@@ -73,6 +73,73 @@ function debug.print_error(message)
     io.stderr:write(os.date("%Y-%m-%d %T E: ") .. tostring(message) .. "\n")
 end
 
+local displayed_deprecations = {}
+--- Display a deprecation notice, but only once per traceback.
+-- @param[opt] see The message to a new method / function to use.
+-- @tparam table args Extra arguments
+-- @tparam boolean args.raw Print the message as-is without the automatic context
+-- @tparam integer args.deprecated_in Print the message only when Awesome's
+--   version is equal to or greater than deprecated_in.
+function debug.deprecate(see, args)
+    args = args or {}
+    if args.deprecated_in then
+        local dep_ver = "v" .. tostring(args.deprecated_in)
+        if awesome.version < dep_ver then
+            return
+        end
+    end
+    local tb = _G.debug.traceback()
+    if displayed_deprecations[tb] then
+        return
+    end
+    displayed_deprecations[tb] = true
+
+    -- Get function name/desc from caller.
+    local info = _G.debug.getinfo(2, "n")
+    local funcname = info.name or "?"
+    local msg = "awful: function " .. funcname .. " is deprecated"
+    if see then
+        if args.raw then
+            msg = see
+        elseif string.sub(see, 1, 3) == 'Use' then
+            msg = msg .. ". " .. see
+        else
+            msg = msg .. ", see " .. see
+        end
+    end
+    debug.print_warning(msg .. ".\n" .. tb)
+end
+
+--- Create a class proxy with deprecation messages.
+-- This is useful when a class has moved somewhere else.
+-- @tparam table fallback The new class
+-- @tparam string old_name The old class name
+-- @tparam string new_name The new class name
+-- @treturn table A proxy class.
+function debug.deprecate_class(fallback, old_name, new_name)
+    local message = old_name.." has been renamed to "..new_name
+
+    local function call(_,...)
+        debug.deprecate(message, {raw = true})
+
+        return fallback(...)
+    end
+
+    local function index(_, k)
+        debug.deprecate(message, {raw = true})
+
+        return fallback[k]
+    end
+
+    local function newindex(_, k, v)
+        debug.deprecate(message, {raw = true})
+
+        fallback[k] = v
+    end
+
+    return setmetatable({}, {__call = call, __index = index, __newindex  = newindex})
+end
+
 return debug
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

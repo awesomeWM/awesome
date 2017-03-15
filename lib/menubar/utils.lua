@@ -12,14 +12,13 @@ local table = table
 local ipairs = ipairs
 local string = string
 local screen = screen
-local awful_util = require("awful.util")
 local gfs = require("gears.filesystem")
 local theme = require("beautiful")
 local lgi = require("lgi")
 local gio = lgi.Gio
 local glib = lgi.GLib
 local wibox = require("wibox")
-local debug = require("gears.debug")
+local gdebug = require("gears.debug")
 local protected_call = require("gears.protected_call")
 local gstring = require("gears.string")
 
@@ -259,14 +258,14 @@ function utils.parse_dir(dir_path, callback)
         local query = gio.FILE_ATTRIBUTE_STANDARD_NAME .. "," .. gio.FILE_ATTRIBUTE_STANDARD_TYPE
         local enum, err = f:async_enumerate_children(query, gio.FileQueryInfoFlags.NONE)
         if not enum then
-            debug.print_error(err)
+            gdebug.print_error(err)
             return
         end
         local files_per_call = 100 -- Actual value is not that important
         while true do
             local list, enum_err = enum:async_next_files(files_per_call)
             if enum_err then
-                debug.print_error(enum_err)
+                gdebug.print_error(enum_err)
                 return
             end
             for _, info in ipairs(list) do
@@ -296,7 +295,7 @@ function utils.parse_dir(dir_path, callback)
 end
 
 function utils.compute_textbox_width(textbox, s)
-    awful_util.deprecate("Use 'width, _ = textbox:get_preferred_size(s)' directly.")
+    gdebug.deprecate("Use 'width, _ = textbox:get_preferred_size(s)' directly.", {deprecated_in=4})
     s = screen[s or mouse.screen]
     local w, _ = textbox:get_preferred_size(s)
     return w

@@ -11,7 +11,6 @@ local os = os
 local assert = assert
 local load = loadstring or load -- luacheck: globals loadstring (compatibility with Lua 5.1)
 local loadfile = loadfile
-local debug = debug
 local pairs = pairs
 local type = type
 local gtable = require("gears.table")
@@ -25,7 +24,7 @@ local capi =
     awesome = awesome,
     mouse = mouse
 }
-local gears_debug = require("gears.debug")
+local gdebug = require("gears.debug")
 local gmath = require("gears.math")
 
 local util = {}
@@ -34,71 +33,32 @@ util.table = {}
 --- The default shell used when spawing processes.
 util.shell = os.getenv("SHELL") or "/bin/sh"
 
-local displayed_deprecations = {}
 --- Display a deprecation notice, but only once per traceback.
+-- @deprecated deprecate
 -- @param[opt] see The message to a new method / function to use.
 -- @tparam table args Extra arguments
 -- @tparam boolean args.raw Print the message as-is without the automatic context
 -- @tparam integer args.deprecated_in Print the message only when Awesome's
 --   version is equal to or greater than deprecated_in.
+-- @see gears.debug
 function util.deprecate(see, args)
-    args = args or {}
-    if args.deprecated_in then
-        local dep_ver = "v" .. tostring(args.deprecated_in)
-        if awesome.version < dep_ver then
-            return
-        end
-    end
-    local tb = debug.traceback()
-    if displayed_deprecations[tb] then
-        return
-    end
-    displayed_deprecations[tb] = true
+    gdebug.deprecate("gears.debug.deprecate", {deprecated_in=5})
 
-    -- Get function name/desc from caller.
-    local info = debug.getinfo(2, "n")
-    local funcname = info.name or "?"
-    local msg = "awful: function " .. funcname .. " is deprecated"
-    if see then
-        if args.raw then
-            msg = see
-        elseif string.sub(see, 1, 3) == 'Use' then
-            msg = msg .. ". " .. see
-        else
-            msg = msg .. ", see " .. see
-        end
-    end
-    gears_debug.print_warning(msg .. ".\n" .. tb)
+    return gdebug.deprecate(see, args)
 end
 
 --- Create a class proxy with deprecation messages.
 -- This is useful when a class has moved somewhere else.
+-- @deprecated deprecate_class
 -- @tparam table fallback The new class
 -- @tparam string old_name The old class name
 -- @tparam string new_name The new class name
 -- @treturn table A proxy class.
+-- @see gears.debug
 function util.deprecate_class(fallback, old_name, new_name)
-    local message = old_name.." has been renamed to "..new_name
+    gdebug.deprecate("gears.debug.deprecate_class", {deprecated_in=5})
 
-    local function call(_,...)
-        util.deprecate(message, {raw = true})
-
-        return fallback(...)
-    end
-
-    local function index(_, k)
-        util.deprecate(message, {raw = true})
-
-        return fallback[k]
-    end
-
-    local function newindex(_, k, v)
-        util.deprecate(message, {raw = true})
-
-        fallback[k] = v
-    end
-
-    return setmetatable({}, {__call = call, __index = index, __newindex  = newindex})
+    return gdebug.deprecate_class(fallback, old_name, new_name)
 end
 
 --- Get a valid color for Pango markup
@@ -108,7 +68,7 @@ end
 -- @treturn string color if it is valid, else fallback.
 -- @see gears.color
 function util.ensure_pango_color(color, fallback)
-    util.deprecate("gears.color.ensure_pango_color")
+    gdebug.deprecate("gears.color.ensure_pango_color", {deprecated_in=5})
 
     return gcolor.ensure_pango_color(color, fallback)
 end
@@ -120,7 +80,7 @@ end
 -- @return An integer in (1, t) or nil if t is less than or equal to zero.
 -- @see gears.math
 function util.cycle(t, i)
-    util.deprecate("gears.math.cycle", {deprecated_in=5})
+    gdebug.deprecate("gears.math.cycle", {deprecated_in=5})
 
     return gmath.cycle(t, i)
 end
@@ -149,7 +109,7 @@ end
 -- @return Escape text.
 -- @see gears.string
 function util.escape(text)
-    util.deprecate("gears.string.xml_escape", {deprecated_in=5})
+    gdebug.deprecate("gears.string.xml_escape", {deprecated_in=5})
 
     return gstring.xml_escape(text)
 end
@@ -160,7 +120,7 @@ end
 -- @return Unescaped text.
 -- @see gears.string
 function util.unescape(text)
-    util.deprecate("gears.string.xml_unescape", {deprecated_in=5})
+    gdebug.deprecate("gears.string.xml_unescape", {deprecated_in=5})
 
     return gstring.xml_unescape(text)
 end
@@ -340,7 +300,7 @@ end
 -- @return A table with all subset.
 -- @see gears.math
 function util.subsets(set)
-    util.deprecate("gears.math.subsets", {deprecated_in=5})
+    gdebug.deprecate("gears.math.subsets", {deprecated_in=5})
 
     return gmath.subsets(set)
 end
@@ -354,7 +314,7 @@ end
 -- @return The index for the rectangle in recttbl closer to cur in the given direction. nil if none found.
 -- @see gears.geometry
 function util.get_rectangle_in_direction(dir, recttbl, cur)
-    util.deprecate("gears.geometry.rectangle.get_in_direction")
+    gdebug.deprecate("gears.geometry.rectangle.get_in_direction", {deprecated_in=4})
 
     return grect.get_in_direction(dir, recttbl, cur)
 end
@@ -366,7 +326,7 @@ end
 -- @return A new table containing all keys from the arguments.
 -- @see gears.table
 function util.table.join(...)
-    util.deprecate("gears.table.join", {deprecated_in=5})
+    gdebug.deprecate("gears.table.join", {deprecated_in=5})
 
     return gtable.join(...)
 end
@@ -381,7 +341,7 @@ end
 -- @treturn table t (for convenience)
 -- @see gears.table
 function util.table.crush(t, set, raw)
-    util.deprecate("gears.table.crush", {deprecated_in=5})
+    gdebug.deprecate("gears.table.crush", {deprecated_in=5})
 
     return gtable.crush(t, set, raw)
 end
@@ -398,7 +358,7 @@ end
 -- @treturn table A packed table with all numeric keys
 -- @see gears.table
 function util.table.from_sparse(t)
-    util.deprecate("gears.table.from_sparse", {deprecated_in=5})
+    gdebug.deprecate("gears.table.from_sparse", {deprecated_in=5})
 
     return gtable.from_sparse(t)
 end
@@ -410,7 +370,7 @@ end
 -- @return The key were the item is found, or nil if not found.
 -- @see gears.table
 function util.table.hasitem(t, item)
-    util.deprecate("gears.table.hasitem", {deprecated_in=5})
+    gdebug.deprecate("gears.table.hasitem", {deprecated_in=5})
 
     return gtable.hasitem(t, item)
 end
@@ -423,7 +383,7 @@ end
 -- @return The string with lines wrapped to width.
 -- @see gears.string
 function util.linewrap(text, width, indent)
-    util.deprecate("gears.string.linewrap", {deprecated_in=5})
+    gdebug.deprecate("gears.string.linewrap", {deprecated_in=5})
 
     return gstring.linewrap(text, width, indent)
 end
@@ -434,7 +394,7 @@ end
 -- @treturn int Number of lines.
 -- @see gears.string
 function util.linecount(text)
-    util.deprecate("gears.string.linecount", {deprecated_in=5})
+    gdebug.deprecate("gears.string.linecount", {deprecated_in=5})
 
     return gstring.linecount(text)
 end
@@ -445,7 +405,7 @@ end
 -- @return A table with keys
 -- @see gears.table
 function util.table.keys(t)
-    util.deprecate("gears.table.keys", {deprecated_in=5})
+    gdebug.deprecate("gears.table.keys", {deprecated_in=5})
 
     return gtable.keys(t)
 end
@@ -457,7 +417,7 @@ end
 -- @return A filtered table with keys
 -- @see gears.table
 function util.table.keys_filter(t, ...)
-    util.deprecate("gears.table.keys_filter", {deprecated_in=5})
+    gdebug.deprecate("gears.table.keys_filter", {deprecated_in=5})
 
     return gtable.keys_filter(t, ...)
 end
@@ -468,7 +428,7 @@ end
 -- @return the reversed table
 -- @see gears.table
 function util.table.reverse(t)
-    util.deprecate("gears.table.reverse", {deprecated_in=5})
+    gdebug.deprecate("gears.table.reverse", {deprecated_in=5})
 
     return gtable.reverse(t)
 end
@@ -480,7 +440,7 @@ end
 -- @return a clone of t
 -- @see gears.table
 function util.table.clone(t, deep)
-    util.deprecate("gears.table.clone", {deprecated_in=5})
+    gdebug.deprecate("gears.table.clone", {deprecated_in=5})
 
     return gtable.clone(t, deep)
 end
@@ -496,7 +456,7 @@ end
 -- the table)
 -- @see gears.table
 function util.table.iterate(t, filter, start)
-    util.deprecate("gears.table.iterate", {deprecated_in=5})
+    gdebug.deprecate("gears.table.iterate", {deprecated_in=5})
 
     return gtable.iterate(t, filter, start)
 end
@@ -509,7 +469,7 @@ end
 -- @treturn table Return `t` for convenience
 -- @see gears.table
 function util.table.merge(t, set)
-    util.deprecate("gears.table.merge", {deprecated_in=5})
+    gdebug.deprecate("gears.table.merge", {deprecated_in=5})
 
     return gtable.merge(t, set)
 end
@@ -521,7 +481,7 @@ end
 -- @deprecated util.quote_pattern
 -- @see gears.string
 function util.quote_pattern(s)
-    util.deprecate("gears.string.quote_pattern", {deprecated_in=5})
+    gdebug.deprecate("gears.string.quote_pattern", {deprecated_in=5})
 
     return gstring.quote_pattern(s)
 end
@@ -531,7 +491,7 @@ end
 -- @deprecated util.query_to_pattern
 -- @see gears.string
 function util.query_to_pattern(q)
-    util.deprecate("gears.string.query_to_pattern", {deprecated_in=5})
+    gdebug.deprecate("gears.string.query_to_pattern", {deprecated_in=5})
 
     return gstring.query_to_pattern(q)
 end
@@ -542,7 +502,7 @@ end
 -- @treturn integer
 -- @see gears.math
 function util.round(x)
-    util.deprecate("gears.math.round", {deprecated_in=5})
+    gdebug.deprecate("gears.math.round", {deprecated_in=5})
 
     return gmath.round(x)
 end

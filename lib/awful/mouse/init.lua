@@ -9,7 +9,7 @@
 -- Grab environment we need
 local layout = require("awful.layout")
 local aplace = require("awful.placement")
-local util = require("awful.util")
+local gdebug = require("gears.debug")
 local type = type
 local ipairs = ipairs
 local capi =
@@ -62,7 +62,7 @@ mouse.wibox = {}
 -- @return The client object under the pointer, if one can be found.
 -- @see current_client
 function mouse.client_under_pointer()
-    util.deprecate("Use mouse.current_client instead of awful.mouse.client_under_pointer()")
+    gdebug.deprecate("Use mouse.current_client instead of awful.mouse.client_under_pointer()", {deprecated_in=4})
 
     return mouse.object.get_current_client()
 end
@@ -74,8 +74,8 @@ end
 -- @param finished_cb Deprecated, do not use
 function mouse.client.move(c, snap, finished_cb) --luacheck: no unused args
     if finished_cb then
-        util.deprecate("The mouse.client.move `finished_cb` argument is no longer"..
-            " used, please use awful.mouse.resize.add_leave_callback(f, 'mouse.move')")
+        gdebug.deprecate("The mouse.client.move `finished_cb` argument is no longer"..
+            " used, please use awful.mouse.resize.add_leave_callback(f, 'mouse.move')", {deprecated_in=4})
     end
 
     c = c or capi.client.focus
@@ -111,8 +111,8 @@ mouse.client.dragtotag = { }
 -- @deprecated awful.mouse.client.dragtotag.border
 -- @param c The client to move
 function mouse.client.dragtotag.border(c)
-    util.deprecate("Use awful.mouse.snap.drag_to_tag_enabled = true instead "..
-        "of awful.mouse.client.dragtotag.border(c). It will now be enabled.")
+    gdebug.deprecate("Use awful.mouse.snap.drag_to_tag_enabled = true instead "..
+        "of awful.mouse.client.dragtotag.border(c). It will now be enabled.", {deprecated_in=4})
 
     -- Enable drag to border
     mouse.snap.drag_to_tag_enabled = true
@@ -159,9 +159,9 @@ end
 -- @treturn number x The horizontal position
 -- @treturn number y The vertical position
 function mouse.client.corner(c, corner)
-    util.deprecate(
+    gdebug.deprecate(
         "Use awful.placement.closest_corner(mouse) or awful.placement[corner](mouse)"..
-        " instead of awful.mouse.client.corner"
+        " instead of awful.mouse.client.corner", {deprecated_in=4}
     )
 
     c = c or capi.client.focus

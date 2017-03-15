@@ -14,7 +14,7 @@ local capi =
     client = client,
     awesome = awesome,
 }
-local util = require("awful.util")
+local gdebug = require("gears.debug")
 local gmath = require("gears.math")
 local object = require("gears.object")
 local grect =  require("gears.geometry").rectangle
@@ -52,7 +52,7 @@ end
 -- @return The squared distance of the screen to the provided point.
 -- @see screen.get_square_distance
 function screen.getdistance_sq(s, x, y)
-    util.deprecate("Use s:get_square_distance(x, y) instead of awful.screen.getdistance_sq")
+    gdebug.deprecate("Use s:get_square_distance(x, y) instead of awful.screen.getdistance_sq", {deprecated_in=4})
     return screen.object.get_square_distance(s, x, y)
 end
 
@@ -184,7 +184,7 @@ end
 -- @treturn table A table with left, right, top and bottom number values.
 -- @see padding
 function screen.padding(_screen, padding)
-    util.deprecate("Use _screen.padding = value instead of awful.screen.padding")
+    gdebug.deprecate("Use _screen.padding = value instead of awful.screen.padding", {deprecated_in=4})
     if padding then
         screen.object.set_padding(_screen, padding)
     end

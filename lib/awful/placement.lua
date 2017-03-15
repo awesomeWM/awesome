@@ -93,7 +93,7 @@ local client = require("awful.client")
 local layout = require("awful.layout")
 local a_screen = require("awful.screen")
 local grect = require("gears.geometry").rectangle
-local util = require("awful.util")
+local gdebug = require("gears.debug")
 local gtable = require("gears.table")
 local cairo = require( "lgi" ).cairo
 local unpack = unpack or table.unpack -- luacheck: globals unpack (compatibility with Lua 5.1)
@@ -951,9 +951,10 @@ end
 -- @treturn table The new geometry
 function placement.next_to_mouse(d, args)
     if type(args) == "number" then
-        util.deprecate(
+        gdebug.deprecate(
             "awful.placement.next_to_mouse offset argument is deprecated"..
-            " use awful.placement.next_to_mouse(c, {offset={x=...}})"
+            " use awful.placement.next_to_mouse(c, {offset={x=...}})",
+            {deprecated_in=4}
         )
         args = nil
     end

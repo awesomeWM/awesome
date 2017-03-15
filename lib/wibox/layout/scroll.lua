@@ -5,9 +5,9 @@
 -- @copyright 2015 Uli Schlachter
 -- @classmod wibox.layout.scroll
 ---------------------------------------------------------------------------
-local util = require("awful.util")
+local gdebug = require("gears.debug")
 
-return util.deprecate_class(
+return gdebug.deprecate_class(
     require("wibox.container.scroll"),
     "wibox.layout.scroll",
     "wibox.container.scroll"

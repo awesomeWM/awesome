@@ -5,8 +5,8 @@
 -- @copyright 2016 Emmanuel Lepage Vallee
 -- @module awful.wibox
 ---------------------------------------------------------------------------
-local util = require("awful.util")
+local gdebug = require("gears.debug")
 
-return util.deprecate_class(require("awful.wibar"), "awful.wibox", "awful.wibar")
+return gdebug.deprecate_class(require("awful.wibar"), "awful.wibox", "awful.wibar")
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

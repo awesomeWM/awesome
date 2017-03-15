@@ -41,7 +41,8 @@ local function find_signal(obj, name)
 end
 
 function object.add_signal()
-    require("awful.util").deprecate("Use signals without explicitly adding them. This is now done implicitly.")
+    require("gears.debug").deprecate("Use signals without explicitly adding them. This is now done implicitly.",
+                                     {deprecated_in=4})
 end
 
 --- Connect to a signal.

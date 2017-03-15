@@ -5,9 +5,9 @@
 -- @copyright 2008-2009 Julien Danjou
 -- @classmod awful.widget.textclock
 ---------------------------------------------------------------------------
-local util = require("awful.util")
+local gdebug = require("gears.debug")
 
-return util.deprecate_class(
+return gdebug.deprecate_class(
     require("wibox.widget.textclock"),
     "awful.widget.textclock",
     "wibox.widget.textclock"
