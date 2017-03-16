@@ -20,7 +20,7 @@ local ipairs = ipairs
 local error = error
 local wibox = require("wibox")
 local beautiful = require("beautiful")
-local util = require("awful.util")
+local gdebug = require("gears.debug")
 local placement = require("awful.placement")
 
 local function get_screen(s)
@@ -256,7 +256,7 @@ end
 -- @deprecated awful.wibar.get_position
 -- @return The wibox position.
 function awfulwibar.get_position(wb)
-    util.deprecate("Use wb:get_position() instead of awful.wibar.get_position")
+    gdebug.deprecate("Use wb:get_position() instead of awful.wibar.get_position", {deprecated_in=4})
     return get_position(wb)
 end
 
@@ -266,7 +266,7 @@ end
 -- @param screen This argument is deprecated, use wb.screen directly.
 -- @deprecated awful.wibar.set_position
 function awfulwibar.set_position(wb, position, screen) --luacheck: no unused args
-    util.deprecate("Use wb:set_position(position) instead of awful.wibar.set_position")
+    gdebug.deprecate("Use wb:set_position(position) instead of awful.wibar.set_position", {deprecated_in=4})
 
     set_position(wb, position)
 end
@@ -282,8 +282,9 @@ end
 -- @see awful.placement
 -- @deprecated awful.wibar.attach
 function awfulwibar.attach(wb, position, screen) --luacheck: no unused args
-    util.deprecate("awful.wibar.attach is deprecated, use the 'attach' property"..
-        " of awful.placement. This method doesn't do anything anymore"
+    gdebug.deprecate("awful.wibar.attach is deprecated, use the 'attach' property"..
+        " of awful.placement. This method doesn't do anything anymore",
+        {deprecated_in=4}
     )
 end
 
@@ -311,12 +312,12 @@ end
 -- @see awful.placement.align
 function awfulwibar.align(wb, align, screen) --luacheck: no unused args
     if align == "center" then
-        util.deprecate("awful.wibar.align(wb, 'center' is deprecated, use 'centered'")
+        gdebug.deprecate("awful.wibar.align(wb, 'center' is deprecated, use 'centered'", {deprecated_in=4})
         align = "centered"
     end
 
     if screen then
-        util.deprecate("awful.wibar.align 'screen' argument is deprecated")
+        gdebug.deprecate("awful.wibar.align 'screen' argument is deprecated", {deprecated_in=4})
     end
 
     if placement[align] then

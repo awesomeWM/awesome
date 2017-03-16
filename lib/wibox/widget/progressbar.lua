@@ -23,7 +23,7 @@
 local setmetatable = setmetatable
 local ipairs = ipairs
 local math = math
-local util =  require("awful.util")
+local gdebug =  require("gears.debug")
 local base = require("wibox.widget.base")
 local color = require("gears.color")
 local beautiful = require("beautiful")
@@ -391,7 +391,7 @@ end
 -- @param height The height to set.
 -- @deprecated set_height
 function progressbar:set_height(height)
-    util.deprecate("Use a `wibox.container.constraint` widget or `forced_height`")
+    gdebug.deprecate("Use a `wibox.container.constraint` widget or `forced_height`", {deprecated_in=4})
     self:set_forced_height(height)
 end
 
@@ -401,7 +401,7 @@ end
 -- @param width The width to set.
 -- @deprecated set_width
 function progressbar:set_width(width)
-    util.deprecate("Use a `wibox.container.constraint` widget or `forced_width`")
+    gdebug.deprecate("Use a `wibox.container.constraint` widget or `forced_width`", {deprecated_in=4})
     self:set_forced_width(width)
 end
 
@@ -417,7 +417,7 @@ for _, prop in ipairs(properties) do
 end
 
 function progressbar:set_vertical(value) --luacheck: no unused_args
-    util.deprecate("Use a `wibox.container.rotate` widget")
+    gdebug.deprecate("Use a `wibox.container.rotate` widget", {deprecated_in=4})
 end
 
 

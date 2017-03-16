@@ -7,7 +7,7 @@
 ---------------------------------------------------------------------------
 
 -- Grab environment we need
-local util = require("awful.util")
+local gdebug = require("gears.debug")
 local spawn = require("awful.spawn")
 local set_shape = require("awful.client.shape").update.all
 local object = require("gears.object")
@@ -70,7 +70,7 @@ client.focus = require("awful.client.focus")
 --   If it is a function, it will be called with the client and its first
 --   tag as arguments.
 function client.jumpto(c, merge)
-    util.deprecate("Use c:jump_to(merge) instead of awful.client.jumpto")
+    gdebug.deprecate("Use c:jump_to(merge) instead of awful.client.jumpto", {deprecated_in=4})
     client.object.jump_to(c, merge)
 end
 
@@ -317,7 +317,7 @@ end
 -- @client[opt] c The client, otherwise focused one is used.
 -- @see client.relative_move
 function client.moveresize(x, y, w, h, c)
-    util.deprecate("Use c:relative_move(x, y, w, h) instead of awful.client.moveresize")
+    gdebug.deprecate("Use c:relative_move(x, y, w, h) instead of awful.client.moveresize", {deprecated_in=4})
     client.object.relative_move(c or capi.client.focus, x, y, w, h)
 end
 
@@ -343,7 +343,7 @@ end
 -- @client[opt] c The client to move, otherwise the focused one is used.
 -- @see client.move_to_tag
 function client.movetotag(target, c)
-    util.deprecate("Use c:move_to_tag(target) instead of awful.client.movetotag")
+    gdebug.deprecate("Use c:move_to_tag(target) instead of awful.client.movetotag", {deprecated_in=4})
     client.object.move_to_tag(c or capi.client.focus, target)
 end
 
@@ -368,7 +368,7 @@ end
 -- @client[opt] c The client to toggle, otherwise the focused one is used.
 -- @see client.toggle_tag
 function client.toggletag(target, c)
-    util.deprecate("Use c:toggle_tag(target) instead of awful.client.toggletag")
+    gdebug.deprecate("Use c:toggle_tag(target) instead of awful.client.toggletag", {deprecated_in=4})
     client.object.toggle_tag(c or capi.client.focus, target)
 end
 
@@ -404,7 +404,7 @@ end
 -- @see screen
 -- @see client.move_to_screen
 function client.movetoscreen(c, s)
-    util.deprecate("Use c:move_to_screen(s) instead of awful.client.movetoscreen")
+    gdebug.deprecate("Use c:move_to_screen(s) instead of awful.client.movetoscreen", {deprecated_in=4})
     client.object.move_to_screen(c or capi.client.focus, s)
 end
 
@@ -506,7 +506,7 @@ end
 -- @deprecated awful.client.mark
 -- @client c The client to mark, the focused one if not specified.
 function client.mark(c)
-    util.deprecate("Use c.marked = true instead of awful.client.mark")
+    gdebug.deprecate("Use c.marked = true instead of awful.client.mark", {deprecated_in=4})
     client.object.set_marked(c or capi.client.focus, true)
 end
 
@@ -514,7 +514,7 @@ end
 -- @deprecated awful.client.unmark
 -- @client c The client to unmark, or the focused one if not specified.
 function client.unmark(c)
-    util.deprecate("Use c.marked = false instead of awful.client.unmark")
+    gdebug.deprecate("Use c.marked = false instead of awful.client.unmark", {deprecated_in=4})
     client.object.set_marked(c or capi.client.focus, false)
 end
 
@@ -522,7 +522,7 @@ end
 -- @deprecated awful.client.ismarked
 -- @client c The client to check, or the focused one otherwise.
 function client.ismarked(c)
-    util.deprecate("Use c.marked instead of awful.client.ismarked")
+    gdebug.deprecate("Use c.marked instead of awful.client.ismarked", {deprecated_in=4})
     return client.object.get_marked(c or capi.client.focus)
 end
 
@@ -530,7 +530,7 @@ end
 -- @deprecated awful.client.togglemarked
 -- @client c The client to toggle mark.
 function client.togglemarked(c)
-    util.deprecate("Use c.marked = not c.marked instead of awful.client.togglemarked")
+    gdebug.deprecate("Use c.marked = not c.marked instead of awful.client.togglemarked", {deprecated_in=4})
     c = c or capi.client.focus
     if c then
         c.marked = not c.marked
@@ -559,7 +559,7 @@ end
 -- @client c A client.
 -- @param s True or false.
 function client.floating.set(c, s)
-    util.deprecate("Use c.floating = true instead of awful.client.floating.set")
+    gdebug.deprecate("Use c.floating = true instead of awful.client.floating.set", {deprecated_in=4})
     client.object.set_floating(c, s)
 end
 
@@ -603,7 +603,7 @@ capi.client.connect_signal("property::geometry", store_floating_geometry)
 -- @see is_fixed
 -- @see size_hints_honor
 function client.isfixed(c)
-    util.deprecate("Use c.is_fixed instead of awful.client.isfixed")
+    gdebug.deprecate("Use c.is_fixed instead of awful.client.isfixed", {deprecated_in=4})
     c = c or capi.client.focus
     return client.object.is_fixed(c)
 end
@@ -642,7 +642,7 @@ end
 -- did not set them manually. For example, windows with a type different than
 -- normal.
 function client.floating.get(c)
-    util.deprecate("Use c.floating instead of awful.client.floating.get")
+    gdebug.deprecate("Use c.floating instead of awful.client.floating.get", {deprecated_in=4})
     return client.object.get_floating(c)
 end
 
@@ -935,7 +935,7 @@ end
 -- @treturn bool
 -- @deprecated awful.client.dockable.get
 function client.dockable.get(c)
-    util.deprecate("Use c.dockable instead of awful.client.dockable.get")
+    gdebug.deprecate("Use c.dockable instead of awful.client.dockable.get", {deprecated_in=4})
     return client.object.get_dockable(c)
 end
 
@@ -978,7 +978,7 @@ end
 -- @param value True or false.
 -- @deprecated awful.client.dockable.set
 function client.dockable.set(c, value)
-    util.deprecate("Use c.dockable = value instead of awful.client.dockable.set")
+    gdebug.deprecate("Use c.dockable = value instead of awful.client.dockable.set", {deprecated_in=4})
     client.property.set(c, "dockable", value)
 end
 
@@ -1111,8 +1111,8 @@ end
 --   a matching parent client is found.
 -- @treturn client.client|nil The matching parent client or nil.
 function client.get_transient_for_matching(c, matcher)
-    util.deprecate("Use c:get_transient_for_matching(matcher) instead of"..
-        "awful.client.get_transient_for_matching")
+    gdebug.deprecate("Use c:get_transient_for_matching(matcher) instead of"..
+        "awful.client.get_transient_for_matching", {deprecated_in=4})
 
     return client.object.get_transient_for_matching(c, matcher)
 end
@@ -1140,8 +1140,8 @@ end
 -- @client c2 The parent client to check.
 -- @treturn client.client|nil The parent client or nil.
 function client.is_transient_for(c, c2)
-    util.deprecate("Use c:is_transient_for(c2) instead of"..
-        "awful.client.is_transient_for")
+    gdebug.deprecate("Use c:is_transient_for(c2) instead of"..
+        "awful.client.is_transient_for", {deprecated_in=4})
     return client.object.is_transient_for(c, c2)
 end
 

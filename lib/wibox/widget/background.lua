@@ -5,9 +5,9 @@
 -- @copyright 2010 Uli Schlachter
 -- @classmod wibox.widget.background
 ---------------------------------------------------------------------------
-local util = require("awful.util")
+local gdebug = require("gears.debug")
 
-return util.deprecate_class(
+return gdebug.deprecate_class(
     require("wibox.container.background"),
     "wibox.widget.background",
     "wibox.container.background"

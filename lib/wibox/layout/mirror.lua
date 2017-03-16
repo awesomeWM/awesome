@@ -6,9 +6,9 @@
 -- @classmod wibox.layout.mirror
 ---------------------------------------------------------------------------
 
-local util = require("awful.util")
+local gdebug = require("gears.debug")
 
-return util.deprecate_class(
+return gdebug.deprecate_class(
     require("wibox.container.mirror"),
     "wibox.layout.mirror",
     "wibox.container.mirror"

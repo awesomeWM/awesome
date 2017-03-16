@@ -122,10 +122,9 @@ local capi =
 }
 local unpack = unpack or table.unpack -- luacheck: globals unpack (compatibility with Lua 5.1)
 local keygrabber = require("awful.keygrabber")
-local util = require("awful.util")
 local beautiful = require("beautiful")
 local akey = require("awful.key")
-local debug = require('gears.debug')
+local gdebug = require('gears.debug')
 local gtable = require("gears.table")
 local gcolor = require("gears.color")
 local gstring = require("gears.string")
@@ -479,9 +478,9 @@ function prompt.run(args, textbox, exe_callback, completion_callback,
     local hooks = {}
 
     local deprecated = function(name)
-        util.deprecate(string.format(
+        gdebug.deprecate(string.format(
             'awful.prompt.run: the argument %s is deprecated, please use args.%s instead',
-            name, name), {raw=true})
+            name, name), {raw=true, deprecated_in=4})
     end
     if textbox             then deprecated('textbox') end
     if exe_callback        then deprecated('exe_callback') end
@@ -523,10 +522,10 @@ function prompt.run(args, textbox, exe_callback, completion_callback,
                 hooks[key] = hooks[key] or {}
                 hooks[key][#hooks[key]+1] = v
             else
-                debug.print_warning("The hook's 3rd parameter has to be a function.")
+                gdebug.print_warning("The hook's 3rd parameter has to be a function.")
             end
         else
-            debug.print_warning("The hook has to have 3 parameters.")
+            gdebug.print_warning("The hook has to have 3 parameters.")
         end
     end
 
