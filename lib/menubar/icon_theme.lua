@@ -11,7 +11,7 @@
 --  http://standards.freedesktop.org/icon-theme-spec/icon-theme-spec-0.12.html
 
 local beautiful = require("beautiful")
-local awful_util = require("awful.util")
+local gfs = require("gears.filesystem")
 local GLib = require("lgi").GLib
 local index_theme = require("menubar.index_theme")
 
@@ -25,18 +25,18 @@ local get_pragmatic_base_directories = function()
     local dirs = {}
 
     local dir = GLib.build_filenamev({GLib.get_home_dir(), ".icons"})
-    if awful_util.dir_readable(dir) then
+    if gfs.dir_readable(dir) then
         table.insert(dirs, dir)
     end
 
     dir = GLib.build_filenamev({GLib.get_user_data_dir(), "icons"})
-    if awful_util.dir_readable(dir) then
+    if gfs.dir_readable(dir) then
         table.insert(dirs, dir)
     end
 
     for _, v in ipairs(GLib.get_system_data_dirs()) do
         dir = GLib.build_filenamev({v, "icons"})
-        if awful_util.dir_readable(dir) then
+        if gfs.dir_readable(dir) then
             table.insert(dirs, dir)
         end
     end
@@ -44,7 +44,7 @@ local get_pragmatic_base_directories = function()
     local need_usr_share_pixmaps = true
     for _, v in ipairs(GLib.get_system_data_dirs()) do
         dir = GLib.build_filenamev({v, "pixmaps"})
-        if awful_util.dir_readable(dir) then
+        if gfs.dir_readable(dir) then
             table.insert(dirs, dir)
         end
         if dir == "/usr/share/pixmaps" then
@@ -53,7 +53,7 @@ local get_pragmatic_base_directories = function()
     end
 
     dir = "/usr/share/pixmaps"
-    if need_usr_share_pixmaps and awful_util.dir_readable(dir) then
+    if need_usr_share_pixmaps and gfs.dir_readable(dir) then
         table.insert(dirs, dir)
     end
 
@@ -65,7 +65,7 @@ local get_default_icon_theme_name = function()
     for _, dir in ipairs(get_pragmatic_base_directories()) do
         for _, icon_theme_name in ipairs(icon_theme_names) do
             local filename = string.format("%s/%s/index.theme", dir, icon_theme_name)
-            if awful_util.file_readable(filename) then
+            if gfs.file_readable(filename) then
                 return icon_theme_name
             end
         end
@@ -152,7 +152,7 @@ local lookup_icon = function(self, icon_name, icon_size)
                     local filename = string.format("%s/%s/%s/%s.%s",
                                                    basedir, self.icon_theme_name, subdir,
                                                    icon_name, ext)
-                    if awful_util.file_readable(filename) then
+                    if gfs.file_readable(filename) then
                         return filename
                     else
                         checked_already[filename] = true
@@ -173,7 +173,7 @@ local lookup_icon = function(self, icon_name, icon_size)
                                                    basedir, self.icon_theme_name, subdir,
                                                    icon_name, ext)
                     if not checked_already[filename] then
-                        if awful_util.file_readable(filename) then
+                        if gfs.file_readable(filename) then
                             closest_filename = filename
                             minimal_size = dist
                         end
@@ -209,7 +209,7 @@ local lookup_fallback_icon = function(self, icon_name)
             local filename = string.format("%s/%s.%s",
                                            dir,
                                            icon_name, ext)
-            if awful_util.file_readable(filename) then
+            if gfs.file_readable(filename) then
                 return filename
             end
         end

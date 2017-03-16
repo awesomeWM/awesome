@@ -3,6 +3,7 @@ local wibox     = require( "wibox"     ) --DOC_HIDE
 local awful     = { prompt = require("awful.prompt"),--DOC_HIDE
                     util   = require("awful.util")}--DOC_HIDE
 local beautiful = require( "beautiful" ) --DOC_HIDE
+local gfs       = require("gears.filesystem") --DOC_HIDE
 local terminal  = "xterm"  --DOC_HIDE
 
     local atextbox = wibox.widget.textbox()
@@ -43,7 +44,7 @@ local terminal  = "xterm"  --DOC_HIDE
             end},
         },
         textbox      = atextbox,
-        history_path = awful.util.getdir('cache') .. '/history',
+        history_path = gfs.get_dir('cache') .. '/history',
         exe_callback = function(cmd) awful.spawn(cmd) end
     }
 

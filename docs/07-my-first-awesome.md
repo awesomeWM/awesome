@@ -71,7 +71,7 @@ Awesome has four themes you can choose from: *default*, *sky*, *xresources*, and
 To change the theme, open your rc.lua and edit this line near the beginning of
 the file:
 
-    beautiful.init(awful.util.getdir("config") .. "/themes/default/theme.lua")
+    beautiful.init(gears.filesystem.get_dir("config") .. "/themes/default/theme.lua")
 
 For this tutorial we will stick with the default theme.
 

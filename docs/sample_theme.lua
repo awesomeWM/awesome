@@ -15,11 +15,11 @@ require("sample_files")(
 -- `~/.config/awesome/mytheme.lua`
 -- and replace:
 --
---    beautiful.init(awful.util.get_themes_dir() .. "default/theme.lua")
+--    beautiful.init(gears.filesystem.get_themes_dir() .. "default/theme.lua")
 --
 -- with
 --
---    beautiful.init(awful.util.getdir("config") .. "mytheme.lua")
+--    beautiful.init(gears.filesystem.get_dir("config") .. "mytheme.lua")
 --
 -- in your `rc.lua`.
 --

@@ -13,6 +13,7 @@ local ipairs = ipairs
 local string = string
 local screen = screen
 local awful_util = require("awful.util")
+local gfs = require("gears.filesystem")
 local theme = require("beautiful")
 local lgi = require("lgi")
 local gio = lgi.Gio
@@ -77,7 +78,7 @@ local icon_lookup_path = nil
 local function get_icon_lookup_path()
     if not icon_lookup_path then
         local add_if_readable = function(t, path)
-            if awful_util.dir_readable(path) then
+            if gfs.dir_readable(path) then
                 table.insert(t, path)
             end
         end
@@ -90,7 +91,7 @@ local function get_icon_lookup_path()
                                                      '.icons'}))
         for _,dir in ipairs(paths) do
             local icons_dir = glib.build_filenamev({dir, 'icons'})
-            if awful_util.dir_readable(icons_dir) then
+            if gfs.dir_readable(icons_dir) then
                 if icon_theme then
                     add_if_readable(icon_theme_paths,
                                     glib.build_filenamev({icons_dir,
@@ -130,11 +131,11 @@ function utils.lookup_icon_uncached(icon_file)
     if icon_file:sub(1, 1) == '/' and is_format_supported(icon_file) then
         -- If the path to the icon is absolute and its format is
         -- supported, do not perform a lookup.
-        return awful_util.file_readable(icon_file) and icon_file or nil
+        return gfs.file_readable(icon_file) and icon_file or nil
     else
         for _, directory in ipairs(get_icon_lookup_path()) do
             if is_format_supported(icon_file) and
-                    awful_util.file_readable(directory .. "/" .. icon_file) then
+                    gfs.file_readable(directory .. "/" .. icon_file) then
                 return directory .. "/" .. icon_file
             else
                 -- Icon is probably specified without path and format,
@@ -142,7 +143,7 @@ function utils.lookup_icon_uncached(icon_file)
                 -- it and see if such file exists.
                 for _, format in ipairs(icon_formats) do
                     local possible_file = directory .. "/" .. icon_file .. "." .. format
-                    if awful_util.file_readable(possible_file) then
+                    if gfs.file_readable(possible_file) then
                         return possible_file
                     end
                 end

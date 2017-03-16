@@ -27,6 +27,7 @@ local capi = {
 }
 local gmath = require("gears.math")
 local awful = require("awful")
+local gfs = require("gears.filesystem")
 local common = require("awful.widget.common")
 local theme = require("beautiful")
 local wibox = require("wibox")
@@ -128,7 +129,7 @@ local function load_count_table()
         return instance.count_table
     end
     instance.count_table = {}
-    local count_file_name = awful.util.getdir("cache") .. "/menu_count_file"
+    local count_file_name = gfs.get_dir("cache") .. "/menu_count_file"
     local count_file = io.open (count_file_name, "r")
     if count_file then
         for line in count_file:lines() do
@@ -144,7 +145,7 @@ end
 
 local function write_count_table(count_table)
     count_table = count_table or instance.count_table
-    local count_file_name = awful.util.getdir("cache") .. "/menu_count_file"
+    local count_file_name = gfs.get_dir("cache") .. "/menu_count_file"
     local count_file = io.open (count_file_name, "w")
     for name, count in pairs(count_table) do
         local str = string.format("%s;%d\n", name, count)
@@ -434,7 +435,7 @@ function menubar.show(scr)
         prompt              = "Run: ",
         textbox             = instance.prompt.widget,
         completion_callback = awful.completion.shell,
-        history_path        = awful.util.get_cache_dir() .. "/history_menu",
+        history_path        = gfs.get_cache_dir() .. "/history_menu",
         done_callback       = menubar.hide,
         changed_callback    = function(query)
             instance.query = query
