@@ -14,13 +14,18 @@ local capi =
     awesome = awesome,
     root = root
 }
+local beautiful = require("beautiful")
 
 local app_starting = {}
 
 local cursor_waiting = "watch"
 
+--- Show busy mouse cursor during spawn.
+-- @beautiful beautiful.enable_spawn_cursor
+-- @tparam[opt=true] boolean enable_spawn_cursor
+
 local function update_cursor()
-    if #app_starting > 0 then
+    if #app_starting > 0 and beautiful.enable_spawn_cursor ~= false then
         capi.root.cursor(cursor_waiting)
     else
         capi.root.cursor("left_ptr")
