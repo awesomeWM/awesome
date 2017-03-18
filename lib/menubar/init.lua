@@ -467,7 +467,7 @@ end
 --- Get a menubar wibox.
 -- @tparam[opt] screen scr Screen.
 -- @return menubar wibox.
--- @deprecated If you know what this actually does, please tell us
+-- @deprecated get
 function menubar.get(scr)
     awful.util.deprecate("Use menubar.show() instead", { deprecated_in = 5 })
     menubar.refresh(scr)
