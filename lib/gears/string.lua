@@ -84,4 +84,26 @@ function gstring.query_to_pattern(q)
                     end)
     return s
 end
+
+--- Split separates a string containing a delimiter into the list of
+-- substrings between that delimiter.    
+-- @class function
+-- @name split
+-- @tparam string str String to be splitted
+-- @tparam string delimiter Character where the string will be splitted
+-- @treturn table list of the substrings
+function gstring.split(str, delimiter)
+    local pattern = "(.-)" .. delimiter .. "()"
+    local result = {}
+    local n = 0
+    local lastPos = 0
+    for part, pos in string.gmatch(str, pattern) do
+        n = n + 1
+        result[n] = part
+        lastPos = pos
+    end
+    result[n + 1] = string.sub(str, lastPos)
+    return result
+end
+
 return gstring
