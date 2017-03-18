@@ -7,6 +7,8 @@
 ---------------------------------------------------------------------------
 
 -- Grab environment
+local gtable = require("gears.table")
+local gfilesystem = require("gears.filesystem")
 local utils = require("menubar.utils")
 local icon_theme = require("menubar.icon_theme")
 local pairs = pairs
@@ -18,14 +20,16 @@ local menu_gen = {}
 
 -- Options section
 
-local data_dir = os.getenv("XDG_DATA_HOME")
-if not data_dir then
-    data_dir = os.getenv("HOME") .. '/.local/share'
+--- Get the path to the directories where XDG menu applications are installed.
+local function get_xdg_menu_dirs()
+    local dirs = gfilesystem.get_xdg_data_dirs()
+    table.insert(dirs, 1, gfilesystem.get_xdg_data_home())
+    return gtable.map(function(dir) return dir .. 'applications/' end, dirs)
 end
 
 --- Specifies all directories where menubar should look for .desktop
 -- files. The search is recursive.
-menu_gen.all_menu_dirs = { data_dir .. '/applications/', '/usr/share/applications/', '/usr/local/share/applications/' }
+menu_gen.all_menu_dirs = get_xdg_menu_dirs()
 
 --- Specify the mapping of .desktop Categories section to the
 -- categories in the menubar. If "use" flag is set to false then any of
