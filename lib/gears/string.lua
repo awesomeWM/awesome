@@ -86,7 +86,7 @@ function gstring.query_to_pattern(q)
 end
 
 --- Split separates a string containing a delimiter into the list of
--- substrings between that delimiter.    
+-- substrings between that delimiter.
 -- @class function
 -- @name split
 -- @tparam string str String to be splitted
