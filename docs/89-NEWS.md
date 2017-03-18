@@ -1,9 +1,191 @@
 # NEWS
 
+<a name="v41"></a>
+# Awesome window manager framework version 4.1 changes
+
+<center> <img src="../images/AUTOGEN_wibox_logo_logo_and_name.svg" /> </center>
+
+Awesome v4.1 is the first stable release for the Awesome 4.0 API. It adds
+non-breaking new features and fixes bugs. The main purpose of the release is to
+provide stability while also adding features submitted by our contributors.
+This release contains about 350 commits by 35 contributors, including many new
+developers. Thanks a lot.
+
+## New features
+
+The shape API has been extended to both client, notifications and wibox.
+
+[![Client geometry](../images/AUTOGEN_wibox_awidget_prompt_highlight.svg)](../libraries/awful.prompt.html)
+
+The prompt now supports syntax highlight and more advanced key hooks.
+
+[![Client geometry](../images/AUTOGEN_wibox_awidget_defaults_prompt.svg)](../libraries/awful.prompt.html)
+
+The prompt widget gained many new themes variables.
+
+[![Client geometry](../images/AUTOGEN_wibox_layout_grid_imperative.svg)](../classes/wibox.layout.grid.html)
+
+There is a new 2D grid layout with rowspan and colspan support.
+
+[![Client geometry](../images/AUTOGEN_wibox_container_defaults_only_on_screen.svg)](../classes/awful.widget.only_on_screen.html)
+
+There is a new `awful.widget.only_on_screen` container to make it easier to
+share wiboxes across multiple screens.
+
+Various documentation improvements. Thanks for the feedbacks.
+
+The `awful.widget.taglist` now has `volatile` theme variables.
+
+There is now extra enviroment variables such as `AWESOME_ICON_PATH` and
+`AWESOME_THEMES_PATH` for those who prefer not installing Awesome.
+
+Dynamic "C" Lua libraries are now detected like pure Lua ones.
+
+`gears.timer` gained many new constructor arguments to make it easier to use.
+
+[Input shape](https://awesomewm.org/apidoc/classes/wibox.html#wibox.shape_input)
+mask are now supported. It is possible to create a wibox with passthough inputs.
+
+There is a new `awful.widget.clienticon` widget capable of fetching icons of
+different sizes.
+
+## New theme variables
+
+This release adds a ton of new theme variables to make Awesome prettier. We also
+thank all users who [submitted screenshot](https://github.com/awesomeWM/awesome/issues/1395).
+
+    theme.arcchart_thickness
+    theme.enable_spawn_cursor
+    theme.fullscreen_hide_border
+    theme.hotkeys_bg
+    theme.hotkeys_border_colo
+    theme.hotkeys_border_width
+    theme.hotkeys_description_font
+    theme.hotkeys_fg
+    theme.hotkeys_font
+    theme.hotkeys_group_margin
+    theme.hotkeys_label_bg
+    theme.hotkeys_label_fg
+    theme.hotkeys_modifiers_fg
+    theme.hotkeys_shape
+    theme.maximized_honor_padding
+    theme.notification_bg
+    theme.notification_border_color
+    theme.notification_border_width
+    theme.notification_fg
+    theme.notification_font
+    theme.notification_height
+    theme.notification_margin
+    theme.notification_opacity
+    theme.notification_shape
+    theme.notification_width
+    theme.prompt_bg_cursor
+    theme.prompt_bg
+    theme.prompt_fg_cursor
+    theme.prompt_fg
+    theme.prompt_font
+    theme.taglist_bg_volatile
+    theme.taglist_fg_volatile
+    theme.taglist_shape_border_color_volatile
+    theme.taglist_shape_border_width_volatile
+    theme.taglist_shape_volatile
+    theme.taglist_spacing
+    theme.tasklist_disable_icon
+    theme.tasklist_disable_task_name
+    theme.titlebar_close_button_focus_hover
+    theme.titlebar_close_button_focus_press
+    theme.titlebar_close_button_normal_hover
+    theme.titlebar_close_button_normal_press
+    theme.titlebar_floating_button_focus_active_hover
+    theme.titlebar_floating_button_focus_active_press
+    theme.titlebar_floating_button_focus_inactive_hover
+    theme.titlebar_floating_button_focus_inactive_press
+    theme.titlebar_floating_button_normal_active_hover
+    theme.titlebar_floating_button_normal_active_press
+    theme.titlebar_floating_button_normal_inactive_hover
+    theme.titlebar_floating_button_normal_inactive_press
+    theme.titlebar_maximized_button_focus_active_hover
+    theme.titlebar_maximized_button_focus_active_press
+    theme.titlebar_maximized_button_focus_inactive_hover
+    theme.titlebar_maximized_button_focus_inactive_press
+    theme.titlebar_maximized_button_normal_active_hover
+    theme.titlebar_maximized_button_normal_active_press
+    theme.titlebar_maximized_button_normal_inactive_hover
+    theme.titlebar_maximized_button_normal_inactive_press
+    theme.titlebar_minimize_button_focus_hover
+    theme.titlebar_minimize_button_focus_press
+    theme.titlebar_minimize_button_normal_hover
+    theme.titlebar_minimize_button_normal_press
+    theme.titlebar_ontop_button_focus_active_hover
+    theme.titlebar_ontop_button_focus_active_press
+    theme.titlebar_ontop_button_focus_inactive_hover
+    theme.titlebar_ontop_button_focus_inactive_press
+    theme.titlebar_ontop_button_normal_active_hover
+    theme.titlebar_ontop_button_normal_active_press
+    theme.titlebar_ontop_button_normal_inactive_hover
+    theme.titlebar_ontop_button_normal_inactive_press
+    theme.titlebar_sticky_button_focus_active_hover
+    theme.titlebar_sticky_button_focus_active_press
+    theme.titlebar_sticky_button_focus_inactive_hover
+    theme.titlebar_sticky_button_focus_inactive_press
+    theme.titlebar_sticky_button_normal_active_hover
+    theme.titlebar_sticky_button_normal_active_press
+    theme.titlebar_sticky_button_normal_inactive_hover
+    theme.titlebar_sticky_button_normal_inactive_press
+    theme.wibar_bgimage
+    theme.wibar_bg
+    theme.wibar_border_color
+    theme.wibar_border_width
+    theme.wibar_cursor
+    theme.wibar_fg
+    theme.wibar_height
+    theme.wibar_ontop
+    theme.wibar_opacity
+    theme.wibar_shape
+    theme.wibar_stretch
+    theme.wibar_type
+    theme.wibar_width
+
+## Noteworthy fixes
+
+ * Some applications such as VLC and Terminator had large unpainted areas
+ * The magnifier layout has been fixed
+ * Un-maximization misbehaved
+ * Docking area is now per-tag again
+ * CMake missing dependencies detection is fixed
+ * Support for FreeBSD and OpenBSD have been restored.
+ * Dialog and transient window can be moved to other screens again
+ * The fallback mode (when Awesome fails to load `rc.lua`) is now more robust
+
+## Behavior changes
+
+This is a stable release and we tried to minimize any upgrade impact. However
+various bugfixes induced minor, not noticeable, changes:
+
+ * HiDPI support fix changed the default theme "taglist square". This is only
+   true if the original theme file is used (not a copy).
+ * Maximization now honor the screen padding. There is an option to restore the
+   previous behavior.
+ * Un-maximized clients are now restored to their current screen instead of the
+   screen where they were maximized.
+ * Hotkey popup no longer enable the Vim module by default due to user
+   complaints
+
+`awful.util` has been split into multiple modules in the `gears` library to
+reduce the dependency graph. This allows for better unit testing. `awful.util`
+will be deprecated in Awesome v5. For now, it is still safe to use it. However,
+new code should use the functions from `gears` instead of `awful.util`.
+
+## Other
+
+ * The minimal LGI version is now 0.8.0. It was found that Awesome 4.0 also had
+   an issue in the menubar module when used with 0.7.3.
+ * GTK+3 is now required to run the integration tests.
+
+
 <a name="v4"></a>
 # Awesome window manager framework version 4.0 changes
 
-<center> <img src="../images/AUTOGEN_wibox_logo_logo_and_name.svg" /> </center>
 
 Awesome 4.0 is the first release of the v4 API level, breaking the proven
 v3.5 API level after 4 years. This requires to port the existing user
