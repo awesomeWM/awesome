@@ -1454,6 +1454,20 @@ capi.tag.connect_signal("request::select", tag.object.view_only)
 -- @signal property::urgent_count
 -- @see client.urgent
 
+--- Emitted when a screen is removed.
+-- This can be used to salvage existing tags by moving them to a new
+-- screen (or creating a virtual screen). By default, there is no
+-- handler for this request. The tags will be deleted. To prevent
+-- this, an handler for this request must simply set a new screen
+-- for the tag.
+-- @signal request::screen
+
+--- Emitted after `request::screen` if no new screen has been set.
+-- The tag will be deleted, this is a last chance to move its clients
+-- before they are sent to a fallback tag. Connect to `request::screen`
+-- if you wish to salvage the tag.
+-- @signal removal-pending
+
 capi.screen.connect_signal("tag::history::update", tag.history.update)
 
 capi.screen.connect_signal("removed", function(s)
