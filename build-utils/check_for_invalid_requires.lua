@@ -48,11 +48,6 @@ local allowed_deps = {
         wibox = true,
     },
     -- TODO: Get rid of these
-    ["beautiful.xresources"] = { ["awful.util"] = true },
-    ["gears.object"]         = { ["awful.util"] = true },
-    ["wibox.container"]      = { ["awful.util"] = true },
-    ["wibox.layout"]         = { ["awful.util"] = true },
-    ["wibox.widget"]         = { ["awful.util"] = true },
     ["gears.surface"]        = { ["wibox.hierarchy"] = true },
 }
 
