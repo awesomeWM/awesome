@@ -91,7 +91,7 @@ function imagebox:set_image(image)
         end
     end
 
-    image = surface.load(image)
+    image = image and surface.load(image)
 
     if image then
         local w = image.width
