@@ -119,6 +119,16 @@ local function get_icon_lookup_path()
     return icon_lookup_path
 end
 
+--- Remove CR newline from the end of the string.
+-- @param s string to trim
+function utils.rtrim(s)
+    if not s then return end
+    if string.byte(s, #s) == 13 then
+        return string.sub(s, 1, #s - 1)
+    end
+    return s
+end
+
 --- Lookup an icon in different folders of the filesystem.
 -- @tparam string icon_file Short or full name of the icon.
 -- @treturn string|boolean Full name of the icon, or false on failure.
@@ -173,6 +183,7 @@ function utils.parse_desktop_file(file)
     -- Parse the .desktop file.
     -- We are interested in [Desktop Entry] group only.
     for line in io.lines(file) do
+        line = utils.rtrim(line)
         if line:find("^%s*#") then
             -- Skip comments.
             (function() end)() -- I haven't found a nice way to silence luacheck here

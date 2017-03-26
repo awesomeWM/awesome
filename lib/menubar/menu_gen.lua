@@ -13,7 +13,6 @@ local utils = require("menubar.utils")
 local icon_theme = require("menubar.icon_theme")
 local pairs = pairs
 local ipairs = ipairs
-local string = string
 local table = table
 
 local menu_gen = {}
@@ -75,16 +74,6 @@ local function get_category_name_and_usage_by_type(app_type)
     end
 end
 
---- Remove CR\LF newline from the end of the string.
--- @param s string to trim
-local function trim(s)
-    if not s then return end
-    if string.byte(s, #s) == 13 then
-        return string.sub(s, 1, #s - 1)
-    end
-    return s
-end
-
 --- Generate an array of all visible menu entries.
 -- @tparam function callback Will be fired when all menu entries were parsed
 -- with the resulting list of menu entries as argument.
@@ -120,8 +109,8 @@ function menu_gen.generate(callback)
                             end
                         end
                         if target_category then
-                            local name = trim(entry.Name) or ""
-                            local cmdline = trim(entry.cmdline) or ""
+                            local name = utils.rtrim(entry.Name) or ""
+                            local cmdline = utils.rtrim(entry.cmdline) or ""
                             local icon = entry.icon_path or nil
                             table.insert(result, { name = name,
                                          cmdline = cmdline,
