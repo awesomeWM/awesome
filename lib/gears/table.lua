@@ -212,5 +212,20 @@ function gtable.merge(t, set)
     return t
 end
 
+--- Map a function to a table. The function is applied to each value
+-- on the table, returning a table of the results.
+-- @class function
+-- @name map
+-- @tparam function f the function to be applied to each value on the table
+-- @tparam table tbl the container table whose values will be operated on
+-- @treturn table Return a table of the results
+function gtable.map(f, tbl)
+    local t = {}
+    for k,v in pairs(tbl) do
+        t[k] = f(v)
+    end
+    return t
+end
+
 
 return gtable

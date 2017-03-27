@@ -6,6 +6,8 @@
 
 -- Grab environment we need
 local Gio = require("lgi").Gio
+local gstring = require("gears.string")
+local gtable = require("gears.table")
 
 local filesystem = {}
 
@@ -64,6 +66,21 @@ end
 -- @return the cache home (XDG_CACHE_HOME) with a slash at the end.
 function filesystem.get_xdg_cache_home()
     return (os.getenv("XDG_CACHE_HOME") or os.getenv("HOME") .. "/.cache") .. "/"
+end
+
+--- Get the data home according to the XDG basedir specification.
+-- @treturn string the data home (XDG_DATA_HOME) with a slash at the end.
+function filesystem.get_xdg_data_home()
+    return (os.getenv("XDG_DATA_HOME") or os.getenv("HOME") .. "/.local/share") .. "/"
+end
+
+--- Get the data dirs according to the XDG basedir specification.
+-- @treturn table the data dirs (XDG_DATA_DIRS) with a slash at the end of each entry.
+function filesystem.get_xdg_data_dirs()
+    local xdg_data_dirs = os.getenv("XDG_DATA_DIRS") or "/usr/share:/usr/local/share"
+    return gtable.map(
+        function(dir) return dir .. "/" end,
+        gstring.split(xdg_data_dirs, ":"))
 end
 
 --- Get the path to the user's config dir.
