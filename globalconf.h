@@ -186,6 +186,12 @@ typedef struct
     struct xkb_context *xkb_ctx;
     /* xkb state of dead keys on keyboard */
     struct xkb_state *xkb_state;
+    /* Do we have a pending reload? */
+    bool xkb_reload_keymap;
+    /* Do we have a pending map change? */
+    bool xkb_map_changed;
+    /* Do we have a pending group change? */
+    bool xkb_group_changed;
     /** The preferred size of client icons for this screen */
     uint32_t preferred_icon_size;
     /** Cached wallpaper information */

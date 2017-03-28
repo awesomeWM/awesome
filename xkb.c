@@ -297,13 +297,29 @@ xkb_reload_keymap(void)
     }
 }
 
+void
+xkb_refresh(void)
+{
+    lua_State *L = globalconf_get_lua_State();
+
+    if (globalconf.xkb_reload_keymap)
+        xkb_reload_keymap();
+    if (globalconf.xkb_map_changed)
+          signal_object_emit(L, &global_signals, "xkb::map_changed", 0);
+    if (globalconf.xkb_group_changed)
+          signal_object_emit(L, &global_signals, "xkb::group_changed", 0);
+
+    globalconf.xkb_reload_keymap = false;
+    globalconf.xkb_map_changed = false;
+    globalconf.xkb_group_changed = false;
+}
+
 /** The xkb notify event handler.
  * \param event The event.
  */
 void
 event_handle_xkb_notify(xcb_generic_event_t* event)
 {
-    lua_State *L = globalconf_get_lua_State();
     assert(globalconf.have_xkb);
 
     /* The pad0 field of xcb_generic_event_t contains the event sub-type,
@@ -315,18 +331,16 @@ event_handle_xkb_notify(xcb_generic_event_t* event)
         {
           xcb_xkb_new_keyboard_notify_event_t *new_keyboard_event = (void*)event;
 
-          xkb_reload_keymap();
+          globalconf.xkb_reload_keymap = true;
 
           if (new_keyboard_event->changed & XCB_XKB_NKN_DETAIL_KEYCODES)
-          {
-              signal_object_emit(L, &global_signals, "xkb::map_changed", 0);
-          }
+              globalconf.xkb_map_changed = true;
           break;
         }
       case XCB_XKB_MAP_NOTIFY:
         {
-          xkb_reload_keymap();
-          signal_object_emit(L, &global_signals, "xkb::map_changed", 0);
+          globalconf.xkb_reload_keymap = true;
+          globalconf.xkb_map_changed = true;
           break;
         }
       case XCB_XKB_STATE_NOTIFY:
@@ -342,10 +356,7 @@ event_handle_xkb_notify(xcb_generic_event_t* event)
                                 state_notify_event->lockedGroup);
 
           if (state_notify_event->changed & XCB_XKB_STATE_PART_GROUP_STATE)
-          {
-              lua_pushinteger(L, state_notify_event->group);
-              signal_object_emit(L, &global_signals, "xkb::group_changed", 1);
-          }
+              globalconf.xkb_group_changed = true;
 
           break;
         }
@@ -358,6 +369,9 @@ event_handle_xkb_notify(xcb_generic_event_t* event)
 void
 xkb_init(void)
 {
+    globalconf.xkb_reload_keymap = false;
+    globalconf.xkb_map_changed = false;
+    globalconf.xkb_group_changed = false;
 
     int success_xkb = xkb_x11_setup_xkb_extension(globalconf.connection,
                                               XKB_X11_MIN_MAJOR_XKB_VERSION,
