@@ -26,6 +26,7 @@
 #include <lua.h>
 
 void event_handle_xkb_notify(xcb_generic_event_t* event);
+void xkb_refresh(void);
 void xkb_init(void);
 void xkb_free(void);
 
