@@ -210,7 +210,7 @@ for f in $tests; do
     DISPLAY=$D "$AWESOME_CLIENT" 2>&1 < "$f"
 
     # Tail the log and quit, when awesome quits.
-    tail -n 100000 -f --pid "$awesome_pid" "$awesome_log"
+    tail -n 100000 -s 0.1 -f --pid "$awesome_pid" "$awesome_log"
 
     set +e
     wait $awesome_pid
