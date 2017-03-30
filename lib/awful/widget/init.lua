@@ -21,6 +21,7 @@ return
     watch = require("awful.widget.watch");
     only_on_screen = require("awful.widget.only_on_screen");
     clienticon = require("awful.widget.clienticon");
+    calendar_popup = require("awful.widget.calendar_popup");
 }
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
