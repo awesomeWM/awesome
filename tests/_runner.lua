@@ -71,7 +71,7 @@ runner.run_steps = function(steps)
             end
 
         elseif result == false then
-            io.stderr:write("Step "..step_as_string.." failed (returned false).")
+            io.stderr:write("Step "..step_as_string.." failed (returned false).\n")
             if not runner.quit_awesome_on_error then
                 io.stderr:write("Keeping awesome open...\n")
                 return
