@@ -176,16 +176,16 @@ You can ensure no application ever starts maximized in the first rule of your
 
 ### How to move and resize floaters with the keyboard?
 
-You can use the `awful.client.moveresize` function. The following `clientkeys`
+You can use the `client:relative_move` function. The following `clientkeys`
 example will move floaters with "Mod4 + Arrow keys" and resize them with "Mod4 +
 PgUP/DN" keys:
 
-    awful.key({ modkey }, "Next",  function () awful.client.moveresize( 20,  20, -40, -40) end),
-    awful.key({ modkey }, "Prior", function () awful.client.moveresize(-20, -20,  40,  40) end),
-    awful.key({ modkey }, "Down",  function () awful.client.moveresize(  0,  20,   0,   0) end),
-    awful.key({ modkey }, "Up",    function () awful.client.moveresize(  0, -20,   0,   0) end),
-    awful.key({ modkey }, "Left",  function () awful.client.moveresize(-20,   0,   0,   0) end),
-    awful.key({ modkey }, "Right", function () awful.client.moveresize( 20,   0,   0,   0) end),
+    awful.key({ modkey }, "Next",  function (c) c:relative_move( 20,  20, -40, -40) end),
+    awful.key({ modkey }, "Prior", function (c) c:relative_move(-20, -20,  40,  40) end),
+    awful.key({ modkey }, "Down",  function (c) c:relative_move(  0,  20,   0,   0) end),
+    awful.key({ modkey }, "Up",    function (c) c:relative_move(  0, -20,   0,   0) end),
+    awful.key({ modkey }, "Left",  function (c) c:relative_move(-20,   0,   0,   0) end),
+    awful.key({ modkey }, "Right", function (c) c:relative_move( 20,   0,   0,   0) end),
 
 #### How to resize tiled clients?
 
@@ -247,7 +247,7 @@ You can use the format `#XYZ` for keycodes in your bindings. The following
 example shows a mapped multimedia/extra key, that's why the modifier is not
 present (but it could be):
 
-    awful.key({}, "#160", function () awful.util.spawn("kscreenlocker --forcelock") end),
+    awful.key({}, "#160", function () awful.spawn("kscreenlocker --forcelock") end),
 
 ### How to add a keyboard layout switcher?
 
