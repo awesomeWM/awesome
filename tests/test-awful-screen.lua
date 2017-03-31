@@ -27,12 +27,12 @@ local steps = {
             end
             assert(counter == 4)
 
-            awful.screen.padding(s, {
-                                 left   = 1337,
-                                 right  = 1337,
-                                 top    = 1337,
-                                 bottom = 1337,
-                             })
+            s.padding = {
+                            left   = 1337,
+                            right  = 1337,
+                            top    = 1337,
+                            bottom = 1337,
+                        }
             counter = 0
             for _, v in pairs(s.padding) do
                 assert(v == 1337)
@@ -41,7 +41,7 @@ local steps = {
             assert(counter == 4)
 
             counter = 0
-            for _, v in pairs(awful.screen.padding(s)) do
+            for _, v in pairs(s.padding) do
                 assert(v == 1337)
                 counter = counter + 1
             end
@@ -49,8 +49,6 @@ local steps = {
 
             -- Test square distance
             assert(s:get_square_distance(9999, 9999))
-            assert(s:get_square_distance(9999, 9999)
-                       == awful.screen.getdistance_sq(s, 9999, 9999))
 
             -- Test count
             counter = 0
