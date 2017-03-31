@@ -33,19 +33,19 @@ local steps = {
             -- awful.client.jumpto(c)
             -- assert(client.focus == c)
 
-            -- Test moveresize
+            -- Test relative_move
             c.size_hints_honor = false
             c:geometry {x=0,y=0,width=50,height=50}
             c:relative_move( 100, 100, 50, 50 )
             for _,v in pairs(c:geometry()) do
                 assert(v == 100)
             end
-            awful.client.moveresize(-25, -25, -25, -25, c )
+            c:relative_move(-25, -25, -25, -25)
             for _,v in pairs(c:geometry()) do
                 assert(v == 75)
             end
 
-            -- Test movetotag
+            -- Test move_to_tag
 
             local t  = mouse.screen.tags[1]
             local t2 = mouse.screen.tags[2]
@@ -54,22 +54,22 @@ local steps = {
             assert(c:tags()[1] == t)
             c:move_to_tag(t2)
             assert(c:tags()[1] == t2)
-            awful.client.movetotag(t, c)
+            c:move_to_tag(t)
             assert(c:tags()[1] == t)
 
-            -- Test toggletag
+            -- Test toggle_tag
 
             c:tags{t}
             c:toggle_tag(t2)
             assert(c:tags()[1] == t2 or c:tags()[2] == t2)
-            awful.client.toggletag(t2, c)
+            c:toggle_tag(t2)
             assert(c:tags()[1] == t and c:tags()[1] ~= t2 and c:tags()[2] == nil)
 
             -- Test floating
             assert(c.floating ~= nil and type(c.floating) == "boolean")
             c.floating = true
-            assert(awful.client.floating.get(c))
-            awful.client.floating.set(c, false)
+            assert(c.floating)
+            c.floating = false
             assert(not c.floating)
 
             return true

@@ -5,7 +5,7 @@
 
 local base = require("wibox.widget.base")
 local surface = require("gears.surface")
-local util = require("awful.util")
+local gtable = require("gears.table")
 
 local clienticon = {}
 local instances = setmetatable({}, { __mode = "k" })
@@ -87,7 +87,7 @@ end
 local function new(c)
     local ret = base.make_widget(nil, nil, {enable_properties = true})
 
-    util.table.crush(ret, clienticon, true)
+    gtable.crush(ret, clienticon, true)
 
     ret._private.client = c
 
