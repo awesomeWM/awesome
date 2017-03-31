@@ -112,7 +112,7 @@ looks like this:
     end
     widget:after_draw_children(context, cr, width, height)
 
-The `:set_children()` method is called recursively when setting a widget with
+The `:set_children()` method gets called recursively when setting a widget with
 the declarative layout system, therefore the method should be well defined.
-It should probably hook to the `:add` or `:add_widget` methods or be overridden
-to do nothing.
+It should probably hook into the `:add` or `:add_widget` methods or be
+overridden to do nothing.
