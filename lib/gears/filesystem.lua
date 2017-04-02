@@ -103,7 +103,9 @@ end
 --- Get the path to a directory that should be used for caching data.
 -- @return A string with the requested path with a slash at the end.
 function filesystem.get_cache_dir()
-    return filesystem.get_xdg_cache_home() .. "awesome/"
+    local result = filesystem.get_xdg_cache_home() .. "awesome/"
+    filesystem.mkdir(result)
+    return result
 end
 
 --- Get the path to the directory where themes are installed.
