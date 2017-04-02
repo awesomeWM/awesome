@@ -15,16 +15,16 @@ local filesystem = {}
 -- @tparam string dir The directory.
 -- @return (true, nil) on success, (false, err) on failure
 function filesystem.mkdir(dir)
-	local gfile = Gio.File.new_for_path(dir)
-	local success, err = gfile:make_directory_with_parents()
-	if success then
-		return true
-	end
-	if err.domain == Gio.IOErrorEnum and err.code == "EXISTS" then
-		-- Direcotry already exists, let this count as success
-		return true
-	end
-	return false, err
+    local gfile = Gio.File.new_for_path(dir)
+    local success, err = gfile:make_directory_with_parents()
+    if success then
+        return true
+    end
+    if err.domain == Gio.IOErrorEnum and err.code == "EXISTS" then
+        -- Direcotry already exists, let this count as success
+        return true
+    end
+    return false, err
 end
 
 --- Check if a file exists, is readable and not a directory.
