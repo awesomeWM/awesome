@@ -128,9 +128,9 @@ end
 --
 -- For example, to block Firefox from stealing the focus, use:
 --
---    awful.ewmh.add_activate_filter(function(c, "ewmh")
+--    awful.ewmh.add_activate_filter(function(c)
 --        if c.class == "Firefox" then return false end
---    end)
+--    end, "ewmh")
 --
 -- @tparam function f The callback
 -- @tparam[opt] string context The `request::activate` context
