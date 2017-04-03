@@ -534,7 +534,6 @@ function widget.new(args)
         end)
     end
 
-
     --- Add hotkey descriptions for third-party applications.
     -- @tparam table hotkeys Table with bindings,
     -- see `awful.hotkeys_popup.key.vim` as an example.
@@ -556,6 +555,13 @@ function widget.new(args)
         self:_sort_hotkeys(self._additional_hotkeys)
     end
 
+    --- Add hotkey group rules for third-party applications.
+    -- @tparam group hotkeys group name,
+    -- @tparam data rule data for the group
+    -- see `awful.hotkeys_popup.key.vim` as an example.
+    function widget_instance:add_group_rules(group, data)
+        self.group_rules[group] = data
+    end
 
     return widget_instance
 end
@@ -580,6 +586,15 @@ end
 -- see `awful.hotkeys_popup.key.vim` as an example.
 function widget.add_hotkeys(...)
     return get_default_widget():add_hotkeys(...)
+end
+
+--- Add hotkey group rules for third-party applications
+-- (default widget instance will be used).
+-- @tparam string hotkeys group name,
+-- @tparam table rule data for the group
+-- see `awful.hotkeys_popup.key.vim` as an example.
+function widget.add_group_rules(...)
+    return get_default_widget():add_group_rules(...)
 end
 
 return widget

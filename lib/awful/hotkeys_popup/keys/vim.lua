@@ -17,7 +17,7 @@ for group_name, group_data in pairs({
     ["VIM: find"] =               { color="#65cF9F", rule_any=vim_rule_any },
     ["VIM: scroll"] =             { color="#659FdF", rule_any=vim_rule_any },
 }) do
-    hotkeys_popup.group_rules[group_name] = group_data
+    hotkeys_popup.add_group_rules(group_name, group_data)
 end
 
 
