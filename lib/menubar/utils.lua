@@ -306,7 +306,8 @@ end
 -- @tparam number|screen s Screen
 -- @treturn int Text width.
 function utils.compute_text_width(text, s)
-    return utils.compute_textbox_width(wibox.widget.textbox(gstring.xml_escape(text)), s)
+    local w, _ = wibox.widget.textbox(gstring.xml_escape(text)):get_preferred_size(s)
+    return w
 end
 
 return utils
