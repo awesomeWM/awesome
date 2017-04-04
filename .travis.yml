@@ -94,8 +94,8 @@ install:
   # Install ldoc for building docs.
   - |
     if [ "$BUILD_APIDOC" = "true" ]; then
-      travis_retry sudo luarocks install ldoc
       travis_retry sudo luarocks install lua-discount
+      travis_retry sudo luarocks install ldoc
     fi
 
   # Install dependencies for code coverage testing.
