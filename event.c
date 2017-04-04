@@ -919,16 +919,6 @@ event_handle_clientmessage(xcb_client_message_event_t *ev)
         ewmh_process_client_message(ev);
 }
 
-/** The keymap change notify event handler.
- * \param ev The event.
- */
-static void
-event_handle_mappingnotify(xcb_mapping_notify_event_t *ev)
-{
-    /* Since we use XKB, we shouldn't get this event */
-    warn("Unexpected MappingNotify of type %d", ev->request);
-}
-
 static void
 event_handle_reparentnotify(xcb_reparent_notify_event_t *ev)
 {
@@ -1049,7 +1039,6 @@ void event_handle(xcb_generic_event_t *event)
         EVENT(XCB_KEY_PRESS, event_handle_key);
         EVENT(XCB_KEY_RELEASE, event_handle_key);
         EVENT(XCB_LEAVE_NOTIFY, event_handle_leavenotify);
-        EVENT(XCB_MAPPING_NOTIFY, event_handle_mappingnotify);
         EVENT(XCB_MAP_REQUEST, event_handle_maprequest);
         EVENT(XCB_MOTION_NOTIFY, event_handle_motionnotify);
         EVENT(XCB_PROPERTY_NOTIFY, property_handle_propertynotify);
