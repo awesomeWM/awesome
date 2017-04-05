@@ -179,6 +179,9 @@ local function set_wallpaper(s)
         if type(wallpaper) == "function" then
             wallpaper = wallpaper(s)
         end
+        if type(wallpaper) == "table" then
+            wallpaper = wallpaper[s.index]
+          end
         gears.wallpaper.maximized(wallpaper, s, true)
     end
 end
