@@ -209,11 +209,19 @@ end
 -- @tparam tooltip self A tooltip object.
 local function set_geometry(self)
     -- calculate width / height
-    local n_w, n_h = self.textbox:get_preferred_size(mouse.screen)
-    n_w = n_w + self.marginbox.left + self.marginbox.right
-    n_h = n_h + self.marginbox.top + self.marginbox.bottom
-
+    local n_w, n_h
     local w = self:get_wibox()
+
+    if self._private.widget then
+        w:set_widget(self._private.widget[1])
+        n_w, n_h = self._private.widget[2], self._private.widget[3]
+    else
+        n_w, n_h = self.textbox:get_preferred_size(mouse.screen)
+        n_w = n_w + self.marginbox.left + self.marginbox.right
+        n_h = n_h + self.marginbox.top + self.marginbox.bottom
+        w:set_widget(self.marginbox)
+    end
+
     w:geometry({ width = n_w, height = n_h })
 
     if self._private.shape then
@@ -275,7 +283,6 @@ function tooltip:get_wibox()
     end
 
     local wb = wibox(self.wibox_properties)
-    wb:set_widget(self.marginbox)
 
     -- Close the tooltip when clicking it.  This gets done on release, to not
     -- emit the release event on an underlying object, e.g. the titlebar icon.
@@ -405,6 +412,21 @@ function tooltip:set_preferred_positions(value)
     set_geometry(self)
 end
 
+--- Set a widget to display.
+-- @tparam widget widget The widget to display
+-- @tparam integer width The width of the tooltip
+-- @tparam integer height The height of the tooltip
+function tooltip:set_widget(widget, width, height)
+    wibox.widget.base.check_widget(widget)
+    assert(type(width) == "number", tostring(width) .. " is not a number")
+    assert(type(height) == "number", tostring(height) .. " is not a number")
+
+    self._private.widget = { widget, width, height }
+    if self._private.visible then
+        set_geometry(self)
+    end
+end
+
 --- Change displayed text.
 --
 -- @property text
@@ -414,6 +436,7 @@ end
 
 function tooltip:set_text(text)
     self.textbox:set_text(text)
+    self._private.widget = nil
     if self._private.visible then
         set_geometry(self)
     end
@@ -428,6 +451,7 @@ end
 
 function tooltip:set_markup(text)
     self.textbox:set_markup(text)
+    self._private.widget = nil
     if self._private.visible then
         set_geometry(self)
     end
