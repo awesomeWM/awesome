@@ -23,11 +23,16 @@ local function make_directory(gfile)
     return false, err
 end
 
---- Create a directory
+--- Create a directory, including all missing parent directories.
 -- @tparam string dir The directory.
 -- @return (true, nil) on success, (false, err) on failure
-function filesystem.mkdir(dir)
+function filesystem.make_directories(dir)
     return make_directory(Gio.File.new_for_path(dir))
+end
+
+function filesystem.mkdir(dir)
+    require("gears.debug").deprecate("gears.filesystem.make_directories", {deprecated_in=5})
+    return filesystem.make_directories(dir)
 end
 
 --- Create all parent directories for a given file.
@@ -104,7 +109,7 @@ end
 -- @return A string with the requested path with a slash at the end.
 function filesystem.get_cache_dir()
     local result = filesystem.get_xdg_cache_home() .. "awesome/"
-    filesystem.mkdir(result)
+    filesystem.make_directories(result)
     return result
 end
 
