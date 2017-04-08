@@ -2,10 +2,10 @@ local gears = require("gears") --DOC_HIDE
 
 local o = gears.object{}
 
--- Add a __tostring metamethod for prettier output
-getmetatable(o).__tostring = function()
-    return "[obj]"
-end
+-- Add a __tostring metamethod for prettier output --DOC_HIDE
+getmetatable(o).__tostring = function() --DOC_HIDE
+    return "[obj]" --DOC_HIDE
+end --DOC_HIDE
 
 -- Function can be attached to signals
 local function slot(obj, a, b, c)
