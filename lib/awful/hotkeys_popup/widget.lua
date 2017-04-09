@@ -556,8 +556,8 @@ function widget.new(args)
     end
 
     --- Add hotkey group rules for third-party applications.
-    -- @tparam group hotkeys group name,
-    -- @tparam data rule data for the group
+    -- @tparam string group hotkeys group name,
+    -- @tparam table data rule data for the group
     -- see `awful.hotkeys_popup.key.vim` as an example.
     function widget_instance:add_group_rules(group, data)
         self.group_rules[group] = data
@@ -590,11 +590,11 @@ end
 
 --- Add hotkey group rules for third-party applications
 -- (default widget instance will be used).
--- @tparam string hotkeys group name,
--- @tparam table rule data for the group
+-- @tparam string group rule group name,
+-- @tparam table data rule data for the group
 -- see `awful.hotkeys_popup.key.vim` as an example.
-function widget.add_group_rules(...)
-    return get_default_widget():add_group_rules(...)
+function widget.add_group_rules(group, data)
+    return get_default_widget():add_group_rules(group, data)
 end
 
 return widget

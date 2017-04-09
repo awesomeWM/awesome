@@ -1,3 +1,11 @@
+---------------------------------------------------------------------------
+--- Firefox hotkeys for awful.hotkeys_widget
+--
+-- @author Jonathan &lt;jonathan@tinypulse.com&gt;
+-- @copyright 2017 Jonathan
+-- @module awful.hotkeys_popup.keys.firefox
+---------------------------------------------------------------------------
+
 local hotkeys_popup = require("awful.hotkeys_popup.widget")
 local fire_rule = { class = { "Firefox" } }
 for group_name, group_data in pairs({
