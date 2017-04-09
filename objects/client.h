@@ -78,13 +78,7 @@ struct client_t
     bool minimized;
     /** True if the client is fullscreen */
     bool fullscreen;
-    /** True if the client is maximized horizontally */
-    bool maximized_horizontal;
-    /** True if the client is maximized vertically */
-    bool maximized_vertical;
-    /** True if the client is maximized both horizontally and vertically by the
-      * the user
-      */
+    /** True if the client is maximized */
     bool maximized;
     /** True if the client is above others */
     bool above;
@@ -171,8 +165,6 @@ void client_set_modal(lua_State *, int, bool);
 void client_set_ontop(lua_State *, int, bool);
 void client_set_fullscreen(lua_State *, int, bool);
 void client_set_maximized(lua_State *, int, bool);
-void client_set_maximized_horizontal(lua_State *, int, bool);
-void client_set_maximized_vertical(lua_State *, int, bool);
 void client_set_minimized(lua_State *, int, bool);
 void client_set_urgent(lua_State *, int, bool);
 void client_set_pid(lua_State *, int, uint32_t);
