@@ -89,7 +89,7 @@ function module.add_leave_callback(cb, context)
     table.insert(callbacks.leave[context], cb)
 end
 
--- Resize, the drawable.
+-- Resize the drawable.
 --
 -- Valid `args` are:
 --
@@ -99,9 +99,9 @@ end
 -- * *mode*: The resize mode.
 --
 -- @function awful.mouse.resize
--- @tparam client client A client
--- @tparam[default=mouse.resize] string context The resizing context
--- @tparam[opt={}] table args A set of `awful.placement` arguments
+-- @tparam client client A client.
+-- @tparam[default=mouse.resize] string context The resizing context.
+-- @tparam[opt={}] table args A set of `awful.placement` arguments.
 
 local function handler(_, client, context, args) --luacheck: no unused_args
     args = args or {}
@@ -156,10 +156,10 @@ local function handler(_, client, context, args) --luacheck: no unused_args
     capi.mousegrabber.run(function (_mouse)
         if not client.valid then return end
 
-        -- Resize everytime the mouse move (default behavior)
+        -- Resize everytime the mouse moves (default behavior).
         if args.mode == "live" then
             -- Get the new geometry
-            geo = setmetatable(args.placement(client, args),{__index=args})
+            geo = setmetatable(args.placement(client, args), {__index=args})
         end
 
         -- Execute the move callbacks. This can be used to add features such as
@@ -194,8 +194,8 @@ local function handler(_, client, context, args) --luacheck: no unused_args
             if v then return true end
         end
 
-        -- Only resize after the mouse is released, this avoid losing content
-        -- in resize sensitive apps such as XTerm or allow external modules
+        -- Only resize after the mouse is released, this avoids losing content
+        -- in resize sensitive apps such as XTerm or allows external modules
         -- to implement custom resizing.
         if args.mode == "after" then
             -- Get the new geometry

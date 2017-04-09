@@ -37,7 +37,8 @@ util.shell = os.getenv("SHELL") or "/bin/sh"
 -- @deprecated deprecate
 -- @param[opt] see The message to a new method / function to use.
 -- @tparam table args Extra arguments
--- @tparam boolean args.raw Print the message as-is without the automatic context
+-- @tparam boolean args.raw Print the message as-is without the automatic
+--   context (but only append a leading dot).
 -- @tparam integer args.deprecated_in Print the message only when Awesome's
 --   version is equal to or greater than deprecated_in.
 -- @see gears.debug
