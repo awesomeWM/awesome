@@ -28,8 +28,8 @@ function floating.mouse_resize_handler(c, corner, x, y)
     local g = c:geometry()
 
     -- Do not allow maximized clients to be resized by mouse
-    local fixed_x = c.maximized_horizontal
-    local fixed_y = c.maximized_vertical
+    local fixed_x = c.maximized
+    local fixed_y = c.maximized
 
     local prev_coords = {}
     local coordinates_delta = {x=0,y=0}

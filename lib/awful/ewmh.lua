@@ -53,7 +53,7 @@ local function repair_geometry(window)
 
     -- Re-apply the geometry locking properties to what they should be.
     for _, prop in ipairs {
-        "fullscreen", "maximized", "maximized_vertical", "maximized_horizontal"
+        "fullscreen", "maximized"
     } do
         if window[prop] then
             window:emit_signal("request::geometry", prop, {
@@ -230,8 +230,6 @@ end
 
 -- Map the state to the action name
 local context_mapper = {
-    maximized_vertical   = "maximize_vertically",
-    maximized_horizontal = "maximize_horizontally",
     maximized            = "maximize",
     fullscreen           = "maximize"
 }
