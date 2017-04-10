@@ -457,28 +457,26 @@ function rules.execute(c, props, callbacks)
     end
 
     -- Some properties need to be handled first. For example, many properties
-    -- depend that the client is tagged, this isn't yet the case.
+    -- require that the client is tagged, this isn't yet the case.
     for prop, handler in pairs(rules.high_priority_properties) do
         local value = props[prop]
-
         if value ~= nil then
             if type(value) == "function" then
                 value = value(c, props)
             end
-
             handler(c, value, props)
         end
-
     end
 
     -- Make sure the tag is selected before the main rules are called.
-    -- Otherwise properties like "urgent" or "focus" may fail because they
-    -- will be overiden by various callbacks.
-    -- Previously, this was done in a second client.manage callback, but caused
-    -- a race condition where the order the require() would change the output.
+    -- Otherwise properties like "urgent" or "focus" may fail (if they were
+    -- overridden by other callbacks).
+    -- Previously this was done in a second client.manage callback, but caused
+    -- a race condition where the order of modules being loaded would change
+    -- the outcome.
     c:emit_signal("request::tag", nil, {reason="rules"})
 
-    -- By default, rc.lua use no_overlap+no_offscreen placement. This has to
+    -- By default, rc.lua uses no_overlap+no_offscreen placement. This has to
     -- be executed before x/y/width/height/geometry as it would otherwise
     -- always override the user specified position with the default rule.
     if props.placement then
@@ -486,13 +484,12 @@ function rules.execute(c, props, callbacks)
         rules.extra_properties.placement(c, props.placement, props)
     end
 
-    -- Now that the tags and screen are set, handle the geometry
+    -- Handle the geometry (since tags and screen are set).
     if props.height or props.width or props.x or props.y or props.geometry then
         rules.extra_properties.geometry(c, nil, props)
     end
 
-    -- As most race conditions should now have been avoided, apply the remaining
-    -- properties.
+    -- Apply the remaining properties (after known race conditions are handled).
     for property, value in pairs(props) do
         if property ~= "focus" and type(value) == "function" then
             value = value(c, props)
@@ -523,12 +520,10 @@ function rules.execute(c, props, callbacks)
     for prop, handler in pairs(rules.delayed_properties) do
         if not force_ignore[prop] then
             local value = props[prop]
-
             if value ~= nil then
                 if type(value) == "function" then
                     value = value(c, props)
                 end
-
                 handler(c, value, props)
             end
         end
