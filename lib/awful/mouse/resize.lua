@@ -89,7 +89,7 @@ function module.add_leave_callback(cb, context)
     table.insert(callbacks.leave[context], cb)
 end
 
--- Resize the drawable.
+--- Resize the drawable.
 --
 -- Valid `args` are:
 --

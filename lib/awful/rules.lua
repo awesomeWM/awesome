@@ -472,7 +472,7 @@ function rules.execute(c, props, callbacks)
     -- Otherwise properties like "urgent" or "focus" may fail (if they were
     -- overridden by other callbacks).
     -- Previously this was done in a second client.manage callback, but caused
-    -- a race condition where the order of modules being required would change
+    -- a race condition where the order of modules being loaded would change
     -- the outcome.
     c:emit_signal("request::tag", nil, {reason="rules"})
 
@@ -489,7 +489,7 @@ function rules.execute(c, props, callbacks)
         rules.extra_properties.geometry(c, nil, props)
     end
 
-    -- Apply the remaining properties (since race conditions are handled).
+    -- Apply the remaining properties (after known race conditions are handled).
     for property, value in pairs(props) do
         if property ~= "focus" and type(value) == "function" then
             value = value(c, props)
