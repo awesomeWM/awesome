@@ -546,7 +546,7 @@ function naughty.notify(args)
         beautiful.notification_margin
     local opacity = args.opacity or preset.opacity or
         beautiful.notification_opacity
-    local notification = { screen = s, destroy_cb = destroy_cb, timeout = timeout }
+    local notification = { screen = s, destroy_cb = destroy_cb, timeout = timeout, actions = actions }
 
     -- replace notification if needed
     if args.replaces_id then
@@ -583,6 +583,7 @@ function naughty.notify(args)
             die(naughty.notificationClosedReason.dismissedByUser)
         end
     end
+    notification.run = run
 
     local hover_destroy = function ()
         if hover_timeout == 0 then
