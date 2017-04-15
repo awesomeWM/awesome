@@ -37,7 +37,7 @@ void luaA_systray_invalidate(void);
  */
 void
 xembed_message_send(xcb_connection_t *connection, xcb_window_t towin,
-                    long message, long d1, long d2, long d3)
+                    xcb_timestamp_t timestamp, uint32_t message, uint32_t d1, uint32_t d2, uint32_t d3)
 {
     xcb_client_message_event_t ev;
 
@@ -45,7 +45,7 @@ xembed_message_send(xcb_connection_t *connection, xcb_window_t towin,
     ev.response_type = XCB_CLIENT_MESSAGE;
     ev.window = towin;
     ev.format = 32;
-    ev.data.data32[0] = XCB_CURRENT_TIME;
+    ev.data.data32[0] = timestamp;
     ev.data.data32[1] = message;
     ev.data.data32[2] = d1;
     ev.data.data32[3] = d2;
@@ -116,10 +116,12 @@ xembed_getbywin(xembed_window_array_t *list, xcb_window_t win)
 /** Update embedded window properties.
  * \param connection The X connection.
  * \param emwin The embedded window.
+ * \param timestamp The timestamp.
+ * \param reply The property reply to handle.
  */
 void
 xembed_property_update(xcb_connection_t *connection, xembed_window_t *emwin,
-                       xcb_get_property_reply_t *reply)
+                       xcb_timestamp_t timestamp, xcb_get_property_reply_t *reply)
 {
     int flags_changed;
     xembed_info_t info = { 0, 0 };
@@ -136,13 +138,13 @@ xembed_property_update(xcb_connection_t *connection, xembed_window_t *emwin,
         if(info.flags & XEMBED_MAPPED)
         {
             xcb_map_window(connection, emwin->win);
-            xembed_window_activate(connection, emwin->win);
+            xembed_window_activate(connection, emwin->win, timestamp);
         }
         else
         {
             xcb_unmap_window(connection, emwin->win);
-            xembed_window_deactivate(connection, emwin->win);
-            xembed_focus_out(connection, emwin->win);
+            xembed_window_deactivate(connection, emwin->win, timestamp);
+            xembed_focus_out(connection, emwin->win, timestamp);
         }
         luaA_systray_invalidate();
     }

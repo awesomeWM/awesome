@@ -751,7 +751,7 @@ event_handle_maprequest(xcb_map_request_event_t *ev)
     if((em = xembed_getbywin(&globalconf.embedded, ev->window)))
     {
         xcb_map_window(globalconf.connection, ev->window);
-        xembed_window_activate(globalconf.connection, ev->window);
+        xembed_window_activate(globalconf.connection, ev->window, globalconf.timestamp);
         /* The correct way to set this is via the _XEMBED_INFO property. Neither
          * of the XEMBED not the systray spec talk about mapping windows.
          * Apparently, Qt doesn't care and does not set an _XEMBED_INFO

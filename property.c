@@ -341,7 +341,8 @@ property_handle_xembed_info(uint8_t state,
                              XCB_GET_PROPERTY_TYPE_ANY, 0, 3);
         xcb_get_property_reply_t *propr =
             xcb_get_property_reply(globalconf.connection, cookie, 0);
-        xembed_property_update(globalconf.connection, emwin, propr);
+        xembed_property_update(globalconf.connection, emwin,
+                               globalconf.timestamp, propr);
         p_delete(&propr);
     }
 

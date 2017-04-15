@@ -166,7 +166,7 @@ systray_request_handle(xcb_window_t embed_win)
     }
 
     xembed_embedded_notify(globalconf.connection, em.win,
-                           globalconf.systray.window,
+                           globalconf.timestamp, globalconf.systray.window,
                            MIN(XEMBED_VERSION, em.info.version));
 
     xembed_window_array_append(&globalconf.embedded, em);
@@ -241,7 +241,8 @@ xembed_process_client_message(xcb_client_message_event_t *ev)
     switch(ev->data.data32[1])
     {
       case XEMBED_REQUEST_FOCUS:
-        xembed_focus_in(globalconf.connection, ev->window, XEMBED_FOCUS_CURRENT);
+        xembed_focus_in(globalconf.connection, ev->window,
+                        globalconf.timestamp, XEMBED_FOCUS_CURRENT);
         break;
     }
     return 0;
