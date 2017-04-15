@@ -88,7 +88,6 @@ luaA_window_buttons(lua_State *L)
     {
         luaA_button_array_set(L, 1, 2, &window->buttons);
         luaA_object_emit_signal(L, 1, "property::buttons", 0);
-        xwindow_buttons_grab(window_get(window), &window->buttons);
         xwindow_buttons_grab(window->window, &window->buttons);
     }
 
