@@ -294,6 +294,49 @@ acquire_WM_Sn(bool replace)
     xcb_send_event(globalconf.connection, false, globalconf.screen->root, 0xFFFFFF, (char *) &ev);
 }
 
+static void
+acquire_timestamp(void)
+{
+    /* Getting a current timestamp is hard. ICCCM recommends a zero-length
+     * append to a property, so let's do that.
+     */
+    xcb_generic_event_t *event;
+    xcb_window_t win = globalconf.screen->root;
+    xcb_atom_t atom = XCB_ATOM_RESOURCE_MANAGER; /* Just something random */
+    xcb_atom_t type = XCB_ATOM_STRING; /* Equally random */
+
+    xcb_grab_server(globalconf.connection);
+    xcb_change_window_attributes(globalconf.connection, win,
+            XCB_CW_EVENT_MASK, (uint32_t[]) { XCB_EVENT_MASK_PROPERTY_CHANGE });
+    xcb_change_property(globalconf.connection, XCB_PROP_MODE_APPEND, win,
+            atom, type, 8, 0, "");
+    xcb_change_window_attributes(globalconf.connection, win,
+            XCB_CW_EVENT_MASK, (uint32_t[]) { 0 });
+    xcb_ungrab_server(globalconf.connection);
+    xcb_flush(globalconf.connection);
+
+    /* Now wait for the event */
+    while((event = xcb_wait_for_event(globalconf.connection)))
+    {
+        /* Is it the event we are waiting for? */
+        if(XCB_EVENT_RESPONSE_TYPE(event) == XCB_PROPERTY_NOTIFY)
+        {
+            xcb_property_notify_event_t *ev = (void *) event;
+            globalconf.timestamp = ev->time;
+            p_delete(&event);
+            break;
+        }
+
+        /* Hm, not the right event. */
+        if (globalconf.pending_event != NULL)
+        {
+            event_handle(globalconf.pending_event);
+            p_delete(&globalconf.pending_event);
+        }
+        globalconf.pending_event = event;
+    }
+}
+
 static xcb_generic_event_t *poll_for_event(void)
 {
     if (globalconf.pending_event) {
@@ -634,6 +677,9 @@ main(int argc, char **argv)
                 globalconf.default_cmap, globalconf.screen->root,
                 globalconf.visual->visual_id);
     }
+
+    /* Get a recent timestamp */
+    acquire_timestamp();
 
     /* Prefetch all the extensions we might need */
     xcb_prefetch_extension_data(globalconf.connection, &xcb_big_requests_id);
