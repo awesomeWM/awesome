@@ -274,7 +274,7 @@ local function get_offset(s, position, idx, width, height)
     if position:match("left") then
         v.x = ws.x + naughty.config.padding
     elseif position:match("middle") then
-        v.x = (ws.width / 2) - (width / 2)
+        v.x = ws.x + (ws.width / 2) - (width / 2)
     else
         v.x = ws.x + ws.width - (width + naughty.config.padding)
     end
