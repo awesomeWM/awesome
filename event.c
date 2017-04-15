@@ -221,7 +221,7 @@ event_handle_button(xcb_button_press_event_t *ev)
         if(ev->child == XCB_NONE)
             xcb_allow_events(globalconf.connection,
                              XCB_ALLOW_ASYNC_POINTER,
-                             XCB_CURRENT_TIME);
+                             ev->time);
     }
     else if((c = client_getbyframewin(ev->event)) || (c = client_getbywin(ev->event)))
     {
@@ -263,7 +263,7 @@ event_handle_button(xcb_button_press_event_t *ev)
         }
         xcb_allow_events(globalconf.connection,
                          XCB_ALLOW_REPLAY_POINTER,
-                         XCB_CURRENT_TIME);
+                         ev->time);
     }
     else if(ev->child == XCB_NONE)
         if(globalconf.screen->root == ev->event)
@@ -837,6 +837,10 @@ event_handle_randr_output_change_notify(xcb_randr_notify_event_t *ev)
         xcb_randr_get_output_info_reply_t *info = NULL;
         lua_State *L = globalconf_get_lua_State();
 
+        /* The following explicitly uses XCB_CURRENT_TIME since we want to know
+         * the final state of the connection. There could be more notification
+         * events underway and using some "old" timestamp causes problems.
+         */
         info = xcb_randr_get_output_info_reply(globalconf.connection,
             xcb_randr_get_output_info_unchecked(globalconf.connection,
                 output,

@@ -107,7 +107,7 @@ awesome_atexit(bool restart)
      * Work around this by placing the focus where we like it to be.
      */
     xcb_set_input_focus(globalconf.connection, XCB_INPUT_FOCUS_POINTER_ROOT,
-            XCB_NONE, XCB_CURRENT_TIME);
+            XCB_NONE, globalconf.timestamp);
     xcb_aux_sync(globalconf.connection);
 
     xkb_free();
@@ -266,7 +266,7 @@ acquire_WM_Sn(bool replace)
 
     /* Acquire the selection */
     xcb_set_selection_owner(globalconf.connection, globalconf.selection_owner_window,
-                            globalconf.selection_atom, XCB_CURRENT_TIME);
+                            globalconf.selection_atom, globalconf.timestamp);
     if (get_sel_reply->owner != XCB_NONE)
     {
         /* Wait for the old owner to go away */
@@ -286,7 +286,7 @@ acquire_WM_Sn(bool replace)
     ev.window = globalconf.screen->root;
     ev.format = 32;
     ev.type = MANAGER;
-    ev.data.data32[0] = XCB_CURRENT_TIME;
+    ev.data.data32[0] = globalconf.timestamp;
     ev.data.data32[1] = globalconf.selection_atom;
     ev.data.data32[2] = globalconf.selection_owner_window;
     ev.data.data32[3] = ev.data.data32[4] = 0;
