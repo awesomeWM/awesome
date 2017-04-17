@@ -103,15 +103,17 @@ function completion.shell(command, cur_pos, ncomp, shell)
             -- NOTE: ${~:-"..."} turns on GLOB_SUBST, useful for expansion of
             -- "~/" ($HOME).  ${:-"foo"} is the string "foo" as var.
             shell_cmd = "/usr/bin/env zsh -c 'local -a res; res=( ${~:-"
-                .. string.format('%q', words[cword_index]) .. "}* ); "
+                .. string.format('%q', words[cword_index]) .. "}*(N) ); "
                 .. "print -ln -- ${res[@]}'"
         else
-            -- check commands, aliases, builtins, functions and reswords
-            shell_cmd = "/usr/bin/env zsh -c 'local -a res; "..
+            -- Check commands, aliases, builtins, functions and reswords.
+            -- Adds executables and non-empty dirs from $PWD (pwd_exe).
+            shell_cmd = "/usr/bin/env zsh -c 'local -a res pwd_exe; "..
+            "pwd_exe=(*(N*:t) *(NF:t)); "..
             "res=( "..
             "\"${(k)commands[@]}\" \"${(k)aliases[@]}\" \"${(k)builtins[@]}\" \"${(k)functions[@]}\" "..
             "\"${(k)reswords[@]}\" "..
-            "${PWD}/*(:t)"..
+            "./${^${pwd_exe}} "..
             "); "..
             "print -ln -- ${(M)res[@]:#" .. string.format('%q', words[cword_index]) .. "*}'"
         end
