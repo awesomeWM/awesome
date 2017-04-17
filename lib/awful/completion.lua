@@ -93,7 +93,7 @@ function completion.shell(command, cur_pos, ncomp, shell)
         i = i + 1
     end
 
-    if cword_index == 1 and not string.find(words[cword_index], "/") then
+    if cword_index == 1 then
         comptype = "command"
     end
 
