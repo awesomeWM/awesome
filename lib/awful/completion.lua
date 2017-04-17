@@ -156,7 +156,7 @@ function completion.shell(command, cur_pos, ncomp, shell)
     end
 
     local str = command:sub(1, cword_start - 1) .. output[ncomp] .. command:sub(cword_end)
-    cur_pos = cword_end + #output[ncomp] + 1
+    cur_pos = cword_start + #output[ncomp]
 
     return str, cur_pos, output
 end
