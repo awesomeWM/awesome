@@ -984,7 +984,10 @@ screen_update_primary(void)
         foreach(output, (*screen)->outputs)
             foreach (randr_output, output->outputs)
                 if (*randr_output == primary->output)
+                {
                     primary_screen = *screen;
+                    break;
+                }
     }
     p_delete(&primary);
 
