@@ -144,7 +144,8 @@ local steps = {
         local new_geo = c:geometry()
 
         for k,v in pairs(original_geo) do
-            assert(new_geo[k] == v)
+            assert(new_geo[k] == v,
+                   string.format('%s != %s (%s)', new_geo[k], v, k))
         end
 
         c.floating  = true
