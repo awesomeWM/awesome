@@ -81,7 +81,7 @@ function xresources.get_dpi(s)
     if not xresources.dpi then
         -- Might not be present when run under unit tests
         if awesome and awesome.xrdb_get_value then
-            xresources.dpi = tonumber(awesome.xrdb_get_value("", "Xft.dpi"))
+            xresources.dpi = tonumber(awesome.xrdb_get_value("", "Xft.dpi") or 96)
         end
         if not xresources.dpi then
             xresources.dpi = 96
