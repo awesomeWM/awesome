@@ -504,7 +504,9 @@ local function drill(ids, content)
         end
     end
     -- Replace all children (if any) with the new ones.
-    l:set_children(widgets)
+    if widgets then
+        l:set_children(widgets)
+    end
     return l, id
 end
 
