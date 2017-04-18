@@ -35,11 +35,11 @@ function filesystem.mkdir(dir)
     return filesystem.make_directories(dir)
 end
 
---- Create all parent directories for a given file.
+--- Create all parent directories for a given path.
 -- @tparam string path The path whose parents should be created.
 -- @return (true, nil) on success, (false, err) on failure
-function filesystem.make_parent_directories(file)
-    return make_directory(Gio.File.new_for_path(file):get_parent())
+function filesystem.make_parent_directories(path)
+    return make_directory(Gio.File.new_for_path(path):get_parent())
 end
 
 --- Check if a file exists, is readable and not a directory.
