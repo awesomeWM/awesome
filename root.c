@@ -276,7 +276,7 @@ luaA_root_fake_input(lua_State *L)
     xcb_test_fake_input(globalconf.connection,
                         type,
                         detail,
-                        XCB_CURRENT_TIME,
+                        0, /* This is a delay, not a timestamp! */
                         XCB_NONE,
                         x, y,
                         0);
