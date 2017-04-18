@@ -11,20 +11,35 @@ local gtable = require("gears.table")
 
 local filesystem = {}
 
---- Create a directory
+local function make_directory(gfile)
+    local success, err = gfile:make_directory_with_parents()
+    if success then
+        return true
+    end
+    if err.domain == Gio.IOErrorEnum and err.code == "EXISTS" then
+        -- Directory already exists, let this count as success
+        return true
+    end
+    return false, err
+end
+
+--- Create a directory, including all missing parent directories.
 -- @tparam string dir The directory.
 -- @return (true, nil) on success, (false, err) on failure
+function filesystem.make_directories(dir)
+    return make_directory(Gio.File.new_for_path(dir))
+end
+
 function filesystem.mkdir(dir)
-	local gfile = Gio.File.new_for_path(dir)
-	local success, err = gfile:make_directory_with_parents()
-	if success then
-		return true
-	end
-	if err.domain == Gio.IOErrorEnum and err.code == "EXISTS" then
-		-- Direcotry already exists, let this count as success
-		return true
-	end
-	return false, err
+    require("gears.debug").deprecate("gears.filesystem.make_directories", {deprecated_in=5})
+    return filesystem.make_directories(dir)
+end
+
+--- Create all parent directories for a given file.
+-- @tparam string path The path whose parents should be created.
+-- @return (true, nil) on success, (false, err) on failure
+function filesystem.make_parent_directories(file)
+    return make_directory(Gio.File.new_for_path(file):get_parent())
 end
 
 --- Check if a file exists, is readable and not a directory.
@@ -93,7 +108,9 @@ end
 --- Get the path to a directory that should be used for caching data.
 -- @return A string with the requested path with a slash at the end.
 function filesystem.get_cache_dir()
-    return filesystem.get_xdg_cache_home() .. "awesome/"
+    local result = filesystem.get_xdg_cache_home() .. "awesome/"
+    filesystem.make_directories(result)
+    return result
 end
 
 --- Get the path to the directory where themes are installed.

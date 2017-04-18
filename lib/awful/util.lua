@@ -92,9 +92,9 @@ end
 -- @return mkdir return code
 -- @see gears.filesystem
 function util.mkdir(dir)
-    util.deprecate("gears.filesystem.mkdir", {deprecated_in=5})
+    util.deprecate("gears.filesystem.make_directories", {deprecated_in=5})
 
-    return gfs.mkdir(dir)
+    return gfs.make_directories(dir)
 end
 
 --- Eval Lua code.

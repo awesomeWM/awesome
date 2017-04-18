@@ -210,15 +210,8 @@ end
 -- @param id The data.history identifier
 local function history_save(id)
     if data.history[id] then
-        local f = io.open(id, "w")
-        if not f then
-            local i = 0
-            for d in id:gmatch(".-/") do
-                i = i + #d
-            end
-            gfs.mkdir(id:sub(1, i - 1))
-            f = assert(io.open(id, "w"))
-        end
+        assert(gfs.make_parent_directories(id))
+        local f = assert(io.open(id, "w"))
         for i = 1, math.min(#data.history[id].table, data.history[id].max) do
             f:write(data.history[id].table[i] .. "\n")
         end
