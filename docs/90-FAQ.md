@@ -103,12 +103,11 @@ additions to the path you want to use in awesome.
 ### How to remove gaps between windows?
 
 You can add `size_hints_honor = false` to the `properties` section in your
-`awful.rules.rules` table in your `rc.lua'. It will match and apply this rule to
-all clients.
+`awful.rules.rules` table in your `rc.lua`. It will match and apply this rule
+to all clients.
 
-If you want to know what are size hints it has been debated many times on the
-mailing list, so you can read the explanation:
-[http://www.mail-archive.com/awesome@naquadah.org/msg01767.html](http://www.mail-archive.com/awesome@naquadah.org/msg01767.html)
+See [the mailing list archive](http://www.mail-archive.com/awesome@naquadah.org/msg01767.html)
+for more info about what size hints are.
 
 This might cause flickering with some non-ICCCM conforming applications (e.g.
 Lilyterm) which try to override the size that the window manager assigned them.
