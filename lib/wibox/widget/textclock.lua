@@ -24,16 +24,22 @@ end
 --
 -- @tparam[opt=" %a %b %d, %H:%M "] string format The time format.
 -- @tparam[opt=60] number timeout How often update the time (in seconds).
+-- @tparam[opt=false] use UTC time instead of local.
 -- @treturn table A textbox widget.
 -- @function wibox.widget.textclock
-function textclock.new(format, timeout)
+function textclock.new(format, timeout, utc)
     format = format or " %a %b %d, %H:%M "
     timeout = timeout or 60
+    utc = utc or false
 
     local w = textbox()
     local t
     function w._private.textclock_update_cb()
-        w:set_markup(DateTime.new_now_local():format(format))
+        if utc then
+            w:set_markup(DateTime.new_now_utc():format(format))
+        else
+            w:set_markup(DateTime.new_now_local():format(format))
+        end
         t.timeout = calc_timeout(timeout)
         t:again()
         return true -- Continue the timer
