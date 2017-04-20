@@ -494,6 +494,8 @@ end
 --   Note: this function is only relevant to notifications sent via dbus.
 -- @tparam[opt] table args.actions Mapping that maps a string to a callback when this
 --   action is selected.
+-- @bool[opt=false] args.ignore_suspend If set to true this notification
+--   will be shown even if notifications are suspended via `naughty.suspend`.
 -- @usage naughty.notify({ title = "Achtung!", text = "You're idling", timeout = 0 })
 -- @treturn ?table The notification object, or nil in case a notification was
 --   not displayed.
@@ -755,7 +757,7 @@ function naughty.notify(args)
     -- insert the notification to the table
     table.insert(naughty.notifications[s][notification.position], notification)
 
-    if suspended then
+    if suspended and not args.ignore_suspend then
         notification.box.visible = false
         table.insert(naughty.notifications.suspended, notification)
     end
