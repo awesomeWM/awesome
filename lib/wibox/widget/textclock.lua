@@ -10,7 +10,9 @@ local setmetatable = setmetatable
 local os = os
 local textbox = require("wibox.widget.textbox")
 local timer = require("gears.timer")
-local DateTime = require("lgi").GLib.DateTime
+local glib = require("lgi").GLib
+local DateTime = glib.DateTime
+local TimeZone = glib.TimeZone
 
 local textclock = { mt = {} }
 
@@ -24,16 +26,18 @@ end
 --
 -- @tparam[opt=" %a %b %d, %H:%M "] string format The time format.
 -- @tparam[opt=60] number timeout How often update the time (in seconds).
+-- @tparam[opt] string timezone The timezone to display, or localtime if nil.
 -- @treturn table A textbox widget.
 -- @function wibox.widget.textclock
-function textclock.new(format, timeout)
+function textclock.new(format, timeout, timezone)
     format = format or " %a %b %d, %H:%M "
     timeout = timeout or 60
+    timezone = timezone and TimeZone.new(timezone) or TimeZone.new_local()
 
     local w = textbox()
     local t
     function w._private.textclock_update_cb()
-        w:set_markup(DateTime.new_now_local():format(format))
+        w:set_markup(DateTime.new_now(timezone):format(format))
         t.timeout = calc_timeout(timeout)
         t:again()
         return true -- Continue the timer
