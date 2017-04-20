@@ -14,6 +14,8 @@ describe("awful.widget.keyboardlayout get_groups_from_group_names", function()
         -- possible worst cases
         [""] = {
         },
+        ["pc+dvorak_alt2+inet(evdev)"] = {
+        },
         ["empty"] = {
         },
         ["empty(basic)"] = {
