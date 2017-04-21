@@ -26,7 +26,9 @@ end
 --
 -- @tparam[opt=" %a %b %d, %H:%M "] string format The time format.
 -- @tparam[opt=60] number timeout How often update the time (in seconds).
--- @tparam[opt] string timezone The timezone to display, or localtime if nil.
+-- @tparam[opt=local timezone] string timezone The timezone to use,
+--   e.g. "Z" for UTC, "±hh:mm" or "Europe/Amsterdam". See
+--   https://developer.gnome.org/glib/stable/glib-GTimeZone.html#g-time-zone-new.
 -- @treturn table A textbox widget.
 -- @function wibox.widget.textclock
 function textclock.new(format, timeout, timezone)
