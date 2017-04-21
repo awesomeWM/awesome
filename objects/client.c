@@ -1059,7 +1059,9 @@ client_ban(client_t *c)
 {
     if(!c->isbanned)
     {
+        client_ignore_enterleave_events();
         xcb_unmap_window(globalconf.connection, c->frame_window);
+        client_restore_enterleave_events();
 
         c->isbanned = true;
 
@@ -2130,7 +2132,9 @@ client_unban(client_t *c)
     lua_State *L = globalconf_get_lua_State();
     if(c->isbanned)
     {
+        client_ignore_enterleave_events();
         xcb_map_window(globalconf.connection, c->frame_window);
+        client_restore_enterleave_events();
 
         c->isbanned = false;
 
