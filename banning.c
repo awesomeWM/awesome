@@ -52,8 +52,6 @@ banning_refresh(void)
 
     globalconf.need_lazy_banning = false;
 
-    client_ignore_enterleave_events();
-
     foreach(c, globalconf.clients)
         if(client_isvisible(*c))
             client_unban(*c);
@@ -63,8 +61,6 @@ banning_refresh(void)
     foreach(c, globalconf.clients)
         if(!client_isvisible(*c))
             client_ban(*c);
-
-    client_restore_enterleave_events();
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
