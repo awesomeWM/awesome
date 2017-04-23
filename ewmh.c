@@ -554,6 +554,8 @@ ewmh_client_check_hints(client_t *c)
     void *data = NULL;
     xcb_get_property_cookie_t c0, c1, c2;
     xcb_get_property_reply_t *reply;
+    bool is_h_max = false;
+    bool is_v_max = false;
 
     /* Send the GetProperty requests which will be processed later */
     c0 = xcb_get_property_unchecked(globalconf.connection, false, c->window,
@@ -578,7 +580,34 @@ ewmh_client_check_hints(client_t *c)
     {
         state = (xcb_atom_t *) data;
         for(int i = 0; i < xcb_get_property_value_length(reply) / ssizeof(xcb_atom_t); i++)
-            ewmh_process_state_atom(c, state[i], _NET_WM_STATE_ADD);
+            if (state[i] == _NET_WM_STATE_MAXIMIZED_HORZ)
+                is_h_max = true;
+            else if (state[i] == _NET_WM_STATE_MAXIMIZED_VERT)
+                is_v_max = true;
+            else
+                ewmh_process_state_atom(c, state[i], _NET_WM_STATE_ADD);
+    }
+
+    /* Check maximization manually */
+    if (is_h_max && is_v_max) {
+        lua_State *L = globalconf_get_lua_State();
+        luaA_object_push(L, c);
+        client_set_maximized(L, -1, true);
+        lua_pop(L, 1);
+    }
+    else if(is_h_max)
+    {
+        lua_State *L = globalconf_get_lua_State();
+        luaA_object_push(L, c);
+        client_set_maximized_horizontal(L, -1, true);
+        lua_pop(L, 1);
+    }
+    else if(is_v_max)
+    {
+        lua_State *L = globalconf_get_lua_State();
+        luaA_object_push(L, c);
+        client_set_maximized_vertical(L, -1, true);
+        lua_pop(L, 1);
     }
 
     p_delete(&reply);
