@@ -32,8 +32,14 @@ local function open_window(class, title, options)
         }
         window:set_geometry_hints(nil, geom, Gdk.WindowHints.RESIZE_INC)
     end
+    if options.maximize_before then
+        window:maximize()
+    end
     window:set_wmclass(class, class)
     window:show_all()
+    if options.maximize_after then
+        window:maximize()
+    end
 end
 
 local function parse_options(options)
@@ -123,6 +129,12 @@ return function(class, title, sn_rules, callback, resize_increment, args)
     end
     if resize_increment then
         options = options .. "resize_increment,"
+    end
+    if args.maximize_before then
+        options = options .. "maximize_before,"
+    end
+    if args.maximize_after then
+        options = options .. "maximize_after,"
     end
     if args.gravity then
         assert(type(args.gravity)=="number","Use `lgi.Gdk.Gravity.NORTH_WEST`")
