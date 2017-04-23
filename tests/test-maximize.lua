@@ -12,6 +12,17 @@ end
 
 local original_geo = nil
 
+local counter = 0
+
+local function geometry_handler(c, context, hints)
+    hints = hints or {}
+    assert(type(c) == "client")
+    assert(type(context) == "string")
+    assert(type(hints.toggle) == "boolean")
+    assert(type(hints.status) == "boolean")
+    counter = counter + 1
+end
+
 local steps = {
     function(count)
         if count == 1 then
@@ -141,6 +152,72 @@ local steps = {
 
         assert(geo_to_str(original_geo) == geo_to_str(new_geo),
             geo_to_str(original_geo) .. " == " .. geo_to_str(new_geo))
+
+        c:kill()
+
+        return true
+    end,
+    -- Now, start some clients maximized
+    function()
+        if #client.get() > 0 then return end
+
+        test_client(nil,nil,nil,nil,nil,{maximize_before=true})
+
+        return true
+    end,
+    function()
+        local c = client.get()[1]
+
+        if not c then return end
+
+        assert(not c.maximized_horizontal)
+        assert(not c.maximized_vertical)
+        assert(c.maximized)
+
+        c:kill()
+
+        return true
+    end,
+    function()
+        if #client.get() > 0 then return end
+
+        test_client(nil,nil,nil,nil,nil,{maximize_after=true})
+
+        return true
+    end,
+    function()
+        local c = client.get()[1]
+
+        if not c then return end
+
+        assert(not c.maximized_horizontal)
+        assert(not c.maximized_vertical)
+
+        -- It might happen in the second try
+        if not c.maximized then return end
+
+        c:kill()
+
+        return true
+    end,
+    function()
+        if #client.get() > 0 then return end
+
+        -- Remove the default handler and replace it with a testing one
+        -- **WARNING**, add test **BEFORE** this function if you want them
+        -- to be relevant.
+        client.disconnect_signal("request::geometry", awful.ewmh.geometry)
+        client.disconnect_signal("request::geometry", awful.ewmh.merge_maximization)
+        client.connect_signal("request::geometry", geometry_handler)
+
+        test_client(nil,nil,nil,nil,nil,{maximize_after=true})
+
+        return true
+    end,
+    function()
+        local c = client.get()[1]
+
+        if not c or counter ~= 2 then return end
 
         return true
     end
