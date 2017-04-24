@@ -8,6 +8,7 @@ local cairo = require("lgi").cairo
 local color = require("gears.color")
 local surface = require("gears.surface")
 local timer = require("gears.timer")
+local debug = require("gears.debug")
 local root = root
 
 local wallpaper = { mt = {} }
@@ -139,7 +140,9 @@ function wallpaper.centered(surf, s, background, scale)
     if surf ~= original_surf then
         surf:finish()
     end
-    assert(cr.status == "SUCCESS", "Cairo context entered error state: " .. cr.status)
+    if cr.status ~= "SUCCESS" then
+        debug.print_warning("Cairo context entered error state: " .. cr.status)
+    end
 end
 
 --- Set a tiled wallpaper.
@@ -164,7 +167,9 @@ function wallpaper.tiled(surf, s, offset)
     if surf ~= original_surf then
         surf:finish()
     end
-    assert(cr.status == "SUCCESS", "Cairo context entered error state: " .. cr.status)
+    if cr.status ~= "SUCCESS" then
+        debug.print_warning("Cairo context entered error state: " .. cr.status)
+    end
 end
 
 --- Set a maximized wallpaper.
@@ -202,7 +207,9 @@ function wallpaper.maximized(surf, s, ignore_aspect, offset)
     if surf ~= original_surf then
         surf:finish()
     end
-    assert(cr.status == "SUCCESS", "Cairo context entered error state: " .. cr.status)
+    if cr.status ~= "SUCCESS" then
+        debug.print_warning("Cairo context entered error state: " .. cr.status)
+    end
 end
 
 --- Set a fitting wallpaper.
@@ -238,7 +245,9 @@ function wallpaper.fit(surf, s, background)
     if surf ~= original_surf then
         surf:finish()
     end
-    assert(cr.status == "SUCCESS", "Cairo context entered error state: " .. cr.status)
+    if cr.status ~= "SUCCESS" then
+        debug.print_warning("Cairo context entered error state: " .. cr.status)
+    end
 end
 
 return wallpaper
