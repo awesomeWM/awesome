@@ -441,6 +441,64 @@ local function set_text(notification, title, text)
     end
 end
 
+local function update_size(notification)
+
+    local n = notification
+    local s = n.size_info
+    local width = s.width
+    local height = s.height
+    local margin = s.margin
+
+    -- calculate the width
+    if not width then
+        local w, _ = n.textbox:get_preferred_size(n.screen)
+        width = w + (n.iconbox and s.icon_w + 2 * margin or 0) + 2 * margin
+    end
+
+    if width < s.actions_max_width then
+        width = s.actions_max_width
+    end
+
+    -- calculate the height
+    if not height then
+        local w = width - (n.iconbox and s.icon_w + 2 * margin or 0) - 2 * margin
+        local h = n.textbox:get_height_for_width(w, n.screen)
+        if n.iconbox and s.icon_h + 2 * margin > h + 2 * margin then
+            height = s.icon_h + 2 * margin
+        else
+            height = h + 2 * margin
+        end
+    end
+
+    height = height + s.actions_total_height
+
+    -- crop to workarea size if too big
+    local workarea = n.screen.workarea
+    local border_width = s.border_width or 0
+    local padding = naughty.config.padding or 0
+    if width > workarea.width - 2*border_width - 2*padding then
+        width = workarea.width - 2*border_width - 2*padding
+    end
+    if height > workarea.height - 2*border_width - 2*padding then
+        height = workarea.height - 2*border_width - 2*padding
+    end
+
+    -- set size in notification object
+    n.height = height + 2*border_width
+    n.width = width + 2*border_width
+    local offset = get_offset(n.screen, n.position, n.idx, n.width, n.height)
+    n.box:geometry({
+        width = width,
+        height = height,
+        x = offset.x,
+        y = offset.y,
+    })
+    n.idx = offset.idx
+
+    -- update positions of other notifications
+    arrange(n.screen)
+end
+
 --- Replace title and text of an existing notification.
 -- @tparam notification notification Notification object, which contents are to be replaced.
 -- @tparam string new_title New title of notification. If not specified, old title remains unchanged.
@@ -452,6 +510,7 @@ function naughty.replace_text(notification, new_title, new_text)
     if title then title = title .. "\n" else title = "" end
 
     set_text(notification, title, new_text)
+    update_size(notification)
 end
 
 --- Create a notification.
@@ -676,6 +735,7 @@ function naughty.notify(args)
             icon_h = icon:get_height()
         end
     end
+    notification.iconbox = iconbox
 
     -- create container wibox
     notification.box = wibox({ fg = fg,
@@ -689,52 +749,22 @@ function naughty.notify(args)
 
     if hover_timeout then notification.box:connect_signal("mouse::enter", hover_destroy) end
 
-    -- calculate the width
-    if not width then
-        local w, _ = textbox:get_preferred_size(s)
-        width = w + (iconbox and icon_w + 2 * margin or 0) + 2 * margin
-    end
-
-    if width < actions_max_width then
-        width = actions_max_width
-    end
-
-    -- calculate the height
-    if not height then
-        local w = width - (iconbox and icon_w + 2 * margin or 0) - 2 * margin
-        local h = textbox:get_height_for_width(w, s)
-        if iconbox and icon_h + 2 * margin > h + 2 * margin then
-            height = icon_h + 2 * margin
-        else
-            height = h + 2 * margin
-        end
-    end
-
-    height = height + actions_total_height
-
-    -- crop to workarea size if too big
-    local workarea = s.workarea
-    if width > workarea.width - 2 * (border_width or 0) - 2 * (naughty.config.padding or 0) then
-        width = workarea.width - 2 * (border_width or 0) - 2 * (naughty.config.padding or 0)
-    end
-    if height > workarea.height - 2 * (border_width or 0) - 2 * (naughty.config.padding or 0) then
-        height = workarea.height - 2 * (border_width or 0) - 2 * (naughty.config.padding or 0)
-    end
-
-    -- set size in notification object
-    notification.height = height + 2 * (border_width or 0)
-    notification.width = width + 2 * (border_width or 0)
+    notification.size_info = {
+        width = width,
+        height = height,
+        icon_w = icon_w,
+        icon_h = icon_h,
+        margin = margin,
+        border_width = border_width,
+        actions_max_width = actions_max_width,
+        actions_total_height = actions_total_height,
+    }
 
     -- position the wibox
-    local offset = get_offset(s, notification.position, nil, notification.width, notification.height)
+    update_size(notification)
     notification.box.ontop = ontop
-    notification.box:geometry({ width = width,
-                                height = height,
-                                x = offset.x,
-                                y = offset.y })
     notification.box.opacity = opacity
     notification.box.visible = true
-    notification.idx = offset.idx
 
     -- populate widgets
     local layout = wibox.layout.fixed.horizontal()
