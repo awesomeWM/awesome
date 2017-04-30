@@ -375,12 +375,16 @@ endif()
 # }}}
 
 # {{{ Tests
+add_executable(test-gravity tests/test-gravity.c)
+target_link_libraries(test-gravity
+    ${AWESOME_COMMON_REQUIRED_LDFLAGS} ${AWESOME_REQUIRED_LDFLAGS})
 add_custom_target(check-integration
     sh -c "CMAKE_BINARY_DIR='${CMAKE_BINARY_DIR}' ${CMAKE_SOURCE_DIR}/tests/run.sh"
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     COMMENT "Running integration tests"
     USES_TERMINAL
     VERBATIM)
+add_dependencies(check-integration test-gravity)
 add_custom_target(check-requires
     lua "${CMAKE_SOURCE_DIR}/build-utils/check_for_invalid_requires.lua"
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
