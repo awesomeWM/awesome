@@ -124,6 +124,14 @@ install:
       fi
       return 0
     }
+  - |
+    do_codecov_gcov() {
+      echo "== do_codecov_gcov in $PWD: $*: =="
+      if [ "$DO_COVERAGE" = "codecov" ]; then
+        travis_retry bash /tmp/codecov-bash -X coveragepy -c -F "$1" || return 1
+      fi
+      return 0
+    }
 
   # Functions for custom Travis folds.
   - |
@@ -143,6 +151,12 @@ install:
     }
 script:
   - export CMAKE_ARGS="-DLUA_LIBRARY=${LUALIBRARY} -DLUA_INCLUDE_DIR=${LUAINCLUDE} -D OVERRIDE_VERSION=$AWESOME_VERSION -DSTRICT_TESTS=true"
+  - |
+    if [ "$DO_COVERAGE" = "codecov" ]; then
+      export CXXFLAGS="-fprofile-arcs -ftest-coverage"
+      export CFLAGS="-fprofile-arcs -ftest-coverage"
+      export LDFLAFS="-fprofile-arcs -ftest-coverage"
+    fi
   - |
     if [ "$EMPTY_THEME_WHILE_LOADING" = 1 ]; then
       # Break beautiful so that trying to access the theme before beautiful.init() causes an error
@@ -181,7 +195,9 @@ script:
         (make check-unit-coverage \
          && do_codecov unittests \
          && tests/run.sh \
-         && do_codecov functionaltests)
+         && do_codecov functionaltests \
+         && gcov $(find -name '*.o') \
+         && do_codecov_gcov c_code)
         ret=$?
         travis_fold_end
         [ "$ret" = 0 ]
