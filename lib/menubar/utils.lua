@@ -272,7 +272,7 @@ function utils.parse_dir(dir_path, callback)
                 local file_child = enum:get_child(info)
                 if file_type == 'REGULAR' then
                     local path = file_child:get_path()
-                    local program = utils.parse_desktop_file(path)
+                    local program = path and utils.parse_desktop_file(path)
                     if program then
                         table.insert(programs, program)
                     end
