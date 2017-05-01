@@ -252,11 +252,10 @@ end
 -- @tparam table callback.programs Paths of found .desktop files.
 function utils.parse_dir(dir_path, callback)
 
-    local function parser(dir, programs)
-        local f = gio.File.new_for_path(dir)
+    local function parser(file, programs)
         -- Except for "NONE" there is also NOFOLLOW_SYMLINKS
         local query = gio.FILE_ATTRIBUTE_STANDARD_NAME .. "," .. gio.FILE_ATTRIBUTE_STANDARD_TYPE
-        local enum, err = f:async_enumerate_children(query, gio.FileQueryInfoFlags.NONE)
+        local enum, err = file:async_enumerate_children(query, gio.FileQueryInfoFlags.NONE)
         if not enum then
             gdebug.print_error(err)
             return
@@ -270,14 +269,15 @@ function utils.parse_dir(dir_path, callback)
             end
             for _, info in ipairs(list) do
                 local file_type = info:get_file_type()
-                local file_path = enum:get_child(info):get_path()
+                local file_child = enum:get_child(info)
                 if file_type == 'REGULAR' then
-                    local program = utils.parse_desktop_file(file_path)
+                    local path = file_child:get_path()
+                    local program = utils.parse_desktop_file(path)
                     if program then
                         table.insert(programs, program)
                     end
                 elseif file_type == 'DIRECTORY' then
-                    parser(file_path, programs)
+                    parser(file_child, programs)
                 end
             end
             if #list == 0 then
@@ -289,7 +289,7 @@ function utils.parse_dir(dir_path, callback)
 
     gio.Async.start(protected_call.call)(function()
         local result = {}
-        parser(dir_path, result)
+        parser(gio.File.new_for_path(dir_path), result)
         callback(result)
     end)
 end
