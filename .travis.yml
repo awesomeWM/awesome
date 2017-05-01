@@ -119,16 +119,9 @@ install:
       if [ "$DO_COVERAGE" = "codecov" ]; then
         test -f build/luacov.stats.out || { echo 'build/luacov.stats.out does not exist.'; return 1; }
         luacov || return 1
+        gcov **/*.o
         travis_retry bash /tmp/codecov-bash -X coveragepy -c -F "$1" || return 1
         rm build/luacov.stats.out
-      fi
-      return 0
-    }
-  - |
-    do_codecov_gcov() {
-      echo "== do_codecov_gcov in $PWD: $*: =="
-      if [ "$DO_COVERAGE" = "codecov" ]; then
-        travis_retry bash /tmp/codecov-bash -X coveragepy -c -F "$1" || return 1
       fi
       return 0
     }
@@ -195,9 +188,7 @@ script:
         (make check-unit-coverage \
          && do_codecov unittests \
          && tests/run.sh \
-         && do_codecov functionaltests \
-         && gcov $(find -name '*.o') \
-         && do_codecov_gcov c_code)
+         && do_codecov functionaltests)
         ret=$?
         travis_fold_end
         [ "$ret" = 0 ]
