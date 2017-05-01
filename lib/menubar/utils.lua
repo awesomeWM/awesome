@@ -287,11 +287,11 @@ function utils.parse_dir(dir_path, callback)
         enum:async_close()
     end
 
-    gio.Async.start(function()
+    gio.Async.start(protected_call.call)(function()
         local result = {}
         parser(dir_path, result)
-        protected_call.call(callback, result)
-    end)()
+        callback(result)
+    end)
 end
 
 function utils.compute_textbox_width(textbox, s)
