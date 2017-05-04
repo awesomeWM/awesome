@@ -14,7 +14,7 @@ env:
     # Lua 5.3 isn't available in Ubuntu Trusty, so some magic below installs it.
     - LUA=5.3 LUANAME=lua5.3 LUALIBRARY=/usr/lib/liblua.so DO_COVERAGE=codecov
     # luajit: installed from source.
-    - LUA=5.1 LUANAME=luajit-2.0 LUALIBRARY=/usr/lib/libluajit-5.1.so LUAROCKS_ARGS=--lua-suffix=jit-2.0.4 TEST_PREV_COMMITS=1 EMPTY_THEME_WHILE_LOADING=1
+    - LUA=5.1 LUANAME=luajit-2.0 LUALIBRARY=/usr/lib/libluajit-5.1.so LUAROCKS_ARGS=--lua-suffix=jit-2.0.5 TEST_PREV_COMMITS=1 EMPTY_THEME_WHILE_LOADING=1
     # Note: luarocks does not work with Lua 5.0.
     - LUA=5.1 LUANAME=lua5.1 BUILD_IN_DIR=/tmp/awesome-build
     # Lua 5.2 with older lgi and screen size not divisible by 2.
