@@ -160,43 +160,6 @@ endforeach()
 # Do it again, but this time with the CFLAGS/LDFLAGS
 pkg_check_modules(AWESOME_REQUIRED REQUIRED ${AWESOME_DEPENDENCIES})
 
-# On Mac OS X and FreeBSD, the executable of Awesome has to be linked against libiconv
-# explicitly.  Unfortunately, libiconv doesn't have its pkg-config file,
-# and CMake doesn't provide a module for looking up the library.  Thus, we
-# have to do everything for ourselves...
-if(APPLE OR CMAKE_SYSTEM_NAME MATCHES "FreeBSD")
-    if(NOT DEFINED AWESOME_ICONV_SEARCH_PATHS)
-        set(AWESOME_ICONV_SEARCH_PATHS /opt/local /opt /usr/local /usr)
-    endif()
-
-    if(NOT DEFINED AWESOME_ICONV_INCLUDE_DIR)
-        find_path(AWESOME_ICONV_INCLUDE_DIR
-                  iconv.h
-                  PATHS ${AWESOME_ICONV_SEARCH_PATHS}
-                  PATH_SUFFIXES include
-                  NO_CMAKE_SYSTEM_PATH)
-    endif()
-
-    if(NOT DEFINED AWESOME_ICONV_LIBRARY_PATH)
-        get_filename_component(AWESOME_ICONV_BASE_DIRECTORY ${AWESOME_ICONV_INCLUDE_DIR} DIRECTORY)
-        find_library(AWESOME_ICONV_LIBRARY_PATH
-                     NAMES iconv
-                     HINTS ${AWESOME_ICONV_BASE_DIRECTORY}
-                     PATH_SUFFIXES lib)
-    endif()
-
-    if(NOT DEFINED AWESOME_ICONV_LIBRARY_PATH)
-        message(FATAL_ERROR "Looking for iconv library - not found.")
-    else()
-        message(STATUS "Looking for iconv library - found: ${AWESOME_ICONV_LIBRARY_PATH}")
-    endif()
-
-    set(AWESOME_REQUIRED_LDFLAGS
-        ${AWESOME_REQUIRED_LDFLAGS} ${AWESOME_ICONV_LIBRARY_PATH})
-    set(AWESOME_REQUIRED_INCLUDE_DIRS
-        ${AWESOME_REQUIRED_INCLUDE_DIRS} ${AWESOME_ICONV_INCLUDE_DIR})
-endif(APPLE OR CMAKE_SYSTEM_NAME MATCHES "FreeBSD")
-
 macro(a_find_library variable library)
     find_library(${variable} ${library})
     if(NOT ${variable})

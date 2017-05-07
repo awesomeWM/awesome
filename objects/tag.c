@@ -366,7 +366,7 @@ is_client_tagged(client_t *c, tag_t *t)
     return false;
 }
 
-/** Get the index of the tag with focused client or first selected 
+/** Get the index of the tag with focused client or first selected
  * \return Its index
  */
 int
@@ -475,10 +475,9 @@ LUA_OBJECT_EXPORT_PROPERTY(tag, tag_t, activated, lua_pushboolean)
 static int
 luaA_tag_set_name(lua_State *L, tag_t *tag)
 {
-    size_t len;
-    const char *buf = luaL_checklstring(L, -1, &len);
+    const char *buf = luaL_checkstring(L, -1);
     p_delete(&tag->name);
-    a_iso2utf8(buf, len, &tag->name, NULL);
+    tag->name = a_strdup(buf);
     luaA_object_emit_signal(L, -3, "property::name", 0);
     ewmh_update_net_desktop_names();
     return 0;

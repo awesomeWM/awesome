@@ -47,29 +47,6 @@ struct area_t
 #define AREA_EQUAL(a, b) ((a).x == (b).x && (a).y == (b).y && \
         (a).width == (b).width && (a).height == (b).height)
 
-bool draw_iso2utf8(const char *, size_t, char **, ssize_t *);
-
-/** Convert a string to UTF-8.
- * \param str The string to convert.
- * \param len The string length.
- * \param dest The destination string that will be allocated.
- * \param dlen The destination string length allocated, can be NULL.
- * \return True if the conversion happened, false otherwise. In both case, dest
- * and dlen will have value and dest have to be free().
- */
-static inline bool
-a_iso2utf8(const char *str, ssize_t len, char **dest, ssize_t *dlen)
-{
-    if(draw_iso2utf8(str, len, dest, dlen))
-        return true;
-
-    *dest = a_strdup(str);
-    if(dlen)
-        *dlen = len;
-
-    return false;
-}
-
 static inline void
 cairo_surface_array_destroy_surface(cairo_surface_t **s)
 {

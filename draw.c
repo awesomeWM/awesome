@@ -24,7 +24,6 @@
 #include "globalconf.h"
 
 #include <langinfo.h>
-#include <iconv.h>
 #include <errno.h>
 #include <ctype.h>
 #include <math.h>
@@ -32,60 +31,6 @@
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <cairo-xcb.h>
 #include <lauxlib.h>
-
-/** Convert text from any charset to UTF-8 using iconv.
- * \param iso The ISO string to convert.
- * \param len The string size.
- * \param dest The destination pointer. Memory will be allocated, up to you to
- * free, like any char *.
- * \param dlen The destination length, can be NULL.
- * \return True if conversion was done.
- */
-bool
-draw_iso2utf8(const char *iso, size_t len, char **dest, ssize_t *dlen)
-{
-    static iconv_t iso2utf8 = (iconv_t) -1;
-    static int8_t dont_need_convert = -1;
-
-    if(dont_need_convert == -1)
-        dont_need_convert = A_STREQ(nl_langinfo(CODESET), "UTF-8");
-
-    if(!len || dont_need_convert)
-        return false;
-
-    if(iso2utf8 == (iconv_t) -1)
-    {
-        iso2utf8 = iconv_open("UTF-8", nl_langinfo(CODESET));
-        if(iso2utf8 == (iconv_t) -1)
-        {
-            if(errno == EINVAL)
-                warn("unable to convert text from %s to UTF-8, not available",
-                     nl_langinfo(CODESET));
-            else
-                warn("unable to convert text: %s", strerror(errno));
-
-            return false;
-        }
-    }
-
-    size_t orig_utf8len, utf8len;
-    char *utf8;
-
-    orig_utf8len = utf8len = 2 * len + 1;
-    utf8 = *dest = p_new(char, utf8len);
-
-    if(iconv(iso2utf8, (char **) &iso, &len, &utf8, &utf8len) == (size_t) -1)
-    {
-        warn("text conversion failed: %s", strerror(errno));
-        p_delete(dest);
-        return false;
-    }
-
-    if(dlen)
-        *dlen = orig_utf8len - utf8len;
-
-    return true;
-}
 
 static cairo_user_data_key_t data_key;
 
