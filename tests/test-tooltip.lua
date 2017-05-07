@@ -26,7 +26,9 @@ place.centered(mouse)
 local tt = nil
 
 table.insert(steps, function()
-    tt = tooltip {text = "A long tooltip", visible = true}
+    tt = tooltip {text = "short", visible = true}
+    -- This tests changing the text while the tooltip is visible
+    tt:set_text("A long tooltip")
 
     return true
 end)
