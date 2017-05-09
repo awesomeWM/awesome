@@ -295,7 +295,10 @@ function ewmh.geometry(c, context, hints)
             props.zap_border_width = true
         end
 
+        local original = repair_geometry_lock
+        repair_geometry_lock = true
         aplace[context](c, props)
+        repair_geometry_lock = original
     end
 end
 
