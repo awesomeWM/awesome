@@ -512,6 +512,7 @@ function menu.clients(args, item_args, filter)
         cls_t[#cls_t + 1] = {
             c.name or "",
             function ()
+                if not c.valid then return end
                 if not c:isvisible() then
                     tags.viewmore(c:tags(), c.screen)
                 end
