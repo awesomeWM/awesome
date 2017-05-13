@@ -1078,7 +1078,7 @@ client_ban(client_t *c)
 void
 client_ignore_enterleave_events(void)
 {
-    assert(globalconf.pending_enter_leave_begin.sequence == 0);
+    check(globalconf.pending_enter_leave_begin.sequence == 0);
     globalconf.pending_enter_leave_begin = xcb_grab_server(globalconf.connection);
     /* If the connection is broken, we get a request with sequence number 0
      * which would then trigger an assertion in
@@ -1087,7 +1087,7 @@ client_ignore_enterleave_events(void)
     if(xcb_connection_has_error(globalconf.connection))
         fatal("X server connection broke (error %d)",
                 xcb_connection_has_error(globalconf.connection));
-    assert(globalconf.pending_enter_leave_begin.sequence != 0);
+    check(globalconf.pending_enter_leave_begin.sequence != 0);
 }
 
 void
@@ -1095,7 +1095,7 @@ client_restore_enterleave_events(void)
 {
     sequence_pair_t pair;
 
-    assert(globalconf.pending_enter_leave_begin.sequence != 0);
+    check(globalconf.pending_enter_leave_begin.sequence != 0);
     pair.begin = globalconf.pending_enter_leave_begin;
     pair.end = xcb_no_operation(globalconf.connection);
     xcb_ungrab_server(globalconf.connection);

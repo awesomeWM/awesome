@@ -566,7 +566,7 @@ screen_scan(void)
         screen_scan_xinerama(L, &globalconf.screens);
     if (globalconf.screens.len == 0)
         screen_scan_x11(L, &globalconf.screens);
-    assert(globalconf.screens.len > 0);
+    check(globalconf.screens.len > 0);
 
     screen_deduplicate(L, &globalconf.screens);
 

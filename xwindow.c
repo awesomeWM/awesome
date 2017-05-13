@@ -308,7 +308,7 @@ xwindow_get_shape(xcb_window_t win, enum xcb_shape_sk_t kind)
             height = extents->bounding_shape_extents_height;
             shaped = extents->bounding_shaped;
         } else {
-            assert(kind == XCB_SHAPE_SK_CLIP);
+            check(kind == XCB_SHAPE_SK_CLIP);
             x = extents->clip_shape_extents_x;
             y = extents->clip_shape_extents_y;
             width = extents->clip_shape_extents_width;
