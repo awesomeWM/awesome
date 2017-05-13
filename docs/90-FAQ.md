@@ -100,6 +100,8 @@ On zsh, any changes to $PATH you do in `~/.zshrc` will not be picked up (because
 this is only run for interactive shells). Use `~/.zshenv` instead to make
 additions to the path you want to use in awesome.
 
+If you need to execute command asynchronously (not blocking awesome while long command is running) you can use `awful.spawn.easy_async`.
+
 ### How to remove gaps between windows?
 
 You can add `size_hints_honor = false` to the `properties` section in your
@@ -111,6 +113,12 @@ for more info about what size hints are.
 
 This might cause flickering with some non-ICCCM conforming applications (e.g.
 Lilyterm) which try to override the size that the window manager assigned them.
+
+### How to add even more gaps between windows?
+
+To set gap between clients to 10 px in theme.lua set:
+
+    theme.useless_gap = 10
 
 ### How to add an application switcher?
 
@@ -282,6 +290,18 @@ you don't want new clients to be urgent by default put this in your rc.lua:
         end
     end
     client.connect_signal("request::activate", awful.ewmh.activate)
+    
+### How to prevent mouse cursor from jumping to the corner when resizing or moving a client
+
+You can specify the behavior for these layouts:
+
+    awful.layout.suit.floating.resize_jump_to_corner = false
+    awful.layout.suit.tile.resize_jump_to_corner = false
+    
+### How to create a simple panel widget
+
+See an example in the documentation for `awful.widget.watch`.
+
 
 ## Usage
 
@@ -293,6 +313,8 @@ button, to open the awesome menu.
 
 From there you can proceed to open `man awesome` which has a good guide,
 including the list of default keybindings.
+
+The list of currently enabled keybindings can be opened by "Mod4 + s" or from the awesome menu.
 
 ### Layouts
 
