@@ -34,6 +34,7 @@ if [ -z "$build_dir" ]; then
         build_dir="$source_dir"
     fi
 fi
+export build_dir
 
 # Get test files: test*, or the ones provided as args (relative to tests/).
 if [ $# != 0 ]; then
