@@ -352,6 +352,9 @@ end
 -- @treturn The drawin's area.
 area_common = function(d, new_geo, ignore_border_width, args)
     -- The C side expect no arguments, nil isn't valid
+    if new_geo and args.zap_border_width then
+        d.border_width = 0
+    end
     local geometry = new_geo and d:geometry(new_geo) or d:geometry()
     local border = ignore_border_width and 0 or d.border_width or 0
 

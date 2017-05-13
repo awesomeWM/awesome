@@ -292,17 +292,13 @@ function ewmh.geometry(c, context, hints)
 
         if original_context == "fullscreen" and beautiful.fullscreen_hide_border ~= false then
             props.ignore_border_width = true
+            props.zap_border_width = true
         end
 
+        local original = repair_geometry_lock
+        repair_geometry_lock = true
         aplace[context](c, props)
-
-        -- Remove the border to get a "real" fullscreen.
-        if original_context == "fullscreen" and beautiful.fullscreen_hide_border ~= false then
-            local original = repair_geometry_lock
-            repair_geometry_lock = true
-            c.border_width = 0
-            repair_geometry_lock = original
-        end
+        repair_geometry_lock = original
     end
 end
 
