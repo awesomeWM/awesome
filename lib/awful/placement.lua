@@ -274,6 +274,19 @@ local outer_positions = {
     bottom2 = function(r, w, _) return {x=r.x-w+r.width, y=r.y            }, "left"  end,
 }
 
+--- Map the effect of X11 border_width change on the various gravities
+local gravity_map = {
+    north_west = {x = 0, y = 0, width = 2, height = 2},
+    north_east = {x = 2, y = 2, width = 0, height = 0}, --FIXME
+    south_east = {x = 2, y = 2, width = 0, height = 0}, --FIXME
+    south_west = {x = 2, y = 2, width = 0, height = 0}, --FIXME
+    center     = {x = 1, y = 1, width = 1, height = 1},
+    north      = {x = 1, y = 1, width = 1, height = 1}, --FIXME
+    south      = {x = 1, y = 1, width = 1, height = 1}, --FIXME
+    east       = {x = 1, y = 1, width = 1, height = 1}, --FIXME
+    west       = {x = 1, y = 1, width = 1, height = 1}, --FIXME
+}
+
 --- Add a context to the arguments.
 -- This function extend the argument table. The context is used by some
 -- internal helper methods. If there already is a context, it has priority and
@@ -342,6 +355,34 @@ local function fix_new_geometry(new_geo, args, force)
             1, (new_geo.height + (offset.height or 0) - (m.top  or 0) - (m.bottom or 0) )
         ),
     }
+end
+
+--- Thanks to gravity, adding the border to the geometry isn't quite as easy as
+-- it sounds...
+-- @tparam table geo A geometry table
+-- @tparam string pos `x`, `y`, `width` or `height`
+-- @tparam number bw The border width
+-- @tparam table hints The size hints
+-- @tparam number mul The multiplier
+-- @treturn number The modified value
+local function apply_border_width(geo, pos, bw, hints, mul)
+    if bw == 0 then return geo[pos] end
+
+    -- Assume the gravity is NW if none is found
+    local grav = ((not hints) or (not hints.win_gravity))
+        and "north_west" or hints.win_gravity
+
+    -- Who knows, maybe X11 for VR will have 3D gravities!
+    if not gravity_map[grav] then return geo[pos] end
+
+    grav = gravity_map[grav]
+
+    -- +1 == add, -1 == remove
+    mul = mul or 1
+
+    assert(grav[pos])
+
+    return geo[pos] + (mul * grav[pos] * bw)
 end
 
 -- Get the area covered by a drawin.
@@ -1240,13 +1281,13 @@ function placement.maximize(d, args)
     local bw   = (not args.ignore_border_width) and d.border_width or 0
 
     if (not args.axis) or args.axis :match "vertical" then
-        ngeo.y      = sgeo.y
-        ngeo.height = sgeo.height - 2*bw
+        ngeo.y      = apply_border_width(sgeo, 'y'     , bw, d.size_hints, -1)
+        ngeo.height = apply_border_width(sgeo, 'height', bw, d.size_hints, -1)
     end
 
     if (not args.axis) or args.axis :match "horizontal" then
-        ngeo.x      = sgeo.x
-        ngeo.width  = sgeo.width - 2*bw
+        ngeo.x      = apply_border_width(sgeo, 'x'    , bw, d.size_hints, -1)
+        ngeo.width  = apply_border_width(sgeo, 'width', bw, d.size_hints, -1)
     end
 
     geometry_common(d, args, ngeo)

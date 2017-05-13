@@ -2,13 +2,31 @@
 
 local runner = require("_runner")
 local awful = require("awful")
+local test_client = require("_client")
+local lgi = require("lgi")
 
 local original_geo = nil
+
+local function check_original_geo()
+    local c = client.get()[1]
+    local new_geo = c:geometry()
+
+    for k,v in pairs(original_geo) do
+        assert(new_geo[k] == v, table.concat{
+            "gravity :\n", (c.size_hints.win_gravity or "N/A"), ",\n",
+            "border_width :\n", c.border_width, ",\n",
+            original_geo.x     , " == ", new_geo.x     , ",\n",
+            original_geo.y     , " == ", new_geo.y     , ",\n",
+            original_geo.width , " == ", new_geo.width , ",\n",
+            original_geo.height, " == ", new_geo.height, ",\n",
+        })
+    end
+end
 
 local steps = {
     function(count)
         if count == 1 then
-            awful.spawn("xterm")
+            test_client(nil,nil,nil,nil,nil,{gravity=lgi.Gdk.Gravity.NORTH_WEST})
         else
             local c = client.get()[1]
             if c then
@@ -40,6 +58,8 @@ local steps = {
         --assert(new_geo.width+2*c.border_width==sgeo.width) --FIXME off by 4px
 
         c.maximized_horizontal = false
+        check_original_geo()
+
         return true
     end,
 
@@ -60,15 +80,31 @@ local steps = {
         return true
     end,
 
+    -- Test restoring client.border_width (again)
+    function()
+        local c = client.get()[1]
+        check_original_geo()
+
+        -- same as last test, but add 1 again. This tests odd and even numbers
+        -- for off-by-one and see if the geometry cache is still tinted by the
+        -- old values
+        local test_width = c.border_width + 1
+
+        c.border_width = test_width
+
+        c.fullscreen = true
+        c.fullscreen = false
+
+        assert(c.border_width == test_width)
+        check_original_geo()
+
+        return true
+    end,
+
     -- Test restoring a geometry
     function()
         local c = client.get()[1]
-
-        local new_geo = c:geometry()
-
-        for k,v in pairs(original_geo) do
-            assert(new_geo[k] == v)
-        end
+        check_original_geo()
 
         c.fullscreen = true
 
@@ -83,10 +119,19 @@ local steps = {
 
         assert(c.fullscreen)
 
-        assert(new_geo.x==sgeo.x)
-        assert(new_geo.y==sgeo.y)
-        assert(new_geo.x+new_geo.width+2*bw==sgeo.x+sgeo.width)
-        assert(new_geo.y+new_geo.height+2*bw==sgeo.y+sgeo.height)
+        local assert_msg = {
+            "gravity :\n", (c.size_hints.win_gravity or "N/A"), ",\n",
+            "border_width :\n", c.border_width, ",\n",
+            sgeo.x     , " == ", new_geo.x     , ",\n",
+            sgeo.y     , " == ", new_geo.y     , ",\n",
+            sgeo.x+sgeo.width+2*bw , " == ", new_geo.width , ",\n",
+            sgeo.y+sgeo.height+2*bw, " == ", new_geo.height, ",\n",
+        }
+
+        assert(new_geo.x==sgeo.x, table.concat(assert_msg))
+        assert(new_geo.y==sgeo.y, table.concat(assert_msg))
+        assert(new_geo.x+new_geo.width+2*bw==sgeo.x+sgeo.width, table.concat(assert_msg))
+        assert(new_geo.y+new_geo.height+2*bw==sgeo.y+sgeo.height, table.concat(assert_msg))
 
         c.fullscreen = false
 
@@ -94,11 +139,13 @@ local steps = {
     end,
     function()
         local c = client.get()[1]
+        check_original_geo()
 
         local new_geo = c:geometry()
 
         for k,v in pairs(original_geo) do
-            assert(new_geo[k] == v)
+            assert(new_geo[k] == v,
+                   string.format('%s != %s (%s)', new_geo[k], v, k))
         end
 
         c.floating  = true
@@ -128,6 +175,7 @@ local steps = {
     end,
     function()
         local c = client.get()[1]
+        check_original_geo()
 
         assert(not c.maximized)
         assert(c.floating)
