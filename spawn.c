@@ -351,7 +351,7 @@ child_exit_callback(GPid pid, gint status, gpointer user_data)
         lua_pushliteral(L, "exit");
         lua_pushinteger(L, WEXITSTATUS(status));
     } else {
-        assert(WIFSIGNALED(status));
+        check(WIFSIGNALED(status));
         lua_pushliteral(L, "signal");
         lua_pushinteger(L, WTERMSIG(status));
     }
