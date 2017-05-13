@@ -859,20 +859,6 @@ void screen_update_workarea(screen_t *screen)
     lua_pop(L, 1);
 }
 
-/** Get display info.
- * \return The display area.
- */
-area_t
-display_area_get(void)
-{
-    xcb_screen_t *s = globalconf.screen;
-    area_t area = { .x = 0,
-                    .y = 0,
-                    .width = s->width_in_pixels,
-                    .height = s->height_in_pixels };
-    return area;
-}
-
 /** Move a client to a virtual screen.
  * \param c The client to move.
  * \param new_screen The destination screen.
