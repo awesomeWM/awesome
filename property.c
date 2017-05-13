@@ -160,9 +160,15 @@ property_get_wm_normal_hints(client_t *c)
 void
 property_update_wm_normal_hints(client_t *c, xcb_get_property_cookie_t cookie)
 {
+    lua_State *L = globalconf_get_lua_State();
+
     xcb_icccm_get_wm_normal_hints_reply(globalconf.connection,
 					cookie,
 					&c->size_hints, NULL);
+
+    luaA_object_push(L, c);
+    luaA_object_emit_signal(L, -1, "property::size_hints", 0);
+    lua_pop(L, 1);
 }
 
 xcb_get_property_cookie_t
