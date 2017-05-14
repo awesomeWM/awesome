@@ -1743,19 +1743,17 @@ client_resize_do(client_t *c, area_t geometry)
 bool
 client_resize(client_t *c, area_t geometry, bool honor_hints)
 {
-    area_t area;
-
     /* offscreen appearance fixes */
-    area = display_area_get();
+    area_t area = c->screen->geometry;
 
-    if(geometry.x > area.width)
-        geometry.x = area.width - geometry.width;
-    if(geometry.y > area.height)
-        geometry.y = area.height - geometry.height;
-    if(geometry.x + geometry.width < 0)
-        geometry.x = 0;
-    if(geometry.y + geometry.height < 0)
-        geometry.y = 0;
+    if(geometry.x > area.x + area.width)
+        geometry.x = area.x + area.width - geometry.width;
+    if(geometry.y > area.y + area.height)
+        geometry.y = area.y + area.height - geometry.height;
+    if(geometry.x + geometry.width < area.x)
+        geometry.x = area.x;
+    if(geometry.y + geometry.height < area.y)
+        geometry.y = area.y;
 
     if (honor_hints) {
         /* We could get integer underflows in client_remove_titlebar_geometry()
