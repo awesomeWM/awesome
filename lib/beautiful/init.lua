@@ -124,6 +124,12 @@ local function load_font(name)
     -- Calculate font height.
     local metrics = ctx:get_metrics(desc, nil)
     local height = math.ceil((metrics:get_ascent() + metrics:get_descent()) / Pango.SCALE)
+    if height == 0 then
+        height = desc:get_size() / Pango.SCALE
+        gears_debug.print_warning(string.format(
+            "beautiful.load_font: could not get height for '%s' (likely missing font), using %d.",
+            name, height))
+    end
 
     local font = { name = name, description = desc, height = height }
     fonts[name] = font
