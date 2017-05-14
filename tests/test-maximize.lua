@@ -203,8 +203,28 @@ local steps = {
     function()
         if #client.get() > 0 then return end
 
-        -- Remove the default handler and replace it with a testing one
-        -- **WARNING**, add test **BEFORE** this function if you want them
+        -- Test if resizing requests work
+        test_client(nil,nil,nil,nil,nil,{resize={width=400, height=400}})
+
+        return true
+    end,
+    function()
+        if #client.get() ~= 1 then return end
+
+        local c = client.get()[1]
+        local _, size = c:titlebar_top()
+
+        if c.width ~= 400 or c.height ~= 400+size then return end
+
+        c:kill()
+
+        return true
+    end,
+    function()
+        if #client.get() > 0 then return end
+
+        -- Remove the default handler and replace it with a testing one.
+        -- **WARNING**: add tests **BEFORE** this function if you want them
         -- to be relevant.
         client.disconnect_signal("request::geometry", awful.ewmh.geometry)
         client.disconnect_signal("request::geometry", awful.ewmh.merge_maximization)
