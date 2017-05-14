@@ -16,6 +16,9 @@ local function open_window(class, title, options)
         default_height = 100,
         title          = title
     }
+    if options.gravity then
+        window:set_gravity(tonumber(options.gravity))
+    end
     if options.snid and options.snid ~= "" then
         window:set_startup_id(options.snid)
     end
@@ -106,7 +109,8 @@ local function get_snid(sn_rules, callback)
     return snid
 end
 
-return function(class, title, sn_rules, callback, resize_increment)
+return function(class, title, sn_rules, callback, resize_increment, args)
+    args  = args or {}
     class = class or "test_app"
     title = title or "Awesome test client"
 
@@ -119,6 +123,10 @@ return function(class, title, sn_rules, callback, resize_increment)
     end
     if resize_increment then
         options = options .. "resize_increment,"
+    end
+    if args.gravity then
+        assert(type(args.gravity)=="number","Use `lgi.Gdk.Gravity.NORTH_WEST`")
+        options = options .. "gravity=" .. args.gravity .. ","
     end
     local data = class .. "\n" .. title .. "\n" .. options .. "\n"
     local success, msg = pipe:write_all(data)

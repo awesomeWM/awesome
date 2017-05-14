@@ -2,13 +2,20 @@
 
 local runner = require("_runner")
 local awful = require("awful")
+local test_client = require("_client")
+local lgi = require("lgi")
+
+local function geo_to_str(g)
+    return "pos=" .. g.x .. "," .. g.y ..
+        ";size=" .. g.width .. "x" .. g.height
+end
 
 local original_geo = nil
 
 local steps = {
     function(count)
         if count == 1 then
-            awful.spawn("xterm")
+            test_client(nil,nil,nil,nil,nil,{gravity=lgi.Gdk.Gravity.NORTH_WEST})
         else
             local c = client.get()[1]
             if c then
@@ -66,9 +73,8 @@ local steps = {
 
         local new_geo = c:geometry()
 
-        for k,v in pairs(original_geo) do
-            assert(new_geo[k] == v)
-        end
+        assert(geo_to_str(original_geo) == geo_to_str(new_geo),
+            geo_to_str(original_geo) .. " == " .. geo_to_str(new_geo))
 
         c.fullscreen = true
 
@@ -97,9 +103,8 @@ local steps = {
 
         local new_geo = c:geometry()
 
-        for k,v in pairs(original_geo) do
-            assert(new_geo[k] == v)
-        end
+        assert(geo_to_str(original_geo) == geo_to_str(new_geo),
+            geo_to_str(original_geo) .. " == " .. geo_to_str(new_geo))
 
         c.floating  = true
 
@@ -134,9 +139,8 @@ local steps = {
 
         local new_geo = c:geometry()
 
-        for k,v in pairs(original_geo) do
-            assert(new_geo[k] == v)
-        end
+        assert(geo_to_str(original_geo) == geo_to_str(new_geo),
+            geo_to_str(original_geo) .. " == " .. geo_to_str(new_geo))
 
         return true
     end
