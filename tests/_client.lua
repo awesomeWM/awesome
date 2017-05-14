@@ -40,6 +40,11 @@ local function open_window(class, title, options)
     if options.maximize_after then
         window:maximize()
     end
+    if options.resize_after_width and options.resize_after_height then
+       window:resize(
+           tonumber(options.resize_after_width), tonumber(options.resize_after_height)
+       )
+    end
 end
 
 local function parse_options(options)
@@ -136,10 +141,20 @@ return function(class, title, sn_rules, callback, resize_increment, args)
     if args.maximize_after then
         options = options .. "maximize_after,"
     end
+    if args.resize then
+        options = table.concat {
+            options,
+            "resize_after_width=",
+            args.resize.height, ",",
+            "resize_after_height=",
+            args.resize.width, ","
+        }
+    end
     if args.gravity then
         assert(type(args.gravity)=="number","Use `lgi.Gdk.Gravity.NORTH_WEST`")
         options = options .. "gravity=" .. args.gravity .. ","
     end
+
     local data = class .. "\n" .. title .. "\n" .. options .. "\n"
     local success, msg = pipe:write_all(data)
     assert(success, tostring(msg))
