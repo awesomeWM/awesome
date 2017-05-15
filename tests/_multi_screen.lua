@@ -248,7 +248,7 @@ local dispositions = {
         end,
     },
 
-    -- Corner case 2: Nothing at 0x0.
+    -- Corner case 2a: Nothing at 0x0.
     -- As some position may fallback to 0x0 this need to be tested often. It
     -- also caused issues such as #154
     {
@@ -268,6 +268,13 @@ local dispositions = {
                 height = canvas_h,
             }
         end
+    },
+
+    -- Corner case 2b: Still nothing at 0x0
+    {
+        function() return { x = 0, y = 32, width  = 32, height = 32, } end,
+        function() return { x = 32, y = 0, width = 32, height = 32, } end,
+        function() return { x = 64, y = 16, width = 32, height = 32, } end,
     },
 
     -- Corner case 3: Many very small screens.
