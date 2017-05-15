@@ -7,6 +7,7 @@ screen.count = 1
 local function create_screen(args)
     local s = gears_obj()
     s.data = {}
+    s.valid = true
 
     -- Copy the geo in case the args are mutated
     local geo = {
@@ -53,7 +54,10 @@ local screens = {}
 function screen._add_screen(args)
     local s = create_screen(args)
     table.insert(screens, s)
-    s.index = #screens
+
+    -- Skip the metatable or it will have side effects
+    rawset(s, "index", #screens)
+
     screen[#screen+1] = s
     screen[s] = s
 end
@@ -94,8 +98,23 @@ function screen._setup_grid(w, h, rows, args)
     end
 end
 
+local function iter_scr(_, _, s)
+    if not s then
+        assert(screen[1])
+        return screen[1], 1
+    end
+
+    local i = s.index
+
+    if i + 1 < #screen then
+        return screen[i+1], i+1
+    end
+end
+
 screen._add_screen {width=320, height=240}
 
-return screen
+return setmetatable(screen, {
+    __call = iter_scr
+})
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

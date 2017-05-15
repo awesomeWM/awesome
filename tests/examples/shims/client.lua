@@ -14,6 +14,14 @@ end
 --     CURRENTLY UNUSED
 -- end
 
+local function titlebar_meta(c)
+    for _, position in ipairs {"top", "bottom", "left", "right" } do
+        c["titlebar_"..position] = function(size) --luacheck: no unused
+            return drawin{}
+        end
+    end
+end
+
 -- Create fake clients to move around
 function client.gen_fake(args)
     local ret = gears_obj()
@@ -22,6 +30,7 @@ function client.gen_fake(args)
     ret.valid = true
     ret.size_hints = {}
     ret.border_width = 1
+    ret.icon_sizes = {{16,16}}
 
     -- Apply all properties
     for k,v in pairs(args or {}) do
@@ -71,6 +80,20 @@ function client.gen_fake(args)
         return nil
     end
 
+    function ret:get_icon(_)
+        return require("beautiful").awesome_icon
+    end
+
+    function ret:raise()
+        --TODO
+    end
+
+    function ret:lower()
+        --TODO
+    end
+
+    titlebar_meta(ret)
+
     function ret:tags(new) --FIXME
         if new then
             ret._tags = new
@@ -92,6 +115,7 @@ function client.gen_fake(args)
     -- Record the geometry
     ret._old_geo = {}
     push_geometry(ret)
+    ret._old_geo[1]._hide = args.hide_first
 
     -- Set the attributes
     ret.screen = args.screen or screen[1]

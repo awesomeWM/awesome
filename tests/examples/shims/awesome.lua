@@ -1,3 +1,6 @@
+local lgi       = require("lgi")
+local GdkPixbuf = lgi.GdkPixbuf
+local Gdk       = lgi.Gdk
 local gears_obj = require("gears.object")
 
 -- Emulate the C API classes. They differ from C API objects as connect_signal
@@ -43,6 +46,29 @@ awesome._shim_fake_class = _shim_fake_class
 awesome.startup = true
 
 function awesome.register_xproperty()
+end
+
+local init, surfaces = false, {}
+
+function awesome.load_image(file)
+    if not init then
+        Gdk.init{}
+        init = true
+    end
+
+    local _, width, height = GdkPixbuf.Pixbuf.get_file_info(file)
+
+    local pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(file, width, height)
+
+    if not pixbuf then
+        return nil, "Could not load "..file
+    end
+
+    local s = Gdk.cairo_surface_create_from_pixbuf( pixbuf, 1, nil )
+
+    table.insert(surfaces, s)
+
+    return s._native, not s and "Could not load surface from "..file or nil, s
 end
 
 -- Always show deprecated messages
