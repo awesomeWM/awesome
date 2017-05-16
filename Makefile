@@ -13,7 +13,7 @@ all: $(TARGETS) ;
 $(TARGETS): cmake-build
 	ln -s -f $(BUILDDIR)/$@ $@
 
-cmake $(BUILDDIR)/CMakeCache.txt:
+$(BUILDDIR)/CMakeCache.txt:
 	$(ECHO) "Creating build directory and running cmake in it. You can also run CMake directly, if you want."
 	$(ECHO)
 	mkdir -p $(BUILDDIR)
@@ -36,8 +36,8 @@ distclean:
 	$(RM) -r $(BUILDDIR) $(TARGETS)
 	$(ECHO) " done"
 
-%: cmake
+%: $(BUILDDIR)/CMakeCache.txt
 	$(ECHO) "Running make $@…"
 	$(MAKE) -C $(BUILDDIR) $@
 
-.PHONY: cmake-build cmake install distclean tags
+.PHONY: cmake-build install distclean tags
