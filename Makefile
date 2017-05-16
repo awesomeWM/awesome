@@ -19,6 +19,8 @@ $(BUILDLN):
 	test -e $(BUILDLN) || ln -s -f ${builddir} $(BUILDLN)
 
 cmake ${builddir}/CMakeCache.txt:
+	$(ECHO) "Creating build directory and running cmake in it. You can also run CMake directly, if you want."
+	$(ECHO)
 	mkdir -p ${builddir}
 	$(ECHO) "Running cmake…"
 	cd ${builddir} && cmake $(CMAKE_ARGS) "$(@D)" ..
