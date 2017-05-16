@@ -74,7 +74,41 @@ local steps = {
 
             return true
         end
-    end
+    end,
+
+    -- Test implicitly floating state: Even though a client way not explicitly
+    -- made floating, it could still end up being floating
+    function()
+        local c = client.get()[1]
+        assert(c ~= nil)
+
+        awful.client.property.set(c, "floating", nil)
+        assert(not c.floating)
+        assert(not c.maximized)
+
+        local signal_count = 0
+        c:connect_signal("property::floating", function()
+            signal_count = signal_count + 1
+        end)
+
+        c.maximized = true
+        assert(c.floating)
+        assert(signal_count == 1)
+
+        c.fullscreen = true
+        assert(c.floating)
+        assert(signal_count == 1)
+
+        c.maximized = false
+        assert(c.floating)
+        assert(signal_count == 1)
+
+        c.fullscreen = false
+        assert(c.floating == false)
+        assert(signal_count == 2)
+
+        return true
+    end,
 }
 
 local original_count, c1, c2 = 0
