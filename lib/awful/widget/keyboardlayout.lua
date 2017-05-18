@@ -245,6 +245,7 @@ local function update_layout(self)
     for _, v in ipairs(layouts) do
         self._layout[v.group_idx] = self.layout_name(v)
     end
+    awesome.xkb_set_layout_group(0);
     update_status(self)
 end
 
