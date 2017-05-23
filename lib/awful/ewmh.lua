@@ -9,6 +9,7 @@
 local client = client
 local screen = screen
 local ipairs = ipairs
+local timer = require("gears.timer")
 local gtable = require("gears.table")
 local aclient = require("awful.client")
 local aplace = require("awful.placement")
@@ -302,10 +303,88 @@ function ewmh.geometry(c, context, hints)
     end
 end
 
+--- Merge the 2 requests sent by clients wanting to be maximized.
+--
+-- The X clients set 2 flags (atoms) when they want to be maximized. This caused
+-- 2 request::geometry to be sent. This code gives some time for them to arrive
+-- and send a new `request::geometry` (through the property change) with the
+-- combined state.
+--
+-- @signalhandler awful.ewmh.merge_maximization
+-- @tparam client c The client
+-- @tparam string context The context
+-- @tparam[opt={}] table hints The hints to pass to the handler
+function ewmh.merge_maximization(c, context, hints)
+    if context ~= "client_maximize_horizontal" and context ~= "client_maximize_vertical" then
+        return
+    end
+
+    if not c._delay_maximization then
+        c._delay_maximization = function()
+            -- This ignores unlikely corner cases like mismatching toggles.
+            -- That's likely to be an accident anyway.
+            if c._delayed_max_h and c._delayed_max_v then
+                c.maximized = c._delayed_max_h or c._delayed_max_v
+            elseif c._delayed_max_h then
+                c.maximized_horizontal = c._delayed_max_h
+            elseif c._delayed_max_v then
+                c.maximized_vertical = c._delayed_max_v
+            end
+        end
+
+        timer {
+            timeout     = 1/60,
+            autostart   = true,
+            single_shot = true,
+            callback    = function()
+                if not c.valid then return end
+
+                c._delay_maximization(c)
+                c._delay_maximization = nil
+                c._delayed_max_h = nil
+                c._delayed_max_v = nil
+            end
+        }
+    end
+
+    local function get_value(suffix, long_suffix)
+        if hints.toggle and c["_delayed_max_"..suffix] ~= nil then
+            return not c["_delayed_max_"..suffix]
+        elseif hints.toggle then
+            return not c["maximized_"..long_suffix]
+        else
+            return hints.status
+        end
+    end
+
+    if context == "client_maximize_horizontal" then
+        c._delayed_max_h = get_value("h", "horizontal")
+    elseif context == "client_maximize_vertical" then
+        c._delayed_max_v = get_value("v", "vertical")
+    end
+end
+
+--- Allow the client to move itself.
+--
+-- This is the default geometry request handler when the context is `ewmh`.
+--
+-- @signalhandler awful.ewmh.client_geometry_requests
+-- @tparam client c The client
+-- @tparam string context The context
+-- @tparam[opt={}] table hints The hints to pass to the handler
+function ewmh.client_geometry_requests(c, context, hints)
+    if context == "ewmh" and hints then
+        c:geometry(hints)
+    end
+end
+
+
 client.connect_signal("request::activate", ewmh.activate)
 client.connect_signal("request::tag", ewmh.tag)
 client.connect_signal("request::urgent", ewmh.urgent)
 client.connect_signal("request::geometry", ewmh.geometry)
+client.connect_signal("request::geometry", ewmh.merge_maximization)
+client.connect_signal("request::geometry", ewmh.client_geometry_requests)
 client.connect_signal("property::border_width", repair_geometry)
 client.connect_signal("property::screen", repair_geometry)
 screen.connect_signal("property::workarea", function(s)
