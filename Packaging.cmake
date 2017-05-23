@@ -62,6 +62,21 @@ set(CPACK_DEBIAN_PACKAGE_MAINTAINER "devnull@example.com")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "A tiling window manager")
 set(CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION "/etc/xdg;/usr/share/xsessions")
 
+if(CPACK_GENERATOR MATCHES "RPM")
+    set(CPACK_PACKAGE_FILE_NAME ${CPACK_PACKAGE_NAME})
+    execute_process(
+        COMMAND ${GIT_EXECUTABLE} log -1 --date=format:%Y%m%d --format=%cdgit%h.dirty
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        OUTPUT_VARIABLE GIT_RELEASE_STRING
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+    message(STATUS "RPM details:")
+    message(STATUS "-- RPM version set to ${version_num}")
+    message(STATUS "-- RPM git release set to ${GIT_RELEASE_STRING}")
+    configure_file("${CMAKE_SOURCE_DIR}/awesome.spec.in" "${CMAKE_BINARY_DIR}/awesome.spec" @ONLY)
+    set(CPACK_RPM_USER_BINARY_SPECFILE "${CMAKE_BINARY_DIR}/awesome.spec")
+endif(CPACK_GENERATOR MATCHES "RPM")
+
 if(CPACK_GENERATOR)
     include(CPack)
 endif()
