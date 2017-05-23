@@ -49,10 +49,11 @@ ewmh_client_update_hints(lua_State *L)
         state[i++] = _NET_WM_STATE_MODAL;
     if(c->fullscreen)
         state[i++] = _NET_WM_STATE_FULLSCREEN;
-    if(c->maximized_vertical || c->maximized)
+    if(c->maximized)
+    {
         state[i++] = _NET_WM_STATE_MAXIMIZED_VERT;
-    if(c->maximized_horizontal || c->maximized)
         state[i++] = _NET_WM_STATE_MAXIMIZED_HORZ;
+    }
     if(c->sticky)
         state[i++] = _NET_WM_STATE_STICKY;
     if(c->skip_taskbar)
@@ -218,8 +219,6 @@ ewmh_init_lua(void)
     luaA_class_connect_signal(L, &client_class, "unmanage", ewmh_update_net_client_list);
     luaA_class_connect_signal(L, &client_class, "property::modal" , ewmh_client_update_hints);
     luaA_class_connect_signal(L, &client_class, "property::fullscreen" , ewmh_client_update_hints);
-    luaA_class_connect_signal(L, &client_class, "property::maximized_horizontal" , ewmh_client_update_hints);
-    luaA_class_connect_signal(L, &client_class, "property::maximized_vertical" , ewmh_client_update_hints);
     luaA_class_connect_signal(L, &client_class, "property::maximized" , ewmh_client_update_hints);
     luaA_class_connect_signal(L, &client_class, "property::sticky" , ewmh_client_update_hints);
     luaA_class_connect_signal(L, &client_class, "property::skip_taskbar" , ewmh_client_update_hints);
@@ -330,23 +329,14 @@ ewmh_process_state_atom(client_t *c, xcb_atom_t state, int set)
         else if(set == _NET_WM_STATE_TOGGLE)
             client_set_fullscreen(L, -1, !c->fullscreen);
     }
-    else if(state == _NET_WM_STATE_MAXIMIZED_HORZ)
+    else if(state == _NET_WM_STATE_MAXIMIZED_HORZ || state == _NET_WM_STATE_MAXIMIZED_VERT)
     {
         if(set == _NET_WM_STATE_REMOVE)
-            client_set_maximized_horizontal(L, -1, false);
+            client_set_maximized(L, -1, false);
         else if(set == _NET_WM_STATE_ADD)
-            client_set_maximized_horizontal(L, -1, true);
+            client_set_maximized(L, -1, true);
         else if(set == _NET_WM_STATE_TOGGLE)
-            client_set_maximized_horizontal(L, -1, !c->maximized_horizontal);
-    }
-    else if(state == _NET_WM_STATE_MAXIMIZED_VERT)
-    {
-        if(set == _NET_WM_STATE_REMOVE)
-            client_set_maximized_vertical(L, -1, false);
-        else if(set == _NET_WM_STATE_ADD)
-            client_set_maximized_vertical(L, -1, true);
-        else if(set == _NET_WM_STATE_TOGGLE)
-            client_set_maximized_vertical(L, -1, !c->maximized_vertical);
+            client_set_maximized(L, -1, !c->maximized);
     }
     else if(state == _NET_WM_STATE_ABOVE)
     {

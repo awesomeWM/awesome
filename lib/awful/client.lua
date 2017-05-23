@@ -140,9 +140,7 @@ function client.tiled(s, stacked)
     for _, c in pairs(clients) do
         if not client.object.get_floating(c)
             and not c.fullscreen
-            and not c.maximized
-            and not c.maximized_vertical
-            and not c.maximized_horizontal then
+            and not c.maximized then
             table.insert(tclients, c)
         end
     end
@@ -683,8 +681,6 @@ local function update_implicitly_floating(c)
     local cur = client.property.get(c, "_implicitly_floating")
     local new = c.type ~= "normal"
             or c.fullscreen
-            or c.maximized_vertical
-            or c.maximized_horizontal
             or c.maximized
             or client.object.is_fixed(c)
     if cur ~= new then

@@ -169,9 +169,8 @@ You can ensure no application ever starts maximized in the first rule of your
     -- Search for this rule,
     keys = clientkeys,
     
-    -- add the following two:
-    maximized_vertical   = false,
-    maximized_horizontal = false,
+    -- add the following:
+    maximized = false,
 
 ### How to move and resize floaters with the keyboard?
 

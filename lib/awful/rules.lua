@@ -44,7 +44,7 @@ You should fill this table with your rule and properties to apply.
 For example, if you want to set xterm maximized at startup, you can add:
 
     { rule = { class = "xterm" },
-      properties = { maximized_vertical = true, maximized_horizontal = true } }
+      properties = { maximized = true } }
 
 If you want to set mplayer floating at startup, you can add:
 

@@ -28,12 +28,10 @@ local steps = {
     -- maximize horizontally
     function()
         local c = client.get()[1]
-        assert(not c.maximized_horizontal)
-        assert(not c.maximized_vertical  )
-        assert(not c.maximized           )
-        assert(not c.fullscreen          )
+        assert(not c.maximized )
+        assert(not c.fullscreen)
 
-        c.maximized_horizontal = true
+        c.maximized = true
         return true
     end,
     function()
@@ -46,7 +44,7 @@ local steps = {
 
         --assert(new_geo.width+2*c.border_width==sgeo.width) --FIXME off by 4px
 
-        c.maximized_horizontal = false
+        c.maximized = false
         return true
     end,
 

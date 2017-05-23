@@ -191,40 +191,22 @@ test_rule {
     end
 }
 
--- Test maximized_horizontal
+-- Test maximized
 test_rule {
-    properties = { maximized_horizontal = true },
+    properties = { maximized = true },
     test = function(class)
         local c = get_client_by_class(class)
         -- Make sure C-API properties are applied
 
-        assert(c.maximized_horizontal)
-
-        local geo = c:geometry()
-        local sgeo = c.screen.workarea
-
-        assert(geo.x==sgeo.x)
-
-        assert(geo.width+2*c.border_width==sgeo.width)
-
-        return true
-    end
-}
-
--- Test maximized_vertical
-test_rule {
-    properties = { maximized_vertical = true },
-    test = function(class)
-        local c = get_client_by_class(class)
-        -- Make sure C-API properties are applied
-
-        assert(c.maximized_vertical)
+        assert(c.maximized)
 
         local geo = c:geometry()
         local sgeo = c.screen.workarea
 
         assert(geo.y==sgeo.y)
+        assert(geo.x==sgeo.x)
 
+        assert(geo.width+2*c.border_width==sgeo.width)
         assert(geo.height+2*c.border_width==sgeo.height)
 
         return true

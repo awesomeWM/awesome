@@ -20,8 +20,6 @@
 -- <tr><td>▾</td><td><a href="./client.html#client.below">below</a></td></tr>
 -- <tr><td>✈</td><td><a href="./client.html#client.floating">floating</a></td></tr>
 -- <tr><td>+</td><td><a href="./client.html#client.maximized">maximized</a></td></tr>
--- <tr><td>⬌</td><td><a href="./client.html#client.maximized_horizontal">maximized_horizontal</a></td></tr>
--- <tr><td>⬍</td><td><a href="./client.html#client.maximized_vertical">maximized_vertical</a></td></tr>
 -- </table>
 --
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
@@ -241,8 +239,6 @@ local function tasklist_label(c, args, tb)
     local below = args.below or theme.tasklist_below or '▾'
     local floating = args.floating or theme.tasklist_floating or '✈'
     local maximized = args.maximized or theme.tasklist_maximized or '<b>+</b>'
-    local maximized_horizontal = args.maximized_horizontal or theme.tasklist_maximized_horizontal or '⬌'
-    local maximized_vertical = args.maximized_vertical or theme.tasklist_maximized_vertical or '⬍'
 
     tb:set_align(align)
 
@@ -256,8 +252,6 @@ local function tasklist_label(c, args, tb)
         if c.maximized then
             name = name .. maximized
         else
-            if c.maximized_horizontal then name = name .. maximized_horizontal end
-            if c.maximized_vertical then name = name .. maximized_vertical end
             if c.floating then name = name .. floating end
         end
     end
@@ -463,8 +457,6 @@ function tasklist.new(screen, filter, buttons, style, update_function, base_widg
         capi.client.connect_signal("property::above", u)
         capi.client.connect_signal("property::below", u)
         capi.client.connect_signal("property::floating", u)
-        capi.client.connect_signal("property::maximized_horizontal", u)
-        capi.client.connect_signal("property::maximized_vertical", u)
         capi.client.connect_signal("property::maximized", u)
         capi.client.connect_signal("property::minimized", u)
         capi.client.connect_signal("property::name", u)
