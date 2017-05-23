@@ -334,8 +334,9 @@ end
 --
 -- @param notification Notification object to be destroyed
 -- @param reason One of the reasons from notificationClosedReason
+-- @param[opt=false] keep_visible If true, keep the notification visible
 -- @return True if the popup was successfully destroyed, nil otherwise
-function naughty.destroy(notification, reason)
+function naughty.destroy(notification, reason, keep_visible)
     if notification and notification.box.visible then
         if suspended then
             for k, v in pairs(naughty.notifications.suspended) do
@@ -350,8 +351,12 @@ function naughty.destroy(notification, reason)
         if notification.timer then
             notification.timer:stop()
         end
-        notification.box.visible = false
-        arrange(scr)
+
+        if not keep_visible then
+            notification.box.visible = false
+            arrange(scr)
+        end
+
         if notification.destroy_cb and reason ~= naughty.notificationClosedReason.silent then
             notification.destroy_cb(reason or naughty.notificationClosedReason.undefined)
         end
@@ -610,11 +615,13 @@ function naughty.notify(args)
     local notification = { screen = s, destroy_cb = destroy_cb, timeout = timeout }
 
     -- replace notification if needed
+    local reuse_box
     if args.replaces_id then
         local obj = naughty.getById(args.replaces_id)
         if obj then
             -- destroy this and ...
-            naughty.destroy(obj, naughty.notificationClosedReason.silent)
+            naughty.destroy(obj, naughty.notificationClosedReason.silent, true)
+            reuse_box = obj.box
         end
         -- ... may use its ID
         if args.replaces_id <= counter then
@@ -746,6 +753,10 @@ function naughty.notify(args)
                                shape_border_width = shape and border_width,
                                shape = shape,
                                type = "notification" })
+
+    if reuse_box then
+        notification.box = reuse_box
+    end
 
     if hover_timeout then notification.box:connect_signal("mouse::enter", hover_destroy) end
 
