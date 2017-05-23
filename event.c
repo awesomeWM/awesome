@@ -340,6 +340,8 @@ event_handle_configurerequest(xcb_configure_request_event_t *ev)
         uint16_t deco_top = bw + tb_top;
         uint16_t deco_bottom = bw + tb_bottom;
         int16_t diff_w = 0, diff_h = 0, diff_border = 0;
+        
+        lua_State *L = globalconf_get_lua_State();
 
         if(ev->value_mask & XCB_CONFIG_WINDOW_X)
         {
@@ -373,8 +375,6 @@ event_handle_configurerequest(xcb_configure_request_event_t *ev)
         }
         if(ev->value_mask & XCB_CONFIG_WINDOW_BORDER_WIDTH)
         {
-            lua_State *L = globalconf_get_lua_State();
-
             diff_border = ev->border_width - bw;
             diff_h += diff_border;
             diff_w += diff_border;
@@ -396,7 +396,16 @@ event_handle_configurerequest(xcb_configure_request_event_t *ev)
         }
 
         c->got_configure_request = true;
-        client_resize(c, geometry, false);
+        
+        /* Request the changes to be applied */
+        luaA_object_push(L, c);
+        lua_pushstring(L, "ewmh");     /* context */
+        lua_newtable(L);               /* props */
+        lua_pushstring(L, "geometry");
+        luaA_pusharea(L, geometry);    /* geometry request */
+        lua_rawset(L, -3);
+        luaA_object_emit_signal(L, -3, "request::geometry", 2);
+        lua_pop(L, 1);
     }
     else if (xembed_getbywin(&globalconf.embedded, ev->window))
     {
