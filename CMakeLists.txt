@@ -1,4 +1,19 @@
 cmake_minimum_required(VERSION 3.0.0)
+
+# Require an out-of-source build. We generate an awesomerc.lua in the build dir
+# from the one in the source dir and this does not work otherwise.
+if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_CURRENT_BINARY_DIR)
+    message(SEND_ERROR "\
+You appear to be doing an in-source build, which means that the binaries are \
+generated in the same directory where the source code is. This is currently not \
+supported. Instead, do, for example, the following:\n\
+   mkdir build && cd build && cmake ..\n\
+Beware that CMake likely already generated a CMakeCache.txt in the source \
+directory which you first have to delete. \
+")
+    message(FATAL_ERROR "In-source builds are not supported")
+endif()
+
 set(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS  TRUE)
 
 if(COMMAND cmake_policy)
