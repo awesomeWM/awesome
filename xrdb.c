@@ -38,10 +38,6 @@ int luaA_xrdb_get_value(lua_State *L) {
     char *result = NULL;
 
     if (xcb_xrm_resource_get_string(globalconf.xrmdb, resource_name, resource_class, &result) < 0 ) {
-        if (strlen(resource_class))
-            luaA_warn(L, "Failed to get xrdb value '%s' (class '%s').", resource_name, resource_class);
-        else
-            luaA_warn(L, "Failed to get xrdb value '%s'.", resource_name);
         lua_pushnil(L);
     } else {
         lua_pushstring(L, result);
