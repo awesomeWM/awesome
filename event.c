@@ -842,10 +842,14 @@ event_handle_randr_screen_change_notify(xcb_randr_screen_change_notify_event_t *
     /* Do (part of) what XRRUpdateConfiguration() would do (update our state) */
     if (ev->rotation & (XCB_RANDR_ROTATION_ROTATE_90 | XCB_RANDR_ROTATION_ROTATE_270)) {
         globalconf.screen->width_in_pixels = ev->height;
+        globalconf.screen->width_in_millimeters = ev->mheight;
         globalconf.screen->height_in_pixels = ev->width;
+        globalconf.screen->height_in_millimeters = ev->mwidth;
     } else {
         globalconf.screen->width_in_pixels = ev->width;
+        globalconf.screen->width_in_millimeters = ev->mwidth;
         globalconf.screen->height_in_pixels = ev->height;
+        globalconf.screen->height_in_millimeters = ev->mheight;;
     }
 
     globalconf.screen_need_refresh = true;
