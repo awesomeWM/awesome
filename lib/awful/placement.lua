@@ -1256,13 +1256,16 @@ function placement.maximize(d, args)
     return fix_new_geometry(ngeo, args, true)
 end
 
--- Add the alias functions
-for _, v in ipairs {"vertically", "horizontally"} do
-    placement["maximize_"..v] = function(d2, args)
-        args = add_context(args, "maximize_"..v)
-        args.axis = v
-        return placement_private.maximize(d2, args)
-    end
+function placement.maximize_vertically(d2, args)
+    args = add_context(args, "maximize_vertically")
+    args.axis = "vertically"
+    return placement_private.maximize(d2, args)
+end
+
+function placement.maximize_horizontally(d2, args)
+    args = add_context(args, "maximize_horizontally")
+    args.axis = "horizontally"
+    return placement_private.maximize(d2, args)
 end
 
 ---@DOC_awful_placement_maximize_vertically_EXAMPLE@
