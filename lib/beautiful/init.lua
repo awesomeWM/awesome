@@ -17,6 +17,7 @@ local lgi = require("lgi")
 local Pango = lgi.Pango
 local PangoCairo = lgi.PangoCairo
 local gears_debug = require("gears.debug")
+local Gio = require("lgi").Gio
 local protected_call = require("gears.protected_call")
 
 local xresources = require("beautiful.xresources")
@@ -93,6 +94,9 @@ local active_font
 
 --- The Awesome icon path.
 -- @beautiful beautiful.awesome_icon
+
+--- The current theme path (if any)
+-- @tfield string beautiful.theme_path
 
 --- Load a font from a string or a font description.
 --
@@ -187,6 +191,8 @@ function beautiful.init(config)
         if type(config) == 'string' then
             -- Expand the '~' $HOME shortcut
             config = config:gsub("^~/", homedir .. "/")
+            local dir = Gio.File.new_for_path(config):get_parent()
+            beautiful.theme_path = dir and (dir:get_path().."/") or nil
             theme = protected_call(dofile, config)
         elseif type(config) == 'table' then
             theme = config
