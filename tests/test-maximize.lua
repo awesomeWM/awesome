@@ -4,6 +4,7 @@ local runner = require("_runner")
 local awful = require("awful")
 local test_client = require("_client")
 local lgi = require("lgi")
+local gears = require("gears")
 
 local function geo_to_str(g)
     return "pos=" .. g.x .. "," .. g.y ..
@@ -12,21 +13,15 @@ end
 
 local original_geo = nil
 
-local counter = 0
+local steps = {}
 
-local function geometry_handler(c, context, hints)
-    hints = hints or {}
-    assert(type(c) == "client")
-    assert(type(context) == "string")
-    assert(type(hints.toggle) == "boolean")
-    assert(type(hints.status) == "boolean")
-    counter = counter + 1
-end
-
-local steps = {
+for _, gravity in ipairs { "NORTH_WEST", "NORTH", "NORTH_EAST", "WEST",
+    "CENTER", "EAST", "SOUTH_WEST", "SOUTH", "SOUTH_EAST", "STATIC" } do
+    gears.table.merge(steps, {
     function(count)
         if count == 1 then
-            test_client(nil,nil,nil,nil,nil,{gravity=lgi.Gdk.Gravity.STATIC})
+            print("testing gravity " .. gravity)
+            test_client(nil,nil,nil,nil,nil,{gravity=lgi.Gdk.Gravity[gravity]})
         else
             local c = client.get()[1]
             if c then
@@ -164,7 +159,22 @@ local steps = {
         c:kill()
 
         return true
-    end,
+    end
+})
+end
+
+local counter = 0
+
+local function geometry_handler(c, context, hints)
+    hints = hints or {}
+    assert(type(c) == "client")
+    assert(type(context) == "string")
+    assert(type(hints.toggle) == "boolean")
+    assert(type(hints.status) == "boolean")
+    counter = counter + 1
+end
+
+gears.table.merge(steps, {
     -- Now, start some clients maximized
     function()
         if #client.get() > 0 then return end
@@ -249,7 +259,7 @@ local steps = {
 
         return true
     end
-}
+})
 
 runner.run_steps(steps)
 
