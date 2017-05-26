@@ -26,7 +26,7 @@ end
 local steps = {
     function(count)
         if count == 1 then
-            test_client(nil,nil,nil,nil,nil,{gravity=lgi.Gdk.Gravity.NORTH_WEST})
+            test_client(nil,nil,nil,nil,nil,{gravity=lgi.Gdk.Gravity.STATIC})
         else
             local c = client.get()[1]
             if c then
@@ -71,6 +71,11 @@ local steps = {
         c.border_width = test_width
 
         c.fullscreen = true
+
+        -- Test that the client covers the full screen
+        assert(geo_to_str(c:geometry()) == geo_to_str(c.screen.geometry),
+            geo_to_str(c:geometry()) .. " == " .. geo_to_str(c.screen.geometry))
+
         c.fullscreen = false
 
         assert(c.border_width == test_width)
