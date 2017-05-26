@@ -91,8 +91,8 @@ function xresources.get_dpi(s)
         if not xresources.dpi then
             if root then
                 local mm_to_inch = 25.4
-                _, h = root.size()
-                _, hmm = root.size_mm()
+                local _, h = root.size()
+                local _, hmm = root.size_mm()
                 if hmm ~= 0 then
                     xresources.dpi = round(h*mm_to_inch/hmm)
                 end
