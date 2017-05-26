@@ -75,6 +75,9 @@ local steps = {
 
         assert(c.border_width == test_width)
 
+        -- Restore old border width
+        c.border_width = test_width - 1
+
         return true
     end,
 
