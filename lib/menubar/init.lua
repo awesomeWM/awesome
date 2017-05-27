@@ -380,7 +380,7 @@ local function prompt_keypressed_callback(mod, key, comm)
     elseif key == "Return" or key == "KP_Enter" then
         if mod.Control then
             current_item = #shownitems
-            if mod.Mod1 then
+            if mod.Mod4 then
                 -- add a terminal to the cmdline
                 shownitems[current_item].cmdline = menubar.utils.terminal
                         .. " -e " .. shownitems[current_item].cmdline
