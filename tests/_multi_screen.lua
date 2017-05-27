@@ -518,6 +518,17 @@ local function add_steps(real_steps, new_steps)
         return true
     end)
 
+        -- Add a step to clean up behind the old screens. This is a step so that
+        -- all delayed calls involving the drawables etc are done.
+        table.insert(real_steps, function()
+            for i=1,3 do
+                collectgarbage("collect")
+            end
+            print(string.format("There are %d drawins and %d drawables alive", drawin.instances(), drawable.instances()))
+
+            return true
+        end)
+
         for _, step in ipairs(new_steps) do
             table.insert(real_steps, step)
         end
