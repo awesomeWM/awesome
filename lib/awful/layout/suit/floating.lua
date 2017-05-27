@@ -44,6 +44,7 @@ function floating.mouse_resize_handler(c, corner, x, y)
       coordinates_delta = {x=corner_x-x,y=corner_y-y}
     end
 
+    local prev_coords = {}
     capi.mousegrabber.run(function (_mouse)
                               if not c.valid then return false end
 
