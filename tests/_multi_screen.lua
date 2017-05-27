@@ -418,7 +418,10 @@ local function add_steps(real_steps, new_steps)
     for _, dispo in ipairs(dispositions) do
         -- Cleanup
         table.insert(real_steps, function()
-            if #client.get() == 0 then return true end
+            if #client.get() == 0 then
+                collectgarbage("collect")
+                return true
+            end
 
             for _, c in ipairs(client.get()) do
                 c:kill()
