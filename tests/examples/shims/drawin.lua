@@ -4,7 +4,7 @@ local drawin, meta = awesome._shim_fake_class()
 
 local function new_drawin(_, args)
     local ret = gears_obj()
-    ret.data = {}
+    ret.data = {drawable = gears_obj()}
 
     for k, v in pairs(args) do
         rawset(ret, k, v)
