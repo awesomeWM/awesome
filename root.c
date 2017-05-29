@@ -119,12 +119,13 @@ root_set_wallpaper(cairo_pattern_t *pattern)
                                  globalconf.screen->root,
                                  XCB_CW_EVENT_MASK,
                                  (uint32_t[]) { 0 });
-    root_set_wallpaper_pixmap(c, p);
+    root_set_wallpaper_pixmap(globalconf.connection, p);
     xcb_change_window_attributes(globalconf.connection,
                                  globalconf.screen->root,
                                  XCB_CW_EVENT_MASK,
                                  ROOT_WINDOW_EVENT_MASK);
     xcb_ungrab_server(globalconf.connection);
+    xcb_flush(globalconf.connection);
 
     /* Make sure our pixmap is not destroyed when we disconnect. */
     xcb_set_close_down_mode(c, XCB_CLOSE_DOWN_RETAIN_PERMANENT);
