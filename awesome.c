@@ -56,6 +56,8 @@
 
 #include <glib-unix.h>
 
+#define RESULT_CODE_RESTART 8
+
 awesome_t globalconf;
 
 /** argv used to run awesome */
@@ -463,7 +465,7 @@ void
 awesome_restart(void)
 {
     awesome_atexit(true);
-    a_exec(awesome_argv);
+    exit(RESULT_CODE_RESTART);
 }
 
 /** Function to restart awesome on some signals.
