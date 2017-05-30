@@ -105,7 +105,6 @@ file = {
         '../lib/awful/startup_notification.lua',
         '../lib/gears/init.lua',
         '../lib/wibox/layout/init.lua',
-        '../lib/wibox/widget/init.lua',
         '../lib/wibox/container/init.lua',
 
         -- Ignore some parts of the widget library
