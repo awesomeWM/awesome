@@ -699,6 +699,7 @@ capi.client.connect_signal("property::maximized_vertical", update_implicitly_flo
 capi.client.connect_signal("property::maximized_horizontal", update_implicitly_floating)
 capi.client.connect_signal("property::maximized", update_implicitly_floating)
 capi.client.connect_signal("property::size_hints", update_implicitly_floating)
+capi.client.connect_signal("manage", update_implicitly_floating)
 
 --- Toggle the floating state of a client between 'auto' and 'true'.
 -- Use `c.floating = not c.floating`
