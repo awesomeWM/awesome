@@ -3,7 +3,6 @@ require("_common_template")(...)
 
 local beautiful = require( "beautiful"     )
 local wibox     = require( "wibox"         )
-local surface   = require( "gears.surface" )
 local shape     = require( "gears.shape"   )
 
 -- Let the test request a size and file format
@@ -72,7 +71,6 @@ end
 local f_w, f_h = container:fit({dpi=96}, 9999, 9999)
 
 -- Save to the output file
-local img = surface.widget_to_svg(container, image_path..".svg", f_w, f_h)
-img:finish()
+wibox.widget.draw_to_svg_file(container, image_path..".svg", f_w, f_h)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

@@ -2,7 +2,6 @@ local file_path, image_path = ...
 require("_common_template")(...)
 
 local wibox     = require( "wibox"         )
-local surface   = require( "gears.surface" )
 local color     = require( "gears.color"   )
 local beautiful = require( "beautiful"     )
 local unpack    = unpack or table.unpack -- luacheck: globals unpack (compatibility with Lua 5.1)
@@ -99,7 +98,6 @@ for _ = 1, 10 do
 end
 
 -- Save to the output file
-local img = surface["widget_to_svg"](widget, image_path..".svg", w or 200, h or 30)
-img:finish()
+wibox.widget.draw_to_svg_file(widget, image_path..".svg", w or 200, h or 30)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
