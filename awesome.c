@@ -636,6 +636,12 @@ main(int argc, char **argv)
         }
     }
 
+    /* Collect any zombies that we inherited. It would be nice if we also
+     * collected zombies at runtime, but that does not really work with glib.
+     */
+    while (waitpid(-1, NULL, WNOHANG) > 0) {
+    }
+
     /* register function for signals */
     g_unix_signal_add(SIGINT, exit_on_signal, NULL);
     g_unix_signal_add(SIGTERM, exit_on_signal, NULL);
