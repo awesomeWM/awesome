@@ -115,6 +115,8 @@ awesome_atexit(bool restart)
     /* Disconnect *after* closing lua */
     xcb_cursor_context_free(globalconf.cursor_ctx);
     xcb_disconnect(globalconf.connection);
+
+    spawn_before_exit(restart);
 }
 
 /** Restore the client order after a restart */
