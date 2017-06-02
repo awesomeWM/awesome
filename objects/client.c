@@ -1996,7 +1996,7 @@ void
 client_set_maximized(lua_State *L, int cidx, bool s)
 {
     return client_set_maximized_common(
-        L, cidx, s, "maximized", CLIENT_MAXIMIZED_BOTH
+        L, cidx, s, "maximized", CLIENT_MAXIMIZED_BOTH | CLIENT_MAXIMIZED_H | CLIENT_MAXIMIZED_V
     );
 }
 
