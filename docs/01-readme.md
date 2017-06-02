@@ -53,7 +53,7 @@ environment):
   introspection
 - [Pango](http://www.pango.org/) with support for Cairo and GObject
   introspection
-- [GLib](https://wiki.gnome.org/Projects/GLib) with support for GObject
+- [GLib >= 2.40](https://wiki.gnome.org/Projects/GLib) with support for GObject
   introspection
 - [GIO](https://developer.gnome.org/gio/stable/) with support for GObject
   introspection

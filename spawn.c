@@ -498,7 +498,7 @@ luaA_spawn(lua_State *L)
         g_timeout_add_seconds(AWESOME_SPAWN_TIMEOUT, spawn_launchee_timeout, context);
     }
 
-    flags |= G_SPAWN_SEARCH_PATH;
+    flags |= G_SPAWN_SEARCH_PATH | G_SPAWN_CLOEXEC_PIPES;
     retval = g_spawn_async_with_pipes(NULL, argv, NULL, flags,
                                       spawn_callback, context, &pid,
                                       stdin_ptr, stdout_ptr, stderr_ptr, &error);
