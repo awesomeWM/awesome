@@ -27,6 +27,7 @@
 #include <lua.h>
 
 void spawn_init(void);
+void spawn_before_exit(bool);
 void spawn_start_notify(client_t *, const char *);
 int luaA_spawn(lua_State *);
 

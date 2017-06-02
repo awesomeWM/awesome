@@ -62,6 +62,12 @@
 /** 20 seconds timeout */
 #define AWESOME_SPAWN_TIMEOUT 20.0
 
+static int
+compare_pids(const void *a, const void *b)
+{
+    return *(GPid *) a - *(GPid *)b;
+}
+
 /** Wrapper for unrefing startup sequence.
  */
 static inline void
@@ -73,7 +79,11 @@ a_sn_startup_sequence_unref(SnStartupSequence **sss)
 DO_ARRAY(SnStartupSequence *, SnStartupSequence, a_sn_startup_sequence_unref)
 
 /** The array of startup sequence running */
-SnStartupSequence_array_t sn_waits;
+static SnStartupSequence_array_t sn_waits;
+
+DO_BARRAY(GPid, pid, DO_NOTHING, compare_pids)
+
+static pid_array_t running_children;
 
 /** Remove a SnStartupSequence pointer from an array and forget about it.
  * \param s The startup sequence to found, remove and unref.
@@ -256,6 +266,20 @@ spawn_start_notify(client_t *c, const char * startup_id)
     }
 }
 
+static void
+remove_running_child(GPid pid, gint status, gpointer user_data)
+{
+    (void) status;
+    (void) user_data;
+
+    GPid *pid_in_array = pid_array_lookup(&running_children, &pid);
+    if (pid_in_array != NULL) {
+        pid_array_remove(&running_children, pid_in_array);
+    } else {
+        warn("(Partially) unknown child %d exited?!", (int) pid);
+    }
+}
+
 /** Initialize program spawner.
  */
 void
@@ -267,6 +291,40 @@ spawn_init(void)
                                                   globalconf.default_screen,
                                                   spawn_monitor_event,
                                                   NULL, NULL);
+
+    const char* children = getenv("AWESOME_RUNNING_CHILDREN");
+    while (children != NULL) {
+        int pid, length;
+        if (sscanf(children, "%d%n", &pid, &length) != 1)
+            break;
+        children += length;
+        if (*children == ',')
+            children++;
+
+        pid_array_insert(&running_children, pid);
+        g_child_watch_add((GPid) pid, remove_running_child, NULL);
+    }
+    unsetenv("AWESOME_RUNNING_CHILDREN");
+}
+
+/** Called right before exit, serialise state in case of a restart.
+ */
+void
+spawn_before_exit(bool restart)
+{
+    if (!restart)
+        return;
+
+    buffer_t buffer;
+    buffer_init(&buffer);
+    foreach(pid, running_children) {
+        if(buffer.len != 0)
+            buffer_addc(&buffer, ',');
+        buffer_addf(&buffer, "%d", (int) *pid);
+    }
+    if(buffer.len != 0)
+        setenv("AWESOME_RUNNING_CHILDREN", buffer.s, 1);
+    buffer_wipe(&buffer);
 }
 
 static gboolean
@@ -345,6 +403,7 @@ child_exit_callback(GPid pid, gint status, gpointer user_data)
 {
     lua_State *L = globalconf_get_lua_State();
     int exit_callback = GPOINTER_TO_INT(user_data);
+    remove_running_child(pid, status, user_data);
 
     /* 'Decode' the exit status */
     if (WIFEXITED(status)) {
@@ -458,6 +517,7 @@ luaA_spawn(lua_State *L)
         int exit_callback = LUA_REFNIL;
         /* Only do this down here to avoid leaks in case of errors */
         luaA_registerfct(L, 6, &exit_callback);
+        pid_array_insert(&running_children, pid);
         g_child_watch_add(pid, child_exit_callback, GINT_TO_POINTER(exit_callback));
     }
 
