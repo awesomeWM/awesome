@@ -291,40 +291,61 @@ spawn_init(void)
                                                   globalconf.default_screen,
                                                   spawn_monitor_event,
                                                   NULL, NULL);
+}
 
-    const char* children = getenv("AWESOME_RUNNING_CHILDREN");
-    while (children != NULL) {
-        int pid, length;
-        if (sscanf(children, "%d%n", &pid, &length) != 1)
-            break;
-        children += length;
-        if (*children == ',')
-            children++;
-
-        pid_array_insert(&running_children, pid);
-        g_child_watch_add((GPid) pid, remove_running_child, NULL);
-    }
-    unsetenv("AWESOME_RUNNING_CHILDREN");
+void
+spawn_handle_reap(const char *arg)
+{
+    GPid pid = atoll(arg);
+    pid_array_insert(&running_children, pid);
+    g_child_watch_add((GPid) pid, remove_running_child, NULL);
 }
 
 /** Called right before exit, serialise state in case of a restart.
  */
-void
-spawn_before_exit(bool restart)
+char * const *
+spawn_transform_commandline(char **argv)
 {
-    if (!restart)
-        return;
-
-    buffer_t buffer;
-    buffer_init(&buffer);
-    foreach(pid, running_children) {
-        if(buffer.len != 0)
-            buffer_addc(&buffer, ',');
-        buffer_addf(&buffer, "%d", (int) *pid);
+    size_t offset = 0;
+    size_t length = 0;
+    while(argv[offset] != NULL)
+    {
+        if(A_STREQ(argv[offset], "--reap"))
+            offset += 2;
+        else {
+            length++;
+            offset++;
+        }
     }
-    if(buffer.len != 0)
-        setenv("AWESOME_RUNNING_CHILDREN", buffer.s, 1);
-    buffer_wipe(&buffer);
+
+    length += 2*running_children.len;
+
+    const char ** transformed = p_new(const char *, length+1);
+    size_t index = 0;
+    offset = 0;
+    while(argv[index + offset] != NULL)
+    {
+        if(A_STREQ(argv[index + offset], "--reap"))
+            offset += 2;
+        else {
+            transformed[index] = argv[index + offset];
+            index++;
+        }
+    }
+
+    foreach(pid, running_children)
+    {
+        buffer_t buffer;
+        buffer_init(&buffer);
+        buffer_addf(&buffer, "%d", (int) *pid);
+
+        transformed[index++] = "--reap";
+        transformed[index++] = buffer_detach(&buffer);
+        buffer_wipe(&buffer);
+    }
+    transformed[index++] = NULL;
+
+    return (char * const *) transformed;
 }
 
 static gboolean

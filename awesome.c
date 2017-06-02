@@ -115,8 +115,6 @@ awesome_atexit(bool restart)
     /* Disconnect *after* closing lua */
     xcb_cursor_context_free(globalconf.cursor_ctx);
     xcb_disconnect(globalconf.connection);
-
-    spawn_before_exit(restart);
 }
 
 /** Restore the client order after a restart */
@@ -465,7 +463,7 @@ void
 awesome_restart(void)
 {
     awesome_atexit(true);
-    execvp(awesome_argv[0], awesome_argv);
+    execvp(awesome_argv[0], spawn_transform_commandline(awesome_argv));
     fatal("execv() failed: %s", strerror(errno));
 }
 
@@ -529,6 +527,7 @@ main(int argc, char **argv)
         { "search",  1, NULL, 's' },
         { "no-argb", 0, NULL, 'a' },
         { "replace", 0, NULL, 'r' },
+        { "reap",    1, NULL, '\1' },
         { NULL,      0, NULL, 0 }
     };
 
@@ -577,6 +576,9 @@ main(int argc, char **argv)
             break;
           case 'r':
             replace_wm = true;
+            break;
+          case '\1':
+            spawn_handle_reap(optarg);
             break;
           default:
             exit_help(EXIT_FAILURE);
