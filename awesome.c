@@ -56,6 +56,8 @@
 
 #include <glib-unix.h>
 
+#define RESULT_CODE_RESTART 8
+
 awesome_t globalconf;
 
 /** argv used to run awesome */
@@ -465,7 +467,7 @@ void
 awesome_restart(void)
 {
     awesome_atexit(true);
-    a_exec(awesome_argv);
+    exit(RESULT_CODE_RESTART);
 }
 
 /** Function to restart awesome on some signals.
@@ -503,6 +505,26 @@ exit_help(int exit_code)
     exit(exit_code);
 }
 
+static void init_with_fork() {
+    int status = 0;
+    do {
+        pid_t pid = fork();
+
+        if (pid < 0) {
+            fatal("fork() returned %s", strerror(errno));
+        }
+        if (pid == 0) {
+            return;
+        }
+
+        pid_t wait_result = waitpid(pid, &status, 0);
+        if (wait_result < 0) {
+            fatal("waitpid() returned %s", strerror(errno));
+        }
+    } while (WIFEXITED(status) && WEXITSTATUS(status) == RESULT_CODE_RESTART);
+    exit(WEXITSTATUS(status));
+}
+
 /** Hello, this is main.
  * \param argc Who knows.
  * \param argv Who knows.
@@ -531,6 +553,8 @@ main(int argc, char **argv)
         { "replace", 0, NULL, 'r' },
         { NULL,      0, NULL, 0 }
     };
+
+    init_with_fork();
 
     /* Make stdout/stderr line buffered. */
     setvbuf(stdout, NULL, _IOLBF, 0);
