@@ -879,6 +879,9 @@ end
 -- This property allow to waste space on the screen in the name of style,
 -- unicorns and readability.
 --
+-- Note that pixels cannot be divided, the gap will be rounded to the closest
+-- multiplier of 2.
+--
 -- @DOC_awful_layout_dynamic_suit_tile_gap_EXAMPLE@
 --
 -- **Signal:**
@@ -896,9 +899,20 @@ function tag.object.set_gap(t, useless_gap)
 end
 
 function tag.object.get_gap(t)
-    return tag.getproperty(t, "useless_gap")
+    local ret = tag.getproperty(t, "useless_gap")
         or beautiful.useless_gap
         or defaults.gap
+
+    --TODO v5 fix this mess
+    -- The cleanest way to apply the gap is to distribute it around each client.
+    -- The current layout system (stateless) has a bug where a gap of 2 will
+    -- result in 4 pixels between the clients. This is however not expected
+    -- and causes some confusion as the screen "gap padding" is also gap*2.
+    if ret % 2 ~= 0 then
+        ret = ret == 1 and 2 or (ret -1)
+    end
+
+    return ret
 end
 
 --- Set the spacing between clients
