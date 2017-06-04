@@ -185,6 +185,7 @@ end
 function beautiful.init(config)
     if config then
         local homedir = os.getenv("HOME")
+        local theme_path = ""
 
         -- If `config` is the path to a theme file, run this file,
         -- otherwise if it is a theme table, save it.
@@ -194,15 +195,26 @@ function beautiful.init(config)
             local dir = Gio.File.new_for_path(config):get_parent()
             beautiful.theme_path = dir and (dir:get_path().."/") or nil
             theme = protected_call(dofile, config)
+            theme_path = config:gsub("/[^/]+$", "")
         elseif type(config) == 'table' then
             theme = config
         end
 
         if theme then
-            -- expand '~'
             if homedir then
-                for k, v in pairs(theme) do
-                    if type(v) == "string" then theme[k] = v:gsub("^~/", homedir .. "/") end
+                -- expand '~' and './'
+                if type(config) == "string" then
+                    for k, v in pairs(theme) do
+                        if type(v) == "string" then
+                            theme[k] = v:gsub("^~/", homedir .. "/")
+                            theme[k] = v:gsub("^%./", theme_path .. "/")
+                        end
+                    end
+                -- expand '~'
+                elseif type(config) == 'table' then
+                    for k, v in pairs(theme) do
+                        if type(v) == "string" then theme[k] = v:gsub("^~/", homedir .. "/") end
+                    end
                 end
             end
 
